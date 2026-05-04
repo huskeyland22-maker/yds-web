@@ -52,10 +52,11 @@ const fetchPanicJsonInit = {
 
 /**
  * 패닉 JSON을 네트워크에서 가져옵니다.
- * 프로덕션: 반드시 `fetch(\`${import.meta.env.VITE_API_BASE}/panic-data\`)` 형태(트림·슬래시 정리 후).
+ * 프로덕션: `console.log("API:", import.meta.env.VITE_API_BASE)` 후
+ * `fetch(\`${base}/panic-data\`)` — base는 VITE_API_BASE trim + 끝 슬래시 제거.
  */
 export async function fetchPanicDataJson() {
-  console.log("[YDS] API:", import.meta.env.VITE_API_BASE ?? "(정의되지 않음)")
+  console.log("API:", import.meta.env.VITE_API_BASE)
 
   if (import.meta.env.PROD) {
     const raw = import.meta.env.VITE_API_BASE
@@ -66,7 +67,9 @@ export async function fetchPanicDataJson() {
       )
     }
 
-    const url = `${String(raw).trim().replace(/\/+$/, "")}/panic-data`
+    // Vercel 빌드 시 주입된 값 — UI와 동일: fetch(`${import.meta.env.VITE_API_BASE}/panic-data`) 와 동일(트림·끝 / 제거 후)
+    const base = String(import.meta.env.VITE_API_BASE).trim().replace(/\/+$/, "")
+    const url = `${base}/panic-data`
     try {
       const res = await fetch(url, fetchPanicJsonInit)
       if (!res.ok) {
