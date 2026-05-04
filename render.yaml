@@ -1,0 +1,10 @@
+# Render 대시보드 → Blueprint → 이 저장소 연결 시 웹 서비스 생성에 사용됩니다.
+# 수동으로 Web Service를 만들 때는 아래 startCommand만 참고해도 됩니다.
+services:
+  - type: web
+    name: yds-panic-api
+    runtime: python
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 1 --threads 2
+    healthCheckPath: /panic-data
