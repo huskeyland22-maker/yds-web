@@ -116,12 +116,39 @@ export default function SignalDashboard() {
             <code className="text-gray-500">{getPanicDataUrlForDisplay()}</code> 가 JSON으로 열리는지 확인하세요.
             환경 변수를 바꿨다면 Vercel에서 <strong className="text-gray-300">Redeploy</strong>가 필요합니다.
           </p>
+        ) : !isProd && !hasApiBase ? (
+          <div className="max-w-lg space-y-2 text-left text-xs text-gray-400">
+            <p className="text-center text-gray-300">
+              지금은 <strong>로컬 개발</strong> 모드이고, <code className="text-gray-500">VITE_API_BASE</code>도 없어서{" "}
+              <strong className="text-gray-300">PC의 5000번 Flask</strong>만 찾고 있어요. 서버가 꺼져 있으면{" "}
+              <code className="text-gray-500">Failed to fetch</code>가 납니다.
+            </p>
+            <ol className="list-decimal space-y-1.5 pl-5 text-gray-500">
+              <li>
+                <strong className="text-gray-400">방법 A</strong> — 상위 폴더{" "}
+                <code className="text-gray-500">yds web</code>에서{" "}
+                <code className="rounded bg-black/30 px-1 py-0.5 text-gray-400">python server.py</code> 실행 (5000
+                포트). 그다음 <code className="text-gray-500">vite-project</code>에서{" "}
+                <code className="rounded bg-black/30 px-1 py-0.5 text-gray-400">npm run dev</code>만 켜도 됩니다.
+              </li>
+              <li>
+                <strong className="text-gray-400">방법 B</strong> —{" "}
+                <code className="rounded bg-black/30 px-1 py-0.5 text-gray-400">npm run dev:full</code> 한 번으로 웹
+                + API 같이 실행.
+              </li>
+              <li>
+                <strong className="text-gray-400">방법 C</strong> — Flask 없이 Render만 쓰려면{" "}
+                <code className="text-gray-500">vite-project/.env.local</code> 파일에{" "}
+                <code className="break-all text-gray-500">VITE_API_BASE=https://(Render주소)</code> 넣고{" "}
+                <strong className="text-gray-400">dev 서버를 껐다가 다시</strong> 켜세요. (
+                <code className="text-gray-600">.env.example</code> 참고)
+              </li>
+            </ol>
+          </div>
         ) : (
-          <p className="text-xs text-gray-500">
-            <code className="text-gray-400">vite-project</code> 폴더에서{" "}
-            <code className="text-gray-400">npm run dev:full</code> 로 웹+API를 같이 띄우거나, 별도 터미널에서{" "}
-            <code className="text-gray-400">python server.py</code> (프로젝트 루트)로 Flask가{" "}
-            <code className="text-gray-400">5000</code> 포트에 있는지 확인하세요.
+          <p className="max-w-md text-xs text-gray-400">
+            <code className="text-gray-500">VITE_API_BASE</code>로 지정한 API가 켜져 있는지 확인하세요.{" "}
+            <code className="text-gray-500">.env.local</code>을 바꿨다면 Vite 개발 서버를 재시작해야 합니다.
           </p>
         )}
         <p className="text-xs text-gray-600">시도한 주소: {triedLine}</p>
