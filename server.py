@@ -212,6 +212,11 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
+@app.route("/")
+def index():
+    return jsonify({"service": "panic-api", "ok": True})
+
+
 @app.route("/panic-data")
 def panic_data():
     with CACHE_LOCK:

@@ -7,4 +7,4 @@ services:
     rootDir: .
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn server:app --bind 0.0.0.0:$PORT --workers 1 --threads 2
-    healthCheckPath: /panic-data
+    healthCheckPath: /
