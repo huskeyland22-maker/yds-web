@@ -1,4 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
+import {
+  fetchPanicDataJson,
+  getApiBase,
+  getPanicDataUrlForDisplay,
+  listPanicDataUrlAttemptsForDisplay,
+} from "../config/api.js"
 import { usePanicNotifications } from "../hooks/usePanicNotifications.js"
 import { getHistory, getTimingSignal, getTrend, saveHistory } from "../utils/panicScoreHistory.js"
 import BacktestPanel from "./BacktestPanel.jsx"
@@ -17,52 +23,11 @@ import {
 } from "../utils/tradingScores.js"
 import { getTradingSignal } from "../utils/tradingStrategy.js"
 
-function getApiBase() {
-  return import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || ""
-}
-
-function getPanicDataUrl() {
-  const base = getApiBase() || "http://127.0.0.1:5000"
-  return `${base}/panic-data`
-}
-
 /** StrictMode 이중 마운트에서도 직전 성공 응답을 바로 쓰기 위한 모듈 캐시 */
 let panicDataCache = null
 
 function clearPanicDataCache() {
   panicDataCache = null
-}
-
-function candidatePanicDataUrls() {
-  const base = getApiBase()
-  if (import.meta.env.PROD) {
-    if (!base) return []
-    return [`${base}/panic-data`]
-  }
-  const primary = base ? `${base}/panic-data` : "http://127.0.0.1:5000/panic-data"
-  return [...new Set([primary, "/panic-data", "http://localhost:5000/panic-data"])]
-}
-
-async function fetchPanicDataFromNetwork() {
-  if (import.meta.env.PROD && !getApiBase()) {
-    throw new Error(
-      "배포 환경에서 API 주소(VITE_API_BASE)가 없습니다. Vercel 환경 변수에 공개 API URL을 넣고 다시 배포하세요.",
-    )
-  }
-  const urls = candidatePanicDataUrls()
-  let lastErr = null
-  for (const url of urls) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const json = await res.json()
-      panicDataCache = json
-      return json
-    } catch (e) {
-      lastErr = e
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr ?? "Failed to fetch"))
 }
 
 export default function SignalDashboard() {
@@ -87,14 +52,17 @@ export default function SignalDashboard() {
       }
 
       try {
-        const json = await fetchPanicDataFromNetwork()
+        const json = await fetchPanicDataJson()
         if (!cancelled) {
+          panicDataCache = json
           setData(json)
           setLoadError(null)
         }
       } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        console.error("[YDS SignalDashboard] 패닉 데이터 로드 실패", err)
         if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : String(err))
+          setLoadError(message)
           setData(null)
         }
       }
@@ -128,7 +96,7 @@ export default function SignalDashboard() {
   if (loadError != null) {
     const isProd = import.meta.env.PROD
     const hasApiBase = Boolean(getApiBase())
-    const tried = candidatePanicDataUrls()
+    const tried = listPanicDataUrlAttemptsForDisplay()
     const triedLine = tried.length ? tried.join(" → ") : "(설정된 API URL 없음)"
     return (
       <div className="flex min-h-[240px] flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-16 text-center text-red-300">
@@ -144,7 +112,8 @@ export default function SignalDashboard() {
           </p>
         ) : isProd && hasApiBase ? (
           <p className="max-w-md text-xs text-gray-400">
-            API 서버(<code className="text-gray-500">{getApiBase()}</code>)가 켜져 있는지, 주소가 맞는지 확인하세요.
+            API 서버(<code className="text-gray-500">{getApiBase()}</code>)가 켜져 있는지, 브라우저에서{" "}
+            <code className="text-gray-500">{getPanicDataUrlForDisplay()}</code> 가 JSON으로 열리는지 확인하세요.
             환경 변수를 바꿨다면 Vercel에서 <strong className="text-gray-300">Redeploy</strong>가 필요합니다.
           </p>
         ) : (
@@ -173,12 +142,16 @@ export default function SignalDashboard() {
   }
 
   if (!data) {
+    const displayUrl = getPanicDataUrlForDisplay()
     return (
       <div className="flex min-h-[240px] flex-col items-center justify-center gap-2 rounded-2xl border border-gray-800 bg-[#111827]/40 px-6 py-16 text-center text-gray-400">
-        <p className="text-lg">로딩 중...</p>
-        <p className="text-xs text-gray-500">
-          <code className="text-gray-500">{getPanicDataUrl()}</code>
-        </p>
+        <p className="text-lg">로딩 중…</p>
+        <p className="text-xs text-gray-500">API에서 데이터를 불러오는 중입니다.</p>
+        {displayUrl ? (
+          <p className="text-xs text-gray-500">
+            <code className="break-all text-gray-500">{displayUrl}</code>
+          </p>
+        ) : null}
       </div>
     )
   }
