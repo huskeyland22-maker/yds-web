@@ -213,8 +213,8 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.route("/")
-def index():
-    return jsonify({"service": "panic-api", "ok": True})
+def home():
+    return {"ok": True}
 
 
 @app.route("/panic-data")
@@ -227,5 +227,5 @@ def panic_data():
 bootstrap()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "5000"))
-    app.run(host="0.0.0.0", port=port)
+    # Render 프로덕션은 render.yaml 의 gunicorn 이 $PORT 로 실행됨 (이 블록은 로컬 등 직접 실행용)
+    app.run(host="0.0.0.0", port=5000)
