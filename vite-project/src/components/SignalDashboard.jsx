@@ -17,10 +17,12 @@ import {
 } from "../utils/tradingScores.js"
 import { getTradingSignal } from "../utils/tradingStrategy.js"
 
+function getApiBase() {
+  return import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || ""
+}
+
 function getPanicDataUrl() {
-  const base =
-    import.meta.env.VITE_API_BASE?.replace(/\/$/, "") ||
-    "http://127.0.0.1:5000"
+  const base = getApiBase() || "http://127.0.0.1:5000"
   return `${base}/panic-data`
 }
 
@@ -32,13 +34,24 @@ function clearPanicDataCache() {
 }
 
 function candidatePanicDataUrls() {
-  const primary = getPanicDataUrl()
+  const base = getApiBase()
+  if (import.meta.env.PROD) {
+    if (!base) return []
+    return [`${base}/panic-data`]
+  }
+  const primary = base ? `${base}/panic-data` : "http://127.0.0.1:5000/panic-data"
   return [...new Set([primary, "/panic-data", "http://localhost:5000/panic-data"])]
 }
 
 async function fetchPanicDataFromNetwork() {
+  if (import.meta.env.PROD && !getApiBase()) {
+    throw new Error(
+      "배포 환경에서 API 주소(VITE_API_BASE)가 없습니다. Vercel 환경 변수에 공개 API URL을 넣고 다시 배포하세요.",
+    )
+  }
+  const urls = candidatePanicDataUrls()
   let lastErr = null
-  for (const url of candidatePanicDataUrls()) {
+  for (const url of urls) {
     try {
       const res = await fetch(url)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -113,17 +126,36 @@ export default function SignalDashboard() {
   usePanicNotifications(finalScore, notificationsActive && data != null)
 
   if (loadError != null) {
+    const isProd = import.meta.env.PROD
+    const hasApiBase = Boolean(getApiBase())
+    const tried = candidatePanicDataUrls()
+    const triedLine = tried.length ? tried.join(" → ") : "(설정된 API URL 없음)"
     return (
       <div className="flex min-h-[240px] flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-16 text-center text-red-300">
         <p className="text-lg">불러오기 실패</p>
         <p className="text-sm opacity-90">{loadError}</p>
-        <p className="text-xs text-gray-500">
-          <code className="text-gray-400">vite-project</code> 폴더에서{" "}
-          <code className="text-gray-400">npm run dev:full</code> 로 웹+API를 같이 띄우거나, 별도 터미널에서{" "}
-          <code className="text-gray-400">python server.py</code> (프로젝트 루트)로 Flask가{" "}
-          <code className="text-gray-400">5000</code> 포트에 있는지 확인하세요.
-        </p>
-        <p className="text-xs text-gray-600">시도한 주소: {candidatePanicDataUrls().join(" → ")}</p>
+        {isProd && !hasApiBase ? (
+          <p className="max-w-md text-xs text-gray-400">
+            인터넷에 있는 사이트는 당신 PC의 <code className="text-gray-500">localhost</code>에 연결할 수 없습니다.{" "}
+            <code className="text-gray-500">server.py</code>(Flask)를 Render·Railway 등에 올리고, Vercel 프로젝트 →
+            Settings → Environment Variables에 <code className="text-gray-500">VITE_API_BASE</code>를 그 API의
+            https 주소(끝 슬래시 없이)로 넣은 뒤 <strong className="text-gray-300">Redeploy</strong> 하세요. (빌드 시
+            값이 들어갑니다.)
+          </p>
+        ) : isProd && hasApiBase ? (
+          <p className="max-w-md text-xs text-gray-400">
+            API 서버(<code className="text-gray-500">{getApiBase()}</code>)가 켜져 있는지, 주소가 맞는지 확인하세요.
+            환경 변수를 바꿨다면 Vercel에서 <strong className="text-gray-300">Redeploy</strong>가 필요합니다.
+          </p>
+        ) : (
+          <p className="text-xs text-gray-500">
+            <code className="text-gray-400">vite-project</code> 폴더에서{" "}
+            <code className="text-gray-400">npm run dev:full</code> 로 웹+API를 같이 띄우거나, 별도 터미널에서{" "}
+            <code className="text-gray-400">python server.py</code> (프로젝트 루트)로 Flask가{" "}
+            <code className="text-gray-400">5000</code> 포트에 있는지 확인하세요.
+          </p>
+        )}
+        <p className="text-xs text-gray-600">시도한 주소: {triedLine}</p>
         <button
           type="button"
           className="min-h-[44px] rounded-lg bg-red-500/20 px-5 py-3 text-sm font-medium text-red-200 ring-1 ring-red-500/40 transition hover:bg-red-500/30 sm:min-h-0 sm:py-2"
