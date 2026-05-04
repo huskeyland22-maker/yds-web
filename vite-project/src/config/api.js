@@ -21,7 +21,7 @@ function panicDataUrlFromBase(base) {
   return `${b}/panic-data`
 }
 
-/** 에러 화면·fetch 순회에 쓰는 URL 목록 (프로덕션은 `${VITE_API_BASE}/panic-data` 단일) */
+/** 에러 화면·개발 fetch 순회에 쓰는 URL 목록 */
 export function listPanicDataUrlAttemptsForDisplay() {
   const base = getApiBase()
   if (import.meta.env.PROD) {
@@ -52,13 +52,39 @@ const fetchPanicJsonInit = {
 
 /**
  * 패닉 JSON을 네트워크에서 가져옵니다.
- * 프로덕션: `fetch(\`${import.meta.env.VITE_API_BASE}/panic-data\`)` 와 동일한 단일 URL.
+ * 프로덕션: 반드시 `fetch(\`${import.meta.env.VITE_API_BASE}/panic-data\`)` 형태(트림·슬래시 정리 후).
  */
 export async function fetchPanicDataJson() {
-  if (import.meta.env.PROD && !getApiBase()) {
-    throw new Error(
-      "배포 환경에서 API 주소(VITE_API_BASE)가 없습니다. Vercel 환경 변수에 공개 API URL을 넣고 다시 배포하세요.",
-    )
+  console.log("[YDS] API:", import.meta.env.VITE_API_BASE ?? "(정의되지 않음)")
+
+  if (import.meta.env.PROD) {
+    const raw = import.meta.env.VITE_API_BASE
+    if (raw == null || typeof raw !== "string" || !String(raw).trim()) {
+      console.error("[YDS] VITE_API_BASE 환경 변수 없음 또는 비어 있음")
+      throw new Error(
+        "배포 환경에서 API 주소(VITE_API_BASE)가 없습니다. Vercel 환경 변수에 공개 API URL을 넣고 다시 배포하세요.",
+      )
+    }
+
+    const url = `${String(raw).trim().replace(/\/+$/, "")}/panic-data`
+    try {
+      const res = await fetch(url, fetchPanicJsonInit)
+      if (!res.ok) {
+        const err = new Error(`HTTP ${res.status}`)
+        console.error("[YDS] API 에러:", err, { url, status: res.status })
+        throw err
+      }
+      const data = await res.json()
+      console.log("[YDS] 데이터:", data)
+      return data
+    } catch (err) {
+      console.error("[YDS] API 에러:", err)
+      throw err
+    }
+  }
+
+  if (!getApiBase()) {
+    console.warn("[YDS] VITE_API_BASE 미설정 — 로컬 후보 URL로 시도합니다.")
   }
 
   const urls = listPanicDataUrlAttemptsForDisplay()
@@ -71,7 +97,9 @@ export async function fetchPanicDataJson() {
         console.error("[YDS panic-data] HTTP 오류", { url, status: res.status })
         continue
       }
-      return await res.json()
+      const data = await res.json()
+      console.log("[YDS] 데이터:", data)
+      return data
     } catch (e) {
       lastErr = e instanceof Error ? e : new Error(String(e))
       console.error("[YDS panic-data] fetch 실패", { url, error: lastErr.message })
