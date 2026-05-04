@@ -1,7 +1,7 @@
 /**
  * YDS PWA — 셸·정적 자원 기본 캐시 (API는 네트워크 우선).
  */
-const CACHE = "yds-pwa-v1"
+const CACHE = "yds-pwa-v2"
 const PRECACHE_URLS = [
   "/",
   "/index.html",
