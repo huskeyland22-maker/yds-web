@@ -58,17 +58,19 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (!auth) return
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser || null)
     })
     return () => unsubscribe()
-  }, [])
+  }, [auth])
 
   const login = async () => {
     if (!hasFirebaseConfig()) {
       window.alert("Firebase 환경변수 설정이 필요합니다 (.env.local 확인)")
       return
     }
+    if (!auth) return
     try {
       const provider = new GoogleAuthProvider()
       await signInWithPopup(auth, provider)
@@ -79,6 +81,7 @@ function App() {
   }
 
   const logout = async () => {
+    if (!auth) return
     try {
       await signOut(auth)
     } catch (err) {
@@ -96,6 +99,7 @@ function App() {
       window.alert("저장할 데이터가 아직 없습니다")
       return
     }
+    if (!db) return
     try {
       await setDoc(
         doc(db, "users", user.uid),

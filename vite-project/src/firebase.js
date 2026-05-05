@@ -17,12 +17,12 @@ export function hasFirebaseConfig() {
   return Object.values(firebaseConfig).every((v) => typeof v === "string" && v.trim() !== "")
 }
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig)
-export const auth = getAuth(app)
-export const db = getFirestore(app)
+const app = hasFirebaseConfig() ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) : null
+export const auth = app ? getAuth(app) : null
+export const db = app ? getFirestore(app) : null
 
 export async function getFirebaseMessagingSafe() {
-  if (!hasFirebaseConfig()) return null
+  if (!app) return null
   const supported = await isSupported()
   if (!supported) return null
   return getMessaging(app)
