@@ -76,6 +76,7 @@ export default function SignalDashboard() {
     highYield: "",
   })
   const [rawText, setRawText] = useState("")
+  const [showInput, setShowInput] = useState(false)
   const [notifyEnabled, setNotifyEnabled] = useState(() =>
     typeof window !== "undefined" ? readNotifyOn() : false,
   )
@@ -206,6 +207,7 @@ export default function SignalDashboard() {
       setLoadError(null)
       setError(false)
       setUpdatedAt(saved.updatedAt ?? new Date().toLocaleTimeString())
+      setShowInput(false)
       console.log("파싱 결과:", saved)
     } catch (e) {
       console.error("텍스트 저장 실패", e)
@@ -348,6 +350,13 @@ export default function SignalDashboard() {
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
       <div className="rounded-lg border border-gray-800 bg-[#111827]/60 px-4 py-4 text-left">
         <h3 className="m-0 text-sm font-semibold text-gray-200">데이터 입력</h3>
+        <button
+          type="button"
+          onClick={() => setShowInput((v) => !v)}
+          className="mt-3 min-h-[40px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+        >
+          {showInput ? "닫기" : "📥 데이터 입력"}
+        </button>
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
           {Object.keys(inputData).map((key) => (
             <input
@@ -366,20 +375,30 @@ export default function SignalDashboard() {
         >
           저장
         </button>
-        <textarea
-          rows={10}
-          placeholder="여기에 그대로 붙여넣기"
-          value={rawText}
-          onChange={(e) => setRawText(e.target.value)}
-          className="mt-3 w-full rounded-md border border-gray-700 bg-[#0f172a] px-3 py-2 text-sm text-gray-100 outline-none focus:border-sky-500"
-        />
-        <button
-          type="button"
-          onClick={submitText}
-          className="mt-3 min-h-[40px] rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+        <div
+          className={`mt-5 overflow-hidden rounded-xl bg-[#1f2937] transition-all duration-300 ease-out ${
+            showInput ? "max-h-[520px] p-5 opacity-100" : "max-h-0 p-0 opacity-0"
+          }`}
+          aria-hidden={!showInput}
         >
-          📥 텍스트로 입력
-        </button>
+          <div className={showInput ? "pointer-events-auto" : "pointer-events-none"}>
+            <h3 className="m-0 text-sm font-semibold text-gray-100">텍스트 붙여넣기</h3>
+            <textarea
+              rows={10}
+              placeholder="여기에 그대로 붙여넣기"
+              value={rawText}
+              onChange={(e) => setRawText(e.target.value)}
+              className="mt-3 w-full rounded-md border border-gray-700 bg-[#0f172a] px-3 py-2 text-sm text-gray-100 outline-none focus:border-sky-500"
+            />
+            <button
+              type="button"
+              onClick={submitText}
+              className="mt-3 min-h-[40px] rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+            >
+              📥 변환 및 저장
+            </button>
+          </div>
+        </div>
       </div>
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
         <h2 className="m-0 text-base font-semibold text-gray-300">📊 현재 시장 상태</h2>
