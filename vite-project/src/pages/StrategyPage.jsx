@@ -1,6 +1,6 @@
 import { getFinalScore } from "../utils/tradingScores.js"
 
-export default function StrategyPage({ data }) {
+export default function StrategyPage({ data, user, onSaveData }) {
   if (!data) return <div>Loading...</div>
 
   const fallbackScore = getFinalScore(data)
@@ -54,6 +54,27 @@ export default function StrategyPage({ data }) {
       <div style={{ marginTop: "30px" }}>
         <h3>⚠️ 리스크 관리</h3>
         <p>변동성 확대 구간에서는 비중 조절 필수</p>
+      </div>
+
+      <div style={{ marginTop: "30px", display: "flex", gap: "10px", alignItems: "center" }}>
+        <button
+          type="button"
+          onClick={onSaveData}
+          style={{
+            padding: "10px 16px",
+            borderRadius: "10px",
+            border: "1px solid #475569",
+            background: "#0f172a",
+            color: "#e2e8f0",
+            cursor: "pointer",
+            fontWeight: 700,
+          }}
+        >
+          💾 내 데이터 저장
+        </button>
+        <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+          {user ? `로그인됨: ${user.displayName || user.email || user.uid}` : "로그인 필요"}
+        </span>
       </div>
     </div>
   )

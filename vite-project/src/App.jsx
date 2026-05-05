@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react"
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
+import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchPanicDataJson, submitManualPanicData } from "./config/api.js"
 import BuyTop5Card from "./components/BuyTop5Card.jsx"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
 import SignalDashboard from "./components/SignalDashboard.jsx"
+import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import StrategyPage from "./pages/StrategyPage.jsx"
 
 const MENU = [
@@ -21,6 +24,7 @@ function App() {
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
   const [panicData, setPanicData] = useState(null)
+  const [user, setUser] = useState(null)
 
   const submitInput = async () => {
     try {
@@ -52,6 +56,64 @@ function App() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser || null)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const login = async () => {
+    if (!hasFirebaseConfig()) {
+      window.alert("Firebase 환경변수 설정이 필요합니다 (.env.local 확인)")
+      return
+    }
+    try {
+      const provider = new GoogleAuthProvider()
+      await signInWithPopup(auth, provider)
+    } catch (err) {
+      console.error("로그인 실패", err)
+      window.alert("로그인에 실패했습니다")
+    }
+  }
+
+  const logout = async () => {
+    try {
+      await signOut(auth)
+    } catch (err) {
+      console.error("로그아웃 실패", err)
+      window.alert("로그아웃에 실패했습니다")
+    }
+  }
+
+  const saveMyData = async () => {
+    if (!user) {
+      window.alert("로그인 후 저장할 수 있습니다")
+      return
+    }
+    if (!panicData) {
+      window.alert("저장할 데이터가 아직 없습니다")
+      return
+    }
+    try {
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          uid: user.uid,
+          email: user.email ?? null,
+          displayName: user.displayName ?? null,
+          lastData: panicData,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      )
+      window.alert("💾 내 데이터 저장 완료")
+    } catch (err) {
+      console.error("Firestore 저장 실패", err)
+      window.alert("저장에 실패했습니다")
+    }
+  }
 
   return (
     <div className="flex min-h-[100dvh] min-h-screen flex-col bg-[#0b0f1a] text-gray-200 lg:flex-row">
@@ -112,7 +174,31 @@ function App() {
               <span className="font-mono text-gray-200">1,384.50</span>
             </span>
           </div>
-          <PwaInstallBar />
+          <div className="flex items-center gap-2">
+            {user ? (
+              <>
+                <span className="max-w-[180px] truncate text-xs text-gray-300">
+                  {user.displayName || user.email || "로그인 유저"}
+                </span>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="rounded-md border border-gray-600/60 bg-gray-800/60 px-2 py-1 text-xs text-gray-100 transition-colors hover:bg-gray-700/70"
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={login}
+                className="rounded-md border border-blue-400/40 bg-blue-500/20 px-2 py-1 text-xs text-blue-100 transition-colors hover:bg-blue-500/30"
+              >
+                🔐 로그인
+              </button>
+            )}
+            <PwaInstallBar />
+          </div>
         </header>
 
         <main className="flex-1 overflow-auto px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
@@ -120,7 +206,7 @@ function App() {
             <Route path="/" element={<SignalDashboard />} />
             <Route
               path="/strategy"
-              element={<StrategyPage data={panicData} />}
+              element={<StrategyPage data={panicData} user={user} onSaveData={saveMyData} />}
             />
             <Route
               path="/finder"
