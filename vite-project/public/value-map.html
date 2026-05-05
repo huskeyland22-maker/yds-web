@@ -1,44 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>국내 주식 밸류체인 맵</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>코리아 밸류체인 맵 · Y'ds의 투자 인사이트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      html { background-color: #0c1222; }
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: #e5e7eb;
-        display: grid;
-        place-items: center;
         min-height: 100vh;
+        background-color: #0c1222;
+        color: #e4e9f2;
+        font-family: "Noto Sans KR", system-ui, sans-serif;
       }
-      .box {
-        width: min(920px, 92vw);
-        border: 1px solid #334155;
-        border-radius: 16px;
-        background: #111827;
-        padding: 24px;
+      .container { width: min(1080px, 100% - 2rem); margin: 0 auto; }
+      .vc-card {
+        border: 1px solid rgba(146, 164, 201, 0.25);
+        background: linear-gradient(180deg, rgba(18, 28, 52, 0.78), rgba(10, 16, 34, 0.9));
+        box-shadow: 0 0 0 1px rgba(88, 132, 255, 0.12), 0 22px 52px rgba(0, 0, 0, 0.34);
       }
-      h1 {
-        margin: 0 0 10px;
-        font-size: 22px;
+      .vc-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: 1rem;
+        background: radial-gradient(circle at 80% 0%, rgba(119, 193, 255, 0.09), rgba(0, 0, 0, 0));
       }
-      p {
-        margin: 0;
-        line-height: 1.7;
-        color: #94a3b8;
+      .stock-link {
+        display: block;
+        color: #d6deee;
+        text-decoration: none;
+        border-radius: 0.5rem;
+        padding: 0.35rem 0.45rem;
+        transition: all 0.2s ease;
+      }
+      .stock-link:hover {
+        color: #fff;
+        background: rgba(86, 131, 255, 0.2);
+        transform: translateX(2px);
       }
     </style>
   </head>
   <body>
-    <div class="box">
-      <h1>🗺️ 국내 주식 밸류체인 맵</h1>
-      <p>
-        `public/value-map.html` 파일이 연결되었습니다. 기존에 보유한 HTML 원본 내용을 이 파일로
-        덮어쓰면 iframe에 그대로 표시됩니다.
-      </p>
-    </div>
+    <main class="container py-10 md:py-14">
+      <section class="mb-8 md:mb-10">
+        <p class="text-xs md:text-sm tracking-[0.22em] uppercase text-blue-200/70">Digital Korea Value Chain</p>
+        <h1 class="mt-3 text-3xl md:text-4xl font-semibold text-slate-100">코리아 밸류체인 맵 (2026 Outlook)</h1>
+        <p class="mt-3 max-w-4xl text-sm md:text-base text-slate-300 leading-relaxed">
+          국내 유망 섹터를 대형주 Top 5와 강소기업 5로 분리해 한눈에 정리했습니다. 종목 클릭 시 네이버 금융 종목 페이지로 연결됩니다.
+        </p>
+      </section>
+
+      <section class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
+        <p id="heat-updated-at" class="text-slate-300">Heat 업데이트: 불러오는 중...</p>
+        <button id="reset-favorites" class="rounded-lg border border-slate-500/40 px-3 py-1.5 text-slate-200 hover:border-blue-300/50 hover:text-white" type="button">
+          관심 섹터 초기화
+        </button>
+      </section>
+
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6" id="value-chain-grid"></section>
+    </main>
+
+    <script src="value-chain-data.js"></script>
+    <script>
+      (function () {
+        var FAVORITE_KEY = "value-chain:favorites:v1";
+        var sectors = Array.isArray(window.VALUE_CHAIN_SECTORS) ? window.VALUE_CHAIN_SECTORS.slice() : [];
+        var heatMeta = { updatedAt: "-" };
+
+        function loadFavorites() {
+          try {
+            var raw = localStorage.getItem(FAVORITE_KEY);
+            var parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function saveFavorites(ids) {
+          try { localStorage.setItem(FAVORITE_KEY, JSON.stringify(ids)); } catch (e) {}
+        }
+
+        function stockUrl(item) {
+          if (item.code) return "https://finance.naver.com/item/main.naver?code=" + encodeURIComponent(item.code);
+          return "https://finance.naver.com/search/search.naver?query=" + encodeURIComponent(item.name);
+        }
+
+        function listHtml(items) {
+          return items.map(function (item) {
+            return '<li><a class="stock-link" href="' + stockUrl(item) + '" target="_blank" rel="noopener noreferrer" title="' + item.tip + '">' + item.name + "</a></li>";
+          }).join("");
+        }
+
+        function heatToneClass(heat) {
+          if (heat === "VERY HOT") return "text-rose-200 bg-rose-500/20 border-rose-300/30";
+          if (heat === "HOT") return "text-amber-200 bg-amber-500/20 border-amber-300/30";
+          return "text-emerald-200 bg-emerald-500/20 border-emerald-300/30";
+        }
+
+        function applyHeatMap(heatData) {
+          if (!heatData || typeof heatData !== "object") return;
+          var map = heatData.sectorHeat || {};
+          heatMeta.updatedAt = heatData.updatedAt || "-";
+          sectors.forEach(function (s) { if (map[s.id]) s.heat = map[s.id]; });
+        }
+
+        function render() {
+          var favoriteIds = loadFavorites();
+          var favoriteSet = {};
+          favoriteIds.forEach(function (id) { favoriteSet[id] = true; });
+
+          var ordered = sectors.slice().sort(function (a, b) {
+            var af = favoriteSet[a.id] ? 0 : 1;
+            var bf = favoriteSet[b.id] ? 0 : 1;
+            if (af !== bf) return af - bf;
+            return a.order - b.order;
+          });
+
+          var container = document.getElementById("value-chain-grid");
+          if (!container) return;
+
+          container.innerHTML = ordered.map(function (sector, index) {
+            var isFavorite = !!favoriteSet[sector.id];
+            return (
+              '<article class="vc-card relative rounded-2xl p-5 md:p-6">' +
+              '<div class="mb-4 flex items-start justify-between gap-3">' +
+              '<div><p class="text-xs text-blue-200/70 tracking-wider">SECTOR ' + String(index + 1).padStart(2, "0") + '</p><h2 class="mt-1 text-lg md:text-xl font-semibold text-slate-100">' + sector.icon + " " + sector.name + '</h2></div>' +
+              '<span class="text-[11px] md:text-xs border rounded-full px-2.5 py-1 ' + heatToneClass(sector.heat) + '">' + sector.heat + "</span></div>" +
+              '<div class="mb-4"><button type="button" class="favorite-btn rounded-lg border px-3 py-1.5 text-xs ' + (isFavorite ? "border-blue-300/70 text-blue-100 bg-blue-500/20" : "border-slate-500/40 text-slate-300 hover:border-blue-300/50 hover:text-white") + '" data-sector-id="' + sector.id + '">' + (isFavorite ? "관심 섹터 해제" : "관심 섹터 등록") + "</button></div>" +
+              '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
+              '<div><p class="text-xs font-semibold text-blue-200/75 mb-2">대형주 TOP 5</p><ul class="text-sm space-y-1.5">' + listHtml(sector.top) + "</ul></div>" +
+              '<div><p class="text-xs font-semibold text-amber-200/75 mb-2">강소기업 5</p><ul class="text-sm space-y-1.5">' + listHtml(sector.hidden) + "</ul></div></div></article>"
+            );
+          }).join("");
+
+          var heatUpdatedAtEl = document.getElementById("heat-updated-at");
+          if (heatUpdatedAtEl) heatUpdatedAtEl.textContent = "Heat 업데이트: " + heatMeta.updatedAt;
+        }
+
+        function bindEvents() {
+          var container = document.getElementById("value-chain-grid");
+          if (container) {
+            container.addEventListener("click", function (e) {
+              var btn = e.target.closest(".favorite-btn");
+              if (!btn) return;
+              var id = btn.getAttribute("data-sector-id");
+              if (!id) return;
+              var favorites = loadFavorites();
+              var idx = favorites.indexOf(id);
+              if (idx === -1) favorites.push(id); else favorites.splice(idx, 1);
+              saveFavorites(favorites);
+              render();
+            });
+          }
+          var resetBtn = document.getElementById("reset-favorites");
+          if (resetBtn) {
+            resetBtn.addEventListener("click", function () {
+              saveFavorites([]);
+              render();
+            });
+          }
+        }
+
+        bindEvents();
+        fetch("value-chain-heat.json")
+          .then(function (res) {
+            if (!res.ok) throw new Error("heat fetch failed");
+            return res.json();
+          })
+          .then(function (data) {
+            applyHeatMap(data);
+            render();
+          })
+          .catch(function () {
+            render();
+          });
+      })();
+    </script>
   </body>
 </html>
