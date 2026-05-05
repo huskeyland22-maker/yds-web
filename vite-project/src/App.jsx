@@ -128,6 +128,28 @@ function App() {
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold text-gray-200">종목 발굴</h2>
                   <BuyTop5Card />
+                  <div style={{ marginTop: "60px" }}>
+                    <h2
+                      style={{
+                        fontSize: "18px",
+                        marginBottom: "12px",
+                        color: "#9ca3af",
+                      }}
+                    >
+                      🗺️ 국내 주식 밸류체인 맵
+                    </h2>
+
+                    <iframe
+                      src="/value-map.html"
+                      title="국내 주식 밸류체인 맵"
+                      style={{
+                        width: "100%",
+                        height: "800px",
+                        border: "none",
+                        borderRadius: "16px",
+                      }}
+                    />
+                  </div>
                 </div>
               }
             />
