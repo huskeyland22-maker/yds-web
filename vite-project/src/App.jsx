@@ -21,7 +21,7 @@ function App() {
     try {
       const parsed = JSON.parse(inputText)
       await submitManualPanicData(parsed)
-      window.alert("저장 완료")
+      window.alert("✅ 저장 완료")
       setOpenInput(false)
     } catch (err) {
       window.alert("JSON 형식이 올바르지 않습니다")
@@ -92,8 +92,18 @@ function App() {
         className={`fixed right-0 top-0 z-[9999] h-full w-[300px] bg-[#111827] p-5 shadow-[-4px_0_10px_rgba(0,0,0,0.3)] transition-transform duration-300 ${
           openInput ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{
+          width: "360px",
+          background: "linear-gradient(180deg, #0f172a, #020617)",
+          boxShadow: "-6px 0 20px rgba(0,0,0,0.6)",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
-        <h3 className="text-base font-semibold text-gray-100">데이터 입력</h3>
+        <div style={{ marginBottom: "15px" }}>
+          <h3 style={{ color: "#c4b5fd", marginBottom: "5px" }}>⚙️ 데이터 입력</h3>
+          <p style={{ fontSize: "12px", color: "#64748b" }}>JSON 형식으로 전체 데이터 입력</p>
+        </div>
         <textarea
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
@@ -104,24 +114,53 @@ function App() {
   "bofa": 3.2,
   "highYield": 4.1
 }`}
-          className="mt-2 h-[200px] w-full rounded-md border border-gray-700 bg-[#0f172a] px-2 py-2 font-mono text-sm text-gray-100"
+          style={{
+            flex: 1,
+            background: "#020617",
+            color: "#e2e8f0",
+            border: "1px solid #1e293b",
+            borderRadius: "10px",
+            padding: "14px",
+            fontFamily: "monospace",
+            fontSize: "13px",
+            lineHeight: "1.5",
+            outline: "none",
+            boxShadow: "inset 0 0 10px rgba(0,0,0,0.4)",
+          }}
         />
-        <button
-          type="button"
-          style={{ marginTop: "10px" }}
-          onClick={submitInput}
-          className="w-full rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-500"
-        >
-          저장
-        </button>
-        <button
-          type="button"
-          style={{ marginTop: "10px" }}
-          onClick={() => setOpenInput(false)}
-          className="w-full rounded-md border border-gray-700 bg-[#0f172a] px-3 py-2 text-sm text-gray-200 hover:bg-gray-800"
-        >
-          닫기
-        </button>
+        <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+          <button
+            type="button"
+            onClick={submitInput}
+            style={{
+              flex: 1,
+              padding: "10px",
+              borderRadius: "8px",
+              background: "#7c3aed",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            💾 저장
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpenInput(false)}
+            style={{
+              flex: 1,
+              padding: "10px",
+              borderRadius: "8px",
+              background: "#1e293b",
+              color: "#94a3b8",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            닫기
+          </button>
+        </div>
       </div>
     </div>
   )
