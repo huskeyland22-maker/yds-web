@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
-import { submitManualPanicData } from "./config/api.js"
+import { fetchPanicDataJson, submitManualPanicData } from "./config/api.js"
 import BuyTop5Card from "./components/BuyTop5Card.jsx"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
-import SignalBacktestPanel from "./components/SignalBacktestPanel.jsx"
 import SignalDashboard from "./components/SignalDashboard.jsx"
+import StrategyPage from "./pages/StrategyPage.jsx"
 
 const MENU = [
   { label: "오늘의 시그널", path: "/", active: true },
@@ -20,11 +20,13 @@ function App() {
   const location = useLocation()
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
+  const [panicData, setPanicData] = useState(null)
 
   const submitInput = async () => {
     try {
       const parsed = JSON.parse(inputText)
-      await submitManualPanicData(parsed)
+      const saved = await submitManualPanicData(parsed)
+      setPanicData(saved)
       window.alert("✅ 저장 완료")
       setOpenInput(false)
     } catch (err) {
@@ -32,6 +34,24 @@ function App() {
       console.error("데이터 입력 저장 실패", err)
     }
   }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadPanicData() {
+      try {
+        const data = await fetchPanicDataJson({ debugLog: false })
+        if (!cancelled) setPanicData(data)
+      } catch (err) {
+        console.error("전략 페이지용 데이터 로드 실패", err)
+      }
+    }
+
+    loadPanicData()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <div className="flex min-h-[100dvh] min-h-screen flex-col bg-[#0b0f1a] text-gray-200 lg:flex-row">
@@ -100,12 +120,7 @@ function App() {
             <Route path="/" element={<SignalDashboard />} />
             <Route
               path="/strategy"
-              element={
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-200">매매 전략</h2>
-                  <SignalBacktestPanel />
-                </div>
-              }
+              element={<StrategyPage data={panicData} />}
             />
             <Route
               path="/finder"
