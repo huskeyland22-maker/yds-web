@@ -189,6 +189,12 @@ export default function SignalDashboard() {
     return () => window.clearTimeout(t)
   }, [loading])
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      console.log("현재 탭 활성 상태:", document.visibilityState)
+    }
+  }, [])
+
   const manualRefresh = useCallback(() => {
     clearPanicDataCache()
     setLoading(true)
@@ -449,20 +455,50 @@ export default function SignalDashboard() {
       </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
       <div className="mt-1 flex justify-end">
-        <button
-          type="button"
-          onClick={() => {
-            sendRealtimeNotification("테스트 알림", "정상 작동 확인")
-          }}
-          style={{
-            ...topRefreshBtnStyle,
-            background: "#2563eb",
-            border: "1px solid #3b82f6",
-            color: "white",
-          }}
-        >
-          🔔 알림 테스트
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            type="button"
+            onClick={() => {
+              sendRealtimeNotification("테스트 알림", "정상 작동 확인")
+            }}
+            style={{
+              ...topRefreshBtnStyle,
+              background: "#2563eb",
+              border: "1px solid #3b82f6",
+              color: "white",
+            }}
+          >
+            🔔 알림 테스트
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!("Notification" in window)) {
+                alert("알림 미지원 브라우저")
+                return
+              }
+              console.log("알림 권한:", Notification.permission)
+              if (Notification.permission === "granted") {
+                new Notification("🔥 테스트 알림", {
+                  body: "이게 안 보이면 OS 문제",
+                })
+              } else {
+                alert("알림 권한 없음")
+              }
+            }}
+            style={{
+              marginTop: "10px",
+              padding: "10px",
+              borderRadius: "10px",
+              background: "#ef4444",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            🔔 알림 테스트 (강제)
+          </button>
+        </div>
       </div>
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
         <h2 style={{ fontSize: "16px", marginBottom: "10px" }} className="m-0 font-semibold text-gray-300">
