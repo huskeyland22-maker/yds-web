@@ -14,7 +14,7 @@ const MENU = [
 function App() {
   return (
     <div className="flex min-h-[100dvh] min-h-screen flex-col bg-[#0b0f1a] text-gray-200 lg:flex-row">
-      <aside className="flex w-full shrink-0 flex-row gap-1 overflow-x-auto border-b border-gray-800/80 bg-[#0f172a] px-2 py-3 lg:w-60 lg:flex-col lg:border-b-0 lg:border-r lg:px-2 lg:py-4">
+      <aside className="flex w-full shrink-0 flex-row gap-1 overflow-x-auto border-b border-gray-800/80 bg-[#0f172a] px-2 py-3 lg:h-[100dvh] lg:w-60 lg:flex-col lg:border-b-0 lg:border-r lg:px-2 lg:py-4">
         <div className="mb-0 shrink-0 px-2 py-1 lg:mb-4 lg:px-3">
           <p className="whitespace-nowrap text-xs font-semibold uppercase tracking-[0.2em] text-purple-400">
             Signal Flow
@@ -35,6 +35,14 @@ function App() {
             </div>
           ))}
         </nav>
+        <div className="hidden lg:block lg:mt-auto lg:px-2 lg:pt-5">
+          <button
+            type="button"
+            className="w-full rounded-lg border border-violet-500/40 bg-violet-500/20 px-2 py-2 text-xs text-violet-300 transition-colors hover:bg-violet-500/30"
+          >
+            📥 데이터 입력
+          </button>
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
