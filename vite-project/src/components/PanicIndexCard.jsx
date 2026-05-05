@@ -37,13 +37,6 @@ const TIMING_TEXT = {
   danger: "text-red-400",
 }
 
-const gridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
-  gap: "16px",
-  marginBottom: "30px",
-}
-
 export default function PanicIndexCard({
   data,
   isPro = false,
@@ -114,7 +107,7 @@ export default function PanicIndexCard({
   }, [data, isPro])
 
   return (
-    <article className="relative z-0 rounded-2xl bg-[#111827] p-6 text-center shadow-lg shadow-black/20 transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl">
+    <article className="relative z-0 rounded-2xl bg-[#111827] p-4 text-center shadow-lg shadow-black/20 transition duration-200 ease-out sm:p-6 lg:hover:z-10 lg:hover:scale-[1.02] lg:hover:shadow-xl">
       <h3 className="text-lg font-semibold text-white">패닉 지수</h3>
       <p className="mt-1 text-xs font-medium text-amber-200/90">
         {isPro ? "PRO — 차트·고급 시그널·브라우저 알림 사용 중" : "무료 — 지표·기본 시그널만 (PRO는 VITE_PRO_API_KEY + 서버 PRO_API_KEY 일치)"}
@@ -188,21 +181,21 @@ export default function PanicIndexCard({
 
         <div className="mt-6 text-left">
           <h2 className="m-0 text-base font-semibold tracking-tight text-gray-100">단기 (Tactical)</h2>
-          <div style={gridStyle}>
+          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             <PanicMetricCard title="VIX" value={panicData.short.vix} type="vix" />
             <PanicMetricCard title="Put/Call" value={panicData.short.putCall} type="putCall" />
             <PanicMetricCard title="VXN" value={panicData.short.vxn} />
           </div>
 
           <h2 className="m-0 mt-2 text-base font-semibold tracking-tight text-gray-100">중기 (Strategic)</h2>
-          <div style={gridStyle}>
+          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             <PanicMetricCard title="공포탐욕지수" value={panicData.mid.fearGreed} type="fearGreed" />
             <PanicMetricCard title="BofA" value={panicData.mid.bofa} type="bofa" />
             <PanicMetricCard title="MOVE" value={panicData.mid.move} />
           </div>
 
           <h2 className="m-0 mt-2 text-base font-semibold tracking-tight text-gray-100">장기 (Macro)</h2>
-          <div style={{ ...gridStyle, marginBottom: 0 }}>
+          <div className="mb-0 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             <PanicMetricCard title="SKEW" value={panicData.long.skew} />
             <PanicMetricCard title="하이일드" value={panicData.long.highYield} type="highYield" />
             <PanicMetricCard title="GS 지수" value={panicData.long.gs} />

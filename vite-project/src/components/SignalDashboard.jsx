@@ -348,9 +348,9 @@ export default function SignalDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
-      <div style={summaryCardStyle} className="border border-gray-800">
+      <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
         <h2 className="m-0 text-base font-semibold text-gray-300">📊 현재 시장 상태</h2>
-        <h1 className="m-0 mt-3 text-2xl font-bold leading-tight" style={{ color: headlineSignal.color }}>
+        <h1 className="m-0 mt-3 text-xl font-bold leading-tight sm:text-2xl" style={{ color: headlineSignal.color }}>
           {headlineSignal.text}
         </h1>
         <p className="m-0 mt-3 text-sm text-gray-400">신뢰도: {headlineConfidence} / 4</p>

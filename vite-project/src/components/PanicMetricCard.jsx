@@ -2,7 +2,7 @@ import { getStatus } from "../utils/panicIndicatorStatus.js"
 
 const cardStyle = {
   background: "#111827",
-  padding: "20px",
+  padding: "14px",
   borderRadius: "12px",
   textAlign: "center",
   color: "white",
@@ -18,13 +18,13 @@ export default function PanicMetricCard({ title, value, type }) {
 
   return (
     <div style={cardStyle}>
-      <h3 className="m-0 text-sm font-semibold text-gray-400">{title}</h3>
+      <h3 className="m-0 text-xs font-semibold text-gray-400 sm:text-sm">{title}</h3>
 
-      <p className="mb-1 mt-2 font-mono text-white" style={{ fontSize: "22px", fontWeight: "bold" }}>
+      <p className="mb-1 mt-2 font-mono text-lg font-bold text-white sm:text-xl" style={{ fontWeight: "bold" }}>
         {display}
       </p>
 
-      <span className="text-sm font-medium" style={{ color: status.color }}>
+      <span className="text-xs font-medium sm:text-sm" style={{ color: status.color }}>
         {status.text}
       </span>
     </div>
