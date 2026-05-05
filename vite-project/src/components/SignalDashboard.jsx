@@ -232,6 +232,13 @@ export default function SignalDashboard() {
 
   usePanicNotifications(finalScore, notificationsActive && data != null)
 
+  const sendRealtimeNotification = useCallback((title, body) => {
+    if (typeof window === "undefined" || !("Notification" in window)) return
+    if (Notification.permission === "granted") {
+      sendNotification(title, body)
+    }
+  }, [])
+
   useEffect(() => {
     if (!data || !alertOn) return
 
@@ -244,21 +251,25 @@ export default function SignalDashboard() {
       return
     }
 
-    let message = null
+    let title = null
+    let body = null
     if (score >= 70) {
-      message = "🚀 과열 구간 진입"
+      title = "🚀 과열"
+      body = "과열 구간 진입"
     } else if (score <= 30) {
-      message = "💀 공포 구간 진입"
+      title = "💀 공포"
+      body = "공포 구간 진입"
     } else if (prevScore !== null && Math.abs(score - prevScore) >= 10) {
-      message = "⚠️ 급격한 변동 발생"
+      title = "⚠️ 변동"
+      body = "급격한 변화 발생"
     }
 
-    if (message) {
-      alert(message)
+    if (title) {
+      sendRealtimeNotification(title, body ?? "")
       setLastAlertTime(now)
     }
     setPrevScore(score)
-  }, [data, alertOn, prevScore, finalScore, lastAlertTime])
+  }, [data, alertOn, prevScore, finalScore, lastAlertTime, sendRealtimeNotification])
 
   useEffect(() => {
     if (!data) return
