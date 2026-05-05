@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useRegisterSW } from "virtual:pwa-register/react"
 import { submitManualPanicData } from "./config/api.js"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
 import SignalDashboard from "./components/SignalDashboard.jsx"
@@ -14,6 +15,7 @@ const MENU = [
 ]
 
 function App() {
+  useRegisterSW()
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
 
