@@ -448,6 +448,22 @@ export default function SignalDashboard() {
         </div>
       </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
+      <div className="mt-1 flex justify-end">
+        <button
+          type="button"
+          onClick={() => {
+            sendRealtimeNotification("테스트 알림", "정상 작동 확인")
+          }}
+          style={{
+            ...topRefreshBtnStyle,
+            background: "#2563eb",
+            border: "1px solid #3b82f6",
+            color: "white",
+          }}
+        >
+          🔔 알림 테스트
+        </button>
+      </div>
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
         <h2 style={{ fontSize: "16px", marginBottom: "10px" }} className="m-0 font-semibold text-gray-300">
           현재 시장 상태
