@@ -13,11 +13,14 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
+const hasFirebaseApiKey =
+  typeof firebaseConfig.apiKey === "string" && firebaseConfig.apiKey.trim() !== ""
+
 export function hasFirebaseConfig() {
   return Object.values(firebaseConfig).every((v) => typeof v === "string" && v.trim() !== "")
 }
 
-const app = hasFirebaseConfig() ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) : null
+const app = hasFirebaseApiKey ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) : null
 export const auth = app ? getAuth(app) : null
 export const db = app ? getFirestore(app) : null
 
