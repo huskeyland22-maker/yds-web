@@ -20,7 +20,7 @@ function App() {
   const [inputText, setInputText] = useState("")
 
   const sendNotification = (title, body) => {
-    if ("Notification" in window && Notification.permission === "granted") {
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
       new Notification(title, { body })
     } else {
       console.warn("알림 권한 없음 또는 미지원")
