@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRegisterSW } from "virtual:pwa-register/react"
 import { submitManualPanicData } from "./config/api.js"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
@@ -18,6 +18,14 @@ function App() {
   useRegisterSW()
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
+
+  useEffect(() => {
+    if ("Notification" in window) {
+      Notification.requestPermission().then((permission) => {
+        console.log("알림 권한:", permission)
+      })
+    }
+  }, [])
 
   const submitInput = async () => {
     try {

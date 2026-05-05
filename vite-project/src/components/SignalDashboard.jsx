@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   fetchPanicDataJson,
   getPanicDataUrlForDisplay,
   listPanicDataUrlAttemptsForDisplay,
 } from "../config/api.js"
-import { usePanicNotifications } from "../hooks/usePanicNotifications.js"
+import { sendNotification, usePanicNotifications } from "../hooks/usePanicNotifications.js"
 import {
   getAdvancedSignal,
   getConfidence,
@@ -88,6 +88,11 @@ export default function SignalDashboard() {
   const [notifyEnabled, setNotifyEnabled] = useState(() =>
     typeof window !== "undefined" ? readNotifyOn() : false,
   )
+  const notifyEdgeRef = useRef({
+    vixAbove30: false,
+    strongBuy: false,
+    strongSell: false,
+  })
 
   /**
    * 패닉 데이터 로드 (정적 파일 `/data.json`).
@@ -223,6 +228,41 @@ export default function SignalDashboard() {
     Notification.permission === "granted"
 
   usePanicNotifications(finalScore, notificationsActive && data != null)
+
+  useEffect(() => {
+    if (!data) return
+    if (typeof window === "undefined" || !("Notification" in window)) return
+    if (Notification.permission !== "granted") return
+
+    const vix = Number(data?.vix)
+    if (Number.isFinite(vix) && vix > 30) {
+      if (!notifyEdgeRef.current.vixAbove30) {
+        sendNotification("🚨 시장 위험", "VIX 급등 발생!")
+        notifyEdgeRef.current.vixAbove30 = true
+      }
+    } else {
+      notifyEdgeRef.current.vixAbove30 = false
+    }
+
+    const signalText = String(headlineSignal?.text ?? "")
+    if (signalText.includes("강한 매수")) {
+      if (!notifyEdgeRef.current.strongBuy) {
+        sendNotification("🟢 매수 기회", "강한 매수 신호 발생!")
+        notifyEdgeRef.current.strongBuy = true
+      }
+    } else {
+      notifyEdgeRef.current.strongBuy = false
+    }
+
+    if (signalText.includes("강한 매도")) {
+      if (!notifyEdgeRef.current.strongSell) {
+        sendNotification("🔴 매도 경고", "시장 과열 상태")
+        notifyEdgeRef.current.strongSell = true
+      }
+    } else {
+      notifyEdgeRef.current.strongSell = false
+    }
+  }, [data, headlineSignal])
 
   if (loading) {
     const displayUrl = getPanicDataUrlForDisplay()
