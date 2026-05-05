@@ -40,12 +40,20 @@ const refreshBtnStyle = {
   borderRadius: "8px",
   cursor: "pointer",
 }
+const topRefreshBtnStyle = {
+  padding: "8px 12px",
+  borderRadius: "10px",
+  border: "1px solid #374151",
+  background: "#1f2937",
+  color: "#e5e7eb",
+  cursor: "pointer",
+}
 
 const summaryCardStyle = {
-  marginTop: "20px",
-  padding: "24px",
-  background: "#111827",
-  borderRadius: "16px",
+  marginTop: "10px",
+  padding: "30px",
+  background: "linear-gradient(135deg, #111827, #1f2937)",
+  borderRadius: "20px",
   textAlign: "center",
 }
 const pageContainerStyle = {
@@ -310,19 +318,26 @@ export default function SignalDashboard() {
 
   return (
     <div style={pageContainerStyle} className="flex flex-col gap-5">
-      <div>
-        <h1 style={{ fontSize: "28px", fontWeight: "bold", marginBottom: "10px" }}>📊 패닉지수 대시보드</h1>
-        <p style={{ color: "gray", fontSize: "14px" }}>시장 공포/탐욕 상태를 한눈에 확인</p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <div>
+          <h1 style={{ fontSize: "26px", margin: 0 }}>📊 패닉지수</h1>
+          <p style={{ color: "gray", fontSize: "13px", margin: 0 }}>시장 심리 지표 대시보드</p>
+        </div>
+        <button type="button" onClick={manualRefresh} style={topRefreshBtnStyle}>
+          🔄 새로고침
+        </button>
       </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
-        <h2 style={{ marginBottom: "10px" }} className="m-0 text-lg font-semibold text-gray-300">
+        <h2 style={{ fontSize: "16px", marginBottom: "10px" }} className="m-0 font-semibold text-gray-300">
           현재 시장 상태
         </h2>
-        <h1 className="m-0 text-3xl font-bold leading-tight" style={{ color: headlineSignal.color }}>
+        <h1 className="m-0 font-bold leading-tight" style={{ fontSize: "36px", color: headlineSignal.color }}>
           {headlineSignal.text}
         </h1>
-        <p className="m-0 mt-3 text-sm text-gray-300">신뢰도: {headlineConfidence} / 4</p>
+        <p style={{ marginTop: "8px", fontSize: "13px" }} className="m-0 text-gray-300">
+          신뢰도: {headlineConfidence} / 4
+        </p>
         <p className="m-0 mt-2 text-xs text-gray-500">
           참고 합산(MVP): {headlineReferenceTotal} — {headlineReferenceLabel.text}
         </p>

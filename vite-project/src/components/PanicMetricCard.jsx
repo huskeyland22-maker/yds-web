@@ -3,11 +3,11 @@ import { getStatus } from "../utils/panicIndicatorStatus.js"
 const cardStyle = {
   background: "#1f2937",
   padding: "16px",
-  borderRadius: "12px",
+  borderRadius: "14px",
   textAlign: "center",
   color: "white",
   boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-  transition: "0.2s",
+  transition: "all 0.2s ease",
 }
 
 /**
@@ -23,10 +23,10 @@ export default function PanicMetricCard({ title, value, type }) {
     <div
       style={cardStyle}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "scale(1.05)"
+        e.currentTarget.style.transform = "translateY(-4px)"
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "scale(1)"
+        e.currentTarget.style.transform = "translateY(0)"
       }}
     >
       <h3 className="m-0 text-xs font-semibold text-gray-400 sm:text-sm">{title}</h3>
@@ -38,7 +38,15 @@ export default function PanicMetricCard({ title, value, type }) {
         {display}
       </p>
 
-      <span className="text-xs font-medium sm:text-sm" style={{ color: status.color }}>
+      <span
+        style={{
+          padding: "4px 8px",
+          borderRadius: "8px",
+          fontSize: "12px",
+          background: status.color,
+          color: "white",
+        }}
+      >
         {status.text}
       </span>
     </div>

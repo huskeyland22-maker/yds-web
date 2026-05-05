@@ -180,25 +180,36 @@ export default function PanicIndexCard({
         <ScoreHistorySparkline history={history} />
 
         <div className="mt-6 text-left">
-          <h2 className="m-0 text-base font-semibold tracking-tight text-gray-100">단기 (Tactical)</h2>
-          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          <h2
+            style={{ marginTop: "30px", fontSize: "18px", borderBottom: "1px solid #374151", paddingBottom: "5px" }}
+            className="m-0 font-semibold tracking-tight text-gray-100"
+          >
+            단기 (Tactical)
+          </h2>
+          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <PanicMetricCard title="VIX" value={panicData.short.vix} type="vix" />
             <PanicMetricCard title="Put/Call" value={panicData.short.putCall} type="putCall" />
-            <PanicMetricCard title="VXN" value={panicData.short.vxn} />
           </div>
 
-          <h2 className="m-0 mt-2 text-base font-semibold tracking-tight text-gray-100">중기 (Strategic)</h2>
-          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          <h2
+            style={{ marginTop: "30px", fontSize: "18px", borderBottom: "1px solid #374151", paddingBottom: "5px" }}
+            className="m-0 font-semibold tracking-tight text-gray-100"
+          >
+            중기 (Strategic)
+          </h2>
+          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <PanicMetricCard title="공포탐욕지수" value={panicData.mid.fearGreed} type="fearGreed" />
             <PanicMetricCard title="BofA" value={panicData.mid.bofa} type="bofa" />
-            <PanicMetricCard title="MOVE" value={panicData.mid.move} />
           </div>
 
-          <h2 className="m-0 mt-2 text-base font-semibold tracking-tight text-gray-100">장기 (Macro)</h2>
-          <div className="mb-0 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            <PanicMetricCard title="SKEW" value={panicData.long.skew} />
+          <h2
+            style={{ marginTop: "30px", fontSize: "18px", borderBottom: "1px solid #374151", paddingBottom: "5px" }}
+            className="m-0 font-semibold tracking-tight text-gray-100"
+          >
+            장기 (Macro)
+          </h2>
+          <div className="mb-0 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <PanicMetricCard title="하이일드" value={panicData.long.highYield} type="highYield" />
-            <PanicMetricCard title="GS 지수" value={panicData.long.gs} />
           </div>
 
           {isPro ? (
