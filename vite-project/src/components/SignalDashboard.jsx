@@ -85,6 +85,9 @@ export default function SignalDashboard() {
   /** STEP 0: 클라이언트에서 마지막으로 네트워크 응답을 받은 시각 */
   const [updatedAt, setUpdatedAt] = useState(null)
   const [history, setHistory] = useState(() => getHistory())
+  const [alertOn, setAlertOn] = useState(true)
+  const [prevScore, setPrevScore] = useState(null)
+  const [lastAlertTime, setLastAlertTime] = useState(0)
   const [notifyEnabled, setNotifyEnabled] = useState(() =>
     typeof window !== "undefined" ? readNotifyOn() : false,
   )
@@ -230,6 +233,34 @@ export default function SignalDashboard() {
   usePanicNotifications(finalScore, notificationsActive && data != null)
 
   useEffect(() => {
+    if (!data || !alertOn) return
+
+    const score = Number(data?.score ?? finalScore ?? 0)
+    if (!Number.isFinite(score)) return
+
+    const now = Date.now()
+    if (now - lastAlertTime < 60_000) {
+      setPrevScore(score)
+      return
+    }
+
+    let message = null
+    if (score >= 70) {
+      message = "🚀 과열 구간 진입"
+    } else if (score <= 30) {
+      message = "💀 공포 구간 진입"
+    } else if (prevScore !== null && Math.abs(score - prevScore) >= 10) {
+      message = "⚠️ 급격한 변동 발생"
+    }
+
+    if (message) {
+      alert(message)
+      setLastAlertTime(now)
+    }
+    setPrevScore(score)
+  }, [data, alertOn, prevScore, finalScore, lastAlertTime])
+
+  useEffect(() => {
     if (!data) return
     if (typeof window === "undefined" || !("Notification" in window)) return
     if (Notification.permission !== "granted") return
@@ -363,9 +394,33 @@ export default function SignalDashboard() {
           <h1 style={{ fontSize: "26px", margin: 0 }}>📊 패닉지수</h1>
           <p style={{ color: "gray", fontSize: "13px", margin: 0 }}>시장 심리 지표 대시보드</p>
         </div>
-        <button type="button" onClick={manualRefresh} style={topRefreshBtnStyle}>
-          🔄 새로고침
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            type="button"
+            onClick={() => setAlertOn(true)}
+            style={{
+              ...topRefreshBtnStyle,
+              background: alertOn ? "#166534" : "#1f2937",
+              border: alertOn ? "1px solid #22c55e" : "1px solid #374151",
+            }}
+          >
+            알림 켜짐
+          </button>
+          <button
+            type="button"
+            onClick={() => setAlertOn(false)}
+            style={{
+              ...topRefreshBtnStyle,
+              background: !alertOn ? "#7f1d1d" : "#1f2937",
+              border: !alertOn ? "1px solid #ef4444" : "1px solid #374151",
+            }}
+          >
+            끄기
+          </button>
+          <button type="button" onClick={manualRefresh} style={topRefreshBtnStyle}>
+            🔄 새로고침
+          </button>
+        </div>
       </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
