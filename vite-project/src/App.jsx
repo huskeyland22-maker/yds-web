@@ -19,6 +19,14 @@ function App() {
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
 
+  const sendNotification = (title, body) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, { body })
+    } else {
+      console.warn("알림 권한 없음 또는 미지원")
+    }
+  }
+
   const submitInput = async () => {
     try {
       const parsed = JSON.parse(inputText)
@@ -88,12 +96,11 @@ function App() {
             type="button"
             onClick={() => {
               if (!("Notification" in window)) return
+              console.log("Notification 상태:", Notification.permission)
               Notification.requestPermission().then((permission) => {
                 console.log("권한:", permission)
                 if (permission === "granted") {
-                  new Notification("알림 허용 완료", {
-                    body: "이제 알림이 정상 작동합니다",
-                  })
+                  sendNotification("알림 허용 완료", "이제 알림이 정상 작동합니다")
                 }
               })
             }}
@@ -108,6 +115,26 @@ function App() {
             }}
           >
             🔔 알림 켜기
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if ("Notification" in window) {
+                console.log("Notification 상태:", Notification.permission)
+              }
+              sendNotification("테스트 알림", "정상 작동 확인")
+            }}
+            style={{
+              marginTop: "10px",
+              padding: "10px",
+              borderRadius: "10px",
+              background: "#2563eb",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            🔔 알림 테스트
           </button>
         </header>
 
