@@ -13,19 +13,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-const maskedApiKey =
-  typeof firebaseConfig.apiKey === "string" && firebaseConfig.apiKey.length > 8
-    ? `${firebaseConfig.apiKey.slice(0, 4)}...${firebaseConfig.apiKey.slice(-4)}`
-    : firebaseConfig.apiKey
-
-console.log("[firebase env check] API KEY:", maskedApiKey)
-console.log("[firebase env check] hasConfigFields:", {
-  authDomain: Boolean(firebaseConfig.authDomain),
-  projectId: Boolean(firebaseConfig.projectId),
-  storageBucket: Boolean(firebaseConfig.storageBucket),
-  messagingSenderId: Boolean(firebaseConfig.messagingSenderId),
-  appId: Boolean(firebaseConfig.appId),
-})
+const apiKey = import.meta.env.VITE_FIREBASE_API_KEY
+console.log("[firebase env check]", import.meta.env.VITE_FIREBASE_API_KEY)
+console.log(
+  "[firebase env check] API KEY:",
+  apiKey ? `${apiKey.slice(0, 4)}***` : "undefined",
+)
 
 const hasFirebaseApiKey =
   typeof firebaseConfig.apiKey === "string" && firebaseConfig.apiKey.trim() !== ""
