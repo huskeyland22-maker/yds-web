@@ -86,7 +86,7 @@ export default function SignalDashboard() {
   const [updatedAt, setUpdatedAt] = useState(null)
   const [history, setHistory] = useState(() => getHistory())
   const [alertOn, setAlertOn] = useState(true)
-  const [prevScore, setPrevScore] = useState(null)
+  const [lastAlertType, setLastAlertType] = useState(null)
   const [lastAlertTime, setLastAlertTime] = useState(0)
   const [notifyEnabled, setNotifyEnabled] = useState(() =>
     typeof window !== "undefined" ? readNotifyOn() : false,
@@ -252,30 +252,24 @@ export default function SignalDashboard() {
     if (!Number.isFinite(score)) return
 
     const now = Date.now()
-    if (now - lastAlertTime < 60_000) {
-      setPrevScore(score)
-      return
-    }
-
-    let title = null
-    let body = null
     if (score >= 70) {
-      title = "🚀 과열"
-      body = "과열 구간 진입"
+      if (lastAlertType !== "hot" && now - lastAlertTime >= 60_000) {
+        sendRealtimeNotification("🚀 과열", "과열 구간 진입")
+        setLastAlertTime(now)
+      }
+      setLastAlertType("hot")
     } else if (score <= 30) {
-      title = "💀 공포"
-      body = "공포 구간 진입"
-    } else if (prevScore !== null && Math.abs(score - prevScore) >= 10) {
-      title = "⚠️ 변동"
-      body = "급격한 변화 발생"
+      if (lastAlertType !== "fear" && now - lastAlertTime >= 60_000) {
+        sendRealtimeNotification("💀 공포", "공포 구간 진입")
+        setLastAlertTime(now)
+      }
+      setLastAlertType("fear")
+    } else {
+      if (lastAlertType !== "neutral") {
+        setLastAlertType("neutral")
+      }
     }
-
-    if (title) {
-      sendRealtimeNotification(title, body ?? "")
-      setLastAlertTime(now)
-    }
-    setPrevScore(score)
-  }, [data, alertOn, prevScore, finalScore, lastAlertTime, sendRealtimeNotification])
+  }, [data, alertOn, finalScore, lastAlertTime, lastAlertType, sendRealtimeNotification])
 
   useEffect(() => {
     if (!data) return
