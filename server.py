@@ -7,6 +7,9 @@ FRED_API_KEY       St. Louis Fed API 키 (High Yield 스프레드 필수)
 BOFA_MANUAL        BofA 수동 값 (기본 2.1)
 PUTCALL_MANUAL     Put/Call 비율 수동 값 (소수, 예: 0.85)
 PUTCALL_FRED_SERIES  Put/Call을 FRED 시리즈로 받을 때 (FRED_API_KEY와 함께)
+PRO_API_KEY        유료 응답용 — 요청 헤더 X-Api-Key 와 일치하면 전체 필드(pro 메타 포함)
+TELEGRAM_BOT_TOKEN 텔레그램 봇 토큰 (없으면 전송 안 함)
+TELEGRAM_CHAT_ID   알림 받을 chat_id
 
 데이터 소스
 -----------
@@ -21,12 +24,12 @@ import math
 import os
 import threading
 import time
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import Any, Optional
 
 import requests
 import yfinance as yf
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 logging.basicConfig(
@@ -48,6 +51,114 @@ HTTP_BROWSER_HEADERS = {
     "Accept": "application/json,text/plain,*/*",
     "Accept-Language": "en-US,en;q=0.9",
 }
+
+FREE_PANIC_KEYS = ("vix", "putCall", "fearGreed", "bofa", "highYield", "updatedAt")
+
+# 프론트 panicMarketSignal.js 와 동일한 MVP 합산 규칙
+def _score_component(kind: str, value: Any) -> int:
+    if value is None:
+        return 0
+    try:
+        n = float(value)
+    except (TypeError, ValueError):
+        return 0
+    if math.isnan(n):
+        return 0
+    if kind == "vix":
+        if n < 20:
+            return 1
+        if n < 30:
+            return 0
+        return -1
+    if kind == "fearGreed":
+        if n < 20:
+            return 1
+        if n < 40:
+            return 0
+        if n < 60:
+            return 0
+        if n < 80:
+            return -1
+        return -1
+    if kind == "putCall":
+        if n > 1.0:
+            return 1
+        if n > 0.7:
+            return 0
+        return -1
+    if kind == "bofa":
+        if n < 2:
+            return 1
+        if n < 5:
+            return 0
+        return -1
+    if kind == "highYield":
+        if n < 4:
+            return 1
+        if n < 6:
+            return 0
+        return -1
+    return 0
+
+
+def total_signal_score(row: dict) -> int:
+    return (
+        _score_component("vix", row.get("vix"))
+        + _score_component("fearGreed", row.get("fearGreed"))
+        + _score_component("putCall", row.get("putCall"))
+        + _score_component("bofa", row.get("bofa"))
+        + _score_component("highYield", row.get("highYield"))
+    )
+
+
+def send_telegram(msg: str) -> None:
+    token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
+    chat_id = (os.environ.get("TELEGRAM_CHAT_ID") or "").strip()
+    if not token or not chat_id:
+        return
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        r = requests.post(url, data={"chat_id": chat_id, "text": msg}, timeout=20)
+        r.raise_for_status()
+    except Exception:
+        log.exception("send_telegram failed")
+
+
+_tg_edge_buy = False
+_tg_edge_sell = False
+
+
+def check_telegram_signals() -> None:
+    """5분 스케줄 — 합산 점수 구간 진입 시에만 텔레그램 (중복 방지)."""
+    global _tg_edge_buy, _tg_edge_sell
+    with CACHE_LOCK:
+        snap = dict(CACHE)
+    ts = total_signal_score(snap)
+    if ts >= 3:
+        if not _tg_edge_buy:
+            send_telegram("🟢 강한 매수 신호 발생!")
+            _tg_edge_buy = True
+    else:
+        _tg_edge_buy = False
+    if ts <= -3:
+        if not _tg_edge_sell:
+            send_telegram("🔴 강한 매도 신호 발생!")
+            _tg_edge_sell = True
+    else:
+        _tg_edge_sell = False
+
+
+def _telegram_schedule_loop() -> None:
+    import schedule
+
+    schedule.every(5).minutes.do(check_telegram_signals)
+    log.info("Telegram signal scheduler every 300s started")
+    while True:
+        try:
+            schedule.run_pending()
+        except Exception:
+            log.exception("telegram schedule.run_pending")
+        time.sleep(1)
 
 
 def manual_bofa() -> float:
@@ -155,10 +266,15 @@ CACHE: dict = {
     "fearGreed": None,
     "bofa": manual_bofa(),
     "highYield": None,
+    "vxn": None,
+    "move": None,
+    "skew": None,
+    "gs": None,
     "updatedAt": None,
 }
 CACHE_LOCK = threading.Lock()
 _background_started = False
+_telegram_scheduler_started = False
 
 
 def refresh_all() -> None:
@@ -195,7 +311,7 @@ def _background_loop() -> None:
 
 
 def bootstrap() -> None:
-    global _background_started
+    global _background_started, _telegram_scheduler_started
     try:
         refresh_all()
     except Exception:
@@ -207,6 +323,17 @@ def bootstrap() -> None:
     threading.Thread(target=_background_loop, daemon=True).start()
     log.info("Background refresh every 600s started")
 
+    if (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip() and (
+        os.environ.get("TELEGRAM_CHAT_ID") or ""
+    ).strip():
+        with CACHE_LOCK:
+            if _telegram_scheduler_started:
+                return
+            _telegram_scheduler_started = True
+        threading.Thread(target=_telegram_schedule_loop, daemon=True).start()
+    else:
+        log.info("Telegram scheduler skipped (set TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)")
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -217,15 +344,67 @@ def home():
     return {"ok": True}
 
 
+def _panic_json_response():
+    """X-Api-Key 가 PRO_API_KEY(기본 PRO_USER)와 같으면 전체(pro 메타), 아니면 무료 최소 필드."""
+    api_key = request.headers.get("X-Api-Key") or request.headers.get("x-api-key") or ""
+    pro_key = os.environ.get("PRO_API_KEY", "PRO_USER")
+    with CACHE_LOCK:
+        base = dict(CACHE)
+
+    if api_key == pro_key:
+        out = dict(base)
+        out["accessTier"] = "pro"
+        out["proFeatures"] = {
+            "advancedSignal": True,
+            "charts": True,
+            "alerts": True,
+            "historyAnalysis": True,
+        }
+        return jsonify(out)
+
+    limited = {k: base.get(k) for k in FREE_PANIC_KEYS}
+    limited["accessTier"] = "free"
+    return jsonify(limited)
+
+
 @app.route("/panic-data")
 def panic_data():
-    with CACHE_LOCK:
-        payload = dict(CACHE)
-    return jsonify(payload)
+    return _panic_json_response()
+
+
+@app.route("/panic")
+def panic():
+    """과제 예시 경로 — /panic-data 와 동일 동작."""
+    return _panic_json_response()
+
+
+def build_history_sample(n: int = 50):
+    """STEP 17: 백테스트용 합성 시계열 (실서비스에서는 DB·크롤링 데이터로 교체)."""
+    out = []
+    price = 100.0
+    start = date(2024, 1, 1)
+    for i in range(n):
+        price += (i % 5) - 2
+        d = start + timedelta(days=i)
+        out.append(
+            {
+                "date": d.isoformat(),
+                "vix": 15 + (i % 20),
+                "fearGreed": 20 + (i % 60),
+                "putCall": round(0.6 + (i % 10) * 0.1, 4),
+                "bofa": 1 + (i % 7),
+                "price": float(price),
+            }
+        )
+    return out
+
+
+@app.route("/history")
+def history():
+    return jsonify(build_history_sample(50))
 
 
 bootstrap()
 
 if __name__ == "__main__":
-    # Render 프로덕션은 render.yaml 의 gunicorn 이 $PORT 로 실행됨 (이 블록은 로컬 등 직접 실행용)
     app.run(host="0.0.0.0", port=5000)

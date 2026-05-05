@@ -1,5 +1,16 @@
+import { useEffect, useMemo, useRef } from "react"
+import { PANIC_DUMMY_CHART_ROWS } from "../data/panicDummyCharts.js"
 import Gauge from "./Gauge.jsx"
+import PanicIndicatorChartBox from "./PanicIndicatorChartBox.jsx"
+import PanicMetricCard from "./PanicMetricCard.jsx"
 import ScoreHistorySparkline from "./ScoreHistorySparkline.jsx"
+import { groupPanicData } from "../utils/groupPanicData.js"
+import {
+  getAdvancedSignal,
+  getConfidence,
+  getSignal,
+  getTotalSignalScore,
+} from "../utils/panicMarketSignal.js"
 import { getActionTone } from "../utils/tradingScores.js"
 
 const PANEL_RING = {
@@ -26,13 +37,16 @@ const TIMING_TEXT = {
   danger: "text-red-400",
 }
 
-function fmt(v) {
-  if (v === null || v === undefined || Number.isNaN(Number(v))) return "—"
-  return String(v)
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: "16px",
+  marginBottom: "30px",
 }
 
 export default function PanicIndexCard({
   data,
+  isPro = false,
   finalScore,
   action,
   weightsDescription,
@@ -52,13 +66,63 @@ export default function PanicIndexCard({
       : TREND_TEXT[trendDir] ?? TREND_TEXT.flat
   const timingCls = timing?.tone ? TIMING_TEXT[timing.tone] ?? TIMING_TEXT.neutral : TIMING_TEXT.neutral
 
+  const panicData = useMemo(() => groupPanicData(data), [data])
+
+  const totalScore = useMemo(() => getTotalSignalScore(data), [data])
+  const referenceMvpSignal = useMemo(() => getSignal(totalScore), [totalScore])
+  const strategySignal = useMemo(() => getAdvancedSignal(data), [data])
+  const confidence = useMemo(() => getConfidence(data), [data])
+
+  /** 구간 진입 시에만 브라우저 alert (폴링마다 반복되지 않도록) */
+  const alertOnceRef = useRef({ vixAbove30: false, strongBuy: false, strongSell: false })
+
+  useEffect(() => {
+    if (!data || !isPro) return
+
+    const checkAlert = () => {
+      const vix = Number(data.vix)
+      if (Number.isFinite(vix) && vix > 30) {
+        if (!alertOnceRef.current.vixAbove30) {
+          alert("🚨 VIX 급등! 시장 위험 상태")
+          alertOnceRef.current.vixAbove30 = true
+        }
+      } else {
+        alertOnceRef.current.vixAbove30 = false
+      }
+
+      const ts = getTotalSignalScore(data)
+      if (ts >= 3) {
+        if (!alertOnceRef.current.strongBuy) {
+          alert("🟢 강한 매수 구간")
+          alertOnceRef.current.strongBuy = true
+        }
+      } else {
+        alertOnceRef.current.strongBuy = false
+      }
+
+      if (ts <= -3) {
+        if (!alertOnceRef.current.strongSell) {
+          alert("🔴 강한 매도 구간")
+          alertOnceRef.current.strongSell = true
+        }
+      } else {
+        alertOnceRef.current.strongSell = false
+      }
+    }
+
+    checkAlert()
+  }, [data, isPro])
+
   return (
     <article className="relative z-0 rounded-2xl bg-[#111827] p-6 text-center shadow-lg shadow-black/20 transition duration-200 ease-out hover:z-10 hover:scale-105 hover:shadow-xl">
       <h3 className="text-lg font-semibold text-white">패닉 지수</h3>
-      <p className="mt-1 text-xs text-gray-500">
-        지표별 0~100 → 단기·중기 → 동적 가중 최종 점수 → 매매 행동
+      <p className="mt-1 text-xs font-medium text-amber-200/90">
+        {isPro ? "PRO — 차트·고급 시그널·브라우저 알림 사용 중" : "무료 — 지표·기본 시그널만 (PRO는 VITE_PRO_API_KEY + 서버 PRO_API_KEY 일치)"}
       </p>
-      {data.updatedAt ? (
+      <p className="mt-1 text-xs text-gray-500">
+        단기·중기·장기 지표 → 0~100 환산 → 동적 가중 최종 점수 → 매매 행동
+      </p>
+      {data?.updatedAt ? (
         <p className="mt-1 text-xs text-gray-500">
           업데이트:{" "}
           <span className="font-mono text-gray-300">{data.updatedAt}</span>
@@ -122,28 +186,85 @@ export default function PanicIndexCard({
 
         <ScoreHistorySparkline history={history} />
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-left text-xs sm:grid-cols-3">
-          <div className="rounded-lg border border-gray-800 bg-[#0f172a]/80 px-2 py-2">
-            <dt className="text-gray-500">VIX</dt>
-            <dd className="font-mono text-gray-200">{fmt(data.vix)}</dd>
+        <div className="mt-6 text-left">
+          <h2 className="m-0 text-base font-semibold tracking-tight text-gray-100">단기 (Tactical)</h2>
+          <div style={gridStyle}>
+            <PanicMetricCard title="VIX" value={panicData.short.vix} type="vix" />
+            <PanicMetricCard title="Put/Call" value={panicData.short.putCall} type="putCall" />
+            <PanicMetricCard title="VXN" value={panicData.short.vxn} />
           </div>
-          <div className="rounded-lg border border-gray-800 bg-[#0f172a]/80 px-2 py-2">
-            <dt className="text-gray-500">Put/Call</dt>
-            <dd className="font-mono text-gray-200">{fmt(data.putCall)}</dd>
+
+          <h2 className="m-0 mt-2 text-base font-semibold tracking-tight text-gray-100">중기 (Strategic)</h2>
+          <div style={gridStyle}>
+            <PanicMetricCard title="공포탐욕지수" value={panicData.mid.fearGreed} type="fearGreed" />
+            <PanicMetricCard title="BofA" value={panicData.mid.bofa} type="bofa" />
+            <PanicMetricCard title="MOVE" value={panicData.mid.move} />
           </div>
-          <div className="rounded-lg border border-gray-800 bg-[#0f172a]/80 px-2 py-2">
-            <dt className="text-gray-500">Fear &amp; Greed</dt>
-            <dd className="font-mono text-gray-200">{fmt(data.fearGreed)}</dd>
+
+          <h2 className="m-0 mt-2 text-base font-semibold tracking-tight text-gray-100">장기 (Macro)</h2>
+          <div style={{ ...gridStyle, marginBottom: 0 }}>
+            <PanicMetricCard title="SKEW" value={panicData.long.skew} />
+            <PanicMetricCard title="하이일드" value={panicData.long.highYield} type="highYield" />
+            <PanicMetricCard title="GS 지수" value={panicData.long.gs} />
           </div>
-          <div className="rounded-lg border border-gray-800 bg-[#0f172a]/80 px-2 py-2">
-            <dt className="text-gray-500">BofA</dt>
-            <dd className="font-mono text-gray-200">{fmt(data.bofa)}</dd>
+
+          {isPro ? (
+            <>
+              <p className="mt-8 text-xs text-gray-500">
+                아래 차트는 API 시계열 연결 전 <span className="text-gray-400">샘플 데이터</span>입니다.
+              </p>
+              <PanicIndicatorChartBox title="VIX 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="vix" />
+              <PanicIndicatorChartBox title="Put/Call 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="putCall" />
+              <PanicIndicatorChartBox title="BofA 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="bofa" />
+              <PanicIndicatorChartBox title="Fear & Greed 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="fearGreed" />
+              <PanicIndicatorChartBox title="하이일드 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="highYield" />
+            </>
+          ) : (
+            <div className="mt-8 rounded-xl border border-amber-500/30 bg-amber-950/25 px-4 py-8 text-center text-amber-100/95">
+              <p className="m-0 text-base font-semibold">🔒 PRO 전용 기능입니다</p>
+              <p className="mx-auto mt-2 max-w-sm text-xs text-amber-200/80">
+                전체 차트·시계열·실시간 브라우저 알림은 PRO 요금제에서 제공됩니다.
+              </p>
+            </div>
+          )}
+
+          <div
+            style={{
+              marginTop: "30px",
+              padding: "20px",
+              background: "#1f2937",
+              borderRadius: "12px",
+              textAlign: "center",
+            }}
+          >
+            <h2 className="m-0 text-base font-semibold text-gray-200">📊 시장 시그널</h2>
+            {isPro ? (
+              <>
+                <h1 className="my-3 text-2xl font-bold leading-tight" style={{ color: strategySignal.color }}>
+                  {strategySignal.text}
+                </h1>
+                <p className="m-0 text-sm text-gray-300">신뢰도: {confidence} / 4</p>
+                {data?.proFeatures?.advancedSignal ? (
+                  <p className="m-0 mt-2 text-xs text-sky-300/90">PRO 기능 플래그: 고급 분석·차트·알림</p>
+                ) : null}
+                <p className="m-0 mt-2 text-sm text-gray-500">
+                  참고 합산(MVP): {totalScore} — {referenceMvpSignal.text}
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="my-3 text-2xl font-bold leading-tight" style={{ color: strategySignal.color }}>
+                  {strategySignal.text}
+                </h1>
+                <p className="m-0 text-sm text-gray-300">신뢰도: {confidence} / 4</p>
+                <p className="m-0 mt-2 text-sm text-gray-500">
+                  참고 합산(MVP): {totalScore} — {referenceMvpSignal.text}
+                </p>
+                <p className="mt-2 text-xs text-gray-500">PRO: 전체 차트·브라우저 알림 등</p>
+              </>
+            )}
           </div>
-          <div className="rounded-lg border border-gray-800 bg-[#0f172a]/80 px-2 py-2">
-            <dt className="text-gray-500">High yield</dt>
-            <dd className="font-mono text-gray-200">{fmt(data.highYield)}</dd>
-          </div>
-        </dl>
+        </div>
       </div>
     </article>
   )
