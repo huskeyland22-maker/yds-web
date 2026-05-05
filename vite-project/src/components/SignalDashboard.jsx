@@ -52,18 +52,20 @@ const compactRefreshBtnStyle = {
   padding: "6px 10px",
   fontSize: "12px",
   borderRadius: "8px",
-  background: "#374151",
+  background: "linear-gradient(135deg, #22c55e, #16a34a)",
   color: "white",
   border: "none",
   cursor: "pointer",
 }
 
 const summaryCardStyle = {
-  marginTop: "10px",
-  padding: "30px",
-  background: "linear-gradient(135deg, #111827, #1f2937)",
-  borderRadius: "20px",
+  marginTop: "20px",
+  padding: "40px",
+  background: "linear-gradient(135deg, #0f172a, #1e293b)",
+  borderRadius: "24px",
   textAlign: "center",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+  border: "1px solid rgba(255,255,255,0.05)",
 }
 const pageContainerStyle = {
   maxWidth: "1200px",
@@ -436,8 +438,8 @@ export default function SignalDashboard() {
     <div style={pageContainerStyle} className="flex flex-col gap-5">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <div>
-          <h1 style={{ fontSize: "26px", margin: 0 }}>📊 패닉지수</h1>
-          <p style={{ color: "gray", fontSize: "13px", margin: 0 }}>시장 심리 지표 대시보드</p>
+          <h1 style={{ fontSize: "28px", fontWeight: "600", letterSpacing: "-0.5px", margin: 0 }}>📊 패닉지수</h1>
+          <p style={{ color: "#6b7280", fontSize: "13px", margin: 0 }}>Market Sentiment Intelligence</p>
           <p style={{ fontSize: "12px", color: "gray", margin: "4px 0 0" }}>
             마지막 업데이트: {updatedAt ?? "-"}
           </p>
@@ -461,7 +463,9 @@ export default function SignalDashboard() {
             style={{
               padding: "10px 16px",
               borderRadius: "12px",
-              background: alertOn ? "#22c55e" : "#374151",
+              background: alertOn
+                ? "linear-gradient(135deg, #22c55e, #16a34a)"
+                : "linear-gradient(135deg, #4b5563, #374151)",
               color: "white",
               border: "none",
               cursor: "pointer",
@@ -479,11 +483,14 @@ export default function SignalDashboard() {
         <h2 style={{ fontSize: "16px", marginBottom: "10px" }} className="m-0 font-semibold text-gray-300">
           현재 시장 상태
         </h2>
-        <h1 className="m-0 font-bold leading-tight" style={{ fontSize: "36px", color: headlineSignal.color }}>
+        <h1
+          className="m-0 font-bold leading-tight"
+          style={{ fontSize: "40px", fontWeight: "bold", letterSpacing: "-1px", color: headlineSignal.color }}
+        >
           {headlineSignal.text}
         </h1>
-        <p style={{ marginTop: "8px", fontSize: "13px" }} className="m-0 text-gray-300">
-          신뢰도: {headlineConfidence} / 4
+        <p style={{ marginTop: "10px", fontSize: "14px", color: "#9ca3af" }} className="m-0">
+          신뢰도 {headlineConfidence}/4 · 자동 분석
         </p>
         <p className="m-0 mt-2 text-xs text-gray-500">
           참고 합산(MVP): {headlineReferenceTotal} — {headlineReferenceLabel.text}

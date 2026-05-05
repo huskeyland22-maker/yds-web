@@ -9,7 +9,7 @@
   body {
     margin: 0;
     font-family: sans-serif;
-    background-color: #0f172a;
+    background: radial-gradient(circle at top, #0f172a, #020617);
     color: white;
   }
   @supports (padding: max(0px)) {

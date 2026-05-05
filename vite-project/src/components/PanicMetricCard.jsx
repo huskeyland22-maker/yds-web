@@ -6,7 +6,7 @@ const cardStyle = {
   borderRadius: "14px",
   textAlign: "center",
   color: "white",
-  boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+  boxShadow: "0 8px 20px rgba(0,0,0,0.35)",
   transition: "all 0.2s ease",
 }
 
@@ -23,10 +23,12 @@ export default function PanicMetricCard({ title, value, type }) {
     <div
       style={cardStyle}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-4px)"
+        e.currentTarget.style.transform = "translateY(-6px)"
+        e.currentTarget.style.boxShadow = "0 15px 40px rgba(0,0,0,0.6)"
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = "translateY(0)"
+        e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.35)"
       }}
     >
       <h3 className="m-0 text-xs font-semibold text-gray-400 sm:text-sm">{title}</h3>
