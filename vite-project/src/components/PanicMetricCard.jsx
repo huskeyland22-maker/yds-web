@@ -1,4 +1,5 @@
 import { getStatus } from "../utils/panicIndicatorStatus.js"
+import { motion } from "framer-motion"
 
 const cardStyle = {
   background: "#1f2937",
@@ -20,16 +21,13 @@ export default function PanicMetricCard({ title, value, type }) {
   const display = typeof raw === "number" && Number.isNaN(raw) ? "-" : String(raw)
 
   return (
-    <div
+    <motion.div
       style={cardStyle}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-6px)"
-        e.currentTarget.style.boxShadow = "0 15px 40px rgba(0,0,0,0.6)"
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)"
-        e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.35)"
-      }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.05, y: -6, boxShadow: "0 15px 40px rgba(0,0,0,0.6)" }}
+      whileTap={{ scale: 0.95 }}
     >
       <h3 className="m-0 text-xs font-semibold text-gray-400 sm:text-sm">{title}</h3>
 
@@ -51,6 +49,6 @@ export default function PanicMetricCard({ title, value, type }) {
       >
         {status.text}
       </span>
-    </div>
+    </motion.div>
   )
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { motion } from "framer-motion"
 import {
   fetchPanicDataJson,
   getPanicDataUrlForDisplay,
@@ -74,7 +75,7 @@ const pageContainerStyle = {
 }
 const gridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
   gap: "12px",
   marginTop: "20px",
 }
@@ -108,6 +109,9 @@ export default function SignalDashboard() {
     strongBuy: false,
     strongSell: false,
   })
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  )
 
   /**
    * 패닉 데이터 로드 (정적 파일 `/data.json`).
@@ -206,6 +210,13 @@ export default function SignalDashboard() {
     if (typeof document !== "undefined") {
       console.log("현재 탭 활성 상태:", document.visibilityState)
     }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const onResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
   }, [])
 
   const manualRefresh = useCallback(() => {
@@ -433,19 +444,32 @@ export default function SignalDashboard() {
   const tradingSignal = getTradingSignal(data)
   const trend = getTrend(history)
   const timing = getTimingSignal(finalScore, trend)
+  const mobileSummaryCardStyle = {
+    ...summaryCardStyle,
+    padding: isMobile ? "16px" : "40px",
+  }
 
   return (
-    <div style={pageContainerStyle} className="flex flex-col gap-5">
+    <div style={{ ...pageContainerStyle, padding: isMobile ? "16px" : "20px" }} className="flex flex-col gap-5">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: "600", letterSpacing: "-0.5px", margin: 0 }}>📊 패닉지수</h1>
+          <h1
+            style={{
+              fontSize: isMobile ? "24px" : "28px",
+              fontWeight: "600",
+              letterSpacing: "-0.5px",
+              margin: 0,
+            }}
+          >
+            📊 패닉지수
+          </h1>
           <p style={{ color: "#6b7280", fontSize: "13px", margin: 0 }}>Market Sentiment Intelligence</p>
           <p style={{ fontSize: "12px", color: "gray", margin: "4px 0 0" }}>
             마지막 업데이트: {updatedAt ?? "-"}
           </p>
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
-          <button
+          <motion.button
             type="button"
             onClick={() => {
               const next = !alertOn
@@ -461,7 +485,7 @@ export default function SignalDashboard() {
               }
             }}
             style={{
-              padding: "10px 16px",
+              padding: isMobile ? "8px 12px" : "10px 16px",
               borderRadius: "12px",
               background: alertOn
                 ? "linear-gradient(135deg, #22c55e, #16a34a)"
@@ -469,23 +493,42 @@ export default function SignalDashboard() {
               color: "white",
               border: "none",
               cursor: "pointer",
+              fontSize: isMobile ? "12px" : "14px",
             }}
+            whileTap={{ scale: 0.95 }}
           >
             {alertOn ? "🔔 알림 ON" : "🔕 알림 OFF"}
-          </button>
-          <button type="button" onClick={manualRefresh} style={compactRefreshBtnStyle}>
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={manualRefresh}
+            style={{ ...compactRefreshBtnStyle, fontSize: isMobile ? "12px" : "14px" }}
+            whileTap={{ scale: 0.95 }}
+          >
             🔄 새로고침
-          </button>
+          </motion.button>
         </div>
       </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
-      <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
+      <motion.div
+        style={mobileSummaryCardStyle}
+        className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        whileHover={{ scale: 1.05 }}
+      >
         <h2 style={{ fontSize: "16px", marginBottom: "10px" }} className="m-0 font-semibold text-gray-300">
           현재 시장 상태
         </h2>
         <h1
           className="m-0 font-bold leading-tight"
-          style={{ fontSize: "40px", fontWeight: "bold", letterSpacing: "-1px", color: headlineSignal.color }}
+          style={{
+            fontSize: isMobile ? "24px" : "40px",
+            fontWeight: "bold",
+            letterSpacing: "-1px",
+            color: headlineSignal.color,
+          }}
         >
           {headlineSignal.text}
         </h1>
@@ -495,7 +538,7 @@ export default function SignalDashboard() {
         <p className="m-0 mt-2 text-xs text-gray-500">
           참고 합산(MVP): {headlineReferenceTotal} — {headlineReferenceLabel.text}
         </p>
-      </div>
+      </motion.div>
       <div
         className="rounded-lg border border-gray-800 bg-[#111827]/60 px-4 py-3 text-left"
         style={{ fontSize: "12px", color: "gray" }}
