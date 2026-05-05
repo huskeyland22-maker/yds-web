@@ -4,6 +4,7 @@ import {
   getPanicDataUrlForDisplay,
   listPanicDataUrlAttemptsForDisplay,
   submitManualPanicData,
+  submitManualTextData,
 } from "../config/api.js"
 import { usePanicNotifications } from "../hooks/usePanicNotifications.js"
 import {
@@ -74,6 +75,7 @@ export default function SignalDashboard() {
     bofa: "",
     highYield: "",
   })
+  const [rawText, setRawText] = useState("")
   const [notifyEnabled, setNotifyEnabled] = useState(() =>
     typeof window !== "undefined" ? readNotifyOn() : false,
   )
@@ -193,6 +195,24 @@ export default function SignalDashboard() {
       setError(true)
     }
   }, [inputData])
+
+  const submitText = useCallback(async () => {
+    try {
+      const saved = await submitManualTextData(rawText)
+      if (!saved) return
+      panicDataCache = saved
+      setData(saved)
+      setIsPro(true)
+      setLoadError(null)
+      setError(false)
+      setUpdatedAt(saved.updatedAt ?? new Date().toLocaleTimeString())
+      console.log("파싱 결과:", saved)
+    } catch (e) {
+      console.error("텍스트 저장 실패", e)
+      setLoadError(e instanceof Error ? e.message : String(e))
+      setError(true)
+    }
+  }, [rawText])
 
   useEffect(() => {
     if (!data) return
@@ -345,6 +365,20 @@ export default function SignalDashboard() {
           className="mt-3 min-h-[40px] rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500"
         >
           저장
+        </button>
+        <textarea
+          rows={10}
+          placeholder="여기에 그대로 붙여넣기"
+          value={rawText}
+          onChange={(e) => setRawText(e.target.value)}
+          className="mt-3 w-full rounded-md border border-gray-700 bg-[#0f172a] px-3 py-2 text-sm text-gray-100 outline-none focus:border-sky-500"
+        />
+        <button
+          type="button"
+          onClick={submitText}
+          className="mt-3 min-h-[40px] rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+        >
+          📥 텍스트로 입력
         </button>
       </div>
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">

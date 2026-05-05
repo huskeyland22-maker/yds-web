@@ -122,3 +122,15 @@ export async function submitManualPanicData(inputData) {
   const out = await res.json()
   return normalizeManualPayload(out?.data)
 }
+
+export async function submitManualTextData(rawText) {
+  const base = getManualApiBase()
+  const res = await fetch(`${base}/update-text`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ text: rawText }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const out = await res.json()
+  return normalizeManualPayload(out?.data)
+}

@@ -23,6 +23,8 @@ import logging
 import math
 import random
 import os
+import re
+import sqlite3
 import threading
 import time
 from datetime import date, datetime, timedelta
@@ -280,6 +282,47 @@ _telegram_scheduler_started = False
 panic_data: dict = {}
 
 
+def init_db() -> None:
+    conn = sqlite3.connect("panic.db")
+    c = conn.cursor()
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS panic (
+            date TEXT PRIMARY KEY,
+            vix REAL,
+            fearGreed REAL,
+            putCall REAL,
+            bofa REAL,
+            highYield REAL
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
+def persist_panic_row(data: dict) -> None:
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect("panic.db")
+    c = conn.cursor()
+    c.execute(
+        """
+        INSERT OR REPLACE INTO panic (date, vix, fearGreed, putCall, bofa, highYield)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            today,
+            data.get("vix"),
+            data.get("fearGreed"),
+            data.get("putCall"),
+            data.get("bofa"),
+            data.get("highYield"),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
 def refresh_all() -> None:
     updates: dict = {}
 
@@ -407,7 +450,61 @@ def update_data():
         "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "accessTier": "pro",
     }
+    persist_panic_row(panic_data)
     return jsonify({"status": "ok", "data": panic_data})
+
+
+@app.route("/update-text", methods=["POST"])
+def update_text():
+    global panic_data
+    incoming = request.get_json(silent=True) or {}
+    raw_text = incoming.get("text", "")
+    if not isinstance(raw_text, str):
+        return jsonify({"status": "error", "message": "text must be string"}), 400
+
+    lines = raw_text.splitlines()
+    parsed: dict[str, float] = {}
+
+    for line in lines:
+        if not line or "지수 명칭" in line:
+            continue
+
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) < 2:
+            continue
+
+        name = parts[0]
+        value = parts[1]
+        num_str = re.sub(r"[^0-9.]", "", value)
+        try:
+            num = float(num_str)
+        except Exception:
+            continue
+
+        if "VIX" in name:
+            parsed["vix"] = num
+        elif "CNN" in name:
+            parsed["fearGreed"] = num
+        elif "풋/콜" in name:
+            parsed["putCall"] = num
+        elif "BofA" in name:
+            parsed["bofa"] = num
+        elif "HY" in name:
+            parsed["highYield"] = num
+        elif "SKEW" in name:
+            parsed["skew"] = num
+        elif "GS" in name:
+            parsed["gs"] = num
+        elif "MOVE" in name:
+            parsed["move"] = num
+        elif "VXN" in name:
+            parsed["vxn"] = num
+
+    parsed["updatedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    parsed["accessTier"] = "pro"
+    panic_data = parsed
+    persist_panic_row(parsed)
+    return jsonify({"status": "parsed", "data": parsed})
 
 
 def build_history_sample(n: int = 50):
@@ -500,6 +597,7 @@ def optimize():
     )
 
 
+init_db()
 bootstrap()
 
 if __name__ == "__main__":
