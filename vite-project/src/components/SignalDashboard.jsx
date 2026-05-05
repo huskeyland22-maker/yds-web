@@ -85,7 +85,7 @@ export default function SignalDashboard() {
   /** STEP 0: 클라이언트에서 마지막으로 네트워크 응답을 받은 시각 */
   const [updatedAt, setUpdatedAt] = useState(null)
   const [history, setHistory] = useState(() => getHistory())
-  const [alertOn, setAlertOn] = useState(true)
+  const [alertOn, setAlertOn] = useState(false)
   const [prevScore, setPrevScore] = useState(null)
   const [lastAlertType, setLastAlertType] = useState(null)
   const [lastAlertTime, setLastAlertTime] = useState(0)
@@ -432,39 +432,29 @@ export default function SignalDashboard() {
         <div style={{ display: "flex", gap: "8px" }}>
           <button
             type="button"
-            onClick={() => setAlertOn(true)}
-            style={{
-              ...topRefreshBtnStyle,
-              background: alertOn ? "#166534" : "#1f2937",
-              border: alertOn ? "1px solid #22c55e" : "1px solid #374151",
-            }}
-          >
-            알림 켜짐
-          </button>
-          <button
-            type="button"
-            onClick={() => setAlertOn(false)}
-            style={{
-              ...topRefreshBtnStyle,
-              background: !alertOn ? "#7f1d1d" : "#1f2937",
-              border: !alertOn ? "1px solid #ef4444" : "1px solid #374151",
-            }}
-          >
-            끄기
-          </button>
-          <button
-            type="button"
             onClick={() => {
-              sendRealtimeNotification("테스트 알림", "정상 작동 확인")
+              const next = !alertOn
+              setAlertOn(next)
+              if (next && typeof window !== "undefined" && "Notification" in window) {
+                Notification.requestPermission().then((permission) => {
+                  if (permission === "granted") {
+                    new Notification("🔔 알림 활성화", {
+                      body: "이제 알림이 작동합니다",
+                    })
+                  }
+                })
+              }
             }}
             style={{
-              ...topRefreshBtnStyle,
-              background: "#2563eb",
-              border: "1px solid #3b82f6",
+              padding: "10px 16px",
+              borderRadius: "12px",
+              background: alertOn ? "#22c55e" : "#374151",
               color: "white",
+              border: "none",
+              cursor: "pointer",
             }}
           >
-            🔔 알림 테스트
+            {alertOn ? "🔔 알림 ON" : "🔕 알림 OFF"}
           </button>
           <button type="button" onClick={manualRefresh} style={topRefreshBtnStyle}>
             🔄 새로고침
@@ -472,84 +462,6 @@ export default function SignalDashboard() {
         </div>
       </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
-      <div className="mt-1 flex justify-end">
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            type="button"
-            onClick={() => {
-              sendRealtimeNotification("테스트 알림", "정상 작동 확인")
-            }}
-            style={{
-              ...topRefreshBtnStyle,
-              background: "#2563eb",
-              border: "1px solid #3b82f6",
-              color: "white",
-            }}
-          >
-            🔔 알림 테스트
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!("Notification" in window)) {
-                alert("알림 미지원 브라우저")
-                return
-              }
-              console.log("알림 권한:", Notification.permission)
-              if (Notification.permission === "granted") {
-                new Notification("🔥 테스트 알림", {
-                  body: "이게 안 보이면 OS 문제",
-                })
-              } else {
-                alert("알림 권한 없음")
-              }
-            }}
-            style={{
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "10px",
-              background: "#ef4444",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            🔔 알림 테스트 (강제)
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              alert("이건 무조건 뜨는 테스트")
-
-              if (!("Notification" in window)) {
-                console.warn("알림 미지원 브라우저")
-                return
-              }
-
-              console.log("알림 권한:", Notification.permission)
-              if (Notification.permission !== "granted") {
-                alert("알림 권한 없음")
-                return
-              }
-
-              new Notification("🔥 테스트", {
-                body: "오른쪽 아래 확인",
-              })
-            }}
-            style={{
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "10px",
-              background: "#f59e0b",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            🔔 알림 위치 테스트
-          </button>
-        </div>
-      </div>
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
         <h2 style={{ fontSize: "16px", marginBottom: "10px" }} className="m-0 font-semibold text-gray-300">
           현재 시장 상태
