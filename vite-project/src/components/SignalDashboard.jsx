@@ -3,8 +3,6 @@ import {
   fetchPanicDataJson,
   getPanicDataUrlForDisplay,
   listPanicDataUrlAttemptsForDisplay,
-  submitManualPanicData,
-  submitManualTextData,
 } from "../config/api.js"
 import { usePanicNotifications } from "../hooks/usePanicNotifications.js"
 import {
@@ -68,15 +66,6 @@ export default function SignalDashboard() {
   /** STEP 0: 클라이언트에서 마지막으로 네트워크 응답을 받은 시각 */
   const [updatedAt, setUpdatedAt] = useState(null)
   const [history, setHistory] = useState(() => getHistory())
-  const [inputData, setInputData] = useState({
-    vix: "",
-    fearGreed: "",
-    putCall: "",
-    bofa: "",
-    highYield: "",
-  })
-  const [rawText, setRawText] = useState("")
-  const [showInput, setShowInput] = useState(false)
   const [notifyEnabled, setNotifyEnabled] = useState(() =>
     typeof window !== "undefined" ? readNotifyOn() : false,
   )
@@ -178,43 +167,6 @@ export default function SignalDashboard() {
     setLoading(true)
     setRetryKey((k) => k + 1)
   }, [])
-
-  const submitData = useCallback(async () => {
-    try {
-      const saved = await submitManualPanicData(inputData)
-      if (!saved) return
-      panicDataCache = saved
-      setData(saved)
-      setIsPro(true)
-      setLoadError(null)
-      setError(false)
-      setUpdatedAt(saved.updatedAt ?? new Date().toLocaleTimeString())
-      console.log("저장 완료", saved)
-    } catch (e) {
-      console.error("저장 실패", e)
-      setLoadError(e instanceof Error ? e.message : String(e))
-      setError(true)
-    }
-  }, [inputData])
-
-  const submitText = useCallback(async () => {
-    try {
-      const saved = await submitManualTextData(rawText)
-      if (!saved) return
-      panicDataCache = saved
-      setData(saved)
-      setIsPro(true)
-      setLoadError(null)
-      setError(false)
-      setUpdatedAt(saved.updatedAt ?? new Date().toLocaleTimeString())
-      setShowInput(false)
-      console.log("파싱 결과:", saved)
-    } catch (e) {
-      console.error("텍스트 저장 실패", e)
-      setLoadError(e instanceof Error ? e.message : String(e))
-      setError(true)
-    }
-  }, [rawText])
 
   useEffect(() => {
     if (!data) return
@@ -348,58 +300,6 @@ export default function SignalDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
-      <div className="rounded-lg border border-gray-800 bg-[#111827]/60 px-4 py-4 text-left">
-        <h3 className="m-0 text-sm font-semibold text-gray-200">데이터 입력</h3>
-        <button
-          type="button"
-          onClick={() => setShowInput((v) => !v)}
-          className="mt-3 min-h-[40px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
-        >
-          {showInput ? "닫기" : "📥 데이터 입력"}
-        </button>
-        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
-          {Object.keys(inputData).map((key) => (
-            <input
-              key={key}
-              placeholder={key}
-              value={inputData[key]}
-              onChange={(e) => setInputData((prev) => ({ ...prev, [key]: e.target.value }))}
-              className="min-h-[40px] rounded-md border border-gray-700 bg-[#0f172a] px-2 py-1 text-sm text-gray-100 outline-none ring-0 focus:border-sky-500"
-            />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={submitData}
-          className="mt-3 min-h-[40px] rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500"
-        >
-          저장
-        </button>
-        <div
-          className={`mt-5 overflow-hidden rounded-xl bg-[#1f2937] transition-all duration-300 ease-out ${
-            showInput ? "max-h-[520px] p-5 opacity-100" : "max-h-0 p-0 opacity-0"
-          }`}
-          aria-hidden={!showInput}
-        >
-          <div className={showInput ? "pointer-events-auto" : "pointer-events-none"}>
-            <h3 className="m-0 text-sm font-semibold text-gray-100">텍스트 붙여넣기</h3>
-            <textarea
-              rows={10}
-              placeholder="여기에 그대로 붙여넣기"
-              value={rawText}
-              onChange={(e) => setRawText(e.target.value)}
-              className="mt-3 w-full rounded-md border border-gray-700 bg-[#0f172a] px-3 py-2 text-sm text-gray-100 outline-none focus:border-sky-500"
-            />
-            <button
-              type="button"
-              onClick={submitText}
-              className="mt-3 min-h-[40px] rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
-            >
-              📥 변환 및 저장
-            </button>
-          </div>
-        </div>
-      </div>
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
         <h2 className="m-0 text-base font-semibold text-gray-300">📊 현재 시장 상태</h2>
         <h1 className="m-0 mt-3 text-xl font-bold leading-tight sm:text-2xl" style={{ color: headlineSignal.color }}>
