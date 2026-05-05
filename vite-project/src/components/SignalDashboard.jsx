@@ -86,6 +86,7 @@ export default function SignalDashboard() {
   const [updatedAt, setUpdatedAt] = useState(null)
   const [history, setHistory] = useState(() => getHistory())
   const [alertOn, setAlertOn] = useState(true)
+  const [prevScore, setPrevScore] = useState(null)
   const [lastAlertType, setLastAlertType] = useState(null)
   const [lastAlertTime, setLastAlertTime] = useState(0)
   const [notifyEnabled, setNotifyEnabled] = useState(() =>
@@ -252,24 +253,47 @@ export default function SignalDashboard() {
     if (!Number.isFinite(score)) return
 
     const now = Date.now()
-    if (score >= 70) {
-      if (lastAlertType !== "hot" && now - lastAlertTime >= 60_000) {
-        sendRealtimeNotification("🚀 과열", "과열 구간 진입")
-        setLastAlertTime(now)
-      }
-      setLastAlertType("hot")
-    } else if (score <= 30) {
-      if (lastAlertType !== "fear" && now - lastAlertTime >= 60_000) {
-        sendRealtimeNotification("💀 공포", "공포 구간 진입")
-        setLastAlertTime(now)
-      }
-      setLastAlertType("fear")
-    } else {
-      if (lastAlertType !== "neutral") {
-        setLastAlertType("neutral")
-      }
+
+    // 최초 실행 시점에는 알림 없이 기준 점수만 기록
+    if (prevScore === null) {
+      setPrevScore(score)
+      return
     }
-  }, [data, alertOn, finalScore, lastAlertTime, lastAlertType, sendRealtimeNotification])
+
+    // 점수 변화가 없으면 아무것도 하지 않음
+    if (score === prevScore) return
+
+    // 60초 쿨타임
+    if (now - lastAlertTime < 60_000) {
+      setPrevScore(score)
+      return
+    }
+
+    // 과열 구간
+    if (score >= 70 && lastAlertType !== "hot") {
+      sendRealtimeNotification("🚀 과열", "과열 구간 진입")
+      setLastAlertType("hot")
+      setLastAlertTime(now)
+    }
+    // 공포 구간
+    else if (score <= 30 && lastAlertType !== "fear") {
+      sendRealtimeNotification("💀 공포", "공포 구간 진입")
+      setLastAlertType("fear")
+      setLastAlertTime(now)
+    }
+    // 급변 구간
+    else if (Math.abs(score - prevScore) >= 10) {
+      sendRealtimeNotification("⚠️ 급변", "10 이상 변화 발생")
+      setLastAlertTime(now)
+    }
+
+    // 중립 구간 진입 시 상태 초기화
+    if (score > 30 && score < 70) {
+      setLastAlertType("neutral")
+    }
+
+    setPrevScore(score)
+  }, [data, alertOn, finalScore, lastAlertTime, lastAlertType, prevScore, sendRealtimeNotification])
 
   useEffect(() => {
     if (!data) return
