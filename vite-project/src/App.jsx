@@ -1,19 +1,23 @@
 import { useState } from "react"
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { submitManualPanicData } from "./config/api.js"
+import BuyTop5Card from "./components/BuyTop5Card.jsx"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
+import SignalBacktestPanel from "./components/SignalBacktestPanel.jsx"
 import SignalDashboard from "./components/SignalDashboard.jsx"
 
 const MENU = [
-  "시그널 데스크",
-  "오늘의 시그널",
-  "시장 사이클",
-  "종목 발굴",
-  "종목 분석",
-  "매매 전략",
-  "인사이트",
+  { label: "오늘의 시그널", path: "/", active: true },
+  { label: "매매 전략", path: "/strategy", active: true },
+  { label: "종목 발굴", path: "/finder", active: true },
+  { label: "시장 사이클", active: false },
+  { label: "종목 분석", active: false },
+  { label: "인사이트", active: false },
 ]
 
 function App() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
 
@@ -38,17 +42,24 @@ function App() {
           </p>
         </div>
         <nav className="flex min-h-[48px] flex-1 flex-row items-stretch gap-1 lg:flex-col lg:items-stretch lg:px-2">
-          {MENU.map((label, i) => (
+          {MENU.map((item) => (
             <div
-              key={label}
+              key={item.label}
               role="presentation"
+              onClick={() => {
+                if (item.active) {
+                  navigate(item.path)
+                } else {
+                  alert("준비 중입니다")
+                }
+              }}
               className={
-                i === 0
+                item.active && location.pathname === item.path
                   ? "flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white lg:min-w-0 lg:justify-start lg:px-3 lg:py-3"
                   : "flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg px-4 py-3 text-sm text-gray-300 transition-colors hover:bg-gray-800/60 lg:min-w-0 lg:justify-start lg:px-3 lg:py-3"
               }
             >
-              <span className="whitespace-nowrap">{label}</span>
+              <span className="whitespace-nowrap">{item.label}</span>
             </div>
           ))}
         </nav>
@@ -85,7 +96,27 @@ function App() {
         </header>
 
         <main className="flex-1 overflow-auto px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-          <SignalDashboard />
+          <Routes>
+            <Route path="/" element={<SignalDashboard />} />
+            <Route
+              path="/strategy"
+              element={
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-gray-200">매매 전략</h2>
+                  <SignalBacktestPanel />
+                </div>
+              }
+            />
+            <Route
+              path="/finder"
+              element={
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold text-gray-200">종목 발굴</h2>
+                  <BuyTop5Card />
+                </div>
+              }
+            />
+          </Routes>
         </main>
       </div>
       <div
