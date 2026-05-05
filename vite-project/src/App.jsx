@@ -1,7 +1,5 @@
 import { useState } from "react"
-import { getToken } from "firebase/messaging"
 import { submitManualPanicData } from "./config/api.js"
-import { getFirebaseMessagingSafe, hasFirebaseConfig } from "./firebase.js"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
 import SignalDashboard from "./components/SignalDashboard.jsx"
 
@@ -19,14 +17,6 @@ function App() {
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
 
-  const sendNotification = (title, body) => {
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-      new Notification(title, { body })
-    } else {
-      console.warn("알림 권한 없음 또는 미지원")
-    }
-  }
-
   const submitInput = async () => {
     try {
       const parsed = JSON.parse(inputText)
@@ -36,43 +26,6 @@ function App() {
     } catch (err) {
       window.alert("JSON 형식이 올바르지 않습니다")
       console.error("데이터 입력 저장 실패", err)
-    }
-  }
-
-  const requestPushPermission = async () => {
-    try {
-      if (typeof window === "undefined" || !("Notification" in window)) {
-        alert("이 브라우저는 알림을 지원하지 않습니다.")
-        return
-      }
-      if (!hasFirebaseConfig()) {
-        alert("Firebase 환경변수(VITE_FIREBASE_*)를 먼저 설정하세요.")
-        return
-      }
-      const permission = await Notification.requestPermission()
-      if (permission !== "granted") {
-        alert("알림 권한이 허용되지 않았습니다.")
-        return
-      }
-      const messaging = await getFirebaseMessagingSafe()
-      if (!messaging) {
-        alert("이 브라우저/환경에서는 Firebase Messaging을 사용할 수 없습니다.")
-        return
-      }
-      const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY
-      if (!vapidKey) {
-        alert("VITE_FIREBASE_VAPID_KEY를 설정하세요.")
-        return
-      }
-      const token = await getToken(messaging, {
-        vapidKey,
-        serviceWorkerRegistration: await navigator.serviceWorker.register("/firebase-messaging-sw.js"),
-      })
-      console.log("토큰:", token)
-      alert(token ? "푸시 알림 활성화 완료" : "토큰 발급 실패")
-    } catch (err) {
-      console.error("푸시 알림 활성화 실패", err)
-      alert("푸시 알림 활성화 중 오류가 발생했습니다.")
     }
   }
 
@@ -129,65 +82,6 @@ function App() {
             </span>
           </div>
           <PwaInstallBar />
-          <button
-            type="button"
-            onClick={requestPushPermission}
-            style={{
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "10px",
-              background: "#16a34a",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            🔔 푸시 알림 활성화
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!("Notification" in window)) return
-              console.log("Notification 상태:", Notification.permission)
-              Notification.requestPermission().then((permission) => {
-                console.log("권한:", permission)
-                if (permission === "granted") {
-                  sendNotification("알림 허용 완료", "이제 알림이 정상 작동합니다")
-                }
-              })
-            }}
-            style={{
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "10px",
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            🔔 알림 켜기
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if ("Notification" in window) {
-                console.log("Notification 상태:", Notification.permission)
-              }
-              sendNotification("테스트 알림", "정상 작동 확인")
-            }}
-            style={{
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "10px",
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            🔔 알림 테스트
-          </button>
         </header>
 
         <main className="flex-1 overflow-auto px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
