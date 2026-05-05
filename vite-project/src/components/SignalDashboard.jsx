@@ -428,6 +428,20 @@ export default function SignalDashboard() {
           >
             끄기
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              sendRealtimeNotification("테스트 알림", "정상 작동 확인")
+            }}
+            style={{
+              ...topRefreshBtnStyle,
+              background: "#2563eb",
+              border: "1px solid #3b82f6",
+              color: "white",
+            }}
+          >
+            🔔 알림 테스트
+          </button>
           <button type="button" onClick={manualRefresh} style={topRefreshBtnStyle}>
             🔄 새로고침
           </button>
