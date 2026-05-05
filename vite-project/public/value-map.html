@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>코리아 밸류체인 맵 · Y'ds의 투자 인사이트</title>
+    <title>코리아 밸류체인 맵 (Fixed) · Y'ds의 투자 인사이트</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,7 +23,32 @@
         color: #e4e9f2;
         font-family: "Noto Sans KR", system-ui, sans-serif;
       }
-      .container { width: min(1080px, 100% - 2rem); margin: 0 auto; }
+      .container { width: min(1080px, calc(100% - 2rem)); margin-inline: auto; }
+      .bg-layer {
+        position: fixed; inset: 0; z-index: -3;
+        background: linear-gradient(165deg, #0b0f14 0%, #11161c 38%, #1a2438 100%);
+      }
+      .bg-glow { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.45; z-index: -2; pointer-events: none; }
+      .bg-glow--gold {
+        width: min(55vw, 520px); height: min(55vw, 520px); top: -12%; right: -8%;
+        background: radial-gradient(circle, rgba(198, 163, 90, 0.22), transparent 70%);
+      }
+      .bg-glow--blue {
+        width: min(70vw, 640px); height: min(70vw, 640px); bottom: -20%; left: -15%;
+        background: radial-gradient(circle, rgba(61, 90, 128, 0.35), transparent 65%); opacity: 0.35;
+      }
+      .site-header {
+        position: sticky; top: 0; z-index: 10; backdrop-filter: blur(14px);
+        background: rgba(11, 15, 20, 0.82); border-bottom: 1px solid rgba(232, 236, 244, 0.06);
+      }
+      .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; gap: 1.5rem; }
+      .logo {
+        font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 1.35rem; color: #e8ecf4; text-decoration: none;
+      }
+      .site-footer { padding: 2rem 0 2.5rem; border-top: 1px solid rgba(232, 236, 244, 0.06); }
+      .footer-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+      .footer-brand { margin: 0 0 0.5rem; font-family: "Playfair Display", Georgia, serif; font-size: 1rem; color: #c5cdd9; }
+      .footer-note { margin: 0; font-size: 0.8rem; color: #9aa4b8; max-width: 40rem; line-height: 1.5; }
       .vc-card {
         border: 1px solid rgba(146, 164, 201, 0.25);
         background: linear-gradient(180deg, rgba(18, 28, 52, 0.78), rgba(10, 16, 34, 0.9));
@@ -50,61 +75,501 @@
         background: rgba(86, 131, 255, 0.2);
         transform: translateX(2px);
       }
+      .vc-tree-wrap {
+        border: 1px solid rgba(146, 164, 201, 0.28);
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(16, 24, 44, 0.78), rgba(10, 16, 34, 0.9));
+        padding: 1rem;
+      }
+      .vc-tree-wrap details {
+        margin-top: 0.45rem;
+      }
+      .vc-tree-wrap summary {
+        cursor: pointer;
+        list-style: none;
+      }
+      .vc-tree-wrap summary::-webkit-details-marker {
+        display: none;
+      }
+      .vc-tree-wrap .node {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        font-size: 0.76rem;
+      }
+      .vc-tree-wrap .node--stage { color: #dbeafe; border-color: rgba(125, 211, 252, 0.35); }
+      .vc-tree-wrap .node--subsector { color: #fde68a; border-color: rgba(253, 230, 138, 0.35); }
+      .vc-tree-wrap .node--stock {
+        display: inline-block;
+        margin: 0.2rem 0.25rem 0 0;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        padding: 0.2rem 0.45rem;
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 0.74rem;
+      }
+      .vc-tree-wrap .node--stock:hover {
+        color: #fff;
+        border-color: rgba(125, 211, 252, 0.5);
+        background: rgba(59, 130, 246, 0.18);
+      }
+      .vc-tree-indent {
+        position: relative;
+        margin-left: 0.85rem;
+        border-left: 1px dashed rgba(148, 163, 184, 0.32);
+        padding-left: 0.7rem;
+      }
+      .vc-tree-indent::after {
+        content: "";
+        position: absolute;
+        left: -1px;
+        bottom: 0;
+        width: 0.55rem;
+        height: 0.55rem;
+        border-left: 1px dashed rgba(148, 163, 184, 0.32);
+        border-bottom: 1px dashed rgba(148, 163, 184, 0.32);
+        border-bottom-left-radius: 0.35rem;
+      }
+      .rotation-item {
+        margin-bottom: 0.2rem;
+      }
+      .rotation-item--strong {
+        color: #ffc0c7;
+        font-weight: 700;
+      }
+      .rotation-item--mid {
+        color: #ffd7dc;
+        font-weight: 600;
+      }
     </style>
   </head>
   <body>
+    <div class="bg-layer" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow--gold" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow--blue" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="index.html">Y'ds</a>
+      </div>
+    </header>
+
     <main class="container py-10 md:py-14">
+
       <section class="mb-8 md:mb-10">
         <p class="text-xs md:text-sm tracking-[0.22em] uppercase text-blue-200/70">Digital Korea Value Chain</p>
-        <h1 class="mt-3 text-3xl md:text-4xl font-semibold text-slate-100">코리아 밸류체인 맵 (2026 Outlook)</h1>
+        <h1 class="mt-3 text-3xl md:text-4xl font-semibold text-slate-100">KOREA VALUE CHAIN MAP (2026 OUTLOOK)</h1>
         <p class="mt-3 max-w-4xl text-sm md:text-base text-slate-300 leading-relaxed">
-          국내 유망 섹터를 대형주 Top 5와 강소기업 5로 분리해 한눈에 정리했습니다. 종목 클릭 시 네이버 금융 종목 페이지로 연결됩니다.
+          국내 핵심 주도 섹터를 대형주 Top 5와 강소기업 5로 분리해 한눈에 정리했습니다. 종목 클릭 시 네이버 종목 상세(우선)와 다음 종목 상세(백업)가 새 탭으로 함께 열립니다.
         </p>
       </section>
 
       <section class="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm">
         <p id="heat-updated-at" class="text-slate-300">Heat 업데이트: 불러오는 중...</p>
-        <button id="reset-favorites" class="rounded-lg border border-slate-500/40 px-3 py-1.5 text-slate-200 hover:border-blue-300/50 hover:text-white" type="button">
-          관심 섹터 초기화
-        </button>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="text-slate-300" for="open-mode-select">탭 열기</label>
+          <select id="open-mode-select" class="rounded-lg border border-slate-500/40 bg-[#0f172c] px-2 py-1 text-slate-100">
+            <option value="1">1개 (네이버만)</option>
+            <option value="2">2개 (네이버 + 다음)</option>
+          </select>
+          <label class="text-slate-300" for="heat-style-select">Heat 색상</label>
+          <select id="heat-style-select" class="rounded-lg border border-slate-500/40 bg-[#0f172c] px-2 py-1 text-slate-100">
+            <option value="vivid">선명</option>
+            <option value="soft">은은</option>
+          </select>
+        </div>
       </section>
 
+      <section class="mb-6 rounded-2xl border border-slate-500/30 bg-[#101934]/85 p-4 md:p-5" aria-label="순환매 레이더">
+        <p class="text-xs tracking-[0.16em] uppercase text-blue-200/70">Sector Rotation Radar</p>
+        <h2 class="mt-2 text-lg md:text-xl font-semibold text-slate-100">순환매 레이더 (주도 · 다음 출발 · 과열)</h2>
+        <p class="mt-2 text-sm text-slate-300">타이밍 신호(A/B/C)와 섹터별 분포를 바탕으로 현재 순환 흐름을 자동 요약합니다.</p>
+        <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3" id="rotation-radar-grid">
+          <article class="rounded-xl border border-emerald-300/25 bg-emerald-500/10 p-3">
+            <h3 class="text-sm font-semibold text-emerald-100">이번 주 주도 섹터</h3>
+            <ul class="mt-2 text-xs text-slate-200" id="rotation-leaders-list"><li>계산 중...</li></ul>
+          </article>
+          <article class="rounded-xl border border-blue-300/25 bg-blue-500/10 p-3">
+            <h3 class="text-sm font-semibold text-blue-100">다음 출발 후보</h3>
+            <ul class="mt-2 text-xs text-slate-200" id="rotation-next-list"><li>계산 중...</li></ul>
+          </article>
+          <article class="rounded-xl border border-rose-300/25 bg-rose-500/10 p-3">
+            <h3 class="text-sm font-semibold text-rose-100">과열·휴식 구간</h3>
+            <ul class="mt-2 text-xs text-slate-200" id="rotation-hot-list"><li>계산 중...</li></ul>
+          </article>
+        </div>
+      </section>
       <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6" id="value-chain-grid"></section>
     </main>
+
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p class="footer-brand"><a href="index.html" style="color: inherit; text-decoration: none">Y'ds의 투자 인사이트</a></p>
+        <p class="footer-note">본 페이지는 투자 권유가 아니며, 학습·정리 목적입니다.</p>
+      </div>
+    </footer>
 
     <script src="value-chain-data.js"></script>
     <script>
       (function () {
-        var FAVORITE_KEY = "value-chain:favorites:v1";
+        var OPEN_MODE_KEY = "value-chain:open-mode:v1";
+        var HEAT_STYLE_KEY = "value-chain:heat-style:v1";
+        var MAX_TOP_ITEMS = 5;
+        var MAX_HIDDEN_ITEMS = 4;
+        var PRIORITY_HIDDEN_BY_SECTOR = {
+          "on-device-ai-robotics": ["에스피지", "고영", "뉴로메카", "에스비비테크"],
+          "hbm-ai-semiconductor": ["HPSP", "테크윙", "피에스케이홀딩스", "에스티아이"],
+          "power-grid-hvdc": ["제룡전기", "가온전선", "LS전선아시아", "누리플렉스"],
+          defense: ["아이쓰리시스템", "제노코", "켄코아에어로스페이스", "퍼스텍"]
+        };
+        var EXCLUDE_SMALLCAP = {
+          "루미르": true,
+          "에이테크솔루션": true,
+          "피에스텍": true
+        };
         var sectors = Array.isArray(window.VALUE_CHAIN_SECTORS) ? window.VALUE_CHAIN_SECTORS.slice() : [];
         var heatMeta = { updatedAt: "-" };
-
-        function loadFavorites() {
-          try {
-            var raw = localStorage.getItem(FAVORITE_KEY);
-            var parsed = raw ? JSON.parse(raw) : [];
-            return Array.isArray(parsed) ? parsed : [];
-          } catch (e) {
-            return [];
-          }
-        }
-
-        function saveFavorites(ids) {
-          try { localStorage.setItem(FAVORITE_KEY, JSON.stringify(ids)); } catch (e) {}
-        }
+        var timingMeta = { updatedAt: "-", bySymbol: {} };
+        var openMode = localStorage.getItem(OPEN_MODE_KEY) || "2";
+        var heatStyle = localStorage.getItem(HEAT_STYLE_KEY) || "vivid";
 
         function stockUrl(item) {
           if (item.code) return "https://finance.naver.com/item/main.naver?code=" + encodeURIComponent(item.code);
-          return "https://finance.naver.com/search/search.naver?query=" + encodeURIComponent(item.name);
+          var q = item.name + " 주가";
+          return "https://finance.naver.com/search/search.naver?query=" + encodeURIComponent(q);
         }
 
-        function listHtml(items) {
-          return items.map(function (item) {
-            return '<li><a class="stock-link" href="' + stockUrl(item) + '" target="_blank" rel="noopener noreferrer" title="' + item.tip + '">' + item.name + "</a></li>";
+        function secondaryStockUrl(item) {
+          if (item.code) return "https://finance.daum.net/quotes/A" + encodeURIComponent(item.code);
+          var q = item.name + " 주가";
+          return "https://search.daum.net/search?w=tot&q=" + encodeURIComponent(q);
+        }
+
+
+        function inferSectionLabel(item, sector, index) {
+          var tip = (item && item.tip ? item.tip : "").toLowerCase();
+          var name = (item && item.name ? item.name : "").toLowerCase();
+          var text = tip + " " + name;
+
+          var downstreamKeywords = ["플랫폼", "서비스", "유통", "완제품", "완성", "브랜드", "통합", "mro", "c4i", "생태계", "가전"];
+          var upstreamKeywords = ["소재", "부품", "장비", "테스트", "기판", "센서", "피팅", "밸브", "전해질", "음극", "양극", "모듈"];
+          var midstreamKeywords = ["제조", "생산", "주기기", "시스템", "엔진", "패키징", "설계", "파운드리", "셀", "cdmo", "파이프라인"];
+
+          function hasKeyword(list) {
+            return list.some(function (kw) { return text.indexOf(kw) !== -1; });
+          }
+
+          if (hasKeyword(upstreamKeywords)) return "부품단";
+          if (hasKeyword(midstreamKeywords)) return "생산단";
+          if (hasKeyword(downstreamKeywords)) return "수요단";
+
+          if (Array.isArray(sector.sections) && sector.sections.length === 3) {
+            if (index <= 2) return sector.sections[0];
+            if (index <= 5) return sector.sections[1];
+            return sector.sections[2];
+          }
+
+          return "생산단";
+        }
+
+        function inferSubsectorLabel(item, sector, sectionLabel) {
+          var tip = (item && item.tip ? item.tip : "").toLowerCase();
+          var text = tip + " " + (item && item.name ? item.name.toLowerCase() : "");
+          var sectorId = sector && sector.id ? sector.id : "";
+
+          if (sectorId === "hbm-ai-semiconductor") {
+            if (text.indexOf("hbm") !== -1 || text.indexOf("메모리") !== -1) return "메모리/HBM";
+            if (text.indexOf("테스트") !== -1 || text.indexOf("패키") !== -1 || text.indexOf("소켓") !== -1) return "후공정·테스트";
+            return "장비·소재";
+          }
+          if (sectorId === "solid-state-battery") {
+            if (text.indexOf("셀") !== -1 || text.indexOf("배터리") !== -1) return "셀·팩";
+            if (text.indexOf("양극") !== -1 || text.indexOf("음극") !== -1 || text.indexOf("소재") !== -1) return "소재";
+            return "장비·리사이클";
+          }
+          if (sectorId === "defense") {
+            if (text.indexOf("전차") !== -1 || text.indexOf("지상") !== -1) return "지상체계";
+            if (text.indexOf("유도") !== -1 || text.indexOf("레이다") !== -1 || text.indexOf("c4i") !== -1) return "유도무기·전자전";
+            return "항공·엔진";
+          }
+          if (sectorId === "nuclear-smr") {
+            if (text.indexOf("smr") !== -1) return "SMR";
+            if (text.indexOf("정비") !== -1 || text.indexOf("밸브") !== -1 || text.indexOf("계측") !== -1) return "기자재·정비";
+            return "대형원전";
+          }
+          if (sectorId === "power-grid-hvdc") {
+            if (text.indexOf("변압기") !== -1 || text.indexOf("전력기기") !== -1 || text.indexOf("배전") !== -1) return "변압기·전력기기";
+            if (text.indexOf("hvdc") !== -1 || text.indexOf("송전") !== -1 || text.indexOf("그리드") !== -1 || text.indexOf("자동화") !== -1) return "송전·HVDC";
+            return "케이블·전력망";
+          }
+          if (sectorId === "biosimilar-cdmo") {
+            if (text.indexOf("cdmo") !== -1 || text.indexOf("cmo") !== -1) return "CDMO·CMO";
+            if (text.indexOf("시밀러") !== -1 || text.indexOf("유통") !== -1) return "상업화·유통";
+            return "플랫폼·신약";
+          }
+          if (sectorId === "on-device-ai-robotics") {
+            if (text.indexOf("감속기") !== -1 || text.indexOf("센서") !== -1 || text.indexOf("부품") !== -1) return "핵심구동부";
+            if (text.indexOf("협동로봇") !== -1 || text.indexOf("휴머노이드") !== -1) return "완성로봇";
+            return "SI·응용";
+          }
+          if (sectorId === "aerospace") {
+            if (text.indexOf("발사") !== -1 || text.indexOf("엔진") !== -1) return "발사체·추진";
+            if (text.indexOf("위성") !== -1 || text.indexOf("안테나") !== -1 || text.indexOf("탑재") !== -1) return "위성·탑재체";
+            return "지상국·서비스";
+          }
+          if (sectorId === "shipbuilding-offshore") {
+            if (text.indexOf("엔진") !== -1 || text.indexOf("기자재") !== -1 || text.indexOf("보냉") !== -1) return "엔진·기자재";
+            if (text.indexOf("서비스") !== -1 || text.indexOf("mro") !== -1) return "MRO·서비스";
+            return "완성조선";
+          }
+          if (sectorId === "entertainment-kculture") {
+            if (text.indexOf("플랫폼") !== -1 || text.indexOf("팬덤") !== -1 || text.indexOf("md") !== -1) return "팬플랫폼·MD";
+            if (text.indexOf("제작") !== -1 || text.indexOf("미디어") !== -1 || text.indexOf("유통") !== -1) return "제작·유통";
+            return "IP·아티스트";
+          }
+          if (sectorId === "autonomous-automotive") {
+            if (text.indexOf("센서") !== -1 || text.indexOf("칩") !== -1 || text.indexOf("레이더") !== -1) return "센서·칩";
+            if (text.indexOf("부품") !== -1 || text.indexOf("모듈") !== -1 || text.indexOf("mlcc") !== -1) return "전장부품";
+            return "SDV·플랫폼";
+          }
+          if (sectorId === "ai-datacenter-infra") {
+            if (text.indexOf("hbm") !== -1 || text.indexOf("서버") !== -1 || text.indexOf("스토리지") !== -1) return "서버·수요";
+            if (text.indexOf("전력") !== -1 || text.indexOf("배전") !== -1 || text.indexOf("냉각") !== -1 || text.indexOf("hvac") !== -1) return "전력·냉각";
+            return "운영·부품";
+          }
+          if (sectorId === "power-semiconductor-electronics") {
+            if (text.indexOf("ic") !== -1 || text.indexOf("설계") !== -1 || text.indexOf("반도체 생산") !== -1) return "칩 설계·생산";
+            if (text.indexOf("장비") !== -1 || text.indexOf("공정") !== -1) return "공정·장비";
+            return "소재·부품";
+          }
+
+          return sectionLabel === "수요단" ? "서비스·수요" : sectionLabel === "부품단" ? "소재·부품" : "제조·통합";
+        }
+
+        function sectionBadgeClass(label) {
+          if (label === "수요단") return "border-emerald-300/35 bg-emerald-500/15 text-emerald-100";
+          if (label === "부품단") return "border-indigo-300/35 bg-indigo-500/15 text-indigo-100";
+          return "border-amber-300/35 bg-amber-500/15 text-amber-100";
+        }
+
+        function timingSignal(item, sectionLabel) {
+          if (item && item.code && timingMeta.bySymbol && timingMeta.bySymbol[item.code]) {
+            return timingMeta.bySymbol[item.code];
+          }
+          var key = String((item && item.code) || (item && item.name) || "");
+          var score = 0;
+          for (var i = 0; i < key.length; i++) score += key.charCodeAt(i);
+          if (sectionLabel === "수요단") score += 7;
+          if (sectionLabel === "생산단") score += 3;
+          var bucket = score % 3;
+          if (bucket === 0) return { grade: "A", state: "추세초입", action: "분할진입", tone: "good" };
+          if (bucket === 1) return { grade: "B", state: "눌림대기", action: "관찰", tone: "wait" };
+          return { grade: "C", state: "과열주의", action: "추격금지", tone: "hot" };
+        }
+
+        function timingBadgeClass(tone) {
+          if (tone === "good") return "border-emerald-300/35 bg-emerald-500/15 text-emerald-100";
+          if (tone === "hot") return "border-rose-300/35 bg-rose-500/15 text-rose-100";
+          return "border-amber-300/35 bg-amber-500/15 text-amber-100";
+        }
+
+        function actionClass(action) {
+          if (action === "분할진입") return "text-emerald-100 bg-emerald-500/15 border-emerald-300/35";
+          if (action === "추격금지") return "text-rose-100 bg-rose-500/15 border-rose-300/35";
+          return "text-amber-100 bg-amber-500/15 border-amber-300/35";
+        }
+
+        function timingPanelHtml(item, signal, panelId) {
+          var m = signal && signal.metrics ? signal.metrics : null;
+          var trend = m && Number.isFinite(m.close) && Number.isFinite(m.ma20) && Number.isFinite(m.ma60)
+            ? ("종가 " + m.close.toFixed(1) + " / MA20 " + m.ma20.toFixed(1) + " / MA60 " + m.ma60.toFixed(1))
+            : (signal.tone === "good" ? "정배열 근접(20 > 60일선)" : signal.tone === "wait" ? "20일선 눌림 구간" : "고점 이격 확대");
+          var rsi = m && Number.isFinite(m.rsi14)
+            ? ("RSI14 " + m.rsi14.toFixed(1))
+            : (signal.tone === "good" ? "48 ~ 62 (건강한 상승)" : signal.tone === "wait" ? "38 ~ 49 (반등 대기)" : "72+ (과열 경계)");
+          var stochastic = m && Number.isFinite(m.stochK) && Number.isFinite(m.stochD)
+            ? ("%K " + m.stochK.toFixed(1) + " / %D " + m.stochD.toFixed(1))
+            : (signal.tone === "hot" ? "80 이상 데드크로스 경계" : "20~80 내 골든크로스 확인");
+          var macd = m && Number.isFinite(m.macdLine) && Number.isFinite(m.macdSignal)
+            ? ("MACD " + m.macdLine.toFixed(2) + " / Signal " + m.macdSignal.toFixed(2) + " / Hist " + ((Number.isFinite(m.macdHistogram) ? m.macdHistogram : 0).toFixed(2)))
+            : (signal.tone === "good" ? "시그널 상향(골든크로스) 확인" : signal.tone === "hot" ? "시그널 하향(데드크로스) 경계" : "제로라인 부근 방향성 대기");
+          var volume = m && Number.isFinite(m.volumeRatio20)
+            ? ("20일 평균 대비 " + m.volumeRatio20.toFixed(2) + "x")
+            : (signal.tone === "good" ? "20일 평균 대비 1.2x 이상" : signal.tone === "wait" ? "평균 부근 (확인 필요)" : "급증 후 둔화 여부 체크");
+          var risk = signal.tone === "good" ? "60일선 이탈 시 점수 하향" : signal.tone === "wait" ? "지지 이탈 시 관찰 유지" : "스토캐스틱 과열 + 이격 확대 시 비중 축소";
+          return (
+            '<div id="' + panelId + '" class="timing-panel mt-1.5 hidden rounded-lg border border-slate-500/30 bg-[#101934]/85 p-2.5 text-[11px] leading-relaxed">' +
+            '<p class="mb-1 text-slate-100"><span class="text-blue-200">추세</span>: ' + trend + "</p>" +
+            '<p class="mb-1 text-slate-100"><span class="text-blue-200">모멘텀(RSI)</span>: ' + rsi + "</p>" +
+            '<p class="mb-1 text-slate-100"><span class="text-blue-200">스토캐스틱</span>: ' + stochastic + "</p>" +
+            '<p class="mb-1 text-slate-100"><span class="text-blue-200">MACD</span>: ' + macd + "</p>" +
+            '<p class="mb-1 text-slate-100"><span class="text-blue-200">거래</span>: ' + volume + "</p>" +
+            '<p class="text-slate-100"><span class="text-blue-200">리스크</span>: ' + risk + "</p>" +
+            "</div>"
+          );
+        }
+
+        function sectorTimingSummary(allItems, sector) {
+          var counts = { good: 0, wait: 0, hot: 0 };
+          allItems.forEach(function (item, idx) {
+            var sectionLabel = inferSectionLabel(item, sector, idx);
+            var s = timingSignal(item, sectionLabel);
+            counts[s.tone] += 1;
+          });
+          return (
+            '<div class="mb-4 flex flex-wrap gap-1.5 text-[11px]">' +
+            '<span class="rounded-full border border-emerald-300/35 bg-emerald-500/12 px-2 py-0.5 text-emerald-100">초입 ' + counts.good + "</span>" +
+            '<span class="rounded-full border border-amber-300/35 bg-amber-500/12 px-2 py-0.5 text-amber-100">대기 ' + counts.wait + "</span>" +
+            '<span class="rounded-full border border-rose-300/35 bg-rose-500/12 px-2 py-0.5 text-rose-100">과열 ' + counts.hot + "</span>" +
+            "</div>"
+          );
+        }
+
+        function listHtml(items, sector, startIndex) {
+          return items.map(function (item, idx) {
+            var sectionLabel = inferSectionLabel(item, sector, (startIndex || 0) + idx);
+            var subsectorLabel = inferSubsectorLabel(item, sector, sectionLabel);
+            var signal = timingSignal(item, sectionLabel);
+            var panelId = "timing-" + (item.code || item.name).replace(/[^a-zA-Z0-9가-힣]/g, "");
+            return (
+              '<li><a class="stock-link" href="' +
+              stockUrl(item) +
+              '" data-secondary-url="' +
+              secondaryStockUrl(item) +
+              '" target="_blank" rel="noopener noreferrer" title="' +
+              item.tip +
+              '"><span>' +
+              item.name +
+              '</span><span class="ml-2 inline-flex rounded-full border px-1.5 py-0.5 text-[10px] ' +
+              sectionBadgeClass(sectionLabel) +
+              '">' +
+              sectionLabel +
+              " · " +
+              subsectorLabel +
+              '</span><span class="ml-2 inline-flex rounded-full border px-1.5 py-0.5 text-[10px] ' +
+              timingBadgeClass(signal.tone) +
+              '">' +
+              signal.state +
+              ')</span></a><button type="button" class="timing-toggle ml-1 rounded-md border border-slate-500/40 px-1.5 py-0.5 text-[10px] text-slate-300 hover:border-blue-300/50 hover:text-white" data-target="' +
+              panelId +
+              '">신호</button><span class="ml-1 inline-flex rounded-full border px-1.5 py-0.5 text-[10px] ' +
+              actionClass(signal.action) +
+              '">' +
+              signal.action +
+              "</span>" +
+              timingPanelHtml(item, signal, panelId) +
+              "</li>"
+            );
           }).join("");
         }
 
+        function sectionsHtml(sector) {
+          if (!sector || !Array.isArray(sector.sections) || !sector.sections.length) return "";
+          return (
+            '<div class="mb-4 flex flex-wrap gap-1.5">' +
+            sector.sections
+              .map(function (label) {
+                return '<span class="rounded-full border border-blue-300/25 bg-blue-500/10 px-2 py-0.5 text-[11px] text-blue-100/90">' + label + "</span>";
+              })
+              .join("") +
+            "</div>"
+          );
+        }
+
+        function curatedBySector(sector) {
+          var top = (sector.top || []).slice(0, MAX_TOP_ITEMS);
+          var hiddenSource = (sector.hidden || []).filter(function (item) {
+            return item && !EXCLUDE_SMALLCAP[item.name];
+          });
+          var hidden = [];
+          var used = {};
+          var priorityNames = PRIORITY_HIDDEN_BY_SECTOR[sector.id] || [];
+          priorityNames.forEach(function (name) {
+            if (hidden.length >= MAX_HIDDEN_ITEMS) return;
+            var found = hiddenSource.find(function (item) { return item.name === name; });
+            if (found && !used[found.name]) {
+              hidden.push(found);
+              used[found.name] = true;
+            }
+          });
+          hiddenSource.forEach(function (item) {
+            if (hidden.length >= MAX_HIDDEN_ITEMS) return;
+            if (used[item.name]) return;
+            hidden.push(item);
+            used[item.name] = true;
+          });
+          return { top: top, hidden: hidden, all: top.concat(hidden) };
+        }
+
+        function sectorTreeHtml(sector) {
+          var allItems = curatedBySector(sector).all;
+          var tree = {};
+          allItems.forEach(function (item, idx) {
+            var stage = inferSectionLabel(item, sector, idx);
+            var subsector = inferSubsectorLabel(item, sector, stage);
+            if (!tree[stage]) tree[stage] = {};
+            if (!tree[stage][subsector]) tree[stage][subsector] = [];
+            tree[stage][subsector].push(item);
+          });
+          var stages = Object.keys(tree);
+          return (
+            '<div class="vc-tree-wrap">' +
+            '<p class="mb-2 text-[11px] text-slate-300">핵심 종목만 노출 · 대형주 최대 ' + MAX_TOP_ITEMS + '개 / 강소기업 최대 ' + MAX_HIDDEN_ITEMS + "개</p>" +
+            stages
+              .map(function (stage) {
+                var subsectors = Object.keys(tree[stage]);
+                return (
+                  '<div class="mb-2"><span class="node node--stage">' +
+                  stage +
+                  "</span><div class=\"vc-tree-indent mt-1\">" +
+                  subsectors
+                    .map(function (sub) {
+                      return (
+                        '<div class="mb-1.5"><span class="node node--subsector">' +
+                        sub +
+                        "</span><div class=\"vc-tree-indent mt-1\">" +
+                        tree[stage][sub]
+                          .map(function (item) {
+                            var signal = timingSignal(item, stage);
+                            return (
+                              '<span class="inline-flex items-center gap-1">' +
+                              '<a class="node--stock" href="' +
+                              stockUrl(item) +
+                              '" target="_blank" rel="noopener noreferrer">' +
+                              item.name +
+                              "</a>" +
+                              '<span class="inline-flex rounded-full border px-1.5 py-0.5 text-[10px] ' +
+                              timingBadgeClass(signal.tone) +
+                              '">' +
+                              signal.state +
+                              "</span>" +
+                              "</span>"
+                            );
+                          })
+                          .join("") +
+                        "</div></div>"
+                      );
+                    })
+                    .join("") +
+                  "</div></div>"
+                );
+              })
+              .join("") +
+            "</div>"
+          );
+        }
+
         function heatToneClass(heat) {
+          if (heatStyle === "soft") {
+            if (heat === "VERY HOT") return "text-rose-100 bg-rose-400/12 border-rose-200/25";
+            if (heat === "HOT") return "text-amber-100 bg-amber-400/12 border-amber-200/25";
+            return "text-emerald-100 bg-emerald-400/12 border-emerald-200/25";
+          }
           if (heat === "VERY HOT") return "text-rose-200 bg-rose-500/20 border-rose-300/30";
           if (heat === "HOT") return "text-amber-200 bg-amber-500/20 border-amber-300/30";
           return "text-emerald-200 bg-emerald-500/20 border-emerald-300/30";
@@ -117,15 +582,99 @@
           sectors.forEach(function (s) { if (map[s.id]) s.heat = map[s.id]; });
         }
 
-        function render() {
-          var favoriteIds = loadFavorites();
-          var favoriteSet = {};
-          favoriteIds.forEach(function (id) { favoriteSet[id] = true; });
+        function scoreSectorRotation(sector) {
+          var items = curatedBySector(sector).all;
+          var stats = { good: 0, wait: 0, hot: 0, total: 0 };
+          items.forEach(function (item, idx) {
+            var sectionLabel = inferSectionLabel(item, sector, idx);
+            var signal = timingSignal(item, sectionLabel);
+            stats.total += 1;
+            stats[signal.tone] += 1;
+          });
+          var total = stats.total || 1;
+          var leadScore = (stats.good / total) * 100 - (stats.hot / total) * 35;
+          var nextScore = (stats.wait / total) * 100 + (stats.good / total) * 20 - (stats.hot / total) * 15;
+          var hotScore = (stats.hot / total) * 100;
+          return {
+            id: sector.id,
+            name: sector.name,
+            icon: sector.icon,
+            leadScore: Math.round(leadScore * 10) / 10,
+            nextScore: Math.round(nextScore * 10) / 10,
+            hotScore: Math.round(hotScore * 10) / 10,
+            stats: stats
+          };
+        }
 
+
+        function renderRotationRadar() {
+          var leaderEl = document.getElementById("rotation-leaders-list");
+          var nextEl = document.getElementById("rotation-next-list");
+          var hotEl = document.getElementById("rotation-hot-list");
+          if (!leaderEl || !nextEl || !hotEl) return;
+          var scored = sectors.map(scoreSectorRotation);
+          if (!scored.length) return;
+
+          var leaders = scored.slice().sort(function (a, b) { return b.leadScore - a.leadScore; }).slice(0, 3);
+          var nexts = scored.slice().sort(function (a, b) { return b.nextScore - a.nextScore; }).slice(0, 3);
+          var hots = scored.slice().sort(function (a, b) { return b.hotScore - a.hotScore; }).slice(0, 3);
+
+          function rowHtml(item, kind, rank) {
+            var cls = "rotation-item";
+            if ((kind === "lead" || kind === "next") && rank === 0) cls += " rotation-item--strong";
+            else if ((kind === "lead" || kind === "next") && rank === 1) cls += " rotation-item--mid";
+            var score =
+              kind === "lead" ? item.leadScore :
+              kind === "next" ? item.nextScore :
+              item.hotScore;
+            return (
+              '<li class="' + cls + '">' +
+              item.icon +
+              " " +
+              item.name +
+              " · 점수 " +
+              score +
+              " · " +
+              (kind === "lead" ? "초입 우세" : kind === "next" ? "대기 구간" : "과열 비중 높음") +
+              "</li>"
+            );
+          }
+
+          leaderEl.innerHTML = leaders.map(function (item, idx) { return rowHtml(item, "lead", idx); }).join("");
+          nextEl.innerHTML = nexts.map(function (item, idx) { return rowHtml(item, "next", idx); }).join("");
+          hotEl.innerHTML = hots.map(function (item, idx) { return rowHtml(item, "hot", idx); }).join("");
+        }
+
+        function refreshTimingSignals() {
+          var codes = [];
+          sectors.forEach(function (sector) {
+            curatedBySector(sector).all.forEach(function (item) {
+              if (item && item.code) codes.push(item.code);
+            });
+          });
+          var uniqueCodes = Array.from(new Set(codes));
+          if (!uniqueCodes.length) return;
+          fetch("/api/timing?symbols=" + encodeURIComponent(uniqueCodes.join(",")))
+            .then(function (res) {
+              if (!res.ok) throw new Error("timing fetch failed");
+              return res.json();
+            })
+            .then(function (data) {
+              timingMeta.updatedAt = data.updatedAt || "-";
+              timingMeta.bySymbol = data.timingBySymbol || {};
+              render();
+            })
+            .catch(function () {
+              // keep static fallback
+            });
+        }
+
+        function render() {
+          var heatRank = { "VERY HOT": 0, HOT: 1, WARM: 2 };
           var ordered = sectors.slice().sort(function (a, b) {
-            var af = favoriteSet[a.id] ? 0 : 1;
-            var bf = favoriteSet[b.id] ? 0 : 1;
-            if (af !== bf) return af - bf;
+            var ar = Object.prototype.hasOwnProperty.call(heatRank, a.heat) ? heatRank[a.heat] : 99;
+            var br = Object.prototype.hasOwnProperty.call(heatRank, b.heat) ? heatRank[b.heat] : 99;
+            if (ar !== br) return ar - br;
             return a.order - b.order;
           });
 
@@ -133,44 +682,68 @@
           if (!container) return;
 
           container.innerHTML = ordered.map(function (sector, index) {
-            var isFavorite = !!favoriteSet[sector.id];
+            var allItems = curatedBySector(sector).all;
             return (
               '<article class="vc-card relative rounded-2xl p-5 md:p-6">' +
               '<div class="mb-4 flex items-start justify-between gap-3">' +
               '<div><p class="text-xs text-blue-200/70 tracking-wider">SECTOR ' + String(index + 1).padStart(2, "0") + '</p><h2 class="mt-1 text-lg md:text-xl font-semibold text-slate-100">' + sector.icon + " " + sector.name + '</h2></div>' +
               '<span class="text-[11px] md:text-xs border rounded-full px-2.5 py-1 ' + heatToneClass(sector.heat) + '">' + sector.heat + "</span></div>" +
-              '<div class="mb-4"><button type="button" class="favorite-btn rounded-lg border px-3 py-1.5 text-xs ' + (isFavorite ? "border-blue-300/70 text-blue-100 bg-blue-500/20" : "border-slate-500/40 text-slate-300 hover:border-blue-300/50 hover:text-white") + '" data-sector-id="' + sector.id + '">' + (isFavorite ? "관심 섹터 해제" : "관심 섹터 등록") + "</button></div>" +
-              '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">' +
-              '<div><p class="text-xs font-semibold text-blue-200/75 mb-2">대형주 TOP 5</p><ul class="text-sm space-y-1.5">' + listHtml(sector.top) + "</ul></div>" +
-              '<div><p class="text-xs font-semibold text-amber-200/75 mb-2">강소기업 5</p><ul class="text-sm space-y-1.5">' + listHtml(sector.hidden) + "</ul></div></div></article>"
+              sectionsHtml(sector) +
+              sectorTreeHtml(sector) +
+              "</article>"
             );
           }).join("");
 
           var heatUpdatedAtEl = document.getElementById("heat-updated-at");
           if (heatUpdatedAtEl) heatUpdatedAtEl.textContent = "Heat 업데이트: " + heatMeta.updatedAt;
+          renderRotationRadar();
         }
 
         function bindEvents() {
           var container = document.getElementById("value-chain-grid");
-          if (container) {
-            container.addEventListener("click", function (e) {
-              var btn = e.target.closest(".favorite-btn");
-              if (!btn) return;
-              var id = btn.getAttribute("data-sector-id");
-              if (!id) return;
-              var favorites = loadFavorites();
-              var idx = favorites.indexOf(id);
-              if (idx === -1) favorites.push(id); else favorites.splice(idx, 1);
-              saveFavorites(favorites);
+          var openModeSelect = document.getElementById("open-mode-select");
+          var heatStyleSelect = document.getElementById("heat-style-select");
+
+          if (openModeSelect) {
+            openModeSelect.value = openMode;
+            openModeSelect.addEventListener("change", function () {
+              openMode = openModeSelect.value === "1" ? "1" : "2";
+              localStorage.setItem(OPEN_MODE_KEY, openMode);
+            });
+          }
+
+          if (heatStyleSelect) {
+            heatStyleSelect.value = heatStyle;
+            heatStyleSelect.addEventListener("change", function () {
+              heatStyle = heatStyleSelect.value === "soft" ? "soft" : "vivid";
+              localStorage.setItem(HEAT_STYLE_KEY, heatStyle);
               render();
             });
           }
-          var resetBtn = document.getElementById("reset-favorites");
-          if (resetBtn) {
-            resetBtn.addEventListener("click", function () {
-              saveFavorites([]);
-              render();
+
+          if (container) {
+            container.addEventListener("click", function (e) {
+              var timingToggle = e.target.closest(".timing-toggle");
+              if (timingToggle) {
+                e.preventDefault();
+                e.stopPropagation();
+                var targetId = timingToggle.getAttribute("data-target");
+                if (!targetId) return;
+                var panel = document.getElementById(targetId);
+                if (!panel) return;
+                panel.classList.toggle("hidden");
+                return;
+              }
+
+              var link = e.target.closest(".stock-link");
+              if (!link) return;
+              e.preventDefault();
+              var primary = link.getAttribute("href");
+              var secondary = link.getAttribute("data-secondary-url");
+              if (primary) window.open(primary, "_blank", "noopener,noreferrer");
+              if (openMode === "2" && secondary) window.open(secondary, "_blank", "noopener,noreferrer");
             });
+
           }
         }
 
@@ -187,6 +760,8 @@
           .catch(function () {
             render();
           });
+        refreshTimingSignals();
+        setInterval(refreshTimingSignals, 10 * 60 * 1000);
       })();
     </script>
   </body>
