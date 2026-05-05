@@ -1,0 +1,8 @@
+{
+  "best_score": 103.0928,
+  "strategy": {
+    "fear_buy": 39,
+    "putcall_buy": 1.15,
+    "vix_buy": 25
+  }
+}

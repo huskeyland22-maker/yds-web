@@ -1,0 +1,34 @@
+name: Update Panic Data
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # UTC 13:00 = KST 22:00
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v3
+
+      - name: Python 설치
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 라이브러리 설치
+        run: |
+          pip install yfinance pandas pandas_datareader requests pytz
+
+      - name: 데이터 업데이트 실행
+        run: python update_data.py
+
+      - name: 변경사항 커밋
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add vite-project/public/data.json
+          git commit -m "자동 데이터 업데이트" || echo "No changes"
+          git push

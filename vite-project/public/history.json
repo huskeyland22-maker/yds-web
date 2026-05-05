@@ -1,0 +1,7 @@
+[
+  { "date": "2024-01-01", "vix": 35, "fearGreed": 20, "putCall": 1.1, "bofa": 1.5, "price": 100 },
+  { "date": "2024-01-02", "vix": 28, "fearGreed": 30, "putCall": 0.9, "bofa": 2.5, "price": 102 },
+  { "date": "2024-01-03", "vix": 18, "fearGreed": 60, "putCall": 0.6, "bofa": 6.5, "price": 105 },
+  { "date": "2024-01-04", "vix": 22, "fearGreed": 40, "putCall": 0.95, "bofa": 3.0, "price": 103 },
+  { "date": "2024-01-05", "vix": 31, "fearGreed": 21, "putCall": 1.12, "bofa": 1.8, "price": 108 }
+]

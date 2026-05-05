@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   fetchPanicDataJson,
-  getApiBase,
   getPanicDataUrlForDisplay,
   listPanicDataUrlAttemptsForDisplay,
 } from "../config/api.js"
@@ -72,7 +71,7 @@ export default function SignalDashboard() {
   )
 
   /**
-   * 패닉 데이터 로드 (네트워크는 `fetchPanicDataJson` → VITE_API_BASE + `/panic-data`).
+   * 패닉 데이터 로드 (정적 파일 `/data.json`).
    * @param {{ silent?: boolean; useMemoryCache?: boolean; isCancelled?: () => boolean }} [opts]
    * - silent: true면 로딩 UI 없이 조용히 갱신(실패 시 기존 데이터 유지).
    * - useMemoryCache: true면 메모리 캐시가 있으면 네트워크 생략.
@@ -114,7 +113,7 @@ export default function SignalDashboard() {
       setIsPro(json?.accessTier === "pro")
       setLoadError(null)
       setError(false)
-      setUpdatedAt(new Date().toLocaleTimeString())
+      setUpdatedAt(json?.updatedAt ?? json?.updated_at ?? new Date().toLocaleTimeString())
     } catch (err) {
       if (isCancelled?.()) return
       const message = err instanceof Error ? err.message : String(err)
@@ -227,63 +226,16 @@ export default function SignalDashboard() {
   }
 
   if (error) {
-    const isProd = import.meta.env.PROD
-    const hasApiBase = Boolean(getApiBase())
     const tried = listPanicDataUrlAttemptsForDisplay()
     const triedLine = tried.length ? tried.join(" → ") : "(설정된 API URL 없음)"
     return (
       <div className="flex min-h-[240px] flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-16 text-center text-red-300">
         <p className="text-lg">❌ 서버 연결 실패 (잠시 후 다시 시도)</p>
         <p className="text-sm opacity-90">{loadError ?? "알 수 없는 오류"}</p>
-        {isProd && !hasApiBase ? (
-          <p className="max-w-md text-xs text-gray-400">
-            인터넷에 있는 사이트는 당신 PC의 <code className="text-gray-500">localhost</code>에 연결할 수 없습니다.{" "}
-            <code className="text-gray-500">server.py</code>(Flask)를 Render·Railway 등에 올리고, Vercel 프로젝트 →
-            Settings → Environment Variables에 <code className="text-gray-500">VITE_API_BASE</code>를 그 API의
-            https 주소(끝 슬래시 없이)로 넣은 뒤 <strong className="text-gray-300">Redeploy</strong> 하세요. (빌드 시
-            값이 들어갑니다.)
-          </p>
-        ) : isProd && hasApiBase ? (
-          <p className="max-w-md text-xs text-gray-400">
-            API 서버(<code className="text-gray-500">{getApiBase()}</code>)가 켜져 있는지, 브라우저에서{" "}
-            <code className="text-gray-500">{getPanicDataUrlForDisplay()}</code> 가 JSON으로 열리는지 확인하세요.
-            환경 변수를 바꿨다면 Vercel에서 <strong className="text-gray-300">Redeploy</strong>가 필요합니다.
-          </p>
-        ) : !isProd && !hasApiBase ? (
-          <div className="max-w-lg space-y-2 text-left text-xs text-gray-400">
-            <p className="text-center text-gray-300">
-              지금은 <strong>로컬 개발</strong> 모드이고, <code className="text-gray-500">VITE_API_BASE</code>도 없어서{" "}
-              <strong className="text-gray-300">PC의 5000번 Flask</strong>만 찾고 있어요. 서버가 꺼져 있으면{" "}
-              <code className="text-gray-500">Failed to fetch</code>가 납니다.
-            </p>
-            <ol className="list-decimal space-y-1.5 pl-5 text-gray-500">
-              <li>
-                <strong className="text-gray-400">방법 A</strong> — 상위 폴더{" "}
-                <code className="text-gray-500">yds web</code>에서{" "}
-                <code className="rounded bg-black/30 px-1 py-0.5 text-gray-400">python server.py</code> 실행 (5000
-                포트). 그다음 <code className="text-gray-500">vite-project</code>에서{" "}
-                <code className="rounded bg-black/30 px-1 py-0.5 text-gray-400">npm run dev</code>만 켜도 됩니다.
-              </li>
-              <li>
-                <strong className="text-gray-400">방법 B</strong> —{" "}
-                <code className="rounded bg-black/30 px-1 py-0.5 text-gray-400">npm run dev:full</code> 한 번으로 웹
-                + API 같이 실행.
-              </li>
-              <li>
-                <strong className="text-gray-400">방법 C</strong> — Flask 없이 Render만 쓰려면{" "}
-                <code className="text-gray-500">vite-project/.env.local</code> 파일에{" "}
-                <code className="break-all text-gray-500">VITE_API_BASE=https://(Render주소)</code> 넣고{" "}
-                <strong className="text-gray-400">dev 서버를 껐다가 다시</strong> 켜세요. (
-                <code className="text-gray-600">.env.example</code> 참고)
-              </li>
-            </ol>
-          </div>
-        ) : (
-          <p className="max-w-md text-xs text-gray-400">
-            <code className="text-gray-500">VITE_API_BASE</code>로 지정한 API가 켜져 있는지 확인하세요.{" "}
-            <code className="text-gray-500">.env.local</code>을 바꿨다면 Vite 개발 서버를 재시작해야 합니다.
-          </p>
-        )}
+        <p className="max-w-md text-xs text-gray-400">
+          정적 데이터 파일 <code className="text-gray-500">/data.json</code>을 읽지 못했습니다.{" "}
+          <code className="text-gray-500">public/data.json</code> 존재 여부와 JSON 형식을 확인하세요.
+        </p>
         <p className="text-xs text-gray-600">시도한 주소: {triedLine}</p>
         <div style={healthRowStyle}>상태: 에러</div>
         <div style={healthRowStyle}>마지막 업데이트: {updatedAt ?? "-"}</div>
