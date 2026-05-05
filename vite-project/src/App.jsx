@@ -15,19 +15,16 @@ const MENU = [
 
 function App() {
   const [openInput, setOpenInput] = useState(false)
-  const [inputData, setInputData] = useState({
-    vix: "",
-    fearGreed: "",
-    putCall: "",
-    bofa: "",
-    highYield: "",
-  })
+  const [inputText, setInputText] = useState("")
 
   const submitInput = async () => {
     try {
-      await submitManualPanicData(inputData)
+      const parsed = JSON.parse(inputText)
+      await submitManualPanicData(parsed)
+      window.alert("저장 완료")
       setOpenInput(false)
     } catch (err) {
+      window.alert("JSON 형식이 올바르지 않습니다")
       console.error("데이터 입력 저장 실패", err)
     }
   }
@@ -97,35 +94,17 @@ function App() {
         }`}
       >
         <h3 className="text-base font-semibold text-gray-100">데이터 입력</h3>
-        <input
-          placeholder="VIX"
-          value={inputData.vix}
-          onChange={(e) => setInputData((prev) => ({ ...prev, vix: e.target.value }))}
-          className="mt-2 w-full rounded-md border border-gray-700 bg-[#0f172a] px-2 py-2 text-sm text-gray-100"
-        />
-        <input
-          placeholder="FearGreed"
-          value={inputData.fearGreed}
-          onChange={(e) => setInputData((prev) => ({ ...prev, fearGreed: e.target.value }))}
-          className="mt-2 w-full rounded-md border border-gray-700 bg-[#0f172a] px-2 py-2 text-sm text-gray-100"
-        />
-        <input
-          placeholder="Put/Call"
-          value={inputData.putCall}
-          onChange={(e) => setInputData((prev) => ({ ...prev, putCall: e.target.value }))}
-          className="mt-2 w-full rounded-md border border-gray-700 bg-[#0f172a] px-2 py-2 text-sm text-gray-100"
-        />
-        <input
-          placeholder="BofA"
-          value={inputData.bofa}
-          onChange={(e) => setInputData((prev) => ({ ...prev, bofa: e.target.value }))}
-          className="mt-2 w-full rounded-md border border-gray-700 bg-[#0f172a] px-2 py-2 text-sm text-gray-100"
-        />
-        <input
-          placeholder="HighYield"
-          value={inputData.highYield}
-          onChange={(e) => setInputData((prev) => ({ ...prev, highYield: e.target.value }))}
-          className="mt-2 w-full rounded-md border border-gray-700 bg-[#0f172a] px-2 py-2 text-sm text-gray-100"
+        <textarea
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder={`{
+  "vix": 18.2,
+  "fearGreed": 45,
+  "putCall": 0.9,
+  "bofa": 3.2,
+  "highYield": 4.1
+}`}
+          className="mt-2 h-[200px] w-full rounded-md border border-gray-700 bg-[#0f172a] px-2 py-2 font-mono text-sm text-gray-100"
         />
         <button
           type="button"
