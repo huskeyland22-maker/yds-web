@@ -11,6 +11,12 @@ export function getApiBase() {
   return ""
 }
 
+export function getManualApiBase() {
+  const raw = import.meta.env.VITE_API_BASE
+  if (typeof raw === "string" && raw.trim()) return raw.trim().replace(/\/+$/, "")
+  return "https://yds-web.onrender.com"
+}
+
 export function getPanicDataUrlForDisplay() {
   return LOCAL_DATA_URL
 }
@@ -83,4 +89,36 @@ export async function fetchOptimizeResult(options = {}) {
   if (debugLog) console.log("🤖 optimize 상태:", res.status)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
+}
+
+function toNumberOrNull(v) {
+  if (v == null || v === "") return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
+function normalizeManualPayload(data) {
+  if (!data || typeof data !== "object") return data
+  return {
+    ...data,
+    vix: toNumberOrNull(data.vix),
+    fearGreed: toNumberOrNull(data.fearGreed),
+    putCall: toNumberOrNull(data.putCall),
+    bofa: toNumberOrNull(data.bofa),
+    highYield: toNumberOrNull(data.highYield),
+    accessTier: "pro",
+    updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 16).replace("T", " "),
+  }
+}
+
+export async function submitManualPanicData(inputData) {
+  const base = getManualApiBase()
+  const res = await fetch(`${base}/update`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(inputData),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const out = await res.json()
+  return normalizeManualPayload(out?.data)
 }

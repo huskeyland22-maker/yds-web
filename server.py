@@ -276,6 +276,8 @@ CACHE: dict = {
 CACHE_LOCK = threading.Lock()
 _background_started = False
 _telegram_scheduler_started = False
+# STEP 19: 트레이더 수동 입력값 저장소 (메모리)
+panic_data: dict = {}
 
 
 def refresh_all() -> None:
@@ -375,8 +377,37 @@ def panic_data():
 
 @app.route("/panic")
 def panic():
-    """과제 예시 경로 — /panic-data 와 동일 동작."""
+    """수동 입력값이 있으면 우선 반환, 없으면 기존 자동 응답."""
+    if panic_data:
+        return jsonify(panic_data)
     return _panic_json_response()
+
+
+@app.route("/update", methods=["POST"])
+def update_data():
+    global panic_data
+    incoming = request.get_json(silent=True)
+    if not isinstance(incoming, dict):
+        return jsonify({"status": "error", "message": "invalid json body"}), 400
+
+    def _to_num_or_none(v):
+        try:
+            if v is None or v == "":
+                return None
+            return float(v)
+        except Exception:
+            return None
+
+    panic_data = {
+        "vix": _to_num_or_none(incoming.get("vix")),
+        "fearGreed": _to_num_or_none(incoming.get("fearGreed")),
+        "putCall": _to_num_or_none(incoming.get("putCall")),
+        "bofa": _to_num_or_none(incoming.get("bofa")),
+        "highYield": _to_num_or_none(incoming.get("highYield")),
+        "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "accessTier": "pro",
+    }
+    return jsonify({"status": "ok", "data": panic_data})
 
 
 def build_history_sample(n: int = 50):
