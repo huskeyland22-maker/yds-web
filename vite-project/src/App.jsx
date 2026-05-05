@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { useRegisterSW } from "virtual:pwa-register/react"
+import { getToken } from "firebase/messaging"
 import { submitManualPanicData } from "./config/api.js"
+import { getFirebaseMessagingSafe, hasFirebaseConfig } from "./firebase.js"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
 import SignalDashboard from "./components/SignalDashboard.jsx"
 
@@ -36,6 +38,43 @@ function App() {
     } catch (err) {
       window.alert("JSON 형식이 올바르지 않습니다")
       console.error("데이터 입력 저장 실패", err)
+    }
+  }
+
+  const requestPushPermission = async () => {
+    try {
+      if (typeof window === "undefined" || !("Notification" in window)) {
+        alert("이 브라우저는 알림을 지원하지 않습니다.")
+        return
+      }
+      if (!hasFirebaseConfig()) {
+        alert("Firebase 환경변수(VITE_FIREBASE_*)를 먼저 설정하세요.")
+        return
+      }
+      const permission = await Notification.requestPermission()
+      if (permission !== "granted") {
+        alert("알림 권한이 허용되지 않았습니다.")
+        return
+      }
+      const messaging = await getFirebaseMessagingSafe()
+      if (!messaging) {
+        alert("이 브라우저/환경에서는 Firebase Messaging을 사용할 수 없습니다.")
+        return
+      }
+      const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY
+      if (!vapidKey) {
+        alert("VITE_FIREBASE_VAPID_KEY를 설정하세요.")
+        return
+      }
+      const token = await getToken(messaging, {
+        vapidKey,
+        serviceWorkerRegistration: await navigator.serviceWorker.register("/firebase-messaging-sw.js"),
+      })
+      console.log("토큰:", token)
+      alert(token ? "푸시 알림 활성화 완료" : "토큰 발급 실패")
+    } catch (err) {
+      console.error("푸시 알림 활성화 실패", err)
+      alert("푸시 알림 활성화 중 오류가 발생했습니다.")
     }
   }
 
@@ -92,6 +131,21 @@ function App() {
             </span>
           </div>
           <PwaInstallBar />
+          <button
+            type="button"
+            onClick={requestPushPermission}
+            style={{
+              marginTop: "10px",
+              padding: "10px",
+              borderRadius: "10px",
+              background: "#16a34a",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            🔔 푸시 알림 활성화
+          </button>
           <button
             type="button"
             onClick={() => {
