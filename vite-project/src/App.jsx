@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useRegisterSW } from "virtual:pwa-register/react"
 import { getToken } from "firebase/messaging"
 import { submitManualPanicData } from "./config/api.js"
 import { getFirebaseMessagingSafe, hasFirebaseConfig } from "./firebase.js"
@@ -17,7 +16,6 @@ const MENU = [
 ]
 
 function App() {
-  useRegisterSW()
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
 
