@@ -42,11 +42,22 @@ const refreshBtnStyle = {
 }
 
 const summaryCardStyle = {
-  padding: "20px",
-  background: "#111",
-  borderRadius: "12px",
-  marginBottom: "20px",
+  marginTop: "20px",
+  padding: "24px",
+  background: "#111827",
+  borderRadius: "16px",
   textAlign: "center",
+}
+const pageContainerStyle = {
+  maxWidth: "1200px",
+  margin: "0 auto",
+  padding: "20px",
+}
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+  gap: "12px",
+  marginTop: "20px",
 }
 
 /** StrictMode 이중 마운트에서도 직전 성공 응답을 바로 쓰기 위한 모듈 캐시 */
@@ -298,14 +309,20 @@ export default function SignalDashboard() {
   const timing = getTimingSignal(finalScore, trend)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div style={pageContainerStyle} className="flex flex-col gap-5">
+      <div>
+        <h1 style={{ fontSize: "28px", fontWeight: "bold", marginBottom: "10px" }}>📊 패닉지수 대시보드</h1>
+        <p style={{ color: "gray", fontSize: "14px" }}>시장 공포/탐욕 상태를 한눈에 확인</p>
+      </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
-        <h2 className="m-0 text-base font-semibold text-gray-300">📊 현재 시장 상태</h2>
-        <h1 className="m-0 mt-3 text-xl font-bold leading-tight sm:text-2xl" style={{ color: headlineSignal.color }}>
+        <h2 style={{ marginBottom: "10px" }} className="m-0 text-lg font-semibold text-gray-300">
+          현재 시장 상태
+        </h2>
+        <h1 className="m-0 text-3xl font-bold leading-tight" style={{ color: headlineSignal.color }}>
           {headlineSignal.text}
         </h1>
-        <p className="m-0 mt-3 text-sm text-gray-400">신뢰도: {headlineConfidence} / 4</p>
+        <p className="m-0 mt-3 text-sm text-gray-300">신뢰도: {headlineConfidence} / 4</p>
         <p className="m-0 mt-2 text-xs text-gray-500">
           참고 합산(MVP): {headlineReferenceTotal} — {headlineReferenceLabel.text}
         </p>
@@ -339,7 +356,7 @@ export default function SignalDashboard() {
       <StockRecommendCard score={finalScore} />
       <SignalBacktestPanel />
       <BacktestPanel history={history} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div style={gridStyle}>
         <SignalCard
           title="단기 시그널"
           score={shortScore}

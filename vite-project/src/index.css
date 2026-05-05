@@ -6,6 +6,10 @@
   html {
     -webkit-tap-highlight-color: transparent;
   }
+  body {
+    margin: 0;
+    font-family: sans-serif;
+  }
   @supports (padding: max(0px)) {
     body {
       padding-left: max(0px, env(safe-area-inset-left));
