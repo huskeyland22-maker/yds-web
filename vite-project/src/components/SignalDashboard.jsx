@@ -498,6 +498,30 @@ export default function SignalDashboard() {
           >
             🔔 알림 테스트 (강제)
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!("Notification" in window)) return
+              if (Notification.permission !== "granted") {
+                alert("알림 권한을 먼저 허용하세요")
+                return
+              }
+              new Notification("🔥 테스트", {
+                body: "오른쪽 아래 확인",
+              })
+            }}
+            style={{
+              marginTop: "10px",
+              padding: "10px",
+              borderRadius: "10px",
+              background: "#f59e0b",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            🔔 알림 위치 테스트
+          </button>
         </div>
       </div>
       <div style={summaryCardStyle} className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5">
