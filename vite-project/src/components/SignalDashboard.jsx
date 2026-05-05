@@ -48,6 +48,15 @@ const topRefreshBtnStyle = {
   color: "#e5e7eb",
   cursor: "pointer",
 }
+const compactRefreshBtnStyle = {
+  padding: "6px 10px",
+  fontSize: "12px",
+  borderRadius: "8px",
+  background: "#374151",
+  color: "white",
+  border: "none",
+  cursor: "pointer",
+}
 
 const summaryCardStyle = {
   marginTop: "10px",
@@ -175,6 +184,7 @@ export default function SignalDashboard() {
     const isCancelled = () => cancelled
     const id = setInterval(() => {
       void fetchData({ silent: true, useMemoryCache: false, isCancelled })
+      console.log("자동 새로고침 실행")
     }, PANIC_REFRESH_MS)
     return () => {
       cancelled = true
@@ -428,6 +438,9 @@ export default function SignalDashboard() {
         <div>
           <h1 style={{ fontSize: "26px", margin: 0 }}>📊 패닉지수</h1>
           <p style={{ color: "gray", fontSize: "13px", margin: 0 }}>시장 심리 지표 대시보드</p>
+          <p style={{ fontSize: "12px", color: "gray", margin: "4px 0 0" }}>
+            마지막 업데이트: {updatedAt ?? "-"}
+          </p>
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           <button
@@ -456,7 +469,7 @@ export default function SignalDashboard() {
           >
             {alertOn ? "🔔 알림 ON" : "🔕 알림 OFF"}
           </button>
-          <button type="button" onClick={manualRefresh} style={topRefreshBtnStyle}>
+          <button type="button" onClick={manualRefresh} style={compactRefreshBtnStyle}>
             🔄 새로고침
           </button>
         </div>
