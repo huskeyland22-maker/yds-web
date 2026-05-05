@@ -501,11 +501,19 @@ export default function SignalDashboard() {
           <button
             type="button"
             onClick={() => {
-              if (!("Notification" in window)) return
-              if (Notification.permission !== "granted") {
-                alert("알림 권한을 먼저 허용하세요")
+              alert("이건 무조건 뜨는 테스트")
+
+              if (!("Notification" in window)) {
+                console.warn("알림 미지원 브라우저")
                 return
               }
+
+              console.log("알림 권한:", Notification.permission)
+              if (Notification.permission !== "granted") {
+                alert("알림 권한 없음")
+                return
+              }
+
               new Notification("🔥 테스트", {
                 body: "오른쪽 아래 확인",
               })
