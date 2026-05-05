@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRegisterSW } from "virtual:pwa-register/react"
 import { submitManualPanicData } from "./config/api.js"
 import PwaInstallBar from "./components/PwaInstallBar.jsx"
@@ -18,14 +18,6 @@ function App() {
   useRegisterSW()
   const [openInput, setOpenInput] = useState(false)
   const [inputText, setInputText] = useState("")
-
-  useEffect(() => {
-    if ("Notification" in window) {
-      Notification.requestPermission().then((permission) => {
-        console.log("알림 권한:", permission)
-      })
-    }
-  }, [])
 
   const submitInput = async () => {
     try {
@@ -92,6 +84,31 @@ function App() {
             </span>
           </div>
           <PwaInstallBar />
+          <button
+            type="button"
+            onClick={() => {
+              if (!("Notification" in window)) return
+              Notification.requestPermission().then((permission) => {
+                console.log("권한:", permission)
+                if (permission === "granted") {
+                  new Notification("알림 허용 완료", {
+                    body: "이제 알림이 정상 작동합니다",
+                  })
+                }
+              })
+            }}
+            style={{
+              marginTop: "10px",
+              padding: "10px",
+              borderRadius: "10px",
+              background: "#2563eb",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            🔔 알림 켜기
+          </button>
         </header>
 
         <main className="flex-1 overflow-auto px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
