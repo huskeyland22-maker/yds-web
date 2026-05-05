@@ -21,6 +21,7 @@ TELEGRAM_CHAT_ID   알림 받을 chat_id
 """
 import logging
 import math
+import random
 import os
 import threading
 import time
@@ -402,6 +403,70 @@ def build_history_sample(n: int = 50):
 @app.route("/history")
 def history():
     return jsonify(build_history_sample(50))
+
+
+def generate_strategy() -> dict[str, Any]:
+    return {
+        "vix_buy": random.randint(20, 40),
+        "fear_buy": random.randint(10, 40),
+        "putcall_buy": round(random.uniform(0.8, 1.2), 2),
+    }
+
+
+def get_signal(day: dict[str, Any], strategy: dict[str, Any]) -> str:
+    if (
+        float(day.get("vix", 0)) > float(strategy["vix_buy"])
+        and float(day.get("fearGreed", 0)) < float(strategy["fear_buy"])
+        and float(day.get("putCall", 0)) > float(strategy["putcall_buy"])
+    ):
+        return "buy"
+    return "hold"
+
+
+def run_backtest(history_rows: list[dict[str, Any]], strategy: dict[str, Any]) -> float:
+    if not history_rows:
+        return 100.0
+
+    cash = 100.0
+    position = 0.0
+
+    for day in history_rows:
+        price = float(day.get("price", 0))
+        if price <= 0:
+            continue
+
+        signal = get_signal(day, strategy)
+        if signal == "buy" and cash > 0:
+            position = cash / price
+            cash = 0.0
+        elif signal == "sell" and position > 0:
+            cash = position * price
+            position = 0.0
+
+    last_price = float(history_rows[-1].get("price", 0))
+    final_value = cash + (position * last_price if last_price > 0 else 0.0)
+    return round(final_value, 4)
+
+
+@app.route("/optimize")
+def optimize():
+    history_rows = build_history_sample(50)
+    best_score = 0.0
+    best_strategy = None
+
+    for _ in range(100):
+        strategy = generate_strategy()
+        score = run_backtest(history_rows, strategy)
+        if score > best_score:
+            best_score = score
+            best_strategy = strategy
+
+    return jsonify(
+        {
+            "best_score": best_score,
+            "strategy": best_strategy,
+        }
+    )
 
 
 bootstrap()

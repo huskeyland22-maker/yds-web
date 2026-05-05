@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { fetchHistorySample } from "../config/api.js"
+import { fetchHistorySample, fetchOptimizeResult } from "../config/api.js"
 import { runAdvancedSignalBacktest } from "../utils/advancedSignalBacktest.js"
 
 const boxStyle = {
@@ -14,6 +14,7 @@ const boxStyle = {
  */
 export default function SignalBacktestPanel() {
   const [backtestResult, setBacktestResult] = useState(null)
+  const [aiResult, setAiResult] = useState(null)
   const [backtestError, setBacktestError] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -27,6 +28,10 @@ export default function SignalBacktestPanel() {
         const result = runAdvancedSignalBacktest(rows)
         setBacktestResult(result)
         console.log("백테스트 결과:", result)
+
+        const optimized = await fetchOptimizeResult({ debugLog: true })
+        if (cancelled) return
+        setAiResult(optimized)
       } catch (e) {
         if (!cancelled) {
           const msg = e instanceof Error ? e.message : String(e)
@@ -62,6 +67,23 @@ export default function SignalBacktestPanel() {
           <p className="m-0">승률: {backtestResult.winRate.toFixed(1)}%</p>
           <p className="m-0">MDD: {backtestResult.mdd.toFixed(1)}%</p>
           <p className="m-0 text-xs text-gray-500">(시작 자금 100 · 합성 /history 50일)</p>
+        </div>
+      ) : null}
+
+      {aiResult ? (
+        <div
+          style={{
+            marginTop: "30px",
+            padding: "20px",
+            background: "#1f2937",
+            borderRadius: "12px",
+          }}
+        >
+          <h2 className="m-0 text-base font-semibold text-gray-100">🤖 AI 최적 전략</h2>
+          <p className="mb-0 mt-2 text-sm text-gray-300">최종 수익: {aiResult.best_score}</p>
+          <pre className="mt-3 overflow-auto rounded-md border border-gray-700 bg-black/30 p-3 text-xs text-gray-300">
+            {JSON.stringify(aiResult.strategy, null, 2)}
+          </pre>
         </div>
       ) : null}
       <p className="mb-0 mt-3 text-[10px] leading-relaxed text-gray-600">

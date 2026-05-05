@@ -164,3 +164,37 @@ export async function fetchHistorySample(options = {}) {
     throw err
   }
 }
+
+/**
+ * STEP 18: 랜덤 탐색 기반 전략 최적화 결과
+ * @param {{ debugLog?: boolean }} [options]
+ */
+export async function fetchOptimizeResult(options = {}) {
+  const debugLog = options.debugLog !== false
+
+  if (!import.meta.env.VITE_API_BASE) {
+    throw new Error("API 주소 없음")
+  }
+
+  const base = String(import.meta.env.VITE_API_BASE).trim().replace(/\/+$/, "")
+  if (!base) {
+    throw new Error("API 주소 없음")
+  }
+
+  const url = `${base}/optimize`
+  const res = await fetch(url, {
+    ...fetchPanicJsonInit,
+    headers: buildPanicFetchHeaders(),
+  })
+  if (debugLog) {
+    console.log("🤖 optimize 상태:", res.status)
+  }
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`)
+  }
+  const data = await res.json()
+  if (debugLog) {
+    console.log("🤖 optimize 결과:", data)
+  }
+  return data
+}
