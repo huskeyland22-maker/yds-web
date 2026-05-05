@@ -511,6 +511,15 @@ export default function SignalDashboard() {
       </div>
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
       <motion.div
+        className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-5 py-5"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+      >
+        <p className="m-0 text-2xl font-bold text-emerald-300">🔥 지금 전략: {headlineSignal.text}</p>
+        <p className="m-0 mt-2 text-base text-emerald-100">👉 추천 행동: {action}</p>
+      </motion.div>
+      <motion.div
         style={mobileSummaryCardStyle}
         className="border border-gray-800 px-4 py-4 sm:px-5 sm:py-5"
         initial={{ opacity: 0, y: 30 }}
@@ -538,7 +547,29 @@ export default function SignalDashboard() {
         <p className="m-0 mt-2 text-xs text-gray-500">
           참고 합산(MVP): {headlineReferenceTotal} — {headlineReferenceLabel.text}
         </p>
+        <p className="m-0 mt-2 text-xs text-gray-500">
+          단기 {shortScore} · 중기 {midScore} · 최종 {finalScore}
+        </p>
       </motion.div>
+      <div style={gridStyle}>
+        <SignalCard
+          title="단기"
+          score={shortScore}
+          description="수급·변동 기반 단기 상태"
+        />
+        <SignalCard
+          title="중기"
+          score={midScore}
+          description="심리·신용 기반 중기 상태"
+        />
+        <SignalCard
+          title="장기"
+          score={finalScore}
+          description="통합 점수 기반 장기 상태"
+        />
+      </div>
+      <BuyTop5Card />
+      <StockRecommendCard score={finalScore} />
       <div
         className="rounded-lg border border-gray-800 bg-[#111827]/60 px-4 py-3 text-left"
         style={{ fontSize: "12px", color: "gray" }}
@@ -565,27 +596,13 @@ export default function SignalDashboard() {
         trend={trend}
         timing={timing}
       />
-      <StockRecommendCard score={finalScore} />
+      <CombinedSignalCard
+        shortScore={shortScore}
+        midScore={midScore}
+        description="단기·중기 가중 결합 종합 판독"
+      />
       <SignalBacktestPanel />
       <BacktestPanel history={history} />
-      <div style={gridStyle}>
-        <SignalCard
-          title="단기 시그널"
-          score={shortScore}
-          description="수급·캔들 기반 단기 과열/지지 확인"
-        />
-        <SignalCard
-          title="중기 시그널"
-          score={midScore}
-          description="이평·변동성 필터로 중기 방향성 점검"
-        />
-        <CombinedSignalCard
-          shortScore={shortScore}
-          midScore={midScore}
-          description="단기·중기 가중 결합 종합 판독"
-        />
-      </div>
-      <BuyTop5Card />
     </div>
   )
 }
