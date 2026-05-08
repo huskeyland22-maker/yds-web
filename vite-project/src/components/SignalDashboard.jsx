@@ -13,15 +13,27 @@ import {
   getTotalSignalScore,
 } from "../utils/panicMarketSignal.js"
 import { getHistory, getTimingSignal, getTrend, saveHistory } from "../utils/panicScoreHistory.js"
+import {
+  buildCycleAnalysis,
+  getDailyPanicHistory,
+  getIntegrationHistory,
+  saveDailyPanicHistory,
+  saveIntegrationHistory,
+  summarizeIntegrationFlow,
+} from "../utils/panicIntegrationHistory.js"
 import { validatePanicData } from "../utils/validatePanicData.js"
 import BacktestPanel from "./BacktestPanel.jsx"
 import SignalBacktestPanel from "./SignalBacktestPanel.jsx"
 import BuyTop5Card from "./BuyTop5Card.jsx"
 import CombinedSignalCard from "./CombinedSignalCard.jsx"
+import MarketSummaryCard from "./MarketSummaryCard.jsx"
 import PanicIndexCard from "./PanicIndexCard.jsx"
+import PanicHistoryChartCard from "./PanicHistoryChartCard.jsx"
 import PanicNotifyToolbar, { readNotifyOn } from "./PanicNotifyToolbar.jsx"
+import SectorStrengthPanel from "./SectorStrengthPanel.jsx"
 import SignalCard from "./SignalCard.jsx"
 import StockRecommendCard from "./StockRecommendCard.jsx"
+import StockRadarCard from "./StockRadarCard.jsx"
 import {
   describeDynamicWeights,
   getAction,
@@ -30,9 +42,11 @@ import {
   getShortScore,
 } from "../utils/tradingScores.js"
 import { getTradingSignal } from "../utils/tradingStrategy.js"
+import { buildAiMarketBrief } from "../utils/aiAnalysisEngine.js"
 
 /** 자동 새로고침 주기 (5분) */
 const PANIC_REFRESH_MS = 300_000
+const PANIC_CACHE_STALE_MS = 600_000
 
 const healthRowStyle = { marginTop: "10px", fontSize: "12px", color: "gray" }
 const refreshBtnStyle = {
@@ -68,26 +82,51 @@ const summaryCardStyle = {
   boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
   border: "1px solid rgba(255,255,255,0.05)",
 }
-const pageContainerStyle = {
-  maxWidth: "1200px",
-  margin: "0 auto",
-  padding: "20px",
-}
-const gridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-  gap: "12px",
-  marginTop: "20px",
-}
-
 /** StrictMode 이중 마운트에서도 직전 성공 응답을 바로 쓰기 위한 모듈 캐시 */
 let panicDataCache = null
+
+function getPhaseLabel(score) {
+  const n = Number(score)
+  if (!Number.isFinite(n)) return "중립"
+  if (n <= 15) return "패닉"
+  if (n <= 30) return "공포"
+  if (n <= 45) return "반등초기"
+  if (n <= 60) return "중립"
+  if (n <= 75) return "순환매"
+  if (n <= 90) return "과열"
+  return "버블"
+}
+
+function phaseColorClass(label) {
+  switch (label) {
+    case "패닉":
+      return "text-rose-300"
+    case "반등초기":
+      return "text-sky-300"
+    case "순환매":
+      return "text-blue-300"
+    case "과열":
+      return "text-amber-300"
+    case "버블":
+      return "text-violet-300"
+    default:
+      return "text-gray-300"
+  }
+}
 
 function clearPanicDataCache() {
   panicDataCache = null
 }
 
-export default function SignalDashboard() {
+function parseUpdatedAtMs(value) {
+  if (!value) return null
+  const raw = String(value).trim()
+  const normalized = raw.includes("T") ? raw : raw.replace(" ", "T")
+  const t = Date.parse(normalized)
+  return Number.isFinite(t) ? t : null
+}
+
+export default function SignalDashboard({ externalData = null, externalOnly = false }) {
   const [data, setData] = useState(null)
   const [isPro, setIsPro] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -97,6 +136,8 @@ export default function SignalDashboard() {
   /** STEP 0: 클라이언트에서 마지막으로 네트워크 응답을 받은 시각 */
   const [updatedAt, setUpdatedAt] = useState(null)
   const [history, setHistory] = useState(() => getHistory())
+  const [integrationHistory, setIntegrationHistory] = useState(() => getIntegrationHistory())
+  const [dailyPanicHistory, setDailyPanicHistory] = useState(() => getDailyPanicHistory())
   const [alertOn, setAlertOn] = useState(false)
   const [prevScore, setPrevScore] = useState(null)
   const [lastAlertType, setLastAlertType] = useState(null)
@@ -109,30 +150,60 @@ export default function SignalDashboard() {
     strongBuy: false,
     strongSell: false,
   })
+  const lastIntegrationSaveKeyRef = useRef("")
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+    typeof window !== "undefined" ? window.innerWidth <= 768 : false,
   )
+  const staleMode = Boolean(data?.isStale ?? data?.__isStale)
 
   /**
-   * 패닉 데이터 로드 (정적 파일 `/data.json`).
+   * 패닉 데이터 로드 (원격 API 우선, fallback seed 없음).
    * @param {{ silent?: boolean; useMemoryCache?: boolean; isCancelled?: () => boolean }} [opts]
    * - silent: true면 로딩 UI 없이 조용히 갱신(실패 시 기존 데이터 유지).
    * - useMemoryCache: true면 메모리 캐시가 있으면 네트워크 생략.
    */
   const fetchData = useCallback(async (opts = {}) => {
     const { silent = false, useMemoryCache = false, isCancelled } = opts
+    if (externalOnly) {
+      if (isCancelled?.()) return
+      return
+    }
+    // 외부에서 최신 데이터(수동 입력/동기화 데이터)를 주입받은 경우
+    // 대시보드 내부 자동 fetch가 값을 다시 덮어쓰지 않도록 우선순위를 고정합니다.
+    if (externalData && validatePanicData(externalData)) {
+      if (isCancelled?.()) return
+      setData(externalData)
+      setIsPro(externalData?.accessTier === "pro")
+      setLoadError(null)
+      setError(false)
+      setUpdatedAt(externalData?.updatedAt ?? externalData?.updated_at ?? new Date().toLocaleTimeString())
+      if (!silent) setLoading(false)
+      return
+    }
 
-    if (useMemoryCache && panicDataCache) {
-      if (!validatePanicData(panicDataCache)) {
+    if (useMemoryCache && panicDataCache?.data) {
+      const cachedAgeMs = Date.now() - Number(panicDataCache.savedAt ?? 0)
+      const sourceUpdatedAt = panicDataCache.data?.updatedAt ?? panicDataCache.data?.updated_at ?? null
+      const sourceUpdatedAtMs = parseUpdatedAtMs(sourceUpdatedAt)
+      const sourceStaleMs = sourceUpdatedAtMs ? Date.now() - sourceUpdatedAtMs : null
+      if (cachedAgeMs > PANIC_CACHE_STALE_MS || (sourceStaleMs != null && sourceStaleMs > PANIC_CACHE_STALE_MS)) {
+        console.log("[PWA] stale memory cache detected; refetch", { cachedAgeMs, sourceStaleMs })
+        panicDataCache = null
+      } else if (!validatePanicData(panicDataCache.data)) {
         console.warn("[YDS] 캐시 데이터 검증 실패 — 네트워크로 다시 불러옵니다")
         panicDataCache = null
       } else {
         if (isCancelled?.()) return
-        setData(panicDataCache)
-        setIsPro(panicDataCache?.accessTier === "pro")
+        setData(panicDataCache.data)
+        setIsPro(panicDataCache.data?.accessTier === "pro")
         setLoadError(null)
         setError(false)
         setLoading(false)
+        console.log("[BOOT] cache source", {
+          cacheSource: "memory",
+          isStale: Boolean(panicDataCache.data?.isStale ?? panicDataCache.data?.__isStale),
+          updatedAt: panicDataCache.data?.updatedAt ?? panicDataCache.data?.updated_at ?? null,
+        })
         return
       }
     }
@@ -151,7 +222,7 @@ export default function SignalDashboard() {
       if (!validatePanicData(json)) {
         throw new Error("데이터 이상 감지")
       }
-      panicDataCache = json
+      panicDataCache = { data: json, savedAt: Date.now() }
       setData(json)
       setIsPro(json?.accessTier === "pro")
       setLoadError(null)
@@ -174,18 +245,24 @@ export default function SignalDashboard() {
         setLoading(false)
       }
     }
-  }, [])
+  }, [externalData, externalOnly])
 
   useEffect(() => {
+    if (externalOnly) {
+      setLoading(false)
+      return
+    }
     let cancelled = false
     const isCancelled = () => cancelled
     void fetchData({ useMemoryCache: true, silent: false, isCancelled })
     return () => {
       cancelled = true
     }
-  }, [retryKey, fetchData])
+  }, [retryKey, fetchData, externalOnly])
 
   useEffect(() => {
+    if (externalOnly) return
+    if (externalData && validatePanicData(externalData)) return
     let cancelled = false
     const isCancelled = () => cancelled
     const id = setInterval(() => {
@@ -196,7 +273,7 @@ export default function SignalDashboard() {
       cancelled = true
       clearInterval(id)
     }
-  }, [fetchData])
+  }, [fetchData, externalData, externalOnly])
 
   useEffect(() => {
     if (!loading) return
@@ -214,10 +291,20 @@ export default function SignalDashboard() {
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const onResize = () => setIsMobile(window.innerWidth < 768)
+    const onResize = () => setIsMobile(window.innerWidth <= 768)
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
   }, [])
+
+  useEffect(() => {
+    if (!externalData || !validatePanicData(externalData)) return
+    setData(externalData)
+    setIsPro(externalData?.accessTier === "pro")
+    setUpdatedAt(externalData?.updatedAt ?? externalData?.updated_at ?? new Date().toLocaleTimeString())
+    setLoading(false)
+    setError(false)
+    setLoadError(null)
+  }, [externalData])
 
   const manualRefresh = useCallback(() => {
     clearPanicDataCache()
@@ -232,8 +319,12 @@ export default function SignalDashboard() {
 
   const finalScore = useMemo(() => {
     if (!data) return NaN
+    if (externalOnly) {
+      const locked = Number(data?.manualFinalScore)
+      if (Number.isFinite(locked)) return locked
+    }
     return getFinalScore(data)
-  }, [data])
+  }, [data, externalOnly])
 
   const headlineSignal = useMemo(() => {
     if (!data || !validatePanicData(data)) {
@@ -253,6 +344,27 @@ export default function SignalDashboard() {
   }, [data])
 
   const headlineReferenceLabel = useMemo(() => getSignal(headlineReferenceTotal), [headlineReferenceTotal])
+  const aiBrief = useMemo(() => buildAiMarketBrief(data), [data])
+  const integrationFlowText = summarizeIntegrationFlow(integrationHistory)
+  const cycleAnalysisLines = useMemo(() => buildCycleAnalysis(dailyPanicHistory), [dailyPanicHistory])
+
+  useEffect(() => {
+    if (!aiBrief?.integration) return
+    const saveKey = JSON.stringify({
+      score: aiBrief.integration.sentimentScore,
+      state: aiBrief.integration.currentState,
+      risk: aiBrief.integration.riskLevel,
+      flow: aiBrief.integration.stateFlow,
+    })
+    if (lastIntegrationSaveKeyRef.current === saveKey) return
+    try {
+      lastIntegrationSaveKeyRef.current = saveKey
+      setIntegrationHistory(saveIntegrationHistory(aiBrief.integration, data))
+      setDailyPanicHistory(saveDailyPanicHistory(aiBrief.integration, data))
+    } catch {
+      // 히스토리 저장 실패 시에도 UI 렌더는 유지
+    }
+  }, [aiBrief, data])
 
   const notificationsActive =
     notifyEnabled &&
@@ -353,6 +465,16 @@ export default function SignalDashboard() {
     }
   }, [data, headlineSignal])
 
+  useEffect(() => {
+    if (!data) return
+    console.log("[BOOT] runtime status", {
+      cacheSource: panicDataCache?.data ? "memory-or-network" : "network",
+      apiSource: data?.__fetchUrl ?? "unknown",
+      isStale: staleMode,
+      updatedAt: data?.updatedAt ?? data?.updated_at ?? null,
+    })
+  }, [data, staleMode])
+
   if (loading) {
     const displayUrl = getPanicDataUrlForDisplay()
     return (
@@ -380,10 +502,7 @@ export default function SignalDashboard() {
       <div className="flex min-h-[240px] flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-16 text-center text-red-300">
         <p className="text-lg">❌ 서버 연결 실패 (잠시 후 다시 시도)</p>
         <p className="text-sm opacity-90">{loadError ?? "알 수 없는 오류"}</p>
-        <p className="max-w-md text-xs text-gray-400">
-          정적 데이터 파일 <code className="text-gray-500">/data.json</code>을 읽지 못했습니다.{" "}
-          <code className="text-gray-500">public/data.json</code> 존재 여부와 JSON 형식을 확인하세요.
-        </p>
+        <p className="max-w-md text-xs text-gray-400">원격 패닉 데이터 API를 읽지 못했습니다. 서버 상태를 확인하세요.</p>
         <p className="text-xs text-gray-600">시도한 주소: {triedLine}</p>
         <div style={healthRowStyle}>상태: 에러</div>
         <div style={healthRowStyle}>마지막 업데이트: {updatedAt ?? "-"}</div>
@@ -448,27 +567,65 @@ export default function SignalDashboard() {
     ...summaryCardStyle,
     padding: isMobile ? "16px" : "40px",
   }
-
+  const riskToneClass =
+    aiBrief.risk === "매우 높음" || aiBrief.risk === "높음"
+      ? "text-rose-300"
+      : aiBrief.risk === "주의" || aiBrief.risk === "보통"
+        ? "text-amber-300"
+        : "text-emerald-300"
+  const feedDotClass = loadError
+    ? "bg-rose-400 shadow-rose-400/50"
+    : updatedAt
+      ? "bg-emerald-400 shadow-emerald-400/50"
+      : "bg-amber-300 shadow-amber-300/50"
+  const feedLabel = loadError ? "DELAYED" : updatedAt ? "LIVE" : "SYNCING"
+  const shortPhase = getPhaseLabel(shortScore)
+  const midPhase = getPhaseLabel(midScore)
+  const longPhase = getPhaseLabel(finalScore)
   return (
-    <div style={{ ...pageContainerStyle, padding: isMobile ? "16px" : "20px" }} className="flex flex-col gap-5">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <div>
-          <h1
-            style={{
-              fontSize: isMobile ? "24px" : "28px",
-              fontWeight: "600",
-              letterSpacing: "-0.5px",
-              margin: 0,
-            }}
-          >
-            📊 패닉지수
-          </h1>
-          <p style={{ color: "#6b7280", fontSize: "13px", margin: 0 }}>Market Sentiment Intelligence</p>
-          <p style={{ fontSize: "12px", color: "gray", margin: "4px 0 0" }}>
-            마지막 업데이트: {updatedAt ?? "-"}
-          </p>
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 lg:px-6">
+      {staleMode ? (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs text-amber-200">
+          마지막 정상 데이터 사용 중 (일부 실시간 데이터 소스 지연)
         </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+      ) : null}
+      <div
+        className="sticky top-0 z-20 rounded-xl border border-cyan-500/15 bg-[#060b14]/85 px-3 py-2 backdrop-blur-md sm:px-4 sm:py-2.5"
+        style={{ marginBottom: isMobile ? "10px" : "16px" }}
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-cyan-400/10 text-cyan-300 ring-1 ring-cyan-400/25">
+              ⬢
+            </div>
+            <div className="min-w-0">
+              <p className="m-0 truncate text-sm font-semibold tracking-wide text-slate-100">Market Pulse AI</p>
+              <p className="m-0 text-[10px] uppercase tracking-[0.16em] text-cyan-300/80">Sentiment Engine</p>
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <p className="m-0 text-sm font-semibold text-gray-100 sm:text-[15px]">
+              시장 상태: <span className="font-bold" style={{ color: aiBrief.stateColor }}>{aiBrief.state}</span>
+            </p>
+            <p className="m-0 mt-0.5 text-xs text-gray-300">
+              위험도: <span className={`font-semibold ${riskToneClass}`}>{aiBrief.risk}</span>{" "}
+              <span className="text-[11px] font-medium text-gray-400/80">
+                (
+                단기: <span className={phaseColorClass(shortPhase)}>{shortPhase}</span> · 중기:{" "}
+                <span className={phaseColorClass(midPhase)}>{midPhase}</span> · 장기:{" "}
+                <span className={phaseColorClass(longPhase)}>{longPhase}</span>
+                )
+              </span>
+            </p>
+            <p className="m-0 mt-0.5 flex items-center gap-1.5 text-[11px] tracking-wide text-cyan-300">
+              <span className={`inline-block h-2 w-2 rounded-full shadow ${feedDotClass}`} />
+              {feedLabel}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-2 flex flex-wrap gap-2">
           <motion.button
             type="button"
             onClick={() => {
@@ -485,15 +642,13 @@ export default function SignalDashboard() {
               }
             }}
             style={{
-              padding: isMobile ? "8px 12px" : "10px 16px",
-              borderRadius: "12px",
-              background: alertOn
-                ? "linear-gradient(135deg, #22c55e, #16a34a)"
-                : "linear-gradient(135deg, #4b5563, #374151)",
+              padding: "6px 10px",
+              borderRadius: "8px",
+              background: alertOn ? "linear-gradient(135deg, #22c55e, #16a34a)" : "linear-gradient(135deg, #4b5563, #374151)",
               color: "white",
               border: "none",
               cursor: "pointer",
-              fontSize: isMobile ? "12px" : "14px",
+              fontSize: "12px",
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -502,13 +657,27 @@ export default function SignalDashboard() {
           <motion.button
             type="button"
             onClick={manualRefresh}
-            style={{ ...compactRefreshBtnStyle, fontSize: isMobile ? "12px" : "14px" }}
+            style={{ ...compactRefreshBtnStyle, fontSize: "12px" }}
             whileTap={{ scale: 0.95 }}
           >
-            🔄 새로고침
+            🔄 Sync
           </motion.button>
         </div>
       </div>
+      <MarketSummaryCard brief={aiBrief} integrationFlowText={integrationFlowText} />
+      <PanicHistoryChartCard history={dailyPanicHistory} analysisLines={cycleAnalysisLines} />
+      <PanicIndexCard
+        data={data}
+        isPro={isPro}
+        finalScore={finalScore}
+        action={action}
+        weightsDescription={weightsDescription}
+        tradingSignal={tradingSignal}
+        history={history}
+        trend={trend}
+        timing={timing}
+      />
+      <SectorStrengthPanel sectors={aiBrief.sectors} />
       <PanicNotifyToolbar notifyEnabled={notifyEnabled} setNotifyEnabled={setNotifyEnabled} />
       <motion.div
         className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-5 py-5"
@@ -551,7 +720,7 @@ export default function SignalDashboard() {
           단기 {shortScore} · 중기 {midScore} · 최종 {finalScore}
         </p>
       </motion.div>
-      <div style={gridStyle}>
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <SignalCard
           title="단기"
           score={shortScore}
@@ -568,6 +737,7 @@ export default function SignalDashboard() {
           description="통합 점수 기반 장기 상태"
         />
       </div>
+      <StockRadarCard brief={aiBrief} score={finalScore} />
       <BuyTop5Card />
       <StockRecommendCard score={finalScore} />
       <div
@@ -585,17 +755,6 @@ export default function SignalDashboard() {
           🔄 새로고침
         </button>
       </div>
-      <PanicIndexCard
-        data={data}
-        isPro={isPro}
-        finalScore={finalScore}
-        action={action}
-        weightsDescription={weightsDescription}
-        tradingSignal={tradingSignal}
-        history={history}
-        trend={trend}
-        timing={timing}
-      />
       <CombinedSignalCard
         shortScore={shortScore}
         midScore={midScore}

@@ -34,6 +34,7 @@ import requests
 import yfinance as yf
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from yfinance.exceptions import YFRateLimitError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -56,6 +57,12 @@ HTTP_BROWSER_HEADERS = {
 }
 
 FREE_PANIC_KEYS = ("vix", "putCall", "fearGreed", "bofa", "highYield", "updatedAt")
+VIX_RETRY_DELAYS_SECONDS = (2, 5, 10)
+BACKGROUND_REFRESH_SECONDS = 1800
+COLD_START_GRACE_SECONDS = 20
+WAKEUP_DRIFT_LOG_THRESHOLD_SECONDS = BACKGROUND_REFRESH_SECONDS + 120
+YF_SHARED_SESSION = requests.Session()
+YF_SHARED_SESSION.headers.update({"User-Agent": "Mozilla/5.0"})
 
 # 프론트 panicMarketSignal.js 와 동일한 MVP 합산 규칙
 def _score_component(kind: str, value: Any) -> int:
@@ -168,11 +175,49 @@ def manual_bofa() -> float:
     return float(os.environ.get("BOFA_MANUAL", "2.1"))
 
 
-def get_vix() -> Optional[float]:
-    hist = yf.Ticker("^VIX").history(period="5d")
+def _get_cached_vix() -> Optional[float]:
+    with CACHE_LOCK:
+        vix = CACHE.get("vix")
+    try:
+        return float(vix) if vix is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _fetch_vix_once() -> Optional[float]:
+    hist = yf.Ticker("^VIX", session=YF_SHARED_SESSION).history(period="5d")
     if hist is None or hist.empty:
         return None
-    return round(float(hist["Close"].iloc[-1]), 2)
+    close_series = hist.get("Close")
+    if close_series is None or close_series.empty:
+        return None
+    return round(float(close_series.iloc[-1]), 2)
+
+
+def get_vix() -> tuple[Optional[float], bool]:
+    """Returns (value, is_stale). Never hard-fails into null overwrite."""
+    cached_vix = _get_cached_vix()
+    for attempt, delay_sec in enumerate(VIX_RETRY_DELAYS_SECONDS, start=1):
+        try:
+            value = _fetch_vix_once()
+            if value is not None:
+                log.info("[VIX] fetched value=%s", value)
+                return value, False
+            log.warning("[VIX] empty response (attempt=%s)", attempt)
+        except YFRateLimitError:
+            log.warning("[VIX] rate limited (attempt=%s)", attempt)
+        except Exception:
+            log.exception("[VIX] fetch failed (attempt=%s)", attempt)
+
+        log.info("[VIX] retry %s in %ss", attempt, delay_sec)
+        time.sleep(delay_sec)
+
+    if cached_vix is not None:
+        log.warning("[VIX] cached fallback value=%s", cached_vix)
+        log.warning("[VIX] stale used")
+        return cached_vix, True
+    log.warning("[VIX] stale unavailable (no cached value)")
+    return None, True
 
 
 def fred_latest_observation(series_id: str) -> Optional[float]:
@@ -274,6 +319,8 @@ CACHE: dict = {
     "skew": None,
     "gs": None,
     "updatedAt": None,
+    "isStale": False,
+    "vixUpdatedAt": None,
 }
 CACHE_LOCK = threading.Lock()
 _background_started = False
@@ -325,6 +372,7 @@ def persist_panic_row(data: dict) -> None:
 
 def refresh_all() -> None:
     updates: dict = {}
+    next_is_stale = False
 
     def run(name: str, fn):
         try:
@@ -334,7 +382,15 @@ def refresh_all() -> None:
         except Exception:
             log.exception("refresh: %s failed", name)
 
-    run("vix", get_vix)
+    try:
+        vix_value, vix_is_stale = get_vix()
+        next_is_stale = bool(vix_is_stale)
+        if vix_value is not None and not (isinstance(vix_value, float) and math.isnan(vix_value)):
+            updates["vix"] = vix_value
+    except Exception:
+        log.exception("refresh: vix failed")
+        next_is_stale = True
+
     run("putCall", get_put_call)
     run("fearGreed", get_fear_greed)
     run("highYield", get_high_yield)
@@ -345,29 +401,36 @@ def refresh_all() -> None:
             CACHE[k] = v
         CACHE["bofa"] = manual_bofa()
         CACHE["updatedAt"] = now
+        CACHE["isStale"] = next_is_stale
+        if "vix" in updates and not next_is_stale:
+            CACHE["vixUpdatedAt"] = now
 
 
 def _background_loop() -> None:
+    last_tick = time.time()
+    log.info("[SERVER] cold start detected; delaying first refresh by %ss", COLD_START_GRACE_SECONDS)
+    time.sleep(COLD_START_GRACE_SECONDS)
     while True:
-        time.sleep(600)
+        now_ts = time.time()
+        slept_for = now_ts - last_tick
+        if slept_for > WAKEUP_DRIFT_LOG_THRESHOLD_SECONDS:
+            log.warning("[SERVER] wakeup detected; slept_for=%.1fs", slept_for)
+        last_tick = now_ts
         try:
             refresh_all()
         except Exception:
             log.exception("background refresh_all")
+        time.sleep(BACKGROUND_REFRESH_SECONDS)
 
 
 def bootstrap() -> None:
     global _background_started, _telegram_scheduler_started
-    try:
-        refresh_all()
-    except Exception:
-        log.exception("initial refresh_all")
     with CACHE_LOCK:
         if _background_started:
             return
         _background_started = True
     threading.Thread(target=_background_loop, daemon=True).start()
-    log.info("Background refresh every 600s started")
+    log.info("Background refresh every %ss started", BACKGROUND_REFRESH_SECONDS)
 
     if (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip() and (
         os.environ.get("TELEGRAM_CHAT_ID") or ""
@@ -383,6 +446,16 @@ def bootstrap() -> None:
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+
+@app.after_request
+def apply_no_cache_headers(resp):
+    path = request.path or ""
+    if path.startswith("/panic-data") or path.startswith("/panic") or path.startswith("/signals"):
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+    return resp
 
 
 @app.route("/")
@@ -410,6 +483,7 @@ def _panic_json_response():
 
     limited = {k: base.get(k) for k in FREE_PANIC_KEYS}
     limited["accessTier"] = "free"
+    limited["isStale"] = bool(base.get("isStale", False))
     return jsonify(limited)
 
 

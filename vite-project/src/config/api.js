@@ -1,11 +1,16 @@
 import { validatePanicData } from "../utils/validatePanicData.js"
 
-const LOCAL_DATA_URL = "/data.json"
 const fetchPanicJsonInit = {
   method: "GET",
-  headers: { Accept: "application/json" },
+  headers: {
+    Accept: "application/json",
+    Pragma: "no-cache",
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+  },
   cache: "no-store",
 }
+const PANIC_FETCH_RETRIES = 3
+const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
 export function getApiBase() {
   return ""
@@ -17,8 +22,14 @@ export function getManualApiBase() {
   return "https://yds-web.onrender.com"
 }
 
+function buildPanicDataUrls() {
+  const base = getManualApiBase()
+  return [`${base}/panic-data`, `${base}/panic`]
+}
+
 export function getPanicDataUrlForDisplay() {
-  return LOCAL_DATA_URL
+  const [first] = buildPanicDataUrls()
+  return first ?? null
 }
 
 export function getHistoryUrlForDisplay() {
@@ -26,27 +37,30 @@ export function getHistoryUrlForDisplay() {
 }
 
 export function listPanicDataUrlAttemptsForDisplay() {
-  return [LOCAL_DATA_URL]
+  return buildPanicDataUrls()
 }
 
-function pickMetricValue(obj, fallback = null) {
-  if (obj == null) return fallback
+function pickMetricValue(obj) {
+  if (obj == null) return null
   if (typeof obj === "number") return obj
-  if (typeof obj === "object" && obj.value != null) return Number(obj.value)
-  return fallback
+  if (typeof obj === "object" && obj.value != null) {
+    const n = parseFloat(String(obj.value).replace(/%/g, "").replace(/,/g, "").trim())
+    return Number.isFinite(n) ? n : null
+  }
+  return null
 }
 
 function normalizePanicPayload(data) {
   if (!data || typeof data !== "object") return data
   return {
     ...data,
-    vix: pickMetricValue(data.vix, 20),
-    vxn: pickMetricValue(data.vxn, null),
-    skew: pickMetricValue(data.skew, null),
-    putCall: pickMetricValue(data.putCall, 1),
-    move: pickMetricValue(data.move, null),
-    fearGreed: pickMetricValue(data.fearGreed, 50),
-    highYield: pickMetricValue(data.highYield, 4),
+    vix: pickMetricValue(data.vix),
+    vxn: pickMetricValue(data.vxn),
+    skew: pickMetricValue(data.skew),
+    putCall: pickMetricValue(data.putCall),
+    move: pickMetricValue(data.move),
+    fearGreed: pickMetricValue(data.fearGreed),
+    highYield: pickMetricValue(data.highYield),
     updatedAt: typeof data.updated_at === "string" ? data.updated_at : data.updatedAt,
     accessTier: "pro",
   }
@@ -54,21 +68,47 @@ function normalizePanicPayload(data) {
 
 export async function fetchPanicDataJson(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = LOCAL_DATA_URL
-  try {
-    if (debugLog) console.log("📡 API 요청 시작", url)
-    const res = await fetch(url, fetchPanicJsonInit)
-    if (debugLog) console.log("✅ 응답 상태:", res.status)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const raw = await res.json()
-    const data = normalizePanicPayload(raw)
-    if (debugLog) console.log("📦 받은 데이터:", data)
-    if (!validatePanicData(data)) throw new Error("데이터 이상 감지")
-    return data
-  } catch (err) {
-    if (debugLog) console.error("❌ 에러 발생:", err)
-    throw err
+  const urls = buildPanicDataUrls().map((u) => `${u}?t=${Date.now()}`)
+  let lastError = null
+
+  for (const url of urls) {
+    for (let attempt = 1; attempt <= PANIC_FETCH_RETRIES; attempt += 1) {
+      try {
+        if (debugLog) console.log("📡 API 요청 시작", { url, attempt, mode: "network-first" })
+        const res = await fetch(url, fetchPanicJsonInit)
+        if (debugLog) console.log("✅ 응답 상태:", res.status)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const raw = await res.json()
+        const data = normalizePanicPayload(raw)
+        const enriched = {
+          ...data,
+          __fetchSource: "API",
+          __fetchUrl: url,
+          __fetchedAt: Date.now(),
+          __isStale: Boolean(data?.isStale),
+        }
+        if (debugLog) {
+          console.log("📦 받은 데이터:", data)
+          console.log("[BOOT] source log", {
+            cacheSource: "network-first",
+            apiSource: url,
+            isStale: Boolean(data?.isStale),
+            updatedAt: data?.updatedAt ?? data?.updated_at ?? null,
+          })
+        }
+        if (!validatePanicData(enriched)) throw new Error("데이터 이상 감지: fallback 주입 없이 현재 상태 유지")
+        return enriched
+      } catch (err) {
+        lastError = err
+        if (debugLog) console.error("❌ 에러 발생:", { url, attempt, err })
+        if (attempt < PANIC_FETCH_RETRIES) {
+          const waitMs = PANIC_FETCH_BACKOFF_MS[attempt - 1] ?? 1000
+          await new Promise((resolve) => setTimeout(resolve, waitMs))
+        }
+      }
+    }
   }
+  throw lastError ?? new Error("panic data fetch failed")
 }
 
 export async function fetchHistorySample(options = {}) {
@@ -93,7 +133,7 @@ export async function fetchOptimizeResult(options = {}) {
 
 function toNumberOrNull(v) {
   if (v == null || v === "") return null
-  const n = Number(v)
+  const n = parseFloat(String(v).replace(/%/g, "").replace(/,/g, "").trim())
   return Number.isFinite(n) ? n : null
 }
 
@@ -102,10 +142,14 @@ function normalizeManualPayload(data) {
   return {
     ...data,
     vix: toNumberOrNull(data.vix),
+    vxn: toNumberOrNull(data.vxn),
     fearGreed: toNumberOrNull(data.fearGreed),
     putCall: toNumberOrNull(data.putCall),
     bofa: toNumberOrNull(data.bofa),
+    move: toNumberOrNull(data.move),
+    skew: toNumberOrNull(data.skew),
     highYield: toNumberOrNull(data.highYield),
+    gsBullBear: toNumberOrNull(data.gsBullBear ?? data.gs),
     accessTier: "pro",
     updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 16).replace("T", " "),
   }
@@ -133,4 +177,21 @@ export async function submitManualTextData(rawText) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const out = await res.json()
   return normalizeManualPayload(out?.data)
+}
+
+export async function fetchMarketData() {
+  const res = await fetch("/api/market-data", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  })
+  if (!res.ok) {
+    throw new Error(`market-data HTTP ${res.status}`)
+  }
+  const payload = await res.json()
+  console.log("[GlobalBar] market-data response", payload)
+  return {
+    parsedData: payload?.parsedData ?? {},
+    changeData: payload?.changeData ?? {},
+  }
 }
