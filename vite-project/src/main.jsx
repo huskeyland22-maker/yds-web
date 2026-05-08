@@ -6,7 +6,6 @@ import App from "./App.jsx"
 
 const FRESHNESS_FIRST_MODE = false
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
-const APP_SW_VERSION = "panic-app-v5"
 const APP_VERSION = `App Version ${new Date().toISOString().slice(0, 10).replace(/-/g, ".")}.${String(import.meta.env.VITE_APP_BUILD_ID ?? "dev").slice(-1)}`
 
 async function unregisterAllServiceWorkers() {
@@ -173,28 +172,6 @@ async function syncBuildVersionOnIOS() {
   }
 }
 
-async function registerMainServiceWorker() {
-  if (typeof window === "undefined" || typeof navigator === "undefined") return
-  if (!("serviceWorker" in navigator)) return
-  try {
-    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" })
-    await reg.update()
-    const activeUrl = reg.active?.scriptURL ?? reg.waiting?.scriptURL ?? reg.installing?.scriptURL ?? "n/a"
-    const cacheKeys = typeof window !== "undefined" && "caches" in window ? await caches.keys() : []
-    console.log("[PWA] service worker ready", { version: APP_SW_VERSION, script: activeUrl, caches: cacheKeys })
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({ type: "SW_VERSION" })
-    }
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event?.data?.type === "SW_VERSION") {
-        console.log("[PWA] service worker version", event.data)
-      }
-    })
-  } catch (err) {
-    console.warn("[PWA] service worker register failed", err)
-  }
-}
-
 function showUpdateToast(message) {
   if (typeof document === "undefined") return
   const el = document.createElement("div")
@@ -238,12 +215,14 @@ async function bootstrapApp() {
     await clearAllCaches()
     cleanupStaleAutoSnapshot()
   }
+  // Stage 1 policy: keep PWA install surface only, disable runtime SW caching.
+  await unregisterAllServiceWorkers()
 
   forceIosBootRefreshOnce()
   await forceLatestManifestFetch()
   await syncBuildVersionOnIOS()
-  await registerMainServiceWorker()
-  console.log("[PWA] boot", { appVersion: APP_VERSION, swVersion: APP_SW_VERSION })
+  const cacheKeys = typeof window !== "undefined" && "caches" in window ? await caches.keys() : []
+  console.log("[PWA] boot", { appVersion: APP_VERSION, cacheKeys, sw: "disabled" })
 
   if (typeof document !== "undefined" && isIosStandalone()) {
     document.addEventListener("visibilitychange", () => {
