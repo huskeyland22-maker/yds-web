@@ -5,6 +5,7 @@
 ----------
 FRED_API_KEY       St. Louis Fed API 키 (High Yield 스프레드 필수)
 BOFA_MANUAL        BofA 수동 값 (기본 2.1)
+VIX_MANUAL         VIX 수동 fallback 값 (예: 24.3)
 PUTCALL_MANUAL     Put/Call 비율 수동 값 (소수, 예: 0.85)
 PUTCALL_FRED_SERIES  Put/Call을 FRED 시리즈로 받을 때 (FRED_API_KEY와 함께)
 PRO_API_KEY        유료 응답용 — 요청 헤더 X-Api-Key 와 일치하면 전체 필드(pro 메타 포함)
@@ -175,6 +176,21 @@ def manual_bofa() -> float:
     return float(os.environ.get("BOFA_MANUAL", "2.1"))
 
 
+def manual_vix() -> Optional[float]:
+    raw = (os.environ.get("VIX_MANUAL") or "").strip()
+    if not raw:
+        return None
+    try:
+        v = float(raw)
+    except ValueError:
+        log.warning("[VIX] invalid VIX_MANUAL=%r", raw)
+        return None
+    if not (5 <= v <= 120):
+        log.warning("[VIX] VIX_MANUAL out of range (5~120): %s", v)
+        return None
+    return round(v, 2)
+
+
 def _get_cached_vix() -> Optional[float]:
     with CACHE_LOCK:
         vix = CACHE.get("vix")
@@ -216,6 +232,11 @@ def get_vix() -> tuple[Optional[float], bool]:
         log.warning("[VIX] cached fallback value=%s", cached_vix)
         log.warning("[VIX] stale used")
         return cached_vix, True
+    manual = manual_vix()
+    if manual is not None:
+        log.warning("[VIX] manual fallback value=%s", manual)
+        log.warning("[VIX] stale used")
+        return manual, True
     log.warning("[VIX] stale unavailable (no cached value)")
     return None, True
 
