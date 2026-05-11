@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getRecommendedStocks } from "../utils/stockRecommendations.js"
 
 const RING = {
@@ -23,6 +23,16 @@ const RANK = {
 }
 
 export default function StockRecommendCard({ score }) {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth <= 768 : false,
+  )
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const onResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
+
   const { regime, picks } = useMemo(() => getRecommendedStocks(score), [score])
   const tone = regime.tone
   const ring = RING[tone] ?? RING.neutral
@@ -30,7 +40,10 @@ export default function StockRecommendCard({ score }) {
   const rankC = RANK[tone] ?? RANK.neutral
 
   return (
-    <article className={`rounded-2xl border px-5 py-5 shadow-lg shadow-black/20 ${ring}`}>
+    <article
+      className={`rounded-2xl border shadow-lg shadow-black/20 ${ring}`}
+      style={{ padding: isMobile ? "10px" : "18px" }}
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className={`text-lg font-bold ${titleC}`}>🔥 추천 종목 TOP5</h3>
         <p className="text-xs text-gray-500">
@@ -45,11 +58,14 @@ export default function StockRecommendCard({ score }) {
         {picks.map((s, i) => (
           <li
             key={`${s.ticker}-${i}`}
-            className="rounded-xl border border-gray-800/80 bg-[#0f172a]/70 px-3 py-2.5"
+            className="rounded-xl border border-gray-800/80 bg-[#0f172a]/70"
+            style={{ padding: isMobile ? "10px" : "18px" }}
           >
             <div className="flex flex-wrap items-baseline gap-2">
               <span className={`w-6 shrink-0 text-sm font-bold ${rankC}`}>{i + 1}.</span>
-              <span className="font-medium text-gray-100">{s.name}</span>
+              <span className="font-medium text-gray-100" style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}>
+                {s.name}
+              </span>
               <span className="font-mono text-xs text-gray-500">({s.ticker})</span>
               <span className="text-xs text-purple-300/90">· {s.theme}</span>
             </div>

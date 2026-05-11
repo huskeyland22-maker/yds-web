@@ -13,7 +13,7 @@ function isStandalone() {
   )
 }
 
-export default function PwaInstallBar() {
+export default function PwaInstallBar({ isMobile = false }) {
   const deferredRef = useRef(null)
   const [canInstall, setCanInstall] = useState(false)
   const [installed, setInstalled] = useState(() => isStandalone())
@@ -29,8 +29,17 @@ export default function PwaInstallBar() {
       deferredRef.current = e
       setCanInstall(true)
     }
+    const onInstalled = () => {
+      deferredRef.current = null
+      setCanInstall(false)
+      setInstalled(true)
+    }
     window.addEventListener("beforeinstallprompt", onPrompt)
-    return () => window.removeEventListener("beforeinstallprompt", onPrompt)
+    window.addEventListener("appinstalled", onInstalled)
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onPrompt)
+      window.removeEventListener("appinstalled", onInstalled)
+    }
   }, [])
 
   useEffect(() => {
@@ -75,7 +84,13 @@ export default function PwaInstallBar() {
 
   if (showIosHint) {
     return (
-      <span className="max-w-[210px] text-right text-[10px] leading-snug text-gray-400 sm:max-w-none sm:text-xs">
+      <span
+        className="max-w-[210px] leading-snug text-gray-400 sm:max-w-none sm:text-xs"
+        style={{
+          fontSize: isMobile ? "12px" : "14px",
+          textAlign: isMobile ? "center" : "left",
+        }}
+      >
         Safari <span className="text-purple-300">공유</span> → 홈 화면에 추가
       </span>
     )

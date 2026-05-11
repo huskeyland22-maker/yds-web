@@ -23,7 +23,13 @@
         color: #e4e9f2;
         font-family: "Noto Sans KR", system-ui, sans-serif;
       }
-      .container { width: min(1080px, calc(100% - 2rem)); margin-inline: auto; }
+      .container {
+        width: 100%;
+        max-width: 1400px;
+        margin-inline: auto;
+        padding-inline: 24px;
+        box-sizing: border-box;
+      }
       .bg-layer {
         position: fixed; inset: 0; z-index: -3;
         background: linear-gradient(165deg, #0b0f14 0%, #11161c 38%, #1a2438 100%);
@@ -69,6 +75,8 @@
         border-radius: 0.5rem;
         padding: 0.35rem 0.45rem;
         transition: all 0.2s ease;
+        word-break: keep-all;
+        overflow-wrap: break-word;
       }
       .stock-link:hover {
         color: #fff;
@@ -111,6 +119,8 @@
         color: #cbd5e1;
         text-decoration: none;
         font-size: 0.74rem;
+        word-break: keep-all;
+        overflow-wrap: break-word;
       }
       .vc-tree-wrap .node--stock:hover {
         color: #fff;
@@ -144,6 +154,25 @@
       .rotation-item--mid {
         color: #ffd7dc;
         font-weight: 600;
+      }
+      #value-chain-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      @media (min-width: 769px) {
+        #value-chain-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+        }
+      }
+      @media (max-width: 768px) {
+        .container { padding-inline: 12px; }
+        .site-header { position: relative; top: auto; }
+        .header-inner { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+        .footer-inner { flex-direction: column; align-items: flex-start; }
+        .vc-card { padding: 10px !important; }
+        .vc-card h2 { font-size: 18px !important; line-height: 1.35; word-break: keep-all; overflow-wrap: break-word; }
       }
     </style>
   </head>

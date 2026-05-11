@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { PANIC_DUMMY_CHART_ROWS } from "../data/panicDummyCharts.js"
 import Gauge from "./Gauge.jsx"
 import PanicIndicatorChartBox from "./PanicIndicatorChartBox.jsx"
@@ -37,6 +37,24 @@ const TIMING_TEXT = {
   danger: "text-red-400",
 }
 
+const SHORT_METRICS = [
+  { key: "vix", title: "VIX", type: "vix" },
+  { key: "vxn", title: "VXN", type: "vxn" },
+  { key: "putCall", title: "Put/Call", type: "putCall" },
+]
+
+const MID_METRICS = [
+  { key: "fearGreed", title: "공포탐욕지수", type: "fearGreed" },
+  { key: "move", title: "MOVE Index", type: "move" },
+  { key: "bofa", title: "BofA", type: "bofa" },
+]
+
+const LONG_METRICS = [
+  { key: "skew", title: "SKEW", type: "skew" },
+  { key: "highYield", title: "하이일드", type: "highYield" },
+  { key: "gsBullBear", title: "GS Bull/Bear", type: "gsBullBear" },
+]
+
 export default function PanicIndexCard({
   data,
   isPro = false,
@@ -48,6 +66,16 @@ export default function PanicIndexCard({
   trend,
   timing,
 }) {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth <= 768 : false,
+  )
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const onResize = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
+
   const tone = getActionTone(finalScore)
   const pt = tradingSignal?.panelTone ?? "neutral"
   const ring = PANEL_RING[pt] ?? PANEL_RING.neutral
@@ -107,7 +135,12 @@ export default function PanicIndexCard({
   }, [data, isPro])
 
   return (
-    <article className="relative z-0 rounded-2xl bg-[#111827] p-4 text-center shadow-lg shadow-black/20 transition duration-200 ease-out sm:p-6 lg:hover:z-10 lg:hover:scale-[1.02] lg:hover:shadow-xl">
+    <article
+      className="relative z-0 min-w-0 w-full rounded-2xl bg-[#111827] text-center shadow-lg shadow-black/20 transition duration-200 ease-out lg:hover:z-10 lg:hover:scale-[1.02] lg:hover:shadow-xl"
+      style={{
+        padding: isMobile ? "12px" : "24px",
+      }}
+    >
       <h3 className="text-lg font-semibold text-white">패닉 지수</h3>
       <p className="mt-1 text-xs font-medium text-amber-200/90">
         {isPro ? "PRO — 차트·고급 시그널·브라우저 알림 사용 중" : "무료 — 지표·기본 시그널만 (PRO는 VITE_PRO_API_KEY + 서버 PRO_API_KEY 일치)"}
@@ -123,7 +156,7 @@ export default function PanicIndexCard({
       ) : null}
 
       <div className="mt-4">
-        <Gauge score={finalScore} />
+        <Gauge score={finalScore} width={isMobile ? 180 : 280} height={isMobile ? 110 : 160} />
         <p className="mt-1 text-sm text-gray-500">
           <span className="font-mono text-gray-300">{finalScore}</span>
           <span className="text-gray-500"> / 100</span>
@@ -186,9 +219,19 @@ export default function PanicIndexCard({
           >
             단기 (Tactical)
           </h2>
-          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            <PanicMetricCard title="VIX" value={panicData.short.vix} type="vix" />
-            <PanicMetricCard title="Put/Call" value={panicData.short.putCall} type="putCall" />
+          <p className="mt-2 text-xs text-gray-300" style={{ lineHeight: 1.7, letterSpacing: "-0.02em", opacity: 0.92 }}>
+            실전 매매 타점 포착: 시장의 즉각적인 공포와 옵션 수급의 쏠림을 반영하며, 며칠~2주 내 진입/탈출
+            타이밍 포착에 사용합니다. 해당 지표: VXN, VIX, Put/Call Ratio.
+          </p>
+          <div className="mb-6 mt-3 grid w-full gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
+            {SHORT_METRICS.map((metric) => (
+              <PanicMetricCard
+                key={metric.key}
+                title={metric.title}
+                value={panicData.short[metric.key]}
+                type={metric.type}
+              />
+            ))}
           </div>
 
           <h2
@@ -197,9 +240,19 @@ export default function PanicIndexCard({
           >
             중기 (Strategic)
           </h2>
-          <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            <PanicMetricCard title="공포탐욕지수" value={panicData.mid.fearGreed} type="fearGreed" />
-            <PanicMetricCard title="BofA" value={panicData.mid.bofa} type="bofa" />
+          <p className="mt-2 text-xs text-gray-300" style={{ lineHeight: 1.7, letterSpacing: "-0.02em", opacity: 0.92 }}>
+            전략적 비중 조절: 시장 전체 심리와 추세 온도를 확인하고, 2주~수개월 흐름 분석에 활용합니다.
+            해당 지표: Fear & Greed, MOVE, BofA Bull & Bear.
+          </p>
+          <div className="mb-6 mt-3 grid w-full gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
+            {MID_METRICS.map((metric) => (
+              <PanicMetricCard
+                key={metric.key}
+                title={metric.title}
+                value={panicData.mid[metric.key]}
+                type={metric.type}
+              />
+            ))}
           </div>
 
           <h2
@@ -208,8 +261,19 @@ export default function PanicIndexCard({
           >
             장기 (Macro)
           </h2>
-          <div className="mb-0 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            <PanicMetricCard title="하이일드" value={panicData.long.highYield} type="highYield" />
+          <p className="mt-2 text-xs text-gray-300" style={{ lineHeight: 1.7, letterSpacing: "-0.02em", opacity: 0.92 }}>
+            거시 리스크 및 시스템 방어: 블랙스완 및 신용위기 탐지에 사용합니다. 해당 지표: SKEW, High Yield
+            Spread, GS Bull/Bear.
+          </p>
+          <div className="mb-0 mt-3 grid w-full gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
+            {LONG_METRICS.map((metric) => (
+              <PanicMetricCard
+                key={metric.key}
+                title={metric.title}
+                value={panicData.long[metric.key]}
+                type={metric.type}
+              />
+            ))}
           </div>
 
           {isPro ? (

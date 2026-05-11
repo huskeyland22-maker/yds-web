@@ -1,6 +1,8 @@
 import { useId } from "react"
 
-function Gauge({ score }) {
+function Gauge({ score, width = 280, height = 160 }) {
+  const viewBoxWidth = 200
+  const viewBoxHeight = 120
   const radius = 80
   const circumference = Math.PI * radius
   const offset = circumference * (1 - score / 100)
@@ -9,8 +11,8 @@ function Gauge({ score }) {
   const gradientId = `gaugeGradient-${rawId}`
 
   return (
-    <div className="relative mx-auto h-[120px] w-[200px]">
-      <svg viewBox="0 0 200 120" className="h-full w-full">
+    <div className="relative mx-auto" style={{ width: `${width}px`, height: `${height}px`, maxWidth: "100%" }}>
+      <svg viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} className="h-full w-full">
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#22c55e" />

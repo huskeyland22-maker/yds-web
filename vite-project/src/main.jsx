@@ -4,7 +4,9 @@ import { BrowserRouter } from "react-router-dom"
 import "./index.css"
 import App from "./App.jsx"
 
+const WEB_FIRST_STABILIZATION_MODE = true
 const FRESHNESS_FIRST_MODE = false
+const STORAGE_STABILITY_MODE = true
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const APP_VERSION = `App Version ${new Date().toISOString().slice(0, 10).replace(/-/g, ".")}.${String(import.meta.env.VITE_APP_BUILD_ID ?? "dev").slice(-1)}`
 
@@ -149,6 +151,7 @@ async function fetchRemoteBuildMeta() {
 
 async function syncBuildVersionOnIOS() {
   if (!isIosStandalone()) return
+  if (STORAGE_STABILITY_MODE) return
   if (typeof window === "undefined") return
   try {
     const remote = await fetchRemoteBuildMeta()
@@ -215,22 +218,27 @@ async function bootstrapApp() {
     await clearAllCaches()
     cleanupStaleAutoSnapshot()
   }
-  // Stage 1 policy: keep PWA install surface only, disable runtime SW caching.
+  // Web First policy: always disable runtime SW caching.
   await unregisterAllServiceWorkers()
-
-  forceIosBootRefreshOnce()
-  await forceLatestManifestFetch()
-  await syncBuildVersionOnIOS()
-  const cacheKeys = typeof window !== "undefined" && "caches" in window ? await caches.keys() : []
-  console.log("[PWA] boot", { appVersion: APP_VERSION, cacheKeys, sw: "disabled" })
-
-  if (typeof document !== "undefined" && isIosStandalone()) {
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        void syncBuildVersionOnIOS()
-      }
-    })
+  if (WEB_FIRST_STABILIZATION_MODE) {
+    await clearAllCaches()
+    cleanupStaleAutoSnapshot()
+  } else {
+    if (!STORAGE_STABILITY_MODE) {
+      forceIosBootRefreshOnce()
+    }
+    await forceLatestManifestFetch()
+    await syncBuildVersionOnIOS()
+    if (typeof document !== "undefined" && isIosStandalone()) {
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          void syncBuildVersionOnIOS()
+        }
+      })
+    }
   }
+  const cacheKeys = typeof window !== "undefined" && "caches" in window ? await caches.keys() : []
+  console.log("[WEB-FIRST] boot", { appVersion: APP_VERSION, cacheKeys, sw: "disabled", webFirst: WEB_FIRST_STABILIZATION_MODE })
 
   createRoot(document.getElementById("root")).render(
     <StrictMode>

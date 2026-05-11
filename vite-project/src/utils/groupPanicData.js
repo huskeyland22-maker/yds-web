@@ -1,24 +1,29 @@
 /**
- * Flat `/panic-data` JSON → 단기(Tactical) / 중기(Strategic) / 장기(Macro) 뷰 모델.
- * 백엔드에 없는 필드(vxn, move, skew, gs)는 undefined로 두고 UI에서 "-" 처리.
+ * 현재 존재하는 지표를 섹션별로 안전하게 매핑.
+ * - nested({ value }) / flat(number) 모두 허용
+ * - 없는 지표는 null 유지
  */
 export function groupPanicData(data) {
   const d = data && typeof data === "object" ? data : {}
+  const pick = (v) => {
+    if (v && typeof v === "object" && "value" in v) return v.value
+    return v
+  }
   return {
     short: {
-      vix: d.vix,
-      putCall: d.putCall,
-      vxn: d.vxn,
+      vix: pick(d.vix),
+      vxn: pick(d.vxn),
+      putCall: pick(d.putCall),
     },
     mid: {
-      fearGreed: d.fearGreed,
-      bofa: d.bofa,
-      move: d.move,
+      fearGreed: pick(d.fearGreed),
+      move: pick(d.move),
+      bofa: pick(d.bofa),
     },
     long: {
-      skew: d.skew,
-      highYield: d.highYield,
-      gs: d.gs,
+      skew: pick(d.skew),
+      highYield: pick(d.highYield),
+      gsBullBear: pick(d.gsBullBear ?? d.gs),
     },
   }
 }

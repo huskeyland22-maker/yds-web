@@ -1,44 +1,53 @@
 /**
- * 지표 숫자 → 상태 문구 + 표시용 색 이름 (inline style용).
- * @param {string | undefined} type
+ * 지표 숫자 → 상태 문구 + 스타일 클래스.
+ * @param {string | undefined} key
  * @param {unknown} value
- * @returns {{ text: string; color: string }}
+ * @returns {{ label: string; className: "neutral" | "safe" | "warning" | "danger" }}
  */
-export function getStatus(type, value) {
-  if (value == null) return { text: "-", color: "gray" }
+export function getStatus(key, value) {
+  if (value == null || value === "-") return { label: "-", className: "neutral" }
 
-  const n = Number(value)
-  if (Number.isNaN(n)) return { text: "-", color: "gray" }
+  const n = parseFloat(String(value))
+  if (!Number.isFinite(n)) return { label: "-", className: "neutral" }
 
-  switch (type) {
+  switch (key) {
     case "vix":
-      if (n < 20) return { text: "안정", color: "limegreen" }
-      if (n < 30) return { text: "경계", color: "orange" }
-      return { text: "위험", color: "red" }
-
+      if (n >= 30) return { label: "공포", className: "danger" }
+      if (n >= 20) return { label: "주의", className: "warning" }
+      return { label: "안정", className: "safe" }
+    case "vxn":
+      if (n >= 35) return { label: "공포", className: "danger" }
+      if (n >= 25) return { label: "주의", className: "warning" }
+      return { label: "안정", className: "safe" }
     case "fearGreed":
-      if (n < 20) return { text: "극공포", color: "red" }
-      if (n < 40) return { text: "공포", color: "orange" }
-      if (n < 60) return { text: "중립", color: "gray" }
-      if (n < 80) return { text: "탐욕", color: "orange" }
-      return { text: "과열", color: "red" }
-
+      if (n >= 75) return { label: "극단 탐욕", className: "danger" }
+      if (n >= 60) return { label: "탐욕", className: "warning" }
+      if (n <= 25) return { label: "극단 공포", className: "danger" }
+      return { label: "중립", className: "safe" }
     case "putCall":
-      if (n < 0.7) return { text: "과열", color: "red" }
-      if (n < 1.0) return { text: "중립", color: "gray" }
-      return { text: "공포", color: "orange" }
-
+      if (n >= 1) return { label: "공포", className: "danger" }
+      if (n <= 0.7) return { label: "과열", className: "warning" }
+      return { label: "중립", className: "safe" }
     case "bofa":
-      if (n < 2) return { text: "극단적 공포", color: "red" }
-      if (n < 5) return { text: "중립", color: "gray" }
-      return { text: "과열", color: "orange" }
-
+      if (n >= 8) return { label: "과열", className: "danger" }
+      if (n <= 2) return { label: "공포", className: "danger" }
+      return { label: "보통", className: "safe" }
+    case "move":
+      if (n >= 120) return { label: "위험", className: "danger" }
+      if (n >= 100) return { label: "주의", className: "warning" }
+      return { label: "안정", className: "safe" }
+    case "skew":
+      if (n >= 140) return { label: "주의", className: "warning" }
+      return { label: "안정", className: "safe" }
     case "highYield":
-      if (n < 4) return { text: "안정", color: "limegreen" }
-      if (n < 6) return { text: "경계", color: "orange" }
-      return { text: "위험", color: "red" }
-
+      if (n >= 5) return { label: "위험", className: "danger" }
+      if (n >= 3) return { label: "주의", className: "warning" }
+      return { label: "안정", className: "safe" }
+    case "gsBullBear":
+      if (n >= 80) return { label: "과열", className: "danger" }
+      if (n <= 20) return { label: "공포", className: "danger" }
+      return { label: "중립", className: "safe" }
     default:
-      return { text: "-", color: "gray" }
+      return { label: "중립", className: "safe" }
   }
 }

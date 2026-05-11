@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { fetchPanicDataJson } from "../config/api.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { validatePanicData } from "../utils/validatePanicData.js"
+import { emitDebugEvent } from "../utils/debugLogger.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const CURRENT_SNAPSHOT_VERSION = 2
@@ -16,6 +17,7 @@ const LEGACY_PANIC_KEYS = [
 const SNAPSHOT_MAX_AGE_MS = 1000 * 60 * 10
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const AUTO_REFRESH_MS = 300_000
+const AUTO_DATA_ENGINE_ENABLED = false
 const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield", "gsBullBear"]
 const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
@@ -89,8 +91,20 @@ function readMainEnvelope() {
 function writeMain(data, isManual) {
   if (typeof window === "undefined" || !data || typeof data !== "object") return
   try {
+    const current = readMainEnvelope()
+    const currentSavedAt = Number(current?.__savedAt ?? 0)
+    const nextSavedAt = Date.now()
     const safeData = toSnapshotData(data)
     if (!isCompletePanicData(safeData)) {
+      return
+    }
+    // 저장 안정화 우선:
+    // 기존 manual 스냅샷이 있으면 자동 쓰기로 덮어쓰지 않음.
+    if (current?.isManual && !isManual) {
+      return
+    }
+    // 더 최신 스냅샷이 이미 있으면 오래된 쓰기 차단(race 방지)
+    if (Number.isFinite(currentSavedAt) && currentSavedAt > nextSavedAt) {
       return
     }
     const snapshot = {
@@ -98,7 +112,7 @@ function writeMain(data, isManual) {
       updatedAt: Date.now(),
       data: safeData,
       isManual: Boolean(isManual),
-      __savedAt: Date.now(),
+      __savedAt: nextSavedAt,
       __buildId: APP_BUILD_ID,
     }
     localStorage.setItem(
@@ -158,6 +172,8 @@ export const usePanicStore = create((set, get) => ({
 
   initializePanicData: async () => {
     if (get().initialized) return
+    const hydrationStart = typeof performance !== "undefined" ? performance.now() : Date.now()
+    emitDebugEvent("HYDRATION_START", { source: "panicStore.initialize" })
     const envelope = readMainEnvelope()
     if (envelope && !isValidSnapshotShape(envelope)) {
       addFlow(set, "clear-invalid-schema-main", { reason: "version-or-shape-mismatch" })
@@ -167,6 +183,12 @@ export const usePanicStore = create((set, get) => ({
       addFlow(set, "restore-main-manual", { updatedAt: envelope?.data?.updatedAt ?? null })
       const restored = toSnapshotData(envelope.data)
       set({ panicData: restored, manualMode: true, initialized: true })
+      emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage", manualMode: true, restoredItemCount: 1 })
+      emitDebugEvent("HYDRATION_DONE", {
+        source: "panicStore.initialize",
+        restored: true,
+        durationMs: Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - hydrationStart),
+      })
       return
     } else if (envelope && (!isFresh(envelope) || !isCurrentBuild(envelope))) {
       addFlow(set, "clear-stale-main")
@@ -174,10 +196,23 @@ export const usePanicStore = create((set, get) => ({
       clearLegacy()
     }
     set({ initialized: true })
+    emitDebugEvent("HYDRATION_DONE", {
+      source: "panicStore.initialize",
+      restored: false,
+      durationMs: Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - hydrationStart),
+    })
+    if (!AUTO_DATA_ENGINE_ENABLED) {
+      addFlow(set, "skip-initialize-fetch-auto-engine-off")
+      return
+    }
     await get().fetchPanicData("initialize-fetch")
   },
 
   fetchPanicData: async (source = "api-fetch") => {
+    if (!AUTO_DATA_ENGINE_ENABLED) {
+      addFlow(set, "block-fetch-auto-engine-off", { source })
+      return false
+    }
     if (get().manualMode) {
       addFlow(set, "block-fetch-manual", { source })
       return false
@@ -256,6 +291,7 @@ export const usePanicStore = create((set, get) => ({
       next.manualTrend = "manual"
       next.manualSavedAt = nowIso
       writeMain(next, true)
+      emitDebugEvent("SAVE_SUCCESS", { source: "panicStore.manual", savedAt: nowIso, mode: "manual" })
       return { panicData: next, manualMode: true }
     })
     addFlow(set, "set-manual-input")
@@ -267,11 +303,19 @@ export const usePanicStore = create((set, get) => ({
     clearMain()
     clearLegacy()
     set({ panicData: null, manualMode: false })
+    if (!AUTO_DATA_ENGINE_ENABLED) {
+      addFlow(set, "skip-release-fetch-auto-engine-off")
+      return
+    }
     await get().fetchPanicData("after-release-fetch")
     get().startAutoRefresh()
   },
 
   startAutoRefresh: () => {
+    if (!AUTO_DATA_ENGINE_ENABLED) {
+      addFlow(set, "skip-auto-refresh-engine-off")
+      return
+    }
     if (get().manualMode) {
       addFlow(set, "skip-auto-refresh-manual")
       return
@@ -290,6 +334,10 @@ export const usePanicStore = create((set, get) => ({
   },
 
   syncOnAppResume: async () => {
+    if (!AUTO_DATA_ENGINE_ENABLED) {
+      addFlow(set, "skip-resume-sync-auto-engine-off")
+      return
+    }
     if (get().manualMode) {
       addFlow(set, "block-resume-sync-manual")
       return
