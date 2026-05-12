@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { VALUE_CHAIN_SECTORS } from "../data/valueChainSectors.js"
-import { buildValueChainHero } from "../utils/valueChainHero.js"
+import { buildValueChainHeaderBundle } from "../utils/valueChainHero.js"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
 import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
@@ -49,7 +49,7 @@ export default function ValueChainPage({ panicData }) {
     })
   }, [sectors])
 
-  const hero = useMemo(() => buildValueChainHero(sectors, panicData), [sectors, panicData])
+  const header = useMemo(() => buildValueChainHeaderBundle(sectors, panicData), [sectors, panicData])
 
   return (
     <div className="relative overflow-hidden rounded-[1.35rem] border border-[rgba(146,164,201,0.2)] bg-[#0c1222] shadow-[0_0_0_1px_rgba(88,132,255,0.08),0_32px_80px_rgba(0,0,0,0.5)]">
@@ -65,8 +65,8 @@ export default function ValueChainPage({ panicData }) {
         aria-hidden
       />
 
-      <div className="relative z-[1] px-5 pb-12 pt-10 md:px-10 md:pb-14 md:pt-12">
-        <nav className="mb-8 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500 md:text-xs" aria-label="플로우 내비게이션">
+      <div className="relative z-[1] px-5 pb-8 pt-6 md:px-8 md:pb-10 md:pt-8">
+        <nav className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500 md:text-xs" aria-label="플로우 내비게이션">
           <Link to="/cycle" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
             시장 사이클
           </Link>
@@ -84,43 +84,77 @@ export default function ValueChainPage({ panicData }) {
           </Link>
         </nav>
 
-        <section className="relative mb-12 overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(135deg,rgba(12,20,38,0.95),rgba(6,10,18,0.98))] px-5 py-8 md:px-10 md:py-10">
+        <section className="relative mb-7 min-h-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(135deg,rgba(12,20,38,0.95),rgba(6,10,18,0.98))] px-4 py-6 md:px-6 md:py-7">
           <div
-            className="pointer-events-none absolute inset-0 opacity-70"
+            className="pointer-events-none absolute inset-0 opacity-60"
             style={{
-              background: "radial-gradient(ellipse 90% 80% at 20% 0%, rgba(34,211,238,0.12), transparent 52%), radial-gradient(ellipse 60% 50% at 100% 100%, rgba(167,139,250,0.08), transparent 50%)",
+              background: "radial-gradient(ellipse 85% 70% at 15% 0%, rgba(34,211,238,0.1), transparent 50%), radial-gradient(ellipse 55% 45% at 100% 100%, rgba(167,139,250,0.07), transparent 48%)",
             }}
             aria-hidden
           />
-          <div className="relative z-[1]">
-            <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.26em] text-cyan-200/75 md:text-[11px]">Market control · Korea</p>
-            <h1 className="m-0 mt-3 font-['Playfair_Display',Georgia,serif] text-[1.75rem] font-semibold leading-[1.1] tracking-tight text-[#e8ecf4] md:text-[2.25rem]">
-              KOREA VALUE
-              <br />
-              CHAIN MAP
-            </h1>
-            <dl className="m-0 mt-8 grid max-w-2xl gap-5 text-sm md:grid-cols-1 md:gap-6 md:text-[0.95rem]">
-              <div>
-                <dt className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">현재 시장 에너지</dt>
-                <dd className="m-0 mt-1.5 font-medium text-cyan-100/95">{hero.marketEnergy}</dd>
+          <div className="relative z-[1] grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_minmax(220px,280px)] lg:gap-7">
+            <div className="min-w-0">
+              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70 md:text-[10px]">
+                Market control · Korea
+              </p>
+              <h1 className="m-0 mt-2 font-['Playfair_Display',Georgia,serif] text-[1.35rem] font-semibold leading-[1.06] tracking-[-0.03em] text-[#e8ecf4] sm:text-[1.5rem] sm:whitespace-nowrap md:text-[1.65rem]">
+                KOREA VALUE CHAIN MAP
+              </h1>
+              <p className="m-0 mt-2.5 text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">시장 흐름</p>
+              <p className="m-0 mt-1 text-[13px] leading-snug text-slate-200 md:text-sm md:leading-snug">{header.coreFlow}</p>
+              <p className="m-0 mt-3 text-[10px] leading-normal text-slate-600">Heat 기준일 · {heatUpdatedAt}</p>
+            </div>
+
+            <aside
+              className="rounded-xl border border-white/[0.08] bg-[rgba(5,9,16,0.65)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3.5 md:py-3.5"
+              aria-label="매크로 스냅샷"
+            >
+              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">매크로 스냅샷</p>
+              <div className="m-0 mt-2.5 space-y-2.5 text-[11px] leading-snug">
+                <div>
+                  <p className="m-0 text-[10px] text-slate-500">핵심 테마</p>
+                  <p className="m-0 mt-0.5 font-medium text-cyan-100/92">{header.marketEnergy}</p>
+                </div>
+                <div className="border-t border-white/[0.06] pt-2.5">
+                  <p className="m-0 text-[10px] text-slate-500">레짐</p>
+                  <p className="m-0 mt-0.5 font-semibold text-slate-100">{header.riskRegimeLabel}</p>
+                  <p className="m-0 mt-0.5 text-[10px] text-slate-500">{header.riskRegimeDetail}</p>
+                </div>
+                <div className="border-t border-white/[0.06] pt-2.5">
+                  <p className="m-0 text-[10px] text-slate-500">심리·위험</p>
+                  <p className="m-0 mt-0.5 text-slate-300">{header.riskState}</p>
+                </div>
+                <div className="border-t border-white/[0.06] pt-2.5">
+                  <p className="m-0 text-[10px] text-slate-500">HOT 섹터</p>
+                  <div className="mt-1.5 flex flex-col gap-1.5">
+                    {header.hotSectors.map((s) => (
+                      <div key={s.name} className="flex items-center justify-between gap-2">
+                        <span className="min-w-0 truncate text-slate-200">
+                          {s.icon ? `${s.icon} ` : ""}
+                          {s.name}
+                        </span>
+                        <span
+                          className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${heatPillClass(s.heat)}`}
+                        >
+                          {s.heat}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div>
-                <dt className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">핵심 흐름</dt>
-                <dd className="m-0 mt-1.5 text-slate-200">{hero.coreFlow}</dd>
-              </div>
-              <div>
-                <dt className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">위험 상태</dt>
-                <dd className="m-0 mt-1.5 text-slate-200">{hero.riskState}</dd>
-              </div>
-            </dl>
-            <p className="m-0 mt-6 text-[11px] text-slate-600">Heat 기준일 · {heatUpdatedAt}</p>
+            </aside>
           </div>
         </section>
 
-        <h2 className="m-0 font-['Playfair_Display',Georgia,serif] text-lg font-semibold text-slate-100 md:text-xl">메인 산업 밸류체인</h2>
-        <p className="m-0 mt-2 max-w-2xl text-xs text-slate-500 md:text-sm">13개 산업군 · 수요단 / 생산단 / 부품단 공급망</p>
+        <h2 className="m-0 font-['Playfair_Display',Georgia,serif] text-base font-semibold tracking-tight text-slate-100 md:text-lg">
+          메인 산업 밸류체인
+        </h2>
+        <p className="m-0 mt-1.5 max-w-2xl text-[11px] leading-snug text-slate-500 md:text-xs">
+          13개 산업군 · 수요단 / 생산단 / 부품단 공급망
+        </p>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 xl:gap-7">
+        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 xl:grid-cols-3 xl:gap-6">
           {ordered.map((sector, index) => {
             const curated = curatedBySector(sector)
             const { tree, stages } = buildSectorTree(sector)
