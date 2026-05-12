@@ -950,6 +950,51 @@ function App() {
     }),
     [marketCycleStage, strategicView.action, tacticalView.action, macroView.state],
   )
+  const cycleDeskMeta = useMemo(() => {
+    const rows = cycleMetricHistory ?? []
+    const last = rows[rows.length - 1]
+    const asOfDateLabel = last?.ts ? String(last.ts).slice(0, 10) : "—"
+
+    let feedKind = "confirmed"
+    let feedLabel = "CONFIRMED"
+    let sourceLine = "Source: Confirmed Close"
+
+    if (panicData && (panicData.isStale === true || panicData.__isStale === true)) {
+      feedKind = "delayed"
+      feedLabel = "DELAYED"
+      sourceLine = "Source: Stale snapshot"
+    } else if (panicData?.updatedAt) {
+      const t = new Date(panicData.updatedAt).getTime()
+      if (Number.isFinite(t)) {
+        const ageMin = (Date.now() - t) / 60000
+        if (ageMin < 4) {
+          feedKind = "live"
+          feedLabel = "LIVE"
+          sourceLine = "Source: Live refresh"
+        } else if (ageMin > 36 * 60) {
+          feedKind = "delayed"
+          feedLabel = "DELAYED"
+          sourceLine = "Source: Delayed file"
+        }
+      }
+    }
+
+    let updatedLine = "Updated —"
+    if (panicData?.updatedAt) {
+      const d = new Date(panicData.updatedAt)
+      if (!Number.isNaN(d.getTime())) {
+        const hh = d.toLocaleString("en-GB", {
+          timeZone: "Asia/Seoul",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+        updatedLine = `Updated ${hh} KST`
+      }
+    }
+
+    return { asOfDateLabel, updatedLine, sourceLine, feedKind, feedLabel }
+  }, [cycleMetricHistory, panicData])
   return (
     <div className="flex min-h-[100dvh] min-h-screen flex-col overflow-x-hidden bg-[#0b0f1a] text-gray-200 lg:flex-row">
       <aside className="flex w-full shrink-0 flex-row gap-1 overflow-x-auto border-b border-gray-800/80 bg-[#0f172a] px-2 py-3 lg:h-[100dvh] lg:w-60 lg:flex-col lg:border-b-0 lg:border-r lg:px-2 lg:py-4">
@@ -1089,9 +1134,14 @@ function App() {
                 <div className="space-y-5">
                   <section className="rounded-xl bg-gradient-to-br from-white/[0.06] via-slate-800/20 to-transparent p-px shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
                     <div className="rounded-[11px] bg-[#070a10] px-4 py-4 sm:px-5 sm:py-5">
-                      <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        Macro cycle · 관제 데스크
-                      </p>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                          Macro cycle · 관제 데스크
+                        </p>
+                        <p className="m-0 font-mono text-[9px] uppercase tracking-wider text-slate-600">
+                          As of {cycleDeskMeta.asOfDateLabel} · {cycleDeskMeta.updatedLine}
+                        </p>
+                      </div>
                       <p className="m-0 mt-2 text-lg font-semibold tracking-tight text-slate-100 sm:text-xl">
                         현재 시장 단계: <span className="text-slate-50">{heroSummary.stage}</span>
                       </p>
@@ -1117,7 +1167,7 @@ function App() {
                   <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
                       tier="tactical"
-                      tierLabel="Tactical · 단기"
+                      tierLabel="TACTICAL · 단기"
                       state={tacticalView.state}
                       action={tacticalView.action}
                       hint="단기 지표는 진입 방아쇠(Trigger)로 사용합니다."
@@ -1129,10 +1179,11 @@ function App() {
                       statusLabel={macroDashboardStatus(tacticalView.state).label}
                       macroComments={buildTierMacroComments("tactical", panicData)}
                       delay={0}
+                      {...cycleDeskMeta}
                     />
                     <MacroCycleTierCard
                       tier="strategic"
-                      tierLabel="Strategic · 중기"
+                      tierLabel="STRATEGIC · 중기"
                       state={strategicView.state}
                       action={strategicView.action}
                       hint="중기 지표는 비중·섹터 로테이션 기준선입니다."
@@ -1144,10 +1195,11 @@ function App() {
                       statusLabel={macroDashboardStatus(strategicView.state).label}
                       macroComments={buildTierMacroComments("strategic", panicData)}
                       delay={0.06}
+                      {...cycleDeskMeta}
                     />
                     <MacroCycleTierCard
                       tier="macro"
-                      tierLabel="Macro · 장기"
+                      tierLabel="MACRO · 장기"
                       state={macroView.state}
                       action={macroView.action}
                       hint="장기 지표는 꼬리·신용·구조 스트레스를 봅니다."
@@ -1159,6 +1211,7 @@ function App() {
                       statusLabel={macroDashboardStatus(macroView.state).label}
                       macroComments={buildTierMacroComments("macro", panicData)}
                       delay={0.12}
+                      {...cycleDeskMeta}
                     />
                   </section>
                   <section className="rounded-xl border border-white/[0.06] bg-[#080c12] px-4 py-4 shadow-inner sm:px-5">

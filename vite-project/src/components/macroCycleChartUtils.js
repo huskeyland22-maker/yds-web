@@ -1,14 +1,14 @@
-/** 기관 매크로 터미널용 채도 낮춘 팔레트 */
+/** 기관 터미널 팔레트 — 요청 색상 기준, 채도·네온 완화 */
 export const MACRO_SERIES_COLORS = {
-  vix: "#c45c3e",
-  vxn: "#3d9b8f",
-  putCall: "#5a7daf",
-  fearGreed: "#b8566a",
-  move: "#b8923a",
-  bofa: "#8b7aad",
-  skew: "#3d8a82",
-  highYield: "#b07a3d",
-  gsBullBear: "#8f6d9a",
+  vix: "#e06352",
+  vxn: "#0fb0a0",
+  putCall: "#5c7cab",
+  fearGreed: "#e0528f",
+  move: "#e0bc52",
+  bofa: "#9570e8",
+  skew: "#2a9d8f",
+  highYield: "#c98f4a",
+  gsBullBear: "#9b7fd4",
 }
 
 export function resolveSeriesColor(series) {
@@ -31,8 +31,13 @@ export function formatMetricValue(key, v) {
   return Number.isInteger(v) ? String(v) : v.toFixed(2)
 }
 
-/** 레인별 path + area + 마지막 점 좌표 */
-export function buildLaneGeometry(chartRows, series, laneHeight, laneGap, padY, width) {
+/**
+ * @param {number} padX 좌우 패딩 (viewBox 좌표)
+ */
+export function buildLaneGeometry(chartRows, series, laneHeight, laneGap, padY, width, padX = 32) {
+  const innerW = Math.max(1, width - 2 * padX)
+  const toX = (i) => padX + (i / Math.max(1, chartRows.length - 1)) * innerW
+
   const laneCount = series.length
   const chartHeight = laneCount * laneHeight + (laneCount - 1) * laneGap
   const lanes = []
@@ -56,7 +61,7 @@ export function buildLaneGeometry(chartRows, series, laneHeight, laneGap, padY, 
     const points = vals
       .map((v, i) => {
         if (!Number.isFinite(v)) return null
-        const x = (i / Math.max(1, chartRows.length - 1)) * width
+        const x = toX(i)
         return { x, y: toY(v), v }
       })
       .filter(Boolean)
@@ -91,20 +96,19 @@ export function buildLaneGeometry(chartRows, series, laneHeight, laneGap, padY, 
     })
   }
 
-  return { lanes, chartHeight }
+  return { lanes, chartHeight, padX, innerW }
 }
 
-/** 카드 하단 자동 코멘트 (기관 리서치 톤, 과장 없음) */
 export function buildTierMacroComments(tier, panicData) {
-  const vix = Number(panicData?.vix)
-  const vxn = Number(panicData?.vxn)
-  const pc = Number(panicData?.putCall)
-  const fg = Number(panicData?.fearGreed)
-  const move = Number(panicData?.move)
-  const bofa = Number(panicData?.bofa)
-  const skew = Number(panicData?.skew)
-  const hy = Number(panicData?.highYield)
-  const gs = Number(panicData?.gsBullBear)
+  const vix = pickPanicNumber(panicData, "vix")
+  const vxn = pickPanicNumber(panicData, "vxn")
+  const pc = pickPanicNumber(panicData, "putCall")
+  const fg = pickPanicNumber(panicData, "fearGreed")
+  const move = pickPanicNumber(panicData, "move")
+  const bofa = pickPanicNumber(panicData, "bofa")
+  const skew = pickPanicNumber(panicData, "skew")
+  const hy = pickPanicNumber(panicData, "highYield")
+  const gs = pickPanicNumber(panicData, "gsBullBear")
 
   if (tier === "tactical") {
     const a = []
@@ -147,17 +151,39 @@ export function buildTierMacroComments(tier, panicData) {
   return a.slice(0, 3).length ? a.slice(0, 3) : ["장기 매크로 지표 보강 중 · 리스크 예산 유지"]
 }
 
-export function pickXAxisLabels(chartRows, count = 4) {
+export function pickXAxisLabels(chartRows, count = 4, width = 720, padX = 32) {
   if (!chartRows.length) return []
+  const innerW = Math.max(1, width - 2 * padX)
   const n = chartRows.length
-  return Array.from({ length: count }).map((_, i) => {
-    const idx = Math.round(((n - 1) * i) / Math.max(1, count - 1))
-    const row = chartRows[idx]
-    if (!row?.ts) return null
-    const d = new Date(row.ts)
-    if (Number.isNaN(d.getTime())) return null
-    const label = `${d.getMonth() + 1}/${d.getDate()}`
-    const x = (idx / Math.max(1, n - 1)) * 720
-    return { idx, x, label, iso: String(row.ts).slice(0, 10) }
-  }).filter(Boolean)
+  return Array.from({ length: count })
+    .map((_, i) => {
+      const idx = Math.round(((n - 1) * i) / Math.max(1, count - 1))
+      const row = chartRows[idx]
+      if (!row?.ts) return null
+      const d = new Date(row.ts)
+      if (Number.isNaN(d.getTime())) return null
+      const label = `${d.getMonth() + 1}/${d.getDate()}`
+      const x = padX + (idx / Math.max(1, n - 1)) * innerW
+      return { idx, x, label, iso: String(row.ts).slice(0, 10) }
+    })
+    .filter(Boolean)
+}
+
+/** panicData 메타 (flat 또는 { value } ) */
+export function pickPanicRaw(panicData, key) {
+  if (!panicData || typeof panicData !== "object") return null
+  const v = panicData[key]
+  if (v != null && typeof v === "object" && "value" in v) return v
+  return v
+}
+
+export function pickPanicNumber(panicData, key) {
+  const raw = pickPanicRaw(panicData, key)
+  if (raw == null || raw === "") return NaN
+  if (typeof raw === "object" && "value" in raw) {
+    const n = Number(raw.value)
+    return Number.isFinite(n) ? n : NaN
+  }
+  const n = Number(raw)
+  return Number.isFinite(n) ? n : NaN
 }

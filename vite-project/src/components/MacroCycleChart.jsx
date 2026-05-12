@@ -7,11 +7,12 @@ import {
 } from "./macroCycleChartUtils.js"
 
 const VIEW_W = 720
-const LANE_H = 38
-const LANE_GAP = 12
-const PAD_Y = 6
+const PAD_X = 36
+const LANE_H = 58
+const LANE_GAP = 14
+const PAD_Y = 8
 const X_AXIS_H = 22
-const FOOT_H = 18
+const FOOT_H = 14
 
 /**
  * @param {{
@@ -35,13 +36,13 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
 
   const chartRows = useMemo(() => validRows, [validRows])
 
-  const { lanes, chartHeight } = useMemo(
-    () => buildLaneGeometry(chartRows, series, LANE_H, LANE_GAP, PAD_Y, VIEW_W),
+  const { lanes, chartHeight, padX, innerW } = useMemo(
+    () => buildLaneGeometry(chartRows, series, LANE_H, LANE_GAP, PAD_Y, VIEW_W, PAD_X),
     [chartRows, series],
   )
 
   const totalH = chartHeight + X_AXIS_H + FOOT_H
-  const xLabels = useMemo(() => pickXAxisLabels(chartRows, 4), [chartRows])
+  const xLabels = useMemo(() => pickXAxisLabels(chartRows, 4, VIEW_W, PAD_X), [chartRows])
 
   useLayoutEffect(() => {
     if (validRows.length < 2) return
@@ -54,13 +55,13 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
         el.style.strokeDasharray = `${len}`
         el.style.strokeDashoffset = `${len}`
         requestAnimationFrame(() => {
-          el.style.transition = "stroke-dashoffset 0.8s cubic-bezier(0.33, 1, 0.68, 1)"
+          el.style.transition = "stroke-dashoffset 1s cubic-bezier(0.33, 1, 0.68, 1)"
           el.style.strokeDashoffset = "0"
         })
       })
     }
     const t = requestAnimationFrame(run)
-    const done = setTimeout(() => setMounted(true), 900)
+    const done = setTimeout(() => setMounted(true), 1100)
     return () => {
       cancelAnimationFrame(t)
       clearTimeout(done)
@@ -76,21 +77,23 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
       const idx = Math.round(ratio * Math.max(0, chartRows.length - 1))
       const row = chartRows[idx]
       const iso = row?.ts ? String(row.ts).slice(0, 10) : ""
+      const crossX = padX + (idx / Math.max(1, chartRows.length - 1)) * innerW
       setTooltip({
         idx,
         iso,
         pxPct: ratio * 100,
         clientX: px,
+        crossX,
         row,
       })
     },
-    [chartRows],
+    [chartRows, padX, innerW],
   )
 
   if (validRows.length < 2) {
     return (
-      <div className="rounded-lg border border-slate-700/50 bg-[#080c12]/90 px-4 py-8 text-center">
-        <p className="m-0 text-xs font-medium tracking-wide text-slate-500">흐름 데이터 수집 중 · 매크로 시계열 로딩</p>
+      <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-slate-700/40 bg-[#060a10]/95 px-4">
+        <p className="m-0 text-[11px] font-medium tracking-wide text-slate-500">흐름 데이터 수집 중 · 매크로 시계열 로딩</p>
       </div>
     )
   }
@@ -98,7 +101,7 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
   return (
     <div
       ref={wrapRef}
-      className="group relative w-full min-h-[180px] overflow-visible sm:min-h-[220px]"
+      className="group relative w-full min-h-[240px] overflow-visible sm:min-h-[260px]"
       onMouseMove={(e) => updateHover(e.clientX)}
       onMouseLeave={() => setTooltip(null)}
       onTouchStart={(e) => {
@@ -113,14 +116,14 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
     >
       <svg
         viewBox={`0 0 ${VIEW_W} ${totalH}`}
-        className="h-auto w-full max-h-[min(52vh,320px)] sm:max-h-[340px]"
+        className="block h-[260px] w-full min-h-[240px] sm:h-[280px] sm:min-h-[260px]"
         preserveAspectRatio="xMidYMid meet"
         role="img"
-        aria-label="매크로 지표 미니 시계열"
+        aria-label="매크로 지표 시계열"
       >
         <defs>
-          <filter id={`glow-${uid}`} x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="1.2" result="b" />
+          <filter id={`glow-${uid}`} x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2.2" result="b" />
             <feMerge>
               <feMergeNode in="b" />
               <feMergeNode in="SourceGraphic" />
@@ -130,7 +133,8 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
             const c = resolveSeriesColor(s)
             return (
               <linearGradient key={`g-${s.key}`} id={`area-${uid}-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={c} stopOpacity="0.11" />
+                <stop offset="0%" stopColor={c} stopOpacity="0.2" />
+                <stop offset="55%" stopColor={c} stopOpacity="0.07" />
                 <stop offset="100%" stopColor={c} stopOpacity="0.02" />
               </linearGradient>
             )
@@ -146,26 +150,26 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
               {[0.33, 0.66].map((r) => (
                 <line
                   key={`h-${r}`}
-                  x1="0"
+                  x1={padX}
                   y1={laneTop + LANE_H * r}
-                  x2={VIEW_W}
+                  x2={VIEW_W - padX}
                   y2={laneTop + LANE_H * r}
-                  stroke="rgba(148,163,184,0.09)"
+                  stroke="rgba(148,163,184,0.1)"
                   strokeWidth="1"
-                  strokeDasharray="4 7"
+                  strokeDasharray="4 8"
                   vectorEffect="non-scaling-stroke"
                 />
               ))}
               <line
-                x1="0"
+                x1={padX}
                 y1={laneTop + LANE_H}
-                x2={VIEW_W}
+                x2={VIEW_W - padX}
                 y2={laneTop + LANE_H}
-                stroke="rgba(71,85,105,0.22)"
+                stroke="rgba(71,85,105,0.28)"
                 strokeWidth="1"
               />
               {lane.areaD ? (
-                <path d={lane.areaD} fill={`url(#area-${uid}-${s.key})`} stroke="none" opacity={mounted ? 1 : 0.85} />
+                <path d={lane.areaD} fill={`url(#area-${uid}-${s.key})`} stroke="none" opacity={mounted ? 1 : 0.88} />
               ) : null}
               {lane.lineD ? (
                 <path
@@ -175,35 +179,35 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
                   d={lane.lineD}
                   fill="none"
                   stroke={c}
-                  strokeWidth="2.5"
+                  strokeWidth="3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   filter={`url(#glow-${uid})`}
-                  style={{ opacity: 0.92 }}
+                  style={{ opacity: 0.94 }}
                 />
               ) : null}
               {lane.lastPt ? (
                 <g>
-                  <circle cx={lane.lastPt.x} cy={lane.lastPt.y} r="6" fill={c} opacity="0.15">
-                    <animate attributeName="r" values="5;8;5" dur="2.8s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.12;0.22;0.12" dur="2.8s" repeatCount="indefinite" />
+                  <circle cx={lane.lastPt.x} cy={lane.lastPt.y} r="7" fill={c} opacity="0.12">
+                    <animate attributeName="r" values="6;10;6" dur="2.6s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.1;0.2;0.1" dur="2.6s" repeatCount="indefinite" />
                   </circle>
-                  <circle cx={lane.lastPt.x} cy={lane.lastPt.y} r="3.2" fill={c} stroke="rgba(15,23,42,0.9)" strokeWidth="1.2" />
+                  <circle cx={lane.lastPt.x} cy={lane.lastPt.y} r="3.5" fill={c} stroke="rgba(15,23,42,0.95)" strokeWidth="1.4" />
                 </g>
               ) : null}
             </g>
           )
         })}
 
-        {tooltip?.clientX != null ? (
+        {tooltip?.crossX != null ? (
           <line
-            x1={(tooltip.idx / Math.max(1, chartRows.length - 1)) * VIEW_W}
+            x1={tooltip.crossX}
             y1="0"
-            x2={(tooltip.idx / Math.max(1, chartRows.length - 1)) * VIEW_W}
+            x2={tooltip.crossX}
             y2={chartHeight}
-            stroke="rgba(148,163,184,0.22)"
+            stroke="rgba(226,232,240,0.18)"
             strokeWidth="1"
-            strokeDasharray="3 5"
+            strokeDasharray="2 6"
           />
         ) : null}
 
@@ -224,14 +228,14 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
         ))}
 
         <text
-          x={VIEW_W - 8}
-          y={totalH - 4}
-          fill="rgba(148,163,184,0.22)"
-          fontSize="9"
+          x={VIEW_W - padX}
+          y={totalH - 3}
+          fill="rgba(148,163,184,0.28)"
+          fontSize="8.5"
           fontFamily="ui-sans-serif, system-ui"
           textAnchor="end"
           fontWeight="500"
-          letterSpacing="0.12em"
+          letterSpacing="0.14em"
         >
           Y&apos;ds Macro Cycle Engine
         </text>
@@ -239,15 +243,18 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
 
       {tooltip && tooltip.row ? (
         <div
-          className="pointer-events-none absolute z-30 max-w-[min(92vw,320px)] rounded-lg border border-white/[0.08] bg-slate-950/78 px-3.5 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.55)] backdrop-blur-md"
+          className="pointer-events-none absolute z-30 max-w-[min(92vw,340px)] rounded-md border border-white/[0.1] bg-[#070b12]/92 px-3.5 py-3 shadow-[0_20px_56px_rgba(0,0,0,0.65)] backdrop-blur-md"
           style={{
             left: `${tooltip.pxPct}%`,
-            top: "6px",
+            top: "4px",
             transform: "translateX(-50%)",
           }}
         >
-          <p className="m-0 font-mono text-[10px] font-medium tracking-wider text-slate-500">{tooltip.iso}</p>
-          <div className="mt-2 space-y-2">
+          <div className="flex items-baseline justify-between gap-3 border-b border-white/[0.06] pb-2">
+            <p className="m-0 font-mono text-[10px] font-semibold tracking-wider text-slate-400">{tooltip.iso}</p>
+            <p className="m-0 text-[9px] font-medium uppercase tracking-widest text-slate-600">Crosshair</p>
+          </div>
+          <div className="mt-2.5 space-y-2.5">
             {series.map((s) => {
               const raw = tooltip.row[s.key]
               const v = Number(raw)
@@ -255,12 +262,12 @@ export default function MacroCycleChart({ rows, series, resolveInsight }) {
               const insight = resolveInsight?.(s.key, raw) ?? "—"
               const c = resolveSeriesColor(s)
               return (
-                <div key={s.key} className="border-b border-white/[0.05] pb-2 last:border-0 last:pb-0">
-                  <p className="m-0 text-[11px] font-semibold uppercase tracking-wide" style={{ color: c }}>
+                <div key={s.key} className="border-b border-white/[0.05] pb-2.5 last:border-0 last:pb-0">
+                  <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: c }}>
                     {s.name ?? s.key}
                   </p>
-                  <p className="m-0 mt-0.5 font-mono text-xl font-semibold tabular-nums text-slate-100">{val}</p>
-                  <p className="m-0 mt-1 text-[11px] leading-snug text-slate-400">{insight}</p>
+                  <p className="m-0 mt-1 font-mono text-2xl font-semibold tabular-nums leading-none text-slate-50">{val}</p>
+                  <p className="m-0 mt-1.5 text-[11px] leading-snug text-slate-400">{insight}</p>
                 </div>
               )
             })}
