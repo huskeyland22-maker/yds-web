@@ -79,18 +79,12 @@ export default function OvernightUsBriefing() {
           <p className="m-0 mt-6 text-[13px] text-slate-500">시세 로딩 중…</p>
         ) : err ? (
           <p className="m-0 mt-6 text-[13px] text-rose-300/90">{err}</p>
-        ) : briefing?.paragraphs?.length ? (
+        ) : briefing?.prose ? (
           <>
-            <div className="mt-6 space-y-4 text-[13px] leading-[1.8] text-slate-200 sm:text-[14px] sm:leading-[1.82]">
-              {briefing.paragraphs.map((pg, i) => (
-                <p key={i} className="m-0">
-                  {pg}
-                </p>
-              ))}
-            </div>
+            <p className="m-0 mt-6 text-[13px] leading-[1.85] text-slate-200 sm:text-[14px] sm:leading-[1.88]">{briefing.prose}</p>
 
             <p className="m-0 mt-7 border-t border-white/[0.05] pt-4 text-[10px] leading-relaxed text-slate-600">
-              Yahoo Finance 시세 기반 내부 요약. 참고용이며 매매 권유가 아니다.
+              시세: Yahoo Finance. 내부 규칙으로 직접 작성한 리캡이며 참고용이다.
             </p>
           </>
         ) : null}
