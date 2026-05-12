@@ -7,6 +7,15 @@ import { naverFinanceUrl } from "../utils/valueChainStockInsight.js"
 import { fetchStockIndicators } from "../utils/stockIndicatorsApi.js"
 import { buildValueChainTacticalSignal, timingPageSearchParams } from "../utils/valueChainTacticalSignal.js"
 
+function volumeHeadlineToneClass(tier) {
+  if (tier === "explosion" || tier === "inflow") return "text-emerald-200"
+  if (tier === "lift") return "text-cyan-200/95"
+  if (tier === "average") return "text-slate-200"
+  if (tier === "down") return "text-amber-200/90"
+  if (tier === "cold") return "text-rose-200/80"
+  return "text-slate-200"
+}
+
 export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
   const [snap, setSnap] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -181,8 +190,20 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                 </p>
                 <ul className="m-0 mt-4 list-none space-y-4 p-0">
                   <li>
-                    <p className="m-0 text-[11px] font-medium text-cyan-200/90">거래량</p>
-                    <p className="m-0 mt-1 text-sm leading-snug text-slate-200">{panel.volumeLine}</p>
+                    <p className="m-0 text-[11px] font-medium text-cyan-200/90">거래량 · 수급 강도</p>
+                    {panel.volumeHeadline != null && panel.volumeDetail != null ? (
+                      <>
+                        <p
+                          className={`m-0 mt-1.5 text-sm font-semibold leading-snug ${volumeHeadlineToneClass(panel.volumeTier)}`}
+                        >
+                          {panel.volumeHeadline}
+                        </p>
+                        <p className="m-0 mt-1 text-[12px] leading-snug text-slate-300">{panel.volumeSubline}</p>
+                        <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-slate-500">{panel.volumeDetail}</p>
+                      </>
+                    ) : (
+                      <p className="m-0 mt-1 text-sm leading-snug text-slate-200">{panel.volumeLine}</p>
+                    )}
                   </li>
                   <li>
                     <p className="m-0 text-[11px] font-medium text-cyan-200/90">RSI</p>

@@ -321,6 +321,73 @@ function volumeChangePct(volumes) {
   return ((last - avg) / avg) * 100
 }
 
+/** 최근일 거래량 vs 직전 20거래일 평균 (volumeChangePct와 동일 기준) */
+function interpretVolumeFlow(pct) {
+  if (pct == null || !Number.isFinite(pct)) {
+    return {
+      tier: "unknown",
+      headline: "산출 불가",
+      subline: "거래량 데이터가 부족합니다",
+      detail: "—",
+    }
+  }
+
+  const absR = Math.round(Math.abs(pct))
+  const detail =
+    pct === 0
+      ? "20일 평균과 같은 수준"
+      : pct > 0
+        ? `20일 평균 대비 ${absR}% 증가`
+        : `20일 평균 대비 ${absR}% 감소`
+
+  if (pct >= 150) {
+    return {
+      tier: "explosion",
+      headline: "거래량 폭증",
+      subline: "단기적으로 매매가 크게 몰린 구간",
+      detail,
+    }
+  }
+  if (pct >= 50) {
+    return {
+      tier: "inflow",
+      headline: "수급 유입",
+      subline: "강한 수급 유입",
+      detail,
+    }
+  }
+  if (pct > 20) {
+    return {
+      tier: "lift",
+      headline: "거래량 증가",
+      subline: "평균보다 거래가 붙는 편",
+      detail,
+    }
+  }
+  if (pct >= -20) {
+    return {
+      tier: "average",
+      headline: "평균 수준",
+      subline: "특이한 수급 쏠림은 크지 않음",
+      detail,
+    }
+  }
+  if (pct > -50) {
+    return {
+      tier: "down",
+      headline: "거래량 감소",
+      subline: "수급 강도 약함",
+      detail,
+    }
+  }
+  return {
+    tier: "cold",
+    headline: "관심도 둔화",
+    subline: "매매 관심이 크게 줄어든 흐름",
+    detail,
+  }
+}
+
 function macdBundle(closes) {
   const ema12 = emaSeries(closes, 12)
   const ema26 = emaSeries(closes, 26)
@@ -427,7 +494,7 @@ function buildPayload({
   const macd = macdBundle(closes)
   const macdText = interpretMacd(macd)
   const narrative = buildNarrative({ rsi: rsi14, volPct, ma20, ma60, macdText })
-  const volStr = volPct == null ? "—" : `${volPct >= 0 ? "+" : ""}${volPct.toFixed(1)}%`
+  const volFlow = interpretVolumeFlow(volPct)
   const lastClose = closes[closes.length - 1]
   const displayName = name || metaName || ""
   const chartBars = buildChartBars(rows, 130)
@@ -458,7 +525,11 @@ function buildPayload({
       label: interpretMa(ma20, ma60),
     },
     panel: {
-      volumeLine: `${volStr} (최근일 vs 20일 평균 거래량)`,
+      volumeLine: volFlow.tier === "unknown" ? "—" : `${volFlow.headline} · ${volFlow.detail}`,
+      volumeTier: volFlow.tier,
+      volumeHeadline: volFlow.headline,
+      volumeSubline: volFlow.subline,
+      volumeDetail: volFlow.detail,
       rsiLine: rsi14 == null ? "—" : `${rsi14.toFixed(1)} · ${interpretRsi(rsi14)}`,
       macdLine: macdText,
       maLine: interpretMa(ma20, ma60),
