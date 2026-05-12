@@ -114,9 +114,15 @@ function rowsFromKisOutput2(rawList) {
   const rows = []
   for (const row of asc) {
     const close = parseFloat(String(row.stck_clpr ?? "").replace(/,/g, ""))
+    const open = parseFloat(String(row.stck_oprc ?? "").replace(/,/g, ""))
+    const high = parseFloat(String(row.stck_hgpr ?? "").replace(/,/g, ""))
+    const low = parseFloat(String(row.stck_lwpr ?? "").replace(/,/g, ""))
     const vol = parseFloat(String(row.acml_vol ?? "").replace(/,/g, ""))
     if (!Number.isFinite(close)) continue
     rows.push({
+      open: Number.isFinite(open) ? open : close,
+      high: Number.isFinite(high) ? high : close,
+      low: Number.isFinite(low) ? low : close,
       close,
       volume: Number.isFinite(vol) ? vol : 0,
       date: row.stck_bsop_date ? String(row.stck_bsop_date) : null,
@@ -190,13 +196,23 @@ function zipBars(result) {
   const quote = result?.indicators?.quote?.[0]
   const ts = result?.timestamp
   if (!quote || !Array.isArray(ts)) return []
-  const { close, volume } = quote
+  const { open, high, low, close, volume } = quote
   const rows = []
   for (let i = 0; i < ts.length; i++) {
     const c = close[i]
     if (!Number.isFinite(c)) continue
     const v = Number.isFinite(volume[i]) ? volume[i] : 0
-    rows.push({ close: c, volume: v, date: unixSecToYmdKst(ts[i]) })
+    const o = Number.isFinite(open?.[i]) ? open[i] : Number.isFinite(close[i - 1]) ? close[i - 1] : c
+    const h = Number.isFinite(high?.[i]) ? high[i] : Math.max(o, c)
+    const l = Number.isFinite(low?.[i]) ? low[i] : Math.min(o, c)
+    rows.push({
+      open: o,
+      high: Math.max(h, o, c),
+      low: Math.min(l, o, c),
+      close: c,
+      volume: v,
+      date: unixSecToYmdKst(ts[i]),
+    })
   }
   return rows
 }
@@ -255,7 +271,7 @@ function smaAtIndex(values, i, period) {
   return s / period
 }
 
-/** 최근 약 3~6개월(거래일 기준) 미니 차트용 — 전체 rows 기준으로 이평 계산 후 슬라이스 */
+/** 최근 약 3~6개월(거래일 기준) 미니 캔들용 — 전체 rows 기준으로 이평 계산 후 슬라이스 */
 function buildChartBars(rows, maxBars = 130) {
   const n = rows.length
   if (n < 2) return []
@@ -263,10 +279,31 @@ function buildChartBars(rows, maxBars = 130) {
   const sliceStart = Math.max(0, n - maxBars)
   const bars = []
   for (let i = sliceStart; i < n; i++) {
+    const r = rows[i]
+    const c = closes[i]
+    let o = r.open
+    let h = r.high
+    let l = r.low
+    if (!Number.isFinite(o) || !Number.isFinite(h) || !Number.isFinite(l)) {
+      const prevC = i > 0 ? closes[i - 1] : c
+      o = Number.isFinite(o) ? o : prevC
+      h = Number.isFinite(h) ? h : Math.max(o, c)
+      l = Number.isFinite(l) ? l : Math.min(o, c)
+    }
+    h = Math.max(h, o, c)
+    l = Math.min(l, o, c)
+    if (Math.abs(h - l) < Math.max(c, 1) * 1e-9) {
+      const pad = Math.max(c * 0.0015, 1)
+      h = c + pad * 0.5
+      l = c - pad * 0.5
+    }
     bars.push({
-      date: rows[i].date,
-      close: closes[i],
-      volume: rows[i].volume,
+      date: r.date,
+      open: o,
+      high: h,
+      low: l,
+      close: c,
+      volume: r.volume,
       ma20: smaAtIndex(closes, i, 20),
       ma60: smaAtIndex(closes, i, 60),
     })

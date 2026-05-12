@@ -135,9 +135,9 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                   transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                   className="mb-8"
                 >
-                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">미니 일봉</p>
+                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">미니 캔들 (일봉)</p>
                   <p className="m-0 mt-1 text-[10px] leading-relaxed text-slate-600">
-                    최근 약 3~6개월 구간 · 종가·20/60일 이평·거래량 (호버로 일자별 확인)
+                    최근 약 3~6개월 · OHLC·20/60 MA·거래량 (호버 시 시가·고가·저가·종가·등락률)
                   </p>
                   <div className="mt-3">
                     <MiniDailyStockChart bars={snap.chart.bars} />
@@ -145,10 +145,10 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                 </motion.section>
               ) : (
                 <section className="mb-8 rounded-xl border border-cyan-400/15 bg-cyan-500/[0.04] px-4 py-4">
-                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">미니 일봉</p>
+                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">미니 캔들 (일봉)</p>
                   <p className="m-0 mt-3 text-sm font-medium tracking-tight text-slate-200">차트 데이터 준비 중</p>
                   <p className="m-0 mt-2 text-[11px] leading-relaxed text-slate-500">
-                    일봉 차트는 API에 chart 필드가 포함된 뒤 표시됩니다. 재배포 직후에는 캐시를 비우고 강력 새로고침하거나 시크릿 창에서
+                    캔들 차트는 API에 chart 필드(OHLC·거래량)가 포함된 뒤 표시됩니다. 재배포 직후에는 캐시를 비우고 강력 새로고침하거나 시크릿 창에서
                     확인해 주세요.
                   </p>
                 </section>
