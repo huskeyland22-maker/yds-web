@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { LogIn } from "lucide-react"
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchHistorySample, submitManualPanicData } from "./config/api.js"
 import GlobalMarketBar from "./components/GlobalMarketBar.jsx"
+import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
+import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
 
@@ -191,245 +193,18 @@ function toCycleHistoryFromSample(sampleRows = [], fallbackCurrent = {}) {
     .filter(Boolean)
 }
 
-function MiniTrendChart({ rows, series }) {
-  const svgRef = useRef(null)
-  const [hoverIndex, setHoverIndex] = useState(null)
-  const validRows = (Array.isArray(rows) ? rows : [])
-    .filter((r) => series.some((s) => Number.isFinite(Number(r?.[s.key]))))
-    .slice(-120)
-  if (validRows.length < 2) {
-    return <p className="m-0 text-xs text-gray-500">흐름 데이터 수집중</p>
+function macroDashboardStatus(stateLabel) {
+  const s = String(stateLabel || "")
+  if (/공포|패닉|급등|위험|경고|스파이크|확대/i.test(s)) {
+    return { variant: "stress", label: "위험 증가" }
   }
-  const chartRows = validRows.map((row) => {
-    const d = new Date(row.ts)
-    return { ...row, monthLabel: `${d.getMonth() + 1}월` }
-  })
-  const width = 720
-  const laneHeight = 34
-  const laneGap = 10
-  const padY = 5
-  const chartHeight = series.length * laneHeight + (series.length - 1) * laneGap
-  const monthMarks = Array.from({ length: 4 })
-    .map((_, i) => {
-      const idx = Math.round(((chartRows.length - 1) * i) / 3)
-      const row = chartRows[idx]
-      if (!row) return null
-      const x = (idx / Math.max(1, chartRows.length - 1)) * width
-      return { x, label: row.monthLabel }
-    })
-    .filter(Boolean)
-
-  const lanePath = (key, laneTop) => {
-    const vals = chartRows.map((r) => Number(r?.[key]))
-    const finite = vals.filter(Number.isFinite)
-    if (finite.length < 2) return ""
-    const points = vals
-      .map((v, i) => {
-        if (!Number.isFinite(v)) return null
-        const x = (i / Math.max(1, chartRows.length - 1)) * width
-        return { x, v }
-      })
-      .filter(Boolean)
-    if (points.length < 2) return ""
-    const min = Math.min(...finite)
-    const max = Math.max(...finite)
-    const span = Math.max(1e-6, max - min)
-    const laneUsable = laneHeight - padY * 2
-    const toY = (v) => laneTop + (laneHeight - padY) - ((v - min) / span) * laneUsable
-    const pts = points.map((p) => ({ x: p.x, y: toY(p.v) }))
-    let d = `M${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`
-    for (let i = 1; i < pts.length; i += 1) {
-      const prev = pts[i - 1]
-      const curr = pts[i]
-      const cp1x = prev.x + (curr.x - prev.x) * 0.35
-      const cp2x = prev.x + (curr.x - prev.x) * 0.65
-      d += ` C${cp1x.toFixed(2)},${prev.y.toFixed(2)} ${cp2x.toFixed(2)},${curr.y.toFixed(2)} ${curr.x.toFixed(2)},${curr.y.toFixed(2)}`
-    }
-    return d
+  if (/경계|주의|혼조|모호|과열/i.test(s)) {
+    return { variant: "watch", label: "주시 구간" }
   }
-  const hoverX = hoverIndex == null ? null : (hoverIndex / Math.max(1, chartRows.length - 1)) * width
-  const hoverDate = hoverIndex == null ? "" : String(chartRows[hoverIndex]?.ts ?? "").slice(0, 10)
-  const onMove = (e) => {
-    const rect = svgRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const px = e.clientX - rect.left
-    const ratio = Math.max(0, Math.min(1, px / rect.width))
-    const idx = Math.round(ratio * Math.max(0, chartRows.length - 1))
-    setHoverIndex(idx)
+  if (/완화|안정|유지/i.test(s)) {
+    return { variant: "stable", label: "공포 완화 · 안정" }
   }
-
-  return (
-    <div className="flex h-32 w-full gap-3 rounded-lg bg-[#0f172a]/75 px-2 py-2">
-      <div className="flex w-[92px] shrink-0 flex-col justify-center gap-1.5 border-r border-slate-700/60 pr-2">
-        {series.map((s) => (
-          <div key={`label-${s.key}`} className="text-[10px] font-semibold tracking-wide" style={{ color: s.color }}>
-            {s.name ?? s.key}
-          </div>
-        ))}
-      </div>
-      <div className="min-w-0 flex-1">
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${width} ${chartHeight + 22}`}
-          className="h-28 w-full"
-          onMouseMove={onMove}
-          onMouseEnter={onMove}
-          onMouseLeave={() => setHoverIndex(null)}
-        >
-          <defs>
-            <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="1.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          {series.map((s, idx) => {
-            const laneTop = idx * (laneHeight + laneGap)
-            const d = lanePath(s.key, laneTop)
-            return (
-              <g key={s.key}>
-                {[0.25, 0.5, 0.75].map((r) => (
-                  <line
-                    key={`${s.key}-g-${r}`}
-                    x1="0"
-                    y1={laneTop + laneHeight * r}
-                    x2={width}
-                    y2={laneTop + laneHeight * r}
-                    stroke="rgba(71,85,105,0.16)"
-                    strokeWidth="0.9"
-                  />
-                ))}
-                <line
-                  x1="0"
-                  y1={laneTop + laneHeight}
-                  x2={width}
-                  y2={laneTop + laneHeight}
-                  stroke="rgba(71,85,105,0.35)"
-                  strokeWidth="1"
-                />
-                {d ? (
-                  <path
-                    d={d}
-                    fill="none"
-                    stroke={s.color}
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    filter="url(#lineGlow)"
-                  />
-                ) : null}
-              </g>
-            )
-          })}
-          {hoverX != null ? (
-            <line
-              x1={hoverX}
-              y1={0}
-              x2={hoverX}
-              y2={chartHeight}
-              stroke="rgba(148,163,184,0.45)"
-              strokeWidth="1"
-            />
-          ) : null}
-          {monthMarks.map((m, i) => (
-            <g key={`m-${i}`}>
-              <line
-                x1={m.x}
-                y1={chartHeight - 2}
-                x2={m.x}
-                y2={chartHeight + 2}
-                stroke="rgba(148,163,184,0.45)"
-                strokeWidth="1"
-              />
-              <text x={m.x} y={chartHeight + 15} fill="#94a3b8" fontSize="10" textAnchor="middle">
-                {m.label}
-              </text>
-            </g>
-          ))}
-          <g
-            style={{
-              opacity: hoverIndex == null ? 0 : 1,
-              transition: "opacity 180ms ease, transform 180ms ease",
-            }}
-          >
-            {(() => {
-              const tipW = 340
-              const rowGap = 30
-              const headerH = 38
-              const padBottom = 22
-              const tipH = headerH + series.length * rowGap + padBottom
-              const tipX = Math.max(10, Math.min(width - tipW - 10, (hoverX ?? 0) - tipW / 2))
-              const tipY = 8
-              const rowStartY = tipY + headerH
-              const labelX = tipX + 18
-              const valueX = tipX + tipW - 18
-              return (
-                <>
-                  <rect
-                    x={tipX}
-                    y={tipY}
-                    width={tipW}
-                    height={tipH}
-                    rx={14}
-                    fill="rgba(2,6,23,0.86)"
-                    stroke="rgba(103,232,249,0.28)"
-                  />
-                  <rect
-                    x={tipX + 1}
-                    y={tipY + 1}
-                    width={tipW - 2}
-                    height={tipH - 2}
-                    rx={13}
-                    fill="none"
-                    stroke="rgba(168,85,247,0.18)"
-                  />
-                  <text
-                    x={labelX}
-                    y={tipY + 26}
-                    fill="#93c5fd"
-                    fontSize="14"
-                    fontWeight="600"
-                    letterSpacing="0.2px"
-                  >
-                    {hoverDate}
-                  </text>
-                  {series.map((s, i) => {
-                    const raw = Number(chartRows[hoverIndex ?? 0]?.[s.key])
-                    const val = Number.isFinite(raw) ? raw.toFixed(2) : "-"
-                    return (
-                      <g key={`tip-row-${s.key}`}>
-                        <text
-                          x={labelX}
-                          y={rowStartY + i * rowGap}
-                          fill={s.color}
-                          fontSize="15"
-                          fontWeight="600"
-                        >
-                          {s.name}
-                        </text>
-                        <text
-                          x={valueX}
-                          y={rowStartY + i * rowGap}
-                          fill="#e2e8f0"
-                          fontSize="20"
-                          fontWeight="700"
-                          textAnchor="end"
-                        >
-                          {val}
-                        </text>
-                      </g>
-                    )
-                  })}
-                </>
-              )
-            })()}
-          </g>
-        </svg>
-      </div>
-    </div>
-  )
+  return { variant: "stable", label: "안정" }
 }
 
 function extractMetricValueFromLine(line) {
@@ -1311,79 +1086,89 @@ function App() {
             <Route
               path="/cycle"
               element={
-                <div className="space-y-4">
-                  <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-4">
-                    <p className="m-0 text-xs uppercase tracking-[0.14em] text-cyan-300">시장 사이클 관제</p>
-                    <p className="m-0 mt-1 text-lg font-semibold text-cyan-100">현재 시장 단계: {heroSummary.stage}</p>
-                    <div className="mt-2 space-y-1 text-sm text-gray-200">
-                      <p className="m-0">단기 판단: {heroSummary.short}</p>
-                      <p className="m-0">중기 기준: {heroSummary.mid}</p>
-                      <p className="m-0">장기 판단: {heroSummary.long}</p>
+                <div className="space-y-5">
+                  <section className="rounded-xl bg-gradient-to-br from-white/[0.06] via-slate-800/20 to-transparent p-px shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+                    <div className="rounded-[11px] bg-[#070a10] px-4 py-4 sm:px-5 sm:py-5">
+                      <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                        Macro cycle · 관제 데스크
+                      </p>
+                      <p className="m-0 mt-2 text-lg font-semibold tracking-tight text-slate-100 sm:text-xl">
+                        현재 시장 단계: <span className="text-slate-50">{heroSummary.stage}</span>
+                      </p>
+                      <div className="mt-3 grid gap-2 border-t border-white/[0.05] pt-3 text-sm text-slate-300 sm:grid-cols-3">
+                        <p className="m-0">
+                          <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500">단기</span>
+                          <br />
+                          <span className="text-slate-200">{heroSummary.short}</span>
+                        </p>
+                        <p className="m-0">
+                          <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500">중기</span>
+                          <br />
+                          <span className="text-slate-200">{heroSummary.mid}</span>
+                        </p>
+                        <p className="m-0">
+                          <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500">장기</span>
+                          <br />
+                          <span className="text-slate-200">{heroSummary.long}</span>
+                        </p>
+                      </div>
                     </div>
                   </section>
-                  <section className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-                    <article className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-4">
-                      <p className="m-0 text-xs uppercase tracking-[0.14em] text-cyan-300">Tactical · 단기</p>
-                      <p className="m-0 mt-1 text-base font-semibold text-cyan-100">{tacticalView.state}</p>
-                      <p className="m-0 mt-1 text-sm text-cyan-50">{tacticalView.action}</p>
-                      <p className="m-0 mt-2 text-[11px] text-cyan-200/80">단기 지표는 진입 방아쇠(Trigger)입니다.</p>
-                      <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
-                        {TACTICAL_SERIES.map((s) => (
-                          <span key={s.key} className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-gray-200">
-                            {s.name}: {panicData?.[s.key] ?? "-"}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mt-3">
-                        <MiniTrendChart rows={cycleMetricHistory.slice(-120)} series={TACTICAL_SERIES} />
-                      </div>
-                      <p className="m-0 mt-2 text-xs text-gray-300">
-                        {Number(panicData?.vix) >= 24 ? "최근 변동성 스파이크 구간" : "최근 공포 완화 흐름"}
-                      </p>
-                    </article>
-                    <article className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-4">
-                      <p className="m-0 text-xs uppercase tracking-[0.14em] text-indigo-300">Strategic · 중기</p>
-                      <p className="m-0 mt-1 text-base font-semibold text-indigo-100">{strategicView.state}</p>
-                      <p className="m-0 mt-1 text-sm text-indigo-50">{strategicView.action}</p>
-                      <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
-                        {STRATEGIC_SERIES.map((s) => (
-                          <span key={s.key} className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-gray-200">
-                            {s.name}: {panicData?.[s.key] ?? "-"}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mt-3">
-                        <MiniTrendChart rows={cycleMetricHistory.slice(-120)} series={STRATEGIC_SERIES} />
-                      </div>
-                      <p className="m-0 mt-2 text-xs text-gray-300">
-                        {Number(panicData?.fearGreed) >= 75 ? "탐욕 강화 흐름" : "중립 회귀 흐름"}
-                      </p>
-                    </article>
-                    <article className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4">
-                      <p className="m-0 text-xs uppercase tracking-[0.14em] text-emerald-300">Macro · 장기</p>
-                      <p className="m-0 mt-1 text-base font-semibold text-emerald-100">{macroView.state}</p>
-                      <p className="m-0 mt-1 text-sm text-emerald-50">{macroView.action}</p>
-                      <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
-                        {MACRO_SERIES.map((s) => (
-                          <span key={s.key} className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-gray-200">
-                            {s.name}: {panicData?.[s.key] ?? "-"}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mt-3">
-                        <MiniTrendChart rows={cycleMetricHistory.slice(-120)} series={MACRO_SERIES} />
-                      </div>
-                      <p className="m-0 mt-2 text-xs text-gray-300">
-                        {macroView.state.includes("낮음") ? "장기 리스크 안정 유지" : "장기 구조적 스트레스 확대"}
-                      </p>
-                    </article>
+                  <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+                    <MacroCycleTierCard
+                      tier="tactical"
+                      tierLabel="Tactical · 단기"
+                      state={tacticalView.state}
+                      action={tacticalView.action}
+                      hint="단기 지표는 진입 방아쇠(Trigger)로 사용합니다."
+                      series={TACTICAL_SERIES}
+                      rows={cycleMetricHistory.slice(-120)}
+                      panicData={panicData}
+                      resolveInsight={interpretMetricState}
+                      statusVariant={macroDashboardStatus(tacticalView.state).variant}
+                      statusLabel={macroDashboardStatus(tacticalView.state).label}
+                      macroComments={buildTierMacroComments("tactical", panicData)}
+                      delay={0}
+                    />
+                    <MacroCycleTierCard
+                      tier="strategic"
+                      tierLabel="Strategic · 중기"
+                      state={strategicView.state}
+                      action={strategicView.action}
+                      hint="중기 지표는 비중·섹터 로테이션 기준선입니다."
+                      series={STRATEGIC_SERIES}
+                      rows={cycleMetricHistory.slice(-120)}
+                      panicData={panicData}
+                      resolveInsight={interpretMetricState}
+                      statusVariant={macroDashboardStatus(strategicView.state).variant}
+                      statusLabel={macroDashboardStatus(strategicView.state).label}
+                      macroComments={buildTierMacroComments("strategic", panicData)}
+                      delay={0.06}
+                    />
+                    <MacroCycleTierCard
+                      tier="macro"
+                      tierLabel="Macro · 장기"
+                      state={macroView.state}
+                      action={macroView.action}
+                      hint="장기 지표는 꼬리·신용·구조 스트레스를 봅니다."
+                      series={MACRO_SERIES}
+                      rows={cycleMetricHistory.slice(-120)}
+                      panicData={panicData}
+                      resolveInsight={interpretMetricState}
+                      statusVariant={macroDashboardStatus(macroView.state).variant}
+                      statusLabel={macroDashboardStatus(macroView.state).label}
+                      macroComments={buildTierMacroComments("macro", panicData)}
+                      delay={0.12}
+                    />
                   </section>
-                  <section className="rounded-xl border border-slate-700 bg-[#0b1220] px-4 py-4">
-                    <p className="m-0 text-sm font-semibold text-slate-200">시간축 행동 가이드</p>
-                    <div className="mt-2 space-y-1 text-sm text-gray-200">
-                      <p className="m-0">- 단기: {tacticalView.action}</p>
-                      <p className="m-0">- 중기: {strategicView.action}</p>
-                      <p className="m-0">- 장기: {macroView.action}</p>
+                  <section className="rounded-xl border border-white/[0.06] bg-[#080c12] px-4 py-4 shadow-inner sm:px-5">
+                    <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      시간축 행동 가이드
+                    </p>
+                    <div className="mt-2 space-y-2 text-[13px] leading-relaxed text-slate-300">
+                      <p className="m-0 border-l-2 border-slate-600 pl-3">단기 — {tacticalView.action}</p>
+                      <p className="m-0 border-l-2 border-slate-600 pl-3">중기 — {strategicView.action}</p>
+                      <p className="m-0 border-l-2 border-slate-600 pl-3">장기 — {macroView.action}</p>
                     </div>
                   </section>
                 </div>
