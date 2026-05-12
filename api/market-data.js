@@ -5,6 +5,9 @@ const SYMBOLS = [
   { key: "sp500", symbol: "^GSPC" },
   { key: "usdkrw", symbol: "KRW=X" },
   { key: "us10y", symbol: "^TNX" },
+  { key: "vix", symbol: "^VIX" },
+  { key: "dxy", symbol: "DX-Y.NYB" },
+  { key: "soxx", symbol: "SOXX" },
 ]
 
 function toFiniteNumber(value) {
@@ -48,6 +51,9 @@ export default async function handler(_req, res) {
     sp500: null,
     usdkrw: null,
     us10y: null,
+    vix: null,
+    dxy: null,
+    soxx: null,
   }
   const changeData = { ...parsedData }
 

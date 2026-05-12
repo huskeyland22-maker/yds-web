@@ -209,5 +209,7 @@ export async function fetchMarketData() {
   return {
     parsedData: payload?.parsedData ?? {},
     changeData: payload?.changeData ?? {},
+    updatedAt: payload?.updatedAt ?? null,
+    source: payload?.source ?? null,
   }
 }

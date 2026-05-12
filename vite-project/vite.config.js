@@ -29,6 +29,10 @@ export default defineConfig({
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },
+      "/api/market-data": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
     },
   },
   preview: {
@@ -38,6 +42,10 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/stock-indicators": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
+      "/api/market-data": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },

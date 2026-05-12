@@ -5,6 +5,7 @@ import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchCycleMetricsHistory, submitManualPanicData } from "./config/api.js"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
+import OvernightUsBriefing from "./components/OvernightUsBriefing.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
@@ -1215,16 +1216,7 @@ function App() {
                       {...cycleDeskMeta}
                     />
                   </section>
-                  <section className="rounded-xl border border-white/[0.06] bg-[#080c12] px-4 py-4 shadow-inner sm:px-5">
-                    <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      시간축 행동 가이드
-                    </p>
-                    <div className="mt-2 space-y-2 text-[13px] leading-relaxed text-slate-300">
-                      <p className="m-0 border-l-2 border-slate-600 pl-3">단기 — {tacticalView.action}</p>
-                      <p className="m-0 border-l-2 border-slate-600 pl-3">중기 — {strategicView.action}</p>
-                      <p className="m-0 border-l-2 border-slate-600 pl-3">장기 — {macroView.action}</p>
-                    </div>
-                  </section>
+                  <OvernightUsBriefing />
                 </div>
               }
             />
