@@ -79,49 +79,18 @@ export default function OvernightUsBriefing() {
           <p className="m-0 mt-6 text-[13px] text-slate-500">시세 로딩 중…</p>
         ) : err ? (
           <p className="m-0 mt-6 text-[13px] text-rose-300/90">{err}</p>
-        ) : briefing ? (
+        ) : briefing?.paragraphs?.length ? (
           <>
-            {briefing.chips.length ? (
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {briefing.chips.map((chip) => (
-                  <span
-                    key={chip}
-                    className="rounded border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium tracking-wide text-slate-300"
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-
-            <div className="mt-6 space-y-6">
-              <div>
-                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-600">1 · 미국시장 요약</p>
-                <p className="m-0 mt-2 text-[13px] leading-[1.65] text-slate-200 sm:text-[14px]">{briefing.usMarket}</p>
-              </div>
-              <div>
-                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-600">2 · 금리 / 달러 / 변동성</p>
-                <p className="m-0 mt-2 text-[13px] leading-[1.65] text-slate-200 sm:text-[14px]">{briefing.ratesFxVol}</p>
-              </div>
-              <div>
-                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-600">3 · 섹터 강약</p>
-                <p className="m-0 mt-2 text-[13px] leading-[1.65] text-slate-200 sm:text-[14px]">{briefing.sector}</p>
-              </div>
-              <div>
-                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-600">4 · 오늘 체크포인트</p>
-                <ul className="m-0 mt-2 list-none space-y-2 p-0">
-                  {briefing.checkpoints.map((line) => (
-                    <li key={line} className="relative pl-3.5 text-[13px] leading-[1.6] text-slate-300 sm:text-[14px]">
-                      <span className="absolute left-0 top-[0.55em] h-1 w-1 rounded-full bg-sky-400/70" aria-hidden />
-                      {line}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="mt-6 space-y-4 text-[13px] leading-[1.8] text-slate-200 sm:text-[14px] sm:leading-[1.82]">
+              {briefing.paragraphs.map((pg, i) => (
+                <p key={i} className="m-0">
+                  {pg}
+                </p>
+              ))}
             </div>
 
-            <p className="m-0 mt-6 border-t border-white/[0.05] pt-4 text-[10px] leading-relaxed text-slate-600">
-              출처: Yahoo Finance 시세(지수·VIX·금리·환율·SOXX). 해석은 규칙 기반 자동 생성이며 투자 권유가 아니다.
+            <p className="m-0 mt-7 border-t border-white/[0.05] pt-4 text-[10px] leading-relaxed text-slate-600">
+              Yahoo Finance 시세 기반 내부 요약. 참고용이며 매매 권유가 아니다.
             </p>
           </>
         ) : null}
