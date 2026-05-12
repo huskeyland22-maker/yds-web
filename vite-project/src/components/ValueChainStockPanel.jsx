@@ -44,13 +44,15 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
     if (!stock?.code) {
       setSnap(null)
       setErr(new Error("종목 코드가 없습니다."))
+      setLoading(false)
       return
     }
     let cancelled = false
+    const ac = new AbortController()
     setLoading(true)
     setErr(null)
     setSnap(null)
-    fetchStockIndicators({ code: stock.code, name: stock.name })
+    fetchStockIndicators({ code: stock.code, name: stock.name, signal: ac.signal })
       .then((data) => {
         if (!cancelled) setSnap(data)
       })
@@ -62,6 +64,7 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
       })
     return () => {
       cancelled = true
+      ac.abort()
     }
   }, [stock?.code, stock?.name])
 
@@ -258,7 +261,7 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
 
               <p className="m-0 mt-4 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">체크 포인트</p>
               <ul className="m-0 mt-2 list-none space-y-2 p-0">
-                {tactical.checkpoints.map((line) => (
+                {(tactical.checkpoints ?? []).map((line) => (
                   <li key={line} className="relative m-0 pl-3 text-[12px] leading-relaxed text-slate-300 before:absolute before:left-0 before:top-[0.55em] before:h-1 before:w-1 before:rounded-full before:bg-amber-400/45 before:content-['']">
                     {line}
                   </li>

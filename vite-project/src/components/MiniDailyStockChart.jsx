@@ -291,12 +291,19 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
 
     chartRef.current = chart
 
+    let lastW = Math.max(1, Math.floor(el.clientWidth))
+    let lastH = Math.max(1, Math.floor(el.clientHeight || 300))
     const ro = new ResizeObserver((entries) => {
       const cr = entries[0]?.contentRect
       if (!cr || !chartRef.current) return
       const w = Math.max(1, Math.floor(cr.width))
       const h = Math.max(1, Math.floor(cr.height))
-      chartRef.current.applyOptions({ width: w, height: h })
+      if (w === lastW && h === lastH) return
+      lastW = w
+      lastH = h
+      requestAnimationFrame(() => {
+        chartRef.current?.applyOptions({ width: w, height: h })
+      })
     })
     ro.observe(el)
 
