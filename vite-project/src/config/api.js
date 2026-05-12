@@ -36,6 +36,22 @@ export function getHistoryUrlForDisplay() {
   return "/history.json"
 }
 
+/** 시장 사이클 차트용 일별 누적 히스토리 (GitHub Actions / update_data.py 가 갱신) */
+export function getCycleMetricsHistoryUrlForDisplay() {
+  return "/cycle-metrics-history.json"
+}
+
+export async function fetchCycleMetricsHistory(options = {}) {
+  const debugLog = Boolean(options.debugLog)
+  const url = `${getCycleMetricsHistoryUrlForDisplay()}?t=${Date.now()}`
+  const res = await fetch(url, fetchPanicJsonInit)
+  if (debugLog) console.log("cycle-metrics-history 응답:", res.status)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const data = await res.json()
+  if (!Array.isArray(data)) throw new Error("cycle-metrics-history must be a JSON array")
+  return data
+}
+
 export function listPanicDataUrlAttemptsForDisplay() {
   return buildPanicDataUrls()
 }

@@ -3,7 +3,7 @@ import { LogIn } from "lucide-react"
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
-import { fetchHistorySample, submitManualPanicData } from "./config/api.js"
+import { fetchCycleMetricsHistory, submitManualPanicData } from "./config/api.js"
 import GlobalMarketBar from "./components/GlobalMarketBar.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
@@ -111,6 +111,14 @@ function splitCsvLine(line) {
     .map((p) => p.trim())
 }
 
+/** YYYY-MM-DD — 공개 JSON·로컬 스냅샷 병합 키 */
+function rowCalendarKey(row) {
+  if (!row || typeof row !== "object") return ""
+  if (row.date) return String(row.date).slice(0, 10)
+  if (row.ts) return String(row.ts).slice(0, 10)
+  return ""
+}
+
 function readCycleMetricHistory() {
   if (typeof window === "undefined") return []
   try {
@@ -122,75 +130,89 @@ function readCycleMetricHistory() {
   }
 }
 
-function saveCycleMetricHistory(panicData) {
-  if (typeof window === "undefined" || !panicData) return readCycleMetricHistory()
-  const row = {
-    ts: new Date().toISOString(),
-    vix: Number(panicData?.vix),
-    vxn: Number(panicData?.vxn),
-    putCall: Number(panicData?.putCall),
-    fearGreed: Number(panicData?.fearGreed),
-    move: Number(panicData?.move),
-    bofa: Number(panicData?.bofa),
-    skew: Number(panicData?.skew),
-    highYield: Number(panicData?.highYield),
-    gsBullBear: Number(panicData?.gsBullBear),
-  }
-  const validKeys = ["vix", "fearGreed", "putCall", "highYield"]
-  if (!validKeys.every((k) => Number.isFinite(row[k]))) return readCycleMetricHistory()
-  const prev = readCycleMetricHistory()
-  const last = prev[prev.length - 1]
-  if (
-    last &&
-    last.vix === row.vix &&
-    last.fearGreed === row.fearGreed &&
-    last.putCall === row.putCall &&
-    last.highYield === row.highYield
-  ) {
-    return prev
-  }
-  const next = [...prev, row].slice(-CYCLE_HISTORY_MAX)
-  window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(next))
-  return next
+function calendarKeyFromPanic(panicData) {
+  const u = panicData?.updatedAt ?? panicData?.updated_at
+  if (typeof u === "string" && /^\d{4}-\d{2}-\d{2}/.test(u)) return u.slice(0, 10)
+  return new Date().toISOString().slice(0, 10)
+}
+
+/**
+ * 공개 cycle-metrics-history.json 행 → 차트용 (날짜 오름차순, ts 고정)
+ * mock/sample 추정치 없음: JSON·API에 있는 수치만 사용
+ */
+function normalizeCycleHistoryRows(raw) {
+  if (!Array.isArray(raw)) return []
+  const rows = raw
+    .map((r) => {
+      if (!r || typeof r !== "object") return null
+      const dateStr = String(r.date || r.ts || "").trim().slice(0, 10)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null
+      const ts = typeof r.ts === "string" && r.ts.includes("T") ? r.ts : `${dateStr}T12:00:00.000Z`
+      const pick = (k) => {
+        const v = r[k]
+        const n = Number(v)
+        return Number.isFinite(n) ? n : null
+      }
+      const o = { date: dateStr, ts }
+      const take = (key, val) => {
+        if (Number.isFinite(val)) o[key] = val
+      }
+      take("vix", pick("vix"))
+      take("vxn", pick("vxn"))
+      take("putCall", pick("putCall"))
+      take("fearGreed", pick("fearGreed"))
+      take("move", pick("move"))
+      take("bofa", pick("bofa"))
+      take("skew", pick("skew"))
+      take("highYield", pick("highYield"))
+      const gs = pick("gsBullBear")
+      take("gsBullBear", Number.isFinite(gs) ? gs : pick("gs"))
+      return o
+    })
+    .filter(Boolean)
+  rows.sort((a, b) => String(a.ts).localeCompare(String(b.ts)))
+  return rows
 }
 
 function mergeCycleRows(rowsA, rowsB) {
   const out = new Map()
   for (const row of [...(rowsA || []), ...(rowsB || [])]) {
-    if (!row?.ts) continue
-    out.set(row.ts, { ...(out.get(row.ts) || {}), ...row })
+    const key = rowCalendarKey(row)
+    if (!key) continue
+    const prevRow = out.get(key)
+    out.set(key, prevRow ? { ...prevRow, ...row } : { ...row })
   }
   return [...out.values()].sort((a, b) => String(a.ts).localeCompare(String(b.ts))).slice(-CYCLE_HISTORY_MAX)
 }
 
-function toCycleHistoryFromSample(sampleRows = [], fallbackCurrent = {}) {
-  return sampleRows
-    .map((r) => {
-      const vix = Number(r?.vix)
-      const fearGreed = Number(r?.fearGreed)
-      const putCall = Number(r?.putCall)
-      const bofa = Number(r?.bofa)
-      const ts = String(r?.date || "").trim()
-      if (!ts || !Number.isFinite(vix) || !Number.isFinite(fearGreed)) return null
-      const inferredVxn = Number.isFinite(vix) ? Number((vix * 1.25).toFixed(2)) : Number(fallbackCurrent?.vxn)
-      const inferredMove = Number((90 + (vix - 20) * 1.4).toFixed(2))
-      const inferredSkew = Number((130 + (fearGreed - 50) * 0.28).toFixed(2))
-      const inferredHy = Number((3 + (100 - fearGreed) * 0.03).toFixed(2))
-      const inferredGs = Number(fearGreed.toFixed(2))
-      return {
-        ts: ts.includes("T") ? ts : `${ts}T00:00:00.000Z`,
-        vix,
-        vxn: Number.isFinite(inferredVxn) ? inferredVxn : null,
-        putCall: Number.isFinite(putCall) ? putCall : null,
-        fearGreed,
-        move: Number.isFinite(inferredMove) ? inferredMove : Number(fallbackCurrent?.move),
-        bofa: Number.isFinite(bofa) ? bofa : Number(fallbackCurrent?.bofa),
-        skew: Number.isFinite(inferredSkew) ? inferredSkew : Number(fallbackCurrent?.skew),
-        highYield: Number.isFinite(inferredHy) ? inferredHy : Number(fallbackCurrent?.highYield),
-        gsBullBear: Number.isFinite(inferredGs) ? inferredGs : Number(fallbackCurrent?.gsBullBear),
-      }
-    })
-    .filter(Boolean)
+/** 로컬: API 스냅샷으로 당일 행만 보강 (날짜당 1행, 수치는 실제 panicData 기반) */
+function saveCycleMetricHistory(panicData) {
+  if (typeof window === "undefined" || !panicData) return readCycleMetricHistory()
+  const dayKey = calendarKeyFromPanic(panicData)
+  const row = { date: dayKey, ts: `${dayKey}T12:00:00.000Z` }
+  const add = (k, v) => {
+    const n = Number(v)
+    if (Number.isFinite(n)) row[k] = n
+  }
+  add("vix", panicData?.vix)
+  add("vxn", panicData?.vxn)
+  add("putCall", panicData?.putCall)
+  add("fearGreed", panicData?.fearGreed)
+  add("move", panicData?.move)
+  add("bofa", panicData?.bofa)
+  add("skew", panicData?.skew)
+  add("highYield", panicData?.highYield)
+  add("gsBullBear", panicData?.gsBullBear)
+  const validKeys = ["vix", "fearGreed", "putCall", "highYield"]
+  if (!validKeys.every((k) => Number.isFinite(row[k]))) return readCycleMetricHistory()
+  const prev = readCycleMetricHistory()
+  const next = mergeCycleRows(prev, [row])
+  try {
+    window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(next))
+  } catch {
+    // ignore
+  }
+  return next
 }
 
 function macroDashboardStatus(stateLabel) {
@@ -691,11 +713,11 @@ function App() {
     let cancelled = false
     void (async () => {
       try {
-        const sample = await fetchHistorySample({ debugLog: false })
+        const arr = await fetchCycleMetricsHistory({ debugLog: false })
         if (cancelled) return
-        const mapped = toCycleHistoryFromSample(sample, panicData ?? {})
+        const normalized = normalizeCycleHistoryRows(arr)
         setCycleMetricHistory((prev) => {
-          const merged = mergeCycleRows(mapped, prev)
+          const merged = mergeCycleRows(prev, normalized)
           try {
             window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(merged))
           } catch {
@@ -704,13 +726,13 @@ function App() {
           return merged
         })
       } catch {
-        // ignore
+        // 정적 JSON 미배포·오프라인: 로컬/localStorage + saveCycleMetricHistory 만 사용
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [panicData])
+  }, [])
 
   useEffect(() => {
     if (typeof window === "undefined") return

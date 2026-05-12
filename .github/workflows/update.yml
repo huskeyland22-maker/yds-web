@@ -29,6 +29,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add vite-project/public/data.json
+          git add vite-project/public/data.json vite-project/public/cycle-metrics-history.json
           git commit -m "자동 데이터 업데이트" || echo "No changes"
           git push
