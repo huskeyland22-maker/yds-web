@@ -1,0 +1,11 @@
+---
+description: 작업 완료 후 항상 main에 푸시해 배포되게 한다
+alwaysApply: true
+---
+
+# 배포 (항상)
+
+- 코드·설정 변경을 마치면 **반드시** `git add` → 의미 있는 커밋 메시지로 `git commit` → **`git push origin main`** 까지 수행한다.
+- 사용자가 “배포하지 마”라고 명시한 경우만 푸시를 생략한다.
+- `__pycache__`, `.vercel`, 로그·백업 등 불필요한 파일은 커밋에 넣지 않는다.
+- 빌드 산출물이 버전 추적 대상이면(예: `build-version.json`) 프로젝트 관례에 맞게 포함한다.
