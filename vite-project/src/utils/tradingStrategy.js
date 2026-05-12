@@ -1,10 +1,6 @@
 import { getAction, getFinalScore } from "./tradingScores.js"
 
 function toNum(x) {
-  if (x === null || x === undefined || x === "") return NaN
-  if (typeof x === "object" && x !== null && "value" in x) {
-    return toNum(x.value)
-  }
   const n = Number(x)
   return Number.isFinite(n) ? n : NaN
 }
@@ -188,7 +184,7 @@ export function getTradingSignal(data) {
 
   let strategyHeadline = ""
   if (riskAdj.blocked) {
-    strategyHeadline = `현재 전략: 진입 금지 (VIX ${toNum(data.vix).toFixed(1)})`
+    strategyHeadline = `현재 전략: 진입 금지 (VIX ${Number(data.vix).toFixed(1)})`
   } else if (buyStep.phase === "매수 금지") {
     strategyHeadline = "현재 전략: 매수 금지"
   } else if (buyStep.phase === "관망") {

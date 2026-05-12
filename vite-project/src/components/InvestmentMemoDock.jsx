@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { parseInvestmentMemo, suggestHashTags, suggestStocksByPrefix } from "../utils/investmentMemoParser.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
-import { panicMetricNumber } from "../utils/panicMetricValue.js"
 
 const STORAGE_KEY = "yds-investment-memos-v1"
 const RECENT_KEY = "yds-investment-recent-inputs-v1"
@@ -76,7 +75,7 @@ function buildInsight(parsed, panicData) {
   if (parsed.macroCategories?.length) {
     lines.push(`거시 맥락 반영: ${parsed.macroCategories.slice(0, 2).join(", ")}`)
   }
-  if (sig.includes("VIX급등") || panicMetricNumber(panicData?.vix) >= 30) {
+  if (sig.includes("VIX급등") || Number(panicData?.vix) >= 30) {
     lines.push("리스크 경고: 변동성 구간 진입 가능성")
   }
   if ((parsed.sectors ?? []).includes("원전")) {
@@ -186,8 +185,8 @@ export default function InvestmentMemoDock({ panicData }) {
         ? "border-rose-500/40 bg-rose-500/10 text-rose-200"
         : "border-gray-600 bg-gray-700/40 text-gray-200"
   const marketTemperature = useMemo(() => {
-    const vix = panicMetricNumber(panicData?.vix)
-    const fearGreed = panicMetricNumber(panicData?.fearGreed)
+    const vix = Number(panicData?.vix)
+    const fearGreed = Number(panicData?.fearGreed)
     if (Number.isFinite(vix) && vix >= 32) return { label: "패닉", tone: "text-rose-300" }
     if (Number.isFinite(vix) && vix >= 24) return { label: "공포", tone: "text-amber-300" }
     if (Number.isFinite(fearGreed) && fearGreed >= 75) return { label: "과열", tone: "text-orange-300" }

@@ -1,5 +1,3 @@
-import { panicMetricNumber } from "./panicMetricValue.js"
-
 const STORAGE_KEY = "yds-panic-integration-history-v1"
 const DAILY_STORAGE_KEY = "yds-panic-history-v1"
 const MAX_ENTRIES = 720
@@ -43,9 +41,9 @@ export function saveIntegrationHistory(integration, sourceData = null) {
     currentState: String(integration.currentState ?? "중립"),
     riskLevel: String(integration.riskLevel ?? "보통"),
     stateFlow: String(integration.stateFlow ?? integration.currentState ?? "중립"),
-    vix: panicMetricNumber(sourceData?.vix),
-    fearGreed: panicMetricNumber(sourceData?.fearGreed),
-    highYield: panicMetricNumber(sourceData?.highYield),
+    vix: Number(sourceData?.vix ?? NaN),
+    fearGreed: Number(sourceData?.fearGreed ?? NaN),
+    highYield: Number(sourceData?.highYield ?? NaN),
   }
   const prev = getIntegrationHistory()
   const last = prev[prev.length - 1]
@@ -116,11 +114,11 @@ export function saveDailyPanicHistory(integration, sourceData = null) {
   const today = ymd(new Date()) ?? "unknown"
   const nextEntry = {
     date: today,
-    vix: panicMetricNumber(sourceData?.vix),
-    fearGreed: panicMetricNumber(sourceData?.fearGreed),
-    bofa: panicMetricNumber(sourceData?.bofa),
-    putCall: panicMetricNumber(sourceData?.putCall),
-    highYield: panicMetricNumber(sourceData?.highYield),
+    vix: Number(sourceData?.vix ?? NaN),
+    fearGreed: Number(sourceData?.fearGreed ?? NaN),
+    bofa: Number(sourceData?.bofa ?? NaN),
+    putCall: Number(sourceData?.putCall ?? NaN),
+    highYield: Number(sourceData?.highYield ?? NaN),
     totalScore: Number(integration.sentimentScore ?? 50),
     marketState: String(integration.currentState ?? "중립"),
     riskLevel: String(integration.riskLevel ?? "보통"),

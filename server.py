@@ -64,7 +64,6 @@ COLD_START_GRACE_SECONDS = 20
 WAKEUP_DRIFT_LOG_THRESHOLD_SECONDS = BACKGROUND_REFRESH_SECONDS + 120
 YF_SHARED_SESSION = requests.Session()
 YF_SHARED_SESSION.headers.update({"User-Agent": "Mozilla/5.0"})
-AUTO_DATA_ENGINE_ENABLED = False
 
 # 프론트 panicMarketSignal.js 와 동일한 MVP 합산 규칙
 def _score_component(kind: str, value: Any) -> int:
@@ -447,9 +446,6 @@ def _background_loop() -> None:
 
 def bootstrap() -> None:
     global _background_started, _telegram_scheduler_started
-    if not AUTO_DATA_ENGINE_ENABLED:
-        log.warning("Auto data engine is OFF (background refresh/scheduler disabled)")
-        return
     with CACHE_LOCK:
         if _background_started:
             return
@@ -569,13 +565,11 @@ def update_text():
             continue
 
         parts = [p.strip() for p in line.split(",")]
-        if len(parts) < 3:
+        if len(parts) < 2:
             continue
 
-        # Expected input format:
-        # 분류,지수 명칭,최종 확정 수치,전일 대비,상태
-        name = parts[1]
-        value = parts[2]
+        name = parts[0]
+        value = parts[1]
         num_str = re.sub(r"[^0-9.]", "", value)
         try:
             num = float(num_str)

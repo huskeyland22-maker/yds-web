@@ -8,7 +8,6 @@ import GlobalMarketBar from "./components/GlobalMarketBar.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
-import { panicMetricNumber } from "./utils/panicMetricValue.js"
 
 const MENU = [
   { label: "시장 사이클", path: "/cycle", active: true },
@@ -125,15 +124,15 @@ function saveCycleMetricHistory(panicData) {
   if (typeof window === "undefined" || !panicData) return readCycleMetricHistory()
   const row = {
     ts: new Date().toISOString(),
-    vix: panicMetricNumber(panicData?.vix),
-    vxn: panicMetricNumber(panicData?.vxn),
-    putCall: panicMetricNumber(panicData?.putCall),
-    fearGreed: panicMetricNumber(panicData?.fearGreed),
-    move: panicMetricNumber(panicData?.move),
-    bofa: panicMetricNumber(panicData?.bofa),
-    skew: panicMetricNumber(panicData?.skew),
-    highYield: panicMetricNumber(panicData?.highYield),
-    gsBullBear: panicMetricNumber(panicData?.gsBullBear ?? panicData?.gs),
+    vix: Number(panicData?.vix),
+    vxn: Number(panicData?.vxn),
+    putCall: Number(panicData?.putCall),
+    fearGreed: Number(panicData?.fearGreed),
+    move: Number(panicData?.move),
+    bofa: Number(panicData?.bofa),
+    skew: Number(panicData?.skew),
+    highYield: Number(panicData?.highYield),
+    gsBullBear: Number(panicData?.gsBullBear),
   }
   const validKeys = ["vix", "fearGreed", "putCall", "highYield"]
   if (!validKeys.every((k) => Number.isFinite(row[k]))) return readCycleMetricHistory()
@@ -492,8 +491,8 @@ function readRecentMemos(limit = 80) {
 }
 
 function getMarketCycleStage(panicData) {
-  const vix = panicMetricNumber(panicData?.vix)
-  const fearGreed = panicMetricNumber(panicData?.fearGreed)
+  const vix = Number(panicData?.vix)
+  const fearGreed = Number(panicData?.fearGreed)
   if (Number.isFinite(vix) && vix >= 32) return "패닉"
   if (Number.isFinite(vix) && vix >= 24) return "공포"
   if (Number.isFinite(fearGreed) && fearGreed >= 75) return "과열"
@@ -513,22 +512,8 @@ function getLongPositionLabel(score) {
   return "버블"
 }
 
-function rawPanicField(panicData, key) {
-  if (!panicData || typeof panicData !== "object") return null
-  if (key === "gsBullBear") return panicData.gsBullBear ?? panicData.gs
-  return panicData[key]
-}
-
-function formatPanicMetricDisplay(key, raw) {
-  const n = panicMetricNumber(raw)
-  if (!Number.isFinite(n)) return "-"
-  if (key === "putCall") return n.toFixed(2)
-  if (key === "fearGreed" || key === "gsBullBear") return String(Math.round(n))
-  return String(Math.round(n * 100) / 100)
-}
-
 function interpretMetricState(key, rawValue) {
-  const v = panicMetricNumber(rawValue)
+  const v = Number(rawValue)
   if (!Number.isFinite(v)) return "데이터 대기"
   switch (key) {
     case "vix":
@@ -663,8 +648,8 @@ function buildSentimentTrend(memos) {
 
 function buildInsightWarnings({ flowStats, panicData, keywordTop }) {
   const warnings = []
-  const vix = panicMetricNumber(panicData?.vix)
-  const fearGreed = panicMetricNumber(panicData?.fearGreed)
+  const vix = Number(panicData?.vix)
+  const fearGreed = Number(panicData?.fearGreed)
   const top = keywordTop?.[0]?.[0] ?? null
   if ((Number.isFinite(vix) && vix >= 24) || flowStats.risk >= 4) {
     warnings.push("주의: 위험 표현 및 변동성 경계 구간 확대")
@@ -1131,21 +1116,18 @@ function App() {
   const finderCandidates = useMemo(() => buildFinderCandidates(recentMemos, marketCycleStage), [recentMemos, marketCycleStage])
   const metricCards = useMemo(
     () =>
-      METRIC_DEFS.map(({ key, label }) => {
-        const raw = rawPanicField(panicData, key)
-        return {
-          key,
-          label,
-          value: formatPanicMetricDisplay(key, raw),
-          state: interpretMetricState(key, raw),
-        }
-      }),
+      METRIC_DEFS.map(({ key, label }) => ({
+        key,
+        label,
+        value: panicData?.[key] ?? "-",
+        state: interpretMetricState(key, panicData?.[key]),
+      })),
     [panicData],
   )
   const tacticalView = useMemo(() => {
-    const vix = panicMetricNumber(panicData?.vix)
-    const vxn = panicMetricNumber(panicData?.vxn)
-    const putCall = panicMetricNumber(panicData?.putCall)
+    const vix = Number(panicData?.vix)
+    const vxn = Number(panicData?.vxn)
+    const putCall = Number(panicData?.putCall)
     const state =
       (Number.isFinite(vix) && vix >= 24) || (Number.isFinite(vxn) && vxn >= 30)
         ? "단기 변동성 확대"
@@ -1157,9 +1139,9 @@ function App() {
     return { state, action, metrics: [{ k: "VIX", v: panicData?.vix }, { k: "VXN", v: panicData?.vxn }, { k: "Put/Call", v: panicData?.putCall }] }
   }, [panicData])
   const strategicView = useMemo(() => {
-    const fg = panicMetricNumber(panicData?.fearGreed)
-    const move = panicMetricNumber(panicData?.move)
-    const bofa = panicMetricNumber(panicData?.bofa)
+    const fg = Number(panicData?.fearGreed)
+    const move = Number(panicData?.move)
+    const bofa = Number(panicData?.bofa)
     const state =
       Number.isFinite(fg) && fg >= 75
         ? "탐욕 단계 진입"
@@ -1175,9 +1157,9 @@ function App() {
     return { state, action, metrics: [{ k: "Fear&Greed", v: panicData?.fearGreed }, { k: "MOVE", v: panicData?.move }, { k: "BofA B/B", v: panicData?.bofa }], move, bofa }
   }, [panicData])
   const macroView = useMemo(() => {
-    const skew = panicMetricNumber(panicData?.skew)
-    const hy = panicMetricNumber(panicData?.highYield)
-    const gs = panicMetricNumber(panicData?.gsBullBear ?? panicData?.gs)
+    const skew = Number(panicData?.skew)
+    const hy = Number(panicData?.highYield)
+    const gs = Number(panicData?.gsBullBear)
     const highRisk =
       (Number.isFinite(skew) && skew >= 145) || (Number.isFinite(hy) && hy >= 5.5) || (Number.isFinite(gs) && gs >= 75)
     const state = highRisk ? "구조적 리스크 경계" : "시스템 리스크 낮음"
@@ -1348,7 +1330,7 @@ function App() {
                       <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                         {TACTICAL_SERIES.map((s) => (
                           <span key={s.key} className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-gray-200">
-                            {s.name}: {formatPanicMetricDisplay(s.key, rawPanicField(panicData, s.key))}
+                            {s.name}: {panicData?.[s.key] ?? "-"}
                           </span>
                         ))}
                       </div>
@@ -1356,7 +1338,7 @@ function App() {
                         <MiniTrendChart rows={cycleMetricHistory.slice(-120)} series={TACTICAL_SERIES} />
                       </div>
                       <p className="m-0 mt-2 text-xs text-gray-300">
-                        {panicMetricNumber(panicData?.vix) >= 24 ? "최근 변동성 스파이크 구간" : "최근 공포 완화 흐름"}
+                        {Number(panicData?.vix) >= 24 ? "최근 변동성 스파이크 구간" : "최근 공포 완화 흐름"}
                       </p>
                     </article>
                     <article className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-4">
@@ -1366,7 +1348,7 @@ function App() {
                       <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                         {STRATEGIC_SERIES.map((s) => (
                           <span key={s.key} className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-gray-200">
-                            {s.name}: {formatPanicMetricDisplay(s.key, rawPanicField(panicData, s.key))}
+                            {s.name}: {panicData?.[s.key] ?? "-"}
                           </span>
                         ))}
                       </div>
@@ -1374,7 +1356,7 @@ function App() {
                         <MiniTrendChart rows={cycleMetricHistory.slice(-120)} series={STRATEGIC_SERIES} />
                       </div>
                       <p className="m-0 mt-2 text-xs text-gray-300">
-                        {panicMetricNumber(panicData?.fearGreed) >= 75 ? "탐욕 강화 흐름" : "중립 회귀 흐름"}
+                        {Number(panicData?.fearGreed) >= 75 ? "탐욕 강화 흐름" : "중립 회귀 흐름"}
                       </p>
                     </article>
                     <article className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4">
@@ -1384,7 +1366,7 @@ function App() {
                       <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                         {MACRO_SERIES.map((s) => (
                           <span key={s.key} className="rounded-full border border-slate-700 bg-slate-900/70 px-2 py-0.5 text-gray-200">
-                            {s.name}: {formatPanicMetricDisplay(s.key, rawPanicField(panicData, s.key))}
+                            {s.name}: {panicData?.[s.key] ?? "-"}
                           </span>
                         ))}
                       </div>

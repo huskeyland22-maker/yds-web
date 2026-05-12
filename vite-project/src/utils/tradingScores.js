@@ -9,9 +9,6 @@ function clamp(n, lo, hi) {
 
 function toNum(x) {
   if (x === null || x === undefined || x === "") return NaN
-  if (typeof x === "object" && x !== null && "value" in x) {
-    return toNum(x.value)
-  }
   const n = Number(x)
   return Number.isFinite(n) ? n : NaN
 }

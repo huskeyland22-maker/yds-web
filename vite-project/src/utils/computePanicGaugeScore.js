@@ -1,13 +1,11 @@
-import { panicMetricNumber } from "./panicMetricValue.js"
-
 /**
  * 패닉 지수 API 응답으로 게이지 점수(0~100)를 추정합니다.
  * 값이 클수록 시장 불안(패닉) 쪽으로 가정합니다.
  */
 export function computePanicGaugeScore(d) {
-  const fearGreed = panicMetricNumber(d.fearGreed)
-  const vix = panicMetricNumber(d.vix)
-  const putCall = panicMetricNumber(d.putCall)
+  const fearGreed = Number(d.fearGreed)
+  const vix = Number(d.vix)
+  const putCall = Number(d.putCall)
 
   // CNN Fear & Greed: 낮을수록 공포 → 패닉 점수에 반영
   const fromFg = Number.isFinite(fearGreed) ? 100 - fearGreed : 50

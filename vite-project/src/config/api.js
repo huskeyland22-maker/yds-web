@@ -40,13 +40,29 @@ export function listPanicDataUrlAttemptsForDisplay() {
   return buildPanicDataUrls()
 }
 
+function pickMetricValue(obj) {
+  if (obj == null) return null
+  if (typeof obj === "number") return obj
+  if (typeof obj === "object" && obj.value != null) {
+    const n = parseFloat(String(obj.value).replace(/%/g, "").replace(/,/g, "").trim())
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
 function normalizePanicPayload(data) {
   if (!data || typeof data !== "object") return data
   return {
     ...data,
+    vix: pickMetricValue(data.vix),
+    vxn: pickMetricValue(data.vxn),
+    skew: pickMetricValue(data.skew),
+    putCall: pickMetricValue(data.putCall),
+    move: pickMetricValue(data.move),
+    fearGreed: pickMetricValue(data.fearGreed),
+    highYield: pickMetricValue(data.highYield),
     updatedAt: typeof data.updated_at === "string" ? data.updated_at : data.updatedAt,
-    accessTier: data.accessTier ?? "pro",
-    isStale: Boolean(data.isStale),
+    accessTier: "pro",
   }
 }
 
@@ -117,9 +133,6 @@ export async function fetchOptimizeResult(options = {}) {
 
 function toNumberOrNull(v) {
   if (v == null || v === "") return null
-  if (typeof v === "object" && v !== null && "value" in v) {
-    return toNumberOrNull(v.value)
-  }
   const n = parseFloat(String(v).replace(/%/g, "").replace(/,/g, "").trim())
   return Number.isFinite(n) ? n : null
 }

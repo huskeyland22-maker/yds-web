@@ -1,5 +1,3 @@
-import { panicMetricNumber } from "./panicMetricValue.js"
-
 function heatRank(heat) {
   const h = String(heat || "").toUpperCase()
   if (h === "VERY HOT") return 3
@@ -43,7 +41,7 @@ export function buildValueChainHero(sectors, panicData) {
   else if (rH >= 2) coreFlow = "메모리·HBM 채널 우선"
   else if (rP >= 2) coreFlow = "송배전·HVDC 케이블 우선"
 
-  const fg = panicMetricNumber(panicData?.fearGreed)
+  const fg = Number(panicData?.fearGreed)
   let riskState = "중기 심리 혼합"
   if (Number.isFinite(fg)) {
     if (fg >= 75) riskState = "중기 탐욕 진입"
