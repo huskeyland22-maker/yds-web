@@ -3,6 +3,9 @@ function clamp(n, lo, hi) {
 }
 
 function toNum(v) {
+  if (v !== null && typeof v === "object" && "value" in v) {
+    return toNum(v.value)
+  }
   const n = Number(v)
   return Number.isFinite(n) ? n : null
 }

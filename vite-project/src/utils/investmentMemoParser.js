@@ -1,4 +1,5 @@
 import krxListed from "../data/koreanListedNames.json"
+import { panicMetricNumber } from "./panicMetricValue.js"
 
 /** KRX 코스피·코스닥·ETF 등 병합명 + 사용자 별칭 */
 const STOCK_EXTRA_ALIASES = ["에스티지", "두산 에너빌"]
@@ -338,8 +339,8 @@ export function suggestHashTags(input) {
 }
 
 function inferMarketPhase(panicData, sentiment, signalScore) {
-  const vix = Number(panicData?.vix)
-  const fearGreed = Number(panicData?.fearGreed)
+  const vix = panicMetricNumber(panicData?.vix)
+  const fearGreed = panicMetricNumber(panicData?.fearGreed)
   if (Number.isFinite(vix) && vix >= 32) return "패닉"
   if (Number.isFinite(vix) && vix >= 24) return "공포"
   if (Number.isFinite(fearGreed) && fearGreed >= 75) return "과열"

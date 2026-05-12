@@ -4,7 +4,6 @@ import Gauge from "./Gauge.jsx"
 import PanicIndicatorChartBox from "./PanicIndicatorChartBox.jsx"
 import PanicMetricCard from "./PanicMetricCard.jsx"
 import ScoreHistorySparkline from "./ScoreHistorySparkline.jsx"
-import { groupPanicData } from "../utils/groupPanicData.js"
 import {
   getAdvancedSignal,
   getConfidence,
@@ -12,6 +11,7 @@ import {
   getTotalSignalScore,
 } from "../utils/panicMarketSignal.js"
 import { getActionTone } from "../utils/tradingScores.js"
+import { panicMetricNumber } from "../utils/panicMetricValue.js"
 
 const PANEL_RING = {
   buy: "border-emerald-500/45 bg-emerald-500/[0.08] ring-1 ring-emerald-500/20",
@@ -87,8 +87,6 @@ export default function PanicIndexCard({
       : TREND_TEXT[trendDir] ?? TREND_TEXT.flat
   const timingCls = timing?.tone ? TIMING_TEXT[timing.tone] ?? TIMING_TEXT.neutral : TIMING_TEXT.neutral
 
-  const panicData = useMemo(() => groupPanicData(data), [data])
-
   const totalScore = useMemo(() => getTotalSignalScore(data), [data])
   const referenceMvpSignal = useMemo(() => getSignal(totalScore), [totalScore])
   const strategySignal = useMemo(() => getAdvancedSignal(data), [data])
@@ -101,7 +99,7 @@ export default function PanicIndexCard({
     if (!data || !isPro) return
 
     const checkAlert = () => {
-      const vix = Number(data.vix)
+      const vix = panicMetricNumber(data.vix)
       if (Number.isFinite(vix) && vix > 30) {
         if (!alertOnceRef.current.vixAbove30) {
           alert("🚨 VIX 급등! 시장 위험 상태")
@@ -150,8 +148,13 @@ export default function PanicIndexCard({
       </p>
       {data?.updatedAt ? (
         <p className="mt-1 text-xs text-gray-500">
-          업데이트:{" "}
+          배치 업데이트:{" "}
           <span className="font-mono text-gray-300">{data.updatedAt}</span>
+        </p>
+      ) : null}
+      {data?.isStale ? (
+        <p className="mt-1 text-xs text-amber-300/90">
+          일부 지표는 최신 소스 미수신 · 직전 확정값을 유지했습니다.
         </p>
       ) : null}
 
@@ -228,7 +231,8 @@ export default function PanicIndexCard({
               <PanicMetricCard
                 key={metric.key}
                 title={metric.title}
-                value={panicData.short[metric.key]}
+                metricKey={metric.key}
+                panicData={data}
                 type={metric.type}
               />
             ))}
@@ -249,7 +253,8 @@ export default function PanicIndexCard({
               <PanicMetricCard
                 key={metric.key}
                 title={metric.title}
-                value={panicData.mid[metric.key]}
+                metricKey={metric.key}
+                panicData={data}
                 type={metric.type}
               />
             ))}
@@ -270,7 +275,8 @@ export default function PanicIndexCard({
               <PanicMetricCard
                 key={metric.key}
                 title={metric.title}
-                value={panicData.long[metric.key]}
+                metricKey={metric.key}
+                panicData={data}
                 type={metric.type}
               />
             ))}

@@ -1,5 +1,6 @@
 import { getStatus } from "../utils/panicIndicatorStatus.js"
 import { motion } from "framer-motion"
+import { panicMetricFooterLines, panicMetricNumber } from "../utils/panicMetricValue.js"
 
 const cardStyle = {
   background: "#1f2937",
@@ -69,20 +70,44 @@ const copyByType = {
   },
 }
 
+function rawMetric(panicData, metricKey) {
+  if (!panicData || typeof panicData !== "object") return null
+  if (metricKey === "gsBullBear") {
+    return panicData.gsBullBear ?? panicData.gs ?? null
+  }
+  return panicData[metricKey] ?? null
+}
+
+function formatDisplay(type, num) {
+  if (type === "putCall") return num.toFixed(2)
+  if (type === "fearGreed" || type === "gsBullBear") return String(Math.round(num))
+  const rounded = Math.round(num * 100) / 100
+  return String(rounded)
+}
+
 /**
- * @param {{ title: string; value: unknown; type?: string }} props
+ * @param {{ title: string; metricKey: string; panicData?: object; type?: string }} props
  */
-export default function PanicMetricCard({ title, value, type }) {
-  const safe = (v) => (v !== undefined && v !== null ? v : "-")
-  const status = getStatus(type, value)
+export default function PanicMetricCard({ title, metricKey, panicData, type }) {
+  const raw = rawMetric(panicData, metricKey)
+  const num = panicMetricNumber(raw)
+  const status = getStatus(type, Number.isFinite(num) ? num : null)
   const statusStyle = statusColorMap[status.className] ?? statusColorMap.neutral
-  const raw = safe(value)
-  const display = typeof raw === "number" && Number.isNaN(raw) ? "-" : String(raw)
+  const display = Number.isFinite(num) ? formatDisplay(type ?? "", num) : "-"
   const copy = copyByType[type] ?? {
     desc: "지표의 흐름을 확인해 리스크를 점검하세요.",
     usage: ["수치 급변 시 경계", "추세 확인 후 비중 조절"],
     interp: "현재 시장 흐름을 보조적으로 해석합니다.",
   }
+
+  const footerLines = panicMetricFooterLines(raw)
+  const meta = raw && typeof raw === "object" && "value" in raw ? raw : null
+  const bofaStyleNote =
+    type === "bofa" && meta?.fallbackUsed
+      ? " (latest available 데이터 유지 중)"
+      : type === "gsBullBear" && meta?.fallbackUsed
+        ? " (latest available 데이터 유지 중)"
+        : null
 
   return (
     <motion.div
@@ -100,6 +125,7 @@ export default function PanicMetricCard({ title, value, type }) {
         style={{ fontSize: "20px", fontWeight: "bold", color: statusStyle.text }}
       >
         {display}
+        {bofaStyleNote ? <span className="block text-[11px] font-normal text-gray-500">{bofaStyleNote}</span> : null}
       </p>
 
       <span
@@ -127,7 +153,16 @@ export default function PanicMetricCard({ title, value, type }) {
       <p className="mt-2 text-xs text-gray-300" style={{ lineHeight: 1.7, letterSpacing: "-0.02em", opacity: 0.92 }}>
         현재 해석: {copy.interp}
       </p>
-      <p className="mt-2 text-[11px] text-cyan-300/80">시장 심리 기반 · 실시간 반영 · AI 분석 반영중</p>
+      {footerLines.length ? (
+        <div className="mt-2 space-y-0.5 border-t border-white/5 pt-2">
+          {footerLines.map((line) => (
+            <p key={line} className="m-0 text-[11px] text-gray-400">
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : null}
+      <p className="mt-2 text-[11px] text-cyan-300/70">시장 심리 기반 지표</p>
     </motion.div>
   )
 }

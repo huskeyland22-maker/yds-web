@@ -1,3 +1,5 @@
+import { panicMetricNumber } from "./panicMetricValue.js"
+
 /**
  * MVP: 지표별 -1 / 0 / 1 점수 (위험·중립·유리 방향 단순 합산).
  * @param {string} type
@@ -7,8 +9,8 @@
 export function getScore(type, value) {
   if (value == null) return 0
 
-  const n = Number(value)
-  if (Number.isNaN(n)) return 0
+  const n = panicMetricNumber(value)
+  if (!Number.isFinite(n)) return 0
 
   switch (type) {
     case "vix":
@@ -75,10 +77,10 @@ export function getSignal(score) {
 export function getAdvancedSignal(data) {
   if (!data || typeof data !== "object") return { text: "-", color: "gray" }
 
-  const vix = Number(data.vix)
-  const fearGreed = Number(data.fearGreed)
-  const putCall = Number(data.putCall)
-  const bofa = Number(data.bofa)
+  const vix = panicMetricNumber(data.vix)
+  const fearGreed = panicMetricNumber(data.fearGreed)
+  const putCall = panicMetricNumber(data.putCall)
+  const bofa = panicMetricNumber(data.bofa)
 
   if (
     !Number.isFinite(vix) ||
@@ -116,9 +118,9 @@ export function getAdvancedSignal(data) {
 export function getConfidence(data) {
   if (!data || typeof data !== "object") return 0
   let score = 0
-  if (Number(data.vix) > 30) score++
-  if (Number(data.fearGreed) < 25) score++
-  if (Number(data.putCall) > 1.0) score++
-  if (Number(data.bofa) < 2) score++
+  if (panicMetricNumber(data.vix) > 30) score++
+  if (panicMetricNumber(data.fearGreed) < 25) score++
+  if (panicMetricNumber(data.putCall) > 1.0) score++
+  if (panicMetricNumber(data.bofa) < 2) score++
   return Math.min(4, Math.max(0, score))
 }

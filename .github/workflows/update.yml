@@ -2,33 +2,110 @@ name: Update Panic Data
 
 on:
   schedule:
-    - cron: "0 13 * * *" # UTC 13:00 = KST 22:00
+    # 22:20 UTC = 다음날 07:20 KST — 데이터 수집
+    - cron: "20 22 * * *"
+    # 22:30 UTC = 다음날 07:30 KST — 빌드 스탬프로 정적 배포 갱신 유도
+    - cron: "30 22 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: panic-data-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  update-data:
+  update-json:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '20 22 * * *'
     runs-on: ubuntu-latest
-
     steps:
-      - name: 코드 가져오기
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Python 설치
-        uses: actions/setup-python@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      - name: 라이브러리 설치
+      - name: Install dependencies
+        run: pip install yfinance pandas requests pytz
+
+      - name: Run update_data.py (retry once on failure)
+        shell: bash
+        env:
+          BOFA_MANUAL: ${{ secrets.BOFA_MANUAL }}
+          GS_BULLBEAR_MANUAL: ${{ secrets.GS_BULLBEAR_MANUAL }}
+          PUTCALL_MANUAL: ${{ secrets.PUTCALL_MANUAL }}
+          PUTCALL_FRED_SERIES: ${{ secrets.PUTCALL_FRED_SERIES }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: |
-          pip install yfinance pandas pandas_datareader requests pytz
+          set -o pipefail
+          python update_data.py 2>&1 | tee panic-update.log
+          ec=${PIPESTATUS[0]}
+          if [ "$ec" -ne 0 ]; then
+            echo "RETRY_AFTER_45S" | tee -a panic-update.log
+            sleep 45
+            python update_data.py 2>&1 | tee -a panic-update.log
+            ec=${PIPESTATUS[0]}
+          fi
+          exit "$ec"
 
-      - name: 데이터 업데이트 실행
-        run: python update_data.py
+      - name: Upload log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: panic-update-log
+          path: panic-update.log
+          if-no-files-found: ignore
 
-      - name: 변경사항 커밋
+      - name: Commit and push data.json
+        if: success()
+        shell: bash
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add vite-project/public/data.json
-          git commit -m "자동 데이터 업데이트" || echo "No changes"
+          if git diff --staged --quiet; then
+            echo "No changes to data.json"
+            exit 0
+          fi
+          git commit -m "chore: panic indicators daily update (KST 07:20 job)"
+          git push
+
+  bump-build-version:
+    if: github.event.schedule == '30 22 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump build stamp (triggers redeploy)
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = 'vite-project/public/build-version.json';
+            const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+            const t = Date.now();
+            j.buildId = String(t);
+            j.timestamp = t;
+            j.builtAt = new Date().toISOString();
+            j.version = 'v1.0.' + t;
+            fs.writeFileSync(p, JSON.stringify(j, null, 2));
+          "
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vite-project/public/build-version.json
+          if git diff --staged --quiet; then
+            echo "No build-version changes"
+            exit 0
+          fi
+          git commit -m "chore: scheduled site refresh stamp (KST 07:30)"
           git push

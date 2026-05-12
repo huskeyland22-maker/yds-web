@@ -21,6 +21,7 @@ import {
   summarizeIntegrationFlow,
 } from "../utils/panicIntegrationHistory.js"
 import { validatePanicData } from "../utils/validatePanicData.js"
+import { panicMetricNumber } from "../utils/panicMetricValue.js"
 import BacktestPanel from "./BacktestPanel.jsx"
 import SignalBacktestPanel from "./SignalBacktestPanel.jsx"
 import BuyTop5Card from "./BuyTop5Card.jsx"
@@ -178,7 +179,7 @@ function buildMemoBriefLines(memos, panicData) {
   if (topSectors.length) lines.push(`최근 섹터 메모 집중: ${topSectors.join(", ")}`)
   if (sentimentCounts.bullish > sentimentCounts.bearish) lines.push("bullish 흐름 우세, 눌림목 관찰 전략 유효")
   if (sentimentCounts.bearish >= Math.max(2, sentimentCounts.bullish)) lines.push("방어 심리 확대, 리스크 온 비중 축소 필요")
-  if (vixRiskMentions >= 2 || Number(panicData?.vix) >= 24) lines.push("VIX/리스크 표현 확대, 과열·변동성 경계 필요")
+  if (vixRiskMentions >= 2 || panicMetricNumber(panicData?.vix) >= 24) lines.push("VIX/리스크 표현 확대, 과열·변동성 경계 필요")
   return lines.slice(0, 3)
 }
 
@@ -198,7 +199,7 @@ function buildFlowEngineSignal(memos, panicData) {
     if (signals.includes("리스크경고") || signals.includes("VIX급등") || signals.includes("과열경고")) riskSignals += 1
     if (signals.includes("거래량증가")) volumeSignals += 1
   }
-  const vix = Number(panicData?.vix)
+  const vix = panicMetricNumber(panicData?.vix)
   if ((Number.isFinite(vix) && vix >= 24 && riskSignals >= 2) || (riskSignals >= 4 && bullish <= 3)) {
     return { label: "리스크 오프 가능성 증가", tone: "text-rose-300", reason: "VIX/위험 메모가 누적되고 bullish 강도가 둔화되었습니다." }
   }
@@ -258,8 +259,8 @@ function buildMoatInsights(memos) {
 }
 
 function buildPanicCycleStage(data, flowLabel) {
-  const vix = Number(data?.vix)
-  const fearGreed = Number(data?.fearGreed)
+  const vix = panicMetricNumber(data?.vix)
+  const fearGreed = panicMetricNumber(data?.fearGreed)
   if (Number.isFinite(vix) && vix >= 32) return "패닉"
   if (Number.isFinite(vix) && vix >= 24) return "공포"
   if (Number.isFinite(fearGreed) && fearGreed >= 75) return "과열"
@@ -620,7 +621,7 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
     if (typeof window === "undefined" || !("Notification" in window)) return
     if (Notification.permission !== "granted") return
 
-    const vix = Number(data?.vix)
+    const vix = panicMetricNumber(data?.vix)
     if (Number.isFinite(vix) && vix > 30) {
       if (!notifyEdgeRef.current.vixAbove30) {
         sendNotification("🚨 시장 위험", "VIX 급등 발생!")
@@ -843,8 +844,8 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
     })
   })()
   const todayRiskOpportunity = (() => {
-    const vix = Number(data?.vix)
-    const fearGreed = Number(data?.fearGreed)
+    const vix = panicMetricNumber(data?.vix)
+    const fearGreed = panicMetricNumber(data?.fearGreed)
     const risk =
       (Number.isFinite(vix) && vix >= 24) || flowEngine.label.includes("리스크 오프")
         ? "오늘의 위험: 변동성 재확대 가능성"
