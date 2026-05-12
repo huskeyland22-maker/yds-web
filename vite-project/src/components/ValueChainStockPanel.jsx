@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
 import { X } from "lucide-react"
 import MiniDailyStockChart from "./MiniDailyStockChart.jsx"
 import { naverFinanceUrl } from "../utils/valueChainStockInsight.js"
 import { fetchStockIndicators } from "../utils/stockIndicatorsApi.js"
+import { buildValueChainTacticalSignal, timingPageSearchParams } from "../utils/valueChainTacticalSignal.js"
 
 export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
   const [snap, setSnap] = useState(null)
@@ -59,6 +60,24 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
   const extUrl = naverFinanceUrl(stock)
   const narrative = snap?.narrative
   const panel = snap?.panel
+
+  const tactical = useMemo(
+    () =>
+      buildValueChainTacticalSignal(snap, {
+        loading,
+        error: Boolean(err) && !loading,
+        stock,
+      }),
+    [snap, loading, err, stock],
+  )
+
+  const timingHref = `/timing${timingPageSearchParams(stock)}`
+  const tacticalBorder =
+    tactical.tone === "ok"
+      ? "border-cyan-500/20 shadow-[inset_0_1px_0_rgba(34,211,238,0.07)]"
+      : tactical.tone === "warn"
+        ? "border-amber-500/20"
+        : "border-white/[0.08]"
 
   return (
     <div className="fixed inset-0 z-[6000] flex justify-end">
@@ -202,12 +221,40 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
           ) : null}
 
           <div className="mt-8 border-t border-white/[0.06] pt-5">
-            <Link
-              to="/timing"
-              className="inline-flex text-[11px] font-medium text-cyan-300/90 underline-offset-4 transition hover:text-cyan-200 hover:underline"
-            >
-              매매 타점 페이지로 연결 →
-            </Link>
+            <div className={`rounded-xl border bg-black/20 ${tacticalBorder} px-4 py-4`}>
+              <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-cyan-200/60">{"Y'ds Tactical Signal"}</p>
+              <p className="m-0 mt-3 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">현재 전략</p>
+              <p className="m-0 mt-1 text-sm font-semibold tracking-tight text-slate-100">{tactical.strategy}</p>
+
+              {tactical.positionLine ? (
+                <p className="m-0 mt-2 text-[12px] leading-snug text-slate-400">
+                  <span className="text-slate-500">현재 위치</span> · {tactical.positionLine}
+                </p>
+              ) : null}
+              {tactical.flowLine ? (
+                <p className="m-0 mt-1 text-[12px] leading-snug text-slate-400">
+                  <span className="text-slate-500">단기 흐름</span> · {tactical.flowLine}
+                </p>
+              ) : null}
+
+              <ul className="m-0 mt-3 list-none space-y-2 border-t border-white/[0.06] p-0 pt-3">
+                {tactical.bullets.map((line) => (
+                  <li key={line} className="relative m-0 pl-3 text-[12px] leading-relaxed text-slate-300 before:absolute before:left-0 before:top-[0.55em] before:h-1 before:w-1 before:rounded-full before:bg-cyan-400/50 before:content-['']">
+                    {line}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <Link
+                  to={timingHref}
+                  className="inline-flex items-center justify-center rounded-lg border border-cyan-400/25 bg-cyan-500/[0.08] px-3 py-2 text-[11px] font-medium text-cyan-100/95 transition hover:border-cyan-300/40 hover:bg-cyan-500/[0.12]"
+                >
+                  매매 시그널 보기
+                </Link>
+                <span className="text-[10px] text-slate-600">시장·체크리스트 맥락</span>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
