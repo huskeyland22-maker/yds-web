@@ -4,7 +4,6 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchCycleMetricsHistory, submitManualPanicData } from "./config/api.js"
-import GlobalMarketBar from "./components/GlobalMarketBar.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
@@ -1020,7 +1019,7 @@ function App() {
   return (
     <div className="flex min-h-[100dvh] min-h-screen flex-col overflow-x-hidden bg-[#0b0f1a] text-gray-200 lg:flex-row">
       <aside className="flex w-full shrink-0 flex-row gap-1 overflow-x-auto border-b border-gray-800/80 bg-[#0f172a] px-2 py-3 lg:h-[100dvh] lg:w-60 lg:flex-col lg:border-b-0 lg:border-r lg:px-2 lg:py-4">
-        <div className="mb-0 shrink-0 rounded-xl border border-cyan-500/25 bg-cyan-500/10 px-3 py-2 lg:mb-4">
+        <div className="mb-0 shrink-0 border-0 bg-transparent px-3 py-2 shadow-none lg:mb-4">
           <p className="m-0 mt-1 whitespace-nowrap text-sm font-semibold text-cyan-100">
             Y&apos;ds 투자 인사이트
           </p>
@@ -1066,30 +1065,11 @@ function App() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header
-          className="flex min-h-[52px] shrink-0 gap-3 border-b border-gray-800/80 bg-[#0b0f1a] px-4 py-3 sm:px-6"
-          style={{
-            flexDirection: isMobile ? "column" : "row",
-            alignItems: isMobile ? "stretch" : "flex-start",
-            justifyContent: "space-between",
-            overflowX: "hidden",
-          }}
-        >
-          <div className="min-w-0 flex-1">
-            <GlobalMarketBar isMobile={isMobile} />
-          </div>
-          <div className="flex items-start justify-between" style={{ marginTop: "12px", width: isMobile ? "100%" : "auto" }}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                gap: "8px",
-                width: "100%",
-                alignItems: isMobile ? "stretch" : "center",
-                justifyContent: isMobile ? "center" : "flex-start",
-              }}
-            >
-              <div className="flex items-center gap-2">
+        <header className="flex min-h-[52px] shrink-0 flex-wrap items-center justify-end gap-3 border-b border-gray-800/80 bg-[#0b0f1a] px-4 py-3 sm:px-6">
+          <div
+            className={`flex flex-wrap items-center gap-2 ${isMobile ? "w-full justify-center" : "justify-end"}`}
+          >
+            <div className="flex items-center gap-2">
                 <div
                   className="
                   flex items-center gap-3
@@ -1144,7 +1124,6 @@ function App() {
                 {buildVersion}
               </span>
             </div>
-          </div>
         </header>
 
         <main className="flex-1 overflow-auto px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
