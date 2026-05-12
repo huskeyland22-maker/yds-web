@@ -5,6 +5,7 @@ import { X } from "lucide-react"
 import MiniDailyStockChart from "./MiniDailyStockChart.jsx"
 import { naverFinanceUrl } from "../utils/valueChainStockInsight.js"
 import { fetchStockIndicators } from "../utils/stockIndicatorsApi.js"
+import { buildObjectiveStateSnapshot } from "../utils/valueChainObjectiveState.js"
 import { buildValueChainTacticalSignal, timingPageSearchParams } from "../utils/valueChainTacticalSignal.js"
 
 function volumeHeadlineToneClass(tier) {
@@ -67,8 +68,9 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
   if (!stock) return null
 
   const extUrl = naverFinanceUrl(stock)
-  const narrative = snap?.narrative
   const panel = snap?.panel
+
+  const objective = useMemo(() => buildObjectiveStateSnapshot(snap), [snap])
 
   const tactical = useMemo(
     () =>
@@ -154,7 +156,7 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
             </div>
           ) : null}
 
-          {!loading && snap && narrative && panel ? (
+          {!loading && snap && panel ? (
             <>
               {snap.chart?.bars?.length ? (
                 <motion.section
@@ -220,20 +222,26 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                 </ul>
               </div>
 
-              <div className="mt-8 space-y-5">
-                <section>
-                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">현재 상태</p>
-                  <p className="m-0 mt-1.5 text-sm leading-relaxed text-slate-100">{narrative.status}</p>
-                </section>
-                <section>
-                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">시장 위치</p>
-                  <p className="m-0 mt-1.5 text-sm leading-relaxed text-slate-100">{narrative.position}</p>
-                </section>
-                <section>
-                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">단기 흐름</p>
-                  <p className="m-0 mt-1.5 text-sm leading-relaxed text-slate-100">{narrative.flow}</p>
-                </section>
-              </div>
+              {objective ? (
+                <div className="mt-8 rounded-xl border border-white/[0.06] bg-white/[0.015] px-4 py-4">
+                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">객관 상태</p>
+                  <p className="m-0 mt-1 text-[10px] leading-relaxed text-slate-600">차트·수급·추세 요약 (해석 최소)</p>
+                  <dl className="m-0 mt-4 space-y-3 p-0">
+                    <div>
+                      <dt className="m-0 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">수급·거래</dt>
+                      <dd className="m-0 mt-1 text-sm font-medium leading-snug text-slate-100">{objective.liquidity}</dd>
+                    </div>
+                    <div>
+                      <dt className="m-0 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">추세 골격</dt>
+                      <dd className="m-0 mt-1 text-sm font-medium leading-snug text-slate-100">{objective.structure}</dd>
+                    </div>
+                    <div>
+                      <dt className="m-0 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">단기 변동</dt>
+                      <dd className="m-0 mt-1 text-sm font-medium leading-snug text-slate-100">{objective.pulse}</dd>
+                    </div>
+                  </dl>
+                </div>
+              ) : null}
             </>
           ) : null}
 
@@ -244,23 +252,14 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
           <div className="mt-8 border-t border-white/[0.06] pt-5">
             <div className={`rounded-xl border bg-black/20 ${tacticalBorder} px-4 py-4`}>
               <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-cyan-200/60">{"Y'ds Tactical Signal"}</p>
+              <p className="m-0 mt-1 text-[10px] leading-relaxed text-slate-600">대응 가이드</p>
               <p className="m-0 mt-3 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">현재 전략</p>
               <p className="m-0 mt-1 text-sm font-semibold tracking-tight text-slate-100">{tactical.strategy}</p>
 
-              {tactical.positionLine ? (
-                <p className="m-0 mt-2 text-[12px] leading-snug text-slate-400">
-                  <span className="text-slate-500">현재 위치</span> · {tactical.positionLine}
-                </p>
-              ) : null}
-              {tactical.flowLine ? (
-                <p className="m-0 mt-1 text-[12px] leading-snug text-slate-400">
-                  <span className="text-slate-500">단기 흐름</span> · {tactical.flowLine}
-                </p>
-              ) : null}
-
-              <ul className="m-0 mt-3 list-none space-y-2 border-t border-white/[0.06] p-0 pt-3">
-                {tactical.bullets.map((line) => (
-                  <li key={line} className="relative m-0 pl-3 text-[12px] leading-relaxed text-slate-300 before:absolute before:left-0 before:top-[0.55em] before:h-1 before:w-1 before:rounded-full before:bg-cyan-400/50 before:content-['']">
+              <p className="m-0 mt-4 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">체크 포인트</p>
+              <ul className="m-0 mt-2 list-none space-y-2 p-0">
+                {tactical.checkpoints.map((line) => (
+                  <li key={line} className="relative m-0 pl-3 text-[12px] leading-relaxed text-slate-300 before:absolute before:left-0 before:top-[0.55em] before:h-1 before:w-1 before:rounded-full before:bg-amber-400/45 before:content-['']">
                     {line}
                   </li>
                 ))}
