@@ -52,23 +52,26 @@ export default function OvernightUsBriefing() {
 
   return (
     <section
-      className="relative overflow-hidden rounded-xl border border-white/[0.07] bg-[#060a10] shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_20px_50px_rgba(0,0,0,0.35)]"
+      className="relative overflow-hidden rounded-xl border border-white/[0.07] bg-[#0a0c12] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
       aria-label="전일 미국시장 브리핑"
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-90"
+        className="pointer-events-none absolute inset-0 opacity-80"
         style={{
           background:
-            "radial-gradient(120% 80% at 100% 0%, rgba(56,189,248,0.06), transparent 50%), linear-gradient(180deg, rgba(15,23,42,0.35) 0%, transparent 45%)",
+            "radial-gradient(100% 70% at 0% 0%, rgba(99,102,241,0.07), transparent 45%), linear-gradient(180deg, rgba(15,23,42,0.25) 0%, transparent 42%)",
         }}
         aria-hidden
       />
 
-      <div className="relative border-l-[3px] border-sky-500/45 px-4 py-5 sm:px-6 sm:py-6">
+      <div className="relative border-l-[3px] border-indigo-500/50 px-4 py-4 sm:px-5 sm:py-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div>
-            <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Overnight Market Briefing</p>
-            <h2 className="m-0 mt-2 text-base font-semibold tracking-tight text-slate-100 sm:text-lg">전일 미국시장 브리핑</h2>
+            <p className="m-0 font-mono text-[9px] font-medium uppercase tracking-[0.2em] text-slate-500">Overnight briefing</p>
+            <h2 className="m-0 mt-1.5 text-[15px] font-semibold leading-snug tracking-tight text-slate-50 sm:text-base">
+              전일 미국시장 브리핑
+            </h2>
+            <p className="m-0 mt-1 text-[10px] leading-normal text-slate-600">US close → Asia open 맥락</p>
           </div>
           {updatedLabel ? (
             <p className="m-0 font-mono text-[9px] uppercase tracking-wider text-slate-600">Feed · {updatedLabel} KST</p>
@@ -76,15 +79,17 @@ export default function OvernightUsBriefing() {
         </div>
 
         {loading ? (
-          <p className="m-0 mt-6 text-[13px] text-slate-500">시세 로딩 중…</p>
+          <p className="m-0 mt-5 text-[12px] text-slate-500">시세 로딩 중…</p>
         ) : err ? (
-          <p className="m-0 mt-6 text-[13px] text-rose-300/90">{err}</p>
+          <p className="m-0 mt-5 text-[12px] text-rose-300/90">{err}</p>
         ) : briefing?.prose ? (
           <>
-            <p className="m-0 mt-6 text-[13px] leading-[1.85] text-slate-200 sm:text-[14px] sm:leading-[1.88]">{briefing.prose}</p>
+            <p className="m-0 mt-5 max-w-[68ch] text-[13px] leading-[1.72] tracking-[-0.01em] text-slate-200/95 sm:text-[14px] sm:leading-[1.75]">
+              {briefing.prose}
+            </p>
 
-            <p className="m-0 mt-7 border-t border-white/[0.05] pt-4 text-[10px] leading-relaxed text-slate-600">
-              시세: Yahoo Finance. 내부 규칙으로 직접 작성한 리캡이며 참고용이다.
+            <p className="m-0 mt-6 border-t border-white/[0.06] pt-3 font-mono text-[9px] leading-relaxed text-slate-600">
+              Source: Yahoo Finance · 내부 규칙 기반 리캡 · 참고용
             </p>
           </>
         ) : null}

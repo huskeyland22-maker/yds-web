@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { VALUE_CHAIN_SECTORS } from "../data/valueChainSectors.js"
 import { buildValueChainHeaderBundle } from "../utils/valueChainHero.js"
+import { buildTodaysKeySignal } from "../utils/macroTerminalPulse.js"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
 import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
@@ -13,7 +14,33 @@ function heatPillClass(heat) {
   return "text-emerald-200 bg-emerald-500/20 border-emerald-300/30"
 }
 
-export default function ValueChainPage({ panicData }) {
+function sectorMomentumPct(heat) {
+  const h = String(heat || "").toUpperCase()
+  if (h === "VERY HOT") return 100
+  if (h === "HOT") return 72
+  if (h === "WARM") return 44
+  return 24
+}
+
+function SectorMomentumBar({ heat }) {
+  const pct = sectorMomentumPct(heat)
+  return (
+    <div className="mt-2">
+      <div className="mb-1 flex items-center justify-between text-[9px] uppercase tracking-[0.14em] text-slate-500">
+        <span>Sector momentum</span>
+        <span className="font-mono tabular-nums text-slate-400">{pct}%</span>
+      </div>
+      <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-violet-600/75 via-indigo-500/70 to-sky-500/65 shadow-[0_0_12px_rgba(99,102,241,0.25)]"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+export default function ValueChainPage({ panicData, marketCycleStage }) {
   const [sectors, setSectors] = useState(() => VALUE_CHAIN_SECTORS.map((s) => ({ ...s })))
   const [heatUpdatedAt, setHeatUpdatedAt] = useState("-")
   const [selected, setSelected] = useState(null)
@@ -50,6 +77,10 @@ export default function ValueChainPage({ panicData }) {
   }, [sectors])
 
   const header = useMemo(() => buildValueChainHeaderBundle(sectors, panicData), [sectors, panicData])
+  const todaysKey = useMemo(
+    () => buildTodaysKeySignal(sectors, panicData, marketCycleStage),
+    [sectors, panicData, marketCycleStage],
+  )
 
   return (
     <div className="relative overflow-hidden rounded-[1.35rem] border border-[rgba(146,164,201,0.2)] bg-[#0c1222] shadow-[0_0_0_1px_rgba(88,132,255,0.08),0_32px_80px_rgba(0,0,0,0.5)]">
@@ -84,63 +115,69 @@ export default function ValueChainPage({ panicData }) {
           </Link>
         </nav>
 
-        <section className="relative mb-7 min-h-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(135deg,rgba(12,20,38,0.95),rgba(6,10,18,0.98))] px-4 py-6 md:px-6 md:py-7">
+        <section className="relative mb-7 min-h-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,rgba(14,18,28,0.97),rgba(8,10,16,0.99))] px-4 py-5 md:px-6 md:py-6">
           <div
-            className="pointer-events-none absolute inset-0 opacity-60"
+            className="pointer-events-none absolute inset-0 opacity-50"
             style={{
-              background: "radial-gradient(ellipse 85% 70% at 15% 0%, rgba(34,211,238,0.1), transparent 50%), radial-gradient(ellipse 55% 45% at 100% 100%, rgba(167,139,250,0.07), transparent 48%)",
+              background:
+                "radial-gradient(ellipse 80% 60% at 12% 0%, rgba(99,102,241,0.09), transparent 52%), radial-gradient(ellipse 50% 40% at 100% 100%, rgba(56,189,248,0.06), transparent 50%)",
             }}
             aria-hidden
           />
-          <div className="relative z-[1] grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_minmax(220px,280px)] lg:gap-7">
+          <div className="relative z-[1] grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_minmax(240px,300px)] lg:gap-8">
             <div className="min-w-0">
-              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan-200/70 md:text-[10px]">
-                Market control · Korea
+              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Research desk · Korea</p>
+              <p className="m-0 mt-2 text-[1.05rem] font-semibold leading-snug tracking-tight text-slate-50 md:text-[1.2rem]">
+                한국 시장의 가치 흐름을 한눈에
               </p>
-              <h1 className="m-0 mt-2 font-['Playfair_Display',Georgia,serif] text-[1.35rem] font-semibold leading-[1.06] tracking-[-0.03em] text-[#e8ecf4] sm:text-[1.5rem] sm:whitespace-nowrap md:text-[1.65rem]">
+              <p className="m-0 mt-2 font-display text-[0.95rem] font-semibold leading-none tracking-[-0.02em] text-slate-400 md:text-[1.05rem]">
                 KOREA VALUE CHAIN MAP
-              </h1>
-              <p className="m-0 mt-2.5 text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">시장 흐름</p>
-              <p className="m-0 mt-1 text-[13px] leading-snug text-slate-200 md:text-sm md:leading-snug">{header.coreFlow}</p>
-              <p className="m-0 mt-3 text-[10px] leading-normal text-slate-600">Heat 기준일 · {heatUpdatedAt}</p>
+              </p>
+              <dl className="m-0 mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
+                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">현재 시장 에너지</dt>
+                  <dd className="m-0 mt-1 text-[12px] font-medium leading-snug text-cyan-100/95">{header.marketEnergy}</dd>
+                </div>
+                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
+                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">핵심 흐름</dt>
+                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-200">{header.coreFlow}</dd>
+                </div>
+                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
+                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">위험 신호</dt>
+                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-300">{header.riskState}</dd>
+                </div>
+                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
+                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">오늘 핵심 테마</dt>
+                  <dd className="m-0 mt-1 text-[12px] leading-snug text-indigo-200/95">{todaysKey.theme}</dd>
+                </div>
+              </dl>
+              <p className="m-0 mt-3 font-mono text-[9px] text-slate-600">Heat · {heatUpdatedAt}</p>
             </div>
 
             <aside
-              className="rounded-xl border border-white/[0.08] bg-[rgba(5,9,16,0.65)] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] md:px-3.5 md:py-3.5"
-              aria-label="매크로 스냅샷"
+              className="rounded-xl border border-indigo-500/20 bg-[rgba(6,8,14,0.85)] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_0_24px_rgba(79,70,229,0.08)] md:px-4 md:py-3.5"
+              aria-label="오늘의 핵심 시그널"
             >
-              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">매크로 스냅샷</p>
-              <div className="m-0 mt-2.5 space-y-2.5 text-[11px] leading-snug">
-                <div>
-                  <p className="m-0 text-[10px] text-slate-500">핵심 테마</p>
-                  <p className="m-0 mt-0.5 font-medium text-cyan-100/92">{header.marketEnergy}</p>
+              <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-indigo-300/80">
+                Today&apos;s key signal
+              </p>
+              <div className="m-0 mt-3 space-y-2.5 text-[11px] leading-snug">
+                <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
+                  <span className="text-slate-500">Risk-on / off</span>
+                  <span className="text-right font-semibold text-slate-100">{todaysKey.riskOnOff}</span>
                 </div>
-                <div className="border-t border-white/[0.06] pt-2.5">
-                  <p className="m-0 text-[10px] text-slate-500">레짐</p>
-                  <p className="m-0 mt-0.5 font-semibold text-slate-100">{header.riskRegimeLabel}</p>
-                  <p className="m-0 mt-0.5 text-[10px] text-slate-500">{header.riskRegimeDetail}</p>
+                <p className="m-0 text-right font-mono text-[9px] text-slate-500">{todaysKey.riskDetail}</p>
+                <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
+                  <span className="text-slate-500">Leading sector</span>
+                  <span className="max-w-[11rem] text-right font-medium text-slate-100">{todaysKey.leadingSector}</span>
                 </div>
-                <div className="border-t border-white/[0.06] pt-2.5">
-                  <p className="m-0 text-[10px] text-slate-500">심리·위험</p>
-                  <p className="m-0 mt-0.5 text-slate-300">{header.riskState}</p>
+                <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
+                  <span className="text-slate-500">Foreign flow</span>
+                  <span className="max-w-[11rem] text-right text-slate-200">{todaysKey.foreignFlow}</span>
                 </div>
-                <div className="border-t border-white/[0.06] pt-2.5">
-                  <p className="m-0 text-[10px] text-slate-500">HOT 섹터</p>
-                  <div className="mt-1.5 flex flex-col gap-1.5">
-                    {header.hotSectors.map((s) => (
-                      <div key={s.name} className="flex items-center justify-between gap-2">
-                        <span className="min-w-0 truncate text-slate-200">
-                          {s.icon ? `${s.icon} ` : ""}
-                          {s.name}
-                        </span>
-                        <span
-                          className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${heatPillClass(s.heat)}`}
-                        >
-                          {s.heat}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex items-start justify-between gap-2 pt-0.5">
+                  <span className="text-slate-500">Market cycle</span>
+                  <span className="font-mono text-indigo-200/95">{todaysKey.marketCycle}</span>
                 </div>
               </div>
             </aside>
@@ -162,23 +199,24 @@ export default function ValueChainPage({ panicData }) {
             return (
               <article
                 key={sector.id}
-                className="group relative flex flex-col rounded-2xl border border-[rgba(146,164,201,0.26)] bg-[linear-gradient(180deg,rgba(18,28,52,0.82),rgba(10,16,34,0.92))] p-5 shadow-[0_0_0_1px_rgba(88,132,255,0.1),0_22px_52px_rgba(0,0,0,0.34)] transition duration-300 md:p-6"
+                className="group relative flex flex-col rounded-2xl border border-white/[0.08] bg-[linear-gradient(180deg,rgba(16,20,32,0.92),rgba(8,10,18,0.96))] p-4 shadow-[0_0_0_1px_rgba(99,102,241,0.06),0_16px_40px_rgba(0,0,0,0.4)] transition duration-300 hover:border-indigo-500/25 hover:shadow-[0_0_0_1px_rgba(99,102,241,0.12),0_20px_48px_rgba(0,0,0,0.45),0_0_28px_rgba(79,70,229,0.06)] md:p-5"
               >
                 <div
                   className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100"
                   style={{
-                    background: "radial-gradient(circle at 85% 0%, rgba(119,193,255,0.12), transparent 55%)",
+                    background: "radial-gradient(circle at 90% 0%, rgba(129,140,248,0.1), transparent 55%)",
                   }}
                   aria-hidden
                 />
-                <div className="relative z-[1] mb-4 flex items-start justify-between gap-3">
-                  <div>
-                    <p className="m-0 text-[11px] tracking-[0.16em] text-blue-200/65">SECTOR {String(index + 1).padStart(2, "0")}</p>
-                    <h3 className="m-0 mt-1.5 text-lg font-semibold leading-snug text-slate-100 md:text-xl">
+                <div className="relative z-[1] mb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="m-0 font-mono text-[10px] tracking-[0.12em] text-slate-500">SECTOR {String(index + 1).padStart(2, "0")}</p>
+                    <h3 className="m-0 mt-1 text-base font-semibold leading-snug tracking-tight text-slate-50 md:text-lg">
                       {sector.icon} {sector.name}
                     </h3>
+                    <SectorMomentumBar heat={sector.heat} />
                   </div>
-                  <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-medium md:text-[11px] ${heatPillClass(sector.heat)}`}>
+                  <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-semibold md:text-[10px] ${heatPillClass(sector.heat)}`}>
                     {sector.heat}
                   </span>
                 </div>
@@ -196,8 +234,8 @@ export default function ValueChainPage({ panicData }) {
                   </div>
                 ) : null}
 
-                <div className="relative z-[1] rounded-xl border border-[rgba(146,164,201,0.28)] bg-[linear-gradient(180deg,rgba(16,24,44,0.75),rgba(10,16,34,0.88))] p-3.5 md:p-4">
-                  <p className="m-0 text-[11px] text-slate-400">핵심 종목 · 표시 {counts}</p>
+                <div className="relative z-[1] rounded-xl border border-white/[0.06] bg-black/30 p-3 md:p-3.5">
+                  <p className="m-0 text-[10px] font-medium text-slate-500">핵심 종목 · {counts}</p>
                   <div className="mt-3 space-y-3">
                     {stages.map((stage) => (
                       <div key={stage}>
@@ -219,7 +257,7 @@ export default function ValueChainPage({ panicData }) {
                                         key={item.code || item.name}
                                         type="button"
                                         onClick={() => setSelected({ stock: item, sectorName: sector.name })}
-                                        className="group/stock inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-slate-500/30 bg-slate-900/40 px-2 py-1 text-left transition duration-200 hover:border-cyan-400/45 hover:bg-cyan-500/[0.12] hover:shadow-[0_0_22px_rgba(34,211,238,0.18)] md:gap-1.5"
+                                        className="group/stock inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] px-2 py-1 text-left transition duration-200 hover:border-indigo-400/35 hover:bg-indigo-500/[0.08] hover:shadow-[0_0_16px_rgba(99,102,241,0.12)] md:gap-1.5"
                                       >
                                         <span className="text-[11px] text-slate-200 group-hover/stock:text-white md:text-xs">{item.name}</span>
                                         <span

@@ -88,10 +88,10 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
   const timingHref = `/timing${timingPageSearchParams(stock)}`
   const tacticalBorder =
     tactical.tone === "ok"
-      ? "border-cyan-500/20 shadow-[inset_0_1px_0_rgba(34,211,238,0.07)]"
+      ? "border-violet-500/40 bg-gradient-to-b from-violet-950/[0.35] to-black/40 shadow-[0_0_36px_rgba(99,102,241,0.14),inset_0_1px_0_rgba(255,255,255,0.06)]"
       : tactical.tone === "warn"
-        ? "border-amber-500/20"
-        : "border-white/[0.08]"
+        ? "border-amber-500/30 bg-amber-950/20"
+        : "border-white/[0.08] bg-black/25"
 
   return (
     <div className="fixed inset-0 z-[6000] flex justify-end">
@@ -110,14 +110,14 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
-            background: "radial-gradient(circle at 100% 0%, rgba(34,211,238,0.12), transparent 45%)",
+            background: "radial-gradient(circle at 100% 0%, rgba(99,102,241,0.1), transparent 48%)",
           }}
           aria-hidden
         />
         <header className="relative z-[1] flex items-start justify-between gap-3 border-b border-white/[0.06] px-5 py-5">
           <div>
-            <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/75">일봉 데이터 엔진</p>
-            <h2 className="m-0 mt-2 font-['Playfair_Display',Georgia,serif] text-2xl font-semibold tracking-tight text-slate-50">{stock.name}</h2>
+            <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Terminal · 일봉</p>
+            <h2 className="m-0 mt-2 font-display text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">{stock.name}</h2>
             <p className="m-0 mt-1 text-xs text-slate-500">{sectorName}</p>
             {stock.code ? <p className="m-0 mt-0.5 font-mono text-[11px] text-slate-600">{stock.code}</p> : null}
             {snap?.dataSource === "kis" ? (
@@ -132,7 +132,7 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
               href={extUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-cyan-400/25 bg-cyan-500/10 px-3 py-2 text-[11px] font-medium text-cyan-100 transition hover:border-cyan-300/50 hover:bg-cyan-500/15"
+              className="rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-2 text-[11px] font-medium text-slate-100 transition hover:border-indigo-400/35 hover:bg-indigo-500/10"
             >
               시세
             </a>
@@ -253,16 +253,28 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
           ) : null}
 
           <div className="mt-8 border-t border-white/[0.06] pt-5">
-            <div className={`rounded-xl border bg-black/20 ${tacticalBorder} px-4 py-4`}>
-              <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-cyan-200/60">{"Y'ds Tactical Signal"}</p>
-              <p className="m-0 mt-1 text-[10px] leading-relaxed text-slate-600">대응 가이드</p>
-              <p className="m-0 mt-3 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">현재 전략</p>
-              <p className="m-0 mt-1 text-sm font-semibold tracking-tight text-slate-100">{tactical.strategy}</p>
+            <div className={`rounded-xl border px-4 py-4 ${tacticalBorder}`}>
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-violet-300/85">
+                    Tactical signal
+                  </p>
+                  <p className="m-0 mt-0.5 text-[10px] text-slate-500">실전 대응 · 리스크 관리</p>
+                </div>
+                <span className="rounded border border-violet-400/30 bg-violet-500/15 px-2 py-0.5 font-mono text-[9px] font-medium uppercase tracking-wider text-violet-200/95">
+                  {tactical.tone === "ok" ? "Active" : tactical.tone === "warn" ? "Check" : "Sync"}
+                </span>
+              </div>
+              <p className="m-0 mt-4 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">현재 전략</p>
+              <p className="m-0 mt-1 text-[13px] font-semibold leading-snug tracking-tight text-slate-50">{tactical.strategy}</p>
 
               <p className="m-0 mt-4 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">체크 포인트</p>
               <ul className="m-0 mt-2 list-none space-y-2 p-0">
                 {(tactical.checkpoints ?? []).map((line) => (
-                  <li key={line} className="relative m-0 pl-3 text-[12px] leading-relaxed text-slate-300 before:absolute before:left-0 before:top-[0.55em] before:h-1 before:w-1 before:rounded-full before:bg-amber-400/45 before:content-['']">
+                  <li
+                    key={line}
+                    className="relative m-0 border-l border-violet-500/25 pl-3 text-[12px] leading-relaxed text-slate-300"
+                  >
                     {line}
                   </li>
                 ))}
@@ -271,11 +283,11 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <Link
                   to={timingHref}
-                  className="inline-flex items-center justify-center rounded-lg border border-cyan-400/25 bg-cyan-500/[0.08] px-3 py-2 text-[11px] font-medium text-cyan-100/95 transition hover:border-cyan-300/40 hover:bg-cyan-500/[0.12]"
+                  className="inline-flex items-center justify-center rounded-lg border border-violet-400/35 bg-violet-600/[0.15] px-3 py-2 text-[11px] font-medium text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-600/[0.22]"
                 >
                   매매 시그널 보기
                 </Link>
-                <span className="text-[10px] text-slate-600">시장·체크리스트 맥락</span>
+                <span className="font-mono text-[9px] text-slate-600">CTX · timing</span>
               </div>
             </div>
           </div>

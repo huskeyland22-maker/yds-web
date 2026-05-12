@@ -5,16 +5,25 @@ export default {
     extend: {
       fontFamily: {
         sans: [
+          '"IBM Plex Sans"',
+          '"Noto Sans KR"',
           "ui-sans-serif",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
           '"Segoe UI"',
           '"Malgun Gothic"',
-          '"맑은 고딕"',
-          '"Apple SD Gothic Neo"',
           "sans-serif",
         ],
+        display: ['"Playfair Display"', "Georgia", "serif"],
+        mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"],
+      },
+      colors: {
+        terminal: {
+          bg: "#0B0E14",
+          panel: "#0F1319",
+          line: "rgba(255,255,255,0.06)",
+        },
       },
     },
   },

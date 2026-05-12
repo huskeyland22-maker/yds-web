@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { LogIn } from "lucide-react"
-import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchCycleMetricsHistory, submitManualPanicData } from "./config/api.js"
@@ -10,10 +10,11 @@ import ValueChainPage from "./components/ValueChainPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
+import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
 
 const MENU = [
   { label: "시장 사이클", path: "/cycle", active: true },
-  { label: "코리아 밸류체인 맵", path: "/value-chain", active: true },
+  { label: "코리아 밸류체인", path: "/value-chain", active: true },
   { label: "매매 타점", path: "/timing", active: true },
   { label: "AI 인사이트", path: "/insights", active: true },
 ]
@@ -566,8 +567,6 @@ function buildFinderCandidates(memos, marketCycleStage) {
 }
 
 function App() {
-  const navigate = useNavigate()
-  const location = useLocation()
   const panicData = usePanicStore((s) => s.panicData)
   const manualMode = usePanicStore((s) => s.manualMode)
   const panicInitialized = usePanicStore((s) => s.initialized)
@@ -897,6 +896,7 @@ function App() {
     }
   }
   const marketCycleStage = useMemo(() => getMarketCycleStage(panicData), [panicData])
+  const sidebarPulse = useMemo(() => buildMarketSidebarPulse(panicData, marketCycleStage), [panicData, marketCycleStage])
   const insightRows = useMemo(() => buildMemoInsightRows(recentMemos), [recentMemos])
   const flowStats = useMemo(() => buildMemoFlowStats(recentMemos), [recentMemos])
   const cycleSteps = useMemo(() => getCycleStepSequence(), [])
@@ -1018,84 +1018,107 @@ function App() {
     return { asOfDateLabel, updatedLine, sourceLine, feedKind, feedLabel }
   }, [cycleMetricHistory, panicData])
   return (
-    <div className="flex min-h-[100dvh] min-h-screen flex-col overflow-x-hidden bg-[#0b0f1a] text-gray-200 lg:flex-row">
-      <aside className="flex w-full shrink-0 flex-row gap-1 overflow-x-auto border-b border-gray-800/80 bg-[#0f172a] px-2 py-3 lg:h-[100dvh] lg:w-60 lg:flex-col lg:border-b-0 lg:border-r lg:px-2 lg:py-4">
-        <div className="mb-0 shrink-0 border-0 bg-transparent px-3 py-2 shadow-none lg:mb-4">
-          <p className="m-0 mt-1 whitespace-nowrap text-sm font-semibold text-cyan-100">
-            Y&apos;ds 투자 인사이트
-          </p>
+    <div className="flex min-h-[100dvh] min-h-screen flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased lg:flex-row">
+      <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] lg:h-[100dvh] lg:w-[17rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r xl:w-[18rem]">
+        <div className="shrink-0 px-4 pb-3 pt-3 lg:border-b lg:border-white/[0.06] lg:px-5 lg:pb-4 lg:pt-4">
+          <p className="m-0 font-display text-[1.15rem] font-semibold leading-none tracking-tight text-slate-50">Y&apos;ds</p>
+          <p className="m-0 mt-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500">Macro Terminal</p>
         </div>
-        <nav className="flex min-h-[48px] flex-1 flex-row items-stretch gap-1 lg:flex-col lg:items-stretch lg:px-2">
-          {MENU.map((item) => (
-            <div
-              key={item.label}
-              role="presentation"
-              onClick={() => {
-                if (item.active) {
-                  navigate(item.path)
-                } else {
-                  alert("준비 중입니다")
-                }
-              }}
-              className={
-                item.active && location.pathname === item.path
-                  ? "flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg bg-purple-600 font-medium text-white lg:min-w-0 lg:justify-start"
-                  : item.active
-                    ? "flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg text-gray-300 transition-colors hover:bg-gray-800/60 lg:min-w-0 lg:justify-start"
-                    : "flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg text-gray-500 lg:min-w-0 lg:justify-start"
+        <nav
+          className="flex min-h-[48px] flex-1 flex-row items-stretch gap-0.5 overflow-x-auto px-1 py-2 lg:flex-col lg:gap-1 lg:overflow-x-visible lg:px-3 lg:py-3"
+          aria-label="주요 메뉴"
+        >
+          {MENU.map((item, i) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                [
+                  "flex min-h-[44px] min-w-[44px] shrink-0 items-center gap-2.5 rounded-lg border px-3 py-2.5 transition lg:min-h-0 lg:min-w-0 lg:w-full",
+                  isActive
+                    ? "border-indigo-500/30 bg-indigo-500/[0.14] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+                    : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-slate-200",
+                ].join(" ")
               }
-              style={{
-                fontSize: isMobile ? "14px" : "18px",
-                padding: isMobile ? "10px 14px" : "14px 24px",
-              }}
             >
-              <span className="whitespace-nowrap">{item.label}</span>
-              {!item.active ? <span className="ml-2 text-[10px] text-gray-600">준비중</span> : null}
-            </div>
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`font-mono text-[10px] tabular-nums ${isActive ? "text-indigo-300/95" : "text-slate-600"}`}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="whitespace-nowrap text-[13px] font-medium tracking-tight">{item.label}</span>
+                </>
+              )}
+            </NavLink>
           ))}
         </nav>
-        <div className="hidden lg:block lg:mt-auto lg:px-2 lg:pt-5">
+        <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-4 lg:pb-5 lg:pt-4">
+          <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Market status</p>
+          <dl className="m-0 mt-3 space-y-2 font-mono text-[10px] leading-snug">
+            <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
+              <dt className="text-slate-500">Risk appetite</dt>
+              <dd
+                className={
+                  sidebarPulse.riskAppetite === "ON"
+                    ? "text-emerald-300/95"
+                    : sidebarPulse.riskAppetite === "OFF"
+                      ? "text-rose-300/90"
+                      : "text-amber-200/85"
+                }
+              >
+                {sidebarPulse.riskAppetite}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
+              <dt className="text-slate-500">Market mood</dt>
+              <dd className="text-slate-200">{sidebarPulse.marketMood}</dd>
+            </div>
+            <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
+              <dt className="text-slate-500">Leading</dt>
+              <dd className="max-w-[9rem] truncate text-right text-slate-200">{sidebarPulse.leadingSector}</dd>
+            </div>
+            <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
+              <dt className="text-slate-500">Volatility</dt>
+              <dd className="text-slate-200">{sidebarPulse.volatility}</dd>
+            </div>
+            <div className="flex justify-between gap-2 pt-0.5">
+              <dt className="text-slate-500">Cycle</dt>
+              <dd className="text-indigo-200/90">{sidebarPulse.cycleStage}</dd>
+            </div>
+          </dl>
+          <p className="m-0 mt-3 font-mono text-[9px] leading-relaxed text-slate-600">
+            VIX {Number.isFinite(Number(panicData?.vix)) ? Number(panicData.vix).toFixed(2) : "—"} · F&amp;G{" "}
+            {Number.isFinite(Number(panicData?.fearGreed)) ? Math.round(Number(panicData.fearGreed)) : "—"}
+          </p>
           <button
             type="button"
             onClick={() => setOpenInput(true)}
-            className="w-full rounded-lg border border-violet-500/40 bg-violet-500/20 px-2 py-2 text-xs text-violet-300 transition-colors hover:bg-violet-500/30"
+            className="mt-3 w-full rounded-lg border border-violet-500/25 bg-violet-500/[0.08] px-2 py-2 text-[11px] font-medium text-violet-200/95 transition hover:border-violet-400/35 hover:bg-violet-500/[0.14]"
           >
-            🤖 AI 리포트 입력
+            AI 리포트 입력
           </button>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex min-h-[52px] shrink-0 flex-wrap items-center justify-end gap-3 border-b border-gray-800/80 bg-[#0b0f1a] px-4 py-3 sm:px-6">
-          <div
-            className={`flex flex-wrap items-center gap-2 ${isMobile ? "w-full justify-center" : "justify-end"}`}
-          >
+        <header className="flex min-h-[48px] shrink-0 flex-wrap items-center justify-end gap-2 border-b border-white/[0.06] bg-[#0B0E14]/95 px-4 py-2.5 backdrop-blur-sm sm:px-6">
+          <div className={`flex flex-wrap items-center gap-2 ${isMobile ? "w-full justify-center" : "justify-end"}`}>
             <div className="flex items-center gap-2">
-                <div
-                  className="
-                  flex items-center gap-3
-                  rounded-2xl
-                  border border-cyan-400/20
-                  bg-white/5
-                  px-4 py-2
-                  shadow-[0_0_20px_rgba(0,255,255,0.08)]
-                  backdrop-blur-md
-                  transition-all duration-300
-                  hover:border-cyan-300/40
-                "
-                >
+                <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 transition hover:border-white/[0.12]">
                   {user ? (
                     <>
                       <img
                         src={user.photoURL || "https://placehold.co/72x72/0f172a/e2e8f0?text=U"}
                         alt="사용자 프로필"
-                        className="h-9 w-9 rounded-full border border-cyan-400/30 object-cover"
+                        className="h-9 w-9 rounded-full border border-white/15 object-cover"
                       />
                       <div className="leading-tight">
                         <span className="max-w-[140px] truncate text-sm font-semibold text-white">
                           {user.displayName || user.email || "로그인 유저"}
                         </span>
-                        <div className="text-[11px] text-cyan-300/70">Premium Access</div>
+                        <div className="text-[11px] text-slate-500">Premium access</div>
                       </div>
                       <button
                         type="button"
@@ -1109,7 +1132,7 @@ function App() {
                     <button
                       type="button"
                       onClick={login}
-                      className="flex items-center gap-2 text-sm font-medium text-cyan-100 transition hover:text-white"
+                      className="flex items-center gap-2 text-sm font-medium text-slate-200 transition hover:text-white"
                       style={{ width: isMobile ? "100%" : "auto" }}
                     >
                       <LogIn size={16} />
@@ -1118,34 +1141,31 @@ function App() {
                   )}
                 </div>
               </div>
-              <span className="rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2 py-1 text-[11px] font-semibold text-cyan-200">
-                Web First 안정화
-              </span>
-              <span className="rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-2 py-1 text-[11px] font-semibold text-cyan-200">
+              <span className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 font-mono text-[10px] text-slate-400">
                 {buildVersion}
               </span>
             </div>
         </header>
 
-        <main className="flex-1 overflow-auto px-4 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        <main className="flex-1 overflow-auto px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5 sm:py-5 lg:px-7 lg:py-6">
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route
               path="/cycle"
               element={
                 <div className="space-y-5">
-                  <section className="rounded-xl bg-gradient-to-br from-white/[0.06] via-slate-800/20 to-transparent p-px shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
-                    <div className="rounded-[11px] bg-[#070a10] px-4 py-4 sm:px-5 sm:py-5">
+                  <section className="rounded-xl border border-white/[0.07] bg-[#0a0c12] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <div className="px-4 py-4 sm:px-5 sm:py-5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                          Macro cycle · 관제 데스크
+                        <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                          Macro cycle · desk
                         </p>
                         <p className="m-0 font-mono text-[9px] uppercase tracking-wider text-slate-600">
                           As of {cycleDeskMeta.asOfDateLabel} · {cycleDeskMeta.updatedLine}
                         </p>
                       </div>
-                      <p className="m-0 mt-2 text-lg font-semibold tracking-tight text-slate-100 sm:text-xl">
-                        현재 시장 단계: <span className="text-slate-50">{heroSummary.stage}</span>
+                      <p className="m-0 mt-2 text-base font-semibold tracking-tight text-slate-100 sm:text-lg">
+                        현재 시장 단계: <span className="font-mono text-indigo-200/95">{heroSummary.stage}</span>
                       </p>
                       <div className="mt-3 grid gap-2 border-t border-white/[0.05] pt-3 text-sm text-slate-300 sm:grid-cols-3">
                         <p className="m-0">
@@ -1220,7 +1240,7 @@ function App() {
                 </div>
               }
             />
-            <Route path="/value-chain" element={<ValueChainPage panicData={panicData} />} />
+            <Route path="/value-chain" element={<ValueChainPage panicData={panicData} marketCycleStage={marketCycleStage} />} />
             <Route
               path="/timing"
               element={
