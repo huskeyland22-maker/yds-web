@@ -1115,9 +1115,10 @@ function App() {
             <button
               type="button"
               onClick={() => setOpenInput(true)}
-              className="rounded-lg border border-violet-500/30 bg-violet-500/[0.10] px-3 py-1.5 text-[11px] font-medium text-violet-200 transition hover:border-violet-400/40 hover:bg-violet-500/[0.18] lg:hidden"
+              className="flex items-center gap-1.5 rounded-lg border border-violet-400/50 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-3 py-1.5 text-[12px] font-semibold text-white shadow-[0_2px_8px_rgba(124,58,237,0.35)] transition active:scale-95 lg:hidden"
               aria-label="AI 리포트 입력"
             >
+              <span aria-hidden="true" className="text-sm leading-none">＋</span>
               AI 리포트
             </button>
             <div className="flex items-center gap-2">
@@ -1318,6 +1319,21 @@ function App() {
           </Routes>
         </main>
       </div>
+      {!openInput ? (
+        <button
+          type="button"
+          onClick={() => setOpenInput(true)}
+          aria-label="AI 리포트 입력 열기"
+          className="fixed z-[9998] flex items-center gap-2 rounded-full border border-violet-400/40 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(124,58,237,0.45)] transition active:scale-95 lg:hidden"
+          style={{
+            bottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem))",
+            right: "max(1rem, calc(env(safe-area-inset-right) + 0.75rem))",
+          }}
+        >
+          <span aria-hidden="true" className="text-lg leading-none">＋</span>
+          <span>AI 리포트</span>
+        </button>
+      ) : null}
       {openInput ? (
       <div
         className="fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] w-[360px] max-w-[100vw] flex-col bg-[#111827] p-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[-6px_0_20px_rgba(0,0,0,0.6)] transition-transform duration-300 translate-x-0"
@@ -1326,9 +1342,19 @@ function App() {
           pointerEvents: "auto",
         }}
       >
-        <div className="mb-4 rounded-2xl border border-cyan-500/10 bg-[#0b1220] p-3">
-          <h3 style={{ color: "#c4b5fd", marginBottom: "5px" }}>패닉지수 텍스트 붙여넣기</h3>
-          <p style={{ fontSize: "12px", color: "#64748b" }}>표 형태 텍스트를 그대로 붙여넣으면 자동으로 수치를 추출합니다.</p>
+        <div className="mb-4 flex items-start justify-between gap-2 rounded-2xl border border-cyan-500/10 bg-[#0b1220] p-3">
+          <div className="min-w-0">
+            <h3 style={{ color: "#c4b5fd", margin: 0, marginBottom: "5px" }}>패닉지수 텍스트 붙여넣기</h3>
+            <p style={{ fontSize: "12px", color: "#64748b", margin: 0 }}>표 형태 텍스트를 그대로 붙여넣으면 자동으로 수치를 추출합니다.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpenInput(false)}
+            aria-label="입력 창 닫기"
+            className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-slate-300 transition hover:border-white/[0.16] hover:bg-white/[0.08] hover:text-white"
+          >
+            <span aria-hidden="true" className="text-base leading-none">×</span>
+          </button>
         </div>
         <textarea
           value={inputText}
