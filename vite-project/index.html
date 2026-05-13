@@ -2,85 +2,247 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap"
       rel="stylesheet"
     />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0B0E14" />
     <meta name="description" content="Y'ds 패닉 지수 · 시그널 데스크" />
+
+    <!-- iOS PWA hints (apple-mobile-web-app-* are required for standalone freshness behavior) -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Market Pulse" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+
     <title>Y'ds 투자 인사이트</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module">
-      async function bootstrapLatestBuild() {
-        const BUILD_KEY = "yds-build-version"
-        const HARD_RELOAD_KEY = "yds-hard-reload-at"
-        const HARD_RELOAD_COOLDOWN_MS = 8000
-        const now = Date.now()
+      // -----------------------------------------------------------------------------
+      // Critical PWA bootstrap: runs before the app bundle is fetched.
+      // Goals:
+      //   - Detect new builds before loading the cached JS chunk graph
+      //   - Force-evict any legacy Service Worker + Cache Storage entries (iOS standalone)
+      //   - Survive HTML being served from an aggressive CDN/UA cache
+      //   - Auto-recover when a stale HTML references an asset that no longer exists
+      // -----------------------------------------------------------------------------
+      const BUILD_KEY = "yds-build-version"
+      const BUILD_ID_KEY = "yds-build-id"
+      const HARD_RELOAD_AT_KEY = "yds-hard-reload-at"
+      const HARD_RELOAD_COOLDOWN_MS = 6000
+      const VERSION_POLL_COOLDOWN_MS = 8000
+      const HTML_BUILD_ID = (document.querySelector('meta[name="app-build-id"]')?.content || "").trim()
 
-        const forceHardReload = async (latestVersion) => {
+      const safeStorage = {
+        get(area, key) {
           try {
-            const regs = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistrations() : []
-            await Promise.all(regs.map((r) => r.unregister()))
+            return window[area]?.getItem(key)
           } catch {
-            // noop
+            return null
           }
+        },
+        set(area, key, value) {
           try {
-            if ("caches" in window) {
-              const keys = await caches.keys()
-              await Promise.all(keys.map((k) => caches.delete(k)))
-            }
+            window[area]?.setItem(key, value)
           } catch {
-            // noop
+            // ignore
           }
-          // 저장 안정화 우선: 강제 리로드 시 manual 스냅샷 보존
-          localStorage.setItem(BUILD_KEY, latestVersion)
-          sessionStorage.setItem(HARD_RELOAD_KEY, String(now))
-          const next = new URL(window.location.href)
-          next.searchParams.set("hard_reload", String(now))
-          window.location.replace(`${next.pathname}${next.search}`)
+        },
+        remove(area, key) {
+          try {
+            window[area]?.removeItem(key)
+          } catch {
+            // ignore
+          }
+        },
+      }
+
+      function detectIosStandalone() {
+        try {
+          const ua = navigator.userAgent || ""
+          const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+          const standalone =
+            window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true
+          return ios && standalone
+        } catch {
+          return false
         }
+      }
 
-        let latestVersion = null
+      async function purgeServiceWorkers() {
+        if (!("serviceWorker" in navigator)) return
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations()
+          await Promise.all(regs.map((r) => r.unregister().catch(() => null)))
+        } catch {
+          // noop
+        }
+      }
+
+      async function purgeCacheStorage() {
+        if (!("caches" in window)) return
+        try {
+          const keys = await caches.keys()
+          await Promise.all(keys.map((k) => caches.delete(k).catch(() => null)))
+        } catch {
+          // noop
+        }
+      }
+
+      function buildCacheBustUrl(extra) {
+        const next = new URL(window.location.href)
+        next.searchParams.set("pwa_v", String(Date.now()))
+        if (extra) next.searchParams.set(extra.key, extra.value)
+        return `${next.pathname}${next.search}`
+      }
+
+      async function fetchLatestBuildMeta() {
         try {
           const res = await fetch(`/build-version.json?t=${Date.now()}`, {
             cache: "no-store",
+            credentials: "omit",
             headers: {
               Pragma: "no-cache",
-              "Cache-Control": "no-cache, no-store, must-revalidate",
+              "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
             },
           })
-          if (res.ok) {
-            const json = await res.json()
-            latestVersion = typeof json?.version === "string" ? json.version : null
-          }
+          if (!res.ok) return null
+          const json = await res.json()
+          return json && typeof json === "object" ? json : null
         } catch {
-          // ignore and continue boot
+          return null
+        }
+      }
+
+      async function forceHardReload(reason) {
+        const now = Date.now()
+        const last = Number(safeStorage.get("sessionStorage", HARD_RELOAD_AT_KEY) || "0")
+        if (Number.isFinite(last) && now - last < HARD_RELOAD_COOLDOWN_MS) {
+          return false
+        }
+        safeStorage.set("sessionStorage", HARD_RELOAD_AT_KEY, String(now))
+        console.warn("[PWA] hard reload", reason)
+        await purgeServiceWorkers()
+        await purgeCacheStorage()
+        window.location.replace(buildCacheBustUrl({ key: "reason", value: reason || "stale" }))
+        return true
+      }
+
+      function listenForStaleChunkErrors() {
+        const isAssetUrl = (url) => typeof url === "string" && url.includes("/assets/")
+        const handleChunkFailure = () => {
+          void forceHardReload("chunk-load-error")
         }
 
-        const currentVersion = localStorage.getItem(BUILD_KEY)
-        const lastHardReloadAt = Number(sessionStorage.getItem(HARD_RELOAD_KEY) || "0")
-        const canHardReload = !Number.isFinite(lastHardReloadAt) || now - lastHardReloadAt > HARD_RELOAD_COOLDOWN_MS
+        window.addEventListener(
+          "error",
+          (event) => {
+            const target = event?.target
+            if (!target || target === window) return
+            const tag = target.tagName
+            if (tag !== "SCRIPT" && tag !== "LINK") return
+            const src = target.src || target.href
+            if (isAssetUrl(src)) handleChunkFailure()
+          },
+          true,
+        )
 
-        if (latestVersion && currentVersion && currentVersion !== latestVersion && canHardReload) {
-          await forceHardReload(latestVersion)
-          return
+        window.addEventListener("unhandledrejection", (event) => {
+          const reason = event?.reason
+          const msg = String(reason?.message || reason || "")
+          if (/Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(msg)) {
+            handleChunkFailure()
+          }
+        })
+      }
+
+      async function ensureLatestBuild() {
+        const remote = await fetchLatestBuildMeta()
+        if (!remote || !remote.buildId) return { remote: null }
+
+        const storedBuildId = safeStorage.get("localStorage", BUILD_ID_KEY)
+        const storedVersion = safeStorage.get("localStorage", BUILD_KEY)
+
+        // If the HTML embedded build-id disagrees with the latest published one,
+        // the HTML itself is stale — the only safe move is to evict caches & reload.
+        if (HTML_BUILD_ID && HTML_BUILD_ID !== String(remote.buildId)) {
+          await forceHardReload("html-build-mismatch")
+          return { remote, reloaded: true }
         }
 
-        if (latestVersion) {
-          localStorage.setItem(BUILD_KEY, latestVersion)
-          console.log("[PWA] LATEST BUILD LOADED:", latestVersion)
+        if (storedBuildId && String(storedBuildId) !== String(remote.buildId)) {
+          await forceHardReload("client-build-mismatch")
+          return { remote, reloaded: true }
+        }
+
+        safeStorage.set("localStorage", BUILD_ID_KEY, String(remote.buildId))
+        if (typeof remote.version === "string" && remote.version) {
+          safeStorage.set("localStorage", BUILD_KEY, remote.version)
+        }
+        return { remote, reloaded: false }
+      }
+
+      function installVisibilityPoller() {
+        let lastPollAt = 0
+        const poll = async () => {
+          const now = Date.now()
+          if (now - lastPollAt < VERSION_POLL_COOLDOWN_MS) return
+          lastPollAt = now
+          await ensureLatestBuild()
+        }
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") void poll()
+        })
+        window.addEventListener("focus", () => void poll())
+        window.addEventListener("pageshow", (event) => {
+          // bfcache restore on iOS standalone — must re-check freshness
+          if (event.persisted) void poll()
+          else void poll()
+        })
+      }
+
+      async function bootstrap() {
+        listenForStaleChunkErrors()
+        // Always purge any legacy SW we may have shipped in older builds. This is
+        // unconditional because iOS standalone aggressively keeps SW state alive.
+        await purgeServiceWorkers()
+
+        // First-paint freshness gate. If a hard reload is triggered, we bail here.
+        const result = await ensureLatestBuild()
+        if (result?.reloaded) return
+
+        installVisibilityPoller()
+
+        // On iOS standalone the OS may resume the WebView with stale state — poll
+        // a bit more aggressively for the first minute after launch.
+        if (detectIosStandalone()) {
+          let ticks = 0
+          const id = window.setInterval(() => {
+            ticks += 1
+            void ensureLatestBuild()
+            if (ticks >= 6) window.clearInterval(id)
+          }, 10_000)
         }
 
         await import("/src/main.jsx")
       }
 
-      void bootstrapLatestBuild()
+      void bootstrap()
     </script>
   </body>
 </html>

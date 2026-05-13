@@ -2,36 +2,84 @@
   "installCommand": "npm install --prefix vite-project",
   "buildCommand": "npm run build --prefix vite-project",
   "outputDirectory": "vite-project/dist",
-  "rewrites": [{ "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
+  ],
   "headers": [
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Pragma", "value": "no-cache" },
+        { "key": "Expires", "value": "0" },
+        { "key": "Vary", "value": "*" }
+      ]
+    },
     {
       "source": "/index.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Pragma", "value": "no-cache" },
+        { "key": "Expires", "value": "0" },
+        { "key": "Vary", "value": "*" }
       ]
     },
     {
       "source": "/manifest.webmanifest",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate, max-age=0" }
+        { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
       ]
     },
     {
       "source": "/manifest.json",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+        { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
       ]
     },
     {
       "source": "/build-version.json",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Pragma", "value": "no-cache" }
       ]
     },
     {
       "source": "/data.json",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/firebase-messaging-sw.js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" },
+        { "key": "Service-Worker-Allowed", "value": "/" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
       ]
     },
     {
@@ -43,7 +91,9 @@
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
       ]
     }
   ]

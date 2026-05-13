@@ -4,17 +4,21 @@ import { BrowserRouter } from "react-router-dom"
 import "./index.css"
 import App from "./App.jsx"
 
-const WEB_FIRST_STABILIZATION_MODE = true
-const FRESHNESS_FIRST_MODE = false
-const STORAGE_STABILITY_MODE = true
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
-const APP_VERSION = `App Version ${new Date().toISOString().slice(0, 10).replace(/-/g, ".")}.${String(import.meta.env.VITE_APP_BUILD_ID ?? "dev").slice(-1)}`
+const BUILD_ID_KEY = "yds-build-id"
+const BUILD_VERSION_KEY = "yds-build-version"
+const LAST_VERSION_POLL_KEY = "yds-last-version-poll-at"
+const HARD_RELOAD_AT_KEY = "yds-hard-reload-at"
+const HARD_RELOAD_COOLDOWN_MS = 6000
+const VERSION_POLL_COOLDOWN_MS = 8000
+const APP_BUILD_ID = String(import.meta.env.VITE_APP_BUILD_ID ?? "dev")
+const APP_VERSION = `App Version ${new Date().toISOString().slice(0, 10).replace(/-/g, ".")}.${APP_BUILD_ID.slice(-1)}`
 
 async function unregisterAllServiceWorkers() {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return
   try {
     const regs = await navigator.serviceWorker.getRegistrations()
-    await Promise.all(regs.map((r) => r.unregister()))
+    await Promise.all(regs.map((r) => r.unregister().catch(() => null)))
   } catch {
     // ignore
   }
@@ -24,7 +28,7 @@ async function clearAllCaches() {
   if (typeof window === "undefined" || !("caches" in window)) return
   try {
     const keys = await caches.keys()
-    await Promise.all(keys.map((k) => caches.delete(k)))
+    await Promise.all(keys.map((k) => caches.delete(k).catch(() => null)))
   } catch {
     // ignore
   }
@@ -69,20 +73,6 @@ async function forceResetAllClientState() {
   }
 }
 
-async function forceLatestManifestFetch() {
-  try {
-    await fetch(`/manifest.json?t=${Date.now()}`, {
-      cache: "no-store",
-      headers: {
-        Pragma: "no-cache",
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-      },
-    })
-  } catch {
-    // ignore
-  }
-}
-
 function cleanupStaleAutoSnapshot() {
   if (typeof window === "undefined") return
   try {
@@ -93,7 +83,7 @@ function cleanupStaleAutoSnapshot() {
       window.localStorage.removeItem(PANIC_MAIN_STORAGE_KEY)
       return
     }
-    // manual snapshot은 보존, 자동 baseline snapshot만 부팅 시 정리
+    // 사용자 manual snapshot은 절대 폐기하지 않음 — auto baseline 만 부팅 시 정리
     if (!parsed.isManual) {
       window.localStorage.removeItem(PANIC_MAIN_STORAGE_KEY)
     }
@@ -110,98 +100,122 @@ function isIosStandalone() {
   return ios && standalone
 }
 
-function getCacheBustUrl() {
+function buildCacheBustUrl(extra) {
   if (typeof window === "undefined") return "/"
   const next = new URL(window.location.href)
   next.searchParams.set("pwa_v", String(Date.now()))
+  if (extra?.key) next.searchParams.set(extra.key, extra.value)
   return `${next.pathname}${next.search}`
 }
 
-function forceIosBootRefreshOnce() {
-  if (!isIosStandalone()) return
-  if (typeof window === "undefined") return
-  const key = "ios-pwa-boot-refresh-once"
-  if (window.sessionStorage.getItem(key) === "1") return
-  window.sessionStorage.setItem(key, "1")
-  window.location.replace(getCacheBustUrl())
-}
-
-async function disableLegacySwOnIosStandalone() {
-  if (!isIosStandalone()) return
-  if (!("serviceWorker" in navigator)) return
+async function hardReloadWithCooldown(reason) {
+  if (typeof window === "undefined") return false
   try {
-    const regs = await navigator.serviceWorker.getRegistrations()
-    await Promise.all(regs.map((r) => r.unregister()))
+    const last = Number(window.sessionStorage.getItem(HARD_RELOAD_AT_KEY) || "0")
+    const now = Date.now()
+    if (Number.isFinite(last) && now - last < HARD_RELOAD_COOLDOWN_MS) return false
+    window.sessionStorage.setItem(HARD_RELOAD_AT_KEY, String(now))
   } catch {
     // ignore
   }
+  console.warn("[PWA] runtime hard reload", reason)
+  await unregisterAllServiceWorkers()
+  await clearAllCaches()
+  window.location.replace(buildCacheBustUrl({ key: "reason", value: reason || "runtime" }))
+  return true
 }
 
 async function fetchRemoteBuildMeta() {
-  const res = await fetch(`/build-version.json?t=${Date.now()}`, {
-    cache: "no-store",
-    headers: {
-      Pragma: "no-cache",
-      "Cache-Control": "no-cache, no-store, must-revalidate",
-    },
-  })
-  if (!res.ok) return null
-  return res.json()
+  try {
+    const res = await fetch(`/build-version.json?t=${Date.now()}`, {
+      cache: "no-store",
+      credentials: "omit",
+      headers: {
+        Pragma: "no-cache",
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+      },
+    })
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
 }
 
-async function syncBuildVersionOnIOS() {
-  if (!isIosStandalone()) return
-  if (STORAGE_STABILITY_MODE) return
+async function pollLatestBuildAndReloadIfStale() {
   if (typeof window === "undefined") return
   try {
-    const remote = await fetchRemoteBuildMeta()
-    if (!remote?.buildId) return
-    const key = "yds-last-seen-build-id"
-    const seen = window.localStorage.getItem(key)
-    if (!seen) {
-      window.localStorage.setItem(key, String(remote.buildId))
-      return
+    const lastAt = Number(window.sessionStorage.getItem(LAST_VERSION_POLL_KEY) || "0")
+    const now = Date.now()
+    if (Number.isFinite(lastAt) && now - lastAt < VERSION_POLL_COOLDOWN_MS) return
+    window.sessionStorage.setItem(LAST_VERSION_POLL_KEY, String(now))
+  } catch {
+    // ignore
+  }
+
+  const remote = await fetchRemoteBuildMeta()
+  if (!remote?.buildId) return
+
+  if (String(remote.buildId) !== APP_BUILD_ID) {
+    await hardReloadWithCooldown("runtime-build-mismatch")
+    return
+  }
+
+  try {
+    window.localStorage.setItem(BUILD_ID_KEY, String(remote.buildId))
+    if (typeof remote.version === "string" && remote.version) {
+      window.localStorage.setItem(BUILD_VERSION_KEY, remote.version)
     }
-    if (seen === String(remote.buildId)) return
-    showUpdateToast("새 버전 감지 · 앱 재시작")
-    await disableLegacySwOnIosStandalone()
-    await clearAllCaches()
-    window.localStorage.setItem(key, String(remote.buildId))
-    window.setTimeout(() => {
-      window.location.replace(getCacheBustUrl())
-    }, 400)
   } catch {
     // ignore
   }
 }
 
-function showUpdateToast(message) {
-  if (typeof document === "undefined") return
-  const el = document.createElement("div")
-  el.textContent = message
-  el.style.position = "fixed"
-  el.style.left = "50%"
-  el.style.bottom = "20px"
-  el.style.transform = "translateX(-50%)"
-  el.style.zIndex = "99999"
-  el.style.padding = "10px 14px"
-  el.style.borderRadius = "10px"
-  el.style.fontSize = "12px"
-  el.style.fontWeight = "600"
-  el.style.color = "#bbf7d0"
-  el.style.background = "rgba(6, 78, 59, 0.92)"
-  el.style.border = "1px solid rgba(74, 222, 128, 0.35)"
-  document.body.appendChild(el)
-  window.setTimeout(() => {
-    el.remove()
-  }, 1700)
+function installChunkLoadFailureRecovery() {
+  if (typeof window === "undefined") return
+  const isAssetUrl = (url) => typeof url === "string" && url.includes("/assets/")
+  const trigger = () => {
+    void hardReloadWithCooldown("chunk-load-error")
+  }
+
+  window.addEventListener(
+    "error",
+    (event) => {
+      const target = event?.target
+      if (!target || target === window) return
+      const tag = target.tagName
+      if (tag !== "SCRIPT" && tag !== "LINK") return
+      const src = target.src || target.href
+      if (isAssetUrl(src)) trigger()
+    },
+    true,
+  )
+
+  window.addEventListener("unhandledrejection", (event) => {
+    const reason = event?.reason
+    const msg = String(reason?.message || reason || "")
+    if (/Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(msg)) {
+      trigger()
+    }
+  })
 }
 
-if (FRESHNESS_FIRST_MODE) {
-  // cleanup is now awaited in bootstrap()
+function installLifecycleVersionPoller() {
+  if (typeof window === "undefined" || typeof document === "undefined") return
+  const onVisible = () => {
+    if (document.visibilityState === "visible") void pollLatestBuildAndReloadIfStale()
+  }
+  const onFocus = () => void pollLatestBuildAndReloadIfStale()
+  const onPageShow = () => void pollLatestBuildAndReloadIfStale()
+
+  document.addEventListener("visibilitychange", onVisible)
+  window.addEventListener("focus", onFocus)
+  window.addEventListener("pageshow", onPageShow)
 }
 
 async function bootstrapApp() {
+  installChunkLoadFailureRecovery()
+
   if (typeof window !== "undefined") {
     const currentUrl = new URL(window.location.href)
     if (currentUrl.searchParams.get("reset-cache") === "true") {
@@ -213,32 +227,33 @@ async function bootstrapApp() {
     }
   }
 
-  if (FRESHNESS_FIRST_MODE) {
-    await unregisterAllServiceWorkers()
-    await clearAllCaches()
-    cleanupStaleAutoSnapshot()
-  }
-  // Web First policy: always disable runtime SW caching.
+  // Always strip any stale Service Worker that older deployments may have installed.
   await unregisterAllServiceWorkers()
-  if (WEB_FIRST_STABILIZATION_MODE) {
-    await clearAllCaches()
-    cleanupStaleAutoSnapshot()
-  } else {
-    if (!STORAGE_STABILITY_MODE) {
-      forceIosBootRefreshOnce()
+  cleanupStaleAutoSnapshot()
+
+  // Persist the build id we are actually running so the next launch can detect drift.
+  try {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(BUILD_ID_KEY, APP_BUILD_ID)
     }
-    await forceLatestManifestFetch()
-    await syncBuildVersionOnIOS()
-    if (typeof document !== "undefined" && isIosStandalone()) {
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-          void syncBuildVersionOnIOS()
-        }
-      })
-    }
+  } catch {
+    // ignore
   }
-  const cacheKeys = typeof window !== "undefined" && "caches" in window ? await caches.keys() : []
-  console.log("[WEB-FIRST] boot", { appVersion: APP_VERSION, cacheKeys, sw: "disabled", webFirst: WEB_FIRST_STABILIZATION_MODE })
+
+  installLifecycleVersionPoller()
+
+  // iOS standalone: poll a few extra times during the first minute since iOS will
+  // resume the WebView from a frozen state and may not fire visibilitychange.
+  if (isIosStandalone()) {
+    let ticks = 0
+    const id = window.setInterval(() => {
+      ticks += 1
+      void pollLatestBuildAndReloadIfStale()
+      if (ticks >= 6) window.clearInterval(id)
+    }, 10_000)
+  }
+
+  console.log("[PWA] boot", { appVersion: APP_VERSION, appBuildId: APP_BUILD_ID, iosStandalone: isIosStandalone() })
 
   createRoot(document.getElementById("root")).render(
     <StrictMode>
