@@ -4,12 +4,15 @@ import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchCycleMetricsHistory, submitManualPanicData } from "./config/api.js"
+import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import OvernightUsBriefing from "./components/OvernightUsBriefing.jsx"
+import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
+import { buildCycleDeskHeroContext } from "./utils/cycleDeskHero.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
 
 const MENU = [
@@ -1017,9 +1020,13 @@ function App() {
 
     return { asOfDateLabel, updatedLine, sourceLine, feedKind, feedLabel }
   }, [cycleMetricHistory, panicData])
+  const cycleHeroContext = useMemo(
+    () => buildCycleDeskHeroContext(panicData, marketCycleStage, heroSummary),
+    [panicData, marketCycleStage, heroSummary],
+  )
   return (
-    <div className="flex min-h-[100dvh] min-h-screen flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased lg:flex-row">
-      <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] lg:h-[100dvh] lg:w-[17rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r xl:w-[18rem]">
+    <div className="flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased lg:flex-row">
+      <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] lg:h-[100dvh] lg:w-[17rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:pt-[env(safe-area-inset-top)] lg:pb-[env(safe-area-inset-bottom)] xl:w-[18rem]">
         <div className="shrink-0 px-4 pb-3 pt-3 lg:border-b lg:border-white/[0.06] lg:px-5 lg:pb-4 lg:pt-4">
           <p className="m-0 font-display text-[1.15rem] font-semibold leading-none tracking-tight text-slate-50">Y&apos;ds</p>
           <p className="m-0 mt-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500">Macro Terminal</p>
@@ -1103,8 +1110,16 @@ function App() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex min-h-[48px] shrink-0 flex-wrap items-center justify-end gap-2 border-b border-white/[0.06] bg-[#0B0E14]/95 px-4 py-2.5 backdrop-blur-sm sm:px-6">
+        <header className="flex min-h-[48px] shrink-0 flex-wrap items-center justify-end gap-2 border-b border-white/[0.06] bg-[#0B0E14]/95 px-4 py-2.5 backdrop-blur-sm sm:px-6 lg:pt-[calc(0.625rem+env(safe-area-inset-top))]">
           <div className={`flex flex-wrap items-center gap-2 ${isMobile ? "w-full justify-center" : "justify-end"}`}>
+            <button
+              type="button"
+              onClick={() => setOpenInput(true)}
+              className="rounded-lg border border-violet-500/30 bg-violet-500/[0.10] px-3 py-1.5 text-[11px] font-medium text-violet-200 transition hover:border-violet-400/40 hover:bg-violet-500/[0.18] lg:hidden"
+              aria-label="AI 리포트 입력"
+            >
+              AI 리포트
+            </button>
             <div className="flex items-center gap-2">
                 <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 transition hover:border-white/[0.12]">
                   {user ? (
@@ -1154,38 +1169,12 @@ function App() {
               path="/cycle"
               element={
                 <div className="space-y-5">
-                  <section className="rounded-xl border border-white/[0.07] bg-[#0a0c12] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-                    <div className="px-4 py-4 sm:px-5 sm:py-5">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                          Macro cycle · desk
-                        </p>
-                        <p className="m-0 font-mono text-[9px] uppercase tracking-wider text-slate-600">
-                          As of {cycleDeskMeta.asOfDateLabel} · {cycleDeskMeta.updatedLine}
-                        </p>
-                      </div>
-                      <p className="m-0 mt-2 text-base font-semibold tracking-tight text-slate-100 sm:text-lg">
-                        현재 시장 단계: <span className="font-mono text-indigo-200/95">{heroSummary.stage}</span>
-                      </p>
-                      <div className="mt-3 grid gap-2 border-t border-white/[0.05] pt-3 text-sm text-slate-300 sm:grid-cols-3">
-                        <p className="m-0">
-                          <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500">단기</span>
-                          <br />
-                          <span className="text-slate-200">{heroSummary.short}</span>
-                        </p>
-                        <p className="m-0">
-                          <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500">중기</span>
-                          <br />
-                          <span className="text-slate-200">{heroSummary.mid}</span>
-                        </p>
-                        <p className="m-0">
-                          <span className="text-[11px] font-medium uppercase tracking-wide text-slate-500">장기</span>
-                          <br />
-                          <span className="text-slate-200">{heroSummary.long}</span>
-                        </p>
-                      </div>
-                    </div>
-                  </section>
+                  <CycleDeskHero
+                    context={cycleHeroContext}
+                    asOfDateLabel={cycleDeskMeta.asOfDateLabel}
+                    updatedLine={cycleDeskMeta.updatedLine}
+                  />
+                  <SectorFlowStrip />
                   <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
                       tier="tactical"
@@ -1196,7 +1185,6 @@ function App() {
                       series={TACTICAL_SERIES}
                       rows={cycleMetricHistory.slice(-120)}
                       panicData={panicData}
-                      resolveInsight={interpretMetricState}
                       statusVariant={macroDashboardStatus(tacticalView.state).variant}
                       statusLabel={macroDashboardStatus(tacticalView.state).label}
                       macroComments={buildTierMacroComments("tactical", panicData)}
@@ -1212,7 +1200,6 @@ function App() {
                       series={STRATEGIC_SERIES}
                       rows={cycleMetricHistory.slice(-120)}
                       panicData={panicData}
-                      resolveInsight={interpretMetricState}
                       statusVariant={macroDashboardStatus(strategicView.state).variant}
                       statusLabel={macroDashboardStatus(strategicView.state).label}
                       macroComments={buildTierMacroComments("strategic", panicData)}
@@ -1228,7 +1215,6 @@ function App() {
                       series={MACRO_SERIES}
                       rows={cycleMetricHistory.slice(-120)}
                       panicData={panicData}
-                      resolveInsight={interpretMetricState}
                       statusVariant={macroDashboardStatus(macroView.state).variant}
                       statusLabel={macroDashboardStatus(macroView.state).label}
                       macroComments={buildTierMacroComments("macro", panicData)}
@@ -1334,13 +1320,9 @@ function App() {
       </div>
       {openInput ? (
       <div
-        className="fixed right-0 top-0 z-[9999] h-full w-[300px] bg-[#111827] p-5 shadow-[-4px_0_10px_rgba(0,0,0,0.3)] transition-transform duration-300 translate-x-0"
+        className="fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] w-[360px] max-w-[100vw] flex-col bg-[#111827] p-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[-6px_0_20px_rgba(0,0,0,0.6)] transition-transform duration-300 translate-x-0"
         style={{
-          width: "360px",
           background: "linear-gradient(180deg, #0f172a, #020617)",
-          boxShadow: "-6px 0 20px rgba(0,0,0,0.6)",
-          display: "flex",
-          flexDirection: "column",
           pointerEvents: "auto",
         }}
       >
@@ -1442,7 +1424,7 @@ function App() {
       </div>
       ) : null}
       {saveToast ? (
-        <div className="fixed bottom-6 left-1/2 z-[10000] -translate-x-1/2 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-4 py-2 text-sm text-emerald-200 shadow-lg">
+        <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10000] -translate-x-1/2 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-4 py-2 text-sm text-emerald-200 shadow-lg">
           {saveToast}
         </div>
       ) : null}

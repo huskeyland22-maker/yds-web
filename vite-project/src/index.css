@@ -25,12 +25,18 @@
     overscroll-behavior-y: none;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* 가로 safe-area 는 body 에 두어 모든 자식이 노치/펀치홀 측면을 침범하지 못하게 한다 */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
-  @supports (padding: max(0px)) {
-    body {
-      padding-left: max(0px, env(safe-area-inset-left));
-      padding-right: max(0px, env(safe-area-inset-right));
-    }
+  #root {
+    /* 100vh 는 iOS Safari URL bar 가 사라질 때 viewport 보다 커져 상단 컴포넌트를 가린다.
+       dvh = dynamic viewport height → 항상 실제 보이는 영역 기준 */
+    min-height: 100dvh;
+    /* 일부 구형 브라우저용 fallback */
+    min-height: 100vh;
+    min-height: 100svh;
+    background: inherit;
   }
 }
 
@@ -39,6 +45,62 @@
   .touch-target {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* iOS 노치 / Dynamic Island / 홈 인디케이터 대응 유틸리티
+     - Tailwind arbitrary value (`pt-[env(safe-area-inset-top)]`) 와 함께
+       JSX 에서 가독성 좋게 쓰기 위해 클래스 형태로도 제공한다.
+     - PWA standalone 이 아닌 일반 Safari 에서는 env() 가 0 이 되므로 동일 코드가 자연스럽게 동작한다. */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left);
+  }
+  .pr-safe {
+    padding-right: env(safe-area-inset-right);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .py-safe {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+  .min-h-svh {
+    min-height: 100svh;
+  }
+  .h-dvh {
+    height: 100dvh;
+  }
+  .h-svh {
+    height: 100svh;
+  }
+}
+
+/* PWA standalone (홈화면에 추가) 일 때만 작동하는 보정.
+   iOS Safari 표시줄에서는 env(safe-area-inset-top) 이 0 인 경우가 있어
+   브라우저 정상 모드 레이아웃을 건드리지 않고 standalone 만 보강한다. */
+@media all and (display-mode: standalone) {
+  body {
+    /* 노치 보호: standalone 에서는 body 가 root 와 함께 위로 붙기 때문에
+       padding 이 아닌 background-color 만 추가로 깔아 둔다 (실제 padding 은
+       App.jsx 내부 컨테이너에서 처리). */
+    background-color: #0b0e14;
+  }
+  /* iOS 17+ standalone 에서 100vh 가 viewport 보다 큰 값을 반환해
+     상단 콘텐츠가 viewport 위로 밀려나는 케이스가 보고된다 → 보강 */
+  #root {
+    min-height: 100dvh;
+    min-height: 100svh;
   }
 }
 
@@ -66,4 +128,24 @@
 
 .market-flash-down {
   animation: marketFlashDown 0.65s ease-out;
+}
+
+@keyframes yds-flow-strip {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.yds-flow-strip-track {
+  animation: yds-flow-strip 38s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yds-flow-strip-track {
+    animation: none;
+    transform: none;
+  }
 }
