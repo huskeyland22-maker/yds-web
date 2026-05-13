@@ -33,211 +33,29 @@
   <body>
     <div id="root"></div>
     <script type="module">
-      // -----------------------------------------------------------------------------
-      // Critical PWA bootstrap: runs before the app bundle is fetched.
-      // Goals:
-      //   - Detect new builds before loading the cached JS chunk graph
-      //   - Force-evict any legacy Service Worker + Cache Storage entries (iOS standalone)
-      //   - Survive HTML being served from an aggressive CDN/UA cache
-      //   - Auto-recover when a stale HTML references an asset that no longer exists
-      // -----------------------------------------------------------------------------
-      const BUILD_KEY = "yds-build-version"
-      const BUILD_ID_KEY = "yds-build-id"
-      const HARD_RELOAD_AT_KEY = "yds-hard-reload-at"
-      const HARD_RELOAD_COOLDOWN_MS = 6000
-      const VERSION_POLL_COOLDOWN_MS = 8000
-      const HTML_BUILD_ID = (document.querySelector('meta[name="app-build-id"]')?.content || "").trim()
-
-      const safeStorage = {
-        get(area, key) {
-          try {
-            return window[area]?.getItem(key)
-          } catch {
-            return null
-          }
-        },
-        set(area, key, value) {
-          try {
-            window[area]?.setItem(key, value)
-          } catch {
-            // ignore
-          }
-        },
-        remove(area, key) {
-          try {
-            window[area]?.removeItem(key)
-          } catch {
-            // ignore
-          }
-        },
-      }
-
-      function detectIosStandalone() {
-        try {
-          const ua = navigator.userAgent || ""
-          const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-          const standalone =
-            window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true
-          return ios && standalone
-        } catch {
-          return false
-        }
-      }
-
-      async function purgeServiceWorkers() {
-        if (!("serviceWorker" in navigator)) return
-        try {
-          const regs = await navigator.serviceWorker.getRegistrations()
-          await Promise.all(regs.map((r) => r.unregister().catch(() => null)))
-        } catch {
-          // noop
-        }
-      }
-
-      async function purgeCacheStorage() {
-        if (!("caches" in window)) return
-        try {
-          const keys = await caches.keys()
-          await Promise.all(keys.map((k) => caches.delete(k).catch(() => null)))
-        } catch {
-          // noop
-        }
-      }
-
-      function buildCacheBustUrl(extra) {
-        const next = new URL(window.location.href)
-        next.searchParams.set("pwa_v", String(Date.now()))
-        if (extra) next.searchParams.set(extra.key, extra.value)
-        return `${next.pathname}${next.search}`
-      }
-
-      async function fetchLatestBuildMeta() {
-        try {
-          const res = await fetch(`/build-version.json?t=${Date.now()}`, {
-            cache: "no-store",
-            credentials: "omit",
-            headers: {
-              Pragma: "no-cache",
-              "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
-            },
-          })
-          if (!res.ok) return null
-          const json = await res.json()
-          return json && typeof json === "object" ? json : null
-        } catch {
-          return null
-        }
-      }
-
-      async function forceHardReload(reason) {
-        const now = Date.now()
-        const last = Number(safeStorage.get("sessionStorage", HARD_RELOAD_AT_KEY) || "0")
-        if (Number.isFinite(last) && now - last < HARD_RELOAD_COOLDOWN_MS) {
-          return false
-        }
-        safeStorage.set("sessionStorage", HARD_RELOAD_AT_KEY, String(now))
-        console.warn("[PWA] hard reload", reason)
-        await purgeServiceWorkers()
-        await purgeCacheStorage()
-        window.location.replace(buildCacheBustUrl({ key: "reason", value: reason || "stale" }))
-        return true
-      }
-
-      function listenForStaleChunkErrors() {
-        const isAssetUrl = (url) => typeof url === "string" && url.includes("/assets/")
-        const handleChunkFailure = () => {
-          void forceHardReload("chunk-load-error")
-        }
-
-        window.addEventListener(
-          "error",
-          (event) => {
-            const target = event?.target
-            if (!target || target === window) return
-            const tag = target.tagName
-            if (tag !== "SCRIPT" && tag !== "LINK") return
-            const src = target.src || target.href
-            if (isAssetUrl(src)) handleChunkFailure()
-          },
-          true,
-        )
-
-        window.addEventListener("unhandledrejection", (event) => {
-          const reason = event?.reason
-          const msg = String(reason?.message || reason || "")
-          if (/Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(msg)) {
-            handleChunkFailure()
-          }
-        })
-      }
-
-      async function ensureLatestBuild() {
-        const remote = await fetchLatestBuildMeta()
-        if (!remote || !remote.buildId) return { remote: null }
-
-        const storedBuildId = safeStorage.get("localStorage", BUILD_ID_KEY)
-        const storedVersion = safeStorage.get("localStorage", BUILD_KEY)
-
-        // If the HTML embedded build-id disagrees with the latest published one,
-        // the HTML itself is stale — the only safe move is to evict caches & reload.
-        if (HTML_BUILD_ID && HTML_BUILD_ID !== String(remote.buildId)) {
-          await forceHardReload("html-build-mismatch")
-          return { remote, reloaded: true }
-        }
-
-        if (storedBuildId && String(storedBuildId) !== String(remote.buildId)) {
-          await forceHardReload("client-build-mismatch")
-          return { remote, reloaded: true }
-        }
-
-        safeStorage.set("localStorage", BUILD_ID_KEY, String(remote.buildId))
-        if (typeof remote.version === "string" && remote.version) {
-          safeStorage.set("localStorage", BUILD_KEY, remote.version)
-        }
-        return { remote, reloaded: false }
-      }
-
-      function installVisibilityPoller() {
-        let lastPollAt = 0
-        const poll = async () => {
-          const now = Date.now()
-          if (now - lastPollAt < VERSION_POLL_COOLDOWN_MS) return
-          lastPollAt = now
-          await ensureLatestBuild()
-        }
-        document.addEventListener("visibilitychange", () => {
-          if (document.visibilityState === "visible") void poll()
-        })
-        window.addEventListener("focus", () => void poll())
-        window.addEventListener("pageshow", (event) => {
-          // bfcache restore on iOS standalone — must re-check freshness
-          if (event.persisted) void poll()
-          else void poll()
-        })
-      }
+      // Boot loader: runs the freshness gate BEFORE the app bundle is fetched.
+      // If the deployed build is newer than what this HTML belongs to, the gate
+      // unregisters service workers, purges Cache Storage and build-scoped
+      // localStorage, then hard-reloads with a cache-busting query string.
+      import {
+        checkAndEvictStaleBuild,
+        installChunkLoadFailureRecovery,
+        installLifecycleVersionPoller,
+        unregisterAllServiceWorkers,
+      } from "/src/utils/pwaFreshness.js"
 
       async function bootstrap() {
-        listenForStaleChunkErrors()
-        // Always purge any legacy SW we may have shipped in older builds. This is
-        // unconditional because iOS standalone aggressively keeps SW state alive.
-        await purgeServiceWorkers()
+        installChunkLoadFailureRecovery()
 
-        // First-paint freshness gate. If a hard reload is triggered, we bail here.
-        const result = await ensureLatestBuild()
-        if (result?.reloaded) return
+        // Always strip any legacy Service Worker (older deployments may have
+        // shipped one). This is unconditional because iOS standalone PWAs
+        // aggressively keep SW state alive between launches.
+        await unregisterAllServiceWorkers()
 
-        installVisibilityPoller()
+        const result = await checkAndEvictStaleBuild()
+        if (result.reloaded) return
 
-        // On iOS standalone the OS may resume the WebView with stale state — poll
-        // a bit more aggressively for the first minute after launch.
-        if (detectIosStandalone()) {
-          let ticks = 0
-          const id = window.setInterval(() => {
-            ticks += 1
-            void ensureLatestBuild()
-            if (ticks >= 6) window.clearInterval(id)
-          }, 10_000)
-        }
+        installLifecycleVersionPoller()
 
         await import("/src/main.jsx")
       }
