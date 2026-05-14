@@ -3,7 +3,7 @@ import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
-import { fetchCycleMetricsHistory, submitManualPanicData } from "./config/api.js"
+import { fetchCycleMetricsHistory, isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import OvernightUsBriefing from "./components/OvernightUsBriefing.jsx"
@@ -575,6 +575,7 @@ function App() {
   const panicInitialized = usePanicStore((s) => s.initialized)
   const initializePanicData = usePanicStore((s) => s.initializePanicData)
   const applyManualPanicData = usePanicStore((s) => s.applyManualPanicData)
+  const savePanicMetricsHub = usePanicStore((s) => s.savePanicMetricsHub)
   const startAutoRefresh = usePanicStore((s) => s.startAutoRefresh)
   const stopAutoRefresh = usePanicStore((s) => s.stopAutoRefresh)
   const syncOnAppResume = usePanicStore((s) => s.syncOnAppResume)
@@ -589,7 +590,7 @@ function App() {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth <= 768 : false,
   )
-  const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
+  const [hubSaveGlow, setHubSaveGlow] = useState(false)
   const [cycleMetricHistory, setCycleMetricHistory] = useState(() => readCycleMetricHistory())
 
   const parseResult = useMemo(() => parseTextPanicData(inputText), [inputText])
@@ -600,7 +601,7 @@ function App() {
     [parsedData],
   )
 
-  const submitInput = () => {
+  const submitInput = async () => {
     const { vix, vxn, fearGreed, bofa, move, skew, putCall, highYield, gsBullBear } = parsedData
     if (
       vix === null ||
@@ -627,29 +628,47 @@ function App() {
       gsBullBear,
     }
 
+    setIsSaving(true)
     try {
-      setIsSaving(true)
-      console.log("manualData:", normalizedParsedData)
+      if (isPanicHubEnabled()) {
+        const result = await savePanicMetricsHub(normalizedParsedData)
+        if (!result?.ok) {
+          const msg = result?.error instanceof Error ? result.error.message : String(result?.error ?? "저장 실패")
+          setInputError(msg)
+          return
+        }
+        setHubSaveGlow(true)
+        window.setTimeout(() => setHubSaveGlow(false), 1400)
+        setSaveDone(true)
+        setSaveToast("동기화 완료 · 모든 기기에 반영됨")
+        setOpenInput(false)
+        if (db) {
+          void (async () => {
+            try {
+              const reportId = String(Date.now())
+              await setDoc(doc(db, "panic_reports", reportId), {
+                ...normalizedParsedData,
+                source: "panic_hub",
+                createdAt: serverTimestamp(),
+              })
+            } catch (fireErr) {
+              console.error("panic_reports 저장 실패", fireErr)
+            }
+          })()
+        }
+        return
+      }
 
-      // 1) 중앙 store를 통한 단일 업데이트 경로
       applyManualPanicData(normalizedParsedData)
-      const current = usePanicStore.getState?.().panicData ?? null
-      console.log("renderData:", current)
-
-      // 2) UI 즉시 종료
       setSaveDone(true)
       setSaveToast("✅ 패닉지수 저장 완료")
-      setIsSaving(false)
       setOpenInput(false)
       window.setTimeout(() => {
         setOpenInput(false)
       }, 100)
 
-      // 3) 서버 저장은 백그라운드 처리 (UI 블로킹 금지)
       void (async () => {
         try {
-          // 서버 동기화는 수행하되, 로컬 스냅샷 우선 정책을 위해
-          // 응답으로 클라이언트 상태를 덮어쓰지 않습니다.
           await submitManualPanicData(normalizedParsedData)
         } catch (err) {
           console.error("AI 리포트 저장 실패", err)
@@ -672,7 +691,6 @@ function App() {
       }
     } catch (err) {
       console.error(err)
-      setIsSaving(false)
     } finally {
       setIsSaving(false)
     }
@@ -1020,7 +1038,12 @@ function App() {
     [panicData, marketCycleStage, heroSummary],
   )
   return (
-    <div className="flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased lg:flex-row">
+    <div
+      className={[
+        "flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
+        hubSaveGlow ? "shadow-[inset_0_0_80px_rgba(34,211,238,0.08),0_0_60px_rgba(167,139,250,0.12)]" : "",
+      ].join(" ")}
+    >
       <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] lg:h-[100dvh] lg:w-[17rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:pt-[env(safe-area-inset-top)] lg:pb-[env(safe-area-inset-bottom)] xl:w-[18rem]">
         <div className="shrink-0 px-4 pb-3 pt-3 lg:border-b lg:border-white/[0.06] lg:px-5 lg:pb-4 lg:pt-4">
           <p className="m-0 font-display text-[1.15rem] font-semibold leading-none tracking-tight text-slate-50">Y&apos;ds</p>
@@ -1218,7 +1241,7 @@ function App() {
                       {...cycleDeskMeta}
                     />
                   </section>
-                  <OvernightUsBriefing />
+                  <OvernightUsBriefing panicData={panicData} />
                 </div>
               }
             />

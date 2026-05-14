@@ -1,201 +1,201 @@
 /**
- * Overnight market recap — Seeking Alpha식 밀도·흐름 (Korean), Yahoo market-data 기반. LLM 미사용.
+ * Institutional US macro desk briefing — Yahoo `/api/market-data` + 패닉 보드.
+ * 규칙 기반 밀도 문장. OpenAI는 `/api/macro-briefing-ai`에서 선택.
  */
+
+import { getTotalSignalScore } from "./panicMarketSignal.js"
+
+/**
+ * @param {unknown} data
+ * @param {string} key
+ */
+function pickPanicN(data, key) {
+  if (!data || typeof data !== "object") return NaN
+  const v = /** @type {Record<string, unknown>} */ (data)[key]
+  if (v != null && typeof v === "object" && "value" in /** @type {object} */ (v)) {
+    const n = Number(/** @type {{ value: unknown }} */ (v).value)
+    return Number.isFinite(n) ? n : NaN
+  }
+  const n = Number(v)
+  return Number.isFinite(n) ? n : NaN
+}
+
+/**
+ * @param {object | null | undefined} panicData
+ */
+function panicFlatForScore(panicData) {
+  if (!panicData) return null
+  return {
+    vix: pickPanicN(panicData, "vix"),
+    fearGreed: pickPanicN(panicData, "fearGreed"),
+    putCall: pickPanicN(panicData, "putCall"),
+    bofa: pickPanicN(panicData, "bofa"),
+    highYield: pickPanicN(panicData, "highYield"),
+  }
+}
+
+/**
+ * @param {number | null | undefined} x
+ * @param {number} digits
+ */
+function fmtChg(x, digits = 2) {
+  if (x == null || !Number.isFinite(Number(x))) return "—"
+  const v = Number(x)
+  const sign = v > 0 ? "+" : ""
+  return `${sign}${v.toFixed(digits)}%`
+}
 
 /**
  * @param {{
  *   parsedData?: Record<string, number | null>
  *   changeData?: Record<string, number | null>
  *   updatedAt?: string | null
+ *   panicData?: object | null
  * }} input
- * @returns {{ prose: string; updatedAt: string | null }}
  */
-export function buildOvernightUsBriefing(input) {
+export function buildInstitutionalMacroBriefing(input) {
   const p = input?.parsedData ?? {}
   const c = input?.changeData ?? {}
 
   const nas = c.nasdaq
   const sp = c.sp500
+  const soxx = c.soxx
   const vix = p.vix
   const vixChg = c.vix
   const tnxChg = c.us10y
   const krwChg = c.usdkrw
   const dxyChg = c.dxy
-  const soxxChg = c.soxx
   const spChg = c.sp500
   const putCall = p.putCall
   const move = p.move
 
+  let score = 0
+  if (Number.isFinite(nas)) score += nas > 0.15 ? 1.2 : nas < -0.15 ? -1.2 : nas > 0 ? 0.4 : nas < 0 ? -0.4 : 0
+  if (Number.isFinite(sp)) score += sp > 0.12 ? 0.9 : sp < -0.12 ? -0.9 : sp > 0 ? 0.25 : sp < 0 ? -0.25 : 0
+  if (Number.isFinite(soxx) && Number.isFinite(spChg)) {
+    const rel = soxx - spChg
+    if (rel > 0.25) score += 0.5
+    if (rel < -0.25) score -= 0.5
+  }
+  if (Number.isFinite(vixChg)) score += vixChg < -3 ? 0.35 : vixChg > 4 ? -0.55 : 0
+  if (Number.isFinite(vix)) score += vix < 17 ? 0.25 : vix > 24 ? -0.45 : 0
+  if (Number.isFinite(dxyChg)) score += dxyChg < -0.12 ? 0.2 : dxyChg > 0.18 ? -0.2 : 0
+  if (Number.isFinite(tnxChg)) score += tnxChg < -0.5 ? 0.15 : tnxChg > 0.6 ? -0.15 : 0
+
+  /** @type {"risk-on"|"neutral"|"risk-off"} */
+  let sentiment = "neutral"
+  if (score >= 1.1) sentiment = "risk-on"
+  else if (score <= -1.1) sentiment = "risk-off"
+
+  const sentimentLabel =
+    sentiment === "risk-on" ? "RISK-ON" : sentiment === "risk-off" ? "RISK-OFF" : "NEUTRAL"
+
+  /** @type {{ key: string; label: string; chg: number | null }[]} */
+  const ticks = [
+    { key: "nasdaq", label: "NASDAQ", chg: Number.isFinite(Number(nas)) ? Number(nas) : null },
+    { key: "sp500", label: "S&P 500", chg: Number.isFinite(Number(sp)) ? Number(sp) : null },
+    { key: "soxx", label: "SOXX", chg: Number.isFinite(Number(soxx)) ? Number(soxx) : null },
+    { key: "vix", label: "VIX", chg: Number.isFinite(Number(vixChg)) ? Number(vixChg) : null },
+    { key: "us10y", label: "US10Y", chg: Number.isFinite(Number(tnxChg)) ? Number(tnxChg) : null },
+    { key: "dxy", label: "DXY", chg: Number.isFinite(Number(dxyChg)) ? Number(dxyChg) : null },
+    { key: "usdkrw", label: "USD/KRW", chg: Number.isFinite(Number(krwChg)) ? Number(krwChg) : null },
+  ]
+
   /** @type {string[]} */
-  const s = []
+  const bullets = []
 
   if (Number.isFinite(nas) && Number.isFinite(sp)) {
     if (nas > 0.12 && sp > 0.12) {
-      s.push(
-        "지난밤 미국 증시는 기술주 중심 매수세가 이어지며 나스닥이 상대 강세를 유지했고, S&P500 역시 상승 마감으로 흐름을 맞췄다.",
-      )
+      bullets.push(`EQ · NDX+SPX 동반 상승 마감 · 베타 상향 구간.`)
     } else if (nas < -0.12 && sp < -0.12) {
-      s.push(
-        "지난밤 미국 증시는 나스닥·S&P500이 함께 내려 위험자산 비중을 줄이는 쪽 시선이 상대적으로 강한 밤이었다.",
-      )
+      bullets.push(`EQ · 광범위 지수 동반 하락 · 위험자산 축소 레짐.`)
     } else if (nas > sp + 0.18) {
-      s.push(
-        "지난밤 미국 증시는 나스닥이 S&P500보다 강했고, 기술주 쏠림이 하루 단위로도 이어진 마감이었다.",
-      )
+      bullets.push(`EQ · 기술주 주도 · NDX vs SPX 상대강도 유지.`)
     } else if (nas < sp - 0.18) {
-      s.push(
-        "지난밤 미국 증시는 나스닥이 S&P500 대비 다소 약했고, 광범위 지수가 일간 흐름을 주도한 형태로 정리됐다.",
-      )
+      bullets.push(`EQ · 가치/광범위 쏠림 · NDX 열위 완화.`)
     } else {
-      s.push("지난밤 미국 증시는 나스닥과 S&P500이 소폭 등락에 그쳐 방향성이 뚜렷하지 않았다.")
+      bullets.push(`EQ · NDX·SPX 소폭 등락 · 방향성 제한적 세션.`)
     }
   } else {
-    s.push("미국 주요 지수 시세를 불러오지 못해 지수 요약은 이번 호에서 생략한다.")
+    bullets.push(`EQ · 지수 피드 결손 — 레벨 체크 생략.`)
   }
 
-  if (Number.isFinite(soxxChg) && Number.isFinite(spChg)) {
-    const rel = soxxChg - spChg
-    if (rel > 0.28) {
-      s.push(
-        "반도체 ETF(SOXX)는 광범위 지수를 웃돌며 마감했고, 시장 주도권이 테마 쪽에 붙어 있는 분위기가 유지됐다.",
-      )
-    } else if (rel < -0.28) {
-      s.push(
-        "반도체 구간은 지수 대비 열위였고, 기술주 내부에서도 재고림이 감지되는 흐름이었다.",
-      )
-    } else {
-      s.push("반도체와 S&P500의 일간 격차는 크지 않아 섹터 간 온도 차는 크게 벌어지지 않았다.")
-    }
-  } else if (Number.isFinite(soxxChg)) {
-    s.push(
-      soxxChg > 0.15
-        ? "반도체 ETF는 상승 마감이었으나 지수 대비 해석은 데이터가 제한적이다."
-        : soxxChg < -0.15
-          ? "반도체 ETF는 하락 마감이었다."
-          : "반도체 ETF는 보합권에서 마감했다.",
-    )
+  if (Number.isFinite(soxx) && Number.isFinite(spChg)) {
+    const bps = (soxx - spChg) * 100
+    if (bps > 25) bullets.push(`SEMIS · SOXX > SPX · ${bps.toFixed(0)}bps 상대 우위.`)
+    else if (bps < -25) bullets.push(`SEMIS · SOXX < SPX · ${Math.abs(bps).toFixed(0)}bps 열위.`)
+    else bullets.push(`SEMIS · SOXX·SPX 갭 축소 — 테마 박스권.`)
+  } else if (Number.isFinite(soxx)) {
+    bullets.push(`SEMIS · SOXX ${soxx >= 0 ? "↑" : "↓"} 단독 시그널.`)
   }
 
   if (Number.isFinite(tnxChg) && Number.isFinite(vix)) {
-    const rateLead =
-      Math.abs(tnxChg) < 0.4
-        ? "장기금리 움직임은 제한적이었고"
-        : tnxChg > 0
-          ? "장기금리는 소폭이지만 상방 압력이 있었고"
-          : "장기금리는 완화 쪽으로 정리됐고"
-
-    let volMid = ""
-    if (vix < 16) volMid = "변동성 지표 역시 안정 구간 흐름을 이어갔다."
-    else if (vix < 22) {
-      volMid =
-        Number.isFinite(vixChg) && Math.abs(vixChg) >= 4
-          ? "변동성 지표는 중립대에 머물렀으나 전일 변화폭은 눈에 띄었다."
-          : "변동성 지표 역시 중립 구간에서 무난한 모습을 보였다."
-    } else if (vix < 28) volMid = "VIX는 중립을 넘어선 쪽에 붙어 단기 변동성 부담을 완전히 걷어내긴 어렵다."
-    else volMid = "VIX는 높은 수준을 유지해 위험자산 비중은 절제가 필요한 환경이다."
-
-    let fxTail = ""
-    if (Number.isFinite(dxyChg)) {
-      if (Math.abs(dxyChg) < 0.12) fxTail = "달러 인덱스는 보합권에 머물렀다."
-      else if (dxyChg > 0) fxTail = "달러 인덱스는 강보합 이상의 상승으로 마감했다."
-      else fxTail = "달러 인덱스는 약세 조정이었다."
-    } else if (Number.isFinite(krwChg)) {
-      if (Math.abs(krwChg) < 0.1) fxTail = "원·달러는 좁은 범위에서 마감했다."
-      else if (krwChg > 0) fxTail = "원·달러는 원화 약세로 정리됐다."
-      else fxTail = "원·달러는 원화 강세 쪽으로 움직였다."
-    }
-
-    s.push(fxTail ? `${rateLead} ${volMid} ${fxTail}` : `${rateLead} ${volMid}`)
+    const tr = Math.abs(tnxChg) < 0.35 ? "10Y 박스" : tnxChg > 0 ? "10Y 팔림" : "10Y 커버"
+    let vx = ""
+    if (vix < 16) vx = "VIX 낮음."
+    else if (vix < 22) vx = Number.isFinite(vixChg) && Math.abs(vixChg) >= 4 ? "VIX 중립·변동폭 확대." : "VIX 중립."
+    else if (vix < 28) vx = "VIX 상단부."
+    else vx = "VIX 스트레스."
+    let fx = ""
+    if (Number.isFinite(dxyChg)) fx = Math.abs(dxyChg) < 0.12 ? "DXY 보합." : dxyChg > 0 ? "DXY 강세." : "DXY 약세."
+    else if (Number.isFinite(krwChg)) fx = Math.abs(krwChg) < 0.1 ? "원화 박스." : krwChg > 0 ? "원화 약세." : "원화 강세."
+    bullets.push(`RATES/VOL · ${tr} · ${vx} ${fx}`.trim())
   } else if (Number.isFinite(vix)) {
-    let t = ""
-    if (vix < 16) t = "변동성 지표는 낮은 구간에서 안정적으로 마감했다."
-    else if (vix < 22) t = "변동성 지표는 중립 구간 흐름을 이어갔다."
-    else if (vix < 28) t = "VIX는 중립 상단에 가깝게 붙어 있다."
-    else t = "VIX는 높은 레벨이다."
-    if (Number.isFinite(vixChg) && Math.abs(vixChg) >= 4) {
-      t = t.replace(/\.$/, "으며 전일 변동폭은 컸다.")
-    }
-    s.push(t)
+    bullets.push(`VOL · VIX ${vix.toFixed(2)} 레벨 ${Number.isFinite(vixChg) ? `(${fmtChg(vixChg, 1)})` : ""}`.trim())
   } else if (Number.isFinite(tnxChg)) {
-    s.push(
-      Math.abs(tnxChg) < 0.4
-        ? "장기금리는 좁은 범위에서 마감했다."
-        : tnxChg > 0
-          ? "장기금리는 상방으로 밀린 마감이었다."
-          : "장기금리는 완화 쪽으로 마감했다.",
-    )
-  } else if (Number.isFinite(dxyChg)) {
-    s.push(
-      Math.abs(dxyChg) < 0.12
-        ? "달러 인덱스는 보합권이었다."
-        : dxyChg > 0
-          ? "달러 인덱스는 상승 마감이었다."
-          : "달러 인덱스는 하락 조정이었다.",
-    )
-  } else if (Number.isFinite(krwChg)) {
-    s.push(
-      Math.abs(krwChg) < 0.1
-        ? "원·달러는 좁은 범위에서 마감했다."
-        : krwChg > 0
-          ? "원·달러는 원화 약세로 마감했다."
-          : "원·달러는 원화 강세로 마감했다.",
-    )
+    bullets.push(`RATES · US10Y ${fmtChg(tnxChg)}`)
   }
 
   if (Number.isFinite(putCall) && Number.isFinite(move)) {
-    if (putCall >= 1.02 && move >= 98) {
-      s.push(
-        "옵션 풋/콜은 방어 쪽으로 기울어진 모습이었고, MOVE도 높게 유지되며 채권 변동성 감시가 겹친 밤이었다.",
-      )
-    } else if (putCall <= 0.85 && move <= 85) {
-      s.push(
-        "풋/콜은 낮았고 MOVE도 낮아 옵션·국채 쪽 스트레스 신호는 크지 않았다.",
-      )
-    } else if (putCall >= 1.02) {
-      s.push("옵션 시장에서는 풋 우위가 엿보였고 헤지 수요가 일부 겹쳤다.")
-    } else if (move >= 98) {
-      s.push("채권 변동성 지표(MOVE)는 금리 스트레스를 염두에 둘 만한 수준이었다.")
-    } else if (move <= 85) {
-      s.push("MOVE는 낮게 유지돼 국채 변동성 스트레스는 제한적이었다.")
-    }
+    if (putCall >= 1.02 && move >= 98) bullets.push(`SENTIMENT · PCC↑ + MOVE 고 — 헤지·금리 변동성 동반.`)
+    else if (putCall <= 0.85 && move <= 85) bullets.push(`SENTIMENT · PCC↓ · MOVE 억제 — 옵션/국채 스트레스 완화.`)
+    else if (putCall >= 1.02) bullets.push(`OPTIONS · Put/Call 방어 쏠림.`)
+    else if (move >= 98) bullets.push(`RATES · MOVE 고대 — 금리 옵션 감시.`)
   } else if (Number.isFinite(putCall)) {
-    if (putCall >= 1.02) s.push("옵션 풋/콜은 방어 쪽으로 다소 기울어진 모습이었다.")
-    else if (putCall <= 0.85) s.push("풋/콜은 낮아 과도한 헤지 쏠림은 아니었다.")
-  } else if (Number.isFinite(move)) {
-    if (move >= 98) s.push("MOVE는 금리 변동성 감시가 유효한 구간에 머물렀다.")
-    else if (move <= 85) s.push("MOVE는 낮아 국채 쪽 스트레스는 크지 않았다.")
+    bullets.push(`OPTIONS · PCC ${putCall.toFixed(2)}.`)
   }
 
-  if (Number.isFinite(nas) && Number.isFinite(vix)) {
-    if (nas > 0.28 && vix < 17) {
-      s.push(
-        "다만 장 막판에는 추격보다는 확인 매수 쪽 무게가 겹치며 단기 과열 경계 심리도 함께 나타나는 분위기였다.",
-      )
-    } else if (Number.isFinite(vixChg) && vixChg > 3.5) {
-      s.push(
-        "다만 변동성 쪽 민감도가 올라가며 일부 헤지 수요가 유입되는 모습이 겹쳤다.",
-      )
-    } else if (vix >= 22) {
-      s.push(
-        "리스크온에 무게를 두기엔 변동성 부담이 남아 있어 막판 흐름은 신중한 쪽으로 읽혔다.",
-      )
+  const flat = panicFlatForScore(input?.panicData ?? null)
+  const composite = flat ? getTotalSignalScore(flat) : null
+  let panicBridge = ""
+  if (flat && Number.isFinite(composite)) {
+    const v = Number.isFinite(flat.vix) ? flat.vix : null
+    const fg = Number.isFinite(flat.fearGreed) ? flat.fearGreed : null
+    if (sentiment === "risk-on" && composite >= 1) {
+      panicBridge = `PANIC BOARD · 합성 ${composite} · 현물 톤과 정합 (VIX ${v ?? "—"} · F&G ${fg ?? "—"}).`
+    } else if (sentiment === "risk-off" && composite <= -1) {
+      panicBridge = `PANIC BOARD · 합성 ${composite} · 현물 약세와 정합.`
+    } else if (sentiment === "risk-on" && composite <= -1) {
+      panicBridge = `PANIC BOARD · 합성 ${composite} · 현물 대비 방어 시그널 과대 — 확인 매수 유효.`
+    } else if (sentiment === "risk-off" && composite >= 1) {
+      panicBridge = `PANIC BOARD · 합성 ${composite} · 현물 대비 낙관 편차 — 리스크 재평가.`
     } else {
-      s.push(
-        "심리는 한쪽으로 과도하게 기울기보다는 실적·지표 확인에 무게를 둔 거래가 섞인 세션으로 보인다.",
-      )
+      panicBridge = `PANIC BOARD · 합성 ${composite} · 크로스 체크 유지.`
     }
-  } else if (Number.isFinite(vix) && vix >= 22) {
-    s.push("VIX가 높게 유지되는 만큼 막판에는 경계 심리가 남아 있는 밤이었다.")
+  } else {
+    panicBridge = `PANIC BOARD · 스냅샷 없음 — 사이클 탭에서 갱신.`
   }
 
-  s.push(
-    "국내장은 미국 반도체 흐름과 함께 환율, 선물, 외국인 수급을 같은 축에서 체크할 필요가 있다.",
-  )
+  bullets.push(panicBridge)
 
-  const prose = s.filter(Boolean).slice(0, 7).join(" ")
+  const headline = "US SESSION — MACRO DESK"
+
+  const prose = bullets.join(" ")
 
   return {
+    headline,
+    bullets: bullets.slice(0, 8),
     prose,
+    sentiment,
+    sentimentLabel,
+    ticks,
     updatedAt: input.updatedAt ?? null,
+    composite: Number.isFinite(composite) ? composite : null,
   }
+}
+
+/** @deprecated 이름 호환 */
+export function buildOvernightUsBriefing(input) {
+  const b = buildInstitutionalMacroBriefing(input)
+  return { prose: b.prose, updatedAt: b.updatedAt }
 }
