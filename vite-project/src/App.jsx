@@ -601,7 +601,6 @@ function App() {
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
   const [previewKey, setPreviewKey] = useState(0)
   const textareaRef = useRef(null)
-  const saveSuccessCloseTimerRef = useRef(null)
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
   const [buildVersion, setBuildVersion] = useState(`v1.0.${String(APP_BUILD_ID).slice(-6)}`)
@@ -643,16 +642,8 @@ function App() {
     }
   }, [])
 
-  const clearSaveSuccessCloseTimer = useCallback(() => {
-    if (saveSuccessCloseTimerRef.current != null) {
-      window.clearTimeout(saveSuccessCloseTimerRef.current)
-      saveSuccessCloseTimerRef.current = null
-    }
-  }, [])
-
   /** 패널을 열 때마다 빈 폼 — 이전 붙여넣기·parsed·preview·LS 드래프트 제거 */
   const openInputPanel = useCallback(() => {
-    clearSaveSuccessCloseTimer()
     resetAiReportInput()
     setOpenInput(true)
     requestAnimationFrame(() => {
@@ -662,18 +653,17 @@ function App() {
         // ignore
       }
     })
-  }, [clearSaveSuccessCloseTimer, resetAiReportInput])
+  }, [resetAiReportInput])
 
-  /** 배경·X 닫기: 대기 중인 성공 후 자동 닫기 타이머 정리 */
+  /** 배경·X 닫기 + 저장 성공 시 즉시 닫기(타이머 미사용 — 닫힘 누락 방지) */
   const closeInputPanel = useCallback(() => {
-    clearSaveSuccessCloseTimer()
     setOpenInput(false)
     try {
       textareaRef.current?.blur?.()
     } catch {
       // ignore
     }
-  }, [clearSaveSuccessCloseTimer])
+  }, [])
 
   const pulseSaveFeedback = () => {
     setInputPanelFlash(true)
@@ -737,11 +727,7 @@ function App() {
             }
           })()
         }
-        clearSaveSuccessCloseTimer()
-        saveSuccessCloseTimerRef.current = window.setTimeout(() => {
-          saveSuccessCloseTimerRef.current = null
-          closeInputPanel()
-        }, 780)
+        closeInputPanel()
         void usePanicStore
           .getState()
           .fetchPanicData("hub-post-save", { force: true })
@@ -778,11 +764,7 @@ function App() {
           }
         })()
       }
-      clearSaveSuccessCloseTimer()
-      saveSuccessCloseTimerRef.current = window.setTimeout(() => {
-        saveSuccessCloseTimerRef.current = null
-        closeInputPanel()
-      }, 780)
+      closeInputPanel()
       void usePanicStore
         .getState()
         .fetchPanicData("manual-api-post-save", { force: true })
@@ -795,10 +777,6 @@ function App() {
       setIsSaving(false)
     }
   }
-
-  useEffect(() => {
-    return () => clearSaveSuccessCloseTimer()
-  }, [clearSaveSuccessCloseTimer])
 
   useEffect(() => {
     if (!panicData) return
