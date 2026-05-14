@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 import "./index.css"
 import App from "./App.jsx"
+import RootErrorBoundary from "./components/RootErrorBoundary.jsx"
 import {
   checkAndEvictStaleBuild,
   clearAllCacheStorage,
@@ -101,9 +102,11 @@ async function bootstrapApp() {
         try {
           createRoot(rootEl).render(
             <StrictMode>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
+              <RootErrorBoundary>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </RootErrorBoundary>
             </StrictMode>,
           )
         } catch (e) {
@@ -133,9 +136,11 @@ async function bootstrapApp() {
     if (!rootEl) throw new Error("missing #root")
     createRoot(rootEl).render(
       <StrictMode>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <RootErrorBoundary>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </RootErrorBoundary>
       </StrictMode>,
     )
   } catch (e) {

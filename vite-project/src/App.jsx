@@ -7,6 +7,7 @@ import { fetchCycleMetricsHistory, isPanicHubEnabled, submitManualPanicData } fr
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import OvernightUsBriefing from "./components/OvernightUsBriefing.jsx"
+import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
@@ -1241,7 +1242,9 @@ function App() {
                       {...cycleDeskMeta}
                     />
                   </section>
-                  <OvernightUsBriefing panicData={panicData} />
+                  <SectionErrorBoundary label="전일 미국장 매크로 브리핑">
+                    <OvernightUsBriefing panicData={panicData} />
+                  </SectionErrorBoundary>
                 </div>
               }
             />

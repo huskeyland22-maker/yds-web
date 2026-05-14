@@ -6,7 +6,11 @@ import {
   formatRelativeKst,
   msUntilNextKst8am,
 } from "../utils/macroBriefingKst.js"
-import { buildInstitutionalMacroBriefing } from "../utils/overnightUsBriefing.js"
+import {
+  buildInstitutionalMacroBriefing,
+  createFallbackMacroBriefing,
+  normalizeAiBriefingLines,
+} from "../utils/overnightUsBriefing.js"
 
 const BC_NAME = "yds-macro-briefing"
 
@@ -41,7 +45,9 @@ export default function OvernightUsBriefing({ panicData = null }) {
   const panicDataRef = useRef(panicData)
   panicDataRef.current = panicData
 
-  const useAiClient = import.meta.env.VITE_MACRO_BRIEFING_AI === "1" || import.meta.env.VITE_MACRO_BRIEFING_AI === "true"
+  const useAiClient =
+    import.meta.env.VITE_MACRO_BRIEFING_AI === "1" ||
+    String(import.meta.env.VITE_MACRO_BRIEFING_AI ?? "").toLowerCase() === "true"
 
   const load = useCallback(async (opts = {}) => {
     const silent = Boolean(opts.silent)
@@ -61,19 +67,25 @@ export default function OvernightUsBriefing({ panicData = null }) {
       setFetchedAt(Date.now())
       if (silent) setErr(null)
 
-      const desk = buildInstitutionalMacroBriefing(base)
+      let desk
+      try {
+        desk = buildInstitutionalMacroBriefing(base)
+      } catch (buildErr) {
+        console.error("[OvernightUsBriefing] desk build", buildErr)
+        desk = createFallbackMacroBriefing("rule-engine")
+      }
       setAiLines(null)
       setAiMeta({ used: false, error: null })
 
       if (useAiClient) {
         try {
           const facts = {
-            nySession: formatNySessionDate(data.updatedAt),
-            sentiment: desk.sentiment,
-            ticks: desk.ticks,
-            ruleBullets: desk.bullets,
-            composite: desk.composite,
-            updatedAt: data.updatedAt,
+            nySession: formatNySessionDate(data?.updatedAt),
+            sentiment: desk?.sentiment ?? "neutral",
+            ticks: Array.isArray(desk?.ticks) ? desk.ticks : [],
+            ruleBullets: Array.isArray(desk?.bullets) ? desk.bullets : [],
+            composite: desk?.composite ?? null,
+            updatedAt: data?.updatedAt ?? null,
           }
           const res = await fetch("/api/macro-briefing-ai", {
             method: "POST",
@@ -81,12 +93,40 @@ export default function OvernightUsBriefing({ panicData = null }) {
             cache: "no-store",
             body: JSON.stringify({ facts }),
           })
-          const j = await res.json().catch(() => ({}))
-          if (Array.isArray(j.lines) && j.lines.length) {
-            setAiLines(j.lines)
-            setAiMeta({ used: Boolean(j.usedAi), error: j.error ?? null })
-          } else {
-            setAiMeta({ used: false, error: j.error ?? null })
+          const rawText = await res.text()
+          let j = {}
+          let parseOk = true
+          try {
+            j = rawText ? JSON.parse(rawText) : {}
+          } catch {
+            parseOk = false
+            setAiMeta({ used: false, error: "AI 응답 JSON 파싱 실패" })
+          }
+          if (parseOk) {
+            const lines = normalizeAiBriefingLines(j?.lines ?? j?.bullets)
+            if (!res.ok) {
+              const msg =
+                typeof j?.error === "string" && j.error.trim()
+                  ? j.error.trim()
+                  : `macro-briefing-ai HTTP ${res.status}`
+              setAiMeta({ used: false, error: msg })
+            } else if (lines?.length) {
+              setAiLines(lines)
+              setAiMeta({
+                used: Boolean(j?.usedAi),
+                error: typeof j?.error === "string" ? j.error : null,
+              })
+            } else {
+              setAiMeta({
+                used: false,
+                error:
+                  typeof j?.error === "string" && j.error.trim()
+                    ? j.error.trim()
+                    : rawText?.length > 2
+                      ? "AI 응답에 유효한 문장이 없습니다"
+                      : null,
+              })
+            }
           }
         } catch (aiErr) {
           setAiMeta({ used: false, error: aiErr instanceof Error ? aiErr.message : "ai" })
@@ -103,8 +143,10 @@ export default function OvernightUsBriefing({ panicData = null }) {
         /* ignore */
       }
     } catch (e) {
-      if (!silent) setErr(e instanceof Error ? e.message : "load failed")
-      setPayload(null)
+      if (!silent) {
+        setErr(e instanceof Error ? e.message : "load failed")
+        setPayload(null)
+      }
     } finally {
       if (!silent) setLoading(false)
     }
@@ -174,20 +216,32 @@ export default function OvernightUsBriefing({ panicData = null }) {
     }
   }, [load])
 
-  const briefing = useMemo(() => {
+  const briefingFromPayload = useMemo(() => {
     if (!payload) return null
-    return buildInstitutionalMacroBriefing({
-      parsedData: payload.parsedData,
-      changeData: payload.changeData,
-      updatedAt: payload.updatedAt,
-      panicData: panicDataRef.current,
-    })
+    try {
+      return buildInstitutionalMacroBriefing({
+        parsedData: payload.parsedData,
+        changeData: payload.changeData,
+        updatedAt: payload.updatedAt,
+        panicData: panicDataRef.current,
+      })
+    } catch (e) {
+      console.error("[OvernightUsBriefing] briefing memo", e)
+      return createFallbackMacroBriefing("rule-engine")
+    }
   }, [payload, panicData])
 
+  const effectiveBriefing = useMemo(() => {
+    if (briefingFromPayload) return briefingFromPayload
+    if (loading) return null
+    if (err) return createFallbackMacroBriefing("feed-error")
+    return createFallbackMacroBriefing("default")
+  }, [briefingFromPayload, loading, err])
+
   const displayBullets = useMemo(() => {
-    if (aiLines?.length) return aiLines
-    return briefing?.bullets ?? []
-  }, [aiLines, briefing?.bullets])
+    if (Array.isArray(aiLines) && aiLines.length) return aiLines
+    return Array.isArray(effectiveBriefing?.bullets) ? effectiveBriefing.bullets : []
+  }, [aiLines, effectiveBriefing])
 
   const nyDate = formatNySessionDate(payload?.updatedAt)
   const feedKst = formatRelativeKst(fetchedAt ?? undefined)
@@ -221,11 +275,11 @@ export default function OvernightUsBriefing({ panicData = null }) {
             </p>
           </div>
           <div className="flex flex-shrink-0 flex-col items-end gap-2">
-            {briefing ? (
+            {effectiveBriefing ? (
               <span
-                className={`inline-flex items-center rounded-md border px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.18em] ${sentimentPillClass(briefing.sentiment)}`}
+                className={`inline-flex items-center rounded-md border px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.18em] ${sentimentPillClass(effectiveBriefing?.sentiment)}`}
               >
-                {briefing.sentimentLabel}
+                {effectiveBriefing?.sentimentLabel ?? "NEUTRAL"}
               </span>
             ) : null}
             <div className="text-right font-mono text-[8px] uppercase leading-relaxed tracking-wider text-slate-600">
@@ -241,17 +295,17 @@ export default function OvernightUsBriefing({ panicData = null }) {
           </div>
         </div>
 
-        {briefing?.ticks?.length ? (
+        {effectiveBriefing?.ticks?.length ? (
           <div className="mt-4 flex flex-wrap gap-2 border-y border-white/[0.05] py-3">
-            {briefing.ticks.map((t) => (
+            {effectiveBriefing.ticks.map((t, idx) => (
               <div
-                key={t.key}
+                key={t?.key != null ? String(t.key) : `tick-${idx}`}
                 className="min-w-[7.5rem] flex-1 rounded-md border border-white/[0.06] bg-black/30 px-2.5 py-1.5 sm:min-w-0 sm:flex-1"
               >
-                <p className="m-0 font-mono text-[8px] font-semibold uppercase tracking-wider text-slate-600">{t.label}</p>
+                <p className="m-0 font-mono text-[8px] font-semibold uppercase tracking-wider text-slate-600">{t?.label ?? "—"}</p>
                 <p
                   className={`m-0 mt-0.5 font-mono text-[12px] font-semibold tabular-nums ${
-                    t.chg == null
+                    t?.chg == null
                       ? "text-slate-600"
                       : t.chg > 0
                         ? "text-emerald-300/95"
@@ -260,7 +314,7 @@ export default function OvernightUsBriefing({ panicData = null }) {
                           : "text-slate-300"
                   }`}
                 >
-                  {fmtChgLine(t.chg)}
+                  {fmtChgLine(t?.chg)}
                 </p>
               </div>
             ))}
@@ -269,23 +323,26 @@ export default function OvernightUsBriefing({ panicData = null }) {
 
         {loading ? (
           <p className="m-0 mt-5 text-[12px] text-slate-500">피드 동기화 중…</p>
-        ) : err ? (
+        ) : err && !displayBullets.length ? (
           <p className="m-0 mt-5 text-[12px] text-rose-300/90">{err}</p>
         ) : displayBullets.length ? (
           <>
             <ul className="m-0 mt-4 list-none space-y-2.5 p-0">
-              {displayBullets.map((line) => (
+              {displayBullets.map((line, i) => (
                 <li
-                  key={line}
+                  key={`macro-line-${i}-${String(line).slice(0, 48)}`}
                   className="relative pl-3 text-[12.5px] leading-snug text-slate-200/95 before:absolute before:left-0 before:top-[0.45em] before:h-1.5 before:w-1 before:rounded-sm before:bg-cyan-400/55 sm:text-[13px]"
                 >
-                  {line}
+                  {typeof line === "string" ? line : String(line ?? "—")}
                 </li>
               ))}
             </ul>
             <p className="m-0 mt-5 border-t border-white/[0.06] pt-3 font-mono text-[8px] leading-relaxed text-slate-700">
               Source · Yahoo Finance (query1) · no-store · PWA 동일 피드. Desk rules + optional OpenAI.
             </p>
+            {useAiClient && aiMeta.error ? (
+              <p className="m-0 mt-2 font-mono text-[8px] text-amber-600/90">AI · {aiMeta.error}</p>
+            ) : null}
           </>
         ) : null}
       </div>

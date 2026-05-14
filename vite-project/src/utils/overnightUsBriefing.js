@@ -6,6 +6,50 @@
 import { getTotalSignalScore } from "./panicMarketSignal.js"
 
 /**
+ * @param {"default"|"feed-error"|"rule-engine"|"ai-parse"} [reason]
+ */
+export function createFallbackMacroBriefing(reason = "default") {
+  const lines = {
+    default: "DESK · 브리핑 데이터를 준비 중입니다. 잠시 후 자동 갱신됩니다.",
+    "feed-error": "MARKET · 시황 피드를 불러오지 못했습니다. 네트워크 또는 서버 설정을 확인한 뒤 새로고침 해 주세요.",
+    "rule-engine": "DESK · 규칙 기반 브리핑 생성 중 오류가 발생했습니다. 패닉 보드·시장 수치를 확인해 주세요.",
+    "ai-parse": "AI · 응답 형식이 올바르지 않아 규칙 기반 브리핑으로 표시합니다.",
+  }
+  const line = lines[/** @type {keyof typeof lines} */ (reason)] ?? lines.default
+  return {
+    headline: "US SESSION — MACRO DESK",
+    bullets: [line],
+    prose: line,
+    sentiment: /** @type {"neutral"} */ ("neutral"),
+    sentimentLabel: "NEUTRAL",
+    ticks: [],
+    updatedAt: null,
+    composite: null,
+  }
+}
+
+/**
+ * OpenAI/엣지 API가 배열이 아닌 값·객체를 섞어내도 렌더가 깨지지 않게 정규화.
+ * @param {unknown} raw
+ * @returns {string[] | null}
+ */
+export function normalizeAiBriefingLines(raw) {
+  if (!Array.isArray(raw)) return null
+  const out = []
+  for (const item of raw) {
+    if (typeof item === "string") {
+      const t = item.trim()
+      if (t) out.push(t)
+    } else if (item != null && (typeof item === "number" || typeof item === "boolean")) {
+      const t = String(item).trim()
+      if (t) out.push(t)
+    }
+    if (out.length >= 14) break
+  }
+  return out.length ? out : null
+}
+
+/**
  * @param {unknown} data
  * @param {string} key
  */
@@ -53,7 +97,7 @@ function fmtChg(x, digits = 2) {
  *   panicData?: object | null
  * }} input
  */
-export function buildInstitutionalMacroBriefing(input) {
+function buildInstitutionalMacroBriefingCore(input) {
   const p = input?.parsedData ?? {}
   const c = input?.changeData ?? {}
 
@@ -191,6 +235,15 @@ export function buildInstitutionalMacroBriefing(input) {
     ticks,
     updatedAt: input.updatedAt ?? null,
     composite: Number.isFinite(composite) ? composite : null,
+  }
+}
+
+export function buildInstitutionalMacroBriefing(input) {
+  try {
+    return buildInstitutionalMacroBriefingCore(input ?? {})
+  } catch (e) {
+    console.error("[macro-briefing] buildInstitutionalMacroBriefing", e)
+    return createFallbackMacroBriefing("rule-engine")
   }
 }
 

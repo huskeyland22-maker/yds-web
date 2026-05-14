@@ -258,12 +258,23 @@ export async function fetchMarketData() {
   if (!res.ok) {
     throw new Error(`market-data HTTP ${res.status}`)
   }
-  const payload = await res.json()
-  console.log("[GlobalBar] market-data response", payload)
+  const text = await res.text()
+  let payload = {}
+  try {
+    payload = text ? JSON.parse(text) : {}
+  } catch {
+    throw new Error("market-data: invalid JSON")
+  }
+  if (import.meta.env.DEV) {
+    console.log("[GlobalBar] market-data response", payload)
+  }
+  const root = typeof payload === "object" && payload != null && !Array.isArray(payload) ? payload : {}
+  const pd = root?.parsedData
+  const cd = root?.changeData
   return {
-    parsedData: payload?.parsedData ?? {},
-    changeData: payload?.changeData ?? {},
-    updatedAt: payload?.updatedAt ?? null,
-    source: payload?.source ?? null,
+    parsedData: pd != null && typeof pd === "object" && !Array.isArray(pd) ? pd : {},
+    changeData: cd != null && typeof cd === "object" && !Array.isArray(cd) ? cd : {},
+    updatedAt: root?.updatedAt ?? null,
+    source: root?.source ?? null,
   }
 }

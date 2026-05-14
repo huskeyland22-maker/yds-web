@@ -72,8 +72,10 @@ export default function GlobalMarketBar({ isMobile = false }) {
         return parsedData
       })
       setMarketChange(changeData)
-      console.log("[GlobalBar] parsedData", parsedData)
-      console.log("[GlobalBar] setMarketData(parsedData) executed")
+      if (import.meta.env.DEV) {
+        console.log("[GlobalBar] parsedData", parsedData)
+        console.log("[GlobalBar] setMarketData(parsedData) executed")
+      }
     } catch (err) {
       console.error("글로벌 시황 바 로드 실패", err)
     } finally {
