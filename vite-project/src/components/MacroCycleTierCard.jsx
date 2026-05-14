@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import MacroCycleChart from "./MacroCycleChart.jsx"
+import MacroCycleLwChart from "./MacroCycleLwChart.jsx"
 import {
   formatMetricValue,
   pctDelta,
@@ -82,7 +82,6 @@ function MetricBlock({ series, panicData, rows, large }) {
  *   series: { key: string; name?: string; color?: string }[]
  *   rows: object[]
  *   panicData: object | null
- *   resolveInsight: (key: string, raw: unknown) => string
  *   statusVariant?: 'stable'|'watch'|'stress'
  *   statusLabel: string
  *   macroComments: string[]
@@ -103,7 +102,6 @@ export default function MacroCycleTierCard({
   series,
   rows,
   panicData,
-  resolveInsight,
   statusVariant: _statusVariant,
   statusLabel,
   macroComments,
@@ -153,22 +151,24 @@ export default function MacroCycleTierCard({
               <p className="m-0 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{tierLabel}</p>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
                 <FeedStatusBadge kind={feedKind} label={feedLabel} />
-                <p className="m-0 text-[9px] font-medium tracking-wide text-slate-600">{statusLabel}</p>
+                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">{statusLabel}</p>
               </div>
             </div>
 
-            <h2 className="m-0 mt-4 text-[1.35rem] font-semibold leading-tight tracking-tight text-slate-50 sm:text-2xl">{state}</h2>
+            <h2 className="m-0 mt-4 text-[1.45rem] font-semibold leading-[1.15] tracking-tight text-slate-50 sm:text-[1.65rem]">
+              {state}
+            </h2>
 
-            <div className="mt-3 space-y-1 border-l-2 border-white/[0.08] pl-3">
-              <p className="m-0 text-[13px] font-medium leading-snug text-slate-300 sm:text-sm">{subtitlePrimary}</p>
+            <div className="mt-3 space-y-1 border-l-2 border-white/[0.1] pl-3">
+              <p className="m-0 text-[13px] font-semibold leading-snug text-slate-200/95 sm:text-sm">{subtitlePrimary}</p>
               {subtitleSecondary ? (
-                <p className="m-0 text-[12px] leading-relaxed text-slate-500 sm:text-[13px]">{subtitleSecondary}</p>
+                <p className="m-0 text-[11.5px] leading-relaxed text-slate-600 sm:text-[12px]">{subtitleSecondary}</p>
               ) : null}
             </div>
           </header>
 
           <section className="border-b border-white/[0.05] px-5 py-4">
-            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-600">핵심 수치</p>
+            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">핵심 수치</p>
             {primaryS ? (
               <div className="mt-3 rounded-lg border border-white/[0.06] bg-black/25 px-4 py-3">
                 <MetricBlock series={primaryS} panicData={panicData} rows={rows} large />
@@ -186,24 +186,22 @@ export default function MacroCycleTierCard({
               </div>
             ) : null}
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/[0.04] pt-3 font-mono text-[9px] uppercase tracking-wider text-slate-600">
-              <span>
-                As of <span className="text-slate-500">{asOfDateLabel}</span>
-              </span>
-              <span className="hidden h-3 w-px bg-slate-700 sm:inline" aria-hidden />
-              <span className="text-slate-500">{updatedLine}</span>
-              <span className="hidden h-3 w-px bg-slate-700 sm:inline" aria-hidden />
+            <p className="m-0 mt-3 border-t border-white/[0.04] pt-2.5 font-mono text-[8px] leading-relaxed text-slate-700">
+              <span className="text-slate-600">As of {asOfDateLabel}</span>
+              <span className="mx-1.5 text-slate-800">·</span>
+              <span>{updatedLine}</span>
+              <span className="mx-1.5 text-slate-800">·</span>
               <span>{sourceLine}</span>
-            </div>
+            </p>
           </section>
 
           <section className="px-3 pb-1 pt-3 sm:px-4">
-            <p className="m-0 mb-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-600">시계열</p>
-            <MacroCycleChart rows={rows} series={series} resolveInsight={resolveInsight} />
+            <p className="m-0 mb-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">시계열</p>
+            {primaryS ? <MacroCycleLwChart rows={rows} primarySeries={primaryS} /> : null}
           </section>
 
           <footer className="border-t border-white/[0.05] px-5 py-4">
-            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-600">하단 해석</p>
+            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">하단 해석</p>
             <ul className="m-0 mt-2.5 list-none space-y-2 p-0">
               {macroComments.map((line) => (
                 <li
