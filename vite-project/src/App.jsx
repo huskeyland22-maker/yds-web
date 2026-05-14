@@ -199,9 +199,13 @@ function saveCycleMetricHistory(panicData) {
   if (typeof window === "undefined" || !panicData) return readCycleMetricHistory()
   const dayKey = calendarKeyFromPanic(panicData)
   const row = { date: dayKey, ts: `${dayKey}T12:00:00.000Z` }
+  /** 실제 시장에서 0이 거의 불가능한 지표 — 플레이스홀더 0은 히스토리에 기록하지 않음 */
+  const noZeroSentinel = new Set(["vix", "vxn", "move", "skew", "bofa", "highYield", "fearGreed", "gsBullBear"])
   const add = (k, v) => {
     const n = Number(v)
-    if (Number.isFinite(n)) row[k] = n
+    if (!Number.isFinite(n)) return
+    if (n === 0 && noZeroSentinel.has(k)) return
+    row[k] = n
   }
   add("vix", panicData?.vix)
   add("vxn", panicData?.vxn)
@@ -238,11 +242,26 @@ function macroDashboardStatus(stateLabel) {
   return { variant: "stable", label: "안정" }
 }
 
+/**
+ * CSV 한 줄에서 "최종 수치" 추출.
+ * - `1,VIX,17.87,...` → 분류(숫자) + 이름 + **수치가 3번째**
+ * - `SKEW Index, 137.90, -0.68,...` → 이름 + **수치가 2번째** (3번째는 변동)
+ */
 function extractMetricValueFromLine(line) {
   const parts = splitCsvLine(line)
-  // Expected format: 분류,지수 명칭,최종 확정 수치,전일 대비,상태
-  if (parts.length >= 3) return normalizeNumberToken(parts[2])
-  if (parts.length >= 2) return normalizeNumberToken(parts[1])
+  if (parts.length < 2) return null
+  const col0 = String(parts[0] ?? "").trim()
+  const rowIndexLike = /^\d+$/.test(col0)
+  if (rowIndexLike && parts.length >= 3) {
+    const v = normalizeNumberToken(parts[2])
+    if (v != null) return v
+  }
+  const primary = normalizeNumberToken(parts[1])
+  if (primary != null) return primary
+  if (parts.length >= 3) {
+    const fallback = normalizeNumberToken(parts[2])
+    if (fallback != null) return fallback
+  }
   return null
 }
 
@@ -270,7 +289,7 @@ function parseTextPanicData(text) {
   applyByPattern(/(?:풋\/콜|Put\/Call|PutCall|풋콜)/i, "putCall")
   applyByPattern(/(?:CNN\s*F&G|Fear\s*&\s*Greed|공포탐욕|탐욕지수)/i, "fearGreed")
   applyByPattern(/\bMOVE\b/i, "move")
-  applyByPattern(/BofA(?:\s*B&B)?/i, "bofa")
+  applyByPattern(/BofA(?:\s*Bull\s*(?:&|and)?\s*Bear|\s*B&B)?/i, "bofa")
   applyByPattern(/\bSKEW\b/i, "skew")
   applyByPattern(/(?:하이일드|HY\s*스프레드|High\s*Yield)/i, "highYield")
   // "GS Bull & Bear" (Goldman 표기), GS B/B, Goldman Sachs 꼬리 등
@@ -762,6 +781,30 @@ function App() {
         void usePanicStore
           .getState()
           .fetchPanicData(usedHubSavePath ? "hub-post-save" : "manual-api-post-save", { force: true })
+          .then(() => {
+            if (import.meta.env.DEV) {
+              try {
+                const live = usePanicStore.getState().panicData
+                console.table([
+                  { stage: "submitted", ...normalizedParsedData },
+                  {
+                    stage: "after_refetch",
+                    vix: live?.vix,
+                    vxn: live?.vxn,
+                    move: live?.move,
+                    skew: live?.skew,
+                    gsBullBear: live?.gsBullBear,
+                    highYield: live?.highYield,
+                    fearGreed: live?.fearGreed,
+                    bofa: live?.bofa,
+                    putCall: live?.putCall,
+                  },
+                ])
+              } catch {
+                // ignore
+              }
+            }
+          })
           .catch((e) => {
             console.warn("[panic] post-save refresh", e)
           })

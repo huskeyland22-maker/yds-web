@@ -192,6 +192,13 @@ export function pickXAxisLabels(chartRows, count = 4, width = 720, padX = 32) {
     .filter(Boolean)
 }
 
+/** 서버/레거시에서 내려오는 0 플레이스홀더 — 실제 값 없음으로 취급(잘못된 0 표시 방지). putCall은 제외 */
+const ZERO_SENTINEL_KEYS = new Set(["vix", "vxn", "move", "skew", "bofa", "highYield", "gsBullBear", "fearGreed"])
+
+function isPlaceholderZero(key, n) {
+  return n === 0 && ZERO_SENTINEL_KEYS.has(key)
+}
+
 /** panicData 메타 (flat 또는 { value } ) */
 export function pickPanicRaw(panicData, key) {
   if (!panicData || typeof panicData !== "object") return null
@@ -203,12 +210,15 @@ export function pickPanicRaw(panicData, key) {
 export function pickPanicNumber(panicData, key) {
   const raw = pickPanicRaw(panicData, key)
   if (raw == null || raw === "") return NaN
+  if (typeof raw === "boolean") return NaN
   if (typeof raw === "object" && "value" in raw) {
     const n = Number(raw.value)
-    return Number.isFinite(n) ? n : NaN
+    if (!Number.isFinite(n)) return NaN
+    return isPlaceholderZero(key, n) ? NaN : n
   }
   const n = Number(raw)
-  return Number.isFinite(n) ? n : NaN
+  if (!Number.isFinite(n)) return NaN
+  return isPlaceholderZero(key, n) ? NaN : n
 }
 
 /** panicData 우선, 없으면 히스토리 행에서 최신 유효값 (카드 '-' 방지) */
@@ -220,8 +230,10 @@ export function pickMetricDisplayValue(panicData, rows, key) {
     const row = rows[i]
     if (!row || typeof row !== "object") continue
     let n = Number(row[key])
+    if (isPlaceholderZero(key, n)) n = NaN
     if (!Number.isFinite(n) && key === "gsBullBear") {
       n = Number(row.gsBullBear ?? row.gs)
+      if (isPlaceholderZero(key, n)) n = NaN
     }
     if (Number.isFinite(n)) return n
   }
