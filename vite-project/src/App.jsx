@@ -575,7 +575,6 @@ function App() {
   const panicInitialized = usePanicStore((s) => s.initialized)
   const initializePanicData = usePanicStore((s) => s.initializePanicData)
   const applyManualPanicData = usePanicStore((s) => s.applyManualPanicData)
-  const releaseManualMode = usePanicStore((s) => s.releaseManualMode)
   const startAutoRefresh = usePanicStore((s) => s.startAutoRefresh)
   const stopAutoRefresh = usePanicStore((s) => s.stopAutoRefresh)
   const syncOnAppResume = usePanicStore((s) => s.syncOnAppResume)
@@ -1345,14 +1344,11 @@ function App() {
               boxShadow: "inset 1px 0 0 rgba(139,92,246,0.12), -16px 0 48px rgba(0,0,0,0.5)",
             }}
           >
-            <header className="mb-2 flex shrink-0 items-start justify-between gap-2 border-b border-white/[0.06] pb-2.5">
+            <header className="mb-2 flex shrink-0 items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
               <div className="min-w-0">
-                <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-violet-300/80">
-                  Manual ingest
-                </p>
-                <h3 className="m-0 mt-0.5 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
+                <h3 className="m-0 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
-                  표 형식 그대로 붙여넣기. 저장 시 대시보드에 반영됩니다.
+                  붙여넣기 후 반영 — 표 형식 그대로 사용합니다.
                 </p>
               </div>
               <button
@@ -1380,28 +1376,17 @@ function App() {
               />
             </div>
 
-            <div className="mt-2 shrink-0">
-              {inputText.trim() ? (
-                <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-slate-500">Parse</span>
-                  <span className="rounded border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-emerald-200/95">
-                    {parsedFieldCount}/{METRIC_DEFS.length}
-                  </span>
-                  <div className="flex min-w-0 flex-1 flex-wrap gap-1">
-                    {METRIC_DEFS.filter(({ key }) => parsedData[key] !== null).map(({ key, label }) => (
-                      <span
-                        key={key}
-                        className="max-w-[7.5rem] truncate rounded-sm border border-cyan-500/15 bg-cyan-500/[0.06] px-1.5 py-0.5 font-mono text-[10px] text-cyan-100/90"
-                        title={`${label}: ${parsedData[key]}`}
-                      >
-                        {label} {parsedData[key]}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="m-0 font-mono text-[10px] text-slate-600">붙여넣은 행에서 지표를 자동 매칭합니다.</p>
-              )}
+            <div className="mt-1.5 flex shrink-0 items-center justify-between gap-2 font-mono text-[10px] text-slate-500">
+              <span className="tabular-nums">
+                {inputText.trim()
+                  ? `필드 ${parsedFieldCount}/${METRIC_DEFS.length}`
+                  : "입력 대기"}
+              </span>
+              {inputText.trim() && parseResult.missingRequired.length > 0 ? (
+                <span className="text-amber-200/80">필수 {parseResult.missingRequired.length}건 미충족</span>
+              ) : inputText.trim() ? (
+                <span className="text-emerald-500/75">반영 준비됨</span>
+              ) : null}
             </div>
 
             {inputError ? (
@@ -1413,10 +1398,10 @@ function App() {
               </div>
             ) : null}
 
-            <details className="group mt-2 shrink-0 rounded-md border border-white/[0.05] bg-black/20">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-2 py-1.5 font-mono text-[10px] text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-400 [&::-webkit-details-marker]:hidden">
+            <details className="group mt-1.5 shrink-0 rounded-md border border-white/[0.05] bg-black/20">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-2 py-1 font-mono text-[10px] text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-400 [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-1.5">
-                  <span className="uppercase tracking-wider">추출 상세</span>
+                  <span className="tracking-wide">추출 상세</span>
                   {missingFields.length > 0 ? (
                     <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1 py-px text-[9px] text-amber-200/90">
                       {missingFields.length} 미인식
@@ -1447,29 +1432,15 @@ function App() {
               </div>
             </details>
 
-            <footer className="mt-3 flex shrink-0 flex-col gap-2 border-t border-white/[0.06] pt-3">
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={submitInput}
-                  disabled={isSaving}
-                  className="flex-1 rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isSaving ? "저장 중…" : "대시보드에 반영"}
-                </button>
-              </div>
-              {manualMode ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    void releaseManualMode()
-                    setSaveToast("✅ 자동 데이터 모드로 전환")
-                  }}
-                  className="w-full rounded-lg border border-sky-500/25 bg-sky-500/[0.06] py-2 text-[12px] font-medium text-sky-200/90 transition hover:border-sky-400/35 hover:bg-sky-500/10"
-                >
-                  자동 피드로 되돌리기
-                </button>
-              ) : null}
+            <footer className="mt-2.5 shrink-0 border-t border-white/[0.06] pt-2.5">
+              <button
+                type="button"
+                onClick={submitInput}
+                disabled={isSaving}
+                className="w-full rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSaving ? "반영 중…" : "대시보드에 반영"}
+              </button>
             </footer>
           </div>
         </>

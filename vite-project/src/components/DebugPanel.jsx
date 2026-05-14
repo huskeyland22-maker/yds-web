@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { usePanicStore } from "../store/panicStore.js"
 import { getDebugEventChannel, getRecentDebugLogs, isDebugModeEnabled } from "../utils/debugLogger.js"
 
 const CHECKLIST_ITEMS = [
@@ -25,6 +26,8 @@ function readMemosCount() {
 }
 
 export default function DebugPanel({ metrics = {} }) {
+  const manualMode = usePanicStore((s) => s.manualMode)
+  const releaseManualMode = usePanicStore((s) => s.releaseManualMode)
   const [enabled, setEnabled] = useState(() => isDebugModeEnabled())
   const [open, setOpen] = useState(true)
   const [events, setEvents] = useState([])
@@ -237,6 +240,26 @@ export default function DebugPanel({ metrics = {} }) {
           <p className="m-0">fetch count: {metrics.fetchCount ?? 0}</p>
           <p className="m-0">rerender burst: {String(Boolean(metrics.rerenderBurst))}</p>
         </div>
+      </div>
+
+      <div className="mt-3 rounded-lg border border-amber-400/20 bg-black/20 px-3 py-2">
+        <p className="m-0 text-amber-300">패닉 지표 소스</p>
+        <p className="m-0 mt-1 text-[11px] leading-snug text-amber-100/90">
+          {manualMode
+            ? "수동 스냅샷 — 클립보드 반영값이 우선이며 자동 피드 갱신은 보류됩니다."
+            : "자동 피드 — 공개 데이터 소스를 사용합니다."}
+        </p>
+        {manualMode ? (
+          <button
+            type="button"
+            onClick={() => {
+              void releaseManualMode()
+            }}
+            className="mt-2 rounded-md border border-sky-400/45 bg-sky-950/50 px-2.5 py-1.5 text-[11px] font-medium text-sky-100 transition hover:border-sky-300/60 hover:bg-sky-900/50"
+          >
+            자동 피드로 복귀
+          </button>
+        ) : null}
       </div>
 
       <div className="mt-3 rounded-lg border border-amber-400/20 bg-black/20 px-3 py-2">
