@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { fetchPanicDataJson } from "../config/api.js"
+import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { validatePanicData } from "../utils/validatePanicData.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
@@ -16,8 +17,7 @@ const LEGACY_PANIC_KEYS = [
 ]
 const SNAPSHOT_MAX_AGE_MS = 1000 * 60 * 10
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
-const AUTO_REFRESH_MS = 300_000
-const AUTO_DATA_ENGINE_ENABLED = false
+const AUTO_REFRESH_MS = PANIC_DATA_POLL_MS
 const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield", "gsBullBear"]
 const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
@@ -175,45 +175,58 @@ export const usePanicStore = create((set, get) => ({
     const hydrationStart = typeof performance !== "undefined" ? performance.now() : Date.now()
     emitDebugEvent("HYDRATION_START", { source: "panicStore.initialize" })
     const envelope = readMainEnvelope()
+    let fallbackManualEnvelope = null
     if (envelope && !isValidSnapshotShape(envelope)) {
       addFlow(set, "clear-invalid-schema-main", { reason: "version-or-shape-mismatch" })
       clearMain()
       clearLegacy()
-    } else if (envelope && envelope?.isManual) {
-      addFlow(set, "restore-main-manual", { updatedAt: envelope?.data?.updatedAt ?? null })
-      const restored = toSnapshotData(envelope.data)
-      set({ panicData: restored, manualMode: true, initialized: true })
-      emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage", manualMode: true, restoredItemCount: 1 })
-      emitDebugEvent("HYDRATION_DONE", {
-        source: "panicStore.initialize",
-        restored: true,
-        durationMs: Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - hydrationStart),
-      })
-      return
+    } else if (envelope?.isManual && isValidSnapshotShape(envelope)) {
+      fallbackManualEnvelope = envelope
+      addFlow(set, "defer-main-manual", { updatedAt: envelope?.data?.updatedAt ?? null })
+      clearMain()
     } else if (envelope && (!isFresh(envelope) || !isCurrentBuild(envelope))) {
       addFlow(set, "clear-stale-main")
       clearMain()
       clearLegacy()
     }
     set({ initialized: true })
-    emitDebugEvent("HYDRATION_DONE", {
-      source: "panicStore.initialize",
-      restored: false,
-      durationMs: Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - hydrationStart),
-    })
     if (!AUTO_DATA_ENGINE_ENABLED) {
       addFlow(set, "skip-initialize-fetch-auto-engine-off")
+      if (fallbackManualEnvelope) {
+        const restored = toSnapshotData(fallbackManualEnvelope.data)
+        set({ panicData: restored, manualMode: true })
+        addFlow(set, "restore-main-manual-engine-off", { updatedAt: restored?.updatedAt ?? null })
+        emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage", manualMode: true, restoredItemCount: 1 })
+      }
+      emitDebugEvent("HYDRATION_DONE", {
+        source: "panicStore.initialize",
+        restored: Boolean(fallbackManualEnvelope),
+        durationMs: Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - hydrationStart),
+      })
       return
     }
-    await get().fetchPanicData("initialize-fetch")
+    await get().fetchPanicData("initialize-fetch", { force: true })
+    if (!get().panicData && fallbackManualEnvelope) {
+      const restored = toSnapshotData(fallbackManualEnvelope.data)
+      set({ panicData: restored, manualMode: true })
+      writeMain(restored, true)
+      addFlow(set, "restore-main-manual-offline-fallback", { updatedAt: restored?.updatedAt ?? null })
+      emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage-offline-fallback", manualMode: true, restoredItemCount: 1 })
+    }
+    emitDebugEvent("HYDRATION_DONE", {
+      source: "panicStore.initialize",
+      restored: Boolean(fallbackManualEnvelope && get().manualMode),
+      durationMs: Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - hydrationStart),
+    })
   },
 
-  fetchPanicData: async (source = "api-fetch") => {
+  fetchPanicData: async (source = "api-fetch", opts = {}) => {
+    const force = Boolean(opts?.force)
     if (!AUTO_DATA_ENGINE_ENABLED) {
       addFlow(set, "block-fetch-auto-engine-off", { source })
       return false
     }
-    if (get().manualMode) {
+    if (get().manualMode && !force) {
       addFlow(set, "block-fetch-manual", { source })
       return false
     }
@@ -222,7 +235,7 @@ export const usePanicStore = create((set, get) => ({
     try {
       const data = await fetchPanicDataJson({ debugLog: false })
       if (!validatePanicData(data)) return false
-      if (seq !== fetchSeq || get().manualMode) {
+      if (seq !== fetchSeq || (get().manualMode && !force)) {
         addFlow(set, "drop-stale-fetch", { source })
         return false
       }
@@ -257,7 +270,7 @@ export const usePanicStore = create((set, get) => ({
         }
         mergedForLog = merged
         writeMain(merged, false)
-        return { panicData: merged }
+        return { panicData: merged, manualMode: false }
       })
       if (mergedForLog) {
         updated = true
@@ -272,6 +285,25 @@ export const usePanicStore = create((set, get) => ({
       return false
     }
     return updated
+  },
+
+  applyServerPanicSnapshot: (incoming) => {
+    if (!incoming || typeof incoming !== "object") return
+    const next = toSnapshotData(incoming)
+    if (!isCompletePanicData(next)) {
+      addFlow(set, "skip-server-snapshot-incomplete")
+      return
+    }
+    stopRefreshTimer()
+    try {
+      clearMain()
+    } catch {
+      // ignore
+    }
+    writeMain(next, false)
+    set({ panicData: next, manualMode: false })
+    addFlow(set, "set-from-server-submit", { updatedAt: next.updatedAt ?? null })
+    get().startAutoRefresh()
   },
 
   applyManualPanicData: (incoming) => {

@@ -243,6 +243,7 @@ export async function submitManualTextData(rawText) {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ text: rawText }),
+    cache: "no-store",
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const out = await res.json()

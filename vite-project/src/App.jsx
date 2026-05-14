@@ -4,6 +4,7 @@ import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchCycleMetricsHistory, isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
+import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
@@ -39,7 +40,6 @@ const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const PWA_RESUME_RELOAD_COOLDOWN_MS = 10_000
 const PANIC_TEXT_DRAFT_KEY = "yds-panic-text-draft-v1"
-const AUTO_DATA_ENGINE_ENABLED = false
 const PANIC_TEXT_PLACEHOLDER = `분류,지수 명칭,최종 확정 수치,전일 대비 (Δ),상태 등급
 단기,1. VIX Index,17.38,📉 -0.63,🟢 안정
 단기,2. VXN Index,22.45,📉 -0.43,🟢 안정
@@ -584,7 +584,7 @@ function App() {
   const manualMode = usePanicStore((s) => s.manualMode)
   const panicInitialized = usePanicStore((s) => s.initialized)
   const initializePanicData = usePanicStore((s) => s.initializePanicData)
-  const applyManualPanicData = usePanicStore((s) => s.applyManualPanicData)
+  const applyServerPanicSnapshot = usePanicStore((s) => s.applyServerPanicSnapshot)
   const savePanicMetricsHub = usePanicStore((s) => s.savePanicMetricsHub)
   const startAutoRefresh = usePanicStore((s) => s.startAutoRefresh)
   const stopAutoRefresh = usePanicStore((s) => s.stopAutoRefresh)
@@ -667,24 +667,29 @@ function App() {
             }
           })()
         }
+        try {
+          await usePanicStore.getState().fetchPanicData("hub-post-save", { force: true })
+        } catch (e) {
+          console.warn("[panic] hub post-save refresh", e)
+        }
         return
       }
 
-      applyManualPanicData(normalizedParsedData)
+      let serverData
+      try {
+        serverData = await submitManualPanicData(normalizedParsedData)
+      } catch (err) {
+        console.error("패닉지수 서버 저장 실패", err)
+        setInputError(err instanceof Error ? err.message : "저장에 실패했습니다")
+        return
+      }
+      applyServerPanicSnapshot(serverData)
       setSaveDone(true)
-      setSaveToast("✅ 패닉지수 저장 완료")
+      setSaveToast("✅ 패닉지수 저장 완료 · 모든 기기에 반영")
       setOpenInput(false)
       window.setTimeout(() => {
         setOpenInput(false)
       }, 100)
-
-      void (async () => {
-        try {
-          await submitManualPanicData(normalizedParsedData)
-        } catch (err) {
-          console.error("AI 리포트 저장 실패", err)
-        }
-      })()
 
       if (db) {
         void (async () => {

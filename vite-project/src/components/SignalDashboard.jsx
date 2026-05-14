@@ -4,6 +4,7 @@ import {
   getPanicDataUrlForDisplay,
   listPanicDataUrlAttemptsForDisplay,
 } from "../config/api.js"
+import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
 import { sendNotification, usePanicNotifications } from "../hooks/usePanicNotifications.js"
 import {
   getAdvancedSignal,
@@ -45,10 +46,9 @@ import {
 import { getTradingSignal } from "../utils/tradingStrategy.js"
 import { buildAiMarketBrief } from "../utils/aiAnalysisEngine.js"
 
-/** 자동 새로고침 주기 (5분) */
-const PANIC_REFRESH_MS = 300_000
+/** 자동 새로고침 주기 — panicStore와 동일 */
+const PANIC_REFRESH_MS = PANIC_DATA_POLL_MS
 const PANIC_CACHE_STALE_MS = 600_000
-const AUTO_DATA_ENGINE_ENABLED = false
 const APP_BUILD_VERSION = String(import.meta.env.VITE_APP_BUILD_ID ?? "dev")
 
 const healthRowStyle = { marginTop: "10px", fontSize: "12px", color: "gray" }
@@ -423,7 +423,7 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
     }
     let cancelled = false
     const isCancelled = () => cancelled
-    void fetchData({ useMemoryCache: true, silent: false, isCancelled })
+    void fetchData({ useMemoryCache: false, silent: false, isCancelled })
     return () => {
       cancelled = true
     }

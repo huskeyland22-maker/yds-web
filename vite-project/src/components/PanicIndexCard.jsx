@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { PANIC_DUMMY_CHART_ROWS } from "../data/panicDummyCharts.js"
 import Gauge from "./Gauge.jsx"
 import PanicIndicatorChartBox from "./PanicIndicatorChartBox.jsx"
 import PanicMetricCard from "./PanicMetricCard.jsx"
@@ -35,6 +34,29 @@ const TIMING_TEXT = {
   buy: "text-emerald-400",
   neutral: "text-amber-300",
   danger: "text-red-400",
+}
+
+function pickSn(x) {
+  if (x == null) return null
+  if (typeof x === "number") return Number.isFinite(x) ? x : null
+  const n = Number(x)
+  return Number.isFinite(n) ? n : null
+}
+
+/** 시계열 API 없을 때: 현재 스냅샷 수치로 평평한 스파크(더미 난수 없음) */
+function buildLiveMetricSparkFromData(data) {
+  if (!data || typeof data !== "object") return []
+  const row = {
+    vix: pickSn(data.vix),
+    putCall: pickSn(data.putCall),
+    bofa: pickSn(data.bofa),
+    fearGreed: pickSn(data.fearGreed),
+    highYield: pickSn(data.highYield),
+  }
+  if (row.vix == null && row.putCall == null && row.fearGreed == null && row.bofa == null && row.highYield == null) {
+    return []
+  }
+  return [1, 2, 3, 4, 5].map((t) => ({ time: String(t), ...row }))
 }
 
 const SHORT_METRICS = [
@@ -93,6 +115,7 @@ export default function PanicIndexCard({
   const referenceMvpSignal = useMemo(() => getSignal(totalScore), [totalScore])
   const strategySignal = useMemo(() => getAdvancedSignal(data), [data])
   const confidence = useMemo(() => getConfidence(data), [data])
+  const indicatorSpark = useMemo(() => buildLiveMetricSparkFromData(data), [data])
 
   /** 구간 진입 시에만 브라우저 alert (폴링마다 반복되지 않도록) */
   const alertOnceRef = useRef({ vixAbove30: false, strongBuy: false, strongSell: false })
@@ -279,13 +302,19 @@ export default function PanicIndexCard({
           {isPro ? (
             <>
               <p className="mt-8 text-xs text-gray-500">
-                아래 차트는 API 시계열 연결 전 <span className="text-gray-400">샘플 데이터</span>입니다.
+                아래 차트는 <span className="text-gray-300">현재 API 스냅샷</span> 기준입니다. (누적 시계열 연동 시 변동 그래프로 확장)
               </p>
-              <PanicIndicatorChartBox title="VIX 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="vix" />
-              <PanicIndicatorChartBox title="Put/Call 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="putCall" />
-              <PanicIndicatorChartBox title="BofA 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="bofa" />
-              <PanicIndicatorChartBox title="Fear & Greed 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="fearGreed" />
-              <PanicIndicatorChartBox title="하이일드 흐름" data={PANIC_DUMMY_CHART_ROWS} dataKey="highYield" />
+              {indicatorSpark.length ? (
+                <>
+                  <PanicIndicatorChartBox title="VIX 흐름" data={indicatorSpark} dataKey="vix" />
+                  <PanicIndicatorChartBox title="Put/Call 흐름" data={indicatorSpark} dataKey="putCall" />
+                  <PanicIndicatorChartBox title="BofA 흐름" data={indicatorSpark} dataKey="bofa" />
+                  <PanicIndicatorChartBox title="Fear & Greed 흐름" data={indicatorSpark} dataKey="fearGreed" />
+                  <PanicIndicatorChartBox title="하이일드 흐름" data={indicatorSpark} dataKey="highYield" />
+                </>
+              ) : (
+                <p className="mt-4 text-xs text-gray-500">표시할 지표 스냅샷이 없습니다. 패닉 데이터를 불러온 뒤 다시 확인해 주세요.</p>
+              )}
             </>
           ) : (
             <div className="mt-8 rounded-xl border border-amber-500/30 bg-amber-950/25 px-4 py-8 text-center text-amber-100/95">
