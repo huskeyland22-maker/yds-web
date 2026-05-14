@@ -13,13 +13,6 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-const apiKey = import.meta.env.VITE_FIREBASE_API_KEY
-console.log("[firebase env check]", import.meta.env.VITE_FIREBASE_API_KEY)
-console.log(
-  "[firebase env check] API KEY:",
-  apiKey ? `${apiKey.slice(0, 4)}***` : "undefined",
-)
-
 const hasFirebaseApiKey =
   typeof firebaseConfig.apiKey === "string" && firebaseConfig.apiKey.trim() !== ""
 
@@ -27,7 +20,18 @@ export function hasFirebaseConfig() {
   return Object.values(firebaseConfig).every((v) => typeof v === "string" && v.trim() !== "")
 }
 
-const app = hasFirebaseApiKey ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) : null
+let app = null
+if (hasFirebaseConfig()) {
+  try {
+    app = getApps().length ? getApp() : initializeApp(firebaseConfig)
+  } catch (e) {
+    console.error("[firebase] initializeApp failed — running without Firebase", e)
+    app = null
+  }
+} else if (hasFirebaseApiKey) {
+  console.warn("[firebase] partial env (need all VITE_FIREBASE_* keys) — Firebase disabled")
+}
+
 export const auth = app ? getAuth(app) : null
 export const db = app ? getFirestore(app) : null
 

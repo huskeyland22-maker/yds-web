@@ -93,7 +93,26 @@ async function bootstrapApp() {
   // running module scripts) the gate is re-armed here as a second line of
   // defense. checkAndEvictStaleBuild() short-circuits if everything matches.
   const gate = await checkAndEvictStaleBuild()
-  if (gate.reloaded) return
+  if (gate.reloaded) {
+    window.setTimeout(() => {
+      const rootEl = document.getElementById("root")
+      if (rootEl && rootEl.childElementCount === 0) {
+        console.warn("[PWA] stale-build reload did not replace page — mounting app anyway")
+        try {
+          createRoot(rootEl).render(
+            <StrictMode>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </StrictMode>,
+          )
+        } catch (e) {
+          console.error("[BOOT] recovery mount failed", e)
+        }
+      }
+    }, 5000)
+    return
+  }
 
   // Final safety net: any legacy SW must die (idempotent if already done).
   await unregisterAllServiceWorkers()
@@ -109,13 +128,23 @@ async function bootstrapApp() {
     remoteBuildId: gate.remote?.buildId ?? null,
   })
 
-  createRoot(document.getElementById("root")).render(
-    <StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </StrictMode>,
-  )
+  try {
+    const rootEl = document.getElementById("root")
+    if (!rootEl) throw new Error("missing #root")
+    createRoot(rootEl).render(
+      <StrictMode>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </StrictMode>,
+    )
+  } catch (e) {
+    console.error("[BOOT] createRoot failed", e)
+    const el = document.getElementById("root")
+    if (el) {
+      el.textContent = "앱을 불러오지 못했습니다. 새로고침 해 주세요."
+    }
+  }
 }
 
 void bootstrapApp()
