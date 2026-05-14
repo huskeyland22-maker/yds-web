@@ -1,14 +1,37 @@
-/** 기관 터미널 팔레트 — 요청 색상 기준, 채도·네온 완화 */
+/** 기관 터미널 팔레트 — 현재값 강조용 (과한 레인보우 지양) */
 export const MACRO_SERIES_COLORS = {
-  vix: "#e06352",
-  vxn: "#0fb0a0",
-  putCall: "#5c7cab",
-  fearGreed: "#e0528f",
-  move: "#e0bc52",
-  bofa: "#9570e8",
-  skew: "#2a9d8f",
-  highYield: "#c98f4a",
-  gsBullBear: "#9b7fd4",
+  vix: "#fb923c",
+  vxn: "#2dd4bf",
+  putCall: "#60a5fa",
+  fearGreed: "#fb7185",
+  move: "#fbbf24",
+  bofa: "#a78bfa",
+  skew: "#22d3ee",
+  highYield: "#eab308",
+  gsBullBear: "#c084fc",
+}
+
+function hexToRgb(hex) {
+  if (!hex || typeof hex !== "string") return { r: 148, g: 163, b: 184 }
+  let h = hex.trim().replace("#", "")
+  if (h.length === 3) {
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("")
+  }
+  const n = parseInt(h, 16)
+  if (!Number.isFinite(n) || h.length !== 6) return { r: 148, g: 163, b: 184 }
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+}
+
+/** 메인 숫자용 소프트 네온 (overflow 클리핑 완화를 위해 강도 보수적) */
+export function metricValueDisplayStyle(hex) {
+  const { r, g, b } = hexToRgb(hex)
+  return {
+    color: hex,
+    textShadow: `0 0 20px rgba(${r},${g},${b},0.42), 0 0 42px rgba(${r},${g},${b},0.15), 0 1px 0 rgba(0,0,0,0.82)`,
+  }
 }
 
 export function resolveSeriesColor(series) {

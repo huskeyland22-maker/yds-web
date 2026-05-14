@@ -2,6 +2,7 @@ import { motion } from "framer-motion"
 import MacroCycleLwChart from "./MacroCycleLwChart.jsx"
 import {
   formatMetricValue,
+  metricValueDisplayStyle,
   pctDelta,
   pickPanicNumber,
   resolveSeriesColor,
@@ -48,26 +49,46 @@ function FeedStatusBadge({ kind, label }) {
 function MetricBlock({ series, panicData, rows, large }) {
   const v = pickPanicNumber(panicData, series.key)
   const pct = pctDelta(rows, series.key)
-  const c = resolveSeriesColor(series)
   const name = series.name ?? series.key
+  const hasDelta = pct != null && Number.isFinite(pct)
+  const finite = Number.isFinite(v)
+  const accent = finite ? resolveSeriesColor(series) : "#94a3b8"
+  const valueStyle = finite ? metricValueDisplayStyle(accent) : { color: "#94a3b8", textShadow: "0 1px 0 rgba(0,0,0,0.85)" }
+  const valueSize = large
+    ? "text-[clamp(2.35rem,8.2vw,3.45rem)] leading-[0.92] sm:text-[clamp(2.55rem,4.8vw,3.75rem)]"
+    : "text-[clamp(1.7rem,5.2vw,2.25rem)] leading-[0.92] sm:text-[clamp(1.85rem,3.2vw,2.35rem)]"
 
   return (
-    <div className={large ? "min-w-0" : ""}>
-      <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{name}</p>
-      <p
-        className={`m-0 mt-1 font-mono font-semibold tabular-nums tracking-tight text-slate-50 ${large ? "text-[2.35rem] leading-none sm:text-[2.6rem]" : "text-xl sm:text-2xl"}`}
-        style={{ color: c }}
-      >
-        {formatMetricValue(series.key, v)}
-      </p>
-      {pct != null && Number.isFinite(pct) ? (
-        <p className={`m-0 mt-1 text-sm font-semibold tabular-nums ${pct >= 0 ? "text-emerald-400/95" : "text-rose-400/95"}`}>
-          {pct >= 0 ? "+" : ""}
-          {pct.toFixed(1)}%
+    <div
+      className={`relative flex min-w-0 flex-col ${large ? "min-h-[6.75rem] px-1 sm:min-h-[7.25rem]" : "min-h-[5.5rem] px-0.5 sm:min-h-[5.75rem]"}`}
+    >
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <p
+          className={`m-0 max-w-full truncate font-mono font-extrabold tabular-nums tracking-tight ${valueSize}`}
+          style={valueStyle}
+        >
+          {formatMetricValue(series.key, v)}
         </p>
-      ) : (
-        <p className="m-0 mt-1 text-xs text-slate-600">—</p>
-      )}
+        <p className="m-0 mt-2.5 max-w-[18ch] text-[10px] font-semibold uppercase leading-tight tracking-[0.2em] text-slate-500 sm:mt-3 sm:text-[11px]">
+          {name}
+        </p>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-0 right-0 flex translate-y-px items-baseline gap-0.5 font-mono tabular-nums">
+        {hasDelta ? (
+          <>
+            <span className={`text-[9px] sm:text-[10px] ${pct >= 0 ? "text-emerald-500/50" : "text-rose-500/50"}`}>
+              {pct >= 0 ? "▲" : "▼"}
+            </span>
+            <span className="text-[9px] font-medium text-slate-500/75 sm:text-[10px]">
+              {pct >= 0 ? "+" : ""}
+              {pct.toFixed(1)}%
+            </span>
+          </>
+        ) : (
+          <span className="text-[9px] text-slate-600/80 sm:text-[10px]">Δ —</span>
+        )}
+      </div>
     </div>
   )
 }
@@ -170,16 +191,19 @@ export default function MacroCycleTierCard({
           <section className="border-b border-white/[0.05] px-5 py-4">
             <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">핵심 수치</p>
             {primaryS ? (
-              <div className="mt-3 rounded-lg border border-white/[0.06] bg-black/25 px-4 py-3">
+              <div className="mt-3 rounded-lg border border-white/[0.07] bg-gradient-to-b from-black/35 to-black/[0.18] px-3 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-5 sm:py-5">
                 <MetricBlock series={primaryS} panicData={panicData} rows={rows} large />
               </div>
             ) : null}
             {restSeries.length ? (
               <div
-                className={`mt-3 grid gap-4 ${restSeries.length >= 2 ? "grid-cols-2" : "grid-cols-1"}`}
+                className={`mt-3 grid gap-3 sm:gap-4 ${restSeries.length >= 2 ? "grid-cols-2" : "grid-cols-1"}`}
               >
                 {restSeries.map((s) => (
-                  <div key={s.key} className="rounded-lg border border-white/[0.04] bg-black/20 px-3 py-2.5">
+                  <div
+                    key={s.key}
+                    className="rounded-lg border border-white/[0.05] bg-gradient-to-b from-black/30 to-black/[0.14] px-2.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-3 sm:py-3.5"
+                  >
                     <MetricBlock series={s} panicData={panicData} rows={rows} large={false} />
                   </div>
                 ))}
