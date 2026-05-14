@@ -30,15 +30,32 @@ export const LIVE_POST_JSON_INIT = {
   },
 }
 
+function runtimeBuildQueryParam() {
+  try {
+    const bid =
+      typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_APP_BUILD_ID != null
+        ? String(import.meta.env.VITE_APP_BUILD_ID)
+        : ""
+    if (!bid || bid === "undefined") return ""
+    return `b=${encodeURIComponent(bid)}`
+  } catch {
+    return ""
+  }
+}
+
 /**
  * Bust intermediaries that ignore cache headers (notably some iOS WebView / PWA stacks).
+ * Appends `t` (timestamp) and, when defined, `b` (Vite build id) so CDNs cannot serve a stale JSON/API response keyed on URL alone.
  * @param {string} url
  */
 export function withNoStoreQuery(url) {
   const u = String(url || "").trim()
   if (!u) return u
   const sep = u.includes("?") ? "&" : "?"
-  return `${u}${sep}t=${Date.now()}`
+  const b = runtimeBuildQueryParam()
+  const parts = [`t=${Date.now()}`]
+  if (b) parts.push(b)
+  return `${u}${sep}${parts.join("&")}`
 }
 
 /**

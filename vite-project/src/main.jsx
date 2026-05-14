@@ -9,6 +9,7 @@ import {
   clearAllCacheStorage,
   installChunkLoadFailureRecovery,
   installLifecycleVersionPoller,
+  installOnlineBuildRecheck,
   isIosStandalone,
   sweepIosStandaloneCachesOnce,
   unregisterAllServiceWorkers,
@@ -125,6 +126,7 @@ async function bootstrapApp() {
   cleanupStaleAutoSnapshot()
 
   installLifecycleVersionPoller()
+  installOnlineBuildRecheck()
 
   console.log("[PWA] boot", {
     appVersion: APP_VERSION,

@@ -41,6 +41,7 @@
         checkAndEvictStaleBuild,
         installChunkLoadFailureRecovery,
         installLifecycleVersionPoller,
+        installOnlineBuildRecheck,
         sweepIosStandaloneCachesOnce,
         unregisterAllServiceWorkers,
       } from "/src/utils/pwaFreshness.js"
@@ -58,6 +59,7 @@
         if (result.reloaded) return
 
         installLifecycleVersionPoller()
+        installOnlineBuildRecheck()
 
         await import("/src/main.jsx")
       }

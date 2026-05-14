@@ -10,6 +10,7 @@ import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
+import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
@@ -1605,6 +1606,7 @@ function App() {
         </div>
       ) : null}
       <PanicSyncDebugPanel />
+      <PwaRuntimeDebugOverlay />
     </div>
   )
 }

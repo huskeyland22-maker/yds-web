@@ -113,7 +113,7 @@ export async function fetchPanicDataJson(options = {}) {
     if (debugLog) console.log("[BOOT] panic hub", { updatedAt: enriched?.updatedAt ?? null })
     return enriched
   }
-  const urls = buildPanicDataUrls().map((u) => `${u}?t=${Date.now()}`)
+  const urls = buildPanicDataUrls().map((u) => withNoStoreQuery(u))
   let lastError = null
 
   for (const url of urls) {

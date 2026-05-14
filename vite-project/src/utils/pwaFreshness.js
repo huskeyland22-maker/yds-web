@@ -58,17 +58,41 @@ const STALE_EVICT_EXTRA_LS_KEYS = [
 // carrying their own copy of this module. Sharing through window guarantees
 // install* functions are idempotent across both copies.
 const GLOBAL_FLAG_KEY = "__ydsPwaFreshnessState"
+const ONLINE_RECHECK_FLAG_KEY = "__ydsOnlineBuildRecheckInstalled"
+const VISIBILITY_RESUME_MIN_MS = 2200
 
 function getGlobalState() {
-  if (typeof window === "undefined") return { chunkRecoveryInstalled: false, lifecyclePollerInstalled: false, lastPollAt: 0 }
+  if (typeof window === "undefined")
+    return {
+      chunkRecoveryInstalled: false,
+      lifecyclePollerInstalled: false,
+      lastPollAt: 0,
+      lastLifecycleResumeCheckAt: 0,
+    }
   if (!window[GLOBAL_FLAG_KEY]) {
     window[GLOBAL_FLAG_KEY] = {
       chunkRecoveryInstalled: false,
       lifecyclePollerInstalled: false,
       lastPollAt: 0,
+      lastLifecycleResumeCheckAt: 0,
     }
   }
   return window[GLOBAL_FLAG_KEY]
+}
+
+function publishBuildProbeSnapshot(partial) {
+  if (typeof window === "undefined") return
+  try {
+    const prev =
+      window.__YDS_BUILD_CHECK && typeof window.__YDS_BUILD_CHECK === "object" ? window.__YDS_BUILD_CHECK : {}
+    window.__YDS_BUILD_CHECK = {
+      ...prev,
+      ...partial,
+      probeAt: Date.now(),
+    }
+  } catch {
+    // ignore
+  }
 }
 
 function safeRead(area, key) {
@@ -297,31 +321,57 @@ export async function fetchLatestBuildMeta() {
 export async function checkAndEvictStaleBuild() {
   if (typeof window === "undefined") return { remote: null, reloaded: false }
 
-  const remote = await fetchLatestBuildMeta()
-  if (!remote || !remote.buildId) return { remote: null, reloaded: false }
-
-  const remoteBuildId = String(remote.buildId)
-  const remoteVersion = typeof remote.version === "string" ? remote.version.trim() : ""
   const htmlBuildId = readHtmlBuildId()
   const storedBuildId = safeRead("localStorage", BUILD_ID_KEY)
   const storedVersion = (safeRead("localStorage", BUILD_VERSION_KEY) || "").trim()
 
+  const remote = await fetchLatestBuildMeta()
+  if (!remote || !remote.buildId) {
+    publishBuildProbeSnapshot({
+      htmlBuildId,
+      storedBuildId,
+      storedVersion,
+      remoteBuildId: null,
+      remoteVersion: null,
+      reloaded: false,
+      probeNote: "no_remote_manifest",
+    })
+    return { remote: null, reloaded: false }
+  }
+
+  const remoteBuildId = String(remote.buildId)
+  const remoteVersion = typeof remote.version === "string" ? remote.version.trim() : ""
+
+  publishBuildProbeSnapshot({
+    htmlBuildId,
+    storedBuildId,
+    storedVersion,
+    remoteBuildId,
+    remoteVersion,
+    reloaded: false,
+    probeNote: "checking",
+  })
+
   if (htmlBuildId && storedBuildId && htmlBuildId !== String(storedBuildId)) {
+    publishBuildProbeSnapshot({ mismatch: "html-local-build-desync" })
     const reloaded = await evictStaleBuildAndReload("html-local-build-desync", remote)
     return { remote, reloaded }
   }
 
   if (htmlBuildId && htmlBuildId !== remoteBuildId) {
+    publishBuildProbeSnapshot({ mismatch: "html-build-mismatch" })
     const reloaded = await evictStaleBuildAndReload("html-build-mismatch", remote)
     return { remote, reloaded }
   }
 
   if (storedBuildId && String(storedBuildId) !== remoteBuildId) {
+    publishBuildProbeSnapshot({ mismatch: "client-build-mismatch" })
     const reloaded = await evictStaleBuildAndReload("client-build-mismatch", remote)
     return { remote, reloaded }
   }
 
   if (remoteVersion && storedVersion && storedVersion !== remoteVersion) {
+    publishBuildProbeSnapshot({ mismatch: "client-version-mismatch" })
     const reloaded = await evictStaleBuildAndReload("client-version-mismatch", remote)
     return { remote, reloaded }
   }
@@ -330,15 +380,73 @@ export async function checkAndEvictStaleBuild() {
   if (remoteVersion) {
     safeWrite("localStorage", BUILD_VERSION_KEY, remoteVersion)
   }
+  publishBuildProbeSnapshot({
+    mismatch: null,
+    aligned: true,
+    htmlBuildId,
+    storedBuildId: remoteBuildId,
+    storedVersion: remoteVersion || storedVersion,
+    remoteBuildId,
+    remoteVersion,
+    reloaded: false,
+    probeNote: "ok",
+  })
   return { remote, reloaded: false }
 }
 
 export async function pollLatestBuildIfDue() {
   const state = getGlobalState()
   const now = Date.now()
-  if (now - state.lastPollAt < VERSION_POLL_COOLDOWN_MS) return
+  const cooldown = isIosStandalone() ? 4500 : VERSION_POLL_COOLDOWN_MS
+  if (now - state.lastPollAt < cooldown) return
   state.lastPollAt = now
   await checkAndEvictStaleBuild()
+}
+
+/**
+ * Tab focus / visibility — throttled to avoid rapid-fire fetches while still beating iOS cache lag.
+ */
+export async function checkBuildAfterLifecycleResume() {
+  const state = getGlobalState()
+  const now = Date.now()
+  if (now - state.lastLifecycleResumeCheckAt < VISIBILITY_RESUME_MIN_MS) {
+    return { remote: null, reloaded: false, throttled: true }
+  }
+  state.lastLifecycleResumeCheckAt = now
+  return checkAndEvictStaleBuild()
+}
+
+export async function getServiceWorkerDebugInfo() {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return { registrations: 0, controlling: null, waiting: null, scopes: [] }
+  }
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations()
+    const controlling = navigator.serviceWorker.controller?.scriptURL ?? null
+    let waiting = null
+    for (const r of regs) {
+      const w = r.waiting || r.installing
+      if (w?.scriptURL) waiting = w.scriptURL
+    }
+    return {
+      registrations: regs.length,
+      controlling,
+      waiting,
+      scopes: regs.map((r) => r.scope),
+    }
+  } catch {
+    return { registrations: 0, controlling: null, waiting: null, scopes: [] }
+  }
+}
+
+/** 네트워크 복귀 시 즉시 원격 빌드 메타와 대조 (Safari 백그라운드 복귀와 조합). Idempotent. */
+export function installOnlineBuildRecheck() {
+  if (typeof window === "undefined") return
+  if (window[ONLINE_RECHECK_FLAG_KEY]) return
+  window[ONLINE_RECHECK_FLAG_KEY] = true
+  window.addEventListener("online", () => {
+    void checkAndEvictStaleBuild()
+  })
 }
 
 /**
@@ -353,11 +461,11 @@ export function installLifecycleVersionPoller() {
   state.lifecyclePollerInstalled = true
 
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") void pollLatestBuildIfDue()
+    if (document.visibilityState === "visible") void checkBuildAfterLifecycleResume()
   })
-  window.addEventListener("focus", () => void pollLatestBuildIfDue())
+  window.addEventListener("focus", () => void checkBuildAfterLifecycleResume())
   window.addEventListener("pageshow", (event) => {
-    void pollLatestBuildIfDue()
+    void checkBuildAfterLifecycleResume()
     if (event?.persisted) void checkAndEvictStaleBuild()
   })
 
@@ -366,7 +474,7 @@ export function installLifecycleVersionPoller() {
     const id = window.setInterval(() => {
       ticks += 1
       void pollLatestBuildIfDue()
-      if (ticks >= 36) window.clearInterval(id)
+      if (ticks >= 72) window.clearInterval(id)
     }, 5_000)
   }
 }
@@ -416,6 +524,7 @@ export const __testing__ = {
   HARD_RELOAD_AT_KEY,
   HARD_RELOAD_COOLDOWN_MS,
   VERSION_POLL_COOLDOWN_MS,
+  VISIBILITY_RESUME_MIN_MS,
   BUILD_SCOPED_LS_KEYS,
   BUILD_SCOPED_LS_PREFIXES,
   PROTECTED_LS_KEYS,
