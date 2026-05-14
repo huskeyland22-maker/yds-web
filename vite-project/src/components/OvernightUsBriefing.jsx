@@ -37,22 +37,29 @@ export default function OvernightUsBriefing({ panicData = null }) {
   const lastKst8KeyRef = useRef("")
   /** 같은 탭이 보낸 BC 메시지는 무시 (postMessage가 자기 자신에게도 전달됨 → load 무한 루프 방지) */
   const bcTabIdRef = useRef(`tb-${Math.random().toString(36).slice(2, 11)}`)
+  /** 패닉 스토어가 자주 새 객체를 넣어도 load 콜백 ID가 바뀌지 않도록 최신만 유지 */
+  const panicDataRef = useRef(panicData)
+  panicDataRef.current = panicData
 
   const useAiClient = import.meta.env.VITE_MACRO_BRIEFING_AI === "1" || import.meta.env.VITE_MACRO_BRIEFING_AI === "true"
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setErr(null)
+  const load = useCallback(async (opts = {}) => {
+    const silent = Boolean(opts.silent)
+    if (!silent) {
+      setLoading(true)
+      setErr(null)
+    }
     try {
       const data = await fetchMarketData()
       const base = {
         parsedData: data.parsedData ?? {},
         changeData: data.changeData ?? {},
         updatedAt: data.updatedAt ?? null,
-        panicData,
+        panicData: panicDataRef.current,
       }
       setPayload(base)
       setFetchedAt(Date.now())
+      if (silent) setErr(null)
 
       const desk = buildInstitutionalMacroBriefing(base)
       setAiLines(null)
@@ -96,19 +103,19 @@ export default function OvernightUsBriefing({ panicData = null }) {
         /* ignore */
       }
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "load failed")
+      if (!silent) setErr(e instanceof Error ? e.message : "load failed")
       setPayload(null)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
-  }, [panicData, useAiClient])
+  }, [useAiClient])
 
   useEffect(() => {
-    void load()
+    void load({ silent: false })
   }, [load])
 
   useEffect(() => {
-    const poll = window.setInterval(() => void load(), 12 * 60 * 1000)
+    const poll = window.setInterval(() => void load({ silent: true }), 12 * 60 * 1000)
     const kst8 = window.setInterval(() => {
       const parts = new Intl.DateTimeFormat("en-GB", {
         timeZone: "Asia/Seoul",
@@ -128,16 +135,16 @@ export default function OvernightUsBriefing({ panicData = null }) {
       const key = `${y}-${mo}-${da}`
       if (hm >= 8 * 60 && hm < 8 * 60 + 6 && lastKst8KeyRef.current !== key) {
         lastKst8KeyRef.current = key
-        void load()
+        void load({ silent: true })
       }
     }, 60 * 1000)
 
-    const idBoot = window.setTimeout(() => void load(), msUntilNextKst8am())
+    const idBoot = window.setTimeout(() => void load({ silent: true }), msUntilNextKst8am())
 
     const onVis = () => {
-      if (document.visibilityState === "visible") void load()
+      if (document.visibilityState === "visible") void load({ silent: true })
     }
-    const onFocus = () => void load()
+    const onFocus = () => void load({ silent: true })
     document.addEventListener("visibilitychange", onVis)
     window.addEventListener("focus", onFocus)
     let bc = null
@@ -147,7 +154,7 @@ export default function OvernightUsBriefing({ panicData = null }) {
         bcRef.current = bc
         bc.onmessage = (ev) => {
           if (ev?.data?.from === bcTabIdRef.current) return
-          void load()
+          void load({ silent: true })
         }
       }
     } catch {
@@ -169,8 +176,13 @@ export default function OvernightUsBriefing({ panicData = null }) {
 
   const briefing = useMemo(() => {
     if (!payload) return null
-    return buildInstitutionalMacroBriefing(payload)
-  }, [payload])
+    return buildInstitutionalMacroBriefing({
+      parsedData: payload.parsedData,
+      changeData: payload.changeData,
+      updatedAt: payload.updatedAt,
+      panicData: panicDataRef.current,
+    })
+  }, [payload, panicData])
 
   const displayBullets = useMemo(() => {
     if (aiLines?.length) return aiLines
