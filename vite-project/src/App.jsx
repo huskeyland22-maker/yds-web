@@ -255,7 +255,7 @@ function parseTextPanicData(text) {
     const line = lines.find((ln) => {
       const parts = splitCsvLine(ln)
       const metricName = parts[1] ?? parts[0] ?? ""
-      return pattern.test(metricName)
+      return pattern.test(metricName) || pattern.test(ln)
     })
     if (!line) return
     const n = extractMetricValueFromLine(line)
@@ -272,14 +272,17 @@ function parseTextPanicData(text) {
   applyByPattern(/BofA(?:\s*B&B)?/i, "bofa")
   applyByPattern(/\bSKEW\b/i, "skew")
   applyByPattern(/(?:하이일드|HY\s*스프레드|High\s*Yield)/i, "highYield")
-  applyByPattern(/(?:GS\s*B\/B|GS\s*Bull\s*Bear)/i, "gsBullBear")
+  // "GS Bull & Bear" (Goldman 표기), GS B/B, Goldman Sachs 꼬리 등
+  applyByPattern(
+    /(?:GS\s*B\/B|Goldman(?:\s+Sachs)?\s*B\/B|GS\s*Bull\s*(?:&|and)?\s*Bear)/i,
+    "gsBullBear",
+  )
 
   const result = {
     data: out,
     missingRequired: REQUIRED_KEYS.filter((key) => out[key] == null),
     hitCount: hit.size,
   }
-  console.log("PARSED PANIC DATA:", result.data)
   return result
 }
 
@@ -734,16 +737,17 @@ function App() {
             }
           })()
         }
-        try {
-          await usePanicStore.getState().fetchPanicData("hub-post-save", { force: true })
-        } catch (e) {
-          console.warn("[panic] hub post-save refresh", e)
-        }
         clearSaveSuccessCloseTimer()
         saveSuccessCloseTimerRef.current = window.setTimeout(() => {
           saveSuccessCloseTimerRef.current = null
           closeInputPanel()
         }, 780)
+        void usePanicStore
+          .getState()
+          .fetchPanicData("hub-post-save", { force: true })
+          .catch((e) => {
+            console.warn("[panic] hub post-save refresh", e)
+          })
         return
       }
 
@@ -774,16 +778,17 @@ function App() {
           }
         })()
       }
-      try {
-        await usePanicStore.getState().fetchPanicData("manual-api-post-save", { force: true })
-      } catch (e) {
-        console.warn("[panic] manual-api post-save refresh", e)
-      }
       clearSaveSuccessCloseTimer()
       saveSuccessCloseTimerRef.current = window.setTimeout(() => {
         saveSuccessCloseTimerRef.current = null
         closeInputPanel()
       }, 780)
+      void usePanicStore
+        .getState()
+        .fetchPanicData("manual-api-post-save", { force: true })
+        .catch((e) => {
+          console.warn("[panic] manual-api post-save refresh", e)
+        })
     } catch (err) {
       console.error(err)
     } finally {
