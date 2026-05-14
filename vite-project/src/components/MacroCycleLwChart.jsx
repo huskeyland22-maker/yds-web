@@ -99,15 +99,18 @@ function buildLwPack(rows, primaryKey) {
     }
     const avg = c > 0 ? sum / c : vols[i]
     const spike = avg > 0 && r._v >= avg * 1.3
-    let color = up ? "rgba(0,194,168,0.28)" : "rgba(255,107,87,0.28)"
-    if (spike) color = up ? "rgba(0,194,168,0.55)" : "rgba(255,107,87,0.5)"
+    let color = up ? "rgba(52,211,153,0.4)" : "rgba(251,113,133,0.4)"
+    if (spike) color = up ? "rgba(167,243,208,0.72)" : "rgba(254,202,202,0.65)"
     return { time: r.time, value: r._v, color }
   })
 
-  /** @type {Map<string, { open: number; high: number; low: number; close: number; volume: number }>} */
+  /** @type {Map<string, { open: number; high: number; low: number; close: number; volume: number; changePct: number }>} */
   const meta = new Map()
-  for (const r of raw) {
-    meta.set(r.time, { open: r.open, high: r.high, low: r.low, close: r.close, volume: r._v })
+  for (let i = 0; i < raw.length; i++) {
+    const r = raw[i]
+    const prevClose = i > 0 ? raw[i - 1].close : r.close
+    const chg = prevClose ? ((r.close - prevClose) / prevClose) * 100 : 0
+    meta.set(r.time, { open: r.open, high: r.high, low: r.low, close: r.close, volume: r._v, changePct: chg })
   }
 
   return { candles, ma20, ma60, volume, meta }
@@ -144,49 +147,65 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
 
     const chart = createChart(el, {
       layout: {
-        background: { type: ColorType.Solid, color: "#080b12" },
-        textColor: "rgba(148,163,184,0.72)",
+        background: { type: ColorType.Solid, color: "#070a10" },
+        textColor: "rgba(148,163,184,0.76)",
         fontSize: 10,
       },
       grid: {
-        vertLines: { color: "rgba(255,255,255,0.035)" },
-        horzLines: { color: "rgba(255,255,255,0.035)" },
+        vertLines: { visible: false },
+        horzLines: { color: "rgba(255,255,255,0.028)" },
       },
       width: el.clientWidth,
-      height: el.clientHeight || 240,
-      rightPriceScale: { borderColor: "rgba(255,255,255,0.06)" },
+      height: el.clientHeight || 300,
+      rightPriceScale: { borderColor: "rgba(167,139,250,0.12)" },
       timeScale: {
-        borderColor: "rgba(255,255,255,0.06)",
+        borderColor: "rgba(34,211,238,0.1)",
         timeVisible: false,
         secondsVisible: false,
         fixLeftEdge: true,
         fixRightEdge: true,
-        barSpacing: 5,
-        minBarSpacing: 3,
+        barSpacing: 6,
+        minBarSpacing: 4,
       },
       crosshair: {
-        vertLine: { color: "rgba(148,163,184,0.32)", width: 1, style: 2 },
-        horzLine: { color: "rgba(148,163,184,0.2)", width: 1, style: 2 },
+        mode: 1,
+        vertLine: {
+          color: "rgba(167,139,250,0.5)",
+          width: 1,
+          style: 0,
+          labelBackgroundColor: "rgba(15,23,42,0.92)",
+        },
+        horzLine: {
+          color: "rgba(34,211,238,0.38)",
+          width: 1,
+          style: 0,
+          labelBackgroundColor: "rgba(15,23,42,0.92)",
+        },
       },
       localization: { locale: "ko-KR" },
     })
 
     const candleSeries = chart.addCandlestickSeries({
-      upColor: "#00c2a8",
-      downColor: "#ff6b57",
-      borderUpColor: "#00c2a8",
-      borderDownColor: "#ff6b57",
-      wickUpColor: "rgba(0,194,168,0.85)",
-      wickDownColor: "rgba(255,107,87,0.85)",
-      lastPriceAnimation: LastPriceAnimationMode.Disabled,
+      upColor: "#34d399",
+      downColor: "#fb7185",
+      borderUpColor: "#6ee7b7",
+      borderDownColor: "#fda4af",
+      wickUpColor: "rgba(110,231,183,0.95)",
+      wickDownColor: "rgba(253,164,175,0.95)",
+      lastPriceAnimation: LastPriceAnimationMode.On,
+      priceLineVisible: true,
+      priceLineWidth: 2,
+      priceLineColor: "rgba(167,139,250,0.72)",
+      priceLineStyle: 2,
+      lastValueVisible: true,
     })
 
     const ma20Series = chart.addLineSeries({
-      color: "#60a5fa",
+      color: "rgba(96,165,250,0.9)",
       lineWidth: 1,
       priceLineVisible: false,
       lastValueVisible: false,
-      crosshairMarkerVisible: false,
+      crosshairMarkerVisible: true,
     })
     const ma60Series = chart.addLineSeries({
       color: "rgba(255,255,255,0.32)",
@@ -203,10 +222,10 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
     })
 
     candleSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.04, bottom: 0.22 },
+      scaleMargins: { top: 0.04, bottom: 0.28 },
     })
     volumeSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.74, bottom: 0.02 },
+      scaleMargins: { top: 0.7, bottom: 0 },
     })
 
     candleSeries.setData(pack.candles)
@@ -221,10 +240,10 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
       candleSeries.setMarkers([
         {
           time: last.time,
-          position: "aboveBar",
-          color: up ? "rgba(0,194,168,0.55)" : "rgba(255,107,87,0.5)",
-          shape: "circle",
-          size: 1.35,
+          position: up ? "aboveBar" : "belowBar",
+          color: up ? "rgba(52,211,153,0.95)" : "rgba(251,113,133,0.95)",
+          shape: up ? "arrowUp" : "arrowDown",
+          size: 1.4,
         },
       ])
     }
@@ -250,6 +269,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
         low: data.low,
         close: data.close,
         volume: extra?.volume ?? 0,
+        changePct: extra?.changePct ?? 0,
       })
     }
 
@@ -258,7 +278,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
     chart.timeScale().fitContent()
 
     let lastW = Math.max(1, Math.floor(el.clientWidth))
-    let lastH = Math.max(1, Math.floor(el.clientHeight || 240))
+    let lastH = Math.max(1, Math.floor(el.clientHeight || 300))
     const ro = new ResizeObserver((entries) => {
       const cr = entries[0]?.contentRect
       if (!cr || !chartRef.current) return
@@ -294,15 +314,16 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
 
   return (
     <div
-      className={`relative w-full min-w-0 overflow-hidden rounded-lg border border-white/[0.07] bg-[#080b12] ${className}`}
+      className={`relative w-full min-w-0 overflow-hidden rounded-lg border border-white/[0.08] bg-[#070a10] ring-1 ring-violet-500/[0.06] ${className}`}
       style={{
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 32px rgba(0,0,0,0.35)",
       }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.05] px-2.5 py-2 sm:px-3">
-        <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-          Mini · {seriesName}
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] bg-gradient-to-r from-white/[0.03] to-transparent px-2.5 py-2 sm:px-3">
+        <div className="min-w-0">
+          <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">Desk</p>
+          <p className="m-0 mt-0.5 truncate text-[12px] font-semibold text-slate-100 sm:text-[13px]">{seriesName}</p>
+        </div>
         <div className="flex flex-wrap items-center gap-3 text-[9px] text-slate-600">
           <span className="inline-flex items-center gap-1">
             <span className="inline-block h-2 w-2 rounded-full" style={{ background: "#60a5fa" }} />
@@ -319,7 +340,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
         </div>
       </div>
 
-      <div className="relative h-[220px] w-full min-h-[200px] sm:h-[240px]">
+      <div className="relative h-[280px] w-full min-h-[240px] sm:h-[320px] sm:min-h-[260px]">
         <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
 
         {tooltip ? (
@@ -327,7 +348,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
             className="pointer-events-none absolute z-20 min-w-[196px] rounded-md border border-white/[0.1] bg-[rgba(6,9,16,0.94)] px-2.5 py-2 shadow-[0_12px_32px_rgba(0,0,0,0.55)] backdrop-blur-sm"
             style={{
               left: Math.min(Math.max(tooltip.x + 12, 6), (wrapRef.current?.clientWidth ?? 280) - 204),
-              top: Math.min(Math.max(tooltip.y + 6, 6), (wrapRef.current?.clientHeight ?? 220) - 130),
+              top: Math.min(Math.max(tooltip.y + 6, 6), (wrapRef.current?.clientHeight ?? 300) - 140),
             }}
           >
             <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">{tooltip.dateLabel}</p>
@@ -339,7 +360,14 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
               <dt className="m-0 text-slate-600">L</dt>
               <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.low)}</dd>
               <dt className="m-0 text-slate-600">C</dt>
-              <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.close)}</dd>
+              <dd className="m-0 text-right font-semibold text-slate-50">{fmtPrice(tooltip.close)}</dd>
+              <dt className="m-0 text-slate-600">Δ</dt>
+              <dd
+                className={`m-0 text-right font-semibold ${(tooltip.changePct ?? 0) >= 0 ? "text-emerald-300/95" : "text-rose-300/95"}`}
+              >
+                {Number(tooltip.changePct ?? 0) >= 0 ? "+" : ""}
+                {Number(tooltip.changePct ?? 0).toFixed(2)}%
+              </dd>
               <dt className="m-0 text-slate-600">Vol</dt>
               <dd className="m-0 text-right text-slate-200">{fmtVol(tooltip.volume)}</dd>
             </dl>

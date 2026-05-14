@@ -46,20 +46,42 @@ function fmtVol(n) {
 
 /**
  * @param {Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>} bars
+ * @returns {{ lines: string[]; stance: string; tone: "up" | "down" | "neutral"; dayChgPct: number | null; volRatio: number | null }}
  */
 function buildTrendSummary(bars) {
-  if (!bars?.length || bars.length < 3) return []
+  if (!bars?.length) {
+    return { lines: [], stance: "데이터 부족", tone: "neutral", dayChgPct: null, volRatio: null }
+  }
   const last = bars[bars.length - 1]
-  const prev = bars[bars.length - 2]
+  const prev = bars.length >= 2 ? bars[bars.length - 2] : null
   const m20 = last.ma20
   const m60 = last.ma60
-  if (!Number.isFinite(last.close)) return []
+  if (!Number.isFinite(last.close)) {
+    return { lines: [], stance: "—", tone: "neutral", dayChgPct: null, volRatio: null }
+  }
+  let stance = "추세 확인"
+  let tone = "neutral"
+  if (Number.isFinite(m20) && Number.isFinite(m60)) {
+    if (m20 > m60 && last.close > m20) {
+      stance = "상승 우위"
+      tone = "up"
+    } else if (m20 < m60 && last.close < m20) {
+      stance = "하락·조정"
+      tone = "down"
+    } else if (last.close >= m20 * 0.997 && last.close <= m20 * 1.007) {
+      stance = "20일선 박스"
+      tone = "neutral"
+    } else {
+      stance = "혼조"
+      tone = "neutral"
+    }
+  }
   const lines = []
   if (Number.isFinite(m20) && Number.isFinite(m60)) {
-    if (m20 > m60 && last.close > m20) lines.push("상승 추세 유지 · 종가 20일선 상단")
-    else if (m20 < m60 && last.close < m20) lines.push("조정 국면 · 종가 20일선 하단")
-    else if (last.close >= m20 * 0.997 && last.close <= m20 * 1.007) lines.push("20일선 지지·되돌림 구간")
-    else lines.push("이평 혼합 · 추세 확인")
+    if (m20 > m60 && last.close > m20) lines.push("20>60 · 종가가 단기 이평 상단")
+    else if (m20 < m60 && last.close < m20) lines.push("20<60 · 종가가 단기 이평 하단")
+    else if (last.close >= m20 * 0.997 && last.close <= m20 * 1.007) lines.push("20일선 부근 · 지지·저항 확인")
+    else lines.push("이평 혼합 · 방향 대기")
   }
   const vols = bars.map((b) => b.volume ?? 0)
   const n = vols.length
@@ -72,14 +94,19 @@ function buildTrendSummary(bars) {
   }
   const avg = c > 0 ? s / c : 0
   const lv = last.volume || 0
+  const volRatio = avg > 0 ? lv / avg : null
   if (avg > 0 && lv >= avg * 1.35) {
-    if (Number.isFinite(prev.close) && last.close >= prev.close) lines.push("거래량 동반 상승")
-    else lines.push("거래 급증 · 매물 소화 여부 확인")
+    if (prev && Number.isFinite(prev.close) && last.close >= prev.close) lines.push("거래량 동반 상승")
+    else lines.push("거래 급증 · 매물 소화 관찰")
   }
-  if (Number.isFinite(prev.close) && prev.close > 0 && last.close > prev.close * 1.04) {
-    lines.push("단기 급등 구간 · 과열 감시")
+  if (prev && Number.isFinite(prev.close) && prev.close > 0 && last.close > prev.close * 1.04) {
+    lines.push("단기 급등 · 과열 감시")
   }
-  return lines.slice(0, 3)
+  let dayChgPct = null
+  if (Number.isFinite(prev.close) && prev.close > 0) {
+    dayChgPct = ((last.close - prev.close) / prev.close) * 100
+  }
+  return { lines: lines.slice(0, 2), stance, tone, dayChgPct, volRatio }
 }
 
 /**
@@ -116,8 +143,8 @@ function prepareChartData(bars) {
     const v = vols[i] || 0
     const spike = volSma > 0 && v >= volSma * 1.35
     const up = b.close >= b.open
-    let color = up ? "rgba(0,194,168,0.26)" : "rgba(255,107,87,0.26)"
-    if (spike) color = up ? "rgba(0,194,168,0.58)" : "rgba(255,107,87,0.52)"
+    let color = up ? "rgba(52,211,153,0.38)" : "rgba(251,113,133,0.38)"
+    if (spike) color = up ? "rgba(167,243,208,0.72)" : "rgba(254,202,202,0.68)"
     hist.push({ time: t, value: v, color })
 
     const prevClose = i > 0 ? bars[i - 1].close : b.close
@@ -164,7 +191,10 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
     }).filter(Boolean)
   }, [bars])
 
-  const trendLines = useMemo(() => buildTrendSummary(normalizedBars), [normalizedBars])
+  const trendPack = useMemo(() => buildTrendSummary(normalizedBars), [normalizedBars])
+  const trendLines = trendPack.lines
+  const lastBar = normalizedBars[normalizedBars.length - 1]
+  const lastClose = lastBar && Number.isFinite(lastBar.close) ? lastBar.close : null
 
   const chartPack = useMemo(() => prepareChartData(normalizedBars), [normalizedBars])
 
@@ -178,52 +208,70 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
 
     const chart = createChart(el, {
       layout: {
-        background: { type: ColorType.Solid, color: "#0b101a" },
-        textColor: "rgba(148,163,184,0.82)",
+        background: { type: ColorType.Solid, color: "#070a10" },
+        textColor: "rgba(148,163,184,0.78)",
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: "rgba(255,255,255,0.04)" },
-        horzLines: { color: "rgba(255,255,255,0.04)" },
+        vertLines: { visible: false },
+        horzLines: { color: "rgba(255,255,255,0.028)" },
       },
       width: el.clientWidth,
-      height: el.clientHeight || 300,
-      rightPriceScale: { borderColor: "rgba(255,255,255,0.07)" },
+      height: el.clientHeight || 380,
+      rightPriceScale: {
+        borderColor: "rgba(167,139,250,0.12)",
+      },
       timeScale: {
-        borderColor: "rgba(255,255,255,0.07)",
+        borderColor: "rgba(34,211,238,0.1)",
         timeVisible: false,
         secondsVisible: false,
         fixLeftEdge: true,
         fixRightEdge: true,
-        barSpacing: 5,
-        minBarSpacing: 3,
+        barSpacing: 6,
+        minBarSpacing: 4,
       },
       crosshair: {
-        vertLine: { color: "rgba(148,163,184,0.35)", width: 1, style: 2 },
-        horzLine: { color: "rgba(148,163,184,0.22)", width: 1, style: 2 },
+        mode: 1,
+        vertLine: {
+          color: "rgba(167,139,250,0.55)",
+          width: 1,
+          style: 0,
+          labelBackgroundColor: "rgba(15,23,42,0.92)",
+        },
+        horzLine: {
+          color: "rgba(34,211,238,0.4)",
+          width: 1,
+          style: 0,
+          labelBackgroundColor: "rgba(15,23,42,0.92)",
+        },
       },
       localization: { locale: "ko-KR" },
     })
 
     const candleSeries = chart.addCandlestickSeries({
-      upColor: "#00c2a8",
-      downColor: "#ff6b57",
-      borderUpColor: "#00c2a8",
-      borderDownColor: "#ff6b57",
-      wickUpColor: "#00c2a8",
-      wickDownColor: "#ff6b57",
-      lastPriceAnimation: LastPriceAnimationMode.Disabled,
+      upColor: "#34d399",
+      downColor: "#fb7185",
+      borderUpColor: "#6ee7b7",
+      borderDownColor: "#fda4af",
+      wickUpColor: "rgba(110,231,183,0.95)",
+      wickDownColor: "rgba(253,164,175,0.95)",
+      lastPriceAnimation: LastPriceAnimationMode.On,
+      priceLineVisible: true,
+      priceLineWidth: 2,
+      priceLineColor: "rgba(167,139,250,0.75)",
+      priceLineStyle: 2,
+      lastValueVisible: true,
     })
 
     const ma20Series = chart.addLineSeries({
-      color: "#60a5fa",
+      color: "rgba(96,165,250,0.92)",
       lineWidth: 1,
       priceLineVisible: false,
       lastValueVisible: false,
-      crosshairMarkerVisible: false,
+      crosshairMarkerVisible: true,
     })
     const ma60Series = chart.addLineSeries({
-      color: "rgba(255,255,255,0.35)",
+      color: "rgba(148,163,184,0.45)",
       lineWidth: 1,
       priceLineVisible: false,
       lastValueVisible: false,
@@ -237,10 +285,10 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
     })
 
     candleSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.06, bottom: 0.24 },
+      scaleMargins: { top: 0.04, bottom: 0.3 },
     })
     volumeSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.76, bottom: 0.02 },
+      scaleMargins: { top: 0.68, bottom: 0 },
     })
 
     candleSeries.setData(chartPack.candles)
@@ -249,14 +297,16 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
     volumeSeries.setData(chartPack.volume)
 
     const last = chartPack.candles[chartPack.candles.length - 1]
-    if (last) {
+    const prevC = chartPack.candles.length >= 2 ? chartPack.candles[chartPack.candles.length - 2] : null
+    if (last && prevC) {
+      const up = last.close >= last.open
       candleSeries.setMarkers([
         {
           time: last.time,
-          position: "aboveBar",
-          color: "rgba(0,194,168,0.42)",
-          shape: "circle",
-          size: 1.1,
+          position: up ? "aboveBar" : "belowBar",
+          color: up ? "rgba(52,211,153,0.95)" : "rgba(251,113,133,0.95)",
+          shape: up ? "arrowUp" : "arrowDown",
+          size: 1.45,
         },
       ])
     }
@@ -288,11 +338,12 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
     }
 
     chart.subscribeCrosshairMove(onCrosshair)
+    chart.timeScale().fitContent()
 
     chartRef.current = chart
 
     let lastW = Math.max(1, Math.floor(el.clientWidth))
-    let lastH = Math.max(1, Math.floor(el.clientHeight || 300))
+    let lastH = Math.max(1, Math.floor(el.clientHeight || 380))
     const ro = new ResizeObserver((entries) => {
       const cr = entries[0]?.contentRect
       if (!cr || !chartRef.current) return
@@ -318,48 +369,109 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
 
   if (normalizedBars.length < 2) return null
 
+  const accentStripe =
+    trendPack.tone === "up"
+      ? "border-l-emerald-400/75 shadow-[inset_3px_0_0_rgba(52,211,153,0.35)]"
+      : trendPack.tone === "down"
+        ? "border-l-rose-400/70 shadow-[inset_3px_0_0_rgba(251,113,133,0.32)]"
+        : "border-l-cyan-400/50 shadow-[inset_3px_0_0_rgba(34,211,238,0.22)]"
+
   return (
     <div
-      className={`relative w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0b101a] ${className}`}
+      className={`relative w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.09] bg-[#070a10] ring-1 ring-violet-500/[0.08] ${className}`}
       style={{
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 40px rgba(0,0,0,0.35)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 0 48px rgba(0,0,0,0.45)",
       }}
     >
-      {trendLines.length ? (
-        <div className="border-b border-white/[0.06] px-3 py-2.5 md:px-3.5">
-          <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">추세·체크</p>
-          <ul className="m-0 mt-1.5 list-none space-y-1 p-0">
-            {trendLines.map((line) => (
-              <li key={line} className="text-[11px] leading-snug text-slate-300 md:text-[12px]">
-                · {line}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-2 flex flex-wrap gap-3 text-[9px] text-slate-600">
-            <span>
-              <span className="inline-block h-2 w-2 rounded-full align-middle" style={{ background: "#60a5fa" }} />{" "}
-              <span className="align-middle">MA20</span>
+      <div
+        className={`flex flex-col gap-2 border-b border-white/[0.06] bg-gradient-to-br from-white/[0.04] via-transparent to-violet-950/[0.06] px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4 md:py-3.5 ${accentStripe} border-l-[3px]`}
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Signal</span>
+            <span
+              className={
+                trendPack.tone === "up"
+                  ? "text-[15px] font-semibold tracking-tight text-emerald-200/95 md:text-base"
+                  : trendPack.tone === "down"
+                    ? "text-[15px] font-semibold tracking-tight text-rose-200/95 md:text-base"
+                    : "text-[15px] font-semibold tracking-tight text-cyan-100/90 md:text-base"
+              }
+            >
+              {trendPack.stance}
             </span>
-            <span>
-              <span className="inline-block h-px w-3 align-middle bg-white/35" /> <span className="align-middle">MA60</span>
-            </span>
-            <span className="text-slate-500">Vol · 급증 시 강조</span>
+            {trendPack.dayChgPct != null && Number.isFinite(trendPack.dayChgPct) ? (
+              <span
+                className={`font-mono text-sm font-semibold tabular-nums md:text-[15px] ${
+                  trendPack.dayChgPct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
+                }`}
+              >
+                {trendPack.dayChgPct >= 0 ? "+" : ""}
+                {trendPack.dayChgPct.toFixed(2)}%
+                <span className="ml-1 text-[10px] font-medium text-slate-500">1D</span>
+              </span>
+            ) : null}
           </div>
+          {trendLines[0] ? (
+            <p className="m-0 mt-1 text-[11px] leading-snug text-slate-400 md:text-[12px]">{trendLines[0]}</p>
+          ) : null}
+          {trendLines[1] ? (
+            <p className="m-0 mt-0.5 text-[10px] leading-snug text-slate-600">{trendLines[1]}</p>
+          ) : null}
         </div>
-      ) : null}
+        <div className="flex flex-shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[9px] text-slate-500 md:justify-end">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-full bg-sky-400/90 shadow-[0_0_8px_rgba(56,189,248,0.45)]" />
+            MA20
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-px w-4 bg-slate-500/80" />
+            MA60
+          </span>
+          {trendPack.volRatio != null && Number.isFinite(trendPack.volRatio) ? (
+            <span className="font-mono text-slate-400">
+              Vol <span className="text-violet-200/90">{trendPack.volRatio.toFixed(2)}×</span> vs 20d
+            </span>
+          ) : (
+            <span className="text-slate-600">Vol · 20일 대비</span>
+          )}
+        </div>
+      </div>
 
-      <div className="relative h-[min(320px,48vh)] w-full min-h-[260px] sm:min-h-[280px]">
+      <div className="relative h-[min(440px,58vh)] w-full min-h-[300px] sm:min-h-[360px]">
         <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
+
+        {lastClose != null ? (
+          <div className="pointer-events-none absolute right-2 top-2 z-[15] text-right sm:right-3 sm:top-3">
+            <div className="rounded-lg border border-cyan-400/35 bg-[rgba(7,10,16,0.88)] px-2.5 py-1.5 shadow-[0_0_24px_rgba(167,139,250,0.15),0_0_20px_rgba(34,211,238,0.12),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md sm:px-3 sm:py-2">
+              <p className="m-0 font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Last</p>
+              <p className="m-0 mt-0.5 font-mono text-lg font-semibold tabular-nums leading-none text-slate-50 sm:text-xl">
+                {fmtPrice(lastClose)}
+              </p>
+              {trendPack.dayChgPct != null && Number.isFinite(trendPack.dayChgPct) ? (
+                <p
+                  className={`m-0 mt-1 font-mono text-[11px] font-semibold tabular-nums ${
+                    trendPack.dayChgPct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
+                  }`}
+                >
+                  {trendPack.dayChgPct >= 0 ? "▲" : "▼"} {Math.abs(trendPack.dayChgPct).toFixed(2)}%
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
 
         {tooltip ? (
           <div
-            className="pointer-events-none absolute z-20 min-w-[200px] rounded-lg border border-white/[0.1] bg-[rgba(8,12,22,0.94)] px-3 py-2.5 shadow-[0_16px_40px_rgba(0,0,0,0.55)] backdrop-blur-md"
+            className="pointer-events-none absolute z-20 min-w-[210px] rounded-lg border border-violet-400/25 bg-[rgba(6,9,16,0.96)] px-3 py-2.5 shadow-[0_16px_44px_rgba(0,0,0,0.6)] backdrop-blur-md"
             style={{
-              left: Math.min(Math.max(tooltip.x + 14, 8), (wrapRef.current?.clientWidth ?? 300) - 210),
-              top: Math.min(Math.max(tooltip.y + 8, 8), (wrapRef.current?.clientHeight ?? 280) - 140),
+              left: Math.min(Math.max(tooltip.x + 14, 8), (wrapRef.current?.clientWidth ?? 360) - 220),
+              top: Math.min(Math.max(tooltip.y + 8, 8), (wrapRef.current?.clientHeight ?? 400) - 150),
             }}
           >
-            <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">{tooltip.dateLabel}</p>
+            <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-violet-300/85">
+              {tooltip.dateLabel}
+            </p>
             <dl className="m-0 mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] tabular-nums">
               <dt className="m-0 text-slate-500">O</dt>
               <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.open)}</dd>
@@ -368,16 +480,16 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
               <dt className="m-0 text-slate-500">L</dt>
               <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.low)}</dd>
               <dt className="m-0 text-slate-500">C</dt>
-              <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.close)}</dd>
+              <dd className="m-0 text-right font-semibold text-slate-50">{fmtPrice(tooltip.close)}</dd>
               <dt className="m-0 text-slate-500">등락</dt>
               <dd
-                className={`m-0 text-right font-semibold ${tooltip.changePct >= 0 ? "text-[#00c2a8]" : "text-[#ff6b57]"}`}
+                className={`m-0 text-right font-semibold ${tooltip.changePct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"}`}
               >
                 {tooltip.changePct >= 0 ? "+" : ""}
                 {tooltip.changePct.toFixed(2)}%
               </dd>
               <dt className="m-0 text-slate-500">Vol</dt>
-              <dd className="m-0 text-right text-slate-200">{fmtVol(tooltip.volume)}</dd>
+              <dd className="m-0 text-right font-medium text-violet-100/90">{fmtVol(tooltip.volume)}</dd>
             </dl>
           </div>
         ) : null}
