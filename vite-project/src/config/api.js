@@ -22,6 +22,28 @@ export function getManualApiBase() {
   return "https://yds-web.onrender.com"
 }
 
+/** Supabase hub + Vercel `/api/panic/*` — cross-device sync (see .env.example). */
+export function isPanicHubEnabled() {
+  return import.meta.env.VITE_PANIC_HUB === "1" || import.meta.env.VITE_PANIC_HUB === "true"
+}
+
+export async function fetchPanicHubLatest(options = {}) {
+  const debugLog = options.debugLog !== false
+  const url = `/api/panic/latest?t=${Date.now()}`
+  const res = await fetch(url, { ...fetchPanicJsonInit, cache: "no-store" })
+  if (debugLog) console.log("📡 panic hub latest", res.status, url)
+  if (!res.ok) throw new Error(`hub HTTP ${res.status}`)
+  const json = await res.json()
+  if (!json?.ok || !json.data) throw new Error(json?.error || "hub_invalid_payload")
+  const data = normalizeManualPayload(json.data)
+  return {
+    ...data,
+    __fetchSource: "HUB",
+    __fetchUrl: url,
+    __fetchedAt: Date.now(),
+  }
+}
+
 function buildPanicDataUrls() {
   const base = getManualApiBase()
   return [`${base}/panic-data`, `${base}/panic`]
@@ -84,6 +106,24 @@ function normalizePanicPayload(data) {
 
 export async function fetchPanicDataJson(options = {}) {
   const debugLog = options.debugLog !== false
+  if (isPanicHubEnabled()) {
+    try {
+      const hubData = await fetchPanicHubLatest({ debugLog })
+      if (validatePanicData(hubData)) {
+        const enriched = {
+          ...hubData,
+          __fetchSource: "HUB",
+          __fetchUrl: hubData.__fetchUrl,
+          __fetchedAt: Date.now(),
+          __isStale: false,
+        }
+        if (debugLog) console.log("[BOOT] panic hub", { updatedAt: enriched?.updatedAt ?? null })
+        return enriched
+      }
+    } catch (err) {
+      if (debugLog) console.warn("[BOOT] panic hub unavailable, falling back", err)
+    }
+  }
   const urls = buildPanicDataUrls().map((u) => `${u}?t=${Date.now()}`)
   let lastError = null
 
@@ -172,11 +212,25 @@ function normalizeManualPayload(data) {
 }
 
 export async function submitManualPanicData(inputData) {
+  if (isPanicHubEnabled()) {
+    const url = `/api/panic/update?t=${Date.now()}`
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(inputData),
+      cache: "no-store",
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const out = await res.json()
+    if (!out?.ok) throw new Error(String(out?.error || "hub_update_failed"))
+    return normalizeManualPayload(out.data)
+  }
   const base = getManualApiBase()
   const res = await fetch(`${base}/update`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify(inputData),
+    cache: "no-store",
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const out = await res.json()
