@@ -10,6 +10,7 @@ import {
   installChunkLoadFailureRecovery,
   installLifecycleVersionPoller,
   isIosStandalone,
+  sweepIosStandaloneCachesOnce,
   unregisterAllServiceWorkers,
 } from "./utils/pwaFreshness.js"
 
@@ -119,6 +120,7 @@ async function bootstrapApp() {
 
   // Final safety net: any legacy SW must die (idempotent if already done).
   await unregisterAllServiceWorkers()
+  await sweepIosStandaloneCachesOnce()
 
   cleanupStaleAutoSnapshot()
 

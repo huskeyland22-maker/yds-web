@@ -41,6 +41,7 @@
         checkAndEvictStaleBuild,
         installChunkLoadFailureRecovery,
         installLifecycleVersionPoller,
+        sweepIosStandaloneCachesOnce,
         unregisterAllServiceWorkers,
       } from "/src/utils/pwaFreshness.js"
 
@@ -51,6 +52,7 @@
         // shipped one). This is unconditional because iOS standalone PWAs
         // aggressively keep SW state alive between launches.
         await unregisterAllServiceWorkers()
+        await sweepIosStandaloneCachesOnce()
 
         const result = await checkAndEvictStaleBuild()
         if (result.reloaded) return

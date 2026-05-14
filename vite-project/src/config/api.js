@@ -169,7 +169,7 @@ export async function fetchPanicDataJson(options = {}) {
 
 export async function fetchHistorySample(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = "/history.json"
+  const url = `/history.json?t=${Date.now()}`
   const res = await fetch(url, fetchPanicJsonInit)
   if (debugLog) console.log("✅ history 응답 상태:", res.status)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -180,7 +180,7 @@ export async function fetchHistorySample(options = {}) {
 
 export async function fetchOptimizeResult(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = "/optimize.json"
+  const url = `/optimize.json?t=${Date.now()}`
   const res = await fetch(url, fetchPanicJsonInit)
   if (debugLog) console.log("🤖 optimize 상태:", res.status)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

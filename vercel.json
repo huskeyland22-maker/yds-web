@@ -64,6 +64,38 @@
       ]
     },
     {
+      "source": "/history.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/cycle-metrics-history.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/optimize.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/value-chain-heat.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
       "source": "/firebase-messaging-sw.js",
       "headers": [
         { "key": "Content-Type", "value": "application/javascript; charset=utf-8" },

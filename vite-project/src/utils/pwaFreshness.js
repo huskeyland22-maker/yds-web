@@ -44,6 +44,16 @@ const PROTECTED_LS_KEYS = new Set([
   "yds-cycle-metric-history-v1",
 ])
 
+/** stale 빌드 eviction 시에만 제거 — 오래된 클라이언트 캐시·스코어 히스토리 정리 (사용자 메모·패닉 수동 스냅샷은 유지) */
+const STALE_EVICT_EXTRA_LS_KEYS = [
+  "yds-panic-score-history-v1",
+  "yds-panic-integration-history-v1",
+  "yds-panic-history-v1",
+  "yds-panic-notify-on",
+  "yds-panic-notify-prev-score",
+  "yds-panic-notify-last-ms",
+]
+
 // State flags live on `window` rather than module scope because Vite emits the
 // boot-loader chunk and the main app chunk as separate entry points, each
 // carrying their own copy of this module. Sharing through window guarantees
@@ -114,6 +124,9 @@ export async function unregisterAllServiceWorkers() {
   try {
     const regs = await navigator.serviceWorker.getRegistrations()
     await Promise.all(regs.map((r) => r.unregister().catch(() => null)))
+    if (regs.length) {
+      await new Promise((r) => setTimeout(r, 120))
+    }
   } catch {
     // ignore
   }
@@ -124,6 +137,21 @@ export async function clearAllCacheStorage() {
   try {
     const keys = await caches.keys()
     await Promise.all(keys.map((k) => caches.delete(k).catch(() => null)))
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * iOS 홈 화면 PWA: 세션당 1회 Cache Storage를 비워 stale JS·asset 캐시를 끊습니다.
+ * (서비스 워커 제거 직후에 호출하는 것이 안전합니다.)
+ */
+export async function sweepIosStandaloneCachesOnce() {
+  if (typeof window === "undefined" || !isIosStandalone()) return
+  try {
+    if (safeRead("sessionStorage", "yds-ios-pwa-cache-swept-session")) return
+    await clearAllCacheStorage()
+    safeWrite("sessionStorage", "yds-ios-pwa-cache-swept-session", "1")
   } catch {
     // ignore
   }
@@ -220,6 +248,9 @@ export async function evictStaleBuildAndReload(reason, latestMeta) {
   await unregisterAllServiceWorkers()
   await clearAllCacheStorage()
   purgeOldBuildLocalStorage()
+  for (const key of STALE_EVICT_EXTRA_LS_KEYS) {
+    safeRemove("localStorage", key)
+  }
 
   if (latestMeta?.buildId) {
     safeWrite("localStorage", BUILD_ID_KEY, String(latestMeta.buildId))
@@ -237,6 +268,7 @@ export async function fetchLatestBuildMeta() {
     const res = await fetch(`${BUILD_VERSION_ENDPOINT}?t=${Date.now()}`, {
       cache: "no-store",
       credentials: "omit",
+      mode: "cors",
       headers: {
         Pragma: "no-cache",
         "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
@@ -262,8 +294,15 @@ export async function checkAndEvictStaleBuild() {
   if (!remote || !remote.buildId) return { remote: null, reloaded: false }
 
   const remoteBuildId = String(remote.buildId)
+  const remoteVersion = typeof remote.version === "string" ? remote.version.trim() : ""
   const htmlBuildId = readHtmlBuildId()
   const storedBuildId = safeRead("localStorage", BUILD_ID_KEY)
+  const storedVersion = (safeRead("localStorage", BUILD_VERSION_KEY) || "").trim()
+
+  if (htmlBuildId && storedBuildId && htmlBuildId !== String(storedBuildId)) {
+    const reloaded = await evictStaleBuildAndReload("html-local-build-desync", remote)
+    return { remote, reloaded }
+  }
 
   if (htmlBuildId && htmlBuildId !== remoteBuildId) {
     const reloaded = await evictStaleBuildAndReload("html-build-mismatch", remote)
@@ -275,9 +314,14 @@ export async function checkAndEvictStaleBuild() {
     return { remote, reloaded }
   }
 
+  if (remoteVersion && storedVersion && storedVersion !== remoteVersion) {
+    const reloaded = await evictStaleBuildAndReload("client-version-mismatch", remote)
+    return { remote, reloaded }
+  }
+
   safeWrite("localStorage", BUILD_ID_KEY, remoteBuildId)
-  if (typeof remote.version === "string" && remote.version) {
-    safeWrite("localStorage", BUILD_VERSION_KEY, remote.version)
+  if (remoteVersion) {
+    safeWrite("localStorage", BUILD_VERSION_KEY, remoteVersion)
   }
   return { remote, reloaded: false }
 }
@@ -305,15 +349,18 @@ export function installLifecycleVersionPoller() {
     if (document.visibilityState === "visible") void pollLatestBuildIfDue()
   })
   window.addEventListener("focus", () => void pollLatestBuildIfDue())
-  window.addEventListener("pageshow", () => void pollLatestBuildIfDue())
+  window.addEventListener("pageshow", (event) => {
+    void pollLatestBuildIfDue()
+    if (event?.persisted) void checkAndEvictStaleBuild()
+  })
 
   if (isIosStandalone()) {
     let ticks = 0
     const id = window.setInterval(() => {
       ticks += 1
       void pollLatestBuildIfDue()
-      if (ticks >= 12) window.clearInterval(id)
-    }, 10_000)
+      if (ticks >= 36) window.clearInterval(id)
+    }, 5_000)
   }
 }
 
@@ -365,4 +412,5 @@ export const __testing__ = {
   BUILD_SCOPED_LS_KEYS,
   BUILD_SCOPED_LS_PREFIXES,
   PROTECTED_LS_KEYS,
+  STALE_EVICT_EXTRA_LS_KEYS,
 }
