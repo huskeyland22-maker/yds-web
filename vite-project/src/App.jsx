@@ -358,12 +358,13 @@ function getCycleStepSequence() {
 }
 
 function buildMemoInsightRows(memos) {
-  if (!memos.length) return ["메모 누적 후 AI 인사이트가 강화됩니다."]
+  const memoList = Array.isArray(memos) ? memos : []
+  if (!memoList.length) return ["메모 누적 후 AI 인사이트가 강화됩니다."]
   const sectorCounts = {}
   let bullish = 0
   let bearish = 0
   let riskWords = 0
-  for (const memo of memos) {
+  for (const memo of memoList) {
     const sentiment = memo?.sentiment ?? memo?.parsed?.sentiment
     if (sentiment === "bullish") bullish += 1
     if (sentiment === "bearish") bearish += 1
@@ -376,15 +377,15 @@ function buildMemoInsightRows(memos) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 2)
     .map(([name, n]) => `${name}(${n})`)
-  const rows = []
-  if (topSectors.length) rows.push(`최근 섹터 흐름: ${topSectors.join(" → ")}`)
-  rows.push(
+  const out = []
+  if (topSectors.length) out.push(`최근 섹터 흐름: ${topSectors.join(" → ")}`)
+  out.push(
     bullish >= bearish
       ? "bullish 표현이 우세하며 risk-on 심리가 유지되는 구간"
       : "bearish 표현이 증가하며 방어 심리 전환 가능성",
   )
-  if (riskWords >= 3) rows.push("위험 표현 증가: 변동성 확대 구간 경계 필요")
-  return rows.slice(0, 4)
+  if (riskWords >= 3) out.push("위험 표현 증가: 변동성 확대 구간 경계 필요")
+  return out.slice(0, 4)
 }
 
 function buildMemoFlowStats(memos) {
@@ -450,22 +451,31 @@ function buildSentimentTrend(memos) {
 
 function buildInsightWarnings({ flowStats, panicData, keywordTop }) {
   const warnings = []
+  const rotation = Array.isArray(flowStats?.rotation) ? flowStats.rotation : []
+  const riskN = Number(flowStats?.risk)
+  const risk = Number.isFinite(riskN) ? riskN : 0
   const vix = Number(panicData?.vix)
   const fearGreed = Number(panicData?.fearGreed)
-  const top = keywordTop?.[0]?.[0] ?? null
-  if ((Number.isFinite(vix) && vix >= 24) || flowStats.risk >= 4) {
+  const top = Array.isArray(keywordTop) ? (keywordTop[0]?.[0] ?? null) : null
+  if ((Number.isFinite(vix) && vix >= 24) || risk >= 4) {
     warnings.push("주의: 위험 표현 및 변동성 경계 구간 확대")
   }
   if (Number.isFinite(fearGreed) && fearGreed >= 75) {
     warnings.push("주의: 탐욕 과열 신호 유지")
   }
-  if (flowStats.rotation.length >= 3 && top) {
+  if (rotation.length >= 3 && top) {
     warnings.push(`주의: ${top} 중심 과집중 가능성 점검`)
   }
   return warnings.slice(0, 3)
 }
 
 function buildInsightCards({ marketCycleStage, flowStats, trend, keywordTop }) {
+  const rotation = Array.isArray(flowStats?.rotation) ? flowStats.rotation : []
+  const kw = Array.isArray(keywordTop) ? keywordTop : []
+  const tr =
+    trend && typeof trend === "object"
+      ? trend
+      : { bearishDelta: 0, bullishDelta: 0, recentBull: 0, recentBear: 0 }
   const cards = []
   cards.push({
     title: "오늘의 시장 흐름",
@@ -477,26 +487,24 @@ function buildInsightCards({ marketCycleStage, flowStats, trend, keywordTop }) {
           : "중립~탐욕 사이클 · 선별 대응 구간",
     confidence: 0.74,
     tone: "중립",
-    chips: flowStats.rotation.slice(0, 3),
+    chips: rotation.slice(0, 3),
   })
   cards.push({
     title: "순환매 흐름 변화",
-    body: flowStats.rotation.length
-      ? `${flowStats.rotation.slice(0, 4).join(" → ")} 중심으로 시장 관심 이동`
-      : "순환매 흐름 데이터 축적중",
+    body: rotation.length ? `${rotation.slice(0, 4).join(" → ")} 중심으로 시장 관심 이동` : "순환매 흐름 데이터 축적중",
     confidence: 0.69,
     tone: "관찰",
-    chips: flowStats.rotation.slice(0, 3),
+    chips: rotation.slice(0, 3),
   })
   cards.push({
     title: "감정 흐름",
     body:
-      trend.bearishDelta > trend.bullishDelta
+      tr.bearishDelta > tr.bullishDelta
         ? "bearish 흐름 확대로 방어 심리 증가 가능성"
         : "bullish 흐름 유지, 다만 과열 표현 동반 여부 점검 필요",
     confidence: 0.66,
-    tone: trend.bearishDelta > trend.bullishDelta ? "주의" : "완만",
-    chips: keywordTop.slice(0, 2).map(([k]) => k),
+    tone: tr.bearishDelta > tr.bullishDelta ? "주의" : "완만",
+    chips: kw.slice(0, 2).map(([k]) => k),
   })
   return cards
 }
@@ -593,6 +601,7 @@ function App() {
   )
   const [hubSaveGlow, setHubSaveGlow] = useState(false)
   const [cycleMetricHistory, setCycleMetricHistory] = useState(() => readCycleMetricHistory())
+  const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
 
   const parseResult = useMemo(() => parseTextPanicData(inputText), [inputText])
   const parsedData = parseResult.data
@@ -752,7 +761,10 @@ function App() {
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const refreshMemos = () => setRecentMemos(readRecentMemos())
+    const refreshMemos = () => {
+      const next = readRecentMemos()
+      setRecentMemos(Array.isArray(next) ? next : [])
+    }
     refreshMemos()
     window.addEventListener("yds:memo-saved", refreshMemos)
     window.addEventListener("storage", refreshMemos)
@@ -913,12 +925,13 @@ function App() {
     }
   }
   const marketCycleStage = useMemo(() => getMarketCycleStage(panicData), [panicData])
+  const safeRecentMemos = Array.isArray(recentMemos) ? recentMemos : []
   const sidebarPulse = useMemo(() => buildMarketSidebarPulse(panicData, marketCycleStage), [panicData, marketCycleStage])
-  const insightRows = useMemo(() => buildMemoInsightRows(recentMemos), [recentMemos])
-  const flowStats = useMemo(() => buildMemoFlowStats(recentMemos), [recentMemos])
+  const insightRows = useMemo(() => buildMemoInsightRows(safeRecentMemos), [recentMemos])
+  const flowStats = useMemo(() => buildMemoFlowStats(safeRecentMemos), [recentMemos])
   const cycleSteps = useMemo(() => getCycleStepSequence(), [])
-  const keywordTop = useMemo(() => buildKeywordFrequency(recentMemos), [recentMemos])
-  const sentimentTrend = useMemo(() => buildSentimentTrend(recentMemos), [recentMemos])
+  const keywordTop = useMemo(() => buildKeywordFrequency(safeRecentMemos), [recentMemos])
+  const sentimentTrend = useMemo(() => buildSentimentTrend(safeRecentMemos), [recentMemos])
   const insightWarnings = useMemo(
     () => buildInsightWarnings({ flowStats, panicData, keywordTop }),
     [flowStats, panicData, keywordTop],
@@ -927,7 +940,7 @@ function App() {
     () => buildInsightCards({ marketCycleStage, flowStats, trend: sentimentTrend, keywordTop }),
     [marketCycleStage, flowStats, sentimentTrend, keywordTop],
   )
-  const finderCandidates = useMemo(() => buildFinderCandidates(recentMemos, marketCycleStage), [recentMemos, marketCycleStage])
+  const finderCandidates = useMemo(() => buildFinderCandidates(safeRecentMemos, marketCycleStage), [recentMemos, marketCycleStage])
   const metricCards = useMemo(
     () =>
       METRIC_DEFS.map(({ key, label }) => ({
@@ -1252,7 +1265,8 @@ function App() {
             <Route
               path="/timing"
               element={
-                <div className="space-y-4">
+                <SectionErrorBoundary label="매매 타점">
+                  <div className="space-y-4">
                   <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-4">
                     <p className="m-0 text-xs uppercase tracking-[0.14em] text-cyan-300">매매 타점</p>
                     <p className="m-0 mt-1 text-lg font-semibold text-cyan-100">사이클 → 섹터 → 종목 → 진입 확인</p>
@@ -1267,7 +1281,7 @@ function App() {
                     </div>
                   </section>
                   <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {(finderCandidates.length ? finderCandidates : []).slice(0, 6).map((candidate) => (
+                    {(Array.isArray(finderCandidates) ? finderCandidates : []).slice(0, 6).map((candidate) => (
                         <article key={candidate.name} className="rounded-xl border border-gray-800 bg-[#0b1220] px-4 py-3">
                           <div className="flex items-start justify-between gap-2">
                             <p className="m-0 text-base font-semibold text-gray-100">{candidate.name}</p>
@@ -1280,10 +1294,10 @@ function App() {
                             위험도 {candidate.risk}
                           </p>
                           <p className="m-0 mt-1 text-xs text-gray-400">
-                            시그널: {candidate.signals.slice(0, 3).join(", ") || "관찰중"}
+                            시그널: {(Array.isArray(candidate.signals) ? candidate.signals : []).slice(0, 3).join(", ") || "관찰중"}
                           </p>
                           <div className="mt-2 flex flex-wrap gap-1">
-                            {candidate.sectors.slice(0, 3).map((sector) => (
+                            {(Array.isArray(candidate.sectors) ? candidate.sectors : []).slice(0, 3).map((sector) => (
                               <span key={sector} className="rounded-full border border-indigo-400/25 bg-indigo-500/10 px-2 py-0.5 text-[10px] text-indigo-200">
                                 {sector}
                               </span>
@@ -1292,22 +1306,24 @@ function App() {
                           <p className="m-0 mt-2 text-[11px] text-gray-500">{candidate.cycleBias}</p>
                         </article>
                     ))}
-                    {!finderCandidates.length ? <p className="m-0 text-sm text-gray-400">후보 데이터 축적 중입니다.</p> : null}
+                    {!finderCandidates?.length ? <p className="m-0 text-sm text-gray-400">후보 데이터 축적 중입니다.</p> : null}
                   </section>
                 </div>
+                </SectionErrorBoundary>
               }
             />
             <Route
               path="/insights"
               element={
-                <div className="space-y-4">
+                <SectionErrorBoundary label="AI 인사이트">
+                  <div className="space-y-4">
                   <section className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4">
                     <p className="m-0 text-xs uppercase tracking-[0.14em] text-emerald-300">AI 인사이트</p>
                     <p className="m-0 mt-1 text-lg font-semibold text-emerald-100">짧고 강한 시장 해석</p>
                     <p className="m-0 mt-1 text-sm text-gray-300">오늘 시장의 방향만 한눈에 보여줍니다.</p>
                   </section>
                   <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {insightCards.slice(0, 4).map((card) => (
+                    {(Array.isArray(insightCards) ? insightCards : []).slice(0, 4).map((card) => (
                       <article key={card.title} className="rounded-xl border border-gray-800 bg-[#0b1220] px-4 py-3">
                         <p className="m-0 text-sm font-semibold text-gray-100">{card.title}</p>
                         <p className="m-0 mt-1 text-xs text-gray-300">{card.body}</p>
@@ -1317,7 +1333,7 @@ function App() {
                   <section className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
                     <p className="m-0 text-sm font-semibold text-amber-200">핵심 경고</p>
                     <div className="mt-2 space-y-1 text-xs text-amber-100">
-                      {(insightWarnings.length ? insightWarnings : ["지금은 과도한 경고 신호가 보이지 않습니다."]).map((line) => (
+                      {(Array.isArray(insightWarnings) && insightWarnings.length ? insightWarnings : ["지금은 과도한 경고 신호가 보이지 않습니다."]).map((line) => (
                         <p key={line} className="m-0">- {line}</p>
                       ))}
                     </div>
@@ -1325,15 +1341,16 @@ function App() {
                   <section className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3">
                     <p className="m-0 text-sm font-semibold text-indigo-200">반복 흐름 키워드</p>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {keywordTop.slice(0, 6).map(([k, n]) => (
+                      {(Array.isArray(keywordTop) ? keywordTop : []).slice(0, 6).map(([k, n]) => (
                         <span key={k} className="rounded-full border border-indigo-400/25 bg-indigo-500/10 px-2.5 py-1 text-xs text-indigo-100">
                           {k} {n}
                         </span>
                       ))}
-                      {!keywordTop.length ? <p className="m-0 text-xs text-gray-400">키워드 누적 대기중</p> : null}
+                      {!keywordTop?.length ? <p className="m-0 text-xs text-gray-400">키워드 누적 대기중</p> : null}
                     </div>
                   </section>
                 </div>
+                </SectionErrorBoundary>
               }
             />
             <Route path="*" element={<Navigate to="/cycle" replace />} />
