@@ -35,6 +35,8 @@ export default function OvernightUsBriefing({ panicData = null }) {
   const [aiMeta, setAiMeta] = useState({ used: false, error: null })
   const bcRef = useRef(null)
   const lastKst8KeyRef = useRef("")
+  /** 같은 탭이 보낸 BC 메시지는 무시 (postMessage가 자기 자신에게도 전달됨 → load 무한 루프 방지) */
+  const bcTabIdRef = useRef(`tb-${Math.random().toString(36).slice(2, 11)}`)
 
   const useAiClient = import.meta.env.VITE_MACRO_BRIEFING_AI === "1" || import.meta.env.VITE_MACRO_BRIEFING_AI === "true"
 
@@ -85,7 +87,11 @@ export default function OvernightUsBriefing({ panicData = null }) {
       }
 
       try {
-        bcRef.current?.postMessage({ type: "macro-briefing-refresh", t: Date.now() })
+        bcRef.current?.postMessage({
+          type: "macro-briefing-refresh",
+          t: Date.now(),
+          from: bcTabIdRef.current,
+        })
       } catch {
         /* ignore */
       }
@@ -139,7 +145,10 @@ export default function OvernightUsBriefing({ panicData = null }) {
       if (typeof BroadcastChannel !== "undefined") {
         bc = new BroadcastChannel(BC_NAME)
         bcRef.current = bc
-        bc.onmessage = () => void load()
+        bc.onmessage = (ev) => {
+          if (ev?.data?.from === bcTabIdRef.current) return
+          void load()
+        }
       }
     } catch {
       /* ignore */
