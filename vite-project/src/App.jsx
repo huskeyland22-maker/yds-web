@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
@@ -595,7 +595,9 @@ function App() {
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
   const [saveToast, setSaveToast] = useState("")
-  const [saveDone, setSaveDone] = useState(false)
+  const [inputPanelFlash, setInputPanelFlash] = useState(false)
+  const [previewKey, setPreviewKey] = useState(0)
+  const textareaRef = useRef(null)
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
   const [buildVersion, setBuildVersion] = useState(`v1.0.${String(APP_BUILD_ID).slice(-6)}`)
@@ -613,6 +615,38 @@ function App() {
     () => METRIC_DEFS.filter(({ key }) => parsedData[key] !== null).length,
     [parsedData],
   )
+
+  const inputReady = useMemo(() => {
+    const { vix, fearGreed, bofa, putCall, highYield } = parsedData
+    return (
+      vix !== null && fearGreed !== null && bofa !== null && putCall !== null && highYield !== null
+    )
+  }, [parsedData])
+
+  const resetAiReportInput = () => {
+    setInputText("")
+    setInputError("")
+    setPreviewKey((k) => k + 1)
+    try {
+      window.localStorage.removeItem(PANIC_TEXT_DRAFT_KEY)
+    } catch {
+      // ignore
+    }
+    try {
+      textareaRef.current?.blur?.()
+    } catch {
+      // ignore
+    }
+  }
+
+  const pulseSaveFeedback = () => {
+    setInputPanelFlash(true)
+    setHubSaveGlow(true)
+    window.setTimeout(() => {
+      setInputPanelFlash(false)
+      setHubSaveGlow(false)
+    }, 900)
+  }
 
   const submitInput = async () => {
     const { vix, vxn, fearGreed, bofa, move, skew, putCall, highYield, gsBullBear } = parsedData
@@ -650,11 +684,10 @@ function App() {
           setInputError(msg)
           return
         }
-        setHubSaveGlow(true)
-        window.setTimeout(() => setHubSaveGlow(false), 1400)
-        setSaveDone(true)
-        setSaveToast("동기화 완료 · 모든 기기에 반영됨")
+        resetAiReportInput()
         setOpenInput(false)
+        pulseSaveFeedback()
+        setSaveToast("Market metrics updated · 시장 지표가 반영되었습니다")
         if (db) {
           void (async () => {
             try {
@@ -686,12 +719,10 @@ function App() {
         return
       }
       applyServerPanicSnapshot(serverData)
-      setSaveDone(true)
-      setSaveToast("✅ 패닉지수 저장 완료 · 모든 기기에 반영")
+      resetAiReportInput()
       setOpenInput(false)
-      window.setTimeout(() => {
-        setOpenInput(false)
-      }, 100)
+      pulseSaveFeedback()
+      setSaveToast("Market metrics updated · 시장 지표가 반영되었습니다")
 
       if (db) {
         void (async () => {
@@ -706,6 +737,11 @@ function App() {
             console.error("panic_reports 저장 실패", fireErr)
           }
         })()
+      }
+      try {
+        await usePanicStore.getState().fetchPanicData("manual-api-post-save", { force: true })
+      } catch (e) {
+        console.warn("[panic] manual-api post-save refresh", e)
       }
     } catch (err) {
       console.error(err)
@@ -867,16 +903,19 @@ function App() {
 
 
   useEffect(() => {
-    if (!saveDone) return
-    const timer = window.setTimeout(() => {
-      setOpenInput(false)
-      setInputText("")
-      setSaveDone(false)
-      setSaveToast("")
-      setIsSaving(false)
-    }, 600)
+    if (!saveToast) return
+    const timer = window.setTimeout(() => setSaveToast(""), 4200)
     return () => window.clearTimeout(timer)
-  }, [saveDone])
+  }, [saveToast])
+
+  useEffect(() => {
+    if (!openInput || typeof document === "undefined") return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [openInput])
 
 
   const login = async () => {
@@ -1397,7 +1436,9 @@ function App() {
             onClick={() => setOpenInput(false)}
           />
           <div
-            className="fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:pl-4 sm:pr-4"
+            className={`fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-[box-shadow,ring-color] duration-500 sm:pl-4 sm:pr-4 ${
+              inputPanelFlash ? "ring-2 ring-emerald-400/50 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.2),-16px_0_56px_rgba(16,185,129,0.12)]" : ""
+            }`}
             style={{
               background: "linear-gradient(165deg, rgba(15,23,42,0.94) 0%, rgba(2,6,23,0.97) 45%, rgba(2,6,23,0.99) 100%)",
               boxShadow: "inset 1px 0 0 rgba(139,92,246,0.12), -16px 0 48px rgba(0,0,0,0.5)",
@@ -1424,6 +1465,7 @@ function App() {
 
             <div className="flex min-h-0 flex-1 flex-col">
               <textarea
+                ref={textareaRef}
                 value={inputText}
                 onChange={(e) => {
                   setInputText(e.target.value)
@@ -1457,7 +1499,7 @@ function App() {
               </div>
             ) : null}
 
-            <details className="group mt-1.5 shrink-0 rounded-md border border-white/[0.05] bg-black/20">
+            <details key={previewKey} className="group mt-1.5 shrink-0 rounded-md border border-white/[0.05] bg-black/20">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-2 py-1 font-mono text-[10px] text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-400 [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-1.5">
                   <span className="tracking-wide">추출 상세</span>
@@ -1495,8 +1537,11 @@ function App() {
               <button
                 type="button"
                 onClick={submitInput}
-                disabled={isSaving}
-                className="w-full rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isSaving || !inputReady}
+                aria-busy={isSaving}
+                className={`relative w-full overflow-hidden rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-45 ${
+                  isSaving ? "animate-pulse" : ""
+                }`}
               >
                 {isSaving ? "반영 중…" : "대시보드에 반영"}
               </button>
@@ -1505,7 +1550,10 @@ function App() {
         </>
       ) : null}
       {saveToast ? (
-        <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10000] -translate-x-1/2 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-4 py-2 text-sm text-emerald-200 shadow-lg">
+        <div
+          role="status"
+          className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10000] max-w-[min(92vw,22rem)] -translate-x-1/2 rounded-xl border border-emerald-400/35 bg-[rgba(6,24,18,0.92)] px-4 py-2.5 text-center text-[13px] font-medium leading-snug text-emerald-100 shadow-[0_12px_40px_rgba(16,185,129,0.2),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
+        >
           {saveToast}
         </div>
       ) : null}

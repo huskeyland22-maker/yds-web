@@ -210,3 +210,20 @@ export function pickPanicNumber(panicData, key) {
   const n = Number(raw)
   return Number.isFinite(n) ? n : NaN
 }
+
+/** panicData 우선, 없으면 히스토리 행에서 최신 유효값 (카드 '-' 방지) */
+export function pickMetricDisplayValue(panicData, rows, key) {
+  const live = pickPanicNumber(panicData, key)
+  if (Number.isFinite(live)) return live
+  if (!Array.isArray(rows) || rows.length === 0) return NaN
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    const row = rows[i]
+    if (!row || typeof row !== "object") continue
+    let n = Number(row[key])
+    if (!Number.isFinite(n) && key === "gsBullBear") {
+      n = Number(row.gsBullBear ?? row.gs)
+    }
+    if (Number.isFinite(n)) return n
+  }
+  return NaN
+}

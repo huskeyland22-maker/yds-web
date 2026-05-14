@@ -4,7 +4,7 @@ import {
   formatMetricValue,
   metricValueDisplayStyle,
   pctDelta,
-  pickPanicNumber,
+  pickMetricDisplayValue,
   resolveSeriesColor,
 } from "./macroCycleChartUtils.js"
 
@@ -47,7 +47,7 @@ function FeedStatusBadge({ kind, label }) {
 }
 
 function MetricBlock({ series, panicData, rows, large }) {
-  const v = pickPanicNumber(panicData, series.key)
+  const v = pickMetricDisplayValue(panicData, rows, series.key)
   const pct = pctDelta(rows, series.key)
   const name = series.name ?? series.key
   const hasDelta = pct != null && Number.isFinite(pct)
@@ -64,7 +64,7 @@ function MetricBlock({ series, panicData, rows, large }) {
     >
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <p
-          className={`m-0 max-w-full truncate font-mono font-extrabold tabular-nums tracking-tight ${valueSize}`}
+          className={`m-0 max-w-full min-w-0 break-words font-mono font-extrabold tabular-nums tracking-tight ${valueSize}`}
           style={valueStyle}
         >
           {formatMetricValue(series.key, v)}
