@@ -39,7 +39,7 @@ function FeedStatusBadge({ kind, label }) {
   const cls = FEED_BADGE[kind] ?? FEED_BADGE.confirmed
   return (
     <span
-      className={`inline-flex items-center rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] ${cls}`}
+      className={`inline-flex items-center rounded border px-2 py-0.5 text-[9px] font-semibold tracking-wide ${cls}`}
     >
       {label}
     </span>
@@ -128,10 +128,10 @@ export default function MacroCycleTierCard({
   macroComments,
   delay = 0,
   feedKind = "confirmed",
-  feedLabel = "CONFIRMED",
+  feedLabel = "확정",
   asOfDateLabel = "—",
   updatedLine = "—",
-  sourceLine = "Source: Confirmed Close",
+  sourceLine = "데이터 기준 · 확정 종가",
 }) {
   const topBar = TIER_TOP_BAR[tier] ?? TIER_TOP_BAR.tactical
   const radial = TIER_RADIAL[tier] ?? TIER_RADIAL.tactical
@@ -169,10 +169,10 @@ export default function MacroCycleTierCard({
 
           <header className="border-b border-white/[0.05] px-5 pb-4 pt-4">
             <div className="flex items-start justify-between gap-3">
-              <p className="m-0 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{tierLabel}</p>
+              <p className="m-0 text-[10px] font-bold tracking-[0.08em] text-slate-500">{tierLabel}</p>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
                 <FeedStatusBadge kind={feedKind} label={feedLabel} />
-                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">{statusLabel}</p>
+                <p className="m-0 max-w-[10rem] text-right text-[9px] font-medium tracking-wide text-slate-400">{statusLabel}</p>
               </div>
             </div>
 
@@ -189,7 +189,7 @@ export default function MacroCycleTierCard({
           </header>
 
           <section className="border-b border-white/[0.05] px-5 py-4">
-            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">핵심 수치</p>
+            <p className="m-0 text-[9px] font-semibold tracking-[0.1em] text-slate-500">핵심 수치</p>
             {primaryS ? (
               <div className="mt-3 rounded-lg border border-white/[0.07] bg-gradient-to-b from-black/35 to-black/[0.18] px-3 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-5 sm:py-5">
                 <MetricBlock series={primaryS} panicData={panicData} rows={rows} large />
@@ -210,8 +210,8 @@ export default function MacroCycleTierCard({
               </div>
             ) : null}
 
-            <p className="m-0 mt-3 border-t border-white/[0.04] pt-2.5 font-mono text-[8px] leading-relaxed text-slate-700">
-              <span className="text-slate-600">As of {asOfDateLabel}</span>
+            <p className="m-0 mt-3 border-t border-white/[0.04] pt-2.5 font-mono text-[8px] leading-relaxed text-slate-700 sm:text-[9px]">
+              <span className="text-slate-600">기준일 {asOfDateLabel}</span>
               <span className="mx-1.5 text-slate-800">·</span>
               <span>{updatedLine}</span>
               <span className="mx-1.5 text-slate-800">·</span>
@@ -220,12 +220,12 @@ export default function MacroCycleTierCard({
           </section>
 
           <section className="px-3 pb-1 pt-3 sm:px-4">
-            <p className="m-0 mb-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">일별 흐름</p>
+            <p className="m-0 mb-2 px-2 text-[9px] font-semibold tracking-[0.1em] text-slate-500">일별 흐름</p>
             {primaryS ? <MacroCycleLwChart rows={rows} primarySeries={primaryS} /> : null}
           </section>
 
           <footer className="border-t border-white/[0.05] px-5 py-4">
-            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">Desk note</p>
+            <p className="m-0 text-[9px] font-semibold tracking-[0.1em] text-slate-500">데스크 코멘트</p>
             <div className="m-0 mt-2 space-y-1.5">
               {(macroComments.length ? macroComments : ["데이터 보강 중"]).slice(0, 2).map((line) => (
                 <p key={line} className="m-0 text-[12px] leading-snug text-slate-500">

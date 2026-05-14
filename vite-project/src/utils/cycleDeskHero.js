@@ -1,13 +1,14 @@
 import { buildMarketSidebarPulse } from "./macroTerminalPulse.js"
 
-function foreignFlowEnglish(panicData) {
+/** 외국인·옵션 흐름 요약 (히어로 우측 패널용) */
+function foreignFlowSummary(panicData) {
   const fg = Number(panicData?.fearGreed)
   const pc = Number(panicData?.putCall)
   if (!Number.isFinite(fg) && !Number.isFinite(pc)) return "—"
-  if (Number.isFinite(pc) && pc >= 1.02) return "Defensive"
-  if (Number.isFinite(fg) && fg >= 58) return "Positive"
-  if (Number.isFinite(fg) && fg <= 40) return "Cautious"
-  return "Mixed"
+  if (Number.isFinite(pc) && pc >= 1.02) return "옵션 방어 우위"
+  if (Number.isFinite(fg) && fg >= 58) return "위험 선호 흐름"
+  if (Number.isFinite(fg) && fg <= 40) return "신중·유출 경계"
+  return "중립 흐름"
 }
 
 /**
@@ -52,6 +53,10 @@ export function buildCycleDeskHeroContext(panicData, cycleStage, heroSummary) {
   }
 
   const pulse = buildMarketSidebarPulse(panicData, cycleStage)
+  const riskTone =
+    pulse.riskAppetite === "ON" ? "on" : pulse.riskAppetite === "OFF" ? "off" : pulse.riskAppetite === "혼합" ? "mix" : "unknown"
+  const riskLabel =
+    pulse.riskAppetite === "ON" ? "선호 우위" : pulse.riskAppetite === "OFF" ? "회피 우위" : pulse.riskAppetite === "혼합" ? "혼재" : "—"
   const stageStyle =
     cycleStage === "과열" || cycleStage === "탐욕"
       ? "greed"
@@ -69,10 +74,11 @@ export function buildCycleDeskHeroContext(panicData, cycleStage, heroSummary) {
     },
     flowBullets: flowBullets.slice(0, 4),
     keySignal: {
-      riskAppetite: pulse.riskAppetite === "ON" ? "ON" : pulse.riskAppetite === "OFF" ? "OFF" : "Mix",
-      leadingSector: "AI",
+      riskAppetiteTone: riskTone,
+      riskAppetite: riskLabel,
+      leadingSector: pulse.leadingSector ?? "AI · 반도체",
       volatility: pulse.volatility,
-      foreignFlow: foreignFlowEnglish(panicData),
+      foreignFlow: foreignFlowSummary(panicData),
     },
   }
 }

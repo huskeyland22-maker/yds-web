@@ -51,11 +51,9 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
 
       <div className="relative z-[1] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
-          <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-            Macro strategy desk
-          </p>
-          <p className="m-0 font-mono text-[9px] text-slate-600">
-            As of {asOfDateLabel} · {updatedLine}
+          <p className="m-0 text-[10px] font-semibold tracking-[0.14em] text-slate-500">매크로 전략 데스크</p>
+          <p className="m-0 font-mono text-[9px] text-slate-600 sm:text-[10px]">
+            기준일 {asOfDateLabel} · {updatedLine}
           </p>
         </div>
 
@@ -74,13 +72,13 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
                 </p>
                 <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-3 text-[10px] leading-snug text-slate-500">
                   <p className="m-0">
-                    <span className="font-mono text-[9px] text-slate-600">T</span> {tierHints.tactical}
+                    <span className="text-[9px] font-semibold text-slate-600">단기</span> {tierHints.tactical}
                   </p>
                   <p className="m-0">
-                    <span className="font-mono text-[9px] text-slate-600">S</span> {tierHints.strategic}
+                    <span className="text-[9px] font-semibold text-slate-600">중기</span> {tierHints.strategic}
                   </p>
                   <p className="m-0">
-                    <span className="font-mono text-[9px] text-slate-600">M</span> {tierHints.macro}
+                    <span className="text-[9px] font-semibold text-slate-600">장기</span> {tierHints.macro}
                   </p>
                 </div>
               </div>
@@ -104,36 +102,34 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
 
           {/* 우: Today's key signal */}
           <div className="lg:col-span-4">
-            <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-indigo-300/75">
-              Today&apos;s key signal
-            </p>
+            <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-indigo-300/85">오늘의 핵심 시그널</p>
             <div className="mt-3 rounded-xl border border-indigo-500/25 bg-gradient-to-b from-indigo-950/40 to-black/40 px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_28px_rgba(79,70,229,0.08)]">
-              <dl className="m-0 space-y-2.5 font-mono text-[11px]">
+              <dl className="m-0 space-y-2.5 text-[11px] leading-snug sm:text-[12px]">
                 <div className="flex justify-between gap-3 border-b border-white/[0.06] pb-2">
-                  <dt className="text-slate-500">Risk appetite</dt>
+                  <dt className="shrink-0 text-slate-500">위험 선호</dt>
                   <dd
                     className={
-                      keySignal.riskAppetite === "ON"
-                        ? "font-semibold text-emerald-300/95"
-                        : keySignal.riskAppetite === "OFF"
-                          ? "font-semibold text-rose-300/90"
-                          : "text-amber-200/90"
+                      keySignal.riskAppetiteTone === "on"
+                        ? "text-right font-semibold text-emerald-300/95"
+                        : keySignal.riskAppetiteTone === "off"
+                          ? "text-right font-semibold text-rose-300/90"
+                          : "text-right text-amber-200/90"
                     }
                   >
                     {keySignal.riskAppetite}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3 border-b border-white/[0.06] pb-2">
-                  <dt className="text-slate-500">Leading sector</dt>
-                  <dd className="text-right font-semibold text-slate-100">{keySignal.leadingSector}</dd>
+                  <dt className="shrink-0 text-slate-500">주도 섹터</dt>
+                  <dd className="max-w-[11rem] text-right font-semibold text-slate-100">{keySignal.leadingSector}</dd>
                 </div>
                 <div className="flex justify-between gap-3 border-b border-white/[0.06] pb-2">
-                  <dt className="text-slate-500">Volatility</dt>
-                  <dd className="text-slate-200">{keySignal.volatility}</dd>
+                  <dt className="shrink-0 text-slate-500">변동성</dt>
+                  <dd className="text-right text-slate-200">{keySignal.volatility}</dd>
                 </div>
                 <div className="flex justify-between gap-3 pt-0.5">
-                  <dt className="text-slate-500">Foreign flow</dt>
-                  <dd className="text-slate-200">{keySignal.foreignFlow}</dd>
+                  <dt className="shrink-0 text-slate-500">수급·흐름</dt>
+                  <dd className="max-w-[11rem] text-right text-slate-200">{keySignal.foreignFlow}</dd>
                 </div>
               </dl>
             </div>

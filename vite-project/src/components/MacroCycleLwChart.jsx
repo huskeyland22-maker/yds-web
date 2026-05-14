@@ -374,7 +374,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
   }, [pack])
 
   const regimeLabel =
-    pack?.regime === "riskOn" ? "Risk-on flow" : pack?.regime === "riskOff" ? "Risk-off flow" : "Neutral flow"
+    pack?.regime === "riskOn" ? "위험 선호 흐름" : pack?.regime === "riskOff" ? "위험 회피 흐름" : "중립 흐름"
 
   const lastPoint = pack?.closes?.[pack?.closes?.length - 1]
   const prevPoint = pack?.closes?.[pack?.closes?.length - 2]
@@ -403,9 +403,9 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
     >
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] bg-gradient-to-r from-white/[0.03] to-transparent px-2.5 py-2 sm:px-3">
         <div className="min-w-0">
-          <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">Desk</p>
+          <p className="m-0 text-[9px] font-semibold tracking-[0.12em] text-slate-500">데스크</p>
           <p className="m-0 mt-0.5 truncate text-[12px] font-semibold text-slate-100 sm:text-[13px]">{seriesName}</p>
-          <p className="m-0 mt-0.5 font-mono text-[8px] uppercase tracking-[0.12em] text-slate-600">{regimeLabel}</p>
+          <p className="m-0 mt-0.5 text-[8px] font-medium tracking-wide text-slate-600">{regimeLabel}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-[9px] text-slate-600">
           <span className="inline-flex items-center gap-1.5 text-slate-600">
@@ -441,7 +441,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
                     : "border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.12)]"
               }`}
             >
-              <p className="m-0 font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-cyan-300/75">Now</p>
+              <p className="m-0 text-[8px] font-semibold tracking-[0.12em] text-cyan-300/75">현재</p>
               <p className="m-0 mt-0.5 flex items-center justify-end gap-2">
                 <span className="relative inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center">
                   <span

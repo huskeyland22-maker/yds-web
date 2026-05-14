@@ -1098,40 +1098,40 @@ function App() {
     const asOfDateLabel = last?.ts ? String(last.ts).slice(0, 10) : "—"
 
     let feedKind = "confirmed"
-    let feedLabel = "CONFIRMED"
-    let sourceLine = "Source: Confirmed Close"
+    let feedLabel = "확정"
+    let sourceLine = "데이터 기준 · 확정 종가"
 
     if (panicData && (panicData.isStale === true || panicData.__isStale === true)) {
       feedKind = "delayed"
-      feedLabel = "DELAYED"
-      sourceLine = "Source: Stale snapshot"
+      feedLabel = "지연"
+      sourceLine = "데이터 기준 · 스냅샷 지연"
     } else if (panicData?.updatedAt) {
       const t = new Date(panicData.updatedAt).getTime()
       if (Number.isFinite(t)) {
         const ageMin = (Date.now() - t) / 60000
         if (ageMin < 4) {
           feedKind = "live"
-          feedLabel = "LIVE"
-          sourceLine = "Source: Live refresh"
+          feedLabel = "실시간"
+          sourceLine = "데이터 기준 · 실시간 갱신"
         } else if (ageMin > 36 * 60) {
           feedKind = "delayed"
-          feedLabel = "DELAYED"
-          sourceLine = "Source: Delayed file"
+          feedLabel = "지연"
+          sourceLine = "데이터 기준 · 파일 지연"
         }
       }
     }
 
-    let updatedLine = "Updated —"
+    let updatedLine = "업데이트 —"
     if (panicData?.updatedAt) {
       const d = new Date(panicData.updatedAt)
       if (!Number.isNaN(d.getTime())) {
-        const hh = d.toLocaleString("en-GB", {
+        const hh = d.toLocaleString("ko-KR", {
           timeZone: "Asia/Seoul",
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
         })
-        updatedLine = `Updated ${hh} KST`
+        updatedLine = `업데이트 ${hh} (KST)`
       }
     }
 
@@ -1151,7 +1151,7 @@ function App() {
       <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] lg:h-[100dvh] lg:w-[17rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:pt-[env(safe-area-inset-top)] lg:pb-[env(safe-area-inset-bottom)] xl:w-[18rem]">
         <div className="shrink-0 px-4 pb-3 pt-3 lg:border-b lg:border-white/[0.06] lg:px-5 lg:pb-4 lg:pt-4">
           <p className="m-0 font-display text-[1.15rem] font-semibold leading-none tracking-tight text-slate-50">Y&apos;ds</p>
-          <p className="m-0 mt-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500">Macro Terminal</p>
+          <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.14em] text-slate-500">매크로 터미널</p>
         </div>
         <nav
           className="flex min-h-[48px] flex-1 flex-row items-stretch gap-0.5 overflow-x-auto px-1 py-2 lg:flex-col lg:gap-1 lg:overflow-x-visible lg:px-3 lg:py-3"
@@ -1184,37 +1184,41 @@ function App() {
           ))}
         </nav>
         <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-4 lg:pb-5 lg:pt-4">
-          <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Market status</p>
-          <dl className="m-0 mt-3 space-y-2 font-mono text-[10px] leading-snug">
+          <p className="m-0 text-[9px] font-semibold tracking-[0.12em] text-slate-500">시장 상태</p>
+          <dl className="m-0 mt-3 space-y-2 text-[10px] leading-snug sm:text-[11px]">
             <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-              <dt className="text-slate-500">Risk appetite</dt>
+              <dt className="shrink-0 text-slate-500">위험 선호</dt>
               <dd
                 className={
                   sidebarPulse.riskAppetite === "ON"
-                    ? "text-emerald-300/95"
+                    ? "text-right font-medium text-emerald-300/95"
                     : sidebarPulse.riskAppetite === "OFF"
-                      ? "text-rose-300/90"
-                      : "text-amber-200/85"
+                      ? "text-right font-medium text-rose-300/90"
+                      : "text-right text-amber-200/85"
                 }
               >
-                {sidebarPulse.riskAppetite}
+                {sidebarPulse.riskAppetite === "ON"
+                  ? "선호 우위"
+                  : sidebarPulse.riskAppetite === "OFF"
+                    ? "회피 우위"
+                    : sidebarPulse.riskAppetite}
               </dd>
             </div>
             <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-              <dt className="text-slate-500">Market mood</dt>
-              <dd className="text-slate-200">{sidebarPulse.marketMood}</dd>
+              <dt className="shrink-0 text-slate-500">시장 분위기</dt>
+              <dd className="text-right text-slate-200">{sidebarPulse.marketMood}</dd>
             </div>
             <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-              <dt className="text-slate-500">Leading</dt>
+              <dt className="shrink-0 text-slate-500">주도 섹터</dt>
               <dd className="max-w-[9rem] truncate text-right text-slate-200">{sidebarPulse.leadingSector}</dd>
             </div>
             <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-              <dt className="text-slate-500">Volatility</dt>
-              <dd className="text-slate-200">{sidebarPulse.volatility}</dd>
+              <dt className="shrink-0 text-slate-500">변동성</dt>
+              <dd className="text-right text-slate-200">{sidebarPulse.volatility}</dd>
             </div>
             <div className="flex justify-between gap-2 pt-0.5">
-              <dt className="text-slate-500">Cycle</dt>
-              <dd className="text-indigo-200/90">{sidebarPulse.cycleStage}</dd>
+              <dt className="shrink-0 text-slate-500">시장 사이클</dt>
+              <dd className="text-right text-indigo-200/90">{sidebarPulse.cycleStage}</dd>
             </div>
           </dl>
           <p className="m-0 mt-3 font-mono text-[9px] leading-relaxed text-slate-600">
@@ -1304,7 +1308,7 @@ function App() {
                     <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
                       tier="tactical"
-                      tierLabel="TACTICAL · 단기"
+                      tierLabel="단기 전략"
                       state={tacticalView.state}
                       action={tacticalView.action}
                       hint="단기 지표는 진입 방아쇠(Trigger)로 사용합니다."
@@ -1319,7 +1323,7 @@ function App() {
                     />
                     <MacroCycleTierCard
                       tier="strategic"
-                      tierLabel="STRATEGIC · 중기"
+                      tierLabel="중기 전략"
                       state={strategicView.state}
                       action={strategicView.action}
                       hint="중기 지표는 비중·섹터 로테이션 기준선입니다."
@@ -1334,7 +1338,7 @@ function App() {
                     />
                     <MacroCycleTierCard
                       tier="macro"
-                      tierLabel="MACRO · 장기"
+                      tierLabel="장기 전략"
                       state={macroView.state}
                       action={macroView.action}
                       hint="장기 지표는 꼬리·신용·구조 스트레스를 봅니다."

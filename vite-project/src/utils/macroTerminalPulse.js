@@ -20,12 +20,12 @@ export function buildMarketSidebarPulse(panicData, cycleStage) {
 
   let marketMood = "—"
   if (Number.isFinite(fg)) {
-    marketMood = fg >= 62 ? "Positive" : fg <= 38 ? "Defensive" : "Neutral"
+    marketMood = fg >= 62 ? "확장" : fg <= 38 ? "방어" : "중립"
   }
 
   let volatility = "—"
   if (Number.isFinite(vix)) {
-    volatility = vix < 16 ? "Muted" : vix > 22 ? "Elevated" : "Stable"
+    volatility = vix < 16 ? "낮음" : vix > 22 ? "확대" : "안정"
   }
 
   return {
