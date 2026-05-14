@@ -258,6 +258,18 @@ export async function evictStaleBuildAndReload(reason, latestMeta) {
     }
   }
 
+  if (String(reason || "").includes("stale-panic")) {
+    try {
+      const raw = safeRead("localStorage", "yds-panic-main-v2")
+      if (raw) {
+        const p = JSON.parse(raw)
+        if (!p || p.isManual !== true) safeRemove("localStorage", "yds-panic-main-v2")
+      }
+    } catch {
+      safeRemove("localStorage", "yds-panic-main-v2")
+    }
+  }
+
   window.location.replace(buildCacheBustUrl(reason || "stale-build"))
   return true
 }

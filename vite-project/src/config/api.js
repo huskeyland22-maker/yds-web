@@ -97,23 +97,21 @@ function normalizePanicPayload(data) {
 
 export async function fetchPanicDataJson(options = {}) {
   const debugLog = options.debugLog !== false
+  /** 허브가 켜진 배포는 Render 레거시로 폴백하지 않음 — 구형 샘플·기기 불일치 방지 */
   if (isPanicHubEnabled()) {
-    try {
-      const hubData = await fetchPanicHubLatest({ debugLog })
-      if (validatePanicData(hubData)) {
-        const enriched = {
-          ...hubData,
-          __fetchSource: "HUB",
-          __fetchUrl: hubData.__fetchUrl,
-          __fetchedAt: Date.now(),
-          __isStale: false,
-        }
-        if (debugLog) console.log("[BOOT] panic hub", { updatedAt: enriched?.updatedAt ?? null })
-        return enriched
-      }
-    } catch (err) {
-      if (debugLog) console.warn("[BOOT] panic hub unavailable, falling back", err)
+    const hubData = await fetchPanicHubLatest({ debugLog })
+    if (!validatePanicData(hubData)) {
+      throw new Error("hub_payload_stale_or_invalid")
     }
+    const enriched = {
+      ...hubData,
+      __fetchSource: "HUB",
+      __fetchUrl: hubData.__fetchUrl,
+      __fetchedAt: Date.now(),
+      __isStale: false,
+    }
+    if (debugLog) console.log("[BOOT] panic hub", { updatedAt: enriched?.updatedAt ?? null })
+    return enriched
   }
   const urls = buildPanicDataUrls().map((u) => `${u}?t=${Date.now()}`)
   let lastError = null
@@ -143,7 +141,9 @@ export async function fetchPanicDataJson(options = {}) {
             updatedAt: data?.updatedAt ?? data?.updated_at ?? null,
           })
         }
-        if (!validatePanicData(enriched)) throw new Error("데이터 이상 감지: fallback 주입 없이 현재 상태 유지")
+        if (!validatePanicData(enriched)) {
+          throw new Error("PANIC_LEGACY_STALE_PAYLOAD")
+        }
         return enriched
       } catch (err) {
         lastError = err

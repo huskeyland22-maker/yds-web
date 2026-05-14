@@ -8,6 +8,7 @@ import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
 import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
+import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
@@ -1508,6 +1509,7 @@ function App() {
           {saveToast}
         </div>
       ) : null}
+      <PanicSyncDebugPanel />
     </div>
   )
 }

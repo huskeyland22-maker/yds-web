@@ -1,9 +1,10 @@
 import { create } from "zustand"
-import { fetchPanicDataJson } from "../config/api.js"
+import { fetchPanicDataJson, isPanicHubEnabled, submitManualPanicData } from "../config/api.js"
 import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
 import { getFinalScore } from "../utils/tradingScores.js"
-import { validatePanicData } from "../utils/validatePanicData.js"
+import { validatePanicData, isPanicBusinessDataStale } from "../utils/validatePanicData.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
+import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const CURRENT_SNAPSHOT_VERSION = 2
@@ -21,8 +22,17 @@ const AUTO_REFRESH_MS = PANIC_DATA_POLL_MS
 const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield", "gsBullBear"]
 const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
-let refreshTimer = null
-let fetchSeq = 0
+const HEAL_STALE_PANIC_SESSION_KEY = "yds-stale-panic-heal-once"
+
+async function maybeHealAfterStalePanicPayload(err) {
+  if (typeof window === "undefined") return
+  const msg = err instanceof Error ? err.message : String(err || "")
+  if (msg !== "hub_payload_stale_or_invalid" && msg !== "PANIC_LEGACY_STALE_PAYLOAD") return
+  if (sessionStorage.getItem(HEAL_STALE_PANIC_SESSION_KEY)) return
+  const meta = await fetchLatestBuildMeta().catch(() => null)
+  const reloaded = await evictStaleBuildAndReload("stale-panic-payload", meta)
+  if (reloaded) sessionStorage.setItem(HEAL_STALE_PANIC_SESSION_KEY, "1")
+}
 
 function stopRefreshTimer() {
   if (!refreshTimer) return
@@ -169,12 +179,33 @@ export const usePanicStore = create((set, get) => ({
   flowLogs: [],
   lastUpdateSource: "init",
   lastOverwriteAt: null,
+  lastPanicFetchAt: null,
+  lastPanicFetchUrl: null,
+  lastPanicFetchSource: null,
+  lastPanicPayloadUpdatedAt: null,
+  lastPanicFetchError: null,
+
+  savePanicMetricsHub: async (payload) => {
+    try {
+      const data = await submitManualPanicData(payload)
+      get().applyServerPanicSnapshot(data)
+      return { ok: true }
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error : new Error(String(error)) }
+    }
+  },
 
   initializePanicData: async () => {
     if (get().initialized) return
     const hydrationStart = typeof performance !== "undefined" ? performance.now() : Date.now()
     emitDebugEvent("HYDRATION_START", { source: "panicStore.initialize" })
-    const envelope = readMainEnvelope()
+    let envelope = readMainEnvelope()
+    if (isPanicHubEnabled() && envelope && !envelope.isManual) {
+      addFlow(set, "hub-skip-non-manual-local-cache")
+      clearMain()
+      clearLegacy()
+      envelope = null
+    }
     let fallbackManualEnvelope = null
     if (envelope && !isValidSnapshotShape(envelope)) {
       addFlow(set, "clear-invalid-schema-main", { reason: "version-or-shape-mismatch" })
@@ -234,7 +265,20 @@ export const usePanicStore = create((set, get) => ({
     let updated = false
     try {
       const data = await fetchPanicDataJson({ debugLog: false })
-      if (!validatePanicData(data)) return false
+      if (!validatePanicData(data)) {
+        addFlow(set, "reject-invalid-panic-after-fetch", { updatedAt: data?.updatedAt ?? null })
+        set({
+          lastPanicFetchAt: Date.now(),
+          lastPanicFetchUrl: data?.__fetchUrl ?? null,
+          lastPanicFetchSource: data?.__fetchSource ?? null,
+          lastPanicPayloadUpdatedAt: data?.updatedAt ?? null,
+          lastPanicFetchError: "validate_failed",
+        })
+        if (data && typeof data === "object" && isPanicBusinessDataStale(data)) {
+          void maybeHealAfterStalePanicPayload(new Error("PANIC_LEGACY_STALE_PAYLOAD"))
+        }
+        return false
+      }
       if (seq !== fetchSeq || (get().manualMode && !force)) {
         addFlow(set, "drop-stale-fetch", { source })
         return false
@@ -274,6 +318,13 @@ export const usePanicStore = create((set, get) => ({
       })
       if (mergedForLog) {
         updated = true
+        set({
+          lastPanicFetchAt: Date.now(),
+          lastPanicFetchUrl: data.__fetchUrl ?? null,
+          lastPanicFetchSource: data.__fetchSource ?? null,
+          lastPanicPayloadUpdatedAt: mergedForLog?.updatedAt ?? null,
+          lastPanicFetchError: null,
+        })
         addFlow(set, "set-from-fetch-merge", {
           source,
           updatedAt: mergedForLog?.updatedAt ?? null,
@@ -281,7 +332,10 @@ export const usePanicStore = create((set, get) => ({
         })
       }
     } catch (err) {
-      addFlow(set, "fetch-error-keep-state", { source, message: err instanceof Error ? err.message : String(err) })
+      const message = err instanceof Error ? err.message : String(err)
+      addFlow(set, "fetch-error-keep-state", { source, message })
+      set({ lastPanicFetchAt: Date.now(), lastPanicFetchError: message })
+      void maybeHealAfterStalePanicPayload(err)
       return false
     }
     return updated
@@ -301,7 +355,15 @@ export const usePanicStore = create((set, get) => ({
       // ignore
     }
     writeMain(next, false)
-    set({ panicData: next, manualMode: false })
+    set({
+      panicData: next,
+      manualMode: false,
+      lastPanicFetchAt: Date.now(),
+      lastPanicFetchUrl: null,
+      lastPanicFetchSource: "SERVER_SUBMIT",
+      lastPanicPayloadUpdatedAt: next.updatedAt ?? null,
+      lastPanicFetchError: null,
+    })
     addFlow(set, "set-from-server-submit", { updatedAt: next.updatedAt ?? null })
     get().startAutoRefresh()
   },
