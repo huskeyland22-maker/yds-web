@@ -1,3 +1,5 @@
+import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
+
 /**
  * Phase-1 stock engine: GET /api/stock-indicators
  * (KIS 일봉 우선, 미설정 시 Yahoo 일봉 폴백 → RSI·MACD·이평 등).
@@ -22,10 +24,8 @@ export async function fetchStockIndicators({ code, name, signal: userSignal } = 
   }
 
   try {
-    const res = await fetch(`/api/stock-indicators?${qs.toString()}`, {
-      method: "GET",
-      cache: "no-store",
-      headers: { Accept: "application/json" },
+    const res = await fetch(withNoStoreQuery(`/api/stock-indicators?${qs.toString()}`), {
+      ...LIVE_JSON_GET_INIT,
       signal: ctrl.signal,
     })
     const body = await res.json().catch(() => ({}))

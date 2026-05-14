@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { fetchMarketData } from "../config/api.js"
+import { LIVE_POST_JSON_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import {
   formatAgeKorean,
   formatNySessionDate,
@@ -87,10 +88,8 @@ export default function OvernightUsBriefing({ panicData = null }) {
             composite: desk?.composite ?? null,
             updatedAt: data?.updatedAt ?? null,
           }
-          const res = await fetch("/api/macro-briefing-ai", {
-            method: "POST",
-            headers: { Accept: "application/json", "Content-Type": "application/json" },
-            cache: "no-store",
+          const res = await fetch(withNoStoreQuery("/api/macro-briefing-ai"), {
+            ...LIVE_POST_JSON_INIT,
             body: JSON.stringify({ facts }),
           })
           const rawText = await res.text()

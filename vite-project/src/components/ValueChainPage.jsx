@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
+import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import { VALUE_CHAIN_SECTORS } from "../data/valueChainSectors.js"
 import { buildValueChainHeaderBundle } from "../utils/valueChainHero.js"
 import { buildTodaysKeySignal } from "../utils/macroTerminalPulse.js"
@@ -47,7 +48,7 @@ export default function ValueChainPage({ panicData, marketCycleStage }) {
 
   useEffect(() => {
     let cancelled = false
-    fetch("/value-chain-heat.json", { cache: "no-store" })
+    fetch(withNoStoreQuery("/value-chain-heat.json"), LIVE_JSON_GET_INIT)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data) => {
         if (cancelled) return

@@ -41,6 +41,7 @@ function htmlBuildIdPlugin() {
 }
 
 // https://vite.dev/config/
+// Network-first app: only hashed /assets/* are long-cache immutable; never add Workbox precache for JSON/API.
 export default defineConfig({
   define: {
     "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(BUILD_ID),

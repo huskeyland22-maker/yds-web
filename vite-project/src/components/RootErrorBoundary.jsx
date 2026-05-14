@@ -7,6 +7,16 @@ import { Component } from "react"
 export default class RootErrorBoundary extends Component {
   state = { error: null }
 
+  clearCacheAndReload = () => {
+    try {
+      const u = new URL(window.location.href)
+      u.searchParams.set("reset-cache", "true")
+      window.location.href = u.toString()
+    } catch {
+      window.location.reload()
+    }
+  }
+
   static getDerivedStateFromError(err) {
     return { error: err instanceof Error ? err : new Error(String(err)) }
   }
@@ -29,13 +39,22 @@ export default class RootErrorBoundary extends Component {
           <pre className="mt-4 max-h-40 overflow-auto rounded-md border border-white/10 bg-black/40 p-3 font-mono text-[11px] text-rose-200/90">
             {error.message}
           </pre>
-          <button
-            type="button"
-            className="mt-5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 hover:bg-cyan-500/20"
-            onClick={() => window.location.reload()}
-          >
-            새로고침
-          </button>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 hover:bg-cyan-500/20"
+              onClick={() => window.location.reload()}
+            >
+              새로고침
+            </button>
+            <button
+              type="button"
+              className="rounded-lg border border-violet-500/35 bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-100 hover:bg-violet-500/20"
+              onClick={this.clearCacheAndReload}
+            >
+              캐시 초기화 후 다시 로드
+            </button>
+          </div>
         </div>
       </div>
     )

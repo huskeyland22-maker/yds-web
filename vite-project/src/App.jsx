@@ -4,6 +4,7 @@ import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchCycleMetricsHistory, isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
+import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
 import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
@@ -805,7 +806,7 @@ function App() {
     let cancelled = false
     async function loadBuildVersion() {
       try {
-        const res = await fetch(`/build-version.json?t=${Date.now()}`, { cache: "no-store" })
+        const res = await fetch(withNoStoreQuery("/build-version.json"), LIVE_JSON_GET_INIT)
         if (!res.ok) return
         const json = await res.json()
         if (!cancelled && typeof json?.version === "string" && json.version) {
@@ -1215,8 +1216,9 @@ function App() {
                       updatedLine={cycleDeskMeta.updatedLine}
                     />
                   </SectionErrorBoundary>
-                  <SectorFlowStrip />
-                  <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+                  <SectionErrorBoundary label="사이클 플로우·매크로 티어">
+                    <SectorFlowStrip />
+                    <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
                       tier="tactical"
                       tierLabel="TACTICAL · 단기"
@@ -1263,10 +1265,18 @@ function App() {
                       {...cycleDeskMeta}
                     />
                   </section>
+                  </SectionErrorBoundary>
                 </div>
               }
             />
-            <Route path="/value-chain" element={<ValueChainPage panicData={panicData} marketCycleStage={marketCycleStage} />} />
+            <Route
+              path="/value-chain"
+              element={
+                <SectionErrorBoundary label="코리아 밸류체인">
+                  <ValueChainPage panicData={panicData} marketCycleStage={marketCycleStage} />
+                </SectionErrorBoundary>
+              }
+            />
             <Route
               path="/timing"
               element={

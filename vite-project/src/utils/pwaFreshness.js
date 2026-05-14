@@ -1,20 +1,19 @@
 // -----------------------------------------------------------------------------
-// PWA freshness module
+// PWA freshness — network-first / realtime-first (no offline-first data SW)
 //
-// On PWA boot (and on every visibility/focus/pageshow event after that) we:
-//   1) read the build id baked into the HTML  (<meta name="app-build-id">)
-//   2) fetch /build-version.json with no-store
-//   3) if they disagree, or the locally remembered build differs, we
-//        a) unregister every Service Worker
-//        b) delete every Cache Storage entry
-//        c) remove old build-scoped localStorage keys
-//        d) force a hard reload with a cache-busting query string
+// Boot + lifecycle:
+//   1) read build id from HTML (<meta name="app-build-id">)
+//   2) fetch /build-version.json via `liveDataFetch` (no-store + bust query)
+//   3) on mismatch: unregister all SW → clear Cache Storage → purge build-scoped LS → hard reload
 //
-// The module is imported from both the index.html boot loader (so the gate
-// runs before the main JS bundle is fetched) and main.jsx (lifecycle poller +
-// chunk-load failure recovery). All install* functions are idempotent so the
-// double import is safe.
+// Architecture: hashed `/assets/*` only are long-lived (Vite); HTML/JSON/API are never SW-cached.
+// iOS standalone: optional one-shot Cache Storage sweep after SW unregister (`sweepIosStandaloneCachesOnce`).
+// Future Capacitor WebView: keep one origin; do not add a second precache SW for market data.
+//
+// Imported from index.html boot (before main bundle) and main.jsx — idempotent installs.
 // -----------------------------------------------------------------------------
+
+import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 
 const BUILD_VERSION_ENDPOINT = "/build-version.json"
 const BUILD_ID_KEY = "yds-build-id"
@@ -265,14 +264,10 @@ export async function evictStaleBuildAndReload(reason, latestMeta) {
 
 export async function fetchLatestBuildMeta() {
   try {
-    const res = await fetch(`${BUILD_VERSION_ENDPOINT}?t=${Date.now()}`, {
-      cache: "no-store",
+    const res = await fetch(withNoStoreQuery(BUILD_VERSION_ENDPOINT), {
+      ...LIVE_JSON_GET_INIT,
       credentials: "omit",
       mode: "cors",
-      headers: {
-        Pragma: "no-cache",
-        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
-      },
     })
     if (!res.ok) return null
     const json = await res.json()

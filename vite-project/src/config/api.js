@@ -1,14 +1,5 @@
 import { validatePanicData } from "../utils/validatePanicData.js"
-
-const fetchPanicJsonInit = {
-  method: "GET",
-  headers: {
-    Accept: "application/json",
-    Pragma: "no-cache",
-    "Cache-Control": "no-cache, no-store, must-revalidate",
-  },
-  cache: "no-store",
-}
+import { LIVE_JSON_GET_INIT, LIVE_POST_JSON_INIT, withNoStoreQuery } from "./liveDataFetch.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -29,8 +20,8 @@ export function isPanicHubEnabled() {
 
 export async function fetchPanicHubLatest(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = `/api/panic/latest?t=${Date.now()}`
-  const res = await fetch(url, { ...fetchPanicJsonInit, cache: "no-store" })
+  const url = withNoStoreQuery("/api/panic/latest")
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (debugLog) console.log("📡 panic hub latest", res.status, url)
   if (!res.ok) throw new Error(`hub HTTP ${res.status}`)
   const json = await res.json()
@@ -65,8 +56,8 @@ export function getCycleMetricsHistoryUrlForDisplay() {
 
 export async function fetchCycleMetricsHistory(options = {}) {
   const debugLog = Boolean(options.debugLog)
-  const url = `${getCycleMetricsHistoryUrlForDisplay()}?t=${Date.now()}`
-  const res = await fetch(url, fetchPanicJsonInit)
+  const url = withNoStoreQuery(getCycleMetricsHistoryUrlForDisplay())
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (debugLog) console.log("cycle-metrics-history 응답:", res.status)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()
@@ -131,7 +122,7 @@ export async function fetchPanicDataJson(options = {}) {
     for (let attempt = 1; attempt <= PANIC_FETCH_RETRIES; attempt += 1) {
       try {
         if (debugLog) console.log("📡 API 요청 시작", { url, attempt, mode: "network-first" })
-        const res = await fetch(url, fetchPanicJsonInit)
+        const res = await fetch(url, LIVE_JSON_GET_INIT)
         if (debugLog) console.log("✅ 응답 상태:", res.status)
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const raw = await res.json()
@@ -169,8 +160,8 @@ export async function fetchPanicDataJson(options = {}) {
 
 export async function fetchHistorySample(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = `/history.json?t=${Date.now()}`
-  const res = await fetch(url, fetchPanicJsonInit)
+  const url = withNoStoreQuery("/history.json")
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (debugLog) console.log("✅ history 응답 상태:", res.status)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()
@@ -180,8 +171,8 @@ export async function fetchHistorySample(options = {}) {
 
 export async function fetchOptimizeResult(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = `/optimize.json?t=${Date.now()}`
-  const res = await fetch(url, fetchPanicJsonInit)
+  const url = withNoStoreQuery("/optimize.json")
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (debugLog) console.log("🤖 optimize 상태:", res.status)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
@@ -213,12 +204,10 @@ function normalizeManualPayload(data) {
 
 export async function submitManualPanicData(inputData) {
   if (isPanicHubEnabled()) {
-    const url = `/api/panic/update?t=${Date.now()}`
+    const url = withNoStoreQuery("/api/panic/update")
     const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      ...LIVE_POST_JSON_INIT,
       body: JSON.stringify(inputData),
-      cache: "no-store",
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const out = await res.json()
@@ -226,11 +215,9 @@ export async function submitManualPanicData(inputData) {
     return normalizeManualPayload(out.data)
   }
   const base = getManualApiBase()
-  const res = await fetch(`${base}/update`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+  const res = await fetch(withNoStoreQuery(`${base}/update`), {
+    ...LIVE_POST_JSON_INIT,
     body: JSON.stringify(inputData),
-    cache: "no-store",
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const out = await res.json()
@@ -239,11 +226,9 @@ export async function submitManualPanicData(inputData) {
 
 export async function submitManualTextData(rawText) {
   const base = getManualApiBase()
-  const res = await fetch(`${base}/update-text`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+  const res = await fetch(withNoStoreQuery(`${base}/update-text`), {
+    ...LIVE_POST_JSON_INIT,
     body: JSON.stringify({ text: rawText }),
-    cache: "no-store",
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const out = await res.json()
@@ -251,11 +236,7 @@ export async function submitManualTextData(rawText) {
 }
 
 export async function fetchMarketData() {
-  const res = await fetch("/api/market-data", {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  })
+  const res = await fetch(withNoStoreQuery("/api/market-data"), LIVE_JSON_GET_INIT)
   if (!res.ok) {
     throw new Error(`market-data HTTP ${res.status}`)
   }
