@@ -24,6 +24,11 @@ const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
 const HEAL_STALE_PANIC_SESSION_KEY = "yds-stale-panic-heal-once"
 
+/** 패닉 자동 폴링 interval id — zustand 스토어 외부 단일 타이머 */
+let refreshTimer = null
+/** fetchPanicData 동시 호출 시 stale 응답 드롭용 */
+let fetchSeq = 0
+
 async function maybeHealAfterStalePanicPayload(err) {
   if (typeof window === "undefined") return
   const msg = err instanceof Error ? err.message : String(err || "")
@@ -35,8 +40,12 @@ async function maybeHealAfterStalePanicPayload(err) {
 }
 
 function stopRefreshTimer() {
-  if (!refreshTimer) return
-  window.clearInterval(refreshTimer)
+  if (refreshTimer == null) return
+  try {
+    window.clearInterval(refreshTimer)
+  } catch {
+    // ignore
+  }
   refreshTimer = null
 }
 
@@ -414,15 +423,19 @@ export const usePanicStore = create((set, get) => ({
       addFlow(set, "skip-auto-refresh-manual")
       return
     }
-    if (refreshTimer) return
-    refreshTimer = window.setInterval(() => {
-      void get().fetchPanicData("interval-fetch")
-    }, AUTO_REFRESH_MS)
+    if (refreshTimer != null) return
+    try {
+      refreshTimer = window.setInterval(() => {
+        void get().fetchPanicData("interval-fetch")
+      }, AUTO_REFRESH_MS)
+    } catch {
+      refreshTimer = null
+    }
     addFlow(set, "start-auto-refresh")
   },
 
   stopAutoRefresh: () => {
-    if (!refreshTimer) return
+    if (refreshTimer == null) return
     stopRefreshTimer()
     addFlow(set, "stop-auto-refresh")
   },
