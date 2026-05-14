@@ -6,7 +6,6 @@ import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { fetchCycleMetricsHistory, isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
-import OvernightUsBriefing from "./components/OvernightUsBriefing.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
@@ -15,6 +14,8 @@ import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
 import { buildCycleDeskHeroContext } from "./utils/cycleDeskHero.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
+
+/* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
 const MENU = [
   { label: "시장 사이클", path: "/cycle", active: true },
@@ -640,7 +641,7 @@ function App() {
 
     setIsSaving(true)
     try {
-      if (isPanicHubEnabled()) {
+      if (isPanicHubEnabled() && typeof savePanicMetricsHub === "function") {
         const result = await savePanicMetricsHub(normalizedParsedData)
         if (!result?.ok) {
           const msg = result?.error instanceof Error ? result.error.message : String(result?.error ?? "저장 실패")
@@ -1202,11 +1203,13 @@ function App() {
               path="/cycle"
               element={
                 <div className="space-y-5">
-                  <CycleDeskHero
-                    context={cycleHeroContext}
-                    asOfDateLabel={cycleDeskMeta.asOfDateLabel}
-                    updatedLine={cycleDeskMeta.updatedLine}
-                  />
+                  <SectionErrorBoundary label="사이클 데스크 헤더">
+                    <CycleDeskHero
+                      context={cycleHeroContext}
+                      asOfDateLabel={cycleDeskMeta.asOfDateLabel}
+                      updatedLine={cycleDeskMeta.updatedLine}
+                    />
+                  </SectionErrorBoundary>
                   <SectorFlowStrip />
                   <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
@@ -1255,9 +1258,6 @@ function App() {
                       {...cycleDeskMeta}
                     />
                   </section>
-                  <SectionErrorBoundary label="전일 미국장 매크로 브리핑">
-                    <OvernightUsBriefing panicData={panicData} />
-                  </SectionErrorBoundary>
                 </div>
               }
             />

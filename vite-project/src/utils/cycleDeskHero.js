@@ -17,6 +17,10 @@ function foreignFlowEnglish(panicData) {
  * @param {{ short: string; mid: string; long: string }} heroSummary
  */
 export function buildCycleDeskHeroContext(panicData, cycleStage, heroSummary) {
+  const hs =
+    heroSummary && typeof heroSummary === "object"
+      ? heroSummary
+      : { short: "—", mid: "—", long: "—", stage: cycleStage ?? "—" }
   const fg = Number(panicData?.fearGreed)
   const vix = Number(panicData?.vix)
   const pc = Number(panicData?.putCall)
@@ -59,9 +63,9 @@ export function buildCycleDeskHeroContext(panicData, cycleStage, heroSummary) {
     stageLabel: cycleStage,
     stageStyle,
     tierHints: {
-      tactical: heroSummary.short,
-      strategic: heroSummary.mid,
-      macro: heroSummary.long,
+      tactical: hs.short ?? "—",
+      strategic: hs.mid ?? "—",
+      macro: hs.long ?? "—",
     },
     flowBullets: flowBullets.slice(0, 4),
     keySignal: {
