@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { ColorType, LastPriceAnimationMode, createChart } from "lightweight-charts"
+import { ColorType, LastPriceAnimationMode, LineType, createChart } from "lightweight-charts"
 
 /** @param {string | null | undefined} dateRaw YYYYMMDD */
 function ymdToTime(dateRaw) {
@@ -114,22 +114,22 @@ function buildTrendSummary(bars) {
  */
 function prepareChartData(bars) {
   const vols = bars.map((b) => b.volume ?? 0)
-  /** @type {Array<{ time: string; open: number; high: number; low: number; close: number }>} */
-  const candles = []
+  /** @type {Array<{ time: string; value: number }>} */
+  const closes = []
   /** @type {Array<{ time: string; value: number }>} */
   const ma20d = []
   /** @type {Array<{ time: string; value: number }>} */
   const ma60d = []
   /** @type {Array<{ time: string; value: number; color: string }>} */
   const hist = []
-  /** @type {Map<string, { volume: number; changePct: number; dateLabel: string }>} */
+  /** @type {Map<string, { open: number; high: number; low: number; close: number; volume: number; changePct: number; dateLabel: string }>} */
   const meta = new Map()
 
   for (let i = 0; i < bars.length; i++) {
     const b = bars[i]
     const t = ymdToTime(b.date)
     if (!t) continue
-    candles.push({ time: t, open: b.open, high: b.high, low: b.low, close: b.close })
+    closes.push({ time: t, value: b.close })
     if (b.ma20 != null && Number.isFinite(b.ma20)) ma20d.push({ time: t, value: b.ma20 })
     if (b.ma60 != null && Number.isFinite(b.ma60)) ma60d.push({ time: t, value: b.ma60 })
 
@@ -143,20 +143,28 @@ function prepareChartData(bars) {
     const v = vols[i] || 0
     const spike = volSma > 0 && v >= volSma * 1.35
     const up = b.close >= b.open
-    let color = up ? "rgba(52,211,153,0.38)" : "rgba(251,113,133,0.38)"
-    if (spike) color = up ? "rgba(167,243,208,0.72)" : "rgba(254,202,202,0.68)"
+    let color = up ? "rgba(45,212,191,0.12)" : "rgba(244,63,94,0.12)"
+    if (spike) color = up ? "rgba(45,212,191,0.28)" : "rgba(244,63,94,0.26)"
     hist.push({ time: t, value: v, color })
 
     const prevClose = i > 0 ? bars[i - 1].close : b.close
     const chg = prevClose ? ((b.close - prevClose) / prevClose) * 100 : 0
-    meta.set(t, { volume: v, changePct: chg, dateLabel: formatDateLabel(b.date) })
+    meta.set(t, {
+      open: b.open,
+      high: b.high,
+      low: b.low,
+      close: b.close,
+      volume: v,
+      changePct: chg,
+      dateLabel: formatDateLabel(b.date),
+    })
   }
 
-  return { candles, ma20: ma20d, ma60: ma60d, volume: hist, meta }
+  return { closes, ma20: ma20d, ma60: ma60d, volume: hist, meta }
 }
 
 /**
- * 밸류체인 우측 패널 — TradingView 스타일 미니 캔들 + 20/60 MA + 거래량 (lightweight-charts).
+ * 밸류체인 우측 패널 — 프리미엄 라인+영역(종가 추세) · MA 오버레이 · 최소 거래량 (lightweight-charts).
  * @param {{ bars: Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>; className?: string }} props
  */
 export default function MiniDailyStockChart({ bars, className = "" }) {
@@ -204,7 +212,7 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
 
   useEffect(() => {
     const el = wrapRef.current
-    if (!el || chartPack.candles.length < 2) return undefined
+    if (!el || chartPack.closes.length < 2) return undefined
 
     const chart = createChart(el, {
       layout: {
@@ -248,65 +256,69 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
       localization: { locale: "ko-KR" },
     })
 
-    const candleSeries = chart.addCandlestickSeries({
-      upColor: "#34d399",
-      downColor: "#fb7185",
-      borderUpColor: "#6ee7b7",
-      borderDownColor: "#fda4af",
-      wickUpColor: "rgba(110,231,183,0.95)",
-      wickDownColor: "rgba(253,164,175,0.95)",
-      lastPriceAnimation: LastPriceAnimationMode.On,
-      priceLineVisible: true,
-      priceLineWidth: 2,
-      priceLineColor: "rgba(167,139,250,0.75)",
-      priceLineStyle: 2,
-      lastValueVisible: true,
-    })
-
-    const ma20Series = chart.addLineSeries({
-      color: "rgba(96,165,250,0.92)",
-      lineWidth: 1,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: true,
-    })
-    const ma60Series = chart.addLineSeries({
-      color: "rgba(148,163,184,0.45)",
-      lineWidth: 1,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
     const volumeSeries = chart.addHistogramSeries({
       priceFormat: { type: "volume" },
       priceScaleId: "",
       base: 0,
     })
 
-    candleSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.04, bottom: 0.3 },
+    const ma60Series = chart.addLineSeries({
+      color: "rgba(148,163,184,0.22)",
+      lineWidth: 1,
+      lineStyle: 2,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
     })
+
+    const ma20Series = chart.addLineSeries({
+      color: "rgba(56,189,248,0.28)",
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+
+    const priceSeries = chart.addAreaSeries({
+      lineColor: "#5eead4",
+      topColor: "rgba(94,234,212,0.42)",
+      bottomColor: "rgba(7,10,16,0)",
+      lineWidth: 2,
+      lineType: LineType.Curved,
+      lastPriceAnimation: LastPriceAnimationMode.Continuous,
+      priceLineVisible: true,
+      priceLineWidth: 1,
+      priceLineColor: "rgba(45,212,191,0.85)",
+      priceLineStyle: 2,
+      lastValueVisible: true,
+      crosshairMarkerVisible: true,
+      crosshairMarkerBorderColor: "rgba(236,254,255,0.95)",
+      crosshairMarkerBackgroundColor: "rgba(34,211,238,0.95)",
+    })
+
     volumeSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.68, bottom: 0 },
+      scaleMargins: { top: 0.94, bottom: 0 },
+    })
+    priceSeries.priceScale().applyOptions({
+      scaleMargins: { top: 0.06, bottom: 0.08 },
     })
 
-    candleSeries.setData(chartPack.candles)
-    ma20Series.setData(chartPack.ma20)
-    ma60Series.setData(chartPack.ma60)
     volumeSeries.setData(chartPack.volume)
+    ma60Series.setData(chartPack.ma60)
+    ma20Series.setData(chartPack.ma20)
+    priceSeries.setData(chartPack.closes)
 
-    const last = chartPack.candles[chartPack.candles.length - 1]
-    const prevC = chartPack.candles.length >= 2 ? chartPack.candles[chartPack.candles.length - 2] : null
-    if (last && prevC) {
-      const up = last.close >= last.open
-      candleSeries.setMarkers([
+    const last = chartPack.closes[chartPack.closes.length - 1]
+    if (last) {
+      priceSeries.setMarkers([
         {
           time: last.time,
-          position: up ? "aboveBar" : "belowBar",
-          color: up ? "rgba(52,211,153,0.95)" : "rgba(251,113,133,0.95)",
-          shape: up ? "arrowUp" : "arrowDown",
-          size: 1.45,
+          position: "inBar",
+          shape: "circle",
+          color: "#ecfeff",
+          size: 2.25,
+          borderColor: "#22d3ee",
+          borderWidth: 2,
         },
       ])
     }
@@ -316,8 +328,8 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
         setTooltip(null)
         return
       }
-      const data = param.seriesData.get(candleSeries)
-      if (!data || typeof data !== "object" || data.close == null) {
+      const data = param.seriesData.get(priceSeries)
+      if (!data || typeof data !== "object" || data.value == null) {
         setTooltip(null)
         return
       }
@@ -328,10 +340,10 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
         x: param.point.x,
         y: param.point.y,
         dateLabel: extra?.dateLabel ?? String(param.time),
-        open: data.open,
-        high: data.high,
-        low: data.low,
-        close: data.close,
+        open: extra?.open,
+        high: extra?.high,
+        low: extra?.low,
+        close: data.value,
         changePct,
         volume: extra?.volume ?? 0,
       })
@@ -420,8 +432,12 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
           ) : null}
         </div>
         <div className="flex flex-shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[9px] text-slate-500 md:justify-end">
+          <span className="inline-flex items-center gap-1.5 text-slate-600">
+            <span className="inline-block h-2 w-5 rounded-full bg-gradient-to-r from-teal-400/90 to-cyan-300/80 shadow-[0_0_10px_rgba(45,212,191,0.45)]" />
+            종가 흐름
+          </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-sky-400/90 shadow-[0_0_8px_rgba(56,189,248,0.45)]" />
+            <span className="inline-block h-2 w-2 rounded-full bg-sky-400/50 shadow-[0_0_6px_rgba(56,189,248,0.35)]" />
             MA20
           </span>
           <span className="inline-flex items-center gap-1.5">
@@ -469,28 +485,28 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
               top: Math.min(Math.max(tooltip.y + 8, 8), (wrapRef.current?.clientHeight ?? 400) - 150),
             }}
           >
-            <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-violet-300/85">
+            <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-cyan-300/85">
               {tooltip.dateLabel}
             </p>
-            <dl className="m-0 mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] tabular-nums">
-              <dt className="m-0 text-slate-500">O</dt>
-              <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.open)}</dd>
-              <dt className="m-0 text-slate-500">H</dt>
-              <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.high)}</dd>
-              <dt className="m-0 text-slate-500">L</dt>
-              <dd className="m-0 text-right font-medium text-slate-100">{fmtPrice(tooltip.low)}</dd>
-              <dt className="m-0 text-slate-500">C</dt>
-              <dd className="m-0 text-right font-semibold text-slate-50">{fmtPrice(tooltip.close)}</dd>
-              <dt className="m-0 text-slate-500">등락</dt>
-              <dd
-                className={`m-0 text-right font-semibold ${tooltip.changePct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"}`}
-              >
-                {tooltip.changePct >= 0 ? "+" : ""}
-                {tooltip.changePct.toFixed(2)}%
-              </dd>
-              <dt className="m-0 text-slate-500">Vol</dt>
-              <dd className="m-0 text-right font-medium text-violet-100/90">{fmtVol(tooltip.volume)}</dd>
-            </dl>
+            <p className="m-0 mt-1.5 font-mono text-xl font-semibold tabular-nums leading-none text-slate-50">
+              {fmtPrice(tooltip.close)}
+            </p>
+            <p
+              className={`m-0 mt-1 font-mono text-[12px] font-semibold tabular-nums ${
+                tooltip.changePct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
+              }`}
+            >
+              {tooltip.changePct >= 0 ? "+" : ""}
+              {tooltip.changePct.toFixed(2)}% <span className="text-[10px] font-medium text-slate-500">vs 전일</span>
+            </p>
+            {tooltip.high != null && tooltip.low != null ? (
+              <p className="m-0 mt-2 border-t border-white/[0.06] pt-2 font-mono text-[10px] text-slate-500">
+                Range {fmtPrice(tooltip.high)} — {fmtPrice(tooltip.low)}
+              </p>
+            ) : null}
+            <p className="m-0 mt-1.5 font-mono text-[10px] text-slate-500">
+              Vol <span className="text-violet-200/90">{fmtVol(tooltip.volume)}</span>
+            </p>
           </div>
         ) : null}
       </div>
