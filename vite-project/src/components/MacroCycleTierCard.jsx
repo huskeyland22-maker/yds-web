@@ -128,7 +128,7 @@ export default function MacroCycleTierCard({
       className="rounded-xl p-px [background:linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(15,23,42,0.4)_45%,rgba(15,23,42,0.15)_100%)]"
     >
       <div
-        className={`relative overflow-hidden rounded-[11px] bg-[#060910] transition-[box-shadow,transform] duration-300 ease-out hover:shadow-[0_28px_72px_rgba(0,0,0,0.58)] ${borderGlow}`}
+        className={`relative overflow-hidden rounded-[11px] bg-[#060910] transition-[box-shadow,transform,ring-color] duration-300 ease-out hover:shadow-[0_28px_72px_rgba(0,0,0,0.58)] hover:ring-1 hover:ring-cyan-400/12 ${borderGlow}`}
       >
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.035] mix-blend-overlay"
@@ -196,22 +196,19 @@ export default function MacroCycleTierCard({
           </section>
 
           <section className="px-3 pb-1 pt-3 sm:px-4">
-            <p className="m-0 mb-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">시계열</p>
+            <p className="m-0 mb-2 px-2 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">일별 흐름</p>
             {primaryS ? <MacroCycleLwChart rows={rows} primarySeries={primaryS} /> : null}
           </section>
 
           <footer className="border-t border-white/[0.05] px-5 py-4">
-            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">하단 해석</p>
-            <ul className="m-0 mt-2.5 list-none space-y-2 p-0">
-              {macroComments.map((line) => (
-                <li
-                  key={line}
-                  className="relative pl-3.5 text-[12px] leading-relaxed text-slate-400 before:absolute before:left-0 before:top-[0.55em] before:h-px before:w-2.5 before:bg-slate-600"
-                >
+            <p className="m-0 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">Desk note</p>
+            <div className="m-0 mt-2 space-y-1.5">
+              {(macroComments.length ? macroComments : ["데이터 보강 중"]).slice(0, 2).map((line) => (
+                <p key={line} className="m-0 text-[12px] leading-snug text-slate-500">
                   {line}
-                </li>
+                </p>
               ))}
-            </ul>
+            </div>
           </footer>
         </div>
       </div>
