@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
@@ -594,7 +595,7 @@ function App() {
   const startAutoRefresh = usePanicStore((s) => s.startAutoRefresh)
   const stopAutoRefresh = usePanicStore((s) => s.stopAutoRefresh)
   const syncOnAppResume = usePanicStore((s) => s.syncOnAppResume)
-  const [openInput, setOpenInput] = useState(false)
+  const [isInputPanelOpen, setIsInputPanelOpen] = useState(false)
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
   const [saveToast, setSaveToast] = useState("")
@@ -645,7 +646,7 @@ function App() {
   /** 패널을 열 때마다 빈 폼 — 이전 붙여넣기·parsed·preview·LS 드래프트 제거 */
   const openInputPanel = useCallback(() => {
     resetAiReportInput()
-    setOpenInput(true)
+    setIsInputPanelOpen(true)
     requestAnimationFrame(() => {
       try {
         textareaRef.current?.focus?.()
@@ -655,14 +656,23 @@ function App() {
     })
   }, [resetAiReportInput])
 
-  /** 배경·X 닫기 + 저장 성공 시 즉시 닫기(타이머 미사용 — 닫힘 누락 방지) */
+  /** 배경·X 닫기 + blur overlay·스크롤 잠금 해제(useEffect cleanup) + iOS 키보드 dismiss */
   const closeInputPanel = useCallback(() => {
-    setOpenInput(false)
+    try {
+      if (typeof document !== "undefined" && document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur()
+      }
+    } catch {
+      // ignore
+    }
     try {
       textareaRef.current?.blur?.()
     } catch {
       // ignore
     }
+    flushSync(() => {
+      setIsInputPanelOpen(false)
+    })
   }, [])
 
   const pulseSaveFeedback = () => {
@@ -702,24 +712,42 @@ function App() {
     }
 
     setIsSaving(true)
+    let usedHubSavePath = false
+    let saveSucceeded = false
     try {
       if (isPanicHubEnabled() && typeof savePanicMetricsHub === "function") {
+        usedHubSavePath = true
         const result = await savePanicMetricsHub(normalizedParsedData)
         if (!result?.ok) {
           const msg = result?.error instanceof Error ? result.error.message : String(result?.error ?? "저장 실패")
           setInputError(msg)
-          return
+        } else {
+          saveSucceeded = true
         }
+      } else {
+        try {
+          const serverData = await submitManualPanicData(normalizedParsedData)
+          applyServerPanicSnapshot(serverData)
+          saveSucceeded = true
+        } catch (err) {
+          console.error("패닉지수 서버 저장 실패", err)
+          setInputError(err instanceof Error ? err.message : "저장에 실패했습니다")
+        }
+      }
+
+      if (saveSucceeded) {
+        console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()
         pulseSaveFeedback()
         setSaveToast("Market metrics updated")
+
         if (db) {
           void (async () => {
             try {
               const reportId = String(Date.now())
               await setDoc(doc(db, "panic_reports", reportId), {
                 ...normalizedParsedData,
-                source: "panic_hub",
+                source: usedHubSavePath ? "panic_hub" : "ai_report",
                 createdAt: serverTimestamp(),
               })
             } catch (fireErr) {
@@ -727,50 +755,17 @@ function App() {
             }
           })()
         }
+
         closeInputPanel()
+        console.log("PANEL_CLOSED")
+
         void usePanicStore
           .getState()
-          .fetchPanicData("hub-post-save", { force: true })
+          .fetchPanicData(usedHubSavePath ? "hub-post-save" : "manual-api-post-save", { force: true })
           .catch((e) => {
-            console.warn("[panic] hub post-save refresh", e)
+            console.warn("[panic] post-save refresh", e)
           })
-        return
       }
-
-      let serverData
-      try {
-        serverData = await submitManualPanicData(normalizedParsedData)
-      } catch (err) {
-        console.error("패닉지수 서버 저장 실패", err)
-        setInputError(err instanceof Error ? err.message : "저장에 실패했습니다")
-        return
-      }
-      applyServerPanicSnapshot(serverData)
-      resetAiReportInput()
-      pulseSaveFeedback()
-      setSaveToast("Market metrics updated")
-
-      if (db) {
-        void (async () => {
-          try {
-            const reportId = String(Date.now())
-            await setDoc(doc(db, "panic_reports", reportId), {
-              ...normalizedParsedData,
-              source: "ai_report",
-              createdAt: serverTimestamp(),
-            })
-          } catch (fireErr) {
-            console.error("panic_reports 저장 실패", fireErr)
-          }
-        })()
-      }
-      closeInputPanel()
-      void usePanicStore
-        .getState()
-        .fetchPanicData("manual-api-post-save", { force: true })
-        .catch((e) => {
-          console.warn("[panic] manual-api post-save refresh", e)
-        })
     } catch (err) {
       console.error(err)
     } finally {
@@ -914,13 +909,13 @@ function App() {
   }, [saveToast])
 
   useEffect(() => {
-    if (!openInput || typeof document === "undefined") return
+    if (!isInputPanelOpen || typeof document === "undefined") return
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
     return () => {
       document.body.style.overflow = prev
     }
-  }, [openInput])
+  }, [isInputPanelOpen])
 
 
   const login = async () => {
@@ -1417,7 +1412,7 @@ function App() {
           </Routes>
         </main>
       </div>
-      {!openInput ? (
+      {!isInputPanelOpen ? (
         <button
           type="button"
           onClick={openInputPanel}
@@ -1432,7 +1427,7 @@ function App() {
           <span>AI 리포트</span>
         </button>
       ) : null}
-      {openInput ? (
+      {isInputPanelOpen ? (
         <>
           <button
             type="button"
