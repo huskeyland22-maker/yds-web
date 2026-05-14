@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LogIn } from "lucide-react"
+import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
@@ -596,14 +596,10 @@ function App() {
   const parseResult = useMemo(() => parseTextPanicData(inputText), [inputText])
   const parsedData = parseResult.data
   const missingFields = useMemo(() => METRIC_DEFS.filter(({ key }) => parsedData[key] === null).map(({ key }) => key), [parsedData])
-  const previewTone = useMemo(() => {
-    const { vix, fearGreed } = parsedData
-    if (!Number.isFinite(vix) || !Number.isFinite(fearGreed)) return "분석 대기"
-    if (fearGreed <= 25 || vix >= 30) return "패닉"
-    if (fearGreed <= 45 || vix >= 22) return "관망"
-    if (fearGreed <= 70 || vix >= 16) return "중립"
-    return "공격"
-  }, [parsedData])
+  const parsedFieldCount = useMemo(
+    () => METRIC_DEFS.filter(({ key }) => parsedData[key] !== null).length,
+    [parsedData],
+  )
 
   const submitInput = () => {
     const { vix, vxn, fearGreed, bofa, move, skew, putCall, highYield, gsBullBear } = parsedData
@@ -1335,119 +1331,148 @@ function App() {
         </button>
       ) : null}
       {openInput ? (
-      <div
-        className="fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] w-[360px] max-w-[100vw] flex-col bg-[#111827] p-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[-6px_0_20px_rgba(0,0,0,0.6)] transition-transform duration-300 translate-x-0"
-        style={{
-          background: "linear-gradient(180deg, #0f172a, #020617)",
-          pointerEvents: "auto",
-        }}
-      >
-        <div className="mb-4 flex items-start justify-between gap-2 rounded-2xl border border-cyan-500/10 bg-[#0b1220] p-3">
-          <div className="min-w-0">
-            <h3 style={{ color: "#c4b5fd", margin: 0, marginBottom: "5px" }}>패닉지수 텍스트 붙여넣기</h3>
-            <p style={{ fontSize: "12px", color: "#64748b", margin: 0 }}>표 형태 텍스트를 그대로 붙여넣으면 자동으로 수치를 추출합니다.</p>
-          </div>
+        <>
           <button
             type="button"
+            aria-label="입력 패널 배경 닫기"
+            className="fixed inset-0 z-[9998] bg-slate-950/55 backdrop-blur-[2px] transition-opacity"
             onClick={() => setOpenInput(false)}
-            aria-label="입력 창 닫기"
-            className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-slate-300 transition hover:border-white/[0.16] hover:bg-white/[0.08] hover:text-white"
-          >
-            <span aria-hidden="true" className="text-base leading-none">×</span>
-          </button>
-        </div>
-        <textarea
-          value={inputText}
-          onChange={(e) => {
-            setInputText(e.target.value)
-            if (inputError) setInputError("")
-          }}
-          placeholder={PANIC_TEXT_PLACEHOLDER}
-          style={{
-            flex: 1,
-            background: "#020617",
-            color: "#e2e8f0",
-            border: "1px solid #1e293b",
-            borderRadius: "10px",
-            padding: "14px",
-            fontFamily: "Inter, Pretendard, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
-            fontSize: "13px",
-            lineHeight: "1.5",
-            outline: "none",
-            boxShadow: "inset 0 0 10px rgba(0,0,0,0.4)",
-          }}
-        />
-        {inputError ? (
-          <div className="mt-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
-            {inputError}
-          </div>
-        ) : null}
-        <div className="mt-3 rounded-2xl border border-cyan-500/10 bg-[#0b1220] p-3 text-xs text-gray-300">
-          <p className="mb-2 text-cyan-200">자동 분석 미리보기: {previewTone}</p>
-          <div className="space-y-1">
-            {METRIC_DEFS.map(({ key, label }) => (
-              <div key={key}>
-                {label}: {parsedData[key] ?? "-"}
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 space-y-1 text-[11px]">
-            {METRIC_DEFS.map(({ key, label }) => (
-              <p key={`debug-${key}`}>
-                {parsedData[key] !== null ? `✅ ${label}: ${parsedData[key]}` : `❌ ${label} not found`}
-              </p>
-            ))}
-          </div>
-          {missingFields.length > 0 ? (
-            <div className="mt-2 space-y-1 text-amber-300">
-              {missingFields.map((name) => (
-                <p key={name}>⚠️ {name} 값을 찾지 못했습니다</p>
-              ))}
-            </div>
-          ) : null}
-        </div>
-        <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
-          <button
-            type="button"
-            onClick={submitInput}
+          />
+          <div
+            className="fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:pl-4 sm:pr-4"
             style={{
-              flex: 1,
-              padding: "10px",
-              borderRadius: "8px",
-              background: "#7c3aed",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-              pointerEvents: "auto",
+              background: "linear-gradient(165deg, rgba(15,23,42,0.94) 0%, rgba(2,6,23,0.97) 45%, rgba(2,6,23,0.99) 100%)",
+              boxShadow: "inset 1px 0 0 rgba(139,92,246,0.12), -16px 0 48px rgba(0,0,0,0.5)",
             }}
-            className="cursor-pointer pointer-events-auto"
           >
-            저장
-          </button>
-          {manualMode ? (
-            <button
-              type="button"
-              onClick={() => {
-                void releaseManualMode()
-                setSaveToast("✅ 자동 데이터 모드로 전환")
-              }}
-              style={{
-                flex: 1,
-                padding: "10px",
-                borderRadius: "8px",
-                background: "#0f172a",
-                color: "#93c5fd",
-                border: "1px solid #1d4ed8",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              자동 데이터 다시 사용
-            </button>
-          ) : null}
-        </div>
-      </div>
+            <header className="mb-2 flex shrink-0 items-start justify-between gap-2 border-b border-white/[0.06] pb-2.5">
+              <div className="min-w-0">
+                <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-violet-300/80">
+                  Manual ingest
+                </p>
+                <h3 className="m-0 mt-0.5 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
+                <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
+                  표 형식 그대로 붙여넣기. 저장 시 대시보드에 반영됩니다.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpenInput(false)}
+                aria-label="입력 창 닫기"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.03] text-slate-400 transition hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-slate-100"
+              >
+                <span aria-hidden="true" className="text-lg leading-none">
+                  ×
+                </span>
+              </button>
+            </header>
+
+            <div className="flex min-h-0 flex-1 flex-col">
+              <textarea
+                value={inputText}
+                onChange={(e) => {
+                  setInputText(e.target.value)
+                  if (inputError) setInputError("")
+                }}
+                placeholder={PANIC_TEXT_PLACEHOLDER}
+                className="min-h-[10rem] w-full flex-1 resize-none rounded-lg border border-white/[0.08] bg-slate-950/80 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-slate-200 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35),inset_0_1px_12px_rgba(0,0,0,0.25)] outline-none ring-violet-500/0 transition placeholder:text-slate-600 focus:border-violet-500/35 focus:shadow-[inset_0_0_20px_rgba(124,58,237,0.06),0_0_0_1px_rgba(167,139,250,0.2)] focus:ring-1 focus:ring-violet-500/30"
+                spellCheck={false}
+              />
+            </div>
+
+            <div className="mt-2 shrink-0">
+              {inputText.trim() ? (
+                <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-slate-500">Parse</span>
+                  <span className="rounded border border-emerald-500/25 bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-emerald-200/95">
+                    {parsedFieldCount}/{METRIC_DEFS.length}
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-wrap gap-1">
+                    {METRIC_DEFS.filter(({ key }) => parsedData[key] !== null).map(({ key, label }) => (
+                      <span
+                        key={key}
+                        className="max-w-[7.5rem] truncate rounded-sm border border-cyan-500/15 bg-cyan-500/[0.06] px-1.5 py-0.5 font-mono text-[10px] text-cyan-100/90"
+                        title={`${label}: ${parsedData[key]}`}
+                      >
+                        {label} {parsedData[key]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="m-0 font-mono text-[10px] text-slate-600">붙여넣은 행에서 지표를 자동 매칭합니다.</p>
+              )}
+            </div>
+
+            {inputError ? (
+              <div
+                className="mt-2 shrink-0 border-l-2 border-rose-400/70 bg-rose-500/[0.07] py-2 pl-2.5 pr-2 text-[11px] leading-snug text-rose-100/95"
+                role="alert"
+              >
+                {inputError}
+              </div>
+            ) : null}
+
+            <details className="group mt-2 shrink-0 rounded-md border border-white/[0.05] bg-black/20">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-2 py-1.5 font-mono text-[10px] text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-400 [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center gap-1.5">
+                  <span className="uppercase tracking-wider">추출 상세</span>
+                  {missingFields.length > 0 ? (
+                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1 py-px text-[9px] text-amber-200/90">
+                      {missingFields.length} 미인식
+                    </span>
+                  ) : inputText.trim() ? (
+                    <span className="text-emerald-500/80">완료</span>
+                  ) : null}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className="shrink-0 text-slate-600 transition group-open:rotate-180"
+                  aria-hidden
+                />
+              </summary>
+              <div className="border-t border-white/[0.05] px-2 py-2 font-mono text-[10px] leading-relaxed text-slate-500">
+                <ul className="m-0 list-none space-y-1 p-0">
+                  {METRIC_DEFS.map(({ key, label }) => {
+                    const v = parsedData[key]
+                    const ok = v !== null
+                    return (
+                      <li key={key} className="flex justify-between gap-2 border-b border-white/[0.04] pb-1 last:border-0 last:pb-0">
+                        <span className={ok ? "text-slate-400" : "text-slate-600"}>{label}</span>
+                        <span className={ok ? "tabular-nums text-slate-300" : "text-amber-200/70"}>{ok ? String(v) : "—"}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            </details>
+
+            <footer className="mt-3 flex shrink-0 flex-col gap-2 border-t border-white/[0.06] pt-3">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={submitInput}
+                  disabled={isSaving}
+                  className="flex-1 rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSaving ? "저장 중…" : "대시보드에 반영"}
+                </button>
+              </div>
+              {manualMode ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void releaseManualMode()
+                    setSaveToast("✅ 자동 데이터 모드로 전환")
+                  }}
+                  className="w-full rounded-lg border border-sky-500/25 bg-sky-500/[0.06] py-2 text-[12px] font-medium text-sky-200/90 transition hover:border-sky-400/35 hover:bg-sky-500/10"
+                >
+                  자동 피드로 되돌리기
+                </button>
+              ) : null}
+            </footer>
+          </div>
+        </>
       ) : null}
       {saveToast ? (
         <div className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10000] -translate-x-1/2 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-4 py-2 text-sm text-emerald-200 shadow-lg">
