@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
@@ -598,6 +598,7 @@ function App() {
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
   const [previewKey, setPreviewKey] = useState(0)
   const textareaRef = useRef(null)
+  const saveSuccessCloseTimerRef = useRef(null)
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
   const [buildVersion, setBuildVersion] = useState(`v1.0.${String(APP_BUILD_ID).slice(-6)}`)
@@ -623,7 +624,7 @@ function App() {
     )
   }, [parsedData])
 
-  const resetAiReportInput = () => {
+  const resetAiReportInput = useCallback(() => {
     setInputText("")
     setInputError("")
     setPreviewKey((k) => k + 1)
@@ -637,7 +638,39 @@ function App() {
     } catch {
       // ignore
     }
-  }
+  }, [])
+
+  const clearSaveSuccessCloseTimer = useCallback(() => {
+    if (saveSuccessCloseTimerRef.current != null) {
+      window.clearTimeout(saveSuccessCloseTimerRef.current)
+      saveSuccessCloseTimerRef.current = null
+    }
+  }, [])
+
+  /** 패널을 열 때마다 빈 폼 — 이전 붙여넣기·parsed·preview·LS 드래프트 제거 */
+  const openInputPanel = useCallback(() => {
+    clearSaveSuccessCloseTimer()
+    resetAiReportInput()
+    setOpenInput(true)
+    requestAnimationFrame(() => {
+      try {
+        textareaRef.current?.focus?.()
+      } catch {
+        // ignore
+      }
+    })
+  }, [clearSaveSuccessCloseTimer, resetAiReportInput])
+
+  /** 배경·X 닫기: 대기 중인 성공 후 자동 닫기 타이머 정리 */
+  const closeInputPanel = useCallback(() => {
+    clearSaveSuccessCloseTimer()
+    setOpenInput(false)
+    try {
+      textareaRef.current?.blur?.()
+    } catch {
+      // ignore
+    }
+  }, [clearSaveSuccessCloseTimer])
 
   const pulseSaveFeedback = () => {
     setInputPanelFlash(true)
@@ -685,9 +718,8 @@ function App() {
           return
         }
         resetAiReportInput()
-        setOpenInput(false)
         pulseSaveFeedback()
-        setSaveToast("Market metrics updated · 시장 지표가 반영되었습니다")
+        setSaveToast("Market metrics updated")
         if (db) {
           void (async () => {
             try {
@@ -707,6 +739,11 @@ function App() {
         } catch (e) {
           console.warn("[panic] hub post-save refresh", e)
         }
+        clearSaveSuccessCloseTimer()
+        saveSuccessCloseTimerRef.current = window.setTimeout(() => {
+          saveSuccessCloseTimerRef.current = null
+          closeInputPanel()
+        }, 780)
         return
       }
 
@@ -720,9 +757,8 @@ function App() {
       }
       applyServerPanicSnapshot(serverData)
       resetAiReportInput()
-      setOpenInput(false)
       pulseSaveFeedback()
-      setSaveToast("Market metrics updated · 시장 지표가 반영되었습니다")
+      setSaveToast("Market metrics updated")
 
       if (db) {
         void (async () => {
@@ -743,6 +779,11 @@ function App() {
       } catch (e) {
         console.warn("[panic] manual-api post-save refresh", e)
       }
+      clearSaveSuccessCloseTimer()
+      saveSuccessCloseTimerRef.current = window.setTimeout(() => {
+        saveSuccessCloseTimerRef.current = null
+        closeInputPanel()
+      }, 780)
     } catch (err) {
       console.error(err)
     } finally {
@@ -751,27 +792,8 @@ function App() {
   }
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-    try {
-      const savedDraft = window.localStorage.getItem(PANIC_TEXT_DRAFT_KEY)
-      if (savedDraft) setInputText(savedDraft)
-    } catch {
-      // ignore
-    }
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    try {
-      if (inputText.trim()) {
-        window.localStorage.setItem(PANIC_TEXT_DRAFT_KEY, inputText)
-      } else {
-        window.localStorage.removeItem(PANIC_TEXT_DRAFT_KEY)
-      }
-    } catch {
-      // ignore
-    }
-  }, [inputText])
+    return () => clearSaveSuccessCloseTimer()
+  }, [clearSaveSuccessCloseTimer])
 
   useEffect(() => {
     if (!panicData) return
@@ -1180,7 +1202,7 @@ function App() {
           </p>
           <button
             type="button"
-            onClick={() => setOpenInput(true)}
+            onClick={openInputPanel}
             className="mt-3 w-full rounded-lg border border-violet-500/25 bg-violet-500/[0.08] px-2 py-2 text-[11px] font-medium text-violet-200/95 transition hover:border-violet-400/35 hover:bg-violet-500/[0.14]"
           >
             AI 리포트 입력
@@ -1193,7 +1215,7 @@ function App() {
           <div className={`flex flex-wrap items-center gap-2 ${isMobile ? "w-full justify-center" : "justify-end"}`}>
             <button
               type="button"
-              onClick={() => setOpenInput(true)}
+              onClick={openInputPanel}
               className="flex items-center gap-1.5 rounded-lg border border-violet-400/50 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-3 py-1.5 text-[12px] font-semibold text-white shadow-[0_2px_8px_rgba(124,58,237,0.35)] transition active:scale-95 lg:hidden"
               aria-label="AI 리포트 입력"
             >
@@ -1415,7 +1437,7 @@ function App() {
       {!openInput ? (
         <button
           type="button"
-          onClick={() => setOpenInput(true)}
+          onClick={openInputPanel}
           aria-label="AI 리포트 입력 열기"
           className="fixed z-[9998] flex items-center gap-2 rounded-full border border-violet-400/40 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(124,58,237,0.45)] transition active:scale-95 lg:hidden"
           style={{
@@ -1433,7 +1455,7 @@ function App() {
             type="button"
             aria-label="입력 패널 배경 닫기"
             className="fixed inset-0 z-[9998] bg-slate-950/55 backdrop-blur-[2px] transition-opacity"
-            onClick={() => setOpenInput(false)}
+            onClick={closeInputPanel}
           />
           <div
             className={`fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-[box-shadow,ring-color] duration-500 sm:pl-4 sm:pr-4 ${
@@ -1453,7 +1475,7 @@ function App() {
               </div>
               <button
                 type="button"
-                onClick={() => setOpenInput(false)}
+                onClick={closeInputPanel}
                 aria-label="입력 창 닫기"
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.03] text-slate-400 transition hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-slate-100"
               >
