@@ -1,4 +1,4 @@
-import { buildValueChainHeaderBundle } from "./valueChainHero.js"
+import { buildResearchDeskBriefing } from "./researchDeskBriefing.js"
 import { resolveMarketState } from "./marketStateEngine.js"
 
 /**
@@ -41,10 +41,10 @@ function inferForeignFlow(panicData, ms) {
 /**
  * 밸류체인 히어로 우측 Today's Key Signal.
  */
-export function buildTodaysKeySignal(sectors, panicData, cycleStage) {
-  const bundle = buildValueChainHeaderBundle(sectors, panicData)
-  const ms = resolveMarketState(panicData)
-  const top = bundle.hotSectors[0]
+export function buildTodaysKeySignal(sectors, panicData, cycleStage, options) {
+  const desk = buildResearchDeskBriefing(sectors, panicData, options)
+  const ms = desk.marketState
+  const top = desk.hotSectors[0]
   const leading = top ? `${top.icon ? `${top.icon} ` : ""}${top.name}`.trim() : "—"
 
   return {
@@ -53,9 +53,12 @@ export function buildTodaysKeySignal(sectors, panicData, cycleStage) {
     leadingSector: leading,
     foreignFlow: inferForeignFlow(panicData, ms),
     marketCycle: typeof cycleStage === "string" && cycleStage !== "중립" ? cycleStage : ms.label,
-    theme: bundle.marketEnergy,
+    theme: desk.todaysTheme,
+    desk,
     marketState: ms,
-    basisLabelKst: ms.basisLabelKst,
-    basisNote: ms.basisNote,
+    basisLabelKst: desk.basisLabelKst,
+    basisNote: desk.basisNote,
+    heatTimestampLine: desk.heatTimestampLine,
+    heatBasisLine: desk.heatBasisLine,
   }
 }

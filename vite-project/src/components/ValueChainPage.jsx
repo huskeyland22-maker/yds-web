@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import { VALUE_CHAIN_SECTORS } from "../data/valueChainSectors.js"
-import { buildValueChainHeaderBundle } from "../utils/valueChainHero.js"
+import { usePanicStore } from "../store/panicStore.js"
+import { buildResearchDeskBriefing } from "../utils/researchDeskBriefing.js"
 import { buildTodaysKeySignal } from "../utils/macroTerminalPulse.js"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
@@ -41,19 +42,22 @@ function SectorMomentumBar({ heat }) {
   )
 }
 
-export default function ValueChainPage({ panicData, marketCycleStage }) {
+export default function ValueChainPage({ panicData: panicDataProp, marketCycleStage }) {
+  const panicFromStore = usePanicStore((s) => s.panicData)
+  const panicData = panicFromStore ?? panicDataProp
+
   const [sectors, setSectors] = useState(() => VALUE_CHAIN_SECTORS.map((s) => ({ ...s })))
-  const [heatUpdatedAt, setHeatUpdatedAt] = useState("-")
+  const [heatUpdatedAt, setHeatUpdatedAt] = useState(null)
   const [selected, setSelected] = useState(null)
 
-  useEffect(() => {
+  const loadSectorHeat = useCallback(() => {
     let cancelled = false
     fetch(withNoStoreQuery("/value-chain-heat.json"), LIVE_JSON_GET_INIT)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data) => {
         if (cancelled) return
         const map = data?.sectorHeat
-        setHeatUpdatedAt(data?.updatedAt || "-")
+        setHeatUpdatedAt(data?.updatedAt ?? null)
         if (!map || typeof map !== "object") return
         setSectors((prev) =>
           prev.map((s) => ({
@@ -68,6 +72,11 @@ export default function ValueChainPage({ panicData, marketCycleStage }) {
     }
   }, [])
 
+  useEffect(() => {
+    const cancel = loadSectorHeat()
+    return cancel
+  }, [loadSectorHeat, panicData?.updatedAt])
+
   const ordered = useMemo(() => {
     return sectors.slice().sort((a, b) => {
       const ar = heatSortRank(a.heat)
@@ -77,10 +86,13 @@ export default function ValueChainPage({ panicData, marketCycleStage }) {
     })
   }, [sectors])
 
-  const header = useMemo(() => buildValueChainHeaderBundle(sectors, panicData), [sectors, panicData])
+  const desk = useMemo(
+    () => buildResearchDeskBriefing(sectors, panicData, { heatUpdatedAt }),
+    [sectors, panicData, heatUpdatedAt],
+  )
   const todaysKey = useMemo(
-    () => buildTodaysKeySignal(sectors, panicData, marketCycleStage),
-    [sectors, panicData, marketCycleStage],
+    () => buildTodaysKeySignal(sectors, panicData, marketCycleStage, { heatUpdatedAt }),
+    [sectors, panicData, marketCycleStage, heatUpdatedAt],
   )
 
   return (
@@ -137,22 +149,25 @@ export default function ValueChainPage({ panicData, marketCycleStage }) {
               <dl className="m-0 mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
                   <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">현재 시장 에너지</dt>
-                  <dd className="m-0 mt-1 text-[12px] font-medium leading-snug text-cyan-100/95">{header.marketEnergy}</dd>
+                  <dd className="m-0 mt-1 text-[12px] font-medium leading-snug text-cyan-100/95">{desk.marketEnergy}</dd>
                 </div>
                 <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
                   <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">핵심 흐름</dt>
-                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-200">{header.coreFlow}</dd>
+                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-200">{desk.coreFlow}</dd>
                 </div>
                 <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
                   <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">위험 신호</dt>
-                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-300">{header.riskState}</dd>
+                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-300">{desk.riskState}</dd>
                 </div>
                 <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
                   <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">오늘 핵심 테마</dt>
-                  <dd className="m-0 mt-1 text-[12px] leading-snug text-indigo-200/95">{todaysKey.theme}</dd>
+                  <dd className="m-0 mt-1 text-[12px] leading-snug text-indigo-200/95">{desk.todaysTheme}</dd>
                 </div>
               </dl>
-              <p className="m-0 mt-3 font-mono text-[9px] text-slate-600">Heat · {heatUpdatedAt}</p>
+              <p className="m-0 mt-3 font-mono text-[9px] text-slate-600">{desk.heatTimestampLine}</p>
+              {desk.heatBasisLine ? (
+                <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-500">{desk.heatBasisLine}</p>
+              ) : null}
             </div>
 
             <aside
