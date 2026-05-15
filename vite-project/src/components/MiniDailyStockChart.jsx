@@ -56,6 +56,29 @@ function fmtVol(n) {
   return Number(n).toLocaleString("ko-KR", { maximumFractionDigits: 0 })
 }
 
+function fmtSignedPrice(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "—"
+  const v = Number(n)
+  const abs = Math.abs(v).toLocaleString("ko-KR", { maximumFractionDigits: v % 1 === 0 ? 0 : 2 })
+  if (v > 0) return `+${abs}원`
+  if (v < 0) return `-${abs}원`
+  return `${abs}원`
+}
+
+function sessionBadgeClass(key) {
+  if (key === "intraday") return "border-cyan-400/35 bg-cyan-500/15 text-cyan-200"
+  if (key === "after") return "border-violet-400/35 bg-violet-500/15 text-violet-200"
+  if (key === "pre") return "border-sky-400/35 bg-sky-500/15 text-sky-200"
+  if (key === "pending") return "border-amber-400/35 bg-amber-500/15 text-amber-200"
+  if (key === "previous_close") return "border-slate-400/30 bg-slate-500/10 text-slate-300"
+  return "border-emerald-400/30 bg-emerald-500/12 text-emerald-200"
+}
+
+function chgColorClass(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "text-slate-300"
+  return Number(n) >= 0 ? "text-emerald-400" : "text-rose-400"
+}
+
 /**
  * @param {Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>} bars
  */
@@ -155,9 +178,9 @@ function prepareChartData(bars) {
 
 /**
  * 프리미엄 일봉 캔들 · 거래량 · MA (lightweight-charts).
- * @param {{ bars: Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>; chartMeta?: object; className?: string }} props
+ * @param {{ bars: Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>; chartMeta?: object; priceSummary?: object; className?: string }} props
  */
-export default function MiniDailyStockChart({ bars, chartMeta, className = "" }) {
+export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, className = "" }) {
   const wrapRef = useRef(null)
   const chartRef = useRef(null)
   const [tooltip, setTooltip] = useState(null)
@@ -361,49 +384,41 @@ export default function MiniDailyStockChart({ bars, chartMeta, className = "" })
   if (normalizedBars.length < 2) return null
 
   const meta = chartMeta && typeof chartMeta === "object" ? chartMeta : null
-  const sessionLabel = meta?.sessionLabel ?? "일봉 OHLC"
-  const sourceLabel = meta?.dataSourceLabel ?? "—"
-  const updateBasis = meta?.updateBasisLabelKst ?? meta?.asOfLabelKst ?? meta?.updatedLabelKst ?? "—"
-  const delayNote = meta?.delayNote ?? null
-  const refClose =
-    meta?.lastClose != null && Number.isFinite(Number(meta.lastClose))
-      ? Number(meta.lastClose)
-      : normalizedBars[normalizedBars.length - 1]?.close
+  const px = priceSummary && typeof priceSummary === "object" ? priceSummary : null
+  const sessionLabel = meta?.sessionLabel ?? "—"
+  const updateBasis = meta?.updateBasisLabelKst ?? meta?.updatedLabelKst ?? "—"
+  const badge = px?.sessionBadge ?? "—"
+  const badgeKey = px?.sessionBadgeKey ?? "regular_close"
+  const headlineLabel = px?.headlineLabel ?? "오늘 종가"
+  const headlinePrice = px?.headlinePrice ?? px?.regularClose ?? null
+  const changePct = px?.changePct ?? trendPack.dayChgPct
+  const changeAmount = px?.changeAmount ?? null
+  const regularClose = px?.regularClose ?? null
+  const showLive = px?.showLive === true && px?.livePrice != null
+  const livePrice = px?.livePrice ?? null
 
   const toneClass =
-    trendPack.tone === "up"
-      ? "border-l-emerald-500/70"
-      : trendPack.tone === "down"
-        ? "border-l-rose-500/65"
+    changePct != null && Number(changePct) < 0
+      ? "border-l-rose-500/70"
+      : changePct != null && Number(changePct) > 0
+        ? "border-l-emerald-500/70"
         : "border-l-slate-500/50"
 
   return (
     <div
       className={`relative w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.08] bg-[#080b12] ${className}`}
     >
-      <div className={`border-b border-white/[0.06] bg-[#0c1018] px-3 py-2.5 md:px-4 ${toneClass} border-l-[3px]`}>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-            <span className="text-[13px] font-semibold text-slate-100">{trendPack.stance}</span>
-            {trendPack.dayChgPct != null ? (
-              <span
-                className={`font-mono text-[12px] font-semibold tabular-nums ${
-                  trendPack.dayChgPct >= 0 ? "text-emerald-400" : "text-rose-400"
-                }`}
-              >
-                {trendPack.dayChgPct >= 0 ? "+" : ""}
-                {trendPack.dayChgPct.toFixed(2)}%
-              </span>
-            ) : null}
-            {refClose != null ? (
-              <span className="font-mono text-[12px] tabular-nums text-slate-400">{fmtPrice(refClose)}</span>
-            ) : null}
-          </div>
-          <div className="flex flex-wrap items-center gap-3 text-[9px] text-slate-500">
+      <div className={`border-b border-white/[0.06] bg-gradient-to-b from-[#101622] to-[#0c1018] px-3 py-3 md:px-4 ${toneClass} border-l-[3px]`}>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <span
+            className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${sessionBadgeClass(badgeKey)}`}
+          >
+            {badge}
+          </span>
+          <div className="flex flex-wrap items-center gap-2.5 text-[9px] text-slate-500">
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500" />
-              <span className="inline-block h-2.5 w-2.5 rounded-sm bg-rose-500" />
-              캔들
+              <span className="inline-block h-2 w-2 rounded-sm bg-emerald-500/90" />
+              <span className="inline-block h-2 w-2 rounded-sm bg-rose-500/90" />
             </span>
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-0.5 w-3 bg-amber-400" />
@@ -415,17 +430,59 @@ export default function MiniDailyStockChart({ bars, chartMeta, className = "" })
             </span>
           </div>
         </div>
-        {trendPack.lines[0] ? <p className="m-0 mt-1 text-[10px] text-slate-500">{trendPack.lines[0]}</p> : null}
-      </div>
 
-      <div className="border-b border-white/[0.05] bg-[#0a0e16] px-3 py-2 text-[10px] leading-relaxed text-slate-400 md:px-4">
-        <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">업데이트 기준</p>
-        <p className="m-0 mt-1 font-mono text-[11px] tabular-nums text-slate-200">{updateBasis}</p>
-        <p className="m-0 mt-1 font-medium text-slate-300">{sessionLabel}</p>
-        {delayNote ? <p className="m-0 mt-0.5 text-slate-500">{delayNote}</p> : null}
-        <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-600">{sourceLabel}</p>
-        {meta?.ohlcPriority ? (
-          <p className="m-0 mt-0.5 text-[9px] text-slate-600">OHLC · {meta.ohlcPriority === "regular_close" ? "정규장 마감 우선" : meta.ohlcPriority}</p>
+        <p className="m-0 mt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">{headlineLabel}</p>
+        <p className="m-0 mt-0.5 font-mono text-[26px] font-bold leading-none tabular-nums tracking-tight text-slate-50 sm:text-[28px]">
+          {fmtPrice(headlinePrice)}
+          <span className="ml-0.5 text-[14px] font-semibold text-slate-400">원</span>
+        </p>
+
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div>
+            <p className="m-0 text-[9px] font-medium uppercase tracking-[0.1em] text-slate-500">등락률</p>
+            <p className={`m-0 mt-0.5 font-mono text-[15px] font-bold tabular-nums ${chgColorClass(changePct)}`}>
+              {changePct != null ? `${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}%` : "—"}
+            </p>
+          </div>
+          <div>
+            <p className="m-0 text-[9px] font-medium uppercase tracking-[0.1em] text-slate-500">전일 대비</p>
+            <p className={`m-0 mt-0.5 font-mono text-[15px] font-bold tabular-nums ${chgColorClass(changeAmount)}`}>
+              {fmtSignedPrice(changeAmount)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 space-y-1 border-t border-white/[0.06] pt-2.5 text-[11px]">
+          {showLive ? (
+            <>
+              <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                <span className="text-slate-500">정규장 종가</span>
+                <span className="font-mono font-medium tabular-nums text-slate-300">{fmtPrice(regularClose)}원</span>
+              </p>
+              <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                <span className="text-cyan-300/90">실시간 현재가</span>
+                <span className="font-mono font-semibold tabular-nums text-cyan-200">{fmtPrice(livePrice)}원</span>
+              </p>
+            </>
+          ) : (
+            <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+              <span className="text-slate-500">정규장 종가</span>
+              <span className="font-mono font-semibold tabular-nums text-slate-200">{fmtPrice(regularClose ?? headlinePrice)}원</span>
+            </p>
+          )}
+          {px?.regularCloseNote ? <p className="m-0 text-[9px] text-slate-600">{px.regularCloseNote}</p> : null}
+        </div>
+
+        <div className="mt-2.5 border-t border-white/[0.05] pt-2 text-[10px] text-slate-500">
+          <p className="m-0">
+            <span className="text-slate-600">업데이트 · </span>
+            <span className="font-mono tabular-nums text-slate-400">{updateBasis}</span>
+          </p>
+          <p className="m-0 mt-0.5 text-slate-400">{sessionLabel}</p>
+        </div>
+
+        {trendPack.lines[0] ? (
+          <p className="m-0 mt-2 text-[9px] text-slate-600">{trendPack.stance} · {trendPack.lines[0]}</p>
         ) : null}
       </div>
 

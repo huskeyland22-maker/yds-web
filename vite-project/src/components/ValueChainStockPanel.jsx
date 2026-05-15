@@ -230,7 +230,11 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                     최근 약 3개월 · 캔들·거래량·MA20/60 · 휠·핀치 확대
                   </p>
                   <div className="mt-3">
-                    <MiniDailyStockChart bars={snap.chart.bars} chartMeta={snap.chartMeta} />
+                    <MiniDailyStockChart
+                      bars={snap.chart.bars}
+                      chartMeta={snap.chartMeta}
+                      priceSummary={snap.priceSummary}
+                    />
                   </div>
                 </motion.section>
               ) : (

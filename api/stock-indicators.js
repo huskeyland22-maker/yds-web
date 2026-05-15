@@ -1,5 +1,6 @@
 import { buildChartSessionMeta } from "./_lib/chartSessionMeta.js"
 import { sanitizeKisRowsForClose } from "./_lib/krxDomesticClose.js"
+import { buildStockPriceSummary } from "./_lib/stockPriceSummary.js"
 
 /**
  * GET /api/stock-indicators?code=005930&name=삼성전자
@@ -485,6 +486,7 @@ function buildPayload({
   code,
   name,
   rows,
+  rawRows,
   dataSource,
   yahooSymbol,
   asOfIso,
@@ -513,8 +515,17 @@ function buildPayload({
     yahooSymbol,
     domesticClose,
   })
+  const priceSummary = buildStockPriceSummary({
+    rows,
+    rawRows: rawRows ?? rows,
+    dataSource,
+    yahooMeta,
+    domesticClose,
+    chartMeta,
+  })
   const firstBar = chartBars[0]
   const lastChartBar = chartBars[chartBars.length - 1]
+  const displayPrice = priceSummary.headlinePrice ?? lastClose
 
   return {
     symbol: code,
@@ -524,7 +535,9 @@ function buildPayload({
     kisBaseUrl: dataSource === "kis" ? getKisBaseUrl() : undefined,
     updatedAt: new Date().toISOString(),
     asOf: asOfIso,
-    price: lastClose,
+    price: displayPrice,
+    regularClose: priceSummary.regularClose,
+    priceSummary,
     volumeChangePct: volPct,
     rsi14,
     macd: {
@@ -641,6 +654,7 @@ export default async function handler(req, res) {
         code,
         name,
         rows,
+        rawRows,
         dataSource: "kis",
         yahooSymbol: undefined,
         asOfIso,
@@ -669,6 +683,7 @@ export default async function handler(req, res) {
         code,
         name,
         rows,
+        rawRows: rows,
         dataSource: "yahoo",
         yahooSymbol,
         asOfIso,
