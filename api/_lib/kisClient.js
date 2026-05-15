@@ -8,15 +8,20 @@ import {
   logKisError,
   logKisHttpRequest,
   logKisHttpResponse,
-  logKisTokenResult,
   logKisWarn,
 } from "./kisDebugLog.js"
+import {
+  getKisCredentialsFromEnv,
+  getKisTokenCacheStatus,
+  isKisTokenAuthFailure,
+  withKisAccessToken,
+} from "./kisTokenManager.js"
 import { toErrorMessage } from "./toErrorMessage.js"
+
+export { getKisAccessToken, getKisTokenCacheStatus, invalidateKisTokenCache } from "./kisTokenManager.js"
 
 const TR_INQUIRE_DAILY_REAL = "FHKST03010100"
 const TR_INQUIRE_DAILY_VIRTUAL = "VFHKST03010100"
-
-let kisTokenCache = { accessToken: null, expiresAtMs: 0 }
 
 export function normalizeDomesticStockCode(raw) {
   const digits = String(raw ?? "").replace(/\D/g, "")
@@ -46,29 +51,6 @@ function formatYmd(d) {
   const m = String(d.getMonth() + 1).padStart(2, "0")
   const day = String(d.getDate()).padStart(2, "0")
   return `${y}${m}${day}`
-}
-
-function parseKisExpiryMs(raw) {
-  if (raw == null) return null
-  const s = String(raw).trim()
-  if (/^\d{14}$/.test(s)) {
-    return new Date(
-      +s.slice(0, 4),
-      +s.slice(4, 6) - 1,
-      +s.slice(6, 8),
-      +s.slice(8, 10),
-      +s.slice(10, 12),
-      +s.slice(12, 14),
-    ).getTime()
-  }
-  const t = Date.parse(s)
-  return Number.isFinite(t) ? t : null
-}
-
-function assertValidAccessToken(tok) {
-  if (typeof tok !== "string" || tok.length < 8) {
-    throw new Error("KIS access token이 유효하지 않습니다")
-  }
 }
 
 /**
@@ -139,103 +121,39 @@ export function rowsFromKisOutput2(rawList) {
   return rows
 }
 
-export async function getKisAccessToken(baseUrl, appKey, appSecret) {
-  const virtual = isKisVirtualMode()
-  const mode = virtual ? "모의" : "실전"
-  const now = Date.now()
+/**
+ * KIS 일봉 조회 (토큰 자동 관리·인증 실패 시 1회 재발급 후 재시도).
+ * @param {string} code 6자리 (앞자리 0 유지)
+ * @param {string} [baseUrl]
+ */
+export async function fetchKisDailyRows(code, baseUrl = getKisBaseUrl()) {
+  const normalized = normalizeDomesticStockCode(code)
+  if (!normalized) throw new Error("유효하지 않은 국내 종목코드")
 
-  if (kisTokenCache.accessToken && now < kisTokenCache.expiresAtMs - 45_000) {
-    assertValidAccessToken(kisTokenCache.accessToken)
-    logKisTokenResult({
-      mode,
-      virtual,
-      source: "cache",
-      baseUrl,
-      expiresAtMs: kisTokenCache.expiresAtMs,
-      accessToken: kisTokenCache.accessToken,
-    })
-    return kisTokenCache.accessToken
-  }
-
-  const url = `${baseUrl}/oauth2/tokenP`
-  logKisHttpRequest({ phase: "token", mode, virtual, method: "POST", url })
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "content-type": "application/json; charset=UTF-8" },
-    body: JSON.stringify({
-      grant_type: "client_credentials",
-      appkey: appKey,
-      appsecret: appSecret,
-    }),
-  })
-  const text = await res.text()
-  let j = {}
-  try {
-    j = JSON.parse(text)
-  } catch (parseErr) {
-    logKisError("token parse failed", parseErr, { httpStatus: res.status, rawPreview: text.slice(0, 200) })
-    throw new Error(`KIS 토큰 응답 파싱 실패 (${res.status})`)
-  }
-
-  logKisHttpResponse(
-    { phase: "token", mode, virtual, httpStatus: res.status, httpOk: res.ok },
-    j,
+  return withKisAccessToken(
+    (accessToken) => fetchKisDailyRowsWithToken(baseUrl, accessToken, normalized, code),
+    { label: `daily:${normalized}` },
   )
-
-  if (!res.ok) {
-    const err = new Error(toErrorMessage(j.message || j.error_description, `KIS 토큰 HTTP ${res.status}`))
-    logKisError("token HTTP error", err, { httpStatus: res.status })
-    throw err
-  }
-
-  const tok = j.access_token
-  try {
-    assertValidAccessToken(tok)
-  } catch (e) {
-    logKisError("token invalid", e, { hasAccessToken: Boolean(tok) })
-    throw e
-  }
-
-  let expMs = now + (Number(j.expires_in) || 23 * 3600) * 1000
-  const parsed = parseKisExpiryMs(j.access_token_token_expired)
-  if (parsed != null) expMs = Math.min(expMs, parsed - 60_000)
-  kisTokenCache = { accessToken: tok, expiresAtMs: expMs }
-
-  logKisTokenResult({
-    mode,
-    virtual,
-    source: "fresh",
-    baseUrl,
-    httpStatus: res.status,
-    expires_in: j.expires_in,
-    expiresAtMs: expMs,
-    accessToken: tok,
-  })
-
-  return tok
 }
 
 /**
  * @param {string} baseUrl
  * @param {string} accessToken
- * @param {string} appKey
- * @param {string} appSecret
- * @param {string} code 6자리 (앞자리 0 유지)
+ * @param {string} normalized
+ * @param {string} rawCode
  */
-export async function fetchKisDailyRows(baseUrl, accessToken, appKey, appSecret, code) {
-  const normalized = normalizeDomesticStockCode(code)
-  if (!normalized) throw new Error("유효하지 않은 국내 종목코드")
-
+async function fetchKisDailyRowsWithToken(baseUrl, accessToken, normalized, rawCode) {
+  const { appKey, appSecret } = getKisCredentialsFromEnv()
   const virtual = isKisVirtualMode()
   const mode = virtual ? "모의" : "실전"
 
-  logKis("stock code", { raw: code, normalized, symbol: normalized })
+  logKis("stock code", { raw: rawCode, normalized, symbol: normalized, tokenStatus: getKisTokenCacheStatus() })
 
   const end = new Date()
   const start = new Date()
   start.setDate(start.getDate() - 420)
   let lastErr = null
+  let sawAuthFailure = false
 
   for (const mrkt of ["J", "Q"]) {
     const marketLabel = mrkt === "J" ? "KOSPI" : "KOSDAQ"
@@ -293,6 +211,13 @@ export async function fetchKisDailyRows(baseUrl, accessToken, appKey, appSecret,
         data,
       )
 
+      if (isKisTokenAuthFailure(res.status, data)) {
+        sawAuthFailure = true
+        const err = new Error(toErrorMessage(data.msg1 || data.message, "KIS 인증 오류 — 토큰 재발급 필요"))
+        err.kisTokenRetryable = true
+        throw err
+      }
+
       if (!res.ok) {
         throw new Error(toErrorMessage(data.msg1 || data.message, `KIS 일봉 HTTP ${res.status}`))
       }
@@ -310,9 +235,12 @@ export async function fetchKisDailyRows(baseUrl, accessToken, appKey, appSecret,
       })
     } catch (e) {
       lastErr = e
+      if (e?.kisTokenRetryable) throw e
       logKisError("daily fetch failed", e, { symbol: normalized, market: marketLabel })
     }
   }
+
+  if (sawAuthFailure && lastErr?.kisTokenRetryable) throw lastErr
 
   logKisError("daily all markets failed", lastErr, { symbol: normalized })
   throw lastErr instanceof Error ? lastErr : new Error("KIS 일봉 조회 실패")
@@ -321,12 +249,16 @@ export async function fetchKisDailyRows(baseUrl, accessToken, appKey, appSecret,
 export function getKisEnvStatus() {
   const appKey = process.env.KIS_APP_KEY?.trim()
   const appSecret = process.env.KIS_APP_SECRET?.trim()
+  const token = getKisTokenCacheStatus()
   return {
     configured: Boolean(appKey && appSecret),
     virtual: isKisVirtualMode(),
     mode: isKisVirtualMode() ? "모의" : "실전",
     baseUrl: getKisBaseUrl(),
     trId: getKisDailyTrId(),
-    tokenCached: Boolean(kisTokenCache.accessToken && Date.now() < kisTokenCache.expiresAtMs - 45_000),
+    tokenCached: token.cached,
+    tokenValid: token.valid,
+    tokenExpiresInSec: token.expiresInSec,
+    tokenRefreshInSec: token.refreshInSec,
   }
 }

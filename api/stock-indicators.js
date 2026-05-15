@@ -1,8 +1,6 @@
 import { buildChartSessionMeta } from "./_lib/chartSessionMeta.js"
 import {
   fetchKisDailyRows,
-  getKisAccessToken,
-  getKisBaseUrl,
   getKisEnvStatus,
   normalizeDomesticStockCode,
 } from "./_lib/kisClient.js"
@@ -462,15 +460,13 @@ async function fetchKisDomesticPayload({ code, name }) {
   const normalized = normalizeDomesticStockCode(code)
   if (!normalized) throw new Error("유효하지 않은 국내 종목코드")
 
-  const appKey = process.env.KIS_APP_KEY?.trim()
-  const appSecret = process.env.KIS_APP_SECRET?.trim()
-  if (!appKey || !appSecret) {
+  const kisEnv = getKisEnvStatus()
+  if (!kisEnv.configured) {
     const err = new Error("KIS_APP_KEY / KIS_APP_SECRET not configured")
     err.code = "kis_not_configured"
     throw err
   }
 
-  const kisEnv = getKisEnvStatus()
   logKisRequestStart({
     route: "/api/stock",
     symbol: normalized,
@@ -478,9 +474,7 @@ async function fetchKisDomesticPayload({ code, name }) {
     ...kisEnv,
   })
 
-  const baseUrl = getKisBaseUrl()
-  const token = await getKisAccessToken(baseUrl, appKey, appSecret)
-  const rawRows = await fetchKisDailyRows(baseUrl, token, appKey, appSecret, normalized)
+  const rawRows = await fetchKisDailyRows(normalized)
   if (rawRows.length < 70) throw new Error("kis short history")
   const domesticClose = sanitizeKisRowsForClose(rawRows)
   const rows = domesticClose.rows

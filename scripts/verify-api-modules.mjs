@@ -11,6 +11,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const modules = [
   "api/_lib/yahooChartPick.js",
   "api/_lib/stockPriceSummary.js",
+  "api/_lib/kisTokenManager.js",
   "api/_lib/kisClient.js",
   "api/_lib/chartSessionMeta.js",
   "api/stock-indicators.js",
