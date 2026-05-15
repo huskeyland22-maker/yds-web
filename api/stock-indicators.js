@@ -1,19 +1,20 @@
 import { buildChartSessionMeta } from "./_lib/chartSessionMeta.js"
 import { sanitizeKisRowsForClose } from "./_lib/krxDomesticClose.js"
 import { buildStockPriceSummary } from "./_lib/stockPriceSummary.js"
+import { classifyStockInput } from "./_lib/stockMarketKind.js"
 
 /**
  * GET /api/stock-indicators?code=005930&name=삼성전자
+ * GET /api/stock-indicators?code=AAPL  (미국주식·ETF·지수 → Yahoo 전용)
  *
- * 우선순위:
- * 1) KIS Open API (환경변수 KIS_APP_KEY + KIS_APP_SECRET 설정 시)
- * 2) Yahoo Finance (폴백)
+ * 국내 KRX 6자리: KIS API 전용 (Yahoo 미사용)
+ * 해외·ETF·지수: Yahoo Finance 전용
  *
- * 환경변수:
- * - KIS_APP_KEY, KIS_APP_SECRET (필수, 서버에만)
- * - KIS_BASE_URL (선택, 예: https://openapi.koreainvestment.com:9443)
- * - KIS_USE_VIRTUAL=1 이면 모의투자 도메인(openapivts...:29443) 및 TR_ID VFHKST03010100
- * - KIS_TR_ID_DAILY (선택) 일봉 TR_ID 직접 지정 시 위 자동 선택 무시
+ * 환경변수 (국내 종목 필수, 서버에만):
+ * - KIS_APP_KEY, KIS_APP_SECRET
+ * - KIS_BASE_URL (선택)
+ * - KIS_USE_VIRTUAL=1 → 모의투자 도메인·VFHKST03010100
+ * - KIS_TR_ID_DAILY (선택)
  */
 
 const YAHOO_HEADERS = {
@@ -33,10 +34,16 @@ function getKisDailyTrId() {
 /** 프로세스 단위 토큰 캐시 (서버리스 웜 스타트에서 재사용) */
 let kisTokenCache = { accessToken: null, expiresAtMs: 0 }
 
-function padCode(raw) {
-  const s = String(raw || "").replace(/\D/g, "")
-  if (!s) return null
-  return s.padStart(6, "0")
+function readSymbol(req) {
+  if (typeof req.query?.code === "string" && req.query.code.trim()) return req.query.code.trim()
+  if (typeof req.query?.symbol === "string" && req.query.symbol.trim()) return req.query.symbol.trim()
+  try {
+    const raw = req.url || "/"
+    const u = new URL(raw, "http://localhost")
+    return (u.searchParams.get("code") || u.searchParams.get("symbol") || "").trim()
+  } catch {
+    return ""
+  }
 }
 
 function getKisBaseUrl() {
@@ -488,6 +495,7 @@ function buildPayload({
   rows,
   rawRows,
   dataSource,
+  marketKind,
   yahooSymbol,
   asOfIso,
   metaName,
@@ -530,6 +538,7 @@ function buildPayload({
   return {
     symbol: code,
     name: displayName,
+    marketKind: marketKind ?? (dataSource === "kis" ? "domestic_krx" : "yahoo_global"),
     dataSource,
     yahooSymbol: dataSource === "yahoo" ? yahooSymbol : undefined,
     kisBaseUrl: dataSource === "kis" ? getKisBaseUrl() : undefined,
@@ -592,17 +601,42 @@ async function fetchYahooChart(ticker) {
   return { rows, lastPrice, meta, ticker }
 }
 
-function readCode(req) {
-  const q = req.query
-  if (q?.code) return padCode(q.code)
-  if (q?.symbol) return padCode(q.symbol)
-  try {
-    const raw = req.url || "/"
-    const u = new URL(raw, "http://localhost")
-    return padCode(u.searchParams.get("code") || u.searchParams.get("symbol"))
-  } catch {
-    return null
+async function fetchKisDomesticPayload({ code, name }) {
+  const appKey = process.env.KIS_APP_KEY?.trim()
+  const appSecret = process.env.KIS_APP_SECRET?.trim()
+  if (!appKey || !appSecret) {
+    const err = new Error("KIS_APP_KEY / KIS_APP_SECRET not configured")
+    err.code = "kis_not_configured"
+    throw err
   }
+  const baseUrl = getKisBaseUrl()
+  const token = await getKisAccessToken(baseUrl, appKey, appSecret)
+  const rawRows = await fetchKisDailyRows(baseUrl, token, appKey, appSecret, code)
+  if (rawRows.length < 70) throw new Error("kis short history")
+  const domesticClose = sanitizeKisRowsForClose(rawRows)
+  const rows = domesticClose.rows
+  if (rows.length < 70) throw new Error("kis short history")
+  const asOfIso = domesticClose.confirmReady
+    ? new Date().toISOString()
+    : (() => {
+        const lastDate = rows[rows.length - 1]?.date
+        return lastDate && /^\d{8}$/.test(lastDate)
+          ? `${lastDate.slice(0, 4)}-${lastDate.slice(4, 6)}-${lastDate.slice(6, 8)}T16:00:00+09:00`
+          : new Date().toISOString()
+      })()
+  return buildPayload({
+    code,
+    name,
+    rows,
+    rawRows,
+    dataSource: "kis",
+    marketKind: "domestic_krx",
+    yahooSymbol: undefined,
+    asOfIso,
+    metaName: "",
+    yahooMeta: undefined,
+    domesticClose,
+  })
 }
 
 function readName(req) {
@@ -622,84 +656,57 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "method not allowed" })
   }
 
-  const code = readCode(req)
-  if (!code) {
-    return res.status(400).json({ error: "missing code" })
+  const classified = classifyStockInput(readSymbol(req))
+  if (classified.kind === "invalid" || !classified.code) {
+    return res.status(400).json({ error: "missing or invalid code" })
   }
 
+  const code = classified.code
   const name = readName(req)
-  const appKey = process.env.KIS_APP_KEY?.trim()
-  const appSecret = process.env.KIS_APP_SECRET?.trim()
 
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 
-  if (appKey && appSecret) {
+  if (classified.kind === "domestic_krx") {
     try {
-      const baseUrl = getKisBaseUrl()
-      const token = await getKisAccessToken(baseUrl, appKey, appSecret)
-      const rawRows = await fetchKisDailyRows(baseUrl, token, appKey, appSecret, code)
-      if (rawRows.length < 70) throw new Error("kis short history")
-      const domesticClose = sanitizeKisRowsForClose(rawRows)
-      const rows = domesticClose.rows
-      if (rows.length < 70) throw new Error("kis short history")
-      const asOfIso = domesticClose.confirmReady
-        ? new Date().toISOString()
-        : (() => {
-            const lastDate = rows[rows.length - 1]?.date
-            return lastDate && /^\d{8}$/.test(lastDate)
-              ? `${lastDate.slice(0, 4)}-${lastDate.slice(4, 6)}-${lastDate.slice(6, 8)}T16:00:00+09:00`
-              : new Date().toISOString()
-          })()
-      const payload = buildPayload({
-        code,
-        name,
-        rows,
-        rawRows,
-        dataSource: "kis",
-        yahooSymbol: undefined,
-        asOfIso,
-        metaName: "",
-        yahooMeta: undefined,
-        domesticClose,
-      })
+      const payload = await fetchKisDomesticPayload({ code, name })
       return res.status(200).json(payload)
     } catch (e) {
-      return res.status(502).json({
-        error: "kis_fetch_failed",
+      const notConfigured = e?.code === "kis_not_configured"
+      return res.status(notConfigured ? 503 : 502).json({
+        error: notConfigured ? "kis_required" : "kis_fetch_failed",
         message: e?.message || "unknown",
         symbol: code,
+        marketKind: "domestic_krx",
         dataSource: "kis",
+        hint: "국내 종목은 KIS API만 사용합니다. Vercel에 KIS_APP_KEY·KIS_APP_SECRET을 설정하세요.",
       })
     }
   }
 
-  const candidates = [`${code}.KS`, `${code}.KQ`]
-  let lastErr = null
-  for (const ticker of candidates) {
-    try {
-      const { rows, meta, ticker: yahooSymbol } = await fetchYahooChart(ticker)
-      const asOfIso = meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : null
-      const payload = buildPayload({
-        code,
-        name,
-        rows,
-        rawRows: rows,
-        dataSource: "yahoo",
-        yahooSymbol,
-        asOfIso,
-        metaName: meta.shortName || meta.longName || "",
-        yahooMeta: meta,
-      })
-      return res.status(200).json(payload)
-    } catch (e) {
-      lastErr = e
-    }
+  const yahooTicker = classified.yahooTicker || code
+  try {
+    const { rows, meta, ticker: yahooSymbol } = await fetchYahooChart(yahooTicker)
+    const asOfIso = meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : null
+    const payload = buildPayload({
+      code: yahooSymbol,
+      name,
+      rows,
+      rawRows: rows,
+      dataSource: "yahoo",
+      marketKind: "yahoo_global",
+      yahooSymbol,
+      asOfIso,
+      metaName: meta.shortName || meta.longName || "",
+      yahooMeta: meta,
+    })
+    return res.status(200).json(payload)
+  } catch (e) {
+    return res.status(502).json({
+      error: "chart_fetch_failed",
+      message: e?.message || "unknown",
+      symbol: yahooTicker,
+      marketKind: "yahoo_global",
+      hint: "미국주식·ETF·해외지수는 Yahoo Finance로 조회합니다.",
+    })
   }
-
-  return res.status(502).json({
-    error: "chart_fetch_failed",
-    message: lastErr?.message || "unknown",
-    symbol: code,
-    hint: "KIS_APP_KEY / KIS_APP_SECRET 을 설정하면 한국투자증권 일봉으로 조회합니다.",
-  })
 }

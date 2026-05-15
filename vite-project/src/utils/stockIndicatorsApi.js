@@ -1,15 +1,17 @@
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 
 /**
- * Phase-1 stock engine: GET /api/stock-indicators
- * (KIS 일봉 우선, 미설정 시 Yahoo 일봉 폴백 → RSI·MACD·이평 등).
+ * GET /api/stock-indicators
+ * 국내 6자리 → KIS 전용, 해외·ETF·지수 티커 → Yahoo 전용.
  *
  * @param {{ code: string; name?: string; signal?: AbortSignal }} opts
  */
 export async function fetchStockIndicators({ code, name, signal: userSignal } = {}) {
   if (!code) throw new Error("missing code")
   const qs = new URLSearchParams()
-  qs.set("code", String(code).replace(/\D/g, "").padStart(6, "0"))
+  const raw = String(code).trim()
+  const isDomestic = /^\d{4,6}$/.test(raw.replace(/\D/g, "")) && !/[A-Za-z]/.test(raw)
+  qs.set("code", isDomestic ? raw.replace(/\D/g, "").padStart(6, "0") : raw)
   if (name) qs.set("name", String(name))
 
   const ctrl = new AbortController()

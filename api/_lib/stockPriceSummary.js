@@ -2,12 +2,14 @@
  * todayClose / previousClose 분리 (KIS raw 일봉 · Yahoo regularMarket*).
  */
 
+import { resolveDataSourceBadge } from "./dataSourceBadge.js"
 import {
   afterKrxDataConfirmed,
   isKstWeekday,
   kstMinutes,
   ymdKst,
 } from "./krxDomesticClose.js"
+import { isFreshYahooMeta, pickYahooPreviousClose } from "./yahooChartPick.js"
 
 const KRX_REGULAR_OPEN = 9 * 60
 const KRX_REGULAR_CLOSE = 15 * 60 + 30
@@ -28,6 +30,19 @@ function isAfterKrxRegularClose(now = new Date()) {
   return kstMinutes(now) >= KRX_REGULAR_CLOSE
 }
 
+/** @param {Array<{ date?: string; open?: number; high?: number; low?: number; close: number; volume?: number }>} bars */
+function ohlcvFromBar(bar) {
+  if (!bar) {
+    return { open: null, high: null, low: null, close: null, volume: null }
+  }
+  const close = num(bar.close)
+  const open = num(bar.open) ?? close
+  const high = num(bar.high) ?? (open != null && close != null ? Math.max(open, close) : close)
+  const low = num(bar.low) ?? (open != null && close != null ? Math.min(open, close) : close)
+  const volume = num(bar.volume)
+  return { open, high, low, close, volume }
+}
+
 /** @param {Array<{ date?: string; close: number }>} bars */
 function closesFromRawBars(bars, todayYmd) {
   if (!Array.isArray(bars) || bars.length < 1) {
@@ -37,18 +52,11 @@ function closesFromRawBars(bars, todayYmd) {
   const prev = bars.length >= 2 ? bars[bars.length - 2] : null
   const lastDate = last?.date ? String(last.date) : null
 
-  if (lastDate === todayYmd) {
-    return {
-      todayClose: num(last.close),
-      previousClose: num(prev?.close),
-      todayBarDate: lastDate,
-    }
-  }
-
   return {
     todayClose: num(last.close),
     previousClose: num(prev?.close),
     todayBarDate: lastDate,
+    isTodayBar: lastDate === todayYmd,
   }
 }
 
@@ -73,6 +81,38 @@ function validatePriceMath(todayClose, previousClose, changeAmount) {
 }
 
 /**
+ * @param {object} yahooMeta
+ * @param {Array<{ date?: string; close: number }>} raw
+ * @param {string} todayYmd
+ */
+function resolveYahooCloses(yahooMeta, raw, todayYmd) {
+  const closes = raw.map((r) => r.close)
+  const { todayClose: rawToday, previousClose: rawPrev, todayBarDate, isTodayBar } = closesFromRawBars(raw, todayYmd)
+  const rmPrice = num(yahooMeta?.regularMarketPrice)
+  const rmPrev = num(yahooMeta?.regularMarketPreviousClose)
+  const metaFresh = isFreshYahooMeta(yahooMeta, 5)
+
+  let todayClose = null
+  let previousClose = null
+
+  if (metaFresh && rmPrice != null) {
+    todayClose = rmPrice
+    previousClose = rmPrev ?? (isTodayBar ? rawPrev : rawToday) ?? pickYahooPreviousClose(yahooMeta, closes)
+  } else if (isTodayBar && rawToday != null) {
+    todayClose = rmPrice ?? rawToday
+    previousClose = rmPrev ?? rawPrev ?? pickYahooPreviousClose(yahooMeta, closes)
+  } else {
+    todayClose = rmPrice ?? rawToday
+    previousClose = rmPrev ?? (rawToday != null && !isTodayBar ? rawToday : rawPrev) ?? pickYahooPreviousClose(yahooMeta, closes)
+  }
+
+  if (todayClose == null) todayClose = rawToday
+  if (previousClose == null) previousClose = rawPrev
+
+  return { todayClose, previousClose, todayBarDate, metaFresh }
+}
+
+/**
  * @param {{
  *   rows: Array<{ date?: string; close: number }>
  *   rawRows?: Array<{ date?: string; close: number }>
@@ -86,23 +126,25 @@ export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, d
   const now = new Date()
   const todayYmd = ymdKst(now)
   const raw = Array.isArray(rawRows) && rawRows.length ? rawRows : rows
-  const { todayClose: rawToday, previousClose: rawPrev, todayBarDate } = closesFromRawBars(raw, todayYmd)
+  const barInfo = closesFromRawBars(raw, todayYmd)
 
   let sessionBadge = "정규장 마감"
   let sessionBadgeKey = "regular_close"
-  let todayClose = rawToday
-  let previousClose = rawPrev
+  let todayClose = barInfo.todayClose
+  let previousClose = barInfo.previousClose
+  let todayBarDate = barInfo.todayBarDate
   let livePrice = null
   let showLive = false
   let headlineLabel = "오늘 종가"
 
   if (dataSource === "yahoo") {
     const state = String(yahooMeta?.marketState || yahooMeta?.currentTradingPeriod?.regular?.state || "").toUpperCase()
-    const rmPrice = num(yahooMeta?.regularMarketPrice)
-    const rmPrev = num(yahooMeta?.regularMarketPreviousClose)
+    const resolved = resolveYahooCloses(yahooMeta, raw, todayYmd)
+    todayClose = resolved.todayClose
+    previousClose = resolved.previousClose
+    todayBarDate = resolved.todayBarDate
 
-    previousClose = rmPrev ?? rawPrev
-    todayClose = rmPrice ?? rawToday
+    const rmPrice = num(yahooMeta?.regularMarketPrice)
 
     if (state === "REGULAR") {
       sessionBadge = "장중"
@@ -110,89 +152,74 @@ export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, d
       livePrice = rmPrice
       showLive = livePrice != null
       if (showLive) todayClose = livePrice
-      headlineLabel = showLive ? "실시간 현재가" : "오늘 종가"
+      headlineLabel = "실시간 현재가"
     } else if (state === "POST" || state === "POSTPOST") {
       sessionBadge = "애프터"
       sessionBadgeKey = "after"
-      todayClose = rawToday ?? rmPrice
-      previousClose = rmPrev ?? rawPrev
       livePrice = rmPrice
       showLive = livePrice != null && todayClose != null && Math.abs(livePrice - todayClose) >= 1
-      headlineLabel = "오늘 종가"
     } else if (state === "PRE" || state === "PREPRE") {
       sessionBadge = "프리마켓"
       sessionBadgeKey = "pre"
-      previousClose = rmPrev ?? rawPrev
-      todayClose = rmPrice ?? rawToday
       livePrice = rmPrice
       showLive = livePrice != null
       headlineLabel = showLive ? "실시간 현재가" : "오늘 종가"
     } else {
       sessionBadge = "정규장 마감"
       sessionBadgeKey = "regular_close"
-      todayClose = rawToday ?? rmPrice
-      previousClose = rmPrev ?? rawPrev
       headlineLabel = "오늘 종가"
-    }
-
-    if (todayBarDate === todayYmd && rawToday != null && state !== "REGULAR") {
-      todayClose = rawToday
-      previousClose = rmPrev ?? rawPrev
     }
   } else if (dataSource === "kis") {
     const dc = domesticClose || {}
     const inSession = isKrxRegularSession(now)
     const afterRegular = isAfterKrxRegularClose(now)
-    const todayInRaw = todayBarDate === todayYmd
+    const todayInRaw = barInfo.isTodayBar
 
-    todayClose = rawToday
-    previousClose = rawPrev
+    todayClose = barInfo.todayClose
+    previousClose = barInfo.previousClose
 
     if (inSession && todayInRaw) {
       sessionBadge = "장중"
       sessionBadgeKey = "intraday"
-      livePrice = rawToday
+      livePrice = barInfo.todayClose
       showLive = livePrice != null
       headlineLabel = "실시간 현재가"
-    } else if (afterRegular && todayInRaw && !dc.confirmReady) {
+    } else if ((afterRegular || dc.confirmReady) && todayInRaw) {
       sessionBadge = "정규장 마감"
       sessionBadgeKey = "regular_close"
-      todayClose = rawToday
-      previousClose = rawPrev
-      headlineLabel = "오늘 종가"
-    } else if (dc.confirmReady && todayInRaw) {
-      sessionBadge = "정규장 마감"
-      sessionBadgeKey = "regular_close"
-      todayClose = rawToday
-      previousClose = rawPrev
       headlineLabel = "오늘 종가"
     } else if (dc.dataStale) {
       sessionBadge = "동기화 중"
       sessionBadgeKey = "pending"
-      headlineLabel = "오늘 종가"
     } else if (dc.excludedTodayBar && todayInRaw) {
       sessionBadge = "장중"
       sessionBadgeKey = "intraday"
-      livePrice = rawToday
+      livePrice = barInfo.todayClose
       showLive = true
-      todayClose = rawToday
-      previousClose = rawPrev
       headlineLabel = "실시간 현재가"
     } else if (!todayInRaw) {
       sessionBadge = chartMeta?.sessionKind === "previous_close" ? "전일 기준" : "정규장 마감"
       sessionBadgeKey = chartMeta?.sessionKind === "previous_close" ? "previous_close" : "regular_close"
-      todayClose = rawToday
-      previousClose = rawPrev
-      headlineLabel = "오늘 종가"
     }
-  } else {
-    todayClose = rawToday
-    previousClose = rawPrev
   }
 
   const priceForChange = showLive && livePrice != null ? livePrice : todayClose
   const { changeAmount, changePct } = calcChange(priceForChange, previousClose)
+  const changeRate = changePct
   const mappingWarning = validatePriceMath(todayClose, previousClose, changeAmount)
+
+  const refBar =
+    dataSource === "kis" && barInfo.isTodayBar
+      ? raw[raw.length - 1]
+      : raw.length >= 2
+        ? raw[raw.length - 1]
+        : raw[raw.length - 1]
+  const ohlcv = ohlcvFromBar(refBar)
+  const { dataSourceBadge, dataSourceBadgeKey } = resolveDataSourceBadge({
+    dataSource,
+    sessionBadgeKey,
+    domesticClose,
+  })
 
   if (mappingWarning) {
     console.warn("[stockPriceSummary]", mappingWarning, {
@@ -208,6 +235,11 @@ export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, d
   return {
     todayClose,
     previousClose,
+    open: ohlcv.open,
+    high: ohlcv.high,
+    low: ohlcv.low,
+    close: ohlcv.close ?? todayClose,
+    volume: ohlcv.volume,
     headlineLabel,
     headlinePrice: todayClose,
     regularClose: todayClose,
@@ -215,11 +247,15 @@ export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, d
     showLive,
     changeAmount,
     changePct,
+    changeRate,
     changeBasis: showLive ? "live" : "todayClose",
     sessionBadge,
     sessionBadgeKey,
+    dataSourceBadge,
+    dataSourceBadgeKey,
     mappingWarning,
     todayBarDate,
     regularCloseNote: "한국 정규장 15:30 종가",
+    updatePolicy: dataSource === "kis" ? "krx_15:30_close · 16:00_kst_refresh" : null,
   }
 }

@@ -177,11 +177,20 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
             <h2 className="m-0 mt-2 font-display text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">{stock.name}</h2>
             <p className="m-0 mt-1 text-xs text-slate-500">{sectorName}</p>
             {stock.code ? <p className="m-0 mt-0.5 font-mono text-[11px] text-slate-600">{stock.code}</p> : null}
-            {snap?.dataSource === "kis" ? (
-              <p className="m-0 mt-1 text-[10px] text-emerald-200/70">데이터 · 한국투자증권 일봉 (KIS)</p>
+            {snap?.priceSummary?.dataSourceBadge || snap?.chartMeta?.dataSourceBadge ? (
+              <div className="m-0 mt-2 flex flex-wrap gap-1.5">
+                <span className="inline-flex rounded border border-blue-400/35 bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-blue-200/90">
+                  {snap.priceSummary?.dataSourceBadge ?? snap.chartMeta?.dataSourceBadge}
+                </span>
+                {snap?.priceSummary?.sessionBadge ? (
+                  <span className="inline-flex rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[9px] font-medium text-slate-400">
+                    {snap.priceSummary.sessionBadge}
+                  </span>
+                ) : null}
+              </div>
             ) : null}
             {snap?.dataSource === "yahoo" && snap?.yahooSymbol ? (
-              <p className="m-0 mt-1 text-[10px] text-slate-600">소스 심볼 {snap.yahooSymbol} (Yahoo 폴백)</p>
+              <p className="m-0 mt-1 text-[10px] text-slate-600">{snap.yahooSymbol}</p>
             ) : null}
           </div>
           <div className="flex shrink-0 gap-2">
@@ -213,6 +222,11 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
             <div className="rounded-lg border border-rose-500/25 bg-rose-500/10 px-3 py-3 text-sm text-rose-100/95">
               <p className="m-0 font-medium">데이터를 가져오지 못했습니다</p>
               <p className="m-0 mt-1 text-xs text-rose-200/80">{err.message}</p>
+              {/KIS|kis_required|kis_fetch/i.test(err.message) ? (
+                <p className="m-0 mt-2 text-[10px] text-rose-200/70">
+                  국내 종목은 KIS API만 사용합니다. Vercel 환경변수에 KIS_APP_KEY·KIS_APP_SECRET을 설정하세요.
+                </p>
+              ) : null}
             </div>
           ) : null}
 

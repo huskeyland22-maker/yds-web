@@ -3,6 +3,7 @@
  * 국내(KIS): 16:00 KST 이후 확정 OHLC·거래량 반영.
  */
 
+import { resolveDataSourceBadge } from "./dataSourceBadge.js"
 import {
   afterKrxDataConfirmed,
   formatUpdateBasisKst,
@@ -114,10 +115,27 @@ export function buildChartSessionMeta({
     confirmReady = sessionKind === "regular_close"
   }
 
+  const sessionBadgeKeyForSource =
+    dataSource === "kis"
+      ? confirmReady || sessionKind === "regular_close"
+        ? "regular_close"
+        : sessionKind === "pending_confirm"
+          ? "pending"
+          : needsReverify
+            ? "intraday"
+            : "regular_close"
+      : "yahoo"
+
+  const { dataSourceBadge, dataSourceBadgeKey } = resolveDataSourceBadge({
+    dataSource,
+    sessionBadgeKey: sessionBadgeKeyForSource,
+    domesticClose,
+  })
+
   const dataSourceLabel =
     dataSource === "kis"
-      ? "한국투자증권 일봉 (KIS) · 정규장 OHLC · 16:00 KST 확정"
-      : `Yahoo Finance${yahooSymbol ? ` · ${yahooSymbol}` : ""}`
+      ? `${dataSourceBadge} · KIS 일봉 OHLC · 16:00 KST 확정`
+      : `${dataSourceBadge}${yahooSymbol ? ` · ${yahooSymbol}` : ""}`
 
   const refDate = referenceBar?.date ? String(referenceBar.date) : lastDate
   const todayBasis = todayYmd
@@ -146,6 +164,8 @@ export function buildChartSessionMeta({
     sessionLabel,
     delayNote,
     dataSourceLabel,
+    dataSourceBadge,
+    dataSourceBadgeKey,
     dataSource,
     asOfIso: asOfIso || now.toISOString(),
     asOfLabelKst,

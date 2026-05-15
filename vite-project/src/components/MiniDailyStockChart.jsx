@@ -74,6 +74,14 @@ function sessionBadgeClass(key) {
   return "border-emerald-400/30 bg-emerald-500/12 text-emerald-200"
 }
 
+function dataSourceBadgeClass(key) {
+  if (key === "kis_live") return "border-blue-400/40 bg-blue-500/15 text-blue-200"
+  if (key === "krx_close") return "border-emerald-400/35 bg-emerald-500/12 text-emerald-200"
+  if (key === "kis_pending") return "border-amber-400/35 bg-amber-500/12 text-amber-200"
+  if (key === "yahoo") return "border-slate-400/30 bg-slate-500/12 text-slate-300"
+  return "border-indigo-400/30 bg-indigo-500/10 text-indigo-200"
+}
+
 function chgColorClass(n) {
   if (n == null || !Number.isFinite(Number(n))) return "text-slate-300"
   return Number(n) >= 0 ? "text-emerald-400" : "text-rose-400"
@@ -389,6 +397,12 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
   const updateBasis = meta?.updateBasisLabelKst ?? meta?.updatedLabelKst ?? "—"
   const badge = px?.sessionBadge ?? "—"
   const badgeKey = px?.sessionBadgeKey ?? "regular_close"
+  const sourceBadge = px?.dataSourceBadge ?? meta?.dataSourceBadge ?? "—"
+  const sourceBadgeKey = px?.dataSourceBadgeKey ?? meta?.dataSourceBadgeKey ?? "kis"
+  const dayOpen = px?.open ?? null
+  const dayHigh = px?.high ?? null
+  const dayLow = px?.low ?? null
+  const dayVol = px?.volume ?? null
   const todayClose = px?.todayClose ?? px?.headlinePrice ?? px?.regularClose ?? null
   const previousClose = px?.previousClose ?? null
   const changePct = px?.changePct ?? trendPack.dayChgPct
@@ -410,11 +424,18 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
     >
       <div className={`border-b border-white/[0.06] bg-gradient-to-b from-[#101622] to-[#0c1018] px-3 py-3 md:px-4 ${toneClass} border-l-[3px]`}>
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <span
-            className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${sessionBadgeClass(badgeKey)}`}
-          >
-            {badge}
-          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${dataSourceBadgeClass(sourceBadgeKey)}`}
+            >
+              {sourceBadge}
+            </span>
+            <span
+              className={`inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${sessionBadgeClass(badgeKey)}`}
+            >
+              {badge}
+            </span>
+          </div>
           <div className="flex flex-wrap items-center gap-2.5 text-[9px] text-slate-500">
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-2 rounded-sm bg-emerald-500/90" />
@@ -449,6 +470,27 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
             </p>
           ) : null}
         </div>
+
+        {dayOpen != null || dayHigh != null || dayLow != null || dayVol != null ? (
+          <div className="mt-3 grid grid-cols-4 gap-2 border-t border-white/[0.06] pt-3 text-[10px]">
+            <div>
+              <p className="m-0 text-[9px] text-slate-600">시가</p>
+              <p className="m-0 font-mono tabular-nums text-slate-300">{fmtPrice(dayOpen)}</p>
+            </div>
+            <div>
+              <p className="m-0 text-[9px] text-slate-600">고가</p>
+              <p className="m-0 font-mono tabular-nums text-slate-300">{fmtPrice(dayHigh)}</p>
+            </div>
+            <div>
+              <p className="m-0 text-[9px] text-slate-600">저가</p>
+              <p className="m-0 font-mono tabular-nums text-slate-300">{fmtPrice(dayLow)}</p>
+            </div>
+            <div>
+              <p className="m-0 text-[9px] text-slate-600">거래량</p>
+              <p className="m-0 font-mono tabular-nums text-slate-300">{fmtVol(dayVol)}</p>
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-3 grid grid-cols-2 gap-3 border-t border-white/[0.06] pt-3">
           <div>
