@@ -41,8 +41,11 @@ export const METRIC_CANONICAL_FROM_SLUG = {
   gssentiment: "gsBullBear",
   gsbb: "gsBullBear",
   gsbullbear: "gsBullBear",
+  gsriskappetite: "gsBullBear",
+  gssentimentindex: "gsBullBear",
   goldmansachssentiment: "gsBullBear",
   goldmansachsbullbear: "gsBullBear",
+  goldmansachsriskappetite: "gsBullBear",
 }
 
 /** @type {{ alias: string, key: string }[]} */
@@ -85,8 +88,11 @@ export const METRIC_PASTE_RULES = [
     key: "gsBullBear",
     patterns: [
       /\bGS\s*Sentiment\b/i,
+      /\bGS\s*Sentiment\s*Index\b/i,
+      /\bGS\s*Risk\s*Appetite\b/i,
       /\bGS\s*B\s*\/\s*B\b/i,
       /Goldman\s*Sachs\s*Sentiment/i,
+      /Goldman\s*Sachs\s*Risk\s*Appetite/i,
       /\bGS\s*Bull\s*Bear\b/i,
       /(?:GS\s*Bull\s*(?:&|and)\s*Bear|Goldman(?:\s+Sachs)?\s*B\s*\/\s*B)/i,
     ],
@@ -102,7 +108,7 @@ const METRIC_LOG_LABEL = {
   skew: "SKEW",
   putCall: "PUTCALL",
   highYield: "HIGH_YIELD",
-  gsBullBear: "GS_BB",
+  gsBullBear: "GSBB",
 }
 
 let EMOJI_AND_MARKERS_RE = null
@@ -111,6 +117,11 @@ let DATE_SLASH_RE = null
 let DATE_ISO_RE = null
 let SOURCE_NOISE_RE = null
 let NUMBER_TOKEN_RE = null
+let SIGNED_NUMBER_RE = null
+let METRIC_STATUS_WORDS_RE = null
+
+/** Δ·상태 등급 구간만 자르고, 본값 "+0.8" 은 유지 */
+const CHANGE_SPLIT_RE_SOURCE = String.raw`[▲▼↑↓📈📉]|,\s*[+\u2212\u2013\u2014]\s*\d`
 
 function compilePasteRegexes() {
   if (EMOJI_AND_MARKERS_RE) return
@@ -120,12 +131,15 @@ function compilePasteRegexes() {
   } catch {
     EMOJI_AND_MARKERS_RE = /[▲▼↑↓📈📉🟢🟡🔴⚪◆◇■□]/g
   }
-  CHANGE_SPLIT_RE = /[▲▼↑↓📈📉]|[,\s][+\u2212\u2013\u2014]\s*\d/
+  CHANGE_SPLIT_RE = new RegExp(CHANGE_SPLIT_RE_SOURCE)
   DATE_SLASH_RE = /\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b/g
   DATE_ISO_RE = /\b20\d{2}[-/.]\d{1,2}[-/.]\d{1,2}\b/g
   SOURCE_NOISE_RE =
     /\b(?:Yahoo\s*Finance|Reuters|Bloomberg|CNBC|MarketWatch|Investing\.com|Google\s*Finance)\b/gi
-  NUMBER_TOKEN_RE = /(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+\.\d+)%?/g
+  NUMBER_TOKEN_RE = /[-+]?(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d*\.?\d+)/g
+  SIGNED_NUMBER_RE = /[-+]?\d*\.?\d+/g
+  METRIC_STATUS_WORDS_RE =
+    /(?:회복|주의|안정|탐욕|공포|과열|낙관|흔들림|패닉|극단|위험|급등|🟢|🟡|🔴|⚪)\b/giu
 }
 
 export function emptyMetricPasteResult(requiredKeys = []) {
@@ -175,6 +189,28 @@ function logMetricParse(canonicalKey, value) {
   }
 }
 
+function logParserFail(line) {
+  try {
+    const text = String(line ?? "").trim()
+    if (!text) return
+    console.warn(`[Parser Fail]\n${text}`)
+  } catch {
+    // ignore
+  }
+}
+
+function stripMetricStatusWords(segment) {
+  try {
+    compilePasteRegexes()
+    return String(segment || "")
+      .replace(METRIC_STATUS_WORDS_RE, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  } catch {
+    return String(segment || "").trim()
+  }
+}
+
 export function sanitizeMetricPasteText(raw) {
   try {
     compilePasteRegexes()
@@ -203,8 +239,13 @@ export function sanitizeMetricPasteText(raw) {
 export function normalizeNumberToken(raw) {
   try {
     if (raw == null || raw === "") return null
-    const cleaned = String(raw).replace(/%/g, "").replace(/,/g, "").trim()
-    if (!cleaned || cleaned === "-" || cleaned === "—") return null
+    let cleaned = String(raw)
+      .trim()
+      .replace(/%/g, "")
+      .replace(/,/g, "")
+      .replace(/\u2212|\u2013|\u2014/g, "-")
+    if (!cleaned || cleaned === "-" || cleaned === "—" || cleaned === "+") return null
+    if (/^[-+]\.$/.test(cleaned)) return null
     const parsed = parseFloat(cleaned)
     if (!Number.isFinite(parsed) || Number.isNaN(parsed)) return null
     return parsed
@@ -343,7 +384,7 @@ function collectNumbersFromSegment(primarySegment) {
     let guard = 0
     while ((m = safeRegexExec(re, primarySegment)) && guard < MAX_REGEX_ITERATIONS) {
       guard += 1
-      const n = normalizeNumberToken(m[1])
+      const n = normalizeNumberToken(m[0] ?? m[1])
       if (n == null) continue
       candidates.push({ n, index: m.index ?? 0 })
       if (!re.global) break
@@ -365,10 +406,22 @@ export function extractPrimaryMetricValue(text, fromIndex) {
 
     compilePasteRegexes()
     const changeAt = tail.search(CHANGE_SPLIT_RE)
-    const primarySegment = stripPasteNoise(changeAt >= 0 ? tail.slice(0, changeAt) : tail)
+    let primarySegment = stripPasteNoise(changeAt >= 0 ? tail.slice(0, changeAt) : tail)
+    primarySegment = stripMetricStatusWords(primarySegment)
     if (!primarySegment) return null
 
-    const candidates = collectNumbersFromSegment(primarySegment)
+    let candidates = collectNumbersFromSegment(primarySegment)
+    if (!candidates.length) {
+      compilePasteRegexes()
+      const signed = safeRegexExec(
+        new RegExp(SIGNED_NUMBER_RE.source, SIGNED_NUMBER_RE.flags),
+        primarySegment,
+      )
+      if (signed?.[0]) {
+        const n = normalizeNumberToken(signed[0])
+        if (n != null) candidates = [{ n, index: signed.index ?? 0 }]
+      }
+    }
     if (!candidates.length) return null
 
     const filtered = candidates.filter((c, i) => {
@@ -423,18 +476,23 @@ function parseArticleMetricLine(line) {
       const approxStart = slugIdx >= 0 ? slugIdx : 0
       const value = extractPrimaryMetricValue(trimmed, approxStart + aliasHit.alias.length)
       if (value != null) return { key: aliasHit.key, value }
+      logParserFail(trimmed)
+      return null
     }
 
     let best = null
+    let matchedRule = null
     for (const rule of METRIC_PASTE_RULES) {
       const hit = findMetricInText(trimmed, rule.patterns)
       if (!hit) continue
+      matchedRule = rule
       const value = extractPrimaryMetricValue(trimmed, hit.index + hit.length)
       if (value == null) continue
       if (!best || hit.length > best.hit.length) {
         best = { key: rule.key, value, hit }
       }
     }
+    if (!best && matchedRule) logParserFail(trimmed)
     return best ? { key: best.key, value: best.value } : null
   } catch {
     return null
