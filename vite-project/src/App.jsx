@@ -19,7 +19,15 @@ import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
 import { buildCycleDeskHeroContext } from "./utils/cycleDeskHero.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
-import { normalizeMetricPasteForTextarea, parseMetricPasteText } from "./utils/parseMetricPaste.js"
+import MetricInputErrorBoundary from "./components/MetricInputErrorBoundary.jsx"
+import {
+  coerceMetricValue,
+  emptyMetricPasteResult,
+  formatMetricValueForDisplay,
+  parseMetricPasteText,
+  safeNormalizeMetricPasteForTextarea,
+} from "./utils/parseMetricPaste.js"
+import { getToastChannel, toast } from "./utils/toast.js"
 
 /* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
@@ -232,7 +240,12 @@ function macroDashboardStatus(stateLabel) {
 }
 
 function parseTextPanicData(text) {
-  return parseMetricPasteText(text, REQUIRED_KEYS)
+  try {
+    return parseMetricPasteText(text, REQUIRED_KEYS)
+  } catch (err) {
+    console.warn("[parseTextPanicData]", err)
+    return emptyMetricPasteResult(REQUIRED_KEYS)
+  }
 }
 
 function readRecentMemos(limit = 80) {
@@ -547,6 +560,7 @@ function App() {
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
   const [saveToast, setSaveToast] = useState("")
+  const [appToast, setAppToast] = useState(null)
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
   const [previewKey, setPreviewKey] = useState(0)
   const textareaRef = useRef(null)
@@ -560,19 +574,32 @@ function App() {
   const [cycleMetricHistory, setCycleMetricHistory] = useState(() => readCycleMetricHistory())
   const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
 
-  const parseResult = useMemo(() => parseTextPanicData(inputText), [inputText])
-  const parsedData = parseResult.data
-  const missingFields = useMemo(() => METRIC_DEFS.filter(({ key }) => parsedData[key] === null).map(({ key }) => key), [parsedData])
+  const parseResult = useMemo(() => {
+    try {
+      return parseTextPanicData(inputText)
+    } catch (err) {
+      console.warn("[App] parse memo failed", err)
+      return emptyMetricPasteResult(REQUIRED_KEYS)
+    }
+  }, [inputText])
+  const parsedData = parseResult?.data ?? emptyMetricPasteResult(REQUIRED_KEYS).data
+  const missingRequired = Array.isArray(parseResult?.missingRequired) ? parseResult.missingRequired : REQUIRED_KEYS
+  const missingFields = useMemo(
+    () => METRIC_DEFS.filter(({ key }) => parsedData?.[key] == null).map(({ key }) => key),
+    [parsedData],
+  )
   const parsedFieldCount = useMemo(
-    () => METRIC_DEFS.filter(({ key }) => parsedData[key] !== null).length,
+    () => METRIC_DEFS.filter(({ key }) => parsedData?.[key] != null).length,
     [parsedData],
   )
 
   const inputReady = useMemo(() => {
-    const { vix, fearGreed, bofa, putCall, highYield } = parsedData
-    return (
-      vix !== null && fearGreed !== null && bofa !== null && putCall !== null && highYield !== null
-    )
+    try {
+      const { vix, fearGreed, bofa, putCall, highYield } = parsedData ?? {}
+      return [vix, fearGreed, bofa, putCall, highYield].every((v) => coerceMetricValue(v) != null)
+    } catch {
+      return false
+    }
   }, [parsedData])
 
   const resetAiReportInput = useCallback(() => {
@@ -633,15 +660,32 @@ function App() {
   }
 
   const submitInput = async () => {
-    const { vix, vxn, fearGreed, bofa, move, skew, putCall, highYield, gsBullBear } = parsedData
-    if (
-      vix === null ||
-      fearGreed === null ||
-      bofa === null ||
-      putCall === null ||
-      highYield === null
-    ) {
-      const requiredMissingLabels = parseResult.missingRequired.map((key) => FIELD_LABELS[key] ?? key)
+    let vix
+    let vxn
+    let fearGreed
+    let bofa
+    let move
+    let skew
+    let putCall
+    let highYield
+    let gsBullBear
+    try {
+      vix = coerceMetricValue(parsedData?.vix)
+      vxn = coerceMetricValue(parsedData?.vxn)
+      fearGreed = coerceMetricValue(parsedData?.fearGreed)
+      bofa = coerceMetricValue(parsedData?.bofa)
+      move = coerceMetricValue(parsedData?.move)
+      skew = coerceMetricValue(parsedData?.skew)
+      putCall = coerceMetricValue(parsedData?.putCall)
+      highYield = coerceMetricValue(parsedData?.highYield)
+      gsBullBear = coerceMetricValue(parsedData?.gsBullBear)
+    } catch (err) {
+      console.warn("[submitInput] coerce failed", err)
+      toast.error("입력 형식을 확인해주세요")
+      return
+    }
+    if (vix == null || fearGreed == null || bofa == null || putCall == null || highYield == null) {
+      const requiredMissingLabels = missingRequired.map((key) => FIELD_LABELS[key] ?? key)
       setInputError(`${requiredMissingLabels.join(", ")} 값을 찾을 수 없습니다. 입력 텍스트를 확인해 주세요.`)
       return
     }
@@ -879,6 +923,24 @@ function App() {
     const timer = window.setTimeout(() => setSaveToast(""), 4200)
     return () => window.clearTimeout(timer)
   }, [saveToast])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined
+    const channel = getToastChannel()
+    const onToast = (event) => {
+      const detail = event?.detail
+      if (!detail?.message) return
+      setAppToast({ type: detail.type ?? "info", message: String(detail.message) })
+    }
+    window.addEventListener(channel, onToast)
+    return () => window.removeEventListener(channel, onToast)
+  }, [])
+
+  useEffect(() => {
+    if (!appToast?.message) return undefined
+    const timer = window.setTimeout(() => setAppToast(null), 4200)
+    return () => window.clearTimeout(timer)
+  }, [appToast])
 
   useEffect(() => {
     if (!isInputPanelOpen || typeof document === "undefined") return
@@ -1411,6 +1473,7 @@ function App() {
             className="fixed inset-0 z-[9998] bg-slate-950/55 backdrop-blur-[2px] transition-opacity"
             onClick={closeInputPanel}
           />
+          <MetricInputErrorBoundary>
           <div
             className={`fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-[box-shadow,ring-color] duration-500 sm:pl-4 sm:pr-4 ${
               inputPanelFlash ? "ring-2 ring-emerald-400/50 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.2),-16px_0_56px_rgba(16,185,129,0.12)]" : ""
@@ -1444,23 +1507,36 @@ function App() {
                 ref={textareaRef}
                 value={inputText}
                 onPaste={(e) => {
-                  const pasted = e.clipboardData?.getData?.("text/plain") ?? ""
-                  if (!pasted.trim()) return
-                  const normalized = normalizeMetricPasteForTextarea(pasted)
-                  if (normalized === pasted) return
-                  e.preventDefault()
-                  const el = textareaRef.current
-                  const start = el?.selectionStart ?? inputText.length
-                  const end = el?.selectionEnd ?? inputText.length
-                  const next = `${inputText.slice(0, start)}${normalized}${inputText.slice(end)}`
-                  setInputText(next)
-                  if (inputError) setInputError("")
-                  requestAnimationFrame(() => {
-                    if (!el) return
-                    const pos = start + normalized.length
-                    el.selectionStart = pos
-                    el.selectionEnd = pos
-                  })
+                  try {
+                    const pasted = e.clipboardData?.getData?.("text/plain") ?? ""
+                    if (!pasted.trim()) return
+                    const { ok, text: normalized } = safeNormalizeMetricPasteForTextarea(pasted)
+                    if (!ok) {
+                      toast.error("입력 형식을 확인해주세요")
+                      return
+                    }
+                    if (normalized === pasted) return
+                    e.preventDefault()
+                    const el = textareaRef.current
+                    const start = Number(el?.selectionStart ?? inputText.length)
+                    const end = Number(el?.selectionEnd ?? inputText.length)
+                    const next = `${inputText.slice(0, start)}${normalized}${inputText.slice(end)}`
+                    setInputText(next)
+                    if (inputError) setInputError("")
+                    requestAnimationFrame(() => {
+                      try {
+                        if (!el) return
+                        const pos = start + String(normalized).length
+                        el.selectionStart = pos
+                        el.selectionEnd = pos
+                      } catch {
+                        // ignore
+                      }
+                    })
+                  } catch (err) {
+                    console.warn("[onPaste]", err)
+                    toast.error("입력 형식을 확인해주세요")
+                  }
                 }}
                 onChange={(e) => {
                   setInputText(e.target.value)
@@ -1478,8 +1554,8 @@ function App() {
                   ? `필드 ${parsedFieldCount}/${METRIC_DEFS.length}`
                   : "입력 대기"}
               </span>
-              {inputText.trim() && parseResult.missingRequired.length > 0 ? (
-                <span className="text-amber-200/80">필수 {parseResult.missingRequired.length}건 미충족</span>
+              {inputText.trim() && missingRequired.length > 0 ? (
+                <span className="text-amber-200/80">필수 {missingRequired.length}건 미충족</span>
               ) : inputText.trim() ? (
                 <span className="text-emerald-500/75">반영 준비됨</span>
               ) : null}
@@ -1515,12 +1591,13 @@ function App() {
               <div className="border-t border-white/[0.05] px-2 py-2 font-mono text-[10px] leading-relaxed text-slate-500">
                 <ul className="m-0 list-none space-y-1 p-0">
                   {METRIC_DEFS.map(({ key, label }) => {
-                    const v = parsedData[key]
-                    const ok = v !== null
+                    const v = parsedData?.[key]
+                    const display = formatMetricValueForDisplay(v)
+                    const ok = display !== "—"
                     return (
                       <li key={key} className="flex justify-between gap-2 border-b border-white/[0.04] pb-1 last:border-0 last:pb-0">
                         <span className={ok ? "text-slate-400" : "text-slate-600"}>{label}</span>
-                        <span className={ok ? "tabular-nums text-slate-300" : "text-amber-200/70"}>{ok ? String(v) : "—"}</span>
+                        <span className={ok ? "tabular-nums text-slate-300" : "text-amber-200/70"}>{display}</span>
                       </li>
                     )
                   })}
@@ -1542,6 +1619,7 @@ function App() {
               </button>
             </footer>
           </div>
+          </MetricInputErrorBoundary>
         </>
       ) : null}
       {saveToast ? (
@@ -1550,6 +1628,18 @@ function App() {
           className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10000] max-w-[min(92vw,22rem)] -translate-x-1/2 rounded-xl border border-emerald-400/35 bg-[rgba(6,24,18,0.92)] px-4 py-2.5 text-center text-[13px] font-medium leading-snug text-emerald-100 shadow-[0_12px_40px_rgba(16,185,129,0.2),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
         >
           {saveToast}
+        </div>
+      ) : null}
+      {appToast?.message ? (
+        <div
+          role="alert"
+          className={
+            appToast.type === "error"
+              ? "fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10001] max-w-[min(92vw,22rem)] -translate-x-1/2 rounded-xl border border-rose-400/40 bg-[rgba(48,12,18,0.94)] px-4 py-2.5 text-center text-[13px] font-medium text-rose-100 shadow-lg backdrop-blur-md"
+              : "fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10001] max-w-[min(92vw,22rem)] -translate-x-1/2 rounded-xl border border-emerald-400/35 bg-[rgba(6,24,18,0.92)] px-4 py-2.5 text-center text-[13px] font-medium text-emerald-100 shadow-lg backdrop-blur-md"
+          }
+        >
+          {appToast.message}
         </div>
       ) : null}
       <PanicSyncDebugPanel />
