@@ -1,7 +1,11 @@
 import { buildChartSessionMeta } from "./_lib/chartSessionMeta.js"
 import {
+  fetchKisCurrentPrice,
   fetchKisDailyRows,
+  getKisBaseUrl,
   getKisEnvStatus,
+  KisApiError,
+  kisFailurePayload,
   normalizeDomesticStockCode,
 } from "./_lib/kisClient.js"
 import { sanitizeKisRowsForClose } from "./_lib/krxDomesticClose.js"
@@ -356,6 +360,7 @@ function buildPayload({
   metaName,
   yahooMeta,
   domesticClose,
+  kisLiveQuote,
 }) {
   const closes = rows.map((r) => r.close)
   const volumes = rows.map((r) => r.volume)
@@ -385,6 +390,7 @@ function buildPayload({
     yahooMeta,
     domesticClose,
     chartMeta,
+    kisLiveQuote,
   })
   const firstBar = chartBars[0]
   const lastChartBar = chartBars[chartBars.length - 1]
@@ -474,8 +480,27 @@ async function fetchKisDomesticPayload({ code, name }) {
     ...kisEnv,
   })
 
-  const rawRows = await fetchKisDailyRows(normalized)
+  let rawRows
+  let kisLiveQuote = null
+  try {
+    rawRows = await fetchKisDailyRows(normalized)
+  } catch (dailyErr) {
+    console.log("[KIS RAW RESPONSE]", "daily fetch threw before payload", dailyErr)
+    throw dailyErr
+  }
   if (rawRows.length < 70) throw new Error("kis short history")
+
+  try {
+    kisLiveQuote = await fetchKisCurrentPrice(normalized)
+    console.log("[KIS] current price ok", {
+      symbol: normalized,
+      price: kisLiveQuote?.price,
+      changePct: kisLiveQuote?.changePct,
+      trId: getKisEnvStatus().trIdPrice,
+    })
+  } catch (priceErr) {
+    logKisError("current price optional failed", priceErr, { symbol: normalized })
+  }
   const domesticClose = sanitizeKisRowsForClose(rawRows)
   const rows = domesticClose.rows
   if (rows.length < 70) throw new Error("kis short history")
@@ -499,7 +524,22 @@ async function fetchKisDomesticPayload({ code, name }) {
     metaName: "",
     yahooMeta: undefined,
     domesticClose,
+    kisLiveQuote,
   })
+}
+
+function kisErrorJson(e, symbol, notConfigured = false) {
+  const base = e instanceof KisApiError ? kisFailurePayload(e, e.httpStatus) : { error: true, msg_cd: null, msg1: null, rt_cd: null }
+  return {
+    ...base,
+    errorCode: notConfigured ? "kis_required" : "kis_fetch_failed",
+    message: toErrorMessage(e?.msg1 ?? e?.message, "KIS API 오류"),
+    symbol,
+    marketKind: "domestic_krx",
+    dataSource: "kis",
+    hint: "국내 종목은 KIS API만 사용합니다. Vercel에 KIS_APP_KEY·KIS_APP_SECRET을 설정하세요.",
+    kisEnv: getKisEnvStatus(),
+  }
 }
 
 function readName(req) {
@@ -548,15 +588,7 @@ export default async function handler(req, res) {
         notConfigured,
         kisEnv: getKisEnvStatus(),
       })
-      return res.status(notConfigured ? 503 : 502).json({
-        error: notConfigured ? "kis_required" : "kis_fetch_failed",
-        message: toErrorMessage(e?.message, "KIS API 오류"),
-        symbol: code,
-        marketKind: "domestic_krx",
-        dataSource: "kis",
-        hint: "국내 종목은 KIS API만 사용합니다. Vercel에 KIS_APP_KEY·KIS_APP_SECRET을 설정하세요.",
-        kisEnv: getKisEnvStatus(),
-      })
+      return res.status(notConfigured ? 503 : 502).json(kisErrorJson(e, code, notConfigured))
     }
   }
 

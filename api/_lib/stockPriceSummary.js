@@ -120,9 +120,10 @@ function resolveYahooCloses(yahooMeta, raw, todayYmd) {
  *   yahooMeta?: object
  *   domesticClose?: object
  *   chartMeta?: object
+ *   kisLiveQuote?: { price?: number | null; changeAmount?: number | null; changePct?: number | null; volume?: number | null; prevClose?: number | null } | null
  * }} opts
  */
-export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, domesticClose, chartMeta }) {
+export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, domesticClose, chartMeta, kisLiveQuote }) {
   const now = new Date()
   const todayYmd = ymdKst(now)
   const raw = Array.isArray(rawRows) && rawRows.length ? rawRows : rows
@@ -174,11 +175,24 @@ export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, d
     const inSession = isKrxRegularSession(now)
     const afterRegular = isAfterKrxRegularClose(now)
     const todayInRaw = barInfo.isTodayBar
+    const kisPrice = kisLiveQuote?.price != null ? num(kisLiveQuote.price) : null
+    const kisPrev = kisLiveQuote?.prevClose != null ? num(kisLiveQuote.prevClose) : null
 
     todayClose = barInfo.todayClose
     previousClose = barInfo.previousClose
+    if (kisPrev != null && kisPrev > 0) previousClose = kisPrev
+    else if (kisPrice != null && kisLiveQuote?.changeAmount != null) {
+      previousClose = kisPrice - kisLiveQuote.changeAmount
+    }
 
-    if (inSession && todayInRaw) {
+    if (kisPrice != null && (inSession || todayInRaw)) {
+      sessionBadge = inSession ? "장중" : sessionBadge
+      sessionBadgeKey = inSession ? "intraday" : sessionBadgeKey
+      livePrice = kisPrice
+      showLive = true
+      todayClose = kisPrice
+      headlineLabel = "실시간 현재가"
+    } else if (inSession && todayInRaw) {
       sessionBadge = "장중"
       sessionBadgeKey = "intraday"
       livePrice = barInfo.todayClose
@@ -203,8 +217,23 @@ export function buildStockPriceSummary({ rows, rawRows, dataSource, yahooMeta, d
     }
   }
 
-  const priceForChange = showLive && livePrice != null ? livePrice : todayClose
-  const { changeAmount, changePct } = calcChange(priceForChange, previousClose)
+  let priceForChange = showLive && livePrice != null ? livePrice : todayClose
+  let changeAmount = null
+  let changePct = null
+  if (dataSource === "kis" && kisLiveQuote?.price != null) {
+    priceForChange = num(kisLiveQuote.price) ?? priceForChange
+    changeAmount = num(kisLiveQuote.changeAmount)
+    changePct = num(kisLiveQuote.changePct)
+    if (changeAmount == null && changePct == null) {
+      const derived = calcChange(priceForChange, previousClose)
+      changeAmount = derived.changeAmount
+      changePct = derived.changePct
+    }
+  } else {
+    const derived = calcChange(priceForChange, previousClose)
+    changeAmount = derived.changeAmount
+    changePct = derived.changePct
+  }
   const changeRate = changePct
   const mappingWarning = validatePriceMath(todayClose, previousClose, changeAmount)
 

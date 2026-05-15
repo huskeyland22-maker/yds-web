@@ -25,8 +25,18 @@ export function toErrorMessage(value, fallback = "") {
  * @param {number} status HTTP status
  */
 export function stockApiErrorFromBody(body, status) {
-  const code = typeof body?.error === "string" ? body.error : ""
-  const technical = toErrorMessage(body?.message ?? body?.hint ?? body?.error, "")
+  const code =
+    typeof body?.errorCode === "string"
+      ? body.errorCode
+      : typeof body?.error === "string" && body.error !== "true"
+        ? body.error
+        : ""
+  const kisDetail = toErrorMessage(body?.msg1 ?? body?.message, "")
+  const technical =
+    kisDetail ||
+    toErrorMessage(body?.hint, "") ||
+    (body?.msg_cd ? `KIS ${body.msg_cd}` : "") ||
+    (typeof body?.error === "string" && body.error !== "true" ? body.error : "")
 
   if (code === "kis_required") {
     return {
@@ -39,9 +49,11 @@ export function stockApiErrorFromBody(body, status) {
   if (code === "kis_fetch_failed") {
     return {
       title: "데이터를 불러오지 못했습니다.",
-      detail: "종목 데이터를 확인해주세요. API 응답 오류",
+      detail: kisDetail || "종목 데이터를 확인해주세요. KIS API 응답 오류",
       code,
       technical: technical || "KIS API 오류",
+      msg_cd: body?.msg_cd ?? null,
+      msg1: body?.msg1 ?? null,
     }
   }
   if (code === "chart_fetch_failed") {

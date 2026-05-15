@@ -77,8 +77,10 @@ export async function fetchStockIndicators({ code, name, signal: userSignal } = 
         {
           code: normalizedCode,
           httpStatus: res.status,
-          errorCode: body?.error,
-          message: body?.message,
+          errorCode: body?.errorCode ?? body?.error,
+          message: body?.msg1 ?? body?.message,
+          msg_cd: body?.msg_cd,
+          msg1: body?.msg1,
           kisEnv: body?.kisEnv,
           marketKind: body?.marketKind,
           uiMessage: stockError.title,
