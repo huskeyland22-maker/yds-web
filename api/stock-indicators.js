@@ -9,6 +9,7 @@ import {
 import { sanitizeKisRowsForClose } from "./_lib/krxDomesticClose.js"
 import { buildStockPriceSummary } from "./_lib/stockPriceSummary.js"
 import { classifyStockInput } from "./_lib/stockMarketKind.js"
+import { logKisError, logKisRequestStart } from "./_lib/kisDebugLog.js"
 import { toErrorMessage } from "./_lib/toErrorMessage.js"
 
 /**
@@ -470,12 +471,11 @@ async function fetchKisDomesticPayload({ code, name }) {
   }
 
   const kisEnv = getKisEnvStatus()
-  console.log("[stock-indicators] KIS", {
-    code: normalized,
-    virtual: kisEnv.virtual,
-    baseUrl: kisEnv.baseUrl,
-    trId: kisEnv.trId,
-    tokenCached: kisEnv.tokenCached,
+  logKisRequestStart({
+    route: "/api/stock",
+    symbol: normalized,
+    name: name || null,
+    ...kisEnv,
   })
 
   const baseUrl = getKisBaseUrl()
@@ -536,11 +536,24 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 
   if (classified.kind === "domestic_krx") {
+    logKisRequestStart({
+      handler: "stock-indicators",
+      symbol: code,
+      name: name || null,
+      marketKind: "domestic_krx",
+      kisEnv: getKisEnvStatus(),
+    })
     try {
       const payload = await fetchKisDomesticPayload({ code, name })
+      console.log("[KIS] request success", { symbol: code, barsUsed: payload.barsUsed, dataSource: payload.dataSource })
       return res.status(200).json(payload)
     } catch (e) {
       const notConfigured = e?.code === "kis_not_configured"
+      logKisError("handler domestic failed", e, {
+        symbol: code,
+        notConfigured,
+        kisEnv: getKisEnvStatus(),
+      })
       return res.status(notConfigured ? 503 : 502).json({
         error: notConfigured ? "kis_required" : "kis_fetch_failed",
         message: toErrorMessage(e?.message, "KIS API 오류"),

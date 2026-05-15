@@ -1,6 +1,7 @@
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import { stockApiErrorFromBody, stockFetchErrorFromException } from "./errorMessage.js"
 
+/** 서버 API Route — KIS 직접 호출 금지 */
 const STOCK_API_PATH = "/api/stock"
 
 /** @param {string} raw */
@@ -9,6 +10,14 @@ export function normalizeStockCodeParam(raw) {
   if (!s) return ""
   const isDomestic = /^\d{4,6}$/.test(s.replace(/\D/g, "")) && !/[A-Za-z^]/.test(s)
   return isDomestic ? s.replace(/\D/g, "").padStart(6, "0") : s
+}
+
+function logClient(event, payload) {
+  console.info(`[stock-client] ${event}`, payload)
+}
+
+function logClientError(event, payload, err) {
+  console.error(`[stock-client] ${event}`, payload, err)
 }
 
 /**
@@ -24,9 +33,19 @@ export async function fetchStockIndicators({ code, name, signal: userSignal } = 
     throw err
   }
 
+  const normalizedCode = normalizeStockCodeParam(code)
   const qs = new URLSearchParams()
-  qs.set("code", normalizeStockCodeParam(code))
+  qs.set("code", normalizedCode)
   if (name) qs.set("name", String(name))
+
+  const apiUrl = withNoStoreQuery(`${STOCK_API_PATH}?${qs.toString()}`)
+  logClient("request start (API route only, not KIS direct)", {
+    apiRoute: STOCK_API_PATH,
+    apiUrl,
+    code: normalizedCode,
+    name: name || null,
+    kisDirectCall: false,
+  })
 
   const ctrl = new AbortController()
   const tid = setTimeout(() => ctrl.abort(), 28_000)
@@ -42,19 +61,39 @@ export async function fetchStockIndicators({ code, name, signal: userSignal } = 
   }
 
   try {
-    const res = await fetch(withNoStoreQuery(`${STOCK_API_PATH}?${qs.toString()}`), {
+    const res = await fetch(apiUrl, {
       ...LIVE_JSON_GET_INIT,
       signal: ctrl.signal,
     })
     const body = await res.json().catch(() => ({}))
+
     if (!res.ok) {
       const stockError = stockApiErrorFromBody(body, res.status)
       const err = new Error(stockError.detail || stockError.title)
       err.stockError = stockError
       err.httpStatus = res.status
-      console.error("[stockIndicatorsApi] API error", { code, status: res.status, body })
+      logClientError(
+        "server API error (check Vercel [KIS] logs)",
+        {
+          code: normalizedCode,
+          httpStatus: res.status,
+          errorCode: body?.error,
+          message: body?.message,
+          kisEnv: body?.kisEnv,
+          marketKind: body?.marketKind,
+          uiMessage: stockError.title,
+        },
+        body,
+      )
       throw err
     }
+
+    logClient("request success", {
+      code: normalizedCode,
+      dataSource: body?.dataSource,
+      symbol: body?.symbol,
+      barsUsed: body?.barsUsed,
+    })
     return body
   } catch (e) {
     if (e?.stockError) throw e
@@ -63,9 +102,14 @@ export async function fetchStockIndicators({ code, name, signal: userSignal } = 
         userSignal?.aborted ? "요청이 취소되었습니다." : "응답 시간이 초과되었습니다. 네트워크를 확인한 뒤 다시 시도하세요.",
       )
       err.stockError = stockFetchErrorFromException(e)
+      logClientError("client abort/timeout", { code: normalizedCode, apiUrl }, e)
       throw err
     }
-    console.error("[stockIndicatorsApi] fetch failed", { code, error: e })
+    logClientError(
+      "client network error (browser → /api/stock)",
+      { code: normalizedCode, apiUrl, kisDirectCall: false },
+      e,
+    )
     const err = new Error(stockFetchErrorFromException(e).title)
     err.stockError = stockFetchErrorFromException(e)
     throw err
