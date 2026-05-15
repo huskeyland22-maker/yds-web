@@ -4,7 +4,9 @@ import { Link } from "react-router-dom"
 import { X } from "lucide-react"
 import MiniDailyStockChart from "./MiniDailyStockChart.jsx"
 import { naverFinanceUrl } from "../utils/valueChainStockInsight.js"
+import ChartSkeleton from "./ChartSkeleton.jsx"
 import { fetchStockIndicators } from "../utils/stockIndicatorsApi.js"
+import { readStockSnapCache, saveStockSnapCache } from "../utils/stockSnapCache.js"
 import {
   afterKrxDataConfirmed,
   msUntilKrx16Kst,
@@ -25,7 +27,9 @@ function volumeHeadlineToneClass(tier) {
 export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
   const [snap, setSnap] = useState(null)
   const [loading, setLoading] = useState(false)
+  /** @type {[{ title: string; detail: string; code?: string; technical?: string } | null, Function]} */
   const [err, setErr] = useState(null)
+  const [staleSnap, setStaleSnap] = useState(false)
 
   useEffect(() => {
     if (!stock) return
@@ -57,14 +61,42 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
       if (!silent) {
         setLoading(true)
         setErr(null)
-        if (!opts.keepSnap) setSnap(null)
+        setStaleSnap(false)
+        if (!opts.keepSnap) {
+          const cached = readStockSnapCache(stock.code)
+          if (cached?.snap) {
+            setSnap(cached.snap)
+            setStaleSnap(true)
+          } else {
+            setSnap(null)
+          }
+        }
       }
       fetchStockIndicators({ code: stock.code, name: stock.name, signal: ac.signal })
         .then((data) => {
-          if (!ac.signal.aborted) setSnap(data)
+          if (!ac.signal.aborted) {
+            setSnap(data)
+            setStaleSnap(false)
+            setErr(null)
+            saveStockSnapCache(stock.code, data)
+          }
         })
         .catch((e) => {
-          if (!ac.signal.aborted) setErr(e instanceof Error ? e : new Error(String(e)))
+          if (!ac.signal.aborted) {
+            console.error("[ValueChainStockPanel] stock fetch failed", stock?.code, e)
+            const stockError = e?.stockError ?? {
+              title: "데이터 연결 중 문제가 발생했습니다.",
+              detail: "잠시 후 다시 시도해주세요.",
+              code: "unknown",
+              technical: "",
+            }
+            setErr(stockError)
+            const cached = readStockSnapCache(stock.code)
+            if (cached?.snap) {
+              setSnap(cached.snap)
+              setStaleSnap(true)
+            }
+          }
         })
         .finally(() => {
           if (!ac.signal.aborted && !silent) setLoading(false)
@@ -77,7 +109,11 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
   useEffect(() => {
     if (!stock?.code) {
       setSnap(null)
-      setErr(new Error("종목 코드가 없습니다."))
+      setErr({
+        title: "종목 코드가 없습니다.",
+        detail: "종목 데이터를 확인해주세요.",
+        code: "missing_code",
+      })
       setLoading(false)
       return undefined
     }
@@ -214,23 +250,37 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
         </header>
 
         <div className="relative z-[1] flex-1 overflow-y-auto px-5 py-6">
-          {loading ? (
-            <p className="m-0 text-sm text-slate-400">최신 일봉을 불러오는 중…</p>
+          {loading && !snap?.chart?.bars?.length ? <ChartSkeleton className="mb-6" /> : null}
+          {loading && snap?.chart?.bars?.length ? (
+            <p className="m-0 mb-4 text-sm text-slate-400">최신 일봉을 불러오는 중…</p>
           ) : null}
 
           {err && !loading ? (
-            <div className="rounded-lg border border-rose-500/25 bg-rose-500/10 px-3 py-3 text-sm text-rose-100/95">
-              <p className="m-0 font-medium">데이터를 가져오지 못했습니다</p>
-              <p className="m-0 mt-1 text-xs text-rose-200/80">{err.message}</p>
-              {/KIS|kis_required|kis_fetch/i.test(err.message) ? (
+            <div className="mb-4 rounded-lg border border-rose-500/25 bg-rose-500/10 px-3 py-3 text-sm text-rose-100/95">
+              <p className="m-0 font-medium">{err.title}</p>
+              {err.detail ? <p className="m-0 mt-1 text-xs text-rose-200/80">{err.detail}</p> : null}
+              {/kis/i.test(err.code || "") ? (
                 <p className="m-0 mt-2 text-[10px] text-rose-200/70">
                   국내 종목은 KIS API만 사용합니다. Vercel 환경변수에 KIS_APP_KEY·KIS_APP_SECRET을 설정하세요.
                 </p>
               ) : null}
+              <button
+                type="button"
+                onClick={() => loadIndicators()}
+                className="mt-3 rounded-lg border border-rose-400/35 bg-rose-500/15 px-3 py-1.5 text-[11px] font-medium text-rose-100 transition hover:bg-rose-500/25"
+              >
+                다시 시도
+              </button>
             </div>
           ) : null}
 
-          {!loading && snap && panel ? (
+          {staleSnap && snap ? (
+            <p className="m-0 mb-4 rounded border border-amber-500/25 bg-amber-500/10 px-2.5 py-2 text-[10px] text-amber-200/90">
+              마지막으로 저장된 데이터를 표시 중입니다. 연결 복구 후 자동 갱신됩니다.
+            </p>
+          ) : null}
+
+          {snap && (panel || snap.chart?.bars?.length) ? (
             <>
               {snap.chart?.bars?.length ? (
                 <motion.section
@@ -262,6 +312,7 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                 </section>
               )}
 
+              {panel ? (
               <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
                 <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">보조지표 · 확인용</p>
                 <p className="m-0 mt-2 text-[10px] text-slate-600">
@@ -299,6 +350,7 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                   </li>
                 </ul>
               </div>
+              ) : null}
 
               {objective ? (
                 <div className="mt-8 rounded-xl border border-white/[0.06] bg-white/[0.015] px-4 py-4">

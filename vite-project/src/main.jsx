@@ -10,6 +10,7 @@ import {
   installChunkLoadFailureRecovery,
   installLifecycleVersionPoller,
   installOnlineBuildRecheck,
+  invalidateServiceWorkerCachesAfterBuildMismatch,
   isIosStandalone,
   sweepIosStandaloneCachesOnce,
   unregisterAllServiceWorkers,
@@ -95,6 +96,8 @@ async function bootstrapApp() {
   // arrives via bfcache (iOS sometimes restores a frozen WebView without re-
   // running module scripts) the gate is re-armed here as a second line of
   // defense. checkAndEvictStaleBuild() short-circuits if everything matches.
+  await invalidateServiceWorkerCachesAfterBuildMismatch()
+
   const gate = await checkAndEvictStaleBuild()
   if (gate.reloaded) {
     window.setTimeout(() => {

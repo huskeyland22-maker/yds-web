@@ -439,6 +439,25 @@ export async function getServiceWorkerDebugInfo() {
   }
 }
 
+/**
+ * html-build-mismatch 등으로 리로드된 직후 SW·Cache Storage를 한 번 더 비웁니다.
+ * (evictStaleBuildAndReload 직전에도 수행되나, bfcache 복귀 대비)
+ */
+export async function invalidateServiceWorkerCachesAfterBuildMismatch() {
+  if (typeof window === "undefined") return false
+  try {
+    const reason = new URL(window.location.href).searchParams.get("reason") || ""
+    if (!reason.includes("build") && !reason.includes("stale")) return false
+    if (safeRead("sessionStorage", "yds-sw-invalidated-for-reason") === reason) return false
+    await unregisterAllServiceWorkers()
+    await clearAllCacheStorage()
+    safeWrite("sessionStorage", "yds-sw-invalidated-for-reason", reason)
+    return true
+  } catch {
+    return false
+  }
+}
+
 /** 네트워크 복귀 시 즉시 원격 빌드 메타와 대조 (Safari 백그라운드 복귀와 조합). Idempotent. */
 export function installOnlineBuildRecheck() {
   if (typeof window === "undefined") return

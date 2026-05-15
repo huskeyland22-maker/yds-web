@@ -1,7 +1,15 @@
 import { buildChartSessionMeta } from "./_lib/chartSessionMeta.js"
+import {
+  fetchKisDailyRows,
+  getKisAccessToken,
+  getKisBaseUrl,
+  getKisEnvStatus,
+  normalizeDomesticStockCode,
+} from "./_lib/kisClient.js"
 import { sanitizeKisRowsForClose } from "./_lib/krxDomesticClose.js"
 import { buildStockPriceSummary } from "./_lib/stockPriceSummary.js"
 import { classifyStockInput } from "./_lib/stockMarketKind.js"
+import { toErrorMessage } from "./_lib/toErrorMessage.js"
 
 /**
  * GET /api/stock-indicators?code=005930&name=삼성전자
@@ -23,17 +31,6 @@ const YAHOO_HEADERS = {
   Accept: "application/json,text/plain,*/*",
 }
 
-const TR_INQUIRE_DAILY_REAL = "FHKST03010100"
-const TR_INQUIRE_DAILY_VIRTUAL = "VFHKST03010100"
-
-function getKisDailyTrId() {
-  const v = process.env.KIS_USE_VIRTUAL === "1" || process.env.KIS_USE_VIRTUAL === "true"
-  return v ? TR_INQUIRE_DAILY_VIRTUAL : TR_INQUIRE_DAILY_REAL
-}
-
-/** 프로세스 단위 토큰 캐시 (서버리스 웜 스타트에서 재사용) */
-let kisTokenCache = { accessToken: null, expiresAtMs: 0 }
-
 function readSymbol(req) {
   if (typeof req.query?.code === "string" && req.query.code.trim()) return req.query.code.trim()
   if (typeof req.query?.symbol === "string" && req.query.symbol.trim()) return req.query.symbol.trim()
@@ -44,147 +41,6 @@ function readSymbol(req) {
   } catch {
     return ""
   }
-}
-
-function getKisBaseUrl() {
-  const custom = process.env.KIS_BASE_URL?.trim()
-  if (custom) return custom.replace(/\/$/, "")
-  const v = process.env.KIS_USE_VIRTUAL === "1" || process.env.KIS_USE_VIRTUAL === "true"
-  return v ? "https://openapivts.koreainvestment.com:29443" : "https://openapi.koreainvestment.com:9443"
-}
-
-function formatYmd(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return `${y}${m}${day}`
-}
-
-function parseKisExpiryMs(raw) {
-  if (raw == null) return null
-  const s = String(raw).trim()
-  if (/^\d{14}$/.test(s)) {
-    return new Date(
-      +s.slice(0, 4),
-      +s.slice(4, 6) - 1,
-      +s.slice(6, 8),
-      +s.slice(8, 10),
-      +s.slice(10, 12),
-      +s.slice(12, 14),
-    ).getTime()
-  }
-  const t = Date.parse(s)
-  return Number.isFinite(t) ? t : null
-}
-
-async function getKisAccessToken(baseUrl, appKey, appSecret) {
-  const now = Date.now()
-  if (kisTokenCache.accessToken && now < kisTokenCache.expiresAtMs - 45_000) {
-    return kisTokenCache.accessToken
-  }
-  const url = `${baseUrl}/oauth2/tokenP`
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "content-type": "application/json; charset=UTF-8" },
-    body: JSON.stringify({
-      grant_type: "client_credentials",
-      appkey: appKey,
-      appsecret: appSecret,
-    }),
-  })
-  const text = await res.text()
-  let j = {}
-  try {
-    j = JSON.parse(text)
-  } catch {
-    throw new Error(`kis token parse ${res.status}`)
-  }
-  if (!res.ok) throw new Error(j.message || j.error_description || `kis token http ${res.status}`)
-  const tok = j.access_token
-  if (!tok) throw new Error("kis token missing access_token")
-  let expMs = now + (Number(j.expires_in) || 23 * 3600) * 1000
-  const parsed = parseKisExpiryMs(j.access_token_token_expired)
-  if (parsed != null) expMs = Math.min(expMs, parsed - 60_000)
-  kisTokenCache = { accessToken: tok, expiresAtMs: expMs }
-  return tok
-}
-
-function kisDomesticHeaders(accessToken, appKey, appSecret) {
-  return {
-    "content-type": "application/json; charset=UTF-8",
-    authorization: `Bearer ${accessToken}`,
-    appkey: appKey,
-    appsecret: appSecret,
-    tr_id: process.env.KIS_TR_ID_DAILY?.trim() || getKisDailyTrId(),
-    custtype: "P",
-  }
-}
-
-function rowsFromKisOutput2(rawList) {
-  const asc = [...(Array.isArray(rawList) ? rawList : [])].reverse()
-  const rows = []
-  for (const row of asc) {
-    const close = parseFloat(String(row.stck_clpr ?? "").replace(/,/g, ""))
-    const open = parseFloat(String(row.stck_oprc ?? "").replace(/,/g, ""))
-    const high = parseFloat(String(row.stck_hgpr ?? "").replace(/,/g, ""))
-    const low = parseFloat(String(row.stck_lwpr ?? "").replace(/,/g, ""))
-    const vol = parseFloat(String(row.acml_vol ?? "").replace(/,/g, ""))
-    if (!Number.isFinite(close)) continue
-    rows.push({
-      open: Number.isFinite(open) ? open : close,
-      high: Number.isFinite(high) ? high : close,
-      low: Number.isFinite(low) ? low : close,
-      close,
-      volume: Number.isFinite(vol) ? vol : 0,
-      date: row.stck_bsop_date ? String(row.stck_bsop_date) : null,
-    })
-  }
-  return rows
-}
-
-/**
- * 국내주식 기간별시세(일) → output2 최신순 → 시간순 rows
- * KOSPI(J) 우선, 데이터 부족·API 오류 시 KOSDAQ(Q) 재시도.
- */
-async function fetchKisDailyRows(baseUrl, accessToken, appKey, appSecret, code) {
-  const end = new Date()
-  const start = new Date()
-  start.setDate(start.getDate() - 420)
-  let lastErr = null
-  for (const mrkt of ["J", "Q"]) {
-    const params = new URLSearchParams({
-      fid_cond_mrkt_div_code: mrkt,
-      fid_input_iscd: code,
-      fid_input_date_1: formatYmd(start),
-      fid_input_date_2: formatYmd(end),
-      fid_period_div_code: "D",
-      fid_org_adj_prc: "0",
-    })
-    const url = `${baseUrl}/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice?${params.toString()}`
-    try {
-      const res = await fetch(url, {
-        method: "GET",
-        headers: kisDomesticHeaders(accessToken, appKey, appSecret),
-        cache: "no-store",
-      })
-      const text = await res.text()
-      let data = {}
-      try {
-        data = JSON.parse(text)
-      } catch {
-        throw new Error(`kis daily parse ${res.status}`)
-      }
-      if (!res.ok) throw new Error(data.msg1 || data.message || `kis daily http ${res.status}`)
-      const rt = String(data.rt_cd ?? "")
-      if (rt && rt !== "0") throw new Error(data.msg1 || data.msg_cd || `kis rt_cd ${data.rt_cd}`)
-      const rows = rowsFromKisOutput2(data.output2)
-      if (rows.length >= 70) return rows
-      lastErr = new Error(`kis short history (${mrkt}, ${rows.length} bars)`)
-    } catch (e) {
-      lastErr = e
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error("kis daily failed")
 }
 
 function unixSecToYmdKst(sec) {
@@ -602,6 +458,9 @@ async function fetchYahooChart(ticker) {
 }
 
 async function fetchKisDomesticPayload({ code, name }) {
+  const normalized = normalizeDomesticStockCode(code)
+  if (!normalized) throw new Error("유효하지 않은 국내 종목코드")
+
   const appKey = process.env.KIS_APP_KEY?.trim()
   const appSecret = process.env.KIS_APP_SECRET?.trim()
   if (!appKey || !appSecret) {
@@ -609,9 +468,19 @@ async function fetchKisDomesticPayload({ code, name }) {
     err.code = "kis_not_configured"
     throw err
   }
+
+  const kisEnv = getKisEnvStatus()
+  console.log("[stock-indicators] KIS", {
+    code: normalized,
+    virtual: kisEnv.virtual,
+    baseUrl: kisEnv.baseUrl,
+    trId: kisEnv.trId,
+    tokenCached: kisEnv.tokenCached,
+  })
+
   const baseUrl = getKisBaseUrl()
   const token = await getKisAccessToken(baseUrl, appKey, appSecret)
-  const rawRows = await fetchKisDailyRows(baseUrl, token, appKey, appSecret, code)
+  const rawRows = await fetchKisDailyRows(baseUrl, token, appKey, appSecret, normalized)
   if (rawRows.length < 70) throw new Error("kis short history")
   const domesticClose = sanitizeKisRowsForClose(rawRows)
   const rows = domesticClose.rows
@@ -625,7 +494,7 @@ async function fetchKisDomesticPayload({ code, name }) {
           : new Date().toISOString()
       })()
   return buildPayload({
-    code,
+    code: normalized,
     name,
     rows,
     rawRows,
@@ -674,11 +543,12 @@ export default async function handler(req, res) {
       const notConfigured = e?.code === "kis_not_configured"
       return res.status(notConfigured ? 503 : 502).json({
         error: notConfigured ? "kis_required" : "kis_fetch_failed",
-        message: e?.message || "unknown",
+        message: toErrorMessage(e?.message, "KIS API 오류"),
         symbol: code,
         marketKind: "domestic_krx",
         dataSource: "kis",
         hint: "국내 종목은 KIS API만 사용합니다. Vercel에 KIS_APP_KEY·KIS_APP_SECRET을 설정하세요.",
+        kisEnv: getKisEnvStatus(),
       })
     }
   }
@@ -703,7 +573,7 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(502).json({
       error: "chart_fetch_failed",
-      message: e?.message || "unknown",
+      message: toErrorMessage(e?.message, "Yahoo Finance 오류"),
       symbol: yahooTicker,
       marketKind: "yahoo_global",
       hint: "미국주식·ETF·해외지수는 Yahoo Finance로 조회합니다.",
