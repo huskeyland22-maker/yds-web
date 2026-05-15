@@ -7,7 +7,8 @@
     "dev": "vite",
     "dev:full": "concurrently -k -n web,api -c cyan,magenta \"vite\" \"cd .. && python server.py\"",
     "gen:build-meta": "node ./scripts/generate-build-meta.mjs",
-    "build": "npm run gen:build-meta && vite build",
+    "verify:api": "node ../scripts/verify-api-modules.mjs",
+    "build": "npm run verify:api && npm run gen:build-meta && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
