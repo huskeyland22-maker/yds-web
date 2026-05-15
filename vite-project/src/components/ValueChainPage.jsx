@@ -168,6 +168,12 @@ export default function ValueChainPage({ panicData, marketCycleStage }) {
                   <span className="text-right font-semibold text-slate-100">{todaysKey.riskOnOff}</span>
                 </div>
                 <p className="m-0 text-right font-mono text-[9px] text-slate-500">{todaysKey.riskDetail}</p>
+                {todaysKey.basisLabelKst ? (
+                  <p className="m-0 text-right font-mono text-[9px] text-slate-600">
+                    기준: {todaysKey.basisLabelKst}
+                    {todaysKey.basisNote ? ` · ${todaysKey.basisNote}` : ""}
+                  </p>
+                ) : null}
                 <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
                   <span className="text-slate-500">Leading sector</span>
                   <span className="max-w-[11rem] text-right font-medium text-slate-100">{todaysKey.leadingSector}</span>

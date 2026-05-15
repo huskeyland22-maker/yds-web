@@ -1,4 +1,5 @@
 import { buildPanicIntegration } from "./panicIntegrationEngine.js"
+import { extractPanicMetrics, resolveMarketState } from "./marketStateEngine.js"
 
 function toNum(v) {
   const n = Number(v)
@@ -81,15 +82,9 @@ function buildBriefingLines(stateKey, m) {
 }
 
 export function buildAiMarketBrief(data) {
-  const metrics = {
-    vix: toNum(data?.vix),
-    fearGreed: toNum(data?.fearGreed),
-    bofa: toNum(data?.bofa),
-    putCall: toNum(data?.putCall),
-    highYield: toNum(data?.highYield),
-  }
-  const stateKey = classifyState(metrics)
-  const meta = STATE_META[stateKey]
+  const metrics = extractPanicMetrics(data)
+  const marketState = resolveMarketState(data)
+  const legacyKey = classifyState(metrics)
   const integrated = buildPanicIntegration({
     ...metrics,
     us10y: data?.us10y,
@@ -98,37 +93,43 @@ export function buildAiMarketBrief(data) {
   const bullets = buildBullets(metrics)
 
   const shortStrategy =
-    stateKey === "panic" || stateKey === "fear"
+    marketState.stateKey === "fear_dominant" || marketState.stateKey === "volatility_expansion"
       ? "변동성 급등 구간, 분할 접근 중심"
-      : stateKey === "overheating" || stateKey === "bubble"
-        ? "추격매수보다 눌림 대기 우세"
-        : "강한 테마 추격보다 눌림 관찰"
+      : marketState.stateKey === "risk_on"
+        ? "추격보다 눌림·지지 확인 우선"
+        : marketState.stateKey === "defensive"
+          ? "방어·현금 탄력, 신용 스프레드 점검"
+          : "강한 테마 추격보다 눌림 관찰"
   const midStrategy =
-    stateKey === "panic"
+    marketState.stateKey === "fear_dominant" || marketState.stateKey === "defensive"
       ? "방어적 섹터 우선, 현금 비중 유지"
       : "AI 인프라 사이클 지속 가능성 점검하며 비중 유지"
   const briefingLines = integrated.strategyHighlights?.length
     ? integrated.strategyHighlights
-    : buildBriefingLines(stateKey, metrics)
+    : buildBriefingLines(legacyKey, metrics)
 
   return {
-    state: integrated.currentState ?? meta.label,
-    stateKey,
-    stateColor: stateColorFromLabel(integrated.currentState ?? meta.label),
-    risk: integrated.riskLevel ?? meta.risk,
+    state: marketState.label,
+    stateKey: marketState.stateKey,
+    stateColor: marketState.color,
+    risk: integrated.riskLevel ?? marketState.risk,
+    marketState,
+    basisLabelKst: marketState.basisLabelKst,
+    basisNote: marketState.basisNote,
     integration: integrated,
-    headline: integrated.interpretation ?? (stateKey === "rotation"
-      ? "과열 후 순환매 진행"
-      : stateKey === "rebound"
-        ? "하락 진정 후 반등 시도"
-        : `${meta.label} 구간 진행`),
+    headline: marketState.headline || integrated.interpretation,
     briefingLines,
     bullets,
     shortStrategy,
     midStrategy,
     sectors: {
       strong: [
-        { name: "AI 반도체", score: stateKey === "panic" ? 62 : 84, trend: "상승 추세 유지", comment: "수급 집중 지속" },
+        {
+          name: "AI 반도체",
+          score: marketState.stateKey === "fear_dominant" || marketState.stateKey === "defensive" ? 62 : 84,
+          trend: "상승 추세 유지",
+          comment: "수급 집중 지속",
+        },
         { name: "전력/인프라", score: 76, trend: "눌림 후 재상승", comment: "정책·수요 모멘텀 유효" },
         { name: "원자재", score: 68, trend: "박스 상단 테스트", comment: "인플레 헤지 수요 반영" },
       ],

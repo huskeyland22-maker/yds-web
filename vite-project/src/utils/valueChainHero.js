@@ -1,4 +1,5 @@
 import { heatSortRank } from "./valueChainTree.js"
+import { resolveMarketState } from "./marketStateEngine.js"
 
 function heatRank(heat) {
   const h = String(heat || "").toUpperCase()
@@ -75,30 +76,26 @@ export function buildValueChainHeaderBundle(sectors, panicData) {
   })
   const hotSectors = sorted.slice(0, 3).map((s) => ({ name: s.name, icon: s.icon, heat: s.heat }))
 
+  const ms = resolveMarketState(panicData)
   const vix = Number(panicData?.vix)
   const fg = Number(panicData?.fearGreed)
-  let riskRegimeLabel = "레짐"
-  let riskRegimeDetail = "지표 동기화 대기"
-
-  if (Number.isFinite(vix) && Number.isFinite(fg)) {
-    if (vix < 17 && fg >= 58) riskRegimeLabel = "Risk-on"
-    else if (vix > 22 || fg <= 38) riskRegimeLabel = "Risk-off"
-    else riskRegimeLabel = "중립"
-    riskRegimeDetail = `VIX ${vix.toFixed(1)} · F&G ${Math.round(fg)}`
-  } else if (Number.isFinite(fg)) {
-    if (fg >= 62) riskRegimeLabel = "심리 선호"
-    else if (fg <= 38) riskRegimeLabel = "심리 방어"
-    else riskRegimeLabel = "중립"
-    riskRegimeDetail = `F&G ${Math.round(fg)}`
-  } else if (Number.isFinite(vix)) {
-    riskRegimeLabel = vix < 18 ? "변동성 낮음" : vix > 22 ? "변동성 경계" : "변동성 중립"
-    riskRegimeDetail = `VIX ${vix.toFixed(1)}`
-  }
+  const riskRegimeLabel = ms.label
+  const riskRegimeDetail =
+    Number.isFinite(vix) && Number.isFinite(fg)
+      ? `VIX ${vix.toFixed(1)} · F&G ${Math.round(fg)}`
+      : Number.isFinite(vix)
+        ? `VIX ${vix.toFixed(1)}`
+        : Number.isFinite(fg)
+          ? `F&G ${Math.round(fg)}`
+          : "지표 동기화 대기"
 
   return {
     ...base,
     hotSectors,
     riskRegimeLabel,
     riskRegimeDetail,
+    marketState: ms,
+    basisLabelKst: ms.basisLabelKst,
+    basisNote: ms.basisNote,
   }
 }

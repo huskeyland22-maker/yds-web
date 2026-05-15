@@ -57,15 +57,16 @@ export function buildCycleDeskHeroContext(panicData, cycleStage, heroSummary) {
     pulse.riskAppetite === "ON" ? "on" : pulse.riskAppetite === "OFF" ? "off" : pulse.riskAppetite === "혼합" ? "mix" : "unknown"
   const riskLabel =
     pulse.riskAppetite === "ON" ? "선호 우위" : pulse.riskAppetite === "OFF" ? "회피 우위" : pulse.riskAppetite === "혼합" ? "혼재" : "—"
+  const ms = pulse.marketStateKey
   const stageStyle =
-    cycleStage === "과열" || cycleStage === "탐욕"
+    ms === "risk_on"
       ? "greed"
-      : cycleStage === "공포" || cycleStage === "패닉"
+      : ms === "fear_dominant" || ms === "volatility_expansion" || ms === "defensive"
         ? "fear"
         : "neutral"
 
   return {
-    stageLabel: cycleStage,
+    stageLabel: pulse.marketStateLabel ?? cycleStage,
     stageStyle,
     tierHints: {
       tactical: hs.short ?? "—",

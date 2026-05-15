@@ -19,6 +19,7 @@ import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
 import { buildCycleDeskHeroContext } from "./utils/cycleDeskHero.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
+import { resolveMarketState } from "./utils/marketStateEngine.js"
 import MetricInputErrorBoundary from "./components/MetricInputErrorBoundary.jsx"
 import {
   coerceMetricValue,
@@ -260,16 +261,6 @@ function readRecentMemos(limit = 80) {
   }
 }
 
-function getMarketCycleStage(panicData) {
-  const vix = Number(panicData?.vix)
-  const fearGreed = Number(panicData?.fearGreed)
-  if (Number.isFinite(vix) && vix >= 32) return "패닉"
-  if (Number.isFinite(vix) && vix >= 24) return "공포"
-  if (Number.isFinite(fearGreed) && fearGreed >= 75) return "과열"
-  if (Number.isFinite(fearGreed) && fearGreed >= 60) return "탐욕"
-  return "중립"
-}
-
 function getLongPositionLabel(score) {
   const n = Number(score)
   if (!Number.isFinite(n)) return "중립"
@@ -437,7 +428,11 @@ function buildInsightWarnings({ flowStats, panicData, keywordTop }) {
   return warnings.slice(0, 3)
 }
 
-function buildInsightCards({ marketCycleStage, flowStats, trend, keywordTop }) {
+function isRiskOffMarketState(stateKey) {
+  return stateKey === "fear_dominant" || stateKey === "volatility_expansion" || stateKey === "defensive"
+}
+
+function buildInsightCards({ marketStateKey, flowStats, trend, keywordTop }) {
   const rotation = Array.isArray(flowStats?.rotation) ? flowStats.rotation : []
   const kw = Array.isArray(keywordTop) ? keywordTop : []
   const tr =
@@ -448,9 +443,9 @@ function buildInsightCards({ marketCycleStage, flowStats, trend, keywordTop }) {
   cards.push({
     title: "오늘의 시장 흐름",
     body:
-      marketCycleStage === "과열"
-        ? "과열 심리 일부 감지 · 추격보다 리스크 관리 우선"
-        : marketCycleStage === "공포" || marketCycleStage === "패닉"
+      marketStateKey === "risk_on"
+        ? "위험선호 확대 · 추격보다 리스크 관리 우선"
+        : isRiskOffMarketState(marketStateKey)
           ? "리스크 오프 가능성 확대 · 방어 비중 점검"
           : "중립~탐욕 사이클 · 선별 대응 구간",
     confidence: 0.74,
@@ -477,7 +472,7 @@ function buildInsightCards({ marketCycleStage, flowStats, trend, keywordTop }) {
   return cards
 }
 
-function buildFinderCandidates(memos, marketCycleStage) {
+function buildFinderCandidates(memos, marketStateKey) {
   const rows = Array.isArray(memos) ? memos : []
   const bag = new Map()
   for (const memo of rows.slice(0, 80)) {
@@ -501,12 +496,11 @@ function buildFinderCandidates(memos, marketCycleStage) {
     for (const sector of memo?.sectorTags ?? memo?.parsed?.sectors ?? []) row.sectors.add(sector)
     for (const signal of memo?.parsedSignals ?? memo?.parsed?.signal ?? []) row.signals.add(signal)
   }
-  const cycleBias =
-    marketCycleStage === "공포" || marketCycleStage === "패닉"
-      ? "패닉 후 회복 후보 관찰"
-      : marketCycleStage === "과열"
-        ? "추격 금지 · 눌림 대기"
-        : "순환매 초기 흐름 탐색"
+  const cycleBias = isRiskOffMarketState(marketStateKey)
+    ? "패닉 후 회복 후보 관찰"
+    : marketStateKey === "risk_on"
+      ? "추격 금지 · 눌림 대기"
+      : "순환매 초기 흐름 탐색"
   return [...bag.values()]
     .map((row) => {
       const signalArr = [...row.signals]
@@ -520,7 +514,7 @@ function buildFinderCandidates(memos, marketCycleStage) {
       const risk =
         row.bearish > row.bullish
           ? "주의"
-          : marketCycleStage === "과열"
+          : marketStateKey === "risk_on"
             ? "중간"
             : "낮음"
       const flow = hasRotation
@@ -1005,7 +999,8 @@ function App() {
       window.alert("저장에 실패했습니다")
     }
   }
-  const marketCycleStage = useMemo(() => getMarketCycleStage(panicData), [panicData])
+  const marketState = useMemo(() => resolveMarketState(panicData), [panicData])
+  const marketCycleStage = marketState.label
   const safeRecentMemos = Array.isArray(recentMemos) ? recentMemos : []
   const sidebarPulse = useMemo(() => buildMarketSidebarPulse(panicData, marketCycleStage), [panicData, marketCycleStage])
   const insightRows = useMemo(() => buildMemoInsightRows(safeRecentMemos), [recentMemos])
@@ -1018,10 +1013,13 @@ function App() {
     [flowStats, panicData, keywordTop],
   )
   const insightCards = useMemo(
-    () => buildInsightCards({ marketCycleStage, flowStats, trend: sentimentTrend, keywordTop }),
-    [marketCycleStage, flowStats, sentimentTrend, keywordTop],
+    () => buildInsightCards({ marketStateKey: marketState.stateKey, flowStats, trend: sentimentTrend, keywordTop }),
+    [marketState.stateKey, flowStats, sentimentTrend, keywordTop],
   )
-  const finderCandidates = useMemo(() => buildFinderCandidates(safeRecentMemos, marketCycleStage), [recentMemos, marketCycleStage])
+  const finderCandidates = useMemo(
+    () => buildFinderCandidates(safeRecentMemos, marketState.stateKey),
+    [recentMemos, marketState.stateKey],
+  )
   const metricCards = useMemo(
     () =>
       METRIC_DEFS.map(({ key, label }) => ({
@@ -1212,6 +1210,12 @@ function App() {
               <dd className="text-right text-indigo-200/90">{sidebarPulse.cycleStage}</dd>
             </div>
           </dl>
+          {sidebarPulse.basisLabelKst ? (
+            <p className="m-0 mt-2 text-[9px] leading-relaxed text-slate-500">
+              기준: {sidebarPulse.basisLabelKst}
+              {sidebarPulse.basisNote ? ` · ${sidebarPulse.basisNote}` : ""}
+            </p>
+          ) : null}
           <p className="m-0 mt-3 font-mono text-[9px] leading-relaxed text-slate-600">
             VIX {Number.isFinite(Number(panicData?.vix)) ? Number(panicData.vix).toFixed(2) : "—"} · F&amp;G{" "}
             {Number.isFinite(Number(panicData?.fearGreed)) ? Math.round(Number(panicData.fearGreed)) : "—"}

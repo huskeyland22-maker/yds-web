@@ -45,6 +45,7 @@ import {
 } from "../utils/tradingScores.js"
 import { getTradingSignal } from "../utils/tradingStrategy.js"
 import { buildAiMarketBrief } from "../utils/aiAnalysisEngine.js"
+import { resolveMarketState } from "../utils/marketStateEngine.js"
 
 /** 자동 새로고침 주기 — panicStore와 동일 */
 const PANIC_REFRESH_MS = PANIC_DATA_POLL_MS
@@ -511,12 +512,24 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
     return getFinalScore(data)
   }, [data, externalOnly])
 
-  const headlineSignal = useMemo(() => {
-    if (!data || !validatePanicData(data)) {
-      return { text: "—", color: "gray" }
-    }
-    return getAdvancedSignal(data)
+  const aiBrief = useMemo(() => buildAiMarketBrief(data), [data])
+
+  const marketState = useMemo(() => {
+    if (!data || !validatePanicData(data)) return null
+    return resolveMarketState(data)
   }, [data])
+
+  const headlineSignal = useMemo(() => {
+    if (!marketState) return { text: "—", color: "gray" }
+    const colorMap = {
+      risk_on: "limegreen",
+      neutral: "gray",
+      fear_dominant: "red",
+      volatility_expansion: "orange",
+      defensive: "yellow",
+    }
+    return { text: marketState.label, color: colorMap[marketState.stateKey] ?? marketState.color ?? "gray" }
+  }, [marketState])
 
   const headlineConfidence = useMemo(() => {
     if (!data || !validatePanicData(data)) return 0
@@ -529,7 +542,6 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
   }, [data])
 
   const headlineReferenceLabel = useMemo(() => getSignal(headlineReferenceTotal), [headlineReferenceTotal])
-  const aiBrief = useMemo(() => buildAiMarketBrief(data), [data])
   const integrationFlowText = summarizeIntegrationFlow(integrationHistory)
   const cycleAnalysisLines = useMemo(() => buildCycleAnalysis(dailyPanicHistory), [dailyPanicHistory])
 
@@ -941,6 +953,12 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
               {aiBrief.state} · <span className={riskToneClass}>{aiBrief.risk}</span>
             </p>
             <p className="m-0 mt-1 text-sm text-slate-300">{aiBrief.headline}</p>
+            {marketState?.basisLabelKst ? (
+              <p className="m-0 mt-2 text-[10px] text-slate-500">
+                기준: {marketState.basisLabelKst}
+                {marketState.basisNote ? ` · ${marketState.basisNote}` : ""}
+              </p>
+            ) : null}
             <p className="m-0 mt-2 flex items-center gap-1.5 text-[11px] tracking-wide text-cyan-300">
               <span className={`inline-block h-2 w-2 rounded-full shadow ${feedDotClass}`} />
               {feedLabel}

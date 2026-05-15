@@ -1,50 +1,41 @@
 import { buildValueChainHeaderBundle } from "./valueChainHero.js"
+import { resolveMarketState } from "./marketStateEngine.js"
 
 /**
- * 좌측 사이드바 MARKET STATUS (터미널 스타일 요약).
+ * 좌측 사이드바 MARKET STATUS (패닉지표 자동 계산).
  * @param {object | null} panicData
- * @param {string} cycleStage — getMarketCycleStage 결과
+ * @param {string} [cycleStage] — 레거시 호환; 미전달 시 엔진 라벨 사용
  */
 export function buildMarketSidebarPulse(panicData, cycleStage) {
-  const fg = Number(panicData?.fearGreed)
-  const vix = Number(panicData?.vix)
+  const ms = resolveMarketState(panicData)
 
   let riskAppetite = "—"
-  if (Number.isFinite(fg) && Number.isFinite(vix)) {
-    if (vix < 18 && fg >= 56) riskAppetite = "ON"
-    else if (vix > 23 || fg <= 38) riskAppetite = "OFF"
-    else riskAppetite = "혼합"
-  } else if (Number.isFinite(fg)) {
-    riskAppetite = fg >= 58 ? "ON" : fg <= 40 ? "OFF" : "혼합"
-  }
-
-  let marketMood = "—"
-  if (Number.isFinite(fg)) {
-    marketMood = fg >= 62 ? "확장" : fg <= 38 ? "방어" : "중립"
-  }
-
-  let volatility = "—"
-  if (Number.isFinite(vix)) {
-    volatility = vix < 16 ? "낮음" : vix > 22 ? "확대" : "안정"
-  }
+  if (ms.keySignalRisk === "ON") riskAppetite = "ON"
+  else if (ms.keySignalRisk === "OFF") riskAppetite = "OFF"
+  else if (ms.keySignalRisk === "혼합") riskAppetite = "혼합"
 
   return {
     riskAppetite,
-    marketMood,
+    marketMood: ms.marketMood,
     leadingSector: "AI · 반도체",
-    volatility,
-    cycleStage: typeof cycleStage === "string" ? cycleStage : "—",
+    volatility: ms.volatility,
+    marketStateLabel: ms.label,
+    marketStateKey: ms.stateKey,
+    marketStateColor: ms.color,
+    basisLabelKst: ms.basisLabelKst,
+    basisNote: ms.basisNote,
+    cycleStage: typeof cycleStage === "string" && cycleStage !== "중립" ? cycleStage : ms.label,
   }
 }
 
-function inferForeignFlow(panicData) {
-  const fg = Number(panicData?.fearGreed)
+function inferForeignFlow(panicData, ms) {
   const pc = Number(panicData?.putCall)
-  if (!Number.isFinite(fg) && !Number.isFinite(pc)) return "확인 필요"
+  if (ms.stateKey === "fear_dominant" || ms.stateKey === "volatility_expansion" || ms.stateKey === "defensive") {
+    return "방어·헤지 우위"
+  }
+  if (ms.stateKey === "risk_on") return "위험 선호 흐름"
   if (Number.isFinite(pc) && pc >= 1.02) return "옵션 방어 우위"
-  if (Number.isFinite(fg) && fg >= 58) return "추격 심리 가능"
-  if (Number.isFinite(fg) && fg <= 40) return "관망·유출 경계"
-  return "혼재"
+  return "중립 흐름"
 }
 
 /**
@@ -52,17 +43,19 @@ function inferForeignFlow(panicData) {
  */
 export function buildTodaysKeySignal(sectors, panicData, cycleStage) {
   const bundle = buildValueChainHeaderBundle(sectors, panicData)
+  const ms = resolveMarketState(panicData)
   const top = bundle.hotSectors[0]
-  const leading = top
-    ? `${top.icon ? `${top.icon} ` : ""}${top.name}`.trim()
-    : "—"
+  const leading = top ? `${top.icon ? `${top.icon} ` : ""}${top.name}`.trim() : "—"
 
   return {
-    riskOnOff: bundle.riskRegimeLabel,
-    riskDetail: bundle.riskRegimeDetail,
+    riskOnOff: ms.label,
+    riskDetail: `${ms.headline} · ${ms.basisNote}`,
     leadingSector: leading,
-    foreignFlow: inferForeignFlow(panicData),
-    marketCycle: typeof cycleStage === "string" ? cycleStage : "—",
+    foreignFlow: inferForeignFlow(panicData, ms),
+    marketCycle: typeof cycleStage === "string" && cycleStage !== "중립" ? cycleStage : ms.label,
     theme: bundle.marketEnergy,
+    marketState: ms,
+    basisLabelKst: ms.basisLabelKst,
+    basisNote: ms.basisNote,
   }
 }
