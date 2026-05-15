@@ -34,11 +34,9 @@ import { getToastChannel, toast } from "./utils/toast.js"
 /* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
 const MENU = [
-  { label: "시장 사이클", path: "/cycle", active: true },
-  { label: "코리아 밸류체인", path: "/value-chain", active: true },
-  { label: "매매 타점", path: "/timing", active: true },
-  { label: "AI 인사이트", path: "/insights", active: true },
-  { label: "트레이딩 로그", path: "/trading-log", active: true },
+  { label: "01 시장 사이클", path: "/cycle", active: true },
+  { label: "02 코리아 밸류체인", path: "/value-chain", active: true },
+  { label: "03 트레이딩 로그", path: "/trading-log", active: true },
 ]
 
 const METRIC_DEFS = [
@@ -1357,60 +1355,16 @@ function App() {
               path="/value-chain"
               element={
                 <SectionErrorBoundary label="코리아 밸류체인">
-                  <ValueChainPage panicData={panicData} marketCycleStage={marketCycleStage} />
+                  <ValueChainPage
+                    panicData={panicData}
+                    marketCycleStage={marketCycleStage}
+                    finderCandidates={finderCandidates}
+                    insightWarnings={insightWarnings}
+                  />
                 </SectionErrorBoundary>
               }
             />
-            <Route
-              path="/timing"
-              element={
-                <SectionErrorBoundary label="매매 타점">
-                  <div className="space-y-4">
-                  <section className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-4">
-                    <p className="m-0 text-xs uppercase tracking-[0.14em] text-cyan-300">매매 타점</p>
-                    <p className="m-0 mt-1 text-lg font-semibold text-cyan-100">사이클 → 섹터 → 종목 → 진입 확인</p>
-                    <p className="m-0 mt-1 text-sm text-gray-300">보조지표는 확인용, 핵심은 시장 흐름과 돈의 이동입니다.</p>
-                  </section>
-                  <section className="rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-4">
-                    <p className="m-0 text-sm font-semibold text-violet-200">체크리스트</p>
-                    <div className="mt-2 grid grid-cols-1 gap-2 text-xs text-gray-300 md:grid-cols-2">
-                      {["눌림목", "거래량 증가", "단기 시그널", "중기 흐름", "보조지표 확인"].map((item) => (
-                        <p key={item} className="m-0 rounded-lg border border-slate-700 bg-slate-900/70 px-2.5 py-2">{item}</p>
-                      ))}
-                    </div>
-                  </section>
-                  <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {(Array.isArray(finderCandidates) ? finderCandidates : []).slice(0, 6).map((candidate) => (
-                        <article key={candidate.name} className="rounded-xl border border-gray-800 bg-[#0b1220] px-4 py-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="m-0 text-base font-semibold text-gray-100">{candidate.name}</p>
-                            <span className="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] text-cyan-200">
-                              conf {candidate.confidence}
-                            </span>
-                          </div>
-                          <p className="m-0 mt-1 text-xs text-cyan-300">{candidate.flow}</p>
-                          <p className="m-0 mt-1 text-xs text-gray-300">
-                            위험도 {candidate.risk}
-                          </p>
-                          <p className="m-0 mt-1 text-xs text-gray-400">
-                            시그널: {(Array.isArray(candidate.signals) ? candidate.signals : []).slice(0, 3).join(", ") || "관찰중"}
-                          </p>
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {(Array.isArray(candidate.sectors) ? candidate.sectors : []).slice(0, 3).map((sector) => (
-                              <span key={sector} className="rounded-full border border-indigo-400/25 bg-indigo-500/10 px-2 py-0.5 text-[10px] text-indigo-200">
-                                {sector}
-                              </span>
-                            ))}
-                          </div>
-                          <p className="m-0 mt-2 text-[11px] text-gray-500">{candidate.cycleBias}</p>
-                        </article>
-                    ))}
-                    {!finderCandidates?.length ? <p className="m-0 text-sm text-gray-400">후보 데이터 축적 중입니다.</p> : null}
-                  </section>
-                </div>
-                </SectionErrorBoundary>
-              }
-            />
+            <Route path="/timing" element={<Navigate to="/value-chain#stock-signals" replace />} />
             <Route
               path="/trading-log"
               element={
@@ -1419,47 +1373,7 @@ function App() {
                 </SectionErrorBoundary>
               }
             />
-            <Route
-              path="/insights"
-              element={
-                <SectionErrorBoundary label="AI 인사이트">
-                  <div className="space-y-4">
-                  <section className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4">
-                    <p className="m-0 text-xs uppercase tracking-[0.14em] text-emerald-300">AI 인사이트</p>
-                    <p className="m-0 mt-1 text-lg font-semibold text-emerald-100">짧고 강한 시장 해석</p>
-                    <p className="m-0 mt-1 text-sm text-gray-300">오늘 시장의 방향만 한눈에 보여줍니다.</p>
-                  </section>
-                  <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {(Array.isArray(insightCards) ? insightCards : []).slice(0, 4).map((card) => (
-                      <article key={card.title} className="rounded-xl border border-gray-800 bg-[#0b1220] px-4 py-3">
-                        <p className="m-0 text-sm font-semibold text-gray-100">{card.title}</p>
-                        <p className="m-0 mt-1 text-xs text-gray-300">{card.body}</p>
-                      </article>
-                    ))}
-                  </section>
-                  <section className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-                    <p className="m-0 text-sm font-semibold text-amber-200">핵심 경고</p>
-                    <div className="mt-2 space-y-1 text-xs text-amber-100">
-                      {(Array.isArray(insightWarnings) && insightWarnings.length ? insightWarnings : ["지금은 과도한 경고 신호가 보이지 않습니다."]).map((line) => (
-                        <p key={line} className="m-0">- {line}</p>
-                      ))}
-                    </div>
-                  </section>
-                  <section className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3">
-                    <p className="m-0 text-sm font-semibold text-indigo-200">반복 흐름 키워드</p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {(Array.isArray(keywordTop) ? keywordTop : []).slice(0, 6).map(([k, n]) => (
-                        <span key={k} className="rounded-full border border-indigo-400/25 bg-indigo-500/10 px-2.5 py-1 text-xs text-indigo-100">
-                          {k} {n}
-                        </span>
-                      ))}
-                      {!keywordTop?.length ? <p className="m-0 text-xs text-gray-400">키워드 누적 대기중</p> : null}
-                    </div>
-                  </section>
-                </div>
-                </SectionErrorBoundary>
-              }
-            />
+            <Route path="/insights" element={<Navigate to="/value-chain" replace />} />
             <Route path="*" element={<Navigate to="/cycle" replace />} />
           </Routes>
         </main>

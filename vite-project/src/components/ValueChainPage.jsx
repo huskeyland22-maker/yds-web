@@ -9,6 +9,7 @@ import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueCh
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
 import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
+import ValueChainStockSignals from "./ValueChainStockSignals.jsx"
 
 function heatPillClass(heat) {
   if (heat === "VERY HOT") return "text-rose-200 bg-rose-500/20 border-rose-300/30"
@@ -42,7 +43,12 @@ function SectorMomentumBar({ heat }) {
   )
 }
 
-export default function ValueChainPage({ panicData: panicDataProp, marketCycleStage }) {
+export default function ValueChainPage({
+  panicData: panicDataProp,
+  marketCycleStage,
+  finderCandidates = [],
+  insightWarnings = [],
+}) {
   const panicFromStore = usePanicStore((s) => s.panicData)
   const panicData = panicFromStore ?? panicDataProp
 
@@ -74,6 +80,16 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
     const cancel = loadSectorHeat()
     return cancel
   }, [loadSectorHeat, panicData?.updatedAt])
+
+  useEffect(() => {
+    if (typeof window === "undefined" || window.location.hash !== "#stock-signals") return
+    const el = document.getElementById("stock-signals")
+    if (!el) return
+    const t = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 120)
+    return () => window.clearTimeout(t)
+  }, [sectors.length])
 
   const ordered = useMemo(() => {
     return sectors.slice().sort((a, b) => {
@@ -118,9 +134,9 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
           <span className="text-slate-600">→</span>
           <span className="text-slate-500">종목</span>
           <span className="text-slate-600">→</span>
-          <Link to="/timing" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
-            타점
-          </Link>
+          <a href="#stock-signals" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
+            종목 시그널
+          </a>
         </nav>
 
         <section className="relative mb-7 min-h-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,rgba(14,18,28,0.97),rgba(8,10,16,0.99))] px-4 py-5 md:px-6 md:py-6">
@@ -297,6 +313,15 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
               </article>
             )
           })}
+        </div>
+
+        <div className="mt-8">
+          <ValueChainStockSignals
+            sectors={sectors}
+            finderCandidates={finderCandidates}
+            insightWarnings={insightWarnings}
+            onSelectStock={(row) => setSelected({ stock: row, sectorName: row.sectorName })}
+          />
         </div>
 
         <AiBottleneckFlow sectors={sectors} />
