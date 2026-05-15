@@ -525,7 +525,7 @@ function buildPayload({
   })
   const firstBar = chartBars[0]
   const lastChartBar = chartBars[chartBars.length - 1]
-  const displayPrice = priceSummary.headlinePrice ?? lastClose
+  const displayPrice = priceSummary.todayClose ?? priceSummary.headlinePrice ?? lastClose
 
   return {
     symbol: code,
@@ -536,7 +536,7 @@ function buildPayload({
     updatedAt: new Date().toISOString(),
     asOf: asOfIso,
     price: displayPrice,
-    regularClose: priceSummary.regularClose,
+    regularClose: priceSummary.todayClose ?? priceSummary.regularClose,
     priceSummary,
     volumeChangePct: volPct,
     rsi14,

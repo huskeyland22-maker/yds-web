@@ -389,13 +389,13 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
   const updateBasis = meta?.updateBasisLabelKst ?? meta?.updatedLabelKst ?? "—"
   const badge = px?.sessionBadge ?? "—"
   const badgeKey = px?.sessionBadgeKey ?? "regular_close"
-  const headlineLabel = px?.headlineLabel ?? "오늘 종가"
-  const headlinePrice = px?.headlinePrice ?? px?.regularClose ?? null
+  const todayClose = px?.todayClose ?? px?.headlinePrice ?? px?.regularClose ?? null
+  const previousClose = px?.previousClose ?? null
   const changePct = px?.changePct ?? trendPack.dayChgPct
   const changeAmount = px?.changeAmount ?? null
-  const regularClose = px?.regularClose ?? null
   const showLive = px?.showLive === true && px?.livePrice != null
   const livePrice = px?.livePrice ?? null
+  const mappingWarning = px?.mappingWarning ?? null
 
   const toneClass =
     changePct != null && Number(changePct) < 0
@@ -431,47 +431,45 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
           </div>
         </div>
 
-        <p className="m-0 mt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">{headlineLabel}</p>
+        <p className="m-0 mt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">오늘 종가</p>
         <p className="m-0 mt-0.5 font-mono text-[26px] font-bold leading-none tabular-nums tracking-tight text-slate-50 sm:text-[28px]">
-          {fmtPrice(headlinePrice)}
+          {fmtPrice(todayClose)}
           <span className="ml-0.5 text-[14px] font-semibold text-slate-400">원</span>
         </p>
 
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <div>
-            <p className="m-0 text-[9px] font-medium uppercase tracking-[0.1em] text-slate-500">등락률</p>
-            <p className={`m-0 mt-0.5 font-mono text-[15px] font-bold tabular-nums ${chgColorClass(changePct)}`}>
-              {changePct != null ? `${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}%` : "—"}
+        <div className="mt-3 space-y-1.5 text-[11px]">
+          <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+            <span className="text-slate-500">전일 종가</span>
+            <span className="font-mono font-medium tabular-nums text-slate-300">{fmtPrice(previousClose)}원</span>
+          </p>
+          {showLive ? (
+            <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+              <span className="text-cyan-300/90">실시간 현재가</span>
+              <span className="font-mono font-semibold tabular-nums text-cyan-200">{fmtPrice(livePrice)}원</span>
             </p>
-          </div>
+          ) : null}
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-3 border-t border-white/[0.06] pt-3">
           <div>
             <p className="m-0 text-[9px] font-medium uppercase tracking-[0.1em] text-slate-500">전일 대비</p>
             <p className={`m-0 mt-0.5 font-mono text-[15px] font-bold tabular-nums ${chgColorClass(changeAmount)}`}>
               {fmtSignedPrice(changeAmount)}
             </p>
           </div>
+          <div>
+            <p className="m-0 text-[9px] font-medium uppercase tracking-[0.1em] text-slate-500">등락률</p>
+            <p className={`m-0 mt-0.5 font-mono text-[15px] font-bold tabular-nums ${chgColorClass(changePct)}`}>
+              {changePct != null ? `${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}%` : "—"}
+            </p>
+          </div>
         </div>
 
-        <div className="mt-3 space-y-1 border-t border-white/[0.06] pt-2.5 text-[11px]">
-          {showLive ? (
-            <>
-              <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-                <span className="text-slate-500">정규장 종가</span>
-                <span className="font-mono font-medium tabular-nums text-slate-300">{fmtPrice(regularClose)}원</span>
-              </p>
-              <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-                <span className="text-cyan-300/90">실시간 현재가</span>
-                <span className="font-mono font-semibold tabular-nums text-cyan-200">{fmtPrice(livePrice)}원</span>
-              </p>
-            </>
-          ) : (
-            <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-              <span className="text-slate-500">정규장 종가</span>
-              <span className="font-mono font-semibold tabular-nums text-slate-200">{fmtPrice(regularClose ?? headlinePrice)}원</span>
-            </p>
-          )}
-          {px?.regularCloseNote ? <p className="m-0 text-[9px] text-slate-600">{px.regularCloseNote}</p> : null}
-        </div>
+        {mappingWarning ? (
+          <p className="m-0 mt-2 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[9px] text-amber-200/90">
+            {mappingWarning}
+          </p>
+        ) : null}
 
         <div className="mt-2.5 border-t border-white/[0.05] pt-2 text-[10px] text-slate-500">
           <p className="m-0">
