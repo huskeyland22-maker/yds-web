@@ -1,5 +1,5 @@
 /**
- * 시장 지표 붙여넣기 — CSV 표 + 기사/앱 원문 한 줄에서 숫자만 추출.
+ * 시장 지표 붙여넣기 — 라인별 key,value 우선, canonical key 매핑.
  * 모든 공개 API는 throw 하지 않음 (실패 시 null·빈 결과 반환).
  */
 
@@ -19,10 +19,17 @@ const MAX_PASTE_CHARS = 48_000
 const MAX_REGEX_ITERATIONS = 200
 
 /**
- * Normalized alias slug → canonical metric key (앱/스토어 키).
- * 예: feargreed → fearGreed, hyoas → highYield, gssentiment → gsBullBear
+ * Normalized alias slug → canonical metric key.
  */
 export const METRIC_CANONICAL_FROM_SLUG = {
+  vix: "vix",
+  vxn: "vxn",
+  bofa: "bofa",
+  move: "move",
+  skew: "skew",
+  putcall: "putCall",
+  putcallratio: "putCall",
+  pcr: "putCall",
   feargreed: "fearGreed",
   cnnfeargreed: "fearGreed",
   cnnfearandgreed: "fearGreed",
@@ -38,7 +45,7 @@ export const METRIC_CANONICAL_FROM_SLUG = {
   goldmansachsbullbear: "gsBullBear",
 }
 
-/** @type {{ alias: string, key: string }[]} longest-first for greedy match */
+/** @type {{ alias: string, key: string }[]} */
 const METRIC_ALIAS_ENTRIES = Object.entries(METRIC_CANONICAL_FROM_SLUG)
   .map(([alias, key]) => ({ alias, key }))
   .sort((a, b) => b.alias.length - a.alias.length)
@@ -86,6 +93,18 @@ export const METRIC_PASTE_RULES = [
   },
 ]
 
+const METRIC_LOG_LABEL = {
+  vix: "VIX",
+  vxn: "VXN",
+  fearGreed: "FEAR_GREED",
+  bofa: "BOFA",
+  move: "MOVE",
+  skew: "SKEW",
+  putCall: "PUTCALL",
+  highYield: "HIGH_YIELD",
+  gsBullBear: "GS_BB",
+}
+
 let EMOJI_AND_MARKERS_RE = null
 let CHANGE_SPLIT_RE = null
 let DATE_SLASH_RE = null
@@ -119,15 +138,6 @@ export function emptyMetricPasteResult(requiredKeys = []) {
   }
 }
 
-/**
- * 붙여넣기 원문 정리 — emoji, ▲▼, 출처, 제어문자 제거.
- * @param {unknown} raw
- */
-/**
- * 지표 라벨 정규화 — 소문자, 공백 제거, &, /, (), - 등 특수문자 제거, trim.
- * @param {unknown} raw
- * @returns {string} slug (예: "CNN Fear & Greed" → "cnnfeargreed")
- */
 export function normalizeMetricLabel(raw) {
   try {
     return String(raw ?? "")
@@ -142,44 +152,26 @@ export function normalizeMetricLabel(raw) {
   }
 }
 
-/** 라벨 구간만 정규화 (수치 토큰은 제외) */
-function normalizeLineForAliasMatch(line) {
-  try {
-    compilePasteRegexes()
-    const labelPart = String(line ?? "").replace(NUMBER_TOKEN_RE, " ")
-    return normalizeMetricLabel(labelPart)
-  } catch {
-    return normalizeMetricLabel(line)
-  }
-}
-
-/**
- * @param {string} text
- * @returns {{ key: string, alias: string, normIndex: number } | null}
- */
-function findMetricByAlias(text) {
-  try {
-    const norm = normalizeLineForAliasMatch(text)
-    if (!norm) return null
-    for (const { alias, key } of METRIC_ALIAS_ENTRIES) {
-      const idx = norm.indexOf(alias)
-      if (idx >= 0) return { key, alias, normIndex: idx }
-    }
-  } catch {
-    // ignore
-  }
-  return null
-}
-
-/** slug가 canonical 키면 그대로, alias면 변환 */
 export function resolveCanonicalMetricKey(slugOrKey) {
   try {
     const s = normalizeMetricLabel(slugOrKey)
     if (!s) return null
-    if (METRIC_PASTE_KEYS.includes(slugOrKey)) return slugOrKey
-    return METRIC_CANONICAL_FROM_SLUG[s] ?? null
+    if (METRIC_CANONICAL_FROM_SLUG[s]) return METRIC_CANONICAL_FROM_SLUG[s]
+    for (const k of METRIC_PASTE_KEYS) {
+      if (normalizeMetricLabel(k) === s) return k
+    }
+    return null
   } catch {
     return null
+  }
+}
+
+function logMetricParse(canonicalKey, value) {
+  try {
+    const label = METRIC_LOG_LABEL[canonicalKey] ?? String(canonicalKey).toUpperCase()
+    console.log(`[${label}] -> ${value}`)
+  } catch {
+    // ignore
   }
 }
 
@@ -199,8 +191,8 @@ export function sanitizeMetricPasteText(raw) {
       .replace(SOURCE_NOISE_RE, " ")
       .replace(/[^\S\r\n]+/g, " ")
       .replace(/[▲▼↑↓📈📉🟢🟡🔴⚪]/g, " ")
-      .replace(/[^\w\s.,%+\-/&가-힣]/g, " ")
-      .replace(/\s+/g, " ")
+      .replace(/[^\w\s.,%+\-/&가-힣\r\n]/g, " ")
+      .replace(/[ \t]+/g, " ")
       .trim()
     return s
   } catch {
@@ -221,7 +213,6 @@ export function normalizeNumberToken(raw) {
   }
 }
 
-/** @param {unknown} value */
 export function coerceMetricValue(value) {
   if (value == null) return null
   if (typeof value === "number") {
@@ -235,8 +226,64 @@ function splitCsvLine(line) {
     return String(line ?? "")
       .split(",")
       .map((p) => p.trim())
+      .filter((p) => p.length > 0)
   } catch {
     return []
+  }
+}
+
+/**
+ * 한 줄에서 rawKey / rawValue 분리 (표 형식·단순 KEY,VALUE).
+ * @returns {{ rawKey: string, rawValue: string } | null}
+ */
+function splitLineKeyValue(line) {
+  try {
+    const trimmed = String(line ?? "").trim()
+    if (!trimmed || !trimmed.includes(",")) return null
+
+    const parts = splitCsvLine(trimmed)
+    if (parts.length < 2) return null
+
+    if (parts.length >= 3 && /^(단기|중기|장기)$/i.test(parts[0])) {
+      return { rawKey: parts[1], rawValue: parts[2] }
+    }
+    if (parts.length >= 3 && /^\d+$/.test(parts[0])) {
+      return { rawKey: parts[1], rawValue: parts[2] }
+    }
+    if (parts.length >= 3 && /^\d+\.\s/.test(parts[1])) {
+      return { rawKey: parts[1], rawValue: parts[2] }
+    }
+
+    const rawKey = parts[0]
+    let rawValue = parts[1]
+    if (parts.length > 2) {
+      const numericPart = parts.slice(1).find((p) => normalizeNumberToken(p) != null)
+      if (numericPart) rawValue = numericPart
+    }
+    return { rawKey, rawValue }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * 명시적 KEY,VALUE 라인 — 이 줄만 처리, 다른 지표와 값 공유 없음.
+ * @returns {{ key: string, value: number } | null}
+ */
+function parseExplicitKeyValueLine(line) {
+  try {
+    const pair = splitLineKeyValue(line)
+    if (!pair) return null
+
+    const canonicalKey = resolveCanonicalMetricKey(pair.rawKey)
+    if (!canonicalKey) return null
+
+    const parsedNumber = normalizeNumberToken(pair.rawValue)
+    if (parsedNumber == null) return null
+
+    return { key: canonicalKey, value: parsedNumber }
+  } catch {
+    return null
   }
 }
 
@@ -265,6 +312,28 @@ function safeRegexExec(re, text) {
   }
 }
 
+function findMetricInText(text, patterns) {
+  try {
+    if (!text || !Array.isArray(patterns)) return null
+    let best = null
+    for (const pattern of patterns) {
+      if (!pattern?.source) continue
+      const flags = String(pattern.flags || "i").includes("g") ? pattern.flags : `${pattern.flags || "i"}g`
+      const re = new RegExp(pattern.source, flags)
+      const m = safeRegexExec(re, text)
+      if (m && typeof m.index === "number") {
+        const len = m[0]?.length ?? 0
+        if (!best || len > best.length) {
+          best = { index: m.index, length: len }
+        }
+      }
+    }
+    return best
+  } catch {
+    return null
+  }
+}
+
 function collectNumbersFromSegment(primarySegment) {
   const candidates = []
   try {
@@ -285,6 +354,7 @@ function collectNumbersFromSegment(primarySegment) {
   return candidates
 }
 
+/** 기사형 한 줄 — 매치 위치 이후 구간에서만 숫자 추출 (index 0 fallback 없음) */
 export function extractPrimaryMetricValue(text, fromIndex) {
   try {
     if (!text || typeof fromIndex !== "number" || !Number.isFinite(fromIndex)) return null
@@ -316,53 +386,22 @@ export function extractPrimaryMetricValue(text, fromIndex) {
   }
 }
 
-export function extractMetricValueFromCsvLine(line) {
+function normalizeLineForAliasMatch(line) {
   try {
-    const parts = splitCsvLine(line)
-    if (parts.length < 2) return null
-    const col0 = String(parts[0] ?? "").trim()
-    const col1 = String(parts[1] ?? "").trim()
-
-    if (/^\d+$/.test(col0) && parts.length >= 3) {
-      const v = normalizeNumberToken(parts[2])
-      if (v != null) return v
-    }
-
-    if (/^(단기|중기|장기)$/i.test(col0) && parts.length >= 3) {
-      const v = normalizeNumberToken(parts[2])
-      if (v != null) return v
-    }
-
-    if (/^\d+\.\s/.test(col1) && parts.length >= 3) {
-      const v = normalizeNumberToken(parts[2])
-      if (v != null) return v
-    }
-
-    const fromCol1 = normalizeNumberToken(col1)
-    if (fromCol1 != null && !/[A-Za-z가-힣]/.test(col1)) return fromCol1
-
-    if (parts.length >= 3) {
-      const fallback = normalizeNumberToken(parts[2])
-      if (fallback != null) return fallback
-    }
-
-    return fromCol1
+    compilePasteRegexes()
+    const labelPart = String(line ?? "").replace(NUMBER_TOKEN_RE, " ")
+    return normalizeMetricLabel(labelPart)
   } catch {
-    return null
+    return normalizeMetricLabel(line)
   }
 }
 
-function findMetricInText(text, patterns) {
+function findMetricByAliasOnLine(line) {
   try {
-    if (!text || !Array.isArray(patterns)) return null
-    for (const pattern of patterns) {
-      if (!pattern?.source) continue
-      const flags = String(pattern.flags || "i").includes("g") ? pattern.flags : `${pattern.flags || "i"}g`
-      const re = new RegExp(pattern.source, flags)
-      const m = safeRegexExec(re, text)
-      if (m && typeof m.index === "number") {
-        return { index: m.index, length: m[0]?.length ?? 0 }
-      }
+    const norm = normalizeLineForAliasMatch(line)
+    if (!norm) return null
+    for (const { alias, key } of METRIC_ALIAS_ENTRIES) {
+      if (norm.includes(alias)) return { key, alias }
     }
   } catch {
     // ignore
@@ -370,41 +409,47 @@ function findMetricInText(text, patterns) {
   return null
 }
 
-function extractValueForMetricLine(line, matchEndIndex = 0) {
+/**
+ * 기사/라벨 한 줄 (콤마 KEY,VALUE 아님) — 이 줄에서 단일 지표·단일 값만.
+ */
+function parseArticleMetricLine(line) {
   try {
-    if (String(line).includes(",")) {
-      const csvVal = extractMetricValueFromCsvLine(line)
-      if (csvVal != null) return csvVal
+    const trimmed = String(line ?? "").trim()
+    if (!trimmed || trimmed.includes(",")) return null
+
+    const aliasHit = findMetricByAliasOnLine(trimmed)
+    if (aliasHit) {
+      const slugIdx = normalizeLineForAliasMatch(trimmed).indexOf(aliasHit.alias)
+      const approxStart = slugIdx >= 0 ? slugIdx : 0
+      const value = extractPrimaryMetricValue(trimmed, approxStart + aliasHit.alias.length)
+      if (value != null) return { key: aliasHit.key, value }
     }
-    const start = Number.isFinite(matchEndIndex) ? Math.max(0, matchEndIndex) : 0
-    const fromTail = extractPrimaryMetricValue(line, start)
-    if (fromTail != null) return fromTail
-    return extractPrimaryMetricValue(line, 0)
+
+    let best = null
+    for (const rule of METRIC_PASTE_RULES) {
+      const hit = findMetricInText(trimmed, rule.patterns)
+      if (!hit) continue
+      const value = extractPrimaryMetricValue(trimmed, hit.index + hit.length)
+      if (value == null) continue
+      if (!best || hit.length > best.hit.length) {
+        best = { key: rule.key, value, hit }
+      }
+    }
+    return best ? { key: best.key, value: best.value } : null
   } catch {
     return null
   }
 }
 
-function parseLineForMetric(line, rule) {
+function isLikelyKeyValuePaste(lines) {
   try {
-    const { patterns } = rule ?? {}
-    const hit = findMetricInText(line, patterns)
-    if (!hit) return null
-    return extractValueForMetricLine(line, hit.index + hit.length)
+    let kv = 0
+    for (const line of lines) {
+      if (parseExplicitKeyValueLine(line)) kv += 1
+    }
+    return kv >= 1
   } catch {
-    return null
-  }
-}
-
-function parseLineForAlias(line) {
-  try {
-    const aliasHit = findMetricByAlias(line)
-    if (!aliasHit) return null
-    const value = extractValueForMetricLine(line, 0)
-    if (value == null) return null
-    return { key: aliasHit.key, value }
-  } catch {
-    return null
+    return false
   }
 }
 
@@ -431,35 +476,28 @@ export function parseMetricPasteText(text, requiredKeys = []) {
       .split(/\r?\n/)
       .map((ln) => ln.trim())
       .filter(Boolean)
+
     const out = Object.fromEntries(METRIC_PASTE_KEYS.map((k) => [k, null]))
+    const preferKeyValue = isLikelyKeyValuePaste(lines)
 
     for (const line of lines) {
-      const aliasParsed = parseLineForAlias(line)
-      if (aliasParsed && out[aliasParsed.key] == null) {
-        out[aliasParsed.key] = aliasParsed.value
+      if (preferKeyValue || line.includes(",")) {
+        const kv = parseExplicitKeyValueLine(line)
+        if (kv) {
+          if (out[kv.key] == null) {
+            out[kv.key] = kv.value
+            logMetricParse(kv.key, kv.value)
+          }
+          continue
+        }
+        if (preferKeyValue) continue
       }
-      for (const rule of METRIC_PASTE_RULES) {
-        if (out[rule.key] != null) continue
-        const n = parseLineForMetric(line, rule)
-        if (n == null) continue
-        out[rule.key] = n
-      }
-    }
 
-    const blob = lines.join("\n")
-    if (!METRIC_PASTE_KEYS.every((k) => out[k] != null)) {
-      const blobAlias = parseLineForAlias(blob)
-      if (blobAlias && out[blobAlias.key] == null) {
-        out[blobAlias.key] = blobAlias.value
+      const article = parseArticleMetricLine(line)
+      if (article && out[article.key] == null) {
+        out[article.key] = article.value
+        logMetricParse(article.key, article.value)
       }
-    }
-    for (const rule of METRIC_PASTE_RULES) {
-      if (out[rule.key] != null) continue
-      const found = findMetricInText(blob, rule.patterns)
-      if (!found) continue
-      const n = extractPrimaryMetricValue(blob, found.index + found.length)
-      if (n == null) continue
-      out[rule.key] = n
     }
 
     return normalizeParseResult(out, requiredKeys)
@@ -469,15 +507,13 @@ export function parseMetricPasteText(text, requiredKeys = []) {
   }
 }
 
-/**
- * @param {string} pasted
- */
 export function normalizeMetricPasteForTextarea(pasted) {
   try {
     const raw = sanitizeMetricPasteText(pasted)
     if (!raw) return String(pasted ?? "")
 
-    const looksLikeTable = raw.split(/\r?\n/).some((ln) => {
+    const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+    const looksLikeTable = lines.some((ln) => {
       const parts = splitCsvLine(ln)
       return parts.length >= 3 && /^(단기|중기|장기|\d+$)/i.test(parts[0] ?? "")
     })
@@ -486,9 +522,10 @@ export function normalizeMetricPasteForTextarea(pasted) {
     const { data, hitCount } = parseMetricPasteText(raw)
     if (!hitCount) return String(pasted ?? "")
 
-    const rows = METRIC_PASTE_RULES.filter((r) => data[r.key] != null).map((r) => {
-      const v = data[r.key]
-      return `${r.key.toUpperCase()},${typeof v === "number" ? v : ""}`
+    const rows = METRIC_PASTE_KEYS.filter((k) => data[k] != null).map((k) => {
+      const label = METRIC_LOG_LABEL[k] ?? k.toUpperCase()
+      const v = data[k]
+      return `${label},${typeof v === "number" ? v : ""}`
     })
     return rows.filter(Boolean).join("\n") || String(pasted ?? "")
   } catch (err) {
@@ -497,10 +534,6 @@ export function normalizeMetricPasteForTextarea(pasted) {
   }
 }
 
-/**
- * 붙여넣기 정규화 (throw 없음).
- * @returns {{ ok: boolean, text: string }}
- */
 export function safeNormalizeMetricPasteForTextarea(pasted) {
   try {
     const original = String(pasted ?? "")
@@ -513,10 +546,15 @@ export function safeNormalizeMetricPasteForTextarea(pasted) {
   }
 }
 
-/** @param {unknown} value */
 export function formatMetricValueForDisplay(value) {
   const n = coerceMetricValue(value)
   if (n == null) return "—"
   if (typeof n === "number" && Number.isFinite(n)) return String(n)
   return "—"
+}
+
+/** @deprecated 라인별 parse 사용 — 하위 호환 */
+export function extractMetricValueFromCsvLine(line) {
+  const kv = parseExplicitKeyValueLine(line)
+  return kv?.value ?? null
 }
