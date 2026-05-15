@@ -168,12 +168,12 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                   transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                   className="mb-8"
                 >
-                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">미니 캔들 (일봉)</p>
+                  <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">일봉 캔들</p>
                   <p className="m-0 mt-1 text-[10px] leading-relaxed text-slate-600">
-                    최근 약 3~6개월 · OHLC·20/60 MA·거래량 (호버 시 시가·고가·저가·종가·등락률)
+                    최근 약 3개월 · 캔들·거래량·MA20/60 · 휠·핀치 확대
                   </p>
                   <div className="mt-3">
-                    <MiniDailyStockChart bars={snap.chart.bars} />
+                    <MiniDailyStockChart bars={snap.chart.bars} chartMeta={snap.chartMeta} />
                   </div>
                 </motion.section>
               ) : (

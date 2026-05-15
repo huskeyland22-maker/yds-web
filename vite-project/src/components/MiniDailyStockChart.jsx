@@ -1,5 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { ColorType, LastPriceAnimationMode, LineType, createChart } from "lightweight-charts"
+import { ColorType, createChart } from "lightweight-charts"
+
+const CHART_H = 460
+const DISPLAY_BARS = 66
+
+const THEME = {
+  bg: "#080b12",
+  text: "rgba(203,213,225,0.82)",
+  grid: "rgba(255,255,255,0.045)",
+  border: "rgba(255,255,255,0.08)",
+  up: "#22c55e",
+  upWick: "#4ade80",
+  down: "#ef4444",
+  downWick: "#f87171",
+  ma20: "#fbbf24",
+  ma60: "#94a3b8",
+  crosshair: "rgba(148,163,184,0.45)",
+}
 
 /** @param {string | null | undefined} dateRaw YYYYMMDD */
 function ymdToTime(dateRaw) {
@@ -28,11 +45,6 @@ function timeToKey(time) {
   return null
 }
 
-function formatDateLabel(dateRaw) {
-  const t = ymdToTime(dateRaw)
-  return t || "—"
-}
-
 function fmtPrice(n) {
   if (n == null || !Number.isFinite(Number(n))) return "—"
   const v = Number(n)
@@ -46,18 +58,17 @@ function fmtVol(n) {
 
 /**
  * @param {Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>} bars
- * @returns {{ lines: string[]; stance: string; tone: "up" | "down" | "neutral"; dayChgPct: number | null; volRatio: number | null }}
  */
 function buildTrendSummary(bars) {
   if (!bars?.length) {
-    return { lines: [], stance: "데이터 부족", tone: "neutral", dayChgPct: null, volRatio: null }
+    return { lines: [], stance: "데이터 부족", tone: "neutral", dayChgPct: null }
   }
   const last = bars[bars.length - 1]
   const prev = bars.length >= 2 ? bars[bars.length - 2] : null
   const m20 = last.ma20
   const m60 = last.ma60
   if (!Number.isFinite(last.close)) {
-    return { lines: [], stance: "—", tone: "neutral", dayChgPct: null, volRatio: null }
+    return { lines: [], stance: "—", tone: "neutral", dayChgPct: null }
   }
   let stance = "추세 확인"
   let tone = "neutral"
@@ -68,60 +79,35 @@ function buildTrendSummary(bars) {
     } else if (m20 < m60 && last.close < m20) {
       stance = "하락·조정"
       tone = "down"
-    } else if (last.close >= m20 * 0.997 && last.close <= m20 * 1.007) {
-      stance = "20일선 박스"
-      tone = "neutral"
     } else {
       stance = "혼조"
-      tone = "neutral"
     }
   }
   const lines = []
   if (Number.isFinite(m20) && Number.isFinite(m60)) {
-    if (m20 > m60 && last.close > m20) lines.push("20>60 · 종가가 단기 이평 상단")
-    else if (m20 < m60 && last.close < m20) lines.push("20<60 · 종가가 단기 이평 하단")
-    else if (last.close >= m20 * 0.997 && last.close <= m20 * 1.007) lines.push("20일선 부근 · 지지·저항 확인")
+    if (m20 > m60 && last.close > m20) lines.push("20>60 · 종가 단기 이평 상단")
+    else if (m20 < m60 && last.close < m20) lines.push("20<60 · 종가 단기 이평 하단")
     else lines.push("이평 혼합 · 방향 대기")
   }
-  const vols = bars.map((b) => b.volume ?? 0)
-  const n = vols.length
-  const from = Math.max(0, n - 21)
-  let s = 0
-  let c = 0
-  for (let i = from; i < n - 1; i++) {
-    s += vols[i] || 0
-    c += 1
-  }
-  const avg = c > 0 ? s / c : 0
-  const lv = last.volume || 0
-  const volRatio = avg > 0 ? lv / avg : null
-  if (avg > 0 && lv >= avg * 1.35) {
-    if (prev && Number.isFinite(prev.close) && last.close >= prev.close) lines.push("거래량 동반 상승")
-    else lines.push("거래 급증 · 매물 소화 관찰")
-  }
-  if (prev && Number.isFinite(prev.close) && prev.close > 0 && last.close > prev.close * 1.04) {
-    lines.push("단기 급등 · 과열 감시")
-  }
   let dayChgPct = null
-  if (Number.isFinite(prev.close) && prev.close > 0) {
+  if (prev && Number.isFinite(prev.close) && prev.close > 0) {
     dayChgPct = ((last.close - prev.close) / prev.close) * 100
   }
-  return { lines: lines.slice(0, 2), stance, tone, dayChgPct, volRatio }
+  return { lines: lines.slice(0, 2), stance, tone, dayChgPct }
 }
 
 /**
  * @param {Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>} bars
  */
 function prepareChartData(bars) {
-  const vols = bars.map((b) => b.volume ?? 0)
-  /** @type {Array<{ time: string; value: number }>} */
-  const closes = []
+  /** @type {Array<{ time: string; open: number; high: number; low: number; close: number }>} */
+  const candles = []
   /** @type {Array<{ time: string; value: number }>} */
   const ma20d = []
   /** @type {Array<{ time: string; value: number }>} */
   const ma60d = []
   /** @type {Array<{ time: string; value: number; color: string }>} */
-  const hist = []
+  const volume = []
   /** @type {Map<string, { open: number; high: number; low: number; close: number; volume: number; changePct: number; dateLabel: string }>} */
   const meta = new Map()
 
@@ -129,45 +115,49 @@ function prepareChartData(bars) {
     const b = bars[i]
     const t = ymdToTime(b.date)
     if (!t) continue
-    closes.push({ time: t, value: b.close })
+
+    const up = b.close >= b.open
+    candles.push({
+      time: t,
+      open: b.open,
+      high: b.high,
+      low: b.low,
+      close: b.close,
+    })
+
     if (b.ma20 != null && Number.isFinite(b.ma20)) ma20d.push({ time: t, value: b.ma20 })
     if (b.ma60 != null && Number.isFinite(b.ma60)) ma60d.push({ time: t, value: b.ma60 })
 
-    let volSma = 0
-    let cnt = 0
-    for (let j = Math.max(0, i - 19); j <= i; j++) {
-      volSma += vols[j] || 0
-      cnt += 1
-    }
-    volSma = cnt ? volSma / cnt : 0
-    const v = vols[i] || 0
-    const spike = volSma > 0 && v >= volSma * 1.35
-    const up = b.close >= b.open
-    let color = up ? "rgba(45,212,191,0.12)" : "rgba(244,63,94,0.12)"
-    if (spike) color = up ? "rgba(45,212,191,0.28)" : "rgba(244,63,94,0.26)"
-    hist.push({ time: t, value: v, color })
+    volume.push({
+      time: t,
+      value: b.volume ?? 0,
+      color: up ? "rgba(34,197,94,0.55)" : "rgba(239,68,68,0.55)",
+    })
 
     const prevClose = i > 0 ? bars[i - 1].close : b.close
     const chg = prevClose ? ((b.close - prevClose) / prevClose) * 100 : 0
+    const dateLabel = b.date && /^\d{8}$/.test(String(b.date))
+      ? `${String(b.date).slice(4, 6)}/${String(b.date).slice(6, 8)}`
+      : t
     meta.set(t, {
       open: b.open,
       high: b.high,
       low: b.low,
       close: b.close,
-      volume: v,
+      volume: b.volume ?? 0,
       changePct: chg,
-      dateLabel: formatDateLabel(b.date),
+      dateLabel,
     })
   }
 
-  return { closes, ma20: ma20d, ma60: ma60d, volume: hist, meta }
+  return { candles, ma20: ma20d, ma60: ma60d, volume, meta }
 }
 
 /**
- * 밸류체인 우측 패널 — 프리미엄 라인+영역(종가 추세) · MA 오버레이 · 최소 거래량 (lightweight-charts).
- * @param {{ bars: Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>; className?: string }} props
+ * 프리미엄 일봉 캔들 · 거래량 · MA (lightweight-charts).
+ * @param {{ bars: Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>; chartMeta?: object; className?: string }} props
  */
-export default function MiniDailyStockChart({ bars, className = "" }) {
+export default function MiniDailyStockChart({ bars, chartMeta, className = "" }) {
   const wrapRef = useRef(null)
   const chartRef = useRef(null)
   const [tooltip, setTooltip] = useState(null)
@@ -175,35 +165,33 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
 
   const normalizedBars = useMemo(() => {
     if (!Array.isArray(bars) || bars.length === 0) return []
-    return bars.map((b) => {
-      const c = Number(b.close)
-      let o = Number(b.open)
-      let h = Number(b.high)
-      let l = Number(b.low)
-      if (!Number.isFinite(c)) return null
-      if (!Number.isFinite(o)) o = c
-      if (!Number.isFinite(h)) h = Math.max(o, c)
-      if (!Number.isFinite(l)) l = Math.min(o, c)
-      h = Math.max(h, o, c)
-      l = Math.min(l, o, c)
-      return {
-        ...b,
-        open: o,
-        high: h,
-        low: l,
-        close: c,
-        volume: Math.max(0, b.volume ?? 0),
-        ma20: b.ma20 ?? null,
-        ma60: b.ma60 ?? null,
-      }
-    }).filter(Boolean)
+    return bars
+      .map((b) => {
+        const c = Number(b.close)
+        let o = Number(b.open)
+        let h = Number(b.high)
+        let l = Number(b.low)
+        if (!Number.isFinite(c)) return null
+        if (!Number.isFinite(o)) o = c
+        if (!Number.isFinite(h)) h = Math.max(o, c)
+        if (!Number.isFinite(l)) l = Math.min(o, c)
+        h = Math.max(h, o, c)
+        l = Math.min(l, o, c)
+        return {
+          ...b,
+          open: o,
+          high: h,
+          low: l,
+          close: c,
+          volume: Math.max(0, b.volume ?? 0),
+          ma20: b.ma20 ?? null,
+          ma60: b.ma60 ?? null,
+        }
+      })
+      .filter(Boolean)
   }, [bars])
 
   const trendPack = useMemo(() => buildTrendSummary(normalizedBars), [normalizedBars])
-  const trendLines = trendPack.lines
-  const lastBar = normalizedBars[normalizedBars.length - 1]
-  const lastClose = lastBar && Number.isFinite(lastBar.close) ? lastBar.close : null
-
   const chartPack = useMemo(() => prepareChartData(normalizedBars), [normalizedBars])
 
   useEffect(() => {
@@ -212,115 +200,109 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
 
   useEffect(() => {
     const el = wrapRef.current
-    if (!el || chartPack.closes.length < 2) return undefined
+    if (!el || chartPack.candles.length < 2) return undefined
 
     const chart = createChart(el, {
       layout: {
-        background: { type: ColorType.Solid, color: "#070a10" },
-        textColor: "rgba(148,163,184,0.78)",
+        background: { type: ColorType.Solid, color: THEME.bg },
+        textColor: THEME.text,
         fontSize: 11,
+        fontFamily: "'IBM Plex Mono', 'Pretendard', ui-monospace, monospace",
       },
       grid: {
-        vertLines: { visible: false },
-        horzLines: { color: "rgba(255,255,255,0.028)" },
+        vertLines: { color: THEME.grid },
+        horzLines: { color: THEME.grid },
       },
       width: el.clientWidth,
-      height: el.clientHeight || 380,
+      height: el.clientHeight || CHART_H,
       rightPriceScale: {
-        borderColor: "rgba(167,139,250,0.12)",
+        borderColor: THEME.border,
+        scaleMargins: { top: 0.06, bottom: 0.22 },
       },
       timeScale: {
-        borderColor: "rgba(34,211,238,0.1)",
-        timeVisible: false,
+        borderColor: THEME.border,
+        timeVisible: true,
         secondsVisible: false,
-        fixLeftEdge: true,
-        fixRightEdge: true,
-        barSpacing: 6,
-        minBarSpacing: 4,
+        fixLeftEdge: false,
+        fixRightEdge: false,
+        barSpacing: 7,
+        minBarSpacing: 3,
+        rightOffset: 6,
       },
       crosshair: {
         mode: 1,
-        vertLine: {
-          color: "rgba(167,139,250,0.55)",
-          width: 1,
-          style: 0,
-          labelBackgroundColor: "rgba(15,23,42,0.92)",
-        },
-        horzLine: {
-          color: "rgba(34,211,238,0.4)",
-          width: 1,
-          style: 0,
-          labelBackgroundColor: "rgba(15,23,42,0.92)",
-        },
+        vertLine: { color: THEME.crosshair, width: 1, style: 2, labelBackgroundColor: "#1e293b" },
+        horzLine: { color: THEME.crosshair, width: 1, style: 2, labelBackgroundColor: "#1e293b" },
+      },
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: false,
+      },
+      handleScale: {
+        mouseWheel: true,
+        pinch: true,
+        axisPressedMouseMove: { time: true, price: true },
       },
       localization: { locale: "ko-KR" },
     })
 
     const volumeSeries = chart.addHistogramSeries({
       priceFormat: { type: "volume" },
-      priceScaleId: "",
-      base: 0,
+      priceScaleId: "vol",
+    })
+    chart.priceScale("vol").applyOptions({
+      scaleMargins: { top: 0.82, bottom: 0 },
+      borderVisible: false,
     })
 
     const ma60Series = chart.addLineSeries({
-      color: "rgba(148,163,184,0.22)",
-      lineWidth: 1,
+      color: THEME.ma60,
+      lineWidth: 2,
       lineStyle: 2,
       priceLineVisible: false,
-      lastValueVisible: false,
+      lastValueVisible: true,
       crosshairMarkerVisible: false,
     })
 
     const ma20Series = chart.addLineSeries({
-      color: "rgba(56,189,248,0.28)",
-      lineWidth: 1,
+      color: THEME.ma20,
+      lineWidth: 2,
       priceLineVisible: false,
-      lastValueVisible: false,
+      lastValueVisible: true,
       crosshairMarkerVisible: false,
     })
 
-    const priceSeries = chart.addAreaSeries({
-      lineColor: "#5eead4",
-      topColor: "rgba(94,234,212,0.42)",
-      bottomColor: "rgba(7,10,16,0)",
-      lineWidth: 2,
-      lineType: LineType.Curved,
-      lastPriceAnimation: LastPriceAnimationMode.Continuous,
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: THEME.up,
+      downColor: THEME.down,
+      borderVisible: true,
+      borderUpColor: THEME.up,
+      borderDownColor: THEME.down,
+      wickUpColor: THEME.upWick,
+      wickDownColor: THEME.downWick,
       priceLineVisible: true,
       priceLineWidth: 1,
-      priceLineColor: "rgba(45,212,191,0.85)",
+      priceLineColor: "rgba(148,163,184,0.55)",
       priceLineStyle: 2,
       lastValueVisible: true,
-      crosshairMarkerVisible: true,
-      crosshairMarkerBorderColor: "rgba(236,254,255,0.95)",
-      crosshairMarkerBackgroundColor: "rgba(34,211,238,0.95)",
-    })
-
-    volumeSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.94, bottom: 0 },
-    })
-    priceSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.06, bottom: 0.08 },
     })
 
     volumeSeries.setData(chartPack.volume)
     ma60Series.setData(chartPack.ma60)
     ma20Series.setData(chartPack.ma20)
-    priceSeries.setData(chartPack.closes)
+    candleSeries.setData(chartPack.candles)
 
-    const last = chartPack.closes[chartPack.closes.length - 1]
-    if (last) {
-      priceSeries.setMarkers([
-        {
-          time: last.time,
-          position: "inBar",
-          shape: "circle",
-          color: "#ecfeff",
-          size: 2.25,
-          borderColor: "#22d3ee",
-          borderWidth: 2,
-        },
-      ])
+    const n = chartPack.candles.length
+    const visible = Math.min(DISPLAY_BARS, n)
+    if (visible > 0) {
+      chart.timeScale().setVisibleLogicalRange({
+        from: n - visible,
+        to: n + 2,
+      })
+    } else {
+      chart.timeScale().fitContent()
     }
 
     const onCrosshair = (param) => {
@@ -328,34 +310,31 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
         setTooltip(null)
         return
       }
-      const data = param.seriesData.get(priceSeries)
-      if (!data || typeof data !== "object" || data.value == null) {
+      const candle = param.seriesData.get(candleSeries)
+      if (!candle || typeof candle !== "object" || candle.close == null) {
         setTooltip(null)
         return
       }
       const tkey = timeToKey(param.time)
       const extra = tkey ? metaRef.current.get(tkey) : null
-      const changePct = extra?.changePct ?? 0
       setTooltip({
         x: param.point.x,
         y: param.point.y,
         dateLabel: extra?.dateLabel ?? String(param.time),
-        open: extra?.open,
-        high: extra?.high,
-        low: extra?.low,
-        close: data.value,
-        changePct,
+        open: extra?.open ?? candle.open,
+        high: extra?.high ?? candle.high,
+        low: extra?.low ?? candle.low,
+        close: candle.close,
+        changePct: extra?.changePct ?? 0,
         volume: extra?.volume ?? 0,
       })
     }
 
     chart.subscribeCrosshairMove(onCrosshair)
-    chart.timeScale().fitContent()
-
     chartRef.current = chart
 
     let lastW = Math.max(1, Math.floor(el.clientWidth))
-    let lastH = Math.max(1, Math.floor(el.clientHeight || 380))
+    let lastH = Math.max(1, Math.floor(el.clientHeight || CHART_H))
     const ro = new ResizeObserver((entries) => {
       const cr = entries[0]?.contentRect
       if (!cr || !chartRef.current) return
@@ -381,134 +360,112 @@ export default function MiniDailyStockChart({ bars, className = "" }) {
 
   if (normalizedBars.length < 2) return null
 
-  const accentStripe =
+  const meta = chartMeta && typeof chartMeta === "object" ? chartMeta : null
+  const sessionLabel = meta?.sessionLabel ?? "일봉 OHLC"
+  const sourceLabel = meta?.dataSourceLabel ?? "—"
+  const asOfLabel = meta?.asOfLabelKst ?? meta?.updatedLabelKst ?? "—"
+  const delayNote = meta?.delayNote ?? null
+  const refClose =
+    meta?.lastClose != null && Number.isFinite(Number(meta.lastClose))
+      ? Number(meta.lastClose)
+      : normalizedBars[normalizedBars.length - 1]?.close
+
+  const toneClass =
     trendPack.tone === "up"
-      ? "border-l-emerald-400/75 shadow-[inset_3px_0_0_rgba(52,211,153,0.35)]"
+      ? "border-l-emerald-500/70"
       : trendPack.tone === "down"
-        ? "border-l-rose-400/70 shadow-[inset_3px_0_0_rgba(251,113,133,0.32)]"
-        : "border-l-cyan-400/50 shadow-[inset_3px_0_0_rgba(34,211,238,0.22)]"
+        ? "border-l-rose-500/65"
+        : "border-l-slate-500/50"
 
   return (
     <div
-      className={`relative w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.09] bg-[#070a10] ring-1 ring-violet-500/[0.08] ${className}`}
-      style={{
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 0 48px rgba(0,0,0,0.45)",
-      }}
+      className={`relative w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.08] bg-[#080b12] ${className}`}
     >
-      <div
-        className={`flex flex-col gap-2 border-b border-white/[0.06] bg-gradient-to-br from-white/[0.04] via-transparent to-violet-950/[0.06] px-3 py-3 md:flex-row md:items-center md:justify-between md:px-4 md:py-3.5 ${accentStripe} border-l-[3px]`}
-      >
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Signal</span>
-            <span
-              className={
-                trendPack.tone === "up"
-                  ? "text-[15px] font-semibold tracking-tight text-emerald-200/95 md:text-base"
-                  : trendPack.tone === "down"
-                    ? "text-[15px] font-semibold tracking-tight text-rose-200/95 md:text-base"
-                    : "text-[15px] font-semibold tracking-tight text-cyan-100/90 md:text-base"
-              }
-            >
-              {trendPack.stance}
-            </span>
-            {trendPack.dayChgPct != null && Number.isFinite(trendPack.dayChgPct) ? (
+      <div className={`border-b border-white/[0.06] bg-[#0c1018] px-3 py-2.5 md:px-4 ${toneClass} border-l-[3px]`}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <span className="text-[13px] font-semibold text-slate-100">{trendPack.stance}</span>
+            {trendPack.dayChgPct != null ? (
               <span
-                className={`font-mono text-sm font-semibold tabular-nums md:text-[15px] ${
-                  trendPack.dayChgPct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
+                className={`font-mono text-[12px] font-semibold tabular-nums ${
+                  trendPack.dayChgPct >= 0 ? "text-emerald-400" : "text-rose-400"
                 }`}
               >
                 {trendPack.dayChgPct >= 0 ? "+" : ""}
                 {trendPack.dayChgPct.toFixed(2)}%
-                <span className="ml-1 text-[10px] font-medium text-slate-500">1D</span>
               </span>
             ) : null}
+            {refClose != null ? (
+              <span className="font-mono text-[12px] tabular-nums text-slate-400">{fmtPrice(refClose)}</span>
+            ) : null}
           </div>
-          {trendLines[0] ? (
-            <p className="m-0 mt-1 text-[11px] leading-snug text-slate-400 md:text-[12px]">{trendLines[0]}</p>
-          ) : null}
-          {trendLines[1] ? (
-            <p className="m-0 mt-0.5 text-[10px] leading-snug text-slate-600">{trendLines[1]}</p>
-          ) : null}
-        </div>
-        <div className="flex flex-shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[9px] text-slate-500 md:justify-end">
-          <span className="inline-flex items-center gap-1.5 text-slate-600">
-            <span className="inline-block h-2 w-5 rounded-full bg-gradient-to-r from-teal-400/90 to-cyan-300/80 shadow-[0_0_10px_rgba(45,212,191,0.45)]" />
-            종가 흐름
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-sky-400/50 shadow-[0_0_6px_rgba(56,189,248,0.35)]" />
-            MA20
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-px w-4 bg-slate-500/80" />
-            MA60
-          </span>
-          {trendPack.volRatio != null && Number.isFinite(trendPack.volRatio) ? (
-            <span className="font-mono text-slate-400">
-              Vol <span className="text-violet-200/90">{trendPack.volRatio.toFixed(2)}×</span> vs 20d
+          <div className="flex flex-wrap items-center gap-3 text-[9px] text-slate-500">
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+              <span className="inline-block h-2.5 w-2.5 rounded-sm bg-rose-500" />
+              캔들
             </span>
-          ) : (
-            <span className="text-slate-600">Vol · 20일 대비</span>
-          )}
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-0.5 w-3 bg-amber-400" />
+              MA20
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-0.5 w-3 border-b border-dashed border-slate-400" />
+              MA60
+            </span>
+          </div>
         </div>
+        {trendPack.lines[0] ? <p className="m-0 mt-1 text-[10px] text-slate-500">{trendPack.lines[0]}</p> : null}
       </div>
 
-      <div className="relative h-[min(440px,58vh)] w-full min-h-[300px] sm:min-h-[360px]">
-        <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
-
-        {lastClose != null ? (
-          <div className="pointer-events-none absolute right-2 top-2 z-[15] text-right sm:right-3 sm:top-3">
-            <div className="rounded-lg border border-cyan-400/35 bg-[rgba(7,10,16,0.88)] px-2.5 py-1.5 shadow-[0_0_24px_rgba(167,139,250,0.15),0_0_20px_rgba(34,211,238,0.12),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md sm:px-3 sm:py-2">
-              <p className="m-0 font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Last</p>
-              <p className="m-0 mt-0.5 font-mono text-lg font-semibold tabular-nums leading-none text-slate-50 sm:text-xl">
-                {fmtPrice(lastClose)}
-              </p>
-              {trendPack.dayChgPct != null && Number.isFinite(trendPack.dayChgPct) ? (
-                <p
-                  className={`m-0 mt-1 font-mono text-[11px] font-semibold tabular-nums ${
-                    trendPack.dayChgPct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
-                  }`}
-                >
-                  {trendPack.dayChgPct >= 0 ? "▲" : "▼"} {Math.abs(trendPack.dayChgPct).toFixed(2)}%
-                </p>
-              ) : null}
-            </div>
-          </div>
+      <div className="border-b border-white/[0.05] bg-[#0a0e16] px-3 py-2 text-[10px] leading-relaxed text-slate-400 md:px-4">
+        <p className="m-0 font-medium text-slate-300">{sessionLabel}</p>
+        <p className="m-0 mt-0.5 text-slate-500">
+          기준 {asOfLabel}
+          {delayNote ? ` · ${delayNote}` : ""}
+        </p>
+        <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-600">{sourceLabel}</p>
+        {meta?.ohlcPriority ? (
+          <p className="m-0 mt-0.5 text-[9px] text-slate-600">OHLC · {meta.ohlcPriority === "regular_close" ? "정규장 마감 우선" : meta.ohlcPriority}</p>
         ) : null}
+      </div>
+
+      <div
+        className="relative w-full min-h-[420px] sm:min-h-[460px]"
+        style={{ height: CHART_H }}
+      >
+        <div ref={wrapRef} className="absolute inset-0 h-full w-full touch-pan-x" />
 
         {tooltip ? (
           <div
-            className="pointer-events-none absolute z-20 min-w-[210px] rounded-lg border border-violet-400/25 bg-[rgba(6,9,16,0.96)] px-3 py-2.5 shadow-[0_16px_44px_rgba(0,0,0,0.6)] backdrop-blur-md"
+            className="pointer-events-none absolute z-20 min-w-[200px] rounded-md border border-white/10 bg-[#0f141c]/96 px-2.5 py-2 shadow-lg backdrop-blur-sm"
             style={{
-              left: Math.min(Math.max(tooltip.x + 14, 8), (wrapRef.current?.clientWidth ?? 360) - 220),
-              top: Math.min(Math.max(tooltip.y + 8, 8), (wrapRef.current?.clientHeight ?? 400) - 150),
+              left: Math.min(Math.max(tooltip.x + 12, 8), (wrapRef.current?.clientWidth ?? 360) - 210),
+              top: Math.min(Math.max(tooltip.y + 8, 8), (wrapRef.current?.clientHeight ?? CHART_H) - 130),
             }}
           >
-            <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-cyan-300/85">
-              {tooltip.dateLabel}
+            <p className="m-0 font-mono text-[9px] text-slate-500">{tooltip.dateLabel}</p>
+            <p className="m-0 mt-1 font-mono text-[11px] tabular-nums text-slate-200">
+              O {fmtPrice(tooltip.open)} · H {fmtPrice(tooltip.high)}
             </p>
-            <p className="m-0 mt-1.5 font-mono text-xl font-semibold tabular-nums leading-none text-slate-50">
-              {fmtPrice(tooltip.close)}
+            <p className="m-0 font-mono text-[11px] tabular-nums text-slate-200">
+              L {fmtPrice(tooltip.low)} · C {fmtPrice(tooltip.close)}
             </p>
             <p
-              className={`m-0 mt-1 font-mono text-[12px] font-semibold tabular-nums ${
-                tooltip.changePct >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
+              className={`m-0 mt-1 font-mono text-[11px] font-semibold tabular-nums ${
+                tooltip.changePct >= 0 ? "text-emerald-400" : "text-rose-400"
               }`}
             >
               {tooltip.changePct >= 0 ? "+" : ""}
-              {tooltip.changePct.toFixed(2)}% <span className="text-[10px] font-medium text-slate-500">vs 전일</span>
+              {tooltip.changePct.toFixed(2)}%
             </p>
-            {tooltip.high != null && tooltip.low != null ? (
-              <p className="m-0 mt-2 border-t border-white/[0.06] pt-2 font-mono text-[10px] text-slate-500">
-                Range {fmtPrice(tooltip.high)} — {fmtPrice(tooltip.low)}
-              </p>
-            ) : null}
-            <p className="m-0 mt-1.5 font-mono text-[10px] text-slate-500">
-              Vol <span className="text-violet-200/90">{fmtVol(tooltip.volume)}</span>
-            </p>
+            <p className="m-0 mt-1 font-mono text-[10px] text-slate-500">Vol {fmtVol(tooltip.volume)}</p>
           </div>
         ) : null}
+
+        <p className="pointer-events-none absolute bottom-1 right-2 z-10 font-mono text-[9px] text-slate-600">
+          휠·핀치 확대 · 드래그 이동
+        </p>
       </div>
     </div>
   )

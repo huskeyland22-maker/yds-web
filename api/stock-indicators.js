@@ -1,3 +1,5 @@
+import { buildChartSessionMeta } from "./_lib/chartSessionMeta.js"
+
 /**
  * GET /api/stock-indicators?code=005930&name=삼성전자
  *
@@ -271,8 +273,10 @@ function smaAtIndex(values, i, period) {
   return s / period
 }
 
-/** 최근 약 3~6개월(거래일 기준) 미니 캔들용 — 전체 rows 기준으로 이평 계산 후 슬라이스 */
-function buildChartBars(rows, maxBars = 130) {
+/** 최근 약 3개월(거래일 ~66봉) 캔들용 — 전체 rows 기준 이평 후 슬라이스 */
+const CHART_DISPLAY_BARS = 66
+
+function buildChartBars(rows, maxBars = CHART_DISPLAY_BARS) {
   const n = rows.length
   if (n < 2) return []
   const closes = rows.map((r) => r.close)
@@ -484,6 +488,7 @@ function buildPayload({
   yahooSymbol,
   asOfIso,
   metaName,
+  yahooMeta,
 }) {
   const closes = rows.map((r) => r.close)
   const volumes = rows.map((r) => r.volume)
@@ -497,7 +502,16 @@ function buildPayload({
   const volFlow = interpretVolumeFlow(volPct)
   const lastClose = closes[closes.length - 1]
   const displayName = name || metaName || ""
-  const chartBars = buildChartBars(rows, 130)
+  const chartBars = buildChartBars(rows, CHART_DISPLAY_BARS)
+  const chartMeta = buildChartSessionMeta({
+    rows,
+    dataSource,
+    yahooMeta,
+    asOfIso,
+    yahooSymbol,
+  })
+  const firstBar = chartBars[0]
+  const lastChartBar = chartBars[chartBars.length - 1]
 
   return {
     symbol: code,
@@ -539,7 +553,11 @@ function buildPayload({
     chart: {
       bars: chartBars,
       barCount: chartBars.length,
+      rangeMonths: chartMeta.displayRangeMonths,
+      fromDate: firstBar?.date ?? null,
+      toDate: lastChartBar?.date ?? null,
     },
+    chartMeta,
   }
 }
 
@@ -617,6 +635,7 @@ export default async function handler(req, res) {
         yahooSymbol: undefined,
         asOfIso,
         metaName: "",
+        yahooMeta: undefined,
       })
       return res.status(200).json(payload)
     } catch (e) {
@@ -643,6 +662,7 @@ export default async function handler(req, res) {
         yahooSymbol,
         asOfIso,
         metaName: meta.shortName || meta.longName || "",
+        yahooMeta: meta,
       })
       return res.status(200).json(payload)
     } catch (e) {
