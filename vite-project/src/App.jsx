@@ -19,6 +19,7 @@ import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
 import { buildCycleDeskHeroContext } from "./utils/cycleDeskHero.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
+import { normalizeMetricPasteForTextarea, parseMetricPasteText } from "./utils/parseMetricPaste.js"
 
 /* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
@@ -106,19 +107,6 @@ function forceResumeReloadWithCooldown() {
   } catch {
     window.location.reload()
   }
-}
-
-function normalizeNumberToken(raw) {
-  if (!raw) return null
-  const cleaned = String(raw).replace(/%/g, "").replace(/,/g, "").trim()
-  const parsed = parseFloat(cleaned)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
-function splitCsvLine(line) {
-  return String(line)
-    .split(",")
-    .map((p) => p.trim())
 }
 
 /** YYYY-MM-DD — 공개 JSON·로컬 스냅샷 병합 키 */
@@ -243,68 +231,8 @@ function macroDashboardStatus(stateLabel) {
   return { variant: "stable", label: "안정" }
 }
 
-/**
- * CSV 한 줄에서 "최종 수치" 추출.
- * - `1,VIX,17.87,...` → 분류(숫자) + 이름 + **수치가 3번째**
- * - `SKEW Index, 137.90, -0.68,...` → 이름 + **수치가 2번째** (3번째는 변동)
- */
-function extractMetricValueFromLine(line) {
-  const parts = splitCsvLine(line)
-  if (parts.length < 2) return null
-  const col0 = String(parts[0] ?? "").trim()
-  const rowIndexLike = /^\d+$/.test(col0)
-  if (rowIndexLike && parts.length >= 3) {
-    const v = normalizeNumberToken(parts[2])
-    if (v != null) return v
-  }
-  const primary = normalizeNumberToken(parts[1])
-  if (primary != null) return primary
-  if (parts.length >= 3) {
-    const fallback = normalizeNumberToken(parts[2])
-    if (fallback != null) return fallback
-  }
-  return null
-}
-
 function parseTextPanicData(text) {
-  const source = String(text || "")
-  const lines = source.split(/\r?\n/).map((ln) => ln.trim()).filter(Boolean)
-  const out = Object.fromEntries(METRIC_KEYS.map((k) => [k, null]))
-  const hit = new Set()
-
-  const applyByPattern = (pattern, key) => {
-    const line = lines.find((ln) => {
-      const parts = splitCsvLine(ln)
-      const metricName = parts[1] ?? parts[0] ?? ""
-      return pattern.test(metricName) || pattern.test(ln)
-    })
-    if (!line) return
-    const n = extractMetricValueFromLine(line)
-    if (n == null) return
-    out[key] = n
-    hit.add(key)
-  }
-
-  applyByPattern(/\bVIX\b/i, "vix")
-  applyByPattern(/\bVXN\b/i, "vxn")
-  applyByPattern(/(?:풋\/콜|Put\/Call|PutCall|풋콜)/i, "putCall")
-  applyByPattern(/(?:CNN\s*F&G|Fear\s*&\s*Greed|공포탐욕|탐욕지수)/i, "fearGreed")
-  applyByPattern(/\bMOVE\b/i, "move")
-  applyByPattern(/BofA(?:\s*Bull\s*(?:&|and)?\s*Bear|\s*B&B)?/i, "bofa")
-  applyByPattern(/\bSKEW\b/i, "skew")
-  applyByPattern(/(?:하이일드|HY\s*스프레드|High\s*Yield)/i, "highYield")
-  // "GS Bull & Bear" (Goldman 표기), GS B/B, Goldman Sachs 꼬리 등
-  applyByPattern(
-    /(?:GS\s*B\/B|Goldman(?:\s+Sachs)?\s*B\/B|GS\s*Bull\s*(?:&|and)?\s*Bear)/i,
-    "gsBullBear",
-  )
-
-  const result = {
-    data: out,
-    missingRequired: REQUIRED_KEYS.filter((key) => out[key] == null),
-    hitCount: hit.size,
-  }
-  return result
+  return parseMetricPasteText(text, REQUIRED_KEYS)
 }
 
 function readRecentMemos(limit = 80) {
@@ -1496,7 +1424,7 @@ function App() {
               <div className="min-w-0">
                 <h3 className="m-0 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
-                  붙여넣기 후 반영 — 표 형식 그대로 사용합니다.
+                  표(CSV) 또는 기사 한 줄 붙여넣기 — 지표명·숫자만 자동 추출합니다.
                 </p>
               </div>
               <button
@@ -1515,6 +1443,25 @@ function App() {
               <textarea
                 ref={textareaRef}
                 value={inputText}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData?.getData?.("text/plain") ?? ""
+                  if (!pasted.trim()) return
+                  const normalized = normalizeMetricPasteForTextarea(pasted)
+                  if (normalized === pasted) return
+                  e.preventDefault()
+                  const el = textareaRef.current
+                  const start = el?.selectionStart ?? inputText.length
+                  const end = el?.selectionEnd ?? inputText.length
+                  const next = `${inputText.slice(0, start)}${normalized}${inputText.slice(end)}`
+                  setInputText(next)
+                  if (inputError) setInputError("")
+                  requestAnimationFrame(() => {
+                    if (!el) return
+                    const pos = start + normalized.length
+                    el.selectionStart = pos
+                    el.selectionEnd = pos
+                  })
+                }}
                 onChange={(e) => {
                   setInputText(e.target.value)
                   if (inputError) setInputError("")
