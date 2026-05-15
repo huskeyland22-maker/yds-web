@@ -14,6 +14,7 @@ import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
+import TradingLogPage from "./pages/TradingLogPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { usePanicStore } from "./store/panicStore.js"
@@ -37,6 +38,7 @@ const MENU = [
   { label: "코리아 밸류체인", path: "/value-chain", active: true },
   { label: "매매 타점", path: "/timing", active: true },
   { label: "AI 인사이트", path: "/insights", active: true },
+  { label: "트레이딩 로그", path: "/trading-log", active: true },
 ]
 
 const METRIC_DEFS = [
@@ -1406,6 +1408,14 @@ function App() {
                     {!finderCandidates?.length ? <p className="m-0 text-sm text-gray-400">후보 데이터 축적 중입니다.</p> : null}
                   </section>
                 </div>
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/trading-log"
+              element={
+                <SectionErrorBoundary label="트레이딩 로그">
+                  <TradingLogPage />
                 </SectionErrorBoundary>
               }
             />
