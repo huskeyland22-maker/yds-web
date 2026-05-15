@@ -4,7 +4,19 @@ import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
-import { fetchCycleMetricsHistory, isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
+import {
+  fetchCycleMetricsHistory,
+  fetchPanicIndexHistory,
+  isPanicHubEnabled,
+  submitManualPanicData,
+} from "./config/api.js"
+import {
+  appendPanicIndexHistory,
+  getPanicIndexHistory,
+  replacePanicIndexHistory,
+  panicIndexRowToCycleChart,
+  PANIC_INDEX_HISTORY_KEY,
+} from "./utils/panicIndexHistory.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
 import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
@@ -722,6 +734,8 @@ function App() {
       }
 
       if (saveSucceeded) {
+        const savedAt = new Date().toISOString()
+        appendPanicIndexHistory({ ...normalizedParsedData, updatedAt: savedAt })
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()
         pulseSaveFeedback()
@@ -785,18 +799,42 @@ function App() {
 
   useEffect(() => {
     if (!panicData) return
-    setCycleMetricHistory(saveCycleMetricHistory(panicData))
+    appendPanicIndexHistory(panicData)
+    setCycleMetricHistory((prev) => {
+      const fromIndex = getPanicIndexHistory()
+        .map(panicIndexRowToCycleChart)
+        .filter(Boolean)
+      const merged = mergeCycleRows(mergeCycleRows(prev, fromIndex), saveCycleMetricHistory(panicData))
+      try {
+        window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(merged))
+        window.localStorage.setItem(PANIC_INDEX_HISTORY_KEY, JSON.stringify(getPanicIndexHistory()))
+      } catch {
+        // ignore
+      }
+      return merged
+    })
   }, [panicData])
 
   useEffect(() => {
     let cancelled = false
     void (async () => {
       try {
-        const arr = await fetchCycleMetricsHistory({ debugLog: false })
+        const [staticRows, hubRows] = await Promise.all([
+          fetchCycleMetricsHistory({ debugLog: false }).catch(() => []),
+          fetchPanicIndexHistory({ limit: CYCLE_HISTORY_MAX }).catch(() => []),
+        ])
         if (cancelled) return
-        const normalized = normalizeCycleHistoryRows(arr)
+        const normalized = normalizeCycleHistoryRows(staticRows)
+        const fromHub = hubRows
+          .map(panicIndexRowToCycleChart)
+          .filter(Boolean)
+        replacePanicIndexHistory(hubRows)
+        const localIndex = getPanicIndexHistory()
         setCycleMetricHistory((prev) => {
-          const merged = mergeCycleRows(prev, normalized)
+          const merged = mergeCycleRows(
+            mergeCycleRows(prev, normalized),
+            mergeCycleRows(fromHub, localIndex.map(panicIndexRowToCycleChart).filter(Boolean)),
+          )
           try {
             window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(merged))
           } catch {
@@ -805,7 +843,7 @@ function App() {
           return merged
         })
       } catch {
-        // 정적 JSON 미배포·오프라인: 로컬/localStorage + saveCycleMetricHistory 만 사용
+        // 정적 JSON 미배포·오프라인: 로컬/localStorage + appendPanicIndexHistory 만 사용
       }
     })()
     return () => {

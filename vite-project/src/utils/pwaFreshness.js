@@ -48,6 +48,7 @@ const STALE_EVICT_EXTRA_LS_KEYS = [
   "yds-panic-score-history-v1",
   "yds-panic-integration-history-v1",
   "yds-panic-history-v1",
+  "yds-panic-index-history-v1",
   "yds-panic-notify-on",
   "yds-panic-notify-prev-score",
   "yds-panic-notify-last-ms",

@@ -111,17 +111,27 @@ export function getDailyPanicHistory() {
 
 export function saveDailyPanicHistory(integration, sourceData = null) {
   if (!integration) return getDailyPanicHistory()
-  const today = ymd(new Date()) ?? "unknown"
+  const updated = sourceData?.updatedAt
+  const today =
+    typeof updated === "string" && /^\d{4}-\d{2}-\d{2}/.test(updated)
+      ? updated.slice(0, 10)
+      : ymd(new Date()) ?? "unknown"
   const nextEntry = {
     date: today,
     vix: Number(sourceData?.vix ?? NaN),
+    vxn: Number(sourceData?.vxn ?? NaN),
     fearGreed: Number(sourceData?.fearGreed ?? NaN),
+    move: Number(sourceData?.move ?? NaN),
     bofa: Number(sourceData?.bofa ?? NaN),
+    skew: Number(sourceData?.skew ?? NaN),
+    hyOas: Number(sourceData?.highYield ?? sourceData?.hyOas ?? NaN),
+    gsSentiment: Number(sourceData?.gsBullBear ?? sourceData?.gsSentiment ?? NaN),
     putCall: Number(sourceData?.putCall ?? NaN),
     highYield: Number(sourceData?.highYield ?? NaN),
     totalScore: Number(integration.sentimentScore ?? 50),
     marketState: String(integration.currentState ?? "중립"),
     riskLevel: String(integration.riskLevel ?? "보통"),
+    createdAt: new Date().toISOString(),
   }
   const prev = getDailyPanicHistory()
   const withoutToday = prev.filter((row) => row.date !== today)

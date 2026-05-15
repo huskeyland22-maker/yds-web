@@ -65,6 +65,21 @@ export async function fetchCycleMetricsHistory(options = {}) {
   return data
 }
 
+/** Supabase panic_index_history — 일별 스냅샷 (동일 date upsert, 과거 조회) */
+export async function fetchPanicIndexHistory(options = {}) {
+  if (!isPanicHubEnabled()) return []
+  const limit = options.limit ?? 120
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (options.from) params.set("from", String(options.from).slice(0, 10))
+  if (options.to) params.set("to", String(options.to).slice(0, 10))
+  const url = withNoStoreQuery(`/api/panic/history?${params}`)
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  if (!res.ok) throw new Error(`panic history HTTP ${res.status}`)
+  const json = await res.json()
+  if (!json?.ok || !Array.isArray(json.rows)) return []
+  return json.rows
+}
+
 export function listPanicDataUrlAttemptsForDisplay() {
   return buildPanicDataUrls()
 }
