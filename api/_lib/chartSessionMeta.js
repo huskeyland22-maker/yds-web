@@ -1,19 +1,19 @@
 /**
  * 일봉 OHLC 기준 시각·장 상태 라벨 (KIS / Yahoo).
+ * 국내(KIS): 16:00 KST 이후 확정 OHLC·거래량 반영.
  */
 
-function ymdKst(d = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(d)
-  const y = parts.find((p) => p.type === "year")?.value
-  const m = parts.find((p) => p.type === "month")?.value
-  const day = parts.find((p) => p.type === "day")?.value
-  if (!y || !m || !day) return null
-  return `${y}${m}${day}`
+import {
+  afterKrxDataConfirmed,
+  formatUpdateBasisKst,
+  isKstWeekday,
+  ymdKst,
+} from "./krxDomesticClose.js"
+
+function formatBarDateLabel(ymd) {
+  const s = String(ymd || "")
+  if (!/^\d{8}$/.test(s)) return "—"
+  return `${s.slice(4, 6)}/${s.slice(6, 8)}`
 }
 
 function formatKstClock(d = new Date()) {
@@ -27,38 +27,24 @@ function formatKstClock(d = new Date()) {
   }).format(d)
 }
 
-function formatBarDateLabel(ymd) {
-  const s = String(ymd || "")
-  if (!/^\d{8}$/.test(s)) return "—"
-  return `${s.slice(4, 6)}/${s.slice(6, 8)}`
-}
-
-function isKstWeekday(d = new Date()) {
-  const wd = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Seoul", weekday: "short" }).format(d)
-  return wd !== "Sat" && wd !== "Sun"
-}
-
-function kstMinutes(d = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Seoul",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: false,
-  }).formatToParts(d)
-  const h = Number(parts.find((p) => p.type === "hour")?.value)
-  const m = Number(parts.find((p) => p.type === "minute")?.value)
-  if (!Number.isFinite(h) || !Number.isFinite(m)) return 0
-  return h * 60 + m
-}
-
-function afterKrxRegularClose(d = new Date()) {
-  return kstMinutes(d) >= 15 * 60 + 30
-}
-
 /**
- * @param {{ rows: Array<{ date?: string; close: number }>; dataSource: string; yahooMeta?: object; asOfIso?: string; yahooSymbol?: string }} opts
+ * @param {{
+ *   rows: Array<{ date?: string; close: number }>
+ *   dataSource: string
+ *   yahooMeta?: object
+ *   asOfIso?: string
+ *   yahooSymbol?: string
+ *   domesticClose?: { confirmReady?: boolean; dataStale?: boolean; excludedTodayBar?: boolean; needsReverify?: boolean }
+ * }} opts
  */
-export function buildChartSessionMeta({ rows, dataSource, yahooMeta, asOfIso, yahooSymbol }) {
+export function buildChartSessionMeta({
+  rows,
+  dataSource,
+  yahooMeta,
+  asOfIso,
+  yahooSymbol,
+  domesticClose,
+}) {
   const now = new Date()
   const todayYmd = ymdKst(now)
   const last = rows?.[rows.length - 1]
@@ -69,16 +55,32 @@ export function buildChartSessionMeta({ rows, dataSource, yahooMeta, asOfIso, ya
   let sessionKind = "regular_close"
   let sessionLabel = "정규장 마감 일봉 기준"
   let delayNote = null
+  let needsReverify = false
+  let confirmReady = false
 
   if (dataSource === "kis") {
-    const beforeClose = isKstWeekday(now) && !afterKrxRegularClose(now)
-    if (lastDate === todayYmd && beforeClose) {
+    const dc = domesticClose || {}
+    confirmReady = dc.confirmReady === true
+    needsReverify = dc.needsReverify === true
+
+    if (dc.dataStale) {
+      sessionKind = "pending_confirm"
+      sessionLabel = "16:00 이후 확정 데이터 동기화 중"
+      delayNote = "자동 재검증 진행 중"
+      referenceBar = prev ?? last
+    } else if (dc.excludedTodayBar || (isKstWeekday(now) && !afterKrxDataConfirmed(now))) {
       referenceBar = prev ?? last
       sessionKind = "previous_close"
-      sessionLabel = "전일 종가 기준 · 당일 정규장 마감 전"
+      sessionLabel = "전일 종가 기준 · 16:00 KST 이후 확정 반영"
+      delayNote = isKstWeekday(now) ? "16:00 KST 이후 자동 재검증" : null
+      needsReverify = isKstWeekday(now) && !afterKrxDataConfirmed(now)
+    } else if (confirmReady) {
+      sessionKind = "regular_close"
+      sessionLabel = "국내 정규장 마감 데이터 반영 완료"
     } else if (lastDate === todayYmd) {
       sessionKind = "regular_close"
       sessionLabel = "당일 정규장 마감 데이터 반영 완료"
+      confirmReady = true
     } else if (lastDate) {
       sessionKind = "regular_close"
       sessionLabel = `${formatBarDateLabel(lastDate)} 정규장 마감 기준`
@@ -109,19 +111,33 @@ export function buildChartSessionMeta({ rows, dataSource, yahooMeta, asOfIso, ya
     } else {
       delayNote = delayNote || "Yahoo Finance · 15분 지연 가능"
     }
+    confirmReady = sessionKind === "regular_close"
   }
 
   const dataSourceLabel =
     dataSource === "kis"
-      ? "한국투자증권 일봉 (KIS) · 정규장 OHLC"
+      ? "한국투자증권 일봉 (KIS) · 정규장 OHLC · 16:00 KST 확정"
       : `Yahoo Finance${yahooSymbol ? ` · ${yahooSymbol}` : ""}`
 
   const refDate = referenceBar?.date ? String(referenceBar.date) : lastDate
-  const asOfLabelKst = asOfIso
-    ? `${formatKstClock(new Date(asOfIso))} KST`
-    : refDate && /^\d{8}$/.test(refDate)
-      ? `${formatBarDateLabel(refDate)} 장마감`
-      : `${formatKstClock(now)} KST`
+  const todayBasis = todayYmd
+    ? `${todayYmd.slice(0, 4)}-${todayYmd.slice(4, 6)}-${todayYmd.slice(6, 8)}`
+    : formatUpdateBasisKst(now).slice(0, 10)
+  const updateBasisLabelKst =
+    dataSource === "kis" && confirmReady
+      ? formatUpdateBasisKst(now)
+      : dataSource === "kis" && isKstWeekday(now) && !afterKrxDataConfirmed(now)
+        ? `${todayBasis} 16:00 KST 예정`
+        : formatUpdateBasisKst(now)
+
+  const asOfLabelKst =
+    dataSource === "kis" && confirmReady
+      ? updateBasisLabelKst
+      : asOfIso
+        ? formatUpdateBasisKst(new Date(asOfIso))
+        : refDate && /^\d{8}$/.test(refDate)
+          ? `${formatBarDateLabel(refDate)} 장마감`
+          : formatUpdateBasisKst(now)
 
   return {
     lastBarDate: refDate,
@@ -130,11 +146,16 @@ export function buildChartSessionMeta({ rows, dataSource, yahooMeta, asOfIso, ya
     sessionLabel,
     delayNote,
     dataSourceLabel,
+    dataSource,
     asOfIso: asOfIso || now.toISOString(),
     asOfLabelKst,
+    updateBasisLabelKst,
     updatedAtIso: now.toISOString(),
-    updatedLabelKst: `${formatKstClock(now)} KST`,
+    updatedLabelKst: formatUpdateBasisKst(now),
+    confirmReady,
+    needsReverify,
     ohlcPriority: "regular_close",
     displayRangeMonths: 3,
+    updatePolicy: dataSource === "kis" ? "krx_16:00_kst" : null,
   }
 }

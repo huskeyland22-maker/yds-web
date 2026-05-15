@@ -1,4 +1,5 @@
 import { buildChartSessionMeta } from "./_lib/chartSessionMeta.js"
+import { sanitizeKisRowsForClose } from "./_lib/krxDomesticClose.js"
 
 /**
  * GET /api/stock-indicators?code=005930&name=삼성전자
@@ -489,6 +490,7 @@ function buildPayload({
   asOfIso,
   metaName,
   yahooMeta,
+  domesticClose,
 }) {
   const closes = rows.map((r) => r.close)
   const volumes = rows.map((r) => r.volume)
@@ -509,6 +511,7 @@ function buildPayload({
     yahooMeta,
     asOfIso,
     yahooSymbol,
+    domesticClose,
   })
   const firstBar = chartBars[0]
   const lastChartBar = chartBars[chartBars.length - 1]
@@ -621,12 +624,19 @@ export default async function handler(req, res) {
     try {
       const baseUrl = getKisBaseUrl()
       const token = await getKisAccessToken(baseUrl, appKey, appSecret)
-      const rows = await fetchKisDailyRows(baseUrl, token, appKey, appSecret, code)
+      const rawRows = await fetchKisDailyRows(baseUrl, token, appKey, appSecret, code)
+      if (rawRows.length < 70) throw new Error("kis short history")
+      const domesticClose = sanitizeKisRowsForClose(rawRows)
+      const rows = domesticClose.rows
       if (rows.length < 70) throw new Error("kis short history")
-      const lastDate = rows[rows.length - 1]?.date
-      const asOfIso = lastDate && /^\d{8}$/.test(lastDate)
-        ? `${lastDate.slice(0, 4)}-${lastDate.slice(4, 6)}-${lastDate.slice(6, 8)}T15:30:00+09:00`
-        : new Date().toISOString()
+      const asOfIso = domesticClose.confirmReady
+        ? new Date().toISOString()
+        : (() => {
+            const lastDate = rows[rows.length - 1]?.date
+            return lastDate && /^\d{8}$/.test(lastDate)
+              ? `${lastDate.slice(0, 4)}-${lastDate.slice(4, 6)}-${lastDate.slice(6, 8)}T16:00:00+09:00`
+              : new Date().toISOString()
+          })()
       const payload = buildPayload({
         code,
         name,
@@ -636,6 +646,7 @@ export default async function handler(req, res) {
         asOfIso,
         metaName: "",
         yahooMeta: undefined,
+        domesticClose,
       })
       return res.status(200).json(payload)
     } catch (e) {

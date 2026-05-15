@@ -363,7 +363,7 @@ export default function MiniDailyStockChart({ bars, chartMeta, className = "" })
   const meta = chartMeta && typeof chartMeta === "object" ? chartMeta : null
   const sessionLabel = meta?.sessionLabel ?? "일봉 OHLC"
   const sourceLabel = meta?.dataSourceLabel ?? "—"
-  const asOfLabel = meta?.asOfLabelKst ?? meta?.updatedLabelKst ?? "—"
+  const updateBasis = meta?.updateBasisLabelKst ?? meta?.asOfLabelKst ?? meta?.updatedLabelKst ?? "—"
   const delayNote = meta?.delayNote ?? null
   const refClose =
     meta?.lastClose != null && Number.isFinite(Number(meta.lastClose))
@@ -419,11 +419,10 @@ export default function MiniDailyStockChart({ bars, chartMeta, className = "" })
       </div>
 
       <div className="border-b border-white/[0.05] bg-[#0a0e16] px-3 py-2 text-[10px] leading-relaxed text-slate-400 md:px-4">
-        <p className="m-0 font-medium text-slate-300">{sessionLabel}</p>
-        <p className="m-0 mt-0.5 text-slate-500">
-          기준 {asOfLabel}
-          {delayNote ? ` · ${delayNote}` : ""}
-        </p>
+        <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">업데이트 기준</p>
+        <p className="m-0 mt-1 font-mono text-[11px] tabular-nums text-slate-200">{updateBasis}</p>
+        <p className="m-0 mt-1 font-medium text-slate-300">{sessionLabel}</p>
+        {delayNote ? <p className="m-0 mt-0.5 text-slate-500">{delayNote}</p> : null}
         <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-600">{sourceLabel}</p>
         {meta?.ohlcPriority ? (
           <p className="m-0 mt-0.5 text-[9px] text-slate-600">OHLC · {meta.ohlcPriority === "regular_close" ? "정규장 마감 우선" : meta.ohlcPriority}</p>

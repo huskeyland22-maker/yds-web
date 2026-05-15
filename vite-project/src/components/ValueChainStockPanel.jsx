@@ -1,10 +1,15 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
 import { X } from "lucide-react"
 import MiniDailyStockChart from "./MiniDailyStockChart.jsx"
 import { naverFinanceUrl } from "../utils/valueChainStockInsight.js"
 import { fetchStockIndicators } from "../utils/stockIndicatorsApi.js"
+import {
+  afterKrxDataConfirmed,
+  msUntilKrx16Kst,
+  shouldRefetchDomesticStock,
+} from "../utils/krxDomesticClose.js"
 import { buildObjectiveStateSnapshot } from "../utils/valueChainObjectiveState.js"
 import { buildValueChainTacticalSignal, timingPageSearchParams } from "../utils/valueChainTacticalSignal.js"
 
@@ -40,33 +45,85 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
     return () => window.removeEventListener("keydown", onKey)
   }, [stock, onClose])
 
+  const abortRef = useRef(null)
+
+  const loadIndicators = useCallback(
+    (opts = {}) => {
+      if (!stock?.code) return () => {}
+      const silent = opts.silent === true
+      abortRef.current?.abort()
+      const ac = new AbortController()
+      abortRef.current = ac
+      if (!silent) {
+        setLoading(true)
+        setErr(null)
+        if (!opts.keepSnap) setSnap(null)
+      }
+      fetchStockIndicators({ code: stock.code, name: stock.name, signal: ac.signal })
+        .then((data) => {
+          if (!ac.signal.aborted) setSnap(data)
+        })
+        .catch((e) => {
+          if (!ac.signal.aborted) setErr(e instanceof Error ? e : new Error(String(e)))
+        })
+        .finally(() => {
+          if (!ac.signal.aborted && !silent) setLoading(false)
+        })
+      return () => ac.abort()
+    },
+    [stock?.code, stock?.name],
+  )
+
   useEffect(() => {
     if (!stock?.code) {
       setSnap(null)
       setErr(new Error("종목 코드가 없습니다."))
       setLoading(false)
-      return
+      return undefined
     }
-    let cancelled = false
-    const ac = new AbortController()
-    setLoading(true)
-    setErr(null)
-    setSnap(null)
-    fetchStockIndicators({ code: stock.code, name: stock.name, signal: ac.signal })
-      .then((data) => {
-        if (!cancelled) setSnap(data)
-      })
-      .catch((e) => {
-        if (!cancelled) setErr(e instanceof Error ? e : new Error(String(e)))
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+    const cancel = loadIndicators()
     return () => {
-      cancelled = true
-      ac.abort()
+      cancel?.()
     }
-  }, [stock?.code, stock?.name])
+  }, [stock?.code, stock?.name, loadIndicators])
+
+  useEffect(() => {
+    if (!stock?.code) return undefined
+    const ms = msUntilKrx16Kst()
+    if (ms == null || ms <= 0) return undefined
+    const t = window.setTimeout(() => {
+      loadIndicators({ silent: true, keepSnap: true })
+    }, ms + 2500)
+    return () => window.clearTimeout(t)
+  }, [stock?.code, loadIndicators])
+
+  useEffect(() => {
+    if (!stock?.code) return undefined
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return
+      const meta = snap?.chartMeta
+      if (shouldRefetchDomesticStock(meta) || (afterKrxDataConfirmed() && meta?.dataSource === "kis" && !meta?.confirmReady)) {
+        loadIndicators({ silent: true, keepSnap: true })
+      }
+    }
+    document.addEventListener("visibilitychange", onVisible)
+    return () => document.removeEventListener("visibilitychange", onVisible)
+  }, [stock?.code, loadIndicators, snap?.chartMeta])
+
+  useEffect(() => {
+    if (!stock?.code || !shouldRefetchDomesticStock(snap?.chartMeta)) return undefined
+    let n = 0
+    const maxPolls = 12
+    const poll = window.setInterval(() => {
+      n += 1
+      if (n > maxPolls) {
+        window.clearInterval(poll)
+        return
+      }
+      loadIndicators({ silent: true, keepSnap: true })
+    }, 120_000)
+    return () => window.clearInterval(poll)
+  }, [stock?.code, snap?.chartMeta?.needsReverify, snap?.chartMeta?.confirmReady, loadIndicators])
 
   if (!stock) return null
 
