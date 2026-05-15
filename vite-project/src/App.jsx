@@ -1210,11 +1210,11 @@ function App() {
               <dd className="text-right text-indigo-200/90">{sidebarPulse.cycleStage}</dd>
             </div>
           </dl>
-          {sidebarPulse.basisLabelKst ? (
-            <p className="m-0 mt-2 text-[9px] leading-relaxed text-slate-500">
-              기준: {sidebarPulse.basisLabelKst}
-              {sidebarPulse.basisNote ? ` · ${sidebarPulse.basisNote}` : ""}
-            </p>
+          {sidebarPulse.updateTimestampLine ? (
+            <p className="m-0 mt-2 text-[9px] leading-relaxed text-slate-500">{sidebarPulse.updateTimestampLine}</p>
+          ) : null}
+          {sidebarPulse.basisLine ? (
+            <p className="m-0 mt-0.5 text-[9px] leading-relaxed text-slate-500">{sidebarPulse.basisLine}</p>
           ) : null}
           <p className="m-0 mt-3 font-mono text-[9px] leading-relaxed text-slate-600">
             VIX {Number.isFinite(Number(panicData?.vix)) ? Number(panicData.vix).toFixed(2) : "—"} · F&amp;G{" "}

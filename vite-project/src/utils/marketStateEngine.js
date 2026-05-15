@@ -2,6 +2,10 @@
  * 패닉지표 기반 시장 상태 자동 계산 (하드코딩 UI 금지 — 규칙은 본 모듈만).
  */
 
+import { formatMarketBasisKst, resolveMarketTimestampDisplay } from "./marketTimestamp.js"
+
+export { formatMarketBasisKst } from "./marketTimestamp.js"
+
 const CYCLE_HISTORY_KEY = "yds-cycle-metric-history-v1"
 const DAILY_STATE_KEY = "yds-market-state-daily-v1"
 
@@ -98,28 +102,6 @@ export function extractPanicMetrics(data) {
     highYield: toNum(data?.highYield),
     updatedAt: data?.updatedAt ?? data?.updated_at ?? null,
   }
-}
-
-/** @param {string | null | undefined} iso */
-export function formatMarketBasisKst(iso) {
-  const raw = iso ? new Date(iso) : new Date()
-  const d = Number.isFinite(raw.getTime()) ? raw : new Date()
-  const parts = new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(d)
-  const y = parts.find((p) => p.type === "year")?.value
-  const mo = parts.find((p) => p.type === "month")?.value
-  const day = parts.find((p) => p.type === "day")?.value
-  const h = parts.find((p) => p.type === "hour")?.value
-  const mi = parts.find((p) => p.type === "minute")?.value
-  if (!y || !mo || !day) return "—"
-  return `${y}-${mo}-${day} ${h ?? "00"}:${mi ?? "00"} KST`
 }
 
 function kstDayKey(iso) {
@@ -245,6 +227,7 @@ export function computeMarketState(metrics, previous = null) {
 function buildResult(stateKey, reasons, metrics) {
   const meta = STATE_META[stateKey] ?? STATE_META.insufficient
   const basisAt = metrics.updatedAt ?? new Date().toISOString()
+  const ts = resolveMarketTimestampDisplay({ updatedAt: basisAt })
   return {
     stateKey,
     label: meta.label,
@@ -257,8 +240,10 @@ function buildResult(stateKey, reasons, metrics) {
     volatility: meta.volatility,
     reasons,
     basisAt,
-    basisLabelKst: formatMarketBasisKst(basisAt),
-    basisNote: "미국장 종가 기준",
+    basisLabelKst: ts.basisLabelKst,
+    basisNote: ts.basisNote,
+    updateTimestampLine: ts.updateLine,
+    basisLine: ts.basisLine,
     rulesVersion: "panic-v1",
   }
 }

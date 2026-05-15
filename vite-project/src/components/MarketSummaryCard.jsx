@@ -14,11 +14,11 @@ export default function MarketSummaryCard({ brief, integrationFlowText = "히스
       <p className="text-xs font-semibold tracking-wide text-cyan-300">AI MARKET BRIEFING</p>
       <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">오늘 시장 브리핑</h2>
       <p className="m-0 mt-1 text-base font-semibold text-gray-100">{safeBrief.headline ?? "-"}</p>
-      {safeBrief.basisLabelKst ? (
-        <p className="m-0 mt-2 text-[11px] text-slate-500">
-          기준: {safeBrief.basisLabelKst}
-          {safeBrief.basisNote ? ` · ${safeBrief.basisNote}` : ""}
-        </p>
+      {safeBrief.updateTimestampLine ? (
+        <p className="m-0 mt-2 text-[11px] text-slate-500">{safeBrief.updateTimestampLine}</p>
+      ) : null}
+      {safeBrief.basisLine ? (
+        <p className="m-0 mt-0.5 text-[11px] text-slate-500">{safeBrief.basisLine}</p>
       ) : null}
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
         <span className="rounded-full bg-white/5 px-3 py-1 text-gray-200">

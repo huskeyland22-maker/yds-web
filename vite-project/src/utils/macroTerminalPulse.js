@@ -24,6 +24,8 @@ export function buildMarketSidebarPulse(panicData, cycleStage) {
     marketStateColor: ms.color,
     basisLabelKst: ms.basisLabelKst,
     basisNote: ms.basisNote,
+    updateTimestampLine: ms.updateTimestampLine,
+    basisLine: ms.basisLine,
     cycleStage: typeof cycleStage === "string" && cycleStage !== "중립" ? cycleStage : ms.label,
   }
 }
@@ -41,8 +43,8 @@ function inferForeignFlow(panicData, ms) {
 /**
  * 밸류체인 히어로 우측 Today's Key Signal.
  */
-export function buildTodaysKeySignal(sectors, panicData, cycleStage, options) {
-  const desk = buildResearchDeskBriefing(sectors, panicData, options)
+export function buildTodaysKeySignal(sectors, panicData, cycleStage) {
+  const desk = buildResearchDeskBriefing(sectors, panicData)
   const ms = desk.marketState
   const top = desk.hotSectors[0]
   const leading = top ? `${top.icon ? `${top.icon} ` : ""}${top.name}`.trim() : "—"
@@ -58,7 +60,7 @@ export function buildTodaysKeySignal(sectors, panicData, cycleStage, options) {
     marketState: ms,
     basisLabelKst: desk.basisLabelKst,
     basisNote: desk.basisNote,
-    heatTimestampLine: desk.heatTimestampLine,
-    heatBasisLine: desk.heatBasisLine,
+    updateTimestampLine: desk.updateTimestampLine,
+    basisLine: desk.basisLine,
   }
 }

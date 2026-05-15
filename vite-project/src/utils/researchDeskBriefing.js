@@ -6,10 +6,10 @@
 import { heatSortRank } from "./valueChainTree.js"
 import {
   extractPanicMetrics,
-  formatMarketBasisKst,
   readPreviousCycleMetrics,
   resolveMarketState,
 } from "./marketStateEngine.js"
+import { resolveMarketTimestampDisplay } from "./marketTimestamp.js"
 
 export const DESK_CLUSTER_IDS = {
   ai: [
@@ -207,65 +207,11 @@ export function computeTodaysTheme(sectors, marketEnergy) {
   return marketEnergy
 }
 
-function parseKstDisplay(raw) {
-  if (!raw || typeof raw !== "string") return null
-  const trimmed = raw.trim()
-  if (!trimmed || trimmed === "-") return null
-  if (/KST/i.test(trimmed)) return trimmed.replace(/\s*KST\s*$/i, " KST").trim()
-  const iso = new Date(trimmed)
-  if (Number.isFinite(iso.getTime())) return formatMarketBasisKst(iso.toISOString())
-  return trimmed
-}
-
-function parseToMs(label) {
-  if (!label) return NaN
-  const m = label.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/)
-  if (!m) return NaN
-  return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]) - 9, Number(m[5]))
-}
-
-/**
- * @param {string | null | undefined} heatUpdatedAtRaw
- * @param {unknown} panicData
- * @param {{ basisLabelKst?: string; basisNote?: string }} marketState
- */
-export function resolveDeskTimestamps(heatUpdatedAtRaw, panicData, marketState) {
-  const sectorAt = parseKstDisplay(heatUpdatedAtRaw)
-  const macroAt = marketState.basisLabelKst || formatMarketBasisKst(panicData?.updatedAt ?? panicData?.updated_at)
-  const sectorMs = parseToMs(sectorAt)
-  const macroMs = parseToMs(macroAt)
-
-  let primaryAt = macroAt
-  let primaryNote = marketState.basisNote || "미국장 종가 기준"
-
-  if (sectorAt && Number.isFinite(sectorMs)) {
-    if (!Number.isFinite(macroMs) || sectorMs > macroMs) {
-      primaryAt = sectorAt
-      primaryNote = "섹터 Heat 갱신"
-    } else if (sectorAt !== macroAt) {
-      return {
-        heatTimestampLine: `Heat · ${sectorAt}`,
-        heatBasisLine: `매크로 · ${macroAt} · ${marketState.basisNote || "미국장 종가 기준"}`,
-        sectorHeatAt: sectorAt,
-        macroBasisAt: macroAt,
-      }
-    }
-  }
-
-  return {
-    heatTimestampLine: primaryAt ? `Heat · ${primaryAt}` : "Heat · —",
-    heatBasisLine: primaryNote,
-    sectorHeatAt: sectorAt,
-    macroBasisAt: macroAt,
-  }
-}
-
 /**
  * @param {Array<{ id: string; heat?: string; name?: string; icon?: string; order?: number }>} sectors
  * @param {unknown} panicData
- * @param {{ heatUpdatedAt?: string | null }} [options]
  */
-export function buildResearchDeskBriefing(sectors, panicData, options = {}) {
+export function buildResearchDeskBriefing(sectors, panicData) {
   const list = Array.isArray(sectors) ? sectors : []
   const metrics = extractPanicMetrics(panicData)
   const ms = resolveMarketState(panicData)
@@ -279,7 +225,7 @@ export function buildResearchDeskBriefing(sectors, panicData, options = {}) {
   const coreFlow = computeCoreFlow(list)
   const riskState = computeRiskSignals(metrics, previous, ms)
   const todaysTheme = computeTodaysTheme(list, marketEnergy)
-  const timestamps = resolveDeskTimestamps(options.heatUpdatedAt, panicData, ms)
+  const ts = resolveMarketTimestampDisplay(panicData)
 
   const hotSectors = sortSectorsByHeat(list)
     .slice(0, 3)
@@ -292,8 +238,10 @@ export function buildResearchDeskBriefing(sectors, panicData, options = {}) {
     todaysTheme,
     hotSectors,
     marketState: ms,
-    basisLabelKst: ms.basisLabelKst,
-    basisNote: ms.basisNote,
+    basisLabelKst: ts.basisLabelKst,
+    basisNote: ts.basisNote,
+    updateTimestampLine: ts.updateLine,
+    basisLine: ts.basisLine,
     riskRegimeLabel: ms.label,
     riskRegimeDetail:
       metrics.vix != null && metrics.fearGreed != null
@@ -303,9 +251,5 @@ export function buildResearchDeskBriefing(sectors, panicData, options = {}) {
           : metrics.fearGreed != null
             ? `F&G ${Math.round(metrics.fearGreed)}`
             : "—",
-    heatTimestampLine: timestamps.heatTimestampLine,
-    heatBasisLine: timestamps.heatBasisLine,
-    sectorHeatAt: timestamps.sectorHeatAt,
-    macroBasisAt: timestamps.macroBasisAt,
   }
 }

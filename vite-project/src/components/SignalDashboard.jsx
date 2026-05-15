@@ -953,11 +953,11 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
               {aiBrief.state} · <span className={riskToneClass}>{aiBrief.risk}</span>
             </p>
             <p className="m-0 mt-1 text-sm text-slate-300">{aiBrief.headline}</p>
-            {marketState?.basisLabelKst ? (
-              <p className="m-0 mt-2 text-[10px] text-slate-500">
-                기준: {marketState.basisLabelKst}
-                {marketState.basisNote ? ` · ${marketState.basisNote}` : ""}
-              </p>
+            {marketState?.updateTimestampLine ? (
+              <p className="m-0 mt-2 text-[10px] text-slate-500">{marketState.updateTimestampLine}</p>
+            ) : null}
+            {marketState?.basisLine ? (
+              <p className="m-0 mt-0.5 text-[10px] text-slate-500">{marketState.basisLine}</p>
             ) : null}
             <p className="m-0 mt-2 flex items-center gap-1.5 text-[11px] tracking-wide text-cyan-300">
               <span className={`inline-block h-2 w-2 rounded-full shadow ${feedDotClass}`} />

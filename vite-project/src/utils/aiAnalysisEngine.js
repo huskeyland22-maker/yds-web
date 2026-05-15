@@ -116,6 +116,8 @@ export function buildAiMarketBrief(data) {
     marketState,
     basisLabelKst: marketState.basisLabelKst,
     basisNote: marketState.basisNote,
+    updateTimestampLine: marketState.updateTimestampLine,
+    basisLine: marketState.basisLine,
     integration: integrated,
     headline: marketState.headline || integrated.interpretation,
     briefingLines,

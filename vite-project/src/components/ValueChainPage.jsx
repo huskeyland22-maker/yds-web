@@ -47,7 +47,6 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
   const panicData = panicFromStore ?? panicDataProp
 
   const [sectors, setSectors] = useState(() => VALUE_CHAIN_SECTORS.map((s) => ({ ...s })))
-  const [heatUpdatedAt, setHeatUpdatedAt] = useState(null)
   const [selected, setSelected] = useState(null)
 
   const loadSectorHeat = useCallback(() => {
@@ -57,7 +56,6 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
       .then((data) => {
         if (cancelled) return
         const map = data?.sectorHeat
-        setHeatUpdatedAt(data?.updatedAt ?? null)
         if (!map || typeof map !== "object") return
         setSectors((prev) =>
           prev.map((s) => ({
@@ -86,13 +84,10 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
     })
   }, [sectors])
 
-  const desk = useMemo(
-    () => buildResearchDeskBriefing(sectors, panicData, { heatUpdatedAt }),
-    [sectors, panicData, heatUpdatedAt],
-  )
+  const desk = useMemo(() => buildResearchDeskBriefing(sectors, panicData), [sectors, panicData])
   const todaysKey = useMemo(
-    () => buildTodaysKeySignal(sectors, panicData, marketCycleStage, { heatUpdatedAt }),
-    [sectors, panicData, marketCycleStage, heatUpdatedAt],
+    () => buildTodaysKeySignal(sectors, panicData, marketCycleStage),
+    [sectors, panicData, marketCycleStage],
   )
 
   return (
@@ -164,9 +159,9 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
                   <dd className="m-0 mt-1 text-[12px] leading-snug text-indigo-200/95">{desk.todaysTheme}</dd>
                 </div>
               </dl>
-              <p className="m-0 mt-3 font-mono text-[9px] text-slate-600">{desk.heatTimestampLine}</p>
-              {desk.heatBasisLine ? (
-                <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-500">{desk.heatBasisLine}</p>
+              <p className="m-0 mt-3 font-mono text-[9px] text-slate-600">{desk.updateTimestampLine}</p>
+              {desk.basisLine ? (
+                <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-500">{desk.basisLine}</p>
               ) : null}
             </div>
 
@@ -183,11 +178,11 @@ export default function ValueChainPage({ panicData: panicDataProp, marketCycleSt
                   <span className="text-right font-semibold text-slate-100">{todaysKey.riskOnOff}</span>
                 </div>
                 <p className="m-0 text-right font-mono text-[9px] text-slate-500">{todaysKey.riskDetail}</p>
-                {todaysKey.basisLabelKst ? (
-                  <p className="m-0 text-right font-mono text-[9px] text-slate-600">
-                    기준: {todaysKey.basisLabelKst}
-                    {todaysKey.basisNote ? ` · ${todaysKey.basisNote}` : ""}
-                  </p>
+                {todaysKey.updateTimestampLine ? (
+                  <p className="m-0 text-right font-mono text-[9px] text-slate-600">{todaysKey.updateTimestampLine}</p>
+                ) : null}
+                {todaysKey.basisLine ? (
+                  <p className="m-0 text-right font-mono text-[9px] text-slate-500">{todaysKey.basisLine}</p>
                 ) : null}
                 <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
                   <span className="text-slate-500">Leading sector</span>
