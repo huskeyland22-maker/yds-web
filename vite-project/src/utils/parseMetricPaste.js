@@ -18,13 +18,44 @@ export const METRIC_PASTE_KEYS = [
 const MAX_PASTE_CHARS = 48_000
 const MAX_REGEX_ITERATIONS = 200
 
+/**
+ * Normalized alias slug → canonical metric key (앱/스토어 키).
+ * 예: feargreed → fearGreed, hyoas → highYield, gssentiment → gsBullBear
+ */
+export const METRIC_CANONICAL_FROM_SLUG = {
+  feargreed: "fearGreed",
+  cnnfeargreed: "fearGreed",
+  cnnfearandgreed: "fearGreed",
+  cnnfg: "fearGreed",
+  hyoas: "highYield",
+  hyoasfred: "highYield",
+  highyield: "highYield",
+  bamlh0a0hym2: "highYield",
+  gssentiment: "gsBullBear",
+  gsbb: "gsBullBear",
+  gsbullbear: "gsBullBear",
+  goldmansachssentiment: "gsBullBear",
+  goldmansachsbullbear: "gsBullBear",
+}
+
+/** @type {{ alias: string, key: string }[]} longest-first for greedy match */
+const METRIC_ALIAS_ENTRIES = Object.entries(METRIC_CANONICAL_FROM_SLUG)
+  .map(([alias, key]) => ({ alias, key }))
+  .sort((a, b) => b.alias.length - a.alias.length)
+
 /** @type {{ key: string, patterns: RegExp[] }[]} */
 export const METRIC_PASTE_RULES = [
   { key: "vix", patterns: [/\bVIX(?:\s*Index)?\b/i] },
   { key: "vxn", patterns: [/\bVXN(?:\s*Index)?\b/i] },
   {
     key: "fearGreed",
-    patterns: [/(?:CNN\s*F&G|Fear\s*&\s*Greed|공포\s*탐욕|탐욕\s*지수|F&G(?:\s*Index)?)\b/i],
+    patterns: [
+      /CNN\s*Fear\s*&\s*Greed/i,
+      /CNN\s*FearGreed/i,
+      /\bFear\s*&\s*Greed\b/i,
+      /\bFearGreed\b/i,
+      /(?:CNN\s*F&G|공포\s*탐욕|탐욕\s*지수|F&G(?:\s*Index)?)\b/i,
+    ],
   },
   { key: "bofa", patterns: [/BofA(?:\s*Bull\s*(?:&|and)?\s*Bear|\s*B\s*&\s*B)?/i] },
   { key: "move", patterns: [/\bMOVE(?:\s*Index)?\b/i] },
@@ -35,12 +66,22 @@ export const METRIC_PASTE_RULES = [
   },
   {
     key: "highYield",
-    patterns: [/(?:하이\s*일드|High\s*Yield|HY\s*스프레드|하이일드\s*스프레드)/i],
+    patterns: [
+      /HY\s*OAS(?:\s*\(\s*FRED\s*\))?/i,
+      /\bHigh\s*Yield\b/i,
+      /\bHighYield\b/i,
+      /\bBAMLH0A0HYM2\b/i,
+      /(?:하이\s*일드|HY\s*스프레드|하이일드\s*스프레드)/i,
+    ],
   },
   {
     key: "gsBullBear",
     patterns: [
-      /(?:GS\s*B\s*\/\s*B|GS\s*Bull\s*(?:&|and)\s*Bear|Goldman(?:\s+Sachs)?\s*B\s*\/\s*B)/i,
+      /\bGS\s*Sentiment\b/i,
+      /\bGS\s*B\s*\/\s*B\b/i,
+      /Goldman\s*Sachs\s*Sentiment/i,
+      /\bGS\s*Bull\s*Bear\b/i,
+      /(?:GS\s*Bull\s*(?:&|and)\s*Bear|Goldman(?:\s+Sachs)?\s*B\s*\/\s*B)/i,
     ],
   },
 ]
@@ -82,6 +123,66 @@ export function emptyMetricPasteResult(requiredKeys = []) {
  * 붙여넣기 원문 정리 — emoji, ▲▼, 출처, 제어문자 제거.
  * @param {unknown} raw
  */
+/**
+ * 지표 라벨 정규화 — 소문자, 공백 제거, &, /, (), - 등 특수문자 제거, trim.
+ * @param {unknown} raw
+ * @returns {string} slug (예: "CNN Fear & Greed" → "cnnfeargreed")
+ */
+export function normalizeMetricLabel(raw) {
+  try {
+    return String(raw ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/&/g, "")
+      .replace(/[()\-/.,:;_]/g, "")
+      .replace(/[^\w가-힣]/g, "")
+  } catch {
+    return ""
+  }
+}
+
+/** 라벨 구간만 정규화 (수치 토큰은 제외) */
+function normalizeLineForAliasMatch(line) {
+  try {
+    compilePasteRegexes()
+    const labelPart = String(line ?? "").replace(NUMBER_TOKEN_RE, " ")
+    return normalizeMetricLabel(labelPart)
+  } catch {
+    return normalizeMetricLabel(line)
+  }
+}
+
+/**
+ * @param {string} text
+ * @returns {{ key: string, alias: string, normIndex: number } | null}
+ */
+function findMetricByAlias(text) {
+  try {
+    const norm = normalizeLineForAliasMatch(text)
+    if (!norm) return null
+    for (const { alias, key } of METRIC_ALIAS_ENTRIES) {
+      const idx = norm.indexOf(alias)
+      if (idx >= 0) return { key, alias, normIndex: idx }
+    }
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+/** slug가 canonical 키면 그대로, alias면 변환 */
+export function resolveCanonicalMetricKey(slugOrKey) {
+  try {
+    const s = normalizeMetricLabel(slugOrKey)
+    if (!s) return null
+    if (METRIC_PASTE_KEYS.includes(slugOrKey)) return slugOrKey
+    return METRIC_CANONICAL_FROM_SLUG[s] ?? null
+  } catch {
+    return null
+  }
+}
+
 export function sanitizeMetricPasteText(raw) {
   try {
     compilePasteRegexes()
@@ -269,18 +370,39 @@ function findMetricInText(text, patterns) {
   return null
 }
 
+function extractValueForMetricLine(line, matchEndIndex = 0) {
+  try {
+    if (String(line).includes(",")) {
+      const csvVal = extractMetricValueFromCsvLine(line)
+      if (csvVal != null) return csvVal
+    }
+    const start = Number.isFinite(matchEndIndex) ? Math.max(0, matchEndIndex) : 0
+    const fromTail = extractPrimaryMetricValue(line, start)
+    if (fromTail != null) return fromTail
+    return extractPrimaryMetricValue(line, 0)
+  } catch {
+    return null
+  }
+}
+
 function parseLineForMetric(line, rule) {
   try {
     const { patterns } = rule ?? {}
     const hit = findMetricInText(line, patterns)
     if (!hit) return null
+    return extractValueForMetricLine(line, hit.index + hit.length)
+  } catch {
+    return null
+  }
+}
 
-    if (String(line).includes(",")) {
-      const csvVal = extractMetricValueFromCsvLine(line)
-      if (csvVal != null) return csvVal
-    }
-
-    return extractPrimaryMetricValue(line, hit.index + hit.length)
+function parseLineForAlias(line) {
+  try {
+    const aliasHit = findMetricByAlias(line)
+    if (!aliasHit) return null
+    const value = extractValueForMetricLine(line, 0)
+    if (value == null) return null
+    return { key: aliasHit.key, value }
   } catch {
     return null
   }
@@ -312,6 +434,10 @@ export function parseMetricPasteText(text, requiredKeys = []) {
     const out = Object.fromEntries(METRIC_PASTE_KEYS.map((k) => [k, null]))
 
     for (const line of lines) {
+      const aliasParsed = parseLineForAlias(line)
+      if (aliasParsed && out[aliasParsed.key] == null) {
+        out[aliasParsed.key] = aliasParsed.value
+      }
       for (const rule of METRIC_PASTE_RULES) {
         if (out[rule.key] != null) continue
         const n = parseLineForMetric(line, rule)
@@ -321,6 +447,12 @@ export function parseMetricPasteText(text, requiredKeys = []) {
     }
 
     const blob = lines.join("\n")
+    if (!METRIC_PASTE_KEYS.every((k) => out[k] != null)) {
+      const blobAlias = parseLineForAlias(blob)
+      if (blobAlias && out[blobAlias.key] == null) {
+        out[blobAlias.key] = blobAlias.value
+      }
+    }
     for (const rule of METRIC_PASTE_RULES) {
       if (out[rule.key] != null) continue
       const found = findMetricInText(blob, rule.patterns)
