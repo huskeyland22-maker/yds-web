@@ -21,6 +21,7 @@ import {
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
+import SupabaseRawDebugPanel from "./components/SupabaseRawDebugPanel.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
@@ -1567,6 +1568,7 @@ function App() {
         </div>
       ) : null}
       <PanicSyncDebugPanel />
+      <SupabaseRawDebugPanel />
       <PwaRuntimeDebugOverlay />
     </div>
   )
