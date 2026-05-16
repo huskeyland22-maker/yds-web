@@ -1175,13 +1175,13 @@ function App() {
         hubSaveGlow ? "shadow-[inset_0_0_80px_rgba(34,211,238,0.08),0_0_60px_rgba(167,139,250,0.12)]" : "",
       ].join(" ")}
     >
-      <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] lg:h-[100dvh] lg:w-[17rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:pt-[env(safe-area-inset-top)] lg:pb-[env(safe-area-inset-bottom)] xl:w-[18rem]">
-        <div className="shrink-0 px-4 pb-3 pt-3 lg:border-b lg:border-white/[0.06] lg:px-5 lg:pb-4 lg:pt-4">
-          <p className="m-0 font-display text-[1.15rem] font-semibold leading-none tracking-tight text-slate-50">Y&apos;ds</p>
-          <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.14em] text-slate-500">매크로 터미널</p>
+      <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] lg:h-[100dvh] lg:w-[15rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:pt-[env(safe-area-inset-top)] lg:pb-[env(safe-area-inset-bottom)] xl:w-[16rem]">
+        <div className="shrink-0 px-3 pb-2 pt-2.5 lg:border-b lg:border-white/[0.06] lg:px-4 lg:pb-3 lg:pt-3">
+          <p className="m-0 font-display text-trading-lg font-semibold leading-none tracking-tight text-slate-50 lg:text-xl">Y&apos;ds</p>
+          <p className="m-0 mt-1 text-trading-2xs font-medium tracking-[0.12em] text-slate-500">매크로 터미널</p>
         </div>
         <nav
-          className="flex min-h-[48px] flex-1 flex-row items-stretch gap-0.5 overflow-x-auto px-1 py-2 lg:flex-col lg:gap-1 lg:overflow-x-visible lg:px-3 lg:py-3"
+          className="flex min-h-[40px] flex-1 flex-row items-stretch gap-0 overflow-x-auto px-1 py-1.5 lg:flex-col lg:gap-0.5 lg:overflow-x-visible lg:px-2.5 lg:py-2"
           aria-label="주요 메뉴"
         >
           {MENU.map((item, i) => (
@@ -1190,7 +1190,7 @@ function App() {
               to={item.path}
               className={({ isActive }) =>
                 [
-                  "flex min-h-[44px] min-w-[44px] shrink-0 items-center gap-2.5 rounded-lg border px-3 py-2.5 transition lg:min-h-0 lg:min-w-0 lg:w-full",
+                  "flex min-h-[40px] min-w-0 shrink-0 items-center gap-2 rounded-card border px-2.5 py-2 text-trading-sm transition lg:min-h-0 lg:w-full lg:px-3",
                   isActive
                     ? "border-indigo-500/30 bg-indigo-500/[0.14] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
                     : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-slate-200",
@@ -1200,19 +1200,19 @@ function App() {
               {({ isActive }) => (
                 <>
                   <span
-                    className={`font-mono text-[10px] tabular-nums ${isActive ? "text-indigo-300/95" : "text-slate-600"}`}
+                    className={`font-mono text-trading-2xs tabular-nums ${isActive ? "text-indigo-300/95" : "text-slate-600"}`}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="whitespace-nowrap text-[13px] font-medium tracking-tight">{item.label}</span>
+                  <span className="whitespace-nowrap text-trading-sm font-medium tracking-tight">{item.label}</span>
                 </>
               )}
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-4 lg:pb-5 lg:pt-4">
-          <p className="m-0 text-[9px] font-semibold tracking-[0.12em] text-slate-500">시장 상태</p>
-          <dl className="m-0 mt-3 space-y-2 text-[10px] leading-snug sm:text-[11px]">
+        <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-3 lg:pb-4 lg:pt-3">
+          <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">시장 상태</p>
+          <dl className="m-0 mt-2 space-y-1.5 text-trading-xs leading-snug">
             <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
               <dt className="shrink-0 text-slate-500">위험 선호</dt>
               <dd
@@ -1269,36 +1269,36 @@ function App() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex min-h-[48px] shrink-0 flex-wrap items-center justify-end gap-2 border-b border-white/[0.06] bg-[#0B0E14]/95 px-4 py-2.5 backdrop-blur-sm sm:px-6 lg:pt-[calc(0.625rem+env(safe-area-inset-top))]">
-          <div className={`flex flex-wrap items-center gap-2 ${isMobile ? "w-full justify-center" : "justify-end"}`}>
+        <header className="flex min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] bg-[#0B0E14]/95 px-3 py-2 backdrop-blur-sm sm:px-4 lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
+          <div className={`flex flex-wrap items-center gap-1.5 ${isMobile ? "w-full justify-center" : "justify-end"}`}>
             <button
               type="button"
               onClick={openInputPanel}
-              className="flex items-center gap-1.5 rounded-lg border border-violet-400/50 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-3 py-1.5 text-[12px] font-semibold text-white shadow-[0_2px_8px_rgba(124,58,237,0.35)] transition active:scale-95 lg:hidden"
+              className="flex items-center gap-1 rounded-card border border-violet-400/50 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-2.5 py-1.5 text-trading-sm font-semibold text-white shadow-[0_2px_8px_rgba(124,58,237,0.3)] transition active:scale-95 lg:hidden"
               aria-label="AI 리포트 입력"
             >
               <span aria-hidden="true" className="text-sm leading-none">＋</span>
               AI 리포트
             </button>
             <div className="flex items-center gap-2">
-                <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 transition hover:border-white/[0.12]">
+                <div className="flex items-center gap-2 rounded-card border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 transition hover:border-white/[0.12]">
                   {user ? (
                     <>
                       <img
                         src={user.photoURL || "https://placehold.co/72x72/0f172a/e2e8f0?text=U"}
                         alt="사용자 프로필"
-                        className="h-9 w-9 rounded-full border border-white/15 object-cover"
+                        className="h-8 w-8 rounded-full border border-white/15 object-cover"
                       />
                       <div className="leading-tight">
-                        <span className="max-w-[140px] truncate text-sm font-semibold text-white">
+                        <span className="max-w-[120px] truncate text-trading-sm font-semibold text-white">
                           {user.displayName || user.email || "로그인 유저"}
                         </span>
-                        <div className="text-[11px] text-slate-500">Premium access</div>
+                        <div className="text-trading-2xs text-slate-500">Premium access</div>
                       </div>
                       <button
                         type="button"
                         onClick={logout}
-                        className="rounded-lg bg-red-500/10 px-2 py-1 text-xs text-red-300 transition hover:bg-red-500/20"
+                        className="rounded-md bg-red-500/10 px-1.5 py-0.5 text-trading-xs text-red-300 transition hover:bg-red-500/20"
                       >
                         로그아웃
                       </button>
@@ -1307,7 +1307,7 @@ function App() {
                     <button
                       type="button"
                       onClick={login}
-                      className="flex items-center gap-2 text-sm font-medium text-slate-200 transition hover:text-white"
+                      className="flex items-center gap-1.5 text-trading-sm font-medium text-slate-200 transition hover:text-white"
                       style={{ width: isMobile ? "100%" : "auto" }}
                     >
                       <LogIn size={16} />
@@ -1316,19 +1316,19 @@ function App() {
                   )}
                 </div>
               </div>
-              <span className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 font-mono text-[10px] text-slate-400">
+              <span className="rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-mono text-trading-2xs text-slate-400">
                 {buildVersion}
               </span>
             </div>
         </header>
 
-        <main className="flex-1 overflow-auto px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5 sm:py-5 lg:px-7 lg:py-6">
+        <main className="flex-1 overflow-auto px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:py-4 lg:px-6 lg:py-5">
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route
               path="/cycle"
               element={
-                <div className="space-y-5">
+                <div className="space-y-3 md:space-y-5">
                   <SectionErrorBoundary label="사이클 데스크 헤더">
                     <CycleDeskHero
                       context={cycleHeroContext}
@@ -1338,7 +1338,7 @@ function App() {
                   </SectionErrorBoundary>
                   <SectionErrorBoundary label="사이클 플로우·매크로 티어">
                     <SectorFlowStrip />
-                    <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+                    <section className="mt-3 grid grid-cols-1 gap-3 md:gap-4 lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
                       tier="tactical"
                       tierLabel="단기 전략"
@@ -1421,7 +1421,7 @@ function App() {
           type="button"
           onClick={openInputPanel}
           aria-label="AI 리포트 입력 열기"
-          className="fixed z-[9998] flex items-center gap-2 rounded-full border border-violet-400/40 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(124,58,237,0.45)] transition active:scale-95 lg:hidden"
+          className="fixed z-[9998] flex touch-target-comfort items-center gap-1.5 rounded-full border border-violet-400/40 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-3 py-2.5 text-trading-sm font-semibold text-white shadow-[0_8px_20px_rgba(124,58,237,0.4)] transition active:scale-95 lg:hidden"
           style={{
             bottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem))",
             right: "max(1rem, calc(env(safe-area-inset-right) + 0.75rem))",

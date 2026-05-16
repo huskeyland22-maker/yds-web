@@ -7,16 +7,16 @@ export default function SectorFlowStrip() {
   const line = FLOW_LABELS.join("  →  ")
   return (
     <div
-      className="overflow-hidden rounded-lg border border-white/[0.05] bg-black/25 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
+      className="overflow-hidden rounded-card border border-white/[0.05] bg-black/25 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
       aria-hidden
     >
       <div className="yds-flow-strip-track flex w-max gap-0">
-        <div className="yds-flow-strip-content flex shrink-0 items-center gap-6 px-4 text-[10px] tracking-wide text-slate-500">
-          <span className="text-[9px] font-semibold tracking-[0.12em] text-slate-600">섹터 로테이션</span>
+        <div className="yds-flow-strip-content flex shrink-0 items-center gap-4 px-3 text-trading-2xs tracking-wide text-slate-500">
+          <span className="text-trading-2xs font-semibold tracking-[0.1em] text-slate-600">섹터 로테이션</span>
           <span className="text-slate-400">{line}</span>
         </div>
-        <div className="yds-flow-strip-content flex shrink-0 items-center gap-6 px-4 text-[10px] tracking-wide text-slate-500">
-          <span className="text-[9px] font-semibold tracking-[0.12em] text-slate-600">섹터 로테이션</span>
+        <div className="yds-flow-strip-content flex shrink-0 items-center gap-4 px-3 text-trading-2xs tracking-wide text-slate-500">
+          <span className="text-trading-2xs font-semibold tracking-[0.1em] text-slate-600">섹터 로테이션</span>
           <span className="text-slate-400">{line}</span>
         </div>
       </div>

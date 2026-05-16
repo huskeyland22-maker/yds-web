@@ -21,9 +21,9 @@ const TIER_RADIAL = {
 }
 
 const TIER_BORDER_GLOW = {
-  tactical: "shadow-[0_0_0_1px_rgba(251,191,36,0.12),0_24px_64px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]",
-  strategic: "shadow-[0_0_0_1px_rgba(129,140,248,0.12),0_24px_64px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]",
-  macro: "shadow-[0_0_0_1px_rgba(52,211,153,0.1),0_24px_64px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]",
+  tactical: "shadow-trading-card md:hover:shadow-trading-card-hover",
+  strategic: "shadow-trading-card md:hover:shadow-trading-card-hover",
+  macro: "shadow-trading-card md:hover:shadow-trading-card-hover",
 }
 
 const FEED_BADGE = {
@@ -55,12 +55,12 @@ function MetricBlock({ series, panicData, rows, large }) {
   const accent = finite ? resolveSeriesColor(series) : "#94a3b8"
   const valueStyle = finite ? metricValueDisplayStyle(accent) : { color: "#94a3b8", textShadow: "0 1px 0 rgba(0,0,0,0.85)" }
   const valueSize = large
-    ? "text-[clamp(2.35rem,8.2vw,3.45rem)] leading-[0.92] sm:text-[clamp(2.55rem,4.8vw,3.75rem)]"
-    : "text-[clamp(1.7rem,5.2vw,2.25rem)] leading-[0.92] sm:text-[clamp(1.85rem,3.2vw,2.35rem)]"
+    ? "text-[clamp(1.75rem,6.5vw,2.65rem)] leading-[0.92] sm:text-[clamp(1.9rem,4.2vw,3rem)]"
+    : "text-[clamp(1.25rem,4.8vw,1.85rem)] leading-[0.92] sm:text-[clamp(1.4rem,2.8vw,2.1rem)]"
 
   return (
     <div
-      className={`relative flex min-w-0 flex-col ${large ? "min-h-[6.75rem] px-1 sm:min-h-[7.25rem]" : "min-h-[5.5rem] px-0.5 sm:min-h-[5.75rem]"}`}
+      className={`relative flex min-w-0 flex-col ${large ? "min-h-[5rem] px-1 sm:min-h-[5.75rem]" : "min-h-[4.25rem] px-0.5 sm:min-h-[5rem]"}`}
     >
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <p
@@ -69,7 +69,7 @@ function MetricBlock({ series, panicData, rows, large }) {
         >
           {formatMetricValue(series.key, v)}
         </p>
-        <p className="m-0 mt-2.5 max-w-[18ch] text-[10px] font-semibold uppercase leading-tight tracking-[0.2em] text-slate-500 sm:mt-3 sm:text-[11px]">
+        <p className="m-0 mt-1 max-w-[18ch] text-trading-2xs font-semibold uppercase leading-tight tracking-[0.16em] text-slate-500 sm:mt-2 sm:text-trading-xs">
           {name}
         </p>
       </div>
@@ -145,11 +145,11 @@ export default function MacroCycleTierCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -2 }}
-      className="rounded-xl p-px [background:linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(15,23,42,0.4)_45%,rgba(15,23,42,0.15)_100%)]"
+      whileHover={{ y: -1 }}
+      className="rounded-card-lg p-px [background:linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(15,23,42,0.35)_45%,rgba(15,23,42,0.12)_100%)]"
     >
       <div
-        className={`relative overflow-hidden rounded-[11px] bg-[#060910] transition-[box-shadow,transform,ring-color] duration-300 ease-out hover:shadow-[0_28px_72px_rgba(0,0,0,0.58)] hover:ring-1 hover:ring-cyan-400/12 ${borderGlow}`}
+        className={`relative overflow-hidden rounded-card bg-[#060910] transition-[box-shadow,ring-color] duration-300 ease-out md:hover:shadow-trading-card-hover md:hover:ring-1 md:hover:ring-cyan-400/10 ${borderGlow}`}
       >
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.035] mix-blend-overlay"
@@ -167,42 +167,42 @@ export default function MacroCycleTierCard({
         <div className="relative z-[1]">
           <div className={`h-[3px] w-full bg-gradient-to-r ${topBar}`} aria-hidden />
 
-          <header className="border-b border-white/[0.05] px-5 pb-4 pt-4">
-            <div className="flex items-start justify-between gap-3">
-              <p className="m-0 text-[10px] font-bold tracking-[0.08em] text-slate-500">{tierLabel}</p>
-              <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <header className="border-b border-white/[0.05] px-3 pb-3 pt-3 sm:px-4 sm:pb-3.5 sm:pt-3.5">
+            <div className="flex items-start justify-between gap-2">
+              <p className="m-0 text-trading-2xs font-bold tracking-[0.08em] text-slate-500">{tierLabel}</p>
+              <div className="flex shrink-0 flex-col items-end gap-1">
                 <FeedStatusBadge kind={feedKind} label={feedLabel} />
-                <p className="m-0 max-w-[10rem] text-right text-[9px] font-medium tracking-wide text-slate-400">{statusLabel}</p>
+                <p className="m-0 max-w-[10rem] text-right text-trading-2xs font-medium tracking-wide text-slate-400">{statusLabel}</p>
               </div>
             </div>
 
-            <h2 className="m-0 mt-4 text-[1.45rem] font-semibold leading-[1.15] tracking-tight text-slate-50 sm:text-[1.65rem]">
+            <h2 className="m-0 mt-2.5 text-trading-lg font-semibold leading-tight tracking-tight text-slate-50 sm:mt-3 sm:text-trading-xl">
               {state}
             </h2>
 
-            <div className="mt-3 space-y-1 border-l-2 border-white/[0.1] pl-3">
-              <p className="m-0 text-[13px] font-semibold leading-snug text-slate-200/95 sm:text-sm">{subtitlePrimary}</p>
+            <div className="mt-2 space-y-0.5 border-l-2 border-white/[0.1] pl-2.5 sm:mt-2.5">
+              <p className="m-0 text-trading-sm font-semibold leading-snug text-slate-200/95 sm:text-trading-base">{subtitlePrimary}</p>
               {subtitleSecondary ? (
-                <p className="m-0 text-[11.5px] leading-relaxed text-slate-600 sm:text-[12px]">{subtitleSecondary}</p>
+                <p className="m-0 text-trading-xs leading-snug text-slate-600 sm:text-trading-sm">{subtitleSecondary}</p>
               ) : null}
             </div>
           </header>
 
-          <section className="border-b border-white/[0.05] px-5 py-4">
-            <p className="m-0 text-[9px] font-semibold tracking-[0.1em] text-slate-500">핵심 수치</p>
+          <section className="border-b border-white/[0.05] px-3 py-3 sm:px-4 sm:py-3.5">
+            <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">핵심 수치</p>
             {primaryS ? (
-              <div className="mt-3 rounded-lg border border-white/[0.07] bg-gradient-to-b from-black/35 to-black/[0.18] px-3 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-5 sm:py-5">
+              <div className="mt-2 rounded-lg border border-white/[0.07] bg-gradient-to-b from-black/35 to-black/[0.18] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-4 sm:py-4">
                 <MetricBlock series={primaryS} panicData={panicData} rows={rows} large />
               </div>
             ) : null}
             {restSeries.length ? (
               <div
-                className={`mt-3 grid gap-3 sm:gap-4 ${restSeries.length >= 2 ? "grid-cols-2" : "grid-cols-1"}`}
+                className={`mt-2 grid gap-2 sm:gap-3 ${restSeries.length >= 2 ? "grid-cols-2" : "grid-cols-1"}`}
               >
                 {restSeries.map((s) => (
                   <div
                     key={s.key}
-                    className="rounded-lg border border-white/[0.05] bg-gradient-to-b from-black/30 to-black/[0.14] px-2.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-3 sm:py-3.5"
+                    className="rounded-lg border border-white/[0.05] bg-gradient-to-b from-black/30 to-black/[0.14] px-2 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-2.5 sm:py-2.5"
                   >
                     <MetricBlock series={s} panicData={panicData} rows={rows} large={false} />
                   </div>
@@ -210,7 +210,7 @@ export default function MacroCycleTierCard({
               </div>
             ) : null}
 
-            <p className="m-0 mt-3 border-t border-white/[0.04] pt-2.5 font-mono text-[8px] leading-relaxed text-slate-700 sm:text-[9px]">
+            <p className="m-0 mt-2 border-t border-white/[0.04] pt-2 font-mono text-trading-2xs leading-relaxed text-slate-700">
               <span className="text-slate-600">기준일 {asOfDateLabel}</span>
               <span className="mx-1.5 text-slate-800">·</span>
               <span>{updatedLine}</span>
@@ -219,16 +219,16 @@ export default function MacroCycleTierCard({
             </p>
           </section>
 
-          <section className="px-3 pb-1 pt-3 sm:px-4">
-            <p className="m-0 mb-2 px-2 text-[9px] font-semibold tracking-[0.1em] text-slate-500">일별 흐름</p>
+          <section className="px-2.5 pb-1 pt-2 sm:px-3">
+            <p className="m-0 mb-1.5 px-1 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">일별 흐름</p>
             {primaryS ? <MacroCycleLwChart rows={rows} primarySeries={primaryS} /> : null}
           </section>
 
-          <footer className="border-t border-white/[0.05] px-5 py-4">
-            <p className="m-0 text-[9px] font-semibold tracking-[0.1em] text-slate-500">데스크 코멘트</p>
-            <div className="m-0 mt-2 space-y-1.5">
+          <footer className="border-t border-white/[0.05] px-3 py-3 sm:px-4 sm:py-3.5">
+            <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">데스크 코멘트</p>
+            <div className="m-0 mt-1.5 space-y-1">
               {(macroComments.length ? macroComments : ["데이터 보강 중"]).slice(0, 2).map((line) => (
-                <p key={line} className="m-0 text-[12px] leading-snug text-slate-500">
+                <p key={line} className="m-0 text-trading-xs leading-snug text-slate-500 sm:text-trading-sm">
                   {line}
                 </p>
               ))}

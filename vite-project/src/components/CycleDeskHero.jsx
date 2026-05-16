@@ -24,7 +24,7 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
   const labelCls = STAGE_LABEL[stageStyle] ?? STAGE_LABEL.neutral
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-white/[0.09] shadow-[0_0_0_1px_rgba(99,102,241,0.06),0_28px_80px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)]">
+    <section className="relative overflow-hidden rounded-card-lg border border-white/[0.08] shadow-trading-card">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.65]"
         style={{
@@ -49,36 +49,36 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
         aria-hidden
       />
 
-      <div className="relative z-[1] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
-          <p className="m-0 text-[10px] font-semibold tracking-[0.14em] text-slate-500">매크로 전략 데스크</p>
-          <p className="m-0 font-mono text-[9px] text-slate-600 sm:text-[10px]">
+      <div className="relative z-[1] px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-2.5">
+          <p className="m-0 text-trading-2xs font-semibold tracking-[0.12em] text-slate-500">매크로 전략 데스크</p>
+          <p className="m-0 font-mono text-trading-2xs text-slate-600">
             기준일 {asOfDateLabel} · {updatedLine}
           </p>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
           {/* 좌: 시장 단계 */}
           <div className="lg:col-span-3">
-            <p className="m-0 text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">현재 시장 단계</p>
-            <div className="relative mt-3">
+            <p className="m-0 text-trading-2xs font-medium uppercase tracking-[0.14em] text-slate-500">현재 시장 단계</p>
+            <div className="relative mt-2">
               <div
-                className={`absolute -inset-1 rounded-2xl bg-gradient-to-br opacity-80 blur-md ${ring}`}
+                className={`absolute -inset-0.5 rounded-card-lg bg-gradient-to-br opacity-70 blur-md ${ring}`}
                 aria-hidden
               />
-              <div className="relative rounded-xl border border-white/[0.08] bg-black/35 px-4 py-5">
-                <p className={`m-0 text-center font-display text-[1.75rem] font-semibold leading-none tracking-tight sm:text-[2rem] ${labelCls}`}>
+              <div className="relative rounded-card border border-white/[0.08] bg-black/40 px-3 py-3.5 sm:px-4 sm:py-4">
+                <p className={`m-0 text-center font-display text-trading-xl font-semibold leading-none tracking-tight sm:text-trading-2xl ${labelCls}`}>
                   {stageLabel}
                 </p>
-                <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-3 text-[10px] leading-snug text-slate-500">
+                <div className="mt-3 space-y-1 border-t border-white/[0.06] pt-2.5 text-trading-xs leading-snug text-slate-500">
                   <p className="m-0">
-                    <span className="text-[9px] font-semibold text-slate-600">단기</span> {tierHints.tactical}
+                    <span className="text-trading-2xs font-semibold text-slate-600">단기</span> {tierHints.tactical}
                   </p>
                   <p className="m-0">
-                    <span className="text-[9px] font-semibold text-slate-600">중기</span> {tierHints.strategic}
+                    <span className="text-trading-2xs font-semibold text-slate-600">중기</span> {tierHints.strategic}
                   </p>
                   <p className="m-0">
-                    <span className="text-[9px] font-semibold text-slate-600">장기</span> {tierHints.macro}
+                    <span className="text-trading-2xs font-semibold text-slate-600">장기</span> {tierHints.macro}
                   </p>
                 </div>
               </div>
@@ -87,12 +87,12 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
 
           {/* 중: 핵심 흐름 */}
           <div className="lg:col-span-5">
-            <p className="m-0 text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">핵심 시장 흐름</p>
-            <ul className="m-0 mt-3 list-none space-y-2.5 p-0">
+            <p className="m-0 text-trading-2xs font-medium uppercase tracking-[0.14em] text-slate-500">핵심 시장 흐름</p>
+            <ul className="m-0 mt-2 list-none space-y-1.5 p-0">
               {flowBullets.map((line) => (
                 <li
                   key={line}
-                  className="relative border-l-2 border-indigo-500/35 pl-3 text-[12px] leading-[1.55] text-slate-200/95 sm:text-[13px]"
+                  className="relative border-l-2 border-indigo-500/35 pl-2.5 text-trading-sm leading-snug text-slate-200/95 sm:text-trading-base"
                 >
                   {line}
                 </li>
@@ -102,9 +102,9 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
 
           {/* 우: Today's key signal */}
           <div className="lg:col-span-4">
-            <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-indigo-300/85">오늘의 핵심 시그널</p>
-            <div className="mt-3 rounded-xl border border-indigo-500/25 bg-gradient-to-b from-indigo-950/40 to-black/40 px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_28px_rgba(79,70,229,0.08)]">
-              <dl className="m-0 space-y-2.5 text-[11px] leading-snug sm:text-[12px]">
+            <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-indigo-300/85">오늘의 핵심 시그널</p>
+            <div className="mt-2 rounded-card border border-indigo-500/20 bg-gradient-to-b from-indigo-950/35 to-black/45 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <dl className="m-0 space-y-2 text-trading-xs leading-snug sm:text-trading-sm">
                 <div className="flex justify-between gap-3 border-b border-white/[0.06] pb-2">
                   <dt className="shrink-0 text-slate-500">위험 선호</dt>
                   <dd

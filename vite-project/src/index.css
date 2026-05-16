@@ -7,6 +7,13 @@
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
     background: #0b0e14;
+    /* 모바일 퍼스트: 기본 글자 축소 · 데스크에서만 약간 확대 */
+    font-size: 14px;
+  }
+  @media (min-width: 1024px) {
+    html {
+      font-size: 15px;
+    }
   }
   body {
     margin: 0;
@@ -17,9 +24,11 @@
       BlinkMacSystemFont,
       "Segoe UI",
       sans-serif;
+    line-height: 1.45;
     background: #0b0e14;
-    background-image: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(30, 58, 138, 0.12), transparent 55%),
-      radial-gradient(ellipse 80% 50% at 100% 0%, rgba(88, 28, 135, 0.06), transparent 45%);
+    /* 랜딩형 큰 글로우 완화 — 정보 밀도 우선 */
+    background-image: radial-gradient(ellipse 100% 60% at 50% -15%, rgba(30, 58, 138, 0.08), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(88, 28, 135, 0.05), transparent 40%);
     color: rgba(248, 250, 252, 0.92);
     overflow-x: hidden;
     overscroll-behavior-y: none;
@@ -40,9 +49,23 @@
   }
 }
 
-/* 터치 최소 영역 (약 44px) */
+@layer components {
+  /** 컴팩트 다크 터미널 카드 — 모바일 정보 밀도 */
+  .trading-card-shell {
+    @apply rounded-card border border-white/[0.07] bg-[#080b12]/95 shadow-trading-card;
+  }
+  .trading-num {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+}
+
+/* 터치: 컴팩트 네비는 40px, 주요 FAB 는 기존 유지 */
 @layer utilities {
   .touch-target {
+    min-height: 40px;
+    min-width: 40px;
+  }
+  .touch-target-comfort {
     min-height: 44px;
     min-width: 44px;
   }
