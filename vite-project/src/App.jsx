@@ -30,6 +30,7 @@ import DebugDataPage from "./pages/DebugDataPage.jsx"
 import MobileCoreMetricsStrip from "./components/MobileCoreMetricsStrip.jsx"
 import MobileMarketOverview from "./components/MobileMarketOverview.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
+import MobileAiFab from "./components/layout/MobileAiFab.jsx"
 import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
 import MobileDrawer from "./components/layout/MobileDrawer.jsx"
 import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
@@ -1281,11 +1282,11 @@ function App() {
                 <div id="desk" className="space-y-2 lg:space-y-5">
                   {isMobileLayout ? (
                     <>
-                      <MobileCoreMetricsStrip panicData={panicData} updatedLine={cycleDeskMeta.updatedLine} />
                       <MobileMarketOverview
                         context={cycleHeroContext}
                         asOfDateLabel={cycleDeskMeta.asOfDateLabel}
                       />
+                      <MobileCoreMetricsStrip panicData={panicData} updatedLine={cycleDeskMeta.updatedLine} />
                     </>
                   ) : (
                     <SectionErrorBoundary label="사이클 데스크 헤더">
@@ -1392,25 +1393,53 @@ function App() {
           <button
             type="button"
             aria-label="입력 패널 배경 닫기"
-            className="fixed inset-0 z-[9998] bg-slate-950/55 backdrop-blur-[2px] transition-opacity"
+            className={`fixed inset-0 z-[9998] transition-opacity ${
+              isMobileLayout ? "bg-black/45 backdrop-blur-[1px]" : "bg-slate-950/55 backdrop-blur-[2px]"
+            }`}
             onClick={closeInputPanel}
           />
           <MetricInputErrorBoundary>
           <div
-            className={`fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-[box-shadow,ring-color] duration-500 sm:pl-4 sm:pr-4 ${
-              inputPanelFlash ? "ring-2 ring-emerald-400/50 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.2),-16px_0_56px_rgba(16,185,129,0.12)]" : ""
-            }`}
-            style={{
-              background: "linear-gradient(165deg, rgba(15,23,42,0.94) 0%, rgba(2,6,23,0.97) 45%, rgba(2,6,23,0.99) 100%)",
-              boxShadow: "inset 1px 0 0 rgba(139,92,246,0.12), -16px 0 48px rgba(0,0,0,0.5)",
-            }}
+            className={
+              isMobileLayout
+                ? `fixed bottom-0 left-0 right-0 z-[9999] flex max-h-[min(72dvh,520px)] min-h-0 flex-col overflow-hidden rounded-t-xl border-t border-white/[0.08] bg-[#0b0e14]/94 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-sm ${
+                    inputPanelFlash ? "ring-1 ring-emerald-500/25" : ""
+                  }`
+                : `fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:pl-4 sm:pr-4 ${
+                    inputPanelFlash ? "ring-2 ring-emerald-400/50" : ""
+                  }`
+            }
+            style={
+              isMobileLayout
+                ? undefined
+                : {
+                    background:
+                      "linear-gradient(165deg, rgba(15,23,42,0.94) 0%, rgba(2,6,23,0.97) 45%, rgba(2,6,23,0.99) 100%)",
+                    boxShadow: "inset 1px 0 0 rgba(139,92,246,0.12), -16px 0 48px rgba(0,0,0,0.5)",
+                  }
+            }
           >
-            <header className="mb-2 flex shrink-0 items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
+            {isMobileLayout ? <div className="mx-auto mb-1 h-1 w-10 shrink-0 rounded-full bg-white/15" aria-hidden /> : null}
+            <header
+              className={`mb-1.5 flex shrink-0 justify-between gap-2 border-b border-white/[0.06] ${
+                isMobileLayout ? "items-center pb-1.5" : "items-start pb-2"
+              }`}
+            >
               <div className="min-w-0">
-                <h3 className="m-0 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
-                <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
-                  표(CSV) 또는 기사 한 줄 붙여넣기 — 지표명·숫자만 자동 추출합니다.
-                </p>
+                <h3
+                  className={
+                    isMobileLayout
+                      ? "m-0 text-[13px] font-medium text-slate-300"
+                      : "m-0 text-[15px] font-semibold tracking-tight text-slate-50"
+                  }
+                >
+                  {isMobileLayout ? "지표 붙여넣기" : "시장 지표 입력"}
+                </h3>
+                {!isMobileLayout ? (
+                  <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
+                    표(CSV) 또는 기사 한 줄 붙여넣기 — 지표명·숫자만 자동 추출합니다.
+                  </p>
+                ) : null}
               </div>
               <button
                 type="button"
@@ -1465,7 +1494,11 @@ function App() {
                   if (inputError) setInputError("")
                 }}
                 placeholder={PANIC_TEXT_PLACEHOLDER}
-                className="min-h-[10rem] w-full flex-1 resize-none rounded-lg border border-white/[0.08] bg-slate-950/80 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-slate-200 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35),inset_0_1px_12px_rgba(0,0,0,0.25)] outline-none ring-violet-500/0 transition placeholder:text-slate-600 focus:border-violet-500/35 focus:shadow-[inset_0_0_20px_rgba(124,58,237,0.06),0_0_0_1px_rgba(167,139,250,0.2)] focus:ring-1 focus:ring-violet-500/30"
+                className={
+                  isMobileLayout
+                    ? "min-h-[5.5rem] max-h-[28vh] w-full flex-1 resize-none rounded-md border border-white/[0.07] bg-black/50 px-2.5 py-2 font-mono text-[11px] leading-relaxed text-slate-200 outline-none placeholder:text-slate-600 focus:border-white/15 focus:ring-0"
+                    : "min-h-[10rem] w-full flex-1 resize-none rounded-lg border border-white/[0.08] bg-slate-950/80 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-slate-200 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35)] outline-none placeholder:text-slate-600 focus:border-violet-500/35 focus:ring-1 focus:ring-violet-500/30"
+                }
                 spellCheck={false}
               />
             </div>
@@ -1492,6 +1525,7 @@ function App() {
               </div>
             ) : null}
 
+            {!isMobileLayout ? (
             <details key={previewKey} className="group mt-1.5 shrink-0 rounded-md border border-white/[0.05] bg-black/20">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-2 py-1 font-mono text-[10px] text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-400 [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-1.5">
@@ -1526,18 +1560,21 @@ function App() {
                 </ul>
               </div>
             </details>
+            ) : null}
 
-            <footer className="mt-2.5 shrink-0 border-t border-white/[0.06] pt-2.5">
+            <footer className={`shrink-0 border-t border-white/[0.06] ${isMobileLayout ? "mt-1.5 pt-2" : "mt-2.5 pt-2.5"}`}>
               <button
                 type="button"
                 onClick={submitInput}
                 disabled={isSaving || !inputReady}
                 aria-busy={isSaving}
-                className={`relative w-full overflow-hidden rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-45 ${
-                  isSaving ? "animate-pulse" : ""
-                }`}
+                className={`relative w-full overflow-hidden rounded-lg border py-2 text-[12px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 ${
+                  isMobileLayout
+                    ? "border-white/15 bg-white/[0.08] text-slate-200 hover:bg-white/[0.12]"
+                    : "border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] text-white hover:border-violet-300/40"
+                } ${isSaving ? "animate-pulse" : ""}`}
               >
-                {isSaving ? "반영 중…" : "대시보드에 반영"}
+                {isSaving ? "반영 중…" : isMobileLayout ? "반영" : "대시보드에 반영"}
               </button>
             </footer>
           </div>
@@ -1564,10 +1601,8 @@ function App() {
           {appToast.message}
         </div>
       ) : null}
-      <MobileBottomNav
-        onAi={openInputPanel}
-        onSettings={() => setMobileDrawerOpen(true)}
-      />
+      <MobileAiFab onOpen={openInputPanel} hidden={isInputPanelOpen} />
+      <MobileBottomNav onMenu={() => setMobileDrawerOpen(true)} />
       <MobileDrawer
         open={mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}

@@ -50,9 +50,9 @@ export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion 
             onClose()
             onOpenInput?.()
           }}
-          className="mt-1 rounded-md border border-violet-500/30 bg-violet-500/10 px-3 py-2.5 text-left text-[13px] font-medium text-violet-200"
+          className="mt-2 border-t border-white/[0.06] pt-2 text-left text-[11px] font-medium text-slate-500 hover:text-slate-300"
         >
-          AI 지표 입력
+          지표 붙여넣기 (보조)
         </button>
         {isDevMode() ? (
           <Link
