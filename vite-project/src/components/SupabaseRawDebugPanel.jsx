@@ -5,7 +5,6 @@ import { usePanicStore } from "../store/panicStore.js"
 import {
   runAllRawSupabaseProbes,
   shouldAutoShowSupabaseRawDebug,
-  isSupabaseRawDebugVisible,
 } from "../utils/supabaseRawProbes.js"
 
 const STATUS_STYLE = {
@@ -69,7 +68,7 @@ function ProbeBlock({ probe }) {
           {JSON.stringify(probe.queryError, null, 2)}
         </pre>
       ) : null}
-      <p className="m-0 mt-1.5 text-[9px] font-semibold uppercase tracking-wide text-slate-600">RAW fetched rows</p>
+      <p className="m-0 mt-1.5 text-[9px] font-semibold uppercase tracking-wide text-slate-600">RAW JSON</p>
       <pre className="mt-0.5 max-h-36 overflow-auto rounded border border-white/[0.08] bg-black/60 p-2 font-mono text-[9px] leading-relaxed text-emerald-100/95 whitespace-pre-wrap break-all">
         {probe.rawJson || "null"}
       </pre>
@@ -77,28 +76,41 @@ function ProbeBlock({ probe }) {
   )
 }
 
+function probeSummaryLine(probes, loading) {
+  if (loading) return "조회 중…"
+  if (!probes?.length) return "탭 → query 실행"
+  return probes.map((p) => `${p.tableName?.split(".").pop() ?? p.id}:${p.status}`).join(" · ")
+}
+
+function useMobileLayout() {
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)").matches : false,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)")
+    const fn = () => setMobile(mq.matches)
+    mq.addEventListener("change", fn)
+    return () => mq.removeEventListener("change", fn)
+  }, [])
+  return mobile
+}
+
 /**
- * 하단 고정 — Supabase 실제 query RAW 출력 (fallback 없음).
- * ?supabase-debug=1 · localStorage yds-supabase-raw-debug=1 · VITE_SUPABASE_RAW_DEBUG=1
- * 또는 허브 on + panicData 비어 있으면 자동 표시.
+ * 하단 고정 RAW DB — Supabase 실제 query JSON (fallback 없음).
+ * 모바일: 항상 하단 바 표시. 탭하면 펼침 + 즉시 query.
  */
 export default function SupabaseRawDebugPanel() {
   const panicData = usePanicStore((s) => s.panicData)
   const panicInitialized = usePanicStore((s) => s.initialized)
   const env = getSupabaseEnv()
+  const isMobile = useMobileLayout()
 
-  const [visible, setVisible] = useState(() => shouldAutoShowSupabaseRawDebug(false, null))
+  const [dismissed, setDismissed] = useState(false)
   const [expanded, setExpanded] = useState(() => shouldAutoShowSupabaseRawDebug(false, null))
   const [loading, setLoading] = useState(false)
   const [probes, setProbes] = useState([])
   const [lastRunAt, setLastRunAt] = useState(null)
   const [runError, setRunError] = useState(null)
-
-  useEffect(() => {
-    const show = shouldAutoShowSupabaseRawDebug(panicInitialized, panicData)
-    setVisible(show)
-    if (show) setExpanded(true)
-  }, [panicInitialized, panicData])
 
   const runProbes = useCallback(async () => {
     setLoading(true)
@@ -108,63 +120,77 @@ export default function SupabaseRawDebugPanel() {
       setProbes(results)
       setLastRunAt(Date.now())
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      setRunError(msg)
+      setRunError(e instanceof Error ? e.message : String(e))
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => {
-    if (!visible) return
+  const openExpanded = useCallback(() => {
+    try {
+      window.localStorage.setItem("yds-supabase-raw-debug", "1")
+    } catch {
+      // ignore
+    }
+    setExpanded(true)
     void runProbes()
+  }, [runProbes])
+
+  useEffect(() => {
+    if (shouldAutoShowSupabaseRawDebug(panicInitialized, panicData)) {
+      setExpanded(true)
+      void runProbes()
+    }
+  }, [panicInitialized, panicData, runProbes])
+
+  useEffect(() => {
+    if (!expanded) return
     const id = window.setInterval(() => void runProbes(), 45_000)
     return () => window.clearInterval(id)
-  }, [visible, runProbes])
+  }, [expanded, runProbes])
 
-  if (!visible && !isSupabaseRawDebugVisible()) {
-    return (
-      <button
-        type="button"
-        onClick={() => {
-          try {
-            window.localStorage.setItem("yds-supabase-raw-debug", "1")
-          } catch {
-            // ignore
-          }
-          setVisible(true)
-          setExpanded(true)
-        }}
-        className="fixed bottom-[max(4.5rem,env(safe-area-inset-bottom))] left-3 z-[9200] rounded-full border border-violet-500/50 bg-violet-950/95 px-2.5 py-1 font-mono text-[10px] font-semibold text-violet-100 shadow-lg"
-      >
-        RAW DB
-      </button>
-    )
-  }
+  const showBar = !dismissed && (isMobile || shouldAutoShowSupabaseRawDebug(panicInitialized, panicData))
+
+  if (!showBar) return null
+
+  const summary = probeSummaryLine(probes, loading)
 
   if (!expanded) {
     return (
-      <button
-        type="button"
-        onClick={() => setExpanded(true)}
-        className="fixed bottom-0 left-0 right-0 z-[9200] border-t border-violet-500/40 bg-[#0a0612]/98 px-3 py-2 text-center font-mono text-[10px] font-semibold text-violet-200"
-        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-[9200] flex border-t border-violet-500/50 bg-[#0a0612]/98 shadow-[0_-4px_20px_rgba(0,0,0,0.45)]"
+        style={{ paddingBottom: "max(0.35rem, env(safe-area-inset-bottom))" }}
       >
-        Supabase RAW ▲ {loading ? "…" : probes[0]?.status ?? "—"} · tap to expand
-      </button>
+        <button
+          type="button"
+          onClick={openExpanded}
+          className="min-h-[44px] flex-1 px-3 py-2 text-left font-mono text-[11px] font-bold leading-snug text-violet-100"
+        >
+          <span className="text-violet-300">RAW DB</span>
+          <span className="mt-0.5 block text-[9px] font-normal text-slate-500">{summary}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          className="shrink-0 px-3 text-[10px] text-slate-600"
+          aria-label="숨기기"
+        >
+          ✕
+        </button>
+      </div>
     )
   }
 
   return (
     <aside
-      className="fixed bottom-0 left-0 right-0 z-[9200] flex max-h-[min(52vh,420px)] flex-col border-t border-violet-500/45 bg-[#07050f]/98 shadow-[0_-8px_32px_rgba(0,0,0,0.55)] backdrop-blur-md"
+      className="fixed bottom-0 left-0 right-0 z-[9200] flex max-h-[min(55vh,440px)] flex-col border-t-2 border-violet-500/55 bg-[#07050f]/98 shadow-[0_-8px_32px_rgba(0,0,0,0.55)] backdrop-blur-md"
       style={{ paddingBottom: "max(0.25rem, env(safe-area-inset-bottom))" }}
     >
       <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-white/[0.08] px-3 py-2">
         <div className="min-w-0 flex-1">
-          <p className="m-0 text-[11px] font-bold text-violet-100">Supabase RAW (실데이터만)</p>
+          <p className="m-0 text-[12px] font-bold text-violet-100">RAW DB — Supabase query 결과</p>
           <p className="m-0 truncate font-mono text-[9px] text-slate-500">
-            {env.url ? maskSecret(env.url, 12) : "no URL"} ·{" "}
+            {env.configured ? maskSecret(env.url, 14) : "⚠ URL/KEY 없음"} ·{" "}
             {lastRunAt ? new Date(lastRunAt).toLocaleTimeString("ko-KR") : "—"}
           </p>
         </div>
@@ -172,28 +198,22 @@ export default function SupabaseRawDebugPanel() {
           type="button"
           disabled={loading}
           onClick={() => void runProbes()}
-          className="rounded border border-violet-500/40 px-2 py-0.5 text-[10px] text-violet-100 disabled:opacity-50"
+          className="rounded border border-violet-500/40 px-2 py-1 text-[10px] text-violet-100 disabled:opacity-50"
         >
           {loading ? "…" : "재실행"}
         </button>
         <Link to="/debug-data" className="text-[10px] text-slate-400 underline">
-          full
+          전체
         </Link>
-        <button
-          type="button"
-          onClick={() => setExpanded(false)}
-          className="text-[10px] text-slate-500"
-          aria-label="접기"
-        >
-          ▼
+        <button type="button" onClick={() => setExpanded(false)} className="px-1 text-[10px] text-slate-500">
+          접기
         </button>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-1">
-        {runError ? (
-          <pre className="text-[10px] text-rose-300">{runError}</pre>
-        ) : loading && probes.length === 0 ? (
-          <p className="font-mono text-[10px] text-sky-300">STATUS: LOADING — running queries…</p>
+        {runError ? <pre className="text-[10px] text-rose-300">{runError}</pre> : null}
+        {loading && probes.length === 0 ? (
+          <p className="font-mono text-[10px] text-sky-300">STATUS: LOADING</p>
         ) : null}
         {probes.map((p) => (
           <ProbeBlock key={p.id} probe={p} />
