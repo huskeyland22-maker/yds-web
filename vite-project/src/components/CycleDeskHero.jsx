@@ -3,6 +3,7 @@
  */
 
 import { PanicMetricsTraceBadge } from "./DataTraceBadge.jsx"
+import { isDevMode } from "../utils/devMode.js"
 
 const STAGE_RING = {
   greed: "from-amber-400/25 via-rose-500/15 to-transparent",
@@ -138,7 +139,7 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
           </div>
         </div>
 
-        <PanicMetricsTraceBadge className="mt-4" />
+        {isDevMode() ? <PanicMetricsTraceBadge className="mt-4" /> : null}
       </div>
     </section>
   )

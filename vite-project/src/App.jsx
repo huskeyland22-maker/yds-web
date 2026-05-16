@@ -27,6 +27,13 @@ import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
+import MobileCoreMetricsStrip from "./components/MobileCoreMetricsStrip.jsx"
+import MobileMarketOverview from "./components/MobileMarketOverview.jsx"
+import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
+import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
+import MobileDrawer from "./components/layout/MobileDrawer.jsx"
+import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
+import { isDevMode } from "./utils/devMode.js"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
@@ -470,9 +477,8 @@ function App() {
     () => APP_VERSION_LABEL || `build-${String(APP_BUILD_ID).slice(-8)}`,
   )
   const [pwaLastSyncLabel, setPwaLastSyncLabel] = useState("")
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth <= 768 : false,
-  )
+  const isMobileLayout = useIsMobileLayout()
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   const [hubSaveGlow, setHubSaveGlow] = useState(false)
   const cycleMetricHistory = useAppDataStore((s) => s.cycleMetricHistory)
   const cycleHistorySource = useAppDataStore((s) => s.cycleHistorySource)
@@ -836,13 +842,6 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-    const onResize = () => setIsMobile(window.innerWidth <= 768)
-    window.addEventListener("resize", onResize)
-    return () => window.removeEventListener("resize", onResize)
-  }, [])
-
-  useEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") return
     let lastRun = 0
     const MIN_INTERVAL_MS = 10_000
@@ -1111,25 +1110,22 @@ function App() {
     <div
       className={[
         "flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
-        hubSaveGlow ? "shadow-[inset_0_0_80px_rgba(34,211,238,0.08),0_0_60px_rgba(167,139,250,0.12)]" : "",
+        hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
-      <aside className="flex w-full shrink-0 flex-row border-b border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] lg:h-[100dvh] lg:w-[15rem] lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:pt-[env(safe-area-inset-top)] lg:pb-[env(safe-area-inset-bottom)] xl:w-[16rem]">
+      <aside className="hidden w-[15rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh] xl:w-[16rem]">
         <div className="shrink-0 px-3 pb-2 pt-2.5 lg:border-b lg:border-white/[0.06] lg:px-4 lg:pb-3 lg:pt-3">
           <p className="m-0 font-display text-trading-lg font-semibold leading-none tracking-tight text-slate-50 lg:text-xl">Y&apos;ds</p>
           <p className="m-0 mt-1 text-trading-2xs font-medium tracking-[0.12em] text-slate-500">매크로 터미널</p>
         </div>
-        <nav
-          className="flex min-h-[40px] flex-1 flex-row items-stretch gap-0 overflow-x-auto px-1 py-1.5 lg:flex-col lg:gap-0.5 lg:overflow-x-visible lg:px-2.5 lg:py-2"
-          aria-label="주요 메뉴"
-        >
+        <nav className="flex flex-col gap-0.5 px-2.5 py-2" aria-label="주요 메뉴">
           {MENU.map((item, i) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
                 [
-                  "flex min-h-[40px] min-w-0 shrink-0 items-center gap-2 rounded-card border px-2.5 py-2 text-trading-sm transition lg:min-h-0 lg:w-full lg:px-3",
+                  "flex w-full items-center gap-2 rounded-card border px-3 py-2 text-trading-sm transition",
                   isActive
                     ? "border-indigo-500/30 bg-indigo-500/[0.14] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
                     : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-slate-200",
@@ -1208,17 +1204,14 @@ function App() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] bg-[#0B0E14]/95 px-3 py-2 backdrop-blur-sm sm:px-4 lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
-          <div className={`flex flex-wrap items-center gap-1.5 ${isMobile ? "w-full justify-center" : "justify-end"}`}>
-            <button
-              type="button"
-              onClick={openInputPanel}
-              className="flex items-center gap-1 rounded-card border border-violet-400/50 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-2.5 py-1.5 text-trading-sm font-semibold text-white shadow-[0_2px_8px_rgba(124,58,237,0.3)] transition active:scale-95 lg:hidden"
-              aria-label="AI 리포트 입력"
-            >
-              <span aria-hidden="true" className="text-sm leading-none">＋</span>
-              AI 리포트
-            </button>
+        <MobileAppHeader
+          onMenuOpen={() => setMobileDrawerOpen(true)}
+          user={user}
+          onLogin={login}
+          onLogout={logout}
+        />
+        <header className="hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] bg-[#0B0E14]/95 px-3 py-2 backdrop-blur-sm sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
             <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 rounded-card border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 transition hover:border-white/[0.12]">
                   {user ? (
@@ -1247,7 +1240,7 @@ function App() {
                       type="button"
                       onClick={login}
                       className="flex items-center gap-1.5 text-trading-sm font-medium text-slate-200 transition hover:text-white"
-                      style={{ width: isMobile ? "100%" : "auto" }}
+                      style={{ width: "auto" }}
                     >
                       <LogIn size={16} />
                       로그인
@@ -1255,19 +1248,21 @@ function App() {
                   )}
                 </div>
               </div>
-              <span
-                className="flex max-w-[min(42vw,14rem)] flex-col items-end gap-0.5 rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-mono text-trading-2xs text-slate-400"
-                title={`id ${APP_BUILD_ID}`}
-              >
-                <span className="truncate text-slate-300">{buildVersion}</span>
-                <span className="text-[9px] font-normal leading-tight text-slate-500">
-                  {pwaLastSyncLabel ? `sync ${pwaLastSyncLabel}` : "sync …"}
+              {isDevMode() ? (
+                <span
+                  className="flex max-w-[min(42vw,14rem)] flex-col items-end gap-0.5 rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-mono text-trading-2xs text-slate-400"
+                  title={`id ${APP_BUILD_ID}`}
+                >
+                  <span className="truncate text-slate-300">{buildVersion}</span>
+                  <span className="text-[9px] font-normal leading-tight text-slate-500">
+                    {pwaLastSyncLabel ? `sync ${pwaLastSyncLabel}` : "sync …"}
+                  </span>
                 </span>
-              </span>
-            </div>
+              ) : null}
+          </div>
         </header>
 
-        {isDataTraceUiEnabled() ? (
+        {isDevMode() && isDataTraceUiEnabled() ? (
           <div className="flex flex-wrap items-start gap-2 border-b border-amber-500/20 bg-[#070a0f]/95 px-3 py-2">
             <DataFlowPipelineHint />
             <PanicMetricsTraceBadge />
@@ -1277,24 +1272,35 @@ function App() {
           </div>
         ) : null}
 
-        <main className="flex-1 overflow-auto px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:py-4 lg:px-6 lg:py-5">
+        <main className="flex-1 overflow-y-auto overscroll-y-contain px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route
               path="/cycle"
               element={
-                <div className="space-y-3 md:space-y-5">
-                  <SectionErrorBoundary label="사이클 데스크 헤더">
-                    <CycleDeskHero
-                      context={cycleHeroContext}
-                      asOfDateLabel={cycleDeskMeta.asOfDateLabel}
-                      updatedLine={cycleDeskMeta.updatedLine}
-                    />
-                  </SectionErrorBoundary>
+                <div id="desk" className="space-y-2 lg:space-y-5">
+                  {isMobileLayout ? (
+                    <>
+                      <MobileCoreMetricsStrip panicData={panicData} updatedLine={cycleDeskMeta.updatedLine} />
+                      <MobileMarketOverview
+                        context={cycleHeroContext}
+                        asOfDateLabel={cycleDeskMeta.asOfDateLabel}
+                      />
+                    </>
+                  ) : (
+                    <SectionErrorBoundary label="사이클 데스크 헤더">
+                      <CycleDeskHero
+                        context={cycleHeroContext}
+                        asOfDateLabel={cycleDeskMeta.asOfDateLabel}
+                        updatedLine={cycleDeskMeta.updatedLine}
+                      />
+                    </SectionErrorBoundary>
+                  )}
                   <SectionErrorBoundary label="사이클 플로우·매크로 티어">
                     <SectorFlowStrip />
-                    <section className="mt-3 grid grid-cols-1 gap-3 md:gap-4 lg:grid-cols-3 lg:gap-5">
+                    <section className="mt-2 grid grid-cols-1 gap-2 lg:mt-3 lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
+                      compact={isMobileLayout}
                       tier="tactical"
                       tierLabel="단기 전략"
                       state={tacticalView.state}
@@ -1310,6 +1316,7 @@ function App() {
                       {...cycleDeskMeta}
                     />
                     <MacroCycleTierCard
+                      compact={isMobileLayout}
                       tier="strategic"
                       tierLabel="중기 전략"
                       state={strategicView.state}
@@ -1325,6 +1332,7 @@ function App() {
                       {...cycleDeskMeta}
                     />
                     <MacroCycleTierCard
+                      compact={isMobileLayout}
                       tier="macro"
                       tierLabel="장기 전략"
                       state={macroView.state}
@@ -1379,21 +1387,6 @@ function App() {
           </Routes>
         </main>
       </div>
-      {!isInputPanelOpen ? (
-        <button
-          type="button"
-          onClick={openInputPanel}
-          aria-label="AI 리포트 입력 열기"
-          className="fixed z-[9998] flex touch-target-comfort items-center gap-1.5 rounded-full border border-violet-400/40 bg-gradient-to-br from-violet-600 to-fuchsia-700 px-3 py-2.5 text-trading-sm font-semibold text-white shadow-[0_8px_20px_rgba(124,58,237,0.4)] transition active:scale-95 lg:hidden"
-          style={{
-            bottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem))",
-            right: "max(1rem, calc(env(safe-area-inset-right) + 0.75rem))",
-          }}
-        >
-          <span aria-hidden="true" className="text-lg leading-none">＋</span>
-          <span>AI 리포트</span>
-        </button>
-      ) : null}
       {isInputPanelOpen ? (
         <>
           <button
@@ -1571,9 +1564,23 @@ function App() {
           {appToast.message}
         </div>
       ) : null}
-      <PanicSyncDebugPanel />
-      <SupabaseRawDebugPanel />
-      <PwaRuntimeDebugOverlay />
+      <MobileBottomNav
+        onAi={openInputPanel}
+        onSettings={() => setMobileDrawerOpen(true)}
+      />
+      <MobileDrawer
+        open={mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        onOpenInput={openInputPanel}
+        buildVersion={isDevMode() ? buildVersion : null}
+      />
+      {isDevMode() ? (
+        <>
+          <PanicSyncDebugPanel />
+          <SupabaseRawDebugPanel />
+          <PwaRuntimeDebugOverlay />
+        </>
+      ) : null}
     </div>
   )
 }

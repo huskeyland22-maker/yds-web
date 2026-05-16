@@ -5,16 +5,17 @@ import { usePanicStore } from "../store/panicStore.js"
 import { readHtmlBuildId } from "../utils/pwaFreshness.js"
 import { isPanicBusinessDataStale } from "../utils/validatePanicData.js"
 
+import { isDevMode } from "../utils/devMode.js"
+
 export function isPanicSyncDebugPanelVisible() {
   if (typeof window === "undefined") return false
-  if (import.meta.env.DEV) return true
   try {
     if (new URLSearchParams(window.location.search).get("panic-debug") === "1") return true
     if (window.localStorage?.getItem("yds-panic-sync-debug") === "1") return true
   } catch {
     // ignore
   }
-  return false
+  return isDevMode()
 }
 
 function detectPlatform() {

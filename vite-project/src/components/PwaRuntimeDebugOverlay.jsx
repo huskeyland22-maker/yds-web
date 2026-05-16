@@ -4,17 +4,17 @@ import { usePanicStore } from "../store/panicStore.js"
 import { getDebugEventChannel, getRecentDebugLogs } from "../utils/debugLogger.js"
 import { getServiceWorkerDebugInfo, isIosStandalone, readHtmlBuildId } from "../utils/pwaFreshness.js"
 import { isPanicBusinessDataStale } from "../utils/validatePanicData.js"
+import { isDevMode } from "../utils/devMode.js"
 
 export function isPwaRuntimeDebugOverlayVisible() {
   if (typeof window === "undefined") return false
-  if (import.meta.env.DEV) return true
   try {
     if (new URLSearchParams(window.location.search).get("pwa-debug") === "1") return true
     if (window.localStorage?.getItem("yds-pwa-runtime-debug") === "1") return true
   } catch {
     // ignore
   }
-  return false
+  return isDevMode()
 }
 
 /**

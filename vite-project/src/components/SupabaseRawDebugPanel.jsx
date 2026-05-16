@@ -7,6 +7,7 @@ import {
   runAllRawSupabaseProbes,
   shouldAutoShowSupabaseRawDebug,
 } from "../utils/supabaseRawProbes.js"
+import { isDevMode } from "../utils/devMode.js"
 
 const STATUS_STYLE = {
   SUCCESS: "text-emerald-300 bg-emerald-500/20 border-emerald-500/40",
@@ -101,6 +102,8 @@ function useMobileLayout() {
  * 모바일: 항상 하단 바 표시. 탭하면 펼침 + 즉시 query.
  */
 export default function SupabaseRawDebugPanel() {
+  if (!isDevMode()) return null
+
   const panicData = usePanicStore((s) => s.panicData)
   const panicInitialized = usePanicStore((s) => s.initialized)
   const env = getSupabaseEnv()
@@ -164,7 +167,7 @@ export default function SupabaseRawDebugPanel() {
     return () => window.clearInterval(id)
   }, [expanded, runProbes])
 
-  const showBar = !dismissed && (isMobile || shouldAutoShowSupabaseRawDebug(panicInitialized, panicData))
+  const showBar = !dismissed && shouldAutoShowSupabaseRawDebug(panicInitialized, panicData)
 
   if (!showBar) return null
 

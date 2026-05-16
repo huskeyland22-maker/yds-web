@@ -107,6 +107,10 @@
   .h-svh {
     height: 100svh;
   }
+
+  .pb-mobile-nav {
+    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
+  }
 }
 
 /* PWA standalone (홈화면에 추가) 일 때만 작동하는 보정.
