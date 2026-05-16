@@ -716,10 +716,14 @@ function App() {
   useEffect(() => {
     if (!isPanicHubEnabled()) return undefined
     const unsub = subscribePanicHubRealtime({
-      onChange: () => {
-        logRealtime("postgres_change", { table: "panic_metrics" })
+      onChange: (evt) => {
+        const table = evt?.table ?? "panic_metrics"
+        logRealtime("postgres_change", { table })
         useAppDataStore.getState().markRealtimeEvent()
         void usePanicStore.getState().fetchPanicData("supabase-realtime", { force: true })
+        if (table === "panic_index_history") {
+          void useAppDataStore.getState().loadCycleHistoryBundle()
+        }
       },
     })
     return () => {

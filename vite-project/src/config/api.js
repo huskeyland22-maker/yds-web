@@ -52,8 +52,16 @@ export async function fetchPanicHubLatest(options = {}) {
     throw new Error(`hub HTTP ${res.status}`)
   }
   const json = await res.json()
-  if (!json?.ok || !json.data) {
+  if (!json?.ok) {
     if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(String(json?.error)), { url })
+    throw new Error(json?.error || "hub_invalid_payload")
+  }
+  if (json.empty || json.rowCount === 0) {
+    const err = new Error("hub_empty_database")
+    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", err, { url, hint: json.hint })
+    throw err
+  }
+  if (!json.data) {
     throw new Error(json?.error || "hub_invalid_payload")
   }
   const data = normalizeManualPayload(json.data)
@@ -85,8 +93,34 @@ export function getCycleMetricsHistoryUrlForDisplay() {
   return "/cycle-metrics-history.json"
 }
 
+function panicIndexHistoryToCycleRow(row) {
+  if (!row?.date) return null
+  return {
+    date: row.date,
+    vix: row.vix,
+    vxn: row.vxn,
+    fearGreed: row.fearGreed,
+    move: row.move,
+    bofa: row.bofa,
+    skew: row.skew,
+    highYield: row.hyOas,
+    gsBullBear: row.gsSentiment,
+  }
+}
+
 export async function fetchCycleMetricsHistory(options = {}) {
   const debugLog = Boolean(options.debugLog)
+  if (isPanicHubEnabled()) {
+    if (isDataTraceEnabled()) logFetchStart("cycle-metrics-json", { path: "supabase-panic_index_history" })
+    const hubRows = await fetchPanicIndexHistory({ limit: options.limit ?? 500 })
+    const mapped = hubRows.map(panicIndexHistoryToCycleRow).filter(Boolean)
+    const fresh = filterFreshCycleHistoryRows(mapped)
+    if (isDataTraceEnabled()) {
+      logFetchSuccess("cycle-metrics-json", { rows: fresh.length, source: "supabase", cache: false })
+    }
+    if (debugLog) console.log("[YDS] cycle history from Supabase", fresh.length)
+    return fresh
+  }
   const url = withNoStoreQuery(getCycleMetricsHistoryUrlForDisplay())
   if (isDataTraceEnabled()) logFetchStart("cycle-metrics-json", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
@@ -109,6 +143,41 @@ export async function fetchCycleMetricsHistory(options = {}) {
     })
   }
   return fresh
+}
+
+/** GET /api/supabase/health — table row counts */
+export async function fetchSupabaseHealth() {
+  const url = withNoStoreQuery("/api/supabase/health")
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  if (!res.ok) throw new Error(`health HTTP ${res.status}`)
+  return res.json()
+}
+
+/** GET /api/market/status */
+export async function fetchMarketStatus(options = {}) {
+  if (!isPanicHubEnabled()) return []
+  const params = new URLSearchParams()
+  if (options.market) params.set("market", String(options.market))
+  const q = params.toString()
+  const url = withNoStoreQuery(`/api/market/status${q ? `?${q}` : ""}`)
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  if (!res.ok) throw new Error(`market status HTTP ${res.status}`)
+  const json = await res.json()
+  return json?.ok && Array.isArray(json.rows) ? json.rows : []
+}
+
+/** GET /api/ai/reports */
+export async function fetchAiReports(options = {}) {
+  if (!isPanicHubEnabled()) return []
+  const params = new URLSearchParams()
+  if (options.reportKey) params.set("report_key", String(options.reportKey))
+  if (options.limit) params.set("limit", String(options.limit))
+  const q = params.toString()
+  const url = withNoStoreQuery(`/api/ai/reports${q ? `?${q}` : ""}`)
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  if (!res.ok) throw new Error(`ai reports HTTP ${res.status}`)
+  const json = await res.json()
+  return json?.ok && Array.isArray(json.rows) ? json.rows : []
 }
 
 /** Supabase panic_index_history — 일별 스냅샷 (동일 date upsert, 과거 조회) */
@@ -178,8 +247,10 @@ export async function fetchPanicDataJson(options = {}) {
     if (isDataTraceEnabled()) logFetchStart("panic-data-json", { path: "hub-only" })
     const hubData = await fetchPanicHubLatest({ debugLog })
     if (!validatePanicData(hubData)) {
-      if (isDataTraceEnabled()) logFetchFail("panic-data-json", new Error("hub_payload_stale_or_invalid"), {})
-      throw new Error("hub_payload_stale_or_invalid")
+      const errMsg =
+        hubData?.vix == null && hubData?.fearGreed == null ? "hub_empty_database" : "hub_payload_stale_or_invalid"
+      if (isDataTraceEnabled()) logFetchFail("panic-data-json", new Error(errMsg), {})
+      throw new Error(errMsg)
     }
     const enriched = {
       ...hubData,

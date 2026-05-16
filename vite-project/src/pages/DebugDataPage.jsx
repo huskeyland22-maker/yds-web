@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import { createClient } from "@supabase/supabase-js"
-import { isPanicHubEnabled, fetchPanicHubLatest } from "../config/api.js"
+import { isPanicHubEnabled, fetchPanicHubLatest, fetchSupabaseHealth } from "../config/api.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import { getSupabaseEnv, maskSecret } from "../lib/supabaseBrowser.js"
 import { useAppDataStore } from "../store/appDataStore.js"
@@ -34,12 +34,18 @@ const SUPABASE_TABLE_PROBES = [
     order: { column: "date", ascending: false },
   },
   {
-    id: "panic_index_legacy",
-    label: "public.panic_index (legacy — usually missing)",
-    sqlHint: "select * from panic_index limit 5",
-    table: "panic_index",
-    order: { column: "date", ascending: false },
-    optional: true,
+    id: "market_status",
+    label: "public.market_status",
+    sqlHint: "select * from market_status order by updated_at desc limit 5",
+    table: "market_status",
+    order: { column: "updated_at", ascending: false },
+  },
+  {
+    id: "ai_reports",
+    label: "public.ai_reports",
+    sqlHint: "select * from ai_reports order by updated_at desc limit 5",
+    table: "ai_reports",
+    order: { column: "updated_at", ascending: false },
   },
 ]
 
@@ -183,6 +189,7 @@ export default function DebugDataPage() {
     channelState: "—",
     error: null,
   })
+  const [dbHealth, setDbHealth] = useState(null)
 
   const panicData = usePanicStore((s) => s.panicData)
   const lastPanicFetchAt = usePanicStore((s) => s.lastPanicFetchAt)
@@ -337,6 +344,15 @@ export default function DebugDataPage() {
     setRunning(true)
     debugLog("run-all:start", { platform, runId })
     await runHubApiProbe()
+    if (isPanicHubEnabled()) {
+      try {
+        const h = await withTimeout(fetchSupabaseHealth(), QUERY_TIMEOUT_MS, "supabase-health")
+        setDbHealth(h)
+        debugLog("supabase:health", h)
+      } catch (e) {
+        setDbHealth({ ok: false, error: e instanceof Error ? e.message : String(e) })
+      }
+    }
     await runTableProbes()
     if (runId === runIdRef.current) startRealtimeProbe()
     setRunning(false)
@@ -404,6 +420,34 @@ export default function DebugDataPage() {
           <dd className="m-0">{typeof navigator !== "undefined" && navigator.onLine ? "yes" : "no"}</dd>
         </dl>
       </section>
+
+      {dbHealth ? (
+        <section className="rounded-lg border border-white/[0.08] bg-[#0a0d12] p-3">
+          <h2 className="m-0 mb-2 text-xs font-semibold text-slate-300">DB row counts — GET /api/supabase/health</h2>
+          {dbHealth.ok === false ? (
+            <p className="m-0 font-mono text-[10px] text-rose-300">{dbHealth.error ?? "unavailable"}</p>
+          ) : (
+            <>
+              <p className="m-0 mb-2 font-mono text-[10px] text-slate-400">
+                ready={String(dbHealth.ready)} · {dbHealth.checkedAt ?? "—"}
+              </p>
+              <dl className="m-0 grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 font-mono text-[10px]">
+                {Object.entries(dbHealth.tables ?? {}).map(([name, count]) => (
+                  <div key={name} className="contents">
+                    <dt className="text-slate-500">{name}</dt>
+                    <dd className="m-0 text-right text-slate-200">{count == null ? "ERR" : count}</dd>
+                  </div>
+                ))}
+              </dl>
+              {!dbHealth.ready ? (
+                <p className="m-0 mt-2 text-[11px] text-amber-200/90">
+                  Supabase SQL Editor에서 supabase/migrations/20250516120000_yds_initial_schema_seed.sql 실행 필요
+                </p>
+              ) : null}
+            </>
+          )}
+        </section>
+      ) : null}
 
       <ProbeCard
         title="Vercel Hub API — GET /api/panic/latest"

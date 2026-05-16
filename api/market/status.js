@@ -1,5 +1,5 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
-import { fetchPanicMetricsRows, panicObjectFromRows } from "../_lib/panicMetricsHub.js"
+import { fetchMarketStatusRows } from "../_lib/marketStatus.js"
 
 function noStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -14,25 +14,19 @@ export default async function handler(req, res) {
     return
   }
   if (!isSupabaseConfigured()) {
-    res.status(503).json({ ok: false, error: "supabase_not_configured", data: null })
+    res.status(503).json({ ok: false, error: "supabase_not_configured", rows: [] })
     return
   }
   try {
-    const rows = await fetchPanicMetricsRows()
-    const data = panicObjectFromRows(rows)
-    const rowCount = Array.isArray(rows) ? rows.length : 0
-    res.status(200).json({
-      ok: true,
-      data,
-      rowCount,
-      empty: rowCount === 0,
-      hint: rowCount === 0 ? "Run supabase/migrations/20250516120000_yds_initial_schema_seed.sql" : null,
-    })
+    const url = new URL(req.url || "", "http://localhost")
+    const market = url.searchParams.get("market") || undefined
+    const rows = await fetchMarketStatusRows({ market })
+    res.status(200).json({ ok: true, rows })
   } catch (e) {
     res.status(500).json({
       ok: false,
       error: e instanceof Error ? e.message : "fetch_failed",
-      data: null,
+      rows: [],
     })
   }
 }

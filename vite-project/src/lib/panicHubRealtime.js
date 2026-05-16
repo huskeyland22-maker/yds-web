@@ -23,9 +23,12 @@ export function subscribePanicHubRealtime({ onChange }) {
   })
 
   const channel = client
-    .channel("yds-panic-metrics")
+    .channel("yds-panic-hub")
     .on("postgres_changes", { event: "*", schema: "public", table: "panic_metrics" }, () => {
-      onChange()
+      onChange?.({ table: "panic_metrics" })
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "panic_index_history" }, () => {
+      onChange?.({ table: "panic_index_history" })
     })
     .subscribe()
 

@@ -48,6 +48,20 @@ export const SUPABASE_RAW_TABLE_PROBES = [
     table: "panic_index_history",
     order: { column: "date", ascending: false },
   },
+  {
+    id: "market_status",
+    tableName: "market_status",
+    queryChain: "from('market_status').select('*').order('updated_at', { ascending: false }).limit(5)",
+    table: "market_status",
+    order: { column: "updated_at", ascending: false },
+  },
+  {
+    id: "ai_reports",
+    tableName: "ai_reports",
+    queryChain: "from('ai_reports').select('*').order('updated_at', { ascending: false }).limit(5)",
+    table: "ai_reports",
+    order: { column: "updated_at", ascending: false },
+  },
 ]
 
 export function isSupabaseRawDebugVisible() {

@@ -102,11 +102,10 @@ export const useAppDataStore = create((set, get) => ({
     logFetchStart("cycle-history-bundle", { limit })
     get().purgeLegacyCycleStorage()
     try {
-      const [staticRows, hubRows] = await Promise.all([
-        fetchCycleMetricsHistory({ debugLog: false }),
-        isPanicHubEnabled() ? fetchPanicIndexHistory({ limit }) : Promise.resolve([]),
-      ])
-      const normalized = normalizeCycleHistoryRows(staticRows)
+      const hubOn = isPanicHubEnabled()
+      const staticRows = hubOn ? [] : await fetchCycleMetricsHistory({ debugLog: false })
+      const hubRows = hubOn ? await fetchPanicIndexHistory({ limit }) : []
+      const normalized = hubOn ? [] : normalizeCycleHistoryRows(staticRows)
       const fromHub = hubRows.map(panicIndexRowToCycleChart).filter(Boolean)
       replacePanicIndexHistory(hubRows)
 
