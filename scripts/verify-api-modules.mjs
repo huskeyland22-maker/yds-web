@@ -10,6 +10,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 
 const modules = [
   "api/_lib/yahooChartPick.js",
+  "api/_lib/yahooQuote.js",
+  "api/_lib/panicCollectors.js",
+  "api/_lib/panicPipeline.js",
+  "api/_lib/cronAuth.js",
   "api/_lib/stockPriceSummary.js",
   "api/_lib/kisTokenManager.js",
   "api/_lib/kisClient.js",

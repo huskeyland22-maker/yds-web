@@ -36,8 +36,9 @@ export function panicObjectFromRows(rows) {
   return out
 }
 
-export function rowsFromPanicPayload(body) {
+export function rowsFromPanicPayload(body, opts = {}) {
   const nowIso = new Date().toISOString()
+  const source = typeof opts.source === "string" && opts.source ? opts.source : "api"
   const rows = []
   const o = {}
   for (const key of METRIC_KEYS) {
@@ -54,6 +55,7 @@ export function rowsFromPanicPayload(body) {
           ? Number(body.changes[key])
           : null,
       status: null,
+      source,
       updated_at: nowIso,
     })
   }
@@ -63,6 +65,7 @@ export function rowsFromPanicPayload(body) {
     metric_value: null,
     change_percent: null,
     status: regime,
+    source,
     updated_at: nowIso,
   })
   return rows

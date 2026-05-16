@@ -17,9 +17,10 @@ export function calendarDateFromPayload(body) {
  * @param {Record<string, unknown>} body
  * @param {string} [tradeDate] YYYY-MM-DD
  */
-export function panicIndexHistoryRowFromPayload(body, tradeDate) {
+export function panicIndexHistoryRowFromPayload(body, tradeDate, opts = {}) {
   const date = tradeDate || calendarDateFromPayload(body)
   const nowIso = new Date().toISOString()
+  const source = typeof opts.source === "string" && opts.source ? opts.source : "api"
   return {
     date,
     vix: toNum(body?.vix),
@@ -28,8 +29,10 @@ export function panicIndexHistoryRowFromPayload(body, tradeDate) {
     move: toNum(body?.move),
     bofa: toNum(body?.bofa),
     skew: toNum(body?.skew),
+    put_call: toNum(body?.putCall),
     hy_oas: toNum(body?.highYield ?? body?.hyOas),
     gs_sentiment: toNum(body?.gsBullBear ?? body?.gsSentiment ?? body?.gs),
+    source,
     updated_at: nowIso,
   }
 }
@@ -51,6 +54,7 @@ export function panicIndexHistoryRowToClient(row) {
     bofa: pick("bofa"),
     skew: pick("skew"),
     hyOas: pick("hy_oas"),
+    putCall: pick("put_call"),
     gsSentiment: pick("gs_sentiment"),
     createdAt: row.created_at ?? row.updated_at ?? null,
   }
@@ -59,8 +63,8 @@ export function panicIndexHistoryRowToClient(row) {
 /**
  * 동일 날짜는 merge-duplicates(upsert), 다른 날짜는 append.
  */
-export async function upsertPanicIndexHistoryFromPayload(body) {
-  const row = panicIndexHistoryRowFromPayload(body)
+export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
+  const row = panicIndexHistoryRowFromPayload(body, undefined, opts)
   const core = ["vix", "fear_greed", "bofa", "hy_oas"]
   if (!core.every((k) => row[k] != null)) {
     return { ok: false, skipped: true, reason: "incomplete_core_metrics" }

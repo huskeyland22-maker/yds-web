@@ -203,6 +203,8 @@ export const usePanicStore = create((set, get) => ({
   lastPanicFetchSource: null,
   lastPanicPayloadUpdatedAt: null,
   lastPanicFetchError: null,
+  /** 수집기 기준 오래된 데이터 — UI에 last updated / stale 표시용 */
+  panicDataStale: false,
 
   /** UI 디버그 · 데이터 흐름 추적 */
   panicDataTrace: {
@@ -393,6 +395,7 @@ export const usePanicStore = create((set, get) => ({
           lastPanicFetchSource: data.__fetchSource ?? null,
           lastPanicPayloadUpdatedAt: mergedForLog?.updatedAt ?? null,
           lastPanicFetchError: null,
+          panicDataStale: Boolean(data.__isStale),
         })
         addFlow(set, "set-from-fetch-merge", {
           source,

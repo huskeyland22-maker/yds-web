@@ -2,6 +2,12 @@
   "installCommand": "npm install --prefix vite-project",
   "buildCommand": "npm run build --prefix vite-project",
   "outputDirectory": "vite-project/dist",
+  "crons": [
+    {
+      "path": "/api/cron/panic-collect",
+      "schedule": "0 */4 * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
   ],

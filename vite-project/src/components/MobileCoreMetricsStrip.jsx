@@ -12,7 +12,7 @@ function fmt(key, v) {
   return formatMetricValue(key, Number(v))
 }
 
-export default function MobileCoreMetricsStrip({ panicData, updatedLine }) {
+export default function MobileCoreMetricsStrip({ panicData, updatedLine, isStale }) {
   return (
     <section
       className="trading-card-shell overflow-hidden"
@@ -20,7 +20,10 @@ export default function MobileCoreMetricsStrip({ panicData, updatedLine }) {
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-2.5 py-1.5">
         <p className="m-0 text-[10px] font-semibold tracking-[0.14em] text-slate-500">LIVE MARKETS</p>
-        <p className="m-0 truncate font-mono text-[9px] text-slate-600">{updatedLine ?? "—"}</p>
+        <p className="m-0 truncate font-mono text-[9px] text-slate-600">
+          {isStale ? <span className="text-amber-400/90">STALE · </span> : null}
+          {updatedLine ?? "—"}
+        </p>
       </div>
       <div className="grid grid-cols-2 gap-px bg-white/[0.06] p-px">
         {CORE.map(({ key, label, accent }) => {

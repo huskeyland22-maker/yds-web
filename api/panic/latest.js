@@ -1,5 +1,6 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
 import { fetchPanicMetricsRows, panicObjectFromRows } from "../_lib/panicMetricsHub.js"
+import { computePanicServeMeta } from "../_lib/panicPipeline.js"
 
 function noStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -20,13 +21,15 @@ export default async function handler(req, res) {
   try {
     const rows = await fetchPanicMetricsRows()
     const data = panicObjectFromRows(rows)
+    const meta = computePanicServeMeta(rows, data)
     const rowCount = Array.isArray(rows) ? rows.length : 0
     res.status(200).json({
       ok: true,
       data,
+      meta,
       rowCount,
       empty: rowCount === 0,
-      hint: rowCount === 0 ? "Run supabase/migrations/20250516120000_yds_initial_schema_seed.sql" : null,
+      hint: rowCount === 0 ? "Run supabase/migrations or POST /api/cron/panic-collect" : null,
     })
   } catch (e) {
     res.status(500).json({

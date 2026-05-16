@@ -65,12 +65,18 @@ export async function fetchPanicHubLatest(options = {}) {
     throw new Error(json?.error || "hub_invalid_payload")
   }
   const data = normalizeManualPayload(json.data)
-  if (isDataTraceEnabled()) logFetchSuccess("panic-hub-latest", { url, cache: false })
+  const meta = json.meta && typeof json.meta === "object" ? json.meta : {}
+  const isStale = Boolean(meta.isStale)
+  if (isDataTraceEnabled()) {
+    logFetchSuccess("panic-hub-latest", { url, cache: false, isStale, ageMs: meta.ageMs ?? null })
+  }
   return {
     ...data,
     __fetchSource: "HUB",
     __fetchUrl: url,
     __fetchedAt: Date.now(),
+    __isStale: isStale,
+    __meta: meta,
   }
 }
 
@@ -246,18 +252,29 @@ export async function fetchPanicDataJson(options = {}) {
   if (isPanicHubEnabled()) {
     if (isDataTraceEnabled()) logFetchStart("panic-data-json", { path: "hub-only" })
     const hubData = await fetchPanicHubLatest({ debugLog })
-    if (!validatePanicData(hubData)) {
-      const errMsg =
-        hubData?.vix == null && hubData?.fearGreed == null ? "hub_empty_database" : "hub_payload_stale_or_invalid"
+    const hasCore =
+      hubData?.vix != null &&
+      hubData?.fearGreed != null &&
+      hubData?.bofa != null &&
+      hubData?.putCall != null &&
+      hubData?.highYield != null
+    if (!hasCore) {
+      const errMsg = hubData?.vix == null && hubData?.fearGreed == null ? "hub_empty_database" : "hub_incomplete_metrics"
       if (isDataTraceEnabled()) logFetchFail("panic-data-json", new Error(errMsg), {})
       throw new Error(errMsg)
     }
+    const businessStale = !validatePanicData(hubData)
     const enriched = {
       ...hubData,
       __fetchSource: "HUB",
       __fetchUrl: hubData.__fetchUrl,
       __fetchedAt: Date.now(),
-      __isStale: false,
+      __isStale: Boolean(hubData.__isStale) || businessStale,
+    }
+    if (businessStale && debugLog) {
+      console.warn("[YDS] panic hub payload older than freshness window — showing with stale flag", {
+        updatedAt: enriched.updatedAt,
+      })
     }
     if (debugLog) console.log("[BOOT] panic hub", { updatedAt: enriched?.updatedAt ?? null })
     if (isDataTraceEnabled()) logFetchSuccess("panic-data-json", { route: "hub", source: "HUB" })

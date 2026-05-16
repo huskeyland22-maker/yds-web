@@ -456,6 +456,7 @@ function buildFinderCandidates(memos, marketStateKey) {
 
 function App() {
   const panicData = usePanicStore((s) => s.panicData)
+  const panicDataStale = usePanicStore((s) => s.panicDataStale)
   const manualMode = usePanicStore((s) => s.manualMode)
   const panicInitialized = usePanicStore((s) => s.initialized)
   const initializePanicData = usePanicStore((s) => s.initializePanicData)
@@ -1285,7 +1286,11 @@ function App() {
                 <div id="desk" className="space-y-2 lg:space-y-5">
                   {isMobileLayout ? (
                     <>
-                      <MobileCoreMetricsStrip panicData={panicData} updatedLine={cycleDeskMeta.updatedLine} />
+                      <MobileCoreMetricsStrip
+                        panicData={panicData}
+                        updatedLine={cycleDeskMeta.updatedLine}
+                        isStale={panicDataStale}
+                      />
                       <MobileMarketOverview
                         context={cycleHeroContext}
                         asOfDateLabel={cycleDeskMeta.asOfDateLabel}
