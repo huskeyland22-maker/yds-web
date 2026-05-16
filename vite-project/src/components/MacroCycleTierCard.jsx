@@ -1,5 +1,6 @@
 import { motion } from "framer-motion"
 import MacroCycleLwChart from "./MacroCycleLwChart.jsx"
+import { CycleHistoryTraceBadge } from "./DataTraceBadge.jsx"
 import {
   formatMetricValue,
   metricValueDisplayStyle,
@@ -225,6 +226,7 @@ export default function MacroCycleTierCard({
           </section>
 
           <footer className="border-t border-white/[0.05] px-3 py-3 sm:px-4 sm:py-3.5">
+            <CycleHistoryTraceBadge className="mb-2" />
             <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">데스크 코멘트</p>
             <div className="m-0 mt-1.5 space-y-1">
               {(macroComments.length ? macroComments : ["데이터 보강 중"]).slice(0, 2).map((line) => (

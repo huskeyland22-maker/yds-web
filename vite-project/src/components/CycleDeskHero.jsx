@@ -2,6 +2,8 @@
  * /cycle 기관형 헤더 — 단계 · 흐름 · 오늘의 시그널.
  */
 
+import { PanicMetricsTraceBadge } from "./DataTraceBadge.jsx"
+
 const STAGE_RING = {
   greed: "from-amber-400/25 via-rose-500/15 to-transparent",
   fear: "from-sky-400/20 via-indigo-500/20 to-transparent",
@@ -135,6 +137,8 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
             </div>
           </div>
         </div>
+
+        <PanicMetricsTraceBadge className="mt-4" />
       </div>
     </section>
   )

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import { VALUE_CHAIN_SECTORS } from "../data/valueChainSectors.js"
+import { useAppDataStore } from "../store/appDataStore.js"
 import { usePanicStore } from "../store/panicStore.js"
 import { buildResearchDeskBriefing } from "../utils/researchDeskBriefing.js"
+import { ValueChainHeatTraceBadge } from "./DataTraceBadge.jsx"
 import { buildTodaysKeySignal } from "../utils/macroTerminalPulse.js"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
@@ -51,35 +52,25 @@ export default function ValueChainPage({
 }) {
   const panicFromStore = usePanicStore((s) => s.panicData)
   const panicData = panicFromStore ?? panicDataProp
+  const sectorHeatMap = useAppDataStore((s) => s.sectorHeatMap)
+  const fetchSectorHeat = useAppDataStore((s) => s.fetchSectorHeat)
 
   const [sectors, setSectors] = useState(() => VALUE_CHAIN_SECTORS.map((s) => ({ ...s })))
   const [selected, setSelected] = useState(null)
 
-  const loadSectorHeat = useCallback(() => {
-    let cancelled = false
-    fetch(withNoStoreQuery("/value-chain-heat.json"), LIVE_JSON_GET_INIT)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data) => {
-        if (cancelled) return
-        const map = data?.sectorHeat
-        if (!map || typeof map !== "object") return
-        setSectors((prev) =>
-          prev.map((s) => ({
-            ...s,
-            heat: map[s.id] || s.heat,
-          })),
-        )
-      })
-      .catch(() => {})
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  useEffect(() => {
+    void fetchSectorHeat()
+  }, [fetchSectorHeat, panicData?.updatedAt])
 
   useEffect(() => {
-    const cancel = loadSectorHeat()
-    return cancel
-  }, [loadSectorHeat, panicData?.updatedAt])
+    if (!sectorHeatMap || typeof sectorHeatMap !== "object") return
+    setSectors((prev) =>
+      prev.map((s) => ({
+        ...s,
+        heat: sectorHeatMap[s.id] || s.heat,
+      })),
+    )
+  }, [sectorHeatMap])
 
   useEffect(() => {
     if (typeof window === "undefined" || window.location.hash !== "#stock-signals") return
@@ -138,6 +129,8 @@ export default function ValueChainPage({
             종목 시그널
           </a>
         </nav>
+
+        <ValueChainHeatTraceBadge className="mb-3" />
 
         <section className="relative mb-7 min-h-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,rgba(14,18,28,0.97),rgba(8,10,16,0.99))] px-4 py-5 md:px-6 md:py-6">
           <div

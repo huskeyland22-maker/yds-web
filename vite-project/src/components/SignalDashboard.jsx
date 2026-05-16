@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import {
-  fetchPanicDataJson,
-  getPanicDataUrlForDisplay,
-  listPanicDataUrlAttemptsForDisplay,
-} from "../config/api.js"
+import { getPanicDataUrlForDisplay, listPanicDataUrlAttemptsForDisplay } from "../config/api.js"
 import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
 import { sendNotification, usePanicNotifications } from "../hooks/usePanicNotifications.js"
 import {
@@ -21,6 +17,7 @@ import {
   saveIntegrationHistory,
   summarizeIntegrationFlow,
 } from "../utils/panicIntegrationHistory.js"
+import { usePanicStore } from "../store/panicStore.js"
 import { validatePanicData } from "../utils/validatePanicData.js"
 import BacktestPanel from "./BacktestPanel.jsx"
 import SignalBacktestPanel from "./SignalBacktestPanel.jsx"
@@ -375,9 +372,11 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
         source: silent ? "silent-refresh" : "dashboard",
         count: fetchCountRef.current,
       })
-      const json = await fetchPanicDataJson({ debugLog: !silent })
+      const fetchSource = silent ? "signal-dashboard-silent" : "signal-dashboard"
+      await usePanicStore.getState().fetchPanicData(fetchSource)
       if (isCancelled?.()) return
-      if (!validatePanicData(json)) {
+      const json = usePanicStore.getState().panicData
+      if (!json || !validatePanicData(json)) {
         throw new Error("데이터 이상 감지")
       }
       panicDataCache = { data: json, savedAt: Date.now() }

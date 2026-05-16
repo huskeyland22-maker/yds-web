@@ -1,4 +1,10 @@
 import { validatePanicData } from "../utils/validatePanicData.js"
+import {
+  isDataTraceEnabled,
+  logFetchFail,
+  logFetchStart,
+  logFetchSuccess,
+} from "../utils/dataFlowTrace.js"
 import { LIVE_JSON_GET_INIT, LIVE_POST_JSON_INIT, withNoStoreQuery } from "./liveDataFetch.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
@@ -21,12 +27,20 @@ export function isPanicHubEnabled() {
 export async function fetchPanicHubLatest(options = {}) {
   const debugLog = options.debugLog !== false
   const url = withNoStoreQuery("/api/panic/latest")
+  if (isDataTraceEnabled()) logFetchStart("panic-hub-latest", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (debugLog) console.log("📡 panic hub latest", res.status, url)
-  if (!res.ok) throw new Error(`hub HTTP ${res.status}`)
+  if (!res.ok) {
+    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(`HTTP ${res.status}`), { url })
+    throw new Error(`hub HTTP ${res.status}`)
+  }
   const json = await res.json()
-  if (!json?.ok || !json.data) throw new Error(json?.error || "hub_invalid_payload")
+  if (!json?.ok || !json.data) {
+    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(String(json?.error)), { url })
+    throw new Error(json?.error || "hub_invalid_payload")
+  }
   const data = normalizeManualPayload(json.data)
+  if (isDataTraceEnabled()) logFetchSuccess("panic-hub-latest", { url, cache: false })
   return {
     ...data,
     __fetchSource: "HUB",
@@ -57,11 +71,19 @@ export function getCycleMetricsHistoryUrlForDisplay() {
 export async function fetchCycleMetricsHistory(options = {}) {
   const debugLog = Boolean(options.debugLog)
   const url = withNoStoreQuery(getCycleMetricsHistoryUrlForDisplay())
+  if (isDataTraceEnabled()) logFetchStart("cycle-metrics-json", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (debugLog) console.log("cycle-metrics-history 응답:", res.status)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  if (!res.ok) {
+    if (isDataTraceEnabled()) logFetchFail("cycle-metrics-json", new Error(`HTTP ${res.status}`), { url })
+    throw new Error(`HTTP ${res.status}`)
+  }
   const data = await res.json()
-  if (!Array.isArray(data)) throw new Error("cycle-metrics-history must be a JSON array")
+  if (!Array.isArray(data)) {
+    if (isDataTraceEnabled()) logFetchFail("cycle-metrics-json", new Error("not_array"), { url })
+    throw new Error("cycle-metrics-history must be a JSON array")
+  }
+  if (isDataTraceEnabled()) logFetchSuccess("cycle-metrics-json", { rows: data.length, cache: false })
   return data
 }
 
@@ -73,10 +95,18 @@ export async function fetchPanicIndexHistory(options = {}) {
   if (options.from) params.set("from", String(options.from).slice(0, 10))
   if (options.to) params.set("to", String(options.to).slice(0, 10))
   const url = withNoStoreQuery(`/api/panic/history?${params}`)
+  if (isDataTraceEnabled()) logFetchStart("panic-index-history", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
-  if (!res.ok) throw new Error(`panic history HTTP ${res.status}`)
+  if (!res.ok) {
+    if (isDataTraceEnabled()) logFetchFail("panic-index-history", new Error(`HTTP ${res.status}`), { url })
+    throw new Error(`panic history HTTP ${res.status}`)
+  }
   const json = await res.json()
-  if (!json?.ok || !Array.isArray(json.rows)) return []
+  if (!json?.ok || !Array.isArray(json.rows)) {
+    if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: 0, note: "empty_or_invalid" })
+    return []
+  }
+  if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: json.rows.length })
   return json.rows
 }
 
@@ -114,8 +144,10 @@ export async function fetchPanicDataJson(options = {}) {
   const debugLog = options.debugLog !== false
   /** 허브가 켜진 배포는 Render 레거시로 폴백하지 않음 — 구형 샘플·기기 불일치 방지 */
   if (isPanicHubEnabled()) {
+    if (isDataTraceEnabled()) logFetchStart("panic-data-json", { path: "hub-only" })
     const hubData = await fetchPanicHubLatest({ debugLog })
     if (!validatePanicData(hubData)) {
+      if (isDataTraceEnabled()) logFetchFail("panic-data-json", new Error("hub_payload_stale_or_invalid"), {})
       throw new Error("hub_payload_stale_or_invalid")
     }
     const enriched = {
@@ -126,8 +158,10 @@ export async function fetchPanicDataJson(options = {}) {
       __isStale: false,
     }
     if (debugLog) console.log("[BOOT] panic hub", { updatedAt: enriched?.updatedAt ?? null })
+    if (isDataTraceEnabled()) logFetchSuccess("panic-data-json", { route: "hub", source: "HUB" })
     return enriched
   }
+  if (isDataTraceEnabled()) logFetchStart("panic-data-json", { path: "render-fallback", urls: buildPanicDataUrls() })
   const urls = buildPanicDataUrls().map((u) => withNoStoreQuery(u))
   let lastError = null
 
@@ -156,6 +190,7 @@ export async function fetchPanicDataJson(options = {}) {
             updatedAt: data?.updatedAt ?? data?.updated_at ?? null,
           })
         }
+        if (isDataTraceEnabled()) logFetchSuccess("panic-data-json", { route: "render", url, cache: false })
         if (!validatePanicData(enriched)) {
           throw new Error("PANIC_LEGACY_STALE_PAYLOAD")
         }
@@ -170,6 +205,7 @@ export async function fetchPanicDataJson(options = {}) {
       }
     }
   }
+  if (isDataTraceEnabled()) logFetchFail("panic-data-json", lastError ?? new Error("unknown"), { exhausted: true })
   throw lastError ?? new Error("panic data fetch failed")
 }
 

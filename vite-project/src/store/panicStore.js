@@ -1,9 +1,18 @@
 import { create } from "zustand"
-import { fetchPanicDataJson, isPanicHubEnabled, submitManualPanicData } from "../config/api.js"
+import { fetchPanicDataJson, isPanicHubEnabled } from "../config/api.js"
 import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { validatePanicData, isPanicBusinessDataStale } from "../utils/validatePanicData.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
+import {
+  computePayloadStale,
+  logCacheHit,
+  logFetchFail,
+  logFetchSuccess,
+  logFetchStart,
+  logStoreWrite,
+  maybeWarnPayloadStale,
+} from "../utils/dataFlowTrace.js"
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
@@ -194,15 +203,21 @@ export const usePanicStore = create((set, get) => ({
   lastPanicPayloadUpdatedAt: null,
   lastPanicFetchError: null,
 
-  savePanicMetricsHub: async (payload) => {
-    try {
-      const data = await submitManualPanicData(payload)
-      get().applyServerPanicSnapshot(data)
-      return { ok: true }
-    } catch (error) {
-      return { ok: false, error: error instanceof Error ? error : new Error(String(error)) }
-    }
+  /** UI 디버그 · 데이터 흐름 추적 */
+  panicDataTrace: {
+    lastFetchWallClock: null,
+    lastPayloadBusinessAt: null,
+    lastStoreWriteAt: null,
+    fetchSource: null,
+    fetchUrl: null,
+    usedLocalCacheHydration: false,
+    fromFetch: false,
   },
+
+  _touchPanicTrace: (partial) =>
+    set((state) => ({
+      panicDataTrace: { ...state.panicDataTrace, ...partial },
+    })),
 
   initializePanicData: async () => {
     if (get().initialized) return
@@ -235,6 +250,15 @@ export const usePanicStore = create((set, get) => ({
       if (fallbackManualEnvelope) {
         const restored = toSnapshotData(fallbackManualEnvelope.data)
         set({ panicData: restored, manualMode: true })
+        get()._touchPanicTrace({
+          lastStoreWriteAt: Date.now(),
+          usedLocalCacheHydration: true,
+          fromFetch: false,
+          fetchSource: "localStorage-manual",
+          lastPayloadBusinessAt: restored?.updatedAt ?? null,
+        })
+        logCacheHit("panic-main-localStorage", { manual: true, updatedAt: restored?.updatedAt ?? null })
+        logStoreWrite("panicStore", { source: "restore-manual-engine-off" })
         addFlow(set, "restore-main-manual-engine-off", { updatedAt: restored?.updatedAt ?? null })
         emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage", manualMode: true, restoredItemCount: 1 })
       }
@@ -250,6 +274,15 @@ export const usePanicStore = create((set, get) => ({
       const restored = toSnapshotData(fallbackManualEnvelope.data)
       set({ panicData: restored, manualMode: true })
       writeMain(restored, true)
+      get()._touchPanicTrace({
+        lastStoreWriteAt: Date.now(),
+        usedLocalCacheHydration: true,
+        fromFetch: false,
+        fetchSource: "localStorage-manual-fallback",
+        lastPayloadBusinessAt: restored?.updatedAt ?? null,
+      })
+      logCacheHit("panic-main-localStorage", { manual: true, offlineFallback: true })
+      logStoreWrite("panicStore", { source: "restore-offline-fallback" })
       addFlow(set, "restore-main-manual-offline-fallback", { updatedAt: restored?.updatedAt ?? null })
       emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage-offline-fallback", manualMode: true, restoredItemCount: 1 })
     }
@@ -271,10 +304,19 @@ export const usePanicStore = create((set, get) => ({
       return false
     }
     const seq = ++fetchSeq
+    logFetchStart("panic-metrics", { source, seq, force })
     let updated = false
     try {
       const data = await fetchPanicDataJson({ debugLog: false })
+      logFetchSuccess("panic-metrics-network", {
+        source,
+        seq,
+        fetchSource: data?.__fetchSource,
+        url: data?.__fetchUrl,
+        payloadUpdatedAt: data?.updatedAt ?? null,
+      })
       if (!validatePanicData(data)) {
+        logFetchFail("panic-metrics", new Error("validate_failed"), { source, seq })
         addFlow(set, "reject-invalid-panic-after-fetch", { updatedAt: data?.updatedAt ?? null })
         set({
           lastPanicFetchAt: Date.now(),
@@ -326,7 +368,23 @@ export const usePanicStore = create((set, get) => ({
         return { panicData: merged, manualMode: false }
       })
       if (mergedForLog) {
+        const merged = mergedForLog
         updated = true
+        get()._touchPanicTrace({
+          lastFetchWallClock: Date.now(),
+          lastPayloadBusinessAt: merged?.updatedAt ?? null,
+          lastStoreWriteAt: Date.now(),
+          fetchSource: data?.__fetchSource ?? "network",
+          fetchUrl: data?.__fetchUrl ?? null,
+          usedLocalCacheHydration: false,
+          fromFetch: true,
+        })
+        logStoreWrite("panicStore", {
+          source,
+          mergedKeys: Object.keys(merged).length,
+          payloadUpdatedAt: merged?.updatedAt ?? null,
+        })
+        maybeWarnPayloadStale("panic-metrics", merged?.updatedAt, { fetchSource: source })
         set({
           lastPanicFetchAt: Date.now(),
           lastPanicFetchUrl: data.__fetchUrl ?? null,
@@ -342,6 +400,7 @@ export const usePanicStore = create((set, get) => ({
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
+      logFetchFail("panic-metrics", err, { source, seq })
       addFlow(set, "fetch-error-keep-state", { source, message })
       set({ lastPanicFetchAt: Date.now(), lastPanicFetchError: message })
       void maybeHealAfterStalePanicPayload(err)
@@ -372,6 +431,16 @@ export const usePanicStore = create((set, get) => ({
       lastPanicFetchSource: "SERVER_SUBMIT",
       lastPanicPayloadUpdatedAt: next.updatedAt ?? null,
       lastPanicFetchError: null,
+      panicDataTrace: {
+        ...get().panicDataTrace,
+        lastFetchWallClock: Date.now(),
+        lastPayloadBusinessAt: next.updatedAt ?? null,
+        lastStoreWriteAt: Date.now(),
+        fetchSource: "SERVER_SUBMIT",
+        fetchUrl: null,
+        usedLocalCacheHydration: false,
+        fromFetch: true,
+      },
     })
     addFlow(set, "set-from-server-submit", { updatedAt: next.updatedAt ?? null })
     get().startAutoRefresh()
@@ -395,7 +464,19 @@ export const usePanicStore = create((set, get) => ({
       next.manualSavedAt = nowIso
       writeMain(next, true)
       emitDebugEvent("SAVE_SUCCESS", { source: "panicStore.manual", savedAt: nowIso, mode: "manual" })
-      return { panicData: next, manualMode: true }
+      return {
+        panicData: next,
+        manualMode: true,
+        panicDataTrace: {
+          ...state.panicDataTrace,
+          lastStoreWriteAt: Date.now(),
+          lastPayloadBusinessAt: nowIso,
+          fetchSource: "manual-input",
+          fetchUrl: null,
+          usedLocalCacheHydration: false,
+          fromFetch: false,
+        },
+      }
     })
     addFlow(set, "set-manual-input")
     addFlow(set, "stop-auto-refresh")

@@ -4,12 +4,7 @@ import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
-import {
-  fetchCycleMetricsHistory,
-  fetchPanicIndexHistory,
-  isPanicHubEnabled,
-  submitManualPanicData,
-} from "./config/api.js"
+import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import {
   appendPanicIndexHistory,
   getPanicIndexHistory,
@@ -20,6 +15,13 @@ import {
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
 import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
+import {
+  CycleHistoryTraceBadge,
+  DataFlowPipelineHint,
+  PanicMetricsTraceBadge,
+  RealtimeTraceBadge,
+  ValueChainHeatTraceBadge,
+} from "./components/DataTraceBadge.jsx"
 import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
@@ -29,7 +31,10 @@ import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
+import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
+import { useAppDataStore } from "./store/appDataStore.js"
 import { usePanicStore } from "./store/panicStore.js"
+import { isDataTraceUiEnabled, logRealtime } from "./utils/dataFlowTrace.js"
 import { buildCycleDeskHeroContext } from "./utils/cycleDeskHero.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
 import { resolveMarketState } from "./utils/marketStateEngine.js"
@@ -819,15 +824,12 @@ function App() {
     let cancelled = false
     void (async () => {
       try {
-        const [staticRows, hubRows] = await Promise.all([
-          fetchCycleMetricsHistory({ debugLog: false }).catch(() => []),
-          fetchPanicIndexHistory({ limit: CYCLE_HISTORY_MAX }).catch(() => []),
-        ])
+        const bundle = await useAppDataStore.getState().loadCycleHistoryBundle({ limit: CYCLE_HISTORY_MAX })
         if (cancelled) return
+        const staticRows = bundle.staticRows ?? []
+        const hubRows = bundle.hubRows ?? []
         const normalized = normalizeCycleHistoryRows(staticRows)
-        const fromHub = hubRows
-          .map(panicIndexRowToCycleChart)
-          .filter(Boolean)
+        const fromHub = hubRows.map(panicIndexRowToCycleChart).filter(Boolean)
         replacePanicIndexHistory(hubRows)
         const localIndex = getPanicIndexHistory()
         setCycleMetricHistory((prev) => {
@@ -848,6 +850,28 @@ function App() {
     })()
     return () => {
       cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    void useAppDataStore.getState().fetchSectorHeat()
+  }, [])
+
+  useEffect(() => {
+    if (!isPanicHubEnabled()) return undefined
+    const unsub = subscribePanicHubRealtime({
+      onChange: () => {
+        logRealtime("postgres_change", { table: "panic_metrics" })
+        useAppDataStore.getState().markRealtimeEvent()
+        void usePanicStore.getState().fetchPanicData("supabase-realtime", { force: true })
+      },
+    })
+    return () => {
+      try {
+        unsub()
+      } catch {
+        // ignore
+      }
     }
   }, [])
 
@@ -1321,6 +1345,16 @@ function App() {
               </span>
             </div>
         </header>
+
+        {isDataTraceUiEnabled() ? (
+          <div className="flex flex-wrap items-start gap-2 border-b border-amber-500/20 bg-[#070a0f]/95 px-3 py-2">
+            <DataFlowPipelineHint />
+            <PanicMetricsTraceBadge />
+            <CycleHistoryTraceBadge />
+            <ValueChainHeatTraceBadge />
+            <RealtimeTraceBadge />
+          </div>
+        ) : null}
 
         <main className="flex-1 overflow-auto px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:py-4 lg:px-6 lg:py-5">
           <Routes>
