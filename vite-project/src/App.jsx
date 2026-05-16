@@ -25,6 +25,7 @@ import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
+import DebugDataPage from "./pages/DebugDataPage.jsx"
 import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
@@ -1361,6 +1362,14 @@ function App() {
               }
             />
             <Route path="/insights" element={<Navigate to="/value-chain" replace />} />
+            <Route
+              path="/debug-data"
+              element={
+                <SectionErrorBoundary label="Supabase 디버그">
+                  <DebugDataPage />
+                </SectionErrorBoundary>
+              }
+            />
             <Route path="*" element={<Navigate to="/cycle" replace />} />
           </Routes>
         </main>
