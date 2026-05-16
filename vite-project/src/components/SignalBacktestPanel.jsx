@@ -25,6 +25,10 @@ export default function SignalBacktestPanel() {
       try {
         const rows = await fetchHistorySample({ debugLog: true })
         if (cancelled) return
+        if (!rows?.length) {
+          setBacktestError("실제 데이터 없음 — 레거시 history.json 비활성화")
+          return
+        }
         const result = runAdvancedSignalBacktest(rows)
         setBacktestResult(result)
         console.log("백테스트 결과:", result)

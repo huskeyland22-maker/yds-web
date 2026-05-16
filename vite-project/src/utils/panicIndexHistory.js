@@ -3,6 +3,8 @@
  * 서버: Supabase panic_index_history · 로컬: localStorage
  */
 
+import { isStaleHistoryCalendarDate } from "./cycleHistoryHygiene.js"
+
 export const PANIC_INDEX_HISTORY_KEY = "yds-panic-index-history-v1"
 const MAX_ROWS = 500
 
@@ -62,7 +64,7 @@ function writeRaw(rows) {
 export function normalizePanicIndexHistoryRow(row) {
   if (!row || typeof row !== "object") return null
   const date = String(row.date ?? "").slice(0, 10)
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isStaleHistoryCalendarDate(date)) return null
   const snap = {
     date,
     vix: toNum(row.vix),
@@ -93,6 +95,8 @@ export function getPanicIndexHistory() {
  * @returns {ReturnType<typeof getPanicIndexHistory>}
  */
 export function appendPanicIndexHistory(panicData, dateOverride) {
+  const u = panicData?.updatedAt ?? panicData?.updated_at
+  if (typeof u === "string" && isStaleHistoryCalendarDate(u.slice(0, 10))) return getPanicIndexHistory()
   const entry = buildPanicIndexSnapshot(panicData, dateOverride)
   if (!entry) return getPanicIndexHistory()
   const normalized = normalizePanicIndexHistoryRow(entry)

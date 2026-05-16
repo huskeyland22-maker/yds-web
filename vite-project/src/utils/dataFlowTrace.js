@@ -131,3 +131,9 @@ export function maybeWarnPayloadStale(layer, updatedAtIso, extra = {}) {
 export function formatTraceTime(ts) {
   return fmtTime(ts)
 }
+
+/** UI 컴포넌트 데이터 소스 추적 (콘솔) */
+export function logComponentDataSource(component, detail = {}) {
+  if (!isDataTraceEnabled()) return
+  baseLog("info", "component:data", { component, ...detail })
+}

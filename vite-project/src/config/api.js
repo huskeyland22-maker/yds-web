@@ -1,3 +1,4 @@
+import { filterFreshCycleHistoryRows } from "../utils/cycleHistoryHygiene.js"
 import { validatePanicData } from "../utils/validatePanicData.js"
 import {
   isDataTraceEnabled,
@@ -83,8 +84,15 @@ export async function fetchCycleMetricsHistory(options = {}) {
     if (isDataTraceEnabled()) logFetchFail("cycle-metrics-json", new Error("not_array"), { url })
     throw new Error("cycle-metrics-history must be a JSON array")
   }
-  if (isDataTraceEnabled()) logFetchSuccess("cycle-metrics-json", { rows: data.length, cache: false })
-  return data
+  const fresh = filterFreshCycleHistoryRows(data)
+  if (isDataTraceEnabled()) {
+    logFetchSuccess("cycle-metrics-json", {
+      rows: fresh.length,
+      dropped: data.length - fresh.length,
+      cache: false,
+    })
+  }
+  return fresh
 }
 
 /** Supabase panic_index_history — 일별 스냅샷 (동일 date upsert, 과거 조회) */
@@ -209,15 +217,13 @@ export async function fetchPanicDataJson(options = {}) {
   throw lastError ?? new Error("panic data fetch failed")
 }
 
+/** @deprecated 레거시 /history.json(2024 샘플) — Supabase·panicStore만 사용 */
 export async function fetchHistorySample(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = withNoStoreQuery("/history.json")
-  const res = await fetch(url, LIVE_JSON_GET_INIT)
-  if (debugLog) console.log("✅ history 응답 상태:", res.status)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  const data = await res.json()
-  if (!Array.isArray(data)) throw new Error("history 응답이 배열이 아님")
-  return data
+  if (debugLog) console.warn("[YDS] fetchHistorySample disabled — use panic_index_history / panicStore")
+  if (isDataTraceEnabled()) logFetchStart("history-sample", { note: "disabled_legacy" })
+  if (isDataTraceEnabled()) logFetchSuccess("history-sample", { rows: 0 })
+  return []
 }
 
 export async function fetchOptimizeResult(options = {}) {

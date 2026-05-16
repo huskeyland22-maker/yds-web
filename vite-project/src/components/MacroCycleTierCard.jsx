@@ -1,6 +1,8 @@
+import { useEffect } from "react"
 import { motion } from "framer-motion"
 import MacroCycleLwChart from "./MacroCycleLwChart.jsx"
 import { CycleHistoryTraceBadge } from "./DataTraceBadge.jsx"
+import { logComponentDataSource } from "../utils/dataFlowTrace.js"
 import {
   formatMetricValue,
   metricValueDisplayStyle,
@@ -113,6 +115,7 @@ function MetricBlock({ series, panicData, rows, large }) {
  *   asOfDateLabel?: string
  *   updatedLine?: string
  *   sourceLine?: string
+ *   historySourceLine?: string
  * }} props
  */
 export default function MacroCycleTierCard({
@@ -133,7 +136,17 @@ export default function MacroCycleTierCard({
   asOfDateLabel = "—",
   updatedLine = "—",
   sourceLine = "데이터 기준 · 확정 종가",
+  historySourceLine = "",
 }) {
+  useEffect(() => {
+    logComponentDataSource(`MacroCycleTierCard:${tier}`, {
+      source: historySourceLine || sourceLine,
+      rowCount: Array.isArray(rows) ? rows.length : 0,
+      hasPanic: Boolean(panicData),
+      feedKind,
+    })
+  }, [tier, historySourceLine, sourceLine, rows, panicData, feedKind])
+
   const topBar = TIER_TOP_BAR[tier] ?? TIER_TOP_BAR.tactical
   const radial = TIER_RADIAL[tier] ?? TIER_RADIAL.tactical
   const borderGlow = TIER_BORDER_GLOW[tier] ?? TIER_BORDER_GLOW.tactical
@@ -217,6 +230,12 @@ export default function MacroCycleTierCard({
               <span>{updatedLine}</span>
               <span className="mx-1.5 text-slate-800">·</span>
               <span>{sourceLine}</span>
+              {historySourceLine ? (
+                <>
+                  <span className="mx-1.5 text-slate-800">·</span>
+                  <span className="text-slate-600">{historySourceLine}</span>
+                </>
+              ) : null}
             </p>
           </section>
 
@@ -229,7 +248,7 @@ export default function MacroCycleTierCard({
             <CycleHistoryTraceBadge className="mb-2" />
             <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">데스크 코멘트</p>
             <div className="m-0 mt-1.5 space-y-1">
-              {(macroComments.length ? macroComments : ["데이터 보강 중"]).slice(0, 2).map((line) => (
+              {(macroComments.length ? macroComments : ["실제 데이터 없음"]).slice(0, 2).map((line) => (
                 <p key={line} className="m-0 text-trading-xs leading-snug text-slate-500 sm:text-trading-sm">
                   {line}
                 </p>

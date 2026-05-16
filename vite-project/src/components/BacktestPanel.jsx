@@ -81,11 +81,8 @@ export default function BacktestPanel({ history }) {
         <p className="mt-3 text-xs text-gray-500">버튼을 누르면 현재 히스토리(또는 더미)로 시뮬레이션합니다.</p>
       ) : null}
 
-      {result?.usedDummy ? (
-        <p className="mt-2 text-xs text-amber-200/90">
-          저장된 히스토리가 부족해 <strong>더미 시계열</strong>로 대체했습니다. 실제 스냅샷이 쌓이면 자동으로 실데이터를
-          사용합니다.
-        </p>
+      {hasRun && result && result.series?.length < 3 ? (
+        <p className="mt-2 text-xs text-amber-200/90">실제 데이터 없음 — 패닉 히스토리가 3일 이상 쌓이면 백테스트가 가능합니다.</p>
       ) : null}
 
       {result ? (

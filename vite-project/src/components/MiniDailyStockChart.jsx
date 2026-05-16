@@ -92,7 +92,7 @@ function chgColorClass(n) {
  */
 function buildTrendSummary(bars) {
   if (!bars?.length) {
-    return { lines: [], stance: "데이터 부족", tone: "neutral", dayChgPct: null }
+    return { lines: [], stance: "실제 데이터 없음", tone: "neutral", dayChgPct: null }
   }
   const last = bars[bars.length - 1]
   const prev = bars.length >= 2 ? bars[bars.length - 2] : null

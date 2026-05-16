@@ -14,6 +14,7 @@ import {
   maybeWarnPayloadStale,
 } from "../utils/dataFlowTrace.js"
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
+import { useAppDataStore } from "./appDataStore.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const CURRENT_SNAPSHOT_VERSION = 2
@@ -221,6 +222,7 @@ export const usePanicStore = create((set, get) => ({
 
   initializePanicData: async () => {
     if (get().initialized) return
+    useAppDataStore.getState().purgeLegacyCycleStorage()
     const hydrationStart = typeof performance !== "undefined" ? performance.now() : Date.now()
     emitDebugEvent("HYDRATION_START", { source: "panicStore.initialize" })
     let envelope = readMainEnvelope()

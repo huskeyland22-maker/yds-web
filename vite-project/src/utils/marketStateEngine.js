@@ -2,6 +2,7 @@
  * 패닉지표 기반 시장 상태 자동 계산 (하드코딩 UI 금지 — 규칙은 본 모듈만).
  */
 
+import { filterFreshCycleHistoryRows } from "./cycleHistoryHygiene.js"
 import { formatMarketBasisKst, resolveMarketTimestampDisplay } from "./marketTimestamp.js"
 
 export { formatMarketBasisKst } from "./marketTimestamp.js"
@@ -76,7 +77,7 @@ const STATE_META = {
     volatility: "확대",
   },
   insufficient: {
-    label: "데이터 부족",
+    label: "실제 데이터 없음",
     shortLabel: "—",
     color: "#64748b",
     risk: "—",
@@ -254,7 +255,7 @@ export function readPreviousCycleMetrics(currentDayKey) {
   try {
     const raw = window.localStorage.getItem(CYCLE_HISTORY_KEY)
     if (!raw) return null
-    const rows = JSON.parse(raw)
+    const rows = filterFreshCycleHistoryRows(JSON.parse(raw))
     if (!Array.isArray(rows) || rows.length < 2) return null
     const sorted = [...rows].sort((a, b) => String(a.date).localeCompare(String(b.date)))
     const prior = sorted.filter((r) => String(r.date) < String(currentDayKey))

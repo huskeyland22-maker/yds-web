@@ -389,7 +389,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
       <div
         className={`flex min-h-[200px] items-center justify-center rounded-lg border border-white/[0.05] bg-black/30 px-3 text-center text-[11px] text-slate-600 ${className}`}
       >
-        차트용 데이터가 부족합니다.
+        실제 데이터 없음 (차트 히스토리 미수신)
       </div>
     )
   }

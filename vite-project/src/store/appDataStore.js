@@ -1,6 +1,6 @@
 /**
- * 사이클 차트·밸류체인 heat 등 패닉 스토어 외 보조 데이터 단일 진입점.
- * (패닉 지표 숫자는 panicStore 유지)
+ * 사이클 차트·밸류체인 heat · 패닉 히스토리 단일 진입점.
+ * (라이브 패닉 숫자는 panicStore)
  */
 
 import { create } from "zustand"
@@ -11,18 +11,35 @@ import {
 } from "../config/api.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import {
+  buildCycleRowFromPanic,
+  mergeCycleRows,
+  normalizeCycleHistoryRows,
+  readCycleMetricHistoryFromLS,
+  writeCycleMetricHistoryToLS,
+} from "../utils/cycleHistoryUtils.js"
+import { purgeStaleCycleLocalStorage } from "../utils/cycleHistoryHygiene.js"
+import { panicIndexRowToCycleChart, replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
+import { validatePanicData } from "../utils/validatePanicData.js"
+import {
   logFetchFail,
   logFetchStart,
   logFetchSuccess,
   logStoreWrite,
 } from "../utils/dataFlowTrace.js"
 
+/** @typedef {'none' | 'supabase-hub' | 'supabase-index-history' | 'static-json' | 'localStorage' | 'live-panic'} CycleHistorySource */
+
 export const useAppDataStore = create((set, get) => ({
-  /** { [sectorId]: heat string } | null */
   sectorHeatMap: null,
   sectorHeatFetchedAt: null,
   sectorHeatError: null,
   sectorHeatLoading: false,
+
+  cycleMetricHistory: [],
+  /** @type {CycleHistorySource} */
+  cycleHistorySource: "none",
+  cycleHistoryUpdatedAt: null,
+  cycleHistoryRealtime: false,
 
   cycleStaticFetchedAt: null,
   panicIndexFetchedAt: null,
@@ -36,9 +53,101 @@ export const useAppDataStore = create((set, get) => ({
     set({ realtimeLastEventAt: t, realtimeEventCount: get().realtimeEventCount + 1 })
   },
 
+  /** 부팅 시 2024 mock LS 정리 */
+  purgeLegacyCycleStorage: () => {
+    const { purgedCycle, purgedIndex } = purgeStaleCycleLocalStorage()
+    if (purgedCycle || purgedIndex) {
+      const fromLs = readCycleMetricHistoryFromLS()
+      set({
+        cycleMetricHistory: fromLs,
+        cycleHistorySource: fromLs.length ? "localStorage" : "none",
+        cycleHistoryUpdatedAt: fromLs.length ? Date.now() : null,
+      })
+      logStoreWrite("appDataStore.cycleHistory", { action: "purge-legacy", purgedCycle, purgedIndex, rows: fromLs.length })
+    }
+    return { purgedCycle, purgedIndex }
+  },
+
+  _commitCycleHistory: (rows, meta) => {
+    const fresh = Array.isArray(rows) ? rows : []
+    writeCycleMetricHistoryToLS(fresh)
+    set({
+      cycleMetricHistory: fresh,
+      cycleHistorySource: meta.source ?? get().cycleHistorySource,
+      cycleHistoryUpdatedAt: meta.updatedAt ?? Date.now(),
+      cycleHistoryRealtime: Boolean(meta.realtime),
+    })
+    logStoreWrite("appDataStore.cycleHistory", {
+      source: meta.source,
+      rows: fresh.length,
+      realtime: Boolean(meta.realtime),
+    })
+  },
+
+  /** panicStore 갱신 시 당일 행 병합 */
+  syncCycleHistoryFromPanic: (panicData) => {
+    if (!validatePanicData(panicData)) return get().cycleMetricHistory
+    const row = buildCycleRowFromPanic(panicData)
+    if (!row) return get().cycleMetricHistory
+    const merged = mergeCycleRows(get().cycleMetricHistory, [row])
+    get()._commitCycleHistory(merged, { source: "live-panic", realtime: false })
+    return merged
+  },
+
   /**
-   * /value-chain-heat.json — ValueChainPage 전용이던 fetch 중앙화
+   * App 마운트: Supabase index history + (빈) static JSON 병합
    */
+  loadCycleHistoryBundle: async (opts = {}) => {
+    const limit = opts.limit ?? 120
+    logFetchStart("cycle-history-bundle", { limit })
+    get().purgeLegacyCycleStorage()
+    try {
+      const [staticRows, hubRows] = await Promise.all([
+        fetchCycleMetricsHistory({ debugLog: false }),
+        isPanicHubEnabled() ? fetchPanicIndexHistory({ limit }) : Promise.resolve([]),
+      ])
+      const normalized = normalizeCycleHistoryRows(staticRows)
+      const fromHub = hubRows.map(panicIndexRowToCycleChart).filter(Boolean)
+      replacePanicIndexHistory(hubRows)
+
+      const prev = readCycleMetricHistoryFromLS()
+      const merged = mergeCycleRows(mergeCycleRows(prev, normalized), fromHub)
+
+      const source =
+        fromHub.length > 0
+          ? "supabase-index-history"
+          : normalized.length > 0
+            ? "static-json"
+            : prev.length
+              ? "localStorage"
+              : "none"
+
+      const t = Date.now()
+      set({
+        cycleStaticFetchedAt: t,
+        panicIndexFetchedAt: isPanicHubEnabled() ? t : null,
+        lastCycleBundleError: null,
+      })
+      get()._commitCycleHistory(merged, { source, realtime: isPanicHubEnabled() })
+      logFetchSuccess("cycle-history-bundle", {
+        staticRows: normalized.length,
+        hubRows: fromHub.length,
+        merged: merged.length,
+        source,
+      })
+      return { staticRows: normalized, hubRows, fetchedAt: t, merged }
+    } catch (e) {
+      logFetchFail("cycle-history-bundle", e)
+      const fromLs = readCycleMetricHistoryFromLS()
+      set({
+        lastCycleBundleError: String(e instanceof Error ? e.message : e),
+        cycleMetricHistory: fromLs,
+        cycleHistorySource: fromLs.length ? "localStorage" : "none",
+      })
+      return { staticRows: [], hubRows: [], fetchedAt: null, error: e, merged: fromLs }
+    }
+  },
+
   fetchSectorHeat: async () => {
     const layer = "value-chain-heat"
     logFetchStart(layer, { url: "/value-chain-heat.json" })
@@ -64,35 +173,6 @@ export const useAppDataStore = create((set, get) => ({
       logFetchFail(layer, e, { url: "/value-chain-heat.json" })
       set({ sectorHeatLoading: false, sectorHeatError: String(e instanceof Error ? e.message : e) })
       return null
-    }
-  },
-
-  /**
-   * App 마운트 시 1회: 정적 cycle JSON + (허브 시) panic_index_history
-   */
-  loadCycleHistoryBundle: async (opts = {}) => {
-    const limit = opts.limit ?? 120
-    logFetchStart("cycle-history-bundle", { limit })
-    try {
-      const [staticRows, hubRows] = await Promise.all([
-        fetchCycleMetricsHistory({ debugLog: false }),
-        isPanicHubEnabled() ? fetchPanicIndexHistory({ limit }) : Promise.resolve([]),
-      ])
-      const t = Date.now()
-      set({
-        cycleStaticFetchedAt: t,
-        panicIndexFetchedAt: isPanicHubEnabled() ? t : null,
-        lastCycleBundleError: null,
-      })
-      logFetchSuccess("cycle-history-bundle", {
-        staticRows: Array.isArray(staticRows) ? staticRows.length : 0,
-        hubRows: Array.isArray(hubRows) ? hubRows.length : 0,
-      })
-      return { staticRows, hubRows, fetchedAt: t }
-    } catch (e) {
-      logFetchFail("cycle-history-bundle", e)
-      set({ lastCycleBundleError: String(e instanceof Error ? e.message : e) })
-      return { staticRows: [], hubRows: [], fetchedAt: null, error: e }
     }
   },
 }))

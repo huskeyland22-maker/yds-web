@@ -46,13 +46,21 @@ export function CycleHistoryTraceBadge({ className = "" }) {
   const staticAt = useAppDataStore((s) => s.cycleStaticFetchedAt)
   const bundleErr = useAppDataStore((s) => s.lastCycleBundleError)
   const hub = useAppDataStore((s) => s.panicIndexFetchedAt)
+  const source = useAppDataStore((s) => s.cycleHistorySource)
+  const updatedAt = useAppDataStore((s) => s.cycleHistoryUpdatedAt)
+  const rowCount = useAppDataStore((s) => s.cycleMetricHistory?.length ?? 0)
+  const realtime = useAppDataStore((s) => s.cycleHistoryRealtime)
   if (!isDataTraceUiEnabled()) return null
 
   return (
     <div
       className={`rounded border border-sky-500/25 bg-sky-500/[0.06] px-2 py-1 font-mono text-trading-2xs leading-tight text-sky-100/90 ${className}`}
     >
-      <span className="text-sky-400/80">cycle-chart</span> bundle: {formatTraceTime(staticAt)}
+      <span className="text-sky-400/80">cycle-chart</span> source: {source ?? "none"} · rows: {rowCount}
+      <br />
+      store: {formatTraceTime(updatedAt)} · realtime: {realtime ? "yes" : "no"}
+      <br />
+      bundle fetch: {formatTraceTime(staticAt)}
       {hub ? (
         <>
           <br />

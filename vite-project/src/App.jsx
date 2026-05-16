@@ -5,13 +5,9 @@ import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
-import {
-  appendPanicIndexHistory,
-  getPanicIndexHistory,
-  replacePanicIndexHistory,
-  panicIndexRowToCycleChart,
-  PANIC_INDEX_HISTORY_KEY,
-} from "./utils/panicIndexHistory.js"
+import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
+import { CYCLE_HISTORY_MAX } from "./utils/cycleHistoryUtils.js"
+import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
 import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import CycleDeskHero from "./components/CycleDeskHero.jsx"
@@ -83,8 +79,6 @@ const PANIC_TEXT_PLACEHOLDER = `분류,지수 명칭,최종 확정 수치,전일
 장기,8. 하이일드 스프레드,1.68%,-,🟢 안정
 장기,9. GS B/B 지수,68.0%,-,🟡 주의`
 const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
-const CYCLE_HISTORY_KEY = "yds-cycle-metric-history-v1"
-const CYCLE_HISTORY_MAX = 120
 const TACTICAL_SERIES = [
   { key: "vix", name: "VIX", color: "#ef4444" },
   { key: "vxn", name: "VXN", color: "#22c55e" },
@@ -134,114 +128,6 @@ function forceResumeReloadWithCooldown() {
   } catch {
     window.location.reload()
   }
-}
-
-/** YYYY-MM-DD — 공개 JSON·로컬 스냅샷 병합 키 */
-function rowCalendarKey(row) {
-  if (!row || typeof row !== "object") return ""
-  if (row.date) return String(row.date).slice(0, 10)
-  if (row.ts) return String(row.ts).slice(0, 10)
-  return ""
-}
-
-function readCycleMetricHistory() {
-  if (typeof window === "undefined") return []
-  try {
-    const raw = window.localStorage.getItem(CYCLE_HISTORY_KEY)
-    const arr = JSON.parse(raw || "[]")
-    return Array.isArray(arr) ? arr : []
-  } catch {
-    return []
-  }
-}
-
-function calendarKeyFromPanic(panicData) {
-  const u = panicData?.updatedAt ?? panicData?.updated_at
-  if (typeof u === "string" && /^\d{4}-\d{2}-\d{2}/.test(u)) return u.slice(0, 10)
-  return new Date().toISOString().slice(0, 10)
-}
-
-/**
- * 공개 cycle-metrics-history.json 행 → 차트용 (날짜 오름차순, ts 고정)
- * mock/sample 추정치 없음: JSON·API에 있는 수치만 사용
- */
-function normalizeCycleHistoryRows(raw) {
-  if (!Array.isArray(raw)) return []
-  const rows = raw
-    .map((r) => {
-      if (!r || typeof r !== "object") return null
-      const dateStr = String(r.date || r.ts || "").trim().slice(0, 10)
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null
-      const ts = typeof r.ts === "string" && r.ts.includes("T") ? r.ts : `${dateStr}T12:00:00.000Z`
-      const pick = (k) => {
-        const v = r[k]
-        const n = Number(v)
-        return Number.isFinite(n) ? n : null
-      }
-      const o = { date: dateStr, ts }
-      const take = (key, val) => {
-        if (Number.isFinite(val)) o[key] = val
-      }
-      take("vix", pick("vix"))
-      take("vxn", pick("vxn"))
-      take("putCall", pick("putCall"))
-      take("fearGreed", pick("fearGreed"))
-      take("move", pick("move"))
-      take("bofa", pick("bofa"))
-      take("skew", pick("skew"))
-      take("highYield", pick("highYield"))
-      const gs = pick("gsBullBear")
-      take("gsBullBear", Number.isFinite(gs) ? gs : pick("gs"))
-      return o
-    })
-    .filter(Boolean)
-  rows.sort((a, b) => String(a.ts).localeCompare(String(b.ts)))
-  return rows
-}
-
-function mergeCycleRows(rowsA, rowsB) {
-  const out = new Map()
-  for (const row of [...(rowsA || []), ...(rowsB || [])]) {
-    const key = rowCalendarKey(row)
-    if (!key) continue
-    const prevRow = out.get(key)
-    out.set(key, prevRow ? { ...prevRow, ...row } : { ...row })
-  }
-  return [...out.values()].sort((a, b) => String(a.ts).localeCompare(String(b.ts))).slice(-CYCLE_HISTORY_MAX)
-}
-
-/** 로컬: API 스냅샷으로 당일 행만 보강 (날짜당 1행, 수치는 실제 panicData 기반) */
-function saveCycleMetricHistory(panicData) {
-  if (typeof window === "undefined" || !panicData) return readCycleMetricHistory()
-  const dayKey = calendarKeyFromPanic(panicData)
-  const row = { date: dayKey, ts: `${dayKey}T12:00:00.000Z` }
-  /** 실제 시장에서 0이 거의 불가능한 지표 — 플레이스홀더 0은 히스토리에 기록하지 않음 */
-  const noZeroSentinel = new Set(["vix", "vxn", "move", "skew", "bofa", "highYield", "fearGreed", "gsBullBear"])
-  const add = (k, v) => {
-    const n = Number(v)
-    if (!Number.isFinite(n)) return
-    if (n === 0 && noZeroSentinel.has(k)) return
-    row[k] = n
-  }
-  add("vix", panicData?.vix)
-  add("vxn", panicData?.vxn)
-  add("putCall", panicData?.putCall)
-  add("fearGreed", panicData?.fearGreed)
-  add("move", panicData?.move)
-  add("bofa", panicData?.bofa)
-  add("skew", panicData?.skew)
-  add("highYield", panicData?.highYield)
-  add("gsBullBear", panicData?.gsBullBear)
-  const validKeys = ["vix", "fearGreed", "putCall", "highYield"]
-  if (!validKeys.every((k) => Number.isFinite(row[k]))) return readCycleMetricHistory()
-  const prev = readCycleMetricHistory()
-  const next = mergeCycleRows(prev, [row])
-  try {
-    window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(next))
-  } catch {
-    // ignore
-  }
-  return next
 }
 
 function macroDashboardStatus(stateLabel) {
@@ -586,7 +472,8 @@ function App() {
     typeof window !== "undefined" ? window.innerWidth <= 768 : false,
   )
   const [hubSaveGlow, setHubSaveGlow] = useState(false)
-  const [cycleMetricHistory, setCycleMetricHistory] = useState(() => readCycleMetricHistory())
+  const cycleMetricHistory = useAppDataStore((s) => s.cycleMetricHistory)
+  const cycleHistorySource = useAppDataStore((s) => s.cycleHistorySource)
   const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
 
   const parseResult = useMemo(() => {
@@ -807,54 +694,17 @@ function App() {
   }
 
   useEffect(() => {
+    useAppDataStore.getState().purgeLegacyCycleStorage()
+  }, [])
+
+  useEffect(() => {
     if (!panicData) return
     appendPanicIndexHistory(panicData)
-    setCycleMetricHistory((prev) => {
-      const fromIndex = getPanicIndexHistory()
-        .map(panicIndexRowToCycleChart)
-        .filter(Boolean)
-      const merged = mergeCycleRows(mergeCycleRows(prev, fromIndex), saveCycleMetricHistory(panicData))
-      try {
-        window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(merged))
-        window.localStorage.setItem(PANIC_INDEX_HISTORY_KEY, JSON.stringify(getPanicIndexHistory()))
-      } catch {
-        // ignore
-      }
-      return merged
-    })
+    useAppDataStore.getState().syncCycleHistoryFromPanic(panicData)
   }, [panicData])
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const bundle = await useAppDataStore.getState().loadCycleHistoryBundle({ limit: CYCLE_HISTORY_MAX })
-        if (cancelled) return
-        const staticRows = bundle.staticRows ?? []
-        const hubRows = bundle.hubRows ?? []
-        const normalized = normalizeCycleHistoryRows(staticRows)
-        const fromHub = hubRows.map(panicIndexRowToCycleChart).filter(Boolean)
-        replacePanicIndexHistory(hubRows)
-        const localIndex = getPanicIndexHistory()
-        setCycleMetricHistory((prev) => {
-          const merged = mergeCycleRows(
-            mergeCycleRows(prev, normalized),
-            mergeCycleRows(fromHub, localIndex.map(panicIndexRowToCycleChart).filter(Boolean)),
-          )
-          try {
-            window.localStorage.setItem(CYCLE_HISTORY_KEY, JSON.stringify(merged))
-          } catch {
-            // ignore
-          }
-          return merged
-        })
-      } catch {
-        // 정적 JSON 미배포·오프라인: 로컬/localStorage + appendPanicIndexHistory 만 사용
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
+    void useAppDataStore.getState().loadCycleHistoryBundle({ limit: CYCLE_HISTORY_MAX })
   }, [])
 
   useEffect(() => {
@@ -1193,8 +1043,12 @@ function App() {
   )
   const cycleDeskMeta = useMemo(() => {
     const rows = cycleMetricHistory ?? []
+    const panicDay =
+      panicData?.updatedAt && !Number.isNaN(new Date(panicData.updatedAt).getTime())
+        ? calendarKeyFromPanic(panicData)
+        : null
     const last = rows[rows.length - 1]
-    const asOfDateLabel = last?.ts ? String(last.ts).slice(0, 10) : "—"
+    const asOfDateLabel = panicDay ?? (last?.ts ? String(last.ts).slice(0, 10) : "—")
 
     let feedKind = "confirmed"
     let feedLabel = "확정"
@@ -1234,8 +1088,15 @@ function App() {
       }
     }
 
-    return { asOfDateLabel, updatedLine, sourceLine, feedKind, feedLabel }
-  }, [cycleMetricHistory, panicData])
+    const historySourceLine =
+      cycleHistorySource && cycleHistorySource !== "none"
+        ? `히스토리 · ${cycleHistorySource}`
+        : rows.length
+          ? "히스토리 · local"
+          : "히스토리 · 실제 데이터 없음"
+
+    return { asOfDateLabel, updatedLine, sourceLine, feedKind, feedLabel, historySourceLine }
+  }, [cycleMetricHistory, panicData, cycleHistorySource])
   const cycleHeroContext = useMemo(
     () => buildCycleDeskHeroContext(panicData, marketCycleStage, heroSummary),
     [panicData, marketCycleStage, heroSummary],

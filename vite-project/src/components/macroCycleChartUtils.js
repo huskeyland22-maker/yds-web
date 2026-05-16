@@ -1,3 +1,5 @@
+import { isStaleHistoryCalendarDate } from "../utils/cycleHistoryHygiene.js"
+
 /** 기관 터미널 팔레트 — 현재값 강조용 (과한 레인보우 지양) */
 export const MACRO_SERIES_COLORS = {
   vix: "#fb923c",
@@ -144,7 +146,7 @@ export function buildTierMacroComments(tier, panicData) {
     if (Number.isFinite(pc)) {
       a.push(pc >= 1 ? "옵션 시장 헤지 수요 존재 · 방어 쏠림 완화 여부 추적" : "풋/콜 비율은 과열 추격 리스크 완화 쪽")
     }
-    return a.slice(0, 3).length ? a.slice(0, 3) : ["단기 레짐 데이터 보강 중 · 샘플 히스토리와 병행 확인"]
+    return a.slice(0, 3).length ? a.slice(0, 3) : ["실제 데이터 없음 · Supabase 패닉 지표 동기화 후 표시"]
   }
 
   if (tier === "strategic") {
@@ -158,7 +160,7 @@ export function buildTierMacroComments(tier, panicData) {
     if (Number.isFinite(bofa)) {
       a.push(bofa >= 6 ? "기관 리스크 선호 회복 국면 · 밸류에이션 디스플린 유지" : "기관 포지션은 중립~방어 쪽 · 중기 리스크 안정 유지")
     }
-    return a.slice(0, 3).length ? a.slice(0, 3) : ["중기 매크로 코멘트 생성을 위해 입력 데이터를 보강하세요."]
+    return a.slice(0, 3).length ? a.slice(0, 3) : ["실제 데이터 없음 · 패닉 허브 수치 필요"]
   }
 
   const a = []
@@ -171,7 +173,7 @@ export function buildTierMacroComments(tier, panicData) {
   if (Number.isFinite(gs)) {
     a.push(gs >= 70 ? "장기 심리 과열 쪽 · 포지션 크기 점검" : gs <= 35 ? "장기 심리 비관 쪽 · 역발상 분할 검토" : "장기 Bull/Bear 밸런스는 중립")
   }
-  return a.slice(0, 3).length ? a.slice(0, 3) : ["장기 매크로 지표 보강 중 · 리스크 예산 유지"]
+  return a.slice(0, 3).length ? a.slice(0, 3) : ["실제 데이터 없음 · 장기 지표 미수신"]
 }
 
 export function pickXAxisLabels(chartRows, count = 4, width = 720, padX = 32) {
@@ -221,7 +223,7 @@ export function pickPanicNumber(panicData, key) {
   return isPlaceholderZero(key, n) ? NaN : n
 }
 
-/** panicData 우선, 없으면 히스토리 행에서 최신 유효값 (카드 '-' 방지) */
+/** panicData 우선; 히스토리는 2025+ 행만 (mock 2024 미사용) */
 export function pickMetricDisplayValue(panicData, rows, key) {
   const live = pickPanicNumber(panicData, key)
   if (Number.isFinite(live)) return live
@@ -229,6 +231,7 @@ export function pickMetricDisplayValue(panicData, rows, key) {
   for (let i = rows.length - 1; i >= 0; i -= 1) {
     const row = rows[i]
     if (!row || typeof row !== "object") continue
+    if (isStaleHistoryCalendarDate(row.date ?? row.ts)) continue
     let n = Number(row[key])
     if (isPlaceholderZero(key, n)) n = NaN
     if (!Number.isFinite(n) && key === "gsBullBear") {

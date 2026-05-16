@@ -46,7 +46,7 @@ export function generateDummyScoreHistory(n = 48) {
 export function getBacktestInputSeries(series) {
   const s = historyToScoreSeries(series)
   if (s.length >= 3) return { series: s, usedDummy: false }
-  return { series: generateDummyScoreHistory(48), usedDummy: true }
+  return { series: [], usedDummy: false }
 }
 
 function syntheticPrice(score) {

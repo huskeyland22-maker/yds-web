@@ -565,7 +565,7 @@ export default function InvestmentMemoDock({ panicData }) {
           <p>
             시장 온도: <span className={marketTemperature.tone}>{marketTemperature.label}</span>
           </p>
-          <p>최근 상위 섹터: {topMentionedSectors.map(([s, n]) => `${s}(${n})`).join(", ") || "데이터 부족"}</p>
+          <p>최근 상위 섹터: {topMentionedSectors.map(([s, n]) => `${s}(${n})`).join(", ") || "실제 데이터 없음"}</p>
           <p>반복 시그널: {repeatedSignals.map(([s, n]) => `${s}(${n})`).join(", ") || "반복 패턴 없음"}</p>
           <p>감정 분포: bullish {sentimentMix.bullish} / neutral {sentimentMix.neutral} / bearish {sentimentMix.bearish}</p>
         </div>
