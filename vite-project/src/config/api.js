@@ -22,7 +22,23 @@ export function getManualApiBase() {
 
 /** Supabase hub + Vercel `/api/panic/*` — cross-device sync (see .env.example). */
 export function isPanicHubEnabled() {
-  return import.meta.env.VITE_PANIC_HUB === "1" || import.meta.env.VITE_PANIC_HUB === "true"
+  const on = import.meta.env.VITE_PANIC_HUB === "1" || import.meta.env.VITE_PANIC_HUB === "true"
+  const url = String(import.meta.env.VITE_SUPABASE_URL ?? "").trim()
+  const key = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? "").trim()
+  return on && Boolean(url && key)
+}
+
+/** @returns {{ hubFlag: boolean, url: boolean, anonKey: boolean, enabled: boolean }} */
+export function getPanicHubEnvStatus() {
+  const hubFlag = import.meta.env.VITE_PANIC_HUB === "1" || import.meta.env.VITE_PANIC_HUB === "true"
+  const url = String(import.meta.env.VITE_SUPABASE_URL ?? "").trim()
+  const anonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? "").trim()
+  return {
+    hubFlag,
+    url: Boolean(url),
+    anonKey: Boolean(anonKey),
+    enabled: hubFlag && Boolean(url && anonKey),
+  }
 }
 
 export async function fetchPanicHubLatest(options = {}) {
@@ -151,6 +167,13 @@ function normalizePanicPayload(data) {
 export async function fetchPanicDataJson(options = {}) {
   const debugLog = options.debugLog !== false
   /** 허브가 켜진 배포는 Render 레거시로 폴백하지 않음 — 구형 샘플·기기 불일치 방지 */
+  const hubStatus = getPanicHubEnvStatus()
+  if (!hubStatus.enabled) {
+    if (isDataTraceEnabled()) {
+      logFetchFail("panic-data-json", new Error("hub_env_missing"), { hubStatus })
+    }
+    console.error("[YDS] panic hub disabled — check VITE_PANIC_HUB, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (Vercel Production + redeploy)")
+  }
   if (isPanicHubEnabled()) {
     if (isDataTraceEnabled()) logFetchStart("panic-data-json", { path: "hub-only" })
     const hubData = await fetchPanicHubLatest({ debugLog })

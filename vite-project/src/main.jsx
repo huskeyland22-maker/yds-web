@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom"
 import "./index.css"
 import App from "./App.jsx"
 import RootErrorBoundary from "./components/RootErrorBoundary.jsx"
+import { bootSupabaseEnvReport } from "./utils/supabaseEnvBoot.js"
 import {
   checkAndEvictStaleBuild,
   clearAllCacheStorage,
@@ -130,6 +131,8 @@ async function bootstrapApp() {
   }
 
   cleanupStaleAutoSnapshot()
+
+  void bootSupabaseEnvReport()
 
   installLifecycleVersionPoller()
   installOnlineBuildRecheck()

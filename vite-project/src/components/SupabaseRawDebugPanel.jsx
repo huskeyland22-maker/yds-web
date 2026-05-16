@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import { getPanicHubEnvStatus } from "../config/api.js"
 import { getSupabaseEnv, maskSecret } from "../lib/supabaseBrowser.js"
 import { usePanicStore } from "../store/panicStore.js"
 import {
@@ -103,9 +104,11 @@ export default function SupabaseRawDebugPanel() {
   const panicData = usePanicStore((s) => s.panicData)
   const panicInitialized = usePanicStore((s) => s.initialized)
   const env = getSupabaseEnv()
+  const hubStatus = getPanicHubEnvStatus()
   const isMobile = useMobileLayout()
 
   const [dismissed, setDismissed] = useState(false)
+  const [buildManifest, setBuildManifest] = useState(null)
   const [expanded, setExpanded] = useState(() => shouldAutoShowSupabaseRawDebug(false, null))
   const [loading, setLoading] = useState(false)
   const [probes, setProbes] = useState([])
@@ -135,6 +138,18 @@ export default function SupabaseRawDebugPanel() {
     setExpanded(true)
     void runProbes()
   }, [runProbes])
+
+  useEffect(() => {
+    const fromWindow = window.__YDS_SUPABASE_ENV__?.buildManifest
+    if (fromWindow) {
+      setBuildManifest(fromWindow)
+      return
+    }
+    fetch("/client-env-manifest.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => j && setBuildManifest(j))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (shouldAutoShowSupabaseRawDebug(panicInitialized, panicData)) {
@@ -211,6 +226,24 @@ export default function SupabaseRawDebugPanel() {
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-1">
+        {!hubStatus.enabled ? (
+          <div className="mb-2 rounded border border-rose-500/50 bg-rose-950/50 p-2 font-mono text-[10px] text-rose-100">
+            <p className="m-0 font-bold">ENV 오류 — 데이터 null 원인</p>
+            <ul className="m-0 mt-1 list-inside list-disc text-rose-200/90">
+              {!hubStatus.url ? <li>VITE_SUPABASE_URL 없음 (빌드 시 인라인)</li> : null}
+              {!hubStatus.anonKey ? <li>VITE_SUPABASE_ANON_KEY 없음</li> : null}
+              {!hubStatus.hubFlag ? <li>VITE_PANIC_HUB ≠ 1</li> : null}
+            </ul>
+            <p className="m-0 mt-1 text-rose-200/70">
+              Vercel Environment Variables → Production·Preview·Development → Redeploy → ?reset-cache=true
+            </p>
+            {buildManifest ? (
+              <p className="m-0 mt-1 text-slate-400">
+                last build {buildManifest.builtAt} · clientReady={String(buildManifest.clientReady)}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {runError ? <pre className="text-[10px] text-rose-300">{runError}</pre> : null}
         {loading && probes.length === 0 ? (
           <p className="font-mono text-[10px] text-sky-300">STATUS: LOADING</p>

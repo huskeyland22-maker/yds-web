@@ -1,4 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
+import { getSupabaseEnv } from "./supabaseBrowser.js"
+import { assertSupabaseClientEnv } from "../utils/supabaseEnvBoot.js"
 
 /**
  * Browser-side Supabase Realtime for public.panic_metrics (anon SELECT RLS).
@@ -6,8 +8,12 @@ import { createClient } from "@supabase/supabase-js"
  * @returns {() => void} unsubscribe
  */
 export function subscribePanicHubRealtime({ onChange }) {
-  const url = import.meta.env.VITE_SUPABASE_URL
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const check = assertSupabaseClientEnv("realtime")
+  if (!check.ok) {
+    console.warn("[YDS] realtime skipped:", check.message)
+    return () => {}
+  }
+  const { url, anonKey } = getSupabaseEnv()
   if (typeof window === "undefined" || !url || !anonKey) {
     return () => {}
   }

@@ -18,8 +18,18 @@ export function maskSecret(value, visible = 4) {
 
 /** @returns {import('@supabase/supabase-js').SupabaseClient | null} */
 export function getSupabaseBrowserClient() {
-  const { url, anonKey, configured } = getSupabaseEnv()
-  if (!configured || typeof window === "undefined") return null
+  const { url, anonKey, configured, panicHub } = getSupabaseEnv()
+  if (!configured || typeof window === "undefined") {
+    if (typeof window !== "undefined" && !configured) {
+      console.error(
+        "[YDS] Supabase client unavailable: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY missing in bundle (Vercel env + redeploy required)",
+      )
+    }
+    return null
+  }
+  if (!panicHub) {
+    console.warn("[YDS] VITE_PANIC_HUB not enabled — direct Supabase reads may be skipped")
+  }
   if (!cachedClient) {
     cachedClient = createClient(url, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },

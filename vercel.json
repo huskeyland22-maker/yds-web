@@ -56,6 +56,14 @@
       ]
     },
     {
+      "source": "/client-env-manifest.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
       "source": "/data.json",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },

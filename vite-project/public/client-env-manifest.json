@@ -1,0 +1,19 @@
+{
+  "builtAt": "2026-05-16T05:46:08.855Z",
+  "nodeEnv": "unknown",
+  "vercel": false,
+  "vercelEnv": null,
+  "client": {
+    "VITE_SUPABASE_URL": false,
+    "VITE_SUPABASE_ANON_KEY": false,
+    "VITE_PANIC_HUB": false
+  },
+  "server": {
+    "SUPABASE_URL": false,
+    "SUPABASE_SERVICE_ROLE_KEY": false
+  },
+  "clientReady": false,
+  "serverReady": false,
+  "hubReady": false,
+  "note": "client.* = inlined into JS at vite build. If false after setting Vercel env, redeploy Production."
+}
