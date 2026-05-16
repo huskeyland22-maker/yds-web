@@ -161,7 +161,7 @@ export default function MacroCycleTierCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -1 }}
+      whileHover={compact ? undefined : { y: -1 }}
       className="rounded-card-lg p-px [background:linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(15,23,42,0.35)_45%,rgba(15,23,42,0.12)_100%)]"
     >
       <div

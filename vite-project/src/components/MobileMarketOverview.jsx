@@ -1,7 +1,8 @@
 /** 모바일 /cycle 상단 — 시장 단계 + 핵심 시그널 (컴팩트) */
 export default function MobileMarketOverview({ context, asOfDateLabel }) {
   if (!context) return null
-  const { stageLabel, keySignal } = context
+  const stageLabel = context.stageLabel ?? "—"
+  const keySignal = context.keySignal ?? {}
 
   return (
     <section className="trading-card-shell px-2.5 py-2">

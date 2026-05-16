@@ -902,15 +902,39 @@ function App() {
     return () => window.clearTimeout(timer)
   }, [appToast])
 
+  // iOS: 패널 닫힌 뒤 body overflow 가 hidden 으로 남으면 전체가 스크롤·터치 불가(먹통) — 항상 해제
   useEffect(() => {
-    if (!isInputPanelOpen || typeof document === "undefined") return
-    const prev = document.body.style.overflow
+    if (typeof document === "undefined") return undefined
+    if (!isInputPanelOpen) {
+      document.body.style.overflow = ""
+      document.documentElement.style.overflow = ""
+      return undefined
+    }
     document.body.style.overflow = "hidden"
     return () => {
-      document.body.style.overflow = prev
+      document.body.style.overflow = ""
+      document.documentElement.style.overflow = ""
     }
   }, [isInputPanelOpen])
 
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined
+    return () => {
+      document.body.style.overflow = ""
+      document.documentElement.style.overflow = ""
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined
+    const onKey = (e) => {
+      if (e.key !== "Escape") return
+      if (isInputPanelOpen) closeInputPanel()
+      else if (mobileDrawerOpen) setMobileDrawerOpen(false)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [isInputPanelOpen, mobileDrawerOpen, closeInputPanel])
 
   const login = async () => {
     if (!hasFirebaseConfig()) {
@@ -1110,7 +1134,9 @@ function App() {
   return (
     <div
       className={[
-        "flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
+        isMobileLayout
+          ? "flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-[#0B0E14] text-slate-200 antialiased"
+          : "flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
@@ -1204,7 +1230,7 @@ function App() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className={`flex min-w-0 flex-1 flex-col ${isMobileLayout ? "min-h-0 overflow-hidden" : ""}`}>
         <MobileAppHeader
           onMenuOpen={() => setMobileDrawerOpen(true)}
           user={user}
@@ -1273,7 +1299,13 @@ function App() {
           </div>
         ) : null}
 
-        <main className="flex-1 overflow-y-auto overscroll-y-contain px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
+        <main
+          className={`flex-1 touch-pan-y px-2.5 py-2 sm:px-4 lg:px-6 lg:py-5 lg:pb-5 ${
+            isMobileLayout
+              ? "min-h-0 overflow-y-auto overscroll-y-contain pb-[calc(4.25rem+env(safe-area-inset-bottom))]"
+              : "overflow-y-auto overscroll-y-contain pb-[calc(3.75rem+env(safe-area-inset-bottom))]"
+          }`}
+        >
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route
@@ -1282,10 +1314,12 @@ function App() {
                 <div id="desk" className="space-y-2 lg:space-y-5">
                   {isMobileLayout ? (
                     <>
-                      <MobileMarketOverview
-                        context={cycleHeroContext}
-                        asOfDateLabel={cycleDeskMeta.asOfDateLabel}
-                      />
+                      <SectionErrorBoundary label="모바일 시장 개요">
+                        <MobileMarketOverview
+                          context={cycleHeroContext}
+                          asOfDateLabel={cycleDeskMeta.asOfDateLabel}
+                        />
+                      </SectionErrorBoundary>
                       <MobileCoreMetricsStrip panicData={panicData} updatedLine={cycleDeskMeta.updatedLine} />
                     </>
                   ) : (
@@ -1601,14 +1635,18 @@ function App() {
           {appToast.message}
         </div>
       ) : null}
-      <MobileAiFab onOpen={openInputPanel} hidden={isInputPanelOpen} />
-      <MobileBottomNav onMenu={() => setMobileDrawerOpen(true)} />
-      <MobileDrawer
-        open={mobileDrawerOpen}
-        onClose={() => setMobileDrawerOpen(false)}
-        onOpenInput={openInputPanel}
-        buildVersion={isDevMode() ? buildVersion : null}
-      />
+      {isMobileLayout ? (
+        <>
+          <MobileAiFab onOpen={openInputPanel} hidden={isInputPanelOpen} />
+          <MobileBottomNav onMenu={() => setMobileDrawerOpen(true)} />
+          <MobileDrawer
+            open={mobileDrawerOpen}
+            onClose={() => setMobileDrawerOpen(false)}
+            onOpenInput={openInputPanel}
+            buildVersion={isDevMode() ? buildVersion : null}
+          />
+        </>
+      ) : null}
       {isDevMode() ? (
         <>
           <PanicSyncDebugPanel />

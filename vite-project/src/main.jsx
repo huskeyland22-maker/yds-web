@@ -99,29 +99,8 @@ async function bootstrapApp() {
   // defense. checkAndEvictStaleBuild() short-circuits if everything matches.
   await invalidateServiceWorkerCachesAfterBuildMismatch()
 
-  const gate = await checkAndEvictStaleBuild()
-  if (gate.reloaded) {
-    window.setTimeout(() => {
-      const rootEl = document.getElementById("root")
-      if (rootEl && rootEl.childElementCount === 0) {
-        console.warn("[PWA] stale-build reload did not replace page — mounting app anyway")
-        try {
-          createRoot(rootEl).render(
-            <StrictMode>
-              <RootErrorBoundary>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
-              </RootErrorBoundary>
-            </StrictMode>,
-          )
-        } catch (e) {
-          console.error("[BOOT] recovery mount failed", e)
-        }
-      }
-    }, 5000)
-    return
-  }
+  // index.html 부트에서 이미 freshness gate 실행 — 여기서 reloaded 시 조기 return 하면 iOS에서 빈 화면(먹통) 가능
+  await checkAndEvictStaleBuild()
 
   try {
     const { registerSW } = await import("virtual:pwa-register")

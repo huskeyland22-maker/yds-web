@@ -77,6 +77,7 @@ export function buildCycleDeskHeroContext(panicData, cycleStage, heroSummary) {
     keySignal: {
       riskAppetiteTone: riskTone,
       riskAppetite: riskLabel,
+      marketMood: pulse.marketMood ?? "—",
       leadingSector: pulse.leadingSector ?? "AI · 반도체",
       volatility: pulse.volatility,
       foreignFlow: foreignFlowSummary(panicData),
