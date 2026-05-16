@@ -1,12 +1,32 @@
 # Supabase — YDS 패닉 허브
 
-## 1. 마이그레이션 적용 (신규 프로젝트)
+## 1. 긴급: SQL Editor 한 번에 적용 (권장)
 
-Supabase Dashboard → **SQL Editor** → 아래 파일 내용을 **순서대로** 실행:
+Supabase Dashboard → **SQL Editor** → **New query**
 
-1. `migrations/20250514120000_panic_metrics.sql` (이미 적용했다면 생략 가능)
-2. `migrations/20250515140000_panic_index_history.sql` (동일)
-3. `migrations/20250516120000_yds_initial_schema_seed.sql` (**RLS + market_status + ai_reports + seed + realtime**)
+1. `sql/YDS_FULL_SETUP.sql` 전체 복사 → **Run**
+2. 하단 결과에서 row count 확인:
+   - `panic_metrics` ≥ 10
+   - `panic_index_history` ≥ 3
+   - `market_status` ≥ 3
+   - `ai_reports` ≥ 1
+
+테이블이 깨졌거나 잘못 만들어진 경우:
+
+1. `sql/RESET_AND_SETUP.sql` Run
+2. `sql/YDS_FULL_SETUP.sql` Run
+
+### 앱과 맞는 컬럼명 (중요)
+
+| 사용자 예시 | 실제 DB (앱 query) |
+|------------|-------------------|
+| `metric_name` | **`metric_key`** (`vix`, `fearGreed`, …) |
+| `value` | **`metric_value`** |
+| `put_call` (history) | `put_call` + `hy_oas` (highYield) |
+
+## 2. 마이그레이션 파일 (CLI용)
+
+1. `migrations/20250516120000_yds_initial_schema_seed.sql`
 
 또는 CLI: `supabase db push`
 

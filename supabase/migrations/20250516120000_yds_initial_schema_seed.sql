@@ -44,6 +44,14 @@ drop policy if exists "panic_metrics_select_public" on public.panic_metrics;
 create policy "panic_metrics_select_public"
   on public.panic_metrics for select to anon, authenticated using (true);
 
+drop policy if exists "panic_metrics_insert_auth" on public.panic_metrics;
+create policy "panic_metrics_insert_auth"
+  on public.panic_metrics for insert to authenticated with check (true);
+
+drop policy if exists "panic_metrics_update_auth" on public.panic_metrics;
+create policy "panic_metrics_update_auth"
+  on public.panic_metrics for update to authenticated using (true) with check (true);
+
 -- ---------------------------------------------------------------------------
 -- panic_index_history (daily snapshot; PK = date)
 -- ---------------------------------------------------------------------------
@@ -78,6 +86,14 @@ drop policy if exists "panic_index_history_select_public" on public.panic_index_
 create policy "panic_index_history_select_public"
   on public.panic_index_history for select to anon, authenticated using (true);
 
+drop policy if exists "panic_index_history_insert_auth" on public.panic_index_history;
+create policy "panic_index_history_insert_auth"
+  on public.panic_index_history for insert to authenticated with check (true);
+
+drop policy if exists "panic_index_history_update_auth" on public.panic_index_history;
+create policy "panic_index_history_update_auth"
+  on public.panic_index_history for update to authenticated using (true) with check (true);
+
 -- ---------------------------------------------------------------------------
 -- market_status (cycle / regime signals)
 -- ---------------------------------------------------------------------------
@@ -107,6 +123,14 @@ alter table public.market_status enable row level security;
 drop policy if exists "market_status_select_public" on public.market_status;
 create policy "market_status_select_public"
   on public.market_status for select to anon, authenticated using (true);
+
+drop policy if exists "market_status_insert_auth" on public.market_status;
+create policy "market_status_insert_auth"
+  on public.market_status for insert to authenticated with check (true);
+
+drop policy if exists "market_status_update_auth" on public.market_status;
+create policy "market_status_update_auth"
+  on public.market_status for update to authenticated using (true) with check (true);
 
 -- ---------------------------------------------------------------------------
 -- ai_reports (briefings / memos as JSON)
@@ -138,7 +162,15 @@ drop policy if exists "ai_reports_select_public" on public.ai_reports;
 create policy "ai_reports_select_public"
   on public.ai_reports for select to anon, authenticated using (true);
 
--- Writes: Vercel API uses service_role (bypasses RLS). No anon INSERT/UPDATE policies.
+drop policy if exists "ai_reports_insert_auth" on public.ai_reports;
+create policy "ai_reports_insert_auth"
+  on public.ai_reports for insert to authenticated with check (true);
+
+drop policy if exists "ai_reports_update_auth" on public.ai_reports;
+create policy "ai_reports_update_auth"
+  on public.ai_reports for update to authenticated using (true) with check (true);
+
+-- Vercel API writes use service_role (bypasses RLS).
 
 -- ---------------------------------------------------------------------------
 -- Realtime publication
