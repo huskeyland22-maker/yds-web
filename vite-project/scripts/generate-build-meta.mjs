@@ -3,31 +3,53 @@ import path from "node:path"
 
 const now = new Date()
 const buildId = String(Date.now())
-const day = String(now.getDate()).padStart(2, "0")
-const hh = String(now.getHours()).padStart(2, "0")
-const mm = String(now.getMinutes()).padStart(2, "0")
-const version = `v1.0.${day}${hh}${mm}`
+
+const TZ = "Asia/Seoul"
+const y = new Intl.DateTimeFormat("en", { timeZone: TZ, year: "numeric" }).format(now)
+const mo = new Intl.DateTimeFormat("en", { timeZone: TZ, month: "2-digit" }).format(now)
+const da = new Intl.DateTimeFormat("en", { timeZone: TZ, day: "2-digit" }).format(now)
+const dayLabel = `${y}.${mo}.${da}`
+
+const publicDir = path.resolve(process.cwd(), "public")
+fs.mkdirSync(publicDir, { recursive: true })
+
+const buildVersionPath = path.join(publicDir, "build-version.json")
+
+let seq = 1
+if (fs.existsSync(buildVersionPath)) {
+  try {
+    const prevRaw = fs.readFileSync(buildVersionPath, "utf8")
+    const prev = JSON.parse(prevRaw)
+    const v = typeof prev.version === "string" ? prev.version : ""
+    const m = v.match(/^v(\d{4})\.(\d{2})\.(\d{2})\.(\d+)$/)
+    if (m) {
+      const prevDay = `${m[1]}.${m[2]}.${m[3]}`
+      const prevSeq = Number.parseInt(m[4], 10)
+      if (prevDay === dayLabel && Number.isFinite(prevSeq)) seq = prevSeq + 1
+    }
+  } catch {
+    // ignore — reset sequence
+  }
+}
+
+const version = `v${dayLabel}.${String(seq).padStart(3, "0")}`
+/** Workbox cacheId / 디버그용 — 날짜+일련 (비공백, 짧게) */
+const cacheId = `app-v${y}${mo}${da}-${String(seq).padStart(3, "0")}`
 
 const meta = {
   buildId,
   version,
   timestamp: Number(buildId),
   builtAt: now.toISOString(),
+  cacheId,
+  /** UI / 로그: 브라우저 Workbox 캐시 네임스페이스와 맞춤 (vite `workbox.cacheId`) */
+  swWorkboxCacheId: `yds-pwa-${buildId}`,
 }
 
-const publicDir = path.resolve(process.cwd(), "public")
-fs.mkdirSync(publicDir, { recursive: true })
-
 // 1) /build-version.json — fetched by the runtime version checker (must be no-store on Vercel)
-fs.writeFileSync(
-  path.join(publicDir, "build-version.json"),
-  `${JSON.stringify(meta, null, 2)}\n`,
-  "utf8",
-)
+fs.writeFileSync(path.join(publicDir, "build-version.json"), `${JSON.stringify(meta, null, 2)}\n`, "utf8")
 
 // 2) /manifest.webmanifest — versioned PWA manifest so iOS detects identity changes
-// We keep the legacy /manifest.json untouched for back-compat and emit a versioned
-// .webmanifest that is referenced from index.html with a cache-busting query string.
 const manifestSourcePath = path.join(publicDir, "manifest.json")
 let baseManifest = {
   name: "Market Pulse AI",
@@ -54,7 +76,6 @@ try {
   // fall back to defaults
 }
 
-// Inject identity/version into manifest so PWA hosts can detect changes
 const versionedManifest = {
   id: "/?source=pwa",
   ...baseManifest,
@@ -70,11 +91,6 @@ fs.writeFileSync(
   "utf8",
 )
 
-// Also keep manifest.json (legacy) in sync with version metadata to avoid stale PWA installs
-fs.writeFileSync(
-  path.join(publicDir, "manifest.json"),
-  `${JSON.stringify(versionedManifest, null, 2)}\n`,
-  "utf8",
-)
+fs.writeFileSync(path.join(publicDir, "manifest.json"), `${JSON.stringify(versionedManifest, null, 2)}\n`, "utf8")
 
 console.log("[build-meta] generated", { ...meta, manifest: "manifest.webmanifest" })

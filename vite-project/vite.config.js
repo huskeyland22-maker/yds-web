@@ -2,6 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
+import { VitePWA } from "vite-plugin-pwa"
 
 function resolveBuildId() {
   // 우선순위:
@@ -28,6 +29,23 @@ function resolveBuildId() {
 
 const BUILD_ID = resolveBuildId()
 
+function resolveAppVersionLabel() {
+  try {
+    const metaPath = path.resolve(process.cwd(), "public", "build-version.json")
+    if (fs.existsSync(metaPath)) {
+      const parsed = JSON.parse(fs.readFileSync(metaPath, "utf8"))
+      if (parsed && typeof parsed.version === "string" && parsed.version.trim()) {
+        return parsed.version.trim()
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return "dev"
+}
+
+const APP_VERSION_LABEL = resolveAppVersionLabel()
+
 function htmlBuildIdPlugin() {
   return {
     name: "html-build-id",
@@ -45,6 +63,7 @@ function htmlBuildIdPlugin() {
 export default defineConfig({
   define: {
     "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(BUILD_ID),
+    "import.meta.env.VITE_APP_VERSION_LABEL": JSON.stringify(APP_VERSION_LABEL),
   },
   build: {
     rollupOptions: {
@@ -58,6 +77,25 @@ export default defineConfig({
   plugins: [
     react(),
     htmlBuildIdPlugin(),
+    VitePWA({
+      registerType: "autoUpdate",
+      injectRegister: false,
+      filename: "sw.js",
+      manifest: false,
+      devOptions: {
+        enabled: false,
+      },
+      workbox: {
+        /** 배포마다 변경 → 이전 precache·runtime 캐시 일괄 무효화 */
+        cacheId: `yds-pwa-${BUILD_ID}`,
+        globPatterns: ["**/*.{js,css,svg,ico,png,woff2,webp}"],
+        globIgnores: ["**/stats.html", "**/report.html"],
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+      },
+    }),
   ],
   server: {
     open: true,

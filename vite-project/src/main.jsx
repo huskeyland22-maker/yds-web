@@ -12,13 +12,13 @@ import {
   installOnlineBuildRecheck,
   invalidateServiceWorkerCachesAfterBuildMismatch,
   isIosStandalone,
-  sweepIosStandaloneCachesOnce,
   unregisterAllServiceWorkers,
 } from "./utils/pwaFreshness.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const APP_BUILD_ID = String(import.meta.env.VITE_APP_BUILD_ID ?? "dev")
-const APP_VERSION = `App Version ${new Date().toISOString().slice(0, 10).replace(/-/g, ".")}.${APP_BUILD_ID.slice(-1)}`
+const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim() || "dev"
+const APP_VERSION = `App ${APP_VERSION_LABEL} (${APP_BUILD_ID.slice(-8)})`
 
 async function clearAllIndexedDB() {
   if (typeof window === "undefined" || typeof indexedDB === "undefined") return
@@ -122,9 +122,12 @@ async function bootstrapApp() {
     return
   }
 
-  // Final safety net: any legacy SW must die (idempotent if already done).
-  await unregisterAllServiceWorkers()
-  await sweepIosStandaloneCachesOnce()
+  try {
+    const { registerSW } = await import("virtual:pwa-register")
+    registerSW({ immediate: true })
+  } catch (e) {
+    console.warn("[PWA] Service Worker registration unavailable", e)
+  }
 
   cleanupStaleAutoSnapshot()
 

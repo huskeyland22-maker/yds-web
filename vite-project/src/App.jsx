@@ -69,6 +69,7 @@ const METRIC_DEFS = [
 ]
 const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield", "gsBullBear"]
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
+const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim()
 const PWA_RESUME_RELOAD_COOLDOWN_MS = 10_000
 const PANIC_TEXT_DRAFT_KEY = "yds-panic-text-draft-v1"
 const PANIC_TEXT_PLACEHOLDER = `분류,지수 명칭,최종 확정 수치,전일 대비 (Δ),상태 등급
@@ -577,7 +578,10 @@ function App() {
   const textareaRef = useRef(null)
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
-  const [buildVersion, setBuildVersion] = useState(`v1.0.${String(APP_BUILD_ID).slice(-6)}`)
+  const [buildVersion, setBuildVersion] = useState(
+    () => APP_VERSION_LABEL || `build-${String(APP_BUILD_ID).slice(-8)}`,
+  )
+  const [pwaLastSyncLabel, setPwaLastSyncLabel] = useState("")
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth <= 768 : false,
   )
@@ -902,6 +906,50 @@ function App() {
       stopAutoRefresh()
     }
   }, [initializePanicData, startAutoRefresh, stopAutoRefresh])
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("yds-pwa-last-check-at")
+      const n = Number(raw)
+      if (Number.isFinite(n)) {
+        setPwaLastSyncLabel(
+          new Date(n).toLocaleString("ko-KR", {
+            timeZone: "Asia/Seoul",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }),
+        )
+      }
+    } catch {
+      // ignore
+    }
+    const onSync = (e) => {
+      const at = e?.detail?.at
+      if (at != null && Number.isFinite(Number(at))) {
+        const n = Number(at)
+        setPwaLastSyncLabel(
+          new Date(n).toLocaleString("ko-KR", {
+            timeZone: "Asia/Seoul",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }),
+        )
+      }
+      if (typeof e?.detail?.version === "string" && e.detail.version.trim()) {
+        setBuildVersion(e.detail.version.trim())
+      }
+    }
+    window.addEventListener("yds:build-version-synced", onSync)
+    return () => window.removeEventListener("yds:build-version-synced", onSync)
+  }, [])
 
   useEffect(() => {
     if (!auth) return
@@ -1340,8 +1388,14 @@ function App() {
                   )}
                 </div>
               </div>
-              <span className="rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-mono text-trading-2xs text-slate-400">
-                {buildVersion}
+              <span
+                className="flex max-w-[min(42vw,14rem)] flex-col items-end gap-0.5 rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-mono text-trading-2xs text-slate-400"
+                title={`id ${APP_BUILD_ID}`}
+              >
+                <span className="truncate text-slate-300">{buildVersion}</span>
+                <span className="text-[9px] font-normal leading-tight text-slate-500">
+                  {pwaLastSyncLabel ? `sync ${pwaLastSyncLabel}` : "sync …"}
+                </span>
               </span>
             </div>
         </header>

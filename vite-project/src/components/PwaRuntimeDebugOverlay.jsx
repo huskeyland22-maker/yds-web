@@ -93,6 +93,7 @@ export default function PwaRuntimeDebugOverlay() {
       : null)
 
   const viteBuild = String(import.meta.env.VITE_APP_BUILD_ID ?? "dev")
+  const viteVersionLabel = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim() || "dev"
 
   const dataStale = Boolean(panicData && isPanicBusinessDataStale(panicData))
 
@@ -125,7 +126,9 @@ export default function PwaRuntimeDebugOverlay() {
         </button>
       </div>
       <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 font-mono leading-tight">
-        <dt className="text-slate-500">VITE build</dt>
+        <dt className="text-slate-500">app version</dt>
+        <dd className="m-0 break-all text-amber-50/95">{viteVersionLabel}</dd>
+        <dt className="text-slate-500">VITE build id</dt>
         <dd className="m-0 break-all text-amber-50/95">{viteBuild}</dd>
         <dt className="text-slate-500">HTML meta build</dt>
         <dd className="m-0 break-all">{readHtmlBuildId() || "(none)"}</dd>
@@ -135,6 +138,10 @@ export default function PwaRuntimeDebugOverlay() {
         <dd className="m-0 break-all">{probe.remoteVersion ?? "-"}</dd>
         <dt className="text-slate-500">mismatch</dt>
         <dd className="m-0 text-rose-200/90">{buildMismatch ?? (probe.aligned ? "none" : probe.probeNote ?? "-")}</dd>
+        <dt className="text-slate-500">remote cacheId</dt>
+        <dd className="m-0 break-all">{probe.remoteCacheId ?? "-"}</dd>
+        <dt className="text-slate-500">Workbox cacheId (srv)</dt>
+        <dd className="m-0 break-all">{probe.remoteSwWorkboxCacheId ?? "-"}</dd>
         <dt className="text-slate-500">API source</dt>
         <dd className="m-0 break-all text-emerald-100/90">
           {isPanicHubEnabled() ? "HUB /api/panic/latest" : String(lastPanicFetchUrl ?? "legacy")}

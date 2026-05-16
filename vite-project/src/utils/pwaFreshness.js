@@ -1,5 +1,10 @@
 // -----------------------------------------------------------------------------
-// PWA freshness — network-first / realtime-first (no offline-first data SW)
+// PWA freshness — 빌드 메타(/build-version.json)와 HTML meta(buildId)를 대조해
+// stale 클라이언트는 SW·Cache Storage·스코프 LS 정리 후 hard reload.
+//
+// 정상 경로: vite-plugin-pwa Workbox(`skipWaiting`+`clientsClaim`+`cleanupOutdatedCaches`)가
+// 동일 출처에서 해시 번들을 갱신한다. index.html 부트에서는 더 이상 매번 SW를 해제하지 않는다
+// (해제는 evictStaleBuildAndReload 내부에서만 수행).
 //
 // Boot + lifecycle:
 //   1) read build id from HTML (<meta name="app-build-id">)
@@ -342,6 +347,9 @@ export async function checkAndEvictStaleBuild() {
 
   const remoteBuildId = String(remote.buildId)
   const remoteVersion = typeof remote.version === "string" ? remote.version.trim() : ""
+  const remoteCacheId = typeof remote.cacheId === "string" ? remote.cacheId.trim() : ""
+  const remoteSwWorkboxCacheId =
+    typeof remote.swWorkboxCacheId === "string" ? remote.swWorkboxCacheId.trim() : ""
 
   publishBuildProbeSnapshot({
     htmlBuildId,
@@ -349,6 +357,8 @@ export async function checkAndEvictStaleBuild() {
     storedVersion,
     remoteBuildId,
     remoteVersion,
+    remoteCacheId: remoteCacheId || null,
+    remoteSwWorkboxCacheId: remoteSwWorkboxCacheId || null,
     reloaded: false,
     probeNote: "checking",
   })
@@ -389,9 +399,30 @@ export async function checkAndEvictStaleBuild() {
     storedVersion: remoteVersion || storedVersion,
     remoteBuildId,
     remoteVersion,
+    remoteCacheId: remoteCacheId || null,
+    remoteSwWorkboxCacheId: remoteSwWorkboxCacheId || null,
     reloaded: false,
     probeNote: "ok",
   })
+  try {
+    const t = Date.now()
+    safeWrite("sessionStorage", "yds-pwa-last-check-at", String(t))
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("yds:build-version-synced", {
+          detail: {
+            at: t,
+            version: remoteVersion,
+            buildId: remoteBuildId,
+            cacheId: remoteCacheId || null,
+            swWorkboxCacheId: remoteSwWorkboxCacheId || null,
+          },
+        }),
+      )
+    }
+  } catch {
+    // ignore
+  }
   return { remote, reloaded: false }
 }
 

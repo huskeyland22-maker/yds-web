@@ -37,30 +37,12 @@
       // If the deployed build is newer than what this HTML belongs to, the gate
       // unregisters service workers, purges Cache Storage and build-scoped
       // localStorage, then hard-reloads with a cache-busting query string.
-      import {
-        checkAndEvictStaleBuild,
-        installChunkLoadFailureRecovery,
-        installLifecycleVersionPoller,
-        installOnlineBuildRecheck,
-        sweepIosStandaloneCachesOnce,
-        unregisterAllServiceWorkers,
-      } from "/src/utils/pwaFreshness.js"
+      import { checkAndEvictStaleBuild, installChunkLoadFailureRecovery } from "/src/utils/pwaFreshness.js"
 
       async function bootstrap() {
         installChunkLoadFailureRecovery()
-
-        // Always strip any legacy Service Worker (older deployments may have
-        // shipped one). This is unconditional because iOS standalone PWAs
-        // aggressively keep SW state alive between launches.
-        await unregisterAllServiceWorkers()
-        await sweepIosStandaloneCachesOnce()
-
         const result = await checkAndEvictStaleBuild()
         if (result.reloaded) return
-
-        installLifecycleVersionPoller()
-        installOnlineBuildRecheck()
-
         await import("/src/main.jsx")
       }
 
