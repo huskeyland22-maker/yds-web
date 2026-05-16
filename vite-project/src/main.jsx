@@ -99,8 +99,8 @@ async function bootstrapApp() {
   // defense. checkAndEvictStaleBuild() short-circuits if everything matches.
   await invalidateServiceWorkerCachesAfterBuildMismatch()
 
-  // index.html 부트에서 이미 freshness gate 실행 — 여기서 reloaded 시 조기 return 하면 iOS에서 빈 화면(먹통) 가능
-  await checkAndEvictStaleBuild()
+  // index.html 부트에서 이미 freshness gate 실행 — reloaded 여도 앱은 항상 마운트 (iOS 빈 화면 방지)
+  const gate = await checkAndEvictStaleBuild()
 
   try {
     const { registerSW } = await import("virtual:pwa-register")
