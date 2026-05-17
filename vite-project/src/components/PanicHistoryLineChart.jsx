@@ -13,7 +13,7 @@ import {
 } from "recharts"
 import { metricZoneBands, metricZoneLineYs } from "../utils/panicHistoryZoneLines.js"
 import {
-  computeProfileYDomain,
+  computeHistoryYDomain,
   extractChartValues,
   resolveChartProfile,
   yAxisTickFormatter,
@@ -62,10 +62,9 @@ export default function PanicHistoryLineChart({
   )
 
   const yDomain = useMemo(() => {
-    if (showZoneBands && dataKey === "fearGreed") return [0, 100]
     const values = extractChartValues(chartData, dataKey)
-    return computeProfileYDomain(values, profile)
-  }, [chartData, dataKey, profile, showZoneBands])
+    return computeHistoryYDomain(values, dataKey, { showZoneBands })
+  }, [chartData, dataKey, showZoneBands])
 
   const tickFormatter = useMemo(() => yAxisTickFormatter(profile), [profile])
 
@@ -94,7 +93,7 @@ export default function PanicHistoryLineChart({
               fill={band.color}
               fillOpacity={0.07}
               strokeOpacity={0}
-              ifOverflow="extendDomain"
+              ifOverflow="hidden"
             />
           ))}
           {zoneLineYs.map((y) => (
@@ -103,7 +102,7 @@ export default function PanicHistoryLineChart({
               y={y}
               stroke="rgba(255,255,255,0.14)"
               strokeDasharray="4 3"
-              ifOverflow="extendDomain"
+              ifOverflow="hidden"
             />
           ))}
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
