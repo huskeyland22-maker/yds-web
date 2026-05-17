@@ -21,23 +21,23 @@ const CHART_LAYOUT_TOP_PAD_PX = 28
 const CHART_LAYOUT_RIGHT_PAD_PX = 18
 const CHART_LAYOUT_LEFT_PAD_PX = 8
 const CYAN_CORE = "#22d3ee"
+/** Recharts domain={['dataMin - 0.2', 'dataMax + 0.2']} 대응 (절대값 패딩) */
+const PRICE_DOMAIN_PAD = 0.2
+const CHART_PLOT_HEIGHT_PX = 320
 
-/** Y domain: min −8%, max +12% (상단 peak clipping 방지) */
-function paddedPriceAutoscaleProvider(baseImplementation) {
-  return () => {
-    const base = typeof baseImplementation === "function" ? baseImplementation() : null
-    if (!base?.priceRange) return base
-    const min = Number(base.priceRange.minValue)
-    const max = Number(base.priceRange.maxValue)
-    if (!Number.isFinite(min) || !Number.isFinite(max)) return base
-    const span = Math.max(max - min, Math.max(Math.abs(max), Math.abs(min)) * 0.02, 1e-6)
-    return {
-      ...base,
-      priceRange: {
-        minValue: min - span * 0.08,
-        maxValue: max + span * 0.12,
-      },
-    }
+/**
+ * @param {{ value: number }[]} closes
+ */
+function priceAutoscaleFromCloses(closes) {
+  const vals = closes.map((c) => Number(c.value)).filter((n) => Number.isFinite(n))
+  if (!vals.length) return null
+  const dataMin = Math.min(...vals)
+  const dataMax = Math.max(...vals)
+  return {
+    priceRange: {
+      minValue: dataMin - PRICE_DOMAIN_PAD,
+      maxValue: dataMax + PRICE_DOMAIN_PAD,
+    },
   }
 }
 
@@ -311,8 +311,8 @@ function resolveMainLineVisuals(pack) {
   return {
     line,
     priceLine: isVix ? "rgba(34,211,238,0.35)" : base.priceLine,
-    lineWidth: 4,
-    lineWidthHover: 4,
+    lineWidth: 3,
+    lineWidthHover: 3,
     crosshairRadius: 3,
     crosshairRadiusHover: 3,
   }
@@ -364,6 +364,26 @@ export default function MacroCycleLwChart({
   }, [pack?.meta])
 
   useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const key = primarySeries?.key ?? "vix"
+    const arr = Array.isArray(rows) ? rows : []
+    const bad = arr.filter((r) => {
+      const v = r?.[key]
+      return v == null || v === "" || !Number.isFinite(Number(v))
+    })
+    console.log("[MacroCycleLwChart] series data", {
+      key,
+      rowCount: arr.length,
+      packPoints: pack?.closes?.length ?? 0,
+      nullOrInvalid: bad.length,
+      sample: arr.slice(-5).map((r) => ({
+        date: r?.date ?? r?.ts,
+        [key]: r?.[key],
+      })),
+    })
+  }, [rows, pack?.closes?.length, primarySeries?.key])
+
+  useEffect(() => {
     const el = wrapRef.current
     if (!el || !pack || pack.closes.length < 2) return undefined
 
@@ -387,7 +407,7 @@ export default function MacroCycleLwChart({
         horzLines: { visible: true, color: "rgba(255,255,255,0.11)" },
       },
       width: el.clientWidth,
-      height: el.clientHeight || 360,
+      height: el.clientHeight || CHART_PLOT_HEIGHT_PX,
       rightPriceScale: {
         visible: true,
         borderColor: "rgba(148,163,184,0.22)",
@@ -437,8 +457,8 @@ export default function MacroCycleLwChart({
     const priceSeries = chart.addLineSeries({
       color: vis.line,
       lineWidth: vis.lineWidth,
-      lineType: LineType.Simple,
-      autoscaleInfoProvider: paddedPriceAutoscaleProvider,
+      lineType: LineType.Curved,
+      autoscaleInfoProvider: () => priceAutoscaleFromCloses(pack.closes),
       lastPriceAnimation: LastPriceAnimationMode.Continuous,
       priceLineVisible: true,
       priceLineWidth: 1,
@@ -547,7 +567,7 @@ export default function MacroCycleLwChart({
     chart.timeScale().subscribeVisibleLogicalRangeChange(onVisibleRange)
 
     let lastW = Math.max(1, Math.floor(el.clientWidth))
-    let lastH = Math.max(1, Math.floor(el.clientHeight || 360))
+    let lastH = Math.max(1, Math.floor(el.clientHeight || CHART_PLOT_HEIGHT_PX))
     const ro = new ResizeObserver((entries) => {
       const cr = entries[0]?.contentRect
       if (!cr || !chartRef.current) return
@@ -645,7 +665,7 @@ export default function MacroCycleLwChart({
       <div
         className={
           compact
-            ? "relative h-[min(60vw,278px)] w-full min-h-[253px] overflow-visible pt-1 sm:h-[329px] sm:min-h-[278px]"
+            ? "relative h-[320px] w-full min-h-[320px] overflow-visible pt-1"
             : "relative h-[414px] w-full min-h-[322px] overflow-visible pt-1 sm:h-[460px] sm:min-h-[345px]"
         }
       >
