@@ -23,7 +23,7 @@ export default function PanicMarketTimingPanel({ panicData = null }) {
     return (
       <div className="border-t border-white/[0.06] px-3 py-2.5">
         <p className="m-0 text-[10px] text-slate-500">
-          9? ?? ?? ? ???????? ??? ?? ?????.
+          9대 지표 입력 시 단기·중기·장기 타점이 자동 계산됩니다.
         </p>
       </div>
     )
@@ -36,7 +36,7 @@ export default function PanicMarketTimingPanel({ panicData = null }) {
   return (
     <div className="border-t border-amber-500/15 bg-amber-500/[0.02] px-2 py-2 sm:px-2.5 sm:py-2.5">
       <p className="m-0 mb-2 border-l-2 border-amber-400/45 pl-2 text-left text-[11px] font-bold tracking-[0.02em] text-slate-200">
-        ?? ??
+        시장 타점
       </p>
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3 sm:gap-2">
         {cards.map((card) => (
@@ -81,7 +81,7 @@ function TimingCard({ signal }) {
 
       {signal.allocations?.length > 0 ? (
         <div className="mt-1.5 border-t border-white/[0.05] pt-1.5">
-          <p className="m-0 text-[7px] font-semibold uppercase tracking-[0.08em] text-slate-500">?? ??</p>
+          <p className="m-0 text-[7px] font-semibold uppercase tracking-[0.08em] text-slate-500">추천 비중</p>
           <ul className="m-0 mt-1 grid list-none grid-cols-2 gap-x-2 gap-y-1 p-0">
             {signal.allocations.map((row) => (
               <li key={row.label} className="min-w-0">
