@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ColorType, createChart } from "lightweight-charts"
+import { useIsMobileLayout } from "../hooks/useIsMobileLayout.js"
+import {
+  chartTimeToDayKey,
+  formatChartAxisTick,
+  formatChartTooltip,
+} from "../utils/chartDateFormat.js"
 
 const CHART_H = 460
 const DISPLAY_BARS = 66
@@ -23,25 +29,6 @@ function ymdToTime(dateRaw) {
   const s = String(dateRaw || "").trim()
   if (s.length === 8 && /^\d{8}$/.test(s)) return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`
   if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10)
-  return null
-}
-
-/** @param {unknown} time */
-function timeToKey(time) {
-  if (time == null) return null
-  if (typeof time === "string") return time
-  if (typeof time === "number") {
-    const d = new Date(time * 1000)
-    if (Number.isNaN(d.getTime())) return null
-    const y = d.getUTCFullYear()
-    const m = String(d.getUTCMonth() + 1).padStart(2, "0")
-    const day = String(d.getUTCDate()).padStart(2, "0")
-    return `${y}-${m}-${day}`
-  }
-  if (typeof time === "object" && "year" in time && "month" in time && "day" in time) {
-    const { year, month, day } = time
-    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-  }
   return null
 }
 
@@ -167,9 +154,11 @@ function prepareChartData(bars) {
 
     const prevClose = i > 0 ? bars[i - 1].close : b.close
     const chg = prevClose ? ((b.close - prevClose) / prevClose) * 100 : 0
-    const dateLabel = b.date && /^\d{8}$/.test(String(b.date))
-      ? `${String(b.date).slice(4, 6)}/${String(b.date).slice(6, 8)}`
-      : t
+    const dayKey =
+      b.date && /^\d{8}$/.test(String(b.date))
+        ? `${String(b.date).slice(0, 4)}-${String(b.date).slice(4, 6)}-${String(b.date).slice(6, 8)}`
+        : t
+    const dateLabel = dayKey ? formatChartTooltip(dayKey) : t
     meta.set(t, {
       open: b.open,
       high: b.high,
@@ -189,6 +178,7 @@ function prepareChartData(bars) {
  * @param {{ bars: Array<{ date?: string; open: number; high: number; low: number; close: number; volume?: number; ma20?: number | null; ma60?: number | null }>; chartMeta?: object; priceSummary?: object; className?: string }} props
  */
 export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, className = "" }) {
+  const isMobile = useIsMobileLayout()
   const wrapRef = useRef(null)
   const chartRef = useRef(null)
   const [tooltip, setTooltip] = useState(null)
@@ -259,6 +249,10 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
         barSpacing: 7,
         minBarSpacing: 3,
         rightOffset: 6,
+        tickMarkFormatter: (time) => {
+          const key = chartTimeToDayKey(time)
+          return key ? formatChartAxisTick(key, { mobile: isMobile, compact: true }) : ""
+        },
       },
       crosshair: {
         mode: 1,
@@ -276,7 +270,14 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
         pinch: true,
         axisPressedMouseMove: { time: true, price: true },
       },
-      localization: { locale: "ko-KR" },
+      localization: {
+        locale: "en-US",
+        dateFormat: "yyyy-MM-dd",
+        timeFormatter: (time) => {
+          const key = chartTimeToDayKey(time)
+          return key ? formatChartTooltip(key) : ""
+        },
+      },
     })
 
     const volumeSeries = chart.addHistogramSeries({
@@ -346,7 +347,7 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
         setTooltip(null)
         return
       }
-      const tkey = timeToKey(param.time)
+      const tkey = chartTimeToDayKey(param.time)
       const extra = tkey ? metaRef.current.get(tkey) : null
       setTooltip({
         x: param.point.x,
@@ -387,7 +388,7 @@ export default function MiniDailyStockChart({ bars, chartMeta, priceSummary, cla
       chartRef.current = null
       setTooltip(null)
     }
-  }, [chartPack])
+  }, [chartPack, isMobile])
 
   if (normalizedBars.length < 2) return null
 

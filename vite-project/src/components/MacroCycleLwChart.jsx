@@ -1,25 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ColorType, LastPriceAnimationMode, LineType, createChart } from "lightweight-charts"
+import { useIsMobileLayout } from "../hooks/useIsMobileLayout.js"
+import {
+  chartTimeToDayKey,
+  formatChartAxisTick,
+  formatChartTooltip,
+} from "../utils/chartDateFormat.js"
 import { formatMetricValue, resolveSeriesColor } from "./macroCycleChartUtils.js"
-
-/** @param {unknown} time */
-function timeToKey(time) {
-  if (time == null) return null
-  if (typeof time === "string") return time
-  if (typeof time === "number") {
-    const d = new Date(time * 1000)
-    if (Number.isNaN(d.getTime())) return null
-    const y = d.getUTCFullYear()
-    const m = String(d.getUTCMonth() + 1).padStart(2, "0")
-    const day = String(d.getUTCDate()).padStart(2, "0")
-    return `${y}-${m}-${day}`
-  }
-  if (typeof time === "object" && "year" in time && "month" in time && "day" in time) {
-    const { year, month, day } = time
-    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-  }
-  return null
-}
 
 function rowDay(row) {
   const t = row?.ts
@@ -160,6 +147,7 @@ function regimeAreaStyle(regime) {
  * }} props
  */
 export default function MacroCycleLwChart({ rows, primarySeries, className = "", compact = false }) {
+  const isMobile = useIsMobileLayout()
   const wrapRef = useRef(null)
   const chartRef = useRef(null)
   const metaRef = useRef(new Map())
@@ -205,6 +193,10 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
         fixRightEdge: true,
         barSpacing: 9,
         minBarSpacing: 5,
+        tickMarkFormatter: (time) => {
+          const key = chartTimeToDayKey(time)
+          return key ? formatChartAxisTick(key, { mobile: isMobile, compact }) : ""
+        },
       },
       crosshair: {
         mode: 1,
@@ -221,7 +213,14 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
           labelBackgroundColor: "rgba(15,23,42,0.94)",
         },
       },
-      localization: { locale: "ko-KR" },
+      localization: {
+        locale: "en-US",
+        dateFormat: "yyyy-MM-dd",
+        timeFormatter: (time) => {
+          const key = chartTimeToDayKey(time)
+          return key ? formatChartTooltip(key) : ""
+        },
+      },
     })
 
     const volumeSeries = chart.addHistogramSeries({
@@ -311,12 +310,12 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
         setTooltip(null)
         return
       }
-      const tkey = timeToKey(param.time)
+      const tkey = chartTimeToDayKey(param.time)
       const extra = tkey ? metaRef.current.get(tkey) : null
       setTooltip({
         x: param.point.x,
         y: param.point.y,
-        dateLabel: tkey ?? String(param.time),
+        dateLabel: tkey ? formatChartTooltip(tkey) : String(param.time),
         value: data.value,
         volume: extra?.volume ?? 0,
         changePct: extra?.changePct ?? 0,
@@ -361,7 +360,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
       chartRef.current = null
       setTooltip(null)
     }
-  }, [pack])
+  }, [pack, isMobile, compact])
 
   useEffect(() => {
     if (!pack) {
