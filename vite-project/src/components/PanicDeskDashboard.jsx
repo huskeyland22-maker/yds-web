@@ -341,6 +341,7 @@ export default function PanicDeskDashboard({
         rows={cycleMetricHistory}
         primarySeries={chartSeries}
         chartMetric={chartMetric}
+        panicData={panicData}
       />
     </div>
   )

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
+import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
 
 const METRIC_STROKES = {
   vix: "#f87171",
@@ -20,15 +21,17 @@ const METRIC_STROKES = {
  *   primarySeries: { key: string; name: string; color?: string }
  *   chartMetric: string
  *   className?: string
+ *   panicData?: object | null
  * }} props
  */
-export default function PanicDeskChart({ rows, primarySeries, chartMetric, className = "" }) {
+export default function PanicDeskChart({ rows, primarySeries, chartMetric, className = "", panicData = null }) {
   const [rangeId, setRangeId] = useState("6M")
 
   const slicedRows = useMemo(() => sliceHistoryByRange(rows, rangeId), [rows, rangeId])
   const activeKey = chartMetric || primarySeries?.key || "vix"
   const stroke = primarySeries?.color ?? METRIC_STROKES[activeKey] ?? "#22d3ee"
   const hasHistory = Array.isArray(slicedRows) && slicedRows.length > 0
+  const currentValue = panicData?.[activeKey]
 
   return (
     <section className={["trading-card-shell overflow-visible", className].filter(Boolean).join(" ")}>
@@ -65,6 +68,11 @@ export default function PanicDeskChart({ rows, primarySeries, chartMetric, class
           </div>
         )}
       </div>
+      <PanicMetricInsightPanel
+        metricKey={activeKey}
+        currentValue={currentValue}
+        historyRows={slicedRows}
+      />
     </section>
   )
 }
