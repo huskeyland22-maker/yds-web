@@ -23,7 +23,7 @@ export default function PanicMarketTimingPanel({ panicData = null }) {
     return (
       <div className="border-t border-white/[0.06] px-3 py-2.5">
         <p className="m-0 text-[10px] text-slate-500">
-          9대 지표 입력 시 단기·중기·장기 타점이 자동 계산됩니다.
+          9? ?? ?? ? ???????? ??? ?? ?????.
         </p>
       </div>
     )
