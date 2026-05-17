@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react"
 import { getFinalScore, getMidScore, getShortScore } from "../utils/tradingScores.js"
-import { ageMsFromUpdatedAt, formatRelativeAgeEn } from "../utils/formatDataAge.js"
+import {
+  ageMsFromUpdatedAt,
+  formatAgeOldEn,
+  formatDataBasisKst,
+  kstCalendarKey,
+  staleDisplayTier,
+  staleTierClassName,
+} from "../utils/formatDataAge.js"
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
@@ -21,25 +28,6 @@ const METRIC_CELL =
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
   return formatMetricValue(key, Number(v))
-}
-
-function formatCollectedAtKst(updatedAt) {
-  if (!updatedAt) return null
-  const d = new Date(updatedAt)
-  if (Number.isNaN(d.getTime())) return null
-  const date = d.toLocaleDateString("ko-KR", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
-  const time = d.toLocaleString("ko-KR", {
-    timeZone: "Asia/Seoul",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  })
-  return `${date} ${time} KST`
 }
 
 /**
@@ -85,9 +73,25 @@ export default function PanicDeskDashboard({
     return ageMsFromUpdatedAt(panicData?.updatedAt)
   }, [panicData])
 
-  const staleAgeLabel = useMemo(() => formatRelativeAgeEn(dataAgeMs), [dataAgeMs])
-  const collectedAtLabel = useMemo(() => formatCollectedAtKst(panicData?.updatedAt), [panicData?.updatedAt])
-  const showStaleBadge = isStale || (dataAgeMs != null && dataAgeMs >= 4 * 60 * 60 * 1000)
+  const todayKey = useMemo(() => kstCalendarKey(), [])
+  const dataDateKey = useMemo(() => {
+    if (asOfDateLabel && /^\d{4}-\d{2}-\d{2}$/.test(asOfDateLabel)) return asOfDateLabel
+    if (panicData?.updatedAt) return kstCalendarKey(new Date(panicData.updatedAt))
+    return asOfDateLabel
+  }, [asOfDateLabel, panicData?.updatedAt])
+
+  const dataBasisLabel = useMemo(() => formatDataBasisKst(panicData?.updatedAt), [panicData?.updatedAt])
+  const ageOldLabel = useMemo(() => formatAgeOldEn(dataAgeMs), [dataAgeMs])
+  const staleTier = useMemo(() => {
+    if (isStale && staleDisplayTier(dataAgeMs) === "hidden") return "aging"
+    return staleDisplayTier(dataAgeMs)
+  }, [dataAgeMs, isStale])
+
+  const showAgeBlock = staleTier !== "hidden" && ageOldLabel
+  const showCollectBanner =
+    isStale ||
+    (dataAgeMs != null && dataAgeMs >= 4 * 60 * 60 * 1000) ||
+    (dataDateKey && dataDateKey !== todayKey)
 
   const horizons = useMemo(
     () => [
@@ -126,23 +130,39 @@ export default function PanicDeskDashboard({
 
   return (
     <div className="relative space-y-2 lg:space-y-2.5">
-      <div className="sticky top-0 z-20 -mx-0.5 flex items-start justify-end gap-2 border-b border-white/[0.06] bg-[#0B0E14]/95 px-0.5 py-1.5 backdrop-blur-sm">
-        <div className="text-right">
-          <p className="m-0 text-[8px] font-semibold tracking-[0.14em] text-slate-600">마지막 수집</p>
-          <p className="m-0 font-mono text-[10px] tabular-nums text-slate-300">
-            {collectedAtLabel ?? "—"}
-          </p>
-          <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-600">기준일 {asOfDateLabel}</p>
+      <div className="sticky top-0 z-20 -mx-0.5 flex justify-end border-b border-white/[0.06] bg-[#0B0E14]/95 px-0.5 py-1 backdrop-blur-sm">
+        <div className="max-w-[11.5rem] rounded-md border border-white/[0.08] bg-white/[0.02] px-2 py-1 text-right leading-tight">
+          <div className="flex justify-end gap-1.5 font-mono text-[8px] tabular-nums">
+            <span className="text-slate-600">Today</span>
+            <span className="text-slate-400">{todayKey}</span>
+          </div>
+          <div className="mt-0.5 flex justify-end gap-1.5 font-mono text-[8px] tabular-nums">
+            <span className="text-slate-600">Data</span>
+            <span className={dataDateKey !== todayKey ? "text-amber-200/90" : "text-slate-300"}>
+              {dataDateKey ?? "—"}
+            </span>
+          </div>
+          <p className="m-0 mt-1 text-[7px] font-semibold tracking-[0.12em] text-slate-600">데이터 기준</p>
+          <p className="m-0 font-mono text-[9px] tabular-nums text-slate-300">{dataBasisLabel ?? "—"}</p>
+          {showAgeBlock ? (
+            <p
+              className={`m-0 mt-0.5 inline-block rounded px-1 py-px font-mono text-[9px] font-semibold tabular-nums ${staleTierClassName(staleTier)}`}
+            >
+              {ageOldLabel}
+            </p>
+          ) : null}
         </div>
-        {showStaleBadge && staleAgeLabel ? (
-          <span
-            className="shrink-0 rounded-md border border-amber-500/35 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums text-amber-200/95"
-            title="데이터 갱신 지연"
-          >
-            STALE · {staleAgeLabel}
-          </span>
-        ) : null}
       </div>
+
+      {showCollectBanner ? (
+        <div
+          className="flex items-center gap-2 rounded-md border border-cyan-500/20 bg-cyan-500/[0.06] px-2 py-1"
+          role="status"
+        >
+          <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-cyan-400/80" aria-hidden />
+          <p className="m-0 text-[10px] font-medium text-cyan-100/85">다음 시장 데이터 수집 대기중</p>
+        </div>
+      ) : null}
 
       <section className="trading-card-shell overflow-hidden px-2.5 py-2 sm:px-3 sm:py-2.5">
         <div>
