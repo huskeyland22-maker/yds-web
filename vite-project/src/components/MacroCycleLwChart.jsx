@@ -210,27 +210,75 @@ function regimeAreaStyle(regime) {
   if (regime === "riskOn") {
     return {
       line: "#5eead4",
-      glow: "rgba(45,212,191,0.22)",
+      glow: "rgba(45,212,191,0.35)",
       top: "rgba(94,234,212,0.32)",
       bottom: "rgba(7,10,16,0)",
-      priceLine: "rgba(52,211,153,0.75)",
+      priceLine: "rgba(52,211,153,0.5)",
     }
   }
   if (regime === "riskOff") {
     return {
       line: "#fcd34d",
-      glow: "rgba(251,191,36,0.18)",
+      glow: "rgba(251,191,36,0.32)",
       top: "rgba(252,211,77,0.22)",
       bottom: "rgba(7,10,16,0)",
-      priceLine: "rgba(251,191,36,0.72)",
+      priceLine: "rgba(251,191,36,0.5)",
     }
   }
   return {
     line: "#38bdf8",
-    glow: "rgba(56,189,248,0.2)",
+    glow: "rgba(56,189,248,0.32)",
     top: "rgba(56,189,248,0.26)",
     bottom: "rgba(7,10,16,0)",
-    priceLine: "rgba(34,211,238,0.78)",
+    priceLine: "rgba(34,211,238,0.5)",
+  }
+}
+
+const VIX_TEAL = "#2dd4bf"
+const VIX_MINT = "#a7f3d0"
+
+/**
+ * 메인 라인 시각 (VIX 터미널 임팩트 + 타 지표 보강)
+ * @param {NonNullable<ReturnType<typeof buildLwPack>>} pack
+ */
+function resolveMainLineVisuals(pack) {
+  const base = regimeAreaStyle(pack.regime)
+  const isVix = pack.primaryKey === "vix"
+  const rising = pack.stats.dayChg >= 0
+  const n = pack.closes.length
+  const tailN = Math.max(2, Math.ceil(n * 0.2))
+  const tailCloses = pack.closes.slice(-tailN)
+  const lastSeg = pack.closes.slice(-2)
+  const lastSegRising = lastSeg.length >= 2 && lastSeg[1].value >= lastSeg[0].value
+
+  const line = isVix ? (rising ? VIX_MINT : VIX_TEAL) : base.line
+  const lineCore = isVix ? VIX_TEAL : base.line
+
+  return {
+    isVix,
+    line,
+    lineCore,
+    accentLine: isVix && rising ? VIX_MINT : line,
+    outerGlow: isVix ? "rgba(45,212,191,0.45)" : base.glow,
+    innerGlow: isVix ? "rgba(94,234,212,0.58)" : base.glow,
+    top: isVix
+      ? rising
+        ? "rgba(167,243,208,0.22)"
+        : "rgba(45,212,191,0.18)"
+      : base.top,
+    bottom: base.bottom,
+    priceLine: base.priceLine,
+    lineWidth: isVix ? 4.5 : 4,
+    tailLineWidth: isVix ? 5.25 : 4.5,
+    lastSegLineWidth: isVix ? 5.5 : 4.5,
+    outerGlowWidth: isVix ? 16 : 12,
+    innerGlowWidth: isVix ? 9 : 7,
+    tailCloses,
+    lastSeg,
+    lastSegRising,
+    markerSize: 4,
+    crosshairRadius: 5,
+    crosshairRadiusHover: 6,
   }
 }
 
@@ -254,10 +302,14 @@ export default function MacroCycleLwChart({
   const isMobile = useIsMobileLayout()
   const wrapRef = useRef(null)
   const chartRef = useRef(null)
+  const seriesRef = useRef(null)
+  const visualsRef = useRef(null)
+  const hoverLineRef = useRef(false)
   const metaRef = useRef(new Map())
   const [tooltip, setTooltip] = useState(null)
   const [chartIn, setChartIn] = useState(false)
   const [lastValueTopPx, setLastValueTopPx] = useState(null)
+  const [lastPointPx, setLastPointPx] = useState(null)
 
   const pack = useMemo(() => {
     if (!primarySeries?.key) return null
@@ -278,7 +330,8 @@ export default function MacroCycleLwChart({
     const el = wrapRef.current
     if (!el || !pack || pack.closes.length < 2) return undefined
 
-    const rs = regimeAreaStyle(pack.regime)
+    const vis = resolveMainLineVisuals(pack)
+    visualsRef.current = vis
 
     const chart = createChart(el, {
       layout: {
@@ -363,9 +416,18 @@ export default function MacroCycleLwChart({
       crosshairMarkerVisible: false,
     })
 
-    const glowSeries = chart.addLineSeries({
-      color: rs.glow,
-      lineWidth: 5,
+    const outerGlowSeries = chart.addLineSeries({
+      color: vis.outerGlow,
+      lineWidth: vis.outerGlowWidth,
+      lineType: LineType.Curved,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+
+    const innerGlowSeries = chart.addLineSeries({
+      color: vis.innerGlow,
+      lineWidth: vis.innerGlowWidth,
       lineType: LineType.Curved,
       priceLineVisible: false,
       lastValueVisible: false,
@@ -373,22 +435,48 @@ export default function MacroCycleLwChart({
     })
 
     const priceSeries = chart.addAreaSeries({
-      lineColor: rs.line,
-      topColor: rs.top,
-      bottomColor: rs.bottom,
-      lineWidth: 3,
+      lineColor: vis.lineCore,
+      topColor: vis.top,
+      bottomColor: vis.bottom,
+      lineWidth: vis.lineWidth,
       lineType: LineType.Curved,
       lastPriceAnimation: LastPriceAnimationMode.Continuous,
       priceLineVisible: true,
-      priceLineWidth: 2,
-      priceLineColor: rs.priceLine,
+      priceLineWidth: 3,
+      priceLineColor: vis.priceLine,
       priceLineStyle: 2,
       lastValueVisible: false,
       crosshairMarkerVisible: true,
-      crosshairMarkerRadius: 5,
+      crosshairMarkerRadius: vis.crosshairRadius,
       crosshairMarkerBorderColor: "rgba(236,254,255,0.95)",
-      crosshairMarkerBackgroundColor: rs.line,
+      crosshairMarkerBackgroundColor: vis.line,
     })
+
+    const tailAccentSeries = chart.addLineSeries({
+      color: vis.accentLine,
+      lineWidth: vis.tailLineWidth,
+      lineType: LineType.Curved,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+
+    const lastSegSeries = chart.addLineSeries({
+      color: vis.accentLine,
+      lineWidth: vis.lastSegRising ? vis.lastSegLineWidth : vis.lineWidth,
+      lineType: LineType.Curved,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+
+    seriesRef.current = {
+      priceSeries,
+      outerGlowSeries,
+      innerGlowSeries,
+      tailAccentSeries,
+      lastSegSeries,
+    }
 
     volumeSeries.priceScale().applyOptions({
       scaleMargins: { top: 0.78, bottom: 0 },
@@ -400,29 +488,38 @@ export default function MacroCycleLwChart({
     volumeSeries.setData(pack.volume)
     ma60Series.setData(pack.ma60)
     ma20Series.setData(pack.ma20)
-    glowSeries.setData(pack.closes)
+    outerGlowSeries.setData(pack.closes)
+    innerGlowSeries.setData(pack.closes)
     priceSeries.setData(pack.closes)
+    tailAccentSeries.setData(vis.tailCloses)
+    lastSegSeries.setData(vis.lastSeg)
 
-    const last = pack.closes[pack.closes.length - 1]
-    if (last) {
-      priceSeries.setMarkers([
-        {
-          time: last.time,
-          position: "inBar",
-          shape: "circle",
-          color: "#ecfeff",
-          size: 3,
-          borderColor: rs.line,
-          borderWidth: 2,
-        },
-      ])
+    const applyHoverLine = (active) => {
+      if (hoverLineRef.current === active) return
+      hoverLineRef.current = active
+      const v = visualsRef.current
+      const s = seriesRef.current
+      if (!v || !s) return
+      const w = active ? v.lineWidth * 1.1 : v.lineWidth
+      const tw = active ? v.tailLineWidth * 1.1 : v.tailLineWidth
+      const lw = active ? v.lastSegLineWidth * 1.1 : v.lastSegLineWidth
+      const r = active ? v.crosshairRadiusHover : v.crosshairRadius
+      try {
+        s.priceSeries.applyOptions({ lineWidth: w, crosshairMarkerRadius: r })
+        s.tailAccentSeries.applyOptions({ lineWidth: tw })
+        s.lastSegSeries.applyOptions({ lineWidth: v.lastSegRising ? lw : w })
+      } catch {
+        /* ignore */
+      }
     }
 
     const onCrosshair = (param) => {
       if (!param.point || param.time === undefined) {
         setTooltip(null)
+        applyHoverLine(false)
         return
       }
+      applyHoverLine(true)
       const data = param.seriesData.get(priceSeries)
       if (!data || typeof data !== "object" || data.value == null) {
         setTooltip(null)
@@ -444,14 +541,22 @@ export default function MacroCycleLwChart({
       const last = pack.closes[pack.closes.length - 1]
       if (!last) {
         setLastValueTopPx(null)
+        setLastPointPx(null)
         return
       }
       const y = priceSeries.priceToCoordinate(last.value)
+      const x = chart.timeScale().timeToCoordinate(last.time)
       if (y == null || !Number.isFinite(Number(y))) {
         setLastValueTopPx(null)
+        setLastPointPx(null)
         return
       }
       setLastValueTopPx(Number(y))
+      if (x != null && Number.isFinite(Number(x))) {
+        setLastPointPx({ x: Number(x), y: Number(y) })
+      } else {
+        setLastPointPx(null)
+      }
     }
 
     chart.subscribeCrosshairMove(onCrosshair)
@@ -494,8 +599,12 @@ export default function MacroCycleLwChart({
       chart.unsubscribeCrosshairMove(onCrosshair)
       chart.remove()
       chartRef.current = null
+      seriesRef.current = null
+      visualsRef.current = null
+      hoverLineRef.current = false
       setTooltip(null)
       setLastValueTopPx(null)
+      setLastPointPx(null)
     }
   }, [pack, isMobile, compact])
 
@@ -576,6 +685,26 @@ export default function MacroCycleLwChart({
         <div className="relative flex h-full w-full min-h-0">
           <div className="relative min-h-0 min-w-0 flex-1">
             <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
+
+            {lastPointPx ? (
+              <div
+                className="pointer-events-none absolute z-[4]"
+                style={{
+                  left: lastPointPx.x,
+                  top: lastPointPx.y,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                <span
+                  className="absolute left-1/2 top-1/2 block h-[1.35rem] w-[1.35rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-teal-300/40 animate-ping"
+                  aria-hidden
+                />
+                <span
+                  className="relative block h-3 w-3 rounded-full border-2 border-white/90 bg-teal-100 shadow-[0_0_16px_rgba(94,234,212,0.95),0_0_6px_rgba(45,212,191,0.75)]"
+                  aria-hidden
+                />
+              </div>
+            ) : null}
 
             <div className="pointer-events-none absolute left-2 top-2 z-[2] min-w-[8.5rem] rounded-md border border-white/[0.1] bg-[rgba(6,9,16,0.88)] px-2 py-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:left-2.5 sm:top-2.5 sm:px-2.5 sm:py-2">
               <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 font-mono text-[9px] leading-tight sm:text-[10px]">
