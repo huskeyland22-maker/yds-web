@@ -17,9 +17,25 @@
  *   midTerm: string
  *   longTerm: string
  *   sectors: string[]
+ *   marketTemperature: number
+ *   strategyThesis: string
  *   breakdown: { key: string; label: string; value: number | null; score: number }[]
  * }} MarketActionGuide
  */
+
+/** @param {number} totalScore — 공포(+)·탐욕(−) 합산 */
+export function computeMarketTemperature(totalScore) {
+  return Math.max(0, Math.min(100, Math.round(50 - totalScore * 3.2)))
+}
+
+/** @param {number} temp */
+export function marketTemperatureBarClass(temp) {
+  if (temp >= 72) return "bg-cyan-400"
+  if (temp >= 58) return "bg-cyan-500/80"
+  if (temp >= 42) return "bg-slate-400"
+  if (temp >= 28) return "bg-orange-400"
+  return "bg-rose-400"
+}
 
 function num(x) {
   const n = Number(x)
@@ -200,6 +216,8 @@ export function computeMarketAction(panicData) {
 
   const { regime, regimeLabel } = resolveRegime(totalScore)
   const copy = buildActionCopy(regime)
+  const parts = copy.actionHeadline.split("—").map((s) => s.trim())
+  const strategyThesis = parts.length > 1 ? parts[1] : parts[0]
 
   return {
     totalScore,
@@ -207,6 +225,8 @@ export function computeMarketAction(panicData) {
     regime,
     regimeLabel,
     ...copy,
+    marketTemperature: computeMarketTemperature(totalScore),
+    strategyThesis,
     breakdown,
   }
 }
