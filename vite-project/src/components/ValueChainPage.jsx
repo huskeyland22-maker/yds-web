@@ -9,8 +9,21 @@ import { buildTodaysKeySignal } from "../utils/macroTerminalPulse.js"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
 import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
+import KoreaGrowthSectorMap from "./KoreaGrowthSectorMap.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
 import ValueChainStockSignals from "./ValueChainStockSignals.jsx"
+
+/** @type {Record<string, string[]>} */
+const GROWTH_TO_VC_HEAT_IDS = {
+  "ai-infra": ["ai-datacenter-infra", "hbm-ai-semiconductor"],
+  semiconductor: ["hbm-ai-semiconductor"],
+  power: ["power-grid-hvdc", "power-semiconductor-electronics"],
+  transformer: ["power-grid-hvdc"],
+  nuclear: ["nuclear-smr"],
+  robot: ["on-device-ai-robotics"],
+  defense: ["defense"],
+  datacenter: ["ai-datacenter-infra"],
+}
 
 function heatPillClass(heat) {
   if (heat === "VERY HOT") return "text-rose-200 bg-rose-500/20 border-rose-300/30"
@@ -97,6 +110,33 @@ export default function ValueChainPage({
     [sectors, panicData, marketCycleStage],
   )
 
+  const growthHeatById = useMemo(() => {
+    const byVc = Object.fromEntries(sectors.map((s) => [s.id, s.heat]))
+    const rank = (h) => {
+      const u = String(h || "").toUpperCase()
+      if (u === "VERY HOT") return 4
+      if (u === "HOT") return 3
+      if (u === "WARM") return 2
+      return 1
+    }
+    const labelFromRank = (r) => {
+      if (r >= 4) return "VERY HOT"
+      if (r >= 3) return "HOT"
+      if (r >= 2) return "WARM"
+      return "COOL"
+    }
+    /** @type {Record<string, string>} */
+    const out = {}
+    for (const [growthId, vcIds] of Object.entries(GROWTH_TO_VC_HEAT_IDS)) {
+      let best = 0
+      for (const id of vcIds) {
+        best = Math.max(best, rank(byVc[id]))
+      }
+      if (best > 0) out[growthId] = labelFromRank(best)
+    }
+    return out
+  }, [sectors])
+
   return (
     <div className="relative overflow-hidden rounded-[1.35rem] border border-[rgba(146,164,201,0.2)] bg-[#0c1222] shadow-[0_0_0_1px_rgba(88,132,255,0.08),0_32px_80px_rgba(0,0,0,0.5)]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#0b0f14_0%,#11161c_38%,#1a2438_100%)]" aria-hidden />
@@ -118,6 +158,10 @@ export default function ValueChainPage({
           </Link>
           <span className="text-slate-600">→</span>
           <span className="font-medium text-cyan-200/85">산업 흐름</span>
+          <span className="text-slate-600">→</span>
+          <a href="#growth-sector-map" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
+            성장맵
+          </a>
           <span className="text-slate-600">→</span>
           <a href="#ai-bottleneck-flow" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
             병목
@@ -143,12 +187,12 @@ export default function ValueChainPage({
           />
           <div className="relative z-[1] grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_minmax(240px,300px)] lg:gap-8">
             <div className="min-w-0">
-              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Research desk · Korea</p>
+              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Market Cycle Lab · Korea</p>
               <p className="m-0 mt-2 text-[1.05rem] font-semibold leading-snug tracking-tight text-slate-50 md:text-[1.2rem]">
-                한국 시장의 가치 흐름을 한눈에
+                코리아 밸류체인 · 성장섹터 맵
               </p>
-              <p className="m-0 mt-2 font-display text-[0.95rem] font-semibold leading-none tracking-[-0.02em] text-slate-400 md:text-[1.05rem]">
-                KOREA VALUE CHAIN MAP
+              <p className="m-0 mt-2 font-display text-[0.95rem] font-semibold leading-none tracking-[0.04em] text-slate-400/65 md:text-[1.05rem]">
+                AI 병목 · 산업 재편 · 순환매
               </p>
               <dl className="m-0 mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
@@ -209,6 +253,10 @@ export default function ValueChainPage({
             </aside>
           </div>
         </section>
+
+        <div className="mb-10">
+          <KoreaGrowthSectorMap heatById={growthHeatById} />
+        </div>
 
         <h2 className="m-0 font-['Playfair_Display',Georgia,serif] text-base font-semibold tracking-tight text-slate-100 md:text-lg">
           메인 산업 밸류체인
