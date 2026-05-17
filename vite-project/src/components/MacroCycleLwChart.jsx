@@ -430,7 +430,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
       <div
         className={
           compact
-            ? "relative h-[min(52vw,220px)] w-full min-h-[200px] sm:h-[260px] sm:min-h-[220px]"
+            ? "relative h-[min(52vw,242px)] w-full min-h-[220px] sm:h-[286px] sm:min-h-[242px]"
             : "relative h-[360px] w-full min-h-[280px] sm:h-[400px] sm:min-h-[300px]"
         }
       >

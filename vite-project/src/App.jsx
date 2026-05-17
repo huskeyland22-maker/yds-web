@@ -1078,19 +1078,19 @@ function App() {
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
-      <aside className="hidden w-[15rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh] xl:w-[16rem]">
-        <div className="shrink-0 px-3 pb-2 pt-2.5 lg:border-b lg:border-white/[0.06] lg:px-4 lg:pb-3 lg:pt-3">
-          <p className="m-0 font-display text-trading-lg font-semibold leading-none tracking-tight text-slate-50 lg:text-xl">Y&apos;ds</p>
+      <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
+        <div className="shrink-0 px-2 pb-2 pt-2.5 lg:border-b lg:border-white/[0.06] lg:px-2.5 lg:pb-2.5 lg:pt-3">
+          <p className="m-0 font-display text-base font-semibold leading-none tracking-tight text-slate-50">Y&apos;ds</p>
           <p className="m-0 mt-1 text-trading-2xs font-medium tracking-[0.12em] text-slate-500">매크로 터미널</p>
         </div>
-        <nav className="flex flex-col gap-0.5 px-2.5 py-2" aria-label="주요 메뉴">
+        <nav className="flex flex-col gap-0.5 px-2 py-2" aria-label="주요 메뉴">
           {MENU.map((item, i) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
                 [
-                  "flex w-full items-center gap-2 rounded-card border px-3 py-2 text-trading-sm transition",
+                  "flex w-full items-center gap-1.5 rounded-card border px-2 py-1.5 text-[11px] transition",
                   isActive
                     ? "border-indigo-500/30 bg-indigo-500/[0.14] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
                     : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-slate-200",
@@ -1104,13 +1104,13 @@ function App() {
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="whitespace-nowrap text-trading-sm font-medium tracking-tight">{item.label}</span>
+                  <span className="min-w-0 truncate font-medium leading-tight tracking-tight">{item.label}</span>
                 </>
               )}
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-3 lg:pb-4 lg:pt-3">
+        <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-2 lg:pb-3 lg:pt-2.5">
           <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">시장 상태</p>
           <dl className="m-0 mt-2 space-y-1.5 text-trading-xs leading-snug">
             <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
@@ -1249,7 +1249,6 @@ function App() {
                       panicData={panicData}
                       cycleMetricHistory={cycleMetricHistory}
                       isStale={panicDataStale}
-                      updatedLine={cycleDeskMeta.updatedLine}
                       asOfDateLabel={cycleDeskMeta.asOfDateLabel}
                       tacticalView={tacticalView}
                       strategicView={strategicView}
