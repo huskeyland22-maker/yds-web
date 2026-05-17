@@ -127,8 +127,10 @@ export function panicDataFromCycleRow(row) {
   }
 }
 
-/** @param {object[]} rows */
+/** @param {object[]} rows — date 오름차순 배열이면 마지막 = 최신 */
 export function latestCycleHistoryRow(rows) {
   if (!Array.isArray(rows) || !rows.length) return null
   return rows[rows.length - 1]
 }
+
+export { latestHistoryRow, panicDeskDataFromHistory } from "./panicHistoryDesk.js"

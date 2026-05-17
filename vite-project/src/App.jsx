@@ -6,11 +6,8 @@ import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
-import {
-  CYCLE_HISTORY_MAX,
-  latestCycleHistoryRow,
-  panicDataFromCycleRow,
-} from "./utils/cycleHistoryUtils.js"
+import { CYCLE_HISTORY_MAX, latestCycleHistoryRow } from "./utils/cycleHistoryUtils.js"
+import { panicDeskDataFromHistory } from "./utils/panicHistoryDesk.js"
 import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
 import { kstCalendarKey } from "./utils/formatDataAge.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
@@ -449,13 +446,15 @@ function App() {
   const cycleMetricHistory = useAppDataStore((s) => s.cycleMetricHistory)
   const cycleHistorySource = useAppDataStore((s) => s.cycleHistorySource)
 
-  /** 허브: 상단 수치·차트 모두 panic_index_history 최신 행과 동기 */
+  /** panic_index_history 최신 row — panic_metrics 혼합 금지 (허브) */
   const deskPanicData = useMemo(() => {
-    if (!isPanicHubEnabled()) return panicData
-    const last = latestCycleHistoryRow(cycleMetricHistory)
-    const fromHistory = panicDataFromCycleRow(last)
-    if (!fromHistory) return panicData
-    return { ...(panicData ?? {}), ...fromHistory }
+    if (isPanicHubEnabled()) {
+      if (cycleMetricHistory?.length > 0) {
+        return panicDeskDataFromHistory(cycleMetricHistory)
+      }
+      return null
+    }
+    return panicData
   }, [panicData, cycleMetricHistory])
   const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
 
@@ -640,6 +639,7 @@ function App() {
         const savedAt = payload.updatedAt
         if (!isPanicHubEnabled()) {
           appendPanicIndexHistory({ ...normalizedParsedData, updatedAt: savedAt }, tradeDate)
+          await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
         }
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()
@@ -665,12 +665,8 @@ function App() {
         console.log("PANEL_CLOSED")
 
         if (!usedHubSavePath) {
-          const appStore = useAppDataStore.getState()
           try {
-            await Promise.all([
-              usePanicStore.getState().fetchPanicData("manual-api-post-save", { force: true }),
-              appStore.loadCycleHistoryBundle({ limit: 500, force: true }),
-            ])
+            await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
           } catch (e) {
             console.warn("[panic] post-save refresh", e)
           }
@@ -688,14 +684,15 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!panicData || isPanicHubEnabled()) return
-    appendPanicIndexHistory(panicData)
-    useAppDataStore.getState().syncCycleHistoryFromPanic(panicData)
-  }, [panicData])
-
-  useEffect(() => {
     void useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
   }, [])
+
+  /** history refetch 후 panicStore 스냅샷 = 최신 history row (허브 데스크·기타 화면) */
+  useEffect(() => {
+    if (!isPanicHubEnabled() || !cycleMetricHistory?.length) return
+    const desk = panicDeskDataFromHistory(cycleMetricHistory)
+    if (desk) applyServerPanicSnapshot(desk)
+  }, [cycleMetricHistory, applyServerPanicSnapshot])
 
   useEffect(() => {
     void useAppDataStore.getState().fetchSectorHeat()
@@ -705,10 +702,9 @@ function App() {
     if (!isPanicHubEnabled()) return undefined
     const unsub = subscribePanicHubRealtime({
       onChange: (evt) => {
-        const table = evt?.table ?? "panic_metrics"
+        const table = evt?.table ?? "panic_index_history"
         logRealtime("postgres_change", { table })
         useAppDataStore.getState().markRealtimeEvent()
-        void usePanicStore.getState().fetchPanicData("supabase-realtime", { force: true })
         void useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
       },
     })
@@ -1202,8 +1198,8 @@ function App() {
             <p className="m-0 mt-0.5 text-[9px] leading-relaxed text-slate-500">{sidebarPulse.basisLine}</p>
           ) : null}
           <p className="m-0 mt-3 font-mono text-[9px] leading-relaxed text-slate-600">
-            VIX {Number.isFinite(Number(panicData?.vix)) ? Number(panicData.vix).toFixed(2) : "—"} · F&amp;G{" "}
-            {Number.isFinite(Number(panicData?.fearGreed)) ? Math.round(Number(panicData.fearGreed)) : "—"}
+            VIX {Number.isFinite(Number(deskPanicData?.vix)) ? Number(deskPanicData.vix).toFixed(2) : "—"} · F&amp;G{" "}
+            {Number.isFinite(Number(deskPanicData?.fearGreed)) ? Math.round(Number(deskPanicData.fearGreed)) : "—"}
           </p>
           <button
             type="button"

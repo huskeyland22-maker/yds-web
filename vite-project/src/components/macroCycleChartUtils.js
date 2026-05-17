@@ -223,8 +223,13 @@ export function pickPanicNumber(panicData, key) {
   return isPlaceholderZero(key, n) ? NaN : n
 }
 
-/** panicData 우선; 히스토리는 2025+ 행만 (mock 2024 미사용) */
+/** history row 우선 (panic_index_history); panic_metrics는 fallback */
 export function pickMetricDisplayValue(panicData, rows, key) {
+  if (Array.isArray(rows) && rows.length > 0) {
+    const last = rows[rows.length - 1]
+    const n = Number(last?.[key])
+    if (Number.isFinite(n)) return n
+  }
   const live = pickPanicNumber(panicData, key)
   if (Number.isFinite(live)) return live
   if (!Array.isArray(rows) || rows.length === 0) return NaN

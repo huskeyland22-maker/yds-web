@@ -1,19 +1,30 @@
 import { useMemo, useState } from "react"
 import { CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
-import MacroCycleLwChart from "./MacroCycleLwChart.jsx"
+import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
+
+const METRIC_STROKES = {
+  vix: "#f87171",
+  fearGreed: "#fbbf24",
+  putCall: "#60a5fa",
+  highYield: "#fb923c",
+  bofa: "#c084fc",
+}
 
 /**
  * @param {{
  *   rows: object[]
  *   primarySeries: { key: string; name: string; color?: string }
  *   chartMetric: string
- *   onMetricChange: (key: string) => void
  * }} props
  */
-export default function PanicDeskChart({ rows, primarySeries }) {
+export default function PanicDeskChart({ rows, primarySeries, chartMetric }) {
   const [rangeId, setRangeId] = useState("6M")
 
   const slicedRows = useMemo(() => sliceHistoryByRange(rows, rangeId), [rows, rangeId])
+  const activeKey = chartMetric || primarySeries?.key || "vix"
+  const stroke = primarySeries?.color ?? METRIC_STROKES[activeKey] ?? "#22d3ee"
+  const hasHistory = Array.isArray(slicedRows) && slicedRows.length > 0
+
   return (
     <section className="trading-card-shell overflow-visible">
       <div className="flex flex-wrap items-center justify-end gap-2 border-b border-white/[0.06] px-2.5 py-1.5">
@@ -36,16 +47,18 @@ export default function PanicDeskChart({ rows, primarySeries }) {
         </div>
       </div>
       <div className="overflow-visible p-1 sm:p-1.5">
-        <MacroCycleLwChart
-          rows={slicedRows}
-          primarySeries={{
-            key: primarySeries.key,
-            name: primarySeries.name,
-            color: primarySeries.color,
-          }}
-          compact
-          showVolume={false}
-        />
+        {hasHistory ? (
+          <PanicHistoryLineChart
+            rows={slicedRows}
+            dataKey={activeKey}
+            dataLabel={primarySeries?.name ?? activeKey}
+            stroke={stroke}
+          />
+        ) : (
+          <div className="flex h-[340px] items-center justify-center text-[11px] text-slate-500">
+            panic_index_history — 데이터 없음
+          </div>
+        )}
       </div>
     </section>
   )
