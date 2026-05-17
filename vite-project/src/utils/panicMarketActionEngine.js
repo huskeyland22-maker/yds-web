@@ -111,8 +111,8 @@ const METRIC_SCORERS = [
   { key: "vxn", label: "VXN", score: scoreVxn },
 ]
 
-/** @param {object | null | undefined} panicData */
-function pickMetricValue(panicData, key) {
+/** @param {object | null | undefined} panicData @param {string} key */
+export function pickMetricValue(panicData, key) {
   if (!panicData) return null
   if (key === "highYield") return num(panicData.highYield ?? panicData.hyOas)
   if (key === "gsBullBear") return num(panicData.gsBullBear ?? panicData.gsSentiment)

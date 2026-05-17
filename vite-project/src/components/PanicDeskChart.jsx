@@ -3,6 +3,7 @@ import { CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 import PanicMarketActionPanel from "./PanicMarketActionPanel.jsx"
 import PanicMarketReportPanel from "./PanicMarketReportPanel.jsx"
+import PanicMarketTimingPanel from "./PanicMarketTimingPanel.jsx"
 import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
 
 const METRIC_STROKES = {
@@ -86,6 +87,7 @@ export default function PanicDeskChart({
         historyRows={slicedRows}
       />
       <PanicMarketReportPanel report={deskMarketReport} loading={deskMarketReportLoading} />
+      <PanicMarketTimingPanel panicData={panicData} />
       <PanicMarketActionPanel panicData={panicData} />
     </section>
   )
