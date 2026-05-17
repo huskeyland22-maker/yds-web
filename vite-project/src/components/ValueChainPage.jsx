@@ -3,13 +3,11 @@ import { Link } from "react-router-dom"
 import { VALUE_CHAIN_SECTORS } from "../data/valueChainSectors.js"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { usePanicStore } from "../store/panicStore.js"
-import { buildResearchDeskBriefing } from "../utils/researchDeskBriefing.js"
 import { ValueChainHeatTraceBadge } from "./DataTraceBadge.jsx"
-import { buildTodaysKeySignal } from "../utils/macroTerminalPulse.js"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
 import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
-import KoreaGrowthSectorMap from "./KoreaGrowthSectorMap.jsx"
+import KoreaValueChainDesk from "./KoreaValueChainDesk.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
 import ValueChainStockSignals from "./ValueChainStockSignals.jsx"
 
@@ -103,12 +101,6 @@ export default function ValueChainPage({
     })
   }, [sectors])
 
-  const desk = useMemo(() => buildResearchDeskBriefing(sectors, panicData), [sectors, panicData])
-  const todaysKey = useMemo(
-    () => buildTodaysKeySignal(sectors, panicData, marketCycleStage),
-    [sectors, panicData, marketCycleStage],
-  )
-
   const growthHeatById = useMemo(() => {
     const byVc = Object.fromEntries(sectors.map((s) => [s.id, s.heat]))
     const rank = (h) => {
@@ -158,12 +150,12 @@ export default function ValueChainPage({
           <span className="text-slate-600">→</span>
           <span className="font-medium text-cyan-200/85">산업 흐름</span>
           <span className="text-slate-600">→</span>
-          <a href="#growth-sector-map" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
-            국내 섹터
+          <a href="#korea-compressed-map" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
+            산업맵
           </a>
           <span className="text-slate-600">→</span>
-          <a href="#korea-industry-flow" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
-            연결맵
+          <a href="#korea-sector-details" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
+            상세
           </a>
           <span className="text-slate-600">→</span>
           <a href="#ai-bottleneck-flow" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
@@ -179,96 +171,19 @@ export default function ValueChainPage({
 
         <ValueChainHeatTraceBadge className="mb-3" />
 
-        <section className="relative mb-7 min-h-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,rgba(14,18,28,0.97),rgba(8,10,16,0.99))] px-4 py-5 md:px-6 md:py-6">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-50"
-            style={{
-              background:
-                "radial-gradient(ellipse 80% 60% at 12% 0%, rgba(99,102,241,0.09), transparent 52%), radial-gradient(ellipse 50% 40% at 100% 100%, rgba(56,189,248,0.06), transparent 50%)",
-            }}
-            aria-hidden
-          />
-          <div className="relative z-[1] grid grid-cols-1 items-start gap-5 lg:grid-cols-[1fr_minmax(240px,300px)] lg:gap-8">
-            <div className="min-w-0">
-              <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Market Cycle Lab · Korea</p>
-              <p className="m-0 mt-2 text-[1.05rem] font-semibold leading-snug tracking-tight text-slate-50 md:text-[1.2rem]">
-                코리아 밸류체인 · 국내 산업 맵
-              </p>
-              <p className="m-0 mt-2 font-display text-[0.95rem] font-semibold leading-none tracking-[0.04em] text-slate-400/65 md:text-[1.05rem]">
-                산업 재편 · 순환매 · 메가트렌드
-              </p>
-              <dl className="m-0 mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
-                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">현재 시장 에너지</dt>
-                  <dd className="m-0 mt-1 text-[12px] font-medium leading-snug text-cyan-100/95">{desk.marketEnergy}</dd>
-                </div>
-                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
-                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">핵심 흐름</dt>
-                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-200">{desk.coreFlow}</dd>
-                </div>
-                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
-                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">위험 신호</dt>
-                  <dd className="m-0 mt-1 text-[12px] leading-snug text-slate-300">{desk.riskState}</dd>
-                </div>
-                <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
-                  <dt className="m-0 text-[9px] font-medium uppercase tracking-[0.16em] text-slate-500">오늘 핵심 테마</dt>
-                  <dd className="m-0 mt-1 text-[12px] leading-snug text-indigo-200/95">{desk.todaysTheme}</dd>
-                </div>
-              </dl>
-              <p className="m-0 mt-3 font-mono text-[9px] text-slate-600">{desk.updateTimestampLine}</p>
-              {desk.basisLine ? (
-                <p className="m-0 mt-0.5 font-mono text-[9px] text-slate-500">{desk.basisLine}</p>
-              ) : null}
-            </div>
+        <KoreaValueChainDesk
+          heatById={growthHeatById}
+          onStockSelect={(payload) => setSelected(payload)}
+        >
+          <section className="rounded-xl border border-white/[0.06] bg-black/20 px-3 py-4 md:px-4">
+            <h2 className="m-0 text-sm font-semibold text-slate-200">메인 산업 밸류체인</h2>
+            <p className="m-0 mt-1 text-[10px] text-slate-500">
+              13개 산업군 · 수요단 / 생산단 / 부품단 · 종목 클릭 시 한국투자 연결
+            </p>
+          </section>
 
-            <aside
-              className="rounded-xl border border-indigo-500/20 bg-[rgba(6,8,14,0.85)] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_0_24px_rgba(79,70,229,0.08)] md:px-4 md:py-3.5"
-              aria-label="오늘의 핵심 시그널"
-            >
-              <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-indigo-300/80">
-                Today&apos;s key signal
-              </p>
-              <div className="m-0 mt-3 space-y-2.5 text-[11px] leading-snug">
-                <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
-                  <span className="text-slate-500">Risk-on / off</span>
-                  <span className="text-right font-semibold text-slate-100">{todaysKey.riskOnOff}</span>
-                </div>
-                <p className="m-0 text-right font-mono text-[9px] text-slate-500">{todaysKey.riskDetail}</p>
-                {todaysKey.updateTimestampLine ? (
-                  <p className="m-0 text-right font-mono text-[9px] text-slate-600">{todaysKey.updateTimestampLine}</p>
-                ) : null}
-                {todaysKey.basisLine ? (
-                  <p className="m-0 text-right font-mono text-[9px] text-slate-500">{todaysKey.basisLine}</p>
-                ) : null}
-                <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
-                  <span className="text-slate-500">Leading sector</span>
-                  <span className="max-w-[11rem] text-right font-medium text-slate-100">{todaysKey.leadingSector}</span>
-                </div>
-                <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
-                  <span className="text-slate-500">Foreign flow</span>
-                  <span className="max-w-[11rem] text-right text-slate-200">{todaysKey.foreignFlow}</span>
-                </div>
-                <div className="flex items-start justify-between gap-2 pt-0.5">
-                  <span className="text-slate-500">Market cycle</span>
-                  <span className="font-mono text-indigo-200/95">{todaysKey.marketCycle}</span>
-                </div>
-              </div>
-            </aside>
-          </div>
-        </section>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
 
-        <div className="mb-10">
-          <KoreaGrowthSectorMap heatById={growthHeatById} />
-        </div>
-
-        <h2 className="m-0 font-['Playfair_Display',Georgia,serif] text-base font-semibold tracking-tight text-slate-100 md:text-lg">
-          메인 산업 밸류체인
-        </h2>
-        <p className="m-0 mt-1.5 max-w-2xl text-[11px] leading-snug text-slate-500 md:text-xs">
-          13개 산업군 · 수요단 / 생산단 / 부품단 공급망
-        </p>
-
-        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 xl:grid-cols-3 xl:gap-6">
           {ordered.map((sector, index) => {
             const curated = curatedBySector(sector)
             const { tree, stages } = buildSectorTree(sector)
@@ -276,15 +191,8 @@ export default function ValueChainPage({
             return (
               <article
                 key={sector.id}
-                className="group relative flex flex-col rounded-2xl border border-white/[0.08] bg-[linear-gradient(180deg,rgba(16,20,32,0.92),rgba(8,10,18,0.96))] p-4 shadow-[0_0_0_1px_rgba(99,102,241,0.06),0_16px_40px_rgba(0,0,0,0.4)] transition duration-300 hover:border-indigo-500/25 hover:shadow-[0_0_0_1px_rgba(99,102,241,0.12),0_20px_48px_rgba(0,0,0,0.45),0_0_28px_rgba(79,70,229,0.06)] md:p-5"
+                className="group relative flex flex-col rounded-2xl border border-white/[0.07] bg-[rgba(12,14,18,0.95)] p-4 transition duration-200 hover:border-white/12 md:p-5"
               >
-                <div
-                  className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100"
-                  style={{
-                    background: "radial-gradient(circle at 90% 0%, rgba(129,140,248,0.1), transparent 55%)",
-                  }}
-                  aria-hidden
-                />
                 <div className="relative z-[1] mb-3 flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="m-0 font-mono text-[10px] tracking-[0.12em] text-slate-500">SECTOR {String(index + 1).padStart(2, "0")}</p>
@@ -334,7 +242,7 @@ export default function ValueChainPage({
                                         key={item.code || item.name}
                                         type="button"
                                         onClick={() => setSelected({ stock: item, sectorName: sector.name })}
-                                        className="group/stock inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] px-2 py-1 text-left transition duration-200 hover:border-indigo-400/35 hover:bg-indigo-500/[0.08] hover:shadow-[0_0_16px_rgba(99,102,241,0.12)] md:gap-1.5"
+                                        className="group/stock inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-white/[0.07] bg-white/[0.03] px-2 py-1 text-left transition duration-200 hover:border-indigo-400/30 hover:bg-indigo-500/[0.06] md:gap-1.5"
                                       >
                                         <span className="text-[11px] text-slate-200 group-hover/stock:text-white md:text-xs">{item.name}</span>
                                         <span
@@ -369,6 +277,7 @@ export default function ValueChainPage({
         </div>
 
         <AiBottleneckFlow sectors={sectors} />
+        </KoreaValueChainDesk>
       </div>
 
       {selected ? (
