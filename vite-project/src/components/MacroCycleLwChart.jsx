@@ -361,6 +361,8 @@ export default function MacroCycleLwChart({
   const [chartIn, setChartIn] = useState(false)
   const [lastValueTopPx, setLastValueTopPx] = useState(null)
   const [lastPointPx, setLastPointPx] = useState(null)
+  const [ma20On, setMa20On] = useState(false)
+  const [ma60On, setMa60On] = useState(false)
 
   const pack = useMemo(() => {
     if (!primarySeries?.key) return null
@@ -372,6 +374,22 @@ export default function MacroCycleLwChart({
   const deskLabels = useMemo(() => getChartDeskLabels(rows, primarySeries), [rows, primarySeries])
   const titleLine = headerTitle ?? deskLabels.title
   const subtitleLine = headerSubtitle ?? deskLabels.subtitle
+
+  const historyLen = pack?.closes?.length ?? 0
+  const ma20Available = historyLen >= 20 && (pack?.ma20?.length ?? 0) > 0
+  const ma60Available = historyLen >= 60 && (pack?.ma60?.length ?? 0) > 0
+  const showMa20 = ma20On && ma20Available
+  const showMa60 = ma60On && ma60Available
+
+  useEffect(() => {
+    setMa20On(false)
+    setMa60On(false)
+  }, [primarySeries?.key])
+
+  useEffect(() => {
+    if (historyLen < 20) setMa20On(false)
+    if (historyLen < 60) setMa60On(false)
+  }, [historyLen])
 
   useEffect(() => {
     metaRef.current = pack?.meta ?? new Map()
@@ -508,7 +526,14 @@ export default function MacroCycleLwChart({
       crosshairMarkerVisible: false,
     })
 
-    seriesRef.current = { priceSeries, glowSeries, upSegSeries, downSegSeries }
+    seriesRef.current = {
+      priceSeries,
+      glowSeries,
+      upSegSeries,
+      downSegSeries,
+      ma20Series,
+      ma60Series,
+    }
 
     if (showVolume && pack.volume?.length) {
       const volumeSeries = chart.addHistogramSeries({
@@ -527,8 +552,8 @@ export default function MacroCycleLwChart({
     })
 
     const drawMs = 720
-    animateSeriesDraw(ma60Series, pack.ma60, drawMs)
-    animateSeriesDraw(ma20Series, pack.ma20, drawMs)
+    ma20Series.setData([])
+    ma60Series.setData([])
     animateSeriesDraw(glowSeries, pack.closes, drawMs)
     animateSeriesDraw(priceSeries, pack.closes, drawMs)
     if (segments.up.length) animateSeriesDraw(upSegSeries, segments.up, drawMs)
@@ -647,6 +672,17 @@ export default function MacroCycleLwChart({
   }, [pack, isMobile, compact, showVolume])
 
   useEffect(() => {
+    const s = seriesRef.current
+    if (!s?.ma20Series || !s?.ma60Series || !pack) return
+    try {
+      s.ma20Series.setData(showMa20 ? pack.ma20 : [])
+      s.ma60Series.setData(showMa60 ? pack.ma60 : [])
+    } catch {
+      /* chart unmounted */
+    }
+  }, [pack, showMa20, showMa60])
+
+  useEffect(() => {
     if (!pack) {
       setChartIn(false)
       return undefined
@@ -689,22 +725,52 @@ export default function MacroCycleLwChart({
           </p>
           <p className="m-0 mt-0.5 text-[10px] font-medium text-slate-400/95">{subtitleLine}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5 text-[9px] text-slate-500">
-          <span className="inline-flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 text-[9px]">
+          <span className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 font-medium text-slate-200">
             <span
               className="inline-block h-0.5 w-4 rounded-full shadow-[0_0_8px_rgba(45,212,191,0.45)]"
               style={{ backgroundColor: accent }}
             />
             {seriesName}
           </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="inline-block h-0.5 w-3 rounded-full" style={{ backgroundColor: MA20_COLOR }} />
+          <button
+            type="button"
+            disabled={!ma20Available}
+            onClick={() => ma20Available && setMa20On((v) => !v)}
+            title={ma20Available ? "MA20 표시 전환" : `MA20: 데이터 ${historyLen}/20일`}
+            className={[
+              "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium transition",
+              showMa20
+                ? "bg-white/[0.08] text-slate-100 ring-1 ring-white/10"
+                : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-400",
+              !ma20Available && "cursor-not-allowed opacity-35 hover:bg-transparent hover:text-slate-500",
+            ].join(" ")}
+          >
+            <span
+              className="inline-block h-0.5 w-3 rounded-full"
+              style={{ backgroundColor: MA20_COLOR, opacity: showMa20 ? 1 : 0.35 }}
+            />
             MA20
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="inline-block h-0.5 w-3 rounded-full" style={{ backgroundColor: MA60_COLOR }} />
+          </button>
+          <button
+            type="button"
+            disabled={!ma60Available}
+            onClick={() => ma60Available && setMa60On((v) => !v)}
+            title={ma60Available ? "MA60 표시 전환" : `MA60: 데이터 ${historyLen}/60일`}
+            className={[
+              "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium transition",
+              showMa60
+                ? "bg-white/[0.08] text-slate-100 ring-1 ring-white/10"
+                : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-400",
+              !ma60Available && "cursor-not-allowed opacity-35 hover:bg-transparent hover:text-slate-500",
+            ].join(" ")}
+          >
+            <span
+              className="inline-block h-0.5 w-3 rounded-full"
+              style={{ backgroundColor: MA60_COLOR, opacity: showMa60 ? 1 : 0.35 }}
+            />
             MA60
-          </span>
+          </button>
           {showVolume ? (
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-1 rounded-sm bg-emerald-500/60" />
