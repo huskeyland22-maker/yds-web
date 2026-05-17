@@ -85,6 +85,7 @@ export default function PanicDeskChart({
         metricKey={activeKey}
         currentValue={currentValue}
         historyRows={slicedRows}
+        panicData={panicData}
       />
       <div className="mt-6">
         <PanicMarketActionPanel panicData={panicData} />
