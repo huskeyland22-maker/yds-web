@@ -219,7 +219,6 @@ export default function PanicDeskDashboard({
         rows={cycleMetricHistory}
         primarySeries={chartSeries}
         chartMetric={chartMetric}
-        onMetricChange={setChartMetric}
       />
     </div>
   )

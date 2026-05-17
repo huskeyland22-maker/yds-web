@@ -17,12 +17,10 @@ import {
   RealtimeTraceBadge,
   ValueChainHeatTraceBadge,
 } from "./components/DataTraceBadge.jsx"
-import MacroCycleTierCard from "./components/MacroCycleTierCard.jsx"
 import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
 import SupabaseRawDebugPanel from "./components/SupabaseRawDebugPanel.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
-import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
@@ -33,7 +31,6 @@ import MobileDrawer from "./components/layout/MobileDrawer.jsx"
 import MobileShellDebugOverlay from "./components/layout/MobileShellDebugOverlay.jsx"
 import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
 import { isDevMode } from "./utils/devMode.js"
-import { buildTierMacroComments } from "./components/macroCycleChartUtils.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
 import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
 import { useAppDataStore } from "./store/appDataStore.js"
@@ -86,22 +83,6 @@ const PANIC_TEXT_PLACEHOLDER = `분류,지수 명칭,최종 확정 수치,전일
 장기,8. 하이일드 스프레드,1.68%,-,🟢 안정
 장기,9. GS B/B 지수,68.0%,-,🟡 주의`
 const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
-const TACTICAL_SERIES = [
-  { key: "vix", name: "VIX", color: "#ef4444" },
-  { key: "vxn", name: "VXN", color: "#22c55e" },
-  { key: "putCall", name: "Put/Call", color: "#3b82f6" },
-]
-const STRATEGIC_SERIES = [
-  { key: "fearGreed", name: "Fear&Greed", color: "#f43f5e" },
-  { key: "move", name: "MOVE", color: "#eab308" },
-  { key: "bofa", name: "BofA", color: "#8b5cf6" },
-]
-const MACRO_SERIES = [
-  { key: "skew", name: "SKEW", color: "#14b8a6" },
-  { key: "highYield", name: "하이일드", color: "#f97316" },
-  { key: "gsBullBear", name: "GS B/B", color: "#a855f7" },
-]
-
 const FIELD_LABELS = {
   vix: "VIX",
   vxn: "VXN",
@@ -135,20 +116,6 @@ function forceResumeReloadWithCooldown() {
   } catch {
     window.location.reload()
   }
-}
-
-function macroDashboardStatus(stateLabel) {
-  const s = String(stateLabel || "")
-  if (/공포|패닉|급등|위험|경고|스파이크|확대/i.test(s)) {
-    return { variant: "stress", label: "위험 증가" }
-  }
-  if (/경계|주의|혼조|모호|과열/i.test(s)) {
-    return { variant: "watch", label: "주시 구간" }
-  }
-  if (/완화|안정|유지/i.test(s)) {
-    return { variant: "stable", label: "공포 완화 · 안정" }
-  }
-  return { variant: "stable", label: "안정" }
 }
 
 function parseTextPanicData(text) {
@@ -1276,7 +1243,7 @@ function App() {
             <Route
               path="/cycle"
               element={
-                <div id="desk" className="space-y-2 lg:space-y-5">
+                <div id="desk" className="min-w-0">
                   <SectionErrorBoundary label="패닉 데스크">
                     <PanicDeskDashboard
                       panicData={panicData}
@@ -1289,61 +1256,6 @@ function App() {
                       macroView={macroView}
                       marketState={marketState}
                     />
-                  </SectionErrorBoundary>
-                  <SectionErrorBoundary label="사이클 플로우·매크로 티어">
-                    <div className="hidden lg:block">
-                      <SectorFlowStrip />
-                    </div>
-                    <section className="mt-2 hidden grid-cols-1 gap-2 lg:mt-3 lg:grid lg:grid-cols-3 lg:gap-5">
-                    <MacroCycleTierCard
-                      compact={isMobileLayout}
-                      tier="tactical"
-                      tierLabel="단기 전략"
-                      state={tacticalView.state}
-                      action={tacticalView.action}
-                      hint="단기 지표는 진입 방아쇠(Trigger)로 사용합니다."
-                      series={TACTICAL_SERIES}
-                      rows={cycleMetricHistory.slice(-120)}
-                      panicData={panicData}
-                      statusVariant={macroDashboardStatus(tacticalView.state).variant}
-                      statusLabel={macroDashboardStatus(tacticalView.state).label}
-                      macroComments={buildTierMacroComments("tactical", panicData)}
-                      delay={0}
-                      {...cycleDeskMeta}
-                    />
-                    <MacroCycleTierCard
-                      compact={isMobileLayout}
-                      tier="strategic"
-                      tierLabel="중기 전략"
-                      state={strategicView.state}
-                      action={strategicView.action}
-                      hint="중기 지표는 비중·섹터 로테이션 기준선입니다."
-                      series={STRATEGIC_SERIES}
-                      rows={cycleMetricHistory.slice(-120)}
-                      panicData={panicData}
-                      statusVariant={macroDashboardStatus(strategicView.state).variant}
-                      statusLabel={macroDashboardStatus(strategicView.state).label}
-                      macroComments={buildTierMacroComments("strategic", panicData)}
-                      delay={0.06}
-                      {...cycleDeskMeta}
-                    />
-                    <MacroCycleTierCard
-                      compact={isMobileLayout}
-                      tier="macro"
-                      tierLabel="장기 전략"
-                      state={macroView.state}
-                      action={macroView.action}
-                      hint="장기 지표는 꼬리·신용·구조 스트레스를 봅니다."
-                      series={MACRO_SERIES}
-                      rows={cycleMetricHistory.slice(-120)}
-                      panicData={panicData}
-                      statusVariant={macroDashboardStatus(macroView.state).variant}
-                      statusLabel={macroDashboardStatus(macroView.state).label}
-                      macroComments={buildTierMacroComments("macro", panicData)}
-                      delay={0.12}
-                      {...cycleDeskMeta}
-                    />
-                  </section>
                   </SectionErrorBoundary>
                 </div>
               }
