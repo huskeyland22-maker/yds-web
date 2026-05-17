@@ -20,8 +20,10 @@ const PRICE_SCALE_RESERVE_PX = 52
  * @param {import("lightweight-charts").IChartApi} chart
  * @param {HTMLElement} el
  * @param {number} pointCount
+ * @param {{ showTimeLabels?: boolean }} [opts]
  */
-function applyFullWidthTimeScale(chart, el, pointCount) {
+function applyFullWidthTimeScale(chart, el, pointCount, opts = {}) {
+  const { showTimeLabels = true } = opts
   const n = Math.max(2, pointCount)
   const w = Math.max(1, el.clientWidth)
   const leadingPad = Math.round(w * PLOT_LEADING_FRAC)
@@ -39,7 +41,7 @@ function applyFullWidthTimeScale(chart, el, pointCount) {
       rightOffset: 2,
       barSpacing: spacing,
       minBarSpacing: Math.max(4, spacing * 0.45),
-      timeVisible: n <= 14,
+      timeVisible: showTimeLabels,
     },
   })
 
@@ -102,11 +104,13 @@ function fmtVol(n) {
 /** @typedef {'riskOn'|'neutral'|'riskOff'} FlowRegime */
 
 /**
- * 단일 시계열(일별) → 종가 라인용 포인트 + MA20/60 + 보조 거래량(합성) + 메타.
+ * 단일 시계열(일별) → 종가 라인용 포인트 + MA20/60 + 메타.
  * @param {object[]} rows
  * @param {string} primaryKey
+ * @param {{ includeVolume?: boolean }} [opts]
  */
-function buildLwPack(rows, primaryKey) {
+function buildLwPack(rows, primaryKey, opts = {}) {
+  const { includeVolume = false } = opts
   const sorted = [...(rows || [])]
     .filter((r) => rowDay(r) && Number.isFinite(Number(r[primaryKey])))
     .sort((a, b) => String(rowDay(a)).localeCompare(String(rowDay(b))))
@@ -114,19 +118,18 @@ function buildLwPack(rows, primaryKey) {
 
   if (sorted.length < 2) return null
 
-  /** @type {{ time: string; close: number; open: number; _v: number }[]} */
+  /** @type {{ time: string; close: number; open?: number; _v?: number }[]} */
   const raw = []
   for (let i = 0; i < sorted.length; i++) {
     const close = Number(sorted[i][primaryKey])
     const open = i > 0 ? Number(sorted[i - 1][primaryKey]) : close
-    const rng = Math.abs(close - open)
-    const vol = rng * 1e6 + Math.abs(close) * 2e3 + 50
-    raw.push({
-      time: rowDay(sorted[i]),
-      open,
-      close,
-      _v: vol,
-    })
+    const row = { time: rowDay(sorted[i]), close }
+    if (includeVolume) {
+      const rng = Math.abs(close - open)
+      row.open = open
+      row._v = rng * 1e6 + Math.abs(close) * 2e3 + 50
+    }
+    raw.push(row)
   }
 
   /** @type {{ time: string; value: number }[]} */
@@ -147,29 +150,37 @@ function buildLwPack(rows, primaryKey) {
   const ma20 = sma(20)
   const ma60 = sma(60)
 
-  const vols = raw.map((r) => r._v)
-  const volume = raw.map((r, i) => {
-    const up = r.close >= r.open
-    let sum = 0
-    let c = 0
-    for (let j = Math.max(0, i - 19); j < i; j++) {
-      sum += vols[j]
-      c += 1
-    }
-    const avg = c > 0 ? sum / c : vols[i]
-    const spike = avg > 0 && r._v >= avg * 1.3
-    let color = up ? VOL_UP : VOL_DOWN
-    if (spike) color = up ? "rgba(34,197,94,0.78)" : "rgba(239,68,68,0.74)"
-    return { time: r.time, value: r._v * VOL_MULT, color }
-  })
+  /** @type {{ time: string; value: number; color?: string }[] | null} */
+  let volume = null
+  if (includeVolume) {
+    const vols = raw.map((r) => r._v)
+    volume = raw.map((r, i) => {
+      const up = r.close >= r.open
+      let sum = 0
+      let c = 0
+      for (let j = Math.max(0, i - 19); j < i; j++) {
+        sum += vols[j]
+        c += 1
+      }
+      const avg = c > 0 ? sum / c : vols[i]
+      const spike = avg > 0 && r._v >= avg * 1.3
+      let color = up ? VOL_UP : VOL_DOWN
+      if (spike) color = up ? "rgba(34,197,94,0.78)" : "rgba(239,68,68,0.74)"
+      return { time: r.time, value: r._v * VOL_MULT, color }
+    })
+  }
 
-  /** @type {Map<string, { close: number; volume: number; changePct: number }>} */
+  /** @type {Map<string, { close: number; volume?: number; changePct: number }>} */
   const meta = new Map()
   for (let i = 0; i < raw.length; i++) {
     const r = raw[i]
     const prevClose = i > 0 ? raw[i - 1].close : r.close
     const chg = prevClose ? ((r.close - prevClose) / Math.abs(prevClose)) * 100 : 0
-    meta.set(r.time, { close: r.close, volume: r._v, changePct: chg })
+    meta.set(r.time, {
+      close: r.close,
+      changePct: chg,
+      ...(includeVolume ? { volume: r._v } : {}),
+    })
   }
 
   const last = raw[raw.length - 1].close
@@ -261,6 +272,7 @@ function resolveMainLineVisuals(pack) {
  *   className?: string
  *   headerTitle?: string
  *   headerSubtitle?: string
+ *   showVolume?: boolean
  * }} props
  */
 export default function MacroCycleLwChart({
@@ -270,6 +282,7 @@ export default function MacroCycleLwChart({
   compact = false,
   headerTitle,
   headerSubtitle,
+  showVolume = false,
 }) {
   const isMobile = useIsMobileLayout()
   const wrapRef = useRef(null)
@@ -285,8 +298,8 @@ export default function MacroCycleLwChart({
 
   const pack = useMemo(() => {
     if (!primarySeries?.key) return null
-    return buildLwPack(rows, primarySeries.key)
-  }, [rows, primarySeries?.key])
+    return buildLwPack(rows, primarySeries.key, { includeVolume: showVolume })
+  }, [rows, primarySeries?.key, showVolume])
 
   const seriesName = primarySeries?.name ?? primarySeries?.key ?? "Metric"
   const accent = resolveSeriesColor(primarySeries)
@@ -322,12 +335,12 @@ export default function MacroCycleLwChart({
         visible: true,
         borderColor: "rgba(148,163,184,0.22)",
         textColor: "rgba(203,213,225,0.75)",
-        scaleMargins: { top: 0.08, bottom: 0.14 },
+        scaleMargins: showVolume ? { top: 0.08, bottom: 0.14 } : { top: 0.05, bottom: 0.06 },
       },
       leftPriceScale: { visible: false },
       timeScale: {
         borderColor: "rgba(34,211,238,0.08)",
-        timeVisible: false,
+        timeVisible: !showVolume,
         secondsVisible: false,
         fixLeftEdge: true,
         fixRightEdge: false,
@@ -362,12 +375,6 @@ export default function MacroCycleLwChart({
           return key ? formatChartTooltip(key) : ""
         },
       },
-    })
-
-    const volumeSeries = chart.addHistogramSeries({
-      priceFormat: { type: "volume" },
-      priceScaleId: "",
-      base: 0,
     })
 
     const ma60Series = chart.addLineSeries({
@@ -408,14 +415,22 @@ export default function MacroCycleLwChart({
 
     seriesRef.current = { priceSeries }
 
-    volumeSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.78, bottom: 0 },
-    })
+    if (showVolume && pack.volume?.length) {
+      const volumeSeries = chart.addHistogramSeries({
+        priceFormat: { type: "volume" },
+        priceScaleId: "",
+        base: 0,
+      })
+      volumeSeries.priceScale().applyOptions({
+        scaleMargins: { top: 0.78, bottom: 0 },
+      })
+      volumeSeries.setData(pack.volume)
+    }
+
     priceSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.06, bottom: 0.1 },
+      scaleMargins: showVolume ? { top: 0.06, bottom: 0.1 } : { top: 0.04, bottom: 0.035 },
     })
 
-    volumeSeries.setData(pack.volume)
     ma60Series.setData(pack.ma60)
     ma20Series.setData(pack.ma20)
     priceSeries.setData(pack.closes)
@@ -454,7 +469,7 @@ export default function MacroCycleLwChart({
         y: param.point.y,
         dateLabel: tkey ? formatChartTooltip(tkey) : String(param.time),
         value: data.value,
-        volume: extra?.volume ?? 0,
+        volume: showVolume ? (extra?.volume ?? 0) : undefined,
         changePct: extra?.changePct ?? 0,
       })
     }
@@ -486,7 +501,7 @@ export default function MacroCycleLwChart({
 
     const n = pack.closes.length
     const layoutTimeScale = () => {
-      applyFullWidthTimeScale(chart, el, n)
+      applyFullWidthTimeScale(chart, el, n, { showTimeLabels: !showVolume })
       syncLastValueTop()
     }
     layoutTimeScale()
@@ -509,7 +524,7 @@ export default function MacroCycleLwChart({
         const c = chartRef.current
         if (!c) return
         c.applyOptions({ width: w, height: h })
-        applyFullWidthTimeScale(c, el, pack.closes.length)
+        applyFullWidthTimeScale(c, el, pack.closes.length, { showTimeLabels: !showVolume })
         syncLastValueTop()
       })
     })
@@ -528,7 +543,7 @@ export default function MacroCycleLwChart({
       setLastValueTopPx(null)
       setLastPointPx(null)
     }
-  }, [pack, isMobile, compact])
+  }, [pack, isMobile, compact, showVolume])
 
   useEffect(() => {
     if (!pack) {
@@ -589,11 +604,13 @@ export default function MacroCycleLwChart({
             <span className="inline-block h-0.5 w-3 rounded-full" style={{ backgroundColor: MA60_COLOR }} />
             MA60
           </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="inline-block h-2 w-1 rounded-sm bg-emerald-500/60" />
-            <span className="inline-block h-2 w-1 rounded-sm bg-rose-500/55" />
-            Vol
-          </span>
+          {showVolume ? (
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-2 w-1 rounded-sm bg-emerald-500/60" />
+              <span className="inline-block h-2 w-1 rounded-sm bg-rose-500/55" />
+              Vol
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -684,21 +701,12 @@ export default function MacroCycleLwChart({
                       {Number(tooltip.changePct ?? 0).toFixed(2)}%
                     </span>
                   </p>
-                  <p className="m-0 flex justify-between gap-3">
-                    <span className="text-slate-500">거래량</span>
-                    <span className="tabular-nums text-slate-300">{fmtVol(tooltip.volume)}</span>
-                  </p>
-                  <p className="m-0 flex justify-between gap-3">
-                    <span className="text-slate-500">변화율</span>
-                    <span
-                      className={`font-semibold tabular-nums ${
-                        (tooltip.changePct ?? 0) >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
-                      }`}
-                    >
-                      {(tooltip.changePct ?? 0) >= 0 ? "+" : ""}
-                      {Number(tooltip.changePct ?? 0).toFixed(2)}%
-                    </span>
-                  </p>
+                  {showVolume && tooltip.volume != null ? (
+                    <p className="m-0 flex justify-between gap-3">
+                      <span className="text-slate-500">거래량</span>
+                      <span className="tabular-nums text-slate-300">{fmtVol(tooltip.volume)}</span>
+                    </p>
+                  ) : null}
                 </div>
               </div>
             ) : null}

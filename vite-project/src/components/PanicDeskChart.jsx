@@ -44,6 +44,7 @@ export default function PanicDeskChart({ rows, primarySeries }) {
             color: primarySeries.color,
           }}
           compact
+          showVolume={false}
         />
       </div>
     </section>
