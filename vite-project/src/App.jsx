@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { flushSync } from "react-dom"
 import { Calendar, ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
@@ -75,6 +74,8 @@ const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim()
 const PWA_RESUME_RELOAD_COOLDOWN_MS = 10_000
 const PANIC_TEXT_DRAFT_KEY = "yds-panic-text-draft-v1"
+const INPUT_PANEL_CLOSE_MS = 220
+const SAVE_SUCCESS_TOAST_MS = 2000
 const PANIC_TEXT_PLACEHOLDER = PANIC_NINE_BLOCK_TEMPLATE
 const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
@@ -425,9 +426,12 @@ function App() {
   const stopAutoRefresh = usePanicStore((s) => s.stopAutoRefresh)
   const syncOnAppResume = usePanicStore((s) => s.syncOnAppResume)
   const [isInputPanelOpen, setIsInputPanelOpen] = useState(false)
+  const [inputPanelClosing, setInputPanelClosing] = useState(false)
+  const [panelEntered, setPanelEntered] = useState(false)
+  const panelCloseTimerRef = useRef(null)
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
-  const [saveToast, setSaveToast] = useState("")
+  const [saveSuccessToast, setSaveSuccessToast] = useState(false)
   const [appToast, setAppToast] = useState(null)
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
   const [previewKey, setPreviewKey] = useState(0)
@@ -510,21 +514,7 @@ function App() {
     }
   }, [])
 
-  /** 패널을 열 때마다 빈 폼 — 이전 붙여넣기·parsed·preview·LS 드래프트 제거 */
-  const openInputPanel = useCallback(() => {
-    resetAiReportInput()
-    setIsInputPanelOpen(true)
-    requestAnimationFrame(() => {
-      try {
-        textareaRef.current?.focus?.()
-      } catch {
-        // ignore
-      }
-    })
-  }, [resetAiReportInput])
-
-  /** 배경·X 닫기 + blur overlay·스크롤 잠금 해제(useEffect cleanup) + iOS 키보드 dismiss */
-  const closeInputPanel = useCallback(() => {
+  const blurInputPanelFocus = useCallback(() => {
     try {
       if (typeof document !== "undefined" && document.activeElement && typeof document.activeElement.blur === "function") {
         document.activeElement.blur()
@@ -537,10 +527,48 @@ function App() {
     } catch {
       // ignore
     }
-    flushSync(() => {
-      setIsInputPanelOpen(false)
-    })
   }, [])
+
+  const showSaveSuccessToast = useCallback(() => {
+    setSaveSuccessToast(true)
+    window.setTimeout(() => setSaveSuccessToast(false), SAVE_SUCCESS_TOAST_MS)
+  }, [])
+
+  /** 패널을 열 때마다 빈 폼 — 이전 붙여넣기·parsed·preview·LS 드래프트 제거 */
+  const openInputPanel = useCallback(() => {
+    if (panelCloseTimerRef.current) {
+      window.clearTimeout(panelCloseTimerRef.current)
+      panelCloseTimerRef.current = null
+    }
+    setInputPanelClosing(false)
+    setPanelEntered(false)
+    resetAiReportInput()
+    setIsInputPanelOpen(true)
+    requestAnimationFrame(() => {
+      setPanelEntered(true)
+      try {
+        textareaRef.current?.focus?.()
+      } catch {
+        // ignore
+      }
+    })
+  }, [resetAiReportInput])
+
+  /** 슬라이드 아웃 후 언마운트 — 저장 성공·X·배경 닫기 공통 */
+  const closeInputPanel = useCallback(() => {
+    if (!isInputPanelOpen && !inputPanelClosing) return
+    blurInputPanelFocus()
+    setPanelEntered(false)
+    setInputPanelClosing(true)
+    if (panelCloseTimerRef.current) window.clearTimeout(panelCloseTimerRef.current)
+    panelCloseTimerRef.current = window.setTimeout(() => {
+      setIsInputPanelOpen(false)
+      setInputPanelClosing(false)
+      panelCloseTimerRef.current = null
+    }, INPUT_PANEL_CLOSE_MS)
+  }, [blurInputPanelFocus, inputPanelClosing, isInputPanelOpen])
+
+  const inputPanelVisible = isInputPanelOpen || inputPanelClosing
 
   const pulseSaveFeedback = () => {
     setInputPanelFlash(true)
@@ -644,7 +672,7 @@ function App() {
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()
         pulseSaveFeedback()
-        setSaveToast("Market metrics updated")
+        showSaveSuccessToast()
 
         if (db) {
           void (async () => {
@@ -661,9 +689,6 @@ function App() {
           })()
         }
 
-        closeInputPanel()
-        console.log("PANEL_CLOSED")
-
         if (!usedHubSavePath) {
           try {
             await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
@@ -671,6 +696,9 @@ function App() {
             console.warn("[panic] post-save refresh", e)
           }
         }
+
+        closeInputPanel()
+        console.log("PANEL_CLOSED")
       }
     } catch (err) {
       console.error(err)
@@ -854,10 +882,10 @@ function App() {
 
 
   useEffect(() => {
-    if (!saveToast) return
-    const timer = window.setTimeout(() => setSaveToast(""), 4200)
-    return () => window.clearTimeout(timer)
-  }, [saveToast])
+    return () => {
+      if (panelCloseTimerRef.current) window.clearTimeout(panelCloseTimerRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined
@@ -879,7 +907,7 @@ function App() {
 
   useEffect(() => {
     if (typeof document === "undefined") return undefined
-    if (!isInputPanelOpen) {
+    if (!inputPanelVisible) {
       document.body.style.overflow = ""
       return undefined
     }
@@ -887,7 +915,7 @@ function App() {
     return () => {
       document.body.style.overflow = ""
     }
-  }, [isInputPanelOpen])
+  }, [inputPanelVisible])
 
 
   const login = async () => {
@@ -1337,20 +1365,29 @@ function App() {
           </Routes>
         </main>
       </div>
-      {isInputPanelOpen ? (
+      {inputPanelVisible ? (
         <>
           <button
             type="button"
             aria-label="입력 패널 배경 닫기"
-            className="fixed inset-0 z-[9998] bg-slate-950/55 backdrop-blur-[2px] transition-opacity"
+            className={[
+              "fixed inset-0 z-[9998] bg-slate-950/55 backdrop-blur-[2px] transition-opacity ease-out",
+              panelEntered && !inputPanelClosing ? "opacity-100" : "opacity-0",
+            ].join(" ")}
+            style={{ transitionDuration: `${INPUT_PANEL_CLOSE_MS}ms` }}
             onClick={closeInputPanel}
           />
           <MetricInputErrorBoundary>
           <div
-            className={`fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] sm:w-[24rem] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-[box-shadow,ring-color] duration-500 sm:pl-4 sm:pr-4 ${
-              inputPanelFlash ? "ring-2 ring-emerald-400/50 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.2),-16px_0_56px_rgba(16,185,129,0.12)]" : ""
-            }`}
+            className={[
+              "fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-transform ease-out sm:w-[24rem] sm:pl-4 sm:pr-4",
+              panelEntered && !inputPanelClosing ? "translate-x-0" : "translate-x-full",
+              inputPanelFlash
+                ? "ring-2 ring-emerald-400/50 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.2),-16px_0_56px_rgba(16,185,129,0.12)]"
+                : "",
+            ].join(" ")}
             style={{
+              transitionDuration: `${INPUT_PANEL_CLOSE_MS}ms`,
               background: "linear-gradient(165deg, rgba(15,23,42,0.94) 0%, rgba(2,6,23,0.97) 45%, rgba(2,6,23,0.99) 100%)",
               boxShadow: "inset 1px 0 0 rgba(139,92,246,0.12), -16px 0 48px rgba(0,0,0,0.5)",
             }}
@@ -1527,12 +1564,13 @@ function App() {
           </MetricInputErrorBoundary>
         </>
       ) : null}
-      {saveToast ? (
+      {saveSuccessToast ? (
         <div
           role="status"
-          className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10000] max-w-[min(92vw,22rem)] -translate-x-1/2 rounded-xl border border-emerald-400/35 bg-[rgba(6,24,18,0.92)] px-4 py-2.5 text-center text-[13px] font-medium leading-snug text-emerald-100 shadow-[0_12px_40px_rgba(16,185,129,0.2),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
+          className="fixed top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[10002] max-w-[min(92vw,16rem)] rounded-lg border border-emerald-400/35 bg-[rgba(6,24,18,0.94)] px-3 py-2 shadow-[0_8px_28px_rgba(16,185,129,0.22)] backdrop-blur-md"
         >
-          {saveToast}
+          <p className="m-0 text-[13px] font-semibold text-emerald-100">✓ 저장 완료</p>
+          <p className="m-0 mt-0.5 text-[11px] text-emerald-200/80">9대 패닉지수 반영됨</p>
         </div>
       ) : null}
       {appToast?.message ? (
