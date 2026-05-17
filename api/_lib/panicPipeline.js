@@ -1,11 +1,12 @@
 import {
   fetchPanicMetricsRows,
   panicObjectFromRows,
-  rowsFromPanicPayload,
+  rowsFromPanicSnapshot,
   upsertPanicMetricsRows,
 } from "./panicMetricsHub.js"
 import { upsertPanicIndexHistoryBatch, upsertPanicIndexHistoryFromPayload } from "./panicIndexHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
+import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
 
@@ -42,13 +43,16 @@ export function computePanicServeMeta(rows, data) {
  */
 export async function persistPanicPayload(body, opts = {}) {
   const source = opts.source || "api"
-  const incoming = { ...body, updatedAt: body.updatedAt || new Date().toISOString() }
-  const tradeDate = incoming.tradeDate || incoming.historyDate
+  const tradeDate = body?.tradeDate || body?.historyDate
   const requireHistory = opts.requireHistory ?? source === "manual"
+  const snap = normalizePanicPayload(
+    { ...body, updatedAt: body.updatedAt || (tradeDate ? `${String(tradeDate).slice(0, 10)}T12:00:00.000Z` : new Date().toISOString()) },
+    { tradeDate, source },
+  )
 
-  let history = await upsertPanicIndexHistoryFromPayload(incoming, { source, tradeDate })
-  if (Array.isArray(incoming.historyRows) && incoming.historyRows.length > 0) {
-    const batch = await upsertPanicIndexHistoryBatch(incoming.historyRows, { source })
+  let history = await upsertPanicIndexHistoryFromPayload(snap, { source, tradeDate: snap.tradeDate })
+  if (Array.isArray(body.historyRows) && body.historyRows.length > 0) {
+    const batch = await upsertPanicIndexHistoryBatch(body.historyRows, { source })
     history = { ...history, batch }
   }
   if (requireHistory && !history.ok) {
@@ -56,12 +60,15 @@ export async function persistPanicPayload(body, opts = {}) {
     throw new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
   }
 
-  const rows = rowsFromPanicPayload(incoming, { source })
+  const rows = rowsFromPanicSnapshot(snap)
   await upsertPanicMetricsRows(rows)
+
   const fresh = await fetchPanicMetricsRows()
-  const data = panicObjectFromRows(fresh)
+  const fromDb = panicObjectFromRows(fresh)
+  const data = panicObjectFromSnapshot(snap)
+  data.riskRegime = fromDb.riskRegime ?? data.riskRegime
   const meta = computePanicServeMeta(fresh, data)
-  return { data, history, meta, rowCount: fresh?.length ?? 0 }
+  return { data, history, meta, rowCount: fresh?.length ?? 0, tradeDate: snap.tradeDate }
 }
 
 /** Cron / 수집기: 외부 소스 fetch → DB upsert */

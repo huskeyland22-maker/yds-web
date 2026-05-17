@@ -1,10 +1,10 @@
 import { supabaseRest } from "./supabaseRest.js"
-
-function toNum(v) {
-  if (v == null || v === "") return null
-  const n = Number(v)
-  return Number.isFinite(n) ? n : null
-}
+import {
+  normalizePanicPayload,
+  panicIndexHistoryRowFromSnapshot,
+  resolvePanicTradeDate,
+  snapshotHasRequiredHistoryMetrics,
+} from "./panicSnapshot.js"
 
 /** @param {string} isoOrDate */
 export function calendarDateFromPayload(body) {
@@ -18,27 +18,8 @@ export function calendarDateFromPayload(body) {
  * @param {string} [tradeDate] YYYY-MM-DD
  */
 export function panicIndexHistoryRowFromPayload(body, tradeDate, opts = {}) {
-  const date = tradeDate || calendarDateFromPayload(body)
-  const nowIso = new Date().toISOString()
-  const source = typeof opts.source === "string" && opts.source ? opts.source : "api"
-  const hy = toNum(body?.highYield ?? body?.hyOas ?? body?.high_yield)
-  const gs = toNum(body?.gsBullBear ?? body?.gsSentiment ?? body?.gs ?? body?.gs_bb)
-  return {
-    date,
-    vix: toNum(body?.vix),
-    fear_greed: toNum(body?.fearGreed ?? body?.fear_greed),
-    put_call: toNum(body?.putCall ?? body?.put_call),
-    high_yield: hy,
-    hy_oas: hy,
-    bofa: toNum(body?.bofa),
-    move: toNum(body?.move),
-    skew: toNum(body?.skew),
-    gs_bb: gs,
-    gs_sentiment: gs,
-    vxn: toNum(body?.vxn),
-    source,
-    updated_at: nowIso,
-  }
+  const snap = normalizePanicPayload(body, { tradeDate, source: opts.source })
+  return panicIndexHistoryRowFromSnapshot(snap)
 }
 
 export function panicIndexHistoryRowToClient(row) {
@@ -66,29 +47,22 @@ export function panicIndexHistoryRowToClient(row) {
   }
 }
 
-function resolveTradeDate(body, tradeDateOverride) {
-  const raw = tradeDateOverride || body?.tradeDate || body?.historyDate
-  if (typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.slice(0, 10))) return raw.slice(0, 10)
-  return calendarDateFromPayload(body)
-}
-
-/** AI 수동 입력 최소 필드 (App REQUIRED_KEYS와 동일) */
 function rowHasRequiredHistoryMetrics(row) {
-  const hy = row.high_yield ?? row.hy_oas
-  return (
-    row.vix != null &&
-    row.fear_greed != null &&
-    row.put_call != null &&
-    hy != null &&
-    row.bofa != null
-  )
+  const snap = {
+    vix: row.vix,
+    fearGreed: row.fear_greed,
+    putCall: row.put_call,
+    highYield: row.hy_oas ?? row.high_yield,
+    bofa: row.bofa,
+  }
+  return snapshotHasRequiredHistoryMetrics(snap)
 }
 
 /**
  * PK(date) upsert: 같은 날짜만 갱신, 다른 날짜 행은 유지(다중 일자 공존).
  */
 export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
-  const tradeDate = resolveTradeDate(body, opts.tradeDate)
+  const tradeDate = resolvePanicTradeDate(body, opts.tradeDate)
   const row = panicIndexHistoryRowFromPayload(body, tradeDate, opts)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(row.date))) {
     return { ok: false, skipped: true, reason: "invalid_date", row }

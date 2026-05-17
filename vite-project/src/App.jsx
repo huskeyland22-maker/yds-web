@@ -6,7 +6,11 @@ import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
-import { CYCLE_HISTORY_MAX } from "./utils/cycleHistoryUtils.js"
+import {
+  CYCLE_HISTORY_MAX,
+  latestCycleHistoryRow,
+  panicDataFromCycleRow,
+} from "./utils/cycleHistoryUtils.js"
 import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
 import { kstCalendarKey } from "./utils/formatDataAge.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
@@ -442,6 +446,15 @@ function App() {
   const [hubSaveGlow, setHubSaveGlow] = useState(false)
   const cycleMetricHistory = useAppDataStore((s) => s.cycleMetricHistory)
   const cycleHistorySource = useAppDataStore((s) => s.cycleHistorySource)
+
+  /** 허브: 상단 수치·차트 모두 panic_index_history 최신 행과 동기 */
+  const deskPanicData = useMemo(() => {
+    if (!isPanicHubEnabled()) return panicData
+    const last = latestCycleHistoryRow(cycleMetricHistory)
+    const fromHistory = panicDataFromCycleRow(last)
+    if (!fromHistory) return panicData
+    return { ...(panicData ?? {}), ...fromHistory }
+  }, [panicData, cycleMetricHistory])
   const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
 
   const parseResult = useMemo(() => {
@@ -639,39 +652,17 @@ function App() {
         closeInputPanel()
         console.log("PANEL_CLOSED")
 
-        const appStore = useAppDataStore.getState()
-        void Promise.all([
-          usePanicStore.getState().fetchPanicData(usedHubSavePath ? "hub-post-save" : "manual-api-post-save", {
-            force: true,
-          }),
-          appStore.loadCycleHistoryBundle({ limit: 500, force: true }),
-        ]).then(() => {
-            if (import.meta.env.DEV) {
-              try {
-                const live = usePanicStore.getState().panicData
-                console.table([
-                  { stage: "submitted", ...normalizedParsedData },
-                  {
-                    stage: "after_refetch",
-                    vix: live?.vix,
-                    vxn: live?.vxn,
-                    move: live?.move,
-                    skew: live?.skew,
-                    gsBullBear: live?.gsBullBear,
-                    highYield: live?.highYield,
-                    fearGreed: live?.fearGreed,
-                    bofa: live?.bofa,
-                    putCall: live?.putCall,
-                  },
-                ])
-              } catch {
-                // ignore
-              }
-            }
-          })
-          .catch((e) => {
+        if (!usedHubSavePath) {
+          const appStore = useAppDataStore.getState()
+          try {
+            await Promise.all([
+              usePanicStore.getState().fetchPanicData("manual-api-post-save", { force: true }),
+              appStore.loadCycleHistoryBundle({ limit: 500, force: true }),
+            ])
+          } catch (e) {
             console.warn("[panic] post-save refresh", e)
-          })
+          }
+        }
       }
     } catch (err) {
       console.error(err)
@@ -706,9 +697,7 @@ function App() {
         logRealtime("postgres_change", { table })
         useAppDataStore.getState().markRealtimeEvent()
         void usePanicStore.getState().fetchPanicData("supabase-realtime", { force: true })
-        if (table === "panic_index_history") {
-          void useAppDataStore.getState().loadCycleHistoryBundle()
-        }
+        void useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
       },
     })
     return () => {
@@ -946,18 +935,21 @@ function App() {
       window.alert("저장에 실패했습니다")
     }
   }
-  const marketState = useMemo(() => resolveMarketState(panicData), [panicData])
+  const marketState = useMemo(() => resolveMarketState(deskPanicData), [deskPanicData])
   const marketCycleStage = marketState.label
   const safeRecentMemos = Array.isArray(recentMemos) ? recentMemos : []
-  const sidebarPulse = useMemo(() => buildMarketSidebarPulse(panicData, marketCycleStage), [panicData, marketCycleStage])
+  const sidebarPulse = useMemo(
+    () => buildMarketSidebarPulse(deskPanicData, marketCycleStage),
+    [deskPanicData, marketCycleStage],
+  )
   const insightRows = useMemo(() => buildMemoInsightRows(safeRecentMemos), [recentMemos])
   const flowStats = useMemo(() => buildMemoFlowStats(safeRecentMemos), [recentMemos])
   const cycleSteps = useMemo(() => getCycleStepSequence(), [])
   const keywordTop = useMemo(() => buildKeywordFrequency(safeRecentMemos), [recentMemos])
   const sentimentTrend = useMemo(() => buildSentimentTrend(safeRecentMemos), [recentMemos])
   const insightWarnings = useMemo(
-    () => buildInsightWarnings({ flowStats, panicData, keywordTop }),
-    [flowStats, panicData, keywordTop],
+    () => buildInsightWarnings({ flowStats, panicData: deskPanicData, keywordTop }),
+    [flowStats, deskPanicData, keywordTop],
   )
   const insightCards = useMemo(
     () => buildInsightCards({ marketStateKey: marketState.stateKey, flowStats, trend: sentimentTrend, keywordTop }),
@@ -972,15 +964,15 @@ function App() {
       METRIC_DEFS.map(({ key, label }) => ({
         key,
         label,
-        value: panicData?.[key] ?? "-",
-        state: interpretMetricState(key, panicData?.[key]),
+        value: deskPanicData?.[key] ?? "-",
+        state: interpretMetricState(key, deskPanicData?.[key]),
       })),
-    [panicData],
+    [deskPanicData],
   )
   const tacticalView = useMemo(() => {
-    const vix = Number(panicData?.vix)
-    const vxn = Number(panicData?.vxn)
-    const putCall = Number(panicData?.putCall)
+    const vix = Number(deskPanicData?.vix)
+    const vxn = Number(deskPanicData?.vxn)
+    const putCall = Number(deskPanicData?.putCall)
     const state =
       (Number.isFinite(vix) && vix >= 24) || (Number.isFinite(vxn) && vxn >= 30)
         ? "단기 변동성 확대"
@@ -989,12 +981,20 @@ function App() {
       (Number.isFinite(vix) && vix >= 24) || (Number.isFinite(putCall) && putCall >= 1.05)
         ? "변동성 주의 · 추격 금지"
         : "선별 눌림 매수 가능"
-    return { state, action, metrics: [{ k: "VIX", v: panicData?.vix }, { k: "VXN", v: panicData?.vxn }, { k: "Put/Call", v: panicData?.putCall }] }
-  }, [panicData])
+    return {
+      state,
+      action,
+      metrics: [
+        { k: "VIX", v: deskPanicData?.vix },
+        { k: "VXN", v: deskPanicData?.vxn },
+        { k: "Put/Call", v: deskPanicData?.putCall },
+      ],
+    }
+  }, [deskPanicData])
   const strategicView = useMemo(() => {
-    const fg = Number(panicData?.fearGreed)
-    const move = Number(panicData?.move)
-    const bofa = Number(panicData?.bofa)
+    const fg = Number(deskPanicData?.fearGreed)
+    const move = Number(deskPanicData?.move)
+    const bofa = Number(deskPanicData?.bofa)
     const state =
       Number.isFinite(fg) && fg >= 75
         ? "탐욕 단계 진입"
@@ -1007,18 +1007,36 @@ function App() {
         : Number.isFinite(fg) && fg <= 35
           ? "분할 진입 · 현금 탄력 운용"
           : "선택적 risk-on 가능"
-    return { state, action, metrics: [{ k: "Fear&Greed", v: panicData?.fearGreed }, { k: "MOVE", v: panicData?.move }, { k: "BofA B/B", v: panicData?.bofa }], move, bofa }
-  }, [panicData])
+    return {
+      state,
+      action,
+      metrics: [
+        { k: "Fear&Greed", v: deskPanicData?.fearGreed },
+        { k: "MOVE", v: deskPanicData?.move },
+        { k: "BofA B/B", v: deskPanicData?.bofa },
+      ],
+      move,
+      bofa,
+    }
+  }, [deskPanicData])
   const macroView = useMemo(() => {
-    const skew = Number(panicData?.skew)
-    const hy = Number(panicData?.highYield)
-    const gs = Number(panicData?.gsBullBear)
+    const skew = Number(deskPanicData?.skew)
+    const hy = Number(deskPanicData?.highYield)
+    const gs = Number(deskPanicData?.gsBullBear)
     const highRisk =
       (Number.isFinite(skew) && skew >= 145) || (Number.isFinite(hy) && hy >= 5.5) || (Number.isFinite(gs) && gs >= 75)
     const state = highRisk ? "구조적 리스크 경계" : "시스템 리스크 낮음"
     const action = highRisk ? "방어 비중 확대 필요" : "장기 과열 경고 없음"
-    return { state, action, metrics: [{ k: "SKEW", v: panicData?.skew }, { k: "하이일드", v: panicData?.highYield }, { k: "GS B/B", v: panicData?.gsBullBear }] }
-  }, [panicData])
+    return {
+      state,
+      action,
+      metrics: [
+        { k: "SKEW", v: deskPanicData?.skew },
+        { k: "하이일드", v: deskPanicData?.highYield },
+        { k: "GS B/B", v: deskPanicData?.gsBullBear },
+      ],
+    }
+  }, [deskPanicData])
   const heroSummary = useMemo(
     () => ({
       stage: marketCycleStage,
@@ -1030,23 +1048,27 @@ function App() {
   )
   const cycleDeskMeta = useMemo(() => {
     const rows = cycleMetricHistory ?? []
+    const last = latestCycleHistoryRow(rows)
+    const historyDay = last?.date ? String(last.date).slice(0, 10) : last?.ts ? String(last.ts).slice(0, 10) : null
     const panicDay =
-      panicData?.updatedAt && !Number.isNaN(new Date(panicData.updatedAt).getTime())
-        ? calendarKeyFromPanic(panicData)
+      deskPanicData?.updatedAt && !Number.isNaN(new Date(deskPanicData.updatedAt).getTime())
+        ? calendarKeyFromPanic(deskPanicData)
         : null
-    const last = rows[rows.length - 1]
-    const asOfDateLabel = panicDay ?? (last?.ts ? String(last.ts).slice(0, 10) : "—")
+    const asOfDateLabel =
+      isPanicHubEnabled() && historyDay
+        ? historyDay
+        : panicDay ?? historyDay ?? "—"
 
     let feedKind = "confirmed"
     let feedLabel = "확정"
     let sourceLine = "데이터 기준 · 확정 종가"
 
-    if (panicData && (panicData.isStale === true || panicData.__isStale === true)) {
+    if (deskPanicData && (deskPanicData.isStale === true || deskPanicData.__isStale === true)) {
       feedKind = "delayed"
       feedLabel = "지연"
       sourceLine = "데이터 기준 · 스냅샷 지연"
-    } else if (panicData?.updatedAt) {
-      const t = new Date(panicData.updatedAt).getTime()
+    } else if (deskPanicData?.updatedAt) {
+      const t = new Date(deskPanicData.updatedAt).getTime()
       if (Number.isFinite(t)) {
         const ageMin = (Date.now() - t) / 60000
         if (ageMin < 4) {
@@ -1062,8 +1084,8 @@ function App() {
     }
 
     let updatedLine = "업데이트 —"
-    if (panicData?.updatedAt) {
-      const d = new Date(panicData.updatedAt)
+    if (deskPanicData?.updatedAt) {
+      const d = new Date(deskPanicData.updatedAt)
       if (!Number.isNaN(d.getTime())) {
         const hh = d.toLocaleString("ko-KR", {
           timeZone: "Asia/Seoul",
@@ -1083,7 +1105,7 @@ function App() {
           : "히스토리 · 실제 데이터 없음"
 
     return { asOfDateLabel, updatedLine, sourceLine, feedKind, feedLabel, historySourceLine }
-  }, [cycleMetricHistory, panicData, cycleHistorySource])
+  }, [cycleMetricHistory, deskPanicData, cycleHistorySource])
   return (
     <div
       className={[
@@ -1259,7 +1281,7 @@ function App() {
                 <div id="desk" className="min-w-0">
                   <SectionErrorBoundary label="패닉 데스크">
                     <PanicDeskDashboard
-                      panicData={panicData}
+                      panicData={deskPanicData}
                       cycleMetricHistory={cycleMetricHistory}
                       isStale={panicDataStale}
                       asOfDateLabel={cycleDeskMeta.asOfDateLabel}

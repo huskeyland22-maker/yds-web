@@ -1,6 +1,7 @@
 import { supabaseRest } from "./supabaseRest.js"
+import { PANIC_METRIC_KEYS, panicObjectFromSnapshot } from "./panicSnapshot.js"
 
-const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield", "gsBullBear"]
+const METRIC_KEYS = PANIC_METRIC_KEYS
 
 function deriveRiskRegime(row) {
   const vix = Number(row?.vix)
@@ -37,12 +38,16 @@ export function panicObjectFromRows(rows) {
 }
 
 export function rowsFromPanicPayload(body, opts = {}) {
-  const nowIso = new Date().toISOString()
+  const updatedAt =
+    typeof body?.updatedAt === "string" && body.updatedAt
+      ? body.updatedAt
+      : new Date().toISOString()
   const source = typeof opts.source === "string" && opts.source ? opts.source : "api"
+  const forceAllKeys = Boolean(opts.forceAllKeys) || source === "manual"
   const rows = []
   const o = {}
   for (const key of METRIC_KEYS) {
-    if (!Object.prototype.hasOwnProperty.call(body, key)) continue
+    if (!forceAllKeys && !Object.prototype.hasOwnProperty.call(body, key)) continue
     const raw = body[key]
     const n = raw === null || raw === undefined || raw === "" ? null : Number(raw)
     const metricValue = n !== null && Number.isFinite(n) ? n : null
@@ -56,7 +61,7 @@ export function rowsFromPanicPayload(body, opts = {}) {
           : null,
       status: null,
       source,
-      updated_at: nowIso,
+      updated_at: updatedAt,
     })
   }
   const regime = deriveRiskRegime(o)
@@ -66,10 +71,20 @@ export function rowsFromPanicPayload(body, opts = {}) {
     change_percent: null,
     status: regime,
     source,
-    updated_at: nowIso,
+    updated_at: updatedAt,
   })
   return rows
 }
+
+/** @param {ReturnType<import("./panicSnapshot.js").normalizePanicPayload>} snap */
+export function rowsFromPanicSnapshot(snap) {
+  return rowsFromPanicPayload(
+    { ...snap, updatedAt: snap.updatedAt },
+    { source: snap.source, forceAllKeys: true },
+  )
+}
+
+export { panicObjectFromSnapshot }
 
 export async function fetchPanicMetricsRows() {
   return supabaseRest("panic_metrics?select=*", { method: "GET" })

@@ -103,3 +103,32 @@ export function buildCycleRowFromPanic(panicData) {
   if (!validKeys.every((k) => Number.isFinite(row[k]))) return null
   return row
 }
+
+/** cycle 차트 최신 행 → panicStore·상단 카드 호환 객체 */
+export function panicDataFromCycleRow(row) {
+  if (!row || typeof row !== "object") return null
+  const pick = (k) => {
+    const n = Number(row[k])
+    return Number.isFinite(n) ? n : null
+  }
+  const ts = row.ts ?? (row.date ? `${String(row.date).slice(0, 10)}T12:00:00.000Z` : null)
+  return {
+    vix: pick("vix"),
+    vxn: pick("vxn"),
+    fearGreed: pick("fearGreed"),
+    putCall: pick("putCall"),
+    bofa: pick("bofa"),
+    move: pick("move"),
+    skew: pick("skew"),
+    highYield: pick("highYield"),
+    gsBullBear: pick("gsBullBear"),
+    updatedAt: ts,
+    accessTier: "pro",
+  }
+}
+
+/** @param {object[]} rows */
+export function latestCycleHistoryRow(rows) {
+  if (!Array.isArray(rows) || !rows.length) return null
+  return rows[rows.length - 1]
+}

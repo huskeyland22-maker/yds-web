@@ -15,6 +15,7 @@ import {
 } from "../utils/dataFlowTrace.js"
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 import { useAppDataStore } from "./appDataStore.js"
+import { latestCycleHistoryRow, panicDataFromCycleRow } from "../utils/cycleHistoryUtils.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const CURRENT_SNAPSHOT_VERSION = 2
@@ -437,11 +438,16 @@ export const usePanicStore = create((set, get) => ({
         const reason = history?.reason || history?.error || "panic_index_history_upsert_failed"
         return { ok: false, error: new Error(String(reason)), history }
       }
-      get().applyServerPanicSnapshot(data)
       const appStore = useAppDataStore.getState()
       appStore.invalidateCycleHistoryCache()
       await appStore.loadCycleHistoryBundle({ limit: 500, force: true })
-      return { ok: true, data, history, tradeDate: tradeDate ?? null }
+
+      const lastRow = latestCycleHistoryRow(appStore.cycleMetricHistory)
+      const fromHistory = panicDataFromCycleRow(lastRow)
+      const aligned = fromHistory ? { ...data, ...fromHistory } : data
+      get().applyServerPanicSnapshot(aligned)
+
+      return { ok: true, data: aligned, history, tradeDate: tradeDate ?? null }
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err : new Error(String(err)) }
     }
