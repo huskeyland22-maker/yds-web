@@ -4,7 +4,7 @@ import { ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
-import { fetchPanicIndexHistory, isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
+import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
 import { CYCLE_HISTORY_MAX } from "./utils/cycleHistoryUtils.js"
 import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
@@ -85,17 +85,6 @@ const PANIC_TEXT_PLACEHOLDER = `분류,지수 명칭,최종 확정 수치,전일
 장기,9. GS B/B 지수,68.0%,-,🟡 주의`
 const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
-/** @param {Record<string, unknown> | null | undefined} row */
-function cycleRowToPasteText(row) {
-  if (!row || typeof row !== "object") return ""
-  const lines = []
-  for (const { key, label } of METRIC_DEFS) {
-    const v = row[key]
-    if (v == null || !Number.isFinite(Number(v))) continue
-    lines.push(`${label},${Number(v)}`)
-  }
-  return lines.join("\n")
-}
 const FIELD_LABELS = {
   vix: "VIX",
   vxn: "VXN",
@@ -453,7 +442,6 @@ function App() {
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
   const [historyTradeDate, setHistoryTradeDate] = useState(() => kstCalendarKey())
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [buildVersion, setBuildVersion] = useState(
     () => APP_VERSION_LABEL || `build-${String(APP_BUILD_ID).slice(-8)}`,
   )
@@ -492,49 +480,6 @@ function App() {
       return false
     }
   }, [parsedData])
-
-  const loadHistoryForDate = useCallback(async () => {
-    const date =
-      typeof historyTradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(historyTradeDate)
-        ? historyTradeDate
-        : kstCalendarKey()
-    setInputError("")
-    setIsLoadingHistory(true)
-    try {
-      let row = (cycleMetricHistory ?? []).find(
-        (r) => String(r.date ?? r.ts ?? "").slice(0, 10) === date,
-      )
-      if (!row && isPanicHubEnabled()) {
-        const hubRows = await fetchPanicIndexHistory({ limit: 500 })
-        const hit = hubRows.find((r) => r.date === date)
-        if (hit) {
-          row = {
-            date: hit.date,
-            vix: hit.vix,
-            vxn: hit.vxn,
-            fearGreed: hit.fearGreed,
-            move: hit.move,
-            bofa: hit.bofa,
-            skew: hit.skew,
-            putCall: hit.putCall,
-            highYield: hit.hyOas,
-            gsBullBear: hit.gsSentiment,
-          }
-        }
-      }
-      const text = cycleRowToPasteText(row)
-      if (!text) {
-        setInputError(`${date} 저장된 데이터가 없습니다`)
-        return
-      }
-      setInputText(text)
-      setPreviewKey((k) => k + 1)
-    } catch (err) {
-      setInputError(err instanceof Error ? err.message : "불러오기 실패")
-    } finally {
-      setIsLoadingHistory(false)
-    }
-  }, [historyTradeDate, cycleMetricHistory])
 
   const resetAiReportInput = useCallback(() => {
     setInputText("")
@@ -1397,15 +1342,16 @@ function App() {
                     onChange={(e) => setHistoryTradeDate(e.target.value)}
                     className="rounded border border-white/[0.1] bg-slate-950/80 px-1.5 py-0.5 font-mono text-[11px] text-slate-200"
                   />
-                  <button
-                    type="button"
-                    onClick={() => void loadHistoryForDate()}
-                    disabled={isLoadingHistory || isSaving}
-                    className="shrink-0 rounded border border-white/[0.1] bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium text-slate-300 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {isLoadingHistory ? "…" : "적용"}
-                  </button>
                 </label>
+                <button
+                  type="button"
+                  onClick={() => void submitInput()}
+                  disabled={isSaving || !inputReady}
+                  aria-busy={isSaving}
+                  className="mt-1 rounded border border-white/[0.1] bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium text-slate-300 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {isSaving ? "반영 중…" : "히스토리 반영"}
+                </button>
               </div>
               <button
                 type="button"
@@ -1522,19 +1468,6 @@ function App() {
               </div>
             </details>
 
-            <footer className="mt-2.5 shrink-0 border-t border-white/[0.06] pt-2.5">
-              <button
-                type="button"
-                onClick={submitInput}
-                disabled={isSaving || !inputReady}
-                aria-busy={isSaving}
-                className={`relative w-full overflow-hidden rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-45 ${
-                  isSaving ? "animate-pulse" : ""
-                }`}
-              >
-                {isSaving ? "반영 중…" : "대시보드에 반영"}
-              </button>
-            </footer>
           </div>
           </MetricInputErrorBoundary>
         </>
