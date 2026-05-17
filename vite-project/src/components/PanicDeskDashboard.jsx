@@ -13,17 +13,23 @@ import { formatMetricValue } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 
 const METRICS = [
-  { key: "vix", label: "VIX", accent: "#f87171" },
-  { key: "fearGreed", label: "F&G", accent: "#fbbf24" },
-  { key: "putCall", label: "P/C", accent: "#60a5fa" },
-  { key: "highYield", label: "HY OAS", accent: "#fb923c" },
-  { key: "bofa", label: "BofA", accent: "#c084fc" },
+  { key: "vix", label: "VIX 변동성", chartLabel: "VIX", accent: "#f87171" },
+  { key: "fearGreed", label: "공포탐욕", chartLabel: "F&G", accent: "#fbbf24" },
+  { key: "putCall", label: "풋콜비율", chartLabel: "P/C", accent: "#60a5fa" },
+  { key: "highYield", label: "하이일드 스프레드", chartLabel: "HY OAS", accent: "#fb923c" },
+  { key: "bofa", label: "BofA 심리", chartLabel: "BofA", accent: "#c084fc" },
 ]
 
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
 
 const METRIC_CELL =
-  "flex min-h-[3.25rem] flex-col items-center justify-center bg-[#070a10] px-0.5 py-1.5 transition sm:min-h-[3.5rem]"
+  "flex min-h-[4rem] flex-col items-center justify-center bg-[#070a10] px-1 py-2.5 transition sm:min-h-[4.25rem] sm:py-3"
+
+const METRIC_LABEL =
+  "max-w-full px-0.5 text-center text-[13px] font-semibold leading-snug tracking-[0.05em] text-slate-200 [text-wrap:balance]"
+
+const METRIC_VALUE =
+  "mt-1 font-mono text-[1rem] font-bold leading-none tabular-nums sm:text-[1.1rem]"
 
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
@@ -125,7 +131,11 @@ export default function PanicDeskDashboard({
 
   const chartSeries = useMemo(() => {
     const m = METRICS.find((x) => x.key === chartMetric)
-    return { key: chartMetric, name: m?.label ?? chartMetric, color: m?.accent ?? "#94a3b8" }
+    return {
+      key: chartMetric,
+      name: m?.chartLabel ?? m?.label ?? chartMetric,
+      color: m?.accent ?? "#94a3b8",
+    }
   }, [chartMetric])
 
   return (
@@ -206,7 +216,7 @@ export default function PanicDeskDashboard({
       </section>
 
       <section className="trading-card-shell overflow-x-auto p-px">
-        <div className="grid min-w-[20.5rem] grid-cols-6 gap-px bg-white/[0.06] sm:min-w-0">
+        <div className="grid min-w-[22rem] grid-cols-6 gap-px bg-white/[0.06] sm:min-w-0">
           {METRICS.map(({ key, label, accent }) => (
             <button
               key={key}
@@ -217,13 +227,10 @@ export default function PanicDeskDashboard({
                 chartMetric === key ? "ring-1 ring-inset ring-white/15" : "hover:bg-white/[0.03]",
               ].join(" ")}
             >
-              <span
-                className="font-mono text-[1rem] font-bold leading-none tabular-nums sm:text-[1.1rem]"
-                style={{ color: accent }}
-              >
+              <span className={METRIC_LABEL}>{label}</span>
+              <span className={METRIC_VALUE} style={{ color: accent }}>
                 {fmt(key, panicData?.[key])}
               </span>
-              <span className="mt-0.5 text-[8px] font-semibold tracking-[0.1em] text-slate-500">{label}</span>
             </button>
           ))}
           <div
@@ -233,10 +240,10 @@ export default function PanicDeskDashboard({
             ].join(" ")}
             aria-label="패닉 종합 점수"
           >
-            <span className="font-mono text-[1rem] font-bold leading-none tabular-nums text-slate-50 sm:text-[1.1rem]">
+            <span className={METRIC_LABEL}>패닉지수</span>
+            <span className={`${METRIC_VALUE} text-slate-50`}>
               {finalScore != null ? finalScore : "—"}
             </span>
-            <span className="mt-0.5 text-[8px] font-semibold tracking-[0.1em] text-slate-500">패닉</span>
           </div>
         </div>
       </section>
