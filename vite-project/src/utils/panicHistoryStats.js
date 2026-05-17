@@ -56,6 +56,24 @@ export function formatHistoryChangePct(pct) {
 }
 
 /**
+ * @param {number | null} pct
+ * @param {number} rowCount
+ * @param {number} sessionsBack
+ */
+function buildChangeField(pct, rowCount, sessionsBack) {
+  if (pct != null && Number.isFinite(pct)) {
+    return { pct, text: formatHistoryChangePct(pct), pending: false }
+  }
+  if (rowCount < 2) {
+    return { pct: null, text: "수집중", pending: true }
+  }
+  if (rowCount <= sessionsBack) {
+    return { pct: null, text: "히스토리 부족", pending: true }
+  }
+  return { pct: null, text: "히스토리 부족", pending: true }
+}
+
+/**
  * @param {number} current
  * @param {number | null} base
  */
@@ -84,38 +102,49 @@ function metricValueSessionsAgo(rows, metricKey, sessionsBack) {
  * @param {string} metricKey
  */
 export function computeHistoryChangeRates(rows, metricKey) {
+  const sorted = sortHistoryRowsAsc(rows)
+  const rowCount = sorted.length
   const values = historyValuesForMetric(rows, metricKey)
-  if (!values.length) {
-    return {
-      dayPct: null,
-      dayText: "—",
-      weekPct: null,
-      weekText: "—",
-      monthPct: null,
-      monthText: "—",
-    }
+
+  const emptyPending = {
+    dayPct: null,
+    dayText: "수집중",
+    dayPending: true,
+    weekPct: null,
+    weekText: "수집중",
+    weekPending: true,
+    monthPct: null,
+    monthText: "수집중",
+    monthPending: true,
   }
+
+  if (!values.length) return emptyPending
+
   const current = values[values.length - 1]
   const prevDay = metricValueSessionsAgo(rows, metricKey, 1)
   const prevWeek = metricValueSessionsAgo(rows, metricKey, 5)
   const prevMonth = metricValueSessionsAgo(rows, metricKey, 21)
 
-  const dayPct = percentChangeFrom(current, prevDay)
-  const weekPct = percentChangeFrom(current, prevWeek)
-  const monthPct = percentChangeFrom(current, prevMonth)
+  const day = buildChangeField(percentChangeFrom(current, prevDay), rowCount, 1)
+  const week = buildChangeField(percentChangeFrom(current, prevWeek), rowCount, 5)
+  const month = buildChangeField(percentChangeFrom(current, prevMonth), rowCount, 21)
 
   return {
-    dayPct,
-    dayText: formatHistoryChangePct(dayPct),
-    weekPct,
-    weekText: formatHistoryChangePct(weekPct),
-    monthPct,
-    monthText: formatHistoryChangePct(monthPct),
+    dayPct: day.pct,
+    dayText: day.text,
+    dayPending: day.pending,
+    weekPct: week.pct,
+    weekText: week.text,
+    weekPending: week.pending,
+    monthPct: month.pct,
+    monthText: month.text,
+    monthPending: month.pending,
   }
 }
 
-/** @param {number | null} pct @param {boolean} higherIsBad */
-export function historyChangeToneClass(pct, higherIsBad = true) {
+/** @param {number | null} pct @param {boolean} higherIsBad @param {boolean} [pending] */
+export function historyChangeToneClass(pct, higherIsBad = true, pending = false) {
+  if (pending) return "text-[10px] font-semibold text-slate-500"
   if (pct == null || !Number.isFinite(pct) || Math.abs(pct) < 0.05) return "text-slate-300"
   const up = pct > 0
   const favorable = higherIsBad ? !up : up
@@ -130,11 +159,14 @@ export function computeHistoryMetricStats(rows, metricKey) {
   const values = historyValuesForMetric(rows, metricKey)
   const emptyChanges = {
     dayPct: null,
-    dayText: "—",
+    dayText: "수집중",
+    dayPending: true,
     weekPct: null,
-    weekText: "—",
+    weekText: "수집중",
+    weekPending: true,
     monthPct: null,
-    monthText: "—",
+    monthText: "수집중",
+    monthPending: true,
   }
 
   if (!values.length) {

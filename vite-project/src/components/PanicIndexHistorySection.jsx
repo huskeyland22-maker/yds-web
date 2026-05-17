@@ -6,11 +6,10 @@ import {
   historyChangeToneClass,
 } from "../utils/panicHistoryStats.js"
 import { HISTORY_SECTION_METRICS } from "../utils/panicDeskMetrics.js"
-import { MOOD_SPECTRUM } from "../utils/panicDeskMood.js"
-import { metricZoneBands } from "../utils/panicHistoryZoneLines.js"
+import { historyZoneLegendItems } from "../utils/panicHistoryLegend.js"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
-const HISTORY_CHART_HEIGHT = 280
+const HISTORY_CHART_HEIGHT = 318
 
 /**
  * @param {{ rows: object[] }} props
@@ -31,22 +30,27 @@ export default function PanicIndexHistorySection({ rows = [] }) {
     [slicedRows, metricKey],
   )
 
-  const zoneLegend = useMemo(() => {
-    if (metricKey === "fearGreed") return MOOD_SPECTRUM
-    return metricZoneBands(metricKey).map((b) => ({
-      id: b.label,
-      label: b.label,
-      color: b.color,
-    }))
-  }, [metricKey])
+  const zoneLegend = useMemo(() => historyZoneLegendItems(metricKey), [metricKey])
 
+  const chartSummary = useMemo(
+    () => ({
+      currentText: stats.currentText,
+      statusLabel: stats.statusLabel,
+      percentileLabel: stats.percentileLabel,
+      dayText: stats.dayText,
+    }),
+    [stats],
+  )
+
+  const higherIsBad = HIGHER_IS_BAD[metricKey] ?? true
   const hasData = Array.isArray(slicedRows) && slicedRows.length > 0
 
   return (
     <section className="trading-card-shell mt-6 overflow-hidden px-2.5 py-2.5 sm:px-3 sm:py-3">
-      <p className="m-0 border-l-2 border-indigo-400/45 pl-2 text-[11px] font-bold tracking-[0.02em] text-slate-200">
-        패닉지수 히스토리
-      </p>
+      <div className="border-l-2 border-indigo-400/45 pl-2">
+        <p className="m-0 text-[12px] font-bold tracking-[0.02em] text-slate-100">패닉지수 히스토리</p>
+        <p className="m-0 mt-0.5 text-[10px] text-slate-500">시장 심리 변화 추적</p>
+      </div>
 
       <div className="mt-2.5 flex flex-wrap gap-1">
         {HISTORY_SECTION_METRICS.map((m) => (
@@ -87,7 +91,7 @@ export default function PanicIndexHistorySection({ rows = [] }) {
         </div>
       </div>
 
-      <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:grid-cols-4 lg:grid-cols-8">
+      <div className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-8">
         <StatCell label="현재" value={stats.currentText} accent />
         <StatCell label="최근 저점" value={stats.lowText} />
         <StatCell label="최근 고점" value={stats.highText} />
@@ -96,30 +100,24 @@ export default function PanicIndexHistorySection({ rows = [] }) {
         <StatCell
           label="전일"
           value={stats.dayText}
-          valueClassName={historyChangeToneClass(stats.dayPct, HIGHER_IS_BAD[metricKey] ?? true)}
+          valueClassName={historyChangeToneClass(stats.dayPct, higherIsBad, stats.dayPending)}
         />
         <StatCell
           label="1주"
           value={stats.weekText}
-          valueClassName={historyChangeToneClass(stats.weekPct, HIGHER_IS_BAD[metricKey] ?? true)}
+          valueClassName={historyChangeToneClass(stats.weekPct, higherIsBad, stats.weekPending)}
         />
         <StatCell
           label="1개월"
           value={stats.monthText}
-          valueClassName={historyChangeToneClass(stats.monthPct, HIGHER_IS_BAD[metricKey] ?? true)}
+          valueClassName={historyChangeToneClass(stats.monthPct, higherIsBad, stats.monthPending)}
         />
       </div>
 
       {zoneLegend.length > 0 ? (
-        <div className="mt-2 flex flex-wrap gap-1">
+        <div className="mt-2.5 flex flex-wrap gap-2">
           {zoneLegend.map((z) => (
-            <span
-              key={z.id ?? z.label}
-              className="inline-flex items-center gap-1 rounded border border-white/[0.06] bg-white/[0.02] px-1.5 py-px text-[8px] text-slate-500"
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: z.color }} />
-              {z.label}
-            </span>
+            <LegendPill key={z.id ?? z.label} item={z} />
           ))}
         </div>
       ) : null}
@@ -133,6 +131,7 @@ export default function PanicIndexHistorySection({ rows = [] }) {
             stroke={metric.accent}
             showZoneBands
             height={HISTORY_CHART_HEIGHT}
+            summary={chartSummary}
           />
         ) : (
           <div
@@ -147,24 +146,47 @@ export default function PanicIndexHistorySection({ rows = [] }) {
   )
 }
 
+/** @param {{ item: { id?: string; label: string; color: string; hint: string } }} props */
+function LegendPill({ item }) {
+  return (
+    <span className="group relative inline-flex cursor-default items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07]">
+      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+      {item.label}
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-20 w-max max-w-[220px] -translate-x-1/2 rounded-md border border-white/10 bg-[#0a0e16]/95 px-2 py-1 text-[9px] font-normal leading-snug text-slate-300 opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+      >
+        {item.hint}
+      </span>
+    </span>
+  )
+}
+
 /**
- * @param {{ label: string; value: string; accent?: boolean; className?: string; valueClassName?: string }} props
+ * @param {{
+ *   label: string
+ *   value: string
+ *   accent?: boolean
+ *   className?: string
+ *   valueClassName?: string
+ * }} props
  */
 function StatCell({ label, value, accent = false, className = "", valueClassName = "" }) {
-  const valueTone =
-    valueClassName || (accent ? "text-slate-50" : "text-slate-300")
+  const valueTone = valueClassName || (accent ? "text-slate-50" : "text-slate-300")
+  const isCompact = value === "수집중" || value === "히스토리 부족"
 
   return (
     <div
       className={[
-        "rounded-md border border-white/[0.06] bg-[#070a10]/80 px-2 py-1.5",
+        "rounded-md border border-white/[0.06] bg-[#070a10]/80 px-1.5 py-1",
         className,
       ].join(" ")}
     >
-      <p className="m-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="m-0 text-[7px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       <p
         className={[
-          "m-0 mt-0.5 font-mono text-[12px] font-bold tabular-nums leading-tight",
+          "m-0 mt-px font-mono font-bold tabular-nums leading-none",
+          isCompact ? "text-[10px]" : "text-[11px]",
           valueTone,
         ].join(" ")}
       >

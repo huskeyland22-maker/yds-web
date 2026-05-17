@@ -27,7 +27,45 @@ import { buildChartDataFromHistory, logHistoryChartDebug } from "../utils/panicH
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 
 const CHART_HEIGHT = 340
-const CHART_MARGIN = { top: 28, right: 58, left: 8, bottom: 32 }
+const CHART_MARGIN = { top: 32, right: 72, left: 8, bottom: 32 }
+
+/**
+ * @typedef {{
+ *   currentText: string
+ *   statusLabel: string
+ *   percentileLabel: string
+ *   dayText: string
+ * }} HistoryChartSummary
+ */
+
+/**
+ * @param {{ summary: HistoryChartSummary; accent: string }} props
+ */
+function ChartSummaryFloater({ summary, accent }) {
+  return (
+    <div className="pointer-events-none absolute right-2 top-2 z-[2] min-w-[108px] rounded-md border border-white/10 bg-[#070a10]/88 px-2 py-1.5 shadow-lg backdrop-blur-sm">
+      <p className="m-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500">현재</p>
+      <p className="m-0 font-mono text-[13px] font-bold tabular-nums leading-tight" style={{ color: accent }}>
+        {summary.currentText}
+      </p>
+      <div className="mt-1 space-y-0.5 border-t border-white/[0.06] pt-1">
+        <SummaryRow label="상태" value={summary.statusLabel} />
+        <SummaryRow label="백분위" value={summary.percentileLabel} />
+        <SummaryRow label="전일" value={summary.dayText} />
+      </div>
+    </div>
+  )
+}
+
+/** @param {{ label: string; value: string }} props */
+function SummaryRow({ label, value }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2 text-[9px]">
+      <span className="shrink-0 text-slate-500">{label}</span>
+      <span className="truncate text-right font-medium text-slate-200">{value}</span>
+    </div>
+  )
+}
 
 /**
  * @param {{ bands: { y: number; label: string; color: string }[]; yDomain: [number, number]; height: number }} props
@@ -42,15 +80,19 @@ function ZoneYAxisLabels({ bands, yDomain, height }) {
   const yToTop = (y) => plotTop + ((yMax - y) / span) * plotHeight
 
   return (
-    <div className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-[54px]" aria-hidden>
+    <div className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-[70px]" aria-hidden>
       {bands.map((band) => {
         if (band.y < yMin || band.y > yMax) return null
         const top = yToTop(band.y)
         return (
           <span
             key={band.label}
-            className="absolute right-0 max-w-[52px] truncate text-right text-[8px] font-medium leading-none text-slate-500/90"
-            style={{ top: top - 5 }}
+            className="absolute right-0 max-w-[68px] -translate-y-1/2 truncate rounded-full border px-1.5 py-0.5 text-center text-[9px] font-semibold leading-tight text-slate-200/90 backdrop-blur-[2px]"
+            style={{
+              top,
+              borderColor: `${band.color}55`,
+              backgroundColor: `${band.color}18`,
+            }}
             title={band.label}
           >
             {band.label}
@@ -70,6 +112,7 @@ function ZoneYAxisLabels({ bands, yDomain, height }) {
  *   stroke?: string
  *   showZoneBands?: boolean
  *   height?: number
+ *   summary?: HistoryChartSummary | null
  *   debug?: boolean
  * }} props
  */
@@ -80,6 +123,7 @@ export default function PanicHistoryLineChart({
   stroke = "#22d3ee",
   showZoneBands = false,
   height = CHART_HEIGHT,
+  summary = null,
   debug = false,
 }) {
   const chartData = useMemo(() => {
@@ -214,6 +258,7 @@ export default function PanicHistoryLineChart({
           />
         </LineChart>
       </ResponsiveContainer>
+      {summary ? <ChartSummaryFloater summary={summary} accent={stroke} /> : null}
       {showZoneBands && yDomain && zoneLabels.length > 0 ? (
         <ZoneYAxisLabels bands={zoneLabels} yDomain={yDomain} height={height} />
       ) : null}
