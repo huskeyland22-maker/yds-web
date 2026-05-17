@@ -91,7 +91,7 @@ export default function PanicIndexHistorySection({ rows = [] }) {
         </div>
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-8">
+      <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
         <StatCell label="현재" value={stats.currentText} accent />
         <StatCell label="최근 저점" value={stats.lowText} />
         <StatCell label="최근 고점" value={stats.highText} />
@@ -122,7 +122,7 @@ export default function PanicIndexHistorySection({ rows = [] }) {
         </div>
       ) : null}
 
-      <div className="mt-2">
+      <div className="mt-2 pb-6">
         {hasData ? (
           <PanicHistoryLineChart
             rows={slicedRows}
@@ -178,15 +178,15 @@ function StatCell({ label, value, accent = false, className = "", valueClassName
   return (
     <div
       className={[
-        "rounded-md border border-white/[0.06] bg-[#070a10]/80 px-1.5 py-1",
+        "rounded-md border border-white/[0.06] bg-[#070a10]/80 px-2 py-1.5",
         className,
       ].join(" ")}
     >
-      <p className="m-0 text-[7px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="m-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
       <p
         className={[
-          "m-0 mt-px font-mono font-bold tabular-nums leading-none",
-          isCompact ? "text-[10px]" : "text-[11px]",
+          "m-0 mt-0.5 font-mono font-extrabold tabular-nums leading-tight",
+          isCompact ? "text-[10px] font-semibold" : "text-[12px]",
           valueTone,
         ].join(" ")}
       >
