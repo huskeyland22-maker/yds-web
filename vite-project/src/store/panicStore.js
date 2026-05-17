@@ -16,6 +16,7 @@ import {
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 import { useAppDataStore } from "./appDataStore.js"
 import { panicDeskDataFromHistory } from "../utils/panicHistoryDesk.js"
+import { deskReportKey, generatePanicMarketReport } from "../utils/panicMarketReportEngine.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const CURRENT_SNAPSHOT_VERSION = 2
@@ -431,10 +432,13 @@ export const usePanicStore = create((set, get) => ({
           ? `${tradeDate}T12:00:00.000Z`
           : new Date().toISOString()
       const payload = { ...inputData, tradeDate, updatedAt }
+      useAppDataStore.setState({ deskMarketReportLoading: true })
       const result = await submitManualPanicData(payload)
       const data = result?.data ?? result
       const history = result?.history ?? null
+      const apiReport = result?.report ?? null
       if (!history?.ok) {
+        useAppDataStore.setState({ deskMarketReportLoading: false })
         const reason = history?.reason || history?.error || "panic_index_history_upsert_failed"
         return { ok: false, error: new Error(String(reason)), history }
       }
@@ -448,8 +452,26 @@ export const usePanicStore = create((set, get) => ({
       }
       get().applyServerPanicSnapshot(desk)
 
-      return { ok: true, data: desk, history, tradeDate: tradeDate ?? null }
+      const report =
+        apiReport && typeof apiReport === "object" && apiReport.summary
+          ? apiReport
+          : generatePanicMarketReport(desk)
+      if (report) {
+        useAppDataStore.getState().setDeskMarketReport(
+          report,
+          result?.reportKey ?? deskReportKey(tradeDate ?? report.tradeDate),
+        )
+      }
+
+      return {
+        ok: true,
+        data: desk,
+        history,
+        tradeDate: tradeDate ?? null,
+        report,
+      }
     } catch (err) {
+      useAppDataStore.setState({ deskMarketReportLoading: false })
       return { ok: false, error: err instanceof Error ? err : new Error(String(err)) }
     }
   },

@@ -7,6 +7,7 @@ import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
 import { CYCLE_HISTORY_MAX, latestCycleHistoryRow } from "./utils/cycleHistoryUtils.js"
 import { panicDeskDataFromHistory } from "./utils/panicHistoryDesk.js"
+import { deskReportKey, generatePanicMarketReport } from "./utils/panicMarketReportEngine.js"
 import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
 import { kstCalendarKey } from "./utils/formatDataAge.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
@@ -694,6 +695,13 @@ function App() {
             await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
           } catch (e) {
             console.warn("[panic] post-save refresh", e)
+          }
+          const appStore = useAppDataStore.getState()
+          const deskRow = panicDeskDataFromHistory(appStore.cycleMetricHistory)
+          const reportSource = deskRow ?? { ...normalizedParsedData, tradeDate, updatedAt: savedAt }
+          const localReport = generatePanicMarketReport(reportSource)
+          if (localReport) {
+            appStore.setDeskMarketReport(localReport, deskReportKey(tradeDate))
           }
         }
 

@@ -7,6 +7,7 @@ import {
 import { upsertPanicIndexHistoryBatch, upsertPanicIndexHistoryFromPayload } from "./panicIndexHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
+import { persistDeskMarketReport } from "./panicMarketReport.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
 
@@ -68,7 +69,27 @@ export async function persistPanicPayload(body, opts = {}) {
   const data = panicObjectFromSnapshot(snap)
   data.riskRegime = fromDb.riskRegime ?? data.riskRegime
   const meta = computePanicServeMeta(fresh, data)
-  return { data, history, meta, rowCount: fresh?.length ?? 0, tradeDate: snap.tradeDate }
+
+  let reportResult = { ok: false }
+  try {
+    reportResult = await persistDeskMarketReport(data, snap.tradeDate)
+  } catch (err) {
+    reportResult = {
+      ok: false,
+      error: err instanceof Error ? err.message : String(err),
+    }
+  }
+
+  return {
+    data,
+    history,
+    meta,
+    rowCount: fresh?.length ?? 0,
+    tradeDate: snap.tradeDate,
+    report: reportResult.ok ? reportResult.report : null,
+    reportKey: reportResult.reportKey ?? null,
+    reportError: reportResult.ok ? null : reportResult.error || reportResult.reason,
+  }
 }
 
 /** Cron / 수집기: 외부 소스 fetch → DB upsert */

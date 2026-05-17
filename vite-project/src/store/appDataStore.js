@@ -22,6 +22,7 @@ import {
   historyRowsToCycleRows,
   logHistoryChartDebug,
 } from "../utils/panicHistoryDesk.js"
+import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
 import {
   logFetchFail,
@@ -50,6 +51,52 @@ export const useAppDataStore = create((set, get) => ({
 
   realtimeLastEventAt: null,
   realtimeEventCount: 0,
+
+  deskMarketReport: null,
+  deskMarketReportKey: null,
+  deskMarketReportLoading: false,
+
+  setDeskMarketReport: (report, reportKey = null) => {
+    set({
+      deskMarketReport: report && typeof report === "object" ? report : null,
+      deskMarketReportKey: reportKey,
+      deskMarketReportLoading: false,
+    })
+    logStoreWrite("appDataStore.deskMarketReport", { hasReport: Boolean(report?.summary) })
+  },
+
+  loadDeskMarketReport: async (tradeDate) => {
+    if (!isPanicHubEnabled()) {
+      set({ deskMarketReport: null, deskMarketReportKey: null, deskMarketReportLoading: false })
+      return null
+    }
+    const key = deskReportKey(tradeDate)
+    set({ deskMarketReportLoading: true })
+    try {
+      const url = withNoStoreQuery(
+        `/api/ai/reports?report_key=${encodeURIComponent(key)}&limit=1`,
+      )
+      const res = await fetch(url, LIVE_JSON_GET_INIT)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const json = await res.json()
+      const row = Array.isArray(json?.rows) ? json.rows[0] : null
+      const content = row?.content && typeof row.content === "object" ? row.content : null
+      if (content?.summary) {
+        set({
+          deskMarketReport: content,
+          deskMarketReportKey: key,
+          deskMarketReportLoading: false,
+        })
+        return content
+      }
+      set({ deskMarketReport: null, deskMarketReportKey: null, deskMarketReportLoading: false })
+      return null
+    } catch (e) {
+      logFetchFail("desk-market-report", e, { tradeDate, key })
+      set({ deskMarketReport: null, deskMarketReportKey: null, deskMarketReportLoading: false })
+      return null
+    }
+  },
 
   markRealtimeEvent: () => {
     const t = Date.now()

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 import PanicMarketActionPanel from "./PanicMarketActionPanel.jsx"
+import PanicMarketReportPanel from "./PanicMarketReportPanel.jsx"
 import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
 
 const METRIC_STROKES = {
@@ -23,9 +24,19 @@ const METRIC_STROKES = {
  *   chartMetric: string
  *   className?: string
  *   panicData?: object | null
+ *   deskMarketReport?: object | null
+ *   deskMarketReportLoading?: boolean
  * }} props
  */
-export default function PanicDeskChart({ rows, primarySeries, chartMetric, className = "", panicData = null }) {
+export default function PanicDeskChart({
+  rows,
+  primarySeries,
+  chartMetric,
+  className = "",
+  panicData = null,
+  deskMarketReport = null,
+  deskMarketReportLoading = false,
+}) {
   const [rangeId, setRangeId] = useState("6M")
 
   const slicedRows = useMemo(() => sliceHistoryByRange(rows, rangeId), [rows, rangeId])
@@ -74,6 +85,7 @@ export default function PanicDeskChart({ rows, primarySeries, chartMetric, class
         currentValue={currentValue}
         historyRows={slicedRows}
       />
+      <PanicMarketReportPanel report={deskMarketReport} loading={deskMarketReportLoading} />
       <PanicMarketActionPanel panicData={panicData} />
     </section>
   )

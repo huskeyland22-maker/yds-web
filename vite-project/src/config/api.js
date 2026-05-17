@@ -393,6 +393,8 @@ export async function submitManualPanicData(inputData) {
       data: normalizeManualPayload(out.data),
       history: out.history ?? null,
       meta: out.meta ?? null,
+      report: out.report ?? null,
+      reportKey: out.reportKey ?? null,
     }
   }
   const base = getManualApiBase()
@@ -406,6 +408,8 @@ export async function submitManualPanicData(inputData) {
     data: normalizeManualPayload(out?.data),
     history: out?.history ?? null,
     meta: out?.meta ?? null,
+    report: out?.report ?? null,
+    reportKey: out?.reportKey ?? null,
   }
 }
 

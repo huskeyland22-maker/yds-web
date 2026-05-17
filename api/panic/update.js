@@ -35,6 +35,8 @@ export default async function handler(req, res) {
       data: result.data,
       history: result.history,
       meta: result.meta,
+      report: result.report ?? null,
+      reportKey: result.reportKey ?? null,
     })
   } catch (e) {
     res.status(500).json({

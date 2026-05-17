@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { isPanicHubEnabled } from "../config/api.js"
+import { useAppDataStore } from "../store/appDataStore.js"
 import { getFinalScore, getMidScore, getShortScore } from "../utils/tradingScores.js"
 import {
   ageMsFromUpdatedAt,
@@ -120,6 +122,9 @@ export default function PanicDeskDashboard({
   marketState,
 }) {
   const [chartMetric, setChartMetric] = useState("vix")
+  const deskMarketReport = useAppDataStore((s) => s.deskMarketReport)
+  const deskMarketReportLoading = useAppDataStore((s) => s.deskMarketReportLoading)
+  const loadDeskMarketReport = useAppDataStore((s) => s.loadDeskMarketReport)
 
   const mood = useMemo(() => resolveMarketMood(panicData?.fearGreed), [panicData?.fearGreed])
   const moodPct = useMemo(() => moodPositionPct(panicData?.fearGreed), [panicData?.fearGreed])
@@ -205,6 +210,17 @@ export default function PanicDeskDashboard({
       color: m?.accent ?? "#94a3b8",
     }
   }, [chartMetric])
+
+  useEffect(() => {
+    if (!isPanicHubEnabled()) return
+    const date =
+      asOfDateLabel && /^\d{4}-\d{2}-\d{2}$/.test(asOfDateLabel)
+        ? asOfDateLabel
+        : dataDateKey && /^\d{4}-\d{2}-\d{2}$/.test(dataDateKey)
+          ? dataDateKey
+          : null
+    if (date) void loadDeskMarketReport(date)
+  }, [asOfDateLabel, dataDateKey, loadDeskMarketReport])
 
   return (
     <div className="relative space-y-2 lg:space-y-2.5">
@@ -342,6 +358,8 @@ export default function PanicDeskDashboard({
         primarySeries={chartSeries}
         chartMetric={chartMetric}
         panicData={panicData}
+        deskMarketReport={deskMarketReport}
+        deskMarketReportLoading={deskMarketReportLoading}
       />
     </div>
   )
