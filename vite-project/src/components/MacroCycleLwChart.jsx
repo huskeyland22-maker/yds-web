@@ -210,75 +210,47 @@ function regimeAreaStyle(regime) {
   if (regime === "riskOn") {
     return {
       line: "#5eead4",
-      glow: "rgba(45,212,191,0.35)",
-      top: "rgba(94,234,212,0.32)",
+      top: "rgba(94,234,212,0.12)",
       bottom: "rgba(7,10,16,0)",
-      priceLine: "rgba(52,211,153,0.5)",
+      priceLine: "rgba(52,211,153,0.45)",
     }
   }
   if (regime === "riskOff") {
     return {
       line: "#fcd34d",
-      glow: "rgba(251,191,36,0.32)",
-      top: "rgba(252,211,77,0.22)",
+      top: "rgba(252,211,77,0.1)",
       bottom: "rgba(7,10,16,0)",
-      priceLine: "rgba(251,191,36,0.5)",
+      priceLine: "rgba(251,191,36,0.45)",
     }
   }
   return {
     line: "#38bdf8",
-    glow: "rgba(56,189,248,0.32)",
-    top: "rgba(56,189,248,0.26)",
+    top: "rgba(56,189,248,0.1)",
     bottom: "rgba(7,10,16,0)",
-    priceLine: "rgba(34,211,238,0.5)",
+    priceLine: "rgba(34,211,238,0.45)",
   }
 }
 
 const VIX_TEAL = "#2dd4bf"
-const VIX_MINT = "#a7f3d0"
 
 /**
- * 메인 라인 시각 (VIX 터미널 임팩트 + 타 지표 보강)
+ * 메인 라인 시각 (TradingView Dark — 절제된 단일 라인)
  * @param {NonNullable<ReturnType<typeof buildLwPack>>} pack
  */
 function resolveMainLineVisuals(pack) {
   const base = regimeAreaStyle(pack.regime)
   const isVix = pack.primaryKey === "vix"
-  const rising = pack.stats.dayChg >= 0
-  const n = pack.closes.length
-  const tailN = Math.max(2, Math.ceil(n * 0.2))
-  const tailCloses = pack.closes.slice(-tailN)
-  const lastSeg = pack.closes.slice(-2)
-  const lastSegRising = lastSeg.length >= 2 && lastSeg[1].value >= lastSeg[0].value
-
-  const line = isVix ? (rising ? VIX_MINT : VIX_TEAL) : base.line
-  const lineCore = isVix ? VIX_TEAL : base.line
+  const line = isVix ? VIX_TEAL : base.line
 
   return {
-    isVix,
     line,
-    lineCore,
-    accentLine: isVix && rising ? VIX_MINT : line,
-    outerGlow: isVix ? "rgba(45,212,191,0.45)" : base.glow,
-    innerGlow: isVix ? "rgba(94,234,212,0.58)" : base.glow,
-    top: isVix
-      ? rising
-        ? "rgba(167,243,208,0.22)"
-        : "rgba(45,212,191,0.18)"
-      : base.top,
+    top: isVix ? "rgba(45,212,191,0.10)" : base.top,
     bottom: base.bottom,
-    priceLine: base.priceLine,
-    lineWidth: isVix ? 4.5 : 4,
-    tailLineWidth: isVix ? 5.25 : 4.5,
-    lastSegLineWidth: isVix ? 5.5 : 4.5,
-    outerGlowWidth: isVix ? 16 : 12,
-    innerGlowWidth: isVix ? 9 : 7,
-    tailCloses,
-    lastSeg,
-    lastSegRising,
-    markerSize: 4,
-    crosshairRadius: 5,
-    crosshairRadiusHover: 6,
+    priceLine: isVix ? "rgba(45,212,191,0.45)" : base.priceLine,
+    lineWidth: isVix ? 3 : 2.5,
+    lineWidthHover: isVix ? 3.2 : 2.75,
+    crosshairRadius: 4,
+    crosshairRadiusHover: 4.5,
   }
 }
 
@@ -416,67 +388,25 @@ export default function MacroCycleLwChart({
       crosshairMarkerVisible: false,
     })
 
-    const outerGlowSeries = chart.addLineSeries({
-      color: vis.outerGlow,
-      lineWidth: vis.outerGlowWidth,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
-    const innerGlowSeries = chart.addLineSeries({
-      color: vis.innerGlow,
-      lineWidth: vis.innerGlowWidth,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
     const priceSeries = chart.addAreaSeries({
-      lineColor: vis.lineCore,
+      lineColor: vis.line,
       topColor: vis.top,
       bottomColor: vis.bottom,
       lineWidth: vis.lineWidth,
       lineType: LineType.Curved,
       lastPriceAnimation: LastPriceAnimationMode.Continuous,
       priceLineVisible: true,
-      priceLineWidth: 3,
+      priceLineWidth: 1,
       priceLineColor: vis.priceLine,
       priceLineStyle: 2,
       lastValueVisible: false,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: vis.crosshairRadius,
-      crosshairMarkerBorderColor: "rgba(236,254,255,0.95)",
+      crosshairMarkerBorderColor: "rgba(226,232,240,0.85)",
       crosshairMarkerBackgroundColor: vis.line,
     })
 
-    const tailAccentSeries = chart.addLineSeries({
-      color: vis.accentLine,
-      lineWidth: vis.tailLineWidth,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
-    const lastSegSeries = chart.addLineSeries({
-      color: vis.accentLine,
-      lineWidth: vis.lastSegRising ? vis.lastSegLineWidth : vis.lineWidth,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
-    seriesRef.current = {
-      priceSeries,
-      outerGlowSeries,
-      innerGlowSeries,
-      tailAccentSeries,
-      lastSegSeries,
-    }
+    seriesRef.current = { priceSeries }
 
     volumeSeries.priceScale().applyOptions({
       scaleMargins: { top: 0.78, bottom: 0 },
@@ -488,11 +418,7 @@ export default function MacroCycleLwChart({
     volumeSeries.setData(pack.volume)
     ma60Series.setData(pack.ma60)
     ma20Series.setData(pack.ma20)
-    outerGlowSeries.setData(pack.closes)
-    innerGlowSeries.setData(pack.closes)
     priceSeries.setData(pack.closes)
-    tailAccentSeries.setData(vis.tailCloses)
-    lastSegSeries.setData(vis.lastSeg)
 
     const applyHoverLine = (active) => {
       if (hoverLineRef.current === active) return
@@ -500,14 +426,10 @@ export default function MacroCycleLwChart({
       const v = visualsRef.current
       const s = seriesRef.current
       if (!v || !s) return
-      const w = active ? v.lineWidth * 1.1 : v.lineWidth
-      const tw = active ? v.tailLineWidth * 1.1 : v.tailLineWidth
-      const lw = active ? v.lastSegLineWidth * 1.1 : v.lastSegLineWidth
+      const w = active ? v.lineWidthHover : v.lineWidth
       const r = active ? v.crosshairRadiusHover : v.crosshairRadius
       try {
         s.priceSeries.applyOptions({ lineWidth: w, crosshairMarkerRadius: r })
-        s.tailAccentSeries.applyOptions({ lineWidth: tw })
-        s.lastSegSeries.applyOptions({ lineWidth: v.lastSegRising ? lw : w })
       } catch {
         /* ignore */
       }
@@ -696,11 +618,11 @@ export default function MacroCycleLwChart({
                 }}
               >
                 <span
-                  className="absolute left-1/2 top-1/2 block h-[1.35rem] w-[1.35rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-teal-300/40 animate-ping"
+                  className="absolute left-1/2 top-1/2 block h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/15"
                   aria-hidden
                 />
                 <span
-                  className="relative block h-3 w-3 rounded-full border-2 border-white/90 bg-teal-100 shadow-[0_0_16px_rgba(94,234,212,0.95),0_0_6px_rgba(45,212,191,0.75)]"
+                  className="relative block h-2.5 w-2.5 rounded-full border border-teal-300/50 bg-teal-200/80 shadow-[0_0_4px_rgba(45,212,191,0.2)]"
                   aria-hidden
                 />
               </div>
