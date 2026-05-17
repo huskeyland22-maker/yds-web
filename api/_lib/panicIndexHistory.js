@@ -67,7 +67,7 @@ function resolveTradeDate(body, tradeDateOverride) {
 }
 
 function rowHasCoreMetrics(row) {
-  const core = ["vix", "fear_greed", "bofa", "hy_oas"]
+  const core = ["vix", "fear_greed", "put_call", "hy_oas", "bofa"]
   return core.every((k) => row[k] != null)
 }
 

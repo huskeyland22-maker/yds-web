@@ -380,7 +380,11 @@ export async function submitManualPanicData(inputData) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const out = await res.json()
     if (!out?.ok) throw new Error(String(out?.error || "hub_update_failed"))
-    return normalizeManualPayload(out.data)
+    return {
+      data: normalizeManualPayload(out.data),
+      history: out.history ?? null,
+      meta: out.meta ?? null,
+    }
   }
   const base = getManualApiBase()
   const res = await fetch(withNoStoreQuery(`${base}/update`), {
@@ -389,7 +393,11 @@ export async function submitManualPanicData(inputData) {
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const out = await res.json()
-  return normalizeManualPayload(out?.data)
+  return {
+    data: normalizeManualPayload(out?.data),
+    history: out?.history ?? null,
+    meta: out?.meta ?? null,
+  }
 }
 
 export async function submitManualTextData(rawText) {

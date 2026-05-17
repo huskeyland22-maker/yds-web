@@ -441,7 +441,6 @@ function App() {
   const textareaRef = useRef(null)
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
-  const [historyTradeDate, setHistoryTradeDate] = useState(() => kstCalendarKey())
   const [buildVersion, setBuildVersion] = useState(
     () => APP_VERSION_LABEL || `build-${String(APP_BUILD_ID).slice(-8)}`,
   )
@@ -582,10 +581,7 @@ function App() {
       gsBullBear,
     }
 
-    const tradeDate =
-      typeof historyTradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(historyTradeDate)
-        ? historyTradeDate
-        : kstCalendarKey()
+    const tradeDate = kstCalendarKey()
     const payload = {
       ...normalizedParsedData,
       tradeDate,
@@ -604,10 +600,14 @@ function App() {
           setInputError(msg)
         } else {
           saveSucceeded = true
+          if (result.history?.ok === false && !result.history?.skipped) {
+            console.warn("[submitInput] panic_index_history upsert failed", result.history)
+          }
         }
       } else {
         try {
-          const serverData = await submitManualPanicData(payload)
+          const serverResult = await submitManualPanicData(payload)
+          const serverData = serverResult?.data ?? serverResult
           applyServerPanicSnapshot(serverData)
           await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
           saveSucceeded = true
@@ -1334,24 +1334,6 @@ function App() {
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
                   표(CSV) 또는 기사 한 줄 붙여넣기 — 지표명·숫자만 자동 추출합니다.
                 </p>
-                <label className="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
-                  <span className="shrink-0 font-medium">히스토리 기준일</span>
-                  <input
-                    type="date"
-                    value={historyTradeDate}
-                    onChange={(e) => setHistoryTradeDate(e.target.value)}
-                    className="rounded border border-white/[0.1] bg-slate-950/80 px-1.5 py-0.5 font-mono text-[11px] text-slate-200"
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={() => void submitInput()}
-                  disabled={isSaving || !inputReady}
-                  aria-busy={isSaving}
-                  className="mt-1 rounded border border-white/[0.1] bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium text-slate-300 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {isSaving ? "반영 중…" : "히스토리 반영"}
-                </button>
               </div>
               <button
                 type="button"
@@ -1467,6 +1449,18 @@ function App() {
                 </ul>
               </div>
             </details>
+
+            <div className="mt-2 shrink-0 border-t border-white/[0.06] pt-2">
+              <button
+                type="button"
+                onClick={() => void submitInput()}
+                disabled={isSaving || !inputReady}
+                aria-busy={isSaving}
+                className="w-full rounded-lg border border-emerald-500/35 bg-emerald-500/15 px-3 py-2.5 text-[13px] font-semibold text-emerald-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition hover:bg-emerald-500/22 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {isSaving ? "저장 중…" : "저장 · 대시보드 반영"}
+              </button>
+            </div>
 
           </div>
           </MetricInputErrorBoundary>

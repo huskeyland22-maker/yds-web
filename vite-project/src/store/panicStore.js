@@ -430,10 +430,12 @@ export const usePanicStore = create((set, get) => ({
           ? `${tradeDate}T12:00:00.000Z`
           : new Date().toISOString()
       const payload = { ...inputData, tradeDate, updatedAt }
-      const data = await submitManualPanicData(payload)
+      const result = await submitManualPanicData(payload)
+      const data = result?.data ?? result
+      const history = result?.history ?? null
       get().applyServerPanicSnapshot(data)
       await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
-      return { ok: true, data, tradeDate: tradeDate ?? null }
+      return { ok: true, data, history, tradeDate: tradeDate ?? null }
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err : new Error(String(err)) }
     }
