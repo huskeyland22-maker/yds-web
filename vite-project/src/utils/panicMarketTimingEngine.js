@@ -1,7 +1,7 @@
 /**
  * 9대 패닉지표 → 단기 / 중기 / 장기 타점 (0~100 점수 + 행동)
  */
-import { computeMarketAction, pickMetricValue } from "./panicMarketActionEngine.js"
+import { pickMetricValue } from "./panicMarketActionEngine.js"
 
 /** @typedef {"short" | "mid" | "long"} TimingHorizon */
 
@@ -352,78 +352,211 @@ function computeMidTiming(data) {
   }
 }
 
-/** ——— 장기: 9대 종합 ——— */
+/** ——— 장기: 구조 지표 가중 (HY·BofA·GS·VIX·MOVE) ——— */
 
-/** @param {number} total — panicMarketActionEngine 합산 점수 */
-function longScoreFromTotal(total) {
-  return clamp(Math.round(50 + total * 3.8))
+/** @type {{ key: string; label: string; weight: number; score: (v: number) => number }[]} */
+const LONG_CORE_WEIGHTS = [
+  { key: "highYield", label: "HY OAS", weight: 0.3, score: longHyScore },
+  { key: "bofa", label: "BofA", weight: 0.25, score: longBofaScore },
+  { key: "gsBullBear", label: "GS B/B", weight: 0.2, score: longGsScore },
+  { key: "vix", label: "VIX", weight: 0.15, score: longVixScore },
+  { key: "move", label: "MOVE", weight: 0.1, score: longMoveScore },
+]
+
+/** F&G·P/C — 장기 영향 최소 (코어 5개 모두 있을 때만 합산 5%) */
+const LONG_TAIL_WEIGHTS = [
+  { key: "fearGreed", label: "F&G", weight: 0.03, score: longFearGreedTailScore },
+  { key: "putCall", label: "P/C", weight: 0.02, score: longPutCallTailScore },
+]
+
+/** @param {number} v — 낮을수록 신용 안정 → 장기 우호 */
+function longHyScore(v) {
+  if (v < 2.5) return 90
+  if (v < 3.2) return 86
+  if (v < 4) return 76
+  if (v < 5.2) return 62
+  if (v < 6.5) return 45
+  if (v < 8) return 30
+  return 18
 }
 
-/** @param {object} data @param {import("./panicMarketActionEngine.js").MarketRegime} regime */
-function longClues(data, regime) {
-  const action = computeMarketAction(data)
-  if (!action) return "종합 지표 산출 중"
-  const fearish = action.totalScore >= 4
-  const greedy = action.totalScore <= -4
-  if (fearish) return `종합 공포 ${action.totalScore > 0 ? "+" : ""}${action.totalScore} · ${action.regimeLabel}`
-  if (greedy) return `종합 탐욕 ${action.totalScore} · ${action.regimeLabel}`
-  return `종합 중립 ${action.totalScore > 0 ? "+" : ""}${action.totalScore} · ${action.regimeLabel}`
+/** @param {number} v */
+function longBofaScore(v) {
+  if (v <= 2.5) return 38
+  if (v <= 4) return 52
+  if (v <= 6.5) return 66
+  if (v <= 7.5) return 62
+  if (v < 8.5) return 52
+  return 32
 }
 
-/** @param {number} score @param {import("./panicMarketActionEngine.js").MarketRegime} regime */
-function resolveLongAction(score, regime) {
-  if (regime === "extreme_fear" || score <= 28) {
+/** @param {number} v */
+function longGsScore(v) {
+  if (v <= 28) return 42
+  if (v <= 42) return 56
+  if (v <= 58) return 68
+  if (v <= 72) return 52
+  if (v <= 82) return 40
+  return 24
+}
+
+/** @param {number} v — 적정 변동성 구간 우호 */
+function longVixScore(v) {
+  if (v <= 13) return 68
+  if (v <= 18) return 76
+  if (v <= 22) return 72
+  if (v <= 26) return 58
+  if (v <= 32) return 42
+  return 26
+}
+
+/** @param {number} v */
+function longMoveScore(v) {
+  if (v < 78) return 82
+  if (v < 95) return 76
+  if (v < 112) return 64
+  if (v < 125) return 48
+  return 28
+}
+
+/** @param {number} v */
+function longFearGreedTailScore(v) {
+  if (v <= 22) return 88
+  if (v <= 35) return 72
+  if (v >= 78) return 28
+  if (v >= 68) return 42
+  return 58
+}
+
+/** @param {number} v */
+function longPutCallTailScore(v) {
+  if (v >= 0.92) return 82
+  if (v >= 0.82) return 68
+  if (v <= 0.52) return 32
+  if (v <= 0.62) return 48
+  return 58
+}
+
+/** @param {object} data */
+function longClues(data) {
+  const parts = []
+  const hy = pickMetricValue(data, "highYield")
+  const bofa = pickMetricValue(data, "bofa")
+  const gs = pickMetricValue(data, "gsBullBear")
+  const vix = pickMetricValue(data, "vix")
+  const move = pickMetricValue(data, "move")
+
+  if (hy != null) {
+    if (hy < 3.2) parts.push("신용 안정")
+    else if (hy >= 6) parts.push("신용 스트레스")
+    else parts.push(`OAS ${hy.toFixed(2)}%`)
+  }
+  if (vix != null) {
+    if (vix <= 20) parts.push("VIX 안정")
+    else if (vix >= 26) parts.push("VIX 부담")
+    else parts.push(`VIX ${vix.toFixed(1)}`)
+  }
+  if (parts.length < 2 && move != null) {
+    if (move < 95) parts.push("금리 변동성 양호")
+    else parts.push("금리 변동성 부담")
+  }
+  if (parts.length < 2 && bofa != null) {
+    if (bofa >= 7.5) parts.push("BofA 과열")
+    else if (bofa <= 3) parts.push("BofA 위축")
+    else parts.push("심리 균형")
+  }
+  if (parts.length < 2 && gs != null) {
+    if (gs >= 72) parts.push("GS B/B 높음")
+    else if (gs <= 35) parts.push("GS B/B 낮음")
+    else parts.push("센티먼트 양호")
+  }
+  return parts.slice(0, 2).join(" + ") || "구조 지표 혼재"
+}
+
+/** @param {number} score */
+function resolveLongAction(score) {
+  if (score >= 80) {
     return {
       action: "공포 분할매수",
-      status: "장기 공포",
+      status: "장기 공포 기회",
       sectors: ["배당", "대형주", "필수소비"],
     }
   }
-  if (regime === "fear" || score < 42) {
-    return {
-      action: "방어",
-      status: "장기 방어",
-      sectors: ["방어", "채권", "현금"],
-    }
-  }
-  if (regime === "greed" || score >= 72) {
+  if (score >= 60) {
     return {
       action: "장기 적립",
       status: "장기 적립",
       sectors: ["AI", "반도체", "성장"],
     }
   }
-  if (regime === "extreme_greed") {
+  if (score >= 40) {
     return {
       action: "중립",
-      status: "과열 경계",
-      sectors: ["대형주", "ETF", "현금"],
+      status: "장기 중립",
+      sectors: ["ETF", "대형주", "핵심섹터"],
+    }
+  }
+  if (score >= 20) {
+    return {
+      action: "방어",
+      status: "장기 방어",
+      sectors: ["방어", "채권", "현금"],
     }
   }
   return {
-    action: "중립",
-    status: "장기 중립",
-    sectors: ["ETF", "대형주", "핵심섹터"],
+    action: "과열",
+    status: "장기 과열",
+    sectors: ["현금", "대형주", "ETF"],
   }
+}
+
+/**
+ * @param {object} data
+ * @param {{ key: string; label: string; weight: number; score: (v: number) => number }[]} defs
+ */
+function weightedLongScore(data, defs) {
+  let sum = 0
+  let wSum = 0
+  const used = []
+  for (const { key, label, weight, score: scoreFn } of defs) {
+    const v = pickMetricValue(data, key)
+    if (v == null) continue
+    sum += scoreFn(v) * weight
+    wSum += weight
+    used.push(label)
+  }
+  if (wSum <= 0) return { score: null, used }
+  return { score: Math.round(sum / wSum), used }
 }
 
 /** @param {object} data */
 function computeLongTiming(data) {
-  const action = computeMarketAction(data)
-  if (!action || action.metricCount < 5) return null
+  const core = weightedLongScore(data, LONG_CORE_WEIGHTS)
+  if (!core.score || core.used.length < 3) return null
 
-  const score = longScoreFromTotal(action.totalScore)
-  const { action: longAction, status, sectors } = resolveLongAction(score, action.regime)
+  let score = core.score
+  const used = [...core.used]
+
+  const hasFullCore = core.used.length >= 5
+  if (hasFullCore) {
+    const tail = weightedLongScore(data, LONG_TAIL_WEIGHTS)
+    if (tail.score != null && tail.used.length > 0) {
+      score = Math.round(score * 0.95 + tail.score * 0.05)
+      used.push(...tail.used.map((l) => `${l}*`))
+    }
+  }
+
+  const { action, status, sectors } = resolveLongAction(score)
 
   return {
     horizon: "long",
     label: "장기",
     score,
     status,
-    interpretation: longClues(data, action.regime),
-    action: longAction,
+    interpretation: longClues(data),
+    action,
     sectors,
-    metricsUsed: [`${action.metricCount}대 종합`],
+    metricsUsed: used,
   }
 }
 
