@@ -34,13 +34,20 @@ export function historyRowsToCycleRows(hubRows) {
  * @param {object[]} cycleRows
  * @param {string} dataKey
  */
+function rowMetricValue(row, dataKey) {
+  if (dataKey === "highYield" || dataKey === "hyOas") {
+    return Number(row.highYield ?? row.hyOas)
+  }
+  return Number(row[dataKey])
+}
+
 export function buildChartDataFromHistory(cycleRows, dataKey = "vix") {
   const key = dataKey || "vix"
   const sorted = sortHistoryRowsAsc(cycleRows)
   const chartData = sorted
     .map((row) => {
       const date = rowDateKey(row)
-      const v = Number(row[key])
+      const v = rowMetricValue(row, key)
       if (!Number.isFinite(v)) return null
       return {
         date,

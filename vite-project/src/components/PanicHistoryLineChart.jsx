@@ -9,12 +9,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import {
+  computeProfileYDomain,
+  extractChartValues,
+  resolveChartProfile,
+  yAxisTickFormatter,
+} from "../utils/chartMetricProfiles.js"
 import { buildChartDataFromHistory, logHistoryChartDebug } from "../utils/panicHistoryDesk.js"
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 
 const CHART_HEIGHT = 340
-const DOMAIN_PAD = 0.3
-const PUT_CALL_DOMAIN_PAD = 0.03
 
 /**
  * panic_index_history 전용 Recharts 라인 (단일 시리즈)
@@ -37,22 +41,16 @@ export default function PanicHistoryLineChart({
     return data
   }, [rows, dataKey])
 
-  const isPutCall = dataKey === "putCall"
+  const profile = useMemo(() => resolveChartProfile(dataKey), [dataKey])
 
-  const putCallYDomain = useMemo(() => {
-    if (!isPutCall) return null
-    const values = chartData
-      .map((d) => d[dataKey])
-      .filter((v) => v != null && Number.isFinite(Number(v)))
-      .map(Number)
-    if (values.length === 0) return null
-    const min = Math.min(...values)
-    const max = Math.max(...values)
-    return [
-      Number((min - PUT_CALL_DOMAIN_PAD).toFixed(2)),
-      Number((max + PUT_CALL_DOMAIN_PAD).toFixed(2)),
-    ]
-  }, [chartData, dataKey, isPutCall])
+  const yDomain = useMemo(() => {
+    const values = extractChartValues(chartData, dataKey)
+    return computeProfileYDomain(values, profile)
+  }, [chartData, dataKey, profile])
+
+  const tickFormatter = useMemo(() => yAxisTickFormatter(profile), [profile])
+
+  const areaGradientId = `metricArea-${dataKey.replace(/[^a-zA-Z0-9]/g, "")}`
 
   if (!Array.isArray(rows) || rows.length < 1 || chartData.length < 1) {
     return (
@@ -77,33 +75,29 @@ export default function PanicHistoryLineChart({
             minTickGap={28}
           />
           <YAxis
-            domain={
-              isPutCall && putCallYDomain
-                ? putCallYDomain
-                : [`dataMin - ${DOMAIN_PAD}`, `dataMax + ${DOMAIN_PAD}`]
-            }
-            tickCount={isPutCall ? 6 : undefined}
-            tickFormatter={isPutCall ? (v) => Number(v).toFixed(2) : undefined}
+            domain={yDomain ?? ["auto", "auto"]}
+            tickCount={profile.tickCount}
+            tickFormatter={tickFormatter}
             stroke="#64748b"
             tick={{ fill: "#94a3b8", fontSize: 10 }}
             tickLine={false}
             axisLine={{ stroke: "rgba(148,163,184,0.25)" }}
-            width={isPutCall ? 44 : 40}
+            width={profile.narrowRange ? 44 : 40}
           />
-          {isPutCall ? (
+          {profile.showArea ? (
             <defs>
-              <linearGradient id="putCallAreaFill" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={areaGradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={stroke} stopOpacity={0.2} />
                 <stop offset="100%" stopColor={stroke} stopOpacity={0.03} />
               </linearGradient>
             </defs>
           ) : null}
-          {isPutCall ? (
+          {profile.showArea ? (
             <Area
               type="monotone"
               dataKey={dataKey}
               stroke="none"
-              fill="url(#putCallAreaFill)"
+              fill={`url(#${areaGradientId})`}
               connectNulls
               isAnimationActive={false}
             />
@@ -122,13 +116,14 @@ export default function PanicHistoryLineChart({
             type="monotone"
             dataKey={dataKey}
             stroke={stroke}
-            strokeWidth={isPutCall ? 3.5 : 3}
+            strokeWidth={profile.strokeWidth ?? 3}
             dot={false}
-            activeDot={
-              isPutCall
-                ? { r: 6, strokeWidth: 2, fill: stroke, stroke: "#0b0e14" }
-                : { r: 5, strokeWidth: 2, fill: stroke }
-            }
+            activeDot={{
+              r: profile.activeDotR ?? 5,
+              strokeWidth: 2,
+              fill: stroke,
+              stroke: profile.narrowRange ? "#0b0e14" : undefined,
+            }}
             connectNulls
             isAnimationActive={false}
           />
