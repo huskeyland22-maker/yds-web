@@ -17,12 +17,11 @@ import ValueChainStockSignals from "./ValueChainStockSignals.jsx"
 const GROWTH_TO_VC_HEAT_IDS = {
   "ai-infra": ["ai-datacenter-infra", "hbm-ai-semiconductor"],
   semiconductor: ["hbm-ai-semiconductor"],
-  power: ["power-grid-hvdc", "power-semiconductor-electronics"],
-  transformer: ["power-grid-hvdc"],
+  "power-grid": ["power-grid-hvdc", "power-semiconductor-electronics"],
   nuclear: ["nuclear-smr"],
-  robot: ["on-device-ai-robotics"],
+  "copper-wire": ["power-grid-hvdc"],
+  "robot-automation": ["on-device-ai-robotics"],
   defense: ["defense"],
-  datacenter: ["ai-datacenter-infra"],
 }
 
 function heatPillClass(heat) {
@@ -160,7 +159,11 @@ export default function ValueChainPage({
           <span className="font-medium text-cyan-200/85">산업 흐름</span>
           <span className="text-slate-600">→</span>
           <a href="#growth-sector-map" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
-            성장맵
+            국내 섹터
+          </a>
+          <span className="text-slate-600">→</span>
+          <a href="#korea-industry-flow" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
+            연결맵
           </a>
           <span className="text-slate-600">→</span>
           <a href="#ai-bottleneck-flow" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
@@ -189,10 +192,10 @@ export default function ValueChainPage({
             <div className="min-w-0">
               <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">Market Cycle Lab · Korea</p>
               <p className="m-0 mt-2 text-[1.05rem] font-semibold leading-snug tracking-tight text-slate-50 md:text-[1.2rem]">
-                코리아 밸류체인 · 성장섹터 맵
+                코리아 밸류체인 · 국내 산업 맵
               </p>
               <p className="m-0 mt-2 font-display text-[0.95rem] font-semibold leading-none tracking-[0.04em] text-slate-400/65 md:text-[1.05rem]">
-                AI 병목 · 산업 재편 · 순환매
+                산업 재편 · 순환매 · 메가트렌드
               </p>
               <dl className="m-0 mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-white/[0.05] bg-black/25 px-3 py-2.5">
