@@ -34,6 +34,11 @@ export const METRIC_CANONICAL_FROM_SLUG = {
   cnnfeargreed: "fearGreed",
   cnnfearandgreed: "fearGreed",
   cnnfg: "fearGreed",
+  cnnfandg: "fearGreed",
+  bofabb: "bofa",
+  bofab: "bofa",
+  vixindex: "vix",
+  vxnindex: "vxn",
   hyoas: "highYield",
   hyoasfred: "highYield",
   highyield: "highYield",
@@ -67,7 +72,10 @@ export const METRIC_PASTE_RULES = [
       /(?:CNN\s*F&G|공포\s*탐욕|탐욕\s*지수|F&G(?:\s*Index)?)\b/i,
     ],
   },
-  { key: "bofa", patterns: [/BofA(?:\s*Bull\s*(?:&|and)?\s*Bear|\s*B\s*&\s*B)?/i] },
+  {
+    key: "bofa",
+    patterns: [/BofA(?:\s*Bull\s*(?:&|and)?\s*Bear|\s*B\s*&\s*B|\s*B&B)?/i, /\bBofA\b/i],
+  },
   { key: "move", patterns: [/\bMOVE(?:\s*Index)?\b/i] },
   { key: "skew", patterns: [/\bSKEW(?:\s*Index)?\b/i] },
   {
@@ -77,6 +85,7 @@ export const METRIC_PASTE_RULES = [
   {
     key: "highYield",
     patterns: [
+      /\bHY\b(?:\s*OAS)?/i,
       /HY\s*OAS(?:\s*\(\s*FRED\s*\))?/i,
       /\bHigh\s*Yield\b/i,
       /\bHighYield\b/i,
@@ -91,6 +100,7 @@ export const METRIC_PASTE_RULES = [
       /\bGS\s*Sentiment\s*Index\b/i,
       /\bGS\s*Risk\s*Appetite\b/i,
       /\bGS\s*B\s*\/\s*B\b/i,
+      /\bGS\s*B\s*&\s*B\b/i,
       /Goldman\s*Sachs\s*Sentiment/i,
       /Goldman\s*Sachs\s*Risk\s*Appetite/i,
       /\bGS\s*Bull\s*Bear\b/i,
@@ -118,7 +128,9 @@ let DATE_ISO_RE = null
 let SOURCE_NOISE_RE = null
 let NUMBER_TOKEN_RE = null
 let SIGNED_NUMBER_RE = null
+let RELAXED_NUMBER_RE = null
 let METRIC_STATUS_WORDS_RE = null
+let CSV_INDEX_PREFIX_RE = null
 
 /** Δ·상태 등급 구간만 자르고, 본값 "+0.8" 은 유지 */
 const CHANGE_SPLIT_RE_SOURCE = String.raw`[▲▼↑↓📈📉]|,\s*[+\u2212\u2013\u2014]\s*\d`
@@ -138,6 +150,8 @@ function compilePasteRegexes() {
     /\b(?:Yahoo\s*Finance|Reuters|Bloomberg|CNBC|MarketWatch|Investing\.com|Google\s*Finance)\b/gi
   NUMBER_TOKEN_RE = /[-+]?(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d*\.?\d+)/g
   SIGNED_NUMBER_RE = /[-+]?\d*\.?\d+/g
+  RELAXED_NUMBER_RE = /[-+]?\d+(?:\.\d+)?/g
+  CSV_INDEX_PREFIX_RE = /^\d+\.\s*/
   METRIC_STATUS_WORDS_RE =
     /(?:회복|주의|안정|탐욕|공포|과열|낙관|흔들림|패닉|극단|위험|급등|🟢|🟡|🔴|⚪)\b/giu
 }
@@ -273,6 +287,75 @@ function splitCsvLine(line) {
   }
 }
 
+/** CSV 라벨 셀: "1. VIX Index" → "VIX", 상태·Index 접미 제거 */
+function cleanRawMetricKey(raw) {
+  try {
+    compilePasteRegexes()
+    let s = String(raw ?? "").trim()
+    s = s.replace(CSV_INDEX_PREFIX_RE, "")
+    s = s.replace(/\s+Index\s*$/i, "")
+    return stripMetricStatusWords(s)
+  } catch {
+    return String(raw ?? "").trim()
+  }
+}
+
+/** 완화 숫자 추출: [-+]?\d+(\.\d+)? */
+function extractRelaxedNumbers(segment) {
+  const candidates = []
+  try {
+    compilePasteRegexes()
+    const re = new RegExp(RELAXED_NUMBER_RE.source, RELAXED_NUMBER_RE.flags)
+    let m
+    let guard = 0
+    while ((m = safeRegexExec(re, segment)) && guard < MAX_REGEX_ITERATIONS) {
+      guard += 1
+      const n = normalizeNumberToken(m[0])
+      if (n == null) continue
+      candidates.push({ n, index: m.index ?? 0 })
+      if (!re.global) break
+    }
+  } catch {
+    return []
+  }
+  return candidates
+}
+
+/** CSV 값 열: "-", 상태문구 건너뛰고 첫 유효 숫자 */
+function pickValueFromCsvParts(parts, keyIndex) {
+  try {
+    for (let i = keyIndex + 1; i < parts.length; i++) {
+      const cell = String(parts[i] ?? "").trim()
+      if (!cell || cell === "-" || cell === "—" || cell === "–") continue
+      const cleaned = stripMetricStatusWords(cell)
+      if (!cleaned || cleaned === "-") continue
+      const direct = normalizeNumberToken(cleaned)
+      if (direct != null) return direct
+      const fromRelaxed = extractRelaxedNumbers(cleaned)
+      if (fromRelaxed.length) return fromRelaxed[0].n
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/** 라벨 → canonical key (slug · 패턴) */
+function resolveMetricKeyFromLabel(label) {
+  try {
+    const cleaned = cleanRawMetricKey(label)
+    if (!cleaned) return null
+    const fromSlug = resolveCanonicalMetricKey(cleaned)
+    if (fromSlug) return fromSlug
+    for (const rule of METRIC_PASTE_RULES) {
+      if (findMetricInText(cleaned, rule.patterns)) return rule.key
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 /**
  * 한 줄에서 rawKey / rawValue 분리 (표 형식·단순 KEY,VALUE).
  * @returns {{ rawKey: string, rawValue: string } | null}
@@ -285,23 +368,24 @@ function splitLineKeyValue(line) {
     const parts = splitCsvLine(trimmed)
     if (parts.length < 2) return null
 
-    if (parts.length >= 3 && /^(단기|중기|장기)$/i.test(parts[0])) {
-      return { rawKey: parts[1], rawValue: parts[2] }
-    }
-    if (parts.length >= 3 && /^\d+$/.test(parts[0])) {
-      return { rawKey: parts[1], rawValue: parts[2] }
-    }
-    if (parts.length >= 3 && /^\d+\.\s/.test(parts[1])) {
-      return { rawKey: parts[1], rawValue: parts[2] }
+    let keyIndex = 0
+    if (parts.length >= 3 && /^(단기|중기|장기)$/i.test(parts[0])) keyIndex = 1
+    else if (parts.length >= 3 && /^\d+$/.test(parts[0])) keyIndex = 1
+
+    const rawKey = parts[keyIndex]
+    const picked = pickValueFromCsvParts(parts, keyIndex)
+    if (picked != null) {
+      return { rawKey, rawValue: String(picked) }
     }
 
-    const rawKey = parts[0]
-    let rawValue = parts[1]
-    if (parts.length > 2) {
-      const numericPart = parts.slice(1).find((p) => normalizeNumberToken(p) != null)
-      if (numericPart) rawValue = numericPart
+    if (keyIndex > 0) return null
+
+    const fallbackKey = parts[0]
+    const fallbackVal = pickValueFromCsvParts(parts, 0)
+    if (fallbackVal != null) {
+      return { rawKey: fallbackKey, rawValue: String(fallbackVal) }
     }
-    return { rawKey, rawValue }
+    return null
   } catch {
     return null
   }
@@ -316,13 +400,45 @@ function parseExplicitKeyValueLine(line) {
     const pair = splitLineKeyValue(line)
     if (!pair) return null
 
-    const canonicalKey = resolveCanonicalMetricKey(pair.rawKey)
+    const canonicalKey = resolveMetricKeyFromLabel(pair.rawKey)
     if (!canonicalKey) return null
 
-    const parsedNumber = normalizeNumberToken(pair.rawValue)
+    let parsedNumber = normalizeNumberToken(pair.rawValue)
+    if (parsedNumber == null) {
+      const relaxed = extractRelaxedNumbers(pair.rawValue)
+      if (relaxed.length) parsedNumber = relaxed[0].n
+    }
     if (parsedNumber == null) return null
 
     return { key: canonicalKey, value: parsedNumber }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * CSV 한 줄 — 라벨 매칭 후 숫자만 추출 (번호·Index·상태문구 제거)
+ * @returns {{ key: string, value: number } | null}
+ */
+function parseRelaxedCsvMetricLine(line) {
+  try {
+    const trimmed = String(line ?? "").trim()
+    if (!trimmed.includes(",")) return null
+
+    const parts = splitCsvLine(trimmed)
+    if (parts.length < 2) return null
+
+    let keyIndex = 0
+    if (parts.length >= 3 && /^(단기|중기|장기)$/i.test(parts[0])) keyIndex = 1
+    else if (parts.length >= 3 && /^\d+$/.test(parts[0])) keyIndex = 1
+
+    const key = resolveMetricKeyFromLabel(parts[keyIndex])
+    if (!key) return null
+
+    const value = pickValueFromCsvParts(parts, keyIndex)
+    if (value == null) return null
+
+    return { key, value }
   } catch {
     return null
   }
@@ -411,6 +527,9 @@ export function extractPrimaryMetricValue(text, fromIndex) {
     if (!primarySegment) return null
 
     let candidates = collectNumbersFromSegment(primarySegment)
+    if (!candidates.length) {
+      candidates = extractRelaxedNumbers(primarySegment)
+    }
     if (!candidates.length) {
       compilePasteRegexes()
       const signed = safeRegexExec(
@@ -540,7 +659,7 @@ export function parseMetricPasteText(text, requiredKeys = []) {
 
     for (const line of lines) {
       if (preferKeyValue || line.includes(",")) {
-        const kv = parseExplicitKeyValueLine(line)
+        const kv = parseExplicitKeyValueLine(line) ?? parseRelaxedCsvMetricLine(line)
         if (kv) {
           if (out[kv.key] == null) {
             out[kv.key] = kv.value
