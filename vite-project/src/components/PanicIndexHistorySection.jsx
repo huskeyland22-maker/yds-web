@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react"
 import { CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
-import { computeHistoryMetricStats } from "../utils/panicHistoryStats.js"
+import {
+  computeHistoryMetricStats,
+  HIGHER_IS_BAD,
+  historyChangeToneClass,
+} from "../utils/panicHistoryStats.js"
 import { HISTORY_SECTION_METRICS } from "../utils/panicDeskMetrics.js"
 import { MOOD_SPECTRUM } from "../utils/panicDeskMood.js"
 import { metricZoneBands } from "../utils/panicHistoryZoneLines.js"
@@ -83,12 +87,27 @@ export default function PanicIndexHistorySection({ rows = [] }) {
         </div>
       </div>
 
-      <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:grid-cols-4 lg:grid-cols-8">
         <StatCell label="현재" value={stats.currentText} accent />
         <StatCell label="최근 저점" value={stats.lowText} />
         <StatCell label="최근 고점" value={stats.highText} />
         <StatCell label="백분위" value={stats.percentileLabel} />
-        <StatCell label="상태" value={stats.statusLabel} className="col-span-2 sm:col-span-1" />
+        <StatCell label="상태" value={stats.statusLabel} />
+        <StatCell
+          label="전일"
+          value={stats.dayText}
+          valueClassName={historyChangeToneClass(stats.dayPct, HIGHER_IS_BAD[metricKey] ?? true)}
+        />
+        <StatCell
+          label="1주"
+          value={stats.weekText}
+          valueClassName={historyChangeToneClass(stats.weekPct, HIGHER_IS_BAD[metricKey] ?? true)}
+        />
+        <StatCell
+          label="1개월"
+          value={stats.monthText}
+          valueClassName={historyChangeToneClass(stats.monthPct, HIGHER_IS_BAD[metricKey] ?? true)}
+        />
       </div>
 
       {zoneLegend.length > 0 ? (
@@ -129,9 +148,12 @@ export default function PanicIndexHistorySection({ rows = [] }) {
 }
 
 /**
- * @param {{ label: string; value: string; accent?: boolean; className?: string }} props
+ * @param {{ label: string; value: string; accent?: boolean; className?: string; valueClassName?: string }} props
  */
-function StatCell({ label, value, accent = false, className = "" }) {
+function StatCell({ label, value, accent = false, className = "", valueClassName = "" }) {
+  const valueTone =
+    valueClassName || (accent ? "text-slate-50" : "text-slate-300")
+
   return (
     <div
       className={[
@@ -143,7 +165,7 @@ function StatCell({ label, value, accent = false, className = "" }) {
       <p
         className={[
           "m-0 mt-0.5 font-mono text-[12px] font-bold tabular-nums leading-tight",
-          accent ? "text-slate-50" : "text-slate-300",
+          valueTone,
         ].join(" ")}
       >
         {value}

@@ -11,7 +11,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { metricZoneBands, metricZoneLineYs } from "../utils/panicHistoryZoneLines.js"
+import {
+  metricZoneBands,
+  metricZoneLineYs,
+  ZONE_BAND_FILL_OPACITY,
+  zoneBandMidpoints,
+} from "../utils/panicHistoryZoneLines.js"
 import {
   computeHistoryYDomain,
   extractChartValues,
@@ -22,6 +27,39 @@ import { buildChartDataFromHistory, logHistoryChartDebug } from "../utils/panicH
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 
 const CHART_HEIGHT = 340
+const CHART_MARGIN = { top: 28, right: 58, left: 8, bottom: 32 }
+
+/**
+ * @param {{ bands: { y: number; label: string; color: string }[]; yDomain: [number, number]; height: number }} props
+ */
+function ZoneYAxisLabels({ bands, yDomain, height }) {
+  const [yMin, yMax] = yDomain
+  const span = yMax - yMin
+  if (!Number.isFinite(span) || span <= 0) return null
+
+  const plotTop = CHART_MARGIN.top
+  const plotHeight = height - CHART_MARGIN.top - CHART_MARGIN.bottom
+  const yToTop = (y) => plotTop + ((yMax - y) / span) * plotHeight
+
+  return (
+    <div className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-[54px]" aria-hidden>
+      {bands.map((band) => {
+        if (band.y < yMin || band.y > yMax) return null
+        const top = yToTop(band.y)
+        return (
+          <span
+            key={band.label}
+            className="absolute right-0 max-w-[52px] truncate text-right text-[8px] font-medium leading-none text-slate-500/90"
+            style={{ top: top - 5 }}
+            title={band.label}
+          >
+            {band.label}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
 
 /**
  * panic_index_history 전용 Recharts 라인 (단일 시리즈)
@@ -68,7 +106,13 @@ export default function PanicHistoryLineChart({
 
   const tickFormatter = useMemo(() => yAxisTickFormatter(profile), [profile])
 
+  const zoneLabels = useMemo(() => {
+    if (!showZoneBands || !zoneBands.length || !yDomain) return []
+    return zoneBandMidpoints(zoneBands)
+  }, [showZoneBands, zoneBands, yDomain])
+
   const areaGradientId = `metricArea-${dataKey.replace(/[^a-zA-Z0-9]/g, "")}`
+  const lineStrokeWidth = (profile.strokeWidth ?? 3) + (showZoneBands ? 0.5 : 0)
 
   if (!Array.isArray(rows) || rows.length < 1 || chartData.length < 1) {
     return (
@@ -84,14 +128,14 @@ export default function PanicHistoryLineChart({
   return (
     <div className="relative w-full overflow-visible" style={{ height, minHeight: height }}>
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={chartData} margin={{ top: 28, right: 18, left: 8, bottom: 32 }}>
+        <LineChart data={chartData} margin={CHART_MARGIN}>
           {zoneBands.map((band) => (
             <ReferenceArea
               key={band.label}
               y1={band.y1}
               y2={band.y2}
               fill={band.color}
-              fillOpacity={0.07}
+              fillOpacity={ZONE_BAND_FILL_OPACITY}
               strokeOpacity={0}
               ifOverflow="hidden"
             />
@@ -100,7 +144,7 @@ export default function PanicHistoryLineChart({
             <ReferenceLine
               key={y}
               y={y}
-              stroke="rgba(255,255,255,0.14)"
+              stroke="rgba(255,255,255,0.08)"
               strokeDasharray="4 3"
               ifOverflow="hidden"
             />
@@ -157,7 +201,7 @@ export default function PanicHistoryLineChart({
             type="monotone"
             dataKey={dataKey}
             stroke={stroke}
-            strokeWidth={profile.strokeWidth ?? 3}
+            strokeWidth={lineStrokeWidth}
             dot={false}
             activeDot={{
               r: profile.activeDotR ?? 5,
@@ -170,6 +214,9 @@ export default function PanicHistoryLineChart({
           />
         </LineChart>
       </ResponsiveContainer>
+      {showZoneBands && yDomain && zoneLabels.length > 0 ? (
+        <ZoneYAxisLabels bands={zoneLabels} yDomain={yDomain} height={height} />
+      ) : null}
     </div>
   )
 }
