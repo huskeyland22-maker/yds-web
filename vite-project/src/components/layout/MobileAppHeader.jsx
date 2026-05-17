@@ -12,8 +12,12 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
         <Menu size={18} />
       </button>
       <div className="min-w-0 flex-1 text-center">
-        <p className="m-0 font-display text-[15px] font-semibold tracking-tight text-slate-50">Y&apos;ds</p>
-        <p className="m-0 text-[9px] font-medium tracking-[0.14em] text-slate-600">MACRO TERMINAL</p>
+        <p className="m-0 font-display text-[15px] font-bold leading-none tracking-[0.03em] text-slate-50">
+          Y&apos;ds
+        </p>
+        <p className="m-0 mt-0.5 text-[9px] font-medium tracking-[0.16em] text-slate-300/65">
+          Market Cycle Lab
+        </p>
       </div>
       <div className="flex w-9 justify-end">
         {user ? (

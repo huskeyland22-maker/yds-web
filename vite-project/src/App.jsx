@@ -1159,8 +1159,12 @@ function App() {
     >
       <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
         <div className="shrink-0 px-2 pb-2 pt-2.5 lg:border-b lg:border-white/[0.06] lg:px-2.5 lg:pb-2.5 lg:pt-3">
-          <p className="m-0 font-display text-base font-semibold leading-none tracking-tight text-slate-50">Y&apos;ds</p>
-          <p className="m-0 mt-1 text-trading-2xs font-medium tracking-[0.12em] text-slate-500">매크로 터미널</p>
+          <p className="m-0 font-display text-[17px] font-bold leading-none tracking-[0.03em] text-slate-50">
+            Y&apos;ds
+          </p>
+          <p className="m-0 mt-1.5 text-[9px] font-medium tracking-[0.16em] text-slate-300/65">
+            Market Cycle Lab
+          </p>
         </div>
         <nav className="flex flex-col gap-0.5 px-2 py-2" aria-label="주요 메뉴">
           {MENU.map((item, i) => (
