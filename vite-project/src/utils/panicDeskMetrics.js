@@ -32,6 +32,23 @@ export const EXPERT_METRICS = [
 /** @type {PanicDeskMetric[]} */
 export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 
+/** 패닉지수 히스토리 섹션 (8지표, VXN 제외) */
+export const HISTORY_SECTION_METRICS = [
+  { key: "vix", label: "VIX", chartLabel: "VIX", accent: "#f87171" },
+  { key: "fearGreed", label: "CNN F&G", chartLabel: "F&G", accent: "#fbbf24" },
+  { key: "bofa", label: "BofA", chartLabel: "BofA", accent: "#c084fc" },
+  { key: "putCall", label: "P/C", chartLabel: "P/C", accent: "#60a5fa" },
+  {
+    key: "highYield",
+    label: "HY OAS",
+    chartLabel: "HY OAS",
+    accent: "#fb923c",
+  },
+  { key: "move", label: "MOVE", chartLabel: "MOVE", accent: "#fbbf24" },
+  { key: "skew", label: "SKEW", chartLabel: "SKEW", accent: "#22d3ee" },
+  { key: "gsBullBear", label: "GS B/B", chartLabel: "GS B/B", accent: "#a78bfa" },
+]
+
 /** @param {string} key */
 export function findChartMetric(key) {
   return ALL_CHART_METRICS.find((m) => m.key === key) ?? null

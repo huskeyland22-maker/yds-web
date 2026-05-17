@@ -4,11 +4,14 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceArea,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts"
+import { metricZoneBands, metricZoneLineYs } from "../utils/panicHistoryZoneLines.js"
 import {
   computeProfileYDomain,
   extractChartValues,
@@ -27,6 +30,9 @@ const CHART_HEIGHT = 340
  *   dataKey: string
  *   dataLabel?: string
  *   stroke?: string
+ *   showZoneBands?: boolean
+ *   height?: number
+ *   debug?: boolean
  * }} props
  */
 export default function PanicHistoryLineChart({
@@ -34,19 +40,32 @@ export default function PanicHistoryLineChart({
   dataKey = "vix",
   dataLabel = "VIX",
   stroke = "#22d3ee",
+  showZoneBands = false,
+  height = CHART_HEIGHT,
+  debug = false,
 }) {
   const chartData = useMemo(() => {
     const data = buildChartDataFromHistory(rows, dataKey)
-    logHistoryChartDebug(rows, data)
+    if (debug) logHistoryChartDebug(rows, data)
     return data
-  }, [rows, dataKey])
+  }, [rows, dataKey, debug])
 
   const profile = useMemo(() => resolveChartProfile(dataKey), [dataKey])
 
+  const zoneBands = useMemo(
+    () => (showZoneBands ? metricZoneBands(dataKey) : []),
+    [showZoneBands, dataKey],
+  )
+  const zoneLineYs = useMemo(
+    () => (showZoneBands ? metricZoneLineYs(dataKey) : []),
+    [showZoneBands, dataKey],
+  )
+
   const yDomain = useMemo(() => {
+    if (showZoneBands && dataKey === "fearGreed") return [0, 100]
     const values = extractChartValues(chartData, dataKey)
     return computeProfileYDomain(values, profile)
-  }, [chartData, dataKey, profile])
+  }, [chartData, dataKey, profile, showZoneBands])
 
   const tickFormatter = useMemo(() => yAxisTickFormatter(profile), [profile])
 
@@ -54,16 +73,39 @@ export default function PanicHistoryLineChart({
 
   if (!Array.isArray(rows) || rows.length < 1 || chartData.length < 1) {
     return (
-      <div className="flex h-[340px] min-h-[340px] items-center justify-center rounded-lg border border-white/[0.06] bg-black/30 text-[11px] text-slate-500">
+      <div
+        className="flex items-center justify-center rounded-lg border border-white/[0.06] bg-black/30 text-[11px] text-slate-500"
+        style={{ height, minHeight: height }}
+      >
         panic_index_history 데이터 없음
       </div>
     )
   }
 
   return (
-    <div className="relative w-full overflow-visible" style={{ height: CHART_HEIGHT, minHeight: CHART_HEIGHT }}>
-      <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+    <div className="relative w-full overflow-visible" style={{ height, minHeight: height }}>
+      <ResponsiveContainer width="100%" height={height}>
         <LineChart data={chartData} margin={{ top: 28, right: 18, left: 8, bottom: 32 }}>
+          {zoneBands.map((band) => (
+            <ReferenceArea
+              key={band.label}
+              y1={band.y1}
+              y2={band.y2}
+              fill={band.color}
+              fillOpacity={0.07}
+              strokeOpacity={0}
+              ifOverflow="extendDomain"
+            />
+          ))}
+          {zoneLineYs.map((y) => (
+            <ReferenceLine
+              key={y}
+              y={y}
+              stroke="rgba(255,255,255,0.14)"
+              strokeDasharray="4 3"
+              ifOverflow="extendDomain"
+            />
+          ))}
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis
             dataKey="axisLabel"

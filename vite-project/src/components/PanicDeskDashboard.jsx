@@ -14,6 +14,7 @@ import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDes
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
+import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
 
@@ -361,6 +362,8 @@ export default function PanicDeskDashboard({
         deskMarketReport={deskMarketReport}
         deskMarketReportLoading={deskMarketReportLoading}
       />
+
+      <PanicIndexHistorySection rows={cycleMetricHistory} />
     </div>
   )
 }
