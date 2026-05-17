@@ -110,7 +110,10 @@ export const useAppDataStore = create((set, get) => ({
       replacePanicIndexHistory(hubRows)
 
       const prev = readCycleMetricHistoryFromLS()
-      const merged = mergeCycleRows(mergeCycleRows(prev, normalized), fromHub)
+      const merged =
+        fromHub.length > 0
+          ? mergeCycleRows([], fromHub)
+          : mergeCycleRows(mergeCycleRows(prev, normalized), fromHub)
 
       const source =
         fromHub.length > 0

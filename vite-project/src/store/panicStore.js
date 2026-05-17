@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { fetchPanicDataJson, isPanicHubEnabled } from "../config/api.js"
+import { fetchPanicDataJson, isPanicHubEnabled, submitManualPanicData } from "../config/api.js"
 import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { validatePanicData, isPanicBusinessDataStale } from "../utils/validatePanicData.js"
@@ -412,6 +412,31 @@ export const usePanicStore = create((set, get) => ({
       return false
     }
     return updated
+  },
+
+  savePanicMetricsHub: async (inputData, opts = {}) => {
+    if (!isPanicHubEnabled()) {
+      return { ok: false, error: new Error("panic_hub_disabled") }
+    }
+    try {
+      const tradeDate =
+        typeof opts.tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(opts.tradeDate)
+          ? opts.tradeDate
+          : typeof inputData?.tradeDate === "string"
+            ? inputData.tradeDate.slice(0, 10)
+            : undefined
+      const updatedAt =
+        tradeDate != null
+          ? `${tradeDate}T12:00:00.000Z`
+          : new Date().toISOString()
+      const payload = { ...inputData, tradeDate, updatedAt }
+      const data = await submitManualPanicData(payload)
+      get().applyServerPanicSnapshot(data)
+      await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
+      return { ok: true, data, tradeDate: tradeDate ?? null }
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err : new Error(String(err)) }
+    }
   },
 
   applyServerPanicSnapshot: (incoming) => {

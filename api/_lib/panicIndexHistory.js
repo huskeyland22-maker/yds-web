@@ -60,13 +60,24 @@ export function panicIndexHistoryRowToClient(row) {
   }
 }
 
+function resolveTradeDate(body, tradeDateOverride) {
+  const raw = tradeDateOverride || body?.tradeDate || body?.historyDate
+  if (typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.slice(0, 10))) return raw.slice(0, 10)
+  return calendarDateFromPayload(body)
+}
+
+function rowHasCoreMetrics(row) {
+  const core = ["vix", "fear_greed", "bofa", "hy_oas"]
+  return core.every((k) => row[k] != null)
+}
+
 /**
- * 동일 날짜는 merge-duplicates(upsert), 다른 날짜는 append.
+ * PK(date) upsert: 같은 날짜만 갱신, 다른 날짜 행은 유지(다중 일자 공존).
  */
 export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
-  const row = panicIndexHistoryRowFromPayload(body, undefined, opts)
-  const core = ["vix", "fear_greed", "bofa", "hy_oas"]
-  if (!core.every((k) => row[k] != null)) {
+  const tradeDate = resolveTradeDate(body, opts.tradeDate)
+  const row = panicIndexHistoryRowFromPayload(body, tradeDate, opts)
+  if (!rowHasCoreMetrics(row)) {
     return { ok: false, skipped: true, reason: "incomplete_core_metrics" }
   }
   await supabaseRest("panic_index_history?on_conflict=date", {
@@ -75,6 +86,30 @@ export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
     body: row,
   })
   return { ok: true, date: row.date }
+}
+
+/**
+ * @param {Array<Record<string, unknown> & { tradeDate?: string; date?: string }>} entries
+ */
+export async function upsertPanicIndexHistoryBatch(entries, opts = {}) {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return { ok: false, skipped: true, reason: "empty_batch" }
+  }
+  const rows = []
+  for (const entry of entries) {
+    const tradeDate = entry?.tradeDate || entry?.date
+    const row = panicIndexHistoryRowFromPayload(entry, tradeDate, opts)
+    if (rowHasCoreMetrics(row)) rows.push(row)
+  }
+  if (!rows.length) {
+    return { ok: false, skipped: true, reason: "incomplete_core_metrics" }
+  }
+  await supabaseRest("panic_index_history?on_conflict=date", {
+    method: "POST",
+    prefer: "resolution=merge-duplicates,return=minimal",
+    body: rows,
+  })
+  return { ok: true, count: rows.length, dates: rows.map((r) => r.date) }
 }
 
 /**

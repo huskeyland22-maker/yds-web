@@ -4,7 +4,7 @@ import {
   rowsFromPanicPayload,
   upsertPanicMetricsRows,
 } from "./panicMetricsHub.js"
-import { upsertPanicIndexHistoryFromPayload } from "./panicIndexHistory.js"
+import { upsertPanicIndexHistoryBatch, upsertPanicIndexHistoryFromPayload } from "./panicIndexHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
@@ -45,9 +45,14 @@ export async function persistPanicPayload(body, opts = {}) {
   const incoming = { ...body, updatedAt: body.updatedAt || new Date().toISOString() }
   const rows = rowsFromPanicPayload(incoming, { source })
   await upsertPanicMetricsRows(rows)
+  const tradeDate = incoming.tradeDate || incoming.historyDate
   let history = { ok: false, skipped: true }
   try {
-    history = await upsertPanicIndexHistoryFromPayload(incoming, { source })
+    history = await upsertPanicIndexHistoryFromPayload(incoming, { source, tradeDate })
+    if (Array.isArray(incoming.historyRows) && incoming.historyRows.length > 0) {
+      const batch = await upsertPanicIndexHistoryBatch(incoming.historyRows, { source })
+      history = { ...history, batch }
+    }
   } catch (historyErr) {
     history = {
       ok: false,

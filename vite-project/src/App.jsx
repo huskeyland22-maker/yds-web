@@ -8,6 +8,7 @@ import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
 import { CYCLE_HISTORY_MAX } from "./utils/cycleHistoryUtils.js"
 import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
+import { kstCalendarKey } from "./utils/formatDataAge.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
 import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
 import {
@@ -439,6 +440,7 @@ function App() {
   const textareaRef = useRef(null)
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
+  const [historyTradeDate, setHistoryTradeDate] = useState(() => kstCalendarKey())
   const [buildVersion, setBuildVersion] = useState(
     () => APP_VERSION_LABEL || `build-${String(APP_BUILD_ID).slice(-8)}`,
   )
@@ -579,13 +581,23 @@ function App() {
       gsBullBear,
     }
 
+    const tradeDate =
+      typeof historyTradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(historyTradeDate)
+        ? historyTradeDate
+        : kstCalendarKey()
+    const payload = {
+      ...normalizedParsedData,
+      tradeDate,
+      updatedAt: `${tradeDate}T12:00:00.000Z`,
+    }
+
     setIsSaving(true)
     let usedHubSavePath = false
     let saveSucceeded = false
     try {
       if (isPanicHubEnabled() && typeof savePanicMetricsHub === "function") {
         usedHubSavePath = true
-        const result = await savePanicMetricsHub(normalizedParsedData)
+        const result = await savePanicMetricsHub(payload, { tradeDate })
         if (!result?.ok) {
           const msg = result?.error instanceof Error ? result.error.message : String(result?.error ?? "저장 실패")
           setInputError(msg)
@@ -594,8 +606,9 @@ function App() {
         }
       } else {
         try {
-          const serverData = await submitManualPanicData(normalizedParsedData)
+          const serverData = await submitManualPanicData(payload)
           applyServerPanicSnapshot(serverData)
+          await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
           saveSucceeded = true
         } catch (err) {
           console.error("패닉지수 서버 저장 실패", err)
@@ -604,8 +617,10 @@ function App() {
       }
 
       if (saveSucceeded) {
-        const savedAt = new Date().toISOString()
-        appendPanicIndexHistory({ ...normalizedParsedData, updatedAt: savedAt })
+        const savedAt = payload.updatedAt
+        if (!isPanicHubEnabled()) {
+          appendPanicIndexHistory({ ...normalizedParsedData, updatedAt: savedAt }, tradeDate)
+        }
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()
         pulseSaveFeedback()
@@ -672,13 +687,13 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!panicData) return
+    if (!panicData || isPanicHubEnabled()) return
     appendPanicIndexHistory(panicData)
     useAppDataStore.getState().syncCycleHistoryFromPanic(panicData)
   }, [panicData])
 
   useEffect(() => {
-    void useAppDataStore.getState().loadCycleHistoryBundle({ limit: CYCLE_HISTORY_MAX })
+    void useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
   }, [])
 
   useEffect(() => {
@@ -1318,6 +1333,15 @@ function App() {
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
                   표(CSV) 또는 기사 한 줄 붙여넣기 — 지표명·숫자만 자동 추출합니다.
                 </p>
+                <label className="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                  <span className="shrink-0 font-medium">히스토리 기준일</span>
+                  <input
+                    type="date"
+                    value={historyTradeDate}
+                    onChange={(e) => setHistoryTradeDate(e.target.value)}
+                    className="rounded border border-white/[0.1] bg-slate-950/80 px-1.5 py-0.5 font-mono text-[11px] text-slate-200"
+                  />
+                </label>
               </div>
               <button
                 type="button"
