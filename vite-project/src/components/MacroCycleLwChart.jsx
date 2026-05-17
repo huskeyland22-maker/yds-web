@@ -159,7 +159,7 @@ function regimeAreaStyle(regime) {
  *   className?: string
  * }} props
  */
-export default function MacroCycleLwChart({ rows, primarySeries, className = "" }) {
+export default function MacroCycleLwChart({ rows, primarySeries, className = "", compact = false }) {
   const wrapRef = useRef(null)
   const chartRef = useRef(null)
   const metaRef = useRef(new Map())
@@ -427,7 +427,13 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "" 
         </div>
       </div>
 
-      <div className="relative h-[360px] w-full min-h-[280px] sm:h-[400px] sm:min-h-[300px]">
+      <div
+        className={
+          compact
+            ? "relative h-[min(52vw,220px)] w-full min-h-[200px] sm:h-[260px] sm:min-h-[220px]"
+            : "relative h-[360px] w-full min-h-[280px] sm:h-[400px] sm:min-h-[300px]"
+        }
+      >
         <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
 
         {lastValue != null ? (

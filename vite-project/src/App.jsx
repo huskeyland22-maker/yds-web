@@ -10,7 +10,6 @@ import { CYCLE_HISTORY_MAX } from "./utils/cycleHistoryUtils.js"
 import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "./config/liveDataFetch.js"
 import { AUTO_DATA_ENGINE_ENABLED } from "./config/dataEngine.js"
-import CycleDeskHero from "./components/CycleDeskHero.jsx"
 import {
   CycleHistoryTraceBadge,
   DataFlowPipelineHint,
@@ -27,8 +26,7 @@ import SectorFlowStrip from "./components/SectorFlowStrip.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
-import MobileCoreMetricsStrip from "./components/MobileCoreMetricsStrip.jsx"
-import MobileMarketOverview from "./components/MobileMarketOverview.jsx"
+import PanicDeskDashboard from "./components/PanicDeskDashboard.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
 import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
 import MobileDrawer from "./components/layout/MobileDrawer.jsx"
@@ -41,7 +39,6 @@ import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
 import { useAppDataStore } from "./store/appDataStore.js"
 import { usePanicStore } from "./store/panicStore.js"
 import { isDataTraceUiEnabled, logRealtime } from "./utils/dataFlowTrace.js"
-import { buildCycleDeskHeroContext } from "./utils/cycleDeskHero.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
 import { resolveMarketState } from "./utils/marketStateEngine.js"
 import MetricInputErrorBoundary from "./components/MetricInputErrorBoundary.jsx"
@@ -1107,10 +1104,6 @@ function App() {
 
     return { asOfDateLabel, updatedLine, sourceLine, feedKind, feedLabel, historySourceLine }
   }, [cycleMetricHistory, panicData, cycleHistorySource])
-  const cycleHeroContext = useMemo(
-    () => buildCycleDeskHeroContext(panicData, marketCycleStage, heroSummary),
-    [panicData, marketCycleStage, heroSummary],
-  )
   return (
     <div
       className={[
@@ -1284,30 +1277,24 @@ function App() {
               path="/cycle"
               element={
                 <div id="desk" className="space-y-2 lg:space-y-5">
-                  {isMobileLayout ? (
-                    <>
-                      <MobileCoreMetricsStrip
-                        panicData={panicData}
-                        updatedLine={cycleDeskMeta.updatedLine}
-                        isStale={panicDataStale}
-                      />
-                      <MobileMarketOverview
-                        context={cycleHeroContext}
-                        asOfDateLabel={cycleDeskMeta.asOfDateLabel}
-                      />
-                    </>
-                  ) : (
-                    <SectionErrorBoundary label="사이클 데스크 헤더">
-                      <CycleDeskHero
-                        context={cycleHeroContext}
-                        asOfDateLabel={cycleDeskMeta.asOfDateLabel}
-                        updatedLine={cycleDeskMeta.updatedLine}
-                      />
-                    </SectionErrorBoundary>
-                  )}
+                  <SectionErrorBoundary label="패닉 데스크">
+                    <PanicDeskDashboard
+                      panicData={panicData}
+                      cycleMetricHistory={cycleMetricHistory}
+                      isStale={panicDataStale}
+                      updatedLine={cycleDeskMeta.updatedLine}
+                      asOfDateLabel={cycleDeskMeta.asOfDateLabel}
+                      tacticalView={tacticalView}
+                      strategicView={strategicView}
+                      macroView={macroView}
+                      marketState={marketState}
+                    />
+                  </SectionErrorBoundary>
                   <SectionErrorBoundary label="사이클 플로우·매크로 티어">
-                    <SectorFlowStrip />
-                    <section className="mt-2 grid grid-cols-1 gap-2 lg:mt-3 lg:grid-cols-3 lg:gap-5">
+                    <div className="hidden lg:block">
+                      <SectorFlowStrip />
+                    </div>
+                    <section className="mt-2 hidden grid-cols-1 gap-2 lg:mt-3 lg:grid lg:grid-cols-3 lg:gap-5">
                     <MacroCycleTierCard
                       compact={isMobileLayout}
                       tier="tactical"
