@@ -433,8 +433,14 @@ export const usePanicStore = create((set, get) => ({
       const result = await submitManualPanicData(payload)
       const data = result?.data ?? result
       const history = result?.history ?? null
+      if (!history?.ok) {
+        const reason = history?.reason || history?.error || "panic_index_history_upsert_failed"
+        return { ok: false, error: new Error(String(reason)), history }
+      }
       get().applyServerPanicSnapshot(data)
-      await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
+      const appStore = useAppDataStore.getState()
+      appStore.invalidateCycleHistoryCache()
+      await appStore.loadCycleHistoryBundle({ limit: 500, force: true })
       return { ok: true, data, history, tradeDate: tradeDate ?? null }
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err : new Error(String(err)) }

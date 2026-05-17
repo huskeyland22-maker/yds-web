@@ -43,22 +43,21 @@ export function computePanicServeMeta(rows, data) {
 export async function persistPanicPayload(body, opts = {}) {
   const source = opts.source || "api"
   const incoming = { ...body, updatedAt: body.updatedAt || new Date().toISOString() }
+  const tradeDate = incoming.tradeDate || incoming.historyDate
+  const requireHistory = opts.requireHistory ?? source === "manual"
+
+  let history = await upsertPanicIndexHistoryFromPayload(incoming, { source, tradeDate })
+  if (Array.isArray(incoming.historyRows) && incoming.historyRows.length > 0) {
+    const batch = await upsertPanicIndexHistoryBatch(incoming.historyRows, { source })
+    history = { ...history, batch }
+  }
+  if (requireHistory && !history.ok) {
+    const detail = history.skipped ? history.reason : history.error
+    throw new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
+  }
+
   const rows = rowsFromPanicPayload(incoming, { source })
   await upsertPanicMetricsRows(rows)
-  const tradeDate = incoming.tradeDate || incoming.historyDate
-  let history = { ok: false, skipped: true }
-  try {
-    history = await upsertPanicIndexHistoryFromPayload(incoming, { source, tradeDate })
-    if (Array.isArray(incoming.historyRows) && incoming.historyRows.length > 0) {
-      const batch = await upsertPanicIndexHistoryBatch(incoming.historyRows, { source })
-      history = { ...history, batch }
-    }
-  } catch (historyErr) {
-    history = {
-      ok: false,
-      error: historyErr instanceof Error ? historyErr.message : "history_failed",
-    }
-  }
   const fresh = await fetchPanicMetricsRows()
   const data = panicObjectFromRows(fresh)
   const meta = computePanicServeMeta(fresh, data)

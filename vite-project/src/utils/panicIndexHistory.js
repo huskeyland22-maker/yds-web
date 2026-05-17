@@ -142,8 +142,8 @@ export function panicIndexRowToCycleChart(row) {
     move: row.move,
     bofa: row.bofa,
     skew: row.skew,
-    highYield: row.hyOas,
-    gsBullBear: row.gsSentiment,
+    highYield: row.hyOas ?? row.highYield,
+    gsBullBear: row.gsSentiment ?? row.gsBullBear,
     putCall: row.putCall ?? null,
   }
 }

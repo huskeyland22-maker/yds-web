@@ -19,7 +19,17 @@ export default async function handler(req, res) {
   }
   try {
     const incoming = typeof req.body === "object" && req.body ? req.body : {}
-    const result = await persistPanicPayload(incoming, { source: "manual" })
+    const result = await persistPanicPayload(incoming, { source: "manual", requireHistory: true })
+    if (!result.history?.ok) {
+      res.status(422).json({
+        ok: false,
+        error: result.history?.reason || result.history?.error || "panic_index_history_upsert_failed",
+        data: result.data,
+        history: result.history,
+        meta: result.meta,
+      })
+      return
+    }
     res.status(200).json({
       ok: true,
       data: result.data,

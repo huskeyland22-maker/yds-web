@@ -21,17 +21,21 @@ export function panicIndexHistoryRowFromPayload(body, tradeDate, opts = {}) {
   const date = tradeDate || calendarDateFromPayload(body)
   const nowIso = new Date().toISOString()
   const source = typeof opts.source === "string" && opts.source ? opts.source : "api"
+  const hy = toNum(body?.highYield ?? body?.hyOas ?? body?.high_yield)
+  const gs = toNum(body?.gsBullBear ?? body?.gsSentiment ?? body?.gs ?? body?.gs_bb)
   return {
     date,
     vix: toNum(body?.vix),
-    vxn: toNum(body?.vxn),
-    fear_greed: toNum(body?.fearGreed),
-    move: toNum(body?.move),
+    fear_greed: toNum(body?.fearGreed ?? body?.fear_greed),
+    put_call: toNum(body?.putCall ?? body?.put_call),
+    high_yield: hy,
+    hy_oas: hy,
     bofa: toNum(body?.bofa),
+    move: toNum(body?.move),
     skew: toNum(body?.skew),
-    put_call: toNum(body?.putCall),
-    hy_oas: toNum(body?.highYield ?? body?.hyOas),
-    gs_sentiment: toNum(body?.gsBullBear ?? body?.gsSentiment ?? body?.gs),
+    gs_bb: gs,
+    gs_sentiment: gs,
+    vxn: toNum(body?.vxn),
     source,
     updated_at: nowIso,
   }
@@ -53,9 +57,11 @@ export function panicIndexHistoryRowToClient(row) {
     move: pick("move"),
     bofa: pick("bofa"),
     skew: pick("skew"),
-    hyOas: pick("hy_oas"),
+    hyOas: pick("hy_oas") ?? pick("high_yield"),
+    highYield: pick("high_yield") ?? pick("hy_oas"),
     putCall: pick("put_call"),
-    gsSentiment: pick("gs_sentiment"),
+    gsSentiment: pick("gs_sentiment") ?? pick("gs_bb"),
+    gsBullBear: pick("gs_bb") ?? pick("gs_sentiment"),
     createdAt: row.created_at ?? row.updated_at ?? null,
   }
 }
@@ -66,9 +72,16 @@ function resolveTradeDate(body, tradeDateOverride) {
   return calendarDateFromPayload(body)
 }
 
-function rowHasCoreMetrics(row) {
-  const core = ["vix", "fear_greed", "put_call", "hy_oas", "bofa"]
-  return core.every((k) => row[k] != null)
+/** AI 수동 입력 최소 필드 (App REQUIRED_KEYS와 동일) */
+function rowHasRequiredHistoryMetrics(row) {
+  const hy = row.high_yield ?? row.hy_oas
+  return (
+    row.vix != null &&
+    row.fear_greed != null &&
+    row.put_call != null &&
+    hy != null &&
+    row.bofa != null
+  )
 }
 
 /**
@@ -77,15 +90,34 @@ function rowHasCoreMetrics(row) {
 export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   const tradeDate = resolveTradeDate(body, opts.tradeDate)
   const row = panicIndexHistoryRowFromPayload(body, tradeDate, opts)
-  if (!rowHasCoreMetrics(row)) {
-    return { ok: false, skipped: true, reason: "incomplete_core_metrics" }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(row.date))) {
+    return { ok: false, skipped: true, reason: "invalid_date", row }
   }
-  await supabaseRest("panic_index_history?on_conflict=date", {
-    method: "POST",
-    prefer: "resolution=merge-duplicates,return=minimal",
-    body: row,
-  })
+  if (!rowHasRequiredHistoryMetrics(row)) {
+    return { ok: false, skipped: true, reason: "incomplete_core_metrics", row }
+  }
+  await postPanicIndexHistoryRow(row)
   return { ok: true, date: row.date }
+}
+
+/** @param {Record<string, unknown>} row */
+async function postPanicIndexHistoryRow(row) {
+  try {
+    await supabaseRest("panic_index_history?on_conflict=date", {
+      method: "POST",
+      prefer: "resolution=merge-duplicates,return=representation",
+      body: row,
+    })
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    if (!/high_yield|gs_bb|column/i.test(msg)) throw e
+    const { high_yield: _hy, gs_bb: _gs, ...legacy } = row
+    await supabaseRest("panic_index_history?on_conflict=date", {
+      method: "POST",
+      prefer: "resolution=merge-duplicates,return=representation",
+      body: legacy,
+    })
+  }
 }
 
 /**
@@ -99,16 +131,14 @@ export async function upsertPanicIndexHistoryBatch(entries, opts = {}) {
   for (const entry of entries) {
     const tradeDate = entry?.tradeDate || entry?.date
     const row = panicIndexHistoryRowFromPayload(entry, tradeDate, opts)
-    if (rowHasCoreMetrics(row)) rows.push(row)
+    if (rowHasRequiredHistoryMetrics(row)) rows.push(row)
   }
   if (!rows.length) {
     return { ok: false, skipped: true, reason: "incomplete_core_metrics" }
   }
-  await supabaseRest("panic_index_history?on_conflict=date", {
-    method: "POST",
-    prefer: "resolution=merge-duplicates,return=minimal",
-    body: rows,
-  })
+  for (const row of rows) {
+    await postPanicIndexHistoryRow(row)
+  }
   return { ok: true, count: rows.length, dates: rows.map((r) => r.date) }
 }
 

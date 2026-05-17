@@ -53,6 +53,23 @@ export const useAppDataStore = create((set, get) => ({
     set({ realtimeLastEventAt: t, realtimeEventCount: get().realtimeEventCount + 1 })
   },
 
+  /** panic_index_history 재조회 전 로컬·메모리 캐시 비우기 */
+  invalidateCycleHistoryCache: () => {
+    try {
+      writeCycleMetricHistoryToLS([])
+    } catch {
+      // ignore
+    }
+    set({
+      cycleMetricHistory: [],
+      cycleHistorySource: "none",
+      cycleHistoryUpdatedAt: null,
+      cycleStaticFetchedAt: null,
+      panicIndexFetchedAt: null,
+    })
+    logStoreWrite("appDataStore.cycleHistory", { action: "invalidate-cache" })
+  },
+
   /** 부팅 시 2024 mock LS 정리 */
   purgeLegacyCycleStorage: () => {
     const { purgedCycle, purgedIndex } = purgeStaleCycleLocalStorage()
@@ -99,7 +116,9 @@ export const useAppDataStore = create((set, get) => ({
    */
   loadCycleHistoryBundle: async (opts = {}) => {
     const limit = opts.limit ?? 120
-    logFetchStart("cycle-history-bundle", { limit })
+    const force = Boolean(opts.force)
+    if (force) get().invalidateCycleHistoryCache()
+    logFetchStart("cycle-history-bundle", { limit, force })
     get().purgeLegacyCycleStorage()
     try {
       const hubOn = isPanicHubEnabled()
@@ -109,11 +128,13 @@ export const useAppDataStore = create((set, get) => ({
       const fromHub = hubRows.map(panicIndexRowToCycleChart).filter(Boolean)
       replacePanicIndexHistory(hubRows)
 
-      const prev = readCycleMetricHistoryFromLS()
+      const prev = force || hubOn ? [] : readCycleMetricHistoryFromLS()
       const merged =
-        fromHub.length > 0
+        hubOn && fromHub.length > 0
           ? mergeCycleRows([], fromHub)
-          : mergeCycleRows(mergeCycleRows(prev, normalized), fromHub)
+          : fromHub.length > 0
+            ? mergeCycleRows([], fromHub)
+            : mergeCycleRows(mergeCycleRows(prev, normalized), fromHub)
 
       const source =
         fromHub.length > 0

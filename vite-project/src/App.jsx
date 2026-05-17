@@ -600,16 +600,15 @@ function App() {
           setInputError(msg)
         } else {
           saveSucceeded = true
-          if (result.history?.ok === false && !result.history?.skipped) {
-            console.warn("[submitInput] panic_index_history upsert failed", result.history)
-          }
         }
       } else {
         try {
           const serverResult = await submitManualPanicData(payload)
           const serverData = serverResult?.data ?? serverResult
           applyServerPanicSnapshot(serverData)
-          await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
+          const appStore = useAppDataStore.getState()
+          appStore.invalidateCycleHistoryCache()
+          await appStore.loadCycleHistoryBundle({ limit: 500, force: true })
           saveSucceeded = true
         } catch (err) {
           console.error("패닉지수 서버 저장 실패", err)
@@ -645,10 +644,13 @@ function App() {
         closeInputPanel()
         console.log("PANEL_CLOSED")
 
-        void usePanicStore
-          .getState()
-          .fetchPanicData(usedHubSavePath ? "hub-post-save" : "manual-api-post-save", { force: true })
-          .then(() => {
+        const appStore = useAppDataStore.getState()
+        void Promise.all([
+          usePanicStore.getState().fetchPanicData(usedHubSavePath ? "hub-post-save" : "manual-api-post-save", {
+            force: true,
+          }),
+          appStore.loadCycleHistoryBundle({ limit: 500, force: true }),
+        ]).then(() => {
             if (import.meta.env.DEV) {
               try {
                 const live = usePanicStore.getState().panicData

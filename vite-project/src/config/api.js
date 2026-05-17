@@ -379,7 +379,16 @@ export async function submitManualPanicData(inputData) {
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const out = await res.json()
-    if (!out?.ok) throw new Error(String(out?.error || "hub_update_failed"))
+    if (!out?.ok) {
+      const err = new Error(String(out?.error || "hub_update_failed"))
+      err.history = out.history
+      throw err
+    }
+    if (!out.history?.ok) {
+      const err = new Error(String(out.history?.reason || out.history?.error || "panic_index_history_upsert_failed"))
+      err.history = out.history
+      throw err
+    }
     return {
       data: normalizeManualPayload(out.data),
       history: out.history ?? null,
