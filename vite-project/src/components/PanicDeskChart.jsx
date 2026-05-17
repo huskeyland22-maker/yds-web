@@ -19,9 +19,10 @@ const METRIC_STROKES = {
  *   rows: object[]
  *   primarySeries: { key: string; name: string; color?: string }
  *   chartMetric: string
+ *   className?: string
  * }} props
  */
-export default function PanicDeskChart({ rows, primarySeries, chartMetric }) {
+export default function PanicDeskChart({ rows, primarySeries, chartMetric, className = "" }) {
   const [rangeId, setRangeId] = useState("6M")
 
   const slicedRows = useMemo(() => sliceHistoryByRange(rows, rangeId), [rows, rangeId])
@@ -30,7 +31,7 @@ export default function PanicDeskChart({ rows, primarySeries, chartMetric }) {
   const hasHistory = Array.isArray(slicedRows) && slicedRows.length > 0
 
   return (
-    <section className="trading-card-shell overflow-visible">
+    <section className={["trading-card-shell overflow-visible", className].filter(Boolean).join(" ")}>
       <div className="flex flex-wrap items-center justify-end gap-2 border-b border-white/[0.06] px-2.5 py-1.5">
         <div className="flex flex-wrap items-center gap-1">
           {CHART_RANGES.map((r) => (

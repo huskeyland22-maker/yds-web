@@ -10,48 +10,50 @@ import {
 } from "../utils/formatDataAge.js"
 import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
-import { formatMetricValue } from "./macroCycleChartUtils.js"
+import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
 
 const CORE_CELL =
-  "flex min-h-[4rem] flex-col items-center justify-center bg-[#070a10] px-1 py-2.5 transition sm:min-h-[4.25rem] sm:py-3"
+  "flex min-h-[4rem] flex-col items-center justify-center bg-[#070a10] px-1 py-2.5 transition-colors sm:min-h-[4.25rem] sm:py-3"
 
 const CORE_LABEL =
-  "max-w-full px-0.5 text-center text-[13px] font-semibold leading-snug tracking-[0.05em] text-slate-200 [text-wrap:balance]"
+  "max-w-full px-0.5 text-center text-[13px] font-semibold leading-snug tracking-[0.04em] text-slate-200 [text-wrap:balance]"
 
 const CORE_VALUE =
   "mt-1 font-mono text-[1rem] font-bold leading-none tabular-nums sm:text-[1.1rem]"
 
 const EXPERT_CELL =
-  "flex min-h-[3rem] flex-col items-center justify-center bg-[#070a10]/90 px-1 py-1.5 transition sm:min-h-[3.25rem] sm:py-2"
+  "flex min-h-[2.65rem] flex-col items-center justify-center bg-[#070a10]/70 px-0.5 py-1 transition-colors sm:min-h-[2.85rem] sm:py-1.5"
 
 const EXPERT_LABEL =
-  "max-w-full px-0.5 text-center text-[11px] font-medium leading-snug tracking-[0.04em] text-slate-400/90 [text-wrap:balance]"
+  "max-w-full px-0.5 text-center text-[10px] font-medium leading-tight tracking-[0.02em] text-slate-500/90 [text-wrap:balance]"
 
 const EXPERT_VALUE =
-  "mt-0.5 font-mono text-[0.9rem] font-semibold leading-none tabular-nums text-slate-300/90 sm:text-[1rem]"
+  "mt-0.5 font-mono text-[0.78rem] font-medium leading-none tabular-nums text-slate-400/85 sm:text-[0.85rem]"
 
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
   return formatMetricValue(key, Number(v))
 }
 
-/** @param {{ title: string; muted?: boolean }} props */
-function SectionLabel({ title, muted = false }) {
+/** @param {{ title: string; variant?: "core" | "expert" }} props */
+function SectionLabel({ title, variant = "core" }) {
+  const isExpert = variant === "expert"
   return (
-    <div className="flex items-center gap-2 px-0.5">
-      <span className={`h-px flex-1 ${muted ? "bg-white/[0.04]" : "bg-white/[0.07]"}`} />
-      <span
+    <div className={isExpert ? "mb-1 mt-5" : "mb-1.5 mt-1"}>
+      <p
         className={[
-          "shrink-0 text-[9px] font-semibold tracking-[0.14em]",
-          muted ? "text-slate-600" : "text-slate-500",
+          "m-0 border-l-2 pl-2 text-left text-[11px] font-bold tracking-[0.02em]",
+          isExpert ? "border-slate-600/80 text-slate-500" : "border-cyan-400/50 text-slate-300",
         ].join(" ")}
       >
         {title}
-      </span>
-      <span className={`h-px flex-1 ${muted ? "bg-white/[0.04]" : "bg-white/[0.07]"}`} />
+      </p>
+      <span
+        className={["mt-1.5 block h-px w-full", isExpert ? "bg-white/[0.03]" : "bg-white/[0.08]"].join(" ")}
+      />
     </div>
   )
 }
@@ -67,7 +69,10 @@ function SectionLabel({ title, muted = false }) {
  */
 function MetricTile({ metric, value, selected, onSelect, variant = "core" }) {
   const isExpert = variant === "expert"
-  const selectedRing = isExpert ? "ring-1 ring-inset ring-white/10" : "ring-1 ring-inset ring-white/15"
+  const selectedRing = isExpert ? "ring-1 ring-inset ring-white/[0.06]" : "ring-1 ring-inset ring-white/20"
+  const valueStyle = isExpert
+    ? { color: metric.accent, opacity: 0.82 }
+    : metricValueDisplayStyle(metric.accent)
   return (
     <button
       type="button"
@@ -77,11 +82,15 @@ function MetricTile({ metric, value, selected, onSelect, variant = "core" }) {
       onClick={onSelect}
       className={[
         isExpert ? EXPERT_CELL : CORE_CELL,
-        selected ? selectedRing : isExpert ? "hover:bg-white/[0.02]" : "hover:bg-white/[0.03]",
+        selected
+          ? selectedRing
+          : isExpert
+            ? "hover:bg-white/[0.008]"
+            : "hover:bg-white/[0.05]",
       ].join(" ")}
     >
       <span className={isExpert ? EXPERT_LABEL : CORE_LABEL}>{metric.label}</span>
-      <span className={isExpert ? EXPERT_VALUE : CORE_VALUE} style={{ color: metric.accent }}>
+      <span className={isExpert ? EXPERT_VALUE : CORE_VALUE} style={valueStyle}>
         {value}
       </span>
     </button>
@@ -266,10 +275,10 @@ export default function PanicDeskDashboard({
         </div>
       </section>
 
-      <div className="space-y-2">
-        <SectionLabel title="핵심 패닉지수" />
-        <section className="trading-card-shell overflow-hidden p-px">
-          <div className="grid grid-cols-2 gap-px bg-white/[0.06] sm:grid-cols-3 lg:grid-cols-5">
+      <div>
+        <SectionLabel title="핵심 패닉지수" variant="core" />
+        <section className="trading-card-shell overflow-hidden border border-white/[0.1] p-px shadow-[0_0_28px_rgba(0,0,0,0.45)]">
+          <div className="grid grid-cols-2 gap-px bg-white/[0.07] sm:grid-cols-3 lg:grid-cols-5">
             {CORE_METRICS.map((metric) => (
               <MetricTile
                 key={metric.key}
@@ -288,16 +297,16 @@ export default function PanicDeskDashboard({
               aria-label="패닉 종합 점수"
             >
               <span className={CORE_LABEL}>패닉지수</span>
-              <span className={`${CORE_VALUE} text-slate-50`}>
+              <span className={CORE_VALUE} style={metricValueDisplayStyle("#e2e8f0")}>
                 {finalScore != null ? finalScore : "—"}
               </span>
             </div>
           </div>
         </section>
 
-        <SectionLabel title="전문가 리스크 지표" muted />
-        <section className="overflow-hidden rounded-lg border border-white/[0.04] bg-[#070a10]/50 p-px opacity-[0.92]">
-          <div className="grid grid-cols-2 gap-px bg-white/[0.04] sm:grid-cols-3 lg:grid-cols-5">
+        <SectionLabel title="전문가 리스크 지표" variant="expert" />
+        <section className="mb-5 overflow-hidden rounded-md border border-white/[0.03] bg-[rgba(255,255,255,0.015)] p-px opacity-[0.78]">
+          <div className="grid grid-cols-2 gap-px bg-white/[0.025] sm:grid-cols-3 lg:grid-cols-5">
             {EXPERT_METRICS.map((metric) => (
               <MetricTile
                 key={metric.key}
@@ -328,6 +337,7 @@ export default function PanicDeskDashboard({
       </section>
 
       <PanicDeskChart
+        className="mt-3"
         rows={cycleMetricHistory}
         primarySeries={chartSeries}
         chartMetric={chartMetric}
