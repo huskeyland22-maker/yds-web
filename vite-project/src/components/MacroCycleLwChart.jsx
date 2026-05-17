@@ -16,7 +16,30 @@ const PLOT_LEADING_FRAC = 0.08
 const PRICE_SCALE_RESERVE_PX = 52
 /** 날짜축 라벨 잘림 방지 (px) */
 const TIMESCALE_BOTTOM_PAD_PX = 32
+/** 플롯 상·우·좌 여백 (Recharts margin 대응) */
+const CHART_LAYOUT_TOP_PAD_PX = 28
+const CHART_LAYOUT_RIGHT_PAD_PX = 18
+const CHART_LAYOUT_LEFT_PAD_PX = 8
 const CYAN_CORE = "#22d3ee"
+
+/** Y domain: min −8%, max +12% (상단 peak clipping 방지) */
+function paddedPriceAutoscaleProvider(baseImplementation) {
+  return () => {
+    const base = typeof baseImplementation === "function" ? baseImplementation() : null
+    if (!base?.priceRange) return base
+    const min = Number(base.priceRange.minValue)
+    const max = Number(base.priceRange.maxValue)
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return base
+    const span = Math.max(max - min, Math.max(Math.abs(max), Math.abs(min)) * 0.02, 1e-6)
+    return {
+      ...base,
+      priceRange: {
+        minValue: min - span * 0.08,
+        maxValue: max + span * 0.12,
+      },
+    }
+  }
+}
 
 /**
  * 데이터 포인트를 플롯 전체 너비에 균등 배치 (우측 몰림·좌측 대공백 방지)
@@ -36,7 +59,12 @@ function applyFullWidthTimeScale(chart, el, pointCount, opts = {}) {
 
   chart.applyOptions({
     layout: {
-      padding: { left: leadingPad, right: trailingPad, bottom: TIMESCALE_BOTTOM_PAD_PX },
+      padding: {
+        left: leadingPad + CHART_LAYOUT_LEFT_PAD_PX,
+        right: trailingPad + CHART_LAYOUT_RIGHT_PAD_PX,
+        top: CHART_LAYOUT_TOP_PAD_PX,
+        bottom: TIMESCALE_BOTTOM_PAD_PX,
+      },
     },
     timeScale: {
       fixLeftEdge: true,
@@ -347,7 +375,12 @@ export default function MacroCycleLwChart({
         background: { type: ColorType.Solid, color: "#06080d" },
         textColor: "rgba(203,213,225,0.78)",
         fontSize: 11,
-        padding: { left: 0, right: PLOT_END_INSET_PX, bottom: TIMESCALE_BOTTOM_PAD_PX },
+        padding: {
+          left: CHART_LAYOUT_LEFT_PAD_PX,
+          right: PLOT_END_INSET_PX + CHART_LAYOUT_RIGHT_PAD_PX,
+          top: CHART_LAYOUT_TOP_PAD_PX,
+          bottom: TIMESCALE_BOTTOM_PAD_PX,
+        },
       },
       grid: {
         vertLines: { visible: true, color: "rgba(255,255,255,0.065)" },
@@ -359,7 +392,7 @@ export default function MacroCycleLwChart({
         visible: true,
         borderColor: "rgba(148,163,184,0.22)",
         textColor: "rgba(203,213,225,0.75)",
-        scaleMargins: showVolume ? { top: 0.08, bottom: 0.14 } : { top: 0.04, bottom: 0.1 },
+        scaleMargins: showVolume ? { top: 0.1, bottom: 0.14 } : { top: 0.06, bottom: 0.1 },
       },
       leftPriceScale: { visible: false },
       timeScale: {
@@ -404,7 +437,8 @@ export default function MacroCycleLwChart({
     const priceSeries = chart.addLineSeries({
       color: vis.line,
       lineWidth: vis.lineWidth,
-      lineType: LineType.Curved,
+      lineType: LineType.Simple,
+      autoscaleInfoProvider: paddedPriceAutoscaleProvider,
       lastPriceAnimation: LastPriceAnimationMode.Continuous,
       priceLineVisible: true,
       priceLineWidth: 1,
@@ -429,7 +463,7 @@ export default function MacroCycleLwChart({
     }
 
     priceSeries.priceScale().applyOptions({
-      scaleMargins: showVolume ? { top: 0.06, bottom: 0.1 } : { top: 0.035, bottom: 0.08 },
+      scaleMargins: showVolume ? { top: 0.08, bottom: 0.1 } : { top: 0.05, bottom: 0.08 },
     })
 
     const drawMs = 720
@@ -577,7 +611,7 @@ export default function MacroCycleLwChart({
 
   return (
     <div
-      className={`relative w-full min-w-0 overflow-hidden rounded-lg border border-white/[0.08] bg-[#070a10] ring-1 ring-violet-500/[0.06] transition-opacity duration-500 ease-out ${chartIn ? "opacity-100" : "opacity-0"} ${className}`}
+      className={`relative w-full min-w-0 overflow-visible rounded-lg border border-white/[0.08] bg-[#070a10] ring-1 ring-violet-500/[0.06] transition-opacity duration-500 ease-out ${chartIn ? "opacity-100" : "opacity-0"} ${className}`}
       style={{
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 32px rgba(0,0,0,0.35)",
       }}
@@ -593,7 +627,7 @@ export default function MacroCycleLwChart({
         <div className="flex flex-wrap items-center gap-1.5 text-[9px]">
           <span className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 font-medium text-slate-200">
             <span
-              className="inline-block h-0.5 w-4 rounded-full shadow-[0_0_6px_rgba(34,211,238,0.28)]"
+              className="inline-block h-0.5 w-4 rounded-full shadow-[0_0_4px_rgba(34,211,238,0.16)]"
               style={{ backgroundColor: accent }}
             />
             {seriesName}
@@ -611,13 +645,13 @@ export default function MacroCycleLwChart({
       <div
         className={
           compact
-            ? "relative h-[min(60vw,278px)] w-full min-h-[253px] sm:h-[329px] sm:min-h-[278px]"
-            : "relative h-[414px] w-full min-h-[322px] sm:h-[460px] sm:min-h-[345px]"
+            ? "relative h-[min(60vw,278px)] w-full min-h-[253px] overflow-visible pt-1 sm:h-[329px] sm:min-h-[278px]"
+            : "relative h-[414px] w-full min-h-[322px] overflow-visible pt-1 sm:h-[460px] sm:min-h-[345px]"
         }
       >
-        <div className="relative flex h-full w-full min-h-0">
-          <div className="relative min-h-0 min-w-0 flex-1">
-            <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
+        <div className="relative flex h-full w-full min-h-0 overflow-visible">
+          <div className="relative min-h-0 min-w-0 flex-1 overflow-visible">
+            <div ref={wrapRef} className="absolute inset-0 h-full w-full overflow-visible" />
 
             {lastPointPx ? (
               <div
@@ -629,11 +663,11 @@ export default function MacroCycleLwChart({
                 }}
               >
                 <span
-                  className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/12 shadow-[0_0_8px_rgba(34,211,238,0.22)]"
+                  className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 shadow-[0_0_5px_rgba(34,211,238,0.14)]"
                   aria-hidden
                 />
                 <span
-                  className="relative block h-3 w-3 rounded-full border-2 border-white/95 bg-cyan-100 shadow-[0_0_12px_rgba(34,211,238,0.55)]"
+                  className="relative block h-2.5 w-2.5 rounded-full border-[1.5px] border-white/95 bg-cyan-100 shadow-[0_0_8px_rgba(34,211,238,0.38)]"
                   aria-hidden
                 />
               </div>

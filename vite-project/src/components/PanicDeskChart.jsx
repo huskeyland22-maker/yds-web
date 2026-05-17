@@ -15,7 +15,7 @@ export default function PanicDeskChart({ rows, primarySeries }) {
 
   const slicedRows = useMemo(() => sliceHistoryByRange(rows, rangeId), [rows, rangeId])
   return (
-    <section className="trading-card-shell overflow-hidden">
+    <section className="trading-card-shell overflow-visible">
       <div className="flex flex-wrap items-center justify-end gap-2 border-b border-white/[0.06] px-2.5 py-1.5">
         <div className="flex flex-wrap items-center gap-1">
           {CHART_RANGES.map((r) => (
@@ -35,7 +35,7 @@ export default function PanicDeskChart({ rows, primarySeries }) {
           ))}
         </div>
       </div>
-      <div className="p-1 sm:p-1.5">
+      <div className="overflow-visible p-1 sm:p-1.5">
         <MacroCycleLwChart
           rows={slicedRows}
           primarySeries={{
