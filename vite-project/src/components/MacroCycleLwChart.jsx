@@ -17,8 +17,6 @@ const PRICE_SCALE_RESERVE_PX = 52
 /** 날짜축 라벨 잘림 방지 (px) */
 const TIMESCALE_BOTTOM_PAD_PX = 32
 const CYAN_CORE = "#22d3ee"
-const MINT_END = "#6ee7b7"
-const BLUE_END = "#60a5fa"
 
 /**
  * 데이터 포인트를 플롯 전체 너비에 균등 배치 (우측 몰림·좌측 대공백 방지)
@@ -56,8 +54,6 @@ function applyFullWidthTimeScale(chart, el, pointCount, opts = {}) {
     /* ignore */
   }
 }
-const MA20_COLOR = "#2dd4bf"
-const MA60_COLOR = "#4338ca"
 const VOL_UP = "rgba(34,197,94,0.62)"
 const VOL_DOWN = "rgba(239,68,68,0.58)"
 const VOL_MULT = 1.7
@@ -79,30 +75,7 @@ function signalStatusLabel(regime, changePct) {
 }
 
 /**
- * 상승/하락 구간별 색상 라인 (cyan → mint / cyan → blue)
- * @param {{ time: string; value: number }[]} closes
- */
-function buildDirectionSegments(closes) {
-  /** @type {{ time: string; value: number }[]} */
-  const up = []
-  /** @type {{ time: string; value: number }[]} */
-  const down = []
-  for (let i = 1; i < closes.length; i++) {
-    const a = closes[i - 1]
-    const b = closes[i]
-    if (b.value >= a.value) {
-      if (!up.length || up[up.length - 1].time !== a.time) up.push(a)
-      up.push(b)
-    } else {
-      if (!down.length || down[down.length - 1].time !== a.time) down.push(a)
-      down.push(b)
-    }
-  }
-  return { up, down }
-}
-
-/**
- * @param {import("lightweight-charts").ISeriesApi<"Area"> | import("lightweight-charts").ISeriesApi<"Line">} series
+ * @param {import("lightweight-charts").ISeriesApi<"Line">} series
  * @param {unknown[]} data
  * @param {number} [durationMs]
  */
@@ -305,29 +278,15 @@ function regimeAreaStyle(regime) {
 function resolveMainLineVisuals(pack) {
   const base = regimeAreaStyle(pack.regime)
   const isVix = pack.primaryKey === "vix"
-  const rising = pack.stats.dayChg >= 0
   const line = isVix ? CYAN_CORE : base.line
-  const lineEnd = isVix ? (rising ? MINT_END : BLUE_END) : line
 
   return {
     line,
-    lineEnd,
-    upColor: isVix ? MINT_END : "#5eead4",
-    downColor: isVix ? BLUE_END : "#38bdf8",
-    outerGlow: "rgba(34,211,238,0.14)",
-    top: isVix
-      ? rising
-        ? "rgba(110,231,183,0.14)"
-        : "rgba(96,165,250,0.12)"
-      : base.top,
-    bottom: base.bottom,
-    priceLine: isVix ? "rgba(34,211,238,0.45)" : base.priceLine,
-    lineWidth: isVix ? 4.5 : 3.5,
-    lineWidthHover: isVix ? 5 : 3.85,
-    glowWidth: 7,
-    segWidth: 3,
-    crosshairRadius: 5,
-    crosshairRadiusHover: 6,
+    priceLine: isVix ? "rgba(34,211,238,0.35)" : base.priceLine,
+    lineWidth: 4,
+    lineWidthHover: 4,
+    crosshairRadius: 3,
+    crosshairRadiusHover: 3,
   }
 }
 
@@ -361,9 +320,6 @@ export default function MacroCycleLwChart({
   const [chartIn, setChartIn] = useState(false)
   const [lastValueTopPx, setLastValueTopPx] = useState(null)
   const [lastPointPx, setLastPointPx] = useState(null)
-  const [ma20On, setMa20On] = useState(false)
-  const [ma60On, setMa60On] = useState(false)
-
   const pack = useMemo(() => {
     if (!primarySeries?.key) return null
     return buildLwPack(rows, primarySeries.key, { includeVolume: showVolume })
@@ -375,22 +331,6 @@ export default function MacroCycleLwChart({
   const titleLine = headerTitle ?? deskLabels.title
   const subtitleLine = headerSubtitle ?? deskLabels.subtitle
 
-  const historyLen = pack?.closes?.length ?? 0
-  const ma20Available = historyLen >= 20 && (pack?.ma20?.length ?? 0) > 0
-  const ma60Available = historyLen >= 60 && (pack?.ma60?.length ?? 0) > 0
-  const showMa20 = ma20On && ma20Available
-  const showMa60 = ma60On && ma60Available
-
-  useEffect(() => {
-    setMa20On(false)
-    setMa60On(false)
-  }, [primarySeries?.key])
-
-  useEffect(() => {
-    if (historyLen < 20) setMa20On(false)
-    if (historyLen < 60) setMa60On(false)
-  }, [historyLen])
-
   useEffect(() => {
     metaRef.current = pack?.meta ?? new Map()
   }, [pack?.meta])
@@ -400,7 +340,6 @@ export default function MacroCycleLwChart({
     if (!el || !pack || pack.closes.length < 2) return undefined
 
     const vis = resolveMainLineVisuals(pack)
-    const segments = buildDirectionSegments(pack.closes)
     visualsRef.current = vis
 
     const chart = createChart(el, {
@@ -462,37 +401,8 @@ export default function MacroCycleLwChart({
       },
     })
 
-    const ma60Series = chart.addLineSeries({
-      color: MA60_COLOR,
-      lineWidth: 2,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
-    const ma20Series = chart.addLineSeries({
-      color: MA20_COLOR,
-      lineWidth: 2,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
-    const glowSeries = chart.addLineSeries({
-      color: vis.outerGlow,
-      lineWidth: vis.glowWidth,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
-    const priceSeries = chart.addAreaSeries({
-      lineColor: vis.line,
-      topColor: vis.top,
-      bottomColor: vis.bottom,
+    const priceSeries = chart.addLineSeries({
+      color: vis.line,
       lineWidth: vis.lineWidth,
       lineType: LineType.Curved,
       lastPriceAnimation: LastPriceAnimationMode.Continuous,
@@ -501,39 +411,10 @@ export default function MacroCycleLwChart({
       priceLineColor: vis.priceLine,
       priceLineStyle: 2,
       lastValueVisible: false,
-      crosshairMarkerVisible: true,
-      crosshairMarkerRadius: vis.crosshairRadius,
-      crosshairMarkerBorderColor: "rgba(248,250,252,0.95)",
-      crosshairMarkerBackgroundColor: vis.lineEnd,
-      crosshairMarkerBorderWidth: 2,
-    })
-
-    const upSegSeries = chart.addLineSeries({
-      color: vis.upColor,
-      lineWidth: vis.segWidth,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
       crosshairMarkerVisible: false,
     })
 
-    const downSegSeries = chart.addLineSeries({
-      color: vis.downColor,
-      lineWidth: vis.segWidth,
-      lineType: LineType.Curved,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    })
-
-    seriesRef.current = {
-      priceSeries,
-      glowSeries,
-      upSegSeries,
-      downSegSeries,
-      ma20Series,
-      ma60Series,
-    }
+    seriesRef.current = { priceSeries }
 
     if (showVolume && pack.volume?.length) {
       const volumeSeries = chart.addHistogramSeries({
@@ -552,12 +433,7 @@ export default function MacroCycleLwChart({
     })
 
     const drawMs = 720
-    ma20Series.setData([])
-    ma60Series.setData([])
-    animateSeriesDraw(glowSeries, pack.closes, drawMs)
     animateSeriesDraw(priceSeries, pack.closes, drawMs)
-    if (segments.up.length) animateSeriesDraw(upSegSeries, segments.up, drawMs)
-    if (segments.down.length) animateSeriesDraw(downSegSeries, segments.down, drawMs)
 
     const applyHoverLine = (active) => {
       if (hoverLineRef.current === active) return
@@ -672,17 +548,6 @@ export default function MacroCycleLwChart({
   }, [pack, isMobile, compact, showVolume])
 
   useEffect(() => {
-    const s = seriesRef.current
-    if (!s?.ma20Series || !s?.ma60Series || !pack) return
-    try {
-      s.ma20Series.setData(showMa20 ? pack.ma20 : [])
-      s.ma60Series.setData(showMa60 ? pack.ma60 : [])
-    } catch {
-      /* chart unmounted */
-    }
-  }, [pack, showMa20, showMa60])
-
-  useEffect(() => {
     if (!pack) {
       setChartIn(false)
       return undefined
@@ -728,49 +593,11 @@ export default function MacroCycleLwChart({
         <div className="flex flex-wrap items-center gap-1.5 text-[9px]">
           <span className="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 font-medium text-slate-200">
             <span
-              className="inline-block h-0.5 w-4 rounded-full shadow-[0_0_8px_rgba(45,212,191,0.45)]"
+              className="inline-block h-0.5 w-4 rounded-full shadow-[0_0_6px_rgba(34,211,238,0.28)]"
               style={{ backgroundColor: accent }}
             />
             {seriesName}
           </span>
-          <button
-            type="button"
-            disabled={!ma20Available}
-            onClick={() => ma20Available && setMa20On((v) => !v)}
-            title={ma20Available ? "MA20 표시 전환" : `MA20: 데이터 ${historyLen}/20일`}
-            className={[
-              "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium transition",
-              showMa20
-                ? "bg-white/[0.08] text-slate-100 ring-1 ring-white/10"
-                : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-400",
-              !ma20Available && "cursor-not-allowed opacity-35 hover:bg-transparent hover:text-slate-500",
-            ].join(" ")}
-          >
-            <span
-              className="inline-block h-0.5 w-3 rounded-full"
-              style={{ backgroundColor: MA20_COLOR, opacity: showMa20 ? 1 : 0.35 }}
-            />
-            MA20
-          </button>
-          <button
-            type="button"
-            disabled={!ma60Available}
-            onClick={() => ma60Available && setMa60On((v) => !v)}
-            title={ma60Available ? "MA60 표시 전환" : `MA60: 데이터 ${historyLen}/60일`}
-            className={[
-              "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium transition",
-              showMa60
-                ? "bg-white/[0.08] text-slate-100 ring-1 ring-white/10"
-                : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-400",
-              !ma60Available && "cursor-not-allowed opacity-35 hover:bg-transparent hover:text-slate-500",
-            ].join(" ")}
-          >
-            <span
-              className="inline-block h-0.5 w-3 rounded-full"
-              style={{ backgroundColor: MA60_COLOR, opacity: showMa60 ? 1 : 0.35 }}
-            />
-            MA60
-          </button>
           {showVolume ? (
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-1 rounded-sm bg-emerald-500/60" />
@@ -802,15 +629,11 @@ export default function MacroCycleLwChart({
                 }}
               >
                 <span
-                  className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/35 bg-cyan-400/10 shadow-[0_0_14px_rgba(34,211,238,0.35)] animate-ping"
+                  className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/12 shadow-[0_0_8px_rgba(34,211,238,0.22)]"
                   aria-hidden
                 />
                 <span
-                  className="absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-200/40 bg-cyan-400/20"
-                  aria-hidden
-                />
-                <span
-                  className="relative block h-3 w-3 rounded-full border-2 border-white/90 bg-cyan-100 shadow-[0_0_10px_rgba(34,211,238,0.75)]"
+                  className="relative block h-3 w-3 rounded-full border-2 border-white/95 bg-cyan-100 shadow-[0_0_12px_rgba(34,211,238,0.55)]"
                   aria-hidden
                 />
               </div>
