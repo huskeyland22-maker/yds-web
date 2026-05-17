@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
+import PanicMarketActionPanel from "./PanicMarketActionPanel.jsx"
 import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
 
 const METRIC_STROKES = {
@@ -73,6 +74,7 @@ export default function PanicDeskChart({ rows, primarySeries, chartMetric, class
         currentValue={currentValue}
         historyRows={slicedRows}
       />
+      <PanicMarketActionPanel panicData={panicData} />
     </section>
   )
 }
