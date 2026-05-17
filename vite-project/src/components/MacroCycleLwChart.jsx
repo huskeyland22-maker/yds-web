@@ -14,6 +14,11 @@ const PLOT_END_INSET_PX = 24
 const PLOT_LEADING_FRAC = 0.08
 /** 우측 Y축·라벨 예약 (px) */
 const PRICE_SCALE_RESERVE_PX = 52
+/** 날짜축 라벨 잘림 방지 (px) */
+const TIMESCALE_BOTTOM_PAD_PX = 32
+const CYAN_CORE = "#22d3ee"
+const MINT_END = "#6ee7b7"
+const BLUE_END = "#60a5fa"
 
 /**
  * 데이터 포인트를 플롯 전체 너비에 균등 배치 (우측 몰림·좌측 대공백 방지)
@@ -33,7 +38,7 @@ function applyFullWidthTimeScale(chart, el, pointCount, opts = {}) {
 
   chart.applyOptions({
     layout: {
-      padding: { left: leadingPad, right: trailingPad },
+      padding: { left: leadingPad, right: trailingPad, bottom: TIMESCALE_BOTTOM_PAD_PX },
     },
     timeScale: {
       fixLeftEdge: true,
@@ -59,9 +64,60 @@ const VOL_MULT = 1.7
 
 /** @param {FlowRegime} regime */
 function regimeLabelKo(regime) {
-  if (regime === "riskOn") return "위험 선호 흐름"
-  if (regime === "riskOff") return "위험 회피 흐름"
-  return "중립 흐름"
+  if (regime === "riskOn") return "위험 선호 시그널"
+  if (regime === "riskOff") return "위험 회피 시그널"
+  return "중립 시그널"
+}
+
+/** @param {FlowRegime} regime @param {number} changePct */
+function signalStatusLabel(regime, changePct) {
+  if (Number.isFinite(changePct) && changePct >= 1.2) return "상승 압력 확대"
+  if (Number.isFinite(changePct) && changePct <= -1.2) return "하락 압력 확대"
+  if (regime === "riskOn") return "위험 선호 국면"
+  if (regime === "riskOff") return "위험 회피 국면"
+  return "박스권·관망"
+}
+
+/**
+ * 상승/하락 구간별 색상 라인 (cyan → mint / cyan → blue)
+ * @param {{ time: string; value: number }[]} closes
+ */
+function buildDirectionSegments(closes) {
+  /** @type {{ time: string; value: number }[]} */
+  const up = []
+  /** @type {{ time: string; value: number }[]} */
+  const down = []
+  for (let i = 1; i < closes.length; i++) {
+    const a = closes[i - 1]
+    const b = closes[i]
+    if (b.value >= a.value) {
+      if (!up.length || up[up.length - 1].time !== a.time) up.push(a)
+      up.push(b)
+    } else {
+      if (!down.length || down[down.length - 1].time !== a.time) down.push(a)
+      down.push(b)
+    }
+  }
+  return { up, down }
+}
+
+/**
+ * @param {import("lightweight-charts").ISeriesApi<"Area"> | import("lightweight-charts").ISeriesApi<"Line">} series
+ * @param {unknown[]} data
+ * @param {number} [durationMs]
+ */
+function animateSeriesDraw(series, data, durationMs = 720) {
+  if (!data.length) return
+  const start = performance.now()
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / durationMs)
+    const eased = 1 - (1 - t) ** 2.2
+    const count = Math.max(2, Math.ceil(data.length * eased))
+    series.setData(data.slice(0, count))
+    if (t < 1) requestAnimationFrame(tick)
+    else series.setData(data)
+  }
+  requestAnimationFrame(tick)
 }
 
 /** @param {string} metricKey @param {FlowRegime} regime @param {number} dayChg */
@@ -242,26 +298,36 @@ function regimeAreaStyle(regime) {
   }
 }
 
-const VIX_TEAL = "#2dd4bf"
-
 /**
- * 메인 라인 시각 (TradingView Dark — 절제된 단일 라인)
+ * 메인 라인 시각 (Bloomberg / TradingView 시그널 데스크)
  * @param {NonNullable<ReturnType<typeof buildLwPack>>} pack
  */
 function resolveMainLineVisuals(pack) {
   const base = regimeAreaStyle(pack.regime)
   const isVix = pack.primaryKey === "vix"
-  const line = isVix ? VIX_TEAL : base.line
+  const rising = pack.stats.dayChg >= 0
+  const line = isVix ? CYAN_CORE : base.line
+  const lineEnd = isVix ? (rising ? MINT_END : BLUE_END) : line
 
   return {
     line,
-    top: isVix ? "rgba(45,212,191,0.10)" : base.top,
+    lineEnd,
+    upColor: isVix ? MINT_END : "#5eead4",
+    downColor: isVix ? BLUE_END : "#38bdf8",
+    outerGlow: "rgba(34,211,238,0.14)",
+    top: isVix
+      ? rising
+        ? "rgba(110,231,183,0.14)"
+        : "rgba(96,165,250,0.12)"
+      : base.top,
     bottom: base.bottom,
-    priceLine: isVix ? "rgba(45,212,191,0.45)" : base.priceLine,
-    lineWidth: isVix ? 3 : 2.5,
-    lineWidthHover: isVix ? 3.2 : 2.75,
-    crosshairRadius: 4,
-    crosshairRadiusHover: 4.5,
+    priceLine: isVix ? "rgba(34,211,238,0.45)" : base.priceLine,
+    lineWidth: isVix ? 4.5 : 3.5,
+    lineWidthHover: isVix ? 5 : 3.85,
+    glowWidth: 7,
+    segWidth: 3,
+    crosshairRadius: 5,
+    crosshairRadiusHover: 6,
   }
 }
 
@@ -316,18 +382,19 @@ export default function MacroCycleLwChart({
     if (!el || !pack || pack.closes.length < 2) return undefined
 
     const vis = resolveMainLineVisuals(pack)
+    const segments = buildDirectionSegments(pack.closes)
     visualsRef.current = vis
 
     const chart = createChart(el, {
       layout: {
         background: { type: ColorType.Solid, color: "#06080d" },
-        textColor: "rgba(203,213,225,0.75)",
+        textColor: "rgba(203,213,225,0.78)",
         fontSize: 11,
-        padding: { left: 0, right: PLOT_END_INSET_PX },
+        padding: { left: 0, right: PLOT_END_INSET_PX, bottom: TIMESCALE_BOTTOM_PAD_PX },
       },
       grid: {
-        vertLines: { visible: true, color: "rgba(255,255,255,0.04)" },
-        horzLines: { visible: true, color: "rgba(255,255,255,0.085)" },
+        vertLines: { visible: true, color: "rgba(255,255,255,0.065)" },
+        horzLines: { visible: true, color: "rgba(255,255,255,0.11)" },
       },
       width: el.clientWidth,
       height: el.clientHeight || 360,
@@ -335,7 +402,7 @@ export default function MacroCycleLwChart({
         visible: true,
         borderColor: "rgba(148,163,184,0.22)",
         textColor: "rgba(203,213,225,0.75)",
-        scaleMargins: showVolume ? { top: 0.08, bottom: 0.14 } : { top: 0.05, bottom: 0.06 },
+        scaleMargins: showVolume ? { top: 0.08, bottom: 0.14 } : { top: 0.04, bottom: 0.1 },
       },
       leftPriceScale: { visible: false },
       timeScale: {
@@ -355,16 +422,16 @@ export default function MacroCycleLwChart({
       crosshair: {
         mode: 1,
         vertLine: {
-          color: "rgba(148,163,184,0.22)",
+          color: "rgba(148,163,184,0.38)",
           width: 1,
           style: 0,
-          labelBackgroundColor: "rgba(15,23,42,0.94)",
+          labelBackgroundColor: "rgba(8,12,20,0.96)",
         },
         horzLine: {
-          color: "rgba(34,211,238,0.38)",
+          color: "rgba(34,211,238,0.55)",
           width: 1,
           style: 2,
-          labelBackgroundColor: "rgba(15,23,42,0.94)",
+          labelBackgroundColor: "rgba(8,12,20,0.96)",
         },
       },
       localization: {
@@ -395,6 +462,15 @@ export default function MacroCycleLwChart({
       crosshairMarkerVisible: false,
     })
 
+    const glowSeries = chart.addLineSeries({
+      color: vis.outerGlow,
+      lineWidth: vis.glowWidth,
+      lineType: LineType.Curved,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+
     const priceSeries = chart.addAreaSeries({
       lineColor: vis.line,
       topColor: vis.top,
@@ -409,11 +485,30 @@ export default function MacroCycleLwChart({
       lastValueVisible: false,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: vis.crosshairRadius,
-      crosshairMarkerBorderColor: "rgba(226,232,240,0.85)",
-      crosshairMarkerBackgroundColor: vis.line,
+      crosshairMarkerBorderColor: "rgba(248,250,252,0.95)",
+      crosshairMarkerBackgroundColor: vis.lineEnd,
+      crosshairMarkerBorderWidth: 2,
     })
 
-    seriesRef.current = { priceSeries }
+    const upSegSeries = chart.addLineSeries({
+      color: vis.upColor,
+      lineWidth: vis.segWidth,
+      lineType: LineType.Curved,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+
+    const downSegSeries = chart.addLineSeries({
+      color: vis.downColor,
+      lineWidth: vis.segWidth,
+      lineType: LineType.Curved,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+
+    seriesRef.current = { priceSeries, glowSeries, upSegSeries, downSegSeries }
 
     if (showVolume && pack.volume?.length) {
       const volumeSeries = chart.addHistogramSeries({
@@ -428,12 +523,16 @@ export default function MacroCycleLwChart({
     }
 
     priceSeries.priceScale().applyOptions({
-      scaleMargins: showVolume ? { top: 0.06, bottom: 0.1 } : { top: 0.04, bottom: 0.035 },
+      scaleMargins: showVolume ? { top: 0.06, bottom: 0.1 } : { top: 0.035, bottom: 0.08 },
     })
 
-    ma60Series.setData(pack.ma60)
-    ma20Series.setData(pack.ma20)
-    priceSeries.setData(pack.closes)
+    const drawMs = 720
+    animateSeriesDraw(ma60Series, pack.ma60, drawMs)
+    animateSeriesDraw(ma20Series, pack.ma20, drawMs)
+    animateSeriesDraw(glowSeries, pack.closes, drawMs)
+    animateSeriesDraw(priceSeries, pack.closes, drawMs)
+    if (segments.up.length) animateSeriesDraw(upSegSeries, segments.up, drawMs)
+    if (segments.down.length) animateSeriesDraw(downSegSeries, segments.down, drawMs)
 
     const applyHoverLine = (active) => {
       if (hoverLineRef.current === active) return
@@ -464,13 +563,15 @@ export default function MacroCycleLwChart({
       }
       const tkey = chartTimeToDayKey(param.time)
       const extra = tkey ? metaRef.current.get(tkey) : null
+      const chg = extra?.changePct ?? 0
       setTooltip({
         x: param.point.x,
         y: param.point.y,
         dateLabel: tkey ? formatChartTooltip(tkey) : String(param.time),
         value: data.value,
         volume: showVolume ? (extra?.volume ?? 0) : undefined,
-        changePct: extra?.changePct ?? 0,
+        changePct: chg,
+        status: signalStatusLabel(pack.regime, chg),
       })
     }
 
@@ -580,13 +681,13 @@ export default function MacroCycleLwChart({
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 32px rgba(0,0,0,0.35)",
       }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] bg-gradient-to-r from-white/[0.03] to-transparent px-2.5 py-2 sm:px-3">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-white/[0.06] bg-gradient-to-r from-white/[0.03] to-transparent px-2.5 py-1.5 sm:px-3">
         <div className="min-w-0">
-          <p className="m-0 text-[9px] font-semibold tracking-[0.14em] text-cyan-400/70">TERMINAL</p>
-          <p className="m-0 mt-0.5 truncate font-mono text-[13px] font-semibold tracking-tight text-slate-50 sm:text-[14px]">
+          <p className="m-0 text-[8px] font-bold tracking-[0.16em] text-cyan-400/80">TERMINAL</p>
+          <p className="m-0 mt-0.5 truncate font-mono text-[13px] font-semibold tracking-tight text-slate-50 sm:text-[15px]">
             {titleLine}
           </p>
-          <p className="m-0 mt-0.5 text-[10px] font-medium text-slate-400">{subtitleLine}</p>
+          <p className="m-0 mt-0.5 text-[10px] font-medium text-slate-400/95">{subtitleLine}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5 text-[9px] text-slate-500">
           <span className="inline-flex items-center gap-1.5">
@@ -617,8 +718,8 @@ export default function MacroCycleLwChart({
       <div
         className={
           compact
-            ? "relative h-[min(52vw,242px)] w-full min-h-[220px] sm:h-[286px] sm:min-h-[242px]"
-            : "relative h-[360px] w-full min-h-[280px] sm:h-[400px] sm:min-h-[300px]"
+            ? "relative h-[min(60vw,278px)] w-full min-h-[253px] sm:h-[329px] sm:min-h-[278px]"
+            : "relative h-[414px] w-full min-h-[322px] sm:h-[460px] sm:min-h-[345px]"
         }
       >
         <div className="relative flex h-full w-full min-h-0">
@@ -635,11 +736,15 @@ export default function MacroCycleLwChart({
                 }}
               >
                 <span
-                  className="absolute left-1/2 top-1/2 block h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/15"
+                  className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/35 bg-cyan-400/10 shadow-[0_0_14px_rgba(34,211,238,0.35)] animate-ping"
                   aria-hidden
                 />
                 <span
-                  className="relative block h-2.5 w-2.5 rounded-full border border-teal-300/50 bg-teal-200/80 shadow-[0_0_4px_rgba(45,212,191,0.2)]"
+                  className="absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-200/40 bg-cyan-400/20"
+                  aria-hidden
+                />
+                <span
+                  className="relative block h-3 w-3 rounded-full border-2 border-white/90 bg-cyan-100 shadow-[0_0_10px_rgba(34,211,238,0.75)]"
                   aria-hidden
                 />
               </div>
@@ -677,43 +782,62 @@ export default function MacroCycleLwChart({
 
             {tooltip ? (
               <div
-                className="pointer-events-none absolute z-20 min-w-[200px] rounded-md border border-cyan-500/20 bg-[rgba(5,8,14,0.96)] px-2.5 py-2 shadow-[0_12px_36px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md"
+                className="pointer-events-none absolute z-20 min-w-[220px] overflow-hidden rounded border border-slate-600/50 bg-[#0a0e16] shadow-[0_16px_40px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.06)]"
                 style={{
-                  left: Math.min(Math.max(tooltip.x + 12, 6), (wrapRef.current?.clientWidth ?? 280) - 210),
-                  top: Math.min(Math.max(tooltip.y + 6, 6), (wrapRef.current?.clientHeight ?? 360) - 140),
+                  left: Math.min(Math.max(tooltip.x + 12, 6), (wrapRef.current?.clientWidth ?? 280) - 230),
+                  top: Math.min(Math.max(tooltip.y + 6, 6), (wrapRef.current?.clientHeight ?? 360) - 160),
                 }}
               >
-                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-300/80">
-                  {tooltip.dateLabel}
-                </p>
-                <p className="m-0 mt-1.5 font-mono text-lg font-semibold tabular-nums leading-none text-slate-50">
-                  {formatMetricValue(pack.primaryKey, tooltip.value)}
-                </p>
-                <div className="mt-2 space-y-1 border-t border-white/[0.08] pt-2 font-mono text-[10px]">
-                  <p className="m-0 flex justify-between gap-3">
-                    <span className="text-slate-500">전일 대비</span>
-                    <span
-                      className={`font-semibold tabular-nums ${
-                        (tooltip.changePct ?? 0) >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
-                      }`}
-                    >
-                      {(tooltip.changePct ?? 0) >= 0 ? "+" : ""}
-                      {Number(tooltip.changePct ?? 0).toFixed(2)}%
-                    </span>
+                <div className="border-b border-cyan-500/20 bg-[linear-gradient(90deg,rgba(34,211,238,0.12),transparent)] px-2.5 py-1.5">
+                  <p className="m-0 text-[8px] font-bold tracking-[0.14em] text-cyan-400/90">TERMINAL</p>
+                  <p className="m-0 mt-0.5 text-[10px] font-semibold text-slate-200">{tooltip.dateLabel}</p>
+                </div>
+                <div className="px-2.5 py-2">
+                  <p className="m-0 text-[9px] font-medium uppercase tracking-wider text-slate-500">현재값</p>
+                  <p className="m-0 mt-0.5 font-mono text-xl font-semibold tabular-nums leading-none text-slate-50">
+                    {formatMetricValue(pack.primaryKey, tooltip.value)}
                   </p>
-                  {showVolume && tooltip.volume != null ? (
-                    <p className="m-0 flex justify-between gap-3">
-                      <span className="text-slate-500">거래량</span>
-                      <span className="tabular-nums text-slate-300">{fmtVol(tooltip.volume)}</span>
+                  <div className="mt-2.5 space-y-1.5 border-t border-white/[0.08] pt-2 font-mono text-[10px]">
+                    <p className="m-0 flex justify-between gap-4">
+                      <span className="text-slate-500">전일 대비</span>
+                      <span
+                        className={`font-semibold tabular-nums ${
+                          (tooltip.changePct ?? 0) >= 0 ? "text-emerald-300" : "text-rose-300"
+                        }`}
+                      >
+                        {(tooltip.changePct ?? 0) >= 0 ? "+" : ""}
+                        {Number(tooltip.changePct ?? 0).toFixed(2)}%
+                      </span>
                     </p>
-                  ) : null}
+                    <p className="m-0 flex justify-between gap-4">
+                      <span className="text-slate-500">변화율</span>
+                      <span
+                        className={`font-semibold tabular-nums ${
+                          (tooltip.changePct ?? 0) >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
+                        }`}
+                      >
+                        {(tooltip.changePct ?? 0) >= 0 ? "+" : ""}
+                        {Number(tooltip.changePct ?? 0).toFixed(2)}%
+                      </span>
+                    </p>
+                    <p className="m-0 flex justify-between gap-4">
+                      <span className="text-slate-500">상태</span>
+                      <span className="text-right text-[9px] font-medium text-cyan-200/90">{tooltip.status}</span>
+                    </p>
+                    {showVolume && tooltip.volume != null ? (
+                      <p className="m-0 flex justify-between gap-4">
+                        <span className="text-slate-500">거래량</span>
+                        <span className="tabular-nums text-slate-300">{fmtVol(tooltip.volume)}</span>
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             ) : null}
           </div>
 
           <div
-            className="relative h-full w-[72px] shrink-0 sm:w-[96px]"
+            className="relative h-full w-[80px] shrink-0 sm:w-[104px]"
             aria-hidden={lastValue == null}
           >
             {lastValue != null && lastValueTopPx != null ? (
@@ -730,7 +854,8 @@ export default function MacroCycleLwChart({
                     : "border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.12)]"
               }`}
             >
-              <p className="m-0 text-[8px] font-semibold tracking-[0.12em] text-cyan-300/75">현재</p>
+              <p className="m-0 text-[7px] font-bold tracking-[0.14em] text-cyan-400/80">LIVE</p>
+              <p className="m-0 mt-0.5 text-[8px] font-semibold tracking-[0.1em] text-slate-500">현재값</p>
               <p className="m-0 mt-0.5 flex items-center justify-end gap-2">
                 <span className="relative inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center">
                   <span
@@ -766,16 +891,16 @@ export default function MacroCycleLwChart({
                   {dayChgPct.toFixed(2)}% <span className="text-[9px] font-medium text-slate-600">1D</span>
                 </p>
               ) : null}
-              <div className="m-0 mt-2 space-y-0.5 border-t border-white/[0.08] pt-2 font-mono text-[9px] leading-snug">
-                <p className="m-0 flex justify-between gap-2">
-                  <span className="text-slate-500">HIGH</span>
-                  <span className="tabular-nums text-slate-300">
+              <div className="m-0 mt-2 space-y-1 border-t border-white/[0.08] pt-2 font-mono text-[8px] leading-snug">
+                <p className="m-0 flex flex-col items-end gap-0.5">
+                  <span className="text-[7px] font-bold tracking-[0.12em] text-slate-500">DAY HIGH</span>
+                  <span className="tabular-nums text-[11px] text-slate-200">
                     {formatMetricValue(pack.primaryKey, pack.stats.high)}
                   </span>
                 </p>
-                <p className="m-0 flex justify-between gap-2">
-                  <span className="text-slate-500">LOW</span>
-                  <span className="tabular-nums text-slate-300">
+                <p className="m-0 flex flex-col items-end gap-0.5">
+                  <span className="text-[7px] font-bold tracking-[0.12em] text-slate-500">DAY LOW</span>
+                  <span className="tabular-nums text-[11px] text-slate-200">
                     {formatMetricValue(pack.primaryKey, pack.stats.low)}
                   </span>
                 </p>
