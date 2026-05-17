@@ -85,12 +85,6 @@ const PANIC_TEXT_PLACEHOLDER = `분류,지수 명칭,최종 확정 수치,전일
 장기,9. GS B/B 지수,68.0%,-,🟡 주의`
 const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
-const PANEL_SAVE_BTN =
-  "relative w-full overflow-hidden rounded-lg border border-violet-400/45 bg-gradient-to-b from-violet-600/95 to-violet-800/95 font-semibold text-white shadow-[0_0_22px_rgba(139,92,246,0.38)] transition hover:border-violet-300/55 hover:from-violet-500 hover:to-violet-700 hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] disabled:cursor-not-allowed disabled:border-white/10 disabled:from-slate-800/70 disabled:to-slate-900/80 disabled:text-slate-500 disabled:shadow-none disabled:opacity-60"
-
-const PANEL_LOAD_BTN =
-  "w-full rounded-lg border border-violet-500/35 bg-violet-500/[0.12] py-2 text-[12px] font-semibold text-violet-100 shadow-[0_0_14px_rgba(139,92,246,0.2)] transition hover:border-violet-400/50 hover:bg-violet-500/20 hover:shadow-[0_0_20px_rgba(139,92,246,0.32)] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-600 disabled:shadow-none"
-
 /** @param {Record<string, unknown> | null | undefined} row */
 function cycleRowToPasteText(row) {
   if (!row || typeof row !== "object") return ""
@@ -499,13 +493,6 @@ function App() {
     }
   }, [parsedData])
 
-  const chartBaselineDate = useMemo(() => {
-    const rows = cycleMetricHistory ?? []
-    if (!rows.length) return "—"
-    const last = rows[rows.length - 1]
-    return String(last.date ?? last.ts ?? "").slice(0, 10) || "—"
-  }, [cycleMetricHistory])
-
   const loadHistoryForDate = useCallback(async () => {
     const date =
       typeof historyTradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(historyTradeDate)
@@ -537,14 +524,13 @@ function App() {
       }
       const text = cycleRowToPasteText(row)
       if (!text) {
-        toast.error(`${date} 저장된 데이터가 없습니다`)
+        setInputError(`${date} 저장된 데이터가 없습니다`)
         return
       }
       setInputText(text)
       setPreviewKey((k) => k + 1)
-      toast.success(`${date} 데이터를 불러왔습니다`)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "불러오기 실패")
+      setInputError(err instanceof Error ? err.message : "불러오기 실패")
     } finally {
       setIsLoadingHistory(false)
     }
@@ -694,9 +680,7 @@ function App() {
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()
         pulseSaveFeedback()
-        const successMsg = `${tradeDate} 데이터 저장 완료`
-        toast.success(successMsg)
-        setSaveToast(successMsg)
+        setSaveToast("Market metrics updated")
 
         if (db) {
           void (async () => {
@@ -1399,12 +1383,29 @@ function App() {
               boxShadow: "inset 1px 0 0 rgba(139,92,246,0.12), -16px 0 48px rgba(0,0,0,0.5)",
             }}
           >
-            <header className="flex shrink-0 items-start justify-between gap-2 pb-2">
+            <header className="mb-2 flex shrink-0 items-start justify-between gap-2 border-b border-white/[0.06] pb-2">
               <div className="min-w-0">
                 <h3 className="m-0 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
                   표(CSV) 또는 기사 한 줄 붙여넣기 — 지표명·숫자만 자동 추출합니다.
                 </p>
+                <label className="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                  <span className="shrink-0 font-medium">히스토리 기준일</span>
+                  <input
+                    type="date"
+                    value={historyTradeDate}
+                    onChange={(e) => setHistoryTradeDate(e.target.value)}
+                    className="rounded border border-white/[0.1] bg-slate-950/80 px-1.5 py-0.5 font-mono text-[11px] text-slate-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void loadHistoryForDate()}
+                    disabled={isLoadingHistory || isSaving}
+                    className="shrink-0 rounded border border-white/[0.1] bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium text-slate-300 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {isLoadingHistory ? "…" : "적용"}
+                  </button>
+                </label>
               </div>
               <button
                 type="button"
@@ -1418,51 +1419,7 @@ function App() {
               </button>
             </header>
 
-            <section className="sticky top-0 z-10 shrink-0 space-y-2 border-b border-white/[0.08] bg-[#070a10]/95 pb-2.5 backdrop-blur-md">
-              <div className="rounded-lg border border-violet-500/20 bg-violet-500/[0.06] px-2.5 py-2">
-                <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-violet-200/90">기준일 선택</p>
-                <input
-                  type="date"
-                  value={historyTradeDate}
-                  onChange={(e) => setHistoryTradeDate(e.target.value)}
-                  className="mt-1.5 w-full rounded-md border border-white/[0.12] bg-slate-950/90 px-2 py-1.5 font-mono text-[12px] text-slate-100 shadow-[inset_0_0_12px_rgba(0,0,0,0.35)] outline-none focus:border-violet-400/45 focus:ring-1 focus:ring-violet-500/35"
-                  aria-label="히스토리 기준일"
-                />
-                <p className="m-0 mt-1.5 font-mono text-[10px] text-slate-500">
-                  현재 차트 기준:{" "}
-                  <span className="font-semibold text-slate-300">{chartBaselineDate}</span>
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => void loadHistoryForDate()}
-                  disabled={isLoadingHistory || isSaving}
-                  className={PANEL_LOAD_BTN}
-                >
-                  {isLoadingHistory ? "불러오는 중…" : "히스토리 불러오기"}
-                </button>
-                <button
-                  type="button"
-                  onClick={submitInput}
-                  disabled={isSaving || !inputReady}
-                  aria-busy={isSaving}
-                  className={`${PANEL_SAVE_BTN} py-2 text-[12px]`}
-                >
-                  {isSaving ? "반영 중…" : "대시보드에 반영"}
-                </button>
-              </div>
-              {!inputReady ? (
-                <p className="m-0 text-center text-[9px] text-slate-600">
-                  VIX · F&amp;G · BofA · P/C · HY 입력 후 저장 가능
-                </p>
-              ) : (
-                <p className="m-0 text-center text-[9px] font-medium text-emerald-500/80">저장 준비됨 · 아래에서 붙여넣기</p>
-              )}
-            </section>
-
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain">
+            <div className="flex min-h-0 flex-1 flex-col">
               <textarea
                 ref={textareaRef}
                 value={inputText}
@@ -1503,7 +1460,7 @@ function App() {
                   if (inputError) setInputError("")
                 }}
                 placeholder={PANIC_TEXT_PLACEHOLDER}
-                className="mt-2 min-h-[8rem] w-full flex-1 resize-none rounded-lg border border-white/[0.08] bg-slate-950/80 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-slate-200 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35),inset_0_1px_12px_rgba(0,0,0,0.25)] outline-none ring-violet-500/0 transition placeholder:text-slate-600 focus:border-violet-500/35 focus:shadow-[inset_0_0_20px_rgba(124,58,237,0.06),0_0_0_1px_rgba(167,139,250,0.2)] focus:ring-1 focus:ring-violet-500/30"
+                className="min-h-[10rem] w-full flex-1 resize-none rounded-lg border border-white/[0.08] bg-slate-950/80 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-slate-200 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35),inset_0_1px_12px_rgba(0,0,0,0.25)] outline-none ring-violet-500/0 transition placeholder:text-slate-600 focus:border-violet-500/35 focus:shadow-[inset_0_0_20px_rgba(124,58,237,0.06),0_0_0_1px_rgba(167,139,250,0.2)] focus:ring-1 focus:ring-violet-500/30"
                 spellCheck={false}
               />
             </div>
@@ -1565,13 +1522,15 @@ function App() {
               </div>
             </details>
 
-            <footer className="sticky bottom-0 z-10 mt-2 shrink-0 border-t border-white/[0.08] bg-[#070a10]/95 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-md">
+            <footer className="mt-2.5 shrink-0 border-t border-white/[0.06] pt-2.5">
               <button
                 type="button"
                 onClick={submitInput}
                 disabled={isSaving || !inputReady}
                 aria-busy={isSaving}
-                className={`${PANEL_SAVE_BTN} py-2.5 text-[13px] ${isSaving ? "animate-pulse" : ""}`}
+                className={`relative w-full overflow-hidden rounded-lg border border-violet-400/30 bg-gradient-to-b from-violet-600/95 to-violet-800/95 py-2.5 text-[13px] font-semibold text-white shadow-[0_0_20px_rgba(124,58,237,0.25)] transition hover:border-violet-300/40 hover:from-violet-500 hover:to-violet-700 disabled:cursor-not-allowed disabled:opacity-45 ${
+                  isSaving ? "animate-pulse" : ""
+                }`}
               >
                 {isSaving ? "반영 중…" : "대시보드에 반영"}
               </button>
