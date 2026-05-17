@@ -10,6 +10,45 @@ import { formatMetricValue, resolveSeriesColor } from "./macroCycleChartUtils.js
 
 /** 플롯 끝 ↔ 마지막 포인트 간격 (우측 값 레인 w-[72px] sm:w-[96px] 는 JSX) */
 const PLOT_END_INSET_PX = 24
+/** 플롯 시작 여백 (차트 너비 대비) */
+const PLOT_LEADING_FRAC = 0.08
+/** 우측 Y축·라벨 예약 (px) */
+const PRICE_SCALE_RESERVE_PX = 52
+
+/**
+ * 데이터 포인트를 플롯 전체 너비에 균등 배치 (우측 몰림·좌측 대공백 방지)
+ * @param {import("lightweight-charts").IChartApi} chart
+ * @param {HTMLElement} el
+ * @param {number} pointCount
+ */
+function applyFullWidthTimeScale(chart, el, pointCount) {
+  const n = Math.max(2, pointCount)
+  const w = Math.max(1, el.clientWidth)
+  const leadingPad = Math.round(w * PLOT_LEADING_FRAC)
+  const trailingPad = PLOT_END_INSET_PX
+  const usable = Math.max(56, w - leadingPad - trailingPad - PRICE_SCALE_RESERVE_PX)
+  const spacing = usable / (n - 1)
+
+  chart.applyOptions({
+    layout: {
+      padding: { left: leadingPad, right: trailingPad },
+    },
+    timeScale: {
+      fixLeftEdge: true,
+      fixRightEdge: false,
+      rightOffset: 2,
+      barSpacing: spacing,
+      minBarSpacing: Math.max(4, spacing * 0.45),
+      timeVisible: n <= 14,
+    },
+  })
+
+  try {
+    chart.timeScale().setVisibleLogicalRange({ from: 0, to: n - 1 })
+  } catch {
+    /* ignore */
+  }
+}
 const MA20_COLOR = "#2dd4bf"
 const MA60_COLOR = "#4338ca"
 const VOL_UP = "rgba(34,197,94,0.62)"
@@ -241,15 +280,12 @@ export default function MacroCycleLwChart({
 
     const rs = regimeAreaStyle(pack.regime)
 
-    const plotRightPadding = PLOT_END_INSET_PX
-    const endBarOffset = Math.max(4, Math.ceil(plotRightPadding / 9))
-
     const chart = createChart(el, {
       layout: {
         background: { type: ColorType.Solid, color: "#06080d" },
         textColor: "rgba(203,213,225,0.75)",
         fontSize: 11,
-        padding: { right: plotRightPadding },
+        padding: { left: 0, right: PLOT_END_INSET_PX },
       },
       grid: {
         vertLines: { visible: true, color: "rgba(255,255,255,0.04)" },
@@ -268,11 +304,11 @@ export default function MacroCycleLwChart({
         borderColor: "rgba(34,211,238,0.08)",
         timeVisible: false,
         secondsVisible: false,
-        fixLeftEdge: false,
-        fixRightEdge: true,
-        rightOffset: endBarOffset,
+        fixLeftEdge: true,
+        fixRightEdge: false,
+        rightOffset: 2,
         barSpacing: 9,
-        minBarSpacing: 5,
+        minBarSpacing: 4,
         tickMarkFormatter: (time) => {
           const key = chartTimeToDayKey(time)
           return key ? formatChartAxisTick(key, { mobile: isMobile, compact }) : ""
@@ -420,21 +456,14 @@ export default function MacroCycleLwChart({
 
     chart.subscribeCrosshairMove(onCrosshair)
     chartRef.current = chart
-    chart.timeScale().fitContent()
 
     const n = pack.closes.length
-    if (n >= 16) {
-      requestAnimationFrame(() => {
-        try {
-          chart.timeScale().setVisibleLogicalRange({ from: n - 15, to: n - 1 })
-        } catch {
-          /* ignore */
-        }
-        syncLastValueTop()
-      })
-    } else {
+    const layoutTimeScale = () => {
+      applyFullWidthTimeScale(chart, el, n)
       syncLastValueTop()
     }
+    layoutTimeScale()
+    requestAnimationFrame(layoutTimeScale)
 
     const onVisibleRange = () => syncLastValueTop()
     chart.timeScale().subscribeVisibleLogicalRangeChange(onVisibleRange)
@@ -450,7 +479,10 @@ export default function MacroCycleLwChart({
       lastW = w
       lastH = h
       requestAnimationFrame(() => {
-        chartRef.current?.applyOptions({ width: w, height: h })
+        const c = chartRef.current
+        if (!c) return
+        c.applyOptions({ width: w, height: h })
+        applyFullWidthTimeScale(c, el, pack.closes.length)
         syncLastValueTop()
       })
     })
