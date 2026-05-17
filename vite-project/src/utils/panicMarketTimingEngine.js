@@ -18,9 +18,12 @@ import { pickMetricValue } from "./panicMarketActionEngine.js"
  *   marketContext: string | null
  *   risk: string
  *   sectors: string[]
+ *   allocations: AllocationWeight[]
  *   metricsUsed: string[]
  * }} TimingSignal
  */
+
+/** @typedef {{ label: string; pct: number }} AllocationWeight */
 
 /**
  * @typedef {{
@@ -38,6 +41,252 @@ function avg(nums) {
   const v = nums.filter(Number.isFinite)
   if (!v.length) return null
   return v.reduce((a, b) => a + b, 0) / v.length
+}
+
+/** @param {{ label: string; w: number }[]} items @returns {AllocationWeight[]} */
+function normalizeAlloc(items) {
+  const sum = items.reduce((a, b) => a + b.w, 0)
+  if (!sum) return []
+  const rows = items.map((i) => ({
+    label: i.label,
+    pct: Math.round((i.w / sum) * 100),
+  }))
+  const diff = 100 - rows.reduce((a, b) => a + b.pct, 0)
+  if (diff !== 0 && rows.length) rows[0].pct = Math.max(0, rows[0].pct + diff)
+  return rows.filter((r) => r.pct > 0).sort((a, b) => b.pct - a.pct)
+}
+
+/** @param {number} score — 0~100 타점 점수 */
+function scoreTilt(score) {
+  return clamp((score - 50) / 50, -1, 1)
+}
+
+/**
+ * @param {{ label: string; w: number }[]} base
+ * @param {number} score
+ * @param {{ cash?: number; growth?: number }} [bias]
+ */
+function tiltAlloc(base, score, bias = {}) {
+  const t = scoreTilt(score)
+  const cashShift = (bias.cash ?? 12) * -t
+  const growthShift = (bias.growth ?? 10) * t
+  const mapped = base.map((row) => {
+    let w = row.w
+    if (row.label === "현금" || row.label === "채권" || row.label === "방어") w += cashShift
+    if (
+      row.label === "성장" ||
+      row.label === "공격" ||
+      row.label === "AI" ||
+      row.label === "반도체" ||
+      row.label === "성장주" ||
+      row.label === "사이클"
+    ) {
+      w += growthShift
+    }
+    return { label: row.label, w: Math.max(4, w) }
+  })
+  return normalizeAlloc(mapped)
+}
+
+/** @param {string} label */
+export function allocationBarClass(label) {
+  switch (label) {
+    case "현금":
+      return "bg-emerald-500/85"
+    case "ETF":
+      return "bg-blue-500/80"
+    case "AI":
+      return "bg-violet-500/85"
+    case "반도체":
+      return "bg-cyan-500/85"
+    case "대형주":
+      return "bg-slate-400/85"
+    case "성장":
+    case "성장주":
+      return "bg-sky-500/85"
+    case "공격":
+      return "bg-orange-500/85"
+    case "사이클":
+      return "bg-amber-500/85"
+    case "방어":
+      return "bg-rose-500/75"
+    case "채권":
+      return "bg-teal-500/80"
+    case "배당":
+      return "bg-indigo-500/80"
+    case "필수소비":
+      return "bg-lime-500/75"
+    case "핵심섹터":
+      return "bg-slate-500/80"
+    default:
+      return "bg-slate-500/70"
+  }
+}
+
+/** @param {number} score @param {string} action @param {string[]} sectors */
+function buildShortAllocations(score, action, sectors) {
+  if (/익절/.test(action)) {
+    return tiltAlloc(
+      [
+        { label: "현금", w: 40 },
+        { label: "ETF", w: 30 },
+        { label: "성장", w: 20 },
+        { label: "공격", w: 10 },
+      ],
+      score,
+      { cash: 14, growth: 12 },
+    )
+  }
+  if (/공포/.test(action)) {
+    return tiltAlloc(
+      [
+        { label: "현금", w: 32 },
+        { label: "방어", w: 28 },
+        { label: "대형주", w: 22 },
+        { label: "공격", w: 18 },
+      ],
+      score,
+    )
+  }
+  if (score >= 68) {
+    const s = sectors.filter((x) => !["현금", "ETF"].includes(x))
+    if (s.length >= 2) {
+      return tiltAlloc(
+        [
+          { label: "현금", w: 18 },
+          { label: "ETF", w: 22 },
+          { label: s[0], w: 30 },
+          { label: s[1], w: 30 },
+        ],
+        score,
+      )
+    }
+    return tiltAlloc(
+      [
+        { label: "성장", w: 30 },
+        { label: "공격", w: 26 },
+        { label: "ETF", w: 26 },
+        { label: "현금", w: 18 },
+      ],
+      score,
+    )
+  }
+  if (score >= 50) {
+    return tiltAlloc(
+      [
+        { label: "ETF", w: 30 },
+        { label: "대형주", w: 26 },
+        { label: "성장", w: 24 },
+        { label: "현금", w: 20 },
+      ],
+      score,
+    )
+  }
+  return tiltAlloc(
+    [
+      { label: "현금", w: 38 },
+      { label: "ETF", w: 32 },
+      { label: "대형주", w: 20 },
+      { label: "성장", w: 10 },
+    ],
+    score,
+  )
+}
+
+/** @param {number} score @param {string} action @param {string[]} sectors */
+function buildMidAllocations(score, action, sectors) {
+  if (/축소/.test(action) || score < 38) {
+    return tiltAlloc(
+      [
+        { label: "현금", w: 45 },
+        { label: "채권", w: 25 },
+        { label: "방어", w: 18 },
+        { label: "ETF", w: 12 },
+      ],
+      score,
+    )
+  }
+  if (score >= 68 || /확대/.test(action)) {
+    const s = sectors.filter((x) => !["현금", "ETF", "채권"].includes(x))
+    const growthA = s[0] ?? "AI"
+    const growthB = s[1] ?? "반도체"
+    return tiltAlloc(
+      [
+        { label: "ETF", w: 35 },
+        { label: growthA, w: 25 },
+        { label: growthB, w: 20 },
+        { label: "현금", w: 20 },
+      ],
+      score,
+    )
+  }
+  return tiltAlloc(
+    [
+      { label: "ETF", w: 38 },
+      { label: "대형주", w: 28 },
+      { label: "현금", w: 22 },
+      { label: "성장", w: 12 },
+    ],
+    score,
+  )
+}
+
+/** @param {number} score @param {string} action @param {string[]} sectors */
+function buildLongAllocations(score, action, sectors) {
+  if (/과열/.test(action) || score < 20) {
+    return tiltAlloc(
+      [
+        { label: "현금", w: 45 },
+        { label: "ETF", w: 28 },
+        { label: "대형주", w: 18 },
+        { label: "방어", w: 9 },
+      ],
+      score,
+    )
+  }
+  if (/방어/.test(action) || score < 40) {
+    return tiltAlloc(
+      [
+        { label: "현금", w: 40 },
+        { label: "채권", w: 30 },
+        { label: "대형주", w: 20 },
+        { label: "ETF", w: 10 },
+      ],
+      score,
+    )
+  }
+  if (/분할/.test(action) || score >= 80) {
+    return tiltAlloc(
+      [
+        { label: "배당", w: 30 },
+        { label: "대형주", w: 30 },
+        { label: "ETF", w: 25 },
+        { label: "현금", w: 15 },
+      ],
+      score,
+    )
+  }
+  if (score >= 60 || /적립/.test(action)) {
+    const growth = sectors.find((s) => ["AI", "반도체", "성장", "성장주"].includes(s)) ?? "AI"
+    return tiltAlloc(
+      [
+        { label: "ETF", w: 40 },
+        { label: "대형주", w: 30 },
+        { label: growth, w: 20 },
+        { label: "현금", w: 10 },
+      ],
+      score,
+    )
+  }
+  return tiltAlloc(
+    [
+      { label: "ETF", w: 35 },
+      { label: "대형주", w: 30 },
+      { label: "핵심섹터", w: 20 },
+      { label: "현금", w: 15 },
+    ],
+    score,
+  )
 }
 
 /** @param {string} action */
@@ -322,6 +571,7 @@ function computeShortTiming(data) {
     marketContext: meta.marketContext,
     risk: meta.risk,
     sectors: resolved.sectors,
+    allocations: buildShortAllocations(score, resolved.action, resolved.sectors),
     metricsUsed: used,
   }
 }
@@ -486,6 +736,7 @@ function computeMidTiming(data) {
     marketContext: meta.marketContext,
     risk: meta.risk,
     sectors: resolved.sectors,
+    allocations: buildMidAllocations(score, resolved.action, resolved.sectors),
     metricsUsed: used,
   }
 }
@@ -731,6 +982,7 @@ function computeLongTiming(data) {
     marketContext: meta.marketContext,
     risk: meta.risk,
     sectors: meta.sectors,
+    allocations: buildLongAllocations(score, resolved.action, meta.sectors),
     metricsUsed: used,
   }
 }
@@ -766,6 +1018,7 @@ function emptyPlaceholder(horizon, label) {
     marketContext: null,
     risk: "—",
     sectors: [],
+    allocations: [],
     metricsUsed: [],
   }
 }

@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import {
+  allocationBarClass,
   computeMarketTiming,
   timingScoreBarClass,
   timingScoreBorderClass,
@@ -55,7 +56,7 @@ function TimingCard({ signal }) {
   return (
     <article
       className={[
-        "flex min-h-[168px] flex-col rounded-md border bg-[#060910]/95 px-3 py-3",
+        "flex min-h-[220px] flex-col rounded-md border bg-[#060910]/95 px-3 py-3",
         timingScoreBorderClass(score),
       ].join(" ")}
     >
@@ -79,6 +80,35 @@ function TimingCard({ signal }) {
       </div>
 
       <p className="m-0 mt-2.5 text-[12px] font-bold leading-snug tracking-tight text-slate-50">{actionLabel}</p>
+
+      {signal.allocations?.length > 0 ? (
+        <div className="mt-2.5 border-t border-white/[0.06] pt-2">
+          <p className="m-0 text-[8px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            추천 비중
+          </p>
+          <ul className="m-0 mt-1.5 list-none space-y-1.5 p-0">
+            {signal.allocations.map((row) => (
+              <li key={row.label}>
+                <div className="mb-0.5 flex items-center justify-between gap-2">
+                  <span className="text-[9px] font-medium text-slate-400">{row.label}</span>
+                  <span className="font-mono text-[10px] font-bold tabular-nums text-slate-200">
+                    {row.pct}
+                  </span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className={[
+                      "h-full rounded-full transition-all duration-300",
+                      allocationBarClass(row.label),
+                    ].join(" ")}
+                    style={{ width: `${row.pct}%` }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="mt-3 flex flex-1 flex-col gap-2.5 border-t border-white/[0.07] pt-2.5">
         <InfoBlock label="시장 상태">
