@@ -26,7 +26,7 @@ export default function KoreaSectorDetailCards({ heatById = {}, onStockSelect })
   )
 
   return (
-    <div id="korea-sector-details" className="scroll-mt-24 space-y-4">
+    <div id="korea-sector-details" className="korea-value-chain-detail-section scroll-mt-[140px] space-y-4">
       <header className="border-b border-white/[0.06] pb-3">
         <p className="m-0 font-mono text-[9px] uppercase tracking-[0.18em] text-slate-500">
           Sector detail · Korea only
@@ -57,7 +57,7 @@ function DetailCard({ sector, index, onStockSelect }) {
   return (
     <article
       id={`korea-sector-${sector.id}`}
-      className="scroll-mt-28 rounded-2xl border border-white/[0.07] bg-[rgba(12,14,18,0.95)] p-4 md:p-5"
+      className="korea-value-chain-detail-section scroll-mt-[140px] rounded-2xl border border-white/[0.07] bg-[rgba(12,14,18,0.95)] p-4 md:p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-2 border-b border-white/[0.06] pb-3">
         <div>
