@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
-import { ChevronDown, LogIn } from "lucide-react"
+import { Calendar, ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
@@ -435,6 +435,8 @@ function App() {
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
   const [previewKey, setPreviewKey] = useState(0)
   const textareaRef = useRef(null)
+  const historyDateInputRef = useRef(null)
+  const [historyTradeDate, setHistoryTradeDate] = useState(() => kstCalendarKey())
   const [isSaving, setIsSaving] = useState(false)
   const [inputError, setInputError] = useState("")
   const [buildVersion, setBuildVersion] = useState(
@@ -465,6 +467,14 @@ function App() {
       return emptyMetricPasteResult(REQUIRED_KEYS)
     }
   }, [inputText])
+
+  useEffect(() => {
+    const d = parseResult?.tradeDate
+    if (typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      setHistoryTradeDate(d)
+    }
+  }, [parseResult?.tradeDate])
+
   const parsedData = parseResult?.data ?? emptyMetricPasteResult(REQUIRED_KEYS).data
   const missingRequired = Array.isArray(parseResult?.missingRequired) ? parseResult.missingRequired : REQUIRED_KEYS
   const missingFields = useMemo(
@@ -587,9 +597,11 @@ function App() {
     }
 
     const tradeDate =
-      typeof parseResult?.tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(parseResult.tradeDate)
-        ? parseResult.tradeDate
-        : kstCalendarKey()
+      typeof historyTradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(historyTradeDate)
+        ? historyTradeDate
+        : typeof parseResult?.tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(parseResult.tradeDate)
+          ? parseResult.tradeDate
+          : kstCalendarKey()
     const payload = {
       ...normalizedParsedData,
       tradeDate,
@@ -1365,6 +1377,40 @@ function App() {
                 </span>
               </button>
             </header>
+
+            <section className="mb-2 shrink-0">
+              <label
+                htmlFor="history-trade-date"
+                className="m-0 block text-[10px] font-semibold tracking-[0.12em] text-slate-500"
+              >
+                히스토리 기준일
+              </label>
+              <div className="relative mt-1">
+                <input
+                  id="history-trade-date"
+                  ref={historyDateInputRef}
+                  type="date"
+                  value={historyTradeDate}
+                  onChange={(e) => setHistoryTradeDate(e.target.value)}
+                  className="h-9 w-full rounded-md border border-cyan-500/25 bg-slate-950/90 py-0 pl-2.5 pr-10 font-mono text-[12px] text-slate-100 shadow-[inset_0_0_12px_rgba(0,0,0,0.35),0_0_12px_rgba(34,211,238,0.06)] outline-none transition focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-500/35 [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  aria-label="히스토리 기준일"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      historyDateInputRef.current?.showPicker?.()
+                    } catch {
+                      historyDateInputRef.current?.focus()
+                    }
+                  }}
+                  className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-r-md text-cyan-300/80 transition hover:bg-cyan-500/10 hover:text-cyan-200"
+                  aria-label="날짜 선택"
+                >
+                  <Calendar size={16} strokeWidth={2} aria-hidden />
+                </button>
+              </div>
+            </section>
 
             <div className="flex min-h-0 flex-1 flex-col">
               <textarea
