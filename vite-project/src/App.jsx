@@ -44,6 +44,7 @@ import {
   coerceMetricValue,
   emptyMetricPasteResult,
   formatMetricValueForDisplay,
+  PANIC_NINE_BLOCK_TEMPLATE,
   parseMetricPasteText,
   safeNormalizeMetricPasteForTextarea,
 } from "./utils/parseMetricPaste.js"
@@ -73,16 +74,7 @@ const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim()
 const PWA_RESUME_RELOAD_COOLDOWN_MS = 10_000
 const PANIC_TEXT_DRAFT_KEY = "yds-panic-text-draft-v1"
-const PANIC_TEXT_PLACEHOLDER = `분류,지수 명칭,최종 확정 수치,전일 대비 (Δ),상태 등급
-단기,1. VIX Index,17.38,📉 -0.63,🟢 안정
-단기,2. VXN Index,22.45,📉 -0.43,🟢 안정
-단기,3. 풋/콜 비율,0.62,📉 -0.01,🟢 안정
-중기,4. CNN F&G,66,-,🟡 탐욕
-중기,5. MOVE Index,77.92,📉 -0.19,🟢 안정
-중기,6. BofA B&B,6.5,-,🟡 주의
-장기,7. SKEW Index,141.65,📉 -0.47,🟡 주의
-장기,8. 하이일드 스프레드,1.68%,-,🟢 안정
-장기,9. GS B/B 지수,68.0%,-,🟡 주의`
+const PANIC_TEXT_PLACEHOLDER = PANIC_NINE_BLOCK_TEMPLATE
 const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
 const FIELD_LABELS = {
@@ -581,7 +573,10 @@ function App() {
       gsBullBear,
     }
 
-    const tradeDate = kstCalendarKey()
+    const tradeDate =
+      typeof parseResult?.tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(parseResult.tradeDate)
+        ? parseResult.tradeDate
+        : kstCalendarKey()
     const payload = {
       ...normalizedParsedData,
       tradeDate,
@@ -1334,7 +1329,7 @@ function App() {
               <div className="min-w-0">
                 <h3 className="m-0 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
-                  표(CSV) 또는 기사 한 줄 붙여넣기 — 지표명·숫자만 자동 추출합니다.
+                  9대 패닉 지수 블록 형식 — ①~⑨ 번호·%는 무시하고 숫자만 추출합니다.
                 </p>
               </div>
               <button

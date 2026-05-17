@@ -30,6 +30,7 @@ export const METRIC_CANONICAL_FROM_SLUG = {
   putcall: "putCall",
   putcallratio: "putCall",
   pcr: "putCall",
+  pcratio: "putCall",
   feargreed: "fearGreed",
   cnnfeargreed: "fearGreed",
   cnnfearandgreed: "fearGreed",
@@ -80,7 +81,7 @@ export const METRIC_PASTE_RULES = [
   { key: "skew", patterns: [/\bSKEW(?:\s*Index)?\b/i] },
   {
     key: "putCall",
-    patterns: [/(?:풋\s*\/\s*콜|Put\s*\/\s*Call|PutCall|풋콜|Put-Call)/i],
+    patterns: [/(?:P\s*\/\s*C\s*Ratio|풋\s*\/\s*콜|Put\s*\/\s*Call|PutCall|풋콜|Put-Call)/i],
   },
   {
     key: "highYield",
@@ -156,6 +157,105 @@ function compilePasteRegexes() {
     /(?:회복|주의|안정|탐욕|공포|과열|낙관|흔들림|패닉|극단|위험|급등|🟢|🟡|🔴|⚪)\b/giu
 }
 
+/** AI 입력 고정 포맷 (9대 패닉 지수) */
+export const PANIC_NINE_BLOCK_TEMPLATE = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 9대 패닉 지수 | YYYY-MM-DD 뉴욕 종가
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+① VIX        18.43
+② VXN        24.08
+③ P/C Ratio   0.51
+④ CNN F&G       63
+⑤ MOVE       70.24
+⑥ BofA B&B     6.6
+⑦ SKEW      141.51
+⑧ HY OAS     2.82%
+⑨ GS B/B       70%
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+
+const NINE_PANIC_HEADER_RE = /9대\s*패닉\s*지수|패닉\s*지수\s*\|/i
+const NINE_CIRCLED_PREFIX_RE = /^[\s①②③④⑤⑥⑦⑧⑨\d.]+/u
+
+/** @type {{ key: string; label: RegExp }[]} */
+const NINE_PANIC_LINE_RULES = [
+  { key: "vix", label: /\bVIX\b/i },
+  { key: "vxn", label: /\bVXN\b/i },
+  { key: "putCall", label: /P\s*\/\s*C\s*Ratio|Put\s*\/\s*Call|풋\s*\/\s*콜/i },
+  { key: "fearGreed", label: /CNN\s*F\s*&\s*G|CNN\s*Fear\s*&\s*Greed/i },
+  { key: "move", label: /\bMOVE\b/i },
+  { key: "bofa", label: /BofA\s*B\s*&\s*B|BofA\s*B\s*\/\s*B|\bBofA\b/i },
+  { key: "skew", label: /\bSKEW\b/i },
+  { key: "highYield", label: /\bHY\s*OAS\b/i },
+  { key: "gsBullBear", label: /\bGS\s*B\s*\/\s*B|\bGS\s*B\s*&\s*B/i },
+]
+
+export function isNinePanicDeskFormat(text) {
+  const s = String(text ?? "")
+  if (!s.trim()) return false
+  return NINE_PANIC_HEADER_RE.test(s) && NINE_PANIC_LINE_RULES.some((r) => r.label.test(s))
+}
+
+/**
+ * @param {string} line
+ * @returns {number | null}
+ */
+function extractNinePanicLineValue(line) {
+  try {
+    compilePasteRegexes()
+    const withoutPrefix = String(line ?? "")
+      .trim()
+      .replace(NINE_CIRCLED_PREFIX_RE, "")
+      .trim()
+    const cleaned = withoutPrefix.replace(/%/g, " ").replace(/,/g, "")
+    const nums = extractRelaxedNumbers(cleaned)
+    if (!nums.length) return null
+    return coerceMetricValue(nums[nums.length - 1].n)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * 9대 패닉 지수 블록 파싱
+ * @param {string} text
+ * @returns {{ data: Record<string, number | null>, tradeDate: string | null } | null}
+ */
+export function parseNinePanicDeskFormat(text) {
+  try {
+    const raw = String(text ?? "")
+    if (!isNinePanicDeskFormat(raw)) return null
+
+    const dateMatch = raw.match(/\b(20\d{2}-\d{2}-\d{2})\b/)
+    const tradeDate = dateMatch?.[1] && /^\d{4}-\d{2}-\d{2}$/.test(dateMatch[1]) ? dateMatch[1] : null
+
+    const out = Object.fromEntries(METRIC_PASTE_KEYS.map((k) => [k, null]))
+    const lines = raw.split(/\r?\n/).map((ln) => ln.trim()).filter(Boolean)
+
+    for (const line of lines) {
+      if (/^━+$/.test(line.replace(/\s/g, ""))) continue
+      if (NINE_PANIC_HEADER_RE.test(line)) continue
+      if (/뉴욕\s*종가/i.test(line) && !NINE_PANIC_LINE_RULES.some((r) => r.label.test(line))) continue
+
+      for (const rule of NINE_PANIC_LINE_RULES) {
+        if (!rule.label.test(line)) continue
+        const value = extractNinePanicLineValue(line)
+        if (value == null) break
+        if (out[rule.key] == null) {
+          out[rule.key] = value
+          logMetricParse(rule.key, value)
+        }
+        break
+      }
+    }
+
+    const hitCount = METRIC_PASTE_KEYS.filter((k) => out[k] != null).length
+    if (hitCount < 3) return null
+
+    return { data: out, tradeDate }
+  } catch {
+    return null
+  }
+}
+
 export function emptyMetricPasteResult(requiredKeys = []) {
   const data = Object.fromEntries(METRIC_PASTE_KEYS.map((k) => [k, null]))
   return {
@@ -163,6 +263,7 @@ export function emptyMetricPasteResult(requiredKeys = []) {
     missingRequired: Array.isArray(requiredKeys) ? [...requiredKeys] : [],
     hitCount: 0,
     ok: true,
+    tradeDate: null,
   }
 }
 
@@ -630,14 +731,23 @@ function isLikelyKeyValuePaste(lines) {
   }
 }
 
-function normalizeParseResult(out, requiredKeys) {
+/**
+ * @param {Record<string, unknown>} out
+ * @param {string[]} requiredKeys
+ * @param {{ tradeDate?: string | null }} [meta]
+ */
+function normalizeParseResult(out, requiredKeys, meta = {}) {
   const data = Object.fromEntries(
     METRIC_PASTE_KEYS.map((k) => [k, coerceMetricValue(out?.[k])]),
   )
   const keys = Array.isArray(requiredKeys) ? requiredKeys : []
   const missingRequired = keys.filter((key) => data[key] == null)
   const hitCount = METRIC_PASTE_KEYS.filter((k) => data[k] != null).length
-  return { data, missingRequired, hitCount, ok: true }
+  const tradeDate =
+    typeof meta.tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(meta.tradeDate)
+      ? meta.tradeDate
+      : null
+  return { data, missingRequired, hitCount, ok: true, tradeDate }
 }
 
 /**
@@ -646,6 +756,11 @@ function normalizeParseResult(out, requiredKeys) {
  */
 export function parseMetricPasteText(text, requiredKeys = []) {
   try {
+    const nine = parseNinePanicDeskFormat(text)
+    if (nine) {
+      return normalizeParseResult(nine.data, requiredKeys, { tradeDate: nine.tradeDate })
+    }
+
     const source = sanitizeMetricPasteText(text)
     if (!source) return emptyMetricPasteResult(requiredKeys)
 
@@ -686,8 +801,11 @@ export function parseMetricPasteText(text, requiredKeys = []) {
 
 export function normalizeMetricPasteForTextarea(pasted) {
   try {
+    const original = String(pasted ?? "")
+    if (isNinePanicDeskFormat(original)) return original
+
     const raw = sanitizeMetricPasteText(pasted)
-    if (!raw) return String(pasted ?? "")
+    if (!raw) return original
 
     const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
     const looksLikeTable = lines.some((ln) => {
