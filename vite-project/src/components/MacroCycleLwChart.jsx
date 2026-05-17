@@ -153,6 +153,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
   const metaRef = useRef(new Map())
   const [tooltip, setTooltip] = useState(null)
   const [chartIn, setChartIn] = useState(false)
+  const [lastValueTopPx, setLastValueTopPx] = useState(null)
 
   const pack = useMemo(() => {
     if (!primarySeries?.key) return null
@@ -191,6 +192,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
         secondsVisible: false,
         fixLeftEdge: false,
         fixRightEdge: true,
+        rightOffset: 12,
         barSpacing: 9,
         minBarSpacing: 5,
         tickMarkFormatter: (time) => {
@@ -266,7 +268,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
       priceLineWidth: 1,
       priceLineColor: rs.priceLine,
       priceLineStyle: 2,
-      lastValueVisible: true,
+      lastValueVisible: false,
       crosshairMarkerVisible: true,
       crosshairMarkerBorderColor: "rgba(236,254,255,0.9)",
       crosshairMarkerBackgroundColor: rs.line,
@@ -322,6 +324,20 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
       })
     }
 
+    const syncLastValueTop = () => {
+      const last = pack.closes[pack.closes.length - 1]
+      if (!last) {
+        setLastValueTopPx(null)
+        return
+      }
+      const y = priceSeries.priceToCoordinate(last.value)
+      if (y == null || !Number.isFinite(Number(y))) {
+        setLastValueTopPx(null)
+        return
+      }
+      setLastValueTopPx(Number(y))
+    }
+
     chart.subscribeCrosshairMove(onCrosshair)
     chartRef.current = chart
     chart.timeScale().fitContent()
@@ -334,8 +350,14 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
         } catch {
           /* ignore */
         }
+        syncLastValueTop()
       })
+    } else {
+      syncLastValueTop()
     }
+
+    const onVisibleRange = () => syncLastValueTop()
+    chart.timeScale().subscribeVisibleLogicalRangeChange(onVisibleRange)
 
     let lastW = Math.max(1, Math.floor(el.clientWidth))
     let lastH = Math.max(1, Math.floor(el.clientHeight || 360))
@@ -349,16 +371,19 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
       lastH = h
       requestAnimationFrame(() => {
         chartRef.current?.applyOptions({ width: w, height: h })
+        syncLastValueTop()
       })
     })
     ro.observe(el)
 
     return () => {
       ro.disconnect()
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(onVisibleRange)
       chart.unsubscribeCrosshairMove(onCrosshair)
       chart.remove()
       chartRef.current = null
       setTooltip(null)
+      setLastValueTopPx(null)
     }
   }, [pack, isMobile, compact])
 
@@ -433,10 +458,13 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
             : "relative h-[360px] w-full min-h-[280px] sm:h-[400px] sm:min-h-[300px]"
         }
       >
-        <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
+        <div ref={wrapRef} className="absolute inset-y-0 left-0 right-[4.25rem] h-full w-auto sm:right-[4.5rem]" />
 
-        {lastValue != null ? (
-          <div className="pointer-events-none absolute right-2 top-2 z-[15] text-right sm:right-3 sm:top-3">
+        {lastValue != null && lastValueTopPx != null ? (
+          <div
+            className="pointer-events-none absolute right-0 z-[15] text-right"
+            style={{ top: lastValueTopPx, transform: "translateY(-50%)" }}
+          >
             <div
               className={`rounded-lg border bg-[rgba(7,10,16,0.9)] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-sm sm:px-3 sm:py-2 ${
                 pack.regime === "riskOn"
