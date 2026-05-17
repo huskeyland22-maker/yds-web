@@ -8,6 +8,9 @@ import {
 } from "../utils/chartDateFormat.js"
 import { formatMetricValue, resolveSeriesColor } from "./macroCycleChartUtils.js"
 
+/** 플롯 끝 ↔ 마지막 포인트 간격 (우측 값 레인 w-[72px] sm:w-[96px] 는 JSX) */
+const PLOT_END_INSET_PX = 24
+
 function rowDay(row) {
   const t = row?.ts
   if (t && /^\d{4}-\d{2}-\d{2}/.test(String(t))) return String(t).slice(0, 10)
@@ -173,11 +176,15 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
 
     const rs = regimeAreaStyle(pack.regime)
 
+    const plotRightPadding = PLOT_END_INSET_PX
+    const endBarOffset = Math.max(4, Math.ceil(plotRightPadding / 9))
+
     const chart = createChart(el, {
       layout: {
         background: { type: ColorType.Solid, color: "#070a10" },
         textColor: "rgba(148,163,184,0.62)",
         fontSize: 10,
+        padding: { right: plotRightPadding },
       },
       grid: {
         vertLines: { visible: false },
@@ -192,7 +199,7 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
         secondsVisible: false,
         fixLeftEdge: false,
         fixRightEdge: true,
-        rightOffset: 12,
+        rightOffset: endBarOffset,
         barSpacing: 9,
         minBarSpacing: 5,
         tickMarkFormatter: (time) => {
@@ -458,15 +465,49 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
             : "relative h-[360px] w-full min-h-[280px] sm:h-[400px] sm:min-h-[300px]"
         }
       >
-        <div ref={wrapRef} className="absolute inset-y-0 left-0 right-[4.25rem] h-full w-auto sm:right-[4.5rem]" />
+        <div className="relative flex h-full w-full min-h-0">
+          <div className="relative min-h-0 min-w-0 flex-1">
+            <div ref={wrapRef} className="absolute inset-0 h-full w-full" />
 
-        {lastValue != null && lastValueTopPx != null ? (
+            {tooltip ? (
+              <div
+                className="pointer-events-none absolute z-20 min-w-[188px] rounded-md border border-white/[0.1] bg-[rgba(6,9,16,0.94)] px-2.5 py-2 shadow-[0_12px_32px_rgba(0,0,0,0.55)] backdrop-blur-sm"
+                style={{
+                  left: Math.min(Math.max(tooltip.x + 12, 6), (wrapRef.current?.clientWidth ?? 280) - 196),
+                  top: Math.min(Math.max(tooltip.y + 6, 6), (wrapRef.current?.clientHeight ?? 360) - 120),
+                }}
+              >
+                <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">{tooltip.dateLabel}</p>
+                <p className="m-0 mt-1.5 font-mono text-lg font-semibold tabular-nums leading-none text-slate-50">
+                  {formatMetricValue(pack.primaryKey, tooltip.value)}
+                </p>
+                <p
+                  className={`m-0 mt-1 font-mono text-[11px] font-semibold tabular-nums ${
+                    (tooltip.changePct ?? 0) >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
+                  }`}
+                >
+                  {Number(tooltip.changePct ?? 0) >= 0 ? "+" : ""}
+                  {Number(tooltip.changePct ?? 0).toFixed(2)}%{" "}
+                  <span className="text-[9px] font-medium text-slate-600">vs 전일</span>
+                </p>
+                <p className="m-0 mt-2 border-t border-white/[0.06] pt-2 font-mono text-[9px] text-slate-600">
+                  Vol <span className="text-slate-500">{fmtVol(tooltip.volume)}</span>
+                </p>
+              </div>
+            ) : null}
+          </div>
+
           <div
-            className="pointer-events-none absolute right-0 z-[15] text-right"
-            style={{ top: lastValueTopPx, transform: "translateY(-50%)" }}
+            className="relative h-full w-[72px] shrink-0 sm:w-[96px]"
+            aria-hidden={lastValue == null}
           >
-            <div
-              className={`rounded-lg border bg-[rgba(7,10,16,0.9)] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-sm sm:px-3 sm:py-2 ${
+            {lastValue != null && lastValueTopPx != null ? (
+              <div
+                className="pointer-events-none absolute right-2 z-[1] text-right"
+                style={{ top: lastValueTopPx, transform: "translateY(-50%)" }}
+              >
+                <div
+                  className={`rounded-lg border bg-[rgba(7,10,16,0.9)] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-sm sm:px-3 sm:py-2 ${
                 pack.regime === "riskOn"
                   ? "border-emerald-400/30 shadow-[0_0_20px_rgba(52,211,153,0.12)]"
                   : pack.regime === "riskOff"
@@ -510,35 +551,11 @@ export default function MacroCycleLwChart({ rows, primarySeries, className = "",
                   {dayChgPct.toFixed(2)}% <span className="text-[9px] font-medium text-slate-600">1D</span>
                 </p>
               ) : null}
-            </div>
+                </div>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-
-        {tooltip ? (
-          <div
-            className="pointer-events-none absolute z-20 min-w-[188px] rounded-md border border-white/[0.1] bg-[rgba(6,9,16,0.94)] px-2.5 py-2 shadow-[0_12px_32px_rgba(0,0,0,0.55)] backdrop-blur-sm"
-            style={{
-              left: Math.min(Math.max(tooltip.x + 12, 6), (wrapRef.current?.clientWidth ?? 280) - 196),
-              top: Math.min(Math.max(tooltip.y + 6, 6), (wrapRef.current?.clientHeight ?? 360) - 120),
-            }}
-          >
-            <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">{tooltip.dateLabel}</p>
-            <p className="m-0 mt-1.5 font-mono text-lg font-semibold tabular-nums leading-none text-slate-50">
-              {formatMetricValue(pack.primaryKey, tooltip.value)}
-            </p>
-            <p
-              className={`m-0 mt-1 font-mono text-[11px] font-semibold tabular-nums ${
-                (tooltip.changePct ?? 0) >= 0 ? "text-emerald-300/95" : "text-rose-300/95"
-              }`}
-            >
-              {Number(tooltip.changePct ?? 0) >= 0 ? "+" : ""}
-              {Number(tooltip.changePct ?? 0).toFixed(2)}% <span className="text-[9px] font-medium text-slate-600">vs 전일</span>
-            </p>
-            <p className="m-0 mt-2 border-t border-white/[0.06] pt-2 font-mono text-[9px] text-slate-600">
-              Vol <span className="text-slate-500">{fmtVol(tooltip.volume)}</span>
-            </p>
-          </div>
-        ) : null}
+        </div>
       </div>
     </div>
   )
