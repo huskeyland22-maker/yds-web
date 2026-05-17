@@ -6,11 +6,7 @@ export function kstCalendarKey(date = new Date()) {
   return date.toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" })
 }
 
-/**
- * @param {string | number | Date | null | undefined} updatedAt
- * @returns {string | null} e.g. "2026.05.16 15:37 KST"
- */
-export function formatDataBasisKst(updatedAt) {
+function kstDateTimeParts(updatedAt) {
   if (updatedAt == null) return null
   const d = new Date(updatedAt)
   if (Number.isNaN(d.getTime())) return null
@@ -23,8 +19,42 @@ export function formatDataBasisKst(updatedAt) {
     minute: "2-digit",
     hour12: false,
   })
-  const parts = Object.fromEntries(fmt.formatToParts(d).map((p) => [p.type, p.value]))
+  return Object.fromEntries(fmt.formatToParts(d).map((p) => [p.type, p.value]))
+}
+
+/**
+ * @param {string | number | Date | null | undefined} updatedAt
+ * @returns {string | null} e.g. "2026.05.16 15:37 KST"
+ */
+export function formatDataBasisKst(updatedAt) {
+  const parts = kstDateTimeParts(updatedAt)
+  if (!parts) return null
   return `${parts.year}.${parts.month}.${parts.day} ${parts.hour}:${parts.minute} KST`
+}
+
+/**
+ * @param {string | number | Date | null | undefined} updatedAt
+ * @returns {string | null} e.g. "2026.05.16 · 21:00 KST"
+ */
+export function formatDataBasisKstLine(updatedAt) {
+  const parts = kstDateTimeParts(updatedAt)
+  if (!parts) return null
+  return `${parts.year}.${parts.month}.${parts.day} · ${parts.hour}:${parts.minute} KST`
+}
+
+/**
+ * @param {number | null | undefined} ageMs
+ * @returns {string | null} e.g. "21시간 전", "2일 전"
+ */
+export function formatAgeKo(ageMs) {
+  if (ageMs == null || !Number.isFinite(ageMs) || ageMs < 0) return null
+  const min = Math.floor(ageMs / (60 * 1000))
+  if (min < 1) return "방금 전"
+  const hr = Math.floor(ageMs / HOUR_MS)
+  if (hr < 1) return `${min}분 전`
+  if (hr < 24) return `${hr}시간 전`
+  const day = Math.floor(hr / 24)
+  return `${day}일 전`
 }
 
 /**
@@ -66,6 +96,20 @@ export function staleDisplayTier(ageMs) {
   if (ageMs >= 2 * DAY_MS) return "critical"
   if (ageMs >= DAY_MS) return "warn"
   return "aging"
+}
+
+/** @param {"hidden"|"fresh"|"aging"|"warn"|"critical"} tier */
+export function staleAgeAccentClassName(tier) {
+  switch (tier) {
+    case "critical":
+      return "text-rose-300"
+    case "warn":
+      return "text-orange-300"
+    case "aging":
+      return "text-amber-200/90"
+    default:
+      return "text-cyan-400"
+  }
 }
 
 /** @param {"hidden"|"fresh"|"aging"|"warn"|"critical"} tier */

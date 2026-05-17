@@ -2,11 +2,11 @@ import { useMemo, useState } from "react"
 import { getFinalScore, getMidScore, getShortScore } from "../utils/tradingScores.js"
 import {
   ageMsFromUpdatedAt,
-  formatAgeOldEn,
-  formatDataBasisKst,
+  formatAgeKo,
+  formatDataBasisKstLine,
   kstCalendarKey,
+  staleAgeAccentClassName,
   staleDisplayTier,
-  staleTierClassName,
 } from "../utils/formatDataAge.js"
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue } from "./macroCycleChartUtils.js"
@@ -86,14 +86,13 @@ export default function PanicDeskDashboard({
     return asOfDateLabel
   }, [asOfDateLabel, panicData?.updatedAt])
 
-  const dataBasisLabel = useMemo(() => formatDataBasisKst(panicData?.updatedAt), [panicData?.updatedAt])
-  const ageOldLabel = useMemo(() => formatAgeOldEn(dataAgeMs), [dataAgeMs])
+  const basisLine = useMemo(() => formatDataBasisKstLine(panicData?.updatedAt), [panicData?.updatedAt])
+  const ageKoLabel = useMemo(() => formatAgeKo(dataAgeMs), [dataAgeMs])
   const staleTier = useMemo(() => {
     if (isStale && staleDisplayTier(dataAgeMs) === "hidden") return "aging"
     return staleDisplayTier(dataAgeMs)
   }, [dataAgeMs, isStale])
-
-  const showAgeBlock = staleTier !== "hidden" && ageOldLabel
+  const ageAccentClass = useMemo(() => staleAgeAccentClassName(staleTier), [staleTier])
   const showCollectBanner =
     isStale ||
     (dataAgeMs != null && dataAgeMs >= 4 * 60 * 60 * 1000) ||
@@ -141,26 +140,19 @@ export default function PanicDeskDashboard({
   return (
     <div className="relative space-y-2 lg:space-y-2.5">
       <div className="sticky top-0 z-20 -mx-0.5 flex justify-end border-b border-white/[0.06] bg-[#0B0E14]/95 px-0.5 py-1 backdrop-blur-sm">
-        <div className="max-w-[11.5rem] rounded-md border border-white/[0.08] bg-white/[0.02] px-2 py-1 text-right leading-tight">
-          <div className="flex justify-end gap-1.5 font-mono text-[8px] tabular-nums">
-            <span className="text-slate-600">Today</span>
-            <span className="text-slate-400">{todayKey}</span>
-          </div>
-          <div className="mt-0.5 flex justify-end gap-1.5 font-mono text-[8px] tabular-nums">
-            <span className="text-slate-600">Data</span>
-            <span className={dataDateKey !== todayKey ? "text-amber-200/90" : "text-slate-300"}>
-              {dataDateKey ?? "—"}
-            </span>
-          </div>
-          <p className="m-0 mt-1 text-[7px] font-semibold tracking-[0.12em] text-slate-600">데이터 기준</p>
-          <p className="m-0 font-mono text-[9px] tabular-nums text-slate-300">{dataBasisLabel ?? "—"}</p>
-          {showAgeBlock ? (
-            <p
-              className={`m-0 mt-0.5 inline-block rounded px-1 py-px font-mono text-[9px] font-semibold tabular-nums ${staleTierClassName(staleTier)}`}
-            >
-              {ageOldLabel}
-            </p>
-          ) : null}
+        <div className="min-w-[10.5rem] rounded-lg border border-cyan-500/20 bg-cyan-500/[0.05] px-4 py-3 text-right leading-relaxed">
+          <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-400/90">
+            미국장 종가 기준
+          </p>
+          <p className="m-0 mt-1.5 font-mono text-[15px] font-bold leading-snug tabular-nums text-white">
+            {basisLine ?? "—"}
+          </p>
+          <p className="m-0 mt-3 text-[10px] leading-relaxed text-white/60">업데이트 경과</p>
+          <p
+            className={`m-0 mt-1 text-[13px] font-semibold leading-relaxed tabular-nums ${ageAccentClass}`}
+          >
+            {ageKoLabel ?? "—"}
+          </p>
         </div>
       </div>
 
