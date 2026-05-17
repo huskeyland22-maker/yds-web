@@ -22,7 +22,7 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
             behavior: "smooth",
             block: "start",
           })
-        }, 320)
+        }, 420)
         return
       }
       document.getElementById(`korea-sector-${sectorId}`)?.scrollIntoView({
@@ -34,12 +34,12 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
   )
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <KoreaValueChainHero />
 
       <KoreaCompressedIndustryMap heatById={heatById} onNodeClick={scrollToSector} />
 
-      <div className="flex justify-center pt-1">
+      <div className="flex justify-center">
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
@@ -53,15 +53,20 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
 
       <div
         id="korea-value-chain-expand"
-        className={[
-          "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
-          expanded ? "max-h-[20000px] opacity-100" : "max-h-0 opacity-0",
-        ].join(" ")}
+        aria-hidden={!expanded}
+        className={
+          expanded
+            ? "max-h-[5000px] overflow-hidden opacity-100 pt-6"
+            : "m-0 h-0 max-h-0 overflow-hidden p-0 opacity-0"
+        }
+        style={{ transition: "max-height 0.4s ease, opacity 0.3s ease" }}
       >
-        <div className="space-y-8 pt-2">
-          <KoreaSectorDetailCards heatById={heatById} onStockSelect={onStockSelect} />
-          {children}
-        </div>
+        {expanded ? (
+          <div className="space-y-8">
+            <KoreaSectorDetailCards heatById={heatById} onStockSelect={onStockSelect} />
+            {children}
+          </div>
+        ) : null}
       </div>
     </div>
   )
