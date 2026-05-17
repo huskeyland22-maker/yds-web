@@ -86,9 +86,15 @@ export default function PanicDeskChart({
         currentValue={currentValue}
         historyRows={slicedRows}
       />
-      <PanicMarketReportPanel report={deskMarketReport} loading={deskMarketReportLoading} />
-      <PanicMarketTimingPanel panicData={panicData} />
-      <PanicMarketActionPanel panicData={panicData} />
+      <div className="mt-6">
+        <PanicMarketActionPanel panicData={panicData} />
+      </div>
+      <div className="mt-5">
+        <PanicMarketTimingPanel panicData={panicData} />
+      </div>
+      <div className="mt-5">
+        <PanicMarketReportPanel report={deskMarketReport} loading={deskMarketReportLoading} />
+      </div>
     </section>
   )
 }
