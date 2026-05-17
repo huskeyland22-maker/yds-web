@@ -3,7 +3,7 @@ import { getFinalScore, getMidScore, getShortScore } from "../utils/tradingScore
 import {
   ageMsFromUpdatedAt,
   formatAgeKo,
-  formatDataBasisKstLine,
+  formatDataBasisKst,
   kstCalendarKey,
   staleAgeAccentClassName,
   staleDisplayTier,
@@ -86,8 +86,16 @@ export default function PanicDeskDashboard({
     return asOfDateLabel
   }, [asOfDateLabel, panicData?.updatedAt])
 
-  const basisLine = useMemo(() => formatDataBasisKstLine(panicData?.updatedAt), [panicData?.updatedAt])
+  const basisDateTime = useMemo(() => formatDataBasisKst(panicData?.updatedAt), [panicData?.updatedAt])
+  const basisStatusLine = useMemo(
+    () => (basisDateTime ? `미국장 종가 기준 · ${basisDateTime}` : "미국장 종가 기준 · —"),
+    [basisDateTime],
+  )
   const ageKoLabel = useMemo(() => formatAgeKo(dataAgeMs), [dataAgeMs])
+  const ageStatusLine = useMemo(
+    () => (ageKoLabel ? `${ageKoLabel} 업데이트` : "— 업데이트"),
+    [ageKoLabel],
+  )
   const staleTier = useMemo(() => {
     if (isStale && staleDisplayTier(dataAgeMs) === "hidden") return "aging"
     return staleDisplayTier(dataAgeMs)
@@ -139,19 +147,18 @@ export default function PanicDeskDashboard({
 
   return (
     <div className="relative space-y-2 lg:space-y-2.5">
-      <div className="sticky top-0 z-20 -mx-0.5 flex justify-end border-b border-white/[0.06] bg-[#0B0E14]/95 px-0.5 py-1 backdrop-blur-sm">
-        <div className="min-w-[10.5rem] rounded-lg border border-cyan-500/20 bg-cyan-500/[0.05] px-4 py-3 text-right leading-relaxed">
-          <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-400/90">
-            미국장 종가 기준
+      <div className="sticky top-0 z-20 -mx-0.5 flex justify-end border-b border-white/[0.04] bg-[#0B0E14]/90 px-1 py-0.5 backdrop-blur-sm">
+        <div
+          className="w-auto rounded border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-right leading-tight"
+          aria-label="데이터 기준 시각"
+        >
+          <p className="m-0 font-mono text-[12px] font-semibold tabular-nums text-slate-200">
+            {basisStatusLine}
           </p>
-          <p className="m-0 mt-1.5 font-mono text-[15px] font-bold leading-snug tabular-nums text-white">
-            {basisLine ?? "—"}
-          </p>
-          <p className="m-0 mt-3 text-[10px] leading-relaxed text-white/60">업데이트 경과</p>
           <p
-            className={`m-0 mt-1 text-[13px] font-semibold leading-relaxed tabular-nums ${ageAccentClass}`}
+            className={`m-0 mt-0.5 text-[10px] tabular-nums text-white/60 ${ageAccentClass}`}
           >
-            {ageKoLabel ?? "—"}
+            {ageStatusLine}
           </p>
         </div>
       </div>
