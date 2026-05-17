@@ -56,6 +56,13 @@ export const chartProfiles = {
     strokeWidth: 3,
     activeDotR: 5,
   },
+  vxn: {
+    padding: 0.3,
+    tickCount: 5,
+    tickDecimals: 1,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
   fearGreed: {
     padding: 5,
     tickCount: 5,

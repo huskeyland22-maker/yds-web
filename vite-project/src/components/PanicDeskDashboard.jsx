@@ -8,32 +8,84 @@ import {
   staleAgeAccentClassName,
   staleDisplayTier,
 } from "../utils/formatDataAge.js"
+import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 
-const METRICS = [
-  { key: "vix", label: "VIX 변동성", chartLabel: "VIX", accent: "#f87171" },
-  { key: "fearGreed", label: "공포탐욕", chartLabel: "F&G", accent: "#fbbf24" },
-  { key: "putCall", label: "풋콜비율", chartLabel: "P/C", accent: "#60a5fa" },
-  { key: "highYield", label: "하이일드 스프레드", chartLabel: "HY OAS", accent: "#fb923c" },
-  { key: "bofa", label: "BofA 심리", chartLabel: "BofA", accent: "#c084fc" },
-]
-
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
 
-const METRIC_CELL =
+const CORE_CELL =
   "flex min-h-[4rem] flex-col items-center justify-center bg-[#070a10] px-1 py-2.5 transition sm:min-h-[4.25rem] sm:py-3"
 
-const METRIC_LABEL =
+const CORE_LABEL =
   "max-w-full px-0.5 text-center text-[13px] font-semibold leading-snug tracking-[0.05em] text-slate-200 [text-wrap:balance]"
 
-const METRIC_VALUE =
+const CORE_VALUE =
   "mt-1 font-mono text-[1rem] font-bold leading-none tabular-nums sm:text-[1.1rem]"
+
+const EXPERT_CELL =
+  "flex min-h-[3rem] flex-col items-center justify-center bg-[#070a10]/90 px-1 py-1.5 transition sm:min-h-[3.25rem] sm:py-2"
+
+const EXPERT_LABEL =
+  "max-w-full px-0.5 text-center text-[11px] font-medium leading-snug tracking-[0.04em] text-slate-400/90 [text-wrap:balance]"
+
+const EXPERT_VALUE =
+  "mt-0.5 font-mono text-[0.9rem] font-semibold leading-none tabular-nums text-slate-300/90 sm:text-[1rem]"
 
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
   return formatMetricValue(key, Number(v))
+}
+
+/** @param {{ title: string; muted?: boolean }} props */
+function SectionLabel({ title, muted = false }) {
+  return (
+    <div className="flex items-center gap-2 px-0.5">
+      <span className={`h-px flex-1 ${muted ? "bg-white/[0.04]" : "bg-white/[0.07]"}`} />
+      <span
+        className={[
+          "shrink-0 text-[9px] font-semibold tracking-[0.14em]",
+          muted ? "text-slate-600" : "text-slate-500",
+        ].join(" ")}
+      >
+        {title}
+      </span>
+      <span className={`h-px flex-1 ${muted ? "bg-white/[0.04]" : "bg-white/[0.07]"}`} />
+    </div>
+  )
+}
+
+/**
+ * @param {{
+ *   metric: import("../utils/panicDeskMetrics.js").PanicDeskMetric
+ *   value: string
+ *   selected: boolean
+ *   onSelect: () => void
+ *   variant?: "core" | "expert"
+ * }} props
+ */
+function MetricTile({ metric, value, selected, onSelect, variant = "core" }) {
+  const isExpert = variant === "expert"
+  const selectedRing = isExpert ? "ring-1 ring-inset ring-white/10" : "ring-1 ring-inset ring-white/15"
+  return (
+    <button
+      type="button"
+      title={metric.tooltip}
+      aria-label={metric.tooltip ? `${metric.label}: ${metric.tooltip}` : metric.label}
+      data-metric-tooltip={metric.tooltip ?? ""}
+      onClick={onSelect}
+      className={[
+        isExpert ? EXPERT_CELL : CORE_CELL,
+        selected ? selectedRing : isExpert ? "hover:bg-white/[0.02]" : "hover:bg-white/[0.03]",
+      ].join(" ")}
+    >
+      <span className={isExpert ? EXPERT_LABEL : CORE_LABEL}>{metric.label}</span>
+      <span className={isExpert ? EXPERT_VALUE : CORE_VALUE} style={{ color: metric.accent }}>
+        {value}
+      </span>
+    </button>
+  )
 }
 
 /**
@@ -137,7 +189,7 @@ export default function PanicDeskDashboard({
   )
 
   const chartSeries = useMemo(() => {
-    const m = METRICS.find((x) => x.key === chartMetric)
+    const m = findChartMetric(chartMetric)
     return {
       key: chartMetric,
       name: m?.chartLabel ?? m?.label ?? chartMetric,
@@ -214,38 +266,51 @@ export default function PanicDeskDashboard({
         </div>
       </section>
 
-      <section className="trading-card-shell overflow-x-auto p-px">
-        <div className="grid min-w-[22rem] grid-cols-6 gap-px bg-white/[0.06] sm:min-w-0">
-          {METRICS.map(({ key, label, accent }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setChartMetric(key)}
+      <div className="space-y-2">
+        <SectionLabel title="핵심 패닉지수" />
+        <section className="trading-card-shell overflow-hidden p-px">
+          <div className="grid grid-cols-2 gap-px bg-white/[0.06] sm:grid-cols-3 lg:grid-cols-5">
+            {CORE_METRICS.map((metric) => (
+              <MetricTile
+                key={metric.key}
+                metric={metric}
+                value={fmt(metric.key, panicData?.[metric.key])}
+                selected={chartMetric === metric.key}
+                onSelect={() => setChartMetric(metric.key)}
+                variant="core"
+              />
+            ))}
+            <div
               className={[
-                METRIC_CELL,
-                chartMetric === key ? "ring-1 ring-inset ring-white/15" : "hover:bg-white/[0.03]",
+                CORE_CELL,
+                "col-span-2 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-transparent sm:col-span-1 sm:border-t-0 sm:border-l sm:border-white/[0.08]",
               ].join(" ")}
+              aria-label="패닉 종합 점수"
             >
-              <span className={METRIC_LABEL}>{label}</span>
-              <span className={METRIC_VALUE} style={{ color: accent }}>
-                {fmt(key, panicData?.[key])}
+              <span className={CORE_LABEL}>패닉지수</span>
+              <span className={`${CORE_VALUE} text-slate-50`}>
+                {finalScore != null ? finalScore : "—"}
               </span>
-            </button>
-          ))}
-          <div
-            className={[
-              METRIC_CELL,
-              "border-l border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent",
-            ].join(" ")}
-            aria-label="패닉 종합 점수"
-          >
-            <span className={METRIC_LABEL}>패닉지수</span>
-            <span className={`${METRIC_VALUE} text-slate-50`}>
-              {finalScore != null ? finalScore : "—"}
-            </span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <SectionLabel title="전문가 리스크 지표" muted />
+        <section className="overflow-hidden rounded-lg border border-white/[0.04] bg-[#070a10]/50 p-px opacity-[0.92]">
+          <div className="grid grid-cols-2 gap-px bg-white/[0.04] sm:grid-cols-3 lg:grid-cols-5">
+            {EXPERT_METRICS.map((metric) => (
+              <MetricTile
+                key={metric.key}
+                metric={metric}
+                value={fmt(metric.key, panicData?.[metric.key])}
+                selected={chartMetric === metric.key}
+                onSelect={() => setChartMetric(metric.key)}
+                variant="expert"
+              />
+            ))}
+          </div>
+        </section>
+      </div>
 
       <section className="grid grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-1.5">
         {horizons.map((h) => (

@@ -8,6 +8,10 @@ const METRIC_STROKES = {
   putCall: "#60a5fa",
   highYield: "#fb923c",
   bofa: "#c084fc",
+  move: "#fbbf24",
+  skew: "#22d3ee",
+  gsBullBear: "#a78bfa",
+  vxn: "#2dd4bf",
 }
 
 /**
