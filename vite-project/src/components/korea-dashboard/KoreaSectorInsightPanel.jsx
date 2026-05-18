@@ -12,7 +12,7 @@ import { heatToRadarTemp, radarTempPillClass } from "../../utils/koreaValueChain
 export default function KoreaSectorInsightPanel({ sector, heat, onStockSelect }) {
   if (!sector) {
     return (
-      <aside className="korea-dash-insight" aria-label="실시간 인사이트">
+      <aside className="korea-dash-insight live-insight" aria-label="실시간 인사이트">
         <header className="korea-dash-panel-head">
           <p className="m-0 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">Live insight</p>
           <h2 className="m-0 mt-0.5 text-xs font-semibold text-slate-200">실시간 인사이트</h2>
@@ -28,7 +28,7 @@ export default function KoreaSectorInsightPanel({ sector, heat, onStockSelect })
   const phaseLabel = CYCLE_PHASES.find((p) => p.id === sector.cyclePhase)?.label ?? sector.cyclePosition
 
   return (
-    <aside className="korea-dash-insight" aria-label="실시간 인사이트">
+    <aside className="korea-dash-insight live-insight" aria-label="실시간 인사이트">
       <header className="korea-dash-panel-head border-b border-white/[0.06] pb-3">
         <p className="m-0 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">Live insight</p>
         <h2 className="m-0 mt-0.5 text-sm font-semibold text-slate-100">

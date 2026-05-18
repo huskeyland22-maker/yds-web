@@ -318,14 +318,39 @@ html.valuechain-route-active {
   .korea-dash-col-insight {
     display: block !important;
   }
+
+  .korea-dash-col-insight {
+    position: sticky;
+    top: 120px;
+    align-self: start;
+    max-height: none;
+    overflow: visible;
+  }
 }
 
-.korea-dash-radar,
-.korea-dash-insight {
+@media (max-width: 1023px) {
+  .korea-dash-col-insight {
+    position: static;
+    top: auto;
+  }
+}
+
+.korea-dash-radar {
   border-radius: 1rem;
   border: 1px solid var(--korea-dash-border);
   background: var(--korea-dash-bg);
   padding: 0.875rem 1rem;
+}
+
+.korea-dash-insight,
+.live-insight {
+  border-radius: 1rem;
+  border: 1px solid var(--korea-dash-border);
+  background: var(--korea-dash-bg);
+  padding: 0.875rem 1rem;
+  overflow: visible;
+  height: auto;
+  max-height: none;
 }
 
 .korea-dash-map .korea-map-stage {
