@@ -828,31 +828,37 @@ body.valuechain-route-active main.value-chain-main-host {
   color: rgba(148, 163, 184, 0.9);
 }
 
-.korea-signal-flow {
+.korea-signal-select {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem 0.5rem;
-  margin: 0.55rem 0 0;
-  padding: 0.4rem 0.55rem;
-  border-radius: 0.375rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(0, 0, 0, 0.22);
-  font-size: 12px;
-  line-height: 1.4;
+  gap: 0.5rem 0.75rem;
+  margin: 0.6rem 0 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.24);
 }
 
-.korea-signal-flow__pill {
-  border-radius: 0.25rem;
-  border: 1px solid rgba(99, 102, 241, 0.35);
-  background: rgba(99, 102, 241, 0.1);
-  padding: 0.12rem 0.45rem;
+.korea-signal-select__label {
+  font-size: 11px;
   font-weight: 600;
-  color: rgba(199, 210, 254, 0.95);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(100, 116, 139, 0.95);
 }
 
-.korea-signal-flow__label--muted {
-  color: rgba(100, 116, 139, 0.9);
+.korea-signal-select__pill {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.42);
+  background: rgba(99, 102, 241, 0.14);
+  padding: 0.45rem 0.9rem;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: rgba(224, 231, 255, 0.98);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.08);
 }
 
 .korea-signal-sector-summary {
@@ -886,9 +892,7 @@ body.valuechain-route-active main.value-chain-main-host {
 .korea-signal-summary-card {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.2rem;
-  min-height: 78px;
+  gap: 0.45rem;
   padding: 14px;
   border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -903,29 +907,65 @@ body.valuechain-route-active main.value-chain-main-host {
 
 .korea-signal-summary-card__name {
   margin: 0;
-  font-size: 13px;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.35;
   color: rgba(241, 245, 249, 0.96);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.korea-signal-summary-card__counts {
-  margin: 0;
-  font-family: ui-monospace, monospace;
+.korea-signal-summary-card__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.korea-signal-summary-stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.5rem;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.45;
+}
+
+.korea-signal-summary-stat__label {
+  min-width: 2rem;
   color: rgba(148, 163, 184, 0.95);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.korea-signal-summary-stat__value {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.korea-signal-summary-stat--overheat .korea-signal-summary-stat__value {
+  color: rgba(254, 205, 211, 0.92);
+}
+
+.korea-signal-summary-stat--pullback .korea-signal-summary-stat__value {
+  color: rgba(253, 230, 138, 0.92);
+}
+
+.korea-signal-summary-stat--trend .korea-signal-summary-stat__value {
+  color: rgba(167, 243, 208, 0.92);
+}
+
+.korea-signal-summary-stat--watch .korea-signal-summary-stat__value {
+  color: rgba(203, 213, 225, 0.88);
+}
+
+.korea-signal-summary-stat--muted {
+  color: rgba(100, 116, 139, 0.9);
 }
 
 .korea-signal-card-grid {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.32rem;
   grid-template-columns: 1fr;
   margin-bottom: 0;
 }
@@ -933,14 +973,14 @@ body.valuechain-route-active main.value-chain-main-host {
 @media (min-width: 640px) {
   .korea-signal-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.45rem;
+    gap: 0.35rem;
   }
 }
 
 @media (min-width: 1280px) {
   .korea-signal-card-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
+    gap: 0.38rem;
   }
 }
 
@@ -952,7 +992,7 @@ body.valuechain-route-active main.value-chain-main-host {
 
 .korea-signal-card {
   min-height: 140px;
-  max-height: 160px;
+  max-height: 150px;
   border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.02);
@@ -963,7 +1003,7 @@ body.valuechain-route-active main.value-chain-main-host {
   width: 100%;
   height: 100%;
   min-height: 140px;
-  max-height: 160px;
+  max-height: 150px;
   border: none;
   background: transparent;
   padding: 0;
@@ -982,11 +1022,20 @@ body.valuechain-route-active main.value-chain-main-host {
 .korea-signal-card__body {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 0.2rem;
+  justify-content: space-between;
+  gap: 0.15rem;
   height: 100%;
-  padding: 0.65rem 0.7rem;
+  min-height: 140px;
+  max-height: 150px;
+  padding: 0.6rem 0.65rem;
   box-sizing: border-box;
+}
+
+.korea-signal-card__rule {
+  height: 1px;
+  margin: 0.1rem 0;
+  background: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
 .korea-signal-card__head {
@@ -1019,24 +1068,36 @@ body.valuechain-route-active main.value-chain-main-host {
   text-overflow: ellipsis;
 }
 
-.korea-signal-card__status-row {
-  margin: 0;
+.korea-signal-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.75rem;
+}
+
+.korea-signal-card__metric {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.2rem 0.35rem;
-  font-size: 12px;
-  line-height: 1.5;
-  color: rgba(148, 163, 184, 0.95);
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
-.korea-signal-card__status-row strong {
+.korea-signal-card__metric-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(100, 116, 139, 0.95);
+}
+
+.korea-signal-card__metric-value {
+  font-size: 13px;
   font-weight: 600;
-  color: rgba(226, 232, 240, 0.95);
-}
-
-.korea-signal-card__status-sep {
-  color: rgba(71, 85, 105, 0.9);
+  line-height: 1.4;
+  color: rgba(226, 232, 240, 0.96);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .korea-signal-temp {
@@ -1058,23 +1119,56 @@ body.valuechain-route-active main.value-chain-main-host {
   color: rgba(125, 211, 252, 0.88);
 }
 
-.korea-signal-card__aux {
-  margin: 0.1rem 0 0;
+.korea-signal-card__chips {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.55rem;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+.korea-signal-metric-chip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.28rem 0.25rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+
+.korea-signal-metric-chip__label {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.korea-signal-metric-chip__value {
   font-family: ui-monospace, monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  color: rgba(148, 163, 184, 0.92);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  color: rgba(226, 232, 240, 0.94);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .korea-signal-badge {
   flex-shrink: 0;
-  border-radius: 0.2rem;
+  border-radius: 0.25rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.28);
-  padding: 0.15rem 0.35rem;
+  padding: 0.2rem 0.45rem;
   font-size: 11px;
   font-weight: 600;
   line-height: 1.3;
