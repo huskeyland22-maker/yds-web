@@ -4,6 +4,9 @@ import KoreaCompressedIndustryMap from "./KoreaCompressedIndustryMap.jsx"
 import KoreaSectorDetailCards from "./KoreaSectorDetailCards.jsx"
 import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
 
+const TOGGLE_BTN_CLASS =
+  "rounded-lg border border-white/10 bg-white/[0.04] px-5 py-2.5 text-[12px] font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+
 /**
  * @param {{
  *   heatById?: Record<string, string>
@@ -44,20 +47,34 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
 
       <KoreaCompressedIndustryMap heatById={heatById} onNodeClick={handleMapNodeClick} />
 
-      <div className="flex justify-center">
-        <button
-          type="button"
-          onClick={handleExpand}
-          aria-expanded={expanded}
-          aria-controls="korea-value-chain-expand"
-          className="rounded-lg border border-white/10 bg-white/[0.04] px-5 py-2.5 text-[12px] font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
-        >
-          {expanded ? "상세 밸류체인 접기" : "상세 밸류체인 보기"}
-        </button>
-      </div>
+      {!expanded ? (
+        <div className="valuechain-detail-toggle">
+          <button
+            type="button"
+            onClick={handleExpand}
+            aria-expanded={false}
+            aria-controls="korea-value-chain-expand"
+            className={TOGGLE_BTN_CLASS}
+          >
+            상세 밸류체인 보기
+          </button>
+        </div>
+      ) : null}
 
       {expanded ? (
-        <div id="korea-value-chain-expand" className="overflow-hidden pt-6">
+        <div id="korea-value-chain-expand" className="valuechain-detail-wrapper">
+          <div className="valuechain-detail-toggle">
+            <button
+              type="button"
+              onClick={handleExpand}
+              aria-expanded={true}
+              aria-controls="korea-value-chain-expand"
+              className={TOGGLE_BTN_CLASS}
+            >
+              상세 밸류체인 접기
+            </button>
+          </div>
+
           <div className="space-y-8">
             <KoreaSectorDetailCards heatById={heatById} onStockSelect={onStockSelect} />
             {children}

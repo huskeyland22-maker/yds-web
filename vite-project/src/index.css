@@ -187,3 +187,21 @@
     scroll-margin-top: 140px;
   }
 }
+
+/* 코리아 밸류체인 — 상세 펼침 영역 상단 여백·버튼 */
+.valuechain-detail-wrapper {
+  padding-top: 32px;
+}
+
+@media (min-width: 768px) {
+  .valuechain-detail-wrapper {
+    padding-top: 48px;
+  }
+}
+
+.valuechain-detail-toggle {
+  position: relative;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+}
