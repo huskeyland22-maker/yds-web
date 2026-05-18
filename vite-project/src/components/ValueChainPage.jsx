@@ -6,6 +6,7 @@ import { usePanicStore } from "../store/panicStore.js"
 import { ValueChainHeatTraceBadge } from "./DataTraceBadge.jsx"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
+import { scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
 import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
 import KoreaValueChainDesk from "./KoreaValueChainDesk.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
@@ -150,7 +151,14 @@ export default function ValueChainPage({
           <span className="text-slate-600">→</span>
           <span className="font-medium text-cyan-200/85">산업 흐름</span>
           <span className="text-slate-600">→</span>
-          <a href="#industry-map" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
+          <a
+            href="/value-chain"
+            className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline"
+            onClick={(e) => {
+              e.preventDefault()
+              scrollToValueChainSection("industry-map")
+            }}
+          >
             산업맵
           </a>
           <span className="text-slate-600">→</span>

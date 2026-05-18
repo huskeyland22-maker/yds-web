@@ -31,9 +31,10 @@ function marketTempBadge(heat) {
  * @param {{
  *   heatById?: Record<string, string>
  *   onStockSelect: (payload: { stock: { name: string; code: string; tip?: string }; sectorName: string }) => void
+ *   onBackToMap?: () => void
  * }} props
  */
-export default function KoreaSectorDetailCards({ heatById = {}, onStockSelect }) {
+export default function KoreaSectorDetailCards({ heatById = {}, onStockSelect, onBackToMap }) {
   const sectors = useMemo(
     () =>
       KOREA_GROWTH_SECTOR_MAP.map((s) => ({
@@ -62,7 +63,12 @@ export default function KoreaSectorDetailCards({ heatById = {}, onStockSelect })
       </header>
 
       {sectors.map((sector) => (
-        <DetailCard key={sector.id} sector={sector} onStockSelect={onStockSelect} />
+        <DetailCard
+          key={sector.id}
+          sector={sector}
+          onStockSelect={onStockSelect}
+          onBackToMap={onBackToMap}
+        />
       ))}
     </div>
   )
@@ -75,9 +81,10 @@ export default function KoreaSectorDetailCards({ heatById = {}, onStockSelect })
  *     staggerMs: number
  *   }
  *   onStockSelect: (p: { stock: { name: string; code: string; tip?: string }; sectorName: string }) => void
+ *   onBackToMap?: () => void
  * }} props
  */
-function DetailCard({ sector, onStockSelect }) {
+function DetailCard({ sector, onStockSelect, onBackToMap }) {
   const temp = marketTempBadge(sector.heat)
 
   return (
@@ -95,9 +102,16 @@ function DetailCard({ sector, onStockSelect }) {
           {sector.name}
         </h3>
         <div className="flex shrink-0 items-start gap-2">
-          <a href="#industry-map" className="valuechain-map-link mt-0.5" aria-label="산업맵으로 이동">
-            맵
-          </a>
+          {onBackToMap ? (
+            <button
+              type="button"
+              onClick={onBackToMap}
+              className="valuechain-map-link mt-0.5"
+              aria-label="산업맵으로 이동"
+            >
+              맵
+            </button>
+          ) : null}
           <div className="text-right">
             <p className="m-0 text-[8px] font-medium uppercase tracking-[0.1em] text-slate-500">시장 온도</p>
             <span

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { SECTOR_ANCHOR_BY_ID } from "../data/koreaGrowthSectorMap.js"
+import { clearValueChainHash, scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
 import KoreaBackToIndustryMap from "./KoreaBackToIndustryMap.jsx"
 import KoreaCompressedIndustryMap from "./KoreaCompressedIndustryMap.jsx"
 import KoreaSectorDetailCards from "./KoreaSectorDetailCards.jsx"
@@ -7,6 +8,8 @@ import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
 
 const TOGGLE_BTN_CLASS =
   "rounded-lg border border-white/10 bg-white/[0.04] px-5 py-2.5 text-[12px] font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+
+const EXPAND_SCROLL_DELAY_MS = 80
 
 /**
  * @param {{
@@ -17,36 +20,46 @@ const TOGGLE_BTN_CLASS =
  */
 export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, children }) {
   const [expanded, setExpanded] = useState(false)
-  const [pendingAnchor, setPendingAnchor] = useState(null)
+  const [pendingSectorElementId, setPendingSectorElementId] = useState(null)
 
-  const handleExpand = useCallback(() => {
-    setPendingAnchor(null)
-    setExpanded((v) => !v)
+  const scrollToIndustryMap = useCallback(() => {
+    scrollToValueChainSection("industry-map")
   }, [])
 
-  const handleMapNodeClick = useCallback((sectorId) => {
-    const anchor = SECTOR_ANCHOR_BY_ID[sectorId] ?? sectorId
+  const handleSectorSelect = useCallback((sectorId) => {
+    const elementId = SECTOR_ANCHOR_BY_ID[sectorId] ?? sectorId
     setExpanded(true)
-    setPendingAnchor(anchor)
+    setPendingSectorElementId(elementId)
   }, [])
 
   useEffect(() => {
-    if (!expanded || !pendingAnchor || typeof window === "undefined") return
-    const id = pendingAnchor
+    if (!expanded || !pendingSectorElementId || typeof window === "undefined") return
+    const elementId = pendingSectorElementId
     const t = window.setTimeout(() => {
-      if (window.location.hash !== `#${id}`) {
-        window.location.hash = id
-      }
-      setPendingAnchor(null)
-    }, 80)
+      scrollToValueChainSection(elementId)
+      setPendingSectorElementId(null)
+    }, EXPAND_SCROLL_DELAY_MS)
     return () => window.clearTimeout(t)
-  }, [expanded, pendingAnchor])
+  }, [expanded, pendingSectorElementId])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (window.location.hash) clearValueChainHash()
+  }, [])
+
+  const handleExpand = useCallback(() => {
+    setPendingSectorElementId(null)
+    setExpanded((v) => {
+      if (v) clearValueChainHash()
+      return !v
+    })
+  }, [])
 
   return (
     <div className="space-y-3">
       <KoreaValueChainHero />
 
-      <KoreaCompressedIndustryMap heatById={heatById} onNodeClick={handleMapNodeClick} />
+      <KoreaCompressedIndustryMap heatById={heatById} onNodeClick={handleSectorSelect} />
 
       {!expanded ? (
         <div className="valuechain-detail-toggle">
@@ -77,11 +90,15 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
           </div>
 
           <div className="space-y-8">
-            <KoreaSectorDetailCards heatById={heatById} onStockSelect={onStockSelect} />
+            <KoreaSectorDetailCards
+              heatById={heatById}
+              onStockSelect={onStockSelect}
+              onBackToMap={scrollToIndustryMap}
+            />
             {children}
           </div>
 
-          <KoreaBackToIndustryMap active={expanded} />
+          <KoreaBackToIndustryMap active={expanded} onBackToMap={scrollToIndustryMap} />
         </div>
       ) : null}
     </div>
