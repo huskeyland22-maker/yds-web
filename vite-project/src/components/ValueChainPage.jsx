@@ -43,10 +43,21 @@ export default function ValueChainPage({
     if (typeof document === "undefined") return
     document.body.classList.add("valuechain-route-active")
     document.documentElement.classList.add("valuechain-route-active")
+
+    const main = document.querySelector("main")
+    const column = main?.parentElement ?? null
+    const shell = column?.parentElement ?? null
+    main?.classList.add("value-chain-main-host")
+    column?.classList.add("value-chain-column-host")
+    shell?.classList.add("value-chain-shell-host")
+
     ensurePageScrollUnlocked()
     return () => {
       document.body.classList.remove("valuechain-route-active")
       document.documentElement.classList.remove("valuechain-route-active")
+      main?.classList.remove("value-chain-main-host")
+      column?.classList.remove("value-chain-column-host")
+      shell?.classList.remove("value-chain-shell-host")
     }
   }, [])
 

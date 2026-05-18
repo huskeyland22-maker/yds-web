@@ -212,16 +212,37 @@ body.valuechain-route-active {
 }
 
 html.valuechain-route-active {
-  overflow-y: auto !important;
+  /* 문서 스크롤은 body만 — html·body 이중 스크롤바 방지 */
+  overflow-y: visible !important;
   scroll-behavior: smooth;
 }
 
-/* 코리아 밸류체인 페이지 전용 — 이중 스크롤 제거 (전역 레이아웃·sidebar 미변경) */
-body.valuechain-route-active main {
+/* 코리아 밸류체인 라우트 — 우측 main·컬럼·셸 내부 스크롤 해제 (sidebar·전역 body 규칙 미변경) */
+body.valuechain-route-active .value-chain-shell-host {
+  min-height: 100dvh;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body.valuechain-route-active .value-chain-column-host {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
   overflow-y: visible !important;
+}
+
+body.valuechain-route-active main,
+body.valuechain-route-active main.value-chain-main-host {
+  flex: 0 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overscroll-behavior: auto !important;
 }
 
 .value-chain-page,
