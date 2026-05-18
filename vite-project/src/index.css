@@ -203,17 +203,30 @@
   }
 }
 
+/* 앱 메인 — 내부 스크롤 금지, 문서(body/html) 단일 스크롤만 사용 */
+.app-main {
+  height: auto;
+  min-height: auto;
+  overflow-x: hidden;
+  overflow-y: visible;
+  max-height: none;
+}
+
 /* 밸류체인 페이지 — 스크롤 잠금 방지 (모달 열림 시 패널이 body overflow 설정) */
 body.valuechain-route-active {
   overflow-y: auto !important;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
   position: static !important;
   touch-action: auto;
+  height: auto;
+  max-height: none;
 }
 
 html.valuechain-route-active {
   overflow-y: auto !important;
+  overflow-x: hidden;
   scroll-behavior: smooth;
+  height: auto;
 }
 
 .valuechain-detail-toggle {

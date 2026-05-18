@@ -1320,7 +1320,7 @@ function App() {
           </div>
         ) : null}
 
-        <main className="flex-1 overflow-y-auto overscroll-y-contain px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
+        <main className="app-main flex-1 overflow-x-hidden overflow-y-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route

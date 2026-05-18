@@ -27,12 +27,8 @@ function scrollMarginTopPx(el) {
   return Number.isFinite(n) ? n : 0
 }
 
-/**
- * @returns {HTMLElement}
- */
+/** @returns {HTMLElement} */
 function getPageScrollRoot() {
-  const main = document.querySelector("main")
-  if (main && main.scrollHeight > main.clientHeight + 1) return main
   return document.documentElement
 }
 
