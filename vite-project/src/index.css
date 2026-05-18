@@ -5,8 +5,6 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
-    overflow-x: hidden;
-    overflow-y: visible;
     scroll-behavior: smooth;
     background: #0b0e14;
     /* 모바일 퍼스트: 기본 글자 축소 · 데스크에서만 약간 확대 */
@@ -32,8 +30,6 @@
     background-image: radial-gradient(ellipse 100% 60% at 50% -15%, rgba(30, 58, 138, 0.08), transparent 50%),
       radial-gradient(ellipse 60% 40% at 100% 0%, rgba(88, 28, 135, 0.05), transparent 40%);
     color: rgba(248, 250, 252, 0.92);
-    overflow-x: hidden;
-    overflow-y: auto;
     position: static;
     touch-action: auto;
     -webkit-font-smoothing: antialiased;
@@ -43,14 +39,33 @@
     padding-right: env(safe-area-inset-right);
   }
   #root {
-    /* 100vh 는 iOS Safari URL bar 가 사라질 때 viewport 보다 커져 상단 컴포넌트를 가린다.
-       dvh = dynamic viewport height → 항상 실제 보이는 영역 기준 */
-    min-height: 100dvh;
-    /* 일부 구형 브라우저용 fallback */
-    min-height: 100vh;
-    min-height: 100svh;
     background: inherit;
   }
+}
+
+/* 단일 브라우저 스크롤 — 앱 루트 내부 스크롤 금지 */
+html,
+body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+#root,
+.app,
+.app-layout,
+.main-layout,
+.dashboard-layout,
+.page-layout,
+.app-content,
+.app-main {
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: clip;
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
 }
 
 @layer components {
@@ -130,8 +145,7 @@
   /* iOS 17+ standalone 에서 100vh 가 viewport 보다 큰 값을 반환해
      상단 콘텐츠가 viewport 위로 밀려나는 케이스가 보고된다 → 보강 */
   #root {
-    min-height: 100dvh;
-    min-height: 100svh;
+    min-height: auto;
   }
 }
 
@@ -204,32 +218,10 @@
   }
 }
 
-/* 앱 레이아웃 — overflow-x:hidden 은 y축을 auto 로 바꿔 이중 스크롤 유발 → clip 사용 */
-.app-layout,
-.app-content,
-.app-main {
-  height: auto;
-  min-height: auto;
-  max-height: none;
-  overflow-x: clip;
-  overflow-y: visible;
-}
-
 /* 밸류체인 페이지 — 스크롤 잠금 방지 (모달 열림 시 패널이 body overflow 설정) */
 body.valuechain-route-active {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
   position: static !important;
   touch-action: auto;
-  height: auto;
-  max-height: none;
-}
-
-html.valuechain-route-active {
-  overflow-y: visible !important;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  height: auto;
 }
 
 .valuechain-detail-toggle {
