@@ -1,0 +1,26 @@
+2026-05-12 19:13:19 KST [vix] yfinance error: Yahoo API requires curl_cffi session not <class 'requests.sessions.Session'>. Solution: stop setting session, let YF handle.
+2026-05-12 19:13:19 KST [vix] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:19 KST [vxn] yfinance error: Yahoo API requires curl_cffi session not <class 'requests.sessions.Session'>. Solution: stop setting session, let YF handle.
+2026-05-12 19:13:19 KST [vxn] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:19 KST [skew] yfinance error: Yahoo API requires curl_cffi session not <class 'requests.sessions.Session'>. Solution: stop setting session, let YF handle.
+2026-05-12 19:13:19 KST [skew] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:19 KST [move] yfinance error: Yahoo API requires curl_cffi session not <class 'requests.sessions.Session'>. Solution: stop setting session, let YF handle.
+2026-05-12 19:13:19 KST [move] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:19 KST [putCall] yfinance error: Yahoo API requires curl_cffi session not <class 'requests.sessions.Session'>. Solution: stop setting session, let YF handle.
+2026-05-12 19:13:19 KST [putCall] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:20 KST [bofa] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:20 KST [gsBullBear] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:20 KST validate fail: vix missing or invalid
+2026-05-12 19:13:43 KST [putCall] empty history
+2026-05-12 19:13:43 KST [putCall] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:44 KST [bofa] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:44 KST [gsBullBear] CRITICAL: no persisted value in prev or backup
+2026-05-12 19:13:44 KST validate fail: putCall missing or invalid
+2026-05-12 19:13:44 KST Validation failed - refusing to write data.json (previous site data unchanged)
+2026-05-12 19:15:26 KST [putCall] empty history
+2026-05-12 19:15:26 KST [putCall] no live source (set PUTCALL_MANUAL or PUTCALL_FRED_SERIES+FRED_API_KEY)
+2026-05-12 19:15:26 KST Wrote C:\Users\huske\OneDrive\바탕 화면\커서 AI\yds web\vite-project\public\data.json
+2026-05-12 20:18:47 KST Required US session date for daily bars: 2026-05-11 (now US/ET 2026-05-12 07:18)
+2026-05-12 20:18:55 KST [putCall] empty history
+2026-05-12 20:18:55 KST [putCall] no live source (set PUTCALL_MANUAL or PUTCALL_FRED_SERIES+FRED_API_KEY)
+2026-05-12 20:18:56 KST Wrote C:\Users\huske\OneDrive\바탕 화면\커서 AI\yds web\vite-project\public\data.json

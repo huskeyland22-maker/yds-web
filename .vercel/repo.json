@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_IjQBD4v6kXaYqNQx8QTA8b95C0Hm",
+      "name": "yds-web",
+      "directory": ".",
+      "orgId": "team_QDGvg3gDiHiJirWw2771VBKg"
+    }
+  ]
+}
