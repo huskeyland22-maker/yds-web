@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"
 import { KOREA_RADAR_ITEMS } from "../../data/koreaGrowthSectorMap.js"
 import { heatToRadarTemp, radarTempPillClass } from "../../utils/koreaValueChainHeat.js"
 
@@ -23,31 +24,31 @@ export default function KoreaIndustryRadar({ heatById = {}, selectedId, onSelect
           const active = selectedId === item.sectorId
           return (
             <li key={item.sectorId}>
-              <button
+              <motion.button
                 type="button"
+                layout
                 onClick={() => onSelect(item.sectorId)}
-                className={[
-                  "korea-radar-node group w-full text-left",
-                  active ? "is-active" : "",
-                ]
+                className={["korea-radar-node group w-full text-left", active ? "is-active" : ""]
                   .filter(Boolean)
                   .join(" ")}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
               >
                 <span className="korea-radar-ring" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[11px] font-semibold leading-tight text-slate-200 group-hover:text-slate-50">
+                <span className="korea-radar-node-label min-w-0 flex-1">
+                  <span className="block font-semibold leading-snug text-slate-200 group-hover:text-slate-50">
                     {item.label}
                   </span>
                 </span>
                 <span
                   className={[
-                    "shrink-0 rounded border px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-wide",
+                    "korea-radar-temp shrink-0 rounded border px-1.5 py-0.5 font-mono font-semibold uppercase tracking-wide",
                     radarTempPillClass(temp),
                   ].join(" ")}
                 >
                   {temp}
                 </span>
-              </button>
+              </motion.button>
             </li>
           )
         })}

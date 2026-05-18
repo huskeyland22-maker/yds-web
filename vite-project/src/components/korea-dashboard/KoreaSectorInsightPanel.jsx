@@ -1,144 +1,103 @@
-import { motion } from "framer-motion"
+﻿import { AnimatePresence, motion } from "framer-motion"
 import { CYCLE_PHASES } from "../../data/koreaGrowthSectorMap.js"
 import { heatToRadarTemp, radarTempPillClass } from "../../utils/koreaValueChainHeat.js"
 
-/**
- * @param {{
- *   sector: import("../../data/koreaGrowthSectorMap.js").KoreaSectorCard | null
- *   heat?: string
- *   onStockSelect: (p: { stock: { name: string; code: string; tip?: string }; sectorName: string }) => void
- * }} props
- */
+const INSIGHT_FADE = { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
+
 export default function KoreaSectorInsightPanel({ sector, heat, onStockSelect }) {
-  if (!sector) {
-    return (
-      <aside className="korea-dash-insight live-insight insight-panel" aria-label="실시간 인사이트">
-        <header className="korea-dash-panel-head">
-          <p className="m-0 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">Live insight</p>
-          <h2 className="m-0 mt-0.5 text-xs font-semibold text-slate-200">실시간 인사이트</h2>
-        </header>
-        <div className="insight-content">
-          <p className="m-0 mt-6 text-[11px] leading-relaxed text-slate-500">
-            산업을 선택하면 현재 단계·사이클·수혜 논리·대표 종목이 표시됩니다.
-          </p>
-        </div>
-      </aside>
-    )
-  }
-
-  const temp = heatToRadarTemp(heat || sector.heat)
-  const phaseLabel = CYCLE_PHASES.find((p) => p.id === sector.cyclePhase)?.label ?? sector.cyclePosition
-
   return (
     <aside className="korea-dash-insight live-insight insight-panel" aria-label="실시간 인사이트">
-      <header className="korea-dash-panel-head border-b border-white/[0.06] pb-3">
+      <header className="korea-dash-panel-head korea-insight-head">
         <p className="m-0 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">Live insight</p>
-        <h2 className="m-0 mt-0.5 text-sm font-semibold text-slate-100">
-          {sector.icon} {sector.name}
-        </h2>
-        <div className="mt-2 flex flex-wrap gap-1">
-          {sector.themes.map((t) => (
-            <span
-              key={t}
-              className="rounded border border-white/[0.06] bg-white/[0.03] px-1.5 py-0.5 text-[9px] text-slate-400"
-            >
-              {t}
-            </span>
-          ))}
-        </div>
+        <h2 className="m-0 mt-0.5 text-xs font-semibold text-slate-200">LIVE INSIGHT</h2>
       </header>
 
-      <div className="insight-content mt-3 space-y-2.5">
-        <InsightRow label="현재 단계" value={sector.currentStage} />
-        <InsightRow label="사이클 위치" value={phaseLabel} highlight />
-        <div className="rounded-lg border border-white/[0.05] bg-black/20 px-2.5 py-2">
-          <p className="m-0 text-[7px] font-semibold uppercase tracking-[0.1em] text-slate-500">수혜 논리</p>
-          <p className="m-0 mt-1 text-[10px] leading-relaxed text-slate-400">{sector.beneficiaryReason}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <InsightRow label="시장 온도" value={sector.marketTemperature} />
-          <div className="rounded-lg border border-white/[0.05] bg-black/15 px-2.5 py-2">
-            <p className="m-0 text-[7px] font-semibold uppercase tracking-[0.1em] text-slate-500">온도</p>
-            <span
-              className={[
-                "mt-1 inline-block rounded border px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase",
-                radarTempPillClass(temp),
-              ].join(" ")}
-            >
-              {temp}
-            </span>
-          </div>
-        </div>
-        <InsightRow label="관심도" value={sector.interestLevel} />
-
-        <div className="border-t border-white/[0.06] pt-3">
-          <p className="m-0 text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-500">국내 대표 종목</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {sector.stocks.map((s) => (
-              <button
-                key={s.code}
-                type="button"
-                title={s.tip || s.code}
-                onClick={() =>
-                  onStockSelect({
-                    stock: { name: s.name, code: s.code, tip: s.tip },
-                    sectorName: sector.name,
-                  })
-                }
-                className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium text-slate-200 transition hover:border-white/20"
-              >
-                {s.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <CyclePhaseBar activePhase={sector.cyclePhase} pct={sector.cyclePct} />
-      </div>
-    </aside>
-  )
-}
-
-/** @param {{ label: string; value: string; highlight?: boolean }} props */
-function InsightRow({ label, value, highlight = false }) {
-  return (
-    <div className="rounded-lg border border-white/[0.05] bg-black/15 px-2.5 py-2">
-      <p className="m-0 text-[7px] font-semibold uppercase tracking-[0.1em] text-slate-500">{label}</p>
-      <p className={`m-0 mt-0.5 text-[10px] font-semibold ${highlight ? "text-indigo-200/90" : "text-slate-200"}`}>
-        {value}
-      </p>
-    </div>
-  )
-}
-
-/** @param {{ activePhase: string; pct: number }} props */
-function CyclePhaseBar({ activePhase, pct }) {
-  return (
-    <div className="rounded-lg border border-white/[0.05] bg-black/15 px-2.5 py-2.5">
-      <p className="m-0 text-[7px] font-semibold uppercase tracking-[0.1em] text-slate-500">사이클</p>
-      <div className="mt-2 flex flex-wrap gap-1">
-        {CYCLE_PHASES.map((p) => (
-          <span
-            key={p.id}
-            className={[
-              "rounded px-1.5 py-0.5 text-[8px] font-medium",
-              p.id === activePhase
-                ? "border border-indigo-400/30 bg-indigo-500/15 text-indigo-200/95"
-                : "border border-transparent text-slate-600",
-            ].join(" ")}
+      <AnimatePresence mode="wait">
+        {!sector ? (
+          <motion.div
+            key="insight-idle"
+            className="insight-content insight-content--compact"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={INSIGHT_FADE}
           >
-            {p.label}
-          </span>
-        ))}
-      </div>
-      <div className="insight-cycle-track mt-2 h-1 rounded-full bg-white/[0.06]">
-        <motion.div
-          className="h-full rounded-full bg-indigo-500/55"
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        />
-      </div>
-    </div>
+            <p className="m-0 text-[11px] leading-relaxed text-slate-500">
+              산업을 선택하면 단계·온도·사이클·수혜 논리가 표시됩니다.
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key={sector.id}
+            className="insight-content insight-content--compact"
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -6 }}
+            transition={INSIGHT_FADE}
+          >
+            <p className="korea-insight-sector-title m-0">
+              <span aria-hidden>{sector.icon}</span> {sector.name}
+            </p>
+
+            <dl className="korea-insight-kv m-0">
+              <motion.div className="korea-insight-kv__row">
+                <dt>현재 단계</dt>
+                <dd>{sector.currentStage}</dd>
+              </motion.div>
+              <motion.div className="korea-insight-kv__row">
+                <dt>시장 온도</dt>
+                <dd className="flex flex-wrap items-center gap-1.5">
+                  <span>{sector.marketTemperature}</span>
+                  <span
+                    className={[
+                      "rounded border px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-wide",
+                      radarTempPillClass(heatToRadarTemp(heat || sector.heat)),
+                    ].join(" ")}
+                  >
+                    {heatToRadarTemp(heat || sector.heat)}
+                  </span>
+                </dd>
+              </motion.div>
+              <motion.div className="korea-insight-kv__row">
+                <dt>사이클</dt>
+                <dd>
+                  {CYCLE_PHASES.find((p) => p.id === sector.cyclePhase)?.label ?? sector.cyclePosition}
+                  <span className="korea-insight-cycle-pct"> · {sector.cyclePct}%</span>
+                </dd>
+              </motion.div>
+            </dl>
+
+            <motion.div className="korea-insight-reason">
+              <p className="korea-insight-reason__label">수혜 논리</p>
+              <p className="korea-insight-reason__text">{sector.beneficiaryReason}</p>
+            </motion.div>
+
+            <motion.div className="korea-insight-stocks">
+              <p className="korea-insight-stocks__label">대표 종목</p>
+              <ul className="m-0 list-none space-y-1.5 p-0">
+                {sector.stocks.map((s) => (
+                  <li key={s.code}>
+                    <button
+                      type="button"
+                      title={s.tip || s.code}
+                      className="korea-insight-stock-link"
+                      onClick={() =>
+                        onStockSelect({
+                          stock: { name: s.name, code: s.code, tip: s.tip },
+                          sectorName: sector.name,
+                        })
+                      }
+                    >
+                      <span className="font-medium text-slate-200">{s.name}</span>
+                      {s.tip ? <span className="text-slate-500"> · {s.tip}</span> : null}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </aside>
   )
 }
