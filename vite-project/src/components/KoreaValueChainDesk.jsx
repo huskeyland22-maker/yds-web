@@ -76,7 +76,11 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
           <KoreaValueMapHub sector={sector} onStockSelect={onStockSelect} />
         </div>
 
-        <div className={["korea-dash-col-insight", mobileTab !== "insight" ? "max-lg:hidden" : ""].join(" ")}>
+        <div
+          className={["korea-dash-col-insight right-panel", mobileTab !== "insight" ? "max-lg:hidden" : ""]
+            .filter(Boolean)
+            .join(" ")}
+        >
           <KoreaSectorInsightPanel sector={sector} heat={sectorHeat} onStockSelect={onStockSelect} />
         </div>
       </div>

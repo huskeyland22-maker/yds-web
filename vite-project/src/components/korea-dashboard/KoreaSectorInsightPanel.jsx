@@ -12,14 +12,16 @@ import { heatToRadarTemp, radarTempPillClass } from "../../utils/koreaValueChain
 export default function KoreaSectorInsightPanel({ sector, heat, onStockSelect }) {
   if (!sector) {
     return (
-      <aside className="korea-dash-insight live-insight" aria-label="실시간 인사이트">
+      <aside className="korea-dash-insight live-insight insight-panel" aria-label="실시간 인사이트">
         <header className="korea-dash-panel-head">
           <p className="m-0 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">Live insight</p>
           <h2 className="m-0 mt-0.5 text-xs font-semibold text-slate-200">실시간 인사이트</h2>
         </header>
-        <p className="m-0 mt-6 text-[11px] leading-relaxed text-slate-500">
-          산업을 선택하면 현재 단계·사이클·수혜 논리·대표 종목이 표시됩니다.
-        </p>
+        <div className="insight-content">
+          <p className="m-0 mt-6 text-[11px] leading-relaxed text-slate-500">
+            산업을 선택하면 현재 단계·사이클·수혜 논리·대표 종목이 표시됩니다.
+          </p>
+        </div>
       </aside>
     )
   }
@@ -28,13 +30,13 @@ export default function KoreaSectorInsightPanel({ sector, heat, onStockSelect })
   const phaseLabel = CYCLE_PHASES.find((p) => p.id === sector.cyclePhase)?.label ?? sector.cyclePosition
 
   return (
-    <aside className="korea-dash-insight live-insight" aria-label="실시간 인사이트">
+    <aside className="korea-dash-insight live-insight insight-panel" aria-label="실시간 인사이트">
       <header className="korea-dash-panel-head border-b border-white/[0.06] pb-3">
         <p className="m-0 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">Live insight</p>
         <h2 className="m-0 mt-0.5 text-sm font-semibold text-slate-100">
           {sector.icon} {sector.name}
         </h2>
-        <motion.div className="mt-2 flex flex-wrap gap-1" layout>
+        <div className="mt-2 flex flex-wrap gap-1">
           {sector.themes.map((t) => (
             <span
               key={t}
@@ -43,10 +45,10 @@ export default function KoreaSectorInsightPanel({ sector, heat, onStockSelect })
               {t}
             </span>
           ))}
-        </motion.div>
+        </div>
       </header>
 
-      <div className="mt-3 space-y-2.5">
+      <div className="insight-content mt-3 space-y-2.5">
         <InsightRow label="현재 단계" value={sector.currentStage} />
         <InsightRow label="사이클 위치" value={phaseLabel} highlight />
         <div className="rounded-lg border border-white/[0.05] bg-black/20 px-2.5 py-2">
@@ -100,12 +102,12 @@ export default function KoreaSectorInsightPanel({ sector, heat, onStockSelect })
 /** @param {{ label: string; value: string; highlight?: boolean }} props */
 function InsightRow({ label, value, highlight = false }) {
   return (
-    <motion.div layout className="rounded-lg border border-white/[0.05] bg-black/15 px-2.5 py-2">
+    <div className="rounded-lg border border-white/[0.05] bg-black/15 px-2.5 py-2">
       <p className="m-0 text-[7px] font-semibold uppercase tracking-[0.1em] text-slate-500">{label}</p>
       <p className={`m-0 mt-0.5 text-[10px] font-semibold ${highlight ? "text-indigo-200/90" : "text-slate-200"}`}>
         {value}
       </p>
-    </motion.div>
+    </div>
   )
 }
 
@@ -129,14 +131,14 @@ function CyclePhaseBar({ activePhase, pct }) {
           </span>
         ))}
       </div>
-      <motion.div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="insight-cycle-track mt-2 h-1 rounded-full bg-white/[0.06]">
         <motion.div
           className="h-full rounded-full bg-indigo-500/55"
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         />
-      </motion.div>
+      </div>
     </div>
   )
 }

@@ -294,6 +294,7 @@ html.valuechain-route-active {
 .korea-dashboard {
   --korea-dash-border: rgba(255, 255, 255, 0.07);
   --korea-dash-bg: rgba(12, 14, 18, 0.92);
+  overflow: visible;
 }
 
 .korea-dash-panel-head {
@@ -304,6 +305,7 @@ html.valuechain-route-active {
   display: grid;
   gap: 0.75rem;
   grid-template-columns: 1fr;
+  overflow: visible;
 }
 
 @media (min-width: 1024px) {
@@ -319,17 +321,34 @@ html.valuechain-route-active {
     display: block !important;
   }
 
-  .korea-dash-col-insight {
-    position: sticky;
-    top: 120px;
+  /* 우측 컬럼 래퍼 — sticky 없음, 그리드 행 높이에 늘어나지 않게 */
+  .korea-dash-col-insight.right-panel {
+    position: static;
+    top: auto;
     align-self: start;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* LIVE INSIGHT 패널만 sticky — 내부 스크롤 없음 */
+  .live-insight,
+  .insight-panel {
+    position: sticky;
+    top: 110px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    height: auto;
     max-height: none;
     overflow: visible;
   }
 }
 
 @media (max-width: 1023px) {
-  .korea-dash-col-insight {
+  .korea-dash-col-insight.right-panel,
+  .live-insight,
+  .insight-panel {
     position: static;
     top: auto;
   }
@@ -343,7 +362,8 @@ html.valuechain-route-active {
 }
 
 .korea-dash-insight,
-.live-insight {
+.live-insight,
+.insight-panel {
   border-radius: 1rem;
   border: 1px solid var(--korea-dash-border);
   background: var(--korea-dash-bg);
@@ -351,6 +371,19 @@ html.valuechain-route-active {
   overflow: visible;
   height: auto;
   max-height: none;
+}
+
+.live-insight .insight-content,
+.insight-panel .insight-content {
+  overflow: visible;
+  max-height: none;
+  height: auto;
+  flex: 0 1 auto;
+}
+
+/* 사이클 진행 막대 트랙만 클리핑 (패널 스크롤과 무관) */
+.live-insight .insight-cycle-track {
+  overflow: hidden;
 }
 
 .korea-dash-map .korea-map-stage {
