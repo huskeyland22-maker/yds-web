@@ -850,106 +850,87 @@ body.valuechain-route-active main.value-chain-main-host {
   color: rgba(100, 116, 139, 0.9);
 }
 
-/* 산업별 시그널 요약 — 카드형 (밸류체인 플로우와 분리) */
+.korea-signal-active-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.korea-signal-count-chip {
+  border-radius: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.15rem 0.45rem;
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  color: rgba(203, 213, 225, 0.9);
+}
+
 .korea-signal-sector-summary {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .korea-signal-sector-summary__title {
-  margin: 0 0 0.75rem;
-  font-size: 10px;
+  margin: 0 0 0.5rem;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(148, 163, 184, 0.95);
+  color: rgba(100, 116, 139, 0.95);
 }
 
-.korea-signal-sector-summary__grid {
+.korea-signal-sector-summary__list {
   display: grid;
-  gap: 0.65rem;
-  grid-template-columns: 1fr;
+  gap: 0.35rem;
 }
 
-@media (min-width: 640px) {
-  .korea-signal-sector-summary__grid {
+@media (min-width: 768px) {
+  .korea-signal-sector-summary__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
   }
 }
 
-.korea-signal-summary-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 0.75rem 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(120, 140, 255, 0.18);
-  background: rgba(255, 255, 255, 0.03);
-  padding: 0.75rem 1rem;
-}
-
-@media (min-width: 768px) {
-  .korea-signal-summary-card {
-    padding: 0.875rem 1rem;
-  }
-}
-
-.korea-signal-summary-card.is-active {
-  border-color: rgba(129, 140, 248, 0.38);
-  background: rgba(99, 102, 241, 0.07);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.12);
-}
-
-.korea-signal-summary-card__name {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  color: rgba(241, 245, 249, 0.96);
-}
-
-@media (min-width: 768px) {
-  .korea-signal-summary-card__name {
-    font-size: 17px;
-  }
-}
-
-.korea-signal-summary-card__counts {
+.korea-signal-sector-summary__item {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 4.5rem;
-}
-
-.korea-signal-summary-card__count-row {
-  display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 13px;
-  line-height: 1.55;
+  gap: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  padding: 0.3rem 0.45rem;
+  font-size: 10px;
 }
 
-@media (min-width: 768px) {
-  .korea-signal-summary-card__count-row {
-    font-size: 14px;
-    line-height: 1.6;
-  }
+.korea-signal-sector-summary__item.is-active {
+  border-color: rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.06);
 }
 
-.korea-signal-summary-card__count-label {
-  color: rgba(148, 163, 184, 0.95);
-  font-weight: 500;
-}
-
-.korea-signal-summary-card__count-value {
-  font-variant-numeric: tabular-nums;
+.korea-signal-sector-summary__name {
   font-weight: 600;
-  color: rgba(226, 232, 240, 0.92);
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.korea-signal-sector-summary__counts {
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.korea-signal-card__meta-label {
+  font-size: 9px;
+  color: rgba(100, 116, 139, 0.95);
+}
+
+.korea-signal-card__meta-value {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(226, 232, 240, 0.9);
 }
 
 .korea-signal-card-grid {

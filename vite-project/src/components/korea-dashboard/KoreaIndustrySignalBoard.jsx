@@ -16,11 +16,31 @@ const COUNT_KEYS = [
   { key: "watch", label: "관망" },
 ]
 
+const EMPTY_COUNTS = { overheat: 0, pullback: 0, trend: 0, watch: 0 }
+
 export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, onStockSelect }) {
   const sector = useMemo(() => getKoreaSectorById(selectedId), [selectedId])
   const sectorHeat = heatById[selectedId] || sector?.heat
-  const rows = useMemo(() => buildSectorSignalRows(sector, sectorHeat), [sector, sectorHeat])
-  const sectorCounts = useMemo(() => buildAllSectorSignalCounts(heatById), [heatById])
+  const rows = useMemo(() => {
+    try {
+      const built = buildSectorSignalRows(sector, sectorHeat)
+      return Array.isArray(built) ? built : []
+    } catch {
+      return []
+    }
+  }, [sector, sectorHeat])
+  const sectorCounts = useMemo(() => {
+    try {
+      const built = buildAllSectorSignalCounts(heatById ?? {})
+      return Array.isArray(built) ? built : []
+    } catch {
+      return []
+    }
+  }, [heatById])
+  const activeCounts = useMemo(() => {
+    const found = sectorCounts.find((c) => c.sectorId === selectedId)
+    return found?.counts ?? { overheat: 0, pullback: 0, trend: 0, watch: 0 }
+  }, [sectorCounts, selectedId])
 
   return (
     <section id="industry-signal-board" className="korea-signal-board scroll-mt-24" aria-label="산업 시그널 보드">
@@ -36,25 +56,34 @@ export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, on
         <span className="korea-signal-flow__arrow" aria-hidden>↓</span>
         <span className="korea-signal-flow__label korea-signal-flow__label--muted">자동 필터 · 종목 {rows.length}개</span>
       </div>
+      <div className="korea-signal-active-counts">
+        {COUNT_KEYS.map(({ key, label }) =>
+          activeCounts[key] > 0 ? (
+            <span key={key} className={`korea-signal-count-chip korea-signal-count-chip--${key}`}>
+              {label} {activeCounts[key]}
+            </span>
+          ) : null,
+        )}
+      </div>
       <div className="korea-signal-sector-summary">
         <p className="korea-signal-sector-summary__title">산업별 시그널 요약</p>
-        <ul className="korea-signal-sector-summary__grid m-0 list-none p-0">
-          {sectorCounts.map((item) => {
+        <ul className="korea-signal-sector-summary__list m-0 list-none p-0">
+          {(sectorCounts ?? []).map((item) => {
             const active = item.sectorId === selectedId
+            const parts = COUNT_KEYS.filter(({ key }) => Number((item.counts ?? EMPTY_COUNTS)[key]) > 0).map(
+              ({ key, label }) => `${label} ${(item.counts ?? EMPTY_COUNTS)[key]}`,
+            )
             return (
               <li
                 key={item.sectorId}
-                className={["korea-signal-summary-card", active ? "is-active" : ""].filter(Boolean).join(" ")}
+                className={["korea-signal-sector-summary__item", active ? "is-active" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
               >
-                <p className="korea-signal-summary-card__name">{item.fullLabel}</p>
-                <ul className="korea-signal-summary-card__counts m-0 list-none p-0">
-                  {COUNT_KEYS.map(({ key, label }) => (
-                    <li key={key} className="korea-signal-summary-card__count-row">
-                      <span className="korea-signal-summary-card__count-label">{label}</span>
-                      <span className="korea-signal-summary-card__count-value">{item.counts[key]}</span>
-                    </li>
-                  ))}
-                </ul>
+                <span className="korea-signal-sector-summary__name">{item.fullLabel}</span>
+                <span className="korea-signal-sector-summary__counts">
+                  {parts.length ? parts.join(" · ") : "—"}
+                </span>
               </li>
             )
           })}
@@ -74,7 +103,7 @@ export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, on
           ) : (
             rows.map((row, i) => (
               <motion.article
-                key={row.code}
+                key={`${row.code}-${i}`}
                 className="korea-signal-card"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -95,30 +124,28 @@ export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, on
                       <p className="korea-signal-card__name">{row.name}</p>
                       <p className="korea-signal-card__code">{row.code}</p>
                       {row.tip ? <p className="korea-signal-card__role">{row.tip}</p> : null}
-                      <dl className="korea-signal-card__meta m-0">
+                      <div className="korea-signal-card__meta">
                         <div className="korea-signal-card__meta-row">
-                          <dt>현재 상태</dt>
-                          <dd>{row.status}</dd>
+                          <span className="korea-signal-card__meta-label">현재 상태</span>
+                          <span className="korea-signal-card__meta-value">{row.status}</span>
                         </div>
                         <div className="korea-signal-card__meta-row">
-                          <dt>시장 온도</dt>
-                          <dd>
-                            <span className={`korea-signal-temp korea-signal-temp--${row.marketTemp.toLowerCase()}`}>
-                              {row.marketTemp}
-                            </span>
-                          </dd>
+                          <span className="korea-signal-card__meta-label">시장 온도</span>
+                          <span className={`korea-signal-temp korea-signal-temp--${String(row.marketTemp ?? "COOL").toLowerCase()}`}>
+                            {row.marketTemp ?? "COOL"}
+                          </span>
                         </div>
-                      </dl>
+                      </div>
                       <div className="korea-signal-card__aux">
-                        <span>거래량 {row.aux.volume}</span>
-                        <span>10일선 {row.aux.ma10}</span>
-                        <span>20일선 {row.aux.ma20}</span>
-                        <span>52주 {row.aux.w52}</span>
+                        <span>거래량 {row.aux?.volume}</span>
+                        <span>10일선 {row.aux?.ma10}</span>
+                        <span>20일선 {row.aux?.ma20}</span>
+                        <span>52주 {row.aux?.w52}</span>
                       </div>
                     </div>
                     <span
                       className={`korea-signal-badge korea-signal-badge--${row.statusId}`}
-                      title={SIGNAL_STATUS_META[row.statusId].badge}
+                      title={(SIGNAL_STATUS_META[row.statusId ?? "watch"] ?? SIGNAL_STATUS_META.watch).badge}
                     >
                       {row.badge}
                     </span>
