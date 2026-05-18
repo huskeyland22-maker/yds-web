@@ -494,3 +494,13 @@ html.valuechain-route-active {
 .korea-dash-secondary {
   margin-top: 0.5rem;
 }
+
+/* 종목 탐색 카드 — 스크롤 동작 유지, 스크롤바 UI 숨김 */
+.stock-list {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.stock-list::-webkit-scrollbar {
+  display: none;
+}

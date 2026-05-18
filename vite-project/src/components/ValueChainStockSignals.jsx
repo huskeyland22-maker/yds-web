@@ -48,7 +48,7 @@ function BucketCard({ meta, rows, onPick }) {
     <div className={`rounded-xl border bg-black/25 px-3 py-3 ${border}`}>
       <p className="m-0 text-xs font-semibold text-slate-100">{meta.title}</p>
       <p className="m-0 mt-0.5 text-[10px] text-slate-500">{meta.sub}</p>
-      <ul className="m-0 mt-3 max-h-[220px] list-none space-y-1.5 overflow-y-auto p-0">
+      <ul className="stock-list m-0 mt-3 max-h-[220px] list-none space-y-1.5 overflow-y-auto p-0">
         {rows.length === 0 ? (
           <li className="text-[11px] text-slate-600">해당 구간 종목 없음</li>
         ) : (
