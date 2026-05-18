@@ -121,7 +121,7 @@ export default function ValueChainPage({
         aria-hidden
       />
 
-      <div className="value-chain-content relative z-[1] px-5 pb-5 pt-6 md:px-8 md:pb-6 md:pt-8">
+      <div className="value-chain-content relative z-[1] px-5 pb-3 pt-6 md:px-8 md:pb-4 md:pt-8">
         <nav className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500 md:text-xs" aria-label="플로우 내비게이션">
           <Link to="/cycle" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
             시장 사이클

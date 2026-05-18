@@ -134,32 +134,32 @@ export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, on
                     </div>
                     {row.tip ? <p className="korea-signal-card__role">{row.tip}</p> : null}
 
-                    <div className="korea-signal-card__rule" aria-hidden />
-
-                    <div className="korea-signal-card__metrics">
-                      <div className="korea-signal-card__metric">
-                        <span className="korea-signal-card__metric-label">상태</span>
-                        <span className="korea-signal-card__metric-value">{row.status}</span>
-                      </div>
-                      <div className="korea-signal-card__metric">
-                        <span className="korea-signal-card__metric-label">온도</span>
-                        <span
-                          className={`korea-signal-card__metric-value korea-signal-temp korea-signal-temp--${String(row.marketTemp ?? "COOL").toLowerCase()}`}
+                    <p className="korea-signal-card__inline">
+                      <span>
+                        상태 <strong>{row.status}</strong>
+                      </span>
+                      <span className="korea-signal-card__inline-sep" aria-hidden>
+                        ·
+                      </span>
+                      <span>
+                        온도{" "}
+                        <strong
+                          className={`korea-signal-temp korea-signal-temp--${String(row.marketTemp ?? "COOL").toLowerCase()}`}
                         >
                           {row.marketTemp ?? "COOL"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="korea-signal-card__rule" aria-hidden />
+                        </strong>
+                      </span>
+                    </p>
 
                     <div className="korea-signal-card__chips">
-                      {AUX_CHIPS.map(({ key, label }) => (
-                        <span key={key} className="korea-signal-metric-chip">
-                          <span className="korea-signal-metric-chip__label">{label}</span>
-                          <span className="korea-signal-metric-chip__value">{row.aux?.[key] ?? "—"}</span>
-                        </span>
-                      ))}
+                      {AUX_CHIPS.map(({ key, label }) => {
+                        const value = row.aux?.[key] ?? "—"
+                        return (
+                          <span key={key} className="korea-signal-metric-chip" title={`${label} ${value}`}>
+                            {label} {value}
+                          </span>
+                        )
+                      })}
                     </div>
                   </div>
                 </button>
