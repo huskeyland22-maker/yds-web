@@ -433,3 +433,30 @@ export const KOREA_MAP_THEMES = [
   { id: "rotation", label: "순환매", desc: "섹터·테마 간 국내 자금 로테이션" },
   { id: "megatrend", label: "메가트렌드", desc: "AI·방산·자동화 등 구조 성장 수혜" },
 ]
+
+/** 좌측 레이더 표시 라벨 @type {{ sectorId: string; label: string; shortLabel: string }[]} */
+export const KOREA_RADAR_ITEMS = [
+  { sectorId: "ai-semiconductor", label: "AI / 반도체", shortLabel: "AI" },
+  { sectorId: "power-infra", label: "전력 인프라", shortLabel: "전력" },
+  { sectorId: "nuclear-energy", label: "원전 / 에너지", shortLabel: "원전" },
+  { sectorId: "robot-automation", label: "로봇 / 자동화", shortLabel: "로봇" },
+  { sectorId: "defense-space", label: "방산 / 우주", shortLabel: "방산" },
+  { sectorId: "shipbuilding", label: "조선", shortLabel: "조선" },
+  { sectorId: "bio-healthcare", label: "바이오 / 헬스케어", shortLabel: "바이오" },
+  { sectorId: "battery-materials", label: "2차전지 / 소재", shortLabel: "2차전지" },
+]
+
+/** 하단 산업 흐름 타임라인 @type {{ sectorId: string; label: string }[]} */
+export const KOREA_INDUSTRY_FLOW_TIMELINE = [
+  { sectorId: "ai-semiconductor", label: "AI CAPEX" },
+  { sectorId: "power-infra", label: "전력" },
+  { sectorId: "nuclear-energy", label: "원전" },
+  { sectorId: "robot-automation", label: "로봇" },
+  { sectorId: "defense-space", label: "방산" },
+]
+
+/** @param {string} sectorId */
+export function getKoreaSectorById(sectorId) {
+  return KOREA_GROWTH_SECTOR_MAP.find((s) => s.id === sectorId) ?? null
+}
+

@@ -1,19 +1,17 @@
-import { useCallback, useEffect, useState } from "react"
-import { SECTOR_ANCHOR_BY_ID } from "../data/koreaGrowthSectorMap.js"
-import {
-  clearValueChainHash,
-  ensurePageScrollUnlocked,
-  scrollToValueChainSection,
-} from "../utils/valueChainSectorNav.js"
-import KoreaBackToIndustryMap from "./KoreaBackToIndustryMap.jsx"
-import KoreaRadialIndustryMap from "./KoreaRadialIndustryMap.jsx"
-import KoreaSectorDetailCards from "./KoreaSectorDetailCards.jsx"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { getKoreaSectorById } from "../data/koreaGrowthSectorMap.js"
+import { clearValueChainHash } from "../utils/valueChainSectorNav.js"
+import KoreaIndustryFlowTimeline from "./korea-dashboard/KoreaIndustryFlowTimeline.jsx"
+import KoreaIndustryRadar from "./korea-dashboard/KoreaIndustryRadar.jsx"
+import KoreaSectorInsightPanel from "./korea-dashboard/KoreaSectorInsightPanel.jsx"
+import KoreaValueMapHub from "./korea-dashboard/KoreaValueMapHub.jsx"
 import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
 
-const TOGGLE_BTN_CLASS =
-  "rounded-lg border border-white/10 bg-white/[0.04] px-5 py-2.5 text-[12px] font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
-
-const EXPAND_SCROLL_DELAY_MS = 80
+const MOBILE_TABS = [
+  { id: "radar", label: "산업 선택" },
+  { id: "map", label: "맵" },
+  { id: "insight", label: "정보" },
+]
 
 /**
  * @param {{
@@ -23,90 +21,70 @@ const EXPAND_SCROLL_DELAY_MS = 80
  * }} props
  */
 export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, children }) {
-  const [expanded, setExpanded] = useState(false)
-  const [pendingSectorElementId, setPendingSectorElementId] = useState(null)
+  const [selectedId, setSelectedId] = useState("ai-semiconductor")
+  const [mobileTab, setMobileTab] = useState("map")
 
-  const scrollToIndustryMap = useCallback(() => {
-    scrollToValueChainSection("industry-map")
-  }, [])
+  const sector = useMemo(
+    () => (selectedId ? getKoreaSectorById(selectedId) : null),
+    [selectedId],
+  )
+
+  const sectorHeat = selectedId ? heatById[selectedId] || sector?.heat : undefined
 
   const handleSectorSelect = useCallback((sectorId) => {
-    ensurePageScrollUnlocked()
-    const elementId = SECTOR_ANCHOR_BY_ID[sectorId] ?? sectorId
-    setExpanded(true)
-    setPendingSectorElementId(elementId)
+    setSelectedId(sectorId)
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setMobileTab("map")
+    }
   }, [])
-
-  useEffect(() => {
-    if (!expanded || !pendingSectorElementId || typeof window === "undefined") return
-    const elementId = pendingSectorElementId
-    const t = window.setTimeout(() => {
-      scrollToValueChainSection(elementId)
-      ensurePageScrollUnlocked()
-      setPendingSectorElementId(null)
-    }, EXPAND_SCROLL_DELAY_MS)
-    return () => window.clearTimeout(t)
-  }, [expanded, pendingSectorElementId])
 
   useEffect(() => {
     if (typeof window === "undefined") return
     if (window.location.hash) clearValueChainHash()
   }, [])
 
-  const handleExpand = useCallback(() => {
-    setPendingSectorElementId(null)
-    setExpanded((v) => {
-      if (v) clearValueChainHash()
-      return !v
-    })
-  }, [])
-
   return (
-    <div className="space-y-3">
+    <div className="korea-dashboard space-y-4">
       <KoreaValueChainHero />
 
-      <KoreaRadialIndustryMap heatById={heatById} onNodeClick={handleSectorSelect} />
-
-      {!expanded ? (
-        <div className="valuechain-detail-toggle">
-          <button
-            type="button"
-            onClick={handleExpand}
-            aria-expanded={false}
-            aria-controls="korea-value-chain-expand"
-            className={TOGGLE_BTN_CLASS}
-          >
-            상세 밸류체인 보기
-          </button>
-        </div>
-      ) : null}
-
-      {expanded ? (
-        <div id="korea-value-chain-expand" className="valuechain-detail-wrapper">
-          <div className="valuechain-detail-toggle">
+      <div className="lg:hidden">
+        <div className="korea-mobile-tabs" role="tablist" aria-label="코리아 밸류체인 모바일">
+          {MOBILE_TABS.map((tab) => (
             <button
+              key={tab.id}
               type="button"
-              onClick={handleExpand}
-              aria-expanded={true}
-              aria-controls="korea-value-chain-expand"
-              className={TOGGLE_BTN_CLASS}
+              role="tab"
+              aria-selected={mobileTab === tab.id}
+              onClick={() => setMobileTab(tab.id)}
+              className={["korea-mobile-tab", mobileTab === tab.id ? "is-active" : ""].filter(Boolean).join(" ")}
             >
-              상세 밸류체인 접기
+              {tab.label}
             </button>
-          </div>
-
-          <div className="space-y-8">
-            <KoreaSectorDetailCards
-              heatById={heatById}
-              onStockSelect={onStockSelect}
-              onBackToMap={scrollToIndustryMap}
-            />
-            {children}
-          </div>
-
-          <KoreaBackToIndustryMap active={expanded} onBackToMap={scrollToIndustryMap} />
+          ))}
         </div>
-      ) : null}
+      </div>
+
+      <div className="korea-dash-grid">
+        <div className={["korea-dash-col-radar", mobileTab !== "radar" ? "max-lg:hidden" : ""].join(" ")}>
+          <KoreaIndustryRadar
+            heatById={heatById}
+            selectedId={selectedId}
+            onSelect={handleSectorSelect}
+          />
+        </div>
+
+        <div className={["korea-dash-col-map", mobileTab !== "map" ? "max-lg:hidden" : ""].join(" ")}>
+          <KoreaValueMapHub sector={sector} onStockSelect={onStockSelect} />
+        </div>
+
+        <div className={["korea-dash-col-insight", mobileTab !== "insight" ? "max-lg:hidden" : ""].join(" ")}>
+          <KoreaSectorInsightPanel sector={sector} heat={sectorHeat} onStockSelect={onStockSelect} />
+        </div>
+      </div>
+
+      <KoreaIndustryFlowTimeline selectedId={selectedId} onSelect={handleSectorSelect} />
+
+      {children ? <div className="korea-dash-secondary space-y-8 border-t border-white/[0.06] pt-8">{children}</div> : null}
     </div>
   )
 }

@@ -26,9 +26,8 @@ export default function KoreaValueChainHero() {
           </p>
         </div>
         <aside className="flex shrink-0 flex-wrap gap-1 lg:max-w-[14rem] lg:justify-end">
-          <StatusBadge label="KOREA VALUE MAP" />
-          <StatusBadge label="Macro Rotation Monitor" />
-          <StatusBadge label="Y'ds Market Cycle Lab" accent />
+          <StatusBadge label="KOREA VALUE MAP" accent />
+          <StatusBadge label="Y'ds Market Cycle Lab" />
         </aside>
       </div>
     </section>
