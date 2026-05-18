@@ -3,6 +3,7 @@ import { getKoreaSectorById } from "../data/koreaGrowthSectorMap.js"
 import { clearValueChainHash } from "../utils/valueChainSectorNav.js"
 import KoreaIndustryRadar from "./korea-dashboard/KoreaIndustryRadar.jsx"
 import KoreaSectorInsightPanel from "./korea-dashboard/KoreaSectorInsightPanel.jsx"
+import KoreaIndustrySignalBoard from "./korea-dashboard/KoreaIndustrySignalBoard.jsx"
 import KoreaValueMapHub from "./korea-dashboard/KoreaValueMapHub.jsx"
 import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
 
@@ -16,10 +17,9 @@ const MOBILE_TABS = [
  * @param {{
  *   heatById?: Record<string, string>
  *   onStockSelect: (payload: { stock: object; sectorName: string }) => void
- *   children?: import("react").ReactNode
  * }} props
  */
-export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, children }) {
+export default function KoreaValueChainDesk({ heatById = {}, onStockSelect }) {
   const [selectedId, setSelectedId] = useState("ai-semiconductor")
   const [mobileTab, setMobileTab] = useState("map")
 
@@ -85,7 +85,13 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
         </div>
       </div>
 
-      {children ? <div className="korea-dash-secondary space-y-8 border-t border-white/[0.06] pt-8">{children}</div> : null}
+      <div className="korea-dash-secondary border-t border-white/[0.06] pt-8">
+        <KoreaIndustrySignalBoard
+          selectedId={selectedId}
+          heatById={heatById}
+          onStockSelect={onStockSelect}
+        />
+      </div>
     </div>
   )
 }

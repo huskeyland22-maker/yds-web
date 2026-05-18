@@ -1355,7 +1355,7 @@ function App() {
                 </SectionErrorBoundary>
               }
             />
-            <Route path="/timing" element={<Navigate to="/value-chain#stock-signals" replace />} />
+            <Route path="/timing" element={<Navigate to="/value-chain#industry-signal-board" replace />} />
             <Route
               path="/trading-log"
               element={

@@ -178,7 +178,7 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
     [snap, loading, err, stock],
   )
 
-  const timingHref = `/value-chain#stock-signals`
+  const timingHref = `/value-chain#industry-signal-board`
   const tacticalBorder =
     tactical.tone === "ok"
       ? "border-violet-500/40 bg-gradient-to-b from-violet-950/[0.35] to-black/40 shadow-[0_0_36px_rgba(99,102,241,0.14),inset_0_1px_0_rgba(255,255,255,0.06)]"

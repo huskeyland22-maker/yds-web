@@ -7,7 +7,6 @@ import { ValueChainHeatTraceBadge } from "./DataTraceBadge.jsx"
 import { ensurePageScrollUnlocked, scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
 import KoreaValueChainDesk from "./KoreaValueChainDesk.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
-import ValueChainStockSignals from "./ValueChainStockSignals.jsx"
 
 /** @type {Record<string, string[]>} */
 const GROWTH_TO_VC_HEAT_IDS = {
@@ -72,8 +71,8 @@ export default function ValueChainPage({
   }, [sectorHeatMap])
 
   useEffect(() => {
-    if (typeof window === "undefined" || window.location.hash !== "#stock-signals") return
-    const el = document.getElementById("stock-signals")
+    if (typeof window === "undefined" || window.location.hash !== "#industry-signal-board") return
+    const el = document.getElementById("industry-signal-board")
     if (!el) return
     const t = window.setTimeout(() => {
       el.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -143,21 +142,17 @@ export default function ValueChainPage({
           <span className="text-slate-600">→</span>
           <span className="text-slate-500">종목</span>
           <span className="text-slate-600">→</span>
-          <a href="#stock-signals" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
-            종목 시그널
+          <a
+            href="#industry-signal-board"
+            className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline"
+          >
+            산업 시그널
           </a>
         </nav>
 
         <ValueChainHeatTraceBadge className="mb-3" />
 
-        <KoreaValueChainDesk heatById={growthHeatById} onStockSelect={(payload) => setSelected(payload)}>
-          <ValueChainStockSignals
-            sectors={sectors}
-            finderCandidates={finderCandidates}
-            insightWarnings={insightWarnings}
-            onSelectStock={(row) => setSelected({ stock: row, sectorName: row.sectorName })}
-          />
-        </KoreaValueChainDesk>
+        <KoreaValueChainDesk heatById={growthHeatById} onStockSelect={(payload) => setSelected(payload)} />
       </div>
 
       {selected ? (
