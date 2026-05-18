@@ -446,15 +446,6 @@ export const KOREA_RADAR_ITEMS = [
   { sectorId: "battery-materials", label: "2차전지 / 소재", shortLabel: "2차전지" },
 ]
 
-/** 하단 산업 흐름 타임라인 @type {{ sectorId: string; label: string }[]} */
-export const KOREA_INDUSTRY_FLOW_TIMELINE = [
-  { sectorId: "ai-semiconductor", label: "AI CAPEX" },
-  { sectorId: "power-infra", label: "전력" },
-  { sectorId: "nuclear-energy", label: "원전" },
-  { sectorId: "robot-automation", label: "로봇" },
-  { sectorId: "defense-space", label: "방산" },
-]
-
 /** @param {string} sectorId */
 export function getKoreaSectorById(sectorId) {
   return KOREA_GROWTH_SECTOR_MAP.find((s) => s.id === sectorId) ?? null

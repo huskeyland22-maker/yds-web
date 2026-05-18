@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { getKoreaSectorById } from "../data/koreaGrowthSectorMap.js"
 import { clearValueChainHash } from "../utils/valueChainSectorNav.js"
-import KoreaIndustryFlowTimeline from "./korea-dashboard/KoreaIndustryFlowTimeline.jsx"
 import KoreaIndustryRadar from "./korea-dashboard/KoreaIndustryRadar.jsx"
 import KoreaSectorInsightPanel from "./korea-dashboard/KoreaSectorInsightPanel.jsx"
 import KoreaValueMapHub from "./korea-dashboard/KoreaValueMapHub.jsx"
@@ -81,8 +80,6 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
           <KoreaSectorInsightPanel sector={sector} heat={sectorHeat} onStockSelect={onStockSelect} />
         </div>
       </div>
-
-      <KoreaIndustryFlowTimeline selectedId={selectedId} onSelect={handleSectorSelect} />
 
       {children ? <div className="korea-dash-secondary space-y-8 border-t border-white/[0.06] pt-8">{children}</div> : null}
     </div>

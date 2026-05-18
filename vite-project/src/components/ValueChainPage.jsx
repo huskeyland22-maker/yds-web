@@ -5,7 +5,6 @@ import { useAppDataStore } from "../store/appDataStore.js"
 import { usePanicStore } from "../store/panicStore.js"
 import { ValueChainHeatTraceBadge } from "./DataTraceBadge.jsx"
 import { ensurePageScrollUnlocked, scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
-import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
 import KoreaValueChainDesk from "./KoreaValueChainDesk.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
 import ValueChainStockSignals from "./ValueChainStockSignals.jsx"
@@ -136,10 +135,6 @@ export default function ValueChainPage({
           <a href="#stock-signals" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
             종목 시그널
           </a>
-          <span className="text-slate-600">→</span>
-          <a href="#ai-bottleneck-flow" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
-            병목
-          </a>
         </nav>
 
         <ValueChainHeatTraceBadge className="mb-3" />
@@ -151,7 +146,6 @@ export default function ValueChainPage({
             insightWarnings={insightWarnings}
             onSelectStock={(row) => setSelected({ stock: row, sectorName: row.sectorName })}
           />
-          <AiBottleneckFlow sectors={sectors} />
         </KoreaValueChainDesk>
       </div>
 

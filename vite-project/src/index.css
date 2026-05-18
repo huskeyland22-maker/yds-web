@@ -466,65 +466,6 @@ html.valuechain-route-active {
   color: rgba(241, 245, 249, 0.95);
 }
 
-.korea-flow-timeline {
-  border-radius: 1rem;
-  border: 1px solid var(--korea-dash-border);
-  background: var(--korea-dash-bg);
-  padding: 1rem 1.25rem;
-}
-
-.korea-flow-track {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-}
-
-.korea-flow-step-wrap {
-  min-width: 0;
-}
-
-.korea-flow-arrow {
-  display: block;
-  width: 1.5rem;
-  height: 1px;
-  margin: 0 0.15rem;
-  background: linear-gradient(90deg, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.45));
-  position: relative;
-}
-
-.korea-flow-arrow::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 4px solid transparent;
-  border-left-color: rgba(148, 163, 184, 0.45);
-}
-
-.korea-flow-step {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
-  padding: 0.5rem 0.75rem;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.korea-flow-step:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.korea-flow-step.is-active {
-  border-color: rgba(99, 102, 241, 0.35);
-  background: rgba(99, 102, 241, 0.1);
-}
-
 .korea-dash-secondary {
   margin-top: 0.5rem;
 }
