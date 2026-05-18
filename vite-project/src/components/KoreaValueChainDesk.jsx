@@ -6,7 +6,7 @@ import {
   scrollToValueChainSection,
 } from "../utils/valueChainSectorNav.js"
 import KoreaBackToIndustryMap from "./KoreaBackToIndustryMap.jsx"
-import KoreaCompressedIndustryMap from "./KoreaCompressedIndustryMap.jsx"
+import KoreaRadialIndustryMap from "./KoreaRadialIndustryMap.jsx"
 import KoreaSectorDetailCards from "./KoreaSectorDetailCards.jsx"
 import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
 
@@ -65,7 +65,7 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
     <div className="space-y-3">
       <KoreaValueChainHero />
 
-      <KoreaCompressedIndustryMap heatById={heatById} onNodeClick={handleSectorSelect} />
+      <KoreaRadialIndustryMap heatById={heatById} onNodeClick={handleSectorSelect} />
 
       {!expanded ? (
         <div className="valuechain-detail-toggle">

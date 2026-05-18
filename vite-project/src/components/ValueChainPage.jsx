@@ -14,13 +14,14 @@ import ValueChainStockSignals from "./ValueChainStockSignals.jsx"
 
 /** @type {Record<string, string[]>} */
 const GROWTH_TO_VC_HEAT_IDS = {
-  "ai-infra": ["ai-datacenter-infra", "hbm-ai-semiconductor"],
-  semiconductor: ["hbm-ai-semiconductor"],
-  "power-grid": ["power-grid-hvdc", "power-semiconductor-electronics"],
-  nuclear: ["nuclear-smr"],
-  "copper-wire": ["power-grid-hvdc"],
+  "ai-semiconductor": ["ai-datacenter-infra", "hbm-ai-semiconductor"],
+  "power-infra": ["power-grid-hvdc", "power-semiconductor-electronics"],
+  "nuclear-energy": ["nuclear-smr"],
   "robot-automation": ["on-device-ai-robotics"],
-  defense: ["defense"],
+  "defense-space": ["defense", "aerospace"],
+  shipbuilding: ["defense"],
+  "bio-healthcare": ["biopharma"],
+  "battery-materials": ["power-semiconductor-electronics"],
 }
 
 function heatPillClass(heat) {

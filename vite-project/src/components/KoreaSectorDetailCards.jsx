@@ -152,31 +152,64 @@ function DetailCard({ sector, onStockSelect, onBackToMap }) {
       </div>
 
       <div className="mt-4 border-t border-white/[0.06] pt-3">
-        <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">국내 대표 종목</p>
-        <div className="mt-2.5 flex flex-wrap gap-2">
-          {sector.stocks.map((s) => (
-            <button
-              key={s.code}
-              type="button"
-              title={s.tip || s.code}
-              onClick={() =>
-                onStockSelect({
-                  stock: { name: s.name, code: s.code, tip: s.tip },
-                  sectorName: sector.name,
-                })
-              }
-              className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-slate-200 transition duration-200 hover:border-white/25"
-            >
-              {s.name}
-            </button>
-          ))}
-        </div>
+        <p className="m-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+          {sector.subChains?.length ? "하위 밸류체인" : "국내 대표 종목"}
+        </p>
+        {sector.subChains?.length > 0 ? (
+          <div className="mt-3 space-y-3">
+            {sector.subChains.map((sub) => (
+              <div
+                key={sub.id}
+                className="rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2.5"
+              >
+                <p className="m-0 text-[10px] font-semibold text-slate-300">{sub.label}</p>
+                <StockChips
+                  stocks={sub.stocks}
+                  sectorName={`${sector.name} · ${sub.label}`}
+                  onStockSelect={onStockSelect}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <StockChips stocks={sector.stocks} sectorName={sector.name} onStockSelect={onStockSelect} />
+        )}
       </div>
 
       <div className="mt-3">
         <Meta label="관심도" value={sector.interestLevel} />
       </div>
     </article>
+  )
+}
+
+/**
+ * @param {{
+ *   stocks: import("../data/koreaGrowthSectorMap.js").KoreaStockRef[]
+ *   sectorName: string
+ *   onStockSelect: (p: { stock: { name: string; code: string; tip?: string }; sectorName: string }) => void
+ * }} props
+ */
+function StockChips({ stocks, sectorName, onStockSelect }) {
+  return (
+    <div className="mt-2.5 flex flex-wrap gap-2">
+      {stocks.map((s) => (
+        <button
+          key={s.code}
+          type="button"
+          title={s.tip || s.code}
+          onClick={() =>
+            onStockSelect({
+              stock: { name: s.name, code: s.code, tip: s.tip },
+              sectorName,
+            })
+          }
+          className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-slate-200 transition duration-200 hover:border-white/25"
+        >
+          {s.name}
+        </button>
+      ))}
+    </div>
   )
 }
 
