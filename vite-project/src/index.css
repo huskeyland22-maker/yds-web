@@ -5,6 +5,7 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    overflow-y: auto;
     scroll-behavior: smooth;
     background: #0b0e14;
     /* 모바일 퍼스트: 기본 글자 축소 · 데스크에서만 약간 확대 */
@@ -31,7 +32,9 @@
       radial-gradient(ellipse 60% 40% at 100% 0%, rgba(88, 28, 135, 0.05), transparent 40%);
     color: rgba(248, 250, 252, 0.92);
     overflow-x: hidden;
-    overscroll-behavior-y: none;
+    overflow-y: auto;
+    position: static;
+    touch-action: auto;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     /* 가로 safe-area 는 body 에 두어 모든 자식이 노치/펀치홀 측면을 침범하지 못하게 한다 */
@@ -191,12 +194,26 @@
 /* 코리아 밸류체인 — 상세 펼침 영역 상단 여백·버튼 */
 .valuechain-detail-wrapper {
   padding-top: 32px;
+  overflow: visible;
 }
 
 @media (min-width: 768px) {
   .valuechain-detail-wrapper {
     padding-top: 48px;
   }
+}
+
+/* 밸류체인 페이지 — 스크롤 잠금 방지 (모달 열림 시 패널이 body overflow 설정) */
+body.valuechain-route-active {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  position: static !important;
+  touch-action: auto;
+}
+
+html.valuechain-route-active {
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
 }
 
 .valuechain-detail-toggle {

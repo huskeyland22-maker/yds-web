@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react"
 import { SECTOR_ANCHOR_BY_ID } from "../data/koreaGrowthSectorMap.js"
-import { clearValueChainHash, scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
+import {
+  clearValueChainHash,
+  ensurePageScrollUnlocked,
+  scrollToValueChainSection,
+} from "../utils/valueChainSectorNav.js"
 import KoreaBackToIndustryMap from "./KoreaBackToIndustryMap.jsx"
 import KoreaCompressedIndustryMap from "./KoreaCompressedIndustryMap.jsx"
 import KoreaSectorDetailCards from "./KoreaSectorDetailCards.jsx"
@@ -27,6 +31,7 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
   }, [])
 
   const handleSectorSelect = useCallback((sectorId) => {
+    ensurePageScrollUnlocked()
     const elementId = SECTOR_ANCHOR_BY_ID[sectorId] ?? sectorId
     setExpanded(true)
     setPendingSectorElementId(elementId)
@@ -37,6 +42,7 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
     const elementId = pendingSectorElementId
     const t = window.setTimeout(() => {
       scrollToValueChainSection(elementId)
+      ensurePageScrollUnlocked()
       setPendingSectorElementId(null)
     }, EXPAND_SCROLL_DELAY_MS)
     return () => window.clearTimeout(t)

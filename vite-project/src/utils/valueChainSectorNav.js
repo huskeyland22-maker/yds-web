@@ -5,17 +5,61 @@ export function clearValueChainHash() {
   history.replaceState(null, "", path)
 }
 
+/** 섹터 이동 후 body/html 스크롤 잠금 잔여 제거 */
+export function ensurePageScrollUnlocked() {
+  if (typeof document === "undefined") return
+  const { body, documentElement: html } = document
+  body.style.overflow = ""
+  body.style.overflowY = ""
+  body.style.position = ""
+  body.style.touchAction = ""
+  body.style.pointerEvents = ""
+  html.style.overflow = ""
+  html.style.overflowY = ""
+}
+
+/**
+ * @param {HTMLElement} el
+ */
+function scrollMarginTopPx(el) {
+  const v = window.getComputedStyle(el).scrollMarginTop
+  const n = parseFloat(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+/**
+ * @returns {HTMLElement}
+ */
+function getPageScrollRoot() {
+  const main = document.querySelector("main")
+  if (main && main.scrollHeight > main.clientHeight + 1) return main
+  return document.documentElement
+}
+
 /**
  * @param {string} elementId
- * @param {{ behavior?: ScrollBehavior; block?: ScrollLogicalPosition }} [options]
+ * @param {{ behavior?: ScrollBehavior }} [options]
  */
 export function scrollToValueChainSection(elementId, options = {}) {
   if (typeof window === "undefined" || !elementId) return
   const el = document.getElementById(elementId)
   if (!el) return
-  el.scrollIntoView({
-    behavior: options.behavior ?? "smooth",
-    block: options.block ?? "start",
-  })
+
+  ensurePageScrollUnlocked()
   clearValueChainHash()
+
+  const behavior = options.behavior ?? "smooth"
+  const marginTop = scrollMarginTopPx(el)
+  const scrollRoot = getPageScrollRoot()
+
+  if (scrollRoot === document.documentElement) {
+    const y = el.getBoundingClientRect().top + window.scrollY - marginTop
+    window.scrollTo({ top: Math.max(0, y), behavior })
+    return
+  }
+
+  const rootRect = scrollRoot.getBoundingClientRect()
+  const elRect = el.getBoundingClientRect()
+  const top = elRect.top - rootRect.top + scrollRoot.scrollTop - marginTop
+  scrollRoot.scrollTo({ top: Math.max(0, top), behavior })
 }

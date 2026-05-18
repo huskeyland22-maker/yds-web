@@ -6,7 +6,7 @@ import { usePanicStore } from "../store/panicStore.js"
 import { ValueChainHeatTraceBadge } from "./DataTraceBadge.jsx"
 import { buildSectorTree, curatedBySector, heatSortRank } from "../utils/valueChainTree.js"
 import { timingBadgeClass, timingSignalForItem } from "../utils/valueChainTiming.js"
-import { scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
+import { ensurePageScrollUnlocked, scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
 import AiBottleneckFlow from "./AiBottleneckFlow.jsx"
 import KoreaValueChainDesk from "./KoreaValueChainDesk.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
@@ -74,6 +74,17 @@ export default function ValueChainPage({
   }, [fetchSectorHeat, panicData?.updatedAt])
 
   useEffect(() => {
+    if (typeof document === "undefined") return
+    document.body.classList.add("valuechain-route-active")
+    document.documentElement.classList.add("valuechain-route-active")
+    ensurePageScrollUnlocked()
+    return () => {
+      document.body.classList.remove("valuechain-route-active")
+      document.documentElement.classList.remove("valuechain-route-active")
+    }
+  }, [])
+
+  useEffect(() => {
     if (!sectorHeatMap || typeof sectorHeatMap !== "object") return
     setSectors((prev) =>
       prev.map((s) => ({
@@ -130,7 +141,7 @@ export default function ValueChainPage({
   }, [sectors])
 
   return (
-    <div className="relative overflow-hidden rounded-[1.35rem] border border-[rgba(146,164,201,0.2)] bg-[#0c1222] shadow-[0_0_0_1px_rgba(88,132,255,0.08),0_32px_80px_rgba(0,0,0,0.5)]">
+    <div className="relative overflow-visible rounded-[1.35rem] border border-[rgba(146,164,201,0.2)] bg-[#0c1222] shadow-[0_0_0_1px_rgba(88,132,255,0.08),0_32px_80px_rgba(0,0,0,0.5)]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#0b0f14_0%,#11161c_38%,#1a2438_100%)]" aria-hidden />
       <div
         className="pointer-events-none absolute -right-[10%] -top-[12%] h-[min(50vw,460px)] w-[min(50vw,460px)] rounded-full opacity-[0.36]"
