@@ -27,9 +27,13 @@ function scrollMarginTopPx(el) {
   return Number.isFinite(n) ? n : 0
 }
 
-/** @returns {Element} */
+/**
+ * @returns {HTMLElement}
+ */
 function getPageScrollRoot() {
-  return document.scrollingElement ?? document.documentElement
+  const main = document.querySelector("main")
+  if (main && main.scrollHeight > main.clientHeight + 1) return main
+  return document.documentElement
 }
 
 /**
@@ -48,7 +52,7 @@ export function scrollToValueChainSection(elementId, options = {}) {
   const marginTop = scrollMarginTopPx(el)
   const scrollRoot = getPageScrollRoot()
 
-  if (scrollRoot === document.documentElement || scrollRoot === document.body) {
+  if (scrollRoot === document.documentElement) {
     const y = el.getBoundingClientRect().top + window.scrollY - marginTop
     window.scrollTo({ top: Math.max(0, y), behavior })
     return
