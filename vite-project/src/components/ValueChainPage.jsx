@@ -150,7 +150,7 @@ export default function ValueChainPage({
           <span className="text-slate-600">→</span>
           <span className="font-medium text-cyan-200/85">산업 흐름</span>
           <span className="text-slate-600">→</span>
-          <a href="#korea-compressed-map" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
+          <a href="#industry-map" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
             산업맵
           </a>
           <span className="text-slate-600">→</span>

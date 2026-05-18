@@ -205,3 +205,70 @@
   display: flex;
   justify-content: center;
 }
+
+#industry-map {
+  scroll-margin-top: 100px;
+}
+
+@media (min-width: 768px) {
+  #industry-map {
+    scroll-margin-top: 140px;
+  }
+}
+
+.valuechain-back-to-map {
+  position: fixed;
+  right: 16px;
+  bottom: 20px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 14, 18, 0.88);
+  padding: 0.5rem 0.875rem;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92);
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, border-color 0.2s ease;
+}
+
+.valuechain-back-to-map.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.valuechain-back-to-map:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (min-width: 768px) {
+  .valuechain-back-to-map {
+    right: 24px;
+    bottom: 32px;
+  }
+}
+
+.valuechain-map-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.125rem 0.5rem;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.95);
+  text-decoration: none;
+  transition: border-color 0.2s ease;
+}
+
+.valuechain-map-link:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(226, 232, 240, 0.95);
+}

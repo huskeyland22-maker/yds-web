@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { SECTOR_ANCHOR_BY_ID } from "../data/koreaGrowthSectorMap.js"
+import KoreaBackToIndustryMap from "./KoreaBackToIndustryMap.jsx"
 import KoreaCompressedIndustryMap from "./KoreaCompressedIndustryMap.jsx"
 import KoreaSectorDetailCards from "./KoreaSectorDetailCards.jsx"
 import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
@@ -79,6 +80,8 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
             <KoreaSectorDetailCards heatById={heatById} onStockSelect={onStockSelect} />
             {children}
           </div>
+
+          <KoreaBackToIndustryMap active={expanded} />
         </div>
       ) : null}
     </div>

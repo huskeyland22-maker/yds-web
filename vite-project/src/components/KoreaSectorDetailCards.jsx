@@ -94,16 +94,21 @@ function DetailCard({ sector, onStockSelect }) {
           <span aria-hidden>{sector.icon}</span>
           {sector.name}
         </h3>
-        <div className="shrink-0 text-right">
-          <p className="m-0 text-[8px] font-medium uppercase tracking-[0.1em] text-slate-500">시장 온도</p>
-          <span
-            className={[
-              "mt-1 inline-block rounded-md border px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide",
-              temp.className,
-            ].join(" ")}
-          >
-            {temp.label}
-          </span>
+        <div className="flex shrink-0 items-start gap-2">
+          <a href="#industry-map" className="valuechain-map-link mt-0.5" aria-label="산업맵으로 이동">
+            맵
+          </a>
+          <div className="text-right">
+            <p className="m-0 text-[8px] font-medium uppercase tracking-[0.1em] text-slate-500">시장 온도</p>
+            <span
+              className={[
+                "mt-1 inline-block rounded-md border px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide",
+                temp.className,
+              ].join(" ")}
+            >
+              {temp.label}
+            </span>
+          </div>
         </div>
       </div>
 

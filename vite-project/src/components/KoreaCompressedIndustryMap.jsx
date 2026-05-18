@@ -15,8 +15,8 @@ export default function KoreaCompressedIndustryMap({ heatById = {}, onNodeClick 
 
   return (
     <section
-      id="korea-compressed-map"
-      className="relative scroll-mt-24 overflow-hidden rounded-2xl border border-white/[0.07] bg-[rgba(12,14,18,0.88)] px-3 py-6 md:px-5 md:py-8"
+      id="industry-map"
+      className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[rgba(12,14,18,0.88)] px-3 py-6 md:px-5 md:py-8"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.4]"
