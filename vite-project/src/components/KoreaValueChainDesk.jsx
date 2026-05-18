@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { SECTOR_ANCHOR_BY_ID } from "../data/koreaGrowthSectorMap.js"
 import KoreaCompressedIndustryMap from "./KoreaCompressedIndustryMap.jsx"
 import KoreaSectorDetailCards from "./KoreaSectorDetailCards.jsx"
 import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
@@ -12,14 +13,30 @@ import KoreaValueChainHero from "./KoreaValueChainHero.jsx"
  */
 export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, children }) {
   const [expanded, setExpanded] = useState(false)
+  const [pendingAnchor, setPendingAnchor] = useState(null)
 
   const handleExpand = useCallback(() => {
+    setPendingAnchor(null)
     setExpanded((v) => !v)
   }, [])
 
-  const handleMapNodeClick = useCallback(() => {
+  const handleMapNodeClick = useCallback((sectorId) => {
+    const anchor = SECTOR_ANCHOR_BY_ID[sectorId] ?? sectorId
     setExpanded(true)
+    setPendingAnchor(anchor)
   }, [])
+
+  useEffect(() => {
+    if (!expanded || !pendingAnchor || typeof window === "undefined") return
+    const id = pendingAnchor
+    const t = window.setTimeout(() => {
+      if (window.location.hash !== `#${id}`) {
+        window.location.hash = id
+      }
+      setPendingAnchor(null)
+    }, 80)
+    return () => window.clearTimeout(t)
+  }, [expanded, pendingAnchor])
 
   return (
     <div className="space-y-3">
@@ -39,23 +56,14 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
         </button>
       </div>
 
-      <div
-        id="korea-value-chain-expand"
-        aria-hidden={!expanded}
-        className={
-          expanded
-            ? "max-h-[5000px] overflow-hidden opacity-100 pt-6"
-            : "m-0 h-0 max-h-0 overflow-hidden p-0 opacity-0"
-        }
-        style={{ transition: "max-height 0.4s ease, opacity 0.3s ease" }}
-      >
-        {expanded ? (
+      {expanded ? (
+        <div id="korea-value-chain-expand" className="overflow-hidden pt-6">
           <div className="space-y-8">
             <KoreaSectorDetailCards heatById={heatById} onStockSelect={onStockSelect} />
             {children}
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
   )
 }

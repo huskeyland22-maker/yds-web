@@ -1,4 +1,4 @@
-import { KOREA_COMPRESSED_MAP_NODES } from "../data/koreaGrowthSectorMap.js"
+import { KOREA_COMPRESSED_MAP_NODES, SECTOR_ANCHOR_BY_ID } from "../data/koreaGrowthSectorMap.js"
 
 const NODE_CLASS =
   "group flex h-[80px] w-[min(100%,200px)] min-w-[140px] max-w-[200px] shrink-0 flex-col items-center justify-center rounded-[18px] border border-white/[0.06] bg-[rgba(12,14,18,0.95)] px-3 text-center transition duration-200 hover:-translate-y-0.5 hover:border-white/15 sm:h-[86px] sm:w-[185px]"
@@ -55,12 +55,16 @@ function MapRow({ nodes, heatById, onNodeClick }) {
     <div className="flex w-full flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-5">
       {nodes.map((node, index) => {
         const heat = heatById[node.sectorId]
+        const anchor = SECTOR_ANCHOR_BY_ID[node.sectorId] ?? node.sectorId
         return (
           <span key={node.id} className="flex items-center">
-            <button
-              type="button"
-              onClick={() => onNodeClick?.(node.sectorId)}
-              className={NODE_CLASS}
+            <a
+              href={`#${anchor}`}
+              onClick={(e) => {
+                e.preventDefault()
+                onNodeClick?.(node.sectorId)
+              }}
+              className={[NODE_CLASS, "no-underline"].join(" ")}
             >
               <span className="block text-[12px] font-semibold text-slate-200 group-hover:text-slate-50 sm:text-[13px]">
                 {node.label}
@@ -70,7 +74,7 @@ function MapRow({ nodes, heatById, onNodeClick }) {
                   {heat}
                 </span>
               ) : null}
-            </button>
+            </a>
             {index < nodes.length - 1 ? (
               <span className="mx-0.5 hidden text-slate-600 sm:inline md:mx-1.5" aria-hidden>
                 ─

@@ -35,6 +35,28 @@ export const CYCLE_PHASES = [
  * 압축 산업맵 레이아웃 (기본 노출)
  * @type {CompressedMapNode[]}
  */
+/** @type {Record<string, string>} sectorId → hash anchor (no scroll API) */
+export const SECTOR_ANCHOR_BY_ID = {
+  "ai-infra": "ai",
+  semiconductor: "semiconductor",
+  "power-grid": "power",
+  nuclear: "nuclear",
+  "copper-wire": "copper",
+  "robot-automation": "robot",
+  defense: "defense",
+}
+
+/** @type {Record<string, number>} stagger fade delay (ms) */
+export const SECTOR_STAGGER_MS_BY_ID = {
+  "ai-infra": 0,
+  semiconductor: 50,
+  "power-grid": 100,
+  nuclear: 150,
+  "copper-wire": 200,
+  "robot-automation": 250,
+  defense: 300,
+}
+
 export const KOREA_COMPRESSED_MAP_NODES = [
   { id: "ai-infra", label: "AI 인프라", sectorId: "ai-infra", row: "top", col: 0 },
   { id: "semiconductor", label: "반도체", sectorId: "semiconductor", row: "top", col: 1 },
