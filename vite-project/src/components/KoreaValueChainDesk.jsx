@@ -85,7 +85,7 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect }) {
         </div>
       </div>
 
-      <div className="korea-dash-secondary border-t border-white/[0.06] pt-8">
+      <div className="korea-dash-secondary border-t border-white/[0.06]">
         <KoreaIndustrySignalBoard
           selectedId={selectedId}
           heatById={heatById}
