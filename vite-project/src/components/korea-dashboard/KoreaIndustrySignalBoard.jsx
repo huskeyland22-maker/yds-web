@@ -21,10 +21,6 @@ export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, on
   const sectorHeat = heatById[selectedId] || sector?.heat
   const rows = useMemo(() => buildSectorSignalRows(sector, sectorHeat), [sector, sectorHeat])
   const sectorCounts = useMemo(() => buildAllSectorSignalCounts(heatById), [heatById])
-  const activeCounts = useMemo(() => {
-    const found = sectorCounts.find((c) => c.sectorId === selectedId)
-    return found?.counts ?? { overheat: 0, pullback: 0, trend: 0, watch: 0 }
-  }, [sectorCounts, selectedId])
 
   return (
     <section id="industry-signal-board" className="korea-signal-board scroll-mt-24" aria-label="산업 시그널 보드">
@@ -40,34 +36,25 @@ export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, on
         <span className="korea-signal-flow__arrow" aria-hidden>↓</span>
         <span className="korea-signal-flow__label korea-signal-flow__label--muted">자동 필터 · 종목 {rows.length}개</span>
       </div>
-      <div className="korea-signal-active-counts">
-        {COUNT_KEYS.map(({ key, label }) =>
-          activeCounts[key] > 0 ? (
-            <span key={key} className={`korea-signal-count-chip korea-signal-count-chip--${key}`}>
-              {label} {activeCounts[key]}
-            </span>
-          ) : null,
-        )}
-      </div>
       <div className="korea-signal-sector-summary">
         <p className="korea-signal-sector-summary__title">산업별 시그널 요약</p>
-        <ul className="korea-signal-sector-summary__list m-0 list-none p-0">
+        <ul className="korea-signal-sector-summary__grid m-0 list-none p-0">
           {sectorCounts.map((item) => {
             const active = item.sectorId === selectedId
-            const parts = COUNT_KEYS.filter(({ key }) => item.counts[key] > 0).map(
-              ({ key, label }) => `${label} ${item.counts[key]}`,
-            )
             return (
               <li
                 key={item.sectorId}
-                className={["korea-signal-sector-summary__item", active ? "is-active" : ""]
-                  .filter(Boolean)
-                  .join(" ")}
+                className={["korea-signal-summary-card", active ? "is-active" : ""].filter(Boolean).join(" ")}
               >
-                <span className="korea-signal-sector-summary__name">{item.fullLabel}</span>
-                <span className="korea-signal-sector-summary__counts">
-                  {parts.length ? parts.join(" · ") : "—"}
-                </span>
+                <p className="korea-signal-summary-card__name">{item.fullLabel}</p>
+                <ul className="korea-signal-summary-card__counts m-0 list-none p-0">
+                  {COUNT_KEYS.map(({ key, label }) => (
+                    <li key={key} className="korea-signal-summary-card__count-row">
+                      <span className="korea-signal-summary-card__count-label">{label}</span>
+                      <span className="korea-signal-summary-card__count-value">{item.counts[key]}</span>
+                    </li>
+                  ))}
+                </ul>
               </li>
             )
           })}
