@@ -5,7 +5,8 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
-    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
     scroll-behavior: smooth;
     background: #0b0e14;
     /* 모바일 퍼스트: 기본 글자 축소 · 데스크에서만 약간 확대 */
@@ -203,13 +204,15 @@
   }
 }
 
-/* 앱 메인 — 내부 스크롤 금지, 문서(body/html) 단일 스크롤만 사용 */
+/* 앱 레이아웃 — overflow-x:hidden 은 y축을 auto 로 바꿔 이중 스크롤 유발 → clip 사용 */
+.app-layout,
+.app-content,
 .app-main {
   height: auto;
   min-height: auto;
-  overflow-x: hidden;
-  overflow-y: visible;
   max-height: none;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 /* 밸류체인 페이지 — 스크롤 잠금 방지 (모달 열림 시 패널이 body overflow 설정) */
@@ -223,7 +226,7 @@ body.valuechain-route-active {
 }
 
 html.valuechain-route-active {
-  overflow-y: auto !important;
+  overflow-y: visible !important;
   overflow-x: hidden;
   scroll-behavior: smooth;
   height: auto;

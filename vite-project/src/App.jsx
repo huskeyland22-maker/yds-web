@@ -1153,11 +1153,11 @@ function App() {
   return (
     <div
       className={[
-        "flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
+        "app-layout flex min-h-[100dvh] min-h-svh flex-col overflow-x-clip bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row lg:items-start",
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
-      <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
+      <aside className="hidden w-[10rem] shrink-0 flex-col border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:sticky lg:top-0 lg:flex lg:max-h-[100dvh] lg:self-start lg:overflow-x-clip lg:overflow-y-auto">
         <div className="shrink-0 px-2 pb-2 pt-2.5 lg:border-b lg:border-white/[0.06] lg:px-2.5 lg:pb-2.5 lg:pt-3">
           <p className="m-0 font-display text-[17px] font-bold leading-none tracking-[0.03em] text-slate-50">
             Y&apos;ds
@@ -1251,7 +1251,7 @@ function App() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="app-content flex min-w-0 flex-1 flex-col overflow-visible">
         <MobileAppHeader
           onMenuOpen={() => setMobileDrawerOpen(true)}
           user={user}
@@ -1320,7 +1320,7 @@ function App() {
           </div>
         ) : null}
 
-        <main className="app-main flex-1 overflow-x-hidden overflow-y-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
+        <main className="app-main flex-1 overflow-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route
