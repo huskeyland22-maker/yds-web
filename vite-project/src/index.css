@@ -5,7 +5,8 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
-    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
     scroll-behavior: smooth;
     background: #0b0e14;
     /* 모바일 퍼스트: 기본 글자 축소 · 데스크에서만 약간 확대 */
@@ -203,16 +204,27 @@
   }
 }
 
+/* 우측 메인 — 내부 스크롤 제거, 문서(body) 스크롤만 사용 */
+.app-shell-column,
+.app-main,
+.main-content {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+}
+
 /* 밸류체인 페이지 — 스크롤 잠금 방지 (모달 열림 시 패널이 body overflow 설정) */
 body.valuechain-route-active {
   overflow-y: auto !important;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
   position: static !important;
   touch-action: auto;
 }
 
 html.valuechain-route-active {
-  overflow-y: auto !important;
+  overflow-y: visible !important;
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
