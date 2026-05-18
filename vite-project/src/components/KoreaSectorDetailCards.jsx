@@ -83,7 +83,7 @@ function DetailCard({ sector, onStockSelect }) {
   return (
     <article
       id={sector.anchorId}
-      className="rounded-2xl border border-white/[0.07] bg-[rgba(12,14,18,0.95)] p-4 md:p-5"
+      className="valuechain-section rounded-2xl border border-white/[0.07] bg-[rgba(12,14,18,0.95)] p-4 md:p-5"
       style={{
         animation: "koreaSectorCardIn 0.35s ease-out both",
         animationDelay: `${sector.staggerMs}ms`,

@@ -176,3 +176,14 @@
     transform: none;
   }
 }
+
+/* 코리아 밸류체인 — hash 앵커 시 고정 헤더 아래 카드 제목 노출 */
+.valuechain-section {
+  scroll-margin-top: 100px;
+}
+
+@media (min-width: 768px) {
+  .valuechain-section {
+    scroll-margin-top: 140px;
+  }
+}
