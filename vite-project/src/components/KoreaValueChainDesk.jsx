@@ -43,7 +43,7 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
   }, [])
 
   return (
-    <div className="korea-dashboard space-y-4">
+    <div className="value-chain-dashboard korea-dashboard space-y-4">
       <KoreaValueChainHero />
 
       <div className="lg:hidden">
@@ -63,7 +63,7 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect, chil
         </div>
       </div>
 
-      <div className="korea-dash-grid">
+      <div className="korea-dash-grid value-map">
         <div className={["korea-dash-col-radar", mobileTab !== "radar" ? "max-lg:hidden" : ""].join(" ")}>
           <KoreaIndustryRadar
             heatById={heatById}

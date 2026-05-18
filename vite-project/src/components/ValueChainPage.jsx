@@ -98,7 +98,7 @@ export default function ValueChainPage({
   }, [sectors])
 
   return (
-    <div className="relative overflow-visible rounded-[1.35rem] border border-[rgba(146,164,201,0.2)] bg-[#0c1222] shadow-[0_0_0_1px_rgba(88,132,255,0.08),0_32px_80px_rgba(0,0,0,0.5)]">
+    <div className="value-chain-page value-chain-layout relative overflow-visible rounded-[1.35rem] border border-[rgba(146,164,201,0.2)] bg-[#0c1222] shadow-[0_0_0_1px_rgba(88,132,255,0.08),0_32px_80px_rgba(0,0,0,0.5)]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#0b0f14_0%,#11161c_38%,#1a2438_100%)]" aria-hidden />
       <div
         className="pointer-events-none absolute -right-[10%] -top-[12%] h-[min(50vw,460px)] w-[min(50vw,460px)] rounded-full opacity-[0.36]"
@@ -111,7 +111,7 @@ export default function ValueChainPage({
         aria-hidden
       />
 
-      <div className="relative z-[1] px-5 pb-8 pt-6 md:px-8 md:pb-10 md:pt-8">
+      <div className="value-chain-content relative z-[1] px-5 pb-8 pt-6 md:px-8 md:pb-10 md:pt-8">
         <nav className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-500 md:text-xs" aria-label="플로우 내비게이션">
           <Link to="/cycle" className="text-slate-400 underline-offset-4 transition hover:text-cyan-200/90 hover:underline">
             시장 사이클
