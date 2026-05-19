@@ -168,6 +168,9 @@ export default function PanicHistoryLineChart({
 
   const areaGradientId = `metricArea-${dataKey.replace(/[^a-zA-Z0-9]/g, "")}`
   const lineStrokeWidth = (profile.strokeWidth ?? 3) + (showZoneBands ? 0.5 : 0)
+  const pointCount = chartData.length
+  const showDots = pointCount > 0 && pointCount < 3
+  const curveType = pointCount >= 3 ? "monotone" : "linear"
 
   if (!Array.isArray(rows) || rows.length < 1 || chartData.length < 1) {
     return (
@@ -233,9 +236,9 @@ export default function PanicHistoryLineChart({
               </linearGradient>
             </defs>
           ) : null}
-          {profile.showArea ? (
+          {profile.showArea && pointCount >= 2 ? (
             <Area
-              type="monotone"
+              type={curveType}
               dataKey={dataKey}
               stroke="none"
               fill={`url(#${areaGradientId})`}
@@ -254,11 +257,15 @@ export default function PanicHistoryLineChart({
             formatter={(value) => [formatMetricValue(dataKey, value), dataLabel]}
           />
           <Line
-            type="monotone"
+            type={curveType}
             dataKey={dataKey}
             stroke={stroke}
-            strokeWidth={lineStrokeWidth}
-            dot={false}
+            strokeWidth={pointCount === 1 ? 0 : lineStrokeWidth}
+            dot={
+              showDots
+                ? { r: pointCount === 1 ? 5 : 4, fill: stroke, stroke: "#0b0e14", strokeWidth: 1.5 }
+                : false
+            }
             activeDot={{
               r: profile.activeDotR ?? 5,
               strokeWidth: 2,

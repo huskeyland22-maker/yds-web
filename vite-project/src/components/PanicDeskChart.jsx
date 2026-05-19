@@ -34,7 +34,11 @@ export default function PanicDeskChart({
         panicData={panicData}
       />
       <PanicMarketActionPanel panicData={panicData} />
-      <PanicMarketReportPanel report={deskMarketReport} loading={deskMarketReportLoading} />
+      <PanicMarketReportPanel
+        report={deskMarketReport}
+        loading={deskMarketReportLoading}
+        panicData={panicData}
+      />
     </section>
   )
 }

@@ -347,7 +347,11 @@ export const useAppDataStore = create((set, get) => ({
           set({ marketCycleHistory: bundle.cycleRows })
         }
 
-        if (fromHub.length < 1) {
+        let cycleRows = fromHub
+        if (cycleRows.length < 1 && hubRows.length > 0) {
+          cycleRows = historyRowsToCycleRows(hubRows)
+        }
+        if (cycleRows.length < 1) {
           set({
             lastCycleBundleError: "panic_index_history_empty",
             panicIndexFetchedAt: Date.now(),
@@ -363,16 +367,16 @@ export const useAppDataStore = create((set, get) => ({
           panicIndexFetchedAt: t,
           lastCycleBundleError: null,
         })
-        get()._commitCycleHistory(fromHub, { source: "supabase-index-history", realtime: true })
+        get()._commitCycleHistory(cycleRows, { source: "supabase-index-history", realtime: true })
         const latestRow = hubRows.length ? hubRows[hubRows.length - 1] : null
         if (latestRow) set({ latestHistoryRow: latestRow })
         get().refreshDeskResolvedPanicData()
         logFetchSuccess("cycle-history-bundle", {
-          hubRows: fromHub.length,
-          merged: fromHub.length,
+          hubRows: cycleRows.length,
+          merged: cycleRows.length,
           source: "supabase-index-history",
         })
-        return { hubRows, fetchedAt: t, merged: fromHub }
+        return { hubRows, fetchedAt: t, merged: cycleRows }
       } catch (e) {
         logFetchFail("cycle-history-bundle", e)
         set({

@@ -15,7 +15,7 @@ import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 import PanicSectorFlowCard from "./PanicSectorFlowCard.jsx"
-import PanicUnifiedHistorySection from "./PanicUnifiedHistorySection.jsx"
+import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
 import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
@@ -370,7 +370,7 @@ export default function PanicDeskDashboard({
           </div>
         }
       >
-        <PanicUnifiedHistorySection rows={cycleMetricHistory} />
+        <PanicIndexHistorySection rows={cycleMetricHistory} />
       </SectionErrorBoundary>
 
       <PanicDeskChart
