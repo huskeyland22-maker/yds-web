@@ -12,6 +12,10 @@ import {
   normalizePanicSubmitPayload,
 } from "../utils/panicDbNumeric.js"
 import { panicDataFromHistoryApiRow } from "../utils/resolveLatestPanicMetrics.js"
+import {
+  logHistoryFetchDebug,
+  probePanicIndexHistoryDirect,
+} from "../utils/panicHistoryFetchDebug.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -198,9 +202,20 @@ export async function fetchAiReports(options = {}) {
   return json?.ok && Array.isArray(json.rows) ? json.rows : []
 }
 
+/** @alias fetchPanicIndexHistory — 디버그 로그 포함 */
+export async function fetchHistory(options = {}) {
+  return fetchPanicIndexHistory(options)
+}
+
 /** Supabase panic_index_history — 일별 누적 (동일 date NULL-fill upsert) */
 export async function fetchPanicIndexHistory(options = {}) {
-  if (!isPanicHubEnabled()) return options.withCycle ? { rows: [], cycleRows: [] } : []
+  if (!isPanicHubEnabled()) {
+    console.warn("[YDS] fetchHistory: panic hub disabled (VITE_PANIC_HUB + Supabase env)")
+    return options.withCycle ? { rows: [], cycleRows: [] } : []
+  }
+
+  void probePanicIndexHistoryDirect()
+
   const limit = options.limit ?? 120
   const params = new URLSearchParams({ limit: String(limit) })
   if (options.from) params.set("from", String(options.from).slice(0, 10))
@@ -211,13 +226,17 @@ export async function fetchPanicIndexHistory(options = {}) {
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (!res.ok) {
     if (isDataTraceEnabled()) logFetchFail("panic-index-history", new Error(`HTTP ${res.status}`), { url })
+    console.error("[YDS] fetchHistory HTTP error", res.status, url)
     throw new Error(`panic history HTTP ${res.status}`)
   }
   const json = await res.json()
   if (!json?.ok || !Array.isArray(json.rows)) {
     if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: 0, note: "empty_or_invalid" })
+    console.warn("[YDS] fetchHistory: API empty or invalid", json)
+    logHistoryFetchDebug([], options.debugMetric, options.debugRange)
     return options.withCycle ? { rows: [], cycleRows: [] } : []
   }
+  logHistoryFetchDebug(json.rows, options.debugMetric, options.debugRange)
   if (isDataTraceEnabled()) {
     logFetchSuccess("panic-index-history", {
       rows: json.rows.length,

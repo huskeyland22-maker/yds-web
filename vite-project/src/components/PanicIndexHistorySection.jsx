@@ -9,7 +9,11 @@ import {
 import { HISTORY_SECTION_METRICS } from "../utils/panicDeskMetrics.js"
 import { historyZoneLegendItems } from "../utils/panicHistoryLegend.js"
 import {
-  filterHistoryRowsForMetric,
+  logHistoryFetchDebug,
+  logHistoryMetricMapping,
+  probePanicIndexHistoryDirect,
+} from "../utils/panicHistoryFetchDebug.js"
+import {
   resolveCycleHistoryRows,
   resolveDefaultHistoryMetric,
 } from "../utils/panicHistoryRows.js"
@@ -25,6 +29,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
 
   useEffect(() => {
+    void probePanicIndexHistoryDirect()
     void loadCycleHistoryBundle({ limit: 500, force: false })
   }, [loadCycleHistoryBundle])
 
@@ -50,23 +55,23 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
 
-  const filteredHistory = useMemo(
-    () => filterHistoryRowsForMetric(slicedRows, metricKey),
-    [slicedRows, metricKey],
-  )
-
   useEffect(() => {
-    console.log("[YDS] panic history", {
+    logHistoryFetchDebug(history, metricKey, rangeId)
+    logHistoryMetricMapping(history)
+    console.log("[YDS] panic history resolved", {
+      propsRows: rowsProp?.length ?? 0,
+      storeRows: storeRows?.length ?? 0,
       historyLength: history.length,
-      filteredHistoryLength: filteredHistory.length,
+      slicedLength: slicedRows.length,
       selectedMetric: metricKey,
       selectedRange: rangeId,
+      vixSample: history.map((r) => ({ date: r.date, vix: r.vix })),
     })
-  }, [history.length, filteredHistory.length, metricKey, rangeId])
+  }, [history, slicedRows.length, metricKey, rangeId, rowsProp?.length, storeRows?.length])
 
   const stats = useMemo(
-    () => computeHistoryMetricStats(filteredHistory.length ? filteredHistory : slicedRows, metricKey),
-    [filteredHistory, slicedRows, metricKey],
+    () => computeHistoryMetricStats(slicedRows.length ? slicedRows : history, metricKey),
+    [slicedRows, history, metricKey],
   )
 
   const zoneLegend = useMemo(() => historyZoneLegendItems(metricKey), [metricKey])
@@ -82,8 +87,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   )
 
   const higherIsBad = HIGHER_IS_BAD[metricKey] ?? true
-  const chartRows = filteredHistory.length > 0 ? filteredHistory : slicedRows
-  const showChart = chartRows.length > 0
+  const chartRows = history
+  const showChart = history.length > 0
 
   return (
     <section className="trading-card-shell panic-v2-section overflow-hidden px-2 py-2 sm:px-2.5">
@@ -91,6 +96,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         <p className="m-0 text-[11px] font-bold text-slate-100">패닉 히스토리</p>
         <p className="m-0 text-[9px] text-slate-500">
           {metric.label} · {rangeId} · 실제 {chartRangeStats(history, rangeId, "lab").shown}일
+          {history.length > 0 ? ` · 전체 ${history.length}일` : ""}
         </p>
       </div>
 

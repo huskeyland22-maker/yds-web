@@ -131,21 +131,23 @@ export function mergePanicIndexHistoryRows(rowsA, rowsB) {
   return [...out.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
 }
 
-/** cycle-metrics 차트 호환 */
+/** cycle-metrics 차트 호환 — API camelCase · DB snake_case */
 export function panicIndexRowToCycleChart(row) {
-  if (!row) return null
-  const date = String(row.date).slice(0, 10)
+  if (!row || typeof row !== "object") return null
+  const date = String(row.date ?? row.ts ?? "").slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
   return {
     date,
     ts: `${date}T12:00:00.000Z`,
-    vix: row.vix,
-    vxn: row.vxn,
-    fearGreed: row.fearGreed,
-    move: row.move,
-    bofa: row.bofa,
-    skew: row.skew,
-    highYield: row.hyOas ?? row.highYield,
-    gsBullBear: row.gsSentiment ?? row.gsBullBear,
-    putCall: row.putCall ?? null,
+    vix: toNum(row.vix),
+    vxn: toNum(row.vxn),
+    fearGreed: toNum(row.fearGreed ?? row.fear_greed),
+    putCall: toNum(row.putCall ?? row.put_call),
+    move: toNum(row.move),
+    bofa: toNum(row.bofa),
+    skew: toNum(row.skew),
+    highYield: toNum(row.highYield ?? row.hyOas ?? row.hy_oas ?? row.high_yield),
+    gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment ?? row.gs_bb),
+    panicScore: toNum(row.panicScore ?? row.panic_score),
   }
 }

@@ -339,9 +339,16 @@ export const useAppDataStore = create((set, get) => ({
 
     if (hubOn) {
       try {
-        const bundle = await fetchPanicIndexHistory({ limit, withCycle: true })
+        const bundle = await fetchPanicIndexHistory({
+          limit,
+          withCycle: true,
+          debugMetric: "vix",
+          debugRange: "6M",
+        })
         const hubRows = bundle.rows ?? []
+        console.log("[YDS] loadCycleHistoryBundle hubRows", hubRows.length, hubRows)
         const fromHub = historyRowsToCycleRows(hubRows)
+        console.log("[YDS] loadCycleHistoryBundle cycleRows", fromHub.length, fromHub)
         replacePanicIndexHistory(hubRows)
         if (bundle.cycleRows?.length) {
           set({ marketCycleHistory: bundle.cycleRows })

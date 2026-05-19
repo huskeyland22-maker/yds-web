@@ -7,6 +7,8 @@ export const CHART_RANGES = [
   { id: "5Y", label: "5Y", days: 1260 },
 ]
 
+import { PANIC_HISTORY_DISABLE_RANGE_SLICE } from "./panicHistoryFetchDebug.js"
+
 /** 패닉 히스토리 랩 — 1M / 3M / 6M / 1Y / ALL */
 export const LAB_CHART_RANGES = [
   { id: "1M", label: "1M", days: 22 },
@@ -22,12 +24,13 @@ export const LAB_CHART_RANGES = [
  */
 export function sliceHistoryByLabRange(rows, rangeId) {
   if (!Array.isArray(rows) || !rows.length) return []
-  const preset = LAB_CHART_RANGES.find((r) => r.id === rangeId) ?? LAB_CHART_RANGES[2]
   const sorted = [...rows].sort((a, b) => {
     const da = String(a.date ?? a.ts ?? "").slice(0, 10)
     const db = String(b.date ?? b.ts ?? "").slice(0, 10)
     return da.localeCompare(db)
   })
+  if (PANIC_HISTORY_DISABLE_RANGE_SLICE) return sorted
+  const preset = LAB_CHART_RANGES.find((r) => r.id === rangeId) ?? LAB_CHART_RANGES[2]
   if (preset.days == null || sorted.length <= preset.days) return sorted
   return sorted.slice(-preset.days)
 }

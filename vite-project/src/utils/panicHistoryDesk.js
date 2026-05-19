@@ -4,6 +4,7 @@
 
 import { formatChartAxisMd } from "./chartDateFormat.js"
 import { panicIndexRowToCycleChart } from "./panicIndexHistory.js"
+import { rawRowToCycle } from "./panicHistoryRows.js"
 
 function rowDateKey(row) {
   return String(row?.date ?? row?.ts ?? "").slice(0, 10)
@@ -26,7 +27,7 @@ export function latestHistoryRow(rows) {
 /** API history row → cycle chart row */
 export function historyRowsToCycleRows(hubRows) {
   if (!Array.isArray(hubRows)) return []
-  return hubRows.map(panicIndexRowToCycleChart).filter(Boolean)
+  return hubRows.map((r) => panicIndexRowToCycleChart(r) ?? rawRowToCycle(r)).filter(Boolean)
 }
 
 /**
