@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { useAppDataStore } from "../store/appDataStore.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
 import {
   computeHistoryMetricStats,
@@ -20,13 +21,25 @@ const HISTORY_CHART_HEIGHT = 240
  * @param {{ rows?: object[] }} props
  */
 export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
-  const history = useMemo(() => resolveCycleHistoryRows(rowsProp), [rowsProp])
+  const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
+  const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
+
+  useEffect(() => {
+    void loadCycleHistoryBundle({ limit: 500, force: false })
+  }, [loadCycleHistoryBundle])
+
+  const history = useMemo(() => {
+    const fromProps = resolveCycleHistoryRows(rowsProp)
+    if (fromProps.length) return fromProps
+    return resolveCycleHistoryRows(storeRows)
+  }, [rowsProp, storeRows])
+
   const [metricKey, setMetricKey] = useState("vix")
   const [rangeId, setRangeId] = useState("6M")
 
   useEffect(() => {
     if (!history.length) return
-    const next = resolveDefaultHistoryMetric(history, metricKey)
+    const next = resolveDefaultHistoryMetric(history, "vix")
     if (next !== metricKey) setMetricKey(next)
   }, [history, metricKey])
 
@@ -69,20 +82,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   )
 
   const higherIsBad = HIGHER_IS_BAD[metricKey] ?? true
-  const showCollecting = history.length === 0
-  const showChart = filteredHistory.length > 0
-
-  if (showCollecting) {
-    return (
-      <section className="trading-card-shell panic-v2-section px-2 py-1 sm:px-2.5">
-        <p className="m-0 text-[11px] font-bold text-slate-100">패닉 히스토리</p>
-        <div className="mt-1.5 flex h-[80px] flex-col items-center justify-center rounded border border-white/[0.06] bg-black/20 text-center">
-          <p className="m-0 text-[10px] font-semibold text-slate-300">📊 히스토리 수집중</p>
-          <p className="m-0 mt-0.5 text-[9px] text-slate-500">데이터 동기화 후 차트가 표시됩니다</p>
-        </div>
-      </section>
-    )
-  }
+  const chartRows = filteredHistory.length > 0 ? filteredHistory : slicedRows
+  const showChart = chartRows.length > 0
 
   return (
     <section className="trading-card-shell panic-v2-section overflow-hidden px-2 py-2 sm:px-2.5">
@@ -173,7 +174,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       <div className="mt-1.5 pb-1">
         {showChart ? (
           <PanicHistoryLineChart
-            rows={filteredHistory}
+            rows={chartRows}
             dataKey={metricKey}
             dataLabel={metric.chartLabel}
             stroke={metric.accent}
@@ -185,7 +186,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           <div
             className="flex h-[80px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500"
           >
-            선택 구간·지표에 표시할 데이터 없음
+            히스토리 없음
           </div>
         )}
       </div>

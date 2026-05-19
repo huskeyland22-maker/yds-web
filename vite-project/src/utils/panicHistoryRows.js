@@ -5,6 +5,34 @@
 import { PANIC_INDEX_HISTORY_KEY, panicIndexRowToCycleChart } from "./panicIndexHistory.js"
 import { HISTORY_SECTION_METRICS } from "./panicDeskMetrics.js"
 
+function toNum(v) {
+  if (v == null || v === "") return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
+/** API·LS 혼합 row → cycle 차트 row */
+export function rawRowToCycle(row) {
+  if (!row || typeof row !== "object") return null
+  const date = String(row.date ?? row.ts ?? "").slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+  const out = {
+    date,
+    ts: `${date}T12:00:00.000Z`,
+    vix: toNum(row.vix),
+    vxn: toNum(row.vxn),
+    fearGreed: toNum(row.fearGreed ?? row.fear_greed),
+    putCall: toNum(row.putCall ?? row.put_call),
+    move: toNum(row.move),
+    bofa: toNum(row.bofa),
+    skew: toNum(row.skew),
+    highYield: toNum(row.highYield ?? row.hyOas ?? row.high_yield),
+    gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment),
+    panicScore: toNum(row.panicScore ?? row.panic_score),
+  }
+  return out
+}
+
 function rowValue(row, key) {
   if (!row) return null
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
@@ -40,19 +68,29 @@ export function filterHistoryRowsForMetric(rows, metricKey) {
   return rows.filter((r) => Number.isFinite(rowValue(r, metricKey)))
 }
 
+function mapRows(arr) {
+  const out = []
+  for (const r of arr) {
+    const c = panicIndexRowToCycleChart(r) ?? rawRowToCycle(r)
+    if (c) out.push(c)
+  }
+  const byDate = new Map()
+  for (const r of out) byDate.set(r.date, r)
+  return [...byDate.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
+}
+
 /**
  * props rows + localStorage fallback
  * @param {object[] | undefined} rows
  */
 export function resolveCycleHistoryRows(rows) {
-  const fromProp = Array.isArray(rows) ? rows.filter((r) => r && r.date) : []
+  const fromProp = mapRows(Array.isArray(rows) ? rows : [])
   if (fromProp.length) return fromProp
 
   if (typeof window === "undefined") return []
   try {
     const raw = JSON.parse(window.localStorage.getItem(PANIC_INDEX_HISTORY_KEY) || "[]")
-    const arr = Array.isArray(raw) ? raw : []
-    return arr.map((r) => panicIndexRowToCycleChart(r)).filter(Boolean)
+    return mapRows(Array.isArray(raw) ? raw : [])
   } catch {
     return []
   }
