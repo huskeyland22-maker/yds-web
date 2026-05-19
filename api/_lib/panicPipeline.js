@@ -5,7 +5,13 @@ import {
   rowsFromPanicSnapshot,
   upsertPanicMetricsRows,
 } from "./panicMetricsHub.js"
-import { upsertPanicIndexHistoryBatch, upsertPanicIndexHistoryFromPayload } from "./panicIndexHistory.js"
+import {
+  fetchPanicHistoryRowBefore,
+  upsertPanicIndexHistoryBatch,
+  upsertPanicIndexHistoryFromPayload,
+} from "./panicIndexHistory.js"
+import { syncLatestPanicMetricsRpc } from "./latestPanicMetrics.js"
+import { upsertMarketCycleHistoryFromSnapshot } from "./marketCycleHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
 import { logPanicPipelineStage } from "./panicNumeric.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
@@ -76,6 +82,19 @@ export async function persistPanicPayload(body, opts = {}) {
     throw err
   }
 
+  let cycleHistory = { ok: false }
+  try {
+    const previous = await fetchPanicHistoryRowBefore(snap.tradeDate)
+    cycleHistory = await upsertMarketCycleHistoryFromSnapshot(snap, previous, { source })
+    await syncLatestPanicMetricsRpc(snap.tradeDate)
+  } catch (err) {
+    cycleHistory = {
+      ok: false,
+      error: err instanceof Error ? err.message : String(err),
+    }
+    console.warn("[panic] post-history sync failed", cycleHistory.error)
+  }
+
   const rows = rowsFromPanicSnapshot(snap)
   console.log("[panic pipeline] 3-metric-rows", rows.length)
   for (const r of rows) {
@@ -123,6 +142,7 @@ export async function persistPanicPayload(body, opts = {}) {
   return {
     data,
     history,
+    cycleHistory,
     meta,
     rowCount: fresh?.length ?? 0,
     tradeDate: snap.tradeDate,

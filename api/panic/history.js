@@ -1,5 +1,9 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
 import { fetchPanicIndexHistoryRows } from "../_lib/panicIndexHistory.js"
+import {
+  fetchMarketCycleHistoryRows,
+  marketCycleRowToClient,
+} from "../_lib/marketCycleHistory.js"
 
 function noStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -23,7 +27,13 @@ export default async function handler(req, res) {
     const from = url.searchParams.get("from")
     const to = url.searchParams.get("to")
     const rows = await fetchPanicIndexHistoryRows({ limit, from, to })
-    res.status(200).json({ ok: true, rows })
+    const includeCycle = url.searchParams.get("cycle") === "1"
+    let cycleRows = []
+    if (includeCycle) {
+      const raw = await fetchMarketCycleHistoryRows({ limit, from, to })
+      cycleRows = raw.map(marketCycleRowToClient).filter(Boolean)
+    }
+    res.status(200).json({ ok: true, rows, cycleRows: includeCycle ? cycleRows : undefined })
   } catch (e) {
     res.status(500).json({
       ok: false,

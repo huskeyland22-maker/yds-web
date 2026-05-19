@@ -1,6 +1,14 @@
 import { isSupabaseConfigured, supabaseRest } from "./supabaseRest.js"
 
-const TABLES = ["panic_metrics", "panic_index_history", "market_status", "ai_reports"]
+const TABLES = [
+  "panic_metrics",
+  "latest_panic_metrics",
+  "panic_index_history",
+  "market_cycle_history",
+  "market_status",
+  "ai_reports",
+  "stock_signal_history",
+]
 
 /**
  * PostgREST: HEAD with Prefer count=exact — fallback to select id limit 1 + length

@@ -1,4 +1,5 @@
 import { supabaseRest } from "./supabaseRest.js"
+import { enrichPanicHistoryRow } from "./marketCycleCompute.js"
 import { assertPanicHistoryRowNumeric, finalizePanicHistoryRow } from "./panicNumeric.js"
 import {
   normalizePanicPayload,
@@ -44,8 +45,32 @@ export function panicIndexHistoryRowToClient(row) {
     putCall: pick("put_call"),
     gsSentiment: pick("gs_sentiment") ?? pick("gs_bb"),
     gsBullBear: pick("gs_bb") ?? pick("gs_sentiment"),
+    panicScore: pick("panic_score"),
+    marketPhase: row.market_phase ?? null,
+    riskLevel: row.risk_level ?? null,
+    strategy: row.strategy ?? null,
     createdAt: row.created_at ?? row.updated_at ?? null,
   }
+}
+
+/** @param {string} tradeDate YYYY-MM-DD */
+export async function fetchPanicHistoryRowBefore(tradeDate) {
+  const d = String(tradeDate).slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null
+  try {
+    const rows = await supabaseRest(
+      `panic_index_history?select=*&date=lt.${d}&order=date.desc&limit=1`,
+      { method: "GET" },
+    )
+    return Array.isArray(rows) && rows[0] ? rows[0] : null
+  } catch {
+    return null
+  }
+}
+
+function isRpcMissing(err) {
+  const msg = err instanceof Error ? err.message : String(err || "")
+  return /function|rpc|does not exist|42883|PGRST202/i.test(msg)
 }
 
 function rowHasRequiredHistoryMetrics(row) {
@@ -64,14 +89,16 @@ function rowHasRequiredHistoryMetrics(row) {
  */
 export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   const tradeDate = resolvePanicTradeDate(body, opts.tradeDate)
-  const row = panicIndexHistoryRowFromPayload(body, tradeDate, opts)
+  const snap = normalizePanicPayload(body, { tradeDate, source: opts.source })
+  const row = panicIndexHistoryRowFromSnapshot(snap)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(row.date))) {
     return { ok: false, skipped: true, reason: "invalid_date", row }
   }
   if (!rowHasRequiredHistoryMetrics(row)) {
     return { ok: false, skipped: true, reason: "incomplete_core_metrics", row }
   }
-  await postPanicIndexHistoryRow(row)
+  const previous = await fetchPanicHistoryRowBefore(row.date)
+  await postPanicIndexHistoryRow(row, snap, previous)
   return { ok: true, date: row.date }
 }
 
@@ -81,14 +108,48 @@ function isSchemaColumnError(err) {
 }
 
 /** @param {Record<string, unknown>} row */
-async function postPanicIndexHistoryRow(row) {
-  const normalized = finalizePanicHistoryRow(row)
-  assertPanicHistoryRowNumeric(normalized)
-  for (const key of ["vix", "put_call", "fear_greed", "hy_oas", "bofa"]) {
-    if (key in normalized) {
-      console.log("[panic_index_history] pre-insert", key, normalized[key], typeof normalized[key])
-    }
+async function postPanicIndexHistoryRow(row, snap, previousHistoryRow) {
+  let normalized = finalizePanicHistoryRow(row)
+  if (snap) {
+    normalized = enrichPanicHistoryRow(normalized, snap, previousHistoryRow)
   }
+  assertPanicHistoryRowNumeric(normalized)
+
+  const payload = {
+    date: normalized.date,
+    vix: normalized.vix,
+    vxn: normalized.vxn,
+    fear_greed: normalized.fear_greed,
+    put_call: normalized.put_call,
+    move: normalized.move,
+    bofa: normalized.bofa,
+    skew: normalized.skew,
+    hy_oas: normalized.hy_oas,
+    gs_sentiment: normalized.gs_sentiment,
+    high_yield: normalized.high_yield,
+    gs_bb: normalized.gs_bb,
+    market: normalized.market ?? "global",
+    source: normalized.source ?? "manual",
+    panic_score: normalized.panic_score,
+    market_phase: normalized.market_phase,
+    risk_level: normalized.risk_level,
+    strategy: normalized.strategy,
+    created_at: normalized.created_at,
+    updated_at: normalized.updated_at,
+  }
+
+  try {
+    await supabaseRest("rpc/upsert_panic_index_history_fill", {
+      method: "POST",
+      prefer: "return=representation",
+      body: { p_payload: payload },
+    })
+    return
+  } catch (rpcErr) {
+    if (!isRpcMissing(rpcErr)) throw rpcErr
+    console.warn("[panic_index_history] RPC missing — legacy merge upsert fallback")
+  }
+
   const core = {
     date: normalized.date,
     vix: normalized.vix,
@@ -103,13 +164,11 @@ async function postPanicIndexHistoryRow(row) {
     updated_at: normalized.updated_at,
     market: normalized.market ?? "global",
   }
-  const { market: _market, high_yield: _hy, gs_bb: _gs, put_call: _pc, ...baseOnly } = normalized
   const attempts = [
-    normalized,
+    { ...normalized, ...payload },
     { ...core, put_call: normalized.put_call, high_yield: normalized.high_yield, gs_bb: normalized.gs_bb },
     { ...core, put_call: normalized.put_call },
     core,
-    { ...baseOnly, source: baseOnly.source ?? "manual", updated_at: baseOnly.updated_at },
   ]
   let lastErr = null
   for (const body of attempts) {
@@ -138,16 +197,23 @@ export async function upsertPanicIndexHistoryBatch(entries, opts = {}) {
   const rows = []
   for (const entry of entries) {
     const tradeDate = entry?.tradeDate || entry?.date
-    const row = panicIndexHistoryRowFromPayload(entry, tradeDate, opts)
-    if (rowHasRequiredHistoryMetrics(row)) rows.push(row)
+    const snap = normalizePanicPayload(entry, { tradeDate, source: opts.source })
+    const row = panicIndexHistoryRowFromSnapshot(snap)
+    if (rowHasRequiredHistoryMetrics(row)) rows.push({ row, snap })
   }
   if (!rows.length) {
     return { ok: false, skipped: true, reason: "incomplete_core_metrics" }
   }
-  for (const row of rows) {
-    await postPanicIndexHistoryRow(row)
+  rows.sort((a, b) => String(a.row.date).localeCompare(String(b.row.date)))
+  let previous = null
+  for (const { row, snap } of rows) {
+    if (!previous || String(previous.date) >= String(row.date)) {
+      previous = await fetchPanicHistoryRowBefore(row.date)
+    }
+    await postPanicIndexHistoryRow(row, snap, previous)
+    previous = { ...row, ...snap }
   }
-  return { ok: true, count: rows.length, dates: rows.map((r) => r.date) }
+  return { ok: true, count: rows.length, dates: rows.map((r) => r.row.date) }
 }
 
 /**

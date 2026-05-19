@@ -122,7 +122,8 @@ export async function fetchCycleMetricsHistory(options = {}) {
   const debugLog = Boolean(options.debugLog)
   if (isPanicHubEnabled()) {
     if (isDataTraceEnabled()) logFetchStart("cycle-metrics-json", { path: "supabase-panic_index_history" })
-    const hubRows = await fetchPanicIndexHistory({ limit: options.limit ?? 500 })
+    const raw = await fetchPanicIndexHistory({ limit: options.limit ?? 500 })
+    const hubRows = Array.isArray(raw) ? raw : raw?.rows ?? []
     const mapped = hubRows.map(panicIndexHistoryToCycleRow).filter(Boolean)
     const fresh = filterFreshCycleHistoryRows(mapped)
     if (isDataTraceEnabled()) {
@@ -190,13 +191,14 @@ export async function fetchAiReports(options = {}) {
   return json?.ok && Array.isArray(json.rows) ? json.rows : []
 }
 
-/** Supabase panic_index_history — 일별 스냅샷 (동일 date upsert, 과거 조회) */
+/** Supabase panic_index_history — 일별 누적 (동일 date NULL-fill upsert) */
 export async function fetchPanicIndexHistory(options = {}) {
-  if (!isPanicHubEnabled()) return []
+  if (!isPanicHubEnabled()) return options.withCycle ? { rows: [], cycleRows: [] } : []
   const limit = options.limit ?? 120
   const params = new URLSearchParams({ limit: String(limit) })
   if (options.from) params.set("from", String(options.from).slice(0, 10))
   if (options.to) params.set("to", String(options.to).slice(0, 10))
+  if (options.withCycle) params.set("cycle", "1")
   const url = withNoStoreQuery(`/api/panic/history?${params}`)
   if (isDataTraceEnabled()) logFetchStart("panic-index-history", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
@@ -207,9 +209,20 @@ export async function fetchPanicIndexHistory(options = {}) {
   const json = await res.json()
   if (!json?.ok || !Array.isArray(json.rows)) {
     if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: 0, note: "empty_or_invalid" })
-    return []
+    return options.withCycle ? { rows: [], cycleRows: [] } : []
   }
-  if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: json.rows.length })
+  if (isDataTraceEnabled()) {
+    logFetchSuccess("panic-index-history", {
+      rows: json.rows.length,
+      cycleRows: Array.isArray(json.cycleRows) ? json.cycleRows.length : 0,
+    })
+  }
+  if (options.withCycle) {
+    return {
+      rows: json.rows,
+      cycleRows: Array.isArray(json.cycleRows) ? json.cycleRows : [],
+    }
+  }
   return json.rows
 }
 

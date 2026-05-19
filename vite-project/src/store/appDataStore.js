@@ -44,6 +44,8 @@ export const useAppDataStore = create((set, get) => ({
   sectorHeatLoading: false,
 
   cycleMetricHistory: [],
+  /** Supabase market_cycle_history (일별 사이클·점수) */
+  marketCycleHistory: [],
   /** @type {CycleHistorySource} */
   cycleHistorySource: "none",
   cycleHistoryUpdatedAt: null,
@@ -261,9 +263,13 @@ export const useAppDataStore = create((set, get) => ({
 
     if (hubOn) {
       try {
-        const hubRows = await fetchPanicIndexHistory({ limit })
+        const bundle = await fetchPanicIndexHistory({ limit, withCycle: true })
+        const hubRows = bundle.rows ?? []
         const fromHub = historyRowsToCycleRows(hubRows)
         replacePanicIndexHistory(hubRows)
+        if (bundle.cycleRows?.length) {
+          set({ marketCycleHistory: bundle.cycleRows })
+        }
 
         if (fromHub.length < 1) {
           set({

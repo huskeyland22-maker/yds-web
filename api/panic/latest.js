@@ -1,5 +1,9 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
 import {
+  fetchLatestPanicMetricsRow,
+  panicObjectFromLatestRow,
+} from "../_lib/latestPanicMetrics.js"
+import {
   fetchPanicMetricsRows,
   panicObjectFromRows,
   probePanicMetricsNumericInsert,
@@ -28,8 +32,11 @@ export default async function handler(req, res) {
       res.status(200).json({ ok: true, probe })
       return
     }
+    const latestRow = await fetchLatestPanicMetricsRow().catch(() => null)
     const rows = await fetchPanicMetricsRows()
-    const data = panicObjectFromRows(rows)
+    const fromLatest = panicObjectFromLatestRow(latestRow)
+    const fromEav = rows?.length ? panicObjectFromRows(rows) : null
+    const data = fromLatest ?? fromEav
     const meta = computePanicServeMeta(rows, data)
     const rowCount = Array.isArray(rows) ? rows.length : 0
     res.status(200).json({
