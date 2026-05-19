@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { getKoreaSectorById } from "../../data/koreaGrowthSectorMap.js"
+import { usePanicStore } from "../../store/panicStore.js"
+import { getFinalScore } from "../../utils/tradingScores.js"
 import {
   buildAllSectorSignalCounts,
   buildSectorSignalGroups,
+  buildStockSignalRow,
   SIGNAL_STATUS_META,
 } from "../../utils/koreaIndustrySignal.js"
+import { rowFromApiStockSignal } from "../../utils/stockSignalEngine.js"
+import { fetchStockSignalsBatch } from "../../utils/stockSignalApi.js"
 
 const LIST_FADE = { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
 
@@ -79,6 +84,14 @@ export default function KoreaIndustrySignalBoard({
 }) {
   const [expandedCode, setExpandedCode] = useState(null)
   const [openGroups, setOpenGroups] = useState(() => new Set())
+  const [liveByCode, setLiveByCode] = useState({})
+  const [liveLoading, setLiveLoading] = useState(false)
+
+  const panicData = usePanicStore((s) => s.panicData)
+  const panicIndex = useMemo(
+    () => (panicData ? getFinalScore(panicData) : null),
+    [panicData],
+  )
 
   const sector = useMemo(() => getKoreaSectorById(selectedId), [selectedId])
   const sectorHeat = heatById[selectedId] || sector?.heat
@@ -101,13 +114,68 @@ export default function KoreaIndustrySignalBoard({
     }
   }, [sector, sectorHeat])
 
-  const rowCount = useMemo(() => groups.reduce((n, g) => n + g.rows.length, 0), [groups])
+  const enrichedGroups = useMemo(() => {
+    return groups.map((group) => ({
+      ...group,
+      rows: group.rows.map((row) => {
+        const live = liveByCode[row.code]
+        if (!live) return row
+        return buildStockSignalRow(
+          { name: row.name, code: row.code, tip: row.tip },
+          {
+            sectorName: sector?.name ?? "",
+            sectorHeat,
+            subLabel: group.label,
+            live,
+          },
+        )
+      }),
+    }))
+  }, [groups, liveByCode, sector?.name, sectorHeat])
+
+  const rowCount = useMemo(
+    () => enrichedGroups.reduce((n, g) => n + g.rows.length, 0),
+    [enrichedGroups],
+  )
 
   useEffect(() => {
     setExpandedCode(null)
     if (groups[0]?.id) setOpenGroups(new Set([groups[0].id]))
     else setOpenGroups(new Set())
   }, [selectedId, groups])
+
+  useEffect(() => {
+    const codes = groups.flatMap((g) => g.rows.map((r) => r.code)).filter(Boolean)
+    if (!codes.length) {
+      setLiveByCode({})
+      return undefined
+    }
+
+    let cancelled = false
+    setLiveLoading(true)
+
+    void fetchStockSignalsBatch(codes, { panicIndex })
+      .then(({ results }) => {
+        if (cancelled) return
+        /** @type {Record<string, object>} */
+        const mapped = {}
+        for (const [code, payload] of Object.entries(results ?? {})) {
+          const row = rowFromApiStockSignal(payload?.stockSignal)
+          if (row) mapped[code] = row
+        }
+        setLiveByCode(mapped)
+      })
+      .catch(() => {
+        if (!cancelled) setLiveByCode({})
+      })
+      .finally(() => {
+        if (!cancelled) setLiveLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedId, groups, panicIndex])
 
   const toggleGroup = (groupId) => {
     setOpenGroups((prev) => {
@@ -125,6 +193,7 @@ export default function KoreaIndustrySignalBoard({
         <h2 className="korea-signal-board__title">핵심 종목</h2>
         <p className="korea-signal-board__sub">
           {sector?.name ?? "산업 선택"} · {rowCount}종목
+          {liveLoading ? " · 실시간 계산 중" : liveByCode && Object.keys(liveByCode).length ? " · 실시간" : ""}
         </p>
       </header>
 
@@ -157,11 +226,11 @@ export default function KoreaIndustrySignalBoard({
           exit={{ opacity: 0, y: -4 }}
           transition={LIST_FADE}
         >
-          {groups.length === 0 ? (
+          {enrichedGroups.length === 0 ? (
             <p className="korea-signal-empty m-0">선택한 산업의 종목 데이터가 없습니다.</p>
           ) : (
             <div className="korea-signal-accordion">
-              {groups.map((group) => {
+              {enrichedGroups.map((group) => {
                 const open = openGroups.has(group.id)
                 return (
                   <div key={group.id} className={["korea-signal-accordion__item", open ? "is-open" : ""].join(" ")}>

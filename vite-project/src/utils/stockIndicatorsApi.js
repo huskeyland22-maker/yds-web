@@ -26,7 +26,13 @@ function logClientError(event, payload, err) {
  * @param {{ code: string; name?: string; signal?: AbortSignal }} opts
  * @returns {Promise<object>}
  */
-export async function fetchStockIndicators({ code, name, signal: userSignal } = {}) {
+export async function fetchStockIndicators({
+  code,
+  name,
+  signal: userSignal,
+  sectorScore,
+  panicIndex,
+} = {}) {
   if (!code) {
     const err = new Error("missing code")
     err.stockError = stockFetchErrorFromException(err)
@@ -37,6 +43,12 @@ export async function fetchStockIndicators({ code, name, signal: userSignal } = 
   const qs = new URLSearchParams()
   qs.set("code", normalizedCode)
   if (name) qs.set("name", String(name))
+  if (sectorScore != null && Number.isFinite(Number(sectorScore))) {
+    qs.set("sectorScore", String(sectorScore))
+  }
+  if (panicIndex != null && Number.isFinite(Number(panicIndex))) {
+    qs.set("panicIndex", String(panicIndex))
+  }
 
   const apiUrl = withNoStoreQuery(`${STOCK_API_PATH}?${qs.toString()}`)
   logClient("request start (API route only, not KIS direct)", {

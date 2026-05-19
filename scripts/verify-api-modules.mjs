@@ -18,6 +18,9 @@ const modules = [
   "api/_lib/kisTokenManager.js",
   "api/_lib/kisClient.js",
   "api/_lib/chartSessionMeta.js",
+  "api/_lib/stockSignalEngine.js",
+  "api/_lib/stockSignalFromBars.js",
+  "api/_lib/stockSignalHistory.js",
   "api/stock-indicators.js",
   "api/stock.js",
 ]

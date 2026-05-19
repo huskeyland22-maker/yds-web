@@ -13,6 +13,12 @@ import { buildStockPriceSummary } from "./_lib/stockPriceSummary.js"
 import { classifyStockInput } from "./_lib/stockMarketKind.js"
 import { logKisError, logKisRequestStart } from "./_lib/kisDebugLog.js"
 import { toErrorMessage } from "./_lib/toErrorMessage.js"
+import { buildStockSignalBundle } from "./_lib/stockSignalFromBars.js"
+import {
+  fetchLatestPanicIndex,
+  fetchStockSignalHistory,
+  upsertStockSignalHistory,
+} from "./_lib/stockSignalHistory.js"
 
 /**
  * GET /api/stock-indicators?code=005930&name=삼성전자
@@ -361,11 +367,14 @@ function buildPayload({
   yahooMeta,
   domesticClose,
   kisLiveQuote,
+  sectorScore,
+  panicIndex,
 }) {
   const closes = rows.map((r) => r.close)
   const volumes = rows.map((r) => r.volume)
   const rsi14 = rsiWilder14(closes)
   const volPct = volumeChangePct(volumes)
+  const ma10 = smaLast(closes, 10)
   const ma20 = smaLast(closes, 20)
   const ma60 = smaLast(closes, 60)
   const macd = macdBundle(closes)
@@ -396,6 +405,14 @@ function buildPayload({
   const lastChartBar = chartBars[chartBars.length - 1]
   const displayPrice = priceSummary.todayClose ?? priceSummary.headlinePrice ?? lastClose
 
+  const stockSignal = buildStockSignalBundle({
+    rows,
+    price: displayPrice,
+    rsi14,
+    sectorScore: sectorScore ?? null,
+    panicIndex: panicIndex ?? null,
+  })
+
   return {
     symbol: code,
     name: displayName,
@@ -418,7 +435,9 @@ function buildPayload({
         macd.macdLine != null && macd.signalLine != null && macd.macdLine > macd.signalLine ? "bullish" : "bearish",
       label: macdText,
     },
+    stockSignal,
     movingAverage: {
+      ma10,
       ma20,
       ma60,
       trend: ma20 != null && ma60 != null && ma20 > ma60 ? "bullish" : ma20 != null && ma60 != null && ma20 < ma60 ? "bearish" : "mixed",
@@ -462,7 +481,7 @@ async function fetchYahooChart(ticker) {
   return { rows, lastPrice, meta, ticker }
 }
 
-async function fetchKisDomesticPayload({ code, name }) {
+async function fetchKisDomesticPayload({ code, name, sectorScore, panicIndex }) {
   const normalized = normalizeDomesticStockCode(code)
   if (!normalized) throw new Error("유효하지 않은 국내 종목코드")
 
@@ -525,6 +544,8 @@ async function fetchKisDomesticPayload({ code, name }) {
     yahooMeta: undefined,
     domesticClose,
     kisLiveQuote,
+    sectorScore,
+    panicIndex,
   })
 }
 
@@ -553,21 +574,106 @@ function readName(req) {
   }
 }
 
+function readNumQuery(req, key) {
+  const raw = req.query?.[key]
+  const n = Number(raw)
+  return Number.isFinite(n) ? n : null
+}
+
+function readCodesQuery(req) {
+  const raw = typeof req.query?.codes === "string" ? req.query.codes : ""
+  return raw
+    .split(/[,;\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 16)
+}
+
+async function persistPayloadSignal(payload) {
+  if (!payload?.symbol || !payload?.stockSignal?.signal) return
+  try {
+    await upsertStockSignalHistory({
+      ticker: payload.symbol,
+      price: payload.stockSignal.price ?? payload.price,
+      ma10: payload.stockSignal.ma10,
+      ma20: payload.stockSignal.ma20,
+      rsi: payload.stockSignal.rsi14,
+      position_52w: payload.stockSignal.position52w,
+      volume_change_pct: payload.stockSignal.volumeChangePct,
+      sector_score: payload.stockSignal.sectorScore,
+      panic_index: payload.stockSignal.panicIndex,
+      signal: payload.stockSignal.signal,
+    })
+  } catch (e) {
+    console.warn("[stock-signal] persist failed", payload.symbol, e?.message || e)
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET")
     return res.status(405).json({ error: "method not allowed" })
   }
 
-  const classified = classifyStockInput(readSymbol(req))
+  const symbolRaw = readSymbol(req)
+  const classified = classifyStockInput(symbolRaw)
+  const name = readName(req)
+  const sectorScore = readNumQuery(req, "sectorScore")
+  const panicIndexQuery = readNumQuery(req, "panicIndex")
+  const panicIndex = panicIndexQuery ?? (await fetchLatestPanicIndex())
+
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+
+  if (req.query?.signalHistory === "1") {
+    const ticker = symbolRaw
+    if (!ticker) return res.status(400).json({ error: "missing code" })
+    try {
+      const days = readNumQuery(req, "days") ?? 30
+      const rows = await fetchStockSignalHistory(ticker, { days })
+      return res.status(200).json({ ok: true, ticker, rows })
+    } catch (e) {
+      return res.status(502).json({ error: "signal_history_failed", message: toErrorMessage(e?.message) })
+    }
+  }
+
+  if (req.query?.batch === "1") {
+    const codes = readCodesQuery(req)
+    if (!codes.length) return res.status(400).json({ error: "missing codes" })
+    const results = {}
+    const errors = {}
+    await Promise.all(
+      codes.map(async (rawCode) => {
+        const c = classifyStockInput(rawCode)
+        if (c.kind !== "domestic_krx" || !c.code) {
+          errors[rawCode] = "invalid_domestic_code"
+          return
+        }
+        try {
+          const payload = await fetchKisDomesticPayload({
+            code: c.code,
+            name: "",
+            sectorScore,
+            panicIndex,
+          })
+          await persistPayloadSignal(payload)
+          results[c.code] = {
+            stockSignal: payload.stockSignal,
+            price: payload.price,
+            rsi14: payload.rsi14,
+          }
+        } catch (e) {
+          errors[c.code] = toErrorMessage(e?.message, "fetch_failed")
+        }
+      }),
+    )
+    return res.status(200).json({ ok: true, results, errors, panicIndex })
+  }
+
   if (classified.kind === "invalid" || !classified.code) {
     return res.status(400).json({ error: "missing or invalid code" })
   }
 
   const code = classified.code
-  const name = readName(req)
-
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 
   if (classified.kind === "domestic_krx") {
     logKisRequestStart({
@@ -578,8 +684,14 @@ export default async function handler(req, res) {
       kisEnv: getKisEnvStatus(),
     })
     try {
-      const payload = await fetchKisDomesticPayload({ code, name })
-      console.log("[KIS] request success", { symbol: code, barsUsed: payload.barsUsed, dataSource: payload.dataSource })
+      const payload = await fetchKisDomesticPayload({ code, name, sectorScore, panicIndex })
+      await persistPayloadSignal(payload)
+      console.log("[KIS] request success", {
+        symbol: code,
+        barsUsed: payload.barsUsed,
+        dataSource: payload.dataSource,
+        signal: payload.stockSignal?.signal,
+      })
       return res.status(200).json(payload)
     } catch (e) {
       const notConfigured = e?.code === "kis_not_configured"
@@ -607,7 +719,10 @@ export default async function handler(req, res) {
       asOfIso,
       metaName: meta.shortName || meta.longName || "",
       yahooMeta: meta,
+      sectorScore,
+      panicIndex,
     })
+    await persistPayloadSignal(payload)
     return res.status(200).json(payload)
   } catch (e) {
     return res.status(502).json({

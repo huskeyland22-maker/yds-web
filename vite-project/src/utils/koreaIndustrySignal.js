@@ -75,9 +75,25 @@ export function collectSectorStocks(sector) {
 
 /**
  * @param {KoreaStockRef} stock
- * @param {{ sectorName: string; sectorHeat?: string; subLabel?: string }} ctx
+ * @param {{ sectorName: string; sectorHeat?: string; subLabel?: string; live?: object }} ctx
  */
 export function buildStockSignalRow(stock, ctx) {
+  if (ctx.live?.statusId) {
+    const statusId = ctx.live.statusId
+    const meta = SIGNAL_STATUS_META[statusId] ?? SIGNAL_STATUS_META.watch
+    return {
+      ...stock,
+      sectorName: ctx.subLabel ? `${ctx.sectorName} · ${ctx.subLabel}` : ctx.sectorName,
+      statusId,
+      status: ctx.live.status ?? meta.status,
+      badge: ctx.live.badge ?? meta.badge,
+      shortBadge: ctx.live.shortBadge ?? meta.shortBadge,
+      marketTemp: ctx.live.marketTemp ?? deriveMarketTemp(stock.code, ctx.sectorHeat),
+      aux: ctx.live.aux ?? deriveAuxSignals(stock.code),
+      signalLive: true,
+    }
+  }
+
   const statusId = deriveSignalStatus(stock.code)
   const meta = SIGNAL_STATUS_META[statusId]
   return {
@@ -89,6 +105,7 @@ export function buildStockSignalRow(stock, ctx) {
     shortBadge: meta.shortBadge,
     marketTemp: deriveMarketTemp(stock.code, ctx.sectorHeat),
     aux: deriveAuxSignals(stock.code),
+    signalLive: false,
   }
 }
 

@@ -336,6 +336,17 @@ export default function ValueChainStockPanel({ stock, sectorName, onClose }) {
                       <p className="m-0 mt-1 text-sm leading-snug text-slate-200">{panel.volumeLine}</p>
                     )}
                   </li>
+                  {snap.stockSignal?.signalLabel ? (
+                    <li>
+                      <p className="m-0 text-[11px] font-medium text-cyan-200/90">실시간 시그널</p>
+                      <p className="m-0 mt-1 text-sm font-semibold leading-snug text-emerald-100">
+                        {snap.stockSignal.signalLabel}
+                        {snap.stockSignal.position52w != null
+                          ? ` · 52주 ${Math.round(snap.stockSignal.position52w)}%`
+                          : ""}
+                      </p>
+                    </li>
+                  ) : null}
                   <li>
                     <p className="m-0 text-[11px] font-medium text-cyan-200/90">RSI</p>
                     <p className="m-0 mt-1 text-sm leading-snug text-slate-200">{panel.rsiLine}</p>
