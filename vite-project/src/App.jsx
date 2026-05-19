@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Calendar, ChevronDown, LogIn } from "lucide-react"
-import { Navigate, NavLink, Route, Routes } from "react-router-dom"
+import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
@@ -417,6 +417,7 @@ function buildFinderCandidates(memos, marketStateKey) {
 }
 
 function App() {
+  const location = useLocation()
   const panicData = usePanicStore((s) => s.panicData)
   const panicDataStale = usePanicStore((s) => s.panicDataStale)
   const manualMode = usePanicStore((s) => s.manualMode)
@@ -946,6 +947,22 @@ function App() {
     }
   }, [inputPanelVisible])
 
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined
+    const path = location.pathname
+    const scrollDoc =
+      path === "/cycle" ||
+      path === "/trading-log" ||
+      path.startsWith("/value-chain") ||
+      path === "/timing"
+    document.body.classList.toggle("scroll-doc-route", scrollDoc)
+    document.documentElement.classList.toggle("scroll-doc-route", scrollDoc)
+    return () => {
+      document.body.classList.remove("scroll-doc-route")
+      document.documentElement.classList.remove("scroll-doc-route")
+    }
+  }, [location.pathname])
+
 
   const login = async () => {
     if (!hasFirebaseConfig()) {
@@ -1174,7 +1191,7 @@ function App() {
   return (
     <div
       className={[
-        "flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
+        "app-shell-host flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden overflow-y-visible bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
@@ -1272,7 +1289,7 @@ function App() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="app-column-host flex min-w-0 flex-1 flex-col overflow-visible">
         <MobileAppHeader
           onMenuOpen={() => setMobileDrawerOpen(true)}
           user={user}
@@ -1341,13 +1358,13 @@ function App() {
           </div>
         ) : null}
 
-        <main className="flex-1 overflow-y-auto overscroll-y-contain px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
+        <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route
               path="/cycle"
               element={
-                <div id="desk" className="min-w-0">
+                <div id="desk" className="market-cycle-page min-w-0">
                   <SectionErrorBoundary label="패닉 데스크">
                     <PanicDeskDashboard
                       panicData={deskPanicData}

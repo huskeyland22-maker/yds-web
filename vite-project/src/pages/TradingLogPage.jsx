@@ -221,7 +221,7 @@ export default function TradingLogPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
+    <div className="trading-log-page mx-auto max-w-6xl space-y-5">
       <header className="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-[#0c1222] via-[#0b0f18] to-[#12102a] px-4 py-5 sm:px-6">
         <p className="m-0 font-mono text-[9px] font-semibold uppercase tracking-[0.22em] text-violet-300/80">
           Trading desk · log

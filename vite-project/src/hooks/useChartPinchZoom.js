@@ -39,8 +39,10 @@ export function useChartPinchZoom(dataLength, opts = {}) {
 
   const onWheel = useCallback(
     (e) => {
+      // Ctrl/Cmd+휠만 차트 줌 — 일반 휠은 페이지 스크롤
       if (!e.ctrlKey && !e.metaKey) return
       e.preventDefault()
+      e.stopPropagation()
       const delta = e.deltaY > 0 ? 1.12 : 0.88
       applyWindow(windowSize * delta)
     },
@@ -57,6 +59,7 @@ export function useChartPinchZoom(dataLength, opts = {}) {
 
   const onTouchMove = useCallback(
     (e) => {
+      // 2손가락 핀치만 처리 — 1손가락 세로 스와이프는 문서 스크롤
       if (e.touches.length !== 2) return
       const [a, b] = [e.touches[0], e.touches[1]]
       const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)

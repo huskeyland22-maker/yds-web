@@ -129,7 +129,7 @@ export default function PanicHistoryLabChart({
   return (
     <div className="panic-history-lab-chart">
       <div
-        className="overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x"
+        className="panic-chart-scroll-x overflow-x-auto overflow-y-hidden"
         style={{ WebkitOverflowScrolling: "touch" }}
         onWheel={zoom.onWheel}
         onTouchStart={zoom.onTouchStart}

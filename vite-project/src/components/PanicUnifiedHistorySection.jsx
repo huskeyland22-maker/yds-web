@@ -153,7 +153,7 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
   }
 
   return (
-    <section className="trading-card-shell panic-v2-section mt-3 overflow-hidden px-2 py-2 sm:px-2.5 sm:py-2.5">
+    <section className="trading-card-shell panic-v2-section mt-3 overflow-visible px-2 py-2 sm:px-2.5 sm:py-2.5">
       <div className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-cyan-400/45 pl-2">
         <div>
           <p className="m-0 text-[11px] font-bold text-slate-100">패닉 히스토리</p>
