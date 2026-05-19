@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { BUILD_ID, VERSION_LABEL } from "../../constants/build.js"
+import { isDevMode } from "../../utils/devMode.js"
 import {
   fetchLatestBuildMeta,
   forcePwaCacheClear,
@@ -84,6 +85,8 @@ export default function PwaDeveloperPanel() {
 
   const localBuild = getLocalBuildId() || BUILD_ID
   const htmlBuild = readHtmlBuildId() || "(none)"
+
+  if (!isDevMode()) return null
 
   return (
     <div className="mt-2 border-t border-white/[0.06] pt-2">

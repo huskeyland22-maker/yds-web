@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { isPanicHubEnabled } from "../../config/api.js"
+import { isDevMode } from "../../utils/devMode.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../../config/liveDataFetch.js"
 
 function CheckRow({ label, ok, detail }) {
@@ -47,6 +48,8 @@ export default function PanicHistoryVerifyPanel() {
   }, [open, report, busy, error, runVerify])
 
   const c = report?.checks ?? {}
+
+  if (!isDevMode()) return null
 
   return (
     <div className="mt-2 border-t border-white/[0.06] pt-2">

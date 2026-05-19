@@ -1433,9 +1433,13 @@ function App() {
             <Route
               path="/debug-data"
               element={
-                <SectionErrorBoundary label="Supabase 디버그">
-                  <DebugDataPage />
-                </SectionErrorBoundary>
+                isDevMode() ? (
+                  <SectionErrorBoundary label="Supabase 디버그">
+                    <DebugDataPage />
+                  </SectionErrorBoundary>
+                ) : (
+                  <Navigate to="/cycle" replace />
+                )
               }
             />
             <Route path="*" element={<Navigate to="/cycle" replace />} />
@@ -1673,7 +1677,7 @@ function App() {
         onOpenInput={openInputPanel}
         buildVersion={isDevMode() ? buildVersion : null}
       />
-      <MobileShellDebugOverlay />
+      {isDevMode() ? <MobileShellDebugOverlay /> : null}
       {isDevMode() ? (
         <>
           <PanicSyncDebugPanel />

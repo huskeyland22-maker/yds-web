@@ -57,16 +57,18 @@ export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion 
           AI 지표 입력
         </button>
         {isDevMode() ? (
-          <Link
-            to="/debug-data"
-            onClick={onClose}
-            className="rounded-md px-3 py-2 text-[11px] text-amber-400/90"
-          >
-            Supabase 디버그
-          </Link>
+          <>
+            <Link
+              to="/debug-data"
+              onClick={onClose}
+              className="rounded-md px-3 py-2 text-[11px] text-amber-400/90"
+            >
+              Supabase 디버그
+            </Link>
+            <PwaDeveloperPanel />
+            <PanicHistoryVerifyPanel />
+          </>
         ) : null}
-        <PwaDeveloperPanel />
-        <PanicHistoryVerifyPanel />
       </nav>
       {buildVersion ? (
         <p className="m-0 border-t border-white/[0.06] px-3 py-2 font-mono text-[9px] text-slate-600">{buildVersion}</p>
