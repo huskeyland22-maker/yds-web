@@ -10,7 +10,23 @@ export const PANIC_HISTORY_LS_KEY = "panic_history"
 export const CYCLE_HISTORY_LS_KEY = "cycle_history"
 const MAX_ROWS = 500
 
-/** @typedef {{ date: string, vix?: number | null, fearGreed?: number | null, putCall?: number | null, move?: number | null, bofa?: number | null, skew?: number | null, hyOas?: number | null, gsSentiment?: number | null, panicIndex?: number | null }} PanicHistoryRow */
+/** @typedef {{ date: string, vix?: number | null, fearGreed?: number | null, putCall?: number | null, move?: number | null, bofa?: number | null, skew?: number | null, highYield?: number | null, hyOas?: number | null, gsBullBear?: number | null, gsSentiment?: number | null, panicIndex?: number | null }} PanicHistoryRow */
+
+const SEED_METRIC_CHECK_KEYS = ["fearGreed", "bofa", "putCall", "highYield", "move", "skew", "gsBullBear"]
+
+function rowHasSeedMetrics(row) {
+  if (!row) return false
+  return SEED_METRIC_CHECK_KEYS.every((k) => {
+    const v = k === "highYield" ? (row.highYield ?? row.hyOas) : k === "gsBullBear" ? (row.gsBullBear ?? row.gsSentiment) : row[k]
+    return v != null && Number.isFinite(Number(v))
+  })
+}
+
+function storedNeedsSeedUpgrade(stored) {
+  if (!Array.isArray(stored) || stored.length < PANIC_HISTORY_SEED_MIN_DAYS) return true
+  const fullRows = stored.filter(rowHasSeedMetrics).length
+  return fullRows < PANIC_HISTORY_SEED_MIN_DAYS
+}
 
 function toNum(v) {
   if (v == null || v === "") return null
@@ -66,10 +82,10 @@ export function loadStoredPanicHistory() {
     return seededHistory
   }
 
-  if (stored.length < PANIC_HISTORY_SEED_MIN_DAYS) {
+  if (storedNeedsSeedUpgrade(stored)) {
     const seededHistory = mergePanicHistoryRowsByDate(stored, PANIC_HISTORY_SEED)
     window.localStorage.setItem(PANIC_HISTORY_LS_KEY, JSON.stringify(seededHistory))
-    console.log("seed save", seededHistory.length, "(merged with PANIC_HISTORY_SEED)")
+    console.log("seed save", seededHistory.length, "(merged full metrics PANIC_HISTORY_SEED)")
     return seededHistory
   }
 
@@ -85,6 +101,8 @@ export function buildPanicHistoryRow(panicData, tradeDate) {
       : null) ?? calendarKeyFromPanic(panicData)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
 
+  const highYield = toNum(panicData.highYield ?? panicData.hyOas ?? panicData.hy_oas)
+  const gsBullBear = toNum(panicData.gsBullBear ?? panicData.gsSentiment ?? panicData.gs_sentiment)
   return {
     date,
     vix: toNum(panicData.vix),
@@ -93,8 +111,10 @@ export function buildPanicHistoryRow(panicData, tradeDate) {
     move: toNum(panicData.move),
     bofa: toNum(panicData.bofa),
     skew: toNum(panicData.skew),
-    hyOas: toNum(panicData.highYield ?? panicData.hyOas ?? panicData.hy_oas),
-    gsSentiment: toNum(panicData.gsBullBear ?? panicData.gsSentiment ?? panicData.gs_sentiment),
+    highYield,
+    hyOas: highYield,
+    gsBullBear,
+    gsSentiment: gsBullBear,
     panicIndex: toNum(
       panicData.panicIndex ?? panicData.panicScore ?? panicData.panic_score ?? panicData.finalScore,
     ),
@@ -183,8 +203,10 @@ export function persistHistory(panicData, tradeDate, opts = {}) {
 export function panicHistoryLocalToCycleRows(rows) {
   if (!Array.isArray(rows) || !rows.length) return []
   return rows
-    .map((r) =>
-      panicIndexRowToCycleChart({
+    .map((r) => {
+      const highYield = r.highYield ?? r.hyOas
+      const gsBullBear = r.gsBullBear ?? r.gsSentiment
+      return panicIndexRowToCycleChart({
         date: r.date,
         vix: r.vix,
         fearGreed: r.fearGreed,
@@ -194,12 +216,16 @@ export function panicHistoryLocalToCycleRows(rows) {
         move: r.move,
         bofa: r.bofa,
         skew: r.skew,
-        hyOas: r.hyOas,
-        hy_oas: r.hyOas,
-        gsSentiment: r.gsSentiment,
-        gs_sentiment: r.gsSentiment,
-      }),
-    )
+        highYield,
+        high_yield: highYield,
+        hyOas: highYield,
+        hy_oas: highYield,
+        gsBullBear,
+        gs_sentiment: gsBullBear,
+        gsSentiment: gsBullBear,
+        panicScore: r.panicIndex ?? r.panic_score,
+      })
+    })
     .filter(Boolean)
 }
 

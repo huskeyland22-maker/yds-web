@@ -15,6 +15,7 @@ import {
 } from "../utils/panicHistoryFetchDebug.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import {
+  countHistoryMetricPoints,
   resolveCycleHistoryRows,
   resolveDefaultHistoryMetric,
 } from "../utils/panicHistoryRows.js"
@@ -56,6 +57,14 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   )
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
+
+  const metricCounts = useMemo(() => {
+    const counts = {}
+    for (const m of HISTORY_SECTION_METRICS) {
+      counts[m.key] = countHistoryMetricPoints(history, m.key)
+    }
+    return counts
+  }, [history])
 
   useEffect(() => {
     logHistoryFetchDebug(history, metricKey, rangeId)
@@ -103,22 +112,26 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       </div>
 
       <div className="mt-1.5 flex flex-wrap gap-0.5">
-        {HISTORY_SECTION_METRICS.map((m) => (
-          <button
-            key={m.key}
-            type="button"
-            onClick={() => setMetricKey(m.key)}
-            className={[
-              "rounded px-1.5 py-0.5 text-[9px] font-semibold transition sm:text-[10px]",
-              metricKey === m.key
-                ? "bg-white/12 text-slate-100 ring-1 ring-white/15"
-                : "text-slate-500 hover:text-slate-300",
-            ].join(" ")}
-            style={metricKey === m.key ? { boxShadow: `0 0 8px ${m.accent}22` } : undefined}
-          >
-            {m.label}
-          </button>
-        ))}
+        {HISTORY_SECTION_METRICS.map((m) => {
+          const n = metricCounts[m.key] ?? 0
+          return (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setMetricKey(m.key)}
+              className={[
+                "rounded px-1.5 py-0.5 text-[9px] font-semibold transition sm:text-[10px]",
+                metricKey === m.key
+                  ? "bg-white/12 text-slate-100 ring-1 ring-white/15"
+                  : "text-slate-500 hover:text-slate-300",
+              ].join(" ")}
+              style={metricKey === m.key ? { boxShadow: `0 0 8px ${m.accent}22` } : undefined}
+              title={`${m.label} 데이터 ${n}일`}
+            >
+              {m.label} ({n})
+            </button>
+          )
+        })}
       </div>
 
       <div className="mt-1 flex flex-wrap gap-0.5">

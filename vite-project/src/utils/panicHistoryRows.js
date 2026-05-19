@@ -45,6 +45,15 @@ function rowValue(row, key) {
   return Number(row[key])
 }
 
+/** @param {object[]} history @param {string} metricKey */
+export function countHistoryMetricPoints(history, metricKey) {
+  if (!Array.isArray(history) || !metricKey) return 0
+  return history.filter((r) => {
+    const v = rowValue(r, metricKey)
+    return v != null && Number.isFinite(v)
+  }).length
+}
+
 /** @param {object[]} rows */
 export function historyHasAnyMetric(rows) {
   if (!Array.isArray(rows) || !rows.length) return false
