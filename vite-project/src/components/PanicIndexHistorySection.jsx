@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
 import {
@@ -14,11 +14,8 @@ import {
   probePanicIndexHistoryDirect,
 } from "../utils/panicHistoryFetchDebug.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
-import {
-  countHistoryMetricPoints,
-  resolveCycleHistoryRows,
-  resolveDefaultHistoryMetric,
-} from "../utils/panicHistoryRows.js"
+import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
+import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
 const HISTORY_CHART_HEIGHT = 240
@@ -42,18 +39,23 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return merged
   }, [rowsProp, storeRows])
 
-  const [metricKey, setMetricKey] = useState("vix")
+  const [activeHistoryTab, setActiveHistoryTab] = useState("vix")
   const [rangeId, setRangeId] = useState("6M")
+  const didInitMetricRef = useRef(false)
 
   useEffect(() => {
-    if (!history.length) return
-    const next = resolveDefaultHistoryMetric(history, "vix")
-    if (next !== metricKey) setMetricKey(next)
-  }, [history, metricKey])
+    if (!history.length || didInitMetricRef.current) return
+    didInitMetricRef.current = true
+  }, [history.length])
+
+  const metricKey = activeHistoryTab === "all" ? "vix" : activeHistoryTab
 
   const metric = useMemo(
-    () => HISTORY_SECTION_METRICS.find((m) => m.key === metricKey) ?? HISTORY_SECTION_METRICS[0],
-    [metricKey],
+    () =>
+      activeHistoryTab === "all"
+        ? { key: "all", label: "ALL", chartLabel: "ALL", accent: "#94a3b8" }
+        : (HISTORY_SECTION_METRICS.find((m) => m.key === activeHistoryTab) ?? HISTORY_SECTION_METRICS[0]),
+    [activeHistoryTab],
   )
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
@@ -66,26 +68,38 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return counts
   }, [history])
 
+  const chartPayload = useMemo(
+    () => buildHistoryChartPayload(slicedRows.length ? slicedRows : history, activeHistoryTab),
+    [slicedRows, history, activeHistoryTab],
+  )
+
   useEffect(() => {
-    logHistoryFetchDebug(history, metricKey, rangeId)
+    logHistoryFetchDebug(history, activeHistoryTab, rangeId)
     logHistoryMetricMapping(history)
+    console.log(activeHistoryTab, chartPayload.selectedField, chartPayload.chartData)
     console.log("[YDS] panic history resolved", {
       propsRows: rowsProp?.length ?? 0,
       storeRows: storeRows?.length ?? 0,
       historyLength: history.length,
       slicedLength: slicedRows.length,
-      selectedMetric: metricKey,
+      activeHistoryTab,
+      selectedField: chartPayload.selectedField,
       selectedRange: rangeId,
-      vixSample: history.map((r) => ({ date: r.date, vix: r.vix })),
     })
-  }, [history, slicedRows.length, metricKey, rangeId, rowsProp?.length, storeRows?.length])
+  }, [history, slicedRows.length, activeHistoryTab, rangeId, chartPayload, rowsProp?.length, storeRows?.length])
 
   const stats = useMemo(
-    () => computeHistoryMetricStats(slicedRows.length ? slicedRows : history, metricKey),
-    [slicedRows, history, metricKey],
+    () =>
+      activeHistoryTab === "all"
+        ? computeHistoryMetricStats(slicedRows.length ? slicedRows : history, "vix")
+        : computeHistoryMetricStats(slicedRows.length ? slicedRows : history, metricKey),
+    [slicedRows, history, metricKey, activeHistoryTab],
   )
 
-  const zoneLegend = useMemo(() => historyZoneLegendItems(metricKey), [metricKey])
+  const zoneLegend = useMemo(
+    () => (activeHistoryTab === "all" ? [] : historyZoneLegendItems(metricKey)),
+    [metricKey, activeHistoryTab],
+  )
 
   const chartSummary = useMemo(
     () => ({
@@ -98,8 +112,9 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   )
 
   const higherIsBad = HIGHER_IS_BAD[metricKey] ?? true
-  const chartRows = history
-  const showChart = history.length > 0
+  const showChart = chartPayload.chartData.length > 0
+
+  console.log("render history", history.length, "chart", chartPayload.chartData.length, activeHistoryTab)
 
   return (
     <section className="trading-card-shell panic-v2-section overflow-hidden px-2 py-2 sm:px-2.5">
@@ -112,20 +127,33 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       </div>
 
       <div className="mt-1.5 flex flex-wrap gap-0.5">
+        <button
+          type="button"
+          onClick={() => setActiveHistoryTab("all")}
+          className={[
+            "rounded px-1.5 py-0.5 text-[9px] font-semibold transition sm:text-[10px]",
+            activeHistoryTab === "all"
+              ? "bg-white/12 text-slate-100 ring-1 ring-white/15"
+              : "text-slate-500 hover:text-slate-300",
+          ].join(" ")}
+          title="8지표 동시 표시"
+        >
+          ALL ({history.length})
+        </button>
         {HISTORY_SECTION_METRICS.map((m) => {
           const n = metricCounts[m.key] ?? 0
           return (
             <button
               key={m.key}
               type="button"
-              onClick={() => setMetricKey(m.key)}
+              onClick={() => setActiveHistoryTab(m.key)}
               className={[
                 "rounded px-1.5 py-0.5 text-[9px] font-semibold transition sm:text-[10px]",
-                metricKey === m.key
+                activeHistoryTab === m.key
                   ? "bg-white/12 text-slate-100 ring-1 ring-white/15"
                   : "text-slate-500 hover:text-slate-300",
               ].join(" ")}
-              style={metricKey === m.key ? { boxShadow: `0 0 8px ${m.accent}22` } : undefined}
+              style={activeHistoryTab === m.key ? { boxShadow: `0 0 8px ${m.accent}22` } : undefined}
               title={`${m.label} 데이터 ${n}일`}
             >
               {m.label} ({n})
@@ -195,13 +223,16 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       <div className="mt-1.5 pb-1">
         {showChart ? (
           <PanicHistoryLineChart
-            rows={chartRows}
-            dataKey={metricKey}
+            key={`panic-hist-${activeHistoryTab}`}
+            rows={slicedRows.length ? slicedRows : history}
+            chartData={chartPayload.chartData}
+            dataKey={chartPayload.dataKey ?? metricKey}
             dataLabel={metric.chartLabel}
             stroke={metric.accent}
-            showZoneBands
+            showZoneBands={activeHistoryTab !== "all"}
             height={HISTORY_CHART_HEIGHT}
-            summary={chartSummary}
+            summary={activeHistoryTab === "all" ? null : chartSummary}
+            multiSeries={chartPayload.multiSeries}
           />
         ) : (
           <div
