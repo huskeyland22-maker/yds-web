@@ -37,9 +37,9 @@ function cashAllocationHint(regime) {
 /** @param {import("./panicMarketActionEngine.js").MarketRegime} regime @param {number | null} pc */
 function shortTermSubHint(regime, pc) {
   if (regime === "greed" || regime === "extreme_greed") {
-    if (pc != null && pc <= 0.55) return "과열 직전 · 추격주의"
-    if (regime === "extreme_greed") return "과열 구간 · 추격주의"
-    return "분할 접근 · 추격주의"
+    if (pc != null && pc <= 0.55) return "과열 직전 · 추격 주의"
+    if (regime === "extreme_greed") return "과열 구간 · 추격 주의"
+    return "분할 접근 · 추격 주의"
   }
   if (regime === "fear" || regime === "extreme_fear") return "변동성 대비 · 소액 분할"
   return "범위 매매 · 포지션 제한"
@@ -51,18 +51,18 @@ function optionsPsychology(pc, fg) {
     if (pc <= 0.55) {
       return {
         headline: "과열 경계",
-        detail: `P/C${formatMetricValue("putCall", pc)} · 낙관 우세`,
+        detail: `P/C ${formatMetricValue("putCall", pc)} · 낙관 우세`,
       }
     }
     if (pc >= 0.85) {
       return {
         headline: "헤지 쏠림",
-        detail: `P/C${formatMetricValue("putCall", pc)} · 방어 우세`,
+        detail: `P/C ${formatMetricValue("putCall", pc)} · 방어 우세`,
       }
     }
     return {
       headline: "중립권",
-      detail: `P/C${formatMetricValue("putCall", pc)} · 균형`,
+      detail: `P/C ${formatMetricValue("putCall", pc)} · 균형`,
     }
   }
   if (fg != null && fg >= 72) {
@@ -116,7 +116,11 @@ export function buildActionReportCards(report, panicData) {
         ? action.sectors.slice(0, 3).join("·")
         : "대형주·ETF 분산"
   const cashHint = cashAllocationHint(regime).replace(/\s/g, "")
-  const midDetail = joinDetail([sectorLine.replace(/\s*·\s*/g, " · "), cashHint])
+  const growthBias =
+    action?.sectors?.some((s) => /AI|성장|반도체/i.test(s)) || /AI|성장|반도체/i.test(sectorLine)
+      ? "AI 우세"
+      : sectorLine.split("·")[0]?.trim() || "섹터 분산"
+  const midDetail = joinDetail([growthBias, cashHint])
 
   const opt = optionsPsychology(pc, fg)
   const riskHead = opt.headline
@@ -127,7 +131,7 @@ export function buildActionReportCards(report, panicData) {
       id: "market",
       label: "AI 온도",
       emoji: "🔥",
-      headline: actionMode,
+      headline: fgIns?.statusLabel ?? regimeLabel ?? actionMode,
       detail: marketDetail || regimeLabel,
     },
     {
@@ -182,7 +186,7 @@ export function buildStrategyBrief(report, panicData) {
     parts.push(`${mid.headline} 우위`)
   }
 
-  if (risk?.headline) parts.push(`옵션심리 ${risk.headline.replace(/\.$/, "")}`)
+  if (risk?.headline) parts.push(`옵션 심리 ${risk.headline.replace(/\.$/, "")}`)
 
   const built = parts.filter(Boolean).join(" · ")
   if (built.length > 16) return built

@@ -113,11 +113,11 @@
   }
 
   .panic-desk-action__grid {
-    margin-top: 8px;
+    margin-top: 6px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 10px;
-    padding: 8px 10px;
+    gap: 6px 8px;
+    padding: 6px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(7, 10, 16, 0.92);
@@ -126,14 +126,14 @@
   @media (min-width: 640px) {
     .panic-desk-action__grid {
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 10px 12px;
-      padding: 10px 12px;
+      gap: 6px 10px;
+      padding: 6px;
     }
   }
 
   .panic-desk-action__field-label {
     margin: 0;
-    font-size: 8px;
+    font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -142,10 +142,10 @@
   }
 
   .panic-desk-action__field-value {
-    margin: 3px 0 0;
-    font-size: 9px;
+    margin: 2px 0 0;
+    font-size: 12px;
     font-weight: 600;
-    line-height: 1.35;
+    line-height: 1.3;
     color: rgba(226, 232, 240, 0.94);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -185,21 +185,18 @@
 
   .ai-brief {
     display: flex;
-    min-height: 40px;
+    height: 48px;
+    min-height: 48px;
+    max-height: 48px;
     flex-direction: column;
     justify-content: center;
-    margin: 0;
-    padding: 9px 12px;
+    margin: 0 0 8px;
+    padding: 6px 12px;
     border-radius: 10px;
-    border: 1px solid rgba(0, 220, 255, 0.16);
-    background: linear-gradient(90deg, rgba(0, 220, 255, 0.1), rgba(80, 120, 255, 0.05));
+    border: 1px solid rgba(0, 220, 255, 0.2);
+    background: linear-gradient(90deg, rgba(0, 220, 255, 0.12), rgba(80, 120, 255, 0.06));
+    box-shadow: 0 0 16px rgba(0, 220, 255, 0.1);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  @media (min-width: 640px) {
-    .ai-brief {
-      padding: 10px 14px;
-    }
   }
 
   .ai-brief__title {
@@ -231,13 +228,13 @@
     position: relative;
     isolation: isolate;
     display: flex;
-    height: 64px;
-    min-height: 64px;
-    max-height: 64px;
+    height: 72px;
+    min-height: 72px;
+    max-height: 72px;
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
-    padding: 8px 10px;
+    padding: 8px 12px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: linear-gradient(165deg, rgba(12, 16, 28, 0.98), rgba(8, 11, 20, 0.94));
@@ -249,15 +246,6 @@
       border-color 0.2s ease,
       background 0.2s ease;
     will-change: transform;
-  }
-
-  @media (min-width: 640px) {
-    .report-card {
-      height: 68px;
-      min-height: 68px;
-      max-height: 68px;
-      padding: 10px 12px;
-    }
   }
 
   .report-card::before {
@@ -382,17 +370,10 @@
 
   .report-card__headline {
     margin: 0;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     line-height: 1.05;
     letter-spacing: -0.02em;
-  }
-
-  @media (min-width: 640px) {
-    .report-card__headline {
-      font-size: 15px;
-      line-height: 1;
-    }
   }
 
   .report-card__detail {
