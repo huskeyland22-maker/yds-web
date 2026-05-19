@@ -60,6 +60,14 @@
   .trading-num {
     @apply font-mono tabular-nums tracking-tight;
   }
+
+  .panic-history-lab-chart {
+    touch-action: pan-x pinch-zoom;
+  }
+
+  .panic-history-lab-chart .recharts-wrapper {
+    min-width: 100%;
+  }
 }
 
 /* 터치: 컴팩트 네비는 40px, 주요 FAB 는 기존 유지 */
