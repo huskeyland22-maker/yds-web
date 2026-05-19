@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { isDevMode } from "../../utils/devMode.js"
+import PanicHistoryVerifyPanel from "../settings/PanicHistoryVerifyPanel.jsx"
 import PwaDeveloperPanel from "../settings/PwaDeveloperPanel.jsx"
 
 const LINKS = [
@@ -65,6 +66,7 @@ export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion 
           </Link>
         ) : null}
         <PwaDeveloperPanel />
+        <PanicHistoryVerifyPanel />
       </nav>
       {buildVersion ? (
         <p className="m-0 border-t border-white/[0.06] px-3 py-2 font-mono text-[9px] text-slate-600">{buildVersion}</p>

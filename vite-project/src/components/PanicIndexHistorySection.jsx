@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
+import { chartRangeStats, CHART_RANGES, sliceHistoryByRange } from "../utils/chartRange.js"
 import {
   computeHistoryMetricStats,
   HIGHER_IS_BAD,
@@ -73,21 +73,26 @@ export default function PanicIndexHistorySection({ rows = [] }) {
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-1">
-          {CHART_RANGES.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setRangeId(r.id)}
-              className={[
-                "rounded-md px-2 py-1 font-mono text-[10px] font-medium tabular-nums transition",
-                rangeId === r.id
-                  ? "bg-white/[0.12] text-slate-100"
-                  : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-300",
-              ].join(" ")}
-            >
-              {r.label}
-            </button>
-          ))}
+          {CHART_RANGES.map((r) => {
+            const st = chartRangeStats(rows, r.id, "desk")
+            return (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => setRangeId(r.id)}
+                className={[
+                  "rounded-md px-2 py-1 font-mono text-[10px] font-medium tabular-nums transition",
+                  rangeId === r.id
+                    ? "bg-white/[0.12] text-slate-100"
+                    : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-300",
+                ].join(" ")}
+                title={`실제 ${st.shown}일 / 전체 ${st.total}일`}
+              >
+                {r.label}
+                <span className="ml-0.5 text-[9px] opacity-75">({st.shown})</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 

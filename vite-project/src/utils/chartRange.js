@@ -47,3 +47,24 @@ export function sliceHistoryByRange(rows, rangeId) {
   if (sorted.length <= preset.days) return sorted
   return sorted.slice(-preset.days)
 }
+
+/**
+ * 차트 구간별 실제 포인트 수 (더미 패딩 없음)
+ * @param {object[]} rows
+ * @param {string} rangeId
+ * @param {"lab" | "desk"} [mode]
+ */
+export function chartRangeStats(rows, rangeId, mode = "lab") {
+  const total = Array.isArray(rows) ? rows.length : 0
+  const sliced =
+    mode === "desk" ? sliceHistoryByRange(rows, rangeId) : sliceHistoryByLabRange(rows, rangeId)
+  const presets = mode === "desk" ? CHART_RANGES : LAB_CHART_RANGES
+  const preset = presets.find((r) => r.id === rangeId)
+  return {
+    rangeId,
+    total,
+    shown: sliced.length,
+    presetDays: preset?.days ?? null,
+    isFullHistory: preset?.days == null,
+  }
+}

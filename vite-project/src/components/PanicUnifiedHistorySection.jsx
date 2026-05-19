@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
+import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
 import { HISTORY_SECTION_METRICS } from "../utils/panicDeskMetrics.js"
 import {
   buildPanicLabChartData,
@@ -94,6 +94,8 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(rows, rangeId), [rows, rangeId])
 
+  const rangeStats = useMemo(() => chartRangeStats(rows, rangeId, "lab"), [rows, rangeId])
+
   const labData = useMemo(() => {
     try {
       return buildPanicLabChartData(slicedRows)
@@ -157,7 +159,9 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
       <div className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-cyan-400/45 pl-2">
         <div>
           <p className="m-0 text-[11px] font-bold text-slate-100">패닉 히스토리</p>
-          <p className="m-0 text-[9px] text-slate-500">통합 · 1M–ALL · 단일 차트</p>
+          <p className="m-0 text-[9px] text-slate-500">
+            통합 · 1M–ALL · 실제 {rangeStats.shown}/{rangeStats.total}일
+          </p>
         </div>
         {isMobile ? (
           <button
@@ -213,19 +217,24 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
       ) : null}
 
       <div className="mt-1.5 flex flex-wrap gap-0.5">
-        {LAB_CHART_RANGES.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => setRangeId(r.id)}
-            className={[
-              "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
-              rangeId === r.id ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
-            ].join(" ")}
-          >
-            {r.label}
-          </button>
-        ))}
+        {LAB_CHART_RANGES.map((r) => {
+          const st = chartRangeStats(rows, r.id, "lab")
+          return (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => setRangeId(r.id)}
+              className={[
+                "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
+                rangeId === r.id ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
+              ].join(" ")}
+              title={`실제 ${st.shown}일 / 전체 ${st.total}일`}
+            >
+              {r.label}
+              <span className="ml-0.5 text-[8px] opacity-80">({st.shown})</span>
+            </button>
+          )
+        })}
       </div>
 
       <div className="mt-2 grid grid-cols-5 gap-1">
