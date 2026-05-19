@@ -33,7 +33,7 @@ export default function PanicMetricInsightPanel({
   }
 
   const rows = [
-    { label: "상태", value: brief.statusDisplay, tone: brief.tone },
+    { label: "현재 구간", value: brief.statusDisplay, tone: brief.tone },
     { label: "단기", value: brief.shortLine },
     { label: "중기", value: brief.midLine },
     { label: "리스크", value: brief.riskLine },

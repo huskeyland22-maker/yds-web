@@ -79,19 +79,44 @@
   .report-grid {
     display: grid;
     gap: 8px;
-    margin-top: 6px;
+    margin-top: 8px;
     align-items: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .report-strategy-brief {
-    margin: 0 0 6px;
-    padding: 6px 10px;
+  @media (min-width: 640px) {
+    .report-grid {
+      grid-template-columns: 1.3fr 1fr 1fr 0.8fr;
+    }
+  }
+
+  .ai-brief {
+    display: flex;
+    min-height: 40px;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+    padding: 10px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(0, 220, 255, 0.1);
-    background: linear-gradient(90deg, rgba(0, 220, 255, 0.06), rgba(88, 28, 135, 0.04));
+    border: 1px solid rgba(0, 220, 255, 0.15);
+    background: linear-gradient(90deg, rgba(0, 220, 255, 0.08), rgba(80, 120, 255, 0.04));
+  }
+
+  .ai-brief__title {
+    margin: 0 0 2px;
     font-size: 10px;
-    line-height: 1.45;
-    color: rgba(226, 232, 240, 0.88);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(103, 232, 249, 0.9);
+    line-height: 1.2;
+  }
+
+  .ai-brief__body {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(241, 245, 249, 0.95);
   }
 
   .report-card {
@@ -114,14 +139,12 @@
 
   .report-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 18px rgba(0, 220, 255, 0.12);
+    box-shadow: 0 0 20px rgba(0, 220, 255, 0.15);
+    border-color: rgba(0, 220, 255, 0.25);
   }
 
   .report-card--cyan {
     border-color: rgba(34, 211, 238, 0.22);
-  }
-  .report-card--cyan:hover {
-    box-shadow: 0 0 18px rgba(34, 211, 238, 0.14);
   }
   .report-card--cyan .report-card__headline {
     color: #a5f3fc;
@@ -133,9 +156,6 @@
   .report-card--orange {
     border-color: rgba(251, 146, 60, 0.22);
   }
-  .report-card--orange:hover {
-    box-shadow: 0 0 18px rgba(251, 146, 60, 0.14);
-  }
   .report-card--orange .report-card__headline {
     color: #fed7aa;
   }
@@ -146,9 +166,6 @@
   .report-card--green {
     border-color: rgba(52, 211, 153, 0.22);
   }
-  .report-card--green:hover {
-    box-shadow: 0 0 18px rgba(52, 211, 153, 0.14);
-  }
   .report-card--green .report-card__headline {
     color: #bbf7d0;
   }
@@ -158,9 +175,6 @@
 
   .report-card--red {
     border-color: rgba(248, 113, 113, 0.22);
-  }
-  .report-card--red:hover {
-    box-shadow: 0 0 18px rgba(248, 113, 113, 0.14);
   }
   .report-card--red .report-card__headline {
     color: #fecaca;

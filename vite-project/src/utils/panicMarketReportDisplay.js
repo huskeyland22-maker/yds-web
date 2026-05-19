@@ -37,9 +37,9 @@ function cashAllocationHint(regime) {
 /** @param {import("./panicMarketActionEngine.js").MarketRegime} regime @param {number | null} pc */
 function shortTermSubHint(regime, pc) {
   if (regime === "greed" || regime === "extreme_greed") {
-    if (pc != null && pc <= 0.55) return "과열 직전 · 추격 금지"
-    if (regime === "extreme_greed") return "과열 구간 · 추격 금지"
-    return "분할 접근 · 추격 자제"
+    if (pc != null && pc <= 0.55) return "과열 직전 · 추격주의"
+    if (regime === "extreme_greed") return "과열 구간 · 추격주의"
+    return "분할 접근 · 추격주의"
   }
   if (regime === "fear" || regime === "extreme_fear") return "변동성 대비 · 소액 분할"
   return "범위 매매 · 포지션 제한"
@@ -51,18 +51,18 @@ function optionsPsychology(pc, fg) {
     if (pc <= 0.55) {
       return {
         headline: "과열 경계",
-        detail: `P/C ${formatMetricValue("putCall", pc)} · 낙관 우세`,
+        detail: `P/C${formatMetricValue("putCall", pc)} · 낙관 우세`,
       }
     }
     if (pc >= 0.85) {
       return {
         headline: "헤지 쏠림",
-        detail: `P/C ${formatMetricValue("putCall", pc)} · 방어 우세`,
+        detail: `P/C${formatMetricValue("putCall", pc)} · 방어 우세`,
       }
     }
     return {
       headline: "중립권",
-      detail: `P/C ${formatMetricValue("putCall", pc)} · 균형`,
+      detail: `P/C${formatMetricValue("putCall", pc)} · 균형`,
     }
   }
   if (fg != null && fg >= 72) {
@@ -92,11 +92,11 @@ export function buildActionReportCards(report, panicData) {
   const regimeLabel = renderText(report?.regimeLabel) !== "—" ? renderText(report?.regimeLabel) : action?.regimeLabel ?? "중립"
 
   const fgIns = fg != null && Number.isFinite(fg) ? interpretPanicMetric("fearGreed", fg) : null
-  const moodLine = fgIns ? `심리: ${fgIns.statusLabel}` : regimeLabel ? `심리: ${regimeLabel}` : ""
+  const moodLine = fgIns ? `심리 ${fgIns.statusLabel}` : regimeLabel ? `심리 ${regimeLabel}` : ""
 
   const actionMode = renderText(report?.actionMode) !== "—" ? renderText(report?.actionMode) : action?.actionMode ?? "Neutral"
   const marketDetail = joinDetail([
-    fg != null && Number.isFinite(fg) ? `공포탐욕 ${Math.round(fg)}` : "",
+    fg != null && Number.isFinite(fg) ? `공포탐욕${Math.round(fg)}` : "",
     moodLine,
   ])
 
@@ -104,10 +104,7 @@ export function buildActionReportCards(report, panicData) {
     clipReportLine(report?.shortTerm || report?.short_strategy, 14) ||
     action?.shortTerm ||
     "관망 · 분할"
-  const shortDetail = joinDetail([
-    shortTermSubHint(regime, pc),
-    clipReportLine(report?.short_strategy, 12),
-  ])
+  const shortDetail = shortTermSubHint(regime, pc)
 
   const midHead =
     clipReportLine(report?.midTerm || report?.mid_strategy, 12) || action?.midTerm || "중립 유지"
@@ -118,18 +115,17 @@ export function buildActionReportCards(report, panicData) {
       : action?.sectors?.length
         ? action.sectors.slice(0, 3).join("·")
         : "대형주·ETF 분산"
-  const midDetail = joinDetail([sectorLine, cashAllocationHint(regime)])
+  const cashHint = cashAllocationHint(regime).replace(/\s/g, "")
+  const midDetail = joinDetail([sectorLine.replace(/\s*·\s*/g, " · "), cashHint])
 
   const opt = optionsPsychology(pc, fg)
-  const riskHead =
-    clipReportLine(Array.isArray(report?.risks) ? report.risks[0] : report?.risk_note || report?.risk, 12) ||
-    opt.headline
-  const riskDetail = opt.detail || clipReportLine(report?.risk_note, 20)
+  const riskHead = opt.headline
+  const riskDetail = opt.detail
 
   return [
     {
       id: "market",
-      label: "시장 온도",
+      label: "AI 온도",
       emoji: "🔥",
       headline: actionMode,
       detail: marketDetail || regimeLabel,
@@ -143,7 +139,7 @@ export function buildActionReportCards(report, panicData) {
     },
     {
       id: "mid",
-      label: "중기 포지션",
+      label: "포지션",
       emoji: "📈",
       headline: midHead,
       detail: midDetail,
@@ -166,31 +162,30 @@ export function buildActionReportCards(report, panicData) {
 export function buildStrategyBrief(report, panicData) {
   const action = panicData ? computeMarketAction(panicData) : null
   const cards = buildActionReportCards(report, panicData)
+  const parts = []
 
   const mode = action?.actionMode ?? renderText(report?.actionMode)
-  const line1 =
-    mode === "Risk-on"
-      ? "위험선호 유지."
-      : mode === "Risk-off"
-        ? "방어·유동성 우선."
-        : "균형·이벤트 대응."
+  if (mode === "Risk-on") parts.push("위험선호 유지")
+  else if (mode === "Risk-off") parts.push("방어·유동성 우선")
+  else parts.push("균형·이벤트 대응")
 
   const short = cards.find((c) => c.id === "short")
   const mid = cards.find((c) => c.id === "mid")
   const risk = cards.find((c) => c.id === "risk")
 
-  const line2 = short?.headline ? `단기 ${short.headline.replace(/\.$/, "")}.` : ""
-  const line3 = mid?.headline ? `중기 ${mid.headline.replace(/\.$/, "")}.` : ""
-  const line4 = risk?.headline ? `옵션 심리는 ${risk.headline.replace(/\.$/, "")}.` : ""
+  if (short?.headline) parts.push(`단기 ${short.headline.replace(/\.$/, "")}`)
 
-  const built = [line1, line2, line3, line4].filter(Boolean).join(" ")
-  if (built.length > 20) return built
-
-  const summary = renderText(report?.summary)
-  if (summary && summary !== "—") {
-    const first = summary.split(/\n+/)[0]?.replace(/\s+/g, " ").trim()
-    if (first && first.length > 12) return first.length > 120 ? `${first.slice(0, 117)}…` : first
+  const sectorBit = mid?.detail?.split("·")[0]?.trim()
+  if (sectorBit) {
+    parts.push(sectorBit.includes("우위") ? sectorBit : `${sectorBit} 우위`)
+  } else if (mid?.headline) {
+    parts.push(`${mid.headline} 우위`)
   }
+
+  if (risk?.headline) parts.push(`옵션심리 ${risk.headline.replace(/\.$/, "")}`)
+
+  const built = parts.filter(Boolean).join(" · ")
+  if (built.length > 16) return built
 
   return built || "지표 저장 후 오늘 행동 지침이 생성됩니다."
 }

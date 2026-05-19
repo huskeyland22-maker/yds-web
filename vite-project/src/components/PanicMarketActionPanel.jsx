@@ -1,23 +1,22 @@
 import { useMemo } from "react"
-import {
-  actionModeBadgeClass,
-  computeMarketAction,
-  marketTemperatureBarClass,
-  regimeToneClass,
-} from "../utils/panicMarketActionEngine.js"
+import { computeMarketAction, pickMetricValue } from "../utils/panicMarketActionEngine.js"
 
-const STRATEGY_CHIP =
-  "rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[9px] font-semibold text-slate-200"
+const FIELD_LABEL = "shrink-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500"
 
-const STRATEGY_CHIPS = [
-  { id: "growth", label: "\uC131\uC7A5" },
-  { id: "cycle", label: "\uC0AC\uC774\uD074" },
-  { id: "short", label: "\uB2E8\uAE30" },
-  { id: "mid", label: "\uC911\uAE30" },
-]
-
-const SECTOR_CHIP =
-  "rounded-full border border-white/8 bg-white/[0.03] px-1.5 py-px text-[8px] font-medium text-slate-400"
+/**
+ * @param {object | null} panicData
+ * @param {import("../utils/panicMarketActionEngine.js").MarketActionGuide} guide
+ */
+function buildActionRiskLine(panicData, guide) {
+  const pc = pickMetricValue(panicData, "putCall")
+  const vix = pickMetricValue(panicData, "vix")
+  if (pc != null && pc <= 0.55) return "옵션 과열 · 콜 쏠림"
+  if (pc != null && pc >= 0.85) return "헤지 · 풋 수요"
+  if (vix != null && vix >= 25) return "변동성 확대"
+  if (guide.regime === "extreme_greed" || guide.regime === "greed") return "과열 · 익절 검토"
+  if (guide.regime === "extreme_fear" || guide.regime === "fear") return "공포 · 방어 우선"
+  return guide.strategyThesis || "리스크 중립"
+}
 
 /**
  * @param {{ panicData?: object | null }} props
@@ -35,13 +34,19 @@ export default function PanicMarketActionPanel({ panicData = null }) {
     )
   }
 
-  const temp = guide.marketTemperature
-  const barGlow =
-    temp >= 58
-      ? "0 0 8px rgba(34,211,238,0.35)"
-      : temp <= 32
-        ? "0 0 8px rgba(251,113,133,0.32)"
-        : "0 0 6px rgba(148,163,184,0.22)"
+  const riskLine = buildActionRiskLine(panicData, guide)
+  const sectorLine = guide.sectors.length ? guide.sectors.join(" · ") : "분산"
+
+  const fields = [
+    {
+      label: "\uD604\uC7AC \uAD6C\uAC04",
+      value: `${guide.regimeLabel} · ${guide.actionMode}`,
+    },
+    { label: "\uB2E8\uAE30", value: guide.shortTerm },
+    { label: "\uC911\uAE30", value: guide.midTerm },
+    { label: "\uB9AC\uC2A4\uD06C", value: riskLine },
+    { label: "\uC139\uD130", value: sectorLine },
+  ]
 
   return (
     <div className="border-t border-white/[0.06] px-2 py-1.5">
@@ -49,49 +54,12 @@ export default function PanicMarketActionPanel({ panicData = null }) {
         <p className="m-0 text-[10px] font-bold text-slate-300">{"\uC2DC\uC7A5 \uC561\uC158"}</p>
       </div>
 
-      <div className="mt-1.5 grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr]">
-        <article className="rounded border border-white/[0.06] bg-[#070a10] px-2 py-1.5">
-          <p className="m-0 text-[8px] font-semibold uppercase text-slate-500">{"\uC2DC\uC7A5 \uC628\uB3C4"}</p>
-          <p className={`m-0 font-mono text-[16px] font-bold tabular-nums leading-none ${regimeToneClass(guide.regime)}`}>
-            {temp}
-          </p>
-          <span className={`text-[8px] font-bold ${actionModeBadgeClass(guide.actionMode)}`}>
-            {guide.regimeLabel} {"\u00B7"} {guide.actionMode}
-          </span>
-          <div className="relative mt-1 h-2 overflow-hidden rounded-full bg-gradient-to-r from-rose-600/40 via-slate-500/25 to-cyan-500/40">
-            <div
-              className={[
-                "absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-white/80",
-                marketTemperatureBarClass(temp),
-              ].join(" ")}
-              style={{
-                left: `calc(${Math.max(4, Math.min(96, temp))}% - 5px)`,
-                boxShadow: barGlow,
-              }}
-            />
+      <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1.5 rounded border border-white/[0.06] bg-[#070a10] px-2 py-1.5 sm:grid-cols-5">
+        {fields.map((f) => (
+          <div key={f.label} className="min-w-0">
+            <p className={`m-0 ${FIELD_LABEL}`}>{f.label}</p>
+            <p className="m-0 mt-0.5 line-clamp-2 text-[9px] font-semibold leading-snug text-slate-200">{f.value}</p>
           </div>
-        </article>
-
-        <article className="flex flex-col justify-between rounded border border-white/[0.06] bg-[#070a10] px-2 py-1.5">
-          <div>
-            <p className="m-0 text-[8px] font-semibold uppercase text-slate-500">{"\uD589\uB3D9 \uC804\uB7B5"}</p>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {STRATEGY_CHIPS.map((chip) => (
-                <span key={chip.id} className={STRATEGY_CHIP}>
-                  {chip.label}
-                </span>
-              ))}
-            </div>
-          </div>
-          <p className="m-0 mt-1 line-clamp-2 text-[8px] leading-snug text-slate-500">{guide.actionHeadline}</p>
-        </article>
-      </div>
-
-      <div className="mt-1.5 flex flex-wrap gap-1">
-        {guide.sectors.map((s) => (
-          <span key={s} className={SECTOR_CHIP}>
-            {s}
-          </span>
         ))}
       </div>
     </div>

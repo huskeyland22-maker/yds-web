@@ -63,18 +63,17 @@ export default function PanicMarketReportPanel({ report = null, loading = false,
 
   return (
     <div className="report-section border-t border-cyan-500/10 bg-cyan-500/[0.02] px-2 sm:px-2.5">
-      <p className="m-0 mb-1 border-l-2 border-cyan-400/45 pl-2 text-[10px] font-semibold text-slate-200/90">
-        {"\uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8"}
-      </p>
+      <div className="ai-brief" role="note" aria-label={"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}>
+        <p className="ai-brief__title">
+          <span className="mr-1" aria-hidden>
+            {"\uD83E\uDDE0"}
+          </span>
+          {"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}
+        </p>
+        <p className="ai-brief__body line-clamp-2 sm:line-clamp-1">{strategyBrief}</p>
+      </div>
 
-      <p className="report-strategy-brief line-clamp-3 sm:line-clamp-2">
-        <span className="mr-1" aria-hidden>
-          {"\uD83E\uDDE0"}
-        </span>
-        <span className="font-semibold text-cyan-200/90">{"\uC624\uB298 \uC804\uB7B5:"}</span> {strategyBrief}
-      </p>
-
-      <div className="report-grid grid grid-cols-2 sm:grid-cols-4">
+      <div className="report-grid">
         {cards.map((c) => (
           <ActionReportCard
             key={c.id}
