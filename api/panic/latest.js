@@ -39,13 +39,14 @@ export default async function handler(req, res) {
     const data = fromLatest ?? fromEav
     const meta = computePanicServeMeta(rows, data)
     const rowCount = Array.isArray(rows) ? rows.length : 0
+    const hasData = Boolean(data)
     res.status(200).json({
       ok: true,
-      data,
+      data: hasData ? data : null,
       meta,
       rowCount,
-      empty: rowCount === 0,
-      hint: rowCount === 0 ? "Run supabase/migrations or POST /api/cron/panic-collect" : null,
+      empty: !hasData,
+      hint: !hasData ? "Run supabase/migrations or POST /api/cron/panic-collect" : null,
     })
   } catch (e) {
     res.status(500).json({

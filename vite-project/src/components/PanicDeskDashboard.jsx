@@ -18,6 +18,7 @@ import PanicSectorFlowCard from "./PanicSectorFlowCard.jsx"
 import PanicUnifiedHistorySection from "./PanicUnifiedHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
+import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
 
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
 
@@ -132,6 +133,16 @@ export default function PanicDeskDashboard({
 
   const mood = useMemo(() => resolveMarketMood(panicData?.fearGreed), [panicData?.fearGreed])
   const moodPct = useMemo(() => moodPositionPct(panicData?.fearGreed), [panicData?.fearGreed])
+  const moodHeadline = useMemo(() => {
+    if (mood.active) return mood.label
+    if (hasPanicMetricValues(panicData)) return mood.label
+    const fallback =
+      marketState?.shortLabel && marketState.stateKey !== "insufficient"
+        ? marketState.shortLabel
+        : deskMarketReport?.market_view ?? deskMarketReport?.marketView ?? null
+    if (fallback) return String(fallback)
+    return "동기화 대기"
+  }, [mood, panicData, marketState, deskMarketReport])
 
   const finalScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
   const shortScore = useMemo(
@@ -244,7 +255,7 @@ export default function PanicDeskDashboard({
         <div>
           <p className="m-0 text-[9px] font-semibold tracking-[0.16em] text-slate-500">MARKET MOOD</p>
           <p className="m-0 mt-0.5 text-[15px] font-semibold tracking-tight text-slate-50 sm:text-base">
-            {mood.active ? mood.label : "동기화 대기"}
+            {moodHeadline}
           </p>
         </div>
 

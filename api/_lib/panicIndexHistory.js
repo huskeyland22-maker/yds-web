@@ -46,6 +46,8 @@ export function panicIndexHistoryRowToClient(row) {
     gsSentiment: pick("gs_sentiment") ?? pick("gs_bb"),
     gsBullBear: pick("gs_bb") ?? pick("gs_sentiment"),
     panicScore: pick("panic_score"),
+    market_state: row.market_state ?? null,
+    marketState: row.market_state ?? null,
     marketPhase: row.market_phase ?? null,
     riskLevel: row.risk_level ?? null,
     strategy: row.strategy ?? null,

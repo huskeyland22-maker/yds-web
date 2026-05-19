@@ -11,6 +11,7 @@ import {
   assertPanicSubmitPayloadNumeric,
   normalizePanicSubmitPayload,
 } from "../utils/panicDbNumeric.js"
+import { panicDataFromHistoryApiRow } from "../utils/resolveLatestPanicMetrics.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -60,13 +61,10 @@ export async function fetchPanicHubLatest(options = {}) {
     if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(String(json?.error)), { url })
     throw new Error(json?.error || "hub_invalid_payload")
   }
-  if (json.empty || json.rowCount === 0) {
-    const err = new Error("hub_empty_database")
+  if (!json.data) {
+    const err = new Error(json?.error || json?.empty ? "hub_empty_database" : "hub_invalid_payload")
     if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", err, { url, hint: json.hint })
     throw err
-  }
-  if (!json.data) {
-    throw new Error(json?.error || "hub_invalid_payload")
   }
   const data = normalizeManualPayload(json.data)
   const meta = json.meta && typeof json.meta === "object" ? json.meta : {}
@@ -81,6 +79,15 @@ export async function fetchPanicHubLatest(options = {}) {
     __fetchedAt: Date.now(),
     __isStale: isStale,
     __meta: meta,
+  }
+}
+
+/** 데스크 fallback용 — 실패 시 null (throw 없음) */
+export async function fetchPanicHubLatestOptional(options = {}) {
+  try {
+    return await fetchPanicHubLatest({ ...options, debugLog: options.debugLog ?? false })
+  } catch {
+    return null
   }
 }
 
@@ -284,22 +291,33 @@ export async function fetchPanicDataJson(options = {}) {
   }
   if (isPanicHubEnabled()) {
     if (isDataTraceEnabled()) logFetchStart("panic-data-json", { path: "hub-only" })
-    const hubData = await fetchPanicHubLatest({ debugLog })
-    const hasCore =
-      hubData?.vix != null &&
-      hubData?.fearGreed != null &&
-      hubData?.bofa != null &&
-      hubData?.putCall != null &&
-      hubData?.highYield != null
-    if (!hasCore) {
-      const errMsg = hubData?.vix == null && hubData?.fearGreed == null ? "hub_empty_database" : "hub_incomplete_metrics"
+    let hubData = await fetchPanicHubLatestOptional({ debugLog })
+    const hasCore = (d) =>
+      d?.vix != null &&
+      d?.fearGreed != null &&
+      d?.bofa != null &&
+      d?.putCall != null &&
+      d?.highYield != null
+    if (!hasCore(hubData)) {
+      const latestRow = await fetchPanicIndexLatest().catch(() => null)
+      if (latestRow) {
+        const fromHistory = panicDataFromHistoryApiRow(latestRow)
+        if (fromHistory) {
+          hubData = { ...fromHistory, __fetchSource: "HISTORY", __fetchedAt: Date.now() }
+          if (debugLog) console.log("[BOOT] panic hub fallback → history latest", { date: latestRow.date })
+        }
+      }
+    }
+    if (!hasCore(hubData)) {
+      const errMsg =
+        hubData?.vix == null && hubData?.fearGreed == null ? "hub_empty_database" : "hub_incomplete_metrics"
       if (isDataTraceEnabled()) logFetchFail("panic-data-json", new Error(errMsg), {})
       throw new Error(errMsg)
     }
     const businessStale = !validatePanicData(hubData)
     const enriched = {
       ...hubData,
-      __fetchSource: "HUB",
+      __fetchSource: hubData.__fetchSource ?? "HUB",
       __fetchUrl: hubData.__fetchUrl,
       __fetchedAt: Date.now(),
       __isStale: Boolean(hubData.__isStale) || businessStale,
@@ -310,7 +328,7 @@ export async function fetchPanicDataJson(options = {}) {
       })
     }
     if (debugLog) console.log("[BOOT] panic hub", { updatedAt: enriched?.updatedAt ?? null })
-    if (isDataTraceEnabled()) logFetchSuccess("panic-data-json", { route: "hub", source: "HUB" })
+    if (isDataTraceEnabled()) logFetchSuccess("panic-data-json", { route: "hub", source: enriched.__fetchSource })
     return enriched
   }
   if (isDataTraceEnabled()) logFetchStart("panic-data-json", { path: "render-fallback", urls: buildPanicDataUrls() })

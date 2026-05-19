@@ -42,6 +42,10 @@ import { usePanicStore } from "./store/panicStore.js"
 import { isDataTraceUiEnabled, logRealtime } from "./utils/dataFlowTrace.js"
 import { buildMarketSidebarPulse } from "./utils/macroTerminalPulse.js"
 import { resolveMarketState } from "./utils/marketStateEngine.js"
+import {
+  hasPanicMetricValues,
+  resolveDeskMarketStateLabel,
+} from "./utils/resolveLatestPanicMetrics.js"
 import MetricInputErrorBoundary from "./components/MetricInputErrorBoundary.jsx"
 import {
   coerceMetricValue,
@@ -454,21 +458,28 @@ function App() {
   const cycleMetricHistory = useAppDataStore((s) => s.cycleMetricHistory)
   const cycleHistorySource = useAppDataStore((s) => s.cycleHistorySource)
   const deskSnapshotTradeDate = useAppDataStore((s) => s.deskSnapshotTradeDate)
+  const deskResolvedPanicData = useAppDataStore((s) => s.deskResolvedPanicData)
+  const hubPanicMetrics = useAppDataStore((s) => s.hubPanicMetrics)
+  const latestHistoryRow = useAppDataStore((s) => s.latestHistoryRow)
+  const deskMarketReport = useAppDataStore((s) => s.deskMarketReport)
+  const marketCycleHistory = useAppDataStore((s) => s.marketCycleHistory)
 
-  /** panic_index_history 최신 row — panic_metrics 혼합 금지 (허브) */
+  /** latest_panic_metrics → history → cycle → report 순 fallback */
   const deskPanicData = useMemo(() => {
-    if (isPanicHubEnabled()) {
-      if (cycleMetricHistory?.length > 0) {
-        if (deskSnapshotTradeDate) {
-          const hit = cycleMetricHistory.find((r) => rowCalendarKey(r) === deskSnapshotTradeDate)
-          if (hit) return panicDataFromCycleRow(hit)
-        }
-        return panicDeskDataFromHistory(cycleMetricHistory)
-      }
-      return null
-    }
-    return panicData
-  }, [panicData, cycleMetricHistory, deskSnapshotTradeDate])
+    if (!isPanicHubEnabled()) return panicData
+    const resolved = useAppDataStore.getState().resolveDeskPanicData()
+    if (resolved && hasPanicMetricValues(resolved)) return resolved
+    if (panicData && hasPanicMetricValues(panicData)) return panicData
+    return resolved
+  }, [
+    panicData,
+    cycleMetricHistory,
+    deskSnapshotTradeDate,
+    deskResolvedPanicData,
+    hubPanicMetrics,
+    latestHistoryRow,
+    deskMarketReport,
+  ])
   const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
 
   const parseResult = useMemo(() => {
@@ -737,8 +748,10 @@ function App() {
   useEffect(() => {
     void (async () => {
       const store = useAppDataStore.getState()
+      await store.loadDeskMetricSources()
       await store.loadCycleLatestSnapshot({ force: true })
       await store.loadCycleHistoryBundle({ limit: 500 })
+      await store.loadDeskMetricSources()
     })()
   }, [])
 
@@ -764,6 +777,7 @@ function App() {
           const store = useAppDataStore.getState()
           await store.loadCycleLatestSnapshot({ force: true })
           await store.loadCycleHistoryBundle({ limit: 500, force: true })
+          await store.loadDeskMetricSources()
         })()
       },
     })
@@ -1018,7 +1032,14 @@ function App() {
       window.alert("저장에 실패했습니다")
     }
   }
-  const marketState = useMemo(() => resolveMarketState(deskPanicData), [deskPanicData])
+  const marketState = useMemo(() => {
+    const computed = resolveMarketState(deskPanicData)
+    return resolveDeskMarketStateLabel(computed, {
+      latestHistory: latestHistoryRow,
+      marketCycleRow: marketCycleHistory?.[0] ?? null,
+      deskReport: deskMarketReport,
+    })
+  }, [deskPanicData, latestHistoryRow, marketCycleHistory, deskMarketReport])
   const marketCycleStage = marketState.label
   const safeRecentMemos = Array.isArray(recentMemos) ? recentMemos : []
   const sidebarPulse = useMemo(
