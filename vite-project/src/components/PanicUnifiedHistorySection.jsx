@@ -87,6 +87,7 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
   const [tabId, setTabId] = useState("composite")
   const [rangeId, setRangeId] = useState("6M")
   const [mobileDetail, setMobileDetail] = useState(false)
+  const [compositeYScale, setCompositeYScale] = useState("auto")
   const isMobile = useIsMobile()
 
   const chartHeight = isMobile ? CHART_HEIGHT_MOBILE : CHART_HEIGHT_DESKTOP
@@ -187,6 +188,30 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
         ))}
       </div>
 
+      {tabId === "composite" ? (
+        <div className="mt-1.5 flex flex-wrap items-center gap-1">
+          <span className="mr-1 text-[8px] text-slate-600">Y축</span>
+          {[
+            { id: "auto", label: "자동" },
+            { id: "full", label: "0~100" },
+          ].map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setCompositeYScale(opt.id)}
+              className={[
+                "rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold tabular-nums",
+                compositeYScale === opt.id
+                  ? "bg-emerald-500/20 text-emerald-100 ring-1 ring-emerald-400/30"
+                  : "text-slate-500 hover:text-slate-300",
+              ].join(" ")}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div className="mt-1.5 flex flex-wrap gap-0.5">
         {LAB_CHART_RANGES.map((r) => (
           <button
@@ -227,6 +252,7 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
               visibleKeys={visibleKeys}
               defaultWindow={defaultWindow}
               height={chartHeight}
+              compositeYScale={compositeYScale}
             />
           ) : (
             <PanicHistoryLineChart

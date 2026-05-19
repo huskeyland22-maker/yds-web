@@ -162,3 +162,25 @@ export function latestLabSnapshot(data) {
   if (!data?.length) return null
   return data[data.length - 1]
 }
+
+/**
+ * 복합 패닉지수 Y축 — 자동 확대 vs 0~100 전체
+ * @param {number[]} values
+ * @param {"auto" | "full"} [mode]
+ * @returns {[number, number]}
+ */
+export function computeCompositeYDomain(values, mode = "auto") {
+  if (mode === "full") return [0, 100]
+
+  const nums = (values ?? []).filter((v) => typeof v === "number" && Number.isFinite(v))
+  if (!nums.length) return [0, 100]
+
+  const minValue = Math.min(...nums)
+  const maxValue = Math.max(...nums)
+  const padding = Math.max((maxValue - minValue) * 0.3, 2)
+
+  return [
+    Math.max(0, minValue - padding),
+    Math.min(100, maxValue + padding),
+  ]
+}

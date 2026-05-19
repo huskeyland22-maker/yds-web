@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts"
 import { useChartPinchZoom } from "../hooks/useChartPinchZoom.js"
-import { LAB_METRICS, PANIC_STAGE_BANDS } from "../utils/panicHistoryLab.js"
+import { computeCompositeYDomain, LAB_METRICS, PANIC_STAGE_BANDS } from "../utils/panicHistoryLab.js"
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 
 const CHART_HEIGHT_DEFAULT = 360
@@ -72,6 +72,7 @@ function LabTooltip({ active, payload, label }) {
  *   visibleKeys: Record<string, boolean>
  *   defaultWindow?: number
  *   height?: number
+ *   compositeYScale?: "auto" | "full"
  * }} props
  */
 export default function PanicHistoryLabChart({
@@ -79,6 +80,7 @@ export default function PanicHistoryLabChart({
   visibleKeys,
   defaultWindow = 126,
   height = CHART_HEIGHT_DEFAULT,
+  compositeYScale = "auto",
 }) {
   const zoom = useChartPinchZoom(data.length, { defaultWindow })
   const visibleData = useMemo(
@@ -90,6 +92,28 @@ export default function PanicHistoryLabChart({
     () => Math.max(320, visibleData.length * PX_PER_POINT),
     [visibleData.length],
   )
+
+  const showComposite = visibleKeys.composite !== false
+
+  const compositeValues = useMemo(
+    () =>
+      visibleData
+        .map((d) => d.composite)
+        .filter((v) => typeof v === "number" && Number.isFinite(v)),
+    [visibleData],
+  )
+
+  const yDomain = useMemo(() => {
+    if (!showComposite) return [0, 100]
+    return computeCompositeYDomain(compositeValues, compositeYScale)
+  }, [showComposite, compositeValues, compositeYScale])
+
+  const compositeValueRange = useMemo(() => {
+    if (compositeValues.length < 2) return 0
+    return Math.max(...compositeValues) - Math.min(...compositeValues)
+  }, [compositeValues])
+
+  const tightComposite = showComposite && compositeValueRange <= 3
 
   if (!data?.length) {
     return (
@@ -114,17 +138,19 @@ export default function PanicHistoryLabChart({
         <div style={{ minWidth: chartMinWidth, height }}>
           <ResponsiveContainer width="100%" height={height}>
             <LineChart data={visibleData} margin={CHART_MARGIN}>
-              {PANIC_STAGE_BANDS.map((band) => (
-                <ReferenceArea
-                  key={band.id}
-                  y1={band.min}
-                  y2={band.max}
-                  fill={band.color}
-                  fillOpacity={0.06}
-                  strokeOpacity={0}
-                  ifOverflow="hidden"
-                />
-              ))}
+              {compositeYScale === "full"
+                ? PANIC_STAGE_BANDS.map((band) => (
+                    <ReferenceArea
+                      key={band.id}
+                      y1={band.min}
+                      y2={band.max}
+                      fill={band.color}
+                      fillOpacity={0.06}
+                      strokeOpacity={0}
+                      ifOverflow="hidden"
+                    />
+                  ))
+                : null}
               <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
               <XAxis
                 dataKey="axisLabel"
@@ -136,9 +162,10 @@ export default function PanicHistoryLabChart({
                 minTickGap={24}
               />
               <YAxis
-                domain={[0, 100]}
+                domain={yDomain}
                 tickCount={6}
                 tickFormatter={(v) => String(Math.round(v))}
+                allowDataOverflow
                 stroke="#64748b"
                 tick={{ fill: "#94a3b8", fontSize: 10 }}
                 tickLine={false}
@@ -146,14 +173,18 @@ export default function PanicHistoryLabChart({
                 width={32}
               />
               <Tooltip content={<LabTooltip />} />
-              {visibleKeys.composite !== false ? (
+              {showComposite ? (
                 <Line
                   type="monotone"
                   dataKey="composite"
                   name="복합 패닉"
                   stroke="#f8fafc"
-                  strokeWidth={3}
-                  dot={false}
+                  strokeWidth={tightComposite ? 3 : 2.5}
+                  dot={
+                    tightComposite
+                      ? { r: 4, fill: "#f8fafc", stroke: "#0b0e14", strokeWidth: 1 }
+                      : false
+                  }
                   activeDot={{ r: 5, strokeWidth: 2, fill: "#f8fafc" }}
                   connectNulls
                   isAnimationActive={false}
@@ -181,7 +212,11 @@ export default function PanicHistoryLabChart({
         </div>
       </div>
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[9px] text-slate-500">
-        <span>모바일: 가로 스크롤 · 두 손가락 핀치 줌</span>
+        <span>
+          {showComposite && compositeYScale === "auto"
+            ? `Y축 자동 ${Math.round(yDomain[0])}–${Math.round(yDomain[1])} · 핀치/스크롤`
+            : "모바일: 가로 스크롤 · 핀치 줌"}
+        </span>
         <button
           type="button"
           onClick={zoom.resetZoom}
