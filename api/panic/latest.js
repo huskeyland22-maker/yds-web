@@ -1,5 +1,9 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
-import { fetchPanicMetricsRows, panicObjectFromRows } from "../_lib/panicMetricsHub.js"
+import {
+  fetchPanicMetricsRows,
+  panicObjectFromRows,
+  probePanicMetricsNumericInsert,
+} from "../_lib/panicMetricsHub.js"
 import { computePanicServeMeta } from "../_lib/panicPipeline.js"
 
 function noStore(res) {
@@ -19,6 +23,11 @@ export default async function handler(req, res) {
     return
   }
   try {
+    if (req.query?.probe === "1" || req.query?.probeInsert === "1") {
+      const probe = await probePanicMetricsNumericInsert()
+      res.status(200).json({ ok: true, probe })
+      return
+    }
     const rows = await fetchPanicMetricsRows()
     const data = panicObjectFromRows(rows)
     const meta = computePanicServeMeta(rows, data)
