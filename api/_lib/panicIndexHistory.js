@@ -74,24 +74,50 @@ export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   return { ok: true, date: row.date }
 }
 
+function isSchemaColumnError(err) {
+  const msg = err instanceof Error ? err.message : String(err || "")
+  return /column|schema|does not exist|42703|PGRST204/i.test(msg)
+}
+
 /** @param {Record<string, unknown>} row */
 async function postPanicIndexHistoryRow(row) {
-  try {
-    await supabaseRest("panic_index_history?on_conflict=date", {
-      method: "POST",
-      prefer: "resolution=merge-duplicates,return=representation",
-      body: row,
-    })
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e)
-    if (!/high_yield|gs_bb|column/i.test(msg)) throw e
-    const { high_yield: _hy, gs_bb: _gs, ...legacy } = row
-    await supabaseRest("panic_index_history?on_conflict=date", {
-      method: "POST",
-      prefer: "resolution=merge-duplicates,return=representation",
-      body: legacy,
-    })
+  const core = {
+    date: row.date,
+    vix: row.vix,
+    vxn: row.vxn,
+    fear_greed: row.fear_greed,
+    move: row.move,
+    bofa: row.bofa,
+    skew: row.skew,
+    hy_oas: row.hy_oas,
+    gs_sentiment: row.gs_sentiment,
+    source: row.source ?? "manual",
+    updated_at: row.updated_at,
+    market: row.market ?? "global",
   }
+  const { market: _market, high_yield: _hy, gs_bb: _gs, put_call: _pc, ...baseOnly } = row
+  const attempts = [
+    row,
+    { ...core, put_call: row.put_call, high_yield: row.high_yield, gs_bb: row.gs_bb },
+    { ...core, put_call: row.put_call },
+    core,
+    { ...baseOnly, source: baseOnly.source ?? "manual", updated_at: baseOnly.updated_at },
+  ]
+  let lastErr = null
+  for (const body of attempts) {
+    try {
+      await supabaseRest("panic_index_history?on_conflict=date", {
+        method: "POST",
+        prefer: "resolution=merge-duplicates,return=representation",
+        body,
+      })
+      return
+    } catch (e) {
+      lastErr = e
+      if (!isSchemaColumnError(e)) throw e
+    }
+  }
+  throw lastErr ?? new Error("panic_index_history_upsert_failed")
 }
 
 /**

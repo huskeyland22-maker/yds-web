@@ -488,8 +488,9 @@ export const usePanicStore = create((set, get) => ({
       }
     } catch (err) {
       useAppDataStore.setState({ deskMarketReportLoading: false })
-      console.error("SAVE SUCCESS — pipeline failed", err)
-      return { ok: false, error: err instanceof Error ? err : new Error(String(err)) }
+      const message = err instanceof Error ? err.message : String(err)
+      console.error("SAVE FAILED — pipeline", message, err?.stage ?? "")
+      return { ok: false, error: err instanceof Error ? err : new Error(message) }
     }
   },
 

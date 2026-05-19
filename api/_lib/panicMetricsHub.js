@@ -60,6 +60,7 @@ export function rowsFromPanicPayload(body, opts = {}) {
           ? Number(body.changes[key])
           : null,
       status: null,
+      market: "global",
       source,
       updated_at: updatedAt,
     })
@@ -70,6 +71,7 @@ export function rowsFromPanicPayload(body, opts = {}) {
     metric_value: null,
     change_percent: null,
     status: regime,
+    market: "global",
     source,
     updated_at: updatedAt,
   })
@@ -90,10 +92,25 @@ export async function fetchPanicMetricsRows() {
   return supabaseRest("panic_metrics?select=*", { method: "GET" })
 }
 
+function isSchemaColumnError(err) {
+  const msg = err instanceof Error ? err.message : String(err || "")
+  return /column|schema|does not exist|42703|PGRST204/i.test(msg)
+}
+
 export async function upsertPanicMetricsRows(rows) {
-  return supabaseRest("panic_metrics?on_conflict=metric_key", {
-    method: "POST",
-    prefer: "resolution=merge-duplicates,return=minimal",
-    body: rows,
-  })
+  try {
+    return await supabaseRest("panic_metrics?on_conflict=metric_key", {
+      method: "POST",
+      prefer: "resolution=merge-duplicates,return=minimal",
+      body: rows,
+    })
+  } catch (err) {
+    if (!isSchemaColumnError(err)) throw err
+    const stripped = rows.map(({ market: _m, ...rest }) => rest)
+    return await supabaseRest("panic_metrics?on_conflict=metric_key", {
+      method: "POST",
+      prefer: "resolution=merge-duplicates,return=minimal",
+      body: stripped,
+    })
+  }
 }

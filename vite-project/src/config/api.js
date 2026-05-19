@@ -393,11 +393,25 @@ export async function submitManualPanicData(inputData) {
       ...LIVE_POST_JSON_INIT,
       body: JSON.stringify(inputData),
     })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const out = await res.json()
+    let out = {}
+    try {
+      out = await res.json()
+    } catch {
+      out = {}
+    }
+    if (!res.ok) {
+      const detail = out?.error || out?.message || res.statusText || `HTTP ${res.status}`
+      const err = new Error(String(detail))
+      err.status = res.status
+      err.stage = out?.stage ?? "http"
+      err.history = out?.history
+      console.error("SAVE FAILED", { status: res.status, stage: err.stage, detail })
+      throw err
+    }
     if (!out?.ok) {
       const err = new Error(String(out?.error || "hub_update_failed"))
       err.history = out.history
+      err.stage = out?.stage ?? "hub"
       throw err
     }
     if (!out.history?.ok) {

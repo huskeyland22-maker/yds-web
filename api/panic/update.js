@@ -39,9 +39,13 @@ export default async function handler(req, res) {
       reportKey: result.reportKey ?? null,
     })
   } catch (e) {
+    const message = e instanceof Error ? e.message : "update_failed"
+    const stage = e && typeof e === "object" && "stage" in e ? e.stage : "pipeline"
+    console.error("[panic/update]", stage, message)
     res.status(500).json({
       ok: false,
-      error: e instanceof Error ? e.message : "update_failed",
+      error: message,
+      stage,
     })
   }
 }

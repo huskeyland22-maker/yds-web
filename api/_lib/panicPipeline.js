@@ -58,16 +58,29 @@ export async function persistPanicPayload(body, opts = {}) {
   }
   if (requireHistory && !history.ok) {
     const detail = history.skipped ? history.reason : history.error
-    throw new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
+    const err = new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
+    err.stage = "history"
+    throw err
   }
 
   const rows = rowsFromPanicSnapshot(snap)
-  await upsertPanicMetricsRows(rows)
+  let metricsError = null
+  try {
+    await upsertPanicMetricsRows(rows)
+  } catch (err) {
+    metricsError = err instanceof Error ? err.message : String(err)
+    console.error("[panic] panic_metrics upsert failed (non-fatal)", metricsError)
+  }
 
-  const fresh = await fetchPanicMetricsRows()
-  const fromDb = panicObjectFromRows(fresh)
+  let fresh = []
+  try {
+    fresh = await fetchPanicMetricsRows()
+  } catch (err) {
+    metricsError = metricsError || (err instanceof Error ? err.message : String(err))
+  }
+  const fromDb = fresh?.length ? panicObjectFromRows(fresh) : null
   const data = panicObjectFromSnapshot(snap)
-  data.riskRegime = fromDb.riskRegime ?? data.riskRegime
+  if (fromDb) data.riskRegime = fromDb.riskRegime ?? data.riskRegime
   const meta = computePanicServeMeta(fresh, data)
 
   let reportResult = { ok: false }
@@ -86,6 +99,7 @@ export async function persistPanicPayload(body, opts = {}) {
     meta,
     rowCount: fresh?.length ?? 0,
     tradeDate: snap.tradeDate,
+    metricsError,
     report: reportResult.ok ? reportResult.report : null,
     reportKey: reportResult.reportKey ?? null,
     reportError: reportResult.ok ? null : reportResult.error || reportResult.reason,
