@@ -115,72 +115,57 @@ function ZoneYAxisLabels({ bands, yDomain, height }) {
 }
 
 /**
- * @typedef {{ key: string; stroke: string; label: string }} HistoryMultiSeries
- */
-
-/**
- * panic_index_history 전용 Recharts 라인 (단일·멀티 시리즈)
+ * panic_index_history 전용 Recharts 라인 (단일 시리즈)
  * @param {{
  *   rows?: object[]
  *   chartData?: object[] | null
  *   dataKey?: string
+ *   metricField?: string
  *   dataLabel?: string
  *   stroke?: string
  *   showZoneBands?: boolean
  *   height?: number
  *   summary?: HistoryChartSummary | null
  *   debug?: boolean
- *   multiSeries?: HistoryMultiSeries[] | null
  * }} props
  */
 export default function PanicHistoryLineChart({
   rows = [],
   chartData: chartDataProp = null,
   dataKey = "vix",
+  metricField = "",
   dataLabel = "VIX",
   stroke = "#22d3ee",
   showZoneBands = false,
   height = CHART_HEIGHT,
   summary = null,
   debug = false,
-  multiSeries = null,
 }) {
-  const isMulti = Array.isArray(multiSeries) && multiSeries.length > 0
-  const seriesKey = isMulti ? multiSeries[0].key : dataKey
+  const profileKey = metricField || (dataKey === "value" ? "vix" : dataKey)
 
   const chartData = useMemo(() => {
     if (Array.isArray(chartDataProp) && chartDataProp.length) return chartDataProp
-    const data = buildChartDataFromHistory(rows, dataKey === "value" ? seriesKey : dataKey)
+    const data = buildChartDataFromHistory(rows, profileKey)
     if (debug) logHistoryChartDebug(rows, data)
     return data
-  }, [rows, dataKey, seriesKey, chartDataProp, debug])
+  }, [rows, profileKey, chartDataProp, debug])
 
-  const profile = useMemo(() => resolveChartProfile(isMulti ? "vix" : dataKey === "value" ? seriesKey : dataKey), [dataKey, seriesKey, isMulti])
+  const profile = useMemo(() => resolveChartProfile(profileKey), [profileKey])
 
   const zoneBands = useMemo(
-    () => (showZoneBands && !isMulti ? metricZoneBands(seriesKey) : []),
-    [showZoneBands, seriesKey, isMulti],
+    () => (showZoneBands ? metricZoneBands(profileKey) : []),
+    [showZoneBands, profileKey],
   )
   const zoneLineYs = useMemo(
-    () => (showZoneBands && !isMulti ? metricZoneLineYs(seriesKey) : []),
-    [showZoneBands, seriesKey, isMulti],
+    () => (showZoneBands ? metricZoneLineYs(profileKey) : []),
+    [showZoneBands, profileKey],
   )
 
   const yDomain = useMemo(() => {
-    if (isMulti) {
-      const vals = []
-      for (const pt of chartData) {
-        for (const s of multiSeries) {
-          const v = Number(pt[s.key])
-          if (Number.isFinite(v)) vals.push(v)
-        }
-      }
-      return computeHistoryYDomain(vals, "vix", { showZoneBands: false })
-    }
     const lineKey = dataKey === "value" ? "value" : dataKey
     const values = extractChartValues(chartData, lineKey)
-    return computeHistoryYDomain(values, seriesKey, { showZoneBands })
-  }, [chartData, dataKey, seriesKey, showZoneBands, isMulti, multiSeries])
+    return computeHistoryYDomain(values, profileKey, { showZoneBands })
+  }, [chartData, dataKey, profileKey, showZoneBands])
 
   const tickFormatter = useMemo(() => yAxisTickFormatter(profile), [profile])
 
@@ -189,10 +174,10 @@ export default function PanicHistoryLineChart({
     return zoneBandMidpoints(zoneBands)
   }, [showZoneBands, zoneBands, yDomain])
 
-  const areaGradientId = `metricArea-${String(seriesKey).replace(/[^a-zA-Z0-9]/g, "")}`
-  const lineStrokeWidth = (profile.strokeWidth ?? 3) + (showZoneBands && !isMulti ? 0.5 : 0)
+  const areaGradientId = `metricArea-${String(profileKey).replace(/[^a-zA-Z0-9]/g, "")}`
+  const lineStrokeWidth = (profile.strokeWidth ?? 3) + (showZoneBands ? 0.5 : 0)
   const pointCount = chartData.length
-  const showDots = !isMulti && pointCount > 0 && pointCount < 3
+  const showDots = pointCount > 0 && pointCount < 3
   const curveType = pointCount >= 3 ? "monotone" : "linear"
   const lineDataKey = dataKey === "value" ? "value" : dataKey
 
@@ -260,7 +245,7 @@ export default function PanicHistoryLineChart({
               </linearGradient>
             </defs>
           ) : null}
-          {!isMulti && profile.showArea && pointCount >= 2 ? (
+          {profile.showArea && pointCount >= 2 ? (
             <Area
               type={curveType}
               dataKey={lineDataKey}
@@ -278,51 +263,27 @@ export default function PanicHistoryLineChart({
               fontSize: 11,
             }}
             labelStyle={{ color: "#94a3b8" }}
-            formatter={(value, name) => {
-              const key = String(name ?? lineDataKey)
-              const label =
-                isMulti && multiSeries
-                  ? (multiSeries.find((s) => s.key === key)?.label ?? key)
-                  : dataLabel
-              return [formatMetricValue(key === "value" ? seriesKey : key, value), label]
-            }}
+            formatter={(value) => [formatMetricValue(profileKey, value), dataLabel]}
           />
-          {isMulti && multiSeries
-            ? multiSeries.map((s) => (
-                <Line
-                  key={s.key}
-                  type={curveType}
-                  dataKey={s.key}
-                  name={s.key}
-                  stroke={s.stroke}
-                  strokeWidth={lineStrokeWidth}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 2, fill: s.stroke }}
-                  connectNulls
-                  isAnimationActive={false}
-                />
-              ))
-            : (
-                <Line
-                  type={curveType}
-                  dataKey={lineDataKey}
-                  stroke={stroke}
-                  strokeWidth={pointCount === 1 ? 0 : lineStrokeWidth}
-                  dot={
-                    showDots
-                      ? { r: pointCount === 1 ? 5 : 4, fill: stroke, stroke: "#0b0e14", strokeWidth: 1.5 }
-                      : false
-                  }
-                  activeDot={{
-                    r: profile.activeDotR ?? 5,
-                    strokeWidth: 2,
-                    fill: stroke,
-                    stroke: profile.narrowRange ? "#0b0e14" : undefined,
-                  }}
-                  connectNulls
-                  isAnimationActive={false}
-                />
-              )}
+          <Line
+            type={curveType}
+            dataKey={lineDataKey}
+            stroke={stroke}
+            strokeWidth={pointCount === 1 ? 0 : lineStrokeWidth}
+            dot={
+              showDots
+                ? { r: pointCount === 1 ? 5 : 4, fill: stroke, stroke: "#0b0e14", strokeWidth: 1.5 }
+                : false
+            }
+            activeDot={{
+              r: profile.activeDotR ?? 5,
+              strokeWidth: 2,
+              fill: stroke,
+              stroke: profile.narrowRange ? "#0b0e14" : undefined,
+            }}
+            connectNulls
+            isAnimationActive={false}
+          />
           </LineChart>
         </ResponsiveContainer>
         {showZoneBands && yDomain && zoneLabels.length > 0 ? (

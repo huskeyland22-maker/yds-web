@@ -48,13 +48,10 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     didInitMetricRef.current = true
   }, [history.length])
 
-  const metricKey = activeHistoryTab === "all" ? "vix" : activeHistoryTab
+  const metricKey = activeHistoryTab
 
   const metric = useMemo(
-    () =>
-      activeHistoryTab === "all"
-        ? { key: "all", label: "ALL", chartLabel: "ALL", accent: "#94a3b8" }
-        : (HISTORY_SECTION_METRICS.find((m) => m.key === activeHistoryTab) ?? HISTORY_SECTION_METRICS[0]),
+    () => HISTORY_SECTION_METRICS.find((m) => m.key === activeHistoryTab) ?? HISTORY_SECTION_METRICS[0],
     [activeHistoryTab],
   )
 
@@ -89,17 +86,11 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   }, [history, slicedRows.length, activeHistoryTab, rangeId, chartPayload, rowsProp?.length, storeRows?.length])
 
   const stats = useMemo(
-    () =>
-      activeHistoryTab === "all"
-        ? computeHistoryMetricStats(slicedRows.length ? slicedRows : history, "vix")
-        : computeHistoryMetricStats(slicedRows.length ? slicedRows : history, metricKey),
-    [slicedRows, history, metricKey, activeHistoryTab],
+    () => computeHistoryMetricStats(slicedRows.length ? slicedRows : history, metricKey),
+    [slicedRows, history, metricKey],
   )
 
-  const zoneLegend = useMemo(
-    () => (activeHistoryTab === "all" ? [] : historyZoneLegendItems(metricKey)),
-    [metricKey, activeHistoryTab],
-  )
+  const zoneLegend = useMemo(() => historyZoneLegendItems(metricKey), [metricKey])
 
   const chartSummary = useMemo(
     () => ({
@@ -127,19 +118,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       </div>
 
       <div className="mt-1.5 flex flex-wrap gap-0.5">
-        <button
-          type="button"
-          onClick={() => setActiveHistoryTab("all")}
-          className={[
-            "rounded px-1.5 py-0.5 text-[9px] font-semibold transition sm:text-[10px]",
-            activeHistoryTab === "all"
-              ? "bg-white/12 text-slate-100 ring-1 ring-white/15"
-              : "text-slate-500 hover:text-slate-300",
-          ].join(" ")}
-          title="8지표 동시 표시"
-        >
-          ALL ({history.length})
-        </button>
         {HISTORY_SECTION_METRICS.map((m) => {
           const n = metricCounts[m.key] ?? 0
           return (
@@ -226,13 +204,13 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             key={`panic-hist-${activeHistoryTab}`}
             rows={slicedRows.length ? slicedRows : history}
             chartData={chartPayload.chartData}
-            dataKey={chartPayload.dataKey ?? metricKey}
+            dataKey={chartPayload.dataKey ?? "value"}
+            metricField={chartPayload.selectedField ?? metricKey}
             dataLabel={metric.chartLabel}
             stroke={metric.accent}
-            showZoneBands={activeHistoryTab !== "all"}
+            showZoneBands
             height={HISTORY_CHART_HEIGHT}
-            summary={activeHistoryTab === "all" ? null : chartSummary}
-            multiSeries={chartPayload.multiSeries}
+            summary={chartSummary}
           />
         ) : (
           <div

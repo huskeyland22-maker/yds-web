@@ -1,5 +1,5 @@
 /**
- * 패닉 히스토리 수동 seed — 8지표 전체 (2026-05-13 ~ 05-19)
+ * 패닉 히스토리 수동 seed — 9지표 (2026-05-13 ~ 05-19)
  */
 
 /** @typedef {import("./panicHistoryLocalPersist.js").PanicHistoryRow} PanicHistoryRow */
@@ -9,6 +9,7 @@ export const PANIC_HISTORY_SEED = [
   {
     date: "2026-05-13",
     vix: 17.6,
+    vxn: 24.8,
     fearGreed: 62,
     bofa: 6.4,
     putCall: 0.5,
@@ -21,6 +22,7 @@ export const PANIC_HISTORY_SEED = [
   {
     date: "2026-05-14",
     vix: 17.3,
+    vxn: 24.6,
     fearGreed: 64,
     bofa: 6.5,
     putCall: 0.49,
@@ -33,6 +35,7 @@ export const PANIC_HISTORY_SEED = [
   {
     date: "2026-05-15",
     vix: 18.43,
+    vxn: 25.4,
     fearGreed: 63,
     bofa: 6.6,
     putCall: 0.52,
@@ -45,6 +48,7 @@ export const PANIC_HISTORY_SEED = [
   {
     date: "2026-05-16",
     vix: 17.7,
+    vxn: 25.1,
     fearGreed: 64,
     bofa: 6.6,
     putCall: 0.51,
@@ -57,6 +61,7 @@ export const PANIC_HISTORY_SEED = [
   {
     date: "2026-05-19",
     vix: 17.82,
+    vxn: 25.21,
     fearGreed: 66,
     bofa: 6.6,
     putCall: 0.5,
@@ -73,6 +78,7 @@ export const PANIC_HISTORY_SEED_MIN_DAYS = 5
 /** seed·LS 행에 값이 있는 지표 키 (차트 탭) */
 export const PANIC_HISTORY_METRIC_KEYS = [
   "vix",
+  "vxn",
   "fearGreed",
   "bofa",
   "putCall",

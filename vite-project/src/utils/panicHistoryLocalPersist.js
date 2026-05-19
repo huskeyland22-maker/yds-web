@@ -10,9 +10,9 @@ export const PANIC_HISTORY_LS_KEY = "panic_history"
 export const CYCLE_HISTORY_LS_KEY = "cycle_history"
 const MAX_ROWS = 500
 
-/** @typedef {{ date: string, vix?: number | null, fearGreed?: number | null, putCall?: number | null, move?: number | null, bofa?: number | null, skew?: number | null, highYield?: number | null, hyOas?: number | null, gsBullBear?: number | null, gsSentiment?: number | null, panicIndex?: number | null }} PanicHistoryRow */
+/** @typedef {{ date: string, vix?: number | null, vxn?: number | null, fearGreed?: number | null, putCall?: number | null, move?: number | null, bofa?: number | null, skew?: number | null, highYield?: number | null, hyOas?: number | null, gsBullBear?: number | null, gsSentiment?: number | null, panicIndex?: number | null }} PanicHistoryRow */
 
-const SEED_METRIC_CHECK_KEYS = ["fearGreed", "bofa", "putCall", "highYield", "move", "skew", "gsBullBear"]
+const SEED_METRIC_CHECK_KEYS = ["vxn", "fearGreed", "bofa", "putCall", "highYield", "move", "skew", "gsBullBear"]
 
 function rowHasSeedMetrics(row) {
   if (!row) return false
@@ -106,6 +106,7 @@ export function buildPanicHistoryRow(panicData, tradeDate) {
   return {
     date,
     vix: toNum(panicData.vix),
+    vxn: toNum(panicData.vxn),
     fearGreed: toNum(panicData.fearGreed ?? panicData.fear_greed),
     putCall: toNum(panicData.putCall ?? panicData.put_call),
     move: toNum(panicData.move),
@@ -209,6 +210,7 @@ export function panicHistoryLocalToCycleRows(rows) {
       return panicIndexRowToCycleChart({
         date: r.date,
         vix: r.vix,
+        vxn: r.vxn,
         fearGreed: r.fearGreed,
         fear_greed: r.fearGreed,
         putCall: r.putCall,
