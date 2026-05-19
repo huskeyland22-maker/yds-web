@@ -15,7 +15,9 @@ const BUILD_ID_KEY = "yds-build-id"
 const BUILD_VERSION_KEY = "yds-build-version"
 const HARD_RELOAD_AT_KEY = "yds-hard-reload-at"
 const PWA_LAST_SYNC_KEY = "yds-pwa-last-check-at"
-const PWA_UPDATE_EVENT = "yds:pwa-update-available"
+export const PWA_UPDATE_EVENT = "yds:pwa-update-available"
+const PWA_TOAST_DISMISS_KEY = "yds-pwa-toast-dismiss"
+const PWA_HTML_HEAL_PREFIX = "yds-pwa-html-heal-"
 const HARD_RELOAD_COOLDOWN_MS = 6000
 const VERSION_POLL_COOLDOWN_MS = 8000
 const UPDATE_NOTIFY_COOLDOWN_MS = 12_000
@@ -260,6 +262,38 @@ export async function estimateCacheStorageBytes() {
   return total
 }
 
+function htmlHealSessionKey(remoteBuildId) {
+  return `${PWA_HTML_HEAL_PREFIX}${remoteBuildId}`
+}
+
+export function isPwaUpdateToastDismissed(remoteBuildId) {
+  if (!remoteBuildId) return false
+  try {
+    const raw = safeRead("sessionStorage", PWA_TOAST_DISMISS_KEY)
+    if (!raw) return false
+    const parsed = JSON.parse(raw)
+    if (String(parsed?.buildId) !== String(remoteBuildId)) return false
+    const until = Number(parsed?.until)
+    return Number.isFinite(until) && Date.now() < until
+  } catch {
+    return false
+  }
+}
+
+/** 토스트 "닫기" — 같은 배포에 대해 30분간 알림 억제 */
+export function dismissPwaUpdateToast(remoteBuildId, ttlMs = 30 * 60 * 1000) {
+  if (!remoteBuildId) return
+  try {
+    safeWrite(
+      "sessionStorage",
+      PWA_TOAST_DISMISS_KEY,
+      JSON.stringify({ buildId: String(remoteBuildId), until: Date.now() + ttlMs }),
+    )
+  } catch {
+    // ignore
+  }
+}
+
 export async function triggerServiceWorkerUpdate() {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return
   try {
@@ -275,6 +309,9 @@ export async function triggerServiceWorkerUpdate() {
  */
 export function notifyUpdateAvailable(reason, remoteMeta) {
   if (typeof window === "undefined") return
+  const remoteBuildId = remoteMeta?.buildId != null ? String(remoteMeta.buildId) : null
+  if (remoteBuildId && isPwaUpdateToastDismissed(remoteBuildId)) return
+
   const state = getGlobalState()
   const now = Date.now()
   if (now - (state.lastUpdateNotifyAt || 0) < UPDATE_NOTIFY_COOLDOWN_MS) return
@@ -310,43 +347,39 @@ function buildPwaReloadUrl() {
   return `${next.pathname}${next.search}${next.hash}`
 }
 
-/** 사용자 "지금 업데이트" — SW skipWaiting 시도 후 항상 hard reload (waiting SW 없으면 updateSW만으로는 reload 안 됨) */
+/**
+ * 사용자 "지금 업데이트" — iOS PWA는 단순 reload만으로 HTML shell이 안 바뀌므로
+ * SW 해제 + Cache Storage 비운 뒤 hard reload (evictStaleBuildAndReload).
+ */
 export async function applyPwaUpdate() {
-  if (typeof window === "undefined") return
+  if (typeof window === "undefined") return false
 
+  let remote = null
   try {
     const probe = window.__YDS_BUILD_CHECK
     if (probe?.remoteBuildId) {
-      safeWrite("localStorage", BUILD_ID_KEY, String(probe.remoteBuildId))
-      if (probe.remoteVersion) safeWrite("localStorage", BUILD_VERSION_KEY, String(probe.remoteVersion))
+      remote = {
+        buildId: String(probe.remoteBuildId),
+        version: typeof probe.remoteVersion === "string" ? probe.remoteVersion : undefined,
+      }
     }
   } catch {
     // ignore
   }
-
-  const fn = window.__YDS_UPDATE_SW
-  if (typeof fn === "function") {
-    try {
-      await Promise.race([
-        fn(true),
-        new Promise((resolve) => setTimeout(resolve, 2000)),
-      ])
-    } catch {
-      // continue to reload
-    }
-  } else {
-    await triggerServiceWorkerUpdate()
-    try {
-      const regs = await navigator.serviceWorker.getRegistrations()
-      for (const reg of regs) {
-        reg.waiting?.postMessage?.({ type: "SKIP_WAITING" })
-      }
-    } catch {
-      // ignore
-    }
+  if (!remote?.buildId) {
+    remote = await fetchLatestBuildMeta().catch(() => null)
   }
 
-  window.location.replace(buildPwaReloadUrl())
+  if (remote?.buildId) {
+    safeWrite("sessionStorage", htmlHealSessionKey(String(remote.buildId)), "1")
+  }
+
+  const reloaded = await evictStaleBuildAndReload("user-pwa-update", remote, { force: true })
+  if (!reloaded) {
+    window.location.replace(buildPwaReloadUrl())
+    return true
+  }
+  return reloaded
 }
 
 export async function forcePwaCacheClear() {
@@ -401,12 +434,18 @@ function showUpdateBanner() {
  * Honors a 6s cooldown so a misbehaving server can't put us into an
  * infinite reload loop.
  */
-export async function evictStaleBuildAndReload(reason, latestMeta) {
+export async function evictStaleBuildAndReload(reason, latestMeta, options = {}) {
   if (typeof window === "undefined") return false
+  const force = options?.force === true
 
   const now = Date.now()
   const last = Number(safeRead("sessionStorage", HARD_RELOAD_AT_KEY) || "0")
-  if (Number.isFinite(last) && last > 0 && now - last < HARD_RELOAD_COOLDOWN_MS) {
+  if (
+    !force &&
+    Number.isFinite(last) &&
+    last > 0 &&
+    now - last < HARD_RELOAD_COOLDOWN_MS
+  ) {
     console.warn("[PWA] stale-build detected but cooldown active — skipping reload", reason)
     return false
   }
@@ -417,6 +456,7 @@ export async function evictStaleBuildAndReload(reason, latestMeta) {
 
   await unregisterAllServiceWorkers()
   await clearAllCacheStorage()
+  await sweepIosStandaloneCachesOnce()
   purgeOldBuildLocalStorage()
   for (const key of STALE_EVICT_EXTRA_LS_KEYS) {
     safeRemove("localStorage", key)
@@ -504,23 +544,43 @@ export async function checkAndEvictStaleBuild() {
     probeNote: "checking",
   })
 
+  const htmlShellStale =
+    htmlBuildId && (htmlBuildId !== remoteBuildId || (storedBuildId && htmlBuildId !== String(storedBuildId)))
+
+  if (htmlShellStale && storedBuildId === remoteBuildId) {
+    const healKey = htmlHealSessionKey(remoteBuildId)
+    if (!safeRead("sessionStorage", healKey)) {
+      safeWrite("sessionStorage", healKey, "1")
+      const reloaded = await evictStaleBuildAndReload("html-stale-shell", remote, { force: true })
+      return { remote, reloaded, updateAvailable: !reloaded }
+    }
+  }
+
   if (htmlBuildId && storedBuildId && htmlBuildId !== String(storedBuildId)) {
-    notifyUpdateAvailable("html-local-build-desync", remote)
+    if (!isPwaUpdateToastDismissed(remoteBuildId)) {
+      notifyUpdateAvailable("html-local-build-desync", remote)
+    }
     return { remote, reloaded: false, updateAvailable: true }
   }
 
   if (htmlBuildId && htmlBuildId !== remoteBuildId) {
-    notifyUpdateAvailable("html-build-mismatch", remote)
+    if (!isPwaUpdateToastDismissed(remoteBuildId)) {
+      notifyUpdateAvailable("html-build-mismatch", remote)
+    }
     return { remote, reloaded: false, updateAvailable: true }
   }
 
   if (storedBuildId && String(storedBuildId) !== remoteBuildId) {
-    notifyUpdateAvailable("client-build-mismatch", remote)
+    if (!isPwaUpdateToastDismissed(remoteBuildId)) {
+      notifyUpdateAvailable("client-build-mismatch", remote)
+    }
     return { remote, reloaded: false, updateAvailable: true }
   }
 
   if (remoteVersion && storedVersion && storedVersion !== remoteVersion) {
-    notifyUpdateAvailable("client-version-mismatch", remote)
+    if (!isPwaUpdateToastDismissed(remoteBuildId)) {
+      notifyUpdateAvailable("client-version-mismatch", remote)
+    }
     return { remote, reloaded: false, updateAvailable: true }
   }
 

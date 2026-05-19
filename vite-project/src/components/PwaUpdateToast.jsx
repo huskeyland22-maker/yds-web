@@ -1,31 +1,47 @@
 import { useCallback, useEffect, useState } from "react"
-import { applyPwaUpdate } from "../utils/pwaFreshness.js"
-
-const PWA_UPDATE_EVENT = "yds:pwa-update-available"
+import {
+  applyPwaUpdate,
+  dismissPwaUpdateToast,
+  isPwaUpdateToastDismissed,
+  PWA_UPDATE_EVENT,
+} from "../utils/pwaFreshness.js"
 
 /**
- * 신규 배포 감지 시 하단 토스트 — "지금 업데이트" 시 reload / SW skipWaiting.
+ * 신규 배포 감지 시 하단 토스트 — "지금 업데이트" 시 SW·캐시 정리 후 reload.
  */
 export default function PwaUpdateToast() {
   const [visible, setVisible] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [remoteBuildId, setRemoteBuildId] = useState(null)
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const onUpdate = () => setVisible(true)
+    const onUpdate = (event) => {
+      const id = event?.detail?.remoteBuildId != null ? String(event.detail.remoteBuildId) : null
+      if (id && isPwaUpdateToastDismissed(id)) return
+      if (id) setRemoteBuildId(id)
+      setVisible(true)
+      setBusy(false)
+    }
     window.addEventListener(PWA_UPDATE_EVENT, onUpdate)
     return () => window.removeEventListener(PWA_UPDATE_EVENT, onUpdate)
   }, [])
 
+  const onDismiss = useCallback(() => {
+    if (remoteBuildId) dismissPwaUpdateToast(remoteBuildId)
+    setVisible(false)
+    setBusy(false)
+  }, [remoteBuildId])
+
   const onApply = useCallback(() => {
     if (busy) return
     setBusy(true)
-    const safetyReload = window.setTimeout(() => {
-      window.location.reload()
-    }, 3500)
-    void applyPwaUpdate()
-      .catch(() => window.location.reload())
-      .finally(() => window.clearTimeout(safetyReload))
+    setVisible(false)
+    void applyPwaUpdate().catch(() => {
+      window.location.replace(
+        `${window.location.pathname}${window.location.search}${window.location.hash}`,
+      )
+    })
   }, [busy])
 
   if (!visible) return null
@@ -40,10 +56,18 @@ export default function PwaUpdateToast() {
       <button
         type="button"
         disabled={busy}
-        onClick={() => void onApply()}
+        onClick={onApply}
         className="mt-2 w-full rounded-lg border border-sky-400/40 bg-sky-500/20 py-2 text-[13px] font-semibold text-sky-50 transition active:bg-sky-500/35 disabled:opacity-60"
       >
         {busy ? "업데이트 중…" : "지금 업데이트"}
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={onDismiss}
+        className="mt-1.5 w-full py-1 text-[11px] text-slate-500 underline-offset-2 hover:text-slate-400"
+      >
+        나중에
       </button>
     </div>
   )
