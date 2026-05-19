@@ -78,7 +78,7 @@ export default defineConfig({
     react(),
     htmlBuildIdPlugin(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       injectRegister: false,
       filename: "sw.js",
       manifest: false,
@@ -89,7 +89,55 @@ export default defineConfig({
         /** 배포마다 변경 → 이전 precache·runtime 캐시 일괄 무효화 */
         cacheId: `yds-pwa-${BUILD_ID}`,
         globPatterns: ["**/*.{js,css,svg,ico,png,woff2,webp}"],
-        globIgnores: ["**/stats.html", "**/report.html"],
+        globIgnores: [
+          "**/index.html",
+          "**/build-version.json",
+          "**/manifest.webmanifest",
+          "**/manifest.json",
+          "**/client-env-manifest.json",
+          "**/panic-data.json",
+          "**/value-chain-data.js",
+          "**/stats.html",
+          "**/report.html",
+        ],
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "yds-html-pages",
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 },
+            },
+          },
+          {
+            urlPattern: ({ request, url }) =>
+              url.origin === self.location.origin &&
+              (request.destination === "script" || request.destination === "style"),
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "yds-js-css",
+              expiration: { maxEntries: 64, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            },
+          },
+          {
+            urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.startsWith("/api/"),
+            handler: "NetworkOnly",
+          },
+          {
+            urlPattern: ({ url }) =>
+              /\/api\/panic/i.test(url.pathname) ||
+              /\/panic-data/i.test(url.pathname) ||
+              /panic-data\.json$/i.test(url.pathname),
+            handler: "NetworkOnly",
+          },
+          {
+            urlPattern: /\/build-version\.json(\?.*)?$/i,
+            handler: "NetworkOnly",
+          },
+        ],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,

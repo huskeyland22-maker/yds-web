@@ -33,10 +33,8 @@
   <body>
     <div id="root"></div>
     <script type="module">
-      // Boot loader: runs the freshness gate BEFORE the app bundle is fetched.
-      // If the deployed build is newer than what this HTML belongs to, the gate
-      // unregisters service workers, purges Cache Storage and build-scoped
-      // localStorage, then hard-reloads with a cache-busting query string.
+      // Boot loader: 원격 build-version.json 과 HTML meta buildId 대조.
+      // 신규 배포 시 토스트로 안내(자동 hard reload 없음). chunk 404 등만 강제 eviction.
       import { checkAndEvictStaleBuild, installChunkLoadFailureRecovery } from "/src/utils/pwaFreshness.js"
 
       async function bootstrap() {

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { isDevMode } from "../../utils/devMode.js"
+import PwaDeveloperPanel from "../settings/PwaDeveloperPanel.jsx"
 
 const LINKS = [
   { to: "/cycle", label: "시장 사이클" },
@@ -63,6 +64,7 @@ export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion 
             Supabase 디버그
           </Link>
         ) : null}
+        <PwaDeveloperPanel />
       </nav>
       {buildVersion ? (
         <p className="m-0 border-t border-white/[0.06] px-3 py-2 font-mono text-[9px] text-slate-600">{buildVersion}</p>

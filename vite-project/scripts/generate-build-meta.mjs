@@ -1,8 +1,23 @@
+import { execSync } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 
+function resolveGitCommit() {
+  try {
+    return execSync("git rev-parse --short HEAD", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim()
+  } catch {
+    return "nogit"
+  }
+}
+
 const now = new Date()
-const buildId = String(Date.now())
+const gitCommit = resolveGitCommit()
+const timestamp = Date.now()
+/** 배포·PWA 갱신 단위 ID — git short SHA + 빌드 시각 */
+const buildId = `${gitCommit}-${timestamp}`
 
 const TZ = "Asia/Seoul"
 const y = new Intl.DateTimeFormat("en", { timeZone: TZ, year: "numeric" }).format(now)
@@ -38,8 +53,9 @@ const cacheId = `app-v${y}${mo}${da}-${String(seq).padStart(3, "0")}`
 
 const meta = {
   buildId,
+  gitCommit,
   version,
-  timestamp: Number(buildId),
+  timestamp,
   builtAt: now.toISOString(),
   cacheId,
   /** UI / 로그: 브라우저 Workbox 캐시 네임스페이스와 맞춤 (vite `workbox.cacheId`) */

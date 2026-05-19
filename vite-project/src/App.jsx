@@ -22,6 +22,7 @@ import {
 } from "./components/DataTraceBadge.jsx"
 import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
+import PwaUpdateToast from "./components/PwaUpdateToast.jsx"
 import SupabaseRawDebugPanel from "./components/SupabaseRawDebugPanel.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
@@ -1635,6 +1636,7 @@ function App() {
           {appToast.message}
         </div>
       ) : null}
+      <PwaUpdateToast />
       <MobileBottomNav
         onAi={openInputPanel}
         onSettings={() => setMobileDrawerOpen(true)}

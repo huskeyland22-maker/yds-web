@@ -11,8 +11,8 @@ import {
   installChunkLoadFailureRecovery,
   installLifecycleVersionPoller,
   installOnlineBuildRecheck,
-  invalidateServiceWorkerCachesAfterBuildMismatch,
   isIosStandalone,
+  notifyUpdateAvailable,
   unregisterAllServiceWorkers,
 } from "./utils/pwaFreshness.js"
 
@@ -97,14 +97,26 @@ async function bootstrapApp() {
   // arrives via bfcache (iOS sometimes restores a frozen WebView without re-
   // running module scripts) the gate is re-armed here as a second line of
   // defense. checkAndEvictStaleBuild() short-circuits if everything matches.
-  await invalidateServiceWorkerCachesAfterBuildMismatch()
-
   // index.html 부트에서 이미 freshness gate 실행 — reloaded 여도 앱은 항상 마운트 (iOS 빈 화면 방지)
   const gate = await checkAndEvictStaleBuild()
 
   try {
     const { registerSW } = await import("virtual:pwa-register")
-    registerSW({ immediate: true })
+    const updateSW = registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        notifyUpdateAvailable("sw-need-refresh", gate.remote)
+      },
+      onRegisteredSW(_swUrl, registration) {
+        if (!registration) return
+        window.setInterval(() => {
+          void registration.update()
+        }, 60 * 60 * 1000)
+      },
+    })
+    if (typeof window !== "undefined") {
+      window.__YDS_UPDATE_SW = updateSW
+    }
   } catch (e) {
     console.warn("[PWA] Service Worker registration unavailable", e)
   }

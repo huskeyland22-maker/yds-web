@@ -1,21 +1,11 @@
 // -----------------------------------------------------------------------------
-// PWA freshness — 빌드 메타(/build-version.json)와 HTML meta(buildId)를 대조해
-// stale 클라이언트는 SW·Cache Storage·스코프 LS 정리 후 hard reload.
+// PWA freshness — 원격 /build-version.json 과 로컬·HTML buildId 대조.
 //
-// 정상 경로: vite-plugin-pwa Workbox(`skipWaiting`+`clientsClaim`+`cleanupOutdatedCaches`)가
-// 동일 출처에서 해시 번들을 갱신한다. index.html 부트에서는 더 이상 매번 SW를 해제하지 않는다
-// (해제는 evictStaleBuildAndReload 내부에서만 수행).
+// 정상 갱신: Workbox(NetworkFirst HTML, SWR JS/CSS, NetworkOnly API/panic) + 토스트
+// (`yds:pwa-update-available`) → 사용자가 "지금 업데이트" 시 reload / updateSW(true).
 //
-// Boot + lifecycle:
-//   1) read build id from HTML (<meta name="app-build-id">)
-//   2) fetch /build-version.json via `liveDataFetch` (no-store + bust query)
-//   3) on mismatch: unregister all SW → clear Cache Storage → purge build-scoped LS → hard reload
-//
-// Architecture: hashed `/assets/*` only are long-lived (Vite); HTML/JSON/API are never SW-cached.
-// iOS standalone: optional one-shot Cache Storage sweep after SW unregister (`sweepIosStandaloneCachesOnce`).
-// Future Capacitor WebView: keep one origin; do not add a second precache SW for market data.
-//
-// Imported from index.html boot (before main bundle) and main.jsx — idempotent installs.
+// 강제 eviction(evictStaleBuildAndReload): chunk 404·동적 import 실패·stale-panic 1회 등만.
+// html-build-mismatch 는 더 이상 자동 hard reload 하지 않음.
 // -----------------------------------------------------------------------------
 
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
@@ -24,8 +14,11 @@ const BUILD_VERSION_ENDPOINT = "/build-version.json"
 const BUILD_ID_KEY = "yds-build-id"
 const BUILD_VERSION_KEY = "yds-build-version"
 const HARD_RELOAD_AT_KEY = "yds-hard-reload-at"
+const PWA_LAST_SYNC_KEY = "yds-pwa-last-check-at"
+const PWA_UPDATE_EVENT = "yds:pwa-update-available"
 const HARD_RELOAD_COOLDOWN_MS = 6000
 const VERSION_POLL_COOLDOWN_MS = 8000
+const UPDATE_NOTIFY_COOLDOWN_MS = 12_000
 
 // Explicit list of localStorage keys that are tied to a specific build /
 // PWA-runtime instance and should be cleared when we detect a stale build.
@@ -74,6 +67,7 @@ function getGlobalState() {
       lifecyclePollerInstalled: false,
       lastPollAt: 0,
       lastLifecycleResumeCheckAt: 0,
+      lastUpdateNotifyAt: 0,
     }
   if (!window[GLOBAL_FLAG_KEY]) {
     window[GLOBAL_FLAG_KEY] = {
@@ -81,6 +75,7 @@ function getGlobalState() {
       lifecyclePollerInstalled: false,
       lastPollAt: 0,
       lastLifecycleResumeCheckAt: 0,
+      lastUpdateNotifyAt: 0,
     }
   }
   return window[GLOBAL_FLAG_KEY]
@@ -221,6 +216,131 @@ function buildCacheBustUrl(reason) {
   next.searchParams.set("pwa_v", String(Date.now()))
   if (reason) next.searchParams.set("reason", reason)
   return `${next.pathname}${next.search}`
+}
+
+export function getLocalBuildId() {
+  return safeRead("localStorage", BUILD_ID_KEY) || ""
+}
+
+export function getLastBuildSyncAt() {
+  const raw = safeRead("sessionStorage", PWA_LAST_SYNC_KEY)
+  const n = Number(raw)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
+export function formatCacheBytes(bytes) {
+  const n = Number(bytes) || 0
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`
+}
+
+export async function estimateCacheStorageBytes() {
+  if (typeof window === "undefined" || !("caches" in window)) return 0
+  let total = 0
+  try {
+    const keys = await caches.keys()
+    for (const name of keys) {
+      const cache = await caches.open(name)
+      const reqs = await cache.keys()
+      for (const req of reqs) {
+        const res = await cache.match(req)
+        if (!res) continue
+        try {
+          const blob = await res.clone().blob()
+          total += blob.size || 0
+        } catch {
+          // ignore per-entry failures
+        }
+      }
+    }
+  } catch {
+    return 0
+  }
+  return total
+}
+
+export async function triggerServiceWorkerUpdate() {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations()
+    await Promise.all(regs.map((r) => r.update().catch(() => null)))
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * 신규 배포 감지 — 토스트·SW 업데이트 트리거 (자동 hard reload 없음).
+ */
+export function notifyUpdateAvailable(reason, remoteMeta) {
+  if (typeof window === "undefined") return
+  const state = getGlobalState()
+  const now = Date.now()
+  if (now - (state.lastUpdateNotifyAt || 0) < UPDATE_NOTIFY_COOLDOWN_MS) return
+  state.lastUpdateNotifyAt = now
+
+  publishBuildProbeSnapshot({
+    mismatch: reason,
+    updatePending: true,
+    remoteBuildId: remoteMeta?.buildId != null ? String(remoteMeta.buildId) : undefined,
+  })
+
+  void triggerServiceWorkerUpdate()
+
+  try {
+    window.dispatchEvent(
+      new CustomEvent(PWA_UPDATE_EVENT, {
+        detail: {
+          reason: String(reason || "update"),
+          remoteBuildId: remoteMeta?.buildId != null ? String(remoteMeta.buildId) : null,
+          remoteVersion: typeof remoteMeta?.version === "string" ? remoteMeta.version : null,
+          at: now,
+        },
+      }),
+    )
+  } catch {
+    // ignore
+  }
+}
+
+/** 사용자 "지금 업데이트" — vite-plugin-pwa updateSW 우선, 없으면 reload */
+export async function applyPwaUpdate() {
+  if (typeof window === "undefined") return
+  const fn = window.__YDS_UPDATE_SW
+  if (typeof fn === "function") {
+    try {
+      await fn(true)
+      return
+    } catch {
+      // fall through
+    }
+  }
+  await triggerServiceWorkerUpdate()
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations()
+    for (const reg of regs) {
+      reg.waiting?.postMessage?.({ type: "SKIP_WAITING" })
+    }
+  } catch {
+    // ignore
+  }
+  window.location.reload()
+}
+
+export async function forcePwaCacheClear() {
+  await unregisterAllServiceWorkers()
+  await clearAllCacheStorage()
+  purgeOldBuildLocalStorage()
+}
+
+export async function forcePwaUpdate() {
+  await triggerServiceWorkerUpdate()
+  const remote = await fetchLatestBuildMeta().catch(() => null)
+  if (remote?.buildId) {
+    notifyUpdateAvailable("force-update", remote)
+  }
+  await applyPwaUpdate()
 }
 
 function showUpdateBanner() {
@@ -364,27 +484,23 @@ export async function checkAndEvictStaleBuild() {
   })
 
   if (htmlBuildId && storedBuildId && htmlBuildId !== String(storedBuildId)) {
-    publishBuildProbeSnapshot({ mismatch: "html-local-build-desync" })
-    const reloaded = await evictStaleBuildAndReload("html-local-build-desync", remote)
-    return { remote, reloaded }
+    notifyUpdateAvailable("html-local-build-desync", remote)
+    return { remote, reloaded: false, updateAvailable: true }
   }
 
   if (htmlBuildId && htmlBuildId !== remoteBuildId) {
-    publishBuildProbeSnapshot({ mismatch: "html-build-mismatch" })
-    const reloaded = await evictStaleBuildAndReload("html-build-mismatch", remote)
-    return { remote, reloaded }
+    notifyUpdateAvailable("html-build-mismatch", remote)
+    return { remote, reloaded: false, updateAvailable: true }
   }
 
   if (storedBuildId && String(storedBuildId) !== remoteBuildId) {
-    publishBuildProbeSnapshot({ mismatch: "client-build-mismatch" })
-    const reloaded = await evictStaleBuildAndReload("client-build-mismatch", remote)
-    return { remote, reloaded }
+    notifyUpdateAvailable("client-build-mismatch", remote)
+    return { remote, reloaded: false, updateAvailable: true }
   }
 
   if (remoteVersion && storedVersion && storedVersion !== remoteVersion) {
-    publishBuildProbeSnapshot({ mismatch: "client-version-mismatch" })
-    const reloaded = await evictStaleBuildAndReload("client-version-mismatch", remote)
-    return { remote, reloaded }
+    notifyUpdateAvailable("client-version-mismatch", remote)
+    return { remote, reloaded: false, updateAvailable: true }
   }
 
   safeWrite("localStorage", BUILD_ID_KEY, remoteBuildId)
@@ -406,7 +522,7 @@ export async function checkAndEvictStaleBuild() {
   })
   try {
     const t = Date.now()
-    safeWrite("sessionStorage", "yds-pwa-last-check-at", String(t))
+    safeWrite("sessionStorage", PWA_LAST_SYNC_KEY, String(t))
     if (typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent("yds:build-version-synced", {
@@ -450,24 +566,47 @@ export async function checkBuildAfterLifecycleResume() {
 
 export async function getServiceWorkerDebugInfo() {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
-    return { registrations: 0, controlling: null, waiting: null, scopes: [] }
+    return {
+      registrations: 0,
+      controlling: null,
+      waiting: null,
+      installing: null,
+      active: null,
+      scopes: [],
+      cacheBytes: 0,
+    }
   }
   try {
     const regs = await navigator.serviceWorker.getRegistrations()
     const controlling = navigator.serviceWorker.controller?.scriptURL ?? null
     let waiting = null
+    let installing = null
+    let active = null
     for (const r of regs) {
-      const w = r.waiting || r.installing
-      if (w?.scriptURL) waiting = w.scriptURL
+      if (r.waiting?.scriptURL) waiting = r.waiting.scriptURL
+      if (r.installing?.scriptURL) installing = r.installing.scriptURL
+      if (r.active?.scriptURL) active = r.active.scriptURL
     }
+    const cacheBytes = await estimateCacheStorageBytes()
     return {
       registrations: regs.length,
       controlling,
       waiting,
+      installing,
+      active,
       scopes: regs.map((r) => r.scope),
+      cacheBytes,
     }
   } catch {
-    return { registrations: 0, controlling: null, waiting: null, scopes: [] }
+    return {
+      registrations: 0,
+      controlling: null,
+      waiting: null,
+      installing: null,
+      active: null,
+      scopes: [],
+      cacheBytes: 0,
+    }
   }
 }
 
@@ -573,8 +712,10 @@ export const __testing__ = {
   BUILD_ID_KEY,
   BUILD_VERSION_KEY,
   HARD_RELOAD_AT_KEY,
+  PWA_UPDATE_EVENT,
   HARD_RELOAD_COOLDOWN_MS,
   VERSION_POLL_COOLDOWN_MS,
+  UPDATE_NOTIFY_COOLDOWN_MS,
   VISIBILITY_RESUME_MIN_MS,
   BUILD_SCOPED_LS_KEYS,
   BUILD_SCOPED_LS_PREFIXES,
