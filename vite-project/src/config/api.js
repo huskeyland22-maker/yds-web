@@ -209,6 +209,22 @@ export async function fetchPanicIndexHistory(options = {}) {
   return json.rows
 }
 
+/** panic_index_history 최신 1건 — cycle 대시보드 mount·저장 직후용 */
+export async function fetchPanicIndexLatest() {
+  if (!isPanicHubEnabled()) return null
+  const url = withNoStoreQuery("/api/panic/history/latest")
+  if (isDataTraceEnabled()) logFetchStart("panic-index-latest", { url })
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  if (!res.ok) {
+    if (isDataTraceEnabled()) logFetchFail("panic-index-latest", new Error(`HTTP ${res.status}`), { url })
+    throw new Error(`panic latest HTTP ${res.status}`)
+  }
+  const json = await res.json()
+  const row = json?.row ?? (Array.isArray(json?.rows) ? json.rows[0] : null)
+  if (isDataTraceEnabled()) logFetchSuccess("panic-index-latest", { hasRow: Boolean(row), date: row?.date ?? null })
+  return row && typeof row === "object" ? row : null
+}
+
 export function listPanicDataUrlAttemptsForDisplay() {
   return buildPanicDataUrls()
 }

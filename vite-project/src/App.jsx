@@ -5,8 +5,9 @@ import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
-import { CYCLE_HISTORY_MAX, latestCycleHistoryRow } from "./utils/cycleHistoryUtils.js"
+import { CYCLE_HISTORY_MAX, latestCycleHistoryRow, panicDataFromCycleRow } from "./utils/cycleHistoryUtils.js"
 import { panicDeskDataFromHistory } from "./utils/panicHistoryDesk.js"
+import { rowCalendarKey } from "./utils/cycleHistoryHygiene.js"
 import { deskReportKey, generatePanicMarketReport } from "./utils/panicMarketReportEngine.js"
 import { calendarKeyFromPanic } from "./utils/cycleHistoryHygiene.js"
 import { kstCalendarKey } from "./utils/formatDataAge.js"
@@ -450,17 +451,22 @@ function App() {
   const [hubSaveGlow, setHubSaveGlow] = useState(false)
   const cycleMetricHistory = useAppDataStore((s) => s.cycleMetricHistory)
   const cycleHistorySource = useAppDataStore((s) => s.cycleHistorySource)
+  const deskSnapshotTradeDate = useAppDataStore((s) => s.deskSnapshotTradeDate)
 
   /** panic_index_history 최신 row — panic_metrics 혼합 금지 (허브) */
   const deskPanicData = useMemo(() => {
     if (isPanicHubEnabled()) {
       if (cycleMetricHistory?.length > 0) {
+        if (deskSnapshotTradeDate) {
+          const hit = cycleMetricHistory.find((r) => rowCalendarKey(r) === deskSnapshotTradeDate)
+          if (hit) return panicDataFromCycleRow(hit)
+        }
         return panicDeskDataFromHistory(cycleMetricHistory)
       }
       return null
     }
     return panicData
-  }, [panicData, cycleMetricHistory])
+  }, [panicData, cycleMetricHistory, deskSnapshotTradeDate])
   const [recentMemos, setRecentMemos] = useState(() => readRecentMemos())
 
   const parseResult = useMemo(() => {
@@ -653,10 +659,17 @@ function App() {
         try {
           const serverResult = await submitManualPanicData(payload)
           const serverData = serverResult?.data ?? serverResult
-          applyServerPanicSnapshot(serverData)
+          console.log("SAVE SUCCESS", { tradeDate, hub: false })
           const appStore = useAppDataStore.getState()
           appStore.invalidateCycleHistoryCache()
-          await appStore.loadCycleHistoryBundle({ limit: 500, force: true })
+          appStore.mergeCycleRowFromPanicPayload(serverData ?? payload, tradeDate)
+          const desk = await appStore.refreshDashboardAfterSave({
+            tradeDate,
+            payload: serverData ?? payload,
+            limit: 500,
+          })
+          applyServerPanicSnapshot(desk ?? serverData, { skipAutoRefresh: true })
+          console.log("UI UPDATED", { tradeDate, vix: desk?.vix ?? serverData?.vix })
           saveSucceeded = true
         } catch (err) {
           console.error("패닉지수 서버 저장 실패", err)
@@ -720,15 +733,19 @@ function App() {
   }, [])
 
   useEffect(() => {
-    void useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500 })
+    void (async () => {
+      const store = useAppDataStore.getState()
+      await store.loadCycleLatestSnapshot({ force: true })
+      await store.loadCycleHistoryBundle({ limit: 500 })
+    })()
   }, [])
 
   /** history refetch 후 panicStore 스냅샷 = 최신 history row (허브 데스크·기타 화면) */
   useEffect(() => {
     if (!isPanicHubEnabled() || !cycleMetricHistory?.length) return
-    const desk = panicDeskDataFromHistory(cycleMetricHistory)
-    if (desk) applyServerPanicSnapshot(desk)
-  }, [cycleMetricHistory, applyServerPanicSnapshot])
+    const desk = useAppDataStore.getState().resolveDeskPanicData()
+    if (desk) applyServerPanicSnapshot(desk, { skipAutoRefresh: true })
+  }, [cycleMetricHistory, deskSnapshotTradeDate, applyServerPanicSnapshot])
 
   useEffect(() => {
     void useAppDataStore.getState().fetchSectorHeat()
@@ -741,7 +758,11 @@ function App() {
         const table = evt?.table ?? "panic_index_history"
         logRealtime("postgres_change", { table })
         useAppDataStore.getState().markRealtimeEvent()
-        void useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
+        void (async () => {
+          const store = useAppDataStore.getState()
+          await store.loadCycleLatestSnapshot({ force: true })
+          await store.loadCycleHistoryBundle({ limit: 500, force: true })
+        })()
       },
     })
     return () => {

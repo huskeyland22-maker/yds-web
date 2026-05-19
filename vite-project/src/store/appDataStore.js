@@ -7,20 +7,24 @@ import { create } from "zustand"
 import {
   fetchCycleMetricsHistory,
   fetchPanicIndexHistory,
+  fetchPanicIndexLatest,
   isPanicHubEnabled,
 } from "../config/api.js"
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
 import {
+  buildCycleRowFromPanic,
   mergeCycleRows,
   normalizeCycleHistoryRows,
+  panicDataFromCycleRow,
   readCycleMetricHistoryFromLS,
   writeCycleMetricHistoryToLS,
 } from "../utils/cycleHistoryUtils.js"
-import { purgeStaleCycleLocalStorage } from "../utils/cycleHistoryHygiene.js"
+import { purgeStaleCycleLocalStorage, rowCalendarKey } from "../utils/cycleHistoryHygiene.js"
 import {
   buildChartDataFromHistory,
   historyRowsToCycleRows,
   logHistoryChartDebug,
+  panicDeskDataFromHistory,
 } from "../utils/panicHistoryDesk.js"
 import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
@@ -55,6 +59,9 @@ export const useAppDataStore = create((set, get) => ({
   deskMarketReport: null,
   deskMarketReportKey: null,
   deskMarketReportLoading: false,
+
+  /** 저장 직후 대시보드가 따라갈 trade date (YYYY-MM-DD) */
+  deskSnapshotTradeDate: null,
 
   setDeskMarketReport: (report, reportKey = null) => {
     set({
@@ -151,6 +158,93 @@ export const useAppDataStore = create((set, get) => ({
       rows: fresh.length,
       realtime: Boolean(meta.realtime),
     })
+  },
+
+  /**
+   * panic_index_history 최신 1건 — history 전체 대신 latest 우선 (cycle mount·저장 직후)
+   */
+  loadCycleLatestSnapshot: async (opts = {}) => {
+    const force = Boolean(opts.force)
+    const tradeDate =
+      typeof opts.tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(opts.tradeDate.slice(0, 10))
+        ? opts.tradeDate.slice(0, 10)
+        : null
+    if (!isPanicHubEnabled()) return null
+    logFetchStart("cycle-latest-snapshot", { force, tradeDate })
+    try {
+      const latest = await fetchPanicIndexLatest()
+      if (!latest?.date) {
+        console.warn("LATEST UPDATED — skipped (no row)")
+        return null
+      }
+      const fromHub = historyRowsToCycleRows([latest])
+      const cycleRow = fromHub[0] ?? null
+      if (!cycleRow) {
+        console.warn("LATEST UPDATED — skipped (row incomplete)")
+        return null
+      }
+      const prev = force ? [] : get().cycleMetricHistory
+      const merged = mergeCycleRows(prev, fromHub)
+      get()._commitCycleHistory(merged, {
+        source: "supabase-index-history",
+        realtime: true,
+      })
+      if (tradeDate) set({ deskSnapshotTradeDate: tradeDate })
+      console.log("LATEST UPDATED", {
+        date: cycleRow.date,
+        vix: cycleRow.vix,
+        fearGreed: cycleRow.fearGreed,
+        rows: merged.length,
+      })
+      return cycleRow
+    } catch (e) {
+      logFetchFail("cycle-latest-snapshot", e)
+      console.error("LATEST UPDATED — failed", e)
+      return null
+    }
+  },
+
+  /** 저장 payload를 즉시 cycle history에 병합 (서버 refetch 전 UI 반영) */
+  mergeCycleRowFromPanicPayload: (panicLike, tradeDate) => {
+    const row = buildCycleRowFromPanic({
+      ...(panicLike && typeof panicLike === "object" ? panicLike : {}),
+      updatedAt:
+        panicLike?.updatedAt ??
+        (tradeDate ? `${String(tradeDate).slice(0, 10)}T12:00:00.000Z` : undefined),
+    })
+    if (!row) return null
+    const merged = mergeCycleRows(get().cycleMetricHistory, [row])
+    get()._commitCycleHistory(merged, { source: "supabase-index-history", realtime: true })
+    if (tradeDate) set({ deskSnapshotTradeDate: String(tradeDate).slice(0, 10) })
+    return row
+  },
+
+  /** deskSnapshotTradeDate 우선, 없으면 최신 date */
+  resolveDeskPanicData: () => {
+    const rows = get().cycleMetricHistory ?? []
+    if (!rows.length) return null
+    const key = get().deskSnapshotTradeDate
+    if (key) {
+      const hit = rows.find((r) => rowCalendarKey(r) === key)
+      if (hit) return panicDataFromCycleRow(hit)
+    }
+    return panicDeskDataFromHistory(rows)
+  },
+
+  refreshDashboardAfterSave: async (opts = {}) => {
+    const tradeDate = opts.tradeDate ?? null
+    if (opts.payload) {
+      get().mergeCycleRowFromPanicPayload(opts.payload, tradeDate)
+    }
+    await get().loadCycleLatestSnapshot({ force: false, tradeDate })
+    await get().loadCycleHistoryBundle({ limit: opts.limit ?? 500, force: true })
+    const desk = get().resolveDeskPanicData()
+    console.log("DASHBOARD REFRESHED", {
+      rows: get().cycleMetricHistory?.length ?? 0,
+      tradeDate: get().deskSnapshotTradeDate,
+      vix: desk?.vix ?? null,
+    })
+    return desk
   },
 
   /**

@@ -15,7 +15,6 @@ import {
 } from "../utils/dataFlowTrace.js"
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 import { useAppDataStore } from "./appDataStore.js"
-import { panicDeskDataFromHistory } from "../utils/panicHistoryDesk.js"
 import { deskReportKey, generatePanicMarketReport } from "../utils/panicMarketReportEngine.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
@@ -433,6 +432,8 @@ export const usePanicStore = create((set, get) => ({
           : new Date().toISOString()
       const payload = { ...inputData, tradeDate, updatedAt }
       useAppDataStore.setState({ deskMarketReportLoading: true })
+      get().stopAutoRefresh()
+
       const result = await submitManualPanicData(payload)
       const data = result?.data ?? result
       const history = result?.history ?? null
@@ -440,17 +441,32 @@ export const usePanicStore = create((set, get) => ({
       if (!history?.ok) {
         useAppDataStore.setState({ deskMarketReportLoading: false })
         const reason = history?.reason || history?.error || "panic_index_history_upsert_failed"
+        console.error("SAVE SUCCESS — history upsert failed", reason)
         return { ok: false, error: new Error(String(reason)), history }
       }
+      console.log("SAVE SUCCESS", { tradeDate: tradeDate ?? null, historyDate: history?.date ?? null })
+
       const appStore = useAppDataStore.getState()
       appStore.invalidateCycleHistoryCache()
-      await appStore.loadCycleHistoryBundle({ limit: 500, force: true })
+      appStore.mergeCycleRowFromPanicPayload(data ?? payload, tradeDate)
 
-      const desk = panicDeskDataFromHistory(appStore.cycleMetricHistory)
+      const desk = await appStore.refreshDashboardAfterSave({
+        tradeDate,
+        payload: data ?? payload,
+        limit: 500,
+      })
       if (!desk) {
+        useAppDataStore.setState({ deskMarketReportLoading: false })
         return { ok: false, error: new Error("panic_index_history_empty_after_save"), history }
       }
-      get().applyServerPanicSnapshot(desk)
+
+      get().applyServerPanicSnapshot(desk, { skipAutoRefresh: true })
+      console.log("UI UPDATED", {
+        tradeDate: tradeDate ?? null,
+        vix: desk.vix,
+        fearGreed: desk.fearGreed,
+        updatedAt: desk.updatedAt,
+      })
 
       const report =
         apiReport && typeof apiReport === "object" && apiReport.summary
@@ -472,11 +488,12 @@ export const usePanicStore = create((set, get) => ({
       }
     } catch (err) {
       useAppDataStore.setState({ deskMarketReportLoading: false })
+      console.error("SAVE SUCCESS — pipeline failed", err)
       return { ok: false, error: err instanceof Error ? err : new Error(String(err)) }
     }
   },
 
-  applyServerPanicSnapshot: (incoming) => {
+  applyServerPanicSnapshot: (incoming, opts = {}) => {
     if (!incoming || typeof incoming !== "object") return
     const next = toSnapshotData(incoming)
     if (!isCompletePanicData(next)) {
@@ -510,7 +527,7 @@ export const usePanicStore = create((set, get) => ({
       },
     })
     addFlow(set, "set-from-server-submit", { updatedAt: next.updatedAt ?? null })
-    get().startAutoRefresh()
+    if (!opts.skipAutoRefresh) get().startAutoRefresh()
   },
 
   applyManualPanicData: (incoming) => {
