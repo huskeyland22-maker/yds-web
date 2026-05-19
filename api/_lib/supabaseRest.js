@@ -8,6 +8,7 @@ import {
   assertPanicMetricRowsNumeric,
   finalizePanicHistoryRow,
   finalizePanicMetricRows,
+  logPanicInsertPayloadTable,
 } from "./panicNumeric.js"
 
 function getSupabaseConfig() {
@@ -32,13 +33,7 @@ function prepareSupabaseBody(pathQuery, body) {
       source: "supabaseRest",
     })
     assertPanicMetricRowsNumeric(rows)
-    console.table(
-      rows.map((r) => ({
-        metric_key: r.metric_key,
-        metric_value: r.metric_value,
-        type: typeof r.metric_value,
-      })),
-    )
+    logPanicInsertPayloadTable(rows, "SUPABASE_INSERT_PRE")
     return Array.isArray(body) ? rows : rows[0]
   }
 
@@ -83,10 +78,23 @@ export async function supabaseRest(pathQuery, opts = {}) {
       ? prepareSupabaseBody(pathQuery, opts.body)
       : opts.body
 
+  const isPanicMetricsWrite =
+    String(pathQuery).startsWith("panic_metrics") &&
+    method !== "GET" &&
+    method !== "HEAD" &&
+    preparedBody !== undefined
+
+  if (isPanicMetricsWrite) {
+    console.log("INSERT_START", { path: pathQuery, method })
+    logPanicInsertPayloadTable(preparedBody, "INSERT_START_PAYLOAD")
+  }
+
+  const jsonBody = preparedBody !== undefined ? JSON.stringify(preparedBody) : undefined
+
   const res = await fetch(`${url}/rest/v1/${pathQuery}`, {
     method,
     headers,
-    body: preparedBody !== undefined ? JSON.stringify(preparedBody) : undefined,
+    body: jsonBody,
     cache: "no-store",
   })
   const text = await res.text()
@@ -100,7 +108,13 @@ export async function supabaseRest(pathQuery, opts = {}) {
   }
   if (!res.ok) {
     const msg = typeof json?.message === "string" ? json.message : text || res.statusText
+    if (isPanicMetricsWrite) {
+      console.error("INSERT_FAILED", { status: res.status, message: msg })
+    }
     throw new Error(`Supabase ${res.status}: ${msg}`)
+  }
+  if (isPanicMetricsWrite) {
+    console.log("INSERT_SUCCESS", { path: pathQuery, status: res.status })
   }
   return json
 }

@@ -8,12 +8,40 @@ export function metricValueForDb(value) {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : null
   }
+  // Never persist toFixed() strings — always parse back to number.
   const n = Number(
     String(value)
       .replace(/,/g, "")
       .trim(),
   )
   return Number.isFinite(n) ? n : null
+}
+
+/** Use when rounding is needed — never assign toFixed() result without parseFloat. */
+export function roundMetricValueForDb(value, decimals = 2) {
+  const n = metricValueForDb(value)
+  if (n == null) return null
+  return parseFloat(Number(n).toFixed(decimals))
+}
+
+/** Vercel log — insert payload types (metric_key / metric_name). */
+export function logPanicInsertPayloadTable(rows, label = "INSERT_PAYLOAD") {
+  const list = Array.isArray(rows) ? rows : [rows]
+  console.log(label)
+  console.table(
+    list.map((x) => ({
+      metric: x?.metric_name ?? x?.metric_key ?? "?",
+      value: x?.metric_value,
+      type: typeof x?.metric_value,
+    })),
+  )
+  const json = JSON.stringify(list)
+  const quotedMetricValue = /"metric_value"\s*:\s*"/.test(json)
+  if (quotedMetricValue) {
+    console.error(`${label}_JSON_STRING_METRIC_VALUE`, json.slice(0, 2000))
+  } else {
+    console.log(`${label}_JSON_OK`, "metric_value fields are JSON numbers (not quoted strings)")
+  }
 }
 
 /** @alias metricValueForDb */

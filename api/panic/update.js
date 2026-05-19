@@ -19,6 +19,7 @@ export default async function handler(req, res) {
   }
   try {
     const incoming = typeof req.body === "object" && req.body ? req.body : {}
+    console.log("SAVE_PAYLOAD_SERVER", "route-entry")
     console.log("[panic/update] route-body")
     for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
       if (key in incoming) {

@@ -1,6 +1,7 @@
 import {
   fetchPanicMetricsRows,
   panicObjectFromRows,
+  probePanicMetricsNumericInsert,
   rowsFromPanicSnapshot,
   upsertPanicMetricsRows,
 } from "./panicMetricsHub.js"
@@ -48,6 +49,15 @@ export async function persistPanicPayload(body, opts = {}) {
   const tradeDate = body?.tradeDate || body?.historyDate
   const requireHistory = opts.requireHistory ?? source === "manual"
   logPanicPipelineStage("1-incoming", body)
+  if (source === "manual") {
+    try {
+      const probe = await probePanicMetricsNumericInsert()
+      console.log("PROBE_INSERT_OK", probe)
+    } catch (probeErr) {
+      const msg = probeErr instanceof Error ? probeErr.message : String(probeErr)
+      console.error("PROBE_INSERT_FAILED", msg)
+    }
+  }
   const snap = normalizePanicPayload(
     { ...body, updatedAt: body.updatedAt || (tradeDate ? `${String(tradeDate).slice(0, 10)}T12:00:00.000Z` : new Date().toISOString()) },
     { tradeDate, source },

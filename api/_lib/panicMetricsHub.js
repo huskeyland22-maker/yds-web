@@ -1,5 +1,10 @@
 import { supabaseRest } from "./supabaseRest.js"
-import { assertPanicMetricRowsNumeric, finalizePanicMetricRows, toDbDouble } from "./panicNumeric.js"
+import {
+  assertPanicMetricRowsNumeric,
+  finalizePanicMetricRows,
+  logPanicInsertPayloadTable,
+  toDbDouble,
+} from "./panicNumeric.js"
 import { PANIC_METRIC_KEYS, panicObjectFromSnapshot, toPanicNum } from "./panicSnapshot.js"
 
 const METRIC_KEYS = PANIC_METRIC_KEYS
@@ -98,19 +103,36 @@ function isSchemaColumnError(err) {
   return /column|schema|does not exist|42703|PGRST204/i.test(msg)
 }
 
+/** Fixed numeric probe — isolates DB trigger/RPC vs app payload issues. */
+export async function probePanicMetricsNumericInsert() {
+  const row = {
+    metric_key: "__probe_numeric__",
+    metric_value: 17.82,
+    change_percent: null,
+    status: null,
+    market: "global",
+    source: "probe",
+    updated_at: new Date().toISOString(),
+  }
+  console.log("PROBE_INSERT_START", row.metric_value, typeof row.metric_value)
+  logPanicInsertPayloadTable([row], "PROBE_INSERT_PAYLOAD")
+  await supabaseRest("panic_metrics?on_conflict=metric_key", {
+    method: "POST",
+    prefer: "resolution=merge-duplicates,return=minimal",
+    body: [row],
+  })
+  console.log("PROBE_INSERT_SUCCESS")
+  return { ok: true, metric_key: row.metric_key, metric_value: row.metric_value }
+}
+
 export async function upsertPanicMetricsRows(rows, opts = {}) {
   const safe = finalizePanicMetricRows(rows, {
     log: Boolean(opts.log),
     source: opts.source ?? "upsert",
   })
   assertPanicMetricRowsNumeric(safe)
-  console.table(
-    safe.map((r) => ({
-      metric_key: r.metric_key,
-      metric_value: r.metric_value,
-      type: typeof r.metric_value,
-    })),
-  )
+  console.log("SAVE_PAYLOAD_SERVER")
+  logPanicInsertPayloadTable(safe, "SAVE_PAYLOAD_SERVER")
   try {
     return await supabaseRest("panic_metrics?on_conflict=metric_key", {
       method: "POST",
