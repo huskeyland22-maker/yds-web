@@ -19,6 +19,7 @@ import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
 const CHART_HEIGHT_DESKTOP = 300
 const CHART_HEIGHT_MOBILE = 280
+const EMPTY_HISTORY_HEIGHT = 80
 
 const HISTORY_TABS = [
   { id: "composite", label: "복합", key: null },
@@ -147,15 +148,23 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
 
   if (!hasHistory) {
     return (
-      <section className="trading-card-shell panic-v2-section mt-3 px-2 py-2 sm:px-2.5">
+      <section className="trading-card-shell panic-v2-section px-2 py-1 sm:px-2.5">
         <p className="m-0 text-[11px] font-bold text-slate-100">패닉 히스토리</p>
-        <p className="mt-3 text-center text-[10px] text-slate-500">히스토리 데이터 없음</p>
+        <div
+          className="mt-1.5 flex flex-col items-center justify-center rounded border border-white/[0.06] bg-black/20 text-center"
+          style={{ height: EMPTY_HISTORY_HEIGHT }}
+        >
+          <p className="m-0 text-[10px] font-semibold text-slate-300">📊 히스토리 수집중</p>
+          <p className="m-0 mt-0.5 text-[9px] leading-snug text-slate-500">
+            최근 3일 이상 데이터 누적시 표시
+          </p>
+        </div>
       </section>
     )
   }
 
   return (
-    <section className="trading-card-shell panic-v2-section mt-3 overflow-visible px-2 py-2 sm:px-2.5 sm:py-2.5">
+    <section className="trading-card-shell panic-v2-section overflow-visible px-2 py-2 sm:px-2.5 sm:py-2">
       <div className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-cyan-400/45 pl-2">
         <div>
           <p className="m-0 text-[11px] font-bold text-slate-100">패닉 히스토리</p>

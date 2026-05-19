@@ -43,7 +43,7 @@ export default function PanicMetricInsightPanel({
   return (
     <div
       className={[
-        "border-b px-2 py-2 sm:px-2.5",
+        "border-b px-2 py-1.5 sm:px-2.5",
         interpretTonePanelClass(brief.tone),
       ].join(" ")}
       role="region"

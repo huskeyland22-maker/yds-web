@@ -52,7 +52,7 @@ export default function PanicSectorFlowCard({ panicData, marketState }) {
   }
 
   return (
-    <section className="trading-card-shell overflow-hidden px-2.5 py-2.5 sm:px-3" aria-label="시장 섹터 흐름">
+    <section className="trading-card-shell overflow-hidden px-2.5 py-2 sm:px-3" aria-label="시장 섹터 흐름">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <p className="m-0 text-[9px] font-semibold tracking-[0.14em] text-slate-500">MARKET FLOW</p>

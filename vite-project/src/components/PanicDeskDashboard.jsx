@@ -49,7 +49,7 @@ function fmt(key, v) {
 function SectionLabel({ title, variant = "core" }) {
   const isExpert = variant === "expert"
   return (
-    <div className={isExpert ? "mb-1 mt-5" : "mb-1.5 mt-1"}>
+    <div className={isExpert ? "mb-1 mt-2" : "mb-1 mt-0.5"}>
       <p
         className={[
           "m-0 border-l-2 pl-2 text-left text-[11px] font-bold tracking-[0.02em]",
@@ -224,7 +224,7 @@ export default function PanicDeskDashboard({
   }, [asOfDateLabel, dataDateKey, loadDeskMarketReport])
 
   return (
-    <div className="panic-v2-desk relative space-y-1.5 sm:space-y-2">
+    <div className="panic-v2-desk relative">
       <div className="sticky top-0 z-20 -mx-0.5 flex justify-end border-b border-white/[0.04] bg-[#0B0E14]/90 px-1 py-0.5 backdrop-blur-sm">
         <div
           className="w-auto rounded border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-right leading-tight"
@@ -267,21 +267,22 @@ export default function PanicDeskDashboard({
               </span>
             ))}
           </div>
-          <div className="relative mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="relative mt-1 h-2 overflow-hidden rounded-full bg-white/[0.06] shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]">
             <div
-              className="absolute inset-y-0 left-0 rounded-full opacity-90"
+              className="absolute inset-y-0 left-0 rounded-full opacity-95"
               style={{
                 width: `${moodPct}%`,
                 background:
                   "linear-gradient(90deg, #ef4444 0%, #f97316 25%, #94a3b8 50%, #38bdf8 75%, #a78bfa 100%)",
+                boxShadow: "0 0 14px rgba(56,189,248,0.2)",
               }}
             />
             <div
-              className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#0b0e14]"
+              className="absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#0b0e14]"
               style={{
                 left: `${moodPct}%`,
                 backgroundColor: mood.color,
-                boxShadow: `0 0 12px ${mood.color}88`,
+                boxShadow: `0 0 14px ${mood.color}cc, 0 0 6px ${mood.color}88`,
               }}
               aria-hidden
             />
@@ -373,7 +374,6 @@ export default function PanicDeskDashboard({
       </SectionErrorBoundary>
 
       <PanicDeskChart
-        className="mt-3"
         rows={cycleMetricHistory}
         primarySeries={chartSeries}
         chartMetric={chartMetric}
