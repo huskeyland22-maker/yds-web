@@ -27,9 +27,19 @@ export default function PanicHistoryLabSection({ rows = [] }) {
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(rows, rangeId), [rows, rangeId])
 
-  const chartData = useMemo(() => buildPanicLabChartData(slicedRows), [slicedRows])
+  const chartData = useMemo(() => {
+    try {
+      return buildPanicLabChartData(slicedRows)
+    } catch (err) {
+      console.error("[PanicHistoryLabSection] buildPanicLabChartData", err)
+      return []
+    }
+  }, [slicedRows])
 
   const latest = useMemo(() => latestLabSnapshot(chartData), [chartData])
+
+  const hasHistory = Array.isArray(rows) && rows.length > 0
+  const hasChartData = chartData.length > 0
 
   const defaultWindow = useMemo(() => {
     const preset = LAB_CHART_RANGES.find((r) => r.id === rangeId)
@@ -38,6 +48,19 @@ export default function PanicHistoryLabSection({ rows = [] }) {
 
   const toggleSeries = (key) => {
     setVisibleKeys((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  if (!hasHistory) {
+    return (
+      <section className="trading-card-shell mt-6 overflow-hidden px-2.5 py-2.5 sm:px-3 sm:py-3">
+        <div className="border-l-2 border-cyan-400/50 pl-2">
+          <p className="m-0 text-[12px] font-bold text-slate-100">패닉 히스토리 랩</p>
+        </div>
+        <div className="mt-4 flex min-h-[120px] items-center justify-center rounded-lg border border-white/[0.06] bg-black/30 text-[11px] text-slate-500">
+          panic_index_history 데이터가 없습니다. 저장 후 다시 확인해 주세요.
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -118,11 +141,17 @@ export default function PanicHistoryLabSection({ rows = [] }) {
       </div>
 
       <div className="mt-3">
-        <PanicHistoryLabChart
-          data={chartData}
-          visibleKeys={visibleKeys}
-          defaultWindow={defaultWindow}
-        />
+        {hasChartData ? (
+          <PanicHistoryLabChart
+            data={chartData}
+            visibleKeys={visibleKeys}
+            defaultWindow={defaultWindow}
+          />
+        ) : (
+          <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-white/[0.06] bg-black/30 text-[11px] text-slate-500">
+            선택한 기간에 표시할 차트 데이터가 없습니다.
+          </div>
+        )}
       </div>
     </section>
   )

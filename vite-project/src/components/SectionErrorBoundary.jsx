@@ -2,7 +2,7 @@ import { Component } from "react"
 
 /**
  * 섹션 단위 오류 격리 — 한 카드가 터져도 나머지 라우트는 유지.
- * @extends {Component<{ children: import("react").ReactNode; label?: string; className?: string }>}
+ * @extends {Component<{ children: import("react").ReactNode; label?: string; className?: string; fallback?: import("react").ReactNode }>}
  */
 export default class SectionErrorBoundary extends Component {
   state = { error: null }
@@ -18,6 +18,7 @@ export default class SectionErrorBoundary extends Component {
   render() {
     const { error } = this.state
     if (error) {
+      if (this.props.fallback) return this.props.fallback
       const wrap = this.props.className ?? "rounded-xl border border-rose-500/25 bg-rose-950/20 px-4 py-4 text-sm text-rose-100/90"
       return (
         <section className={wrap} role="alert">

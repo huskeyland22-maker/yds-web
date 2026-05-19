@@ -15,6 +15,7 @@ import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 import PanicHistoryLabSection from "./PanicHistoryLabSection.jsx"
+import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
@@ -364,7 +365,16 @@ export default function PanicDeskDashboard({
         deskMarketReportLoading={deskMarketReportLoading}
       />
 
-      <PanicHistoryLabSection rows={cycleMetricHistory} />
+      <SectionErrorBoundary
+        label="패닉 히스토리 랩"
+        fallback={
+          <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
+            패닉 데이터 로딩 실패
+          </div>
+        }
+      >
+        <PanicHistoryLabSection rows={cycleMetricHistory} />
+      </SectionErrorBoundary>
 
       <PanicIndexHistorySection rows={cycleMetricHistory} />
     </div>

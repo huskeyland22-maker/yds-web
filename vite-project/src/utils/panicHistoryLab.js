@@ -112,14 +112,15 @@ function pctChange(curr, prev) {
  * @param {object[]} cycleRows
  */
 export function buildPanicLabChartData(cycleRows) {
-  const sorted = sortHistoryRowsAsc(cycleRows)
-  /** @type {Record<string, number | null>} */
-  let prevRaw = {}
-  let prevComposite = null
+  if (!Array.isArray(cycleRows) || cycleRows.length === 0) return []
 
-  return sorted.map((row) => {
+  const sorted = sortHistoryRowsAsc(cycleRows)
+
+  return sorted.map((row, index) => {
+    const prevRow = index > 0 ? sorted[index - 1] : row
     const date = String(row.date ?? row.ts ?? "").slice(0, 10)
     const composite = compositePanicScore(row)
+    const prevComposite = index > 0 ? compositePanicScore(prevRow) : composite
     const stage = resolvePanicMarketStage(composite)
 
     /** @type {Record<string, unknown>} */
@@ -135,18 +136,22 @@ export function buildPanicLabChartData(cycleRows) {
     for (const m of LAB_METRICS) {
       const raw = rowRaw(row, m.key)
       const norm = metricFearScore(m.key, raw)
-      const normKey = `${m.key}N`
-      const rawKey = `${m.key}Raw`
-      const chgKey = `${m.key}Chg`
-      point[rawKey] = raw
-      point[normKey] = norm
-      point[chgKey] = pctChange(raw, prevRaw[m.key] ?? null)
-      if (raw != null) prevRaw[m.key] = raw
-      if (norm != null) prevNorm[m.key] = norm
+      if (norm != null && Number.isNaN(norm)) continue
+
+      const prevRawVal = index > 0 ? rowRaw(prevRow, m.key) : raw
+      const prevNormVal =
+        index > 0 ? metricFearScore(m.key, prevRawVal) : norm
+
+      point[`${m.key}Raw`] = raw
+      point[`${m.key}N`] = norm
+      point[`${m.key}Chg`] = pctChange(raw, prevRawVal ?? null)
+
+      if (norm != null && prevNormVal != null && !Number.isNaN(norm) && !Number.isNaN(prevNormVal)) {
+        point[`${m.key}Delta`] = norm - prevNormVal
+      }
     }
 
     point.compositeChg = pctChange(composite, prevComposite)
-    if (composite != null) prevComposite = composite
 
     return point
   })
