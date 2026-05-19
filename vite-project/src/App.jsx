@@ -4,6 +4,7 @@ import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
+import { persistHistory } from "./utils/panicHistoryLocalPersist.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
 import { CYCLE_HISTORY_MAX, latestCycleHistoryRow, panicDataFromCycleRow } from "./utils/cycleHistoryUtils.js"
 import { panicDeskDataFromHistory } from "./utils/panicHistoryDesk.js"
@@ -692,9 +693,12 @@ function App() {
 
       if (saveSucceeded) {
         const savedAt = payload.updatedAt
+        const appAfterSave = useAppDataStore.getState()
+        const deskSnap = appAfterSave.resolveDeskPanicData() ?? normalizedParsedData
+        persistHistory(deskSnap, tradeDate)
         if (!isPanicHubEnabled()) {
           appendPanicIndexHistory({ ...normalizedParsedData, updatedAt: savedAt }, tradeDate)
-          await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
+          await appAfterSave.loadCycleHistoryBundle({ limit: 500, force: true })
         }
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()

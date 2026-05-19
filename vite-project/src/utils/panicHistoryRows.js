@@ -4,6 +4,10 @@
 
 import { PANIC_INDEX_HISTORY_KEY, panicIndexRowToCycleChart } from "./panicIndexHistory.js"
 import { HISTORY_SECTION_METRICS } from "./panicDeskMetrics.js"
+import {
+  panicHistoryLocalToCycleRows,
+  readPanicHistoryLocal,
+} from "./panicHistoryLocalPersist.js"
 
 function toNum(v) {
   if (v == null || v === "") return null
@@ -86,6 +90,9 @@ function mapRows(arr) {
 export function resolveCycleHistoryRows(rows) {
   const fromProp = mapRows(Array.isArray(rows) ? rows : [])
   if (fromProp.length) return fromProp
+
+  const fromPanicHistory = panicHistoryLocalToCycleRows(readPanicHistoryLocal())
+  if (fromPanicHistory.length) return fromPanicHistory
 
   if (typeof window === "undefined") return []
   try {

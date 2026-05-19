@@ -64,13 +64,13 @@ function buildChangeField(pct, rowCount, sessionsBack) {
   if (pct != null && Number.isFinite(pct)) {
     return { pct, text: formatHistoryChangePct(pct), pending: false }
   }
-  if (rowCount < 2) {
+  if (rowCount < 1) {
     return { pct: null, text: "수집중", pending: true }
   }
   if (rowCount <= sessionsBack) {
-    return { pct: null, text: "히스토리 부족", pending: true }
+    return { pct: null, text: "—", pending: false }
   }
-  return { pct: null, text: "히스토리 부족", pending: true }
+  return { pct: null, text: "—", pending: false }
 }
 
 /**

@@ -16,6 +16,12 @@ import {
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 import { useAppDataStore } from "./appDataStore.js"
 import { deskReportKey, generatePanicMarketReport } from "../utils/panicMarketReportEngine.js"
+import {
+  appendHistory,
+  buildPanicHistoryRow,
+  persistHistory,
+  saveHistory,
+} from "../utils/panicHistoryLocalPersist.js"
 
 const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const CURRENT_SNAPSHOT_VERSION = 2
@@ -415,6 +421,18 @@ export const usePanicStore = create((set, get) => ({
     return updated
   },
 
+  /** 패닉 지표 저장 — Hub API + localStorage panic_history */
+  submitPanicMetrics: async (inputData, opts = {}) => {
+    const tradeDate =
+      typeof opts.tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(opts.tradeDate)
+        ? opts.tradeDate.slice(0, 10)
+        : undefined
+    const historyRow = buildPanicHistoryRow(inputData, tradeDate)
+    console.log("history save (submitPanicMetrics pre)", historyRow)
+    if (historyRow) appendHistory(historyRow)
+    return get().savePanicMetricsHub(inputData, opts)
+  },
+
   savePanicMetricsHub: async (inputData, opts = {}) => {
     if (!isPanicHubEnabled()) {
       return { ok: false, error: new Error("panic_hub_disabled") }
@@ -483,6 +501,20 @@ export const usePanicStore = create((set, get) => ({
           report,
           result?.reportKey ?? deskReportKey(tradeDate ?? report.tradeDate),
         )
+      }
+
+      persistHistory(desk ?? data ?? payload, tradeDate, {
+        marketState: report?.regimeLabel ?? desk?.marketState ?? null,
+        sector: report?.priority_sector ?? report?.sector ?? null,
+      })
+      const cycleRows = useAppDataStore.getState().cycleMetricHistory ?? []
+      if (cycleRows.length) {
+        saveHistory(
+          cycleRows
+            .map((r) => buildPanicHistoryRow({ ...r, highYield: r.highYield, gsBullBear: r.gsBullBear }, r.date))
+            .filter(Boolean),
+        )
+        console.log("history rows", cycleRows.length)
       }
 
       return {

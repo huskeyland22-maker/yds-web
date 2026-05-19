@@ -31,6 +31,12 @@ import { hasPanicMetricValues, resolveLatestMetrics } from "../utils/resolveLate
 import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
 import {
+  panicHistoryLocalToCycleRows,
+  persistHistory,
+  persistHistoryFromCycleRows,
+  readPanicHistoryLocal,
+} from "../utils/panicHistoryLocalPersist.js"
+import {
   logFetchFail,
   logFetchStart,
   logFetchSuccess,
@@ -155,7 +161,7 @@ export const useAppDataStore = create((set, get) => ({
       cycleStaticFetchedAt: null,
       panicIndexFetchedAt: null,
     })
-    logStoreWrite("appDataStore.cycleHistory", { action: "invalidate-cache" })
+    logStoreWrite("appDataStore.cycleHistory", { action: "invalidate-cache", keepPanicHistoryLs: true })
   },
 
   purgeLegacyCycleStorage: () => {
@@ -175,6 +181,9 @@ export const useAppDataStore = create((set, get) => ({
   _commitCycleHistory: (rows, meta) => {
     const fresh = Array.isArray(rows) ? rows : []
     writeCycleMetricHistoryToLS(fresh)
+    if (fresh.length > 0) {
+      persistHistoryFromCycleRows(fresh)
+    }
     set({
       cycleMetricHistory: fresh,
       cycleHistorySource: meta.source ?? get().cycleHistorySource,
@@ -249,6 +258,7 @@ export const useAppDataStore = create((set, get) => ({
     if (!row) return null
     const merged = mergeCycleRows(get().cycleMetricHistory, [row])
     get()._commitCycleHistory(merged, { source: "supabase-index-history", realtime: true })
+    persistHistory(panicLike, tradeDate)
     if (tradeDate) set({ deskSnapshotTradeDate: String(tradeDate).slice(0, 10) })
     return row
   },
@@ -335,6 +345,18 @@ export const useAppDataStore = create((set, get) => ({
     logFetchStart("cycle-history-bundle", { limit, force })
     get().purgeLegacyCycleStorage()
 
+    let localHistory = readPanicHistoryLocal()
+    console.log("local history", localHistory.length, localHistory)
+
+    if (localHistory.length === 0) {
+      const desk = get().resolveDeskPanicData()
+      if (desk && Number.isFinite(Number(desk.vix))) {
+        persistHistory(desk, get().deskSnapshotTradeDate)
+        localHistory = readPanicHistoryLocal()
+        console.log("[YDS] seeded panic_history from live desk", localHistory.length)
+      }
+    }
+
     const hubOn = isPanicHubEnabled()
 
     if (hubOn) {
@@ -358,13 +380,17 @@ export const useAppDataStore = create((set, get) => ({
         if (cycleRows.length < 1 && hubRows.length > 0) {
           cycleRows = historyRowsToCycleRows(hubRows)
         }
+        if (cycleRows.length < 1 && localHistory.length > 0) {
+          cycleRows = panicHistoryLocalToCycleRows(localHistory)
+          console.log("[YDS] loadCycleHistoryBundle local fallback", cycleRows.length)
+        }
         if (cycleRows.length < 1) {
           set({
             lastCycleBundleError: "panic_index_history_empty",
             panicIndexFetchedAt: Date.now(),
           })
           get()._commitCycleHistory([], { source: "none", realtime: true })
-          logFetchSuccess("cycle-history-bundle", { hubRows: 0, merged: 0, source: "none" })
+          logFetchSuccess("cycle-history-bundle", { hubRows: 0, merged: 0, source: "none", localHistory: localHistory.length })
           return { hubRows: [], fetchedAt: null, merged: [] }
         }
 
