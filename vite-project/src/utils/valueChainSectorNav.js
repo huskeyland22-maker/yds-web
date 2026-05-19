@@ -2,7 +2,8 @@
 export function clearValueChainHash() {
   if (typeof window === "undefined") return
   const path = window.location.pathname || "/value-chain"
-  history.replaceState(null, "", path)
+  const search = window.location.search || ""
+  history.replaceState(null, "", `${path}${search}`)
 }
 
 /** 섹터 이동 후 body/html 스크롤 잠금 잔여 제거 */

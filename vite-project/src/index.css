@@ -89,6 +89,14 @@
       margin-top: 0.5rem;
     }
   }
+
+  .panic-sector-chip-scroll {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .panic-sector-chip-scroll::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* 터치: 컴팩트 네비는 40px, 주요 FAB 는 기존 유지 */

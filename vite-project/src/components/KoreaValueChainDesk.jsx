@@ -16,11 +16,18 @@ const MOBILE_TABS = [
 /**
  * @param {{
  *   heatById?: Record<string, string>
+ *   initialSectorId?: string | null
+ *   highlightStockCode?: string | null
  *   onStockSelect: (payload: { stock: object; sectorName: string }) => void
  * }} props
  */
-export default function KoreaValueChainDesk({ heatById = {}, onStockSelect }) {
-  const [selectedId, setSelectedId] = useState("ai-semiconductor")
+export default function KoreaValueChainDesk({
+  heatById = {},
+  initialSectorId = null,
+  highlightStockCode = null,
+  onStockSelect,
+}) {
+  const [selectedId, setSelectedId] = useState(initialSectorId ?? "ai-semiconductor")
   const [mobileTab, setMobileTab] = useState("map")
 
   const sector = useMemo(
@@ -36,6 +43,21 @@ export default function KoreaValueChainDesk({ heatById = {}, onStockSelect }) {
       setMobileTab("map")
     }
   }, [])
+
+  useEffect(() => {
+    if (!initialSectorId) return
+    setSelectedId(initialSectorId)
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setMobileTab("map")
+    }
+  }, [initialSectorId])
+
+  useEffect(() => {
+    if (!highlightStockCode || !sector) return
+    const pool = [...(sector.stocks ?? []), ...(sector.subChains ?? []).flatMap((c) => c.stocks ?? [])]
+    const hit = pool.find((s) => String(s.code) === String(highlightStockCode))
+    if (hit) onStockSelect({ stock: hit, sectorName: sector.name })
+  }, [highlightStockCode, sector, onStockSelect])
 
   useEffect(() => {
     if (typeof window === "undefined") return

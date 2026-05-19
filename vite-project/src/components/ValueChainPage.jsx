@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { VALUE_CHAIN_SECTORS } from "../data/valueChainSectors.js"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { usePanicStore } from "../store/panicStore.js"
 import { ValueChainHeatTraceBadge } from "./DataTraceBadge.jsx"
+import { resolveGrowthSectorIdFromQuery } from "../utils/sectorFlowNav.js"
 import { ensurePageScrollUnlocked, scrollToValueChainSection } from "../utils/valueChainSectorNav.js"
 import KoreaValueChainDesk from "./KoreaValueChainDesk.jsx"
 import ValueChainStockPanel from "./ValueChainStockPanel.jsx"
@@ -15,8 +16,8 @@ const GROWTH_TO_VC_HEAT_IDS = {
   "nuclear-energy": ["nuclear-smr"],
   "robot-automation": ["on-device-ai-robotics"],
   "defense-space": ["defense", "aerospace"],
-  shipbuilding: ["defense"],
-  "bio-healthcare": ["biopharma"],
+  shipbuilding: ["shipbuilding-offshore"],
+  "bio-healthcare": ["biosimilar-cdmo"],
   "battery-materials": ["power-semiconductor-electronics"],
 }
 
@@ -30,6 +31,13 @@ export default function ValueChainPage({
   const panicData = panicFromStore ?? panicDataProp
   const sectorHeatMap = useAppDataStore((s) => s.sectorHeatMap)
   const fetchSectorHeat = useAppDataStore((s) => s.fetchSectorHeat)
+  const [searchParams] = useSearchParams()
+
+  const sectorFromQuery = useMemo(
+    () => resolveGrowthSectorIdFromQuery(searchParams.get("sector")),
+    [searchParams],
+  )
+  const stockCodeFromQuery = searchParams.get("code")
 
   const [sectors, setSectors] = useState(() => VALUE_CHAIN_SECTORS.map((s) => ({ ...s })))
   const [selected, setSelected] = useState(null)
@@ -152,7 +160,12 @@ export default function ValueChainPage({
 
         <ValueChainHeatTraceBadge className="mb-3" />
 
-        <KoreaValueChainDesk heatById={growthHeatById} onStockSelect={(payload) => setSelected(payload)} />
+        <KoreaValueChainDesk
+          heatById={growthHeatById}
+          initialSectorId={sectorFromQuery}
+          highlightStockCode={stockCodeFromQuery}
+          onStockSelect={(payload) => setSelected(payload)}
+        />
       </div>
 
       {selected ? (

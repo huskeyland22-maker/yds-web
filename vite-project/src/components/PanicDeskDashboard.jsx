@@ -14,6 +14,7 @@ import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDes
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
+import PanicSectorFlowCard from "./PanicSectorFlowCard.jsx"
 import PanicUnifiedHistorySection from "./PanicUnifiedHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
@@ -279,6 +280,8 @@ export default function PanicDeskDashboard({
           ) : null}
         </div>
       </section>
+
+      <PanicSectorFlowCard panicData={panicData} marketState={marketState} />
 
       <div>
         <SectionLabel title="핵심 패닉지수" variant="core" />
