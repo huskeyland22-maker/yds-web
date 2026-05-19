@@ -24,7 +24,7 @@ const CARD_THEMES = {
     glow: "shadow-[0_0_4px_rgba(251,146,60,0.1)]",
     hoverGlow: "hover:shadow-[0_0_4px_rgba(251,146,60,0.14)]",
     iconClass: "text-amber-300",
-    labelClass: "text-amber-200/70 opacity-70",
+    labelClass: "text-amber-200/80",
     headlineClass: "text-amber-50",
     Icon: TrendingUp,
   },
@@ -34,7 +34,7 @@ const CARD_THEMES = {
     glow: "shadow-[0_0_4px_rgba(34,211,238,0.08)]",
     hoverGlow: "hover:shadow-[0_0_4px_rgba(34,211,238,0.12)]",
     iconClass: "text-cyan-300",
-    labelClass: "text-cyan-200/70 opacity-70",
+    labelClass: "text-cyan-200/80",
     headlineClass: "text-cyan-50",
     Icon: Target,
   },
@@ -44,7 +44,7 @@ const CARD_THEMES = {
     glow: "shadow-[0_0_4px_rgba(52,211,153,0.08)]",
     hoverGlow: "hover:shadow-[0_0_4px_rgba(52,211,153,0.12)]",
     iconClass: "text-emerald-300",
-    labelClass: "text-emerald-200/70 opacity-70",
+    labelClass: "text-emerald-200/80",
     headlineClass: "text-emerald-50",
     Icon: BarChart3,
   },
@@ -54,7 +54,7 @@ const CARD_THEMES = {
     glow: "shadow-[0_0_4px_rgba(249,115,22,0.1)]",
     hoverGlow: "hover:shadow-[0_0_4px_rgba(249,115,22,0.14)]",
     iconClass: "text-orange-300",
-    labelClass: "text-orange-200/70 opacity-70",
+    labelClass: "text-orange-200/80",
     headlineClass: "text-orange-50",
     Icon: AlertTriangle,
   },
@@ -109,26 +109,31 @@ function ReportTerminalCard({ id, label, headline, detail }) {
   return (
     <article
       className={[
-        "card-report group relative flex min-h-[90px] max-h-[110px] flex-col overflow-hidden rounded-[14px] border p-3.5 transition-shadow duration-200",
+        "report-card group relative mb-0 flex h-[72px] min-h-[72px] max-h-[72px] flex-col justify-center overflow-hidden rounded-[14px] border px-[14px] py-[10px] transition-shadow duration-200",
         theme.border,
         theme.glow,
         theme.hoverGlow,
       ].join(" ")}
     >
       <div
-        className={["pointer-events-none absolute inset-0 bg-gradient-to-br opacity-80", theme.gradient].join(" ")}
+        className={["pointer-events-none absolute inset-0 bg-gradient-to-br opacity-75", theme.gradient].join(" ")}
         aria-hidden
       />
-      <div className="relative flex min-w-0 items-center gap-1">
-        <Icon className={["h-4 w-4 shrink-0", theme.iconClass].join(" ")} strokeWidth={2} aria-hidden />
-        <p className={["m-0 truncate text-[9px] font-semibold uppercase tracking-wide", theme.labelClass].join(" ")}>
+      <div className="relative mb-1 flex min-w-0 items-center gap-0.5">
+        <Icon className={["h-3 w-3 shrink-0 opacity-[0.65]", theme.iconClass].join(" ")} strokeWidth={2} aria-hidden />
+        <p
+          className={[
+            "m-0 truncate text-[10px] font-semibold uppercase tracking-wide opacity-[0.65]",
+            theme.labelClass,
+          ].join(" ")}
+        >
           {label}
         </p>
       </div>
 
       <p
         className={[
-          "relative m-0 mt-1 line-clamp-1 text-[20px] font-bold leading-tight tracking-tight",
+          "relative m-0 line-clamp-1 text-[16px] font-bold leading-[1.1] tracking-tight",
           theme.headlineClass,
         ].join(" ")}
         title={headline}
@@ -136,7 +141,7 @@ function ReportTerminalCard({ id, label, headline, detail }) {
         {headline}
       </p>
 
-      <p className="relative m-0 mt-auto line-clamp-1 text-[11px] leading-snug text-slate-400/90">{detail}</p>
+      <p className="relative m-0 mb-0 line-clamp-1 text-[10px] leading-[1.1] text-slate-400/90">{detail}</p>
     </article>
   )
 }
@@ -163,12 +168,12 @@ export default function PanicMarketReportPanel({ report = null, loading = false,
   const cards = buildReportCards(report, panicData)
 
   return (
-    <div className="border-t border-violet-500/10 bg-violet-500/[0.015] px-2 py-1.5 sm:px-2.5">
-      <p className="m-0 mb-1 border-l-2 border-violet-400/40 pl-2 text-[10px] font-semibold text-slate-300/80">
+    <div className="border-t border-violet-500/10 bg-violet-500/[0.015] px-2 py-1 sm:px-2.5">
+      <p className="m-0 mb-0 border-l-2 border-violet-400/40 pl-2 text-[10px] font-semibold text-slate-300/80">
         {"\uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8"}
       </p>
 
-      <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+      <div className="report-grid mt-2 grid grid-cols-2 items-stretch gap-2.5 sm:grid-cols-4">
         {cards.map((c) => (
           <ReportTerminalCard key={c.id} id={c.id} label={c.label} headline={c.headline} detail={c.detail} />
         ))}
