@@ -66,7 +66,13 @@ export default function PanicMarketActionPanel({ panicData = null, strategyBrief
             </span>
             {"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}
           </p>
-          <p className="ai-brief__body">{strategyBrief}</p>
+          <p className="ai-brief__body">
+            {strategyBrief.split(" · ").filter(Boolean).map((part, i) => (
+              <span key={`brief-${i}`} className="ai-brief__item">
+                {part}
+              </span>
+            ))}
+          </p>
         </div>
       ) : null}
     </div>
