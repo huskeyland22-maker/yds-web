@@ -1,74 +1,194 @@
+import {
+  AlertTriangle,
+  BarChart3,
+  Target,
+  TrendingUp,
+} from "lucide-react"
+
 /**
  * @param {{ report?: import("../utils/panicMarketReportEngine.js").PanicMarketReport | null; loading?: boolean }} props
  */
 
-const SUMMARY_CARD =
-  "flex min-h-[3.25rem] flex-col justify-center rounded-md border border-white/[0.08] bg-[#070a10]/90 px-2 py-1.5 text-center"
+/** @typedef {'market' | 'short' | 'mid' | 'risk'} ReportCardId */
 
-function clipLine(text, max = 10) {
-  if (text == null || text === "") return "—"
+const CARD_THEMES = {
+  market: {
+    gradient: "from-amber-500/30 via-orange-600/15 to-[#1a0f08]",
+    border: "border-amber-400/40",
+    glow: "shadow-[0_0_22px_rgba(251,146,60,0.22),inset_0_1px_0_rgba(251,191,36,0.12)]",
+    hoverGlow: "group-hover:shadow-[0_0_28px_rgba(251,146,60,0.35),0_4px_20px_rgba(0,0,0,0.35)]",
+    iconClass: "text-amber-300",
+    labelClass: "text-amber-200/75",
+    valueClass: "text-amber-50",
+    Icon: TrendingUp,
+    emoji: "\uD83D\uDD25",
+    radial: "radial-gradient(circle, rgba(251,191,36,0.45) 0%, transparent 70%)",
+  },
+  short: {
+    gradient: "from-cyan-500/28 via-sky-600/12 to-[#061018]",
+    border: "border-cyan-400/40",
+    glow: "shadow-[0_0_22px_rgba(34,211,238,0.2),inset_0_1px_0_rgba(103,232,249,0.1)]",
+    hoverGlow: "group-hover:shadow-[0_0_28px_rgba(34,211,238,0.32),0_4px_20px_rgba(0,0,0,0.35)]",
+    iconClass: "text-cyan-300",
+    labelClass: "text-cyan-200/75",
+    valueClass: "text-cyan-50",
+    Icon: Target,
+    emoji: "\uD83C\uDFAF",
+    radial: "radial-gradient(circle, rgba(34,211,238,0.4) 0%, transparent 70%)",
+  },
+  mid: {
+    gradient: "from-emerald-500/28 via-green-600/12 to-[#061210]",
+    border: "border-emerald-400/38",
+    glow: "shadow-[0_0_22px_rgba(52,211,153,0.2),inset_0_1px_0_rgba(110,231,183,0.1)]",
+    hoverGlow: "group-hover:shadow-[0_0_28px_rgba(52,211,153,0.32),0_4px_20px_rgba(0,0,0,0.35)]",
+    iconClass: "text-emerald-300",
+    labelClass: "text-emerald-200/75",
+    valueClass: "text-emerald-50",
+    Icon: BarChart3,
+    emoji: "\uD83D\uDCC8",
+    radial: "radial-gradient(circle, rgba(52,211,153,0.4) 0%, transparent 70%)",
+  },
+  risk: {
+    gradient: "from-orange-500/30 via-red-600/18 to-[#180a08]",
+    border: "border-orange-400/42",
+    glow: "shadow-[0_0_22px_rgba(249,115,22,0.22),inset_0_1px_0_rgba(251,146,60,0.1)]",
+    hoverGlow: "group-hover:shadow-[0_0_28px_rgba(239,68,68,0.3),0_4px_20px_rgba(0,0,0,0.35)]",
+    iconClass: "text-orange-300",
+    labelClass: "text-orange-200/75",
+    valueClass: "text-orange-50",
+    Icon: AlertTriangle,
+    emoji: "\u26A0",
+    radial: "radial-gradient(circle, rgba(249,115,22,0.45) 0%, transparent 70%)",
+  },
+}
+
+function clipLine(text, max = 12) {
+  if (text == null || text === "") return "\u2014"
   const s = String(text).replace(/\s+/g, " ").trim()
-  const first = s.split(/[.,\n·|]/)[0]?.trim() ?? s
+  const first = s.split(/[.,\n|]/)[0]?.trim() ?? s
   if (first.length <= max) return first
-  return `${first.slice(0, max)}…`
+  return `${first.slice(0, max)}\u2026`
 }
 
 function riskSummary(report) {
   const risks = Array.isArray(report?.risks) ? report.risks : report?.risk ? [report.risk] : []
   const raw = risks[0] ?? report?.risk_note ?? report?.risk ?? ""
   const t = String(raw)
-  if (/낮음|안정|제한|완화/i.test(t)) return "낮음"
-  if (/높음|경계|확대|스트레스|급등/i.test(t)) return "높음"
-  if (/보통|중립/i.test(t)) return "보통"
+  if (/\uB0AE\uC74C|\uC548\uC815|\uC81C\uD55C|\uC644\uD654/i.test(t)) return "\uB0AE\uC74C"
+  if (/\uB192\uC74C|\uACBD\uACC4|\uD655\uB300|\uC2A4\uD2B8\uB808\uC2A4|\uAE09\uB4F1/i.test(t)) return "\uB192\uC74C"
+  if (/\uBCF4\uD1B5|\uC911\uB9BD/i.test(t)) return "\uBCF4\uD1B5"
   return clipLine(t, 6)
 }
 
 function greedLabel(report) {
   const view = String(report?.market_view ?? report?.marketView ?? "")
-  if (/탐욕|과열|greed/i.test(view)) return "탐욕"
-  if (/공포|fear/i.test(view)) return "공포"
+  if (/\uD0D0\uC6B0\uAE50|\uACFC\uC5F4|greed/i.test(view)) return "\uD0D0\uC6B0\uAE50"
+  if (/\uACF5\uD3EC|fear/i.test(view)) return "\uACF5\uD3EC"
   if (report?.regimeLabel) {
-    if (/탐욕|과열/.test(report.regimeLabel)) return "탐욕"
-    if (/공포/.test(report.regimeLabel)) return "공포"
+    if (/\uD0D0\uC6B0\uAE50|\uACFC\uC5F4/.test(report.regimeLabel)) return "\uD0D0\uC6B0\uAE50"
+    if (/\uACF5\uD3EC/.test(report.regimeLabel)) return "\uACF5\uD3EC"
   }
-  if (report?.actionMode === "Risk-on") return "탐욕"
-  if (report?.actionMode === "Risk-off") return "공포"
-  return "중립"
+  if (report?.actionMode === "Risk-on") return "\uD0D0\uC6B0\uAE50"
+  if (report?.actionMode === "Risk-off") return "\uACF5\uD3EC"
+  return "\uC911\uB9BD"
 }
 
 function shortStrategyValue(report) {
   const raw = report?.shortTerm ?? report?.short_strategy ?? ""
   const t = String(raw)
-  if (/눌림/.test(t)) return "눌림 가능"
-  if (/매수/.test(t)) return "매수 검토"
-  if (/자제|축소|방어/.test(t)) return "방어"
+  if (/\uB204\uB98C/.test(t)) return "\uB204\uB98C \uAC00\uB2A5"
+  if (/\uB9E4\uC218/.test(t)) return "\uB9E4\uC218 \uAC80\uD1A0"
+  if (/\uC790\uC81C|\uCD95\uC18C|\uBC29\uC5B4/.test(t)) return "\uBC29\uC5B4"
   return clipLine(t, 8)
 }
 
 function midStrategyValue(report) {
   const raw = report?.midTerm ?? report?.mid_strategy ?? ""
   const t = String(raw)
-  if (/비중/.test(t)) return "비중확대"
-  if (/분할|회복/.test(t)) return "분할"
-  if (/축소|방어/.test(t)) return "비중축소"
+  if (/\uBE44\uC911/.test(t)) return "\uBE44\uC911 \uD655\uB300"
+  if (/\uBD84\uD560|\uD68C\uBCF5/.test(t)) return "\uBD84\uD560"
+  if (/\uCD95\uC18C|\uBC29\uC5B4/.test(t)) return "\uBE44\uC911\uCD95\uC18C"
   return clipLine(t, 8)
+}
+
+function marketStateValue(report) {
+  const greed = greedLabel(report)
+  if (greed !== "\uC911\uB9BD") return greed
+  return clipLine(report.regimeLabel || report.market_view, 8)
+}
+
+function riskDisplayValue(report) {
+  const risks = Array.isArray(report?.risks) ? report.risks : report?.risk ? [report.risk] : []
+  const raw = [risks.join(" "), report?.risk_note, report?.risk].filter(Boolean).join(" ")
+  const t = String(raw)
+  if (/\uD1B1|put\s*\/?\s*call|p\/c/i.test(t)) return "\uD1B1\uCF5C \uACFC\uC5F4"
+  return riskSummary(report)
 }
 
 /** @param {import("../utils/panicMarketReportEngine.js").PanicMarketReport} report */
 function buildSummaryCards(report) {
   return [
-    { label: "시장상태", value: clipLine(report.regimeLabel || report.market_view, 8) },
-    { label: "탐욕", value: greedLabel(report) },
-    { label: "단기", value: shortStrategyValue(report) },
-    { label: "리스크", value: riskSummary(report) },
+    { id: "market", label: "\uC2DC\uC7A5\uC0C1\uD0DC", value: marketStateValue(report) },
+    { id: "short", label: "\uB2E8\uAE30", value: shortStrategyValue(report) },
+    { id: "mid", label: "\uC911\uAE30", value: midStrategyValue(report) },
+    { id: "risk", label: "\uB9AC\uC2A4\uD06C", value: riskDisplayValue(report) },
   ]
+}
+
+/**
+ * @param {{ id: ReportCardId; label: string; value: string }} props
+ */
+function ReportTerminalCard({ id, label, value }) {
+  const theme = CARD_THEMES[id]
+  const { Icon, emoji } = theme
+
+  return (
+    <article
+      className={[
+        "group relative flex h-[94px] min-h-[90px] max-h-[100px] flex-col justify-between overflow-hidden",
+        "rounded-2xl border px-2 py-2 transition duration-200",
+        "hover:-translate-y-0.5",
+        theme.border,
+        theme.glow,
+        theme.hoverGlow,
+      ].join(" ")}
+    >
+      <div
+        className={["pointer-events-none absolute inset-0 bg-gradient-to-br", theme.gradient].join(" ")}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -right-3 -top-3 h-14 w-14 rounded-full opacity-40 blur-2xl"
+        style={{ background: theme.radial }}
+        aria-hidden
+      />
+      <div className="relative flex items-start justify-between gap-1">
+        <p className={["m-0 text-[9px] font-semibold uppercase tracking-[0.12em]", theme.labelClass].join(" ")}>
+          {label}
+        </p>
+        <Icon className={["h-3.5 w-3.5 shrink-0 opacity-90", theme.iconClass].join(" ")} strokeWidth={2.25} aria-hidden />
+      </div>
+      <p
+        className={[
+          "relative m-0 truncate text-[22px] font-bold leading-[1.1] tracking-tight",
+          theme.valueClass,
+        ].join(" ")}
+        title={value}
+      >
+        <span className="mr-0.5 text-[18px] not-italic" aria-hidden>
+          {emoji}
+        </span>
+        {value}
+      </p>
+    </article>
+  )
 }
 
 export default function PanicMarketReportPanel({ report = null, loading = false }) {
   if (loading) {
     return (
       <div className="border-t border-white/[0.06] px-2.5 py-2">
-        <p className="m-0 text-[10px] text-slate-500">시장 리포트 생성 중…</p>
+        <p className="m-0 text-[10px] text-slate-500">\uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8 \uC0DD\uC131 \uC911\u2026</p>
       </div>
     )
   }
@@ -76,7 +196,7 @@ export default function PanicMarketReportPanel({ report = null, loading = false 
   if (!report?.summary) {
     return (
       <div className="border-t border-white/[0.06] px-2.5 py-2">
-        <p className="m-0 text-[10px] text-slate-500">9대 지표 저장 후 오늘 시장 리포트가 자동 생성됩니다.</p>
+        <p className="m-0 text-[10px] text-slate-500">9\uB300 \uC9C0\uD45C \uC800\uC7A5 \uD6C4 \uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8\uAC00 \uC790\uB3D9 \uC0DD\uC131\uB429\uB2C8\uB2E4.</p>
       </div>
     )
   }
@@ -85,8 +205,8 @@ export default function PanicMarketReportPanel({ report = null, loading = false 
 
   return (
     <div className="border-t border-violet-500/15 bg-violet-500/[0.03] px-2 py-2 sm:px-2.5">
-      <div className="mb-1.5 flex flex-wrap items-center gap-1.5 border-l-2 border-violet-400/50 pl-2">
-        <p className="m-0 text-[11px] font-bold text-slate-200">오늘 시장 리포트</p>
+      <div className="mb-2 flex flex-wrap items-center gap-1.5 border-l-2 border-violet-400/50 pl-2">
+        <p className="m-0 text-[11px] font-bold text-slate-200">\uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8</p>
         {report.regimeLabel ? (
           <span className="rounded border border-white/10 bg-white/[0.04] px-1.5 py-px text-[8px] font-semibold text-slate-400">
             {report.regimeLabel}
@@ -99,21 +219,18 @@ export default function PanicMarketReportPanel({ report = null, loading = false 
         ) : null}
       </div>
 
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-4 gap-1.5">
         {cards.map((c) => (
-          <article key={c.label} className={SUMMARY_CARD}>
-            <p className="m-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500">{c.label}</p>
-            <p className="m-0 mt-0.5 text-[11px] font-bold leading-tight text-slate-100">{c.value}</p>
-          </article>
+          <ReportTerminalCard key={c.id} id={c.id} label={c.label} value={c.value} />
         ))}
       </div>
 
-      <p className="m-0 mt-1 text-center text-[9px] text-slate-500">
-        중기 {midStrategyValue(report)}
-        {report.priority_sector || report.sector
-          ? ` · ${clipLine(report.priority_sector || report.sector, 12)}`
-          : ""}
-      </p>
+      {report.priority_sector || report.sector ? (
+        <p className="m-0 mt-1.5 text-center text-[9px] text-slate-500">
+          \uC6B0\uC120 \uC139\uD130 \u00B7{" "}
+          <span className="text-cyan-200/85">{clipLine(report.priority_sector || report.sector, 14)}</span>
+        </p>
+      ) : null}
 
       {report.summary ? (
         <p className="m-0 mt-1 line-clamp-2 text-[9px] leading-snug text-slate-500">{report.summary}</p>
