@@ -1,4 +1,4 @@
-import { buildActionReportCards, buildStrategyBrief } from "../utils/panicMarketReportDisplay.js"
+import { buildActionReportCards } from "../utils/panicMarketReportDisplay.js"
 
 /**
  * @param {{
@@ -11,8 +11,8 @@ import { buildActionReportCards, buildStrategyBrief } from "../utils/panicMarket
 /** @typedef {import("../utils/panicMarketReportDisplay.js").ActionReportCardId} ReportCardId */
 
 const CARD_VARIANT = {
-  market: "report-card--cyan",
-  short: "report-card--orange",
+  market: "report-card--orange",
+  short: "report-card--cyan",
   mid: "report-card--green",
   risk: "report-card--red",
 }
@@ -59,24 +59,10 @@ export default function PanicMarketReportPanel({ report = null, loading = false,
   }
 
   const cards = buildActionReportCards(report, panicData)
-  const strategyBrief = buildStrategyBrief(report, panicData)
-  const briefLines = strategyBrief.split(" ? ").filter(Boolean)
 
   return (
     <div className="report-section">
-      <div className="ai-brief" role="note" aria-label={"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}>
-        <p className="ai-brief__title">
-          <span className="mr-1" aria-hidden>
-            {"\uD83E\uDDE0"}
-          </span>
-          {"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}
-        </p>
-        <p className="ai-brief__body line-clamp-2 sm:line-clamp-1">
-          {briefLines.length > 1 ? briefLines.join(" ? ") : strategyBrief}
-        </p>
-      </div>
-
-      <p className="m-0 mt-2 mb-1 text-[10px] font-semibold text-slate-400/90">{"\uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8"}</p>
+      <p className="m-0 mb-1.5 text-[10px] font-semibold text-slate-400/90">{"\uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8"}</p>
 
       <div className="report-grid">
         {cards.map((c) => (

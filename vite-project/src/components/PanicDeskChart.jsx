@@ -1,7 +1,9 @@
+import { useMemo } from "react"
 import PanicMarketActionPanel from "./PanicMarketActionPanel.jsx"
 import PanicMarketReportPanel from "./PanicMarketReportPanel.jsx"
 import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
+import { buildStrategyBrief } from "../utils/panicMarketReportDisplay.js"
 
 /**
  * 패닉 V2 — 차트는 PanicUnifiedHistorySection 단일 사용 (중복 제거)
@@ -26,9 +28,19 @@ export default function PanicDeskChart({
   const activeKey = chartMetric || "vix"
   const currentValue = panicData?.[activeKey]
 
+  const strategyBrief = useMemo(() => {
+    if (deskMarketReportLoading || !deskMarketReport?.summary) return ""
+    return buildStrategyBrief(deskMarketReport, panicData)
+  }, [deskMarketReport, deskMarketReportLoading, panicData])
+
   return (
     <section
-      className={["trading-card-shell panic-v2-section overflow-visible", className].filter(Boolean).join(" ")}
+      className={[
+        "trading-card-shell panic-v2-section panic-desk-report-block overflow-x-hidden overflow-y-visible",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <PanicMetricInsightPanel
         metricKey={activeKey}
@@ -37,7 +49,7 @@ export default function PanicDeskChart({
         panicData={panicData}
       />
       <SectionErrorBoundary label="시장 액션">
-        <PanicMarketActionPanel panicData={panicData} />
+        <PanicMarketActionPanel panicData={panicData} strategyBrief={strategyBrief} />
       </SectionErrorBoundary>
       <SectionErrorBoundary label="시장 리포트">
         <PanicMarketReportPanel

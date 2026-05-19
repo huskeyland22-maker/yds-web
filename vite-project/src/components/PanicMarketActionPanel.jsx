@@ -17,9 +17,9 @@ function buildActionRiskLine(panicData, guide) {
 }
 
 /**
- * @param {{ panicData?: object | null }} props
+ * @param {{ panicData?: object | null; strategyBrief?: string }} props
  */
-export default function PanicMarketActionPanel({ panicData = null }) {
+export default function PanicMarketActionPanel({ panicData = null, strategyBrief = "" }) {
   const guide = useMemo(() => computeMarketAction(panicData), [panicData])
 
   if (!guide) {
@@ -57,6 +57,18 @@ export default function PanicMarketActionPanel({ panicData = null }) {
           </div>
         ))}
       </div>
+
+      {strategyBrief ? (
+        <div className="ai-brief ai-brief--after-action" role="note" aria-label={"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}>
+          <p className="ai-brief__title">
+            <span className="mr-1" aria-hidden>
+              {"\uD83E\uDDE0"}
+            </span>
+            {"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}
+          </p>
+          <p className="ai-brief__body">{strategyBrief}</p>
+        </div>
+      ) : null}
     </div>
   )
 }
