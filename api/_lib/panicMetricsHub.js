@@ -1,5 +1,5 @@
 import { supabaseRest } from "./supabaseRest.js"
-import { sanitizePanicMetricRows, toDbDouble } from "./panicNumeric.js"
+import { assertPanicMetricRowsNumeric, finalizePanicMetricRows, toDbDouble } from "./panicNumeric.js"
 import { PANIC_METRIC_KEYS, panicObjectFromSnapshot, toPanicNum } from "./panicSnapshot.js"
 
 const METRIC_KEYS = PANIC_METRIC_KEYS
@@ -99,10 +99,18 @@ function isSchemaColumnError(err) {
 }
 
 export async function upsertPanicMetricsRows(rows, opts = {}) {
-  const safe = sanitizePanicMetricRows(rows, {
+  const safe = finalizePanicMetricRows(rows, {
     log: Boolean(opts.log),
     source: opts.source ?? "upsert",
   })
+  assertPanicMetricRowsNumeric(safe)
+  console.table(
+    safe.map((r) => ({
+      metric_key: r.metric_key,
+      metric_value: r.metric_value,
+      type: typeof r.metric_value,
+    })),
+  )
   try {
     return await supabaseRest("panic_metrics?on_conflict=metric_key", {
       method: "POST",

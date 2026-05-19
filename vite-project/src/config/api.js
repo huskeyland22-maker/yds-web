@@ -7,6 +7,10 @@ import {
   logFetchSuccess,
 } from "../utils/dataFlowTrace.js"
 import { LIVE_JSON_GET_INIT, LIVE_POST_JSON_INIT, withNoStoreQuery } from "./liveDataFetch.js"
+import {
+  assertPanicSubmitPayloadNumeric,
+  normalizePanicSubmitPayload,
+} from "../utils/panicDbNumeric.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -362,51 +366,28 @@ export async function fetchOptimizeResult(options = {}) {
   return res.json()
 }
 
-function toNumberOrNull(v) {
-  if (v == null || v === "") return null
-  if (typeof v === "number") return Number.isFinite(v) ? v : null
-  const s = String(v)
-    .trim()
-    .replace(/%/g, "")
-    .replace(/,/g, "")
-  if (!s) return null
-  const n = parseFloat(s)
-  return Number.isFinite(n) ? n : null
-}
-
-const PANIC_SUBMIT_NUMERIC_KEYS = [
-  "vix",
-  "vxn",
-  "fearGreed",
-  "putCall",
-  "bofa",
-  "move",
-  "skew",
-  "highYield",
-  "gsBullBear",
-]
-
 function normalizeManualPayload(data) {
-  if (!data || typeof data !== "object") return data
-  const out = {
-    ...data,
-    accessTier: "pro",
-    updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 16).replace("T", " "),
+  console.log("[panic pipeline] client-input")
+  if (data && typeof data === "object") {
+    for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
+      if (key in data) console.log("[panic pipeline] client-input", key, data[key], typeof data[key])
+    }
   }
-  for (const key of PANIC_SUBMIT_NUMERIC_KEYS) {
-    const alt =
-      key === "fearGreed" ? data.fear_greed : key === "putCall" ? data.put_call : key === "highYield" ? data.hy_oas : key === "gsBullBear" ? data.gs_bb : undefined
-    const raw = data[key] ?? alt
-    const num = toNumberOrNull(raw)
-    out[key] = num
-    console.log("[panic submit]", key, raw, typeof raw, "->", num, typeof num)
-  }
-  if (data.gs != null && out.gsBullBear == null) out.gsBullBear = toNumberOrNull(data.gs)
+  const out = normalizePanicSubmitPayload(data)
+  assertPanicSubmitPayloadNumeric(out)
+  console.log("[panic pipeline] client-payload-ready")
   return out
 }
 
 export async function submitManualPanicData(inputData) {
   const payload = normalizeManualPayload(inputData)
+  console.table(
+    ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"].map((key) => ({
+      metric: key,
+      value: payload?.[key],
+      type: typeof payload?.[key],
+    })),
+  )
   if (isPanicHubEnabled()) {
     const url = withNoStoreQuery("/api/panic/update")
     const res = await fetch(url, {

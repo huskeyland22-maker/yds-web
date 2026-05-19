@@ -6,6 +6,7 @@ import {
 } from "./panicMetricsHub.js"
 import { upsertPanicIndexHistoryBatch, upsertPanicIndexHistoryFromPayload } from "./panicIndexHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
+import { logPanicPipelineStage } from "./panicNumeric.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
 import { persistDeskMarketReport } from "./panicMarketReport.js"
 
@@ -46,10 +47,12 @@ export async function persistPanicPayload(body, opts = {}) {
   const source = opts.source || "api"
   const tradeDate = body?.tradeDate || body?.historyDate
   const requireHistory = opts.requireHistory ?? source === "manual"
+  logPanicPipelineStage("1-incoming", body)
   const snap = normalizePanicPayload(
     { ...body, updatedAt: body.updatedAt || (tradeDate ? `${String(tradeDate).slice(0, 10)}T12:00:00.000Z` : new Date().toISOString()) },
     { tradeDate, source },
   )
+  logPanicPipelineStage("2-snapshot", snap)
 
   let history = await upsertPanicIndexHistoryFromPayload(snap, { source, tradeDate: snap.tradeDate })
   if (Array.isArray(body.historyRows) && body.historyRows.length > 0) {
@@ -64,12 +67,26 @@ export async function persistPanicPayload(body, opts = {}) {
   }
 
   const rows = rowsFromPanicSnapshot(snap)
+  console.log("[panic pipeline] 3-metric-rows", rows.length)
+  for (const r of rows) {
+    console.log(
+      "[panic pipeline] 3-row",
+      r.metric_key,
+      r.metric_value,
+      typeof r.metric_value,
+    )
+  }
   let metricsError = null
   try {
     await upsertPanicMetricsRows(rows, { log: source === "manual", source })
   } catch (err) {
     metricsError = err instanceof Error ? err.message : String(err)
-    console.error("[panic] panic_metrics upsert failed (non-fatal)", metricsError)
+    console.error("[panic] panic_metrics upsert failed", metricsError)
+    if (source === "manual") {
+      const e = new Error(metricsError)
+      e.stage = "panic_metrics"
+      throw e
+    }
   }
 
   let fresh = []

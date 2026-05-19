@@ -1,5 +1,5 @@
 import { supabaseRest } from "./supabaseRest.js"
-import { sanitizePanicHistoryRow } from "./panicNumeric.js"
+import { assertPanicHistoryRowNumeric, finalizePanicHistoryRow } from "./panicNumeric.js"
 import {
   normalizePanicPayload,
   panicIndexHistoryRowFromSnapshot,
@@ -82,7 +82,13 @@ function isSchemaColumnError(err) {
 
 /** @param {Record<string, unknown>} row */
 async function postPanicIndexHistoryRow(row) {
-  const normalized = sanitizePanicHistoryRow(row)
+  const normalized = finalizePanicHistoryRow(row)
+  assertPanicHistoryRowNumeric(normalized)
+  for (const key of ["vix", "put_call", "fear_greed", "hy_oas", "bofa"]) {
+    if (key in normalized) {
+      console.log("[panic_index_history] pre-insert", key, normalized[key], typeof normalized[key])
+    }
+  }
   const core = {
     date: normalized.date,
     vix: normalized.vix,

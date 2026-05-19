@@ -3,6 +3,13 @@
  * Uses service role — never expose to the browser.
  */
 
+import {
+  assertPanicHistoryRowNumeric,
+  assertPanicMetricRowsNumeric,
+  finalizePanicHistoryRow,
+  finalizePanicMetricRows,
+} from "./panicNumeric.js"
+
 function getSupabaseConfig() {
   const url = String(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "").replace(/\/+$/, "")
   const key = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim()
@@ -12,6 +19,46 @@ function getSupabaseConfig() {
 export function isSupabaseConfigured() {
   const { url, key } = getSupabaseConfig()
   return Boolean(url && key)
+}
+
+/** Last gate before PostgREST — coerce numeric columns, never send strings. */
+function prepareSupabaseBody(pathQuery, body) {
+  if (body === undefined || body === null) return body
+  const path = String(pathQuery || "")
+
+  if (path.startsWith("panic_metrics")) {
+    const rows = finalizePanicMetricRows(Array.isArray(body) ? body : [body], {
+      log: true,
+      source: "supabaseRest",
+    })
+    assertPanicMetricRowsNumeric(rows)
+    console.table(
+      rows.map((r) => ({
+        metric_key: r.metric_key,
+        metric_value: r.metric_value,
+        type: typeof r.metric_value,
+      })),
+    )
+    return Array.isArray(body) ? rows : rows[0]
+  }
+
+  if (path.startsWith("panic_index_history")) {
+    const list = Array.isArray(body) ? body : [body]
+    const rows = list.map((row) => finalizePanicHistoryRow(row))
+    for (const row of rows) assertPanicHistoryRowNumeric(row)
+    console.table(
+      rows.map((r) => ({
+        date: r.date,
+        vix: r.vix,
+        vix_type: typeof r.vix,
+        put_call: r.put_call,
+        put_call_type: typeof r.put_call,
+      })),
+    )
+    return Array.isArray(body) ? rows : rows[0]
+  }
+
+  return body
 }
 
 /**
@@ -31,10 +78,15 @@ export async function supabaseRest(pathQuery, opts = {}) {
   }
   if (opts.prefer) headers.Prefer = opts.prefer
 
+  const preparedBody =
+    method !== "GET" && method !== "HEAD" && opts.body !== undefined
+      ? prepareSupabaseBody(pathQuery, opts.body)
+      : opts.body
+
   const res = await fetch(`${url}/rest/v1/${pathQuery}`, {
     method,
     headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    body: preparedBody !== undefined ? JSON.stringify(preparedBody) : undefined,
     cache: "no-store",
   })
   const text = await res.text()

@@ -431,6 +431,12 @@ export const usePanicStore = create((set, get) => ({
           ? `${tradeDate}T12:00:00.000Z`
           : new Date().toISOString()
       const payload = { ...inputData, tradeDate, updatedAt }
+      console.log("[panic pipeline] store-state")
+      for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
+        if (key in payload) {
+          console.log("[panic pipeline] store-state", key, payload[key], typeof payload[key])
+        }
+      }
       useAppDataStore.setState({ deskMarketReportLoading: true })
       get().stopAutoRefresh()
 

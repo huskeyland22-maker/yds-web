@@ -1,30 +1,32 @@
 /**
- * Supabase double precision columns — never send string numbers.
+ * Supabase double precision — never send string numbers.
  * @param {unknown} value
  * @returns {number | null}
  */
-export function toDbDouble(value) {
+export function metricValueForDb(value) {
   if (value == null || value === "") return null
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : null
   }
-  if (typeof value === "boolean") return null
-  const s = String(value)
-    .trim()
-    .replace(/%/g, "")
-    .replace(/,/g, "")
-    .replace(/[—–−]/g, "-")
-  if (!s || s === "-" || s === "null" || s === "undefined") return null
-  const n = parseFloat(s)
+  const n = Number(
+    String(value)
+      .replace(/,/g, "")
+      .trim(),
+  )
   return Number.isFinite(n) ? n : null
 }
 
+/** @alias metricValueForDb */
+export function toDbDouble(value) {
+  return metricValueForDb(value)
+}
+
 /** @param {Array<Record<string, unknown>>} rows */
-export function sanitizePanicMetricRows(rows, { log = false, source = "" } = {}) {
+export function finalizePanicMetricRows(rows, { log = false, source = "" } = {}) {
   if (!Array.isArray(rows)) return []
   return rows.map((row) => {
-    const metricValue = toDbDouble(row?.metric_value)
-    const changePercent = toDbDouble(row?.change_percent)
+    const metricValue = metricValueForDb(row?.metric_value)
+    const changePercent = metricValueForDb(row?.change_percent)
     if (log) {
       console.log(
         "[panic_metrics]",
@@ -39,28 +41,110 @@ export function sanitizePanicMetricRows(rows, { log = false, source = "" } = {})
       )
     }
     return {
-      ...row,
+      metric_key: String(row?.metric_key ?? ""),
       metric_value: metricValue,
       change_percent: changePercent,
+      status: row?.status == null ? null : String(row.status),
+      market: row?.market == null ? null : String(row.market),
+      source: row?.source == null ? null : String(row.source),
+      updated_at:
+        typeof row?.updated_at === "string" && row.updated_at
+          ? row.updated_at
+          : new Date().toISOString(),
     }
   })
 }
 
+/** @param {Array<{ metric_value: unknown }>} rows */
+export function assertPanicMetricRowsNumeric(rows) {
+  if (!Array.isArray(rows)) return
+  for (const x of rows) {
+    if (x.metric_value !== null && typeof x.metric_value !== "number") {
+      throw new Error(
+        `metric_value not number: key=${x.metric_key} value=${String(x.metric_value)} type=${typeof x.metric_value}`,
+      )
+    }
+    if (x.change_percent !== null && typeof x.change_percent !== "number") {
+      throw new Error(
+        `change_percent not number: key=${x.metric_key} type=${typeof x.change_percent}`,
+      )
+    }
+  }
+}
+
+/** @deprecated use finalizePanicMetricRows */
+export function sanitizePanicMetricRows(rows, opts = {}) {
+  return finalizePanicMetricRows(rows, opts)
+}
+
+const HISTORY_DOUBLE_KEYS = [
+  "vix",
+  "vxn",
+  "fear_greed",
+  "put_call",
+  "move",
+  "bofa",
+  "skew",
+  "hy_oas",
+  "high_yield",
+  "gs_sentiment",
+  "gs_bb",
+]
+
 /** @param {Record<string, unknown>} row */
-export function sanitizePanicHistoryRow(row) {
+export function finalizePanicHistoryRow(row) {
   if (!row || typeof row !== "object") return row
-  return {
-    ...row,
-    vix: toDbDouble(row.vix),
-    vxn: toDbDouble(row.vxn),
-    fear_greed: toDbDouble(row.fear_greed),
-    put_call: toDbDouble(row.put_call),
-    move: toDbDouble(row.move),
-    bofa: toDbDouble(row.bofa),
-    skew: toDbDouble(row.skew),
-    hy_oas: toDbDouble(row.hy_oas),
-    gs_sentiment: toDbDouble(row.gs_sentiment),
-    high_yield: toDbDouble(row.high_yield),
-    gs_bb: toDbDouble(row.gs_bb),
+  /** @type {Record<string, unknown>} */
+  const out = {
+    date: String(row.date ?? "").slice(0, 10),
+    source: row.source == null ? "manual" : String(row.source),
+    updated_at:
+      typeof row.updated_at === "string" && row.updated_at
+        ? row.updated_at
+        : new Date().toISOString(),
+    market: row.market == null ? "global" : String(row.market),
+  }
+  for (const key of HISTORY_DOUBLE_KEYS) {
+    if (key in row) out[key] = metricValueForDb(row[key])
+  }
+  return out
+}
+
+/** @deprecated use finalizePanicHistoryRow */
+export function sanitizePanicHistoryRow(row) {
+  return finalizePanicHistoryRow(row)
+}
+
+/** @param {Record<string, unknown>} row */
+export function assertPanicHistoryRowNumeric(row) {
+  if (!row || typeof row !== "object") return
+  for (const key of HISTORY_DOUBLE_KEYS) {
+    if (!(key in row)) continue
+    const v = row[key]
+    if (v !== null && typeof v !== "number") {
+      throw new Error(`panic_index_history.${key} not number: ${String(v)} type=${typeof v}`)
+    }
+  }
+}
+
+export function logPanicPipelineStage(stage, data) {
+  console.log(`[panic pipeline] ${stage}`)
+  if (!data || typeof data !== "object") return
+  const keys = [
+    "vix",
+    "vxn",
+    "fearGreed",
+    "putCall",
+    "bofa",
+    "move",
+    "skew",
+    "highYield",
+    "gsBullBear",
+  ]
+  for (const key of keys) {
+    if (key in data) {
+      const v = data[key]
+      console.log("[panic pipeline]", stage, key, v, typeof v)
+    }
   }
 }
