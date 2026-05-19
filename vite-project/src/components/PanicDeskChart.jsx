@@ -26,7 +26,11 @@ export default function PanicDeskChart({
   const currentValue = panicData?.[activeKey]
 
   return (
-    <section className={["trading-card-shell panic-v2-section overflow-visible", className].filter(Boolean).join(" ")}>
+    <section
+      className={["trading-card-shell panic-v2-section panic-desk-stack overflow-visible", className]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <PanicMetricInsightPanel
         metricKey={activeKey}
         currentValue={currentValue}

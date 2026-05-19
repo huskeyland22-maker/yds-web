@@ -62,7 +62,7 @@ export default function PanicMarketReportPanel({ report = null, loading = false,
   const strategyBrief = buildStrategyBrief(report, panicData)
 
   return (
-    <div className="report-section border-t border-cyan-500/10 bg-cyan-500/[0.02] px-2 sm:px-2.5">
+    <div className="report-section">
       <div className="ai-brief" role="note" aria-label={"\uC624\uB298 \uC804\uB7B5 \uBE0C\uB9AC\uD551"}>
         <p className="ai-brief__title">
           <span className="mr-1" aria-hidden>

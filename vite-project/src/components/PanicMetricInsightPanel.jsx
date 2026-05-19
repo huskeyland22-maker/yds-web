@@ -42,10 +42,7 @@ export default function PanicMetricInsightPanel({
 
   return (
     <div
-      className={[
-        "border-b px-2 py-1.5 sm:px-2.5",
-        interpretTonePanelClass(brief.tone),
-      ].join(" ")}
+      className={["panic-desk-insight border-b", interpretTonePanelClass(brief.tone)].join(" ")}
       role="region"
       aria-label={`${brief.metricTitle} 해석`}
     >
@@ -57,9 +54,9 @@ export default function PanicMetricInsightPanel({
           ) : null}
         </p>
       </div>
-      <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-5">
+      <div className="mt-1.5 grid grid-cols-2 gap-x-2.5 gap-y-1.5 sm:grid-cols-5 sm:gap-x-3">
         {rows.map((r) => (
-          <div key={r.label} className="flex min-w-0 items-baseline gap-1.5 text-[9px] leading-snug">
+          <div key={r.label} className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-1.5 text-[9px] leading-snug">
             <span className="shrink-0 text-slate-500">{r.label}</span>
             <span
               className={[

@@ -1,8 +1,6 @@
 import { useMemo } from "react"
 import { computeMarketAction, pickMetricValue } from "../utils/panicMarketActionEngine.js"
 
-const FIELD_LABEL = "shrink-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500"
-
 /**
  * @param {object | null} panicData
  * @param {import("../utils/panicMarketActionEngine.js").MarketActionGuide} guide
@@ -26,7 +24,7 @@ export default function PanicMarketActionPanel({ panicData = null }) {
 
   if (!guide) {
     return (
-      <div className="border-t border-white/[0.06] px-2 py-1">
+      <div className="panic-desk-action">
         <p className="m-0 text-[9px] text-slate-500">
           {"3\uAC1C \uC774\uC0C1 \uC9C0\uD45C \uC785\uB825 \uC2DC \uC2DC\uC7A5 \uC561\uC158 \uD45C\uC2DC"}
         </p>
@@ -49,16 +47,13 @@ export default function PanicMarketActionPanel({ panicData = null }) {
   ]
 
   return (
-    <div className="border-t border-white/[0.06] px-2 py-1.5">
-      <div className="border-l-2 border-cyan-400/35 pl-1.5">
-        <p className="m-0 text-[10px] font-bold text-slate-300">{"\uC2DC\uC7A5 \uC561\uC158"}</p>
-      </div>
-
-      <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1.5 rounded border border-white/[0.06] bg-[#070a10] px-2 py-1.5 sm:grid-cols-5">
+    <div className="panic-desk-action">
+      <p className="panic-desk-action__title">{"\uC2DC\uC7A5 \uC561\uC158"}</p>
+      <div className="panic-desk-action__grid">
         {fields.map((f) => (
           <div key={f.label} className="min-w-0">
-            <p className={`m-0 ${FIELD_LABEL}`}>{f.label}</p>
-            <p className="m-0 mt-0.5 line-clamp-2 text-[9px] font-semibold leading-snug text-slate-200">{f.value}</p>
+            <p className="panic-desk-action__field-label">{f.label}</p>
+            <p className="panic-desk-action__field-value">{f.value}</p>
           </div>
         ))}
       </div>
