@@ -40,11 +40,16 @@ export default function PanicMarketReportPanel({ report = null, loading = false 
         <article className="rounded-md border border-white/[0.08] bg-[#070a10]/80 px-2.5 py-2 sm:col-span-2">
           <p className="m-0 text-[9px] font-semibold uppercase tracking-wide text-slate-500">시장 요약</p>
           <p className="m-0 mt-1 whitespace-pre-line text-[11px] leading-relaxed text-slate-300">{report.summary}</p>
+          {report.marketView || report.market_view ? (
+            <p className="m-0 mt-1.5 border-t border-white/[0.06] pt-1.5 text-[10px] text-cyan-200/85">
+              {report.marketView || report.market_view}
+            </p>
+          ) : null}
         </article>
 
-        <ReportCell label="단기 전략" value={report.shortTerm} />
-        <ReportCell label="중기 전략" value={report.midTerm} />
-        <ReportCell label="장기 전략" value={report.longTerm} />
+        <ReportCell label="단기 전략" value={report.shortTerm || report.short_strategy} multiline />
+        <ReportCell label="중기 전략" value={report.midTerm || report.mid_strategy} />
+        <ReportCell label="장기 전략" value={report.longTerm || report.long_strategy} multiline />
 
         <article className="rounded-md border border-white/[0.08] bg-[#070a10]/80 px-2.5 py-2">
           <p className="m-0 text-[9px] font-semibold tracking-wide text-slate-500">리스크</p>
@@ -58,20 +63,29 @@ export default function PanicMarketReportPanel({ report = null, loading = false 
         </article>
 
         <article className="rounded-md border border-white/[0.08] bg-[#070a10]/80 px-2.5 py-2">
-          <p className="m-0 text-[9px] font-semibold tracking-wide text-slate-500">우위 섹터</p>
-          <p className="m-0 mt-1 text-[11px] leading-snug text-cyan-200/90">{report.sector}</p>
+          <p className="m-0 text-[9px] font-semibold tracking-wide text-slate-500">우선 섹터</p>
+          <p className="m-0 mt-1 whitespace-pre-line text-[11px] leading-snug text-cyan-200/90">
+            {report.priority_sector || report.sector || "—"}
+          </p>
         </article>
       </div>
     </div>
   )
 }
 
-/** @param {{ label: string; value?: string }} props */
-function ReportCell({ label, value }) {
+/** @param {{ label: string; value?: string; multiline?: boolean }} props */
+function ReportCell({ label, value, multiline = false }) {
   return (
     <article className="rounded-md border border-white/[0.08] bg-[#070a10]/80 px-2.5 py-2">
       <p className="m-0 text-[9px] font-semibold tracking-wide text-slate-500">{label}</p>
-      <p className="m-0 mt-1 text-[11px] leading-snug text-slate-200">{value ?? "—"}</p>
+      <p
+        className={[
+          "m-0 mt-1 text-[11px] leading-snug text-slate-200",
+          multiline ? "whitespace-pre-line" : "",
+        ].join(" ")}
+      >
+        {value ?? "—"}
+      </p>
     </article>
   )
 }

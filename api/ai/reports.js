@@ -1,5 +1,6 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
 import { aiReportToClient, fetchAiReportRows } from "../_lib/aiReports.js"
+import { dailyReportToClient, fetchDailyAiReportByDate, fetchDailyAiReports } from "../_lib/dailyAiReports.js"
 
 function noStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -21,6 +22,20 @@ export default async function handler(req, res) {
     const url = new URL(req.url || "", "http://localhost")
     const reportKey = url.searchParams.get("report_key") || url.searchParams.get("key") || undefined
     const limit = url.searchParams.get("limit")
+    const daily = url.searchParams.get("daily") === "1"
+    const date = url.searchParams.get("date")
+
+    if (daily) {
+      if (date && /^\d{4}-\d{2}-\d{2}$/.test(String(date).slice(0, 10))) {
+        const row = await fetchDailyAiReportByDate(String(date).slice(0, 10))
+        res.status(200).json({ ok: true, rows: row ? [row] : [], row })
+        return
+      }
+      const rows = await fetchDailyAiReports({ limit })
+      res.status(200).json({ ok: true, rows })
+      return
+    }
+
     const raw = await fetchAiReportRows({ reportKey, limit })
     const rows = raw.map(aiReportToClient).filter(Boolean)
     res.status(200).json({ ok: true, rows })

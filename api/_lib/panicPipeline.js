@@ -11,11 +11,14 @@ import {
   upsertPanicIndexHistoryFromPayload,
 } from "./panicIndexHistory.js"
 import { syncLatestPanicMetricsRpc } from "./latestPanicMetrics.js"
-import { upsertMarketCycleHistoryFromSnapshot } from "./marketCycleHistory.js"
+import {
+  fetchMarketCycleRowByDate,
+  upsertMarketCycleHistoryFromSnapshot,
+} from "./marketCycleHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
 import { logPanicPipelineStage } from "./panicNumeric.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
-import { persistDeskMarketReport } from "./panicMarketReport.js"
+import { createAndPersistDailyReport } from "./dailyAiReports.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
 
@@ -129,14 +132,19 @@ export async function persistPanicPayload(body, opts = {}) {
   if (fromDb) data.riskRegime = fromDb.riskRegime ?? data.riskRegime
   const meta = computePanicServeMeta(fresh, data)
 
-  let reportResult = { ok: false }
+  let dailyReportResult = { ok: false }
   try {
-    reportResult = await persistDeskMarketReport(data, snap.tradeDate)
+    const cycleRow = cycleHistory?.ok ? await fetchMarketCycleRowByDate(snap.tradeDate) : null
+    dailyReportResult = await createAndPersistDailyReport(data, snap.tradeDate, {
+      source,
+      cycleRow,
+    })
   } catch (err) {
-    reportResult = {
+    dailyReportResult = {
       ok: false,
       error: err instanceof Error ? err.message : String(err),
     }
+    console.warn("[panic] daily report failed", dailyReportResult.error)
   }
 
   return {
@@ -147,9 +155,10 @@ export async function persistPanicPayload(body, opts = {}) {
     rowCount: fresh?.length ?? 0,
     tradeDate: snap.tradeDate,
     metricsError,
-    report: reportResult.ok ? reportResult.report : null,
-    reportKey: reportResult.reportKey ?? null,
-    reportError: reportResult.ok ? null : reportResult.error || reportResult.reason,
+    report: dailyReportResult.ok ? dailyReportResult.report : null,
+    dailyReport: dailyReportResult.ok ? dailyReportResult.daily : null,
+    sectorScores: dailyReportResult.ok ? dailyReportResult.sectors : null,
+    reportError: dailyReportResult.ok ? null : dailyReportResult.error || dailyReportResult.reason,
   }
 }
 

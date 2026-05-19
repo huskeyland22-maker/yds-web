@@ -80,8 +80,27 @@ export const useAppDataStore = create((set, get) => ({
       return null
     }
     const key = deskReportKey(tradeDate)
+    const dateStr =
+      typeof tradeDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(tradeDate.slice(0, 10))
+        ? tradeDate.slice(0, 10)
+        : new Date().toISOString().slice(0, 10)
     set({ deskMarketReportLoading: true })
     try {
+      const dailyUrl = withNoStoreQuery(`/api/ai/reports?daily=1&date=${encodeURIComponent(dateStr)}`)
+      const dailyRes = await fetch(dailyUrl, LIVE_JSON_GET_INIT)
+      if (dailyRes.ok) {
+        const dailyJson = await dailyRes.json()
+        const dailyRow = dailyJson?.row ?? (Array.isArray(dailyJson?.rows) ? dailyJson.rows[0] : null)
+        if (dailyRow?.summary) {
+          set({
+            deskMarketReport: dailyRow,
+            deskMarketReportKey: key,
+            deskMarketReportLoading: false,
+          })
+          return dailyRow
+        }
+      }
+
       const url = withNoStoreQuery(
         `/api/ai/reports?report_key=${encodeURIComponent(key)}&limit=1`,
       )

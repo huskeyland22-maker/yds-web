@@ -8,6 +8,8 @@ const TABLES = [
   "market_status",
   "ai_reports",
   "stock_signal_history",
+  "daily_ai_reports",
+  "sector_score_history",
 ]
 
 /**
