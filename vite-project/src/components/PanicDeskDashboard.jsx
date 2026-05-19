@@ -14,9 +14,9 @@ import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDes
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import PanicDeskChart from "./PanicDeskChart.jsx"
-import PanicHistoryLabSection from "./PanicHistoryLabSection.jsx"
+import PanicUnifiedHistorySection from "./PanicUnifiedHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
-import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
+import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
 
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
 
@@ -175,35 +175,21 @@ export default function PanicDeskDashboard({
     (dataAgeMs != null && dataAgeMs >= 4 * 60 * 60 * 1000) ||
     (dataDateKey && dataDateKey !== todayKey)
 
-  const horizons = useMemo(
-    () => [
-      {
-        id: "short",
-        tag: "단기",
-        title: tacticalView?.state ?? "—",
-        body: tacticalView?.action ?? "—",
-        accent: "border-sky-500/25 bg-sky-500/[0.06]",
-        score: shortScore,
-      },
-      {
-        id: "mid",
-        tag: "중기",
-        title: strategicView?.state ?? "—",
-        body: strategicView?.action ?? "—",
-        accent: "border-violet-500/25 bg-violet-500/[0.06]",
-        score: midScore,
-      },
-      {
-        id: "long",
-        tag: "장기",
-        title: macroView?.state ?? "—",
-        body: macroView?.action ?? "—",
-        accent: "border-emerald-500/25 bg-emerald-500/[0.06]",
-        score: finalScore,
-      },
-    ],
-    [tacticalView, strategicView, macroView, shortScore, midScore, finalScore],
-  )
+  const timing = useMemo(() => computeMarketTiming(panicData), [panicData])
+
+  const horizons = useMemo(() => {
+    const cards = [
+      { id: "short", tag: "단기", signal: timing?.short, score: shortScore, accent: "border-sky-500/20" },
+      { id: "mid", tag: "중기", signal: timing?.mid, score: midScore, accent: "border-violet-500/20" },
+      { id: "long", tag: "장기", signal: timing?.long, score: finalScore, accent: "border-emerald-500/20" },
+    ]
+    return cards.map((c) => ({
+      ...c,
+      title: c.signal?.actionShort ?? c.signal?.action ?? tacticalView?.state ?? "—",
+      body: c.signal?.marketState ?? "—",
+      allocs: c.signal?.allocations?.slice(0, 4) ?? [],
+    }))
+  }, [timing, shortScore, midScore, finalScore, tacticalView])
 
   const chartSeries = useMemo(() => {
     const m = findChartMetric(chartMetric)
@@ -226,7 +212,7 @@ export default function PanicDeskDashboard({
   }, [asOfDateLabel, dataDateKey, loadDeskMarketReport])
 
   return (
-    <div className="relative space-y-2 lg:space-y-2.5">
+    <div className="panic-v2-desk relative space-y-1.5 sm:space-y-2">
       <div className="sticky top-0 z-20 -mx-0.5 flex justify-end border-b border-white/[0.04] bg-[#0B0E14]/90 px-1 py-0.5 backdrop-blur-sm">
         <div
           className="w-auto rounded border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-right leading-tight"
@@ -324,7 +310,7 @@ export default function PanicDeskDashboard({
         </section>
 
         <SectionLabel title="전문가 리스크 지표" variant="expert" />
-        <section className="mb-5 overflow-hidden rounded-md border border-white/[0.03] bg-[rgba(255,255,255,0.015)] p-px opacity-[0.78]">
+        <section className="mb-1 overflow-hidden rounded-md border border-white/[0.03] bg-[rgba(255,255,255,0.015)] p-px opacity-[0.78]">
           <div className="grid grid-cols-2 gap-px bg-white/[0.025] sm:grid-cols-3 lg:grid-cols-5">
             {EXPERT_METRICS.map((metric) => (
               <MetricTile
@@ -340,20 +326,37 @@ export default function PanicDeskDashboard({
         </section>
       </div>
 
-      <section className="grid grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-1.5">
+      <section className="grid grid-cols-1 gap-1 sm:grid-cols-3">
         {horizons.map((h) => (
-          <article key={h.id} className={`rounded-lg border px-2 py-1.5 ${h.accent}`}>
-            <div className="flex items-center justify-between gap-1.5">
-              <span className="text-[8px] font-bold tracking-[0.14em] text-slate-500">{h.tag}</span>
-              {h.score != null ? (
-                <span className="font-mono text-[9px] tabular-nums text-slate-500">{h.score}</span>
-              ) : null}
+          <article key={h.id} className={`rounded border px-2 py-1 ${h.accent} bg-black/20`}>
+            <div className="flex items-baseline justify-between">
+              <span className="text-[8px] font-bold text-slate-500">{h.tag}</span>
+              <span className="font-mono text-[15px] font-bold tabular-nums text-slate-100">
+                {h.score ?? h.signal?.score ?? "—"}
+              </span>
             </div>
-            <p className="m-0 mt-0.5 line-clamp-1 text-[11px] font-semibold leading-tight text-slate-100">{h.title}</p>
-            <p className="m-0 mt-0.5 line-clamp-2 text-[9px] leading-snug text-slate-500">{h.body}</p>
+            <p className="m-0 text-[10px] font-bold leading-tight text-slate-100">{h.title}</p>
+            {h.allocs.length > 0 ? (
+              <p className="m-0 mt-0.5 text-[8px] leading-snug text-slate-500">
+                {h.allocs.map((a) => `${a.label} ${a.pct}`).join(" · ")}
+              </p>
+            ) : (
+              <p className="m-0 mt-0.5 text-[8px] text-slate-500">{h.body}</p>
+            )}
           </article>
         ))}
       </section>
+
+      <SectionErrorBoundary
+        label="패닉 히스토리"
+        fallback={
+          <div className="trading-card-shell mt-3 px-3 py-4 text-center text-sm text-slate-400">
+            패닉 데이터 로딩 실패
+          </div>
+        }
+      >
+        <PanicUnifiedHistorySection rows={cycleMetricHistory} />
+      </SectionErrorBoundary>
 
       <PanicDeskChart
         className="mt-3"
@@ -364,19 +367,6 @@ export default function PanicDeskDashboard({
         deskMarketReport={deskMarketReport}
         deskMarketReportLoading={deskMarketReportLoading}
       />
-
-      <SectionErrorBoundary
-        label="패닉 히스토리 랩"
-        fallback={
-          <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
-            패닉 데이터 로딩 실패
-          </div>
-        }
-      >
-        <PanicHistoryLabSection rows={cycleMetricHistory} />
-      </SectionErrorBoundary>
-
-      <PanicIndexHistorySection rows={cycleMetricHistory} />
     </div>
   )
 }

@@ -13,7 +13,7 @@ import { useChartPinchZoom } from "../hooks/useChartPinchZoom.js"
 import { LAB_METRICS, PANIC_STAGE_BANDS } from "../utils/panicHistoryLab.js"
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 
-const CHART_HEIGHT = 360
+const CHART_HEIGHT_DEFAULT = 360
 const CHART_MARGIN = { top: 28, right: 12, left: 4, bottom: 24 }
 const PX_PER_POINT = 14
 
@@ -71,9 +71,15 @@ function LabTooltip({ active, payload, label }) {
  *   data: object[]
  *   visibleKeys: Record<string, boolean>
  *   defaultWindow?: number
+ *   height?: number
  * }} props
  */
-export default function PanicHistoryLabChart({ data, visibleKeys, defaultWindow = 126 }) {
+export default function PanicHistoryLabChart({
+  data,
+  visibleKeys,
+  defaultWindow = 126,
+  height = CHART_HEIGHT_DEFAULT,
+}) {
   const zoom = useChartPinchZoom(data.length, { defaultWindow })
   const visibleData = useMemo(
     () => zoom.visibleSlice(data),
@@ -89,7 +95,7 @@ export default function PanicHistoryLabChart({ data, visibleKeys, defaultWindow 
     return (
       <div
         className="flex items-center justify-center rounded-lg border border-white/[0.06] bg-black/30 text-[11px] text-slate-500"
-        style={{ height: CHART_HEIGHT }}
+        style={{ height }}
       >
         panic_index_history 데이터 없음
       </div>
@@ -105,8 +111,8 @@ export default function PanicHistoryLabChart({ data, visibleKeys, defaultWindow 
         onTouchStart={zoom.onTouchStart}
         onTouchMove={zoom.onTouchMove}
       >
-        <div style={{ minWidth: chartMinWidth, height: CHART_HEIGHT }}>
-          <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+        <div style={{ minWidth: chartMinWidth, height }}>
+          <ResponsiveContainer width="100%" height={height}>
             <LineChart data={visibleData} margin={CHART_MARGIN}>
               {PANIC_STAGE_BANDS.map((band) => (
                 <ReferenceArea
