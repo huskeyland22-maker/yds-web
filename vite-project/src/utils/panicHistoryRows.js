@@ -5,8 +5,8 @@
 import { PANIC_INDEX_HISTORY_KEY, panicIndexRowToCycleChart } from "./panicIndexHistory.js"
 import { HISTORY_SECTION_METRICS } from "./panicDeskMetrics.js"
 import {
+  loadStoredPanicHistory,
   panicHistoryLocalToCycleRows,
-  readPanicHistoryLocal,
 } from "./panicHistoryLocalPersist.js"
 
 function toNum(v) {
@@ -83,22 +83,37 @@ function mapRows(arr) {
   return [...byDate.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
 }
 
+/** 여러 소스 병합 — store 1건이 seed 5건을 덮어쓰지 않음 */
+function mergeCycleHistorySources(...lists) {
+  const byDate = new Map()
+  for (const list of lists) {
+    if (!Array.isArray(list)) continue
+    for (const r of list) {
+      if (!r?.date) continue
+      const d = String(r.date).slice(0, 10)
+      byDate.set(d, { ...byDate.get(d), ...r, date: d })
+    }
+  }
+  return [...byDate.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
+}
+
 /**
- * props rows + localStorage fallback
+ * props rows + localStorage + legacy fallback (병합)
  * @param {object[] | undefined} rows
  */
 export function resolveCycleHistoryRows(rows) {
   const fromProp = mapRows(Array.isArray(rows) ? rows : [])
-  if (fromProp.length) return fromProp
+  const fromPanicHistory = panicHistoryLocalToCycleRows(loadStoredPanicHistory())
 
-  const fromPanicHistory = panicHistoryLocalToCycleRows(readPanicHistoryLocal())
-  if (fromPanicHistory.length) return fromPanicHistory
-
-  if (typeof window === "undefined") return []
-  try {
-    const raw = JSON.parse(window.localStorage.getItem(PANIC_INDEX_HISTORY_KEY) || "[]")
-    return mapRows(Array.isArray(raw) ? raw : [])
-  } catch {
-    return []
+  let fromLegacy = []
+  if (typeof window !== "undefined") {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(PANIC_INDEX_HISTORY_KEY) || "[]")
+      fromLegacy = mapRows(Array.isArray(raw) ? raw : [])
+    } catch {
+      fromLegacy = []
+    }
   }
+
+  return mergeCycleHistorySources(fromProp, fromPanicHistory, fromLegacy)
 }

@@ -13,6 +13,7 @@ import {
   logHistoryMetricMapping,
   probePanicIndexHistoryDirect,
 } from "../utils/panicHistoryFetchDebug.js"
+import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import {
   resolveCycleHistoryRows,
   resolveDefaultHistoryMetric,
@@ -34,9 +35,10 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   }, [loadCycleHistoryBundle])
 
   const history = useMemo(() => {
-    const fromProps = resolveCycleHistoryRows(rowsProp)
-    if (fromProps.length) return fromProps
-    return resolveCycleHistoryRows(storeRows)
+    const propsMerged = mergeCycleRows(storeRows ?? [], rowsProp ?? [])
+    const merged = resolveCycleHistoryRows(propsMerged)
+    console.log("render history", merged.length)
+    return merged
   }, [rowsProp, storeRows])
 
   const [metricKey, setMetricKey] = useState("vix")

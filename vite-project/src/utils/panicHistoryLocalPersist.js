@@ -4,10 +4,13 @@
 
 import { calendarKeyFromPanic } from "./cycleHistoryHygiene.js"
 import { panicIndexRowToCycleChart } from "./panicIndexHistory.js"
+import { PANIC_HISTORY_SEED, PANIC_HISTORY_SEED_MIN_DAYS } from "./panicHistorySeed.js"
 
 export const PANIC_HISTORY_LS_KEY = "panic_history"
 export const CYCLE_HISTORY_LS_KEY = "cycle_history"
 const MAX_ROWS = 500
+
+/** @typedef {{ date: string, vix?: number | null, fearGreed?: number | null, putCall?: number | null, move?: number | null, bofa?: number | null, skew?: number | null, hyOas?: number | null, gsSentiment?: number | null, panicIndex?: number | null }} PanicHistoryRow */
 
 function toNum(v) {
   if (v == null || v === "") return null
@@ -32,6 +35,45 @@ function writeJsonArray(key, rows) {
   } catch (e) {
     console.warn("[YDS] localStorage write failed", key, e)
   }
+}
+
+/** @param {PanicHistoryRow[]} rows */
+function mergePanicHistoryRowsByDate(...rowLists) {
+  const byDate = new Map()
+  for (const list of rowLists) {
+    if (!Array.isArray(list)) continue
+    for (const r of list) {
+      if (!r?.date) continue
+      const d = String(r.date).slice(0, 10)
+      byDate.set(d, { ...byDate.get(d), ...r, date: d })
+    }
+  }
+  return [...byDate.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
+}
+
+/**
+ * panic_history 로드 + seed fallback (immutable)
+ * @returns {PanicHistoryRow[]}
+ */
+export function loadStoredPanicHistory() {
+  let stored = readJsonArray(PANIC_HISTORY_LS_KEY)
+  console.log("loaded history", stored.length, stored)
+
+  if (stored.length === 0) {
+    const seededHistory = [...PANIC_HISTORY_SEED]
+    window.localStorage.setItem(PANIC_HISTORY_LS_KEY, JSON.stringify(seededHistory))
+    console.log("seed save", seededHistory.length)
+    return seededHistory
+  }
+
+  if (stored.length < PANIC_HISTORY_SEED_MIN_DAYS) {
+    const seededHistory = mergePanicHistoryRowsByDate(stored, PANIC_HISTORY_SEED)
+    window.localStorage.setItem(PANIC_HISTORY_LS_KEY, JSON.stringify(seededHistory))
+    console.log("seed save", seededHistory.length, "(merged with PANIC_HISTORY_SEED)")
+    return seededHistory
+  }
+
+  return stored
 }
 
 /** @param {object} panicData @param {string} [tradeDate] */
@@ -79,7 +121,7 @@ export function buildCycleHistoryMetaRow(panicData, tradeDate, meta = {}) {
 }
 
 export function readPanicHistoryLocal() {
-  return readJsonArray(PANIC_HISTORY_LS_KEY)
+  return loadStoredPanicHistory()
 }
 
 export function readCycleHistoryLocal() {
@@ -89,21 +131,27 @@ export function readCycleHistoryLocal() {
 /** @param {object} historyRow */
 export function appendHistory(historyRow) {
   if (!historyRow?.date) return readPanicHistoryLocal()
-  const prev = readPanicHistoryLocal()
-  const without = prev.filter((r) => String(r.date).slice(0, 10) !== String(historyRow.date).slice(0, 10))
-  const merged = [...without, historyRow].sort((a, b) => String(a.date).localeCompare(String(b.date)))
+  const prev = loadStoredPanicHistory()
+  const merged = mergePanicHistoryRowsByDate(prev, [historyRow])
   const trimmed = merged.length > MAX_ROWS ? merged.slice(-MAX_ROWS) : merged
   writeJsonArray(PANIC_HISTORY_LS_KEY, trimmed)
   console.log("history save", historyRow)
   return trimmed
 }
 
-/** @param {object[]} historyRows */
-export function saveHistory(historyRows) {
-  const rows = Array.isArray(historyRows) ? historyRows.filter((r) => r?.date) : []
+/**
+ * @param {object[]} historyRows
+ * @param {{ merge?: boolean }} [opts]
+ */
+export function saveHistory(historyRows, opts = { merge: true }) {
+  const incoming = Array.isArray(historyRows) ? historyRows.filter((r) => r?.date) : []
+  const rows = opts.merge
+    ? mergePanicHistoryRowsByDate(loadStoredPanicHistory(), incoming)
+    : incoming
   const trimmed = rows.slice(-MAX_ROWS)
   writeJsonArray(PANIC_HISTORY_LS_KEY, trimmed)
   if (trimmed.length) console.log("history save", trimmed[trimmed.length - 1])
+  console.log("history rows", trimmed.length)
   return trimmed
 }
 
@@ -114,7 +162,7 @@ export function saveHistory(historyRows) {
  */
 export function persistHistory(panicData, tradeDate, opts = {}) {
   const historyRow = buildPanicHistoryRow(panicData, tradeDate)
-  let historyRows = readPanicHistoryLocal()
+  let historyRows = loadStoredPanicHistory()
   if (historyRow) {
     historyRows = appendHistory(historyRow)
   }
@@ -155,7 +203,7 @@ export function panicHistoryLocalToCycleRows(rows) {
     .filter(Boolean)
 }
 
-/** @param {object[]} cycleRows — cycleMetricHistory → panic_history 동기화 */
+/** @param {object[]} cycleRows — cycleMetricHistory → panic_history 동기화 (기존 seed 유지 병합) */
 export function persistHistoryFromCycleRows(cycleRows) {
   if (!Array.isArray(cycleRows) || !cycleRows.length) return { historyRows: [], cycleRows: [] }
   const historyRows = cycleRows
@@ -170,7 +218,7 @@ export function persistHistoryFromCycleRows(cycleRows) {
       ),
     )
     .filter(Boolean)
-  saveHistory(historyRows)
-  console.log("history rows", historyRows.length)
-  return { historyRows, cycleRows }
+  const merged = saveHistory(historyRows, { merge: true })
+  console.log("history rows", merged.length)
+  return { historyRows: merged, cycleRows }
 }

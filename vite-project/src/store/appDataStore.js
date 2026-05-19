@@ -31,10 +31,10 @@ import { hasPanicMetricValues, resolveLatestMetrics } from "../utils/resolveLate
 import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
 import {
+  loadStoredPanicHistory,
   panicHistoryLocalToCycleRows,
   persistHistory,
   persistHistoryFromCycleRows,
-  readPanicHistoryLocal,
 } from "../utils/panicHistoryLocalPersist.js"
 import {
   logFetchFail,
@@ -345,17 +345,19 @@ export const useAppDataStore = create((set, get) => ({
     logFetchStart("cycle-history-bundle", { limit, force })
     get().purgeLegacyCycleStorage()
 
-    let localHistory = readPanicHistoryLocal()
+    let localHistory = loadStoredPanicHistory()
     console.log("local history", localHistory.length, localHistory)
 
     if (localHistory.length === 0) {
       const desk = get().resolveDeskPanicData()
       if (desk && Number.isFinite(Number(desk.vix))) {
         persistHistory(desk, get().deskSnapshotTradeDate)
-        localHistory = readPanicHistoryLocal()
+        localHistory = loadStoredPanicHistory()
         console.log("[YDS] seeded panic_history from live desk", localHistory.length)
       }
     }
+
+    const localCycleRows = panicHistoryLocalToCycleRows(localHistory)
 
     const hubOn = isPanicHubEnabled()
 
@@ -376,12 +378,16 @@ export const useAppDataStore = create((set, get) => ({
           set({ marketCycleHistory: bundle.cycleRows })
         }
 
-        let cycleRows = fromHub
+        let cycleRows = mergeCycleRows(fromHub, localCycleRows)
+        if (cycleRows.length < localCycleRows.length && localCycleRows.length > 0) {
+          cycleRows = localCycleRows
+          console.log("[YDS] loadCycleHistoryBundle prefer local seed", cycleRows.length)
+        }
         if (cycleRows.length < 1 && hubRows.length > 0) {
           cycleRows = historyRowsToCycleRows(hubRows)
         }
-        if (cycleRows.length < 1 && localHistory.length > 0) {
-          cycleRows = panicHistoryLocalToCycleRows(localHistory)
+        if (cycleRows.length < 1 && localCycleRows.length > 0) {
+          cycleRows = localCycleRows
           console.log("[YDS] loadCycleHistoryBundle local fallback", cycleRows.length)
         }
         if (cycleRows.length < 1) {
