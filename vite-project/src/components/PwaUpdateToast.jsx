@@ -17,14 +17,15 @@ export default function PwaUpdateToast() {
     return () => window.removeEventListener(PWA_UPDATE_EVENT, onUpdate)
   }, [])
 
-  const onApply = useCallback(async () => {
+  const onApply = useCallback(() => {
     if (busy) return
     setBusy(true)
-    try {
-      await applyPwaUpdate()
-    } catch {
+    const safetyReload = window.setTimeout(() => {
       window.location.reload()
-    }
+    }, 3500)
+    void applyPwaUpdate()
+      .catch(() => window.location.reload())
+      .finally(() => window.clearTimeout(safetyReload))
   }, [busy])
 
   if (!visible) return null

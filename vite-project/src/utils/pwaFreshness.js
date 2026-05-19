@@ -304,28 +304,49 @@ export function notifyUpdateAvailable(reason, remoteMeta) {
   }
 }
 
-/** 사용자 "지금 업데이트" — vite-plugin-pwa updateSW 우선, 없으면 reload */
+function buildPwaReloadUrl() {
+  const next = new URL(window.location.href)
+  next.searchParams.set("pwa_v", String(Date.now()))
+  return `${next.pathname}${next.search}${next.hash}`
+}
+
+/** 사용자 "지금 업데이트" — SW skipWaiting 시도 후 항상 hard reload (waiting SW 없으면 updateSW만으로는 reload 안 됨) */
 export async function applyPwaUpdate() {
   if (typeof window === "undefined") return
-  const fn = window.__YDS_UPDATE_SW
-  if (typeof fn === "function") {
-    try {
-      await fn(true)
-      return
-    } catch {
-      // fall through
-    }
-  }
-  await triggerServiceWorkerUpdate()
+
   try {
-    const regs = await navigator.serviceWorker.getRegistrations()
-    for (const reg of regs) {
-      reg.waiting?.postMessage?.({ type: "SKIP_WAITING" })
+    const probe = window.__YDS_BUILD_CHECK
+    if (probe?.remoteBuildId) {
+      safeWrite("localStorage", BUILD_ID_KEY, String(probe.remoteBuildId))
+      if (probe.remoteVersion) safeWrite("localStorage", BUILD_VERSION_KEY, String(probe.remoteVersion))
     }
   } catch {
     // ignore
   }
-  window.location.reload()
+
+  const fn = window.__YDS_UPDATE_SW
+  if (typeof fn === "function") {
+    try {
+      await Promise.race([
+        fn(true),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ])
+    } catch {
+      // continue to reload
+    }
+  } else {
+    await triggerServiceWorkerUpdate()
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      for (const reg of regs) {
+        reg.waiting?.postMessage?.({ type: "SKIP_WAITING" })
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  window.location.replace(buildPwaReloadUrl())
 }
 
 export async function forcePwaCacheClear() {
