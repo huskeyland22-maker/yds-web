@@ -126,6 +126,8 @@ export default function PanicDeskDashboard({
   macroView,
   marketState,
 }) {
+  const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
+
   const [chartMetric, setChartMetric] = useState("vix")
   const deskMarketReport = useAppDataStore((s) => s.deskMarketReport)
   const deskMarketReportLoading = useAppDataStore((s) => s.deskMarketReportLoading)
@@ -222,6 +224,14 @@ export default function PanicDeskDashboard({
           : null
     if (date) void loadDeskMarketReport(date)
   }, [asOfDateLabel, dataDateKey, loadDeskMarketReport])
+
+  if (!panicData && safeHistory.length === 0) {
+    return (
+      <div className="panic-v2-desk relative px-3 py-8 text-center">
+        <p className="m-0 text-sm text-slate-400">시장 데이터 불러오는 중…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="panic-v2-desk relative">
@@ -370,11 +380,11 @@ export default function PanicDeskDashboard({
           </div>
         }
       >
-        <PanicIndexHistorySection rows={cycleMetricHistory} />
+        <PanicIndexHistorySection rows={safeHistory} />
       </SectionErrorBoundary>
 
       <PanicDeskChart
-        rows={cycleMetricHistory}
+        rows={safeHistory}
         primarySeries={chartSeries}
         chartMetric={chartMetric}
         panicData={panicData}

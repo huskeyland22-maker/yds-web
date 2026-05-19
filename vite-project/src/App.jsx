@@ -25,6 +25,7 @@ import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
 import PwaUpdateToast from "./components/PwaUpdateToast.jsx"
 import SupabaseRawDebugPanel from "./components/SupabaseRawDebugPanel.jsx"
+import CycleErrorBoundary from "./components/CycleErrorBoundary.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
@@ -1391,7 +1392,7 @@ function App() {
               path="/cycle"
               element={
                 <div id="desk" className="market-cycle-page min-w-0">
-                  <SectionErrorBoundary label="패닉 데스크">
+                  <CycleErrorBoundary>
                     <PanicDeskDashboard
                       panicData={deskPanicData}
                       cycleMetricHistory={cycleMetricHistory}
@@ -1402,7 +1403,7 @@ function App() {
                       macroView={macroView}
                       marketState={marketState}
                     />
-                  </SectionErrorBoundary>
+                  </CycleErrorBoundary>
                 </div>
               }
             />

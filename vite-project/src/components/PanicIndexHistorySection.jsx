@@ -103,7 +103,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   )
 
   const higherIsBad = HIGHER_IS_BAD[metricKey] ?? true
-  const showChart = chartPayload.chartData.length > 0
+  const chartRows = chartPayload?.chartData ?? []
+  const showChart = chartRows.length > 0
 
   console.log("render history", history.length, "chart", chartPayload.chartData.length, activeHistoryTab)
 
@@ -203,9 +204,9 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           <PanicHistoryLineChart
             key={`panic-hist-${activeHistoryTab}`}
             rows={slicedRows.length ? slicedRows : history}
-            chartData={chartPayload.chartData}
-            dataKey={chartPayload.dataKey ?? "value"}
-            metricField={chartPayload.selectedField ?? metricKey}
+            chartData={chartRows}
+            dataKey={chartPayload?.dataKey ?? "value"}
+            metricField={chartPayload?.selectedField ?? metricKey}
             dataLabel={metric.chartLabel}
             stroke={metric.accent}
             showZoneBands

@@ -83,6 +83,12 @@ async function bootstrapApp() {
   installChunkLoadFailureRecovery()
 
   if (typeof window !== "undefined") {
+    window.onerror = (message, source, lineno, colno, error) => {
+      console.error("[window.onerror]", { message, source, lineno, colno, error })
+    }
+    window.addEventListener("unhandledrejection", (event) => {
+      console.error("[unhandledrejection]", event.reason)
+    })
     const currentUrl = new URL(window.location.href)
     if (currentUrl.searchParams.get("reset-cache") === "true") {
       console.warn("[PWA] reset-cache requested; clearing SW/cache/storage/indexedDB")

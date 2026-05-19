@@ -1,6 +1,7 @@
 import PanicMarketActionPanel from "./PanicMarketActionPanel.jsx"
 import PanicMarketReportPanel from "./PanicMarketReportPanel.jsx"
 import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
+import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 
 /**
  * 패닉 V2 — 차트는 PanicUnifiedHistorySection 단일 사용 (중복 제거)
@@ -27,9 +28,7 @@ export default function PanicDeskChart({
 
   return (
     <section
-      className={["trading-card-shell panic-v2-section panic-desk-stack overflow-visible", className]
-        .filter(Boolean)
-        .join(" ")}
+      className={["trading-card-shell panic-v2-section overflow-visible", className].filter(Boolean).join(" ")}
     >
       <PanicMetricInsightPanel
         metricKey={activeKey}
@@ -37,12 +36,16 @@ export default function PanicDeskChart({
         historyRows={rows}
         panicData={panicData}
       />
-      <PanicMarketActionPanel panicData={panicData} />
-      <PanicMarketReportPanel
-        report={deskMarketReport}
-        loading={deskMarketReportLoading}
-        panicData={panicData}
-      />
+      <SectionErrorBoundary label="시장 액션">
+        <PanicMarketActionPanel panicData={panicData} />
+      </SectionErrorBoundary>
+      <SectionErrorBoundary label="시장 리포트">
+        <PanicMarketReportPanel
+          report={deskMarketReport}
+          loading={deskMarketReportLoading}
+          panicData={panicData}
+        />
+      </SectionErrorBoundary>
     </section>
   )
 }
