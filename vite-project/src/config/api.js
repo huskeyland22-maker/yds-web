@@ -364,34 +364,54 @@ export async function fetchOptimizeResult(options = {}) {
 
 function toNumberOrNull(v) {
   if (v == null || v === "") return null
-  const n = parseFloat(String(v).replace(/%/g, "").replace(/,/g, "").trim())
+  if (typeof v === "number") return Number.isFinite(v) ? v : null
+  const s = String(v)
+    .trim()
+    .replace(/%/g, "")
+    .replace(/,/g, "")
+  if (!s) return null
+  const n = parseFloat(s)
   return Number.isFinite(n) ? n : null
 }
 
+const PANIC_SUBMIT_NUMERIC_KEYS = [
+  "vix",
+  "vxn",
+  "fearGreed",
+  "putCall",
+  "bofa",
+  "move",
+  "skew",
+  "highYield",
+  "gsBullBear",
+]
+
 function normalizeManualPayload(data) {
   if (!data || typeof data !== "object") return data
-  return {
+  const out = {
     ...data,
-    vix: toNumberOrNull(data.vix),
-    vxn: toNumberOrNull(data.vxn),
-    fearGreed: toNumberOrNull(data.fearGreed),
-    putCall: toNumberOrNull(data.putCall),
-    bofa: toNumberOrNull(data.bofa),
-    move: toNumberOrNull(data.move),
-    skew: toNumberOrNull(data.skew),
-    highYield: toNumberOrNull(data.highYield),
-    gsBullBear: toNumberOrNull(data.gsBullBear ?? data.gs),
     accessTier: "pro",
     updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 16).replace("T", " "),
   }
+  for (const key of PANIC_SUBMIT_NUMERIC_KEYS) {
+    const alt =
+      key === "fearGreed" ? data.fear_greed : key === "putCall" ? data.put_call : key === "highYield" ? data.hy_oas : key === "gsBullBear" ? data.gs_bb : undefined
+    const raw = data[key] ?? alt
+    const num = toNumberOrNull(raw)
+    out[key] = num
+    console.log("[panic submit]", key, raw, typeof raw, "->", num, typeof num)
+  }
+  if (data.gs != null && out.gsBullBear == null) out.gsBullBear = toNumberOrNull(data.gs)
+  return out
 }
 
 export async function submitManualPanicData(inputData) {
+  const payload = normalizeManualPayload(inputData)
   if (isPanicHubEnabled()) {
     const url = withNoStoreQuery("/api/panic/update")
     const res = await fetch(url, {
       ...LIVE_POST_JSON_INIT,
-      body: JSON.stringify(inputData),
+      body: JSON.stringify(payload),
     })
     let out = {}
     try {
@@ -430,7 +450,7 @@ export async function submitManualPanicData(inputData) {
   const base = getManualApiBase()
   const res = await fetch(withNoStoreQuery(`${base}/update`), {
     ...LIVE_POST_JSON_INIT,
-    body: JSON.stringify(inputData),
+    body: JSON.stringify(payload),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const out = await res.json()

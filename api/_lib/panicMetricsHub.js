@@ -1,5 +1,6 @@
 import { supabaseRest } from "./supabaseRest.js"
-import { PANIC_METRIC_KEYS, panicObjectFromSnapshot } from "./panicSnapshot.js"
+import { sanitizePanicMetricRows, toDbDouble } from "./panicNumeric.js"
+import { PANIC_METRIC_KEYS, panicObjectFromSnapshot, toPanicNum } from "./panicSnapshot.js"
 
 const METRIC_KEYS = PANIC_METRIC_KEYS
 
@@ -46,19 +47,19 @@ export function rowsFromPanicPayload(body, opts = {}) {
   const forceAllKeys = Boolean(opts.forceAllKeys) || source === "manual"
   const rows = []
   const o = {}
+  const shouldLog = source === "manual" || source === "api"
   for (const key of METRIC_KEYS) {
     if (!forceAllKeys && !Object.prototype.hasOwnProperty.call(body, key)) continue
     const raw = body[key]
-    const n = raw === null || raw === undefined || raw === "" ? null : Number(raw)
-    const metricValue = n !== null && Number.isFinite(n) ? n : null
+    const metricValue = toPanicNum(raw)
     o[key] = metricValue
+    if (shouldLog) {
+      console.log("[panic_metrics] build", key, raw, typeof raw, "->", metricValue, typeof metricValue)
+    }
     rows.push({
       metric_key: key,
       metric_value: metricValue,
-      change_percent:
-        body?.changes && body.changes[key] !== undefined && body.changes[key] !== null
-          ? Number(body.changes[key])
-          : null,
+      change_percent: toDbDouble(body?.changes?.[key]),
       status: null,
       market: "global",
       source,
@@ -97,16 +98,20 @@ function isSchemaColumnError(err) {
   return /column|schema|does not exist|42703|PGRST204/i.test(msg)
 }
 
-export async function upsertPanicMetricsRows(rows) {
+export async function upsertPanicMetricsRows(rows, opts = {}) {
+  const safe = sanitizePanicMetricRows(rows, {
+    log: Boolean(opts.log),
+    source: opts.source ?? "upsert",
+  })
   try {
     return await supabaseRest("panic_metrics?on_conflict=metric_key", {
       method: "POST",
       prefer: "resolution=merge-duplicates,return=minimal",
-      body: rows,
+      body: safe,
     })
   } catch (err) {
     if (!isSchemaColumnError(err)) throw err
-    const stripped = rows.map(({ market: _m, ...rest }) => rest)
+    const stripped = safe.map(({ market: _m, ...rest }) => rest)
     return await supabaseRest("panic_metrics?on_conflict=metric_key", {
       method: "POST",
       prefer: "resolution=merge-duplicates,return=minimal",

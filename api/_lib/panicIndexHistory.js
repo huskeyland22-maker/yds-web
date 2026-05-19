@@ -1,4 +1,5 @@
 import { supabaseRest } from "./supabaseRest.js"
+import { sanitizePanicHistoryRow } from "./panicNumeric.js"
 import {
   normalizePanicPayload,
   panicIndexHistoryRowFromSnapshot,
@@ -81,25 +82,26 @@ function isSchemaColumnError(err) {
 
 /** @param {Record<string, unknown>} row */
 async function postPanicIndexHistoryRow(row) {
+  const normalized = sanitizePanicHistoryRow(row)
   const core = {
-    date: row.date,
-    vix: row.vix,
-    vxn: row.vxn,
-    fear_greed: row.fear_greed,
-    move: row.move,
-    bofa: row.bofa,
-    skew: row.skew,
-    hy_oas: row.hy_oas,
-    gs_sentiment: row.gs_sentiment,
-    source: row.source ?? "manual",
-    updated_at: row.updated_at,
-    market: row.market ?? "global",
+    date: normalized.date,
+    vix: normalized.vix,
+    vxn: normalized.vxn,
+    fear_greed: normalized.fear_greed,
+    move: normalized.move,
+    bofa: normalized.bofa,
+    skew: normalized.skew,
+    hy_oas: normalized.hy_oas,
+    gs_sentiment: normalized.gs_sentiment,
+    source: normalized.source ?? "manual",
+    updated_at: normalized.updated_at,
+    market: normalized.market ?? "global",
   }
-  const { market: _market, high_yield: _hy, gs_bb: _gs, put_call: _pc, ...baseOnly } = row
+  const { market: _market, high_yield: _hy, gs_bb: _gs, put_call: _pc, ...baseOnly } = normalized
   const attempts = [
-    row,
-    { ...core, put_call: row.put_call, high_yield: row.high_yield, gs_bb: row.gs_bb },
-    { ...core, put_call: row.put_call },
+    normalized,
+    { ...core, put_call: normalized.put_call, high_yield: normalized.high_yield, gs_bb: normalized.gs_bb },
+    { ...core, put_call: normalized.put_call },
     core,
     { ...baseOnly, source: baseOnly.source ?? "manual", updated_at: baseOnly.updated_at },
   ]

@@ -19,6 +19,11 @@ export default async function handler(req, res) {
   }
   try {
     const incoming = typeof req.body === "object" && req.body ? req.body : {}
+    for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
+      if (key in incoming) {
+        console.log("[panic/update] in", key, incoming[key], typeof incoming[key])
+      }
+    }
     const result = await persistPanicPayload(incoming, { source: "manual", requireHistory: true })
     if (!result.history?.ok) {
       res.status(422).json({

@@ -66,7 +66,7 @@ export async function persistPanicPayload(body, opts = {}) {
   const rows = rowsFromPanicSnapshot(snap)
   let metricsError = null
   try {
-    await upsertPanicMetricsRows(rows)
+    await upsertPanicMetricsRows(rows, { log: source === "manual", source })
   } catch (err) {
     metricsError = err instanceof Error ? err.message : String(err)
     console.error("[panic] panic_metrics upsert failed (non-fatal)", metricsError)

@@ -1,5 +1,7 @@
 /** AI·수동 입력 — panic_metrics / panic_index_history 동일 스냅샷 */
 
+import { toDbDouble } from "./panicNumeric.js"
+
 export const PANIC_METRIC_KEYS = [
   "vix",
   "vxn",
@@ -13,9 +15,7 @@ export const PANIC_METRIC_KEYS = [
 ]
 
 export function toPanicNum(v) {
-  if (v == null || v === "") return null
-  const n = Number(String(v).replace(/%/g, "").replace(/,/g, "").trim())
-  return Number.isFinite(n) ? n : null
+  return toDbDouble(v)
 }
 
 export function resolvePanicTradeDate(body, tradeDateOverride) {
