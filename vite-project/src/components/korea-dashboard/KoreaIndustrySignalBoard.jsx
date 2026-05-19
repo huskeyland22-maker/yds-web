@@ -1,22 +1,13 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { getKoreaSectorById } from "../../data/koreaGrowthSectorMap.js"
 import {
   buildAllSectorSignalCounts,
-  buildSectorSignalRows,
+  buildSectorSignalGroups,
   SIGNAL_STATUS_META,
 } from "../../utils/koreaIndustrySignal.js"
 
 const LIST_FADE = { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
-
-const COUNT_KEYS = [
-  { key: "overheat", label: "과열" },
-  { key: "pullback", label: "눌림" },
-  { key: "trend", label: "추세" },
-  { key: "watch", label: "관망" },
-]
-
-const EMPTY_COUNTS = { overheat: 0, pullback: 0, trend: 0, watch: 0 }
 
 const AUX_CHIPS = [
   { key: "ma10", label: "10일선" },
@@ -24,17 +15,74 @@ const AUX_CHIPS = [
   { key: "w52", label: "52주" },
 ]
 
-export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, onStockSelect }) {
+/**
+ * @param {{
+ *   row: object
+ *   expanded: boolean
+ *   onToggle: () => void
+ *   onDetail: () => void
+ * }} props
+ */
+function SignalStockCard({ row, expanded, onToggle, onDetail }) {
+  const statusId = row.statusId ?? "watch"
+  const shortBadge = row.shortBadge ?? SIGNAL_STATUS_META[statusId]?.shortBadge ?? "관망"
+  const showHotTemp = String(row.marketTemp ?? "").toUpperCase() === "HOT"
+
+  return (
+    <article
+      className={["korea-signal-card", expanded ? "is-expanded" : ""].filter(Boolean).join(" ")}
+    >
+      <button type="button" className="korea-signal-card__hit" onClick={onToggle}>
+        <div className="korea-signal-card__body">
+          <p className="korea-signal-card__name" title={row.code}>
+            {row.name}
+          </p>
+          {row.tip ? <p className="korea-signal-card__role">{row.tip}</p> : null}
+          <div className="korea-signal-card__tags">
+            <span className={`korea-signal-badge korea-signal-badge--${statusId}`}>{shortBadge}</span>
+            {showHotTemp ? (
+              <span className="korea-signal-card__temp">온도 {row.marketTemp}</span>
+            ) : null}
+          </div>
+        </div>
+      </button>
+
+      <div className="korea-signal-card__expand" aria-hidden={!expanded}>
+        <div className="korea-signal-card__expand-inner">
+          {AUX_CHIPS.map(({ key, label }) => (
+            <span key={key} className="korea-signal-metric-chip">
+              {label} {row.aux?.[key] ?? "—"}
+            </span>
+          ))}
+          <button type="button" className="korea-signal-card__strategy" onClick={onDetail}>
+            상세 전략 열기
+          </button>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+/**
+ * @param {{
+ *   selectedId: string
+ *   heatById?: Record<string, string>
+ *   onSectorSelect: (sectorId: string) => void
+ *   onStockSelect: (payload: { stock: object; sectorName: string }) => void
+ * }} props
+ */
+export default function KoreaIndustrySignalBoard({
+  selectedId,
+  heatById = {},
+  onSectorSelect,
+  onStockSelect,
+}) {
+  const [expandedCode, setExpandedCode] = useState(null)
+  const [openGroups, setOpenGroups] = useState(() => new Set())
+
   const sector = useMemo(() => getKoreaSectorById(selectedId), [selectedId])
   const sectorHeat = heatById[selectedId] || sector?.heat
-  const rows = useMemo(() => {
-    try {
-      const built = buildSectorSignalRows(sector, sectorHeat)
-      return Array.isArray(built) ? built : []
-    } catch {
-      return []
-    }
-  }, [sector, sectorHeat])
+
   const sectorCounts = useMemo(() => {
     try {
       const built = buildAllSectorSignalCounts(heatById ?? {})
@@ -44,127 +92,112 @@ export default function KoreaIndustrySignalBoard({ selectedId, heatById = {}, on
     }
   }, [heatById])
 
+  const groups = useMemo(() => {
+    try {
+      const built = buildSectorSignalGroups(sector, sectorHeat)
+      return Array.isArray(built) ? built : []
+    } catch {
+      return []
+    }
+  }, [sector, sectorHeat])
+
+  const rowCount = useMemo(() => groups.reduce((n, g) => n + g.rows.length, 0), [groups])
+
+  useEffect(() => {
+    setExpandedCode(null)
+    if (groups[0]?.id) setOpenGroups(new Set([groups[0].id]))
+    else setOpenGroups(new Set())
+  }, [selectedId, groups])
+
+  const toggleGroup = (groupId) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(groupId)) next.delete(groupId)
+      else next.add(groupId)
+      return next
+    })
+  }
+
   return (
     <section id="industry-signal-board" className="korea-signal-board scroll-mt-24" aria-label="산업 시그널 보드">
       <header className="korea-signal-board__head">
-        <p className="korea-signal-board__eyebrow">Industry signal desk</p>
-        <h2 className="korea-signal-board__title">산업 시그널 보드</h2>
-        <p className="korea-signal-board__sub">산업 흐름 기반 종목 탐색 · {rows.length}종목</p>
+        <p className="korea-signal-board__eyebrow">Industry flow</p>
+        <h2 className="korea-signal-board__title">핵심 종목</h2>
+        <p className="korea-signal-board__sub">
+          {sector?.name ?? "산업 선택"} · {rowCount}종목
+        </p>
       </header>
 
-      <div className="korea-signal-select">
-        <span className="korea-signal-select__label">선택 산업</span>
-        <span className="korea-signal-select__pill">{sector?.name ?? "—"}</span>
-      </div>
-
-      <div className="korea-signal-sector-summary">
-        <p className="korea-signal-sector-summary__title">산업별 시그널 요약</p>
-        <ul className="korea-signal-sector-summary__grid m-0 list-none p-0">
-          {(sectorCounts ?? []).map((item) => {
-            const active = item.sectorId === selectedId
-            const counts = item.counts ?? EMPTY_COUNTS
-            const lines = COUNT_KEYS.filter(({ key }) => Number(counts[key]) > 0)
-            return (
-              <li
-                key={item.sectorId}
-                className={["korea-signal-summary-card", active ? "is-active" : ""].filter(Boolean).join(" ")}
-              >
-                <p className="korea-signal-summary-card__name">{item.fullLabel}</p>
-                <ul className="korea-signal-summary-card__stats m-0 list-none p-0">
-                  {lines.length ? (
-                    lines.map(({ key, label }) => (
-                      <li key={key} className={`korea-signal-summary-stat korea-signal-summary-stat--${key}`}>
-                        <span className="korea-signal-summary-stat__label">{label}</span>
-                        <span className="korea-signal-summary-stat__value">{counts[key]}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="korea-signal-summary-stat korea-signal-summary-stat--muted">
-                      <span className="korea-signal-summary-stat__label">시그널 없음</span>
-                    </li>
-                  )}
-                </ul>
-              </li>
-            )
-          })}
-        </ul>
+      <div className="korea-sector-chips" role="tablist" aria-label="산업 선택">
+        {sectorCounts.map((item) => {
+          const active = item.sectorId === selectedId
+          const total = item.total ?? 0
+          return (
+            <button
+              key={item.sectorId}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              className={["korea-sector-chip", active ? "is-active" : ""].filter(Boolean).join(" ")}
+              onClick={() => onSectorSelect(item.sectorId)}
+            >
+              {item.label}
+              <span className="korea-sector-chip__count">({total})</span>
+            </button>
+          )
+        })}
       </div>
 
       <AnimatePresence mode="wait">
         <motion.div
           key={selectedId}
-          className="korea-signal-card-grid"
-          initial={{ opacity: 0, y: 8 }}
+          className="korea-signal-detail"
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
+          exit={{ opacity: 0, y: -4 }}
           transition={LIST_FADE}
         >
-          {rows.length === 0 ? (
+          {groups.length === 0 ? (
             <p className="korea-signal-empty m-0">선택한 산업의 종목 데이터가 없습니다.</p>
           ) : (
-            rows.map((row, i) => (
-              <motion.article
-                key={`${row.code}-${i}`}
-                className="korea-signal-card"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.22, delay: i * 0.03 }}
-              >
-                <button
-                  type="button"
-                  className="korea-signal-card__hit"
-                  onClick={() =>
-                    onStockSelect({
-                      stock: { name: row.name, code: row.code, tip: row.tip },
-                      sectorName: row.sectorName,
-                    })
-                  }
-                >
-                  <div className="korea-signal-card__body">
-                    <div className="korea-signal-card__head">
-                      <p className="korea-signal-card__name" title={row.code}>
-                        {row.name}
-                      </p>
-                      <span
-                        className={`korea-signal-badge korea-signal-badge--${row.statusId ?? "watch"}`}
-                        title={(SIGNAL_STATUS_META[row.statusId ?? "watch"] ?? SIGNAL_STATUS_META.watch).badge}
-                      >
-                        {row.badge}
-                      </span>
-                    </div>
-                    {row.tip ? <p className="korea-signal-card__role">{row.tip}</p> : null}
-
-                    <p className="korea-signal-card__inline">
-                      <span>
-                        상태 <strong>{row.status}</strong>
-                      </span>
-                      <span className="korea-signal-card__inline-sep" aria-hidden>
-                        ·
-                      </span>
-                      <span>
-                        온도{" "}
-                        <strong
-                          className={`korea-signal-temp korea-signal-temp--${String(row.marketTemp ?? "COOL").toLowerCase()}`}
-                        >
-                          {row.marketTemp ?? "COOL"}
-                        </strong>
-                      </span>
-                    </p>
-
-                    <div className="korea-signal-card__chips">
-                      {AUX_CHIPS.map(({ key, label }) => {
-                        const value = row.aux?.[key] ?? "—"
-                        return (
-                          <span key={key} className="korea-signal-metric-chip" title={`${label} ${value}`}>
-                            {label} {value}
-                          </span>
-                        )
-                      })}
-                    </div>
+            <div className="korea-signal-accordion">
+              {groups.map((group) => {
+                const open = openGroups.has(group.id)
+                return (
+                  <div key={group.id} className={["korea-signal-accordion__item", open ? "is-open" : ""].join(" ")}>
+                    <button
+                      type="button"
+                      className="korea-signal-accordion__trigger"
+                      aria-expanded={open}
+                      onClick={() => toggleGroup(group.id)}
+                    >
+                      <span>{group.label}</span>
+                      <span className="korea-signal-accordion__meta">{group.rows.length}종목</span>
+                    </button>
+                    {open ? (
+                      <div className="korea-signal-card-grid">
+                        {group.rows.map((row, i) => (
+                          <SignalStockCard
+                            key={`${row.code}-${i}`}
+                            row={row}
+                            expanded={expandedCode === row.code}
+                            onToggle={() =>
+                              setExpandedCode((prev) => (prev === row.code ? null : row.code))
+                            }
+                            onDetail={() =>
+                              onStockSelect({
+                                stock: { name: row.name, code: row.code, tip: row.tip },
+                                sectorName: row.sectorName,
+                              })
+                            }
+                          />
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                </button>
-              </motion.article>
-            ))
+                )
+              })}
+            </div>
           )}
         </motion.div>
       </AnimatePresence>

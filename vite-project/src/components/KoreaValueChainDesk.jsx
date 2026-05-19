@@ -111,6 +111,7 @@ export default function KoreaValueChainDesk({
         <KoreaIndustrySignalBoard
           selectedId={selectedId}
           heatById={heatById}
+          onSectorSelect={handleSectorSelect}
           onStockSelect={onStockSelect}
         />
       </div>

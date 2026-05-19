@@ -786,7 +786,57 @@ body.valuechain-route-active main.value-chain-main-host {
   font-size: 13px;
   font-weight: 700;
   color: rgba(241, 245, 249, 0.96);
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.4rem;
+}
+
+.korea-insight-oneline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  font-size: 10px;
+  color: rgba(203, 213, 225, 0.9);
+}
+
+.korea-insight-stocks--compact {
+  margin-bottom: 0.45rem;
+}
+
+.korea-insight-reason--compact {
+  margin-bottom: 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.korea-insight-reason__text--clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.korea-insight-more {
+  margin-top: 0.35rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.95);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.korea-insight-more:hover {
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.korea-insight-kv--detail {
+  margin-top: 0.45rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .korea-insight-kv {
@@ -918,20 +968,20 @@ body.valuechain-route-active main.value-chain-main-host {
   margin-bottom: 0;
 }
 
-/* 산업 시그널 보드 — HTS 스크리너 */
+/* 산업 시그널 보드 — 상→하 흐름 (칩 · 아코디언 · 컴팩트 카드) */
 .korea-signal-board {
   height: auto;
   min-height: 0;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(8, 10, 14, 0.88);
-  padding: 0.75rem 0.75rem 0.35rem;
+  padding: 0.55rem 0.65rem 0.35rem;
   margin-bottom: 0;
 }
 
 @media (min-width: 768px) {
   .korea-signal-board {
-    padding: 0.875rem 0.875rem 0.4rem;
+    padding: 0.65rem 0.75rem 0.4rem;
   }
 }
 
@@ -945,187 +995,130 @@ body.valuechain-route-active main.value-chain-main-host {
 }
 
 .korea-signal-board__title {
-  margin: 0.2rem 0 0;
-  font-size: 1rem;
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
   font-weight: 700;
   line-height: 1.3;
   color: rgba(248, 250, 252, 0.96);
 }
 
 .korea-signal-board__sub {
-  margin: 0.15rem 0 0;
-  font-size: 12px;
-  line-height: 1.45;
+  margin: 0.1rem 0 0;
+  font-size: 11px;
+  line-height: 1.4;
   color: rgba(148, 163, 184, 0.9);
 }
 
-.korea-signal-select {
+/* 산업 가로 칩 */
+.korea-sector-chips {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-  margin: 0.6rem 0 0;
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(0, 0, 0, 0.24);
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding-bottom: 0.2rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
-.korea-signal-select__label {
+.korea-sector-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.korea-sector-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.3rem 0.65rem;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(100, 116, 139, 0.95);
+  color: rgba(203, 213, 225, 0.9);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-.korea-signal-select__pill {
-  border-radius: 0.5rem;
-  border: 1px solid rgba(99, 102, 241, 0.42);
-  background: rgba(99, 102, 241, 0.14);
-  padding: 0.45rem 0.9rem;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  color: rgba(224, 231, 255, 0.98);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.08);
-}
-
-.korea-signal-sector-summary {
-  margin-top: 0.5rem;
-  padding-top: 0.45rem;
-  margin-bottom: 0.4rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.korea-signal-sector-summary__title {
-  margin: 0 0 0.4rem;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(100, 116, 139, 0.95);
-}
-
-.korea-signal-sector-summary__grid {
-  display: grid;
-  gap: 0.4rem;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 640px) {
-  .korea-signal-sector-summary__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.korea-signal-summary-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  padding: 14px;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.korea-signal-summary-card.is-active {
-  border-color: rgba(99, 102, 241, 0.32);
-  background: rgba(99, 102, 241, 0.07);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.1);
-}
-
-.korea-signal-summary-card__name {
-  margin: 0;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.35;
-  color: rgba(241, 245, 249, 0.96);
-}
-
-.korea-signal-summary-card__stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.korea-signal-summary-stat {
-  display: flex;
-  align-items: baseline;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.korea-signal-summary-stat__label {
-  min-width: 2rem;
-  color: rgba(148, 163, 184, 0.95);
-}
-
-.korea-signal-summary-stat__value {
+.korea-sector-chip__count {
   font-family: ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.korea-sector-chip.is-active {
+  border-color: rgba(45, 212, 191, 0.45);
+  background: rgba(45, 212, 191, 0.1);
+  color: rgba(204, 251, 241, 0.98);
+}
+
+.korea-sector-chip.is-active .korea-sector-chip__count {
+  color: rgba(153, 246, 228, 0.9);
+}
+
+.korea-signal-detail {
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* 서브체인 아코디언 */
+.korea-signal-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.korea-signal-accordion__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.45rem;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.4rem 0.55rem;
+  font-size: 11px;
+  font-weight: 600;
   color: rgba(226, 232, 240, 0.95);
+  cursor: pointer;
+  text-align: left;
 }
 
-.korea-signal-summary-stat--overheat .korea-signal-summary-stat__value {
-  color: rgba(254, 205, 211, 0.92);
+.korea-signal-accordion__item.is-open .korea-signal-accordion__trigger {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.korea-signal-summary-stat--pullback .korea-signal-summary-stat__value {
-  color: rgba(253, 230, 138, 0.92);
-}
-
-.korea-signal-summary-stat--trend .korea-signal-summary-stat__value {
-  color: rgba(167, 243, 208, 0.92);
-}
-
-.korea-signal-summary-stat--watch .korea-signal-summary-stat__value {
-  color: rgba(203, 213, 225, 0.88);
-}
-
-.korea-signal-summary-stat--muted {
-  color: rgba(100, 116, 139, 0.9);
+.korea-signal-accordion__meta {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .korea-signal-card-grid {
-  --korea-signal-card-gap: 0.28rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
-  gap: var(--korea-signal-card-gap);
-  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+  margin: 0.4rem 0 0;
   padding: 0;
 }
 
-.korea-signal-card-grid > .korea-signal-card,
-.korea-signal-card-grid > .korea-signal-empty {
-  flex: 0 0 100%;
-  max-width: 100%;
-}
-
 @media (min-width: 640px) {
-  .korea-signal-card-grid > .korea-signal-card {
-    flex: 0 0 calc((100% - var(--korea-signal-card-gap)) / 2);
-    max-width: calc((100% - var(--korea-signal-card-gap)) / 2);
+  .korea-signal-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
   .korea-signal-card-grid {
-    --korea-signal-card-gap: 0.3rem;
-  }
-
-  .korea-signal-card-grid > .korea-signal-card {
-    flex: 0 0 calc((100% - 3 * var(--korea-signal-card-gap)) / 4);
-    max-width: calc((100% - 3 * var(--korea-signal-card-gap)) / 4);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1169,19 +1162,25 @@ body.valuechain-route-active main.value-chain-main-host {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 0.2rem;
-  height: auto;
-  min-height: 120px;
-  max-height: 130px;
-  padding: 0.45rem 0.5rem 0.4rem;
+  gap: 0.15rem;
+  min-height: 90px;
+  max-height: 90px;
+  padding: 0.45rem 0.5rem 0.35rem;
   box-sizing: border-box;
+  transition: max-height 0.22s ease;
 }
 
-.korea-signal-card__head {
+.korea-signal-card.is-expanded .korea-signal-card__body {
+  max-height: none;
+  min-height: 0;
+}
+
+.korea-signal-card__tags {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: auto;
 }
 
 .korea-signal-card__name {
@@ -1207,108 +1206,102 @@ body.valuechain-route-active main.value-chain-main-host {
   text-overflow: ellipsis;
 }
 
-.korea-signal-card__inline {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.2rem 0.35rem;
-  padding: 0.2rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 11px;
-  line-height: 1.4;
-  color: rgba(148, 163, 184, 0.95);
-}
-
-.korea-signal-card__inline strong {
-  font-weight: 600;
-  color: rgba(226, 232, 240, 0.96);
-}
-
-.korea-signal-card__inline-sep {
-  color: rgba(71, 85, 105, 0.85);
-}
-
-.korea-signal-temp {
+.korea-signal-card__temp {
   font-family: ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  color: rgba(248, 250, 252, 0.88);
 }
 
-.korea-signal-temp--hot {
-  color: rgba(251, 191, 36, 0.95);
+.korea-signal-card__expand {
+  display: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.2);
 }
 
-.korea-signal-temp--warm {
-  color: rgba(148, 163, 184, 0.95);
+.korea-signal-card.is-expanded .korea-signal-card__expand {
+  display: block;
 }
 
-.korea-signal-temp--cool {
-  color: rgba(125, 211, 252, 0.88);
+@media (hover: hover) {
+  .korea-signal-card:hover .korea-signal-card__expand {
+    display: block;
+  }
+
+  .korea-signal-card:hover .korea-signal-card__body {
+    max-height: none;
+    min-height: 0;
+  }
 }
 
-.korea-signal-card__chips {
+.korea-signal-card__expand-inner {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  gap: 0.22rem;
-  margin: 0;
-  flex: 1;
-  min-height: 0;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.35rem 0.5rem 0.45rem;
+}
+
+.korea-signal-card__strategy {
+  align-self: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.35rem;
+  background: transparent;
+  padding: 0.25rem 0.5rem;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92);
+  cursor: pointer;
+}
+
+.korea-signal-card__strategy:hover {
+  border-color: rgba(45, 212, 191, 0.35);
+  color: rgba(153, 246, 228, 0.95);
 }
 
 .korea-signal-metric-chip {
-  flex: 1;
-  min-width: 0;
-  padding: 0.22rem 0.2rem;
+  display: block;
+  padding: 0.2rem 0.35rem;
   border-radius: 0.3rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.24);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.35;
-  letter-spacing: -0.01em;
-  text-align: center;
-  color: rgba(203, 213, 225, 0.94);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: rgba(226, 232, 240, 0.9);
 }
 
 .korea-signal-badge {
   flex-shrink: 0;
   border-radius: 0.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.28);
-  padding: 0.12rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.1rem 0.35rem;
   font-size: 10px;
   font-weight: 600;
   line-height: 1.3;
-  letter-spacing: 0.02em;
-  color: rgba(203, 213, 225, 0.92);
+  color: rgba(248, 250, 252, 0.9);
   white-space: nowrap;
 }
 
-.korea-signal-badge--overheat {
-  border-color: rgba(244, 63, 94, 0.22);
-  color: rgba(254, 205, 211, 0.9);
+/* 추천=민트 · 주의=주황 · 과열=빨강 · 나머지 흰색 */
+.korea-signal-badge--trend {
+  border-color: rgba(45, 212, 191, 0.35);
+  color: rgba(153, 246, 228, 0.95);
 }
 
 .korea-signal-badge--pullback {
-  border-color: rgba(251, 191, 36, 0.22);
-  color: rgba(253, 230, 138, 0.9);
+  border-color: rgba(251, 146, 60, 0.35);
+  color: rgba(254, 215, 170, 0.95);
 }
 
-.korea-signal-badge--trend {
-  border-color: rgba(52, 211, 153, 0.2);
-  color: rgba(167, 243, 208, 0.9);
+.korea-signal-badge--overheat {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: rgba(254, 202, 202, 0.95);
 }
 
 .korea-signal-badge--watch {
-  border-color: rgba(148, 163, 184, 0.2);
-  color: rgba(203, 213, 225, 0.85);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(248, 250, 252, 0.85);
 }
 
 .korea-signal-card__hit:hover .korea-signal-badge {

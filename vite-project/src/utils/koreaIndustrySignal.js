@@ -9,10 +9,10 @@ import {
 /** @typedef {{ volume: string; ma10: string; ma20: string; w52: string }} AuxSignals */
 
 export const SIGNAL_STATUS_META = {
-  overheat: { id: "overheat", status: "과열", badge: "과열주의" },
-  pullback: { id: "pullback", status: "눌림", badge: "눌림대기" },
-  trend: { id: "trend", status: "추세", badge: "추세유지" },
-  watch: { id: "watch", status: "관망", badge: "관망" },
+  overheat: { id: "overheat", status: "과열", badge: "과열", shortBadge: "과열" },
+  pullback: { id: "pullback", status: "눌림", badge: "눌림대기", shortBadge: "주의" },
+  trend: { id: "trend", status: "추세", badge: "추세유지", shortBadge: "추천유지" },
+  watch: { id: "watch", status: "관망", badge: "관망", shortBadge: "관망" },
 }
 
 /** @param {string} key */
@@ -86,9 +86,42 @@ export function buildStockSignalRow(stock, ctx) {
     statusId,
     status: meta.status,
     badge: meta.badge,
+    shortBadge: meta.shortBadge,
     marketTemp: deriveMarketTemp(stock.code, ctx.sectorHeat),
     aux: deriveAuxSignals(stock.code),
   }
+}
+
+/**
+ * @param {import("../data/koreaGrowthSectorMap.js").KoreaSectorCard | null} sector
+ * @param {string} [sectorHeat]
+ */
+export function buildSectorSignalGroups(sector, sectorHeat) {
+  if (!sector) return []
+
+  if (sector.subChains?.length) {
+    return sector.subChains
+      .map((sub) => ({
+        id: sub.id,
+        label: sub.label,
+        rows: (sub.stocks || []).map((stock) =>
+          buildStockSignalRow(stock, {
+            sectorName: sector.name,
+            sectorHeat,
+            subLabel: sub.label,
+          }),
+        ),
+      }))
+      .filter((g) => g.rows.length > 0)
+  }
+
+  return [
+    {
+      id: "main",
+      label: sector.name,
+      rows: buildSectorSignalRows(sector, sectorHeat),
+    },
+  ]
 }
 
 /**
