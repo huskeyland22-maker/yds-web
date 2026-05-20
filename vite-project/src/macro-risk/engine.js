@@ -1,4 +1,5 @@
 import { buildRawLayer } from "./rawLayer.js"
+import { buildMarketImpact } from "./marketImpact.js"
 import { scoreInflationPressure, scoreLiquidity, scoreRatePressure } from "./pillars.js"
 import { clampScore, scoreEmoji } from "./seriesMath.js"
 import { evaluateCompositeTriggers } from "./triggers.js"
@@ -14,6 +15,8 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {string} longTerm
  * @property {string} shortTerm
  * @property {string} tactical
+ * @property {string} connectLongTerm
+ * @property {import('./marketImpact.js').MarketImpactRow[]} marketImpact
  * @property {string} updatedAt
  */
 
@@ -44,9 +47,11 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
   ]
 
   const longTerm = score < 50 ? "중립 이상" : score < 70 ? "중립" : "방어 우선"
+  const connectLongTerm = score < 55 ? "중립" : score < 72 ? "중립" : "방어"
   const shortTerm = rate.score >= 60 ? "금리 압박" : inflation.score >= 55 ? "인플레 주의" : "변동성 관리"
   const tactical =
     activeTriggers.length > 0 ? "보수 접근" : score >= 60 ? "선별 매수" : "분할 대응"
+  const marketImpact = buildMarketImpact(raw, [rate, inflation, liquidity], triggers)
 
   return {
     score,
@@ -56,8 +61,10 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
     pillars: [rate, inflation, liquidity],
     triggers,
     longTerm,
+    connectLongTerm,
     shortTerm,
     tactical,
+    marketImpact,
     updatedAt: new Date().toISOString(),
   }
 }

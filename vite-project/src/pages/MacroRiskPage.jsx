@@ -1,4 +1,6 @@
+import MacroRiskConnectCard from "../components/macro-risk/MacroRiskConnectCard.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
+import MacroRiskMarketImpact from "../components/macro-risk/MacroRiskMarketImpact.jsx"
 import MacroRiskPillarSection from "../components/macro-risk/MacroRiskPillarSection.jsx"
 import MacroRiskTriggers from "../components/macro-risk/MacroRiskTriggers.jsx"
 import SectionErrorBoundary from "../components/SectionErrorBoundary.jsx"
@@ -40,6 +42,10 @@ export default function MacroRiskPage({ panicData = null }) {
 
       {snapshot ? (
         <div className="macro-risk-stack flex flex-col gap-2 sm:gap-2.5">
+          <SectionErrorBoundary label="Cycle + Macro">
+            <MacroRiskConnectCard snapshot={snapshot} panicData={panicData} />
+          </SectionErrorBoundary>
+
           <SectionErrorBoundary label="Macro Risk Hero">
             <MacroRiskHero snapshot={snapshot} />
           </SectionErrorBoundary>
@@ -49,6 +55,10 @@ export default function MacroRiskPage({ panicData = null }) {
               <MacroRiskPillarSection pillar={pillar} />
             </SectionErrorBoundary>
           ))}
+
+          <SectionErrorBoundary label="시장 영향">
+            <MacroRiskMarketImpact rows={snapshot.marketImpact} />
+          </SectionErrorBoundary>
 
           <SectionErrorBoundary label="복합 트리거">
             <MacroRiskTriggers triggers={snapshot.triggers} />
