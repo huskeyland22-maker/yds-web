@@ -1,5 +1,4 @@
 import { scoreEmoji } from "../../macro-risk/seriesMath.js"
-import MacroRiskChangeRates from "./MacroRiskChangeRates.jsx"
 
 const ACCENT = {
   rate: "macro-risk-pillar--rate",
@@ -31,8 +30,6 @@ export default function MacroRiskPillarSection({ pillar }) {
           </li>
         ))}
       </ul>
-      <MacroRiskChangeRates metrics={pillar.metrics} />
-
       <p className="m-0 mt-2 border-t border-white/[0.06] pt-2 text-[11px] font-medium text-cyan-200/90">
         상태: {pillar.status}
       </p>

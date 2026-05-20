@@ -1,4 +1,5 @@
 import { buildRawLayer } from "./rawLayer.js"
+import { buildTieredMetrics } from "./metricTiers.js"
 import { buildMarketImpact } from "./marketImpact.js"
 import { scoreInflationPressure, scoreLiquidity, scoreRatePressure } from "./pillars.js"
 import { clampScore, scoreEmoji } from "./seriesMath.js"
@@ -17,6 +18,7 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {string} tactical
  * @property {string} connectLongTerm
  * @property {import('./marketImpact.js').MarketImpactRow[]} marketImpact
+ * @property {{ tier1: import('./displayMetrics.js').MetricDisplayRow[]; tier2: import('./displayMetrics.js').MetricDisplayRow[] }} tieredMetrics
  * @property {string} updatedAt
  */
 
@@ -36,6 +38,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
 
   const activeTriggers = triggers.filter((t) => t.active)
   const headline =
+    activeTriggers.find((t) => t.id === "long_rate_stress")?.label ??
     activeTriggers.find((t) => t.id === "rate_shock")?.label ??
     (rate.score >= 65 ? "단기 조정 위험" : score >= 55 ? "매크로 중립" : "리스크 완화")
   const subheadline = rate.status || inflation.status
@@ -52,6 +55,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
   const tactical =
     activeTriggers.length > 0 ? "보수 접근" : score >= 60 ? "선별 매수" : "분할 대응"
   const marketImpact = buildMarketImpact(raw, [rate, inflation, liquidity], triggers)
+  const tieredMetrics = buildTieredMetrics(raw, panicContext)
 
   return {
     score,
@@ -65,6 +69,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
     shortTerm,
     tactical,
     marketImpact,
+    tieredMetrics,
     updatedAt: new Date().toISOString(),
   }
 }

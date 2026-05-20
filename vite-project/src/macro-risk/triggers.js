@@ -8,6 +8,7 @@
  */
 export function evaluateCompositeTriggers(raw, panicContext = null) {
   const us10 = raw.US10Y
+  const us30 = raw.US30Y
   const real = raw.REAL_YIELD
   const move = raw.MOVE
   const bei = raw.BEI
@@ -57,6 +58,20 @@ export function evaluateCompositeTriggers(raw, panicContext = null) {
     emoji: "🟠",
     active: Boolean(riskAssetPressure),
     detail: "DXY·MOVE·VXN 동반 상승",
+  })
+
+  const longRateStress =
+    us30?.change20D != null &&
+    us30.change20D > 0.25 &&
+    (bei?.slope === "up" || (bei?.change20D != null && bei.change20D > 0.03)) &&
+    (us10?.slope === "up" || (us10?.change20D != null && us10.change20D > 0.05))
+
+  triggers.push({
+    id: "long_rate_stress",
+    label: "장기 인플레 경고",
+    emoji: "🔴",
+    active: Boolean(longRateStress),
+    detail: "재정 / 채권 부담",
   })
 
   return triggers

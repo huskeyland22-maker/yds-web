@@ -1,4 +1,5 @@
 import MacroRiskConnectCard from "../components/macro-risk/MacroRiskConnectCard.jsx"
+import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
 import MacroRiskMarketImpact from "../components/macro-risk/MacroRiskMarketImpact.jsx"
 import MacroRiskPillarSection from "../components/macro-risk/MacroRiskPillarSection.jsx"
@@ -48,6 +49,10 @@ export default function MacroRiskPage({ panicData = null }) {
 
           <SectionErrorBoundary label="Macro Risk Hero">
             <MacroRiskHero snapshot={snapshot} />
+          </SectionErrorBoundary>
+
+          <SectionErrorBoundary label="Tier 지표">
+            <MacroRiskTierPanel tieredMetrics={snapshot.tieredMetrics} />
           </SectionErrorBoundary>
 
           {snapshot.pillars.map((pillar) => (

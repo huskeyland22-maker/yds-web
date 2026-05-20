@@ -1,4 +1,3 @@
-import { buildMetricRow } from "./displayMetrics.js"
 import { changeTag, clampScore, nearRecentHigh, slopeArrow } from "./seriesMath.js"
 
 /**
@@ -35,10 +34,15 @@ export function scoreRatePressure(raw) {
     score += 8
   }
 
+  const us30 = raw.US30Y
   const lines = [
     {
       label: "10Y",
       text: `${slopeArrow(us10?.slope ?? "flat")} ${changeTag(us10?.change5D, us10?.slope ?? "flat")}`,
+    },
+    {
+      label: "30Y",
+      text: `${slopeArrow(us30?.slope ?? "flat")} ${changeTag(us30?.change20D, us30?.slope ?? "flat")}`,
     },
     {
       label: "REAL",
@@ -59,12 +63,6 @@ export function scoreRatePressure(raw) {
     score: clampScore(score),
     lines,
     status,
-    metrics: [
-      buildMetricRow(us10, "10Y", { format: "rate" }),
-      buildMetricRow(raw.US2Y, "2Y", { format: "rate" }),
-      buildMetricRow(real, "REAL", { format: "rate" }),
-      buildMetricRow(move, "MOVE", { format: "index" }),
-    ],
   }
 }
 
@@ -99,12 +97,6 @@ export function scoreInflationPressure(raw) {
     score: clampScore(score),
     lines,
     status,
-    metrics: [
-      buildMetricRow(bei, "BEI", { format: "rate" }),
-      buildMetricRow(cpi, "CPI", { format: "rate" }),
-      buildMetricRow(core, "Core", { format: "rate" }),
-      buildMetricRow(pce, "PCE", { format: "rate" }),
-    ],
   }
 }
 
@@ -138,12 +130,6 @@ export function scoreLiquidity(raw) {
     score: clampScore(score),
     lines,
     status,
-    metrics: [
-      buildMetricRow(dxy, "DXY", { format: "pct" }),
-      buildMetricRow(qt, "QT", { format: "index" }),
-      buildMetricRow(m2, "M2", { format: "pct" }),
-      buildMetricRow(fed, "Fed", { format: "pct" }),
-    ],
   }
 }
 

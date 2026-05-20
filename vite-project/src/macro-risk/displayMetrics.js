@@ -12,12 +12,15 @@ import { slopeArrow } from "./seriesMath.js"
  * @property {number|null} change20D
  * @property {'up'|'down'|'flat'} slope
  * @property {MetricFormat} format
+ * @property {number} [tier]
+ * @property {string} [category]
+ * @property {boolean} [hide1D]
  */
 
 /**
  * @param {MetricSeries | undefined} series
  * @param {string} label
- * @param {{ format?: MetricFormat }} [opts]
+ * @param {{ format?: MetricFormat; tier?: number; category?: string; hide1D?: boolean }} [opts]
  * @returns {MetricDisplayRow}
  */
 export function buildMetricRow(series, label, opts = {}) {
@@ -30,6 +33,9 @@ export function buildMetricRow(series, label, opts = {}) {
     change20D: series?.change20D ?? null,
     slope: series?.slope ?? "flat",
     format: opts.format ?? "rate",
+    tier: opts.tier,
+    category: opts.category,
+    hide1D: opts.hide1D ?? false,
   }
 }
 
