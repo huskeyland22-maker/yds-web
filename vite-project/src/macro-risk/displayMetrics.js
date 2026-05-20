@@ -2,7 +2,7 @@ import { slopeArrow } from "./seriesMath.js"
 
 /**
  * @typedef {import('./rawLayer.js').MetricSeries} MetricSeries
- * @typedef {'rate'|'index'|'pct'} MetricFormat
+ * @typedef {'rate'|'index'|'pct'|'level'} MetricFormat
  * @typedef {Object} MetricDisplayRow
  * @property {string} key
  * @property {string} label
@@ -16,12 +16,13 @@ import { slopeArrow } from "./seriesMath.js"
  * @property {string} [category]
  * @property {boolean} [hide1D]
  * @property {string} [tooltip]
+ * @property {'LIVE'|'MOCK'|'STATIC'} [dataBadge]
  */
 
 /**
  * @param {MetricSeries | undefined} series
  * @param {string} label
- * @param {{ format?: MetricFormat; tier?: number; category?: string; hide1D?: boolean; tooltip?: string }} [opts]
+ * @param {{ format?: MetricFormat; tier?: number; category?: string; hide1D?: boolean; tooltip?: string; dataBadge?: 'LIVE'|'MOCK'|'STATIC' }} [opts]
  * @returns {MetricDisplayRow}
  */
 export function buildMetricRow(series, label, opts = {}) {
@@ -38,6 +39,7 @@ export function buildMetricRow(series, label, opts = {}) {
     tier: opts.tier,
     category: opts.category,
     hide1D: opts.hide1D ?? false,
+    dataBadge: opts.dataBadge,
   }
 }
 
@@ -54,7 +56,7 @@ export function formatDelta(v, format, base = null) {
     const pct = base != null && base !== 0 ? (n / base) * 100 : n
     return `${sign}${pct.toFixed(1)}%`
   }
-  if (format === "index") return `${sign}${n.toFixed(2)}`
+  if (format === "level" || format === "index") return `${sign}${n.toFixed(2)}`
   return `${sign}${n.toFixed(2)}`
 }
 
@@ -66,7 +68,7 @@ export function formatCurrent(v, format) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
   const n = Number(v)
   if (format === "pct") return `${n.toFixed(1)}%`
-  if (format === "index") return n.toFixed(2)
+  if (format === "level" || format === "index") return n.toFixed(1)
   return n.toFixed(2)
 }
 

@@ -9,6 +9,9 @@ import { MACRO_RISK_SEED_HISTORY } from "./staticSeed.js"
  * @property {number|null} change20D
  * @property {'up'|'down'|'flat'} slope
  * @property {string} status
+ * @property {number|null} [previous1D]
+ * @property {number|null} [previous5D]
+ * @property {number|null} [previous20D]
  */
 
 /**
@@ -40,6 +43,9 @@ export function buildMetricSeries(key, history, opts = {}) {
   return {
     key,
     current,
+    previous1D: prev1,
+    previous5D: prev5,
+    previous20D: prev20,
     change1D,
     change5D,
     change20D,

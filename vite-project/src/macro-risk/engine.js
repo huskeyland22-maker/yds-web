@@ -60,7 +60,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
   const tactical =
     activeTriggers.length > 0 ? "보수 접근" : score >= 60 ? "선별 매수" : "분할 대응"
   const marketImpact = buildMarketImpact(raw, [rate, inflation, liquidity], triggers)
-  const tieredMetrics = buildTieredMetrics(raw, panicContext)
+  const tieredMetrics = buildTieredMetrics(raw, panicContext, meta.sources ?? {})
   const yieldCurve = buildYieldCurve(raw)
   const devValidation = meta.includeDev ? buildDevValidation(raw, meta.sources ?? {}) : null
 

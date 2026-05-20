@@ -1,4 +1,5 @@
 import { buildMetricRow } from "./displayMetrics.js"
+import { sourceToDataBadge } from "./deltaSemantics.js"
 import { metricDisplayLabel, metricDisplayTooltip } from "./metricLabels.js"
 
 /**
@@ -28,20 +29,23 @@ function vxnSeriesFromPanic(panicContext) {
 /**
  * @param {Record<string, MetricSeries>} raw
  * @param {object | null} panicContext
+ * @param {Record<string, string>} [sources]
  * @returns {{ tier1: MetricDisplayRow[]; tier2: MetricDisplayRow[] }}
  */
-export function buildTieredMetrics(raw, panicContext = null) {
+export function buildTieredMetrics(raw, panicContext = null, sources = {}) {
   const vxn = vxnSeriesFromPanic(panicContext)
+  const badge = (key) => sourceToDataBadge(sources[key] ?? "staticSeed")
 
   const tier1 = [
     buildMetricRow(raw.US10Y, metricDisplayLabel("US10Y"), {
       format: "rate",
       tier: 1,
       tooltip: metricDisplayTooltip("US10Y"),
+      dataBadge: badge("US10Y"),
     }),
-    buildMetricRow(raw.REAL_YIELD, "REAL", { format: "rate", tier: 1 }),
-    buildMetricRow(raw.DXY, "DXY", { format: "pct", tier: 1 }),
-    buildMetricRow(raw.MOVE, "MOVE", { format: "index", tier: 1 }),
+    buildMetricRow(raw.REAL_YIELD, "REAL", { format: "rate", tier: 1, dataBadge: badge("REAL_YIELD") }),
+    buildMetricRow(raw.DXY, "DXY", { format: "level", tier: 1, dataBadge: badge("DXY") }),
+    buildMetricRow(raw.MOVE, "MOVE", { format: "index", tier: 1, dataBadge: badge("MOVE") }),
   ]
 
   const tier2 = [
@@ -51,13 +55,20 @@ export function buildTieredMetrics(raw, panicContext = null) {
       category: "장기금리",
       hide1D: true,
       tooltip: metricDisplayTooltip("US30Y"),
+      dataBadge: badge("US30Y"),
     }),
-    buildMetricRow(raw.BEI, "BEI", { format: "rate", tier: 2 }),
-    buildMetricRow(vxn, "VXN", { format: "index", tier: 2, hide1D: true }),
+    buildMetricRow(raw.BEI, "BEI", { format: "rate", tier: 2, dataBadge: badge("BEI") }),
+    buildMetricRow(vxn, "VXN", {
+      format: "index",
+      tier: 2,
+      hide1D: true,
+      dataBadge: sources.VXN ? badge("VXN") : "LIVE",
+    }),
     buildMetricRow(raw.US2Y, metricDisplayLabel("US2Y"), {
       format: "rate",
       tier: 2,
       tooltip: metricDisplayTooltip("US2Y"),
+      dataBadge: badge("US2Y"),
     }),
   ]
 
