@@ -253,11 +253,19 @@ export default function PanicDeskDashboard({
 
       {showCollectBanner ? (
         <div
-          className="flex items-center gap-2 rounded-md border border-cyan-500/20 bg-cyan-500/[0.06] px-2 py-1"
+          className="space-y-0.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 leading-snug"
           role="status"
         >
-          <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-cyan-400/80" aria-hidden />
-          <p className="m-0 text-[10px] font-medium text-cyan-100/85">다음 시장 데이터 수집 대기중</p>
+          <p className="m-0 text-[10px] font-semibold text-slate-200">미국장 종가 기준 스냅샷</p>
+          <p className="m-0 text-[10px] text-slate-500">
+            미국장 종가 확정 · 한국시간 오전 8시 기준 통일
+          </p>
+          <p className="m-0 text-[10px] text-slate-400">
+            <span className="text-slate-500">상태:</span> Cycle 확정 ✅ · Macro 확정 ✅
+          </p>
+          <p className="m-0 text-[10px] text-slate-400">
+            <span className="text-slate-500">다음 갱신:</span> 미국장 마감 후
+          </p>
         </div>
       ) : null}
 

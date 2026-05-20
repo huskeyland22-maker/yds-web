@@ -9,7 +9,9 @@ export default function MacroRiskLiveDataStatus({ status }) {
   return (
     <section className="trading-card-shell px-3 py-2.5 sm:px-3.5 sm:py-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-slate-500">LIVE DATA STATUS</p>
+        <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-slate-500">
+          종가 스냅샷 · 데이터 소스
+        </p>
         <p className="m-0 font-mono text-[9px] text-slate-500">
           {status.liveFetchOk ? "API OK" : "API 실패"}
           {status.lastUpdateDisplay ? ` · ${status.lastUpdateDisplay}` : ""}

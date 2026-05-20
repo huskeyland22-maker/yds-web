@@ -20,10 +20,11 @@ function buildVxnTierRow(raw, panicContext, sources) {
   if (hist?.current != null && Number.isFinite(hist.current)) {
     const noHorizon = hist.change5D == null && hist.change20D == null
     const series = noHorizon ? { ...hist, slope: "flat", status: "—" } : hist
-    return buildMetricRow(series, "VXN", {
+    return buildMetricRow(series, metricDisplayLabel("VXN"), {
       format: "index",
       tier: 2,
       hide1D: true,
+      tooltip: metricDisplayTooltip("VXN"),
       dataBadge: sourceToDataBadge(sources.VXN ?? "staticSeed"),
       deltaHorizonNA: noHorizon,
     })
@@ -32,8 +33,15 @@ function buildVxnTierRow(raw, panicContext, sources) {
   if (!Number.isFinite(spot)) {
     return buildMetricRow(
       { key: "VXN", current: null, change1D: null, change5D: null, change20D: null, slope: "flat", status: "—" },
-      "VXN",
-      { format: "index", tier: 2, hide1D: true, dataBadge: "MOCK", deltaHorizonNA: true },
+      metricDisplayLabel("VXN"),
+      {
+        format: "index",
+        tier: 2,
+        hide1D: true,
+        tooltip: metricDisplayTooltip("VXN"),
+        dataBadge: "MOCK",
+        deltaHorizonNA: true,
+      },
     )
   }
 
@@ -47,11 +55,12 @@ function buildVxnTierRow(raw, panicContext, sources) {
       slope: "flat",
       status: "—",
     },
-    "VXN",
+    metricDisplayLabel("VXN"),
     {
       format: "index",
       tier: 2,
       hide1D: true,
+      tooltip: metricDisplayTooltip("VXN"),
       dataBadge: sourceToDataBadge(sources.VXN ?? "cycle-manual"),
       deltaHorizonNA: true,
     },
@@ -74,9 +83,24 @@ export function buildTieredMetrics(raw, panicContext = null, sources = {}) {
       tooltip: metricDisplayTooltip("US10Y"),
       dataBadge: badge("US10Y"),
     }),
-    buildMetricRow(raw.REAL_YIELD, "REAL", { format: "rate", tier: 1, dataBadge: badge("REAL_YIELD") }),
-    buildMetricRow(raw.DXY, "DXY", { format: "level", tier: 1, dataBadge: badge("DXY") }),
-    buildMetricRow(raw.MOVE, "MOVE", { format: "index", tier: 1, dataBadge: badge("MOVE") }),
+    buildMetricRow(raw.REAL_YIELD, metricDisplayLabel("REAL_YIELD"), {
+      format: "rate",
+      tier: 1,
+      tooltip: metricDisplayTooltip("REAL_YIELD"),
+      dataBadge: badge("REAL_YIELD"),
+    }),
+    buildMetricRow(raw.DXY, metricDisplayLabel("DXY"), {
+      format: "level",
+      tier: 1,
+      tooltip: metricDisplayTooltip("DXY"),
+      dataBadge: badge("DXY"),
+    }),
+    buildMetricRow(raw.MOVE, metricDisplayLabel("MOVE"), {
+      format: "index",
+      tier: 1,
+      tooltip: metricDisplayTooltip("MOVE"),
+      dataBadge: badge("MOVE"),
+    }),
   ]
 
   const tier2 = [
@@ -88,7 +112,12 @@ export function buildTieredMetrics(raw, panicContext = null, sources = {}) {
       tooltip: metricDisplayTooltip("US30Y"),
       dataBadge: badge("US30Y"),
     }),
-    buildMetricRow(raw.BEI, "BEI", { format: "rate", tier: 2, dataBadge: badge("BEI") }),
+    buildMetricRow(raw.BEI, metricDisplayLabel("BEI"), {
+      format: "rate",
+      tier: 2,
+      tooltip: metricDisplayTooltip("BEI"),
+      dataBadge: badge("BEI"),
+    }),
     buildVxnTierRow(raw, panicContext, sources),
     buildMetricRow(raw.US2Y, metricDisplayLabel("US2Y"), {
       format: "rate",

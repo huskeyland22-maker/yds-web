@@ -57,14 +57,14 @@ import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from ".
 
 /** @type {Record<string, string>} */
 const DEV_LABEL = {
-  US10Y: "10년물 국채금리",
-  US2Y: "2년물 국채금리",
-  US30Y: "30년물 국채금리",
-  REAL_YIELD: "실질금리",
-  BEI: "BEI",
-  MOVE: "MOVE",
-  DXY: "DXY",
-  VXN: "VXN",
+  US10Y: "10년물 국채금리 (US10Y)",
+  US2Y: "2년물 국채금리 (US2Y)",
+  US30Y: "30년물 국채금리 (US30Y)",
+  REAL_YIELD: "실질금리 (REAL)",
+  BEI: "기대인플레이션 (BEI)",
+  MOVE: "채권 변동성 (MOVE)",
+  DXY: "달러지수 (DXY)",
+  VXN: "나스닥 변동성 (VXN)",
   CPI: "CPI",
   CORE_CPI: "CORE CPI",
   PCE: "PCE",

@@ -35,6 +35,9 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
                   <span className="text-[11px] font-semibold leading-tight text-slate-200" title={row.tooltip ?? undefined}>
                     {row.label}
                   </span>
+                  {row.tooltip ? (
+                    <span className="text-[10px] leading-snug text-slate-500">{row.tooltip}</span>
+                  ) : null}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {row.dataBadge ? (
                       <span

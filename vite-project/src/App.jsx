@@ -1179,8 +1179,8 @@ function App() {
         const ageMin = (Date.now() - t) / 60000
         if (ageMin < 4) {
           feedKind = "live"
-          feedLabel = "실시간"
-          sourceLine = "데이터 기준 · 실시간 갱신"
+          feedLabel = "스냅샷"
+          sourceLine = "데이터 기준 · 미국장 종가 확정 · 한국시간 오전 8시 통일"
         } else if (ageMin > 36 * 60) {
           feedKind = "delayed"
           feedLabel = "지연"

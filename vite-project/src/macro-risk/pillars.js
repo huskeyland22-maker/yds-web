@@ -46,11 +46,11 @@ export function scoreRatePressure(raw) {
       text: `${slopeArrow(us30?.slope ?? "flat")} ${changeTag(us30?.change20D, us30?.slope ?? "flat")}`,
     },
     {
-      label: "REAL",
+      label: metricDisplayLabel("REAL_YIELD"),
       text: `${slopeArrow(real?.slope ?? "flat")} ${changeTag(real?.change20D, real?.slope ?? "flat")}`,
     },
     {
-      label: "MOVE",
+      label: metricDisplayLabel("MOVE"),
       text: `${slopeArrow(move?.slope ?? "flat")} 변동확대`,
     },
   ]
@@ -84,7 +84,7 @@ export function scoreInflationPressure(raw) {
   if (cpi?.slope === "down") score -= 4
 
   const lines = [
-    { label: "BEI", text: bei?.slope === "up" ? "상승" : "보합" },
+    { label: metricDisplayLabel("BEI"), text: bei?.slope === "up" ? "상승" : "보합" },
     { label: "Core", text: core?.slope === "up" ? "상승" : "유지" },
     { label: "PCE", text: pce?.slope === "down" ? "둔화" : "후행" },
   ]
