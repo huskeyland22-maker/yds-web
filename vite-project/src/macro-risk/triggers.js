@@ -20,34 +20,43 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
   const triggers = []
 
   const us10Current = toNum(us10?.current)
-  const us10d1 = toNum(us10?.delta1D)
-  const us10d5 = toNum(us10?.delta5D)
-  const us10d20 = toNum(us10?.delta20D)
+  const us10d1Abs = toNum(us10?.delta1D)
+  const us10d5Abs = toNum(us10?.delta5D)
+  const us10d20Abs = toNum(us10?.delta20D)
+  const us10Prev1 = toNum(us10?.previous1D)
+  const us10Prev5 = toNum(us10?.previous5D)
+  const us10d1Pct = pctDelta(us10Current, us10Prev1)
+  const us10d5Pct = pctDelta(us10Current, us10Prev5)
   const moveD1 = toNum(move?.delta1D)
   const moveD5 = toNum(move?.delta5D)
-  const us10Acceleration = Number.isFinite(us10d1) && Number.isFinite(us10d5) ? us10d1 - us10d5 / 5 : null
+  const us10Acceleration = Number.isFinite(us10d1Pct) && Number.isFinite(us10d5Pct) ? us10d1Pct - us10d5Pct / 5 : null
+  const us30Current = toNum(us30?.current)
 
   const rateStable =
-    Number.isFinite(us10d1) &&
-    Number.isFinite(us10d5) &&
-    us10d1 < 1 &&
-    us10d5 < 3
+    Number.isFinite(us10d1Pct) &&
+    Number.isFinite(us10d5Pct) &&
+    us10d1Pct < 1 &&
+    us10d5Pct < 3
   const rateWarning =
     !rateStable &&
-    ((Number.isFinite(us10d1) && us10d1 >= 1 && us10d1 < 3) || (Number.isFinite(us10d5) && us10d5 >= 3 && us10d5 < 7))
+    ((Number.isFinite(us10d1Pct) && us10d1Pct >= 1 && us10d1Pct < 3) ||
+      (Number.isFinite(us10d5Pct) && us10d5Pct >= 3 && us10d5Pct < 7))
   const moveSurge =
     (Number.isFinite(moveD1) && moveD1 >= 8) ||
     (Number.isFinite(moveD5) && moveD5 >= 20) ||
     (move?.slope === "up" && Number.isFinite(toNum(move?.delta20D)) && toNum(move?.delta20D) >= 40)
   const rateShock =
-    (Number.isFinite(us10d1) && us10d1 >= 3) ||
-    (Number.isFinite(us10d5) && us10d5 >= 7) ||
+    (Number.isFinite(us10d1Pct) && us10d1Pct >= 3) ||
+    (Number.isFinite(us10d5Pct) && us10d5Pct >= 7) ||
     moveSurge
-  const rateShockExtreme =
-    (Number.isFinite(us10d1) && us10d1 >= 4) ||
-    (Number.isFinite(us10d5) && us10d5 >= 9) ||
-    (moveSurge && move?.slope === "up" && real?.slope === "up")
-  const rateShockAdd = rateShock ? (rateShockExtreme ? 20 : 15) : 0
+  const rateShockAdd = rateShock ? 8 : 0
+  const moveRising = move?.slope === "up" || (Number.isFinite(moveD1) && moveD1 > 0)
+  const rateRepricingEvent =
+    Number.isFinite(us10d1Pct) &&
+    us10d1Pct >= 3 &&
+    Number.isFinite(us30Current) &&
+    us30Current > 5 &&
+    moveRising
 
   const ratePhase = rateShock ? "금리 쇼크" : rateWarning ? "금리 경고" : "금리 안정"
   const ratePhaseOutputs = rateShock
@@ -57,13 +66,28 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
       : "금리 안정"
   triggers.push({
     id: "rate_shock",
-    label: "금리 재평가",
+    label: "금리 쇼크",
     emoji: "🔴",
     active: Boolean(rateShock),
     scoreAdd: rateShockAdd,
     detail: [
       `${ratePhase} · ${ratePhaseOutputs}`,
-      `10Y 현재 ${fmt(us10Current)} · 1D ${fmt(us10d1)}% · 5D ${fmt(us10d5)}% · 20D ${fmt(us10d20)}% · 가속도 ${fmt(us10Acceleration)}`,
+      `10Y 현재 ${fmt(us10Current)} · 1D ${fmt(us10d1Pct)}% · 5D ${fmt(us10d5Pct)}% · 20D ${fmt(us10d20Abs)} · 가속도 ${fmt(us10Acceleration)}`,
+    ].join(" / "),
+  })
+
+  const us30Phase =
+    !Number.isFinite(us30Current) ? "30Y 데이터 대기" : us30Current >= 5.1 ? "장기채 압박" : us30Current > 5 ? "심리선 경고" : us30Current >= 4.7 ? "경계" : "안정"
+  triggers.push({
+    id: "rate_repricing_event",
+    label: "금리 재평가 이벤트",
+    emoji: "🚨",
+    active: Boolean(rateRepricingEvent),
+    scoreAdd: rateRepricingEvent ? 15 : 0,
+    detail: [
+      `30Y ${fmt(us30Current)} · ${us30Phase}`,
+      "출력: 성장주 압박 · AI 주의 · 코스피 리스크",
+      "조건: 10Y 1D +3% AND 30Y > 5% AND MOVE 상승",
     ].join(" / "),
   })
 
@@ -133,4 +157,9 @@ function toNum(v) {
 
 function fmt(v) {
   return Number.isFinite(v) ? v.toFixed(2) : "—"
+}
+
+function pctDelta(current, previous) {
+  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return NaN
+  return ((current - previous) / Math.abs(previous)) * 100
 }

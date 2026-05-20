@@ -53,6 +53,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
 
   const activeTriggers = triggers.filter((t) => t.active)
   const headline =
+    activeTriggers.find((t) => t.id === "rate_repricing_event")?.label ??
     activeTriggers.find((t) => t.id === "rate_shock")?.label ??
     activeTriggers.find((t) => t.id === "dollar_pressure")?.label ??
     activeTriggers.find((t) => t.id === "liquidity_easing")?.label ??
