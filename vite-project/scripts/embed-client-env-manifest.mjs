@@ -16,10 +16,16 @@ function hubOn() {
   return v === "1" || v === "true"
 }
 
+function macroRiskOn() {
+  const v = process.env.VITE_ENABLE_MACRO_RISK
+  return v === "1" || v === "true"
+}
+
 const client = {
   VITE_SUPABASE_URL: flag("VITE_SUPABASE_URL"),
   VITE_SUPABASE_ANON_KEY: flag("VITE_SUPABASE_ANON_KEY"),
   VITE_PANIC_HUB: hubOn(),
+  VITE_ENABLE_MACRO_RISK: macroRiskOn(),
 }
 
 const server = {

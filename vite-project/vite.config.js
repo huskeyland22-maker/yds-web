@@ -164,6 +164,10 @@ export default defineConfig({
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },
+      "/api/macro-risk": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
       "/api/macro-briefing-ai": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
@@ -189,6 +193,10 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/market-data": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
+      "/api/macro-risk": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },

@@ -21,8 +21,10 @@ const modules = [
   "api/_lib/stockSignalEngine.js",
   "api/_lib/stockSignalFromBars.js",
   "api/_lib/stockSignalHistory.js",
+  "api/_lib/macroRiskHistory.js",
   "api/stock-indicators.js",
   "api/stock.js",
+  "api/macro-risk.js",
 ]
 
 let failed = 0

@@ -17,6 +17,7 @@ import PanicDeskChart from "./PanicDeskChart.jsx"
 import PanicSectorFlowCard from "./PanicSectorFlowCard.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
+import YdsMarketOsScoreCard from "./macro-risk/YdsMarketOsScoreCard.jsx"
 import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
 import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
 
@@ -302,6 +303,8 @@ export default function PanicDeskDashboard({
           ) : null}
         </div>
       </section>
+
+      <YdsMarketOsScoreCard cycleScore={finalScore} panicData={panicData} />
 
       <PanicSectorFlowCard panicData={panicData} marketState={marketState} />
 

@@ -29,7 +29,9 @@ import CycleErrorBoundary from "./components/CycleErrorBoundary.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
+import MacroRiskPage from "./pages/MacroRiskPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
+import { getMarketOsNavItems } from "./macro-risk/navItems.js"
 import PanicDeskDashboard from "./components/PanicDeskDashboard.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
 import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
@@ -61,11 +63,7 @@ import { getToastChannel, toast } from "./utils/toast.js"
 
 /* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
-const MENU = [
-  { label: "01 시장 사이클", path: "/cycle", active: true },
-  { label: "02 코리아 밸류체인", path: "/value-chain", active: true },
-  { label: "03 트레이딩 로그", path: "/trading-log", active: true },
-]
+const MENU = getMarketOsNavItems()
 
 const METRIC_DEFS = [
   { key: "vix", label: "VIX" },
@@ -972,6 +970,7 @@ function App() {
     const path = location.pathname
     const scrollDoc =
       path === "/cycle" ||
+      path === "/macro-risk" ||
       path === "/trading-log" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
@@ -1405,6 +1404,14 @@ function App() {
                     />
                   </CycleErrorBoundary>
                 </div>
+              }
+            />
+            <Route
+              path="/macro-risk"
+              element={
+                <SectionErrorBoundary label="Macro Risk">
+                  <MacroRiskPage panicData={deskPanicData} />
+                </SectionErrorBoundary>
               }
             />
             <Route
