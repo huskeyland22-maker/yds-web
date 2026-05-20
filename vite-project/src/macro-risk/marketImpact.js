@@ -36,7 +36,7 @@ export function buildMarketImpact(raw, pillars, triggers) {
   const rateScore = rate?.score ?? 50
   const inflScore = inflation?.score ?? 50
   const liqScore = liquidity?.score ?? 50
-  const riskAsset = triggers.some((t) => t.id === "risk_asset" && t.active)
+  const riskAsset = triggers.some((t) => (t.id === "risk_asset" || t.id === "ai_pressure") && t.active)
   const rateShock = triggers.some((t) => t.id === "rate_shock" && t.active)
   const dxyUp = raw.DXY?.slope === "up" || (raw.DXY?.change20D != null && raw.DXY.change20D > 0.5)
 

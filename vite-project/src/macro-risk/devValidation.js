@@ -1,4 +1,5 @@
 import { auditDelta, inferDeltaMethod, sourceToDataBadge } from "./deltaSemantics.js"
+import { classifyMetric } from "./normalizeLayer.js"
 
 /**
  * DEV ONLY — 데이터 패널용 (SHOW_DEBUG + isDevMode).
@@ -20,6 +21,8 @@ import { auditDelta, inferDeltaMethod, sourceToDataBadge } from "./deltaSemantic
  * @property {number|null} previous5D
  * @property {number|null} previous20D
  * @property {string|null} delta20DLine
+ * @property {string} normalizeType
+ * @property {string} normalizeMethod
  * @property {string} method20D
  * @property {string} deltaSummary
  * @property {string|null} warning
@@ -71,6 +74,7 @@ const DEV_LABEL = {
  */
 export function buildDevValidation(raw, sources = {}, apiHistory = {}, yieldCurve = null, panicContext = null) {
   const rows = Object.entries(raw).map(([key, series]) => {
+    const cls = classifyMetric(key)
     const method20 = inferDeltaMethod(key, series.current, series.change20D, "20D")
     const audit20 = auditDelta(key, series.current, series.change20D, "20D")
     const deltaStr = formatDeltaLine(key, series, method20)
@@ -89,6 +93,8 @@ export function buildDevValidation(raw, sources = {}, apiHistory = {}, yieldCurv
       previous5D: series.previous5D ?? null,
       previous20D: series.previous20D ?? null,
       delta20DLine: delta20Str,
+      normalizeType: cls.type,
+      normalizeMethod: cls.method,
       method20D: audit20?.ok === false ? `${method20} ⚠` : method20,
       deltaSummary: deltaStr,
       warning: audit20?.ok === false ? audit20.warning : null,
@@ -108,6 +114,8 @@ export function buildDevValidation(raw, sources = {}, apiHistory = {}, yieldCurv
       previous5D: null,
       previous20D: null,
       delta20DLine: null,
+      normalizeType: "volatility",
+      normalizeMethod: "index",
       method20D: "—",
       deltaSummary: "스팟만 제공 · 5D/20D N/A",
       warning: "히스토리 없음 — 상승 표시 생략",

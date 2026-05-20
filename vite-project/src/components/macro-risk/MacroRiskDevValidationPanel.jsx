@@ -83,6 +83,9 @@ export default function MacroRiskDevValidationPanel({ data }) {
               <span className="text-amber-500/70"> ({r.originDetail})</span>
             </p>
             <p className="m-0">
+              <span className="text-amber-400/90">normalize:</span> {r.normalizeType} / {r.normalizeMethod}
+            </p>
+            <p className="m-0">
               <span className="text-amber-400/90">current=</span>
               {String(r.raw ?? "—")}
             </p>
