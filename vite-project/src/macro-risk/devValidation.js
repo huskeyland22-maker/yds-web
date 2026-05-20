@@ -7,6 +7,7 @@ import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from ".
  * DEV ONLY — 데이터 패널용 (SHOW_DEBUG + isDevMode).
  * @typedef {Object} DevValidationPayload
  * @property {DevRow[]} rows
+ * @property {{ live: number; mock: number; manual: number; static: number; total: number; error: number }} dataHealth
  * @property {RealBeiAudit|null} realBei
  * @property {YieldSpreadDev|null} yieldSpread
  */
@@ -23,6 +24,7 @@ import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from ".
  * @property {string|null} fallbackNote
  * @property {string} originDetail
  * @property {string} [typeNote]
+ * @property {number|null} current
  * @property {number|null} raw
  * @property {number|null} previous1D
  * @property {number|null} previous5D
@@ -95,10 +97,13 @@ export function buildDevValidation(
   const rows = TIER_STATUS_METRICS.map((cat) => buildTierDevRow(cat.key, raw, sources, panicContext, liveFetchOk, lastUpdate)).filter(
     Boolean,
   )
+  const realBei = auditRealVsBei(raw, sources, apiHistory)
+  const dataHealth = buildDataHealth(rows, realBei)
 
   return {
     rows,
-    realBei: auditRealVsBei(raw, sources, apiHistory),
+    dataHealth,
+    realBei,
     yieldSpread: buildYieldSpreadDevBlock(yieldCurve, raw),
   }
 }
@@ -263,6 +268,7 @@ function buildTierDevRow(key, raw, sources, panicContext, liveFetchOk, lastUpdat
     fallbackNote,
     originDetail: mapOriginDetail(rawSource),
     typeNote,
+    current: series.current,
     raw: series.current,
     previous1D: series.previous1D ?? null,
     previous5D: series.previous5D ?? null,
@@ -278,6 +284,35 @@ function buildTierDevRow(key, raw, sources, panicContext, liveFetchOk, lastUpdat
         : key === "VXN" && series.change5D == null
           ? "히스토리 없음 — 상승 표시 생략"
           : null,
+  }
+}
+
+/**
+ * @param {DevRow[]} rows
+ * @param {RealBeiAudit|null} realBei
+ */
+function buildDataHealth(rows, realBei) {
+  let live = 0
+  let mock = 0
+  let manual = 0
+  let stat = 0
+  let error = 0
+  for (const r of rows) {
+    if (r.dataBadge === "LIVE") live += 1
+    else if (r.dataBadge === "MOCK") mock += 1
+    else if (r.dataBadge === "MANUAL") manual += 1
+    else if (r.dataBadge === "STATIC") stat += 1
+    if (r.warning) error += 1
+    if (r.key === "DXY" && String(r.normalizeMethod) !== "index") error += 1
+  }
+  if (realBei?.mockReuse) error += 1
+  return {
+    live,
+    mock,
+    manual,
+    static: stat,
+    total: rows.length,
+    error,
   }
 }
 

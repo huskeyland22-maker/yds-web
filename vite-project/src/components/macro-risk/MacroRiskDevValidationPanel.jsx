@@ -13,6 +13,20 @@ export default function MacroRiskDevValidationPanel({ data }) {
       <p className="m-0 mb-2 text-[10px] font-semibold text-amber-300">
         DEV DATA · LIVE 검증 (SHOW_DEBUG)
       </p>
+      {data.dataHealth ? (
+        <div className="mb-2.5 rounded border border-amber-500/20 bg-black/15 px-2 py-1.5">
+          <p className="m-0 text-[10px] font-bold text-amber-200">DATA HEALTH</p>
+          <p className="m-0 mt-0.5 text-[9px]">
+            <span className="text-amber-400/90">LIVE:</span> {data.dataHealth.live} / {data.dataHealth.total}
+          </p>
+          <p className="m-0 text-[9px]">
+            <span className="text-amber-400/90">MOCK:</span> {data.dataHealth.mock + data.dataHealth.static} / {data.dataHealth.total}
+          </p>
+          <p className="m-0 text-[9px]">
+            <span className="text-amber-400/90">ERROR:</span> {data.dataHealth.error}
+          </p>
+        </div>
+      ) : null}
 
       {data.realBei ? (
         <div className="mb-2.5 border-b border-amber-500/15 pb-2.5">
@@ -92,7 +106,7 @@ export default function MacroRiskDevValidationPanel({ data }) {
             </p>
             <p className="m-0">
               <span className="text-amber-400/90">current=</span>
-              {String(r.raw ?? "—")}
+              {String(r.current ?? r.raw ?? "—")}
             </p>
             <p className="m-0">
               <span className="text-amber-400/90">prev1D=</span>
