@@ -1,21 +1,19 @@
-import MacroRiskConnectCard from "../components/macro-risk/MacroRiskConnectCard.jsx"
 import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevValidationPanel.jsx"
-import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
 import MacroRiskLiveDataStatus from "../components/macro-risk/MacroRiskLiveDataStatus.jsx"
-import MacroRiskMarketImpact from "../components/macro-risk/MacroRiskMarketImpact.jsx"
-import MacroRiskPositionCard from "../components/macro-risk/MacroRiskPositionCard.jsx"
-import MacroRiskMarketRegime from "../components/macro-risk/MacroRiskMarketRegime.jsx"
 import MacroRiskPillarSection from "../components/macro-risk/MacroRiskPillarSection.jsx"
-import MacroRiskTodayMarketCard from "../components/macro-risk/MacroRiskTodayMarketCard.jsx"
+import MacroRiskPlaybook from "../components/macro-risk/MacroRiskPlaybook.jsx"
+import MacroRiskPositionCard from "../components/macro-risk/MacroRiskPositionCard.jsx"
+import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskTriggers from "../components/macro-risk/MacroRiskTriggers.jsx"
-import MacroRiskYieldCurveCard from "../components/macro-risk/MacroRiskYieldCurveCard.jsx"
 import SectionErrorBoundary from "../components/SectionErrorBoundary.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { formatMacroRiskPipelineSubtitle } from "../macro-risk/liveDataStatus.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
-import { isDevMode, isShowDebugPanel } from "../utils/devMode.js"
+import { useCallback, useEffect, useState } from "react"
 import { Navigate } from "react-router-dom"
+
+const MACRO_DEV_UI_KEY = "yds-macro-dev-ui"
 
 /**
  * YDS Market OS — Macro Risk 레이어 (패닉/Cycle 비침투)
@@ -26,23 +24,66 @@ export default function MacroRiskPage({ panicData = null }) {
     return <Navigate to="/cycle" replace />
   }
 
-  const { snapshot, loading, error } = useMacroRiskSnapshot(panicData)
+  const { snapshot, loading, error, refetch } = useMacroRiskSnapshot(panicData)
+
+  const [macroDevUi, setMacroDevUi] = useState(() => {
+    if (typeof window === "undefined") return false
+    try {
+      return window.localStorage?.getItem(MACRO_DEV_UI_KEY) === "1"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleMacroDevUi = useCallback(() => {
+    setMacroDevUi((prev) => {
+      const next = !prev
+      try {
+        window.localStorage?.setItem(MACRO_DEV_UI_KEY, next ? "1" : "0")
+      } catch {
+        // ignore
+      }
+      queueMicrotask(() => refetch())
+      return next
+    })
+  }, [refetch])
+
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === MACRO_DEV_UI_KEY && e.newValue != null) {
+        setMacroDevUi(e.newValue === "1")
+      }
+    }
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
+  }, [])
 
   return (
-    <div className="macro-risk-page min-w-0 overflow-x-hidden">
-      <header className="mb-2 px-0.5">
-        <p className="m-0 text-[9px] font-semibold tracking-[0.2em] text-slate-600">YDS MARKET OS</p>
-        <h1 className="m-0 mt-0.5 text-lg font-semibold tracking-tight text-slate-100">Macro Risk</h1>
-        <p className="m-0 mt-1 text-[11px] text-slate-500">
-          {snapshot?.liveDataStatus
-            ? formatMacroRiskPipelineSubtitle(snapshot.liveDataStatus)
-            : loading
-              ? "클라이언트 계산 · /api/market-data · 로드 중…"
-              : error
-                ? "클라이언트 계산 · /api/market-data · LIVE FAIL"
-                : "클라이언트 계산 · /api/market-data · —"}
-        </p>
+    <div className="macro-risk-page min-w-0 overflow-x-hidden px-0.5">
+      <header className="mb-2 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="m-0 text-[9px] font-semibold tracking-[0.2em] text-slate-600">YDS MARKET OS</p>
+          <h1 className="m-0 mt-0.5 text-lg font-semibold tracking-tight text-slate-100">Macro Risk</h1>
+        </div>
+        <button
+          type="button"
+          onClick={toggleMacroDevUi}
+          className={[
+            "shrink-0 rounded-md border px-2.5 py-1 text-[10px] font-bold tracking-wide",
+            macroDevUi
+              ? "border-amber-400/40 bg-amber-500/15 text-amber-100"
+              : "border-white/[0.08] bg-white/[0.03] text-slate-400",
+          ].join(" ")}
+        >
+          DEV MODE {macroDevUi ? "ON" : "OFF"}
+        </button>
       </header>
+
+      {macroDevUi && snapshot?.liveDataStatus ? (
+        <p className="m-0 mb-2 text-[10px] leading-relaxed text-slate-500">
+          {formatMacroRiskPipelineSubtitle(snapshot.liveDataStatus)}
+        </p>
+      ) : null}
 
       {loading && !snapshot ? (
         <p className="text-[11px] text-slate-500" role="status">
@@ -56,64 +97,47 @@ export default function MacroRiskPage({ panicData = null }) {
       ) : null}
 
       {snapshot ? (
-        <div className="macro-risk-stack flex flex-col gap-4 sm:gap-5">
-          <SectionErrorBoundary label="Cycle + Macro">
-            <MacroRiskConnectCard snapshot={snapshot} panicData={panicData} />
+        <div className="macro-risk-stack flex flex-col gap-4">
+          <SectionErrorBoundary label="Top summary">
+            <MacroRiskHero snapshot={snapshot} macroDevUi={macroDevUi} />
           </SectionErrorBoundary>
 
           <SectionErrorBoundary label="Market Position">
             <MacroRiskPositionCard snapshot={snapshot} panicData={panicData} />
           </SectionErrorBoundary>
 
-          <SectionErrorBoundary label="Macro Risk Hero">
-            <MacroRiskHero snapshot={snapshot} />
+          <SectionErrorBoundary label="핵심 지표">
+            <MacroRiskTierPanel tieredMetrics={snapshot.tieredMetrics} />
           </SectionErrorBoundary>
 
-          {snapshot.liveDataStatus ? (
+          <SectionErrorBoundary label="Pressure Engine">
+            <div>
+              <p className="mb-2 px-0.5 text-[9px] font-semibold tracking-[0.18em] text-slate-500">PRESSURE ENGINE</p>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                {snapshot.pillars.map((pillar) => (
+                  <SectionErrorBoundary key={pillar.id} label={pillar.title}>
+                    <MacroRiskPillarSection pillar={pillar} />
+                  </SectionErrorBoundary>
+                ))}
+              </div>
+            </div>
+          </SectionErrorBoundary>
+
+          <SectionErrorBoundary label="Active Triggers">
+            <MacroRiskTriggers triggers={snapshot.triggers} />
+          </SectionErrorBoundary>
+
+          <SectionErrorBoundary label="Market Playbook">
+            <MacroRiskPlaybook snapshot={snapshot} />
+          </SectionErrorBoundary>
+
+          {macroDevUi && snapshot.liveDataStatus ? (
             <SectionErrorBoundary label="LIVE DATA STATUS">
               <MacroRiskLiveDataStatus status={snapshot.liveDataStatus} />
             </SectionErrorBoundary>
           ) : null}
 
-          <SectionErrorBoundary label="Today Market">
-            <MacroRiskTodayMarketCard snapshot={snapshot} panicData={panicData} />
-          </SectionErrorBoundary>
-
-          {snapshot.marketRegime?.length ? (
-            <SectionErrorBoundary label="Market Regime">
-              <MacroRiskMarketRegime rows={snapshot.marketRegime} />
-            </SectionErrorBoundary>
-          ) : null}
-
-          {snapshot.yieldCurve ? (
-            <SectionErrorBoundary label="장단기 금리차">
-              <MacroRiskYieldCurveCard curve={snapshot.yieldCurve} />
-            </SectionErrorBoundary>
-          ) : null}
-
-          <SectionErrorBoundary label="Tier 지표">
-            <MacroRiskTierPanel tieredMetrics={snapshot.tieredMetrics} />
-          </SectionErrorBoundary>
-
-          <SectionErrorBoundary label="압력 지표">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-4">
-              {snapshot.pillars.map((pillar) => (
-                <SectionErrorBoundary key={pillar.id} label={pillar.title}>
-                  <MacroRiskPillarSection pillar={pillar} />
-                </SectionErrorBoundary>
-              ))}
-            </div>
-          </SectionErrorBoundary>
-
-          <SectionErrorBoundary label="시장 영향">
-            <MacroRiskMarketImpact rows={snapshot.marketImpact} />
-          </SectionErrorBoundary>
-
-          <SectionErrorBoundary label="복합 트리거">
-            <MacroRiskTriggers triggers={snapshot.triggers} />
-          </SectionErrorBoundary>
-
-          {isDevMode() && isShowDebugPanel() && snapshot.devValidation?.rows?.length ? (
+          {macroDevUi && snapshot.devValidation?.rows?.length ? (
             <MacroRiskDevValidationPanel data={snapshot.devValidation} />
           ) : null}
         </div>

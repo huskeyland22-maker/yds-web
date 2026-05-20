@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { isMacroRiskEnabled } from "./featureFlag.js"
 import { loadMacroRiskSnapshot } from "./fetchMacroRisk.js"
 
@@ -12,6 +12,11 @@ export function useMacroRiskSnapshot(panicContext = null) {
   const [snapshot, setSnapshot] = useState(null)
   const [loading, setLoading] = useState(enabled)
   const [error, setError] = useState(null)
+  const [reloadToken, setReloadToken] = useState(0)
+
+  const refetch = useCallback(() => {
+    setReloadToken((t) => t + 1)
+  }, [])
 
   useEffect(() => {
     if (!enabled) {
@@ -39,7 +44,7 @@ export function useMacroRiskSnapshot(panicContext = null) {
     return () => {
       cancelled = true
     }
-  }, [enabled, vxn, move])
+  }, [enabled, vxn, move, reloadToken])
 
-  return { enabled, snapshot, loading, error }
+  return { enabled, snapshot, loading, error, refetch }
 }

@@ -5,6 +5,7 @@ import { buildRawLayer } from "./rawLayer.js"
 import { buildTieredMetrics } from "./metricTiers.js"
 import { buildMarketImpact } from "./marketImpact.js"
 import { buildMarketRegime } from "./regimeEngine.js"
+import { scoreInflationPressure, scoreLiquidity, scoreRatePressure } from "./pillars.js"
 import { buildCompatPillars, computeMacroRiskScore } from "./scoreEngine.js"
 import { buildYieldCurve } from "./yieldCurve.js"
 import { scoreEmoji } from "./seriesMath.js"
@@ -46,11 +47,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
   const score = scored.score
   const marketRegime = buildMarketRegime(normalized, triggers, score)
   const compat = buildCompatPillars(normalized)
-  const pillars = [
-    { id: "rate", title: "금리 압력", score: compat.rate, lines: [], status: "Tier1/Tier2 혼합" },
-    { id: "inflation", title: "인플레 압력", score: compat.inflation, lines: [], status: "장기물/BEI 중심" },
-    { id: "liquidity", title: "유동성", score: compat.liquidity, lines: [], status: "달러/변동성 중심" },
-  ]
+  const pillars = [scoreRatePressure(raw), scoreInflationPressure(raw), scoreLiquidity(raw)]
 
   const activeTriggers = triggers.filter((t) => t.active)
   const headline =
@@ -61,10 +58,13 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
     (scored.band === "위험" ? "고위험 매크로 구간" : scored.band === "경계" ? "리스크 경계 구간" : `${scored.band} 구간`)
   const subheadline = `점수 밴드: ${scored.band} · Tier1 ${scored.tier1Score} / Tier2 ${scored.tier2Score}`
 
+  const rateP = pillars.find((p) => p.id === "rate")
+  const infP = pillars.find((p) => p.id === "inflation")
+  const liqP = pillars.find((p) => p.id === "liquidity")
   const pillarChips = [
-    { key: "rate", label: "금리압력", emoji: scoreEmoji(compat.rate), score: compat.rate },
-    { key: "inflation", label: "인플레", emoji: scoreEmoji(compat.inflation), score: compat.inflation },
-    { key: "liquidity", label: "유동성", emoji: scoreEmoji(compat.liquidity), score: compat.liquidity },
+    { key: "rate", label: "금리압력", emoji: scoreEmoji(rateP?.score ?? compat.rate), score: rateP?.score ?? compat.rate },
+    { key: "inflation", label: "인플레", emoji: scoreEmoji(infP?.score ?? compat.inflation), score: infP?.score ?? compat.inflation },
+    { key: "liquidity", label: "유동성", emoji: scoreEmoji(liqP?.score ?? compat.liquidity), score: liqP?.score ?? compat.liquidity },
   ]
 
   const longTerm = score <= 30 ? "안정" : score <= 60 ? "주의" : score <= 80 ? "경계" : "위험"
