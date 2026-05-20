@@ -36,7 +36,7 @@ export default function MacroRiskPlaybook({ snapshot }) {
       <p className="m-0 mt-0.5 text-[8px] text-slate-600">
         Macro {Number.isFinite(s) ? Math.round(s) : "—"} · {scoreBandLabel(s)}
       </p>
-      <div className="mt-2 grid grid-cols-3 gap-2">
+      <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3">
         {cells.map((row) => (
           <div
             key={row.k}

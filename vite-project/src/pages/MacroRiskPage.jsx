@@ -153,7 +153,7 @@ export default function MacroRiskPage({ panicData = null }) {
           <SectionErrorBoundary label="Pressure Engine">
             <div>
               <p className="mb-2 px-0.5 text-[9px] font-semibold tracking-[0.18em] text-slate-500">PRESSURE ENGINE</p>
-              <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+              <div className="macro-risk-pressure-grid grid grid-cols-1 gap-2 md:grid-cols-3">
                 {snapshot.pillars.map((pillar) => (
                   <SectionErrorBoundary key={pillar.id} label={pillar.title}>
                     <MacroRiskPillarSection pillar={pillar} />

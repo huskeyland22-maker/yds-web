@@ -1,16 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
-
-/** 왼쪽 데스크톱 사이드바 — Macro Risk 메뉴는 플래그 ON 시에만 삽입 */
-function getSidebarNavItems() {
-  const items = [{ label: "시장 사이클", path: "/cycle" }]
-  if (isMacroRiskEnabled()) {
-    items.push({ label: "매크로 리스크", path: "/macro-risk" })
-  }
-  items.push({ label: "코리아 밸류체인", path: "/value-chain" })
-  items.push({ label: "트레이딩 로그", path: "/trading-log" })
-  return items
-}
+import { getPrimaryNavItems } from "../../utils/appNavItems.js"
 
 /**
  * @param {{
@@ -20,7 +9,7 @@ function getSidebarNavItems() {
  * }} props
  */
 export default function AppSidebar({ sidebarPulse, deskPanicData, onOpenInputPanel }) {
-  const navItems = getSidebarNavItems()
+  const navItems = getPrimaryNavItems()
 
   return (
     <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">

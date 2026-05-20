@@ -32,7 +32,7 @@ export default function MacroRiskTriggers({ triggers }) {
       {cards.length === 0 ? (
         <p className="m-0 mt-2 text-[10px] text-slate-500">활성 트리거 없음</p>
       ) : (
-        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="mt-2 grid grid-cols-1 gap-2 max-md:grid-cols-1 md:grid-cols-3">
           {cards.map((t, idx) => {
             const tier = triggerSeverityTier(t.scoreAdd)
             const cls = TIER_STYLE[tier]

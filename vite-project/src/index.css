@@ -419,6 +419,31 @@
 
   .macro-risk-stack {
     max-width: 100%;
+    min-width: 0;
+  }
+
+  @media (max-width: 768px) {
+    .macro-risk-page {
+      padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
+    }
+
+    .macro-risk-stack {
+      gap: 12px;
+    }
+
+    .macro-risk-stack > *,
+    .macro-risk-tier-cell,
+    .macro-risk-pillar,
+    .macro-risk-pressure-grid > * {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .macro-risk-pillar {
+      height: auto;
+      max-height: none;
+      min-height: 6.5rem;
+    }
   }
 
   .macro-risk-pillar--rate {
