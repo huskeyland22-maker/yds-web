@@ -28,6 +28,7 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {import('./yieldCurve.js').ReturnType<buildYieldCurve>} yieldCurve
  * @property {import('./devValidation.js').DevValidationPayload|null} [devValidation]
  * @property {import('./liveDataStatus.js').LiveDataStatusPayload} liveDataStatus
+ * @property {NonNullable<ReturnType<computeMacroRiskScore>['breakdown']>} scoreBreakdown
  * @property {string} updatedAt
  */
 
@@ -101,6 +102,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
     yieldCurve,
     devValidation,
     liveDataStatus,
+    scoreBreakdown: scored.breakdown,
     updatedAt: meta.updatedAt ?? new Date().toISOString(),
   }
 }

@@ -13,6 +13,14 @@ const TIER_WEIGHTS = {
 
 const TIER1_KEYS = ["US10Y", "REAL_YIELD", "DXY", "MOVE"]
 const TIER2_KEYS = ["US30Y", "BEI", "VXN", "US2Y"]
+const METRIC_MAX_POINTS = {
+  US10Y: 20,
+  REAL_YIELD: 15,
+  MOVE: 15,
+  US30Y: 10,
+  BEI: 10,
+  DXY: 10,
+}
 
 /**
  * @param {number|null} v
@@ -31,7 +39,7 @@ function scale(v, min, max) {
  * @param {string} key
  * @param {import('./normalizeLayer.js').NormalizedMetric | undefined} m
  */
-function metricRiskUnit(key, m) {
+export function metricRiskUnit(key, m) {
   if (!m) return 0
   const d20 = m.delta20D
   switch (key) {
@@ -82,6 +90,13 @@ export function computeMacroRiskScore(normalized, triggers) {
     tier1Score: clampScore(tier1Weighted),
     tier2Score: clampScore(tier2Weighted),
     band: scoreBand(score),
+    breakdown: buildScoreBreakdown(normalized, triggers, {
+      score,
+      tier1Score: clampScore(tier1Weighted),
+      tier2Score: clampScore(tier2Weighted),
+      base,
+      triggerBoost,
+    }),
   }
 }
 
@@ -113,4 +128,77 @@ export function buildCompatPillars(normalized) {
     inflation: clampScore(inflation),
     liquidity: clampScore(liquidity),
   }
+}
+
+/**
+ * @param {Record<string, import('./normalizeLayer.js').NormalizedMetric>} normalized
+ * @param {{ id: string; label?: string; active: boolean; scoreAdd?: number }[]} triggers
+ * @param {{ score: number; tier1Score: number; tier2Score: number; base: number; triggerBoost: number }} totals
+ */
+function buildScoreBreakdown(normalized, triggers, totals) {
+  const metricRows = Object.keys(TIER_WEIGHTS).map((key) => {
+    const m = normalized[key]
+    const unit = metricRiskUnit(key, m)
+    return {
+      key,
+      current: Number.isFinite(Number(m?.current)) ? Number(m.current) : null,
+      delta1D: Number.isFinite(Number(m?.delta1D)) ? Number(m.delta1D) : null,
+      delta5D: Number.isFinite(Number(m?.delta5D)) ? Number(m.delta5D) : null,
+      delta20D: Number.isFinite(Number(m?.delta20D)) ? Number(m.delta20D) : null,
+      raw: Number.isFinite(Number(m?.delta20D)) ? Number(m.delta20D) : null,
+      normalized: Number(unit.toFixed(2)),
+      score: metricContributionPoints(key, unit),
+    }
+  })
+  const byKey = Object.fromEntries(metricRows.map((m) => [m.key, m]))
+  const activeEvents = triggers.filter((t) => t.active)
+  const eventRate = activeEvents
+    .filter((t) => t.id === "rate_shock" || t.id === "rate_repricing_event")
+    .reduce((acc, t) => acc + Number(t.scoreAdd ?? 0), 0)
+  const eventInflation = activeEvents
+    .filter((t) => t.id === "long_inflation" || t.id === "long_rate_stress")
+    .reduce((acc, t) => acc + Number(t.scoreAdd ?? 0), 0)
+  const eventTotal = activeEvents.reduce((acc, t) => acc + Number(t.scoreAdd ?? 0), 0)
+
+  const rateItems = [
+    { label: "10Y", points: byKey.US10Y?.score ?? 0 },
+    { label: "REAL", points: byKey.REAL_YIELD?.score ?? 0 },
+    { label: "MOVE", points: byKey.MOVE?.score ?? 0 },
+    { label: "이벤트", points: eventRate },
+  ]
+  const inflationItems = [
+    { label: "30Y", points: byKey.US30Y?.score ?? 0 },
+    { label: "BEI", points: byKey.BEI?.score ?? 0 },
+    { label: "이벤트", points: eventInflation },
+  ]
+  const liquidityItems = [
+    { label: "DXY", points: byKey.DXY?.score ?? 0 },
+    { label: "MOVE", points: Math.round((byKey.MOVE?.score ?? 0) / 3) },
+  ]
+
+  return {
+    formula: {
+      macro: Number(totals.score.toFixed(2)),
+      tier1: Number(totals.tier1Score.toFixed(2)),
+      tier2: Number(totals.tier2Score.toFixed(2)),
+      base: Number(totals.base.toFixed(2)),
+      events: Number(totals.triggerBoost.toFixed(2)),
+    },
+    sections: [
+      { id: "rate", title: "금리압력", items: rateItems, total: sumPoints(rateItems) },
+      { id: "inflation", title: "인플레압력", items: inflationItems, total: sumPoints(inflationItems) },
+      { id: "liquidity", title: "유동성", items: liquidityItems, total: sumPoints(liquidityItems) },
+      { id: "events", title: "이벤트", items: activeEvents.map((e) => ({ label: e.label ?? e.id, points: Number(e.scoreAdd ?? 0) })), total: eventTotal },
+    ],
+    metrics: metricRows,
+  }
+}
+
+function metricContributionPoints(key, unit) {
+  const max = METRIC_MAX_POINTS[key] ?? 0
+  return Math.round((clampScore(unit) / 100) * max)
+}
+
+function sumPoints(items) {
+  return items.reduce((acc, it) => acc + Number(it.points ?? 0), 0)
 }
