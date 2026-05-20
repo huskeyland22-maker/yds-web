@@ -46,14 +46,32 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
     detail: "30Y·BEI·10Y 동반 상방",
   })
 
-  const aiPressure = dxy?.slope === "up" && move?.slope === "up" && Number.isFinite(Number(vxn)) && Number(vxn) > 0 && normalized.VXN?.slope === "up"
+  const dollarPressure =
+    dxy?.slope === "up" &&
+    move?.slope === "up" &&
+    Number.isFinite(Number(vxn)) &&
+    Number(vxn) > 0 &&
+    normalized.VXN?.slope === "up"
   triggers.push({
-    id: "ai_pressure",
-    label: "AI 압박",
+    id: "dollar_pressure",
+    label: "위험자산 압박",
     emoji: "🔴",
-    active: Boolean(aiPressure),
+    active: Boolean(dollarPressure),
     scoreAdd: 15,
-    detail: "DXY·MOVE·VXN 동반 상승",
+    detail: "성장주 주의",
+  })
+
+  const liquidityEasing =
+    (normalized.US10Y?.delta20D != null && normalized.US10Y.delta20D < 0) &&
+    (normalized.REAL_YIELD?.delta20D != null && normalized.REAL_YIELD.delta20D < 0) &&
+    (normalized.DXY?.delta20D != null && normalized.DXY.delta20D < 0)
+  triggers.push({
+    id: "liquidity_easing",
+    label: "위험자산 우호",
+    emoji: "🟢",
+    active: Boolean(liquidityEasing),
+    scoreAdd: -15,
+    detail: "AI / 성장주 우세",
   })
 
   // 기존 UI/표현 호환: long_rate_stress 명칭 유지하되 long_inflation과 동일 신호로 매핑

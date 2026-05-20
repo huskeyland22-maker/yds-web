@@ -19,6 +19,9 @@ export default function MacroRiskTriggers({ triggers }) {
             >
               <span>{t.label}</span>
               <span aria-hidden>{t.emoji}</span>
+              <span className="text-[10px] font-bold text-amber-200/90">
+                {Number(t.scoreAdd) >= 0 ? `score +${t.scoreAdd}` : `score ${t.scoreAdd}`}
+              </span>
               {t.detail ? <span className="text-[10px] font-normal text-amber-200/70">{t.detail}</span> : null}
             </li>
           ))}

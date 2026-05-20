@@ -3,6 +3,7 @@ import { buildNormalizeLayer } from "./normalizeLayer.js"
 import { buildRawLayer } from "./rawLayer.js"
 import { buildTieredMetrics } from "./metricTiers.js"
 import { buildMarketImpact } from "./marketImpact.js"
+import { buildMarketRegime } from "./regimeEngine.js"
 import { buildCompatPillars, computeMacroRiskScore } from "./scoreEngine.js"
 import { buildYieldCurve } from "./yieldCurve.js"
 import { scoreEmoji } from "./seriesMath.js"
@@ -21,6 +22,7 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {string} tactical
  * @property {string} connectLongTerm
  * @property {import('./marketImpact.js').MarketImpactRow[]} marketImpact
+ * @property {import('./regimeEngine.js').MarketRegimeRow[]} marketRegime
  * @property {{ tier1: import('./displayMetrics.js').MetricDisplayRow[]; tier2: import('./displayMetrics.js').MetricDisplayRow[] }} tieredMetrics
  * @property {import('./yieldCurve.js').ReturnType<buildYieldCurve>} yieldCurve
  * @property {import('./devValidation.js').DevValidationPayload|null} [devValidation]
@@ -39,6 +41,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
   const triggers = evaluateCompositeTriggers(raw, normalized, panicContext)
   const scored = computeMacroRiskScore(normalized, triggers)
   const score = scored.score
+  const marketRegime = buildMarketRegime(normalized, triggers, score)
   const compat = buildCompatPillars(normalized)
   const pillars = [
     { id: "rate", title: "금리 압력", score: compat.rate, lines: [], status: "Tier1/Tier2 혼합" },
@@ -49,7 +52,8 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
   const activeTriggers = triggers.filter((t) => t.active)
   const headline =
     activeTriggers.find((t) => t.id === "rate_shock")?.label ??
-    activeTriggers.find((t) => t.id === "ai_pressure")?.label ??
+    activeTriggers.find((t) => t.id === "dollar_pressure")?.label ??
+    activeTriggers.find((t) => t.id === "liquidity_easing")?.label ??
     (scored.band === "위험" ? "고위험 매크로 구간" : scored.band === "경계" ? "리스크 경계 구간" : `${scored.band} 구간`)
   const subheadline = `점수 밴드: ${scored.band} · Tier1 ${scored.tier1Score} / Tier2 ${scored.tier2Score}`
 
@@ -80,6 +84,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
     shortTerm,
     tactical,
     marketImpact,
+    marketRegime,
     tieredMetrics,
     yieldCurve,
     devValidation,

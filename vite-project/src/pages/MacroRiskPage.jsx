@@ -3,7 +3,9 @@ import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevVa
 import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
 import MacroRiskMarketImpact from "../components/macro-risk/MacroRiskMarketImpact.jsx"
+import MacroRiskMarketRegime from "../components/macro-risk/MacroRiskMarketRegime.jsx"
 import MacroRiskPillarSection from "../components/macro-risk/MacroRiskPillarSection.jsx"
+import MacroRiskTodayMarketCard from "../components/macro-risk/MacroRiskTodayMarketCard.jsx"
 import MacroRiskTriggers from "../components/macro-risk/MacroRiskTriggers.jsx"
 import MacroRiskYieldCurveCard from "../components/macro-risk/MacroRiskYieldCurveCard.jsx"
 import SectionErrorBoundary from "../components/SectionErrorBoundary.jsx"
@@ -53,6 +55,16 @@ export default function MacroRiskPage({ panicData = null }) {
           <SectionErrorBoundary label="Macro Risk Hero">
             <MacroRiskHero snapshot={snapshot} />
           </SectionErrorBoundary>
+
+          <SectionErrorBoundary label="Today Market">
+            <MacroRiskTodayMarketCard snapshot={snapshot} panicData={panicData} />
+          </SectionErrorBoundary>
+
+          {snapshot.marketRegime?.length ? (
+            <SectionErrorBoundary label="Market Regime">
+              <MacroRiskMarketRegime rows={snapshot.marketRegime} />
+            </SectionErrorBoundary>
+          ) : null}
 
           {snapshot.yieldCurve ? (
             <SectionErrorBoundary label="장단기 금리차">
