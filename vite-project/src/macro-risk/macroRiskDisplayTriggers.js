@@ -44,6 +44,26 @@ export function selectActiveTriggerCards(triggers) {
   return out.slice(0, 3)
 }
 
+/** 압축 트리거 본문 — 제목 제외 최대 3줄 */
+/** @param {{ id: string; scoreAdd?: number; label?: string }} t */
+export function getTriggerShortLines(t) {
+  const sa = Number(t.scoreAdd)
+  const line0 = Number.isFinite(sa) ? (sa >= 0 ? `+${sa}` : `${sa}`) : "—"
+
+  switch (t.id) {
+    case "rate_repricing_event":
+      return [line0, "30Y>5% · MOVE↑", "AI/성장 압박"]
+    case "rate_shock":
+      return [line0, "10Y 급변·MOVE", "채권·성장 압박"]
+    case "long_inflation":
+      return [line0, "BEI 상승", "장기금리 동행"]
+    case "dollar_pressure":
+      return [line0, "달러·VXN↑", "리스크 자산 압박"]
+    default:
+      return [line0, "조건 충족", "방어 점검"]
+  }
+}
+
 /** @param {number} scoreAdd */
 export function triggerSeverityTier(scoreAdd) {
   const n = Number(scoreAdd)

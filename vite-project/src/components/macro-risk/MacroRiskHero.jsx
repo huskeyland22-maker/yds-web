@@ -13,82 +13,68 @@ const METRIC_NAME = {
 }
 
 /**
- * @param {{ snapshot: import("../../macro-risk/engine.js").MacroRiskSnapshot; macroDevUi?: boolean }} props
+ * @param {{
+ *   snapshot: import("../../macro-risk/engine.js").MacroRiskSnapshot;
+ *   macroDevUi?: boolean;
+ *   prevDayDelta: number | null;
+ *   prevDayKnown: boolean;
+ * }} props
  */
-export default function MacroRiskHero({ snapshot, macroDevUi = false }) {
+export default function MacroRiskHero({ snapshot, macroDevUi = false, prevDayDelta = null, prevDayKnown = false }) {
   const [showBreakdown, setShowBreakdown] = useState(false)
   const breakdown = snapshot.scoreBreakdown
-  const base = Number(breakdown?.formula?.base)
-  const deltaVsBase = Number.isFinite(base) ? Math.round(Number(snapshot.score) - base) : null
-  const trend =
-    deltaVsBase == null
-      ? { label: "추세", text: "—", arrow: "→" }
-      : deltaVsBase > 2
-        ? { label: "추세", text: "상승 압력", arrow: "↑" }
-        : deltaVsBase < -2
-          ? { label: "추세", text: "하락 완화", arrow: "↓" }
-          : { label: "추세", text: "베이스 수렴", arrow: "→" }
 
   const ratePillar = snapshot.pillars.find((p) => p.id === "rate")
   const phaseHeadline = String(snapshot.headline ?? "").replace(/\s*이벤트\s*$/u, "").trim() || "—"
   const impactLine = ratePillar?.status ?? "매크로 혼합"
+  const positionLabel = scoreBandLabel(snapshot.score)
+  const tacticLine = snapshot.tactical
+
+  const prevDayText =
+    !prevDayKnown || prevDayDelta == null ? "—" : prevDayDelta >= 0 ? `+${prevDayDelta}` : `${prevDayDelta}`
 
   return (
-    <section className="macro-risk-hero trading-card-shell overflow-hidden px-3 py-3 sm:px-4 sm:py-3.5">
-      <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">TOP SUMMARY · MACRO RISK</p>
-      <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className="m-0 text-[11px] font-medium text-slate-400">Macro Risk</p>
+    <section className="macro-risk-hero trading-card-shell overflow-hidden px-4 py-4">
+      <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">MACRO SUMMARY</p>
+
+      <div className="mt-1.5 flex flex-wrap items-end justify-between gap-2">
+        <div className="flex items-baseline gap-2">
           <p
-            className={`m-0 font-mono text-[2rem] font-bold leading-none tabular-nums sm:text-[2.1rem] ${scoreTextClass(snapshot.score)}`}
+            className={`m-0 font-mono text-[1.85rem] font-bold leading-none tabular-nums sm:text-[2rem] ${scoreTextClass(snapshot.score)}`}
           >
             {snapshot.score}
           </p>
+          <p className="m-0 text-[10px] text-slate-500">Macro Risk</p>
         </div>
-        <div className="flex flex-col items-end gap-1 text-right">
-          <div className="flex flex-wrap justify-end gap-1.5 text-[10px] font-semibold text-slate-300">
-            {snapshot.pillarChips.map((p) => (
-              <span key={p.key} className="rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5">
-                {p.label} {p.emoji}
-              </span>
-            ))}
-          </div>
-          <p className="m-0 text-[10px] text-slate-500">
-            {trend.arrow} {trend.text}
-            {deltaVsBase != null ? (
-              <span className="ml-2 font-mono text-slate-400">
-                베이스 대비 {deltaVsBase >= 0 ? `+${deltaVsBase}` : deltaVsBase}
-              </span>
-            ) : null}
-          </p>
+        <div className="flex max-w-[min(100%,14rem)] flex-wrap justify-end gap-1 text-[9px] font-semibold text-slate-400">
+          {snapshot.pillarChips.map((p) => (
+            <span key={p.key} className="rounded border border-white/[0.07] bg-white/[0.03] px-1 py-px">
+              {p.label}
+              {p.emoji}
+            </span>
+          ))}
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-2 border-t border-white/[0.06] pt-3 sm:grid-cols-2">
-        <div className="rounded-md border border-white/[0.06] bg-black/20 px-2.5 py-2">
-          <p className="m-0 text-[9px] font-semibold uppercase tracking-wide text-slate-500">현재 국면</p>
-          <p className="m-0 mt-0.5 text-[12px] font-semibold text-slate-100">{phaseHeadline}</p>
-        </div>
-        <div className="rounded-md border border-white/[0.06] bg-black/20 px-2.5 py-2">
-          <p className="m-0 text-[9px] font-semibold uppercase tracking-wide text-slate-500">위험등급</p>
-          <p className={`m-0 mt-0.5 text-[12px] font-semibold ${scoreTextClass(snapshot.score)}`}>
-            {scoreBandLabel(snapshot.score)}
-          </p>
-        </div>
-        <div className="rounded-md border border-white/[0.06] bg-black/20 px-2.5 py-2">
-          <p className="m-0 text-[9px] font-semibold uppercase tracking-wide text-slate-500">시장 영향</p>
-          <p className="m-0 mt-0.5 text-[12px] font-medium text-slate-200">{impactLine}</p>
-        </div>
-        <div className="rounded-md border border-white/[0.06] bg-black/20 px-2.5 py-2">
-          <p className="m-0 text-[9px] font-semibold uppercase tracking-wide text-slate-500">행동</p>
-          <p className="m-0 mt-0.5 text-[12px] font-semibold text-cyan-200/90">{snapshot.tactical}</p>
-        </div>
+      <div className="mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5 rounded-md border border-white/[0.06] bg-black/25 px-2 py-2 sm:grid-cols-5">
+        <SummaryCell k="현재" v={phaseHeadline} />
+        <SummaryCell k="시장" v={impactLine} />
+        <SummaryCell k="위치" v={positionLabel} emphasizeClass={scoreTextClass(snapshot.score)} />
+        <SummaryCell k="전술" v={tacticLine} emphasizeClass="text-cyan-200/90" />
+        <SummaryCell
+          k="전일"
+          v={prevDayText}
+          sub={!prevDayKnown ? "(기록 대기)" : undefined}
+          emphasizeClass="font-mono text-slate-100"
+        />
       </div>
 
-      <p className="m-0 mt-2 text-[11px] text-slate-500">{snapshot.subheadline}</p>
+      {macroDevUi && snapshot.subheadline ? (
+        <p className="m-0 mt-2 text-[10px] text-slate-500">{snapshot.subheadline}</p>
+      ) : null}
 
       {macroDevUi && breakdown ? (
-        <div className="mt-3">
+        <div className="mt-2">
           <button
             type="button"
             onClick={() => setShowBreakdown((v) => !v)}
@@ -132,6 +118,16 @@ export default function MacroRiskHero({ snapshot, macroDevUi = false }) {
         </div>
       ) : null}
     </section>
+  )
+}
+
+function SummaryCell({ k, v, sub, emphasizeClass = "" }) {
+  return (
+    <div className="min-w-0">
+      <p className="m-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500">{k}</p>
+      <p className={`m-0 truncate text-[10px] font-semibold leading-tight text-slate-100 ${emphasizeClass}`}>{v}</p>
+      {sub ? <p className="m-0 text-[8px] text-slate-600">{sub}</p> : null}
+    </div>
   )
 }
 

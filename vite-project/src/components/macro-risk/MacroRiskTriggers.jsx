@@ -1,4 +1,4 @@
-import { selectActiveTriggerCards, triggerSeverityTier } from "../../macro-risk/macroRiskDisplayTriggers.js"
+import { getTriggerShortLines, selectActiveTriggerCards, triggerSeverityTier } from "../../macro-risk/macroRiskDisplayTriggers.js"
 
 const TIER_STYLE = {
   yellow: {
@@ -26,52 +26,46 @@ export default function MacroRiskTriggers({ triggers }) {
   const inactive = triggers.filter((t) => !t.active && t.id !== "long_rate_stress")
 
   return (
-    <section className="trading-card-shell px-3 py-3 sm:px-4 sm:py-3.5">
+    <section className="trading-card-shell px-4 py-4">
       <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">ACTIVE TRIGGERS</p>
-      <p className="m-0 mt-0.5 text-[10px] text-slate-500">최대 3 · 조합 신호 우선</p>
       {cards.length === 0 ? (
-        <p className="m-0 mt-3 text-[11px] leading-relaxed text-slate-500">
-          활성 트리거 없음 — 조합 조건이 충족되면 카드가 표시됩니다.
-        </p>
+        <p className="m-0 mt-2 text-[10px] leading-relaxed text-slate-500">활성 트리거 없음</p>
       ) : (
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {cards.map((t) => {
             const tier = triggerSeverityTier(t.scoreAdd)
             const cls = TIER_STYLE[tier]
             const label = t._cardLabel ?? t.label
             const icon = t._icon ?? t.emoji ?? "◎"
+            const lines = getTriggerShortLines(t)
             return (
               <div
                 key={t.id}
-                className={[
-                  "flex min-h-[5.5rem] flex-col gap-1 rounded-xl border px-3 py-3 shadow-sm",
-                  cls.shell,
-                ].join(" ")}
+                className={["flex flex-col gap-0.5 rounded-lg border px-2.5 py-2 shadow-sm", cls.shell].join(" ")}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg leading-none text-slate-200" aria-hidden>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm leading-none text-slate-200" aria-hidden>
                     {icon}
                   </span>
-                  <span className={`text-[12px] font-bold ${cls.accent}`}>{label}</span>
+                  <span className={`text-[11px] font-bold leading-tight ${cls.accent}`}>{label}</span>
                 </div>
-                <span className={`font-mono text-[10px] font-semibold ${cls.sub}`}>
-                  {Number(t.scoreAdd) >= 0 ? `score +${t.scoreAdd}` : `score ${t.scoreAdd}`}
-                </span>
-                {t.detail ? (
-                  <p className={`m-0 mt-1 line-clamp-4 text-[10px] leading-snug ${cls.sub}`}>{t.detail}</p>
-                ) : null}
+                {lines.map((line, i) => (
+                  <p key={i} className={`m-0 font-mono text-[9px] leading-snug tabular-nums ${cls.sub}`}>
+                    {line}
+                  </p>
+                ))}
               </div>
             )
           })}
         </div>
       )}
       {inactive.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-white/[0.06] pt-3">
-          <span className="w-full text-[10px] font-medium text-slate-600">대기 조건</span>
+        <div className="mt-3 flex flex-wrap gap-1.5 border-t border-white/[0.06] pt-2">
+          <span className="w-full text-[9px] font-medium text-slate-600">대기</span>
           {inactive.map((t) => (
             <span
               key={t.id}
-              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 text-[10px] font-medium text-slate-500"
+              className="inline-flex items-center gap-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[9px] font-medium text-slate-500"
             >
               {t.label}
               <span aria-hidden>{t.emoji}</span>

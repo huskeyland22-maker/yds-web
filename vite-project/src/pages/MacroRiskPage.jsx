@@ -1,3 +1,4 @@
+import MacroRiskActionNow from "../components/macro-risk/MacroRiskActionNow.jsx"
 import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevValidationPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
 import MacroRiskLiveDataStatus from "../components/macro-risk/MacroRiskLiveDataStatus.jsx"
@@ -7,6 +8,7 @@ import MacroRiskPositionCard from "../components/macro-risk/MacroRiskPositionCar
 import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskTriggers from "../components/macro-risk/MacroRiskTriggers.jsx"
 import SectionErrorBoundary from "../components/SectionErrorBoundary.jsx"
+import { macroScorePrevDayDelta } from "../macro-risk/macroRiskDayOverDay.js"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { formatMacroRiskPipelineSubtitle } from "../macro-risk/liveDataStatus.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
@@ -34,6 +36,16 @@ export default function MacroRiskPage({ panicData = null }) {
       return false
     }
   })
+
+  const [prevDayDelta, setPrevDayDelta] = useState(null)
+  const [prevDayKnown, setPrevDayKnown] = useState(false)
+
+  useEffect(() => {
+    if (!snapshot) return
+    const { delta, hasYesterday } = macroScorePrevDayDelta(snapshot.score)
+    setPrevDayDelta(delta)
+    setPrevDayKnown(hasYesterday)
+  }, [snapshot?.score, snapshot?.updatedAt])
 
   const toggleMacroDevUi = useCallback(() => {
     setMacroDevUi((prev) => {
@@ -97,23 +109,32 @@ export default function MacroRiskPage({ panicData = null }) {
       ) : null}
 
       {snapshot ? (
-        <div className="macro-risk-stack flex flex-col gap-4">
-          <SectionErrorBoundary label="Top summary">
-            <MacroRiskHero snapshot={snapshot} macroDevUi={macroDevUi} />
+        <div className="macro-risk-stack flex flex-col gap-[18px]">
+          <SectionErrorBoundary label="Summary">
+            <MacroRiskHero
+              snapshot={snapshot}
+              macroDevUi={macroDevUi}
+              prevDayDelta={prevDayDelta}
+              prevDayKnown={prevDayKnown}
+            />
           </SectionErrorBoundary>
 
           <SectionErrorBoundary label="Market Position">
             <MacroRiskPositionCard snapshot={snapshot} panicData={panicData} />
           </SectionErrorBoundary>
 
-          <SectionErrorBoundary label="핵심 지표">
+          <div className="sticky top-1 z-30 -mx-0.5 rounded-lg border border-white/[0.04] bg-slate-950/75 px-0.5 py-1 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md">
+            <MacroRiskActionNow snapshot={snapshot} />
+          </div>
+
+          <SectionErrorBoundary label="Tier metrics">
             <MacroRiskTierPanel tieredMetrics={snapshot.tieredMetrics} />
           </SectionErrorBoundary>
 
           <SectionErrorBoundary label="Pressure Engine">
             <div>
               <p className="mb-2 px-0.5 text-[9px] font-semibold tracking-[0.18em] text-slate-500">PRESSURE ENGINE</p>
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
                 {snapshot.pillars.map((pillar) => (
                   <SectionErrorBoundary key={pillar.id} label={pillar.title}>
                     <MacroRiskPillarSection pillar={pillar} />

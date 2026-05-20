@@ -28,7 +28,7 @@ export default function MacroRiskPositionCard({ snapshot, panicData = null }) {
     .trim()
 
   return (
-    <section className="trading-card-shell px-3 py-3 sm:px-4 sm:py-3.5">
+    <section className="trading-card-shell px-4 py-4">
       <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">MARKET POSITION</p>
       <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
         <PositionBlock

@@ -14,21 +14,29 @@ export default function MacroRiskPillarSection({ pillar }) {
   const accent = ACCENT[pillar.id] ?? ""
   const barCls = scoreBarClass(pillar.score)
   const ringCls = scoreRingClass(pillar.score)
-  const narrative = buildNarrative(pillar)
+  const badge = statusBadgeLine(pillar)
 
   return (
     <article
       className={[
-        "macro-risk-pillar trading-card-shell flex min-h-0 flex-col px-3 py-3 sm:px-4 sm:py-3.5",
+        "macro-risk-pillar trading-card-shell flex min-h-0 flex-col px-4 py-4",
         accent,
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="m-0 text-[12px] font-semibold leading-snug text-slate-100 sm:text-[13px]">{pillar.title}</p>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/[0.08]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[11px] font-semibold leading-snug text-slate-200">{pillar.title}</p>
+          <p className="m-0 mt-1 line-clamp-1 rounded-md border border-white/[0.1] bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold text-slate-200">
+            {badge}
+          </p>
+          <p
+            className={`m-0 mt-1.5 font-mono text-[1.75rem] font-bold tabular-nums leading-none sm:text-[2rem] ${scoreTextClass(pillar.score)}`}
+          >
+            {pillar.score}
+          </p>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
             <div
               className={`h-full rounded-full bg-gradient-to-r ${barCls}`}
               style={{ width: `${Math.min(100, Math.max(0, pillar.score))}%` }}
@@ -37,32 +45,6 @@ export default function MacroRiskPillarSection({ pillar }) {
         </div>
         <PillarRing score={pillar.score} accentClass={ringCls} emoji={scoreEmoji(pillar.score)} />
       </div>
-
-      <p className={`m-0 mt-2 font-mono text-[1.5rem] font-bold tabular-nums leading-none ${scoreTextClass(pillar.score)}`}>
-        {pillar.score}
-      </p>
-
-      <div className="mt-3 space-y-0 border-y border-white/[0.05] py-3">
-        <p className="m-0 text-[9px] font-semibold uppercase tracking-wide text-slate-500">상태</p>
-        <ul className="m-0 mt-1 flex list-none flex-col gap-1.5 p-0">
-          {narrative.map((line, i) => (
-            <li key={i} className="flex gap-2 text-[11px] leading-snug text-slate-300">
-              <span className="shrink-0 text-slate-600" aria-hidden>
-                ·
-              </span>
-              <span>{line}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <p className="m-0 mt-3 border-t border-dashed border-white/[0.08] pt-3 text-[10px] text-slate-500">
-        {pillar.lines.slice(0, 4).map((line) => (
-          <span key={line.label} className="mr-3 inline-block">
-            <span className="font-semibold text-slate-500">{line.label}</span> {line.text}
-          </span>
-        ))}
-      </p>
     </article>
   )
 }
@@ -72,27 +54,27 @@ export default function MacroRiskPillarSection({ pillar }) {
  */
 function PillarRing({ score, accentClass, emoji }) {
   const s = Math.min(100, Math.max(0, Number(score) || 0))
-  const r = 22
+  const r = 12
   const c = 2 * Math.PI * r
   const dash = (s / 100) * c
   const gap = c - dash
   return (
-    <div className="relative h-[52px] w-[52px] shrink-0">
-      <svg className="-rotate-90" width="52" height="52" viewBox="0 0 52 52" aria-hidden>
-        <circle cx="26" cy="26" r={r} fill="none" className="text-white/[0.08]" stroke="currentColor" strokeWidth="5" />
+    <div className="relative h-8 w-8 shrink-0">
+      <svg className="-rotate-90" width="32" height="32" viewBox="0 0 32 32" aria-hidden>
+        <circle cx="16" cy="16" r={r} fill="none" className="text-white/[0.08]" stroke="currentColor" strokeWidth="3" />
         <circle
-          cx="26"
-          cy="26"
+          cx="16"
+          cy="16"
           r={r}
           fill="none"
           stroke="currentColor"
-          strokeWidth="5"
+          strokeWidth="3"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${gap}`}
           className={accentClass}
         />
       </svg>
-      <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[11px]" aria-hidden>
+      <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[8px]" aria-hidden>
         {emoji}
       </span>
     </div>
@@ -100,23 +82,16 @@ function PillarRing({ score, accentClass, emoji }) {
 }
 
 /**
- * OS 스타일 짧은 서술 (지표 카드와 중복 최소화).
  * @param {import("../../macro-risk/pillars.js").ReturnType<import("../../macro-risk/pillars.js").scoreRatePressure>} pillar
  */
-function buildNarrative(pillar) {
-  if (pillar.id === "rate") {
-    return [
-      pillar.status,
-      "장기금리·실질금리 방향을 함께 봅니다.",
-      "MOVE 상승은 고정·성장주 베타를 압박합니다.",
-    ]
-  }
+function statusBadgeLine(pillar) {
+  if (pillar.id === "rate") return pillar.status
   if (pillar.id === "inflation") {
-    return [
-      pillar.status,
-      "BEI·장기물이 동반 상방이면 인플레 리스크가 길어집니다.",
-      "Core·PCE는 후행이므로 방향만 확인합니다.",
-    ]
+    if (/재가속/.test(pillar.status)) return "재가속 우려"
+    if (/기대인플/.test(pillar.status)) return "기대인플 상방"
+    return pillar.status.length > 14 ? pillar.status.slice(0, 14) : pillar.status
   }
-  return [pillar.status, "달러·QT·유동성 축소가 리스크 자산에 전달됩니다.", "MOVE·VXN은 변동성 통로로 해석합니다."]
+  const dxy = pillar.lines.find((l) => l.label === "달러")
+  if (dxy?.text === "강세") return "달러 강세"
+  return pillar.status.length > 12 ? pillar.status.slice(0, 12) : pillar.status
 }
