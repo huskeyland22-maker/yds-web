@@ -1,6 +1,12 @@
 import { useMemo } from "react"
-import { getFinalScore } from "../../utils/tradingScores.js"
+import {
+  dangerProgressPct,
+  fearProgressPct,
+  resolveCyclePosition,
+  resolveMacroPosition,
+} from "../../market-os/positionLabels.js"
 import { scoreBarClass, scoreTextClass } from "../../macro-risk/macroRiskUiTone.js"
+import { getFinalScore } from "../../utils/tradingScores.js"
 
 /**
  * @param {{ snapshot: import("../../macro-risk/engine.js").MacroRiskSnapshot; panicData?: object | null }} props
@@ -11,17 +17,8 @@ export default function MacroRiskPositionCard({ snapshot, panicData = null }) {
   const macroPos = resolveMacroPosition(snapshot.score)
   const macroPast = Number(snapshot?.scoreBreakdown?.formula?.base)
 
-  const cycleToNeutralPct =
-    cycleScore == null || !Number.isFinite(Number(cycleScore))
-      ? null
-      : Number(cycleScore) <= 30
-        ? Math.round((Number(cycleScore) / 30) * 100)
-        : 100
-
-  const macroDangerPct =
-    snapshot.score == null || !Number.isFinite(Number(snapshot.score))
-      ? null
-      : Math.round(Math.min(100, Math.max(0, ((Number(snapshot.score) - 60) / 40) * 100)))
+  const cycleToNeutralPct = fearProgressPct(cycleScore)
+  const macroDangerPct = dangerProgressPct(snapshot.score)
 
   const macroPhaseLabel = String(snapshot.headline ?? "")
     .replace(/\s*이벤트\s*$/u, "")
@@ -153,24 +150,3 @@ function HorizontalGauge({ value, transitionAt, gradientClass }) {
   )
 }
 
-function resolveCyclePosition(score) {
-  if (!Number.isFinite(Number(score)))
-    return { position: "데이터 대기", phaseLine: "—", emoji: "⚪" }
-  const s = Number(score)
-  if (s <= 15) return { position: "극단 공포", phaseLine: "극단 공포 구간", emoji: "🟢🟢🟢" }
-  if (s <= 30) return { position: s >= 22 ? "공포 후반" : "공포", phaseLine: "공포 후반", emoji: "🟢" }
-  if (s <= 45) return { position: "중립", phaseLine: "중립 전환", emoji: "🟡" }
-  if (s <= 60) return { position: "과열", phaseLine: "과열 구간", emoji: "🟠" }
-  return { position: "극단 과열", phaseLine: "극단 과열", emoji: "🔴" }
-}
-
-function resolveMacroPosition(score) {
-  if (!Number.isFinite(Number(score)))
-    return { position: "데이터 대기", phaseLine: "—", emoji: "⚪" }
-  const s = Number(score)
-  if (s <= 20) return { position: "유동성 우호", phaseLine: "유동성 우호", emoji: "🟢" }
-  if (s <= 40) return { position: "중립", phaseLine: "중립 국면", emoji: "🟡" }
-  if (s <= 60) return { position: "압박 시작", phaseLine: "압박 시작", emoji: "🟠" }
-  if (s <= 80) return { position: "위험", phaseLine: "위험 국면", emoji: "🔴" }
-  return { position: "쇼크", phaseLine: "금리 재평가", emoji: "🔴🔴" }
-}

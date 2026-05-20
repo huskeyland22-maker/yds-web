@@ -1,25 +1,13 @@
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { formatDeltaByMethod, inferDeltaMethod } from "../../macro-risk/deltaSemantics.js"
 import { DATA_BADGE_CLASS } from "../../macro-risk/metricSourceCatalog.js"
+import { metricShortLabel } from "../../macro-risk/metricLabels.js"
 import { slopeArrow } from "../../macro-risk/seriesMath.js"
 
 const STANCE_COLOR = {
   up: "text-rose-300/90",
   down: "text-emerald-300/90",
   flat: "text-slate-400",
-}
-
-const LABEL_T1 = {
-  US10Y: "US10Y",
-  REAL_YIELD: "REAL",
-  DXY: "DXY",
-  MOVE: "MOVE",
-}
-const LABEL_T2 = {
-  US30Y: "30Y",
-  BEI: "BEI",
-  VXN: "VXN",
-  US2Y: "2Y",
 }
 
 /**
@@ -51,8 +39,7 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
           const currentDisplay =
             row.current == null || !Number.isFinite(Number(row.current)) ? "—" : formatCurrent(row.current, fmt)
 
-          const short =
-            variant === "tier2" ? LABEL_T2[row.key] ?? row.label : LABEL_T1[row.key] ?? row.label
+          const short = metricShortLabel(row.key) ?? row.label
 
           const shell = variant === "tier1" ? shellTier1 : shellTier2
 

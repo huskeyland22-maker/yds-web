@@ -1,3 +1,4 @@
+import MarketOsIntegratedPanel from "../components/market-os/MarketOsIntegratedPanel.jsx"
 import MacroRiskActionNow from "../components/macro-risk/MacroRiskActionNow.jsx"
 import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevValidationPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
@@ -133,8 +134,12 @@ export default function MacroRiskPage({ panicData = null }) {
             <MacroRiskHero snapshot={snapshot} macroDevUi={macroDevUi} macroDay={macroDay} cycleDay={cycleDay} />
           </SectionErrorBoundary>
 
+          <SectionErrorBoundary label="Market OS 통합">
+            <MarketOsIntegratedPanel cycleScore={cycleScore} snapshot={snapshot} />
+          </SectionErrorBoundary>
+
           <div className="sticky top-0 z-40 -mx-0.5 py-0.5">
-            <MacroRiskActionNow snapshot={snapshot} />
+            <MacroRiskActionNow snapshot={snapshot} cycleScore={cycleScore} />
           </div>
 
           <SectionErrorBoundary label="Market Position">

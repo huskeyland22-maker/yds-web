@@ -1,5 +1,17 @@
 /** 표시명·툴팁만 관리 (데이터 키·로직 불변) */
 
+/** Tier 카드 짧은 표기 */
+export const METRIC_SHORT_KO = {
+  US10Y: "10Y",
+  REAL_YIELD: "실질금리",
+  DXY: "달러지수",
+  MOVE: "채권변동성",
+  US30Y: "30Y",
+  BEI: "기대인플레",
+  VXN: "VXN",
+  US2Y: "2Y",
+}
+
 /** @type {Record<string, { label: string; tooltip?: string }>} */
 export const METRIC_LABEL_KO = {
   US10Y: {
@@ -15,7 +27,7 @@ export const METRIC_LABEL_KO = {
     tooltip: "달러 강세 / 유동성",
   },
   MOVE: {
-    label: "채권 변동성 (MOVE)",
+    label: "채권변동성 (MOVE)",
     tooltip: "미국채 변동성",
   },
   US30Y: {
@@ -23,7 +35,7 @@ export const METRIC_LABEL_KO = {
     tooltip: "장기 인플레 / 재정",
   },
   BEI: {
-    label: "기대인플레이션 (BEI)",
+    label: "기대인플레 (BEI)",
     tooltip: "시장 인플레 기대",
   },
   VXN: {
@@ -42,6 +54,11 @@ export const METRIC_LABEL_KO = {
  */
 export function metricDisplayLabel(key, fallback = key) {
   return METRIC_LABEL_KO[key]?.label ?? fallback
+}
+
+/** @param {string} key */
+export function metricShortLabel(key) {
+  return METRIC_SHORT_KO[key] ?? metricDisplayLabel(key, key)
 }
 
 /**
