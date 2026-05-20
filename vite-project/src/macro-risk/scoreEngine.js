@@ -22,18 +22,9 @@ const METRIC_MAX_POINTS = {
   DXY: 10,
 }
 
-/**
- * @param {number|null} v
- * @param {number} min
- * @param {number} max
- */
-function scale(v, min, max) {
-  if (!Number.isFinite(Number(v))) return 0
-  const n = Number(v)
-  if (n <= min) return 0
-  if (n >= max) return 100
-  return ((n - min) / (max - min)) * 100
-}
+const TIER1_CAP = 85
+const TIER2_CAP = 70
+const MACRO_CAP = 85
 
 /**
  * @param {string} key
@@ -44,21 +35,54 @@ export function metricRiskUnit(key, m) {
   const d20 = m.delta20D
   switch (key) {
     case "US10Y":
-      return scale(d20, 0.02, 0.35)
+      return bucketNormalized(d20, [
+        [0.1, 20],
+        [0.2, 40],
+        [0.35, 60],
+        [0.5, 80],
+      ])
     case "REAL_YIELD":
-      return scale(d20, 0.01, 0.25)
+      return bucketNormalized(d20, [
+        [0.1, 20],
+        [0.2, 40],
+        [0.35, 70],
+      ])
     case "DXY":
-      return scale(d20, 0.1, 3.2)
+      return bucketNormalized(d20, [
+        [0.5, 20],
+        [1.2, 40],
+        [2.2, 70],
+      ])
     case "MOVE":
-      return scale(d20, 0.5, 18)
+      return bucketNormalized(d20, [
+        [20, 20],
+        [40, 40],
+        [60, 70],
+      ])
     case "US30Y":
-      return scale(d20, 0.02, 0.35)
+      return bucketNormalized(d20, [
+        [0.1, 20],
+        [0.2, 40],
+        [0.35, 70],
+      ])
     case "BEI":
-      return scale(d20, 0.01, 0.2)
+      return bucketNormalized(d20, [
+        [0.05, 20],
+        [0.1, 40],
+        [0.2, 70],
+      ])
     case "VXN":
-      return scale(m.current, 14, 30)
+      return bucketNormalized(m.current, [
+        [20, 20],
+        [25, 40],
+        [30, 70],
+      ])
     case "US2Y":
-      return scale(d20, 0.02, 0.4)
+      return bucketNormalized(d20, [
+        [0.1, 20],
+        [0.2, 40],
+        [0.35, 70],
+      ])
     default:
       return 0
   }
@@ -69,21 +93,25 @@ export function metricRiskUnit(key, m) {
  * @param {{ id: string; active: boolean; scoreAdd?: number }[]} triggers
  */
 export function computeMacroRiskScore(normalized, triggers) {
-  let tier1Weighted = 0
-  let tier2Weighted = 0
+  let tier1WeightedRaw = 0
+  let tier2WeightedRaw = 0
 
   for (const key of TIER1_KEYS) {
     const unit = metricRiskUnit(key, normalized[key])
-    tier1Weighted += unit * (TIER_WEIGHTS[key] / 70)
+    tier1WeightedRaw += unit * (TIER_WEIGHTS[key] / 70)
   }
   for (const key of TIER2_KEYS) {
     const unit = metricRiskUnit(key, normalized[key])
-    tier2Weighted += unit * (TIER_WEIGHTS[key] / 30)
+    tier2WeightedRaw += unit * (TIER_WEIGHTS[key] / 30)
   }
 
+  const extremeAll = isAllExtreme(normalized)
+  const tier1Weighted = extremeAll ? tier1WeightedRaw : Math.min(tier1WeightedRaw, TIER1_CAP)
+  const tier2Weighted = extremeAll ? tier2WeightedRaw : Math.min(tier2WeightedRaw, TIER2_CAP)
   const base = tier1Weighted * 0.7 + tier2Weighted * 0.3
   const triggerBoost = triggers.reduce((acc, t) => acc + (t.active ? Number(t.scoreAdd ?? 0) : 0), 0)
-  const score = clampScore(base + triggerBoost)
+  const unclamped = base + triggerBoost
+  const score = extremeAll ? clampScore(unclamped) : Math.min(clampScore(unclamped), MACRO_CAP)
 
   return {
     score,
@@ -96,6 +124,9 @@ export function computeMacroRiskScore(normalized, triggers) {
       tier2Score: clampScore(tier2Weighted),
       base,
       triggerBoost,
+      extremeAll,
+      rawTier1: Number(tier1WeightedRaw.toFixed(2)),
+      rawTier2: Number(tier2WeightedRaw.toFixed(2)),
     }),
   }
 }
@@ -201,4 +232,24 @@ function metricContributionPoints(key, unit) {
 
 function sumPoints(items) {
   return items.reduce((acc, it) => acc + Number(it.points ?? 0), 0)
+}
+
+function bucketNormalized(value, bands) {
+  if (!Number.isFinite(Number(value))) return 0
+  const n = Number(value)
+  for (let i = 0; i < bands.length; i += 1) {
+    const [max, score] = bands[i]
+    if (n <= max) return score
+  }
+  return 100
+}
+
+function isAllExtreme(normalized) {
+  return (
+    Number(normalized.US10Y?.delta20D) >= 0.5 &&
+    Number(normalized.REAL_YIELD?.delta20D) >= 0.35 &&
+    Number(normalized.MOVE?.delta20D) >= 60 &&
+    Number(normalized.US30Y?.delta20D) >= 0.35 &&
+    Number(normalized.BEI?.delta20D) >= 0.2
+  )
 }
