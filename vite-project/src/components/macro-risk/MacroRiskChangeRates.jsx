@@ -1,4 +1,4 @@
-import { formatCurrent, slopeLabelKo } from "../../macro-risk/displayMetrics.js"
+import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { formatDeltaByMethod, inferDeltaMethod } from "../../macro-risk/deltaSemantics.js"
 import { DATA_BADGE_CLASS } from "../../macro-risk/metricSourceCatalog.js"
 import { slopeArrow } from "../../macro-risk/seriesMath.js"
@@ -10,7 +10,7 @@ const STANCE_COLOR = {
 }
 
 const LABEL_T1 = {
-  US10Y: "10Y",
+  US10Y: "US10Y",
   REAL_YIELD: "REAL",
   DXY: "DXY",
   MOVE: "MOVE",
@@ -45,16 +45,14 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
       {!hideBlockTitle ? (
         <p className="m-0 text-[9px] font-semibold tracking-[0.1em] text-slate-500">{title}</p>
       ) : null}
-      <div className={`mt-2 grid grid-cols-2 gap-3 ${hideBlockTitle ? "mt-0" : ""}`}>
+      <div className={`grid grid-cols-2 gap-2 ${hideBlockTitle ? "" : "mt-2"}`}>
         {metrics.map((row) => {
           const fmt = row.format === "pct" ? "level" : row.format
           const currentDisplay =
             row.current == null || !Number.isFinite(Number(row.current)) ? "—" : formatCurrent(row.current, fmt)
 
           const short =
-            variant === "tier2"
-              ? LABEL_T2[row.key] ?? row.label
-              : LABEL_T1[row.key] ?? row.label
+            variant === "tier2" ? LABEL_T2[row.key] ?? row.label : LABEL_T1[row.key] ?? row.label
 
           const shell = variant === "tier1" ? shellTier1 : shellTier2
 
@@ -70,41 +68,36 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
             !row.deltaHorizonNA && row.change20D != null
               ? `20D ${formatDeltaByMethod(row.change20D, inferDeltaMethod(row.key, row.current, row.change20D, "20D"), fmt)}`
               : null
-          const deltas = [d1, d5, d20].filter(Boolean).join(" · ")
 
           return (
             <div
               key={row.key}
               className={[
-                "macro-risk-tier-cell flex h-[92px] max-h-[100px] flex-col justify-between rounded-lg border px-2 py-1.5 text-left",
+                "macro-risk-tier-cell flex h-[72px] max-h-[72px] flex-col justify-between rounded-lg border px-2 py-1.5 text-left",
                 shell,
               ].join(" ")}
             >
-              <div>
-                <p className="m-0 truncate text-[10px] font-semibold leading-tight text-slate-200">{short}</p>
-                <p className="m-0 mt-0.5 font-mono text-[16px] font-bold tabular-nums leading-none text-slate-50">
-                  {currentDisplay}
-                </p>
-                <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                  {row.dataBadge ? (
-                    <span
-                      className={[
-                        "rounded px-1 py-px text-[6px] font-bold tracking-wide",
-                        DATA_BADGE_CLASS[row.dataBadge] ?? DATA_BADGE_CLASS.MOCK,
-                      ].join(" ")}
-                    >
-                      {row.dataBadge === "LIVE" ? "LIVE" : row.dataBadge}
-                    </span>
-                  ) : null}
+              <div className="flex items-baseline justify-between gap-1">
+                <p className="m-0 text-[10px] font-semibold leading-none text-slate-200">{short}</p>
+                {row.dataBadge === "LIVE" ? (
                   <span
-                    className={`text-[9px] font-semibold ${STANCE_COLOR[row.slope] ?? STANCE_COLOR.flat}`}
+                    className={[
+                      "rounded px-1 py-px text-[6px] font-bold",
+                      DATA_BADGE_CLASS.LIVE,
+                    ].join(" ")}
                   >
-                    {slopeArrow(row.slope)} {slopeLabelKo(row.slope)}
+                    LIVE
                   </span>
-                </div>
+                ) : null}
               </div>
-              <p className="m-0 border-t border-white/[0.06] pt-1 font-mono text-[8px] tabular-nums leading-tight text-slate-400">
-                {deltas || "—"}
+              <p className="m-0 flex items-baseline gap-1 font-mono text-[15px] font-bold tabular-nums leading-none text-slate-50">
+                {currentDisplay}
+                <span className={`text-[10px] font-semibold ${STANCE_COLOR[row.slope] ?? STANCE_COLOR.flat}`}>
+                  {slopeArrow(row.slope)}
+                </span>
+              </p>
+              <p className="m-0 font-mono text-[8px] leading-tight tabular-nums text-slate-400">
+                {[d1, d5, d20].filter(Boolean).join(" · ") || "—"}
               </p>
             </div>
           )

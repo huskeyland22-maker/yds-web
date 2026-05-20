@@ -7,12 +7,14 @@ import MacroRiskPlaybook from "../components/macro-risk/MacroRiskPlaybook.jsx"
 import MacroRiskPositionCard from "../components/macro-risk/MacroRiskPositionCard.jsx"
 import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskTriggers from "../components/macro-risk/MacroRiskTriggers.jsx"
+import MacroRiskWaitSignal from "../components/macro-risk/MacroRiskWaitSignal.jsx"
 import SectionErrorBoundary from "../components/SectionErrorBoundary.jsx"
-import { macroScorePrevDayDelta } from "../macro-risk/macroRiskDayOverDay.js"
+import { cycleScorePrevDayDelta, macroScorePrevDayDelta } from "../macro-risk/macroRiskDayOverDay.js"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { formatMacroRiskPipelineSubtitle } from "../macro-risk/liveDataStatus.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
-import { useCallback, useEffect, useState } from "react"
+import { getFinalScore } from "../utils/tradingScores.js"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Navigate } from "react-router-dom"
 
 const MACRO_DEV_UI_KEY = "yds-macro-dev-ui"
@@ -27,6 +29,7 @@ export default function MacroRiskPage({ panicData = null }) {
   }
 
   const { snapshot, loading, error, refetch } = useMacroRiskSnapshot(panicData)
+  const cycleScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
 
   const [macroDevUi, setMacroDevUi] = useState(() => {
     if (typeof window === "undefined") return false
@@ -37,15 +40,31 @@ export default function MacroRiskPage({ panicData = null }) {
     }
   })
 
-  const [prevDayDelta, setPrevDayDelta] = useState(null)
-  const [prevDayKnown, setPrevDayKnown] = useState(false)
+  const [macroDay, setMacroDay] = useState({
+    yesterdayScore: null,
+    todayScore: 0,
+    delta: null,
+    hasYesterday: false,
+  })
+  const [cycleDay, setCycleDay] = useState({
+    yesterdayScore: null,
+    todayScore: null,
+    delta: null,
+    hasYesterday: false,
+  })
 
   useEffect(() => {
     if (!snapshot) return
-    const { delta, hasYesterday } = macroScorePrevDayDelta(snapshot.score)
-    setPrevDayDelta(delta)
-    setPrevDayKnown(hasYesterday)
+    setMacroDay(macroScorePrevDayDelta(snapshot.score))
   }, [snapshot?.score, snapshot?.updatedAt])
+
+  useEffect(() => {
+    if (cycleScore == null || !Number.isFinite(Number(cycleScore))) {
+      setCycleDay({ yesterdayScore: null, todayScore: null, delta: null, hasYesterday: false })
+      return
+    }
+    setCycleDay(cycleScorePrevDayDelta(cycleScore))
+  }, [cycleScore])
 
   const toggleMacroDevUi = useCallback(() => {
     setMacroDevUi((prev) => {
@@ -111,21 +130,16 @@ export default function MacroRiskPage({ panicData = null }) {
       {snapshot ? (
         <div className="macro-risk-stack flex flex-col gap-[18px]">
           <SectionErrorBoundary label="Summary">
-            <MacroRiskHero
-              snapshot={snapshot}
-              macroDevUi={macroDevUi}
-              prevDayDelta={prevDayDelta}
-              prevDayKnown={prevDayKnown}
-            />
+            <MacroRiskHero snapshot={snapshot} macroDevUi={macroDevUi} macroDay={macroDay} cycleDay={cycleDay} />
           </SectionErrorBoundary>
+
+          <div className="sticky top-0 z-40 -mx-0.5 py-0.5">
+            <MacroRiskActionNow snapshot={snapshot} />
+          </div>
 
           <SectionErrorBoundary label="Market Position">
             <MacroRiskPositionCard snapshot={snapshot} panicData={panicData} />
           </SectionErrorBoundary>
-
-          <div className="sticky top-1 z-30 -mx-0.5 rounded-lg border border-white/[0.04] bg-slate-950/75 px-0.5 py-1 shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md">
-            <MacroRiskActionNow snapshot={snapshot} />
-          </div>
 
           <SectionErrorBoundary label="Tier metrics">
             <MacroRiskTierPanel tieredMetrics={snapshot.tieredMetrics} />
@@ -146,6 +160,10 @@ export default function MacroRiskPage({ panicData = null }) {
 
           <SectionErrorBoundary label="Active Triggers">
             <MacroRiskTriggers triggers={snapshot.triggers} />
+          </SectionErrorBoundary>
+
+          <SectionErrorBoundary label="Wait Signal">
+            <MacroRiskWaitSignal triggers={snapshot.triggers} />
           </SectionErrorBoundary>
 
           <SectionErrorBoundary label="Market Playbook">

@@ -16,11 +16,11 @@ const METRIC_NAME = {
  * @param {{
  *   snapshot: import("../../macro-risk/engine.js").MacroRiskSnapshot;
  *   macroDevUi?: boolean;
- *   prevDayDelta: number | null;
- *   prevDayKnown: boolean;
+ *   macroDay: { yesterdayScore: number | null; todayScore: number; delta: number | null; hasYesterday: boolean };
+ *   cycleDay?: { yesterdayScore: number | null; todayScore: number | null; delta: number | null; hasYesterday: boolean };
  * }} props
  */
-export default function MacroRiskHero({ snapshot, macroDevUi = false, prevDayDelta = null, prevDayKnown = false }) {
+export default function MacroRiskHero({ snapshot, macroDevUi = false, macroDay, cycleDay }) {
   const [showBreakdown, setShowBreakdown] = useState(false)
   const breakdown = snapshot.scoreBreakdown
 
@@ -30,43 +30,35 @@ export default function MacroRiskHero({ snapshot, macroDevUi = false, prevDayDel
   const positionLabel = scoreBandLabel(snapshot.score)
   const tacticLine = snapshot.tactical
 
-  const prevDayText =
-    !prevDayKnown || prevDayDelta == null ? "—" : prevDayDelta >= 0 ? `+${prevDayDelta}` : `${prevDayDelta}`
+  const macroDeltaText = formatDelta(macroDay.delta, macroDay.hasYesterday)
+  const cycleDeltaText = formatDelta(cycleDay?.delta ?? null, cycleDay?.hasYesterday ?? false)
 
   return (
-    <section className="macro-risk-hero trading-card-shell overflow-hidden px-4 py-4">
+    <section className="macro-risk-hero trading-card-shell overflow-hidden px-4 py-3">
       <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">MACRO SUMMARY</p>
 
-      <div className="mt-1.5 flex flex-wrap items-end justify-between gap-2">
-        <div className="flex items-baseline gap-2">
-          <p
-            className={`m-0 font-mono text-[1.85rem] font-bold leading-none tabular-nums sm:text-[2rem] ${scoreTextClass(snapshot.score)}`}
-          >
-            {snapshot.score}
-          </p>
-          <p className="m-0 text-[10px] text-slate-500">Macro Risk</p>
-        </div>
-        <div className="flex max-w-[min(100%,14rem)] flex-wrap justify-end gap-1 text-[9px] font-semibold text-slate-400">
-          {snapshot.pillarChips.map((p) => (
-            <span key={p.key} className="rounded border border-white/[0.07] bg-white/[0.03] px-1 py-px">
-              {p.label}
-              {p.emoji}
-            </span>
-          ))}
-        </div>
+      <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <ScoreDeltaBlock
+          title="Macro"
+          yesterday={macroDay.hasYesterday ? macroDay.yesterdayScore : null}
+          today={macroDay.todayScore}
+          deltaText={macroDeltaText}
+          scoreClass={scoreTextClass(snapshot.score)}
+        />
+        <ScoreDeltaBlock
+          title="Cycle"
+          yesterday={cycleDay?.hasYesterday ? cycleDay.yesterdayScore : null}
+          today={cycleDay?.todayScore ?? null}
+          deltaText={cycleDeltaText}
+          scoreClass={scoreTextClass(cycleDay?.todayScore ?? 50)}
+        />
       </div>
 
-      <div className="mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5 rounded-md border border-white/[0.06] bg-black/25 px-2 py-2 sm:grid-cols-5">
+      <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 rounded-md border border-white/[0.06] bg-black/25 px-2 py-1.5 sm:grid-cols-4">
         <SummaryCell k="현재" v={phaseHeadline} />
         <SummaryCell k="시장" v={impactLine} />
         <SummaryCell k="위치" v={positionLabel} emphasizeClass={scoreTextClass(snapshot.score)} />
         <SummaryCell k="전술" v={tacticLine} emphasizeClass="text-cyan-200/90" />
-        <SummaryCell
-          k="전일"
-          v={prevDayText}
-          sub={!prevDayKnown ? "(기록 대기)" : undefined}
-          emphasizeClass="font-mono text-slate-100"
-        />
       </div>
 
       {macroDevUi && snapshot.subheadline ? (
@@ -121,12 +113,38 @@ export default function MacroRiskHero({ snapshot, macroDevUi = false, prevDayDel
   )
 }
 
-function SummaryCell({ k, v, sub, emphasizeClass = "" }) {
+function ScoreDeltaBlock({ title, yesterday, today, deltaText, scoreClass }) {
+  return (
+    <div className="rounded-md border border-white/[0.08] bg-black/30 px-2.5 py-2">
+      <p className="m-0 text-[9px] font-semibold uppercase tracking-wide text-slate-500">{title}</p>
+      <div className="mt-1 flex flex-wrap items-end gap-x-3 gap-y-0.5 font-mono tabular-nums">
+        <span className="text-[9px] text-slate-500">
+          전일 <span className="text-[11px] font-semibold text-slate-300">{yesterday ?? "—"}</span>
+        </span>
+        <span className="text-[9px] text-slate-500">
+          오늘{" "}
+          <span className={`text-[14px] font-bold leading-none ${today != null ? scoreClass : "text-slate-500"}`}>
+            {today ?? "—"}
+          </span>
+        </span>
+        <span className="text-[9px] text-slate-500">
+          변화 <span className="text-[11px] font-bold text-slate-100">{deltaText}</span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function formatDelta(delta, hasYesterday) {
+  if (!hasYesterday || delta == null) return "—"
+  return delta >= 0 ? `+${delta}` : `${delta}`
+}
+
+function SummaryCell({ k, v, emphasizeClass = "" }) {
   return (
     <div className="min-w-0">
       <p className="m-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500">{k}</p>
       <p className={`m-0 truncate text-[10px] font-semibold leading-tight text-slate-100 ${emphasizeClass}`}>{v}</p>
-      {sub ? <p className="m-0 text-[8px] text-slate-600">{sub}</p> : null}
     </div>
   )
 }

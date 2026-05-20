@@ -14,16 +14,19 @@ function prevLocalDay(isoDate) {
   return localIsoDate(d)
 }
 
-const KEY = "yds-macro-score-hist"
+const MACRO_KEY = "yds-macro-score-hist"
+const CYCLE_KEY = "yds-cycle-score-hist"
 
 /**
- * 전일(로컬 캘린더) 대비 Macro 점수 차이. 직전 저장일이 없으면 null.
  * @param {number} currentScore
- * @returns {{ delta: number | null; hasYesterday: boolean }}
+ * @param {string} storageKey
+ * @returns {{ delta: number | null; hasYesterday: boolean; yesterdayScore: number | null; todayScore: number }}
  */
-export function macroScorePrevDayDelta(currentScore) {
+function scoreDayOverDay(currentScore, storageKey) {
   const s = Number(currentScore)
-  if (!Number.isFinite(s)) return { delta: null, hasYesterday: false }
+  if (!Number.isFinite(s)) {
+    return { delta: null, hasYesterday: false, yesterdayScore: null, todayScore: NaN }
+  }
 
   const today = localIsoDate()
   const y = prevLocalDay(today)
@@ -31,7 +34,7 @@ export function macroScorePrevDayDelta(currentScore) {
   /** @type {{ d: string; s: number }[]} */
   let hist = []
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(storageKey)
     if (raw) hist = JSON.parse(raw)
   } catch {
     hist = []
@@ -41,17 +44,37 @@ export function macroScorePrevDayDelta(currentScore) {
   const yesterdayRow = hist.find((h) => h && h.d === y && Number.isFinite(Number(h.s)))
 
   const idx = hist.findIndex((h) => h && h.d === today)
-  if (idx >= 0) hist[idx] = { d: today, s: s }
+  if (idx >= 0) hist[idx] = { d: today, s }
   else hist.push({ d: today, s })
 
   hist.sort((a, b) => (a.d < b.d ? -1 : 1))
   while (hist.length > 45) hist.shift()
   try {
-    localStorage.setItem(KEY, JSON.stringify(hist))
+    localStorage.setItem(storageKey, JSON.stringify(hist))
   } catch {
     // ignore
   }
 
-  if (!yesterdayRow || !Number.isFinite(Number(yesterdayRow.s))) return { delta: null, hasYesterday: false }
-  return { delta: Math.round(s - Number(yesterdayRow.s)), hasYesterday: true }
+  const yesterdayScore =
+    yesterdayRow && Number.isFinite(Number(yesterdayRow.s)) ? Math.round(Number(yesterdayRow.s)) : null
+
+  if (yesterdayScore == null) {
+    return { delta: null, hasYesterday: false, yesterdayScore: null, todayScore: Math.round(s) }
+  }
+  return {
+    delta: Math.round(s - yesterdayScore),
+    hasYesterday: true,
+    yesterdayScore,
+    todayScore: Math.round(s),
+  }
+}
+
+/** @param {number} currentScore */
+export function macroScorePrevDayDelta(currentScore) {
+  return scoreDayOverDay(currentScore, MACRO_KEY)
+}
+
+/** @param {number} currentScore */
+export function cycleScorePrevDayDelta(currentScore) {
+  return scoreDayOverDay(currentScore, CYCLE_KEY)
 }
