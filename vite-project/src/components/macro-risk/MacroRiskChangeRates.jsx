@@ -9,9 +9,9 @@ const STANCE_COLOR = {
 }
 
 const BADGE_CLASS = {
+  MANUAL: "border-sky-500/30 bg-sky-500/10 text-sky-300",
   LIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
   MOCK: "border-violet-500/30 bg-violet-500/10 text-violet-300",
-  STATIC: "border-slate-500/30 bg-slate-500/10 text-slate-400",
 }
 
 /**
@@ -39,7 +39,7 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
                     <span
                       className={[
                         "rounded px-1 py-px text-[8px] font-bold tracking-wide",
-                        BADGE_CLASS[row.dataBadge] ?? BADGE_CLASS.STATIC,
+                        BADGE_CLASS[row.dataBadge] ?? BADGE_CLASS.MOCK,
                       ].join(" ")}
                     >
                       {row.dataBadge}

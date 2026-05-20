@@ -33,7 +33,7 @@ function buildVxnTierRow(raw, panicContext, sources) {
     return buildMetricRow(
       { key: "VXN", current: null, change1D: null, change5D: null, change20D: null, slope: "flat", status: "—" },
       "VXN",
-      { format: "index", tier: 2, hide1D: true, dataBadge: "STATIC", deltaHorizonNA: true },
+      { format: "index", tier: 2, hide1D: true, dataBadge: "MOCK", deltaHorizonNA: true },
     )
   }
 
@@ -52,7 +52,7 @@ function buildVxnTierRow(raw, panicContext, sources) {
       format: "index",
       tier: 2,
       hide1D: true,
-      dataBadge: sourceToDataBadge(sources.VXN ?? "panicContext"),
+      dataBadge: sourceToDataBadge(sources.VXN ?? "cycle-manual"),
       deltaHorizonNA: true,
     },
   )

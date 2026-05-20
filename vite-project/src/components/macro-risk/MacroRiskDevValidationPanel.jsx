@@ -7,9 +7,9 @@ export default function MacroRiskDevValidationPanel({ data }) {
   if (!rows?.length) return null
 
   const BADGE_CLASS = {
+    MANUAL: "border-sky-500/35 bg-sky-500/10 text-sky-300",
     LIVE: "border-emerald-500/35 bg-emerald-500/10 text-emerald-300",
     MOCK: "border-violet-500/35 bg-violet-500/10 text-violet-300",
-    STATIC: "border-slate-500/35 bg-slate-500/10 text-slate-400",
   }
 
   return (
@@ -68,7 +68,7 @@ export default function MacroRiskDevValidationPanel({ data }) {
               <span
                 className={[
                   "rounded px-1 py-px text-[8px] font-bold tracking-wide",
-                  BADGE_CLASS[r.dataBadge] ?? BADGE_CLASS.STATIC,
+                  BADGE_CLASS[r.dataBadge] ?? BADGE_CLASS.MOCK,
                 ].join(" ")}
               >
                 {r.dataBadge}

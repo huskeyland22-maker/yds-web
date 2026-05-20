@@ -16,14 +16,14 @@ import { slopeArrow } from "./seriesMath.js"
  * @property {string} [category]
  * @property {boolean} [hide1D]
  * @property {string} [tooltip]
- * @property {'LIVE'|'MOCK'|'STATIC'} [dataBadge]
+ * @property {'MANUAL'|'LIVE'|'MOCK'} [dataBadge]
  * @property {boolean} [deltaHorizonNA] — 5D·20D 미산출 시 N/A 및 추세 화살표 생략(VXN 등)
  */
 
 /**
  * @param {MetricSeries | undefined} series
  * @param {string} label
- * @param {{ format?: MetricFormat; tier?: number; category?: string; hide1D?: boolean; tooltip?: string; dataBadge?: 'LIVE'|'MOCK'|'STATIC'; deltaHorizonNA?: boolean }} [opts]
+ * @param {{ format?: MetricFormat; tier?: number; category?: string; hide1D?: boolean; tooltip?: string; dataBadge?: 'MANUAL'|'LIVE'|'MOCK'; deltaHorizonNA?: boolean }} [opts]
  * @returns {MetricDisplayRow}
  */
 export function buildMetricRow(series, label, opts = {}) {

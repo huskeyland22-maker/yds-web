@@ -19,19 +19,17 @@ const METRIC_LIMITS = {
 
 /**
  * @param {string} source
- * @returns {'LIVE'|'MOCK'|'STATIC'}
+ * @returns {'MANUAL'|'LIVE'|'MOCK'}
  */
 export function sourceToDataBadge(source) {
+  if (source === "cycle-manual") return "MANUAL"
   if (
     source === "market-data" ||
-    source === "market-data+panic" ||
-    source === "panicContext" ||
-    source === "panicContext+synth"
+    source === "market-data+panic"
   ) {
     return "LIVE"
   }
-  if (source === "macro-risk-seed.json") return "MOCK"
-  return "STATIC"
+  return "MOCK"
 }
 
 /**

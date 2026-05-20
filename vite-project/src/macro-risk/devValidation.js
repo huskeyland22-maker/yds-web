@@ -13,7 +13,7 @@ import { classifyMetric } from "./normalizeLayer.js"
  * @typedef {Object} DevRow
  * @property {string} key
  * @property {string} label
- * @property {'LIVE'|'MOCK'|'STATIC'} dataBadge
+ * @property {'MANUAL'|'LIVE'|'MOCK'} dataBadge
  * @property {string} originDetail
  * @property {string} [typeNote]
  * @property {number|null} raw
@@ -106,8 +106,8 @@ export function buildDevValidation(raw, sources = {}, apiHistory = {}, yieldCurv
     rows.push({
       key: "VXN",
       label: "VXN",
-      dataBadge: sourceToDataBadge(sources.VXN ?? "panicContext"),
-      originDetail: mapOriginDetail(sources.VXN ?? "panicContext"),
+      dataBadge: sourceToDataBadge(sources.VXN ?? "cycle-manual"),
+      originDetail: mapOriginDetail(sources.VXN ?? "cycle-manual"),
       typeNote: null,
       raw: v,
       previous1D: null,
@@ -238,11 +238,10 @@ function buildYieldSpreadDevBlock(curve, raw) {
  * @param {string} source
  */
 function mapOriginDetail(source) {
+  if (source === "cycle-manual") return "cycle manual (source of truth)"
   if (source === "market-data") return "/api/market-data"
   if (source === "macro-risk-seed.json") return "macro-risk-seed.json"
-  if (source === "panicContext") return "panic (VXN spot)"
-  if (source === "panicContext+synth") return "panic + 1D% 추정"
-  if (source === "market-data+panic") return "market-data + panic(MOVE)"
+  if (source === "market-data+panic") return "market-data"
   return "staticSeed"
 }
 
