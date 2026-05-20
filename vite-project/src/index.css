@@ -462,6 +462,12 @@
     max-width: 100%;
   }
 
+  .yds-market-os-command {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
   .dev-only-menu {
     display: none;
   }

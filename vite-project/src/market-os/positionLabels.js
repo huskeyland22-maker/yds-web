@@ -35,6 +35,10 @@ export function fearProgressPct(cycleScore) {
 }
 
 /** 위험 구간(60~) 진행률 */
+/**
+ * @typedef {{ score: number|null; pct: number|null; variant: "cycle"|"macro" }} PositionMapSlot
+ */
+
 /** @param {number|null|undefined} macroScore */
 export function dangerProgressPct(macroScore) {
   if (!Number.isFinite(Number(macroScore))) return null
