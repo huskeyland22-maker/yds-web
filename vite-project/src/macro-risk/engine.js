@@ -1,6 +1,8 @@
+import { buildDevValidation } from "./devValidation.js"
 import { buildRawLayer } from "./rawLayer.js"
 import { buildTieredMetrics } from "./metricTiers.js"
 import { buildMarketImpact } from "./marketImpact.js"
+import { buildYieldCurve } from "./yieldCurve.js"
 import { scoreInflationPressure, scoreLiquidity, scoreRatePressure } from "./pillars.js"
 import { clampScore, scoreEmoji } from "./seriesMath.js"
 import { evaluateCompositeTriggers } from "./triggers.js"
@@ -19,15 +21,18 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {string} connectLongTerm
  * @property {import('./marketImpact.js').MarketImpactRow[]} marketImpact
  * @property {{ tier1: import('./displayMetrics.js').MetricDisplayRow[]; tier2: import('./displayMetrics.js').MetricDisplayRow[] }} tieredMetrics
+ * @property {import('./yieldCurve.js').ReturnType<buildYieldCurve>} yieldCurve
+ * @property {import('./devValidation.js').ReturnType<buildDevValidation>|null} [devValidation]
  * @property {string} updatedAt
  */
 
 /**
  * @param {Record<string, number[]>} [apiHistory]
  * @param {object | null} [panicContext] read-only
+ * @param {{ sources?: Record<string, string>; includeDev?: boolean }} [meta]
  * @returns {MacroRiskSnapshot}
  */
-export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
+export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, meta = {}) {
   const raw = buildRawLayer(apiHistory)
   const rate = scoreRatePressure(raw)
   const inflation = scoreInflationPressure(raw)
@@ -56,6 +61,8 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
     activeTriggers.length > 0 ? "보수 접근" : score >= 60 ? "선별 매수" : "분할 대응"
   const marketImpact = buildMarketImpact(raw, [rate, inflation, liquidity], triggers)
   const tieredMetrics = buildTieredMetrics(raw, panicContext)
+  const yieldCurve = buildYieldCurve(raw)
+  const devValidation = meta.includeDev ? buildDevValidation(raw, meta.sources ?? {}) : null
 
   return {
     score,
@@ -70,6 +77,8 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null) {
     tactical,
     marketImpact,
     tieredMetrics,
+    yieldCurve,
+    devValidation,
     updatedAt: new Date().toISOString(),
   }
 }

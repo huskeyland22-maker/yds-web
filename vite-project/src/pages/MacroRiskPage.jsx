@@ -1,12 +1,15 @@
 import MacroRiskConnectCard from "../components/macro-risk/MacroRiskConnectCard.jsx"
+import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevValidationPanel.jsx"
 import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
 import MacroRiskMarketImpact from "../components/macro-risk/MacroRiskMarketImpact.jsx"
 import MacroRiskPillarSection from "../components/macro-risk/MacroRiskPillarSection.jsx"
 import MacroRiskTriggers from "../components/macro-risk/MacroRiskTriggers.jsx"
+import MacroRiskYieldCurveCard from "../components/macro-risk/MacroRiskYieldCurveCard.jsx"
 import SectionErrorBoundary from "../components/SectionErrorBoundary.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
+import { isDevMode } from "../utils/devMode.js"
 import { Navigate } from "react-router-dom"
 
 /**
@@ -51,6 +54,12 @@ export default function MacroRiskPage({ panicData = null }) {
             <MacroRiskHero snapshot={snapshot} />
           </SectionErrorBoundary>
 
+          {snapshot.yieldCurve ? (
+            <SectionErrorBoundary label="장단기 금리차">
+              <MacroRiskYieldCurveCard curve={snapshot.yieldCurve} />
+            </SectionErrorBoundary>
+          ) : null}
+
           <SectionErrorBoundary label="Tier 지표">
             <MacroRiskTierPanel tieredMetrics={snapshot.tieredMetrics} />
           </SectionErrorBoundary>
@@ -68,6 +77,10 @@ export default function MacroRiskPage({ panicData = null }) {
           <SectionErrorBoundary label="복합 트리거">
             <MacroRiskTriggers triggers={snapshot.triggers} />
           </SectionErrorBoundary>
+
+          {isDevMode() && snapshot.devValidation?.length ? (
+            <MacroRiskDevValidationPanel rows={snapshot.devValidation} />
+          ) : null}
         </div>
       ) : null}
     </div>

@@ -27,28 +27,43 @@ export function synthesizeHistoryFromSpot(current, changePct1D, points = HISTORY
  * @param {object | null} panicContext
  * @returns {Record<string, number[]>}
  */
+/**
+ * @param {{ parsedData?: Record<string, number|null>; changeData?: Record<string, number|null> }} market
+ * @param {object | null} panicContext
+ * @returns {{ history: Record<string, number[]>; sources: Record<string, string> }}
+ */
 export function buildMacroRiskHistoryFromMarket(market, panicContext = null) {
   const pd = market?.parsedData ?? {}
   const cd = market?.changeData ?? {}
   const history = { ...MACRO_RISK_SEED_HISTORY }
+  /** @type {Record<string, string>} */
+  const sources = {}
+  for (const k of Object.keys(MACRO_RISK_SEED_HISTORY)) sources[k] = "staticSeed"
 
   const us10 = pd.us10y
   if (Number.isFinite(Number(us10))) {
     history.US10Y = synthesizeHistoryFromSpot(us10, cd.us10y)
+    sources.US10Y = "market-data"
   }
 
   const dxy = pd.dxy
   if (Number.isFinite(Number(dxy))) {
     history.DXY = synthesizeHistoryFromSpot(dxy, cd.dxy)
+    sources.DXY = "market-data"
   }
 
   const moveLive = pd.move ?? panicContext?.move
   const moveChg = cd.move
   if (Number.isFinite(Number(moveLive))) {
     history.MOVE = synthesizeHistoryFromSpot(moveLive, moveChg)
+    sources.MOVE = pd.move != null ? "market-data" : "market-data+panic"
   }
 
-  return history
+  if (Number.isFinite(Number(panicContext?.vxn))) {
+    sources.VXN = "panicContext"
+  }
+
+  return { history, sources }
 }
 
 /**
@@ -72,18 +87,26 @@ async function fetchStaticMacroSeedJson() {
  */
 export async function loadMacroRiskHistory(panicContext = null) {
   let history = { ...MACRO_RISK_SEED_HISTORY }
+  /** @type {Record<string, string>} */
+  let sources = {}
+  for (const k of Object.keys(MACRO_RISK_SEED_HISTORY)) sources[k] = "staticSeed"
   let updatedAt = new Date().toISOString()
 
   const staticJson = await fetchStaticMacroSeedJson()
-  if (staticJson) history = { ...history, ...staticJson }
+  if (staticJson) {
+    history = { ...history, ...staticJson }
+    for (const k of Object.keys(staticJson)) sources[k] = "macro-risk-seed.json"
+  }
 
   try {
     const market = await fetchMarketData()
-    history = buildMacroRiskHistoryFromMarket(market, panicContext)
+    const built = buildMacroRiskHistoryFromMarket(market, panicContext)
+    history = built.history
+    sources = { ...sources, ...built.sources }
     if (market.updatedAt) updatedAt = market.updatedAt
   } catch {
     /* 시드만 사용 */
   }
 
-  return { history, updatedAt }
+  return { history, updatedAt, sources }
 }
