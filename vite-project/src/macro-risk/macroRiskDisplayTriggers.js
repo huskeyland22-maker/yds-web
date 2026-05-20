@@ -52,13 +52,13 @@ export function getTriggerShortLines(t) {
 
   switch (t.id) {
     case "rate_repricing_event":
-      return [line0, "30Y>5% · MOVE↑", "AI/성장 압박"]
+      return [line0, "30Y>5% · 패닉↑", "AI/성장 압박"]
     case "rate_shock":
-      return [line0, "10Y 급변·MOVE", "채권·성장 압박"]
+      return [line0, "10Y 급변", "채권·성장 압박"]
     case "long_inflation":
       return [line0, "BEI 상승", "장기금리 동행"]
     case "dollar_pressure":
-      return [line0, "달러·VXN↑", "리스크 자산 압박"]
+      return [line0, "달러·패닉↑", "리스크 자산 압박"]
     default:
       return [line0, "조건 충족", "방어 점검"]
   }

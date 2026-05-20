@@ -7,7 +7,7 @@ import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 export function getPrimaryNavItems() {
   const items = [{ label: "시장 사이클", path: "/cycle" }]
   if (isMacroRiskEnabled()) {
-    items.push({ label: "매크로 리스크", path: "/macro-risk" })
+    items.push({ label: "Bond / Liquidity", path: "/macro-risk" })
   }
   items.push(
     { label: "코리아 밸류체인", path: "/value-chain" },

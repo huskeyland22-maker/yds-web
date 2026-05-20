@@ -56,7 +56,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
     activeTriggers.find((t) => t.id === "dollar_pressure")?.label ??
     activeTriggers.find((t) => t.id === "liquidity_easing")?.label ??
     (scored.band === "위험" ? "고위험 매크로 구간" : scored.band === "경계" ? "리스크 경계 구간" : `${scored.band} 구간`)
-  const subheadline = `점수 밴드: ${scored.band} · Tier1 ${scored.tier1Score} / Tier2 ${scored.tier2Score}`
+  const subheadline = `Bond 보조 ${scored.band} · CORE ${scored.tier1Score} / Expert ${scored.tier2Score}`
 
   const rateP = pillars.find((p) => p.id === "rate")
   const infP = pillars.find((p) => p.id === "inflation")

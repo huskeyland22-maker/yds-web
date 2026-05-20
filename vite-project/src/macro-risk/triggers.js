@@ -11,10 +11,10 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
   const us10 = normalized.US10Y
   const us30 = normalized.US30Y
   const real = normalized.REAL_YIELD
-  const move = normalized.MOVE
   const bei = normalized.BEI
   const dxy = normalized.DXY
-  const vxn = normalized.VXN?.current ?? pickNum(panicContext?.vxn)
+  const panicMove = pickNum(panicContext?.move)
+  const panicVix = pickNum(panicContext?.vix)
 
   /** @type {{ id: string; label: string; emoji: string; active: boolean; detail?: string; scoreAdd: number }[]} */
   const triggers = []
@@ -27,8 +27,6 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
   const us10Prev5 = toNum(us10?.previous5D)
   const us10d1Pct = pctDelta(us10Current, us10Prev1)
   const us10d5Pct = pctDelta(us10Current, us10Prev5)
-  const moveD1 = toNum(move?.delta1D)
-  const moveD5 = toNum(move?.delta5D)
   const us10Acceleration = Number.isFinite(us10d1Pct) && Number.isFinite(us10d5Pct) ? us10d1Pct - us10d5Pct / 5 : null
   const us30Current = toNum(us30?.current)
 
@@ -41,16 +39,13 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
     !rateStable &&
     ((Number.isFinite(us10d1Pct) && us10d1Pct >= 1 && us10d1Pct < 3) ||
       (Number.isFinite(us10d5Pct) && us10d5Pct >= 3 && us10d5Pct < 7))
-  const moveSurge =
-    (Number.isFinite(moveD1) && moveD1 >= 8) ||
-    (Number.isFinite(moveD5) && moveD5 >= 20) ||
-    (move?.slope === "up" && Number.isFinite(toNum(move?.delta20D)) && toNum(move?.delta20D) >= 40)
+  const moveSurge = Number.isFinite(panicMove) && panicMove >= 125
   const rateShock =
     (Number.isFinite(us10d1Pct) && us10d1Pct >= 3) ||
     (Number.isFinite(us10d5Pct) && us10d5Pct >= 7) ||
     moveSurge
   const rateShockAdd = rateShock ? 8 : 0
-  const moveRising = move?.slope === "up" || (Number.isFinite(moveD1) && moveD1 > 0)
+  const moveRising = Number.isFinite(panicMove) && panicMove >= 115
   const rateRepricingEvent =
     Number.isFinite(us10d1Pct) &&
     us10d1Pct >= 3 &&
@@ -87,7 +82,7 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
     detail: [
       `30Y ${fmt(us30Current)} · ${us30Phase}`,
       "출력: 성장주 압박 · AI 주의 · 코스피 리스크",
-      "조건: 10Y 1D +3% AND 30Y > 5% AND MOVE 상승",
+      "조건: 10Y 1D +3% AND 30Y > 5% AND 패닉 MOVE 상승",
     ].join(" / "),
   })
 
@@ -106,10 +101,7 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
 
   const dollarPressure =
     dxy?.slope === "up" &&
-    move?.slope === "up" &&
-    Number.isFinite(Number(vxn)) &&
-    Number(vxn) > 0 &&
-    normalized.VXN?.slope === "up"
+    ((Number.isFinite(panicVix) && panicVix >= 22) || moveSurge)
   triggers.push({
     id: "dollar_pressure",
     label: "위험자산 압박",

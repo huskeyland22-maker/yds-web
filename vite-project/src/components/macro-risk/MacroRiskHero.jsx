@@ -35,11 +35,11 @@ export default function MacroRiskHero({ snapshot, macroDevUi = false, macroDay, 
 
   return (
     <section className="macro-risk-hero trading-card-shell overflow-hidden px-4 py-3">
-      <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">MACRO SUMMARY</p>
+      <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">BOND · LIQUIDITY</p>
 
       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <ScoreDeltaBlock
-          title="Macro"
+          title="Bond 보조"
           yesterday={macroDay.hasYesterday ? macroDay.yesterdayScore : null}
           today={macroDay.todayScore}
           deltaText={macroDeltaText}

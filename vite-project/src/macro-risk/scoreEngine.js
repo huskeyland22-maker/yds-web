@@ -1,30 +1,32 @@
 import { clampScore } from "./seriesMath.js"
 
+/** CORE — Bond/유동성 보조 (비중 축소) */
+const CORE_KEYS = ["US10Y", "US30Y", "DXY"]
+/** Expert — 기본 접힘, 낮은 가중 */
+const EXPERT_KEYS = ["REAL_YIELD", "US2Y", "BEI"]
+
 const TIER_WEIGHTS = {
-  US10Y: 25,
-  REAL_YIELD: 20,
-  DXY: 15,
-  MOVE: 10,
-  US30Y: 10,
-  BEI: 10,
-  VXN: 5,
-  US2Y: 5,
+  US10Y: 45,
+  US30Y: 30,
+  DXY: 25,
+  REAL_YIELD: 40,
+  US2Y: 30,
+  BEI: 30,
 }
 
-const TIER1_KEYS = ["US10Y", "REAL_YIELD", "DXY", "MOVE"]
-const TIER2_KEYS = ["US30Y", "BEI", "VXN", "US2Y"]
 const METRIC_MAX_POINTS = {
   US10Y: 20,
-  REAL_YIELD: 15,
-  MOVE: 15,
+  REAL_YIELD: 12,
   US30Y: 10,
   BEI: 10,
   DXY: 10,
+  US2Y: 8,
 }
 
-const TIER1_CAP = 85
-const TIER2_CAP = 70
-const MACRO_CAP = 85
+const CORE_CAP = 55
+const EXPERT_CAP = 45
+/** 보조 레이어 상한 — Cycle이 최종 판단 */
+const BOND_LAYER_CAP = 55
 
 /**
  * @param {string} key
@@ -53,12 +55,6 @@ export function metricRiskUnit(key, m) {
         [1.2, 40],
         [2.2, 70],
       ])
-    case "MOVE":
-      return bucketNormalized(d20, [
-        [20, 20],
-        [40, 40],
-        [60, 70],
-      ])
     case "US30Y":
       return bucketNormalized(d20, [
         [0.1, 20],
@@ -70,12 +66,6 @@ export function metricRiskUnit(key, m) {
         [0.05, 20],
         [0.1, 40],
         [0.2, 70],
-      ])
-    case "VXN":
-      return bucketNormalized(m.current, [
-        [20, 20],
-        [25, 40],
-        [30, 70],
       ])
     case "US2Y":
       return bucketNormalized(d20, [
@@ -93,40 +83,41 @@ export function metricRiskUnit(key, m) {
  * @param {{ id: string; active: boolean; scoreAdd?: number }[]} triggers
  */
 export function computeMacroRiskScore(normalized, triggers) {
-  let tier1WeightedRaw = 0
-  let tier2WeightedRaw = 0
+  let coreRaw = 0
+  let expertRaw = 0
 
-  for (const key of TIER1_KEYS) {
+  for (const key of CORE_KEYS) {
     const unit = metricRiskUnit(key, normalized[key])
-    tier1WeightedRaw += unit * (TIER_WEIGHTS[key] / 70)
+    coreRaw += unit * (TIER_WEIGHTS[key] / 100)
   }
-  for (const key of TIER2_KEYS) {
+  for (const key of EXPERT_KEYS) {
     const unit = metricRiskUnit(key, normalized[key])
-    tier2WeightedRaw += unit * (TIER_WEIGHTS[key] / 30)
+    expertRaw += unit * (TIER_WEIGHTS[key] / 100)
   }
 
   const extremeAll = isAllExtreme(normalized)
-  const tier1Weighted = extremeAll ? tier1WeightedRaw : Math.min(tier1WeightedRaw, TIER1_CAP)
-  const tier2Weighted = extremeAll ? tier2WeightedRaw : Math.min(tier2WeightedRaw, TIER2_CAP)
-  const base = tier1Weighted * 0.7 + tier2Weighted * 0.3
-  const triggerBoost = triggers.reduce((acc, t) => acc + (t.active ? Number(t.scoreAdd ?? 0) : 0), 0)
+  const coreWeighted = extremeAll ? coreRaw : Math.min(coreRaw, CORE_CAP)
+  const expertWeighted = extremeAll ? expertRaw : Math.min(expertRaw, EXPERT_CAP)
+  const base = coreWeighted * 0.78 + expertWeighted * 0.22
+  const triggerBoost =
+    triggers.reduce((acc, t) => acc + (t.active ? Number(t.scoreAdd ?? 0) : 0), 0) * 0.55
   const unclamped = base + triggerBoost
-  const score = extremeAll ? clampScore(unclamped) : Math.min(clampScore(unclamped), MACRO_CAP)
+  const score = extremeAll ? clampScore(unclamped) : Math.min(clampScore(unclamped), BOND_LAYER_CAP)
 
   return {
     score,
-    tier1Score: clampScore(tier1Weighted),
-    tier2Score: clampScore(tier2Weighted),
+    tier1Score: clampScore(coreWeighted),
+    tier2Score: clampScore(expertWeighted),
     band: scoreBand(score),
     breakdown: buildScoreBreakdown(normalized, triggers, {
       score,
-      tier1Score: clampScore(tier1Weighted),
-      tier2Score: clampScore(tier2Weighted),
+      tier1Score: clampScore(coreWeighted),
+      tier2Score: clampScore(expertWeighted),
       base,
       triggerBoost,
       extremeAll,
-      rawTier1: Number(tier1WeightedRaw.toFixed(2)),
-      rawTier2: Number(tier2WeightedRaw.toFixed(2)),
+      rawTier1: Number(coreRaw.toFixed(2)),
+      rawTier2: Number(expertRaw.toFixed(2)),
     }),
   }
 }
@@ -134,25 +125,23 @@ export function computeMacroRiskScore(normalized, triggers) {
 /** @param {number} score */
 export function scoreBand(score) {
   if (score <= 30) return "안정"
-  if (score <= 60) return "주의"
-  if (score <= 80) return "경계"
-  return "위험"
+  if (score <= 45) return "주의"
+  if (score <= 55) return "경계"
+  return "경계"
 }
 
 /**
- * 기존 UI 칩 호환용 3개 pillar 점수로 매핑.
  * @param {Record<string, import('./normalizeLayer.js').NormalizedMetric>} normalized
  */
 export function buildCompatPillars(normalized) {
   const rate = Math.round(
     (metricRiskUnit("US10Y", normalized.US10Y) +
-      metricRiskUnit("REAL_YIELD", normalized.REAL_YIELD) +
       metricRiskUnit("US2Y", normalized.US2Y) +
       metricRiskUnit("US30Y", normalized.US30Y)) /
-      4,
+      3,
   )
   const inflation = Math.round((metricRiskUnit("BEI", normalized.BEI) + metricRiskUnit("US30Y", normalized.US30Y)) / 2)
-  const liquidity = Math.round((metricRiskUnit("DXY", normalized.DXY) + metricRiskUnit("MOVE", normalized.MOVE)) / 2)
+  const liquidity = Math.round(metricRiskUnit("DXY", normalized.DXY))
 
   return {
     rate: clampScore(rate),
@@ -167,7 +156,8 @@ export function buildCompatPillars(normalized) {
  * @param {{ score: number; tier1Score: number; tier2Score: number; base: number; triggerBoost: number }} totals
  */
 function buildScoreBreakdown(normalized, triggers, totals) {
-  const metricRows = Object.keys(TIER_WEIGHTS).map((key) => {
+  const allKeys = [...CORE_KEYS, ...EXPERT_KEYS]
+  const metricRows = allKeys.map((key) => {
     const m = normalized[key]
     const unit = metricRiskUnit(key, m)
     return {
@@ -193,8 +183,7 @@ function buildScoreBreakdown(normalized, triggers, totals) {
 
   const rateItems = [
     { label: "10Y", points: byKey.US10Y?.score ?? 0 },
-    { label: "REAL", points: byKey.REAL_YIELD?.score ?? 0 },
-    { label: "MOVE", points: byKey.MOVE?.score ?? 0 },
+    { label: "2Y", points: byKey.US2Y?.score ?? 0 },
     { label: "이벤트", points: eventRate },
   ]
   const inflationItems = [
@@ -202,10 +191,7 @@ function buildScoreBreakdown(normalized, triggers, totals) {
     { label: "BEI", points: byKey.BEI?.score ?? 0 },
     { label: "이벤트", points: eventInflation },
   ]
-  const liquidityItems = [
-    { label: "DXY", points: byKey.DXY?.score ?? 0 },
-    { label: "MOVE", points: Math.round((byKey.MOVE?.score ?? 0) / 3) },
-  ]
+  const liquidityItems = [{ label: "DXY", points: byKey.DXY?.score ?? 0 }]
 
   return {
     formula: {
@@ -219,7 +205,12 @@ function buildScoreBreakdown(normalized, triggers, totals) {
       { id: "rate", title: "금리압력", items: rateItems, total: sumPoints(rateItems) },
       { id: "inflation", title: "인플레압력", items: inflationItems, total: sumPoints(inflationItems) },
       { id: "liquidity", title: "유동성", items: liquidityItems, total: sumPoints(liquidityItems) },
-      { id: "events", title: "이벤트", items: activeEvents.map((e) => ({ label: e.label ?? e.id, points: Number(e.scoreAdd ?? 0) })), total: eventTotal },
+      {
+        id: "events",
+        title: "이벤트",
+        items: activeEvents.map((e) => ({ label: e.label ?? e.id, points: Number(e.scoreAdd ?? 0) })),
+        total: eventTotal,
+      },
     ],
     metrics: metricRows,
   }
@@ -247,9 +238,8 @@ function bucketNormalized(value, bands) {
 function isAllExtreme(normalized) {
   return (
     Number(normalized.US10Y?.delta20D) >= 0.5 &&
-    Number(normalized.REAL_YIELD?.delta20D) >= 0.35 &&
-    Number(normalized.MOVE?.delta20D) >= 60 &&
     Number(normalized.US30Y?.delta20D) >= 0.35 &&
+    Number(normalized.DXY?.delta20D) >= 2.2 &&
     Number(normalized.BEI?.delta20D) >= 0.2
   )
 }

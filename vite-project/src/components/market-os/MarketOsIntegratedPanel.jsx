@@ -20,8 +20,8 @@ export default function MarketOsIntegratedPanel({ cycleScore, snapshot }) {
           <strong className="text-[15px] text-slate-100">{os.cycleScore ?? "—"}</strong>
         </span>
         <span className="text-[11px] text-slate-400">
-          Macro{" "}
-          <strong className="text-[15px] text-slate-100">{os.macroScore ?? "—"}</strong>
+          Bond{" "}
+          <strong className="text-[12px] text-amber-100/95">{os.bondStatuses?.[0] ?? "—"}</strong>
         </span>
       </div>
 
@@ -30,7 +30,7 @@ export default function MarketOsIntegratedPanel({ cycleScore, snapshot }) {
 
       <div className="mt-2.5 grid grid-cols-2 gap-2">
         <ProgressChip label="공포 진행률" value={os.fearProgressPct} tone="fear" />
-        <ProgressChip label="위험 진행률" value={os.dangerProgressPct} tone="risk" />
+        <BondStatusChip statuses={os.bondStatuses} confirming={os.bondConfirming} />
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-2 border-t border-white/[0.06] pt-3 sm:grid-cols-3">
@@ -40,7 +40,7 @@ export default function MarketOsIntegratedPanel({ cycleScore, snapshot }) {
       </div>
 
       <p className="m-0 mt-3 border-t border-white/[0.05] pt-2 text-[8px] leading-relaxed text-slate-600">
-        데이터: 미국장 마감 기준 · Tier LIVE / 9대 패닉(MOVE·VXN 등) = 수동 입력
+        데이터: 미국장 마감 · CORE LIVE · 패닉 9대 = Cycle 수동 (Bond는 보조)
       </p>
     </section>
   )
@@ -60,6 +60,21 @@ function ProgressChip({ label, value, tone }) {
       </p>
       <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/[0.08]">
         <div className={`h-full rounded-full bg-gradient-to-r ${bar}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  )
+}
+
+function BondStatusChip({ statuses, confirming }) {
+  const label = confirming ? "보조 경고" : "보조 양호"
+  const bar = confirming ? "from-amber-700 to-rose-500" : "from-slate-600 to-emerald-600"
+  const text = (statuses ?? []).slice(0, 2).join(" · ") || "—"
+  return (
+    <div className="rounded-md border border-white/[0.07] bg-black/25 px-2 py-1.5">
+      <p className="m-0 text-[8px] font-semibold text-slate-500">{label}</p>
+      <p className="m-0 line-clamp-2 text-[10px] font-bold leading-snug text-amber-100/90">{text}</p>
+      <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/[0.08]">
+        <div className={`h-full rounded-full bg-gradient-to-r ${bar}`} style={{ width: confirming ? "72%" : "28%" }} />
       </div>
     </div>
   )

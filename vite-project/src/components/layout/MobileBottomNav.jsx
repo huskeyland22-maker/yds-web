@@ -11,7 +11,7 @@ const ICON_BY_PATH = {
 
 const SHORT_LABEL = {
   "/cycle": "사이클",
-  "/macro-risk": "매크로",
+  "/macro-risk": "Bond",
   "/value-chain": "코리아",
   "/trading-log": "로그",
 }

@@ -67,22 +67,11 @@ export function buildMacroRiskHistoryFromMarket(market, panicContext = null) {
   applySeries("BEI", pd.bei ?? pd.t10yie, cd.bei ?? cd.t10yie, "market-data")
   applySeries("DXY", pd.dxy, cd.dxy, "market-data")
 
-  // 중복 지표(MOVE/VXN): Cycle 재사용만 허용 (Macro fetch 금지)
-  const manualMove = Number(panicContext?.move)
-  if (Number.isFinite(manualMove)) {
-    applySeries("MOVE", manualMove, cd.move, "cycle-manual")
-  }
-
-  const manualVxn = Number(panicContext?.vxn)
-  if (Number.isFinite(manualVxn)) {
-    applySeries("VXN", manualVxn, cd.vxn, "cycle-manual")
-  }
-
   return { history, sources }
 }
 
 /**
- * /api/market-data + Cycle 수동 입력(MOVE/VXN). Macro 점수는 정적 시드·JSON 시드로 계산하지 않음.
+ * /api/market-data (Bond CORE). 패닉 MOVE/VXN은 Cycle 전용 — Bond 레이어 미주입.
  * @param {object | null} panicContext
  */
 export async function loadMacroRiskHistory(panicContext = null) {

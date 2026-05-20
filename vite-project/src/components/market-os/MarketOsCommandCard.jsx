@@ -1,7 +1,8 @@
 import { buildMarketOsPhase2 } from "../../market-os/buildMarketOsPhase2.js"
+import { BOND_MONITOR_SHORT, BOND_MONITOR_TAGLINE } from "../../market-os/bondMonitorLabels.js"
 
 /**
- * Phase 2 — 상단 고정 Market OS 커맨드 카드 (Cycle+Macro+패닉+트리거)
+ * Phase 2 — Cycle → Bond 확인 → 실전 행동 (상단 고정)
  * @param {{
  *   cycleScore: number | null;
  *   snapshot: import("../../macro-risk/engine.js").MacroRiskSnapshot | null;
@@ -27,14 +28,17 @@ export default function MarketOsCommandCard({ cycleScore, snapshot, panicData = 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="m-0 text-[9px] font-bold tracking-[0.22em] text-indigo-200/90">YDS MARKET OS</p>
         <p className="m-0 font-mono text-[10px] tabular-nums text-slate-500">
-          Cycle {os.cycleScore ?? "—"} · Macro {os.macroScore ?? "—"}
+          Cycle {os.cycleScore ?? "—"}
           {os.panicStressScore != null ? ` · 패닉 ${os.panicStressScore}` : ""}
         </p>
       </div>
+      <p className="m-0 mt-1 text-[9px] text-slate-500">
+        Cycle 최종 → {BOND_MONITOR_SHORT} 보조 · {BOND_MONITOR_TAGLINE}
+      </p>
 
       <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <div className="min-w-0 space-y-2">
-          <BlockTitle>현재 위치</BlockTitle>
+          <BlockTitle>현재 위치 (Cycle 우선)</BlockTitle>
           <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {os.currentPosition.map((line) => (
               <li key={line} className="flex gap-2 text-[11px] font-semibold text-slate-100">
@@ -48,19 +52,19 @@ export default function MarketOsCommandCard({ cycleScore, snapshot, panicData = 
         </div>
 
         <div className="min-w-0 space-y-2">
-          <BlockTitle>OS 위치맵</BlockTitle>
-          <OsMiniBar
-            label="Cycle"
-            score={os.positionMap.cycle.score}
-            phaseLabel={os.positionMap.cycleLabel}
-            variant="cycle"
-          />
-          <OsMiniBar
-            label="Macro"
-            score={os.positionMap.macro.score}
-            phaseLabel={os.positionMap.macroLabel}
-            variant="macro"
-          />
+          <BlockTitle>OS 위치 · Cycle</BlockTitle>
+          <OsMiniBar label="Cycle" score={os.positionMap.cycle.score} phaseLabel={os.positionMap.cycleLabel} />
+          <BlockTitle className="mt-2">{BOND_MONITOR_SHORT} 상태</BlockTitle>
+          <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
+            {os.positionMap.bondStatuses.map((s) => (
+              <li
+                key={s}
+                className="rounded border border-amber-500/25 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-100/90"
+              >
+                {s}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
@@ -108,8 +112,10 @@ export default function MarketOsCommandCard({ cycleScore, snapshot, panicData = 
   )
 }
 
-function BlockTitle({ children }) {
-  return <p className="m-0 text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-500">{children}</p>
+function BlockTitle({ children, className = "" }) {
+  return (
+    <p className={`m-0 text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-500 ${className}`}>{children}</p>
+  )
 }
 
 function MiniCell({ k, v, accent = "text-slate-50" }) {
@@ -131,17 +137,14 @@ function PlaybookCell({ k, v }) {
 }
 
 /**
- * @param {{ label: string; score: number|null; phaseLabel: string; variant: "cycle"|"macro" }} props
+ * @param {{ label: string; score: number|null; phaseLabel: string }} props
  */
-function OsMiniBar({ label, score, phaseLabel, variant }) {
+function OsMiniBar({ label, score, phaseLabel }) {
   const v = Number(score)
   const value = Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : null
-  const isCycle = variant === "cycle"
-  const fillCls = isCycle ? "bg-emerald-500/35" : "bg-rose-500/35"
-  const dotCls = isCycle
-    ? "bg-emerald-400 ring-2 ring-emerald-300/25"
-    : "bg-rose-400 ring-2 ring-rose-300/25"
-  const valueCls = isCycle ? "text-emerald-300" : "text-rose-300"
+  const fillCls = "bg-emerald-500/35"
+  const dotCls = "bg-emerald-400 ring-2 ring-emerald-300/25"
+  const valueCls = "text-emerald-300"
 
   if (value == null) {
     return (

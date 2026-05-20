@@ -72,10 +72,5 @@ export function buildRawLayer(apiHistory = {}) {
     out[key] = buildMetricSeries(key, hist, { mode })
   }
 
-  const vxnHist = apiHistory.VXN ?? []
-  if (Array.isArray(vxnHist) && vxnHist.length) {
-    out.VXN = buildMetricSeries("VXN", vxnHist, { mode: "index" })
-  }
-
   return out
 }

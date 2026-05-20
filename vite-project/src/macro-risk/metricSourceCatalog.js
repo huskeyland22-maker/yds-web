@@ -1,7 +1,7 @@
 import { metricDisplayLabel } from "./metricLabels.js"
 
 /**
- * Macro Risk 지표별 공급자·시리즈 메타 (FRED 연동 준비, 신규 API 없음).
+ * Bond / Liquidity Monitor 지표 메타 (FRED 연동 준비, 신규 API 없음).
  * LIVE 실제 수신은 /api/market-data 키 존재 여부로 판별.
  */
 
@@ -21,13 +21,11 @@ import { metricDisplayLabel } from "./metricLabels.js"
 /** @type {MetricCatalogEntry[]} */
 export const TIER_STATUS_METRICS = [
   { key: "US10Y", short: "10Y", label: metricDisplayLabel("US10Y"), tier: 1, provider: "FRED", series: "DGS10", liveTarget: true, cycleReuse: false },
-  { key: "REAL_YIELD", short: "REAL", label: metricDisplayLabel("REAL_YIELD"), tier: 1, provider: "FRED", series: "DFII10", liveTarget: true, cycleReuse: false },
+  { key: "US30Y", short: "30Y", label: metricDisplayLabel("US30Y"), tier: 1, provider: "FRED", series: "DGS30", liveTarget: true, cycleReuse: false },
   { key: "DXY", short: "DXY", label: metricDisplayLabel("DXY"), tier: 1, provider: "Yahoo", series: "DX-Y.NYB", liveTarget: true, cycleReuse: false },
-  { key: "MOVE", short: "MOVE", label: metricDisplayLabel("MOVE"), tier: 1, provider: "Cycle", series: "manual", liveTarget: false, cycleReuse: true },
-  { key: "US30Y", short: "30Y", label: metricDisplayLabel("US30Y"), tier: 2, provider: "FRED", series: "DGS30", liveTarget: true, cycleReuse: false },
-  { key: "BEI", short: "BEI", label: metricDisplayLabel("BEI"), tier: 2, provider: "FRED", series: "T10YIE", liveTarget: true, cycleReuse: false },
-  { key: "VXN", short: "VXN", label: metricDisplayLabel("VXN"), tier: 2, provider: "Cycle", series: "manual", liveTarget: false, cycleReuse: true },
+  { key: "REAL_YIELD", short: "REAL", label: metricDisplayLabel("REAL_YIELD"), tier: 2, provider: "FRED", series: "DFII10", liveTarget: true, cycleReuse: false },
   { key: "US2Y", short: "2Y", label: metricDisplayLabel("US2Y"), tier: 2, provider: "FRED", series: "DGS2", liveTarget: true, cycleReuse: false },
+  { key: "BEI", short: "BEI", label: metricDisplayLabel("BEI"), tier: 2, provider: "FRED", series: "T10YIE", liveTarget: true, cycleReuse: false },
 ]
 
 /** @type {Record<string, MetricCatalogEntry>} */

@@ -1,4 +1,6 @@
+import BondLiquidityStatusBar from "../components/bond-monitor/BondLiquidityStatusBar.jsx"
 import MarketOsPhase2Shell from "../components/market-os/MarketOsPhase2Shell.jsx"
+import { BOND_MONITOR_TITLE } from "../market-os/bondMonitorLabels.js"
 import MacroRiskActionNow from "../components/macro-risk/MacroRiskActionNow.jsx"
 import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevValidationPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
@@ -21,7 +23,7 @@ import { Navigate } from "react-router-dom"
 const MACRO_DEV_UI_KEY = "yds-macro-dev-ui"
 
 /**
- * YDS Market OS — Macro Risk 레이어 (패닉/Cycle 비침투)
+ * YDS Market OS — Bond / Liquidity Monitor (보조, Cycle·패닉 비침투)
  * @param {{ panicData?: object | null }} props
  */
 export default function MacroRiskPage({ panicData = null }) {
@@ -95,7 +97,8 @@ export default function MacroRiskPage({ panicData = null }) {
       <header className="mb-2 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="m-0 text-[9px] font-semibold tracking-[0.2em] text-slate-600">YDS MARKET OS</p>
-          <h1 className="m-0 mt-0.5 text-lg font-semibold tracking-tight text-slate-100">Macro Risk</h1>
+          <h1 className="m-0 mt-0.5 text-lg font-semibold tracking-tight text-slate-100">{BOND_MONITOR_TITLE}</h1>
+          <p className="m-0 mt-0.5 text-[10px] text-slate-500">보조 확인 · 최종 판단은 시장 사이클</p>
         </div>
         <button
           type="button"
@@ -131,6 +134,8 @@ export default function MacroRiskPage({ panicData = null }) {
       {snapshot ? (
         <div className="macro-risk-stack flex flex-col gap-[18px]">
           <MarketOsPhase2Shell panicData={panicData} sticky />
+
+          <BondLiquidityStatusBar snapshot={snapshot} />
 
           <SectionErrorBoundary label="Summary">
             <MacroRiskHero snapshot={snapshot} macroDevUi={macroDevUi} macroDay={macroDay} cycleDay={cycleDay} />
