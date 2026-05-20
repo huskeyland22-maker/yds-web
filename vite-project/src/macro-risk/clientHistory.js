@@ -70,12 +70,10 @@ export function buildMacroRiskHistoryFromMarket(market, panicContext = null) {
   applySeries("BEI", pd.bei ?? pd.t10yie, cd.bei ?? cd.t10yie, "market-data")
   applySeries("DXY", pd.dxy, cd.dxy, "market-data")
 
-  // 중복 지표(MOVE/VXN): Cycle 수동입력 Source of Truth 우선
+  // 중복 지표(MOVE/VXN): Cycle 재사용만 허용 (Macro fetch 금지)
   const manualMove = Number(panicContext?.move)
   if (Number.isFinite(manualMove)) {
     applySeries("MOVE", manualMove, cd.move, "cycle-manual")
-  } else {
-    applySeries("MOVE", pd.move, cd.move, "market-data")
   }
 
   const manualVxn = Number(panicContext?.vxn)
@@ -128,6 +126,14 @@ export async function loadMacroRiskHistory(panicContext = null) {
     if (market.updatedAt) updatedAt = market.updatedAt
   } catch {
     /* 시드만 사용 — LIVE 실패, fallback 유지(숨김 없음) */
+  }
+
+  // 데이터 기준시점 동기화: Cycle(updatedAt) 우선 사용.
+  // 정책: 미국장 종가 확정 이후(KST 오전 8시 기준) 동일 시점으로 Cycle/Macro 해석.
+  const cycleUpdatedAt = String(panicContext?.updatedAt ?? "").trim()
+  if (cycleUpdatedAt) {
+    const t = new Date(cycleUpdatedAt).getTime()
+    if (Number.isFinite(t)) updatedAt = new Date(t).toISOString()
   }
 
   return { history, updatedAt, sources, liveFetchOk }
