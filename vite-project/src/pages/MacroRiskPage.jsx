@@ -48,7 +48,7 @@ export default function MacroRiskPage({ panicData = null }) {
       ) : null}
 
       {snapshot ? (
-        <div className="macro-risk-stack flex flex-col gap-2 sm:gap-2.5">
+        <div className="macro-risk-stack flex flex-col gap-4 sm:gap-5">
           <SectionErrorBoundary label="Cycle + Macro">
             <MacroRiskConnectCard snapshot={snapshot} panicData={panicData} />
           </SectionErrorBoundary>
@@ -83,11 +83,15 @@ export default function MacroRiskPage({ panicData = null }) {
             <MacroRiskTierPanel tieredMetrics={snapshot.tieredMetrics} />
           </SectionErrorBoundary>
 
-          {snapshot.pillars.map((pillar) => (
-            <SectionErrorBoundary key={pillar.id} label={pillar.title}>
-              <MacroRiskPillarSection pillar={pillar} />
-            </SectionErrorBoundary>
-          ))}
+          <SectionErrorBoundary label="압력 지표">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-4">
+              {snapshot.pillars.map((pillar) => (
+                <SectionErrorBoundary key={pillar.id} label={pillar.title}>
+                  <MacroRiskPillarSection pillar={pillar} />
+                </SectionErrorBoundary>
+              ))}
+            </div>
+          </SectionErrorBoundary>
 
           <SectionErrorBoundary label="시장 영향">
             <MacroRiskMarketImpact rows={snapshot.marketImpact} />
