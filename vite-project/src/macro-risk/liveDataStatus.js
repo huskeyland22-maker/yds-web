@@ -1,5 +1,5 @@
 import { sourceToDataBadge } from "./deltaSemantics.js"
-import { describeSourceFallback, TIER_STATUS_METRICS } from "./metricSourceCatalog.js"
+import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from "./metricSourceCatalog.js"
 
 /**
  * @typedef {Object} LiveStatusRow
@@ -10,6 +10,7 @@ import { describeSourceFallback, TIER_STATUS_METRICS } from "./metricSourceCatal
  * @property {import('./deltaSemantics.js').DataSourceBadge} badge
  * @property {string} rawSource
  * @property {string|null} fallbackNote
+ * @property {'SEED'|'STATIC'|'LIVE FAIL'|null} fallbackTag
  */
 
 /**
@@ -41,9 +42,17 @@ export function buildLiveDataStatus(sources = {}, meta = {}) {
   const lastUpdate = meta.updatedAt ?? null
 
   const mapRow = (entry) => {
-    const rawSource = sources[entry.key] ?? "staticSeed"
+    const rawSource = sources[entry.key] ?? "missing"
     const badge = sourceToDataBadge(rawSource)
     const fallbackNote = describeSourceFallback(rawSource, badge, liveFetchOk, entry.liveTarget)
+    const fallbackTag =
+      !liveFetchOk && entry.liveTarget && badge !== "LIVE"
+        ? "LIVE FAIL"
+        : rawSource === "macro-risk-seed.json"
+          ? "SEED"
+          : rawSource === "staticSeed"
+            ? "STATIC"
+            : null
     return {
       key: entry.key,
       short: entry.short,
@@ -52,6 +61,7 @@ export function buildLiveDataStatus(sources = {}, meta = {}) {
       badge,
       rawSource,
       fallbackNote,
+      fallbackTag,
     }
   }
 
@@ -65,4 +75,39 @@ export function buildLiveDataStatus(sources = {}, meta = {}) {
     tier1,
     tier2,
   }
+}
+
+/**
+ * Macro Risk 페이지 상단 파이프라인 문구 (/api/market-data + LIVE 상태).
+ * @param {LiveDataStatusPayload|null|undefined} payload
+ */
+export function formatMacroRiskPipelineSubtitle(payload) {
+  if (!payload) return "클라이언트 계산 · /api/market-data · —"
+  const rows = [...payload.tier1, ...payload.tier2]
+  /** @type {Record<string, LiveStatusRow>} */
+  const byKey = Object.fromEntries(rows.map((r) => [r.key, r]))
+
+  let apiClean = true
+  for (const m of TIER_STATUS_METRICS) {
+    if (!m.liveTarget) continue
+    const r = byKey[m.key]
+    if (!r || r.badge !== "LIVE" || r.fallbackTag) {
+      apiClean = false
+      break
+    }
+  }
+
+  const hasCycleManual = rows.some((r) => {
+    const c = getMetricCatalog(r.key)
+    return Boolean(c?.cycleReuse && r.badge === "MANUAL")
+  })
+
+  let tail = "—"
+  if (!payload.liveFetchOk || !apiClean) {
+    tail = "LIVE FAIL"
+  } else {
+    tail = hasCycleManual ? "LIVE + MANUAL" : "LIVE SNAPSHOT"
+  }
+
+  return `클라이언트 계산 · /api/market-data · ${tail}`
 }

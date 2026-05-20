@@ -49,6 +49,7 @@ export function getMetricCatalog(key) {
  * @returns {string|null}
  */
 export function describeSourceFallback(rawSource, badge, liveFetchOk, liveTarget) {
+  if (rawSource === "missing") return liveTarget ? "시계열 미로드" : "입력 없음"
   if (badge === "MANUAL") return "cycle reuse"
   if (badge === "LIVE") return null
   if (!liveTarget) {

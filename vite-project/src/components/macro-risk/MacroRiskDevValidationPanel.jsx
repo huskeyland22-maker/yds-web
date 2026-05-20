@@ -1,5 +1,11 @@
 import { DATA_BADGE_CLASS } from "../../macro-risk/metricSourceCatalog.js"
 
+const FALLBACK_BADGE_CLASS = {
+  SEED: "border-violet-500/35 bg-violet-500/15 text-violet-200",
+  STATIC: "border-slate-500/35 bg-slate-500/12 text-slate-200",
+  "LIVE FAIL": "border-rose-500/40 bg-rose-500/14 text-rose-200",
+}
+
 /**
  * DEV ONLY — `isDevMode() && isShowDebugPanel()` (SHOW_DEBUG / VITE_SHOW_DEBUG).
  * @param {{ data: import("../../macro-risk/devValidation.js").DevValidationPayload }} props
@@ -20,7 +26,10 @@ export default function MacroRiskDevValidationPanel({ data }) {
             <span className="text-amber-400/90">LIVE:</span> {data.dataHealth.live} / {data.dataHealth.total}
           </p>
           <p className="m-0 text-[9px]">
-            <span className="text-amber-400/90">MOCK:</span> {data.dataHealth.mock + data.dataHealth.static} / {data.dataHealth.total}
+            <span className="text-amber-400/90">MANUAL:</span> {data.dataHealth.manual} / {data.dataHealth.total}
+          </p>
+          <p className="m-0 text-[9px]">
+            <span className="text-amber-400/90">SEED:</span> {data.dataHealth.seed} / {data.dataHealth.total}
           </p>
           <p className="m-0 text-[9px]">
             <span className="text-amber-400/90">ERROR:</span> {data.dataHealth.error}
@@ -83,9 +92,31 @@ export default function MacroRiskDevValidationPanel({ data }) {
               >
                 {r.dataBadge}
               </span>
+              {r.fallbackTag ? (
+                <span
+                  className={[
+                    "rounded px-1 py-px text-[8px] font-bold tracking-wide",
+                    FALLBACK_BADGE_CLASS[r.fallbackTag],
+                  ].join(" ")}
+                >
+                  {r.fallbackTag}
+                </span>
+              ) : null}
             </div>
             <p className="m-0 mt-1">
+              <span className="text-amber-400/90">source:</span> {r.source}
+            </p>
+            <p className="m-0">
               <span className="text-amber-400/90">provider:</span> {r.provider}
+            </p>
+            <p className="m-0">
+              <span className="text-amber-400/90">seed:</span> {r.seed ? "true" : "false"}
+            </p>
+            <p className="m-0">
+              <span className="text-amber-400/90">fallback:</span> {r.fallback ? "true" : "false"}
+            </p>
+            <p className="m-0">
+              <span className="text-amber-400/90">wire:</span> {r.rawWire}
             </p>
             <p className="m-0">
               <span className="text-amber-400/90">series:</span> {r.series}
@@ -94,8 +125,10 @@ export default function MacroRiskDevValidationPanel({ data }) {
               <span className="text-amber-400/90">lastUpdate:</span> {r.lastUpdate ?? "—"}
             </p>
             <p className="m-0">
-              <span className="text-amber-400/90">source:</span> {r.source}
-              <span className="text-amber-500/70"> ({r.originDetail})</span>
+              <span className="text-amber-400/90">usedValue:</span> {r.usedValue == null ? "—" : String(r.usedValue)}
+            </p>
+            <p className="m-0">
+              <span className="text-amber-400/90">origin:</span> {r.originDetail}
             </p>
             {r.fallbackNote ? (
               <p className="m-0 text-[9px] font-semibold text-amber-300/95">{r.fallbackNote}</p>

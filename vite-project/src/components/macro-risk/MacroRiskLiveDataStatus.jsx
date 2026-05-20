@@ -1,5 +1,11 @@
 import { DATA_BADGE_CLASS } from "../../macro-risk/metricSourceCatalog.js"
 
+const FALLBACK_BADGE_CLASS = {
+  SEED: "border-violet-500/30 bg-violet-500/10 text-violet-300",
+  STATIC: "border-slate-500/30 bg-slate-500/10 text-slate-300",
+  "LIVE FAIL": "border-rose-500/35 bg-rose-500/12 text-rose-300",
+}
+
 /**
  * @param {{ status: import("../../macro-risk/liveDataStatus.js").LiveDataStatusPayload }} props
  */
@@ -20,7 +26,7 @@ export default function MacroRiskLiveDataStatus({ status }) {
 
       {!status.liveFetchOk ? (
         <p className="m-0 mt-1.5 text-[10px] font-medium text-amber-300/90">
-          /api/market-data 실패 — MOCK/STATIC fallback 표시 (숨김 없음)
+          /api/market-data LIVE FAIL — SEED · STATIC · LIVE FAIL 배지로 표시 (숨김 없음)
         </p>
       ) : null}
 
@@ -50,6 +56,16 @@ function TierBlock({ title, rows }) {
             >
               {r.badge}
             </span>
+            {r.fallbackTag ? (
+              <span
+                className={[
+                  "rounded px-1 py-px text-[8px] font-bold tracking-wide",
+                  FALLBACK_BADGE_CLASS[r.fallbackTag],
+                ].join(" ")}
+              >
+                {r.fallbackTag}
+              </span>
+            ) : null}
             {r.fallbackNote ? (
               <span className="text-[9px] text-amber-300/85">{r.fallbackNote}</span>
             ) : r.badge === "MANUAL" ? (

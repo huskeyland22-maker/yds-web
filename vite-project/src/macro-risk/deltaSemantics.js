@@ -28,6 +28,7 @@ export function sourceToDataBadge(source) {
   if (source === "market-data" || source === "market-data+panic") return "LIVE"
   if (source === "macro-risk-seed.json") return "MOCK"
   if (source === "staticSeed") return "STATIC"
+  if (source === "missing") return "MOCK"
   return "MOCK"
 }
 

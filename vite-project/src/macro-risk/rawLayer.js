@@ -1,5 +1,4 @@
 import { absDelta, lastFinite, slopeDirection, valueAtOffset } from "./seriesMath.js"
-import { MACRO_RISK_SEED_HISTORY } from "./staticSeed.js"
 
 /**
  * @typedef {Object} MetricSeries
@@ -68,7 +67,7 @@ export function buildRawLayer(apiHistory = {}) {
 
   const allKeys = [...rateKeys, ...inflKeys, ...liqKeys]
   for (const key of allKeys) {
-    const hist = apiHistory[key] ?? MACRO_RISK_SEED_HISTORY[key] ?? []
+    const hist = apiHistory[key] ?? []
     const mode = rateKeys.includes(key) || key === "REAL_YIELD" || key === "BEI" ? "rate" : "index"
     out[key] = buildMetricSeries(key, hist, { mode })
   }

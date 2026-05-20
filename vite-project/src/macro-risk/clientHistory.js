@@ -1,6 +1,4 @@
-import { withNoStoreQuery, LIVE_JSON_GET_INIT } from "../config/liveDataFetch.js"
 import { fetchMarketData } from "../config/api.js"
-import { MACRO_RISK_SEED_HISTORY } from "./staticSeed.js"
 
 const HISTORY_LEN = 22
 const SOURCE_PRIORITY = {
@@ -41,10 +39,9 @@ export function synthesizeHistoryFromSpot(current, changePct1D, points = HISTORY
 export function buildMacroRiskHistoryFromMarket(market, panicContext = null) {
   const pd = market?.parsedData ?? {}
   const cd = market?.changeData ?? {}
-  const history = { ...MACRO_RISK_SEED_HISTORY }
+  const history = {}
   /** @type {Record<string, string>} */
   const sources = {}
-  for (const k of Object.keys(MACRO_RISK_SEED_HISTORY)) sources[k] = "staticSeed"
 
   /**
    * Source of Truth 우선순위: MANUAL > LIVE API > MOCK
@@ -85,37 +82,15 @@ export function buildMacroRiskHistoryFromMarket(market, panicContext = null) {
 }
 
 /**
- * 선택: public/macro-risk-seed.json (정적 자산, serverless 아님)
- * @returns {Promise<Record<string, number[]>|null>}
- */
-async function fetchStaticMacroSeedJson() {
-  try {
-    const res = await fetch(withNoStoreQuery("/macro-risk-seed.json"), LIVE_JSON_GET_INIT)
-    if (!res.ok) return null
-    const data = await res.json()
-    return data?.history && typeof data.history === "object" ? data.history : null
-  } catch {
-    return null
-  }
-}
-
-/**
- * 기존 /api/market-data + 정적 시드. 신규 Vercel function 호출 없음.
+ * /api/market-data + Cycle 수동 입력(MOVE/VXN). Macro 점수는 정적 시드·JSON 시드로 계산하지 않음.
  * @param {object | null} panicContext
  */
 export async function loadMacroRiskHistory(panicContext = null) {
-  let history = { ...MACRO_RISK_SEED_HISTORY }
+  let history = {}
   /** @type {Record<string, string>} */
   let sources = {}
-  for (const k of Object.keys(MACRO_RISK_SEED_HISTORY)) sources[k] = "staticSeed"
   let updatedAt = new Date().toISOString()
   let liveFetchOk = false
-
-  const staticJson = await fetchStaticMacroSeedJson()
-  if (staticJson) {
-    history = { ...history, ...staticJson }
-    for (const k of Object.keys(staticJson)) sources[k] = "macro-risk-seed.json"
-  }
 
   try {
     const market = await fetchMarketData()
@@ -125,7 +100,7 @@ export async function loadMacroRiskHistory(panicContext = null) {
     sources = { ...sources, ...built.sources }
     if (market.updatedAt) updatedAt = market.updatedAt
   } catch {
-    /* 시드만 사용 — LIVE 실패, fallback 유지(숨김 없음) */
+    /* LIVE 실패 — 빈 히스토리(정적 시드 비혼입); UI는 DEV/배지로만 감사 */
   }
 
   // 데이터 기준시점 동기화: Cycle(updatedAt) 우선 사용.

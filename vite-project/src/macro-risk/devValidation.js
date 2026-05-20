@@ -7,7 +7,7 @@ import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from ".
  * DEV ONLY — 데이터 패널용 (SHOW_DEBUG + isDevMode).
  * @typedef {Object} DevValidationPayload
  * @property {DevRow[]} rows
- * @property {{ live: number; mock: number; manual: number; static: number; total: number; error: number }} dataHealth
+ * @property {{ live: number; manual: number; seed: number; total: number; error: number }} dataHealth
  * @property {RealBeiAudit|null} realBei
  * @property {YieldSpreadDev|null} yieldSpread
  */
@@ -18,6 +18,7 @@ import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from ".
  * @property {string} label
  * @property {'MANUAL'|'LIVE'|'MOCK'|'STATIC'} dataBadge
  * @property {'MANUAL'|'LIVE'|'MOCK'|'STATIC'} source
+ * @property {string} rawWire
  * @property {string} provider
  * @property {string} series
  * @property {string|null} lastUpdate
@@ -35,6 +36,10 @@ import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from ".
  * @property {string} method20D
  * @property {string} deltaSummary
  * @property {string|null} warning
+ * @property {boolean} seed
+ * @property {boolean} fallback
+ * @property {'SEED'|'STATIC'|'LIVE FAIL'|null} fallbackTag
+ * @property {number|null} usedValue
  */
 
 /**
@@ -247,9 +252,17 @@ function buildTierDevRow(key, raw, sources, panicContext, liveFetchOk, lastUpdat
   }
   if (!series) return null
 
-  const rawSource = sources[key] ?? "staticSeed"
+  const rawSource = sources[key] ?? "missing"
   const dataBadge = sourceToDataBadge(rawSource)
   const fallbackNote = describeSourceFallback(rawSource, dataBadge, liveFetchOk, cat.liveTarget)
+  const fallbackTag =
+    !liveFetchOk && cat.liveTarget && dataBadge !== "LIVE"
+      ? "LIVE FAIL"
+      : rawSource === "macro-risk-seed.json"
+        ? "SEED"
+        : rawSource === "staticSeed"
+          ? "STATIC"
+          : null
   const cls = classifyMetric(key)
   const method20 = inferDeltaMethod(key, series.current, series.change20D, "20D")
   const audit20 = auditDelta(key, series.current, series.change20D, "20D")
@@ -265,6 +278,7 @@ function buildTierDevRow(key, raw, sources, panicContext, liveFetchOk, lastUpdat
     lastUpdate,
     dataBadge,
     source: dataBadge,
+    rawWire: rawSource,
     fallbackNote,
     originDetail: mapOriginDetail(rawSource),
     typeNote,
@@ -284,6 +298,10 @@ function buildTierDevRow(key, raw, sources, panicContext, liveFetchOk, lastUpdat
         : key === "VXN" && series.change5D == null
           ? "히스토리 없음 — 상승 표시 생략"
           : null,
+    seed: rawSource === "macro-risk-seed.json" || rawSource === "staticSeed",
+    fallback: Boolean(fallbackTag || fallbackNote),
+    fallbackTag,
+    usedValue: Number.isFinite(Number(series.current)) ? Number(series.current) : null,
   }
 }
 
@@ -293,24 +311,22 @@ function buildTierDevRow(key, raw, sources, panicContext, liveFetchOk, lastUpdat
  */
 function buildDataHealth(rows, realBei) {
   let live = 0
-  let mock = 0
   let manual = 0
-  let stat = 0
+  let seed = 0
   let error = 0
   for (const r of rows) {
     if (r.dataBadge === "LIVE") live += 1
-    else if (r.dataBadge === "MOCK") mock += 1
     else if (r.dataBadge === "MANUAL") manual += 1
-    else if (r.dataBadge === "STATIC") stat += 1
+    else if (r.dataBadge === "MOCK" || r.dataBadge === "STATIC") seed += 1
     if (r.warning) error += 1
     if (r.key === "DXY" && String(r.normalizeMethod) !== "index") error += 1
+    if (r.fallbackTag === "LIVE FAIL") error += 1
   }
   if (realBei?.mockReuse) error += 1
   return {
     live,
-    mock,
     manual,
-    static: stat,
+    seed,
     total: rows.length,
     error,
   }
@@ -321,6 +337,7 @@ function mapOriginDetail(source) {
   if (source === "market-data") return "/api/market-data"
   if (source === "macro-risk-seed.json") return "macro-risk-seed.json"
   if (source === "market-data+panic") return "market-data"
+  if (source === "missing") return "—"
   return "staticSeed"
 }
 

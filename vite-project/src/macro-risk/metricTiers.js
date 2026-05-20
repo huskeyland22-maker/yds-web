@@ -25,7 +25,7 @@ function buildVxnTierRow(raw, panicContext, sources) {
       tier: 2,
       hide1D: true,
       tooltip: metricDisplayTooltip("VXN"),
-      dataBadge: sourceToDataBadge(sources.VXN ?? "staticSeed"),
+      dataBadge: sourceToDataBadge(sources.VXN ?? "missing"),
       deltaHorizonNA: noHorizon,
     })
   }
@@ -74,7 +74,7 @@ function buildVxnTierRow(raw, panicContext, sources) {
  * @returns {{ tier1: MetricDisplayRow[]; tier2: MetricDisplayRow[] }}
  */
 export function buildTieredMetrics(raw, panicContext = null, sources = {}) {
-  const badge = (key) => sourceToDataBadge(sources[key] ?? "staticSeed")
+  const badge = (key) => sourceToDataBadge(sources[key] ?? "missing")
 
   const tier1 = [
     buildMetricRow(raw.US10Y, metricDisplayLabel("US10Y"), {
