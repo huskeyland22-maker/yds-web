@@ -1,44 +1,251 @@
-import { auditDelta, inferDeltaMethod } from "./deltaSemantics.js"
+import { auditDelta, inferDeltaMethod, sourceToDataBadge } from "./deltaSemantics.js"
 
 /**
- * DEV ONLY — source / raw / previous / delta / method (+ 검증 경고).
+ * DEV ONLY — 데이터 패널용 (SHOW_DEBUG + isDevMode).
+ * @typedef {Object} DevValidationPayload
+ * @property {DevRow[]} rows
+ * @property {RealBeiAudit|null} realBei
+ * @property {YieldSpreadDev|null} yieldSpread
+ */
+
+/**
+ * @typedef {Object} DevRow
+ * @property {string} key
+ * @property {string} label
+ * @property {'LIVE'|'MOCK'|'STATIC'} dataBadge
+ * @property {string} originDetail
+ * @property {string} [typeNote]
+ * @property {number|null} raw
+ * @property {number|null} previous1D
+ * @property {number|null} previous5D
+ * @property {number|null} previous20D
+ * @property {string|null} delta20DLine
+ * @property {string} method20D
+ * @property {string} deltaSummary
+ * @property {string|null} warning
+ */
+
+/**
+ * @typedef {Object} RealBeiAudit
+ * @property {number|null} correlation
+ * @property {boolean} sameSource
+ * @property {boolean} mockReuse
+ */
+
+/**
+ * @typedef {Object} YieldSpreadDev
+ * @property {string} currentLabel
+ * @property {string} rawParts
+ * @property {number|null} spread
+ * @property {number|null} delta5D
+ * @property {number|null} delta20D
+ * @property {string} method5D
+ * @property {string} method20D
+ */
+
+/** @type {Record<string, string>} */
+const DEV_LABEL = {
+  US10Y: "10년물 국채금리",
+  US2Y: "2년물 국채금리",
+  US30Y: "30년물 국채금리",
+  REAL_YIELD: "실질금리",
+  BEI: "BEI",
+  MOVE: "MOVE",
+  DXY: "DXY",
+  VXN: "VXN",
+  CPI: "CPI",
+  CORE_CPI: "CORE CPI",
+  PCE: "PCE",
+  QT: "QT",
+  M2: "M2",
+  FED_BALANCE: "연준 잔고",
+}
+
+/**
  * @param {Record<string, import('./rawLayer.js').MetricSeries>} raw
  * @param {Record<string, string>} [sources]
+ * @param {Record<string, number[]>} [apiHistory]
+ * @param {import('./yieldCurve.js').ReturnType<import('./yieldCurve.js').buildYieldCurve>} [yieldCurve]
+ * @param {object|null} [panicContext]
+ * @returns {DevValidationPayload}
  */
-export function buildDevValidation(raw, sources = {}) {
-  return Object.entries(raw).map(([key, series]) => {
-    const source = mapSourceLabel(sources[key] ?? "staticSeed")
+export function buildDevValidation(raw, sources = {}, apiHistory = {}, yieldCurve = null, panicContext = null) {
+  const rows = Object.entries(raw).map(([key, series]) => {
     const method20 = inferDeltaMethod(key, series.current, series.change20D, "20D")
     const audit20 = auditDelta(key, series.current, series.change20D, "20D")
     const deltaStr = formatDeltaLine(key, series, method20)
+    const delta20Str = formatDelta20Only(key, series, method20)
+
+    const typeNote = key === "DXY" ? "type=index (percent 제거)" : null
 
     return {
-      key: displayKey(key),
-      source,
+      key,
+      label: DEV_LABEL[key] ?? key,
+      dataBadge: sourceToDataBadge(sources[key] ?? "staticSeed"),
+      originDetail: mapOriginDetail(sources[key] ?? "staticSeed"),
+      typeNote,
       raw: series.current,
       previous1D: series.previous1D ?? null,
       previous5D: series.previous5D ?? null,
       previous20D: series.previous20D ?? null,
-      delta: deltaStr,
-      method: audit20?.ok === false ? `${method20} ⚠` : method20,
+      delta20DLine: delta20Str,
+      method20D: audit20?.ok === false ? `${method20} ⚠` : method20,
+      deltaSummary: deltaStr,
       warning: audit20?.ok === false ? audit20.warning : null,
     }
   })
+
+  if (!raw.VXN && Number.isFinite(Number(panicContext?.vxn))) {
+    const v = Number(panicContext.vxn)
+    rows.push({
+      key: "VXN",
+      label: "VXN",
+      dataBadge: sourceToDataBadge(sources.VXN ?? "panicContext"),
+      originDetail: mapOriginDetail(sources.VXN ?? "panicContext"),
+      typeNote: null,
+      raw: v,
+      previous1D: null,
+      previous5D: null,
+      previous20D: null,
+      delta20DLine: null,
+      method20D: "—",
+      deltaSummary: "스팟만 제공 · 5D/20D N/A",
+      warning: "히스토리 없음 — 상승 표시 생략",
+    })
+  }
+
+  return {
+    rows,
+    realBei: auditRealVsBei(raw, sources, apiHistory),
+    yieldSpread: buildYieldSpreadDevBlock(yieldCurve, raw),
+  }
 }
 
-function displayKey(key) {
-  if (key === "US10Y") return "10Y"
-  if (key === "US2Y") return "2Y"
-  if (key === "US30Y") return "30Y"
-  return key
+/**
+ * @param {Record<string, import('./rawLayer.js').MetricSeries>} raw
+ * @param {Record<string, string>} sources
+ * @param {Record<string, number[]>} apiHistory
+ * @returns {RealBeiAudit|null}
+ */
+function auditRealVsBei(raw, sources, apiHistory) {
+  const rr = raw.REAL_YIELD?.current
+  const br = raw.BEI?.current
+  if (!Number.isFinite(Number(rr)) || !Number.isFinite(Number(br))) return null
+
+  const ra = apiHistory.REAL_YIELD ?? []
+  const be = apiHistory.BEI ?? []
+  const correlation = pearsonLastAligned(ra, be)
+
+  const sr = sources.REAL_YIELD ?? ""
+  const sb = sources.BEI ?? ""
+  const sameSource = sr.length > 0 && sr === sb
+
+  const equalSpot = Math.abs(Number(rr) - Number(br)) < 1e-5
+  const mockReuse =
+    equalSpot &&
+    (sr === "staticSeed" ||
+      sb === "staticSeed" ||
+      sr === "macro-risk-seed.json" ||
+      sb === "macro-risk-seed.json")
+
+  return {
+    correlation,
+    sameSource,
+    mockReuse,
+  }
 }
 
-function mapSourceLabel(source) {
-  if (source === "market-data") return "LIVE:/api/market-data"
-  if (source === "macro-risk-seed.json") return "MOCK:seed.json"
-  if (source === "panicContext") return "LIVE:panic"
-  if (source === "market-data+panic") return "LIVE:market+panic"
-  return "STATIC:seed"
+/**
+ * @param {number[]} a
+ * @param {number[]} b
+ * @returns {number|null}
+ */
+function pearsonLastAligned(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return null
+  const n = Math.min(a.length, b.length)
+  if (n < 5) return null
+  const win = Math.min(22, n)
+  const xs = a.slice(-win).map(Number)
+  const ys = b.slice(-win).map(Number)
+  if (xs.length !== ys.length || xs.length < 5) return null
+  const mx = mean(xs)
+  const my = mean(ys)
+  let num = 0
+  let dx = 0
+  let dy = 0
+  for (let i = 0; i < xs.length; i += 1) {
+    const vx = xs[i] - mx
+    const vy = ys[i] - my
+    num += vx * vy
+    dx += vx * vx
+    dy += vy * vy
+  }
+  const den = Math.sqrt(dx * dy)
+  if (den < 1e-12) return null
+  const r = num / den
+  return Number.isFinite(r) ? Number(r.toFixed(4)) : null
+}
+
+/** @param {number[]} arr */
+function mean(arr) {
+  let s = 0
+  let c = 0
+  for (const v of arr) {
+    if (Number.isFinite(v)) {
+      s += v
+      c += 1
+    }
+  }
+  return c ? s / c : 0
+}
+
+/**
+ * @param {import('./yieldCurve.js').ReturnType<import('./yieldCurve.js').buildYieldCurve>} curve
+ * @param {Record<string, import('./rawLayer.js').MetricSeries>} raw
+ * @returns {YieldSpreadDev|null}
+ */
+function buildYieldSpreadDevBlock(curve, raw) {
+  if (!curve || !raw.US10Y || !raw.US2Y) return null
+  const y10 = raw.US10Y.current
+  const y2 = raw.US2Y.current
+  if (!Number.isFinite(Number(y10)) || !Number.isFinite(Number(y2))) return null
+
+  const method5 = inferDeltaMethod("YIELD_SPREAD", curve.spread, curve.change5D, "5D")
+  const method20 = inferDeltaMethod("YIELD_SPREAD", curve.spread, curve.change20D, "20D")
+
+  return {
+    currentLabel: "10Y − 2Y",
+    rawParts: `${Number(y10).toFixed(2)} − ${Number(y2).toFixed(2)}`,
+    spread: curve.spread,
+    delta5D: curve.change5D,
+    delta20D: curve.change20D,
+    method5D:
+      curve.change5D == null ? "—" : method5 === "percent_suspect" ? `${method5} ⚠` : method5,
+    method20D:
+      curve.change20D == null ? "—" : method20 === "percent_suspect" ? `${method20} ⚠` : method20,
+  }
+}
+
+/**
+ * @param {string} source
+ */
+function mapOriginDetail(source) {
+  if (source === "market-data") return "/api/market-data"
+  if (source === "macro-risk-seed.json") return "macro-risk-seed.json"
+  if (source === "panicContext") return "panic (VXN spot)"
+  if (source === "panicContext+synth") return "panic + 1D% 추정"
+  if (source === "market-data+panic") return "market-data + panic(MOVE)"
+  return "staticSeed"
+}
+
+/**
+ * @param {string} key
+ * @param {import('./rawLayer.js').MetricSeries} series
+ * @param {string} method20
+ */
+function formatDelta20Only(key, series, method20) {
+  if (series.change20D == null || !Number.isFinite(Number(series.change20D))) return null
+  return `delta20D=${fmtSigned(series.change20D, method20, key)}`
 }
 
 function formatDeltaLine(key, series, method20) {

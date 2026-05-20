@@ -9,7 +9,7 @@ import MacroRiskYieldCurveCard from "../components/macro-risk/MacroRiskYieldCurv
 import SectionErrorBoundary from "../components/SectionErrorBoundary.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
-import { isDevMode } from "../utils/devMode.js"
+import { isDevMode, isShowDebugPanel } from "../utils/devMode.js"
 import { Navigate } from "react-router-dom"
 
 /**
@@ -78,8 +78,8 @@ export default function MacroRiskPage({ panicData = null }) {
             <MacroRiskTriggers triggers={snapshot.triggers} />
           </SectionErrorBoundary>
 
-          {isDevMode() && snapshot.devValidation?.length ? (
-            <MacroRiskDevValidationPanel rows={snapshot.devValidation} />
+          {isDevMode() && isShowDebugPanel() && snapshot.devValidation?.rows?.length ? (
+            <MacroRiskDevValidationPanel data={snapshot.devValidation} />
           ) : null}
         </div>
       ) : null}

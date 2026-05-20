@@ -1,4 +1,4 @@
-import { isDevMode } from "../utils/devMode.js"
+import { isDevMode, isShowDebugPanel } from "../utils/devMode.js"
 import { buildMacroRiskSnapshot } from "./engine.js"
 import { loadMacroRiskHistory } from "./clientHistory.js"
 
@@ -10,7 +10,7 @@ export async function loadMacroRiskSnapshot(panicContext = null) {
   const { history, updatedAt, sources } = await loadMacroRiskHistory(panicContext)
   const snapshot = buildMacroRiskSnapshot(history, panicContext, {
     sources,
-    includeDev: isDevMode(),
+    includeDev: isDevMode() && isShowDebugPanel(),
   })
   snapshot.updatedAt = updatedAt
   return snapshot

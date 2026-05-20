@@ -50,7 +50,7 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
                   ) : null}
                 </span>
                 <span className="font-mono text-[12px] font-bold tabular-nums text-slate-100">
-                  {formatCurrent(row.current, fmt)}
+                  {row.current == null || !Number.isFinite(Number(row.current)) ? "—" : formatCurrent(row.current, fmt)}
                 </span>
               </div>
               <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 font-mono text-[10px] tabular-nums text-slate-400">
@@ -64,29 +64,41 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
                     )}
                   </span>
                 ) : null}
-                {row.change5D != null ? (
-                  <span>
-                    5D{" "}
-                    {formatDeltaByMethod(
-                      row.change5D,
-                      inferDeltaMethod(row.key, row.current, row.change5D, "5D"),
-                      fmt,
-                    )}
+                {row.deltaHorizonNA ? (
+                  <span className="text-slate-500">
+                    5D N/A · 20D N/A
                   </span>
-                ) : null}
-                {row.change20D != null ? (
-                  <span>
-                    20D{" "}
-                    {formatDeltaByMethod(
-                      row.change20D,
-                      inferDeltaMethod(row.key, row.current, row.change20D, "20D"),
-                      fmt,
-                    )}
+                ) : (
+                  <>
+                    {row.change5D != null ? (
+                      <span>
+                        5D{" "}
+                        {formatDeltaByMethod(
+                          row.change5D,
+                          inferDeltaMethod(row.key, row.current, row.change5D, "5D"),
+                          fmt,
+                        )}
+                      </span>
+                    ) : null}
+                    {row.change20D != null ? (
+                      <span>
+                        20D{" "}
+                        {formatDeltaByMethod(
+                          row.change20D,
+                          inferDeltaMethod(row.key, row.current, row.change20D, "20D"),
+                          fmt,
+                        )}
+                      </span>
+                    ) : null}
+                  </>
+                )}
+                {!row.deltaHorizonNA ? (
+                  <span className={STANCE_COLOR[row.slope] ?? STANCE_COLOR.flat}>
+                    {slopeArrow(row.slope)} {slopeLabelKo(row.slope)}
                   </span>
-                ) : null}
-                <span className={STANCE_COLOR[row.slope] ?? STANCE_COLOR.flat}>
-                  {slopeArrow(row.slope)} {slopeLabelKo(row.slope)}
-                </span>
+                ) : (
+                  <span className="text-slate-600">—</span>
+                )}
               </div>
             </div>
           )

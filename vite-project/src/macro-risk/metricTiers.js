@@ -8,22 +8,54 @@ import { metricDisplayLabel, metricDisplayTooltip } from "./metricLabels.js"
  */
 
 /**
+ * @param {Record<string, MetricSeries>} raw
  * @param {object | null} panicContext
- * @returns {MetricSeries | undefined}
+ * @param {Record<string, string>} sources
+ * @returns {MetricDisplayRow}
  */
-function vxnSeriesFromPanic(panicContext) {
-  const v = Number(panicContext?.vxn)
-  if (!Number.isFinite(v)) return undefined
-  const slope = v >= 22 ? "up" : v <= 15 ? "down" : "flat"
-  return {
-    key: "VXN",
-    current: v,
-    change1D: null,
-    change5D: null,
-    change20D: null,
-    slope,
-    status: slope === "up" ? "변동성 상승" : "보합",
+function buildVxnTierRow(raw, panicContext, sources) {
+  const hist = raw.VXN
+  const spot = Number(panicContext?.vxn)
+
+  if (hist?.current != null && Number.isFinite(hist.current)) {
+    const noHorizon = hist.change5D == null && hist.change20D == null
+    const series = noHorizon ? { ...hist, slope: "flat", status: "—" } : hist
+    return buildMetricRow(series, "VXN", {
+      format: "index",
+      tier: 2,
+      hide1D: true,
+      dataBadge: sourceToDataBadge(sources.VXN ?? "staticSeed"),
+      deltaHorizonNA: noHorizon,
+    })
   }
+
+  if (!Number.isFinite(spot)) {
+    return buildMetricRow(
+      { key: "VXN", current: null, change1D: null, change5D: null, change20D: null, slope: "flat", status: "—" },
+      "VXN",
+      { format: "index", tier: 2, hide1D: true, dataBadge: "STATIC", deltaHorizonNA: true },
+    )
+  }
+
+  return buildMetricRow(
+    {
+      key: "VXN",
+      current: spot,
+      change1D: null,
+      change5D: null,
+      change20D: null,
+      slope: "flat",
+      status: "—",
+    },
+    "VXN",
+    {
+      format: "index",
+      tier: 2,
+      hide1D: true,
+      dataBadge: sourceToDataBadge(sources.VXN ?? "panicContext"),
+      deltaHorizonNA: true,
+    },
+  )
 }
 
 /**
@@ -33,7 +65,6 @@ function vxnSeriesFromPanic(panicContext) {
  * @returns {{ tier1: MetricDisplayRow[]; tier2: MetricDisplayRow[] }}
  */
 export function buildTieredMetrics(raw, panicContext = null, sources = {}) {
-  const vxn = vxnSeriesFromPanic(panicContext)
   const badge = (key) => sourceToDataBadge(sources[key] ?? "staticSeed")
 
   const tier1 = [
@@ -58,12 +89,7 @@ export function buildTieredMetrics(raw, panicContext = null, sources = {}) {
       dataBadge: badge("US30Y"),
     }),
     buildMetricRow(raw.BEI, "BEI", { format: "rate", tier: 2, dataBadge: badge("BEI") }),
-    buildMetricRow(vxn, "VXN", {
-      format: "index",
-      tier: 2,
-      hide1D: true,
-      dataBadge: sources.VXN ? badge("VXN") : "LIVE",
-    }),
+    buildVxnTierRow(raw, panicContext, sources),
     buildMetricRow(raw.US2Y, metricDisplayLabel("US2Y"), {
       format: "rate",
       tier: 2,

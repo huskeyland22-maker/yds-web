@@ -13,6 +13,8 @@ const METRIC_LIMITS = {
   MOVE: { max1D: 8, max5D: 18, max20D: 28, kind: "index" },
   DXY: { max1D: 1.2, max5D: 2.5, max20D: 4.5, kind: "level" },
   VXN: { max1D: 3, max5D: 6, max20D: 12, kind: "index" },
+  /** 장단기 금리차(10Y−2Y) 변화 — 스프레드 pp 단위 */
+  YIELD_SPREAD: { max1D: 0.15, max5D: 0.35, max20D: 0.65, kind: "rate" },
 }
 
 /**
@@ -20,7 +22,14 @@ const METRIC_LIMITS = {
  * @returns {'LIVE'|'MOCK'|'STATIC'}
  */
 export function sourceToDataBadge(source) {
-  if (source === "market-data" || source === "market-data+panic" || source === "panicContext") return "LIVE"
+  if (
+    source === "market-data" ||
+    source === "market-data+panic" ||
+    source === "panicContext" ||
+    source === "panicContext+synth"
+  ) {
+    return "LIVE"
+  }
   if (source === "macro-risk-seed.json") return "MOCK"
   return "STATIC"
 }

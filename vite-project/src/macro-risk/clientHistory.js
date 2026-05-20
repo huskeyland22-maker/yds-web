@@ -59,8 +59,16 @@ export function buildMacroRiskHistoryFromMarket(market, panicContext = null) {
     sources.MOVE = pd.move != null ? "market-data" : "market-data+panic"
   }
 
-  if (Number.isFinite(Number(panicContext?.vxn))) {
-    sources.VXN = "panicContext"
+  const vxnSpot = Number(panicContext?.vxn)
+  if (Number.isFinite(vxnSpot)) {
+    const chg = cd.vxn
+    if (Number.isFinite(Number(chg))) {
+      history.VXN = synthesizeHistoryFromSpot(vxnSpot, chg)
+      sources.VXN = "panicContext+synth"
+    } else {
+      history.VXN = [vxnSpot]
+      sources.VXN = "panicContext"
+    }
   }
 
   return { history, sources }

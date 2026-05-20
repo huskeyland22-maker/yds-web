@@ -22,7 +22,7 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {import('./marketImpact.js').MarketImpactRow[]} marketImpact
  * @property {{ tier1: import('./displayMetrics.js').MetricDisplayRow[]; tier2: import('./displayMetrics.js').MetricDisplayRow[] }} tieredMetrics
  * @property {import('./yieldCurve.js').ReturnType<buildYieldCurve>} yieldCurve
- * @property {import('./devValidation.js').ReturnType<buildDevValidation>|null} [devValidation]
+ * @property {import('./devValidation.js').DevValidationPayload|null} [devValidation]
  * @property {string} updatedAt
  */
 
@@ -60,9 +60,9 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
   const tactical =
     activeTriggers.length > 0 ? "보수 접근" : score >= 60 ? "선별 매수" : "분할 대응"
   const marketImpact = buildMarketImpact(raw, [rate, inflation, liquidity], triggers)
-  const tieredMetrics = buildTieredMetrics(raw, panicContext, meta.sources ?? {})
   const yieldCurve = buildYieldCurve(raw)
-  const devValidation = meta.includeDev ? buildDevValidation(raw, meta.sources ?? {}) : null
+  const tieredMetrics = buildTieredMetrics(raw, panicContext, meta.sources ?? {})
+  const devValidation = meta.includeDev ? buildDevValidation(raw, meta.sources ?? {}, apiHistory, yieldCurve, panicContext) : null
 
   return {
     score,
