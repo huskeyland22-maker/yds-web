@@ -8,6 +8,7 @@ import { loadMacroRiskSnapshot } from "./fetchMacroRisk.js"
 export function useMacroRiskSnapshot(panicContext = null) {
   const enabled = isMacroRiskEnabled()
   const vxn = panicContext?.vxn
+  const move = panicContext?.move
   const [snapshot, setSnapshot] = useState(null)
   const [loading, setLoading] = useState(enabled)
   const [error, setError] = useState(null)
@@ -23,7 +24,7 @@ export function useMacroRiskSnapshot(panicContext = null) {
     setLoading(true)
     setError(null)
 
-    const ctx = vxn != null ? { vxn } : null
+    const ctx = vxn != null || move != null ? { vxn, move } : null
     loadMacroRiskSnapshot(ctx)
       .then((s) => {
         if (!cancelled) setSnapshot(s)
@@ -38,7 +39,7 @@ export function useMacroRiskSnapshot(panicContext = null) {
     return () => {
       cancelled = true
     }
-  }, [enabled, vxn])
+  }, [enabled, vxn, move])
 
   return { enabled, snapshot, loading, error }
 }

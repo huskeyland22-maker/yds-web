@@ -22,7 +22,9 @@ export default function MacroRiskPage({ panicData = null }) {
       <header className="mb-2 px-0.5">
         <p className="m-0 text-[9px] font-semibold tracking-[0.2em] text-slate-600">YDS MARKET OS</p>
         <h1 className="m-0 mt-0.5 text-lg font-semibold tracking-tight text-slate-100">Macro Risk</h1>
-        <p className="m-0 mt-1 text-[11px] text-slate-500">변화율 · 기울기 · 복합 트리거 (절대값 최소 표시)</p>
+        <p className="m-0 mt-1 text-[11px] text-slate-500">
+          클라이언트 계산 · /api/market-data · 정적 시드 (신규 serverless 없음)
+        </p>
       </header>
 
       {loading && !snapshot ? (

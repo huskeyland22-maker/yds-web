@@ -1,28 +1,13 @@
-import { withNoStoreQuery, LIVE_JSON_GET_INIT } from "../config/liveDataFetch.js"
 import { buildMacroRiskSnapshot } from "./engine.js"
+import { loadMacroRiskHistory } from "./clientHistory.js"
 
 /**
- * @returns {Promise<{ history: Record<string, number[]>; updatedAt?: string } | null>}
- */
-async function fetchMacroRiskApi() {
-  try {
-    const res = await fetch(withNoStoreQuery("/api/macro-risk"), LIVE_JSON_GET_INIT)
-    if (!res.ok) return null
-    const data = await res.json()
-    if (!data || typeof data !== "object") return null
-    return data
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {object | null} panicContext read-only
+ * 클라이언트 전용 Macro Risk 스냅샷 (신규 api/* route 없음).
+ * @param {object | null} panicContext read-only (vxn, move)
  */
 export async function loadMacroRiskSnapshot(panicContext = null) {
-  const api = await fetchMacroRiskApi()
-  const history = api?.history && typeof api.history === "object" ? api.history : {}
+  const { history, updatedAt } = await loadMacroRiskHistory(panicContext)
   const snapshot = buildMacroRiskSnapshot(history, panicContext)
-  if (api?.updatedAt) snapshot.updatedAt = api.updatedAt
+  snapshot.updatedAt = updatedAt
   return snapshot
 }
