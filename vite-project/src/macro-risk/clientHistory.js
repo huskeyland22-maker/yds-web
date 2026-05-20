@@ -111,6 +111,7 @@ export async function loadMacroRiskHistory(panicContext = null) {
   let sources = {}
   for (const k of Object.keys(MACRO_RISK_SEED_HISTORY)) sources[k] = "staticSeed"
   let updatedAt = new Date().toISOString()
+  let liveFetchOk = false
 
   const staticJson = await fetchStaticMacroSeedJson()
   if (staticJson) {
@@ -120,13 +121,14 @@ export async function loadMacroRiskHistory(panicContext = null) {
 
   try {
     const market = await fetchMarketData()
+    liveFetchOk = true
     const built = buildMacroRiskHistoryFromMarket(market, panicContext)
     history = built.history
     sources = { ...sources, ...built.sources }
     if (market.updatedAt) updatedAt = market.updatedAt
   } catch {
-    /* 시드만 사용 */
+    /* 시드만 사용 — LIVE 실패, fallback 유지(숨김 없음) */
   }
 
-  return { history, updatedAt, sources }
+  return { history, updatedAt, sources, liveFetchOk }
 }

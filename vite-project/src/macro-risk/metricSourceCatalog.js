@@ -1,0 +1,69 @@
+/**
+ * Macro Risk 지표별 공급자·시리즈 메타 (FRED 연동 준비, 신규 API 없음).
+ * LIVE 실제 수신은 /api/market-data 키 존재 여부로 판별.
+ */
+
+/** @typedef {'MANUAL'|'LIVE'|'MOCK'|'STATIC'} DataSourceBadge */
+
+/** @typedef {Object} MetricCatalogEntry
+ * @property {string} key
+ * @property {string} short
+ * @property {string} label
+ * @property {number} tier
+ * @property {string} provider
+ * @property {string} series
+ * @property {boolean} liveTarget
+ * @property {boolean} cycleReuse
+ */
+
+/** @type {MetricCatalogEntry[]} */
+export const TIER_STATUS_METRICS = [
+  { key: "US10Y", short: "10Y", label: "10년물 국채금리", tier: 1, provider: "FRED", series: "DGS10", liveTarget: true, cycleReuse: false },
+  { key: "REAL_YIELD", short: "REAL", label: "실질금리", tier: 1, provider: "FRED", series: "DFII10", liveTarget: true, cycleReuse: false },
+  { key: "DXY", short: "DXY", label: "DXY", tier: 1, provider: "Yahoo", series: "DX-Y.NYB", liveTarget: true, cycleReuse: false },
+  { key: "MOVE", short: "MOVE", label: "MOVE", tier: 1, provider: "Cycle", series: "manual", liveTarget: false, cycleReuse: true },
+  { key: "US30Y", short: "30Y", label: "30년물 국채금리", tier: 2, provider: "FRED", series: "DGS30", liveTarget: true, cycleReuse: false },
+  { key: "BEI", short: "BEI", label: "BEI", tier: 2, provider: "FRED", series: "T10YIE", liveTarget: true, cycleReuse: false },
+  { key: "VXN", short: "VXN", label: "VXN", tier: 2, provider: "Cycle", series: "manual", liveTarget: false, cycleReuse: true },
+  { key: "US2Y", short: "2Y", label: "2년물 국채금리", tier: 2, provider: "FRED", series: "DGS2", liveTarget: true, cycleReuse: false },
+]
+
+/** @type {Record<string, MetricCatalogEntry>} */
+export const METRIC_CATALOG_BY_KEY = Object.fromEntries(TIER_STATUS_METRICS.map((m) => [m.key, m]))
+
+/**
+ * @param {string} key
+ * @returns {MetricCatalogEntry|undefined}
+ */
+export function getMetricCatalog(key) {
+  return METRIC_CATALOG_BY_KEY[key]
+}
+
+/**
+ * @param {string} rawSource
+ * @param {import('./deltaSemantics.js').DataSourceBadge} badge
+ * @param {boolean} liveFetchOk
+ * @param {boolean} liveTarget
+ * @returns {string|null}
+ */
+export function describeSourceFallback(rawSource, badge, liveFetchOk, liveTarget) {
+  if (badge === "MANUAL") return "cycle reuse"
+  if (badge === "LIVE") return null
+  if (!liveTarget) {
+    if (badge === "MOCK") return "mock seed"
+    if (badge === "STATIC") return "static seed"
+    return null
+  }
+  if (!liveFetchOk) return "LIVE 실패 → MOCK/STATIC fallback"
+  if (badge === "MOCK") return "MOCK fallback"
+  if (badge === "STATIC") return "STATIC fallback"
+  return "MOCK fallback"
+}
+
+/** UI 배지 색상 (Tier / DEV / LIVE STATUS 공통) */
+export const DATA_BADGE_CLASS = {
+  MANUAL: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+  LIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+  MOCK: "border-violet-500/30 bg-violet-500/10 text-violet-300",
+  STATIC: "border-slate-500/30 bg-slate-500/10 text-slate-400",
+}

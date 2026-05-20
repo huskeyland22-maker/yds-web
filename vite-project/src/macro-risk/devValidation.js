@@ -1,5 +1,7 @@
 import { auditDelta, inferDeltaMethod, sourceToDataBadge } from "./deltaSemantics.js"
+import { formatLastUpdateDisplay } from "./liveDataStatus.js"
 import { classifyMetric } from "./normalizeLayer.js"
+import { describeSourceFallback, getMetricCatalog, TIER_STATUS_METRICS } from "./metricSourceCatalog.js"
 
 /**
  * DEV ONLY — 데이터 패널용 (SHOW_DEBUG + isDevMode).
@@ -13,7 +15,12 @@ import { classifyMetric } from "./normalizeLayer.js"
  * @typedef {Object} DevRow
  * @property {string} key
  * @property {string} label
- * @property {'MANUAL'|'LIVE'|'MOCK'} dataBadge
+ * @property {'MANUAL'|'LIVE'|'MOCK'|'STATIC'} dataBadge
+ * @property {'MANUAL'|'LIVE'|'MOCK'|'STATIC'} source
+ * @property {string} provider
+ * @property {string} series
+ * @property {string|null} lastUpdate
+ * @property {string|null} fallbackNote
  * @property {string} originDetail
  * @property {string} [typeNote]
  * @property {number|null} raw
@@ -70,57 +77,24 @@ const DEV_LABEL = {
  * @param {Record<string, number[]>} [apiHistory]
  * @param {import('./yieldCurve.js').ReturnType<import('./yieldCurve.js').buildYieldCurve>} [yieldCurve]
  * @param {object|null} [panicContext]
+ * @param {{ liveFetchOk?: boolean; updatedAt?: string|null }} [meta]
  * @returns {DevValidationPayload}
  */
-export function buildDevValidation(raw, sources = {}, apiHistory = {}, yieldCurve = null, panicContext = null) {
-  const rows = Object.entries(raw).map(([key, series]) => {
-    const cls = classifyMetric(key)
-    const method20 = inferDeltaMethod(key, series.current, series.change20D, "20D")
-    const audit20 = auditDelta(key, series.current, series.change20D, "20D")
-    const deltaStr = formatDeltaLine(key, series, method20)
-    const delta20Str = formatDelta20Only(key, series, method20)
+export function buildDevValidation(
+  raw,
+  sources = {},
+  apiHistory = {},
+  yieldCurve = null,
+  panicContext = null,
+  meta = {},
+) {
+  const liveFetchOk = Boolean(meta.liveFetchOk)
+  const lastUpdate = formatLastUpdateDisplay(meta.updatedAt)
 
-    const typeNote = key === "DXY" ? "type=index (percent 제거)" : null
-
-    return {
-      key,
-      label: DEV_LABEL[key] ?? key,
-      dataBadge: sourceToDataBadge(sources[key] ?? "staticSeed"),
-      originDetail: mapOriginDetail(sources[key] ?? "staticSeed"),
-      typeNote,
-      raw: series.current,
-      previous1D: series.previous1D ?? null,
-      previous5D: series.previous5D ?? null,
-      previous20D: series.previous20D ?? null,
-      delta20DLine: delta20Str,
-      normalizeType: cls.type,
-      normalizeMethod: cls.method,
-      method20D: audit20?.ok === false ? `${method20} ⚠` : method20,
-      deltaSummary: deltaStr,
-      warning: audit20?.ok === false ? audit20.warning : null,
-    }
-  })
-
-  if (!raw.VXN && Number.isFinite(Number(panicContext?.vxn))) {
-    const v = Number(panicContext.vxn)
-    rows.push({
-      key: "VXN",
-      label: "VXN",
-      dataBadge: sourceToDataBadge(sources.VXN ?? "cycle-manual"),
-      originDetail: mapOriginDetail(sources.VXN ?? "cycle-manual"),
-      typeNote: null,
-      raw: v,
-      previous1D: null,
-      previous5D: null,
-      previous20D: null,
-      delta20DLine: null,
-      normalizeType: "volatility",
-      normalizeMethod: "index",
-      method20D: "—",
-      deltaSummary: "스팟만 제공 · 5D/20D N/A",
-      warning: "히스토리 없음 — 상승 표시 생략",
-    })
-  }
+  /** @type {DevRow[]} */
+  const rows = TIER_STATUS_METRICS.map((cat) => buildTierDevRow(cat.key, raw, sources, panicContext, liveFetchOk, lastUpdate)).filter(
+    Boolean,
+  )
 
   return {
     rows,
@@ -237,6 +211,76 @@ function buildYieldSpreadDevBlock(curve, raw) {
 /**
  * @param {string} source
  */
+/**
+ * @param {string} key
+ * @param {Record<string, import('./rawLayer.js').MetricSeries>} raw
+ * @param {Record<string, string>} sources
+ * @param {object|null} panicContext
+ * @param {boolean} liveFetchOk
+ * @param {string|null} lastUpdate
+ * @returns {DevRow|null}
+ */
+function buildTierDevRow(key, raw, sources, panicContext, liveFetchOk, lastUpdate) {
+  const cat = getMetricCatalog(key)
+  if (!cat) return null
+
+  let series = raw[key]
+  if (!series && key === "VXN" && Number.isFinite(Number(panicContext?.vxn))) {
+    const v = Number(panicContext.vxn)
+    series = {
+      key: "VXN",
+      current: v,
+      previous1D: null,
+      previous5D: null,
+      previous20D: null,
+      change1D: null,
+      change5D: null,
+      change20D: null,
+      slope: "flat",
+      status: "—",
+    }
+  }
+  if (!series) return null
+
+  const rawSource = sources[key] ?? "staticSeed"
+  const dataBadge = sourceToDataBadge(rawSource)
+  const fallbackNote = describeSourceFallback(rawSource, dataBadge, liveFetchOk, cat.liveTarget)
+  const cls = classifyMetric(key)
+  const method20 = inferDeltaMethod(key, series.current, series.change20D, "20D")
+  const audit20 = auditDelta(key, series.current, series.change20D, "20D")
+  const deltaStr = formatDeltaLine(key, series, method20)
+  const delta20Str = formatDelta20Only(key, series, method20)
+  const typeNote = key === "DXY" ? "type=index (percent 제거)" : cat.cycleReuse ? "cycle reuse" : null
+
+  return {
+    key,
+    label: cat.label,
+    provider: cat.provider,
+    series: cat.series,
+    lastUpdate,
+    dataBadge,
+    source: dataBadge,
+    fallbackNote,
+    originDetail: mapOriginDetail(rawSource),
+    typeNote,
+    raw: series.current,
+    previous1D: series.previous1D ?? null,
+    previous5D: series.previous5D ?? null,
+    previous20D: series.previous20D ?? null,
+    delta20DLine: delta20Str,
+    normalizeType: cls.type,
+    normalizeMethod: cls.method,
+    method20D: audit20?.ok === false ? `${method20} ⚠` : method20,
+    deltaSummary: deltaStr,
+    warning:
+      audit20?.ok === false
+        ? audit20.warning
+        : key === "VXN" && series.change5D == null
+          ? "히스토리 없음 — 상승 표시 생략"
+          : null,
+  }
+}
+
 function mapOriginDetail(source) {
   if (source === "cycle-manual") return "cycle manual (source of truth)"
   if (source === "market-data") return "/api/market-data"

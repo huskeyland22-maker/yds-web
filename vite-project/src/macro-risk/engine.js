@@ -1,4 +1,5 @@
 import { buildDevValidation } from "./devValidation.js"
+import { buildLiveDataStatus } from "./liveDataStatus.js"
 import { buildNormalizeLayer } from "./normalizeLayer.js"
 import { buildRawLayer } from "./rawLayer.js"
 import { buildTieredMetrics } from "./metricTiers.js"
@@ -26,6 +27,7 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {{ tier1: import('./displayMetrics.js').MetricDisplayRow[]; tier2: import('./displayMetrics.js').MetricDisplayRow[] }} tieredMetrics
  * @property {import('./yieldCurve.js').ReturnType<buildYieldCurve>} yieldCurve
  * @property {import('./devValidation.js').DevValidationPayload|null} [devValidation]
+ * @property {import('./liveDataStatus.js').LiveDataStatusPayload} liveDataStatus
  * @property {string} updatedAt
  */
 
@@ -70,7 +72,16 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
   const marketImpact = buildMarketImpact(raw, pillars, triggers)
   const yieldCurve = buildYieldCurve(raw)
   const tieredMetrics = buildTieredMetrics(raw, panicContext, meta.sources ?? {})
-  const devValidation = meta.includeDev ? buildDevValidation(raw, meta.sources ?? {}, apiHistory, yieldCurve, panicContext) : null
+  const liveDataStatus = buildLiveDataStatus(meta.sources ?? {}, {
+    liveFetchOk: meta.liveFetchOk,
+    updatedAt: meta.updatedAt,
+  })
+  const devValidation = meta.includeDev
+    ? buildDevValidation(raw, meta.sources ?? {}, apiHistory, yieldCurve, panicContext, {
+        liveFetchOk: meta.liveFetchOk,
+        updatedAt: meta.updatedAt,
+      })
+    : null
 
   return {
     score,
@@ -88,6 +99,7 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
     tieredMetrics,
     yieldCurve,
     devValidation,
-    updatedAt: new Date().toISOString(),
+    liveDataStatus,
+    updatedAt: meta.updatedAt ?? new Date().toISOString(),
   }
 }

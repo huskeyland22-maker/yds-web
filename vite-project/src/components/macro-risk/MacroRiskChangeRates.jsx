@@ -1,17 +1,12 @@
 import { formatCurrent, slopeLabelKo } from "../../macro-risk/displayMetrics.js"
 import { formatDeltaByMethod, inferDeltaMethod } from "../../macro-risk/deltaSemantics.js"
+import { DATA_BADGE_CLASS } from "../../macro-risk/metricSourceCatalog.js"
 import { slopeArrow } from "../../macro-risk/seriesMath.js"
 
 const STANCE_COLOR = {
   up: "text-rose-300/90",
   down: "text-emerald-300/90",
   flat: "text-slate-400",
-}
-
-const BADGE_CLASS = {
-  MANUAL: "border-sky-500/30 bg-sky-500/10 text-sky-300",
-  LIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  MOCK: "border-violet-500/30 bg-violet-500/10 text-violet-300",
 }
 
 /**
@@ -39,7 +34,7 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
                     <span
                       className={[
                         "rounded px-1 py-px text-[8px] font-bold tracking-wide",
-                        BADGE_CLASS[row.dataBadge] ?? BADGE_CLASS.MOCK,
+                        DATA_BADGE_CLASS[row.dataBadge] ?? DATA_BADGE_CLASS.MOCK,
                       ].join(" ")}
                     >
                       {row.dataBadge}

@@ -7,9 +7,11 @@ import { loadMacroRiskHistory } from "./clientHistory.js"
  * @param {object | null} panicContext read-only (vxn, move)
  */
 export async function loadMacroRiskSnapshot(panicContext = null) {
-  const { history, updatedAt, sources } = await loadMacroRiskHistory(panicContext)
+  const { history, updatedAt, sources, liveFetchOk } = await loadMacroRiskHistory(panicContext)
   const snapshot = buildMacroRiskSnapshot(history, panicContext, {
     sources,
+    liveFetchOk,
+    updatedAt,
     includeDev: isDevMode() && isShowDebugPanel(),
   })
   snapshot.updatedAt = updatedAt

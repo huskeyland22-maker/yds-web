@@ -17,18 +17,17 @@ const METRIC_LIMITS = {
   YIELD_SPREAD: { max1D: 0.15, max5D: 0.35, max20D: 0.65, kind: "rate" },
 }
 
+/** @typedef {'MANUAL'|'LIVE'|'MOCK'|'STATIC'} DataSourceBadge */
+
 /**
  * @param {string} source
- * @returns {'MANUAL'|'LIVE'|'MOCK'}
+ * @returns {DataSourceBadge}
  */
 export function sourceToDataBadge(source) {
   if (source === "cycle-manual") return "MANUAL"
-  if (
-    source === "market-data" ||
-    source === "market-data+panic"
-  ) {
-    return "LIVE"
-  }
+  if (source === "market-data" || source === "market-data+panic") return "LIVE"
+  if (source === "macro-risk-seed.json") return "MOCK"
+  if (source === "staticSeed") return "STATIC"
   return "MOCK"
 }
 

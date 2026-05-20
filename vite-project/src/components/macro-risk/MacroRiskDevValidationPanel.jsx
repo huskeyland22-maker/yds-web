@@ -1,3 +1,5 @@
+import { DATA_BADGE_CLASS } from "../../macro-risk/metricSourceCatalog.js"
+
 /**
  * DEV ONLY — `isDevMode() && isShowDebugPanel()` (SHOW_DEBUG / VITE_SHOW_DEBUG).
  * @param {{ data: import("../../macro-risk/devValidation.js").DevValidationPayload }} props
@@ -6,16 +8,10 @@ export default function MacroRiskDevValidationPanel({ data }) {
   const rows = data?.rows
   if (!rows?.length) return null
 
-  const BADGE_CLASS = {
-    MANUAL: "border-sky-500/35 bg-sky-500/10 text-sky-300",
-    LIVE: "border-emerald-500/35 bg-emerald-500/10 text-emerald-300",
-    MOCK: "border-violet-500/35 bg-violet-500/10 text-violet-300",
-  }
-
   return (
     <section className="rounded-md border border-amber-500/30 bg-amber-950/20 px-2.5 py-2 font-mono text-[9px] text-amber-100/90">
       <p className="m-0 mb-2 text-[10px] font-semibold text-amber-300">
-        DEV DATA · 검증 (SHOW_DEBUG)
+        DEV DATA · LIVE 검증 (SHOW_DEBUG)
       </p>
 
       {data.realBei ? (
@@ -60,7 +56,7 @@ export default function MacroRiskDevValidationPanel({ data }) {
         </div>
       ) : null}
 
-      <div className="max-h-[22rem] space-y-2.5 overflow-y-auto">
+      <div className="max-h-[24rem] space-y-2.5 overflow-y-auto">
         {rows.map((r) => (
           <div key={`${r.key}-${r.label}`} className="border-b border-amber-500/15 pb-2 last:border-0">
             <div className="flex flex-wrap items-center gap-1.5">
@@ -68,20 +64,29 @@ export default function MacroRiskDevValidationPanel({ data }) {
               <span
                 className={[
                   "rounded px-1 py-px text-[8px] font-bold tracking-wide",
-                  BADGE_CLASS[r.dataBadge] ?? BADGE_CLASS.MOCK,
+                  DATA_BADGE_CLASS[r.dataBadge] ?? DATA_BADGE_CLASS.MOCK,
                 ].join(" ")}
               >
                 {r.dataBadge}
               </span>
             </div>
-            {r.typeNote ? (
-              <p className="m-0 mt-0.5 text-[9px] text-amber-500/90">{r.typeNote}</p>
-            ) : null}
             <p className="m-0 mt-1">
-              <span className="text-amber-400/90">source:</span>
-              <span className="text-amber-200/90"> {r.dataBadge}</span>
+              <span className="text-amber-400/90">provider:</span> {r.provider}
+            </p>
+            <p className="m-0">
+              <span className="text-amber-400/90">series:</span> {r.series}
+            </p>
+            <p className="m-0">
+              <span className="text-amber-400/90">lastUpdate:</span> {r.lastUpdate ?? "—"}
+            </p>
+            <p className="m-0">
+              <span className="text-amber-400/90">source:</span> {r.source}
               <span className="text-amber-500/70"> ({r.originDetail})</span>
             </p>
+            {r.fallbackNote ? (
+              <p className="m-0 text-[9px] font-semibold text-amber-300/95">{r.fallbackNote}</p>
+            ) : null}
+            {r.typeNote ? <p className="m-0 text-[9px] text-amber-500/90">{r.typeNote}</p> : null}
             <p className="m-0">
               <span className="text-amber-400/90">normalize:</span> {r.normalizeType} / {r.normalizeMethod}
             </p>

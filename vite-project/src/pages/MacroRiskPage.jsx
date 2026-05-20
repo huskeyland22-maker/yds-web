@@ -2,6 +2,7 @@ import MacroRiskConnectCard from "../components/macro-risk/MacroRiskConnectCard.
 import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevValidationPanel.jsx"
 import MacroRiskTierPanel from "../components/macro-risk/MacroRiskTierPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
+import MacroRiskLiveDataStatus from "../components/macro-risk/MacroRiskLiveDataStatus.jsx"
 import MacroRiskMarketImpact from "../components/macro-risk/MacroRiskMarketImpact.jsx"
 import MacroRiskMarketRegime from "../components/macro-risk/MacroRiskMarketRegime.jsx"
 import MacroRiskPillarSection from "../components/macro-risk/MacroRiskPillarSection.jsx"
@@ -55,6 +56,12 @@ export default function MacroRiskPage({ panicData = null }) {
           <SectionErrorBoundary label="Macro Risk Hero">
             <MacroRiskHero snapshot={snapshot} />
           </SectionErrorBoundary>
+
+          {snapshot.liveDataStatus ? (
+            <SectionErrorBoundary label="LIVE DATA STATUS">
+              <MacroRiskLiveDataStatus status={snapshot.liveDataStatus} />
+            </SectionErrorBoundary>
+          ) : null}
 
           <SectionErrorBoundary label="Today Market">
             <MacroRiskTodayMarketCard snapshot={snapshot} panicData={panicData} />
