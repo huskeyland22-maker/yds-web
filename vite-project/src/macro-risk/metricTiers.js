@@ -1,4 +1,5 @@
 import { buildMetricRow } from "./displayMetrics.js"
+import { metricDisplayLabel, metricDisplayTooltip } from "./metricLabels.js"
 
 /**
  * @typedef {import('./displayMetrics.js').MetricDisplayRow} MetricDisplayRow
@@ -33,22 +34,31 @@ export function buildTieredMetrics(raw, panicContext = null) {
   const vxn = vxnSeriesFromPanic(panicContext)
 
   const tier1 = [
-    buildMetricRow(raw.US10Y, "US10Y", { format: "rate", tier: 1 }),
+    buildMetricRow(raw.US10Y, metricDisplayLabel("US10Y"), {
+      format: "rate",
+      tier: 1,
+      tooltip: metricDisplayTooltip("US10Y"),
+    }),
     buildMetricRow(raw.REAL_YIELD, "REAL", { format: "rate", tier: 1 }),
     buildMetricRow(raw.DXY, "DXY", { format: "pct", tier: 1 }),
     buildMetricRow(raw.MOVE, "MOVE", { format: "index", tier: 1 }),
   ]
 
   const tier2 = [
-    buildMetricRow(raw.US30Y, "30Y", {
+    buildMetricRow(raw.US30Y, metricDisplayLabel("US30Y"), {
       format: "rate",
       tier: 2,
       category: "장기금리",
       hide1D: true,
+      tooltip: metricDisplayTooltip("US30Y"),
     }),
     buildMetricRow(raw.BEI, "BEI", { format: "rate", tier: 2 }),
     buildMetricRow(vxn, "VXN", { format: "index", tier: 2, hide1D: true }),
-    buildMetricRow(raw.US2Y, "2Y", { format: "rate", tier: 2 }),
+    buildMetricRow(raw.US2Y, metricDisplayLabel("US2Y"), {
+      format: "rate",
+      tier: 2,
+      tooltip: metricDisplayTooltip("US2Y"),
+    }),
   ]
 
   return { tier1, tier2 }

@@ -1,3 +1,4 @@
+import { metricDisplayLabel } from "./metricLabels.js"
 import { changeTag, clampScore, nearRecentHigh, slopeArrow } from "./seriesMath.js"
 
 /**
@@ -37,11 +38,11 @@ export function scoreRatePressure(raw) {
   const us30 = raw.US30Y
   const lines = [
     {
-      label: "10Y",
+      label: metricDisplayLabel("US10Y"),
       text: `${slopeArrow(us10?.slope ?? "flat")} ${changeTag(us10?.change5D, us10?.slope ?? "flat")}`,
     },
     {
-      label: "30Y",
+      label: metricDisplayLabel("US30Y"),
       text: `${slopeArrow(us30?.slope ?? "flat")} ${changeTag(us30?.change20D, us30?.slope ?? "flat")}`,
     },
     {

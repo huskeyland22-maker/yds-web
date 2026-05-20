@@ -15,18 +15,20 @@ import { slopeArrow } from "./seriesMath.js"
  * @property {number} [tier]
  * @property {string} [category]
  * @property {boolean} [hide1D]
+ * @property {string} [tooltip]
  */
 
 /**
  * @param {MetricSeries | undefined} series
  * @param {string} label
- * @param {{ format?: MetricFormat; tier?: number; category?: string; hide1D?: boolean }} [opts]
+ * @param {{ format?: MetricFormat; tier?: number; category?: string; hide1D?: boolean; tooltip?: string }} [opts]
  * @returns {MetricDisplayRow}
  */
 export function buildMetricRow(series, label, opts = {}) {
   return {
     key: series?.key ?? label,
     label,
+    tooltip: opts.tooltip,
     current: series?.current ?? null,
     change1D: series?.change1D ?? null,
     change5D: series?.change5D ?? null,
