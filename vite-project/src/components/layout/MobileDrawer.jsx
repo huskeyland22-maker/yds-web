@@ -1,11 +1,14 @@
 import { NavLink } from "react-router-dom"
 import { Link } from "react-router-dom"
-import { getMobileDrawerLinks } from "../../macro-risk/navItems.js"
 import { isDevMode } from "../../utils/devMode.js"
 import PanicHistoryVerifyPanel from "../settings/PanicHistoryVerifyPanel.jsx"
 import PwaDeveloperPanel from "../settings/PwaDeveloperPanel.jsx"
 
-const LINKS = getMobileDrawerLinks()
+const LINKS = [
+  { to: "/cycle", label: "시장 사이클" },
+  { to: "/value-chain", label: "코리아 밸류체인" },
+  { to: "/trading-log", label: "트레이딩 로그" },
+]
 
 export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion }) {
   if (!open) return null
