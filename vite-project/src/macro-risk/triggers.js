@@ -19,18 +19,52 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
   /** @type {{ id: string; label: string; emoji: string; active: boolean; detail?: string; scoreAdd: number }[]} */
   const triggers = []
 
+  const us10Current = toNum(us10?.current)
+  const us10d1 = toNum(us10?.delta1D)
+  const us10d5 = toNum(us10?.delta5D)
+  const us10d20 = toNum(us10?.delta20D)
+  const moveD1 = toNum(move?.delta1D)
+  const moveD5 = toNum(move?.delta5D)
+  const us10Acceleration = Number.isFinite(us10d1) && Number.isFinite(us10d5) ? us10d1 - us10d5 / 5 : null
+
+  const rateStable =
+    Number.isFinite(us10d1) &&
+    Number.isFinite(us10d5) &&
+    us10d1 < 1 &&
+    us10d5 < 3
+  const rateWarning =
+    !rateStable &&
+    ((Number.isFinite(us10d1) && us10d1 >= 1 && us10d1 < 3) || (Number.isFinite(us10d5) && us10d5 >= 3 && us10d5 < 7))
+  const moveSurge =
+    (Number.isFinite(moveD1) && moveD1 >= 8) ||
+    (Number.isFinite(moveD5) && moveD5 >= 20) ||
+    (move?.slope === "up" && Number.isFinite(toNum(move?.delta20D)) && toNum(move?.delta20D) >= 40)
   const rateShock =
-    us10?.delta20D != null &&
-    us10.delta20D > 0.25 &&
-    real?.slope === "up" &&
-    move?.slope === "up"
+    (Number.isFinite(us10d1) && us10d1 >= 3) ||
+    (Number.isFinite(us10d5) && us10d5 >= 7) ||
+    moveSurge
+  const rateShockExtreme =
+    (Number.isFinite(us10d1) && us10d1 >= 4) ||
+    (Number.isFinite(us10d5) && us10d5 >= 9) ||
+    (moveSurge && move?.slope === "up" && real?.slope === "up")
+  const rateShockAdd = rateShock ? (rateShockExtreme ? 20 : 15) : 0
+
+  const ratePhase = rateShock ? "금리 쇼크" : rateWarning ? "금리 경고" : "금리 안정"
+  const ratePhaseOutputs = rateShock
+    ? "금리 재평가 · 채권 압박 · 성장주 압박 · AI / 반도체 주의"
+    : rateWarning
+      ? "금리 재평가 · 성장주 압박"
+      : "금리 안정"
   triggers.push({
     id: "rate_shock",
-    label: "금리쇼크",
+    label: "금리 재평가",
     emoji: "🔴",
     active: Boolean(rateShock),
-    scoreAdd: 20,
-    detail: "10Y 20D +0.25 초과 + REAL/MOVE 상승",
+    scoreAdd: rateShockAdd,
+    detail: [
+      `${ratePhase} · ${ratePhaseOutputs}`,
+      `10Y 현재 ${fmt(us10Current)} · 1D ${fmt(us10d1)}% · 5D ${fmt(us10d5)}% · 20D ${fmt(us10d20)}% · 가속도 ${fmt(us10Acceleration)}`,
+    ].join(" / "),
   })
 
   const longInflation =
@@ -90,4 +124,13 @@ export function evaluateCompositeTriggers(raw, normalized, panicContext = null) 
 function pickNum(v) {
   const n = Number(v)
   return Number.isFinite(n) ? n : null
+}
+
+function toNum(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : NaN
+}
+
+function fmt(v) {
+  return Number.isFinite(v) ? v.toFixed(2) : "—"
 }

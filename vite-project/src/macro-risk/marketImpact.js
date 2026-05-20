@@ -40,6 +40,9 @@ export function buildMarketImpact(raw, pillars, triggers) {
   const rateShock = triggers.some((t) => t.id === "rate_shock" && t.active)
   const easing = triggers.some((t) => t.id === "liquidity_easing" && t.active)
   const dxyUp = raw.DXY?.slope === "up" || (raw.DXY?.change20D != null && raw.DXY.change20D > 0.5)
+  const us10Surge = raw.US10Y?.slope === "up" && raw.US10Y?.change20D != null && raw.US10Y.change20D > 0.2
+  const realUp = raw.REAL_YIELD?.slope === "up"
+  const kospiRateRiskBoost = us10Surge && realUp
 
   const growthPressure = rateScore >= 58 || rateShock || riskAsset
   const defValueBid = rateScore >= 55 && inflScore < 65
@@ -55,8 +58,14 @@ export function buildMarketImpact(raw, pillars, triggers) {
     row(
       "kospi",
       "코스피",
-      liqScore >= 60 && dxyUp ? "risk" : rateScore >= 50 && rateScore < 70 ? "neutral" : "favorable",
-      dxyUp ? "달러·유동성" : "매크로 중립",
+      liqScore >= 60 && dxyUp
+        ? "risk"
+        : kospiRateRiskBoost || rateShock
+          ? "risk"
+          : rateScore >= 50 && rateScore < 70
+            ? "neutral"
+            : "favorable",
+      kospiRateRiskBoost ? "10Y 급등 + REAL 상승" : dxyUp ? "달러·유동성" : "매크로 중립",
     ),
     row("growth", "성장주", easing ? "favorable" : growthPressure ? "risk" : rateScore < 42 ? "favorable" : "neutral", "금리 민감 순환"),
     row(
