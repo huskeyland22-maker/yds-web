@@ -85,19 +85,19 @@ export default function DailyMarketReportPanel({
           <ReportRow label="리더" value={marketToday.leaders} valueClass="daily-report-v2__value--cyan" />
         </ReportCard>
 
-        <ReportCard title="오늘 행동" accent>
-          <div className="daily-report-v2__action-lines">
-            <p className="m-0 daily-report-v2__action-line">{actionToday.today}</p>
-            <p className="m-0 daily-report-v2__action-line">
-              <span className="daily-report-v2__action-prefix">AI</span> {actionToday.ai}
-            </p>
-            <p className="m-0 daily-report-v2__action-line font-mono tabular-nums">
-              <span className="daily-report-v2__action-prefix">현금</span> {actionToday.cash}
-            </p>
-            <p className="m-0 daily-report-v2__action-line daily-report-v2__value--amber">
-              {actionToday.rate}
-            </p>
-          </div>
+        <ReportCard title="오늘 행동">
+          <p className="m-0 daily-report-v2__value">{actionToday.today}</p>
+          <ReportRow label="AI" value={actionToday.ai} />
+          <ReportRow
+            label="현금"
+            value={actionToday.cash}
+            valueClass="font-mono tabular-nums"
+          />
+          <ReportRow
+            label="금리"
+            value={actionToday.rate}
+            valueClass="daily-report-v2__value--amber"
+          />
         </ReportCard>
 
         <ReportCard title="실전 전략">
