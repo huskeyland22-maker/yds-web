@@ -187,13 +187,6 @@
     background: rgba(7, 10, 16, 0.92);
   }
 
-  @media (min-width: 640px) {
-    .panic-today-brief__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px 12px;
-    }
-  }
-
   .panic-today-brief__row {
     display: flex;
     flex-direction: column;
@@ -525,77 +518,40 @@
   }
 
   .daily-market-report__head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 12px 14px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 10px 14px 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .daily-market-report__context {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 12px;
+  .daily-market-report__status-block {
     padding: 8px 14px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .daily-market-report__context-line {
+  .daily-market-report__status-title {
+    margin: 0 0 6px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(100, 116, 139, 0.95);
+  }
+
+  .daily-market-report__status-pills {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
     gap: 6px;
-    font-size: 10px;
-    line-height: 1.35;
   }
 
-  .daily-market-report__ctx-label {
-    font-weight: 700;
-    color: rgba(100, 116, 139, 0.95);
-    letter-spacing: 0.04em;
-  }
-
-  .daily-market-report__ctx-value {
-    font-weight: 600;
-    color: rgba(226, 232, 240, 0.94);
-  }
-
-  .daily-market-report__horizons {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    padding: 8px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .daily-market-report__horizon {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-    padding: 6px 8px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.22);
-  }
-
-  .daily-market-report__horizon-label {
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: rgba(100, 116, 139, 0.95);
-  }
-
-  .daily-market-report__horizon-value {
+  .daily-market-report__status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    background: rgba(34, 211, 238, 0.08);
     font-size: 10px;
     font-weight: 600;
     line-height: 1.3;
     color: rgba(226, 232, 240, 0.94);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     word-break: keep-all;
   }
 

@@ -387,23 +387,24 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <section className="grid grid-cols-1 gap-1 sm:grid-cols-3">
+      <SectionLabel title="포트 비중" />
+      <section
+        className="grid grid-cols-3 gap-1.5 sm:gap-2"
+        aria-label="포트 비중 단기 중기 장기"
+      >
         {horizons.map((h) => (
-          <article key={h.id} className={`rounded border px-2 py-1 ${h.accent} bg-black/20`}>
-            <div className="flex items-baseline justify-between">
-              <span className="text-[8px] font-bold text-slate-500">{h.tag}</span>
-              <span className="font-mono text-[15px] font-bold tabular-nums text-slate-100">
-                {h.score ?? h.signal?.score ?? "—"}
-              </span>
-            </div>
-            <p className="m-0 text-[10px] font-bold leading-tight text-slate-100">{h.title}</p>
-            {h.allocs.length > 0 ? (
-              <p className="m-0 mt-0.5 text-[8px] leading-snug text-slate-500">
-                {h.allocs.map((a) => `${a.label} ${a.pct}`).join(" · ")}
-              </p>
-            ) : (
-              <p className="m-0 mt-0.5 text-[8px] text-slate-500">{h.body}</p>
-            )}
+          <article
+            key={h.id}
+            className={[
+              "flex min-h-[3.25rem] flex-col items-center justify-center rounded border px-2 py-2",
+              h.accent,
+              "bg-black/25",
+            ].join(" ")}
+          >
+            <span className="text-[8px] font-bold tracking-wide text-slate-500">{h.tag}</span>
+            <span className="mt-1 font-mono text-[18px] font-bold leading-none tabular-nums text-slate-50 sm:text-[20px]">
+              {h.score ?? h.signal?.score ?? "—"}
+            </span>
           </article>
         ))}
       </section>

@@ -1,32 +1,53 @@
 /**
  * YDS Daily Market Report — Cycle + 패닉 + 채권(10Y·30Y·DXY) 통합 브리핑 (순수 함수)
+ * 단기/중기/장기 행동 문구는 포트 비중 수치 카드에만 표시 (중복 제거)
  */
 import { buildMarketOsIntegrated } from "../market-os/buildMarketOsIntegrated.js"
 import { deriveBondLiquidityStatuses } from "../market-os/bondLiquidityStatus.js"
 import { resolveCyclePosition } from "../market-os/positionLabels.js"
 import { computeMarketAction } from "./panicMarketActionEngine.js"
-import { computeMarketTiming } from "./panicMarketTimingEngine.js"
 
 /**
  * @typedef {{
- *   marketStatus: string
- *   cycleLine: string
- *   bondLine: string
- *   shortTerm: string
- *   midTerm: string
- *   longTerm: string
+ *   statusPills: string[]
  *   practicalAction: string
  *   cashAllocation: string
  *   cautionSectors: string
  *   watchSectors: string
- *   actionMode: string
  *   ready: boolean
  * }} DailyMarketReport
  */
 
+const BOND_STRESS_STATUSES = new Set([
+  "금리 재평가",
+  "장기채 경고",
+  "유동성 주의",
+  "성장주 압박",
+  "유동성 축소",
+  "금리·유동성 경계",
+])
+
 /** @param {string[]} items */
 function joinKo(items) {
   return items.filter((x) => x && x !== "—").join(" · ")
+}
+
+/**
+ * @param {string[]} bondStatuses
+ * @param {string} cyclePosition
+ */
+function buildStatusPills(bondStatuses, cyclePosition) {
+  /** @type {string[]} */
+  const pills = []
+  if (cyclePosition && cyclePosition !== "데이터 대기" && cyclePosition !== "—") {
+    pills.push(cyclePosition)
+  }
+  for (const s of bondStatuses) {
+    if (s === "보조 확인 양호" || s === "데이터 수집 중") continue
+    if (BOND_STRESS_STATUSES.has(s) && !pills.includes(s)) pills.push(s)
+  }
+  if (!pills.length && bondStatuses[0]) pills.push(bondStatuses[0])
+  return pills.slice(0, 4)
 }
 
 /**
@@ -72,35 +93,22 @@ function buildSectorLines(sectors, regime, bondStress) {
 export function buildDailyMarketReport({ panicData = null, cycleScore = null, snapshot = null }) {
   const cycle = resolveCyclePosition(cycleScore)
   const action = computeMarketAction(panicData)
-  const timing = computeMarketTiming(panicData)
   const os = snapshot ? buildMarketOsIntegrated({ cycleScore, snapshot }) : null
   const bondStatuses = deriveBondLiquidityStatuses(snapshot)
-  const bondLine = bondStatuses.slice(0, 2).join(" · ") || "채권·유동성 확인"
 
   const hasCycle = Number.isFinite(Number(cycleScore))
-  const hasPanic = Boolean(action && timing)
+  const hasPanic = Boolean(action)
   const hasBond = Boolean(snapshot)
   const ready = hasCycle || hasPanic || hasBond
 
-  const shortTerm =
-    timing?.short?.actionShort || timing?.short?.action || action?.shortTerm || "—"
-  const midTerm = timing?.mid?.actionShort || timing?.mid?.action || action?.midTerm || "—"
-  const longTerm =
-    timing?.long?.actionShort || timing?.long?.action || action?.longTerm || "—"
+  const bondStress = bondStatuses.some((s) => BOND_STRESS_STATUSES.has(s))
+  const statusPills = buildStatusPills(bondStatuses, cycle.position)
 
-  const bondStress = bondStatuses.some((s) =>
-    ["금리 재평가", "장기채 경고", "유동성 주의", "성장주 압박", "유동성 축소"].includes(s),
-  )
-
-  const practicalParts = []
-  if (os?.forbiddenActions?.length) {
-    const chase = os.forbiddenActions.find((x) => x.includes("추격"))
-    if (chase) practicalParts.push(chase)
-  }
-  if (os?.actionNow?.today) practicalParts.push(os.actionNow.today)
-  if (os?.actionNow?.ai) practicalParts.push(`${os.actionNow.ai}`)
-  else if (action?.strategyThesis) practicalParts.push(action.strategyThesis)
-  const practicalAction = joinKo(practicalParts) || action?.actionHeadline?.split("—")[0]?.trim() || "관망"
+  const practicalAction =
+    os?.actionNow?.today ||
+    os?.forbiddenActions?.find((x) => x.includes("추격")) ||
+    action?.actionHeadline?.split("—")[0]?.trim() ||
+    "관망"
 
   const cashRaw = os?.actionNow?.cash
   const cashAllocation = cashRaw && cashRaw !== "—" ? `${cashRaw}%` : "20~30%"
@@ -108,30 +116,12 @@ export function buildDailyMarketReport({ panicData = null, cycleScore = null, sn
   const regime = action?.regime ?? "neutral"
   const sectorLines = buildSectorLines(action?.sectors ?? [], regime, bondStress)
 
-  const marketStatus =
-    os?.positionSummary ||
-    joinKo([cycle.position, action?.regimeLabel, bondLine]) ||
-    "데이터 입력 후 자동 생성"
-
-  const actionMode =
-    action?.actionMode === "Risk-on"
-      ? "Risk ON"
-      : action?.actionMode === "Risk-off"
-        ? "Risk OFF"
-        : "Neutral"
-
   return {
-    marketStatus,
-    cycleLine: cycle.position,
-    bondLine,
-    shortTerm,
-    midTerm,
-    longTerm,
+    statusPills,
     practicalAction,
     cashAllocation,
     cautionSectors: sectorLines.caution === "—" ? "특이 없음" : sectorLines.caution,
     watchSectors: sectorLines.watch,
-    actionMode,
     ready,
   }
 }

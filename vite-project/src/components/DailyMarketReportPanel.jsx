@@ -1,6 +1,5 @@
 import { useMemo } from "react"
 import { buildDailyMarketReport } from "../utils/buildDailyMarketReport.js"
-import { actionModeBadgeClass } from "../utils/panicMarketActionEngine.js"
 
 /**
  * @param {{
@@ -39,57 +38,23 @@ export default function DailyMarketReportPanel({
     )
   }
 
-  const horizonRows = [
-    { label: "단기", value: report.shortTerm },
-    { label: "중기", value: report.midTerm },
-    { label: "장기", value: report.longTerm },
-  ]
-
   return (
     <section className="daily-market-report" aria-label="YDS Daily Market Report">
       <header className="daily-market-report__head">
-        <div className="min-w-0 flex-1">
-          <p className="m-0 text-[9px] font-bold tracking-[0.14em] text-cyan-300/80">
-            YDS DAILY MARKET REPORT
-          </p>
-          <p className="m-0 mt-0.5 text-[13px] font-bold leading-snug text-slate-50">
-            {report.marketStatus}
-          </p>
-        </div>
-        <span
-          className={[
-            "shrink-0 rounded border px-2 py-0.5 font-mono text-[10px] font-bold",
-            actionModeBadgeClass(
-              report.actionMode === "Risk ON"
-                ? "Risk-on"
-                : report.actionMode === "Risk OFF"
-                  ? "Risk-off"
-                  : "Neutral",
-            ),
-          ].join(" ")}
-        >
-          {report.actionMode}
-        </span>
+        <p className="m-0 text-[9px] font-bold tracking-[0.14em] text-cyan-300/80">
+          YDS DAILY MARKET REPORT
+        </p>
       </header>
 
-      <div className="daily-market-report__context">
-        <p className="m-0 daily-market-report__context-line">
-          <span className="daily-market-report__ctx-label">Cycle</span>
-          <span className="daily-market-report__ctx-value">{report.cycleLine}</span>
-        </p>
-        <p className="m-0 daily-market-report__context-line">
-          <span className="daily-market-report__ctx-label">채권</span>
-          <span className="daily-market-report__ctx-value">{report.bondLine}</span>
-        </p>
-      </div>
-
-      <div className="daily-market-report__horizons">
-        {horizonRows.map((row) => (
-          <div key={row.label} className="daily-market-report__horizon">
-            <span className="daily-market-report__horizon-label">{row.label}</span>
-            <span className="daily-market-report__horizon-value">{row.value}</span>
-          </div>
-        ))}
+      <div className="daily-market-report__status-block">
+        <p className="m-0 daily-market-report__status-title">상태</p>
+        <div className="daily-market-report__status-pills" role="list">
+          {report.statusPills.map((pill) => (
+            <span key={pill} className="daily-market-report__status-pill" role="listitem">
+              {pill}
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="daily-market-report__actions">
@@ -104,15 +69,15 @@ export default function DailyMarketReportPanel({
           </span>
         </div>
         <div className="daily-market-report__action-row">
-          <span className="daily-market-report__action-label">주의 섹터</span>
-          <span className="daily-market-report__action-value text-amber-200/90">
-            {report.cautionSectors}
+          <span className="daily-market-report__action-label">관심</span>
+          <span className="daily-market-report__action-value text-cyan-200/90">
+            {report.watchSectors}
           </span>
         </div>
         <div className="daily-market-report__action-row">
-          <span className="daily-market-report__action-label">관심 섹터</span>
-          <span className="daily-market-report__action-value text-cyan-200/90">
-            {report.watchSectors}
+          <span className="daily-market-report__action-label">주의</span>
+          <span className="daily-market-report__action-value text-amber-200/90">
+            {report.cautionSectors}
           </span>
         </div>
       </div>

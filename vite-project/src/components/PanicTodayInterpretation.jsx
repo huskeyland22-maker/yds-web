@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react"
 import { computeMarketAction, pickMetricValue } from "../utils/panicMarketActionEngine.js"
-import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
 import PanicMarketReportPanel from "./PanicMarketReportPanel.jsx"
 import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
@@ -52,7 +51,6 @@ export default function PanicTodayInterpretation({
   const [detailOpen, setDetailOpen] = useState(false)
 
   const guide = useMemo(() => computeMarketAction(panicData), [panicData])
-  const timing = useMemo(() => computeMarketTiming(panicData), [panicData])
 
   if (!guide) {
     return (
@@ -62,14 +60,10 @@ export default function PanicTodayInterpretation({
     )
   }
 
-  const shortVal = timing?.short?.actionShort || timing?.short?.action || guide.shortTerm
-  const midVal = timing?.mid?.actionShort || timing?.mid?.action || guide.midTerm
   const riskVal = buildRiskLine(panicData, guide)
   const sectorVal = guide.sectors.length ? guide.sectors.join(" / ") : "분산"
 
   const summaryRows = [
-    { label: "단기", value: shortVal },
-    { label: "중기", value: midVal },
     { label: "리스크", value: riskVal },
     { label: "섹터", value: sectorVal },
   ]
@@ -90,7 +84,7 @@ export default function PanicTodayInterpretation({
           ))}
         </div>
         <p className="m-0 mt-2 text-[9px] leading-snug text-slate-600">
-          상단 단기·중기·장기 의견 우선 · 하단은 보조 요약
+          Daily Report·포트 비중 카드 우선 · 하단은 보조
         </p>
       </div>
 
