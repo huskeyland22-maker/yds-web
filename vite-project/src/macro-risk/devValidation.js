@@ -334,7 +334,8 @@ function buildDataHealth(rows, realBei) {
 
 function mapOriginDetail(source) {
   if (source === "cycle-manual") return "cycle manual (source of truth)"
-  if (source === "market-data") return "/api/market-data"
+  if (source === "fred-h15") return "FRED H.15"
+  if (source === "market-data") return "/api/market-data (DXY)"
   if (source === "macro-risk-seed.json") return "macro-risk-seed.json"
   if (source === "market-data+panic") return "market-data"
   if (source === "missing") return "—"

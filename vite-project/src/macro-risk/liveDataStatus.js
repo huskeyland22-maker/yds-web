@@ -82,7 +82,7 @@ export function buildLiveDataStatus(sources = {}, meta = {}) {
  * @param {LiveDataStatusPayload|null|undefined} payload
  */
 export function formatMacroRiskPipelineSubtitle(payload) {
-  if (!payload) return "클라이언트 계산 · /api/market-data · —"
+  if (!payload) return "Bond FRED H.15 · DXY market-data · —"
   const rows = [...payload.tier1, ...payload.tier2]
   /** @type {Record<string, LiveStatusRow>} */
   const byKey = Object.fromEntries(rows.map((r) => [r.key, r]))
@@ -109,5 +109,5 @@ export function formatMacroRiskPipelineSubtitle(payload) {
     tail = hasCycleManual ? "LIVE + MANUAL" : "LIVE SNAPSHOT"
   }
 
-  return `클라이언트 계산 · /api/market-data · ${tail}`
+  return `Bond FRED H.15 · DXY market-data · ${tail}`
 }

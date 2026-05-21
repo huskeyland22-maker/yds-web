@@ -1,22 +1,17 @@
+import { BOND_FRED_SERIES, fetchAllBondFredSeries } from "./_lib/fredBond.js"
+
+/** Yahoo — 채권 제외 (10Y는 FRED DGS10만) */
 const SYMBOLS = [
   { key: "kospi", symbol: "^KS11" },
   { key: "kosdaq", symbol: "^KQ11" },
   { key: "nasdaq", symbol: "^IXIC" },
   { key: "sp500", symbol: "^GSPC" },
   { key: "usdkrw", symbol: "KRW=X" },
-  { key: "us10y", symbol: "^TNX" },
   { key: "vix", symbol: "^VIX" },
   { key: "dxy", symbol: "DX-Y.NYB" },
   { key: "soxx", symbol: "SOXX" },
   { key: "putCall", symbol: "^PCC" },
   { key: "move", symbol: "^MOVE" },
-]
-
-const FRED_SERIES = [
-  { key: "dgs2", series: "DGS2" },
-  { key: "dgs30", series: "DGS30" },
-  { key: "dfii10", series: "DFII10" },
-  { key: "t10yie", series: "T10YIE" },
 ]
 
 function toFiniteNumber(value) {
@@ -52,34 +47,6 @@ async function fetchYahooQuote(symbol) {
   return { price, changePct }
 }
 
-async function fetchFredSeries(series) {
-  const url = `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(series)}`
-  const res = await fetch(url, { method: "GET", cache: "no-store" })
-  if (!res.ok) throw new Error(`FRED HTTP ${res.status} (${series})`)
-  const text = await res.text()
-  const lines = String(text || "")
-    .split(/\r?\n/)
-    .slice(1)
-    .map((line) => line.trim())
-    .filter(Boolean)
-
-  /** @type {number[]} */
-  const values = []
-  for (const line of lines) {
-    const idx = line.lastIndexOf(",")
-    if (idx < 0) continue
-    const raw = line.slice(idx + 1).trim()
-    if (raw === "." || raw === "") continue
-    const n = Number(raw)
-    if (Number.isFinite(n)) values.push(n)
-  }
-  if (values.length < 1) throw new Error(`FRED parse failed (${series})`)
-  const current = values[values.length - 1]
-  const prev = values.length >= 2 ? values[values.length - 2] : null
-  const changePct = Number.isFinite(prev) && prev !== 0 ? ((current - prev) / prev) * 100 : null
-  return { price: current, changePct }
-}
-
 export default async function handler(_req, res) {
   const parsedData = {
     kospi: null,
@@ -93,11 +60,11 @@ export default async function handler(_req, res) {
     soxx: null,
     putCall: null,
     move: null,
+    dgs10: null,
     dgs2: null,
     dgs30: null,
     dfii10: null,
     t10yie: null,
-    // Macro layer alias keys (기존 클라이언트 재사용)
     us2y: null,
     us30y: null,
     realYield: null,
@@ -116,26 +83,34 @@ export default async function handler(_req, res) {
     changeData[key] = quote.changePct
   })
 
-  const fredSettled = await Promise.allSettled(
-    FRED_SERIES.map(async ({ key, series }) => ({ key, series, quote: await fetchFredSeries(series) })),
-  )
+  /** @type {Record<string, { values: number[]; dates: string[]; current: number; changePct: number|null; asOfNy: string|null }>} */
+  const bondSeries = {}
+  let bondAsOfNy = null
 
-  fredSettled.forEach((entry) => {
-    if (entry.status !== "fulfilled") return
-    const { key, quote } = entry.value
-    parsedData[key] = quote.price
-    changeData[key] = quote.changePct
-  })
+  try {
+    const fred = await fetchAllBondFredSeries(90)
+    bondAsOfNy = fred.asOfNy
 
-  // Alias mapping for macro-risk clientHistory fallback keys.
-  parsedData.us2y = parsedData.us2y ?? parsedData.dgs2
-  parsedData.us30y = parsedData.us30y ?? parsedData.dgs30
-  parsedData.realYield = parsedData.realYield ?? parsedData.dfii10
-  parsedData.bei = parsedData.bei ?? parsedData.t10yie
-  changeData.us2y = changeData.us2y ?? changeData.dgs2
-  changeData.us30y = changeData.us30y ?? changeData.dgs30
-  changeData.realYield = changeData.realYield ?? changeData.dfii10
-  changeData.bei = changeData.bei ?? changeData.t10yie
+    for (const def of BOND_FRED_SERIES) {
+      const hist = fred.bySeriesId[def.series]
+      if (!hist) continue
+      bondSeries[def.series] = {
+        values: hist.values,
+        dates: hist.dates,
+        current: hist.current,
+        changePct: hist.changePct,
+        asOfNy: hist.asOfNy,
+      }
+      parsedData[def.key] = hist.current
+      changeData[def.key] = hist.changePct
+      for (const alias of def.aliasKeys ?? []) {
+        parsedData[alias] = hist.current
+        changeData[alias] = hist.changePct
+      }
+    }
+  } catch {
+    /* Bond FRED 전체 실패 시 채권 필드 null — Yahoo TNX 등 혼합 금지 */
+  }
 
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
   res.setHeader("Pragma", "no-cache")
@@ -144,6 +119,12 @@ export default async function handler(_req, res) {
     parsedData,
     changeData,
     updatedAt: new Date().toISOString(),
-    source: "vercel-yahoo",
+    source: "yahoo-equity-fx-dxy+fred-h15-bonds",
+    bondFred: {
+      policy: "fred-h15",
+      snapshotRule: "us_close_confirmed_preferred_kst_0800",
+      asOfNy: bondAsOfNy,
+      series: bondSeries,
+    },
   })
 }

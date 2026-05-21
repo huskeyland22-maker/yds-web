@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-05-20T14:09:44.387Z",
+  "builtAt": "2026-05-21T07:23:48.172Z",
   "nodeEnv": "unknown",
   "vercel": false,
   "vercelEnv": null,
@@ -7,7 +7,7 @@
     "VITE_SUPABASE_URL": false,
     "VITE_SUPABASE_ANON_KEY": false,
     "VITE_PANIC_HUB": false,
-    "VITE_ENABLE_MACRO_RISK": true
+    "VITE_ENABLE_MACRO_RISK": false
   },
   "server": {
     "SUPABASE_URL": false,

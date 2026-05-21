@@ -25,6 +25,7 @@ const METRIC_LIMITS = {
  */
 export function sourceToDataBadge(source) {
   if (source === "cycle-manual") return "MANUAL"
+  if (source === "fred-h15") return "LIVE"
   if (source === "market-data" || source === "market-data+panic") return "LIVE"
   if (source === "macro-risk-seed.json") return "MOCK"
   if (source === "staticSeed") return "STATIC"

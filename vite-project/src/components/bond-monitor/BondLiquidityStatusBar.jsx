@@ -1,5 +1,6 @@
 import { deriveBondLiquidityStatuses } from "../../market-os/bondLiquidityStatus.js"
 import { BOND_MONITOR_TAGLINE } from "../../market-os/bondMonitorLabels.js"
+import { BOND_DATA_FOOTNOTE, BOND_FRED_POLICY_LABEL } from "../../macro-risk/bondFredPolicy.js"
 
 /**
  * @param {{ snapshot: import("../../macro-risk/engine.js").MacroRiskSnapshot | null }} props
@@ -24,6 +25,14 @@ export default function BondLiquidityStatusBar({ snapshot }) {
           </li>
         ))}
       </ul>
+      <p className="m-0 mt-2 border-t border-white/[0.06] pt-2 text-[8px] leading-relaxed text-slate-600">
+        <span className="text-slate-500">{BOND_FRED_POLICY_LABEL}</span>
+        {snapshot.liveDataStatus?.lastUpdateDisplay
+          ? ` · NY ${snapshot.liveDataStatus.lastUpdateDisplay}`
+          : ""}
+        <br />
+        {BOND_DATA_FOOTNOTE}
+      </p>
     </section>
   )
 }

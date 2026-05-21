@@ -2,7 +2,7 @@ import { metricDisplayLabel } from "./metricLabels.js"
 
 /**
  * Bond / Liquidity Monitor 지표 메타 (FRED 연동 준비, 신규 API 없음).
- * LIVE 실제 수신은 /api/market-data 키 존재 여부로 판별.
+ * 채권 LIVE: FRED H.15 (market-data.bondFred). DXY: Yahoo market-data.
  */
 
 /** @typedef {'MANUAL'|'LIVE'|'MOCK'|'STATIC'} DataSourceBadge */
@@ -48,6 +48,7 @@ export function getMetricCatalog(key) {
  */
 export function describeSourceFallback(rawSource, badge, liveFetchOk, liveTarget) {
   if (rawSource === "missing") return liveTarget ? "시계열 미로드" : "입력 없음"
+  if (rawSource === "fred-h15") return "FRED H.15 종가"
   if (badge === "MANUAL") return "cycle reuse"
   if (badge === "LIVE") return null
   if (!liveTarget) {

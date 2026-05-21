@@ -528,5 +528,6 @@ export async function fetchMarketData() {
     changeData: cd != null && typeof cd === "object" && !Array.isArray(cd) ? cd : {},
     updatedAt: root?.updatedAt ?? null,
     source: root?.source ?? null,
+    bondFred: root?.bondFred ?? null,
   }
 }

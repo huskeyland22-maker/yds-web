@@ -31,6 +31,7 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {import('./liveDataStatus.js').LiveDataStatusPayload} liveDataStatus
  * @property {NonNullable<ReturnType<computeMacroRiskScore>['breakdown']>} scoreBreakdown
  * @property {string} updatedAt
+ * @property {string|null} [bondAsOfNy]
  */
 
 /**
@@ -104,5 +105,6 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
     liveDataStatus,
     scoreBreakdown: scored.breakdown,
     updatedAt: meta.updatedAt ?? new Date().toISOString(),
+    bondAsOfNy: meta.bondAsOfNy ?? null,
   }
 }

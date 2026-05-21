@@ -16,13 +16,15 @@ function readMacroDevUiFlag() {
  * @param {object | null} panicContext read-only (vxn, move)
  */
 export async function loadMacroRiskSnapshot(panicContext = null) {
-  const { history, updatedAt, sources, liveFetchOk } = await loadMacroRiskHistory(panicContext)
+  const { history, updatedAt, sources, liveFetchOk, bondAsOfNy } = await loadMacroRiskHistory(panicContext)
   const snapshot = buildMacroRiskSnapshot(history, panicContext, {
     sources,
     liveFetchOk,
     updatedAt,
+    bondAsOfNy,
     includeDev: readMacroDevUiFlag() || (isDevMode() && isShowDebugPanel()),
   })
   snapshot.updatedAt = updatedAt
+  snapshot.bondAsOfNy = bondAsOfNy ?? null
   return snapshot
 }
