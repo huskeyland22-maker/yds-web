@@ -9,6 +9,7 @@ import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUti
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
 import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
+import PanicSignalEnginePanel from "./PanicSignalEnginePanel.jsx"
 import RecommendationEnginePanel from "./RecommendationEnginePanel.jsx"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
@@ -306,6 +307,14 @@ export default function PanicDeskDashboard({
           cycleScore={finalScore}
           snapshot={bondSnapshot.snapshot}
           loading={macroRiskEnabled && bondSnapshot.loading}
+        />
+      </div>
+
+      <div className="panic-v2-desk__signal-slot">
+        <PanicSignalEnginePanel
+          panicData={panicData}
+          cycleScore={finalScore}
+          snapshot={bondSnapshot.snapshot}
         />
       </div>
 

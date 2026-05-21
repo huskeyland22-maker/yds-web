@@ -1449,6 +1449,105 @@
     display: none !important;
   }
 
+  /* 패닉 시그널 엔진 — 9지표 판단 (Risk ON / 중립 / 주의 / 방어) */
+  .panic-signal-engine {
+    border-radius: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    background: linear-gradient(165deg, rgba(8, 14, 24, 0.96) 0%, rgba(10, 16, 28, 0.92) 100%);
+    box-shadow: inset 0 1px 0 rgba(56, 189, 248, 0.08);
+    overflow: hidden;
+    padding: 10px 12px 12px;
+  }
+
+  .panic-signal-engine__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 10px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .panic-signal-engine__badge {
+    margin: 0;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.25;
+    border: 1px solid transparent;
+  }
+
+  .panic-signal-engine__badge--risk-on {
+    color: rgba(167, 243, 208, 0.98);
+    background: rgba(16, 185, 129, 0.18);
+    border-color: rgba(52, 211, 153, 0.45);
+  }
+
+  .panic-signal-engine__badge--neutral {
+    color: rgba(186, 230, 253, 0.98);
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(96, 165, 250, 0.42);
+  }
+
+  .panic-signal-engine__badge--caution {
+    color: rgba(253, 230, 138, 0.98);
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(251, 191, 36, 0.42);
+  }
+
+  .panic-signal-engine__badge--defense {
+    color: rgba(254, 202, 202, 0.98);
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(248, 113, 113, 0.45);
+  }
+
+  .panic-signal-engine__hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    margin-bottom: 6px;
+  }
+
+  .panic-signal-engine__hero-ko {
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .panic-signal-engine__meta-line {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(203, 213, 225, 0.9);
+    word-break: keep-all;
+  }
+
+  .panic-signal-engine__bond-note {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(148, 163, 184, 0.92);
+    word-break: keep-all;
+  }
+
+  .panic-signal-engine__bond-tag {
+    margin-right: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.85);
+  }
+
+  .panic-signal-engine__placeholder {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.85);
+  }
+
   /* 추천 엔진 — 행동 중심 컴팩트 */
   .recommend-engine {
     border-radius: 12px;
@@ -1655,6 +1754,7 @@
   }
 
   /* 추천 단계 → 패닉 히스토리: 데스크 gap 중복 방지 (8~12px) */
+  .panic-v2-desk > .panic-v2-desk__signal-slot,
   .panic-v2-desk > .panic-v2-desk__recommend-slot {
     margin-bottom: 0;
   }
