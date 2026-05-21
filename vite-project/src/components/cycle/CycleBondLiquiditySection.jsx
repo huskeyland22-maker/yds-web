@@ -3,9 +3,7 @@ import { RefreshCw } from "lucide-react"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { metricDisplayLabel, metricShortLabel } from "../../macro-risk/metricLabels.js"
-import { buildMarketOsIntegrated } from "../../market-os/buildMarketOsIntegrated.js"
-import { bondCoreCardHints, deriveBondLiquidityStatuses } from "../../market-os/bondLiquidityStatus.js"
-import { resolveCyclePosition } from "../../market-os/positionLabels.js"
+import { buildBondReferenceDisplay } from "../../market-os/bondLiquidityReference.js"
 import { formatBondLastSyncKst, loadBondSyncMeta } from "../../macro-risk/bondSyncMeta.js"
 
 const CORE_KEYS = ["US10Y", "US30Y", "DXY"]
@@ -13,8 +11,6 @@ const EXPERT_KEYS = ["REAL_YIELD", "BEI", "US2Y"]
 
 /**
  * @param {{
- *   panicData?: object | null
- *   cycleScore?: number | null
  *   basisDateTime?: string | null
  *   snapshot?: import("../../macro-risk/engine.js").MacroRiskSnapshot | null
  *   loading?: boolean
@@ -24,8 +20,6 @@ const EXPERT_KEYS = ["REAL_YIELD", "BEI", "US2Y"]
  * }} props
  */
 export default function CycleBondLiquiditySection({
-  panicData = null,
-  cycleScore = null,
   basisDateTime = null,
   snapshot = null,
   loading = false,
@@ -44,13 +38,7 @@ export default function CycleBondLiquiditySection({
     }
   }, [])
 
-  const cyclePos = useMemo(() => resolveCyclePosition(cycleScore), [cycleScore])
-  const statuses = useMemo(() => deriveBondLiquidityStatuses(snapshot), [snapshot])
-  const hints = useMemo(() => bondCoreCardHints(snapshot), [snapshot])
-  const os = useMemo(
-    () => (snapshot ? buildMarketOsIntegrated({ cycleScore, snapshot }) : null),
-    [cycleScore, snapshot],
-  )
+  const reference = useMemo(() => buildBondReferenceDisplay(snapshot), [snapshot])
 
   const tierByKey = useMemo(() => {
     const rows = [...(snapshot?.tieredMetrics?.tier1 ?? []), ...(snapshot?.tieredMetrics?.tier2 ?? [])]
@@ -63,7 +51,7 @@ export default function CycleBondLiquiditySection({
   if (!enabled) return null
 
   return (
-    <section id="bond-liquidity" className="cycle-bond-section scroll-mt-24" aria-label="채권·유동성 보조">
+    <section id="bond-liquidity" className="cycle-bond-section scroll-mt-24" aria-label="채권·유동성 참고">
       <div className="cycle-bond-panel">
         <header className="cycle-bond-panel__header">
           <div className="cycle-bond-panel__accent" aria-hidden />
@@ -76,7 +64,7 @@ export default function CycleBondLiquiditySection({
                 aria-expanded={detailOpen}
               >
                 <p className="m-0 text-[12px] font-bold tracking-tight text-cyan-100/95">
-                  채권·유동성 <span className="text-[10px] font-semibold text-cyan-300/70">(보조)</span>
+                  채권·유동성 <span className="text-[10px] font-semibold text-cyan-300/70">(참고)</span>
                   <span className="ml-1.5 text-[10px] font-normal text-slate-500">{detailOpen ? "▲" : "▼"}</span>
                 </p>
               </button>
@@ -96,9 +84,9 @@ export default function CycleBondLiquiditySection({
               <span className="font-mono tabular-nums text-slate-300">{basisLine}</span>
             </p>
             <p className="m-0 mt-0.5 text-[9px] text-slate-500">
-              Core: 10Y · 30Y · DXY
+              참고 · 힌트 · 상황판단 · 미래 체크
               <span className="mx-1 text-slate-600">|</span>
-              전문가: REAL · BEI · 2Y
+              판단권 없음
             </p>
           </div>
         </header>
@@ -109,13 +97,27 @@ export default function CycleBondLiquiditySection({
 
         {snapshot ? (
           <div className="cycle-bond-panel__body">
-            <div className="cycle-bond-status-lines" role="status">
-              {statuses.slice(0, 3).map((s) => (
-                <span key={s} className="cycle-bond-status-pill">
-                  {s}
-                </span>
-              ))}
-            </div>
+            {reference.statusLabels.length > 0 ? (
+              <div className="cycle-bond-status-lines" role="status">
+                {reference.statusLabels.map((s) => (
+                  <span key={s} className="cycle-bond-status-pill">
+                    {s}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            {reference.hintLines.length > 0 ? (
+              <div className="cycle-bond-hint-lines">
+                {reference.hintLines.map((line) => (
+                  <p key={line} className="m-0 cycle-bond-hint-line">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p className="m-0 px-1 text-[9px] text-slate-600">향후 상황 참고 · 특이 신호 없음</p>
+            )}
 
             <div className="cycle-bond-core-grid">
               {CORE_KEYS.map((key) => {
@@ -132,28 +134,15 @@ export default function CycleBondLiquiditySection({
                     <p className="m-0 mt-0.5 font-mono text-[16px] font-bold leading-none tabular-nums text-slate-50">
                       {value}
                     </p>
-                    <p className="m-0 mt-1.5 text-[9px] font-medium leading-snug text-amber-200/90">
-                      {hints[key] ?? "—"}
-                    </p>
                   </article>
                 )
               })}
             </div>
 
             {detailOpen ? (
-              <div className="cycle-bond-detail-block space-y-2">
-                {Number.isFinite(Number(cycleScore)) ? (
-                  <p className="m-0 text-[10px] text-slate-300">
-                    Cycle {Math.round(Number(cycleScore))} · {cyclePos.position}
-                    <span className="text-slate-500"> → 채권·유동성 확인</span>
-                  </p>
-                ) : null}
-                {os ? (
-                  <p className="m-0 text-[10px] font-semibold text-cyan-200/90">
-                    실전: {os.actionNow.today} · AI {os.actionNow.ai}
-                  </p>
-                ) : null}
-              </div>
+              <p className="m-0 cycle-bond-ref-note">
+                최종 판단은 Cycle(단기·중기·장기·실전) 우선 · 채권은 미래 체크용
+              </p>
             ) : null}
 
             <div className="cycle-bond-expert">

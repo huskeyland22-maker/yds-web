@@ -365,8 +365,6 @@ export default function PanicDeskDashboard({
 
       <div className="my-7 sm:my-8">
         <CycleBondLiquiditySection
-          panicData={panicData}
-          cycleScore={finalScore}
           basisDateTime={basisStatusLine}
           snapshot={bondSnapshot.snapshot}
           loading={bondSnapshot.loading}
@@ -389,8 +387,7 @@ export default function PanicDeskDashboard({
         <SectorRotationPanel
           panicData={panicData}
           cycleScore={finalScore}
-          snapshot={bondSnapshot.snapshot}
-          loading={macroRiskEnabled && bondSnapshot.loading}
+          loading={false}
         />
       </div>
 

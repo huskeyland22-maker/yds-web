@@ -1,8 +1,6 @@
 /**
- * YDS Sector Rotation Engine — Cycle + 패닉 + 채권(10Y·30Y·DXY) → 섹터 4단계 + 종목 후보
+ * YDS Sector Rotation — Cycle + 패닉 최종 (채권·유동성 판단·섹터 결정 없음)
  */
-import { buildMarketOsIntegrated } from "../market-os/buildMarketOsIntegrated.js"
-import { deriveBondLiquidityStatuses } from "../market-os/bondLiquidityStatus.js"
 import { resolveCyclePosition } from "../market-os/positionLabels.js"
 import { sectorFlowStocks } from "./sectorFlowNav.js"
 import { computeMarketAction } from "./panicMarketActionEngine.js"
@@ -137,75 +135,22 @@ export const ROTATION_SECTOR_DEFS = [
 
 const ROTATION_IDS = ROTATION_SECTOR_DEFS.map((d) => d.id)
 
-/** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot @param {string} key */
-function metricRow(snapshot, key) {
-  const rows = [
-    ...(snapshot?.tieredMetrics?.tier1 ?? []),
-    ...(snapshot?.tieredMetrics?.tier2 ?? []),
-  ]
-  return rows.find((r) => r.key === key) ?? null
-}
-
 /**
  * @param {{
  *   cycleScore?: number | null
  *   panicData?: object | null
- *   snapshot?: import("../macro-risk/engine.js").MacroRiskSnapshot | null
  * }} input
  */
-function buildMarketContext({ cycleScore, panicData, snapshot }) {
+function buildMarketContext({ cycleScore, panicData }) {
   const cycle = resolveCyclePosition(cycleScore)
   const action = computeMarketAction(panicData)
-  const os = snapshot ? buildMarketOsIntegrated({ cycleScore, snapshot }) : null
-  const bondStatuses = deriveBondLiquidityStatuses(snapshot)
-  const triggers = snapshot?.triggers ?? []
-  const activeTrig = (id) => triggers.some((t) => t.active && t.id === id)
-
-  const us10 = metricRow(snapshot, "US10Y")
-  const us30 = metricRow(snapshot, "US30Y")
-  const dxy = metricRow(snapshot, "DXY")
-
-  const us30y = us30?.current != null ? Number(us30.current) : null
-  const us10y = us10?.current != null ? Number(us10.current) : null
-
-  const rateRepricing =
-    bondStatuses.includes("금리 재평가") ||
-    activeTrig("rate_repricing_event") ||
-    activeTrig("rate_shock")
-  const longBondStress =
-    bondStatuses.includes("장기채 경고") || (us30y != null && us30y >= 5)
-  const liquidityWarning =
-    bondStatuses.includes("유동성 주의") ||
-    bondStatuses.includes("유동성 축소") ||
-    activeTrig("dollar_pressure") ||
-    dxy?.slope === "up" ||
-    (dxy?.change1D != null && Number(dxy.change1D) > 0.3)
-
-  const bond10yStable =
-    !rateRepricing &&
-    us10?.slope !== "up" &&
-    (us10?.change1D == null || Math.abs(Number(us10.change1D)) < 0.08)
 
   const c = Number(cycleScore)
   const fearLate = Number.isFinite(c) && c > 15 && c <= 32
   const fear = action?.regime === "fear" || action?.regime === "extreme_fear"
   const greed = action?.regime === "greed" || action?.regime === "extreme_greed"
 
-  return {
-    cycle,
-    action,
-    os,
-    bondStatuses,
-    fearLate,
-    fear,
-    greed,
-    rateRepricing,
-    longBondStress,
-    liquidityWarning,
-    bond10yStable,
-    us30y,
-    us10y,
-  }
+  return { cycle, action, fearLate, fear, greed, cycleScore: c }
 }
 
 /**
@@ -222,16 +167,11 @@ function scoreRotationSectors(ctx) {
     if (reason && !out[id].reasons.includes(reason)) out[id].reasons.push(reason)
   }
 
-  if (ctx.fearLate && ctx.bond10yStable) {
+  if (ctx.fearLate) {
     add("ai", 3, "공포 후반")
-    add("semi", 3, "10Y 안정")
+    add("semi", 3, "눌림 관심")
     add("value", 2, "가치 우호")
-    add("battery", 1, "눌림 관찰")
-  } else if (ctx.fearLate) {
-    add("ai", 2, "공포 후반")
-    add("semi", 2, "분할 관찰")
-    add("value", 2, "방어")
-    add("cash", 2, "현금")
+    add("battery", 1, "분할 관찰")
   }
 
   if (ctx.fear) {
@@ -242,53 +182,27 @@ function scoreRotationSectors(ctx) {
     add("semi", 1, "소액 분할")
   }
 
-  if (ctx.greed && !ctx.rateRepricing) {
+  if (ctx.greed) {
     add("ai", 2, "Risk-on")
     add("semi", 2, "성장")
     add("power", 1, "전력 수요")
     add("ship", 1, "사이클")
   }
 
-  if (ctx.rateRepricing) {
-    add("ai", -3, "금리 재평가")
-    add("semi", -3, "성장 추격 주의")
-    add("battery", -2, "고베타")
-    add("value", 2, "가치")
-    add("cash", 3, "현금")
-    add("defense", 1, "방어")
-  }
-
-  if (ctx.longBondStress) {
-    add("semi", -2, "30Y>5")
-    add("ai", -2, "장기채 경고")
-    add("battery", -1, "금리 민감")
-    add("value", 1, "가치")
-  }
-
-  if (ctx.liquidityWarning) {
-    add("ai", -2, "DXY·유동성")
-    add("semi", -2, "유동성 경고")
-    add("defense", 2, "방어")
-    add("value", 2, "가치")
-    add("cash", 3, "현금")
-    add("power", -1, "성장 압박")
-  }
-
-  if (ctx.greed && (ctx.rateRepricing || ctx.liquidityWarning)) {
-    add("ai", -1, "추격 주의")
-    add("semi", -2, "과열")
-  }
-
-  const c = Number(ctx.os?.cycleScore ?? NaN)
-  if (Number.isFinite(c)) {
-    if (c >= 55) add("cash", 2, "과열·현금")
+  if (Number.isFinite(ctx.cycleScore)) {
+    const c = ctx.cycleScore
+    if (c >= 55) {
+      add("cash", 2, "과열·현금")
+      add("ai", -1, "추격 주의")
+      add("semi", -1, "과열")
+    }
     if (c <= 28) add("cash", 2, "극단 공포")
     if (c >= 48 && c < 58) add("defense", 1, "방산 관찰")
     if (c >= 40 && c < 52) add("ship", 1, "조선")
     if (c >= 35 && c < 50) add("power", 1, "전력")
   }
 
-  if (!ctx.fear && !ctx.greed && !ctx.rateRepricing && !ctx.liquidityWarning) {
+  if (!ctx.fear && !ctx.greed && !ctx.fearLate) {
     add("power", 1, "중립")
     add("ship", 1, "중립")
   }
@@ -304,8 +218,8 @@ function scoreToState(score) {
   return "neutral"
 }
 
-/** @param {string} id @param {{ score: number; reasons: string[] }} row */
-function picksForSector(id, row) {
+/** @param {string} id */
+function picksForSector(id) {
   const def = ROTATION_SECTOR_DEFS.find((d) => d.id === id)
   if (!def) return []
   if (def.koreaSectorId) {
@@ -318,9 +232,9 @@ function picksForSector(id, row) {
   return def.picks.slice(0, 4)
 }
 
-/** @param {SectorRotationState[]} states */
-function summarizeByState(states, state) {
-  return states
+/** @param {RotationSectorCard[]} sectors @param {SectorRotationState} state */
+function summarizeByState(sectors, state) {
+  return sectors
     .filter((s) => s.state === state)
     .map((s) => s.label)
     .join(" · ")
@@ -334,8 +248,8 @@ function summarizeByState(states, state) {
  * }} input
  * @returns {SectorRotationResult}
  */
-export function buildSectorRotation({ panicData = null, cycleScore = null, snapshot = null }) {
-  const ctx = buildMarketContext({ cycleScore, panicData, snapshot })
+export function buildSectorRotation({ panicData = null, cycleScore = null }) {
+  const ctx = buildMarketContext({ cycleScore, panicData })
   const scored = scoreRotationSectors(ctx)
 
   const sectors = ROTATION_SECTOR_DEFS.map((def) => {
@@ -348,17 +262,14 @@ export function buildSectorRotation({ panicData = null, cycleScore = null, snaps
       stateLabel: ROTATION_STATE_LABELS[state],
       score: row.score,
       reasons: row.reasons,
-      picks: picksForSector(def.id, row),
+      picks: picksForSector(def.id),
       koreaSectorId: def.koreaSectorId,
     }
   })
 
   const regimeParts = []
   if (ctx.cycle.position && ctx.cycle.position !== "데이터 대기") regimeParts.push(ctx.cycle.position)
-  if (ctx.bond10yStable) regimeParts.push("10Y 안정")
-  else if (ctx.rateRepricing) regimeParts.push("금리 재평가")
-  if (ctx.longBondStress && ctx.us30y != null) regimeParts.push(`30Y ${ctx.us30y.toFixed(2)}%`)
-  if (ctx.liquidityWarning) regimeParts.push("유동성 경고")
+  if (ctx.action?.regimeLabel) regimeParts.push(ctx.action.regimeLabel)
 
   const watchSummary = summarizeByState(sectors, "watch") || "—"
   const cautionParts = [
@@ -374,8 +285,7 @@ export function buildSectorRotation({ panicData = null, cycleScore = null, snaps
 
   const hasCycle = Number.isFinite(Number(cycleScore))
   const hasPanic = Boolean(ctx.action)
-  const hasBond = Boolean(snapshot)
-  const ready = hasCycle || hasPanic || hasBond
+  const ready = hasCycle || hasPanic
 
   return {
     ready,

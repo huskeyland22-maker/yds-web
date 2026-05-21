@@ -22,11 +22,7 @@ export function deriveBondLiquidityStatuses(snapshot) {
   if (liqStatus.includes("축소") && !out.includes("유동성 축소")) out.push("유동성 축소")
   else if (liqStatus.includes("압박") && !out.includes("유동성 주의")) out.push("유동성 주의")
 
-  if (!out.length) {
-    const band = snapshot.scoreBreakdown?.formula?.macro != null ? snapshot.score : null
-    if (Number.isFinite(Number(band)) && Number(band) >= 55) out.push("금리·유동성 경계")
-    else out.push("보조 확인 양호")
-  }
+  if (!out.length) out.push("보조 확인 양호")
 
   return out
 }

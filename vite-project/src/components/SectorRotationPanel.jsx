@@ -15,19 +15,17 @@ const STATE_CARD_CLASS = {
  * @param {{
  *   panicData?: object | null
  *   cycleScore?: number | null
- *   snapshot?: import("../macro-risk/engine.js").MacroRiskSnapshot | null
  *   loading?: boolean
  * }} props
  */
 export default function SectorRotationPanel({
   panicData = null,
   cycleScore = null,
-  snapshot = null,
   loading = false,
 }) {
   const rotation = useMemo(
-    () => buildSectorRotation({ panicData, cycleScore, snapshot }),
-    [panicData, cycleScore, snapshot],
+    () => buildSectorRotation({ panicData, cycleScore }),
+    [panicData, cycleScore],
   )
 
   const [selectedId, setSelectedId] = useState(null)
