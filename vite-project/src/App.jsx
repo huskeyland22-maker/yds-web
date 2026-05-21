@@ -29,9 +29,6 @@ import CycleErrorBoundary from "./components/CycleErrorBoundary.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
-import MarketOsPhase2Shell from "./components/market-os/MarketOsPhase2Shell.jsx"
-import MacroRiskPage from "./pages/MacroRiskPage.jsx"
-import { isMacroRiskEnabled } from "./macro-risk/featureFlag.js"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import AppSidebar from "./components/layout/AppSidebar.jsx"
 import PanicDeskDashboard from "./components/PanicDeskDashboard.jsx"
@@ -1299,7 +1296,6 @@ function App() {
               path="/cycle"
               element={
                 <div id="desk" className="market-cycle-page min-w-0">
-                  {isMacroRiskEnabled() ? <MarketOsPhase2Shell panicData={deskPanicData} sticky /> : null}
                   <CycleErrorBoundary>
                     <PanicDeskDashboard
                       panicData={deskPanicData}
@@ -1315,14 +1311,7 @@ function App() {
                 </div>
               }
             />
-            <Route
-              path="/macro-risk"
-              element={
-                <SectionErrorBoundary label="Macro Risk">
-                  <MacroRiskPage panicData={deskPanicData} />
-                </SectionErrorBoundary>
-              }
-            />
+            <Route path="/macro-risk" element={<Navigate to="/cycle#bond-liquidity" replace />} />
             <Route
               path="/value-chain"
               element={

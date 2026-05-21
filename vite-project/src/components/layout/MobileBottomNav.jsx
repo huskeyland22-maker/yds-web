@@ -1,17 +1,15 @@
-import { Activity, Gauge, Layers, ScrollText } from "lucide-react"
+import { Activity, Layers, ScrollText } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { getPrimaryNavItems } from "../../utils/appNavItems.js"
 
 const ICON_BY_PATH = {
   "/cycle": Activity,
-  "/macro-risk": Gauge,
   "/value-chain": Layers,
   "/trading-log": ScrollText,
 }
 
 const SHORT_LABEL = {
   "/cycle": "사이클",
-  "/macro-risk": "채권·유동성",
   "/value-chain": "코리아",
   "/trading-log": "로그",
 }
@@ -35,7 +33,6 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
 
   const activeId = (() => {
     const p = location.pathname
-    if (p.startsWith("/macro-risk")) return "macro_risk"
     if (p.startsWith("/value-chain")) return "value_chain"
     if (p.startsWith("/trading-log")) return "trading_log"
     if (p.startsWith("/cycle") || p === "/") return "cycle"

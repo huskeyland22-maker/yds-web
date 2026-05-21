@@ -13,6 +13,7 @@ import {
 import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
+import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 import PanicSectorFlowCard from "./PanicSectorFlowCard.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
@@ -379,6 +380,8 @@ export default function PanicDeskDashboard({
           </article>
         ))}
       </section>
+
+      <CycleBondLiquiditySection panicData={panicData} cycleScore={finalScore} />
 
       <SectionErrorBoundary
         label="패닉 히스토리"
