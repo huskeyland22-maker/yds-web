@@ -86,7 +86,7 @@ export default function DailyMarketReportPanel({
         </ReportCard>
 
         <ReportCard title="오늘 행동">
-          <p className="m-0 daily-report-v2__value">{actionToday.today}</p>
+          <ReportRow label="오늘" value={actionToday.today} />
           <ReportRow label="AI" value={actionToday.ai} />
           <ReportRow
             label="현금"
