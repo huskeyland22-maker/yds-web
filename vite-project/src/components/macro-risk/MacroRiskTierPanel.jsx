@@ -12,23 +12,23 @@ export default function MacroRiskTierPanel({ tieredMetrics }) {
 
   return (
     <>
-      <section className="trading-card-shell px-4 py-3">
-        <p className="m-0 text-[9px] font-semibold tracking-[0.18em] text-slate-500">핵심 지표</p>
-        <p className="m-0 mt-0.5 text-[10px] text-slate-500">10년물 · 30년물 · 달러지수</p>
+      <section className="macro-risk-tier-shell trading-card-shell">
+        <p className="m-0 macro-risk-tier-shell__eyebrow">핵심 지표</p>
+        <p className="m-0 macro-risk-tier-shell__sub">10년물 · 30년물 · 달러지수</p>
         <MacroRiskChangeRates metrics={tier1} variant="tier1" hideBlockTitle title="" />
       </section>
 
-      <section className="trading-card-shell px-4 py-3">
+      <section className="macro-risk-tier-shell trading-card-shell">
         <button
           type="button"
           onClick={() => setExpertOpen((v) => !v)}
-          className="flex w-full items-center justify-between gap-2 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-left"
+          className="macro-risk-tier-expert-btn flex w-full items-center justify-between gap-2 text-left"
         >
           <span className="text-[10px] font-semibold text-slate-300">전문가 보기 {expertOpen ? "▲" : "▼"}</span>
         </button>
-        <p className="m-0 mt-1 text-[10px] text-slate-600">실질금리 · 기대인플레 · 2년물</p>
+        <p className="m-0 macro-risk-tier-shell__sub">실질금리 · 기대인플레 · 2년물</p>
         {expertOpen ? (
-          <div className="mt-2">
+          <div className="mt-1.5">
             <MacroRiskChangeRates metrics={tier2} variant="tier2" hideBlockTitle title="" />
           </div>
         ) : null}

@@ -133,7 +133,7 @@ export default function MacroRiskPage({ panicData = null }) {
       ) : null}
 
       {snapshot ? (
-        <div className="macro-risk-stack flex flex-col gap-[18px]">
+        <div className="macro-risk-stack flex flex-col">
           <MarketOsPhase2Shell panicData={panicData} sticky />
 
           <BondLiquidityStatusBar
@@ -159,8 +159,8 @@ export default function MacroRiskPage({ panicData = null }) {
 
           <SectionErrorBoundary label="Pressure Engine">
             <div>
-              <p className="mb-2 px-0.5 text-[9px] font-semibold tracking-[0.18em] text-slate-500">PRESSURE ENGINE</p>
-              <div className="macro-risk-pressure-grid grid grid-cols-1 gap-2 md:grid-cols-3">
+              <p className="macro-risk-pressure-heading m-0 px-0.5">PRESSURE ENGINE</p>
+              <div className="macro-risk-pressure-grid grid grid-cols-1 md:grid-cols-3">
                 {snapshot.pillars.map((pillar) => (
                   <SectionErrorBoundary key={pillar.id} label={pillar.title}>
                     <MacroRiskPillarSection pillar={pillar} />

@@ -27,13 +27,13 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
   return (
     <div
       className={
-        hideBlockTitle ? "mt-0 pt-0 first:mt-0" : "mt-3 border-t border-white/[0.06] pt-3 first:mt-0 first:border-t-0 first:pt-0"
+        hideBlockTitle ? "mt-0 pt-0 first:mt-0" : "mt-2 border-t border-white/[0.06] pt-2 first:mt-0 first:border-t-0 first:pt-0"
       }
     >
       {!hideBlockTitle ? (
         <p className="m-0 cycle-eyebrow">{title}</p>
       ) : null}
-      <div className={`grid grid-cols-2 gap-2 ${hideBlockTitle ? "" : "mt-2"}`}>
+      <div className={`macro-risk-tier-grid grid grid-cols-2 ${hideBlockTitle ? "" : "mt-1.5"}`}>
         {metrics.map((row) => {
           const fmt = row.format === "pct" ? "level" : row.format
           const currentDisplay =
@@ -60,7 +60,7 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
             <div
               key={row.key}
               className={[
-                "macro-risk-tier-cell flex h-[72px] max-h-[72px] flex-col justify-between rounded-lg border px-2 py-1.5 text-left",
+                "macro-risk-tier-cell flex flex-col justify-between rounded-[10px] border text-left",
                 shell,
               ].join(" ")}
             >

@@ -19,7 +19,7 @@ export default function MacroRiskPillarSection({ pillar }) {
     <article
       title={hoverDetail || undefined}
       className={[
-        "macro-risk-pillar trading-card-shell flex h-[110px] max-h-[110px] flex-col justify-between overflow-hidden px-3 py-2.5",
+        "macro-risk-pillar trading-card-shell flex flex-col justify-between overflow-hidden",
         accent,
       ]
         .filter(Boolean)

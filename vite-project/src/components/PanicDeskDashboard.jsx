@@ -287,7 +287,7 @@ export default function PanicDeskDashboard({
         </section>
       </div>
 
-      <div className="my-4 sm:my-5">
+      <div>
         <CycleBondLiquiditySection
           basisDateTime={null}
           panicData={panicData}
@@ -299,7 +299,7 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <div className="mb-5 sm:mb-6">
+      <div>
         <DailyMarketReportPanel
           panicData={panicData}
           cycleScore={finalScore}
