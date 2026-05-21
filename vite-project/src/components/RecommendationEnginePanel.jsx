@@ -55,33 +55,12 @@ export default function RecommendationEnginePanel({
         </p>
       </header>
 
-      <div className="recommend-engine__hero">
-        <p className="m-0 daily-report-v2__label">오늘 추천</p>
-        <p className="m-0 daily-report-v2__value recommend-engine__hero-value">{rec.today}</p>
-      </div>
-
-      {rec.reasons.length > 0 ? (
-        <p className="m-0 recommend-engine__meta-line">
-          <span className="recommend-engine__meta-tag">사유</span>
-          {rec.reasons.join(" · ")}
-        </p>
-      ) : null}
-
-      <div className="recommend-engine__grid">
+      <div className="recommend-engine__grid recommend-engine__grid--solo">
         <ActionRow label="단기" value={rec.practical.short} />
         <ActionRow label="중기" value={rec.practical.mid} />
         <ActionRow label="장기" value={rec.practical.long} />
         <ActionRow label="실전" value={rec.practical.tactical} accent />
       </div>
-
-      {rec.risk.length > 0 ? (
-        <div className="recommend-engine__risk">
-          <p className="m-0 recommend-engine__meta-line">
-            <span className="recommend-engine__meta-tag">리스크</span>
-            {rec.risk.join(" · ")}
-          </p>
-        </div>
-      ) : null}
     </section>
   )
 }

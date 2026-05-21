@@ -1589,17 +1589,6 @@
     color: rgba(52, 211, 153, 0.95);
   }
 
-  .recommend-engine__hero {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-
-  .recommend-engine__hero-value {
-    color: rgba(253, 230, 138, 0.98);
-  }
-
   .recommend-engine__meta-line {
     margin: 0 0 8px;
     font-size: 12px;
@@ -1626,7 +1615,11 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px 10px;
-    margin-bottom: 6px;
+    margin-bottom: 0;
+  }
+
+  .recommend-engine__grid--solo {
+    margin-top: 2px;
   }
 
   @media (min-width: 640px) {
