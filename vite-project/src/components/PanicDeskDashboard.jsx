@@ -314,9 +314,6 @@ export default function PanicDeskDashboard({
       </SectionErrorBoundary>
 
       <PanicDeskChart
-        rows={safeHistory}
-        primarySeries={chartSeries}
-        chartMetric={chartMetric}
         panicData={panicData}
         deskMarketReport={deskMarketReport}
         deskMarketReportLoading={deskMarketReportLoading}
