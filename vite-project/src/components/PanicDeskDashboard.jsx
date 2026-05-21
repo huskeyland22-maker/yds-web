@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { isPanicHubEnabled } from "../config/api.js"
 import { useAppDataStore } from "../store/appDataStore.js"
-import { getFinalScore, getMidScore, getShortScore } from "../utils/tradingScores.js"
+import { getFinalScore } from "../utils/tradingScores.js"
 import { kstCalendarKey } from "../utils/formatDataAge.js"
 import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
@@ -12,10 +12,8 @@ import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
-import SectorRotationPanel from "./SectorRotationPanel.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
-import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
 import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
 
 const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
@@ -145,14 +143,6 @@ export default function PanicDeskDashboard({
   }, [mood, panicData, marketState, deskMarketReport])
 
   const finalScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
-  const shortScore = useMemo(
-    () => (panicData ? getShortScore(panicData.vix, panicData.putCall) : null),
-    [panicData],
-  )
-  const midScore = useMemo(
-    () => (panicData ? getMidScore(panicData.fearGreed, panicData.bofa, panicData.highYield) : null),
-    [panicData],
-  )
 
   const dataDateKey = useMemo(() => {
     if (asOfDateLabel && /^\d{4}-\d{2}-\d{2}$/.test(asOfDateLabel)) return asOfDateLabel
@@ -167,23 +157,8 @@ export default function PanicDeskDashboard({
     return "수동 입력"
   }, [panicData])
 
-  const timing = useMemo(() => computeMarketTiming(panicData), [panicData])
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
-
-  const horizons = useMemo(() => {
-    const cards = [
-      { id: "short", tag: "단기", signal: timing?.short, score: shortScore, accent: "border-sky-500/20" },
-      { id: "mid", tag: "중기", signal: timing?.mid, score: midScore, accent: "border-violet-500/20" },
-      { id: "long", tag: "장기", signal: timing?.long, score: finalScore, accent: "border-emerald-500/20" },
-    ]
-    return cards.map((c) => ({
-      ...c,
-      title: c.signal?.actionShort ?? c.signal?.action ?? tacticalView?.state ?? "—",
-      body: c.signal?.marketState ?? "—",
-      allocs: c.signal?.allocations?.slice(0, 4) ?? [],
-    }))
-  }, [timing, shortScore, midScore, finalScore, tacticalView])
 
   const chartSeries = useMemo(() => {
     const m = findChartMetric(chartMetric)
@@ -326,36 +301,6 @@ export default function PanicDeskDashboard({
           loading={macroRiskEnabled && bondSnapshot.loading}
         />
       </div>
-
-      <div className="mb-5 sm:mb-6">
-        <SectorRotationPanel
-          panicData={panicData}
-          cycleScore={finalScore}
-          loading={false}
-        />
-      </div>
-
-      <SectionLabel title="포트 비중" />
-      <section
-        className="grid grid-cols-3 gap-1.5 sm:gap-2"
-        aria-label="포트 비중 단기 중기 장기"
-      >
-        {horizons.map((h) => (
-          <article
-            key={h.id}
-            className={[
-              "flex min-h-[3.25rem] flex-col items-center justify-center rounded border px-2 py-2",
-              h.accent,
-              "bg-black/25",
-            ].join(" ")}
-          >
-            <span className="text-[8px] font-bold tracking-wide text-slate-500">{h.tag}</span>
-            <span className="mt-1 font-mono text-[18px] font-bold leading-none tabular-nums text-slate-50 sm:text-[20px]">
-              {h.score ?? h.signal?.score ?? "—"}
-            </span>
-          </article>
-        ))}
-      </section>
 
       <SectionErrorBoundary
         label="패닉 히스토리"

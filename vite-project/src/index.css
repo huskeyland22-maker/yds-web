@@ -505,7 +505,79 @@
     opacity: 0.85;
   }
 
-  /* YDS Daily Market Report — Cycle + 패닉 + 채권 통합 */
+  /* YDS Daily Market Report v2 */
+  .daily-report-v2 {
+    border-radius: 15px;
+    border: 1px solid rgba(34, 211, 238, 0.32);
+    background: linear-gradient(165deg, rgba(6, 12, 22, 0.98) 0%, rgba(10, 18, 30, 0.92) 100%);
+    box-shadow:
+      0 0 0 1px rgba(6, 182, 212, 0.1),
+      0 16px 40px rgba(0, 0, 0, 0.42);
+    overflow: hidden;
+  }
+
+  .daily-report-v2__head {
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .daily-report-v2__block {
+    padding: 8px 14px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .daily-report-v2__block--accent {
+    background: rgba(34, 211, 238, 0.06);
+  }
+
+  .daily-report-v2__block-title {
+    margin: 0 0 6px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .daily-report-v2__row {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 8px;
+    align-items: baseline;
+    padding: 3px 0;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .daily-report-v2__label {
+    font-weight: 700;
+    color: rgba(100, 116, 139, 0.95);
+  }
+
+  .daily-report-v2__value {
+    font-weight: 600;
+    color: rgba(241, 245, 249, 0.96);
+    word-break: keep-all;
+  }
+
+  .daily-report-v2__brief {
+    padding: 8px 14px 12px;
+    background: rgba(0, 0, 0, 0.22);
+  }
+
+  .daily-report-v2__brief-line {
+    margin: 0;
+    padding: 2px 0;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: rgba(203, 213, 225, 0.9);
+  }
+
+  .daily-report-v2__brief-line:first-of-type {
+    padding-top: 4px;
+  }
+
+  /* legacy daily-market-report (unused) */
   .daily-market-report {
     border-radius: 15px;
     border: 1px solid rgba(34, 211, 238, 0.28);

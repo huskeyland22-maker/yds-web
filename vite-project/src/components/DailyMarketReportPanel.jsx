@@ -2,6 +2,18 @@ import { useMemo } from "react"
 import { buildDailyMarketReport } from "../utils/buildDailyMarketReport.js"
 
 /**
+ * @param {{ label: string; value: string; valueClass?: string }} props
+ */
+function ReportRow({ label, value, valueClass = "" }) {
+  return (
+    <div className="daily-report-v2__row">
+      <span className="daily-report-v2__label">{label}</span>
+      <span className={["daily-report-v2__value", valueClass].filter(Boolean).join(" ")}>{value}</span>
+    </div>
+  )
+}
+
+/**
  * @param {{
  *   panicData?: object | null
  *   cycleScore?: number | null
@@ -22,64 +34,76 @@ export default function DailyMarketReportPanel({
 
   if (loading && !report.ready) {
     return (
-      <section className="daily-market-report" aria-label="YDS Daily Market Report">
-        <p className="m-0 px-3 py-4 text-[10px] text-slate-500">통합 브리핑 생성 중…</p>
+      <section className="daily-report-v2" aria-label="YDS Daily Market Report">
+        <p className="m-0 px-3 py-4 text-[10px] text-slate-500">리포트 생성 중…</p>
       </section>
     )
   }
 
   if (!report.ready) {
     return (
-      <section className="daily-market-report" aria-label="YDS Daily Market Report">
+      <section className="daily-report-v2" aria-label="YDS Daily Market Report">
         <p className="m-0 px-3 py-4 text-[10px] text-slate-500">
-          Cycle·패닉·채권(10Y·30Y·DXY) 입력 후 자동 생성됩니다.
+          Cycle·패닉 입력 후 자동 생성됩니다.
         </p>
       </section>
     )
   }
 
+  const { marketToday, actionToday, strategy, sectors, oneLiner } = report
+
   return (
-    <section className="daily-market-report" aria-label="YDS Daily Market Report">
-      <header className="daily-market-report__head">
+    <section className="daily-report-v2" aria-label="YDS Daily Market Report">
+      <header className="daily-report-v2__head">
         <p className="m-0 text-[9px] font-bold tracking-[0.14em] text-cyan-300/80">
           YDS DAILY MARKET REPORT
         </p>
       </header>
 
-      <div className="daily-market-report__status-block">
-        <p className="m-0 daily-market-report__status-title">상태</p>
-        <div className="daily-market-report__status-pills" role="list">
-          {report.statusPills.map((pill) => (
-            <span key={pill} className="daily-market-report__status-pill" role="listitem">
-              {pill}
-            </span>
-          ))}
-        </div>
+      <div className="daily-report-v2__block">
+        <p className="m-0 daily-report-v2__block-title">1. 오늘 시장</p>
+        <ReportRow label="시장" value={marketToday.market} />
+        <ReportRow label="채권" value={marketToday.bond} valueClass="text-amber-200/90" />
+        <ReportRow label="리더" value={marketToday.leaders} valueClass="text-cyan-200/90" />
       </div>
 
-      <div className="daily-market-report__actions">
-        <div className="daily-market-report__action-row">
-          <span className="daily-market-report__action-label">실전</span>
-          <span className="daily-market-report__action-value">{report.practicalAction}</span>
-        </div>
-        <div className="daily-market-report__action-row">
-          <span className="daily-market-report__action-label">현금</span>
-          <span className="daily-market-report__action-value font-mono tabular-nums">
-            {report.cashAllocation}
-          </span>
-        </div>
-        <div className="daily-market-report__action-row">
-          <span className="daily-market-report__action-label">관심</span>
-          <span className="daily-market-report__action-value text-cyan-200/90">
-            {report.watchSectors}
-          </span>
-        </div>
-        <div className="daily-market-report__action-row">
-          <span className="daily-market-report__action-label">주의</span>
-          <span className="daily-market-report__action-value text-amber-200/90">
-            {report.cautionSectors}
-          </span>
-        </div>
+      <div className="daily-report-v2__block daily-report-v2__block--accent">
+        <p className="m-0 daily-report-v2__block-title">2. 오늘 행동</p>
+        <ReportRow label="오늘" value={actionToday.today} />
+        <ReportRow label="AI" value={actionToday.ai} valueClass="text-cyan-200/95" />
+        <ReportRow label="현금" value={actionToday.cash} valueClass="font-mono tabular-nums" />
+        <ReportRow label="리스크" value={actionToday.risk} valueClass="text-amber-200/90" />
+      </div>
+
+      <div className="daily-report-v2__block">
+        <p className="m-0 daily-report-v2__block-title">3. 실전 전략</p>
+        <ReportRow label="단기" value={strategy.short} />
+        <ReportRow label="중기" value={strategy.mid} />
+        <ReportRow label="장기" value={strategy.long} />
+        <ReportRow label="실전" value={strategy.practical} valueClass="font-semibold text-slate-50" />
+      </div>
+
+      <div className="daily-report-v2__block">
+        <p className="m-0 daily-report-v2__block-title">4. 관심 섹터</p>
+        <ReportRow
+          label="리더"
+          value={sectors.leaders.length ? sectors.leaders.join(" · ") : "—"}
+          valueClass="text-cyan-200/90"
+        />
+        <ReportRow
+          label="주의"
+          value={sectors.caution.join(" · ")}
+          valueClass="text-amber-200/90"
+        />
+      </div>
+
+      <div className="daily-report-v2__brief">
+        <p className="m-0 daily-report-v2__block-title">5. 한줄 브리핑</p>
+        {oneLiner.map((line) => (
+          <p key={line} className="m-0 daily-report-v2__brief-line">
+            {line}
+          </p>
+        ))}
       </div>
     </section>
   )
