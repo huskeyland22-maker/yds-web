@@ -1476,6 +1476,34 @@
     display: none !important;
   }
 
+  /* 패닉 히스토리 지표 탭 — 약어 · 한글 한 줄 */
+  .panic-history-tabs {
+    gap: 4px;
+  }
+
+  .panic-history-tab {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  .panic-history-tab__label {
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  @media (min-width: 640px) {
+    .panic-history-tab__label {
+      font-size: 10px;
+    }
+  }
+
+  .panic-history-tab[aria-pressed="true"] .panic-history-tab__label {
+    font-weight: 700;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
   .panic-history-lab-chart {
     pointer-events: auto;
     overflow: visible;

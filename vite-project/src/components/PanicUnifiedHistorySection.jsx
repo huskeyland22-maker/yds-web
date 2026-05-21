@@ -183,22 +183,26 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
         ) : null}
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-0.5">
-        {tabsToShow.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTabId(t.id)}
-            className={[
-              "rounded px-1.5 py-0.5 text-[9px] font-semibold transition sm:text-[10px]",
-              tabId === t.id
-                ? "bg-white/12 text-slate-100 ring-1 ring-white/15"
-                : "text-slate-500 hover:text-slate-300",
-            ].join(" ")}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="panic-history-tabs mt-2 flex flex-wrap gap-1">
+        {tabsToShow.map((t) => {
+          const active = tabId === t.id
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTabId(t.id)}
+              className={[
+                "panic-history-tab inline-flex max-w-full items-center rounded-md border px-1.5 py-1 transition",
+                active
+                  ? "border-white/20 bg-white/12 text-slate-50 ring-1 ring-white/12"
+                  : "border-transparent bg-transparent text-slate-400 hover:border-white/10 hover:text-slate-200",
+              ].join(" ")}
+              aria-pressed={active}
+            >
+              <span className="panic-history-tab__label whitespace-nowrap">{t.label}</span>
+            </button>
+          )
+        })}
       </div>
 
       {tabId === "composite" ? (

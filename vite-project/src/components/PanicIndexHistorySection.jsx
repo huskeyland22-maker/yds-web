@@ -118,24 +118,29 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         </p>
       </div>
 
-      <div className="mt-1.5 flex flex-wrap gap-0.5">
+      <div className="panic-history-tabs mt-1.5 flex flex-wrap gap-1">
         {HISTORY_SECTION_METRICS.map((m) => {
           const n = metricCounts[m.key] ?? 0
+          const active = activeHistoryTab === m.key
           return (
             <button
               key={m.key}
               type="button"
               onClick={() => setActiveHistoryTab(m.key)}
               className={[
-                "rounded px-1.5 py-0.5 text-[9px] font-semibold transition sm:text-[10px]",
-                activeHistoryTab === m.key
-                  ? "bg-white/12 text-slate-100 ring-1 ring-white/15"
-                  : "text-slate-500 hover:text-slate-300",
+                "panic-history-tab inline-flex max-w-full items-center gap-0.5 rounded-md border px-1.5 py-1 transition",
+                active
+                  ? "border-white/20 bg-white/12 text-slate-50 ring-1 ring-white/12"
+                  : "border-transparent bg-transparent text-slate-400 hover:border-white/10 hover:text-slate-200",
               ].join(" ")}
-              style={activeHistoryTab === m.key ? { boxShadow: `0 0 8px ${m.accent}22` } : undefined}
-              title={`${m.label} 데이터 ${n}일`}
+              style={active ? { boxShadow: `0 0 10px ${m.accent}28` } : undefined}
+              title={m.tooltip ? `${m.label} · ${m.tooltip} · ${n}일` : `${m.label} · ${n}일`}
+              aria-pressed={active}
             >
-              {m.label} ({n})
+              <span className="panic-history-tab__label whitespace-nowrap">{m.label}</span>
+              <span className="panic-history-tab__count font-mono text-[8px] tabular-nums opacity-75">
+                {n}
+              </span>
             </button>
           )
         })}
