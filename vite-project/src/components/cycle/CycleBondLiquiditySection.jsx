@@ -4,13 +4,13 @@ import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { metricDisplayTooltip } from "../../macro-risk/metricLabels.js"
 import {
-  buildBondCompactLines,
+  buildBondLiquidityGroups,
   bondStatusSummaryLine,
 } from "../../market-os/bondLiquidityReference.js"
 import { formatBondLastSyncKst, loadBondSyncMeta } from "../../macro-risk/bondSyncMeta.js"
 import { slopeArrow } from "../../macro-risk/seriesMath.js"
 
-const EXPERT_KEYS = ["REAL_YIELD", "BEI", "MOVE"]
+const EXPERT_KEYS = ["REAL_YIELD", "BEI"]
 
 /**
  * @param {string} key
@@ -20,6 +20,47 @@ const EXPERT_KEYS = ["REAL_YIELD", "BEI", "MOVE"]
 function fmtBondValue(key, n, fmt = "rate") {
   if (n == null || !Number.isFinite(n)) return "—"
   return formatCurrent(n, fmt)
+}
+
+/**
+ * @param {import("../../market-os/bondLiquidityReference.js").BondCompactLine} line
+ */
+function CompactMetricLine({ line }) {
+  return (
+    <div className="cycle-bond-compact-line">
+      <span className="cycle-bond-compact-line__metric">{line.shortLabel}</span>
+      <span className="cycle-bond-compact-line__value font-mono tabular-nums">{line.value}</span>
+      <span
+        className={[
+          "cycle-bond-compact-line__arrow",
+          line.arrow === "↑" ? "cycle-bond-compact-line__arrow--up" : "",
+          line.arrow === "↓" ? "cycle-bond-compact-line__arrow--down" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {line.warn ? "⚠" : line.arrow}
+      </span>
+      <span className="cycle-bond-compact-line__tag">{line.tag}</span>
+    </div>
+  )
+}
+
+/**
+ * @param {{ title: string; lines: import("../../market-os/bondLiquidityReference.js").BondCompactLine[] }} props
+ */
+function MetricGroup({ title, lines }) {
+  if (!lines.length) return null
+  return (
+    <div className="cycle-bond-group">
+      <p className="m-0 cycle-bond-group__title">{title}</p>
+      <div className="cycle-bond-compact-grid">
+        {lines.map((line) => (
+          <CompactMetricLine key={line.key} line={line} />
+        ))}
+      </div>
+    </div>
+  )
 }
 
 /**
@@ -51,9 +92,9 @@ export default function CycleBondLiquiditySection({
     }
   }, [])
 
-  const compactLines = useMemo(
-    () => buildBondCompactLines(snapshot, fmtBondValue),
-    [snapshot],
+  const groups = useMemo(
+    () => buildBondLiquidityGroups(snapshot, fmtBondValue, panicData?.move),
+    [snapshot, panicData?.move],
   )
 
   const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
@@ -107,25 +148,9 @@ export default function CycleBondLiquiditySection({
               {statusLine}
             </p>
 
-            <div className="cycle-bond-compact-grid">
-              {compactLines.map((line) => (
-                <div key={line.key} className="cycle-bond-compact-line">
-                  <span className="cycle-bond-compact-line__metric">{line.shortLabel}</span>
-                  <span className="cycle-bond-compact-line__value font-mono tabular-nums">{line.value}</span>
-                  <span
-                    className={[
-                      "cycle-bond-compact-line__arrow",
-                      line.arrow === "↑" ? "cycle-bond-compact-line__arrow--up" : "",
-                      line.arrow === "↓" ? "cycle-bond-compact-line__arrow--down" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {line.warn ? "⚠" : line.arrow}
-                  </span>
-                  <span className="cycle-bond-compact-line__tag">{line.tag}</span>
-                </div>
-              ))}
+            <div className="cycle-bond-split">
+              <MetricGroup title="채권" lines={groups.bond} />
+              <MetricGroup title="유동성" lines={groups.liquidity} />
             </div>
 
             <div className="cycle-bond-expert">
@@ -143,24 +168,12 @@ export default function CycleBondLiquiditySection({
                   <div className="cycle-bond-expert-grid">
                     {EXPERT_KEYS.map((key) => {
                       const row = tierByKey[key]
-                      const fmt = row?.format === "pct" ? "level" : row?.format ?? (key === "MOVE" ? "index" : "rate")
-                      let value = "—"
-                      let slope = "flat"
-
-                      if (key === "MOVE") {
-                        const m = Number(panicData?.move)
-                        if (Number.isFinite(m)) {
-                          value = fmtBondValue("MOVE", m, "index")
-                          if (m >= 120) slope = "up"
-                          else if (m <= 90) slope = "down"
-                        }
-                      } else if (row?.current != null && Number.isFinite(Number(row.current))) {
-                        value = fmtBondValue(key, Number(row.current), fmt)
-                        slope = row.slope ?? "flat"
-                      }
-
-                      const title =
-                        key === "REAL_YIELD" ? "REAL" : key === "BEI" ? "BEI" : "MOVE"
+                      const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
+                      const value =
+                        row?.current != null && Number.isFinite(Number(row.current))
+                          ? fmtBondValue(key, Number(row.current), fmt)
+                          : "—"
+                      const title = key === "REAL_YIELD" ? "REAL" : "BEI"
                       const hint = metricDisplayTooltip(key) ?? "—"
 
                       return (
@@ -168,7 +181,7 @@ export default function CycleBondLiquiditySection({
                           <p className="m-0 cycle-bond-expert-card__head">
                             <span className="font-bold text-slate-200">{title}</span>
                             <span className="font-mono tabular-nums text-slate-50">{value}</span>
-                            <span className="text-slate-400">{slopeArrow(slope)}</span>
+                            <span className="text-slate-400">{slopeArrow(row?.slope ?? "flat")}</span>
                           </p>
                           <p className="m-0 cycle-bond-expert-card__hint">{hint}</p>
                         </article>

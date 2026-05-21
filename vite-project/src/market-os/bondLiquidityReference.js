@@ -108,59 +108,114 @@ export function buildBondReferenceDisplay(snapshot) {
  * }} BondCompactLine
  */
 
-/** @param {string} key @param {ReturnType<typeof metricRow>} row @param {string[]} statuses */
-function compactTagForKey(key, row, statuses) {
-  if (key === "US10Y") {
-    if (statuses.includes("금리 재평가")) return "금리압박"
-    if (row?.slope === "up") return "금리압박"
-    if (row?.slope === "down") return "금리완화"
-    return "금리"
-  }
-  if (key === "US30Y") {
-    if (statuses.includes("장기채 경고")) return "장기채"
-    if (row?.current != null && Number(row.current) >= 5) return "장기채"
-    return "장기"
-  }
-  if (key === "DXY") {
-    if (statuses.includes("유동성 주의") || statuses.includes("유동성 축소")) return "유동성주의"
-    if (row?.slope === "up") return "유동성주의"
-    if (row?.slope === "down") return "유동성완화"
-    return "유동성"
-  }
-  return ""
+/** @type {Record<string, string>} */
+const ROLE_TAG = {
+  US10Y: "금리 방향",
+  US30Y: "장기채 압력",
+  DXY: "달러 유동성",
+  MOVE: "채권 변동성",
+}
+
+/** @type {Record<string, string>} */
+const SHORT_LABEL = {
+  US10Y: "10Y",
+  US30Y: "30Y",
+  DXY: "DXY",
+  MOVE: "MOVE",
 }
 
 /**
  * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
  * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
- * @returns {BondCompactLine[]}
+ * @param {string[]} statuses
+ * @param {string} key
+ * @returns {BondCompactLine}
  */
-export function buildBondCompactLines(snapshot, formatValue) {
-  if (!snapshot) return []
+function buildMetricCompactLine(snapshot, formatValue, statuses, key) {
+  const row = metricRow(snapshot, key)
+  const fmt = row?.format === "pct" ? "level" : row?.format ?? (key === "DXY" ? "level" : "rate")
+  const cur = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
+  const value = formatValue(key, cur, fmt)
+  const slope = row?.slope ?? "flat"
+  const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
+  const warn =
+    key === "US30Y" &&
+    (statuses.includes("장기채 경고") || (cur != null && cur >= 5))
+
+  return {
+    key,
+    shortLabel: SHORT_LABEL[key] ?? key,
+    value,
+    arrow,
+    warn,
+    tag: ROLE_TAG[key] ?? key,
+  }
+}
+
+/**
+ * @param {number | null | undefined} panicMove
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
+ * @returns {BondCompactLine}
+ */
+function buildMoveCompactLine(panicMove, formatValue) {
+  const m = Number(panicMove)
+  if (!Number.isFinite(m)) {
+    return {
+      key: "MOVE",
+      shortLabel: "MOVE",
+      value: "—",
+      arrow: "→",
+      warn: false,
+      tag: ROLE_TAG.MOVE,
+    }
+  }
+  let slope = "flat"
+  if (m >= 120) slope = "up"
+  else if (m <= 90) slope = "down"
+  const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
+
+  return {
+    key: "MOVE",
+    shortLabel: "MOVE",
+    value: formatValue("MOVE", m, "index"),
+    arrow,
+    warn: m >= 120,
+    tag: ROLE_TAG.MOVE,
+  }
+}
+
+/**
+ * @typedef {{
+ *   bond: BondCompactLine[]
+ *   liquidity: BondCompactLine[]
+ * }} BondLiquidityGroups
+ */
+
+/**
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
+ * @param {number | null | undefined} [panicMove]
+ * @returns {BondLiquidityGroups}
+ */
+export function buildBondLiquidityGroups(snapshot, formatValue, panicMove = null) {
+  if (!snapshot) {
+    return { bond: [], liquidity: [buildMoveCompactLine(panicMove, formatValue)] }
+  }
 
   const statuses = deriveBondReferenceStatuses(snapshot)
-  const keys = ["US10Y", "US30Y", "DXY"]
-  const short = { US10Y: "10Y", US30Y: "30Y", DXY: "DXY" }
+  return {
+    bond: ["US10Y", "US30Y"].map((key) => buildMetricCompactLine(snapshot, formatValue, statuses, key)),
+    liquidity: [
+      buildMetricCompactLine(snapshot, formatValue, statuses, "DXY"),
+      buildMoveCompactLine(panicMove, formatValue),
+    ],
+  }
+}
 
-  return keys.map((key) => {
-    const row = metricRow(snapshot, key)
-    const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
-    const cur = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
-    const value = formatValue(key, cur, fmt)
-    const slope = row?.slope ?? "flat"
-    const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
-    const tag = compactTagForKey(key, row, statuses)
-    const warn = key === "US30Y" && (tag === "장기채" || statuses.includes("장기채 경고"))
-
-    return {
-      key,
-      shortLabel: short[key] ?? key,
-      value,
-      arrow,
-      warn,
-      tag,
-    }
-  })
+/** @deprecated Use buildBondLiquidityGroups */
+export function buildBondCompactLines(snapshot, formatValue) {
+  const { bond, liquidity } = buildBondLiquidityGroups(snapshot, formatValue)
+  return [...bond, ...liquidity]
 }
 
 /** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot @returns {string} */
