@@ -1,12 +1,9 @@
 import { useMemo } from "react"
-import PanicMarketActionPanel from "./PanicMarketActionPanel.jsx"
-import PanicMarketReportPanel from "./PanicMarketReportPanel.jsx"
-import PanicMetricInsightPanel from "./PanicMetricInsightPanel.jsx"
-import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import { buildStrategyBrief } from "../utils/panicMarketReportDisplay.js"
+import PanicTodayInterpretation from "./PanicTodayInterpretation.jsx"
 
 /**
- * 패닉 V2 — 차트는 PanicUnifiedHistorySection 단일 사용 (중복 제거)
+ * 패닉 V2 — 차트 하단 해석 (요약 + 상세 접기)
  * @param {{
  *   rows: object[]
  *   primarySeries: { key: string; name: string; color?: string }
@@ -42,22 +39,15 @@ export default function PanicDeskChart({
         .filter(Boolean)
         .join(" ")}
     >
-      <PanicMetricInsightPanel
+      <PanicTodayInterpretation
+        panicData={panicData}
         metricKey={activeKey}
         currentValue={currentValue}
         historyRows={rows}
-        panicData={panicData}
+        deskMarketReport={deskMarketReport}
+        deskMarketReportLoading={deskMarketReportLoading}
+        strategyBrief={strategyBrief}
       />
-      <SectionErrorBoundary label="시장 액션">
-        <PanicMarketActionPanel panicData={panicData} strategyBrief={strategyBrief} />
-      </SectionErrorBoundary>
-      <SectionErrorBoundary label="시장 리포트">
-        <PanicMarketReportPanel
-          report={deskMarketReport}
-          loading={deskMarketReportLoading}
-          panicData={panicData}
-        />
-      </SectionErrorBoundary>
     </section>
   )
 }

@@ -11,6 +11,7 @@ import {
  *   currentValue: unknown
  *   historyRows?: object[]
  *   panicData?: object | null
+ *   mode?: "full" | "metric"
  * }} props
  */
 export default function PanicMetricInsightPanel({
@@ -18,6 +19,7 @@ export default function PanicMetricInsightPanel({
   currentValue,
   historyRows = [],
   panicData = null,
+  mode = "full",
 }) {
   const brief = useMemo(
     () => buildMetricInsightBrief(metricKey, currentValue, { historyRows, panicData }),
@@ -32,13 +34,24 @@ export default function PanicMetricInsightPanel({
     )
   }
 
-  const rows = [
-    { label: "현재 구간", value: brief.statusDisplay, tone: brief.tone },
-    { label: "단기", value: brief.shortLine },
-    { label: "중기", value: brief.midLine },
-    { label: "리스크", value: brief.riskLine },
-    { label: "섹터", value: brief.tradePriority?.replace(/현재 매매 우선순위[:\s]*/i, "") ?? brief.longLine },
-  ]
+  const rows =
+    mode === "metric"
+      ? [
+          { label: "현재 구간", value: brief.statusDisplay, tone: brief.tone },
+          ...(brief.changeContext
+            ? [{ label: "변화", value: `${brief.changeLabel ?? ""} ${brief.changeContext}`.trim(), tone: brief.tone }]
+            : []),
+        ]
+      : [
+          { label: "현재 구간", value: brief.statusDisplay, tone: brief.tone },
+          { label: "단기", value: brief.shortLine },
+          { label: "중기", value: brief.midLine },
+          { label: "리스크", value: brief.riskLine },
+          {
+            label: "섹터",
+            value: brief.tradePriority?.replace(/현재 매매 우선순위[:\s]*/i, "") ?? brief.longLine,
+          },
+        ]
 
   return (
     <div
@@ -54,7 +67,12 @@ export default function PanicMetricInsightPanel({
           ) : null}
         </p>
       </div>
-      <div className="mt-1.5 grid grid-cols-2 gap-x-2.5 gap-y-1.5 sm:grid-cols-5 sm:gap-x-3">
+      <div
+        className={[
+          "mt-1.5 grid gap-x-2.5 gap-y-1.5",
+          mode === "metric" ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-5 sm:gap-x-3",
+        ].join(" ")}
+      >
         {rows.map((r) => (
           <div key={r.label} className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-1.5 text-[9px] leading-snug">
             <span className="shrink-0 text-slate-500">{r.label}</span>
