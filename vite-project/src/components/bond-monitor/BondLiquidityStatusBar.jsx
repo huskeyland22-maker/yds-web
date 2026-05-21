@@ -1,6 +1,6 @@
 import { RefreshCw } from "lucide-react"
 import { deriveBondLiquidityStatuses } from "../../market-os/bondLiquidityStatus.js"
-import { BOND_MONITOR_TAGLINE } from "../../market-os/bondMonitorLabels.js"
+import { BOND_MONITOR_SHORT, BOND_MONITOR_TAGLINE } from "../../market-os/bondMonitorLabels.js"
 import { BOND_DATA_FOOTNOTE, BOND_FRED_POLICY_LABEL } from "../../macro-risk/bondFredPolicy.js"
 import {
   BOND_SYNC_METRICS_LABEL,
@@ -35,7 +35,7 @@ export default function BondLiquidityStatusBar({
   return (
     <section className="trading-card-shell border-amber-500/20 px-3 py-2.5 sm:px-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="m-0 text-[9px] font-semibold tracking-[0.16em] text-amber-200/80">BOND · LIQUIDITY</p>
+        <p className="m-0 text-[9px] font-semibold tracking-[0.16em] text-amber-200/80">{BOND_MONITOR_SHORT}</p>
         <p className="m-0 text-[9px] text-slate-500">{BOND_MONITOR_TAGLINE}</p>
       </div>
 
@@ -58,7 +58,7 @@ export default function BondLiquidityStatusBar({
           aria-busy={syncing}
         >
           <RefreshCw size={12} className={syncing ? "animate-spin" : ""} aria-hidden />
-          {syncing ? "동기화 중…" : "Bond Sync"}
+          {syncing ? "동기화 중…" : "채권 동기화"}
         </button>
       </div>
 
@@ -81,7 +81,7 @@ export default function BondLiquidityStatusBar({
         <br />
         {BOND_DATA_FOOTNOTE}
         <br />
-        <span className="text-slate-500">FRED 지연·PWA 캐시·모바일 차이 시 Bond Sync로 재조회</span>
+        <span className="text-slate-500">FRED 지연·PWA 캐시·모바일 차이 시 채권 동기화로 재조회</span>
       </p>
     </section>
   )

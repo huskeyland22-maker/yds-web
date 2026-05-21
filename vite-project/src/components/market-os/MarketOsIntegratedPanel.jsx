@@ -20,7 +20,7 @@ export default function MarketOsIntegratedPanel({ cycleScore, snapshot }) {
           <strong className="text-[15px] text-slate-100">{os.cycleScore ?? "—"}</strong>
         </span>
         <span className="text-[11px] text-slate-400">
-          Bond{" "}
+          채권·유동성{" "}
           <strong className="text-[12px] text-amber-100/95">{os.bondStatuses?.[0] ?? "—"}</strong>
         </span>
       </div>

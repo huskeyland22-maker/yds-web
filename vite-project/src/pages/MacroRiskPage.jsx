@@ -1,6 +1,6 @@
 import BondLiquidityStatusBar from "../components/bond-monitor/BondLiquidityStatusBar.jsx"
 import MarketOsPhase2Shell from "../components/market-os/MarketOsPhase2Shell.jsx"
-import { BOND_MONITOR_TITLE } from "../market-os/bondMonitorLabels.js"
+import { BOND_MONITOR_SUBTITLE, BOND_MONITOR_TITLE } from "../market-os/bondMonitorLabels.js"
 import MacroRiskActionNow from "../components/macro-risk/MacroRiskActionNow.jsx"
 import MacroRiskDevValidationPanel from "../components/macro-risk/MacroRiskDevValidationPanel.jsx"
 import MacroRiskHero from "../components/macro-risk/MacroRiskHero.jsx"
@@ -99,7 +99,7 @@ export default function MacroRiskPage({ panicData = null }) {
         <div>
           <p className="m-0 text-[9px] font-semibold tracking-[0.2em] text-slate-600">YDS MARKET OS</p>
           <h1 className="m-0 mt-0.5 text-lg font-semibold tracking-tight text-slate-100">{BOND_MONITOR_TITLE}</h1>
-          <p className="m-0 mt-0.5 text-[10px] text-slate-500">보조 확인 · 최종 판단은 시장 사이클</p>
+          <p className="m-0 mt-0.5 text-[10px] text-slate-500">{BOND_MONITOR_SUBTITLE}</p>
         </div>
         <button
           type="button"

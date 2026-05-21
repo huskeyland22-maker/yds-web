@@ -20,12 +20,12 @@ import { metricDisplayLabel } from "./metricLabels.js"
 
 /** @type {MetricCatalogEntry[]} */
 export const TIER_STATUS_METRICS = [
-  { key: "US10Y", short: "10Y", label: metricDisplayLabel("US10Y"), tier: 1, provider: "FRED", series: "DGS10", liveTarget: true, cycleReuse: false },
-  { key: "US30Y", short: "30Y", label: metricDisplayLabel("US30Y"), tier: 1, provider: "FRED", series: "DGS30", liveTarget: true, cycleReuse: false },
-  { key: "DXY", short: "DXY", label: metricDisplayLabel("DXY"), tier: 1, provider: "Yahoo", series: "DX-Y.NYB", liveTarget: true, cycleReuse: false },
-  { key: "REAL_YIELD", short: "REAL", label: metricDisplayLabel("REAL_YIELD"), tier: 2, provider: "FRED", series: "DFII10", liveTarget: true, cycleReuse: false },
-  { key: "US2Y", short: "2Y", label: metricDisplayLabel("US2Y"), tier: 2, provider: "FRED", series: "DGS2", liveTarget: true, cycleReuse: false },
-  { key: "BEI", short: "BEI", label: metricDisplayLabel("BEI"), tier: 2, provider: "FRED", series: "T10YIE", liveTarget: true, cycleReuse: false },
+  { key: "US10Y", short: "10년물", label: metricDisplayLabel("US10Y"), tier: 1, provider: "FRED", series: "DGS10", liveTarget: true, cycleReuse: false },
+  { key: "US30Y", short: "30년물", label: metricDisplayLabel("US30Y"), tier: 1, provider: "FRED", series: "DGS30", liveTarget: true, cycleReuse: false },
+  { key: "DXY", short: "달러", label: metricDisplayLabel("DXY"), tier: 1, provider: "Yahoo", series: "DX-Y.NYB", liveTarget: true, cycleReuse: false },
+  { key: "REAL_YIELD", short: "실질금리", label: metricDisplayLabel("REAL_YIELD"), tier: 2, provider: "FRED", series: "DFII10", liveTarget: true, cycleReuse: false },
+  { key: "US2Y", short: "2년물", label: metricDisplayLabel("US2Y"), tier: 2, provider: "FRED", series: "DGS2", liveTarget: true, cycleReuse: false },
+  { key: "BEI", short: "기대인플레", label: metricDisplayLabel("BEI"), tier: 2, provider: "FRED", series: "T10YIE", liveTarget: true, cycleReuse: false },
 ]
 
 /** @type {Record<string, MetricCatalogEntry>} */

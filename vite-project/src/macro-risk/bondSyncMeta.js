@@ -54,7 +54,7 @@ export function formatBondLastSyncKst(iso) {
   return `${y}-${mo}-${da} ${h}:${mi}`
 }
 
-export const BOND_SYNC_METRICS_LABEL = "10Y · 30Y · 2Y · REAL · BEI · DXY"
+export const BOND_SYNC_METRICS_LABEL = "10년물 · 30년물 · 2년물 · 실질금리 · 기대인플레 · 달러지수"
 
 export const BOND_SYNC_REQUEST_EVENT = "yds-bond-sync-request"
 

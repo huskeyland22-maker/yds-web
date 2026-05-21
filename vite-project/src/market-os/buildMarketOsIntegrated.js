@@ -47,7 +47,7 @@ export function buildMarketOsIntegrated({ cycleScore, snapshot }) {
   const dollarTrig = Boolean(snapshot?.triggers?.some((t) => t.active && t.id === "dollar_pressure"))
 
   const fearPct = fearProgressPct(cycleScore)
-  const macroPhase = bondStatuses.slice(0, 2).join(" · ") || "Bond 확인"
+  const macroPhase = bondStatuses.slice(0, 2).join(" · ") || "채권·유동성 확인"
   const marketImpact = ratePillar?.status ?? "—"
   const positionSummary = [cycle.position, macroPhase].filter((x) => x && x !== "—").join(" · ")
 
