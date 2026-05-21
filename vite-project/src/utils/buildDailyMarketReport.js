@@ -21,7 +21,7 @@ import { buildSectorRotation } from "./buildSectorRotation.js"
  *   today: string
  *   ai: string
  *   cash: string
- *   risk: string
+ *   rate: string
  * }} DailyActionToday
  */
 
@@ -73,7 +73,7 @@ function buildActionToday(zone, regime, cycleScore) {
   const c = Number(cycleScore)
   let today = "관망"
   let ai = "선별 관망"
-  let risk = "변동성 감시"
+  let rate = "금리 감시"
 
   if (zone === "low") {
     today = "추격 금지"
@@ -81,7 +81,6 @@ function buildActionToday(zone, regime, cycleScore) {
   } else if (zone === "high" || regime === "greed" || regime === "extreme_greed") {
     today = "추격 금지"
     ai = "익절·비중 조절"
-    risk = "과열 잔존 감시"
   } else if (zone === "transition") {
     today = "추세 확인"
     ai = "분할 관심"
@@ -90,14 +89,13 @@ function buildActionToday(zone, regime, cycleScore) {
   if (regime === "extreme_fear" || regime === "fear") {
     today = "추격 금지"
     ai = "눌림 대기"
-    risk = "헤지·변동성"
   }
 
   return {
     today: compactPhrase(today),
     ai: compactPhrase(ai),
     cash: cashRange(c),
-    risk: compactPhrase(risk),
+    rate,
   }
 }
 
@@ -206,10 +204,10 @@ export function buildDailyMarketReport({ panicData = null, cycleScore = null, sn
   const actionToday = buildActionToday(zone.zone, action?.regime ?? "neutral", Number(cycleScore))
   const strategy = buildStrategy(timing)
 
-  if (bondRef.statusLabels.includes("금리 재평가") || bondRef.statusLabels.includes("장기채 경고")) {
-    actionToday.risk = "금리 우선 감시"
-  } else if (bondRef.statusLabels.includes("유동성 주의")) {
-    actionToday.risk = "유동성·외인 감시"
+  if (bondRef.statusLabels.includes("유동성 주의") || bondRef.statusLabels.includes("유동성 축소")) {
+    actionToday.rate = "유동성 감시"
+  } else {
+    actionToday.rate = "금리 감시"
   }
 
   const sectors = buildSectorFocus(rotation)

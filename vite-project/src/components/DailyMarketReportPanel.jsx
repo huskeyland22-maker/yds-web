@@ -68,11 +68,19 @@ export default function DailyMarketReportPanel({
       </div>
 
       <div className="daily-report-v2__block daily-report-v2__block--accent">
-        <p className="m-0 daily-report-v2__block-title">2. 오늘 행동</p>
-        <ReportRow label="오늘" value={actionToday.today} />
-        <ReportRow label="AI" value={actionToday.ai} valueClass="text-cyan-200/95" />
-        <ReportRow label="현금" value={actionToday.cash} valueClass="font-mono tabular-nums" />
-        <ReportRow label="리스크" value={actionToday.risk} valueClass="text-amber-200/90" />
+        <p className="m-0 daily-report-v2__block-title">오늘 행동</p>
+        <div className="daily-report-v2__action-lines">
+          <p className="m-0 daily-report-v2__action-line">{actionToday.today}</p>
+          <p className="m-0 daily-report-v2__action-line">
+            <span className="daily-report-v2__action-prefix">AI</span> {actionToday.ai}
+          </p>
+          <p className="m-0 daily-report-v2__action-line font-mono tabular-nums">
+            <span className="daily-report-v2__action-prefix">현금</span> {actionToday.cash}
+          </p>
+          <p className="m-0 daily-report-v2__action-line text-amber-200/95">
+            {actionToday.rate}
+          </p>
+        </div>
       </div>
 
       <div className="daily-report-v2__block">

@@ -530,6 +530,25 @@
     background: rgba(34, 211, 238, 0.06);
   }
 
+  .daily-report-v2__action-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .daily-report-v2__action-line {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: rgba(241, 245, 249, 0.98);
+    word-break: keep-all;
+  }
+
+  .daily-report-v2__action-prefix {
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.95);
+  }
+
   .daily-report-v2__block-title {
     margin: 0 0 6px;
     font-size: 9px;
