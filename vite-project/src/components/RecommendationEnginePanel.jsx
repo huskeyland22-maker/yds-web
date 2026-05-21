@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import ScoreExplainLayer from "./ScoreExplainLayer.jsx"
 import { buildRecommendationEngine } from "../utils/buildRecommendationEngine.js"
 
 const STRENGTH_CLASS = {
@@ -24,12 +25,14 @@ function ActionRow({ label, value, accent = false }) {
  *   panicData?: object | null
  *   cycleScore?: number | null
  *   snapshot?: import("../macro-risk/engine.js").MacroRiskSnapshot | null
+ *   historyRows?: object[]
  * }} props
  */
 export default function RecommendationEnginePanel({
   panicData = null,
   cycleScore = null,
   snapshot = null,
+  historyRows = [],
 }) {
   const rec = useMemo(
     () => buildRecommendationEngine({ panicData, cycleScore, snapshot }),
@@ -61,6 +64,8 @@ export default function RecommendationEnginePanel({
         <ActionRow label="장기" value={rec.practical.long} />
         <ActionRow label="실전" value={rec.practical.tactical} accent />
       </div>
+
+      <ScoreExplainLayer panicData={panicData} snapshot={snapshot} historyRows={historyRows} />
     </section>
   )
 }

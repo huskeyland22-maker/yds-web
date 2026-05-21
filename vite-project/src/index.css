@@ -1664,6 +1664,196 @@
     color: rgba(203, 213, 225, 0.85);
   }
 
+  /* 점수 근거 + Slope Explain */
+  .score-explain {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .score-explain__toggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+    padding: 4px 0;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 650;
+    color: rgba(203, 213, 225, 0.92);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .score-explain__chevron {
+    font-size: 10px;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .score-explain__body {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .score-explain__blend-meta {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.85);
+  }
+
+  .score-explain__horizon {
+    padding: 8px 8px 6px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .score-explain__horizon-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .score-explain__horizon-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .score-explain__horizon-score {
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(253, 230, 138, 0.95);
+  }
+
+  .score-explain__horizon-action {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.88);
+  }
+
+  .score-explain__drivers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .score-explain__driver {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .score-explain__driver--aux {
+    opacity: 0.82;
+  }
+
+  .score-explain__driver-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .score-explain__driver-title {
+    font-size: 11px;
+    font-weight: 650;
+    color: rgba(226, 232, 240, 0.94);
+  }
+
+  .score-explain__pts {
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .score-explain__pts--positive {
+    color: rgba(52, 211, 153, 0.95);
+  }
+
+  .score-explain__pts--neutral {
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .score-explain__pts--warning {
+    color: rgba(251, 191, 36, 0.95);
+  }
+
+  .score-explain__pts--shock {
+    color: rgba(248, 113, 113, 0.98);
+  }
+
+  .score-explain__bar-track {
+    height: 4px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+  }
+
+  .score-explain__bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    min-width: 4px;
+    transition: width 0.2s ease;
+  }
+
+  .score-explain__bar-fill--positive {
+    background: rgba(16, 185, 129, 0.75);
+  }
+
+  .score-explain__bar-fill--neutral {
+    background: rgba(100, 116, 139, 0.65);
+  }
+
+  .score-explain__bar-fill--warning {
+    background: rgba(245, 158, 11, 0.8);
+  }
+
+  .score-explain__bar-fill--shock {
+    background: rgba(239, 68, 68, 0.85);
+  }
+
+  .score-explain__slope {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(203, 213, 225, 0.88);
+  }
+
+  .score-explain__slope-tag {
+    margin-right: 4px;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .score-explain__warn {
+    color: rgba(251, 113, 133, 0.9);
+  }
+
+  .score-explain__delta {
+    font-size: 9px;
+    color: rgba(148, 163, 184, 0.8);
+  }
+
+  .score-explain__bond {
+    padding-top: 6px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  .score-explain__bond-title {
+    margin: 0 0 6px;
+    font-size: 10px;
+    font-weight: 650;
+    color: rgba(148, 163, 184, 0.85);
+  }
+
   /* 패닉 히스토리 지표 탭 — 약어 · 한글 한 줄 */
   .panic-history-tabs {
     gap: 4px;

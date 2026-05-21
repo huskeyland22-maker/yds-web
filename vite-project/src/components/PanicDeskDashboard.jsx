@@ -323,6 +323,7 @@ export default function PanicDeskDashboard({
           panicData={panicData}
           cycleScore={finalScore}
           snapshot={bondSnapshot.snapshot}
+          historyRows={safeHistory}
         />
       </div>
 
