@@ -94,36 +94,49 @@ export default function ScoreExplainLayer({
 
   return (
     <div className="score-explain">
-      <button
-        type="button"
-        className="score-explain__toggle"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span>점수 근거</span>
-        <span className="score-explain__chevron" aria-hidden>
-          {open ? "▲" : "▼"}
-        </span>
-      </button>
+      <div className="score-explain__toggle-wrap">
+        <button
+          type="button"
+          className={["score-explain__toggle", open ? "score-explain__toggle--open" : ""].join(" ")}
+          aria-expanded={open}
+          aria-controls="score-explain-panel"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span className="score-explain__toggle-inner">
+            <span className="score-explain__icon" aria-hidden>
+              📊
+            </span>
+            <span className="score-explain__label">근거 보기</span>
+            <span className="score-explain__expand font-mono" aria-hidden>
+              {open ? "−" : "+"}
+            </span>
+          </span>
+        </button>
+      </div>
 
-      {open ? (
-        <div className="score-explain__body">
-          <p className="m-0 score-explain__blend-meta">
-            절대 {Math.round(SCORE_BLEND.absolute * 100)}% · 기울기 {Math.round(SCORE_BLEND.slope * 100)}%
-          </p>
-          {layer.horizons.map((h) => (
-            <HorizonBlock key={h.horizon} block={h} />
-          ))}
-          {layer.bondAuxiliary.length > 0 ? (
-            <div className="score-explain__bond">
-              <p className="m-0 score-explain__bond-title">채권·유동성 (보조 · 판정 제외)</p>
-              {layer.bondAuxiliary.map((d) => (
-                <DriverRow key={d.key} driver={d} />
-              ))}
-            </div>
-          ) : null}
+      <div
+        id="score-explain-panel"
+        className={["score-explain__collapse", open ? "score-explain__collapse--open" : ""].join(" ")}
+      >
+        <div className="score-explain__collapse-inner">
+          <div className="score-explain__body">
+            <p className="m-0 score-explain__blend-meta">
+              절대 {Math.round(SCORE_BLEND.absolute * 100)}% · 기울기 {Math.round(SCORE_BLEND.slope * 100)}%
+            </p>
+            {layer.horizons.map((h) => (
+              <HorizonBlock key={h.horizon} block={h} />
+            ))}
+            {layer.bondAuxiliary.length > 0 ? (
+              <div className="score-explain__bond">
+                <p className="m-0 score-explain__bond-title">채권·유동성 (보조 · 판정 제외)</p>
+                {layer.bondAuxiliary.map((d) => (
+                  <DriverRow key={d.key} driver={d} />
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }
