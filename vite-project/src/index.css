@@ -1711,9 +1711,22 @@
     margin-top: 0;
   }
 
+  /* 추천 단계 → 패닉 히스토리: 데스크 gap 중복 방지 (8~12px) */
+  .panic-v2-desk > .panic-v2-desk__recommend-slot {
+    margin-bottom: 0;
+  }
+
+  .panic-v2-desk > .panic-v2-desk__recommend-slot + .panic-v2-section {
+    margin-top: 10px;
+  }
+
   @media (max-width: 639px) {
     .panic-v2-desk {
       --panic-v2-gap: 12px;
+    }
+
+    .panic-v2-desk > .panic-v2-desk__recommend-slot + .panic-v2-section {
+      margin-top: 8px;
     }
   }
 

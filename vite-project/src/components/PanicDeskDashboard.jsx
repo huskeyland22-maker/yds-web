@@ -309,7 +309,7 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <div>
+      <div className="panic-v2-desk__recommend-slot">
         <RecommendationEnginePanel
           panicData={panicData}
           cycleScore={finalScore}
