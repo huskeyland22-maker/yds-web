@@ -469,7 +469,7 @@ function resolveShortAction(data, score) {
   }
   if (heatExtreme) {
     return {
-      action: "과열 익절",
+      action: "익절 관리",
       status: "과열 경계",
       sectors: ["대형주", "현금", "ETF"],
     }

@@ -105,24 +105,17 @@ function buildStrategy(timing) {
   let mid = compactPhrase(timing?.mid?.actionShort || timing?.mid?.action || "관망")
   let long = compactPhrase(timing?.long?.actionShort || timing?.long?.action || "관망")
 
-  if (phrasesEqual(short, mid)) short = "익절·조정"
-  if (phrasesEqual(long, mid)) long = "적립 유지"
-  if (phrasesEqual(short, long)) short = "단기 대응"
+  if (phrasesEqual(short, mid)) short = "익절 관리"
+  if (phrasesEqual(long, mid)) long = "장기 보유"
+  if (phrasesEqual(short, long)) short = "익절 관리"
 
-  const practical = uniquePhrases(
-    [
-      short.includes("분할") || short.includes("대기") ? "분할 대기" : null,
-      mid.includes("확대") ? "분할 관심" : "분할 관심",
-      short.includes("익절") ? null : "익절 검토",
-    ].filter(Boolean),
-    2,
-  ).join(" · ")
+  const practical = mid.includes("확대") || short.includes("익절") ? "분할 관심" : "분할 관심"
 
   return {
     short,
     mid,
     long,
-    practical: practical || "분할 대기 · 분할 관심",
+    practical,
   }
 }
 

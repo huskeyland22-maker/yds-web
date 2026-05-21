@@ -91,6 +91,49 @@ function resolveStrength(zone, bondStatuses, flags, score) {
 }
 
 /**
+ * 추천 단계 · 실전 전략 — 기간별 표준 문구
+ * @param {import("./cycleZoneLabels.js").CycleZone} zone
+ * @param {import("./buildDailyMarketReport.js").DailyStrategy} strategy
+ */
+function resolveRecommendationPeriods(zone, strategy) {
+  const z = zone.zone
+
+  if (z === "peak" || z === "high") {
+    return {
+      short: "익절 관리",
+      mid: "비중 확대",
+      long: "장기 보유",
+      tactical: "분할 관심",
+    }
+  }
+
+  if (z === "floor" || z === "low") {
+    return {
+      short: "눌림 대기",
+      mid: "분할매수",
+      long: "장기 보유",
+      tactical: "분할 관심",
+    }
+  }
+
+  if (z === "transition") {
+    return {
+      short: "관망",
+      mid: "비중 조절",
+      long: "장기 보유",
+      tactical: "분할 관심",
+    }
+  }
+
+  return {
+    short: compactPhrase(strategy.short) || "관망",
+    mid: compactPhrase(strategy.mid) || "관망",
+    long: compactPhrase(strategy.long) || "장기 보유",
+    tactical: compactPhrase(strategy.practical) || "분할 관심",
+  }
+}
+
+/**
  * @param {import("./cycleZoneLabels.js").CycleZone} zone
  * @param {ReturnType<typeof computeMarketAction>} action
  * @param {ReturnType<typeof buildDailyMarketReport>} report
@@ -168,21 +211,14 @@ export function buildRecommendationEngine({ panicData = null, cycleScore = null,
   const reasons = buildReasons(zone, bondRef.statusLabels, flags)
   const strength = resolveStrength(zone, bondRef.statusLabels, flags, score)
 
-  let tactical = compactPhrase(report.strategy.practical)
-  if (zone.zone === "floor" && !/분할|매수/.test(tactical)) tactical = "분할 관심"
-  if (zone.zone === "peak" && !/익절|현금/.test(tactical)) tactical = "익절 검토"
+  const periods = resolveRecommendationPeriods(zone, report.strategy)
 
   return {
     ready: true,
     today,
     reasons: reasons.length ? reasons : [zone.zoneLabel || "중립"],
     strength,
-    practical: {
-      short: compactPhrase(report.strategy.short) || "관망",
-      mid: compactPhrase(report.strategy.mid) || "관망",
-      long: compactPhrase(report.strategy.long) || "적립 유지",
-      tactical,
-    },
+    practical: periods,
     risk: buildRiskActions(zone, action, report),
   }
 }
