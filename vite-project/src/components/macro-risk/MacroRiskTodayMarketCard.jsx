@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { resolveCycleZone } from "../../utils/cycleZoneLabels.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 
 /**
@@ -8,11 +9,7 @@ export default function MacroRiskTodayMarketCard({ snapshot, panicData = null })
   const cycleScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
   const cycleView = useMemo(() => {
     if (cycleScore == null) return "—"
-    if (cycleScore <= 15) return "극단 공포"
-    if (cycleScore <= 30) return cycleScore >= 22 ? "공포 후반" : "공포"
-    if (cycleScore <= 45) return "중립"
-    if (cycleScore <= 60) return "과열"
-    return "극단 과열"
+    return resolveCycleZone(cycleScore).zoneLabel
   }, [cycleScore])
   const cycleAction = useMemo(() => {
     if (cycleScore == null) return "관망"
@@ -30,16 +27,16 @@ export default function MacroRiskTodayMarketCard({ snapshot, panicData = null })
 
   return (
     <section className="trading-card-shell px-3 py-2.5 sm:px-3.5 sm:py-3">
-      <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-slate-500">TODAY MARKET</p>
-      <ul className="m-0 mt-2 list-none space-y-1 p-0 text-[11px] text-slate-200">
+      <p className="m-0 cycle-eyebrow">TODAY MARKET</p>
+      <ul className="m-0 mt-2 list-none space-y-1.5 p-0 cycle-aux-line">
         <li>
-          <span className="text-slate-500">장기:</span> {cycleView} · {cycleAction}
+          <span className="cycle-aux-label">장기</span> {cycleView} · {cycleAction}
         </li>
         <li>
-          <span className="text-slate-500">단기:</span> {macroView} · {snapshot.shortTerm}
+          <span className="cycle-aux-label">단기</span> {macroView} · {snapshot.shortTerm}
         </li>
         <li>
-          <span className="text-slate-500">실전:</span> {snapshot.tactical}
+          <span className="cycle-aux-label">실전</span> {snapshot.tactical}
         </li>
       </ul>
     </section>

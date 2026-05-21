@@ -75,10 +75,10 @@ function buildActionToday(zone, regime, cycleScore) {
   let ai = "선별 관망"
   let rate = "금리 감시"
 
-  if (zone === "low") {
+  if (zone === "floor" || zone === "low") {
     today = "추격 금지"
     ai = "눌림 대기"
-  } else if (zone === "high" || regime === "greed" || regime === "extreme_greed") {
+  } else if (zone === "peak" || zone === "high" || regime === "greed" || regime === "extreme_greed") {
     today = "추격 금지"
     ai = "익절·비중 조절"
   } else if (zone === "transition") {

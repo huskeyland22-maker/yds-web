@@ -64,8 +64,8 @@ export function describeSourceFallback(rawSource, badge, liveFetchOk, liveTarget
 
 /** UI 배지 색상 (Tier / DEV / LIVE STATUS 공통) */
 export const DATA_BADGE_CLASS = {
-  MANUAL: "border-sky-500/30 bg-sky-500/10 text-sky-300",
-  LIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  MOCK: "border-violet-500/30 bg-violet-500/10 text-violet-300",
-  STATIC: "border-slate-500/30 bg-slate-500/10 text-slate-400",
+  MANUAL: "border-sky-400/40 bg-sky-500/14 text-sky-200",
+  LIVE: "border-emerald-400/45 bg-emerald-500/16 text-emerald-100",
+  MOCK: "border-violet-400/40 bg-violet-500/14 text-violet-200",
+  STATIC: "border-slate-400/35 bg-slate-500/12 text-slate-200",
 }

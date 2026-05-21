@@ -35,7 +35,7 @@ export default function DailyMarketReportPanel({
   if (loading && !report.ready) {
     return (
       <section className="daily-report-v2" aria-label="YDS Daily Market Report">
-        <p className="m-0 px-3 py-4 text-[10px] text-slate-500">리포트 생성 중…</p>
+        <p className="m-0 px-3 py-4 cycle-aux-line">리포트 생성 중…</p>
       </section>
     )
   }
@@ -43,9 +43,7 @@ export default function DailyMarketReportPanel({
   if (!report.ready) {
     return (
       <section className="daily-report-v2" aria-label="YDS Daily Market Report">
-        <p className="m-0 px-3 py-4 text-[10px] text-slate-500">
-          Cycle·패닉 입력 후 자동 생성됩니다.
-        </p>
+        <p className="m-0 px-3 py-4 cycle-aux-line">Cycle·패닉 입력 후 자동 생성됩니다.</p>
       </section>
     )
   }
@@ -55,9 +53,7 @@ export default function DailyMarketReportPanel({
   return (
     <section className="daily-report-v2" aria-label="YDS Daily Market Report">
       <header className="daily-report-v2__head">
-        <p className="m-0 text-[9px] font-bold tracking-[0.14em] text-cyan-300/80">
-          YDS DAILY MARKET REPORT
-        </p>
+        <p className="m-0 cycle-eyebrow text-cyan-200/95">YDS DAILY MARKET REPORT</p>
       </header>
 
       <div className="daily-report-v2__block">

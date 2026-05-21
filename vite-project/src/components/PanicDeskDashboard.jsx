@@ -4,7 +4,7 @@ import { useAppDataStore } from "../store/appDataStore.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { kstCalendarKey } from "../utils/formatDataAge.js"
 import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
-import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
+import { MOOD_SPECTRUM, moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
@@ -16,13 +16,11 @@ import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
 
-const MOOD_LABELS = ["극도 공포", "공포", "중립", "과열", "극도 과열"]
-
 const CORE_CELL =
   "flex min-h-[4rem] flex-col items-center justify-center bg-[#070a10] px-1 py-2.5 transition-colors sm:min-h-[4.25rem] sm:py-3"
 
 const CORE_LABEL =
-  "max-w-full px-0.5 text-center text-[13px] font-semibold leading-snug tracking-[0.04em] text-slate-200 [text-wrap:balance]"
+  "max-w-full px-0.5 text-center text-[14px] font-semibold leading-snug tracking-[0.04em] text-slate-100 [text-wrap:balance]"
 
 const CORE_VALUE =
   "mt-1 font-mono text-[1rem] font-bold leading-none tabular-nums sm:text-[1.1rem]"
@@ -31,7 +29,7 @@ const EXPERT_CELL =
   "flex min-h-[2.65rem] flex-col items-center justify-center bg-[#070a10]/70 px-0.5 py-1 transition-colors sm:min-h-[2.85rem] sm:py-1.5"
 
 const EXPERT_LABEL =
-  "max-w-full px-0.5 text-center text-[10px] font-medium leading-tight tracking-[0.02em] text-slate-500/90 [text-wrap:balance]"
+  "max-w-full px-0.5 text-center text-[12px] font-semibold leading-tight tracking-[0.02em] text-slate-300 [text-wrap:balance]"
 
 const EXPERT_VALUE =
   "mt-0.5 font-mono text-[0.78rem] font-medium leading-none tabular-nums text-slate-400/85 sm:text-[0.85rem]"
@@ -49,7 +47,7 @@ function SectionLabel({ title, variant = "core" }) {
       <p
         className={[
           "m-0 border-l-2 pl-2 text-left text-[11px] font-bold tracking-[0.02em]",
-          isExpert ? "border-slate-600/80 text-slate-500" : "border-cyan-400/50 text-slate-300",
+          isExpert ? "border-slate-500/50 text-slate-300" : "border-cyan-400/50 text-slate-200",
         ].join(" ")}
       >
         {title}
@@ -196,17 +194,24 @@ export default function PanicDeskDashboard({
 
       <section className="trading-card-shell overflow-hidden px-2.5 py-2 sm:px-3 sm:py-2.5">
         <div>
-          <p className="m-0 text-[9px] font-semibold tracking-[0.16em] text-slate-500">MARKET MOOD</p>
-          <p className="m-0 mt-0.5 text-[15px] font-semibold tracking-tight text-slate-50 sm:text-base">
+          <p className="m-0 cycle-eyebrow">MARKET MOOD</p>
+          <p className="m-0 mt-0.5 cycle-mood-headline" style={mood.active ? { color: mood.color } : undefined}>
             {moodHeadline}
           </p>
         </div>
 
         <div className="relative mt-2.5">
-          <div className="flex justify-between gap-0.5 text-[8px] font-medium tracking-tight text-slate-600 sm:text-[9px]">
-            {MOOD_LABELS.map((l) => (
-              <span key={l} className="flex-1 text-center">
-                {l}
+          <div className="flex justify-between gap-0.5">
+            {MOOD_SPECTRUM.map((m, i) => (
+              <span
+                key={m.id}
+                className={[
+                  "cycle-zone-axis__label flex-1 text-center",
+                  mood.active && mood.index === i ? "cycle-zone-axis__label--active" : "",
+                ].join(" ")}
+                style={mood.active && mood.index === i ? { color: m.color } : undefined}
+              >
+                {m.label}
               </span>
             ))}
           </div>
@@ -231,7 +236,7 @@ export default function PanicDeskDashboard({
             />
           </div>
           {marketState?.headline ? (
-            <p className="m-0 mt-1.5 text-[10px] leading-snug text-slate-500">{marketState.headline}</p>
+            <p className="m-0 mt-1.5 cycle-aux-line">{marketState.headline}</p>
           ) : null}
         </div>
       </section>

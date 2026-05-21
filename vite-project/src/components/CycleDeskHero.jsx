@@ -54,8 +54,8 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
 
       <div className="relative z-[1] px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-2.5">
-          <p className="m-0 text-trading-2xs font-semibold tracking-[0.12em] text-slate-500">매크로 전략 데스크</p>
-          <p className="m-0 font-mono text-trading-2xs text-slate-600">
+          <p className="m-0 cycle-eyebrow">매크로 전략 데스크</p>
+          <p className="m-0 font-mono text-[11px] font-semibold text-slate-300">
             기준일 {asOfDateLabel} · {updatedLine}
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
           {/* 좌: 시장 단계 */}
           <div className="lg:col-span-3">
-            <p className="m-0 text-trading-2xs font-medium uppercase tracking-[0.14em] text-slate-500">현재 시장 단계</p>
+            <p className="m-0 cycle-eyebrow">현재 시장 단계</p>
             <div className="relative mt-2">
               <div
                 className={`absolute -inset-0.5 rounded-card-lg bg-gradient-to-br opacity-70 blur-md ${ring}`}
@@ -73,15 +73,18 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
                 <p className={`m-0 text-center font-display text-trading-xl font-semibold leading-none tracking-tight sm:text-trading-2xl ${labelCls}`}>
                   {stageLabel}
                 </p>
-                <div className="mt-3 space-y-1 border-t border-white/[0.06] pt-2.5 text-trading-xs leading-snug text-slate-500">
-                  <p className="m-0">
-                    <span className="text-trading-2xs font-semibold text-slate-600">단기</span> {tierHints.tactical}
+                <div className="mt-3 space-y-1 border-t border-white/[0.06] pt-2.5">
+                  <p className="m-0 cycle-aux-line">
+                    <span className="cycle-aux-label">단기</span>
+                    {tierHints.tactical}
                   </p>
-                  <p className="m-0">
-                    <span className="text-trading-2xs font-semibold text-slate-600">중기</span> {tierHints.strategic}
+                  <p className="m-0 cycle-aux-line">
+                    <span className="cycle-aux-label">중기</span>
+                    {tierHints.strategic}
                   </p>
-                  <p className="m-0">
-                    <span className="text-trading-2xs font-semibold text-slate-600">장기</span> {tierHints.macro}
+                  <p className="m-0 cycle-aux-line">
+                    <span className="cycle-aux-label">장기</span>
+                    {tierHints.macro}
                   </p>
                 </div>
               </div>
@@ -90,12 +93,12 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
 
           {/* 중: 핵심 흐름 */}
           <div className="lg:col-span-5">
-            <p className="m-0 text-trading-2xs font-medium uppercase tracking-[0.14em] text-slate-500">핵심 시장 흐름</p>
+            <p className="m-0 cycle-eyebrow">핵심 시장 흐름</p>
             <ul className="m-0 mt-2 list-none space-y-1.5 p-0">
               {flowBullets.map((line) => (
                 <li
                   key={line}
-                  className="relative border-l-2 border-indigo-500/35 pl-2.5 text-trading-sm leading-snug text-slate-200/95 sm:text-trading-base"
+                  className="relative border-l-2 border-indigo-500/35 pl-2.5 text-[13px] font-semibold leading-snug text-slate-100 sm:text-[14px]"
                 >
                   {line}
                 </li>
@@ -105,11 +108,11 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
 
           {/* 우: Today's key signal */}
           <div className="lg:col-span-4">
-            <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-indigo-300/85">오늘의 핵심 시그널</p>
+            <p className="m-0 text-[11px] font-bold tracking-[0.1em] text-indigo-200/95">오늘의 핵심 시그널</p>
             <div className="mt-2 rounded-card border border-indigo-500/20 bg-gradient-to-b from-indigo-950/35 to-black/45 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-              <dl className="m-0 space-y-2 text-trading-xs leading-snug sm:text-trading-sm">
+              <dl className="m-0 space-y-2 text-[12px] font-semibold leading-snug sm:text-[13px]">
                 <div className="flex justify-between gap-3 border-b border-white/[0.06] pb-2">
-                  <dt className="shrink-0 text-slate-500">위험 선호</dt>
+                  <dt className="shrink-0 cycle-aux-label">위험 선호</dt>
                   <dd
                     className={
                       keySignal.riskAppetiteTone === "on"
@@ -123,16 +126,16 @@ export default function CycleDeskHero({ context, asOfDateLabel, updatedLine }) {
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3 border-b border-white/[0.06] pb-2">
-                  <dt className="shrink-0 text-slate-500">주도 섹터</dt>
-                  <dd className="max-w-[11rem] text-right font-semibold text-slate-100">{keySignal.leadingSector}</dd>
+                  <dt className="shrink-0 cycle-aux-label">주도 섹터</dt>
+                  <dd className="max-w-[11rem] text-right font-bold text-slate-50">{keySignal.leadingSector}</dd>
                 </div>
                 <div className="flex justify-between gap-3 border-b border-white/[0.06] pb-2">
-                  <dt className="shrink-0 text-slate-500">변동성</dt>
-                  <dd className="text-right text-slate-200">{keySignal.volatility}</dd>
+                  <dt className="shrink-0 cycle-aux-label">변동성</dt>
+                  <dd className="text-right font-semibold text-slate-100">{keySignal.volatility}</dd>
                 </div>
                 <div className="flex justify-between gap-3 pt-0.5">
-                  <dt className="shrink-0 text-slate-500">수급·흐름</dt>
-                  <dd className="max-w-[11rem] text-right text-slate-200">{keySignal.foreignFlow}</dd>
+                  <dt className="shrink-0 cycle-aux-label">수급·흐름</dt>
+                  <dd className="max-w-[11rem] text-right font-semibold text-slate-100">{keySignal.foreignFlow}</dd>
                 </div>
               </dl>
             </div>

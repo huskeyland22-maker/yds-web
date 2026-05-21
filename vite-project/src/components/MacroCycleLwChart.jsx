@@ -797,8 +797,8 @@ export default function MacroCycleLwChart({
                     : "border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.12)]"
               }`}
             >
-              <p className="m-0 text-[7px] font-bold tracking-[0.14em] text-cyan-400/80">LIVE</p>
-              <p className="m-0 mt-0.5 text-[8px] font-semibold tracking-[0.1em] text-slate-500">현재값</p>
+              <p className="m-0 cycle-meta-badge border border-emerald-400/45 bg-emerald-500/16 text-emerald-100">LIVE</p>
+              <p className="m-0 mt-1 text-[10px] font-bold tracking-[0.1em] text-slate-300">현재값</p>
               <p className="m-0 mt-0.5 flex items-center justify-end gap-2">
                 <span className="relative inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center">
                   <span
@@ -831,19 +831,19 @@ export default function MacroCycleLwChart({
                   }`}
                 >
                   {dayChgPct >= 0 ? "+" : ""}
-                  {dayChgPct.toFixed(2)}% <span className="text-[9px] font-medium text-slate-600">1D</span>
+                  {dayChgPct.toFixed(2)}% <span className="text-[11px] font-bold text-slate-300">1D</span>
                 </p>
               ) : null}
-              <div className="m-0 mt-2 space-y-1 border-t border-white/[0.08] pt-2 font-mono text-[8px] leading-snug">
+              <div className="m-0 mt-2 space-y-1 border-t border-white/[0.08] pt-2 font-mono leading-snug">
                 <p className="m-0 flex flex-col items-end gap-0.5">
-                  <span className="text-[7px] font-bold tracking-[0.12em] text-slate-500">DAY HIGH</span>
-                  <span className="tabular-nums text-[11px] text-slate-200">
+                  <span className="cycle-eyebrow text-[9px]">DAY HIGH</span>
+                  <span className="tabular-nums text-[12px] font-semibold text-slate-100">
                     {formatMetricValue(pack.primaryKey, pack.stats.high)}
                   </span>
                 </p>
                 <p className="m-0 flex flex-col items-end gap-0.5">
-                  <span className="text-[7px] font-bold tracking-[0.12em] text-slate-500">DAY LOW</span>
-                  <span className="tabular-nums text-[11px] text-slate-200">
+                  <span className="cycle-eyebrow text-[9px]">DAY LOW</span>
+                  <span className="tabular-nums text-[12px] font-semibold text-slate-100">
                     {formatMetricValue(pack.primaryKey, pack.stats.low)}
                   </span>
                 </p>

@@ -31,7 +31,7 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
       }
     >
       {!hideBlockTitle ? (
-        <p className="m-0 text-[9px] font-semibold tracking-[0.1em] text-slate-500">{title}</p>
+        <p className="m-0 cycle-eyebrow">{title}</p>
       ) : null}
       <div className={`grid grid-cols-2 gap-2 ${hideBlockTitle ? "" : "mt-2"}`}>
         {metrics.map((row) => {
@@ -65,25 +65,20 @@ export default function MacroRiskChangeRates({ metrics = [], title = "변화율"
               ].join(" ")}
             >
               <div className="flex items-baseline justify-between gap-1">
-                <p className="m-0 text-[10px] font-semibold leading-none text-slate-200">{short}</p>
+                <p className="m-0 text-[12px] font-bold leading-none text-slate-100">{short}</p>
                 {row.dataBadge === "LIVE" ? (
-                  <span
-                    className={[
-                      "rounded px-1 py-px text-[6px] font-bold",
-                      DATA_BADGE_CLASS.LIVE,
-                    ].join(" ")}
-                  >
-                    LIVE
-                  </span>
+                  <span className={["cycle-meta-badge", DATA_BADGE_CLASS.LIVE].join(" ")}>LIVE</span>
+                ) : row.dataBadge === "MANUAL" ? (
+                  <span className={["cycle-meta-badge", DATA_BADGE_CLASS.MANUAL].join(" ")}>MANUAL</span>
                 ) : null}
               </div>
-              <p className="m-0 flex items-baseline gap-1 font-mono text-[15px] font-bold tabular-nums leading-none text-slate-50">
+              <p className="m-0 flex items-baseline gap-1 font-mono text-[16px] font-bold tabular-nums leading-none text-slate-50">
                 {currentDisplay}
-                <span className={`text-[10px] font-semibold ${STANCE_COLOR[row.slope] ?? STANCE_COLOR.flat}`}>
+                <span className={`text-[11px] font-bold ${STANCE_COLOR[row.slope] ?? STANCE_COLOR.flat}`}>
                   {slopeArrow(row.slope)}
                 </span>
               </p>
-              <p className="m-0 font-mono text-[8px] leading-tight tabular-nums text-slate-400">
+              <p className="cycle-delta-line">
                 {[d1, d5, d20].filter(Boolean).join(" · ") || "—"}
               </p>
             </div>

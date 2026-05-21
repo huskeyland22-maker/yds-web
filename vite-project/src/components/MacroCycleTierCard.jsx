@@ -42,7 +42,7 @@ function FeedStatusBadge({ kind, label }) {
   const cls = FEED_BADGE[kind] ?? FEED_BADGE.confirmed
   return (
     <span
-      className={`inline-flex items-center rounded border px-2 py-0.5 text-[9px] font-semibold tracking-wide ${cls}`}
+      className={`cycle-meta-badge inline-flex items-center rounded border px-2 py-0.5 tracking-wide ${cls}`}
     >
       {label}
     </span>
@@ -72,7 +72,7 @@ function MetricBlock({ series, panicData, rows, large }) {
         >
           {formatMetricValue(series.key, v)}
         </p>
-        <p className="m-0 mt-1 max-w-[18ch] text-trading-2xs font-semibold uppercase leading-tight tracking-[0.16em] text-slate-500 sm:mt-2 sm:text-trading-xs">
+        <p className="m-0 mt-1 max-w-[18ch] text-[11px] font-bold uppercase leading-tight tracking-[0.14em] text-slate-300 sm:mt-2 sm:text-[12px]">
           {name}
         </p>
       </div>
@@ -83,13 +83,13 @@ function MetricBlock({ series, panicData, rows, large }) {
             <span className={`text-[9px] sm:text-[10px] ${pct >= 0 ? "text-emerald-500/50" : "text-rose-500/50"}`}>
               {pct >= 0 ? "▲" : "▼"}
             </span>
-            <span className="text-[9px] font-medium text-slate-500/75 sm:text-[10px]">
+            <span className="cycle-delta-line text-[10px] sm:text-[11px]">
               {pct >= 0 ? "+" : ""}
               {pct.toFixed(1)}%
             </span>
           </>
         ) : (
-          <span className="text-[9px] text-slate-600/80 sm:text-[10px]">Δ —</span>
+          <span className="cycle-delta-line text-[10px] opacity-70">Δ —</span>
         )}
       </div>
     </div>
@@ -185,10 +185,10 @@ export default function MacroCycleTierCard({
 
           <header className={`border-b border-white/[0.05] ${compact ? "px-2.5 pb-2 pt-2" : "px-3 pb-3 pt-3 sm:px-4 sm:pb-3.5 sm:pt-3.5"}`}>
             <div className="flex items-start justify-between gap-2">
-              <p className="m-0 text-trading-2xs font-bold tracking-[0.08em] text-slate-500">{tierLabel}</p>
+              <p className="m-0 cycle-eyebrow">{tierLabel}</p>
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <FeedStatusBadge kind={feedKind} label={feedLabel} />
-                <p className="m-0 max-w-[10rem] text-right text-trading-2xs font-medium tracking-wide text-slate-400">{statusLabel}</p>
+                <p className="m-0 max-w-[10rem] text-right text-[11px] font-semibold tracking-wide text-slate-200">{statusLabel}</p>
               </div>
             </div>
 
@@ -203,15 +203,15 @@ export default function MacroCycleTierCard({
             </h2>
 
             <div className="mt-2 space-y-0.5 border-l-2 border-white/[0.1] pl-2.5 sm:mt-2.5">
-              <p className="m-0 text-trading-sm font-semibold leading-snug text-slate-200/95 sm:text-trading-base">{subtitlePrimary}</p>
+              <p className="m-0 text-[13px] font-semibold leading-snug text-slate-100 sm:text-[14px]">{subtitlePrimary}</p>
               {subtitleSecondary ? (
-                <p className="m-0 text-trading-xs leading-snug text-slate-600 sm:text-trading-sm">{subtitleSecondary}</p>
+                <p className="m-0 cycle-aux-line text-[12px] sm:text-[13px]">{subtitleSecondary}</p>
               ) : null}
             </div>
           </header>
 
           <section className={`border-b border-white/[0.05] ${compact ? "px-2.5 py-2" : "px-3 py-3 sm:px-4 sm:py-3.5"}`}>
-            <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">핵심 수치</p>
+            <p className="m-0 cycle-eyebrow">핵심 수치</p>
             {primaryS ? (
               <div className="mt-2 rounded-lg border border-white/[0.07] bg-gradient-to-b from-black/35 to-black/[0.18] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-4 sm:py-4">
                 <MetricBlock series={primaryS} panicData={panicData} rows={rows} large />
@@ -243,7 +243,7 @@ export default function MacroCycleTierCard({
 
           {!compact ? (
             <section className="px-2.5 pb-1 pt-2 sm:px-3">
-              <p className="m-0 mb-1.5 px-1 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">일별 흐름</p>
+              <p className="m-0 mb-1.5 px-1 cycle-eyebrow">일별 흐름</p>
               {primaryS ? <MacroCycleLwChart rows={rows} primarySeries={primaryS} /> : null}
             </section>
           ) : null}
@@ -251,10 +251,10 @@ export default function MacroCycleTierCard({
           {!compact ? (
             <footer className="border-t border-white/[0.05] px-3 py-3 sm:px-4 sm:py-3.5">
               <CycleHistoryTraceBadge className="mb-2" />
-              <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">데스크 코멘트</p>
+              <p className="m-0 cycle-eyebrow">데스크 코멘트</p>
               <div className="m-0 mt-1.5 space-y-1">
                 {(macroComments.length ? macroComments : ["실제 데이터 없음"]).slice(0, 2).map((line) => (
-                  <p key={line} className="m-0 text-trading-xs leading-snug text-slate-500 sm:text-trading-sm">
+                  <p key={line} className="m-0 cycle-aux-line">
                     {line}
                   </p>
                 ))}

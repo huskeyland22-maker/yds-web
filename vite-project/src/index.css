@@ -136,20 +136,20 @@
 
   .panic-desk-action__field-label {
     margin: 0;
-    font-size: 9px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: rgba(100, 116, 139, 0.95);
+    color: rgba(203, 213, 225, 0.88);
     line-height: 1.3;
   }
 
   .panic-desk-action__field-value {
     margin: 0;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 650;
     line-height: 1.3;
-    color: rgba(226, 232, 240, 0.94);
+    color: rgba(241, 245, 249, 0.96);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -195,18 +195,18 @@
   }
 
   .panic-today-brief__label {
-    font-size: 9px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     letter-spacing: 0.04em;
-    color: rgba(100, 116, 139, 0.95);
+    color: rgba(203, 213, 225, 0.88);
     line-height: 1.3;
   }
 
   .panic-today-brief__value {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 650;
     line-height: 1.3;
-    color: rgba(226, 232, 240, 0.94);
+    color: rgba(241, 245, 249, 0.96);
     word-break: keep-all;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -225,9 +225,9 @@
     border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(12, 18, 30, 0.45);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
-    color: rgba(203, 213, 225, 0.92);
+    color: rgba(241, 245, 249, 0.96);
     cursor: pointer;
     text-align: left;
     transition: background 0.15s ease;
@@ -299,10 +299,10 @@
     gap: 8px;
     margin: 0;
     width: 100%;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 650;
     line-height: 1.35;
-    color: rgba(241, 245, 249, 0.96);
+    color: rgba(248, 250, 252, 0.97);
     word-break: keep-all;
     overflow: visible;
     white-space: normal;
@@ -537,24 +537,24 @@
   }
 
   .daily-report-v2__action-line {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     line-height: 1.35;
-    color: rgba(241, 245, 249, 0.98);
+    color: rgba(248, 250, 252, 0.98);
     word-break: keep-all;
   }
 
   .daily-report-v2__action-prefix {
-    font-weight: 600;
-    color: rgba(148, 163, 184, 0.95);
+    font-weight: 650;
+    color: rgba(203, 213, 225, 0.9);
   }
 
   .daily-report-v2__block-title {
     margin: 0 0 6px;
-    font-size: 9px;
-    font-weight: 800;
+    font-size: 11px;
+    font-weight: 700;
     letter-spacing: 0.06em;
-    color: rgba(148, 163, 184, 0.95);
+    color: rgba(203, 213, 225, 0.92);
   }
 
   .daily-report-v2__row {
@@ -563,18 +563,18 @@
     gap: 8px;
     align-items: baseline;
     padding: 3px 0;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.35;
   }
 
   .daily-report-v2__label {
     font-weight: 700;
-    color: rgba(100, 116, 139, 0.95);
+    color: rgba(203, 213, 225, 0.9);
   }
 
   .daily-report-v2__value {
-    font-weight: 600;
-    color: rgba(241, 245, 249, 0.96);
+    font-weight: 650;
+    color: rgba(248, 250, 252, 0.97);
     word-break: keep-all;
   }
 
@@ -586,10 +586,10 @@
   .daily-report-v2__brief-line {
     margin: 0;
     padding: 2px 0;
-    font-size: 10px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 650;
     line-height: 1.45;
-    color: rgba(203, 213, 225, 0.9);
+    color: rgba(226, 232, 240, 0.94);
   }
 
   .daily-report-v2__brief-line:first-of-type {
@@ -838,6 +838,90 @@
     border-bottom: none;
   }
 
+  /* Cycle typography — 가독성·다크 대비 (텍스트 우선) */
+  .cycle-eyebrow {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: rgba(203, 213, 225, 0.88);
+  }
+
+  .cycle-mood-headline {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  @media (min-width: 640px) {
+    .cycle-mood-headline {
+      font-size: 18px;
+    }
+  }
+
+  .cycle-zone-axis__label {
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    color: rgba(226, 232, 240, 0.82);
+    line-height: 1.2;
+  }
+
+  @media (min-width: 640px) {
+    .cycle-zone-axis__label {
+      font-size: 11px;
+    }
+  }
+
+  .cycle-zone-axis__label--active {
+    font-weight: 700;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .cycle-aux-line {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: rgba(226, 232, 240, 0.92);
+  }
+
+  .cycle-aux-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: rgba(203, 213, 225, 0.85);
+    margin-right: 0.35rem;
+  }
+
+  .cycle-meta-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+  }
+
+  .cycle-delta-line {
+    margin: 0;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    color: rgba(226, 232, 240, 0.9);
+  }
+
+  @media (min-width: 640px) {
+    .cycle-delta-line {
+      font-size: 11px;
+    }
+  }
+
   /* Cycle 데이터 기준 — 1줄 + 접기 상세 */
   .cycle-data-basis {
     width: 100%;
@@ -852,10 +936,16 @@
   }
 
   .cycle-data-basis__line {
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 600;
     line-height: 1.35;
     min-width: 0;
     flex: 1 1 auto;
+    color: rgba(241, 245, 249, 0.94);
+  }
+
+  .cycle-data-basis__muted {
+    color: rgba(203, 213, 225, 0.82);
   }
 
   .cycle-data-basis__toggle {
@@ -867,20 +957,20 @@
     border: none;
     border-radius: 6px;
     background: transparent;
-    font-size: 9px;
-    font-weight: 600;
-    color: rgba(148, 163, 184, 0.95);
+    font-size: 11px;
+    font-weight: 650;
+    color: rgba(203, 213, 225, 0.92);
     cursor: pointer;
     flex-shrink: 0;
   }
 
   .cycle-data-basis__toggle:hover {
     background: rgba(255, 255, 255, 0.04);
-    color: rgba(203, 213, 225, 0.95);
+    color: rgba(241, 245, 249, 0.98);
   }
 
   .cycle-data-basis__toggle-icon {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1;
   }
 
@@ -890,9 +980,10 @@
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(0, 0, 0, 0.25);
-    font-size: 9px;
+    font-size: 11px;
+    font-weight: 600;
     line-height: 1.45;
-    color: rgba(203, 213, 225, 0.88);
+    color: rgba(226, 232, 240, 0.92);
     display: flex;
     flex-direction: column;
     gap: 3px;

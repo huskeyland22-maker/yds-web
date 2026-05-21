@@ -30,7 +30,7 @@ export default function PanicTodayInterpretation({
         aria-expanded={detailOpen}
       >
         <span>상세 브리핑</span>
-        <span className="text-slate-500">{detailOpen ? "▲" : "▼"}</span>
+        <span className="cycle-data-basis__muted">{detailOpen ? "▲" : "▼"}</span>
       </button>
 
       {detailOpen ? (
