@@ -13,8 +13,8 @@ const STRENGTH_CLASS = {
 function ActionRow({ label, value, accent = false }) {
   return (
     <div className={["recommend-engine__row", accent ? "recommend-engine__row--accent" : ""].join(" ")}>
-      <span className="recommend-engine__label">{label}</span>
-      <span className="recommend-engine__value">{value}</span>
+      <span className="daily-report-v2__label">{label}</span>
+      <span className="daily-report-v2__value">{value}</span>
     </div>
   )
 }
@@ -49,20 +49,20 @@ export default function RecommendationEnginePanel({
   return (
     <section className="recommend-engine" aria-label="추천 단계">
       <header className="recommend-engine__head">
-        <p className="m-0 cycle-eyebrow text-amber-200/90">추천 단계</p>
+        <p className="m-0 daily-report-v2__block-title text-amber-200/90">추천 단계</p>
         <p className={`m-0 recommend-engine__strength ${strengthCls}`}>
-          강도 <span className="font-bold">{rec.strength}</span>
+          강도 {rec.strength}
         </p>
       </header>
 
       <div className="recommend-engine__hero">
-        <p className="m-0 recommend-engine__hero-label">오늘 추천</p>
-        <p className="m-0 recommend-engine__hero-action">{rec.today}</p>
+        <p className="m-0 daily-report-v2__label">오늘 추천</p>
+        <p className="m-0 daily-report-v2__value recommend-engine__hero-value">{rec.today}</p>
       </div>
 
       {rec.reasons.length > 0 ? (
-        <p className="m-0 recommend-engine__reasons">
-          <span className="recommend-engine__reasons-tag">사유</span>
+        <p className="m-0 recommend-engine__meta-line">
+          <span className="recommend-engine__meta-tag">사유</span>
           {rec.reasons.join(" · ")}
         </p>
       ) : null}
@@ -76,8 +76,10 @@ export default function RecommendationEnginePanel({
 
       {rec.risk.length > 0 ? (
         <div className="recommend-engine__risk">
-          <p className="m-0 recommend-engine__risk-tag">리스크</p>
-          <p className="m-0 recommend-engine__risk-line">{rec.risk.join(" · ")}</p>
+          <p className="m-0 recommend-engine__meta-line">
+            <span className="recommend-engine__meta-tag">리스크</span>
+            {rec.risk.join(" · ")}
+          </p>
         </div>
       ) : null}
     </section>
