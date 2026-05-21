@@ -14,6 +14,26 @@ function ReportRow({ label, value, valueClass = "" }) {
 }
 
 /**
+ * @param {{ title: string; accent?: boolean; className?: string; children: import("react").ReactNode }} props
+ */
+function ReportCard({ title, accent = false, className = "", children }) {
+  return (
+    <article
+      className={[
+        "daily-report-v2__card",
+        accent ? "daily-report-v2__card--accent" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <p className="m-0 daily-report-v2__block-title">{title}</p>
+      <div className="daily-report-v2__card-body">{children}</div>
+    </article>
+  )
+}
+
+/**
  * @param {{
  *   panicData?: object | null
  *   cycleScore?: number | null
@@ -35,7 +55,7 @@ export default function DailyMarketReportPanel({
   if (loading && !report.ready) {
     return (
       <section className="daily-report-v2" aria-label="YDS Daily Market Report">
-        <p className="m-0 px-3 py-4 cycle-aux-line">리포트 생성 중…</p>
+        <p className="m-0 daily-report-v2__placeholder cycle-aux-line">리포트 생성 중…</p>
       </section>
     )
   }
@@ -43,7 +63,9 @@ export default function DailyMarketReportPanel({
   if (!report.ready) {
     return (
       <section className="daily-report-v2" aria-label="YDS Daily Market Report">
-        <p className="m-0 px-3 py-4 cycle-aux-line">Cycle·패닉 입력 후 자동 생성됩니다.</p>
+        <p className="m-0 daily-report-v2__placeholder cycle-aux-line">
+          Cycle·패닉 입력 후 자동 생성됩니다.
+        </p>
       </section>
     )
   }
@@ -56,58 +78,57 @@ export default function DailyMarketReportPanel({
         <p className="m-0 cycle-eyebrow text-cyan-200/95">YDS DAILY MARKET REPORT</p>
       </header>
 
-      <div className="daily-report-v2__block">
-        <p className="m-0 daily-report-v2__block-title">1. 오늘 시장</p>
-        <ReportRow label="시장" value={marketToday.market} />
-        <ReportRow label="채권" value={marketToday.bond} valueClass="text-amber-200/90" />
-        <ReportRow label="리더" value={marketToday.leaders} valueClass="text-cyan-200/90" />
-      </div>
+      <div className="daily-report-v2__grid">
+        <ReportCard title="오늘 시장">
+          <ReportRow label="시장" value={marketToday.market} />
+          <ReportRow label="채권" value={marketToday.bond} valueClass="daily-report-v2__value--amber" />
+          <ReportRow label="리더" value={marketToday.leaders} valueClass="daily-report-v2__value--cyan" />
+        </ReportCard>
 
-      <div className="daily-report-v2__block daily-report-v2__block--accent">
-        <p className="m-0 daily-report-v2__block-title">오늘 행동</p>
-        <div className="daily-report-v2__action-lines">
-          <p className="m-0 daily-report-v2__action-line">{actionToday.today}</p>
-          <p className="m-0 daily-report-v2__action-line">
-            <span className="daily-report-v2__action-prefix">AI</span> {actionToday.ai}
-          </p>
-          <p className="m-0 daily-report-v2__action-line font-mono tabular-nums">
-            <span className="daily-report-v2__action-prefix">현금</span> {actionToday.cash}
-          </p>
-          <p className="m-0 daily-report-v2__action-line text-amber-200/95">
-            {actionToday.rate}
-          </p>
-        </div>
-      </div>
+        <ReportCard title="오늘 행동" accent>
+          <div className="daily-report-v2__action-lines">
+            <p className="m-0 daily-report-v2__action-line">{actionToday.today}</p>
+            <p className="m-0 daily-report-v2__action-line">
+              <span className="daily-report-v2__action-prefix">AI</span> {actionToday.ai}
+            </p>
+            <p className="m-0 daily-report-v2__action-line font-mono tabular-nums">
+              <span className="daily-report-v2__action-prefix">현금</span> {actionToday.cash}
+            </p>
+            <p className="m-0 daily-report-v2__action-line daily-report-v2__value--amber">
+              {actionToday.rate}
+            </p>
+          </div>
+        </ReportCard>
 
-      <div className="daily-report-v2__block">
-        <p className="m-0 daily-report-v2__block-title">3. 실전 전략</p>
-        <ReportRow label="단기" value={strategy.short} />
-        <ReportRow label="중기" value={strategy.mid} />
-        <ReportRow label="장기" value={strategy.long} />
-        <ReportRow label="실전" value={strategy.practical} valueClass="font-semibold text-slate-50" />
-      </div>
+        <ReportCard title="실전 전략">
+          <ReportRow label="단기" value={strategy.short} />
+          <ReportRow label="중기" value={strategy.mid} />
+          <ReportRow label="장기" value={strategy.long} />
+          <ReportRow label="실전" value={strategy.practical} valueClass="daily-report-v2__value--emph" />
+        </ReportCard>
 
-      <div className="daily-report-v2__block">
-        <p className="m-0 daily-report-v2__block-title">4. 관심 섹터</p>
-        <ReportRow
-          label="리더"
-          value={sectors.leaders.length ? sectors.leaders.join(" · ") : "—"}
-          valueClass="text-cyan-200/90"
-        />
-        <ReportRow
-          label="주의"
-          value={sectors.caution.join(" · ")}
-          valueClass="text-amber-200/90"
-        />
-      </div>
+        <ReportCard title="관심 섹터">
+          <ReportRow
+            label="리더"
+            value={sectors.leaders.length ? sectors.leaders.join(" · ") : "—"}
+            valueClass="daily-report-v2__value--cyan"
+          />
+          <ReportRow
+            label="주의"
+            value={sectors.caution.join(" · ")}
+            valueClass="daily-report-v2__value--amber"
+          />
+        </ReportCard>
 
-      <div className="daily-report-v2__brief">
-        <p className="m-0 daily-report-v2__block-title">5. 한줄 브리핑</p>
-        {oneLiner.map((line) => (
-          <p key={line} className="m-0 daily-report-v2__brief-line">
-            {line}
-          </p>
-        ))}
+        <ReportCard title="한줄 브리핑" className="daily-report-v2__card--full">
+          <div className="daily-report-v2__brief-lines">
+            {oneLiner.map((line) => (
+              <p key={line} className="m-0 daily-report-v2__brief-line">
+                {line}
+              </p>
+            ))}
+          </div>
+        </ReportCard>
       </div>
     </section>
   )

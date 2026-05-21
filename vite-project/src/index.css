@@ -505,7 +505,7 @@
     opacity: 0.85;
   }
 
-  /* YDS Daily Market Report v2 */
+  /* YDS Daily Market Report v2 — 2열 카드 그리드 */
   .daily-report-v2 {
     border-radius: 15px;
     border: 1px solid rgba(34, 211, 238, 0.32);
@@ -514,43 +514,86 @@
       0 0 0 1px rgba(6, 182, 212, 0.1),
       0 16px 40px rgba(0, 0, 0, 0.42);
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
   }
 
   .daily-report-v2__head {
-    padding: 10px 14px 8px;
+    padding: 12px 16px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .daily-report-v2__block {
-    padding: 8px 14px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  .daily-report-v2__placeholder {
+    padding: 16px;
   }
 
-  .daily-report-v2__block--accent {
-    background: rgba(34, 211, 238, 0.06);
+  .daily-report-v2__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .daily-report-v2__action-lines {
+  @media (min-width: 640px) {
+    .daily-report-v2__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 14px 16px 16px;
+    }
+  }
+
+  .daily-report-v2__card {
     display: flex;
+    min-height: 128px;
+    min-width: 0;
     flex-direction: column;
-    gap: 5px;
+    padding: 14px 16px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(7, 10, 18, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  .daily-report-v2__action-line {
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.35;
-    color: rgba(248, 250, 252, 0.98);
-    word-break: keep-all;
+  @media (min-width: 640px) {
+    .daily-report-v2__card {
+      min-height: 132px;
+      padding: 16px 18px 18px;
+    }
   }
 
-  .daily-report-v2__action-prefix {
-    font-weight: 650;
-    color: rgba(203, 213, 225, 0.9);
+  .daily-report-v2__card--accent {
+    border-color: rgba(34, 211, 238, 0.22);
+    background: linear-gradient(165deg, rgba(34, 211, 238, 0.1) 0%, rgba(7, 12, 22, 0.88) 100%);
+  }
+
+  .daily-report-v2__card--full {
+    min-height: auto;
+  }
+
+  @media (min-width: 640px) {
+    .daily-report-v2__card--full {
+      grid-column: 1 / -1;
+      min-height: 96px;
+    }
+  }
+
+  .daily-report-v2__card-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
   }
 
   .daily-report-v2__block-title {
-    margin: 0 0 6px;
+    margin: 0;
+    flex-shrink: 0;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -559,41 +602,95 @@
 
   .daily-report-v2__row {
     display: grid;
-    grid-template-columns: 52px minmax(0, 1fr);
-    gap: 8px;
-    align-items: baseline;
-    padding: 3px 0;
+    grid-template-columns: minmax(2.75rem, auto) minmax(0, 1fr);
+    gap: 4px 12px;
+    align-items: start;
+    width: 100%;
     font-size: 12px;
-    line-height: 1.35;
+    line-height: 1.4;
+  }
+
+  @media (min-width: 640px) {
+    .daily-report-v2__row {
+      font-size: 13px;
+    }
   }
 
   .daily-report-v2__label {
     font-weight: 700;
-    color: rgba(203, 213, 225, 0.9);
+    color: rgba(203, 213, 225, 0.88);
+    white-space: nowrap;
   }
 
   .daily-report-v2__value {
     font-weight: 650;
     color: rgba(248, 250, 252, 0.97);
     word-break: keep-all;
+    text-align: left;
   }
 
-  .daily-report-v2__brief {
-    padding: 8px 14px 12px;
-    background: rgba(0, 0, 0, 0.22);
+  .daily-report-v2__value--cyan {
+    color: rgba(103, 232, 249, 0.95);
+  }
+
+  .daily-report-v2__value--amber {
+    color: rgba(253, 224, 71, 0.95);
+  }
+
+  .daily-report-v2__value--emph {
+    font-weight: 700;
+    color: rgba(248, 250, 252, 0.99);
+  }
+
+  .daily-report-v2__action-lines {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .daily-report-v2__action-line {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.38;
+    color: rgba(248, 250, 252, 0.98);
+    word-break: keep-all;
+  }
+
+  @media (min-width: 640px) {
+    .daily-report-v2__action-line {
+      font-size: 15px;
+    }
+  }
+
+  .daily-report-v2__action-prefix {
+    font-weight: 650;
+    color: rgba(203, 213, 225, 0.9);
+    margin-right: 0.25rem;
+  }
+
+  .daily-report-v2__brief-lines {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .daily-report-v2__brief-line {
     margin: 0;
-    padding: 2px 0;
     font-size: 12px;
     font-weight: 650;
     line-height: 1.45;
     color: rgba(226, 232, 240, 0.94);
+    word-break: keep-all;
   }
 
-  .daily-report-v2__brief-line:first-of-type {
-    padding-top: 4px;
+  @media (min-width: 640px) {
+    .daily-report-v2__brief-line {
+      font-size: 13px;
+    }
   }
 
   /* legacy daily-market-report (unused) */
