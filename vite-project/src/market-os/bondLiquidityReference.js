@@ -96,3 +96,75 @@ export function buildBondReferenceDisplay(snapshot) {
   const hintLines = buildBondFutureHints(snapshot)
   return { statusLabels, hintLines }
 }
+
+/**
+ * @typedef {{
+ *   key: string
+ *   shortLabel: string
+ *   value: string
+ *   arrow: string
+ *   warn: boolean
+ *   tag: string
+ * }} BondCompactLine
+ */
+
+/** @param {string} key @param {ReturnType<typeof metricRow>} row @param {string[]} statuses */
+function compactTagForKey(key, row, statuses) {
+  if (key === "US10Y") {
+    if (statuses.includes("금리 재평가")) return "금리압박"
+    if (row?.slope === "up") return "금리압박"
+    if (row?.slope === "down") return "금리완화"
+    return "금리"
+  }
+  if (key === "US30Y") {
+    if (statuses.includes("장기채 경고")) return "장기채"
+    if (row?.current != null && Number(row.current) >= 5) return "장기채"
+    return "장기"
+  }
+  if (key === "DXY") {
+    if (statuses.includes("유동성 주의") || statuses.includes("유동성 축소")) return "유동성주의"
+    if (row?.slope === "up") return "유동성주의"
+    if (row?.slope === "down") return "유동성완화"
+    return "유동성"
+  }
+  return ""
+}
+
+/**
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
+ * @returns {BondCompactLine[]}
+ */
+export function buildBondCompactLines(snapshot, formatValue) {
+  if (!snapshot) return []
+
+  const statuses = deriveBondReferenceStatuses(snapshot)
+  const keys = ["US10Y", "US30Y", "DXY"]
+  const short = { US10Y: "10Y", US30Y: "30Y", DXY: "DXY" }
+
+  return keys.map((key) => {
+    const row = metricRow(snapshot, key)
+    const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
+    const cur = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
+    const value = formatValue(key, cur, fmt)
+    const slope = row?.slope ?? "flat"
+    const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
+    const tag = compactTagForKey(key, row, statuses)
+    const warn = key === "US30Y" && (tag === "장기채" || statuses.includes("장기채 경고"))
+
+    return {
+      key,
+      shortLabel: short[key] ?? key,
+      value,
+      arrow,
+      warn,
+      tag,
+    }
+  })
+}
+
+/** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot @returns {string} */
+export function bondStatusSummaryLine(snapshot) {
+  const labels = deriveBondReferenceStatuses(snapshot)
+  return labels.length ? labels.join(" · ") : "특이 신호 없음"
+}
