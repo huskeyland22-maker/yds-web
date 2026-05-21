@@ -1,6 +1,7 @@
 import { fetchMarketData } from "../config/api.js"
 import { BOND_FRED_SERIES_MAP } from "./bondFredPolicy.js"
-import { resolveBondFredFromMarket } from "./bondFredSnapshotStore.js"
+import { clearBondFredSnapshot, resolveBondFredFromMarket } from "./bondFredSnapshotStore.js"
+import { recordBondSyncMeta } from "./bondSyncMeta.js"
 
 const HISTORY_LEN = 22
 const SOURCE_PRIORITY = {
@@ -34,7 +35,7 @@ export function synthesizeHistoryFromSpot(current, changePct1D, points = HISTORY
  * @param {object | null} _panicContext
  * @returns {{ history: Record<string, number[]>; sources: Record<string, string>; bondAsOfNy: string|null }}
  */
-export function buildMacroRiskHistoryFromMarket(market, _panicContext = null) {
+export function buildMacroRiskHistoryFromMarket(market, _panicContext = null, opts = {}) {
   const pd = market?.parsedData ?? {}
   const cd = market?.changeData ?? {}
   const history = {}
@@ -59,7 +60,7 @@ export function buildMacroRiskHistoryFromMarket(market, _panicContext = null) {
     sources[key] = source
   }
 
-  const fredResolved = resolveBondFredFromMarket(market)
+  const fredResolved = resolveBondFredFromMarket(market, { forceRefresh: Boolean(opts.forceBondSync) })
 
   for (const row of BOND_FRED_SERIES_MAP) {
     const hist = fredResolved.history[row.macroKey]
@@ -83,7 +84,11 @@ export function buildMacroRiskHistoryFromMarket(market, _panicContext = null) {
  * Bond: FRED H.15 · DXY: market-data(Yahoo). 패닉 MOVE/VXN은 Cycle 전용.
  * @param {object | null} panicContext
  */
-export async function loadMacroRiskHistory(panicContext = null) {
+/**
+ * @param {object | null} panicContext
+ * @param {{ forceBondSync?: boolean }} [opts]
+ */
+export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
   let history = {}
   /** @type {Record<string, string>} */
   let sources = {}
@@ -92,9 +97,10 @@ export async function loadMacroRiskHistory(panicContext = null) {
   let bondAsOfNy = null
 
   try {
-    const market = await fetchMarketData()
+    if (opts.forceBondSync) clearBondFredSnapshot()
+    const market = await fetchMarketData({ cacheBust: true })
     liveFetchOk = true
-    const built = buildMacroRiskHistoryFromMarket(market, panicContext)
+    const built = buildMacroRiskHistoryFromMarket(market, panicContext, opts)
     history = built.history
     sources = { ...sources, ...built.sources }
     bondAsOfNy = built.bondAsOfNy
@@ -102,6 +108,9 @@ export async function loadMacroRiskHistory(panicContext = null) {
       updatedAt = `${market.bondFred.asOfNy}T21:00:00.000Z`
     } else if (market.updatedAt) {
       updatedAt = market.updatedAt
+    }
+    if (opts.forceBondSync) {
+      recordBondSyncMeta({ asOfNy: bondAsOfNy })
     }
   } catch {
     /* LIVE 실패 — 빈 히스토리 */

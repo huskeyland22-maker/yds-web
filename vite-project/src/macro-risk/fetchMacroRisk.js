@@ -15,8 +15,12 @@ function readMacroDevUiFlag() {
  * 클라이언트 전용 Macro Risk 스냅샷 (신규 api/* route 없음).
  * @param {object | null} panicContext read-only (vxn, move)
  */
-export async function loadMacroRiskSnapshot(panicContext = null) {
-  const { history, updatedAt, sources, liveFetchOk, bondAsOfNy } = await loadMacroRiskHistory(panicContext)
+/**
+ * @param {object | null} panicContext
+ * @param {{ forceBondSync?: boolean }} [opts]
+ */
+export async function loadMacroRiskSnapshot(panicContext = null, opts = {}) {
+  const { history, updatedAt, sources, liveFetchOk, bondAsOfNy } = await loadMacroRiskHistory(panicContext, opts)
   const snapshot = buildMacroRiskSnapshot(history, panicContext, {
     sources,
     liveFetchOk,

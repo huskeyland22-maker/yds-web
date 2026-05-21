@@ -31,7 +31,8 @@ export default function MacroRiskPage({ panicData = null }) {
     return <Navigate to="/cycle" replace />
   }
 
-  const { snapshot, loading, error, refetch } = useMacroRiskSnapshot(panicData)
+  const { snapshot, loading, syncingBond, error, refetch, refetchBond, lastBondSyncAt } =
+    useMacroRiskSnapshot(panicData)
   const cycleScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
 
   const [macroDevUi, setMacroDevUi] = useState(() => {
@@ -135,7 +136,12 @@ export default function MacroRiskPage({ panicData = null }) {
         <div className="macro-risk-stack flex flex-col gap-[18px]">
           <MarketOsPhase2Shell panicData={panicData} sticky />
 
-          <BondLiquidityStatusBar snapshot={snapshot} />
+          <BondLiquidityStatusBar
+            snapshot={snapshot}
+            syncing={syncingBond}
+            lastSyncAt={lastBondSyncAt}
+            onBondSync={refetchBond}
+          />
 
           <SectionErrorBoundary label="Summary">
             <MacroRiskHero snapshot={snapshot} macroDevUi={macroDevUi} macroDay={macroDay} cycleDay={cycleDay} />

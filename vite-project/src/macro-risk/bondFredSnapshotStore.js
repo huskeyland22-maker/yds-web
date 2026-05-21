@@ -74,6 +74,16 @@ export function mergeBondFredSnapshots(stored, incoming) {
 /**
  * @param {BondFredStoredSnapshot|null} snap
  */
+/** 수동 Sync 시 PWA/로컬 확정 스냅샷 무시 */
+export function clearBondFredSnapshot() {
+  if (typeof window === "undefined") return
+  try {
+    window.localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // ignore
+  }
+}
+
 export function persistBondFredSnapshot(snap) {
   if (typeof window === "undefined" || !snap) return
   const prev = loadBondFredSnapshot()
@@ -89,8 +99,20 @@ export function persistBondFredSnapshot(snap) {
  * @param {{ bondFred?: { series?: Record<string, { values?: number[] }>; asOfNy?: string|null } }|null} market
  * @returns {{ history: Record<string, number[]>; sources: Record<string, string>; asOfNy: string|null }}
  */
-export function resolveBondFredFromMarket(market) {
+/**
+ * @param {{ bondFred?: object }|null} market
+ * @param {{ forceRefresh?: boolean }} [opts]
+ */
+export function resolveBondFredFromMarket(market, opts = {}) {
   const incoming = bondFredPayloadToSnapshot(market?.bondFred ?? null)
+  if (opts.forceRefresh) {
+    if (incoming) persistBondFredSnapshot(incoming)
+    return {
+      history: incoming?.historyByMacroKey ?? {},
+      sources: incoming?.sources ?? {},
+      asOfNy: incoming?.asOfNy ?? market?.bondFred?.asOfNy ?? null,
+    }
+  }
   const stored = loadBondFredSnapshot()
   const snap = mergeBondFredSnapshots(stored, incoming)
   if (snap) persistBondFredSnapshot(snap)

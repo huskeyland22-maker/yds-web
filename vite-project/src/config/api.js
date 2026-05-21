@@ -505,8 +505,12 @@ export async function submitManualTextData(rawText) {
   return normalizeManualPayload(out?.data)
 }
 
-export async function fetchMarketData() {
-  const res = await fetch(withNoStoreQuery("/api/market-data"), LIVE_JSON_GET_INIT)
+/**
+ * @param {{ cacheBust?: boolean }} [opts] — Bond Sync: PWA/중간 캐시 우회용 추가 bust
+ */
+export async function fetchMarketData(opts = {}) {
+  const path = opts.cacheBust ? "/api/market-data?bondSync=1" : "/api/market-data"
+  const res = await fetch(withNoStoreQuery(path), LIVE_JSON_GET_INIT)
   if (!res.ok) {
     throw new Error(`market-data HTTP ${res.status}`)
   }
