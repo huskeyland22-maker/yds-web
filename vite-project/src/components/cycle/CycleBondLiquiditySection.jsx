@@ -6,7 +6,6 @@ import { metricDisplayLabel, metricShortLabel } from "../../macro-risk/metricLab
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { buildMarketOsIntegrated } from "../../market-os/buildMarketOsIntegrated.js"
 import { bondCoreCardHints, deriveBondLiquidityStatuses } from "../../market-os/bondLiquidityStatus.js"
-import { BOND_MONITOR_SHORT, BOND_MONITOR_SUBTITLE } from "../../market-os/bondMonitorLabels.js"
 import { resolveCyclePosition } from "../../market-os/positionLabels.js"
 import { formatBondLastSyncKst, loadBondSyncMeta } from "../../macro-risk/bondSyncMeta.js"
 
@@ -14,19 +13,24 @@ const CORE_KEYS = ["US10Y", "US30Y", "DXY"]
 const EXPERT_KEYS = ["REAL_YIELD", "BEI", "US2Y"]
 
 /**
- * @param {{ panicData?: object | null; cycleScore?: number | null }} props
+ * @param {{ panicData?: object | null; cycleScore?: number | null; basisDateTime?: string | null }} props
  */
-export default function CycleBondLiquiditySection({ panicData = null, cycleScore = null }) {
+export default function CycleBondLiquiditySection({
+  panicData = null,
+  cycleScore = null,
+  basisDateTime = null,
+}) {
   const enabled = isMacroRiskEnabled()
-  const [sectionOpen, setSectionOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [expertOpen, setExpertOpen] = useState(false)
+  const { snapshot, loading, syncingBond, refetchBond, lastBondSyncAt } = useMacroRiskSnapshot(panicData)
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#bond-liquidity") {
-      setSectionOpen(true)
+      setDetailOpen(true)
+      setExpertOpen(true)
     }
   }, [])
-  const [expertOpen, setExpertOpen] = useState(false)
-  const { snapshot, loading, syncingBond, refetchBond, lastBondSyncAt } = useMacroRiskSnapshot(panicData)
 
   const cyclePos = useMemo(() => resolveCyclePosition(cycleScore), [cycleScore])
   const statuses = useMemo(() => deriveBondLiquidityStatuses(snapshot), [snapshot])
@@ -41,151 +45,139 @@ export default function CycleBondLiquiditySection({ panicData = null, cycleScore
     return Object.fromEntries(rows.map((r) => [r.key, r]))
   }, [snapshot])
 
-  const bondLinkLines = useMemo(() => {
-    if (!snapshot) return []
-    const lines = []
-    if (Number.isFinite(Number(cycleScore))) lines.push(`Cycle ${Math.round(Number(cycleScore))} · ${cyclePos.position}`)
-    else lines.push(`Cycle · ${cyclePos.position}`)
-    lines.push("채권·유동성 확인")
-    const us10 = tierByKey.US10Y
-    const us30 = tierByKey.US30Y
-    if (us10?.slope === "up") lines.push("10Y 상승")
-    if (Number.isFinite(Number(us30?.current)) && Number(us30.current) > 5) lines.push("30Y > 5")
-    return lines
-  }, [snapshot, cycleScore, cyclePos.position, tierByKey])
-
   const syncLabel = formatBondLastSyncKst(lastBondSyncAt ?? loadBondSyncMeta()?.at ?? snapshot?.updatedAt)
+  const basisLine = basisDateTime ? basisDateTime.replace(/^미국장 종가 기준 · /u, "") : syncLabel
 
   if (!enabled) return null
 
   return (
-    <section id="bond-liquidity" className="cycle-bond-section scroll-mt-20">
-      <button
-        type="button"
-        onClick={() => setSectionOpen((v) => !v)}
-        className="flex w-full min-h-[2.5rem] items-center justify-between gap-2 rounded-md border border-amber-500/25 bg-amber-500/[0.06] px-2.5 py-2 text-left"
-        aria-expanded={sectionOpen}
-      >
-        <span className="min-w-0">
-          <span className="block text-[11px] font-bold text-amber-100/95">채권·유동성 (보조)</span>
-          {!sectionOpen ? (
-            <span className="mt-0.5 block truncate text-[9px] text-slate-500">
-              {statuses.slice(0, 2).join(" · ") || BOND_MONITOR_SUBTITLE}
-            </span>
-          ) : null}
-        </span>
-        <span className="shrink-0 text-[10px] text-slate-400">{sectionOpen ? "▲" : "▼"}</span>
-      </button>
-
-      {sectionOpen ? (
-        <div className="mt-1.5 space-y-2 rounded-md border border-white/[0.06] bg-black/20 px-2 py-2 sm:px-2.5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="m-0 text-[9px] text-slate-500">
-              {BOND_MONITOR_SHORT} · 마지막 갱신 {syncLabel}
+    <section id="bond-liquidity" className="cycle-bond-section scroll-mt-24" aria-label="채권·유동성 보조">
+      <div className="cycle-bond-panel">
+        <header className="cycle-bond-panel__header">
+          <div className="cycle-bond-panel__accent" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setDetailOpen((v) => !v)}
+                className="min-w-0 flex-1 text-left"
+                aria-expanded={detailOpen}
+              >
+                <p className="m-0 text-[12px] font-bold tracking-tight text-cyan-100/95">
+                  채권·유동성 <span className="text-[10px] font-semibold text-cyan-300/70">(보조)</span>
+                  <span className="ml-1.5 text-[10px] font-normal text-slate-500">{detailOpen ? "▲" : "▼"}</span>
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => refetchBond()}
+                disabled={syncingBond || loading}
+                className="cycle-bond-sync-btn shrink-0"
+                aria-busy={syncingBond}
+              >
+                <RefreshCw size={11} className={syncingBond ? "animate-spin" : ""} />
+                {syncingBond ? "동기화…" : "채권 동기화"}
+              </button>
+            </div>
+            <p className="m-0 mt-1 text-[10px] text-slate-400">
+              <span className="text-slate-500">미국장 기준</span>{" "}
+              <span className="font-mono tabular-nums text-slate-300">{basisLine}</span>
             </p>
-            <button
-              type="button"
-              onClick={() => refetchBond()}
-              disabled={syncingBond || loading}
-              className="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold text-amber-100/90 disabled:opacity-50"
-            >
-              <RefreshCw size={10} className={syncingBond ? "animate-spin" : ""} />
-              {syncingBond ? "동기화…" : "채권 동기화"}
-            </button>
+            <p className="m-0 mt-0.5 text-[9px] text-slate-500">
+              Core: 10Y · 30Y · DXY
+              <span className="mx-1 text-slate-600">|</span>
+              전문가: REAL · BEI · 2Y
+            </p>
           </div>
+        </header>
 
-          {loading && !snapshot ? (
-            <p className="m-0 text-[10px] text-slate-500">채권·유동성 불러오는 중…</p>
-          ) : null}
+        {loading && !snapshot ? (
+          <p className="m-0 px-3 pb-3 text-[10px] text-slate-500">채권·유동성 불러오는 중…</p>
+        ) : null}
 
-          {snapshot ? (
-            <>
-              {bondLinkLines.length > 0 ? (
-                <div className="rounded border border-indigo-500/20 bg-indigo-500/[0.06] px-2 py-1.5 text-[10px] leading-snug text-slate-200">
-                  {bondLinkLines.map((line) => (
-                    <p key={line} className="m-0">
-                      {line}
+        {snapshot ? (
+          <div className="cycle-bond-panel__body">
+            <div className="cycle-bond-status-lines" role="status">
+              {statuses.slice(0, 3).map((s) => (
+                <span key={s} className="cycle-bond-status-pill">
+                  {s}
+                </span>
+              ))}
+            </div>
+
+            <div className="cycle-bond-core-grid">
+              {CORE_KEYS.map((key) => {
+                const row = tierByKey[key]
+                const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
+                const value =
+                  row?.current == null || !Number.isFinite(Number(row.current))
+                    ? "—"
+                    : formatCurrent(row.current, fmt)
+                const title = metricShortLabel(key)
+                return (
+                  <article key={key} className="cycle-bond-core-card">
+                    <p className="m-0 text-[10px] font-semibold text-slate-400">{title}</p>
+                    <p className="m-0 mt-0.5 font-mono text-[16px] font-bold leading-none tabular-nums text-slate-50">
+                      {value}
                     </p>
-                  ))}
-                  {os ? (
-                    <p className="m-0 mt-1 font-semibold text-cyan-200/90">
-                      실전: {os.actionNow.today} · AI {os.actionNow.ai}
+                    <p className="m-0 mt-1.5 text-[9px] font-medium leading-snug text-amber-200/90">
+                      {hints[key] ?? "—"}
                     </p>
-                  ) : null}
-                </div>
-              ) : null}
+                  </article>
+                )
+              })}
+            </div>
 
-              <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
-                {statuses.slice(0, 4).map((s) => (
-                  <li
-                    key={s}
-                    className="rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-100/90"
-                  >
-                    {s}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
-                {CORE_KEYS.map((key) => {
-                  const row = tierByKey[key]
-                  const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
-                  const value =
-                    row?.current == null || !Number.isFinite(Number(row.current))
-                      ? "—"
-                      : formatCurrent(row.current, fmt)
-                  const title = metricShortLabel(key)
-                  return (
-                    <article
-                      key={key}
-                      className="rounded-md border border-white/[0.08] bg-[#070a10] px-2 py-2"
-                    >
-                      <p className="m-0 text-[10px] font-semibold text-slate-300">{title}</p>
-                      <p className="m-0 mt-0.5 font-mono text-[15px] font-bold tabular-nums text-slate-50">
-                        {value}
-                      </p>
-                      <p className="m-0 mt-1 text-[9px] font-medium text-amber-200/85">{hints[key] ?? "—"}</p>
-                    </article>
-                  )
-                })}
-              </div>
-
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setExpertOpen((v) => !v)}
-                  className="flex w-full items-center justify-between rounded border border-white/[0.06] bg-white/[0.02] px-2 py-1 text-left"
-                >
-                  <span className="text-[10px] font-semibold text-slate-400">전문가 보기 {expertOpen ? "▲" : "▼"}</span>
-                </button>
-                {expertOpen ? (
-                  <div className="mt-1.5 grid grid-cols-1 gap-1 sm:grid-cols-3">
-                    {EXPERT_KEYS.map((key) => {
-                      const row = tierByKey[key]
-                      const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
-                      const value =
-                        row?.current == null || !Number.isFinite(Number(row.current))
-                          ? "—"
-                          : formatCurrent(row.current, fmt)
-                      return (
-                        <div
-                          key={key}
-                          className="rounded border border-white/[0.05] bg-black/30 px-2 py-1.5 opacity-90"
-                        >
-                          <p className="m-0 text-[9px] text-slate-500">{metricDisplayLabel(key)}</p>
-                          <p className="m-0 font-mono text-[12px] font-semibold tabular-nums text-slate-300">
-                            {value}
-                          </p>
-                        </div>
-                      )
-                    })}
-                  </div>
+            {detailOpen ? (
+              <div className="cycle-bond-detail-block space-y-2">
+                {Number.isFinite(Number(cycleScore)) ? (
+                  <p className="m-0 text-[10px] text-slate-300">
+                    Cycle {Math.round(Number(cycleScore))} · {cyclePos.position}
+                    <span className="text-slate-500"> → 채권·유동성 확인</span>
+                  </p>
+                ) : null}
+                {os ? (
+                  <p className="m-0 text-[10px] font-semibold text-cyan-200/90">
+                    실전: {os.actionNow.today} · AI {os.actionNow.ai}
+                  </p>
                 ) : null}
               </div>
-            </>
-          ) : null}
-        </div>
-      ) : null}
+            ) : null}
+
+            <div className="cycle-bond-expert">
+              <button
+                type="button"
+                onClick={() => setExpertOpen((v) => !v)}
+                className="cycle-bond-expert-toggle"
+                aria-expanded={expertOpen}
+              >
+                <span>전문가 보기</span>
+                <span className="text-slate-500">{expertOpen ? "▲" : "▼"}</span>
+              </button>
+              {expertOpen ? (
+                <div className="cycle-bond-expert-grid">
+                  {EXPERT_KEYS.map((key) => {
+                    const row = tierByKey[key]
+                    const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
+                    const value =
+                      row?.current == null || !Number.isFinite(Number(row.current))
+                        ? "—"
+                        : formatCurrent(row.current, fmt)
+                    return (
+                      <div key={key} className="cycle-bond-expert-card">
+                        <p className="m-0 text-[9px] text-slate-500">{metricDisplayLabel(key)}</p>
+                        <p className="m-0 font-mono text-[12px] font-semibold tabular-nums text-slate-300">
+                          {value}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+      </div>
     </section>
   )
 }

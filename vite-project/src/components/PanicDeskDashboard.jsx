@@ -360,6 +360,14 @@ export default function PanicDeskDashboard({
         </section>
       </div>
 
+      <div className="my-7 sm:my-8">
+        <CycleBondLiquiditySection
+          panicData={panicData}
+          cycleScore={finalScore}
+          basisDateTime={basisStatusLine}
+        />
+      </div>
+
       <section className="grid grid-cols-1 gap-1 sm:grid-cols-3">
         {horizons.map((h) => (
           <article key={h.id} className={`rounded border px-2 py-1 ${h.accent} bg-black/20`}>
@@ -381,12 +389,10 @@ export default function PanicDeskDashboard({
         ))}
       </section>
 
-      <CycleBondLiquiditySection panicData={panicData} cycleScore={finalScore} />
-
       <SectionErrorBoundary
         label="패닉 히스토리"
         fallback={
-          <div className="trading-card-shell mt-3 px-3 py-4 text-center text-sm text-slate-400">
+          <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
             패닉 데이터 로딩 실패
           </div>
         }
