@@ -5,7 +5,7 @@
 import { buildMarketOsIntegrated } from "../market-os/buildMarketOsIntegrated.js"
 import { deriveBondLiquidityStatuses } from "../market-os/bondLiquidityStatus.js"
 import { resolveCyclePosition } from "../market-os/positionLabels.js"
-import { computeMarketAction } from "./panicMarketActionEngine.js"
+import { buildSectorRotation } from "./buildSectorRotation.js"
 
 /**
  * @typedef {{
@@ -27,11 +27,6 @@ const BOND_STRESS_STATUSES = new Set([
   "금리·유동성 경계",
 ])
 
-/** @param {string[]} items */
-function joinKo(items) {
-  return items.filter((x) => x && x !== "—").join(" · ")
-}
-
 /**
  * @param {string[]} bondStatuses
  * @param {string} cyclePosition
@@ -51,38 +46,6 @@ function buildStatusPills(bondStatuses, cyclePosition) {
 }
 
 /**
- * @param {string[]} sectors
- * @param {import("./panicMarketActionEngine.js").MarketRegime} regime
- * @param {boolean} bondStress
- */
-function buildSectorLines(sectors, regime, bondStress) {
-  const watch = [...sectors]
-  if (bondStress && !watch.some((s) => /AI|반도체/i.test(s))) {
-    watch.unshift("AI 관찰")
-  }
-  if (regime === "fear" || regime === "extreme_fear") {
-    if (!watch.some((s) => /가치|배당/i.test(s))) watch.push("가치주 우호")
-  }
-
-  /** @type {string[]} */
-  const caution = []
-  if (regime === "greed" || regime === "extreme_greed") {
-    caution.push("성장 추격")
-    if (regime === "extreme_greed") caution.push("소형·테마")
-  }
-  if (bondStress) {
-    caution.push("금리 민감 성장")
-    caution.push("고베타")
-  }
-  if (regime === "extreme_fear") caution.push("레버리지·풀비중")
-
-  return {
-    watch: watch.length ? joinKo([...new Set(watch)].slice(0, 4)) : "분산·대형",
-    caution: caution.length ? joinKo([...new Set(caution)].slice(0, 4)) : "—",
-  }
-}
-
-/**
  * @param {{
  *   panicData?: object | null
  *   cycleScore?: number | null
@@ -92,36 +55,31 @@ function buildSectorLines(sectors, regime, bondStress) {
  */
 export function buildDailyMarketReport({ panicData = null, cycleScore = null, snapshot = null }) {
   const cycle = resolveCyclePosition(cycleScore)
-  const action = computeMarketAction(panicData)
   const os = snapshot ? buildMarketOsIntegrated({ cycleScore, snapshot }) : null
   const bondStatuses = deriveBondLiquidityStatuses(snapshot)
+  const rotation = buildSectorRotation({ panicData, cycleScore, snapshot })
 
   const hasCycle = Number.isFinite(Number(cycleScore))
-  const hasPanic = Boolean(action)
+  const hasPanic = Boolean(rotation.ready)
   const hasBond = Boolean(snapshot)
   const ready = hasCycle || hasPanic || hasBond
 
-  const bondStress = bondStatuses.some((s) => BOND_STRESS_STATUSES.has(s))
   const statusPills = buildStatusPills(bondStatuses, cycle.position)
 
   const practicalAction =
     os?.actionNow?.today ||
     os?.forbiddenActions?.find((x) => x.includes("추격")) ||
-    action?.actionHeadline?.split("—")[0]?.trim() ||
     "관망"
 
   const cashRaw = os?.actionNow?.cash
   const cashAllocation = cashRaw && cashRaw !== "—" ? `${cashRaw}%` : "20~30%"
 
-  const regime = action?.regime ?? "neutral"
-  const sectorLines = buildSectorLines(action?.sectors ?? [], regime, bondStress)
-
   return {
     statusPills,
     practicalAction,
     cashAllocation,
-    cautionSectors: sectorLines.caution === "—" ? "특이 없음" : sectorLines.caution,
-    watchSectors: sectorLines.watch,
+    cautionSectors: rotation.cautionSummary,
+    watchSectors: rotation.watchSummary,
     ready,
   }
 }

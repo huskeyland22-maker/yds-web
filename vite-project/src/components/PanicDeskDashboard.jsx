@@ -18,7 +18,7 @@ import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
-import PanicSectorFlowCard from "./PanicSectorFlowCard.jsx"
+import SectorRotationPanel from "./SectorRotationPanel.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import { computeMarketTiming } from "../utils/panicMarketTimingEngine.js"
@@ -317,8 +317,6 @@ export default function PanicDeskDashboard({
         </div>
       </section>
 
-      <PanicSectorFlowCard panicData={panicData} marketState={marketState} />
-
       <div>
         <SectionLabel title="핵심 패닉지수" variant="core" />
         <section className="trading-card-shell overflow-hidden border border-white/[0.1] p-px shadow-[0_0_28px_rgba(0,0,0,0.45)]">
@@ -380,6 +378,15 @@ export default function PanicDeskDashboard({
 
       <div className="mb-5 sm:mb-6">
         <DailyMarketReportPanel
+          panicData={panicData}
+          cycleScore={finalScore}
+          snapshot={bondSnapshot.snapshot}
+          loading={macroRiskEnabled && bondSnapshot.loading}
+        />
+      </div>
+
+      <div className="mb-5 sm:mb-6">
+        <SectorRotationPanel
           panicData={panicData}
           cycleScore={finalScore}
           snapshot={bondSnapshot.snapshot}

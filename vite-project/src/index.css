@@ -582,6 +582,171 @@
     word-break: keep-all;
   }
 
+  /* YDS Sector Rotation */
+  .sector-rotation {
+    border-radius: 15px;
+    border: 1px solid rgba(167, 139, 250, 0.28);
+    background: linear-gradient(165deg, rgba(10, 12, 22, 0.96) 0%, rgba(14, 18, 32, 0.9) 100%);
+    box-shadow:
+      0 0 0 1px rgba(139, 92, 246, 0.08),
+      0 14px 36px rgba(0, 0, 0, 0.38);
+    overflow: hidden;
+  }
+
+  .sector-rotation__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .sector-rotation__summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sector-rotation__summary-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .sector-rotation__summary-label {
+    font-weight: 700;
+    color: rgba(100, 116, 139, 0.95);
+    min-width: 28px;
+  }
+
+  .sector-rotation__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 14px 8px;
+  }
+
+  .sector-rotation__legend-item {
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .sector-rotation__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 0 10px 10px;
+  }
+
+  @media (min-width: 640px) {
+    .sector-rotation__grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  .sector-rotation-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 52px;
+    padding: 6px 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .sector-rotation-card--active {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35);
+    border-color: rgba(34, 211, 238, 0.4);
+  }
+
+  .sector-rotation-card__label {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .sector-rotation-card__state {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .sector-rotation-card--watch {
+    border-color: rgba(34, 211, 238, 0.35);
+    background: rgba(34, 211, 238, 0.1);
+  }
+
+  .sector-rotation-card--watch .sector-rotation-card__state {
+    color: rgba(103, 232, 249, 0.95);
+  }
+
+  .sector-rotation-card--neutral {
+    border-color: rgba(100, 116, 139, 0.25);
+  }
+
+  .sector-rotation-card--neutral .sector-rotation-card__state {
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .sector-rotation-card--caution {
+    border-color: rgba(251, 191, 36, 0.35);
+    background: rgba(251, 191, 36, 0.06);
+  }
+
+  .sector-rotation-card--caution .sector-rotation-card__state {
+    color: rgba(252, 211, 77, 0.95);
+  }
+
+  .sector-rotation-card--alert {
+    border-color: rgba(244, 63, 94, 0.4);
+    background: rgba(244, 63, 94, 0.08);
+  }
+
+  .sector-rotation-card--alert .sector-rotation-card__state {
+    color: rgba(251, 113, 133, 0.95);
+  }
+
+  .sector-rotation__picks {
+    padding: 8px 14px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .sector-rotation__picks-title {
+    margin: 0 0 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(203, 213, 225, 0.92);
+  }
+
+  .sector-rotation__pick-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    padding: 4px 0;
+    font-size: 10px;
+    line-height: 1.35;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .sector-rotation__pick-row:last-child {
+    border-bottom: none;
+  }
+
   /* 채권·유동성 보조 — 패닉 블록과 분리된 독립 레이어 */
   .cycle-bond-section {
     max-width: 100%;
