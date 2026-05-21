@@ -2,18 +2,12 @@ import { useEffect, useMemo, useState } from "react"
 import { isPanicHubEnabled } from "../config/api.js"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { getFinalScore, getMidScore, getShortScore } from "../utils/tradingScores.js"
-import {
-  ageMsFromUpdatedAt,
-  formatAgeKo,
-  formatDataBasisKst,
-  kstCalendarKey,
-  staleAgeAccentClassName,
-  staleDisplayTier,
-} from "../utils/formatDataAge.js"
+import { kstCalendarKey } from "../utils/formatDataAge.js"
 import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
+import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
 import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
 import PanicDeskChart from "./PanicDeskChart.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
@@ -160,38 +154,18 @@ export default function PanicDeskDashboard({
     [panicData],
   )
 
-  const dataAgeMs = useMemo(() => {
-    const metaAge = panicData?.__meta?.ageMs
-    if (metaAge != null && Number.isFinite(Number(metaAge))) return Number(metaAge)
-    return ageMsFromUpdatedAt(panicData?.updatedAt)
-  }, [panicData])
-
-  const todayKey = useMemo(() => kstCalendarKey(), [])
   const dataDateKey = useMemo(() => {
     if (asOfDateLabel && /^\d{4}-\d{2}-\d{2}$/.test(asOfDateLabel)) return asOfDateLabel
     if (panicData?.updatedAt) return kstCalendarKey(new Date(panicData.updatedAt))
     return asOfDateLabel
   }, [asOfDateLabel, panicData?.updatedAt])
 
-  const basisDateTime = useMemo(() => formatDataBasisKst(panicData?.updatedAt), [panicData?.updatedAt])
-  const basisStatusLine = useMemo(
-    () => (basisDateTime ? `미국장 종가 기준 · ${basisDateTime}` : "미국장 종가 기준 · —"),
-    [basisDateTime],
-  )
-  const ageKoLabel = useMemo(() => formatAgeKo(dataAgeMs), [dataAgeMs])
-  const ageStatusLine = useMemo(
-    () => (ageKoLabel ? `${ageKoLabel} 업데이트` : "— 업데이트"),
-    [ageKoLabel],
-  )
-  const staleTier = useMemo(() => {
-    if (isStale && staleDisplayTier(dataAgeMs) === "hidden") return "aging"
-    return staleDisplayTier(dataAgeMs)
-  }, [dataAgeMs, isStale])
-  const ageAccentClass = useMemo(() => staleAgeAccentClassName(staleTier), [staleTier])
-  const showCollectBanner =
-    isStale ||
-    (dataAgeMs != null && dataAgeMs >= 4 * 60 * 60 * 1000) ||
-    (dataDateKey && dataDateKey !== todayKey)
+  const cycleDataSource = useMemo(() => {
+    if (panicData?.__fromHub) return "Panic Hub"
+    if (panicData?.__fromHistory) return "히스토리"
+    if (panicData?.__fromReport) return "리포트"
+    return "수동 입력"
+  }, [panicData])
 
   const timing = useMemo(() => computeMarketTiming(panicData), [panicData])
   const macroRiskEnabled = isMacroRiskEnabled()
@@ -241,39 +215,9 @@ export default function PanicDeskDashboard({
 
   return (
     <div className="panic-v2-desk relative">
-      <div className="sticky top-0 z-20 -mx-0.5 flex justify-end border-b border-white/[0.04] bg-[#0B0E14]/90 px-1 py-0.5 backdrop-blur-sm">
-        <div
-          className="w-auto rounded border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-right leading-tight"
-          aria-label="데이터 기준 시각"
-        >
-          <p className="m-0 font-mono text-[12px] font-semibold tabular-nums text-slate-200">
-            {basisStatusLine}
-          </p>
-          <p
-            className={`m-0 mt-0.5 text-[10px] tabular-nums text-white/60 ${ageAccentClass}`}
-          >
-            {ageStatusLine}
-          </p>
-        </div>
+      <div className="sticky top-0 z-20 -mx-0.5 border-b border-white/[0.04] bg-[#0B0E14]/90 px-1 py-1 backdrop-blur-sm">
+        <CycleDataBasisBar updatedAt={panicData?.updatedAt} cycleSource={cycleDataSource} bondSource="FRED" />
       </div>
-
-      {showCollectBanner ? (
-        <div
-          className="space-y-0.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 leading-snug"
-          role="status"
-        >
-          <p className="m-0 text-[10px] font-semibold text-slate-200">미국장 종가 기준 스냅샷</p>
-          <p className="m-0 text-[10px] text-slate-500">
-            미국장 종가 확정 · 한국시간 오전 8시 기준 통일
-          </p>
-          <p className="m-0 text-[10px] text-slate-400">
-            <span className="text-slate-500">상태:</span> Cycle 확정 ✅ · Macro 확정 ✅
-          </p>
-          <p className="m-0 text-[10px] text-slate-400">
-            <span className="text-slate-500">다음 갱신:</span> 미국장 마감 후
-          </p>
-        </div>
-      ) : null}
 
       <section className="trading-card-shell overflow-hidden px-2.5 py-2 sm:px-3 sm:py-2.5">
         <div>
@@ -365,7 +309,7 @@ export default function PanicDeskDashboard({
 
       <div className="my-7 sm:my-8">
         <CycleBondLiquiditySection
-          basisDateTime={basisStatusLine}
+          basisDateTime={null}
           snapshot={bondSnapshot.snapshot}
           loading={bondSnapshot.loading}
           syncingBond={bondSnapshot.syncingBond}

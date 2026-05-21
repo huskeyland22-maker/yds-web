@@ -43,6 +43,16 @@ export function formatDataBasisKstLine(updatedAt) {
 }
 
 /**
+ * @param {string | number | Date | null | undefined} updatedAt
+ * @returns {string | null} e.g. "2026-05-21 08:03"
+ */
+export function formatUpdateTimestampKst(updatedAt) {
+  const parts = kstDateTimeParts(updatedAt)
+  if (!parts) return null
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`
+}
+
+/**
  * @param {number | null | undefined} ageMs
  * @returns {string | null} e.g. "21시간 전", "2일 전"
  */
