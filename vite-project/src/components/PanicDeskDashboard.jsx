@@ -14,7 +14,10 @@ import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDes
 import { moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
+import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
 import PanicDeskChart from "./PanicDeskChart.jsx"
+import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
+import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
 import PanicSectorFlowCard from "./PanicSectorFlowCard.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
@@ -191,6 +194,8 @@ export default function PanicDeskDashboard({
     (dataDateKey && dataDateKey !== todayKey)
 
   const timing = useMemo(() => computeMarketTiming(panicData), [panicData])
+  const macroRiskEnabled = isMacroRiskEnabled()
+  const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
 
   const horizons = useMemo(() => {
     const cards = [
@@ -365,6 +370,20 @@ export default function PanicDeskDashboard({
           panicData={panicData}
           cycleScore={finalScore}
           basisDateTime={basisStatusLine}
+          snapshot={bondSnapshot.snapshot}
+          loading={bondSnapshot.loading}
+          syncingBond={bondSnapshot.syncingBond}
+          refetchBond={bondSnapshot.refetchBond}
+          lastBondSyncAt={bondSnapshot.lastBondSyncAt}
+        />
+      </div>
+
+      <div className="mb-5 sm:mb-6">
+        <DailyMarketReportPanel
+          panicData={panicData}
+          cycleScore={finalScore}
+          snapshot={bondSnapshot.snapshot}
+          loading={macroRiskEnabled && bondSnapshot.loading}
         />
       </div>
 

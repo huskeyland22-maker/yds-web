@@ -3,7 +3,6 @@ import { RefreshCw } from "lucide-react"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { metricDisplayLabel, metricShortLabel } from "../../macro-risk/metricLabels.js"
-import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { buildMarketOsIntegrated } from "../../market-os/buildMarketOsIntegrated.js"
 import { bondCoreCardHints, deriveBondLiquidityStatuses } from "../../market-os/bondLiquidityStatus.js"
 import { resolveCyclePosition } from "../../market-os/positionLabels.js"
@@ -13,17 +12,30 @@ const CORE_KEYS = ["US10Y", "US30Y", "DXY"]
 const EXPERT_KEYS = ["REAL_YIELD", "BEI", "US2Y"]
 
 /**
- * @param {{ panicData?: object | null; cycleScore?: number | null; basisDateTime?: string | null }} props
+ * @param {{
+ *   panicData?: object | null
+ *   cycleScore?: number | null
+ *   basisDateTime?: string | null
+ *   snapshot?: import("../../macro-risk/engine.js").MacroRiskSnapshot | null
+ *   loading?: boolean
+ *   syncingBond?: boolean
+ *   refetchBond: () => void
+ *   lastBondSyncAt?: string | null
+ * }} props
  */
 export default function CycleBondLiquiditySection({
   panicData = null,
   cycleScore = null,
   basisDateTime = null,
+  snapshot = null,
+  loading = false,
+  syncingBond = false,
+  refetchBond,
+  lastBondSyncAt = null,
 }) {
   const enabled = isMacroRiskEnabled()
   const [detailOpen, setDetailOpen] = useState(false)
   const [expertOpen, setExpertOpen] = useState(false)
-  const { snapshot, loading, syncingBond, refetchBond, lastBondSyncAt } = useMacroRiskSnapshot(panicData)
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#bond-liquidity") {
