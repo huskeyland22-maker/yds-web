@@ -11,12 +11,11 @@ const TONE_PTS = {
   shock: "score-explain__pts--shock",
 }
 
-const TONE_SLOPE = {
+/** 상승=green · 안정=gray · 하락=orange */
+const TONE_SLOPE_DIR = {
   positive: "score-explain__slope-line--positive",
   neutral: "score-explain__slope-line--neutral",
-  warning: "score-explain__slope-line--risk",
   risk: "score-explain__slope-line--risk",
-  shock: "score-explain__slope-line--shock",
 }
 
 /**
@@ -44,27 +43,25 @@ function DriverRow({ driver }) {
         <div className="score-explain__slope-block">
           <p className="m-0 score-explain__slope-heading">기울기</p>
           <ul className="m-0 score-explain__slope-list">
-            {slopeItems.map((line) => (
-              <li
-                key={`${driver.key}-${line}`}
-                className={["score-explain__slope-line", TONE_SLOPE[driver.tone] ?? TONE_SLOPE.neutral].join(" ")}
-              >
-                {line}
-              </li>
-            ))}
+            {slopeItems.map((item) => {
+              const label = typeof item === "string" ? item : item.label
+              const tone =
+                typeof item === "object" && item?.tone
+                  ? TONE_SLOPE_DIR[item.tone] ?? TONE_SLOPE_DIR.neutral
+                  : TONE_SLOPE_DIR.neutral
+              const key =
+                typeof item === "object" && item?.horizon
+                  ? `${driver.key}-${item.horizon}`
+                  : `${driver.key}-${label}`
+              return (
+                <li key={key} className={["score-explain__slope-line", tone].join(" ")}>
+                  {label}
+                </li>
+              )
+            })}
           </ul>
           {driver.warn ? <p className="m-0 score-explain__warn">경고</p> : null}
         </div>
-      ) : null}
-
-      {driver.deltaLines.length > 0 ? (
-        <ul className="m-0 score-explain__delta-list font-mono tabular-nums">
-          {driver.deltaLines.map((line) => (
-            <li key={`${driver.key}-d-${line}`} className="score-explain__delta-line">
-              {line}
-            </li>
-          ))}
-        </ul>
       ) : null}
     </article>
   )
@@ -73,8 +70,8 @@ function DriverRow({ driver }) {
 /**
  * @param {{ block: import('../utils/buildScoreExplainLayer.js').HorizonExplain }} props
  */
-function HorizonAccordion({ block }) {
-  const [open, setOpen] = useState(false)
+function HorizonAccordion({ block, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen)
   const panelId = `score-explain-${block.horizon}`
 
   return (
@@ -140,7 +137,7 @@ export default function ScoreExplainLayer({
       </p>
 
       {layer.horizons.map((h) => (
-        <HorizonAccordion key={h.horizon} block={h} />
+        <HorizonAccordion key={h.horizon} block={h} defaultOpen={h.horizon === "short"} />
       ))}
 
       {layer.bondAuxiliary.length > 0 ? (

@@ -12,10 +12,9 @@ import {
   slopeContributionPoints,
 } from "./ydsScoreExplainConfig.js"
 import {
-  buildSlopeSummaryLines,
+  buildSlopeDirectionItems,
   classifySlopeState,
   computeSlopeDeltas,
-  formatHorizonDelta,
   slopeToneFromState,
   toneFromContribution,
 } from "./ydsSlopeEngine.js"
@@ -26,7 +25,7 @@ import {
  *   metricLabel: string
  *   title: string
  *   points: number
- *   slopeItems: string[]
+ *   slopeItems: import('./ydsSlopeEngine.js').SlopeDirectionItem[]
  *   tone: 'positive'|'neutral'|'warning'|'shock'
  *   slopeLines: string[]
  *   deltaLines: string[]
@@ -88,8 +87,7 @@ function buildPanicDriver(def, panicData, historyRows) {
   const { state, warn } = classifySlopeState(def.kind, deltas, { higherHurts })
   const totalPts = absoluteContributionPoints(absScore) + slopeContributionPoints(state)
 
-  const slopeLines = buildSlopeSummaryLines(deltas, state, { higherHurts })
-  const deltaLines = formatHorizonDelta(def.key, def.kind, value, deltas)
+  const slopeItems = buildSlopeDirectionItems(deltas, def.kind)
 
   return {
     key: def.key,
@@ -97,9 +95,9 @@ function buildPanicDriver(def, panicData, historyRows) {
     title: def.status(value),
     points: totalPts,
     tone: warn ? slopeToneFromState(state) : toneFromContribution(totalPts),
-    slopeLines,
-    slopeItems: slopeLines,
-    deltaLines,
+    slopeLines: slopeItems.map((i) => i.label),
+    slopeItems,
+    deltaLines: [],
     warn,
   }
 }
@@ -132,16 +130,16 @@ function buildBondAuxDriver(def, snapshot) {
   else if (def.key === "US30Y" && (state === "surge" || state === "shock")) title = "30Y · 장기채 경고"
   else if (def.key === "DXY" && state === "rise") title = "DXY · 유동성 압박"
 
-  const slopeLines = buildSlopeSummaryLines(deltas, state, { higherHurts: true })
+  const slopeItems = buildSlopeDirectionItems(deltas, def.kind)
   return {
     key: def.key,
     metricLabel: def.label,
     title,
     points: 0,
     tone: warn ? slopeToneFromState(state) : "neutral",
-    slopeLines,
-    slopeItems: slopeLines,
-    deltaLines: formatHorizonDelta(def.key, def.kind, current, deltas),
+    slopeLines: slopeItems.map((i) => i.label),
+    slopeItems,
+    deltaLines: [],
     warn,
     auxiliary: true,
   }

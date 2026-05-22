@@ -1,13 +1,29 @@
 /**
- * YDS Slope Engine — 1D / 5D / 20D → 안정·상승·급등·쇼크
+ * YDS Slope Engine — 5D / 20D 방향 기울기 (숫자 델타 UI 금지)
  */
 import { absDelta, lastFinite, valueAtOffset } from "../macro-risk/seriesMath.js"
-import { inferDeltaMethod, formatDeltaByMethod } from "../macro-risk/deltaSemantics.js"
 import { SLOPE_STATE_LABEL, SLOPE_THRESHOLDS } from "./ydsScoreExplainConfig.js"
 
 /** @typedef {import('./ydsScoreExplainConfig.js').SlopeKind} SlopeKind */
 
 /** @typedef {'stable'|'rise'|'surge'|'shock'} SlopeState */
+
+/** @typedef {'up'|'down'|'stable'} SlopeDirection */
+
+/**
+ * @typedef {{
+ *   horizon: '5D' | '20D'
+ *   direction: SlopeDirection
+ *   label: string
+ *   tone: 'positive' | 'neutral' | 'risk'
+ * }} SlopeDirectionItem
+ */
+
+const DIRECTION_LABEL = Object.freeze({
+  up: "상승",
+  down: "하락",
+  stable: "안정",
+})
 
 /**
  * @typedef {{
@@ -30,9 +46,9 @@ export function computeSlopeDeltas(values) {
   const prev5 = valueAtOffset(values, 5)
   const prev20 = valueAtOffset(values, 20)
 
-  const d1 = absDelta(prev1, current)
-  const d5 = absDelta(prev5, current)
-  const d20 = absDelta(prev20, current)
+  const d1 = signedDelta(prev1, current)
+  const d5 = signedDelta(prev5, current)
+  const d20 = signedDelta(prev20, current)
 
   const pct = (from, to) => {
     if (!Number.isFinite(from) || !Number.isFinite(to) || Math.abs(from) < 1e-9) return null
@@ -85,77 +101,79 @@ export function classifySlopeState(kind, deltas, opts = {}) {
   return { state, warn: state === "surge" || state === "shock" }
 }
 
+function signedDelta(from, to) {
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return null
+  return to - from
+}
+
 /**
- * @param {string} key
+ * @param {number | null} delta
+ * @param {number} threshold
+ * @returns {{ direction: SlopeDirection; tone: 'positive' | 'neutral' | 'risk' }}
+ */
+export function classifySlopeDirection(delta, threshold) {
+  if (delta == null || !Number.isFinite(delta) || threshold <= 0) {
+    return { direction: "stable", tone: "neutral" }
+  }
+  if (Math.abs(delta) < threshold) {
+    return { direction: "stable", tone: "neutral" }
+  }
+  if (delta > 0) {
+    return { direction: "up", tone: "positive" }
+  }
+  return { direction: "down", tone: "risk" }
+}
+
+/**
+ * @param {SlopeDeltas} deltas
  * @param {SlopeKind} kind
- * @param {number | null} current
- * @param {SlopeDeltas} deltas
+ * @returns {SlopeDirectionItem[]}
  */
-export function formatHorizonDelta(key, kind, current, deltas) {
-  const fmt = kind === "rate" || kind === "spread" ? "rate" : kind === "level" ? "level" : "index"
-  const lines = []
+export function buildSlopeDirectionItems(deltas, kind) {
+  const th = SLOPE_THRESHOLDS[kind] ?? SLOPE_THRESHOLDS.level
+  const threshold = th.stable5
+  /** @type {SlopeDirectionItem[]} */
+  const items = []
 
-  if (deltas.d1 != null) {
-    const method = inferDeltaMethod(key, current, deltas.d1, "1D")
-    lines.push(`1D: ${formatDeltaByMethod(deltas.d1, method, fmt)}`)
-  }
-  if (deltas.d5 != null) {
-    const method = inferDeltaMethod(key, current, deltas.d5, "5D")
-    lines.push(`5D: ${formatDeltaByMethod(deltas.d5, method, fmt)}`)
-  }
-  if (deltas.d20 != null) {
-    const method = inferDeltaMethod(key, current, deltas.d20, "20D")
-    lines.push(`20D: ${formatDeltaByMethod(deltas.d20, method, fmt)}`)
+  for (const { horizon, key, pctKey } of [
+    { horizon: /** @type {'5D'} */ ("5D"), key: "d5", pctKey: "d5Pct" },
+    { horizon: /** @type {'20D'} */ ("20D"), key: "d20", pctKey: "d20Pct" },
+  ]) {
+    let delta = deltas[key]
+    if ((delta == null || !Number.isFinite(delta)) && deltas[pctKey] != null) {
+      delta = deltas[pctKey]
+    }
+    if (delta == null && deltas[pctKey] == null) continue
+
+    const { direction, tone } = classifySlopeDirection(delta, threshold)
+    items.push({
+      horizon,
+      direction,
+      label: `${horizon} ${DIRECTION_LABEL[direction]}`,
+      tone,
+    })
   }
 
-  return lines
+  if (!items.length) {
+    items.push({
+      horizon: "5D",
+      direction: "stable",
+      label: `5D ${DIRECTION_LABEL.stable}`,
+      tone: "neutral",
+    })
+  }
+
+  return items
 }
 
-/**
- * @param {SlopeDeltas} deltas
- * @param {SlopeState} state
- * @param {{ higherHurts?: boolean }} [opts]
- * @returns {string[]}
- */
-export function buildSlopeSummaryLines(deltas, state, opts = {}) {
-  const higherHurts = opts.higherHurts !== false
-  const lines = []
-
-  const label5 = slopeMoveLabel(deltas.d5, deltas.d5Pct, "5D", higherHurts)
-  const label20 = slopeMoveLabel(deltas.d20, deltas.d20Pct, "20D", higherHurts)
-
-  if (label5) lines.push(label5)
-  if (label20 && label20 !== label5) lines.push(label20)
-  if (!lines.length) lines.push(SLOPE_STATE_LABEL[state] ?? "안정")
-
-  if (state === "surge" || state === "shock") lines.push("경고")
-
-  return lines
+/** @deprecated UI v1 — 문자열 요약 대신 buildSlopeDirectionItems 사용 */
+export function buildSlopeSummaryLines(deltas, state, _opts = {}) {
+  return buildSlopeDirectionItems(deltas, "level").map((i) => i.label)
 }
 
-/**
- * @param {number|null} delta
- * @param {number|null} pct
- * @param {'5D'|'20D'} tag
- * @param {boolean} higherHurts
- */
-function slopeMoveLabel(delta, pct, tag, higherHurts) {
-  if (delta == null && pct == null) return null
-  const n = pct != null && Math.abs(pct) >= 0.5 ? pct : delta
-  if (n == null || !Number.isFinite(n)) return `${tag} ${SLOPE_STATE_LABEL.stable}`
-
-  if (Math.abs(n) < 2) return `${tag} ${SLOPE_STATE_LABEL.stable}`
-
-  const up = n > 0
-  if (up) {
-    if (Math.abs(n) >= 18) return `${tag} ${SLOPE_STATE_LABEL.shock}`
-    if (Math.abs(n) >= 8) return `${tag} ${SLOPE_STATE_LABEL.surge}`
-    return `${tag} ${higherHurts ? SLOPE_STATE_LABEL.rise : "개선"}`
-  }
-
-  if (Math.abs(n) >= 12) return `${tag} ${higherHurts ? "급락" : SLOPE_STATE_LABEL.shock}`
-  if (Math.abs(n) >= 5) return `${tag} 하락`
-  return `${tag} ${higherHurts ? "완화" : "개선"}`
+/** @deprecated 숫자 델타 라인 UI 금지 */
+export function formatHorizonDelta() {
+  return []
 }
 
 /** @param {'stable'|'rise'|'surge'|'shock'} state @returns {'positive'|'neutral'|'warning'|'shock'} */
