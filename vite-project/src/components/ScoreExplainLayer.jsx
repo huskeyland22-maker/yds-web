@@ -12,7 +12,7 @@ function formatPts(n) {
  */
 function HorizonStepCard({ block }) {
   const drivers = block.drivers.filter((d) => !d.auxiliary)
-  const xaiLine = formatActionScoreXaiLine(block.actionScoreXai, "formula")
+  const xaiLine = formatActionScoreXaiLine(block.actionScoreXai, "qualitative")
 
   return (
     <article className="reco-step-card" aria-label={`${block.label} ${block.action}`}>
@@ -22,6 +22,8 @@ function HorizonStepCard({ block }) {
         <span className="reco-step-card__score-label">행동점수</span>
         <span className="reco-step-card__score-value">{block.score}</span>
       </p>
+
+      <p className="m-0 reco-step-card__xai font-mono tabular-nums">{xaiLine}</p>
 
       <ul className="m-0 reco-step-card__drivers">
         {drivers.map((d) => {
@@ -37,8 +39,6 @@ function HorizonStepCard({ block }) {
           )
         })}
       </ul>
-
-      <p className="m-0 reco-step-card__xai font-mono tabular-nums">{xaiLine}</p>
     </article>
   )
 }

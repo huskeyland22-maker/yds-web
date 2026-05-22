@@ -221,7 +221,7 @@ export function formatXaiSigned(n) {
 export function formatActionScoreXaiLine(xai, style = "formula") {
   if (style === "qualitative") {
     const panic = (xai.display.panicStatus || "—").replace(/\s+/g, "")
-    return `패닉 ${panic} / 근거합계 ${formatXaiSigned(xai.basis.total)} / 보정 ${formatXaiSigned(xai.adjustments.total)}`
+    return `패닉 ${panic} | 근거합계 ${formatXaiSigned(xai.basis.total)} | 보정 ${formatXaiSigned(xai.adjustments.total)}`
   }
   return `기본${xai.base.subtotal} + 근거${formatXaiSigned(xai.basis.total)} + 보정${formatXaiSigned(xai.adjustments.total)} = 최종${xai.final}`
 }
