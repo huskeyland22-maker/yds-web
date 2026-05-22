@@ -24,18 +24,6 @@ function XaiPts({ points }) {
 }
 
 /**
- * @param {{ left: string; status?: string }} props
- */
-function XaiMetricLeft({ left, status }) {
-  return (
-    <span className="score-explain__xai-metric-left">
-      <span className="score-explain__xai-metric-label">{left}</span>
-      {status ? <span className="score-explain__xai-metric-status">{status}</span> : null}
-    </span>
-  )
-}
-
-/**
  * @param {{ xai: import('../utils/buildActionScoreXai.js').ActionScoreXai }} props
  */
 function ActionScoreXaiPanel({ xai }) {
@@ -46,7 +34,10 @@ function ActionScoreXaiPanel({ xai }) {
       <article className="score-explain__xai-card score-explain__xai-card--left">
         <section className="score-explain__xai-section score-explain__xai-section--panic">
           <p className="m-0 score-explain__xai-heading">{display.panicHeading}</p>
-          <p className="m-0 score-explain__xai-status">{display.panicStatus}</p>
+          <p className="m-0 score-explain__xai-status-row">
+            <span className="score-explain__xai-status-label">상태</span>
+            <span className="score-explain__xai-status">{display.panicStatus}</span>
+          </p>
         </section>
 
         <hr className="score-explain__xai-divider" aria-hidden />
@@ -67,7 +58,7 @@ function ActionScoreXaiPanel({ xai }) {
           <p className="m-0 score-explain__xai-heading">근거</p>
           {xai.basis.lines.map((line) => (
             <p key={line.label} className="m-0 score-explain__xai-row font-mono tabular-nums">
-              <XaiMetricLeft left={line.label} status={line.statusShort} />
+              <span className="score-explain__xai-metric-label">{line.label}</span>
               <XaiPts points={line.points} />
             </p>
           ))}
