@@ -1,5 +1,5 @@
 import { buildScoreExplainLayer } from "../utils/buildScoreExplainLayer.js"
-import { formatActionScoreXaiLine } from "../utils/buildActionScoreXai.js"
+import { getActionScoreBreakdown } from "../utils/buildActionScoreXai.js"
 
 /** @param {number} n */
 function formatPts(n) {
@@ -8,11 +8,37 @@ function formatPts(n) {
 }
 
 /**
+ * @param {{
+ *   label: string
+ *   value: number
+ *   emphasized?: boolean
+ *   plain?: boolean
+ * }} props
+ */
+function BreakdownRow({ label, value, emphasized = false, plain = false }) {
+  const tone = value > 0 ? "reco-step-card__pts--up" : value < 0 ? "reco-step-card__pts--down" : ""
+  return (
+    <div
+      className={[
+        "reco-step-card__breakdown-row font-mono tabular-nums",
+        emphasized ? "reco-step-card__breakdown-row--final" : "",
+      ].join(" ")}
+    >
+      <span>{label}</span>
+      <span className={plain ? "" : ["reco-step-card__pts", tone].join(" ")}>
+        {plain ? value : formatPts(value)}
+      </span>
+    </div>
+  )
+}
+
+/**
  * @param {{ block: import("../utils/buildScoreExplainLayer.js").HorizonExplain }} props
  */
 function HorizonStepCard({ block }) {
   const drivers = block.drivers.filter((d) => !d.auxiliary)
-  const xaiLine = formatActionScoreXaiLine(block.actionScoreXai, "qualitative")
+  const xai = block.actionScoreXai
+  const breakdown = getActionScoreBreakdown(xai)
 
   return (
     <article className="reco-step-card" aria-label={`${block.label} ${block.action}`}>
@@ -23,8 +49,15 @@ function HorizonStepCard({ block }) {
         <span className="reco-step-card__score-value">{block.score}</span>
       </p>
 
-      <p className="m-0 reco-step-card__xai font-mono tabular-nums">{xaiLine}</p>
+      <div className="reco-step-card__breakdown">
+        <BreakdownRow label="기본점수" value={breakdown.base} plain />
+        <BreakdownRow label="근거합계" value={breakdown.basis} />
+        <BreakdownRow label="보정" value={breakdown.adjustment} />
+        <hr className="reco-step-card__breakdown-divider" aria-hidden />
+        <BreakdownRow label="최종점수" value={breakdown.final} emphasized plain />
+      </div>
 
+      <p className="m-0 reco-step-card__detail-heading">세부 근거:</p>
       <ul className="m-0 reco-step-card__drivers">
         {drivers.map((d) => {
           const tone =
@@ -46,7 +79,7 @@ function HorizonStepCard({ block }) {
 /**
  * @param {{
  *   panicData?: object | null
- *   snapshot?: import("../macro-risk/engine.js").MacroRiskSnapshot | null
+ *   snapshot?: import("../macro-risk/engine.js').MacroRiskSnapshot | null
  *   historyRows?: object[]
  *   cycleScore?: number | null
  * }} props

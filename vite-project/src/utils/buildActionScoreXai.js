@@ -225,3 +225,16 @@ export function formatActionScoreXaiLine(xai, style = "formula") {
   }
   return `기본${xai.base.subtotal} + 근거${formatXaiSigned(xai.basis.total)} + 보정${formatXaiSigned(xai.adjustments.total)} = 최종${xai.final}`
 }
+
+/**
+ * UI 공식 노출용 (기본 + 근거 + 보정 = 최종)
+ * @param {ActionScoreXai} xai
+ * @returns {{ base: number; basis: number; adjustment: number; final: number }}
+ */
+export function getActionScoreBreakdown(xai) {
+  const base = Math.round(xai.base.score)
+  const basis = Math.round(xai.basis.total)
+  const final = Math.round(xai.final)
+  const adjustment = final - base - basis
+  return { base, basis, adjustment, final }
+}
