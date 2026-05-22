@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { buildScoreExplainLayer } from "../utils/buildScoreExplainLayer.js"
 import { getActionScoreBreakdown } from "../utils/buildActionScoreXai.js"
 
@@ -8,20 +9,28 @@ function formatPts(n) {
 }
 
 /**
- * @param {{
- *   label: string
- *   value: number
- *   plain?: boolean
- *   className?: string
- * }} props
+ * @param {{ label: string; value: number; plain?: boolean; final?: boolean }} props
  */
-function MetricRow({ label, value, plain = false, className = "" }) {
+function BreakdownRow({ label, value, plain = false, final = false }) {
   const tone = value > 0 ? "reco-step-card__pts--up" : value < 0 ? "reco-step-card__pts--down" : ""
   return (
-    <div className={["reco-step-card__metric-row font-mono tabular-nums", className].join(" ")}>
-      <span className="reco-step-card__metric-label">{label}</span>
-      <span className={plain ? "reco-step-card__metric-num" : ["reco-step-card__metric-num", "reco-step-card__pts", tone].join(" ")}>
-        {plain ? value : formatPts(value)}
+    <div
+      className={[
+        "reco-step-card__breakdown-row font-mono tabular-nums",
+        final ? "reco-step-card__breakdown-row--final" : "",
+      ].join(" ")}
+    >
+      <span>{label}</span>
+      <span
+        className={
+          final
+            ? "reco-step-card__final-num"
+            : plain
+              ? ""
+              : ["reco-step-card__pts", tone].join(" ")
+        }
+      >
+        {plain || final ? value : formatPts(value)}
       </span>
     </div>
   )
@@ -31,10 +40,12 @@ function MetricRow({ label, value, plain = false, className = "" }) {
  * @param {{ block: import("../utils/buildScoreExplainLayer.js").HorizonExplain }} props
  */
 function HorizonStepCard({ block }) {
+  const [xaiOpen, setXaiOpen] = useState(false)
   const drivers = block.drivers.filter((d) => !d.auxiliary)
   const xai = block.actionScoreXai
   const breakdown = getActionScoreBreakdown(xai)
   const panicLabel = (xai.display.panicStatus || "—").replace(/\s+/g, "")
+  const driverSummary = drivers.map((d) => `${d.metricLabel} ${d.statusShort}`).join(" / ")
 
   return (
     <article className="reco-step-card" aria-label={`${block.label} ${block.action}`}>
@@ -46,36 +57,37 @@ function HorizonStepCard({ block }) {
         </p>
       </header>
 
-      <div className="reco-step-card__inline">
-        <p className="m-0 reco-step-card__panic reco-step-card__inline-panic">
-          <span className="reco-step-card__metric-label">패닉:</span>
-          <span>{panicLabel}</span>
-        </p>
-        <MetricRow className="reco-step-card__inline-calc-1" label="기본" value={breakdown.base} plain />
-        <MetricRow className="reco-step-card__inline-calc-2" label="근거" value={breakdown.basis} />
-        <MetricRow className="reco-step-card__inline-calc-3" label="보정" value={breakdown.adjustment} />
-        <div className="reco-step-card__metric-row reco-step-card__inline-final font-mono tabular-nums">
-          <span className="reco-step-card__metric-label">최종</span>
-          <span className="reco-step-card__final-num">{breakdown.final}</span>
+      <p className="m-0 reco-step-card__panic">
+        <span className="reco-step-card__panic-label">패닉:</span> {panicLabel}
+      </p>
+
+      {driverSummary ? <p className="m-0 reco-step-card__summary">{driverSummary}</p> : null}
+
+      <button
+        type="button"
+        className="reco-step-card__why-toggle"
+        onClick={() => setXaiOpen((v) => !v)}
+        aria-expanded={xaiOpen}
+        aria-controls={`reco-step-xai-${block.horizon}`}
+      >
+        <span>왜 {breakdown.final}점인가?</span>
+        <span className="reco-step-card__why-icon" aria-hidden>
+          {xaiOpen ? "−" : "+"}
+        </span>
+      </button>
+
+      {xaiOpen ? (
+        <div
+          id={`reco-step-xai-${block.horizon}`}
+          className="reco-step-card__xai-panel"
+        >
+          <BreakdownRow label="기본" value={breakdown.base} plain />
+          <BreakdownRow label="근거" value={breakdown.basis} />
+          <BreakdownRow label="보정" value={breakdown.adjustment} />
+          <hr className="reco-step-card__xai-rule" aria-hidden />
+          <BreakdownRow label="최종" value={breakdown.final} final />
         </div>
-      </div>
-
-      <hr className="reco-step-card__rule" aria-hidden />
-
-      <ul className="m-0 reco-step-card__drivers">
-        {drivers.map((d) => {
-          const tone =
-            d.points > 0 ? "reco-step-card__pts--up" : d.points < 0 ? "reco-step-card__pts--down" : ""
-          return (
-            <li key={d.key} className="reco-step-card__driver font-mono tabular-nums">
-              <span className="reco-step-card__driver-left">
-                {d.metricLabel} {d.statusShort}
-              </span>
-              <span className={["reco-step-card__pts", tone].join(" ")}>{formatPts(d.points)}</span>
-            </li>
-          )
-        })}
-      </ul>
+      ) : null}
     </article>
   )
 }

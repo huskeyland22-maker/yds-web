@@ -1667,7 +1667,7 @@
     color: rgba(203, 213, 225, 0.85);
   }
 
-  /* 추천 단계 — 외곽 카드 1개, 패닉·계산·최종 인라인 + 세부 근거 */
+  /* 추천 단계 — 컴팩트 카드 + XAI 접기(왜 N점인가?) */
   .reco-step-stack {
     display: flex;
     flex-direction: column;
@@ -1687,7 +1687,7 @@
   .reco-step-card {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     width: 100%;
     min-width: 0;
     padding: 8px 10px;
@@ -1731,60 +1731,66 @@
     color: rgba(251, 191, 36, 0.98);
   }
 
-  .reco-step-card__inline {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: repeat(5, 22px);
-    row-gap: 2px;
-    column-gap: 12px;
-    width: 100%;
-    min-width: 0;
-  }
-
-  @media (min-width: 520px) {
-    .reco-step-card__inline {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.8fr);
-      grid-template-rows: repeat(3, 22px);
-    }
-
-    .reco-step-card__inline-panic {
-      grid-column: 1;
-      grid-row: 1;
-    }
-
-    .reco-step-card__inline-calc-1 {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .reco-step-card__inline-calc-2 {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
-    .reco-step-card__inline-calc-3 {
-      grid-column: 2;
-      grid-row: 3;
-    }
-
-    .reco-step-card__inline-final {
-      grid-column: 3;
-      grid-row: 1;
-    }
-  }
-
   .reco-step-card__panic {
-    display: flex;
-    align-items: center;
-    gap: 0.25em;
     min-height: 22px;
     line-height: 22px;
     font-size: 12px;
     font-weight: 600;
-    color: rgba(226, 232, 240, 0.95);
+    color: rgba(226, 232, 240, 0.92);
   }
 
-  .reco-step-card__metric-row {
+  .reco-step-card__panic-label {
+    color: rgba(148, 163, 184, 0.88);
+  }
+
+  .reco-step-card__summary {
+    min-height: 22px;
+    line-height: 22px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.85);
+  }
+
+  .reco-step-card__why-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    min-height: 22px;
+    margin: 1px 0 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 22px;
+    color: rgba(186, 230, 253, 0.82);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .reco-step-card__why-toggle:hover {
+    color: rgba(224, 242, 254, 0.95);
+  }
+
+  .reco-step-card__why-icon {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .reco-step-card__xai-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    min-width: 0;
+    margin-top: 2px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .reco-step-card__breakdown-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -1796,13 +1802,15 @@
     color: rgba(203, 213, 225, 0.92);
   }
 
-  .reco-step-card__metric-label {
-    color: rgba(148, 163, 184, 0.88);
+  .reco-step-card__breakdown-row--final {
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.98);
   }
 
-  .reco-step-card__metric-num {
-    text-align: right;
-    font-weight: 600;
+  .reco-step-card__xai-rule {
+    margin: 3px 0 2px;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .reco-step-card__final-num {
@@ -1810,38 +1818,6 @@
     font-weight: 700;
     text-align: right;
     color: rgba(251, 191, 36, 0.98);
-  }
-
-  .reco-step-card__rule {
-    margin: 2px 0 0;
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .reco-step-card__drivers {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .reco-step-card__driver {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 8px;
-    min-height: 22px;
-    line-height: 22px;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(148, 163, 184, 0.82);
-  }
-
-  .reco-step-card__driver-left {
-    min-width: 0;
-    color: rgba(226, 232, 240, 0.88);
   }
 
   .reco-step-card__pts--up {
