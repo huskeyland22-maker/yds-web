@@ -29,23 +29,19 @@ function HorizonActionPanel({ action, actionScore, contribution }) {
     <div className="score-explain__action-panel">
       <p className="m-0 score-explain__horizon-action">{action}</p>
 
-      <div className="score-explain__score-row score-explain__score-row--action">
+      <p className="m-0 score-explain__score-line score-explain__score-line--action font-mono tabular-nums">
         <span className="score-explain__score-label">행동 점수</span>
-        <span className="score-explain__score-value score-explain__score-value--action font-mono tabular-nums">
-          {actionScore}
-        </span>
-      </div>
+        <span className="score-explain__score-value score-explain__score-value--action">{actionScore}</span>
+      </p>
 
       <hr className="score-explain__score-divider" aria-hidden />
 
-      <div className="score-explain__score-row score-explain__score-row--basis">
+      <p className="m-0 score-explain__score-line score-explain__score-line--basis font-mono tabular-nums">
         <span className="score-explain__score-label">근거 점수</span>
-        <span className="score-explain__score-value score-explain__score-value--basis font-mono tabular-nums">
-          {formatContributionPts(total)}
-        </span>
-      </div>
+        <span className="score-explain__score-value score-explain__score-value--basis">{formatContributionPts(total)}</span>
+      </p>
 
-      <div className="score-explain__polarity-rows">
+      <div className="score-explain__polarity-row">
         <p className="m-0 score-explain__polarity score-explain__polarity--positive font-mono tabular-nums">
           <span className="score-explain__polarity-icon" aria-hidden>
             ▲
