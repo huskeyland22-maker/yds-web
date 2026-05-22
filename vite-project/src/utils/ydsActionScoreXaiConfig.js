@@ -8,10 +8,26 @@
 
 /**
  * @typedef {{
+ *   upTo: number
+ *   label: string
+ * }} PanicStatusBand
+ */
+
+/**
+ * @typedef {{
  *   base: number
- *   panic: { neutral: number; scale: number; maxAbs: number }
+ *   panic: { neutral: number; scale: number; maxAbs: number; statusBands: PanicStatusBand[] }
  * }} HorizonXaiConfig
  */
+
+/** 패닉 지수(0~100) → UI 정성 라벨 (가중치·기본점수 비노출) */
+const DEFAULT_PANIC_STATUS_BANDS = Object.freeze([
+  { upTo: 32, label: "안정 관망" },
+  { upTo: 48, label: "중립 관망" },
+  { upTo: 62, label: "경계 관망" },
+  { upTo: 78, label: "스트레스 주의" },
+  { upTo: 100, label: "공포 확대" },
+])
 
 /** @typedef {{
  *   key: string
@@ -24,16 +40,21 @@
 export const ACTION_SCORE_XAI_HORIZON = Object.freeze({
   short: {
     base: 70,
-    panic: { neutral: 50, scale: 0.04, maxAbs: 12 },
+    panic: { neutral: 50, scale: 0.04, maxAbs: 12, statusBands: DEFAULT_PANIC_STATUS_BANDS },
   },
   mid: {
     base: 68,
-    panic: { neutral: 50, scale: 0.035, maxAbs: 10 },
+    panic: { neutral: 50, scale: 0.035, maxAbs: 10, statusBands: DEFAULT_PANIC_STATUS_BANDS },
   },
   long: {
     base: 65,
-    panic: { neutral: 50, scale: 0.03, maxAbs: 10 },
+    panic: { neutral: 50, scale: 0.03, maxAbs: 10, statusBands: DEFAULT_PANIC_STATUS_BANDS },
   },
+})
+
+/** UI 맥락 라인 (보정·내부 가중과 분리 가능) */
+export const ACTION_SCORE_XAI_CONTEXT = Object.freeze({
+  bondAuxLabel: "채권·유동성 보조",
 })
 
 /** 보정 축 — enabled·weight는 백테스트에서 조정 */
@@ -46,4 +67,18 @@ export const ACTION_SCORE_XAI_ADJUSTMENTS = Object.freeze([
 /** @param {ActionScoreHorizon} horizon @returns {HorizonXaiConfig} */
 export function horizonXaiConfig(horizon) {
   return ACTION_SCORE_XAI_HORIZON[horizon] ?? ACTION_SCORE_XAI_HORIZON.short
+}
+
+/**
+ * @param {number | null | undefined} cycleScore
+ * @param {PanicStatusBand[]} bands
+ * @returns {string}
+ */
+export function panicStatusLabel(cycleScore, bands = DEFAULT_PANIC_STATUS_BANDS) {
+  if (!Number.isFinite(Number(cycleScore))) return "데이터 부족"
+  const s = Number(cycleScore)
+  for (const band of bands) {
+    if (s <= band.upTo) return band.label
+  }
+  return bands[bands.length - 1]?.label ?? "중립 관망"
 }

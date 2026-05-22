@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { buildScoreExplainLayer } from "../utils/buildScoreExplainLayer.js"
-import { SCORE_BLEND } from "../utils/ydsScoreExplainConfig.js"
 
 /** 상승=green · 안정=gray · 하락=orange */
 const TONE_SLOPE_DIR = {
@@ -28,17 +27,17 @@ function XaiPts({ points }) {
  * @param {{ xai: import('../utils/buildActionScoreXai.js').ActionScoreXai }} props
  */
 function ActionScoreXaiPanel({ xai }) {
+  const { display } = xai
+
   return (
     <div className="score-explain__xai-panel">
-      <section className="score-explain__xai-section">
-        <p className="m-0 score-explain__xai-line font-mono tabular-nums">
-          <span>기본점수</span>
-          <XaiPts points={xai.base.score} />
-        </p>
-        {xai.base.components.map((c) => (
-          <p key={c.label} className="m-0 score-explain__xai-line score-explain__xai-line--sub font-mono tabular-nums">
-            <span>{c.label}</span>
-            <XaiPts points={c.points} />
+      <section className="score-explain__xai-section score-explain__xai-section--context">
+        <p className="m-0 score-explain__xai-heading">{display.panicHeading}</p>
+        <p className="m-0 score-explain__xai-status">{display.panicStatus}</p>
+        {display.contextLines.map((line) => (
+          <p key={line.label} className="m-0 score-explain__xai-line font-mono tabular-nums">
+            <span>{line.label}</span>
+            {line.showPoints && line.points != null ? <XaiPts points={line.points} /> : null}
           </p>
         ))}
       </section>
@@ -246,10 +245,6 @@ export default function ScoreExplainLayer({
 
   return (
     <div className="score-explain">
-      <p className="m-0 score-explain__blend-meta">
-        절대 {Math.round(SCORE_BLEND.absolute * 100)}% · 기울기 {Math.round(SCORE_BLEND.slope * 100)}%
-      </p>
-
       {layer.horizons.map((h) => (
         <HorizonAccordion key={h.horizon} block={h} defaultOpen={h.horizon === "short"} />
       ))}

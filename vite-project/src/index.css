@@ -1913,6 +1913,17 @@
     color: rgba(186, 230, 253, 0.75);
   }
 
+  .score-explain__xai-status {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.55;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .score-explain__xai-section--context {
+    gap: 8px;
+  }
+
   .score-explain__xai-line {
     display: inline-flex;
     align-items: baseline;

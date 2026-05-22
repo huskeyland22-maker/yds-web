@@ -4,7 +4,9 @@
 import { evaluateMetaRisk } from "../core/metaRisk/metaRiskEngine.ts"
 import {
   ACTION_SCORE_XAI_ADJUSTMENTS,
+  ACTION_SCORE_XAI_CONTEXT,
   horizonXaiConfig,
+  panicStatusLabel,
 } from "./ydsActionScoreXaiConfig.js"
 
 /**
@@ -38,10 +40,27 @@ import {
 
 /**
  * @typedef {{
+ *   label: string
+ *   points: number | null
+ *   showPoints: boolean
+ * }} XaiDisplayLine
+ */
+
+/**
+ * @typedef {{
+ *   panicHeading: string
+ *   panicStatus: string
+ *   contextLines: XaiDisplayLine[]
+ * }} XaiDisplayBlock
+ */
+
+/**
+ * @typedef {{
  *   final: number
  *   base: XaiBaseBlock
  *   basis: XaiBasisBlock
  *   adjustments: XaiAdjustmentBlock
+ *   display: XaiDisplayBlock
  *   checksOut: boolean
  * }} ActionScoreXai
  */
@@ -150,6 +169,17 @@ export function buildActionScoreXai({
   const recomposed = roundPts(baseSubtotal + basisTotal + adjustmentTotal)
   const checksOut = recomposed === final
 
+  const bondAuxPts = bondLiquidityPoints(bondDrivers, true)
+  /** @type {XaiDisplayLine[]} */
+  const contextLines = []
+  if (bondAuxPts !== 0) {
+    contextLines.push({
+      label: ACTION_SCORE_XAI_CONTEXT.bondAuxLabel,
+      points: bondAuxPts,
+      showPoints: true,
+    })
+  }
+
   return {
     final,
     base: {
@@ -159,6 +189,11 @@ export function buildActionScoreXai({
     },
     basis: { lines: basisLines, total: basisTotal },
     adjustments: { items: adjItems, total: adjustmentTotal },
+    display: {
+      panicHeading: "패닉",
+      panicStatus: panicStatusLabel(cycleScore, cfg.panic.statusBands),
+      contextLines,
+    },
     checksOut,
   }
 }
