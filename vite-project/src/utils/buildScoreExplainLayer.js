@@ -11,6 +11,7 @@ import {
   SCORE_BLEND,
   slopeContributionPoints,
 } from "./ydsScoreExplainConfig.js"
+import { buildActionScoreXai } from "./buildActionScoreXai.js"
 import {
   buildSlopeDirectionItems,
   classifySlopeState,
@@ -76,6 +77,7 @@ function extractStatusShort(title, metricLabel) {
  *   action: string
  *   summary: string
  *   contribution: HorizonContribution
+ *   actionScoreXai: import('./buildActionScoreXai.js').ActionScoreXai
  *   drivers: ExplainDriver[]
  * }} HorizonExplain
  */
@@ -213,8 +215,10 @@ function buildBondAuxDriver(def, snapshot) {
  * @param {import('./panicMarketTimingEngine.js').TimingSignal | null} signal
  * @param {object | null} panicData
  * @param {object[]} historyRows
+ * @param {import('./buildScoreExplainLayer.js').ExplainDriver[]} bondAuxiliary
+ * @param {number | null} cycleScore
  */
-function buildHorizonExplain(horizon, signal, panicData, historyRows) {
+function buildHorizonExplain(horizon, signal, panicData, historyRows, bondAuxiliary, cycleScore) {
   const defs = driversForHorizon(horizon)
   /** @type {ExplainDriver[]} */
   const drivers = []
@@ -227,13 +231,22 @@ function buildHorizonExplain(horizon, signal, panicData, historyRows) {
   const score = signal?.score ?? 0
   const action = signal?.actionShort || signal?.action || "—"
 
+  const contribution = summarizeHorizonContribution(drivers)
+
   return {
     horizon,
     label,
     score,
     action,
     summary: signal?.interpretation || signal?.marketState || "—",
-    contribution: summarizeHorizonContribution(drivers),
+    contribution,
+    actionScoreXai: buildActionScoreXai({
+      horizon,
+      finalScore: score,
+      drivers,
+      bondDrivers: bondAuxiliary,
+      cycleScore,
+    }),
     drivers,
   }
 }
@@ -243,6 +256,7 @@ function buildHorizonExplain(horizon, signal, panicData, historyRows) {
  *   panicData?: object | null
  *   snapshot?: import('../macro-risk/engine.js').MacroRiskSnapshot | null
  *   historyRows?: object[]
+ *   cycleScore?: number | null
  * }} input
  * @returns {ScoreExplainLayer}
  */
@@ -250,6 +264,7 @@ export function buildScoreExplainLayer({
   panicData = null,
   snapshot = null,
   historyRows = [],
+  cycleScore = null,
 }) {
   if (!panicData) {
     return { ready: false, horizons: [], bondAuxiliary: [], blend: SCORE_BLEND }
@@ -260,18 +275,18 @@ export function buildScoreExplainLayer({
     return { ready: false, horizons: [], bondAuxiliary: [], blend: SCORE_BLEND }
   }
 
-  const horizons = [
-    buildHorizonExplain("short", timing.short, panicData, historyRows),
-    buildHorizonExplain("mid", timing.mid, panicData, historyRows),
-    buildHorizonExplain("long", timing.long, panicData, historyRows),
-  ].filter((h) => h.drivers.length > 0)
-
   /** @type {ExplainDriver[]} */
   const bondAuxiliary = []
   for (const def of BOND_AUX_KEYS) {
     const d = buildBondAuxDriver(def, snapshot)
     if (d) bondAuxiliary.push(d)
   }
+
+  const horizons = [
+    buildHorizonExplain("short", timing.short, panicData, historyRows, bondAuxiliary, cycleScore),
+    buildHorizonExplain("mid", timing.mid, panicData, historyRows, bondAuxiliary, cycleScore),
+    buildHorizonExplain("long", timing.long, panicData, historyRows, bondAuxiliary, cycleScore),
+  ].filter((h) => h.drivers.length > 0)
 
   return {
     ready: horizons.length > 0,

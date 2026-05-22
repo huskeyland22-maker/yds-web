@@ -65,7 +65,12 @@ export default function RecommendationEnginePanel({
         <ActionRow label="실전" value={rec.practical.tactical} accent />
       </div>
 
-      <ScoreExplainLayer panicData={panicData} snapshot={snapshot} historyRows={historyRows} />
+      <ScoreExplainLayer
+        panicData={panicData}
+        snapshot={snapshot}
+        historyRows={historyRows}
+        cycleScore={cycleScore}
+      />
     </section>
   )
 }

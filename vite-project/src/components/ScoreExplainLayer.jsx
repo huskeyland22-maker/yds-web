@@ -16,44 +16,107 @@ function formatContributionPts(n) {
 }
 
 /**
+ * @param {{ points: number }} props
+ */
+function XaiPts({ points }) {
+  const tone =
+    points > 0 ? "score-explain__xai-pts--positive" : points < 0 ? "score-explain__xai-pts--risk" : ""
+  return <span className={["score-explain__xai-pts font-mono tabular-nums", tone].join(" ")}>{formatContributionPts(points)}</span>
+}
+
+/**
+ * @param {{ xai: import('../utils/buildActionScoreXai.js').ActionScoreXai }} props
+ */
+function ActionScoreXaiPanel({ xai }) {
+  return (
+    <div className="score-explain__xai-panel">
+      <section className="score-explain__xai-section">
+        <p className="m-0 score-explain__xai-line font-mono tabular-nums">
+          <span>기본점수</span>
+          <XaiPts points={xai.base.score} />
+        </p>
+        {xai.base.components.map((c) => (
+          <p key={c.label} className="m-0 score-explain__xai-line score-explain__xai-line--sub font-mono tabular-nums">
+            <span>{c.label}</span>
+            <XaiPts points={c.points} />
+          </p>
+        ))}
+      </section>
+
+      <hr className="score-explain__xai-divider" aria-hidden />
+
+      <section className="score-explain__xai-section">
+        <p className="m-0 score-explain__xai-heading">근거</p>
+        {xai.basis.lines.map((line) => (
+          <p key={line.label} className="m-0 score-explain__xai-line font-mono tabular-nums">
+            <span>{line.label}</span>
+            <XaiPts points={line.points} />
+          </p>
+        ))}
+        <p className="m-0 score-explain__xai-line score-explain__xai-line--sum font-mono tabular-nums">
+          <span>합계</span>
+          <XaiPts points={xai.basis.total} />
+        </p>
+      </section>
+
+      <hr className="score-explain__xai-divider" aria-hidden />
+
+      <section className="score-explain__xai-section">
+        <p className="m-0 score-explain__xai-heading">보정</p>
+        {xai.adjustments.items.map((item) => (
+          <p key={item.label} className="m-0 score-explain__xai-line font-mono tabular-nums">
+            <span>{item.label}</span>
+            <XaiPts points={item.points} />
+          </p>
+        ))}
+      </section>
+
+      <hr className="score-explain__xai-divider" aria-hidden />
+
+      <p className="m-0 score-explain__xai-line score-explain__xai-line--final font-mono tabular-nums">
+        <span>최종</span>
+        <span className="score-explain__xai-pts score-explain__xai-pts--final">{xai.final}</span>
+      </p>
+    </div>
+  )
+}
+
+/**
  * @param {{
  *   action: string
  *   actionScore: number
- *   contribution: import('../utils/buildScoreExplainLayer.js').HorizonContribution
+ *   actionScoreXai: import('../utils/buildActionScoreXai.js').ActionScoreXai
  * }} props
  */
-function HorizonActionPanel({ action, actionScore, contribution }) {
-  const { total, positive, risk } = contribution
+function HorizonActionPanel({ action, actionScore, actionScoreXai }) {
+  const [xaiOpen, setXaiOpen] = useState(false)
 
   return (
     <div className="score-explain__action-panel">
       <p className="m-0 score-explain__horizon-action">{action}</p>
 
-      <p className="m-0 score-explain__score-line score-explain__score-line--action font-mono tabular-nums">
-        <span className="score-explain__score-label">행동 점수</span>
-        <span className="score-explain__score-value score-explain__score-value--action">{actionScore}</span>
-      </p>
-
-      <hr className="score-explain__score-divider" aria-hidden />
-
-      <p className="m-0 score-explain__score-line score-explain__score-line--basis font-mono tabular-nums">
-        <span className="score-explain__score-label">근거 점수</span>
-        <span className="score-explain__score-value score-explain__score-value--basis">{formatContributionPts(total)}</span>
-      </p>
-
-      <div className="score-explain__polarity-row">
-        <p className="m-0 score-explain__polarity score-explain__polarity--positive font-mono tabular-nums">
-          <span className="score-explain__polarity-icon" aria-hidden>
-            ▲
-          </span>
-          <span>긍정 {formatContributionPts(positive)}</span>
+      <div className="score-explain__action-score-head">
+        <p className="m-0 score-explain__score-line score-explain__score-line--action font-mono tabular-nums">
+          <span className="score-explain__score-label">행동 점수</span>
+          <span className="score-explain__score-value score-explain__score-value--action">{actionScore}</span>
         </p>
-        <p className="m-0 score-explain__polarity score-explain__polarity--risk font-mono tabular-nums">
-          <span className="score-explain__polarity-icon" aria-hidden>
-            ▼
+        <button
+          type="button"
+          className={["score-explain__xai-toggle", xaiOpen ? "score-explain__xai-toggle--open" : ""].join(" ")}
+          aria-expanded={xaiOpen}
+          onClick={() => setXaiOpen((v) => !v)}
+        >
+          <span>구성 보기</span>
+          <span className="score-explain__expand font-mono" aria-hidden>
+            {xaiOpen ? "−" : "+"}
           </span>
-          <span>위험 {formatContributionPts(risk)}</span>
-        </p>
+        </button>
+      </div>
+
+      <div className={["score-explain__collapse score-explain__xai-collapse", xaiOpen ? "score-explain__collapse--open" : ""].join(" ")}>
+        <div className="score-explain__collapse-inner">
+          <ActionScoreXaiPanel xai={actionScoreXai} />
+        </div>
       </div>
     </div>
   )
@@ -128,7 +191,7 @@ function HorizonAccordion({ block, defaultOpen = false }) {
           <HorizonActionPanel
             action={block.action}
             actionScore={block.score}
-            contribution={block.contribution}
+            actionScoreXai={block.actionScoreXai}
           />
         </div>
         <button
@@ -166,16 +229,18 @@ function HorizonAccordion({ block, defaultOpen = false }) {
  *   panicData?: object | null
  *   snapshot?: import('../macro-risk/engine.js').MacroRiskSnapshot | null
  *   historyRows?: object[]
+ *   cycleScore?: number | null
  * }} props
  */
 export default function ScoreExplainLayer({
   panicData = null,
   snapshot = null,
   historyRows = [],
+  cycleScore = null,
 }) {
   const [bondOpen, setBondOpen] = useState(false)
 
-  const layer = buildScoreExplainLayer({ panicData, snapshot, historyRows })
+  const layer = buildScoreExplainLayer({ panicData, snapshot, historyRows, cycleScore })
 
   if (!layer.ready) return null
 

@@ -1851,6 +1851,119 @@
     color: rgba(251, 146, 60, 0.98);
   }
 
+  .score-explain__action-score-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    width: 100%;
+  }
+
+  .score-explain__xai-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 4px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(186, 230, 253, 0.9);
+    cursor: pointer;
+    transition:
+      background 180ms ease,
+      border-color 180ms ease;
+  }
+
+  .score-explain__xai-toggle:hover {
+    border-color: rgba(34, 211, 238, 0.35);
+    background: rgba(34, 211, 238, 0.1);
+  }
+
+  .score-explain__xai-toggle--open {
+    border-color: rgba(34, 211, 238, 0.32);
+    background: rgba(34, 211, 238, 0.12);
+  }
+
+  .score-explain__xai-collapse .score-explain__collapse-inner {
+    padding-top: 8px;
+  }
+
+  .score-explain__xai-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0 8px;
+    line-height: 1.65;
+  }
+
+  .score-explain__xai-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .score-explain__xai-heading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(186, 230, 253, 0.75);
+  }
+
+  .score-explain__xai-line {
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: nowrap;
+    gap: 0.45em;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.92);
+    white-space: nowrap;
+  }
+
+  .score-explain__xai-line--sub {
+    padding-left: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .score-explain__xai-line--sum {
+    margin-top: 2px;
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .score-explain__xai-line--final {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .score-explain__xai-divider {
+    margin: 0;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .score-explain__xai-pts--positive {
+    color: rgba(74, 222, 128, 0.98);
+    font-weight: 700;
+  }
+
+  .score-explain__xai-pts--risk {
+    color: rgba(251, 146, 60, 0.98);
+    font-weight: 700;
+  }
+
+  .score-explain__xai-pts--final {
+    color: rgba(251, 191, 36, 0.98);
+    font-weight: 700;
+  }
+
   @media (max-width: 360px) {
     .score-explain__polarity-row {
       flex-direction: column;
