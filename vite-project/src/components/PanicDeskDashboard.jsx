@@ -11,24 +11,6 @@ import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 
-const CORE_CELL =
-  "flex min-h-[4rem] flex-col items-center justify-center bg-[#070a10] px-1 py-2.5 transition-colors sm:min-h-[4.25rem] sm:py-3"
-
-const CORE_LABEL =
-  "max-w-full px-0.5 text-center text-[14px] font-semibold leading-snug tracking-[0.04em] text-slate-100 [text-wrap:balance]"
-
-const CORE_VALUE =
-  "mt-1 font-mono text-[1rem] font-bold leading-none tabular-nums sm:text-[1.1rem]"
-
-const EXPERT_CELL =
-  "flex min-h-[2.65rem] flex-col items-center justify-center bg-[#070a10]/70 px-0.5 py-1 transition-colors sm:min-h-[2.85rem] sm:py-1.5"
-
-const EXPERT_LABEL =
-  "max-w-full px-0.5 text-center text-[12px] font-semibold leading-tight tracking-[0.02em] text-slate-300 [text-wrap:balance]"
-
-const EXPERT_VALUE =
-  "mt-0.5 font-mono text-[0.78rem] font-medium leading-none tabular-nums text-slate-400/85 sm:text-[0.85rem]"
-
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
   return formatMetricValue(key, Number(v))
@@ -38,7 +20,12 @@ function fmt(key, v) {
 function SectionLabel({ title, variant = "core" }) {
   const isExpert = variant === "expert"
   return (
-    <div className={isExpert ? "mb-1 mt-2" : "mb-1 mt-0.5"}>
+    <div
+      className={[
+        "panic-metric-section-label",
+        isExpert ? "panic-metric-section-label--expert" : "",
+      ].join(" ")}
+    >
       <p
         className={[
           "m-0 border-l-2 pl-2 text-left text-[11px] font-bold tracking-[0.02em]",
@@ -65,7 +52,6 @@ function SectionLabel({ title, variant = "core" }) {
  */
 function MetricTile({ metric, value, selected, onSelect, variant = "core" }) {
   const isExpert = variant === "expert"
-  const selectedRing = isExpert ? "ring-1 ring-inset ring-white/[0.06]" : "ring-1 ring-inset ring-white/20"
   const valueStyle = isExpert
     ? { color: metric.accent, opacity: 0.82 }
     : metricValueDisplayStyle(metric.accent)
@@ -77,16 +63,13 @@ function MetricTile({ metric, value, selected, onSelect, variant = "core" }) {
       data-metric-tooltip={metric.tooltip ?? ""}
       onClick={onSelect}
       className={[
-        isExpert ? EXPERT_CELL : CORE_CELL,
-        selected
-          ? selectedRing
-          : isExpert
-            ? "hover:bg-white/[0.008]"
-            : "hover:bg-white/[0.05]",
+        "panic-metric-tile",
+        isExpert ? "panic-metric-tile--expert" : "panic-metric-tile--core",
+        selected ? "is-selected" : "",
       ].join(" ")}
     >
-      <span className={isExpert ? EXPERT_LABEL : CORE_LABEL}>{metric.label}</span>
-      <span className={isExpert ? EXPERT_VALUE : CORE_VALUE} style={valueStyle}>
+      <span className="panic-metric-tile__label">{metric.label}</span>
+      <span className="panic-metric-tile__value" style={valueStyle}>
         {value}
       </span>
     </button>
@@ -154,7 +137,7 @@ export default function PanicDeskDashboard({
       <div>
         <SectionLabel title="핵심지수" variant="core" />
         <section className="trading-card-shell overflow-hidden border border-white/[0.1] p-px shadow-[0_0_28px_rgba(0,0,0,0.45)]">
-          <div className="grid grid-cols-2 gap-px bg-white/[0.07] sm:grid-cols-3 lg:grid-cols-5">
+          <div className="panic-metric-grid panic-metric-grid--core">
             {CORE_METRICS.map((metric) => (
               <MetricTile
                 key={metric.key}
@@ -166,14 +149,11 @@ export default function PanicDeskDashboard({
               />
             ))}
             <div
-              className={[
-                CORE_CELL,
-                "col-span-2 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-transparent sm:col-span-1 sm:border-t-0 sm:border-l sm:border-white/[0.08]",
-              ].join(" ")}
+              className="panic-metric-tile panic-metric-tile--core panic-metric-tile--summary"
               aria-label="패닉 종합 점수"
             >
-              <span className={CORE_LABEL}>패닉지수</span>
-              <span className={CORE_VALUE} style={metricValueDisplayStyle("#e2e8f0")}>
+              <span className="panic-metric-tile__label">패닉지수</span>
+              <span className="panic-metric-tile__value" style={metricValueDisplayStyle("#e2e8f0")}>
                 {finalScore != null ? finalScore : "—"}
               </span>
             </div>
@@ -182,7 +162,7 @@ export default function PanicDeskDashboard({
 
         <SectionLabel title="전문가 리스크 지표" variant="expert" />
         <section className="mb-1 overflow-hidden rounded-md border border-white/[0.03] bg-[rgba(255,255,255,0.015)] p-px opacity-[0.78]">
-          <div className="grid grid-cols-2 gap-px bg-white/[0.025] sm:grid-cols-3 lg:grid-cols-5">
+          <div className="panic-metric-grid panic-metric-grid--expert">
             {EXPERT_METRICS.map((metric) => (
               <MetricTile
                 key={metric.key}

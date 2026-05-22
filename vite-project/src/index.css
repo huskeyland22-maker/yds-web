@@ -1949,6 +1949,126 @@
     }
   }
 
+  /* 핵심지수 · 전문가 리스크 — 컴팩트 메트릭 타일 */
+  .panic-metric-grid {
+    display: grid;
+    gap: 1px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .panic-metric-grid--core {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .panic-metric-grid--expert {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  @media (min-width: 1024px) {
+    .panic-metric-grid--core,
+    .panic-metric-grid--expert {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  .panic-metric-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 60px;
+    padding: 10px 12px;
+    border: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.15s ease;
+  }
+
+  .panic-metric-tile--core {
+    background: #070a10;
+    min-height: 60px;
+  }
+
+  .panic-metric-tile--expert {
+    background: rgba(7, 10, 16, 0.7);
+    min-height: 56px;
+    padding: 8px 10px;
+    gap: 3px;
+  }
+
+  .panic-metric-tile--summary {
+    cursor: default;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  @media (min-width: 640px) {
+    .panic-metric-tile--summary {
+      border-top: none;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .panic-metric-tile__label {
+    max-width: 100%;
+    padding: 0 2px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    color: rgba(241, 245, 249, 0.95);
+    text-wrap: balance;
+  }
+
+  .panic-metric-tile--expert .panic-metric-tile__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.88);
+  }
+
+  .panic-metric-tile__value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .panic-metric-tile--expert .panic-metric-tile__value {
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .panic-metric-tile--core:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .panic-metric-tile--expert:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .panic-metric-tile--core.is-selected {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .panic-metric-tile--expert.is-selected {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .panic-metric-section-label {
+    margin: 4px 0 6px;
+  }
+
+  .panic-metric-section-label--expert {
+    margin-top: 8px;
+  }
+
   .panic-v2-desk {
     --panic-v2-gap: 14px;
     overflow: visible;
