@@ -12,6 +12,7 @@ import {
 /**
  * @typedef {{
  *   label: string
+ *   statusShort?: string
  *   points: number
  * }} XaiPointLine
  */
@@ -140,7 +141,11 @@ export function buildActionScoreXai({
 
   const basisLines = drivers
     .filter((d) => !d.auxiliary)
-    .map((d) => ({ label: d.metricLabel, points: roundPts(d.points) }))
+    .map((d) => ({
+      label: d.metricLabel,
+      statusShort: d.statusShort,
+      points: roundPts(d.points),
+    }))
 
   const basisTotal = roundPts(basisLines.reduce((s, l) => s + l.points, 0))
 

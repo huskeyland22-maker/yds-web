@@ -24,58 +24,66 @@ function XaiPts({ points }) {
 }
 
 /**
+ * @param {{ left: string; status?: string }} props
+ */
+function XaiMetricLeft({ left, status }) {
+  return (
+    <span className="score-explain__xai-metric-left">
+      <span className="score-explain__xai-metric-label">{left}</span>
+      {status ? <span className="score-explain__xai-metric-status">{status}</span> : null}
+    </span>
+  )
+}
+
+/**
  * @param {{ xai: import('../utils/buildActionScoreXai.js').ActionScoreXai }} props
  */
 function ActionScoreXaiPanel({ xai }) {
   const { display } = xai
 
   return (
-    <div className="score-explain__xai-panel">
-      <section className="score-explain__xai-section score-explain__xai-section--context">
-        <p className="m-0 score-explain__xai-heading">{display.panicHeading}</p>
-        <p className="m-0 score-explain__xai-status">{display.panicStatus}</p>
-        {display.contextLines.map((line) => (
-          <p key={line.label} className="m-0 score-explain__xai-line font-mono tabular-nums">
-            <span>{line.label}</span>
-            {line.showPoints && line.points != null ? <XaiPts points={line.points} /> : null}
-          </p>
-        ))}
-      </section>
+    <div className="score-explain__xai-grid">
+      <article className="score-explain__xai-card score-explain__xai-card--left">
+        <section className="score-explain__xai-section score-explain__xai-section--panic">
+          <p className="m-0 score-explain__xai-heading">{display.panicHeading}</p>
+          <p className="m-0 score-explain__xai-status">{display.panicStatus}</p>
+        </section>
 
-      <hr className="score-explain__xai-divider" aria-hidden />
+        <hr className="score-explain__xai-divider" aria-hidden />
 
-      <section className="score-explain__xai-section">
-        <p className="m-0 score-explain__xai-heading">근거</p>
-        {xai.basis.lines.map((line) => (
-          <p key={line.label} className="m-0 score-explain__xai-line font-mono tabular-nums">
-            <span>{line.label}</span>
-            <XaiPts points={line.points} />
+        <section className="score-explain__xai-section">
+          <p className="m-0 score-explain__xai-heading">보정</p>
+          {xai.adjustments.items.map((item) => (
+            <p key={item.label} className="m-0 score-explain__xai-row font-mono tabular-nums">
+              <span>{item.label}</span>
+              <XaiPts points={item.points} />
+            </p>
+          ))}
+        </section>
+      </article>
+
+      <article className="score-explain__xai-card score-explain__xai-card--right">
+        <section className="score-explain__xai-section">
+          <p className="m-0 score-explain__xai-heading">근거</p>
+          {xai.basis.lines.map((line) => (
+            <p key={line.label} className="m-0 score-explain__xai-row font-mono tabular-nums">
+              <XaiMetricLeft left={line.label} status={line.statusShort} />
+              <XaiPts points={line.points} />
+            </p>
+          ))}
+          <p className="m-0 score-explain__xai-row score-explain__xai-row--sum font-mono tabular-nums">
+            <span>합계</span>
+            <XaiPts points={xai.basis.total} />
           </p>
-        ))}
-        <p className="m-0 score-explain__xai-line score-explain__xai-line--sum font-mono tabular-nums">
-          <span>합계</span>
-          <XaiPts points={xai.basis.total} />
+        </section>
+
+        <hr className="score-explain__xai-divider" aria-hidden />
+
+        <p className="m-0 score-explain__xai-row score-explain__xai-row--final font-mono tabular-nums">
+          <span className="score-explain__xai-final-label">행동점수</span>
+          <span className="score-explain__xai-pts score-explain__xai-pts--final">{xai.final}</span>
         </p>
-      </section>
-
-      <hr className="score-explain__xai-divider" aria-hidden />
-
-      <section className="score-explain__xai-section">
-        <p className="m-0 score-explain__xai-heading">보정</p>
-        {xai.adjustments.items.map((item) => (
-          <p key={item.label} className="m-0 score-explain__xai-line font-mono tabular-nums">
-            <span>{item.label}</span>
-            <XaiPts points={item.points} />
-          </p>
-        ))}
-      </section>
-
-      <hr className="score-explain__xai-divider" aria-hidden />
-
-      <p className="m-0 score-explain__xai-line score-explain__xai-line--final font-mono tabular-nums">
-        <span>최종</span>
-        <span className="score-explain__xai-pts score-explain__xai-pts--final">{xai.final}</span>
-      </p>
+      </article>
     </div>
   )
 }

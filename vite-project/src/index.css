@@ -1892,18 +1892,40 @@
     padding-top: 8px;
   }
 
-  .score-explain__xai-panel {
+  .score-explain__xai-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+    line-height: 1.55;
+  }
+
+  @media (min-width: 520px) {
+    .score-explain__xai-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+  }
+
+  .score-explain__xai-card {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 4px 0 8px;
-    line-height: 1.65;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px 10px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.22);
   }
 
   .score-explain__xai-section {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
+  }
+
+  .score-explain__xai-section--panic {
+    gap: 4px;
   }
 
   .score-explain__xai-heading {
@@ -1914,50 +1936,61 @@
   }
 
   .score-explain__xai-status {
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.55;
-    color: rgba(226, 232, 240, 0.95);
-  }
-
-  .score-explain__xai-section--context {
-    gap: 8px;
-  }
-
-  .score-explain__xai-line {
-    display: inline-flex;
-    align-items: baseline;
-    flex-wrap: nowrap;
-    gap: 0.45em;
     font-size: 13px;
     font-weight: 600;
-    color: rgba(203, 213, 225, 0.92);
-    white-space: nowrap;
+    line-height: 1.5;
+    color: rgba(226, 232, 240, 0.95);
   }
 
-  .score-explain__xai-line--sub {
-    padding-left: 10px;
+  .score-explain__xai-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
     font-size: 12px;
-    font-weight: 500;
-    color: rgba(148, 163, 184, 0.9);
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.92);
   }
 
-  .score-explain__xai-line--sum {
-    margin-top: 2px;
+  .score-explain__xai-metric-left {
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .score-explain__xai-metric-label {
     font-weight: 700;
     color: rgba(226, 232, 240, 0.95);
   }
 
-  .score-explain__xai-line--final {
-    font-size: 15px;
+  .score-explain__xai-metric-status {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.88);
+  }
+
+  .score-explain__xai-row--sum {
+    margin-top: 2px;
+    padding-top: 2px;
     font-weight: 700;
-    color: #fff;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .score-explain__xai-row--final {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .score-explain__xai-final-label {
+    color: rgba(203, 213, 225, 0.95);
   }
 
   .score-explain__xai-divider {
     margin: 0;
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .score-explain__xai-pts--positive {
