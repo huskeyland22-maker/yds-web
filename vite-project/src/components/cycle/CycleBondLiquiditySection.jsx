@@ -110,15 +110,16 @@ export default function CycleBondLiquiditySection({
   if (!enabled) return null
 
   return (
-    <section id="bond-liquidity" className="cycle-bond-section scroll-mt-24" aria-label="채권·유동성 요약">
-      <div className="cycle-bond-panel cycle-bond-panel--compact">
+    <section
+      id="bond-liquidity"
+      className="cycle-bond-section cycle-bond-section--reference scroll-mt-24"
+      aria-label="채권·유동성 참고"
+    >
+      <div className="cycle-bond-panel cycle-bond-panel--compact cycle-bond-panel--reference">
         <header className="cycle-bond-panel__header cycle-bond-panel__header--compact">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="m-0 text-[12px] font-bold tracking-tight text-cyan-100/95">
-                채권·유동성 요약
-                <span className="ml-1.5 text-[10px] font-semibold text-cyan-300/75">참고</span>
-              </p>
+              <p className="m-0 cycle-bond-panel__title-ref">채권·유동성 참고</p>
               <button
                 type="button"
                 onClick={() => refetchBond()}

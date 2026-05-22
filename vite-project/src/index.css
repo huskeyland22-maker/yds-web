@@ -1151,22 +1151,21 @@
     gap: 3px;
   }
 
-  /* 채권·유동성 요약 — 보조·컴팩트 (density −25%) */
+  /* 채권·유동성 참고 — 하단 보조 영역 */
   .cycle-bond-section {
     max-width: 100%;
     min-width: 0;
-    margin-bottom: 20px;
+    margin-bottom: 0;
+  }
+
+  .cycle-bond-section--reference {
+    margin-top: 20px;
+    opacity: 0.82;
   }
 
   @media (min-width: 640px) {
-    .cycle-bond-section {
-      margin-bottom: 28px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .cycle-bond-section {
-      margin-bottom: 32px;
+    .cycle-bond-section--reference {
+      margin-top: 24px;
     }
   }
 
@@ -1177,11 +1176,15 @@
     opacity: 1;
   }
 
-  .panic-v2-desk > .panic-v2-desk__bond-slot + .cycle-desk-divider {
+  .cycle-desk-divider--reference {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .panic-v2-desk > .panic-history-section + .cycle-desk-divider {
     margin-top: 0;
   }
 
-  .panic-v2-desk > .cycle-desk-divider + .panic-history-section {
+  .panic-v2-desk > .cycle-desk-divider--reference + .panic-v2-desk__bond-slot {
     margin-top: 0 !important;
   }
 
@@ -1192,6 +1195,19 @@
     background: rgba(10, 14, 24, 0.72);
     box-shadow: inset 0 1px 0 rgba(34, 211, 238, 0.06);
     overflow: hidden;
+  }
+
+  .cycle-bond-panel--reference {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(8, 11, 18, 0.45);
+    box-shadow: none;
+  }
+
+  .cycle-bond-panel__title-ref {
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    color: rgba(148, 163, 184, 0.92);
   }
 
   .cycle-bond-panel--compact {
@@ -2350,6 +2366,7 @@
   .panic-history-section {
     padding-top: 12px;
     margin-top: 0 !important;
+    margin-bottom: 0;
   }
 
   .panic-history-section__head {

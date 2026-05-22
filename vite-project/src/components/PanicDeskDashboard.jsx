@@ -195,6 +195,19 @@ export default function PanicDeskDashboard({
         />
       </div>
 
+      <SectionErrorBoundary
+        label="패닉 히스토리"
+        fallback={
+          <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
+            패닉 데이터 로딩 실패
+          </div>
+        }
+      >
+        <PanicIndexHistorySection rows={safeHistory} />
+      </SectionErrorBoundary>
+
+      <hr className="cycle-desk-divider cycle-desk-divider--reference" aria-hidden />
+
       <div className="panic-v2-desk__bond-slot">
         <CycleBondLiquiditySection
           basisDateTime={null}
@@ -206,19 +219,6 @@ export default function PanicDeskDashboard({
           lastBondSyncAt={bondSnapshot.lastBondSyncAt}
         />
       </div>
-
-      <hr className="cycle-desk-divider" aria-hidden />
-
-      <SectionErrorBoundary
-        label="패닉 히스토리"
-        fallback={
-          <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
-            패닉 데이터 로딩 실패
-          </div>
-        }
-      >
-        <PanicIndexHistorySection rows={safeHistory} />
-      </SectionErrorBoundary>
 
     </div>
   )
