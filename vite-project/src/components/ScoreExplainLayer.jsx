@@ -2,15 +2,6 @@ import { useState } from "react"
 import { buildScoreExplainLayer } from "../utils/buildScoreExplainLayer.js"
 import { SCORE_BLEND } from "../utils/ydsScoreExplainConfig.js"
 
-/** positive=green · neutral=gray · risk/warning=orange · shock=red */
-const TONE_PTS = {
-  positive: "score-explain__pts--positive",
-  neutral: "score-explain__pts--neutral",
-  warning: "score-explain__pts--risk",
-  risk: "score-explain__pts--risk",
-  shock: "score-explain__pts--shock",
-}
-
 /** 상승=green · 안정=gray · 하락=orange */
 const TONE_SLOPE_DIR = {
   positive: "score-explain__slope-line--positive",
@@ -18,11 +9,68 @@ const TONE_SLOPE_DIR = {
   risk: "score-explain__slope-line--risk",
 }
 
+/** @param {number} n */
+function formatContributionPts(n) {
+  if (n > 0) return `+${n}`
+  return String(n)
+}
+
+/**
+ * @param {{ contribution: import('../utils/buildScoreExplainLayer.js').HorizonContribution; variant?: 'header' | 'detail' }} props
+ */
+function ContributionSummary({ contribution, variant = "detail" }) {
+  const { total, positive, risk, lines } = contribution
+  const rootClass =
+    variant === "header"
+      ? "score-explain__contrib-header"
+      : "score-explain__contrib-detail"
+
+  if (variant === "header") {
+    return (
+      <div className={rootClass}>
+        <p className="m-0 score-explain__contrib-total-line font-mono tabular-nums">
+          총점 {formatContributionPts(total)}
+        </p>
+        <p className="m-0 score-explain__contrib-split font-mono tabular-nums">
+          (긍정 {formatContributionPts(positive)} / 위험 {formatContributionPts(risk)})
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className={rootClass}>
+      <ul className="m-0 score-explain__contrib-lines">
+        {lines.map((line) => (
+          <li
+            key={line.label}
+            className={[
+              "score-explain__contrib-line font-mono tabular-nums",
+              line.points > 0
+                ? "score-explain__contrib-line--positive"
+                : line.points < 0
+                  ? "score-explain__contrib-line--risk"
+                  : "",
+            ].join(" ")}
+          >
+            <span>{line.label}</span>
+            <span>{formatContributionPts(line.points)}</span>
+          </li>
+        ))}
+      </ul>
+      <hr className="score-explain__contrib-divider" />
+      <p className="m-0 score-explain__contrib-total-row font-mono tabular-nums">
+        <span>총점</span>
+        <span>{formatContributionPts(total)}</span>
+      </p>
+    </div>
+  )
+}
+
 /**
  * @param {{ driver: import('../utils/buildScoreExplainLayer.js').ExplainDriver }} props
  */
 function DriverRow({ driver }) {
-  const sign = driver.points > 0 ? "+" : ""
   const slopeItems = Array.isArray(driver.slopeItems) ? driver.slopeItems : driver.slopeLines ?? []
 
   return (
@@ -31,12 +79,6 @@ function DriverRow({ driver }) {
     >
       <div className="score-explain__driver-head">
         <span className="score-explain__driver-title">{driver.title}</span>
-        {!driver.auxiliary ? (
-          <span className={["score-explain__pts font-mono tabular-nums", TONE_PTS[driver.tone] ?? TONE_PTS.neutral].join(" ")}>
-            {sign}
-            {driver.points}
-          </span>
-        ) : null}
       </div>
 
       {slopeItems.length > 0 ? (
@@ -79,8 +121,10 @@ function HorizonAccordion({ block, defaultOpen = false }) {
       <header className="score-explain__horizon-head">
         <div className="score-explain__horizon-meta">
           <span className="score-explain__horizon-label">{block.label}</span>
-          <span className="score-explain__horizon-action">{block.action}</span>
-          <span className="score-explain__horizon-score font-mono tabular-nums">{block.score}</span>
+          <div className="score-explain__horizon-action-block">
+            <span className="score-explain__horizon-action">{block.action}</span>
+            <ContributionSummary contribution={block.contribution} variant="header" />
+          </div>
         </div>
         <button
           type="button"
@@ -101,6 +145,7 @@ function HorizonAccordion({ block, defaultOpen = false }) {
         className={["score-explain__collapse score-explain__horizon-collapse", open ? "score-explain__collapse--open" : ""].join(" ")}
       >
         <div className="score-explain__collapse-inner">
+          <ContributionSummary contribution={block.contribution} variant="detail" />
           <div className="score-explain__drivers">
             {block.drivers.map((d) => (
               <DriverRow key={d.key} driver={d} />

@@ -36,14 +36,52 @@ import {
 
 /**
  * @typedef {{
+ *   label: string
+ *   points: number
+ * }} ContributionLine
+ */
+
+/**
+ * @typedef {{
+ *   total: number
+ *   positive: number
+ *   risk: number
+ *   lines: ContributionLine[]
+ * }} HorizonContribution
+ */
+
+/**
+ * @typedef {{
  *   horizon: 'short'|'mid'|'long'
  *   label: string
  *   score: number
  *   action: string
  *   summary: string
+ *   contribution: HorizonContribution
  *   drivers: ExplainDriver[]
  * }} HorizonExplain
  */
+
+/**
+ * @param {ExplainDriver[]} drivers
+ * @returns {HorizonContribution}
+ */
+function summarizeHorizonContribution(drivers) {
+  const active = drivers.filter((d) => !d.auxiliary)
+  /** @type {ContributionLine[]} */
+  const lines = []
+  let positive = 0
+  let risk = 0
+
+  for (const d of active) {
+    lines.push({ label: d.metricLabel, points: d.points })
+    if (d.points > 0) positive += d.points
+    else if (d.points < 0) risk += d.points
+  }
+
+  const total = active.reduce((sum, d) => sum + d.points, 0)
+  return { total, positive, risk, lines }
+}
 
 /**
  * @typedef {{
@@ -170,6 +208,7 @@ function buildHorizonExplain(horizon, signal, panicData, historyRows) {
     score,
     action,
     summary: signal?.interpretation || signal?.marketState || "—",
+    contribution: summarizeHorizonContribution(drivers),
     drivers,
   }
 }

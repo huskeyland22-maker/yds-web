@@ -1740,7 +1740,7 @@
   .score-explain__horizon-meta {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: flex-start;
     gap: 6px 10px;
     min-width: 0;
   }
@@ -1751,16 +1751,84 @@
     color: rgba(226, 232, 240, 0.95);
   }
 
-  .score-explain__horizon-score {
-    font-size: 13px;
-    font-weight: 800;
-    color: rgba(253, 230, 138, 0.95);
+  .score-explain__horizon-action-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
   }
 
   .score-explain__horizon-action {
     font-size: 11px;
     font-weight: 600;
     color: rgba(203, 213, 225, 0.88);
+  }
+
+  .score-explain__contrib-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .score-explain__contrib-total-line {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .score-explain__contrib-split {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(148, 163, 184, 0.72);
+  }
+
+  .score-explain__contrib-detail {
+    padding: 4px 0 8px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .score-explain__contrib-lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .score-explain__contrib-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 10px;
+    line-height: 1.4;
+    color: rgba(148, 163, 184, 0.88);
+  }
+
+  .score-explain__contrib-line--positive {
+    color: rgba(74, 222, 128, 0.88);
+  }
+
+  .score-explain__contrib-line--risk {
+    color: rgba(251, 146, 60, 0.92);
+  }
+
+  .score-explain__contrib-divider {
+    margin: 6px 0 5px;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .score-explain__contrib-total-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(203, 213, 225, 0.92);
   }
 
   .score-explain__horizon-toggle {
