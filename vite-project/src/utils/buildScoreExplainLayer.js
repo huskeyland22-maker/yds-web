@@ -23,8 +23,10 @@ import {
 /**
  * @typedef {{
  *   key: string
+ *   metricLabel: string
  *   title: string
  *   points: number
+ *   slopeItems: string[]
  *   tone: 'positive'|'neutral'|'warning'|'shock'
  *   slopeLines: string[]
  *   deltaLines: string[]
@@ -91,10 +93,12 @@ function buildPanicDriver(def, panicData, historyRows) {
 
   return {
     key: def.key,
+    metricLabel: def.label,
     title: def.status(value),
     points: totalPts,
     tone: warn ? slopeToneFromState(state) : toneFromContribution(totalPts),
     slopeLines,
+    slopeItems: slopeLines,
     deltaLines,
     warn,
   }
@@ -128,12 +132,15 @@ function buildBondAuxDriver(def, snapshot) {
   else if (def.key === "US30Y" && (state === "surge" || state === "shock")) title = "30Y · 장기채 경고"
   else if (def.key === "DXY" && state === "rise") title = "DXY · 유동성 압박"
 
+  const slopeLines = buildSlopeSummaryLines(deltas, state, { higherHurts: true })
   return {
     key: def.key,
+    metricLabel: def.label,
     title,
     points: 0,
     tone: warn ? slopeToneFromState(state) : "neutral",
-    slopeLines: buildSlopeSummaryLines(deltas, state, { higherHurts: true }),
+    slopeLines,
+    slopeItems: slopeLines,
     deltaLines: formatHorizonDelta(def.key, def.kind, current, deltas),
     warn,
     auxiliary: true,
