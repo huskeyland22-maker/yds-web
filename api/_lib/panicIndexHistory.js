@@ -222,9 +222,13 @@ export async function upsertPanicIndexHistoryBatch(entries, opts = {}) {
 /**
  * @param {{ limit?: number, from?: string, to?: string }} [opts]
  */
+/** 목록 조회 — reason/slope/metaRisk 등 실험 컬럼 제외 */
+const PANIC_HISTORY_LIST_SELECT =
+  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,high_yield,gs_bb,gs_sentiment,panic_score,updated_at,source,market"
+
 export async function fetchPanicIndexHistoryRows(opts = {}) {
   const limit = Math.min(Math.max(Number(opts.limit) || 120, 1), 500)
-  let q = `panic_index_history?select=*&order=date.desc&limit=${limit}`
+  let q = `panic_index_history?select=${PANIC_HISTORY_LIST_SELECT}&order=date.desc&limit=${limit}`
   const from = opts.from ? String(opts.from).slice(0, 10) : ""
   const to = opts.to ? String(opts.to).slice(0, 10) : ""
   if (/^\d{4}-\d{2}-\d{2}$/.test(from)) q += `&date=gte.${from}`

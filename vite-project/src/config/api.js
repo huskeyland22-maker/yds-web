@@ -61,22 +61,36 @@ export async function fetchPanicHubLatest(options = {}) {
   const url = withNoStoreQuery("/api/panic/latest")
   if (isDataTraceEnabled()) logFetchStart("panic-hub-latest", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
+  const responseText = await res.text()
   if (debugLog) console.log("📡 panic hub latest", res.status, url)
+  console.log("response status", res.status)
+  console.log("response text", responseText)
+  let json = {}
+  try {
+    json = responseText ? JSON.parse(responseText) : {}
+  } catch {
+    json = { raw: responseText }
+  }
   if (!res.ok) {
-    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(`HTTP ${res.status}`), { url })
-    throw new Error(`hub HTTP ${res.status}`)
+    const detail = toErrorMessage(json?.message ?? json?.error, "") || `hub HTTP ${res.status}`
+    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(detail), { url, stack: json?.stack })
+    const err = new Error(detail)
+    if (typeof json?.stack === "string") err.stack = json.stack
+    throw err
   }
-  const json = await res.json()
   if (!json?.ok) {
-    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(String(json?.error)), { url })
-    throw new Error(json?.error || "hub_invalid_payload")
+    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(String(json?.error ?? json?.message)), { url })
+    throw new Error(json?.error || json?.message || "hub_invalid_payload")
   }
-  if (!json.data) {
+  const hasData =
+    json.data != null &&
+    !(Array.isArray(json.data) && json.data.length === 0)
+  if (!hasData) {
     const err = new Error(json?.error || json?.empty ? "hub_empty_database" : "hub_invalid_payload")
     if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", err, { url, hint: json.hint })
     throw err
   }
-  const data = normalizeManualPayload(json.data)
+  const data = normalizeManualPayload(Array.isArray(json.data) ? json.data[0] : json.data)
   const meta = json.meta && typeof json.meta === "object" ? json.meta : {}
   const isStale = Boolean(meta.isStale)
   if (isDataTraceEnabled()) {

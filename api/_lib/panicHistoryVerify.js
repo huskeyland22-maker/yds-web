@@ -30,7 +30,10 @@ async function fetchHistorySample(limit = 30) {
 }
 
 async function fetchLatestPanicMetrics() {
-  const rows = await supabaseRest("latest_panic_metrics?select=*&id=eq.global&limit=1", { method: "GET" })
+  const rows = await supabaseRest(
+    "latest_panic_metrics?select=id,date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,gs_sentiment,panic_score,updated_at&id=eq.global&limit=1",
+    { method: "GET" },
+  )
   return Array.isArray(rows) && rows[0] ? rows[0] : null
 }
 

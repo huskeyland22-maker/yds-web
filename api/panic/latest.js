@@ -1,6 +1,8 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
 import {
+  fetchLatestPanicIndexHistoryCore,
   fetchLatestPanicMetricsRow,
+  panicObjectFromHistoryCoreRow,
   panicObjectFromLatestRow,
 } from "../_lib/latestPanicMetrics.js"
 import {
@@ -32,26 +34,72 @@ export default async function handler(req, res) {
       res.status(200).json({ ok: true, probe })
       return
     }
-    const latestRow = await fetchLatestPanicMetricsRow().catch(() => null)
-    const rows = await fetchPanicMetricsRows()
+
+    let latestRow = null
+    let historyRow = null
+    let rows = []
+
+    try {
+      latestRow = await fetchLatestPanicMetricsRow()
+    } catch (err) {
+      console.warn("[panic/latest] latest_panic_metrics fetch failed", err)
+    }
+
+    try {
+      historyRow = await fetchLatestPanicIndexHistoryCore()
+    } catch (err) {
+      console.warn("[panic/latest] panic_index_history fetch failed", err)
+    }
+
+    try {
+      rows = await fetchPanicMetricsRows()
+    } catch (err) {
+      console.warn("[panic/latest] panic_metrics fetch failed", err)
+      rows = []
+    }
+
+    if (!latestRow && !historyRow && (!rows || !rows.length)) {
+      res.status(200).json({
+        ok: true,
+        data: [],
+        meta: { isStale: true, rowCount: 0, sources: [] },
+        rowCount: 0,
+        empty: true,
+        hint: "panic_index_history / latest_panic_metrics empty — run migration or POST /api/panic/update",
+      })
+      return
+    }
+
     const fromLatest = panicObjectFromLatestRow(latestRow)
+    const fromHistory = panicObjectFromHistoryCoreRow(historyRow)
     const fromEav = rows?.length ? panicObjectFromRows(rows) : null
-    const data = fromLatest ?? fromEav
+    const data = fromLatest ?? fromHistory ?? fromEav
     const meta = computePanicServeMeta(rows, data)
     const rowCount = Array.isArray(rows) ? rows.length : 0
     const hasData = Boolean(data)
+
     res.status(200).json({
       ok: true,
       data: hasData ? data : null,
       meta,
       rowCount,
       empty: !hasData,
+      sources: {
+        latest_panic_metrics: Boolean(latestRow),
+        panic_index_history: Boolean(historyRow),
+        panic_metrics: rowCount > 0,
+      },
       hint: !hasData ? "Run supabase/migrations or POST /api/cron/panic-collect" : null,
     })
-  } catch (e) {
+  } catch (error) {
+    console.error("panic latest error", error)
+    const message = error instanceof Error ? error.message : String(error ?? "fetch_failed")
+    const stack = error instanceof Error ? error.stack : undefined
     res.status(500).json({
       ok: false,
-      error: e instanceof Error ? e.message : "fetch_failed",
+      message,
+      error: message,
+      stack,
       data: null,
     })
   }

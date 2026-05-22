@@ -95,7 +95,13 @@ export function rowsFromPanicSnapshot(snap) {
 export { panicObjectFromSnapshot }
 
 export async function fetchPanicMetricsRows() {
-  return supabaseRest("panic_metrics?select=*", { method: "GET" })
+  const result = await supabaseRest(
+    "panic_metrics?select=metric_key,metric_value,change_percent,status,market,source,updated_at",
+    { method: "GET" },
+  )
+  console.log("panic latest result", result)
+  if (!result || !Array.isArray(result)) return []
+  return result
 }
 
 function isSchemaColumnError(err) {

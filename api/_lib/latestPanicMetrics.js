@@ -36,12 +36,33 @@ export async function syncLatestPanicMetricsRpc(tradeDate) {
   })
 }
 
+/** metaRisk·reason·slope 등 신규/실험 컬럼 제외 */
+export const LATEST_PANIC_METRICS_CORE_SELECT =
+  "id,date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,gs_sentiment,panic_score,updated_at"
+
+/** panic_index_history (panic_history) 핵심 컬럼만 */
+export const PANIC_INDEX_HISTORY_CORE_SELECT =
+  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,high_yield,gs_bb,gs_sentiment,updated_at"
+
 export async function fetchLatestPanicMetricsRow() {
-  const rows = await supabaseRest("latest_panic_metrics?select=*&id=eq.global&limit=1", {
-    method: "GET",
-  })
-  if (Array.isArray(rows) && rows[0]) return rows[0]
-  return null
+  const result = await supabaseRest(
+    `latest_panic_metrics?select=${LATEST_PANIC_METRICS_CORE_SELECT}&id=eq.global&limit=1`,
+    { method: "GET" },
+  )
+  console.log("panic latest result", result)
+  if (!result || !Array.isArray(result) || !result[0]) return null
+  return result[0]
+}
+
+/** @returns {Record<string, unknown> | null} panic_index_history 최신 1건 */
+export async function fetchLatestPanicIndexHistoryCore() {
+  const result = await supabaseRest(
+    `panic_index_history?select=${PANIC_INDEX_HISTORY_CORE_SELECT}&order=date.desc&limit=1`,
+    { method: "GET" },
+  )
+  console.log("panic latest result", result)
+  if (!result || !Array.isArray(result) || !result[0]) return null
+  return result[0]
 }
 
 export function panicObjectFromLatestRow(row) {
@@ -57,10 +78,15 @@ export function panicObjectFromLatestRow(row) {
     bofa: row.bofa,
     move: row.move,
     skew: row.skew,
-    highYield: row.hy_oas,
-    gsBullBear: row.gs_sentiment,
+    highYield: row.hy_oas ?? row.high_yield,
+    gsBullBear: row.gs_sentiment ?? row.gs_bb,
   }
   const data = panicObjectFromSnapshot(snap)
   if (row.panic_score != null) data.panicIndex = Number(row.panic_score)
   return data
+}
+
+/** panic_index_history row → 클라이언트 panic 객체 */
+export function panicObjectFromHistoryCoreRow(row) {
+  return panicObjectFromLatestRow(row)
 }
