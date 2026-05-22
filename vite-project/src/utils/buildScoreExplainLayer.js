@@ -24,6 +24,7 @@ import {
  *   key: string
  *   metricLabel: string
  *   title: string
+ *   statusShort: string
  *   points: number
  *   slopeItems: import('./ydsSlopeEngine.js').SlopeDirectionItem[]
  *   tone: 'positive'|'neutral'|'warning'|'shock'
@@ -37,9 +38,26 @@ import {
 /**
  * @typedef {{
  *   label: string
+ *   statusShort: string
  *   points: number
  * }} ContributionLine
  */
+
+/**
+ * @param {string} title
+ * @param {string} metricLabel
+ * @returns {string}
+ */
+function extractStatusShort(title, metricLabel) {
+  if (!title || title === "—") return "—"
+  const t = title.trim()
+  if (t.startsWith(metricLabel)) {
+    return t.slice(metricLabel.length).trim() || "중립"
+  }
+  const dot = t.indexOf("·")
+  if (dot >= 0) return t.slice(dot + 1).trim()
+  return t
+}
 
 /**
  * @typedef {{
@@ -74,7 +92,11 @@ function summarizeHorizonContribution(drivers) {
   let risk = 0
 
   for (const d of active) {
-    lines.push({ label: d.metricLabel, points: d.points })
+    lines.push({
+      label: d.metricLabel,
+      statusShort: d.statusShort,
+      points: d.points,
+    })
     if (d.points > 0) positive += d.points
     else if (d.points < 0) risk += d.points
   }
@@ -126,11 +148,13 @@ function buildPanicDriver(def, panicData, historyRows) {
   const totalPts = absoluteContributionPoints(absScore) + slopeContributionPoints(state)
 
   const slopeItems = buildSlopeDirectionItems(deltas, def.kind)
+  const title = def.status(value)
 
   return {
     key: def.key,
     metricLabel: def.label,
-    title: def.status(value),
+    title,
+    statusShort: extractStatusShort(title, def.label),
     points: totalPts,
     tone: warn ? slopeToneFromState(state) : toneFromContribution(totalPts),
     slopeLines: slopeItems.map((i) => i.label),
@@ -173,6 +197,7 @@ function buildBondAuxDriver(def, snapshot) {
     key: def.key,
     metricLabel: def.label,
     title,
+    statusShort: extractStatusShort(title, def.label),
     points: 0,
     tone: warn ? slopeToneFromState(state) : "neutral",
     slopeLines: slopeItems.map((i) => i.label),
