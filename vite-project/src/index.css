@@ -1155,6 +1155,34 @@
   .cycle-bond-section {
     max-width: 100%;
     min-width: 0;
+    margin-bottom: 20px;
+  }
+
+  @media (min-width: 640px) {
+    .cycle-bond-section {
+      margin-bottom: 28px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .cycle-bond-section {
+      margin-bottom: 32px;
+    }
+  }
+
+  .cycle-desk-divider {
+    margin: 0;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    opacity: 1;
+  }
+
+  .panic-v2-desk > .panic-v2-desk__bond-slot + .cycle-desk-divider {
+    margin-top: 0;
+  }
+
+  .panic-v2-desk > .cycle-desk-divider + .panic-history-section {
+    margin-top: 0 !important;
   }
 
   .cycle-bond-panel {
@@ -1217,7 +1245,7 @@
 
   .cycle-bond-panel__body--compact {
     gap: 4px;
-    padding: 6px 10px 7px;
+    padding: 6px 10px 16px;
   }
 
   .cycle-bond-placeholder {
@@ -1337,6 +1365,7 @@
 
   .cycle-bond-expert {
     margin-top: 1px;
+    margin-bottom: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding-top: 4px;
   }
@@ -2318,24 +2347,25 @@
     margin-top: 0;
   }
 
-  /* 추천 단계 → 패닉 히스토리: 데스크 gap 중복 방지 (8~12px) */
+  .panic-history-section {
+    padding-top: 12px;
+    margin-top: 0 !important;
+  }
+
+  .panic-history-section__head {
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  .panic-history-section__chart {
+    margin-top: 4px;
+    padding-bottom: 4px;
+  }
+
   .panic-v2-desk > .panic-v2-desk__signal-slot,
-  .panic-v2-desk > .panic-v2-desk__recommend-slot {
+  .panic-v2-desk > .panic-v2-desk__recommend-slot,
+  .panic-v2-desk > .panic-v2-desk__bond-slot {
     margin-bottom: 0;
-  }
-
-  .panic-v2-desk > .panic-v2-desk__recommend-slot + .panic-v2-section {
-    margin-top: 10px;
-  }
-
-  @media (max-width: 639px) {
-    .panic-v2-desk {
-      --panic-v2-gap: 12px;
-    }
-
-    .panic-v2-desk > .panic-v2-desk__recommend-slot + .panic-v2-section {
-      margin-top: 8px;
-    }
   }
 
   .panic-sector-chip-scroll {

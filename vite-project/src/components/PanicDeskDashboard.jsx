@@ -195,7 +195,7 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <div>
+      <div className="panic-v2-desk__bond-slot">
         <CycleBondLiquiditySection
           basisDateTime={null}
           panicData={panicData}
@@ -206,6 +206,8 @@ export default function PanicDeskDashboard({
           lastBondSyncAt={bondSnapshot.lastBondSyncAt}
         />
       </div>
+
+      <hr className="cycle-desk-divider" aria-hidden />
 
       <SectionErrorBoundary
         label="패닉 히스토리"
