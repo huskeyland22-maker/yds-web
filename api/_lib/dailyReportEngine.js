@@ -1,8 +1,8 @@
 /**
  * 패닉·시장상태·산업강도 → 일별 AI 리포트 (createDailyReport)
  */
-import { generatePanicMarketReport } from "../../vite-project/src/utils/panicMarketReportEngine.js"
-import { sectorFlowFromPanic } from "../../vite-project/src/utils/sectorScoreEngine.js"
+import { generatePanicMarketReport } from "./panicMarketReportEngine.js"
+import { sectorFlowFromPanic } from "./sectorFlowLite.js"
 import { computeMarketState } from "./marketCycleCompute.js"
 import { getFinalScore } from "./panicScores.js"
 

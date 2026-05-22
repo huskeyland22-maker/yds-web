@@ -18,7 +18,6 @@ import {
 import { collectPanicMetricsLive } from "./panicCollectors.js"
 import { logPanicPipelineStage } from "./panicNumeric.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
-import { createAndPersistDailyReport } from "./dailyAiReports.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
 
@@ -135,6 +134,7 @@ export async function persistPanicPayload(body, opts = {}) {
   let dailyReportResult = { ok: false }
   try {
     const cycleRow = cycleHistory?.ok ? await fetchMarketCycleRowByDate(snap.tradeDate) : null
+    const { createAndPersistDailyReport } = await import("./dailyAiReports.js")
     dailyReportResult = await createAndPersistDailyReport(data, snap.tradeDate, {
       source,
       cycleRow,

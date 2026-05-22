@@ -11,7 +11,7 @@ import {
   panicObjectFromRows,
   probePanicMetricsNumericInsert,
 } from "../_lib/panicMetricsHub.js"
-import { computePanicServeMeta } from "../_lib/panicPipeline.js"
+import { computePanicServeMeta } from "../_lib/panicServeMeta.js"
 
 function noStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")

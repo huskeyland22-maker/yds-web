@@ -1,5 +1,5 @@
 import { supabaseRest } from "./supabaseRest.js"
-import { generatePanicMarketReport, deskReportKey } from "../../vite-project/src/utils/panicMarketReportEngine.js"
+import { generatePanicMarketReport, deskReportKey } from "./panicMarketReportEngine.js"
 
 export { generatePanicMarketReport, deskReportKey }
 
