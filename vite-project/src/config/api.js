@@ -17,6 +17,7 @@ import {
   probePanicIndexHistoryDirect,
 } from "../utils/panicHistoryFetchDebug.js"
 import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
+import { stripUndefinedEntries, validatePanicSavePayload } from "../utils/panicSaveValidate.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -430,9 +431,37 @@ function normalizeManualPayload(data) {
   return out
 }
 
+async function postPanicSave(url, payload) {
+  const body = stripUndefinedEntries(payload)
+  const validation = validatePanicSavePayload(body)
+  if (!validation.ok) {
+    const err = new Error(validation.error || "missing_required")
+    err.stage = "validation"
+    err.missing = validation.missing
+    logSaveError("save error", err)
+    throw err
+  }
+  console.log("save payload", body)
+  console.log(JSON.stringify(body, null, 2))
+  const res = await fetch(url, {
+    ...LIVE_POST_JSON_INIT,
+    body: JSON.stringify(body),
+  })
+  const responseText = await res.text()
+  console.log("response status", res.status)
+  console.log("response text", responseText)
+  let out = {}
+  try {
+    out = responseText ? JSON.parse(responseText) : {}
+  } catch {
+    out = { raw: responseText }
+  }
+  console.log("save response", { status: res.status, ok: res.ok, body: out })
+  return { res, out, responseText }
+}
+
 export async function submitManualPanicData(inputData) {
   const payload = normalizeManualPayload(inputData)
-  console.log("save payload", payload)
   console.table(
     ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"].map((key) => ({
       metric: key,
@@ -442,17 +471,7 @@ export async function submitManualPanicData(inputData) {
   )
   if (isPanicHubEnabled()) {
     const url = withNoStoreQuery("/api/panic/update")
-    const res = await fetch(url, {
-      ...LIVE_POST_JSON_INIT,
-      body: JSON.stringify(payload),
-    })
-    let out = {}
-    try {
-      out = await res.json()
-    } catch {
-      out = {}
-    }
-    console.log("save response", { status: res.status, ok: res.ok, body: out })
+    const { res, out } = await postPanicSave(url, payload)
     if (!res.ok) {
       const detail =
         toErrorMessage(out?.error ?? out?.message, "") ||
@@ -462,6 +481,7 @@ export async function submitManualPanicData(inputData) {
       err.status = res.status
       err.stage = out?.stage ?? "http"
       err.history = out?.history
+      if (typeof out?.stack === "string") err.stack = out.stack
       logSaveError("save error", err)
       throw err
     }
@@ -497,22 +517,13 @@ export async function submitManualPanicData(inputData) {
     return response
   }
   const base = getManualApiBase()
-  const res = await fetch(withNoStoreQuery(`${base}/update`), {
-    ...LIVE_POST_JSON_INIT,
-    body: JSON.stringify(payload),
-  })
-  let out = {}
-  try {
-    out = await res.json()
-  } catch {
-    out = {}
-  }
-  console.log("save response", { status: res.status, ok: res.ok, body: out })
+  const { res, out } = await postPanicSave(withNoStoreQuery(`${base}/update`), payload)
   if (!res.ok) {
     const err = new Error(
       toErrorMessage(out?.error ?? out?.message, "") || res.statusText || `HTTP ${res.status}`,
     )
     err.status = res.status
+    if (typeof out?.stack === "string") err.stack = out.stack
     logSaveError("save error", err)
     throw err
   }

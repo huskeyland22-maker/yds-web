@@ -5,6 +5,7 @@ import { getFinalScore } from "../utils/tradingScores.js"
 import { validatePanicData, isPanicBusinessDataStale } from "../utils/validatePanicData.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
 import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
+import { stripUndefinedEntries } from "../utils/panicSaveValidate.js"
 import {
   computePayloadStale,
   logCacheHit,
@@ -449,8 +450,9 @@ export const usePanicStore = create((set, get) => ({
         tradeDate != null
           ? `${tradeDate}T12:00:00.000Z`
           : new Date().toISOString()
-      const payload = { ...inputData, tradeDate, updatedAt }
+      const payload = stripUndefinedEntries({ ...inputData, tradeDate, updatedAt })
       console.log("save payload", payload)
+      console.log(JSON.stringify(payload, null, 2))
       console.log("[panic pipeline] store-state")
       for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
         if (key in payload) {
