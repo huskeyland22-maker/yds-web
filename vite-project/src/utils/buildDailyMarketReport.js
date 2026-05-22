@@ -172,7 +172,7 @@ function buildOneLiner({ zoneLabel, leaders, bondLine, actionToday }) {
 }
 
 /** @param {string} bondLine */
-function compactBondPhrase(bondLine) {
+export function compactBondPhrase(bondLine) {
   if (!bondLine || bondLine === "—") return null
   if (/장기|30Y|장기채/i.test(bondLine)) return "장기채 주의"
   if (/유동성|MOVE|스프레드/i.test(bondLine)) return "유동성 주의"
@@ -282,4 +282,29 @@ export function buildDailyMarketReport({ panicData = null, cycleScore = null, sn
     oneLinerCompact,
     actionLine,
   }
+}
+
+/**
+ * 상단 상태 바 pill 문구
+ * @param {DailyMarketReport} report
+ * @returns {string[]}
+ */
+export function buildMarketStatusPills(report) {
+  if (!report.ready) return []
+
+  const sectorLeaders = report.sectors.leaders
+  const leaderText =
+    sectorLeaders.length > 0 ? `${sectorLeaders.slice(0, 2).join(" · ")} 리더` : null
+  const bondShort = compactBondPhrase(report.marketToday.bond)
+
+  return uniquePhrases(
+    [
+      `시장 ${report.marketToday.market}`,
+      compactPhrase(report.actionToday.today),
+      report.actionToday.cash ? `현금 ${report.actionToday.cash}` : null,
+      leaderText,
+      bondShort,
+    ],
+    6,
+  )
 }
