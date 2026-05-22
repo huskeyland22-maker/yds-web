@@ -8,22 +8,12 @@ function formatPts(n) {
 }
 
 /**
- * @param {{
- *   label: string
- *   value: number
- *   emphasized?: boolean
- *   plain?: boolean
- * }} props
+ * @param {{ label: string; value: number; plain?: boolean }} props
  */
-function BreakdownRow({ label, value, emphasized = false, plain = false }) {
+function BreakdownRow({ label, value, plain = false }) {
   const tone = value > 0 ? "reco-step-card__pts--up" : value < 0 ? "reco-step-card__pts--down" : ""
   return (
-    <div
-      className={[
-        "reco-step-card__breakdown-row font-mono tabular-nums",
-        emphasized ? "reco-step-card__breakdown-row--final" : "",
-      ].join(" ")}
-    >
+    <div className="reco-step-card__breakdown-row font-mono tabular-nums">
       <span>{label}</span>
       <span className={plain ? "" : ["reco-step-card__pts", tone].join(" ")}>
         {plain ? value : formatPts(value)}
@@ -39,39 +29,53 @@ function HorizonStepCard({ block }) {
   const drivers = block.drivers.filter((d) => !d.auxiliary)
   const xai = block.actionScoreXai
   const breakdown = getActionScoreBreakdown(xai)
+  const panicLabel = (xai.display.panicStatus || "—").replace(/\s+/g, "")
 
   return (
     <article className="reco-step-card" aria-label={`${block.label} ${block.action}`}>
       <h3 className="m-0 reco-step-card__action">{block.action}</h3>
 
-      <p className="m-0 reco-step-card__score font-mono tabular-nums">
-        <span className="reco-step-card__score-label">행동점수</span>
-        <span className="reco-step-card__score-value">{block.score}</span>
-      </p>
+      <div className="reco-step-card__top-grid">
+        <section className="reco-step-card__pane reco-step-card__pane--panic">
+          <p className="m-0 reco-step-card__pane-title">패닉</p>
+          <p className="m-0 reco-step-card__pane-value">{panicLabel}</p>
+        </section>
 
-      <div className="reco-step-card__breakdown">
-        <BreakdownRow label="기본점수" value={breakdown.base} plain />
-        <BreakdownRow label="근거합계" value={breakdown.basis} />
-        <BreakdownRow label="보정" value={breakdown.adjustment} />
-        <hr className="reco-step-card__breakdown-divider" aria-hidden />
-        <BreakdownRow label="최종점수" value={breakdown.final} emphasized plain />
+        <section className="reco-step-card__pane reco-step-card__pane--breakdown">
+          <p className="m-0 reco-step-card__pane-title">점수분해</p>
+          <div className="reco-step-card__pane-body">
+            <BreakdownRow label="기본" value={breakdown.base} plain />
+            <BreakdownRow label="근거" value={breakdown.basis} />
+            <BreakdownRow label="보정" value={breakdown.adjustment} />
+          </div>
+        </section>
+
+        <section className="reco-step-card__pane reco-step-card__pane--final">
+          <p className="m-0 reco-step-card__pane-title">최종</p>
+          <p className="m-0 reco-step-card__final-score font-mono tabular-nums">
+            <span className="reco-step-card__final-label">행동점수</span>
+            <span className="reco-step-card__final-value">{breakdown.final}</span>
+          </p>
+        </section>
       </div>
 
-      <p className="m-0 reco-step-card__detail-heading">세부 근거:</p>
-      <ul className="m-0 reco-step-card__drivers">
-        {drivers.map((d) => {
-          const tone =
-            d.points > 0 ? "reco-step-card__pts--up" : d.points < 0 ? "reco-step-card__pts--down" : ""
-          return (
-            <li key={d.key} className="reco-step-card__driver font-mono tabular-nums">
-              <span className="reco-step-card__driver-left">
-                {d.metricLabel} {d.statusShort}
-              </span>
-              <span className={["reco-step-card__pts", tone].join(" ")}>{formatPts(d.points)}</span>
-            </li>
-          )
-        })}
-      </ul>
+      <div className="reco-step-card__detail">
+        <p className="m-0 reco-step-card__detail-heading">세부 근거:</p>
+        <ul className="m-0 reco-step-card__drivers">
+          {drivers.map((d) => {
+            const tone =
+              d.points > 0 ? "reco-step-card__pts--up" : d.points < 0 ? "reco-step-card__pts--down" : ""
+            return (
+              <li key={d.key} className="reco-step-card__driver font-mono tabular-nums">
+                <span className="reco-step-card__driver-left">
+                  {d.metricLabel} {d.statusShort}
+                </span>
+                <span className={["reco-step-card__pts", tone].join(" ")}>{formatPts(d.points)}</span>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
     </article>
   )
 }
