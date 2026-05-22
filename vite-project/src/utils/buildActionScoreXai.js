@@ -202,3 +202,26 @@ export function buildActionScoreXai({
     checksOut,
   }
 }
+
+/**
+ * @param {number} n
+ * @returns {string}
+ */
+export function formatXaiSigned(n) {
+  const v = Math.round(Number(n) || 0)
+  if (v > 0) return `+${v}`
+  return String(v)
+}
+
+/**
+ * @param {ActionScoreXai} xai
+ * @param {'formula' | 'qualitative'} [style]
+ * @returns {string}
+ */
+export function formatActionScoreXaiLine(xai, style = "formula") {
+  if (style === "qualitative") {
+    const panic = (xai.display.panicStatus || "—").replace(/\s+/g, "")
+    return `패닉 ${panic} / 근거합계 ${formatXaiSigned(xai.basis.total)} / 보정 ${formatXaiSigned(xai.adjustments.total)}`
+  }
+  return `기본${xai.base.subtotal} + 근거${formatXaiSigned(xai.basis.total)} + 보정${formatXaiSigned(xai.adjustments.total)} = 최종${xai.final}`
+}

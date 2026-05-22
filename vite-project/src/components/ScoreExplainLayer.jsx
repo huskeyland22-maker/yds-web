@@ -1,4 +1,5 @@
 import { buildScoreExplainLayer } from "../utils/buildScoreExplainLayer.js"
+import { formatActionScoreXaiLine } from "../utils/buildActionScoreXai.js"
 
 /** @param {number} n */
 function formatPts(n) {
@@ -7,74 +8,37 @@ function formatPts(n) {
 }
 
 /**
- * @param {{ points: number; final?: boolean }} props
- */
-function RecoPts({ points, final = false }) {
-  if (final) {
-    return <span className="reco-xai__pts reco-xai__pts--final font-mono tabular-nums">{points}</span>
-  }
-  const tone = points > 0 ? "reco-xai__pts--up" : points < 0 ? "reco-xai__pts--down" : ""
-  return <span className={["reco-xai__pts font-mono tabular-nums", tone].join(" ")}>{formatPts(points)}</span>
-}
-
-/**
- * @param {{ label: string; points: number; sum?: boolean }} props
- */
-function RecoXaiRow({ label, points, sum = false }) {
-  return (
-    <div className={["reco-xai__row font-mono tabular-nums", sum ? "reco-xai__row--sum" : ""].join(" ")}>
-      <span>{label}</span>
-      <RecoPts points={points} />
-    </div>
-  )
-}
-
-/**
  * @param {{ block: import("../utils/buildScoreExplainLayer.js").HorizonExplain }} props
  */
-function HorizonRecoCard({ block }) {
-  const xai = block.actionScoreXai
-  const { display } = xai
+function HorizonStepCard({ block }) {
+  const drivers = block.drivers.filter((d) => !d.auxiliary)
+  const xaiLine = formatActionScoreXaiLine(block.actionScoreXai, "formula")
 
   return (
-    <article className="reco-xai-card" aria-label={`${block.label} ${block.action}`}>
-      <h3 className="m-0 reco-xai-card__action">{block.action}</h3>
+    <article className="reco-step-card" aria-label={`${block.label} ${block.action}`}>
+      <h3 className="m-0 reco-step-card__action">{block.action}</h3>
 
-      <div className="reco-xai-card__top">
-        <div className="reco-xai__pane reco-xai__pane--panic">
-          <p className="m-0 reco-xai__pane-title">패닉</p>
-          <p className="m-0 reco-xai__pane-value">{display.panicStatus}</p>
-        </div>
+      <p className="m-0 reco-step-card__score font-mono tabular-nums">
+        <span className="reco-step-card__score-label">행동점수</span>
+        <span className="reco-step-card__score-value">{block.score}</span>
+      </p>
 
-        <div className="reco-xai__pane reco-xai__pane--basis">
-          <p className="m-0 reco-xai__pane-title">근거</p>
-          <div className="reco-xai__pane-body">
-            {xai.basis.lines.map((line) => (
-              <RecoXaiRow key={line.label} label={line.label} points={line.points} />
-            ))}
-            <RecoXaiRow label="합계" points={xai.basis.total} sum />
-          </div>
-        </div>
+      <ul className="m-0 reco-step-card__drivers">
+        {drivers.map((d) => {
+          const tone =
+            d.points > 0 ? "reco-step-card__pts--up" : d.points < 0 ? "reco-step-card__pts--down" : ""
+          return (
+            <li key={d.key} className="reco-step-card__driver font-mono tabular-nums">
+              <span className="reco-step-card__driver-left">
+                {d.metricLabel} {d.statusShort}
+              </span>
+              <span className={["reco-step-card__pts", tone].join(" ")}>{formatPts(d.points)}</span>
+            </li>
+          )
+        })}
+      </ul>
 
-        <div className="reco-xai__pane reco-xai__pane--final">
-          <p className="m-0 reco-xai__pane-title">최종</p>
-          <div className="reco-xai__row reco-xai__row--final font-mono tabular-nums">
-            <span>행동점수</span>
-            <RecoPts points={xai.final} final />
-          </div>
-        </div>
-      </div>
-
-      <hr className="reco-xai-card__split" aria-hidden />
-
-      <section className="reco-xai-card__adj">
-        <p className="m-0 reco-xai__pane-title">보정</p>
-        <div className="reco-xai__adj-body">
-          {xai.adjustments.items.map((item) => (
-            <RecoXaiRow key={item.label} label={item.label} points={item.points} />
-          ))}
-        </div>
-      </section>
+      <p className="m-0 reco-step-card__xai font-mono tabular-nums">{xaiLine}</p>
     </article>
   )
 }
@@ -98,9 +62,9 @@ export default function ScoreExplainLayer({
   if (!layer.ready) return null
 
   return (
-    <div className="reco-xai-stack">
+    <div className="reco-step-stack">
       {layer.horizons.map((h) => (
-        <HorizonRecoCard key={h.horizon} block={h} />
+        <HorizonStepCard key={h.horizon} block={h} />
       ))}
     </div>
   )

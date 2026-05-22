@@ -1667,11 +1667,11 @@
     color: rgba(203, 213, 225, 0.85);
   }
 
-  /* 추천 단계 — XAI 압축형 (상단 패닉|근거|최종 · 하단 보정) */
-  .reco-xai-stack {
+  /* 추천 단계 — 초기형 + XAI 1줄 (높이 최소) */
+  .reco-step-stack {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
     min-width: 0;
     margin-top: 8px;
@@ -1679,138 +1679,92 @@
     border-top: 1px solid rgba(34, 211, 238, 0.12);
   }
 
-  .reco-xai-card {
+  .reco-step-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     width: 100%;
     min-width: 0;
-    height: auto;
-    padding: 12px 14px;
+    max-height: 120px;
+    padding: 8px 10px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(0, 0, 0, 0.22);
+    background: rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
+    overflow: hidden;
   }
 
-  .reco-xai-card__action {
-    margin: 0 0 10px;
-    font-size: 17px;
+  .reco-step-card__action {
+    font-size: 15px;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.25;
     color: #fff;
     letter-spacing: -0.01em;
   }
 
-  .reco-xai-card__top {
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr) 220px;
-    gap: 10px 12px;
-    align-items: start;
-    width: 100%;
-    min-width: 0;
-  }
-
-  @media (max-width: 719px) {
-    .reco-xai-card__top {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-
-  .reco-xai__pane {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    height: auto;
-    padding: 12px 14px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.15);
-  }
-
-  .reco-xai__pane-title {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: rgba(186, 230, 253, 0.75);
-  }
-
-  .reco-xai__pane-value {
+  .reco-step-card__score {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
     font-size: 13px;
     font-weight: 600;
-    line-height: 1.4;
-    color: rgba(226, 232, 240, 0.95);
+    line-height: 1.3;
   }
 
-  .reco-xai__pane-body {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    width: 100%;
-    min-width: 0;
+  .reco-step-card__score-label {
+    color: rgba(203, 213, 225, 0.88);
   }
 
-  .reco-xai-card__split {
-    margin: 10px 0 8px;
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  .reco-step-card__score-value {
+    color: rgba(251, 191, 36, 0.98);
   }
 
-  .reco-xai-card__adj {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    min-width: 0;
-    height: auto;
+  .reco-step-card__drivers {
+    list-style: none;
+    margin: 0;
     padding: 0;
-  }
-
-  .reco-xai__adj-body {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    width: 100%;
-    min-width: 0;
+    gap: 2px;
   }
 
-  .reco-xai__row {
+  .reco-step-card__driver {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: baseline;
     column-gap: 8px;
-    width: 100%;
     font-size: 11px;
     font-weight: 600;
-    line-height: 1.35;
-    color: rgba(203, 213, 225, 0.92);
+    line-height: 1.3;
+    color: rgba(203, 213, 225, 0.9);
   }
 
-  .reco-xai__row--sum {
-    margin-top: 2px;
-    padding-top: 4px;
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
-    font-weight: 700;
-    color: rgba(226, 232, 240, 0.95);
+  .reco-step-card__driver-left {
+    min-width: 0;
+    color: rgba(226, 232, 240, 0.92);
   }
 
-  .reco-xai__row--final {
-    font-size: 12px;
+  .reco-step-card__pts--up {
+    color: rgba(74, 222, 128, 0.95);
     font-weight: 700;
   }
 
-  .reco-xai__pts--up {
-    color: rgba(74, 222, 128, 0.98);
-    font-weight: 700;
-  }
-
-  .reco-xai__pts--down {
+  .reco-step-card__pts--down {
     color: rgba(251, 146, 60, 0.98);
     font-weight: 700;
   }
 
-  .reco-xai__pts--final {
-    font-size: 15px;
-    font-weight: 700;
-    color: rgba(251, 191, 36, 0.98);
+  .reco-step-card__xai {
+    margin-top: 2px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: rgba(148, 163, 184, 0.88);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* 패닉 히스토리 지표 탭 — 약어 · 한글 한 줄 */
