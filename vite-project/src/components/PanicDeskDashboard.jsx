@@ -129,12 +129,13 @@ export default function PanicDeskDashboard({
   }
 
   return (
-    <div className="panic-v2-desk relative">
+    <div className="panic-v2-desk panic-v2-desk--terminal relative">
       <div className="sticky top-0 z-20 -mx-0.5 border-b border-white/[0.04] bg-[#0B0E14]/90 px-1 py-1 backdrop-blur-sm">
         <CycleDataBasisBar updatedAt={panicData?.updatedAt} cycleSource={cycleDataSource} bondSource="FRED" />
       </div>
 
-      <div>
+      {/* 1. 핵심지수 · 전문가 리스크 */}
+      <div className="panic-v2-desk__metrics-slot">
         <SectionLabel title="핵심지수" variant="core" />
         <section className="trading-card-shell overflow-hidden border border-white/[0.1] p-px shadow-[0_0_28px_rgba(0,0,0,0.45)]">
           <div className="panic-metric-grid panic-metric-grid--core">
@@ -177,7 +178,8 @@ export default function PanicDeskDashboard({
         </section>
       </div>
 
-      <div>
+      {/* 2. 시장 상태 배지 */}
+      <div className="panic-v2-desk__status-slot">
         <DailyMarketReportPanel
           panicData={panicData}
           cycleScore={finalScore}
@@ -186,6 +188,7 @@ export default function PanicDeskDashboard({
         />
       </div>
 
+      {/* 3. 추천 단계 (전술 HUD) */}
       <div className="panic-v2-desk__recommend-slot">
         <RecommendationEnginePanel
           panicData={panicData}
@@ -195,17 +198,21 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <SectionErrorBoundary
-        label="패닉 히스토리"
-        fallback={
-          <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
-            패닉 데이터 로딩 실패
-          </div>
-        }
-      >
-        <PanicIndexHistorySection rows={safeHistory} />
-      </SectionErrorBoundary>
+      {/* 4. 패닉 히스토리 — 메인 차트 */}
+      <div className="panic-v2-desk__history-slot">
+        <SectionErrorBoundary
+          label="패닉 히스토리"
+          fallback={
+            <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
+              패닉 데이터 로딩 실패
+            </div>
+          }
+        >
+          <PanicIndexHistorySection rows={safeHistory} />
+        </SectionErrorBoundary>
+      </div>
 
+      {/* 5. 채권·유동성 참고 — 하단 보조 */}
       <hr className="cycle-desk-divider cycle-desk-divider--reference" aria-hidden />
 
       <div className="panic-v2-desk__bond-slot">

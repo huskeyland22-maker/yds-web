@@ -1159,14 +1159,8 @@
   }
 
   .cycle-bond-section--reference {
-    margin-top: 20px;
+    margin-top: 0;
     opacity: 0.82;
-  }
-
-  @media (min-width: 640px) {
-    .cycle-bond-section--reference {
-      margin-top: 24px;
-    }
   }
 
   .cycle-desk-divider {
@@ -1180,12 +1174,17 @@
     border-top-color: rgba(255, 255, 255, 0.08);
   }
 
-  .panic-v2-desk > .panic-history-section + .cycle-desk-divider {
-    margin-top: 0;
+  .panic-v2-desk > .panic-v2-desk__history-slot + .cycle-desk-divider--reference,
+  .panic-v2-desk > .panic-history-section + .cycle-desk-divider--reference {
+    margin-top: 16px;
   }
 
   .panic-v2-desk > .cycle-desk-divider--reference + .panic-v2-desk__bond-slot {
     margin-top: 0 !important;
+  }
+
+  .panic-v2-desk--terminal > .panic-v2-desk__bond-slot {
+    margin-top: 0;
   }
 
   .cycle-bond-panel {
@@ -2349,14 +2348,52 @@
     overflow: visible;
   }
 
+  .panic-v2-desk--terminal {
+    --panic-v2-gap: 10px;
+  }
+
   @media (min-width: 640px) {
     .panic-v2-desk {
       --panic-v2-gap: 16px;
+    }
+
+    .panic-v2-desk--terminal {
+      --panic-v2-gap: 12px;
     }
   }
 
   .panic-v2-desk > * + * {
     margin-top: var(--panic-v2-gap);
+  }
+
+  .panic-v2-desk--terminal > .panic-v2-desk__metrics-slot {
+    margin-top: var(--panic-v2-gap);
+  }
+
+  .panic-v2-desk--terminal > .panic-v2-desk__status-slot {
+    margin-top: 8px;
+  }
+
+  .panic-v2-desk--terminal > .panic-v2-desk__recommend-slot {
+    margin-top: 10px;
+  }
+
+  .panic-v2-desk--terminal > .panic-v2-desk__history-slot {
+    margin-top: 12px;
+  }
+
+  @media (min-width: 640px) {
+    .panic-v2-desk--terminal > .panic-v2-desk__status-slot {
+      margin-top: 10px;
+    }
+
+    .panic-v2-desk--terminal > .panic-v2-desk__recommend-slot {
+      margin-top: 12px;
+    }
+
+    .panic-v2-desk--terminal > .panic-v2-desk__history-slot {
+      margin-top: 14px;
+    }
   }
 
   .panic-v2-section {
@@ -2381,7 +2418,10 @@
 
   .panic-v2-desk > .panic-v2-desk__signal-slot,
   .panic-v2-desk > .panic-v2-desk__recommend-slot,
-  .panic-v2-desk > .panic-v2-desk__bond-slot {
+  .panic-v2-desk > .panic-v2-desk__history-slot,
+  .panic-v2-desk > .panic-v2-desk__bond-slot,
+  .panic-v2-desk > .panic-v2-desk__metrics-slot,
+  .panic-v2-desk > .panic-v2-desk__status-slot {
     margin-bottom: 0;
   }
 
