@@ -58,7 +58,7 @@ function HorizonStepCard({ block }) {
       </header>
 
       <p className="m-0 reco-step-card__panic">
-        <span className="reco-step-card__panic-label">패닉:</span> {panicLabel}
+        <span className="reco-step-card__panic-label">패닉 :</span> {panicLabel}
       </p>
 
       {driverSummary ? <p className="m-0 reco-step-card__summary">{driverSummary}</p> : null}

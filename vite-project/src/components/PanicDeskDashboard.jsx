@@ -1,22 +1,15 @@
-import { useEffect, useMemo, useState } from "react"
-import { isPanicHubEnabled } from "../config/api.js"
-import { useAppDataStore } from "../store/appDataStore.js"
+import { useMemo, useState } from "react"
 import { getFinalScore } from "../utils/tradingScores.js"
-import { kstCalendarKey } from "../utils/formatDataAge.js"
 import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
-import { MOOD_SPECTRUM, moodPositionPct, resolveMarketMood } from "../utils/panicDeskMood.js"
 import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
 import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
-import PanicSignalEnginePanel from "./PanicSignalEnginePanel.jsx"
 import RecommendationEnginePanel from "./RecommendationEnginePanel.jsx"
-import PanicDeskChart from "./PanicDeskChart.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
-import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
 
 const CORE_CELL =
   "flex min-h-[4rem] flex-col items-center justify-center bg-[#070a10] px-1 py-2.5 transition-colors sm:min-h-[4.25rem] sm:py-3"
@@ -106,49 +99,20 @@ function MetricTile({ metric, value, selected, onSelect, variant = "core" }) {
  *   cycleMetricHistory: object[]
  *   isStale?: boolean
  *   asOfDateLabel?: string
- *   tacticalView: { state: string; action: string }
- *   strategicView: { state: string; action: string }
- *   macroView: { state: string; action: string }
  *   marketState?: { headline?: string; stateKey?: string }
  * }} props
  */
 export default function PanicDeskDashboard({
   panicData,
   cycleMetricHistory,
-  isStale = false,
+  isStale: _isStale = false,
   asOfDateLabel = "—",
-  tacticalView,
-  strategicView,
-  macroView,
-  marketState,
 }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
 
   const [chartMetric, setChartMetric] = useState("vix")
-  const deskMarketReport = useAppDataStore((s) => s.deskMarketReport)
-  const deskMarketReportLoading = useAppDataStore((s) => s.deskMarketReportLoading)
-  const loadDeskMarketReport = useAppDataStore((s) => s.loadDeskMarketReport)
-
-  const mood = useMemo(() => resolveMarketMood(panicData?.fearGreed), [panicData?.fearGreed])
-  const moodPct = useMemo(() => moodPositionPct(panicData?.fearGreed), [panicData?.fearGreed])
-  const moodHeadline = useMemo(() => {
-    if (mood.active) return mood.label
-    if (hasPanicMetricValues(panicData)) return mood.label
-    const fallback =
-      marketState?.shortLabel && marketState.stateKey !== "insufficient"
-        ? marketState.shortLabel
-        : deskMarketReport?.market_view ?? deskMarketReport?.marketView ?? null
-    if (fallback) return String(fallback)
-    return "동기화 대기"
-  }, [mood, panicData, marketState, deskMarketReport])
 
   const finalScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
-
-  const dataDateKey = useMemo(() => {
-    if (asOfDateLabel && /^\d{4}-\d{2}-\d{2}$/.test(asOfDateLabel)) return asOfDateLabel
-    if (panicData?.updatedAt) return kstCalendarKey(new Date(panicData.updatedAt))
-    return asOfDateLabel
-  }, [asOfDateLabel, panicData?.updatedAt])
 
   const cycleDataSource = useMemo(() => {
     if (panicData?.__fromHub) return "Panic Hub"
@@ -169,17 +133,6 @@ export default function PanicDeskDashboard({
     }
   }, [chartMetric])
 
-  useEffect(() => {
-    if (!isPanicHubEnabled()) return
-    const date =
-      asOfDateLabel && /^\d{4}-\d{2}-\d{2}$/.test(asOfDateLabel)
-        ? asOfDateLabel
-        : dataDateKey && /^\d{4}-\d{2}-\d{2}$/.test(dataDateKey)
-          ? dataDateKey
-          : null
-    if (date) void loadDeskMarketReport(date)
-  }, [asOfDateLabel, dataDateKey, loadDeskMarketReport])
-
   if (!panicData && safeHistory.length === 0) {
     return (
       <div className="panic-v2-desk relative px-3 py-8 text-center" role="status">
@@ -198,57 +151,8 @@ export default function PanicDeskDashboard({
         <CycleDataBasisBar updatedAt={panicData?.updatedAt} cycleSource={cycleDataSource} bondSource="FRED" />
       </div>
 
-      <section className="trading-card-shell overflow-hidden px-2.5 py-2 sm:px-3 sm:py-2.5">
-        <div>
-          <p className="m-0 cycle-eyebrow">MARKET MOOD</p>
-          <p className="m-0 mt-0.5 cycle-mood-headline" style={mood.active ? { color: mood.color } : undefined}>
-            {moodHeadline}
-          </p>
-        </div>
-
-        <div className="relative mt-2.5">
-          <div className="flex justify-between gap-0.5">
-            {MOOD_SPECTRUM.map((m, i) => (
-              <span
-                key={m.id}
-                className={[
-                  "cycle-zone-axis__label flex-1 text-center",
-                  mood.active && mood.index === i ? "cycle-zone-axis__label--active" : "",
-                ].join(" ")}
-                style={mood.active && mood.index === i ? { color: m.color } : undefined}
-              >
-                {m.label}
-              </span>
-            ))}
-          </div>
-          <div className="relative mt-1 h-2 overflow-hidden rounded-full bg-white/[0.06] shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]">
-            <div
-              className="absolute inset-y-0 left-0 rounded-full opacity-95"
-              style={{
-                width: `${moodPct}%`,
-                background:
-                  "linear-gradient(90deg, #ef4444 0%, #f97316 25%, #94a3b8 50%, #38bdf8 75%, #a78bfa 100%)",
-                boxShadow: "0 0 14px rgba(56,189,248,0.2)",
-              }}
-            />
-            <div
-              className="absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#0b0e14]"
-              style={{
-                left: `${moodPct}%`,
-                backgroundColor: mood.color,
-                boxShadow: `0 0 14px ${mood.color}cc, 0 0 6px ${mood.color}88`,
-              }}
-              aria-hidden
-            />
-          </div>
-          {marketState?.headline ? (
-            <p className="m-0 mt-1.5 cycle-aux-line">{marketState.headline}</p>
-          ) : null}
-        </div>
-      </section>
-
       <div>
-        <SectionLabel title="핵심 패닉지수" variant="core" />
+        <SectionLabel title="핵심지수" variant="core" />
         <section className="trading-card-shell overflow-hidden border border-white/[0.1] p-px shadow-[0_0_28px_rgba(0,0,0,0.45)]">
           <div className="grid grid-cols-2 gap-px bg-white/[0.07] sm:grid-cols-3 lg:grid-cols-5">
             {CORE_METRICS.map((metric) => (
@@ -294,31 +198,11 @@ export default function PanicDeskDashboard({
       </div>
 
       <div>
-        <CycleBondLiquiditySection
-          basisDateTime={null}
-          panicData={panicData}
-          snapshot={bondSnapshot.snapshot}
-          loading={bondSnapshot.loading}
-          syncingBond={bondSnapshot.syncingBond}
-          refetchBond={bondSnapshot.refetchBond}
-          lastBondSyncAt={bondSnapshot.lastBondSyncAt}
-        />
-      </div>
-
-      <div>
         <DailyMarketReportPanel
           panicData={panicData}
           cycleScore={finalScore}
           snapshot={bondSnapshot.snapshot}
           loading={macroRiskEnabled && bondSnapshot.loading}
-        />
-      </div>
-
-      <div className="panic-v2-desk__signal-slot">
-        <PanicSignalEnginePanel
-          panicData={panicData}
-          cycleScore={finalScore}
-          snapshot={bondSnapshot.snapshot}
         />
       </div>
 
@@ -328,6 +212,18 @@ export default function PanicDeskDashboard({
           cycleScore={finalScore}
           snapshot={bondSnapshot.snapshot}
           historyRows={safeHistory}
+        />
+      </div>
+
+      <div>
+        <CycleBondLiquiditySection
+          basisDateTime={null}
+          panicData={panicData}
+          snapshot={bondSnapshot.snapshot}
+          loading={bondSnapshot.loading}
+          syncingBond={bondSnapshot.syncingBond}
+          refetchBond={bondSnapshot.refetchBond}
+          lastBondSyncAt={bondSnapshot.lastBondSyncAt}
         />
       </div>
 
@@ -342,11 +238,6 @@ export default function PanicDeskDashboard({
         <PanicIndexHistorySection rows={safeHistory} />
       </SectionErrorBoundary>
 
-      <PanicDeskChart
-        panicData={panicData}
-        deskMarketReport={deskMarketReport}
-        deskMarketReportLoading={deskMarketReportLoading}
-      />
     </div>
   )
 }

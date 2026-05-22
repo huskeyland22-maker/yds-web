@@ -667,6 +667,61 @@
     word-break: keep-all;
   }
 
+  .daily-report-v2--compact .daily-report-v2__head {
+    padding: 8px 11px 6px;
+  }
+
+  .daily-report-v2--compact .daily-report-v2__grid {
+    gap: 6px;
+    padding: 8px 10px 10px;
+  }
+
+  .daily-report-v2--compact .daily-report-v2__grid--summary {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .daily-report-v2--compact .daily-report-v2__grid--summary {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    }
+  }
+
+  .daily-report-v2--compact .daily-report-v2__card {
+    min-height: auto;
+    padding: 9px 11px 10px;
+  }
+
+  .daily-report-v2--compact .daily-report-v2__card-body {
+    gap: 3px;
+    margin-top: 0;
+  }
+
+  .daily-report-v2__card--brief {
+    display: flex;
+    align-items: center;
+    min-height: auto;
+    padding: 9px 11px;
+    border-color: rgba(255, 255, 255, 0.06);
+    background: rgba(7, 10, 18, 0.55);
+  }
+
+  .daily-report-v2__brief-compact {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(148, 163, 184, 0.9);
+    word-break: keep-all;
+  }
+
+  .recommend-engine--primary {
+    margin-top: 0;
+  }
+
+  .recommend-engine__head--solo {
+    margin-bottom: 2px;
+  }
+
   /* legacy daily-market-report (unused) */
   .daily-market-report {
     border-radius: 15px;

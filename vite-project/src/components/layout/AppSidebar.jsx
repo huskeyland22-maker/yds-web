@@ -10,6 +10,12 @@ import { getPrimaryNavItems } from "../../utils/appNavItems.js"
  */
 export default function AppSidebar({ sidebarPulse, deskPanicData, onOpenInputPanel }) {
   const navItems = getPrimaryNavItems()
+  const vix =
+    sidebarPulse.vix ??
+    (Number.isFinite(Number(deskPanicData?.vix)) ? Number(deskPanicData.vix).toFixed(1) : "—")
+  const fg =
+    sidebarPulse.fearGreed ??
+    (Number.isFinite(Number(deskPanicData?.fearGreed)) ? String(Math.round(Number(deskPanicData.fearGreed))) : "—")
 
   return (
     <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
@@ -50,38 +56,16 @@ export default function AppSidebar({ sidebarPulse, deskPanicData, onOpenInputPan
         <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">시장 상태</p>
         <dl className="m-0 mt-2 space-y-1.5 text-trading-xs leading-snug">
           <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-            <dt className="shrink-0 text-slate-500">위험 선호</dt>
-            <dd
-              className={
-                sidebarPulse.riskAppetite === "ON"
-                  ? "text-right font-medium text-emerald-300/95"
-                  : sidebarPulse.riskAppetite === "OFF"
-                    ? "text-right font-medium text-rose-300/90"
-                    : "text-right text-amber-200/85"
-              }
-            >
-              {sidebarPulse.riskAppetite === "ON"
-                ? "선호 우위"
-                : sidebarPulse.riskAppetite === "OFF"
-                  ? "회피 우위"
-                  : sidebarPulse.riskAppetite}
-            </dd>
+            <dt className="shrink-0 text-slate-500">시장</dt>
+            <dd className="text-right font-medium text-indigo-200/90">{sidebarPulse.marketLabel ?? "—"}</dd>
           </div>
           <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-            <dt className="shrink-0 text-slate-500">시장 분위기</dt>
-            <dd className="text-right text-slate-200">{sidebarPulse.marketMood}</dd>
-          </div>
-          <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-            <dt className="shrink-0 text-slate-500">주도 섹터</dt>
-            <dd className="max-w-[9rem] truncate text-right text-slate-200">{sidebarPulse.leadingSector}</dd>
-          </div>
-          <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-            <dt className="shrink-0 text-slate-500">변동성</dt>
-            <dd className="text-right text-slate-200">{sidebarPulse.volatility}</dd>
+            <dt className="shrink-0 text-slate-500">VIX</dt>
+            <dd className="text-right font-mono tabular-nums text-slate-200">{vix}</dd>
           </div>
           <div className="flex justify-between gap-2 pt-0.5">
-            <dt className="shrink-0 text-slate-500">시장 사이클</dt>
-            <dd className="text-right text-indigo-200/90">{sidebarPulse.cycleStage}</dd>
+            <dt className="shrink-0 text-slate-500">F&amp;G</dt>
+            <dd className="text-right font-mono tabular-nums text-slate-200">{fg}</dd>
           </div>
         </dl>
         {sidebarPulse.updateTimestampLine ? (
@@ -90,10 +74,6 @@ export default function AppSidebar({ sidebarPulse, deskPanicData, onOpenInputPan
         {sidebarPulse.basisLine ? (
           <p className="m-0 mt-0.5 text-[9px] leading-relaxed text-slate-500">{sidebarPulse.basisLine}</p>
         ) : null}
-        <p className="m-0 mt-3 font-mono text-[9px] leading-relaxed text-slate-600">
-          VIX {Number.isFinite(Number(deskPanicData?.vix)) ? Number(deskPanicData.vix).toFixed(2) : "—"} · F&amp;G{" "}
-          {Number.isFinite(Number(deskPanicData?.fearGreed)) ? Math.round(Number(deskPanicData.fearGreed)) : "—"}
-        </p>
         <button
           type="button"
           onClick={onOpenInputPanel}

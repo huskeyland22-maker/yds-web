@@ -1,32 +1,36 @@
 import { buildResearchDeskBriefing } from "./researchDeskBriefing.js"
+import { resolveCycleZone } from "./cycleZoneLabels.js"
 import { resolveMarketState } from "./marketStateEngine.js"
+import { getFinalScore } from "./tradingScores.js"
 
 /**
- * 좌측 사이드바 MARKET STATUS (패닉지표 자동 계산).
+ * 좌측 사이드바 시장 상태 (축약).
  * @param {object | null} panicData
- * @param {string} [cycleStage] — 레거시 호환; 미전달 시 엔진 라벨 사용
+ * @param {string} [cycleStage] — 레거시 호환
  */
 export function buildMarketSidebarPulse(panicData, cycleStage) {
   const ms = resolveMarketState(panicData)
+  const cycleScore = panicData ? getFinalScore(panicData) : null
+  const zone = resolveCycleZone(cycleScore)
 
-  let riskAppetite = "—"
-  if (ms.keySignalRisk === "ON") riskAppetite = "ON"
-  else if (ms.keySignalRisk === "OFF") riskAppetite = "OFF"
-  else if (ms.keySignalRisk === "혼합") riskAppetite = "혼합"
+  const marketLabel =
+    zone.zone != null ? zone.zoneLabel : typeof cycleStage === "string" && cycleStage !== "중립" ? cycleStage : ms.label
+
+  const vix = Number.isFinite(Number(panicData?.vix)) ? Number(panicData.vix).toFixed(1) : "—"
+  const fg = Number.isFinite(Number(panicData?.fearGreed)) ? String(Math.round(Number(panicData.fearGreed))) : "—"
 
   return {
-    riskAppetite,
+    marketLabel,
+    vix,
+    fearGreed: fg,
+    updateTimestampLine: ms.updateTimestampLine,
+    basisLine: ms.basisLine,
+    /** @deprecated 레거시 필드 — 신규 UI는 marketLabel·vix·fearGreed 사용 */
+    riskAppetite: ms.keySignalRisk,
     marketMood: ms.marketMood,
     leadingSector: "AI · 반도체",
     volatility: ms.volatility,
-    marketStateLabel: ms.label,
-    marketStateKey: ms.stateKey,
-    marketStateColor: ms.color,
-    basisLabelKst: ms.basisLabelKst,
-    basisNote: ms.basisNote,
-    updateTimestampLine: ms.updateTimestampLine,
-    basisLine: ms.basisLine,
-    cycleStage: typeof cycleStage === "string" && cycleStage !== "중립" ? cycleStage : ms.label,
+    cycleStage: marketLabel,
   }
 }
 

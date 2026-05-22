@@ -49,6 +49,8 @@ import { buildSectorRotation } from "./buildSectorRotation.js"
  *   strategy: DailyStrategy
  *   sectors: DailySectorFocus
  *   oneLiner: string[]
+ *   oneLinerCompact: string
+ *   actionLine: string
  * }} DailyMarketReport
  */
 
@@ -169,6 +171,49 @@ function buildOneLiner({ zoneLabel, leaders, bondLine, actionToday }) {
   return lines.length ? lines : ["데이터 입력 후 브리핑 생성."]
 }
 
+/** @param {string} bondLine */
+function compactBondPhrase(bondLine) {
+  if (!bondLine || bondLine === "—") return null
+  if (/장기|30Y|장기채/i.test(bondLine)) return "장기채 주의"
+  if (/유동성|MOVE|스프레드/i.test(bondLine)) return "유동성 주의"
+  const first = bondLine.split(" · ")[0]?.trim()
+  return first ? `${first} 참고` : null
+}
+
+/**
+ * @param {{
+ *   zoneLabel: string
+ *   leaders: string[]
+ *   bondLine: string
+ *   actionToday: DailyActionToday
+ * }} ctx
+ */
+function buildOneLinerCompact({ zoneLabel, leaders, bondLine, actionToday }) {
+  const zone = zoneLabel.replace(/ 구간\.?$/u, "").trim()
+  const leaderPart = leaders.length
+    ? `${leaders.slice(0, 2).join("")}리더 유지`
+    : null
+  const bondPart = compactBondPhrase(bondLine)
+  const actionPart = actionToday.today.includes("추격")
+    ? "눌림우선"
+    : compactPhrase(actionToday.ai).replace(/\s+/g, "")
+
+  const parts = uniquePhrases([zone, leaderPart, bondPart, actionPart], 4)
+  return parts.length ? parts.join(" · ") : "데이터 입력 후 브리핑 생성."
+}
+
+/**
+ * @param {DailyActionToday} actionToday
+ * @param {DailyStrategy} strategy
+ */
+function buildActionLine(actionToday, strategy) {
+  const parts = uniquePhrases(
+    [compactPhrase(actionToday.today), compactPhrase(strategy.short)],
+    2,
+  )
+  return parts.length ? parts.join(" / ") : "—"
+}
+
 /**
  * @param {{
  *   panicData?: object | null
@@ -218,6 +263,15 @@ export function buildDailyMarketReport({ panicData = null, cycleScore = null, sn
     actionToday,
   })
 
+  const oneLinerCompact = buildOneLinerCompact({
+    zoneLabel: zone.zoneLabel,
+    leaders,
+    bondLine,
+    actionToday,
+  })
+
+  const actionLine = buildActionLine(actionToday, strategy)
+
   return {
     ready,
     marketToday,
@@ -225,5 +279,7 @@ export function buildDailyMarketReport({ panicData = null, cycleScore = null, sn
     strategy,
     sectors,
     oneLiner,
+    oneLinerCompact,
+    actionLine,
   }
 }
