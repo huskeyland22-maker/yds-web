@@ -14,10 +14,72 @@ export function toErrorMessage(value, fallback = "") {
   if (typeof value === "number" || typeof value === "boolean") return String(value)
   if (typeof value === "object") {
     const o = /** @type {Record<string, unknown>} */ (value)
-    const nested = o.message ?? o.msg1 ?? o.error ?? o.hint
-    if (nested != null && nested !== value) return toErrorMessage(nested, fallback)
+    const nested = o.message ?? o.msg1 ?? o.error ?? o.hint ?? o.reason ?? o.detail
+    if (nested != null && nested !== value) {
+      const fromNested = toErrorMessage(nested, "")
+      if (fromNested) return fromNested
+    }
+    try {
+      const json = JSON.stringify(value)
+      if (json && json !== "{}" && json !== "[object Object]") return json
+    } catch {
+      // ignore
+    }
   }
   return fallback
+}
+
+/** 저장 실패 콘솔 로그 (payload/response 디버깅용) */
+export function logSaveError(label, error) {
+  console.error(`${label}:`, error)
+  try {
+    if (error instanceof Error) {
+      const plain = {
+        name: error.name,
+        message: error.message,
+        status: /** @type {Error & { status?: number }} */ (error).status,
+        stage: /** @type {Error & { stage?: string }} */ (error).stage,
+        stack: error.stack,
+        history: /** @type {Error & { history?: unknown }} */ (error).history,
+      }
+      console.error(JSON.stringify(plain, null, 2))
+    } else {
+      console.error(JSON.stringify(error, null, 2))
+    }
+  } catch {
+    console.error(toErrorMessage(error, "unknown error"))
+  }
+}
+
+/** UI·setLog용 — [object Object] 금지, status·message·stack 포함 */
+export function formatSaveErrorForUi(error, fallback = "unknown error") {
+  if (error == null) return fallback
+  if (error instanceof Error) {
+    const lines = []
+    const msg = toErrorMessage(error.message, "")
+    if (msg) lines.push(msg)
+    const status = /** @type {Error & { status?: number }} */ (error).status
+    if (status != null) lines.push(`status: ${status}`)
+    const stage = /** @type {Error & { stage?: string }} */ (error).stage
+    if (stage) lines.push(`stage: ${stage}`)
+    if (error.stack) {
+      lines.push(
+        error.stack
+          .split("\n")
+          .slice(0, 5)
+          .join("\n"),
+      )
+    }
+    const text = lines.filter(Boolean).join("\n")
+    return text || fallback
+  }
+  const msg = toErrorMessage(error, "")
+  if (msg) return msg
+  try {
+    return JSON.stringify(error, null, 2)
+  } catch {
+    return fallback
+  }
 }
 
 /**

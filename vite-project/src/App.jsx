@@ -59,6 +59,7 @@ import {
   safeNormalizeMetricPasteForTextarea,
 } from "./utils/parseMetricPaste.js"
 import { getToastChannel, toast } from "./utils/toast.js"
+import { formatSaveErrorForUi, logSaveError } from "./utils/errorMessage.js"
 
 /* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
@@ -655,19 +656,22 @@ function App() {
     setIsSaving(true)
     let usedHubSavePath = false
     let saveSucceeded = false
+    console.log("save payload", payload)
     try {
       if (isPanicHubEnabled() && typeof savePanicMetricsHub === "function") {
         usedHubSavePath = true
         const result = await savePanicMetricsHub(payload, { tradeDate })
+        console.log("save response", result)
         if (!result?.ok) {
-          const msg = result?.error instanceof Error ? result.error.message : String(result?.error ?? "저장 실패")
-          setInputError(msg)
+          logSaveError("save error", result?.error)
+          setInputError(formatSaveErrorForUi(result?.error, "저장 실패"))
         } else {
           saveSucceeded = true
         }
       } else {
         try {
           const serverResult = await submitManualPanicData(payload)
+          console.log("save response", serverResult)
           const serverData = serverResult?.data ?? serverResult
           console.log("SAVE SUCCESS", { tradeDate, hub: false })
           const appStore = useAppDataStore.getState()
@@ -682,8 +686,8 @@ function App() {
           console.log("UI UPDATED", { tradeDate, vix: desk?.vix ?? serverData?.vix })
           saveSucceeded = true
         } catch (err) {
-          console.error("패닉지수 서버 저장 실패", err)
-          setInputError(err instanceof Error ? err.message : "저장에 실패했습니다")
+          logSaveError("save error", err)
+          setInputError(formatSaveErrorForUi(err, "저장에 실패했습니다"))
         }
       }
 
@@ -735,7 +739,8 @@ function App() {
         console.log("PANEL_CLOSED")
       }
     } catch (err) {
-      console.error(err)
+      logSaveError("save error", err)
+      setInputError(formatSaveErrorForUi(err, "저장에 실패했습니다"))
     } finally {
       setIsSaving(false)
     }
@@ -1492,7 +1497,7 @@ function App() {
 
             {inputError ? (
               <div
-                className="mt-2 shrink-0 border-l-2 border-rose-400/70 bg-rose-500/[0.07] py-2 pl-2.5 pr-2 text-[11px] leading-snug text-rose-100/95"
+                className="mt-2 shrink-0 whitespace-pre-wrap break-words border-l-2 border-rose-400/70 bg-rose-500/[0.07] py-2 pl-2.5 pr-2 font-mono text-[11px] leading-snug text-rose-100/95"
                 role="alert"
               >
                 {inputError}

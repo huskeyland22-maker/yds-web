@@ -4,6 +4,7 @@ import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngi
 import { getFinalScore } from "../utils/tradingScores.js"
 import { validatePanicData, isPanicBusinessDataStale } from "../utils/validatePanicData.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
+import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
 import {
   computePayloadStale,
   logCacheHit,
@@ -449,6 +450,7 @@ export const usePanicStore = create((set, get) => ({
           ? `${tradeDate}T12:00:00.000Z`
           : new Date().toISOString()
       const payload = { ...inputData, tradeDate, updatedAt }
+      console.log("save payload", payload)
       console.log("[panic pipeline] store-state")
       for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
         if (key in payload) {
@@ -459,14 +461,18 @@ export const usePanicStore = create((set, get) => ({
       get().stopAutoRefresh()
 
       const result = await submitManualPanicData(payload)
+      console.log("save response", result)
       const data = result?.data ?? result
       const history = result?.history ?? null
       const apiReport = result?.report ?? null
       if (!history?.ok) {
         useAppDataStore.setState({ deskMarketReportLoading: false })
         const reason = history?.reason || history?.error || "panic_index_history_upsert_failed"
-        console.error("SAVE SUCCESS — history upsert failed", reason)
-        return { ok: false, error: new Error(String(reason)), history }
+        const err = new Error(toErrorMessage(reason, "panic_index_history_upsert_failed"))
+        err.stage = "history"
+        err.history = history
+        logSaveError("save error", err)
+        return { ok: false, error: err, history }
       }
       console.log("SAVE SUCCESS", { tradeDate: tradeDate ?? null, historyDate: history?.date ?? null })
 
@@ -526,8 +532,8 @@ export const usePanicStore = create((set, get) => ({
       }
     } catch (err) {
       useAppDataStore.setState({ deskMarketReportLoading: false })
-      const message = err instanceof Error ? err.message : String(err)
-      console.error("SAVE FAILED — pipeline", message, err?.stage ?? "")
+      logSaveError("save error", err)
+      const message = toErrorMessage(err, "unknown error")
       return { ok: false, error: err instanceof Error ? err : new Error(message) }
     }
   },

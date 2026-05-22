@@ -16,6 +16,7 @@ import {
   logHistoryFetchDebug,
   probePanicIndexHistoryDirect,
 } from "../utils/panicHistoryFetchDebug.js"
+import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -431,6 +432,7 @@ function normalizeManualPayload(data) {
 
 export async function submitManualPanicData(inputData) {
   const payload = normalizeManualPayload(inputData)
+  console.log("save payload", payload)
   console.table(
     ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"].map((key) => ({
       metric: key,
@@ -450,48 +452,79 @@ export async function submitManualPanicData(inputData) {
     } catch {
       out = {}
     }
+    console.log("save response", { status: res.status, ok: res.ok, body: out })
     if (!res.ok) {
-      const detail = out?.error || out?.message || res.statusText || `HTTP ${res.status}`
-      const err = new Error(String(detail))
+      const detail =
+        toErrorMessage(out?.error ?? out?.message, "") ||
+        res.statusText ||
+        `HTTP ${res.status}`
+      const err = new Error(detail)
       err.status = res.status
       err.stage = out?.stage ?? "http"
       err.history = out?.history
-      console.error("SAVE FAILED", { status: res.status, stage: err.stage, detail })
+      logSaveError("save error", err)
       throw err
     }
     if (!out?.ok) {
-      const err = new Error(String(out?.error || "hub_update_failed"))
+      const err = new Error(toErrorMessage(out?.error, "hub_update_failed"))
+      err.status = res.status
       err.history = out.history
       err.stage = out?.stage ?? "hub"
+      logSaveError("save error", err)
       throw err
     }
     if (!out.history?.ok) {
-      const err = new Error(String(out.history?.reason || out.history?.error || "panic_index_history_upsert_failed"))
+      const err = new Error(
+        toErrorMessage(
+          out.history?.reason ?? out.history?.error,
+          "panic_index_history_upsert_failed",
+        ),
+      )
+      err.status = res.status
       err.history = out.history
+      err.stage = out?.stage ?? "history"
+      logSaveError("save error", err)
       throw err
     }
-    return {
+    const response = {
       data: normalizeManualPayload(out.data),
       history: out.history ?? null,
       meta: out.meta ?? null,
       report: out.report ?? null,
       reportKey: out.reportKey ?? null,
     }
+    console.log("save response", response)
+    return response
   }
   const base = getManualApiBase()
   const res = await fetch(withNoStoreQuery(`${base}/update`), {
     ...LIVE_POST_JSON_INIT,
     body: JSON.stringify(payload),
   })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  const out = await res.json()
-  return {
+  let out = {}
+  try {
+    out = await res.json()
+  } catch {
+    out = {}
+  }
+  console.log("save response", { status: res.status, ok: res.ok, body: out })
+  if (!res.ok) {
+    const err = new Error(
+      toErrorMessage(out?.error ?? out?.message, "") || res.statusText || `HTTP ${res.status}`,
+    )
+    err.status = res.status
+    logSaveError("save error", err)
+    throw err
+  }
+  const response = {
     data: normalizeManualPayload(out?.data),
     history: out?.history ?? null,
     meta: out?.meta ?? null,
     report: out?.report ?? null,
     reportKey: out?.reportKey ?? null,
   }
+  console.log("save response", response)
+  return response
 }
 
 export async function submitManualTextData(rawText) {
