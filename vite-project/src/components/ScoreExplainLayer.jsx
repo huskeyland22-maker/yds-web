@@ -40,15 +40,15 @@ function HorizonRecoCard({ block }) {
     <article className="reco-xai-card" aria-label={`${block.label} ${block.action}`}>
       <h3 className="m-0 reco-xai-card__action">{block.action}</h3>
 
-      <div className="reco-xai-card__grid">
-        <div className="reco-xai__cell reco-xai__cell--panic">
-          <p className="m-0 reco-xai__cell-title">패닉</p>
-          <p className="m-0 reco-xai__cell-value">{display.panicStatus}</p>
+      <div className="reco-xai-card__top">
+        <div className="reco-xai__pane reco-xai__pane--panic">
+          <p className="m-0 reco-xai__pane-title">패닉</p>
+          <p className="m-0 reco-xai__pane-value">{display.panicStatus}</p>
         </div>
 
-        <div className="reco-xai__cell reco-xai__cell--basis">
-          <p className="m-0 reco-xai__cell-title">근거</p>
-          <div className="reco-xai__cell-body">
+        <div className="reco-xai__pane reco-xai__pane--basis">
+          <p className="m-0 reco-xai__pane-title">근거</p>
+          <div className="reco-xai__pane-body">
             {xai.basis.lines.map((line) => (
               <RecoXaiRow key={line.label} label={line.label} points={line.points} />
             ))}
@@ -56,23 +56,25 @@ function HorizonRecoCard({ block }) {
           </div>
         </div>
 
-        <div className="reco-xai__cell reco-xai__cell--adj">
-          <p className="m-0 reco-xai__cell-title">보정</p>
-          <div className="reco-xai__cell-body">
-            {xai.adjustments.items.map((item) => (
-              <RecoXaiRow key={item.label} label={item.label} points={item.points} />
-            ))}
-          </div>
-        </div>
-
-        <div className="reco-xai__cell reco-xai__cell--final">
-          <p className="m-0 reco-xai__cell-title">최종</p>
+        <div className="reco-xai__pane reco-xai__pane--final">
+          <p className="m-0 reco-xai__pane-title">최종</p>
           <div className="reco-xai__row reco-xai__row--final font-mono tabular-nums">
             <span>행동점수</span>
             <RecoPts points={xai.final} final />
           </div>
         </div>
       </div>
+
+      <hr className="reco-xai-card__split" aria-hidden />
+
+      <section className="reco-xai-card__adj">
+        <p className="m-0 reco-xai__pane-title">보정</p>
+        <div className="reco-xai__adj-body">
+          {xai.adjustments.items.map((item) => (
+            <RecoXaiRow key={item.label} label={item.label} points={item.points} />
+          ))}
+        </div>
+      </section>
     </article>
   )
 }
