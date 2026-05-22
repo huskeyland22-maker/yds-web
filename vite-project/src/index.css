@@ -1667,149 +1667,155 @@
     color: rgba(203, 213, 225, 0.85);
   }
 
-  /* 추천 단계 — 3열(패닉·점수분해·최종) + 세부 근거 */
+  /* 추천 단계 — 외곽 카드 1개, 패닉·계산·최종 인라인 + 세부 근거 */
   .reco-step-stack {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
     min-width: 0;
-    margin-top: 8px;
-    padding-top: 8px;
+    margin-top: 6px;
+    padding-top: 6px;
     border-top: 1px solid rgba(34, 211, 238, 0.12);
+  }
+
+  .reco-step-card + .reco-step-card {
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .reco-step-card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     width: 100%;
     min-width: 0;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
   }
 
+  .reco-step-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 22px;
+    line-height: 22px;
+  }
+
   .reco-step-card__action {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 22px;
     color: #fff;
     letter-spacing: -0.01em;
   }
 
-  .reco-step-card__top-grid {
+  .reco-step-card__head-score {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35em;
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 22px;
+    color: rgba(203, 213, 225, 0.9);
+  }
+
+  .reco-step-card__head-score-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(251, 191, 36, 0.98);
+  }
+
+  .reco-step-card__inline {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-    align-items: stretch;
+    grid-template-rows: repeat(5, 22px);
+    row-gap: 2px;
+    column-gap: 12px;
     width: 100%;
     min-width: 0;
   }
 
   @media (min-width: 520px) {
-    .reco-step-card__top-grid {
+    .reco-step-card__inline {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.8fr);
-      gap: 10px;
+      grid-template-rows: repeat(3, 22px);
+    }
+
+    .reco-step-card__inline-panic {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .reco-step-card__inline-calc-1 {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .reco-step-card__inline-calc-2 {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .reco-step-card__inline-calc-3 {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    .reco-step-card__inline-final {
+      grid-column: 3;
+      grid-row: 1;
     }
   }
 
-  .reco-step-card__pane {
+  .reco-step-card__panic {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-    min-height: 72px;
-    height: 100%;
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    background: rgba(0, 0, 0, 0.18);
-    box-sizing: border-box;
-  }
-
-  .reco-step-card__pane-title {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: rgba(186, 230, 253, 0.75);
-  }
-
-  .reco-step-card__pane-value {
-    font-size: 13px;
+    align-items: center;
+    gap: 0.25em;
+    min-height: 22px;
+    line-height: 22px;
+    font-size: 12px;
     font-weight: 600;
-    line-height: 1.4;
     color: rgba(226, 232, 240, 0.95);
   }
 
-  .reco-step-card__pane-body {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .reco-step-card__breakdown-row {
+  .reco-step-card__metric-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
-    justify-items: end;
-    column-gap: 8px;
-    width: 100%;
+    align-items: center;
+    column-gap: 10px;
+    min-height: 22px;
+    line-height: 22px;
     font-size: 12px;
     font-weight: 600;
-    line-height: 1.35;
     color: rgba(203, 213, 225, 0.92);
   }
 
-  .reco-step-card__breakdown-row > span:first-child {
-    justify-self: start;
+  .reco-step-card__metric-label {
+    color: rgba(148, 163, 184, 0.88);
   }
 
-  .reco-step-card__pane--final {
-    justify-content: flex-start;
-  }
-
-  .reco-step-card__final-score {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-    width: 100%;
-    margin-top: auto;
+  .reco-step-card__metric-num {
     text-align: right;
-  }
-
-  .reco-step-card__final-label {
-    font-size: 11px;
     font-weight: 600;
-    color: rgba(203, 213, 225, 0.88);
   }
 
-  .reco-step-card__final-value {
-    font-size: 20px;
+  .reco-step-card__final-num {
+    font-size: 14px;
     font-weight: 700;
-    line-height: 1.1;
+    text-align: right;
     color: rgba(251, 191, 36, 0.98);
   }
 
-  .reco-step-card__detail {
-    width: 100%;
-    min-width: 0;
-    padding-top: 2px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  .reco-step-card__detail-heading {
-    margin: 0 0 4px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    color: rgba(148, 163, 184, 0.75);
+  .reco-step-card__rule {
+    margin: 2px 0 0;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .reco-step-card__drivers {
@@ -1818,17 +1824,18 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
   }
 
   .reco-step-card__driver {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
+    align-items: center;
     column-gap: 8px;
-    font-size: 10px;
+    min-height: 22px;
+    line-height: 22px;
+    font-size: 11px;
     font-weight: 600;
-    line-height: 1.3;
     color: rgba(148, 163, 184, 0.82);
   }
 
