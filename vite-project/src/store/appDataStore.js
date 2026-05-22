@@ -138,8 +138,10 @@ export const useAppDataStore = create((set, get) => ({
       return null
     } catch (e) {
       logFetchFail("desk-market-report", e, { tradeDate, key })
-      set({ deskMarketReport: null, deskMarketReportKey: null, deskMarketReportLoading: false })
+      set({ deskMarketReport: null, deskMarketReportKey: null })
       return null
+    } finally {
+      set({ deskMarketReportLoading: false })
     }
   },
 
@@ -296,8 +298,10 @@ export const useAppDataStore = create((set, get) => ({
     if (!isPanicHubEnabled()) return null
     const tradeDate = opts.tradeDate ?? get().deskSnapshotTradeDate ?? null
     logFetchStart("desk-metric-sources", { tradeDate })
+    let hub = null
+    let latest = null
     try {
-      const [hub, latest] = await Promise.all([
+      ;[hub, latest] = await Promise.all([
         fetchPanicHubLatestOptional({ debugLog: false }),
         fetchPanicIndexLatest().catch(() => null),
       ])
@@ -310,11 +314,14 @@ export const useAppDataStore = create((set, get) => ({
         hasHub: Boolean(hub),
         hasHistory: Boolean(latest?.date),
         hasDesk: hasPanicMetricValues(resolved),
+        emergency: Boolean(hub?.__emergency),
       })
       return resolved
     } catch (e) {
       logFetchFail("desk-metric-sources", e)
       return get().refreshDeskResolvedPanicData()
+    } finally {
+      set({ deskMarketReportLoading: false })
     }
   },
 

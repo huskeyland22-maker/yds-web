@@ -22,6 +22,7 @@ import {
   stripNilEntries,
   validatePanicSavePayload,
 } from "../utils/panicSaveValidate.js"
+import { panicEmergencyHubPayload } from "../utils/panicEmergencyFallback.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -60,58 +61,65 @@ export async function fetchPanicHubLatest(options = {}) {
   const debugLog = options.debugLog !== false
   const url = withNoStoreQuery("/api/panic/latest")
   if (isDataTraceEnabled()) logFetchStart("panic-hub-latest", { url })
-  const res = await fetch(url, LIVE_JSON_GET_INIT)
-  const responseText = await res.text()
-  if (debugLog) console.log("📡 panic hub latest", res.status, url)
-  console.log("response status", res.status)
-  console.log("response text", responseText)
-  let json = {}
   try {
-    json = responseText ? JSON.parse(responseText) : {}
-  } catch {
-    json = { raw: responseText }
-  }
-  if (!res.ok) {
-    const detail = toErrorMessage(json?.message ?? json?.error, "") || `hub HTTP ${res.status}`
-    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(detail), { url, stack: json?.stack })
-    const err = new Error(detail)
-    if (typeof json?.stack === "string") err.stack = json.stack
-    throw err
-  }
-  if (!json?.ok) {
-    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", new Error(String(json?.error ?? json?.message)), { url })
-    throw new Error(json?.error || json?.message || "hub_invalid_payload")
-  }
-  const hasData =
-    json.data != null &&
-    !(Array.isArray(json.data) && json.data.length === 0)
-  if (!hasData) {
-    const err = new Error(json?.error || json?.empty ? "hub_empty_database" : "hub_invalid_payload")
-    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", err, { url, hint: json.hint })
-    throw err
-  }
-  const data = normalizeManualPayload(Array.isArray(json.data) ? json.data[0] : json.data)
-  const meta = json.meta && typeof json.meta === "object" ? json.meta : {}
-  const isStale = Boolean(meta.isStale)
-  if (isDataTraceEnabled()) {
-    logFetchSuccess("panic-hub-latest", { url, cache: false, isStale, ageMs: meta.ageMs ?? null })
-  }
-  return {
-    ...data,
-    __fetchSource: "HUB",
-    __fetchUrl: url,
-    __fetchedAt: Date.now(),
-    __isStale: isStale,
-    __meta: meta,
+    const res = await fetch(url, LIVE_JSON_GET_INIT)
+    const responseText = await res.text()
+    if (debugLog) console.log("📡 panic hub latest", res.status, url)
+    console.log("response status", res.status)
+    console.log("response text", responseText)
+    let json = {}
+    try {
+      json = responseText ? JSON.parse(responseText) : {}
+    } catch {
+      json = { raw: responseText }
+    }
+
+    const rawData = json?.data
+    const hasData =
+      rawData != null &&
+      !(Array.isArray(rawData) && rawData.length === 0) &&
+      (typeof rawData === "object" || Array.isArray(rawData))
+
+    if (!hasData) {
+      console.warn("[panic-hub-latest] empty — emergency fallback")
+      return panicEmergencyHubPayload()
+    }
+
+    const data = normalizeManualPayload(Array.isArray(rawData) ? rawData[0] : rawData)
+    const meta = json.meta && typeof json.meta === "object" ? json.meta : {}
+    const isStale = Boolean(meta.isStale) || Boolean(json.emergency)
+    if (isDataTraceEnabled()) {
+      logFetchSuccess("panic-hub-latest", {
+        url,
+        cache: false,
+        isStale,
+        ageMs: meta.ageMs ?? null,
+        emergency: Boolean(json.emergency),
+      })
+    }
+    return {
+      ...data,
+      __fetchSource: json.emergency ? "EMERGENCY" : "HUB",
+      __fetchUrl: url,
+      __fetchedAt: Date.now(),
+      __isStale: isStale,
+      __meta: meta,
+      __emergency: Boolean(json.emergency),
+    }
+  } catch (err) {
+    console.error("[panic-hub-latest] fetch failed — emergency fallback", err)
+    if (isDataTraceEnabled()) logFetchFail("panic-hub-latest", err, { url, emergency: true })
+    return panicEmergencyHubPayload()
   }
 }
 
-/** 데스크 fallback용 — 실패 시 null (throw 없음) */
+/** 데스크 fallback용 — 절대 throw 없음 */
 export async function fetchPanicHubLatestOptional(options = {}) {
   try {
-    return await fetchPanicHubLatest({ ...options, debugLog: options.debugLog ?? false })
+    const data = await fetchPanicHubLatest({ ...options, debugLog: options.debugLog ?? false })
+    return data ?? panicEmergencyHubPayload()
   } catch {
-    return null
+    return panicEmergencyHubPayload()
   }
 }
 
@@ -348,10 +356,8 @@ export async function fetchPanicDataJson(options = {}) {
       }
     }
     if (!hasCore(hubData)) {
-      const errMsg =
-        hubData?.vix == null && hubData?.fearGreed == null ? "hub_empty_database" : "hub_incomplete_metrics"
-      if (isDataTraceEnabled()) logFetchFail("panic-data-json", new Error(errMsg), {})
-      throw new Error(errMsg)
+      if (debugLog) console.warn("[BOOT] panic hub incomplete — emergency fallback")
+      hubData = panicEmergencyHubPayload()
     }
     const businessStale = !validatePanicData(hubData)
     const enriched = {

@@ -1,4 +1,5 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
+import { panicEmergencyHubData, PANIC_EMERGENCY_ROWS } from "../_lib/panicEmergencyFallback.js"
 import {
   fetchLatestPanicIndexHistoryCore,
   fetchLatestPanicMetricsRow,
@@ -18,20 +19,43 @@ function noStore(res) {
   res.setHeader("Expires", "0")
 }
 
+/** 절대 500 금지 — 항상 200 */
+function respondEmergency(res, reason, error) {
+  if (error) console.error("panic latest", error)
+  const data = panicEmergencyHubData()
+  res.status(200).json({
+    ok: true,
+    success: false,
+    data,
+    dataRows: PANIC_EMERGENCY_ROWS,
+    emergency: true,
+    reason: reason ?? "emergency_fallback",
+    meta: { isStale: true, rowCount: 0, sources: [] },
+    rowCount: 0,
+    empty: false,
+  })
+}
+
 export default async function handler(req, res) {
   noStore(res)
   if (req.method !== "GET") {
-    res.status(405).json({ ok: false, error: "method_not_allowed" })
+    res.status(200).json({ ok: false, success: false, data: [], error: "method_not_allowed" })
     return
   }
-  if (!isSupabaseConfigured()) {
-    res.status(503).json({ ok: false, error: "supabase_not_configured", data: null })
-    return
-  }
+
   try {
     if (req.query?.probe === "1" || req.query?.probeInsert === "1") {
-      const probe = await probePanicMetricsNumericInsert()
-      res.status(200).json({ ok: true, probe })
+      try {
+        const probe = await probePanicMetricsNumericInsert()
+        res.status(200).json({ ok: true, success: true, probe })
+      } catch (error) {
+        respondEmergency(res, "probe_failed", error)
+      }
+      return
+    }
+
+    if (!isSupabaseConfigured()) {
+      respondEmergency(res, "supabase_not_configured")
       return
     }
 
@@ -42,65 +66,49 @@ export default async function handler(req, res) {
     try {
       latestRow = await fetchLatestPanicMetricsRow()
     } catch (err) {
-      console.warn("[panic/latest] latest_panic_metrics fetch failed", err)
+      console.warn("[panic/latest] latest_panic_metrics", err)
     }
 
     try {
       historyRow = await fetchLatestPanicIndexHistoryCore()
     } catch (err) {
-      console.warn("[panic/latest] panic_index_history fetch failed", err)
+      console.warn("[panic/latest] panic_index_history", err)
     }
 
     try {
       rows = await fetchPanicMetricsRows()
     } catch (err) {
-      console.warn("[panic/latest] panic_metrics fetch failed", err)
+      console.warn("[panic/latest] panic_metrics", err)
       rows = []
-    }
-
-    if (!latestRow && !historyRow && (!rows || !rows.length)) {
-      res.status(200).json({
-        ok: true,
-        data: [],
-        meta: { isStale: true, rowCount: 0, sources: [] },
-        rowCount: 0,
-        empty: true,
-        hint: "panic_index_history / latest_panic_metrics empty — run migration or POST /api/panic/update",
-      })
-      return
     }
 
     const fromLatest = panicObjectFromLatestRow(latestRow)
     const fromHistory = panicObjectFromHistoryCoreRow(historyRow)
     const fromEav = rows?.length ? panicObjectFromRows(rows) : null
     const data = fromLatest ?? fromHistory ?? fromEav
+
+    if (!data) {
+      respondEmergency(res, "no_db_rows")
+      return
+    }
+
     const meta = computePanicServeMeta(rows, data)
     const rowCount = Array.isArray(rows) ? rows.length : 0
-    const hasData = Boolean(data)
 
     res.status(200).json({
       ok: true,
-      data: hasData ? data : null,
+      success: true,
+      data,
       meta,
       rowCount,
-      empty: !hasData,
+      empty: false,
       sources: {
         latest_panic_metrics: Boolean(latestRow),
         panic_index_history: Boolean(historyRow),
         panic_metrics: rowCount > 0,
       },
-      hint: !hasData ? "Run supabase/migrations or POST /api/cron/panic-collect" : null,
     })
   } catch (error) {
-    console.error("panic latest error", error)
-    const message = error instanceof Error ? error.message : String(error ?? "fetch_failed")
-    const stack = error instanceof Error ? error.stack : undefined
-    res.status(500).json({
-      ok: false,
-      message,
-      error: message,
-      stack,
-      data: null,
-    })
+    respondEmergency(res, "handler_catch", error)
   }
 }

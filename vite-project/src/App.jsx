@@ -753,12 +753,22 @@ function App() {
   useEffect(() => {
     void (async () => {
       const store = useAppDataStore.getState()
-      await store.loadDeskMetricSources()
-      await store.loadCycleLatestSnapshot({ force: true })
-      await store.loadCycleHistoryBundle({ limit: 500 })
-      await store.loadDeskMetricSources()
+      try {
+        await store.loadDeskMetricSources()
+        await store.loadCycleLatestSnapshot({ force: true })
+        await store.loadCycleHistoryBundle({ limit: 500 })
+        await store.loadDeskMetricSources()
+        const desk = store.resolveDeskPanicData()
+        if (desk && isPanicHubEnabled()) {
+          applyServerPanicSnapshot(desk, { skipAutoRefresh: true })
+        }
+      } catch (err) {
+        console.error("[App] cycle boot load failed", err)
+      } finally {
+        useAppDataStore.setState({ deskMarketReportLoading: false })
+      }
     })()
-  }, [])
+  }, [applyServerPanicSnapshot])
 
   /** history refetch 후 panicStore 스냅샷 = 최신 history row (허브 데스크·기타 화면) */
   useEffect(() => {

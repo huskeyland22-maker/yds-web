@@ -182,8 +182,12 @@ export default function PanicDeskDashboard({
 
   if (!panicData && safeHistory.length === 0) {
     return (
-      <div className="panic-v2-desk relative px-3 py-8 text-center">
-        <p className="m-0 text-sm text-slate-400">시장 데이터 불러오는 중…</p>
+      <div className="panic-v2-desk relative px-3 py-8 text-center" role="status">
+        <p className="m-0 text-sm font-medium text-slate-300">시장 데이터 없음</p>
+        <p className="m-0 mt-1.5 text-xs leading-relaxed text-slate-500">
+          서버 연결을 복구 중입니다. 새로고침하거나 상단 입력으로 지표를 저장해 주세요.
+        </p>
+        <p className="m-0 mt-2 text-[10px] text-amber-400/90">연결 복구 후 자동 갱신됩니다</p>
       </div>
     )
   }
