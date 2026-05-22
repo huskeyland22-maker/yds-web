@@ -12,6 +12,8 @@ import {
   YAxis,
 } from "recharts"
 import {
+  INSIGHT_ZONE_FILL_OPACITY,
+  metricInsightZoneBands,
   metricZoneBands,
   metricZoneLineYs,
   ZONE_BAND_FILL_OPACITY,
@@ -27,44 +29,37 @@ import { buildChartDataFromHistory, logHistoryChartDebug } from "../utils/panicH
 import { formatMetricValue } from "./macroCycleChartUtils.js"
 
 const CHART_HEIGHT = 340
-const CHART_MARGIN = { top: 32, right: 52, left: 8, bottom: 32 }
+const CHART_MARGIN = { top: 36, right: 12, left: 8, bottom: 28 }
 const ZONE_LABEL_INSET = 14
-const SUMMARY_PANEL_WIDTH = 116
 
-/**
- * @typedef {{
- *   currentText: string
- *   statusLabel: string
- *   percentileLabel: string
- *   dayText: string
- * }} HistoryChartSummary
- */
-
-/**
- * @param {{ summary: HistoryChartSummary; accent: string }} props
- */
-function ChartSummaryFloater({ summary, accent }) {
+/** @param {import("recharts").DotProps & { payload?: object }} props */
+function InflectionDot(props) {
+  const { cx, cy, payload } = props
+  if (cx == null || cy == null || !payload?.inflectionLabel) return null
+  const color = payload.inflectionColor ?? "#22d3ee"
   return (
-    <div className="pointer-events-none sticky top-1 w-full rounded-md border border-white/12 bg-[#070a10]/95 px-2.5 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-sm">
-      <p className="m-0 text-[8px] font-semibold uppercase tracking-wide text-slate-500">현재</p>
-      <p className="m-0 font-mono text-[13px] font-extrabold tabular-nums leading-tight" style={{ color: accent }}>
-        {summary.currentText}
-      </p>
-      <div className="mt-1.5 space-y-0.5 border-t border-white/[0.08] pt-1.5">
-        <SummaryRow label="상태" value={summary.statusLabel} />
-        <SummaryRow label="백분위" value={summary.percentileLabel} />
-        <SummaryRow label="전일" value={summary.dayText} />
-      </div>
-    </div>
+    <g className="panic-inflection-dot">
+      <circle cx={cx} cy={cy} r={5} fill={color} stroke="#0b0e14" strokeWidth={1.5} />
+      <circle cx={cx} cy={cy} r={9} fill={color} fillOpacity={0.18} stroke="none" />
+    </g>
   )
 }
 
-/** @param {{ label: string; value: string }} props */
-function SummaryRow({ label, value }) {
+/** @param {boolean} active @param {object[]} payload @param {string} dataLabel */
+function HistoryTooltipContent({ active, payload, dataLabel, profileKey }) {
+  if (!active || !payload?.length) return null
+  const row = payload[0]?.payload
+  if (!row) return null
+  const value = payload[0]?.value
   return (
-    <div className="flex items-baseline justify-between gap-2 text-[9px]">
-      <span className="shrink-0 text-slate-500">{label}</span>
-      <span className="truncate text-right font-semibold text-slate-100">{value}</span>
+    <div className="panic-history-tooltip rounded border border-white/15 bg-[#070a10]/98 px-2 py-1.5 text-[10px] shadow-lg">
+      <p className="m-0 text-slate-500">{row.axisLabel ?? row.date}</p>
+      <p className="m-0 font-mono font-bold tabular-nums text-slate-50">
+        {formatMetricValue(profileKey, value)} <span className="font-normal text-slate-500">{dataLabel}</span>
+      </p>
+      {row.inflectionLabel ? (
+        <p className="m-0 mt-0.5 font-semibold text-cyan-200">{row.inflectionLabel}</p>
+      ) : null}
     </div>
   )
 }
@@ -124,8 +119,8 @@ function ZoneYAxisLabels({ bands, yDomain, height }) {
  *   dataLabel?: string
  *   stroke?: string
  *   showZoneBands?: boolean
+ *   insightZones?: boolean
  *   height?: number
- *   summary?: HistoryChartSummary | null
  *   debug?: boolean
  * }} props
  */
@@ -137,8 +132,8 @@ export default function PanicHistoryLineChart({
   dataLabel = "VIX",
   stroke = "#22d3ee",
   showZoneBands = false,
+  insightZones = false,
   height = CHART_HEIGHT,
-  summary = null,
   debug = false,
 }) {
   const profileKey = metricField || (dataKey === "value" ? "vix" : dataKey)
@@ -152,13 +147,18 @@ export default function PanicHistoryLineChart({
 
   const profile = useMemo(() => resolveChartProfile(profileKey), [profileKey])
 
-  const zoneBands = useMemo(
-    () => (showZoneBands ? metricZoneBands(profileKey) : []),
-    [showZoneBands, profileKey],
-  )
+  const useInsightPalette = insightZones || showZoneBands
+
+  const zoneBands = useMemo(() => {
+    if (!showZoneBands && !insightZones) return []
+    if (insightZones) return metricInsightZoneBands(profileKey)
+    return metricZoneBands(profileKey)
+  }, [showZoneBands, insightZones, profileKey])
+
+  const zoneFillOpacity = insightZones ? INSIGHT_ZONE_FILL_OPACITY : ZONE_BAND_FILL_OPACITY
   const zoneLineYs = useMemo(
-    () => (showZoneBands ? metricZoneLineYs(profileKey) : []),
-    [showZoneBands, profileKey],
+    () => (useInsightPalette ? metricZoneLineYs(profileKey) : []),
+    [useInsightPalette, profileKey],
   )
 
   const yDomain = useMemo(() => {
@@ -192,9 +192,11 @@ export default function PanicHistoryLineChart({
     )
   }
 
+  const hasInflectionDots = chartData.some((d) => d.inflectionLabel)
+
   return (
-    <div className="flex w-full items-start gap-2 overflow-visible">
-      <div className="relative min-w-0 flex-1" style={{ height, minHeight: height }}>
+    <div className="panic-history-lab-chart w-full overflow-visible">
+      <div className="relative min-w-0" style={{ height, minHeight: height }}>
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={chartData} margin={CHART_MARGIN}>
           {zoneBands.map((band) => (
@@ -203,7 +205,7 @@ export default function PanicHistoryLineChart({
               y1={band.y1}
               y2={band.y2}
               fill={band.color}
-              fillOpacity={ZONE_BAND_FILL_OPACITY}
+              fillOpacity={zoneFillOpacity}
               strokeOpacity={0}
               ifOverflow="hidden"
             />
@@ -256,14 +258,14 @@ export default function PanicHistoryLineChart({
             />
           ) : null}
           <Tooltip
-            contentStyle={{
-              background: "#0a0e16",
-              border: "1px solid rgba(148,163,184,0.35)",
-              borderRadius: 6,
-              fontSize: 11,
-            }}
-            labelStyle={{ color: "#94a3b8" }}
-            formatter={(value) => [formatMetricValue(profileKey, value), dataLabel]}
+            content={(tipProps) => (
+              <HistoryTooltipContent
+                {...tipProps}
+                dataLabel={dataLabel}
+                profileKey={profileKey}
+              />
+            )}
+            cursor={{ stroke: "rgba(148,163,184,0.35)", strokeWidth: 1 }}
           />
           <Line
             type={curveType}
@@ -271,9 +273,11 @@ export default function PanicHistoryLineChart({
             stroke={stroke}
             strokeWidth={pointCount === 1 ? 0 : lineStrokeWidth}
             dot={
-              showDots
-                ? { r: pointCount === 1 ? 5 : 4, fill: stroke, stroke: "#0b0e14", strokeWidth: 1.5 }
-                : false
+              hasInflectionDots
+                ? InflectionDot
+                : showDots
+                  ? { r: pointCount === 1 ? 5 : 4, fill: stroke, stroke: "#0b0e14", strokeWidth: 1.5 }
+                  : false
             }
             activeDot={{
               r: profile.activeDotR ?? 5,
@@ -286,18 +290,10 @@ export default function PanicHistoryLineChart({
           />
           </LineChart>
         </ResponsiveContainer>
-        {showZoneBands && yDomain && zoneLabels.length > 0 ? (
+        {useInsightPalette && showZoneBands && yDomain && zoneLabels.length > 0 ? (
           <ZoneYAxisLabels bands={zoneLabels} yDomain={yDomain} height={height} />
         ) : null}
       </div>
-      {summary ? (
-        <div
-          className="shrink-0 self-start"
-          style={{ width: SUMMARY_PANEL_WIDTH, minHeight: height }}
-        >
-          <ChartSummaryFloater summary={summary} accent={stroke} />
-        </div>
-      ) : null}
     </div>
   )
 }

@@ -2416,6 +2416,220 @@
     padding-bottom: 4px;
   }
 
+  .panic-history-insight {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .panic-history-insight__hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 6px 10px;
+    align-items: start;
+    padding: 10px 10px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.06), rgba(0, 0, 0, 0.35));
+  }
+
+  .panic-history-insight__hero-main {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .panic-history-insight__hero-label {
+    margin: 0;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+  }
+
+  .panic-history-insight__hero-value {
+    margin: 2px 0 0;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .panic-history-insight__hero-meta {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+
+  .panic-history-insight__badge {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .panic-history-insight__mini {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .panic-history-insight__mini-label {
+    font-size: 8px;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  .panic-history-insight__mini-value {
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .panic-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .panic-badge--stable {
+    border-color: rgba(34, 211, 238, 0.35);
+    background: rgba(34, 211, 238, 0.12);
+    color: #a5f3fc;
+  }
+
+  .panic-badge--transition {
+    border-color: rgba(249, 115, 22, 0.35);
+    background: rgba(249, 115, 22, 0.12);
+    color: #fdba74;
+  }
+
+  .panic-badge--warning {
+    border-color: rgba(251, 146, 60, 0.35);
+    background: rgba(251, 146, 60, 0.1);
+    color: #fed7aa;
+  }
+
+  .panic-badge--overheat {
+    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.12);
+    color: #fecaca;
+  }
+
+  .panic-history-insight__interpret {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  .panic-history-insight__interpret-line {
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.45;
+    color: #cbd5e1;
+  }
+
+  .panic-history-insight__interpret-line + .panic-history-insight__interpret-line {
+    margin-top: 2px;
+  }
+
+  .panic-history-insight__changes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .panic-history-insight__change-cell {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.22);
+    text-align: center;
+  }
+
+  .panic-history-insight__change-label {
+    display: block;
+    font-size: 8px;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .panic-history-insight__change-value {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .panic-history-insight__footer {
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border-left: 2px solid rgba(34, 211, 238, 0.45);
+    background: rgba(34, 211, 238, 0.04);
+    font-size: 10px;
+    line-height: 1.5;
+    color: #e2e8f0;
+  }
+
+  .panic-history-zone-legend__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 8px;
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+
+  .panic-history-zone-legend__chip::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .panic-history-zone-legend__chip--floor {
+    border-color: rgba(34, 211, 238, 0.25);
+    color: #a5f3fc;
+  }
+
+  .panic-history-zone-legend__chip--floor::before {
+    background: #22d3ee;
+  }
+
+  .panic-history-zone-legend__chip--transition {
+    border-color: rgba(249, 115, 22, 0.25);
+    color: #fdba74;
+  }
+
+  .panic-history-zone-legend__chip--transition::before {
+    background: #f97316;
+  }
+
+  .panic-history-zone-legend__chip--risk {
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fecaca;
+  }
+
+  .panic-history-zone-legend__chip--risk::before {
+    background: #ef4444;
+  }
+
+  .panic-inflection-dot {
+    pointer-events: none;
+  }
+
   .panic-v2-desk > .panic-v2-desk__signal-slot,
   .panic-v2-desk > .panic-v2-desk__recommend-slot,
   .panic-v2-desk > .panic-v2-desk__history-slot,

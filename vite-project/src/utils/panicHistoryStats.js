@@ -28,11 +28,11 @@ function percentileUpperLabel(values, current, higherIsBad = true) {
   if (!values.length || !Number.isFinite(current)) return "—"
   const below = values.filter((v) => v < current).length
   const pct = (below / values.length) * 100
-  const upper = Math.round(100 - pct)
+  const lowRank = Math.round(100 - pct)
   if (!higherIsBad) {
     return `하위 ${Math.round(pct)}%`
   }
-  return `상위 ${upper}%`
+  return `하위 ${lowRank}%`
 }
 
 export const HIGHER_IS_BAD = {

@@ -1,24 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
-import {
-  computeHistoryMetricStats,
-  HIGHER_IS_BAD,
-  historyChangeToneClass,
-} from "../utils/panicHistoryStats.js"
 import { HISTORY_SECTION_METRICS } from "../utils/panicDeskMetrics.js"
 import { historyZoneLegendItems } from "../utils/panicHistoryLegend.js"
 import {
-  logHistoryFetchDebug,
-  logHistoryMetricMapping,
-  probePanicIndexHistoryDirect,
-} from "../utils/panicHistoryFetchDebug.js"
+  buildPanicHistoryInsight,
+  mergeInflectionsIntoChartData,
+} from "../utils/buildPanicHistoryInsight.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
+import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
-const HISTORY_CHART_HEIGHT = 240
+const HISTORY_CHART_HEIGHT = 260
 
 /**
  * @param {{ rows?: object[] }} props
@@ -28,15 +23,12 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
 
   useEffect(() => {
-    void probePanicIndexHistoryDirect()
     void loadCycleHistoryBundle({ limit: 500, force: false })
   }, [loadCycleHistoryBundle])
 
   const history = useMemo(() => {
     const propsMerged = mergeCycleRows(storeRows ?? [], rowsProp ?? [])
-    const merged = resolveCycleHistoryRows(propsMerged)
-    console.log("render history", merged.length)
-    return merged
+    return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
 
   const [activeHistoryTab, setActiveHistoryTab] = useState("vix")
@@ -48,14 +40,13 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     didInitMetricRef.current = true
   }, [history.length])
 
-  const metricKey = activeHistoryTab
-
   const metric = useMemo(
     () => HISTORY_SECTION_METRICS.find((m) => m.key === activeHistoryTab) ?? HISTORY_SECTION_METRICS[0],
     [activeHistoryTab],
   )
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
+  const chartRowsSource = slicedRows.length ? slicedRows : history
 
   const metricCounts = useMemo(() => {
     const counts = {}
@@ -66,47 +57,23 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   }, [history])
 
   const chartPayload = useMemo(
-    () => buildHistoryChartPayload(slicedRows.length ? slicedRows : history, activeHistoryTab),
-    [slicedRows, history, activeHistoryTab],
+    () => buildHistoryChartPayload(chartRowsSource, activeHistoryTab),
+    [chartRowsSource, activeHistoryTab],
   )
 
-  useEffect(() => {
-    logHistoryFetchDebug(history, activeHistoryTab, rangeId)
-    logHistoryMetricMapping(history)
-    console.log(activeHistoryTab, chartPayload.selectedField, chartPayload.chartData)
-    console.log("[YDS] panic history resolved", {
-      propsRows: rowsProp?.length ?? 0,
-      storeRows: storeRows?.length ?? 0,
-      historyLength: history.length,
-      slicedLength: slicedRows.length,
-      activeHistoryTab,
-      selectedField: chartPayload.selectedField,
-      selectedRange: rangeId,
-    })
-  }, [history, slicedRows.length, activeHistoryTab, rangeId, chartPayload, rowsProp?.length, storeRows?.length])
-
-  const stats = useMemo(
-    () => computeHistoryMetricStats(slicedRows.length ? slicedRows : history, metricKey),
-    [slicedRows, history, metricKey],
+  const insight = useMemo(
+    () => buildPanicHistoryInsight(chartRowsSource, history, activeHistoryTab),
+    [chartRowsSource, history, activeHistoryTab],
   )
 
-  const zoneLegend = useMemo(() => historyZoneLegendItems(metricKey), [metricKey])
+  const zoneLegend = useMemo(() => historyZoneLegendItems(activeHistoryTab), [activeHistoryTab])
 
-  const chartSummary = useMemo(
-    () => ({
-      currentText: stats.currentText,
-      statusLabel: stats.statusLabel,
-      percentileLabel: stats.percentileLabel,
-      dayText: stats.dayText,
-    }),
-    [stats],
-  )
+  const chartRows = useMemo(() => {
+    const base = chartPayload?.chartData ?? []
+    return mergeInflectionsIntoChartData(base, insight.inflections)
+  }, [chartPayload?.chartData, insight.inflections])
 
-  const higherIsBad = HIGHER_IS_BAD[metricKey] ?? true
-  const chartRows = chartPayload?.chartData ?? []
   const showChart = chartRows.length > 0
-
-  console.log("render history", history.length, "chart", chartPayload.chartData.length, activeHistoryTab)
 
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
@@ -167,78 +134,52 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         })}
       </div>
 
-      <div className="mt-1.5 grid grid-cols-4 gap-1 sm:grid-cols-8">
-        <StatCell label="현재" value={stats.currentText} accent />
-        <StatCell label="저점" value={stats.lowText} />
-        <StatCell label="고점" value={stats.highText} />
-        <StatCell label="상태" value={stats.statusLabel} />
-        <StatCell
-          label="전일"
-          value={stats.dayText}
-          valueClassName={historyChangeToneClass(stats.dayPct, higherIsBad, stats.dayPending)}
-        />
-        <StatCell label="백분위" value={stats.percentileLabel} />
-        <StatCell
-          label="1주"
-          value={stats.weekText}
-          valueClassName={historyChangeToneClass(stats.weekPct, higherIsBad, stats.weekPending)}
-        />
-        <StatCell
-          label="1M"
-          value={stats.monthText}
-          valueClassName={historyChangeToneClass(stats.monthPct, higherIsBad, stats.monthPending)}
-        />
-      </div>
+      <PanicHistoryInsightPanel
+        header={insight.header}
+        changeStrip={insight.changeStrip}
+        interpretationLines={insight.interpretationLines}
+        bottomInsight={insight.bottomInsight}
+        metricKey={activeHistoryTab}
+        accent={metric.accent}
+      />
 
-      {zoneLegend.length > 0 ? (
-        <div className="mt-1 flex flex-wrap gap-1">
-          {zoneLegend.map((z) => (
-            <span
-              key={z.id ?? z.label}
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-1.5 py-px text-[8px] text-slate-400"
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: z.color }} />
-              {z.label}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <div className="panic-history-zone-legend mt-1 flex flex-wrap items-center gap-1">
+        <span className="panic-history-zone-legend__chip panic-history-zone-legend__chip--floor">
+          저점
+        </span>
+        <span className="panic-history-zone-legend__chip panic-history-zone-legend__chip--transition">
+          전환
+        </span>
+        <span className="panic-history-zone-legend__chip panic-history-zone-legend__chip--risk">
+          과열
+        </span>
+        {zoneLegend.length > 0 ? (
+          <span className="ml-1 text-[8px] text-slate-600">
+            · {zoneLegend.map((z) => z.label).join(" / ")}
+          </span>
+        ) : null}
+      </div>
 
       <div className="panic-history-section__chart mt-1 pb-2">
         {showChart ? (
           <PanicHistoryLineChart
-            key={`panic-hist-${activeHistoryTab}`}
-            rows={slicedRows.length ? slicedRows : history}
+            key={`panic-hist-v2-${activeHistoryTab}-${rangeId}`}
+            rows={chartRowsSource}
             chartData={chartRows}
             dataKey={chartPayload?.dataKey ?? "value"}
-            metricField={chartPayload?.selectedField ?? metricKey}
+            metricField={chartPayload?.selectedField ?? activeHistoryTab}
             dataLabel={metric.chartLabel}
             stroke={metric.accent}
-            showZoneBands
+            showZoneBands={false}
+            insightZones
             height={HISTORY_CHART_HEIGHT}
-            summary={chartSummary}
           />
         ) : (
-          <div
-            className="flex h-[80px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500"
-          >
+          <div className="flex h-[80px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
             히스토리 없음
           </div>
         )}
       </div>
     </section>
-  )
-}
-
-/** @param {{ label: string; value: string; accent?: boolean; valueClassName?: string }} props */
-function StatCell({ label, value, accent = false, valueClassName = "" }) {
-  const valueTone = valueClassName || (accent ? "text-slate-50" : "text-slate-300")
-  return (
-    <div className="rounded border border-white/[0.05] bg-black/25 px-1 py-1">
-      <p className="m-0 text-[7px] font-semibold uppercase text-slate-600">{label}</p>
-      <p className={["m-0 mt-0.5 truncate font-mono text-[10px] font-bold tabular-nums", valueTone].join(" ")}>
-        {value}
-      </p>
-    </div>
   )
 }

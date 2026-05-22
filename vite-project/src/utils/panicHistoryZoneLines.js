@@ -5,8 +5,17 @@ import { MOOD_SPECTRUM } from "./panicDeskMood.js"
 
 /** @typedef {{ y?: number; y1: number; y2: number; label: string; color: string; area?: boolean }} MetricZoneBand */
 
-/** 구간 배경 — 라인 우선 (기존 0.07 대비 ~80% 감소) */
+/** 구간 배경 — 기본(얇음) */
 export const ZONE_BAND_FILL_OPACITY = 0.014
+
+/** V2 인사이트 차트 — 상태 영역 강조 */
+export const INSIGHT_ZONE_FILL_OPACITY = 0.1
+
+export const INSIGHT_ZONE_COLORS = {
+  floor: "#22d3ee",
+  transition: "#f97316",
+  risk: "#ef4444",
+}
 
 /** @param {string} metricKey @returns {MetricZoneBand[]} */
 export function metricZoneBands(metricKey) {
@@ -83,6 +92,41 @@ export function zoneBandMidpoints(bands) {
     label: b.label,
     color: b.color,
   }))
+}
+
+/**
+ * 인사이트 차트용 3단 색 (저점·전환·과열)
+ * @param {string} metricKey
+ * @param {number} bandIndex
+ * @param {number} bandCount
+ */
+function insightTierForBand(metricKey, bandIndex, bandCount) {
+  if (metricKey === "fearGreed" || metricKey === "bofa" || metricKey === "gsBullBear") {
+    if (bandIndex >= bandCount - 1) return "risk"
+    if (bandIndex >= Math.floor(bandCount * 0.55)) return "transition"
+    return "floor"
+  }
+  if (bandIndex <= 0) return "floor"
+  if (bandIndex >= bandCount - 1) return "risk"
+  if (bandCount <= 3) {
+    if (bandIndex === bandCount - 1) return "risk"
+    if (bandIndex === 0) return "floor"
+    return "transition"
+  }
+  if (bandIndex <= 1) return "floor"
+  if (bandIndex >= bandCount - 2) return "risk"
+  return "transition"
+}
+
+/** @param {string} metricKey @returns {MetricZoneBand[]} */
+export function metricInsightZoneBands(metricKey) {
+  const bands = metricZoneBands(metricKey)
+  if (!bands.length) return []
+  return bands.map((b, i) => {
+    const tier = insightTierForBand(metricKey, i, bands.length)
+    const color = INSIGHT_ZONE_COLORS[tier] ?? b.color
+    return { ...b, color, insightTier: tier }
+  })
 }
 
 /** @param {string} metricKey @returns {number[]} */
