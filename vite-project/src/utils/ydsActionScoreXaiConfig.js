@@ -61,7 +61,7 @@ export const ACTION_SCORE_XAI_CONTEXT = Object.freeze({
 export const ACTION_SCORE_XAI_ADJUSTMENTS = Object.freeze([
   { key: "bondLiquidity", label: "채권유동성", enabled: true, weight: 1 },
   { key: "metaRisk", label: "MetaRisk", enabled: true, weight: 1 },
-  { key: "encycle", label: "엔케리", enabled: true, weight: 1 },
+  { key: "encycle", label: "엔캐리", enabled: true, weight: 1 },
 ])
 
 /** @param {ActionScoreHorizon} horizon @returns {HorizonXaiConfig} */
