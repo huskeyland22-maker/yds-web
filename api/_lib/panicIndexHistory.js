@@ -175,10 +175,11 @@ async function postPanicIndexHistoryRow(row, snap, previousHistoryRow) {
   let lastErr = null
   for (const body of attempts) {
     try {
+      // PK(date) — insert 금지, 동일 date는 upsert만
       await supabaseRest("panic_index_history?on_conflict=date", {
         method: "POST",
         prefer: "resolution=merge-duplicates,return=representation",
-        body,
+        body: [body],
       })
       return
     } catch (e) {

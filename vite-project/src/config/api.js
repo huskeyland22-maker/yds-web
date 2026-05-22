@@ -17,7 +17,11 @@ import {
   probePanicIndexHistoryDirect,
 } from "../utils/panicHistoryFetchDebug.js"
 import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
-import { stripUndefinedEntries, validatePanicSavePayload } from "../utils/panicSaveValidate.js"
+import {
+  coercePanicSavePayload,
+  stripNilEntries,
+  validatePanicSavePayload,
+} from "../utils/panicSaveValidate.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -432,7 +436,7 @@ function normalizeManualPayload(data) {
 }
 
 async function postPanicSave(url, payload) {
-  const body = stripUndefinedEntries(payload)
+  const body = coercePanicSavePayload(stripNilEntries(payload))
   const validation = validatePanicSavePayload(body)
   if (!validation.ok) {
     const err = new Error(validation.error || "missing_required")
@@ -441,8 +445,7 @@ async function postPanicSave(url, payload) {
     logSaveError("save error", err)
     throw err
   }
-  console.log("save payload", body)
-  console.log(JSON.stringify(body, null, 2))
+  console.log("save payload", JSON.stringify(body, null, 2))
   const res = await fetch(url, {
     ...LIVE_POST_JSON_INIT,
     body: JSON.stringify(body),
@@ -474,7 +477,7 @@ export async function submitManualPanicData(inputData) {
     const { res, out } = await postPanicSave(url, payload)
     if (!res.ok) {
       const detail =
-        toErrorMessage(out?.error ?? out?.message, "") ||
+        toErrorMessage(out?.message ?? out?.error, "") ||
         res.statusText ||
         `HTTP ${res.status}`
       const err = new Error(detail)
@@ -482,6 +485,7 @@ export async function submitManualPanicData(inputData) {
       err.stage = out?.stage ?? "http"
       err.history = out?.history
       if (typeof out?.stack === "string") err.stack = out.stack
+      if (out?.payload) console.log("save error payload", out.payload)
       logSaveError("save error", err)
       throw err
     }
@@ -520,10 +524,11 @@ export async function submitManualPanicData(inputData) {
   const { res, out } = await postPanicSave(withNoStoreQuery(`${base}/update`), payload)
   if (!res.ok) {
     const err = new Error(
-      toErrorMessage(out?.error ?? out?.message, "") || res.statusText || `HTTP ${res.status}`,
+      toErrorMessage(out?.message ?? out?.error, "") || res.statusText || `HTTP ${res.status}`,
     )
     err.status = res.status
     if (typeof out?.stack === "string") err.stack = out.stack
+    if (out?.payload) console.log("save error payload", out.payload)
     logSaveError("save error", err)
     throw err
   }

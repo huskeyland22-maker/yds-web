@@ -11,6 +11,7 @@ export function metricValueForDb(value) {
   // Never persist toFixed() strings — always parse back to number.
   const n = Number(
     String(value)
+      .replace(/%/g, "")
       .replace(/,/g, "")
       .trim(),
   )

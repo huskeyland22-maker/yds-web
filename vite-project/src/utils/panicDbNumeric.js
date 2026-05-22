@@ -7,6 +7,7 @@ export function metricValueForDb(value) {
   }
   const n = Number(
     String(value)
+      .replace(/%/g, "")
       .replace(/,/g, "")
       .trim(),
   )

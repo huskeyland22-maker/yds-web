@@ -1,6 +1,10 @@
 import { isSupabaseConfigured } from "../_lib/supabaseRest.js"
 import { persistPanicPayload } from "../_lib/panicPipeline.js"
-import { stripUndefinedEntries, validatePanicSavePayload } from "../_lib/panicSaveValidate.js"
+import {
+  coercePanicSavePayload,
+  stripNilEntries,
+  validatePanicSavePayload,
+} from "../_lib/panicSaveValidate.js"
 
 function noStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -18,33 +22,34 @@ export default async function handler(req, res) {
     res.status(503).json({ ok: false, error: "supabase_not_configured" })
     return
   }
+  let savePayload = {}
   try {
-    const incoming = stripUndefinedEntries(
-      typeof req.body === "object" && req.body ? req.body : {},
-    )
-    console.log("save payload", incoming)
-    console.log(JSON.stringify(incoming, null, 2))
+    const raw =
+      typeof req.body === "object" && req.body ? req.body : {}
+    savePayload = coercePanicSavePayload(stripNilEntries(raw))
+    console.log("save payload", JSON.stringify(savePayload, null, 2))
 
-    const validation = validatePanicSavePayload(incoming)
+    const validation = validatePanicSavePayload(savePayload)
     if (!validation.ok) {
       console.error("[panic/update] validation_failed", validation.missing)
       res.status(400).json({
         ok: false,
         error: validation.error,
+        message: validation.error,
         missing: validation.missing,
+        payload: savePayload,
         stage: "validation",
       })
       return
     }
 
     console.log("SAVE_PAYLOAD_SERVER", "route-entry")
-    console.log("[panic/update] route-body")
     for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
-      if (key in incoming) {
-        console.log("[panic/update]", key, incoming[key], typeof incoming[key])
+      if (key in savePayload) {
+        console.log("[panic/update]", key, savePayload[key], typeof savePayload[key])
       }
     }
-    const result = await persistPanicPayload(incoming, { source: "manual", requireHistory: true })
+    const result = await persistPanicPayload(savePayload, { source: "manual", requireHistory: true })
     if (!result.history?.ok) {
       res.status(422).json({
         ok: false,
@@ -63,15 +68,17 @@ export default async function handler(req, res) {
       report: result.report ?? null,
       reportKey: result.reportKey ?? null,
     })
-  } catch (e) {
-    console.error("panic save error", e)
-    const message = e instanceof Error ? e.message : String(e ?? "update_failed")
-    const stack = e instanceof Error ? e.stack : undefined
-    const stage = e && typeof e === "object" && "stage" in e ? e.stage : "pipeline"
+  } catch (error) {
+    console.error("panic save error", error)
+    const message = error instanceof Error ? error.message : String(error ?? "update_failed")
+    const stack = error instanceof Error ? error.stack : undefined
+    const stage = error && typeof error === "object" && "stage" in error ? error.stage : "pipeline"
     res.status(500).json({
       ok: false,
+      message,
       error: message,
       stack,
+      payload: savePayload,
       stage,
     })
   }

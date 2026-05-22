@@ -17,10 +17,15 @@ export const PANIC_SAVE_REQUIRED_SPECS = [
 ]
 
 /** @param {Record<string, unknown>} obj */
-export function stripUndefinedEntries(obj) {
+export function stripNilEntries(obj) {
   if (!obj || typeof obj !== "object") return obj
-  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined))
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined && v !== null),
+  )
 }
+
+/** @deprecated use stripNilEntries */
+export const stripUndefinedEntries = stripNilEntries
 
 /** @param {Record<string, unknown>} body @param {string[]} aliases */
 function pickRaw(body, aliases) {
@@ -32,24 +37,55 @@ function pickRaw(body, aliases) {
 }
 
 /**
+ * VIX·VXN·PC·CNN·MOVE·BofA·SKEW·HY·GS — Number() 강제 (%·쉼표 제거)
+ * @param {Record<string, unknown>} body
+ */
+export function coercePanicSavePayload(body) {
+  const data = body && typeof body === "object" ? body : {}
+  const dateRaw = pickRaw(data, ["tradeDate", "historyDate", "date"])
+  const tradeDate =
+    typeof dateRaw === "string" && /^\d{4}-\d{2}-\d{2}/.test(dateRaw)
+      ? dateRaw.slice(0, 10)
+      : undefined
+
+  const out = {
+    ...stripNilEntries(data),
+    accessTier: data.accessTier ?? "pro",
+  }
+  if (tradeDate) out.tradeDate = tradeDate
+
+  for (const spec of PANIC_SAVE_REQUIRED_SPECS) {
+    if (spec.key === "tradeDate") continue
+    const raw = pickRaw(data, spec.aliases)
+    const num = metricValueForDb(raw)
+    if (num != null) out[spec.key] = num
+    else delete out[spec.key]
+  }
+
+  if (data.updatedAt != null && data.updatedAt !== "") {
+    out.updatedAt = data.updatedAt
+  } else if (tradeDate) {
+    out.updatedAt = `${tradeDate}T12:00:00.000Z`
+  }
+
+  return stripNilEntries(out)
+}
+
+/**
  * @param {Record<string, unknown>} body
  * @returns {{ ok: boolean, missing: string[], error?: string }}
  */
 export function validatePanicSavePayload(body) {
   const missing = []
-  const data = body && typeof body === "object" ? body : {}
+  const data = coercePanicSavePayload(body)
 
-  const dateRaw = pickRaw(data, ["tradeDate", "historyDate", "date"])
-  const dateStr =
-    typeof dateRaw === "string" && /^\d{4}-\d{2}-\d{2}/.test(dateRaw)
-      ? dateRaw.slice(0, 10)
-      : null
-  if (!dateStr) missing.push("date")
+  if (!data.tradeDate || !/^\d{4}-\d{2}-\d{2}$/.test(String(data.tradeDate))) {
+    missing.push("date")
+  }
 
   for (const spec of PANIC_SAVE_REQUIRED_SPECS) {
     if (spec.key === "tradeDate") continue
-    const raw = pickRaw(data, spec.aliases)
-    if (metricValueForDb(raw) == null) missing.push(spec.label)
+    if (metricValueForDb(data[spec.key]) == null) missing.push(spec.label)
   }
 
   if (missing.length) {
