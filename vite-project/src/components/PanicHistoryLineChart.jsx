@@ -122,6 +122,7 @@ function ZoneYAxisLabels({ bands, yDomain, height }) {
  *   insightZones?: boolean
  *   height?: number
  *   debug?: boolean
+ *   connectNulls?: boolean
  * }} props
  */
 export default function PanicHistoryLineChart({
@@ -135,6 +136,7 @@ export default function PanicHistoryLineChart({
   insightZones = false,
   height = CHART_HEIGHT,
   debug = false,
+  connectNulls = true,
 }) {
   const profileKey = metricField || (dataKey === "value" ? "vix" : dataKey)
 
@@ -254,7 +256,7 @@ export default function PanicHistoryLineChart({
               dataKey={lineDataKey}
               stroke="none"
               fill={`url(#${areaGradientId})`}
-              connectNulls
+              connectNulls={connectNulls}
               isAnimationActive={false}
             />
           ) : null}
@@ -286,7 +288,7 @@ export default function PanicHistoryLineChart({
               fill: stroke,
               stroke: profile.narrowRange ? "#0b0e14" : undefined,
             }}
-            connectNulls
+            connectNulls={connectNulls}
             isAnimationActive={false}
           />
           </LineChart>

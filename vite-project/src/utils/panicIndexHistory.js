@@ -139,7 +139,7 @@ export function panicIndexRowToCycleChart(row) {
   if (!row || typeof row !== "object") return null
   const date = String(row.date ?? row.ts ?? "").slice(0, 10)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
-  return {
+  const base = {
     date,
     ts: `${date}T12:00:00.000Z`,
     vix: toNum(row.vix),
@@ -152,10 +152,12 @@ export function panicIndexRowToCycleChart(row) {
     highYield: toNum(row.highYield ?? row.hyOas ?? row.hy_oas ?? row.high_yield),
     gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment ?? row.gs_bb),
     panicScore: toNum(row.panicScore ?? row.panic_score),
-    panic_v2: toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panic_index_v2),
-    panicV2Score: toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panic_index_v2),
-    panicV2DynamicScore: toNum(
-      row.panic_v2 ?? row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_index_v2,
-    ),
   }
+  const panicV2 = toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panic_index_v2)
+  if (panicV2 != null) {
+    base.panic_v2 = panicV2
+    base.panicV2Score = panicV2
+    base.panicV2DynamicScore = panicV2
+  }
+  return base
 }

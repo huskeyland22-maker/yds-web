@@ -30,8 +30,16 @@ const HISTORY_CHART_HEIGHT = 220
 
 /** @param {object} r */
 function panicV2ValueFromRow(r) {
-  const n = Number(r?.panic_v2 ?? r?.panicScore ?? r?.panic_index_v2 ?? 0)
-  return Number.isFinite(n) ? n : 0
+  const raw =
+    r.panic_v2 ??
+    r.panicV2 ??
+    r.panicV2Score ??
+    r.panic_index_v2 ??
+    (r.panicScore != null && r.panicScore !== "" && Number(r.panicScore) !== 0 ? r.panicScore : null) ??
+    null
+  if (raw == null || raw === "") return null
+  const value = Number(raw)
+  return Number.isNaN(value) ? null : value
 }
 
 /** @param {object[]} rows */
@@ -116,14 +124,21 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   const currentPanicV2Score = useMemo(() => {
     const chartData = buildPanicV2ChartData(history)
-    return chartData.at(-1)?.value ?? 0
+    const latestValid = [...chartData].reverse().find((x) => x.value != null)
+    return latestValid?.value ?? 0
   }, [history])
 
   useEffect(() => {
-    const sorted = sortHistoryRowsAsc(history)
-    const chartData = buildPanicV2ChartData(history)
-    console.log("[패닉V2 rows]", sorted.slice(-3))
-    console.log("[패닉V2 chart]", chartData.slice(-3))
+    console.log("[V2 RAW]", history)
+    console.log(
+      "[V2 MAP]",
+      history.map((r) => ({
+        date: r.date,
+        panic_v2: r.panic_v2,
+        panicScore: r.panicScore,
+        panic_index_v2: r.panic_index_v2,
+      })),
+    )
   }, [history])
 
   const chartRows = useMemo(() => {
@@ -163,7 +178,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const showHistoryLoading = history.length === 0
   const showChart =
     activeHistoryTab === "panicV2"
-      ? !showHistoryLoading && panicV2ChartData.length > 0
+      ? !showHistoryLoading && panicV2ChartData.some((x) => x.value != null)
       : uiState.showChart && chartRows.length > 0
 
   return (
@@ -306,6 +321,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             stroke={metric.accent}
             showZoneBands={false}
             insightZones={isPanicScoreTab}
+            connectNulls={activeHistoryTab !== "panicV2"}
             height={HISTORY_CHART_HEIGHT}
           />
         ) : (

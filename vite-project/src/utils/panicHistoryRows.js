@@ -37,13 +37,19 @@ export function rawRowToCycle(row) {
     highYield: toNum(row.highYield ?? row.hyOas ?? row.high_yield),
     gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment),
     panicScore: toNum(row.panicScore ?? row.panic_score),
-    panicV2Score: toNum(
-      row.panicV2Score ?? row.panicV2DynamicScore ?? row.panic_v2 ?? row.panic_index_v2 ?? row.panic_v2_score,
-    ),
-    panicV2DynamicScore: toNum(
-      row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_v2 ?? row.panic_index_v2,
-    ),
-    panic_v2: toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panic_index_v2),
+  }
+  const panicV2 = toNum(
+    row.panic_v2 ??
+      row.panicV2 ??
+      row.panicV2Score ??
+      row.panicV2DynamicScore ??
+      row.panic_index_v2 ??
+      row.panic_v2_score,
+  )
+  if (panicV2 != null) {
+    out.panic_v2 = panicV2
+    out.panicV2Score = panicV2
+    out.panicV2DynamicScore = panicV2
   }
   return out
 }
@@ -129,7 +135,16 @@ function mergeCycleHistorySources(...lists) {
     for (const r of list) {
       if (!r?.date) continue
       const d = String(r.date).slice(0, 10)
-      byDate.set(d, { ...byDate.get(d), ...r, date: d })
+      const prev = byDate.get(d)
+      const merged = { ...prev, ...r, date: d }
+      const prevV2 = toNum(prev?.panic_v2 ?? prev?.panicV2Score ?? prev?.panicV2)
+      const nextV2 = toNum(merged.panic_v2 ?? merged.panicV2Score ?? merged.panicV2)
+      if (prevV2 != null && nextV2 == null) {
+        merged.panic_v2 = prevV2
+        merged.panicV2Score = prev.panicV2Score ?? prevV2
+        merged.panicV2DynamicScore = prev.panicV2DynamicScore ?? prevV2
+      }
+      byDate.set(d, merged)
     }
   }
   return [...byDate.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
