@@ -1773,10 +1773,56 @@
   }
 
   .tactical-hud__score {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px 4px;
+    line-height: 1.15;
+    color: rgba(251, 191, 36, 0.96);
+  }
+
+  .tactical-hud__score-num {
     font-size: 18px;
     font-weight: 800;
-    line-height: 1;
-    color: rgba(251, 191, 36, 0.96);
+  }
+
+  .tactical-hud__score-dir {
+    font-size: 11px;
+    font-weight: 800;
+    opacity: 0.92;
+  }
+
+  .tactical-hud__score-hint {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: rgba(226, 232, 240, 0.92);
+  }
+
+  .tactical-hud__score[data-band="overheat"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="overheat"] .tactical-hud__score-dir {
+    color: rgba(251, 113, 133, 0.96);
+  }
+
+  .tactical-hud__score[data-band="watch"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="watch"] .tactical-hud__score-dir {
+    color: rgba(148, 163, 184, 0.96);
+  }
+
+  .tactical-hud__score[data-band="neutral"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="neutral"] .tactical-hud__score-dir {
+    color: rgba(203, 213, 225, 0.96);
+  }
+
+  .tactical-hud__score[data-band="favorable"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="favorable"] .tactical-hud__score-dir {
+    color: rgba(52, 211, 153, 0.96);
+  }
+
+  .tactical-hud__score[data-band="strongBuy"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="strongBuy"] .tactical-hud__score-dir {
+    color: rgba(251, 191, 36, 0.98);
   }
 
   .tactical-hud__footer {

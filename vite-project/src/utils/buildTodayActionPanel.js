@@ -5,13 +5,18 @@ import { buildDailyMarketReport } from "./buildDailyMarketReport.js"
 import { buildRecommendationEngine } from "./buildRecommendationEngine.js"
 import { buildScoreExplainLayer } from "./buildScoreExplainLayer.js"
 import { PANIC_TACTICAL_CARD_ACTIONS_COMPACT } from "./panicTacticalCardCopy.js"
+import { buildTacticalScoreBottomLine } from "./tacticalScoreInterpretation.js"
 
 /**
  * @typedef {{
- *   id: string
+ *   id: import("./tacticalScoreInterpretation.js").TacticalCardHorizonId
  *   period: string
  *   action: string
  *   score: number | null
+ *   scoreLine: string | null
+ *   scoreArrow: string | null
+ *   scoreHint: string | null
+ *   scoreBand: import("./tacticalScoreInterpretation.js").TacticalScoreBandId | null
  * }} TacticalCard
  */
 
@@ -28,35 +33,30 @@ import { PANIC_TACTICAL_CARD_ACTIONS_COMPACT } from "./panicTacticalCardCopy.js"
  * @param {import("./buildScoreExplainLayer.js").HorizonExplain[]} horizons
  * @returns {TacticalCard[]}
  */
+function withScoreInterpretation(cardId, period, action, score) {
+  const bottom = buildTacticalScoreBottomLine(cardId, score)
+  return {
+    id: cardId,
+    period,
+    action,
+    score: bottom?.score ?? (Number.isFinite(Number(score)) ? Math.round(Number(score)) : null),
+    scoreLine: bottom?.line ?? null,
+    scoreArrow: bottom?.arrow ?? null,
+    scoreHint: bottom?.hint ?? null,
+    scoreBand: bottom?.band ?? null,
+  }
+}
+
 function buildTacticalCards(_practical, horizons) {
   const scoreByHorizon = Object.fromEntries(horizons.map((h) => [h.horizon, h.score]))
   const a = PANIC_TACTICAL_CARD_ACTIONS_COMPACT
+  const tacticalScore = scoreByHorizon.mid ?? scoreByHorizon.short ?? null
 
   return [
-    {
-      id: "short",
-      period: "단기",
-      action: a.short,
-      score: scoreByHorizon.short ?? null,
-    },
-    {
-      id: "mid",
-      period: "중기",
-      action: a.mid,
-      score: scoreByHorizon.mid ?? null,
-    },
-    {
-      id: "long",
-      period: "장기",
-      action: a.long,
-      score: scoreByHorizon.long ?? null,
-    },
-    {
-      id: "tactical",
-      period: "실전",
-      action: a.tactical,
-      score: scoreByHorizon.mid ?? scoreByHorizon.short ?? null,
-    },
+    withScoreInterpretation("short", "단기", a.short, scoreByHorizon.short),
+    withScoreInterpretation("mid", "중기", a.mid, scoreByHorizon.mid),
+    withScoreInterpretation("long", "장기", a.long, scoreByHorizon.long),
+    withScoreInterpretation("tactical", "실전", a.tactical, tacticalScore),
   ]
 }
 

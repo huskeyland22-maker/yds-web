@@ -44,12 +44,25 @@ export default function TodayActionPanel({
               className={["tactical-hud__cell", isSelected ? "tactical-hud__cell--active" : ""].join(" ")}
               onClick={() => setSelectedId(card.id)}
               aria-pressed={isSelected}
-              aria-label={`${card.period} ${card.action} ${card.score ?? ""}`}
+              aria-label={
+                card.scoreLine
+                  ? `${card.period} ${card.action} ${card.scoreLine}`
+                  : `${card.period} ${card.action} ${card.score ?? ""}`
+              }
             >
               <span className="tactical-hud__period">{card.period}</span>
               <span className="tactical-hud__action">{card.action}</span>
-              {card.score != null ? (
-                <span className="tactical-hud__score font-mono tabular-nums">{card.score}</span>
+              {card.scoreLine ? (
+                <span
+                  className="tactical-hud__score font-mono tabular-nums"
+                  data-band={card.scoreBand ?? undefined}
+                >
+                  <span className="tactical-hud__score-num">{card.score}</span>
+                  <span className="tactical-hud__score-dir" aria-hidden>
+                    {card.scoreArrow}
+                  </span>
+                  <span className="tactical-hud__score-hint">{card.scoreHint}</span>
+                </span>
               ) : null}
             </button>
           )
