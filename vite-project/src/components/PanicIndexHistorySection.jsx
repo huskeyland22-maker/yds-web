@@ -20,7 +20,10 @@ import {
 } from "../utils/buildPanicHistoryInsight.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
-import { PANIC_V2_CHART_DETAIL_METRICS } from "../panic-v2/weights.js"
+import {
+  PANIC_V2_CHART_DETAIL_METRICS,
+  PANIC_V2_CHART_DETAIL_METRICS_VISIBLE,
+} from "../panic-v2/weights.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import {
   buildPanicV2ChartData,
@@ -62,6 +65,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
   const [rangeId, setRangeId] = useState("6M")
   const [v2DetailMetric, setV2DetailMetric] = useState(null)
+  const [v2AuxOpen, setV2AuxOpen] = useState(false)
   const [auxMetricsOpen, setAuxMetricsOpen] = useState(false)
 
   const isPanicScoreTab = activeHistoryTab === "panicV2" || activeHistoryTab === "panicV1"
@@ -222,10 +226,38 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
 
   const showHistoryLoading = history.length === 0
-  const showChart =
-    activeHistoryTab === "panicV2"
-      ? !showHistoryLoading && panicV2ChartData.some((x) => x.value != null)
-      : uiState.showChart && chartRows.length > 0
+
+  const showChart = useMemo(() => {
+    if (showHistoryLoading) return false
+    if (activeHistoryTab === "panicV2") {
+      const series = v2DetailMetric ? chartRows : panicV2ChartData
+      return series.some((x) => x?.value != null)
+    }
+    return uiState.showChart && chartRows.some((x) => x?.value != null)
+  }, [
+    showHistoryLoading,
+    activeHistoryTab,
+    v2DetailMetric,
+    chartRows,
+    panicV2ChartData,
+    uiState.showChart,
+  ])
+
+  const chartEmptyMessage = useMemo(() => {
+    if (activeHistoryTab === "panicV2" && v2DetailMetric) {
+      const m = PANIC_V2_CHART_DETAIL_METRICS.find((x) => x.key === v2DetailMetric)
+      return `${m?.label ?? "지표"} 데이터 준비중`
+    }
+    return "데이터 준비중"
+  }, [activeHistoryTab, v2DetailMetric])
+
+  const toggleV2Aux = () => {
+    setV2AuxOpen((open) => {
+      const next = !open
+      if (!next) setV2DetailMetric(null)
+      return next
+    })
+  }
 
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
@@ -401,12 +433,13 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             stroke={chartMetric.accent}
             showZoneBands={false}
             insightZones={isPanicScoreTab && !v2DetailMetric}
-            connectNulls={activeHistoryTab !== "panicV2"}
+            connectNulls={activeHistoryTab !== "panicV2" || Boolean(v2DetailMetric)}
             height={HISTORY_CHART_HEIGHT}
+            emptyMessage={chartEmptyMessage}
           />
         ) : (
           <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
-            {showHistoryLoading ? "데이터 준비중" : (uiState.chartMessage ?? "데이터 준비중")}
+            {chartEmptyMessage}
           </div>
         )}
       </div>
@@ -415,31 +448,56 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         <PanicChartEventStrip events={tacticalEventLog} />
       ) : null}
 
-      {activeHistoryTab === "panicV2" && showChart ? (
-        <div className="mt-0.5 flex flex-wrap gap-0.5" role="group" aria-label="V2 보조 지표">
+      {activeHistoryTab === "panicV2" ? (
+        <div className="mt-0.5">
           <button
             type="button"
-            onClick={() => setV2DetailMetric(null)}
+            onClick={toggleV2Aux}
             className={[
-              "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
-              !v2DetailMetric ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
+              "panic-history-tab panic-history-tab--aux-toggle inline-flex items-center rounded-md border px-1.5 py-0.5",
+              v2AuxOpen
+                ? "border-sky-400/25 bg-sky-500/10 text-sky-100"
+                : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
             ].join(" ")}
+            aria-expanded={v2AuxOpen}
+            aria-controls="panic-v2-aux-metrics"
           >
-            점수
+            <span className="whitespace-nowrap text-[9px] font-semibold">
+              {v2AuxOpen ? "보조지표 −" : "보조지표 +"}
+            </span>
           </button>
-          {PANIC_V2_CHART_DETAIL_METRICS.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => setV2DetailMetric(m.key)}
-              className={[
-                "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
-                v2DetailMetric === m.key ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
-              ].join(" ")}
+          {v2AuxOpen ? (
+            <div
+              id="panic-v2-aux-metrics"
+              className="mt-0.5 flex flex-wrap gap-0.5"
+              role="group"
+              aria-label="V2 보조 지표"
             >
-              {m.label}
-            </button>
-          ))}
+              <button
+                type="button"
+                onClick={() => setV2DetailMetric(null)}
+                className={[
+                  "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
+                  !v2DetailMetric ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
+                ].join(" ")}
+              >
+                점수
+              </button>
+              {PANIC_V2_CHART_DETAIL_METRICS_VISIBLE.map((m) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  onClick={() => setV2DetailMetric(m.key)}
+                  className={[
+                    "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
+                    v2DetailMetric === m.key ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
+                  ].join(" ")}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </section>

@@ -131,6 +131,7 @@ function ZoneYAxisLabels({ bands, yDomain, height }) {
  *   height?: number
  *   debug?: boolean
  *   connectNulls?: boolean
+ *   emptyMessage?: string
  * }} props
  */
 export default function PanicHistoryLineChart({
@@ -145,6 +146,7 @@ export default function PanicHistoryLineChart({
   height = CHART_HEIGHT,
   debug = false,
   connectNulls = true,
+  emptyMessage = "데이터 준비중",
 }) {
   const profileKey = metricField || (dataKey === "value" ? "vix" : dataKey)
 
@@ -197,7 +199,7 @@ export default function PanicHistoryLineChart({
         className="flex items-center justify-center rounded-lg border border-white/[0.06] bg-black/30 text-[11px] text-slate-500"
         style={{ height, minHeight: height }}
       >
-        panic_index_history 데이터 없음
+        {emptyMessage}
       </div>
     )
   }
