@@ -65,13 +65,33 @@ export function buildSingleMetricChartData(history, selectedField) {
     .filter(Boolean)
 }
 
+/** DB·병합된 panic_v2 점수로 차트 (1건 이상이면 즉시 표시) */
+export function buildPanicV2StoredChartData(history) {
+  return sortHistoryRowsAsc(history)
+    .map((row) => {
+      const date = String(row.date ?? row.ts ?? "").slice(0, 10)
+      const score = Number(
+        row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_v2 ?? row.panic_index_v2,
+      )
+      if (!Number.isFinite(score)) return null
+      return {
+        date,
+        axisLabel: formatChartAxisMd(date),
+        value: score,
+        panicV2: score,
+      }
+    })
+    .filter(Boolean)
+}
+
 /**
  * @param {object[]} history
  * @param {string} activeHistoryTab
  */
 export function buildHistoryChartPayload(history, activeHistoryTab) {
   if (activeHistoryTab === "panicV2") {
-    const chartData = buildPanicV2DynamicChartData(history)
+    const stored = buildPanicV2StoredChartData(history)
+    const chartData = stored.length >= 1 ? stored : buildPanicV2DynamicChartData(history)
     return {
       selectedField: "panicV2",
       dataKey: "value",

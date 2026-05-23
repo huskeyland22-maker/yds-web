@@ -1,7 +1,7 @@
 /**
  * Panic API — 단일 Vercel Serverless Function
  *
- * GET  ?mode=latest | history | historylatest | v2 | v2history | backfill
+ * GET  ?mode=latest | history | history-latest | v2 | v2history | backfill
  * POST ?mode=update | backfill
  */
 import {
@@ -21,7 +21,7 @@ function normalizeMode(raw) {
     .toLowerCase()
     .replace(/-/g, "")
   if (!m) return ""
-  if (m === "v2" || m === "v2history" || m === "historyv2") return "v2history"
+  if (m === "v2" || m === "v2history" || m === "historyv2") return "v2"
   if (m === "historylatest" || m === "latesthistory") return "historylatest"
   return m
 }
@@ -68,6 +68,7 @@ export default async function handler(req, res) {
         await handlePanicModeHistoryLatest(req, res)
         return
 
+      case "v2":
       case "v2history":
         if (req.method !== "GET") {
           res.status(405).json({ ok: false, error: "method_not_allowed", mode })
@@ -97,7 +98,16 @@ export default async function handler(req, res) {
           ok: false,
           error: "unknown_mode",
           mode,
-          allowed: ["latest", "history", "historylatest", "v2", "v2history", "backfill", "update"],
+          allowed: [
+            "latest",
+            "history",
+            "history-latest",
+            "historylatest",
+            "v2",
+            "v2history",
+            "backfill",
+            "update",
+          ],
         })
     }
   } catch (error) {

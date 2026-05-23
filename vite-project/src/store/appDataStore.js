@@ -34,6 +34,7 @@ import { enrichCycleRowsWithPanicV2 } from "../panic-v2/panicHistoryV2Backfill.j
 import { logPanicV2ClientSummary } from "../utils/panicV2BackfillLog.js"
 import {
   countPanicV2ScoredRows,
+  cycleRowsFromV2Only,
   mergePanicHistoryV2IntoCycleRows,
 } from "../utils/panicHistoryV2Merge.js"
 import { hasPanicMetricValues, resolveLatestMetrics } from "../utils/resolveLatestPanicMetrics.js"
@@ -228,7 +229,10 @@ export const useAppDataStore = create((set, get) => ({
         }
       }
 
-      let merged = mergePanicHistoryV2IntoCycleRows(base, v2Rows)
+      let merged =
+        base.length >= 1
+          ? mergePanicHistoryV2IntoCycleRows(base, v2Rows)
+          : cycleRowsFromV2Only(v2Rows)
       let scored = countPanicV2ScoredRows(merged)
 
       if (scored < 1 && base.length >= 1) {
@@ -502,6 +506,14 @@ export const useAppDataStore = create((set, get) => ({
           cycleRows = localCycleRows
           console.log("[YDS] loadCycleHistoryBundle local fallback", cycleRows.length)
         }
+        if (cycleRows.length < 1) {
+          const v2OnlySync = await get().syncPanicHistoryV2([])
+          if (v2OnlySync.rows?.length >= 1) {
+            cycleRows = v2OnlySync.rows
+            console.log("[YDS] loadCycleHistoryBundle v2-only fallback", cycleRows.length)
+          }
+        }
+
         if (cycleRows.length < 1) {
           set({
             lastCycleBundleError: "panic_index_history_empty",

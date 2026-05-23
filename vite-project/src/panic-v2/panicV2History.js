@@ -25,7 +25,8 @@ export function rowToPanicV2Input(row) {
 
 /** @param {object} row */
 export function panicV2ScoreForRow(row) {
-  const cached = row?.panicV2Score ?? row?.panic_v2_score
+  const cached =
+    row?.panicV2DynamicScore ?? row?.panicV2Score ?? row?.panic_v2 ?? row?.panic_index_v2 ?? row?.panic_v2_score
   if (cached != null && Number.isFinite(Number(cached))) return Math.round(Number(cached))
   const result = computePanicV2(rowToPanicV2Input(row) ?? row, { includeLegacy: false })
   return result.score

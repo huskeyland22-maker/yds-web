@@ -11,11 +11,16 @@ export const PANIC_INDEX_HISTORY_V2_TABLE = "panic_index_history_v2"
 export const PANIC_INDEX_HISTORY_V2_SELECT =
   "date,vix,vxn,fear_greed,put_call,high_yield,move,skew,gs,bofa,panic_index_v2,source,updated_at"
 
-/** 레거시 fallback */
+/** DB에 데이터 있는 테이블 (panic_history_v2) 우선 */
 const LEGACY_TABLE = "panic_history_v2"
+const LEGACY_SELECT_MINIMAL = "date,panic_v2,vix,hy"
 const LEGACY_SELECT = "date,panic_v2,vix,vxn,fear_greed,put_call,hy,move,skew,gs,bofa,source,updated_at"
 
-const V2_TABLES = [PANIC_INDEX_HISTORY_V2_TABLE, LEGACY_TABLE]
+const V2_FETCH_ATTEMPTS = [
+  { table: LEGACY_TABLE, select: LEGACY_SELECT_MINIMAL },
+  { table: LEGACY_TABLE, select: LEGACY_SELECT },
+  { table: PANIC_INDEX_HISTORY_V2_TABLE, select: PANIC_INDEX_HISTORY_V2_SELECT },
+]
 
 function isSchemaColumnError(err) {
   const msg = err instanceof Error ? err.message : String(err || "")
@@ -155,15 +160,14 @@ export async function fetchPanicHistoryV2Rows(opts = {}) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(from)) suffix += `&date=gte.${from}`
   if (/^\d{4}-\d{2}-\d{2}$/.test(to)) suffix += `&date=lte.${to}`
 
-  for (const table of V2_TABLES) {
-    const select = table === PANIC_INDEX_HISTORY_V2_TABLE ? PANIC_INDEX_HISTORY_V2_SELECT : LEGACY_SELECT
+  for (const { table, select } of V2_FETCH_ATTEMPTS) {
     try {
       const rows = await restGetV2(table, select, suffix)
       if (!Array.isArray(rows)) return []
-      return rows
-        .map(panicHistoryV2RowToClient)
-        .filter(Boolean)
-        .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+      const mapped = rows.map(panicHistoryV2RowToClient).filter(Boolean)
+      if (mapped.length) {
+        return mapped.sort((a, b) => String(a.date).localeCompare(String(b.date)))
+      }
     } catch (err) {
       if (isSchemaColumnError(err)) {
         console.warn(`[${table}] fetch fallback`, err instanceof Error ? err.message : err)
@@ -184,19 +188,19 @@ export async function upsertPanicHistoryV2Rows(dbRows) {
   if (!valid.length) return { ok: false, skipped: true, reason: "no_valid_dates" }
 
   let lastErr = null
-  for (const table of V2_TABLES) {
+  for (const { table } of V2_FETCH_ATTEMPTS) {
     try {
       const payload =
         table === PANIC_INDEX_HISTORY_V2_TABLE
           ? valid
           : valid.map((r) => ({
               date: r.date,
-              panic_v2: r.panic_index_v2,
+              panic_v2: r.panic_index_v2 ?? r.panic_v2,
               vix: r.vix,
               vxn: r.vxn,
               fear_greed: r.fear_greed,
               put_call: r.put_call,
-              hy: r.high_yield,
+              hy: r.high_yield ?? r.hy,
               move: r.move,
               skew: r.skew,
               gs: r.gs,

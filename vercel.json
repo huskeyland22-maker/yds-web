@@ -9,6 +9,12 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/panic/latest", "destination": "/api/panic?mode=latest" },
+    { "source": "/api/panic/history/latest", "destination": "/api/panic?mode=history-latest" },
+    { "source": "/api/panic/history", "destination": "/api/panic?mode=history" },
+    { "source": "/api/panic/history-v2/backfill", "destination": "/api/panic?mode=backfill" },
+    { "source": "/api/panic/history-v2", "destination": "/api/panic?mode=v2" },
+    { "source": "/api/panic/update", "destination": "/api/panic?mode=update" },
     { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
   ],
   "headers": [

@@ -58,7 +58,7 @@ export function getPanicHubEnvStatus() {
 }
 
 /**
- * @param {string} mode latest | history | historylatest | v2 | v2history | backfill | update
+ * @param {string} mode latest | history | history-latest | v2 | v2history | backfill | update
  * @param {Record<string, string | number | undefined>} [extra]
  */
 export function panicApiUrl(mode, extra = {}) {
@@ -299,7 +299,7 @@ export async function fetchPanicHistoryV2(options = {}) {
   const extra = { limit: String(limit) }
   if (options.from) extra.from = String(options.from).slice(0, 10)
   if (options.to) extra.to = String(options.to).slice(0, 10)
-  const url = panicApiUrl("v2history", extra)
+  const url = panicApiUrl("v2", extra)
   if (isDataTraceEnabled()) logFetchStart("panic-history-v2", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (!res.ok) {
@@ -338,7 +338,7 @@ export async function backfillPanicHistoryV2(options = {}) {
 /** panic_index_history 최신 1건 — cycle 대시보드 mount·저장 직후용 */
 export async function fetchPanicIndexLatest() {
   if (!isPanicHubEnabled()) return null
-  const url = panicApiUrl("historylatest")
+  const url = panicApiUrl("history-latest")
   if (isDataTraceEnabled()) logFetchStart("panic-index-latest", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (!res.ok) {

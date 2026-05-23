@@ -16,7 +16,9 @@ import {
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
+import { resolvePanicV2Status } from "../panic-v2/panicV2Status.js"
 import { resolvePanicHistoryUiState } from "../utils/panicHistoryUiState.js"
+import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { countPanicV2ScoredRows } from "../utils/panicHistoryV2Merge.js"
 import { isPanicHubEnabled } from "../config/api.js"
 import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
@@ -101,12 +103,25 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     [history.length, panicV2Count, activeHistoryTab, metricCounts.panicV2, panicHistoryV2SyncStatus],
   )
 
+  const latestV2Point = useMemo(() => {
+    if (panicV2Count < 1) return null
+    const sorted = sortHistoryRowsAsc(history)
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      const score = Number(sorted[i].panicV2DynamicScore ?? sorted[i].panicV2Score ?? sorted[i].panic_v2)
+      if (Number.isFinite(score)) {
+        return { score: Math.round(score), status: resolvePanicV2Status(score) }
+      }
+    }
+    return null
+  }, [history, panicV2Count])
+
   const headerCurrentText =
     uiState.currentText ??
-    (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
+    (latestV2Point ? String(latestV2Point.score) : insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
   const headerStatusLabel =
     uiState.statusLabel ??
-    (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel)
+    (latestV2Point?.status?.label ??
+      (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel))
 
   const showChart =
     uiState.showChart && chartRows.length > 0 && (activeHistoryTab !== "panicV2" || panicV2Count >= 1)

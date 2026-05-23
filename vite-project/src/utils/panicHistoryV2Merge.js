@@ -45,6 +45,36 @@ export function mergePanicHistoryV2IntoCycleRows(cycleRows, v2Rows) {
   })
 }
 
+/** panic_history_v2 API rows → cycleMetricHistory (index history 없을 때) */
+export function cycleRowsFromV2Only(v2Rows) {
+  if (!Array.isArray(v2Rows) || !v2Rows.length) return []
+  return v2Rows
+    .map((r) => {
+      const date = String(r?.date ?? "").slice(0, 10)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+      const score = toNum(r.panicV2 ?? r.panic_index_v2 ?? r.panic_v2)
+      if (score == null) return null
+      return {
+        date,
+        ts: `${date}T12:00:00.000Z`,
+        vix: toNum(r.vix),
+        vxn: toNum(r.vxn),
+        fearGreed: toNum(r.fearGreed),
+        putCall: toNum(r.putCall),
+        highYield: toNum(r.highYield ?? r.hy),
+        hyOas: toNum(r.highYield ?? r.hy),
+        move: toNum(r.move),
+        skew: toNum(r.skew),
+        gsBullBear: toNum(r.gsBullBear ?? r.gs),
+        bofa: toNum(r.bofa),
+        panicV2Score: score,
+        panicV2DynamicScore: score,
+        panic_v2: score,
+      }
+    })
+    .filter(Boolean)
+}
+
 /** @param {object[]} rows */
 export function countPanicV2ScoredRows(rows) {
   if (!Array.isArray(rows)) return 0
