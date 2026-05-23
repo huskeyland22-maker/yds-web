@@ -987,6 +987,263 @@ function computeLongTiming(data) {
   }
 }
 
+/**
+ * @param {object} data
+ * @param {{ key: string; label: string; scoreFn: (v: number) => number; scoreFnName: string }[]} defs
+ * @param {number} minComponents
+ */
+function buildAvgHorizonScoreDebug(data, defs, minComponents) {
+  /** @type {{ key: string; label: string; rawValue: number; componentScore: number; scoreFnName: string }[]} */
+  const components = []
+  for (const { key, label, scoreFn, scoreFnName } of defs) {
+    const rawValue = pickMetricValue(data, key)
+    if (rawValue == null) continue
+    components.push({
+      key,
+      label,
+      rawValue,
+      componentScore: scoreFn(rawValue),
+      scoreFnName,
+    })
+  }
+  const componentScores = components.map((c) => c.componentScore)
+  const rawAvg = avg(componentScores)
+  const rawRounded = rawAvg != null ? Math.round(rawAvg) : null
+
+  return {
+    metricsUsed: components.map((c) => c.label),
+    components,
+    componentScores,
+    rawAvg,
+    rawRounded,
+    minComponentsRequired: minComponents,
+    hasEnoughMetrics: componentScores.length >= minComponents,
+    normalization: "Math.round(avg(componentScores))",
+    clamp: {
+      horizonFinalScore: {
+        applied: false,
+        formula: "none (not passed through clamp(0,100))",
+      },
+      componentScores: {
+        applied: true,
+        formula: "piecewise lookup tables return hard-coded 0–100 tiers per metric",
+      },
+      allocationTiltOnly: {
+        applied: true,
+        formula: "clamp((score - 50) / 50, -1, 1) in scoreTilt() — affects allocation bars only, not HUD card score",
+      },
+    },
+  }
+}
+
+/** @param {object} data */
+function buildLongHorizonScoreDebug(data) {
+  /** @type {{ label: string; rawValue: number; weight: number; componentScore: number; weighted: number; scoreFnName: string }[]} */
+  const coreComponents = []
+  let sum = 0
+  let wSum = 0
+  for (const { key, label, weight, score } of LONG_CORE_WEIGHTS) {
+    const rawValue = pickMetricValue(data, key)
+    if (rawValue == null) continue
+    const componentScore = score(rawValue)
+    const weighted = componentScore * weight
+    sum += weighted
+    wSum += weight
+    coreComponents.push({
+      label,
+      key,
+      rawValue,
+      weight,
+      componentScore,
+      weighted,
+      scoreFnName: `long${label.replace(/\s/g, "")}Score`,
+    })
+  }
+
+  const coreAvg = wSum > 0 ? sum / wSum : null
+  const coreRounded = coreAvg != null ? Math.round(coreAvg) : null
+
+  /** @type {{ label: string; rawValue: number; weight: number; componentScore: number; weighted: number }[]} */
+  const tailComponents = []
+  let tailSum = 0
+  let tailWSum = 0
+  for (const { key, label, weight, score } of LONG_TAIL_WEIGHTS) {
+    const rawValue = pickMetricValue(data, key)
+    if (rawValue == null) continue
+    const componentScore = score(rawValue)
+    tailSum += componentScore * weight
+    tailWSum += weight
+    tailComponents.push({ label, rawValue, weight, componentScore, weighted: componentScore * weight })
+  }
+  const tailAvg = tailWSum > 0 ? tailSum / tailWSum : null
+  const tailRounded = tailAvg != null ? Math.round(tailAvg) : null
+
+  const hasFullCore = coreComponents.length >= 5
+  let rawRounded = coreRounded
+  let blendNote = null
+  if (hasFullCore && tailRounded != null) {
+    rawRounded = Math.round(coreRounded * 0.95 + tailRounded * 0.05)
+    blendNote = `Math.round(coreRounded(${coreRounded}) * 0.95 + tailRounded(${tailRounded}) * 0.05) = ${rawRounded}`
+  }
+
+  return {
+    metricsUsed: [
+      ...coreComponents.map((c) => c.label),
+      ...tailComponents.map((c) => `${c.label}*`),
+    ],
+    coreComponents,
+    tailComponents,
+    coreAvg,
+    coreRounded,
+    tailAvg,
+    tailRounded,
+    rawRounded,
+    hasFullCore,
+    minComponentsRequired: 3,
+    hasEnoughMetrics: coreComponents.length >= 3,
+    normalization: hasFullCore && tailRounded != null
+      ? blendNote ?? "weighted core + 5% tail blend, Math.round"
+      : "Math.round(weightedAvg(coreComponents, LONG_CORE_WEIGHTS))",
+    clamp: {
+      horizonFinalScore: { applied: false, formula: "none" },
+      componentScores: {
+        applied: true,
+        formula: "piecewise lookup tables (hard-coded 0–100 tiers)",
+      },
+      allocationTiltOnly: {
+        applied: true,
+        formula: "clamp((score - 50) / 50, -1, 1) in scoreTilt() — allocation only",
+      },
+    },
+  }
+}
+
+/**
+ * 전술 HUD — 단·중·장·실전 점수 디버그 (콘솔용)
+ * @param {object | null | undefined} panicData
+ */
+export function buildTacticalHudTimingScoreDebug(panicData) {
+  if (!panicData || typeof panicData !== "object") {
+    return {
+      rawShortScore: null,
+      rawMidScore: null,
+      rawLongScore: null,
+      rawWatchScore: null,
+      rawTacticalScore: null,
+      source: null,
+      normalization: null,
+      clamp: null,
+      tacticalReuse: null,
+    }
+  }
+
+  const shortDbg = buildAvgHorizonScoreDebug(
+    panicData,
+    [
+      { key: "vix", label: "VIX", scoreFn: shortVixScore, scoreFnName: "shortVixScore" },
+      { key: "putCall", label: "P/C", scoreFn: shortPutCallScore, scoreFnName: "shortPutCallScore" },
+      { key: "fearGreed", label: "F&G", scoreFn: shortFearGreedScore, scoreFnName: "shortFearGreedScore" },
+      { key: "move", label: "MOVE", scoreFn: shortMoveScore, scoreFnName: "shortMoveScore" },
+    ],
+    2,
+  )
+
+  const midDbg = buildAvgHorizonScoreDebug(
+    panicData,
+    [
+      { key: "highYield", label: "HY OAS", scoreFn: midHyScore, scoreFnName: "midHyScore" },
+      { key: "bofa", label: "BofA", scoreFn: midBofaScore, scoreFnName: "midBofaScore" },
+      { key: "gsBullBear", label: "GS B/B", scoreFn: midGsScore, scoreFnName: "midGsScore" },
+      { key: "move", label: "MOVE", scoreFn: midMoveScore, scoreFnName: "midMoveScore" },
+    ],
+    2,
+  )
+
+  const longDbg = buildLongHorizonScoreDebug(panicData)
+
+  const rawShortScore = shortDbg.hasEnoughMetrics ? shortDbg.rawRounded : null
+  const rawMidScore = midDbg.hasEnoughMetrics ? midDbg.rawRounded : null
+  const rawLongScore = longDbg.hasEnoughMetrics ? longDbg.rawRounded : null
+  const rawTacticalScore = rawMidScore ?? rawShortScore
+  const rawWatchScore = rawTacticalScore
+
+  const tacticalReuse = {
+    formula: "scoreByHorizon.mid ?? scoreByHorizon.short",
+    usesMid: rawMidScore != null,
+    usesShortFallback: rawMidScore == null && rawShortScore != null,
+    sameAsMid: rawTacticalScore != null && rawTacticalScore === rawMidScore,
+    sameAsShort: rawTacticalScore != null && rawTacticalScore === rawShortScore,
+    sameAsLong: rawTacticalScore != null && rawTacticalScore === rawLongScore,
+    allFourIdentical:
+      rawShortScore != null &&
+      rawShortScore === rawMidScore &&
+      rawShortScore === rawLongScore &&
+      rawShortScore === rawTacticalScore,
+    spread:
+      [rawShortScore, rawMidScore, rawLongScore, rawTacticalScore].filter(Number.isFinite).length >= 2
+        ? Math.max(...[rawShortScore, rawMidScore, rawLongScore, rawTacticalScore].filter(Number.isFinite)) -
+          Math.min(...[rawShortScore, rawMidScore, rawLongScore, rawTacticalScore].filter(Number.isFinite))
+        : null,
+  }
+
+  return {
+    rawShortScore,
+    rawMidScore,
+    rawLongScore,
+    rawWatchScore,
+    rawTacticalScore,
+    source: {
+      short: {
+        metrics: shortDbg.metricsUsed,
+        components: shortDbg.components,
+        componentScores: shortDbg.componentScores,
+      },
+      mid: {
+        metrics: midDbg.metricsUsed,
+        components: midDbg.components,
+        componentScores: midDbg.componentScores,
+      },
+      long: {
+        metrics: longDbg.metricsUsed,
+        coreComponents: longDbg.coreComponents,
+        tailComponents: longDbg.tailComponents,
+        coreRounded: longDbg.coreRounded,
+        tailRounded: longDbg.tailRounded,
+      },
+      tactical: {
+        note: "실전 카드 — 별도 엔진 없음",
+        reusedFrom: rawMidScore != null ? "mid" : rawShortScore != null ? "short" : "none",
+        metrics: rawMidScore != null ? midDbg.metricsUsed : shortDbg.metricsUsed,
+      },
+    },
+    normalization: {
+      short: shortDbg.normalization,
+      mid: midDbg.normalization,
+      long: longDbg.normalization,
+      tactical: "mid ?? short (no Math.round re-applied)",
+    },
+    clamp: {
+      short: shortDbg.clamp,
+      mid: midDbg.clamp,
+      long: longDbg.clamp,
+      tactical: { horizonFinalScore: { applied: false, formula: "inherits mid/short (no extra clamp)" } },
+    },
+    tacticalReuse,
+    computeMarketTimingScores: (() => {
+      const timing = computeMarketTiming(panicData)
+      if (!timing) return null
+      return {
+        short: timing.short?.score ?? null,
+        mid: timing.mid?.score ?? null,
+        long: timing.long?.score ?? null,
+        shortIsPlaceholder: timing.short?.status === "데이터 부족",
+        midIsPlaceholder: timing.mid?.status === "데이터 부족",
+        longIsPlaceholder: timing.long?.status === "데이터 부족",
+      }
+    })(),
+  }
+}
+
 /** @param {object | null | undefined} panicData @returns {MarketTimingGuide | null} */
 export function computeMarketTiming(panicData) {
   if (!panicData || typeof panicData !== "object") return null

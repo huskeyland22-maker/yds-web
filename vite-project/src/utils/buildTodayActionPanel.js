@@ -6,6 +6,7 @@ import { buildRecommendationEngine } from "./buildRecommendationEngine.js"
 import { buildScoreExplainLayer } from "./buildScoreExplainLayer.js"
 import { PANIC_TACTICAL_CARD_ACTIONS_COMPACT } from "./panicTacticalCardCopy.js"
 import { buildTacticalScoreBottomLine } from "./tacticalScoreInterpretation.js"
+import { logTacticalHudScoreDebug } from "./tacticalHudScoreDebug.js"
 
 /**
  * @typedef {{
@@ -89,9 +90,17 @@ export function buildTodayActionPanel({
     }
   }
 
+  const tacticalCards = buildTacticalCards(rec.practical, explainLayer.horizons)
+
+  logTacticalHudScoreDebug({
+    panicData,
+    horizons: explainLayer.horizons,
+    tacticalCards,
+  })
+
   return {
     ready: true,
-    tacticalCards: buildTacticalCards(rec.practical, explainLayer.horizons),
+    tacticalCards,
     explainLayer,
   }
 }
