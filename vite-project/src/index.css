@@ -1691,6 +1691,10 @@
     box-sizing: border-box;
   }
 
+  .tactical-hud__head {
+    margin-bottom: 6px;
+  }
+
   .tactical-hud__placeholder {
     padding: 10px 12px;
     font-size: 11px;

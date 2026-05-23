@@ -3,6 +3,15 @@ import { buildTodayActionPanel } from "../utils/buildTodayActionPanel.js"
 import { TACTICAL_SCORE_LEGEND } from "../utils/tacticalScoreInterpretation.js"
 import ActionEvidenceSection from "./ActionEvidenceSection.jsx"
 
+function TacticalHudSectionHead() {
+  return (
+    <header className="tactical-hud__head border-l-2 border-cyan-400/45 pl-2 text-left">
+      <p className="m-0 text-[11px] font-bold text-slate-100">투자 전략 엔진</p>
+      <p className="m-0 mt-0.5 text-[9px] text-slate-500">단기 · 중기 · 장기 · 실전 판단</p>
+    </header>
+  )
+}
+
 /**
  * @param {{
  *   panicData?: object | null
@@ -27,14 +36,16 @@ export default function TodayActionPanel({
 
   if (!model.ready) {
     return (
-      <section className="tactical-hud" aria-label="전술 HUD">
+      <section className="tactical-hud" aria-label="투자 전략 엔진">
+        <TacticalHudSectionHead />
         <p className="m-0 tactical-hud__placeholder">Cycle·패닉 입력 후 전술 HUD 생성</p>
       </section>
     )
   }
 
   return (
-    <section className="tactical-hud" aria-label="전술 HUD">
+    <section className="tactical-hud" aria-label="투자 전략 엔진">
+      <TacticalHudSectionHead />
       <div className="tactical-hud__row">
         {model.tacticalCards.map((card) => {
           const isSelected = selectedId === card.id
