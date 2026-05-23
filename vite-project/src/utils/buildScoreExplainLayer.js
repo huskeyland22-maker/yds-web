@@ -270,7 +270,7 @@ export function buildScoreExplainLayer({
     return { ready: false, horizons: [], bondAuxiliary: [], blend: SCORE_BLEND }
   }
 
-  const timing = computeMarketTiming(panicData)
+  const timing = computeMarketTiming(panicData, snapshot)
   if (!timing) {
     return { ready: false, horizons: [], bondAuxiliary: [], blend: SCORE_BLEND }
   }

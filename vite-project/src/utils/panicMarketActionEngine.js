@@ -132,6 +132,12 @@ export function pickMetricValue(panicData, key) {
   if (!panicData) return null
   if (key === "highYield") return num(panicData.highYield ?? panicData.hyOas)
   if (key === "gsBullBear") return num(panicData.gsBullBear ?? panicData.gsSentiment)
+  if (key === "ndxDistance") return num(panicData.ndxDistance ?? panicData.ndx_distance)
+  if (key === "soxxDistance") return num(panicData.soxxDistance ?? panicData.soxx_distance)
+  if (key === "vvix") return num(panicData.vvix)
+  if (key === "dxy") return num(panicData.dxy)
+  if (key === "us10y") return num(panicData.us10y ?? panicData.US10Y)
+  if (key === "us30y") return num(panicData.us30y ?? panicData.US30Y)
   return num(panicData[key])
 }
 

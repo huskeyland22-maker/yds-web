@@ -6,12 +6,18 @@ import { buildTacticalHudTimingScoreDebug } from "./panicMarketTimingEngine.js"
 /**
  * @param {{
  *   panicData?: object | null
+ *   snapshot?: import("../macro-risk/engine.js").MacroRiskSnapshot | null
  *   horizons?: { horizon: string; score: number }[]
  *   tacticalCards?: { id: string; period: string; score: number | null }[]
  * }} ctx
  */
-export function logTacticalHudScoreDebug({ panicData = null, horizons = [], tacticalCards = [] }) {
-  const timing = buildTacticalHudTimingScoreDebug(panicData)
+export function logTacticalHudScoreDebug({
+  panicData = null,
+  snapshot = null,
+  horizons = [],
+  tacticalCards = [],
+}) {
+  const timing = buildTacticalHudTimingScoreDebug(panicData, snapshot)
 
   const horizonScores = Object.fromEntries(horizons.map((h) => [h.horizon, h.score]))
   const cardScores = Object.fromEntries(tacticalCards.map((c) => [c.id, c.score]))
@@ -25,7 +31,7 @@ export function logTacticalHudScoreDebug({ panicData = null, horizons = [], tact
     source: timing.source,
     normalization: timing.normalization,
     clamp: timing.clamp,
-    tacticalReuse: timing.tacticalReuse,
+    scoreSpread: timing.scoreSpread,
     explainLayerHorizonScores: horizonScores,
     cardDisplayedScores: cardScores,
     computeMarketTimingScores: timing.computeMarketTimingScores,

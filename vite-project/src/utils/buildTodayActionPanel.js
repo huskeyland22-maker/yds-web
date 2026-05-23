@@ -6,6 +6,7 @@ import { buildRecommendationEngine } from "./buildRecommendationEngine.js"
 import { buildScoreExplainLayer } from "./buildScoreExplainLayer.js"
 import { PANIC_TACTICAL_CARD_ACTIONS_COMPACT } from "./panicTacticalCardCopy.js"
 import { buildTacticalScoreBottomLine } from "./tacticalScoreInterpretation.js"
+import { computeTacticalTiming } from "./panicTacticalTimingEngine.js"
 import { logTacticalHudScoreDebug } from "./tacticalHudScoreDebug.js"
 
 /**
@@ -48,10 +49,9 @@ function withScoreInterpretation(cardId, period, action, score) {
   }
 }
 
-function buildTacticalCards(_practical, horizons) {
+function buildTacticalCards(_practical, horizons, tacticalScore) {
   const scoreByHorizon = Object.fromEntries(horizons.map((h) => [h.horizon, h.score]))
   const a = PANIC_TACTICAL_CARD_ACTIONS_COMPACT
-  const tacticalScore = scoreByHorizon.mid ?? scoreByHorizon.short ?? null
 
   return [
     withScoreInterpretation("short", "단기", a.short, scoreByHorizon.short),
@@ -90,10 +90,16 @@ export function buildTodayActionPanel({
     }
   }
 
-  const tacticalCards = buildTacticalCards(rec.practical, explainLayer.horizons)
+  const tacticalSignal = computeTacticalTiming(panicData)
+  const tacticalCards = buildTacticalCards(
+    rec.practical,
+    explainLayer.horizons,
+    tacticalSignal?.score ?? null,
+  )
 
   logTacticalHudScoreDebug({
     panicData,
+    snapshot,
     horizons: explainLayer.horizons,
     tacticalCards,
   })

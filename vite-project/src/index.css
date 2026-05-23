@@ -1825,6 +1825,31 @@
     color: rgba(251, 191, 36, 0.98);
   }
 
+  .tactical-hud__score[data-band="danger"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="danger"] .tactical-hud__score-dir {
+    color: rgba(251, 113, 133, 0.96);
+  }
+
+  .tactical-hud__score[data-band="caution"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="caution"] .tactical-hud__score-dir {
+    color: rgba(251, 146, 60, 0.96);
+  }
+
+  .tactical-hud__score[data-band="hold"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="hold"] .tactical-hud__score-dir {
+    color: rgba(203, 213, 225, 0.96);
+  }
+
+  .tactical-hud__score[data-band="maintain"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="maintain"] .tactical-hud__score-dir {
+    color: rgba(52, 211, 153, 0.96);
+  }
+
+  .tactical-hud__score[data-band="strongInterest"] .tactical-hud__score-num,
+  .tactical-hud__score[data-band="strongInterest"] .tactical-hud__score-dir {
+    color: rgba(251, 191, 36, 0.98);
+  }
+
   .tactical-hud__footer {
     margin-top: 6px;
   }

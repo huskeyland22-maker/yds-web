@@ -2,6 +2,15 @@
  * 9대 패닉지표 → 단기 / 중기 / 장기 타점 (0~100 점수 + 행동)
  */
 import { pickMetricValue } from "./panicMarketActionEngine.js"
+import {
+  compositeRatesInterestScore,
+  dxyInterestScore,
+  liquidityInterestScore,
+  pickDxyValue,
+  pickUs10yValue,
+  us10yInterestScore,
+} from "./macroTimingAuxScores.js"
+import { buildTacticalTimingScoreDebug } from "./panicTacticalTimingEngine.js"
 
 /** @typedef {"short" | "mid" | "long"} TimingHorizon */
 
@@ -693,30 +702,38 @@ function buildMidMeta(data, score, resolved) {
   }
 }
 
-/** @param {object} data */
-function computeMidTiming(data) {
+/**
+ * @param {object} data
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null | undefined} snapshot
+ */
+function computeMidTiming(data, snapshot) {
   const scores = []
   const used = []
   const hy = pickMetricValue(data, "highYield")
-  const bofa = pickMetricValue(data, "bofa")
-  const gs = pickMetricValue(data, "gsBullBear")
+  const dxy = pickDxyValue(data)
   const move = pickMetricValue(data, "move")
+  const y10 = pickUs10yValue(data, snapshot)
+  const liq = liquidityInterestScore(snapshot)
 
   if (hy != null) {
     scores.push(midHyScore(hy))
     used.push("HY OAS")
   }
-  if (bofa != null) {
-    scores.push(midBofaScore(bofa))
-    used.push("BofA")
-  }
-  if (gs != null) {
-    scores.push(midGsScore(gs))
-    used.push("GS B/B")
+  if (dxy != null) {
+    scores.push(dxyInterestScore(dxy))
+    used.push("DXY")
   }
   if (move != null) {
     scores.push(midMoveScore(move))
     used.push("MOVE")
+  }
+  if (y10 != null) {
+    scores.push(us10yInterestScore(y10))
+    used.push("10Y")
+  }
+  if (liq != null) {
+    scores.push(liq)
+    used.push("유동성")
   }
   if (scores.length < 2) return null
 
@@ -950,23 +967,47 @@ function weightedLongScore(data, defs) {
   return { score: Math.round(sum / wSum), used }
 }
 
-/** @param {object} data */
-function computeLongTiming(data) {
-  const core = weightedLongScore(data, LONG_CORE_WEIGHTS)
-  if (!core.score || core.used.length < 3) return null
+/**
+ * @param {object} data
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null | undefined} snapshot
+ */
+function computeLongTiming(data, snapshot) {
+  const scores = []
+  const used = []
+  const gs = pickMetricValue(data, "gsBullBear")
+  const bofa = pickMetricValue(data, "bofa")
+  const hy = pickMetricValue(data, "highYield")
+  const dxy = pickDxyValue(data)
+  const liq = liquidityInterestScore(snapshot)
+  const rates = compositeRatesInterestScore(data, snapshot)
 
-  let score = core.score
-  const used = [...core.used]
-
-  const hasFullCore = core.used.length >= 5
-  if (hasFullCore) {
-    const tail = weightedLongScore(data, LONG_TAIL_WEIGHTS)
-    if (tail.score != null && tail.used.length > 0) {
-      score = Math.round(score * 0.95 + tail.score * 0.05)
-      used.push(...tail.used.map((l) => `${l}*`))
-    }
+  if (gs != null) {
+    scores.push(longGsScore(gs))
+    used.push("GS B/B")
   }
+  if (bofa != null) {
+    scores.push(longBofaScore(bofa))
+    used.push("BofA")
+  }
+  if (hy != null) {
+    scores.push(longHyScore(hy))
+    used.push("HY OAS")
+  }
+  if (dxy != null) {
+    scores.push(dxyInterestScore(dxy))
+    used.push("DXY")
+  }
+  if (liq != null) {
+    scores.push(liq)
+    used.push("유동성")
+  }
+  if (rates != null) {
+    scores.push(rates)
+    used.push("금리")
+  }
+  if (scores.length < 3) return null
 
+  const score = Math.round(avg(scores))
   const resolved = resolveLongAction(score)
   const meta = buildLongMeta(data, score, resolved)
 
@@ -1119,10 +1160,64 @@ function buildLongHorizonScoreDebug(data) {
 }
 
 /**
+ * @param {object} data
+ * @param {{
+ *   key?: string
+ *   label: string
+ *   scoreFn: (v: number) => number
+ *   scoreFnName: string
+ *   getRaw?: (data: object, snapshot: import("../macro-risk/engine.js").MacroRiskSnapshot | null | undefined) => number | null
+ * }[]} defs
+ * @param {number} minComponents
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null | undefined} snapshot
+ */
+function buildAvgHorizonScoreDebugEx(data, defs, minComponents, snapshot = null) {
+  /** @type {{ key: string; label: string; rawValue: number; componentScore: number; scoreFnName: string }[]} */
+  const components = []
+  for (const def of defs) {
+    const rawValue = def.getRaw ? def.getRaw(data, snapshot) : pickMetricValue(data, def.key ?? "")
+    if (rawValue == null) continue
+    components.push({
+      key: def.key ?? def.label,
+      label: def.label,
+      rawValue,
+      componentScore: def.scoreFn(rawValue),
+      scoreFnName: def.scoreFnName,
+    })
+  }
+  const componentScores = components.map((c) => c.componentScore)
+  const rawAvg = avg(componentScores)
+  const rawRounded = rawAvg != null ? Math.round(rawAvg) : null
+
+  return {
+    metricsUsed: components.map((c) => c.label),
+    components,
+    componentScores,
+    rawAvg,
+    rawRounded,
+    minComponentsRequired: minComponents,
+    hasEnoughMetrics: componentScores.length >= minComponents,
+    normalization: "Math.round(avg(componentScores))",
+    clamp: {
+      horizonFinalScore: { applied: false, formula: "none" },
+      componentScores: {
+        applied: true,
+        formula: "piecewise lookup / macro aux → 0–100 tiers",
+      },
+      allocationTiltOnly: {
+        applied: true,
+        formula: "clamp((score - 50) / 50, -1, 1) in scoreTilt() — allocation only",
+      },
+    },
+  }
+}
+
+/**
  * 전술 HUD — 단·중·장·실전 점수 디버그 (콘솔용)
  * @param {object | null | undefined} panicData
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null | undefined} [snapshot]
  */
-export function buildTacticalHudTimingScoreDebug(panicData) {
+export function buildTacticalHudTimingScoreDebug(panicData, snapshot = null) {
   if (!panicData || typeof panicData !== "object") {
     return {
       rawShortScore: null,
@@ -1133,7 +1228,6 @@ export function buildTacticalHudTimingScoreDebug(panicData) {
       source: null,
       normalization: null,
       clamp: null,
-      tacticalReuse: null,
     }
   }
 
@@ -1148,43 +1242,75 @@ export function buildTacticalHudTimingScoreDebug(panicData) {
     2,
   )
 
-  const midDbg = buildAvgHorizonScoreDebug(
+  const midDbg = buildAvgHorizonScoreDebugEx(
     panicData,
     [
       { key: "highYield", label: "HY OAS", scoreFn: midHyScore, scoreFnName: "midHyScore" },
-      { key: "bofa", label: "BofA", scoreFn: midBofaScore, scoreFnName: "midBofaScore" },
-      { key: "gsBullBear", label: "GS B/B", scoreFn: midGsScore, scoreFnName: "midGsScore" },
+      {
+        key: "dxy",
+        label: "DXY",
+        scoreFn: dxyInterestScore,
+        scoreFnName: "dxyInterestScore",
+        getRaw: (d) => pickDxyValue(d),
+      },
       { key: "move", label: "MOVE", scoreFn: midMoveScore, scoreFnName: "midMoveScore" },
+      {
+        key: "us10y",
+        label: "10Y",
+        scoreFn: us10yInterestScore,
+        scoreFnName: "us10yInterestScore",
+        getRaw: (d, s) => pickUs10yValue(d, s),
+      },
+      {
+        label: "유동성",
+        scoreFn: (v) => v,
+        scoreFnName: "liquidityInterestScore",
+        getRaw: (_d, s) => liquidityInterestScore(s),
+      },
     ],
     2,
+    snapshot,
   )
 
-  const longDbg = buildLongHorizonScoreDebug(panicData)
+  const longDbg = buildAvgHorizonScoreDebugEx(
+    panicData,
+    [
+      { key: "gsBullBear", label: "GS B/B", scoreFn: longGsScore, scoreFnName: "longGsScore" },
+      { key: "bofa", label: "BofA", scoreFn: longBofaScore, scoreFnName: "longBofaScore" },
+      { key: "highYield", label: "HY OAS", scoreFn: longHyScore, scoreFnName: "longHyScore" },
+      {
+        key: "dxy",
+        label: "DXY",
+        scoreFn: dxyInterestScore,
+        scoreFnName: "dxyInterestScore",
+        getRaw: (d) => pickDxyValue(d),
+      },
+      {
+        label: "유동성",
+        scoreFn: (v) => v,
+        scoreFnName: "liquidityInterestScore",
+        getRaw: (_d, s) => liquidityInterestScore(s),
+      },
+      {
+        label: "금리",
+        scoreFn: (v) => v,
+        scoreFnName: "compositeRatesInterestScore",
+        getRaw: (d, s) => compositeRatesInterestScore(d, s),
+      },
+    ],
+    3,
+    snapshot,
+  )
+
+  const tacticalDbg = buildTacticalTimingScoreDebug(panicData)
 
   const rawShortScore = shortDbg.hasEnoughMetrics ? shortDbg.rawRounded : null
   const rawMidScore = midDbg.hasEnoughMetrics ? midDbg.rawRounded : null
   const rawLongScore = longDbg.hasEnoughMetrics ? longDbg.rawRounded : null
-  const rawTacticalScore = rawMidScore ?? rawShortScore
+  const rawTacticalScore = tacticalDbg.rawTacticalScore
   const rawWatchScore = rawTacticalScore
 
-  const tacticalReuse = {
-    formula: "scoreByHorizon.mid ?? scoreByHorizon.short",
-    usesMid: rawMidScore != null,
-    usesShortFallback: rawMidScore == null && rawShortScore != null,
-    sameAsMid: rawTacticalScore != null && rawTacticalScore === rawMidScore,
-    sameAsShort: rawTacticalScore != null && rawTacticalScore === rawShortScore,
-    sameAsLong: rawTacticalScore != null && rawTacticalScore === rawLongScore,
-    allFourIdentical:
-      rawShortScore != null &&
-      rawShortScore === rawMidScore &&
-      rawShortScore === rawLongScore &&
-      rawShortScore === rawTacticalScore,
-    spread:
-      [rawShortScore, rawMidScore, rawLongScore, rawTacticalScore].filter(Number.isFinite).length >= 2
-        ? Math.max(...[rawShortScore, rawMidScore, rawLongScore, rawTacticalScore].filter(Number.isFinite)) -
-          Math.min(...[rawShortScore, rawMidScore, rawLongScore, rawTacticalScore].filter(Number.isFinite))
-        : null,
-  }
+  const scores = [rawShortScore, rawMidScore, rawLongScore, rawTacticalScore].filter(Number.isFinite)
 
   return {
     rawShortScore,
@@ -1205,32 +1331,26 @@ export function buildTacticalHudTimingScoreDebug(panicData) {
       },
       long: {
         metrics: longDbg.metricsUsed,
-        coreComponents: longDbg.coreComponents,
-        tailComponents: longDbg.tailComponents,
-        coreRounded: longDbg.coreRounded,
-        tailRounded: longDbg.tailRounded,
+        components: longDbg.components,
+        componentScores: longDbg.componentScores,
       },
-      tactical: {
-        note: "실전 카드 — 별도 엔진 없음",
-        reusedFrom: rawMidScore != null ? "mid" : rawShortScore != null ? "short" : "none",
-        metrics: rawMidScore != null ? midDbg.metricsUsed : shortDbg.metricsUsed,
-      },
+      tactical: tacticalDbg.source,
     },
     normalization: {
       short: shortDbg.normalization,
       mid: midDbg.normalization,
       long: longDbg.normalization,
-      tactical: "mid ?? short (no Math.round re-applied)",
+      tactical: tacticalDbg.normalization,
     },
     clamp: {
       short: shortDbg.clamp,
       mid: midDbg.clamp,
       long: longDbg.clamp,
-      tactical: { horizonFinalScore: { applied: false, formula: "inherits mid/short (no extra clamp)" } },
+      tactical: tacticalDbg.clamp,
     },
-    tacticalReuse,
+    scoreSpread: scores.length >= 2 ? Math.max(...scores) - Math.min(...scores) : null,
     computeMarketTimingScores: (() => {
-      const timing = computeMarketTiming(panicData)
+      const timing = computeMarketTiming(panicData, snapshot)
       if (!timing) return null
       return {
         short: timing.short?.score ?? null,
@@ -1244,13 +1364,17 @@ export function buildTacticalHudTimingScoreDebug(panicData) {
   }
 }
 
-/** @param {object | null | undefined} panicData @returns {MarketTimingGuide | null} */
-export function computeMarketTiming(panicData) {
+/**
+ * @param {object | null | undefined} panicData
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null | undefined} [snapshot]
+ * @returns {MarketTimingGuide | null}
+ */
+export function computeMarketTiming(panicData, snapshot = null) {
   if (!panicData || typeof panicData !== "object") return null
 
   const short = computeShortTiming(panicData)
-  const mid = computeMidTiming(panicData)
-  const long = computeLongTiming(panicData)
+  const mid = computeMidTiming(panicData, snapshot)
+  const long = computeLongTiming(panicData, snapshot)
 
   if (!short && !mid && !long) return null
 
