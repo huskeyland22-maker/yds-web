@@ -4,7 +4,7 @@
 import { formatChartAxisMd } from "../utils/chartDateFormat.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
-import { resolveMacroRegime } from "./panicMacroRegime.js"
+import { resolvePanicV2Status } from "./panicV2Status.js"
 import { rowToPanicV2Input } from "./panicV2History.js"
 
 /** @param {object} row */
@@ -31,7 +31,7 @@ export function buildPanicV1HistoryChartData(history) {
       const score = panicV1ScoreForRow(row)
       if (score == null) return null
       const date = String(row.date ?? "").slice(0, 10)
-      const regime = resolveMacroRegime(score)
+      const regime = resolvePanicV2Status(score)
       return {
         date,
         axisLabel: formatChartAxisMd(date),

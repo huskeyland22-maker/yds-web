@@ -1,7 +1,6 @@
 /**
  * 히스토리 차트 구간선 (극단·중립 밴드)
  */
-import { macroRegimeZoneBands } from "../panic-v2/panicMacroRegime.js"
 import { MOOD_SPECTRUM } from "./panicDeskMood.js"
 
 /** @typedef {{ y?: number; y1: number; y2: number; label: string; color: string; area?: boolean }} MetricZoneBand */
@@ -29,10 +28,7 @@ const PANIC_SCORE_ZONE_BANDS = [
 
 /** @param {string} metricKey @returns {MetricZoneBand[]} */
 export function metricZoneBands(metricKey) {
-  if (metricKey === "panicV1") {
-    return macroRegimeZoneBands()
-  }
-  if (metricKey === "panicV2") {
+  if (metricKey === "panicV2" || metricKey === "panicV1") {
     return PANIC_SCORE_ZONE_BANDS
   }
   if (metricKey === "fearGreed") {

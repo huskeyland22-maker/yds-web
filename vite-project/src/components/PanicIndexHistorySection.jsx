@@ -5,7 +5,11 @@ import {
   enrichChartDataWithMacroRegime,
   markMacroRegimeChangePoints,
 } from "../panic-v2/panicMacroRegimeHistory.js"
-import { resolveMacroRegime } from "../panic-v2/panicMacroRegime.js"
+import {
+  resolveMacroMarketStatus,
+  resolveTacticalActionStatus,
+} from "../panic-v2/panicEngineStatusUi.js"
+import { computeTacticalTiming } from "../utils/panicTacticalTimingEngine.js"
 import { buildTacticalTradeEventLog, attachTradeEventsToChartData } from "../panic-v2/panicTacticalTradeEvents.js"
 import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
@@ -28,7 +32,6 @@ import {
   buildPanicV2ChartData,
   resolveLatestPanicV2HistoryScore,
 } from "../panic-v2/panicV2LatestScore.js"
-import { resolvePanicV2Status } from "../panic-v2/panicV2Status.js"
 import { resolvePanicHistoryUiState } from "../utils/panicHistoryUiState.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { countPanicV2ScoredRows } from "../utils/panicHistoryV2Merge.js"
@@ -36,6 +39,11 @@ import { isPanicHubEnabled } from "../config/api.js"
 import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
 import PanicChartEventStrip from "./panic-history/PanicChartEventStrip.jsx"
 import PanicEngineHistoryLog from "./panic-history/PanicEngineHistoryLog.jsx"
+import PanicEngineStatusPanel, {
+  MACRO_MARKET_STATUS_BAR,
+  TACTICAL_ACTION_STATUS_BAR,
+  resolveStatusBarIndex,
+} from "./panic-history/PanicEngineStatusPanel.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
 const HISTORY_CHART_HEIGHT = 220
@@ -173,7 +181,40 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return last ? panicV1ScoreForRow(last) : null
   }, [history])
 
-  const currentMacroRegime = useMemo(() => resolveMacroRegime(latestV1Score), [latestV1Score])
+  const macroMarketStatus = useMemo(() => resolveMacroMarketStatus(latestV1Score), [latestV1Score])
+  const macroBarIndex = useMemo(
+    () => resolveStatusBarIndex(latestV1Score, MACRO_MARKET_STATUS_BAR),
+    [latestV1Score],
+  )
+
+  const latestHistoryRow = useMemo(() => {
+    if (!history.length) return null
+    const rows = [...history].filter((r) => r?.date)
+    return rows.length ? rows[rows.length - 1] : null
+  }, [history])
+
+  const prevHistoryRow = useMemo(() => {
+    if (!history.length) return null
+    const rows = [...history].filter((r) => r?.date)
+    return rows.length >= 2 ? rows[rows.length - 2] : null
+  }, [history])
+
+  const tacticalInterestScore = useMemo(() => {
+    if (!latestHistoryRow) return null
+    return computeTacticalTiming(latestHistoryRow)?.score ?? null
+  }, [latestHistoryRow])
+
+  const prevTacticalInterestScore = useMemo(() => {
+    if (!prevHistoryRow) return null
+    return computeTacticalTiming(prevHistoryRow)?.score ?? null
+  }, [prevHistoryRow])
+
+  const tacticalActionStatus = useMemo(
+    () => resolveTacticalActionStatus(tacticalInterestScore, prevTacticalInterestScore),
+    [tacticalInterestScore, prevTacticalInterestScore],
+  )
+
+  const tacticalBarIndex = tacticalActionStatus?.barIndex ?? 0
 
   const panicV2Count = useMemo(() => countPanicV2ScoredRows(history), [history])
 
@@ -199,18 +240,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           : "데이터 준비중"
         : uiState.currentText ??
           (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
-  const latestTacticalEvent = tacticalEventLog.length ? tacticalEventLog[tacticalEventLog.length - 1] : null
-
-  const headerStatusLabel =
-    activeHistoryTab === "panicV2"
-      ? (latestTacticalEvent?.eventLabel ?? resolvePanicV2Status(currentPanicV2Score)?.label ?? "—")
-      : activeHistoryTab === "panicV1"
-        ? (currentMacroRegime?.label ?? "—")
-        : uiState.statusLabel ??
-          (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel)
-
-  const headerStatusPrefix =
-    activeHistoryTab === "panicV1" ? "현재" : activeHistoryTab === "panicV2" ? "상태" : null
 
   const showHistoryLoading = history.length === 0
   const showChart =
@@ -359,24 +388,26 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       ) : null}
 
       {isPanicScoreTab ? (
-        <div className="panic-history-v2-compact mt-1.5 flex flex-wrap items-center justify-between gap-2 rounded-md border border-white/[0.06] bg-black/25 px-2 py-1.5">
-          <div>
-            <span className="text-[8px] font-semibold uppercase text-slate-500">현재</span>
-            <p className="m-0 font-mono text-[18px] font-bold tabular-nums text-cyan-100">
-              {headerCurrentText}
-            </p>
-          </div>
-          <span
-            className={[
-              "rounded-full border px-2 py-0.5 text-[10px] font-bold",
-              activeHistoryTab === "panicV1"
-                ? "panic-history-status-badge--macro"
-                : "border-cyan-500/30 bg-cyan-500/10 text-cyan-100",
-            ].join(" ")}
-          >
-            {headerStatusPrefix ? `${headerStatusPrefix}: ` : ""}
-            {headerStatusLabel}
-          </span>
+        <div className="mt-1.5">
+          {activeHistoryTab === "panicV1" ? (
+            <PanicEngineStatusPanel
+              variant="macro"
+              score={headerCurrentText}
+              scoreLabel="거시"
+              status={macroMarketStatus}
+              barSegments={MACRO_MARKET_STATUS_BAR}
+              activeBarIndex={macroBarIndex}
+            />
+          ) : (
+            <PanicEngineStatusPanel
+              variant="tactical"
+              score={headerCurrentText}
+              scoreLabel="실전"
+              status={tacticalActionStatus}
+              barSegments={TACTICAL_ACTION_STATUS_BAR}
+              activeBarIndex={tacticalBarIndex}
+            />
+          )}
         </div>
       ) : (
         <PanicHistoryInsightPanel
