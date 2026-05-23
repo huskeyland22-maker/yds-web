@@ -52,8 +52,21 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
   const [rangeId, setRangeId] = useState("6M")
   const [v2DetailMetric, setV2DetailMetric] = useState(null)
+  const [auxMetricsOpen, setAuxMetricsOpen] = useState(false)
 
   const isPanicScoreTab = activeHistoryTab === "panicV2" || activeHistoryTab === "panicV1"
+  const isAuxHistoryTab = HISTORY_AUX_METRICS.some((m) => m.key === activeHistoryTab)
+
+  const toggleAuxMetrics = () => {
+    setAuxMetricsOpen((open) => {
+      const next = !open
+      if (!next && isAuxHistoryTab) {
+        setActiveHistoryTab("panicV2")
+        setV2DetailMetric(null)
+      }
+      return next
+    })
+  }
 
   const metric = useMemo(
     () => HISTORY_TAB_METRICS.find((m) => m.key === activeHistoryTab) ?? PANIC_V2_HISTORY_TAB,
@@ -211,28 +224,47 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             {metricCounts.panicV1 ?? 0}
           </span>
         </button>
-        <span className="panic-history-tabs__divider text-[8px] text-slate-600">보조</span>
-        {HISTORY_AUX_METRICS.map((m) => {
-          const n = metricCounts[m.key] ?? 0
-          const active = activeHistoryTab === m.key
-          return (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => setActiveHistoryTab(m.key)}
-              className={[
-                "panic-history-tab panic-history-tab--aux inline-flex max-w-full items-center gap-0.5 rounded-md border px-1.5 py-0.5 transition",
-                active
-                  ? "border-white/20 bg-white/10 text-slate-100"
-                  : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
-              ].join(" ")}
-              title={m.tooltip ? `${m.label} · ${n}일` : `${m.label} · ${n}일`}
-              aria-pressed={active}
-            >
-              <span className="panic-history-tab__label whitespace-nowrap text-[9px]">{m.label}</span>
-            </button>
-          )
-        })}
+        <button
+          type="button"
+          onClick={toggleAuxMetrics}
+          className={[
+            "panic-history-tab panic-history-tab--aux-toggle inline-flex max-w-full items-center rounded-md border px-1.5 py-0.5",
+            auxMetricsOpen
+              ? "border-sky-400/25 bg-sky-500/10 text-sky-100"
+              : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
+          ].join(" ")}
+          aria-expanded={auxMetricsOpen}
+          aria-controls="panic-history-aux-tabs"
+        >
+          <span className="panic-history-tab__label whitespace-nowrap text-[9px] font-semibold">
+            {auxMetricsOpen ? "보조지표 −" : "보조지표 +"}
+          </span>
+        </button>
+        {auxMetricsOpen ? (
+          <span id="panic-history-aux-tabs" className="contents">
+            {HISTORY_AUX_METRICS.map((m) => {
+              const n = metricCounts[m.key] ?? 0
+              const active = activeHistoryTab === m.key
+              return (
+                <button
+                  key={m.key}
+                  type="button"
+                  onClick={() => setActiveHistoryTab(m.key)}
+                  className={[
+                    "panic-history-tab panic-history-tab--aux inline-flex max-w-full items-center gap-0.5 rounded-md border px-1.5 py-0.5",
+                    active
+                      ? "border-white/20 bg-white/10 text-slate-100"
+                      : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
+                  ].join(" ")}
+                  title={m.tooltip ? `${m.label} · ${n}일` : `${m.label} · ${n}일`}
+                  aria-pressed={active}
+                >
+                  <span className="panic-history-tab__label whitespace-nowrap text-[9px]">{m.label}</span>
+                </button>
+              )
+            })}
+          </span>
+        ) : null}
       </div>
 
       <div className="mt-1 flex flex-wrap gap-0.5">
