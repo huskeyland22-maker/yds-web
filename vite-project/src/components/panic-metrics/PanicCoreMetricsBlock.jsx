@@ -1,8 +1,10 @@
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { useAppDataStore } from "../../store/appDataStore.js"
-import { computePanicV2 } from "../../panic-v2/index.js"
+import { resolveLatestPanicV2HistoryScore } from "../../panic-v2/panicV2LatestScore.js"
 import { resolvePanicV2Status } from "../../panic-v2/panicV2Status.js"
+import { mergeCycleRows } from "../../utils/cycleHistoryUtils.js"
 import { CORE_METRICS } from "../../utils/panicDeskMetrics.js"
+import { resolveCycleHistoryRows } from "../../utils/panicHistoryRows.js"
 import { formatMetricValue } from "../macroCycleChartUtils.js"
 import PanicMetricRow from "./PanicMetricRow.jsx"
 
@@ -19,9 +21,19 @@ const CORE_ROW_ORDER = ["vix", "fearGreed", "putCall", "highYield"]
  */
 export default function PanicCoreMetricsBlock({ panicData, historyRows = [] }) {
   const v2SyncStatus = useAppDataStore((s) => s.panicHistoryV2SyncStatus)
-  const levelV2 = useMemo(() => computePanicV2(panicData), [panicData])
+  const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
 
-  const displayScore = levelV2.score
+  const history = useMemo(
+    () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], historyRows ?? [])),
+    [storeRows, historyRows],
+  )
+
+  const latestHistoryScore = useMemo(() => resolveLatestPanicV2HistoryScore(history), [history])
+  const displayScore = latestHistoryScore
+
+  useEffect(() => {
+    console.log("[V2 CARD]", displayScore)
+  }, [displayScore])
 
   const status = useMemo(() => resolvePanicV2Status(displayScore), [displayScore])
 

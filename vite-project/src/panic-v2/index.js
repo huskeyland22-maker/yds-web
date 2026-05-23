@@ -22,3 +22,8 @@ export {
   PANIC_HISTORY_V2_STORAGE_KEY,
 } from "./panicHistoryV2Backfill.js"
 export { buildPanicV1HistoryChartData, panicV1ScoreForRow } from "./panicV1History.js"
+export {
+  buildPanicV2ChartData,
+  panicV2ValueFromRow,
+  resolveLatestPanicV2HistoryScore,
+} from "./panicV2LatestScore.js"
