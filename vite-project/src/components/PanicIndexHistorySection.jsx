@@ -16,6 +16,9 @@ import {
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
+import { resolvePanicHistoryUiState } from "../utils/panicHistoryUiState.js"
+import { countPanicV2ScoredRows } from "../utils/panicHistoryV2Merge.js"
+import { isPanicHubEnabled } from "../config/api.js"
 import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
 import PanicScoreTimeline from "./panic-history/PanicScoreTimeline.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
@@ -28,6 +31,7 @@ const HISTORY_CHART_HEIGHT = 220
 export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
+  const panicHistoryV2SyncStatus = useAppDataStore((s) => s.panicHistoryV2SyncStatus)
 
   useEffect(() => {
     void loadCycleHistoryBundle({ limit: 600, force: false })
@@ -84,7 +88,28 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return mergeInflectionsIntoChartData(base, insight.inflections)
   }, [chartPayload?.chartData, insight.inflections])
 
-  const showChart = chartRows.length > 0
+  const panicV2Count = useMemo(() => countPanicV2ScoredRows(history), [history])
+
+  const uiState = useMemo(
+    () =>
+      resolvePanicHistoryUiState({
+        historyLength: history.length,
+        panicV2Count: activeHistoryTab === "panicV2" ? panicV2Count : metricCounts.panicV2 ?? 0,
+        syncStatus: panicHistoryV2SyncStatus,
+        hubEnabled: isPanicHubEnabled(),
+      }),
+    [history.length, panicV2Count, activeHistoryTab, metricCounts.panicV2, panicHistoryV2SyncStatus],
+  )
+
+  const headerCurrentText =
+    uiState.currentText ??
+    (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
+  const headerStatusLabel =
+    uiState.statusLabel ??
+    (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel)
+
+  const showChart =
+    uiState.showChart && chartRows.length > 0 && (activeHistoryTab !== "panicV2" || panicV2Count >= 1)
 
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
@@ -182,11 +207,11 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           <div>
             <span className="text-[8px] font-semibold uppercase text-slate-500">현재</span>
             <p className="m-0 font-mono text-[18px] font-bold tabular-nums text-cyan-100">
-              {insight.header.currentText}
+              {headerCurrentText}
             </p>
           </div>
           <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-100">
-            {insight.header.statusLabel}
+            {headerStatusLabel}
           </span>
         </div>
       ) : (
@@ -230,7 +255,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           />
         ) : (
           <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
-            히스토리 없음
+            {uiState.chartMessage ?? "데이터 준비중"}
           </div>
         )}
       </div>

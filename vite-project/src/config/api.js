@@ -280,6 +280,48 @@ export async function fetchPanicIndexHistory(options = {}) {
   return json.rows
 }
 
+/** panic_history_v2 — 일별 패닉 V2 점수 */
+export async function fetchPanicHistoryV2(options = {}) {
+  if (!isPanicHubEnabled()) return []
+  const limit = options.limit ?? 600
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (options.from) params.set("from", String(options.from).slice(0, 10))
+  if (options.to) params.set("to", String(options.to).slice(0, 10))
+  const url = withNoStoreQuery(`/api/panic/history-v2?${params}`)
+  if (isDataTraceEnabled()) logFetchStart("panic-history-v2", { url })
+  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  if (!res.ok) {
+    if (isDataTraceEnabled()) logFetchFail("panic-history-v2", new Error(`HTTP ${res.status}`), { url })
+    console.warn("[YDS] fetchPanicHistoryV2 HTTP", res.status)
+    return []
+  }
+  const json = await res.json()
+  const rows = json?.ok && Array.isArray(json.rows) ? json.rows : []
+  if (json?.warning) console.warn("[YDS] fetchPanicHistoryV2 warning", json.warning)
+  if (isDataTraceEnabled()) logFetchSuccess("panic-history-v2", { rows: rows.length })
+  return rows
+}
+
+/** panic_index_history → panic_history_v2 백필 */
+export async function backfillPanicHistoryV2(options = {}) {
+  if (!isPanicHubEnabled()) return { ok: false, skipped: true, reason: "hub_disabled" }
+  const limit = options.limit ?? 600
+  const url = withNoStoreQuery(`/api/panic/history-v2/backfill?limit=${limit}`)
+  if (isDataTraceEnabled()) logFetchStart("panic-history-v2-backfill", { url })
+  const res = await fetch(url, {
+    ...LIVE_POST_JSON_INIT,
+    method: "POST",
+    body: JSON.stringify({ limit, source: options.source ?? "client" }),
+  })
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    if (isDataTraceEnabled()) logFetchFail("panic-history-v2-backfill", new Error(`HTTP ${res.status}`))
+    return { ok: false, error: `HTTP ${res.status}` }
+  }
+  if (isDataTraceEnabled()) logFetchSuccess("panic-history-v2-backfill", json)
+  return json
+}
+
 /** panic_index_history 최신 1건 — cycle 대시보드 mount·저장 직후용 */
 export async function fetchPanicIndexLatest() {
   if (!isPanicHubEnabled()) return null

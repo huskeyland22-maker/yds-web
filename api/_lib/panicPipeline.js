@@ -17,6 +17,7 @@ import {
 } from "./marketCycleHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
 import { logPanicPipelineStage } from "./panicNumeric.js"
+import { upsertPanicHistoryV2ForSnapshot } from "./panicHistoryV2Db.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
@@ -82,6 +83,22 @@ export async function persistPanicPayload(body, opts = {}) {
     const err = new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
     err.stage = "history"
     throw err
+  }
+
+  let panicHistoryV2 = { ok: false }
+  try {
+    panicHistoryV2 = await upsertPanicHistoryV2ForSnapshot(snap, { source })
+    if (!panicHistoryV2.ok && !panicHistoryV2.skipped) {
+      console.warn("[panic] panic_history_v2 save failed", panicHistoryV2)
+    } else if (panicHistoryV2.ok) {
+      console.log("[panic] panic_history_v2 saved", panicHistoryV2.date, panicHistoryV2.panic_v2)
+    }
+  } catch (err) {
+    panicHistoryV2 = {
+      ok: false,
+      error: err instanceof Error ? err.message : String(err),
+    }
+    console.warn("[panic] panic_history_v2 save error", panicHistoryV2.error)
   }
 
   let cycleHistory = { ok: false }
@@ -150,6 +167,7 @@ export async function persistPanicPayload(body, opts = {}) {
   return {
     data,
     history,
+    panicHistoryV2,
     cycleHistory,
     meta,
     rowCount: fresh?.length ?? 0,

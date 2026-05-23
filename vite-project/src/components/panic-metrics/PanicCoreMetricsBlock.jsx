@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { useAppDataStore } from "../../store/appDataStore.js"
 import { computePanicV2 } from "../../panic-v2/index.js"
 import { latestPanicV2DynamicScore } from "../../panic-v2/panicV2Dynamic.js"
 import { resolvePanicV2Status } from "../../panic-v2/panicV2Status.js"
@@ -18,6 +19,7 @@ const CORE_ROW_ORDER = ["vix", "fearGreed", "putCall", "highYield"]
  * @param {{ panicData: object | null; historyRows?: object[] }} props
  */
 export default function PanicCoreMetricsBlock({ panicData, historyRows = [] }) {
+  const v2SyncStatus = useAppDataStore((s) => s.panicHistoryV2SyncStatus)
   const levelV2 = useMemo(() => computePanicV2(panicData), [panicData])
 
   const displayScore = useMemo(() => {
@@ -47,13 +49,22 @@ export default function PanicCoreMetricsBlock({ panicData, historyRows = [] }) {
         ))}
         <PanicMetricRow
           label="패닉지수"
-          value={displayScore != null ? String(displayScore) : "—"}
+          value={
+            displayScore != null
+              ? String(displayScore)
+              : v2SyncStatus === "backfilling"
+                ? "백필중"
+                : "데이터 준비중"
+          }
           accent="#22d3ee"
           variant="highlight"
         />
         <PanicMetricRow
           label="상태"
-          value={status?.label ?? "—"}
+          value={
+            status?.label ??
+            (v2SyncStatus === "backfilling" ? "백필중" : displayScore == null ? "준비중" : "—")
+          }
           accent="#94a3b8"
           variant="highlight"
         />

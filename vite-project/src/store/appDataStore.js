@@ -5,7 +5,9 @@
 
 import { create } from "zustand"
 import {
+  backfillPanicHistoryV2,
   fetchCycleMetricsHistory,
+  fetchPanicHistoryV2,
   fetchPanicHubLatestOptional,
   fetchPanicIndexHistory,
   fetchPanicIndexLatest,
@@ -28,6 +30,10 @@ import {
   panicDeskDataFromHistory,
 } from "../utils/panicHistoryDesk.js"
 import { enrichCycleRowsWithPanicV2 } from "../panic-v2/panicHistoryV2Backfill.js"
+import {
+  countPanicV2ScoredRows,
+  mergePanicHistoryV2IntoCycleRows,
+} from "../utils/panicHistoryV2Merge.js"
 import { hasPanicMetricValues, resolveLatestMetrics } from "../utils/resolveLatestPanicMetrics.js"
 import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
@@ -75,6 +81,9 @@ export const useAppDataStore = create((set, get) => ({
   hubPanicMetrics: null,
   /** panic_index_history 최신 1건 (API raw row) */
   latestHistoryRow: null,
+  /** @type {'idle' | 'loading' | 'backfilling' | 'ready' | 'preparing'} */
+  panicHistoryV2SyncStatus: "idle",
+  panicHistoryV2RowCount: 0,
   /** resolveLatestMetrics 결과 캐시 */
   deskResolvedPanicData: null,
 
@@ -181,6 +190,57 @@ export const useAppDataStore = create((set, get) => ({
     return { purgedCycle, purgedIndex }
   },
 
+  /**
+   * panic_history_v2 API 동기화 → cycle rows 병합 (없으면 백필 시도)
+   * @param {object[]} cycleRows
+   */
+  syncPanicHistoryV2: async (cycleRows) => {
+    const base = Array.isArray(cycleRows) ? cycleRows : []
+    if (!isPanicHubEnabled() || base.length < 1) {
+      set({ panicHistoryV2SyncStatus: "preparing", panicHistoryV2RowCount: 0 })
+      return { rows: base, v2Rows: [], status: "preparing" }
+    }
+
+    set({ panicHistoryV2SyncStatus: "loading" })
+    try {
+      let v2Rows = await fetchPanicHistoryV2({ limit: 600 })
+      let v2Count = v2Rows.length
+
+      if (v2Count < 8 && base.length >= 8) {
+        set({ panicHistoryV2SyncStatus: "backfilling" })
+        const backfill = await backfillPanicHistoryV2({ limit: 600, source: "client_mount" })
+        if (backfill?.ok && !backfill?.skipped) {
+          v2Rows = await fetchPanicHistoryV2({ limit: 600 })
+          v2Count = v2Rows.length
+        }
+      }
+
+      let merged = mergePanicHistoryV2IntoCycleRows(base, v2Rows)
+      const scored = countPanicV2ScoredRows(merged)
+
+      if (scored < 8 && base.length >= 8) {
+        merged = enrichCycleRowsWithPanicV2(merged)
+      }
+
+      const finalScored = countPanicV2ScoredRows(merged)
+      const status = finalScored >= 8 ? "ready" : base.length >= 8 ? "preparing" : "preparing"
+      set({
+        panicHistoryV2SyncStatus: status,
+        panicHistoryV2RowCount: finalScored,
+      })
+      return { rows: merged, v2Rows, status }
+    } catch (e) {
+      logFetchFail("panic-history-v2-sync", e)
+      const fallback =
+        base.length >= 8 ? enrichCycleRowsWithPanicV2(base) : base
+      set({
+        panicHistoryV2SyncStatus: "preparing",
+        panicHistoryV2RowCount: countPanicV2ScoredRows(fallback),
+      })
+      return { rows: fallback, v2Rows: [], status: "preparing" }
+    }
+  },
+
   _commitCycleHistory: (rows, meta) => {
     const raw = Array.isArray(rows) ? rows : []
     const fresh = raw.length >= 8 ? enrichCycleRowsWithPanicV2(raw) : raw
@@ -261,7 +321,17 @@ export const useAppDataStore = create((set, get) => ({
     })
     if (!row) return null
     const merged = mergeCycleRows(get().cycleMetricHistory, [row])
-    get()._commitCycleHistory(merged, { source: "supabase-index-history", realtime: true })
+    void get()
+      .syncPanicHistoryV2(merged)
+      .then((v2Sync) => {
+        get()._commitCycleHistory(v2Sync?.rows ?? merged, {
+          source: "supabase-index-history",
+          realtime: true,
+        })
+      })
+      .catch(() => {
+        get()._commitCycleHistory(merged, { source: "supabase-index-history", realtime: true })
+      })
     persistHistory(panicLike, tradeDate)
     if (tradeDate) set({ deskSnapshotTradeDate: String(tradeDate).slice(0, 10) })
     return row
@@ -415,7 +485,9 @@ export const useAppDataStore = create((set, get) => ({
           panicIndexFetchedAt: t,
           lastCycleBundleError: null,
         })
-        get()._commitCycleHistory(cycleRows, { source: "supabase-index-history", realtime: true })
+        const v2Sync = await get().syncPanicHistoryV2(cycleRows)
+        const mergedWithV2 = v2Sync?.rows ?? cycleRows
+        get()._commitCycleHistory(mergedWithV2, { source: "supabase-index-history", realtime: true })
         const latestRow = hubRows.length ? hubRows[hubRows.length - 1] : null
         if (latestRow) set({ latestHistoryRow: latestRow })
         get().refreshDeskResolvedPanicData()
