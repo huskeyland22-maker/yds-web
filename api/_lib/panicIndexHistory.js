@@ -1,5 +1,12 @@
 import { supabaseRest } from "./supabaseRest.js"
 import { enrichPanicHistoryRow } from "./marketCycleCompute.js"
+import {
+  fetchPanicIndexHistoryRaw,
+  isSchemaColumnError,
+  mapPanicIndexHistoryRowToClient,
+  panicIndexHistoryDbPayloadFromNormalized,
+  pickHyFromRow,
+} from "./panicIndexHistoryColumns.js"
 import { assertPanicHistoryRowNumeric, finalizePanicHistoryRow } from "./panicNumeric.js"
 import {
   normalizePanicPayload,
@@ -25,34 +32,7 @@ export function panicIndexHistoryRowFromPayload(body, tradeDate, opts = {}) {
 }
 
 export function panicIndexHistoryRowToClient(row) {
-  if (!row || typeof row !== "object") return null
-  const dateStr = String(row.date ?? "").slice(0, 10)
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null
-  const pick = (k) => {
-    const n = Number(row[k])
-    return Number.isFinite(n) ? n : null
-  }
-  return {
-    date: dateStr,
-    vix: pick("vix"),
-    vxn: pick("vxn"),
-    fearGreed: pick("fear_greed"),
-    move: pick("move"),
-    bofa: pick("bofa"),
-    skew: pick("skew"),
-    hyOas: pick("hy_oas") ?? pick("high_yield"),
-    highYield: pick("high_yield") ?? pick("hy_oas"),
-    putCall: pick("put_call"),
-    gsSentiment: pick("gs_sentiment") ?? pick("gs_bb"),
-    gsBullBear: pick("gs_bb") ?? pick("gs_sentiment"),
-    panicScore: pick("panic_score"),
-    market_state: row.market_state ?? null,
-    marketState: row.market_state ?? null,
-    marketPhase: row.market_phase ?? null,
-    riskLevel: row.risk_level ?? null,
-    strategy: row.strategy ?? null,
-    createdAt: row.created_at ?? row.updated_at ?? null,
-  }
+  return mapPanicIndexHistoryRowToClient(row)
 }
 
 /** @param {string} tradeDate YYYY-MM-DD */
@@ -80,7 +60,7 @@ function rowHasRequiredHistoryMetrics(row) {
     vix: row.vix,
     fearGreed: row.fear_greed,
     putCall: row.put_call,
-    highYield: row.hy_oas ?? row.high_yield,
+    highYield: pickHyFromRow(row),
     bofa: row.bofa,
   }
   return snapshotHasRequiredHistoryMetrics(snap)
@@ -104,11 +84,6 @@ export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   return { ok: true, date: row.date }
 }
 
-function isSchemaColumnError(err) {
-  const msg = err instanceof Error ? err.message : String(err || "")
-  return /column|schema|does not exist|42703|PGRST204/i.test(msg)
-}
-
 /** @param {Record<string, unknown>} row */
 async function postPanicIndexHistoryRow(row, snap, previousHistoryRow) {
   let normalized = finalizePanicHistoryRow(row)
@@ -117,28 +92,7 @@ async function postPanicIndexHistoryRow(row, snap, previousHistoryRow) {
   }
   assertPanicHistoryRowNumeric(normalized)
 
-  const payload = {
-    date: normalized.date,
-    vix: normalized.vix,
-    vxn: normalized.vxn,
-    fear_greed: normalized.fear_greed,
-    put_call: normalized.put_call,
-    move: normalized.move,
-    bofa: normalized.bofa,
-    skew: normalized.skew,
-    hy_oas: normalized.hy_oas,
-    gs_sentiment: normalized.gs_sentiment,
-    high_yield: normalized.high_yield,
-    gs_bb: normalized.gs_bb,
-    market: normalized.market ?? "global",
-    source: normalized.source ?? "manual",
-    panic_score: normalized.panic_score,
-    market_phase: normalized.market_phase,
-    risk_level: normalized.risk_level,
-    strategy: normalized.strategy,
-    created_at: normalized.created_at,
-    updated_at: normalized.updated_at,
-  }
+  const payload = panicIndexHistoryDbPayloadFromNormalized(normalized)
 
   try {
     await supabaseRest("rpc/upsert_panic_index_history_fill", {
@@ -153,23 +107,23 @@ async function postPanicIndexHistoryRow(row, snap, previousHistoryRow) {
   }
 
   const core = {
-    date: normalized.date,
-    vix: normalized.vix,
-    vxn: normalized.vxn,
-    fear_greed: normalized.fear_greed,
-    move: normalized.move,
-    bofa: normalized.bofa,
-    skew: normalized.skew,
-    hy_oas: normalized.hy_oas,
-    gs_sentiment: normalized.gs_sentiment,
-    source: normalized.source ?? "manual",
-    updated_at: normalized.updated_at,
-    market: normalized.market ?? "global",
+    date: payload.date,
+    vix: payload.vix,
+    vxn: payload.vxn,
+    fear_greed: payload.fear_greed,
+    move: payload.move,
+    bofa: payload.bofa,
+    skew: payload.skew,
+    hy_oas: payload.hy_oas,
+    gs_sentiment: payload.gs_sentiment,
+    source: payload.source ?? "manual",
+    updated_at: payload.updated_at,
+    market: payload.market ?? "global",
   }
   const attempts = [
-    { ...normalized, ...payload },
-    { ...core, put_call: normalized.put_call, high_yield: normalized.high_yield, gs_bb: normalized.gs_bb },
-    { ...core, put_call: normalized.put_call },
+    payload,
+    { ...core, put_call: payload.put_call, panic_score: payload.panic_score },
+    { ...core, put_call: payload.put_call },
     core,
   ]
   let lastErr = null
@@ -222,19 +176,14 @@ export async function upsertPanicIndexHistoryBatch(entries, opts = {}) {
 /**
  * @param {{ limit?: number, from?: string, to?: string }} [opts]
  */
-/** 목록 조회 — reason/slope/metaRisk 등 실험 컬럼 제외 */
-const PANIC_HISTORY_LIST_SELECT =
-  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,high_yield,gs_bb,gs_sentiment,panic_score,updated_at,source,market"
-
 export async function fetchPanicIndexHistoryRows(opts = {}) {
   const limit = Math.min(Math.max(Number(opts.limit) || 120, 1), 500)
-  let q = `panic_index_history?select=${PANIC_HISTORY_LIST_SELECT}&order=date.desc&limit=${limit}`
+  let suffix = `order=date.desc&limit=${limit}`
   const from = opts.from ? String(opts.from).slice(0, 10) : ""
   const to = opts.to ? String(opts.to).slice(0, 10) : ""
-  if (/^\d{4}-\d{2}-\d{2}$/.test(from)) q += `&date=gte.${from}`
-  if (/^\d{4}-\d{2}-\d{2}$/.test(to)) q += `&date=lte.${to}`
-  const rows = await supabaseRest(q, { method: "GET" })
-  if (!Array.isArray(rows)) return []
+  if (/^\d{4}-\d{2}-\d{2}$/.test(from)) suffix += `&date=gte.${from}`
+  if (/^\d{4}-\d{2}-\d{2}$/.test(to)) suffix += `&date=lte.${to}`
+  const rows = await fetchPanicIndexHistoryRaw(supabaseRest, suffix)
   return rows
     .map(panicIndexHistoryRowToClient)
     .filter(Boolean)

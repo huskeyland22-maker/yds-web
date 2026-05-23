@@ -54,7 +54,7 @@ export function historyRowToMetrics(row) {
     fearGreed: row.fear_greed ?? row.fearGreed,
     bofa: row.bofa,
     putCall: row.put_call ?? row.putCall,
-    highYield: row.hy_oas ?? row.high_yield ?? row.highYield,
+    highYield: row.hy_oas ?? row.highYield ?? row.hyOas,
     updatedAt: row.updated_at,
   })
 }

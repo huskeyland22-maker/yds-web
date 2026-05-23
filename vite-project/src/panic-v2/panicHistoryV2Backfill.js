@@ -15,13 +15,44 @@ export const PANIC_HISTORY_V2_STORAGE_KEY = "yds-panic-history-v2"
  * }} PanicHistoryV2Store
  */
 
-/** @param {ReturnType<typeof buildPanicV2DynamicSeries>} series */
-export function persistPanicHistoryV2(series) {
+/** @param {ReturnType<typeof buildPanicV2DynamicSeries>} series @param {number} tradingDaysBack */
+function computeWindowChangePct(series, tradingDaysBack) {
+  const valid = series.filter((p) => p.score != null && Number.isFinite(p.score))
+  if (valid.length < 2) return null
+  const current = valid[valid.length - 1].score
+  const idx = valid.length - 1 - tradingDaysBack
+  if (idx < 0) return null
+  const base = valid[idx].score
+  if (!Number.isFinite(base) || base === 0) return null
+  return ((current - base) / Math.abs(base)) * 100
+}
+
+/**
+ * @param {ReturnType<typeof buildPanicV2DynamicSeries>} series
+ * @param {object[]} [sourceRows]
+ */
+function persistPanicHistoryV2Meta(series, sourceRows = []) {
+  const sixMonthPct = computeWindowChangePct(series, 126)
+  const oneYearPct = computeWindowChangePct(series, 252)
+  return {
+    sourceRowCount: sourceRows.length,
+    sixMonthPct,
+    oneYearPct,
+    rangeReady: {
+      "6M": series.length >= 8,
+      "1Y": series.length >= 252,
+    },
+  }
+}
+
+/** @param {ReturnType<typeof buildPanicV2DynamicSeries>} series @param {object[]} [sourceRows] */
+export function persistPanicHistoryV2(series, sourceRows = []) {
   if (typeof window === "undefined") return
   const payload = {
     version: 2,
     builtAt: new Date().toISOString(),
     rowCount: series.length,
+    windows: persistPanicHistoryV2Meta(series, sourceRows),
     series: series
       .filter((p) => p.score != null)
       .map((p) => ({
@@ -74,7 +105,7 @@ export function enrichCycleRowsWithPanicV2(rows) {
     }
   })
 
-  persistPanicHistoryV2(series)
+  persistPanicHistoryV2(series, rows)
   return enriched
 }
 

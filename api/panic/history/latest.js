@@ -23,10 +23,13 @@ export default async function handler(req, res) {
     const row = rows.length ? rows[rows.length - 1] : null
     res.status(200).json({ ok: true, row, rows: row ? [row] : [] })
   } catch (e) {
-    res.status(500).json({
-      ok: false,
-      error: e instanceof Error ? e.message : "fetch_failed",
+    const msg = e instanceof Error ? e.message : "fetch_failed"
+    console.warn("[panic/history/latest]", msg)
+    res.status(200).json({
+      ok: true,
+      warning: msg,
       row: null,
+      rows: [],
     })
   }
 }

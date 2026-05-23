@@ -115,9 +115,8 @@ const HISTORY_DOUBLE_KEYS = [
   "bofa",
   "skew",
   "hy_oas",
-  "high_yield",
   "gs_sentiment",
-  "gs_bb",
+  "panic_score",
 ]
 
 /** @param {Record<string, unknown>} row */

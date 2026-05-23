@@ -1,3 +1,10 @@
+import {
+  fetchPanicIndexHistoryRaw,
+  mapPanicIndexHistoryRowToClient,
+  PANIC_INDEX_HISTORY_SELECT,
+  pickGsFromRow,
+  pickHyFromRow,
+} from "./panicIndexHistoryColumns.js"
 import { supabaseRest } from "./supabaseRest.js"
 import { panicObjectFromSnapshot } from "./panicSnapshot.js"
 import { getFinalScore } from "./panicScores.js"
@@ -40,9 +47,8 @@ export async function syncLatestPanicMetricsRpc(tradeDate) {
 export const LATEST_PANIC_METRICS_CORE_SELECT =
   "id,date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,gs_sentiment,panic_score,updated_at"
 
-/** panic_index_history (panic_history) 핵심 컬럼만 */
-export const PANIC_INDEX_HISTORY_CORE_SELECT =
-  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,high_yield,gs_bb,gs_sentiment,updated_at"
+/** panic_index_history (panic_history) 핵심 컬럼만 — alias 컬럼 제외 */
+export const PANIC_INDEX_HISTORY_CORE_SELECT = PANIC_INDEX_HISTORY_SELECT
 
 export async function fetchLatestPanicMetricsRow() {
   const result = await supabaseRest(
@@ -56,12 +62,8 @@ export async function fetchLatestPanicMetricsRow() {
 
 /** @returns {Record<string, unknown> | null} panic_index_history 최신 1건 */
 export async function fetchLatestPanicIndexHistoryCore() {
-  const result = await supabaseRest(
-    `panic_index_history?select=${PANIC_INDEX_HISTORY_CORE_SELECT}&order=date.desc&limit=1`,
-    { method: "GET" },
-  )
-  console.log("panic latest result", result)
-  if (!result || !Array.isArray(result) || !result[0]) return null
+  const result = await fetchPanicIndexHistoryRaw(supabaseRest, "order=date.desc&limit=1")
+  if (!result.length) return null
   return result[0]
 }
 
@@ -78,8 +80,8 @@ export function panicObjectFromLatestRow(row) {
     bofa: row.bofa,
     move: row.move,
     skew: row.skew,
-    highYield: row.hy_oas ?? row.high_yield,
-    gsBullBear: row.gs_sentiment ?? row.gs_bb,
+    highYield: pickHyFromRow(row),
+    gsBullBear: pickGsFromRow(row),
   }
   const data = panicObjectFromSnapshot(snap)
   if (row.panic_score != null) data.panicIndex = Number(row.panic_score)
@@ -90,3 +92,5 @@ export function panicObjectFromLatestRow(row) {
 export function panicObjectFromHistoryCoreRow(row) {
   return panicObjectFromLatestRow(row)
 }
+
+export { mapPanicIndexHistoryRowToClient }

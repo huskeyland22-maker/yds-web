@@ -35,10 +35,13 @@ export default async function handler(req, res) {
     }
     res.status(200).json({ ok: true, rows, cycleRows: includeCycle ? cycleRows : undefined })
   } catch (e) {
-    res.status(500).json({
-      ok: false,
-      error: e instanceof Error ? e.message : "fetch_failed",
+    const msg = e instanceof Error ? e.message : "fetch_failed"
+    console.warn("[panic/history]", msg)
+    res.status(200).json({
+      ok: true,
+      warning: msg,
       rows: [],
+      cycleRows: undefined,
     })
   }
 }

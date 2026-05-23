@@ -69,8 +69,6 @@ export function panicIndexHistoryRowFromSnapshot(snap) {
     bofa: snap.bofa,
     skew: snap.skew,
     hy_oas: hy,
-    gs_bb: gs,
-    high_yield: hy,
     gs_sentiment: gs,
     market: "global",
     source: snap.source,
