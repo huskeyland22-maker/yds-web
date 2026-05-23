@@ -17,13 +17,13 @@ export const INSIGHT_ZONE_COLORS = {
   risk: "#ef4444",
 }
 
-/** 패닉 V1/V2 차트 배경 — 0~100 위험구간 (라인 Y축은 별도 자동 확대) */
+/** 패닉 V1/V2 차트 배경 — 0~100 (라벨은 상단 상태바만, 차트에는 색만) */
 const PANIC_SCORE_ZONE_BANDS = [
-  { y1: 0, y2: 20, label: "안정", color: "#22d3ee", area: true },
-  { y1: 20, y2: 40, label: "관찰", color: "#38bdf8", area: true },
-  { y1: 40, y2: 60, label: "경계", color: "#f97316", area: true },
-  { y1: 60, y2: 80, label: "공포", color: "#ef4444", area: true },
-  { y1: 80, y2: 100, label: "패닉", color: "#dc2626", area: true },
+  { y1: 0, y2: 20, label: "", color: "#22d3ee", area: true },
+  { y1: 20, y2: 40, label: "", color: "#38bdf8", area: true },
+  { y1: 40, y2: 60, label: "", color: "#f97316", area: true },
+  { y1: 60, y2: 80, label: "", color: "#ef4444", area: true },
+  { y1: 80, y2: 100, label: "", color: "#dc2626", area: true },
 ]
 
 /** @param {string} metricKey @returns {MetricZoneBand[]} */

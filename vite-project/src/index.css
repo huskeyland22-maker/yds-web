@@ -2743,6 +2743,22 @@
     line-height: 1.2;
   }
 
+  .panic-engine-status-bar--stack {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .panic-engine-status-bar--stack .panic-engine-status-bar__segment {
+    width: 100%;
+  }
+
+  .panic-engine-status-bar--stack .panic-engine-status-bar__chip {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 2px 4px;
+  }
+
   .panic-engine-status-bar__segment {
     display: inline-flex;
     align-items: center;

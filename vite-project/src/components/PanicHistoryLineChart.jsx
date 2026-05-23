@@ -65,10 +65,7 @@ function HistoryTooltipContent({ active, payload, dataLabel, profileKey }) {
           ) : null}
         </p>
       ) : null}
-      {row.macroRegimeLabel ? (
-        <p className="m-0 mt-0.5 font-semibold text-cyan-200">국면: {row.macroRegimeLabel}</p>
-      ) : null}
-      {row.inflectionLabel && !row.tradeEventLabel && !row.macroRegimeLabel ? (
+      {row.tradeEventLabel ? null : row.inflectionLabel && profileKey !== "panicV1" && profileKey !== "panicV2" ? (
         <p className="m-0 mt-0.5 font-semibold text-cyan-200">{row.inflectionLabel}</p>
       ) : null}
     </div>
@@ -98,11 +95,11 @@ function ZoneYAxisLabels({ bands, yDomain, height }) {
       aria-hidden
     >
       {bands.map((band) => {
-        if (band.y < yMin || band.y > yMax) return null
+        if (!band.label || band.y < yMin || band.y > yMax) return null
         const top = yToTop(band.y)
         return (
           <span
-            key={band.label}
+            key={`${band.y}-${band.label}`}
             className="absolute right-0 max-w-[74px] -translate-y-1/2 truncate rounded-full border px-[7px] py-[3px] text-center text-[10px] font-semibold leading-tight text-slate-100/95 backdrop-blur-[2px]"
             style={{
               top,
@@ -212,9 +209,9 @@ export default function PanicHistoryLineChart({
       <div className="relative min-w-0" style={{ height, minHeight: height }}>
         <ResponsiveContainer width="100%" height={height}>
           <LineChart data={chartData} margin={CHART_MARGIN}>
-          {zoneBands.map((band) => (
+          {zoneBands.map((band, bandIdx) => (
             <ReferenceArea
-              key={band.label}
+              key={`${band.y1}-${band.y2}-${bandIdx}`}
               y1={band.y1}
               y2={band.y2}
               fill={band.color}

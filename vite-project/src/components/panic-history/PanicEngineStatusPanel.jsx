@@ -8,14 +8,20 @@ import {
  * @param {{
  *   segments: { id: string; label: string; emoji: string }[]
  *   activeIndex: number
+ *   layout?: "row" | "stack"
  * }} props
  */
-function PanicEngineStatusBar({ segments, activeIndex }) {
+function PanicEngineStatusBar({ segments, activeIndex, layout = "row" }) {
+  const isStack = layout === "stack"
   return (
-    <div className="panic-engine-status-bar" role="list" aria-label="상태 구간">
+    <div
+      className={["panic-engine-status-bar", isStack ? "panic-engine-status-bar--stack" : ""].join(" ")}
+      role="list"
+      aria-label="상태 구간"
+    >
       {segments.map((seg, i) => (
         <span key={seg.id} className="panic-engine-status-bar__segment" role="listitem">
-          {i > 0 ? <span className="panic-engine-status-bar__sep" aria-hidden>─</span> : null}
+          {!isStack && i > 0 ? <span className="panic-engine-status-bar__sep" aria-hidden>─</span> : null}
           <span
             className={[
               "panic-engine-status-bar__chip",
@@ -91,6 +97,7 @@ export default function PanicEngineStatusPanel({
       <PanicEngineStatusBar
         segments={barSegments}
         activeIndex={activeBarIndex >= 0 ? activeBarIndex : 0}
+        layout={variant === "tactical" ? "stack" : "row"}
       />
     </div>
   )

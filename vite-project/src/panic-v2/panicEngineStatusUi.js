@@ -35,7 +35,7 @@ export const MACRO_MARKET_GUIDANCE = {
     hint: "변동성 낮음 · 선별적 진입 검토 가능",
   },
   observe: {
-    badge: "관찰구간",
+    badge: "위험구간",
     title: "현재 시장",
     hint: "시장 전반 리스크 존재 · 보수적 접근 권장",
   },

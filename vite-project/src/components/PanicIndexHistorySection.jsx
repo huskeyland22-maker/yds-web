@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import {
-  buildMacroRegimeLog,
-  enrichChartDataWithMacroRegime,
-  markMacroRegimeChangePoints,
-} from "../panic-v2/panicMacroRegimeHistory.js"
-import {
   resolveMacroMarketStatus,
   resolveTacticalActionStatus,
 } from "../panic-v2/panicEngineStatusUi.js"
@@ -19,7 +14,6 @@ import {
   PANIC_V1_HISTORY_TAB,
   PANIC_V2_HISTORY_TAB,
 } from "../utils/panicDeskMetrics.js"
-import { historyZoneLegendItems } from "../utils/panicHistoryLegend.js"
 import {
   buildPanicHistoryInsight,
   mergeInflectionsIntoChartData,
@@ -120,11 +114,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     [chartRowsSource, history, activeHistoryTab],
   )
 
-  const macroRegimeLog = useMemo(
-    () => (activeHistoryTab === "panicV1" ? buildMacroRegimeLog(chartRowsSource, { maxEntries: 10 }) : []),
-    [chartRowsSource, activeHistoryTab],
-  )
-
   const tacticalEventLog = useMemo(
     () =>
       activeHistoryTab === "panicV2" && !v2DetailMetric
@@ -132,8 +121,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         : [],
     [chartRowsSource, activeHistoryTab, v2DetailMetric],
   )
-
-  const zoneLegend = useMemo(() => historyZoneLegendItems(activeHistoryTab), [activeHistoryTab])
 
   const panicV2ChartData = useMemo(
     () => buildPanicV2ChartData(chartRowsSource),
@@ -143,10 +130,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const latestHistoryScore = useMemo(() => resolveLatestPanicV2HistoryScore(history), [history])
   const currentPanicV2Score = latestHistoryScore ?? 0
 
-  useEffect(() => {
-    console.log("[V2 CHART]", latestHistoryScore)
-  }, [latestHistoryScore])
-
   const chartRows = useMemo(() => {
     let base =
       activeHistoryTab === "panicV2"
@@ -155,9 +138,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           : panicV2ChartData
         : (chartPayload?.chartData ?? [])
 
-    if (activeHistoryTab === "panicV1" && base.length) {
-      base = markMacroRegimeChangePoints(enrichChartDataWithMacroRegime(base), macroRegimeLog)
-    } else if (activeHistoryTab === "panicV2" && !v2DetailMetric && base.length) {
+    if (activeHistoryTab === "panicV2" && !v2DetailMetric && base.length) {
       base = attachTradeEventsToChartData(tacticalEventLog, base)
     } else if (activeHistoryTab !== "panicV2" || v2DetailMetric) {
       const inflections = insight.inflections
@@ -171,7 +152,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     panicV2ChartData,
     chartPayload?.chartData,
     insight.inflections,
-    macroRegimeLog,
     tacticalEventLog,
   ])
 
@@ -364,17 +344,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         })}
       </div>
 
-      {activeHistoryTab === "panicV1" && macroRegimeLog.length > 0 ? (
-        <PanicEngineHistoryLog
-          title="시장 국면 변화"
-          entries={macroRegimeLog.map((e) => ({
-            axisLabel: e.axisLabel,
-            primary: e.regimeLabel,
-            toneId: e.regimeId,
-          }))}
-        />
-      ) : null}
-
       {activeHistoryTab === "panicV2" && !v2DetailMetric && tacticalEventLog.length > 0 ? (
         <PanicEngineHistoryLog
           title="매매 이벤트 기록"
@@ -419,20 +388,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           accent={metric.accent}
         />
       )}
-
-      {zoneLegend.length > 0 && isPanicScoreTab ? (
-        <div className="mt-1 flex flex-wrap gap-1">
-          {zoneLegend.map((z) => (
-            <span
-              key={z.id ?? z.label}
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-1.5 py-px text-[8px] text-slate-400"
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: z.color }} />
-              {z.label}
-            </span>
-          ))}
-        </div>
-      ) : null}
 
       <div className="panic-history-section__chart mt-1 pb-1">
         {showChart ? (
