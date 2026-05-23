@@ -1,9 +1,9 @@
 /**
- * 패닉지수 V2 가중치 (합 100)
- * 핵심 70 + 전문가 30
+ * 패닉 V2 실전 엔진 가중치 (합 100)
+ * 변동성 40 · 심리 20 · 추세 25 · 유동성 15
  */
 
-/** @typedef {"core" | "expert"} PanicV2Group */
+/** @typedef {"volatility" | "psychology" | "trend" | "liquidity"} PanicV2Group */
 
 /**
  * @typedef {{
@@ -17,22 +17,36 @@
 
 /** @type {PanicV2MetricDef[]} */
 export const PANIC_V2_METRICS = [
-  { key: "vix", label: "VIX", shortLabel: "VIX", weight: 25, group: "core" },
-  { key: "vxn", label: "VXN 나스닥", shortLabel: "VXN", weight: 20, group: "core" },
-  { key: "putCall", label: "P/C 풋콜", shortLabel: "P/C", weight: 20, group: "core" },
-  { key: "highYield", label: "HY 스프레드", shortLabel: "HY", weight: 15, group: "core" },
-  { key: "fearGreed", label: "CNN 공포탐욕", shortLabel: "CNN", weight: 10, group: "core" },
-  { key: "move", label: "MOVE 채권", shortLabel: "MOVE", weight: 5, group: "core" },
-  { key: "skew", label: "SKEW 꼬리위험", shortLabel: "SKEW", weight: 3, group: "expert" },
-  { key: "gsBullBear", label: "GS 강세약세", shortLabel: "GS", weight: 2, group: "expert" },
+  { key: "vix", label: "VIX", shortLabel: "VIX", weight: 15, group: "volatility" },
+  { key: "vvix", label: "VVIX", shortLabel: "VVIX", weight: 10, group: "volatility" },
+  { key: "vixTerm", label: "VIX Term", shortLabel: "TERM", weight: 15, group: "volatility" },
+  { key: "putCall", label: "P/C Ratio", shortLabel: "P/C", weight: 20, group: "psychology" },
+  { key: "ndxDistance", label: "NDX 이격", shortLabel: "NDX", weight: 15, group: "trend" },
+  { key: "soxxDistance", label: "SOXX 이격", shortLabel: "SOXX", weight: 10, group: "trend" },
+  { key: "dxy", label: "DXY", shortLabel: "DXY", weight: 10, group: "liquidity" },
+  { key: "move", label: "MOVE", shortLabel: "MOVE", weight: 5, group: "liquidity" },
 ]
 
-export const PANIC_V2_CORE_WEIGHT_SUM = PANIC_V2_METRICS.filter((m) => m.group === "core").reduce(
+export const PANIC_V2_VOL_WEIGHT_SUM = PANIC_V2_METRICS.filter((m) => m.group === "volatility").reduce(
   (s, m) => s + m.weight,
   0,
 )
 
-export const PANIC_V2_EXPERT_WEIGHT_SUM = PANIC_V2_METRICS.filter((m) => m.group === "expert").reduce(
+export const PANIC_V2_TREND_WEIGHT_SUM = PANIC_V2_METRICS.filter((m) => m.group === "trend").reduce(
   (s, m) => s + m.weight,
   0,
 )
+
+/** @deprecated PanicCoreMetricsBlock 호환 */
+export const PANIC_V2_CORE_WEIGHT_SUM = PANIC_V2_VOL_WEIGHT_SUM + 20
+
+/** @deprecated */
+export const PANIC_V2_EXPERT_WEIGHT_SUM = PANIC_V2_TREND_WEIGHT_SUM + 15
+
+/** 차트 하단 — V2 보조 시리즈 (레이아웃 변경 없음) */
+export const PANIC_V2_CHART_DETAIL_METRICS = [
+  { key: "vix", label: "VIX", chartLabel: "VIX", accent: "#f87171" },
+  { key: "vvix", label: "VVIX", chartLabel: "VVIX", accent: "#fb7185" },
+  { key: "ndxDistance", label: "NDX", chartLabel: "NDX 이격%", accent: "#38bdf8" },
+  { key: "soxxDistance", label: "SOXX", chartLabel: "SOXX 이격%", accent: "#a78bfa" },
+]

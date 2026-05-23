@@ -12,7 +12,7 @@ const DEFAULT_Z_WINDOW = 36
 const MIN_WEIGHT_COVERAGE = 0.35
 
 /** 변화율↑ = 패닉↑ 이면 false */
-const INVERT_CHANGE = new Set(["fearGreed", "bofa", "gsBullBear"])
+const INVERT_CHANGE = new Set(["ndxDistance", "soxxDistance"])
 
 /**
  * @param {number | null} current

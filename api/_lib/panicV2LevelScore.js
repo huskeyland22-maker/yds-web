@@ -1,5 +1,5 @@
 /**
- * 패닉 V2 레벨 점수 — 일별 백필용 (가중치 합 100)
+ * 패닉 V2 실전 엔진 — 레벨 점수 (DB·백필, 합 100)
  */
 import { piecewiseNorm } from "./panicV2Piecewise.js"
 import { resolvePanicV2Status } from "./panicV2Status.js"
@@ -8,70 +8,74 @@ import { pickPanicV2Raw } from "./panicV2DynamicCompute.js"
 /** @type {Record<string, [number, number][]>} */
 const PANIC_V2_KNOTS = {
   vix: [
-    [10, 0],
-    [20, 30],
-    [30, 60],
-    [40, 100],
+    [12, 0],
+    [18, 25],
+    [25, 50],
+    [35, 75],
+    [45, 100],
   ],
-  highYield: [
-    [2, 0],
-    [4, 50],
-    [6, 100],
+  vvix: [
+    [90, 0],
+    [105, 30],
+    [120, 55],
+    [140, 80],
+    [165, 100],
   ],
-  move: [
-    [60, 0],
-    [100, 50],
-    [140, 100],
-  ],
-  vxn: [
-    [15, 0],
-    [25, 30],
-    [35, 60],
-    [50, 100],
+  vixTerm: [
+    [-6, 0],
+    [-1, 20],
+    [0, 40],
+    [5, 70],
+    [12, 100],
   ],
   putCall: [
     [0.55, 0],
     [0.7, 30],
-    [0.85, 60],
-    [1.1, 100],
+    [0.85, 55],
+    [1.0, 80],
+    [1.15, 100],
   ],
-  fearGreed: [
-    [80, 0],
-    [60, 30],
-    [40, 60],
-    [15, 100],
+  ndxDistance: [
+    [-12, 100],
+    [-8, 80],
+    [-5, 55],
+    [-2, 30],
+    [0, 10],
+    [5, 0],
   ],
-  skew: [
-    [118, 0],
-    [130, 30],
-    [140, 60],
-    [155, 100],
+  soxxDistance: [
+    [-12, 100],
+    [-8, 80],
+    [-5, 55],
+    [-2, 30],
+    [0, 10],
+    [5, 0],
   ],
-  bofa: [
-    [8, 0],
-    [6, 25],
-    [4, 50],
-    [2, 80],
-    [0, 100],
+  dxy: [
+    [98, 0],
+    [102, 30],
+    [105, 55],
+    [108, 80],
+    [112, 100],
   ],
-  gsBullBear: [
-    [70, 0],
-    [50, 30],
-    [35, 60],
-    [20, 100],
+  move: [
+    [60, 0],
+    [100, 45],
+    [130, 75],
+    [160, 100],
   ],
 }
 
 /** 백필·저장용 가중치 (합 100) */
 export const PANIC_V2_BACKFILL_WEIGHTS = [
-  { key: "vix", weight: 25 },
-  { key: "vxn", weight: 20 },
+  { key: "vix", weight: 15 },
+  { key: "vvix", weight: 10 },
+  { key: "vixTerm", weight: 15 },
   { key: "putCall", weight: 20 },
-  { key: "highYield", weight: 15 },
-  { key: "fearGreed", weight: 10 },
+  { key: "ndxDistance", weight: 15 },
+  { key: "soxxDistance", weight: 10 },
+  { key: "dxy", weight: 10 },
   { key: "move", weight: 5 },
-  { key: "skew", weight: 3 },
-  { key: "gsBullBear", weight: 2 },
 ]
 
 function normalizeMetric(key, raw) {
@@ -90,8 +94,12 @@ export function computePanicV2LevelScore(data) {
 
   for (const { key, weight } of PANIC_V2_BACKFILL_WEIGHTS) {
     const raw = pickPanicV2Raw(data, key)
-    const normalized = normalizeMetric(key, raw)
+    let normalized = normalizeMetric(key, raw)
     if (normalized == null) continue
+    if (key === "putCall") {
+      const vix = pickPanicV2Raw(data, "vix")
+      if (vix != null && vix >= 22) normalized = Math.min(100, normalized * 1.08)
+    }
     scoreSum += (normalized * weight) / 100
     weightUsed += weight
   }

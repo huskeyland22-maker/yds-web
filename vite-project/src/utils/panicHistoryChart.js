@@ -12,6 +12,11 @@ export const HISTORY_CHART_FIELD_MAP = {
   panicV2: "panicV2",
   panicV1: "panicV1",
   vix: "vix",
+  vvix: "vvix",
+  vixTerm: "vixTerm",
+  ndxDistance: "ndxDistance",
+  soxxDistance: "soxxDistance",
+  dxy: "dxy",
   vxn: "vxn",
   fearGreed: "fearGreed",
   bofa: "bofa",
@@ -34,6 +39,9 @@ export function historyRowFieldValue(row, field) {
     const n = Number(row.gsBullBear ?? row.gsSentiment)
     return Number.isFinite(n) ? n : null
   }
+  if (field === "vixTerm") return Number(row.vixTerm ?? row.vix_term)
+  if (field === "ndxDistance") return Number(row.ndxDistance ?? row.ndx_distance)
+  if (field === "soxxDistance") return Number(row.soxxDistance ?? row.soxx_distance)
   const n = Number(row[field])
   return Number.isFinite(n) ? n : null
 }

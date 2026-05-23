@@ -159,5 +159,15 @@ export function panicIndexRowToCycleChart(row) {
     base.panicV2Score = panicV2
     base.panicV2DynamicScore = panicV2
   }
+  const vvix = toNum(row.vvix)
+  const vixTerm = toNum(row.vixTerm ?? row.vix_term)
+  const ndxDistance = toNum(row.ndxDistance ?? row.ndx_distance)
+  const soxxDistance = toNum(row.soxxDistance ?? row.soxx_distance)
+  const dxy = toNum(row.dxy)
+  if (vvix != null) base.vvix = vvix
+  if (vixTerm != null) base.vixTerm = vixTerm
+  if (ndxDistance != null) base.ndxDistance = ndxDistance
+  if (soxxDistance != null) base.soxxDistance = soxxDistance
+  if (dxy != null) base.dxy = dxy
   return base
 }

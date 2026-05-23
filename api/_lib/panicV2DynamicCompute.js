@@ -4,19 +4,18 @@
 import { resolvePanicV2Status } from "./panicV2Status.js"
 
 const PANIC_V2_DYNAMIC_WEIGHTS = {
-  vix: 0.22,
-  vxn: 0.15,
-  putCall: 0.18,
-  fearGreed: 0.12,
-  highYield: 0.12,
-  move: 0.08,
-  skew: 0.05,
-  gsBullBear: 0.04,
-  bofa: 0.04,
+  vix: 0.15,
+  vvix: 0.1,
+  vixTerm: 0.15,
+  putCall: 0.2,
+  ndxDistance: 0.15,
+  soxxDistance: 0.1,
+  dxy: 0.1,
+  move: 0.05,
 }
 
 const PANIC_V2_DYNAMIC_METRIC_KEYS = Object.keys(PANIC_V2_DYNAMIC_WEIGHTS)
-const INVERT_CHANGE = new Set(["fearGreed", "bofa", "gsBullBear"])
+const INVERT_CHANGE = new Set(["ndxDistance", "soxxDistance"])
 const DEFAULT_CHANGE_LAG = 5
 const DEFAULT_Z_WINDOW = 36
 const MIN_WEIGHT_COVERAGE = 0.35
@@ -31,6 +30,16 @@ function toNum(v) {
 export function pickPanicV2Raw(data, key) {
   if (!data || typeof data !== "object") return null
   switch (key) {
+    case "vixTerm":
+      return toNum(data.vixTerm ?? data.vix_term)
+    case "ndxDistance":
+      return toNum(data.ndxDistance ?? data.ndx_distance)
+    case "soxxDistance":
+      return toNum(data.soxxDistance ?? data.soxx_distance)
+    case "vvix":
+      return toNum(data.vvix)
+    case "dxy":
+      return toNum(data.dxy)
     case "highYield":
       return toNum(data.highYield ?? data.hyOas ?? data.hy_oas ?? data.hy)
     case "gsBullBear":

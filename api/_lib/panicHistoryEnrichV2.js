@@ -1,18 +1,8 @@
 /**
- * panic_index_history API 응답 — panic_v2 보강 (DB V2 + 레벨 가중치 + HY 버킷)
+ * panic_index_history API 응답 — panic_v2 보강 (DB V2 + 실전 레벨 점수)
  */
 import { cycleRowFromHistorySource, fetchPanicHistoryV2Rows } from "./panicHistoryV2Db.js"
 import { computePanicV2LevelScore } from "./panicV2LevelScore.js"
-
-/** @param {number | null | undefined} hy */
-export function highYieldBucketScore(hy) {
-  if (hy == null || !Number.isFinite(Number(hy))) return null
-  const h = Number(hy)
-  if (h <= 3) return 15
-  if (h <= 4) return 30
-  if (h <= 5) return 50
-  return 70
-}
 
 /**
  * @param {object} clientRow — mapPanicIndexHistoryRowToClient 결과
@@ -34,17 +24,27 @@ export function resolvePanicV2ForHistoryRow(clientRow, storedV2) {
     skew: clientRow.skew,
     hy_oas: clientRow.highYield ?? clientRow.hyOas,
     gs_sentiment: clientRow.gsBullBear ?? clientRow.gsSentiment,
+    vvix: clientRow.vvix,
+    vix_term: clientRow.vixTerm,
+    ndx_distance: clientRow.ndxDistance,
+    soxx_distance: clientRow.soxxDistance,
+    dxy: clientRow.dxy,
   })
 
-  const { score: levelScore } = computePanicV2LevelScore(cycle ?? clientRow)
-  const hyBucket = highYieldBucketScore(clientRow.highYield ?? clientRow.hyOas)
-
-  if (levelScore != null && hyBucket != null) {
-    return Math.round(Math.max(0, Math.min(100, (levelScore + hyBucket) / 2)))
+  const practical = {
+    ...(cycle ?? clientRow),
+    vvix: clientRow.vvix ?? cycle?.vvix,
+    vixTerm: clientRow.vixTerm ?? cycle?.vixTerm,
+    ndxDistance: clientRow.ndxDistance ?? cycle?.ndxDistance,
+    soxxDistance: clientRow.soxxDistance ?? cycle?.soxxDistance,
+    dxy: clientRow.dxy ?? cycle?.dxy,
+    putCall: clientRow.putCall ?? cycle?.putCall,
+    move: clientRow.move ?? cycle?.move,
+    vix: clientRow.vix ?? cycle?.vix,
   }
-  if (levelScore != null) return levelScore
-  if (hyBucket != null) return hyBucket
-  return null
+
+  const { score } = computePanicV2LevelScore(practical)
+  return score != null ? score : null
 }
 
 /**
@@ -74,7 +74,7 @@ export async function enrichPanicIndexHistoryWithV2(clientRows) {
     v2ByDate = new Map(
       v2Rows
         .filter((r) => r?.date && r.panicV2 != null)
-        .map((r) => [String(r.date).slice(0, 10), r.panicV2]),
+        .map((r) => [String(r.date).slice(0, 10), r]),
     )
   } catch (err) {
     console.warn("[panic] enrichPanicIndexHistoryWithV2 v2 fetch skipped", err)
@@ -82,6 +82,17 @@ export async function enrichPanicIndexHistoryWithV2(clientRows) {
 
   return clientRows.map((row) => {
     const date = String(row?.date ?? "").slice(0, 10)
-    return attachPanicV2ToHistoryRow(row, v2ByDate.get(date))
+    const hit = v2ByDate.get(date)
+    const merged = hit
+      ? {
+          ...row,
+          vvix: row.vvix ?? hit.vvix,
+          vixTerm: row.vixTerm ?? hit.vixTerm,
+          ndxDistance: row.ndxDistance ?? hit.ndxDistance,
+          soxxDistance: row.soxxDistance ?? hit.soxxDistance,
+          dxy: row.dxy ?? hit.dxy,
+        }
+      : row
+    return attachPanicV2ToHistoryRow(merged, hit?.panicV2 ?? hit?.panic_v2)
   })
 }

@@ -1,4 +1,8 @@
-import { fetchYahooQuoteSeries } from "./yahooQuote.js"
+import {
+  fetchVixTermStructurePercent,
+  fetchYahooMaDistancePercent,
+  fetchYahooQuoteSeries,
+} from "./yahooQuote.js"
 
 const CNN_FG_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
 const FRED_HY_SERIES = "BAMLH0A0HYM2"
@@ -101,6 +105,11 @@ export async function collectPanicMetricsLive(opts = {}) {
 
   const tasks = [
     ["vix", () => fetchYahooQuoteSeries("^VIX")],
+    ["vvix", () => fetchYahooQuoteSeries("^VVIX")],
+    ["vixTerm", () => fetchVixTermStructurePercent()],
+    ["ndxDistance", () => fetchYahooMaDistancePercent("^NDX")],
+    ["soxxDistance", () => fetchYahooMaDistancePercent("SOXX")],
+    ["dxy", () => fetchYahooQuoteSeries("DX-Y.NYB")],
     ["vxn", () => fetchYahooQuoteSeries("^VXN")],
     ["skew", () => fetchYahooQuoteSeries("^SKEW")],
     ["putCall", () => fetchYahooQuoteSeries("^PCC")],

@@ -16,6 +16,7 @@ import {
 } from "../utils/buildPanicHistoryInsight.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
+import { PANIC_V2_CHART_DETAIL_METRICS } from "../panic-v2/weights.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { resolvePanicV2Status } from "../panic-v2/panicV2Status.js"
 import { resolvePanicHistoryUiState } from "../utils/panicHistoryUiState.js"
@@ -78,6 +79,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
   const [rangeId, setRangeId] = useState("6M")
+  const [v2DetailMetric, setV2DetailMetric] = useState(null)
 
   const isPanicScoreTab = activeHistoryTab === "panicV2" || activeHistoryTab === "panicV1"
 
@@ -98,9 +100,19 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   }, [history])
 
   const chartPayload = useMemo(
-    () => buildHistoryChartPayload(chartRowsSource, activeHistoryTab),
-    [chartRowsSource, activeHistoryTab],
+    () =>
+      activeHistoryTab === "panicV2" && v2DetailMetric
+        ? buildHistoryChartPayload(chartRowsSource, v2DetailMetric)
+        : buildHistoryChartPayload(chartRowsSource, activeHistoryTab),
+    [chartRowsSource, activeHistoryTab, v2DetailMetric],
   )
+
+  const chartMetric = useMemo(() => {
+    if (activeHistoryTab === "panicV2" && v2DetailMetric) {
+      return PANIC_V2_CHART_DETAIL_METRICS.find((m) => m.key === v2DetailMetric) ?? metric
+    }
+    return metric
+  }, [activeHistoryTab, v2DetailMetric, metric])
 
   const insight = useMemo(
     () => buildPanicHistoryInsight(chartRowsSource, history, activeHistoryTab),
@@ -144,10 +156,13 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const chartRows = useMemo(() => {
     const base =
       activeHistoryTab === "panicV2"
-        ? panicV2ChartData
+        ? v2DetailMetric
+          ? (chartPayload?.chartData ?? [])
+          : panicV2ChartData
         : (chartPayload?.chartData ?? [])
-    return mergeInflectionsIntoChartData(base, insight.inflections)
-  }, [activeHistoryTab, panicV2ChartData, chartPayload?.chartData, insight.inflections])
+    const inflections = activeHistoryTab === "panicV2" && v2DetailMetric ? [] : insight.inflections
+    return mergeInflectionsIntoChartData(base, inflections)
+  }, [activeHistoryTab, v2DetailMetric, panicV2ChartData, chartPayload?.chartData, insight.inflections])
 
   const panicV2Count = useMemo(() => countPanicV2ScoredRows(history), [history])
 
@@ -187,7 +202,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         <p className="m-0 text-[11px] font-bold text-slate-100">패닉지수 히스토리</p>
         <p className="m-0 text-[9px] text-slate-500">
           {metric.label}
-          {activeHistoryTab === "panicV2" ? " · V2" : ""} · {rangeId} ·{" "}
+          {activeHistoryTab === "panicV2" ? " · 실전" : ""} · {rangeId} ·{" "}
           {chartRangeStats(history, rangeId, "lab").shown}일
         </p>
       </div>
@@ -195,7 +210,11 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       <div className="panic-history-tabs mt-1.5 flex flex-wrap items-center gap-1">
         <button
           type="button"
-          onClick={() => setActiveHistoryTab("panicV2")}
+          onClick={() => {
+            setActiveHistoryTab("panicV2")
+            setV2DetailMetric(null)
+          }}
+          title={PANIC_V2_HISTORY_TAB.tooltip}
           className={[
             "panic-history-tab panic-history-tab--main",
             activeHistoryTab === "panicV2"
@@ -312,15 +331,15 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       <div className="panic-history-section__chart mt-1 pb-1">
         {showChart ? (
           <PanicHistoryLineChart
-            key={`panic-hist-${activeHistoryTab}-${rangeId}`}
+            key={`panic-hist-${activeHistoryTab}-${rangeId}-${v2DetailMetric ?? "score"}`}
             rows={chartRowsSource}
             chartData={chartRows}
             dataKey={chartPayload?.dataKey ?? "value"}
             metricField={chartPayload?.selectedField ?? activeHistoryTab}
-            dataLabel={metric.chartLabel}
-            stroke={metric.accent}
+            dataLabel={chartMetric.chartLabel}
+            stroke={chartMetric.accent}
             showZoneBands={false}
-            insightZones={isPanicScoreTab}
+            insightZones={isPanicScoreTab && !v2DetailMetric}
             connectNulls={activeHistoryTab !== "panicV2"}
             height={HISTORY_CHART_HEIGHT}
           />
@@ -330,6 +349,34 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           </div>
         )}
       </div>
+
+      {activeHistoryTab === "panicV2" && showChart ? (
+        <div className="mt-0.5 flex flex-wrap gap-0.5" role="group" aria-label="V2 보조 지표">
+          <button
+            type="button"
+            onClick={() => setV2DetailMetric(null)}
+            className={[
+              "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
+              !v2DetailMetric ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
+            ].join(" ")}
+          >
+            점수
+          </button>
+          {PANIC_V2_CHART_DETAIL_METRICS.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setV2DetailMetric(m.key)}
+              className={[
+                "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
+                v2DetailMetric === m.key ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
+              ].join(" ")}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -111,6 +111,48 @@ export const chartProfiles = {
     strokeWidth: 3,
     activeDotR: 5,
   },
+  vvix: {
+    paddingRatio: 0.08,
+    paddingMin: 2,
+    tickCount: 5,
+    tickDecimals: 1,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
+  vixTerm: {
+    paddingRatio: 0.08,
+    paddingMin: 0.5,
+    tickCount: 5,
+    tickDecimals: 1,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
+  ndxDistance: {
+    paddingRatio: 0.08,
+    paddingMin: 0.5,
+    narrowRange: true,
+    tickCount: 5,
+    tickDecimals: 1,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
+  soxxDistance: {
+    paddingRatio: 0.08,
+    paddingMin: 0.5,
+    narrowRange: true,
+    tickCount: 5,
+    tickDecimals: 1,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
+  dxy: {
+    paddingRatio: 0.05,
+    paddingMin: 0.5,
+    tickCount: 5,
+    tickDecimals: 1,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
 }
 
 const DEFAULT_PROFILE = {

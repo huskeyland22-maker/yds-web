@@ -17,13 +17,34 @@ function toNum(x) {
 export function pickPanicV2Raw(data, key) {
   if (!data || typeof data !== "object") return null
   switch (key) {
-    case "highYield":
-      return toNum(data.highYield ?? data.hyOas ?? data.hy_oas)
-    case "gsBullBear":
-      return toNum(data.gsBullBear ?? data.gsSentiment ?? data.gs_sentiment ?? data.gs)
+    case "vixTerm":
+      return toNum(data.vixTerm ?? data.vix_term)
+    case "ndxDistance":
+      return toNum(data.ndxDistance ?? data.ndx_distance)
+    case "soxxDistance":
+      return toNum(data.soxxDistance ?? data.soxx_distance)
+    case "vvix":
+      return toNum(data.vvix)
+    case "dxy":
+      return toNum(data.dxy)
     default:
       return toNum(data[key])
   }
+}
+
+function logPracticalDebug(data, score) {
+  if (typeof console === "undefined") return
+  console.log("[패닉V2 실전]", {
+    score,
+    vix: pickPanicV2Raw(data, "vix"),
+    vvix: pickPanicV2Raw(data, "vvix"),
+    term: pickPanicV2Raw(data, "vixTerm"),
+    pc: pickPanicV2Raw(data, "putCall"),
+    ndxDist: pickPanicV2Raw(data, "ndxDistance"),
+    soxxDist: pickPanicV2Raw(data, "soxxDistance"),
+    dxy: pickPanicV2Raw(data, "dxy"),
+    move: pickPanicV2Raw(data, "move"),
+  })
 }
 
 /**
@@ -31,7 +52,7 @@ export function pickPanicV2Raw(data, key) {
  *   key: string
  *   label: string
  *   shortLabel: string
- *   group: "core" | "expert"
+ *   group: string
  *   weight: number
  *   raw: number | null
  *   normalized: number | null
@@ -69,21 +90,29 @@ export function computePanicV2(data, opts = {}) {
   const metrics = []
   let scoreSum = 0
   let weightUsed = 0
-  let coreContribution = 0
-  let expertContribution = 0
+  let volContribution = 0
+  let otherContribution = 0
 
   for (const def of PANIC_V2_METRICS) {
     const raw = pickPanicV2Raw(data, def.key)
-    const normalized = normalizePanicV2Metric(def.key, raw)
+    let normalized = normalizePanicV2Metric(def.key, raw)
     const missing = normalized == null
+
+    if (!missing && def.key === "putCall") {
+      const vix = pickPanicV2Raw(data, "vix")
+      if (vix != null && vix >= 22) {
+        normalized = Math.min(100, normalized * 1.08)
+      }
+    }
+
     const contribution = missing ? 0 : (normalized * def.weight) / 100
     const roundedContribution = Math.round(contribution * 10) / 10
 
     if (!missing) {
       scoreSum += contribution
       weightUsed += def.weight
-      if (def.group === "core") coreContribution += contribution
-      else expertContribution += contribution
+      if (def.group === "volatility") volContribution += contribution
+      else otherContribution += contribution
     }
 
     metrics.push({
@@ -110,14 +139,16 @@ export function computePanicV2(data, opts = {}) {
     score = Math.max(0, Math.min(100, score))
   }
 
+  logPracticalDebug(data, score)
+
   const legacyScore =
     includeLegacy && data && typeof data === "object" ? getFinalScore(data) : null
 
   return {
     version: 2,
     score,
-    coreContribution: Math.round(coreContribution * 10) / 10,
-    expertContribution: Math.round(expertContribution * 10) / 10,
+    coreContribution: Math.round((volContribution + (metrics.find((m) => m.key === "putCall")?.contribution ?? 0)) * 10) / 10,
+    expertContribution: Math.round(otherContribution * 10) / 10,
     weightUsed,
     weightTotal,
     completenessPct,
@@ -128,7 +159,7 @@ export function computePanicV2(data, opts = {}) {
   }
 }
 
-/** @param {PanicV2Result | null | undefined} result @param {"core" | "expert"} group */
+/** @param {PanicV2Result | null | undefined} result @param {string} group */
 export function panicV2MetricsByGroup(result, group) {
   if (!result?.metrics) return []
   return result.metrics.filter((m) => m.group === group && !m.missing)

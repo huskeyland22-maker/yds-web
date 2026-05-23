@@ -51,6 +51,16 @@ export function rawRowToCycle(row) {
     out.panicV2Score = panicV2
     out.panicV2DynamicScore = panicV2
   }
+  const vvix = toNum(row.vvix)
+  const vixTerm = toNum(row.vixTerm ?? row.vix_term)
+  const ndxDistance = toNum(row.ndxDistance ?? row.ndx_distance)
+  const soxxDistance = toNum(row.soxxDistance ?? row.soxx_distance)
+  const dxy = toNum(row.dxy)
+  if (vvix != null) out.vvix = vvix
+  if (vixTerm != null) out.vixTerm = vixTerm
+  if (ndxDistance != null) out.ndxDistance = ndxDistance
+  if (soxxDistance != null) out.soxxDistance = soxxDistance
+  if (dxy != null) out.dxy = dxy
   return out
 }
 
@@ -61,12 +71,25 @@ function rowValue(row, key) {
     return Number.isFinite(v) ? v : null
   }
   if (key === "panicV2") {
-    const cached =
-      row.panic_v2 ?? row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_index_v2 ?? row.panicScore
+    const cached = row.panic_v2 ?? row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_index_v2
     if (Number.isFinite(Number(cached))) return Number(cached)
     const v = panicV2ScoreFromRow(row)
     return Number.isFinite(v) ? v : null
   }
+  if (key === "vvix") return Number(row.vvix)
+  if (key === "vixTerm") {
+    const n = Number(row.vixTerm ?? row.vix_term)
+    return Number.isFinite(n) ? n : null
+  }
+  if (key === "ndxDistance") {
+    const n = Number(row.ndxDistance ?? row.ndx_distance)
+    return Number.isFinite(n) ? n : null
+  }
+  if (key === "soxxDistance") {
+    const n = Number(row.soxxDistance ?? row.soxx_distance)
+    return Number.isFinite(n) ? n : null
+  }
+  if (key === "dxy") return Number(row.dxy)
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
   if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
   if (key === "panicScore") return Number(row.panicScore ?? row.panic_score)

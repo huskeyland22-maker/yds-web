@@ -14,7 +14,8 @@ export const PANIC_INDEX_HISTORY_V2_SELECT =
 /** DB에 데이터 있는 테이블 (panic_history_v2) 우선 */
 const LEGACY_TABLE = "panic_history_v2"
 const LEGACY_SELECT_MINIMAL = "date,panic_v2,vix,hy"
-const LEGACY_SELECT = "date,panic_v2,vix,vxn,fear_greed,put_call,hy,move,skew,gs,bofa,source,updated_at"
+const LEGACY_SELECT =
+  "date,panic_v2,vix,vxn,fear_greed,put_call,hy,move,skew,gs,bofa,vvix,vix_term,ndx_distance,soxx_distance,dxy,source,updated_at"
 
 const V2_FETCH_ATTEMPTS = [
   { table: LEGACY_TABLE, select: LEGACY_SELECT_MINIMAL },
@@ -63,6 +64,11 @@ export function cycleRowFromHistorySource(row) {
     skew: toNum(client.skew ?? row.skew),
     gsBullBear: toNum(client.gsBullBear ?? client.gsSentiment ?? row.gs ?? row.gs_sentiment),
     bofa: toNum(client.bofa ?? row.bofa),
+    vvix: toNum(client.vvix ?? row.vvix),
+    vixTerm: toNum(client.vixTerm ?? row.vix_term),
+    ndxDistance: toNum(client.ndxDistance ?? row.ndx_distance),
+    soxxDistance: toNum(client.soxxDistance ?? row.soxx_distance),
+    dxy: toNum(client.dxy ?? row.dxy),
   }
 }
 
@@ -84,6 +90,11 @@ export function panicIndexHistoryV2DbRow(cycleRow, panicIndexV2, source = "yds")
     bofa: toNum(cycleRow.bofa),
     panic_index_v2:
       panicIndexV2 != null && Number.isFinite(panicIndexV2) ? panicIndexV2 : null,
+    vvix: toNum(cycleRow.vvix),
+    vix_term: toNum(cycleRow.vixTerm ?? cycleRow.vix_term),
+    ndx_distance: toNum(cycleRow.ndxDistance ?? cycleRow.ndx_distance),
+    soxx_distance: toNum(cycleRow.soxxDistance ?? cycleRow.soxx_distance),
+    dxy: toNum(cycleRow.dxy),
     source,
     updated_at: new Date().toISOString(),
   }
@@ -120,6 +131,11 @@ export function panicHistoryV2RowToClient(row) {
     gsBullBear: toNum(row.gs),
     gs: toNum(row.gs),
     bofa: toNum(row.bofa),
+    vvix: toNum(row.vvix),
+    vixTerm: toNum(row.vix_term),
+    ndxDistance: toNum(row.ndx_distance),
+    soxxDistance: toNum(row.soxx_distance),
+    dxy: toNum(row.dxy),
     panicV2Status: status?.label ?? null,
     panicV2StatusId: status?.id ?? null,
     source: row.source ?? "yds",
@@ -288,19 +304,26 @@ export async function upsertPanicHistoryV2ForSnapshot(snap, opts = {}) {
     return { ok: false, skipped: true, reason: "invalid_date" }
   }
 
-  const todayRow = cycleRowFromHistorySource({
-    date: tradeDate,
-    vix: snap.vix,
-    vxn: snap.vxn,
-    fear_greed: snap.fearGreed,
-    put_call: snap.putCall,
-    high_yield: snap.highYield,
-    hy_oas: snap.highYield,
-    move: snap.move,
-    skew: snap.skew,
-    gs_sentiment: snap.gsBullBear,
-    bofa: snap.bofa,
-  })
+  const todayRow = {
+    ...cycleRowFromHistorySource({
+      date: tradeDate,
+      vix: snap.vix,
+      vxn: snap.vxn,
+      fear_greed: snap.fearGreed,
+      put_call: snap.putCall,
+      high_yield: snap.highYield,
+      hy_oas: snap.highYield,
+      move: snap.move,
+      skew: snap.skew,
+      gs_sentiment: snap.gsBullBear,
+      bofa: snap.bofa,
+    }),
+    vvix: snap.vvix,
+    vixTerm: snap.vixTerm,
+    ndxDistance: snap.ndxDistance,
+    soxxDistance: snap.soxxDistance,
+    dxy: snap.dxy,
+  }
 
   if (!todayRow) return { ok: false, skipped: true, reason: "invalid_snapshot" }
 

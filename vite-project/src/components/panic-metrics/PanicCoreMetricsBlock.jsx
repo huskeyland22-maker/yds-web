@@ -1,7 +1,6 @@
 import { useMemo } from "react"
 import { useAppDataStore } from "../../store/appDataStore.js"
 import { computePanicV2 } from "../../panic-v2/index.js"
-import { latestPanicV2DynamicScore } from "../../panic-v2/panicV2Dynamic.js"
 import { resolvePanicV2Status } from "../../panic-v2/panicV2Status.js"
 import { CORE_METRICS } from "../../utils/panicDeskMetrics.js"
 import { formatMetricValue } from "../macroCycleChartUtils.js"
@@ -22,11 +21,7 @@ export default function PanicCoreMetricsBlock({ panicData, historyRows = [] }) {
   const v2SyncStatus = useAppDataStore((s) => s.panicHistoryV2SyncStatus)
   const levelV2 = useMemo(() => computePanicV2(panicData), [panicData])
 
-  const displayScore = useMemo(() => {
-    const dynamic = historyRows.length >= 8 ? latestPanicV2DynamicScore(historyRows) : null
-    if (dynamic != null) return dynamic
-    return levelV2.score
-  }, [historyRows, levelV2.score])
+  const displayScore = levelV2.score
 
   const status = useMemo(() => resolvePanicV2Status(displayScore), [displayScore])
 
@@ -48,7 +43,7 @@ export default function PanicCoreMetricsBlock({ panicData, historyRows = [] }) {
           />
         ))}
         <PanicMetricRow
-          label="패닉지수"
+          label="패닉 V2 실전"
           value={
             displayScore != null
               ? String(displayScore)

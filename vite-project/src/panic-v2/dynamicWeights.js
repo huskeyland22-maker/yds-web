@@ -1,16 +1,15 @@
 /**
- * 패닉 V2 동적 히스토리 가중치 (합 1.0)
+ * 패닉 V2 실전 동적 히스토리 가중치 (합 1.0)
  */
 export const PANIC_V2_DYNAMIC_WEIGHTS = {
-  vix: 0.22,
-  vxn: 0.15,
-  putCall: 0.18,
-  fearGreed: 0.12,
-  highYield: 0.12,
-  move: 0.08,
-  skew: 0.05,
-  gsBullBear: 0.04,
-  bofa: 0.04,
+  vix: 0.15,
+  vvix: 0.1,
+  vixTerm: 0.15,
+  putCall: 0.2,
+  ndxDistance: 0.15,
+  soxxDistance: 0.1,
+  dxy: 0.1,
+  move: 0.05,
 }
 
 /** @type {string[]} */

@@ -51,6 +51,11 @@ export function normalizePanicPayload(body, opts = {}) {
     skew: toPanicNum(body?.skew),
     highYield: toPanicNum(body?.highYield ?? body?.hyOas ?? body?.hy_oas ?? body?.high_yield),
     gsBullBear: toPanicNum(body?.gsBullBear ?? body?.gsSentiment ?? body?.gs_bb ?? body?.gs),
+    vvix: toPanicNum(body?.vvix),
+    vixTerm: toPanicNum(body?.vixTerm ?? body?.vix_term),
+    ndxDistance: toPanicNum(body?.ndxDistance ?? body?.ndx_distance),
+    soxxDistance: toPanicNum(body?.soxxDistance ?? body?.soxx_distance),
+    dxy: toPanicNum(body?.dxy),
   }
   return snap
 }

@@ -41,6 +41,11 @@ export function mergePanicHistoryV2IntoCycleRows(cycleRows, v2Rows) {
       panicV2Score: score,
       panicV2DynamicScore: score,
       panic_v2: score,
+      vvix: row.vvix ?? hit.vvix,
+      vixTerm: row.vixTerm ?? hit.vixTerm,
+      ndxDistance: row.ndxDistance ?? hit.ndxDistance,
+      soxxDistance: row.soxxDistance ?? hit.soxxDistance,
+      dxy: row.dxy ?? hit.dxy,
     }
   })
 }
@@ -70,6 +75,11 @@ export function cycleRowsFromV2Only(v2Rows) {
         panicV2Score: score,
         panicV2DynamicScore: score,
         panic_v2: score,
+        vvix: toNum(r.vvix),
+        vixTerm: toNum(r.vixTerm ?? r.vix_term),
+        ndxDistance: toNum(r.ndxDistance ?? r.ndx_distance),
+        soxxDistance: toNum(r.soxxDistance ?? r.soxx_distance),
+        dxy: toNum(r.dxy),
       }
     })
     .filter(Boolean)

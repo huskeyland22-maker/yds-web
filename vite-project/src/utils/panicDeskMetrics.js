@@ -36,9 +36,9 @@ export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 export const PANIC_V2_HISTORY_TAB = {
   key: "panicV2",
   label: "패닉 V2",
-  chartLabel: "패닉 V2",
+  chartLabel: "실전",
   accent: "#22d3ee",
-  tooltip: "N일 변화율 → z-score → 가중합",
+  tooltip: "실전 엔진 · 변동성 + 심리 + AI추세 + 유동성 기반",
 }
 
 /** 패닉 히스토리 — V1 (getFinalScore) */

@@ -19,7 +19,17 @@ export const INSIGHT_ZONE_COLORS = {
 
 /** @param {string} metricKey @returns {MetricZoneBand[]} */
 export function metricZoneBands(metricKey) {
-  if (metricKey === "panicV2" || metricKey === "panicV1") {
+  if (metricKey === "panicV2") {
+    return [
+      { y1: 0, y2: 20, label: "안정", color: "#22d3ee", area: true },
+      { y1: 20, y2: 35, label: "관찰", color: "#38bdf8", area: true },
+      { y1: 35, y2: 50, label: "눌림", color: "#2dd4bf", area: true },
+      { y1: 50, y2: 70, label: "공포", color: "#f97316", area: true },
+      { y1: 70, y2: 85, label: "매수후보", color: "#ef4444", area: true },
+      { y1: 85, y2: 100, label: "극단공포", color: "#dc2626", area: true },
+    ]
+  }
+  if (metricKey === "panicV1") {
     return [
       { y1: 0, y2: 20, label: "안정", color: "#22d3ee", area: true },
       { y1: 20, y2: 40, label: "전환", color: "#38bdf8", area: true },
@@ -140,7 +150,8 @@ export function metricInsightZoneBands(metricKey) {
 
 /** @param {string} metricKey @returns {number[]} */
 export function metricZoneLineYs(metricKey) {
-  if (metricKey === "panicV2" || metricKey === "panicV1") return [20, 40, 60, 80]
+  if (metricKey === "panicV2") return [20, 35, 50, 70, 85]
+  if (metricKey === "panicV1") return [20, 40, 60, 80]
   if (metricKey === "fearGreed") return [20, 40, 60, 80]
   if (metricKey === "vix" || metricKey === "vxn") return [15, 20, 30]
   if (metricKey === "putCall") return [0.55, 0.85]

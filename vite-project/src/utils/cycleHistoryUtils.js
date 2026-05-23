@@ -122,6 +122,13 @@ export function panicDataFromCycleRow(row) {
     skew: pick("skew"),
     highYield: pick("highYield"),
     gsBullBear: pick("gsBullBear"),
+    vvix: pick("vvix"),
+    vixTerm: pick("vixTerm") ?? (row.vix_term != null ? Number(row.vix_term) : null),
+    ndxDistance:
+      pick("ndxDistance") ?? (row.ndx_distance != null ? Number(row.ndx_distance) : null),
+    soxxDistance:
+      pick("soxxDistance") ?? (row.soxx_distance != null ? Number(row.soxx_distance) : null),
+    dxy: pick("dxy"),
     updatedAt: ts,
     accessTier: "pro",
   }
