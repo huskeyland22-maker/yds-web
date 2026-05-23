@@ -2664,15 +2664,20 @@
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(0, 0, 0, 0.25);
     padding: 8px 10px;
+    min-height: 52px;
   }
 
-  .panic-engine-status-panel__top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px 12px;
-    margin-bottom: 8px;
+  .panic-engine-status-panel__grid {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 10px;
+    min-height: 36px;
+  }
+
+  .panic-engine-status-panel__score-block {
+    flex-shrink: 0;
+    min-width: 36px;
   }
 
   .panic-engine-status-panel__score-label {
@@ -2686,17 +2691,21 @@
   .panic-engine-status-panel__score {
     font-size: 18px;
     font-weight: 700;
-    color: rgba(207, 250, 254, 0.98);
+    color: rgba(226, 232, 240, 0.98);
     line-height: 1.1;
   }
 
-  .panic-engine-status-panel--tactical .panic-engine-status-panel__score {
-    color: rgba(255, 237, 213, 0.98);
+  .panic-engine-status-panel__bar-wrap {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .panic-engine-status-panel__badge-block {
-    flex: 1 1 140px;
-    min-width: 0;
+    flex-shrink: 0;
+    min-width: 88px;
+    max-width: 120px;
     text-align: right;
   }
 
@@ -2712,21 +2721,6 @@
     color: rgba(226, 232, 240, 0.98);
   }
 
-  .panic-engine-status-panel--macro .panic-engine-status-panel__badge-value {
-    color: #a5f3fc;
-  }
-
-  .panic-engine-status-panel--tactical .panic-engine-status-panel__badge-value {
-    color: #fcd34d;
-  }
-
-  .panic-engine-status-panel__action {
-    margin-top: 2px;
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(226, 232, 240, 0.92);
-  }
-
   .panic-engine-status-panel__hint {
     margin-top: 2px;
     font-size: 9px;
@@ -2734,29 +2728,31 @@
     color: rgba(148, 163, 184, 0.9);
   }
 
+  @media (max-width: 520px) {
+    .panic-engine-status-panel__grid {
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto;
+    }
+
+    .panic-engine-status-panel__bar-wrap {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+
+    .panic-engine-status-panel__badge-block {
+      text-align: right;
+    }
+  }
+
   .panic-engine-status-bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-start;
     gap: 2px 0;
     font-size: 9px;
     line-height: 1.2;
-  }
-
-  .panic-engine-status-bar--stack {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
-  }
-
-  .panic-engine-status-bar--stack .panic-engine-status-bar__segment {
     width: 100%;
-  }
-
-  .panic-engine-status-bar--stack .panic-engine-status-bar__chip {
-    width: 100%;
-    justify-content: flex-start;
-    padding: 2px 4px;
   }
 
   .panic-engine-status-bar__segment {

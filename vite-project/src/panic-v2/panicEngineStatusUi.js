@@ -31,56 +31,51 @@ export const TACTICAL_ACTION_STATUS_BAR = [
 export const MACRO_MARKET_GUIDANCE = {
   stable: {
     badge: "안정구간",
-    title: "현재 시장",
+    title: "현재",
     hint: "변동성 낮음 · 선별적 진입 검토 가능",
   },
   observe: {
     badge: "위험구간",
-    title: "현재 시장",
-    hint: "시장 전반 리스크 존재 · 보수적 접근 권장",
+    title: "현재",
+    hint: "시장 전반 리스크 존재",
   },
   caution: {
     badge: "경계구간",
-    title: "현재 시장",
+    title: "현재",
     hint: "방향성 혼재 · 포지션 크기 제한",
   },
   fear: {
     badge: "공포구간",
-    title: "현재 시장",
+    title: "현재",
     hint: "변동성 확대 · 비중 축소·헤지 검토",
   },
   panic: {
     badge: "패닉구간",
-    title: "현재 시장",
+    title: "현재",
     hint: "극단 공포 · 유동성·현금 우선",
   },
 }
 
-/** @type {Record<string, { badge: string; action: string; hint: string }>} */
+/** @type {Record<string, { badge: string; hint: string }>} */
 export const TACTICAL_ACTION_GUIDANCE = {
   buyCandidate: {
     badge: "매수후보",
-    action: "매수 후보 검토",
     hint: "조건 충족 · 분할 진입 검토",
   },
   maintainInterest: {
     badge: "관심유지",
-    action: "관심 유지",
     hint: "신규 진입 신호 약함",
   },
   addWeight: {
     badge: "비중확대",
-    action: "비중 확대 검토",
     hint: "흐름 개선 · 단계적 비중 가감",
   },
   watch: {
     badge: "관망",
-    action: "관망",
     hint: "추가 확인 후 대응",
   },
   riskCaution: {
     badge: "리스크주의",
-    action: "리스크 주의",
     hint: "신규 진입 자제 · 방어 우선",
   },
 }

@@ -5,23 +5,18 @@ import {
 } from "../../panic-v2/panicEngineStatusUi.js"
 
 /**
+ * 거시 V1 / 실전 V2 공통 — 가로 5단계 상태바 + ▲
  * @param {{
  *   segments: { id: string; label: string; emoji: string }[]
  *   activeIndex: number
- *   layout?: "row" | "stack"
  * }} props
  */
-function PanicEngineStatusBar({ segments, activeIndex, layout = "row" }) {
-  const isStack = layout === "stack"
+function PanicEngineStatusBar({ segments, activeIndex }) {
   return (
-    <div
-      className={["panic-engine-status-bar", isStack ? "panic-engine-status-bar--stack" : ""].join(" ")}
-      role="list"
-      aria-label="상태 구간"
-    >
+    <div className="panic-engine-status-bar" role="list" aria-label="상태 구간">
       {segments.map((seg, i) => (
         <span key={seg.id} className="panic-engine-status-bar__segment" role="listitem">
-          {!isStack && i > 0 ? <span className="panic-engine-status-bar__sep" aria-hidden>─</span> : null}
+          {i > 0 ? <span className="panic-engine-status-bar__sep" aria-hidden>─</span> : null}
           <span
             className={[
               "panic-engine-status-bar__chip",
@@ -52,11 +47,9 @@ function PanicEngineStatusBar({ segments, activeIndex, layout = "row" }) {
  *   scoreLabel?: string
  *   status: {
  *     badge?: string
- *     title?: string
  *     hint?: string
- *     action?: string
- *     bandLabel?: string
  *     eventLabel?: string
+ *     bandLabel?: string
  *   } | null
  *   barSegments: { id: string; label: string; emoji: string; min?: number; max?: number }[]
  *   activeBarIndex: number
@@ -70,10 +63,8 @@ export default function PanicEngineStatusPanel({
   barSegments,
   activeBarIndex,
 }) {
-  const badgeTitle = variant === "macro" ? (status?.title ?? "현재 시장") : "현재 행동"
-  const badgeValue = status?.badge ?? status?.eventLabel ?? status?.bandLabel ?? "—"
+  const currentLabel = status?.badge ?? status?.eventLabel ?? status?.bandLabel ?? "—"
   const hint = status?.hint ?? ""
-  const actionLine = variant === "tactical" ? status?.action : null
 
   return (
     <div
@@ -82,23 +73,25 @@ export default function PanicEngineStatusPanel({
         variant === "macro" ? "panic-engine-status-panel--macro" : "panic-engine-status-panel--tactical",
       ].join(" ")}
     >
-      <div className="panic-engine-status-panel__top">
+      <div className="panic-engine-status-panel__grid">
         <div className="panic-engine-status-panel__score-block">
           <span className="panic-engine-status-panel__score-label">{scoreLabel}</span>
           <p className="panic-engine-status-panel__score m-0 font-mono tabular-nums">{score}</p>
         </div>
+
+        <div className="panic-engine-status-panel__bar-wrap">
+          <PanicEngineStatusBar
+            segments={barSegments}
+            activeIndex={activeBarIndex >= 0 ? activeBarIndex : 0}
+          />
+        </div>
+
         <div className="panic-engine-status-panel__badge-block">
-          <p className="panic-engine-status-panel__badge-title m-0">{badgeTitle}</p>
-          <p className="panic-engine-status-panel__badge-value m-0">{badgeValue}</p>
-          {actionLine ? <p className="panic-engine-status-panel__action m-0">{actionLine}</p> : null}
+          <p className="panic-engine-status-panel__badge-title m-0">현재</p>
+          <p className="panic-engine-status-panel__badge-value m-0">{currentLabel}</p>
           {hint ? <p className="panic-engine-status-panel__hint m-0">{hint}</p> : null}
         </div>
       </div>
-      <PanicEngineStatusBar
-        segments={barSegments}
-        activeIndex={activeBarIndex >= 0 ? activeBarIndex : 0}
-        layout={variant === "tactical" ? "stack" : "row"}
-      />
     </div>
   )
 }
