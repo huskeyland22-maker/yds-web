@@ -10,6 +10,7 @@ import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
 import PanicExpertMetricsAccordion from "./PanicExpertMetricsAccordion.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
+import PanicV2ScorePanel from "./PanicV2ScorePanel.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 
 function fmt(key, v) {
@@ -150,17 +151,10 @@ export default function PanicDeskDashboard({
                 variant="core"
               />
             ))}
-            <div
-              className="panic-metric-tile panic-metric-tile--core panic-metric-tile--summary"
-              aria-label="패닉 종합 점수"
-            >
-              <span className="panic-metric-tile__label">패닉지수</span>
-              <span className="panic-metric-tile__value" style={metricValueDisplayStyle("#e2e8f0")}>
-                {finalScore != null ? finalScore : "—"}
-              </span>
-            </div>
           </div>
         </section>
+
+        <PanicV2ScorePanel panicData={panicData} legacyScore={finalScore} />
 
         <PanicExpertMetricsAccordion>
           <div className="panic-metric-grid panic-metric-grid--expert">
