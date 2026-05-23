@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
+import { buildPanicScoreTimeline } from "../panic-v2/panicV2History.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
-import { HISTORY_SECTION_METRICS } from "../utils/panicDeskMetrics.js"
+import {
+  HISTORY_AUX_METRICS,
+  HISTORY_TAB_METRICS,
+  PANIC_V2_HISTORY_TAB,
+} from "../utils/panicDeskMetrics.js"
 import { historyZoneLegendItems } from "../utils/panicHistoryLegend.js"
 import {
   buildPanicHistoryInsight,
@@ -11,9 +16,10 @@ import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
+import PanicScoreTimeline from "./panic-history/PanicScoreTimeline.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
-const HISTORY_CHART_HEIGHT = 260
+const HISTORY_CHART_HEIGHT = 220
 
 /**
  * @param {{ rows?: object[] }} props
@@ -31,17 +37,13 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
 
-  const [activeHistoryTab, setActiveHistoryTab] = useState("vix")
+  const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
   const [rangeId, setRangeId] = useState("6M")
-  const didInitMetricRef = useRef(false)
 
-  useEffect(() => {
-    if (!history.length || didInitMetricRef.current) return
-    didInitMetricRef.current = true
-  }, [history.length])
+  const isMainPanicTab = activeHistoryTab === "panicV2"
 
   const metric = useMemo(
-    () => HISTORY_SECTION_METRICS.find((m) => m.key === activeHistoryTab) ?? HISTORY_SECTION_METRICS[0],
+    () => HISTORY_TAB_METRICS.find((m) => m.key === activeHistoryTab) ?? PANIC_V2_HISTORY_TAB,
     [activeHistoryTab],
   )
 
@@ -50,7 +52,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   const metricCounts = useMemo(() => {
     const counts = {}
-    for (const m of HISTORY_SECTION_METRICS) {
+    for (const m of HISTORY_TAB_METRICS) {
       counts[m.key] = countHistoryMetricPoints(history, m.key)
     }
     return counts
@@ -66,6 +68,11 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     [chartRowsSource, history, activeHistoryTab],
   )
 
+  const timeline = useMemo(
+    () => buildPanicScoreTimeline(chartRowsSource, 8),
+    [chartRowsSource],
+  )
+
   const zoneLegend = useMemo(() => historyZoneLegendItems(activeHistoryTab), [activeHistoryTab])
 
   const chartRows = useMemo(() => {
@@ -78,15 +85,34 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
       <div className="panic-history-section__head border-l-2 border-cyan-400/45 pl-2">
-        <p className="m-0 text-[11px] font-bold text-slate-100">패닉 히스토리</p>
+        <p className="m-0 text-[11px] font-bold text-slate-100">
+          {isMainPanicTab ? "패닉지수 히스토리" : "패닉 히스토리"}
+        </p>
         <p className="m-0 text-[9px] text-slate-500">
-          {metric.label} · {rangeId} · 실제 {chartRangeStats(history, rangeId, "lab").shown}일
+          {metric.label} · {rangeId} · {chartRangeStats(history, rangeId, "lab").shown}일
           {history.length > 0 ? ` · 전체 ${history.length}일` : ""}
         </p>
       </div>
 
-      <div className="panic-history-tabs mt-1.5 flex flex-wrap gap-1">
-        {HISTORY_SECTION_METRICS.map((m) => {
+      <div className="panic-history-tabs mt-1.5 flex flex-wrap items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setActiveHistoryTab("panicV2")}
+          className={[
+            "panic-history-tab panic-history-tab--main",
+            isMainPanicTab
+              ? "border-cyan-400/35 bg-cyan-500/15 text-cyan-50 ring-1 ring-cyan-400/25"
+              : "border-transparent text-slate-400",
+          ].join(" ")}
+          aria-pressed={isMainPanicTab}
+        >
+          <span className="panic-history-tab__label">패닉지수</span>
+          <span className="panic-history-tab__count font-mono text-[8px] opacity-75">
+            {metricCounts.panicV2 ?? 0}
+          </span>
+        </button>
+        <span className="panic-history-tabs__divider text-[8px] text-slate-600">보조</span>
+        {HISTORY_AUX_METRICS.map((m) => {
           const n = metricCounts[m.key] ?? 0
           const active = activeHistoryTab === m.key
           return (
@@ -95,19 +121,15 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
               type="button"
               onClick={() => setActiveHistoryTab(m.key)}
               className={[
-                "panic-history-tab inline-flex max-w-full items-center gap-0.5 rounded-md border px-1.5 py-1 transition",
+                "panic-history-tab panic-history-tab--aux inline-flex max-w-full items-center gap-0.5 rounded-md border px-1.5 py-0.5 transition",
                 active
-                  ? "border-white/20 bg-white/12 text-slate-50 ring-1 ring-white/12"
-                  : "border-transparent bg-transparent text-slate-400 hover:border-white/10 hover:text-slate-200",
+                  ? "border-white/20 bg-white/10 text-slate-100"
+                  : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
               ].join(" ")}
-              style={active ? { boxShadow: `0 0 10px ${m.accent}28` } : undefined}
-              title={m.tooltip ? `${m.label} · ${m.tooltip} · ${n}일` : `${m.label} · ${n}일`}
+              title={m.tooltip ? `${m.label} · ${n}일` : `${m.label} · ${n}일`}
               aria-pressed={active}
             >
-              <span className="panic-history-tab__label whitespace-nowrap">{m.label}</span>
-              <span className="panic-history-tab__count font-mono text-[8px] tabular-nums opacity-75">
-                {n}
-              </span>
+              <span className="panic-history-tab__label whitespace-nowrap text-[9px]">{m.label}</span>
             </button>
           )
         })}
@@ -125,45 +147,58 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
                 "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
                 rangeId === r.id ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
               ].join(" ")}
-              title={`실제 ${st.shown}일 / 전체 ${st.total}일`}
             >
               {r.label}
-              <span className="ml-0.5 text-[8px] opacity-80">({st.shown})</span>
             </button>
           )
         })}
       </div>
 
-      <PanicHistoryInsightPanel
-        header={insight.header}
-        changeStrip={insight.changeStrip}
-        interpretationLines={insight.interpretationLines}
-        bottomInsight={insight.bottomInsight}
-        metricKey={activeHistoryTab}
-        accent={metric.accent}
-      />
+      {isMainPanicTab && timeline.length > 0 ? (
+        <PanicScoreTimeline items={timeline} />
+      ) : null}
 
-      <div className="panic-history-zone-legend mt-1 flex flex-wrap items-center gap-1">
-        <span className="panic-history-zone-legend__chip panic-history-zone-legend__chip--floor">
-          저점
-        </span>
-        <span className="panic-history-zone-legend__chip panic-history-zone-legend__chip--transition">
-          전환
-        </span>
-        <span className="panic-history-zone-legend__chip panic-history-zone-legend__chip--risk">
-          과열
-        </span>
-        {zoneLegend.length > 0 ? (
-          <span className="ml-1 text-[8px] text-slate-600">
-            · {zoneLegend.map((z) => z.label).join(" / ")}
+      {!isMainPanicTab ? (
+        <PanicHistoryInsightPanel
+          header={insight.header}
+          changeStrip={insight.changeStrip}
+          interpretationLines={insight.interpretationLines}
+          bottomInsight={insight.bottomInsight}
+          metricKey={activeHistoryTab}
+          accent={metric.accent}
+        />
+      ) : (
+        <div className="panic-history-v2-compact mt-1.5 flex flex-wrap items-center justify-between gap-2 rounded-md border border-white/[0.06] bg-black/25 px-2 py-1.5">
+          <div>
+            <span className="text-[8px] font-semibold uppercase text-slate-500">현재</span>
+            <p className="m-0 font-mono text-[18px] font-bold tabular-nums text-cyan-100">
+              {insight.header.currentText}
+            </p>
+          </div>
+          <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-100">
+            {insight.header.statusLabel}
           </span>
-        ) : null}
-      </div>
+        </div>
+      )}
 
-      <div className="panic-history-section__chart mt-1 pb-2">
+      {zoneLegend.length > 0 && !isMainPanicTab ? (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {zoneLegend.map((z) => (
+            <span
+              key={z.id ?? z.label}
+              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-1.5 py-px text-[8px] text-slate-400"
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: z.color }} />
+              {z.label}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="panic-history-section__chart mt-1 pb-1">
         {showChart ? (
           <PanicHistoryLineChart
-            key={`panic-hist-v2-${activeHistoryTab}-${rangeId}`}
+            key={`panic-hist-${activeHistoryTab}-${rangeId}`}
             rows={chartRowsSource}
             chartData={chartRows}
             dataKey={chartPayload?.dataKey ?? "value"}
@@ -175,7 +210,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             height={HISTORY_CHART_HEIGHT}
           />
         ) : (
-          <div className="flex h-[80px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
+          <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
             히스토리 없음
           </div>
         )}

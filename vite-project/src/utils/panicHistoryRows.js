@@ -3,7 +3,8 @@
  */
 
 import { PANIC_INDEX_HISTORY_KEY, panicIndexRowToCycleChart } from "./panicIndexHistory.js"
-import { HISTORY_SECTION_METRICS } from "./panicDeskMetrics.js"
+import { HISTORY_AUX_METRICS, HISTORY_TAB_METRICS } from "./panicDeskMetrics.js"
+import { panicV2ScoreForRow } from "../panic-v2/panicV2History.js"
 import {
   loadStoredPanicHistory,
   panicHistoryLocalToCycleRows,
@@ -33,12 +34,19 @@ export function rawRowToCycle(row) {
     highYield: toNum(row.highYield ?? row.hyOas ?? row.high_yield),
     gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment),
     panicScore: toNum(row.panicScore ?? row.panic_score),
+    panicV2Score: toNum(row.panicV2Score ?? row.panic_v2_score),
   }
   return out
 }
 
 function rowValue(row, key) {
   if (!row) return null
+  if (key === "panicV2") {
+    const cached = row.panicV2Score ?? row.panic_v2_score
+    if (cached != null && Number.isFinite(Number(cached))) return Number(cached)
+    const computed = panicV2ScoreForRow(row)
+    return Number.isFinite(computed) ? computed : null
+  }
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
   if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
   if (key === "panicScore") return Number(row.panicScore ?? row.panic_score)
@@ -57,7 +65,7 @@ export function countHistoryMetricPoints(history, metricKey) {
 /** @param {object[]} rows */
 export function historyHasAnyMetric(rows) {
   if (!Array.isArray(rows) || !rows.length) return false
-  return HISTORY_SECTION_METRICS.some((m) => rows.some((r) => Number.isFinite(rowValue(r, m.key))))
+  return HISTORY_TAB_METRICS.some((m) => rows.some((r) => Number.isFinite(rowValue(r, m.key))))
 }
 
 /**
@@ -65,7 +73,7 @@ export function historyHasAnyMetric(rows) {
  * @param {string} [preferred]
  */
 export function resolveDefaultHistoryMetric(rows, preferred = "vix") {
-  const order = ["panicScore", "vix", ...HISTORY_SECTION_METRICS.map((m) => m.key)]
+  const order = ["panicV2", "panicScore", "vix", ...HISTORY_AUX_METRICS.map((m) => m.key)]
   const seen = new Set()
   for (const key of [preferred, ...order]) {
     if (!key || seen.has(key)) continue

@@ -3,3 +3,9 @@ export { normalizePanicV2Metric, PANIC_V2_KNOTS } from "./normalizeMetrics.js"
 export { piecewiseNorm, clamp } from "./piecewise.js"
 export { PANIC_V2_METRICS, PANIC_V2_CORE_WEIGHT_SUM, PANIC_V2_EXPERT_WEIGHT_SUM } from "./weights.js"
 export { resolvePanicV2Status, PANIC_V2_STATUS_BANDS } from "./panicV2Status.js"
+export {
+  buildPanicScoreTimeline,
+  buildPanicV2HistoryChartData,
+  enrichHistoryWithPanicV2,
+  panicV2ScoreForRow,
+} from "./panicV2History.js"

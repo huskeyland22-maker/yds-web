@@ -3,6 +3,7 @@
  * 서버: Supabase panic_index_history · 로컬: localStorage
  */
 
+import { computePanicV2 } from "../panic-v2/index.js"
 import { isStaleHistoryCalendarDate } from "./cycleHistoryHygiene.js"
 
 export const PANIC_INDEX_HISTORY_KEY = "yds-panic-index-history-v1"
@@ -27,8 +28,10 @@ export function calendarDateFromPanic(panicData) {
 export function buildPanicIndexSnapshot(panicData, dateOverride) {
   if (!panicData || typeof panicData !== "object") return null
   const date = dateOverride || calendarDateFromPanic(panicData)
+  const v2 = computePanicV2(panicData, { includeLegacy: false })
   return {
     date,
+    panicV2Score: v2.score,
     vix: toNum(panicData.vix),
     vxn: toNum(panicData.vxn),
     fearGreed: toNum(panicData.fearGreed),

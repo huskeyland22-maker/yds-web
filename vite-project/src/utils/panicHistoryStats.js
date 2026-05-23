@@ -3,10 +3,16 @@
  */
 import { formatMetricValue } from "../components/macroCycleChartUtils.js"
 import { interpretPanicMetric } from "./panicMetricInterpretation.js"
+import { panicV2ScoreForRow } from "../panic-v2/panicV2History.js"
+import { resolvePanicV2Status } from "../panic-v2/panicV2Status.js"
 import { sortHistoryRowsAsc } from "./panicHistoryDesk.js"
 
 /** @param {object} row @param {string} key */
 function rowValue(row, key) {
+  if (key === "panicV2") {
+    const v = panicV2ScoreForRow(row)
+    return Number.isFinite(v) ? v : null
+  }
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
   if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
   return Number(row[key])
@@ -36,6 +42,7 @@ function percentileUpperLabel(values, current, higherIsBad = true) {
 }
 
 export const HIGHER_IS_BAD = {
+  panicV2: true,
   vix: true,
   vxn: true,
   putCall: true,
@@ -186,14 +193,22 @@ export function computeHistoryMetricStats(rows, metricKey) {
   const current = values[values.length - 1]
   const low = Math.min(...values)
   const high = Math.max(...values)
-  const ins = interpretPanicMetric(metricKey, current)
-  const statusLabel = ins?.statusLabel ?? "—"
+  let statusLabel = "—"
+  if (metricKey === "panicV2") {
+    statusLabel = resolvePanicV2Status(current)?.label ?? "—"
+  } else {
+    const ins = interpretPanicMetric(metricKey, current)
+    statusLabel = ins?.statusLabel ?? "—"
+  }
 
   const changes = computeHistoryChangeRates(rows, metricKey)
 
   return {
     current,
-    currentText: formatMetricValue(metricKey, current),
+    currentText:
+      metricKey === "panicV2"
+        ? String(Math.round(current))
+        : formatMetricValue(metricKey, current),
     low,
     lowText: formatMetricValue(metricKey, low),
     high,

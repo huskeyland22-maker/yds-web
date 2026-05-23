@@ -7,7 +7,7 @@ export const CORE_METRICS = [
   { key: "putCall", label: "풋콜비율", chartLabel: "P/C", accent: "#60a5fa", tooltip: "옵션 Put/Call 비율" },
   {
     key: "highYield",
-    label: "하이일드 스프레드",
+    label: "하이일드",
     chartLabel: "HY OAS",
     accent: "#fb923c",
     tooltip: "하이일드 채권 OAS 스프레드",
@@ -32,8 +32,17 @@ export const EXPERT_METRICS = [
 /** @type {PanicDeskMetric[]} */
 export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 
-/** 패닉지수 히스토리 탭·차트 (약어 · 한글 한 줄) */
-export const HISTORY_SECTION_METRICS = [
+/** 패닉 히스토리 메인 탭 — V2 가중 통합 */
+export const PANIC_V2_HISTORY_TAB = {
+  key: "panicV2",
+  label: "패닉지수",
+  chartLabel: "패닉 V2",
+  accent: "#22d3ee",
+  tooltip: "9대 지표 가중 통합 (핵심 70 + 전문가 30)",
+}
+
+/** 보조 탭 — 개별 지표 */
+export const HISTORY_AUX_METRICS = [
   { key: "vix", label: "VIX · 변동성", chartLabel: "VIX", accent: "#f87171", tooltip: "S&P 500 내재 변동성" },
   { key: "vxn", label: "VXN · 나스닥", chartLabel: "VXN", accent: "#2dd4bf", tooltip: "나스닥 변동성 지수" },
   { key: "fearGreed", label: "CNN · 공포탐욕", chartLabel: "CNN", accent: "#fbbf24", tooltip: "CNN Fear & Greed" },
@@ -51,7 +60,14 @@ export const HISTORY_SECTION_METRICS = [
   { key: "gsBullBear", label: "GS · 강약", chartLabel: "GS", accent: "#a78bfa", tooltip: "Goldman Sachs 강세·약세" },
 ]
 
+/** @deprecated HISTORY_AUX_METRICS + PANIC_V2_HISTORY_TAB 사용 */
+export const HISTORY_SECTION_METRICS = HISTORY_AUX_METRICS
+
+/** 히스토리 UI 탭 순서 (메인 + 보조) */
+export const HISTORY_TAB_METRICS = [PANIC_V2_HISTORY_TAB, ...HISTORY_AUX_METRICS]
+
 /** @param {string} key */
 export function findChartMetric(key) {
-  return ALL_CHART_METRICS.find((m) => m.key === key) ?? null
+  if (key === "panicV2") return PANIC_V2_HISTORY_TAB
+  return ALL_CHART_METRICS.find((m) => m.key === key) ?? HISTORY_AUX_METRICS.find((m) => m.key === key) ?? null
 }

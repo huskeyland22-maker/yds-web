@@ -78,6 +78,22 @@ const SCENARIO_FIXTURES = [
     },
   },
   {
+    label: "2024-08 엔캐리·엔화",
+    year: 2024,
+    row: {
+      date: "2024-08-05",
+      vix: 38,
+      vxn: 40,
+      highYield: 4.5,
+      move: 115,
+      putCall: 0.92,
+      fearGreed: 28,
+      skew: 136,
+      bofa: 3.2,
+      gsBullBear: 32,
+    },
+  },
+  {
     label: "2025-04 관세·변동성",
     year: 2025,
     row: {
@@ -199,7 +215,7 @@ if (historyRows.length) {
   const scored = historyRows.map(scoreRow).filter((r) => r.v2 != null)
   const byYear = summarizeByYear(scored)
   console.log("\n=== 히스토리 연도별 평균 ===")
-  for (const year of ["2020", "2022", "2023", "2025"]) {
+  for (const year of ["2020", "2022", "2024", "2025"]) {
     const y = byYear[year]
     if (!y?.n) {
       console.log(`${year}: (데이터 없음)`)

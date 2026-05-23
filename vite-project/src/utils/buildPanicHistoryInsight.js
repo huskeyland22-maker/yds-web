@@ -2,6 +2,7 @@
  * 패닉 히스토리 V2 — 상단 카드·해석·변곡점·하단 인사이트
  */
 import { formatChartAxisMd } from "./chartDateFormat.js"
+import { resolvePanicV2Status } from "../panic-v2/panicV2Status.js"
 import { interpretPanicMetric } from "./panicMetricInterpretation.js"
 import {
   computeHistoryChangeRates,
@@ -182,7 +183,10 @@ export function detectHistoryInflections(rows, metricKey, opts = {}) {
   for (const row of sorted) {
     const v = rowValue(row, metricKey)
     if (!Number.isFinite(v)) continue
-    const ins = interpretPanicMetric(metricKey, v)
+    const ins =
+      metricKey === "panicV2"
+        ? { statusLabel: resolvePanicV2Status(v)?.label ?? null }
+        : interpretPanicMetric(metricKey, v)
     const status = ins?.statusLabel ?? null
     if (prevStatus && status && status !== prevStatus) {
       const badge = resolvePanicBadge(ins)
@@ -232,6 +236,8 @@ export function buildMarketInterpretationLines(metricKey, stats, badge, changes)
   if (interp?.headline) {
     const short = interp.headline.replace(/\.$/, "").slice(0, 42)
     lines.push(short.length < interp.headline.length ? `${short}…` : short)
+  } else if (metricKey === "panicV2" && Number.isFinite(stats.current)) {
+    lines.push(`통합 패닉 ${Math.round(stats.current)} · ${resolvePanicV2Status(stats.current)?.label ?? "—"}`)
   } else if (metricKey === "vix" && badge.id === "stable") {
     lines.push("변동성 안정 구간")
   }
@@ -266,13 +272,15 @@ export function buildMarketInterpretationLines(metricKey, stats, badge, changes)
 export function buildBottomInsightText(metricKey, stats, badge, changes) {
   const parts = []
   const metricName =
-    metricKey === "vix"
-      ? "VIX"
-      : metricKey === "fearGreed"
-        ? "F&G"
-        : metricKey === "putCall"
-          ? "P/C"
-          : "지표"
+    metricKey === "panicV2"
+      ? "패닉"
+      : metricKey === "vix"
+        ? "VIX"
+        : metricKey === "fearGreed"
+          ? "F&G"
+          : metricKey === "putCall"
+            ? "P/C"
+            : "지표"
 
   if (badge.id === "stable") parts.push(`${metricName} 안정.`)
   else if (badge.id === "transition") parts.push(`${metricName} 전환 구간.`)
@@ -311,7 +319,9 @@ export function buildPanicHistoryInsight(rows, fullRows, metricKey) {
   const stats = computeHistoryMetricStats(rows, metricKey)
   const changes = computeHistoryChangeRates(rows, metricKey)
   const interp = Number.isFinite(stats.current)
-    ? interpretPanicMetric(metricKey, stats.current, { historyRows: rows })
+    ? metricKey === "panicV2"
+      ? { statusLabel: resolvePanicV2Status(stats.current)?.label, tone: "neutral" }
+      : interpretPanicMetric(metricKey, stats.current, { historyRows: rows })
     : null
   const badge = resolvePanicBadge(interp)
 

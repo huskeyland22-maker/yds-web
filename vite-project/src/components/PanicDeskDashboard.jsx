@@ -1,16 +1,17 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { getFinalScore } from "../utils/tradingScores.js"
-import { CORE_METRICS, EXPERT_METRICS, findChartMetric } from "../utils/panicDeskMetrics.js"
-import { formatMetricValue, metricValueDisplayStyle } from "./macroCycleChartUtils.js"
+import { EXPERT_METRICS } from "../utils/panicDeskMetrics.js"
+import { formatMetricValue } from "./macroCycleChartUtils.js"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
 import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
 import RecommendationEnginePanel from "./RecommendationEnginePanel.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
+import PanicCoreMetricsBlock from "./panic-metrics/PanicCoreMetricsBlock.jsx"
+import PanicMetricRow from "./panic-metrics/PanicMetricRow.jsx"
 import PanicExpertMetricsAccordion from "./PanicExpertMetricsAccordion.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
-import PanicV2ScorePanel from "./PanicV2ScorePanel.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 
 function fmt(key, v) {
@@ -45,46 +46,10 @@ function SectionLabel({ title, variant = "core" }) {
 
 /**
  * @param {{
- *   metric: import("../utils/panicDeskMetrics.js").PanicDeskMetric
- *   value: string
- *   selected: boolean
- *   onSelect: () => void
- *   variant?: "core" | "expert"
- * }} props
- */
-function MetricTile({ metric, value, selected, onSelect, variant = "core" }) {
-  const isExpert = variant === "expert"
-  const valueStyle = isExpert
-    ? { color: metric.accent, opacity: 0.82 }
-    : metricValueDisplayStyle(metric.accent)
-  return (
-    <button
-      type="button"
-      title={metric.tooltip}
-      aria-label={metric.tooltip ? `${metric.label}: ${metric.tooltip}` : metric.label}
-      data-metric-tooltip={metric.tooltip ?? ""}
-      onClick={onSelect}
-      className={[
-        "panic-metric-tile",
-        isExpert ? "panic-metric-tile--expert" : "panic-metric-tile--core",
-        selected ? "is-selected" : "",
-      ].join(" ")}
-    >
-      <span className="panic-metric-tile__label">{metric.label}</span>
-      <span className="panic-metric-tile__value" style={valueStyle}>
-        {value}
-      </span>
-    </button>
-  )
-}
-
-/**
- * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
  *   isStale?: boolean
  *   asOfDateLabel?: string
- *   marketState?: { headline?: string; stateKey?: string }
  * }} props
  */
 export default function PanicDeskDashboard({
@@ -94,8 +59,6 @@ export default function PanicDeskDashboard({
   asOfDateLabel = "—",
 }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
-
-  const [chartMetric, setChartMetric] = useState("vix")
 
   const finalScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
 
@@ -108,15 +71,6 @@ export default function PanicDeskDashboard({
 
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
-
-  const chartSeries = useMemo(() => {
-    const m = findChartMetric(chartMetric)
-    return {
-      key: chartMetric,
-      name: m?.chartLabel ?? m?.label ?? chartMetric,
-      color: m?.accent ?? "#94a3b8",
-    }
-  }, [chartMetric])
 
   if (!panicData && safeHistory.length === 0) {
     return (
@@ -136,35 +90,18 @@ export default function PanicDeskDashboard({
         <CycleDataBasisBar updatedAt={panicData?.updatedAt} cycleSource={cycleDataSource} bondSource="FRED" />
       </div>
 
-      {/* 1. 핵심지수 · 전문가 리스크 */}
       <div className="panic-v2-desk__metrics-slot">
         <SectionLabel title="핵심지수" variant="core" />
-        <section className="trading-card-shell overflow-hidden border border-white/[0.1] p-px shadow-[0_0_28px_rgba(0,0,0,0.45)]">
-          <div className="panic-metric-grid panic-metric-grid--core">
-            {CORE_METRICS.map((metric) => (
-              <MetricTile
-                key={metric.key}
-                metric={metric}
-                value={fmt(metric.key, panicData?.[metric.key])}
-                selected={chartMetric === metric.key}
-                onSelect={() => setChartMetric(metric.key)}
-                variant="core"
-              />
-            ))}
-          </div>
-        </section>
-
-        <PanicV2ScorePanel panicData={panicData} legacyScore={finalScore} />
+        <PanicCoreMetricsBlock panicData={panicData} legacyScore={finalScore} />
 
         <PanicExpertMetricsAccordion>
-          <div className="panic-metric-grid panic-metric-grid--expert">
+          <div className="panic-metric-rows-grid panic-metric-rows-grid--expert">
             {EXPERT_METRICS.map((metric) => (
-              <MetricTile
+              <PanicMetricRow
                 key={metric.key}
-                metric={metric}
+                label={metric.label}
                 value={fmt(metric.key, panicData?.[metric.key])}
-                selected={chartMetric === metric.key}
-                onSelect={() => setChartMetric(metric.key)}
+                accent={metric.accent}
                 variant="expert"
               />
             ))}
@@ -172,7 +109,6 @@ export default function PanicDeskDashboard({
         </PanicExpertMetricsAccordion>
       </div>
 
-      {/* 2. 시장 상태 배지 */}
       <div className="panic-v2-desk__status-slot">
         <DailyMarketReportPanel
           panicData={panicData}
@@ -182,7 +118,6 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      {/* 3. 추천 단계 (전술 HUD) */}
       <div className="panic-v2-desk__recommend-slot">
         <RecommendationEnginePanel
           panicData={panicData}
@@ -192,7 +127,6 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      {/* 4. 패닉 히스토리 — 메인 차트 */}
       <div className="panic-v2-desk__history-slot">
         <SectionErrorBoundary
           label="패닉 히스토리"
@@ -206,7 +140,6 @@ export default function PanicDeskDashboard({
         </SectionErrorBoundary>
       </div>
 
-      {/* 5. 채권·유동성 참고 — 하단 보조 */}
       <hr className="cycle-desk-divider cycle-desk-divider--reference" aria-hidden />
 
       <div className="panic-v2-desk__bond-slot">
@@ -220,7 +153,6 @@ export default function PanicDeskDashboard({
           lastBondSyncAt={bondSnapshot.lastBondSyncAt}
         />
       </div>
-
     </div>
   )
 }

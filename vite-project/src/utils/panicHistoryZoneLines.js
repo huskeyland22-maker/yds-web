@@ -19,6 +19,15 @@ export const INSIGHT_ZONE_COLORS = {
 
 /** @param {string} metricKey @returns {MetricZoneBand[]} */
 export function metricZoneBands(metricKey) {
+  if (metricKey === "panicV2") {
+    return [
+      { y1: 0, y2: 20, label: "안정", color: "#22d3ee", area: true },
+      { y1: 20, y2: 40, label: "전환", color: "#38bdf8", area: true },
+      { y1: 40, y2: 60, label: "경계", color: "#f97316", area: true },
+      { y1: 60, y2: 80, label: "공포", color: "#ef4444", area: true },
+      { y1: 80, y2: 100, label: "패닉", color: "#dc2626", area: true },
+    ]
+  }
   if (metricKey === "fearGreed") {
     return MOOD_SPECTRUM.map((m, i) => ({
       y1: m.min,
@@ -131,6 +140,7 @@ export function metricInsightZoneBands(metricKey) {
 
 /** @param {string} metricKey @returns {number[]} */
 export function metricZoneLineYs(metricKey) {
+  if (metricKey === "panicV2") return [20, 40, 60, 80]
   if (metricKey === "fearGreed") return [20, 40, 60, 80]
   if (metricKey === "vix" || metricKey === "vxn") return [15, 20, 30]
   if (metricKey === "putCall") return [0.55, 0.85]
