@@ -18,7 +18,7 @@ export function mergePanicHistoryV2IntoCycleRows(cycleRows, v2Rows) {
 
   const byDate = new Map(
     v2Rows
-      .filter((r) => r?.date && toNum(r.panicV2 ?? r.panic_index_v2 ?? r.panic_v2) != null)
+      .filter((r) => r?.date && toNum(r.panic_v2 ?? r.panicV2 ?? r.panic_index_v2 ?? r.panic_v2) != null)
       .map((r) => [String(r.date).slice(0, 10), r]),
   )
 

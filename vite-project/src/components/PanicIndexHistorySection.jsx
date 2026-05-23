@@ -44,6 +44,12 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
 
+  useEffect(() => {
+    if (!history.length) return
+    const latest = history[history.length - 1]
+    console.log("[패닉V2]", latest?.panic_v2 ?? latest?.panicV2 ?? null)
+  }, [history])
+
   const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
   const [rangeId, setRangeId] = useState("6M")
 

@@ -26,6 +26,7 @@ const modules = [
   "api/_lib/stockSignalFromBars.js",
   "api/_lib/stockSignalHistory.js",
   "api/_lib/panicApiHandlers.js",
+  "api/_lib/panicHistoryEnrichV2.js",
   "api/panic.js",
   "api/ai/reports.js",
   "api/stock-indicators.js",

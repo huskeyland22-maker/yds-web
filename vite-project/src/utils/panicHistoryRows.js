@@ -37,7 +37,13 @@ export function rawRowToCycle(row) {
     highYield: toNum(row.highYield ?? row.hyOas ?? row.high_yield),
     gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment),
     panicScore: toNum(row.panicScore ?? row.panic_score),
-    panicV2Score: toNum(row.panicV2Score ?? row.panic_v2_score),
+    panicV2Score: toNum(
+      row.panicV2Score ?? row.panicV2DynamicScore ?? row.panic_v2 ?? row.panic_index_v2 ?? row.panic_v2_score,
+    ),
+    panicV2DynamicScore: toNum(
+      row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_v2 ?? row.panic_index_v2,
+    ),
+    panic_v2: toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score),
   }
   return out
 }
@@ -65,7 +71,7 @@ export function countHistoryMetricPoints(history, metricKey) {
   if (!Array.isArray(history) || !metricKey) return 0
   if (metricKey === "panicV2") {
     const cached = history.filter((r) =>
-      Number.isFinite(Number(r.panicV2DynamicScore ?? r.panicV2Score)),
+      Number.isFinite(Number(r.panic_v2 ?? r.panicV2DynamicScore ?? r.panicV2Score)),
     ).length
     if (cached > 0) return cached
     return buildPanicV2DynamicSeries(history).filter((p) => p.score != null).length

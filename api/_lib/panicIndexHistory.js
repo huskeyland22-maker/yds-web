@@ -1,3 +1,4 @@
+import { enrichPanicIndexHistoryWithV2 } from "./panicHistoryEnrichV2.js"
 import { supabaseRest } from "./supabaseRest.js"
 import { enrichPanicHistoryRow } from "./marketCycleCompute.js"
 import {
@@ -184,8 +185,9 @@ export async function fetchPanicIndexHistoryRows(opts = {}) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(from)) suffix += `&date=gte.${from}`
   if (/^\d{4}-\d{2}-\d{2}$/.test(to)) suffix += `&date=lte.${to}`
   const rows = await fetchPanicIndexHistoryRaw(supabaseRest, suffix)
-  return rows
+  const clientRows = rows
     .map(panicIndexHistoryRowToClient)
     .filter(Boolean)
     .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+  return enrichPanicIndexHistoryWithV2(clientRows)
 }

@@ -16,6 +16,8 @@ function rowValue(row, key) {
     return Number.isFinite(v) ? v : null
   }
   if (key === "panicV2") {
+    const cached = row.panic_v2 ?? row.panicV2DynamicScore ?? row.panicV2Score
+    if (cached != null && Number.isFinite(Number(cached))) return Number(cached)
     const v = panicV2ScoreForRow(row)
     return Number.isFinite(v) ? v : null
   }

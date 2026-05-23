@@ -277,6 +277,10 @@ export async function fetchPanicIndexHistory(options = {}) {
     return options.withCycle ? { rows: [], cycleRows: [] } : []
   }
   logHistoryFetchDebug(json.rows, options.debugMetric, options.debugRange)
+  if (json.rows?.length) {
+    const latest = json.rows[json.rows.length - 1]
+    console.log("[패닉V2]", latest?.panic_v2 ?? latest?.panicV2 ?? null)
+  }
   if (isDataTraceEnabled()) {
     logFetchSuccess("panic-index-history", {
       rows: json.rows.length,
