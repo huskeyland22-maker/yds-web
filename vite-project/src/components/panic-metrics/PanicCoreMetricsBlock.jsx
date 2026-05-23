@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { computePanicV2 } from "../../panic-v2/index.js"
+import { latestPanicV2DynamicScore } from "../../panic-v2/panicV2Dynamic.js"
+import { resolvePanicV2Status } from "../../panic-v2/panicV2Status.js"
 import { CORE_METRICS } from "../../utils/panicDeskMetrics.js"
 import { formatMetricValue } from "../macroCycleChartUtils.js"
 import PanicMetricRow from "./PanicMetricRow.jsx"
@@ -9,18 +11,32 @@ function fmt(key, v) {
   return formatMetricValue(key, Number(v))
 }
 
+/** 핵심 4지표 고정 순서: 1행 VIX·FG, 2행 P/C·HY */
+const CORE_ROW_ORDER = ["vix", "fearGreed", "putCall", "highYield"]
+
 /**
- * @param {{ panicData: object | null; legacyScore?: number | null }} props
+ * @param {{ panicData: object | null; historyRows?: object[] }} props
  */
-export default function PanicCoreMetricsBlock({ panicData, legacyScore = null }) {
-  const [explainOpen, setExplainOpen] = useState(false)
-  const v2 = useMemo(() => computePanicV2(panicData), [panicData])
-  const status = v2.status
+export default function PanicCoreMetricsBlock({ panicData, historyRows = [] }) {
+  const levelV2 = useMemo(() => computePanicV2(panicData), [panicData])
+
+  const displayScore = useMemo(() => {
+    const dynamic = historyRows.length >= 12 ? latestPanicV2DynamicScore(historyRows) : null
+    if (dynamic != null) return dynamic
+    return levelV2.score
+  }, [historyRows, levelV2.score])
+
+  const status = useMemo(() => resolvePanicV2Status(displayScore), [displayScore])
+
+  const coreByKey = useMemo(() => {
+    const map = new Map(CORE_METRICS.map((m) => [m.key, m]))
+    return CORE_ROW_ORDER.map((k) => map.get(k)).filter(Boolean)
+  }, [])
 
   return (
     <section className="panic-core-block trading-card-shell overflow-hidden border border-white/[0.1] p-px">
-      <div className="panic-metric-rows-grid">
-        {CORE_METRICS.map((m) => (
+      <div className="panic-core-grid">
+        {coreByKey.map((m) => (
           <PanicMetricRow
             key={m.key}
             label={m.label}
@@ -31,48 +47,17 @@ export default function PanicCoreMetricsBlock({ panicData, legacyScore = null })
         ))}
         <PanicMetricRow
           label="패닉지수"
-          value={v2.score != null ? String(v2.score) : "—"}
+          value={displayScore != null ? String(displayScore) : "—"}
           accent="#22d3ee"
           variant="highlight"
-          fullWidth
         />
         <PanicMetricRow
           label="상태"
           value={status?.label ?? "—"}
           accent="#94a3b8"
           variant="highlight"
-          fullWidth
         />
       </div>
-
-      {v2.score != null ? (
-        <button
-          type="button"
-          className="panic-core-block__explain-btn"
-          aria-expanded={explainOpen}
-          onClick={() => setExplainOpen((o) => !o)}
-        >
-          왜 {v2.score}인가 {explainOpen ? "−" : "+"}
-        </button>
-      ) : null}
-
-      {explainOpen && v2.score != null ? (
-        <div className="panic-core-block__explain">
-          <p className="m-0 text-[9px] text-slate-500">
-            9지표 가중 (핵심 70 + 전문가 30) · V2
-            {legacyScore != null ? ` · 기존 ${legacyScore}` : ""}
-          </p>
-          <div className="panic-core-block__chips">
-            {v2.metrics
-              .filter((m) => !m.missing)
-              .map((m) => (
-                <span key={m.key} className="panic-core-block__chip">
-                  {m.shortLabel} {m.contributionLabel}
-                </span>
-              ))}
-          </div>
-        </div>
-      ) : null}
     </section>
   )
 }

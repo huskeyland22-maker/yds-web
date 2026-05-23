@@ -4,7 +4,9 @@
 
 import { PANIC_INDEX_HISTORY_KEY, panicIndexRowToCycleChart } from "./panicIndexHistory.js"
 import { HISTORY_AUX_METRICS, HISTORY_TAB_METRICS } from "./panicDeskMetrics.js"
+import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
 import { panicV2ScoreForRow } from "../panic-v2/panicV2History.js"
+import { buildPanicV2DynamicSeries } from "../panic-v2/panicV2Dynamic.js"
 import {
   loadStoredPanicHistory,
   panicHistoryLocalToCycleRows,
@@ -41,6 +43,10 @@ export function rawRowToCycle(row) {
 
 function rowValue(row, key) {
   if (!row) return null
+  if (key === "panicV1") {
+    const v = panicV1ScoreForRow(row)
+    return Number.isFinite(v) ? v : null
+  }
   if (key === "panicV2") {
     const cached = row.panicV2Score ?? row.panic_v2_score
     if (cached != null && Number.isFinite(Number(cached))) return Number(cached)
@@ -56,6 +62,9 @@ function rowValue(row, key) {
 /** @param {object[]} history @param {string} metricKey */
 export function countHistoryMetricPoints(history, metricKey) {
   if (!Array.isArray(history) || !metricKey) return 0
+  if (metricKey === "panicV2") {
+    return buildPanicV2DynamicSeries(history).filter((p) => p.score != null).length
+  }
   return history.filter((r) => {
     const v = rowValue(r, metricKey)
     return v != null && Number.isFinite(v)
@@ -73,7 +82,7 @@ export function historyHasAnyMetric(rows) {
  * @param {string} [preferred]
  */
 export function resolveDefaultHistoryMetric(rows, preferred = "vix") {
-  const order = ["panicV2", "panicScore", "vix", ...HISTORY_AUX_METRICS.map((m) => m.key)]
+  const order = ["panicV2", "panicV1", "panicScore", "vix", ...HISTORY_AUX_METRICS.map((m) => m.key)]
   const seen = new Set()
   for (const key of [preferred, ...order]) {
     if (!key || seen.has(key)) continue

@@ -4,6 +4,7 @@
 import { formatChartAxisMd } from "../utils/chartDateFormat.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { computePanicV2, pickPanicV2Raw } from "./computePanicV2.js"
+import { buildPanicV2DynamicSeries } from "./panicV2Dynamic.js"
 import { resolvePanicV2Status } from "./panicV2Status.js"
 
 /** @param {object} row */
@@ -67,7 +68,24 @@ export function buildPanicV2HistoryChartData(history) {
  * @param {object[]} history
  * @param {number} [limit]
  */
-export function buildPanicScoreTimeline(history, limit = 8) {
+/**
+ * @param {object[]} history
+ * @param {number} [limit]
+ * @param {"level" | "dynamic"} [mode]
+ */
+export function buildPanicScoreTimeline(history, limit = 8, mode = "dynamic") {
+  if (mode === "dynamic") {
+    return buildPanicV2DynamicSeries(history)
+      .filter((r) => r.score != null)
+      .slice(-limit)
+      .map((r) => ({
+        date: r.date,
+        axisLabel: r.axisLabel,
+        score: r.score,
+        status: r.status,
+        statusId: r.statusId,
+      }))
+  }
   const enriched = enrichHistoryWithPanicV2(history)
   return enriched
     .filter((r) => r.panicV2Score != null)

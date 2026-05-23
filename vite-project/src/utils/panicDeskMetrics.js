@@ -32,13 +32,22 @@ export const EXPERT_METRICS = [
 /** @type {PanicDeskMetric[]} */
 export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 
-/** 패닉 히스토리 메인 탭 — V2 가중 통합 */
+/** 패닉 히스토리 — V2 동적(변화율·z-score) */
 export const PANIC_V2_HISTORY_TAB = {
   key: "panicV2",
-  label: "패닉지수",
+  label: "패닉 V2",
   chartLabel: "패닉 V2",
   accent: "#22d3ee",
-  tooltip: "9대 지표 가중 통합 (핵심 70 + 전문가 30)",
+  tooltip: "N일 변화율 → z-score → 가중합",
+}
+
+/** 패닉 히스토리 — V1 (getFinalScore) */
+export const PANIC_V1_HISTORY_TAB = {
+  key: "panicV1",
+  label: "패닉 V1",
+  chartLabel: "패닉 V1",
+  accent: "#94a3b8",
+  tooltip: "기존 통합 패닉지수 (단기·중기 가중)",
 }
 
 /** 보조 탭 — 개별 지표 */
@@ -64,10 +73,11 @@ export const HISTORY_AUX_METRICS = [
 export const HISTORY_SECTION_METRICS = HISTORY_AUX_METRICS
 
 /** 히스토리 UI 탭 순서 (메인 + 보조) */
-export const HISTORY_TAB_METRICS = [PANIC_V2_HISTORY_TAB, ...HISTORY_AUX_METRICS]
+export const HISTORY_TAB_METRICS = [PANIC_V2_HISTORY_TAB, PANIC_V1_HISTORY_TAB, ...HISTORY_AUX_METRICS]
 
 /** @param {string} key */
 export function findChartMetric(key) {
   if (key === "panicV2") return PANIC_V2_HISTORY_TAB
+  if (key === "panicV1") return PANIC_V1_HISTORY_TAB
   return ALL_CHART_METRICS.find((m) => m.key === key) ?? HISTORY_AUX_METRICS.find((m) => m.key === key) ?? null
 }

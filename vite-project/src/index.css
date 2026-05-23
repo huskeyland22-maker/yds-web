@@ -2223,7 +2223,37 @@
     }
   }
 
-  /* 핵심·전문가 — 가로형 2열 행 */
+  /* 핵심지수 — 2x2 + 패닉/상태 (60px 이하) */
+  .panic-core-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, minmax(0, 60px));
+    gap: 1px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .panic-core-grid .panic-metric-row {
+    min-height: 0;
+    max-height: 60px;
+    height: 100%;
+    padding: 6px 10px;
+  }
+
+  .panic-core-grid .panic-metric-row__label {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .panic-core-grid .panic-metric-row__value {
+    font-size: 14px;
+  }
+
+  .panic-core-grid .panic-metric-row--highlight .panic-metric-row__value {
+    font-size: 15px;
+  }
+
+  /* 전문가·기타 — 가로형 2열 */
   .panic-metric-rows-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2236,14 +2266,24 @@
     background: rgba(255, 255, 255, 0.03);
   }
 
+  .panic-metric-rows-grid--expert-5 .panic-metric-row:last-child {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 480px) {
+    .panic-metric-rows-grid--expert-5 .panic-metric-row:last-child {
+      max-width: 50%;
+    }
+  }
+
   .panic-metric-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    min-height: 56px;
-    max-height: 64px;
-    padding: 8px 10px;
+    min-height: 52px;
+    max-height: 60px;
+    padding: 6px 10px;
     border: none;
     background: #070a10;
     text-align: left;

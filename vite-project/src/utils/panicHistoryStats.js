@@ -3,12 +3,18 @@
  */
 import { formatMetricValue } from "../components/macroCycleChartUtils.js"
 import { interpretPanicMetric } from "./panicMetricInterpretation.js"
+import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
+import { buildPanicV2DynamicSeries } from "../panic-v2/panicV2Dynamic.js"
 import { panicV2ScoreForRow } from "../panic-v2/panicV2History.js"
 import { resolvePanicV2Status } from "../panic-v2/panicV2Status.js"
 import { sortHistoryRowsAsc } from "./panicHistoryDesk.js"
 
 /** @param {object} row @param {string} key */
 function rowValue(row, key) {
+  if (key === "panicV1") {
+    const v = panicV1ScoreForRow(row)
+    return Number.isFinite(v) ? v : null
+  }
   if (key === "panicV2") {
     const v = panicV2ScoreForRow(row)
     return Number.isFinite(v) ? v : null
@@ -20,6 +26,11 @@ function rowValue(row, key) {
 
 /** @param {object[]} rows @param {string} metricKey */
 export function historyValuesForMetric(rows, metricKey) {
+  if (metricKey === "panicV2") {
+    return buildPanicV2DynamicSeries(rows)
+      .map((p) => p.score)
+      .filter((v) => v != null && Number.isFinite(v))
+  }
   return sortHistoryRowsAsc(rows)
     .map((r) => rowValue(r, metricKey))
     .filter(Number.isFinite)
@@ -43,6 +54,7 @@ function percentileUpperLabel(values, current, higherIsBad = true) {
 
 export const HIGHER_IS_BAD = {
   panicV2: true,
+  panicV1: true,
   vix: true,
   vxn: true,
   putCall: true,
@@ -194,7 +206,7 @@ export function computeHistoryMetricStats(rows, metricKey) {
   const low = Math.min(...values)
   const high = Math.max(...values)
   let statusLabel = "—"
-  if (metricKey === "panicV2") {
+  if (metricKey === "panicV2" || metricKey === "panicV1") {
     statusLabel = resolvePanicV2Status(current)?.label ?? "—"
   } else {
     const ins = interpretPanicMetric(metricKey, current)
@@ -206,7 +218,7 @@ export function computeHistoryMetricStats(rows, metricKey) {
   return {
     current,
     currentText:
-      metricKey === "panicV2"
+      metricKey === "panicV2" || metricKey === "panicV1"
         ? String(Math.round(current))
         : formatMetricValue(metricKey, current),
     low,

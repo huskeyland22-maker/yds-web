@@ -9,7 +9,7 @@ import { metricZoneBands } from "./panicHistoryZoneLines.js"
 
 /** @param {string} metricKey @returns {HistoryLegendItem[]} */
 export function historyZoneLegendItems(metricKey) {
-  if (metricKey === "panicV2") {
+  if (metricKey === "panicV2" || metricKey === "panicV1") {
     return PANIC_V2_STATUS_BANDS.map((b) => ({
       id: b.id,
       label: b.label,

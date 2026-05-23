@@ -184,7 +184,7 @@ export function detectHistoryInflections(rows, metricKey, opts = {}) {
     const v = rowValue(row, metricKey)
     if (!Number.isFinite(v)) continue
     const ins =
-      metricKey === "panicV2"
+      metricKey === "panicV2" || metricKey === "panicV1"
         ? { statusLabel: resolvePanicV2Status(v)?.label ?? null }
         : interpretPanicMetric(metricKey, v)
     const status = ins?.statusLabel ?? null
@@ -319,7 +319,7 @@ export function buildPanicHistoryInsight(rows, fullRows, metricKey) {
   const stats = computeHistoryMetricStats(rows, metricKey)
   const changes = computeHistoryChangeRates(rows, metricKey)
   const interp = Number.isFinite(stats.current)
-    ? metricKey === "panicV2"
+    ? metricKey === "panicV2" || metricKey === "panicV1"
       ? { statusLabel: resolvePanicV2Status(stats.current)?.label, tone: "neutral" }
       : interpretPanicMetric(metricKey, stats.current, { historyRows: rows })
     : null

@@ -2,13 +2,15 @@
  * 패닉 히스토리 차트 — 탭 → row 필드 매핑 (단일 지표만)
  */
 
-import { buildPanicV2HistoryChartData } from "../panic-v2/panicV2History.js"
+import { buildPanicV1HistoryChartData } from "../panic-v2/panicV1History.js"
+import { buildPanicV2DynamicChartData } from "../panic-v2/panicV2Dynamic.js"
 import { formatChartAxisMd } from "./chartDateFormat.js"
 import { sortHistoryRowsAsc } from "./panicHistoryDesk.js"
 
 /** UI 탭 id → cycle row 필드 */
 export const HISTORY_CHART_FIELD_MAP = {
   panicV2: "panicV2",
+  panicV1: "panicV1",
   vix: "vix",
   vxn: "vxn",
   fearGreed: "fearGreed",
@@ -69,9 +71,17 @@ export function buildSingleMetricChartData(history, selectedField) {
  */
 export function buildHistoryChartPayload(history, activeHistoryTab) {
   if (activeHistoryTab === "panicV2") {
-    const chartData = buildPanicV2HistoryChartData(history)
+    const chartData = buildPanicV2DynamicChartData(history)
     return {
       selectedField: "panicV2",
+      dataKey: "value",
+      chartData,
+    }
+  }
+  if (activeHistoryTab === "panicV1") {
+    const chartData = buildPanicV1HistoryChartData(history)
+    return {
+      selectedField: "panicV1",
       dataKey: "value",
       chartData,
     }

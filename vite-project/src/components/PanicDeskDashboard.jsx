@@ -92,10 +92,10 @@ export default function PanicDeskDashboard({
 
       <div className="panic-v2-desk__metrics-slot">
         <SectionLabel title="핵심지수" variant="core" />
-        <PanicCoreMetricsBlock panicData={panicData} legacyScore={finalScore} />
+        <PanicCoreMetricsBlock panicData={panicData} historyRows={safeHistory} />
 
         <PanicExpertMetricsAccordion>
-          <div className="panic-metric-rows-grid panic-metric-rows-grid--expert">
+          <div className="panic-metric-rows-grid panic-metric-rows-grid--expert panic-metric-rows-grid--expert-5">
             {EXPERT_METRICS.map((metric) => (
               <PanicMetricRow
                 key={metric.key}

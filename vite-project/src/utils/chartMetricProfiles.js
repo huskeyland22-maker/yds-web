@@ -137,6 +137,7 @@ export const yDomainConfigs = {
   skew: { mode: "auto", paddingRatio: 0.08, paddingMin: 2, fixed: [100, 180] },
   gsBullBear: { mode: "fixed", fixed: [0, 100] },
   panicV2: { mode: "fixed", fixed: [0, 100], tickCount: 5 },
+  panicV1: { mode: "fixed", fixed: [0, 100], tickCount: 5 },
 }
 
 /** @param {string} metricKey */
