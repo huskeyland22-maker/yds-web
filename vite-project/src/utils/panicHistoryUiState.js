@@ -55,13 +55,13 @@ export function resolvePanicHistoryUiState(ctx) {
     }
   }
 
-  if (panicV2Count < 8) {
+  if (panicV2Count < 1) {
     return {
       phase: "preparing",
       currentText: "데이터 준비중",
-      statusLabel: "집계중",
-      chartMessage: historyLength >= 8 ? "백필중" : "데이터 준비중",
-      showChart: panicV2Count > 0,
+      statusLabel: "준비중",
+      chartMessage: historyLength >= 1 ? "백필중" : "데이터 준비중",
+      showChart: false,
     }
   }
 

@@ -29,7 +29,9 @@ import {
   logHistoryChartDebug,
   panicDeskDataFromHistory,
 } from "../utils/panicHistoryDesk.js"
+import { computePanicV2 } from "../panic-v2/computePanicV2.js"
 import { enrichCycleRowsWithPanicV2 } from "../panic-v2/panicHistoryV2Backfill.js"
+import { logPanicV2ClientSummary } from "../utils/panicV2BackfillLog.js"
 import {
   countPanicV2ScoredRows,
   mergePanicHistoryV2IntoCycleRows,
@@ -51,6 +53,12 @@ import {
 } from "../utils/dataFlowTrace.js"
 
 /** @typedef {'none' | 'supabase-index-history' | 'static-json' | 'localStorage'} CycleHistorySource */
+
+function panicScoreNum(v) {
+  if (v == null || v === "") return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
 
 export const useAppDataStore = create((set, get) => ({
   sectorHeatMap: null,
@@ -203,27 +211,52 @@ export const useAppDataStore = create((set, get) => ({
 
     set({ panicHistoryV2SyncStatus: "loading" })
     try {
-      let v2Rows = await fetchPanicHistoryV2({ limit: 600 })
+      let v2Rows = await fetchPanicHistoryV2({ limit: 30 })
       let v2Count = v2Rows.length
 
-      if (v2Count < 8 && base.length >= 8) {
+      if (v2Count < 1 && base.length >= 1) {
         set({ panicHistoryV2SyncStatus: "backfilling" })
-        const backfill = await backfillPanicHistoryV2({ limit: 600, source: "client_mount" })
+        const backfill = await backfillPanicHistoryV2({
+          limit: 35,
+          days: 30,
+          source: "client_mount",
+        })
         if (backfill?.ok && !backfill?.skipped) {
-          v2Rows = await fetchPanicHistoryV2({ limit: 600 })
+          v2Rows = await fetchPanicHistoryV2({ limit: 30 })
           v2Count = v2Rows.length
+          if (backfill.summary) console.log("[패닉V2 백필 API]", backfill.summary)
         }
       }
 
       let merged = mergePanicHistoryV2IntoCycleRows(base, v2Rows)
-      const scored = countPanicV2ScoredRows(merged)
+      let scored = countPanicV2ScoredRows(merged)
 
-      if (scored < 8 && base.length >= 8) {
+      if (scored < 1 && base.length >= 1) {
+        merged = merged.map((row) => {
+          if (panicScoreNum(row.panicV2Score) != null) return row
+          const v2 = computePanicV2(row)
+          if (v2.score == null) return row
+          return {
+            ...row,
+            panicV2Score: v2.score,
+            panicV2DynamicScore: v2.score,
+            panicV2Status: v2.status?.label ?? null,
+            panicV2StatusId: v2.status?.id ?? null,
+          }
+        })
+        scored = countPanicV2ScoredRows(merged)
+      }
+
+      if (scored >= 1 && scored < 8 && base.length >= 8) {
         merged = enrichCycleRowsWithPanicV2(merged)
+        scored = countPanicV2ScoredRows(merged)
       }
 
       const finalScored = countPanicV2ScoredRows(merged)
-      const status = finalScored >= 8 ? "ready" : base.length >= 8 ? "preparing" : "preparing"
+      const status = finalScored >= 1 ? "ready" : "preparing"
+      if (finalScored >= 1) {
+        logPanicV2ClientSummary(merged)
+      }
       set({
         panicHistoryV2SyncStatus: status,
         panicHistoryV2RowCount: finalScored,

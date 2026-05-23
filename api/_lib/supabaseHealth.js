@@ -5,6 +5,7 @@ const TABLES = [
   "latest_panic_metrics",
   "panic_index_history",
   "panic_history_v2",
+  "panic_index_history_v2",
   "market_cycle_history",
   "market_status",
   "ai_reports",

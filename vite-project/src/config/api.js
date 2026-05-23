@@ -295,7 +295,7 @@ export async function fetchPanicIndexHistory(options = {}) {
 /** panic_history_v2 — 일별 패닉 V2 점수 */
 export async function fetchPanicHistoryV2(options = {}) {
   if (!isPanicHubEnabled()) return []
-  const limit = options.limit ?? 600
+  const limit = options.limit ?? 30
   const extra = { limit: String(limit) }
   if (options.from) extra.from = String(options.from).slice(0, 10)
   if (options.to) extra.to = String(options.to).slice(0, 10)
@@ -317,13 +317,14 @@ export async function fetchPanicHistoryV2(options = {}) {
 /** panic_index_history → panic_history_v2 백필 */
 export async function backfillPanicHistoryV2(options = {}) {
   if (!isPanicHubEnabled()) return { ok: false, skipped: true, reason: "hub_disabled" }
-  const limit = options.limit ?? 600
-  const url = panicApiUrl("backfill", { limit: String(limit) })
+  const days = options.days ?? 30
+  const limit = options.limit ?? days + 5
+  const url = panicApiUrl("backfill", { limit: String(limit), days: String(days) })
   if (isDataTraceEnabled()) logFetchStart("panic-history-v2-backfill", { url })
   const res = await fetch(url, {
     ...LIVE_POST_JSON_INIT,
     method: "POST",
-    body: JSON.stringify({ limit, source: options.source ?? "client" }),
+    body: JSON.stringify({ limit, days, source: options.source ?? "client" }),
   })
   const json = await res.json().catch(() => ({}))
   if (!res.ok) {

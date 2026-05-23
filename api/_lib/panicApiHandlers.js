@@ -196,8 +196,10 @@ export async function handlePanicModeBackfill(req, res) {
     const q = queryParams(req)
     const body = typeof req.body === "object" && req.body ? req.body : {}
     const limit = body.limit ?? q.get("limit")
+    const days = body.days ?? q.get("days") ?? 30
     const result = await backfillPanicHistoryV2FromIndexHistory({
       limit,
+      days,
       source: body.source ?? "api_backfill",
     })
     res.status(200).json({ ok: true, ...result })

@@ -18,7 +18,7 @@ export function mergePanicHistoryV2IntoCycleRows(cycleRows, v2Rows) {
 
   const byDate = new Map(
     v2Rows
-      .filter((r) => r?.date && toNum(r.panicV2 ?? r.panic_v2) != null)
+      .filter((r) => r?.date && toNum(r.panicV2 ?? r.panic_index_v2 ?? r.panic_v2) != null)
       .map((r) => [String(r.date).slice(0, 10), r]),
   )
 
@@ -26,7 +26,7 @@ export function mergePanicHistoryV2IntoCycleRows(cycleRows, v2Rows) {
     const date = String(row?.date ?? "").slice(0, 10)
     const hit = byDate.get(date)
     if (!hit) return row
-    const score = toNum(hit.panicV2 ?? hit.panic_v2)
+    const score = toNum(hit.panicV2 ?? hit.panic_index_v2 ?? hit.panic_v2)
     return {
       ...row,
       vix: row.vix ?? hit.vix,
@@ -48,5 +48,9 @@ export function mergePanicHistoryV2IntoCycleRows(cycleRows, v2Rows) {
 /** @param {object[]} rows */
 export function countPanicV2ScoredRows(rows) {
   if (!Array.isArray(rows)) return 0
-  return rows.filter((r) => Number.isFinite(Number(r.panicV2DynamicScore ?? r.panicV2Score ?? r.panic_v2))).length
+  return rows.filter((r) =>
+    Number.isFinite(
+      Number(r.panicV2DynamicScore ?? r.panicV2Score ?? r.panic_index_v2 ?? r.panic_v2),
+    ),
+  ).length
 }
