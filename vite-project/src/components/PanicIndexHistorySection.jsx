@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { buildPanicScoreTimeline } from "../panic-v2/panicV2History.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
+import { formatChartAxisMd } from "../utils/chartDateFormat.js"
 import {
   HISTORY_AUX_METRICS,
   HISTORY_TAB_METRICS,
@@ -45,9 +46,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   }, [rowsProp, storeRows])
 
   useEffect(() => {
-    if (!history.length) return
-    const latest = history[history.length - 1]
-    console.log("[패닉V2]", latest?.panic_v2 ?? latest?.panicV2 ?? null)
+    console.log("[패닉V2 chart]", history.length, history[0] ?? null)
   }, [history])
 
   const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
@@ -91,10 +90,32 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   const zoneLegend = useMemo(() => historyZoneLegendItems(activeHistoryTab), [activeHistoryTab])
 
+  /** 패닉 V2 — API panic_v2 직접 매핑 (dynamic 시리즈 실패 시에도 차트) */
+  const panicV2ChartData = useMemo(
+    () =>
+      sortHistoryRowsAsc(chartRowsSource)
+        .map((r) => {
+          const date = String(r.date ?? r.ts ?? "").slice(0, 10)
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+          const value = Number(r.panic_v2 ?? r.panicV2 ?? r.panicV2Score ?? r.panicScore ?? 0)
+          return {
+            date,
+            axisLabel: formatChartAxisMd(date),
+            value: Number.isFinite(value) ? value : 0,
+            panicV2: Number.isFinite(value) ? value : 0,
+          }
+        })
+        .filter(Boolean),
+    [chartRowsSource],
+  )
+
   const chartRows = useMemo(() => {
-    const base = chartPayload?.chartData ?? []
+    const base =
+      activeHistoryTab === "panicV2" && panicV2ChartData.length
+        ? panicV2ChartData
+        : (chartPayload?.chartData ?? [])
     return mergeInflectionsIntoChartData(base, insight.inflections)
-  }, [chartPayload?.chartData, insight.inflections])
+  }, [activeHistoryTab, panicV2ChartData, chartPayload?.chartData, insight.inflections])
 
   const panicV2Count = useMemo(() => countPanicV2ScoredRows(history), [history])
 
@@ -129,8 +150,11 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     (latestV2Point?.status?.label ??
       (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel))
 
+  const showHistoryLoading = history.length === 0
   const showChart =
-    uiState.showChart && chartRows.length > 0 && (activeHistoryTab !== "panicV2" || panicV2Count >= 1)
+    activeHistoryTab === "panicV2"
+      ? !showHistoryLoading && panicV2ChartData.length > 0
+      : uiState.showChart && chartRows.length > 0
 
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
@@ -276,7 +300,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           />
         ) : (
           <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
-            {uiState.chartMessage ?? "데이터 준비중"}
+            {showHistoryLoading ? "데이터 준비중" : (uiState.chartMessage ?? "데이터 준비중")}
           </div>
         )}
       </div>

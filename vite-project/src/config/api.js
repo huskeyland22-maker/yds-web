@@ -69,6 +69,32 @@ export function panicApiUrl(mode, extra = {}) {
   return withNoStoreQuery(`/api/panic?${params}`)
 }
 
+/**
+ * /api/panic?mode=history — 배열 직접 반환 · { rows } · { data } 모두 수용
+ * @param {unknown} json
+ */
+export function parsePanicHistoryPayload(json) {
+  if (Array.isArray(json)) {
+    return { rows: json, cycleRows: [], ok: true }
+  }
+  if (!json || typeof json !== "object") {
+    return { rows: [], cycleRows: [], ok: false }
+  }
+  const obj = /** @type {Record<string, unknown>} */ (json)
+  const dataField = obj.data
+  const rowsFromData = Array.isArray(dataField)
+    ? dataField
+    : dataField &&
+        typeof dataField === "object" &&
+        Array.isArray(/** @type {{ rows?: unknown }} */ (dataField).rows)
+      ? /** @type {{ rows: unknown[] }} */ (dataField).rows
+      : []
+  const rows = Array.isArray(obj.rows) ? obj.rows : rowsFromData
+  const cycleRows = Array.isArray(obj.cycleRows) ? obj.cycleRows : []
+  const ok = obj.ok !== false && rows.length > 0
+  return { rows, cycleRows, ok: ok || rows.length > 0, warning: obj.warning }
+}
+
 export async function fetchPanicHubLatest(options = {}) {
   const debugLog = options.debugLog !== false
   const url = panicApiUrl("latest")
@@ -270,30 +296,32 @@ export async function fetchPanicIndexHistory(options = {}) {
     throw new Error(`panic history HTTP ${res.status}`)
   }
   const json = await res.json()
-  if (!json?.ok || !Array.isArray(json.rows)) {
+  const parsed = parsePanicHistoryPayload(json)
+  if (!parsed.rows.length) {
     if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: 0, note: "empty_or_invalid" })
     console.warn("[YDS] fetchHistory: API empty or invalid", json)
     logHistoryFetchDebug([], options.debugMetric, options.debugRange)
     return options.withCycle ? { rows: [], cycleRows: [] } : []
   }
-  logHistoryFetchDebug(json.rows, options.debugMetric, options.debugRange)
-  if (json.rows?.length) {
-    const latest = json.rows[json.rows.length - 1]
+  logHistoryFetchDebug(parsed.rows, options.debugMetric, options.debugRange)
+  if (parsed.rows.length) {
+    const latest = parsed.rows[parsed.rows.length - 1]
     console.log("[패닉V2]", latest?.panic_v2 ?? latest?.panicV2 ?? null)
+    console.log("[패닉V2 chart]", parsed.rows.length, parsed.rows[0])
   }
   if (isDataTraceEnabled()) {
     logFetchSuccess("panic-index-history", {
-      rows: json.rows.length,
-      cycleRows: Array.isArray(json.cycleRows) ? json.cycleRows.length : 0,
+      rows: parsed.rows.length,
+      cycleRows: parsed.cycleRows.length,
     })
   }
   if (options.withCycle) {
     return {
-      rows: json.rows,
-      cycleRows: Array.isArray(json.cycleRows) ? json.cycleRows : [],
+      rows: parsed.rows,
+      cycleRows: parsed.cycleRows,
     }
   }
-  return json.rows
+  return parsed.rows
 }
 
 /** panic_history_v2 — 일별 패닉 V2 점수 */
@@ -312,7 +340,8 @@ export async function fetchPanicHistoryV2(options = {}) {
     return []
   }
   const json = await res.json()
-  const rows = json?.ok && Array.isArray(json.rows) ? json.rows : []
+  const parsed = parsePanicHistoryPayload(json)
+  const rows = parsed.rows
   if (json?.warning) console.warn("[YDS] fetchPanicHistoryV2 warning", json.warning)
   if (isDataTraceEnabled()) logFetchSuccess("panic-history-v2", { rows: rows.length })
   return rows
