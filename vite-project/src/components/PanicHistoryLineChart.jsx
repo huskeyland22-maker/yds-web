@@ -57,7 +57,18 @@ function HistoryTooltipContent({ active, payload, dataLabel, profileKey }) {
       <p className="m-0 font-mono font-bold tabular-nums text-slate-50">
         {formatMetricValue(profileKey, value)} <span className="font-normal text-slate-500">{dataLabel}</span>
       </p>
-      {row.inflectionLabel ? (
+      {row.tradeEventLabel ? (
+        <p className="m-0 mt-0.5 font-semibold text-emerald-200">
+          {row.tradeEventLabel}
+          {row.tradeEventReason ? (
+            <span className="block font-normal text-slate-400">({row.tradeEventReason})</span>
+          ) : null}
+        </p>
+      ) : null}
+      {row.macroRegimeLabel ? (
+        <p className="m-0 mt-0.5 font-semibold text-cyan-200">국면: {row.macroRegimeLabel}</p>
+      ) : null}
+      {row.inflectionLabel && !row.tradeEventLabel && !row.macroRegimeLabel ? (
         <p className="m-0 mt-0.5 font-semibold text-cyan-200">{row.inflectionLabel}</p>
       ) : null}
     </div>

@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
-import { buildPanicScoreTimeline } from "../panic-v2/panicV2History.js"
+import {
+  buildMacroRegimeLog,
+  enrichChartDataWithMacroRegime,
+  markMacroRegimeChangePoints,
+} from "../panic-v2/panicMacroRegimeHistory.js"
+import { resolveMacroRegime } from "../panic-v2/panicMacroRegime.js"
+import { buildTacticalTradeEventLog, attachTradeEventsToChartData } from "../panic-v2/panicTacticalTradeEvents.js"
+import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
 import {
   HISTORY_AUX_METRICS,
@@ -27,7 +34,8 @@ import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { countPanicV2ScoredRows } from "../utils/panicHistoryV2Merge.js"
 import { isPanicHubEnabled } from "../config/api.js"
 import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
-import PanicScoreTimeline from "./panic-history/PanicScoreTimeline.jsx"
+import PanicChartEventStrip from "./panic-history/PanicChartEventStrip.jsx"
+import PanicEngineHistoryLog from "./panic-history/PanicEngineHistoryLog.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
 const HISTORY_CHART_HEIGHT = 220
@@ -104,12 +112,17 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     [chartRowsSource, history, activeHistoryTab],
   )
 
-  const timeline = useMemo(
-    () =>
-      activeHistoryTab === "panicV2"
-        ? buildPanicScoreTimeline(chartRowsSource, 8, "dynamic")
-        : [],
+  const macroRegimeLog = useMemo(
+    () => (activeHistoryTab === "panicV1" ? buildMacroRegimeLog(chartRowsSource, { maxEntries: 10 }) : []),
     [chartRowsSource, activeHistoryTab],
+  )
+
+  const tacticalEventLog = useMemo(
+    () =>
+      activeHistoryTab === "panicV2" && !v2DetailMetric
+        ? buildTacticalTradeEventLog(chartRowsSource, { maxEntries: 10 })
+        : [],
+    [chartRowsSource, activeHistoryTab, v2DetailMetric],
   )
 
   const zoneLegend = useMemo(() => historyZoneLegendItems(activeHistoryTab), [activeHistoryTab])
@@ -127,15 +140,40 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   }, [latestHistoryScore])
 
   const chartRows = useMemo(() => {
-    const base =
+    let base =
       activeHistoryTab === "panicV2"
         ? v2DetailMetric
           ? (chartPayload?.chartData ?? [])
           : panicV2ChartData
         : (chartPayload?.chartData ?? [])
-    const inflections = activeHistoryTab === "panicV2" && v2DetailMetric ? [] : insight.inflections
-    return mergeInflectionsIntoChartData(base, inflections)
-  }, [activeHistoryTab, v2DetailMetric, panicV2ChartData, chartPayload?.chartData, insight.inflections])
+
+    if (activeHistoryTab === "panicV1" && base.length) {
+      base = markMacroRegimeChangePoints(enrichChartDataWithMacroRegime(base), macroRegimeLog)
+    } else if (activeHistoryTab === "panicV2" && !v2DetailMetric && base.length) {
+      base = attachTradeEventsToChartData(tacticalEventLog, base)
+    } else if (activeHistoryTab !== "panicV2" || v2DetailMetric) {
+      const inflections = insight.inflections
+      base = mergeInflectionsIntoChartData(base, inflections)
+    }
+
+    return base
+  }, [
+    activeHistoryTab,
+    v2DetailMetric,
+    panicV2ChartData,
+    chartPayload?.chartData,
+    insight.inflections,
+    macroRegimeLog,
+    tacticalEventLog,
+  ])
+
+  const latestV1Score = useMemo(() => {
+    if (!history.length) return null
+    const last = [...history].reverse().find((r) => panicV1ScoreForRow(r) != null)
+    return last ? panicV1ScoreForRow(last) : null
+  }, [history])
+
+  const currentMacroRegime = useMemo(() => resolveMacroRegime(latestV1Score), [latestV1Score])
 
   const panicV2Count = useMemo(() => countPanicV2ScoredRows(history), [history])
 
@@ -155,13 +193,24 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       ? history.length > 0
         ? String(currentPanicV2Score)
         : "데이터 준비중"
-      : uiState.currentText ??
-        (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
+      : activeHistoryTab === "panicV1"
+        ? latestV1Score != null
+          ? String(latestV1Score)
+          : "데이터 준비중"
+        : uiState.currentText ??
+          (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
+  const latestTacticalEvent = tacticalEventLog.length ? tacticalEventLog[tacticalEventLog.length - 1] : null
+
   const headerStatusLabel =
     activeHistoryTab === "panicV2"
-      ? (resolvePanicV2Status(currentPanicV2Score)?.label ?? "—")
-      : uiState.statusLabel ??
-        (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel)
+      ? (latestTacticalEvent?.eventLabel ?? resolvePanicV2Status(currentPanicV2Score)?.label ?? "—")
+      : activeHistoryTab === "panicV1"
+        ? (currentMacroRegime?.label ?? "—")
+        : uiState.statusLabel ??
+          (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel)
+
+  const headerStatusPrefix =
+    activeHistoryTab === "panicV1" ? "현재" : activeHistoryTab === "panicV2" ? "상태" : null
 
   const showHistoryLoading = history.length === 0
   const showChart =
@@ -174,7 +223,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       <div className="panic-history-section__head border-l-2 border-cyan-400/45 pl-2">
         <p className="m-0 text-[11px] font-bold text-slate-100">시장 엔진 히스토리</p>
         <p className="m-0 text-[9px] text-slate-500">
-          거시 V1 = 장기보유·비중조절 · 실전 V2 = 매수타점·관심종목
+          거시 V1 = 시장 국면 변화 · 실전 V2 = 매매 이벤트 기록
           {activeHistoryTab !== "panicV1" && activeHistoryTab !== "panicV2" ? ` · ${metric.label}` : ""} ·{" "}
           {rangeId} · {chartRangeStats(history, rangeId, "lab").shown}일
         </p>
@@ -286,8 +335,27 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         })}
       </div>
 
-      {activeHistoryTab === "panicV2" && timeline.length > 0 ? (
-        <PanicScoreTimeline items={timeline} />
+      {activeHistoryTab === "panicV1" && macroRegimeLog.length > 0 ? (
+        <PanicEngineHistoryLog
+          title="시장 국면 변화"
+          entries={macroRegimeLog.map((e) => ({
+            axisLabel: e.axisLabel,
+            primary: e.regimeLabel,
+            toneId: e.regimeId,
+          }))}
+        />
+      ) : null}
+
+      {activeHistoryTab === "panicV2" && !v2DetailMetric && tacticalEventLog.length > 0 ? (
+        <PanicEngineHistoryLog
+          title="매매 이벤트 기록"
+          entries={tacticalEventLog.map((e) => ({
+            axisLabel: e.axisLabel,
+            primary: e.eventLabel,
+            secondary: e.reason,
+            toneId: e.eventId,
+          }))}
+        />
       ) : null}
 
       {isPanicScoreTab ? (
@@ -298,7 +366,15 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
               {headerCurrentText}
             </p>
           </div>
-          <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-100">
+          <span
+            className={[
+              "rounded-full border px-2 py-0.5 text-[10px] font-bold",
+              activeHistoryTab === "panicV1"
+                ? "panic-history-status-badge--macro"
+                : "border-cyan-500/30 bg-cyan-500/10 text-cyan-100",
+            ].join(" ")}
+          >
+            {headerStatusPrefix ? `${headerStatusPrefix}: ` : ""}
             {headerStatusLabel}
           </span>
         </div>
@@ -348,6 +424,10 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           </div>
         )}
       </div>
+
+      {activeHistoryTab === "panicV2" && !v2DetailMetric && showChart && tacticalEventLog.length > 0 ? (
+        <PanicChartEventStrip events={tacticalEventLog} />
+      ) : null}
 
       {activeHistoryTab === "panicV2" && showChart ? (
         <div className="mt-0.5 flex flex-wrap gap-0.5" role="group" aria-label="V2 보조 지표">

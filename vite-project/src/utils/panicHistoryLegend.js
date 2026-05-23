@@ -1,6 +1,7 @@
 /**
  * 패닉 히스토리 차트 구간 범례 + hover 설명
  */
+import { MACRO_REGIME_BANDS } from "../panic-v2/panicMacroRegime.js"
 import { PANIC_V2_STATUS_BANDS } from "../panic-v2/panicV2Status.js"
 import { MOOD_SPECTRUM } from "./panicDeskMood.js"
 import { metricZoneBands } from "./panicHistoryZoneLines.js"
@@ -9,7 +10,15 @@ import { metricZoneBands } from "./panicHistoryZoneLines.js"
 
 /** @param {string} metricKey @returns {HistoryLegendItem[]} */
 export function historyZoneLegendItems(metricKey) {
-  if (metricKey === "panicV2" || metricKey === "panicV1") {
+  if (metricKey === "panicV1") {
+    return MACRO_REGIME_BANDS.map((b) => ({
+      id: b.id,
+      label: b.label,
+      color: b.color,
+      hint: `${b.min}–${b.max}: ${b.label}`,
+    }))
+  }
+  if (metricKey === "panicV2") {
     return PANIC_V2_STATUS_BANDS.map((b) => ({
       id: b.id,
       label: b.label,
