@@ -90,24 +90,40 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   const zoneLegend = useMemo(() => historyZoneLegendItems(activeHistoryTab), [activeHistoryTab])
 
-  /** 패닉 V2 — API panic_v2 직접 매핑 (dynamic 시리즈 실패 시에도 차트) */
+  const pickRowPanicV2 = (row) => {
+    if (!row) return null
+    const n = Number(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panicV2DynamicScore)
+    return Number.isFinite(n) ? Math.round(n) : null
+  }
+
+  /** 패닉 V2 — panic_v2만 사용 (panicScore 미사용) */
   const panicV2ChartData = useMemo(
     () =>
       sortHistoryRowsAsc(chartRowsSource)
         .map((r) => {
           const date = String(r.date ?? r.ts ?? "").slice(0, 10)
           if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
-          const value = Number(r.panic_v2 ?? r.panicV2 ?? r.panicV2Score ?? r.panicScore ?? 0)
+          const value = pickRowPanicV2(r)
+          if (value == null) return null
           return {
             date,
             axisLabel: formatChartAxisMd(date),
-            value: Number.isFinite(value) ? value : 0,
-            panicV2: Number.isFinite(value) ? value : 0,
+            value,
+            panicV2: value,
           }
         })
         .filter(Boolean),
     [chartRowsSource],
   )
+
+  const currentPanicV2Score = useMemo(() => {
+    const sorted = sortHistoryRowsAsc(history)
+    const last = sorted[sorted.length - 1]
+    const first = sorted[0]
+    const score = pickRowPanicV2(last) ?? pickRowPanicV2(first) ?? 0
+    console.log("[패닉V2 current]", score, history.at(-1) ?? last)
+    return score
+  }, [history])
 
   const chartRows = useMemo(() => {
     const base =
@@ -130,25 +146,18 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     [history.length, panicV2Count, activeHistoryTab, metricCounts.panicV2, panicHistoryV2SyncStatus],
   )
 
-  const latestV2Point = useMemo(() => {
-    if (panicV2Count < 1) return null
-    const sorted = sortHistoryRowsAsc(history)
-    for (let i = sorted.length - 1; i >= 0; i--) {
-      const score = Number(sorted[i].panicV2DynamicScore ?? sorted[i].panicV2Score ?? sorted[i].panic_v2)
-      if (Number.isFinite(score)) {
-        return { score: Math.round(score), status: resolvePanicV2Status(score) }
-      }
-    }
-    return null
-  }, [history, panicV2Count])
-
   const headerCurrentText =
-    uiState.currentText ??
-    (latestV2Point ? String(latestV2Point.score) : insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
+    activeHistoryTab === "panicV2"
+      ? history.length > 0
+        ? String(currentPanicV2Score)
+        : "데이터 준비중"
+      : uiState.currentText ??
+        (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
   const headerStatusLabel =
-    uiState.statusLabel ??
-    (latestV2Point?.status?.label ??
-      (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel))
+    activeHistoryTab === "panicV2"
+      ? (resolvePanicV2Status(currentPanicV2Score)?.label ?? "—")
+      : uiState.statusLabel ??
+        (insight.header.statusLabel === "—" ? "준비중" : insight.header.statusLabel)
 
   const showHistoryLoading = history.length === 0
   const showChart =
@@ -162,7 +171,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         <p className="m-0 text-[11px] font-bold text-slate-100">패닉지수 히스토리</p>
         <p className="m-0 text-[9px] text-slate-500">
           {metric.label}
-          {activeHistoryTab === "panicV2" ? " · 변화율+z" : ""} · {rangeId} ·{" "}
+          {activeHistoryTab === "panicV2" ? " · V2" : ""} · {rangeId} ·{" "}
           {chartRangeStats(history, rangeId, "lab").shown}일
         </p>
       </div>

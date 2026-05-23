@@ -231,6 +231,7 @@ export default function PanicHistoryLineChart({
           />
           <YAxis
             domain={yDomain ?? ["auto", "auto"]}
+            allowDataOverflow
             tickCount={profile.tickCount}
             tickFormatter={tickFormatter}
             stroke="#64748b"

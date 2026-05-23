@@ -136,8 +136,8 @@ export const yDomainConfigs = {
   move: { mode: "auto", paddingRatio: 0.08, paddingMin: 3, fixed: [50, 200] },
   skew: { mode: "auto", paddingRatio: 0.08, paddingMin: 2, fixed: [100, 180] },
   gsBullBear: { mode: "fixed", fixed: [0, 100] },
-  panicV2: { mode: "fixed", fixed: [0, 100], tickCount: 5 },
-  panicV1: { mode: "fixed", fixed: [0, 100], tickCount: 5 },
+  panicV2: { mode: "auto", paddingMin: 3 },
+  panicV1: { mode: "auto", paddingMin: 3 },
 }
 
 /** @param {string} metricKey */
@@ -217,6 +217,14 @@ export function computeHistoryYDomain(values, metricKey, options = {}) {
 
   if (options.showZoneBands && key === "fearGreed") {
     return [0, 100]
+  }
+
+  if ((key === "panicV2" || key === "panicV1") && !options.showZoneBands) {
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const yMin = Math.max(0, min - 3)
+    const yMax = Math.min(100, max + 3)
+    return [yMin, yMax]
   }
 
   if (cfg.mode === "fixed" && cfg.fixed) {
