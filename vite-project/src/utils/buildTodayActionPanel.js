@@ -4,7 +4,7 @@
 import { buildDailyMarketReport } from "./buildDailyMarketReport.js"
 import { buildRecommendationEngine } from "./buildRecommendationEngine.js"
 import { buildScoreExplainLayer } from "./buildScoreExplainLayer.js"
-import { compactPhrase } from "./dailyReportCopy.js"
+import { PANIC_TACTICAL_CARD_ACTIONS_COMPACT } from "./panicTacticalCardCopy.js"
 
 /**
  * @typedef {{
@@ -28,32 +28,33 @@ import { compactPhrase } from "./dailyReportCopy.js"
  * @param {import("./buildScoreExplainLayer.js").HorizonExplain[]} horizons
  * @returns {TacticalCard[]}
  */
-function buildTacticalCards(practical, horizons) {
+function buildTacticalCards(_practical, horizons) {
   const scoreByHorizon = Object.fromEntries(horizons.map((h) => [h.horizon, h.score]))
+  const a = PANIC_TACTICAL_CARD_ACTIONS_COMPACT
 
   return [
     {
       id: "short",
       period: "단기",
-      action: compactPhrase(practical.short).replace(/\s+/g, ""),
+      action: a.short,
       score: scoreByHorizon.short ?? null,
     },
     {
       id: "mid",
       period: "중기",
-      action: compactPhrase(practical.mid).replace(/\s+/g, ""),
+      action: a.mid,
       score: scoreByHorizon.mid ?? null,
     },
     {
       id: "long",
       period: "장기",
-      action: compactPhrase(practical.long).replace(/\s+/g, ""),
+      action: a.long,
       score: scoreByHorizon.long ?? null,
     },
     {
       id: "tactical",
       period: "실전",
-      action: compactPhrase(practical.tactical).replace(/\s+/g, ""),
+      action: a.tactical,
       score: scoreByHorizon.mid ?? scoreByHorizon.short ?? null,
     },
   ]

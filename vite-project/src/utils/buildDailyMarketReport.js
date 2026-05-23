@@ -85,7 +85,7 @@ function buildActionToday(zone, regime, cycleScore) {
     ai = "익절·비중 조절"
   } else if (zone === "transition") {
     today = "추세 확인"
-    ai = "분할 관심"
+    ai = "관심 종목"
   }
 
   if (regime === "extreme_fear" || regime === "fear") {
@@ -107,11 +107,11 @@ function buildStrategy(timing) {
   let mid = compactPhrase(timing?.mid?.actionShort || timing?.mid?.action || "관망")
   let long = compactPhrase(timing?.long?.actionShort || timing?.long?.action || "관망")
 
-  if (phrasesEqual(short, mid)) short = "익절 관리"
+  if (phrasesEqual(short, mid)) short = "매수 타점"
   if (phrasesEqual(long, mid)) long = "장기 보유"
-  if (phrasesEqual(short, long)) short = "익절 관리"
+  if (phrasesEqual(short, long)) short = "매수 타점"
 
-  const practical = mid.includes("확대") || short.includes("익절") ? "분할 관심" : "분할 관심"
+  const practical = "관심 종목"
 
   return {
     short,

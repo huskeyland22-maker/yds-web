@@ -161,7 +161,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       <div className="panic-history-section__head border-l-2 border-cyan-400/45 pl-2">
         <p className="m-0 text-[11px] font-bold text-slate-100">시장 엔진 히스토리</p>
         <p className="m-0 text-[9px] text-slate-500">
-          거시 V1 = 장기 · 실전 V2 = 단기
+          거시 V1 = 장기보유·비중조절 · 실전 V2 = 매수타점·관심종목
           {activeHistoryTab !== "panicV1" && activeHistoryTab !== "panicV2" ? ` · ${metric.label}` : ""} ·{" "}
           {rangeId} · {chartRangeStats(history, rangeId, "lab").shown}일
         </p>

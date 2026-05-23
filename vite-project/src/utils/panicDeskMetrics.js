@@ -39,7 +39,7 @@ export const PANIC_V2_HISTORY_TAB = {
   chartLabel: "실전",
   accent: "#f97316",
   badge: "TACTICAL",
-  tooltip: "단기 타점 · 눌림목 · 추세",
+  tooltip: "실전판단 · 매수타점 + 관심종목",
 }
 
 /** 패닉 히스토리 — 거시 V1 (장기 사이클) */
@@ -49,7 +49,7 @@ export const PANIC_V1_HISTORY_TAB = {
   chartLabel: "거시",
   accent: "#22d3ee",
   badge: "MACRO",
-  tooltip: "장기 사이클 · 비중 · 인생타점",
+  tooltip: "거시판단 · 장기보유 + 비중조절",
 }
 
 /** 보조 탭 — 개별 지표 */

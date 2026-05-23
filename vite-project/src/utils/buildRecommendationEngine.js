@@ -6,6 +6,7 @@ import { resolveCycleZone } from "./cycleZoneLabels.js"
 import { buildDailyMarketReport } from "./buildDailyMarketReport.js"
 import { computeMarketAction } from "./panicMarketActionEngine.js"
 import { compactPhrase } from "./dailyReportCopy.js"
+import { PANIC_TACTICAL_CARD_ACTIONS } from "./panicTacticalCardCopy.js"
 
 /** @typedef {"LOW" | "MID" | "HIGH"} RecommendationStrength */
 
@@ -95,42 +96,8 @@ function resolveStrength(zone, bondStatuses, flags, score) {
  * @param {import("./cycleZoneLabels.js").CycleZone} zone
  * @param {import("./buildDailyMarketReport.js").DailyStrategy} strategy
  */
-function resolveRecommendationPeriods(zone, strategy) {
-  const z = zone.zone
-
-  if (z === "peak" || z === "high") {
-    return {
-      short: "익절 관리",
-      mid: "비중 확대",
-      long: "장기 보유",
-      tactical: "분할 관심",
-    }
-  }
-
-  if (z === "floor" || z === "low") {
-    return {
-      short: "눌림 대기",
-      mid: "분할매수",
-      long: "장기 보유",
-      tactical: "분할 관심",
-    }
-  }
-
-  if (z === "transition") {
-    return {
-      short: "관망",
-      mid: "비중 조절",
-      long: "장기 보유",
-      tactical: "분할 관심",
-    }
-  }
-
-  return {
-    short: compactPhrase(strategy.short) || "관망",
-    mid: compactPhrase(strategy.mid) || "관망",
-    long: compactPhrase(strategy.long) || "장기 보유",
-    tactical: compactPhrase(strategy.practical) || "분할 관심",
-  }
+function resolveRecommendationPeriods(_zone, _strategy) {
+  return { ...PANIC_TACTICAL_CARD_ACTIONS }
 }
 
 /**
