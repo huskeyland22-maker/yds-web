@@ -4,7 +4,7 @@
 import { formatChartAxisMd } from "../utils/chartDateFormat.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { panicV1ScoreForRow } from "./panicV1History.js"
-import { resolvePanicV2Status } from "./panicV2Status.js"
+import { resolveMacroV1Status } from "./panicMacroV1Status.js"
 
 /**
  * @typedef {{
@@ -31,7 +31,7 @@ export function buildMacroRegimeLog(history, opts = {}) {
   for (const row of rows) {
     const score = panicV1ScoreForRow(row)
     if (score == null) continue
-    const regime = resolvePanicV2Status(score)
+    const regime = resolveMacroV1Status(score)
     if (!regime) continue
 
     if (!changeOnly || regime.label !== prevLabel) {
@@ -55,7 +55,7 @@ export function buildMacroRegimeLog(history, opts = {}) {
  */
 export function enrichChartDataWithMacroRegime(chartData) {
   return chartData.map((pt) => {
-    const regime = resolvePanicV2Status(pt.value)
+    const regime = resolveMacroV1Status(pt.value)
     if (!regime) return pt
     return {
       ...pt,
@@ -72,18 +72,9 @@ export function enrichChartDataWithMacroRegime(chartData) {
 export function markMacroRegimeChangePoints(chartData, log) {
   const changeDates = new Set(log.map((e) => e.date))
   return chartData.map((pt) => {
-    const regime = resolvePanicV2Status(pt.value)
+    const regime = resolveMacroV1Status(pt.value)
     if (!changeDates.has(pt.date) || !regime) return pt
-    const color =
-      regime.id === "stable"
-        ? "#22d3ee"
-        : regime.id === "observe"
-          ? "#38bdf8"
-          : regime.id === "caution"
-            ? "#f97316"
-            : regime.id === "fear"
-              ? "#ef4444"
-              : "#dc2626"
+    const color = regime.color ?? "#94a3b8"
     return {
       ...pt,
       inflectionLabel: regime.label,

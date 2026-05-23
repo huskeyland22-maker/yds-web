@@ -1,21 +1,21 @@
 /**
  * 시장 엔진 히스토리 — 상태바·배지·가이드 (UI 전용)
  */
-import { PANIC_V2_STATUS_BANDS, resolvePanicV2Status } from "./panicV2Status.js"
+import { MACRO_V1_STATUS_BANDS, resolveMacroV1Status } from "./panicMacroV1Status.js"
 import { TACTICAL_EVENT_LABELS } from "./panicTacticalTradeEvents.js"
 import { resolveTacticalTradeEventId } from "./panicTacticalTradeEvents.js"
 
 /** @typedef {{ id: string; label: string; emoji: string; min: number; max: number }} StatusBarSegment */
 
-/** 거시 V1 — 패닉 스케일 (낮을수록 안정) */
+/** 거시 V1 — 패닉 상승 = 장기 매수 기회 */
 /** @type {StatusBarSegment[]} */
-export const MACRO_MARKET_STATUS_BAR = [
-  { id: "stable", label: "안정", emoji: "🟢", min: 0, max: 20 },
-  { id: "observe", label: "관찰", emoji: "🔵", min: 20, max: 40 },
-  { id: "caution", label: "경계", emoji: "🟡", min: 40, max: 60 },
-  { id: "fear", label: "공포", emoji: "🟠", min: 60, max: 80 },
-  { id: "panic", label: "패닉", emoji: "🔴", min: 80, max: 100 },
-]
+export const MACRO_MARKET_STATUS_BAR = MACRO_V1_STATUS_BANDS.map((b) => ({
+  id: b.id,
+  label: b.label,
+  emoji: b.emoji,
+  min: b.id === "overheated" ? 0 : b.min,
+  max: b.id === "panicBuy" ? 100 : b.max + 1,
+}))
 
 /** 실전 V2 — 관심유지(좌) → 리스크주의(우), ▲는 이벤트 ID 기준 */
 /** @type {StatusBarSegment[]} */
@@ -27,32 +27,27 @@ export const TACTICAL_ACTION_STATUS_BAR = [
   { id: "riskCaution", label: "리스크주의", emoji: "🔴", min: 0, max: 100 },
 ]
 
-/** @type {Record<string, { badge: string; title: string; hint: string }>} */
+/** @type {Record<string, { badge: string; hint: string }>} */
 export const MACRO_MARKET_GUIDANCE = {
-  stable: {
-    badge: "안정구간",
-    title: "현재",
-    hint: "변동성 낮음 · 선별적 진입 검토 가능",
+  overheated: {
+    badge: "과열구간",
+    hint: "시장 과열 / 리스크 존재 · 비중 확대보다 관찰 우선",
   },
-  observe: {
-    badge: "위험구간",
-    title: "현재",
-    hint: "시장 전반 리스크 존재",
+  neutral: {
+    badge: "중립구간",
+    hint: "시장 균형 · 일반 대응",
   },
-  caution: {
-    badge: "경계구간",
-    title: "현재",
-    hint: "방향성 혼재 · 포지션 크기 제한",
+  interest: {
+    badge: "관심구간",
+    hint: "변동성 확대 가능 · 관심 종목 관찰",
   },
-  fear: {
-    badge: "공포구간",
-    title: "현재",
-    hint: "변동성 확대 · 비중 축소·헤지 검토",
+  dca: {
+    badge: "분할매수",
+    hint: "공포 확대 · 장기 분할매수 시작",
   },
-  panic: {
-    badge: "패닉구간",
-    title: "현재",
-    hint: "극단 공포 · 유동성·현금 우선",
+  panicBuy: {
+    badge: "패닉매수",
+    hint: "극단 공포 · 장기 저점 기회",
   },
 }
 
@@ -98,7 +93,7 @@ export function resolveStatusBarIndex(score, segments) {
 
 /** @param {number | null | undefined} score */
 export function resolveMacroMarketStatus(score) {
-  const band = resolvePanicV2Status(score)
+  const band = resolveMacroV1Status(score)
   if (!band) return null
   const guidance = MACRO_MARKET_GUIDANCE[band.id] ?? null
   return {

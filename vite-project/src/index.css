@@ -2779,7 +2779,28 @@
   .panic-engine-status-bar__chip--active {
     font-weight: 800;
     color: rgba(248, 250, 252, 0.98);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+  }
+
+  .panic-engine-status-bar__chip--overheated.panic-engine-status-bar__chip--active {
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+  }
+
+  .panic-engine-status-bar__chip--neutral.panic-engine-status-bar__chip--active {
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+  }
+
+  .panic-engine-status-bar__chip--interest.panic-engine-status-bar__chip--active {
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.45);
+  }
+
+  .panic-engine-status-bar__chip--dca.panic-engine-status-bar__chip--active {
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
+  }
+
+  .panic-engine-status-bar__chip--panicBuy.panic-engine-status-bar__chip--active {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.55);
   }
 
   .panic-engine-status-bar__marker {
@@ -2797,24 +2818,24 @@
     font-size: 9px;
   }
 
-  .panic-engine-log__item--stable .panic-engine-log__primary {
+  .panic-engine-log__item--overheated .panic-engine-log__primary {
+    color: #93c5fd;
+  }
+
+  .panic-engine-log__item--neutral .panic-engine-log__primary {
     color: #6ee7b7;
   }
 
-  .panic-engine-log__item--observe .panic-engine-log__primary {
-    color: #67e8f9;
+  .panic-engine-log__item--interest .panic-engine-log__primary {
+    color: #fde047;
   }
 
-  .panic-engine-log__item--caution .panic-engine-log__primary {
+  .panic-engine-log__item--dca .panic-engine-log__primary {
     color: #fdba74;
   }
 
-  .panic-engine-log__item--fear .panic-engine-log__primary {
+  .panic-engine-log__item--panicBuy .panic-engine-log__primary {
     color: #fca5a5;
-  }
-
-  .panic-engine-log__item--panic .panic-engine-log__primary {
-    color: #f87171;
   }
 
   .panic-history-tabs__divider {
