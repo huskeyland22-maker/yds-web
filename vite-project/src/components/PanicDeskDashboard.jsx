@@ -8,6 +8,7 @@ import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
 import RecommendationEnginePanel from "./RecommendationEnginePanel.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
+import PanicExpertMetricsAccordion from "./PanicExpertMetricsAccordion.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 
@@ -161,8 +162,7 @@ export default function PanicDeskDashboard({
           </div>
         </section>
 
-        <SectionLabel title="전문가 리스크 지표" variant="expert" />
-        <section className="mb-1 overflow-hidden rounded-md border border-white/[0.03] bg-[rgba(255,255,255,0.015)] p-px opacity-[0.78]">
+        <PanicExpertMetricsAccordion>
           <div className="panic-metric-grid panic-metric-grid--expert">
             {EXPERT_METRICS.map((metric) => (
               <MetricTile
@@ -175,7 +175,7 @@ export default function PanicDeskDashboard({
               />
             ))}
           </div>
-        </section>
+        </PanicExpertMetricsAccordion>
       </div>
 
       {/* 2. 시장 상태 배지 */}
