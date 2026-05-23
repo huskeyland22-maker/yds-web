@@ -153,6 +153,18 @@ export const chartProfiles = {
     strokeWidth: 3,
     activeDotR: 5,
   },
+  panicV2: {
+    tickCount: 5,
+    tickDecimals: 0,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
+  panicV1: {
+    tickCount: 5,
+    tickDecimals: 0,
+    strokeWidth: 3,
+    activeDotR: 5,
+  },
 }
 
 const DEFAULT_PROFILE = {
@@ -178,21 +190,14 @@ export const yDomainConfigs = {
   move: { mode: "auto", paddingRatio: 0.08, paddingMin: 3, fixed: [50, 200] },
   skew: { mode: "auto", paddingRatio: 0.08, paddingMin: 2, fixed: [100, 180] },
   gsBullBear: { mode: "fixed", fixed: [0, 100] },
-  panicV2: { mode: "fixed", fixed: [0, 100], tickCount: 6 },
-  panicV1: { mode: "fixed", fixed: [0, 100], tickCount: 6 },
+  panicV2: { mode: "auto", paddingMin: 3 },
+  panicV1: { mode: "auto", paddingMin: 3 },
 }
-
-/** 패닉 V1/V2 히스토리 Y축 눈금 (0~100 고정) */
-export const PANIC_SCORE_Y_TICKS = [0, 20, 40, 60, 80, 100]
 
 /** @param {string} metricKey */
 export function resolveChartProfile(metricKey) {
   const key = metricKey === "hyOas" ? "highYield" : metricKey
-  const base = { ...DEFAULT_PROFILE, ...(chartProfiles[key] ?? {}) }
-  if (key === "panicV2" || key === "panicV1") {
-    return { ...base, tickCount: 6, tickDecimals: 0 }
-  }
-  return base
+  return { ...DEFAULT_PROFILE, ...(chartProfiles[key] ?? {}) }
 }
 
 /** @param {object[]} chartData @param {string} dataKey */
@@ -261,7 +266,12 @@ export function computeHistoryYDomain(values, metricKey, options = {}) {
   const key = normalizeMetricKey(metricKey)
 
   if (key === "panicV2" || key === "panicV1") {
-    return [0, 100]
+    if (!values?.length) return [0, 100]
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const yMin = Math.max(0, min - 3)
+    const yMax = Math.min(100, max + 3)
+    return [yMin, yMax]
   }
 
   if (!values?.length) return null

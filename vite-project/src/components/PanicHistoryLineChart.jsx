@@ -22,7 +22,6 @@ import {
 import {
   computeHistoryYDomain,
   extractChartValues,
-  PANIC_SCORE_Y_TICKS,
   resolveChartProfile,
   yAxisTickFormatter,
 } from "../utils/chartMetricProfiles.js"
@@ -171,7 +170,6 @@ export default function PanicHistoryLineChart({
   }, [chartData, dataKey, profileKey, showZoneBands])
 
   const tickFormatter = useMemo(() => yAxisTickFormatter(profile), [profile])
-  const isPanicScoreChart = profileKey === "panicV2" || profileKey === "panicV1"
 
   const zoneLabels = useMemo(() => {
     if (!showZoneBands || !zoneBands.length || !yDomain) return []
@@ -235,9 +233,8 @@ export default function PanicHistoryLineChart({
           />
           <YAxis
             domain={yDomain ?? ["auto", "auto"]}
-            allowDataOverflow={!isPanicScoreChart}
-            ticks={isPanicScoreChart ? PANIC_SCORE_Y_TICKS : undefined}
-            tickCount={isPanicScoreChart ? PANIC_SCORE_Y_TICKS.length : profile.tickCount}
+            allowDataOverflow
+            tickCount={profile.tickCount}
             tickFormatter={tickFormatter}
             stroke="#64748b"
             tick={{ fill: "#94a3b8", fontSize: 10 }}
