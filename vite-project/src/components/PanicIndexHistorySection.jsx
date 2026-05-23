@@ -159,11 +159,11 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
       <div className="panic-history-section__head border-l-2 border-cyan-400/45 pl-2">
-        <p className="m-0 text-[11px] font-bold text-slate-100">패닉지수 히스토리</p>
+        <p className="m-0 text-[11px] font-bold text-slate-100">시장 엔진 히스토리</p>
         <p className="m-0 text-[9px] text-slate-500">
-          {metric.label}
-          {activeHistoryTab === "panicV2" ? " · 실전" : ""} · {rangeId} ·{" "}
-          {chartRangeStats(history, rangeId, "lab").shown}일
+          거시 V1 = 장기 · 실전 V2 = 단기
+          {activeHistoryTab !== "panicV1" && activeHistoryTab !== "panicV2" ? ` · ${metric.label}` : ""} ·{" "}
+          {rangeId} · {chartRangeStats(history, rangeId, "lab").shown}일
         </p>
       </div>
 
@@ -176,14 +176,17 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           }}
           title={PANIC_V2_HISTORY_TAB.tooltip}
           className={[
-            "panic-history-tab panic-history-tab--main",
+            "panic-history-tab panic-history-tab--main inline-flex items-center gap-0.5",
             activeHistoryTab === "panicV2"
-              ? "border-cyan-400/35 bg-cyan-500/15 text-cyan-50 ring-1 ring-cyan-400/25"
+              ? "border-orange-400/35 bg-orange-500/15 text-orange-50 ring-1 ring-orange-400/25"
               : "border-transparent text-slate-400",
           ].join(" ")}
           aria-pressed={activeHistoryTab === "panicV2"}
         >
           <span className="panic-history-tab__label">{PANIC_V2_HISTORY_TAB.label}</span>
+          <span className="text-[7px] font-bold uppercase tracking-wide opacity-80">
+            {PANIC_V2_HISTORY_TAB.badge}
+          </span>
           <span className="panic-history-tab__count font-mono text-[8px] opacity-75">
             {metricCounts.panicV2 ?? 0}
           </span>
@@ -191,15 +194,19 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         <button
           type="button"
           onClick={() => setActiveHistoryTab("panicV1")}
+          title={PANIC_V1_HISTORY_TAB.tooltip}
           className={[
-            "panic-history-tab panic-history-tab--main",
+            "panic-history-tab panic-history-tab--main inline-flex items-center gap-0.5",
             activeHistoryTab === "panicV1"
-              ? "border-slate-400/35 bg-white/10 text-slate-100 ring-1 ring-white/15"
+              ? "border-cyan-400/35 bg-cyan-500/15 text-cyan-50 ring-1 ring-cyan-400/25"
               : "border-transparent text-slate-500",
           ].join(" ")}
           aria-pressed={activeHistoryTab === "panicV1"}
         >
           <span className="panic-history-tab__label">{PANIC_V1_HISTORY_TAB.label}</span>
+          <span className="text-[7px] font-bold uppercase tracking-wide opacity-80">
+            {PANIC_V1_HISTORY_TAB.badge}
+          </span>
           <span className="panic-history-tab__count font-mono text-[8px] opacity-75">
             {metricCounts.panicV1 ?? 0}
           </span>

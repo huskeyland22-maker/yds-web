@@ -1,4 +1,4 @@
-/** @typedef {{ key: string; label: string; chartLabel: string; accent: string; tooltip?: string }} PanicDeskMetric */
+/** @typedef {{ key: string; label: string; chartLabel: string; accent: string; tooltip?: string; badge?: string }} PanicDeskMetric */
 
 /** @type {PanicDeskMetric[]} */
 export const CORE_METRICS = [
@@ -32,22 +32,24 @@ export const EXPERT_METRICS = [
 /** @type {PanicDeskMetric[]} */
 export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 
-/** 패닉 히스토리 — V2 동적(변화율·z-score) */
+/** 패닉 히스토리 — 실전 V2 (단기 타점) */
 export const PANIC_V2_HISTORY_TAB = {
   key: "panicV2",
-  label: "패닉 V2",
+  label: "실전 V2",
   chartLabel: "실전",
-  accent: "#22d3ee",
-  tooltip: "실전 엔진 · 변동성 + 심리 + AI추세 + 유동성 기반",
+  accent: "#f97316",
+  badge: "TACTICAL",
+  tooltip: "단기 타점 · 눌림목 · 추세",
 }
 
-/** 패닉 히스토리 — V1 (getFinalScore) */
+/** 패닉 히스토리 — 거시 V1 (장기 사이클) */
 export const PANIC_V1_HISTORY_TAB = {
   key: "panicV1",
-  label: "패닉 V1",
-  chartLabel: "패닉 V1",
-  accent: "#94a3b8",
-  tooltip: "기존 통합 패닉지수 (단기·중기 가중)",
+  label: "거시 V1",
+  chartLabel: "거시",
+  accent: "#22d3ee",
+  badge: "MACRO",
+  tooltip: "장기 사이클 · 비중 · 인생타점",
 }
 
 /** 보조 탭 — 개별 지표 */
