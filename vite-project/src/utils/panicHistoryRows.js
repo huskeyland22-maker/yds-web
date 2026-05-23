@@ -43,7 +43,7 @@ export function rawRowToCycle(row) {
     panicV2DynamicScore: toNum(
       row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_v2 ?? row.panic_index_v2,
     ),
-    panic_v2: toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score),
+    panic_v2: toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panic_index_v2),
   }
   return out
 }
@@ -55,7 +55,8 @@ function rowValue(row, key) {
     return Number.isFinite(v) ? v : null
   }
   if (key === "panicV2") {
-    const cached = row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_index_v2
+    const cached =
+      row.panic_v2 ?? row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_index_v2 ?? row.panicScore
     if (Number.isFinite(Number(cached))) return Number(cached)
     const v = panicV2ScoreFromRow(row)
     return Number.isFinite(v) ? v : null

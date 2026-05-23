@@ -28,6 +28,29 @@ import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
 const HISTORY_CHART_HEIGHT = 220
 
+/** @param {object} r */
+function panicV2ValueFromRow(r) {
+  const n = Number(r?.panic_v2 ?? r?.panicScore ?? r?.panic_index_v2 ?? 0)
+  return Number.isFinite(n) ? n : 0
+}
+
+/** @param {object[]} rows */
+function buildPanicV2ChartData(rows) {
+  return sortHistoryRowsAsc(rows)
+    .map((r) => {
+      const date = String(r.date ?? r.ts ?? "").slice(0, 10)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+      const value = panicV2ValueFromRow(r)
+      return {
+        date,
+        axisLabel: formatChartAxisMd(date),
+        value,
+        panicV2: value,
+      }
+    })
+    .filter(Boolean)
+}
+
 /**
  * @param {{ rows?: object[] }} props
  */
@@ -44,10 +67,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     const propsMerged = mergeCycleRows(storeRows ?? [], rowsProp ?? [])
     return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
-
-  useEffect(() => {
-    console.log("[패닉V2 chart]", history.length, history[0] ?? null)
-  }, [history])
 
   const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
   const [rangeId, setRangeId] = useState("6M")
@@ -90,44 +109,26 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   const zoneLegend = useMemo(() => historyZoneLegendItems(activeHistoryTab), [activeHistoryTab])
 
-  const pickRowPanicV2 = (row) => {
-    if (!row) return null
-    const n = Number(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panicV2DynamicScore)
-    return Number.isFinite(n) ? Math.round(n) : null
-  }
-
-  /** 패닉 V2 — panic_v2만 사용 (panicScore 미사용) */
   const panicV2ChartData = useMemo(
-    () =>
-      sortHistoryRowsAsc(chartRowsSource)
-        .map((r) => {
-          const date = String(r.date ?? r.ts ?? "").slice(0, 10)
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
-          const value = pickRowPanicV2(r)
-          if (value == null) return null
-          return {
-            date,
-            axisLabel: formatChartAxisMd(date),
-            value,
-            panicV2: value,
-          }
-        })
-        .filter(Boolean),
+    () => buildPanicV2ChartData(chartRowsSource),
     [chartRowsSource],
   )
 
   const currentPanicV2Score = useMemo(() => {
+    const chartData = buildPanicV2ChartData(history)
+    return chartData.at(-1)?.value ?? 0
+  }, [history])
+
+  useEffect(() => {
     const sorted = sortHistoryRowsAsc(history)
-    const last = sorted[sorted.length - 1]
-    const first = sorted[0]
-    const score = pickRowPanicV2(last) ?? pickRowPanicV2(first) ?? 0
-    console.log("[패닉V2 current]", score, history.at(-1) ?? last)
-    return score
+    const chartData = buildPanicV2ChartData(history)
+    console.log("[패닉V2 rows]", sorted.slice(-3))
+    console.log("[패닉V2 chart]", chartData.slice(-3))
   }, [history])
 
   const chartRows = useMemo(() => {
     const base =
-      activeHistoryTab === "panicV2" && panicV2ChartData.length
+      activeHistoryTab === "panicV2"
         ? panicV2ChartData
         : (chartPayload?.chartData ?? [])
     return mergeInflectionsIntoChartData(base, insight.inflections)

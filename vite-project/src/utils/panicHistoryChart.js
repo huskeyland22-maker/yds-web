@@ -70,7 +70,7 @@ export function buildPanicV2StoredChartData(history) {
   return sortHistoryRowsAsc(history)
     .map((row) => {
       const date = String(row.date ?? row.ts ?? "").slice(0, 10)
-      const score = Number(row.panic_v2 ?? row.panicV2DynamicScore ?? row.panicV2Score ?? row.panic_index_v2)
+      const score = Number(row.panic_v2 ?? row.panicScore ?? row.panic_index_v2 ?? 0)
       if (!Number.isFinite(score)) return null
       return {
         date,
