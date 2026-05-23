@@ -76,6 +76,6 @@ if (process.env.VERCEL === "1") {
     console.warn("[YDS BUILD] WARN: VITE_PANIC_HUB is not 1 — app uses Render fallback / hub disabled.")
   }
   if (!server.SUPABASE_SERVICE_ROLE_KEY) {
-    console.warn("[YDS BUILD] WARN: SUPABASE_SERVICE_ROLE_KEY missing — /api/panic/latest will 503.")
+    console.warn("[YDS BUILD] WARN: SUPABASE_SERVICE_ROLE_KEY missing — /api/panic?mode=latest will 503.")
   }
 }

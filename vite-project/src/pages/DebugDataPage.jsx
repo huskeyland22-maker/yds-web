@@ -450,7 +450,7 @@ export default function DebugDataPage() {
       ) : null}
 
       <ProbeCard
-        title="Vercel Hub API — GET /api/panic/latest"
+        title="Vercel Hub API — GET /api/panic?mode=latest"
         sqlHint="Server: SUPABASE_SERVICE_ROLE → panic_metrics"
         status={hubProbe.status}
         failure={hubProbe.failure}

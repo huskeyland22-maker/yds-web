@@ -36,7 +36,7 @@ export function getManualApiBase() {
   return "https://yds-web.onrender.com"
 }
 
-/** Supabase hub + Vercel `/api/panic/*` — cross-device sync (see .env.example). */
+/** Supabase hub + Vercel `/api/panic?mode=…` — 단일 serverless 함수 (see .env.example). */
 export function isPanicHubEnabled() {
   const on = import.meta.env.VITE_PANIC_HUB === "1" || import.meta.env.VITE_PANIC_HUB === "true"
   const url = String(import.meta.env.VITE_SUPABASE_URL ?? "").trim()
@@ -57,9 +57,21 @@ export function getPanicHubEnvStatus() {
   }
 }
 
+/**
+ * @param {string} mode latest | history | historylatest | v2 | v2history | backfill | update
+ * @param {Record<string, string | number | undefined>} [extra]
+ */
+export function panicApiUrl(mode, extra = {}) {
+  const params = new URLSearchParams({ mode })
+  for (const [k, v] of Object.entries(extra)) {
+    if (v != null && v !== "") params.set(k, String(v))
+  }
+  return withNoStoreQuery(`/api/panic?${params}`)
+}
+
 export async function fetchPanicHubLatest(options = {}) {
   const debugLog = options.debugLog !== false
-  const url = withNoStoreQuery("/api/panic/latest")
+  const url = panicApiUrl("latest")
   if (isDataTraceEnabled()) logFetchStart("panic-hub-latest", { url })
   try {
     const res = await fetch(url, LIVE_JSON_GET_INIT)
@@ -245,11 +257,11 @@ export async function fetchPanicIndexHistory(options = {}) {
   void probePanicIndexHistoryDirect()
 
   const limit = options.limit ?? 120
-  const params = new URLSearchParams({ limit: String(limit) })
-  if (options.from) params.set("from", String(options.from).slice(0, 10))
-  if (options.to) params.set("to", String(options.to).slice(0, 10))
-  if (options.withCycle) params.set("cycle", "1")
-  const url = withNoStoreQuery(`/api/panic/history?${params}`)
+  const extra = { limit: String(limit) }
+  if (options.from) extra.from = String(options.from).slice(0, 10)
+  if (options.to) extra.to = String(options.to).slice(0, 10)
+  if (options.withCycle) extra.cycle = "1"
+  const url = panicApiUrl("history", extra)
   if (isDataTraceEnabled()) logFetchStart("panic-index-history", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (!res.ok) {
@@ -284,10 +296,10 @@ export async function fetchPanicIndexHistory(options = {}) {
 export async function fetchPanicHistoryV2(options = {}) {
   if (!isPanicHubEnabled()) return []
   const limit = options.limit ?? 600
-  const params = new URLSearchParams({ limit: String(limit) })
-  if (options.from) params.set("from", String(options.from).slice(0, 10))
-  if (options.to) params.set("to", String(options.to).slice(0, 10))
-  const url = withNoStoreQuery(`/api/panic/history-v2?${params}`)
+  const extra = { limit: String(limit) }
+  if (options.from) extra.from = String(options.from).slice(0, 10)
+  if (options.to) extra.to = String(options.to).slice(0, 10)
+  const url = panicApiUrl("v2history", extra)
   if (isDataTraceEnabled()) logFetchStart("panic-history-v2", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (!res.ok) {
@@ -306,7 +318,7 @@ export async function fetchPanicHistoryV2(options = {}) {
 export async function backfillPanicHistoryV2(options = {}) {
   if (!isPanicHubEnabled()) return { ok: false, skipped: true, reason: "hub_disabled" }
   const limit = options.limit ?? 600
-  const url = withNoStoreQuery(`/api/panic/history-v2/backfill?limit=${limit}`)
+  const url = panicApiUrl("backfill", { limit: String(limit) })
   if (isDataTraceEnabled()) logFetchStart("panic-history-v2-backfill", { url })
   const res = await fetch(url, {
     ...LIVE_POST_JSON_INIT,
@@ -325,7 +337,7 @@ export async function backfillPanicHistoryV2(options = {}) {
 /** panic_index_history 최신 1건 — cycle 대시보드 mount·저장 직후용 */
 export async function fetchPanicIndexLatest() {
   if (!isPanicHubEnabled()) return null
-  const url = withNoStoreQuery("/api/panic/history/latest")
+  const url = panicApiUrl("historylatest")
   if (isDataTraceEnabled()) logFetchStart("panic-index-latest", { url })
   const res = await fetch(url, LIVE_JSON_GET_INIT)
   if (!res.ok) {
@@ -535,7 +547,7 @@ export async function submitManualPanicData(inputData) {
     })),
   )
   if (isPanicHubEnabled()) {
-    const url = withNoStoreQuery("/api/panic/update")
+    const url = panicApiUrl("update")
     const { res, out } = await postPanicSave(url, payload)
     if (!res.ok) {
       const detail =

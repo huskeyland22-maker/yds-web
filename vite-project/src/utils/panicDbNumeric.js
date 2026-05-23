@@ -1,4 +1,4 @@
-/** Client-side mirror of api/_lib/panicNumeric.js — coerce before POST /api/panic/update */
+/** Client-side mirror of api/_lib/panicNumeric.js — coerce before POST /api/panic?mode=update */
 
 export function metricValueForDb(value) {
   if (value == null || value === "") return null

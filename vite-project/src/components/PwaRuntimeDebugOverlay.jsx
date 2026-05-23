@@ -144,7 +144,7 @@ export default function PwaRuntimeDebugOverlay() {
         <dd className="m-0 break-all">{probe.remoteSwWorkboxCacheId ?? "-"}</dd>
         <dt className="text-slate-500">API source</dt>
         <dd className="m-0 break-all text-emerald-100/90">
-          {isPanicHubEnabled() ? "HUB /api/panic/latest" : String(lastPanicFetchUrl ?? "legacy")}
+          {isPanicHubEnabled() ? "HUB /api/panic?mode=latest" : String(lastPanicFetchUrl ?? "legacy")}
         </dd>
         <dt className="text-slate-500">last fetch</dt>
         <dd className="m-0 break-all">{lastFetchIso}</dd>

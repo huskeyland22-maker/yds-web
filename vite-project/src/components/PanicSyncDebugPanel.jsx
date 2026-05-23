@@ -72,7 +72,7 @@ export default function PanicSyncDebugPanel() {
   const hubEnv = String(import.meta.env.VITE_PANIC_HUB ?? "")
 
   const apiEndpointLabel = useMemo(() => {
-    if (hub) return "GET /api/panic/latest · POST /api/panic/update (Supabase 허브)"
+    if (hub) return "GET /api/panic?mode=latest · POST /api/panic?mode=update (Supabase 허브)"
     const primary = getPanicDataUrlForDisplay()
     const attempts = listPanicDataUrlAttemptsForDisplay()
     return [primary, ...(attempts || []).filter((u) => u !== primary)].join(" → ")

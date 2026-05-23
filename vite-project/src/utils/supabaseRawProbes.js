@@ -203,7 +203,7 @@ export async function runRawTableProbe(client, spec) {
 
 /** @returns {Promise<RawProbeResult>} */
 export async function runRawHubApiProbe() {
-  const queryChain = "fetch('/api/panic/latest') — server: service_role → panic_metrics"
+  const queryChain = "fetch('/api/panic?mode=latest') — server: service_role → panic_metrics"
   const tableName = "(hub api)"
   const started = performance.now()
   debugLog("raw-hub:start", { query: queryChain })
