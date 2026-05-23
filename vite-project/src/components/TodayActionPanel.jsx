@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import { buildTodayActionPanel } from "../utils/buildTodayActionPanel.js"
+import { TACTICAL_SCORE_LEGEND } from "../utils/tacticalScoreInterpretation.js"
 import ActionEvidenceSection from "./ActionEvidenceSection.jsx"
 
 /**
@@ -58,8 +59,8 @@ export default function TodayActionPanel({
                   data-band={card.scoreBand ?? undefined}
                 >
                   <span className="tactical-hud__score-num">{card.score}</span>
-                  <span className="tactical-hud__score-dir" aria-hidden>
-                    {card.scoreArrow}
+                  <span className="tactical-hud__score-sep" aria-hidden>
+                    |
                   </span>
                   <span className="tactical-hud__score-hint">{card.scoreHint}</span>
                 </span>
@@ -68,6 +69,10 @@ export default function TodayActionPanel({
           )
         })}
       </div>
+
+      <p className="tactical-hud__legend m-0" aria-label="점수 구간 범례">
+        {TACTICAL_SCORE_LEGEND.join(" · ")}
+      </p>
 
       <div className="tactical-hud__footer">
         <button

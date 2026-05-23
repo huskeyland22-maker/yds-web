@@ -7,6 +7,15 @@
 
 /** @typedef {'short'|'mid'|'long'|'tactical'} TacticalCardHorizonId */
 
+/** 점수 구간 범례 (카드 하단) */
+export const TACTICAL_SCORE_LEGEND = [
+  "80↑ 강세",
+  "60~79 우호",
+  "40~59 중립",
+  "20~39 경계",
+  "0~19 위험",
+]
+
 /**
  * @param {number} score
  * @returns {{ band: TacticalScoreBandId; common: string; arrow: string }}
@@ -82,6 +91,6 @@ export function buildTacticalScoreBottomLine(cardId, score) {
     hint,
     common,
     band,
-    line: `${rounded} ${arrow} ${hint}`,
+    line: `${rounded} | ${hint}`,
   }
 }

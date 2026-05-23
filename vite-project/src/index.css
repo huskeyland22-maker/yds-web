@@ -1787,10 +1787,11 @@
     font-weight: 800;
   }
 
-  .tactical-hud__score-dir {
+  .tactical-hud__score-sep {
     font-size: 11px;
-    font-weight: 800;
-    opacity: 0.92;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.5);
+    margin: 0 2px;
   }
 
   .tactical-hud__score-hint {
@@ -1800,54 +1801,55 @@
     color: rgba(226, 232, 240, 0.92);
   }
 
-  .tactical-hud__score[data-band="overheat"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="overheat"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="overheat"] .tactical-hud__score-num {
     color: rgba(251, 113, 133, 0.96);
   }
 
-  .tactical-hud__score[data-band="watch"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="watch"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="watch"] .tactical-hud__score-num {
     color: rgba(148, 163, 184, 0.96);
   }
 
-  .tactical-hud__score[data-band="neutral"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="neutral"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="neutral"] .tactical-hud__score-num {
     color: rgba(203, 213, 225, 0.96);
   }
 
-  .tactical-hud__score[data-band="favorable"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="favorable"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="favorable"] .tactical-hud__score-num {
     color: rgba(52, 211, 153, 0.96);
   }
 
-  .tactical-hud__score[data-band="strongBuy"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="strongBuy"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="strongBuy"] .tactical-hud__score-num {
     color: rgba(251, 191, 36, 0.98);
   }
 
-  .tactical-hud__score[data-band="danger"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="danger"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="danger"] .tactical-hud__score-num {
     color: rgba(251, 113, 133, 0.96);
   }
 
-  .tactical-hud__score[data-band="caution"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="caution"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="caution"] .tactical-hud__score-num {
     color: rgba(251, 146, 60, 0.96);
   }
 
-  .tactical-hud__score[data-band="hold"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="hold"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="hold"] .tactical-hud__score-num {
     color: rgba(203, 213, 225, 0.96);
   }
 
-  .tactical-hud__score[data-band="maintain"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="maintain"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="maintain"] .tactical-hud__score-num {
     color: rgba(52, 211, 153, 0.96);
   }
 
-  .tactical-hud__score[data-band="strongInterest"] .tactical-hud__score-num,
-  .tactical-hud__score[data-band="strongInterest"] .tactical-hud__score-dir {
+  .tactical-hud__score[data-band="strongInterest"] .tactical-hud__score-num {
     color: rgba(251, 191, 36, 0.98);
+  }
+
+  .tactical-hud__legend {
+    margin-top: 4px;
+    padding: 0 2px;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    text-align: center;
+    color: rgba(148, 163, 184, 0.68);
   }
 
   .tactical-hud__footer {
