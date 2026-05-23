@@ -2838,6 +2838,42 @@
     color: #fca5a5;
   }
 
+  .panic-v2-aux-metric-btn {
+    border: 1px solid transparent;
+    color: rgba(148, 163, 184, 0.88);
+    transition:
+      background-color 0.12s ease,
+      color 0.12s ease;
+  }
+
+  .panic-v2-aux-metric-btn--active {
+    border-color: rgba(34, 211, 238, 0.35);
+    background: rgba(34, 211, 238, 0.12);
+    color: rgba(207, 250, 254, 0.98);
+  }
+
+  .panic-v2-aux-metric-btn--idle:hover {
+    color: rgba(226, 232, 240, 0.92);
+  }
+
+  .panic-v2-aux-metric-btn--pending {
+    opacity: 0.82;
+  }
+
+  .panic-v2-aux-metric__badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid rgba(100, 116, 139, 0.45);
+    background: rgba(51, 65, 85, 0.55);
+    padding: 0 4px;
+    font-size: 7px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: rgba(148, 163, 184, 0.95);
+    letter-spacing: 0.02em;
+  }
+
   .panic-history-tabs__divider {
     padding: 0 2px;
     align-self: center;

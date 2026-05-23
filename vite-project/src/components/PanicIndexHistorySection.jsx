@@ -20,10 +20,7 @@ import {
 } from "../utils/buildPanicHistoryInsight.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
-import {
-  PANIC_V2_CHART_DETAIL_METRICS,
-  PANIC_V2_CHART_DETAIL_METRICS_VISIBLE,
-} from "../panic-v2/weights.js"
+import { PANIC_V2_CHART_DETAIL_METRICS } from "../panic-v2/weights.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import {
   buildPanicV2ChartData,
@@ -41,6 +38,7 @@ import PanicEngineStatusPanel, {
   TACTICAL_ACTION_STATUS_BAR,
   resolveStatusBarIndex,
 } from "./panic-history/PanicEngineStatusPanel.jsx"
+import PanicV2AuxMetrics from "./panic-history/PanicV2AuxMetrics.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 
 const HISTORY_CHART_HEIGHT = 220
@@ -243,13 +241,25 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     uiState.showChart,
   ])
 
+  const v2AuxMetricCounts = useMemo(() => {
+    /** @type {Record<string, number>} */
+    const counts = {}
+    for (const m of PANIC_V2_CHART_DETAIL_METRICS) {
+      counts[m.key] = countHistoryMetricPoints(chartRowsSource, m.key)
+    }
+    return counts
+  }, [chartRowsSource])
+
+  const v2DetailMetricReady = v2DetailMetric ? (v2AuxMetricCounts[v2DetailMetric] ?? 0) > 0 : true
+
   const chartEmptyMessage = useMemo(() => {
     if (activeHistoryTab === "panicV2" && v2DetailMetric) {
+      if (!v2DetailMetricReady) return "히스토리 준비중"
       const m = PANIC_V2_CHART_DETAIL_METRICS.find((x) => x.key === v2DetailMetric)
-      return `${m?.label ?? "지표"} 데이터 준비중`
+      return `${m?.tabLabel ?? m?.label ?? "지표"} 데이터 준비중`
     }
     return "데이터 준비중"
-  }, [activeHistoryTab, v2DetailMetric])
+  }, [activeHistoryTab, v2DetailMetric, v2DetailMetricReady])
 
   const toggleV2Aux = () => {
     setV2AuxOpen((open) => {
@@ -450,54 +460,15 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
       {activeHistoryTab === "panicV2" ? (
         <div className="mt-0.5">
-          <button
-            type="button"
-            onClick={toggleV2Aux}
-            className={[
-              "panic-history-tab panic-history-tab--aux-toggle inline-flex items-center rounded-md border px-1.5 py-0.5",
-              v2AuxOpen
-                ? "border-sky-400/25 bg-sky-500/10 text-sky-100"
-                : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
-            ].join(" ")}
-            aria-expanded={v2AuxOpen}
-            aria-controls="panic-v2-aux-metrics"
-          >
-            <span className="whitespace-nowrap text-[9px] font-semibold">
-              {v2AuxOpen ? "보조지표 −" : "보조지표 +"}
-            </span>
-          </button>
-          {v2AuxOpen ? (
-            <div
-              id="panic-v2-aux-metrics"
-              className="mt-0.5 flex flex-wrap gap-0.5"
-              role="group"
-              aria-label="V2 보조 지표"
-            >
-              <button
-                type="button"
-                onClick={() => setV2DetailMetric(null)}
-                className={[
-                  "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
-                  !v2DetailMetric ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
-                ].join(" ")}
-              >
-                점수
-              </button>
-              {PANIC_V2_CHART_DETAIL_METRICS_VISIBLE.map((m) => (
-                <button
-                  key={m.key}
-                  type="button"
-                  onClick={() => setV2DetailMetric(m.key)}
-                  className={[
-                    "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
-                    v2DetailMetric === m.key ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
-                  ].join(" ")}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
+          <PanicV2AuxMetrics
+            open={v2AuxOpen}
+            onToggle={toggleV2Aux}
+            scoreSelected={!v2DetailMetric}
+            detailMetric={v2DetailMetric}
+            metricCounts={v2AuxMetricCounts}
+            onSelectScore={() => setV2DetailMetric(null)}
+            onSelectMetric={setV2DetailMetric}
+          />
         </div>
       ) : null}
     </section>
