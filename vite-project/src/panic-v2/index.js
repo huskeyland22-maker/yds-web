@@ -9,9 +9,16 @@ export {
   enrichHistoryWithPanicV2,
   panicV2ScoreForRow,
 } from "./panicV2History.js"
+export { PANIC_V2_DYNAMIC_WEIGHTS, PANIC_V2_DYNAMIC_METRIC_KEYS } from "./dynamicWeights.js"
 export {
   buildPanicV2DynamicChartData,
   buildPanicV2DynamicSeries,
   latestPanicV2DynamicScore,
 } from "./panicV2Dynamic.js"
+export {
+  enrichCycleRowsWithPanicV2,
+  loadPanicHistoryV2,
+  persistPanicHistoryV2,
+  PANIC_HISTORY_V2_STORAGE_KEY,
+} from "./panicHistoryV2Backfill.js"
 export { buildPanicV1HistoryChartData, panicV1ScoreForRow } from "./panicV1History.js"

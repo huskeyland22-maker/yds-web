@@ -2771,15 +2771,10 @@
     color: #94a3b8;
   }
 
-  /* 전문가 리스크 — 모바일 아코디언 (데스크톱 1024px+ 기존 유지) */
+  /* 전문가 리스크 — 데스크톱·모바일 공통 아코디언 (기본 접힘) */
   .panic-expert-accordion {
     margin-top: 8px;
     margin-bottom: 4px;
-  }
-
-  .panic-expert-accordion__label-desktop {
-    display: none;
-    margin: 4px 0 6px;
   }
 
   .panic-expert-accordion__toggle {
@@ -2833,17 +2828,20 @@
   }
 
   .panic-expert-accordion__panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 250ms ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      max-height 200ms ease,
+      opacity 200ms ease;
   }
 
   .panic-expert-accordion.is-open .panic-expert-accordion__panel {
-    grid-template-rows: 1fr;
+    max-height: 320px;
+    opacity: 1;
   }
 
   .panic-expert-accordion__inner {
-    overflow: hidden;
     min-height: 0;
   }
 
@@ -2853,32 +2851,7 @@
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.03);
     background: rgba(255, 255, 255, 0.015);
-    opacity: 0.78;
     padding: 1px;
-  }
-
-  @media (min-width: 1024px) {
-    .panic-expert-accordion__label-desktop {
-      display: block;
-    }
-
-    .panic-expert-accordion__toggle {
-      display: none;
-    }
-
-    .panic-expert-accordion__panel {
-      display: block;
-      grid-template-rows: none;
-      transition: none;
-    }
-
-    .panic-expert-accordion__inner {
-      overflow: visible;
-    }
-
-    .panic-expert-accordion__body {
-      margin-top: 0;
-    }
   }
 
   .panic-v2-desk {

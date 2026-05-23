@@ -30,7 +30,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
 
   useEffect(() => {
-    void loadCycleHistoryBundle({ limit: 500, force: false })
+    void loadCycleHistoryBundle({ limit: 600, force: false })
   }, [loadCycleHistoryBundle])
 
   const history = useMemo(() => {

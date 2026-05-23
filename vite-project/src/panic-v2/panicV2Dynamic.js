@@ -4,13 +4,14 @@
 import { formatChartAxisMd } from "../utils/chartDateFormat.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { pickPanicV2Raw } from "./computePanicV2.js"
+import { PANIC_V2_DYNAMIC_METRIC_KEYS, PANIC_V2_DYNAMIC_WEIGHTS } from "./dynamicWeights.js"
 import { resolvePanicV2Status } from "./panicV2Status.js"
-import { PANIC_V2_METRICS } from "./weights.js"
 
 const DEFAULT_CHANGE_LAG = 5
-const DEFAULT_Z_WINDOW = 42
+const DEFAULT_Z_WINDOW = 36
+const MIN_WEIGHT_COVERAGE = 0.35
 
-/** 변화율↑ = 패닉↑ 이면 false (FG·BofA·GS는 역방향) */
+/** 변화율↑ = 패닉↑ 이면 false */
 const INVERT_CHANGE = new Set(["fearGreed", "bofa", "gsBullBear"])
 
 /**
@@ -26,7 +27,7 @@ function percentChange(current, past) {
 }
 
 /**
- * @param {number[]} arr
+ * @param {(number | null)[]} arr
  * @param {number} idx
  * @param {number} window
  */
@@ -60,20 +61,20 @@ export function buildPanicV2DynamicSeries(history, opts = {}) {
 
   /** @type {Record<string, (number | null)[]>} */
   const valueSeries = {}
-  for (const def of PANIC_V2_METRICS) {
-    valueSeries[def.key] = sorted.map((row) => pickPanicV2Raw(row, def.key))
+  for (const key of PANIC_V2_DYNAMIC_METRIC_KEYS) {
+    valueSeries[key] = sorted.map((row) => pickPanicV2Raw(row, key))
   }
 
   /** @type {Record<string, (number | null)[]>} */
   const changeSeries = {}
-  for (const def of PANIC_V2_METRICS) {
-    const vals = valueSeries[def.key]
-    changeSeries[def.key] = vals.map((cur, i) => {
+  for (const key of PANIC_V2_DYNAMIC_METRIC_KEYS) {
+    const vals = valueSeries[key]
+    changeSeries[key] = vals.map((cur, i) => {
       if (i < changeLag) return null
       const past = vals[i - changeLag]
       let ch = percentChange(cur, past)
       if (ch == null) return null
-      if (INVERT_CHANGE.has(def.key)) ch = -ch
+      if (INVERT_CHANGE.has(key)) ch = -ch
       return ch
     })
   }
@@ -89,25 +90,21 @@ export function buildPanicV2DynamicSeries(history, opts = {}) {
     let weighted = 0
     let weightUsed = 0
 
-    for (const def of PANIC_V2_METRICS) {
-      const ch = changeSeries[def.key][i]
+    for (const key of PANIC_V2_DYNAMIC_METRIC_KEYS) {
+      const w = PANIC_V2_DYNAMIC_WEIGHTS[key]
+      const ch = changeSeries[key][i]
       if (ch == null || !Number.isFinite(ch)) continue
 
-      const { mean, std } = rollingMeanStd(
-        changeSeries[def.key].map((v) => (v == null ? null : v)),
-        i,
-        zWindow,
-      )
+      const { mean, std } = rollingMeanStd(changeSeries[key], i, zWindow)
       if (std == null) continue
 
       const z = (ch - mean) / std
-      const contrib = zToContribution(z)
-      weighted += contrib * def.weight
-      weightUsed += def.weight
+      weighted += zToContribution(z) * w
+      weightUsed += w
     }
 
     let score = null
-    if (weightUsed >= 25) {
+    if (weightUsed >= MIN_WEIGHT_COVERAGE) {
       score = Math.round(weighted / weightUsed)
       score = Math.max(0, Math.min(100, score))
     }
@@ -127,20 +124,47 @@ export function buildPanicV2DynamicSeries(history, opts = {}) {
 
 /** @param {object[]} history */
 export function buildPanicV2DynamicChartData(history, opts) {
-  return buildPanicV2DynamicSeries(history, opts)
+  const enriched = enrichOrBuildSeries(history)
+  return enriched
     .filter((p) => p.score != null)
     .map((p) => ({
       date: p.date,
-      axisLabel: p.axisLabel,
+      axisLabel: p.axisLabel ?? formatChartAxisMd(p.date),
       value: p.score,
       panicV2: p.score,
       panicV2Status: p.status,
     }))
 }
 
+/**
+ * @param {object[]} history
+ */
+function enrichOrBuildSeries(history) {
+  const sorted = sortHistoryRowsAsc(history)
+  const hasCached = sorted.some(
+    (r) => r.panicV2DynamicScore != null && Number.isFinite(Number(r.panicV2DynamicScore)),
+  )
+  if (hasCached) {
+    return sorted.map((row) => {
+      const date = String(row.date ?? "").slice(0, 10)
+      const score = Number(row.panicV2DynamicScore ?? row.panicV2Score)
+      if (!Number.isFinite(score)) return { date, score: null, axisLabel: formatChartAxisMd(date), status: null, statusId: null }
+      const status = resolvePanicV2Status(score)
+      return {
+        date,
+        axisLabel: formatChartAxisMd(date),
+        score: Math.round(score),
+        status: row.panicV2Status ?? status?.label ?? null,
+        statusId: row.panicV2StatusId ?? status?.id ?? null,
+      }
+    })
+  }
+  return buildPanicV2DynamicSeries(history)
+}
+
 /** @param {object[]} history */
 export function latestPanicV2DynamicScore(history, opts) {
-  const series = buildPanicV2DynamicSeries(history, opts)
+  const series = enrichOrBuildSeries(history)
   for (let i = series.length - 1; i >= 0; i--) {
     if (series[i].score != null) return series[i].score
   }

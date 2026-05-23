@@ -27,6 +27,7 @@ import {
   logHistoryChartDebug,
   panicDeskDataFromHistory,
 } from "../utils/panicHistoryDesk.js"
+import { enrichCycleRowsWithPanicV2 } from "../panic-v2/panicHistoryV2Backfill.js"
 import { hasPanicMetricValues, resolveLatestMetrics } from "../utils/resolveLatestPanicMetrics.js"
 import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
@@ -181,7 +182,8 @@ export const useAppDataStore = create((set, get) => ({
   },
 
   _commitCycleHistory: (rows, meta) => {
-    const fresh = Array.isArray(rows) ? rows : []
+    const raw = Array.isArray(rows) ? rows : []
+    const fresh = raw.length >= 8 ? enrichCycleRowsWithPanicV2(raw) : raw
     writeCycleMetricHistoryToLS(fresh)
     if (fresh.length > 0) {
       persistHistoryFromCycleRows(fresh)

@@ -21,7 +21,7 @@ export default function PanicCoreMetricsBlock({ panicData, historyRows = [] }) {
   const levelV2 = useMemo(() => computePanicV2(panicData), [panicData])
 
   const displayScore = useMemo(() => {
-    const dynamic = historyRows.length >= 12 ? latestPanicV2DynamicScore(historyRows) : null
+    const dynamic = historyRows.length >= 8 ? latestPanicV2DynamicScore(historyRows) : null
     if (dynamic != null) return dynamic
     return levelV2.score
   }, [historyRows, levelV2.score])

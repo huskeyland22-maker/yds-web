@@ -6,6 +6,7 @@ import { PANIC_INDEX_HISTORY_KEY, panicIndexRowToCycleChart } from "./panicIndex
 import { HISTORY_AUX_METRICS, HISTORY_TAB_METRICS } from "./panicDeskMetrics.js"
 import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
 import { panicV2ScoreForRow } from "../panic-v2/panicV2History.js"
+import { panicV2ScoreFromRow } from "../panic-v2/panicHistoryV2Backfill.js"
 import { buildPanicV2DynamicSeries } from "../panic-v2/panicV2Dynamic.js"
 import {
   loadStoredPanicHistory,
@@ -48,10 +49,8 @@ function rowValue(row, key) {
     return Number.isFinite(v) ? v : null
   }
   if (key === "panicV2") {
-    const cached = row.panicV2Score ?? row.panic_v2_score
-    if (cached != null && Number.isFinite(Number(cached))) return Number(cached)
-    const computed = panicV2ScoreForRow(row)
-    return Number.isFinite(computed) ? computed : null
+    const v = panicV2ScoreFromRow(row)
+    return Number.isFinite(v) ? v : null
   }
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
   if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
@@ -63,6 +62,10 @@ function rowValue(row, key) {
 export function countHistoryMetricPoints(history, metricKey) {
   if (!Array.isArray(history) || !metricKey) return 0
   if (metricKey === "panicV2") {
+    const cached = history.filter((r) =>
+      Number.isFinite(Number(r.panicV2DynamicScore ?? r.panicV2Score)),
+    ).length
+    if (cached > 0) return cached
     return buildPanicV2DynamicSeries(history).filter((p) => p.score != null).length
   }
   return history.filter((r) => {

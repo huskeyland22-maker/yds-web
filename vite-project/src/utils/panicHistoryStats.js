@@ -27,6 +27,10 @@ function rowValue(row, key) {
 /** @param {object[]} rows @param {string} metricKey */
 export function historyValuesForMetric(rows, metricKey) {
   if (metricKey === "panicV2") {
+    const fromRows = sortHistoryRowsAsc(rows)
+      .map((r) => Number(r.panicV2DynamicScore ?? r.panicV2Score))
+      .filter(Number.isFinite)
+    if (fromRows.length >= 8) return fromRows
     return buildPanicV2DynamicSeries(rows)
       .map((p) => p.score)
       .filter((v) => v != null && Number.isFinite(v))

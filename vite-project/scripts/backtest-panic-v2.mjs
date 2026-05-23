@@ -6,6 +6,7 @@ import { readFileSync, existsSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { computePanicV2 } from "../src/panic-v2/computePanicV2.js"
+import { PANIC_V2_DYNAMIC_WEIGHTS } from "../src/panic-v2/dynamicWeights.js"
 import { buildPanicV2DynamicSeries } from "../src/panic-v2/panicV2Dynamic.js"
 import { panicV1ScoreForRow } from "../src/panic-v2/panicV1History.js"
 import { getFinalScore } from "../src/utils/tradingScores.js"
@@ -183,4 +184,5 @@ if (historyRows.length >= 20) {
   console.log("\n히스토리 JSON 비어 있음 — 시나리오 경로로 동적 차트 검증됨")
 }
 
-console.log("\n[완료] V2 차트=변화율+z-score · V1=getFinalScore · 절대 V2=computePanicV2")
+console.log("\nV2 동적 가중치:", PANIC_V2_DYNAMIC_WEIGHTS)
+console.log("[완료] V2 차트=변화율+z-score · V1=getFinalScore · 절대 V2=computePanicV2")
