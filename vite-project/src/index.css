@@ -2929,6 +2929,12 @@
     padding-top: 10px;
   }
 
+  .tactical-zone-detail__aux-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
   .tactical-zone-aux-tag {
     display: inline-flex;
     align-items: center;
@@ -2943,6 +2949,49 @@
     line-height: 1;
     color: rgba(203, 213, 225, 0.96);
     white-space: nowrap;
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+      border-color 0.12s ease,
+      background-color 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+
+  .tactical-zone-aux-tag:hover {
+    border-color: rgba(148, 163, 184, 0.55);
+  }
+
+  .tactical-zone-aux-tag--expanded {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35);
+  }
+
+  .tactical-zone-aux-detail {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    background: rgba(8, 18, 32, 0.72);
+  }
+
+  .tactical-zone-aux-detail__headline {
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: rgba(226, 232, 240, 0.98);
+    margin-bottom: 4px !important;
+  }
+
+  .tactical-zone-aux-detail__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tactical-zone-aux-detail__line {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(148, 163, 184, 0.95);
   }
 
   .tactical-zone-aux-tag--on {
