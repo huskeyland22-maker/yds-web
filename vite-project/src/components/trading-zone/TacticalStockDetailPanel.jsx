@@ -73,44 +73,39 @@ export default function TacticalStockDetailPanel({ position }) {
       {progress ? (
         <div className="tactical-zone-progress">
           <p className="m-0 text-[8px] font-semibold text-slate-500">목표 진행</p>
-          <p className="tactical-zone-progress__ruler m-0 mt-1 font-mono tabular-nums">
-            <span className="tactical-zone-progress__stop">
-              손절 <strong>{progress.formatted.stop}</strong>
-            </span>
-            <span className="tactical-zone-progress__dash" aria-hidden>
-              {" "}
-              ─{" "}
-            </span>
-            <span className="tactical-zone-progress__current">
-              현재 <strong>{progress.formatted.current}</strong>
-            </span>
-            <span className="tactical-zone-progress__dash" aria-hidden>
-              {" "}
-              ─{" "}
-            </span>
-            <span className="tactical-zone-progress__target">
-              목표 <strong>{progress.formatted.target}</strong>
-            </span>
-          </p>
+
+          <div className="tactical-zone-progress__heads font-mono tabular-nums">
+            <div className="tactical-zone-progress__col tactical-zone-progress__col--stop">
+              <span className="tactical-zone-progress__label">손절</span>
+              <span className="tactical-zone-progress__value">{progress.formatted.stop}</span>
+            </div>
+            <div className="tactical-zone-progress__col tactical-zone-progress__col--current">
+              <span className="tactical-zone-progress__label">
+                <span className="tactical-zone-progress__live-dot" aria-hidden>
+                  ●
+                </span>{" "}
+                현재
+              </span>
+              <span className="tactical-zone-progress__value">{progress.formatted.current}</span>
+            </div>
+            <div className="tactical-zone-progress__col tactical-zone-progress__col--target">
+              <span className="tactical-zone-progress__label">목표</span>
+              <span className="tactical-zone-progress__value">{progress.formatted.target}</span>
+            </div>
+          </div>
 
           <div
             className="tactical-zone-progress__visual"
             style={{ "--progress-pct": `${progress.progressPct}%` }}
+            aria-hidden
           >
-            <div className="tactical-zone-progress__track" aria-hidden>
+            <div className="tactical-zone-progress__track">
               <span className="tactical-zone-progress__rail" />
               <span className="tactical-zone-progress__fill" />
-              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--stop" title="손절" />
-              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" title="현재" />
-              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" title="목표" />
+              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--stop" />
+              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
+              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
             </div>
-            <p className="tactical-zone-progress__nums m-0 font-mono tabular-nums">
-              <span className="tactical-zone-progress__stop">{progress.formatted.stop}</span>
-              <span className="tactical-zone-progress__nums-sep">/</span>
-              <span className="tactical-zone-progress__current">{progress.formatted.current}</span>
-              <span className="tactical-zone-progress__nums-sep">/</span>
-              <span className="tactical-zone-progress__target">{progress.formatted.target}</span>
-            </p>
           </div>
 
           <p className="m-0 mt-0.5 text-[8px] text-slate-500">
