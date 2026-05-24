@@ -76,6 +76,18 @@ export function formatStageHistoryBadgeDisplay(item) {
 }
 
 /**
+ * 타임라인 표시: `🟢05/18 관심`
+ * @param {{ dateLabel: string; stage: import("./tacticalTradingZoneData.js").TradingStageId }} item
+ */
+export function formatStageHistoryTimelineDisplay(item) {
+  const meta = TRADING_STAGE_META[item.stage]
+  const emoji = meta?.emoji ?? "⚪"
+  const label = meta?.label ?? item.stage
+  const date = item.dateLabel ?? ""
+  return date ? `${emoji}${date} ${label}` : `${emoji}${label}`
+}
+
+/**
  * @param {import("./tacticalTradingZoneData.js").TradingStageHistoryEntry[]} history
  */
 export function formatStageHistoryLog(history) {

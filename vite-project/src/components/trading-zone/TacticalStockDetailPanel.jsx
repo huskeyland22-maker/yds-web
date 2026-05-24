@@ -15,8 +15,8 @@ import {
   resolvePositionPriceLevels,
 } from "../../trading-zone/tradingZonePriceProgress.js"
 import {
-  formatStageHistoryBadgeDisplay,
   formatStageHistoryLog,
+  formatStageHistoryTimelineDisplay,
 } from "../../trading-zone/tradingZoneStageHistory.js"
 /**
  * @param {{ position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition }} props
@@ -28,10 +28,6 @@ export default function TacticalStockDetailPanel({ position }) {
   const progress = computeTradingZoneProgress(levels)
   const coreMetrics = useMemo(() => buildTradingCoreMetrics(position), [position])
   const activeAux = new Set(position.aux ?? [])
-
-  const flowActiveIndex = TRADING_STAGE_FLOW.includes(position.stage)
-    ? TRADING_STAGE_FLOW.indexOf(position.stage)
-    : -1
 
   const currentStageId =
     position.stage === "interest" ||
@@ -60,7 +56,7 @@ export default function TacticalStockDetailPanel({ position }) {
     >
       <header className="tactical-zone-detail__head">
         <p className="m-0 tactical-zone-detail__name">{position.symbol}</p>
-        <p className="m-0 tactical-zone-detail__current-line">
+        <p className="m-0 tactical-zone-detail__current-line tactical-zone-detail__current-stage">
           <span className="tactical-zone-detail__current-label">현재단계</span>
           <span className="tactical-zone-detail__current-sep" aria-hidden>
             :
@@ -73,35 +69,29 @@ export default function TacticalStockDetailPanel({ position }) {
 
       <div className="tactical-zone-detail__stage-center">
         <div
-          className="tactical-zone-stage-flow tactical-zone-stage-flow--compact"
+          className="tactical-zone-stage-flow tactical-zone-stage-flow--compact tactical-zone-detail__status-flow"
           aria-label="단계 진행"
         >
           {TRADING_STAGE_FLOW.map((stageId, i) => {
             const meta = TRADING_STAGE_META[stageId]
             const isActive = position.stage === stageId
-            const isMuted = flowActiveIndex >= 0 && i > flowActiveIndex
+            const isInactive = !isActive
             return (
               <span key={stageId} className="tactical-zone-stage-flow__segment">
                 {i > 0 ? (
-                  <span
-                    className={[
-                      "tactical-zone-stage-flow__arrow",
-                      isMuted ? "tactical-zone-stage-flow__arrow--muted" : "",
-                    ].join(" ")}
-                    aria-hidden
-                  >
-                    →
+                  <span className="tactical-zone-stage-flow__sep" aria-hidden>
+                    ─
                   </span>
                 ) : null}
                 <span
                   className={[
                     "tactical-zone-stage-flow__chip",
                     isActive ? "tactical-zone-stage-flow__chip--active" : "",
-                    isMuted ? "tactical-zone-stage-flow__chip--muted" : "",
+                    isInactive ? "tactical-zone-stage-flow__chip--inactive" : "",
                   ].join(" ")}
                   data-stage={stageId}
                 >
-                  {meta.label}
+                  <span aria-hidden>{meta.emoji}</span> {meta.label}
                 </span>
               </span>
             )
@@ -151,10 +141,7 @@ export default function TacticalStockDetailPanel({ position }) {
                   <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
                   <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
                 </div>
-                <p
-                  className="m-0 tactical-zone-price-rail__achieve"
-                  style={{ left: `${progress.progressPct}%` }}
-                >
+                <p className="m-0 tactical-zone-price-rail__achieve tactical-zone-price-rail__achieve--center">
                   <span className="tactical-zone-price-rail__achieve-val">{progress.progressPct}%</span>
                   <span className="tactical-zone-price-rail__achieve-label">목표달성</span>
                 </p>
@@ -228,7 +215,7 @@ export default function TacticalStockDetailPanel({ position }) {
                     ].join(" ")}
                     data-stage={h.stage}
                   >
-                    {formatStageHistoryBadgeDisplay(h)}
+                    {formatStageHistoryTimelineDisplay(h)}
                   </span>
                 </span>
               ))}
