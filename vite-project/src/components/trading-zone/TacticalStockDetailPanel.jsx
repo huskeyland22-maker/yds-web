@@ -151,13 +151,15 @@ export default function TacticalStockDetailPanel({ position }) {
                   <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
                   <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
                 </div>
+                <p
+                  className="m-0 tactical-zone-price-rail__achieve"
+                  style={{ left: `${progress.progressPct}%` }}
+                >
+                  <span className="tactical-zone-price-rail__achieve-val">{progress.progressPct}%</span>
+                  <span className="tactical-zone-price-rail__achieve-label">목표달성</span>
+                </p>
               </div>
             </div>
-
-            <p className="m-0 tactical-zone-price-rail__achieve">
-              <span className="tactical-zone-price-rail__achieve-label">달성</span>
-              <span className="tactical-zone-price-rail__achieve-val">{progress.progressPct}%</span>
-            </p>
           </div>
         </div>
       ) : null}
