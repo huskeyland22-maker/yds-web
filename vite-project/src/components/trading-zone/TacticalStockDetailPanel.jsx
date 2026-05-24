@@ -9,8 +9,8 @@ import {
   resolvePositionPriceLevels,
 } from "../../trading-zone/tradingZonePriceProgress.js"
 import {
+  formatStageHistoryChipLabel,
   formatStageHistoryLog,
-  formatStageHistoryTimelineSegment,
 } from "../../trading-zone/tradingZoneStageHistory.js"
 
 /**
@@ -48,11 +48,12 @@ export default function TacticalStockDetailPanel({ position }) {
     historyHighlightIndex = historyLog.length - 1
   }
 
-  const fieldValue = (raw) => {
+  const fieldDisplay = (raw, suffix = "") => {
     if (raw == null) return "-"
-    if (typeof raw === "number" && Number.isFinite(raw)) return String(raw)
+    if (typeof raw === "number" && Number.isFinite(raw)) return `${raw}${suffix}`
     const s = String(raw).trim()
-    return s && s !== "—" ? s : "-"
+    if (!s || s === "—") return "-"
+    return `${s}${suffix}`
   }
 
   return (
@@ -91,19 +92,25 @@ export default function TacticalStockDetailPanel({ position }) {
 
       <dl className="tactical-zone-detail__grid m-0">
         <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--entry">
-          <dt>진입</dt>
+          <dt>
+            <span aria-hidden>🎯</span> 진입
+          </dt>
           <dd>
             <span className="tactical-zone-price-pill font-mono tabular-nums">{displayEntry}</span>
           </dd>
         </div>
         <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--stop">
-          <dt>손절</dt>
+          <dt>
+            <span aria-hidden>🛑</span> 손절
+          </dt>
           <dd>
             <span className="tactical-zone-price-pill font-mono tabular-nums">{displayStop}</span>
           </dd>
         </div>
         <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--target">
-          <dt>목표</dt>
+          <dt>
+            <span aria-hidden>🚀</span> 목표
+          </dt>
           <dd>
             <span className="tactical-zone-price-pill font-mono tabular-nums">{displayTarget}</span>
           </dd>
@@ -116,17 +123,22 @@ export default function TacticalStockDetailPanel({ position }) {
           style={{ "--progress-pct": `${progress.progressPct}%` }}
         >
           <div className="tactical-zone-progress__chart font-mono tabular-nums">
-            <p className="m-0 tactical-zone-progress__ruler">
+            <div className="tactical-zone-progress__ruler">
               <span className="tactical-zone-progress__ruler-stop">{progress.formatted.stop}</span>
               <span className="tactical-zone-progress__ruler-sep" aria-hidden>
-                ─
+                ──
               </span>
-              <span className="tactical-zone-progress__ruler-current">{progress.formatted.current}</span>
+              <div className="tactical-zone-progress__ruler-center">
+                <span className="tactical-zone-progress__ruler-current">
+                  ●{progress.formatted.current}
+                </span>
+                <span className="tactical-zone-progress__ruler-pct">{progress.progressPct}%</span>
+              </div>
               <span className="tactical-zone-progress__ruler-sep" aria-hidden>
-                ─
+                ──
               </span>
               <span className="tactical-zone-progress__ruler-target">{progress.formatted.target}</span>
-            </p>
+            </div>
 
             <div className="tactical-zone-progress__track-wrap">
               <div className="tactical-zone-progress__track">
@@ -137,13 +149,6 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
               </div>
             </div>
-
-            <p className="m-0 tactical-zone-progress__achieve-row">
-              <span className="tactical-zone-progress__achieve-label">목표달성</span>
-              <span className="tactical-zone-progress__achieve-pct font-mono tabular-nums">
-                {progress.progressPct}%
-              </span>
-            </p>
           </div>
         </div>
       ) : null}
@@ -165,54 +170,51 @@ export default function TacticalStockDetailPanel({ position }) {
         </div>
       </div>
 
-      <div className="tactical-zone-detail__reserved" aria-label="실전 필드 예약">
-        <div className="tactical-zone-field-card">
-          <p className="m-0 tactical-zone-field-card__label">RR</p>
-          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">{fieldValue(position.rr)}</p>
-        </div>
-        <div className="tactical-zone-field-card">
-          <p className="m-0 tactical-zone-field-card__label">기대수익</p>
-          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">
-            {fieldValue(position.expectedReturn)}
-          </p>
-        </div>
-        <div className="tactical-zone-field-card">
-          <p className="m-0 tactical-zone-field-card__label">보유일</p>
-          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">
+      <div className="tactical-zone-fields-compact" aria-label="실전 필드">
+        <p className="m-0 tactical-zone-fields-compact__row font-mono tabular-nums">
+          <span>RR {fieldDisplay(position.rr)}</span>
+          <span className="tactical-zone-fields-compact__sep" aria-hidden>
+            |
+          </span>
+          <span>기대수익 {fieldDisplay(position.expectedReturn)}</span>
+        </p>
+        <p className="m-0 tactical-zone-fields-compact__row font-mono tabular-nums">
+          <span>
+            보유일{" "}
             {position.holdingDays != null && Number.isFinite(position.holdingDays)
               ? `${position.holdingDays}일`
               : "-"}
-          </p>
-        </div>
-        <div className="tactical-zone-field-card">
-          <p className="m-0 tactical-zone-field-card__label">비중</p>
-          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">{fieldValue(position.weight)}</p>
-        </div>
+          </span>
+          <span className="tactical-zone-fields-compact__sep" aria-hidden>
+            |
+          </span>
+          <span>비중 {fieldDisplay(position.weight)}</span>
+        </p>
       </div>
 
       {historyLog.length ? (
         <div className="tactical-zone-detail__history">
           <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
-          <p className="m-0 tactical-zone-history-timeline font-mono" aria-label="상태 이력 타임라인">
+          <div className="tactical-zone-history-chips" aria-label="상태 이력 타임라인">
             {historyLog.map((h, i) => (
-              <span key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-timeline__item">
+              <span key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-chips__item">
                 {i > 0 ? (
-                  <span className="tactical-zone-history-timeline__arrow" aria-hidden>
+                  <span className="tactical-zone-history-chips__arrow" aria-hidden>
                     →
                   </span>
                 ) : null}
                 <span
                   className={[
-                    "tactical-zone-history-timeline__segment",
-                    i === historyHighlightIndex ? "tactical-zone-history-timeline__segment--current" : "",
+                    "tactical-zone-history-chip",
+                    i === historyHighlightIndex ? "tactical-zone-history-chip--current" : "",
                   ].join(" ")}
                   data-stage={h.stage}
                 >
-                  {formatStageHistoryTimelineSegment(h)}
+                  {formatStageHistoryChipLabel(h)}
                 </span>
               </span>
             ))}
-          </p>
+          </div>
         </div>
       ) : null}
     </div>

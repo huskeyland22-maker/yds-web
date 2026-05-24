@@ -45,6 +45,16 @@ export function formatStageHistoryTimelineSegment(item) {
 }
 
 /**
+ * 타임라인 chip: `05/18 관심`
+ * @param {{ dateLabel: string; stage: import("./tacticalTradingZoneData.js").TradingStageId }} item
+ */
+export function formatStageHistoryChipLabel(item) {
+  const meta = TRADING_STAGE_META[item.stage]
+  const label = meta?.label ?? item.stage
+  return item.dateLabel ? `${item.dateLabel} ${label}` : label
+}
+
+/**
  * @param {import("./tacticalTradingZoneData.js").TradingStageHistoryEntry[]} history
  */
 export function formatStageHistoryLog(history) {

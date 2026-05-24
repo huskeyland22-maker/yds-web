@@ -43,7 +43,7 @@ function StockChip({ position, selected, onSelect }) {
  */
 function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
   return (
-    <div className="tactical-zone-bucket">
+    <div className="tactical-zone-bucket" data-bucket={bucketId}>
       <p className="m-0 tactical-zone-bucket__title">{title}</p>
       <div className="tactical-zone-bucket__list">
         {positions.length === 0 ? (
