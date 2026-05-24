@@ -122,6 +122,7 @@ export default function TacticalTradingZoneSection({
         title="실전 매매존"
         description="미국·한국 실전 진입 관리"
         tone="green"
+        compact
       />
 
       <hr className="tactical-trading-zone__divider" aria-hidden />
