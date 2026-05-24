@@ -26,8 +26,13 @@ function StockChip({ position, selected, onSelect }) {
       className={["tactical-zone-chip", selected ? "tactical-zone-chip--selected" : ""].join(" ")}
     >
       <span className="tactical-zone-chip__name">{position.symbol}</span>
-      <span className="tactical-zone-chip__badge" title={badge.label}>
-        {badge.emoji} {badge.label}
+      <span
+        className="tactical-zone-chip__badge"
+        data-stage={position.stage}
+        title={badge.label}
+      >
+        <span aria-hidden>{badge.emoji}</span>
+        {badge.label}
       </span>
     </button>
   )
@@ -50,8 +55,12 @@ function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
         {positions.length === 0 ? (
           bucketId === "takeProfit" ? (
             <div className="tactical-zone-bucket__empty-stack">
-              <span className="tactical-zone-bucket__empty">{TRADING_ZONE_TAKE_PROFIT_EMPTY.status}</span>
-              <span className="tactical-zone-bucket__empty-sub">{TRADING_ZONE_TAKE_PROFIT_EMPTY.partial}</span>
+              <span className="tactical-zone-bucket__empty">
+                📌 {TRADING_ZONE_TAKE_PROFIT_EMPTY.status}
+              </span>
+              <span className="tactical-zone-bucket__empty-sub">
+                📌 {TRADING_ZONE_TAKE_PROFIT_EMPTY.partial}
+              </span>
             </div>
           ) : (
             <span className="tactical-zone-bucket__empty">—</span>

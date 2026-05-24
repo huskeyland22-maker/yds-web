@@ -1257,15 +1257,6 @@
     width: 100%;
   }
 
-  .tactical-zone-chip__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 13px;
-    font-weight: 700;
-    color: rgba(148, 163, 184, 0.95);
-  }
-
   .tactical-trading-zone__head {
     margin-bottom: 0;
   }
@@ -1342,41 +1333,44 @@
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(0, 0, 0, 0.22);
-    padding: 5px 7px;
-    min-height: 68px;
+    padding: 8px 6px;
+    min-height: 110px;
+    box-sizing: border-box;
   }
 
   .tactical-zone-bucket__title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 800;
     color: rgba(203, 213, 225, 0.96);
-    padding-bottom: 5px;
-    margin-bottom: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 3px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     letter-spacing: 0.02em;
+    line-height: 1.15;
   }
 
   .tactical-zone-bucket__list {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-top: 5px;
+    gap: 3px;
+    margin-top: 3px;
   }
 
   .tactical-zone-chip {
     display: flex;
     width: 100%;
+    height: 30px;
     min-height: 30px;
     align-items: center;
     justify-content: space-between;
-    gap: 6px;
+    gap: 8px;
     border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(255, 255, 255, 0.03);
-    padding: 5px 9px;
+    padding: 0 8px;
     text-align: left;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: rgba(226, 232, 240, 0.95);
     transition:
       border-color 0.15s ease,
@@ -1403,7 +1397,48 @@
   }
 
   .tactical-zone-chip__badge {
+    display: inline-flex;
     flex-shrink: 0;
+    align-items: center;
+    gap: 0;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+    padding: 2px 6px;
+    border-radius: 8px;
+    opacity: 0.9;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .tactical-zone-chip__badge[data-stage="interest"] {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.22);
+  }
+
+  .tactical-zone-chip__badge[data-stage="pullback"] {
+    color: #fde047;
+    background: rgba(250, 204, 21, 0.12);
+    border-color: rgba(250, 204, 21, 0.22);
+  }
+
+  .tactical-zone-chip__badge[data-stage="trend"] {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.22);
+  }
+
+  .tactical-zone-chip__badge[data-stage="takeProfit"] {
+    color: #fdba74;
+    background: rgba(249, 115, 22, 0.12);
+    border-color: rgba(249, 115, 22, 0.22);
+  }
+
+  .tactical-zone-chip__badge[data-stage="risk"] {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.22);
   }
 
   .tactical-zone-detail {
@@ -2307,24 +2342,30 @@
 
   .tactical-zone-bucket__empty {
     display: block;
-    padding: 5px 2px;
-    font-size: 13px;
+    padding: 2px 8px;
+    font-size: 11px;
     font-weight: 600;
-    color: rgba(100, 116, 139, 0.75);
+    line-height: 1.25;
+    color: rgba(148, 163, 184, 0.88);
+    opacity: 0.7;
     font-style: italic;
   }
 
   .tactical-zone-bucket__empty-stack {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: 4px 2px;
+    gap: 3px;
+    padding: 2px 0;
   }
 
   .tactical-zone-bucket__empty-sub {
-    font-size: 13px;
+    display: block;
+    padding: 0 8px;
+    font-size: 11px;
     font-weight: 600;
-    color: rgba(100, 116, 139, 0.62);
+    line-height: 1.25;
+    color: rgba(148, 163, 184, 0.88);
+    opacity: 0.7;
     font-style: italic;
   }
 
