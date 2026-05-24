@@ -1643,8 +1643,46 @@
 
   .tactical-zone-trade-line__track {
     position: relative;
-    height: 16px;
+    height: 18px;
     overflow: visible;
+  }
+
+  .tactical-zone-trade-zone-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .tactical-zone-trade-zone-overlay__danger {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--progress-pct, 0%);
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(239, 68, 68, 0.08),
+      rgba(250, 204, 21, 0.05)
+    );
+  }
+
+  .tactical-zone-trade-zone-overlay__profit {
+    position: absolute;
+    top: 0;
+    left: var(--progress-pct, 0%);
+    width: var(--profit-pct, 100%);
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(34, 197, 94, 0.05),
+      rgba(59, 130, 246, 0.03)
+    );
   }
 
   .tactical-zone-trade-line__rail {
@@ -1652,14 +1690,15 @@
     top: 50%;
     left: 0;
     right: 0;
+    z-index: 1;
     height: 3px;
     transform: translateY(-50%);
     border-radius: 2px;
     background: linear-gradient(
       90deg,
-      rgba(239, 68, 68, 0.2) 0%,
-      rgba(251, 191, 36, 0.16) 50%,
-      rgba(59, 130, 246, 0.2) 100%
+      rgba(239, 68, 68, 0.28) 0%,
+      rgba(251, 191, 36, 0.22) 50%,
+      rgba(59, 130, 246, 0.28) 100%
     );
   }
 
@@ -1667,16 +1706,38 @@
     position: absolute;
     top: 50%;
     left: 0;
+    z-index: 1;
     width: var(--progress-pct, 0%);
     height: 3px;
     transform: translateY(-50%);
     border-radius: 2px;
     background: linear-gradient(
       90deg,
-      rgba(239, 68, 68, 0.7) 0%,
-      rgba(251, 191, 36, 0.75) 100%
+      rgba(239, 68, 68, 0.75) 0%,
+      rgba(251, 191, 36, 0.8) 100%
     );
     pointer-events: none;
+  }
+
+  .tactical-zone-trade-line__zone-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 14px;
+    margin-top: 4px;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: rgba(203, 213, 225, 0.88);
+    opacity: 0.6;
+    white-space: nowrap;
+  }
+
+  .tactical-zone-trade-line__zone-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
   }
 
   .tactical-zone-trade-line__dot {
