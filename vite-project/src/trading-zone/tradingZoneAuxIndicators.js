@@ -6,14 +6,44 @@ import { TRADING_ZONE_STANDARD_AUX } from "./tacticalTradingZoneData.js"
 
 /** @typedef {'10MA' | '20MA' | 'RSI' | 'MACD' | '거래량'} AuxIndicatorKey */
 
+/** @typedef {'positive' | 'warn' | 'danger'} AuxStatusTone */
+
 /**
  * @typedef {{
  *   key: AuxIndicatorKey
  *   title: string
- *   headline: string
+ *   statusIcon: string
+ *   statusTone: AuxStatusTone
+ *   headlineText: string
  *   lines: { text: string }[]
  * }} AuxIndicatorDetail
  */
+
+/** @type {Record<AuxStatusTone, string>} */
+const AUX_STATUS_ICON = {
+  positive: "🟢",
+  warn: "🟡",
+  danger: "🔴",
+}
+
+/**
+ * @param {AuxStatusTone} tone
+ */
+function statusIconFor(tone) {
+  return AUX_STATUS_ICON[tone] ?? AUX_STATUS_ICON.warn
+}
+
+/**
+ * @param {AuxStatusTone} tone
+ * @param {string} text
+ */
+function buildHeadline(tone, text) {
+  return {
+    statusIcon: statusIconFor(tone),
+    statusTone: tone,
+    headlineText: text,
+  }
+}
 
 /**
  * @typedef {{
@@ -65,9 +95,9 @@ const POSITION_AUX_SEED = {
 }
 
 const MA10_TREND_LABEL = {
-  up: "↑ 상향 유지",
-  down: "↓ 하향",
-  break: "⚠ 이탈",
+  up: "상향 유지",
+  down: "하향",
+  break: "이탈",
 }
 
 const MA20_RELATION_LABEL = {
@@ -138,12 +168,13 @@ function formatAuxDetail(key, raw) {
   if (key === "10MA") {
     const d = /** @type {NonNullable<AuxIndicatorSeed['ma10']>} */ (raw)
     const trend = d.trend ?? "up"
+    const tone = trend === "up" ? "positive" : trend === "break" ? "danger" : "warn"
     const dist = d.distancePct ?? 0
     const distStr = `${dist >= 0 ? "+" : ""}${dist.toFixed(1)}%`
     return {
       key,
       title: "10MA",
-      headline: `10MA ${MA10_TREND_LABEL[trend]}`,
+      ...buildHeadline(tone, `10MA ${MA10_TREND_LABEL[trend]}`),
       lines: [
         { text: d.above !== false ? "현재가 > 10MA" : "현재가 < 10MA" },
         { text: `거리 ${distStr}` },
@@ -155,6 +186,7 @@ function formatAuxDetail(key, raw) {
     const d = /** @type {NonNullable<AuxIndicatorSeed['ma20']>} */ (raw)
     const relation = d.relation ?? "near"
     const label = d.relationLabel ?? MA20_RELATION_LABEL[relation]
+    const tone = relation === "support" ? "positive" : relation === "near" ? "warn" : "danger"
     const hint =
       relation === "support"
         ? "현재가 ≥ 20MA · 눌림 지지"
@@ -164,7 +196,7 @@ function formatAuxDetail(key, raw) {
     return {
       key,
       title: "20MA",
-      headline: `20MA · ${label}`,
+      ...buildHeadline(tone, `20MA ${label}`),
       lines: [{ text: hint }],
     }
   }
@@ -174,10 +206,11 @@ function formatAuxDetail(key, raw) {
     const value = d.value ?? 50
     const band = d.band ?? "neutral"
     const bandLabel = d.bandLabel ?? RSI_BAND_LABEL[band]
+    const tone = band === "overbought" ? "danger" : band === "oversold" ? "positive" : "warn"
     return {
       key,
       title: "RSI",
-      headline: `RSI ${value} · ${bandLabel}`,
+      ...buildHeadline(tone, `RSI ${value} · ${bandLabel}`),
       lines: [{ text: `상태 · ${bandLabel}` }],
     }
   }
@@ -186,6 +219,7 @@ function formatAuxDetail(key, raw) {
     const d = /** @type {NonNullable<AuxIndicatorSeed['macd']>} */ (raw)
     const signal = d.signal ?? "neutral"
     const label = d.signalLabel ?? MACD_SIGNAL_LABEL[signal]
+    const tone = signal === "golden" ? "positive" : signal === "dead" ? "danger" : "warn"
     const hint =
       signal === "golden"
         ? "시그널선 상향 교차"
@@ -195,7 +229,7 @@ function formatAuxDetail(key, raw) {
     return {
       key,
       title: "MACD",
-      headline: `MACD · ${label}`,
+      ...buildHeadline(tone, `MACD ${label}`),
       lines: [{ text: hint }],
     }
   }
@@ -205,10 +239,11 @@ function formatAuxDetail(key, raw) {
     const vs = d.vsAvgPct ?? 0
     const turn = d.turnoverPct ?? 0
     const fmt = (n) => `${n >= 0 ? "+" : ""}${n}%`
+    const tone = vs >= 15 ? "positive" : vs >= 0 ? "warn" : "danger"
     return {
       key,
       title: "거래량",
-      headline: "거래량",
+      ...buildHeadline(tone, "거래량"),
       lines: [
         { text: `평균 대비 ${fmt(vs)}` },
         { text: `거래대금 증감 ${fmt(turn)}` },

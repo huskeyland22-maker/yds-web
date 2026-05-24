@@ -2,11 +2,9 @@ import { Fragment, useEffect, useMemo, useState } from "react"
 import {
   TRADING_STAGE_FLOW,
   TRADING_STAGE_META,
-  TRADING_ZONE_STANDARD_AUX,
   tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
-import { buildAuxIndicatorDetail } from "../../trading-zone/tradingZoneAuxIndicators.js"
-import TacticalZoneAuxDetail from "./TacticalZoneAuxDetail.jsx"
+import TacticalZoneAuxPanel from "./TacticalZoneAuxPanel.jsx"
 import {
   buildTradingCoreMetrics,
   isCoreMetricPlaceholder,
@@ -31,11 +29,6 @@ export default function TacticalStockDetailPanel({ position }) {
   const coreMetrics = useMemo(() => buildTradingCoreMetrics(position), [position])
   const activeAux = new Set(position.aux ?? [])
   const [expandedAux, setExpandedAux] = useState(/** @type {string | null} */ (null))
-
-  const expandedAuxDetail = useMemo(() => {
-    if (!expandedAux) return null
-    return buildAuxIndicatorDetail(position, expandedAux)
-  }, [position, expandedAux])
 
   useEffect(() => {
     setExpandedAux(null)
@@ -201,29 +194,12 @@ export default function TacticalStockDetailPanel({ position }) {
       <footer className="tactical-zone-detail__foot">
         <div className="tactical-zone-detail__aux">
           <p className="m-0 tactical-zone-detail__section-label">보조지표</p>
-          <div className="tactical-zone-detail__aux-tags" role="group" aria-label="보조지표 선택">
-            {TRADING_ZONE_STANDARD_AUX.map((tag) => {
-              const isOn = activeAux.has(tag)
-              const isExpanded = expandedAux === tag
-              return (
-                <button
-                  key={tag}
-                  type="button"
-                  className={[
-                    "tactical-zone-aux-tag",
-                    isOn ? "tactical-zone-aux-tag--on" : "tactical-zone-aux-tag--off",
-                    isExpanded ? "tactical-zone-aux-tag--expanded" : "",
-                  ].join(" ")}
-                  aria-pressed={isExpanded}
-                  aria-expanded={isExpanded}
-                  onClick={() => setExpandedAux(isExpanded ? null : tag)}
-                >
-                  {tag}
-                </button>
-              )
-            })}
-          </div>
-          <TacticalZoneAuxDetail detail={expandedAuxDetail} />
+          <TacticalZoneAuxPanel
+            position={position}
+            activeAux={activeAux}
+            expandedAux={expandedAux}
+            onToggle={(tag) => setExpandedAux(expandedAux === tag ? null : tag)}
+          />
         </div>
 
         {historyLog.length ? (

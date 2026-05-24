@@ -2929,7 +2929,7 @@
     padding-top: 10px;
   }
 
-  .tactical-zone-detail__aux-tags {
+  .tactical-zone-aux-panel__tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -2941,76 +2941,108 @@
     justify-content: center;
     min-height: 28px;
     border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(100, 116, 139, 0.45);
+    background: transparent;
     padding: 4px 9px;
     font-size: 12px;
     font-weight: 700;
     line-height: 1;
-    color: rgba(203, 213, 225, 0.96);
+    color: rgba(148, 163, 184, 0.85);
     white-space: nowrap;
     cursor: pointer;
     font-family: inherit;
+    opacity: 0.5;
     transition:
-      border-color 0.12s ease,
-      background-color 0.12s ease,
-      box-shadow 0.12s ease;
+      opacity 180ms ease,
+      border-color 180ms ease,
+      background-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   .tactical-zone-aux-tag:hover {
+    opacity: 0.72;
     border-color: rgba(148, 163, 184, 0.55);
   }
 
-  .tactical-zone-aux-tag--expanded {
-    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35);
+  .tactical-zone-aux-tag--monitored {
+    opacity: 0.62;
+    border-color: rgba(100, 116, 139, 0.55);
+  }
+
+  .tactical-zone-aux-tag--active {
+    opacity: 1;
+    border: 1px solid #22d3ee;
+    background: rgba(34, 211, 238, 0.12);
+    color: #fff;
+    box-shadow:
+      0 0 12px rgba(34, 211, 238, 0.35),
+      0 0 4px rgba(34, 211, 238, 0.2);
+  }
+
+  .tactical-zone-aux-panel__collapse {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(-4px);
+    transition:
+      max-height 180ms ease,
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .tactical-zone-aux-panel__collapse--open {
+    max-height: 72px;
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .tactical-zone-aux-detail {
-    margin-top: 8px;
+    margin-top: 6px;
+    min-height: 52px;
     padding: 8px 10px;
     border-radius: 6px;
-    border: 1px solid rgba(34, 211, 238, 0.2);
-    background: rgba(8, 18, 32, 0.72);
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    background: rgba(8, 18, 32, 0.78);
+    box-sizing: border-box;
   }
 
   .tactical-zone-aux-detail__headline {
     font-size: 12px;
     font-weight: 800;
-    line-height: 1.35;
-    color: rgba(226, 232, 240, 0.98);
-    margin-bottom: 4px !important;
+    line-height: 1.25;
+    color: #fff;
+    margin-bottom: 2px !important;
+  }
+
+  .tactical-zone-aux-detail__icon {
+    font-size: 11px;
+    line-height: 1;
   }
 
   .tactical-zone-aux-detail__lines {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
   }
 
   .tactical-zone-aux-detail__line {
     font-size: 11px;
     font-weight: 600;
-    line-height: 1.35;
-    color: rgba(148, 163, 184, 0.95);
+    line-height: 1.25;
+    color: rgba(148, 163, 184, 0.92);
   }
 
-  .tactical-zone-aux-tag--on {
-    opacity: 1;
-    border: 1px solid rgba(0, 200, 255, 0.45);
-    background: linear-gradient(
-      180deg,
-      rgba(0, 180, 255, 0.18),
-      rgba(0, 120, 255, 0.08)
-    );
-    color: rgba(186, 230, 253, 1);
-    box-shadow: 0 0 10px rgba(0, 180, 255, 0.12);
+  .tactical-zone-aux-detail[data-tone="positive"] .tactical-zone-aux-detail__headline {
+    color: rgba(240, 253, 244, 0.98);
   }
 
-  .tactical-zone-aux-tag--off {
-    opacity: 0.55;
-    border: 1px solid rgba(100, 116, 139, 0.45);
-    background: transparent;
-    color: rgba(148, 163, 184, 0.75);
+  .tactical-zone-aux-detail[data-tone="warn"] .tactical-zone-aux-detail__headline {
+    color: rgba(254, 249, 195, 0.98);
+  }
+
+  .tactical-zone-aux-detail[data-tone="danger"] .tactical-zone-aux-detail__headline {
+    color: rgba(254, 226, 226, 0.98);
   }
 
   .tactical-zone-fields-grid {
