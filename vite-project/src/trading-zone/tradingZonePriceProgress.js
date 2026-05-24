@@ -48,12 +48,13 @@ export function parseEntryMid(entryRange) {
 export function computeTradingZoneProgress(levels) {
   const { stop, current, target } = levels
   if (stop == null || current == null || target == null) return null
-  if (stop === target) return null
 
-  const lo = Math.min(stop, target)
-  const hi = Math.max(stop, target)
-  const span = hi - lo
-  const progressPct = span > 0 ? Math.round((Math.max(lo, Math.min(hi, current)) - lo) / span * 100) : 0
+  const span = target - stop
+  if (!Number.isFinite(span) || span === 0) return null
+
+  // 현재점 비율: (현재 − 손절) / (목표 − 손절) — 손절 0%, 목표 100%
+  const rawPct = ((current - stop) / span) * 100
+  const progressPct = Math.round(Math.max(0, Math.min(100, rawPct)))
   const direction = target > stop ? "up" : target < stop ? "down" : "flat"
 
   const fmt = (n) =>
@@ -61,7 +62,7 @@ export function computeTradingZoneProgress(levels) {
 
   return {
     levels: { stop, current, target },
-    progressPct: Math.max(0, Math.min(100, progressPct)),
+    progressPct,
     direction,
     formatted: {
       stop: fmt(stop),
@@ -71,16 +72,6 @@ export function computeTradingZoneProgress(levels) {
   }
 }
 
-/**
- * @param {{
- *   stopNum?: number | null
- *   currentPrice?: number | null
- *   targetNum?: number | null
- *   stop?: string
- *   target?: string
- *   entry?: string
- * }} position
- */
 /**
  * 목표가 문자열 — 범위(28~30)가 아닌 단일 목표만 사용
  * @param {string | null | undefined} targetRaw
@@ -97,6 +88,16 @@ export function parseTargetPrice(targetRaw) {
   return parseTradingPrice(s)
 }
 
+/**
+ * @param {{
+ *   stopNum?: number | null
+ *   currentPrice?: number | null
+ *   targetNum?: number | null
+ *   stop?: string
+ *   target?: string
+ *   entry?: string
+ * }} position
+ */
 export function resolvePositionPriceLevels(position) {
   const stop =
     position.stopNum != null && Number.isFinite(position.stopNum)

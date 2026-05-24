@@ -165,7 +165,7 @@ const SEED_POSITIONS = [
     stageHistory: [
       { stage: "interest", at: "2026-05-18" },
       { stage: "pullback", at: "2026-05-20" },
-      { stage: "interest", at: "2026-05-22", note: "관심 유지" },
+      { stage: "interest", at: "2026-05-22", note: "관심 진입" },
     ],
   },
   {

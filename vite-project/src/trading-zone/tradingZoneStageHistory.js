@@ -26,8 +26,9 @@ export function buildStageHistoryMessage(entry, index, prevStage) {
   const meta = TRADING_STAGE_META[entry.stage]
   const label = meta?.label ?? entry.stage
 
-  if (index === 0) return `${label} 진입`
+  if (index === 0) return label
   if (prevStage === entry.stage) return `${label} 유지`
+  if (entry.stage === "interest") return `${label} 진입`
   return label
 }
 

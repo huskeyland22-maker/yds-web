@@ -116,7 +116,7 @@ export default function TacticalStockDetailPanel({ position }) {
           </div>
 
           <p className="m-0 mt-0.5 text-[8px] text-slate-500">
-            진행률{" "}
+            목표달성{" "}
             <span className="font-mono text-slate-300">{progress.progressPct}%</span>
           </p>
         </div>
@@ -140,11 +140,11 @@ export default function TacticalStockDetailPanel({ position }) {
           <p className="m-0 text-[8px] font-semibold text-slate-500">상태 이력</p>
           <ul className="tactical-zone-history-feed m-0 mt-1 list-none p-0">
             {historyLog.map((h, i) => (
-              <li key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-feed__line">
-                {h.dateLabel ? (
-                  <span className="tactical-zone-history-feed__date font-mono">{h.dateLabel}</span>
-                ) : null}
-                <span className="tactical-zone-history-feed__message">{h.message}</span>
+              <li key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-feed__line font-mono">
+                <span className="tactical-zone-history-feed__text">
+                  {h.dateLabel ? `${h.dateLabel} ` : ""}
+                  {h.message}
+                </span>
               </li>
             ))}
           </ul>
