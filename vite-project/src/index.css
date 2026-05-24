@@ -1727,21 +1727,69 @@
   .tactical-zone-detail__grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px 8px;
+    gap: 8px 6px;
     margin-top: 8px;
-    font-size: 9px;
+  }
+
+  .tactical-zone-detail__grid-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
   }
 
   .tactical-zone-detail__grid dt {
-    color: rgba(100, 116, 139, 0.95);
+    font-size: 10px;
     font-weight: 600;
+    line-height: 1.1;
+    color: rgba(100, 116, 139, 0.88);
+    letter-spacing: 0.02em;
   }
 
   .tactical-zone-detail__grid dd {
-    margin: 2px 0 0;
-    font-family: ui-monospace, monospace;
-    font-weight: 700;
-    color: rgba(226, 232, 240, 0.95);
+    margin: 0;
+    min-width: 0;
+  }
+
+  .tactical-zone-price-pill {
+    display: inline-block;
+    max-width: 100%;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+  }
+
+  .tactical-zone-detail__grid-cell--entry .tactical-zone-price-pill {
+    color: rgba(45, 212, 191, 0.98);
+    border-color: rgba(45, 212, 191, 0.22);
+    background: rgba(45, 212, 191, 0.08);
+  }
+
+  .tactical-zone-detail__grid-cell--stop .tactical-zone-price-pill {
+    color: rgba(252, 165, 165, 0.98);
+    border-color: rgba(248, 113, 113, 0.22);
+    background: rgba(239, 68, 68, 0.08);
+  }
+
+  .tactical-zone-detail__grid-cell--target .tactical-zone-price-pill {
+    color: rgba(147, 197, 253, 0.98);
+    border-color: rgba(96, 165, 250, 0.22);
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  @media (min-width: 380px) {
+    .tactical-zone-price-pill {
+      font-size: 16px;
+      padding: 5px 10px;
+    }
   }
 
   .tactical-zone-detail__aux {

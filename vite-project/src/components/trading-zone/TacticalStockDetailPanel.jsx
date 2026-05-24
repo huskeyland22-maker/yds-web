@@ -20,6 +20,7 @@ export default function TacticalStockDetailPanel({ position }) {
 
   const displayStop = progress?.formatted.stop ?? position.stop ?? "—"
   const displayTarget = progress?.formatted.target ?? position.target ?? "—"
+  const displayEntry = position.entry?.trim() ? position.entry.replace(/\s*~\s*/g, "~") : "—"
 
   return (
     <div className="tactical-zone-detail" role="region" aria-label={`${position.symbol} 상세`}>
@@ -56,17 +57,23 @@ export default function TacticalStockDetailPanel({ position }) {
       </div>
 
       <dl className="tactical-zone-detail__grid m-0">
-        <div>
+        <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--entry">
           <dt>진입</dt>
-          <dd>{position.entry ?? "—"}</dd>
+          <dd>
+            <span className="tactical-zone-price-pill font-mono tabular-nums">{displayEntry}</span>
+          </dd>
         </div>
-        <div>
+        <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--stop">
           <dt>손절</dt>
-          <dd className="font-mono tabular-nums">{displayStop}</dd>
+          <dd>
+            <span className="tactical-zone-price-pill font-mono tabular-nums">{displayStop}</span>
+          </dd>
         </div>
-        <div>
+        <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--target">
           <dt>목표</dt>
-          <dd className="font-mono tabular-nums">{displayTarget}</dd>
+          <dd>
+            <span className="tactical-zone-price-pill font-mono tabular-nums">{displayTarget}</span>
+          </dd>
         </div>
       </dl>
 
