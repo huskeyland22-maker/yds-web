@@ -109,6 +109,20 @@ export default function TacticalStockDetailPanel({ position }) {
                 "--profit-pct": `${100 - progress.progressPct}%`,
               }}
             >
+              <div className="tactical-zone-trade-zone-legend" aria-hidden>
+                <span className="tactical-zone-trade-zone-legend__item">
+                  <span className="tactical-zone-trade-zone-legend__dot tactical-zone-trade-zone-legend__dot--danger" />
+                  위험존
+                </span>
+                <span className="tactical-zone-trade-zone-legend__item">
+                  <span className="tactical-zone-trade-zone-legend__dot tactical-zone-trade-zone-legend__dot--buy" />
+                  매수존
+                </span>
+                <span className="tactical-zone-trade-zone-legend__item">
+                  <span className="tactical-zone-trade-zone-legend__dot tactical-zone-trade-zone-legend__dot--profit" />
+                  수익존
+                </span>
+              </div>
               <div className="tactical-zone-trade-line__markers">
                 <div className="tactical-zone-trade-line__marker tactical-zone-trade-line__marker--stop">
                   <span className="tactical-zone-trade-line__marker-label">손절</span>
@@ -137,11 +151,6 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--stop" />
                 <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--current" />
                 <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--target" />
-              </div>
-              <div className="tactical-zone-trade-line__zone-legend" aria-hidden>
-                <span className="tactical-zone-trade-line__zone-legend-item">🔴 위험존</span>
-                <span className="tactical-zone-trade-line__zone-legend-item">🟡 매수존</span>
-                <span className="tactical-zone-trade-line__zone-legend-item">🟢 수익존</span>
               </div>
             </div>
           </div>

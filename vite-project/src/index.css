@@ -1719,25 +1719,46 @@
     pointer-events: none;
   }
 
-  .tactical-zone-trade-line__zone-legend {
+  .tactical-zone-trade-zone-legend {
+    position: absolute;
+    top: -18px;
+    right: 24px;
+    z-index: 3;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 10px 14px;
-    margin-top: 4px;
-    font-size: 9px;
+    gap: 12px;
+    font-size: 10px;
     font-weight: 600;
     line-height: 1.2;
-    color: rgba(203, 213, 225, 0.88);
-    opacity: 0.6;
+    color: rgba(203, 213, 225, 0.92);
+    opacity: 0.55;
     white-space: nowrap;
+    pointer-events: none;
   }
 
-  .tactical-zone-trade-line__zone-legend-item {
+  .tactical-zone-trade-zone-legend__item {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
+  }
+
+  .tactical-zone-trade-zone-legend__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .tactical-zone-trade-zone-legend__dot--danger {
+    background: #ef4444;
+  }
+
+  .tactical-zone-trade-zone-legend__dot--buy {
+    background: #facc15;
+  }
+
+  .tactical-zone-trade-zone-legend__dot--profit {
+    background: #22c55e;
   }
 
   .tactical-zone-trade-line__dot {
@@ -1784,7 +1805,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 6px;
     margin-top: 8px;
     transform: none !important;
@@ -1829,6 +1850,7 @@
     align-items: center;
     gap: 16px;
     width: 100%;
+    align-self: stretch;
     margin-top: 18px;
     padding: 10px 0;
     box-sizing: border-box;
