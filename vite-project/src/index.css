@@ -1510,64 +1510,114 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
     width: 100%;
     max-width: none;
     margin-top: 10px;
   }
 
-  .tactical-zone-price-stats {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: center;
-    gap: 4px 8px;
+  .tactical-zone-price-rail {
     width: 100%;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.15;
+  }
+
+  .tactical-zone-price-rail__body {
+    position: relative;
+    width: 100%;
+    padding-top: 36px;
+  }
+
+  .tactical-zone-price-rail__markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 34px;
+    pointer-events: none;
+  }
+
+  .tactical-zone-price-rail__marker {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 44px;
+    transform: translateX(-50%);
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  .tactical-zone-price-rail__marker-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.88);
     white-space: nowrap;
   }
 
-  .tactical-zone-price-stats__item {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 3px;
-  }
-
-  .tactical-zone-price-stats__label {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(148, 163, 184, 0.88);
-  }
-
-  .tactical-zone-price-stats__val {
+  .tactical-zone-price-rail__marker-val {
     font-size: 13px;
     font-weight: 800;
+    white-space: nowrap;
   }
 
-  .tactical-zone-price-stats__sep {
-    color: rgba(71, 85, 105, 0.55);
-    font-weight: 500;
-    font-size: 11px;
+  .tactical-zone-price-rail__marker--stop {
+    transform: translateX(0);
+    align-items: flex-start;
+    text-align: left;
   }
 
-  .tactical-zone-price-stats__item--stop .tactical-zone-price-stats__val {
+  .tactical-zone-price-rail__marker--target {
+    transform: translateX(-100%);
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .tactical-zone-price-rail__marker--stop .tactical-zone-price-rail__marker-val {
     color: rgba(252, 165, 165, 0.98);
   }
 
-  .tactical-zone-price-stats__item--current .tactical-zone-price-stats__val {
+  .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-val {
     color: rgba(253, 224, 71, 1);
-    text-shadow: 0 0 8px rgba(251, 191, 36, 0.35);
+    text-shadow:
+      0 0 12px rgba(251, 191, 36, 0.55),
+      0 0 4px rgba(251, 191, 36, 0.4);
   }
 
-  .tactical-zone-price-stats__item--target .tactical-zone-price-stats__val {
+  .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-label {
+    color: rgba(253, 224, 71, 0.92);
+    font-weight: 700;
+  }
+
+  .tactical-zone-price-rail__marker--target .tactical-zone-price-rail__marker-val {
     color: rgba(147, 197, 253, 0.98);
   }
 
-  .tactical-zone-price-stats__item--achieve .tactical-zone-price-stats__val {
+  .tactical-zone-price-rail__achieve {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .tactical-zone-price-rail__achieve-label {
+    color: rgba(148, 163, 184, 0.88);
+    font-weight: 600;
+  }
+
+  .tactical-zone-price-rail__achieve-val {
+    font-size: 15px;
+    font-weight: 800;
     color: rgba(251, 191, 36, 1);
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+  }
+
+  .tactical-zone-detail--flow .tactical-zone-price-rail .tactical-zone-progress__track-wrap {
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .tactical-zone-detail__foot {
@@ -2102,8 +2152,14 @@
 
   .tactical-zone-progress__dot--current {
     left: var(--progress-pct, 0%);
-    background: rgba(251, 191, 36, 0.98);
-    box-shadow: 0 0 10px rgba(251, 191, 36, 0.55);
+    width: 11px;
+    height: 11px;
+    background: rgba(253, 224, 71, 1);
+    border-color: rgba(253, 224, 71, 0.55);
+    box-shadow:
+      0 0 14px rgba(251, 191, 36, 0.75),
+      0 0 6px rgba(251, 191, 36, 0.5);
+    z-index: 3;
   }
 
   .tactical-zone-progress__dot--target {
@@ -2615,27 +2671,33 @@
       padding: 14px 10px 16px;
     }
 
-    .tactical-zone-detail--flow .tactical-zone-price-stats {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px 10px;
-      justify-items: start;
-      white-space: normal;
+    .tactical-zone-detail--flow .tactical-zone-price-rail__body {
+      padding-top: 40px;
     }
 
-    .tactical-zone-detail--flow .tactical-zone-price-stats__sep {
-      display: none;
+    .tactical-zone-detail--flow .tactical-zone-price-rail__markers {
+      height: 38px;
     }
 
-    .tactical-zone-detail--flow .tactical-zone-price-stats__item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1px;
+    .tactical-zone-price-rail[data-overlap="stop"] .tactical-zone-price-rail__marker--stop {
+      transform: translate(0, -6px);
+    }
+
+    .tactical-zone-price-rail[data-overlap="stop"] .tactical-zone-price-rail__marker--current {
+      transform: translate(-50%, 8px);
+    }
+
+    .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--target {
+      transform: translate(-100%, -6px);
+    }
+
+    .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--current {
+      transform: translate(-50%, 8px);
     }
 
     .tactical-zone-detail--flow .tactical-zone-progress__track-wrap {
-      padding-left: 6px;
-      padding-right: 6px;
+      padding-left: 4px;
+      padding-right: 4px;
     }
 
     .tactical-zone-history-badges {
