@@ -125,18 +125,30 @@ export default function TacticalStockDetailPanel({ position }) {
               </div>
               <div className="tactical-zone-trade-line__track">
                 <div className="tactical-zone-trade-line__markers">
-                  <span className="price-marker-label marker-stop tactical-zone-trade-line__marker tactical-zone-trade-line__marker--stop">
-                    손절{progress.formatted.stop}
-                  </span>
-                  <span
-                    className="price-marker-label marker-current tactical-zone-trade-line__marker tactical-zone-trade-line__marker--current"
+                  <div className="tactical-zone-trade-line__marker-anchor tactical-zone-trade-line__marker-anchor--stop">
+                    <span className="price-marker-label marker-stop">손절{progress.formatted.stop}</span>
+                    <span
+                      className="marker-dot tactical-zone-trade-line__dot tactical-zone-trade-line__dot--stop"
+                      aria-hidden
+                    />
+                  </div>
+                  <div
+                    className="tactical-zone-trade-line__marker-anchor tactical-zone-trade-line__marker-anchor--current"
                     style={{ left: `${progress.progressPct}%` }}
                   >
-                    현재{progress.formatted.current}
-                  </span>
-                  <span className="price-marker-label marker-target tactical-zone-trade-line__marker tactical-zone-trade-line__marker--target">
-                    목표{progress.formatted.target}
-                  </span>
+                    <span className="price-marker-label marker-current">현재{progress.formatted.current}</span>
+                    <span
+                      className="marker-dot tactical-zone-trade-line__dot tactical-zone-trade-line__dot--current"
+                      aria-hidden
+                    />
+                  </div>
+                  <div className="tactical-zone-trade-line__marker-anchor tactical-zone-trade-line__marker-anchor--target">
+                    <span className="price-marker-label marker-target">목표{progress.formatted.target}</span>
+                    <span
+                      className="marker-dot tactical-zone-trade-line__dot tactical-zone-trade-line__dot--target"
+                      aria-hidden
+                    />
+                  </div>
                 </div>
                 <div className="tactical-zone-trade-zone-overlay" aria-hidden>
                   <span className="tactical-zone-trade-zone-overlay__danger" />
@@ -144,9 +156,6 @@ export default function TacticalStockDetailPanel({ position }) {
                 </div>
                 <span className="tactical-zone-trade-line__rail" />
                 <span className="tactical-zone-trade-line__fill" />
-                <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--stop" />
-                <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--current" />
-                <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--target" />
               </div>
             </div>
           </div>
