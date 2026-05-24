@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { Fragment, useMemo } from "react"
 import {
   TRADING_STAGE_FLOW,
   TRADING_STAGE_META,
@@ -15,8 +15,8 @@ import {
   resolvePositionPriceLevels,
 } from "../../trading-zone/tradingZonePriceProgress.js"
 import {
+  buildStageHistoryTooltipLines,
   formatStageHistoryLog,
-  formatStageHistoryTimelineDisplay,
 } from "../../trading-zone/tradingZoneStageHistory.js"
 /**
  * @param {{ position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition }} props
@@ -182,29 +182,38 @@ export default function TacticalStockDetailPanel({ position }) {
         </div>
 
         {historyLog.length ? (
-          <div className="tactical-zone-detail__history">
+          <div className="tactical-zone-detail__status-history">
             <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
-            <div className="tactical-zone-history-timeline" aria-label="상태 이력">
-              {historyLog.map((h, i) => (
-                <span key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-timeline__segment">
-                  {i > 0 ? (
-                    <span className="tactical-zone-history-timeline__arrow" aria-hidden>
-                      →
-                    </span>
-                  ) : null}
-                  <span
-                    className={[
-                      "tactical-zone-history-badge",
-                      i === historyHighlightIndex
-                        ? "tactical-zone-history-badge--current"
-                        : "tactical-zone-history-badge--past",
-                    ].join(" ")}
-                    data-stage={h.stage}
-                  >
-                    {formatStageHistoryTimelineDisplay(h)}
-                  </span>
-                </span>
-              ))}
+            <div className="tactical-zone-status-timeline" aria-label="상태 이력 타임라인">
+              {historyLog.map((h, i) => {
+                const isActive = i === historyHighlightIndex
+                const tip = buildStageHistoryTooltipLines(h)
+                return (
+                  <Fragment key={`${h.stage}-${h.dateLabel}-${i}`}>
+                    {i > 0 ? <span className="tactical-zone-timeline-line" aria-hidden /> : null}
+                    <div
+                      className={[
+                        "tactical-zone-timeline-step",
+                        isActive ? "tactical-zone-timeline-step--active" : "",
+                        isActive ? `tactical-zone-timeline-step--active-${h.stage}` : "",
+                      ].join(" ")}
+                      data-stage={h.stage}
+                      tabIndex={0}
+                    >
+                      <span className="tactical-zone-timeline-step__dot" aria-hidden />
+                      <span className="tactical-zone-timeline-step__label">{h.label}</span>
+                      {h.dateLabel ? (
+                        <span className="tactical-zone-timeline-step__date">{h.dateLabel}</span>
+                      ) : null}
+                      <div className="tactical-zone-timeline-step__tooltip" role="tooltip">
+                        <span>가격 {tip.price}</span>
+                        <span>점수 {tip.score}</span>
+                        <span>상태 {tip.state}</span>
+                      </div>
+                    </div>
+                  </Fragment>
+                )
+              })}
             </div>
           </div>
         ) : null}

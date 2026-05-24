@@ -11,8 +11,19 @@
  *   stage: TradingStageId
  *   at?: string
  *   note?: string
+ *   price?: string | number
+ *   score?: string | number
  * }} TradingStageHistoryEntry
  */
+
+/** @type {Record<TradingStageId, string>} */
+export const TRADING_STAGE_TIMELINE_COLOR = {
+  interest: "#22c55e",
+  pullback: "#facc15",
+  trend: "#3b82f6",
+  takeProfit: "#f97316",
+  risk: "#ef4444",
+}
 
 /**
  * @typedef {{
@@ -109,9 +120,9 @@ const SEED_POSITIONS = [
     currentPrice: 138,
     aux: ["10MA", "20MA", "거래량", "RSI"],
     stageHistory: [
-      { stage: "interest", at: "2026-05-18" },
-      { stage: "pullback", at: "2026-05-20" },
-      { stage: "trend", at: "2026-05-22" },
+      { stage: "interest", at: "2026-05-18", price: 128, score: 62 },
+      { stage: "pullback", at: "2026-05-20", price: 131, score: 68 },
+      { stage: "trend", at: "2026-05-22", price: 138, score: 74 },
     ],
   },
   {
@@ -180,9 +191,9 @@ const SEED_POSITIONS = [
     currentPrice: 221,
     aux: ["10MA", "20MA", "거래량", "RSI", "거래대금"],
     stageHistory: [
-      { stage: "interest", at: "2026-05-18" },
-      { stage: "pullback", at: "2026-05-20" },
-      { stage: "interest", at: "2026-05-22" },
+      { stage: "interest", at: "2026-05-18", price: 215, score: 58 },
+      { stage: "pullback", at: "2026-05-20", price: 219, score: 64 },
+      { stage: "interest", at: "2026-05-22", price: 221, score: 61 },
     ],
   },
   {

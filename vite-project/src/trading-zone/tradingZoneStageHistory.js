@@ -87,6 +87,34 @@ export function formatStageHistoryTimelineDisplay(item) {
   return date ? `${emoji}${date} ${label}` : `${emoji}${label}`
 }
 
+/** @param {string | number | null | undefined} raw */
+function formatHistoryTooltipPrice(raw) {
+  if (raw == null || raw === "") return null
+  const n = Number(String(raw).replace(/,/g, ""))
+  if (Number.isFinite(n)) {
+    return n >= 1000 ? Math.round(n).toLocaleString("ko-KR") : String(Math.round(n * 10) / 10)
+  }
+  return String(raw).trim()
+}
+
+/**
+ * @param {{
+ *   stage: import("./tacticalTradingZoneData.js").TradingStageId
+ *   dateLabel: string
+ *   message: string
+ *   label: string
+ *   price: string | null
+ *   score: string | null
+ * }} item
+ */
+export function buildStageHistoryTooltipLines(item) {
+  return {
+    price: item.price ?? "—",
+    score: item.score ?? "—",
+    state: item.message || item.label,
+  }
+}
+
 /**
  * @param {import("./tacticalTradingZoneData.js").TradingStageHistoryEntry[]} history
  */
@@ -95,10 +123,17 @@ export function formatStageHistoryLog(history) {
 
   return history.map((h, i) => {
     const prev = i > 0 ? history[i - 1].stage : null
+    const meta = TRADING_STAGE_META[h.stage]
+    const price = formatHistoryTooltipPrice(h.price)
+    const score =
+      h.score != null && h.score !== "" ? String(h.score).trim() : null
     return {
       stage: h.stage,
       dateLabel: formatStageHistoryDate(h.at),
       message: buildStageHistoryMessage(h, i, prev),
+      label: meta?.label ?? h.stage,
+      price,
+      score,
     }
   })
 }
