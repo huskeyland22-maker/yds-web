@@ -1457,7 +1457,7 @@
   }
 
   .tactical-zone-detail__current-value {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.02em;
   }
@@ -1492,8 +1492,13 @@
   }
 
   .tactical-zone-stage-flow--compact .tactical-zone-stage-flow__chip {
-    font-size: 12px;
-    padding: 1px 5px;
+    font-size: 11px;
+    padding: 1px 4px;
+  }
+
+  .tactical-zone-stage-flow--compact .tactical-zone-stage-flow__chip--active {
+    padding: 1px 4px;
+    font-size: 11px;
   }
 
   .tactical-zone-stage-flow--compact .tactical-zone-stage-flow__arrow {
@@ -1573,9 +1578,10 @@
 
   .tactical-zone-price-rail__marker--target {
     left: 100%;
-    transform: translateX(-100%);
     align-items: flex-end;
     text-align: right;
+    transform: translateX(-100%) scale(1.2);
+    transform-origin: right bottom;
   }
 
   .tactical-zone-price-rail__marker--stop .tactical-zone-price-rail__marker-val {
@@ -1584,14 +1590,14 @@
 
   .tactical-zone-price-rail__marker--current {
     z-index: 2;
-    padding: 3px 8px 2px;
-    border-radius: 5px;
+    padding: 2px 6px 1px;
+    border-radius: 4px;
     background: rgba(251, 191, 36, 0.1);
     box-shadow: 0 0 16px rgba(251, 191, 36, 0.22);
   }
 
   .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-val {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 900;
     color: rgba(253, 224, 71, 1);
     text-shadow:
@@ -1607,16 +1613,17 @@
 
   .tactical-zone-price-rail__marker--target .tactical-zone-price-rail__marker-val {
     color: rgba(147, 197, 253, 0.98);
+    text-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
   }
 
   .tactical-zone-price-rail .tactical-zone-progress__track-wrap {
     position: relative;
-    padding-bottom: 30px;
+    padding-bottom: 38px;
   }
 
   .tactical-zone-price-rail__achieve {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% + 14px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1669,16 +1676,17 @@
   }
 
   .tactical-zone-detail__core .tactical-zone-detail__section-label {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
   .tactical-zone-core-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(0, auto));
-    gap: 8px;
+    gap: 5px 8px;
     width: 100%;
-    padding: 10px 12px;
+    min-height: 0;
+    padding: 6px 8px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(10, 15, 25, 0.7);
@@ -1688,14 +1696,14 @@
   .tactical-zone-core-cell {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     min-width: 0;
-    min-height: 40px;
+    min-height: 0;
     justify-content: flex-start;
   }
 
   .tactical-zone-core-cell__label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: rgba(148, 163, 184, 0.92);
     line-height: 1.15;
@@ -1704,10 +1712,10 @@
 
   .tactical-zone-core-cell__value {
     margin: 0;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
     color: rgba(226, 232, 240, 0.96);
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   .tactical-zone-core-cell__value--placeholder {
@@ -2277,7 +2285,8 @@
   .tactical-zone-progress__dot--target {
     left: 100%;
     background: rgba(59, 130, 246, 0.95);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
   }
 
   .tactical-zone-history-chips {
@@ -2719,24 +2728,39 @@
     color: rgba(100, 116, 139, 0.62);
   }
 
-  .tactical-zone-history-badges {
+  .tactical-zone-history-timeline {
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    width: fit-content;
+    gap: 4px 2px;
+    width: 100%;
     max-width: 100%;
     margin-top: 4px;
+  }
+
+  .tactical-zone-history-timeline__segment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .tactical-zone-history-timeline__arrow {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(100, 116, 139, 0.55);
+    line-height: 1;
   }
 
   .tactical-zone-history-badge {
     display: inline-flex;
     align-items: center;
     width: fit-content;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.04);
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
     font-size: 11px;
     font-weight: 700;
     line-height: 1.2;
@@ -2810,7 +2834,7 @@
     }
 
     .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--target {
-      transform: translate(-100%, -6px);
+      transform: translate(-100%, -6px) scale(1.2);
     }
 
     .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--current {
@@ -2822,7 +2846,7 @@
       padding-right: 4px;
     }
 
-    .tactical-zone-history-badges {
+    .tactical-zone-history-timeline {
       width: 100%;
     }
   }

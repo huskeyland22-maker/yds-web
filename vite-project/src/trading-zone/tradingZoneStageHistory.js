@@ -69,7 +69,10 @@ export function formatStageHistoryChipDisplay(item) {
  * @param {{ dateLabel: string; stage: import("./tacticalTradingZoneData.js").TradingStageId }} item
  */
 export function formatStageHistoryBadgeDisplay(item) {
-  return `● ${formatStageHistoryChipLabel(item)}`
+  const meta = TRADING_STAGE_META[item.stage]
+  const label = meta?.label ?? item.stage
+  const date = item.dateLabel ?? ""
+  return date ? `● ${date} ${label}` : `● ${label}`
 }
 
 /**

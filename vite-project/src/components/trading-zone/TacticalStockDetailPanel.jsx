@@ -211,19 +211,25 @@ export default function TacticalStockDetailPanel({ position }) {
         {historyLog.length ? (
           <div className="tactical-zone-detail__history">
             <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
-            <div className="tactical-zone-history-badges" aria-label="상태 이력">
+            <div className="tactical-zone-history-timeline" aria-label="상태 이력">
               {historyLog.map((h, i) => (
-                <span
-                  key={`${h.stage}-${h.dateLabel}-${i}`}
-                  className={[
-                    "tactical-zone-history-badge",
-                    i === historyHighlightIndex
-                      ? "tactical-zone-history-badge--current"
-                      : "tactical-zone-history-badge--past",
-                  ].join(" ")}
-                  data-stage={h.stage}
-                >
-                  {formatStageHistoryBadgeDisplay(h)}
+                <span key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-timeline__segment">
+                  {i > 0 ? (
+                    <span className="tactical-zone-history-timeline__arrow" aria-hidden>
+                      →
+                    </span>
+                  ) : null}
+                  <span
+                    className={[
+                      "tactical-zone-history-badge",
+                      i === historyHighlightIndex
+                        ? "tactical-zone-history-badge--current"
+                        : "tactical-zone-history-badge--past",
+                    ].join(" ")}
+                    data-stage={h.stage}
+                  >
+                    {formatStageHistoryBadgeDisplay(h)}
+                  </span>
                 </span>
               ))}
             </div>
