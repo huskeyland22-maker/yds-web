@@ -1249,8 +1249,9 @@
     min-height: 0;
   }
 
-  .tactical-trading-zone__detail .tactical-zone-detail--compact {
+  .tactical-trading-zone__detail .tactical-zone-detail--flow {
     min-height: 0;
+    width: 100%;
   }
 
   .tactical-zone-chip__badge {
@@ -1403,34 +1404,37 @@
     padding: 8px 10px;
   }
 
-  .tactical-zone-detail--compact {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
-    gap: 0;
-    min-height: 0;
-    padding: 6px 8px 5px;
-  }
-
-  .tactical-zone-detail__bundle {
+  .tactical-zone-detail--flow {
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    justify-content: flex-start;
     width: 100%;
-    max-width: min(100%, 340px);
-    margin-left: auto;
-    margin-right: auto;
+    max-width: none;
+    min-height: 0;
+    padding: 16px 12px;
+    box-sizing: border-box;
   }
 
-  .tactical-zone-detail__bundle .tactical-zone-detail__name {
-    margin-bottom: 6px;
+  .tactical-zone-detail__head {
+    width: 100%;
+    text-align: left;
   }
 
-  .tactical-zone-detail__stage-block {
+  .tactical-zone-detail__head .tactical-zone-detail__name {
+    margin-bottom: 4px;
+  }
+
+  .tactical-zone-detail__stage-center {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .tactical-zone-detail__stage-center .tactical-zone-stage-flow--compact {
+    width: 100%;
+    max-width: none;
   }
 
   .tactical-zone-detail__current-line {
@@ -1502,12 +1506,14 @@
     gap: 2px;
   }
 
-  .tactical-zone-price-block {
+  .tactical-zone-detail__price {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 8px;
-    margin-top: 12px;
     width: 100%;
+    max-width: none;
+    margin-top: 10px;
   }
 
   .tactical-zone-price-stats {
@@ -1515,7 +1521,8 @@
     flex-wrap: wrap;
     align-items: baseline;
     justify-content: center;
-    gap: 4px 6px;
+    gap: 4px 8px;
+    width: 100%;
     font-size: 12px;
     font-weight: 700;
     line-height: 1.15;
@@ -1563,32 +1570,37 @@
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
   }
 
-  .tactical-zone-detail__footer {
+  .tactical-zone-detail__foot {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    align-items: stretch;
+    gap: 10px;
     width: 100%;
     margin-top: 16px;
   }
 
-  .tactical-zone-detail--compact .tactical-zone-detail__aux {
+  .tactical-zone-detail--flow .tactical-zone-detail__aux {
     margin-top: 0;
     padding-top: 0;
     border-top: none;
   }
 
-  .tactical-zone-detail--compact .tactical-zone-fields-rows {
-    margin-top: 4px;
-  }
-
-  .tactical-zone-detail--compact .tactical-zone-detail__history {
+  .tactical-zone-detail--flow .tactical-zone-detail__history {
     margin-top: 0;
-    padding-top: 3px;
+    padding-top: 0;
+    border-top: none;
   }
 
-  .tactical-zone-detail--compact .tactical-zone-progress__track-wrap {
-    padding-left: 12px;
-    padding-right: 12px;
+  .tactical-zone-detail--flow .tactical-zone-progress__track-wrap {
+    width: 100%;
+    max-width: none;
+    padding-left: 8px;
+    padding-right: 8px;
+    box-sizing: border-box;
+  }
+
+  .tactical-zone-detail--flow .tactical-zone-progress__track {
+    width: 100%;
   }
 
   .tactical-zone-detail__name {
@@ -1926,7 +1938,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .tactical-zone-detail--compact .tactical-zone-progress {
+  .tactical-zone-detail--flow .tactical-zone-progress {
     border-top: none;
     padding-top: 0;
     margin: 0;
@@ -2258,8 +2270,8 @@
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .tactical-zone-detail--compact .tactical-zone-detail__section-label {
-    margin-bottom: 2px;
+  .tactical-zone-detail--flow .tactical-zone-detail__section-label {
+    margin-bottom: 4px;
   }
 
   .tactical-zone-detail__aux-tags {
@@ -2499,48 +2511,136 @@
     color: rgba(148, 163, 184, 0.75);
   }
 
-  .tactical-zone-fields-rows {
+  .tactical-zone-fields-grid {
     display: grid;
-    grid-template-columns: minmax(52px, auto) 1fr;
-    column-gap: 10px;
-    row-gap: 3px;
-    padding: 4px 6px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+
+  .tactical-zone-field-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: 5px 8px;
     border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
   }
 
-  .tactical-zone-fields-rows__row {
-    display: contents;
-  }
-
-  .tactical-zone-fields-rows__label {
-    font-size: 12px;
+  .tactical-zone-field-cell__label {
+    font-size: 11px;
     font-weight: 600;
     color: rgba(100, 116, 139, 0.92);
-    line-height: 1.2;
+    line-height: 1.1;
   }
 
-  .tactical-zone-fields-rows__value {
+  .tactical-zone-field-cell__value {
     margin: 0;
     font-size: 12px;
     font-weight: 700;
-    color: rgba(203, 213, 225, 0.92);
-    line-height: 1.2;
-    text-align: right;
+    color: rgba(203, 213, 225, 0.94);
+    line-height: 1.15;
   }
 
-  .tactical-zone-fields-rows__value--pending {
+  .tactical-zone-field-cell__value--placeholder {
     font-size: 11px;
     font-weight: 600;
-    color: rgba(100, 116, 139, 0.65);
+    color: rgba(100, 116, 139, 0.62);
   }
 
-  .tactical-zone-history-timeline {
+  .tactical-zone-history-badges {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    max-width: 100%;
     margin-top: 4px;
+  }
+
+  .tactical-zone-history-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: rgba(203, 213, 225, 0.92);
+    box-shadow: none;
+  }
+
+  .tactical-zone-history-badge[data-stage="interest"] {
+    color: rgba(74, 222, 128, 0.95);
+    border-color: rgba(74, 222, 128, 0.2);
+  }
+
+  .tactical-zone-history-badge[data-stage="pullback"] {
+    color: rgba(253, 224, 71, 0.95);
+    border-color: rgba(251, 191, 36, 0.2);
+  }
+
+  .tactical-zone-history-badge[data-stage="trend"] {
+    color: rgba(147, 197, 253, 0.95);
+    border-color: rgba(96, 165, 250, 0.2);
+  }
+
+  .tactical-zone-history-badge[data-stage="takeProfit"] {
+    color: rgba(251, 146, 60, 0.95);
+    border-color: rgba(251, 146, 60, 0.2);
+  }
+
+  .tactical-zone-history-badge--past {
+    opacity: 0.5;
+    color: rgba(148, 163, 184, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+  }
+
+  .tactical-zone-history-badge--current {
+    opacity: 1;
+    font-weight: 800;
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  @media (max-width: 768px) {
+    .tactical-zone-detail--flow {
+      padding: 14px 10px 16px;
+    }
+
+    .tactical-zone-detail--flow .tactical-zone-price-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 10px;
+      justify-items: start;
+      white-space: normal;
+    }
+
+    .tactical-zone-detail--flow .tactical-zone-price-stats__sep {
+      display: none;
+    }
+
+    .tactical-zone-detail--flow .tactical-zone-price-stats__item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+    }
+
+    .tactical-zone-detail--flow .tactical-zone-progress__track-wrap {
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+
+    .tactical-zone-history-badges {
+      width: 100%;
+    }
   }
 
   .panic-v2-desk > .cycle-desk-divider--reference + .panic-v2-desk__bond-slot {

@@ -65,6 +65,14 @@ export function formatStageHistoryChipDisplay(item) {
 }
 
 /**
+ * 배지 행 표시: `● 05/22 관심`
+ * @param {{ dateLabel: string; stage: import("./tacticalTradingZoneData.js").TradingStageId }} item
+ */
+export function formatStageHistoryBadgeDisplay(item) {
+  return `● ${formatStageHistoryChipLabel(item)}`
+}
+
+/**
  * @param {import("./tacticalTradingZoneData.js").TradingStageHistoryEntry[]} history
  */
 export function formatStageHistoryLog(history) {
