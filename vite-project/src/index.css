@@ -1645,7 +1645,7 @@
   .price-marker-label {
     position: absolute;
     left: 50%;
-    bottom: 10px;
+    bottom: 22px;
     transform: translateX(-50%);
     font-size: 11px;
     font-weight: 700;
