@@ -2969,11 +2969,11 @@
       rgba(0, 120, 255, 0.08)
     );
     color: rgba(186, 230, 253, 1);
-    box-shadow: none;
+    box-shadow: 0 0 10px rgba(0, 180, 255, 0.12);
   }
 
   .tactical-zone-aux-tag--off {
-    opacity: 0.6;
+    opacity: 0.55;
     border: 1px solid rgba(100, 116, 139, 0.45);
     background: transparent;
     color: rgba(148, 163, 184, 0.75);

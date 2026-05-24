@@ -73,6 +73,9 @@ export const TRADING_BUCKET_ORDER = ["interest", "pullback", "trend", "takeProfi
 /** 상세 패널 보조지표 — 실전 핵심세트 (추가 지표 보류: 볼린저, ADX, OBV, Stoch RSI) */
 export const TRADING_ZONE_STANDARD_AUX = ["10MA", "20MA", "RSI", "MACD", "거래량"]
 
+/** 기본 ON — 추세 우선 (10MA 눌림 · 20MA 추세) */
+export const TRADING_ZONE_DEFAULT_ACTIVE_AUX = ["10MA", "20MA"]
+
 /** 익절관리 버킷 빈 상태 기본 문구 */
 export const TRADING_ZONE_TAKE_PROFIT_EMPTY = {
   status: "대기중",
@@ -118,7 +121,7 @@ const SEED_POSITIONS = [
     stopNum: 120,
     targetNum: 145,
     currentPrice: 138,
-    aux: ["10MA", "20MA", "RSI", "MACD", "거래량"],
+    aux: ["10MA", "20MA"],
     stageHistory: [
       { stage: "interest", at: "2026-05-18", price: 128, score: 62 },
       { stage: "pullback", at: "2026-05-20", price: 131, score: 68 },
@@ -136,7 +139,7 @@ const SEED_POSITIONS = [
     stopNum: 22,
     targetNum: 30,
     currentPrice: 25,
-    aux: ["10MA", "20MA", "거래량"],
+    aux: ["10MA", "20MA"],
     stageHistory: [{ stage: "interest", at: "2026-05-22" }],
   },
   {
@@ -147,7 +150,7 @@ const SEED_POSITIONS = [
     entry: "480 ~ 495",
     stop: "465",
     target: "520",
-    aux: ["10MA", "RSI"],
+    aux: ["10MA", "20MA"],
     stageHistory: [{ stage: "interest", at: "2026-05-21" }],
   },
   {
@@ -158,7 +161,7 @@ const SEED_POSITIONS = [
     entry: "248 ~ 258",
     stop: "238",
     target: "275",
-    aux: ["10MA", "20MA", "거래량"],
+    aux: ["10MA", "20MA"],
     stageHistory: [{ stage: "interest", at: "2026-05-20" }],
   },
   {
@@ -172,7 +175,7 @@ const SEED_POSITIONS = [
     stopNum: 26,
     targetNum: 34,
     currentPrice: 29,
-    aux: ["20MA", "거래량", "RSI"],
+    aux: ["10MA", "20MA"],
     stageHistory: [
       { stage: "interest", at: "2026-05-17" },
       { stage: "pullback", at: "2026-05-22" },
@@ -189,7 +192,7 @@ const SEED_POSITIONS = [
     stopNum: 210,
     targetNum: 238,
     currentPrice: 221,
-    aux: ["10MA", "20MA", "RSI", "MACD", "거래량"],
+    aux: ["10MA", "20MA"],
     stageHistory: [
       { stage: "interest", at: "2026-05-18", price: 215, score: 58 },
       { stage: "pullback", at: "2026-05-20", price: 219, score: 64 },
@@ -204,7 +207,7 @@ const SEED_POSITIONS = [
     entry: "168 ~ 174",
     stop: "162",
     target: "188",
-    aux: ["10MA", "RSI"],
+    aux: ["10MA", "20MA"],
     stageHistory: [{ stage: "pullback", at: "2026-05-21" }],
   },
   {
@@ -218,7 +221,7 @@ const SEED_POSITIONS = [
     stopNum: 40500,
     targetNum: 48000,
     currentPrice: 43500,
-    aux: ["10MA", "20MA", "거래량"],
+    aux: ["10MA", "20MA"],
     stageHistory: [
       { stage: "interest", at: "2026-05-15" },
       { stage: "pullback", at: "2026-05-19" },
@@ -233,7 +236,7 @@ const SEED_POSITIONS = [
     entry: "—",
     stop: "—",
     target: "분할 익절",
-    aux: ["10MA", "거래량"],
+    aux: ["10MA", "20MA"],
     stageHistory: [
       { stage: "interest", at: "2026-05-01" },
       { stage: "trend", at: "2026-05-12" },
@@ -248,7 +251,7 @@ const SEED_POSITIONS = [
     entry: "—",
     stop: "—",
     target: "목표가 도달",
-    aux: ["20MA", "RSI"],
+    aux: ["10MA", "20MA"],
     stageHistory: [
       { stage: "pullback", at: "2026-05-10" },
       { stage: "trend", at: "2026-05-18" },
@@ -263,7 +266,7 @@ const SEED_POSITIONS = [
     entry: "12,500 ~ 13,200",
     stop: "11,800",
     target: "14,500",
-    aux: ["10MA", "RSI"],
+    aux: ["10MA", "20MA"],
     stageHistory: [{ stage: "interest", at: "2026-05-22" }],
   },
 ]
