@@ -70,8 +70,8 @@ export const TRADING_BUCKET_META = {
 /** @type {TradingBucketId[]} */
 export const TRADING_BUCKET_ORDER = ["interest", "pullback", "trend", "takeProfit"]
 
-/** 상세 패널 기본 보조지표 (실전 필드) */
-export const TRADING_ZONE_STANDARD_AUX = ["10MA", "20MA", "거래량", "RSI", "거래대금"]
+/** 상세 패널 보조지표 — 실전 핵심세트 (추가 지표 보류: 볼린저, ADX, OBV, Stoch RSI) */
+export const TRADING_ZONE_STANDARD_AUX = ["10MA", "20MA", "RSI", "MACD", "거래량"]
 
 /** 익절관리 버킷 빈 상태 기본 문구 */
 export const TRADING_ZONE_TAKE_PROFIT_EMPTY = {
@@ -118,7 +118,7 @@ const SEED_POSITIONS = [
     stopNum: 120,
     targetNum: 145,
     currentPrice: 138,
-    aux: ["10MA", "20MA", "거래량", "RSI"],
+    aux: ["10MA", "20MA", "RSI", "MACD", "거래량"],
     stageHistory: [
       { stage: "interest", at: "2026-05-18", price: 128, score: 62 },
       { stage: "pullback", at: "2026-05-20", price: 131, score: 68 },
@@ -189,7 +189,7 @@ const SEED_POSITIONS = [
     stopNum: 210,
     targetNum: 238,
     currentPrice: 221,
-    aux: ["10MA", "20MA", "거래량", "RSI", "거래대금"],
+    aux: ["10MA", "20MA", "RSI", "MACD", "거래량"],
     stageHistory: [
       { stage: "interest", at: "2026-05-18", price: 215, score: 58 },
       { stage: "pullback", at: "2026-05-20", price: 219, score: 64 },
