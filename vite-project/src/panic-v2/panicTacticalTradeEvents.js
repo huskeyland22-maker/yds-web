@@ -17,6 +17,29 @@ export const TACTICAL_EVENT_LABELS = {
   riskCaution: "리스크주의",
 }
 
+/** @type {Record<TacticalEventId, string>} */
+export const TACTICAL_EVENT_EMOJI = {
+  buyCandidate: "🟢",
+  maintainInterest: "🟢",
+  addWeight: "🟡",
+  watch: "🟠",
+  riskCaution: "🔴",
+}
+
+/** @type {Record<TacticalEventId, string>} */
+export const TACTICAL_EVENT_STAGE_TONE = {
+  buyCandidate: "interest",
+  maintainInterest: "interest",
+  addWeight: "pullback",
+  watch: "caution",
+  riskCaution: "danger",
+}
+
+/** @param {TacticalEventId | string} eventId */
+export function tacticalEventStageTone(eventId) {
+  return TACTICAL_EVENT_STAGE_TONE[eventId] ?? "caution"
+}
+
 /**
  * @param {object} row
  * @returns {string}

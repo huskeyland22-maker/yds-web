@@ -5,7 +5,14 @@
 /**
  * @param {{
  *   title: string
- *   entries: { axisLabel: string; primary: string; secondary?: string | null; toneId?: string }[]
+ *   entries: {
+ *     axisLabel: string
+ *     primary: string
+ *     secondary?: string | null
+ *     emoji?: string
+ *     stageTone?: string
+ *     toneId?: string
+ *   }[]
  *   emptyText?: string
  * }} props
  */
@@ -23,19 +30,31 @@ export default function PanicEngineHistoryLog({ title, entries, emptyText = "기
     <div className="panic-engine-log" aria-label={title}>
       <p className="panic-engine-log__title m-0">{title}</p>
       <ul className="panic-engine-log__list m-0 list-none p-0">
-        {entries.map((entry) => (
-          <li
-            key={`${entry.axisLabel}-${entry.primary}`}
-            className={["panic-engine-log__item", entry.toneId ? `panic-engine-log__item--${entry.toneId}` : ""].join(
-              " ",
-            )}
-            title={entry.secondary ? `${entry.primary} · ${entry.secondary}` : entry.primary}
-          >
-            <span className="panic-engine-log__date font-mono tabular-nums">{entry.axisLabel}</span>
-            <span className="panic-engine-log__primary">{entry.primary}</span>
-            {entry.secondary ? <span className="panic-engine-log__secondary">({entry.secondary})</span> : null}
-          </li>
-        ))}
+        {entries.map((entry) => {
+          const toneClass = entry.stageTone ?? entry.toneId ?? ""
+          return (
+            <li
+              key={`${entry.axisLabel}-${entry.primary}`}
+              className={[
+                "panic-engine-log__item",
+                "panic-engine-log__event-row",
+                toneClass ? `panic-engine-log__item--${toneClass}` : "",
+              ].join(" ")}
+              title={entry.secondary ? `${entry.primary} · ${entry.secondary}` : entry.primary}
+            >
+              <span className="panic-engine-log__date font-mono tabular-nums">[{entry.axisLabel}]</span>
+              <span className="panic-engine-log__main">
+                <span className="panic-engine-log__primary">
+                  {entry.emoji ? <span className="panic-engine-log__emoji" aria-hidden>{entry.emoji} </span> : null}
+                  {entry.primary}
+                </span>
+                {entry.secondary ? (
+                  <span className="panic-engine-log__secondary">({entry.secondary})</span>
+                ) : null}
+              </span>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

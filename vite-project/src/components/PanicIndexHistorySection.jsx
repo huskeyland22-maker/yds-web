@@ -5,7 +5,12 @@ import {
   resolveTacticalActionStatus,
 } from "../panic-v2/panicEngineStatusUi.js"
 import { computeTacticalTiming } from "../utils/panicTacticalTimingEngine.js"
-import { buildTacticalTradeEventLog, attachTradeEventsToChartData } from "../panic-v2/panicTacticalTradeEvents.js"
+import {
+  TACTICAL_EVENT_EMOJI,
+  attachTradeEventsToChartData,
+  buildTacticalTradeEventLog,
+  tacticalEventStageTone,
+} from "../panic-v2/panicTacticalTradeEvents.js"
 import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
 import {
@@ -277,6 +282,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         title="시장엔진 히스토리"
         description="시장 변화 추적 / 관심→눌림→추세"
         tone="amber"
+        compact
       />
       <p className="m-0 panic-history-section__meta text-[11px] text-slate-500">
         거시 V1 = 시장 국면 · 실전 V2 = 매매 이벤트
@@ -397,7 +403,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             axisLabel: e.axisLabel,
             primary: e.eventLabel,
             secondary: e.reason,
-            toneId: e.eventId,
+            emoji: TACTICAL_EVENT_EMOJI[e.eventId],
+            stageTone: tacticalEventStageTone(e.eventId),
           }))}
         />
       ) : null}
