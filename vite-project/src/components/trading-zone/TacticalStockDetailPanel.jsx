@@ -184,10 +184,11 @@ export default function TacticalStockDetailPanel({ position }) {
         {historyLog.length ? (
           <div className="tactical-zone-detail__status-history">
             <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
-            <div className="tactical-zone-status-timeline" aria-label="상태 이력 타임라인">
+            <div className="tactical-zone-status-history" aria-label="상태 이력 타임라인">
               {historyLog.map((h, i) => {
                 const isActive = i === historyHighlightIndex
                 const tip = buildStageHistoryTooltipLines(h)
+                const stageEmoji = TRADING_STAGE_META[h.stage]?.emoji ?? "⚪"
                 return (
                   <Fragment key={`${h.stage}-${h.dateLabel}-${i}`}>
                     {i > 0 ? <span className="tactical-zone-timeline-line" aria-hidden /> : null}
@@ -195,16 +196,18 @@ export default function TacticalStockDetailPanel({ position }) {
                       className={[
                         "tactical-zone-timeline-step",
                         isActive ? "tactical-zone-timeline-step--active" : "",
-                        isActive ? `tactical-zone-timeline-step--active-${h.stage}` : "",
                       ].join(" ")}
                       data-stage={h.stage}
                       tabIndex={0}
                     >
-                      <span className="tactical-zone-timeline-step__dot" aria-hidden />
+                      <span className="tactical-zone-timeline-dot" aria-hidden>
+                        <span className="tactical-zone-timeline-dot__emoji">{stageEmoji}</span>
+                        <span className="tactical-zone-timeline-dot__ring" aria-hidden />
+                      </span>
                       <span className="tactical-zone-timeline-step__label">{h.label}</span>
-                      {h.dateLabel ? (
-                        <span className="tactical-zone-timeline-step__date">{h.dateLabel}</span>
-                      ) : null}
+                      <span className="tactical-zone-timeline-step__date">
+                        {h.dateLabel || "—"}
+                      </span>
                       <div className="tactical-zone-timeline-step__tooltip" role="tooltip">
                         <span>가격 {tip.price}</span>
                         <span>점수 {tip.score}</span>

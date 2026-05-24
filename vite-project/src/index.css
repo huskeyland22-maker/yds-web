@@ -2817,12 +2817,12 @@
     margin-top: 2px;
   }
 
-  .tactical-zone-status-timeline {
+  .tactical-zone-status-history {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: flex-start;
-    gap: 10px;
+    gap: 0;
     width: 100%;
     margin-top: 10px;
     padding-bottom: 6px;
@@ -2832,11 +2832,11 @@
     scrollbar-width: thin;
   }
 
-  .tactical-zone-status-timeline::-webkit-scrollbar {
+  .tactical-zone-status-history::-webkit-scrollbar {
     height: 4px;
   }
 
-  .tactical-zone-status-timeline::-webkit-scrollbar-thumb {
+  .tactical-zone-status-history::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.12);
   }
@@ -2849,7 +2849,7 @@
     flex: 0 0 auto;
     min-width: 70px;
     position: relative;
-    padding-top: 2px;
+    color: var(--timeline-color);
     outline: none;
     cursor: default;
   }
@@ -2874,54 +2874,70 @@
     --timeline-color: #ef4444;
   }
 
-  .tactical-zone-timeline-step:not(.tactical-zone-timeline-step--active) {
-    opacity: 0.72;
-  }
-
-  .tactical-zone-timeline-step__dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--timeline-color);
-    border: 2px solid rgba(15, 23, 42, 0.9);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  .tactical-zone-timeline-dot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
     transition:
       transform 0.15s ease,
       box-shadow 0.15s ease;
   }
 
-  .tactical-zone-timeline-step--active .tactical-zone-timeline-step__dot {
-    transform: scale(1.1);
-    box-shadow: 0 0 10px var(--timeline-color);
+  .tactical-zone-timeline-dot__emoji {
+    position: relative;
+    z-index: 1;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .tactical-zone-timeline-dot__ring {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--timeline-color);
+    opacity: 0.4;
+  }
+
+  .tactical-zone-timeline-step--active .tactical-zone-timeline-dot {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px currentColor);
   }
 
   .tactical-zone-timeline-step__label {
-    margin-top: 6px;
-    font-size: 11px;
+    margin-top: 5px;
+    font-size: 12px;
     font-weight: 700;
-    line-height: 1.15;
-    color: var(--timeline-color);
+    line-height: 1.2;
+    color: rgba(226, 232, 240, 0.96);
     white-space: nowrap;
   }
 
+  .tactical-zone-timeline-step--active .tactical-zone-timeline-step__label {
+    color: var(--timeline-color);
+  }
+
   .tactical-zone-timeline-step__date {
-    margin-top: 2px;
-    font-size: 10px;
+    margin-top: 3px;
+    font-size: 11px;
     font-weight: 600;
-    line-height: 1.1;
-    color: rgba(148, 163, 184, 0.88);
+    line-height: 1.15;
+    color: rgba(148, 163, 184, 0.92);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
   .tactical-zone-timeline-line {
-    flex: 0 0 32px;
-    width: 32px;
+    flex: 0 0 36px;
+    width: 36px;
     height: 2px;
-    margin-top: 7px;
+    margin: 8px 0 0;
     border-radius: 1px;
     background: rgba(255, 255, 255, 0.15);
-    align-self: flex-start;
+    flex-shrink: 0;
   }
 
   .tactical-zone-timeline-step__tooltip {
@@ -3004,7 +3020,7 @@
       min-width: 52px;
     }
 
-    .tactical-zone-status-timeline {
+    .tactical-zone-status-history {
       margin-top: 8px;
       padding-bottom: 8px;
     }
@@ -3014,8 +3030,17 @@
     }
 
     .tactical-zone-timeline-line {
-      flex-basis: 24px;
-      width: 24px;
+      flex-basis: 28px;
+      width: 28px;
+      margin-top: 7px;
+    }
+
+    .tactical-zone-timeline-step__label {
+      font-size: 11px;
+    }
+
+    .tactical-zone-timeline-step__date {
+      font-size: 10px;
     }
   }
 
