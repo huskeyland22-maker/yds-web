@@ -130,10 +130,10 @@ export default function PanicDeskDashboard({
 
       <div className="panic-v2-desk__history-slot">
         <SectionErrorBoundary
-          label="패닉 히스토리"
+          label="시장 엔진 히스토리"
           fallback={
             <div className="trading-card-shell mt-6 px-3 py-4 text-center text-sm text-slate-400">
-              패닉 데이터 로딩 실패
+              시장 엔진 히스토리 로딩 실패
             </div>
           }
         >

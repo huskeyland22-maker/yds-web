@@ -27,7 +27,33 @@ export default function TacticalStockDetailPanel({ position }) {
   const displayTarget = progress?.formatted.target ?? position.target ?? "—"
   const displayEntry = position.entry?.trim() ? position.entry.replace(/\s*~\s*/g, "~") : "—"
 
-  const currentDisplay = progress?.formatted.current ?? "—"
+  const currentStageId =
+    position.stage === "interest" ||
+    position.stage === "pullback" ||
+    position.stage === "trend" ||
+    position.stage === "takeProfit"
+      ? position.stage
+      : null
+
+  let historyHighlightIndex = -1
+  if (historyLog.length && currentStageId) {
+    for (let i = historyLog.length - 1; i >= 0; i -= 1) {
+      if (historyLog[i].stage === currentStageId) {
+        historyHighlightIndex = i
+        break
+      }
+    }
+  }
+  if (historyHighlightIndex < 0 && historyLog.length) {
+    historyHighlightIndex = historyLog.length - 1
+  }
+
+  const fieldValue = (raw) => {
+    if (raw == null) return "-"
+    if (typeof raw === "number" && Number.isFinite(raw)) return String(raw)
+    const s = String(raw).trim()
+    return s && s !== "—" ? s : "-"
+  }
 
   return (
     <div className="tactical-zone-detail" role="region" aria-label={`${position.symbol} 상세`}>
@@ -90,20 +116,19 @@ export default function TacticalStockDetailPanel({ position }) {
           style={{ "--progress-pct": `${progress.progressPct}%` }}
         >
           <div className="tactical-zone-progress__chart font-mono tabular-nums">
-            <div className="tactical-zone-progress__ends">
-              <span className="tactical-zone-progress__end tactical-zone-progress__end--stop">
-                손절<span className="tactical-zone-progress__end-num">{progress.formatted.stop}</span>
+            <p className="m-0 tactical-zone-progress__ruler">
+              <span className="tactical-zone-progress__ruler-stop">{progress.formatted.stop}</span>
+              <span className="tactical-zone-progress__ruler-sep" aria-hidden>
+                ─
               </span>
-              <span className="tactical-zone-progress__end tactical-zone-progress__end--target">
-                목표<span className="tactical-zone-progress__end-num">{progress.formatted.target}</span>
+              <span className="tactical-zone-progress__ruler-current">{progress.formatted.current}</span>
+              <span className="tactical-zone-progress__ruler-sep" aria-hidden>
+                ─
               </span>
-            </div>
+              <span className="tactical-zone-progress__ruler-target">{progress.formatted.target}</span>
+            </p>
 
             <div className="tactical-zone-progress__track-wrap">
-              <div className="tactical-zone-progress__current-tag" aria-hidden>
-                <span className="tactical-zone-progress__current-dot">●</span>
-                <span className="tactical-zone-progress__current-label">현재{currentDisplay}</span>
-              </div>
               <div className="tactical-zone-progress__track">
                 <span className="tactical-zone-progress__rail" />
                 <span className="tactical-zone-progress__fill" />
@@ -140,24 +165,30 @@ export default function TacticalStockDetailPanel({ position }) {
         </div>
       </div>
 
-      <dl className="tactical-zone-detail__reserved m-0" aria-label="실전 필드 예약">
-        <div className="tactical-zone-detail__reserved-cell">
-          <dt>RR</dt>
-          <dd>{position.rr?.trim() ? position.rr : "—"}</dd>
+      <div className="tactical-zone-detail__reserved" aria-label="실전 필드 예약">
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">RR</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">{fieldValue(position.rr)}</p>
         </div>
-        <div className="tactical-zone-detail__reserved-cell">
-          <dt>기대수익</dt>
-          <dd>{position.expectedReturn?.trim() ? position.expectedReturn : "—"}</dd>
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">기대수익</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">
+            {fieldValue(position.expectedReturn)}
+          </p>
         </div>
-        <div className="tactical-zone-detail__reserved-cell">
-          <dt>보유일</dt>
-          <dd>{position.holdingDays != null ? `${position.holdingDays}일` : "—"}</dd>
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">보유일</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">
+            {position.holdingDays != null && Number.isFinite(position.holdingDays)
+              ? `${position.holdingDays}일`
+              : "-"}
+          </p>
         </div>
-        <div className="tactical-zone-detail__reserved-cell">
-          <dt>비중</dt>
-          <dd>{position.weight?.trim() ? position.weight : "—"}</dd>
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">비중</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">{fieldValue(position.weight)}</p>
         </div>
-      </dl>
+      </div>
 
       {historyLog.length ? (
         <div className="tactical-zone-detail__history">
@@ -170,7 +201,13 @@ export default function TacticalStockDetailPanel({ position }) {
                     →
                   </span>
                 ) : null}
-                <span className="tactical-zone-history-timeline__segment" data-stage={h.stage}>
+                <span
+                  className={[
+                    "tactical-zone-history-timeline__segment",
+                    i === historyHighlightIndex ? "tactical-zone-history-timeline__segment--current" : "",
+                  ].join(" ")}
+                  data-stage={h.stage}
+                >
                   {formatStageHistoryTimelineSegment(h)}
                 </span>
               </span>

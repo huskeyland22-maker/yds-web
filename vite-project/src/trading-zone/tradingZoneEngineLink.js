@@ -30,6 +30,7 @@ export const ENGINE_LINK_CARD_ORDER = ["short", "mid", "long", "tactical"]
  *   ready: boolean
  *   cards: EngineLinkCard[]
  *   actions: string[]
+ *   actionSummary?: string
  * }} TradingZoneEngineLink
  */
 
@@ -56,6 +57,28 @@ function deriveActionLines(cards) {
     return ["선별적 비중 확대 검토", "추세 추격 제한"]
   }
   return ["관심유지 · 감시 위주", "추세 추격 제한"]
+}
+
+/**
+ * 현재 행동 1줄 요약
+ * @param {string[]} actions
+ */
+export function formatEngineActionSummary(actions) {
+  if (!actions?.length) return ""
+
+  const allow = actions.find((line) => !/제한|축소|경계/.test(line))
+  const warn = actions.find((line) => /제한|축소|경계/.test(line))
+  const parts = []
+
+  if (allow) {
+    const text = allow.replace(/\s*\/\s*/g, "·").replace(/\s+/g, " ").trim()
+    parts.push(`🟢 ${text}`)
+  }
+  if (warn) {
+    parts.push(`⚠ ${warn.trim()}`)
+  }
+
+  return parts.join(" | ")
 }
 
 /**
@@ -88,9 +111,12 @@ export function buildTradingZoneEngineLink({
     scoreHint: c.scoreHint,
   }))
 
+  const actions = deriveActionLines(cards)
+
   return {
     ready: true,
     cards,
-    actions: deriveActionLines(cards),
+    actions,
+    actionSummary: formatEngineActionSummary(actions),
   }
 }
