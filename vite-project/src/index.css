@@ -1594,10 +1594,46 @@
     margin-top: 10px;
   }
 
-  .progress-header-spacer {
-    height: 18px;
+  .trade-progress-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 18px;
+    padding-bottom: 10px;
     width: 100%;
-    flex-shrink: 0;
+  }
+
+  .price-label-row {
+    position: relative;
+    width: calc(100% - 24px);
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 4px;
+    min-height: 14px;
+  }
+
+  .price-label-row .price-marker-label {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+
+  .price-label-row .price-marker-label.marker-stop {
+    left: 0;
+    transform: none;
+    text-align: left;
+  }
+
+  .price-label-row .price-marker-label.marker-target {
+    left: auto;
+    right: 0;
+    transform: none;
+    text-align: right;
   }
 
   .tactical-zone-trade-line-container {
@@ -1629,9 +1665,12 @@
 
   .tactical-zone-trade-line__marker-anchor {
     position: absolute;
-    bottom: 50%;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
     width: 0;
-    height: 0;
+    height: auto;
     z-index: 2;
   }
 
@@ -1646,32 +1685,6 @@
   .tactical-zone-trade-line__marker-anchor--target {
     left: auto;
     right: 0;
-  }
-
-  .price-marker-label {
-    position: absolute;
-    left: 50%;
-    bottom: 3px;
-    transform: translateX(-50%);
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1;
-    white-space: nowrap;
-    letter-spacing: 0.01em;
-    z-index: 5;
-  }
-
-  .tactical-zone-trade-line__marker-anchor--stop .price-marker-label {
-    left: 0;
-    transform: none;
-    text-align: left;
-  }
-
-  .tactical-zone-trade-line__marker-anchor--target .price-marker-label {
-    left: auto;
-    right: 0;
-    transform: none;
-    text-align: right;
   }
 
   .marker-stop {
@@ -1696,24 +1709,18 @@
 
   .marker-dot,
   .tactical-zone-trade-line__markers .tactical-zone-trade-line__dot {
-    position: absolute;
-    top: auto;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    flex-shrink: 0;
     z-index: 4;
   }
 
   .tactical-zone-trade-line__marker-anchor--stop .marker-dot,
   .tactical-zone-trade-line__marker-anchor--stop .tactical-zone-trade-line__dot--stop {
-    left: 0;
     transform: translateX(-50%);
   }
 
   .tactical-zone-trade-line__marker-anchor--target .marker-dot,
   .tactical-zone-trade-line__marker-anchor--target .tactical-zone-trade-line__dot--target {
-    left: auto;
-    right: 0;
     transform: translateX(50%);
   }
 
@@ -1755,17 +1762,32 @@
     );
   }
 
+  .trade-progress-group .tactical-zone-trade-line-container {
+    margin-top: 4px;
+  }
+
   .progress-line,
   .tactical-zone-trade-line__rail,
   .tactical-zone-trade-line__fill {
     position: absolute;
-    top: 50%;
     left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     z-index: 1;
     height: 3px;
-    transform: translateY(-50%);
+    margin: auto 0;
     border-radius: 2px;
     pointer-events: none;
+  }
+
+  .tactical-zone-trade-line__fill {
+    right: auto;
+    width: var(--progress-pct, 0%);
+  }
+
+  .progress-achievement {
+    margin-top: 10px;
   }
 
   .tactical-zone-trade-line__rail {
@@ -1779,7 +1801,6 @@
   }
 
   .tactical-zone-trade-line__fill {
-    width: var(--progress-pct, 0%);
     background: linear-gradient(
       90deg,
       rgba(239, 68, 68, 0.75) 0%,
@@ -3144,6 +3165,9 @@
       padding-top: 0;
     }
 
+    .price-label-row {
+      width: calc(100% - 16px);
+    }
 
     .tactical-zone-trade-info-row {
       gap: 10px 12px;
