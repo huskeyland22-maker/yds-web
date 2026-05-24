@@ -1299,33 +1299,50 @@
 
   .tactical-trading-zone__buckets {
     display: grid;
-    grid-template-columns:
-      minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, 0.85fr) minmax(0, 0.65fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 5px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    width: 100%;
+    min-width: 0;
   }
 
-  .tactical-trading-zone__buckets::-webkit-scrollbar {
-    display: none;
-  }
-
-  @media (max-width: 639px) {
+  @media (max-width: 1024px) {
     .tactical-trading-zone__buckets {
-      grid-template-columns: minmax(72px, 1.3fr) minmax(72px, 1.3fr) minmax(56px, 0.85fr) minmax(48px, 0.65fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
   }
 
-  @media (max-width: 639px) {
-    .tactical-zone-bucket[data-bucket="trend"] {
-      grid-column: 1;
+  @media (max-width: 768px) {
+    .tactical-trading-zone__buckets {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-x: hidden;
+    }
+
+    .tactical-zone-bucket {
+      width: 100%;
+      max-width: none;
+      justify-self: stretch;
     }
 
     .tactical-zone-bucket[data-bucket="takeProfit"] {
-      grid-column: 2;
-      max-width: 92%;
-      justify-self: end;
+      max-width: none;
+      justify-self: stretch;
+    }
+
+    .tactical-zone-chip {
+      height: 34px;
+      min-height: 34px;
+      padding: 0 10px;
+    }
+
+    .tactical-zone-chip__name {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -3141,6 +3158,7 @@
   @media (max-width: 768px) {
     .tactical-trading-zone.panic-desk-section {
       padding-top: 10px;
+      overflow-x: hidden;
     }
 
     .tactical-trading-zone .panic-desk-section-header--compact {
