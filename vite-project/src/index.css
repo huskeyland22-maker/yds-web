@@ -1195,14 +1195,14 @@
   }
 
   .tactical-zone-detail__section-label {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: rgba(148, 163, 184, 0.95);
     letter-spacing: 0.02em;
   }
 
   .tactical-zone-detail__history {
-    margin-top: 6px;
+    margin-top: 0;
     padding-top: 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
@@ -1227,7 +1227,7 @@
     display: inline-flex;
     align-items: center;
     gap: 3px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: rgba(148, 163, 184, 0.95);
   }
@@ -1238,7 +1238,7 @@
 
   .tactical-trading-zone__sub {
     margin-top: 2px;
-    font-size: 12px;
+    font-size: 13px;
     color: rgba(100, 116, 139, 0.9);
   }
 
@@ -1279,9 +1279,13 @@
   }
 
   .tactical-zone-bucket__title {
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(203, 213, 225, 0.92);
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(203, 213, 225, 0.96);
+    padding-bottom: 5px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.02em;
   }
 
   .tactical-zone-bucket__list {
@@ -1363,12 +1367,12 @@
   }
 
   .tactical-zone-stage-flow__arrow {
-    font-size: 12px;
+    font-size: 13px;
     color: rgba(100, 116, 139, 0.8);
   }
 
   .tactical-zone-stage-flow__chip {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
   }
@@ -1442,7 +1446,7 @@
   }
 
   .tactical-zone-engine-link__section-title {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: rgba(165, 243, 252, 0.92);
   }
@@ -1469,22 +1473,22 @@
   }
 
   .tactical-zone-engine-link__action-card--slim {
-    padding: 5px 7px;
+    padding: 4px 6px;
     box-shadow:
       0 0 0 1px rgba(34, 197, 94, 0.06) inset,
       0 2px 8px rgba(34, 197, 94, 0.06);
   }
 
   .tactical-zone-engine-link__action-card--slim .tactical-zone-engine-link__action-head {
-    font-size: 12px;
-    line-height: 1.15;
+    font-size: 13px;
+    line-height: 1.1;
   }
 
   .tactical-zone-engine-link__action-card--slim .tactical-zone-engine-link__action-list {
-    margin-top: 4px;
+    margin-top: 3px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
   }
 
   .tactical-zone-engine-link__action-card--slim .tactical-zone-engine-link__action-line {
@@ -1494,12 +1498,12 @@
   }
 
   .tactical-zone-engine-link__action-card--slim .tactical-zone-engine-link__action-icon {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .tactical-zone-engine-link__market-head,
   .tactical-zone-engine-link__action-head {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.02em;
     color: rgba(148, 163, 184, 0.95);
@@ -1531,7 +1535,7 @@
   }
 
   .tactical-zone-market-status__period {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: rgba(148, 163, 184, 0.95);
     white-space: nowrap;
@@ -1548,7 +1552,7 @@
   .tactical-zone-market-status__hint {
     margin-top: auto;
     padding-top: 2px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     line-height: 1.2;
     color: rgba(103, 232, 249, 0.95);
@@ -1566,7 +1570,7 @@
 
   .tactical-zone-engine-link__action-icon {
     flex-shrink: 0;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.2;
   }
 
@@ -1581,7 +1585,7 @@
   .tactical-zone-bucket__empty {
     display: block;
     padding: 5px 2px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: rgba(100, 116, 139, 0.75);
     font-style: italic;
@@ -1589,73 +1593,103 @@
 
   .tactical-zone-progress {
     margin-top: 6px;
+    margin-bottom: 14px;
     padding-top: 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .tactical-zone-progress__hero {
+  .tactical-zone-progress__achieve {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 8px;
+    text-align: center;
   }
 
-  .tactical-zone-progress__hero-label {
+  .tactical-zone-progress__achieve-label {
     font-size: 13px;
     font-weight: 700;
     color: rgba(251, 191, 36, 0.92);
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
   }
 
-  .tactical-zone-progress__hero-pct {
-    font-size: 26px;
+  .tactical-zone-progress__achieve-pct {
+    font-size: 33px;
     font-weight: 800;
     line-height: 1;
     color: rgba(251, 191, 36, 1);
-    text-shadow: 0 0 18px rgba(251, 191, 36, 0.45);
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
   }
 
-  .tactical-zone-progress__ruler {
+  .tactical-zone-progress__chart {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  .tactical-zone-progress__ends {
     display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    gap: 4px;
-    margin-top: 6px;
+    gap: 8px;
+    min-height: 20px;
+    margin-bottom: 2px;
+  }
+
+  .tactical-zone-progress__end {
     font-size: 13px;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.15;
     white-space: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
   }
 
-  .tactical-zone-progress__ruler::-webkit-scrollbar {
-    display: none;
+  .tactical-zone-progress__end-num {
+    margin-left: 2px;
+    font-weight: 800;
   }
 
-  .tactical-zone-progress__ruler-sep {
-    flex-shrink: 0;
-    color: rgba(100, 116, 139, 0.45);
-    font-weight: 500;
-    letter-spacing: -0.08em;
-  }
-
-  .tactical-zone-progress__ruler-stop {
+  .tactical-zone-progress__end--stop {
     color: rgba(252, 165, 165, 0.98);
   }
 
-  .tactical-zone-progress__ruler-current {
-    color: rgba(253, 224, 71, 1);
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
-  }
-
-  .tactical-zone-progress__ruler-target {
+  .tactical-zone-progress__end--target {
     color: rgba(147, 197, 253, 0.98);
   }
 
-  .tactical-zone-progress__visual {
-    margin-top: 6px;
+  .tactical-zone-progress__track-wrap {
+    position: relative;
+    padding-top: 40px;
+  }
+
+  .tactical-zone-progress__current-tag {
+    position: absolute;
+    top: 0;
+    left: var(--progress-pct, 0%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    max-width: min(42vw, 120px);
+  }
+
+  .tactical-zone-progress__current-dot {
+    font-size: 11px;
+    line-height: 1;
+    color: rgba(251, 191, 36, 1);
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.55);
+  }
+
+  .tactical-zone-progress__current-label {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: rgba(253, 224, 71, 1);
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+    white-space: nowrap;
   }
 
   .tactical-zone-progress__track {
@@ -1737,23 +1771,43 @@
     display: flex;
     flex-direction: column;
     gap: 3px;
-    padding: 6px 8px;
+    padding: 7px 9px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.04);
   }
 
   .tactical-zone-history-card__date {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    color: rgba(100, 116, 139, 0.95);
+    color: rgba(100, 116, 139, 0.88);
   }
 
   .tactical-zone-history-card__message {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.25;
     color: rgba(226, 232, 240, 0.96);
+  }
+
+  .tactical-zone-history-card[data-stage="interest"] .tactical-zone-history-card__message {
+    color: rgba(74, 222, 128, 0.98);
+  }
+
+  .tactical-zone-history-card[data-stage="pullback"] .tactical-zone-history-card__message {
+    color: rgba(253, 224, 71, 0.98);
+  }
+
+  .tactical-zone-history-card[data-stage="trend"] .tactical-zone-history-card__message {
+    color: rgba(147, 197, 253, 0.98);
+  }
+
+  .tactical-zone-history-card[data-stage="takeProfit"] .tactical-zone-history-card__message {
+    color: rgba(251, 146, 60, 0.98);
+  }
+
+  .tactical-zone-history-card[data-stage="risk"] .tactical-zone-history-card__message {
+    color: rgba(252, 165, 165, 0.98);
   }
 
   .tactical-zone-detail__grid {
@@ -1773,8 +1827,13 @@
     min-height: 52px;
   }
 
+  .tactical-zone-detail__grid-cell--entry {
+    align-items: center;
+    text-align: center;
+  }
+
   .tactical-zone-detail__grid dt {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1.15;
     color: rgba(100, 116, 139, 0.88);
@@ -1838,8 +1897,8 @@
       font-size: 17px;
     }
 
-    .tactical-zone-progress__hero-pct {
-      font-size: 28px;
+    .tactical-zone-progress__achieve-pct {
+      font-size: 35px;
     }
   }
 

@@ -78,39 +78,41 @@ export default function TacticalStockDetailPanel({ position }) {
       </dl>
 
       {progress ? (
-        <div className="tactical-zone-progress">
-          <div className="tactical-zone-progress__hero">
-            <p className="m-0 tactical-zone-progress__hero-label">목표진행</p>
-            <p className="m-0 tactical-zone-progress__hero-pct font-mono tabular-nums">
+        <div
+          className="tactical-zone-progress"
+          style={{ "--progress-pct": `${progress.progressPct}%` }}
+        >
+          <div className="tactical-zone-progress__achieve">
+            <p className="m-0 tactical-zone-progress__achieve-label">목표달성</p>
+            <p className="m-0 tactical-zone-progress__achieve-pct font-mono tabular-nums">
               {progress.progressPct}%
             </p>
           </div>
 
-          <p className="tactical-zone-progress__ruler m-0 font-mono tabular-nums">
-            <span className="tactical-zone-progress__ruler-stop">손절{progress.formatted.stop}</span>
-            <span className="tactical-zone-progress__ruler-sep" aria-hidden>
-              ─────
-            </span>
-            <span className="tactical-zone-progress__ruler-current">
-              현재{progress.formatted.current}
-            </span>
-            <span className="tactical-zone-progress__ruler-sep" aria-hidden>
-              ─────
-            </span>
-            <span className="tactical-zone-progress__ruler-target">목표{progress.formatted.target}</span>
-          </p>
+          <div className="tactical-zone-progress__chart font-mono tabular-nums">
+            <div className="tactical-zone-progress__ends">
+              <span className="tactical-zone-progress__end tactical-zone-progress__end--stop">
+                손절<span className="tactical-zone-progress__end-num">{progress.formatted.stop}</span>
+              </span>
+              <span className="tactical-zone-progress__end tactical-zone-progress__end--target">
+                목표<span className="tactical-zone-progress__end-num">{progress.formatted.target}</span>
+              </span>
+            </div>
 
-          <div
-            className="tactical-zone-progress__visual"
-            style={{ "--progress-pct": `${progress.progressPct}%` }}
-            aria-hidden
-          >
-            <div className="tactical-zone-progress__track">
-              <span className="tactical-zone-progress__rail" />
-              <span className="tactical-zone-progress__fill" />
-              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--stop" />
-              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
-              <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
+            <div className="tactical-zone-progress__track-wrap">
+              <div className="tactical-zone-progress__current-tag" aria-hidden>
+                <span className="tactical-zone-progress__current-dot">●</span>
+                <span className="tactical-zone-progress__current-label">
+                  현재 {progress.formatted.current}
+                </span>
+              </div>
+              <div className="tactical-zone-progress__track">
+                <span className="tactical-zone-progress__rail" />
+                <span className="tactical-zone-progress__fill" />
+                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--stop" />
+                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
+                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
+              </div>
             </div>
           </div>
         </div>
@@ -134,7 +136,11 @@ export default function TacticalStockDetailPanel({ position }) {
           <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
           <ul className="tactical-zone-history-cards m-0 list-none p-0">
             {historyLog.map((h, i) => (
-              <li key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-card">
+              <li
+                key={`${h.stage}-${h.dateLabel}-${i}`}
+                className="tactical-zone-history-card"
+                data-stage={h.stage}
+              >
                 {h.dateLabel ? (
                   <span className="tactical-zone-history-card__date font-mono">[{h.dateLabel}]</span>
                 ) : null}

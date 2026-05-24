@@ -28,6 +28,11 @@
  *   currentPrice?: number | null
  *   aux?: string[]
  *   stageHistory?: TradingStageHistoryEntry[]
+ *   rr?: string
+ *   expectedReturn?: string
+ *   partialTakeProfit?: string
+ *   holdingDays?: number
+ *   weight?: string
  * }} TradingZonePosition
  */
 

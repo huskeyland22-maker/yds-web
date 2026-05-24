@@ -11,7 +11,7 @@ export default function TacticalEngineLinkBar({ link }) {
     return (
       <div className="tactical-zone-engine-link tactical-zone-engine-link--pending">
         <p className="m-0 tactical-zone-engine-link__section-title">시장 엔진 연계</p>
-        <p className="m-0 mt-1 text-[8px] text-slate-600">패닉·사이클 입력 후 연동</p>
+        <p className="m-0 mt-1 text-[13px] text-slate-500">패닉·사이클 입력 후 연동</p>
       </div>
     )
   }
