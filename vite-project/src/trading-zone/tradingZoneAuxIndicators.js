@@ -65,10 +65,10 @@ const POSITION_AUX_SEED = {
     volume: { vsAvgPct: 28, turnoverPct: 15 },
   },
   "us-pltr": {
-    "10MA": { trend: "up", above: true, distancePct: 1.8 },
-    "20MA": { relation: "near" },
-    rsi: { value: 54, band: "neutral" },
-    macd: { signal: "neutral" },
+    "10MA": { trend: "up", above: true, distancePct: 2.4 },
+    "20MA": { relation: "support" },
+    rsi: { value: 58, band: "neutral" },
+    macd: { signal: "golden" },
     volume: { vsAvgPct: 12, turnoverPct: 8 },
   },
   "us-nvda": {
@@ -185,19 +185,20 @@ function formatAuxDetail(key, raw) {
   if (key === "20MA") {
     const d = /** @type {NonNullable<AuxIndicatorSeed['ma20']>} */ (raw)
     const relation = d.relation ?? "near"
-    const label = d.relationLabel ?? MA20_RELATION_LABEL[relation]
-    const tone = relation === "support" ? "positive" : relation === "near" ? "warn" : "danger"
-    const hint =
-      relation === "support"
-        ? "현재가 ≥ 20MA · 눌림 지지"
+    const tone = relation === "break" ? "danger" : relation === "near" ? "warn" : "positive"
+    const headlineText =
+      relation === "break" ? "20MA 이탈" : relation === "near" ? "20MA 근접" : "20MA 상향"
+    const lines =
+      relation === "break"
+        ? [{ text: "현재가 < 20MA" }, { text: "중기 추세 이탈" }]
         : relation === "near"
-          ? "현재가 ≈ 20MA · 밴드 근접"
-          : "현재가 < 20MA · 추세 이탈"
+          ? [{ text: "현재가 ≈ 20MA" }, { text: "밴드 근접" }]
+          : [{ text: "현재가 > 20MA" }, { text: "중기 추세 유지" }]
     return {
       key,
       title: "20MA",
-      ...buildHeadline(tone, `20MA ${label}`),
-      lines: [{ text: hint }],
+      ...buildHeadline(tone, headlineText),
+      lines,
     }
   }
 
@@ -205,13 +206,18 @@ function formatAuxDetail(key, raw) {
     const d = /** @type {NonNullable<AuxIndicatorSeed['rsi']>} */ (raw)
     const value = d.value ?? 50
     const band = d.band ?? "neutral"
-    const bandLabel = d.bandLabel ?? RSI_BAND_LABEL[band]
     const tone = band === "overbought" ? "danger" : band === "oversold" ? "positive" : "warn"
+    const lines =
+      band === "overbought"
+        ? [{ text: "과열 구간" }, { text: "조정 주의" }]
+        : band === "oversold"
+          ? [{ text: "과매도 구간" }, { text: "반등 관찰" }]
+          : [{ text: "중립~상승 구간" }, { text: "과열 아님" }]
     return {
       key,
       title: "RSI",
-      ...buildHeadline(tone, `RSI ${value} · ${bandLabel}`),
-      lines: [{ text: `상태 · ${bandLabel}` }],
+      ...buildHeadline(tone, `RSI ${value}`),
+      lines,
     }
   }
 
@@ -220,34 +226,34 @@ function formatAuxDetail(key, raw) {
     const signal = d.signal ?? "neutral"
     const label = d.signalLabel ?? MACD_SIGNAL_LABEL[signal]
     const tone = signal === "golden" ? "positive" : signal === "dead" ? "danger" : "warn"
-    const hint =
+    const lines =
       signal === "golden"
-        ? "시그널선 상향 교차"
+        ? [{ text: "Signal > MACD" }, { text: "상승 모멘텀 유지" }]
         : signal === "dead"
-          ? "시그널선 하향 교차"
-          : "시그널·히스토그램 중립"
+          ? [{ text: "Signal < MACD" }, { text: "하락 모멘텀" }]
+          : [{ text: "Signal ≈ MACD" }, { text: "중립 모멘텀" }]
     return {
       key,
       title: "MACD",
       ...buildHeadline(tone, `MACD ${label}`),
-      lines: [{ text: hint }],
+      lines,
     }
   }
 
   if (key === "거래량") {
     const d = /** @type {NonNullable<AuxIndicatorSeed['volume']>} */ (raw)
     const vs = d.vsAvgPct ?? 0
-    const turn = d.turnoverPct ?? 0
     const fmt = (n) => `${n >= 0 ? "+" : ""}${n}%`
-    const tone = vs >= 15 ? "positive" : vs >= 0 ? "warn" : "danger"
+    const tone = vs >= 8 ? "positive" : vs >= 0 ? "warn" : "danger"
+    const lines =
+      vs >= 0
+        ? [{ text: "평균 대비 증가" }, { text: "수급 유입" }]
+        : [{ text: "평균 대비 감소" }, { text: "수급 이탈" }]
     return {
       key,
       title: "거래량",
-      ...buildHeadline(tone, "거래량"),
-      lines: [
-        { text: `평균 대비 ${fmt(vs)}` },
-        { text: `거래대금 증감 ${fmt(turn)}` },
-      ],
+      ...buildHeadline(tone, `거래량 ${fmt(vs)}`),
+      lines,
     }
   }
 

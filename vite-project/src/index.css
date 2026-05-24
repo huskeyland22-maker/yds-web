@@ -2980,31 +2980,47 @@
       0 0 4px rgba(34, 211, 238, 0.2);
   }
 
-  .tactical-zone-aux-panel__collapse {
-    max-height: 0;
-    opacity: 0;
+  .tactical-zone-aux-panel__slot {
+    height: 0;
+    min-height: 0;
+    margin-top: 0;
     overflow: hidden;
-    transform: translateY(-4px);
-    transition:
-      max-height 180ms ease,
-      opacity 180ms ease,
-      transform 180ms ease;
+    opacity: 0;
+    transition: opacity 180ms ease;
   }
 
-  .tactical-zone-aux-panel__collapse--open {
-    max-height: 72px;
+  .tactical-zone-aux-panel__slot--visible {
+    height: 72px;
+    min-height: 72px;
+    margin-top: 6px;
     opacity: 1;
-    transform: translateY(0);
   }
 
   .tactical-zone-aux-detail {
-    margin-top: 6px;
-    min-height: 52px;
-    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    min-height: 72px;
+    height: 72px;
+    padding: 12px;
     border-radius: 6px;
     border: 1px solid rgba(34, 211, 238, 0.22);
     background: rgba(8, 18, 32, 0.78);
     box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 160ms ease;
+  }
+
+  .tactical-zone-aux-detail--visible {
+    opacity: 1;
+  }
+
+  .tactical-zone-aux-detail__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    width: 100%;
   }
 
   .tactical-zone-aux-detail__headline {
@@ -3012,7 +3028,7 @@
     font-weight: 800;
     line-height: 1.25;
     color: #fff;
-    margin-bottom: 2px !important;
+    margin-bottom: 0 !important;
   }
 
   .tactical-zone-aux-detail__icon {
@@ -3094,13 +3110,114 @@
     display: inline-flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 0;
     width: auto;
     max-width: 100%;
     margin-top: 0;
-    padding: 0;
+    padding: 4px 0 2px;
     overflow: visible;
+  }
+
+  .tactical-zone-timeline-connector {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin: 2px 2px 0;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.08em;
+    color: rgba(148, 163, 184, 0.45);
+    user-select: none;
+  }
+
+  .tactical-zone-timeline-node {
+    --timeline-color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 40px;
+    position: relative;
+    color: var(--timeline-color);
+    outline: none;
+    cursor: default;
+  }
+
+  .tactical-zone-timeline-node__emoji {
+    font-size: 12px;
+    line-height: 1;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.35));
+  }
+
+  .tactical-zone-timeline-node__date {
+    margin-top: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: rgba(148, 163, 184, 0.88);
+    white-space: nowrap;
+  }
+
+  .tactical-zone-timeline-node--active .tactical-zone-timeline-node__emoji {
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+
+  .tactical-zone-timeline-node--active .tactical-zone-timeline-node__date {
+    color: var(--timeline-color);
+  }
+
+  .tactical-zone-timeline-node__tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 108px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(15, 23, 42, 0.96);
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: rgba(226, 232, 240, 0.95);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+    transition:
+      opacity 0.12s ease,
+      transform 0.12s ease;
+  }
+
+  .tactical-zone-timeline-node:hover .tactical-zone-timeline-node__tooltip,
+  .tactical-zone-timeline-node:focus-visible .tactical-zone-timeline-node__tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .tactical-zone-timeline-node[data-stage="interest"] {
+    --timeline-color: #22c55e;
+  }
+
+  .tactical-zone-timeline-node[data-stage="pullback"] {
+    --timeline-color: #facc15;
+  }
+
+  .tactical-zone-timeline-node[data-stage="trend"] {
+    --timeline-color: #3b82f6;
+  }
+
+  .tactical-zone-timeline-node[data-stage="takeProfit"] {
+    --timeline-color: #f97316;
+  }
+
+  .tactical-zone-timeline-node[data-stage="risk"] {
+    --timeline-color: #ef4444;
   }
 
   .tactical-zone-timeline-step {

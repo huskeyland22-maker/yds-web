@@ -209,23 +209,30 @@ export default function TacticalStockDetailPanel({ position }) {
               {historyLog.map((h, i) => {
                 const isActive = i === historyHighlightIndex
                 const tip = buildStageHistoryTooltipLines(h)
+                const emoji = TRADING_STAGE_META[h.stage]?.emoji ?? "⚪"
                 return (
                   <Fragment key={`${h.stage}-${h.dateLabel}-${i}`}>
-                    {i > 0 ? <span className="tactical-zone-timeline-line" aria-hidden /> : null}
+                    {i > 0 ? (
+                      <span className="tactical-zone-timeline-connector" aria-hidden>
+                        ──
+                      </span>
+                    ) : null}
                     <div
                       className={[
-                        "tactical-zone-timeline-step",
-                        isActive ? "tactical-zone-timeline-step--active" : "",
+                        "tactical-zone-timeline-node",
+                        isActive ? "tactical-zone-timeline-node--active" : "",
                       ].join(" ")}
                       data-stage={h.stage}
                       tabIndex={0}
                     >
-                      <span className="tactical-zone-timeline-dot" aria-hidden />
-                      <span className="tactical-zone-timeline-step__label">{h.label}</span>
-                      <span className="tactical-zone-timeline-step__date">
+                      <span className="tactical-zone-timeline-node__emoji" aria-hidden>
+                        {emoji}
+                      </span>
+                      <span className="tactical-zone-timeline-node__date font-mono tabular-nums">
                         {h.dateLabel || "—"}
                       </span>
-                      <div className="tactical-zone-timeline-step__tooltip" role="tooltip">
+                      <span className="sr-only">{h.label}</span>
+                      <div className="tactical-zone-timeline-node__tooltip" role="tooltip">
                         <span>가격 {tip.price}</span>
                         <span>점수 {tip.score}</span>
                         <span>상태 {tip.state}</span>
