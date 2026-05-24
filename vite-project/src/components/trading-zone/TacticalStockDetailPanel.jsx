@@ -1,4 +1,6 @@
 import {
+  TRADING_STAGE_FLOW,
+  TRADING_STAGE_META,
   TRADING_ZONE_FIELD_PENDING,
   TRADING_ZONE_STANDARD_AUX,
   tradingStageBadge,
@@ -28,6 +30,10 @@ export default function TacticalStockDetailPanel({ position }) {
   const levels = resolvePositionPriceLevels(position)
   const progress = computeTradingZoneProgress(levels)
   const activeAux = new Set(position.aux ?? [])
+
+  const flowActiveIndex = TRADING_STAGE_FLOW.includes(position.stage)
+    ? TRADING_STAGE_FLOW.indexOf(position.stage)
+    : -1
 
   const currentStageId =
     position.stage === "interest" ||
@@ -64,40 +70,92 @@ export default function TacticalStockDetailPanel({ position }) {
 
   return (
     <div
-      className="tactical-zone-detail tactical-zone-detail--tight"
+      className="tactical-zone-detail tactical-zone-detail--compact"
       role="region"
       aria-label={`${position.symbol} 상세`}
+      data-stage={position.stage}
     >
-      <p className="m-0 tactical-zone-detail__name">{position.symbol}</p>
+      <div className="tactical-zone-detail__bundle">
+        <p className="m-0 tactical-zone-detail__name">{position.symbol}</p>
 
-      <div className="tactical-zone-current-stage" data-stage={position.stage}>
-        <p className="m-0 tactical-zone-current-stage__label">
-          <span className="tactical-zone-current-stage__emoji" aria-hidden>
-            {badge.emoji}
-          </span>
-          현재단계
-        </p>
-        <p className="m-0 tactical-zone-current-stage__badge">{badge.label}</p>
-      </div>
+        <div className="tactical-zone-detail__stage-block">
+          <p className="m-0 tactical-zone-detail__current-line">
+            <span className="tactical-zone-detail__current-label">현재단계</span>
+            <span className="tactical-zone-detail__current-sep" aria-hidden>
+              :
+            </span>
+            <span className="tactical-zone-detail__current-value">
+              <span aria-hidden>{badge.emoji}</span> {badge.label}
+            </span>
+          </p>
 
-      {progress ? (
-        <div
-          className="tactical-zone-progress"
-          style={{ "--progress-pct": `${progress.progressPct}%` }}
-        >
-          <div className="tactical-zone-progress__chart font-mono tabular-nums">
-            <div className="tactical-zone-progress__ruler">
-              <span className="tactical-zone-progress__ruler-col tactical-zone-progress__ruler-col--stop">
-                <span className="tactical-zone-progress__ruler-label">손절</span>
-                <span className="tactical-zone-progress__ruler-num">{progress.formatted.stop}</span>
+          <div
+            className="tactical-zone-stage-flow tactical-zone-stage-flow--compact"
+            aria-label="단계 진행"
+          >
+            {TRADING_STAGE_FLOW.map((stageId, i) => {
+              const meta = TRADING_STAGE_META[stageId]
+              const isActive = position.stage === stageId
+              const isMuted = flowActiveIndex >= 0 && i > flowActiveIndex
+              return (
+                <span key={stageId} className="tactical-zone-stage-flow__segment">
+                  {i > 0 ? (
+                    <span
+                      className={[
+                        "tactical-zone-stage-flow__arrow",
+                        isMuted ? "tactical-zone-stage-flow__arrow--muted" : "",
+                      ].join(" ")}
+                      aria-hidden
+                    >
+                      →
+                    </span>
+                  ) : null}
+                  <span
+                    className={[
+                      "tactical-zone-stage-flow__chip",
+                      isActive ? "tactical-zone-stage-flow__chip--active" : "",
+                      isMuted ? "tactical-zone-stage-flow__chip--muted" : "",
+                    ].join(" ")}
+                    data-stage={stageId}
+                  >
+                    {meta.label}
+                  </span>
+                </span>
+              )
+            })}
+          </div>
+        </div>
+
+        {progress ? (
+          <div
+            className="tactical-zone-price-block"
+            style={{ "--progress-pct": `${progress.progressPct}%` }}
+          >
+            <div className="tactical-zone-price-stats font-mono tabular-nums">
+              <span className="tactical-zone-price-stats__item tactical-zone-price-stats__item--stop">
+                <span className="tactical-zone-price-stats__label">손절</span>
+                <span className="tactical-zone-price-stats__val">{progress.formatted.stop}</span>
               </span>
-              <span className="tactical-zone-progress__ruler-col tactical-zone-progress__ruler-col--current">
-                <span className="tactical-zone-progress__ruler-label">현재</span>
-                <span className="tactical-zone-progress__ruler-num">{progress.formatted.current}</span>
+              <span className="tactical-zone-price-stats__sep" aria-hidden>
+                |
               </span>
-              <span className="tactical-zone-progress__ruler-col tactical-zone-progress__ruler-col--target">
-                <span className="tactical-zone-progress__ruler-label">목표</span>
-                <span className="tactical-zone-progress__ruler-num">{progress.formatted.target}</span>
+              <span className="tactical-zone-price-stats__item tactical-zone-price-stats__item--current">
+                <span className="tactical-zone-price-stats__label">현재</span>
+                <span className="tactical-zone-price-stats__val">{progress.formatted.current}</span>
+              </span>
+              <span className="tactical-zone-price-stats__sep" aria-hidden>
+                |
+              </span>
+              <span className="tactical-zone-price-stats__item tactical-zone-price-stats__item--target">
+                <span className="tactical-zone-price-stats__label">목표</span>
+                <span className="tactical-zone-price-stats__val">{progress.formatted.target}</span>
+              </span>
+              <span className="tactical-zone-price-stats__sep" aria-hidden>
+                |
+              </span>
+              <span className="tactical-zone-price-stats__item tactical-zone-price-stats__item--achieve">
+                <span className="tactical-zone-price-stats__label">달성</span>
+                <span className="tactical-zone-price-stats__val">{progress.progressPct}%</span>
               </span>
             </div>
 
@@ -110,73 +168,70 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
               </div>
             </div>
-
-            <p className="m-0 tactical-zone-progress__achieve-row">
-              <span className="tactical-zone-progress__achieve-label">목표달성</span>
-              <span className="tactical-zone-progress__achieve-pct">{progress.progressPct}%</span>
-            </p>
           </div>
-        </div>
-      ) : null}
-
-      <div className="tactical-zone-detail__aux">
-        <p className="m-0 tactical-zone-detail__section-label">보조지표</p>
-        <div className="tactical-zone-detail__aux-tags">
-          {TRADING_ZONE_STANDARD_AUX.map((tag) => (
-            <span
-              key={tag}
-              className={[
-                "tactical-zone-aux-tag",
-                activeAux.has(tag) ? "tactical-zone-aux-tag--on" : "tactical-zone-aux-tag--off",
-              ].join(" ")}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        ) : null}
       </div>
 
-      <dl className="tactical-zone-fields-rows m-0" aria-label="실전 필드">
-        {FIELD_ROWS.map(({ key, label }) => {
-          const value = resolveFieldValue(key)
-          const pending = value === TRADING_ZONE_FIELD_PENDING
-          return (
-            <div key={key} className="tactical-zone-fields-rows__row">
-              <dt className="tactical-zone-fields-rows__label">{label}</dt>
-              <dd
-                className={[
-                  "tactical-zone-fields-rows__value font-mono tabular-nums",
-                  pending ? "tactical-zone-fields-rows__value--pending" : "",
-                ].join(" ")}
-              >
-                {value}
-              </dd>
-            </div>
-          )
-        })}
-      </dl>
-
-      {historyLog.length ? (
-        <div className="tactical-zone-detail__history">
-          <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
-          <div className="tactical-zone-history-timeline" aria-label="상태 이력 타임라인">
-            {historyLog.map((h, i) => (
+      <div className="tactical-zone-detail__footer">
+        <div className="tactical-zone-detail__aux">
+          <p className="m-0 tactical-zone-detail__section-label">보조지표</p>
+          <div className="tactical-zone-detail__aux-tags">
+            {TRADING_ZONE_STANDARD_AUX.map((tag) => (
               <span
-                key={`${h.stage}-${h.dateLabel}-${i}`}
+                key={tag}
                 className={[
-                  "tactical-zone-history-chip",
-                  i === historyHighlightIndex
-                    ? "tactical-zone-history-chip--current"
-                    : "tactical-zone-history-chip--past",
+                  "tactical-zone-aux-tag",
+                  activeAux.has(tag) ? "tactical-zone-aux-tag--on" : "tactical-zone-aux-tag--off",
                 ].join(" ")}
-                data-stage={h.stage}
               >
-                {formatStageHistoryChipDisplay(h)}
+                {tag}
               </span>
             ))}
           </div>
         </div>
-      ) : null}
+
+        <dl className="tactical-zone-fields-rows m-0" aria-label="실전 필드">
+          {FIELD_ROWS.map(({ key, label }) => {
+            const value = resolveFieldValue(key)
+            const pending = value === TRADING_ZONE_FIELD_PENDING
+            return (
+              <div key={key} className="tactical-zone-fields-rows__row">
+                <dt className="tactical-zone-fields-rows__label">{label}</dt>
+                <dd
+                  className={[
+                    "tactical-zone-fields-rows__value font-mono tabular-nums",
+                    pending ? "tactical-zone-fields-rows__value--pending" : "",
+                  ].join(" ")}
+                >
+                  {value}
+                </dd>
+              </div>
+            )
+          })}
+        </dl>
+
+        {historyLog.length ? (
+          <div className="tactical-zone-detail__history">
+            <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
+            <div className="tactical-zone-history-timeline" aria-label="상태 이력 타임라인">
+              {historyLog.map((h, i) => (
+                <span
+                  key={`${h.stage}-${h.dateLabel}-${i}`}
+                  className={[
+                    "tactical-zone-history-chip",
+                    i === historyHighlightIndex
+                      ? "tactical-zone-history-chip--current"
+                      : "tactical-zone-history-chip--past",
+                  ].join(" ")}
+                  data-stage={h.stage}
+                >
+                  {formatStageHistoryChipDisplay(h)}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }
