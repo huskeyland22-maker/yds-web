@@ -27,20 +27,16 @@ export default function TacticalEngineLinkBar({ link }) {
         <p className="m-0 tactical-zone-engine-link__market-head">현재 시장 상태</p>
         <div className="tactical-zone-engine-link__status-grid">
           {orderedCards.map((c) => {
-            const label = c.scoreHint ?? c.action
+            const hint = c.scoreHint ?? c.action
             return (
               <div key={c.id} className="tactical-zone-market-status">
                 <p className="m-0 tactical-zone-market-status__period">
                   <span aria-hidden>{ENGINE_LINK_HORIZON_DOT[c.id] ?? "⚪"}</span> {c.period}
                 </p>
-                <p className="m-0 tactical-zone-market-status__line font-mono tabular-nums">
-                  <span className="tactical-zone-market-status__score">{c.score ?? "—"}</span>
-                  <span className="tactical-zone-market-status__sep" aria-hidden>
-                    {" "}
-                    |{" "}
-                  </span>
-                  <span className="tactical-zone-market-status__hint">{label}</span>
+                <p className="m-0 tactical-zone-market-status__score font-mono tabular-nums">
+                  {c.score ?? "—"}
                 </p>
+                <p className="m-0 tactical-zone-market-status__hint">{hint}</p>
               </div>
             )
           })}
@@ -48,9 +44,9 @@ export default function TacticalEngineLinkBar({ link }) {
       </div>
 
       {link.actions.length ? (
-        <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis mt-1">
+        <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis tactical-zone-engine-link__action-card--compact mt-1">
           <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
-          <ul className="tactical-zone-engine-link__action-list m-0 mt-1 list-none space-y-1 p-0">
+          <ul className="tactical-zone-engine-link__action-list m-0 list-none p-0">
             {link.actions.map((line) => {
               const isRestrict = /제한|축소|경계/.test(line)
               const tone = isRestrict ? "warn" : "allow"

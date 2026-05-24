@@ -13,7 +13,6 @@ import { formatStageHistoryLog } from "../../trading-zone/tradingZoneStageHistor
  * @param {{ position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition }} props
  */
 export default function TacticalStockDetailPanel({ position }) {
-  const currentIdx = TRADING_STAGE_FLOW.indexOf(position.stage)
   const badge = tradingStageBadge(position)
   const historyLog = formatStageHistoryLog(position.stageHistory ?? [])
   const levels = resolvePositionPriceLevels(position)
@@ -71,26 +70,31 @@ export default function TacticalStockDetailPanel({ position }) {
       {progress ? (
         <div className="tactical-zone-progress">
           <p className="m-0 text-[8px] font-semibold text-slate-500">목표 진행</p>
+          <p className="tactical-zone-progress__ruler m-0 mt-1 font-mono tabular-nums">
+            <span className="tactical-zone-progress__stop">
+              손절 <strong>{progress.formatted.stop}</strong>
+            </span>
+            <span className="tactical-zone-progress__dash" aria-hidden>
+              {" "}
+              ─{" "}
+            </span>
+            <span className="tactical-zone-progress__current">
+              현재 <strong>{progress.formatted.current}</strong>
+            </span>
+            <span className="tactical-zone-progress__dash" aria-hidden>
+              {" "}
+              ─{" "}
+            </span>
+            <span className="tactical-zone-progress__target">
+              목표 <strong>{progress.formatted.target}</strong>
+            </span>
+          </p>
           <div className="tactical-zone-progress__track" aria-hidden>
             <span className="tactical-zone-progress__fill" style={{ width: `${progress.progressPct}%` }} />
             <span
               className="tactical-zone-progress__marker"
               style={{ left: `${progress.progressPct}%` }}
             />
-          </div>
-          <div className="tactical-zone-progress__labels font-mono tabular-nums">
-            <span className="tactical-zone-progress__stop">
-              <span aria-hidden>🔴 </span>
-              {progress.formatted.stop}
-            </span>
-            <span className="tactical-zone-progress__current">
-              <span aria-hidden>🟡 </span>
-              {progress.formatted.current}
-            </span>
-            <span className="tactical-zone-progress__target">
-              <span aria-hidden>🔵 </span>
-              {progress.formatted.target}
-            </span>
           </div>
           <p className="m-0 mt-0.5 text-[8px] text-slate-500">
             진행률{" "}

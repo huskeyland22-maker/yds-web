@@ -81,6 +81,22 @@ export function computeTradingZoneProgress(levels) {
  *   entry?: string
  * }} position
  */
+/**
+ * 목표가 문자열 — 범위(28~30)가 아닌 단일 목표만 사용
+ * @param {string | null | undefined} targetRaw
+ */
+export function parseTargetPrice(targetRaw) {
+  if (!targetRaw || targetRaw === "—") return null
+  const s = String(targetRaw).trim()
+  if (!/\d/.test(s)) return null
+  if (/[~\-–—]/.test(s)) {
+    const parts = s.split(/[~\-–—]/).map((p) => parseTradingPrice(p.trim()))
+    const valid = parts.filter((n) => n != null)
+    return valid.length ? valid[valid.length - 1] : null
+  }
+  return parseTradingPrice(s)
+}
+
 export function resolvePositionPriceLevels(position) {
   const stop =
     position.stopNum != null && Number.isFinite(position.stopNum)
@@ -89,7 +105,7 @@ export function resolvePositionPriceLevels(position) {
   const target =
     position.targetNum != null && Number.isFinite(position.targetNum)
       ? position.targetNum
-      : parseTradingPrice(position.target)
+      : parseTargetPrice(position.target)
   const current =
     position.currentPrice != null && Number.isFinite(position.currentPrice)
       ? position.currentPrice
