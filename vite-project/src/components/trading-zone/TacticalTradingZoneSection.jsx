@@ -3,6 +3,7 @@ import {
   TRADING_BUCKET_META,
   TRADING_BUCKET_ORDER,
   TRADING_MARKETS,
+  TRADING_ZONE_TAKE_PROFIT_EMPTY,
   getTradingZonePositions,
   groupPositionsByBucket,
   resolveDefaultTradingPositionId,
@@ -41,14 +42,19 @@ function StockChip({ position, selected, onSelect }) {
  * }} props
  */
 function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
-  const emptyLabel = bucketId === "takeProfit" ? "대기중" : "—"
-
   return (
     <div className="tactical-zone-bucket">
       <p className="m-0 tactical-zone-bucket__title">{title}</p>
       <div className="tactical-zone-bucket__list">
         {positions.length === 0 ? (
-          <span className="tactical-zone-bucket__empty">{emptyLabel}</span>
+          bucketId === "takeProfit" ? (
+            <div className="tactical-zone-bucket__empty-stack">
+              <span className="tactical-zone-bucket__empty">{TRADING_ZONE_TAKE_PROFIT_EMPTY.status}</span>
+              <span className="tactical-zone-bucket__empty-sub">{TRADING_ZONE_TAKE_PROFIT_EMPTY.partial}</span>
+            </div>
+          ) : (
+            <span className="tactical-zone-bucket__empty">—</span>
+          )
         ) : (
           positions.map((p) => (
             <StockChip

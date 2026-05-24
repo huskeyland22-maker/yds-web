@@ -59,6 +59,15 @@ export const TRADING_BUCKET_META = {
 /** @type {TradingBucketId[]} */
 export const TRADING_BUCKET_ORDER = ["interest", "pullback", "trend", "takeProfit"]
 
+/** 상세 패널 기본 보조지표 (실전 필드) */
+export const TRADING_ZONE_STANDARD_AUX = ["10MA", "20MA", "거래량", "RSI", "거래대금"]
+
+/** 익절관리 버킷 빈 상태 기본 문구 */
+export const TRADING_ZONE_TAKE_PROFIT_EMPTY = {
+  status: "대기중",
+  partial: "부분익절 없음",
+}
+
 /** @type {Record<TradingMarketId, { id: TradingMarketId; label: string; flag: string }>} */
 export const TRADING_MARKETS = {
   us: { id: "us", label: "미국", flag: "🇺🇸" },
@@ -166,11 +175,11 @@ const SEED_POSITIONS = [
     stopNum: 210,
     targetNum: 238,
     currentPrice: 221,
-    aux: ["10MA", "20MA", "거래량"],
+    aux: ["10MA", "20MA", "거래량", "RSI", "거래대금"],
     stageHistory: [
       { stage: "interest", at: "2026-05-18" },
       { stage: "pullback", at: "2026-05-20" },
-      { stage: "interest", at: "2026-05-22", note: "관심 진입" },
+      { stage: "interest", at: "2026-05-22" },
     ],
   },
   {

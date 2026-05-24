@@ -1396,31 +1396,48 @@
   .tactical-zone-stage-flow__chip--active {
     font-weight: 800;
     border-radius: 4px;
-    padding: 1px 4px;
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
-    box-shadow: 0 0 14px rgba(251, 191, 36, 0.22);
+    padding: 2px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.55);
+    box-shadow:
+      0 0 18px rgba(251, 191, 36, 0.35),
+      0 0 0 1px rgba(251, 191, 36, 0.15) inset;
   }
 
   .tactical-zone-stage-flow__chip--active[data-stage="interest"] {
-    color: rgba(74, 222, 128, 0.98);
-    box-shadow: 0 0 14px rgba(74, 222, 128, 0.22);
-    text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+    color: rgba(74, 222, 128, 1);
+    border-color: rgba(74, 222, 128, 0.35);
+    box-shadow:
+      0 0 20px rgba(74, 222, 128, 0.45),
+      0 0 0 1px rgba(74, 222, 128, 0.2) inset;
+    text-shadow: 0 0 12px rgba(74, 222, 128, 0.55);
   }
 
   .tactical-zone-stage-flow__chip--active[data-stage="pullback"] {
-    color: rgba(251, 191, 36, 0.98);
+    color: rgba(251, 191, 36, 1);
+    border-color: rgba(251, 191, 36, 0.35);
+    box-shadow:
+      0 0 20px rgba(251, 191, 36, 0.45),
+      0 0 0 1px rgba(251, 191, 36, 0.2) inset;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.55);
   }
 
   .tactical-zone-stage-flow__chip--active[data-stage="trend"] {
-    color: rgba(96, 165, 250, 0.98);
-    box-shadow: 0 0 14px rgba(96, 165, 250, 0.22);
-    text-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+    color: rgba(96, 165, 250, 1);
+    border-color: rgba(96, 165, 250, 0.35);
+    box-shadow:
+      0 0 20px rgba(96, 165, 250, 0.45),
+      0 0 0 1px rgba(96, 165, 250, 0.2) inset;
+    text-shadow: 0 0 12px rgba(96, 165, 250, 0.55);
   }
 
   .tactical-zone-stage-flow__chip--active[data-stage="takeProfit"] {
-    color: rgba(251, 146, 60, 0.98);
-    box-shadow: 0 0 14px rgba(251, 146, 60, 0.22);
-    text-shadow: 0 0 10px rgba(251, 146, 60, 0.4);
+    color: rgba(251, 146, 60, 1);
+    border-color: rgba(251, 146, 60, 0.35);
+    box-shadow:
+      0 0 20px rgba(251, 146, 60, 0.45),
+      0 0 0 1px rgba(251, 146, 60, 0.2) inset;
+    text-shadow: 0 0 12px rgba(251, 146, 60, 0.55);
   }
 
   .tactical-zone-stage-flow__chip--muted {
@@ -1591,36 +1608,25 @@
     font-style: italic;
   }
 
+  .tactical-zone-bucket__empty-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 2px;
+  }
+
+  .tactical-zone-bucket__empty-sub {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(100, 116, 139, 0.62);
+    font-style: italic;
+  }
+
   .tactical-zone-progress {
     margin-top: 6px;
     margin-bottom: 14px;
     padding-top: 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  .tactical-zone-progress__achieve {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    margin-bottom: 8px;
-    text-align: center;
-  }
-
-  .tactical-zone-progress__achieve-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: rgba(251, 191, 36, 0.92);
-    letter-spacing: 0.04em;
-  }
-
-  .tactical-zone-progress__achieve-pct {
-    font-size: 33px;
-    font-weight: 800;
-    line-height: 1;
-    color: rgba(251, 191, 36, 1);
-    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
   }
 
   .tactical-zone-progress__chart {
@@ -1659,7 +1665,8 @@
 
   .tactical-zone-progress__track-wrap {
     position: relative;
-    padding-top: 40px;
+    margin-top: 2px;
+    padding-top: 48px;
   }
 
   .tactical-zone-progress__current-tag {
@@ -1670,23 +1677,23 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
+    gap: 10px;
     transform: translateX(-50%);
     pointer-events: none;
-    max-width: min(42vw, 120px);
+    max-width: min(44vw, 128px);
   }
 
   .tactical-zone-progress__current-dot {
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1;
     color: rgba(251, 191, 36, 1);
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.55);
   }
 
   .tactical-zone-progress__current-label {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1;
     color: rgba(253, 224, 71, 1);
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
     white-space: nowrap;
@@ -1694,9 +1701,33 @@
 
   .tactical-zone-progress__track {
     position: relative;
-    height: 14px;
+    height: 16px;
     margin-top: 0;
     overflow: visible;
+  }
+
+  .tactical-zone-progress__achieve-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 6px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .tactical-zone-progress__achieve-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(251, 191, 36, 0.9);
+    letter-spacing: 0.02em;
+  }
+
+  .tactical-zone-progress__achieve-pct {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    color: rgba(251, 191, 36, 1);
+    text-shadow: 0 0 16px rgba(251, 191, 36, 0.45);
   }
 
   .tactical-zone-progress__rail {
@@ -1760,53 +1791,60 @@
     box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
   }
 
-  .tactical-zone-history-cards {
+  .tactical-zone-history-timeline {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: 6px;
-  }
-
-  .tactical-zone-history-card {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 7px 9px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .tactical-zone-history-card__date {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 5px;
+    padding: 4px 0 2px;
     font-size: 13px;
-    font-weight: 600;
-    color: rgba(100, 116, 139, 0.88);
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
-  .tactical-zone-history-card__message {
-    font-size: 13px;
+  .tactical-zone-history-timeline::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tactical-zone-history-timeline__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .tactical-zone-history-timeline__arrow {
+    color: rgba(100, 116, 139, 0.55);
+    font-weight: 500;
+  }
+
+  .tactical-zone-history-timeline__segment {
     font-weight: 800;
-    line-height: 1.25;
     color: rgba(226, 232, 240, 0.96);
   }
 
-  .tactical-zone-history-card[data-stage="interest"] .tactical-zone-history-card__message {
+  .tactical-zone-history-timeline__segment[data-stage="interest"] {
     color: rgba(74, 222, 128, 0.98);
   }
 
-  .tactical-zone-history-card[data-stage="pullback"] .tactical-zone-history-card__message {
+  .tactical-zone-history-timeline__segment[data-stage="pullback"] {
     color: rgba(253, 224, 71, 0.98);
   }
 
-  .tactical-zone-history-card[data-stage="trend"] .tactical-zone-history-card__message {
+  .tactical-zone-history-timeline__segment[data-stage="trend"] {
     color: rgba(147, 197, 253, 0.98);
   }
 
-  .tactical-zone-history-card[data-stage="takeProfit"] .tactical-zone-history-card__message {
+  .tactical-zone-history-timeline__segment[data-stage="takeProfit"] {
     color: rgba(251, 146, 60, 0.98);
   }
 
-  .tactical-zone-history-card[data-stage="risk"] .tactical-zone-history-card__message {
+  .tactical-zone-history-timeline__segment[data-stage="risk"] {
     color: rgba(252, 165, 165, 0.98);
   }
 
@@ -1898,7 +1936,11 @@
     }
 
     .tactical-zone-progress__achieve-pct {
-      font-size: 35px;
+      font-size: 24px;
+    }
+
+    .tactical-zone-progress__current-label {
+      font-size: 16px;
     }
   }
 
@@ -1912,6 +1954,51 @@
     line-height: 1.2;
     color: rgba(203, 213, 225, 0.96);
     white-space: nowrap;
+  }
+
+  .tactical-zone-aux-tag--on {
+    border-color: rgba(34, 211, 238, 0.28);
+    background: rgba(34, 211, 238, 0.1);
+    color: rgba(165, 243, 252, 0.98);
+  }
+
+  .tactical-zone-aux-tag--off {
+    opacity: 0.45;
+    border-style: dashed;
+  }
+
+  .tactical-zone-detail__reserved {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 8px;
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.18);
+  }
+
+  .tactical-zone-detail__reserved-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .tactical-zone-detail__reserved dt {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(100, 116, 139, 0.88);
+    line-height: 1.1;
+  }
+
+  .tactical-zone-detail__reserved dd {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: rgba(71, 85, 105, 0.95);
+    line-height: 1.15;
   }
 
   .panic-v2-desk > .cycle-desk-divider--reference + .panic-v2-desk__bond-slot {

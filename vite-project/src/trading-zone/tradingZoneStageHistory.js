@@ -27,12 +27,21 @@ export function buildStageHistoryMessage(entry, index, prevStage) {
   const label = meta?.label ?? entry.stage
 
   if (index === 0) {
-    if (entry.stage === "interest") return `${label} 진입`
+    if (entry.stage === "interest") return `${label}진입`
     return label
   }
-  if (prevStage === entry.stage) return `${label} 유지`
-  if (entry.stage === "interest") return `${label} 진입`
+  if (prevStage === entry.stage) return `${label}유지`
+  if (entry.stage === "interest" && prevStage !== "interest") return label
   return label
+}
+
+/**
+ * 타임라인 한 칸: `05/18 관심진입`
+ * @param {{ dateLabel: string; message: string; stage: string }} item
+ */
+export function formatStageHistoryTimelineSegment(item) {
+  const text = item.message.replace(/\s+/g, "")
+  return item.dateLabel ? `${item.dateLabel} ${text}` : text
 }
 
 /**
