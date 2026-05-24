@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { formatUpdateTimestampKst } from "../../utils/formatDataAge.js"
+import { useMemo, useState } from "react"
+import { resolveMarketUpdateTime } from "../../utils/marketUpdateTime.js"
 
 /**
  * @param {{
@@ -14,7 +14,8 @@ export default function CycleDataBasisBar({
   bondSource = "FRED",
 }) {
   const [open, setOpen] = useState(false)
-  const ts = formatUpdateTimestampKst(updatedAt) ?? "—"
+  const marketTime = useMemo(() => resolveMarketUpdateTime({ updatedAt }), [updatedAt])
+  const ts = marketTime.kstLabel ?? "—"
 
   return (
     <div className="cycle-data-basis">
@@ -22,7 +23,7 @@ export default function CycleDataBasisBar({
         <p className="m-0 cycle-data-basis__line font-mono tabular-nums">
           <span className="cycle-data-basis__muted">업데이트:</span> {ts}
           <span className="cycle-data-basis__muted"> · </span>
-          <span>미국장 마감 기준</span>
+          <span>{marketTime.basisNote}</span>
         </p>
         <button
           type="button"

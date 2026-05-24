@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react"
-import { RefreshCw } from "lucide-react"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { metricDisplayTooltip } from "../../macro-risk/metricLabels.js"
@@ -7,10 +6,12 @@ import {
   buildBondLiquidityGroups,
   bondStatusSummaryLine,
 } from "../../market-os/bondLiquidityReference.js"
-import { formatBondLastSyncKst, loadBondSyncMeta } from "../../macro-risk/bondSyncMeta.js"
+import { resolveMarketUpdateTime } from "../../utils/marketUpdateTime.js"
 import { slopeArrow } from "../../macro-risk/seriesMath.js"
 
 const EXPERT_KEYS = ["REAL_YIELD", "BEI"]
+
+const PANEL_TITLE = "장기 참고 지표 (미국장 종가 기준)"
 
 /**
  * @param {string} key
@@ -65,26 +66,20 @@ function MetricGroup({ title, lines }) {
 
 /**
  * @param {{
- *   basisDateTime?: string | null
  *   snapshot?: import("../../macro-risk/engine.js").MacroRiskSnapshot | null
  *   panicData?: object | null
  *   loading?: boolean
- *   syncingBond?: boolean
- *   refetchBond: () => void
- *   lastBondSyncAt?: string | null
  * }} props
  */
 export default function CycleBondLiquiditySection({
-  basisDateTime = null,
   snapshot = null,
   panicData = null,
   loading = false,
-  syncingBond = false,
-  refetchBond,
-  lastBondSyncAt = null,
 }) {
   const enabled = isMacroRiskEnabled()
   const [expertOpen, setExpertOpen] = useState(false)
+
+  const marketUpdateTime = useMemo(() => resolveMarketUpdateTime(panicData), [panicData])
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#bond-liquidity") {
@@ -104,38 +99,24 @@ export default function CycleBondLiquiditySection({
     return Object.fromEntries(rows.map((r) => [r.key, r]))
   }, [snapshot])
 
-  const syncLabel = formatBondLastSyncKst(lastBondSyncAt ?? loadBondSyncMeta()?.at ?? snapshot?.updatedAt)
-  const basisLine = basisDateTime ? basisDateTime.replace(/^미국장 종가 기준 · /u, "") : syncLabel
-
   if (!enabled) return null
 
   return (
     <section
       id="bond-liquidity"
       className="cycle-bond-section cycle-bond-section--reference scroll-mt-24"
-      aria-label="채권·유동성 참고"
+      aria-label={PANEL_TITLE}
     >
       <div className="cycle-bond-panel cycle-bond-panel--compact cycle-bond-panel--reference">
         <header className="cycle-bond-panel__header cycle-bond-panel__header--compact">
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="m-0 cycle-bond-panel__title-ref">채권·유동성 참고</p>
-              <button
-                type="button"
-                onClick={() => refetchBond()}
-                disabled={syncingBond || loading}
-                className="cycle-bond-sync-btn shrink-0"
-                aria-busy={syncingBond}
-              >
-                <RefreshCw size={11} className={syncingBond ? "animate-spin" : ""} />
-                {syncingBond ? "…" : "동기화"}
-              </button>
-            </div>
-            {basisLine && basisLine !== "—" ? (
-              <p className="m-0 mt-0.5 font-mono text-[10px] font-semibold tabular-nums text-slate-300">
-                {basisLine}
+            <p className="m-0 cycle-bond-panel__title-ref">{PANEL_TITLE}</p>
+            <div className="mt-0.5">
+              <p className="m-0 text-[9px] font-medium text-slate-500">{marketUpdateTime.basisNote}</p>
+              <p className="m-0 font-mono text-[10px] font-semibold tabular-nums text-slate-300">
+                {marketUpdateTime.kstLabel ?? "—"}
               </p>
-            ) : null}
+            </div>
           </div>
         </header>
 

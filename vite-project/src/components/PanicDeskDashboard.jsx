@@ -144,13 +144,9 @@ export default function PanicDeskDashboard({
 
       <div className="panic-v2-desk__bond-slot">
         <CycleBondLiquiditySection
-          basisDateTime={null}
           panicData={panicData}
           snapshot={bondSnapshot.snapshot}
           loading={bondSnapshot.loading}
-          syncingBond={bondSnapshot.syncingBond}
-          refetchBond={bondSnapshot.refetchBond}
-          lastBondSyncAt={bondSnapshot.lastBondSyncAt}
         />
       </div>
     </div>
