@@ -101,6 +101,7 @@ export default function TacticalStockDetailPanel({ position }) {
 
       {progress ? (
         <div className="tactical-zone-detail__trade-zone">
+          <div className="progress-header-spacer" aria-hidden />
           <div className="tactical-zone-trade-line-container">
             <div
               className="tactical-zone-trade-line font-mono tabular-nums"
