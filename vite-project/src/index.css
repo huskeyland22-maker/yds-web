@@ -1690,12 +1690,20 @@
     color: rgba(100, 116, 139, 0.62);
   }
 
-  .tactical-zone-core-cell__value--up {
-    color: rgba(74, 222, 128, 0.95);
+  .tactical-zone-core-cell__value--gain {
+    color: rgba(74, 222, 128, 0.98);
   }
 
-  .tactical-zone-core-cell__value--down {
-    color: rgba(252, 165, 165, 0.95);
+  .tactical-zone-core-cell__value--upside {
+    color: rgba(96, 165, 250, 0.98);
+  }
+
+  .tactical-zone-core-cell__value--risk {
+    color: rgba(252, 165, 165, 0.98);
+  }
+
+  .tactical-zone-core-cell__value--weight {
+    color: rgba(34, 211, 238, 0.98);
   }
 
   .tactical-zone-detail__foot {

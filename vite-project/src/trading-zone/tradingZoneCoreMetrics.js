@@ -4,31 +4,35 @@
 import { TRADING_ZONE_FIELD_PENDING } from "./tacticalTradingZoneData.js"
 import { resolvePositionPriceLevels } from "./tradingZonePriceProgress.js"
 
-/** @type {readonly { key: string; label: string; tooltip: string; empty: string }[]} */
+/** @type {readonly { key: string; label: string; tooltip: string; empty: string; tone: string }[]} */
 export const TRADING_CORE_METRIC_FIELDS = [
-  {
-    key: "rr",
-    label: "손익비 (RR)",
-    tooltip: "= 목표수익 ÷ 손실위험 · RR 2 이상 = 우수 · RR 1 이하 = 주의",
-    empty: TRADING_ZONE_FIELD_PENDING,
-  },
   {
     key: "expectedReturn",
     label: "기대수익",
-    tooltip: "목표가 도달 시 예상 수익률(%)",
+    tooltip: "목표 달성 시 예상 수익률(%)",
     empty: TRADING_ZONE_FIELD_PENDING,
+    tone: "gain",
+  },
+  {
+    key: "upside",
+    label: "상승여력",
+    tooltip: "현재가 → 목표가 상승 폭 = (목표가 − 현재가) ÷ 현재가",
+    empty: TRADING_ZONE_FIELD_PENDING,
+    tone: "upside",
   },
   {
     key: "stopRisk",
     label: "손절위험",
     tooltip: "현재가 대비 손절가 하락 폭(%)",
     empty: TRADING_ZONE_FIELD_PENDING,
+    tone: "risk",
   },
   {
     key: "weight",
     label: "권장비중",
     tooltip: "포트폴리오 내 권장 비중",
     empty: "-",
+    tone: "weight",
   },
 ]
 
@@ -53,39 +57,13 @@ export function computeStopRiskPercent(current, stop) {
 }
 
 /**
+ * 상승여력 · 기대수익(가격 기준) = (목표가 − 현재가) / 현재가
  * @param {number | null} current
  * @param {number | null} target
  */
-export function computeExpectedReturnPercent(current, target) {
+export function computeUpsidePercent(current, target) {
   if (current == null || target == null || !Number.isFinite(current) || current === 0) return null
   return ((target - current) / current) * 100
-}
-
-/**
- * @param {number | null} current
- * @param {number | null} stop
- * @param {number | null} target
- */
-export function computeRewardRiskRatioLabel(current, stop, target) {
-  if (current == null || stop == null || target == null) return null
-  const risk = Math.abs(current - stop)
-  const reward = Math.abs(target - current)
-  if (risk === 0 || !Number.isFinite(risk) || !Number.isFinite(reward)) return null
-  const ratio = reward / risk
-  const rounded = Math.round(ratio * 100) / 100
-  const body = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/0+$/, "").replace(/\.$/, "")
-  return `1 : ${body}`
-}
-
-/** @param {string | null | undefined} raw */
-function parsePositionRrDisplay(raw) {
-  if (raw == null) return null
-  const s = String(raw).trim()
-  if (!s || s === "—" || s === "-") return null
-  if (/^1\s*:\s*\d/.test(s)) return s.replace(/\s+/g, " ")
-  const num = Number(s.replace(/[^\d.]/g, ""))
-  if (Number.isFinite(num) && num > 0) return `1 : ${num}`
-  return s
 }
 
 /** @param {string | null | undefined} raw */
@@ -106,26 +84,16 @@ export function buildTradingCoreMetrics(position) {
   const levels = resolvePositionPriceLevels(position)
   const { stop, current, target } = levels
 
-  const rrFromPrice = computeRewardRiskRatioLabel(current, stop, target)
-  const expectedFromPrice = formatSignedPercent(computeExpectedReturnPercent(current, target))
+  const upsideFromPrice = formatSignedPercent(computeUpsidePercent(current, target))
   const stopRiskFromPrice = formatSignedPercent(computeStopRiskPercent(current, stop))
-
-  const rr =
-    parsePositionRrDisplay(position.rr) ??
-    rrFromPrice ??
-    TRADING_ZONE_FIELD_PENDING
 
   const expectedReturn =
     parsePositionPercentDisplay(position.expectedReturn) ??
-    expectedFromPrice ??
+    upsideFromPrice ??
     TRADING_ZONE_FIELD_PENDING
 
+  const upside = upsideFromPrice ?? TRADING_ZONE_FIELD_PENDING
   const stopRisk = stopRiskFromPrice ?? TRADING_ZONE_FIELD_PENDING
-
-  let holdingDays = "-"
-  if (position.holdingDays != null && Number.isFinite(position.holdingDays)) {
-    holdingDays = `${position.holdingDays}일`
-  }
 
   let weight = "-"
   const weightRaw = position.weight
@@ -137,10 +105,9 @@ export function buildTradingCoreMetrics(position) {
   }
 
   return {
-    rr,
     expectedReturn,
+    upside,
     stopRisk,
-    holdingDays,
     weight,
   }
 }

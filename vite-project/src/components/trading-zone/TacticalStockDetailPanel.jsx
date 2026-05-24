@@ -165,7 +165,7 @@ export default function TacticalStockDetailPanel({ position }) {
       <section className="tactical-zone-detail__core" aria-label="핵심 매매정보">
         <p className="m-0 tactical-zone-detail__section-label">핵심 매매정보</p>
         <dl className="tactical-zone-core-grid m-0">
-          {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty }) => {
+          {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty, tone }) => {
             const value = coreMetrics[key]
             const pending = isCoreMetricPlaceholder(value, empty)
             return (
@@ -177,8 +177,7 @@ export default function TacticalStockDetailPanel({ position }) {
                   className={[
                     "tactical-zone-core-cell__value font-mono tabular-nums",
                     pending ? "tactical-zone-core-cell__value--placeholder" : "",
-                    key === "expectedReturn" && !pending ? "tactical-zone-core-cell__value--up" : "",
-                    key === "stopRisk" && !pending ? "tactical-zone-core-cell__value--down" : "",
+                    !pending ? `tactical-zone-core-cell__value--${tone}` : "",
                   ].join(" ")}
                 >
                   {value}
