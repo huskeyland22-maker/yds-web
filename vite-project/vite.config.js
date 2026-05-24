@@ -116,10 +116,11 @@ export default defineConfig({
             urlPattern: ({ request, url }) =>
               url.origin === self.location.origin &&
               (request.destination === "script" || request.destination === "style"),
-            handler: "StaleWhileRevalidate",
+            handler: "NetworkFirst",
             options: {
               cacheName: "yds-js-css",
-              expiration: { maxEntries: 64, maxAgeSeconds: 7 * 24 * 60 * 60 },
+              networkTimeoutSeconds: 8,
+              expiration: { maxEntries: 64, maxAgeSeconds: 24 * 60 * 60 },
             },
           },
           {

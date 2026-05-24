@@ -4,7 +4,8 @@
 // 정상 갱신: Workbox(NetworkFirst HTML, SWR JS/CSS, NetworkOnly API/panic) + 토스트
 // (`yds:pwa-update-available`) → 사용자가 "지금 업데이트" 시 reload / updateSW(true).
 //
-// 강제 eviction(evictStaleBuildAndReload): chunk 404·동적 import 실패·stale-panic 1회 등만.
+// Chunk 404·dynamic import·preload 실패 → recoverFromChunkLoadFailure (cooldown 없음, 즉시 reload).
+// evictStaleBuildAndReload: stale-panic·html-stale-shell·사용자 "지금 업데이트" 등.
 // html-build-mismatch 는 더 이상 자동 hard reload 하지 않음.
 // -----------------------------------------------------------------------------
 
@@ -397,36 +398,118 @@ export async function forcePwaUpdate() {
   await applyPwaUpdate()
 }
 
-function showUpdateBanner() {
+const CHUNK_RECOVERY_OVERLAY_ID = "yds-chunk-recovery-overlay"
+
+/** Chunk / stale asset 실패 시 검은 화면 대신 표시. */
+export function showChunkRecoveryFallback() {
   if (typeof document === "undefined") return
+
   try {
-    if (document.getElementById("yds-pwa-update-banner")) return
-    const el = document.createElement("div")
-    el.id = "yds-pwa-update-banner"
-    el.textContent = "최신 버전으로 업데이트 중…"
-    el.style.cssText = [
-      "position:fixed",
-      "left:50%",
-      "top:16px",
-      "transform:translateX(-50%)",
-      "z-index:99999",
-      "padding:8px 14px",
-      "border-radius:999px",
-      "font-family:ui-sans-serif,system-ui,-apple-system,'Pretendard',sans-serif",
-      "font-size:12px",
-      "font-weight:600",
-      "letter-spacing:0.02em",
-      "color:#d1fae5",
-      "background:rgba(6,78,59,0.92)",
-      "border:1px solid rgba(74,222,128,0.35)",
-      "box-shadow:0 6px 18px rgba(0,0,0,0.4)",
-      "pointer-events:none",
-    ].join(";")
-    if (document.body) document.body.appendChild(el)
-    else document.documentElement.appendChild(el)
+    let el = document.getElementById(CHUNK_RECOVERY_OVERLAY_ID)
+    if (!el) {
+      el = document.createElement("div")
+      el.id = CHUNK_RECOVERY_OVERLAY_ID
+      el.setAttribute("role", "alertdialog")
+      el.setAttribute("aria-labelledby", "yds-chunk-recovery-title")
+      el.setAttribute("aria-describedby", "yds-chunk-recovery-desc")
+      el.innerHTML = `
+        <div class="yds-chunk-recovery__panel">
+          <p id="yds-chunk-recovery-title" class="yds-chunk-recovery__title">업데이트 감지됨</p>
+          <p id="yds-chunk-recovery-desc" class="yds-chunk-recovery__desc">새 버전 적용중…</p>
+          <button type="button" class="yds-chunk-recovery__btn">새로고침</button>
+        </div>
+      `
+      el.style.cssText = [
+        "position:fixed",
+        "inset:0",
+        "z-index:2147483646",
+        "display:flex",
+        "align-items:center",
+        "justify-content:center",
+        "padding:24px",
+        "box-sizing:border-box",
+        "background:#0B0E14",
+        "font-family:ui-sans-serif,system-ui,-apple-system,'Pretendard','Noto Sans KR',sans-serif",
+      ].join(";")
+      const panel = el.querySelector(".yds-chunk-recovery__panel")
+      if (panel) {
+        panel.style.cssText = [
+          "width:min(100%,20rem)",
+          "text-align:center",
+          "padding:20px 18px",
+          "border-radius:12px",
+          "border:1px solid rgba(56,189,248,0.28)",
+          "background:rgba(15,23,42,0.96)",
+          "box-shadow:0 12px 40px rgba(0,0,0,0.55)",
+        ].join(";")
+      }
+      const title = el.querySelector(".yds-chunk-recovery__title")
+      if (title) {
+        title.style.cssText =
+          "margin:0;font-size:15px;font-weight:700;color:#e2e8f0;letter-spacing:0.02em"
+      }
+      const desc = el.querySelector(".yds-chunk-recovery__desc")
+      if (desc) {
+        desc.style.cssText = "margin:8px 0 0;font-size:13px;font-weight:500;color:#94a3b8"
+      }
+      const btn = el.querySelector(".yds-chunk-recovery__btn")
+      if (btn) {
+        btn.style.cssText = [
+          "margin-top:16px",
+          "width:100%",
+          "padding:10px 14px",
+          "border-radius:8px",
+          "border:1px solid rgba(56,189,248,0.45)",
+          "background:rgba(14,116,144,0.35)",
+          "color:#f0f9ff",
+          "font-size:14px",
+          "font-weight:700",
+          "cursor:pointer",
+        ].join(";")
+        btn.addEventListener("click", () => {
+          void recoverFromChunkLoadFailure("user-reload")
+        })
+      }
+      ;(document.body || document.documentElement).appendChild(el)
+    } else {
+      el.hidden = false
+      el.style.display = "flex"
+    }
+
+    const root = document.getElementById("root")
+    if (root && !root.textContent?.trim()) {
+      root.setAttribute("aria-hidden", "true")
+    }
   } catch {
     // ignore
   }
+}
+
+/**
+ * Chunk 404 / dynamic import / preload 실패 — cooldown 없이 SW·캐시 정리 후 즉시 reload.
+ * @param {string} [reason]
+ * @param {{ showFallback?: boolean }} [options]
+ */
+export async function recoverFromChunkLoadFailure(reason = "chunk-load-error", options = {}) {
+  if (typeof window === "undefined") return
+
+  if (options.showFallback !== false) {
+    showChunkRecoveryFallback({ autoReload: false })
+  }
+
+  try {
+    await unregisterAllServiceWorkers()
+    await clearAllCacheStorage()
+  } catch {
+    // ignore — reload anyway
+  }
+
+  console.warn("[PWA] chunk recovery — reloading", { reason })
+  window.location.reload()
+}
+
+function showUpdateBanner() {
+  showChunkRecoveryFallback()
 }
 
 /**
@@ -756,6 +839,14 @@ export function installLifecycleVersionPoller() {
  * treat it as a definitive "the app is stale" signal and run the full eviction
  * pipeline. The hash-mismatch path is the most common iOS PWA failure mode.
  */
+let chunkRecoveryInFlight = false
+
+function triggerChunkRecovery(reason) {
+  if (chunkRecoveryInFlight) return
+  chunkRecoveryInFlight = true
+  void recoverFromChunkLoadFailure(reason)
+}
+
 export function installChunkLoadFailureRecovery() {
   if (typeof window === "undefined") return
   const state = getGlobalState()
@@ -763,9 +854,10 @@ export function installChunkLoadFailureRecovery() {
   state.chunkRecoveryInstalled = true
 
   const isAssetUrl = (url) => typeof url === "string" && url.includes("/assets/")
-  const trigger = () => {
-    void evictStaleBuildAndReload("chunk-load-error")
-  }
+
+  window.addEventListener("vite:preloadError", () => {
+    triggerChunkRecovery("vite-preload-error")
+  })
 
   window.addEventListener(
     "error",
@@ -775,7 +867,7 @@ export function installChunkLoadFailureRecovery() {
       const tag = target.tagName
       if (tag !== "SCRIPT" && tag !== "LINK") return
       const src = target.src || target.href
-      if (isAssetUrl(src)) trigger()
+      if (isAssetUrl(src)) triggerChunkRecovery("chunk-asset-404")
     },
     true,
   )
@@ -783,8 +875,8 @@ export function installChunkLoadFailureRecovery() {
   window.addEventListener("unhandledrejection", (event) => {
     const reason = event?.reason
     const msg = String(reason?.message || reason || "")
-    if (/Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(msg)) {
-      trigger()
+    if (/Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError|404/i.test(msg)) {
+      triggerChunkRecovery("chunk-load-error")
     }
   })
 }

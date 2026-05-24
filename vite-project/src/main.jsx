@@ -108,18 +108,37 @@ async function bootstrapApp() {
 
   try {
     const { registerSW } = await import("virtual:pwa-register")
+    let applySwUpdate = () => {
+      window.location.reload()
+    }
     const updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
         notifyUpdateAvailable("sw-need-refresh", gate.remote)
+        applySwUpdate(true)
       },
       onRegisteredSW(_swUrl, registration) {
         if (!registration) return
+        const activateWaiting = () => {
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: "SKIP_WAITING" })
+          }
+        }
+        activateWaiting()
+        registration.addEventListener("updatefound", () => {
+          const worker = registration.installing
+          worker?.addEventListener("statechange", () => {
+            if (worker.state === "installed" && navigator.serviceWorker.controller) {
+              activateWaiting()
+            }
+          })
+        })
         window.setInterval(() => {
           void registration.update()
         }, 60 * 60 * 1000)
       },
     })
+    applySwUpdate = updateSW
     if (typeof window !== "undefined") {
       window.__YDS_UPDATE_SW = updateSW
     }
@@ -155,10 +174,8 @@ async function bootstrapApp() {
     )
   } catch (e) {
     console.error("[BOOT] createRoot failed", e)
-    const el = document.getElementById("root")
-    if (el) {
-      el.textContent = "앱을 불러오지 못했습니다. 새로고침 해 주세요."
-    }
+    const { showChunkRecoveryFallback } = await import("./utils/pwaFreshness.js")
+    showChunkRecoveryFallback()
   }
 }
 
