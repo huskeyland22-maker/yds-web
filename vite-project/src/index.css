@@ -1330,12 +1330,33 @@
   }
 
   .tactical-zone-stage-flow__chip--active {
-    color: rgba(251, 191, 36, 0.98);
     font-weight: 800;
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
-    box-shadow: 0 0 12px rgba(251, 191, 36, 0.18);
     border-radius: 4px;
-    padding: 0 2px;
+    padding: 1px 4px;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.22);
+  }
+
+  .tactical-zone-stage-flow__chip--active[data-stage="interest"] {
+    color: rgba(74, 222, 128, 0.98);
+    box-shadow: 0 0 14px rgba(74, 222, 128, 0.22);
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+  }
+
+  .tactical-zone-stage-flow__chip--active[data-stage="pullback"] {
+    color: rgba(251, 191, 36, 0.98);
+  }
+
+  .tactical-zone-stage-flow__chip--active[data-stage="trend"] {
+    color: rgba(96, 165, 250, 0.98);
+    box-shadow: 0 0 14px rgba(96, 165, 250, 0.22);
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+  }
+
+  .tactical-zone-stage-flow__chip--active[data-stage="takeProfit"] {
+    color: rgba(251, 146, 60, 0.98);
+    box-shadow: 0 0 14px rgba(251, 146, 60, 0.22);
+    text-shadow: 0 0 10px rgba(251, 146, 60, 0.4);
   }
 
   .tactical-zone-stage-flow__chip--muted {
@@ -1374,9 +1395,17 @@
     padding: 7px 8px;
   }
 
-  .tactical-zone-engine-link__action-card {
-    border-color: rgba(251, 146, 60, 0.14);
-    background: rgba(251, 146, 60, 0.04);
+  .tactical-zone-engine-link__action-card--emphasis {
+    border-color: rgba(34, 197, 94, 0.28);
+    background: linear-gradient(
+      135deg,
+      rgba(34, 197, 94, 0.1) 0%,
+      rgba(251, 191, 36, 0.06) 55%,
+      rgba(0, 0, 0, 0.32) 100%
+    );
+    box-shadow:
+      0 0 0 1px rgba(34, 197, 94, 0.08) inset,
+      0 4px 18px rgba(34, 197, 94, 0.1);
   }
 
   .tactical-zone-engine-link__market-head,
@@ -1440,10 +1469,26 @@
   }
 
   .tactical-zone-engine-link__action-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
     font-size: 9px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.35;
-    color: rgba(255, 237, 213, 0.92);
+  }
+
+  .tactical-zone-engine-link__action-icon {
+    flex-shrink: 0;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .tactical-zone-engine-link__action-line--allow {
+    color: rgba(134, 239, 172, 0.95);
+  }
+
+  .tactical-zone-engine-link__action-line--warn {
+    color: rgba(252, 211, 77, 0.95);
   }
 
   .tactical-zone-bucket__empty {
@@ -1466,15 +1511,25 @@
     height: 6px;
     margin-top: 6px;
     border-radius: 3px;
-    background: rgba(255, 255, 255, 0.06);
     overflow: visible;
+    background: linear-gradient(
+      90deg,
+      rgba(239, 68, 68, 0.12) 0%,
+      rgba(251, 191, 36, 0.1) 50%,
+      rgba(59, 130, 246, 0.12) 100%
+    );
   }
 
   .tactical-zone-progress__fill {
     display: block;
     height: 100%;
     border-radius: 3px;
-    background: linear-gradient(90deg, rgba(239, 68, 68, 0.35), rgba(34, 211, 238, 0.55));
+    background: linear-gradient(
+      90deg,
+      rgba(239, 68, 68, 0.55) 0%,
+      rgba(251, 191, 36, 0.65) 50%,
+      rgba(59, 130, 246, 0.55) 100%
+    );
   }
 
   .tactical-zone-progress__marker {
@@ -1498,8 +1553,16 @@
     color: rgba(148, 163, 184, 0.9);
   }
 
+  .tactical-zone-progress__stop {
+    color: rgba(248, 113, 113, 0.95);
+  }
+
   .tactical-zone-progress__current {
     color: rgba(251, 191, 36, 0.98);
+  }
+
+  .tactical-zone-progress__target {
+    color: rgba(96, 165, 250, 0.98);
   }
 
   .tactical-zone-history-log__item {
@@ -1513,8 +1576,12 @@
     font-size: 10px;
     line-height: 1;
     color: rgba(100, 116, 139, 0.7);
-    text-align: center;
-    padding: 1px 0;
+    text-align: left;
+    padding: 2px 0 1px;
+  }
+
+  .tactical-zone-history-log__item:last-child .tactical-zone-history-log__arrow {
+    display: none;
   }
 
   .tactical-zone-history-log__row {

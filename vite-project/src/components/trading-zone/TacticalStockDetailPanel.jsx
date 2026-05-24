@@ -28,17 +28,10 @@ export default function TacticalStockDetailPanel({ position }) {
           {TRADING_STAGE_FLOW.map((stageId, i) => {
             const meta = TRADING_STAGE_META[stageId]
             const active = stageId === position.stage
-            const muted = !active
             return (
               <span key={stageId} className="tactical-zone-stage-flow__item">
                 {i > 0 ? (
-                  <span
-                    className={[
-                      "tactical-zone-stage-flow__arrow",
-                      muted ? "tactical-zone-stage-flow__arrow--muted" : "",
-                    ].join(" ")}
-                    aria-hidden
-                  >
+                  <span className="tactical-zone-stage-flow__arrow" aria-hidden>
                     →
                   </span>
                 ) : null}
@@ -47,10 +40,9 @@ export default function TacticalStockDetailPanel({ position }) {
                     "tactical-zone-stage-flow__chip",
                     active ? "tactical-zone-stage-flow__chip--active" : "tactical-zone-stage-flow__chip--muted",
                   ].join(" ")}
+                  data-stage={stageId}
                 >
-                  {active ? "[" : ""}
-                  {meta.label}
-                  {active ? "]" : ""}
+                  {meta.emoji} {meta.label}
                 </span>
               </span>
             )
@@ -87,9 +79,18 @@ export default function TacticalStockDetailPanel({ position }) {
             />
           </div>
           <div className="tactical-zone-progress__labels font-mono tabular-nums">
-            <span>{progress.formatted.stop}</span>
-            <span className="tactical-zone-progress__current">{progress.formatted.current}</span>
-            <span>{progress.formatted.target}</span>
+            <span className="tactical-zone-progress__stop">
+              <span aria-hidden>🔴 </span>
+              {progress.formatted.stop}
+            </span>
+            <span className="tactical-zone-progress__current">
+              <span aria-hidden>🟡 </span>
+              {progress.formatted.current}
+            </span>
+            <span className="tactical-zone-progress__target">
+              <span aria-hidden>🔵 </span>
+              {progress.formatted.target}
+            </span>
           </div>
           <p className="m-0 mt-0.5 text-[8px] text-slate-500">
             진행률{" "}
@@ -117,9 +118,9 @@ export default function TacticalStockDetailPanel({ position }) {
           <ol className="tactical-zone-history-log m-0 mt-1 list-none p-0">
             {historyLog.map((h, i) => {
               const meta = TRADING_STAGE_META[h.stage]
+              const isLast = i === historyLog.length - 1
               return (
                 <li key={`${h.stage}-${h.dateLabel}-${i}`} className="tactical-zone-history-log__item">
-                  {i > 0 ? <span className="tactical-zone-history-log__arrow" aria-hidden>↓</span> : null}
                   <span className="tactical-zone-history-log__row">
                     {h.dateLabel ? (
                       <span className="tactical-zone-history-log__date font-mono">{h.dateLabel}</span>
@@ -128,6 +129,11 @@ export default function TacticalStockDetailPanel({ position }) {
                       {meta?.label ?? h.stage}
                     </span>
                   </span>
+                  {!isLast ? (
+                    <span className="tactical-zone-history-log__arrow" aria-hidden>
+                      ↓
+                    </span>
+                  ) : null}
                 </li>
               )
             })}

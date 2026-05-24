@@ -48,14 +48,28 @@ export default function TacticalEngineLinkBar({ link }) {
       </div>
 
       {link.actions.length ? (
-        <div className="tactical-zone-engine-link__action-card mt-1">
+        <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis mt-1">
           <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
-          <ul className="tactical-zone-engine-link__action-list m-0 mt-1 list-none space-y-0.5 p-0">
-            {link.actions.map((line) => (
-              <li key={line} className="tactical-zone-engine-link__action-line">
-                {line}
-              </li>
-            ))}
+          <ul className="tactical-zone-engine-link__action-list m-0 mt-1 list-none space-y-1 p-0">
+            {link.actions.map((line) => {
+              const isRestrict = /제한|축소|경계/.test(line)
+              const tone = isRestrict ? "warn" : "allow"
+              const icon = isRestrict ? "⚠" : "🟢"
+              return (
+                <li
+                  key={line}
+                  className={[
+                    "tactical-zone-engine-link__action-line",
+                    `tactical-zone-engine-link__action-line--${tone}`,
+                  ].join(" ")}
+                >
+                  <span className="tactical-zone-engine-link__action-icon" aria-hidden>
+                    {icon}
+                  </span>
+                  <span>{line}</span>
+                </li>
+              )
+            })}
           </ul>
         </div>
       ) : null}
