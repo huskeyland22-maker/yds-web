@@ -188,7 +188,6 @@ export default function TacticalStockDetailPanel({ position }) {
               {historyLog.map((h, i) => {
                 const isActive = i === historyHighlightIndex
                 const tip = buildStageHistoryTooltipLines(h)
-                const stageEmoji = TRADING_STAGE_META[h.stage]?.emoji ?? "⚪"
                 return (
                   <Fragment key={`${h.stage}-${h.dateLabel}-${i}`}>
                     {i > 0 ? <span className="tactical-zone-timeline-line" aria-hidden /> : null}
@@ -200,10 +199,7 @@ export default function TacticalStockDetailPanel({ position }) {
                       data-stage={h.stage}
                       tabIndex={0}
                     >
-                      <span className="tactical-zone-timeline-dot" aria-hidden>
-                        <span className="tactical-zone-timeline-dot__emoji">{stageEmoji}</span>
-                        <span className="tactical-zone-timeline-dot__ring" aria-hidden />
-                      </span>
+                      <span className="tactical-zone-timeline-dot" aria-hidden />
                       <span className="tactical-zone-timeline-step__label">{h.label}</span>
                       <span className="tactical-zone-timeline-step__date">
                         {h.dateLabel || "—"}
