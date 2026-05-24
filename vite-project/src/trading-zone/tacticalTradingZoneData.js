@@ -23,6 +23,9 @@
  *   entry?: string
  *   stop?: string
  *   target?: string
+ *   stopNum?: number | null
+ *   targetNum?: number | null
+ *   currentPrice?: number | null
  *   aux?: string[]
  *   stageHistory?: TradingStageHistoryEntry[]
  * }} TradingZonePosition
@@ -67,6 +70,9 @@ const SEED_POSITIONS = [
     entry: "126 ~ 132",
     stop: "120",
     target: "145",
+    stopNum: 120,
+    targetNum: 145,
+    currentPrice: 138,
     aux: ["10MA", "20MA", "거래량", "RSI"],
     stageHistory: [
       { stage: "interest", at: "2026-05-18" },
@@ -115,6 +121,9 @@ const SEED_POSITIONS = [
     entry: "28 ~ 30",
     stop: "26",
     target: "34",
+    stopNum: 26,
+    targetNum: 34,
+    currentPrice: 29,
     aux: ["20MA", "거래량", "RSI"],
     stageHistory: [
       { stage: "interest", at: "2026-05-17" },
@@ -129,8 +138,14 @@ const SEED_POSITIONS = [
     entry: "218 ~ 224",
     stop: "210",
     target: "238",
+    stopNum: 210,
+    targetNum: 238,
+    currentPrice: 221,
     aux: ["10MA", "20MA", "거래량"],
-    stageHistory: [{ stage: "pullback", at: "2026-05-22" }],
+    stageHistory: [
+      { stage: "interest", at: "2026-05-10" },
+      { stage: "pullback", at: "2026-05-16" },
+    ],
   },
   {
     id: "us-avgo",
@@ -151,6 +166,9 @@ const SEED_POSITIONS = [
     entry: "42,000 ~ 44,000",
     stop: "40,500",
     target: "48,000",
+    stopNum: 40500,
+    targetNum: 48000,
+    currentPrice: 43500,
     aux: ["10MA", "20MA", "거래량"],
     stageHistory: [
       { stage: "interest", at: "2026-05-15" },

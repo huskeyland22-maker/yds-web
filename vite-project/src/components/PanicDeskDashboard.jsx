@@ -160,7 +160,12 @@ export default function PanicDeskDashboard({
             </div>
           }
         >
-          <TacticalTradingZoneSection />
+          <TacticalTradingZoneSection
+            panicData={panicData}
+            cycleScore={finalScore}
+            snapshot={bondSnapshot.snapshot}
+            historyRows={safeHistory}
+          />
         </SectionErrorBoundary>
       </div>
     </div>

@@ -1332,10 +1332,143 @@
   .tactical-zone-stage-flow__chip--active {
     color: rgba(251, 191, 36, 0.98);
     font-weight: 800;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.18);
+    border-radius: 4px;
+    padding: 0 2px;
   }
 
-  .tactical-zone-stage-flow__chip--done {
-    color: rgba(148, 163, 184, 0.55);
+  .tactical-zone-stage-flow__chip--muted {
+    color: rgba(100, 116, 139, 0.55);
+    font-weight: 500;
+  }
+
+  .tactical-zone-stage-flow__arrow--muted {
+    color: rgba(71, 85, 105, 0.45);
+  }
+
+  .tactical-zone-engine-link {
+    border-radius: 6px;
+    border: 1px solid rgba(34, 211, 238, 0.12);
+    background: rgba(0, 0, 0, 0.25);
+    padding: 6px 8px;
+  }
+
+  .tactical-zone-engine-link--pending {
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .tactical-zone-engine-link__title {
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(165, 243, 252, 0.92);
+  }
+
+  .tactical-zone-engine-link__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 8px;
+  }
+
+  .tactical-zone-engine-link__cell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 9px;
+  }
+
+  .tactical-zone-engine-link__period {
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .tactical-zone-engine-link__score {
+    font-weight: 800;
+    color: rgba(226, 232, 240, 0.98);
+  }
+
+  .tactical-zone-engine-link__action {
+    color: rgba(103, 232, 249, 0.88);
+    font-weight: 600;
+  }
+
+  .tactical-zone-progress {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .tactical-zone-progress__track {
+    position: relative;
+    height: 6px;
+    margin-top: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: visible;
+  }
+
+  .tactical-zone-progress__fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.35), rgba(34, 211, 238, 0.55));
+  }
+
+  .tactical-zone-progress__marker {
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: rgba(251, 191, 36, 0.95);
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+  }
+
+  .tactical-zone-progress__labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .tactical-zone-progress__current {
+    color: rgba(251, 191, 36, 0.98);
+  }
+
+  .tactical-zone-history-log__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tactical-zone-history-log__arrow {
+    display: block;
+    font-size: 10px;
+    line-height: 1;
+    color: rgba(100, 116, 139, 0.7);
+    text-align: center;
+    padding: 1px 0;
+  }
+
+  .tactical-zone-history-log__row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 9px;
+  }
+
+  .tactical-zone-history-log__date {
+    color: rgba(100, 116, 139, 0.95);
+  }
+
+  .tactical-zone-history-log__stage {
+    font-weight: 700;
+    color: rgba(203, 213, 225, 0.92);
   }
 
   .tactical-zone-detail__grid {
