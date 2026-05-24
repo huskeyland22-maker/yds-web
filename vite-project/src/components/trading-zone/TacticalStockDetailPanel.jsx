@@ -1,10 +1,15 @@
+import { useMemo } from "react"
 import {
   TRADING_STAGE_FLOW,
   TRADING_STAGE_META,
-  TRADING_ZONE_FIELD_PENDING,
   TRADING_ZONE_STANDARD_AUX,
   tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
+import {
+  buildTradingCoreMetrics,
+  isCoreMetricPlaceholder,
+  TRADING_CORE_METRIC_FIELDS,
+} from "../../trading-zone/tradingZoneCoreMetrics.js"
 import {
   computeTradingZoneProgress,
   resolvePositionPriceLevels,
@@ -13,14 +18,6 @@ import {
   formatStageHistoryBadgeDisplay,
   formatStageHistoryLog,
 } from "../../trading-zone/tradingZoneStageHistory.js"
-
-const FIELD_CELLS = [
-  { key: "rr", label: "RR", empty: TRADING_ZONE_FIELD_PENDING },
-  { key: "expectedReturn", label: "기대수익", empty: TRADING_ZONE_FIELD_PENDING },
-  { key: "holdingDays", label: "보유일", empty: "-" },
-  { key: "weight", label: "비중", empty: "-" },
-]
-
 /**
  * @param {{ position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition }} props
  */
@@ -29,6 +26,7 @@ export default function TacticalStockDetailPanel({ position }) {
   const historyLog = formatStageHistoryLog(position.stageHistory ?? [])
   const levels = resolvePositionPriceLevels(position)
   const progress = computeTradingZoneProgress(levels)
+  const coreMetrics = useMemo(() => buildTradingCoreMetrics(position), [position])
   const activeAux = new Set(position.aux ?? [])
 
   const flowActiveIndex = TRADING_STAGE_FLOW.includes(position.stage)
@@ -51,21 +49,6 @@ export default function TacticalStockDetailPanel({ position }) {
         break
       }
     }
-  }
-
-  const resolveFieldValue = (key, emptyPlaceholder) => {
-    if (key === "holdingDays") {
-      if (position.holdingDays != null && Number.isFinite(position.holdingDays)) {
-        return `${position.holdingDays}일`
-      }
-      return emptyPlaceholder
-    }
-    const raw = position[key]
-    if (raw == null) return emptyPlaceholder
-    if (typeof raw === "number" && Number.isFinite(raw)) return String(raw)
-    const s = String(raw).trim()
-    if (!s || s === "—" || s === "-") return emptyPlaceholder
-    return s
   }
 
   return (
@@ -179,6 +162,33 @@ export default function TacticalStockDetailPanel({ position }) {
         </div>
       ) : null}
 
+      <section className="tactical-zone-detail__core" aria-label="핵심 매매정보">
+        <p className="m-0 tactical-zone-detail__section-label">핵심 매매정보</p>
+        <dl className="tactical-zone-core-grid m-0">
+          {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty }) => {
+            const value = coreMetrics[key]
+            const pending = isCoreMetricPlaceholder(value, empty)
+            return (
+              <div key={key} className="tactical-zone-core-cell">
+                <dt className="tactical-zone-core-cell__label" title={tooltip}>
+                  {label}
+                </dt>
+                <dd
+                  className={[
+                    "tactical-zone-core-cell__value font-mono tabular-nums",
+                    pending ? "tactical-zone-core-cell__value--placeholder" : "",
+                    key === "expectedReturn" && !pending ? "tactical-zone-core-cell__value--up" : "",
+                    key === "stopRisk" && !pending ? "tactical-zone-core-cell__value--down" : "",
+                  ].join(" ")}
+                >
+                  {value}
+                </dd>
+              </div>
+            )
+          })}
+        </dl>
+      </section>
+
       <footer className="tactical-zone-detail__foot">
         <div className="tactical-zone-detail__aux">
           <p className="m-0 tactical-zone-detail__section-label">보조지표</p>
@@ -196,26 +206,6 @@ export default function TacticalStockDetailPanel({ position }) {
             ))}
           </div>
         </div>
-
-        <dl className="tactical-zone-fields-grid m-0" aria-label="실전 필드">
-          {FIELD_CELLS.map(({ key, label, empty }) => {
-            const value = resolveFieldValue(key, empty)
-            const pending = value === TRADING_ZONE_FIELD_PENDING || value === "-"
-            return (
-              <div key={key} className="tactical-zone-field-cell">
-                <dt className="tactical-zone-field-cell__label">{label}</dt>
-                <dd
-                  className={[
-                    "tactical-zone-field-cell__value font-mono tabular-nums",
-                    pending ? "tactical-zone-field-cell__value--placeholder" : "",
-                  ].join(" ")}
-                >
-                  {value}
-                </dd>
-              </div>
-            )
-          })}
-        </dl>
 
         {historyLog.length ? (
           <div className="tactical-zone-detail__history">
