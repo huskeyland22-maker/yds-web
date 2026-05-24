@@ -13,6 +13,7 @@ import PanicMetricRow from "./panic-metrics/PanicMetricRow.jsx"
 import PanicExpertMetricsAccordion from "./PanicExpertMetricsAccordion.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
+import TacticalTradingZoneSection from "./trading-zone/TacticalTradingZoneSection.jsx"
 
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
@@ -137,6 +138,19 @@ export default function PanicDeskDashboard({
           }
         >
           <PanicIndexHistorySection rows={safeHistory} />
+        </SectionErrorBoundary>
+      </div>
+
+      <div className="panic-v2-desk__trading-zone-slot">
+        <SectionErrorBoundary
+          label="실전 매매 존"
+          fallback={
+            <div className="trading-card-shell px-3 py-4 text-center text-sm text-slate-400">
+              실전 매매 존 로딩 실패
+            </div>
+          }
+        >
+          <TacticalTradingZoneSection />
         </SectionErrorBoundary>
       </div>
 
