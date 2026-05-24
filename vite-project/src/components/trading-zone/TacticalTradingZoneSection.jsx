@@ -138,7 +138,7 @@ export default function TacticalTradingZoneSection({
         <TacticalEngineLinkBar link={engineLink} hideTitle />
       </div>
 
-      <div className="tactical-trading-zone__tabs flex gap-1">
+      <div className="tactical-trading-zone__tabs">
         {Object.values(TRADING_MARKETS).map((m) => (
           <button
             key={m.id}

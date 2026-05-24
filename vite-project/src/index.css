@@ -1237,6 +1237,9 @@
   }
 
   .tactical-trading-zone__tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-top: 6px;
   }
 
@@ -1274,12 +1277,18 @@
   }
 
   .tactical-trading-zone__tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 32px;
+    min-height: 32px;
     border-radius: 6px;
     border: 1px solid transparent;
-    padding: 6px 12px;
-    min-height: 34px;
+    padding: 0 12px;
     font-size: 13px;
     font-weight: 700;
+    line-height: 1;
     color: rgba(148, 163, 184, 0.88);
     background: transparent;
     transition:
@@ -1525,89 +1534,77 @@
     gap: 2px;
   }
 
-  .tactical-zone-detail__price {
+  .tactical-zone-detail__trade-zone {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    max-width: none;
     margin-top: 10px;
   }
 
-  .tactical-zone-price-line {
-    position: relative;
+  .tactical-zone-trade-line-container {
     width: 100%;
-    padding-top: 42px;
     transform: none;
     left: auto;
   }
 
-  .tactical-zone-price-line__markers {
+  .tactical-zone-trade-line {
+    position: relative;
+    width: calc(100% - 24px);
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 38px;
+    box-sizing: border-box;
+  }
+
+  .tactical-zone-trade-line__markers {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 40px;
+    height: 36px;
     pointer-events: none;
   }
 
-  .tactical-zone-price-line__marker {
+  .tactical-zone-trade-line__marker {
     position: absolute;
-    top: 0;
     bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    transform: translateX(-50%);
-    text-align: center;
-    line-height: 1.05;
-  }
-
-  .tactical-zone-price-line__marker-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     gap: 2px;
-    min-width: 48px;
-    text-align: center;
+    line-height: 1.05;
+    white-space: nowrap;
   }
 
-  .tactical-zone-price-line__marker-label {
-    display: block;
-    width: 100%;
+  .tactical-zone-trade-line__marker-label {
     font-size: 10px;
     font-weight: 600;
     color: rgba(148, 163, 184, 0.88);
-    white-space: nowrap;
-    text-align: center;
   }
 
-  .tactical-zone-price-line__marker-val {
-    display: block;
-    width: 100%;
+  .tactical-zone-trade-line__marker-val {
     font-size: 13px;
     font-weight: 800;
-    white-space: nowrap;
     letter-spacing: 0.01em;
-    text-align: center;
   }
 
-  .tactical-zone-price-line__marker--target {
-    transform: translateX(-50%) scale(1.2);
-    transform-origin: center bottom;
+  .tactical-zone-trade-line__marker--stop {
+    left: 0;
+    transform: none;
+    align-items: flex-start;
+    text-align: left;
   }
 
-  .tactical-zone-price-line__marker--stop .tactical-zone-price-line__marker-val {
+  .tactical-zone-trade-line__marker--stop .tactical-zone-trade-line__marker-val {
     color: rgba(252, 165, 165, 0.98);
   }
 
-  .tactical-zone-price-line__marker--current {
+  .tactical-zone-trade-line__marker--current {
+    transform: translateX(-50%);
+    align-items: center;
+    text-align: center;
     z-index: 2;
-  }
-
-  .tactical-zone-price-line__marker--current .tactical-zone-price-line__marker-body {
     min-width: 58px;
     padding: 2px 6px 1px;
     border-radius: 4px;
@@ -1615,7 +1612,7 @@
     box-shadow: 0 0 12px rgba(251, 191, 36, 0.16);
   }
 
-  .tactical-zone-price-line__marker--current .tactical-zone-price-line__marker-val {
+  .tactical-zone-trade-line__marker--current .tactical-zone-trade-line__marker-val {
     font-size: 14px;
     font-weight: 900;
     color: rgba(253, 224, 71, 1);
@@ -1624,33 +1621,110 @@
       0 0 4px rgba(251, 191, 36, 0.34);
   }
 
-  .tactical-zone-price-line__marker--current .tactical-zone-price-line__marker-label {
+  .tactical-zone-trade-line__marker--current .tactical-zone-trade-line__marker-label {
     color: rgba(253, 224, 71, 0.95);
     font-weight: 800;
     font-size: 11px;
   }
 
-  .tactical-zone-price-line__marker--target .tactical-zone-price-line__marker-val {
-    color: rgba(147, 197, 253, 0.98);
-    text-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+  .tactical-zone-trade-line__marker--target {
+    right: 0;
+    left: auto;
+    transform: none;
+    align-items: flex-end;
+    text-align: right;
   }
 
-  .tactical-zone-price-line__track-wrap {
+  .tactical-zone-trade-line__marker--target .tactical-zone-trade-line__marker-val {
+    color: rgba(147, 197, 253, 0.98);
+    text-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    font-size: 14px;
+  }
+
+  .tactical-zone-trade-line__track {
     position: relative;
-    width: 100%;
-    padding-bottom: 0;
-    transform: none;
+    height: 16px;
+    overflow: visible;
+  }
+
+  .tactical-zone-trade-line__rail {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    background: linear-gradient(
+      90deg,
+      rgba(239, 68, 68, 0.2) 0%,
+      rgba(251, 191, 36, 0.16) 50%,
+      rgba(59, 130, 246, 0.2) 100%
+    );
+  }
+
+  .tactical-zone-trade-line__fill {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: var(--progress-pct, 0%);
+    height: 3px;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    background: linear-gradient(
+      90deg,
+      rgba(239, 68, 68, 0.7) 0%,
+      rgba(251, 191, 36, 0.75) 100%
+    );
+    pointer-events: none;
+  }
+
+  .tactical-zone-trade-line__dot {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .tactical-zone-trade-line__dot--stop {
+    left: 0;
+    transform: translate(-50%, -50%);
+    background: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.55);
+  }
+
+  .tactical-zone-trade-line__dot--current {
+    left: var(--progress-pct, 0%);
+    width: 11px;
+    height: 11px;
+    transform: translate(-50%, -50%);
+    background: rgba(253, 224, 71, 1);
+    border-color: rgba(253, 224, 71, 0.55);
+    box-shadow:
+      0 0 10px rgba(251, 191, 36, 0.56),
+      0 0 4px rgba(251, 191, 36, 0.38);
+  }
+
+  .tactical-zone-trade-line__dot--target {
+    right: 0;
     left: auto;
+    width: 11px;
+    height: 11px;
+    transform: translate(50%, -50%);
+    background: rgba(59, 130, 246, 0.95);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
   }
 
   .tactical-zone-detail__trade-info {
     position: relative;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    margin-top: 12px;
     transform: none !important;
     left: auto !important;
   }
@@ -1686,87 +1760,71 @@
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
   }
 
-  .tactical-zone-detail--flow .tactical-zone-price-line .tactical-zone-progress__track-wrap,
-  .tactical-zone-detail--flow .tactical-zone-price-line__track-wrap {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .tactical-zone-detail__core,
-  .tactical-zone-detail__foot {
-    position: relative;
-    transform: none !important;
-    left: auto !important;
-  }
-
-  .tactical-zone-detail__core {
-    width: 100%;
-    margin-top: 16px;
-  }
-
-  .tactical-zone-detail__core .tactical-zone-detail__section-label {
-    margin-bottom: 4px;
-  }
-
-  .tactical-zone-core-grid {
+  .tactical-zone-trade-info__grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(0, auto));
-    gap: 4px 8px;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
     width: 100%;
-    min-height: 0;
-    padding: 5px 7px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(10, 15, 25, 0.7);
+    max-width: min(100%, 340px);
+    padding: 8px 4px;
     box-sizing: border-box;
   }
 
-  .tactical-zone-core-cell {
+  .tactical-zone-trade-info__cell {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    align-items: center;
+    gap: 4px;
     min-width: 0;
-    min-height: 0;
-    justify-content: flex-start;
+    text-align: center;
   }
 
-  .tactical-zone-core-cell__label {
-    font-size: 9px;
+  .tactical-zone-trade-info__cell:nth-child(1),
+  .tactical-zone-trade-info__cell:nth-child(2) {
+    justify-self: center;
+  }
+
+  .tactical-zone-trade-info__label {
+    font-size: 10px;
     font-weight: 600;
     color: rgba(148, 163, 184, 0.92);
     line-height: 1.15;
     cursor: help;
   }
 
-  .tactical-zone-core-cell__value {
+  .tactical-zone-trade-info__value {
     margin: 0;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 800;
-    color: rgba(226, 232, 240, 0.96);
-    line-height: 1.1;
+    line-height: 1.15;
   }
 
-  .tactical-zone-core-cell__value--placeholder {
+  .tactical-zone-trade-info__value--placeholder {
     font-size: 11px;
     font-weight: 600;
     color: rgba(100, 116, 139, 0.62);
   }
 
-  .tactical-zone-core-cell__value--gain {
+  .tactical-zone-trade-info__value--gain {
     color: rgba(74, 222, 128, 0.98);
   }
 
-  .tactical-zone-core-cell__value--upside {
+  .tactical-zone-trade-info__value--upside {
     color: rgba(96, 165, 250, 0.98);
   }
 
-  .tactical-zone-core-cell__value--risk {
+  .tactical-zone-trade-info__value--risk {
     color: rgba(252, 165, 165, 0.98);
   }
 
-  .tactical-zone-core-cell__value--weight {
+  .tactical-zone-trade-info__value--weight {
     color: rgba(34, 211, 238, 0.98);
+  }
+
+  .tactical-zone-detail__foot {
+    position: relative;
+    transform: none !important;
+    left: auto !important;
   }
 
   .tactical-zone-detail__foot {
@@ -1788,18 +1846,6 @@
     margin-top: 0;
     padding-top: 0;
     border-top: none;
-  }
-
-  .tactical-zone-detail--flow .tactical-zone-progress__track-wrap {
-    width: 100%;
-    max-width: none;
-    padding-left: 8px;
-    padding-right: 8px;
-    box-sizing: border-box;
-  }
-
-  .tactical-zone-detail--flow .tactical-zone-progress__track {
-    width: 100%;
   }
 
   .tactical-zone-detail__name {
@@ -2849,33 +2895,23 @@
       padding: 14px 10px 16px;
     }
 
-    .tactical-zone-detail--flow .tactical-zone-price-line {
-      padding-top: 40px;
+    .tactical-zone-trade-line {
+      width: calc(100% - 16px);
+      padding-top: 36px;
     }
 
-    .tactical-zone-detail--flow .tactical-zone-price-line__markers {
-      height: 38px;
+    .tactical-zone-trade-line__markers {
+      height: 34px;
     }
 
-    .tactical-zone-price-line[data-overlap="stop"] .tactical-zone-price-line__marker--stop {
-      transform: translateX(-50%) translateY(-6px);
+    .tactical-zone-trade-info__grid {
+      gap: 14px 20px;
+      max-width: 100%;
+      padding: 6px 2px;
     }
 
-    .tactical-zone-price-line[data-overlap="stop"] .tactical-zone-price-line__marker--current {
-      transform: translateX(-50%) translateY(8px);
-    }
-
-    .tactical-zone-price-line[data-overlap="target"] .tactical-zone-price-line__marker--target {
-      transform: translateX(-50%) translateY(-6px) scale(1.2);
-    }
-
-    .tactical-zone-price-line[data-overlap="target"] .tactical-zone-price-line__marker--current {
-      transform: translateX(-50%) translateY(8px);
-    }
-
-    .tactical-zone-detail--flow .tactical-zone-progress__track-wrap {
-      padding-left: 4px;
-      padding-right: 4px;
+    .tactical-zone-trade-line__marker--current {
+      min-width: 52px;
     }
 
     .tactical-zone-history-timeline {

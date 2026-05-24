@@ -100,89 +100,70 @@ export default function TacticalStockDetailPanel({ position }) {
       </div>
 
       {progress ? (
-        <div className="tactical-zone-detail__price">
-          <div
-            className="tactical-zone-price-line font-mono tabular-nums"
-            style={{ "--progress-pct": `${progress.progressPct}%` }}
-            data-overlap={
-              progress.progressPct < 24 ? "stop" : progress.progressPct > 76 ? "target" : undefined
-            }
-          >
-            <div className="tactical-zone-price-line__markers">
-              <div
-                className="tactical-zone-price-line__marker tactical-zone-price-line__marker--stop"
-                style={{ left: "0%" }}
-              >
-                <div className="tactical-zone-price-line__marker-body">
-                  <span className="tactical-zone-price-line__marker-label">손절</span>
-                  <span className="tactical-zone-price-line__marker-val">{progress.formatted.stop}</span>
+        <div className="tactical-zone-detail__trade-zone">
+          <div className="tactical-zone-trade-line-container">
+            <div
+              className="tactical-zone-trade-line font-mono tabular-nums"
+              style={{ "--progress-pct": `${progress.progressPct}%` }}
+            >
+              <div className="tactical-zone-trade-line__markers">
+                <div className="tactical-zone-trade-line__marker tactical-zone-trade-line__marker--stop">
+                  <span className="tactical-zone-trade-line__marker-label">손절</span>
+                  <span className="tactical-zone-trade-line__marker-val">{progress.formatted.stop}</span>
+                </div>
+                <div
+                  className="tactical-zone-trade-line__marker tactical-zone-trade-line__marker--current"
+                  style={{ left: `${progress.progressPct}%` }}
+                >
+                  <span className="tactical-zone-trade-line__marker-label">현재</span>
+                  <span className="tactical-zone-trade-line__marker-val">{progress.formatted.current}</span>
+                </div>
+                <div className="tactical-zone-trade-line__marker tactical-zone-trade-line__marker--target">
+                  <span className="tactical-zone-trade-line__marker-label">목표</span>
+                  <span className="tactical-zone-trade-line__marker-val">{progress.formatted.target}</span>
                 </div>
               </div>
-              <div
-                className="tactical-zone-price-line__marker tactical-zone-price-line__marker--current"
-                style={{ left: `${progress.progressPct}%` }}
-              >
-                <div className="tactical-zone-price-line__marker-body">
-                  <span className="tactical-zone-price-line__marker-label">현재</span>
-                  <span className="tactical-zone-price-line__marker-val">{progress.formatted.current}</span>
-                </div>
-              </div>
-              <div
-                className="tactical-zone-price-line__marker tactical-zone-price-line__marker--target"
-                style={{ left: "100%" }}
-              >
-                <div className="tactical-zone-price-line__marker-body">
-                  <span className="tactical-zone-price-line__marker-label">목표</span>
-                  <span className="tactical-zone-price-line__marker-val">{progress.formatted.target}</span>
-                </div>
-              </div>
-            </div>
 
-            <div className="tactical-zone-price-line__track-wrap">
-              <div className="tactical-zone-progress__track">
-                <span className="tactical-zone-progress__rail" />
-                <span className="tactical-zone-progress__fill" />
-                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--stop" />
-                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
-                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
+              <div className="tactical-zone-trade-line__track">
+                <span className="tactical-zone-trade-line__rail" />
+                <span className="tactical-zone-trade-line__fill" />
+                <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--stop" />
+                <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--current" />
+                <span className="tactical-zone-trade-line__dot tactical-zone-trade-line__dot--target" />
               </div>
             </div>
           </div>
 
-          <div className="tactical-zone-detail__trade-info">
+          <div className="tactical-zone-detail__trade-info" aria-label="핵심 매매정보">
             <p className="m-0 tactical-zone-detail__achieve">
               <span className="tactical-zone-detail__achieve-val">{progress.progressPct}%</span>
               <span className="tactical-zone-detail__achieve-label">목표달성</span>
             </p>
+            <dl className="tactical-zone-trade-info__grid m-0">
+              {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty, tone }) => {
+                const value = coreMetrics[key]
+                const pending = isCoreMetricPlaceholder(value, empty)
+                return (
+                  <div key={key} className="tactical-zone-trade-info__cell">
+                    <dt className="tactical-zone-trade-info__label" title={tooltip}>
+                      {label}
+                    </dt>
+                    <dd
+                      className={[
+                        "tactical-zone-trade-info__value font-mono tabular-nums",
+                        pending ? "tactical-zone-trade-info__value--placeholder" : "",
+                        !pending ? `tactical-zone-trade-info__value--${tone}` : "",
+                      ].join(" ")}
+                    >
+                      {value}
+                    </dd>
+                  </div>
+                )
+              })}
+            </dl>
           </div>
         </div>
       ) : null}
-
-      <section className="tactical-zone-detail__core" aria-label="핵심 매매정보">
-        <p className="m-0 tactical-zone-detail__section-label">핵심 매매정보</p>
-        <dl className="tactical-zone-core-grid m-0">
-          {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty, tone }) => {
-            const value = coreMetrics[key]
-            const pending = isCoreMetricPlaceholder(value, empty)
-            return (
-              <div key={key} className="tactical-zone-core-cell">
-                <dt className="tactical-zone-core-cell__label" title={tooltip}>
-                  {label}
-                </dt>
-                <dd
-                  className={[
-                    "tactical-zone-core-cell__value font-mono tabular-nums",
-                    pending ? "tactical-zone-core-cell__value--placeholder" : "",
-                    !pending ? `tactical-zone-core-cell__value--${tone}` : "",
-                  ].join(" ")}
-                >
-                  {value}
-                </dd>
-              </div>
-            )
-          })}
-        </dl>
-      </section>
 
       <footer className="tactical-zone-detail__foot">
         <div className="tactical-zone-detail__aux">
