@@ -109,16 +109,16 @@ export default function TacticalStockDetailPanel({ position }) {
                 "--profit-pct": `${100 - progress.progressPct}%`,
               }}
             >
-              <div className="tactical-zone-trade-zone-legend" aria-hidden>
-                <span className="tactical-zone-trade-zone-legend__item">
+              <div className="zone-legend tactical-zone-trade-zone-legend" aria-hidden>
+                <span className="zone-legend-item tactical-zone-trade-zone-legend__item">
                   <span className="tactical-zone-trade-zone-legend__dot tactical-zone-trade-zone-legend__dot--danger" />
                   위험존
                 </span>
-                <span className="tactical-zone-trade-zone-legend__item">
+                <span className="zone-legend-item tactical-zone-trade-zone-legend__item">
                   <span className="tactical-zone-trade-zone-legend__dot tactical-zone-trade-zone-legend__dot--buy" />
                   매수존
                 </span>
-                <span className="tactical-zone-trade-zone-legend__item">
+                <span className="zone-legend-item tactical-zone-trade-zone-legend__item">
                   <span className="tactical-zone-trade-zone-legend__dot tactical-zone-trade-zone-legend__dot--profit" />
                   수익존
                 </span>
@@ -154,8 +154,8 @@ export default function TacticalStockDetailPanel({ position }) {
                   <span className="tactical-zone-trade-zone-overlay__danger" />
                   <span className="tactical-zone-trade-zone-overlay__profit" />
                 </div>
-                <span className="tactical-zone-trade-line__rail" />
-                <span className="tactical-zone-trade-line__fill" />
+                <span className="progress-line tactical-zone-trade-line__rail" />
+                <span className="progress-line tactical-zone-trade-line__fill" />
               </div>
             </div>
           </div>
