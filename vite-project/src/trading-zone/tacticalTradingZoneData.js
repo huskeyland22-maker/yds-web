@@ -1,5 +1,5 @@
 /**
- * 실전 매매 존 — 초기 시드 (로컬 UI, 추후 API 연동)
+ * 실전 매매 존 V2 — 1종목 1상태, 단계 이동 히스토리 확장 가능
  */
 
 /** @typedef {'us' | 'kr'} TradingMarketId */
@@ -8,16 +8,24 @@
 
 /**
  * @typedef {{
+ *   stage: TradingStageId
+ *   at?: string
+ *   note?: string
+ * }} TradingStageHistoryEntry
+ */
+
+/**
+ * @typedef {{
  *   id: string
- *   name: string
+ *   symbol: string
  *   market: TradingMarketId
- *   bucket: TradingBucketId
  *   stage: TradingStageId
  *   entry?: string
  *   stop?: string
  *   target?: string
  *   aux?: string[]
- * }} TradingZoneStock
+ *   stageHistory?: TradingStageHistoryEntry[]
+ * }} TradingZonePosition
  */
 
 /** @type {Record<TradingStageId, { label: string; emoji: string }>} */
@@ -49,200 +57,211 @@ export const TRADING_MARKETS = {
   kr: { id: "kr", label: "한국", flag: "🇰🇷" },
 }
 
-/** @type {TradingZoneStock[]} */
-const SEED_STOCKS = [
+/** @type {TradingZonePosition[]} */
+const SEED_POSITIONS = [
   {
-    id: "us-nvda-interest",
-    name: "NVDA",
+    id: "us-nvda",
+    symbol: "NVDA",
     market: "us",
-    bucket: "interest",
-    stage: "interest",
-    entry: "118 ~ 124",
-    stop: "112",
-    target: "138",
-    aux: ["10MA", "20MA", "거래량", "RSI"],
-  },
-  {
-    id: "us-pltr-interest",
-    name: "PLTR",
-    market: "us",
-    bucket: "interest",
-    stage: "interest",
-    entry: "24 ~ 26",
-    stop: "22",
-    target: "30",
-    aux: ["10MA", "20MA", "거래량"],
-  },
-  {
-    id: "us-meta-interest",
-    name: "META",
-    market: "us",
-    bucket: "interest",
-    stage: "interest",
-    entry: "480 ~ 495",
-    stop: "465",
-    target: "520",
-    aux: ["10MA", "RSI"],
-  },
-  {
-    id: "us-tsla-interest",
-    name: "TSLA",
-    market: "us",
-    bucket: "interest",
-    stage: "interest",
-    entry: "248 ~ 258",
-    stop: "238",
-    target: "275",
-    aux: ["10MA", "20MA", "거래량"],
-  },
-  {
-    id: "us-soxl-pullback",
-    name: "SOXL",
-    market: "us",
-    bucket: "pullback",
-    stage: "pullback",
-    entry: "28 ~ 30",
-    stop: "26",
-    target: "34",
-    aux: ["20MA", "거래량", "RSI"],
-  },
-  {
-    id: "us-smh-pullback",
-    name: "SMH",
-    market: "us",
-    bucket: "pullback",
-    stage: "pullback",
-    entry: "218 ~ 224",
-    stop: "210",
-    target: "238",
-    aux: ["10MA", "20MA", "거래량"],
-  },
-  {
-    id: "us-avgo-pullback",
-    name: "AVGO",
-    market: "us",
-    bucket: "pullback",
-    stage: "pullback",
-    entry: "168 ~ 174",
-    stop: "162",
-    target: "188",
-    aux: ["10MA", "RSI"],
-  },
-  {
-    id: "us-nvda-trend",
-    name: "NVDA",
-    market: "us",
-    bucket: "trend",
     stage: "trend",
     entry: "126 ~ 132",
     stop: "120",
     target: "145",
     aux: ["10MA", "20MA", "거래량", "RSI"],
+    stageHistory: [
+      { stage: "interest", at: "2026-05-18" },
+      { stage: "pullback", at: "2026-05-20" },
+      { stage: "trend", at: "2026-05-22" },
+    ],
   },
   {
-    id: "us-meta-trend",
-    name: "META",
+    id: "us-pltr",
+    symbol: "PLTR",
     market: "us",
-    bucket: "trend",
-    stage: "trend",
-    entry: "500 ~ 512",
-    stop: "488",
-    target: "540",
-    aux: ["20MA", "거래량"],
+    stage: "interest",
+    entry: "24 ~ 26",
+    stop: "22",
+    target: "30",
+    aux: ["10MA", "20MA", "거래량"],
+    stageHistory: [{ stage: "interest", at: "2026-05-22" }],
   },
   {
-    id: "kr-silicon-trend",
-    name: "실리콘투",
+    id: "us-meta",
+    symbol: "META",
+    market: "us",
+    stage: "interest",
+    entry: "480 ~ 495",
+    stop: "465",
+    target: "520",
+    aux: ["10MA", "RSI"],
+    stageHistory: [{ stage: "interest", at: "2026-05-21" }],
+  },
+  {
+    id: "us-tsla",
+    symbol: "TSLA",
+    market: "us",
+    stage: "interest",
+    entry: "248 ~ 258",
+    stop: "238",
+    target: "275",
+    aux: ["10MA", "20MA", "거래량"],
+    stageHistory: [{ stage: "interest", at: "2026-05-20" }],
+  },
+  {
+    id: "us-soxl",
+    symbol: "SOXL",
+    market: "us",
+    stage: "pullback",
+    entry: "28 ~ 30",
+    stop: "26",
+    target: "34",
+    aux: ["20MA", "거래량", "RSI"],
+    stageHistory: [
+      { stage: "interest", at: "2026-05-17" },
+      { stage: "pullback", at: "2026-05-22" },
+    ],
+  },
+  {
+    id: "us-smh",
+    symbol: "SMH",
+    market: "us",
+    stage: "pullback",
+    entry: "218 ~ 224",
+    stop: "210",
+    target: "238",
+    aux: ["10MA", "20MA", "거래량"],
+    stageHistory: [{ stage: "pullback", at: "2026-05-22" }],
+  },
+  {
+    id: "us-avgo",
+    symbol: "AVGO",
+    market: "us",
+    stage: "pullback",
+    entry: "168 ~ 174",
+    stop: "162",
+    target: "188",
+    aux: ["10MA", "RSI"],
+    stageHistory: [{ stage: "pullback", at: "2026-05-21" }],
+  },
+  {
+    id: "kr-silicon",
+    symbol: "실리콘투",
     market: "kr",
-    bucket: "trend",
     stage: "trend",
     entry: "42,000 ~ 44,000",
     stop: "40,500",
     target: "48,000",
     aux: ["10MA", "20MA", "거래량"],
+    stageHistory: [
+      { stage: "interest", at: "2026-05-15" },
+      { stage: "pullback", at: "2026-05-19" },
+      { stage: "trend", at: "2026-05-22" },
+    ],
   },
   {
-    id: "kr-hyosung-tp",
-    name: "효성중공업",
+    id: "kr-hyosung",
+    symbol: "효성중공업",
     market: "kr",
-    bucket: "takeProfit",
     stage: "takeProfit",
     entry: "—",
     stop: "—",
     target: "분할 익절",
     aux: ["10MA", "거래량"],
+    stageHistory: [
+      { stage: "interest", at: "2026-05-01" },
+      { stage: "trend", at: "2026-05-12" },
+      { stage: "takeProfit", at: "2026-05-22" },
+    ],
   },
   {
-    id: "kr-ls-tp",
-    name: "LS ELECTRIC",
+    id: "kr-ls",
+    symbol: "LS ELECTRIC",
     market: "kr",
-    bucket: "takeProfit",
     stage: "takeProfit",
     entry: "—",
     stop: "—",
     target: "목표가 도달",
     aux: ["20MA", "RSI"],
+    stageHistory: [
+      { stage: "pullback", at: "2026-05-10" },
+      { stage: "trend", at: "2026-05-18" },
+      { stage: "takeProfit", at: "2026-05-23" },
+    ],
   },
   {
-    id: "kr-silicon-interest",
-    name: "실리콘투",
+    id: "kr-spg",
+    symbol: "에스피지",
     market: "kr",
-    bucket: "interest",
-    stage: "interest",
-    entry: "38,000 ~ 40,000",
-    stop: "36,500",
-    target: "45,000",
-    aux: ["10MA", "20MA", "거래량"],
-  },
-  {
-    id: "kr-spg-interest",
-    name: "에스피지",
-    market: "kr",
-    bucket: "interest",
     stage: "interest",
     entry: "12,500 ~ 13,200",
     stop: "11,800",
     target: "14,500",
     aux: ["10MA", "RSI"],
-  },
-  {
-    id: "kr-ls-pullback",
-    name: "LS ELECTRIC",
-    market: "kr",
-    bucket: "pullback",
-    stage: "pullback",
-    entry: "168,000 ~ 172,000",
-    stop: "162,000",
-    target: "185,000",
-    aux: ["20MA", "거래량", "RSI"],
+    stageHistory: [{ stage: "interest", at: "2026-05-22" }],
   },
 ]
 
-/** @returns {TradingZoneStock[]} */
-export function getTradingZoneStocks() {
-  return SEED_STOCKS
+/**
+ * 현재 단계 → 표시 버킷 (1종목 1버킷)
+ * @param {TradingStageId} stage
+ * @returns {TradingBucketId | null}
+ */
+export function stageToDisplayBucket(stage) {
+  if (stage === "interest" || stage === "pullback" || stage === "trend" || stage === "takeProfit") {
+    return stage
+  }
+  return null
+}
+
+/** @returns {TradingZonePosition[]} */
+export function getTradingZonePositions() {
+  return SEED_POSITIONS
 }
 
 /**
  * @param {TradingMarketId} market
- * @param {TradingZoneStock[]} [stocks]
+ * @param {TradingZonePosition[]} [positions]
  */
-export function stocksByMarket(market, stocks = SEED_STOCKS) {
-  return stocks.filter((s) => s.market === market)
+export function positionsByMarket(market, positions = SEED_POSITIONS) {
+  return positions.filter((p) => p.market === market)
 }
 
 /**
  * @param {TradingMarketId} market
  * @param {TradingBucketId} bucket
- * @param {TradingZoneStock[]} [stocks]
+ * @param {TradingZonePosition[]} [positions]
  */
-export function stocksInBucket(market, bucket, stocks = SEED_STOCKS) {
-  return stocks.filter((s) => s.market === market && s.bucket === bucket)
+export function positionsInBucket(market, bucket, positions = SEED_POSITIONS) {
+  return positions.filter((p) => p.market === market && stageToDisplayBucket(p.stage) === bucket)
 }
 
 /**
- * @param {TradingZoneStock} stock
+ * @param {TradingMarketId} market
+ * @param {TradingZonePosition[]} [positions]
+ * @returns {Record<TradingBucketId, TradingZonePosition[]>}
  */
-export function tradingStageBadge(stock) {
-  return TRADING_STAGE_META[stock.stage] ?? TRADING_STAGE_META.interest
+export function groupPositionsByBucket(market, positions = SEED_POSITIONS) {
+  /** @type {Record<TradingBucketId, TradingZonePosition[]>} */
+  const groups = { interest: [], pullback: [], trend: [], takeProfit: [] }
+  for (const p of positions) {
+    if (p.market !== market) continue
+    const bucket = stageToDisplayBucket(p.stage)
+    if (bucket) groups[bucket].push(p)
+  }
+  return groups
+}
+
+/** @param {TradingZonePosition} position */
+export function tradingStageBadge(position) {
+  return TRADING_STAGE_META[position.stage] ?? TRADING_STAGE_META.interest
+}
+
+/** @deprecated */
+export function getTradingZoneStocks() {
+  return getTradingZonePositions()
+}
+
+/** @deprecated */
+export function stocksInBucket(market, bucket, stocks) {
+  return positionsInBucket(market, bucket, stocks)
 }

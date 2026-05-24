@@ -1179,8 +1179,31 @@
     margin-top: 16px;
   }
 
+  .panic-v2-desk--terminal > .panic-v2-desk__bond-slot {
+    margin-top: 0;
+  }
+
   .panic-v2-desk--terminal > .panic-v2-desk__trading-zone-slot {
     margin-top: 10px;
+  }
+
+  .tactical-zone-detail__current {
+    margin-top: 6px;
+  }
+
+  .tactical-zone-detail__history {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .tactical-zone-chip__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.95);
   }
 
   .tactical-trading-zone__head {
@@ -1271,8 +1294,6 @@
 
   .tactical-zone-chip__badge {
     flex-shrink: 0;
-    font-size: 9px;
-    line-height: 1;
   }
 
   .tactical-zone-detail {

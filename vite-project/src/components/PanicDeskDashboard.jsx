@@ -141,6 +141,16 @@ export default function PanicDeskDashboard({
         </SectionErrorBoundary>
       </div>
 
+      <hr className="cycle-desk-divider cycle-desk-divider--reference" aria-hidden />
+
+      <div className="panic-v2-desk__bond-slot">
+        <CycleBondLiquiditySection
+          panicData={panicData}
+          snapshot={bondSnapshot.snapshot}
+          loading={bondSnapshot.loading}
+        />
+      </div>
+
       <div className="panic-v2-desk__trading-zone-slot">
         <SectionErrorBoundary
           label="실전 매매 존"
@@ -152,16 +162,6 @@ export default function PanicDeskDashboard({
         >
           <TacticalTradingZoneSection />
         </SectionErrorBoundary>
-      </div>
-
-      <hr className="cycle-desk-divider cycle-desk-divider--reference" aria-hidden />
-
-      <div className="panic-v2-desk__bond-slot">
-        <CycleBondLiquiditySection
-          panicData={panicData}
-          snapshot={bondSnapshot.snapshot}
-          loading={bondSnapshot.loading}
-        />
       </div>
     </div>
   )
