@@ -114,22 +114,28 @@ export default function TacticalStockDetailPanel({ position }) {
                   className="tactical-zone-price-rail__marker tactical-zone-price-rail__marker--stop"
                   style={{ left: "0%" }}
                 >
-                  <span className="tactical-zone-price-rail__marker-label">손절</span>
-                  <span className="tactical-zone-price-rail__marker-val">{progress.formatted.stop}</span>
+                  <div className="tactical-zone-price-rail__marker-body">
+                    <span className="tactical-zone-price-rail__marker-label">손절</span>
+                    <span className="tactical-zone-price-rail__marker-val">{progress.formatted.stop}</span>
+                  </div>
                 </div>
                 <div
                   className="tactical-zone-price-rail__marker tactical-zone-price-rail__marker--current"
                   style={{ left: `${progress.progressPct}%` }}
                 >
-                  <span className="tactical-zone-price-rail__marker-label">현재</span>
-                  <span className="tactical-zone-price-rail__marker-val">{progress.formatted.current}</span>
+                  <div className="tactical-zone-price-rail__marker-body">
+                    <span className="tactical-zone-price-rail__marker-label">현재</span>
+                    <span className="tactical-zone-price-rail__marker-val">{progress.formatted.current}</span>
+                  </div>
                 </div>
                 <div
                   className="tactical-zone-price-rail__marker tactical-zone-price-rail__marker--target"
                   style={{ left: "100%" }}
                 >
-                  <span className="tactical-zone-price-rail__marker-label">목표</span>
-                  <span className="tactical-zone-price-rail__marker-val">{progress.formatted.target}</span>
+                  <div className="tactical-zone-price-rail__marker-body">
+                    <span className="tactical-zone-price-rail__marker-label">목표</span>
+                    <span className="tactical-zone-price-rail__marker-val">{progress.formatted.target}</span>
+                  </div>
                 </div>
               </div>
 

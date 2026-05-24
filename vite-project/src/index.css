@@ -1555,47 +1555,50 @@
 
   .tactical-zone-price-rail__marker {
     position: absolute;
+    top: 0;
     bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    gap: 2px;
-    min-width: 48px;
     transform: translateX(-50%);
     text-align: center;
     line-height: 1.05;
   }
 
+  .tactical-zone-price-rail__marker-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 48px;
+    text-align: center;
+  }
+
   .tactical-zone-price-rail__marker-label {
     display: block;
+    width: 100%;
     font-size: 10px;
     font-weight: 600;
     color: rgba(148, 163, 184, 0.88);
     white-space: nowrap;
+    text-align: center;
   }
 
   .tactical-zone-price-rail__marker-val {
     display: block;
+    width: 100%;
     font-size: 13px;
     font-weight: 800;
     white-space: nowrap;
     letter-spacing: 0.01em;
-  }
-
-  .tactical-zone-price-rail__marker--stop {
-    left: 0;
-    transform: translateX(0);
-    align-items: flex-start;
-    text-align: left;
+    text-align: center;
   }
 
   .tactical-zone-price-rail__marker--target {
-    left: 100%;
-    align-items: flex-end;
-    text-align: right;
-    transform: translateX(-100%) scale(1.2);
-    transform-origin: right bottom;
+    transform: translateX(-50%) scale(1.2);
+    transform-origin: center bottom;
   }
 
   .tactical-zone-price-rail__marker--stop .tactical-zone-price-rail__marker-val {
@@ -1604,6 +1607,10 @@
 
   .tactical-zone-price-rail__marker--current {
     z-index: 2;
+  }
+
+  .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-body {
+    min-width: 58px;
     padding: 2px 6px 1px;
     border-radius: 4px;
     background: rgba(251, 191, 36, 0.08);
@@ -2836,19 +2843,19 @@
     }
 
     .tactical-zone-price-rail[data-overlap="stop"] .tactical-zone-price-rail__marker--stop {
-      transform: translate(0, -6px);
+      transform: translateX(-50%) translateY(-6px);
     }
 
     .tactical-zone-price-rail[data-overlap="stop"] .tactical-zone-price-rail__marker--current {
-      transform: translate(-50%, 8px);
+      transform: translateX(-50%) translateY(8px);
     }
 
     .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--target {
-      transform: translate(-100%, -6px) scale(1.2);
+      transform: translateX(-50%) translateY(-6px) scale(1.2);
     }
 
     .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--current {
-      transform: translate(-50%, 8px);
+      transform: translateX(-50%) translateY(8px);
     }
 
     .tactical-zone-detail--flow .tactical-zone-progress__track-wrap {
