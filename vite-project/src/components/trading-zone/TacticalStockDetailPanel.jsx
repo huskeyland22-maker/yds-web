@@ -102,57 +102,58 @@ export default function TacticalStockDetailPanel({ position }) {
       {progress ? (
         <div className="tactical-zone-detail__price">
           <div
-            className="tactical-zone-price-rail font-mono tabular-nums"
+            className="tactical-zone-price-line font-mono tabular-nums"
             style={{ "--progress-pct": `${progress.progressPct}%` }}
             data-overlap={
               progress.progressPct < 24 ? "stop" : progress.progressPct > 76 ? "target" : undefined
             }
           >
-            <div className="tactical-zone-price-rail__body">
-              <div className="tactical-zone-price-rail__markers">
-                <div
-                  className="tactical-zone-price-rail__marker tactical-zone-price-rail__marker--stop"
-                  style={{ left: "0%" }}
-                >
-                  <div className="tactical-zone-price-rail__marker-body">
-                    <span className="tactical-zone-price-rail__marker-label">손절</span>
-                    <span className="tactical-zone-price-rail__marker-val">{progress.formatted.stop}</span>
-                  </div>
-                </div>
-                <div
-                  className="tactical-zone-price-rail__marker tactical-zone-price-rail__marker--current"
-                  style={{ left: `${progress.progressPct}%` }}
-                >
-                  <div className="tactical-zone-price-rail__marker-body">
-                    <span className="tactical-zone-price-rail__marker-label">현재</span>
-                    <span className="tactical-zone-price-rail__marker-val">{progress.formatted.current}</span>
-                  </div>
-                </div>
-                <div
-                  className="tactical-zone-price-rail__marker tactical-zone-price-rail__marker--target"
-                  style={{ left: "100%" }}
-                >
-                  <div className="tactical-zone-price-rail__marker-body">
-                    <span className="tactical-zone-price-rail__marker-label">목표</span>
-                    <span className="tactical-zone-price-rail__marker-val">{progress.formatted.target}</span>
-                  </div>
+            <div className="tactical-zone-price-line__markers">
+              <div
+                className="tactical-zone-price-line__marker tactical-zone-price-line__marker--stop"
+                style={{ left: "0%" }}
+              >
+                <div className="tactical-zone-price-line__marker-body">
+                  <span className="tactical-zone-price-line__marker-label">손절</span>
+                  <span className="tactical-zone-price-line__marker-val">{progress.formatted.stop}</span>
                 </div>
               </div>
-
-              <div className="tactical-zone-progress__track-wrap">
-                <div className="tactical-zone-progress__track">
-                  <span className="tactical-zone-progress__rail" />
-                  <span className="tactical-zone-progress__fill" />
-                  <span className="tactical-zone-progress__dot tactical-zone-progress__dot--stop" />
-                  <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
-                  <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
+              <div
+                className="tactical-zone-price-line__marker tactical-zone-price-line__marker--current"
+                style={{ left: `${progress.progressPct}%` }}
+              >
+                <div className="tactical-zone-price-line__marker-body">
+                  <span className="tactical-zone-price-line__marker-label">현재</span>
+                  <span className="tactical-zone-price-line__marker-val">{progress.formatted.current}</span>
                 </div>
-                <p className="m-0 tactical-zone-price-rail__achieve tactical-zone-price-rail__achieve--center">
-                  <span className="tactical-zone-price-rail__achieve-val">{progress.progressPct}%</span>
-                  <span className="tactical-zone-price-rail__achieve-label">목표달성</span>
-                </p>
+              </div>
+              <div
+                className="tactical-zone-price-line__marker tactical-zone-price-line__marker--target"
+                style={{ left: "100%" }}
+              >
+                <div className="tactical-zone-price-line__marker-body">
+                  <span className="tactical-zone-price-line__marker-label">목표</span>
+                  <span className="tactical-zone-price-line__marker-val">{progress.formatted.target}</span>
+                </div>
               </div>
             </div>
+
+            <div className="tactical-zone-price-line__track-wrap">
+              <div className="tactical-zone-progress__track">
+                <span className="tactical-zone-progress__rail" />
+                <span className="tactical-zone-progress__fill" />
+                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--stop" />
+                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--current" />
+                <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
+              </div>
+            </div>
+          </div>
+
+          <div className="tactical-zone-detail__trade-info">
+            <p className="m-0 tactical-zone-detail__achieve">
+              <span className="tactical-zone-detail__achieve-val">{progress.progressPct}%</span>
+              <span className="tactical-zone-detail__achieve-label">목표달성</span>
+            </p>
           </div>
         </div>
       ) : null}

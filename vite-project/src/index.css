@@ -1534,17 +1534,15 @@
     margin-top: 10px;
   }
 
-  .tactical-zone-price-rail {
-    width: 100%;
-  }
-
-  .tactical-zone-price-rail__body {
+  .tactical-zone-price-line {
     position: relative;
     width: 100%;
     padding-top: 42px;
+    transform: none;
+    left: auto;
   }
 
-  .tactical-zone-price-rail__markers {
+  .tactical-zone-price-line__markers {
     position: absolute;
     top: 0;
     left: 0;
@@ -1553,7 +1551,7 @@
     pointer-events: none;
   }
 
-  .tactical-zone-price-rail__marker {
+  .tactical-zone-price-line__marker {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -1566,7 +1564,7 @@
     line-height: 1.05;
   }
 
-  .tactical-zone-price-rail__marker-body {
+  .tactical-zone-price-line__marker-body {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1576,7 +1574,7 @@
     text-align: center;
   }
 
-  .tactical-zone-price-rail__marker-label {
+  .tactical-zone-price-line__marker-label {
     display: block;
     width: 100%;
     font-size: 10px;
@@ -1586,7 +1584,7 @@
     text-align: center;
   }
 
-  .tactical-zone-price-rail__marker-val {
+  .tactical-zone-price-line__marker-val {
     display: block;
     width: 100%;
     font-size: 13px;
@@ -1596,20 +1594,20 @@
     text-align: center;
   }
 
-  .tactical-zone-price-rail__marker--target {
+  .tactical-zone-price-line__marker--target {
     transform: translateX(-50%) scale(1.2);
     transform-origin: center bottom;
   }
 
-  .tactical-zone-price-rail__marker--stop .tactical-zone-price-rail__marker-val {
+  .tactical-zone-price-line__marker--stop .tactical-zone-price-line__marker-val {
     color: rgba(252, 165, 165, 0.98);
   }
 
-  .tactical-zone-price-rail__marker--current {
+  .tactical-zone-price-line__marker--current {
     z-index: 2;
   }
 
-  .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-body {
+  .tactical-zone-price-line__marker--current .tactical-zone-price-line__marker-body {
     min-width: 58px;
     padding: 2px 6px 1px;
     border-radius: 4px;
@@ -1617,7 +1615,7 @@
     box-shadow: 0 0 12px rgba(251, 191, 36, 0.16);
   }
 
-  .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-val {
+  .tactical-zone-price-line__marker--current .tactical-zone-price-line__marker-val {
     font-size: 14px;
     font-weight: 900;
     color: rgba(253, 224, 71, 1);
@@ -1626,31 +1624,43 @@
       0 0 4px rgba(251, 191, 36, 0.34);
   }
 
-  .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-label {
+  .tactical-zone-price-line__marker--current .tactical-zone-price-line__marker-label {
     color: rgba(253, 224, 71, 0.95);
     font-weight: 800;
     font-size: 11px;
   }
 
-  .tactical-zone-price-rail__marker--target .tactical-zone-price-rail__marker-val {
+  .tactical-zone-price-line__marker--target .tactical-zone-price-line__marker-val {
     color: rgba(147, 197, 253, 0.98);
     text-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
   }
 
-  .tactical-zone-price-rail .tactical-zone-progress__track-wrap {
+  .tactical-zone-price-line__track-wrap {
     position: relative;
-    padding-bottom: 38px;
+    width: 100%;
+    padding-bottom: 0;
+    transform: none;
+    left: auto;
   }
 
-  .tactical-zone-price-rail__achieve {
-    position: absolute;
-    top: calc(100% + 14px);
+  .tactical-zone-detail__trade-info {
+    position: relative;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
+    margin-top: 10px;
+    transform: none !important;
+    left: auto !important;
+  }
+
+  .tactical-zone-detail__achieve {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 1px;
-    min-width: 52px;
     margin: 0;
     padding: 0;
     font-size: 12px;
@@ -1658,30 +1668,35 @@
     line-height: 1.1;
     text-align: center;
     white-space: nowrap;
-    pointer-events: none;
+    position: static;
+    transform: none !important;
+    left: auto !important;
   }
 
-  .tactical-zone-price-rail__achieve--center {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .tactical-zone-price-rail__achieve-label {
+  .tactical-zone-detail__achieve-label {
     font-size: 10px;
     color: rgba(148, 163, 184, 0.9);
     font-weight: 600;
   }
 
-  .tactical-zone-price-rail__achieve-val {
+  .tactical-zone-detail__achieve-val {
     font-size: 14px;
     font-weight: 800;
     color: rgba(251, 191, 36, 1);
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
   }
 
-  .tactical-zone-detail--flow .tactical-zone-price-rail .tactical-zone-progress__track-wrap {
+  .tactical-zone-detail--flow .tactical-zone-price-line .tactical-zone-progress__track-wrap,
+  .tactical-zone-detail--flow .tactical-zone-price-line__track-wrap {
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .tactical-zone-detail__core,
+  .tactical-zone-detail__foot {
+    position: relative;
+    transform: none !important;
+    left: auto !important;
   }
 
   .tactical-zone-detail__core {
@@ -2834,27 +2849,27 @@
       padding: 14px 10px 16px;
     }
 
-    .tactical-zone-detail--flow .tactical-zone-price-rail__body {
+    .tactical-zone-detail--flow .tactical-zone-price-line {
       padding-top: 40px;
     }
 
-    .tactical-zone-detail--flow .tactical-zone-price-rail__markers {
+    .tactical-zone-detail--flow .tactical-zone-price-line__markers {
       height: 38px;
     }
 
-    .tactical-zone-price-rail[data-overlap="stop"] .tactical-zone-price-rail__marker--stop {
+    .tactical-zone-price-line[data-overlap="stop"] .tactical-zone-price-line__marker--stop {
       transform: translateX(-50%) translateY(-6px);
     }
 
-    .tactical-zone-price-rail[data-overlap="stop"] .tactical-zone-price-rail__marker--current {
+    .tactical-zone-price-line[data-overlap="stop"] .tactical-zone-price-line__marker--current {
       transform: translateX(-50%) translateY(8px);
     }
 
-    .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--target {
+    .tactical-zone-price-line[data-overlap="target"] .tactical-zone-price-line__marker--target {
       transform: translateX(-50%) translateY(-6px) scale(1.2);
     }
 
-    .tactical-zone-price-rail[data-overlap="target"] .tactical-zone-price-rail__marker--current {
+    .tactical-zone-price-line[data-overlap="target"] .tactical-zone-price-line__marker--current {
       transform: translateX(-50%) translateY(8px);
     }
 
