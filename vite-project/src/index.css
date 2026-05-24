@@ -1348,49 +1348,111 @@
   }
 
   .tactical-zone-engine-link {
-    border-radius: 6px;
-    border: 1px solid rgba(34, 211, 238, 0.12);
-    background: rgba(0, 0, 0, 0.25);
-    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
 
   .tactical-zone-engine-link--pending {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.22);
+    padding: 6px 8px;
   }
 
-  .tactical-zone-engine-link__title {
+  .tactical-zone-engine-link__section-title {
     font-size: 9px;
     font-weight: 700;
     color: rgba(165, 243, 252, 0.92);
   }
 
-  .tactical-zone-engine-link__grid {
+  .tactical-zone-engine-link__market-card,
+  .tactical-zone-engine-link__action-card {
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.28);
+    padding: 7px 8px;
+  }
+
+  .tactical-zone-engine-link__action-card {
+    border-color: rgba(251, 146, 60, 0.14);
+    background: rgba(251, 146, 60, 0.04);
+  }
+
+  .tactical-zone-engine-link__market-head,
+  .tactical-zone-engine-link__action-head {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .tactical-zone-engine-link__status-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px 8px;
+    gap: 6px 8px;
+    margin-top: 6px;
   }
 
-  .tactical-zone-engine-link__cell {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px;
+  @media (min-width: 480px) {
+    .tactical-zone-engine-link__status-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .tactical-zone-market-status {
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 5px 6px;
+    min-width: 0;
+  }
+
+  .tactical-zone-market-status__period {
     font-size: 9px;
-  }
-
-  .tactical-zone-engine-link__period {
     font-weight: 700;
-    color: rgba(148, 163, 184, 0.9);
+    color: rgba(203, 213, 225, 0.95);
+    white-space: nowrap;
   }
 
-  .tactical-zone-engine-link__score {
+  .tactical-zone-market-status__line {
+    margin-top: 3px;
+    font-size: 9px;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tactical-zone-market-status__score {
     font-weight: 800;
-    color: rgba(226, 232, 240, 0.98);
+    color: rgba(248, 250, 252, 0.98);
   }
 
-  .tactical-zone-engine-link__action {
-    color: rgba(103, 232, 249, 0.88);
+  .tactical-zone-market-status__sep {
+    color: rgba(100, 116, 139, 0.75);
+    font-weight: 500;
+  }
+
+  .tactical-zone-market-status__hint {
     font-weight: 600;
+    color: rgba(103, 232, 249, 0.9);
+  }
+
+  .tactical-zone-engine-link__action-line {
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(255, 237, 213, 0.92);
+  }
+
+  .tactical-zone-bucket__empty {
+    display: block;
+    padding: 4px 2px;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(100, 116, 139, 0.75);
+    font-style: italic;
   }
 
   .tactical-zone-progress {

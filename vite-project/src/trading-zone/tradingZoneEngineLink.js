@@ -14,50 +14,48 @@ import { buildTodayActionPanel } from "../utils/buildTodayActionPanel.js"
  * }} EngineLinkCard
  */
 
+/** @type {Record<string, string>} */
+export const ENGINE_LINK_HORIZON_DOT = {
+  short: "🟢",
+  mid: "🟡",
+  long: "⚪",
+  tactical: "🔵",
+}
+
+/** @type {string[]} */
+export const ENGINE_LINK_CARD_ORDER = ["short", "mid", "long", "tactical"]
+
 /**
  * @typedef {{
  *   ready: boolean
  *   cards: EngineLinkCard[]
- *   guidance: string[]
+ *   actions: string[]
  * }} TradingZoneEngineLink
  */
 
 /**
- * @param {import("../utils/buildTodayActionPanel.js").TacticalCard[]} cards
+ * @param {EngineLinkCard[]} cards
  * @returns {string[]}
  */
-function deriveGuidanceLines(cards) {
+function deriveActionLines(cards) {
   const byId = Object.fromEntries(cards.map((c) => [c.id, c]))
-  const short = byId.short
-  const mid = byId.mid
-  const long = byId.long
-  const tactical = byId.tactical
-
-  /** @type {string[]} */
-  const lines = []
-
-  const shortScore = short?.score ?? null
-  const midScore = mid?.score ?? null
-  const longScore = long?.score ?? null
+  const shortScore = byId.short?.score ?? null
+  const midScore = byId.mid?.score ?? null
+  const longScore = byId.long?.score ?? null
 
   if (longScore != null && longScore < 35) {
-    lines.push("거시 위험 · 신규 진입 축소")
-  } else if (shortScore != null && shortScore >= 70 && midScore != null && midScore >= 55) {
-    lines.push("관심 → 눌림 진입 허용 · 추세 추격 제한")
-  } else if (shortScore != null && shortScore < 40) {
-    lines.push("단기 경계 · 분할·확인 후 대응")
-  } else if (midScore != null && midScore >= 60) {
-    lines.push("중기 우호 · 선별적 비중 확대 검토")
-  } else {
-    lines.push("시장 혼조 · 관심유지·감시 위주")
+    return ["신규 진입 축소", "관심유지 · 감시 위주"]
   }
-
-  if (tactical?.action) {
-    const hint = tactical.scoreHint ? ` · ${tactical.scoreHint}` : ""
-    lines.push(`실전 ${tactical.action}${hint}`)
+  if (shortScore != null && shortScore >= 70 && midScore != null && midScore >= 55) {
+    return ["관심 / 눌림 진입 허용", "추세 추격 제한"]
   }
-
-  return lines.slice(0, 2)
+  if (shortScore != null && shortScore < 40) {
+    return ["단기 경계 · 분할·확인 후 대응", "추세 추격 제한"]
+  }
+  if (midScore != null && midScore >= 60) {
+    return ["선별적 비중 확대 검토", "추세 추격 제한"]
+  }
+  return ["관심유지 · 감시 위주", "추세 추격 제한"]
 }
 
 /**
@@ -78,7 +76,7 @@ export function buildTradingZoneEngineLink({
   const panel = buildTodayActionPanel({ panicData, cycleScore, snapshot, historyRows })
 
   if (!panel.ready || !panel.tacticalCards.length) {
-    return { ready: false, cards: [], guidance: [] }
+    return { ready: false, cards: [], actions: [] }
   }
 
   const cards = panel.tacticalCards.map((c) => ({
@@ -93,6 +91,6 @@ export function buildTradingZoneEngineLink({
   return {
     ready: true,
     cards,
-    guidance: deriveGuidanceLines(cards),
+    actions: deriveActionLines(cards),
   }
 }

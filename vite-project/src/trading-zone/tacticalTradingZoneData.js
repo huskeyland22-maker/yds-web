@@ -60,6 +60,23 @@ export const TRADING_MARKETS = {
   kr: { id: "kr", label: "한국", flag: "🇰🇷" },
 }
 
+/** 시장 탭 진입 시 자동 선택·상세 오픈 대표 종목 */
+export const TRADING_ZONE_DEFAULT_POSITION_ID = {
+  us: "us-smh",
+  kr: "kr-silicon",
+}
+
+/**
+ * @param {TradingMarketId} market
+ * @param {TradingZonePosition[]} positions
+ * @returns {string | null}
+ */
+export function resolveDefaultTradingPositionId(market, positions) {
+  const preferred = TRADING_ZONE_DEFAULT_POSITION_ID[market]
+  if (preferred && positions.some((p) => p.id === preferred)) return preferred
+  return positions[0]?.id ?? null
+}
+
 /** @type {TradingZonePosition[]} */
 const SEED_POSITIONS = [
   {

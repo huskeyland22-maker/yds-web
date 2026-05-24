@@ -5,6 +5,7 @@ import {
   TRADING_MARKETS,
   getTradingZonePositions,
   groupPositionsByBucket,
+  resolveDefaultTradingPositionId,
   tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
 import { buildTradingZoneEngineLink } from "../../trading-zone/tradingZoneEngineLink.js"
@@ -33,18 +34,21 @@ function StockChip({ position, selected, onSelect }) {
 /**
  * @param {{
  *   title: string
+ *   bucketId: import("../../trading-zone/tacticalTradingZoneData.js").TradingBucketId
  *   positions: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition[]
  *   selectedId: string | null
  *   onSelect: (id: string) => void
  * }} props
  */
-function BucketCard({ title, positions, selectedId, onSelect }) {
+function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
+  const emptyLabel = bucketId === "takeProfit" ? "현재 없음" : "—"
+
   return (
     <div className="tactical-zone-bucket">
       <p className="m-0 tactical-zone-bucket__title">{title}</p>
       <div className="tactical-zone-bucket__list">
         {positions.length === 0 ? (
-          <span className="text-[9px] text-slate-600">—</span>
+          <span className="tactical-zone-bucket__empty">{emptyLabel}</span>
         ) : (
           positions.map((p) => (
             <StockChip
@@ -76,7 +80,10 @@ export default function TacticalTradingZoneSection({
 }) {
   const positions = useMemo(() => getTradingZonePositions(), [])
   const [market, setMarket] = useState("us")
-  const [selectedId, setSelectedId] = useState(null)
+  const [selectedId, setSelectedId] = useState(() => {
+    const us = positions.filter((p) => p.market === "us")
+    return resolveDefaultTradingPositionId("us", us)
+  })
 
   const engineLink = useMemo(
     () => buildTradingZoneEngineLink({ panicData, cycleScore, snapshot, historyRows }),
@@ -97,7 +104,8 @@ export default function TacticalTradingZoneSection({
 
   const onMarketChange = (id) => {
     setMarket(id)
-    setSelectedId(null)
+    const next = positions.filter((p) => p.market === id)
+    setSelectedId(resolveDefaultTradingPositionId(id, next))
   }
 
   return (
@@ -132,6 +140,7 @@ export default function TacticalTradingZoneSection({
         {TRADING_BUCKET_ORDER.map((bucketId) => (
           <BucketCard
             key={bucketId}
+            bucketId={bucketId}
             title={TRADING_BUCKET_META[bucketId].title}
             positions={bucketGroups[bucketId]}
             selectedId={selectedId}
