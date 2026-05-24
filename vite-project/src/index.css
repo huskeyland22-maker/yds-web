@@ -1718,12 +1718,13 @@
     box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
   }
 
-  .tactical-zone-detail__trade-info {
+  .tactical-zone-detail__trade-info-block {
     position: relative;
     width: 100%;
-    display: grid;
-    justify-items: center;
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     margin-top: 12px;
     transform: none !important;
     left: auto !important;
@@ -1760,65 +1761,77 @@
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
   }
 
-  .tactical-zone-trade-info__grid {
+  .tactical-zone-trade-info {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 20px;
     width: 100%;
-    max-width: min(100%, 340px);
-    padding: 8px 4px;
+    max-width: 420px;
+    margin: 24px auto 0;
+    padding: 0 8px;
     box-sizing: border-box;
+    justify-content: center;
+    align-items: stretch;
   }
 
-  .tactical-zone-trade-info__cell {
+  .tactical-zone-info-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
     min-width: 0;
+    min-height: 60px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     text-align: center;
-  }
-
-  .tactical-zone-trade-info__cell:nth-child(1),
-  .tactical-zone-trade-info__cell:nth-child(2) {
-    justify-self: center;
-  }
-
-  .tactical-zone-trade-info__label {
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(148, 163, 184, 0.92);
-    line-height: 1.15;
     cursor: help;
   }
 
-  .tactical-zone-trade-info__value {
-    margin: 0;
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1.15;
-  }
-
-  .tactical-zone-trade-info__value--placeholder {
+  .tactical-zone-info-card__label {
+    display: block;
+    width: 100%;
+    margin: 0 0 6px;
     font-size: 11px;
     font-weight: 600;
-    color: rgba(100, 116, 139, 0.62);
+    line-height: 1.2;
+    color: rgba(226, 232, 240, 0.92);
+    opacity: 0.7;
   }
 
-  .tactical-zone-trade-info__value--gain {
+  .tactical-zone-info-card__value {
+    display: block;
+    width: 100%;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+  }
+
+  .tactical-zone-info-card__value--placeholder {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(100, 116, 139, 0.62);
+    opacity: 1;
+  }
+
+  .tactical-zone-info-card__value--gain {
     color: rgba(74, 222, 128, 0.98);
   }
 
-  .tactical-zone-trade-info__value--upside {
-    color: rgba(96, 165, 250, 0.98);
+  .tactical-zone-info-card__value--upside {
+    color: rgba(253, 224, 71, 0.98);
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.22);
   }
 
-  .tactical-zone-trade-info__value--risk {
+  .tactical-zone-info-card__value--risk {
     color: rgba(252, 165, 165, 0.98);
   }
 
-  .tactical-zone-trade-info__value--weight {
-    color: rgba(34, 211, 238, 0.98);
+  .tactical-zone-info-card__value--weight {
+    color: rgba(96, 165, 250, 0.98);
   }
 
   .tactical-zone-detail__foot {
@@ -2904,10 +2917,27 @@
       height: 34px;
     }
 
-    .tactical-zone-trade-info__grid {
-      gap: 14px 20px;
-      max-width: 100%;
-      padding: 6px 2px;
+    .tactical-zone-trade-info {
+      grid-template-columns: repeat(2, minmax(100px, 1fr));
+      gap: 12px;
+      max-width: min(100%, 420px);
+      margin-top: 16px;
+      padding: 0 4px;
+    }
+
+    .tactical-zone-info-card {
+      min-height: 56px;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .tactical-zone-info-card__label {
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+
+    .tactical-zone-info-card__value {
+      font-size: 16px;
     }
 
     .tactical-zone-trade-line__marker--current {

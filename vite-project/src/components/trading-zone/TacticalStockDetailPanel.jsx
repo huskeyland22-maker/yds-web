@@ -134,33 +134,31 @@ export default function TacticalStockDetailPanel({ position }) {
             </div>
           </div>
 
-          <div className="tactical-zone-detail__trade-info" aria-label="핵심 매매정보">
+          <div className="tactical-zone-detail__trade-info-block">
             <p className="m-0 tactical-zone-detail__achieve">
               <span className="tactical-zone-detail__achieve-val">{progress.progressPct}%</span>
               <span className="tactical-zone-detail__achieve-label">목표달성</span>
             </p>
-            <dl className="tactical-zone-trade-info__grid m-0">
+            <div className="tactical-zone-trade-info" role="group" aria-label="핵심 매매정보">
               {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty, tone }) => {
                 const value = coreMetrics[key]
                 const pending = isCoreMetricPlaceholder(value, empty)
                 return (
-                  <div key={key} className="tactical-zone-trade-info__cell">
-                    <dt className="tactical-zone-trade-info__label" title={tooltip}>
-                      {label}
-                    </dt>
-                    <dd
+                  <article key={key} className="tactical-zone-info-card" title={tooltip}>
+                    <span className="tactical-zone-info-card__label">{label}</span>
+                    <span
                       className={[
-                        "tactical-zone-trade-info__value font-mono tabular-nums",
-                        pending ? "tactical-zone-trade-info__value--placeholder" : "",
-                        !pending ? `tactical-zone-trade-info__value--${tone}` : "",
+                        "tactical-zone-info-card__value font-mono tabular-nums",
+                        pending ? "tactical-zone-info-card__value--placeholder" : "",
+                        !pending ? `tactical-zone-info-card__value--${tone}` : "",
                       ].join(" ")}
                     >
                       {value}
-                    </dd>
-                  </div>
+                    </span>
+                  </article>
                 )
               })}
-            </dl>
+            </div>
           </div>
         </div>
       ) : null}
