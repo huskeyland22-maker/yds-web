@@ -1617,96 +1617,52 @@
 
   .tactical-zone-trade-line__markers {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 100%;
-    margin-bottom: 4px;
-    height: 18px;
+    inset: 0;
     pointer-events: none;
   }
 
+  .price-marker-label,
   .tactical-zone-trade-line__marker {
     position: absolute;
-    top: -18px;
-    bottom: auto;
-    display: inline-flex;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 4px;
-    line-height: 1.1;
-    white-space: nowrap;
-  }
-
-  .marker-label,
-  .tactical-zone-trade-line__marker-label {
+    top: auto;
+    bottom: 8px;
+    transform: translateX(-50%);
     font-size: 11px;
     font-weight: 700;
     line-height: 1;
-  }
-
-  .marker-val,
-  .tactical-zone-trade-line__marker-val {
-    font-size: 13px;
-    font-weight: 800;
+    white-space: nowrap;
     letter-spacing: 0.01em;
   }
 
+  .marker-stop,
   .tactical-zone-trade-line__marker--stop {
     left: 0;
     transform: none;
+    color: #ff5b5b;
     text-align: left;
   }
 
-  .tactical-zone-trade-line__marker--stop .marker-label,
-  .tactical-zone-trade-line__marker--stop .tactical-zone-trade-line__marker-label,
-  .tactical-zone-trade-line__marker--stop .marker-val,
-  .tactical-zone-trade-line__marker--stop .tactical-zone-trade-line__marker-val {
-    color: #f87171;
-  }
-
+  .marker-current,
   .tactical-zone-trade-line__marker--current {
-    transform: translateX(-50%);
-    text-align: center;
     z-index: 2;
-    min-width: 0;
+    color: #ffd84d;
     padding: 0 6px 2px;
     border-radius: 4px;
     background: rgba(251, 191, 36, 0.08);
     box-shadow: 0 0 12px rgba(251, 191, 36, 0.16);
-  }
-
-  .tactical-zone-trade-line__marker--current .marker-label,
-  .tactical-zone-trade-line__marker--current .tactical-zone-trade-line__marker-label {
-    color: #fde047;
-  }
-
-  .tactical-zone-trade-line__marker--current .marker-val,
-  .tactical-zone-trade-line__marker--current .tactical-zone-trade-line__marker-val {
-    font-size: 14px;
-    font-weight: 900;
-    color: #fde047;
     text-shadow:
       0 0 10px rgba(251, 191, 36, 0.49),
       0 0 4px rgba(251, 191, 36, 0.34);
   }
 
+  .marker-target,
   .tactical-zone-trade-line__marker--target {
-    right: 0;
     left: auto;
+    right: 0;
     transform: none;
+    color: #57a8ff;
     text-align: right;
-  }
-
-  .tactical-zone-trade-line__marker--target .marker-val,
-  .tactical-zone-trade-line__marker--target .tactical-zone-trade-line__marker-val {
-    color: #60a5fa;
     text-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
-    font-size: 14px;
-  }
-
-  .tactical-zone-trade-line__marker--target .marker-label,
-  .tactical-zone-trade-line__marker--target .tactical-zone-trade-line__marker-label {
-    color: #93c5fd;
   }
 
   .tactical-zone-trade-zone-overlay {
@@ -3190,10 +3146,6 @@
       padding-top: 22px;
     }
 
-    .tactical-zone-trade-line__markers {
-      height: 20px;
-      margin-bottom: 5px;
-    }
 
     .tactical-zone-trade-info-row {
       gap: 10px 12px;
@@ -3211,9 +3163,6 @@
       font-size: 16px;
     }
 
-    .tactical-zone-trade-line__marker--current {
-      min-width: 52px;
-    }
   }
 
   .panic-v2-desk > .cycle-desk-divider--reference + .panic-v2-desk__bond-slot {
