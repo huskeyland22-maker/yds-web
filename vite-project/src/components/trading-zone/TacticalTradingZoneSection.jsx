@@ -10,6 +10,7 @@ import {
   tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
 import { buildTradingZoneEngineLink } from "../../trading-zone/tradingZoneEngineLink.js"
+import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 
@@ -115,11 +116,13 @@ export default function TacticalTradingZoneSection({
   }
 
   return (
-    <section className="tactical-trading-zone trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
-      <div className="tactical-trading-zone__head border-l-2 border-orange-400/45 pl-2">
-        <p className="m-0 text-[11px] font-bold text-slate-100">실전 매매 존</p>
-        <p className="m-0 tactical-trading-zone__sub">미국 · 한국 · 관심 · 눌림 · 추세 · 1종목 1상태</p>
-      </div>
+    <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
+      <PanicDeskSectionHeader
+        icon="🎯"
+        title="실전 매매존"
+        description="미국 · 한국 실전 진입 관리"
+        tone="green"
+      />
 
       <div className="tactical-trading-zone__engine">
         <TacticalEngineLinkBar link={engineLink} />

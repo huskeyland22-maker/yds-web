@@ -40,6 +40,7 @@ import PanicEngineStatusPanel, {
 } from "./panic-history/PanicEngineStatusPanel.jsx"
 import PanicV2AuxMetrics from "./panic-history/PanicV2AuxMetrics.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
+import PanicDeskSectionHeader from "./panic-desk/PanicDeskSectionHeader.jsx"
 
 const HISTORY_CHART_HEIGHT = 220
 
@@ -271,14 +272,17 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
 
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
-      <div className="panic-history-section__head border-l-2 border-cyan-400/45 pl-2">
-        <p className="m-0 text-[11px] font-bold text-slate-100">시장 엔진 히스토리</p>
-        <p className="m-0 text-[9px] text-slate-500">
-          거시 V1 = 시장 국면 변화 · 실전 V2 = 매매 이벤트 기록
-          {activeHistoryTab !== "panicV1" && activeHistoryTab !== "panicV2" ? ` · ${metric.label}` : ""} ·{" "}
-          {rangeId} · {chartRangeStats(history, rangeId, "lab").shown}일
-        </p>
-      </div>
+      <PanicDeskSectionHeader
+        icon="📈"
+        title="시장엔진 히스토리"
+        description="시장 변화 추적 / 관심→눌림→추세"
+        tone="amber"
+      />
+      <p className="m-0 panic-history-section__meta text-[11px] text-slate-500">
+        거시 V1 = 시장 국면 · 실전 V2 = 매매 이벤트
+        {activeHistoryTab !== "panicV1" && activeHistoryTab !== "panicV2" ? ` · ${metric.label}` : ""} ·{" "}
+        {rangeId} · {chartRangeStats(history, rangeId, "lab").shown}일
+      </p>
 
       <div className="panic-history-tabs mt-1.5 flex flex-wrap items-center gap-1">
         <button

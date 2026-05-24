@@ -2,7 +2,6 @@ import {
   TRADING_STAGE_FLOW,
   TRADING_STAGE_META,
   TRADING_ZONE_STANDARD_AUX,
-  tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
 import {
   computeTradingZoneProgress,
@@ -17,15 +16,10 @@ import {
  * @param {{ position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition }} props
  */
 export default function TacticalStockDetailPanel({ position }) {
-  const badge = tradingStageBadge(position)
   const historyLog = formatStageHistoryLog(position.stageHistory ?? [])
   const levels = resolvePositionPriceLevels(position)
   const progress = computeTradingZoneProgress(levels)
   const activeAux = new Set(position.aux ?? [])
-
-  const displayStop = progress?.formatted.stop ?? position.stop ?? "—"
-  const displayTarget = progress?.formatted.target ?? position.target ?? "—"
-  const displayEntry = position.entry?.trim() ? position.entry.replace(/\s*~\s*/g, "~") : "—"
 
   const currentStageId =
     position.stage === "interest" ||
@@ -44,9 +38,6 @@ export default function TacticalStockDetailPanel({ position }) {
       }
     }
   }
-  if (historyHighlightIndex < 0 && historyLog.length) {
-    historyHighlightIndex = historyLog.length - 1
-  }
 
   const fieldDisplay = (raw, suffix = "") => {
     if (raw == null) return "-"
@@ -60,62 +51,31 @@ export default function TacticalStockDetailPanel({ position }) {
     <div className="tactical-zone-detail" role="region" aria-label={`${position.symbol} 상세`}>
       <p className="m-0 tactical-zone-detail__name">{position.symbol}</p>
 
-      <div className="tactical-zone-detail__flow">
-        <div className="tactical-zone-stage-flow" aria-label="단계 흐름">
-          {TRADING_STAGE_FLOW.map((stageId, i) => {
-            const meta = TRADING_STAGE_META[stageId]
-            const active = stageId === position.stage
-            return (
-              <span key={stageId} className="tactical-zone-stage-flow__item">
-                {i > 0 ? (
-                  <span className="tactical-zone-stage-flow__arrow" aria-hidden>
-                    →
-                  </span>
-                ) : null}
-                <span
-                  className={[
-                    "tactical-zone-stage-flow__chip",
-                    active ? "tactical-zone-stage-flow__chip--active" : "tactical-zone-stage-flow__chip--muted",
-                  ].join(" ")}
-                  data-stage={stageId}
-                >
-                  {meta.emoji} {meta.label}
+      <div className="tactical-zone-stage-flow tactical-zone-stage-flow--bar" aria-label="단계 흐름">
+        {TRADING_STAGE_FLOW.map((stageId, i) => {
+          const meta = TRADING_STAGE_META[stageId]
+          const active = stageId === position.stage
+          return (
+            <span key={stageId} className="tactical-zone-stage-flow__item">
+              {i > 0 ? (
+                <span className="tactical-zone-stage-flow__arrow" aria-hidden>
+                  →
                 </span>
+              ) : null}
+              <span
+                className={[
+                  "tactical-zone-stage-flow__chip",
+                  active ? "tactical-zone-stage-flow__chip--active" : "tactical-zone-stage-flow__chip--muted",
+                ].join(" ")}
+                data-stage={stageId}
+              >
+                {meta.emoji}
+                {meta.label}
               </span>
-            )
-          })}
-        </div>
-        <p className="m-0 tactical-zone-detail__current">
-          현재: {badge.emoji} {badge.label}
-        </p>
+            </span>
+          )
+        })}
       </div>
-
-      <dl className="tactical-zone-detail__grid m-0">
-        <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--entry">
-          <dt>
-            <span aria-hidden>🎯</span> 진입
-          </dt>
-          <dd>
-            <span className="tactical-zone-price-pill font-mono tabular-nums">{displayEntry}</span>
-          </dd>
-        </div>
-        <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--stop">
-          <dt>
-            <span aria-hidden>🛑</span> 손절
-          </dt>
-          <dd>
-            <span className="tactical-zone-price-pill font-mono tabular-nums">{displayStop}</span>
-          </dd>
-        </div>
-        <div className="tactical-zone-detail__grid-cell tactical-zone-detail__grid-cell--target">
-          <dt>
-            <span aria-hidden>🚀</span> 목표
-          </dt>
-          <dd>
-            <span className="tactical-zone-price-pill font-mono tabular-nums">{displayTarget}</span>
-          </dd>
-        </div>
-      </dl>
 
       {progress ? (
         <div
@@ -132,7 +92,7 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span className="tactical-zone-progress__ruler-current">
                   ●{progress.formatted.current}
                 </span>
-                <span className="tactical-zone-progress__ruler-pct">{progress.progressPct}%</span>
+                <span className="tactical-zone-progress__ruler-tag">현재</span>
               </div>
               <span className="tactical-zone-progress__ruler-sep" aria-hidden>
                 ──
@@ -149,6 +109,11 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span className="tactical-zone-progress__dot tactical-zone-progress__dot--target" />
               </div>
             </div>
+
+            <p className="m-0 tactical-zone-progress__achieve-row">
+              <span className="tactical-zone-progress__achieve-label">목표달성</span>
+              <span className="tactical-zone-progress__achieve-pct">{progress.progressPct}%</span>
+            </p>
           </div>
         </div>
       ) : null}
@@ -170,26 +135,29 @@ export default function TacticalStockDetailPanel({ position }) {
         </div>
       </div>
 
-      <div className="tactical-zone-fields-compact" aria-label="실전 필드">
-        <p className="m-0 tactical-zone-fields-compact__row font-mono tabular-nums">
-          <span>RR {fieldDisplay(position.rr)}</span>
-          <span className="tactical-zone-fields-compact__sep" aria-hidden>
-            |
-          </span>
-          <span>기대수익 {fieldDisplay(position.expectedReturn)}</span>
-        </p>
-        <p className="m-0 tactical-zone-fields-compact__row font-mono tabular-nums">
-          <span>
-            보유일{" "}
+      <div className="tactical-zone-fields-grid" aria-label="실전 필드">
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">RR</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">{fieldDisplay(position.rr)}</p>
+        </div>
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">기대수익</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">
+            {fieldDisplay(position.expectedReturn)}
+          </p>
+        </div>
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">보유일</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">
             {position.holdingDays != null && Number.isFinite(position.holdingDays)
               ? `${position.holdingDays}일`
               : "-"}
-          </span>
-          <span className="tactical-zone-fields-compact__sep" aria-hidden>
-            |
-          </span>
-          <span>비중 {fieldDisplay(position.weight)}</span>
-        </p>
+          </p>
+        </div>
+        <div className="tactical-zone-field-card">
+          <p className="m-0 tactical-zone-field-card__label">비중</p>
+          <p className="m-0 tactical-zone-field-card__value font-mono tabular-nums">{fieldDisplay(position.weight)}</p>
+        </div>
       </div>
 
       {historyLog.length ? (
@@ -206,7 +174,9 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span
                   className={[
                     "tactical-zone-history-chip",
-                    i === historyHighlightIndex ? "tactical-zone-history-chip--current" : "",
+                    i === historyHighlightIndex
+                      ? "tactical-zone-history-chip--current"
+                      : "tactical-zone-history-chip--past",
                   ].join(" ")}
                   data-stage={h.stage}
                 >

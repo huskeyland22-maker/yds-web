@@ -13,36 +13,12 @@ import PanicMetricRow from "./panic-metrics/PanicMetricRow.jsx"
 import PanicExpertMetricsAccordion from "./PanicExpertMetricsAccordion.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
+import PanicDeskSectionHeader from "./panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalTradingZoneSection from "./trading-zone/TacticalTradingZoneSection.jsx"
 
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
   return formatMetricValue(key, Number(v))
-}
-
-/** @param {{ title: string; variant?: "core" | "expert" }} props */
-function SectionLabel({ title, variant = "core" }) {
-  const isExpert = variant === "expert"
-  return (
-    <div
-      className={[
-        "panic-metric-section-label",
-        isExpert ? "panic-metric-section-label--expert" : "",
-      ].join(" ")}
-    >
-      <p
-        className={[
-          "m-0 border-l-2 pl-2 text-left text-[11px] font-bold tracking-[0.02em]",
-          isExpert ? "border-slate-500/50 text-slate-300" : "border-cyan-400/50 text-slate-200",
-        ].join(" ")}
-      >
-        {title}
-      </p>
-      <span
-        className={["mt-1.5 block h-px w-full", isExpert ? "bg-white/[0.03]" : "bg-white/[0.08]"].join(" ")}
-      />
-    </div>
-  )
 }
 
 /**
@@ -91,8 +67,13 @@ export default function PanicDeskDashboard({
         <CycleDataBasisBar updatedAt={panicData?.updatedAt} cycleSource={cycleDataSource} bondSource="FRED" />
       </div>
 
-      <div className="panic-v2-desk__metrics-slot">
-        <SectionLabel title="핵심지수" variant="core" />
+      <div className="panic-v2-desk__metrics-slot panic-desk-section panic-desk-section--cyan panic-desk-section--lead">
+        <PanicDeskSectionHeader
+          icon="📊"
+          title="핵심 지수"
+          description="거시 · 패닉 · 시장 상태"
+          tone="cyan"
+        />
         <PanicCoreMetricsBlock panicData={panicData} historyRows={safeHistory} />
 
         <PanicExpertMetricsAccordion>
@@ -128,7 +109,7 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <div className="panic-v2-desk__history-slot">
+      <div className="panic-v2-desk__history-slot panic-desk-section panic-desk-section--amber">
         <SectionErrorBoundary
           label="시장 엔진 히스토리"
           fallback={
@@ -151,7 +132,7 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <div className="panic-v2-desk__trading-zone-slot">
+      <div className="panic-v2-desk__trading-zone-slot panic-desk-section-slot">
         <SectionErrorBoundary
           label="실전 매매 존"
           fallback={
