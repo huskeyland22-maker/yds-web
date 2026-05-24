@@ -55,6 +55,16 @@ export function formatStageHistoryChipLabel(item) {
 }
 
 /**
+ * 칩 표시: `🟢 05/22 관심`
+ * @param {{ dateLabel: string; stage: import("./tacticalTradingZoneData.js").TradingStageId }} item
+ */
+export function formatStageHistoryChipDisplay(item) {
+  const meta = TRADING_STAGE_META[item.stage]
+  const emoji = meta?.emoji ?? "⚪"
+  return `${emoji} ${formatStageHistoryChipLabel(item)}`
+}
+
+/**
  * @param {import("./tacticalTradingZoneData.js").TradingStageHistoryEntry[]} history
  */
 export function formatStageHistoryLog(history) {

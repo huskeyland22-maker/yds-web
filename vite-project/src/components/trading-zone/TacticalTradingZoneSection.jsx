@@ -120,12 +120,21 @@ export default function TacticalTradingZoneSection({
       <PanicDeskSectionHeader
         icon="🎯"
         title="실전 매매존"
-        description="미국 · 한국 실전 진입 관리"
+        description="미국·한국 실전 진입 관리"
         tone="green"
       />
 
+      <hr className="tactical-trading-zone__divider" aria-hidden />
+
+      <div className="tactical-trading-zone__engine-head">
+        <p className="m-0 tactical-trading-zone__engine-title">
+          <span aria-hidden>📈</span> 시장 엔진 연계
+        </p>
+        <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → 종목 실행</p>
+      </div>
+
       <div className="tactical-trading-zone__engine">
-        <TacticalEngineLinkBar link={engineLink} />
+        <TacticalEngineLinkBar link={engineLink} hideTitle />
       </div>
 
       <div className="tactical-trading-zone__tabs flex gap-1">

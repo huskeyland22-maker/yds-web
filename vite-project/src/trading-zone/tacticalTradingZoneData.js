@@ -68,6 +68,9 @@ export const TRADING_ZONE_TAKE_PROFIT_EMPTY = {
   partial: "부분익절 없음",
 }
 
+/** 실전 필드 미입력 시 표시 */
+export const TRADING_ZONE_FIELD_PENDING = "계산대기"
+
 /** @type {Record<TradingMarketId, { id: TradingMarketId; label: string; flag: string }>} */
 export const TRADING_MARKETS = {
   us: { id: "us", label: "미국", flag: "🇺🇸" },
