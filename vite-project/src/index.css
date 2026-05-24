@@ -1522,7 +1522,7 @@
   .tactical-zone-price-rail__body {
     position: relative;
     width: 100%;
-    padding-top: 36px;
+    padding-top: 42px;
   }
 
   .tactical-zone-price-rail__markers {
@@ -1530,7 +1530,7 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 34px;
+    height: 40px;
     pointer-events: none;
   }
 
@@ -1540,14 +1540,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
-    min-width: 44px;
+    justify-content: flex-end;
+    gap: 2px;
+    min-width: 48px;
     transform: translateX(-50%);
     text-align: center;
-    line-height: 1.1;
+    line-height: 1.05;
   }
 
   .tactical-zone-price-rail__marker-label {
+    display: block;
     font-size: 10px;
     font-weight: 600;
     color: rgba(148, 163, 184, 0.88);
@@ -1555,18 +1557,22 @@
   }
 
   .tactical-zone-price-rail__marker-val {
+    display: block;
     font-size: 13px;
     font-weight: 800;
     white-space: nowrap;
+    letter-spacing: 0.01em;
   }
 
   .tactical-zone-price-rail__marker--stop {
+    left: 0;
     transform: translateX(0);
     align-items: flex-start;
     text-align: left;
   }
 
   .tactical-zone-price-rail__marker--target {
+    left: 100%;
     transform: translateX(-100%);
     align-items: flex-end;
     text-align: right;
@@ -1576,16 +1582,27 @@
     color: rgba(252, 165, 165, 0.98);
   }
 
+  .tactical-zone-price-rail__marker--current {
+    z-index: 2;
+    padding: 3px 8px 2px;
+    border-radius: 5px;
+    background: rgba(251, 191, 36, 0.1);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.22);
+  }
+
   .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-val {
+    font-size: 15px;
+    font-weight: 900;
     color: rgba(253, 224, 71, 1);
     text-shadow:
-      0 0 12px rgba(251, 191, 36, 0.55),
-      0 0 4px rgba(251, 191, 36, 0.4);
+      0 0 14px rgba(251, 191, 36, 0.65),
+      0 0 6px rgba(251, 191, 36, 0.45);
   }
 
   .tactical-zone-price-rail__marker--current .tactical-zone-price-rail__marker-label {
-    color: rgba(253, 224, 71, 0.92);
-    font-weight: 700;
+    color: rgba(253, 224, 71, 0.95);
+    font-weight: 800;
+    font-size: 11px;
   }
 
   .tactical-zone-price-rail__marker--target .tactical-zone-price-rail__marker-val {
@@ -1632,7 +1649,8 @@
   .tactical-zone-core-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 10px;
+    grid-template-rows: repeat(2, minmax(0, auto));
+    gap: 8px;
     width: 100%;
     padding: 10px 12px;
     border-radius: 6px;
@@ -1646,6 +1664,8 @@
     flex-direction: column;
     gap: 3px;
     min-width: 0;
+    min-height: 40px;
+    justify-content: flex-start;
   }
 
   .tactical-zone-core-cell__label {
@@ -2438,7 +2458,9 @@
   }
 
   .tactical-trading-zone .panic-desk-section-header--compact {
-    margin-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 14px;
+    padding-top: 12px;
   }
 
   .panic-desk-section-header--cyan {
@@ -2591,22 +2613,21 @@
 
   .tactical-trading-zone.panic-desk-section {
     margin-top: 0;
-    padding-top: 0;
-  }
-
-  .tactical-trading-zone.panic-desk-section::before,
-  .tactical-trading-zone.panic-desk-section::after {
-    display: none;
+    padding-top: 10px;
   }
 
   .tactical-zone-aux-tag {
-    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.05);
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 4px 9px;
+    font-size: 12px;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1;
     color: rgba(203, 213, 225, 0.96);
     white-space: nowrap;
   }
@@ -2711,10 +2732,10 @@
   }
 
   .tactical-zone-history-badge--past {
-    opacity: 0.5;
-    color: rgba(148, 163, 184, 0.8) !important;
-    border-color: rgba(255, 255, 255, 0.06) !important;
-    background: rgba(255, 255, 255, 0.02) !important;
+    opacity: 0.6;
+    color: rgba(148, 163, 184, 0.88) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
   }
 
   .tactical-zone-history-badge--current {
@@ -2725,6 +2746,15 @@
   }
 
   @media (max-width: 768px) {
+    .tactical-trading-zone.panic-desk-section {
+      padding-top: 10px;
+    }
+
+    .tactical-trading-zone .panic-desk-section-header--compact {
+      margin-bottom: 12px;
+      padding-top: 10px;
+    }
+
     .tactical-zone-detail--flow {
       padding: 14px 10px 16px;
     }

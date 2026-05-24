@@ -25,15 +25,9 @@ export const TRADING_CORE_METRIC_FIELDS = [
     empty: TRADING_ZONE_FIELD_PENDING,
   },
   {
-    key: "holdingDays",
-    label: "보유일",
-    tooltip: "진입 후 경과 일수",
-    empty: "-",
-  },
-  {
     key: "weight",
-    label: "비중",
-    tooltip: "포트폴리오 내 비중",
+    label: "권장비중",
+    tooltip: "포트폴리오 내 권장 비중",
     empty: "-",
   },
 ]
