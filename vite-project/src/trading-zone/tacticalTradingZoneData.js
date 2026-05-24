@@ -163,8 +163,9 @@ const SEED_POSITIONS = [
     currentPrice: 221,
     aux: ["10MA", "20MA", "거래량"],
     stageHistory: [
-      { stage: "interest", at: "2026-05-10" },
-      { stage: "pullback", at: "2026-05-16" },
+      { stage: "interest", at: "2026-05-18" },
+      { stage: "pullback", at: "2026-05-20" },
+      { stage: "interest", at: "2026-05-22", note: "관심 유지" },
     ],
   },
   {

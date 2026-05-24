@@ -1311,10 +1311,17 @@
 
   .tactical-zone-stage-flow {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 2px 4px;
+    gap: 2px 3px;
     margin-top: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tactical-zone-stage-flow::-webkit-scrollbar {
+    display: none;
   }
 
   .tactical-zone-stage-flow__arrow {
@@ -1547,42 +1554,107 @@
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
+  .tactical-zone-progress__visual {
+    margin-top: 6px;
+  }
+
   .tactical-zone-progress__track {
     position: relative;
-    height: 6px;
-    margin-top: 6px;
-    border-radius: 3px;
+    height: 20px;
+    margin-top: 0;
     overflow: visible;
+  }
+
+  .tactical-zone-progress__rail {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    transform: translateY(-50%);
+    border-radius: 2px;
     background: linear-gradient(
       90deg,
-      rgba(239, 68, 68, 0.12) 0%,
-      rgba(251, 191, 36, 0.1) 50%,
-      rgba(59, 130, 246, 0.12) 100%
+      rgba(239, 68, 68, 0.2) 0%,
+      rgba(251, 191, 36, 0.16) 50%,
+      rgba(59, 130, 246, 0.2) 100%
     );
   }
 
   .tactical-zone-progress__fill {
-    display: block;
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(
-      90deg,
-      rgba(239, 68, 68, 0.55) 0%,
-      rgba(251, 191, 36, 0.65) 50%,
-      rgba(59, 130, 246, 0.55) 100%
-    );
-  }
-
-  .tactical-zone-progress__marker {
     position: absolute;
     top: 50%;
-    width: 8px;
-    height: 8px;
-    margin-left: -4px;
+    left: 0;
+    width: var(--progress-pct, 0%);
+    height: 3px;
     transform: translateY(-50%);
+    border-radius: 2px;
+    background: linear-gradient(
+      90deg,
+      rgba(239, 68, 68, 0.7) 0%,
+      rgba(251, 191, 36, 0.75) 100%
+    );
+    pointer-events: none;
+  }
+
+  .tactical-zone-progress__dot {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 9px;
+    height: 9px;
+    transform: translate(-50%, -50%);
     border-radius: 50%;
-    background: rgba(251, 191, 36, 0.95);
-    box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .tactical-zone-progress__dot--stop {
+    left: 0;
+    background: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.55);
+  }
+
+  .tactical-zone-progress__dot--current {
+    left: var(--progress-pct, 0%);
+    background: rgba(251, 191, 36, 0.98);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.55);
+  }
+
+  .tactical-zone-progress__dot--target {
+    left: 100%;
+    background: rgba(59, 130, 246, 0.95);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  }
+
+  .tactical-zone-progress__nums {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .tactical-zone-progress__nums-sep {
+    color: rgba(100, 116, 139, 0.55);
+    font-weight: 500;
+    padding: 0 2px;
+  }
+
+  .tactical-zone-progress__nums .tactical-zone-progress__stop {
+    flex: 1;
+    text-align: left;
+  }
+
+  .tactical-zone-progress__nums .tactical-zone-progress__current {
+    flex: 1;
+    text-align: center;
+  }
+
+  .tactical-zone-progress__nums .tactical-zone-progress__target {
+    flex: 1;
+    text-align: right;
   }
 
   .tactical-zone-progress__ruler {
@@ -1638,39 +1710,30 @@
     color: rgba(147, 197, 253, 0.98);
   }
 
-  .tactical-zone-history-log__item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .tactical-zone-history-log__arrow {
-    display: block;
-    font-size: 10px;
-    line-height: 1;
-    color: rgba(100, 116, 139, 0.7);
-    text-align: left;
-    padding: 2px 0 1px;
-  }
-
-  .tactical-zone-history-log__item:last-child .tactical-zone-history-log__arrow {
-    display: none;
-  }
-
-  .tactical-zone-history-log__row {
+  .tactical-zone-history-feed__line {
     display: flex;
     align-items: baseline;
     gap: 6px;
+    padding: 3px 0;
     font-size: 9px;
+    line-height: 1.35;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   }
 
-  .tactical-zone-history-log__date {
+  .tactical-zone-history-feed__line:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .tactical-zone-history-feed__date {
+    flex-shrink: 0;
+    min-width: 34px;
     color: rgba(100, 116, 139, 0.95);
   }
 
-  .tactical-zone-history-log__stage {
-    font-weight: 700;
-    color: rgba(203, 213, 225, 0.92);
+  .tactical-zone-history-feed__message {
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.94);
   }
 
   .tactical-zone-detail__grid {

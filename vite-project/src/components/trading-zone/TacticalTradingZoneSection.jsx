@@ -41,7 +41,7 @@ function StockChip({ position, selected, onSelect }) {
  * }} props
  */
 function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
-  const emptyLabel = bucketId === "takeProfit" ? "현재 없음" : "—"
+  const emptyLabel = bucketId === "takeProfit" ? "대기중" : "—"
 
   return (
     <div className="tactical-zone-bucket">

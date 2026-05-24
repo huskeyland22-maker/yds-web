@@ -1,6 +1,7 @@
 /**
  * 실전 매매 존 — 단계 이력 표시 (자동 기록용 스키마)
  */
+import { TRADING_STAGE_META } from "./tacticalTradingZoneData.js"
 
 /** @param {string | undefined} iso */
 export function formatStageHistoryDate(iso) {
@@ -15,13 +16,33 @@ export function formatStageHistoryDate(iso) {
 }
 
 /**
+ * @param {import("./tacticalTradingZoneData.js").TradingStageHistoryEntry} entry
+ * @param {number} index
+ * @param {import("./tacticalTradingZoneData.js").TradingStageId | null} prevStage
+ */
+export function buildStageHistoryMessage(entry, index, prevStage) {
+  if (entry.note?.trim()) return entry.note.trim()
+
+  const meta = TRADING_STAGE_META[entry.stage]
+  const label = meta?.label ?? entry.stage
+
+  if (index === 0) return `${label} 진입`
+  if (prevStage === entry.stage) return `${label} 유지`
+  return label
+}
+
+/**
  * @param {import("./tacticalTradingZoneData.js").TradingStageHistoryEntry[]} history
  */
 export function formatStageHistoryLog(history) {
   if (!history?.length) return []
-  return history.map((h) => ({
-    stage: h.stage,
-    dateLabel: formatStageHistoryDate(h.at),
-    note: h.note,
-  }))
+
+  return history.map((h, i) => {
+    const prev = i > 0 ? history[i - 1].stage : null
+    return {
+      stage: h.stage,
+      dateLabel: formatStageHistoryDate(h.at),
+      message: buildStageHistoryMessage(h, i, prev),
+    }
+  })
 }
