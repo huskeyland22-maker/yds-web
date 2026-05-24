@@ -139,23 +139,23 @@ export default function TacticalStockDetailPanel({ position }) {
               <span className="tactical-zone-detail__achieve-val">{progress.progressPct}%</span>
               <span className="tactical-zone-detail__achieve-label">목표달성</span>
             </p>
-            <div className="tactical-zone-trade-info" role="group" aria-label="핵심 매매정보">
+            <div className="tactical-zone-trade-info-row" role="group" aria-label="핵심 매매정보">
               {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty, tone }) => {
                 const value = coreMetrics[key]
                 const pending = isCoreMetricPlaceholder(value, empty)
                 return (
-                  <article key={key} className="tactical-zone-info-card" title={tooltip}>
-                    <span className="tactical-zone-info-card__label">{label}</span>
+                  <div key={key} className="tactical-zone-info-item" title={tooltip}>
+                    <span className="tactical-zone-info-item__label">{label}</span>
                     <span
                       className={[
-                        "tactical-zone-info-card__value font-mono tabular-nums",
-                        pending ? "tactical-zone-info-card__value--placeholder" : "",
-                        !pending ? `tactical-zone-info-card__value--${tone}` : "",
+                        "tactical-zone-info-item__value font-mono tabular-nums",
+                        pending ? "tactical-zone-info-item__value--placeholder" : "",
+                        !pending ? `tactical-zone-info-item__value--${tone}` : "",
                       ].join(" ")}
                     >
                       {value}
                     </span>
-                  </article>
+                  </div>
                 )
               })}
             </div>

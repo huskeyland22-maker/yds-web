@@ -1723,9 +1723,9 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 8px;
     transform: none !important;
     left: auto !important;
   }
@@ -1761,77 +1761,70 @@
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
   }
 
-  .tactical-zone-trade-info {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-    gap: 20px;
+  .tactical-zone-trade-info-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 16px;
     width: 100%;
-    max-width: 420px;
-    margin: 24px auto 0;
-    padding: 0 8px;
+    margin-top: 18px;
+    padding: 10px 0;
     box-sizing: border-box;
-    justify-content: center;
-    align-items: stretch;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .tactical-zone-info-card {
+  .tactical-zone-info-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-width: 0;
-    min-height: 60px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-width: 80px;
+    flex: 1 1 80px;
+    max-width: 120px;
     text-align: center;
     cursor: help;
   }
 
-  .tactical-zone-info-card__label {
+  .tactical-zone-info-item__label {
     display: block;
-    width: 100%;
-    margin: 0 0 6px;
+    margin: 0 0 4px;
     font-size: 11px;
     font-weight: 600;
     line-height: 1.2;
     color: rgba(226, 232, 240, 0.92);
-    opacity: 0.7;
+    opacity: 0.65;
+    white-space: nowrap;
   }
 
-  .tactical-zone-info-card__value {
+  .tactical-zone-info-item__value {
     display: block;
-    width: 100%;
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    line-height: 1.15;
+    line-height: 1;
     letter-spacing: 0.01em;
   }
 
-  .tactical-zone-info-card__value--placeholder {
-    font-size: 16px;
+  .tactical-zone-info-item__value--placeholder {
     font-weight: 600;
-    color: rgba(100, 116, 139, 0.62);
+    color: #94a3b8;
     opacity: 1;
   }
 
-  .tactical-zone-info-card__value--gain {
-    color: rgba(74, 222, 128, 0.98);
+  .tactical-zone-info-item__value--gain {
+    color: #22c55e;
   }
 
-  .tactical-zone-info-card__value--upside {
-    color: rgba(253, 224, 71, 0.98);
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.22);
+  .tactical-zone-info-item__value--upside {
+    color: #facc15;
   }
 
-  .tactical-zone-info-card__value--risk {
-    color: rgba(252, 165, 165, 0.98);
+  .tactical-zone-info-item__value--risk {
+    color: #ef4444;
   }
 
-  .tactical-zone-info-card__value--weight {
-    color: rgba(96, 165, 250, 0.98);
+  .tactical-zone-info-item__value--weight {
+    color: #94a3b8;
   }
 
   .tactical-zone-detail__foot {
@@ -2917,26 +2910,19 @@
       height: 34px;
     }
 
-    .tactical-zone-trade-info {
-      grid-template-columns: repeat(2, minmax(100px, 1fr));
-      gap: 12px;
-      max-width: min(100%, 420px);
-      margin-top: 16px;
-      padding: 0 4px;
+    .tactical-zone-trade-info-row {
+      gap: 10px 12px;
+      margin-top: 14px;
+      padding: 8px 0;
     }
 
-    .tactical-zone-info-card {
-      min-height: 56px;
-      padding: 8px 10px;
-      border-radius: 8px;
+    .tactical-zone-info-item {
+      min-width: 72px;
+      flex: 1 1 72px;
+      max-width: none;
     }
 
-    .tactical-zone-info-card__label {
-      font-size: 10px;
-      margin-bottom: 4px;
-    }
-
-    .tactical-zone-info-card__value {
+    .tactical-zone-info-item__value {
       font-size: 16px;
     }
 
