@@ -112,14 +112,14 @@ export default function TacticalTradingZoneSection({
     <section className="tactical-trading-zone trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
       <div className="tactical-trading-zone__head border-l-2 border-orange-400/45 pl-2">
         <p className="m-0 text-[11px] font-bold text-slate-100">실전 매매 존</p>
-        <p className="m-0 text-[9px] text-slate-500">미국 · 한국 · 관심 · 눌림 · 추세 · 1종목 1상태</p>
+        <p className="m-0 tactical-trading-zone__sub">미국 · 한국 · 관심 · 눌림 · 추세 · 1종목 1상태</p>
       </div>
 
-      <div className="mt-1.5">
+      <div className="tactical-trading-zone__engine">
         <TacticalEngineLinkBar link={engineLink} />
       </div>
 
-      <div className="tactical-trading-zone__tabs mt-1.5 flex gap-1">
+      <div className="tactical-trading-zone__tabs flex gap-1">
         {Object.values(TRADING_MARKETS).map((m) => (
           <button
             key={m.id}
@@ -136,7 +136,7 @@ export default function TacticalTradingZoneSection({
         ))}
       </div>
 
-      <div className="tactical-trading-zone__buckets mt-1.5">
+      <div className="tactical-trading-zone__buckets">
         {TRADING_BUCKET_ORDER.map((bucketId) => (
           <BucketCard
             key={bucketId}
@@ -150,7 +150,7 @@ export default function TacticalTradingZoneSection({
       </div>
 
       {selectedPosition ? (
-        <div className="mt-1.5">
+        <div className="tactical-trading-zone__detail">
           <TacticalStockDetailPanel position={selectedPosition} />
         </div>
       ) : null}

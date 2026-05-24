@@ -23,7 +23,7 @@ export default function TacticalEngineLinkBar({ link }) {
     <div className="tactical-zone-engine-link" aria-label="시장 엔진 연계">
       <p className="m-0 tactical-zone-engine-link__section-title">시장 엔진 연계</p>
 
-      <div className="tactical-zone-engine-link__market-card mt-1">
+      <div className="tactical-zone-engine-link__market-card">
         <p className="m-0 tactical-zone-engine-link__market-head">현재 시장 상태</p>
         <div className="tactical-zone-engine-link__status-grid">
           {orderedCards.map((c) => {
@@ -44,7 +44,7 @@ export default function TacticalEngineLinkBar({ link }) {
       </div>
 
       {link.actions.length ? (
-        <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis tactical-zone-engine-link__action-card--compact mt-1">
+        <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis tactical-zone-engine-link__action-card--slim">
           <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
           <ul className="tactical-zone-engine-link__action-list m-0 list-none p-0">
             {link.actions.map((line) => {
