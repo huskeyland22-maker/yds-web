@@ -1,7 +1,9 @@
 /**
  * 실전 매매 존 — 투자 전략 엔진(단·중·장·실전) 연계 (기존 HUD 값 재사용, 신규 점수 계산 없음)
  */
+import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { buildTodayActionPanel } from "../utils/buildTodayActionPanel.js"
+import { getFinalScore } from "../utils/tradingScores.js"
 
 /**
  * @typedef {{
@@ -22,8 +24,23 @@ export const ENGINE_LINK_HORIZON_DOT = {
   tactical: "🔵",
 }
 
+/** @type {Record<string, string>} */
+export const ENGINE_LINK_HORIZON_TOP_BAR = {
+  short: "#22c55e",
+  mid: "#facc15",
+  long: "#94a3b8",
+  tactical: "#3b82f6",
+}
+
 /** @type {string[]} */
 export const ENGINE_LINK_CARD_ORDER = ["short", "mid", "long", "tactical"]
+
+/**
+ * @typedef {{
+ *   emoji: string
+ *   label: string
+ * }} EngineLinkMacroStage
+ */
 
 /**
  * @typedef {{
@@ -31,6 +48,7 @@ export const ENGINE_LINK_CARD_ORDER = ["short", "mid", "long", "tactical"]
  *   cards: EngineLinkCard[]
  *   actions: string[]
  *   actionSummary?: string
+ *   macroStage?: EngineLinkMacroStage | null
  * }} TradingZoneEngineLink
  */
 
@@ -113,10 +131,17 @@ export function buildTradingZoneEngineLink({
 
   const actions = deriveActionLines(cards)
 
+  const panicScore = panicData ? getFinalScore(panicData) : null
+  const macro = resolveMacroV1Status(panicScore)
+  const macroStage = macro
+    ? { emoji: macro.emoji, label: macro.label }
+    : null
+
   return {
     ready: true,
     cards,
     actions,
     actionSummary: formatEngineActionSummary(actions),
+    macroStage,
   }
 }

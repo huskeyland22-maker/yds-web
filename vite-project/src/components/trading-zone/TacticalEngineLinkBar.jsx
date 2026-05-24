@@ -30,7 +30,8 @@ export default function TacticalEngineLinkBar({ link, hideTitle = false }) {
             const hint = c.scoreHint ?? c.action
             const dot = ENGINE_LINK_HORIZON_DOT[c.id] ?? "⚪"
             return (
-              <div key={c.id} className="tactical-zone-market-status">
+              <div key={c.id} className="tactical-zone-market-status" data-horizon={c.id}>
+                <span className="tactical-zone-market-status__top-bar" aria-hidden />
                 <p className="m-0 tactical-zone-market-status__period">
                   <span className="tactical-zone-market-status__dot" aria-hidden>
                     {dot}
@@ -40,38 +41,50 @@ export default function TacticalEngineLinkBar({ link, hideTitle = false }) {
                 <p className="m-0 tactical-zone-market-status__score font-mono tabular-nums">
                   {c.score ?? "—"}
                 </p>
-                <p className="m-0 tactical-zone-market-status__hint">{hint}</p>
+                <p className="m-0 tactical-zone-market-status__label">{hint}</p>
               </div>
             )
           })}
         </div>
       </div>
 
-      {link.actions.length ? (
+      {link.actions.length || link.macroStage ? (
         <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis tactical-zone-engine-link__action-card--slim">
-          <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
-          <ul className="tactical-zone-engine-link__action-list m-0 list-none p-0">
-            {link.actions.map((line) => {
-              const isRestrict = /제한|축소|경계/.test(line)
-              const tone = isRestrict ? "warn" : "allow"
-              const icon = isRestrict ? "⚠" : "🟢"
-              const text = line.replace(/\s*\/\s*/g, "·").replace(/\s+/g, " ").trim()
-              return (
-                <li
-                  key={line}
-                  className={[
-                    "tactical-zone-engine-link__action-line",
-                    `tactical-zone-engine-link__action-line--${tone}`,
-                  ].join(" ")}
-                >
-                  <span className="tactical-zone-engine-link__action-icon" aria-hidden>
-                    {icon}
-                  </span>
-                  <span>{text}</span>
-                </li>
-              )
-            })}
-          </ul>
+          {link.actions.length ? (
+            <>
+              <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
+              <ul className="tactical-zone-engine-link__action-list m-0 list-none p-0">
+                {link.actions.map((line) => {
+                  const isRestrict = /제한|축소|경계/.test(line)
+                  const tone = isRestrict ? "warn" : "allow"
+                  const icon = isRestrict ? "⚠" : "🟢"
+                  const text = line.replace(/\s*\/\s*/g, "·").replace(/\s+/g, " ").trim()
+                  return (
+                    <li
+                      key={line}
+                      className={[
+                        "tactical-zone-engine-link__action-line",
+                        `tactical-zone-engine-link__action-line--${tone}`,
+                      ].join(" ")}
+                    >
+                      <span className="tactical-zone-engine-link__action-icon" aria-hidden>
+                        {icon}
+                      </span>
+                      <span>{text}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </>
+          ) : null}
+          {link.macroStage ? (
+            <p className="m-0 tactical-zone-engine-link__macro-stage">
+              <span className="tactical-zone-engine-link__macro-stage-head">거시단계:</span>
+              <span className="tactical-zone-engine-link__macro-stage-val">
+                <span aria-hidden>{link.macroStage.emoji}</span> {link.macroStage.label}
+              </span>
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>
