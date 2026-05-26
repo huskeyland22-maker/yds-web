@@ -56,7 +56,7 @@ export default function PanicDeskDashboard({
       </div>
 
       <div className="panic-v2-desk__metrics-slot panic-desk-section panic-desk-section--cyan panic-desk-section--lead">
-        <HomeV5DeskLead panicData={panicData} />
+        <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
       </div>
 
       <div className="panic-v2-desk__history-slot panic-desk-section panic-desk-section--amber">

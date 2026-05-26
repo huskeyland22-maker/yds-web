@@ -7,10 +7,13 @@ import HomeV5StrategyHero from "./HomeV5StrategyHero.jsx"
 
 /**
  * 홈 v5 상단 — 핵심지수 · 전략 Hero · 시장 분석
- * @param {{ panicData?: object | null; className?: string }} props
+ * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
  */
-export default function HomeV5DeskLead({ panicData = null, className = "" }) {
-  const model = useMemo(() => buildHomeV5DeskModel(panicData), [panicData])
+export default function HomeV5DeskLead({ panicData = null, historyRows = [], className = "" }) {
+  const model = useMemo(
+    () => buildHomeV5DeskModel(panicData, historyRows),
+    [panicData, historyRows],
+  )
 
   return (
     <div

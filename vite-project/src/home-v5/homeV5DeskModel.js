@@ -1,5 +1,6 @@
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
+import { buildHomeV5CoreTrend } from "./homeV5CoreTrend.js"
 
 /** @typedef {"fearGreed" | "vix" | "highYield"} HomeV5CoreKey */
 
@@ -8,6 +9,10 @@ import { getFinalScore } from "../utils/tradingScores.js"
  *   role: string
  *   symbol: string
  *   value: string
+ *   trendLine: string
+ *   trendDir: "up" | "down" | "flat"
+ *   caption: string
+ *   sparkline: string | null
  * }} HomeV5CoreCardModel */
 
 /** @typedef {{
@@ -57,17 +62,23 @@ function fmtNum(v, digits = 1) {
 /**
  * @param {HomeV5CoreKey} key
  * @param {object | null | undefined} panicData
+ * @param {object[]} [historyRows]
  */
-export function buildHomeV5CoreCard(key, panicData) {
+export function buildHomeV5CoreCard(key, panicData, historyRows = []) {
   const raw = panicData?.[key]
   const n = Number(raw)
   const digits = key === "highYield" ? 1 : 0
+  const trend = buildHomeV5CoreTrend(key, panicData, historyRows)
 
   return {
     key,
     role: CORE_ROLES[key],
     symbol: VALUE_LINES[key],
     value: Number.isFinite(n) ? fmtNum(n, digits) : "—",
+    trendLine: trend.trendLine,
+    trendDir: trend.trendDir,
+    caption: trend.caption,
+    sparkline: trend.sparkline,
   }
 }
 
@@ -104,11 +115,12 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
 
 /**
  * @param {object | null | undefined} panicData
+ * @param {object[]} [historyRows]
  * @returns {{ core: HomeV5CoreCardModel[]; strategy: HomeV5StrategyModel | null }}
  */
-export function buildHomeV5DeskModel(panicData) {
+export function buildHomeV5DeskModel(panicData, historyRows = []) {
   const core = /** @type {HomeV5CoreKey[]} */ (["fearGreed", "vix", "highYield"]).map((key) =>
-    buildHomeV5CoreCard(key, panicData),
+    buildHomeV5CoreCard(key, panicData, historyRows),
   )
 
   const score = panicData ? getFinalScore(panicData) : null
