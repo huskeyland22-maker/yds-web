@@ -8335,6 +8335,20 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-bottom: 0.55rem;
 }
 
+.home-v5-strategy-validation__controls--simple {
+  gap: 0.5rem;
+}
+
+.home-v5-strategy-validation__controls--simple .home-v5-strategy-validation__field {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.home-v5-strategy-validation__controls--simple .home-v5-strategy-validation__run {
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+}
+
 .home-v5-strategy-validation__field {
   display: flex;
   flex-direction: column;

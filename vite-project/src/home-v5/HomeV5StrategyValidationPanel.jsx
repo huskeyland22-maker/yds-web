@@ -9,8 +9,6 @@ import {
   loadHomeV5StrategyLogs,
 } from "./homeV5StrategyLogPersist.js"
 
-/** @typedef {import("./homeV5StrategyValidation.js").HomeV5ReplayMode} HomeV5ReplayMode */
-
 /**
  * @param {{ historyRows?: object[]; defaultOpen?: boolean; compact?: boolean }} props
  */
@@ -21,8 +19,7 @@ export default function HomeV5StrategyValidationPanel({
 }) {
   const panelId = useId()
   const [open, setOpen] = useState(defaultOpen)
-  const [replayMode, setReplayMode] = useState(/** @type {HomeV5ReplayMode} */ ("anchors"))
-  const [scenarioId, setScenarioId] = useState("all")
+  const [scenarioId, setScenarioId] = useState(HOME_V5_VALIDATION_SCENARIOS[0]?.id ?? "")
   const [results, setResults] = useState([])
   const [logTick, setLogTick] = useState(0)
 
@@ -35,21 +32,16 @@ export default function HomeV5StrategyValidationPanel({
   const grouped = useMemo(() => groupValidationByScenario(results), [results])
 
   const runValidation = useCallback(() => {
-    if (!historyRows.length) return
-    const out = runHomeV5StrategyValidation(historyRows, replayMode, {
+    if (!historyRows.length || !scenarioId) return
+    const out = runHomeV5StrategyValidation(historyRows, "anchors", {
       persistLog: true,
-      scenarioId: scenarioId === "all" ? undefined : scenarioId,
+      scenarioId,
     })
     setResults(out)
     setLogTick((t) => t + 1)
-  }, [historyRows, replayMode, scenarioId])
+  }, [historyRows, scenarioId])
 
   const logCount = useMemo(() => loadHomeV5StrategyLogs().length, [results, logTick])
-
-  const eventSummary = useMemo(
-    () => HOME_V5_VALIDATION_SCENARIOS.map((s) => s.label).join(" · "),
-    [],
-  )
 
   return (
     <section
@@ -71,38 +63,26 @@ export default function HomeV5StrategyValidationPanel({
       >
         <span className="home-v5-strategy-validation__toggle-main">
           <span className="home-v5-strategy-validation__title">
-            <span aria-hidden>{open ? "▲" : "▼"}</span>
+            <span className="home-v5-strategy-validation__chevron" aria-hidden>
+              {open ? "▲" : "▼"}
+            </span>
             <span>전략 연구실</span>
             <span className="home-v5-strategy-validation__lab-tag">LAB</span>
           </span>
         </span>
-        <span className="home-v5-strategy-validation__hint">
-          {open ? "시장 재생 · 판정 · 타임라인" : `시장 재생 · ${eventSummary}`}
-          {logCount > 0 ? ` · 로그 ${logCount}건` : ""}
-        </span>
+        <span className="home-v5-strategy-validation__hint">전략 검증 / 백테스트</span>
       </button>
 
       <div id={panelId} className="home-v5-strategy-validation__panel" hidden={!open}>
         <p className="home-v5-strategy-validation__meta">
           히스토리 {historyMeta.count}행 · {historyMeta.from} ~ {historyMeta.to}
+          {logCount > 0 ? ` · 로그 ${logCount}건` : ""}
         </p>
 
-        <div className="home-v5-strategy-validation__controls">
-          <label className="home-v5-strategy-validation__field">
-            <span>재생</span>
-            <select
-              value={replayMode}
-              onChange={(e) => setReplayMode(/** @type {HomeV5ReplayMode} */ (e.target.value))}
-            >
-              <option value="anchors">앵커 일자</option>
-              <option value="weekly">주간</option>
-              <option value="daily">일별</option>
-            </select>
-          </label>
+        <div className="home-v5-strategy-validation__controls home-v5-strategy-validation__controls--simple">
           <label className="home-v5-strategy-validation__field">
             <span>이벤트</span>
             <select value={scenarioId} onChange={(e) => setScenarioId(e.target.value)}>
-              <option value="all">전체</option>
               {HOME_V5_VALIDATION_SCENARIOS.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.label}
@@ -113,17 +93,17 @@ export default function HomeV5StrategyValidationPanel({
           <button
             type="button"
             className="home-v5-strategy-validation__run"
-            disabled={!historyRows.length}
+            disabled={!historyRows.length || !scenarioId}
             onClick={runValidation}
           >
-            재생 · 판정
+            ▶ 재생
           </button>
         </div>
 
         {grouped.length === 0 ? (
           <p className="home-v5-strategy-validation__empty">
             {historyRows.length
-              ? "재생 · 판정을 실행하면 히스토리 카드와 타임라인이 표시됩니다."
+              ? "이벤트를 선택한 뒤 ▶ 재생을 누르면 판정·타임라인이 표시됩니다."
               : "히스토리 데이터가 없습니다. 시장 엔진 히스토리 로드 후 다시 시도하세요."}
           </p>
         ) : (
