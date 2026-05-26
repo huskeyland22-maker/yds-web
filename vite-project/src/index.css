@@ -8472,6 +8472,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-align: center;
 }
 
+.home-v5-strategy-validation__timeline-node.is-current .home-v5-strategy-validation__timeline-date {
+  color: rgba(255, 255, 255, 1);
+  text-shadow:
+    0 0 10px rgba(103, 232, 249, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
 .home-v5-strategy-validation__timeline-node.is-current .home-v5-strategy-validation__timeline-dot {
   box-shadow:
     0 0 0 2px rgba(248, 250, 252, 0.95),
@@ -8518,6 +8525,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: rgba(239, 68, 68, 0.14);
 }
 
+.home-v5-strategy-validation__timeline-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
 .home-v5-strategy-validation__timeline-label {
   font-size: 0.625rem;
   font-weight: 600;
@@ -8527,20 +8541,22 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-strategy-validation__timeline-date {
-  font-size: 0.5625rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-  color: rgba(148, 163, 184, 0.95);
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
 }
 
 .home-v5-strategy-validation__timeline-duration {
   font-size: 0.5rem;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
-  color: rgba(100, 116, 139, 0.92);
+  color: rgba(180, 190, 210, 0.7);
   white-space: nowrap;
 }
 
@@ -8562,7 +8578,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   align-items: center;
   flex: 1 1 auto;
   min-width: 1.5rem;
-  margin-top: 1.35rem;
+  margin-top: 1.65rem;
   padding: 0 0.15rem;
   gap: 0.1rem;
 }

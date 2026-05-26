@@ -268,6 +268,13 @@ function labDaysUntilNext(fromIso, toIso) {
   return Math.max(1, Math.round(ms))
 }
 
+/** @param {string} dateLabel */
+export function formatLabTimelineDate(dateLabel) {
+  const s = String(dateLabel ?? "").slice(0, 7)
+  if (/^\d{4}-\d{2}$/.test(s)) return s.replace("-", ".")
+  return s
+}
+
 /**
  * 재생 결과(앵커) 1행 = 타임라인 1노드 — 카드와 날짜·순서 동기화
  * @param {ReturnType<typeof evaluateAt>[]} results
@@ -287,6 +294,7 @@ export function buildRegimeTimeline(results, scenarioEnd = "") {
       regimeId: r.regimeId,
       date,
       dateLabel,
+      dateDisplay: formatLabTimelineDate(dateLabel),
       durationDays,
       missing: Boolean(r.missing),
     }

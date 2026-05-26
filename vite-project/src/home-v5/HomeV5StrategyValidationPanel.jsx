@@ -66,7 +66,7 @@ function StrategyResultCard({ row, active = false, onSelect }) {
 /**
  * @param {{
  *   scenario: { label: string }
- *   timeline: { emoji: string; label: string; dateLabel: string; durationDays?: number | null; regimeId?: string; date: string; missing?: boolean }[]
+ *   timeline: { emoji: string; label: string; dateDisplay?: string; dateLabel: string; durationDays?: number | null; regimeId?: string; date: string; missing?: boolean }[]
  *   currentIndex?: number
  *   onStepSelect?: (index: number) => void
  * }} props
@@ -97,13 +97,17 @@ function RegimeTimeline({ scenario, timeline, currentIndex = -1, onStepSelect })
                 aria-current={isCurrent ? "step" : undefined}
                 onClick={() => onStepSelect?.(idx)}
               >
-                <span className="home-v5-strategy-validation__timeline-dot" aria-hidden>
-                  {step.emoji}
-                </span>
-                <span className="home-v5-strategy-validation__timeline-label">{step.label}</span>
-                {step.dateLabel ? (
-                  <span className="home-v5-strategy-validation__timeline-date">{step.dateLabel}</span>
+                {(step.dateDisplay ?? step.dateLabel) ? (
+                  <span className="home-v5-strategy-validation__timeline-date">
+                    {step.dateDisplay ?? step.dateLabel}
+                  </span>
                 ) : null}
+                <span className="home-v5-strategy-validation__timeline-status">
+                  <span className="home-v5-strategy-validation__timeline-dot" aria-hidden>
+                    {step.emoji}
+                  </span>
+                  <span className="home-v5-strategy-validation__timeline-label">{step.label}</span>
+                </span>
                 {step.durationDays != null ? (
                   <span className="home-v5-strategy-validation__timeline-duration">{step.durationDays}d</span>
                 ) : null}
