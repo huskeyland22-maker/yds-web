@@ -66,7 +66,7 @@ function coreStatusLine(key, value) {
   }
   if (key === "highYield") {
     if (s.label === "위험") return "🔴 위험"
-    if (s.label === "주의") return "🟡 주의"
+    if (s.label === "경계") return "🟡 경계"
     return "🟢 정상"
   }
   return s.label

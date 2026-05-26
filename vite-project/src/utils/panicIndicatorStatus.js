@@ -41,8 +41,8 @@ export function getStatus(key, value) {
       return { label: "안정", className: "safe" }
     case "highYield":
       if (n >= 5) return { label: "위험", className: "danger" }
-      if (n >= 3) return { label: "주의", className: "warning" }
-      return { label: "안정", className: "safe" }
+      if (n >= 4.5) return { label: "경계", className: "warning" }
+      return { label: "정상", className: "safe" }
     case "gsBullBear":
       if (n >= 80) return { label: "과열", className: "danger" }
       if (n <= 20) return { label: "공포", className: "danger" }
