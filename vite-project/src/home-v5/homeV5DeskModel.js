@@ -1,17 +1,18 @@
+import { resolveCoreHudStatusLabel } from "./homeV5CoreHudStatus.js"
 import { buildHomeV5CoreTrend } from "./homeV5CoreTrend.js"
 import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
 
-/** @typedef {"fearGreed" | "vix" | "highYield"} HomeV5CoreKey */
+/** @typedef {"fearGreed" | "vix" | "highYield" | "strategy"} HomeV5CoreKey */
 
 /** @typedef {{
  *   key: HomeV5CoreKey
+ *   kind: "metric" | "strategy"
  *   role: string
- *   symbol: string
  *   value: string
  *   trendLine: string
  *   trendDir: "up" | "down" | "flat"
- *   caption: string
- *   sparkline: string | null
+ *   statusLabel: string
+ *   accentColor?: string
  * }} HomeV5CoreCardModel */
 
 /** @typedef {{
@@ -71,13 +72,30 @@ export function buildHomeV5CoreCard(key, panicData, historyRows = []) {
 
   return {
     key,
+    kind: "metric",
     role: CORE_ROLES[key],
-    symbol: VALUE_LINES[key],
     value: Number.isFinite(n) ? fmtNum(n, digits) : "—",
     trendLine: trend.trendLine,
     trendDir: trend.trendDir,
-    caption: trend.caption,
-    sparkline: trend.sparkline,
+    statusLabel: resolveCoreHudStatusLabel(key, raw),
+  }
+}
+
+/**
+ * @param {NonNullable<ReturnType<typeof buildHomeV5StrategyEvaluation>>} evaluation
+ * @returns {HomeV5CoreCardModel}
+ */
+function buildHomeV5StrategyHudCard(evaluation) {
+  const actionCompact = String(evaluation.action).replace("기본 비중", "기본비중")
+  return {
+    key: "strategy",
+    kind: "strategy",
+    role: "전략",
+    value: `${evaluation.emoji} ${evaluation.label}`,
+    trendLine: actionCompact,
+    trendDir: "flat",
+    statusLabel: "거시 연동",
+    accentColor: evaluation.color,
   }
 }
 
@@ -147,11 +165,15 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
  * @returns {{ core: HomeV5CoreCardModel[]; strategy: HomeV5StrategyModel | null }}
  */
 export function buildHomeV5DeskModel(panicData, historyRows = []) {
-  const core = /** @type {HomeV5CoreKey[]} */ (["fearGreed", "vix", "highYield"]).map((key) =>
-    buildHomeV5CoreCard(key, panicData, historyRows),
-  )
+  const metrics = /** @type {("fearGreed" | "vix" | "highYield")[]} */ ([
+    "fearGreed",
+    "vix",
+    "highYield",
+  ]).map((key) => buildHomeV5CoreCard(key, panicData, historyRows))
 
   const evaluation = buildHomeV5StrategyEvaluation(panicData, historyRows)
+  const core = evaluation ? [...metrics, buildHomeV5StrategyHudCard(evaluation)] : metrics
+
   if (!evaluation) {
     return { core, strategy: null }
   }

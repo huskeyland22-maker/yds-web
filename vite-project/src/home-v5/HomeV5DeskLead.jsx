@@ -6,7 +6,7 @@ import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { buildHomeV5DeskModel } from "./homeV5DeskModel.js"
 import HomeV5CoreIndices from "./HomeV5CoreIndices.jsx"
 import HomeV5MarketAnalysis from "./HomeV5MarketAnalysis.jsx"
-import HomeV5StrategyHero from "./HomeV5StrategyHero.jsx"
+import HomeV5StrategyRationaleBar from "./HomeV5StrategyRationaleBar.jsx"
 
 /**
  * 홈 v5 상단 — 핵심지수 · 전략 Hero · 시장 분석
@@ -31,6 +31,7 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
         "home-v5-preview",
         "home-v5-preview--compact",
         "home-v5-preview--hero",
+        "home-v5-preview--hud",
         className,
       ]
         .filter(Boolean)
@@ -39,16 +40,7 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
       <div className="home-v5-preview__zone home-v5-preview__zone--core">
         <PanicDeskSectionHeader icon="📊" title="핵심 지수" tone="cyan" compact />
         <HomeV5CoreIndices cards={model.core} />
-      </div>
-
-      <div className="home-v5-preview__zone home-v5-preview__zone--strategy">
-        {model.strategy ? (
-          <HomeV5StrategyHero strategy={model.strategy} />
-        ) : (
-          <p className="home-v5-preview__placeholder home-v5-preview__placeholder--hero">
-            지표 입력 후 전략 엔진 표시
-          </p>
-        )}
+        {model.strategy ? <HomeV5StrategyRationaleBar strategy={model.strategy} /> : null}
       </div>
 
       <div className="home-v5-preview__zone home-v5-preview__zone--market">
