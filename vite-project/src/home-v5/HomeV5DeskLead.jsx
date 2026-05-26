@@ -7,6 +7,7 @@ import { buildHomeV5DeskModel } from "./homeV5DeskModel.js"
 import HomeV5CoreIndices from "./HomeV5CoreIndices.jsx"
 import HomeV5MarketAnalysis from "./HomeV5MarketAnalysis.jsx"
 import HomeV5StrategyRationaleBar from "./HomeV5StrategyRationaleBar.jsx"
+import HomeV5StrategyValidationPanel from "./HomeV5StrategyValidationPanel.jsx"
 
 /**
  * 홈 v5 상단 — 핵심지수 · 전략 Hero · 시장 분석
@@ -45,6 +46,10 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
 
       <div className="home-v5-preview__zone home-v5-preview__zone--market">
         <HomeV5MarketAnalysis panicData={panicData} />
+      </div>
+
+      <div className="home-v5-preview__zone home-v5-preview__zone--validation">
+        <HomeV5StrategyValidationPanel historyRows={mergedHistory} compact />
       </div>
     </div>
   )

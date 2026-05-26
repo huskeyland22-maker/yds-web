@@ -8256,3 +8256,240 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.625rem;
   color: rgba(100, 116, 139, 0.95);
 }
+
+/* /cycle — 전략 엔진 검증 (접이식, 핵심지수·시장분석 아래) */
+.home-v5-preview__zone--validation {
+  margin-top: 0.35rem;
+}
+
+.home-v5-strategy-validation {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+}
+
+.home-v5-strategy-validation__toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-v5-strategy-validation__toggle-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.home-v5-strategy-validation__hint {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.home-v5-strategy-validation__panel {
+  padding: 0 0.65rem 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.home-v5-strategy-validation__meta {
+  margin: 0.5rem 0 0.45rem;
+  font-size: 0.625rem;
+  color: rgba(148, 163, 184, 0.88);
+}
+
+.home-v5-strategy-validation__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: flex-end;
+  margin-bottom: 0.55rem;
+}
+
+.home-v5-strategy-validation__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.5625rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.home-v5-strategy-validation__field select {
+  min-width: 6.5rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.35rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: rgba(248, 250, 252, 0.95);
+  font-size: 0.6875rem;
+}
+
+.home-v5-strategy-validation__run {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  border-radius: 0.35rem;
+  background: rgba(37, 99, 235, 0.22);
+  color: rgba(226, 232, 240, 0.95);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-v5-strategy-validation__run:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.home-v5-strategy-validation__empty {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: 0.6875rem;
+  color: rgba(148, 163, 184, 0.88);
+}
+
+.home-v5-strategy-validation__scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.home-v5-strategy-validation__scenario-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.home-v5-strategy-validation__scenario-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.home-v5-strategy-validation__scenario-range {
+  font-size: 0.625rem;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.home-v5-strategy-validation__timeline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  margin-bottom: 0.45rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.home-v5-strategy-validation__timeline-step {
+  display: inline-flex;
+  align-items: center;
+}
+
+.home-v5-strategy-validation__timeline-arrow {
+  margin: 0 0.2rem;
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.home-v5-strategy-validation__timeline-emoji {
+  cursor: default;
+}
+
+.home-v5-strategy-validation__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.4rem;
+}
+
+.home-v5-strategy-hist-card {
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 18, 28, 0.55);
+}
+
+.home-v5-strategy-hist-card--missing {
+  opacity: 0.65;
+}
+
+.home-v5-strategy-hist-card__date {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.home-v5-strategy-hist-card__status {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.home-v5-strategy-hist-card__action {
+  margin: 0.2rem 0 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: rgba(103, 232, 249, 0.9);
+}
+
+.home-v5-strategy-hist-card__rationale {
+  margin-top: 0.35rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.home-v5-strategy-hist-card__rationale-k {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.home-v5-strategy-hist-card__rationale-list {
+  margin: 0.2rem 0 0;
+  padding: 0 0 0 0.85rem;
+  font-size: 0.625rem;
+  line-height: 1.35;
+  color: rgba(203, 213, 225, 0.88);
+}
+
+.home-v5-strategy-hist-card__rationale-list li + li {
+  margin-top: 0.1rem;
+}
+
+.home-v5-strategy-validation__foot {
+  margin-top: 0.45rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.home-v5-strategy-validation__link-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.625rem;
+  color: rgba(148, 163, 184, 0.9);
+  cursor: pointer;
+  text-decoration: underline;
+}

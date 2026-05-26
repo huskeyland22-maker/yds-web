@@ -148,6 +148,8 @@ function evaluateAt(panicData, historyUpTo, meta) {
       statusLabel: "데이터 없음",
       action: "—",
       rationale: "해당 일자 히스토리 없음",
+      rationaleLines: ["해당 일자 히스토리 없음"],
+      dateLabel: meta.date.slice(0, 7),
       metrics: { cnn: null, vix: null, bofa: null, hy: null },
     }
   }
@@ -161,6 +163,8 @@ function evaluateAt(panicData, historyUpTo, meta) {
       statusLabel: "판정 불가",
       action: "—",
       rationale: "CNN·VIX·BofA 지표 부족",
+      rationaleLines: ["CNN·VIX·BofA 지표 부족"],
+      dateLabel: meta.date.slice(0, 7),
       metrics: {
         cnn: Number(panicData.fearGreed),
         vix: Number(panicData.vix),
@@ -177,9 +181,47 @@ function evaluateAt(panicData, historyUpTo, meta) {
     statusEmoji: evaluation.emoji,
     statusLabel: evaluation.label,
     action: evaluation.action,
+    rationaleLines: [...evaluation.rationale],
     rationale: evaluation.rationale.join(" · "),
+    dateLabel: meta.date.slice(0, 7),
     metrics: evaluation.metrics,
   }
+}
+
+/** @param {ReturnType<typeof evaluateAt>[]} results */
+export function buildRegimeTimeline(results) {
+  /** @type {{ emoji: string; regimeId?: string; date: string }[]} */
+  const chain = []
+  for (const r of results) {
+    if (r.missing || !r.statusEmoji || r.statusEmoji === "—") continue
+    const prev = chain[chain.length - 1]
+    if (prev && prev.regimeId === r.regimeId && prev.emoji === r.statusEmoji) continue
+    chain.push({
+      emoji: r.statusEmoji,
+      regimeId: r.regimeId,
+      date: r.date,
+    })
+  }
+  return chain
+}
+
+/** @param {ReturnType<typeof evaluateAt>[]} results */
+export function groupValidationByScenario(results) {
+  const byId = new Map()
+  for (const row of results) {
+    const list = byId.get(row.scenarioId) ?? []
+    list.push(row)
+    byId.set(row.scenarioId, list)
+  }
+
+  return HOME_V5_VALIDATION_SCENARIOS.map((scenario) => {
+    const rows = byId.get(scenario.id) ?? []
+    return {
+      scenario,
+      results: rows,
+      timeline: buildRegimeTimeline(rows),
+    }
+  }).filter((g) => g.results.length > 0)
 }
 
 /**
