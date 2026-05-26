@@ -24,6 +24,7 @@ export default function HomeV5StrategyValidationPanel({
   const [replayMode, setReplayMode] = useState(/** @type {HomeV5ReplayMode} */ ("anchors"))
   const [scenarioId, setScenarioId] = useState("all")
   const [results, setResults] = useState([])
+  const [logTick, setLogTick] = useState(0)
 
   const historyMeta = useMemo(() => {
     if (!historyRows.length) return { count: 0, from: "—", to: "—" }
@@ -43,8 +44,12 @@ export default function HomeV5StrategyValidationPanel({
     setLogTick((t) => t + 1)
   }, [historyRows, replayMode, scenarioId])
 
-  const [logTick, setLogTick] = useState(0)
   const logCount = useMemo(() => loadHomeV5StrategyLogs().length, [results, logTick])
+
+  const eventSummary = useMemo(
+    () => HOME_V5_VALIDATION_SCENARIOS.map((s) => s.label).join(" · "),
+    [],
+  )
 
   return (
     <section
@@ -64,11 +69,14 @@ export default function HomeV5StrategyValidationPanel({
         onClick={() => setOpen((v) => !v)}
       >
         <span className="home-v5-strategy-validation__toggle-main">
-          <span>전략 엔진 검증</span>
-          <span aria-hidden>{open ? "▲" : "▼"}</span>
+          <span className="home-v5-strategy-validation__title">
+            <span aria-hidden>{open ? "▲" : "▼"}</span>
+            <span>전략 연구실</span>
+            <span className="home-v5-strategy-validation__lab-tag">LAB</span>
+          </span>
         </span>
         <span className="home-v5-strategy-validation__hint">
-          과거 시장 재생 · {HOME_V5_VALIDATION_SCENARIOS.length}개 이벤트
+          {open ? "시장 재생 · 판정 · 타임라인" : `시장 재생 · ${eventSummary}`}
           {logCount > 0 ? ` · 로그 ${logCount}건` : ""}
         </span>
       </button>

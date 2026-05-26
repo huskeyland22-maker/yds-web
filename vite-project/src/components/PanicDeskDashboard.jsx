@@ -3,6 +3,9 @@ import { getFinalScore } from "../utils/tradingScores.js"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../home-v5/HomeV5DeskLead.jsx"
+import HomeV5StrategyValidationPanel from "../home-v5/HomeV5StrategyValidationPanel.jsx"
+import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
+import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
@@ -24,6 +27,11 @@ export default function PanicDeskDashboard({
   asOfDateLabel: _asOfDateLabel = "—",
 }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
+
+  const mergedHistory = useMemo(
+    () => resolveCycleHistoryRows(mergeCycleRows(safeHistory, [])),
+    [safeHistory],
+  )
 
   const finalScore = useMemo(() => (panicData ? getFinalScore(panicData) : null), [panicData])
 
@@ -70,6 +78,10 @@ export default function PanicDeskDashboard({
         >
           <PanicIndexHistorySection rows={safeHistory} />
         </SectionErrorBoundary>
+      </div>
+
+      <div className="panic-v2-desk__lab-slot">
+        <HomeV5StrategyValidationPanel historyRows={mergedHistory} compact />
       </div>
 
       <hr className="cycle-desk-divider cycle-desk-divider--reference" aria-hidden />

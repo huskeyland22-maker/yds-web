@@ -8257,9 +8257,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(100, 116, 139, 0.95);
 }
 
-/* /cycle — 전략 엔진 검증 (접이식, 핵심지수·시장분석 아래) */
-.home-v5-preview__zone--validation {
-  margin-top: 0.35rem;
+/* /cycle — 전략 연구실 LAB (히스토리 아래, 기본 접힘) */
+.panic-v2-desk__lab-slot {
+  margin-top: 0.4rem;
+  padding-top: 0.15rem;
 }
 
 .home-v5-strategy-validation {
@@ -8287,10 +8288,26 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .home-v5-strategy-validation__toggle-main {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   font-size: 0.8125rem;
   font-weight: 700;
   color: rgba(226, 232, 240, 0.95);
+}
+
+.home-v5-strategy-validation__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.home-v5-strategy-validation__lab-tag {
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.2rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.95);
 }
 
 .home-v5-strategy-validation__hint {
