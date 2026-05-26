@@ -8552,12 +8552,42 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-strategy-validation__timeline-duration {
-  font-size: 0.5rem;
+  display: inline-block;
+  margin-top: 0.1rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.875rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  color: rgba(180, 190, 210, 0.7);
+  line-height: 1.25;
+  color: rgba(226, 232, 240, 0.92);
   white-space: nowrap;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.home-v5-strategy-validation__timeline-duration--overheated {
+  background: rgba(0, 120, 255, 0.15);
+  color: rgba(191, 219, 254, 0.98);
+}
+
+.home-v5-strategy-validation__timeline-duration--neutral {
+  background: rgba(0, 200, 120, 0.15);
+  color: rgba(187, 247, 208, 0.98);
+}
+
+.home-v5-strategy-validation__timeline-duration--interest {
+  background: rgba(234, 179, 8, 0.15);
+  color: rgba(254, 240, 138, 0.98);
+}
+
+.home-v5-strategy-validation__timeline-duration--dca {
+  background: rgba(255, 140, 0, 0.15);
+  color: rgba(254, 215, 170, 0.98);
+}
+
+.home-v5-strategy-validation__timeline-duration--panicBuy {
+  background: rgba(239, 68, 68, 0.15);
+  color: rgba(254, 202, 202, 0.98);
 }
 
 .home-v5-strategy-validation__timeline-node.is-missing .home-v5-strategy-validation__timeline-dot {

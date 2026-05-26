@@ -109,7 +109,18 @@ function RegimeTimeline({ scenario, timeline, currentIndex = -1, onStepSelect })
                   <span className="home-v5-strategy-validation__timeline-label">{step.label}</span>
                 </span>
                 {step.durationDays != null ? (
-                  <span className="home-v5-strategy-validation__timeline-duration">{step.durationDays}d</span>
+                  <span
+                    className={[
+                      "home-v5-strategy-validation__timeline-duration",
+                      step.regimeId
+                        ? `home-v5-strategy-validation__timeline-duration--${step.regimeId}`
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    [유지 {step.durationDays}일]
+                  </span>
                 ) : null}
                 {isCurrent ? (
                   <span className="home-v5-strategy-validation__timeline-now">현재</span>
