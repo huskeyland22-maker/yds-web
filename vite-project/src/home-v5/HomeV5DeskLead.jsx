@@ -1,5 +1,8 @@
 import { useMemo } from "react"
 import PanicDeskSectionHeader from "../components/panic-desk/PanicDeskSectionHeader.jsx"
+import { useAppDataStore } from "../store/appDataStore.js"
+import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
+import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { buildHomeV5DeskModel } from "./homeV5DeskModel.js"
 import HomeV5CoreIndices from "./HomeV5CoreIndices.jsx"
 import HomeV5MarketAnalysis from "./HomeV5MarketAnalysis.jsx"
@@ -10,9 +13,15 @@ import HomeV5StrategyHero from "./HomeV5StrategyHero.jsx"
  * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
  */
 export default function HomeV5DeskLead({ panicData = null, historyRows = [], className = "" }) {
+  const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
+  const mergedHistory = useMemo(
+    () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], historyRows ?? [])),
+    [storeRows, historyRows],
+  )
+
   const model = useMemo(
-    () => buildHomeV5DeskModel(panicData, historyRows),
-    [panicData, historyRows],
+    () => buildHomeV5DeskModel(panicData, mergedHistory),
+    [panicData, mergedHistory],
   )
 
   return (

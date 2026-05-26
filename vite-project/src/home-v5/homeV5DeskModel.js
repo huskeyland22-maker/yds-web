@@ -1,6 +1,5 @@
-import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
-import { getFinalScore } from "../utils/tradingScores.js"
 import { buildHomeV5CoreTrend } from "./homeV5CoreTrend.js"
+import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
 
 /** @typedef {"fearGreed" | "vix" | "highYield"} HomeV5CoreKey */
 
@@ -101,8 +100,7 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
     if (Number.isFinite(fg) && fg < 30) lines.push("CNN < 30")
   } else if (regimeId === "dca") {
     if (Number.isFinite(fg) && fg < 25) lines.push("CNN < 25")
-    if (Number.isFinite(vix) && vix >= 25 && vix <= 30) lines.push("VIX 25~30")
-    else if (Number.isFinite(vix) && vix > 20) lines.push("VIX 상승")
+    if (Number.isFinite(vix) && vix >= 25) lines.push("VIX 25+")
   } else if (regimeId === "panicBuy") {
     if (Number.isFinite(fg) && fg < 10) lines.push("CNN < 10")
     if (Number.isFinite(vix) && vix >= 35) lines.push("VIX 35+")
@@ -123,8 +121,7 @@ export function buildHomeV5DeskModel(panicData, historyRows = []) {
     buildHomeV5CoreCard(key, panicData, historyRows),
   )
 
-  const score = panicData ? getFinalScore(panicData) : null
-  const band = resolveMacroV1Status(score)
+  const band = resolveHomeV5StrategyRegime(panicData)
   if (!band) {
     return { core, strategy: null }
   }
