@@ -10,9 +10,9 @@ import {
 } from "./homeV5StrategyLogPersist.js"
 
 /**
- * @param {{ row: object }} props
+ * @param {{ row: object; active?: boolean; onSelect?: () => void }} props
  */
-function StrategyResultCard({ row }) {
+function StrategyResultCard({ row, active = false, onSelect }) {
   const dateText = row.date?.length >= 7 ? row.date.slice(0, 7) : row.dateLabel ?? row.date
   const lines = row.rationaleLines ?? (row.rationale ? [row.rationale] : [])
 
@@ -22,9 +22,23 @@ function StrategyResultCard({ row }) {
         "home-v5-strategy-hist-card",
         row.missing ? "home-v5-strategy-hist-card--missing" : "",
         row.regimeId ? `home-v5-strategy-hist-card--${row.regimeId}` : "",
+        active ? "home-v5-strategy-hist-card--active" : "",
       ]
         .filter(Boolean)
         .join(" ")}
+      onClick={onSelect}
+      onKeyDown={
+        onSelect
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onSelect()
+              }
+            }
+          : undefined
+      }
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
     >
       <p className="home-v5-strategy-hist-card__date">{dateText}</p>
       <div className="home-v5-strategy-hist-card__status">
@@ -50,45 +64,55 @@ function StrategyResultCard({ row }) {
 }
 
 /**
- * @param {{ scenario: { label: string }; timeline: { emoji: string; label: string; regimeId?: string; date: string }[]; layout?: "horizontal" | "vertical" }} props
+ * @param {{
+ *   scenario: { label: string }
+ *   timeline: { emoji: string; label: string; regimeId?: string; date: string }[]
+ *   currentIndex?: number
+ *   onStepSelect?: (index: number) => void
+ * }} props
  */
-function RegimeTimeline({ scenario, timeline, layout = "horizontal" }) {
+function RegimeTimeline({ scenario, timeline, currentIndex = -1, onStepSelect }) {
   if (!timeline?.length) return null
-  const vertical = layout === "vertical"
+  const current = currentIndex >= 0 && currentIndex < timeline.length ? currentIndex : timeline.length - 1
 
   return (
     <div className="home-v5-strategy-validation__timeline-block">
       <p className="home-v5-strategy-validation__timeline-scenario">{scenario.label}</p>
-      <div
-        className={[
-          "home-v5-strategy-validation__timeline-chips",
-          vertical
-            ? "home-v5-strategy-validation__timeline-chips--vertical"
-            : "home-v5-strategy-validation__timeline-chips--horizontal",
-        ].join(" ")}
-        aria-label="국면 변화 타임라인"
-      >
-        {timeline.map((step, idx) => (
-          <span key={`${step.date}-${step.regimeId}-${idx}`} className="home-v5-strategy-validation__timeline-seg">
-            {idx > 0 ? (
-              <span className="home-v5-strategy-validation__timeline-conn" aria-hidden>
-                {vertical ? "↓" : "→"}
-              </span>
-            ) : null}
-            <span
-              className={[
-                "home-v5-strategy-validation__timeline-chip",
-                step.regimeId ? `home-v5-strategy-validation__timeline-chip--${step.regimeId}` : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              title={step.date}
-            >
-              <span className="home-v5-strategy-validation__timeline-chip-emoji">{step.emoji}</span>
-              <span className="home-v5-strategy-validation__timeline-chip-label">{step.label}</span>
-            </span>
-          </span>
-        ))}
+      <div className="home-v5-strategy-validation__timeline-rail" aria-label="국면 변화 타임라인">
+        {timeline.map((step, idx) => {
+          const isCurrent = idx === current
+          return (
+            <div key={`${step.date}-${step.regimeId}-${idx}`} className="home-v5-strategy-validation__timeline-unit">
+              <button
+                type="button"
+                className={[
+                  "home-v5-strategy-validation__timeline-node",
+                  step.regimeId ? `home-v5-strategy-validation__timeline-node--${step.regimeId}` : "",
+                  isCurrent ? "is-current" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                title={step.date}
+                aria-current={isCurrent ? "step" : undefined}
+                onClick={() => onStepSelect?.(idx)}
+              >
+                <span className="home-v5-strategy-validation__timeline-dot" aria-hidden>
+                  {step.emoji}
+                </span>
+                <span className="home-v5-strategy-validation__timeline-label">{step.label}</span>
+                {isCurrent ? (
+                  <span className="home-v5-strategy-validation__timeline-now">현재</span>
+                ) : null}
+              </button>
+              {idx < timeline.length - 1 ? (
+                <span className="home-v5-strategy-validation__timeline-bridge" aria-hidden>
+                  <span className="home-v5-strategy-validation__timeline-bridge-line" />
+                  <span className="home-v5-strategy-validation__timeline-bridge-arrow">▶</span>
+                </span>
+              ) : null}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -107,6 +131,7 @@ export default function HomeV5StrategyValidationPanel({
   const [scenarioId, setScenarioId] = useState(HOME_V5_VALIDATION_SCENARIOS[0]?.id ?? "")
   const [results, setResults] = useState([])
   const [replayed, setReplayed] = useState(false)
+  const [timelineStepIndex, setTimelineStepIndex] = useState(-1)
   const [logTick, setLogTick] = useState(0)
 
   const historyMeta = useMemo(() => {
@@ -137,7 +162,23 @@ export default function HomeV5StrategyValidationPanel({
     setResults(out)
     setReplayed(true)
     setLogTick((t) => t + 1)
+    const groupedOut = groupValidationByScenario(out)
+    const g = groupedOut.find((x) => x.scenario.id === scenarioId) ?? groupedOut[0]
+    setTimelineStepIndex(g?.timeline?.length ? g.timeline.length - 1 : -1)
   }, [historyRows, scenarioId])
+
+  const resolveTimelineIndexForRow = useCallback(
+    (row) => {
+      const tl = activeGroup?.timeline ?? []
+      if (!tl.length || row.missing) return -1
+      const date = String(row.date ?? "").slice(0, 10)
+      let idx = tl.findIndex((s) => s.date === date && s.regimeId === row.regimeId)
+      if (idx < 0) idx = tl.findIndex((s) => s.date === date)
+      if (idx < 0) idx = tl.findIndex((s) => s.regimeId === row.regimeId)
+      return idx
+    },
+    [activeGroup],
+  )
 
   const logCount = useMemo(() => loadHomeV5StrategyLogs().length, [results, logTick])
 
@@ -202,7 +243,8 @@ export default function HomeV5StrategyValidationPanel({
           <RegimeTimeline
             scenario={activeGroup.scenario}
             timeline={activeGroup.timeline}
-            layout={compact ? "vertical" : "horizontal"}
+            currentIndex={timelineStepIndex}
+            onStepSelect={setTimelineStepIndex}
           />
         ) : null}
 
@@ -224,9 +266,21 @@ export default function HomeV5StrategyValidationPanel({
                 </div>
 
                 <div className="home-v5-strategy-validation__cards home-v5-strategy-validation__cards--stack">
-                  {rows.map((row) => (
-                    <StrategyResultCard key={`${row.scenarioId}-${row.date}`} row={row} />
-                  ))}
+                  {rows.map((row) => {
+                    const stepIdx = resolveTimelineIndexForRow(row)
+                    return (
+                      <StrategyResultCard
+                        key={`${row.scenarioId}-${row.date}`}
+                        row={row}
+                        active={stepIdx >= 0 && stepIdx === timelineStepIndex}
+                        onSelect={
+                          stepIdx >= 0
+                            ? () => setTimelineStepIndex(stepIdx)
+                            : undefined
+                        }
+                      />
+                    )
+                  })}
                 </div>
               </div>
             ))}

@@ -8435,86 +8435,145 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(226, 232, 240, 0.95);
 }
 
-.home-v5-strategy-validation__timeline-chips--horizontal {
+.home-v5-strategy-validation__timeline-rail {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.2rem 0.15rem;
+  align-items: flex-start;
+  width: 100%;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+  scrollbar-width: thin;
 }
 
-.home-v5-strategy-validation__timeline-chips--vertical {
+.home-v5-strategy-validation__timeline-unit {
+  display: flex;
+  align-items: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.home-v5-strategy-validation__timeline-unit:last-child {
+  flex: 0 0 auto;
+}
+
+.home-v5-strategy-validation__timeline-node {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
-}
-
-.home-v5-strategy-validation__timeline-seg {
-  display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-}
-
-.home-v5-strategy-validation__timeline-chips--vertical .home-v5-strategy-validation__timeline-seg {
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.home-v5-strategy-validation__timeline-conn {
   flex-shrink: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1;
-  color: rgba(148, 163, 184, 0.8);
+  margin: 0;
+  padding: 0.15rem 0.25rem 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: center;
 }
 
-.home-v5-strategy-validation__timeline-chip {
-  display: inline-flex;
+.home-v5-strategy-validation__timeline-node.is-current .home-v5-strategy-validation__timeline-dot {
+  box-shadow:
+    0 0 0 2px rgba(248, 250, 252, 0.95),
+    0 0 12px rgba(103, 232, 249, 0.45);
+  transform: scale(1.08);
+}
+
+.home-v5-strategy-validation__timeline-dot {
+  display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.22rem 0.45rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(14, 18, 28, 0.72);
-  font-size: 0.6875rem;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  background: rgba(14, 18, 28, 0.85);
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home-v5-strategy-validation__timeline-node--overheated .home-v5-strategy-validation__timeline-dot {
+  border-color: rgba(59, 130, 246, 0.65);
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.home-v5-strategy-validation__timeline-node--neutral .home-v5-strategy-validation__timeline-dot {
+  border-color: rgba(34, 197, 94, 0.6);
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.home-v5-strategy-validation__timeline-node--interest .home-v5-strategy-validation__timeline-dot {
+  border-color: rgba(234, 179, 8, 0.65);
+  background: rgba(234, 179, 8, 0.14);
+}
+
+.home-v5-strategy-validation__timeline-node--dca .home-v5-strategy-validation__timeline-dot {
+  border-color: rgba(249, 115, 22, 0.65);
+  background: rgba(249, 115, 22, 0.14);
+}
+
+.home-v5-strategy-validation__timeline-node--panicBuy .home-v5-strategy-validation__timeline-dot {
+  border-color: rgba(239, 68, 68, 0.65);
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.home-v5-strategy-validation__timeline-label {
+  font-size: 0.625rem;
   font-weight: 600;
   line-height: 1.2;
-  color: rgba(248, 250, 252, 0.96);
+  color: rgba(226, 232, 240, 0.95);
   white-space: nowrap;
 }
 
-.home-v5-strategy-validation__timeline-chip--overheated {
-  border-color: rgba(59, 130, 246, 0.45);
-  background: rgba(59, 130, 246, 0.12);
-}
-
-.home-v5-strategy-validation__timeline-chip--neutral {
-  border-color: rgba(34, 197, 94, 0.4);
-  background: rgba(34, 197, 94, 0.1);
-}
-
-.home-v5-strategy-validation__timeline-chip--interest {
-  border-color: rgba(234, 179, 8, 0.45);
-  background: rgba(234, 179, 8, 0.1);
-}
-
-.home-v5-strategy-validation__timeline-chip--dca {
-  border-color: rgba(249, 115, 22, 0.45);
-  background: rgba(249, 115, 22, 0.1);
-}
-
-.home-v5-strategy-validation__timeline-chip--panicBuy {
-  border-color: rgba(239, 68, 68, 0.45);
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.home-v5-strategy-validation__timeline-chip-emoji {
-  font-size: 0.8125rem;
+.home-v5-strategy-validation__timeline-now {
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(103, 232, 249, 0.95);
   line-height: 1;
 }
 
-.home-v5-strategy-validation__timeline-chip-label {
-  font-size: 0.625rem;
+.home-v5-strategy-validation__timeline-bridge {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  margin-top: 0.95rem;
+  padding: 0 0.15rem;
+  gap: 0.1rem;
+}
+
+.home-v5-strategy-validation__timeline-bridge-line {
+  flex: 1 1 auto;
+  height: 2px;
+  min-width: 0.75rem;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.35) 0%,
+    rgba(148, 163, 184, 0.75) 100%
+  );
+}
+
+.home-v5-strategy-validation__timeline-bridge-arrow {
+  flex-shrink: 0;
+  font-size: 0.5625rem;
+  line-height: 1;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.home-v5-strategy-hist-card--active {
+  border-color: rgba(103, 232, 249, 0.45);
+  box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.2);
+}
+
+.home-v5-strategy-hist-card[role="button"] {
+  cursor: pointer;
+}
+
+.home-v5-strategy-hist-card[role="button"]:hover {
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .home-v5-strategy-validation__cards {
