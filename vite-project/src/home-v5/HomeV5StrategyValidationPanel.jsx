@@ -10,6 +10,43 @@ import {
 } from "./homeV5StrategyLogPersist.js"
 
 /**
+ * @param {{ row: object }} props
+ */
+function StrategyResultCard({ row }) {
+  const dateText = row.date?.length >= 7 ? row.date.slice(0, 7) : row.dateLabel ?? row.date
+  const lines = row.rationaleLines ?? (row.rationale ? [row.rationale] : [])
+
+  return (
+    <article
+      className={[
+        "home-v5-strategy-hist-card",
+        row.missing ? "home-v5-strategy-hist-card--missing" : "",
+        row.regimeId ? `home-v5-strategy-hist-card--${row.regimeId}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <p className="home-v5-strategy-hist-card__date">{dateText}</p>
+      <p className="home-v5-strategy-hist-card__regime">
+        {row.statusEmoji} {row.statusLabel}
+      </p>
+      <div className="home-v5-strategy-hist-card__action">
+        <span className="home-v5-strategy-hist-card__label-k">행동</span>
+        <span className="home-v5-strategy-hist-card__action-v">{row.action}</span>
+      </div>
+      <div className="home-v5-strategy-hist-card__rationale">
+        <span className="home-v5-strategy-hist-card__label-k">근거</span>
+        <ul className="home-v5-strategy-hist-card__rationale-list">
+          {lines.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </div>
+    </article>
+  )
+}
+
+/**
  * @param {{ historyRows?: object[]; defaultOpen?: boolean; compact?: boolean }} props
  */
 export default function HomeV5StrategyValidationPanel({
@@ -113,55 +150,38 @@ export default function HomeV5StrategyValidationPanel({
                 <div className="home-v5-strategy-validation__scenario-head">
                   <h3 className="home-v5-strategy-validation__scenario-title">{scenario.label}</h3>
                   <span className="home-v5-strategy-validation__scenario-range">
-                    {scenario.start} ~ {scenario.end}
+                    재생 결과 {rows.filter((r) => !r.missing).length}건 · {scenario.start} ~ {scenario.end}
                   </span>
                 </div>
 
-                {timeline.length > 0 ? (
-                  <div className="home-v5-strategy-validation__timeline" aria-label="국면 타임라인">
-                    {timeline.map((step, idx) => (
-                      <span key={`${step.date}-${step.regimeId}-${idx}`} className="home-v5-strategy-validation__timeline-step">
-                        {idx > 0 ? (
-                          <span className="home-v5-strategy-validation__timeline-arrow" aria-hidden>
-                            →
-                          </span>
-                        ) : null}
-                        <span className="home-v5-strategy-validation__timeline-emoji" title={step.date}>
-                          {step.emoji}
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-
-                <div className="home-v5-strategy-validation__cards">
+                <div className="home-v5-strategy-validation__cards home-v5-strategy-validation__cards--stack">
                   {rows.map((row) => (
-                    <article
-                      key={`${row.scenarioId}-${row.date}`}
-                      className={[
-                        "home-v5-strategy-hist-card",
-                        row.missing ? "home-v5-strategy-hist-card--missing" : "",
-                        row.regimeId ? `home-v5-strategy-hist-card--${row.regimeId}` : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      <p className="home-v5-strategy-hist-card__date">{row.dateLabel ?? row.date.slice(0, 7)}</p>
-                      <p className="home-v5-strategy-hist-card__status">
-                        {row.statusEmoji} {row.statusLabel}
-                      </p>
-                      <p className="home-v5-strategy-hist-card__action">{row.action}</p>
-                      <div className="home-v5-strategy-hist-card__rationale">
-                        <span className="home-v5-strategy-hist-card__rationale-k">근거</span>
-                        <ul className="home-v5-strategy-hist-card__rationale-list">
-                          {(row.rationaleLines ?? [row.rationale]).map((line) => (
-                            <li key={line}>{line}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </article>
+                    <StrategyResultCard key={`${row.scenarioId}-${row.date}`} row={row} />
                   ))}
                 </div>
+
+                {timeline.length > 0 ? (
+                  <div className="home-v5-strategy-validation__timeline-wrap">
+                    <p className="home-v5-strategy-validation__timeline-k">국면 흐름</p>
+                    <div className="home-v5-strategy-validation__timeline" aria-label="국면 타임라인">
+                      {timeline.map((step, idx) => (
+                        <span
+                          key={`${step.date}-${step.regimeId}-${idx}`}
+                          className="home-v5-strategy-validation__timeline-step"
+                        >
+                          {idx > 0 ? (
+                            <span className="home-v5-strategy-validation__timeline-arrow" aria-hidden>
+                              →
+                            </span>
+                          ) : null}
+                          <span className="home-v5-strategy-validation__timeline-emoji" title={step.date}>
+                            {step.emoji}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

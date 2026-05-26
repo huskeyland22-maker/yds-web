@@ -1,6 +1,57 @@
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
-import { buildHomeV5StrategyEvaluation } from "./homeV5DeskModel.js"
+import { buildHomeV5StrategyEvaluation, buildHomeV5StrategyRationale } from "./homeV5DeskModel.js"
 import { appendHomeV5StrategyLogs } from "./homeV5StrategyLogPersist.js"
+
+/** @type {Record<string, string>} */
+const LAB_ACTION_BY_REGIME = {
+  overheated: "현금 준비",
+  neutral: "관망 · 기본 비중",
+  interest: "저점 관찰",
+  dca: "저점 분할",
+  panicBuy: "분할매수",
+}
+
+/**
+ * @param {object} panicData
+ * @param {string} regimeId
+ * @returns {string[]}
+ */
+export function buildHomeV5LabRationaleLines(panicData, regimeId) {
+  const fg = Number(panicData?.fearGreed)
+  const vix = Number(panicData?.vix)
+  const bofa = Number(panicData?.bofa)
+  const lines = []
+
+  const rules = buildHomeV5StrategyRationale(panicData, regimeId).filter((l) => l !== "명확 신호 없음")
+  lines.push(...rules)
+
+  if (Number.isFinite(fg)) {
+    if (fg >= 70 && !lines.some((l) => l.startsWith("CNN"))) lines.push(`CNN ${Math.round(fg)}`)
+    else if (fg < 10 && !lines.some((l) => l.includes("CNN"))) lines.push(`CNN ${Math.round(fg)}`)
+    else if (fg < 25 && regimeId === "dca" && !lines.some((l) => l.includes("CNN")))
+      lines.push(`CNN ${Math.round(fg)}`)
+    else if (fg < 30 && regimeId === "interest" && !lines.some((l) => l.includes("CNN")))
+      lines.push(`CNN ${Math.round(fg)}`)
+  }
+
+  if (Number.isFinite(bofa) && bofa >= 7 && !lines.some((l) => l.startsWith("BofA"))) {
+    lines.push(bofa >= 7.5 ? "BofA ~8" : "BofA 7+")
+  }
+
+  if (Number.isFinite(vix)) {
+    if (vix >= 35 && !lines.some((l) => l.startsWith("VIX"))) lines.push(`VIX ${Math.round(vix)}+`)
+    else if (vix >= 25 && !lines.some((l) => l.startsWith("VIX"))) lines.push(`VIX ${Math.round(vix)}+`)
+    else if (vix < 20 && regimeId === "overheated" && !lines.some((l) => l.startsWith("VIX")))
+      lines.push("VIX 저점")
+  }
+
+  if (!lines.length) {
+    if (regimeId === "neutral") lines.push("명확 신호 없음")
+    else lines.push("데이터 입력 후 근거 표시")
+  }
+
+  return [...new Set(lines)]
+}
 
 /** @typedef {"anchors" | "daily" | "weekly"} HomeV5ReplayMode */
 
@@ -174,15 +225,17 @@ function evaluateAt(panicData, historyUpTo, meta) {
     }
   }
 
+  const rationaleLines = buildHomeV5LabRationaleLines(panicData, evaluation.regimeId)
+
   return {
     ...meta,
     missing: false,
     regimeId: evaluation.regimeId,
     statusEmoji: evaluation.emoji,
     statusLabel: evaluation.label,
-    action: evaluation.action,
-    rationaleLines: [...evaluation.rationale],
-    rationale: evaluation.rationale.join(" · "),
+    action: LAB_ACTION_BY_REGIME[evaluation.regimeId] ?? evaluation.action,
+    rationaleLines,
+    rationale: rationaleLines.join(" · "),
     dateLabel: meta.date.slice(0, 7),
     metrics: evaluation.metrics,
   }
