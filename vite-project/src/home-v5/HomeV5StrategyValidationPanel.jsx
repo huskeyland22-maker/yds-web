@@ -27,9 +27,12 @@ function StrategyResultCard({ row }) {
         .join(" ")}
     >
       <p className="home-v5-strategy-hist-card__date">{dateText}</p>
-      <p className="home-v5-strategy-hist-card__regime">
-        {row.statusEmoji} {row.statusLabel}
-      </p>
+      <div className="home-v5-strategy-hist-card__status">
+        <span className="home-v5-strategy-hist-card__label-k">상태</span>
+        <span className="home-v5-strategy-hist-card__status-v">
+          {row.statusEmoji} {row.statusLabel}
+        </span>
+      </div>
       <div className="home-v5-strategy-hist-card__action">
         <span className="home-v5-strategy-hist-card__label-k">행동</span>
         <span className="home-v5-strategy-hist-card__action-v">{row.action}</span>
@@ -43,6 +46,51 @@ function StrategyResultCard({ row }) {
         </ul>
       </div>
     </article>
+  )
+}
+
+/**
+ * @param {{ scenario: { label: string }; timeline: { emoji: string; label: string; regimeId?: string; date: string }[]; layout?: "horizontal" | "vertical" }} props
+ */
+function RegimeTimeline({ scenario, timeline, layout = "horizontal" }) {
+  if (!timeline?.length) return null
+  const vertical = layout === "vertical"
+
+  return (
+    <div className="home-v5-strategy-validation__timeline-block">
+      <p className="home-v5-strategy-validation__timeline-scenario">{scenario.label}</p>
+      <div
+        className={[
+          "home-v5-strategy-validation__timeline-chips",
+          vertical
+            ? "home-v5-strategy-validation__timeline-chips--vertical"
+            : "home-v5-strategy-validation__timeline-chips--horizontal",
+        ].join(" ")}
+        aria-label="국면 변화 타임라인"
+      >
+        {timeline.map((step, idx) => (
+          <span key={`${step.date}-${step.regimeId}-${idx}`} className="home-v5-strategy-validation__timeline-seg">
+            {idx > 0 ? (
+              <span className="home-v5-strategy-validation__timeline-conn" aria-hidden>
+                {vertical ? "↓" : "→"}
+              </span>
+            ) : null}
+            <span
+              className={[
+                "home-v5-strategy-validation__timeline-chip",
+                step.regimeId ? `home-v5-strategy-validation__timeline-chip--${step.regimeId}` : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              title={step.date}
+            >
+              <span className="home-v5-strategy-validation__timeline-chip-emoji">{step.emoji}</span>
+              <span className="home-v5-strategy-validation__timeline-chip-label">{step.label}</span>
+            </span>
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -67,6 +115,11 @@ export default function HomeV5StrategyValidationPanel({
   }, [historyRows])
 
   const grouped = useMemo(() => groupValidationByScenario(results), [results])
+
+  const activeGroup = useMemo(() => {
+    if (!grouped.length) return null
+    return grouped.find((g) => g.scenario.id === scenarioId) ?? grouped[0]
+  }, [grouped, scenarioId])
 
   const runValidation = useCallback(() => {
     if (!historyRows.length || !scenarioId) return
@@ -137,20 +190,28 @@ export default function HomeV5StrategyValidationPanel({
           </button>
         </div>
 
+        {activeGroup?.timeline?.length ? (
+          <RegimeTimeline
+            scenario={activeGroup.scenario}
+            timeline={activeGroup.timeline}
+            layout={compact ? "vertical" : "horizontal"}
+          />
+        ) : null}
+
         {grouped.length === 0 ? (
           <p className="home-v5-strategy-validation__empty">
             {historyRows.length
-              ? "이벤트를 선택한 뒤 ▶ 재생을 누르면 판정·타임라인이 표시됩니다."
+              ? "이벤트를 선택한 뒤 ▶ 재생을 누르면 국면 타임라인·결과 카드가 표시됩니다."
               : "히스토리 데이터가 없습니다. 시장 엔진 히스토리 로드 후 다시 시도하세요."}
           </p>
         ) : (
           <div className="home-v5-strategy-validation__scenarios">
-            {grouped.map(({ scenario, results: rows, timeline }) => (
+            {grouped.map(({ scenario, results: rows }) => (
               <div key={scenario.id} className="home-v5-strategy-validation__scenario">
                 <div className="home-v5-strategy-validation__scenario-head">
-                  <h3 className="home-v5-strategy-validation__scenario-title">{scenario.label}</h3>
+                  <h3 className="home-v5-strategy-validation__scenario-title">재생 결과</h3>
                   <span className="home-v5-strategy-validation__scenario-range">
-                    재생 결과 {rows.filter((r) => !r.missing).length}건 · {scenario.start} ~ {scenario.end}
+                    {rows.filter((r) => !r.missing).length}건 · {scenario.start} ~ {scenario.end}
                   </span>
                 </div>
 
@@ -159,29 +220,6 @@ export default function HomeV5StrategyValidationPanel({
                     <StrategyResultCard key={`${row.scenarioId}-${row.date}`} row={row} />
                   ))}
                 </div>
-
-                {timeline.length > 0 ? (
-                  <div className="home-v5-strategy-validation__timeline-wrap">
-                    <p className="home-v5-strategy-validation__timeline-k">국면 흐름</p>
-                    <div className="home-v5-strategy-validation__timeline" aria-label="국면 타임라인">
-                      {timeline.map((step, idx) => (
-                        <span
-                          key={`${step.date}-${step.regimeId}-${idx}`}
-                          className="home-v5-strategy-validation__timeline-step"
-                        >
-                          {idx > 0 ? (
-                            <span className="home-v5-strategy-validation__timeline-arrow" aria-hidden>
-                              →
-                            </span>
-                          ) : null}
-                          <span className="home-v5-strategy-validation__timeline-emoji" title={step.date}>
-                            {step.emoji}
-                          </span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
               </div>
             ))}
           </div>

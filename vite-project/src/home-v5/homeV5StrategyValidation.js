@@ -243,7 +243,7 @@ function evaluateAt(panicData, historyUpTo, meta) {
 
 /** @param {ReturnType<typeof evaluateAt>[]} results */
 export function buildRegimeTimeline(results) {
-  /** @type {{ emoji: string; regimeId?: string; date: string }[]} */
+  /** @type {{ emoji: string; label: string; regimeId?: string; date: string }[]} */
   const chain = []
   for (const r of results) {
     if (r.missing || !r.statusEmoji || r.statusEmoji === "—") continue
@@ -251,6 +251,7 @@ export function buildRegimeTimeline(results) {
     if (prev && prev.regimeId === r.regimeId && prev.emoji === r.statusEmoji) continue
     chain.push({
       emoji: r.statusEmoji,
+      label: r.statusLabel ?? "",
       regimeId: r.regimeId,
       date: r.date,
     })

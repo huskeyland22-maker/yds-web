@@ -8390,6 +8390,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.88);
 }
 
+.home-v5-strategy-validation__timeline-block + .home-v5-strategy-validation__scenarios {
+  margin-top: 0.55rem;
+}
+
 .home-v5-strategy-validation__scenarios {
   display: flex;
   flex-direction: column;
@@ -8416,44 +8420,101 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(100, 116, 139, 0.9);
 }
 
-.home-v5-strategy-validation__timeline-wrap {
-  margin-top: 0.55rem;
-  padding-top: 0.45rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+.home-v5-strategy-validation__timeline-block {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.18);
 }
 
-.home-v5-strategy-validation__timeline-k {
-  margin: 0 0 0.35rem;
-  font-size: 0.5625rem;
-  font-weight: 600;
-  color: rgba(100, 116, 139, 0.92);
+.home-v5-strategy-validation__timeline-scenario {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.95);
 }
 
-.home-v5-strategy-validation__timeline {
+.home-v5-strategy-validation__timeline-chips--horizontal {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 0.2rem 0.15rem;
+}
+
+.home-v5-strategy-validation__timeline-chips--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.15rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 0.35rem;
-  background: rgba(0, 0, 0, 0.22);
-  font-size: 1.0625rem;
+}
+
+.home-v5-strategy-validation__timeline-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.home-v5-strategy-validation__timeline-chips--vertical .home-v5-strategy-validation__timeline-seg {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.home-v5-strategy-validation__timeline-conn {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.home-v5-strategy-validation__timeline-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 18, 28, 0.72);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(248, 250, 252, 0.96);
+  white-space: nowrap;
+}
+
+.home-v5-strategy-validation__timeline-chip--overheated {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.home-v5-strategy-validation__timeline-chip--neutral {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.home-v5-strategy-validation__timeline-chip--interest {
+  border-color: rgba(234, 179, 8, 0.45);
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.home-v5-strategy-validation__timeline-chip--dca {
+  border-color: rgba(249, 115, 22, 0.45);
+  background: rgba(249, 115, 22, 0.1);
+}
+
+.home-v5-strategy-validation__timeline-chip--panicBuy {
+  border-color: rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.home-v5-strategy-validation__timeline-chip-emoji {
+  font-size: 0.8125rem;
   line-height: 1;
 }
 
-.home-v5-strategy-validation__timeline-step {
-  display: inline-flex;
-  align-items: center;
-}
-
-.home-v5-strategy-validation__timeline-arrow {
-  margin: 0 0.2rem;
-  font-size: 0.75rem;
-  color: rgba(148, 163, 184, 0.75);
-}
-
-.home-v5-strategy-validation__timeline-emoji {
-  cursor: default;
+.home-v5-strategy-validation__timeline-chip-label {
+  font-size: 0.625rem;
 }
 
 .home-v5-strategy-validation__cards {
@@ -8487,9 +8548,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(203, 213, 225, 0.95);
 }
 
-.home-v5-strategy-hist-card__regime {
-  margin: 0.3rem 0 0;
-  font-size: 0.875rem;
+.home-v5-strategy-hist-card__status {
+  margin-top: 0.3rem;
+}
+
+.home-v5-strategy-hist-card__status-v {
+  font-size: 0.8125rem;
   font-weight: 700;
   line-height: 1.2;
   color: rgba(248, 250, 252, 0.98);
