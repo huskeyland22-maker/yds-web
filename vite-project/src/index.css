@@ -7244,6 +7244,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.35rem;
   width: 100%;
+  align-items: stretch;
 }
 
 .home-v5-preview--hero .home-v5-core-grid--hero {
@@ -7251,8 +7252,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero .home-v5-core-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
   min-height: 3.5rem;
-  padding: 0.3rem 0.25rem;
+  padding: 0.25rem 0.25rem;
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.12);
@@ -7272,9 +7278,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero .home-v5-core-card__status {
+  margin: 0;
   font-size: 1.0625rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.12;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.06);
 }
 
@@ -7283,19 +7290,24 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero .home-v5-core-card__role {
+  margin: 0;
   font-size: 0.625rem;
+  line-height: 1.1;
   color: rgba(148, 163, 184, 0.62);
 }
 
 .home-v5-preview--hero .home-v5-core-card__value {
+  margin: 0;
   font-size: 0.625rem;
+  line-height: 1.1;
   color: rgba(100, 116, 139, 0.72);
 }
 
 @media (min-width: 768px) {
   .home-v5-preview--hero .home-v5-core-card {
     min-height: 3.75rem;
-    padding: 0.35rem 0.3rem;
+    padding: 0.28rem 0.3rem;
+    gap: 0.35rem;
   }
 
   .home-v5-preview--hero .home-v5-core-card__status {
@@ -7312,9 +7324,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
+  gap: 0.3rem;
   min-height: 3.75rem;
-  padding: 0.4rem 0.3rem;
+  padding: 0.35rem 0.3rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.25);
@@ -7358,8 +7370,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-core-card__value {
-  margin: 0.15rem 0 0;
+  margin: 0;
   font-size: 0.6875rem;
+  line-height: 1.1;
   font-family: ui-monospace, monospace;
   color: rgba(100, 116, 139, 0.95);
 }
