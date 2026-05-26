@@ -60,6 +60,7 @@ export default function HomeV5StrategyValidationPanel({
       ]
         .filter(Boolean)
         .join(" ")}
+      aria-label="전략 연구실 LAB"
     >
       <button
         type="button"

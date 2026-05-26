@@ -17,8 +17,8 @@ export default function HomeV5StrategyValidationPage() {
     <div className="home-v5-validation-page min-w-0 px-3 py-4 sm:px-4">
       <header className="home-v5-validation-page__head">
         <div>
-          <h1 className="home-v5-validation-page__title">전략 엔진 검증</h1>
-          <p className="home-v5-validation-page__sub">과거 시장 재생 · dev 전용 전체 화면</p>
+          <h1 className="home-v5-validation-page__title">전략 연구실 LAB</h1>
+          <p className="home-v5-validation-page__sub">과거 시장 재생 · dev 전용 · /cycle과 동일 패널</p>
         </div>
         <Link to="/cycle" className="home-v5-validation-page__link">
           홈으로
