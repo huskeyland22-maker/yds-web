@@ -66,7 +66,7 @@ function StrategyResultCard({ row, active = false, onSelect }) {
 /**
  * @param {{
  *   scenario: { label: string }
- *   timeline: { emoji: string; label: string; regimeId?: string; date: string }[]
+ *   timeline: { emoji: string; label: string; dateLabel: string; durationDays?: number | null; regimeId?: string; date: string; missing?: boolean }[]
  *   currentIndex?: number
  *   onStepSelect?: (index: number) => void
  * }} props
@@ -82,12 +82,13 @@ function RegimeTimeline({ scenario, timeline, currentIndex = -1, onStepSelect })
         {timeline.map((step, idx) => {
           const isCurrent = idx === current
           return (
-            <div key={`${step.date}-${step.regimeId}-${idx}`} className="home-v5-strategy-validation__timeline-unit">
+            <div key={`${step.date}-${idx}`} className="home-v5-strategy-validation__timeline-unit">
               <button
                 type="button"
                 className={[
                   "home-v5-strategy-validation__timeline-node",
                   step.regimeId ? `home-v5-strategy-validation__timeline-node--${step.regimeId}` : "",
+                  step.missing ? "is-missing" : "",
                   isCurrent ? "is-current" : "",
                 ]
                   .filter(Boolean)
@@ -100,6 +101,12 @@ function RegimeTimeline({ scenario, timeline, currentIndex = -1, onStepSelect })
                   {step.emoji}
                 </span>
                 <span className="home-v5-strategy-validation__timeline-label">{step.label}</span>
+                {step.dateLabel ? (
+                  <span className="home-v5-strategy-validation__timeline-date">{step.dateLabel}</span>
+                ) : null}
+                {step.durationDays != null ? (
+                  <span className="home-v5-strategy-validation__timeline-duration">{step.durationDays}d</span>
+                ) : null}
                 {isCurrent ? (
                   <span className="home-v5-strategy-validation__timeline-now">현재</span>
                 ) : null}
@@ -166,19 +173,6 @@ export default function HomeV5StrategyValidationPanel({
     const g = groupedOut.find((x) => x.scenario.id === scenarioId) ?? groupedOut[0]
     setTimelineStepIndex(g?.timeline?.length ? g.timeline.length - 1 : -1)
   }, [historyRows, scenarioId])
-
-  const resolveTimelineIndexForRow = useCallback(
-    (row) => {
-      const tl = activeGroup?.timeline ?? []
-      if (!tl.length || row.missing) return -1
-      const date = String(row.date ?? "").slice(0, 10)
-      let idx = tl.findIndex((s) => s.date === date && s.regimeId === row.regimeId)
-      if (idx < 0) idx = tl.findIndex((s) => s.date === date)
-      if (idx < 0) idx = tl.findIndex((s) => s.regimeId === row.regimeId)
-      return idx
-    },
-    [activeGroup],
-  )
 
   const logCount = useMemo(() => loadHomeV5StrategyLogs().length, [results, logTick])
 
@@ -266,21 +260,14 @@ export default function HomeV5StrategyValidationPanel({
                 </div>
 
                 <div className="home-v5-strategy-validation__cards home-v5-strategy-validation__cards--stack">
-                  {rows.map((row) => {
-                    const stepIdx = resolveTimelineIndexForRow(row)
-                    return (
-                      <StrategyResultCard
-                        key={`${row.scenarioId}-${row.date}`}
-                        row={row}
-                        active={stepIdx >= 0 && stepIdx === timelineStepIndex}
-                        onSelect={
-                          stepIdx >= 0
-                            ? () => setTimelineStepIndex(stepIdx)
-                            : undefined
-                        }
-                      />
-                    )
-                  })}
+                  {rows.map((row, idx) => (
+                    <StrategyResultCard
+                      key={`${row.scenarioId}-${row.date}`}
+                      row={row}
+                      active={idx === timelineStepIndex}
+                      onSelect={() => setTimelineStepIndex(idx)}
+                    />
+                  ))}
                 </div>
               </div>
             ))}

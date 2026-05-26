@@ -257,22 +257,40 @@ function evaluateAt(panicData, historyUpTo, meta, opts = {}) {
   }
 }
 
-/** @param {ReturnType<typeof evaluateAt>[]} results */
-export function buildRegimeTimeline(results) {
-  /** @type {{ emoji: string; label: string; regimeId?: string; date: string }[]} */
-  const chain = []
-  for (const r of results) {
-    if (r.missing || !r.statusEmoji || r.statusEmoji === "—") continue
-    const prev = chain[chain.length - 1]
-    if (prev && prev.regimeId === r.regimeId && prev.emoji === r.statusEmoji) continue
-    chain.push({
-      emoji: r.statusEmoji,
-      label: r.statusLabel ?? "",
+/** @param {string} fromIso @param {string} toIso */
+function labDaysUntilNext(fromIso, toIso) {
+  const from = String(fromIso).slice(0, 10)
+  const to = String(toIso).slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return null
+  const ms =
+    (new Date(`${to}T12:00:00`).getTime() - new Date(`${from}T12:00:00`).getTime()) / 86_400_000
+  if (!Number.isFinite(ms) || ms < 0) return null
+  return Math.max(1, Math.round(ms))
+}
+
+/**
+ * 재생 결과(앵커) 1행 = 타임라인 1노드 — 카드와 날짜·순서 동기화
+ * @param {ReturnType<typeof evaluateAt>[]} results
+ * @param {string} [scenarioEnd]
+ */
+export function buildRegimeTimeline(results, scenarioEnd = "") {
+  return results.map((r, idx) => {
+    const date = String(r.date ?? "").slice(0, 10)
+    const dateLabel = r.dateLabel ?? (date.length >= 7 ? date.slice(0, 7) : date)
+    const nextBound = results[idx + 1]?.date ?? scenarioEnd
+    const durationDays = date ? labDaysUntilNext(date, nextBound) : null
+
+    return {
+      resultIndex: idx,
+      emoji: r.statusEmoji ?? "—",
+      label: r.statusLabel ?? "—",
       regimeId: r.regimeId,
-      date: r.date,
-    })
-  }
-  return chain
+      date,
+      dateLabel,
+      durationDays,
+      missing: Boolean(r.missing),
+    }
+  })
 }
 
 /** @param {ReturnType<typeof evaluateAt>[]} results */
@@ -289,7 +307,7 @@ export function groupValidationByScenario(results) {
     return {
       scenario,
       results: rows,
-      timeline: buildRegimeTimeline(rows),
+      timeline: buildRegimeTimeline(rows, scenario.end),
     }
   }).filter((g) => g.results.length > 0)
 }
