@@ -4,9 +4,11 @@
 function CoreIndexCard({ statusLine, role, valueLine, tone }) {
   return (
     <article className={`home-v5-core-card home-v5-core-card--${tone}`}>
-      <p className="home-v5-core-card__status">{statusLine}</p>
-      <p className="home-v5-core-card__role">{role}</p>
-      <p className="home-v5-core-card__value">{valueLine}</p>
+      <div className="home-v5-core-card__body">
+        <p className="home-v5-core-card__status">{statusLine}</p>
+        <p className="home-v5-core-card__role">{role}</p>
+        <p className="home-v5-core-card__value">{valueLine}</p>
+      </div>
     </article>
   )
 }

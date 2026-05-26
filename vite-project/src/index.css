@@ -7254,15 +7254,32 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .home-v5-preview--hero .home-v5-core-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
   min-height: 3.5rem;
-  padding: 0.25rem 0.25rem;
+  height: 100%;
+  padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.12);
   box-shadow: none;
+}
+
+.home-v5-core-card__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  gap: 0.3rem;
+  padding: 0.25rem 0.3rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+.home-v5-preview--hero .home-v5-core-card__body {
+  gap: 0.3rem;
 }
 
 .home-v5-preview--hero .home-v5-core-card--safe {
@@ -7306,8 +7323,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 @media (min-width: 768px) {
   .home-v5-preview--hero .home-v5-core-card {
     min-height: 3.75rem;
-    padding: 0.28rem 0.3rem;
+  }
+
+  .home-v5-preview--hero .home-v5-core-card__body {
     gap: 0.35rem;
+    padding: 0.28rem 0.3rem;
   }
 
   .home-v5-preview--hero .home-v5-core-card__status {
@@ -7322,11 +7342,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .home-v5-core-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
   min-height: 3.75rem;
-  padding: 0.35rem 0.3rem;
+  height: 100%;
+  padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.25);
@@ -7662,6 +7680,97 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-preview--compact.panic-v2-desk > * + * {
   margin-top: 0;
+}
+
+/* ── 시장엔진 히스토리 가독성 (레이아웃·로직 변경 없음) ── */
+.panic-history-section .panic-desk-section-header__desc {
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.9);
+  opacity: 0.9;
+}
+
+.panic-history-section__meta {
+  font-size: 12px !important;
+  color: rgba(203, 213, 225, 0.9) !important;
+  opacity: 0.9;
+}
+
+.panic-history-section .panic-history-tab__label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.panic-history-section .panic-history-tab--main {
+  font-weight: 600;
+}
+
+.panic-history-section .panic-history-tab--main > span:not(.panic-history-tab__label):not(.panic-history-tab__count) {
+  font-size: 8px;
+  font-weight: 600;
+  opacity: 1;
+  color: rgba(226, 232, 240, 0.88);
+}
+
+.panic-history-section .panic-history-tab__count {
+  font-size: 9px;
+  opacity: 0.92;
+}
+
+.panic-history-section .panic-engine-status-bar__label,
+.panic-history-section .panic-engine-status-bar__chip {
+  font-size: 11px;
+  opacity: 1;
+}
+
+.panic-history-section .panic-engine-status-bar__chip {
+  color: rgba(203, 213, 225, 0.92);
+}
+
+.panic-history-section .panic-engine-status-bar__chip--active {
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.panic-history-section .panic-chart-event-strip__chip {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92);
+  opacity: 1;
+}
+
+.panic-history-section .panic-history-zone-legend__chip {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.panic-history-section .panic-engine-status-panel__badge-title {
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(203, 213, 225, 0.92);
+}
+
+.panic-history-section .panic-engine-status-panel__badge-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.panic-history-section .panic-engine-status-panel__hint {
+  font-size: 10px;
+  color: rgba(203, 213, 225, 0.88);
+  opacity: 1;
+}
+
+.panic-history-section .panic-history-lab-chart .recharts-cartesian-axis-tick-value {
+  font-size: 11px !important;
+  fill: rgba(203, 213, 225, 0.92) !important;
+}
+
+.panic-history-section .panic-history-insight__interpret-line,
+.panic-history-section .panic-history-insight__footer {
+  font-size: 11px;
+  color: rgba(226, 232, 240, 0.92);
+  opacity: 1;
 }
 
 /* v5 상단 밀도 — 시장 분석 ↔ 시장엔진 히스토리 간격 축소 */
