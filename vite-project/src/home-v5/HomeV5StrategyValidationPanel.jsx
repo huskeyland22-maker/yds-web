@@ -106,6 +106,7 @@ export default function HomeV5StrategyValidationPanel({
   const [open, setOpen] = useState(defaultOpen)
   const [scenarioId, setScenarioId] = useState(HOME_V5_VALIDATION_SCENARIOS[0]?.id ?? "")
   const [results, setResults] = useState([])
+  const [replayed, setReplayed] = useState(false)
   const [logTick, setLogTick] = useState(0)
 
   const historyMeta = useMemo(() => {
@@ -121,13 +122,20 @@ export default function HomeV5StrategyValidationPanel({
     return grouped.find((g) => g.scenario.id === scenarioId) ?? grouped[0]
   }, [grouped, scenarioId])
 
+  const usesMock = useMemo(
+    () => results.some((r) => r.dataSource === "mock" && !r.missing),
+    [results],
+  )
+
   const runValidation = useCallback(() => {
-    if (!historyRows.length || !scenarioId) return
+    if (!scenarioId) return
     const out = runHomeV5StrategyValidation(historyRows, "anchors", {
       persistLog: true,
       scenarioId,
+      useMockFallback: true,
     })
     setResults(out)
+    setReplayed(true)
     setLogTick((t) => t + 1)
   }, [historyRows, scenarioId])
 
@@ -183,7 +191,7 @@ export default function HomeV5StrategyValidationPanel({
           <button
             type="button"
             className="home-v5-strategy-validation__run"
-            disabled={!historyRows.length || !scenarioId}
+            disabled={!scenarioId}
             onClick={runValidation}
           >
             ▶ 재생
@@ -200,9 +208,9 @@ export default function HomeV5StrategyValidationPanel({
 
         {grouped.length === 0 ? (
           <p className="home-v5-strategy-validation__empty">
-            {historyRows.length
-              ? "이벤트를 선택한 뒤 ▶ 재생을 누르면 국면 타임라인·결과 카드가 표시됩니다."
-              : "히스토리 데이터가 없습니다. 시장 엔진 히스토리 로드 후 다시 시도하세요."}
+            {replayed
+              ? "재생 결과가 없습니다. 다른 이벤트를 선택해 보세요."
+              : "이벤트를 선택한 뒤 ▶ 재생을 누르면 국면 타임라인·결과 카드가 표시됩니다."}
           </p>
         ) : (
           <div className="home-v5-strategy-validation__scenarios">

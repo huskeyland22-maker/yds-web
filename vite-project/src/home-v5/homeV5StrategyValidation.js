@@ -1,6 +1,7 @@
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { buildHomeV5StrategyEvaluation, buildHomeV5StrategyRationale } from "./homeV5DeskModel.js"
 import { appendHomeV5StrategyLogs } from "./homeV5StrategyLogPersist.js"
+import { getLabMockPanicData, isUsablePanicSnapshot } from "./homeV5StrategyLabMock.js"
 
 /** @type {Record<string, string>} */
 const LAB_ACTION_BY_REGIME = {
@@ -43,6 +44,16 @@ export function buildHomeV5LabRationaleLines(panicData, regimeId) {
     else if (vix >= 25 && !lines.some((l) => l.startsWith("VIX"))) lines.push(`VIX ${Math.round(vix)}+`)
     else if (vix < 20 && regimeId === "overheated" && !lines.some((l) => l.startsWith("VIX")))
       lines.push("VIX 저점")
+    else if (vix < 22 && regimeId === "neutral" && !lines.some((l) => l.includes("VIX"))) lines.push("VIX 안정")
+  }
+
+  const hy = Number(panicData?.highYield)
+  if (Number.isFinite(hy) && hy < 5.5 && regimeId === "neutral" && !lines.some((l) => l.startsWith("HY"))) {
+    lines.push("HY 정상")
+  }
+
+  if (regimeId === "neutral" && Number.isFinite(fg) && fg >= 55 && !lines.some((l) => l.startsWith("CNN"))) {
+    lines.push(fg >= 60 ? `CNN ${Math.round(fg)}+` : `CNN ${Math.round(fg)}`)
   }
 
   if (!lines.length) {
@@ -156,11 +167,11 @@ function rowsInRange(sortedAsc, start, end) {
  * @param {string[]} anchors
  */
 function pickReplayDates(rangeRows, mode, anchors) {
-  if (!rangeRows.length) return []
-
   if (mode === "anchors") {
     return anchors
   }
+
+  if (!rangeRows.length) return []
 
   if (mode === "daily") {
     return rangeRows.map((r) => rowDateKey(r)).filter(Boolean)
@@ -189,12 +200,15 @@ function pickReplayDates(rangeRows, mode, anchors) {
  * @param {object | null} panicData
  * @param {object[]} historyUpTo
  * @param {{ scenarioId: string; scenarioLabel: string; date: string }} meta
+ * @param {{ dataSource?: "history" | "mock" }} [opts]
  */
-function evaluateAt(panicData, historyUpTo, meta) {
+function evaluateAt(panicData, historyUpTo, meta, opts = {}) {
+  const dataSource = opts.dataSource ?? "history"
   if (!panicData) {
     return {
       ...meta,
       missing: true,
+      dataSource,
       statusEmoji: "—",
       statusLabel: "데이터 없음",
       action: "—",
@@ -210,6 +224,7 @@ function evaluateAt(panicData, historyUpTo, meta) {
     return {
       ...meta,
       missing: true,
+      dataSource,
       statusEmoji: "—",
       statusLabel: "판정 불가",
       action: "—",
@@ -230,6 +245,7 @@ function evaluateAt(panicData, historyUpTo, meta) {
   return {
     ...meta,
     missing: false,
+    dataSource,
     regimeId: evaluation.regimeId,
     statusEmoji: evaluation.emoji,
     statusLabel: evaluation.label,
@@ -282,21 +298,33 @@ export function groupValidationByScenario(results) {
  * @param {object[]} historyRows
  * @param {HomeV5ValidationScenario} scenario
  * @param {HomeV5ReplayMode} [replayMode]
+ * @param {{ useMockFallback?: boolean }} [opts]
  */
-export function replayHomeV5Scenario(historyRows, scenario, replayMode = "anchors") {
+export function replayHomeV5Scenario(historyRows, scenario, replayMode = "anchors", opts = {}) {
+  const { useMockFallback = true } = opts
   const sorted = sortHistoryRowsAsc(historyRows)
   const rangeRows = rowsInRange(sorted, scenario.start, scenario.end)
   const dates = pickReplayDates(rangeRows, replayMode, scenario.anchors)
 
   return dates.map((date) => {
     const row = rowOnOrBefore(sorted, date)
-    const panicData = cycleRowToPanicData(row)
+    let panicData = cycleRowToPanicData(row)
+    let dataSource = /** @type {"history" | "mock"} */ ("history")
+
+    if (!isUsablePanicSnapshot(panicData) && useMockFallback) {
+      const mock = getLabMockPanicData(scenario.id, date)
+      if (mock) {
+        panicData = mock
+        dataSource = "mock"
+      }
+    }
+
     const historyUpTo = sorted.filter((r) => rowDateKey(r) <= date)
     return evaluateAt(panicData, historyUpTo, {
       scenarioId: scenario.id,
       scenarioLabel: scenario.label,
       date,
-    })
+    }, { dataSource })
   })
 }
 
@@ -328,10 +356,10 @@ export function persistHomeV5ValidationResults(results) {
 /**
  * @param {object[]} historyRows
  * @param {HomeV5ReplayMode} [replayMode]
- * @param {{ persistLog?: boolean; scenarioId?: string }} [opts]
+ * @param {{ persistLog?: boolean; scenarioId?: string; useMockFallback?: boolean }} [opts]
  */
 export function runHomeV5StrategyValidation(historyRows, replayMode = "anchors", opts = {}) {
-  const { persistLog = true, scenarioId } = opts
+  const { persistLog = true, scenarioId, useMockFallback = true } = opts
   const sorted = sortHistoryRowsAsc(historyRows)
   /** @type {ReturnType<typeof evaluateAt>[]} */
   const results = []
@@ -341,7 +369,7 @@ export function runHomeV5StrategyValidation(historyRows, replayMode = "anchors",
     : HOME_V5_VALIDATION_SCENARIOS
 
   for (const scenario of scenarios) {
-    results.push(...replayHomeV5Scenario(sorted, scenario, replayMode))
+    results.push(...replayHomeV5Scenario(sorted, scenario, replayMode, { useMockFallback }))
   }
 
   if (persistLog) persistHomeV5ValidationResults(results)
