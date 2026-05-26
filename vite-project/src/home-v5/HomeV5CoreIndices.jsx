@@ -1,13 +1,16 @@
 /**
- * @param {{ statusLine: string; role: string; valueLine: string; tone: string }} props
+ * @param {import("./homeV5DeskModel.js").HomeV5CoreCardModel} props
  */
-function CoreIndexCard({ statusLine, role, valueLine, tone }) {
+function CoreIndexCard({ key: cardKey, role, symbol, value }) {
   return (
-    <article className={`home-v5-core-card home-v5-core-card--${tone}`}>
+    <article className={`home-v5-core-card home-v5-core-card--${cardKey}`}>
       <div className="home-v5-core-card__body">
-        <p className="home-v5-core-card__status">{statusLine}</p>
-        <p className="home-v5-core-card__role">{role}</p>
-        <p className="home-v5-core-card__value">{valueLine}</p>
+        <p className="home-v5-core-card__label">
+          <span className="home-v5-core-card__dot" aria-hidden="true" />
+          {role}
+        </p>
+        <p className="home-v5-core-card__symbol">{symbol}</p>
+        <p className="home-v5-core-card__value">{value}</p>
       </div>
     </article>
   )

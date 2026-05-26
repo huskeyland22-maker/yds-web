@@ -1,15 +1,13 @@
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
-import { getStatus } from "../utils/panicIndicatorStatus.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
 /** @typedef {"fearGreed" | "vix" | "highYield"} HomeV5CoreKey */
 
 /** @typedef {{
  *   key: HomeV5CoreKey
- *   statusLine: string
  *   role: string
- *   valueLine: string
- *   tone: "safe" | "warning" | "danger" | "neutral"
+ *   symbol: string
+ *   value: string
  * }} HomeV5CoreCardModel */
 
 /** @typedef {{
@@ -49,29 +47,6 @@ const SHORT_REGIME_LABEL = {
   panicBuy: "패닉매수",
 }
 
-/** @param {string} key @param {unknown} value */
-function coreStatusLine(key, value) {
-  const s = getStatus(key, value)
-  if (s.label === "-") return "—"
-
-  if (key === "fearGreed") {
-    if (s.label.includes("탐욕")) return "🔥 탐욕"
-    if (s.label.includes("공포")) return "😨 공포"
-    return "⚖️ 중립"
-  }
-  if (key === "vix") {
-    if (s.label === "공포") return "😱 공포"
-    if (s.label === "주의") return "⚠️ 주의"
-    return "😴 안정"
-  }
-  if (key === "highYield") {
-    if (s.label === "위험") return "🔴 위험"
-    if (s.label === "경계") return "🟡 경계"
-    return "🟢 정상"
-  }
-  return s.label
-}
-
 /** @param {unknown} v @param {number} [digits] */
 function fmtNum(v, digits = 1) {
   const n = Number(v)
@@ -85,16 +60,14 @@ function fmtNum(v, digits = 1) {
  */
 export function buildHomeV5CoreCard(key, panicData) {
   const raw = panicData?.[key]
-  const prefix = VALUE_LINES[key]
   const n = Number(raw)
-  const valueLine = Number.isFinite(n) ? `${prefix} ${fmtNum(n, key === "highYield" ? 1 : 0)}` : `${prefix} —`
+  const digits = key === "highYield" ? 1 : 0
 
   return {
     key,
-    statusLine: coreStatusLine(key, raw),
     role: CORE_ROLES[key],
-    valueLine,
-    tone: getStatus(key, raw).className,
+    symbol: VALUE_LINES[key],
+    value: Number.isFinite(n) ? fmtNum(n, digits) : "—",
   }
 }
 
