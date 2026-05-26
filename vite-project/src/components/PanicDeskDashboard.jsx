@@ -1,25 +1,13 @@
 import { useMemo } from "react"
 import { getFinalScore } from "../utils/tradingScores.js"
-import { EXPERT_METRICS } from "../utils/panicDeskMetrics.js"
-import { formatMetricValue } from "./macroCycleChartUtils.js"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
-import DailyMarketReportPanel from "./DailyMarketReportPanel.jsx"
-import RecommendationEnginePanel from "./RecommendationEnginePanel.jsx"
+import HomeV5DeskLead from "../home-v5/HomeV5DeskLead.jsx"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
-import PanicCoreMetricsBlock from "./panic-metrics/PanicCoreMetricsBlock.jsx"
-import PanicMetricRow from "./panic-metrics/PanicMetricRow.jsx"
-import PanicExpertMetricsAccordion from "./PanicExpertMetricsAccordion.jsx"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
-import PanicDeskSectionHeader from "./panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalTradingZoneSection from "./trading-zone/TacticalTradingZoneSection.jsx"
-
-function fmt(key, v) {
-  if (v == null || !Number.isFinite(Number(v))) return "—"
-  return formatMetricValue(key, Number(v))
-}
 
 /**
  * @param {{
@@ -33,7 +21,7 @@ export default function PanicDeskDashboard({
   panicData,
   cycleMetricHistory,
   isStale: _isStale = false,
-  asOfDateLabel = "—",
+  asOfDateLabel: _asOfDateLabel = "—",
 }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
 
@@ -68,45 +56,7 @@ export default function PanicDeskDashboard({
       </div>
 
       <div className="panic-v2-desk__metrics-slot panic-desk-section panic-desk-section--cyan panic-desk-section--lead">
-        <PanicDeskSectionHeader
-          icon="📊"
-          title="핵심 지수"
-          description="거시 · 패닉 · 시장 상태"
-          tone="cyan"
-        />
-        <PanicCoreMetricsBlock panicData={panicData} historyRows={safeHistory} />
-
-        <PanicExpertMetricsAccordion>
-          <div className="panic-metric-rows-grid panic-metric-rows-grid--expert panic-metric-rows-grid--expert-5">
-            {EXPERT_METRICS.map((metric) => (
-              <PanicMetricRow
-                key={metric.key}
-                label={metric.label}
-                value={fmt(metric.key, panicData?.[metric.key])}
-                accent={metric.accent}
-                variant="expert"
-              />
-            ))}
-          </div>
-        </PanicExpertMetricsAccordion>
-      </div>
-
-      <div className="panic-v2-desk__status-slot">
-        <DailyMarketReportPanel
-          panicData={panicData}
-          cycleScore={finalScore}
-          snapshot={bondSnapshot.snapshot}
-          loading={macroRiskEnabled && bondSnapshot.loading}
-        />
-      </div>
-
-      <div className="panic-v2-desk__recommend-slot">
-        <RecommendationEnginePanel
-          panicData={panicData}
-          cycleScore={finalScore}
-          snapshot={bondSnapshot.snapshot}
-          historyRows={safeHistory}
-        />
+        <HomeV5DeskLead panicData={panicData} />
       </div>
 
       <div className="panic-v2-desk__history-slot panic-desk-section panic-desk-section--amber">

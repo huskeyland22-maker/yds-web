@@ -30,6 +30,8 @@ import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
+import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
+import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
 import AppSidebar from "./components/layout/AppSidebar.jsx"
 import PanicDeskDashboard from "./components/PanicDeskDashboard.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
@@ -421,6 +423,8 @@ function buildFinderCandidates(memos, marketStateKey) {
 
 function App() {
   const location = useLocation()
+  const isHomeV5Preview = isHomeV5PreviewRoute(location.pathname)
+  const showDevDebugChrome = isDevMode() && !isHomeV5Preview
   const panicData = usePanicStore((s) => s.panicData)
   const panicDataStale = usePanicStore((s) => s.panicDataStale)
   const manualMode = usePanicStore((s) => s.manualMode)
@@ -1280,7 +1284,7 @@ function App() {
                   )}
                 </div>
               </div>
-              {isDevMode() ? (
+              {showDevDebugChrome ? (
                 <span
                   className="flex max-w-[min(42vw,14rem)] flex-col items-end gap-0.5 rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-mono text-trading-2xs text-slate-400"
                   title={`id ${APP_BUILD_ID}`}
@@ -1294,7 +1298,7 @@ function App() {
           </div>
         </header>
 
-        {isDevMode() && isDataTraceUiEnabled() ? (
+        {showDevDebugChrome && isDataTraceUiEnabled() ? (
           <div className="flex flex-wrap items-start gap-2 border-b border-amber-500/20 bg-[#070a0f]/95 px-3 py-2">
             <DataFlowPipelineHint />
             <PanicMetricsTraceBadge />
@@ -1356,6 +1360,18 @@ function App() {
                 isDevMode() ? (
                   <SectionErrorBoundary label="Supabase 디버그">
                     <DebugDataPage />
+                  </SectionErrorBoundary>
+                ) : (
+                  <Navigate to="/cycle" replace />
+                )
+              }
+            />
+            <Route
+              path="/preview/home-v5"
+              element={
+                isDevMode() ? (
+                  <SectionErrorBoundary label="홈 v5 미리보기">
+                    <HomeV5PreviewPage />
                   </SectionErrorBoundary>
                 ) : (
                   <Navigate to="/cycle" replace />
@@ -1595,10 +1611,10 @@ function App() {
         open={mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}
         onOpenInput={openInputPanel}
-        buildVersion={isDevMode() ? buildVersion : null}
+        buildVersion={showDevDebugChrome ? buildVersion : null}
       />
-      {isDevMode() ? <MobileShellDebugOverlay /> : null}
-      {isDevMode() ? (
+      {showDevDebugChrome ? <MobileShellDebugOverlay /> : null}
+      {showDevDebugChrome ? (
         <>
           <PanicSyncDebugPanel />
           <SupabaseRawDebugPanel />
