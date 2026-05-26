@@ -7304,11 +7304,24 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card__role {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
   margin: 0;
-  font-size: 12px;
-  font-weight: 700;
   line-height: 1.15;
+  white-space: nowrap;
   color: rgba(148, 163, 184, 0.95);
+}
+
+.home-v5-hud-card__role-ko {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.home-v5-hud-card__role-en {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
 }
 
 .home-v5-hud-card__value {

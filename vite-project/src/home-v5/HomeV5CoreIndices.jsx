@@ -1,7 +1,7 @@
 /**
  * @param {import("./homeV5DeskModel.js").HomeV5CoreCardModel} props
  */
-function CoreHudCard({ key: cardKey, kind, role, value, trendLine, trendDir, statusLabel, accentColor }) {
+function CoreHudCard({ key: cardKey, kind, role, symbol, value, trendLine, trendDir, statusLabel, accentColor }) {
   const isStrategy = kind === "strategy"
   const style = accentColor ? { "--home-v5-hud-accent": accentColor } : undefined
 
@@ -17,7 +17,16 @@ function CoreHudCard({ key: cardKey, kind, role, value, trendLine, trendDir, sta
       style={style}
     >
       <span className="home-v5-hud-card__top-bar" aria-hidden="true" />
-      <p className="home-v5-hud-card__role">{role}</p>
+      <p className="home-v5-hud-card__role">
+        {isStrategy || !symbol ? (
+          role
+        ) : (
+          <>
+            <span className="home-v5-hud-card__role-ko">{role}</span>
+            <span className="home-v5-hud-card__role-en">{symbol}</span>
+          </>
+        )}
+      </p>
       <p className={`home-v5-hud-card__value${isStrategy ? " home-v5-hud-card__value--regime" : ""}`}>{value}</p>
       <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine}</p>
       {!isStrategy ? (

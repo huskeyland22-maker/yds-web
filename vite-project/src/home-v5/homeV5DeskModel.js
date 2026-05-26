@@ -8,6 +8,7 @@ import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
  *   key: HomeV5CoreKey
  *   kind: "metric" | "strategy"
  *   role: string
+ *   symbol?: string
  *   value: string
  *   trendLine: string
  *   trendDir: "up" | "down" | "flat"
@@ -74,6 +75,7 @@ export function buildHomeV5CoreCard(key, panicData, historyRows = []) {
     key,
     kind: "metric",
     role: CORE_ROLES[key],
+    symbol: VALUE_LINES[key],
     value: Number.isFinite(n) ? fmtNum(n, digits) : "—",
     trendLine: trend.trendLine,
     trendDir: trend.trendDir,
