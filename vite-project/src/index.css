@@ -7231,7 +7231,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-preview__placeholder--hero {
   width: 100%;
-  min-height: 7.5rem;
+  min-height: 7.25rem;
   max-height: 9.375rem;
   display: flex;
   align-items: center;
@@ -7247,11 +7247,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero .home-v5-core-grid--hero {
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .home-v5-preview--hero .home-v5-core-card {
-  min-height: 4.25rem;
+  min-height: 3.5rem;
+  padding: 0.3rem 0.25rem;
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.12);
@@ -7293,12 +7294,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 @media (min-width: 768px) {
   .home-v5-preview--hero .home-v5-core-card {
-    min-height: 4.75rem;
-    padding: 0.55rem 0.5rem;
+    min-height: 3.75rem;
+    padding: 0.35rem 0.3rem;
   }
 
   .home-v5-preview--hero .home-v5-core-card__status {
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
   }
 }
 
@@ -7379,9 +7380,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-strategy--hero {
   box-sizing: border-box;
-  min-height: 8.75rem;
-  max-height: 11.25rem;
-  padding: 0.55rem 1rem;
+  min-height: 7.25rem;
+  max-height: 9.375rem;
+  padding: 0.45rem 0.9rem;
   border-radius: 0.625rem;
   background: linear-gradient(
     165deg,
@@ -7394,16 +7395,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     0 4px 16px rgba(0, 0, 0, 0.28);
 }
 
-/* 접힘: ~140~180px · 3줄(국면·행동·근거 버튼) */
+/* 접힘: ~116~150px · 3줄(국면·행동·근거 버튼) */
 .home-v5-strategy--hero:not(:has(.home-v5-strategy__rationale)) {
-  height: clamp(8.75rem, 22vw, 11.25rem);
+  height: clamp(7.25rem, 18vw, 9.375rem);
 }
 
 .home-v5-strategy--hero:has(.home-v5-strategy__rationale) {
   max-height: none;
   height: auto;
-  min-height: 8.75rem;
-  padding-bottom: 0.65rem;
+  min-height: 7.25rem;
+  padding-bottom: 0.55rem;
 }
 
 .home-v5-strategy__eyebrow {
@@ -7420,13 +7421,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero.home-v5-preview--compact .home-v5-strategy--hero {
-  gap: 0.2rem;
-  padding: 0.4rem 0.85rem;
+  gap: 0.15rem;
+  padding: 0.35rem 0.75rem;
 }
 
 .home-v5-preview--hero.home-v5-preview--compact .home-v5-strategy--hero:not(:has(.home-v5-strategy__rationale)) {
-  height: 9.75rem;
-  max-height: 11.25rem;
+  height: 8.125rem;
+  max-height: 9.375rem;
 }
 
 .home-v5-strategy__regime {
@@ -7451,7 +7452,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero .home-v5-strategy--hero .home-v5-strategy__emoji {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
 }
 
 .home-v5-strategy__label {
@@ -7465,8 +7466,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero .home-v5-strategy--hero .home-v5-strategy__label {
-  font-size: 1.375rem;
-  line-height: 1.15;
+  font-size: 1.25rem;
+  line-height: 1.12;
 }
 
 .home-v5-strategy__action {
@@ -7502,10 +7503,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--hero .home-v5-strategy--hero .home-v5-strategy__toggle {
-  min-width: 7.5rem;
-  padding: 0.22rem 0.75rem;
+  min-width: 7.25rem;
+  padding: 0.18rem 0.65rem;
   font-size: 0.6875rem;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .home-v5-strategy__rationale {
@@ -7544,8 +7545,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-preview--compact .home-v5-market__toggle {
-  padding: 0.38rem 0.6rem;
-  gap: 0.1rem;
+  padding: 0.32rem 0.55rem;
+  gap: 0.08rem;
 }
 
 .home-v5-market__toggle {
@@ -7641,11 +7642,28 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .home-v5-preview--hero .home-v5-strategy--hero:not(:has(.home-v5-strategy__rationale)) {
-    height: 10.25rem;
-    max-height: 11.25rem;
+    height: 8.5rem;
+    max-height: 9.375rem;
   }
 }
 
 .home-v5-preview--compact.panic-v2-desk > * + * {
   margin-top: 0;
+}
+
+/* v5 상단 밀도 — 시장 분석 ↔ 시장엔진 히스토리 간격 축소 */
+.panic-v2-desk--terminal > .panic-v2-desk__metrics-slot + .panic-v2-desk__history-slot.panic-desk-section {
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+}
+
+.panic-v2-desk--terminal > .panic-v2-desk__history-slot .panic-desk-section-header--compact {
+  margin-bottom: 0.35rem;
+}
+
+@media (min-width: 640px) {
+  .panic-v2-desk--terminal > .panic-v2-desk__metrics-slot + .panic-v2-desk__history-slot.panic-desk-section {
+    margin-top: 0.5rem;
+    padding-top: 0.55rem;
+  }
 }
