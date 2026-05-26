@@ -31,7 +31,9 @@ import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
+import HomeV5StrategyValidationPage from "./pages/HomeV5StrategyValidationPage.jsx"
 import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
+import { isHomeV5ValidationRoute } from "./home-preview/homeV5ValidationRoute.js"
 import AppSidebar from "./components/layout/AppSidebar.jsx"
 import PanicDeskDashboard from "./components/PanicDeskDashboard.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
@@ -424,7 +426,8 @@ function buildFinderCandidates(memos, marketStateKey) {
 function App() {
   const location = useLocation()
   const isHomeV5Preview = isHomeV5PreviewRoute(location.pathname)
-  const showDevDebugChrome = isDevMode() && !isHomeV5Preview
+  const isHomeV5Validation = isHomeV5ValidationRoute(location.pathname)
+  const showDevDebugChrome = isDevMode() && !isHomeV5Preview && !isHomeV5Validation
   const panicData = usePanicStore((s) => s.panicData)
   const panicDataStale = usePanicStore((s) => s.panicDataStale)
   const manualMode = usePanicStore((s) => s.manualMode)
@@ -1372,6 +1375,18 @@ function App() {
                 isDevMode() ? (
                   <SectionErrorBoundary label="홈 v5 미리보기">
                     <HomeV5PreviewPage />
+                  </SectionErrorBoundary>
+                ) : (
+                  <Navigate to="/cycle" replace />
+                )
+              }
+            />
+            <Route
+              path="/preview/home-v5-validation"
+              element={
+                isDevMode() ? (
+                  <SectionErrorBoundary label="전략 엔진 검증">
+                    <HomeV5StrategyValidationPage />
                   </SectionErrorBoundary>
                 ) : (
                   <Navigate to="/cycle" replace />

@@ -7912,3 +7912,178 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     padding-top: 0.55rem;
   }
 }
+
+/* 홈 v5 전략 엔진 검증 (dev /preview/home-v5-validation) */
+.home-v5-validation-page {
+  max-width: 72rem;
+  margin: 0 auto;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.home-v5-validation-page__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.home-v5-validation-page__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.home-v5-validation-page__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.home-v5-validation-page__link {
+  font-size: 0.75rem;
+  color: rgba(96, 165, 250, 0.95);
+  text-decoration: none;
+}
+
+.home-v5-validation-panel {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.home-v5-validation-panel__meta {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  color: rgba(148, 163, 184, 0.88);
+}
+
+.home-v5-validation-panel__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.home-v5-validation-panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.home-v5-validation-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.home-v5-validation-panel__h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.home-v5-validation-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.625rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.home-v5-validation-field select {
+  min-width: 10rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.35rem;
+  background: rgba(15, 23, 42, 0.9);
+  color: rgba(248, 250, 252, 0.95);
+  font-size: 0.6875rem;
+}
+
+.home-v5-validation-btn {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.35rem;
+  background: rgba(30, 41, 59, 0.8);
+  color: rgba(226, 232, 240, 0.95);
+  font-size: 0.6875rem;
+  cursor: pointer;
+}
+
+.home-v5-validation-btn--primary {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(37, 99, 235, 0.25);
+}
+
+.home-v5-validation-btn--danger {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: rgba(252, 165, 165, 0.95);
+}
+
+.home-v5-validation-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.home-v5-validation-table-wrap {
+  overflow-x: auto;
+}
+
+.home-v5-validation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.6875rem;
+}
+
+.home-v5-validation-table th,
+.home-v5-validation-table td {
+  padding: 0.35rem 0.45rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+  vertical-align: top;
+}
+
+.home-v5-validation-table th {
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.95);
+  white-space: nowrap;
+}
+
+.home-v5-validation-table tr.is-missing td {
+  color: rgba(148, 163, 184, 0.65);
+}
+
+.home-v5-validation-table__rationale {
+  max-width: 14rem;
+  line-height: 1.35;
+  color: rgba(203, 213, 225, 0.88);
+}
+
+.home-v5-validation-events {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.6875rem;
+}
+
+.home-v5-validation-events li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.home-v5-validation-events__anchors {
+  font-size: 0.625rem;
+  color: rgba(100, 116, 139, 0.95);
+}

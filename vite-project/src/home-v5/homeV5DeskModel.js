@@ -83,6 +83,36 @@ export function buildHomeV5CoreCard(key, panicData, historyRows = []) {
 
 /**
  * @param {object | null | undefined} panicData
+ * @param {object[]} [historyRows]
+ */
+export function buildHomeV5StrategyEvaluation(panicData, historyRows = []) {
+  void historyRows
+  const band = resolveHomeV5StrategyRegime(panicData)
+  if (!band) return null
+
+  const fg = Number(panicData?.fearGreed)
+  const vix = Number(panicData?.vix)
+  const bofa = Number(panicData?.bofa)
+  const hy = Number(panicData?.highYield ?? panicData?.hyOas)
+
+  return {
+    regimeId: band.id,
+    emoji: band.emoji,
+    label: SHORT_REGIME_LABEL[band.id] ?? band.label,
+    color: band.color,
+    action: ACTION_BY_REGIME[band.id] ?? "—",
+    rationale: buildHomeV5StrategyRationale(panicData, band.id),
+    metrics: {
+      cnn: Number.isFinite(fg) ? fg : null,
+      vix: Number.isFinite(vix) ? vix : null,
+      bofa: Number.isFinite(bofa) ? bofa : null,
+      hy: Number.isFinite(hy) ? hy : null,
+    },
+  }
+}
+
+/**
+ * @param {object | null | undefined} panicData
  * @param {string} regimeId
  */
 export function buildHomeV5StrategyRationale(panicData, regimeId) {
@@ -121,22 +151,20 @@ export function buildHomeV5DeskModel(panicData, historyRows = []) {
     buildHomeV5CoreCard(key, panicData, historyRows),
   )
 
-  const band = resolveHomeV5StrategyRegime(panicData)
-  if (!band) {
+  const evaluation = buildHomeV5StrategyEvaluation(panicData, historyRows)
+  if (!evaluation) {
     return { core, strategy: null }
   }
-
-  const shortLabel = SHORT_REGIME_LABEL[band.id] ?? band.label
 
   return {
     core,
     strategy: {
-      id: band.id,
-      emoji: band.emoji,
-      label: shortLabel,
-      color: band.color,
-      action: ACTION_BY_REGIME[band.id] ?? "—",
-      rationale: buildHomeV5StrategyRationale(panicData, band.id),
+      id: evaluation.regimeId,
+      emoji: evaluation.emoji,
+      label: evaluation.label,
+      color: evaluation.color,
+      action: evaluation.action,
+      rationale: evaluation.rationale,
     },
   }
 }
