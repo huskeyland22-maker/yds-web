@@ -10,6 +10,7 @@ import {
   tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
 import { buildTradingZoneEngineLink } from "../../trading-zone/tradingZoneEngineLink.js"
+import { buildTradingZoneStrategyState } from "../../trading-zone/tradingZoneStrategyEngine.js"
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
@@ -140,11 +141,19 @@ export default function TacticalTradingZoneSection({
     [panicData, cycleScore, snapshot, historyRows],
   )
 
-  const bucketGroups = useMemo(() => groupPositionsByBucket(market, positions), [market, positions])
+  const strategyState = useMemo(
+    () => buildTradingZoneStrategyState({ positions, panicData, engineLink }),
+    [positions, panicData, engineLink],
+  )
+
+  const bucketGroups = useMemo(
+    () => groupPositionsByBucket(market, strategyState.adjustedPositions),
+    [market, strategyState.adjustedPositions],
+  )
 
   const marketPositions = useMemo(
-    () => positions.filter((p) => p.market === market),
-    [positions, market],
+    () => strategyState.adjustedPositions.filter((p) => p.market === market),
+    [strategyState.adjustedPositions, market],
   )
 
   const selectedPosition = useMemo(
@@ -166,8 +175,9 @@ export default function TacticalTradingZoneSection({
       takeProfit: "🟠 목표 접근 · 분할 익절 준비",
       risk: "🔴 과열 가능성 증가 → 현금 비중 고려",
     }
-    return byStage[selectedPosition.stage] ?? "🟢 실전 행동 가이드 확인"
-  }, [selectedPosition])
+    const local = byStage[selectedPosition.stage] ?? "🟢 실전 행동 가이드 확인"
+    return strategyState.banner ? `${strategyState.banner} | ${local}` : local
+  }, [selectedPosition, strategyState.banner])
 
   const marketTemperature = useMemo(() => {
     const fg = Number(panicData?.fearGreed)
@@ -276,11 +286,16 @@ export default function TacticalTradingZoneSection({
             시장 온도 {marketTemperature.emoji} {marketTemperature.label}
           </span>
         </div>
-        {liveAlerts.length ? (
+        {liveAlerts.length || strategyState.transitions.length ? (
           <div className="tactical-trading-zone__alerts">
             {liveAlerts.map((a) => (
               <span key={a} className="tactical-trading-zone__alert-item">
                 {a}
+              </span>
+            ))}
+            {strategyState.transitions.map((t) => (
+              <span key={t} className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
+                ⚙ {t}
               </span>
             ))}
           </div>
@@ -293,6 +308,9 @@ export default function TacticalTradingZoneSection({
             ))}
           </div>
         </div>
+        <p className="m-0 tactical-trading-zone__backtest-seed">
+          백테스트 준비: 평균 유지기간 · 승률 · MDD · 목표 도달률 (샘플 {strategyState.backtestSeed.sampleSize})
+        </p>
       </section>
 
       <div className="tactical-trading-zone__mode-toggle" role="tablist" aria-label="실전/분석 모드">

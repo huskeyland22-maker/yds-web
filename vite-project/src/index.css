@@ -1335,6 +1335,11 @@
   padding: 2px 7px;
 }
 
+.tactical-trading-zone__alert-item--engine {
+  background: rgba(34, 211, 238, 0.14);
+  color: rgba(186, 230, 253, 0.98);
+}
+
 .tactical-trading-zone__priority {
   margin-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -1358,6 +1363,14 @@
   font-size: 11px;
   font-weight: 700;
   color: rgba(240, 249, 255, 0.96);
+}
+
+.tactical-trading-zone__backtest-seed {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: rgba(125, 211, 252, 0.9);
 }
 
   .tactical-zone-detail__current-stage {
