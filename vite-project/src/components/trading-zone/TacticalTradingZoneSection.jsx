@@ -11,6 +11,7 @@ import {
 } from "../../trading-zone/tacticalTradingZoneData.js"
 import { buildTradingZoneEngineLink } from "../../trading-zone/tradingZoneEngineLink.js"
 import { buildTradingZoneStrategyState } from "../../trading-zone/tradingZoneStrategyEngine.js"
+import { buildTradingPriorityRanking } from "../../trading-zone/tradingZonePriorityEngine.js"
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
@@ -145,6 +146,15 @@ export default function TacticalTradingZoneSection({
     () => buildTradingZoneStrategyState({ positions, panicData, engineLink }),
     [positions, panicData, engineLink],
   )
+  const priorityRanking = useMemo(
+    () =>
+      buildTradingPriorityRanking({
+        positions: strategyState.adjustedPositions.filter((p) => p.market === market),
+        panicData,
+      }),
+    [strategyState.adjustedPositions, panicData, market],
+  )
+  const topCandidate = priorityRanking[0] ?? null
 
   const bucketGroups = useMemo(
     () => groupPositionsByBucket(market, strategyState.adjustedPositions),
@@ -333,6 +343,41 @@ export default function TacticalTradingZoneSection({
           분석 모드
         </button>
       </div>
+
+      {priorityRanking.length ? (
+        <section className="tactical-trading-zone__priority-rank">
+          <p className="m-0 tactical-trading-zone__priority-rank-title">오늘 우선 감시</p>
+          <div className="tactical-trading-zone__priority-rank-list">
+            {priorityRanking.slice(0, 4).map((item, i) => (
+              <span key={item.symbol} className="tactical-trading-zone__priority-rank-item">
+                {i + 1}. {item.symbol} {item.score}
+              </span>
+            ))}
+          </div>
+          {topCandidate ? (
+            <article className="tactical-trading-zone__top-card">
+              <p className="m-0 tactical-trading-zone__top-card-title">🔥 오늘 최우선 감시</p>
+              <p className="m-0 tactical-trading-zone__top-card-symbol">
+                {topCandidate.symbol} <span>{topCandidate.score}</span>
+              </p>
+              <p className="m-0 tactical-trading-zone__top-card-k">이유</p>
+              <ul className="m-0 tactical-trading-zone__top-card-list">
+                {topCandidate.reasons.slice(0, 4).map((r) => (
+                  <li key={r}>- {r}</li>
+                ))}
+              </ul>
+              <p className="m-0 tactical-trading-zone__top-card-k">행동</p>
+              <p className="m-0 tactical-trading-zone__top-card-action">{topCandidate.action}</p>
+              <p className="m-0 tactical-trading-zone__top-card-k">주의</p>
+              <ul className="m-0 tactical-trading-zone__top-card-list is-risk">
+                {topCandidate.risks.slice(0, 3).map((r) => (
+                  <li key={r}>- {r}</li>
+                ))}
+              </ul>
+            </article>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className="tactical-trading-zone__tabs">
         {Object.values(TRADING_MARKETS).map((m) => (

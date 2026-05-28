@@ -1250,6 +1250,90 @@
   box-shadow: 0 0 12px rgba(34, 211, 238, 0.28);
 }
 
+.tactical-trading-zone__priority-rank {
+  margin-top: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.52);
+  padding: 8px 10px;
+}
+
+.tactical-trading-zone__priority-rank-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(191, 219, 254, 0.97);
+}
+
+.tactical-trading-zone__priority-rank-list {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tactical-trading-zone__priority-rank-item {
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: rgba(226, 232, 240, 0.97);
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.tactical-trading-zone__top-card {
+  margin-top: 7px;
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 9px;
+  background: rgba(250, 204, 21, 0.08);
+  padding: 7px 9px;
+}
+
+.tactical-trading-zone__top-card-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(254, 249, 195, 0.98);
+}
+
+.tactical-trading-zone__top-card-symbol {
+  margin-top: 3px;
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.98);
+}
+
+.tactical-trading-zone__top-card-symbol span {
+  margin-left: 6px;
+  font-size: 12px;
+  color: rgba(34, 211, 238, 0.98);
+}
+
+.tactical-trading-zone__top-card-k {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(148, 163, 184, 0.94);
+}
+
+.tactical-trading-zone__top-card-list {
+  margin-top: 2px;
+  padding-left: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.95);
+  line-height: 1.35;
+}
+
+.tactical-trading-zone__top-card-list.is-risk {
+  color: rgba(254, 202, 202, 0.96);
+}
+
+.tactical-trading-zone__top-card-action {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(186, 230, 253, 0.98);
+}
+
 .tactical-trading-zone__ai-briefing {
   margin-top: 8px;
   border: 1px solid rgba(56, 189, 248, 0.25);
