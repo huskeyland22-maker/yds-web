@@ -2,7 +2,10 @@ import {
   ENGINE_LINK_CARD_ORDER,
   ENGINE_LINK_HORIZON_DOT,
 } from "../../trading-zone/tradingZoneEngineLink.js"
-import { resolveHorizonStatusLabel } from "../../trading-zone/marketPolicyEngine.js"
+import {
+  resolveHorizonStatusLabel,
+  resolveHorizonStatusTone,
+} from "../../trading-zone/marketPolicyEngine.js"
 
 /**
  * @param {{
@@ -67,14 +70,21 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
           {orderedCards.map((c) => {
             const hint = c.scoreHint ?? c.action
             const dot = ENGINE_LINK_HORIZON_DOT[c.id] ?? "⚪"
+            const horizonLabel = statusLabel(c)
+            const labelTone = resolveHorizonStatusTone(horizonLabel)
             return (
-              <div key={c.id} className="tactical-zone-market-status" data-horizon={c.id}>
+              <div
+                key={c.id}
+                className="tactical-zone-market-status"
+                data-horizon={c.id}
+                data-status-tone={labelTone}
+              >
                 <span className="tactical-zone-market-status__top-bar" aria-hidden />
                 <p className="m-0 tactical-zone-market-status__period">
                   <span className="tactical-zone-market-status__dot" aria-hidden>
                     {dot}
                   </span>
-                  {c.period} {statusLabel(c)}
+                  {c.period} {horizonLabel}
                 </p>
                 <p className="m-0 tactical-zone-market-status__score font-mono tabular-nums">
                   {c.score ?? "—"}

@@ -3280,19 +3280,19 @@
   }
 
   .tactical-zone-market-status[data-horizon="short"] {
-    --market-top-bar: #22c55e;
+    --market-top-bar: #4ade80;
   }
 
   .tactical-zone-market-status[data-horizon="mid"] {
-    --market-top-bar: #facc15;
+    --market-top-bar: #60a5fa;
   }
 
   .tactical-zone-market-status[data-horizon="long"] {
-    --market-top-bar: #94a3b8;
+    --market-top-bar: #f59e0b;
   }
 
   .tactical-zone-market-status[data-horizon="tactical"] {
-    --market-top-bar: #3b82f6;
+    --market-top-bar: #ef4444;
   }
 
   .tactical-zone-market-status__period {
@@ -3304,6 +3304,22 @@
     line-height: 1.15;
     color: rgba(148, 163, 184, 0.95);
     white-space: nowrap;
+  }
+
+  .tactical-zone-market-status[data-status-tone="pullback"] .tactical-zone-market-status__period {
+    color: rgba(134, 239, 172, 0.98);
+  }
+
+  .tactical-zone-market-status[data-status-tone="selective"] .tactical-zone-market-status__period {
+    color: rgba(191, 219, 254, 0.98);
+  }
+
+  .tactical-zone-market-status[data-status-tone="guard"] .tactical-zone-market-status__period {
+    color: rgba(253, 230, 138, 0.99);
+  }
+
+  .tactical-zone-market-status[data-status-tone="limit"] .tactical-zone-market-status__period {
+    color: rgba(252, 165, 165, 0.99);
   }
 
   .tactical-zone-market-status__dot {

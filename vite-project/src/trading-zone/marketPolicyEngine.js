@@ -289,13 +289,37 @@ export function appendTransitionHistory(history, transition, policy) {
  * @returns {string}
  */
 export function resolveHorizonStatusLabel(card, marketState) {
-  const score = Number(card?.score)
-  if (marketState === "panic") return card?.id === "short" ? "방어" : "보수"
-  if (marketState === "overheat") return card?.id === "short" ? "과열경계" : "축소"
-  if (card?.id === "short") return score >= 65 ? "우호" : score >= 45 ? "경계" : "약세"
-  if (card?.id === "mid") return score >= 62 ? "비중확대" : score >= 45 ? "중립" : "방어"
-  if (card?.id === "long") return score >= 60 ? "우호" : score >= 42 ? "중립" : "보수"
-  return score >= 62 ? "우호" : score >= 45 ? "중립" : "경계"
+  const id = card?.id
+  if (id === "tactical") return "추격 제한"
+  if (id === "short") {
+    if (marketState === "overheat" || marketState === "panic") return "추격 제한"
+    if (marketState === "caution") return "눌림 대기"
+    return "눌림 우세"
+  }
+  if (id === "mid") {
+    if (marketState === "overheat" || marketState === "panic") return "리스크 관리"
+    if (marketState === "caution") return "선별 대기"
+    return "선별 대응"
+  }
+  if (id === "long") {
+    if (marketState === "overheat") return "고점 경계"
+    if (marketState === "panic") return "방어 우선"
+    if (marketState === "caution") return "밸류 점검"
+    return "고점 경계"
+  }
+  return marketState === "overheat" || marketState === "panic" ? "추격 제한" : "선별 대응"
+}
+
+/**
+ * @param {string} label
+ * @returns {"pullback" | "selective" | "guard" | "limit" | "neutral"}
+ */
+export function resolveHorizonStatusTone(label) {
+  if (label === "눌림 우세" || label === "눌림 대기") return "pullback"
+  if (label === "선별 대응" || label === "선별 대기") return "selective"
+  if (label === "고점 경계" || label === "밸류 점검" || label === "방어 우선" || label === "리스크 관리") return "guard"
+  if (label === "추격 제한") return "limit"
+  return "neutral"
 }
 
 /**
