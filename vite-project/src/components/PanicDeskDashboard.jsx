@@ -103,8 +103,9 @@ export default function PanicDeskDashboard({
         <SectionErrorBoundary
           label="실전 매매 존"
           fallback={
-            <div className="trading-card-shell px-3 py-4 text-center text-sm text-slate-400">
-              실전 매매 존 로딩 실패
+            <div className="trading-card-shell px-3 py-4 text-center">
+              <p className="m-0 text-sm font-semibold text-amber-300">⚠ 일부 데이터 연결 지연</p>
+              <p className="m-0 mt-1 text-xs text-slate-300">실전 엔진은 유지되며 마지막 정상 정책으로 동작 중입니다.</p>
             </div>
           }
         >

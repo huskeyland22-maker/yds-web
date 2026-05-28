@@ -224,6 +224,44 @@ export default function TacticalTradingZoneSection({
   const showTransitionTag = transitionConfidence >= 40
   const showTransitionHighlight = transitionConfidence >= 70
   const showTransitionStrong = transitionConfidence >= 85
+  const tacticalDegrade = useMemo(() => {
+    const reasons = []
+    /** @type {string[]} */
+    const degradeCodes = []
+    if (aiReportDegraded) {
+      degradeCodes.push("ai_reports_degraded")
+      reasons.push(aiReportWarning ? String(aiReportWarning) : "AI 브리핑 일시 지연")
+    }
+    if (isStaleFeed) {
+      degradeCodes.push("stale_mode")
+      reasons.push("마지막 정상 정책 유지 중")
+    }
+    if (/timeout/i.test(String(aiReportWarning ?? ""))) {
+      degradeCodes.push("timeout")
+      reasons.push("일부 데이터 연결 지연")
+    }
+    if (!engineLink?.ready || !selectedPosition) {
+      degradeCodes.push("tactical_partial")
+      reasons.push("일부 종목 데이터 재동기화 중")
+    }
+    const fatal = !marketPolicyView?.marketState || !marketPolicyView?.actionLines
+    if (fatal) degradeCodes.push("fatal_policy")
+    return {
+      fatal,
+      recoverable: degradeCodes.some((c) => c !== "fatal_policy"),
+      degradeCode: degradeCodes[0] ?? "none",
+      reasons,
+      source: aiReportDegraded ? "ai_reports" : isStaleFeed ? "stale_feed" : "tactical",
+    }
+  }, [aiReportDegraded, aiReportWarning, isStaleFeed, engineLink, selectedPosition, marketPolicyView])
+  useEffect(() => {
+    if (!tacticalDegrade.recoverable && !tacticalDegrade.fatal) return
+    console.log("[Tactical Degrade]", {
+      reason: tacticalDegrade.reasons.join(" | "),
+      degradeCode: tacticalDegrade.degradeCode,
+      source: tacticalDegrade.source,
+    })
+  }, [tacticalDegrade])
   useEffect(() => {
     if (typeof window === "undefined") return
     const dump = {
@@ -328,6 +366,15 @@ export default function TacticalTradingZoneSection({
     setPrevStage(stage)
   }, [selectedPosition, prevStage, marketTransition, showTransitionTag, showTransitionStrong])
 
+  if (tacticalDegrade.fatal) {
+    return (
+      <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
+        <p className="m-0 text-sm font-semibold text-amber-300">⚠ 일부 데이터 연결 지연</p>
+        <p className="m-0 mt-1 text-xs text-slate-300">마지막 정상 정책을 유지하며 자동 복구를 시도 중입니다.</p>
+      </section>
+    )
+  }
+
   return (
     <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
       <PanicDeskSectionHeader
@@ -352,6 +399,11 @@ export default function TacticalTradingZoneSection({
       </div>
 
       <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
+      {tacticalDegrade.recoverable ? (
+        <div className="tactical-trading-zone__ultra-summary">
+          ⚠ {tacticalDegrade.reasons[0] ?? "일부 데이터 연결 지연"} · 엔진은 정상 동작 중
+        </div>
+      ) : null}
       {aiReportDegraded ? (
         <div className="tactical-trading-zone__ultra-summary">AI 브리핑 일시 지연{aiReportWarning ? ` · ${aiReportWarning}` : ""}</div>
       ) : null}
