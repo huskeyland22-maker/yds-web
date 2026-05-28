@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { buildStrategyBrief } from "../utils/panicMarketReportDisplay.js"
+import { buildMarketPolicy } from "../trading-zone/marketPolicyEngine.js"
 import PanicTodayInterpretation from "./PanicTodayInterpretation.jsx"
 
 /**
@@ -21,6 +22,10 @@ export default function PanicDeskChart({
     if (deskMarketReportLoading || !deskMarketReport?.summary) return ""
     return buildStrategyBrief(deskMarketReport, panicData)
   }, [deskMarketReport, deskMarketReportLoading, panicData])
+  const marketPolicy = useMemo(
+    () => buildMarketPolicy({ panicData, panicStage: deskMarketReport?.regimeLabel ?? null }),
+    [panicData, deskMarketReport],
+  )
 
   const hasFooter =
     Boolean(strategyBrief?.trim()) ||
@@ -42,6 +47,7 @@ export default function PanicDeskChart({
         deskMarketReport={deskMarketReport}
         deskMarketReportLoading={deskMarketReportLoading}
         strategyBrief={strategyBrief}
+        marketPolicy={marketPolicy}
       />
     </section>
   )

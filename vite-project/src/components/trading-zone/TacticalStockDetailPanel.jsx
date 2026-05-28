@@ -14,6 +14,7 @@ import {
   computeTradingZoneProgress,
   resolvePositionPriceLevels,
 } from "../../trading-zone/tradingZonePriceProgress.js"
+import { buildMarketPolicy } from "../../trading-zone/marketPolicyEngine.js"
 import {
   buildStageHistoryTooltipLines,
   formatStageHistoryLog,
@@ -23,9 +24,14 @@ import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneC
  * @param {{
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
  *   mode?: "live" | "analysis"
+ *   marketPolicy?: {
+ *     marketStateLabel?: string
+ *     riskLevel?: "low" | "mid" | "high"
+ *     actionPolicy?: { lead?: string; items?: { key: string; icon: string; text: string; level: string }[] }
+ *   } | null
  * }} props
  */
-export default function TacticalStockDetailPanel({ position, mode = "live", panicData = null }) {
+export default function TacticalStockDetailPanel({ position, mode = "live", panicData = null, marketPolicy = null }) {
   const badge = tradingStageBadge(position)
   const stageLabelById = {
     interest: "관심구간",
@@ -215,12 +221,6 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
     takeProfit: "⚠ 목표 근접\n→ 되돌림 확대 가능",
     risk: "⚠ 장기 저항 근접\n→ 상단 막힘 가능",
   }
-  const riskLevel = useMemo(() => {
-    const vix = Number(panicData?.vix)
-    if (position.stage === "risk" || Number.isFinite(vix) && vix >= 33) return "high"
-    if (position.stage === "takeProfit" || position.stage === "trend" || Number.isFinite(vix) && vix >= 24) return "mid"
-    return "low"
-  }, [position.stage, panicData])
   const marketFlow = useMemo(() => {
     const fg = Number(panicData?.fearGreed)
     const vix = Number(panicData?.vix)
@@ -246,6 +246,14 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
     takeProfit: "익절 우선 / 추격 금지 / 되돌림 경계",
     risk: "리스크 우선 / 현금 비중 / 추격 금지",
   }
+  const policy = useMemo(
+    () => marketPolicy ?? buildMarketPolicy({ panicData, position }),
+    [marketPolicy, panicData, position],
+  )
+  const policyItems = policy?.actionPolicy?.items?.length
+    ? policy.actionPolicy.items
+    : [{ key: "default-wait", icon: "🟡", text: "눌림 대기", level: "caution" }]
+  const riskLevel = policy.riskLevel ?? "mid"
 
   return (
     <div
@@ -317,17 +325,6 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
             <p className="m-0 tactical-zone-detail__compressed-summary">
               {compressedSummaryByStage[position.stage] ?? "추격 금지 / 눌림 대기 / 분할 진입"}
             </p>
-            <section className="tactical-zone-detail__market-flow">
-              <p className="m-0 tactical-zone-detail__market-flow-title">현재 시장 흐름</p>
-              <ul className="m-0 tactical-zone-detail__market-flow-list">
-                {marketFlow.factors.map((f) => (
-                  <li key={f}>- {f}</li>
-                ))}
-              </ul>
-              <p className="m-0 tactical-zone-detail__market-flow-links">
-                → 연결 종목: {marketFlow.linkedSymbols.join(" / ")}
-              </p>
-            </section>
             <div className="tactical-zone-detail__action-banner">
               {actionHeadlineByStage[position.stage] ?? "🟢 실전 대응 구간 확인"}
             </div>
@@ -421,11 +418,25 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
             <div className="tactical-zone-detail__signal-grid">
               <section className="tactical-zone-detail__signal-card tactical-zone-detail__signal-card--action">
                 <p className="m-0 tactical-zone-detail__action-title">📌 오늘 행동</p>
-                <ul className="m-0 tactical-zone-detail__action-list">
-                  <li>눌림 대기</li>
-                  <li>추격 금지</li>
-                  <li>분할 진입 가능</li>
-                </ul>
+                <p className="m-0 tactical-zone-detail__action-subtitle">
+                  {policy.marketStateLabel ?? "중립"} 시장 대응 · {policy.actionPolicy?.lead ?? "리스크 우선 대응"}
+                </p>
+                <div className="tactical-zone-detail__action-items">
+                  {policyItems.map((item) => (
+                    <div
+                      key={item.key}
+                      className={[
+                        "tactical-zone-detail__action-item",
+                        `tactical-zone-detail__action-item--${item.level}`,
+                      ].join(" ")}
+                    >
+                      <span className="tactical-zone-detail__action-item-main">
+                        <span aria-hidden>{item.icon}</span> {item.text}
+                      </span>
+                      <span className="tactical-zone-detail__action-item-level">{item.level}</span>
+                    </div>
+                  ))}
+                </div>
               </section>
               <section
                 className={[
@@ -454,6 +465,17 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                 <p className="m-0 tactical-zone-detail__target-note">목표 도달 시: 1차 익절 고려 구간</p>
               </section>
             </div>
+            <section className="tactical-zone-detail__market-flow">
+              <p className="m-0 tactical-zone-detail__market-flow-title">현재 시장 흐름</p>
+              <ul className="m-0 tactical-zone-detail__market-flow-list">
+                {marketFlow.factors.map((f) => (
+                  <li key={f}>- {f}</li>
+                ))}
+              </ul>
+              <p className="m-0 tactical-zone-detail__market-flow-links">
+                → 연결 종목: {marketFlow.linkedSymbols.join(" / ")}
+              </p>
+            </section>
             <button
               type="button"
               className="tactical-zone-detail__expand-btn"
@@ -463,7 +485,7 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
               {detailsOpen ? "상세 분석 접기" : "상세 분석 펼치기"}
             </button>
             {detailsOpen ? (
-              <>
+              <div className="tactical-zone-detail__secondary-stack">
                 <section className="tactical-zone-detail__confidence-breakdown">
                   <p className="m-0 tactical-zone-detail__confidence-breakdown-title">신뢰도 분석</p>
                   <div className="tactical-zone-detail__confidence-lines">
@@ -550,7 +572,7 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                   </div>
                   <p className="m-0 tactical-zone-detail__perf-case">최근 성공 사례: {performanceStats.recentCase}</p>
                 </section>
-              </>
+              </div>
             ) : null}
           </div>
 

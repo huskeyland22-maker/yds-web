@@ -2,6 +2,7 @@
  * 실전 매매 존 — 투자 전략 엔진(단·중·장·실전) 연계 (기존 HUD 값 재사용, 신규 점수 계산 없음)
  */
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
+import { buildMarketPolicy } from "./marketPolicyEngine.js"
 import { buildTodayActionPanel } from "../utils/buildTodayActionPanel.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -47,35 +48,11 @@ export const ENGINE_LINK_CARD_ORDER = ["short", "mid", "long", "tactical"]
  *   ready: boolean
  *   cards: EngineLinkCard[]
  *   actions: string[]
+ *   actionLines?: { primary: string; caution: string; execution: string; summary: string }
  *   actionSummary?: string
  *   macroStage?: EngineLinkMacroStage | null
  * }} TradingZoneEngineLink
  */
-
-/**
- * @param {EngineLinkCard[]} cards
- * @returns {string[]}
- */
-function deriveActionLines(cards) {
-  const byId = Object.fromEntries(cards.map((c) => [c.id, c]))
-  const shortScore = byId.short?.score ?? null
-  const midScore = byId.mid?.score ?? null
-  const longScore = byId.long?.score ?? null
-
-  if (longScore != null && longScore < 35) {
-    return ["신규 진입 축소", "관심유지 · 감시 위주"]
-  }
-  if (shortScore != null && shortScore >= 70 && midScore != null && midScore >= 55) {
-    return ["관심 / 눌림 진입 허용", "추세 추격 제한"]
-  }
-  if (shortScore != null && shortScore < 40) {
-    return ["단기 경계 · 분할·확인 후 대응", "추세 추격 제한"]
-  }
-  if (midScore != null && midScore >= 60) {
-    return ["선별적 비중 확대 검토", "추세 추격 제한"]
-  }
-  return ["관심유지 · 감시 위주", "추세 추격 제한"]
-}
 
 /**
  * 현재 행동 1줄 요약
@@ -129,7 +106,9 @@ export function buildTradingZoneEngineLink({
     scoreHint: c.scoreHint,
   }))
 
-  const actions = deriveActionLines(cards)
+  const marketPolicy = buildMarketPolicy({ panicData })
+  const actionLines = marketPolicy.actionLines
+  const actions = [actionLines.primary, actionLines.execution, actionLines.caution].filter(Boolean)
 
   const panicScore = panicData ? getFinalScore(panicData) : null
   const macro = resolveMacroV1Status(panicScore)
@@ -141,7 +120,8 @@ export function buildTradingZoneEngineLink({
     ready: true,
     cards,
     actions,
-    actionSummary: formatEngineActionSummary(actions),
+    actionLines,
+    actionSummary: actionLines.summary || formatEngineActionSummary(actions),
     macroStage,
   }
 }

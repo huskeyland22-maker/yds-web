@@ -1,10 +1,12 @@
 import { buildActionReportCards } from "../utils/panicMarketReportDisplay.js"
+import { buildMarketPolicy } from "../trading-zone/marketPolicyEngine.js"
 
 /**
  * @param {{
  *   report?: import("../utils/panicMarketReportEngine.js").PanicMarketReport | null
  *   loading?: boolean
  *   panicData?: object | null
+ *   marketPolicy?: { marketStateLabel?: string } | null
  * }} props
  */
 
@@ -39,7 +41,7 @@ function ActionReportCard({ id, label, emoji, headline, detail }) {
   )
 }
 
-export default function PanicMarketReportPanel({ report = null, loading = false, panicData = null }) {
+export default function PanicMarketReportPanel({ report = null, loading = false, panicData = null, marketPolicy = null }) {
   if (loading) {
     return (
       <div className="report-section">
@@ -59,10 +61,13 @@ export default function PanicMarketReportPanel({ report = null, loading = false,
   }
 
   const cards = buildActionReportCards(report, panicData)
+  const policy = marketPolicy ?? buildMarketPolicy({ panicData, panicStage: report?.regimeLabel ?? null })
 
   return (
     <div className="report-section">
-      <p className="m-0 mb-1.5 text-[10px] font-semibold text-slate-400/90">{"\uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8"}</p>
+      <p className="m-0 mb-1.5 text-[10px] font-semibold text-slate-400/90">
+        {"\uC624\uB298 \uC2DC\uC7A5 \uB9AC\uD3EC\uD2B8"} · {policy.marketStateLabel} 정책
+      </p>
 
       <div className="report-grid">
         {cards.map((c) => (

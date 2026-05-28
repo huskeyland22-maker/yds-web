@@ -2,11 +2,21 @@ import {
   ENGINE_LINK_CARD_ORDER,
   ENGINE_LINK_HORIZON_DOT,
 } from "../../trading-zone/tradingZoneEngineLink.js"
+import { resolveHorizonStatusLabel } from "../../trading-zone/marketPolicyEngine.js"
 
 /**
- * @param {{ link: import("../../trading-zone/tradingZoneEngineLink.js").TradingZoneEngineLink; hideTitle?: boolean }} props
+ * @param {{
+ *   link: import("../../trading-zone/tradingZoneEngineLink.js").TradingZoneEngineLink
+ *   marketPolicy?: {
+ *     marketState?: string
+ *     riskLevel?: string
+ *     actionLines?: { primary?: string; caution?: string; execution?: string }
+ *     actionPolicy?: { items?: { key: string; icon: string; text: string; level: string }[] }
+ *   } | null
+ *   hideTitle?: boolean
+ * }} props
  */
-export default function TacticalEngineLinkBar({ link, hideTitle = false }) {
+export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideTitle = false }) {
   if (!link.ready) {
     return (
       <div className="tactical-zone-engine-link tactical-zone-engine-link--pending">
@@ -20,13 +30,22 @@ export default function TacticalEngineLinkBar({ link, hideTitle = false }) {
 
   const cardById = Object.fromEntries(link.cards.map((c) => [c.id, c]))
   const orderedCards = ENGINE_LINK_CARD_ORDER.map((id) => cardById[id]).filter(Boolean)
-  const statusLabel = (card) => {
-    const score = Number(card?.score)
-    if (card?.id === "short") return score >= 65 ? "우호" : score >= 45 ? "경계" : "약세"
-    if (card?.id === "mid") return score >= 62 ? "비중확대" : score >= 45 ? "중립" : "방어"
-    if (card?.id === "long") return score >= 60 ? "우호" : score >= 42 ? "중립" : "보수"
-    return score >= 62 ? "우호" : score >= 45 ? "중립" : "경계"
-  }
+  const statusLabel = (card) => resolveHorizonStatusLabel(card, marketPolicy?.marketState ?? "neutral")
+
+  const actionLines = marketPolicy?.actionLines ?? link.actionLines ?? null
+  const actionRows = actionLines
+    ? [
+        { key: "primary", icon: "🟢", text: actionLines.primary ?? "", tone: "allow" },
+        { key: "execution", icon: "🧭", text: actionLines.execution ?? "", tone: "allow" },
+        { key: "caution", icon: "⚠", text: actionLines.caution ?? "", tone: "warn" },
+      ].filter((row) => row.text)
+    : (marketPolicy?.actionPolicy?.items?.length ? marketPolicy.actionPolicy.items : link.actions).map((line) => {
+        const text = typeof line === "string" ? line : line.text
+        const level = typeof line === "string" ? (/제한|축소|경계/.test(line) ? "danger" : "safe") : line.level
+        const tone = level === "danger" ? "warn" : level === "caution" ? "warn" : "allow"
+        const icon = typeof line === "string" ? (tone === "warn" ? "⚠" : "🟢") : line.icon
+        return { key: typeof line === "string" ? line : line.key, icon, text, tone }
+      })
 
   return (
     <div className="tactical-zone-engine-link" aria-label="시장 엔진 연계">
@@ -55,29 +74,26 @@ export default function TacticalEngineLinkBar({ link, hideTitle = false }) {
         </div>
       </div>
 
-      {link.actions.length || link.macroStage ? (
+      {actionRows.length || link.macroStage ? (
         <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis tactical-zone-engine-link__action-card--slim">
-          {link.actions.length ? (
+          {actionRows.length ? (
             <>
               <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
               <ul className="tactical-zone-engine-link__action-list m-0 list-none p-0">
-                {link.actions.map((line) => {
-                  const isRestrict = /제한|축소|경계/.test(line)
-                  const tone = isRestrict ? "warn" : "allow"
-                  const icon = isRestrict ? "⚠" : "🟢"
-                  const text = line.replace(/\s*\/\s*/g, "·").replace(/\s+/g, " ").trim()
+                {actionRows.map((row) => {
+                  const label = row.text.replace(/\s*\/\s*/g, "·").replace(/\s+/g, " ").trim()
                   return (
                     <li
-                      key={line}
+                      key={row.key}
                       className={[
                         "tactical-zone-engine-link__action-line",
-                        `tactical-zone-engine-link__action-line--${tone}`,
+                        `tactical-zone-engine-link__action-line--${row.tone}`,
                       ].join(" ")}
                     >
                       <span className="tactical-zone-engine-link__action-icon" aria-hidden>
-                        {icon}
+                        {row.icon}
                       </span>
-                      <span>{text}</span>
+                      <span>{label}</span>
                     </li>
                   )
                 })}

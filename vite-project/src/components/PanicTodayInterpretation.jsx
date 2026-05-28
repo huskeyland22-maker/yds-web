@@ -8,12 +8,14 @@ import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
  *   deskMarketReport?: object | null
  *   deskMarketReportLoading?: boolean
  *   strategyBrief?: string
+ *   marketPolicy?: object | null
  * }} props
  */
 export default function PanicTodayInterpretation({
   deskMarketReport = null,
   deskMarketReportLoading = false,
   strategyBrief = "",
+  marketPolicy = null,
 }) {
   const [detailOpen, setDetailOpen] = useState(false)
 
@@ -48,7 +50,11 @@ export default function PanicTodayInterpretation({
           ) : null}
           {hasReport ? (
             <SectionErrorBoundary label="시장 리포트">
-              <PanicMarketReportPanel report={deskMarketReport} loading={deskMarketReportLoading} />
+              <PanicMarketReportPanel
+                report={deskMarketReport}
+                loading={deskMarketReportLoading}
+                marketPolicy={marketPolicy}
+              />
             </SectionErrorBoundary>
           ) : null}
         </div>
