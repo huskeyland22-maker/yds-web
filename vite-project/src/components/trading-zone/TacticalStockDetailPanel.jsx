@@ -207,6 +207,30 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
     takeProfit: "⚠ 목표권 진입 후 되돌림 확대 가능",
     risk: "⚠ 장기 저항 근접으로 상단 막힘 가능",
   }
+  const riskLevel = useMemo(() => {
+    const vix = Number(panicData?.vix)
+    if (position.stage === "risk" || Number.isFinite(vix) && vix >= 33) return "high"
+    if (position.stage === "takeProfit" || position.stage === "trend" || Number.isFinite(vix) && vix >= 24) return "mid"
+    return "low"
+  }, [position.stage, panicData])
+  const marketFlow = useMemo(() => {
+    const fg = Number(panicData?.fearGreed)
+    const vix = Number(panicData?.vix)
+    /** @type {string[]} */
+    const factors = []
+    if (Number.isFinite(vix) && vix < 22) factors.push("금리 안정")
+    if (Number.isFinite(fg) && fg >= 50) factors.push("AI 모멘텀 유지")
+    if (position.symbol === "SOXL" || position.symbol === "SMH" || position.symbol === "NVDA") factors.push("반도체 강세")
+    if (position.stage === "interest" || position.stage === "pullback" || position.stage === "trend") {
+      factors.push("성장주 우호")
+    }
+    const linkedSymbols =
+      factors.includes("반도체 강세") ? ["SOXL", "SMH", "NVDA"] : [position.symbol, "META", "SMH"]
+    return {
+      factors: factors.slice(0, 4),
+      linkedSymbols,
+    }
+  }, [panicData, position])
   const compressedSummaryByStage = {
     interest: "관심 유지 가능 / 추격 금지 / 눌림 대기",
     pullback: "눌림 대기 우선 / 추격 금지 / 분할 진입",
@@ -285,6 +309,17 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
             <p className="m-0 tactical-zone-detail__compressed-summary">
               {compressedSummaryByStage[position.stage] ?? "추격 금지 / 눌림 대기 / 분할 진입"}
             </p>
+            <section className="tactical-zone-detail__market-flow">
+              <p className="m-0 tactical-zone-detail__market-flow-title">현재 시장 흐름</p>
+              <ul className="m-0 tactical-zone-detail__market-flow-list">
+                {marketFlow.factors.map((f) => (
+                  <li key={f}>- {f}</li>
+                ))}
+              </ul>
+              <p className="m-0 tactical-zone-detail__market-flow-links">
+                → 연결 종목: {marketFlow.linkedSymbols.join(" / ")}
+              </p>
+            </section>
             <div className="tactical-zone-detail__action-banner">
               {actionHeadlineByStage[position.stage] ?? "🟢 실전 대응 구간 확인"}
             </div>
@@ -381,7 +416,13 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                   <li>분할 진입 가능</li>
                 </ul>
               </section>
-              <section className="tactical-zone-detail__signal-card tactical-zone-detail__signal-card--risk">
+              <section
+                className={[
+                  "tactical-zone-detail__signal-card",
+                  "tactical-zone-detail__signal-card--risk",
+                  `tactical-zone-detail__signal-card--risk-${riskLevel}`,
+                ].join(" ")}
+              >
                 <p className="m-0 tactical-zone-detail__action-title">⚠ 리스크</p>
                 <p className="m-0 tactical-zone-detail__signal-text">
                   {riskMessageByStage[position.stage] ?? "거래량/변동성 변화 지속 확인 필요"}

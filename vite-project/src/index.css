@@ -2422,6 +2422,24 @@
   background: rgba(239, 68, 68, 0.15);
 }
 
+.tactical-zone-detail__signal-card--risk-low {
+  border-color: rgba(248, 113, 113, 0.26);
+  background: rgba(239, 68, 68, 0.11);
+}
+
+.tactical-zone-detail__signal-card--risk-mid {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(220, 38, 38, 0.2);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.16);
+}
+
+.tactical-zone-detail__signal-card--risk-high {
+  border-color: rgba(248, 113, 113, 0.72);
+  background: rgba(185, 28, 28, 0.25);
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.26);
+  animation: tactical-risk-pulse 2.4s ease-in-out infinite;
+}
+
 .tactical-zone-detail__signal-card--trend {
   border-color: rgba(34, 197, 94, 0.3);
   background: rgba(34, 197, 94, 0.08);
@@ -2451,11 +2469,60 @@
   color: rgba(254, 202, 202, 0.98);
 }
 
+.tactical-zone-detail__signal-card--risk-high .tactical-zone-detail__action-title {
+  font-size: 14px;
+}
+
+.tactical-zone-detail__signal-card--risk-high .tactical-zone-detail__risk-strong {
+  font-weight: 900;
+}
+
+@keyframes tactical-risk-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(239, 68, 68, 0.34);
+  }
+}
+
 .tactical-zone-detail__compressed-summary {
   margin-top: 1px;
   font-size: 11px;
   font-weight: 800;
   color: rgba(186, 230, 253, 0.97);
+}
+
+.tactical-zone-detail__market-flow {
+  margin-top: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  border-radius: 8px;
+  background: rgba(14, 165, 233, 0.08);
+  padding: 6px 8px;
+}
+
+.tactical-zone-detail__market-flow-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(186, 230, 253, 0.98);
+}
+
+.tactical-zone-detail__market-flow-list {
+  margin-top: 3px;
+  padding-left: 10px;
+  display: grid;
+  gap: 1px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.tactical-zone-detail__market-flow-links {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(125, 211, 252, 0.96);
 }
 
 .tactical-zone-detail__expand-btn {
