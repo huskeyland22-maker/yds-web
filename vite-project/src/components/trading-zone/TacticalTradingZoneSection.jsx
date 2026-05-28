@@ -123,6 +123,8 @@ function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
  *   cycleScore?: number | null
  *   snapshot?: import("../../macro-risk/engine.js").MacroRiskSnapshot | null
  *   historyRows?: object[]
+ *   aiReportDegraded?: boolean
+ *   aiReportWarning?: string | null
  * }} props
  */
 export default function TacticalTradingZoneSection({
@@ -130,6 +132,8 @@ export default function TacticalTradingZoneSection({
   cycleScore = null,
   snapshot = null,
   historyRows = [],
+  aiReportDegraded = false,
+  aiReportWarning = null,
 }) {
   const positions = useMemo(() => getTradingZonePositions(), [])
   const [market, setMarket] = useState("us")
@@ -348,6 +352,9 @@ export default function TacticalTradingZoneSection({
       </div>
 
       <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
+      {aiReportDegraded ? (
+        <div className="tactical-trading-zone__ultra-summary">AI 브리핑 일시 지연{aiReportWarning ? ` · ${aiReportWarning}` : ""}</div>
+      ) : null}
       {isStaleFeed ? <div className="tactical-trading-zone__ultra-summary">⏱ 데이터 지연 · 마지막 정상 정책 유지</div> : null}
       <div className="tactical-trading-zone__ultra-summary">
         {[marketPolicyView.actionLines.primary, marketPolicyView.actionLines.execution, marketPolicyView.actionLines.caution].join(" / ")}

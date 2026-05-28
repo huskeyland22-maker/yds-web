@@ -467,6 +467,8 @@ function App() {
   const hubPanicMetrics = useAppDataStore((s) => s.hubPanicMetrics)
   const latestHistoryRow = useAppDataStore((s) => s.latestHistoryRow)
   const deskMarketReport = useAppDataStore((s) => s.deskMarketReport)
+  const deskMarketReportDegraded = useAppDataStore((s) => s.deskMarketReportDegraded)
+  const deskMarketReportWarning = useAppDataStore((s) => s.deskMarketReportWarning)
   const marketCycleHistory = useAppDataStore((s) => s.marketCycleHistory)
 
   /** latest_panic_metrics → history → cycle → report 순 fallback */
@@ -1324,6 +1326,8 @@ function App() {
                       cycleMetricHistory={cycleMetricHistory}
                       isStale={panicDataStale}
                       asOfDateLabel={cycleDeskMeta.asOfDateLabel}
+                      aiReportDegraded={deskMarketReportDegraded}
+                      aiReportWarning={deskMarketReportWarning}
                       tacticalView={tacticalView}
                       strategicView={strategicView}
                       macroView={macroView}

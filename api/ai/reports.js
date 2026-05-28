@@ -8,6 +8,28 @@ function noStore(res) {
   res.setHeader("Expires", "0")
 }
 
+function safeOk(res, body) {
+  res.status(200).json({
+    ok: false,
+    degraded: true,
+    reports: [],
+    rows: [],
+    ...body,
+  })
+}
+
+async function withTimeout(promise, ms, label) {
+  let timer = null
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label}_timeout_${ms}ms`)), ms)
+  })
+  try {
+    return await Promise.race([promise, timeout])
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
+}
+
 export default async function handler(req, res) {
   noStore(res)
   const payload = {
@@ -21,7 +43,7 @@ export default async function handler(req, res) {
     return
   }
   if (!isSupabaseConfigured()) {
-    res.status(503).json({ ok: false, error: "supabase_not_configured", rows: [] })
+    safeOk(res, { error: "supabase_not_configured" })
     return
   }
   try {
@@ -33,18 +55,21 @@ export default async function handler(req, res) {
 
     if (daily) {
       if (date && /^\d{4}-\d{2}-\d{2}$/.test(String(date).slice(0, 10))) {
-        const row = await fetchDailyAiReportByDate(String(date).slice(0, 10))
-        res.status(200).json({ ok: true, rows: row ? [row] : [], row })
+        const row = await withTimeout(fetchDailyAiReportByDate(String(date).slice(0, 10)), 5000, "daily_report")
+        const safeRow = row && typeof row === "object" ? row : null
+        const reports = safeRow ? [safeRow] : []
+        res.status(200).json({ ok: true, degraded: false, reports, rows: reports, row: safeRow })
         return
       }
-      const rows = await fetchDailyAiReports({ limit })
-      res.status(200).json({ ok: true, rows })
+      const rows = await withTimeout(fetchDailyAiReports({ limit }), 5000, "daily_reports")
+      const reports = Array.isArray(rows) ? rows : []
+      res.status(200).json({ ok: true, degraded: false, reports, rows: reports })
       return
     }
 
-    const raw = await fetchAiReportRows({ reportKey, limit })
-    const rows = raw.map(aiReportToClient).filter(Boolean)
-    res.status(200).json({ ok: true, rows })
+    const raw = await withTimeout(fetchAiReportRows({ reportKey, limit }), 5000, "ai_reports")
+    const rows = (Array.isArray(raw) ? raw : []).map((row) => aiReportToClient(row)).filter(Boolean)
+    res.status(200).json({ ok: true, degraded: false, reports: rows, rows })
   } catch (e) {
     const message = e instanceof Error ? e.message : "fetch_failed"
     const stack = e instanceof Error ? e.stack : null
@@ -61,21 +86,10 @@ export default async function handler(req, res) {
         2,
       ),
     )
-    const isSoft = /does not exist|timeout|timed out|statement timeout|canceling statement/i.test(message)
-    if (isSoft) {
-      res.status(200).json({
-        ok: true,
-        rows: [],
-        warning: message,
-        degraded: true,
-      })
-      return
-    }
-    res.status(500).json({
-      ok: false,
+    safeOk(res, {
       error: message,
       stack,
-      rows: [],
+      warning: message,
     })
   }
 }

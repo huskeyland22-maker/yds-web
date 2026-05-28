@@ -85,6 +85,8 @@ export const useAppDataStore = create((set, get) => ({
   deskMarketReport: null,
   deskMarketReportKey: null,
   deskMarketReportLoading: false,
+  deskMarketReportDegraded: false,
+  deskMarketReportWarning: null,
 
   /** latest_panic_metrics 스냅샷 (허브 API) */
   hubPanicMetrics: null,
@@ -104,13 +106,21 @@ export const useAppDataStore = create((set, get) => ({
       deskMarketReport: report && typeof report === "object" ? report : null,
       deskMarketReportKey: reportKey,
       deskMarketReportLoading: false,
+      deskMarketReportDegraded: false,
+      deskMarketReportWarning: null,
     })
     logStoreWrite("appDataStore.deskMarketReport", { hasReport: Boolean(report?.summary) })
   },
 
   loadDeskMarketReport: async (tradeDate) => {
     if (!isPanicHubEnabled()) {
-      set({ deskMarketReport: null, deskMarketReportKey: null, deskMarketReportLoading: false })
+      set({
+        deskMarketReport: null,
+        deskMarketReportKey: null,
+        deskMarketReportLoading: false,
+        deskMarketReportDegraded: false,
+        deskMarketReportWarning: null,
+      })
       return null
     }
     const key = deskReportKey(tradeDate)
@@ -124,12 +134,21 @@ export const useAppDataStore = create((set, get) => ({
       const dailyRes = await fetch(dailyUrl, LIVE_JSON_GET_INIT)
       if (dailyRes.ok) {
         const dailyJson = await dailyRes.json()
+        if (dailyJson?.degraded || dailyJson?.ok === false) {
+          set({
+            deskMarketReportDegraded: true,
+            deskMarketReportWarning: dailyJson?.warning ?? dailyJson?.error ?? "AI 브리핑 일시 지연",
+          })
+          return get().deskMarketReport
+        }
         const dailyRow = dailyJson?.row ?? (Array.isArray(dailyJson?.rows) ? dailyJson.rows[0] : null)
         if (dailyRow?.summary) {
           set({
             deskMarketReport: dailyRow,
             deskMarketReportKey: key,
             deskMarketReportLoading: false,
+            deskMarketReportDegraded: false,
+            deskMarketReportWarning: null,
           })
           get().refreshDeskResolvedPanicData()
           return dailyRow
@@ -142,6 +161,13 @@ export const useAppDataStore = create((set, get) => ({
       const res = await fetch(url, LIVE_JSON_GET_INIT)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
+      if (json?.degraded || json?.ok === false) {
+        set({
+          deskMarketReportDegraded: true,
+          deskMarketReportWarning: json?.warning ?? json?.error ?? "AI 브리핑 일시 지연",
+        })
+        return get().deskMarketReport
+      }
       const row = Array.isArray(json?.rows) ? json.rows[0] : null
       const content = row?.content && typeof row.content === "object" ? row.content : null
       if (content?.summary) {
@@ -149,16 +175,24 @@ export const useAppDataStore = create((set, get) => ({
           deskMarketReport: content,
           deskMarketReportKey: key,
           deskMarketReportLoading: false,
+          deskMarketReportDegraded: false,
+          deskMarketReportWarning: null,
         })
         get().refreshDeskResolvedPanicData()
         return content
       }
-      set({ deskMarketReport: null, deskMarketReportKey: null, deskMarketReportLoading: false })
-      return null
+      set({
+        deskMarketReportDegraded: true,
+        deskMarketReportWarning: "AI 브리핑 일시 지연",
+      })
+      return get().deskMarketReport
     } catch (e) {
       logFetchFail("desk-market-report", e, { tradeDate, key })
-      set({ deskMarketReport: null, deskMarketReportKey: null })
-      return null
+      set({
+        deskMarketReportDegraded: true,
+        deskMarketReportWarning: "AI 브리핑 일시 지연",
+      })
+      return get().deskMarketReport
     } finally {
       set({ deskMarketReportLoading: false })
     }

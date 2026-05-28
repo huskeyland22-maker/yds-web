@@ -18,6 +18,8 @@ import TacticalTradingZoneSection from "./trading-zone/TacticalTradingZoneSectio
  *   cycleMetricHistory: object[]
  *   isStale?: boolean
  *   asOfDateLabel?: string
+ *   aiReportDegraded?: boolean
+ *   aiReportWarning?: string | null
  * }} props
  */
 export default function PanicDeskDashboard({
@@ -25,6 +27,8 @@ export default function PanicDeskDashboard({
   cycleMetricHistory,
   isStale: _isStale = false,
   asOfDateLabel: _asOfDateLabel = "—",
+  aiReportDegraded = false,
+  aiReportWarning = null,
 }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
 
@@ -109,6 +113,8 @@ export default function PanicDeskDashboard({
             cycleScore={finalScore}
             snapshot={bondSnapshot.snapshot}
             historyRows={safeHistory}
+            aiReportDegraded={aiReportDegraded}
+            aiReportWarning={aiReportWarning}
           />
         </SectionErrorBoundary>
       </div>

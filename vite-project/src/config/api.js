@@ -271,7 +271,8 @@ export async function fetchAiReports(options = {}) {
   if (json?.warning) {
     console.warn("[api/ai/reports] degraded", { warning: json.warning })
   }
-  return json?.ok && Array.isArray(json.rows) ? json.rows : []
+  const reports = Array.isArray(json?.reports) ? json.reports : Array.isArray(json?.rows) ? json.rows : []
+  return reports
 }
 
 /** @alias fetchPanicIndexHistory — 디버그 로그 포함 */
