@@ -23,6 +23,13 @@ import {
  */
 export default function TacticalStockDetailPanel({ position }) {
   const badge = tradingStageBadge(position)
+  const stageLabelById = {
+    interest: "관심구간",
+    pullback: "눌림구간",
+    trend: "추세구간",
+    takeProfit: "익절구간",
+    risk: "리스크구간",
+  }
   const historyLog = formatStageHistoryLog(position.stageHistory ?? [])
   const levels = resolvePositionPriceLevels(position)
   const progress = computeTradingZoneProgress(levels)
@@ -67,7 +74,7 @@ export default function TacticalStockDetailPanel({ position }) {
             :
           </span>
           <span className="tactical-zone-detail__current-value">
-            <span aria-hidden>{badge.emoji}</span> {badge.label}
+            <span aria-hidden>{badge.emoji}</span> {stageLabelById[position.stage] ?? badge.label}
           </span>
         </p>
       </header>
@@ -113,13 +120,19 @@ export default function TacticalStockDetailPanel({ position }) {
               "--profit-pct": `${100 - progress.progressPct}%`,
             }}
           >
+            <p className="m-0 tactical-zone-detail__main-status">
+              현재 위치:{" "}
+              <span className="tactical-zone-detail__main-status-value">
+                <span aria-hidden>{badge.emoji}</span> {stageLabelById[position.stage] ?? badge.label}
+              </span>
+            </p>
             <div className="price-label-row">
               <span className="price-marker-label marker-stop">손절{progress.formatted.stop}</span>
               <span
                 className="price-marker-label marker-current"
                 style={{ left: `${progress.progressPct}%` }}
               >
-                현재{progress.formatted.current}
+                ● 현재 {progress.formatted.current}
               </span>
               <span className="price-marker-label marker-target">목표{progress.formatted.target}</span>
             </div>
@@ -162,7 +175,7 @@ export default function TacticalStockDetailPanel({ position }) {
 
             <p className="progress-achievement m-0 tactical-zone-detail__achieve">
               <span className="tactical-zone-detail__achieve-val">{progress.progressPct}%</span>
-              <span className="tactical-zone-detail__achieve-label">목표달성</span>
+              <span className="tactical-zone-detail__achieve-label">목표도달률</span>
             </p>
           </div>
 

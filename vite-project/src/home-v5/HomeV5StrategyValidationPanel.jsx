@@ -154,6 +154,7 @@ export default function HomeV5StrategyValidationPanel({
   const [results, setResults] = useState([])
   const [replayed, setReplayed] = useState(false)
   const [timelineStepIndex, setTimelineStepIndex] = useState(-1)
+  const [cardsOpen, setCardsOpen] = useState(false)
   const [logTick, setLogTick] = useState(0)
 
   const historyMeta = useMemo(() => {
@@ -182,6 +183,7 @@ export default function HomeV5StrategyValidationPanel({
       useMockFallback: true,
     })
     setResults(out)
+    setCardsOpen(false)
     setReplayed(true)
     setLogTick((t) => t + 1)
     const groupedOut = groupValidationByScenario(out)
@@ -257,13 +259,26 @@ export default function HomeV5StrategyValidationPanel({
           />
         ) : null}
 
+        {grouped.length > 0 ? (
+          <div className="home-v5-strategy-validation__cards-toggle-wrap">
+            <button
+              type="button"
+              className="home-v5-strategy-validation__cards-toggle"
+              onClick={() => setCardsOpen((v) => !v)}
+              aria-expanded={cardsOpen}
+            >
+              {cardsOpen ? "결과 카드 접기" : "결과 카드 펼치기"}
+            </button>
+          </div>
+        ) : null}
+
         {grouped.length === 0 ? (
           <p className="home-v5-strategy-validation__empty">
             {replayed
               ? "재생 결과가 없습니다. 다른 이벤트를 선택해 보세요."
               : "이벤트를 선택한 뒤 ▶ 재생을 누르면 국면 타임라인·결과 카드가 표시됩니다."}
           </p>
-        ) : (
+        ) : cardsOpen ? (
           <div className="home-v5-strategy-validation__scenarios">
             {grouped.map(({ scenario, results: rows }) => (
               <div key={scenario.id} className="home-v5-strategy-validation__scenario">
@@ -287,6 +302,10 @@ export default function HomeV5StrategyValidationPanel({
               </div>
             ))}
           </div>
+        ) : (
+          <p className="home-v5-strategy-validation__empty home-v5-strategy-validation__empty--cards-collapsed">
+            타임라인 확인 후 필요할 때 결과 카드를 펼쳐보세요.
+          </p>
         )}
 
         {!compact ? (
