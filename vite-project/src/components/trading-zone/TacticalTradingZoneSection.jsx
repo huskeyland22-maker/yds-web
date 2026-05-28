@@ -125,6 +125,7 @@ export default function TacticalTradingZoneSection({
 }) {
   const positions = useMemo(() => getTradingZonePositions(), [])
   const [market, setMarket] = useState("us")
+  const [mode, setMode] = useState(/** @type {"live" | "analysis"} */ ("live"))
   const [selectedId, setSelectedId] = useState(() => {
     const us = positions.filter((p) => p.market === "us")
     return resolveDefaultTradingPositionId("us", us)
@@ -152,6 +153,17 @@ export default function TacticalTradingZoneSection({
     const next = positions.filter((p) => p.market === id)
     setSelectedId(resolveDefaultTradingPositionId(id, next))
   }
+  const actionBanner = useMemo(() => {
+    if (!selectedPosition) return "🟢 종목 선택 후 실전 행동 가이드를 확인하세요"
+    const byStage = {
+      interest: "🟢 지금은 관심 유지 + 눌림 대기 구간",
+      pullback: "🟡 추가 진입 가능하지만 추격 금지",
+      trend: "🔵 추세 유지 중 · 비중 분할 대응",
+      takeProfit: "🟠 목표 접근 · 분할 익절 준비",
+      risk: "🔴 과열 가능성 증가 → 현금 비중 고려",
+    }
+    return byStage[selectedPosition.stage] ?? "🟢 실전 행동 가이드 확인"
+  }, [selectedPosition])
 
   return (
     <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
@@ -174,6 +186,29 @@ export default function TacticalTradingZoneSection({
 
       <div className="tactical-trading-zone__engine">
         <TacticalEngineLinkBar link={engineLink} hideTitle />
+      </div>
+
+      <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
+
+      <div className="tactical-trading-zone__mode-toggle" role="tablist" aria-label="실전/분석 모드">
+        <button
+          type="button"
+          className={["tactical-trading-zone__mode-btn", mode === "live" ? "is-active" : ""].join(" ")}
+          onClick={() => setMode("live")}
+          role="tab"
+          aria-selected={mode === "live"}
+        >
+          실전 모드
+        </button>
+        <button
+          type="button"
+          className={["tactical-trading-zone__mode-btn", mode === "analysis" ? "is-active" : ""].join(" ")}
+          onClick={() => setMode("analysis")}
+          role="tab"
+          aria-selected={mode === "analysis"}
+        >
+          분석 모드
+        </button>
       </div>
 
       <div className="tactical-trading-zone__tabs">
@@ -208,7 +243,7 @@ export default function TacticalTradingZoneSection({
 
       {selectedPosition ? (
         <div className="tactical-trading-zone__detail">
-          <TacticalStockDetailPanel position={selectedPosition} />
+          <TacticalStockDetailPanel position={selectedPosition} mode={mode} />
         </div>
       ) : null}
     </section>

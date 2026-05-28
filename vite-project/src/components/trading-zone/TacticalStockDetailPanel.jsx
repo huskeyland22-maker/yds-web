@@ -19,9 +19,12 @@ import {
   formatStageHistoryLog,
 } from "../../trading-zone/tradingZoneStageHistory.js"
 /**
- * @param {{ position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition }} props
+ * @param {{
+ *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
+ *   mode?: "live" | "analysis"
+ * }} props
  */
-export default function TacticalStockDetailPanel({ position }) {
+export default function TacticalStockDetailPanel({ position, mode = "live" }) {
   const badge = tradingStageBadge(position)
   const stageLabelById = {
     interest: "관심구간",
@@ -42,6 +45,11 @@ export default function TacticalStockDetailPanel({ position }) {
     trend: "추세 가속 구간, 분할 추가 대응 가능",
     takeProfit: "목표 근접, 분할 익절 중심 관리 구간",
     risk: "손절/비중 축소 우선 대응 구간",
+  }
+  const aiCommentBySymbol = {
+    META: "광고 회복 + AI 기대 유지",
+    NVDA: "과열권 접근 중이나 추세 강세 유지",
+    SOXL: "반도체 변동성 확대 구간",
   }
   const strategicLabelByKey = {
     expectedReturn: "단기 전략",
@@ -155,6 +163,21 @@ export default function TacticalStockDetailPanel({ position }) {
       : progress.progressPct >= 45
         ? "중간 도달 · 추세 확인 후 대응"
         : "목표까지 여유 있음 · 추가 진입 가능 구간"
+  const confidenceTone = confidence.score >= 80 ? "high" : confidence.score >= 60 ? "mid" : "low"
+  const actionHeadlineByStage = {
+    interest: "🟢 지금은 관심 유지 + 눌림 대기 구간",
+    pullback: "🟡 추가 진입 가능하지만 추격 금지",
+    trend: "🔵 추세 유지 중 · 분할 추가 가능",
+    takeProfit: "🟠 목표 근접 · 분할 익절 준비",
+    risk: "🔴 과열 가능성 증가 → 현금 비중 고려",
+  }
+  const riskMessageByStage = {
+    interest: "⚠ 거래량 감소로 추세 지속성 약화 가능",
+    pullback: "⚠ 변동성 확대 시 손절 구간 빠른 이탈 가능",
+    trend: "⚠ 거래량 둔화 시 추세 연장 실패 가능",
+    takeProfit: "⚠ 목표권 진입 후 되돌림 확대 가능",
+    risk: "⚠ 장기 저항 근접으로 상단 막힘 가능",
+  }
 
   return (
     <div
@@ -223,6 +246,9 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span aria-hidden>{badge.emoji}</span> {stageLabelById[position.stage] ?? badge.label}
               </span>
             </p>
+            <div className="tactical-zone-detail__action-banner">
+              {actionHeadlineByStage[position.stage] ?? "🟢 실전 대응 구간 확인"}
+            </div>
             <div className="tactical-zone-detail__reason-box">
               {reasons.map((line) => (
                 <p key={line} className="m-0 tactical-zone-detail__reason-line">
@@ -292,17 +318,46 @@ export default function TacticalStockDetailPanel({ position }) {
             <p className="m-0 tactical-zone-detail__confidence">
               신뢰도 <strong>{confidence.score}%</strong> · {confidence.level}
             </p>
+            <div className="tactical-zone-detail__confidence-bar" aria-hidden>
+              <span
+                className={[
+                  "tactical-zone-detail__confidence-fill",
+                  `tactical-zone-detail__confidence-fill--${confidenceTone}`,
+                ].join(" ")}
+                style={{ width: `${confidence.score}%` }}
+              />
+            </div>
             <p className="m-0 tactical-zone-detail__status-description">
               {stageDescriptionById[position.stage] ?? "시장 흐름에 맞춘 단계 대응 구간"}
             </p>
-            <div className="tactical-zone-detail__action-card">
-              <p className="m-0 tactical-zone-detail__action-title">📌 오늘 행동</p>
-              <ul className="m-0 tactical-zone-detail__action-list">
-                <li>눌림 대기</li>
-                <li>추격 금지</li>
-                <li>분할 진입 가능</li>
-              </ul>
+            <div className="tactical-zone-detail__signal-grid">
+              <section className="tactical-zone-detail__signal-card tactical-zone-detail__signal-card--action">
+                <p className="m-0 tactical-zone-detail__action-title">📌 오늘 행동</p>
+                <ul className="m-0 tactical-zone-detail__action-list">
+                  <li>눌림 대기</li>
+                  <li>추격 금지</li>
+                  <li>분할 진입 가능</li>
+                </ul>
+              </section>
+              <section className="tactical-zone-detail__signal-card tactical-zone-detail__signal-card--risk">
+                <p className="m-0 tactical-zone-detail__action-title">⚠ 리스크</p>
+                <p className="m-0 tactical-zone-detail__signal-text">
+                  {riskMessageByStage[position.stage] ?? "거래량/변동성 변화 지속 확인 필요"}
+                </p>
+              </section>
+              <section className="tactical-zone-detail__signal-card tactical-zone-detail__signal-card--trend">
+                <p className="m-0 tactical-zone-detail__action-title">📈 추세 해석</p>
+                <p className="m-0 tactical-zone-detail__signal-text">
+                  {aiCommentBySymbol[position.symbol] ?? "추세/거래량 합치 구간 재확인"}
+                </p>
+                <p className="m-0 tactical-zone-detail__target-note">목표 도달 시: 1차 익절 고려 구간</p>
+              </section>
             </div>
+            {mode === "analysis" ? (
+              <p className="m-0 tactical-zone-detail__mode-hint">
+                분석 모드: 지표·근거 중심으로 상세 확인 중
+              </p>
+            ) : null}
             {warnings.length ? (
               <div className="tactical-zone-detail__warnings">
                 {warnings.map((w) => (
