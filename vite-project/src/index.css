@@ -1250,6 +1250,116 @@
   box-shadow: 0 0 12px rgba(34, 211, 238, 0.28);
 }
 
+.tactical-trading-zone__ai-briefing {
+  margin-top: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.55);
+  padding: 8px 10px;
+}
+
+.tactical-trading-zone__ai-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(186, 230, 253, 0.98);
+}
+
+.tactical-trading-zone__ai-body {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.tactical-trading-zone__ai-inline {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tactical-trading-zone__ai-rotating {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(125, 211, 252, 0.96);
+  transition: opacity 0.22s ease;
+}
+
+.tactical-trading-zone__ai-rotating.is-fading {
+  opacity: 0.25;
+}
+
+.tactical-trading-zone__temp {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.tactical-trading-zone__temp.is-stable {
+  background: rgba(34, 197, 94, 0.16);
+  color: rgba(187, 247, 208, 0.98);
+}
+
+.tactical-trading-zone__temp.is-warn {
+  background: rgba(250, 204, 21, 0.16);
+  color: rgba(254, 240, 138, 0.98);
+}
+
+.tactical-trading-zone__temp.is-hot {
+  background: rgba(249, 115, 22, 0.16);
+  color: rgba(254, 215, 170, 0.98);
+}
+
+.tactical-trading-zone__temp.is-panic {
+  background: rgba(239, 68, 68, 0.16);
+  color: rgba(254, 202, 202, 0.98);
+}
+
+.tactical-trading-zone__alerts {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tactical-trading-zone__alert-item {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.95);
+  background: rgba(148, 163, 184, 0.16);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.tactical-trading-zone__priority {
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 5px;
+}
+
+.tactical-trading-zone__priority-k {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(148, 163, 184, 0.92);
+}
+
+.tactical-trading-zone__priority-lines {
+  margin-top: 2px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tactical-trading-zone__priority-lines span {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(240, 249, 255, 0.96);
+}
+
   .tactical-zone-detail__current-stage {
     margin-top: 3px;
     font-size: 13px;
@@ -2100,6 +2210,13 @@
     color: rgba(34, 211, 238, 0.98);
     text-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
   }
+
+.tactical-zone-detail__confidence-sub {
+  margin-top: -2px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.92);
+}
 
 .tactical-zone-detail__confidence-bar {
   width: 100%;

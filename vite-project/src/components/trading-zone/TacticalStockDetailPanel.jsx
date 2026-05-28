@@ -164,6 +164,12 @@ export default function TacticalStockDetailPanel({ position, mode = "live" }) {
         ? "중간 도달 · 추세 확인 후 대응"
         : "목표까지 여유 있음 · 추가 진입 가능 구간"
   const confidenceTone = confidence.score >= 80 ? "high" : confidence.score >= 60 ? "mid" : "low"
+  const confidenceReason =
+    confidence.score >= 80
+      ? "(지표 4개 일치)"
+      : confidence.score >= 60
+        ? "(지표 2~3개 일치)"
+        : "(변동성 혼조)"
   const actionHeadlineByStage = {
     interest: "🟢 지금은 관심 유지 + 눌림 대기 구간",
     pullback: "🟡 추가 진입 가능하지만 추격 금지",
@@ -317,6 +323,9 @@ export default function TacticalStockDetailPanel({ position, mode = "live" }) {
             <p className="m-0 tactical-zone-detail__progress-meaning">{progressMeaning}</p>
             <p className="m-0 tactical-zone-detail__confidence">
               신뢰도 <strong>{confidence.score}%</strong> · {confidence.level}
+            </p>
+            <p className="m-0 tactical-zone-detail__confidence-sub">
+              신뢰도 {confidence.level} {confidenceReason}
             </p>
             <div className="tactical-zone-detail__confidence-bar" aria-hidden>
               <span
