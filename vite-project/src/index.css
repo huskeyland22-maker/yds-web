@@ -1228,6 +1228,17 @@
   letter-spacing: 0.01em;
 }
 
+.tactical-trading-zone__ultra-summary {
+  margin-top: 5px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  border: 1px dashed rgba(148, 163, 184, 0.34);
+  background: rgba(15, 23, 42, 0.48);
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.98);
+}
+
 .tactical-trading-zone__mode-toggle {
   margin-top: 7px;
   display: inline-flex;
@@ -2440,6 +2451,24 @@
   color: rgba(254, 202, 202, 0.98);
 }
 
+.tactical-zone-detail__compressed-summary {
+  margin-top: 1px;
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(186, 230, 253, 0.97);
+}
+
+.tactical-zone-detail__expand-btn {
+  margin-top: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.45);
+  color: rgba(226, 232, 240, 0.95);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .tactical-zone-detail__signal-text {
   margin-top: 3px;
   font-size: 11px;
@@ -2608,6 +2637,21 @@
   font-size: 10px;
   font-weight: 700;
   color: rgba(125, 211, 252, 0.94);
+}
+
+@media (max-width: 640px) {
+  .tactical-trading-zone__priority-rank,
+  .tactical-trading-zone__ai-briefing {
+    padding: 7px 8px;
+  }
+
+  .tactical-zone-detail__signal-card--action {
+    min-height: 76px;
+  }
+
+  .tactical-zone-detail__signal-grid {
+    gap: 5px;
+  }
 }
 
   @keyframes tactical-stage-fade {

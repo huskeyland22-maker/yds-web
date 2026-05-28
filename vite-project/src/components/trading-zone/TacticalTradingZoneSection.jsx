@@ -279,6 +279,13 @@ export default function TacticalTradingZoneSection({
       </div>
 
       <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
+      <div className="tactical-trading-zone__ultra-summary">
+        {selectedPosition?.stage === "pullback"
+          ? "시장 안정 / 눌림 유리 / 추격 금지"
+          : selectedPosition?.stage === "risk"
+            ? "리스크 확대 / 비중 관리 / 신규 추격 제한"
+            : "관심 유지 가능 / 추격 금지 / 눌림 대기"}
+      </div>
 
       <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
         <p className="m-0 tactical-trading-zone__ai-title">🤖 AI 브리핑</p>
