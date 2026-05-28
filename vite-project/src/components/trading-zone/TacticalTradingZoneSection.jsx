@@ -366,7 +366,7 @@ export default function TacticalTradingZoneSection({
 
       {selectedPosition ? (
         <div className="tactical-trading-zone__detail">
-          <TacticalStockDetailPanel position={selectedPosition} mode={mode} />
+          <TacticalStockDetailPanel position={selectedPosition} mode={mode} panicData={panicData} />
         </div>
       ) : null}
     </section>

@@ -2258,6 +2258,51 @@
   background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
+.tactical-zone-detail__confidence-breakdown {
+  margin-top: 5px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: rgba(15, 23, 42, 0.44);
+}
+
+.tactical-zone-detail__confidence-breakdown-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(191, 219, 254, 0.97);
+}
+
+.tactical-zone-detail__confidence-lines {
+  margin-top: 4px;
+  display: grid;
+  gap: 2px;
+}
+
+.tactical-zone-detail__confidence-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.94);
+}
+
+.tactical-zone-detail__confidence-line .is-pos {
+  color: rgba(134, 239, 172, 0.97);
+}
+
+.tactical-zone-detail__confidence-line .is-neg {
+  color: rgba(252, 165, 165, 0.97);
+}
+
+.tactical-zone-detail__confidence-reason {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: rgba(148, 163, 184, 0.92);
+}
+
 .tactical-zone-detail__signal-grid {
   display: grid;
   gap: 6px;

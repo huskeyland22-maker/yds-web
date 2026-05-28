@@ -18,13 +18,14 @@ import {
   buildStageHistoryTooltipLines,
   formatStageHistoryLog,
 } from "../../trading-zone/tradingZoneStageHistory.js"
+import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneConfidenceEngine.js"
 /**
  * @param {{
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
  *   mode?: "live" | "analysis"
  * }} props
  */
-export default function TacticalStockDetailPanel({ position, mode = "live" }) {
+export default function TacticalStockDetailPanel({ position, mode = "live", panicData = null }) {
   const badge = tradingStageBadge(position)
   const stageLabelById = {
     interest: "관심구간",
@@ -88,25 +89,10 @@ export default function TacticalStockDetailPanel({ position, mode = "live" }) {
     }
   }
 
-  const confidence = useMemo(() => {
-    const checks = []
-    const auxCount = activeAux.size
-    checks.push(auxCount >= 2 ? 22 : auxCount >= 1 ? 12 : 6)
-    checks.push(position.stage === "pullback" || position.stage === "trend" ? 22 : 14)
-    const cur = safeNum(position.currentPrice)
-    const tgt = safeNum(position.targetNum)
-    const stp = safeNum(position.stopNum)
-    if (cur != null && tgt != null && stp != null) {
-      checks.push(cur > stp ? 18 : 6)
-      checks.push(tgt > cur ? 16 : 8)
-    } else {
-      checks.push(8, 8)
-    }
-    checks.push((position.stageHistory?.length ?? 0) >= 3 ? 14 : 9)
-    const score = Math.max(38, Math.min(92, checks.reduce((a, b) => a + b, 0)))
-    const level = score >= 76 ? "높음" : score >= 58 ? "보통" : "낮음"
-    return { score, level }
-  }, [activeAux.size, position])
+  const confidence = useMemo(
+    () => buildTradingConfidenceBreakdown({ position, panicData, activeAux }),
+    [position, panicData, activeAux],
+  )
 
   const reasons = useMemo(() => {
     const lines = []
@@ -164,12 +150,7 @@ export default function TacticalStockDetailPanel({ position, mode = "live" }) {
         ? "중간 도달 · 추세 확인 후 대응"
         : "목표까지 여유 있음 · 추가 진입 가능 구간"
   const confidenceTone = confidence.score >= 80 ? "high" : confidence.score >= 60 ? "mid" : "low"
-  const confidenceReason =
-    confidence.score >= 80
-      ? "(지표 4개 일치)"
-      : confidence.score >= 60
-        ? "(지표 2~3개 일치)"
-        : "(변동성 혼조)"
+  const confidenceReason = confidence.score >= 80 ? "(지표 4개 일치)" : "(변동성/추세 혼조 반영)"
   const actionHeadlineByStage = {
     interest: "🟢 지금은 관심 유지 + 눌림 대기 구간",
     pullback: "🟡 추가 진입 가능하지만 추격 금지",
@@ -336,6 +317,20 @@ export default function TacticalStockDetailPanel({ position, mode = "live" }) {
                 style={{ width: `${confidence.score}%` }}
               />
             </div>
+            <section className="tactical-zone-detail__confidence-breakdown">
+              <p className="m-0 tactical-zone-detail__confidence-breakdown-title">신뢰도 분석</p>
+              <div className="tactical-zone-detail__confidence-lines">
+                {confidence.entries.slice(0, 6).map((entry) => (
+                  <p key={`${entry.label}-${entry.score}`} className="m-0 tactical-zone-detail__confidence-line">
+                    <span className={entry.score >= 0 ? "is-pos" : "is-neg"}>
+                      {entry.score >= 0 ? "🟢" : "🔴"} {entry.label}
+                    </span>
+                    <span>{entry.score >= 0 ? `+${entry.score}` : entry.score}</span>
+                  </p>
+                ))}
+              </div>
+              <p className="m-0 tactical-zone-detail__confidence-reason">{confidence.actionReasonText}</p>
+            </section>
             <p className="m-0 tactical-zone-detail__status-description">
               {stageDescriptionById[position.stage] ?? "시장 흐름에 맞춘 단계 대응 구간"}
             </p>
