@@ -34,6 +34,8 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
   const statusLabel = (card) => resolveHorizonStatusLabel(card, marketPolicy?.marketState ?? "neutral")
 
   const actionLines = marketPolicy?.actionLines ?? link.actionLines ?? null
+  const transitionConfidence = marketPolicy?.marketTransition?.transitionConfidence ?? 0
+  const showTransition = marketPolicy?.marketTransition?.changed && transitionConfidence >= 40
   const actionRows = actionLines
     ? [
         { key: "primary", icon: "🟢", text: actionLines.primary ?? "", tone: "allow" },
@@ -80,11 +82,12 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
           {actionRows.length ? (
             <>
               <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
-              {marketPolicy?.marketTransition?.changed ? (
+              {showTransition ? (
                 <p className="m-0 tactical-zone-engine-link__macro-stage">
                   <span className="tactical-zone-engine-link__macro-stage-head">변화:</span>
                   <span className="tactical-zone-engine-link__macro-stage-val">
-                    {marketPolicy.marketTransition.directionTag}
+                    {transitionConfidence >= 85 ? "🚨 강한 변화 감지 " : ""}
+                    {marketPolicy.marketTransition.directionTag} ({transitionConfidence})
                   </span>
                 </p>
               ) : null}

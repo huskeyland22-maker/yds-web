@@ -144,8 +144,10 @@ export default function TacticalTradingZoneSection({
     transitionStrength: "low",
     transitionLabel: "상태 유지",
     directionTag: "→ 상태 유지",
+    transitionConfidence: 0,
+    visibility: "hidden",
   }))
-  const [transitionHistory, setTransitionHistory] = useState(/** @type {Array<{ at: string; marketState: string; transitionLabel: string }>} */ ([]))
+  const [transitionHistory, setTransitionHistory] = useState(/** @type {Array<{ at: string; marketState: string; transitionLabel: string; transitionConfidence: number }>} */ ([]))
   const prevPolicyRef = useRef(/** @type {ReturnType<typeof buildMarketPolicy> | null} */ (null))
   const [selectedId, setSelectedId] = useState(() => {
     const us = positions.filter((p) => p.market === "us")
@@ -205,6 +207,10 @@ export default function TacticalTradingZoneSection({
     () => ({ ...marketPolicy, marketTransition }),
     [marketPolicy, marketTransition],
   )
+  const transitionConfidence = marketTransition.transitionConfidence ?? 0
+  const showTransitionTag = transitionConfidence >= 40
+  const showTransitionHighlight = transitionConfidence >= 70
+  const showTransitionStrong = transitionConfidence >= 85
   const actionBanner = useMemo(() => {
     if (!selectedPosition) return "🟢 종목 선택 후 실전 행동 가이드를 확인하세요"
     const lead = marketPolicyView.actionPolicy.items[0]?.text ?? "정책 점검"
@@ -216,10 +222,10 @@ export default function TacticalTradingZoneSection({
           : marketPolicyView.marketState === "pullback" || marketPolicyView.marketState === "caution"
             ? "🟡"
             : "🟢"
-    const transitionTag = marketTransition.changed ? ` ${marketTransition.directionTag}` : ""
+    const transitionTag = showTransitionTag ? ` ${marketTransition.directionTag}` : ""
     const local = `${emoji} ${marketPolicyView.marketStateLabel} 정책 · ${lead}${transitionTag}`
     return strategyState.banner ? `${strategyState.banner} | ${local}` : local
-  }, [selectedPosition, strategyState.banner, marketPolicyView, marketTransition])
+  }, [selectedPosition, strategyState.banner, marketPolicyView, marketTransition, showTransitionTag])
 
   const marketTemperature = useMemo(() => {
     if (marketPolicyView.marketState === "panic") return { emoji: "🔴", label: "패닉", tone: "panic" }
@@ -247,8 +253,15 @@ export default function TacticalTradingZoneSection({
       Number.isFinite(Number(panicData?.vix)) && Number(panicData?.vix) >= 24
         ? "변동성은 높아졌고"
         : "변동성은 안정적이나"
-    return `현재 시장은 ${buildPolicyBriefing(marketPolicyView)} ${volatility} 거래량 변화가 나타나고 있습니다.`
-  }, [panicData, marketPolicyView])
+    const strengthLine = showTransitionStrong
+      ? "강한 변화 구간으로 행동 강도를 즉시 재조정합니다."
+      : showTransitionHighlight
+        ? "의미 있는 변화가 감지되어 행동 우선순위를 조정합니다."
+        : showTransitionTag
+          ? "약한 변화 신호는 내부 추적 중심으로 반영합니다."
+          : "노이즈 구간은 관찰 중심으로 유지합니다."
+    return `현재 시장은 ${buildPolicyBriefing(marketPolicyView)} ${volatility} 거래량 변화가 나타나고 있습니다. ${strengthLine}`
+  }, [panicData, marketPolicyView, showTransitionStrong, showTransitionHighlight, showTransitionTag])
 
   const actionPriority = useMemo(
     () =>
@@ -278,12 +291,14 @@ export default function TacticalTradingZoneSection({
     if (prevStage && stage && prevStage !== stage) {
       alerts.push(stage === "interest" || stage === "pullback" || stage === "trend" ? "🟢 상태 회복 감지" : "🔴 단기 과열 진입 가능성")
     }
-    if (marketTransition.changed) alerts.push(marketTransition.directionTag)
+    if (showTransitionTag) {
+      alerts.push(showTransitionStrong ? `🚨 강한 변화 감지 ${marketTransition.directionTag}` : marketTransition.directionTag)
+    }
     if ((selectedPosition?.stageHistory?.length ?? 0) <= 1) alerts.push("🟡 거래량 둔화 시작")
     const next = alerts.slice(0, 2)
     setLiveAlerts(next)
     setPrevStage(stage)
-  }, [selectedPosition, prevStage, marketTransition])
+  }, [selectedPosition, prevStage, marketTransition, showTransitionTag, showTransitionStrong])
 
   return (
     <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
@@ -343,7 +358,7 @@ export default function TacticalTradingZoneSection({
             ))}
             {transitionHistory.length ? (
               <span className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
-                🧭 최근전환 {transitionHistory[transitionHistory.length - 1]?.marketState} ({transitionHistory.length})
+                🧭 최근전환 {transitionHistory[transitionHistory.length - 1]?.marketState} ({transitionHistory[transitionHistory.length - 1]?.transitionConfidence})
               </span>
             ) : null}
           </div>

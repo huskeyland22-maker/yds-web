@@ -9,6 +9,7 @@
  * @typedef {"low" | "mid" | "high"} MarketRiskLevel
  * @typedef {"safe" | "caution" | "danger"} ActionLevel
  * @typedef {"no-change" | "recovery" | "risk-onset" | "risk-expansion" | "stabilization"} TransitionState
+ * @typedef {"hidden" | "tag" | "highlight" | "strong"} TransitionVisibility
  */
 
 /**
@@ -157,6 +158,39 @@ const MARKET_STATE_ORDER = {
 export function detectMarketTransition(prevPolicy, currentPolicy) {
   const prev = prevPolicy?.marketState
   const next = currentPolicy?.marketState
+  const prevVix = Number(prevPolicy?.metrics?.vix)
+  const nextVix = Number(currentPolicy?.metrics?.vix)
+  const prevFg = Number(prevPolicy?.metrics?.fearGreed)
+  const nextFg = Number(currentPolicy?.metrics?.fearGreed)
+  const stateDelta = Math.abs((MARKET_STATE_ORDER[next] ?? 0) - (MARKET_STATE_ORDER[prev] ?? 0))
+  const riskScale = { low: 0, mid: 1, high: 2 }
+  const riskDelta = Math.abs((riskScale[currentPolicy?.riskLevel ?? "low"] ?? 0) - (riskScale[prevPolicy?.riskLevel ?? "low"] ?? 0))
+  const vixDelta = Number.isFinite(prevVix) && Number.isFinite(nextVix) ? Math.abs(nextVix - prevVix) : 0
+  const fgDelta = Number.isFinite(prevFg) && Number.isFinite(nextFg) ? Math.abs(nextFg - prevFg) : 0
+  const prevKeys = new Set((prevPolicy?.actionPolicy?.items ?? []).map((item) => item.key || item.text))
+  const nextKeys = new Set((currentPolicy?.actionPolicy?.items ?? []).map((item) => item.key || item.text))
+  let actionChangedCount = 0
+  for (const key of nextKeys) {
+    if (!prevKeys.has(key)) actionChangedCount += 1
+  }
+  let transitionConfidence = Math.min(
+    100,
+    Math.round(
+      Math.min(42, stateDelta * 16) +
+      Math.min(18, riskDelta * 9) +
+      Math.min(16, vixDelta * 1.8) +
+      Math.min(14, fgDelta * 0.6) +
+      Math.min(10, actionChangedCount * 4) +
+      (stateDelta >= 1 ? 8 : 0),
+    ),
+  )
+  // Noise guard: tiny one-day oscillations stay internal.
+  if (stateDelta <= 1 && vixDelta < 1.8 && fgDelta < 4) transitionConfidence = Math.max(0, transitionConfidence - 22)
+  const visibility =
+    transitionConfidence >= 85 ? "strong"
+      : transitionConfidence >= 70 ? "highlight"
+        : transitionConfidence >= 40 ? "tag"
+          : "hidden"
   if (!prev || !next || prev === next) {
     return {
       changed: false,
@@ -164,68 +198,86 @@ export function detectMarketTransition(prevPolicy, currentPolicy) {
       transitionStrength: "low",
       transitionLabel: "상태 유지",
       directionTag: "→ 상태 유지",
+      transitionConfidence: 0,
+      visibility: "hidden",
     }
   }
   const delta = (MARKET_STATE_ORDER[next] ?? 0) - (MARKET_STATE_ORDER[prev] ?? 0)
+  /** @param {{transitionState: TransitionState, transitionStrength: "low"|"mid"|"high", transitionLabel: string, directionTag: string}} base */
+  const withConfidence = (base) => ({
+    ...base,
+    transitionConfidence,
+    visibility,
+  })
+  if (visibility === "hidden") {
+    return withConfidence({
+      changed: false,
+      transitionState: "no-change",
+      transitionStrength: "low",
+      transitionLabel: "미세 변동",
+      directionTag: "→ 미세 변동",
+    })
+  }
   if ((prev === "panic" || prev === "caution") && (next === "pullback" || next === "neutral")) {
-    return {
+    return withConfidence({
       changed: true,
       transitionState: "recovery",
       transitionStrength: Math.abs(delta) >= 2 ? "high" : "mid",
-      transitionLabel: "회복 강화",
-      directionTag: "↑ 회복 강화",
-    }
+      transitionLabel: transitionConfidence >= 70 ? "회복 강화" : "약한 회복",
+      directionTag: transitionConfidence >= 70 ? "↑ 회복 강화" : "↗ 회복 신호",
+    })
   }
   if (prev === "panic" && next === "caution") {
-    return {
+    return withConfidence({
       changed: true,
       transitionState: "stabilization",
       transitionStrength: "mid",
       transitionLabel: "안정화 진입",
       directionTag: "↑ 안정화 진입",
-    }
+    })
   }
   if (next === "overheat" || (prev !== "overheat" && next === "caution" && delta > 0)) {
-    return {
+    return withConfidence({
       changed: true,
       transitionState: "risk-onset",
       transitionStrength: next === "overheat" ? "high" : "mid",
-      transitionLabel: "과열 접근",
-      directionTag: "⚠ 과열 접근",
-    }
+      transitionLabel: transitionConfidence >= 75 ? "강한 과열 접근" : "과열 접근",
+      directionTag: transitionConfidence >= 75 ? "⚠ 과열 접근" : "⚠ 과열 징후",
+    })
   }
   if (delta < 0) {
-    return {
+    return withConfidence({
       changed: true,
       transitionState: "risk-expansion",
       transitionStrength: Math.abs(delta) >= 2 ? "high" : "mid",
-      transitionLabel: "변동성 확대",
-      directionTag: "↓ 변동성 확대",
-    }
+      transitionLabel: transitionConfidence >= 70 ? "변동성 확대" : "변동성 흔들림",
+      directionTag: transitionConfidence >= 70 ? "↓ 변동성 확대" : "↓ 변동성 주의",
+    })
   }
-  return {
+  return withConfidence({
     changed: true,
     transitionState: "recovery",
     transitionStrength: "low",
     transitionLabel: "완만한 회복",
     directionTag: "↑ 완만한 회복",
-  }
+  })
 }
 
 /**
- * @param {Array<{ at: string; marketState: MarketState; transitionLabel: string }>} history
+ * @param {Array<{ at: string; marketState: MarketState; transitionLabel: string; transitionConfidence: number }>} history
  * @param {ReturnType<typeof detectMarketTransition>} transition
  * @param {ReturnType<typeof buildMarketPolicy>} policy
- * @returns {Array<{ at: string; marketState: MarketState; transitionLabel: string }>}
+ * @returns {Array<{ at: string; marketState: MarketState; transitionLabel: string; transitionConfidence: number }>}
  */
 export function appendTransitionHistory(history, transition, policy) {
-  if (!transition?.changed || !policy?.marketState) return history ?? []
+  if (!transition?.changed || !policy?.marketState || (transition.transitionConfidence ?? 0) < 40) return history ?? []
   const next = [
     ...(history ?? []),
     {
       at: new Date().toISOString(),
       marketState: policy.marketState,
       transitionLabel: transition.transitionLabel,
+      transitionConfidence: transition.transitionConfidence ?? 0,
     },
   ]
   return next.slice(-10)
@@ -260,6 +312,10 @@ export function buildMarketPolicy(input = {}) {
   const actionLines = buildActionLines(actionPolicy)
   const sectorBias = buildSectorBias(marketState)
   const stockActionRange = buildStockActionRange(marketState)
+  const metrics = {
+    vix: Number(input?.panicData?.vix),
+    fearGreed: Number(input?.panicData?.fearGreed),
+  }
   const marketStateLabel =
     marketState === "panic"
       ? "패닉"
@@ -280,6 +336,7 @@ export function buildMarketPolicy(input = {}) {
     sectorBias,
     stockActionRange,
     marketTransition: null,
+    metrics,
     tacticalMode: actionPolicy.tacticalMode,
     uiTone: actionPolicy.uiTone,
   }
@@ -299,8 +356,9 @@ export function buildPolicyBriefing(policy) {
   const primary = policy?.actionLines?.primary ?? "관심 종목 감시"
   const caution = policy?.actionLines?.caution ?? "추격 금지"
   const execution = policy?.actionLines?.execution ?? "분할 대응"
-  const transitionLine = policy?.marketTransition?.changed
-    ? `${policy.marketTransition.directionTag} 감지. `
+  const confidence = policy?.marketTransition?.transitionConfidence ?? 0
+  const transitionLine = policy?.marketTransition?.changed && confidence >= 40
+    ? `${confidence >= 85 ? "강한 변화 감지:" : confidence >= 70 ? "의미 변화 감지:" : "약한 변화 신호:"} ${policy.marketTransition.directionTag}. `
     : ""
   return `${transitionLine}${stateLabel} 정책: ${primary}. ${execution}. ${caution}. ${sectors} 우선 점검.`
 }
