@@ -1418,6 +1418,15 @@
     box-shadow: 0 0 20px rgba(250, 204, 21, 0.27);
   }
 
+  .tactical-zone-chip--strong {
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.24);
+  }
+
+  .tactical-zone-chip--weak {
+    opacity: 0.72;
+    filter: saturate(0.82);
+  }
+
   .tactical-zone-chip__main {
     display: flex;
     flex-direction: column;
@@ -1674,6 +1683,19 @@
     transform: translateY(0);
   }
 
+  .tactical-zone-detail__reason-box {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    display: grid;
+    gap: 2px;
+  }
+
+  .tactical-zone-detail__reason-line {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.95);
+  }
+
   .price-label-row {
     position: relative;
     width: calc(100% - 16px);
@@ -1907,6 +1929,24 @@
     transform: scale(1.08);
   }
 
+  .tactical-zone-trade-line__dot--current {
+    animation: tactical-current-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes tactical-current-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 0 18px rgba(255, 210, 0, 0.35),
+        0 0 6px rgba(251, 191, 36, 0.28);
+    }
+    50% {
+      box-shadow:
+        0 0 22px rgba(255, 210, 0, 0.48),
+        0 0 8px rgba(251, 191, 36, 0.4);
+    }
+  }
+
   .tactical-zone-trade-line__dot--target {
     width: 11px;
     height: 11px;
@@ -1958,6 +1998,7 @@
       rgba(148, 163, 184, 0.22) var(--ring-progress)
     );
     box-shadow: 0 0 16px rgba(251, 191, 36, 0.24);
+    animation: tactical-ring-glow 6s linear infinite;
   }
 
   .tactical-zone-detail__achieve-ring-core {
@@ -1986,6 +2027,89 @@
 .trade-progress-group:hover .tactical-zone-detail__achieve-val {
   transform: scale(1.06);
 }
+
+  @keyframes tactical-ring-glow {
+    0% {
+      filter: hue-rotate(0deg);
+    }
+    100% {
+      filter: hue-rotate(20deg);
+    }
+  }
+
+  .tactical-zone-detail__progress-meaning {
+    margin-top: -2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(191, 219, 254, 0.95);
+  }
+
+  .tactical-zone-detail__confidence {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .tactical-zone-detail__confidence strong {
+    color: rgba(34, 211, 238, 0.98);
+    text-shadow: 0 0 8px rgba(34, 211, 238, 0.3);
+  }
+
+  .tactical-zone-detail__action-card {
+    margin-top: 2px;
+    border: 1px solid rgba(56, 189, 248, 0.26);
+    border-radius: 8px;
+    padding: 7px 9px;
+    background: rgba(14, 165, 233, 0.08);
+  }
+
+  .tactical-zone-detail__action-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(186, 230, 253, 0.98);
+  }
+
+  .tactical-zone-detail__action-list {
+    margin-top: 4px;
+    padding-left: 14px;
+    display: grid;
+    gap: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(226, 232, 240, 0.94);
+  }
+
+  .tactical-zone-detail__warnings {
+    margin-top: 2px;
+    display: grid;
+    gap: 2px;
+  }
+
+  .tactical-zone-detail__warning-line {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(252, 211, 77, 0.96);
+  }
+
+  .tactical-zone-detail__stage-shift {
+    margin-top: 1px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(74, 222, 128, 0.95);
+    opacity: 0;
+    animation: tactical-stage-fade 0.45s ease forwards;
+  }
+
+  @keyframes tactical-stage-fade {
+    from {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   .tactical-zone-trade-info-row {
     display: flex;

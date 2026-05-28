@@ -24,6 +24,8 @@ import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
  */
 function StockChip({ position, bucketId, selected, onSelect }) {
   const badge = tradingStageBadge(position)
+  const strengthScore = (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
+  const strengthTone = strengthScore >= 40 ? "strong" : strengthScore <= 20 ? "weak" : "normal"
   const trendLabel =
     position.stage === "trend" && (position.stageHistory?.length ?? 0) >= 3
       ? "🔥 강추세"
@@ -38,6 +40,8 @@ function StockChip({ position, bucketId, selected, onSelect }) {
         "tactical-zone-chip",
         selected ? "tactical-zone-chip--selected" : "",
         bucketId === "pullback" ? "tactical-zone-chip--priority" : "",
+        strengthTone === "strong" ? "tactical-zone-chip--strong" : "",
+        strengthTone === "weak" ? "tactical-zone-chip--weak" : "",
       ].join(" ")}
     >
       <span className="tactical-zone-chip__main">

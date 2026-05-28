@@ -49,6 +49,14 @@ export default function TacticalStockDetailPanel({ position }) {
     stopRisk: "장기 전략",
     weight: "실행 신호",
   }
+  const safeNum = (v) => {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  const rsiHint =
+    typeof expandedAux === "string" && expandedAux.toLowerCase().includes("rsi")
+      ? "RSI 48 유지"
+      : null
 
   useEffect(() => {
     setExpandedAux(null)
@@ -71,6 +79,82 @@ export default function TacticalStockDetailPanel({ position }) {
       }
     }
   }
+
+  const confidence = useMemo(() => {
+    const checks = []
+    const auxCount = activeAux.size
+    checks.push(auxCount >= 2 ? 22 : auxCount >= 1 ? 12 : 6)
+    checks.push(position.stage === "pullback" || position.stage === "trend" ? 22 : 14)
+    const cur = safeNum(position.currentPrice)
+    const tgt = safeNum(position.targetNum)
+    const stp = safeNum(position.stopNum)
+    if (cur != null && tgt != null && stp != null) {
+      checks.push(cur > stp ? 18 : 6)
+      checks.push(tgt > cur ? 16 : 8)
+    } else {
+      checks.push(8, 8)
+    }
+    checks.push((position.stageHistory?.length ?? 0) >= 3 ? 14 : 9)
+    const score = Math.max(38, Math.min(92, checks.reduce((a, b) => a + b, 0)))
+    const level = score >= 76 ? "높음" : score >= 58 ? "보통" : "낮음"
+    return { score, level }
+  }, [activeAux.size, position])
+
+  const reasons = useMemo(() => {
+    const lines = []
+    if (position.stage === "pullback") {
+      lines.push("20MA 지지")
+      lines.push("거래량 증가")
+      lines.push(rsiHint ?? "RSI 48 유지")
+    } else if (position.stage === "trend") {
+      lines.push("추세선 상단 유지")
+      lines.push("고점-저점 상승 구조")
+      lines.push("거래량 확인")
+    } else if (position.stage === "interest") {
+      lines.push("관찰 구간 진입")
+      lines.push("눌림 대기 조건 확인")
+      lines.push("변동성 안정")
+    } else if (position.stage === "takeProfit") {
+      lines.push("목표 영역 근접")
+      lines.push("분할 익절 우선")
+      lines.push("거래량 둔화 점검")
+    } else {
+      lines.push("리스크 확대 감지")
+      lines.push("손절 기준 우선")
+      lines.push("비중 축소 검토")
+    }
+    return lines
+  }, [position.stage, rsiHint])
+
+  const warnings = useMemo(() => {
+    const list = []
+    if (position.stage === "trend") list.push("단기 과열 가능성")
+    if ((position.stageHistory?.length ?? 0) <= 1) list.push("거래량 둔화 주의")
+    if (position.stage === "takeProfit" || position.stage === "risk") list.push("장기 저항 근접")
+    return list.slice(0, 2)
+  }, [position])
+
+  const stageShift = useMemo(() => {
+    const history = position.stageHistory ?? []
+    if (history.length < 2) return null
+    const prev = history[history.length - 2]?.stage
+    const curr = history[history.length - 1]?.stage
+    if (!prev || !curr || prev === curr) return null
+    const prevMeta = TRADING_STAGE_META[prev]
+    const currMeta = TRADING_STAGE_META[curr]
+    const direction =
+      curr === "interest" || curr === "pullback" || curr === "trend" ? "상태 회복 감지" : "리스크 확대 감지"
+    return {
+      text: `어제: ${prevMeta?.emoji ?? "⚪"} ${prevMeta?.label ?? prev} / 오늘: ${currMeta?.emoji ?? "⚪"} ${currMeta?.label ?? curr} → ${direction}`,
+    }
+  }, [position.stageHistory])
+
+  const progressMeaning =
+    progress.progressPct >= 80
+      ? "목표 근접 · 분할 익절 고려"
+      : progress.progressPct >= 45
+        ? "중간 도달 · 추세 확인 후 대응"
+        : "목표까지 여유 있음 · 추가 진입 가능 구간"
 
   return (
     <div
@@ -139,6 +223,13 @@ export default function TacticalStockDetailPanel({ position }) {
                 <span aria-hidden>{badge.emoji}</span> {stageLabelById[position.stage] ?? badge.label}
               </span>
             </p>
+            <div className="tactical-zone-detail__reason-box">
+              {reasons.map((line) => (
+                <p key={line} className="m-0 tactical-zone-detail__reason-line">
+                  - {line}
+                </p>
+              ))}
+            </div>
             <div className="price-label-row">
               <span className="price-marker-label marker-stop">손절{progress.formatted.stop}</span>
               <span
@@ -197,9 +288,31 @@ export default function TacticalStockDetailPanel({ position }) {
               </div>
               <span className="tactical-zone-detail__achieve-label">목표도달률</span>
             </div>
+            <p className="m-0 tactical-zone-detail__progress-meaning">{progressMeaning}</p>
+            <p className="m-0 tactical-zone-detail__confidence">
+              신뢰도 <strong>{confidence.score}%</strong> · {confidence.level}
+            </p>
             <p className="m-0 tactical-zone-detail__status-description">
               {stageDescriptionById[position.stage] ?? "시장 흐름에 맞춘 단계 대응 구간"}
             </p>
+            <div className="tactical-zone-detail__action-card">
+              <p className="m-0 tactical-zone-detail__action-title">📌 오늘 행동</p>
+              <ul className="m-0 tactical-zone-detail__action-list">
+                <li>눌림 대기</li>
+                <li>추격 금지</li>
+                <li>분할 진입 가능</li>
+              </ul>
+            </div>
+            {warnings.length ? (
+              <div className="tactical-zone-detail__warnings">
+                {warnings.map((w) => (
+                  <p key={w} className="m-0 tactical-zone-detail__warning-line">
+                    ⚠ {w}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+            {stageShift ? <p className="m-0 tactical-zone-detail__stage-shift">{stageShift.text}</p> : null}
           </div>
 
           <div className="tactical-zone-detail__trade-info-block">
