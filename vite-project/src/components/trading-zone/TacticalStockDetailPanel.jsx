@@ -142,6 +142,32 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
       text: `어제: ${prevMeta?.emoji ?? "⚪"} ${prevMeta?.label ?? prev} / 오늘: ${currMeta?.emoji ?? "⚪"} ${currMeta?.label ?? curr} → ${direction}`,
     }
   }, [position.stageHistory])
+  const signalFlow = useMemo(() => {
+    const raw = position.stageHistory ?? []
+    if (!raw.length) return []
+    return raw.slice(-5).map((h) => ({
+      date: String(h.at ?? "").slice(5, 10).replace("-", "/"),
+      stage: h.stage,
+      label: TRADING_STAGE_META[h.stage]?.label ?? h.stage,
+      emoji: TRADING_STAGE_META[h.stage]?.emoji ?? "⚪",
+      score: Number.isFinite(Number(h.score)) ? Number(h.score) : null,
+    }))
+  }, [position.stageHistory])
+  const confidenceFlow = useMemo(() => {
+    const scores = signalFlow.map((s) => s.score).filter((n) => Number.isFinite(n))
+    if (!scores.length) return { line: "", delta: 0 }
+    const line = scores.map((n) => Math.round(Number(n))).join(" → ")
+    const delta = Math.round(Number(scores[scores.length - 1]) - Number(scores[0]))
+    return { line, delta }
+  }, [signalFlow])
+  const recentChanges = useMemo(() => {
+    const list = []
+    if ((position.stageHistory?.length ?? 0) >= 3) list.push("↑ 거래량 증가")
+    if (activeAux.has("RSI")) list.push("↑ RSI 회복")
+    if (position.stage === "trend" && (position.stageHistory?.length ?? 0) <= 2) list.push("↓ 추세 둔화")
+    if (position.stage === "pullback" || position.stage === "risk") list.push("↓ 변동성 확대")
+    return list.slice(0, 4)
+  }, [position, activeAux])
 
   const progressMeaning =
     progress.progressPct >= 80
@@ -372,6 +398,43 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
               </div>
             ) : null}
             {stageShift ? <p className="m-0 tactical-zone-detail__stage-shift">{stageShift.text}</p> : null}
+            {signalFlow.length ? (
+              <section className="tactical-zone-detail__flow-card">
+                <p className="m-0 tactical-zone-detail__flow-title">신호 변화 추적</p>
+                <div className="tactical-zone-detail__flow-line">
+                  {signalFlow.map((s, i) => (
+                    <Fragment key={`${s.stage}-${s.date}-${i}`}>
+                      {i > 0 ? <span className="tactical-zone-detail__flow-arrow">→</span> : null}
+                      <span className="tactical-zone-detail__flow-chip">
+                        {s.emoji} {s.label}
+                      </span>
+                    </Fragment>
+                  ))}
+                </div>
+                <div className="tactical-zone-detail__flow-dates">
+                  {signalFlow.map((s) => (
+                    <span key={`${s.stage}-${s.date}`}>{s.date || "—"}</span>
+                  ))}
+                </div>
+                {confidenceFlow.line ? (
+                  <p className="m-0 tactical-zone-detail__flow-confidence">
+                    최근 5일 신뢰도 {confidenceFlow.line} ·{" "}
+                    <strong className={confidenceFlow.delta >= 0 ? "is-up" : "is-down"}>
+                      {confidenceFlow.delta >= 0 ? `+${confidenceFlow.delta}` : confidenceFlow.delta}
+                    </strong>
+                  </p>
+                ) : null}
+                {recentChanges.length ? (
+                  <div className="tactical-zone-detail__flow-changes">
+                    {recentChanges.map((c) => (
+                      <span key={c} className={c.startsWith("↑") ? "is-up" : "is-down"}>
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
           </div>
 
           <div className="tactical-zone-detail__trade-info-block">
