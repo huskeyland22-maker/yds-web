@@ -8,8 +8,18 @@ export async function fetchAiReportRows(opts = {}) {
   const limit = Math.min(Math.max(Number(opts.limit) || 20, 1), 50)
   let q = `ai_reports?select=*&order=updated_at.desc&limit=${limit}`
   if (key) q += `&report_key=eq.${encodeURIComponent(key)}`
-  const rows = await supabaseRest(q, { method: "GET" })
-  return Array.isArray(rows) ? rows : []
+  try {
+    const rows = await supabaseRest(q, { method: "GET" })
+    return Array.isArray(rows) ? rows : []
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err ?? "")
+    // reports 조회 실패는 전체 패닉 데이터 파이프라인을 죽이지 않도록 빈 배열로 degrade.
+    if (/does not exist|timeout|timed out|statement timeout|canceling statement/i.test(message)) {
+      console.warn("[ai/reports] soft-fail", { message })
+      return []
+    }
+    throw err
+  }
 }
 
 export function aiReportToClient(row) {

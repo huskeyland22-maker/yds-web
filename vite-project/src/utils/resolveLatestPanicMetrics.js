@@ -146,13 +146,15 @@ export function resolveLatestMetrics(input = {}) {
   const report = reportMetricsFromDeskReport(input.reportMetrics)
 
   const latestMetrics = coalesceLatestMetrics(hub, history, cycle, report)
-
-  console.log("[YDS] panic metrics fallback", {
-    panicMetrics: hub,
-    latestHistory: history,
-    reportMetrics: report,
-    latestMetrics,
-  })
+  const fallbackUsed = Boolean(!hub && (history || cycle || report))
+  if (fallbackUsed || !latestMetrics) {
+    console.log("[YDS] panic metrics fallback", {
+      panicMetrics: hub,
+      latestHistory: history,
+      reportMetrics: report,
+      latestMetrics,
+    })
+  }
 
   return latestMetrics
 }

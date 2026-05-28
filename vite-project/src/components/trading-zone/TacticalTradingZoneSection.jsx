@@ -149,6 +149,7 @@ export default function TacticalTradingZoneSection({
   }))
   const [transitionHistory, setTransitionHistory] = useState(/** @type {Array<{ at: string; marketState: string; transitionLabel: string; transitionConfidence: number }>} */ ([]))
   const prevPolicyRef = useRef(/** @type {ReturnType<typeof buildMarketPolicy> | null} */ (null))
+  const lastStablePolicyRef = useRef(/** @type {ReturnType<typeof buildMarketPolicy> | null} */ (null))
   const [selectedId, setSelectedId] = useState(() => {
     const us = positions.filter((p) => p.market === "us")
     return resolveDefaultTradingPositionId("us", us)
@@ -197,20 +198,43 @@ export default function TacticalTradingZoneSection({
     () => buildMarketPolicy({ panicData, position: selectedPosition }),
     [panicData, selectedPosition],
   )
+  const isStaleFeed = Boolean(panicData?.isStale ?? panicData?.__isStale)
   useEffect(() => {
-    const transition = detectMarketTransition(prevPolicyRef.current, marketPolicy)
+    if (!isStaleFeed) lastStablePolicyRef.current = marketPolicy
+  }, [isStaleFeed, marketPolicy])
+  const effectivePolicy = useMemo(
+    () => (isStaleFeed && lastStablePolicyRef.current ? lastStablePolicyRef.current : marketPolicy),
+    [isStaleFeed, marketPolicy],
+  )
+  useEffect(() => {
+    const transition = detectMarketTransition(prevPolicyRef.current, effectivePolicy)
     setMarketTransition(transition)
-    setTransitionHistory((history) => appendTransitionHistory(history, transition, marketPolicy))
-    prevPolicyRef.current = marketPolicy
-  }, [marketPolicy])
+    setTransitionHistory((history) => appendTransitionHistory(history, transition, effectivePolicy))
+    prevPolicyRef.current = effectivePolicy
+  }, [effectivePolicy])
   const marketPolicyView = useMemo(
-    () => ({ ...marketPolicy, marketTransition }),
-    [marketPolicy, marketTransition],
+    () => ({ ...effectivePolicy, marketTransition, dataDelay: isStaleFeed }),
+    [effectivePolicy, marketTransition, isStaleFeed],
   )
   const transitionConfidence = marketTransition.transitionConfidence ?? 0
   const showTransitionTag = transitionConfidence >= 40
   const showTransitionHighlight = transitionConfidence >= 70
   const showTransitionStrong = transitionConfidence >= 85
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const dump = {
+      marketState: marketPolicyView.marketState,
+      riskLevel: marketPolicyView.riskLevel,
+      transitionState: marketPolicyView.marketTransition?.transitionState,
+      transitionStrength: marketPolicyView.marketTransition?.transitionStrength,
+      confidence: marketPolicyView.marketTransition?.transitionConfidence ?? 0,
+      actionLines: marketPolicyView.actionLines,
+      stale: Boolean(marketPolicyView.dataDelay),
+      at: new Date().toISOString(),
+    }
+    window.__YDS_POLICY__ = dump
+    console.table([dump])
+  }, [marketPolicyView])
   const actionBanner = useMemo(() => {
     if (!selectedPosition) return "🟢 종목 선택 후 실전 행동 가이드를 확인하세요"
     const lead = marketPolicyView.actionPolicy.items[0]?.text ?? "정책 점검"
@@ -324,6 +348,7 @@ export default function TacticalTradingZoneSection({
       </div>
 
       <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
+      {isStaleFeed ? <div className="tactical-trading-zone__ultra-summary">⏱ 데이터 지연 · 마지막 정상 정책 유지</div> : null}
       <div className="tactical-trading-zone__ultra-summary">
         {[marketPolicyView.actionLines.primary, marketPolicyView.actionLines.execution, marketPolicyView.actionLines.caution].join(" / ")}
       </div>

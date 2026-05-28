@@ -40,9 +40,27 @@ export default async function handler(req, res) {
     const rows = raw.map(aiReportToClient).filter(Boolean)
     res.status(200).json({ ok: true, rows })
   } catch (e) {
+    const message = e instanceof Error ? e.message : "fetch_failed"
+    const stack = e instanceof Error ? e.stack : null
+    console.error("[api/ai/reports] handler failed", {
+      message,
+      stack,
+      url: req.url ?? null,
+    })
+    const isSoft = /does not exist|timeout|timed out|statement timeout|canceling statement/i.test(message)
+    if (isSoft) {
+      res.status(200).json({
+        ok: true,
+        rows: [],
+        warning: message,
+        degraded: true,
+      })
+      return
+    }
     res.status(500).json({
       ok: false,
-      error: e instanceof Error ? e.message : "fetch_failed",
+      error: message,
+      stack,
       rows: [],
     })
   }

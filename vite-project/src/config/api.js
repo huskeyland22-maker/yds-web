@@ -263,8 +263,14 @@ export async function fetchAiReports(options = {}) {
   const q = params.toString()
   const url = withNoStoreQuery(`/api/ai/reports${q ? `?${q}` : ""}`)
   const res = await fetch(url, LIVE_JSON_GET_INIT)
-  if (!res.ok) throw new Error(`ai reports HTTP ${res.status}`)
+  if (!res.ok) {
+    console.warn("[api/ai/reports] non-200", { status: res.status })
+    return []
+  }
   const json = await res.json()
+  if (json?.warning) {
+    console.warn("[api/ai/reports] degraded", { warning: json.warning })
+  }
   return json?.ok && Array.isArray(json.rows) ? json.rows : []
 }
 
