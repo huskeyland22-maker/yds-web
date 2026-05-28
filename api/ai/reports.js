@@ -10,6 +10,12 @@ function noStore(res) {
 
 export default async function handler(req, res) {
   noStore(res)
+  const payload = {
+    method: req.method ?? null,
+    url: req.url ?? null,
+    query: req.query ?? null,
+    now: new Date().toISOString(),
+  }
   if (req.method !== "GET") {
     res.status(405).json({ ok: false, error: "method_not_allowed" })
     return
@@ -42,11 +48,19 @@ export default async function handler(req, res) {
   } catch (e) {
     const message = e instanceof Error ? e.message : "fetch_failed"
     const stack = e instanceof Error ? e.stack : null
-    console.error("[api/ai/reports] handler failed", {
-      message,
+    console.error(
+      "[AI REPORT ERROR]",
+      e,
       stack,
-      url: req.url ?? null,
-    })
+      JSON.stringify(
+        {
+          ...payload,
+          message,
+        },
+        null,
+        2,
+      ),
+    )
     const isSoft = /does not exist|timeout|timed out|statement timeout|canceling statement/i.test(message)
     if (isSoft) {
       res.status(200).json({
