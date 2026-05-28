@@ -2291,6 +2291,20 @@
     font-weight: 600;
   }
 
+.tactical-zone-detail__achieve-mini {
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.tactical-zone-detail__achieve-mini span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.95), rgba(34, 197, 94, 0.9));
+}
+
   .tactical-zone-detail__achieve-val {
     position: relative;
     z-index: 1;
@@ -2719,6 +2733,33 @@
   font-size: 10px;
   font-weight: 700;
   color: rgba(125, 211, 252, 0.94);
+}
+
+.tactical-zone-detail__perf-bars {
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 6px;
+  align-items: center;
+}
+
+.tactical-zone-detail__perf-bars p {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.tactical-zone-detail__perf-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.tactical-zone-detail__perf-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.9), rgba(125, 211, 252, 0.9));
 }
 
 @media (max-width: 640px) {

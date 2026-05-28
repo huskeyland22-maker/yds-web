@@ -20,6 +20,13 @@ export default function TacticalEngineLinkBar({ link, hideTitle = false }) {
 
   const cardById = Object.fromEntries(link.cards.map((c) => [c.id, c]))
   const orderedCards = ENGINE_LINK_CARD_ORDER.map((id) => cardById[id]).filter(Boolean)
+  const statusLabel = (card) => {
+    const score = Number(card?.score)
+    if (card?.id === "short") return score >= 65 ? "우호" : score >= 45 ? "경계" : "약세"
+    if (card?.id === "mid") return score >= 62 ? "비중확대" : score >= 45 ? "중립" : "방어"
+    if (card?.id === "long") return score >= 60 ? "우호" : score >= 42 ? "중립" : "보수"
+    return score >= 62 ? "우호" : score >= 45 ? "중립" : "경계"
+  }
 
   return (
     <div className="tactical-zone-engine-link" aria-label="시장 엔진 연계">
@@ -36,7 +43,7 @@ export default function TacticalEngineLinkBar({ link, hideTitle = false }) {
                   <span className="tactical-zone-market-status__dot" aria-hidden>
                     {dot}
                   </span>
-                  {c.period}
+                  {c.period} {statusLabel(c)}
                 </p>
                 <p className="m-0 tactical-zone-market-status__score font-mono tabular-nums">
                   {c.score ?? "—"}

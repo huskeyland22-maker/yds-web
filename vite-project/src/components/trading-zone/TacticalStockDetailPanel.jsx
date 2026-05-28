@@ -184,6 +184,14 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
           : `${position.symbol} 관심→눌림 전환 후 리스크 회피`
     return { winRate, avgReturn, maxLoss, accuracy, recentCase }
   }, [position])
+  const perfBars = useMemo(
+    () => ({
+      win: performanceStats.winRate,
+      mdd: Math.max(0, Math.min(100, 100 + Number(performanceStats.maxLoss) * 8)),
+      recovery: Math.max(20, 100 - Math.max(2, Math.round((position.stageHistory?.length ?? 4) * 1.2)) * 10),
+    }),
+    [performanceStats, position.stageHistory],
+  )
 
   const progressMeaning =
     progress.progressPct >= 80
@@ -388,6 +396,9 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
               </div>
               <span className="tactical-zone-detail__achieve-label">목표도달률</span>
             </div>
+            <div className="tactical-zone-detail__achieve-mini" aria-hidden>
+              <span style={{ width: `${progress.progressPct}%` }} />
+            </div>
             <p className="m-0 tactical-zone-detail__progress-meaning">{progressMeaning}</p>
             <p className="m-0 tactical-zone-detail__confidence">
               신뢰도 <strong>{confidence.score}%</strong> · {confidence.level}
@@ -528,6 +539,14 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                     <span>최대 낙폭(MDD) <strong>{performanceStats.maxLoss}%</strong></span>
                     <span>신호 정확도 <strong>{performanceStats.accuracy}%</strong></span>
                     <span>평균 회복 <strong>{Math.max(2, Math.round((position.stageHistory?.length ?? 4) * 1.2))}일</strong></span>
+                  </div>
+                  <div className="tactical-zone-detail__perf-bars" aria-hidden>
+                    <p className="m-0">승률</p>
+                    <div className="tactical-zone-detail__perf-bar"><span style={{ width: `${perfBars.win}%` }} /></div>
+                    <p className="m-0">MDD</p>
+                    <div className="tactical-zone-detail__perf-bar"><span style={{ width: `${perfBars.mdd}%` }} /></div>
+                    <p className="m-0">회복</p>
+                    <div className="tactical-zone-detail__perf-bar"><span style={{ width: `${perfBars.recovery}%` }} /></div>
                   </div>
                   <p className="m-0 tactical-zone-detail__perf-case">최근 성공 사례: {performanceStats.recentCase}</p>
                 </section>
