@@ -36,6 +36,19 @@ export default function TacticalStockDetailPanel({ position }) {
   const coreMetrics = useMemo(() => buildTradingCoreMetrics(position), [position])
   const activeAux = new Set(position.aux ?? [])
   const [expandedAux, setExpandedAux] = useState(/** @type {string | null} */ (null))
+  const stageDescriptionById = {
+    interest: "관심 종목 관찰 및 시그널 대기 구간",
+    pullback: "단기 조정 후 재진입 가능 구간",
+    trend: "추세 가속 구간, 분할 추가 대응 가능",
+    takeProfit: "목표 근접, 분할 익절 중심 관리 구간",
+    risk: "손절/비중 축소 우선 대응 구간",
+  }
+  const strategicLabelByKey = {
+    expectedReturn: "단기 전략",
+    upside: "중기 전략",
+    stopRisk: "장기 전략",
+    weight: "실행 신호",
+  }
 
   useEffect(() => {
     setExpandedAux(null)
@@ -173,9 +186,19 @@ export default function TacticalStockDetailPanel({ position }) {
               </div>
             </div>
 
-            <p className="progress-achievement m-0 tactical-zone-detail__achieve">
-              <span className="tactical-zone-detail__achieve-val">{progress.progressPct}%</span>
+            <div className="progress-achievement m-0 tactical-zone-detail__achieve">
+              <div
+                className="tactical-zone-detail__achieve-ring"
+                style={{ "--ring-progress": `${progress.progressPct}%` }}
+                aria-hidden
+              >
+                <span className="tactical-zone-detail__achieve-ring-core" />
+                <span className="tactical-zone-detail__achieve-val">{progress.progressPct}%</span>
+              </div>
               <span className="tactical-zone-detail__achieve-label">목표도달률</span>
+            </div>
+            <p className="m-0 tactical-zone-detail__status-description">
+              {stageDescriptionById[position.stage] ?? "시장 흐름에 맞춘 단계 대응 구간"}
             </p>
           </div>
 
@@ -186,7 +209,9 @@ export default function TacticalStockDetailPanel({ position }) {
                 const pending = isCoreMetricPlaceholder(value, empty)
                 return (
                   <div key={key} className="tactical-zone-info-item" title={tooltip}>
-                    <span className="tactical-zone-info-item__label">{label}</span>
+                    <span className="tactical-zone-info-item__label">
+                      {strategicLabelByKey[key] ?? label}
+                    </span>
                     <span
                       className={[
                         "tactical-zone-info-item__value font-mono tabular-nums",
@@ -227,7 +252,7 @@ export default function TacticalStockDetailPanel({ position }) {
                   <Fragment key={`${h.stage}-${h.dateLabel}-${i}`}>
                     {i > 0 ? (
                       <span className="tactical-zone-timeline-connector" aria-hidden>
-                        ──
+                        →
                       </span>
                     ) : null}
                     <div

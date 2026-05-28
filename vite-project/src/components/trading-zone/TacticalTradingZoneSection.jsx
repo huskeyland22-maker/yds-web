@@ -15,17 +15,35 @@ import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 
 /**
- * @param {{ position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition; selected: boolean; onSelect: (id: string) => void }} props
+ * @param {{
+ *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
+ *   bucketId: import("../../trading-zone/tacticalTradingZoneData.js").TradingBucketId
+ *   selected: boolean
+ *   onSelect: (id: string) => void
+ * }} props
  */
-function StockChip({ position, selected, onSelect }) {
+function StockChip({ position, bucketId, selected, onSelect }) {
   const badge = tradingStageBadge(position)
+  const trendLabel =
+    position.stage === "trend" && (position.stageHistory?.length ?? 0) >= 3
+      ? "🔥 강추세"
+      : position.stage === "trend"
+        ? "↗ 상승추세 유지"
+        : null
   return (
     <button
       type="button"
       onClick={() => onSelect(position.id)}
-      className={["tactical-zone-chip", selected ? "tactical-zone-chip--selected" : ""].join(" ")}
+      className={[
+        "tactical-zone-chip",
+        selected ? "tactical-zone-chip--selected" : "",
+        bucketId === "pullback" ? "tactical-zone-chip--priority" : "",
+      ].join(" ")}
     >
-      <span className="tactical-zone-chip__name">{position.symbol}</span>
+      <span className="tactical-zone-chip__main">
+        <span className="tactical-zone-chip__name">{position.symbol}</span>
+        {trendLabel ? <span className="tactical-zone-chip__sub">{trendLabel}</span> : null}
+      </span>
       <span
         className="tactical-zone-chip__badge"
         data-stage={position.stage}
@@ -54,14 +72,20 @@ function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
       <div className="tactical-zone-bucket__list">
         {positions.length === 0 ? (
           bucketId === "takeProfit" ? (
-            <div className="tactical-zone-bucket__empty-stack">
-              <span className="tactical-zone-bucket__empty">
+            <ul className="tactical-zone-bucket__empty-stack">
+              <li className="tactical-zone-bucket__empty">
                 📌 {TRADING_ZONE_TAKE_PROFIT_EMPTY.status}
-              </span>
-              <span className="tactical-zone-bucket__empty-sub">
+              </li>
+              <li className="tactical-zone-bucket__empty-sub">
+                • +15% 도달 시 1차 분할
+              </li>
+              <li className="tactical-zone-bucket__empty-sub">
+                • 거래량 이탈 시 일부 축소
+              </li>
+              <li className="tactical-zone-bucket__empty-sub">
                 📌 {TRADING_ZONE_TAKE_PROFIT_EMPTY.partial}
-              </span>
-            </div>
+              </li>
+            </ul>
           ) : (
             <span className="tactical-zone-bucket__empty">—</span>
           )
@@ -70,6 +94,7 @@ function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
             <StockChip
               key={p.id}
               position={p}
+              bucketId={bucketId}
               selected={selectedId === p.id}
               onSelect={onSelect}
             />
