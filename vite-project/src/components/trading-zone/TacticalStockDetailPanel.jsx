@@ -201,11 +201,11 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
     risk: "🔴 과열 가능성 증가 → 현금 비중 고려",
   }
   const riskMessageByStage = {
-    interest: "⚠ 거래량 감소로 추세 지속성 약화 가능",
-    pullback: "⚠ 변동성 확대 시 손절 구간 빠른 이탈 가능",
-    trend: "⚠ 거래량 둔화 시 추세 연장 실패 가능",
-    takeProfit: "⚠ 목표권 진입 후 되돌림 확대 가능",
-    risk: "⚠ 장기 저항 근접으로 상단 막힘 가능",
+    interest: "⚠ 거래량 둔화\n→ 추세 지속 약화 가능",
+    pullback: "⚠ 변동성 확대\n→ 손절 라인 이탈 가능",
+    trend: "⚠ 추세 둔화\n→ 연장 실패 가능",
+    takeProfit: "⚠ 목표 근접\n→ 되돌림 확대 가능",
+    risk: "⚠ 장기 저항 근접\n→ 상단 막힘 가능",
   }
   const riskLevel = useMemo(() => {
     const vix = Number(panicData?.vix)
@@ -232,11 +232,11 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
     }
   }, [panicData, position])
   const compressedSummaryByStage = {
-    interest: "관심 유지 가능 / 추격 금지 / 눌림 대기",
-    pullback: "눌림 대기 우선 / 추격 금지 / 분할 진입",
-    trend: "추세 유지 / 추격 금지 / 리스크 관리",
-    takeProfit: "익절 우선 / 신규 추격 금지 / 변동성 경계",
-    risk: "리스크 관리 / 현금 비중 고려 / 추격 금지",
+    interest: "관심 유지 / 추격 금지 / 눌림 대기",
+    pullback: "눌림 대기 / 추격 금지 / 분할 진입",
+    trend: "추세 유지 / 과열 경계 / 분할 대응",
+    takeProfit: "익절 우선 / 추격 금지 / 되돌림 경계",
+    risk: "리스크 우선 / 현금 비중 / 추격 금지",
   }
 
   return (
@@ -424,9 +424,13 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                 ].join(" ")}
               >
                 <p className="m-0 tactical-zone-detail__action-title">⚠ 리스크</p>
-                <p className="m-0 tactical-zone-detail__signal-text">
-                  {riskMessageByStage[position.stage] ?? "거래량/변동성 변화 지속 확인 필요"}
-                </p>
+                {(riskMessageByStage[position.stage] ?? "⚠ 변동성 변화\n→ 리스크 확인 필요")
+                  .split("\n")
+                  .map((line) => (
+                    <p key={line} className="m-0 tactical-zone-detail__signal-text">
+                      {line}
+                    </p>
+                  ))}
                 <p className="m-0 tactical-zone-detail__risk-strong">
                   변동성 확대 시 손절 구간 빠른 이탈 가능
                 </p>

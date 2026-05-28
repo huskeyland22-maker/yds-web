@@ -300,7 +300,7 @@ export default function TacticalTradingZoneSection({
             - {briefLines[briefIdx] ?? "시장 상태 점검 중"}
           </span>
           <span className={["tactical-trading-zone__temp", `is-${marketTemperature.tone}`].join(" ")}>
-            시장 온도 {marketTemperature.emoji} {marketTemperature.label}
+            {marketTemperature.emoji} {marketTemperature.label}
           </span>
         </div>
         {liveAlerts.length || strategyState.transitions.length ? (
@@ -361,6 +361,9 @@ export default function TacticalTradingZoneSection({
               </span>
             ))}
           </div>
+          <p className="m-0 tactical-trading-zone__priority-rank-reason">
+            근거: 거래량 증가 · 추세 유지 · 변동성 안정
+          </p>
           {topCandidate ? (
             <article className="tactical-trading-zone__top-card">
               <p className="m-0 tactical-trading-zone__top-card-title">🔥 오늘 최우선 감시</p>

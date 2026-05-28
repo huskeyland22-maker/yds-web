@@ -1282,6 +1282,13 @@
   gap: 6px;
 }
 
+.tactical-trading-zone__priority-rank-reason {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.95);
+}
+
 .tactical-trading-zone__priority-rank-item {
   font-size: 11px;
   font-weight: 800;
@@ -1392,26 +1399,31 @@
   padding: 3px 8px;
   font-size: 10px;
   font-weight: 800;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.08);
 }
 
 .tactical-trading-zone__temp.is-stable {
   background: rgba(34, 197, 94, 0.16);
   color: rgba(187, 247, 208, 0.98);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
 }
 
 .tactical-trading-zone__temp.is-warn {
   background: rgba(250, 204, 21, 0.16);
   color: rgba(254, 240, 138, 0.98);
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.28);
 }
 
 .tactical-trading-zone__temp.is-hot {
   background: rgba(249, 115, 22, 0.16);
   color: rgba(254, 215, 170, 0.98);
+  box-shadow: 0 0 11px rgba(249, 115, 22, 0.32);
 }
 
 .tactical-trading-zone__temp.is-panic {
   background: rgba(239, 68, 68, 0.16);
   color: rgba(254, 202, 202, 0.98);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
 }
 
 .tactical-trading-zone__alerts {
@@ -2414,12 +2426,14 @@
   border-color: rgba(56, 189, 248, 0.3);
   background: rgba(14, 165, 233, 0.14);
   min-height: 84px;
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.16);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.2);
+  order: 1;
 }
 
 .tactical-zone-detail__signal-card--risk {
   border-color: rgba(248, 113, 113, 0.3);
   background: rgba(239, 68, 68, 0.15);
+  order: 2;
 }
 
 .tactical-zone-detail__signal-card--risk-low {
@@ -2443,6 +2457,7 @@
 .tactical-zone-detail__signal-card--trend {
   border-color: rgba(34, 197, 94, 0.3);
   background: rgba(34, 197, 94, 0.08);
+  order: 3;
 }
 
   .tactical-zone-detail__action-title {
@@ -2538,8 +2553,8 @@
 
 .tactical-zone-detail__signal-text {
   margin-top: 3px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   line-height: 1.25;
   color: rgba(226, 232, 240, 0.95);
 }
