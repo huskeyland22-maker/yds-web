@@ -10,6 +10,7 @@ import { resolveHorizonStatusLabel } from "../../trading-zone/marketPolicyEngine
  *   marketPolicy?: {
  *     marketState?: string
  *     riskLevel?: string
+ *     marketTransition?: { changed?: boolean; directionTag?: string; transitionStrength?: string } | null
  *     actionLines?: { primary?: string; caution?: string; execution?: string }
  *     actionPolicy?: { items?: { key: string; icon: string; text: string; level: string }[] }
  *   } | null
@@ -79,6 +80,14 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
           {actionRows.length ? (
             <>
               <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
+              {marketPolicy?.marketTransition?.changed ? (
+                <p className="m-0 tactical-zone-engine-link__macro-stage">
+                  <span className="tactical-zone-engine-link__macro-stage-head">변화:</span>
+                  <span className="tactical-zone-engine-link__macro-stage-val">
+                    {marketPolicy.marketTransition.directionTag}
+                  </span>
+                </p>
+              ) : null}
               <ul className="tactical-zone-engine-link__action-list m-0 list-none p-0">
                 {actionRows.map((row) => {
                   const label = row.text.replace(/\s*\/\s*/g, "·").replace(/\s+/g, " ").trim()

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   TRADING_BUCKET_META,
   TRADING_BUCKET_ORDER,
@@ -10,7 +10,12 @@ import {
   tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
 import { buildTradingZoneEngineLink } from "../../trading-zone/tradingZoneEngineLink.js"
-import { buildMarketPolicy, buildPolicyBriefing } from "../../trading-zone/marketPolicyEngine.js"
+import {
+  appendTransitionHistory,
+  buildMarketPolicy,
+  buildPolicyBriefing,
+  detectMarketTransition,
+} from "../../trading-zone/marketPolicyEngine.js"
 import { buildTradingZoneStrategyState } from "../../trading-zone/tradingZoneStrategyEngine.js"
 import { buildTradingPriorityRanking } from "../../trading-zone/tradingZonePriorityEngine.js"
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
@@ -133,6 +138,15 @@ export default function TacticalTradingZoneSection({
   const [briefFade, setBriefFade] = useState(false)
   const [liveAlerts, setLiveAlerts] = useState(/** @type {string[]} */ ([]))
   const [prevStage, setPrevStage] = useState(/** @type {string | null} */ (null))
+  const [marketTransition, setMarketTransition] = useState(() => ({
+    changed: false,
+    transitionState: "no-change",
+    transitionStrength: "low",
+    transitionLabel: "상태 유지",
+    directionTag: "→ 상태 유지",
+  }))
+  const [transitionHistory, setTransitionHistory] = useState(/** @type {Array<{ at: string; marketState: string; transitionLabel: string }>} */ ([]))
+  const prevPolicyRef = useRef(/** @type {ReturnType<typeof buildMarketPolicy> | null} */ (null))
   const [selectedId, setSelectedId] = useState(() => {
     const us = positions.filter((p) => p.market === "us")
     return resolveDefaultTradingPositionId("us", us)
@@ -181,29 +195,40 @@ export default function TacticalTradingZoneSection({
     () => buildMarketPolicy({ panicData, position: selectedPosition }),
     [panicData, selectedPosition],
   )
+  useEffect(() => {
+    const transition = detectMarketTransition(prevPolicyRef.current, marketPolicy)
+    setMarketTransition(transition)
+    setTransitionHistory((history) => appendTransitionHistory(history, transition, marketPolicy))
+    prevPolicyRef.current = marketPolicy
+  }, [marketPolicy])
+  const marketPolicyView = useMemo(
+    () => ({ ...marketPolicy, marketTransition }),
+    [marketPolicy, marketTransition],
+  )
   const actionBanner = useMemo(() => {
     if (!selectedPosition) return "🟢 종목 선택 후 실전 행동 가이드를 확인하세요"
-    const lead = marketPolicy.actionPolicy.items[0]?.text ?? "정책 점검"
+    const lead = marketPolicyView.actionPolicy.items[0]?.text ?? "정책 점검"
     const emoji =
-      marketPolicy.marketState === "panic"
+      marketPolicyView.marketState === "panic"
         ? "🔴"
-        : marketPolicy.marketState === "overheat"
+        : marketPolicyView.marketState === "overheat"
           ? "🟠"
-          : marketPolicy.marketState === "pullback" || marketPolicy.marketState === "caution"
+          : marketPolicyView.marketState === "pullback" || marketPolicyView.marketState === "caution"
             ? "🟡"
             : "🟢"
-    const local = `${emoji} ${marketPolicy.marketStateLabel} 정책 · ${lead}`
+    const transitionTag = marketTransition.changed ? ` ${marketTransition.directionTag}` : ""
+    const local = `${emoji} ${marketPolicyView.marketStateLabel} 정책 · ${lead}${transitionTag}`
     return strategyState.banner ? `${strategyState.banner} | ${local}` : local
-  }, [selectedPosition, strategyState.banner, marketPolicy])
+  }, [selectedPosition, strategyState.banner, marketPolicyView, marketTransition])
 
   const marketTemperature = useMemo(() => {
-    if (marketPolicy.marketState === "panic") return { emoji: "🔴", label: "패닉", tone: "panic" }
-    if (marketPolicy.marketState === "overheat") return { emoji: "🟠", label: "과열", tone: "hot" }
-    if (marketPolicy.marketState === "pullback" || marketPolicy.marketState === "caution") {
+    if (marketPolicyView.marketState === "panic") return { emoji: "🔴", label: "패닉", tone: "panic" }
+    if (marketPolicyView.marketState === "overheat") return { emoji: "🟠", label: "과열", tone: "hot" }
+    if (marketPolicyView.marketState === "pullback" || marketPolicyView.marketState === "caution") {
       return { emoji: "🟡", label: "경계", tone: "warn" }
     }
     return { emoji: "🟢", label: "안정", tone: "stable" }
-  }, [marketPolicy])
+  }, [marketPolicyView])
 
   const briefLines = useMemo(() => {
     const fg = Number(panicData?.fearGreed)
@@ -211,28 +236,28 @@ export default function TacticalTradingZoneSection({
     const base = [
       Number.isFinite(vix) && vix < 20 ? "VIX 안정 유지" : "VIX 변동성 확대 주의",
       Number.isFinite(fg) && fg >= 65 ? "CNN 탐욕 유지" : "CNN 중립~경계 구간",
-      `${marketPolicy.sectorBias.label}`,
+      `${marketPolicyView.sectorBias.label}`,
       (selectedPosition?.stageHistory?.length ?? 0) <= 1 ? "거래량 감소 주의" : "거래량 흐름 정상",
     ]
     return base
-  }, [panicData, selectedPosition, marketPolicy.sectorBias.label])
+  }, [panicData, selectedPosition, marketPolicyView.sectorBias.label])
 
   const aiBriefing = useMemo(() => {
     const volatility =
       Number.isFinite(Number(panicData?.vix)) && Number(panicData?.vix) >= 24
         ? "변동성은 높아졌고"
         : "변동성은 안정적이나"
-    return `현재 시장은 ${buildPolicyBriefing(marketPolicy)} ${volatility} 거래량 변화가 나타나고 있습니다.`
-  }, [panicData, marketPolicy])
+    return `현재 시장은 ${buildPolicyBriefing(marketPolicyView)} ${volatility} 거래량 변화가 나타나고 있습니다.`
+  }, [panicData, marketPolicyView])
 
   const actionPriority = useMemo(
     () =>
       [
-        `1. ${marketPolicy.actionLines.primary}`,
-        `2. ${marketPolicy.actionLines.caution}`,
-        `3. ${marketPolicy.actionLines.execution}`,
+        `1. ${marketPolicyView.actionLines.primary}`,
+        `2. ${marketPolicyView.actionLines.caution}`,
+        `3. ${marketPolicyView.actionLines.execution}`,
       ],
-    [marketPolicy.actionLines],
+    [marketPolicyView.actionLines],
   )
 
   useEffect(() => {
@@ -253,11 +278,12 @@ export default function TacticalTradingZoneSection({
     if (prevStage && stage && prevStage !== stage) {
       alerts.push(stage === "interest" || stage === "pullback" || stage === "trend" ? "🟢 상태 회복 감지" : "🔴 단기 과열 진입 가능성")
     }
+    if (marketTransition.changed) alerts.push(marketTransition.directionTag)
     if ((selectedPosition?.stageHistory?.length ?? 0) <= 1) alerts.push("🟡 거래량 둔화 시작")
     const next = alerts.slice(0, 2)
     setLiveAlerts(next)
     setPrevStage(stage)
-  }, [selectedPosition, prevStage])
+  }, [selectedPosition, prevStage, marketTransition])
 
   return (
     <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
@@ -279,12 +305,12 @@ export default function TacticalTradingZoneSection({
       </div>
 
       <div className="tactical-trading-zone__engine">
-        <TacticalEngineLinkBar link={engineLink} marketPolicy={marketPolicy} hideTitle />
+        <TacticalEngineLinkBar link={engineLink} marketPolicy={marketPolicyView} hideTitle />
       </div>
 
       <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
       <div className="tactical-trading-zone__ultra-summary">
-        {[marketPolicy.actionLines.primary, marketPolicy.actionLines.execution, marketPolicy.actionLines.caution].join(" / ")}
+        {[marketPolicyView.actionLines.primary, marketPolicyView.actionLines.execution, marketPolicyView.actionLines.caution].join(" / ")}
       </div>
 
       <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
@@ -315,6 +341,11 @@ export default function TacticalTradingZoneSection({
                 ⚙ {t}
               </span>
             ))}
+            {transitionHistory.length ? (
+              <span className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
+                🧭 최근전환 {transitionHistory[transitionHistory.length - 1]?.marketState} ({transitionHistory.length})
+              </span>
+            ) : null}
           </div>
         ) : null}
         <div className="tactical-trading-zone__priority">
@@ -425,7 +456,7 @@ export default function TacticalTradingZoneSection({
             position={selectedPosition}
             mode={mode}
             panicData={panicData}
-            marketPolicy={marketPolicy}
+            marketPolicy={marketPolicyView}
           />
         </div>
       ) : null}

@@ -8,6 +8,7 @@
  * @typedef {"overheat" | "caution" | "neutral" | "pullback" | "panic"} MarketState
  * @typedef {"low" | "mid" | "high"} MarketRiskLevel
  * @typedef {"safe" | "caution" | "danger"} ActionLevel
+ * @typedef {"no-change" | "recovery" | "risk-onset" | "risk-expansion" | "stabilization"} TransitionState
  */
 
 /**
@@ -133,6 +134,103 @@ function buildStockActionRange(state) {
   return { newEntry: "open", chase: "discouraged", splitBuy: "allow", cash: "low" }
 }
 
+/** @type {Record<MarketState, number>} */
+const MARKET_STATE_ORDER = {
+  panic: 0,
+  caution: 1,
+  pullback: 2,
+  neutral: 3,
+  overheat: 4,
+}
+
+/**
+ * @param {ReturnType<typeof buildMarketPolicy> | null | undefined} prevPolicy
+ * @param {ReturnType<typeof buildMarketPolicy> | null | undefined} currentPolicy
+ * @returns {{
+ *   changed: boolean
+ *   transitionState: TransitionState
+ *   transitionStrength: "low" | "mid" | "high"
+ *   transitionLabel: string
+ *   directionTag: string
+ * }}
+ */
+export function detectMarketTransition(prevPolicy, currentPolicy) {
+  const prev = prevPolicy?.marketState
+  const next = currentPolicy?.marketState
+  if (!prev || !next || prev === next) {
+    return {
+      changed: false,
+      transitionState: "no-change",
+      transitionStrength: "low",
+      transitionLabel: "상태 유지",
+      directionTag: "→ 상태 유지",
+    }
+  }
+  const delta = (MARKET_STATE_ORDER[next] ?? 0) - (MARKET_STATE_ORDER[prev] ?? 0)
+  if ((prev === "panic" || prev === "caution") && (next === "pullback" || next === "neutral")) {
+    return {
+      changed: true,
+      transitionState: "recovery",
+      transitionStrength: Math.abs(delta) >= 2 ? "high" : "mid",
+      transitionLabel: "회복 강화",
+      directionTag: "↑ 회복 강화",
+    }
+  }
+  if (prev === "panic" && next === "caution") {
+    return {
+      changed: true,
+      transitionState: "stabilization",
+      transitionStrength: "mid",
+      transitionLabel: "안정화 진입",
+      directionTag: "↑ 안정화 진입",
+    }
+  }
+  if (next === "overheat" || (prev !== "overheat" && next === "caution" && delta > 0)) {
+    return {
+      changed: true,
+      transitionState: "risk-onset",
+      transitionStrength: next === "overheat" ? "high" : "mid",
+      transitionLabel: "과열 접근",
+      directionTag: "⚠ 과열 접근",
+    }
+  }
+  if (delta < 0) {
+    return {
+      changed: true,
+      transitionState: "risk-expansion",
+      transitionStrength: Math.abs(delta) >= 2 ? "high" : "mid",
+      transitionLabel: "변동성 확대",
+      directionTag: "↓ 변동성 확대",
+    }
+  }
+  return {
+    changed: true,
+    transitionState: "recovery",
+    transitionStrength: "low",
+    transitionLabel: "완만한 회복",
+    directionTag: "↑ 완만한 회복",
+  }
+}
+
+/**
+ * @param {Array<{ at: string; marketState: MarketState; transitionLabel: string }>} history
+ * @param {ReturnType<typeof detectMarketTransition>} transition
+ * @param {ReturnType<typeof buildMarketPolicy>} policy
+ * @returns {Array<{ at: string; marketState: MarketState; transitionLabel: string }>}
+ */
+export function appendTransitionHistory(history, transition, policy) {
+  if (!transition?.changed || !policy?.marketState) return history ?? []
+  const next = [
+    ...(history ?? []),
+    {
+      at: new Date().toISOString(),
+      marketState: policy.marketState,
+      transitionLabel: transition.transitionLabel,
+    },
+  ]
+  return next.slice(-10)
+}
+
 /**
  * @param {{ id?: string; score?: number | null }} card
  * @param {MarketState} marketState
@@ -181,6 +279,7 @@ export function buildMarketPolicy(input = {}) {
     actionLines,
     sectorBias,
     stockActionRange,
+    marketTransition: null,
     tacticalMode: actionPolicy.tacticalMode,
     uiTone: actionPolicy.uiTone,
   }
@@ -200,6 +299,9 @@ export function buildPolicyBriefing(policy) {
   const primary = policy?.actionLines?.primary ?? "관심 종목 감시"
   const caution = policy?.actionLines?.caution ?? "추격 금지"
   const execution = policy?.actionLines?.execution ?? "분할 대응"
-  return `${stateLabel} 정책: ${primary}. ${execution}. ${caution}. ${sectors} 우선 점검.`
+  const transitionLine = policy?.marketTransition?.changed
+    ? `${policy.marketTransition.directionTag} 감지. `
+    : ""
+  return `${transitionLine}${stateLabel} 정책: ${primary}. ${execution}. ${caution}. ${sectors} 우선 점검.`
 }
 

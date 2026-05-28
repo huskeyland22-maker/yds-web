@@ -27,6 +27,7 @@ import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneC
  *   marketPolicy?: {
  *     marketStateLabel?: string
  *     riskLevel?: "low" | "mid" | "high"
+ *     marketTransition?: { changed?: boolean; directionTag?: string; transitionLabel?: string } | null
  *     actionPolicy?: { lead?: string; items?: { key: string; icon: string; text: string; level: string }[] }
  *   } | null
  * }} props
@@ -254,6 +255,9 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
     ? policy.actionPolicy.items
     : [{ key: "default-wait", icon: "🟡", text: "눌림 대기", level: "caution" }]
   const riskLevel = policy.riskLevel ?? "mid"
+  const policyTransitionLine = policy?.marketTransition?.changed
+    ? policy.marketTransition.directionTag ?? "⚠ 정책 전환 감지"
+    : null
 
   return (
     <div
@@ -539,6 +543,11 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                         <strong className={confidenceFlow.delta >= 0 ? "is-up" : "is-down"}>
                           {confidenceFlow.delta >= 0 ? `+${confidenceFlow.delta}` : confidenceFlow.delta}
                         </strong>
+                      </p>
+                    ) : null}
+                    {policyTransitionLine ? (
+                      <p className="m-0 tactical-zone-detail__flow-confidence">
+                        정책 전환: <strong className="is-up">{policyTransitionLine}</strong>
                       </p>
                     ) : null}
                     {recentChanges.length ? (
