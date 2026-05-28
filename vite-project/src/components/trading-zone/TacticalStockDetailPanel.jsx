@@ -24,6 +24,7 @@ import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneC
  * @param {{
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
  *   mode?: "live" | "analysis"
+ *   focusMode?: boolean
  *   marketPolicy?: {
  *     marketStateLabel?: string
  *     riskLevel?: "low" | "mid" | "high"
@@ -32,7 +33,13 @@ import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneC
  *   } | null
  * }} props
  */
-export default function TacticalStockDetailPanel({ position, mode = "live", panicData = null, marketPolicy = null }) {
+export default function TacticalStockDetailPanel({
+  position,
+  mode = "live",
+  panicData = null,
+  marketPolicy = null,
+  focusMode = false,
+}) {
   const badge = tradingStageBadge(position)
   const stageLabelById = {
     interest: "관심구간",
@@ -254,6 +261,24 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
   const policyItems = policy?.actionPolicy?.items?.length
     ? policy.actionPolicy.items
     : [{ key: "default-wait", icon: "🟡", text: "눌림 대기", level: "caution" }]
+  const keyActionItems = useMemo(() => {
+    const normalize = (text) => String(text ?? "").replace(/\s+/g, " ").trim()
+    const seeded = [
+      { key: "primary", icon: "🟢", text: policy?.actionLines?.primary ?? "", level: "safe" },
+      { key: "execution", icon: "🧭", text: policy?.actionLines?.execution ?? "", level: "caution" },
+      { key: "caution", icon: "⚠", text: policy?.actionLines?.caution ?? "", level: "danger" },
+      ...policyItems,
+    ]
+    const deduped = []
+    const seen = new Set()
+    seeded.forEach((item) => {
+      const normalized = normalize(item.text)
+      if (!normalized || seen.has(normalized)) return
+      seen.add(normalized)
+      deduped.push({ ...item, text: normalized })
+    })
+    return deduped.slice(0, 3)
+  }, [policy?.actionLines?.primary, policy?.actionLines?.execution, policy?.actionLines?.caution, policyItems])
   const riskLevel = policy.riskLevel ?? "mid"
   const policyTransitionLine = policy?.marketTransition?.changed && (policy?.marketTransition?.transitionConfidence ?? 0) >= 40
     ? `${policy.marketTransition.directionTag ?? "⚠ 정책 전환 감지"} (${policy.marketTransition.transitionConfidence})`
@@ -426,7 +451,7 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                   {policy.marketStateLabel ?? "중립"} 시장 대응 · {policy.actionPolicy?.lead ?? "리스크 우선 대응"}
                 </p>
                 <div className="tactical-zone-detail__action-items">
-                  {policyItems.map((item) => (
+                  {keyActionItems.map((item) => (
                     <div
                       key={item.key}
                       className={[
@@ -461,33 +486,39 @@ export default function TacticalStockDetailPanel({ position, mode = "live", pani
                   변동성 확대 시 손절 구간 빠른 이탈 가능
                 </p>
               </section>
-              <section className="tactical-zone-detail__signal-card tactical-zone-detail__signal-card--trend">
-                <p className="m-0 tactical-zone-detail__action-title">📈 추세 해석</p>
-                <p className="m-0 tactical-zone-detail__signal-text">
-                  {aiCommentBySymbol[position.symbol] ?? "추세/거래량 합치 구간 재확인"}
-                </p>
-                <p className="m-0 tactical-zone-detail__target-note">목표 도달 시: 1차 익절 고려 구간</p>
-              </section>
+              {!focusMode ? (
+                <section className="tactical-zone-detail__signal-card tactical-zone-detail__signal-card--trend">
+                  <p className="m-0 tactical-zone-detail__action-title">📈 추세 해석</p>
+                  <p className="m-0 tactical-zone-detail__signal-text">
+                    {aiCommentBySymbol[position.symbol] ?? "추세/거래량 합치 구간 재확인"}
+                  </p>
+                  <p className="m-0 tactical-zone-detail__target-note">목표 도달 시: 1차 익절 고려 구간</p>
+                </section>
+              ) : null}
             </div>
-            <section className="tactical-zone-detail__market-flow">
-              <p className="m-0 tactical-zone-detail__market-flow-title">현재 시장 흐름</p>
-              <ul className="m-0 tactical-zone-detail__market-flow-list">
-                {marketFlow.factors.map((f) => (
-                  <li key={f}>- {f}</li>
-                ))}
-              </ul>
-              <p className="m-0 tactical-zone-detail__market-flow-links">
-                → 연결 종목: {marketFlow.linkedSymbols.join(" / ")}
-              </p>
-            </section>
-            <button
-              type="button"
-              className="tactical-zone-detail__expand-btn"
-              onClick={() => setDetailsOpen((v) => !v)}
-              aria-expanded={detailsOpen}
-            >
-              {detailsOpen ? "상세 분석 접기" : "상세 분석 펼치기"}
-            </button>
+            {!focusMode ? (
+              <section className="tactical-zone-detail__market-flow">
+                <p className="m-0 tactical-zone-detail__market-flow-title">현재 시장 흐름</p>
+                <ul className="m-0 tactical-zone-detail__market-flow-list">
+                  {marketFlow.factors.map((f) => (
+                    <li key={f}>- {f}</li>
+                  ))}
+                </ul>
+                <p className="m-0 tactical-zone-detail__market-flow-links">
+                  → 연결 종목: {marketFlow.linkedSymbols.join(" / ")}
+                </p>
+              </section>
+            ) : null}
+            {!focusMode ? (
+              <button
+                type="button"
+                className="tactical-zone-detail__expand-btn"
+                onClick={() => setDetailsOpen((v) => !v)}
+                aria-expanded={detailsOpen}
+              >
+                {detailsOpen ? "상세 분석 접기" : "상세 분석 보기"}
+              </button>
+            ) : null}
             {detailsOpen ? (
               <div className="tactical-zone-detail__secondary-stack">
                 <section className="tactical-zone-detail__confidence-breakdown">

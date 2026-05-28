@@ -36,7 +36,7 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
   const actionLines = marketPolicy?.actionLines ?? link.actionLines ?? null
   const transitionConfidence = marketPolicy?.marketTransition?.transitionConfidence ?? 0
   const showTransition = marketPolicy?.marketTransition?.changed && transitionConfidence >= 40
-  const actionRows = actionLines
+  const actionRowsRaw = actionLines
     ? [
         { key: "primary", icon: "🟢", text: actionLines.primary ?? "", tone: "allow" },
         { key: "execution", icon: "🧭", text: actionLines.execution ?? "", tone: "allow" },
@@ -49,6 +49,15 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
         const icon = typeof line === "string" ? (tone === "warn" ? "⚠" : "🟢") : line.icon
         return { key: typeof line === "string" ? line : line.key, icon, text, tone }
       })
+  const actionRows = (() => {
+    const seen = new Set()
+    return actionRowsRaw.filter((row) => {
+      const normalized = String(row.text ?? "").replace(/\s+/g, " ").trim()
+      if (!normalized || seen.has(normalized)) return false
+      seen.add(normalized)
+      return true
+    }).slice(0, 3)
+  })()
 
   return (
     <div className="tactical-zone-engine-link" aria-label="시장 엔진 연계">

@@ -139,6 +139,10 @@ export default function TacticalTradingZoneSection({
   const positions = useMemo(() => getTradingZonePositions(), [])
   const [market, setMarket] = useState("us")
   const [mode, setMode] = useState(/** @type {"live" | "analysis"} */ ("live"))
+  const [focusMode, setFocusMode] = useState(() => {
+    if (typeof window === "undefined") return false
+    return window.matchMedia("(max-width: 640px)").matches
+  })
   const [briefIdx, setBriefIdx] = useState(0)
   const [briefFade, setBriefFade] = useState(false)
   const [liveAlerts, setLiveAlerts] = useState(/** @type {string[]} */ ([]))
@@ -231,7 +235,7 @@ export default function TacticalTradingZoneSection({
     const degradeCodes = []
     if (aiReportDegraded) {
       degradeCodes.push("ai_reports_degraded")
-      reasons.push(aiReportWarning ? String(aiReportWarning) : "AI 브리핑 일시 지연")
+      reasons.push("AI 브리핑 일시 지연")
     }
     if (isStaleFeed) {
       degradeCodes.push("stale_mode")
@@ -332,13 +336,25 @@ export default function TacticalTradingZoneSection({
   }, [panicData, marketPolicyView, showTransitionStrong, showTransitionHighlight, showTransitionTag])
 
   const actionPriority = useMemo(
-    () =>
-      [
-        `1. ${marketPolicyView.actionLines.primary}`,
-        `2. ${marketPolicyView.actionLines.caution}`,
-        `3. ${marketPolicyView.actionLines.execution}`,
-      ],
-    [marketPolicyView.actionLines],
+    () => {
+      const normalize = (text) => String(text ?? "").replace(/\s+/g, " ").trim()
+      const source = [
+        marketPolicyView.actionLines.primary,
+        marketPolicyView.actionLines.execution,
+        marketPolicyView.actionLines.caution,
+        ...(marketPolicyView.actionPolicy?.items ?? []).map((item) => item.text),
+      ]
+      const deduped = []
+      const seen = new Set()
+      source.forEach((line) => {
+        const normalized = normalize(line)
+        if (!normalized || seen.has(normalized)) return
+        seen.add(normalized)
+        deduped.push(normalized)
+      })
+      return deduped.slice(0, 3).map((line, i) => `${i + 1}. ${line}`)
+    },
+    [marketPolicyView.actionLines, marketPolicyView.actionPolicy],
   )
 
   useEffect(() => {
@@ -389,16 +405,28 @@ export default function TacticalTradingZoneSection({
 
       <hr className="tactical-trading-zone__divider" aria-hidden />
 
-      <div className="tactical-trading-zone__engine-head">
-        <p className="m-0 tactical-trading-zone__engine-title">
-          <span aria-hidden>📈</span> 시장 엔진 연계
-        </p>
-        <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → 종목 실행</p>
+      <div className="tactical-trading-zone__hud-head">
+        <div className="tactical-trading-zone__engine-head">
+          <p className="m-0 tactical-trading-zone__engine-title">
+            <span aria-hidden>📈</span> 시장 엔진 연계
+          </p>
+          <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → 종목 실행</p>
+        </div>
+        <button
+          type="button"
+          className={["tactical-trading-zone__focus-btn", focusMode ? "is-on" : ""].join(" ")}
+          onClick={() => setFocusMode((v) => !v)}
+          aria-pressed={focusMode}
+        >
+          {focusMode ? "Focus ON" : "Focus OFF"}
+        </button>
       </div>
 
-      <div className="tactical-trading-zone__engine">
-        <TacticalEngineLinkBar link={engineLink} marketPolicy={marketPolicyView} hideTitle />
-      </div>
+      {!focusMode ? (
+        <div className="tactical-trading-zone__engine">
+          <TacticalEngineLinkBar link={engineLink} marketPolicy={marketPolicyView} hideTitle />
+        </div>
+      ) : null}
 
       <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
       {tacticalDegrade.recoverable ? (
@@ -407,83 +435,87 @@ export default function TacticalTradingZoneSection({
         </div>
       ) : null}
       {aiReportDegraded ? (
-        <div className="tactical-trading-zone__ultra-summary">AI 브리핑 일시 지연{aiReportWarning ? ` · ${aiReportWarning}` : ""}</div>
+        <div className="tactical-trading-zone__ultra-summary">AI 브리핑 일시 지연</div>
       ) : null}
-      {isStaleFeed ? <div className="tactical-trading-zone__ultra-summary">⏱ 데이터 지연 · 마지막 정상 정책 유지</div> : null}
-      <div className="tactical-trading-zone__ultra-summary">
-        {[marketPolicyView.actionLines.primary, marketPolicyView.actionLines.execution, marketPolicyView.actionLines.caution].join(" / ")}
+      {isStaleFeed ? <div className="tactical-trading-zone__ultra-summary">AI 브리핑 데이터 동기화 중</div> : null}
+      <div className="tactical-trading-zone__ultra-summary tactical-trading-zone__ultra-summary--action">
+        {actionPriority.join(" / ")}
       </div>
 
-      <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
-        <p className="m-0 tactical-trading-zone__ai-title">🤖 AI 브리핑</p>
-        <p className="m-0 tactical-trading-zone__ai-body">{aiBriefing}</p>
-        <div className="tactical-trading-zone__ai-inline">
-          <span
-            className={[
-              "tactical-trading-zone__ai-rotating",
-              briefFade ? "is-fading" : "",
-            ].join(" ")}
+      {!focusMode ? (
+        <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
+          <p className="m-0 tactical-trading-zone__ai-title">🤖 AI 브리핑</p>
+          <p className="m-0 tactical-trading-zone__ai-body">{aiBriefing}</p>
+          <div className="tactical-trading-zone__ai-inline">
+            <span
+              className={[
+                "tactical-trading-zone__ai-rotating",
+                briefFade ? "is-fading" : "",
+              ].join(" ")}
+            >
+              - {briefLines[briefIdx] ?? "시장 상태 점검 중"}
+            </span>
+            <span className={["tactical-trading-zone__temp", `is-${marketTemperature.tone}`].join(" ")}>
+              {marketTemperature.emoji} {marketTemperature.label}
+            </span>
+          </div>
+          {liveAlerts.length || strategyState.transitions.length ? (
+            <div className="tactical-trading-zone__alerts">
+              {liveAlerts.map((a) => (
+                <span key={a} className="tactical-trading-zone__alert-item">
+                  {a}
+                </span>
+              ))}
+              {strategyState.transitions.map((t) => (
+                <span key={t} className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
+                  ⚙ {t}
+                </span>
+              ))}
+              {transitionHistory.length ? (
+                <span className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
+                  🧭 최근전환 {transitionHistory[transitionHistory.length - 1]?.marketState} ({transitionHistory[transitionHistory.length - 1]?.transitionConfidence})
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+          <div className="tactical-trading-zone__priority">
+            <p className="m-0 tactical-trading-zone__priority-k">오늘 우선 행동</p>
+            <div className="tactical-trading-zone__priority-lines">
+              {actionPriority.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </div>
+          </div>
+          <p className="m-0 tactical-trading-zone__backtest-seed">
+            백테스트 준비: 평균 유지기간 · 승률 · MDD · 목표 도달률 (샘플 {strategyState.backtestSeed.sampleSize})
+          </p>
+        </section>
+      ) : null}
+
+      {!focusMode ? (
+        <div className="tactical-trading-zone__mode-toggle" role="tablist" aria-label="실전/분석 모드">
+          <button
+            type="button"
+            className={["tactical-trading-zone__mode-btn", mode === "live" ? "is-active" : ""].join(" ")}
+            onClick={() => setMode("live")}
+            role="tab"
+            aria-selected={mode === "live"}
           >
-            - {briefLines[briefIdx] ?? "시장 상태 점검 중"}
-          </span>
-          <span className={["tactical-trading-zone__temp", `is-${marketTemperature.tone}`].join(" ")}>
-            {marketTemperature.emoji} {marketTemperature.label}
-          </span>
+            실전 모드
+          </button>
+          <button
+            type="button"
+            className={["tactical-trading-zone__mode-btn", mode === "analysis" ? "is-active" : ""].join(" ")}
+            onClick={() => setMode("analysis")}
+            role="tab"
+            aria-selected={mode === "analysis"}
+          >
+            분석 모드
+          </button>
         </div>
-        {liveAlerts.length || strategyState.transitions.length ? (
-          <div className="tactical-trading-zone__alerts">
-            {liveAlerts.map((a) => (
-              <span key={a} className="tactical-trading-zone__alert-item">
-                {a}
-              </span>
-            ))}
-            {strategyState.transitions.map((t) => (
-              <span key={t} className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
-                ⚙ {t}
-              </span>
-            ))}
-            {transitionHistory.length ? (
-              <span className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
-                🧭 최근전환 {transitionHistory[transitionHistory.length - 1]?.marketState} ({transitionHistory[transitionHistory.length - 1]?.transitionConfidence})
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-        <div className="tactical-trading-zone__priority">
-          <p className="m-0 tactical-trading-zone__priority-k">오늘 우선 행동</p>
-          <div className="tactical-trading-zone__priority-lines">
-            {actionPriority.map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-          </div>
-        </div>
-        <p className="m-0 tactical-trading-zone__backtest-seed">
-          백테스트 준비: 평균 유지기간 · 승률 · MDD · 목표 도달률 (샘플 {strategyState.backtestSeed.sampleSize})
-        </p>
-      </section>
+      ) : null}
 
-      <div className="tactical-trading-zone__mode-toggle" role="tablist" aria-label="실전/분석 모드">
-        <button
-          type="button"
-          className={["tactical-trading-zone__mode-btn", mode === "live" ? "is-active" : ""].join(" ")}
-          onClick={() => setMode("live")}
-          role="tab"
-          aria-selected={mode === "live"}
-        >
-          실전 모드
-        </button>
-        <button
-          type="button"
-          className={["tactical-trading-zone__mode-btn", mode === "analysis" ? "is-active" : ""].join(" ")}
-          onClick={() => setMode("analysis")}
-          role="tab"
-          aria-selected={mode === "analysis"}
-        >
-          분석 모드
-        </button>
-      </div>
-
-      {priorityRanking.length ? (
+      {!focusMode && priorityRanking.length ? (
         <section className="tactical-trading-zone__priority-rank">
           <p className="m-0 tactical-trading-zone__priority-rank-title">오늘 우선 감시</p>
           <div className="tactical-trading-zone__priority-rank-list">
@@ -558,6 +590,7 @@ export default function TacticalTradingZoneSection({
             mode={mode}
             panicData={panicData}
             marketPolicy={marketPolicyView}
+            focusMode={focusMode}
           />
         </div>
       ) : null}
