@@ -2401,12 +2401,14 @@
 
 .tactical-zone-detail__signal-card--action {
   border-color: rgba(56, 189, 248, 0.3);
-  background: rgba(14, 165, 233, 0.09);
+  background: rgba(14, 165, 233, 0.14);
+  min-height: 84px;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.16);
 }
 
 .tactical-zone-detail__signal-card--risk {
   border-color: rgba(248, 113, 113, 0.3);
-  background: rgba(239, 68, 68, 0.08);
+  background: rgba(239, 68, 68, 0.15);
 }
 
 .tactical-zone-detail__signal-card--trend {
@@ -2415,7 +2417,7 @@
 }
 
   .tactical-zone-detail__action-title {
-    font-size: 12px;
+  font-size: 13px;
     font-weight: 800;
     color: rgba(186, 230, 253, 0.98);
   }
@@ -2425,10 +2427,18 @@
     padding-left: 14px;
     display: grid;
     gap: 2px;
-    font-size: 11px;
-    font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
     color: rgba(226, 232, 240, 0.94);
   }
+
+.tactical-zone-detail__risk-strong {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: rgba(254, 202, 202, 0.98);
+}
 
 .tactical-zone-detail__signal-text {
   margin-top: 3px;
@@ -2560,6 +2570,44 @@
 .tactical-zone-detail__flow-changes .is-down {
   color: rgba(252, 165, 165, 0.98);
   background: rgba(239, 68, 68, 0.14);
+}
+
+.tactical-zone-detail__perf-card {
+  margin-top: 5px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 7px 8px;
+  background: rgba(2, 6, 23, 0.4);
+}
+
+.tactical-zone-detail__perf-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(191, 219, 254, 0.97);
+}
+
+.tactical-zone-detail__perf-grid {
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+.tactical-zone-detail__perf-grid span {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.tactical-zone-detail__perf-grid strong {
+  color: rgba(226, 232, 240, 0.98);
+}
+
+.tactical-zone-detail__perf-case {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(125, 211, 252, 0.94);
 }
 
   @keyframes tactical-stage-fade {
