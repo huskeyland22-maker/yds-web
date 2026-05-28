@@ -97,6 +97,7 @@ export function logStoreWrite(layer, detail = {}) {
 }
 
 export function warnStaleData(layer, detail = {}) {
+  if (!isDataTraceEnabled()) return
   baseLog("warn", "STALE_WARNING", { layer, ...detail })
 }
 

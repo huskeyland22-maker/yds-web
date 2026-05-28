@@ -88,9 +88,8 @@ export default defineConfig({
       workbox: {
         /** 배포마다 변경 → 이전 precache·runtime 캐시 일괄 무효화 */
         cacheId: `yds-pwa-${BUILD_ID}`,
-        globPatterns: ["**/*.{js,css,svg,ico,png,woff2,webp}"],
+        globPatterns: ["**/*.{html,js,css,svg,ico,png,woff2,webp}"],
         globIgnores: [
-          "**/index.html",
           "**/build-version.json",
           "**/manifest.webmanifest",
           "**/manifest.json",
@@ -107,7 +106,7 @@ export default defineConfig({
             urlPattern: ({ request }) => request.mode === "navigate",
             handler: "NetworkFirst",
             options: {
-              cacheName: "yds-html-pages",
+              cacheName: `yds-cache-${BUILD_ID}-html-pages`,
               networkTimeoutSeconds: 5,
               expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 },
             },
@@ -118,7 +117,7 @@ export default defineConfig({
               (request.destination === "script" || request.destination === "style"),
             handler: "NetworkFirst",
             options: {
-              cacheName: "yds-js-css",
+              cacheName: `yds-cache-${BUILD_ID}-js-css`,
               networkTimeoutSeconds: 8,
               expiration: { maxEntries: 64, maxAgeSeconds: 24 * 60 * 60 },
             },

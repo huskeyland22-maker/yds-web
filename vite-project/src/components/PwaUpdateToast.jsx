@@ -52,7 +52,7 @@ export default function PwaUpdateToast() {
       aria-live="polite"
       className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-1/2 z-[10002] w-[min(92vw,22rem)] -translate-x-1/2 rounded-xl border border-sky-400/35 bg-[rgba(8,20,36,0.96)] px-3 py-2.5 shadow-lg backdrop-blur-md"
     >
-      <p className="m-0 text-center text-[13px] font-medium text-sky-100">새 버전 발견</p>
+      <p className="m-0 text-center text-[13px] font-medium text-sky-100">새 버전 업데이트 가능</p>
       <button
         type="button"
         disabled={busy}

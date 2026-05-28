@@ -16,6 +16,7 @@ import {
   buildPolicyBriefing,
   detectMarketTransition,
 } from "../../trading-zone/marketPolicyEngine.js"
+import { isDataTraceEnabled } from "../../utils/dataFlowTrace.js"
 import { buildTradingZoneStrategyState } from "../../trading-zone/tradingZoneStrategyEngine.js"
 import { buildTradingPriorityRanking } from "../../trading-zone/tradingZonePriorityEngine.js"
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
@@ -256,6 +257,7 @@ export default function TacticalTradingZoneSection({
   }, [aiReportDegraded, aiReportWarning, isStaleFeed, engineLink, selectedPosition, marketPolicyView])
   useEffect(() => {
     if (!tacticalDegrade.recoverable && !tacticalDegrade.fatal) return
+    if (!isDataTraceEnabled()) return
     console.log("[Tactical Degrade]", {
       reason: tacticalDegrade.reasons.join(" | "),
       degradeCode: tacticalDegrade.degradeCode,

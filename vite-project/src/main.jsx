@@ -20,6 +20,7 @@ const PANIC_MAIN_STORAGE_KEY = "yds-panic-main-v2"
 const APP_BUILD_ID = String(import.meta.env.VITE_APP_BUILD_ID ?? "dev")
 const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim() || "dev"
 const APP_VERSION = `App ${APP_VERSION_LABEL} (${APP_BUILD_ID.slice(-8)})`
+const RUNTIME_CACHE_PREFIX = "yds-cache-"
 
 async function clearAllIndexedDB() {
   if (typeof window === "undefined" || typeof indexedDB === "undefined") return
@@ -55,6 +56,21 @@ async function forceResetAllClientState() {
       window.localStorage.clear()
       window.sessionStorage.clear()
     }
+  } catch {
+    // ignore
+  }
+}
+
+async function cleanupLegacyRuntimeCaches(currentBuildId) {
+  if (typeof window === "undefined" || typeof caches === "undefined") return
+  const keepToken = `-${currentBuildId}-`
+  try {
+    const keys = await caches.keys()
+    await Promise.all(
+      keys
+        .filter((name) => name.startsWith(RUNTIME_CACHE_PREFIX) && !name.includes(keepToken))
+        .map((name) => caches.delete(name)),
+    )
   } catch {
     // ignore
   }
@@ -132,6 +148,9 @@ async function bootstrapApp() {
               activateWaiting()
             }
           })
+        })
+        registration.addEventListener("controllerchange", () => {
+          void cleanupLegacyRuntimeCaches(APP_BUILD_ID)
         })
         window.setInterval(() => {
           void registration.update()
