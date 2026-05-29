@@ -1,6 +1,7 @@
-import { resolveCoreHudStatusLabel } from "./homeV5CoreHudStatus.js"
+import { resolveCoreMetricDataStatus } from "./homeV5CoreMetricLayers.js"
 import { buildHomeV5CoreTrend } from "./homeV5CoreTrend.js"
 import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
+import { buildMarketPolicy, resolveCoreMetricPolicyHint } from "../trading-zone/marketPolicyEngine.js"
 
 /** @typedef {"fearGreed" | "vix" | "bofa" | "strategy"} HomeV5CoreKey */
 
@@ -14,7 +15,8 @@ import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
  *   timelineText: string
  *   changeText: string
  *   trendDir: "up" | "down" | "flat"
- *   statusLabel: string
+ *   dataStatusLabel: string
+ *   policyHint: string
  *   accentColor?: string
  * }} HomeV5CoreCardModel */
 
@@ -65,13 +67,15 @@ function fmtNum(v, digits = 1) {
 /**
  * @param {HomeV5CoreKey} key
  * @param {object | null | undefined} panicData
+ * @param {ReturnType<typeof buildMarketPolicy> | null} [marketPolicy]
  * @param {object[]} [historyRows]
  */
-export function buildHomeV5CoreCard(key, panicData, historyRows = []) {
+export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, historyRows = []) {
   const raw = panicData?.[key]
   const n = Number(raw)
   const digits = key === "bofa" ? 1 : key === "vix" ? 2 : 0
   const trend = buildHomeV5CoreTrend(key, panicData, historyRows)
+  const policy = marketPolicy ?? buildMarketPolicy({ panicData })
 
   return {
     key,
@@ -83,7 +87,8 @@ export function buildHomeV5CoreCard(key, panicData, historyRows = []) {
     timelineText: trend.timelineText,
     changeText: trend.changeText,
     trendDir: trend.trendDir,
-    statusLabel: resolveCoreHudStatusLabel(key, raw),
+    dataStatusLabel: resolveCoreMetricDataStatus(key, raw),
+    policyHint: resolveCoreMetricPolicyHint(key, policy),
   }
 }
 
@@ -99,8 +104,11 @@ function buildHomeV5StrategyHudCard(evaluation) {
     role: "전략",
     value: `${evaluation.emoji} ${evaluation.label}`,
     trendLine: actionCompact,
+    timelineText: "",
+    changeText: actionCompact,
     trendDir: "flat",
-    statusLabel: "거시 연동",
+    dataStatusLabel: "거시 레짐",
+    policyHint: actionCompact,
     accentColor: evaluation.color,
   }
 }
@@ -171,11 +179,12 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
  * @returns {{ core: HomeV5CoreCardModel[]; strategy: HomeV5StrategyModel | null }}
  */
 export function buildHomeV5DeskModel(panicData, historyRows = []) {
+  const marketPolicy = buildMarketPolicy({ panicData })
   const metrics = /** @type {("fearGreed" | "vix" | "bofa")[]} */ ([
     "fearGreed",
     "vix",
     "bofa",
-  ]).map((key) => buildHomeV5CoreCard(key, panicData, historyRows))
+  ]).map((key) => buildHomeV5CoreCard(key, panicData, marketPolicy, historyRows))
 
   const evaluation = buildHomeV5StrategyEvaluation(panicData, historyRows)
   const core = evaluation ? [...metrics, buildHomeV5StrategyHudCard(evaluation)] : metrics

@@ -310,6 +310,45 @@ export function resolveHorizonStatusLabel(card, marketState) {
   return marketState === "overheat" || marketState === "panic" ? "추격 제한" : "선별 대응"
 }
 
+/** @type {Record<MarketState, Record<"fearGreed" | "vix" | "bofa", string>>} */
+const CORE_METRIC_POLICY_HINT = {
+  overheat: {
+    fearGreed: "경계 강화",
+    vix: "과열 주의",
+    bofa: "현금 준비",
+  },
+  caution: {
+    fearGreed: "경계 유지",
+    vix: "변동성 주의",
+    bofa: "선별 대응",
+  },
+  neutral: {
+    fearGreed: "관망 유지",
+    vix: "안정 활용",
+    bofa: "균형 유지",
+  },
+  pullback: {
+    fearGreed: "눌림 관찰",
+    vix: "진입 타이밍",
+    bofa: "분할 접근",
+  },
+  panic: {
+    fearGreed: "방어 우선",
+    vix: "리스크 축소",
+    bofa: "현금 방어",
+  },
+}
+
+/**
+ * 핵심 지표 카드 — Market Policy Engine 기반 행동 해석 (데이터 상태와 분리)
+ * @param {"fearGreed" | "vix" | "bofa"} metricKey
+ * @ {{ marketState?: MarketState } | null | undefined} marketPolicy
+ */
+export function resolveCoreMetricPolicyHint(metricKey, marketPolicy) {
+  const state = marketPolicy?.marketState ?? "neutral"
+  return CORE_METRIC_POLICY_HINT[state]?.[metricKey] ?? CORE_METRIC_POLICY_HINT.neutral[metricKey] ?? "관망 유지"
+}
+
 /**
  * @param {string} label
  * @returns {"pullback" | "selective" | "guard" | "limit" | "neutral"}

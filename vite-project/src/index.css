@@ -8334,11 +8334,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     font-size: 19px;
   }
 
-  .home-v5-hud-card__timeline {
-    font-size: 9px;
-  }
-
-  .home-v5-hud-card__change {
+  .home-v5-hud-card__data-status,
+  .home-v5-hud-card__policy-hint {
     font-size: 11px;
   }
 }
@@ -8416,6 +8413,34 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
   color: rgba(248, 250, 252, 0.98);
+}
+
+.home-v5-hud-card__data-status {
+  margin: 5px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgba(203, 213, 225, 0.96);
+}
+
+.home-v5-hud-card__policy-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: rgba(125, 211, 252, 0.98);
+}
+
+.home-v5-hud-card--fearGreed .home-v5-hud-card__policy-hint {
+  color: rgba(253, 224, 71, 0.98);
+}
+
+.home-v5-hud-card--vix .home-v5-hud-card__policy-hint {
+  color: rgba(147, 197, 253, 0.98);
+}
+
+.home-v5-hud-card--bofa .home-v5-hud-card__policy-hint {
+  color: rgba(216, 180, 254, 0.98);
 }
 
 .home-v5-hud-card__timeline {

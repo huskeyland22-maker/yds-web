@@ -7,11 +7,10 @@ function CoreHudCard({
   role,
   symbol,
   value,
-  timelineText,
-  changeText,
+  dataStatusLabel,
+  policyHint,
   trendLine,
   trendDir,
-  statusLabel,
   accentColor,
 }) {
   const isStrategy = kind === "strategy"
@@ -42,20 +41,12 @@ function CoreHudCard({
       <p className={`home-v5-hud-card__value${isStrategy ? " home-v5-hud-card__value--regime" : ""}`}>{value}</p>
       {!isStrategy ? (
         <>
-          <p className="home-v5-hud-card__timeline" title="최근 10일 · 2일 간격">
-            {timelineText ?? "—"}
-          </p>
-          <p className={`home-v5-hud-card__change home-v5-hud-card__change--${trendDir}`}>{changeText ?? "→ —"}</p>
+          <p className="home-v5-hud-card__data-status">{dataStatusLabel ?? "—"}</p>
+          <p className="home-v5-hud-card__policy-hint">{policyHint ?? "—"}</p>
         </>
       ) : (
-        <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine ?? changeText ?? "—"}</p>
+        <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine ?? policyHint ?? "—"}</p>
       )}
-      {!isStrategy ? (
-        <p className="home-v5-hud-card__status">
-          <span className="home-v5-hud-card__status-k">상태</span>
-          <span className="home-v5-hud-card__status-v">{statusLabel}</span>
-        </p>
-      ) : null}
     </article>
   )
 }
