@@ -21,6 +21,7 @@ function CoreHudCard({
 }) {
   const isStrategy = kind === "strategy"
   const style = accentColor ? { "--home-v5-hud-accent": accentColor } : undefined
+  const statusActionParts = [dataStatusLabel, policyHint].filter((v) => v && v !== "—")
 
   return (
     <article
@@ -59,11 +60,26 @@ function CoreHudCard({
           <p className="home-v5-hud-card__timeline" title={trendLine ?? timelineText ?? "최근 10일 · 2일 간격"}>
             {timelineText ?? "—"}
           </p>
-          <p className="home-v5-hud-card__data-status">{dataStatusLabel ?? "—"}</p>
-          <p className="home-v5-hud-card__policy-hint">{policyHint ?? "—"}</p>
+          <p
+            className="home-v5-hud-card__status-action"
+            title={statusActionParts.length ? statusActionParts.join(" · ") : undefined}
+          >
+            {statusActionParts.length ? (
+              <>
+                <span className="home-v5-hud-card__status-action-s">{statusActionParts[0]}</span>
+                {statusActionParts[1] ? (
+                  <>
+                    <span className="home-v5-hud-card__status-action-sep"> · </span>
+                    <span className="home-v5-hud-card__status-action-a">{statusActionParts[1]}</span>
+                  </>
+                ) : null}
+              </>
+            ) : (
+              "—"
+            )}
+          </p>
           <p className={`home-v5-hud-card__recent-change home-v5-hud-card__recent-change--${recentChangeTone ?? "flat"}`}>
-            <span className="home-v5-hud-card__recent-change-k">최근 변화:</span>
-            <span className="home-v5-hud-card__recent-change-v">{recentChangeLabel ?? "—"}</span>
+            {recentChangeLabel ?? "—"}
           </p>
         </>
       ) : (

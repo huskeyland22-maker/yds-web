@@ -8322,12 +8322,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-core-grid--hud {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .home-v5-core-synthesis {
-  margin-top: 8px;
-  padding: 8px 10px 9px;
+  margin-top: 6px;
+  padding: 6px 8px 7px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(14, 18, 28, 0.48);
@@ -8397,8 +8397,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
   .home-v5-hud-card--metric {
     --hud-base: 17px;
-    min-height: 8.25rem;
-    padding: 7px 6px 9px;
+    min-height: 5.75rem;
+    padding: 4px 5px 5px;
+  }
+
+  .home-v5-hud-card--strategy {
+    min-height: 5.75rem;
+    padding: 4px 5px 5px;
   }
 
   .home-v5-hud-card__timeline {
@@ -8422,8 +8427,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  min-height: 8.25rem;
-  padding: 8px 8px 10px;
+  min-height: 6.25rem;
+  padding: 5px 6px 6px;
   box-sizing: border-box;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -8438,9 +8443,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .home-v5-hud-card__top-bar {
   display: block;
   width: 100%;
-  height: 3px;
-  border-radius: 3px;
-  margin-bottom: 8px;
+  height: 2px;
+  border-radius: 2px;
+  margin-bottom: 4px;
   flex-shrink: 0;
   background: var(--home-v5-hud-accent, #94a3b8);
   opacity: 0.88;
@@ -8493,12 +8498,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card__role-ko {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 
 .home-v5-hud-card__role-en {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   opacity: 0.75;
 }
@@ -8558,7 +8563,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card--metric .home-v5-hud-card__value {
-  margin-top: 1px;
+  margin-top: 0;
 }
 
 .home-v5-hud-card__change-delta {
@@ -8583,46 +8588,45 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: var(--hud-trend-flat, #94a3b8);
 }
 
-.home-v5-hud-card__data-status,
-.home-v5-hud-card__policy-hint {
-  margin: 3px 0 0;
+.home-v5-hud-card__status-action {
+  margin: 2px 0 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.15;
+  font-size: var(--hud-meta-size, 14px);
 }
 
-.home-v5-hud-card--metric .home-v5-hud-card__data-status,
-.home-v5-hud-card--metric .home-v5-hud-card__policy-hint {
-  font-size: var(--hud-meta-size, 16px);
-}
-
-.home-v5-hud-card__data-status {
+.home-v5-hud-card__status-action-s {
   font-weight: 600;
   color: rgba(203, 213, 225, 0.88);
 }
 
-.home-v5-hud-card__policy-hint {
-  margin-top: 2px;
+.home-v5-hud-card__status-action-sep {
+  font-weight: 600;
+  color: rgba(100, 116, 139, 0.85);
+}
+
+.home-v5-hud-card__status-action-a {
   font-weight: 700;
   color: rgba(125, 211, 252, 0.98);
 }
 
-.home-v5-hud-card--fearGreed .home-v5-hud-card__policy-hint {
+.home-v5-hud-card--fearGreed .home-v5-hud-card__status-action-a {
   color: rgba(253, 224, 71, 0.98);
 }
 
-.home-v5-hud-card--vix .home-v5-hud-card__policy-hint {
+.home-v5-hud-card--vix .home-v5-hud-card__status-action-a {
   color: rgba(147, 197, 253, 0.98);
 }
 
-.home-v5-hud-card--bofa .home-v5-hud-card__policy-hint {
+.home-v5-hud-card--bofa .home-v5-hud-card__status-action-a {
   color: rgba(216, 180, 254, 0.98);
 }
 
 .home-v5-hud-card__timeline {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -8640,49 +8644,37 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card__recent-change {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin: 4px 0 0;
-  min-width: 0;
-  font-size: 10px;
-  line-height: 1.2;
-}
-
-.home-v5-hud-card__recent-change-k {
-  flex-shrink: 0;
-  font-weight: 600;
-  color: rgba(100, 116, 139, 0.92);
-}
-
-.home-v5-hud-card__recent-change-v {
+  margin: 2px 0 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 10px;
   font-weight: 700;
-  color: rgba(203, 213, 225, 0.92);
+  line-height: 1.15;
+  color: rgba(148, 163, 184, 0.88);
 }
 
-.home-v5-hud-card__recent-change--up .home-v5-hud-card__recent-change-v {
+.home-v5-hud-card__recent-change--up {
   color: var(--hud-trend-up, #6ee7a8);
 }
 
-.home-v5-hud-card__recent-change--down .home-v5-hud-card__recent-change-v {
+.home-v5-hud-card__recent-change--down {
   color: var(--hud-trend-down, #f0a8a8);
 }
 
-.home-v5-hud-card__recent-change--flat .home-v5-hud-card__recent-change-v {
+.home-v5-hud-card__recent-change--flat {
   color: rgba(148, 163, 184, 0.88);
 }
 
 .home-v5-hud-card--metric {
-  min-height: 9.35rem;
-  padding: 8px 7px 10px;
+  min-height: 6.25rem;
+  padding: 5px 6px 6px;
 }
 
 .home-v5-hud-card--strategy {
-  min-height: 9.35rem;
+  min-height: 6.25rem;
+  padding: 5px 6px 6px;
 }
 
 .home-v5-hud-card--strategy .home-v5-hud-card__role {
@@ -8690,16 +8682,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card__value--stage {
-  margin-top: 3px;
-  font-size: 15px;
+  margin-top: 1px;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.01em;
 }
 
 .home-v5-hud-card__stage-action {
-  margin: 5px 0 0;
-  font-size: 13px;
+  margin: 2px 0 0;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1.2;
   color: rgba(248, 250, 252, 0.96);
@@ -8709,8 +8701,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card__stage-transition {
-  margin: 4px 0 0;
-  font-size: 11px;
+  margin: 2px 0 0;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
   overflow: hidden;
