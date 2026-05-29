@@ -2,7 +2,7 @@
  * @param {{ synthesis: import("./homeV5CoreSynthesis.js").HomeV5CoreSynthesisModel }} props
  */
 export default function HomeV5CoreSynthesis({ synthesis }) {
-  if (!synthesis?.signalLine) return null
+  if (!synthesis?.headline && !synthesis?.signalLine) return null
 
   return (
     <aside
@@ -14,9 +14,15 @@ export default function HomeV5CoreSynthesis({ synthesis }) {
         .join(" ")}
       aria-label="종합 판단"
     >
-      <p className="home-v5-core-synthesis__head">종합 판단</p>
-      <p className="home-v5-core-synthesis__signals">{synthesis.signalLine}</p>
-      <p className="home-v5-core-synthesis__verdict">{synthesis.verdictLine}</p>
+      <p className="home-v5-core-synthesis__headline">
+        <span className="home-v5-core-synthesis__pin" aria-hidden="true">
+          📌
+        </span>
+        {synthesis.headline ?? "—"}
+      </p>
+      {synthesis.signalLine ? (
+        <p className="home-v5-core-synthesis__signals">{synthesis.signalLine}</p>
+      ) : null}
     </aside>
   )
 }

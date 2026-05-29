@@ -4,8 +4,8 @@ import { buildMarketPolicy } from "../trading-zone/marketPolicyEngine.js"
 /** @typedef {"fearGreed" | "vix" | "bofa"} HomeV5CoreMetricKey */
 
 /** @typedef {{
+ *   headline: string
  *   signalLine: string
- *   verdictLine: string
  *   tone: "panic" | "caution" | "pullback" | "neutral" | "overheat"
  * }} HomeV5CoreSynthesisModel */
 
@@ -98,6 +98,34 @@ function resolveContextVerdict(fg, vix, bofa, marketState) {
 }
 
 /**
+ * @param {string} verdict
+ * @param {import("../trading-zone/marketPolicyEngine.js").MarketState} marketState
+ * @param {string} fg
+ * @param {string} vix
+ * @param {string} bofa
+ */
+function resolveSynthesisHeadline(verdict, marketState, fg, vix, bofa) {
+  const greed = /탐욕|강세/.test(fg)
+  const lowVol = vix === "변동성 축소"
+  const bull = /낙관/.test(bofa)
+
+  if (greed && lowVol && bull) return "눌림 대기 우위"
+  if (greed && lowVol) return "눌림 대기 우위"
+  if (marketState === "overheat") return "추격 금지 우위"
+  if (marketState === "panic") return "분할 대응 우위"
+  if (marketState === "pullback") return "눌림 분할 우위"
+  if (marketState === "caution") return "선별 대기 우위"
+  if (/추격보다 눌림/.test(verdict)) return "눌림 대기 우위"
+  if (/추격 금지/.test(verdict)) return "추격 금지 우위"
+  if (/현금/.test(verdict)) return "현금 확보 우위"
+  if (/분할/.test(verdict)) return "분할 대응 우위"
+
+  const parts = verdict.split("·").map((s) => s.trim()).filter(Boolean)
+  const action = parts[parts.length - 1] ?? parts[0] ?? "관망"
+  return action.includes("우위") ? action : `${action} 우위`
+}
+
+/**
  * @param {object | null | undefined} panicData
  * @param {ReturnType<typeof buildMarketPolicy> | null | undefined} [marketPolicy]
  * @returns {HomeV5CoreSynthesisModel}
@@ -117,18 +145,19 @@ export function buildHomeV5CoreSynthesis(panicData, marketPolicy = null) {
 
   if (!parts.length) {
     return {
+      headline: "데이터 확인 중",
       signalLine: "지표 동기화 중",
-      verdictLine: "→ 데이터 확인 후 판단 표시",
       tone: "neutral",
     }
   }
 
   const signalLine = parts.join(" + ")
   const verdict = resolveContextVerdict(fg ?? "", vix ?? "", bofa ?? "", state)
+  const headline = resolveSynthesisHeadline(verdict, state, fg ?? "", vix ?? "", bofa ?? "")
 
   return {
+    headline,
     signalLine,
-    verdictLine: `→ ${verdict}`,
     tone: state,
   }
 }

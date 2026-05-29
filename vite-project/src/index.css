@@ -8333,48 +8333,48 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: rgba(14, 18, 28, 0.48);
 }
 
-.home-v5-core-synthesis__head {
-  margin: 0 0 4px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: rgba(100, 116, 139, 0.95);
+.home-v5-core-synthesis__headline {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: rgba(248, 250, 252, 0.98);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-v5-core-synthesis__pin {
+  margin-right: 3px;
 }
 
 .home-v5-core-synthesis__signals {
-  margin: 0;
-  font-size: 12px;
+  margin: 5px 0 0;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.35;
-  color: rgba(203, 213, 225, 0.9);
+  color: rgba(148, 163, 184, 0.88);
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
-.home-v5-core-synthesis__verdict {
-  margin: 4px 0 0;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.3;
-  color: rgba(125, 211, 252, 0.98);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.home-v5-core-synthesis--overheat .home-v5-core-synthesis__verdict {
+.home-v5-core-synthesis--overheat .home-v5-core-synthesis__headline {
   color: rgba(253, 186, 116, 0.98);
 }
 
-.home-v5-core-synthesis--panic .home-v5-core-synthesis__verdict,
-.home-v5-core-synthesis--caution .home-v5-core-synthesis__verdict {
+.home-v5-core-synthesis--panic .home-v5-core-synthesis__headline,
+.home-v5-core-synthesis--caution .home-v5-core-synthesis__headline {
   color: rgba(252, 165, 165, 0.96);
 }
 
-.home-v5-core-synthesis--pullback .home-v5-core-synthesis__verdict {
+.home-v5-core-synthesis--pullback .home-v5-core-synthesis__headline {
   color: rgba(250, 204, 21, 0.96);
+}
+
+.home-v5-core-synthesis--neutral .home-v5-core-synthesis__headline {
+  color: rgba(125, 211, 252, 0.98);
 }
 
 @media (max-width: 520px) {
@@ -8383,12 +8383,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     padding: 7px 8px 8px;
   }
 
-  .home-v5-core-synthesis__signals {
-    font-size: 11px;
+  .home-v5-core-synthesis__headline {
+    font-size: 14px;
   }
 
-  .home-v5-core-synthesis__verdict {
-    font-size: 12px;
+  .home-v5-core-synthesis__signals {
+    font-size: 10px;
   }
 
   .home-v5-core-grid--hud {
@@ -8402,7 +8402,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .home-v5-hud-card__timeline {
-    font-size: 8px;
+    font-size: 10px;
   }
 }
 
@@ -8607,20 +8607,57 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.25;
   font-variant-numeric: tabular-nums;
   color: rgba(148, 163, 184, 0.82);
 }
 
 .home-v5-hud-card--metric .home-v5-hud-card__timeline {
-  opacity: 0.58;
-  color: rgba(148, 163, 184, 0.9);
+  opacity: 0.82;
+  color: rgba(186, 198, 214, 0.95);
+}
+
+.home-v5-hud-card__recent-change {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 4px 0 0;
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.home-v5-hud-card__recent-change-k {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: rgba(100, 116, 139, 0.92);
+}
+
+.home-v5-hud-card__recent-change-v {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  color: rgba(203, 213, 225, 0.92);
+}
+
+.home-v5-hud-card__recent-change--up .home-v5-hud-card__recent-change-v {
+  color: var(--hud-trend-up, #6ee7a8);
+}
+
+.home-v5-hud-card__recent-change--down .home-v5-hud-card__recent-change-v {
+  color: var(--hud-trend-down, #f0a8a8);
+}
+
+.home-v5-hud-card__recent-change--flat .home-v5-hud-card__recent-change-v {
+  color: rgba(148, 163, 184, 0.88);
 }
 
 .home-v5-hud-card--metric {
-  min-height: 8.75rem;
+  min-height: 9.35rem;
   padding: 8px 7px 10px;
 }
 

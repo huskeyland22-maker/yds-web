@@ -3,6 +3,7 @@ import { buildHomeV5CoreTrend } from "./homeV5CoreTrend.js"
 import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
 import { buildMarketPolicy, resolveCoreMetricPolicyHint } from "../trading-zone/marketPolicyEngine.js"
 import { buildHomeV5CoreSynthesis } from "./homeV5CoreSynthesis.js"
+import { resolveCoreMetricRecentChange } from "./homeV5CoreMetricTransition.js"
 
 /** @typedef {"fearGreed" | "vix" | "bofa" | "strategy"} HomeV5CoreKey */
 
@@ -20,6 +21,8 @@ import { buildHomeV5CoreSynthesis } from "./homeV5CoreSynthesis.js"
  *   trendDir: "up" | "down" | "flat"
  *   dataStatusLabel: string
  *   policyHint: string
+ *   recentChangeLabel: string
+ *   recentChangeTone: "up" | "down" | "flat"
  *   accentColor?: string
  * }} HomeV5CoreCardModel */
 
@@ -79,6 +82,7 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
   const digits = key === "bofa" ? 1 : key === "vix" ? 2 : 0
   const trend = buildHomeV5CoreTrend(key, panicData, historyRows)
   const policy = marketPolicy ?? buildMarketPolicy({ panicData })
+  const recentChange = resolveCoreMetricRecentChange(key, panicData, historyRows)
 
   return {
     key,
@@ -94,6 +98,8 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
     trendDir: trend.trendDir,
     dataStatusLabel: resolveCoreMetricDataStatus(key, raw),
     policyHint: resolveCoreMetricPolicyHint(key, policy),
+    recentChangeLabel: recentChange.label,
+    recentChangeTone: recentChange.tone,
   }
 }
 
@@ -116,6 +122,8 @@ function buildHomeV5StrategyHudCard(evaluation) {
     trendDir: "flat",
     dataStatusLabel: "거시 레짐",
     policyHint: actionCompact,
+    recentChangeLabel: "흐름 유지",
+    recentChangeTone: "flat",
     accentColor: evaluation.color,
   }
 }
