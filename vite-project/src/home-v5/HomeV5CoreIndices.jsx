@@ -7,6 +7,9 @@ function CoreHudCard({
   role,
   symbol,
   value,
+  timelineText,
+  changeText,
+  trendArrow,
   dataStatusLabel,
   policyHint,
   trendLine,
@@ -41,8 +44,21 @@ function CoreHudCard({
       <p className={`home-v5-hud-card__value${isStrategy ? " home-v5-hud-card__value--regime" : ""}`}>{value}</p>
       {!isStrategy ? (
         <>
-          <p className="home-v5-hud-card__data-status">{dataStatusLabel ?? "—"}</p>
-          <p className="home-v5-hud-card__policy-hint">{policyHint ?? "—"}</p>
+          <p className="home-v5-hud-card__timeline" title={trendLine ?? timelineText ?? "최근 10일 · 2일 간격"}>
+            <span className="home-v5-hud-card__timeline-track">{timelineText ?? "—"}</span>
+            <span className={`home-v5-hud-card__timeline-arrow home-v5-hud-card__timeline-arrow--${trendDir}`}>
+              {trendArrow ?? "→"}
+            </span>
+          </p>
+          <p className={`home-v5-hud-card__change home-v5-hud-card__change--${trendDir}`}>{changeText ?? "→ —"}</p>
+          <p className="home-v5-hud-card__data-status">
+            <span className="home-v5-hud-card__layer-k">상태</span>
+            <span className="home-v5-hud-card__layer-v">{dataStatusLabel ?? "—"}</span>
+          </p>
+          <p className="home-v5-hud-card__policy-hint">
+            <span className="home-v5-hud-card__layer-k">행동</span>
+            <span className="home-v5-hud-card__layer-v">{policyHint ?? "—"}</span>
+          </p>
         </>
       ) : (
         <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine ?? policyHint ?? "—"}</p>

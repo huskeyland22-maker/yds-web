@@ -61,7 +61,9 @@ function formatTimelineValue(key, value) {
 /** @param {HomeV5CoreKey} key @param {number} delta */
 function formatChangeDelta(key, delta) {
   if (!Number.isFinite(delta)) return "—"
-  const sign = delta > 0 ? "+" : delta < 0 ? "−" : ""
+  const flatThreshold = FLAT_THRESHOLDS[key]
+  if (Math.abs(delta) < flatThreshold) return "0"
+  const sign = delta > 0 ? "+" : "−"
   const abs = Math.abs(delta)
   if (key === "fearGreed") return `${sign}${Math.round(abs)}`
   if (key === "vix") {
