@@ -12,13 +12,15 @@ function toNum(v) {
  * @param {{
  *  positions: TradingZonePosition[]
  *  panicData?: object | null
+ *  evalMap?: Record<string, import("./tradingZoneStockEvaluation.js").TradingZoneStockEvaluation>
  * }} input
  */
-export function buildTradingPriorityRanking({ positions, panicData = null }) {
+export function buildTradingPriorityRanking({ positions, panicData = null, evalMap = {} }) {
   const vix = toNum(panicData?.vix)
   const fg = toNum(panicData?.fearGreed)
 
   const ranked = positions.map((p) => {
+    const liveEval = evalMap[p.id]
     const confidence = buildTradingConfidenceBreakdown({
       position: p,
       panicData,
@@ -33,17 +35,22 @@ export function buildTradingPriorityRanking({ positions, panicData = null }) {
       (vix != null && vix < 25 ? 6 : 2) + (fg != null && fg >= 30 && fg <= 72 ? 5 : 1)
     const volatility = vix != null && vix <= 24 ? 6 : 2
     const trendKeep = p.stage === "trend" || p.stage === "pullback" ? 7 : 3
-    const score = Math.max(
+    const heuristicScore = Math.max(
       40,
       Math.min(99, Math.round(confidence.score * 0.58 + stageBase + volume + rsi + maSupport + macroFit + volatility + trendKeep)),
     )
+    const score = liveEval?.dataReady ? liveEval.tacticalScore : heuristicScore
+    const trust = liveEval?.dataReady ? liveEval.confidence : confidence.score
 
-    const reasons = [
-      volume >= 8 ? "거래량 증가" : "거래량 점검 필요",
-      maSupport >= 8 ? "20MA 지지" : "이동평균 지지 약함",
-      p.stage === "trend" || p.stage === "pullback" ? "추세 유지" : "추세 초기 단계",
-      `신뢰도 ${confidence.score}`,
-    ]
+    const reasons =
+      liveEval?.dataReady && liveEval.entryRationale.length
+        ? [...liveEval.entryRationale, `신뢰도 ${trust}`]
+        : [
+            volume >= 8 ? "거래량 증가" : "거래량 점검 필요",
+            maSupport >= 8 ? "20MA 지지" : "이동평균 지지 약함",
+            p.stage === "trend" || p.stage === "pullback" ? "추세 유지" : "추세 초기 단계",
+            `신뢰도 ${trust}`,
+          ]
     const risks = []
     if (p.stage === "trend") risks.push("단기 과열 가능")
     if (p.stage === "takeProfit") risks.push("목표 근접")

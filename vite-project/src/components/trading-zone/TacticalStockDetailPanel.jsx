@@ -31,6 +31,8 @@ import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneC
  *     marketTransition?: { changed?: boolean; directionTag?: string; transitionLabel?: string; transitionConfidence?: number } | null
  *     actionPolicy?: { lead?: string; items?: { key: string; icon: string; text: string; level: string }[] }
  *   } | null
+ *   stockEvaluation?: import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | null
+ *   stockEvalLoading?: boolean
  * }} props
  */
 export default function TacticalStockDetailPanel({
@@ -39,6 +41,8 @@ export default function TacticalStockDetailPanel({
   panicData = null,
   marketPolicy = null,
   focusMode = false,
+  stockEvaluation = null,
+  stockEvalLoading = false,
 }) {
   const badge = tradingStageBadge(position)
   const stageLabelById = {
@@ -49,7 +53,21 @@ export default function TacticalStockDetailPanel({
     risk: "리스크구간",
   }
   const historyLog = formatStageHistoryLog(position.stageHistory ?? [])
-  const levels = resolvePositionPriceLevels(position)
+  const levels = useMemo(() => {
+    const base = resolvePositionPriceLevels(position)
+    const zones = stockEvaluation?.priceZones
+    if (!zones?.current) return base
+    return {
+      ...base,
+      current: zones.current,
+      currentLabel: String(zones.current),
+      entry: zones.entry ?? base.entry,
+      stop: zones.stop ?? base.stop,
+      target: zones.target ?? base.target,
+      stopNum: zones.stopNum ?? base.stopNum,
+      targetNum: zones.targetNum ?? base.targetNum,
+    }
+  }, [position, stockEvaluation])
   const progress = computeTradingZoneProgress(levels)
   const coreMetrics = useMemo(() => buildTradingCoreMetrics(position), [position])
   const activeAux = new Set(position.aux ?? [])
@@ -105,12 +123,18 @@ export default function TacticalStockDetailPanel({
     }
   }
 
-  const confidence = useMemo(
-    () => buildTradingConfidenceBreakdown({ position, panicData, activeAux }),
-    [position, panicData, activeAux],
-  )
+  const confidence = useMemo(() => {
+    const base = buildTradingConfidenceBreakdown({ position, panicData, activeAux })
+    if (stockEvaluation?.dataReady) {
+      return { ...base, score: stockEvaluation.confidence }
+    }
+    return base
+  }, [position, panicData, activeAux, stockEvaluation])
 
   const reasons = useMemo(() => {
+    if (stockEvaluation?.dataReady && stockEvaluation.entryRationale.length) {
+      return stockEvaluation.entryRationale
+    }
     const lines = []
     if (position.stage === "pullback") {
       lines.push("20MA 지지")
@@ -134,7 +158,7 @@ export default function TacticalStockDetailPanel({
       lines.push("비중 축소 검토")
     }
     return lines
-  }, [position.stage, rsiHint])
+  }, [position.stage, rsiHint, stockEvaluation])
 
   const warnings = useMemo(() => {
     const list = []
@@ -292,7 +316,24 @@ export default function TacticalStockDetailPanel({
       data-stage={position.stage}
     >
       <header className="tactical-zone-detail__head">
-        <p className="m-0 tactical-zone-detail__name">{position.symbol}</p>
+        <p className="m-0 tactical-zone-detail__name">
+          {position.symbol}
+          {stockEvaluation?.dataReady ? (
+            <span className="tactical-zone-detail__live-score" title="실데이터 종목 점수">
+              {" "}
+              {stockEvaluation.tacticalScore}
+            </span>
+          ) : null}
+        </p>
+        {stockEvalLoading ? (
+          <p className="m-0 tactical-zone-detail__eval-hint" role="status">
+            실데이터 평가 중…
+          </p>
+        ) : stockEvaluation?.dataReady ? (
+          <p className="m-0 tactical-zone-detail__eval-hint">
+            시그널 {stockEvaluation.signalLabel} · 자동 가격 영역 반영
+          </p>
+        ) : null}
         <p className="m-0 tactical-zone-detail__current-line tactical-zone-detail__current-stage">
           <span className="tactical-zone-detail__current-label">현재단계</span>
           <span className="tactical-zone-detail__current-sep" aria-hidden>

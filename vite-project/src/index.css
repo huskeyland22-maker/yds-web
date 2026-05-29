@@ -1746,6 +1746,28 @@
     line-height: 1.1;
   }
 
+  .tactical-zone-chip__score {
+    flex-shrink: 0;
+    min-width: 28px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+    color: rgba(34, 211, 238, 0.98);
+    background: rgba(34, 211, 238, 0.12);
+    border: 1px solid rgba(34, 211, 238, 0.28);
+  }
+
+  .tactical-trading-zone__stock-sync {
+    margin: 4px 0 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.95);
+    letter-spacing: 0.01em;
+  }
+
   .tactical-zone-chip__badge {
     display: inline-flex;
     flex-shrink: 0;
@@ -3020,6 +3042,20 @@
     font-size: 15px;
     font-weight: 800;
     color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tactical-zone-detail__live-score {
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(34, 211, 238, 0.98);
+  }
+
+  .tactical-zone-detail__eval-hint {
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.92);
+    letter-spacing: 0.01em;
   }
 
   .tactical-zone-stage-flow--legend {

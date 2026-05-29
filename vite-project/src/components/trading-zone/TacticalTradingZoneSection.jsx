@@ -19,6 +19,7 @@ import {
 import { isDataTraceEnabled } from "../../utils/dataFlowTrace.js"
 import { buildTradingZoneStrategyState } from "../../trading-zone/tradingZoneStrategyEngine.js"
 import { buildTradingPriorityRanking } from "../../trading-zone/tradingZonePriorityEngine.js"
+import { useTradingZoneStockEvaluations } from "../../trading-zone/useTradingZoneStockEvaluations.js"
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
@@ -28,13 +29,27 @@ import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
  *   bucketId: import("../../trading-zone/tacticalTradingZoneData.js").TradingBucketId
  *   selected: boolean
+ *   evaluation?: import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | null
  *   onSelect: (id: string) => void
  * }} props
  */
-function StockChip({ position, bucketId, selected, onSelect }) {
+function StockChip({ position, bucketId, selected, onSelect, evaluation = null }) {
   const badge = tradingStageBadge(position)
-  const strengthScore = (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
-  const strengthTone = strengthScore >= 40 ? "strong" : strengthScore <= 20 ? "weak" : "normal"
+  const displayScore = evaluation?.dataReady ? evaluation.tacticalScore : null
+  const strengthScore =
+    displayScore ?? (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
+  const strengthTone =
+    displayScore != null
+      ? displayScore >= 80
+        ? "strong"
+        : displayScore < 58
+          ? "weak"
+          : "normal"
+      : strengthScore >= 40
+        ? "strong"
+        : strengthScore <= 20
+          ? "weak"
+          : "normal"
   const trendLabel =
     position.stage === "trend" && (position.stageHistory?.length ?? 0) >= 3
       ? "🔥 강추세"
@@ -57,6 +72,11 @@ function StockChip({ position, bucketId, selected, onSelect }) {
         <span className="tactical-zone-chip__name">{position.symbol}</span>
         {trendLabel ? <span className="tactical-zone-chip__sub">{trendLabel}</span> : null}
       </span>
+      {displayScore != null ? (
+        <span className="tactical-zone-chip__score" title="실데이터 종목 점수">
+          {displayScore}
+        </span>
+      ) : null}
       <span
         className="tactical-zone-chip__badge"
         data-stage={position.stage}
@@ -75,10 +95,11 @@ function StockChip({ position, bucketId, selected, onSelect }) {
  *   bucketId: import("../../trading-zone/tacticalTradingZoneData.js").TradingBucketId
  *   positions: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition[]
  *   selectedId: string | null
+ *   evalMap?: Record<string, import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation>
  *   onSelect: (id: string) => void
  * }} props
  */
-function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
+function BucketCard({ title, bucketId, positions, selectedId, onSelect, evalMap = {} }) {
   return (
     <div className="tactical-zone-bucket" data-bucket={bucketId}>
       <p className="m-0 tactical-zone-bucket__title">{title}</p>
@@ -109,6 +130,7 @@ function BucketCard({ title, bucketId, positions, selectedId, onSelect }) {
               position={p}
               bucketId={bucketId}
               selected={selectedId === p.id}
+              evaluation={evalMap[p.id] ?? null}
               onSelect={onSelect}
             />
           ))
@@ -173,24 +195,36 @@ export default function TacticalTradingZoneSection({
     () => buildTradingZoneStrategyState({ positions, panicData, engineLink }),
     [positions, panicData, engineLink],
   )
+
+  const { evalMap, enrichedPositions, loading: stockEvalLoading } = useTradingZoneStockEvaluations({
+    positions: strategyState.adjustedPositions,
+    market,
+    panicData,
+    macroBehavior: strategyState.behavior,
+    enabled: mode === "live",
+  })
+
+  const livePositions = mode === "live" ? enrichedPositions : strategyState.adjustedPositions
+
   const priorityRanking = useMemo(
     () =>
       buildTradingPriorityRanking({
-        positions: strategyState.adjustedPositions.filter((p) => p.market === market),
+        positions: livePositions.filter((p) => p.market === market),
         panicData,
+        evalMap,
       }),
-    [strategyState.adjustedPositions, panicData, market],
+    [livePositions, panicData, market, evalMap],
   )
   const topCandidate = priorityRanking[0] ?? null
 
   const bucketGroups = useMemo(
-    () => groupPositionsByBucket(market, strategyState.adjustedPositions),
-    [market, strategyState.adjustedPositions],
+    () => groupPositionsByBucket(market, livePositions),
+    [market, livePositions],
   )
 
   const marketPositions = useMemo(
-    () => strategyState.adjustedPositions.filter((p) => p.market === market),
-    [strategyState.adjustedPositions, market],
+    () => livePositions.filter((p) => p.market === market),
+    [livePositions, market],
   )
 
   const selectedPosition = useMemo(
@@ -526,7 +560,11 @@ export default function TacticalTradingZoneSection({
             ))}
           </div>
           <p className="m-0 tactical-trading-zone__priority-rank-reason">
-            근거: 거래량 증가 · 추세 유지 · 변동성 안정
+            {stockEvalLoading
+              ? "종목 실데이터 동기화 중…"
+              : topCandidate?.reasons?.length
+                ? `근거: ${topCandidate.reasons.slice(0, 3).join(" · ")}`
+                : "근거: 거래량 · 이동평균 · 추세"}
           </p>
           {topCandidate ? (
             <article className="tactical-trading-zone__top-card">
@@ -551,6 +589,12 @@ export default function TacticalTradingZoneSection({
             </article>
           ) : null}
         </section>
+      ) : null}
+
+      {mode === "live" && stockEvalLoading ? (
+        <p className="m-0 tactical-trading-zone__stock-sync" role="status">
+          📡 종목 실데이터 평가 중…
+        </p>
       ) : null}
 
       <div className="tactical-trading-zone__tabs">
@@ -578,6 +622,7 @@ export default function TacticalTradingZoneSection({
             title={TRADING_BUCKET_META[bucketId].title}
             positions={bucketGroups[bucketId]}
             selectedId={selectedId}
+            evalMap={evalMap}
             onSelect={setSelectedId}
           />
         ))}
@@ -591,6 +636,8 @@ export default function TacticalTradingZoneSection({
             panicData={panicData}
             marketPolicy={marketPolicyView}
             focusMode={focusMode}
+            stockEvaluation={evalMap[selectedPosition.id] ?? null}
+            stockEvalLoading={stockEvalLoading}
           />
         </div>
       ) : null}
