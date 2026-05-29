@@ -1,6 +1,6 @@
 import { getStatus } from "../utils/panicIndicatorStatus.js"
 
-/** @param {"fearGreed" | "vix" | "highYield"} key @param {unknown} value */
+/** @param {"fearGreed" | "vix" | "bofa"} key @param {unknown} value */
 export function resolveCoreHudStatusLabel(key, value) {
   const n = Number(value)
   if (!Number.isFinite(n)) return "—"
@@ -19,10 +19,10 @@ export function resolveCoreHudStatusLabel(key, value) {
     return label === "-" ? "—" : label
   }
 
-  if (key === "highYield") {
-    const label = getStatus("highYield", n).label
-    if (label === "정상") return "양호"
-    if (label === "경계") return "주의"
+  if (key === "bofa") {
+    const label = getStatus("bofa", n).label
+    if (label === "정상") return "중립"
+    if (label === "경계") return "과열 경계"
     return label === "-" ? "—" : label
   }
 

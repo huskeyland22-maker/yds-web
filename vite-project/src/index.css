@@ -8329,6 +8329,18 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   .home-v5-core-grid--hud {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .home-v5-hud-card__value {
+    font-size: 19px;
+  }
+
+  .home-v5-hud-card__timeline {
+    font-size: 9px;
+  }
+
+  .home-v5-hud-card__change {
+    font-size: 11px;
+  }
 }
 
 .home-v5-hud-card {
@@ -8336,7 +8348,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  min-height: 5.25rem;
+  min-height: 6.5rem;
   padding: 8px 8px 10px;
   box-sizing: border-box;
   border-radius: 12px;
@@ -8368,8 +8380,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   --home-v5-hud-accent: #3b82f6;
 }
 
-.home-v5-hud-card--highYield {
-  --home-v5-hud-accent: #22c55e;
+.home-v5-hud-card--bofa {
+  --home-v5-hud-accent: #c084fc;
 }
 
 .home-v5-hud-card--strategy {
@@ -8399,11 +8411,32 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-hud-card__value {
   margin: 4px 0 0;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 900;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
   color: rgba(248, 250, 252, 0.98);
+}
+
+.home-v5-hud-card__timeline {
+  margin: 5px 0 0;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: rgba(148, 163, 184, 0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-v5-hud-card__change {
+  margin: 3px 0 0;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: rgba(203, 213, 225, 0.95);
 }
 
 .home-v5-hud-card__value--regime {
@@ -8420,17 +8453,39 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(203, 213, 225, 0.92);
 }
 
-.home-v5-hud-card__trend--up {
+.home-v5-hud-card__trend--up,
+.home-v5-hud-card__change--up {
   color: rgba(250, 204, 21, 0.95);
 }
 
-.home-v5-hud-card--vix .home-v5-hud-card__trend--down,
-.home-v5-hud-card--highYield .home-v5-hud-card__trend--flat {
+.home-v5-hud-card--fearGreed .home-v5-hud-card__change--up {
+  color: rgba(250, 204, 21, 0.95);
+}
+
+.home-v5-hud-card--fearGreed .home-v5-hud-card__change--down {
+  color: rgba(96, 165, 250, 0.95);
+}
+
+.home-v5-hud-card--vix .home-v5-hud-card__change--down,
+.home-v5-hud-card--vix .home-v5-hud-card__trend--down {
   color: rgba(74, 222, 128, 0.92);
 }
 
+.home-v5-hud-card--vix .home-v5-hud-card__change--up,
 .home-v5-hud-card--vix .home-v5-hud-card__trend--up {
   color: rgba(248, 113, 113, 0.92);
+}
+
+.home-v5-hud-card--bofa .home-v5-hud-card__change--up {
+  color: rgba(250, 204, 21, 0.92);
+}
+
+.home-v5-hud-card--bofa .home-v5-hud-card__change--down {
+  color: rgba(96, 165, 250, 0.92);
+}
+
+.home-v5-hud-card__change--flat {
+  color: rgba(148, 163, 184, 0.92);
 }
 
 .home-v5-hud-card__status {

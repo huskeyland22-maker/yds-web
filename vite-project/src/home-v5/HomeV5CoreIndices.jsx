@@ -1,7 +1,19 @@
 /**
  * @param {import("./homeV5DeskModel.js").HomeV5CoreCardModel} props
  */
-function CoreHudCard({ key: cardKey, kind, role, symbol, value, trendLine, trendDir, statusLabel, accentColor }) {
+function CoreHudCard({
+  key: cardKey,
+  kind,
+  role,
+  symbol,
+  value,
+  timelineText,
+  changeText,
+  trendLine,
+  trendDir,
+  statusLabel,
+  accentColor,
+}) {
   const isStrategy = kind === "strategy"
   const style = accentColor ? { "--home-v5-hud-accent": accentColor } : undefined
 
@@ -28,7 +40,16 @@ function CoreHudCard({ key: cardKey, kind, role, symbol, value, trendLine, trend
         )}
       </p>
       <p className={`home-v5-hud-card__value${isStrategy ? " home-v5-hud-card__value--regime" : ""}`}>{value}</p>
-      <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine}</p>
+      {!isStrategy ? (
+        <>
+          <p className="home-v5-hud-card__timeline" title="최근 10일 · 2일 간격">
+            {timelineText ?? "—"}
+          </p>
+          <p className={`home-v5-hud-card__change home-v5-hud-card__change--${trendDir}`}>{changeText ?? "→ —"}</p>
+        </>
+      ) : (
+        <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine ?? changeText ?? "—"}</p>
+      )}
       {!isStrategy ? (
         <p className="home-v5-hud-card__status">
           <span className="home-v5-hud-card__status-k">상태</span>

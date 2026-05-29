@@ -1,20 +1,15 @@
-import { getStatus } from "../utils/panicIndicatorStatus.js"
-import { historyValuesForMetric } from "../utils/panicHistoryStats.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 
-/** @typedef {"fearGreed" | "vix" | "highYield"} HomeV5CoreKey */
+/** @typedef {"fearGreed" | "vix" | "bofa"} HomeV5CoreKey */
 /** @typedef {"up" | "down" | "flat"} HomeV5TrendDir */
 
-const CAPTIONS = {
-  fearGreed: "CNN 공포탐욕",
-  vix: "VIX",
-  highYield: "HY 스프레드",
-}
+/** 최근 10일 · 2일 간격 5포인트 (t-8 … t-0) */
+const TIMELINE_OFFSET_DAYS = [8, 6, 4, 2, 0]
 
 const FLAT_THRESHOLDS = {
   fearGreed: 2,
   vix: 0.5,
-  highYield: 0.05,
+  bofa: 0.15,
 }
 
 /** @param {string} iso */
@@ -36,10 +31,6 @@ function rowDateKey(row) {
 /** @param {object} row @param {HomeV5CoreKey} key */
 function metricAtRow(row, key) {
   if (!row) return null
-  if (key === "highYield") {
-    const n = Number(row.highYield ?? row.hyOas)
-    return Number.isFinite(n) ? n : null
-  }
   const n = Number(row[key])
   return Number.isFinite(n) ? n : null
 }
@@ -59,6 +50,27 @@ function valueOnOrBefore(rows, targetIso, key) {
   return picked ? metricAtRow(picked, key) : null
 }
 
+/** @param {HomeV5CoreKey} key @param {number} value */
+function formatTimelineValue(key, value) {
+  if (!Number.isFinite(value)) return "—"
+  if (key === "vix") return Number.isInteger(value) ? String(value) : value.toFixed(1)
+  if (key === "bofa") return value.toFixed(1)
+  return String(Math.round(value))
+}
+
+/** @param {HomeV5CoreKey} key @param {number} delta */
+function formatChangeDelta(key, delta) {
+  if (!Number.isFinite(delta)) return "—"
+  const sign = delta > 0 ? "+" : delta < 0 ? "−" : ""
+  const abs = Math.abs(delta)
+  if (key === "fearGreed") return `${sign}${Math.round(abs)}`
+  if (key === "vix") {
+    const n = abs < 10 && !Number.isInteger(abs) ? abs.toFixed(1) : String(Math.round(abs))
+    return `${sign}${n}`
+  }
+  return `${sign}${abs.toFixed(1)}`
+}
+
 /** @param {number} delta @param {HomeV5CoreKey} key */
 function classifyDirection(delta, key) {
   const t = FLAT_THRESHOLDS[key]
@@ -73,35 +85,37 @@ function trendArrow(dir) {
   return "→"
 }
 
-/** @param {number} delta @param {HomeV5CoreKey} key @param {number | null} current */
-function trendDetail(delta, key, current) {
-  if (key === "fearGreed") {
-    if (!Number.isFinite(delta)) return "—"
-    const sign = delta > 0 ? "+" : ""
-    const n = Math.abs(delta) < 1 ? delta.toFixed(1) : String(Math.round(delta))
-    return `${sign}${n}`
-  }
-  if (Number.isFinite(current)) {
-    const label = getStatus(key, current).label
-    return label === "-" ? "—" : label
-  }
-  return "—"
+/** @param {object | null | undefined} panicData @param {HomeV5CoreKey} key */
+function currentFromPanic(panicData, key) {
+  if (!panicData) return null
+  const n = Number(panicData[key])
+  return Number.isFinite(n) ? n : null
 }
 
-/** @param {number[]} values */
-function buildSparkline(values) {
-  const last7 = values.filter(Number.isFinite).slice(-7)
-  if (last7.length < 2) return null
-  const min = Math.min(...last7)
-  const max = Math.max(...last7)
-  const glyphs = ["▁", "▂", "▃", "▄", "▅", "▆", "▇"]
-  return last7
-    .map((v) => {
-      if (max === min) return glyphs[3]
-      const idx = Math.round(((v - min) / (max - min)) * (glyphs.length - 1))
-      return glyphs[Math.min(glyphs.length - 1, Math.max(0, idx))]
-    })
-    .join("")
+/**
+ * @param {object[]} rows
+ * @param {string} anchorDate
+ * @param {HomeV5CoreKey} key
+ * @param {number | null} current
+ */
+function buildTimelineValues(rows, anchorDate, key, current) {
+  const raw = TIMELINE_OFFSET_DAYS.map((daysAgo) => {
+    if (daysAgo === 0 && current != null) return current
+    return valueOnOrBefore(rows, subtractCalendarDays(anchorDate, daysAgo), key)
+  })
+
+  let lastKnown = null
+  for (let i = 0; i < raw.length; i += 1) {
+    if (raw[i] != null) lastKnown = raw[i]
+    else if (lastKnown != null) raw[i] = lastKnown
+  }
+  let nextKnown = null
+  for (let i = raw.length - 1; i >= 0; i -= 1) {
+    if (raw[i] != null) nextKnown = raw[i]
+    else if (nextKnown != null) raw[i] = nextKnown
+  }
+  if (current != null) raw[raw.length - 1] = current
+  return raw
 }
 
 /**
@@ -109,36 +123,17 @@ function buildSparkline(values) {
  * @param {object | null | undefined} panicData
  * @param {object[]} historyRows
  */
-/** @param {object | null | undefined} panicData @param {HomeV5CoreKey} key */
-function currentFromPanic(panicData, key) {
-  if (!panicData) return null
-  if (key === "highYield") {
-    const n = Number(panicData.highYield ?? panicData.hyOas)
-    return Number.isFinite(n) ? n : null
-  }
-  const n = Number(panicData[key])
-  return Number.isFinite(n) ? n : null
-}
-
 export function buildHomeV5CoreTrend(key, panicData, historyRows = []) {
   const rows = sortHistoryRowsAsc(historyRows)
-  const fromPanic = currentFromPanic(panicData, key)
-  const series = historyValuesForMetric(rows, key)
-  const current = Number.isFinite(fromPanic)
-    ? fromPanic
-    : series.length
-      ? series[series.length - 1]
-      : null
-
-  const caption = CAPTIONS[key]
+  const current = currentFromPanic(panicData, key)
 
   if (current == null) {
     return {
-      caption,
-      trendArrow: "→",
-      trendLine: "— (7일)",
-      sparkline: null,
+      timelineText: "—",
+      changeText: "→ —",
       trendDir: "flat",
+      trendArrow: "→",
+      trendLine: "—",
     }
   }
 
@@ -149,36 +144,23 @@ export function buildHomeV5CoreTrend(key, panicData, historyRows = []) {
         ? rowDateKey(rows[rows.length - 1])
         : null
 
-  let baseline = null
-  if (anchorDate) {
-    baseline = valueOnOrBefore(rows, subtractCalendarDays(anchorDate, 7), key)
-  }
-  if (baseline == null && series.length >= 2) {
-    const lookback = Math.min(7, series.length - 1)
-    baseline = series[series.length - 1 - lookback]
-  }
+  const values = anchorDate ? buildTimelineValues(rows, anchorDate, key, current) : [current]
+  const finite = values.filter((v) => Number.isFinite(v))
+  const labels = values.map((v) => formatTimelineValue(key, v))
+  const timelineText = labels.join(" → ")
 
-  const delta = baseline != null ? current - baseline : null
-  const trendDir = classifyDirection(delta ?? 0, key)
+  const first = finite[0] ?? current
+  const last = finite[finite.length - 1] ?? current
+  const delta = last - first
+  const trendDir = classifyDirection(delta, key)
   const arrow = trendArrow(trendDir)
-  const detail = trendDetail(delta ?? 0, key, current)
-  const trendLine =
-    key === "fearGreed" && Number.isFinite(delta)
-      ? `${arrow} ${detail} (7일)`
-      : `${arrow} ${detail} (7일)`
-
-  const sparkValues =
-    series.length >= 2
-      ? series
-      : baseline != null && Number.isFinite(current)
-        ? [baseline, current]
-        : []
+  const changeText = `${arrow} ${formatChangeDelta(key, delta)}`
 
   return {
-    caption,
-    trendArrow: arrow,
-    trendLine,
-    sparkline: buildSparkline(sparkValues),
+    timelineText,
+    changeText,
     trendDir,
+    trendArrow: arrow,
+    trendLine: `${timelineText} ${changeText}`,
   }
 }
