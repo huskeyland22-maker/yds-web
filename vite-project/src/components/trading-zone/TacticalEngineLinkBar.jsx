@@ -68,7 +68,6 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
         <p className="m-0 tactical-zone-engine-link__market-head">현재 시장 상태</p>
         <div className="tactical-zone-engine-link__status-grid">
           {orderedCards.map((c) => {
-            const hint = c.scoreHint ?? c.action
             const dot = ENGINE_LINK_HORIZON_DOT[c.id] ?? "⚪"
             const horizonLabel = statusLabel(c)
             const labelTone = resolveHorizonStatusTone(horizonLabel)
@@ -84,12 +83,12 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
                   <span className="tactical-zone-market-status__dot" aria-hidden>
                     {dot}
                   </span>
-                  {c.period} {horizonLabel}
+                  {c.period}
                 </p>
                 <p className="m-0 tactical-zone-market-status__score font-mono tabular-nums">
                   {c.score ?? "—"}
                 </p>
-                <p className="m-0 tactical-zone-market-status__label">{hint}</p>
+                <p className="m-0 tactical-zone-market-status__label">{horizonLabel}</p>
               </div>
             )
           })}
