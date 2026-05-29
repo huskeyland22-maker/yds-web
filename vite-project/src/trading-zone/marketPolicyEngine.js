@@ -313,29 +313,29 @@ export function resolveHorizonStatusLabel(card, marketState) {
 /** @type {Record<MarketState, Record<"fearGreed" | "vix" | "bofa", string>>} */
 const CORE_METRIC_POLICY_HINT = {
   overheat: {
-    fearGreed: "경계 강화",
-    vix: "과열 주의",
-    bofa: "현금 준비",
+    fearGreed: "추격 금지",
+    vix: "신규 제한",
+    bofa: "현금 확보",
   },
   caution: {
-    fearGreed: "경계 유지",
-    vix: "변동성 주의",
-    bofa: "선별 대응",
+    fearGreed: "추격 금지",
+    vix: "눌림 대기",
+    bofa: "현금 확보",
   },
   neutral: {
-    fearGreed: "관망 유지",
-    vix: "안정 활용",
-    bofa: "균형 유지",
+    fearGreed: "추격 금지",
+    vix: "눌림 대기",
+    bofa: "현금 확보",
   },
   pullback: {
-    fearGreed: "눌림 관찰",
-    vix: "진입 타이밍",
-    bofa: "분할 접근",
+    fearGreed: "눌림 대기",
+    vix: "분할 진입",
+    bofa: "분할 진입",
   },
   panic: {
-    fearGreed: "방어 우선",
-    vix: "리스크 축소",
-    bofa: "현금 방어",
+    fearGreed: "분할 매수",
+    vix: "현금 확보",
+    bofa: "분할 매수",
   },
 }
 
@@ -346,7 +346,7 @@ const CORE_METRIC_POLICY_HINT = {
  */
 export function resolveCoreMetricPolicyHint(metricKey, marketPolicy) {
   const state = marketPolicy?.marketState ?? "neutral"
-  return CORE_METRIC_POLICY_HINT[state]?.[metricKey] ?? CORE_METRIC_POLICY_HINT.neutral[metricKey] ?? "관망 유지"
+  return CORE_METRIC_POLICY_HINT[state]?.[metricKey] ?? CORE_METRIC_POLICY_HINT.neutral[metricKey] ?? "추격 금지"
 }
 
 /**
