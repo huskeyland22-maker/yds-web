@@ -3283,6 +3283,186 @@
     }
   }
 
+  .tz-market-explain {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .tz-market-explain__section {
+    padding: 8px 8px 9px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(10, 14, 24, 0.55);
+  }
+
+  .tz-market-explain__section--actions {
+    border-color: rgba(34, 211, 238, 0.18);
+    background: rgba(8, 47, 73, 0.22);
+  }
+
+  .tz-market-explain__head {
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .tz-market-explain__horizons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .tz-score-block {
+    padding: 6px 7px 7px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .tz-score-block__title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(226, 232, 240, 0.96);
+  }
+
+  .tz-score-block__score {
+    font-size: 14px;
+    font-weight: 900;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tz-score-block__drivers {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 5px;
+  }
+
+  .tz-score-driver {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .tz-score-driver__icon {
+    width: 1.1rem;
+    text-align: center;
+  }
+
+  .tz-score-driver__status {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.9);
+  }
+
+  .tz-score-driver__pts {
+    font-weight: 800;
+    color: rgba(203, 213, 225, 0.92);
+  }
+
+  .tz-score-driver--positive .tz-score-driver__pts {
+    color: rgba(110, 231, 168, 0.98);
+  }
+
+  .tz-score-driver--negative .tz-score-driver__pts {
+    color: rgba(252, 165, 165, 0.96);
+  }
+
+  .tz-score-block__total {
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(100, 116, 139, 0.95);
+    text-align: right;
+  }
+
+  .tz-market-explain__reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .tz-market-explain__reason {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: rgba(203, 213, 225, 0.92);
+  }
+
+  .tz-market-explain__check {
+    flex-shrink: 0;
+    font-weight: 800;
+    color: rgba(110, 231, 168, 0.95);
+  }
+
+  .tz-market-explain__reason--negative .tz-market-explain__check {
+    color: rgba(252, 165, 165, 0.95);
+  }
+
+  .tz-market-explain__conclusion {
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: rgba(125, 211, 252, 0.98);
+  }
+
+  .tz-market-explain__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .tz-market-explain__action {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: rgba(248, 250, 252, 0.96);
+  }
+
+  .tz-market-explain__action--warn {
+    color: rgba(252, 165, 165, 0.96);
+  }
+
+  .tz-market-explain__action-icon {
+    flex-shrink: 0;
+  }
+
+  .tactical-zone-engine-link__meta {
+    margin-top: 4px;
+    padding: 0 2px;
+  }
+
+  @media (min-width: 640px) {
+    .tz-market-explain__horizons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+  }
+
   @media (min-width: 480px) {
     .tactical-zone-engine-link__status-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));

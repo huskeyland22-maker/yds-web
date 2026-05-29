@@ -123,6 +123,7 @@ export function buildTradingZoneEngineLink({
     snapshot,
     historyRows,
     cycleScore,
+    cards,
   })
 
   return {

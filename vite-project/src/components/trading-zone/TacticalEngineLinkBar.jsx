@@ -6,6 +6,7 @@ import {
   resolveHorizonStatusLabel,
   resolveHorizonStatusTone,
 } from "../../trading-zone/marketPolicyEngine.js"
+import TacticalMarketStateExplain from "./TacticalMarketStateExplain.jsx"
 
 /**
  * @param {{
@@ -39,6 +40,7 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
   const actionLines = marketPolicy?.actionLines ?? link.actionLines ?? null
   const transitionConfidence = marketPolicy?.marketTransition?.transitionConfidence ?? 0
   const showTransition = marketPolicy?.marketTransition?.changed && transitionConfidence >= 40
+
   const actionRowsRaw = actionLines
     ? [
         { key: "primary", icon: "🟢", text: actionLines.primary ?? "", tone: "allow" },
@@ -52,20 +54,20 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
         const icon = typeof line === "string" ? (tone === "warn" ? "⚠" : "🟢") : line.icon
         return { key: typeof line === "string" ? line : line.key, icon, text, tone }
       })
-  const marketBrief = link.marketBrief
-  const basisLine = (items) =>
-    items?.map((item) => `${item.label} ${item.text}`).join("  ") ?? ""
-  const reasonLine = (items) => items?.map((item) => item.text).join("  ") ?? ""
 
   const actionRows = (() => {
     const seen = new Set()
-    return actionRowsRaw.filter((row) => {
-      const normalized = String(row.text ?? "").replace(/\s+/g, " ").trim()
-      if (!normalized || seen.has(normalized)) return false
-      seen.add(normalized)
-      return true
-    }).slice(0, 3)
+    return actionRowsRaw
+      .filter((row) => {
+        const normalized = String(row.text ?? "").replace(/\s+/g, " ").trim()
+        if (!normalized || seen.has(normalized)) return false
+        seen.add(normalized)
+        return true
+      })
+      .slice(0, 3)
   })()
+
+  const marketBrief = link.marketBrief
 
   return (
     <div className="tactical-zone-engine-link" aria-label="시장 엔진 연계">
@@ -98,56 +100,20 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
             )
           })}
         </div>
-
-        {marketBrief?.scoreBasis?.length ? (
-          <div className="tactical-zone-engine-link__brief">
-            <p className="m-0 tactical-zone-engine-link__brief-head">📊 점수 산출 근거</p>
-            <p className="m-0 tactical-zone-engine-link__brief-line">{basisLine(marketBrief.scoreBasis)}</p>
-          </div>
-        ) : null}
-
-        {marketBrief?.actionReasons?.length ? (
-          <div className="tactical-zone-engine-link__brief">
-            <p className="m-0 tactical-zone-engine-link__brief-head">📌 행동 이유</p>
-            <p className="m-0 tactical-zone-engine-link__brief-line">{reasonLine(marketBrief.actionReasons)}</p>
-          </div>
-        ) : null}
       </div>
 
-      {actionRows.length || link.macroStage ? (
-        <div className="tactical-zone-engine-link__action-card tactical-zone-engine-link__action-card--emphasis tactical-zone-engine-link__action-card--slim">
-          {actionRows.length ? (
-            <>
-              <p className="m-0 tactical-zone-engine-link__action-head">현재 행동</p>
-              {showTransition ? (
-                <p className="m-0 tactical-zone-engine-link__macro-stage">
-                  <span className="tactical-zone-engine-link__macro-stage-head">변화:</span>
-                  <span className="tactical-zone-engine-link__macro-stage-val">
-                    {transitionConfidence >= 85 ? "🚨 강한 변화 감지 " : ""}
-                    {marketPolicy.marketTransition.directionTag} ({transitionConfidence})
-                  </span>
-                </p>
-              ) : null}
-              <ul className="tactical-zone-engine-link__action-list m-0 list-none p-0">
-                {actionRows.map((row) => {
-                  const label = row.text.replace(/\s*\/\s*/g, "·").replace(/\s+/g, " ").trim()
-                  return (
-                    <li
-                      key={row.key}
-                      className={[
-                        "tactical-zone-engine-link__action-line",
-                        `tactical-zone-engine-link__action-line--${row.tone}`,
-                      ].join(" ")}
-                    >
-                      <span className="tactical-zone-engine-link__action-icon" aria-hidden>
-                        {row.icon}
-                      </span>
-                      <span>{label}</span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </>
+      <TacticalMarketStateExplain brief={marketBrief} actionRows={actionRows} />
+
+      {showTransition || link.macroStage ? (
+        <div className="tactical-zone-engine-link__meta">
+          {showTransition ? (
+            <p className="m-0 tactical-zone-engine-link__macro-stage">
+              <span className="tactical-zone-engine-link__macro-stage-head">변화:</span>
+              <span className="tactical-zone-engine-link__macro-stage-val">
+                {transitionConfidence >= 85 ? "🚨 강한 변화 감지 " : ""}
+                {marketPolicy.marketTransition.directionTag} ({transitionConfidence})
+              </span>
+            </p>
           ) : null}
           {link.macroStage ? (
             <p className="m-0 tactical-zone-engine-link__macro-stage">
