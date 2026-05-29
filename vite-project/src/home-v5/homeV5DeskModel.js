@@ -12,6 +12,10 @@ import {
 
 /** @typedef {"fearGreed" | "vix" | "bofa" | "strategy"} HomeV5CoreKey */
 
+import { HOME_V5_CORE_METRIC_ORDER } from "./homeV5CoreMetricOrder.js"
+
+export { HOME_V5_CORE_METRIC_ORDER } from "./homeV5CoreMetricOrder.js"
+
 /** @typedef {{
  *   key: HomeV5CoreKey
  *   kind: "metric" | "strategy"
@@ -195,11 +199,9 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
 export function buildHomeV5DeskModel(panicData, historyRows = []) {
   const marketPolicy = buildMarketPolicy({ panicData })
   const synthesis = buildHomeV5CoreSynthesis(panicData, marketPolicy)
-  const metrics = /** @type {("fearGreed" | "vix" | "bofa")[]} */ ([
-    "fearGreed",
-    "vix",
-    "bofa",
-  ]).map((key) => buildHomeV5CoreCard(key, panicData, marketPolicy, historyRows))
+  const metrics = HOME_V5_CORE_METRIC_ORDER.map((key) =>
+    buildHomeV5CoreCard(key, panicData, marketPolicy, historyRows),
+  )
 
   const evaluation = buildHomeV5StrategyEvaluation(panicData, historyRows, synthesis)
   const core = evaluation ? [...metrics, buildHomeV5StrategyHudCard(evaluation)] : metrics

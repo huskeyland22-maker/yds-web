@@ -1,4 +1,5 @@
 import { resolveCoreMetricDataStatus } from "./homeV5CoreMetricLayers.js"
+import { HOME_V5_CORE_METRIC_ORDER } from "./homeV5CoreMetricOrder.js"
 import { buildMarketPolicy } from "../trading-zone/marketPolicyEngine.js"
 
 /** @typedef {"fearGreed" | "vix" | "bofa"} HomeV5CoreMetricKey */
@@ -134,14 +135,16 @@ export function buildHomeV5CoreSynthesis(panicData, marketPolicy = null) {
   const policy = marketPolicy ?? buildMarketPolicy({ panicData })
   const state = policy.marketState ?? "neutral"
 
-  const fgRaw = resolveCoreMetricDataStatus("fearGreed", panicData?.fearGreed)
-  const vixRaw = resolveCoreMetricDataStatus("vix", panicData?.vix)
-  const bofaRaw = resolveCoreMetricDataStatus("bofa", panicData?.bofa)
-
-  const fg = shortenSignal("fearGreed", fgRaw)
-  const vix = shortenSignal("vix", vixRaw)
-  const bofa = shortenSignal("bofa", bofaRaw)
-  const parts = [fg, vix, bofa].filter(Boolean)
+  const signalsByKey = Object.fromEntries(
+    HOME_V5_CORE_METRIC_ORDER.map((key) => [
+      key,
+      shortenSignal(key, resolveCoreMetricDataStatus(key, panicData?.[key])),
+    ]),
+  )
+  const fg = signalsByKey.fearGreed
+  const vix = signalsByKey.vix
+  const bofa = signalsByKey.bofa
+  const parts = HOME_V5_CORE_METRIC_ORDER.map((key) => signalsByKey[key]).filter(Boolean)
 
   if (!parts.length) {
     return {
