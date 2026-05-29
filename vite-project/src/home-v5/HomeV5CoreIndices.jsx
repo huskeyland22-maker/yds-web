@@ -16,6 +16,7 @@ function CoreHudCard({
   trendLine,
   trendArrow,
   trendDir,
+  stageId,
   accentColor,
 }) {
   const isStrategy = kind === "strategy"
@@ -27,6 +28,7 @@ function CoreHudCard({
         "home-v5-hud-card",
         `home-v5-hud-card--${cardKey}`,
         isStrategy ? "home-v5-hud-card--strategy" : "home-v5-hud-card--metric",
+        isStrategy && stageId ? `home-v5-hud-card--stage-${stageId}` : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -67,8 +69,16 @@ function CoreHudCard({
       ) : (
         <>
           <p className="home-v5-hud-card__role">{role}</p>
-          <p className="home-v5-hud-card__value home-v5-hud-card__value--regime">{value}</p>
-          <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine ?? policyHint ?? "—"}</p>
+          <p className="home-v5-hud-card__value home-v5-hud-card__value--stage">{value}</p>
+          <p className="home-v5-hud-card__stage-action">{policyHint ?? "—"}</p>
+          <p
+            className={[
+              "home-v5-hud-card__stage-transition",
+              `home-v5-hud-card__stage-transition--${recentChangeTone ?? "flat"}`,
+            ].join(" ")}
+          >
+            {recentChangeLabel ?? "—"}
+          </p>
         </>
       )}
     </article>

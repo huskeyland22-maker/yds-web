@@ -8462,6 +8462,26 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   --home-v5-hud-accent: #22c55e;
 }
 
+.home-v5-hud-card--stage-overheated {
+  --home-v5-hud-accent: #3b82f6;
+}
+
+.home-v5-hud-card--stage-neutral {
+  --home-v5-hud-accent: #22c55e;
+}
+
+.home-v5-hud-card--stage-interest {
+  --home-v5-hud-accent: #eab308;
+}
+
+.home-v5-hud-card--stage-dca {
+  --home-v5-hud-accent: #f97316;
+}
+
+.home-v5-hud-card--stage-panicBuy {
+  --home-v5-hud-accent: #ef4444;
+}
+
 .home-v5-hud-card__role {
   display: flex;
   align-items: baseline;
@@ -8661,13 +8681,50 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   padding: 8px 7px 10px;
 }
 
+.home-v5-hud-card--strategy {
+  min-height: 9.35rem;
+}
+
 .home-v5-hud-card--strategy .home-v5-hud-card__role {
   margin-top: 0;
 }
 
-.home-v5-hud-card--strategy .home-v5-hud-card__value {
-  margin-top: 4px;
-  font-size: 20px;
+.home-v5-hud-card__value--stage {
+  margin-top: 3px;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.home-v5-hud-card__stage-action {
+  margin: 5px 0 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: rgba(248, 250, 252, 0.96);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-v5-hud-card__stage-transition {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.home-v5-hud-card__stage-transition--up {
+  color: var(--hud-trend-up, #6ee7a8);
+}
+
+.home-v5-hud-card__stage-transition--down {
+  color: var(--hud-trend-down, #f0a8a8);
 }
 
 .home-v5-hud-card__value--regime {

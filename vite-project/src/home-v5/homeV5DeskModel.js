@@ -4,6 +4,11 @@ import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
 import { buildMarketPolicy, resolveCoreMetricPolicyHint } from "../trading-zone/marketPolicyEngine.js"
 import { buildHomeV5CoreSynthesis } from "./homeV5CoreSynthesis.js"
 import { resolveCoreMetricRecentChange } from "./homeV5CoreMetricTransition.js"
+import {
+  YDS_STAGE_ACTION,
+  formatYdsStageTitle,
+  resolveHomeV5StrategyTransition,
+} from "./homeV5StrategyStage.js"
 
 /** @typedef {"fearGreed" | "vix" | "bofa" | "strategy"} HomeV5CoreKey */
 
@@ -23,6 +28,7 @@ import { resolveCoreMetricRecentChange } from "./homeV5CoreMetricTransition.js"
  *   policyHint: string
  *   recentChangeLabel: string
  *   recentChangeTone: "up" | "down" | "flat"
+ *   stageId?: string
  *   accentColor?: string
  * }} HomeV5CoreCardModel */
 
@@ -45,22 +51,6 @@ const VALUE_LINES = {
   fearGreed: "CNN",
   vix: "VIX",
   bofa: "BofA",
-}
-
-const ACTION_BY_REGIME = {
-  overheated: "현금 준비",
-  neutral: "관망 · 기본 비중",
-  interest: "저점 관찰",
-  dca: "분할 진입 검토",
-  panicBuy: "패닉 구간 대응",
-}
-
-const SHORT_REGIME_LABEL = {
-  overheated: "과열",
-  neutral: "중립",
-  interest: "관심",
-  dca: "분할매수",
-  panicBuy: "패닉매수",
 }
 
 /** @param {unknown} v @param {number} [digits] */
@@ -108,22 +98,22 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
  * @returns {HomeV5CoreCardModel}
  */
 function buildHomeV5StrategyHudCard(evaluation) {
-  const actionCompact = String(evaluation.action).replace("기본 비중", "기본비중")
   return {
     key: "strategy",
     kind: "strategy",
     role: "전략",
-    value: `${evaluation.emoji} ${evaluation.label}`,
-    trendLine: actionCompact,
+    stageId: evaluation.regimeId,
+    value: evaluation.stageTitle,
+    trendLine: `${evaluation.actionLine} · ${evaluation.transitionLine}`,
     timelineText: "",
-    changeText: actionCompact,
-    changeDeltaText: actionCompact,
+    changeText: evaluation.actionLine,
+    changeDeltaText: evaluation.actionLine,
     trendArrow: "→",
     trendDir: "flat",
-    dataStatusLabel: "거시 레짐",
-    policyHint: actionCompact,
-    recentChangeLabel: "흐름 유지",
-    recentChangeTone: "flat",
+    dataStatusLabel: "YDS 단계",
+    policyHint: evaluation.actionLine,
+    recentChangeLabel: evaluation.transitionLine,
+    recentChangeTone: evaluation.transitionTone,
     accentColor: evaluation.color,
   }
 }
@@ -132,8 +122,7 @@ function buildHomeV5StrategyHudCard(evaluation) {
  * @param {object | null | undefined} panicData
  * @param {object[]} [historyRows]
  */
-export function buildHomeV5StrategyEvaluation(panicData, historyRows = []) {
-  void historyRows
+export function buildHomeV5StrategyEvaluation(panicData, historyRows = [], synthesis = null) {
   const band = resolveHomeV5StrategyRegime(panicData)
   if (!band) return null
 
@@ -141,13 +130,19 @@ export function buildHomeV5StrategyEvaluation(panicData, historyRows = []) {
   const vix = Number(panicData?.vix)
   const bofa = Number(panicData?.bofa)
   const hy = Number(panicData?.highYield ?? panicData?.hyOas)
+  const transition = resolveHomeV5StrategyTransition(band.id, panicData, historyRows, synthesis)
+  const actionLine = YDS_STAGE_ACTION[band.id] ?? "—"
 
   return {
     regimeId: band.id,
     emoji: band.emoji,
-    label: SHORT_REGIME_LABEL[band.id] ?? band.label,
+    label: band.label,
+    stageTitle: formatYdsStageTitle(band),
     color: band.color,
-    action: ACTION_BY_REGIME[band.id] ?? "—",
+    action: actionLine,
+    actionLine,
+    transitionLine: transition.label,
+    transitionTone: transition.tone,
     rationale: buildHomeV5StrategyRationale(panicData, band.id),
     metrics: {
       cnn: Number.isFinite(fg) ? fg : null,
@@ -206,7 +201,7 @@ export function buildHomeV5DeskModel(panicData, historyRows = []) {
     "bofa",
   ]).map((key) => buildHomeV5CoreCard(key, panicData, marketPolicy, historyRows))
 
-  const evaluation = buildHomeV5StrategyEvaluation(panicData, historyRows)
+  const evaluation = buildHomeV5StrategyEvaluation(panicData, historyRows, synthesis)
   const core = evaluation ? [...metrics, buildHomeV5StrategyHudCard(evaluation)] : metrics
 
   if (!evaluation) {
