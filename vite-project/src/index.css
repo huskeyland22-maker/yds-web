@@ -8332,7 +8332,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
   .home-v5-hud-card--metric {
     --hud-base: 17px;
-    min-height: 8.5rem;
+    min-height: 8.25rem;
     padding: 7px 6px 9px;
   }
 
@@ -8344,11 +8344,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .home-v5-hud-card--metric {
   --hud-base: 20px;
   --hud-value-size: var(--hud-base);
-  --hud-delta-size: calc(var(--hud-base) * 1.8);
-  --hud-arrow-size: calc(var(--hud-base) * 2.75);
-  --hud-meta-size: calc(var(--hud-base) * 0.7);
-  --hud-trend-up: #4ade80;
-  --hud-trend-down: #f87171;
+  --hud-delta-size: calc(var(--hud-base) * 1.25);
+  --hud-arrow-size: calc(var(--hud-base) * 1.6);
+  --hud-meta-size: calc(var(--hud-base) * 0.8);
+  --hud-trend-up: #6ee7a8;
+  --hud-trend-down: #f0a8a8;
   --hud-trend-flat: #94a3b8;
 }
 
@@ -8434,22 +8434,20 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-hud-card__trend-arrow {
   flex-shrink: 0;
-  margin: -4px -2px 0 0;
-  font-size: var(--hud-arrow-size, 55px);
-  font-weight: 900;
-  line-height: 0.82;
-  letter-spacing: -0.04em;
+  margin: 0;
+  font-size: var(--hud-arrow-size, 32px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 .home-v5-hud-card__trend-arrow--up {
-  color: var(--hud-trend-up, #4ade80);
-  text-shadow: 0 0 18px rgba(74, 222, 128, 0.45);
+  color: var(--hud-trend-up, #6ee7a8);
 }
 
 .home-v5-hud-card__trend-arrow--down {
-  color: var(--hud-trend-down, #f87171);
-  text-shadow: 0 0 18px rgba(248, 113, 113, 0.42);
+  color: var(--hud-trend-down, #f0a8a8);
 }
 
 .home-v5-hud-card__trend-arrow--flat {
@@ -8481,10 +8479,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .home-v5-hud-card__change-delta {
   margin: 0;
   flex-shrink: 0;
-  font-size: var(--hud-delta-size, 36px);
-  font-weight: 900;
-  line-height: 0.9;
-  letter-spacing: -0.03em;
+  font-size: var(--hud-delta-size, 25px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -8512,17 +8510,17 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-hud-card--metric .home-v5-hud-card__data-status,
 .home-v5-hud-card--metric .home-v5-hud-card__policy-hint {
-  font-size: var(--hud-meta-size, 14px);
+  font-size: var(--hud-meta-size, 16px);
 }
 
 .home-v5-hud-card__data-status {
-  font-weight: 700;
+  font-weight: 600;
   color: rgba(203, 213, 225, 0.88);
 }
 
 .home-v5-hud-card__policy-hint {
   margin-top: 2px;
-  font-weight: 800;
+  font-weight: 700;
   color: rgba(125, 211, 252, 0.98);
 }
 
@@ -8545,16 +8543,20 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
   color: rgba(148, 163, 184, 0.82);
 }
 
+.home-v5-hud-card--metric .home-v5-hud-card__timeline {
+  opacity: 0.58;
+  color: rgba(148, 163, 184, 0.9);
+}
+
 .home-v5-hud-card--metric {
-  min-height: 9.5rem;
+  min-height: 8.75rem;
   padding: 8px 7px 10px;
-  overflow: visible;
 }
 
 .home-v5-hud-card--strategy .home-v5-hud-card__role {
