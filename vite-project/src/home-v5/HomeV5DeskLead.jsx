@@ -5,6 +5,7 @@ import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { buildHomeV5DeskModel } from "./homeV5DeskModel.js"
 import HomeV5CoreIndices from "./HomeV5CoreIndices.jsx"
+import HomeV5CoreSynthesis from "./HomeV5CoreSynthesis.jsx"
 import HomeV5MarketAnalysis from "./HomeV5MarketAnalysis.jsx"
 import HomeV5StrategyRationaleBar from "./HomeV5StrategyRationaleBar.jsx"
 
@@ -40,6 +41,7 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
       <div className="home-v5-preview__zone home-v5-preview__zone--core">
         <PanicDeskSectionHeader icon="📊" title="핵심 지수" tone="cyan" compact />
         <HomeV5CoreIndices cards={model.core} />
+        <HomeV5CoreSynthesis synthesis={model.synthesis} />
         {model.strategy ? <HomeV5StrategyRationaleBar strategy={model.strategy} /> : null}
       </div>
 

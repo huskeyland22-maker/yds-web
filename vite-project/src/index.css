@@ -8325,7 +8325,72 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 8px;
 }
 
+.home-v5-core-synthesis {
+  margin-top: 8px;
+  padding: 8px 10px 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 18, 28, 0.48);
+}
+
+.home-v5-core-synthesis__head {
+  margin: 0 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(100, 116, 139, 0.95);
+}
+
+.home-v5-core-synthesis__signals {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgba(203, 213, 225, 0.9);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.home-v5-core-synthesis__verdict {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: rgba(125, 211, 252, 0.98);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-v5-core-synthesis--overheat .home-v5-core-synthesis__verdict {
+  color: rgba(253, 186, 116, 0.98);
+}
+
+.home-v5-core-synthesis--panic .home-v5-core-synthesis__verdict,
+.home-v5-core-synthesis--caution .home-v5-core-synthesis__verdict {
+  color: rgba(252, 165, 165, 0.96);
+}
+
+.home-v5-core-synthesis--pullback .home-v5-core-synthesis__verdict {
+  color: rgba(250, 204, 21, 0.96);
+}
+
 @media (max-width: 520px) {
+  .home-v5-core-synthesis {
+    margin-top: 6px;
+    padding: 7px 8px 8px;
+  }
+
+  .home-v5-core-synthesis__signals {
+    font-size: 11px;
+  }
+
+  .home-v5-core-synthesis__verdict {
+    font-size: 12px;
+  }
+
   .home-v5-core-grid--hud {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

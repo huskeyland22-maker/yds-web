@@ -2,6 +2,7 @@ import { resolveCoreMetricDataStatus } from "./homeV5CoreMetricLayers.js"
 import { buildHomeV5CoreTrend } from "./homeV5CoreTrend.js"
 import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
 import { buildMarketPolicy, resolveCoreMetricPolicyHint } from "../trading-zone/marketPolicyEngine.js"
+import { buildHomeV5CoreSynthesis } from "./homeV5CoreSynthesis.js"
 
 /** @typedef {"fearGreed" | "vix" | "bofa" | "strategy"} HomeV5CoreKey */
 
@@ -182,10 +183,15 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
 /**
  * @param {object | null | undefined} panicData
  * @param {object[]} [historyRows]
- * @returns {{ core: HomeV5CoreCardModel[]; strategy: HomeV5StrategyModel | null }}
+ * @returns {{
+ *   core: HomeV5CoreCardModel[]
+ *   strategy: HomeV5StrategyModel | null
+ *   synthesis: import("./homeV5CoreSynthesis.js").HomeV5CoreSynthesisModel
+ * }}
  */
 export function buildHomeV5DeskModel(panicData, historyRows = []) {
   const marketPolicy = buildMarketPolicy({ panicData })
+  const synthesis = buildHomeV5CoreSynthesis(panicData, marketPolicy)
   const metrics = /** @type {("fearGreed" | "vix" | "bofa")[]} */ ([
     "fearGreed",
     "vix",
@@ -196,11 +202,12 @@ export function buildHomeV5DeskModel(panicData, historyRows = []) {
   const core = evaluation ? [...metrics, buildHomeV5StrategyHudCard(evaluation)] : metrics
 
   if (!evaluation) {
-    return { core, strategy: null }
+    return { core, strategy: null, synthesis }
   }
 
   return {
     core,
+    synthesis,
     strategy: {
       id: evaluation.regimeId,
       emoji: evaluation.emoji,
