@@ -52,6 +52,11 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
         const icon = typeof line === "string" ? (tone === "warn" ? "⚠" : "🟢") : line.icon
         return { key: typeof line === "string" ? line : line.key, icon, text, tone }
       })
+  const marketBrief = link.marketBrief
+  const basisLine = (items) =>
+    items?.map((item) => `${item.label} ${item.text}`).join("  ") ?? ""
+  const reasonLine = (items) => items?.map((item) => item.text).join("  ") ?? ""
+
   const actionRows = (() => {
     const seen = new Set()
     return actionRowsRaw.filter((row) => {
@@ -93,6 +98,20 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
             )
           })}
         </div>
+
+        {marketBrief?.scoreBasis?.length ? (
+          <div className="tactical-zone-engine-link__brief">
+            <p className="m-0 tactical-zone-engine-link__brief-head">📊 점수 산출 근거</p>
+            <p className="m-0 tactical-zone-engine-link__brief-line">{basisLine(marketBrief.scoreBasis)}</p>
+          </div>
+        ) : null}
+
+        {marketBrief?.actionReasons?.length ? (
+          <div className="tactical-zone-engine-link__brief">
+            <p className="m-0 tactical-zone-engine-link__brief-head">📌 행동 이유</p>
+            <p className="m-0 tactical-zone-engine-link__brief-line">{reasonLine(marketBrief.actionReasons)}</p>
+          </div>
+        ) : null}
       </div>
 
       {actionRows.length || link.macroStage ? (

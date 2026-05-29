@@ -3,6 +3,7 @@
  */
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { buildMarketPolicy } from "./marketPolicyEngine.js"
+import { buildTradingZoneMarketStateBrief } from "./tradingZoneMarketStateBrief.js"
 import { buildTodayActionPanel } from "../utils/buildTodayActionPanel.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -51,6 +52,7 @@ export const ENGINE_LINK_CARD_ORDER = ["short", "mid", "long", "tactical"]
  *   actionLines?: { primary: string; caution: string; execution: string; summary: string }
  *   actionSummary?: string
  *   macroStage?: EngineLinkMacroStage | null
+ *   marketBrief?: import("./tradingZoneMarketStateBrief.js").TradingZoneMarketStateBrief
  * }} TradingZoneEngineLink
  */
 
@@ -116,6 +118,13 @@ export function buildTradingZoneEngineLink({
     ? { emoji: macro.emoji, label: macro.label }
     : null
 
+  const marketBrief = buildTradingZoneMarketStateBrief({
+    panicData,
+    snapshot,
+    historyRows,
+    cycleScore,
+  })
+
   return {
     ready: true,
     cards,
@@ -123,5 +132,6 @@ export function buildTradingZoneEngineLink({
     actionLines,
     actionSummary: actionLines.summary || formatEngineActionSummary(actions),
     macroStage,
+    marketBrief,
   }
 }

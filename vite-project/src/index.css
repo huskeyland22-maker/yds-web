@@ -3249,6 +3249,40 @@
     margin-top: 4px;
   }
 
+  .tactical-zone-engine-link__brief {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .tactical-zone-engine-link__brief-head {
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: rgba(148, 163, 184, 0.92);
+  }
+
+  .tactical-zone-engine-link__brief-line {
+    margin-top: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    color: rgba(203, 213, 225, 0.9);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 479px) {
+    .tactical-zone-engine-link__brief-line {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+  }
+
   @media (min-width: 480px) {
     .tactical-zone-engine-link__status-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
