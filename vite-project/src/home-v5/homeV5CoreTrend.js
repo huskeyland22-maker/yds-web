@@ -132,6 +132,7 @@ export function buildHomeV5CoreTrend(key, panicData, historyRows = []) {
   if (current == null) {
     return {
       timelineText: "—",
+      changeDeltaText: "—",
       changeText: "→ —",
       trendDir: "flat",
       trendArrow: "→",
@@ -156,10 +157,12 @@ export function buildHomeV5CoreTrend(key, panicData, historyRows = []) {
   const delta = last - first
   const trendDir = classifyDirection(delta, key)
   const arrow = trendArrow(trendDir)
-  const changeText = `${arrow} ${formatChangeDelta(key, delta)}`
+  const changeDeltaText = formatChangeDelta(key, delta)
+  const changeText = `${arrow} ${changeDeltaText}`
 
   return {
     timelineText,
+    changeDeltaText,
     changeText,
     trendDir,
     trendArrow: arrow,

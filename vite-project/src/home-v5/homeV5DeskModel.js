@@ -14,6 +14,7 @@ import { buildMarketPolicy, resolveCoreMetricPolicyHint } from "../trading-zone/
  *   trendLine: string
  *   timelineText: string
  *   changeText: string
+ *   changeDeltaText: string
  *   trendArrow: string
  *   trendDir: "up" | "down" | "flat"
  *   dataStatusLabel: string
@@ -87,6 +88,7 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
     trendLine: trend.trendLine,
     timelineText: trend.timelineText,
     changeText: trend.changeText,
+    changeDeltaText: trend.changeDeltaText,
     trendArrow: trend.trendArrow,
     trendDir: trend.trendDir,
     dataStatusLabel: resolveCoreMetricDataStatus(key, raw),
@@ -108,6 +110,7 @@ function buildHomeV5StrategyHudCard(evaluation) {
     trendLine: actionCompact,
     timelineText: "",
     changeText: actionCompact,
+    changeDeltaText: actionCompact,
     trendArrow: "→",
     trendDir: "flat",
     dataStatusLabel: "거시 레짐",

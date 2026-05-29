@@ -8330,31 +8330,26 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .home-v5-hud-card__value {
-    font-size: 19px;
-  }
-
-  .home-v5-hud-card {
-    min-height: 7.75rem;
+  .home-v5-hud-card--metric {
+    --hud-base: 17px;
+    min-height: 8.5rem;
+    padding: 7px 6px 9px;
   }
 
   .home-v5-hud-card__timeline {
-    font-size: 9px;
-    gap: 3px;
+    font-size: 8px;
   }
+}
 
-  .home-v5-hud-card__change {
-    font-size: 11px;
-  }
-
-  .home-v5-hud-card__data-status,
-  .home-v5-hud-card__policy-hint {
-    font-size: 11px;
-  }
-
-  .home-v5-hud-card__layer-k {
-    font-size: 9px;
-  }
+.home-v5-hud-card--metric {
+  --hud-base: 20px;
+  --hud-value-size: var(--hud-base);
+  --hud-delta-size: calc(var(--hud-base) * 1.8);
+  --hud-arrow-size: calc(var(--hud-base) * 2.75);
+  --hud-meta-size: calc(var(--hud-base) * 0.7);
+  --hud-trend-up: #4ade80;
+  --hud-trend-down: #f87171;
+  --hud-trend-flat: #94a3b8;
 }
 
 .home-v5-hud-card {
@@ -8423,53 +8418,112 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   opacity: 0.75;
 }
 
-.home-v5-hud-card__value {
-  margin: 4px 0 0;
-  font-size: 20px;
+.home-v5-hud-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+}
+
+.home-v5-hud-card__head .home-v5-hud-card__role {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-v5-hud-card__trend-arrow {
+  flex-shrink: 0;
+  margin: -4px -2px 0 0;
+  font-size: var(--hud-arrow-size, 55px);
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.home-v5-hud-card__trend-arrow--up {
+  color: var(--hud-trend-up, #4ade80);
+  text-shadow: 0 0 18px rgba(74, 222, 128, 0.45);
+}
+
+.home-v5-hud-card__trend-arrow--down {
+  color: var(--hud-trend-down, #f87171);
+  text-shadow: 0 0 18px rgba(248, 113, 113, 0.42);
+}
+
+.home-v5-hud-card__trend-arrow--flat {
+  color: var(--hud-trend-flat, #94a3b8);
+}
+
+.home-v5-hud-card__hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+}
+
+.home-v5-hud-card__value {
+  margin: 0;
+  font-size: var(--hud-value-size, 20px);
+  font-weight: 900;
+  line-height: 0.95;
   font-variant-numeric: tabular-nums;
   color: rgba(248, 250, 252, 0.98);
 }
 
+.home-v5-hud-card--metric .home-v5-hud-card__value {
+  margin-top: 1px;
+}
+
+.home-v5-hud-card__change-delta {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: var(--hud-delta-size, 36px);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-v5-hud-card__change-delta--up {
+  color: var(--hud-trend-up, #4ade80);
+}
+
+.home-v5-hud-card__change-delta--down {
+  color: var(--hud-trend-down, #f87171);
+}
+
+.home-v5-hud-card__change-delta--flat {
+  color: var(--hud-trend-flat, #94a3b8);
+}
+
 .home-v5-hud-card__data-status,
 .home-v5-hud-card__policy-hint {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  margin: 4px 0 0;
-  min-width: 0;
-  line-height: 1.2;
-}
-
-.home-v5-hud-card__layer-k {
-  flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(100, 116, 139, 0.92);
-}
-
-.home-v5-hud-card__layer-v {
+  margin: 3px 0 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.15;
+}
+
+.home-v5-hud-card--metric .home-v5-hud-card__data-status,
+.home-v5-hud-card--metric .home-v5-hud-card__policy-hint {
+  font-size: var(--hud-meta-size, 14px);
 }
 
 .home-v5-hud-card__data-status {
-  font-size: 12px;
   font-weight: 700;
-  color: rgba(203, 213, 225, 0.96);
+  color: rgba(203, 213, 225, 0.88);
 }
 
 .home-v5-hud-card__policy-hint {
-  font-size: 12px;
+  margin-top: 2px;
   font-weight: 800;
   color: rgba(125, 211, 252, 0.98);
-}
-
-.home-v5-hud-card__policy-hint .home-v5-hud-card__layer-v {
-  color: inherit;
 }
 
 .home-v5-hud-card--fearGreed .home-v5-hud-card__policy-hint {
@@ -8485,39 +8539,31 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card__timeline {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin: 5px 0 0;
-  min-width: 0;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.25;
-  font-variant-numeric: tabular-nums;
-  color: rgba(148, 163, 184, 0.95);
-}
-
-.home-v5-hud-card__timeline-track {
-  flex: 1;
+  margin: 4px 0 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.home-v5-hud-card__timeline-arrow {
-  flex-shrink: 0;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.home-v5-hud-card__change {
-  margin: 3px 0 0;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.15;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
-  color: rgba(203, 213, 225, 0.95);
+  color: rgba(148, 163, 184, 0.82);
+}
+
+.home-v5-hud-card--metric {
+  min-height: 9.5rem;
+  padding: 8px 7px 10px;
+  overflow: visible;
+}
+
+.home-v5-hud-card--strategy .home-v5-hud-card__role {
+  margin-top: 0;
+}
+
+.home-v5-hud-card--strategy .home-v5-hud-card__value {
+  margin-top: 4px;
+  font-size: 20px;
 }
 
 .home-v5-hud-card__value--regime {
@@ -8534,39 +8580,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(203, 213, 225, 0.92);
 }
 
-.home-v5-hud-card__trend--up,
-.home-v5-hud-card__change--up {
-  color: rgba(250, 204, 21, 0.95);
+.home-v5-hud-card__trend--up {
+  color: var(--hud-trend-up, #4ade80);
 }
 
-.home-v5-hud-card--fearGreed .home-v5-hud-card__change--up {
-  color: rgba(250, 204, 21, 0.95);
+.home-v5-hud-card__trend--down {
+  color: var(--hud-trend-down, #f87171);
 }
 
-.home-v5-hud-card--fearGreed .home-v5-hud-card__change--down {
-  color: rgba(96, 165, 250, 0.95);
-}
-
-.home-v5-hud-card--vix .home-v5-hud-card__change--down,
-.home-v5-hud-card--vix .home-v5-hud-card__trend--down {
-  color: rgba(74, 222, 128, 0.92);
-}
-
-.home-v5-hud-card--vix .home-v5-hud-card__change--up,
-.home-v5-hud-card--vix .home-v5-hud-card__trend--up {
-  color: rgba(248, 113, 113, 0.92);
-}
-
-.home-v5-hud-card--bofa .home-v5-hud-card__change--up {
-  color: rgba(250, 204, 21, 0.92);
-}
-
-.home-v5-hud-card--bofa .home-v5-hud-card__change--down {
-  color: rgba(96, 165, 250, 0.92);
-}
-
-.home-v5-hud-card__change--flat {
-  color: rgba(148, 163, 184, 0.92);
+.home-v5-hud-card__trend--flat {
+  color: var(--hud-trend-flat, #94a3b8);
 }
 
 .home-v5-hud-card__status {

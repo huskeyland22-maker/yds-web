@@ -8,11 +8,11 @@ function CoreHudCard({
   symbol,
   value,
   timelineText,
-  changeText,
-  trendArrow,
+  changeDeltaText,
   dataStatusLabel,
   policyHint,
   trendLine,
+  trendArrow,
   trendDir,
   accentColor,
 }) {
@@ -24,44 +24,46 @@ function CoreHudCard({
       className={[
         "home-v5-hud-card",
         `home-v5-hud-card--${cardKey}`,
-        isStrategy ? "home-v5-hud-card--strategy" : "",
+        isStrategy ? "home-v5-hud-card--strategy" : "home-v5-hud-card--metric",
       ]
         .filter(Boolean)
         .join(" ")}
       style={style}
+      title={!isStrategy ? (trendLine ?? undefined) : undefined}
     >
       <span className="home-v5-hud-card__top-bar" aria-hidden="true" />
-      <p className="home-v5-hud-card__role">
-        {isStrategy || !symbol ? (
-          role
-        ) : (
-          <>
-            <span className="home-v5-hud-card__role-ko">{role}</span>
-            <span className="home-v5-hud-card__role-en">{symbol}</span>
-          </>
-        )}
-      </p>
-      <p className={`home-v5-hud-card__value${isStrategy ? " home-v5-hud-card__value--regime" : ""}`}>{value}</p>
       {!isStrategy ? (
         <>
-          <p className="home-v5-hud-card__timeline" title={trendLine ?? timelineText ?? "최근 10일 · 2일 간격"}>
-            <span className="home-v5-hud-card__timeline-track">{timelineText ?? "—"}</span>
-            <span className={`home-v5-hud-card__timeline-arrow home-v5-hud-card__timeline-arrow--${trendDir}`}>
+          <header className="home-v5-hud-card__head">
+            <p className="home-v5-hud-card__role">
+              <span className="home-v5-hud-card__role-ko">{role}</span>
+              <span className="home-v5-hud-card__role-en">{symbol}</span>
+            </p>
+            <span
+              className={`home-v5-hud-card__trend-arrow home-v5-hud-card__trend-arrow--${trendDir}`}
+              aria-hidden="true"
+            >
               {trendArrow ?? "→"}
             </span>
+          </header>
+          <div className="home-v5-hud-card__hero">
+            <p className="home-v5-hud-card__value">{value}</p>
+            <p className={`home-v5-hud-card__change-delta home-v5-hud-card__change-delta--${trendDir}`}>
+              {changeDeltaText ?? "—"}
+            </p>
+          </div>
+          <p className="home-v5-hud-card__timeline" title={trendLine ?? timelineText ?? "최근 10일 · 2일 간격"}>
+            {timelineText ?? "—"}
           </p>
-          <p className={`home-v5-hud-card__change home-v5-hud-card__change--${trendDir}`}>{changeText ?? "→ —"}</p>
-          <p className="home-v5-hud-card__data-status">
-            <span className="home-v5-hud-card__layer-k">상태</span>
-            <span className="home-v5-hud-card__layer-v">{dataStatusLabel ?? "—"}</span>
-          </p>
-          <p className="home-v5-hud-card__policy-hint">
-            <span className="home-v5-hud-card__layer-k">행동</span>
-            <span className="home-v5-hud-card__layer-v">{policyHint ?? "—"}</span>
-          </p>
+          <p className="home-v5-hud-card__data-status">{dataStatusLabel ?? "—"}</p>
+          <p className="home-v5-hud-card__policy-hint">{policyHint ?? "—"}</p>
         </>
       ) : (
-        <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine ?? policyHint ?? "—"}</p>
+        <>
+          <p className="home-v5-hud-card__role">{role}</p>
+          <p className="home-v5-hud-card__value home-v5-hud-card__value--regime">{value}</p>
+          <p className={`home-v5-hud-card__trend home-v5-hud-card__trend--${trendDir}`}>{trendLine ?? policyHint ?? "—"}</p>
+        </>
       )}
     </article>
   )
