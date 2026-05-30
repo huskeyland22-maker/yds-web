@@ -24,8 +24,10 @@ export { HOME_V5_CORE_METRIC_ORDER } from "./homeV5CoreMetricOrder.js"
  *   value: string
  *   trendLine: string
  *   timelineText: string
+ *   timelineTextMobile?: string
  *   changeText: string
  *   changeDeltaText: string
+ *   changeDeltaTextMobile?: string
  *   trendArrow: string
  *   trendDir: "up" | "down" | "flat"
  *   dataStatusLabel: string
@@ -86,8 +88,10 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
     value: Number.isFinite(n) ? fmtNum(n, digits) : "—",
     trendLine: trend.trendLine,
     timelineText: trend.timelineText,
+    timelineTextMobile: trend.timelineTextMobile,
     changeText: trend.changeText,
     changeDeltaText: trend.changeDeltaText,
+    changeDeltaTextMobile: trend.changeDeltaTextMobile,
     trendArrow: trend.trendArrow,
     trendDir: trend.trendDir,
     dataStatusLabel: resolveCoreMetricDataStatus(key, raw),

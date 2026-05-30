@@ -58,6 +58,38 @@ function formatTimelineValue(key, value) {
   return String(Math.round(value))
 }
 
+/** @param {HomeV5CoreKey} key @param {number} value */
+function formatTimelineValueMobile(key, value) {
+  if (!Number.isFinite(value)) return "—"
+  if (key === "vix") return String(Math.round(value))
+  if (key === "bofa") {
+    const n = Math.round(value * 10) / 10
+    return Number.isInteger(n) ? String(n) : n.toFixed(1)
+  }
+  return String(Math.round(value))
+}
+
+/**
+ * @param {HomeV5CoreKey} key
+ * @param {(number | null)[]} values
+ * @param {number} delta
+ */
+function buildTimelineTextMobile(key, values, delta) {
+  const labels = values.map((v) => formatTimelineValueMobile(key, v))
+  const tail = labels.length > 4 ? labels.slice(-4) : labels
+  const chain = tail.join(" → ")
+  if (chain.length <= 20 && !chain.includes("—")) return chain
+
+  const deltaText = formatChangeDeltaMobile(key, delta)
+  const signed =
+    deltaText === "0" || deltaText === "—"
+      ? deltaText
+      : deltaText.startsWith("+") || deltaText.startsWith("−")
+        ? deltaText
+        : `+${deltaText}`
+  return `최근 10일 ${signed}`
+}
+
 /** @param {HomeV5CoreKey} key @param {number} delta */
 function formatChangeDelta(key, delta) {
   if (!Number.isFinite(delta)) return "—"
@@ -71,6 +103,25 @@ function formatChangeDelta(key, delta) {
     return `${sign}${n}`
   }
   return `${sign}${abs.toFixed(1)}`
+}
+
+/** @param {HomeV5CoreKey} key @param {number} delta */
+export function formatChangeDeltaMobile(key, delta) {
+  if (!Number.isFinite(delta)) return "—"
+  const flatThreshold = FLAT_THRESHOLDS[key]
+  if (Math.abs(delta) < flatThreshold) return "0"
+  const sign = delta > 0 ? "+" : "−"
+  const abs = Math.abs(delta)
+  if (key === "fearGreed") return `${sign}${Math.round(abs)}`
+  if (key === "vix") {
+    if (abs >= 10) return `${sign}${Math.round(abs)}`
+    const one = Math.round(abs * 10) / 10
+    const text = Number.isInteger(one) ? String(one) : one.toFixed(1)
+    return `${sign}${text}`
+  }
+  const one = Math.round(abs * 10) / 10
+  const text = Number.isInteger(one) ? String(one) : one.toFixed(1)
+  return `${sign}${text}`
 }
 
 /** @param {number} delta @param {HomeV5CoreKey} key */
@@ -132,7 +183,9 @@ export function buildHomeV5CoreTrend(key, panicData, historyRows = []) {
   if (current == null) {
     return {
       timelineText: "—",
+      timelineTextMobile: "—",
       changeDeltaText: "—",
+      changeDeltaTextMobile: "—",
       changeText: "→ —",
       trendDir: "flat",
       trendArrow: "→",
@@ -158,11 +211,15 @@ export function buildHomeV5CoreTrend(key, panicData, historyRows = []) {
   const trendDir = classifyDirection(delta, key)
   const arrow = trendArrow(trendDir)
   const changeDeltaText = formatChangeDelta(key, delta)
+  const changeDeltaTextMobile = formatChangeDeltaMobile(key, delta)
+  const timelineTextMobile = buildTimelineTextMobile(key, values, delta)
   const changeText = `${arrow} ${changeDeltaText}`
 
   return {
     timelineText,
+    timelineTextMobile,
     changeDeltaText,
+    changeDeltaTextMobile,
     changeText,
     trendDir,
     trendArrow: arrow,

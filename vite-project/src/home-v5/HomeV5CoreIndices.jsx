@@ -8,7 +8,9 @@ function CoreHudCard({
   symbol,
   value,
   timelineText,
+  timelineTextMobile,
   changeDeltaText,
+  changeDeltaTextMobile,
   dataStatusLabel,
   policyHint,
   recentChangeLabel,
@@ -54,11 +56,20 @@ function CoreHudCard({
           <div className="home-v5-hud-card__hero">
             <p className="home-v5-hud-card__value">{value}</p>
             <p className={`home-v5-hud-card__change-delta home-v5-hud-card__change-delta--${trendDir}`}>
-              {changeDeltaText ?? "—"}
+              <span className="home-v5-hud-card__change-arrow-inline" aria-hidden="true">
+                {trendArrow ?? "→"}
+              </span>
+              <span className="home-v5-hud-card__change-delta-full">{changeDeltaText ?? "—"}</span>
+              <span className="home-v5-hud-card__change-delta-mobile">
+                {changeDeltaTextMobile ?? changeDeltaText ?? "—"}
+              </span>
             </p>
           </div>
           <p className="home-v5-hud-card__timeline" title={trendLine ?? timelineText ?? "최근 10일 · 2일 간격"}>
-            {timelineText ?? "—"}
+            <span className="home-v5-hud-card__timeline-full">{timelineText ?? "—"}</span>
+            <span className="home-v5-hud-card__timeline-mobile">
+              {timelineTextMobile ?? timelineText ?? "—"}
+            </span>
           </p>
           <p
             className="home-v5-hud-card__status-action"
@@ -78,7 +89,10 @@ function CoreHudCard({
               "—"
             )}
           </p>
-          <p className={`home-v5-hud-card__recent-change home-v5-hud-card__recent-change--${recentChangeTone ?? "flat"}`}>
+          <p
+            className={`home-v5-hud-card__recent-change home-v5-hud-card__recent-change--${recentChangeTone ?? "flat"}`}
+            title={recentChangeLabel ?? undefined}
+          >
             {recentChangeLabel ?? "—"}
           </p>
         </>
