@@ -3693,6 +3693,123 @@
     color: rgba(250, 250, 250, 0.98);
   }
 
+  .tactical-zone-macro-progress__allocation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 8px;
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .tactical-zone-macro-progress__allocation-label {
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .tactical-zone-macro-progress__allocation-val {
+    font-weight: 800;
+    color: rgba(226, 232, 240, 0.98);
+  }
+
+  .tactical-zone-recommend-track {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .tactical-zone-recommend-track__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tactical-zone-recommend-track__title {
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .tactical-zone-recommend-track__link {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(129, 140, 248, 0.95);
+    text-decoration: none;
+  }
+
+  .tactical-zone-recommend-track__link:hover {
+    text-decoration: underline;
+  }
+
+  .tactical-zone-recommend-track__list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+
+  .tactical-zone-recommend-track__item {
+    padding: 8px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .tactical-zone-recommend-track__item:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .tactical-zone-recommend-track__symbol-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .tactical-zone-recommend-track__symbol {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tactical-zone-recommend-track__return {
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .tactical-zone-recommend-track__return--up {
+    color: rgba(52, 211, 153, 0.98);
+  }
+
+  .tactical-zone-recommend-track__return--down {
+    color: rgba(248, 113, 113, 0.98);
+  }
+
+  .tactical-zone-recommend-track__return--flat {
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .tactical-zone-recommend-track__meta {
+    margin-top: 2px;
+    font-size: 10px;
+    color: rgba(148, 163, 184, 0.92);
+  }
+
+  .tactical-zone-recommend-track__price {
+    margin-top: 2px;
+    font-size: 11px;
+    color: rgba(203, 213, 225, 0.95);
+  }
+
   .tactical-zone-macro-progress__now {
     font-size: 9px;
     font-weight: 800;
@@ -11796,4 +11913,172 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.9);
   cursor: pointer;
   text-decoration: underline;
+}
+
+.panic-validation-page {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.panic-validation-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.panic-validation-page__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.panic-validation-page__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.panic-validation-page__link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(129, 140, 248, 0.95);
+  text-decoration: none;
+}
+
+.panic-validation-page__link:hover {
+  text-decoration: underline;
+}
+
+.panic-validation-panel {
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 18, 28, 0.55);
+}
+
+.panic-validation-panel__h2 {
+  margin: 0 0 0.65rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.98);
+}
+
+.panic-validation-panel__h3 {
+  margin: 0.85rem 0 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(203, 213, 225, 0.95);
+}
+
+.panic-validation-panel__note,
+.panic-validation-panel__bench {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: rgba(148, 163, 184, 0.92);
+}
+
+.panic-validation-panel__warn {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(251, 191, 36, 0.95);
+}
+
+.panic-validation-allocation {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.panic-validation-allocation__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.panic-validation-allocation__regime {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.96);
+}
+
+.panic-validation-allocation__split {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(203, 213, 225, 0.92);
+}
+
+.panic-validation-kpi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+@media (min-width: 640px) {
+  .panic-validation-kpi {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.panic-validation-kpi__card {
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.panic-validation-kpi__label {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.92);
+}
+
+.panic-validation-kpi__value {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.panic-validation-year-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.panic-validation-year-table th,
+.panic-validation-year-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+.panic-validation-year-table th {
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.panic-validation-year-table__up {
+  font-weight: 700;
+  color: rgba(52, 211, 153, 0.98);
+}
+
+.panic-validation-year-table__down {
+  font-weight: 700;
+  color: rgba(248, 113, 113, 0.98);
 }

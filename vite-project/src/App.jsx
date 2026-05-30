@@ -29,6 +29,7 @@ import CycleErrorBoundary from "./components/CycleErrorBoundary.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
+import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
 import HomeV5StrategyValidationPage from "./pages/HomeV5StrategyValidationPage.jsx"
@@ -993,6 +994,7 @@ function App() {
       path === "/cycle" ||
       path === "/macro-risk" ||
       path === "/trading-log" ||
+      path === "/panic-validation" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
     document.body.classList.toggle("scroll-doc-route", scrollDoc)
@@ -1357,6 +1359,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="트레이딩 로그">
                   <TradingLogPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/panic-validation"
+              element={
+                <SectionErrorBoundary label="패닉지수 검증">
+                  <PanicIndexValidationPage />
                 </SectionErrorBoundary>
               }
             />

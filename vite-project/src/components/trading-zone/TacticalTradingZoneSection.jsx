@@ -22,6 +22,7 @@ import { useTradingZoneStockEvaluations } from "../../trading-zone/useTradingZon
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalMarketStockBridge from "./TacticalMarketStockBridge.jsx"
+import TacticalRecommendationTrack from "./TacticalRecommendationTrack.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStockBridge.js"
 
@@ -292,6 +293,21 @@ export default function TacticalTradingZoneSection({
     [livePositions, evalMap, marketPolicyView, panicData, market],
   )
 
+  const recommendPriorityIds = useMemo(
+    () => marketStockBridge.priorities?.map((p) => p.id) ?? [],
+    [marketStockBridge.priorities],
+  )
+
+  const recommendLiveById = useMemo(() => {
+    /** @type {Record<string, { price?: number | null }>} */
+    const out = {}
+    for (const [id, ev] of Object.entries(evalMap)) {
+      const price = ev?.priceZones?.current
+      if (Number.isFinite(price)) out[id] = { price }
+    }
+    return out
+  }, [evalMap])
+
   const tacticalDegrade = useMemo(() => {
     const reasons = []
     /** @type {string[]} */
@@ -416,6 +432,11 @@ export default function TacticalTradingZoneSection({
             selectedId={selectedId}
             onSelect={setSelectedId}
             loading={mode === "live" && stockEvalLoading}
+          />
+          <TacticalRecommendationTrack
+            positions={livePositions}
+            priorityIds={recommendPriorityIds}
+            liveById={recommendLiveById}
           />
         </div>
       ) : null}

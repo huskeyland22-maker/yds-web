@@ -2,6 +2,7 @@ import {
   MACRO_V1_STATUS_BANDS,
   resolveMacroV1Status,
 } from "../../panic-v2/panicMacroV1Status.js"
+import { resolveMacroStageAllocation } from "../../trading-zone/macroStageAllocation.js"
 
 /** @type {{ id: string; short: string }[]} */
 const MACRO_PROGRESS_STEPS = [
@@ -17,6 +18,7 @@ const MACRO_PROGRESS_STEPS = [
  */
 export default function TacticalMacroProgress({ panicScore = null }) {
   const current = resolveMacroV1Status(panicScore)
+  const allocation = resolveMacroStageAllocation(current?.id)
   const currentId = current?.id ?? null
   const currentIndex = currentId != null ? MACRO_V1_STATUS_BANDS.findIndex((b) => b.id === currentId) : -1
 
@@ -38,6 +40,15 @@ export default function TacticalMacroProgress({ panicScore = null }) {
               {Math.round(panicScore)}
             </span>
           ) : null}
+        </p>
+      ) : null}
+
+      {allocation ? (
+        <p className="m-0 tactical-zone-macro-progress__allocation" role="status">
+          <span className="tactical-zone-macro-progress__allocation-label">권장 비중</span>
+          <span className="tactical-zone-macro-progress__allocation-val">
+            {allocation.stockLabel} · {allocation.cashLabel}
+          </span>
         </p>
       ) : null}
 

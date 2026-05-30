@@ -140,9 +140,9 @@ const SEED_POSITIONS = [
     target: "30",
     stopNum: 22,
     targetNum: 30,
-    currentPrice: 25,
+    currentPrice: 156,
     aux: ["10MA", "20MA"],
-    stageHistory: [{ stage: "interest", at: "2026-05-22" }],
+    stageHistory: [{ stage: "interest", at: "2026-05-22", price: 133, score: 58 }],
   },
   {
     id: "us-meta",
