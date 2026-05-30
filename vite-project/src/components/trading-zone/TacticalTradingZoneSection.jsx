@@ -18,11 +18,12 @@ import {
 } from "../../trading-zone/marketPolicyEngine.js"
 import { isDataTraceEnabled } from "../../utils/dataFlowTrace.js"
 import { buildTradingZoneStrategyState } from "../../trading-zone/tradingZoneStrategyEngine.js"
-import { buildTradingPriorityRanking } from "../../trading-zone/tradingZonePriorityEngine.js"
 import { useTradingZoneStockEvaluations } from "../../trading-zone/useTradingZoneStockEvaluations.js"
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
+import TacticalMarketStockBridge from "./TacticalMarketStockBridge.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
+import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStockBridge.js"
 
 /**
  * @param {{
@@ -206,17 +207,6 @@ export default function TacticalTradingZoneSection({
 
   const livePositions = mode === "live" ? enrichedPositions : strategyState.adjustedPositions
 
-  const priorityRanking = useMemo(
-    () =>
-      buildTradingPriorityRanking({
-        positions: livePositions.filter((p) => p.market === market),
-        panicData,
-        evalMap,
-      }),
-    [livePositions, panicData, market, evalMap],
-  )
-  const topCandidate = priorityRanking[0] ?? null
-
   const bucketGroups = useMemo(
     () => groupPositionsByBucket(market, livePositions),
     [market, livePositions],
@@ -259,6 +249,19 @@ export default function TacticalTradingZoneSection({
     () => ({ ...effectivePolicy, marketTransition, dataDelay: isStaleFeed }),
     [effectivePolicy, marketTransition, isStaleFeed],
   )
+
+  const marketStockBridge = useMemo(
+    () =>
+      buildMarketStockBridge({
+        positions: livePositions,
+        evalMap,
+        marketPolicy: marketPolicyView,
+        panicData,
+        market,
+      }),
+    [livePositions, evalMap, marketPolicyView, panicData, market],
+  )
+
   const transitionConfidence = marketTransition.transitionConfidence ?? 0
   const showTransitionTag = transitionConfidence >= 40
   const showTransitionHighlight = transitionConfidence >= 70
@@ -459,6 +462,12 @@ export default function TacticalTradingZoneSection({
       {!focusMode ? (
         <div className="tactical-trading-zone__engine">
           <TacticalEngineLinkBar link={engineLink} marketPolicy={marketPolicyView} hideTitle />
+          <TacticalMarketStockBridge
+            bridge={marketStockBridge}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            loading={mode === "live" && stockEvalLoading}
+          />
         </div>
       ) : null}
 
@@ -547,48 +556,6 @@ export default function TacticalTradingZoneSection({
             분석 모드
           </button>
         </div>
-      ) : null}
-
-      {!focusMode && priorityRanking.length ? (
-        <section className="tactical-trading-zone__priority-rank">
-          <p className="m-0 tactical-trading-zone__priority-rank-title">오늘 우선 감시</p>
-          <div className="tactical-trading-zone__priority-rank-list">
-            {priorityRanking.slice(0, 4).map((item, i) => (
-              <span key={item.symbol} className="tactical-trading-zone__priority-rank-item">
-                {i + 1}. {item.symbol} {item.score}
-              </span>
-            ))}
-          </div>
-          <p className="m-0 tactical-trading-zone__priority-rank-reason">
-            {stockEvalLoading
-              ? "종목 실데이터 동기화 중…"
-              : topCandidate?.reasons?.length
-                ? `근거: ${topCandidate.reasons.slice(0, 3).join(" · ")}`
-                : "근거: 거래량 · 이동평균 · 추세"}
-          </p>
-          {topCandidate ? (
-            <article className="tactical-trading-zone__top-card">
-              <p className="m-0 tactical-trading-zone__top-card-title">🔥 오늘 최우선 감시</p>
-              <p className="m-0 tactical-trading-zone__top-card-symbol">
-                {topCandidate.symbol} <span>{topCandidate.score}</span>
-              </p>
-              <p className="m-0 tactical-trading-zone__top-card-k">이유</p>
-              <ul className="m-0 tactical-trading-zone__top-card-list">
-                {topCandidate.reasons.slice(0, 4).map((r) => (
-                  <li key={r}>- {r}</li>
-                ))}
-              </ul>
-              <p className="m-0 tactical-trading-zone__top-card-k">행동</p>
-              <p className="m-0 tactical-trading-zone__top-card-action">{topCandidate.action}</p>
-              <p className="m-0 tactical-trading-zone__top-card-k">주의</p>
-              <ul className="m-0 tactical-trading-zone__top-card-list is-risk">
-                {topCandidate.risks.slice(0, 3).map((r) => (
-                  <li key={r}>- {r}</li>
-                ))}
-              </ul>
-            </article>
-          ) : null}
-        </section>
       ) : null}
 
       {mode === "live" && stockEvalLoading ? (

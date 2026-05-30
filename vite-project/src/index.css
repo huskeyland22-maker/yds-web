@@ -3058,6 +3058,14 @@
     letter-spacing: 0.01em;
   }
 
+  .tactical-zone-detail__stage-path {
+    margin-top: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
   .tactical-zone-stage-flow--legend {
     margin-top: 4px;
     margin-bottom: 5px;
@@ -3489,6 +3497,290 @@
   .tactical-zone-engine-link__meta {
     margin-top: 4px;
     padding: 0 2px;
+  }
+
+  /* 시장 상태 → 우선 종목 연결 */
+  .tactical-zone-stock-bridge {
+    margin-top: 8px;
+    padding: 8px 8px 9px;
+    border-radius: 10px;
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    background: rgba(8, 18, 32, 0.55);
+  }
+
+  .tactical-zone-stock-bridge--pending {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(14, 18, 28, 0.4);
+  }
+
+  .tactical-zone-stock-bridge__pending,
+  .tactical-zone-stock-bridge__sync {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .tactical-zone-stock-bridge__sync {
+    margin: 4px 0 6px;
+  }
+
+  .tactical-zone-stock-bridge__flow {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .tactical-zone-stock-bridge__flow-step {
+    min-width: 0;
+  }
+
+  .tactical-zone-stock-bridge__flow-k {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(148, 163, 184, 0.82);
+  }
+
+  .tactical-zone-stock-bridge__flow-headline {
+    margin-top: 1px;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: rgba(250, 204, 21, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__flow-action {
+    margin-top: 1px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .tactical-zone-stock-bridge__flow-focus {
+    margin-top: 1px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: rgba(125, 211, 252, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__flow-arrow {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(100, 116, 139, 0.9);
+    text-align: center;
+  }
+
+  .tactical-zone-stock-bridge__regime-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(253, 186, 116, 0.98);
+    background: rgba(249, 115, 22, 0.14);
+    border: 1px solid rgba(249, 115, 22, 0.28);
+    vertical-align: middle;
+  }
+
+  .tactical-zone-stock-bridge__rank {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .tactical-zone-stock-bridge__rank-item {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .tactical-zone-stock-bridge__pick {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    padding: 6px 7px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+    text-align: left;
+    color: inherit;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .tactical-zone-stock-bridge__pick:hover {
+    border-color: rgba(34, 211, 238, 0.35);
+    background: rgba(34, 211, 238, 0.08);
+  }
+
+  .tactical-zone-stock-bridge__pick--selected {
+    border-color: rgba(34, 211, 238, 0.45);
+    background: rgba(34, 211, 238, 0.12);
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
+  }
+
+  .tactical-zone-stock-bridge__pick--boost {
+    border-color: rgba(251, 146, 60, 0.32);
+  }
+
+  .tactical-zone-stock-bridge__pick-main {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .tactical-zone-stock-bridge__pick-rank {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .tactical-zone-stock-bridge__pick-symbol {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__pick-score {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: rgba(34, 211, 238, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__pick-stage {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(203, 213, 225, 0.9);
+  }
+
+  .tactical-zone-stock-bridge__boost-badge {
+    padding: 0 4px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 800;
+    color: rgba(253, 186, 116, 0.98);
+    background: rgba(249, 115, 22, 0.18);
+  }
+
+  .tactical-zone-stock-bridge__confidence {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .tactical-zone-stock-bridge__confidence-label {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.88);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tactical-zone-stock-bridge__confidence-bar {
+    flex: 1;
+    min-width: 48px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+
+  .tactical-zone-stock-bridge__confidence-fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.85), rgba(52, 211, 153, 0.9));
+  }
+
+  .tactical-zone-stock-bridge__confidence-level {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+    color: rgba(110, 231, 168, 0.95);
+  }
+
+  .tactical-zone-stock-bridge__path {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(148, 163, 184, 0.88);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tactical-zone-stock-bridge__entry {
+    margin-top: 8px;
+    padding-top: 7px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  .tactical-zone-stock-bridge__entry-k {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.85);
+  }
+
+  .tactical-zone-stock-bridge__entry-symbol {
+    margin-top: 2px;
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__entry-score {
+    margin-left: 6px;
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(34, 211, 238, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__entry-reasons {
+    margin-top: 4px;
+    padding-left: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(186, 198, 214, 0.92);
+  }
+
+  @media (min-width: 640px) {
+    .tactical-zone-stock-bridge__flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tactical-zone-stock-bridge__flow-arrow {
+      padding-top: 12px;
+    }
+
+    .tactical-zone-stock-bridge__path {
+      white-space: normal;
+    }
   }
 
   @media (min-width: 640px) {

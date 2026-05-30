@@ -20,6 +20,7 @@ import {
   formatStageHistoryLog,
 } from "../../trading-zone/tradingZoneStageHistory.js"
 import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneConfidenceEngine.js"
+import { buildStagePathDisplay } from "../../trading-zone/tradingZoneMarketStockBridge.js"
 /**
  * @param {{
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
@@ -53,6 +54,10 @@ export default function TacticalStockDetailPanel({
     risk: "리스크구간",
   }
   const historyLog = formatStageHistoryLog(position.stageHistory ?? [])
+  const stagePathDisplay = useMemo(
+    () => buildStagePathDisplay(position.stageHistory ?? []),
+    [position.stageHistory],
+  )
   const levels = useMemo(() => {
     const base = resolvePositionPriceLevels(position)
     const zones = stockEvaluation?.priceZones
@@ -343,6 +348,11 @@ export default function TacticalStockDetailPanel({
             <span aria-hidden>{badge.emoji}</span> {stageLabelById[position.stage] ?? badge.label}
           </span>
         </p>
+        {stagePathDisplay.path && stagePathDisplay.path !== "—" ? (
+          <p className="m-0 tactical-zone-detail__stage-path" title="최근 이동 경로">
+            {stagePathDisplay.path}
+          </p>
+        ) : null}
       </header>
 
       <div className="tactical-zone-detail__stage-center">
