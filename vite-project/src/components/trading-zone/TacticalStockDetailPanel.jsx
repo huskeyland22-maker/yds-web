@@ -197,7 +197,17 @@ export default function TacticalStockDetailPanel({
     [position.stage, keyActionItems],
   )
 
+  const riskFactors = useMemo(() => {
+    if (stockEvaluation?.dataReady && stockEvaluation.riskFactors?.length) {
+      return stockEvaluation.riskFactors
+    }
+    return []
+  }, [stockEvaluation])
+
   const entryRationale = useMemo(() => {
+    if (stockEvaluation?.dataReady && stockEvaluation.strengthHighlights?.length) {
+      return stockEvaluation.strengthHighlights
+    }
     if (stockEvaluation?.dataReady && stockEvaluation.entryRationale.length) {
       return stockEvaluation.entryRationale
     }
@@ -350,10 +360,20 @@ export default function TacticalStockDetailPanel({
             <div className="tactical-zone-detail__secondary-stack">
               {entryRationale.length ? (
                 <section className="tactical-zone-detail__entry-rationale">
-                  <p className="m-0 tactical-zone-detail__block-title">진입 근거</p>
+                  <p className="m-0 tactical-zone-detail__block-title">상승 요인</p>
                   <ul className="m-0 tactical-zone-detail__entry-rationale-list">
                     {entryRationale.map((line) => (
-                      <li key={line}>{line}</li>
+                      <li key={line}>✓ {line}</li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+              {riskFactors.length ? (
+                <section className="tactical-zone-detail__risk-factors">
+                  <p className="m-0 tactical-zone-detail__block-title">위험 요소</p>
+                  <ul className="m-0 tactical-zone-detail__entry-rationale-list">
+                    {riskFactors.map((line) => (
+                      <li key={line}>⚠ {line}</li>
                     ))}
                   </ul>
                 </section>

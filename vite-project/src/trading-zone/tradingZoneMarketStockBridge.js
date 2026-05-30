@@ -47,7 +47,7 @@ const REGIME_SYMBOL_BOOST = {
   interest: ["PLTR", "META", "NVDA", "TSLA"],
   pullback: ["SMH", "SOXL", "AVGO", "META"],
   trend: ["NVDA", "SMH", "실리콘투"],
-  dca: ["SOXL", "TSLL", "TQQQ"],
+  dca: ["SOXL", "TSLL", "TQQQ", "SMH"],
   panicBuy: ["SOXL", "TSLL", "TQQQ", "SMH"],
   overheated: ["META", "NVDA"],
 }
@@ -232,7 +232,12 @@ export function buildMarketStockBridge(input = {}) {
     const { path, segments } = buildStagePathDisplay(position.stageHistory)
 
     /** @type {string[]} */
-    const reasons = ev?.dataReady && ev.entryRationale.length ? [...ev.entryRationale] : []
+    const reasons =
+      ev?.dataReady && ev.strengthHighlights?.length
+        ? [...ev.strengthHighlights]
+        : ev?.dataReady && ev.entryRationale.length
+          ? [...ev.entryRationale]
+          : []
     if (regimeBoost) reasons.push("패닉지수 연계 우선")
     if (position.stage === focus.focusStage) {
       reasons.push(`${TRADING_STAGE_META[position.stage]?.label ?? position.stage} 구간 일치`)

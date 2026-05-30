@@ -2,6 +2,8 @@
  * 실전 매매 존 V2 — 1종목 1상태, 단계 이동 히스토리 확장 가능
  */
 
+import { mergePersistIntoPositions } from "./tradingZoneStagePersist.js"
+
 /** @typedef {'us' | 'kr'} TradingMarketId */
 /** @typedef {'interest' | 'pullback' | 'trend' | 'takeProfit' | 'risk'} TradingStageId */
 /** @typedef {'interest' | 'pullback' | 'trend' | 'takeProfit'} TradingBucketId */
@@ -165,6 +167,40 @@ const SEED_POSITIONS = [
     stageHistory: [{ stage: "interest", at: "2026-05-20" }],
   },
   {
+    id: "us-tsll",
+    symbol: "TSLL",
+    market: "us",
+    stage: "pullback",
+    entry: "12 ~ 13",
+    stop: "11",
+    target: "15",
+    stopNum: 11,
+    targetNum: 15,
+    currentPrice: 12.5,
+    aux: ["10MA", "20MA"],
+    stageHistory: [
+      { stage: "interest", at: "2026-05-12" },
+      { stage: "pullback", at: "2026-05-20" },
+    ],
+  },
+  {
+    id: "us-tqqq",
+    symbol: "TQQQ",
+    market: "us",
+    stage: "pullback",
+    entry: "58 ~ 62",
+    stop: "54",
+    target: "68",
+    stopNum: 54,
+    targetNum: 68,
+    currentPrice: 60,
+    aux: ["10MA", "20MA"],
+    stageHistory: [
+      { stage: "interest", at: "2026-05-14" },
+      { stage: "pullback", at: "2026-05-21" },
+    ],
+  },
+  {
     id: "us-soxl",
     symbol: "SOXL",
     market: "us",
@@ -285,7 +321,7 @@ export function stageToDisplayBucket(stage) {
 
 /** @returns {TradingZonePosition[]} */
 export function getTradingZonePositions() {
-  return SEED_POSITIONS
+  return mergePersistIntoPositions(SEED_POSITIONS)
 }
 
 /**

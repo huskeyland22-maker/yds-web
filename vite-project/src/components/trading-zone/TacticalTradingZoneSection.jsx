@@ -37,6 +37,13 @@ import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStoc
 function StockChip({ position, bucketId, selected, onSelect, evaluation = null }) {
   const badge = tradingStageBadge(position)
   const displayScore = evaluation?.dataReady ? evaluation.tacticalScore : null
+  const highlights =
+    evaluation?.dataReady && evaluation.strengthHighlights?.length
+      ? evaluation.strengthHighlights
+      : evaluation?.dataReady && evaluation.entryRationale?.length
+        ? evaluation.entryRationale.slice(0, 2)
+        : []
+  const risks = evaluation?.dataReady ? (evaluation.riskFactors ?? []).slice(0, 1) : []
   const strengthScore =
     displayScore ?? (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
   const strengthTone =
@@ -63,6 +70,7 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
       onClick={() => onSelect(position.id)}
       className={[
         "tactical-zone-chip",
+        evaluation?.dataReady ? "tactical-zone-chip--rich" : "",
         selected ? "tactical-zone-chip--selected" : "",
         bucketId === "pullback" ? "tactical-zone-chip--priority" : "",
         strengthTone === "strong" ? "tactical-zone-chip--strong" : "",
@@ -71,11 +79,30 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
     >
       <span className="tactical-zone-chip__main">
         <span className="tactical-zone-chip__name">{position.symbol}</span>
+        {displayScore != null ? (
+          <span className="tactical-zone-chip__conf" title="신뢰도">
+            신뢰도 {evaluation.confidence}
+          </span>
+        ) : null}
         {trendLabel ? <span className="tactical-zone-chip__sub">{trendLabel}</span> : null}
       </span>
       {displayScore != null ? (
         <span className="tactical-zone-chip__score" title="실데이터 종목 점수">
           {displayScore}
+        </span>
+      ) : null}
+      {highlights.length || risks.length ? (
+        <span className="tactical-zone-chip__signals">
+          {highlights.map((line) => (
+            <span key={`up-${line}`} className="tactical-zone-chip__signal tactical-zone-chip__signal--up">
+              ✓ {line}
+            </span>
+          ))}
+          {risks.map((line) => (
+            <span key={`risk-${line}`} className="tactical-zone-chip__signal tactical-zone-chip__signal--risk">
+              ⚠ {line}
+            </span>
+          ))}
         </span>
       ) : null}
       <span
@@ -101,11 +128,19 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
  * }} props
  */
 function BucketCard({ title, bucketId, positions, selectedId, onSelect, evalMap = {} }) {
+  const sorted = useMemo(() => {
+    return [...positions].sort((a, b) => {
+      const sa = evalMap[a.id]?.dataReady ? evalMap[a.id].tacticalScore : 0
+      const sb = evalMap[b.id]?.dataReady ? evalMap[b.id].tacticalScore : 0
+      return sb - sa
+    })
+  }, [positions, evalMap])
+
   return (
     <div className="tactical-zone-bucket" data-bucket={bucketId}>
       <p className="m-0 tactical-zone-bucket__title">{title}</p>
       <div className="tactical-zone-bucket__list">
-        {positions.length === 0 ? (
+        {sorted.length === 0 ? (
           bucketId === "takeProfit" ? (
             <ul className="tactical-zone-bucket__empty-stack">
               <li className="tactical-zone-bucket__empty">
@@ -125,7 +160,7 @@ function BucketCard({ title, bucketId, positions, selectedId, onSelect, evalMap 
             <span className="tactical-zone-bucket__empty">—</span>
           )
         ) : (
-          positions.map((p) => (
+          sorted.map((p) => (
             <StockChip
               key={p.id}
               position={p}
@@ -193,15 +228,25 @@ export default function TacticalTradingZoneSection({
   )
 
   const strategyState = useMemo(
-    () => buildTradingZoneStrategyState({ positions, panicData, engineLink }),
-    [positions, panicData, engineLink],
+    () =>
+      buildTradingZoneStrategyState({
+        positions,
+        panicData,
+        engineLink,
+        disableStageShift: mode === "live",
+      }),
+    [positions, panicData, engineLink, mode],
   )
+
+  const baseMarketPolicy = useMemo(() => buildMarketPolicy({ panicData }), [panicData])
 
   const { evalMap, enrichedPositions, loading: stockEvalLoading } = useTradingZoneStockEvaluations({
     positions: strategyState.adjustedPositions,
     market,
     panicData,
     macroBehavior: strategyState.behavior,
+    marketPolicy: baseMarketPolicy,
+    cycleScore,
     enabled: mode === "live",
   })
 

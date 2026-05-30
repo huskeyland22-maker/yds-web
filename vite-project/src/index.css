@@ -1673,6 +1673,7 @@
 
   .tactical-zone-chip {
     display: flex;
+    flex-wrap: wrap;
     width: 100%;
     min-height: 36px;
     align-items: center;
@@ -1759,6 +1760,47 @@
     color: rgba(34, 211, 238, 0.98);
     background: rgba(34, 211, 238, 0.12);
     border: 1px solid rgba(34, 211, 238, 0.28);
+  }
+
+  .tactical-zone-chip--rich {
+    min-height: 52px;
+    align-items: flex-start;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .tactical-zone-chip__conf {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.92);
+    line-height: 1.15;
+  }
+
+  .tactical-zone-chip__signals {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 100%;
+    gap: 1px;
+    min-width: 0;
+    margin-top: 2px;
+  }
+
+  .tactical-zone-chip__signal {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tactical-zone-chip__signal--up {
+    color: rgba(110, 231, 168, 0.95);
+  }
+
+  .tactical-zone-chip__signal--risk {
+    color: rgba(252, 165, 165, 0.92);
   }
 
   .tactical-trading-zone__stock-sync {

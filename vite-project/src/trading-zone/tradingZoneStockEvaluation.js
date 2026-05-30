@@ -18,6 +18,8 @@ import { resolvePositionApiCode } from "./tradingZonePositionRegistry.js"
  *   signalLabel: string
  *   suggestedStage: TradingStageId
  *   entryRationale: string[]
+ *   strengthHighlights: string[]
+ *   riskFactors: string[]
  *   priceZones: {
  *     current: number | null
  *     entry: string
@@ -99,10 +101,61 @@ export function mapSignalToTradingStage(signalId, ctx = {}) {
 }
 
 /**
+ * @param {ReturnType<typeof computeStockSignal>} signal
+ * @param {ReturnType<typeof extractStockEvalInputs>} inputs
+ */
+export function buildStrengthHighlights(signal, inputs) {
+  /** @type {string[]} */
+  const lines = []
+  if (signal.id === "trend") lines.push("추세 유지")
+  if (signal.id === "pullback") lines.push("눌림 구간")
+  if (signal.id === "watch") lines.push("관망·대기")
+
+  const price = inputs.price
+  const ma20 = inputs.ma20
+  if (price != null && ma20 != null && price >= ma20) lines.push("20일선 위")
+  if (inputs.volumeChangePct != null && inputs.volumeChangePct >= 12) lines.push("거래량 증가")
+  else if (inputs.volumeRatio != null && inputs.volumeRatio >= 1.3) lines.push("거래량 증가")
+
+  for (const r of buildEntryRationale(inputs)) {
+    if (r.includes("20MA") && !lines.includes("20일선 위")) lines.push("20일선 위")
+    if (r.includes("거래량 증가") && !lines.includes("거래량 증가")) lines.push("거래량 증가")
+  }
+
+  return [...new Set(lines)].slice(0, 4)
+}
+
+/**
+ * @param {ReturnType<typeof computeStockSignal>} signal
+ * @param {ReturnType<typeof extractStockEvalInputs>} inputs
+ */
+export function buildRiskFactors(signal, inputs) {
+  /** @type {string[]} */
+  const risks = []
+  const price = inputs.price
+  const ma20 = inputs.ma20
+
+  if (inputs.rsi14 != null && inputs.rsi14 >= 72) risks.push("RSI 과열")
+  if (price != null && ma20 != null && price < ma20 * 0.98) risks.push("20MA 하회")
+  if (inputs.position52w != null && inputs.position52w >= 85) risks.push("52주 고점 근접")
+  if (signal.id === "overheat") risks.push("과열 신호")
+  if (inputs.volumeChangePct != null && inputs.volumeChangePct <= -15) risks.push("거래량 이탈")
+
+  return [...new Set(risks)].slice(0, 3)
+}
+
+/**
  * @param {ReturnType<typeof extractStockEvalInputs>} inputs
  * @param {object | null} panicData
+ * @param {{
+ *   symbol?: string
+ *   marketState?: string
+ *   regimeId?: string | null
+ *   cycleScore?: number | null
+ *   positionStage?: string
+ * }} [ctx]
  */
-export function computeTacticalStockScore(inputs, panicData = null) {
+export function computeTacticalStockScore(inputs, panicData = null, ctx = {}) {
   const signal = computeStockSignal({
     price: inputs.price,
     ma10: inputs.ma10,
@@ -135,6 +188,32 @@ export function computeTacticalStockScore(inputs, panicData = null) {
   if (vix != null && vix < 22) score += 3
   if (fg != null && fg >= 35 && fg <= 68) score += 2
   if (vix != null && vix >= 28) score -= 6
+
+  const { symbol, marketState, regimeId, cycleScore, positionStage } = ctx
+  const sym = String(symbol ?? "").toUpperCase()
+
+  if (marketState === "panic") score -= 5
+  else if (marketState === "overheat") score -= 4
+  else if (marketState === "pullback" || marketState === "caution") score += 2
+
+  const regimeBoost = {
+    neutral: ["SMH", "META", "PLTR", "NVDA"],
+    interest: ["PLTR", "META", "NVDA"],
+    dca: ["SOXL", "TSLL", "TQQQ"],
+    panicBuy: ["SOXL", "TSLL", "TQQQ", "SMH"],
+    pullback: ["SMH", "SOXL", "AVGO"],
+    overheated: ["META", "NVDA"],
+  }
+  const boostList = regimeId ? regimeBoost[regimeId] : null
+  if (boostList?.some((s) => sym === s || sym.includes(s))) score += 8
+
+  if (cycleScore != null && Number.isFinite(cycleScore)) {
+    if (cycleScore >= 70) score += 3
+    if (cycleScore <= 25) score -= 4
+  }
+
+  if (positionStage === "trend" && signal.id === "trend") score += 4
+  if (positionStage === "pullback" && signal.id === "pullback") score += 3
 
   return Math.max(35, Math.min(99, Math.round(score)))
 }
@@ -203,9 +282,14 @@ export function computeAutoPriceZones(position, inputs) {
  * @param {TradingZonePosition} position
  * @param {object | null} apiBody
  * @param {object | null} [panicData]
+ * @param {{
+ *   marketState?: string
+ *   regimeId?: string | null
+ *   cycleScore?: number | null
+ * }} [evalContext]
  * @returns {TradingZoneStockEvaluation}
  */
-export function evaluateStockFromApi(position, apiBody, panicData = null) {
+export function evaluateStockFromApi(position, apiBody, panicData = null, evalContext = {}) {
   const fetchedAt = new Date().toISOString()
   if (!apiBody || apiBody.error) {
     return {
@@ -217,6 +301,8 @@ export function evaluateStockFromApi(position, apiBody, panicData = null) {
       signalLabel: "관망",
       suggestedStage: position.stage,
       entryRationale: [],
+      strengthHighlights: [],
+      riskFactors: [],
       priceZones: null,
       fetchedAt,
       error: apiBody?.message ?? "no data",
@@ -234,6 +320,8 @@ export function evaluateStockFromApi(position, apiBody, panicData = null) {
       signalLabel: "관망",
       suggestedStage: position.stage,
       entryRationale: [],
+      strengthHighlights: [],
+      riskFactors: [],
       priceZones: null,
       fetchedAt,
       error: "missing price",
@@ -251,7 +339,13 @@ export function evaluateStockFromApi(position, apiBody, panicData = null) {
   })
 
   const priceZones = computeAutoPriceZones(position, inputs)
-  const tacticalScore = computeTacticalStockScore(inputs, panicData)
+  const tacticalScore = computeTacticalStockScore(inputs, panicData, {
+    symbol: position.symbol,
+    marketState: evalContext.marketState,
+    regimeId: evalContext.regimeId,
+    cycleScore: evalContext.cycleScore,
+    positionStage: position.stage,
+  })
   const targetNum = priceZones?.targetNum ?? toNum(position.targetNum)
   const suggestedStage = mapSignalToTradingStage(signal.id, {
     price: inputs.price,
@@ -260,6 +354,8 @@ export function evaluateStockFromApi(position, apiBody, panicData = null) {
     targetNum,
   })
   const entryRationale = buildEntryRationale(inputs)
+  const strengthHighlights = buildStrengthHighlights(signal, inputs)
+  const riskFactors = buildRiskFactors(signal, inputs)
   const confidence = Math.max(40, Math.min(99, Math.round(tacticalScore * 0.92 + (inputs.ma20 != null ? 5 : 0))))
 
   return {
@@ -271,6 +367,8 @@ export function evaluateStockFromApi(position, apiBody, panicData = null) {
     signalLabel: signal.status,
     suggestedStage,
     entryRationale,
+    strengthHighlights,
+    riskFactors,
     priceZones,
     fetchedAt,
   }
@@ -323,7 +421,7 @@ export function resolveEvaluatedStage(current, suggested, score, macroBehavior =
 function mergeEvaluationIntoPosition(position, evaluation, at, macroBehavior) {
   if (!evaluation.dataReady) return position
 
-  const nextStage = resolveEvaluatedStage(
+  let nextStage = resolveEvaluatedStage(
     position.stage,
     evaluation.suggestedStage,
     evaluation.tacticalScore,
@@ -331,6 +429,11 @@ function mergeEvaluationIntoPosition(position, evaluation, at, macroBehavior) {
   )
 
   const zones = evaluation.priceZones
+  const price = zones?.current ?? position.currentPrice
+  if (zones?.stopNum != null && price != null && price < zones.stopNum) {
+    nextStage = "risk"
+  }
+
   /** @type {TradingZonePosition} */
   let next = {
     ...position,

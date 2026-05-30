@@ -37,9 +37,15 @@ function withShiftedStage(p, nextStage, at) {
  *   positions: TradingZonePosition[]
  *   panicData?: object | null
  *   engineLink?: { actions?: string[]; actionSummary?: string } | null
+ *   disableStageShift?: boolean
  * }} input
  */
-export function buildTradingZoneStrategyState({ positions, panicData = null, engineLink = null }) {
+export function buildTradingZoneStrategyState({
+  positions,
+  panicData = null,
+  engineLink = null,
+  disableStageShift = false,
+}) {
   const vix = toNum(panicData?.vix)
   const fg = toNum(panicData?.fearGreed)
   const hy = toNum(panicData?.highYield ?? panicData?.hyOas)
@@ -51,6 +57,38 @@ export function buildTradingZoneStrategyState({ positions, panicData = null, eng
     (fg != null && fg >= 22 && fg <= 46) &&
     (vix == null || vix <= 30) &&
     (hy == null || hy <= 5.7)
+
+  const behavior = {
+    reduceTrend: marketRiskUp,
+    increasePullbackWait: marketRiskUp,
+    restrictChasing: marketRiskUp,
+    strongerTakeProfitWarning: marketRiskUp,
+    enableScaleIn: panicRecoveryEarly,
+  }
+
+  if (disableStageShift) {
+    const banner =
+      engineLink?.actionSummary ||
+      (marketRiskUp
+        ? "시장 위험 증가 → 눌림 대기 우선"
+        : panicRecoveryEarly
+          ? "패닉 회복 초기 → 관심 종목 확대"
+          : "시장 중립 → 선별 대응 유지")
+    return {
+      adjustedPositions: positions,
+      banner,
+      transitions: [],
+      behavior,
+      backtestSeed: {
+        averageHoldingDays: null,
+        winRate: null,
+        maxDrawdown: null,
+        targetHitRate: null,
+        sampleSize: positions.length,
+        updatedAt: date,
+      },
+    }
+  }
 
   /** @type {string[]} */
   const transitions = []
@@ -78,14 +116,6 @@ export function buildTradingZoneStrategyState({ positions, panicData = null, eng
     : panicRecoveryEarly
       ? "패닉 회복 초기 → 관심 종목 확대"
       : engineLink?.actionSummary || "시장 중립 → 선별 대응 유지"
-
-  const behavior = {
-    reduceTrend: marketRiskUp,
-    increasePullbackWait: marketRiskUp,
-    restrictChasing: marketRiskUp,
-    strongerTakeProfitWarning: marketRiskUp,
-    enableScaleIn: panicRecoveryEarly,
-  }
 
   // 향후 백테스트 연결용 준비 구조 (현재는 런타임 placeholder)
   const backtestSeed = {
