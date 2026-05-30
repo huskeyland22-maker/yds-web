@@ -13,7 +13,6 @@ import { buildTradingZoneEngineLink } from "../../trading-zone/tradingZoneEngine
 import {
   appendTransitionHistory,
   buildMarketPolicy,
-  buildPolicyBriefing,
   detectMarketTransition,
 } from "../../trading-zone/marketPolicyEngine.js"
 import { isDataTraceEnabled } from "../../utils/dataFlowTrace.js"
@@ -38,13 +37,12 @@ import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStoc
 function StockChip({ position, bucketId, selected, onSelect, evaluation = null }) {
   const badge = tradingStageBadge(position)
   const displayScore = evaluation?.dataReady ? evaluation.tacticalScore : null
-  const highlights =
-    evaluation?.dataReady && evaluation.strengthHighlights?.length
-      ? evaluation.strengthHighlights
-      : evaluation?.dataReady && evaluation.entryRationale?.length
-        ? evaluation.entryRationale.slice(0, 2)
-        : []
-  const risks = evaluation?.dataReady ? (evaluation.riskFactors ?? []).slice(0, 1) : []
+  const coreReason =
+    evaluation?.dataReady && evaluation.strengthHighlights?.[0]
+      ? evaluation.strengthHighlights[0]
+      : evaluation?.dataReady && evaluation.entryRationale?.[0]
+        ? evaluation.entryRationale[0]
+        : null
   const strengthScore =
     displayScore ?? (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
   const strengthTone =
@@ -92,19 +90,8 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
           {displayScore}
         </span>
       ) : null}
-      {highlights.length || risks.length ? (
-        <span className="tactical-zone-chip__signals">
-          {highlights.map((line) => (
-            <span key={`up-${line}`} className="tactical-zone-chip__signal tactical-zone-chip__signal--up">
-              ✓ {line}
-            </span>
-          ))}
-          {risks.map((line) => (
-            <span key={`risk-${line}`} className="tactical-zone-chip__signal tactical-zone-chip__signal--risk">
-              ⚠ {line}
-            </span>
-          ))}
-        </span>
+      {coreReason ? (
+        <span className="tactical-zone-chip__signal tactical-zone-chip__signal--up">✓ {coreReason}</span>
       ) : null}
       <span
         className="tactical-zone-chip__badge"
@@ -202,10 +189,6 @@ export default function TacticalTradingZoneSection({
     if (typeof window === "undefined") return false
     return window.matchMedia("(max-width: 640px)").matches
   })
-  const [briefIdx, setBriefIdx] = useState(0)
-  const [briefFade, setBriefFade] = useState(false)
-  const [liveAlerts, setLiveAlerts] = useState(/** @type {string[]} */ ([]))
-  const [prevStage, setPrevStage] = useState(/** @type {string | null} */ (null))
   const [marketTransition, setMarketTransition] = useState(() => ({
     changed: false,
     transitionState: "no-change",
@@ -259,6 +242,11 @@ export default function TacticalTradingZoneSection({
     [market, livePositions],
   )
 
+  const visibleBuckets = useMemo(
+    () => TRADING_BUCKET_ORDER.filter((bucketId) => (bucketGroups[bucketId]?.length ?? 0) > 0),
+    [bucketGroups],
+  )
+
   const marketPositions = useMemo(
     () => livePositions.filter((p) => p.market === market),
     [livePositions, market],
@@ -309,10 +297,6 @@ export default function TacticalTradingZoneSection({
     [livePositions, evalMap, marketPolicyView, panicData, market],
   )
 
-  const transitionConfidence = marketTransition.transitionConfidence ?? 0
-  const showTransitionTag = transitionConfidence >= 40
-  const showTransitionHighlight = transitionConfidence >= 70
-  const showTransitionStrong = transitionConfidence >= 85
   const tacticalDegrade = useMemo(() => {
     const reasons = []
     /** @type {string[]} */
@@ -366,68 +350,25 @@ export default function TacticalTradingZoneSection({
     window.__YDS_POLICY__ = dump
     console.table([dump])
   }, [marketPolicyView])
-  const marketTemperature = useMemo(() => {
-    if (marketPolicyView.marketState === "panic") return { emoji: "🔴", label: "패닉", tone: "panic" }
-    if (marketPolicyView.marketState === "overheat") return { emoji: "🟠", label: "과열", tone: "hot" }
-    if (marketPolicyView.marketState === "pullback" || marketPolicyView.marketState === "caution") {
-      return { emoji: "🟡", label: "경계", tone: "warn" }
-    }
-    return { emoji: "🟢", label: "안정", tone: "stable" }
-  }, [marketPolicyView])
-
-  const briefLines = useMemo(() => {
-    const fg = Number(panicData?.fearGreed)
+  const aiBriefSummary = useMemo(() => {
     const vix = Number(panicData?.vix)
-    const base = [
-      Number.isFinite(vix) && vix < 20 ? "VIX 안정 유지" : "VIX 변동성 확대 주의",
-      Number.isFinite(fg) && fg >= 65 ? "CNN 탐욕 유지" : "CNN 중립~경계 구간",
-      `${marketPolicyView.sectorBias.label}`,
-      (selectedPosition?.stageHistory?.length ?? 0) <= 1 ? "거래량 감소 주의" : "거래량 흐름 정상",
-    ]
-    return base
-  }, [panicData, selectedPosition, marketPolicyView.sectorBias.label])
+    const state = marketPolicyView.marketState ?? "neutral"
+    let posture = "종목 탐색 우세"
+    if (state === "overheat" || state === "panic") posture = "현금·방어 우세"
+    else if (state === "pullback" || state === "caution") posture = "눌림 대기 우세"
+    else if (Number.isFinite(vix) && vix >= 22) posture = "변동성 경계 우세"
 
-  const aiBriefing = useMemo(() => {
-    const volatility =
-      Number.isFinite(Number(panicData?.vix)) && Number(panicData?.vix) >= 24
-        ? "변동성은 높아졌고"
-        : "변동성은 안정적이나"
-    const strengthLine = showTransitionStrong
-      ? "강한 변화 구간으로 행동 강도를 즉시 재조정합니다."
-      : showTransitionHighlight
-        ? "의미 있는 변화가 감지되어 행동 우선순위를 조정합니다."
-        : showTransitionTag
-          ? "약한 변화 신호는 내부 추적 중심으로 반영합니다."
-          : "노이즈 구간은 관찰 중심으로 유지합니다."
-    return `현재 시장은 ${buildPolicyBriefing(marketPolicyView)} ${volatility} 거래량 변화가 나타나고 있습니다. ${strengthLine}`
-  }, [panicData, marketPolicyView, showTransitionStrong, showTransitionHighlight, showTransitionTag])
+    const caution = marketPolicyView.actionLines?.caution ?? "추격 금지"
+    const chaseLine = /추격/.test(caution) ? caution : "추격 금지"
 
-  useEffect(() => {
-    const delay = 6500
-    const id = setInterval(() => {
-      setBriefFade(true)
-      setTimeout(() => {
-        setBriefIdx((v) => (v + 1) % Math.max(briefLines.length, 1))
-        setBriefFade(false)
-      }, 220)
-    }, delay)
-    return () => clearInterval(id)
-  }, [briefLines.length])
+    const symbols = marketStockBridge.priorities
+      .slice(0, 3)
+      .map((p) => p.symbol)
+      .join(" · ")
+    const priorityLine = symbols ? `우선 종목 ${symbols}` : "우선 종목 선정 중"
 
-  useEffect(() => {
-    const alerts = []
-    const stage = selectedPosition?.stage ?? null
-    if (prevStage && stage && prevStage !== stage) {
-      alerts.push(stage === "interest" || stage === "pullback" || stage === "trend" ? "🟢 상태 회복 감지" : "🔴 단기 과열 진입 가능성")
-    }
-    if (showTransitionTag) {
-      alerts.push(showTransitionStrong ? `🚨 강한 변화 감지 ${marketTransition.directionTag}` : marketTransition.directionTag)
-    }
-    if ((selectedPosition?.stageHistory?.length ?? 0) <= 1) alerts.push("🟡 거래량 둔화 시작")
-    const next = alerts.slice(0, 2)
-    setLiveAlerts(next)
-    setPrevStage(stage)
-  }, [selectedPosition, prevStage, marketTransition, showTransitionTag, showTransitionStrong])
+    return [posture, chaseLine, priorityLine]
+  }, [panicData, marketPolicyView, marketStockBridge.priorities])
 
   if (tacticalDegrade.fatal) {
     return (
@@ -487,42 +428,11 @@ export default function TacticalTradingZoneSection({
       {!focusMode ? (
         <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
           <p className="m-0 tactical-trading-zone__ai-title">🤖 AI 브리핑</p>
-          <p className="m-0 tactical-trading-zone__ai-body">{aiBriefing}</p>
-          <div className="tactical-trading-zone__ai-inline">
-            <span
-              className={[
-                "tactical-trading-zone__ai-rotating",
-                briefFade ? "is-fading" : "",
-              ].join(" ")}
-            >
-              - {briefLines[briefIdx] ?? "시장 상태 점검 중"}
-            </span>
-            <span className={["tactical-trading-zone__temp", `is-${marketTemperature.tone}`].join(" ")}>
-              {marketTemperature.emoji} {marketTemperature.label}
-            </span>
-          </div>
-          {liveAlerts.length || strategyState.transitions.length ? (
-            <div className="tactical-trading-zone__alerts">
-              {liveAlerts.map((a) => (
-                <span key={a} className="tactical-trading-zone__alert-item">
-                  {a}
-                </span>
-              ))}
-              {strategyState.transitions.map((t) => (
-                <span key={t} className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
-                  ⚙ {t}
-                </span>
-              ))}
-              {transitionHistory.length ? (
-                <span className="tactical-trading-zone__alert-item tactical-trading-zone__alert-item--engine">
-                  🧭 최근전환 {transitionHistory[transitionHistory.length - 1]?.marketState} ({transitionHistory[transitionHistory.length - 1]?.transitionConfidence})
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-          <p className="m-0 tactical-trading-zone__backtest-seed">
-            백테스트 준비: 평균 유지기간 · 승률 · MDD · 목표 도달률 (샘플 {strategyState.backtestSeed.sampleSize})
-          </p>
+          <ul className="m-0 tactical-trading-zone__ai-lines">
+            {aiBriefSummary.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
         </section>
       ) : null}
 
@@ -572,19 +482,24 @@ export default function TacticalTradingZoneSection({
         ))}
       </div>
 
-      <div className="tactical-trading-zone__buckets">
-        {TRADING_BUCKET_ORDER.map((bucketId) => (
-          <BucketCard
-            key={bucketId}
-            bucketId={bucketId}
-            title={TRADING_BUCKET_META[bucketId].title}
-            positions={bucketGroups[bucketId]}
-            selectedId={selectedId}
-            evalMap={evalMap}
-            onSelect={setSelectedId}
-          />
-        ))}
-      </div>
+      {visibleBuckets.length ? (
+        <div
+          className="tactical-trading-zone__buckets"
+          style={{ "--bucket-cols": visibleBuckets.length }}
+        >
+          {visibleBuckets.map((bucketId) => (
+            <BucketCard
+              key={bucketId}
+              bucketId={bucketId}
+              title={TRADING_BUCKET_META[bucketId].title}
+              positions={bucketGroups[bucketId]}
+              selectedId={selectedId}
+              evalMap={evalMap}
+              onSelect={setSelectedId}
+            />
+          ))}
+        </div>
+      ) : null}
 
       {selectedPosition ? (
         <div className="tactical-trading-zone__detail">

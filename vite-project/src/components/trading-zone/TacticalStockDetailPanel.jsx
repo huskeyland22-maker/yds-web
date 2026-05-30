@@ -1,11 +1,6 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import { TRADING_STAGE_META, tradingStageBadge } from "../../trading-zone/tacticalTradingZoneData.js"
 import TacticalZoneAuxPanel from "./TacticalZoneAuxPanel.jsx"
-import {
-  buildTradingCoreMetrics,
-  isCoreMetricPlaceholder,
-  TRADING_CORE_METRIC_FIELDS,
-} from "../../trading-zone/tradingZoneCoreMetrics.js"
 import {
   computeTradingZoneProgress,
   resolvePositionPriceLevels,
@@ -117,27 +112,6 @@ export default function TacticalStockDetailPanel({
     }
   }, [position, stockEvaluation])
   const progress = computeTradingZoneProgress(levels)
-  const coreMetrics = useMemo(() => buildTradingCoreMetrics(position), [position])
-  const [detailsOpen, setDetailsOpen] = useState(false)
-
-  const strategicLabelByKey = {
-    expectedReturn: "단기 전략",
-    upside: "중기 전략",
-    stopRisk: "장기 전략",
-    weight: "실행 신호",
-  }
-
-  useEffect(() => {
-    setDetailsOpen(false)
-  }, [position.id])
-
-  const confidence = useMemo(() => {
-    const base = buildTradingConfidenceBreakdown({ position, panicData, activeAux: new Set(position.aux ?? []) })
-    if (stockEvaluation?.dataReady) {
-      return { ...base, score: stockEvaluation.confidence }
-    }
-    return base
-  }, [position, panicData, stockEvaluation])
 
   const policy = useMemo(
     () => marketPolicy ?? buildMarketPolicy({ panicData, position }),
@@ -171,26 +145,34 @@ export default function TacticalStockDetailPanel({
     [position.stage, keyActionItems],
   )
 
-  const riskFactors = useMemo(() => {
-    if (stockEvaluation?.dataReady && stockEvaluation.riskFactors?.length) {
-      return stockEvaluation.riskFactors
+  const entryRationale = useMemo(() => {
+    if (stockEvaluation?.dataReady && stockEvaluation.strengthHighlights?.length) {
+      return stockEvaluation.strengthHighlights.slice(0, 3)
+    }
+    if (stockEvaluation?.dataReady && stockEvaluation.entryRationale.length) {
+      return stockEvaluation.entryRationale.slice(0, 3)
     }
     return []
   }, [stockEvaluation])
 
-  const entryRationale = useMemo(() => {
-    if (stockEvaluation?.dataReady && stockEvaluation.strengthHighlights?.length) {
-      return stockEvaluation.strengthHighlights
-    }
-    if (stockEvaluation?.dataReady && stockEvaluation.entryRationale.length) {
-      return stockEvaluation.entryRationale
+  const riskFactors = useMemo(() => {
+    if (stockEvaluation?.dataReady && stockEvaluation.riskFactors?.length) {
+      return stockEvaluation.riskFactors.slice(0, 2)
     }
     return []
   }, [stockEvaluation])
+
+  const confidence = useMemo(() => {
+    const base = buildTradingConfidenceBreakdown({ position, panicData, activeAux: new Set(position.aux ?? []) })
+    if (stockEvaluation?.dataReady) {
+      return { ...base, score: stockEvaluation.confidence }
+    }
+    return base
+  }, [position, panicData, stockEvaluation])
 
   return (
     <div
-      className="tactical-zone-detail tactical-zone-detail--simple"
+      className="tactical-zone-detail tactical-zone-detail--simple tactical-zone-detail--compact"
       role="region"
       aria-label={`${position.symbol} 상세`}
       data-stage={position.stage}
@@ -204,6 +186,10 @@ export default function TacticalStockDetailPanel({
               {stockEvaluation.tacticalScore}
             </span>
           ) : null}
+          <span className="tactical-zone-detail__trust" title="신뢰도">
+            {" "}
+            · 신뢰 {confidence.score}
+          </span>
         </p>
         {stockEvalLoading ? (
           <p className="m-0 tactical-zone-detail__eval-hint" role="status">
@@ -212,16 +198,11 @@ export default function TacticalStockDetailPanel({
         ) : null}
       </header>
 
-      <div className="tactical-zone-detail__aux-wrap">
-        <p className="m-0 tactical-zone-detail__section-label">보조지표</p>
-        <TacticalZoneAuxPanel position={position} stockEvaluation={stockEvaluation} />
-      </div>
-
       {progress ? (
         <div className="tactical-zone-detail__simple-body">
           <section className="tactical-zone-detail__block" aria-labelledby={`${position.id}-position`}>
             <h3 id={`${position.id}-position`} className="m-0 tactical-zone-detail__block-title">
-              1. 현재 위치
+              현재 위치
             </h3>
             <p className="m-0 tactical-zone-detail__position-stage" data-stage={position.stage}>
               <span aria-hidden>{badge.emoji}</span> {STAGE_LABEL[position.stage] ?? badge.label}
@@ -238,7 +219,7 @@ export default function TacticalStockDetailPanel({
 
           <section className="tactical-zone-detail__block" aria-labelledby={`${position.id}-price`}>
             <h3 id={`${position.id}-price`} className="m-0 tactical-zone-detail__block-title">
-              2. 가격 위치
+              가격 위치
             </h3>
             <div
               className="trade-progress-group font-mono tabular-nums"
@@ -310,7 +291,7 @@ export default function TacticalStockDetailPanel({
 
           <section className="tactical-zone-detail__block" aria-labelledby={`${position.id}-action`}>
             <h3 id={`${position.id}-action`} className="m-0 tactical-zone-detail__block-title">
-              3. 오늘 행동
+              오늘 행동
             </h3>
             <ul className="m-0 tactical-zone-detail__today-actions">
               {todayActions.map((item) => (
@@ -324,101 +305,33 @@ export default function TacticalStockDetailPanel({
             </ul>
           </section>
 
-          {!focusMode ? (
-            <button
-              type="button"
-              className="tactical-zone-detail__expand-btn"
-              onClick={() => setDetailsOpen((v) => !v)}
-              aria-expanded={detailsOpen}
-            >
-              {detailsOpen ? "상세 분석 접기" : "상세 분석 보기"}
-            </button>
-          ) : null}
-
-          {detailsOpen ? (
-            <div className="tactical-zone-detail__secondary-stack">
-              {entryRationale.length ? (
-                <section className="tactical-zone-detail__entry-rationale">
-                  <p className="m-0 tactical-zone-detail__block-title">상승 요인</p>
-                  <ul className="m-0 tactical-zone-detail__entry-rationale-list">
-                    {entryRationale.map((line) => (
-                      <li key={line}>✓ {line}</li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-              {riskFactors.length ? (
-                <section className="tactical-zone-detail__risk-factors">
-                  <p className="m-0 tactical-zone-detail__block-title">위험 요소</p>
-                  <ul className="m-0 tactical-zone-detail__entry-rationale-list">
-                    {riskFactors.map((line) => (
-                      <li key={line}>⚠ {line}</li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-              <section className="tactical-zone-detail__confidence-breakdown">
-                <p className="m-0 tactical-zone-detail__confidence-breakdown-title">
-                  신뢰도 {confidence.score}% · {confidence.level}
-                </p>
-                <div className="tactical-zone-detail__confidence-bar" aria-hidden>
-                  <span
-                    className={[
-                      "tactical-zone-detail__confidence-fill",
-                      confidence.score >= 80
-                        ? "tactical-zone-detail__confidence-fill--high"
-                        : confidence.score >= 60
-                          ? "tactical-zone-detail__confidence-fill--mid"
-                          : "tactical-zone-detail__confidence-fill--low",
-                    ].join(" ")}
-                    style={{ width: `${confidence.score}%` }}
-                  />
-                </div>
-                <div className="tactical-zone-detail__confidence-lines">
-                  {confidence.entries.slice(0, 5).map((entry) => (
-                    <p key={`${entry.label}-${entry.score}`} className="m-0 tactical-zone-detail__confidence-line">
-                      <span className={entry.score >= 0 ? "is-pos" : "is-neg"}>
-                        {entry.score >= 0 ? "🟢" : "🔴"} {entry.label}
-                      </span>
-                      <span>{entry.score >= 0 ? `+${entry.score}` : entry.score}</span>
-                    </p>
-                  ))}
-                </div>
-              </section>
-              {mode === "analysis" ? (
-                <p className="m-0 tactical-zone-detail__mode-hint">분석 모드: 지표·근거 상세</p>
-              ) : null}
-              <div className="tactical-zone-detail__trade-info-block">
-                <div className="tactical-zone-trade-info-row" role="group" aria-label="핵심 매매정보">
-                  {TRADING_CORE_METRIC_FIELDS.map(({ key, label, tooltip, empty, tone }) => {
-                    const value = coreMetrics[key]
-                    const pending = isCoreMetricPlaceholder(value, empty)
-                    return (
-                      <div key={key} className="tactical-zone-info-item" title={tooltip}>
-                        <span className="tactical-zone-info-item__label">
-                          {strategicLabelByKey[key] ?? label}
-                        </span>
-                        <span
-                          className={[
-                            "tactical-zone-info-item__value font-mono tabular-nums",
-                            pending ? "tactical-zone-info-item__value--placeholder" : "",
-                            !pending ? `tactical-zone-info-item__value--${tone}` : "",
-                          ].join(" ")}
-                        >
-                          {value}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
+          {!focusMode && (entryRationale.length || riskFactors.length) ? (
+            <ul className="m-0 tactical-zone-detail__quick-factors">
+              {entryRationale.map((line) => (
+                <li key={line}>✓ {line}</li>
+              ))}
+              {riskFactors.map((line) => (
+                <li key={line} className="is-warn">
+                  ⚠ {line}
+                </li>
+              ))}
+            </ul>
           ) : null}
         </div>
       ) : (
         <p className="m-0 tactical-zone-detail__no-price">가격 영역 계산 대기</p>
       )}
 
+      <details className="tactical-zone-detail__fold">
+        <summary className="tactical-zone-detail__fold-summary">보조지표</summary>
+        <div className="tactical-zone-detail__fold-body">
+          <TacticalZoneAuxPanel position={position} stockEvaluation={stockEvaluation} />
+        </div>
+      </details>
+
+      {mode === "analysis" ? (
+        <p className="m-0 tactical-zone-detail__mode-hint">분석 모드</p>
+      ) : null}
     </div>
   )
 }

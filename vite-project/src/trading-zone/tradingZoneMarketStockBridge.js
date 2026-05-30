@@ -190,7 +190,7 @@ function buildPriorityReasons(position, ev, ctx) {
     if (warn && !reasons.includes(warn)) reasons.push(`⚠ ${warn}`)
   }
 
-  return [...new Set(reasons)].slice(0, 3)
+  return [...new Set(reasons)].slice(0, 2)
 }
 
 /**
