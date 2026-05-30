@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { chartRangeStats, PANIC_INDEX_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
 import {
+  PANIC_INDEX_CORE_HISTORY_METRICS,
+  PANIC_INDEX_CORE_HISTORY_ROWS,
   PANIC_INDEX_HISTORY_METRICS,
   PANIC_INDEX_HISTORY_ROWS,
 } from "../utils/panicDeskMetrics.js"
@@ -38,13 +40,22 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
 
+  const [metricScope, setMetricScope] = useState(/** @type {"core" | "all"} */ ("core"))
   const [activeMetricKey, setActiveMetricKey] = useState(DEFAULT_METRIC_KEY)
   const [rangeId, setRangeId] = useState("3M")
 
+  const scopeRows = metricScope === "core" ? PANIC_INDEX_CORE_HISTORY_ROWS : PANIC_INDEX_HISTORY_ROWS
+  const scopeMetrics = metricScope === "core" ? PANIC_INDEX_CORE_HISTORY_METRICS : PANIC_INDEX_HISTORY_METRICS
+
+  useEffect(() => {
+    if (scopeMetrics.some((m) => m.key === activeMetricKey)) return
+    setActiveMetricKey(scopeMetrics[0]?.key ?? DEFAULT_METRIC_KEY)
+  }, [metricScope, scopeMetrics, activeMetricKey])
+
   const metric = useMemo(() => {
-    const found = PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === activeMetricKey)
-    return found ?? PANIC_INDEX_HISTORY_METRICS[0]
-  }, [activeMetricKey])
+    const found = scopeMetrics.find((m) => m.key === activeMetricKey)
+    return found ?? scopeMetrics[0] ?? PANIC_INDEX_HISTORY_METRICS[0]
+  }, [activeMetricKey, scopeMetrics])
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
   const chartRowsSource = slicedRows.length ? slicedRows : history
@@ -93,20 +104,50 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const chartEmptyMessage = `${metric.shortLabel} 원본 데이터 준비중`
 
   return (
-    <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
+    <section
+      className={[
+        "panic-history-section",
+        "trading-card-shell",
+        "panic-v2-section",
+        "overflow-hidden",
+        "px-2",
+        "pb-2",
+        "sm:px-2.5",
+        metricScope === "core" ? "panic-history-section--core" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <PanicDeskSectionHeader
         icon="📈"
         title="패닉지수 히스토리"
-        description="9대 패닉지수 원본 흐름 · 지표 선택 후 확인"
+        description="핵심·전체 지표 토글 · 원본 흐름"
         tone="amber"
         tier="main"
       />
-      <p className="m-0 panic-history-section__meta text-[11px] text-slate-500">
-        원본 지표 데이터 · 매매 판단은 하단 실전 매매존
-      </p>
+      <div className="panic-history-scope-toggle" role="tablist" aria-label="지표 범위">
+        <button
+          type="button"
+          role="tab"
+          className={["panic-history-scope-toggle__btn", metricScope === "core" ? "is-active" : ""].join(" ")}
+          aria-selected={metricScope === "core"}
+          onClick={() => setMetricScope("core")}
+        >
+          핵심 3지표
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={["panic-history-scope-toggle__btn", metricScope === "all" ? "is-active" : ""].join(" ")}
+          aria-selected={metricScope === "all"}
+          onClick={() => setMetricScope("all")}
+        >
+          전체 9지표
+        </button>
+      </div>
 
-      <div className="panic-history-picker" role="tablist" aria-label="9대 패닉지수">
-        {PANIC_INDEX_HISTORY_ROWS.map((row, rowIdx) => (
+      <div className="panic-history-picker" role="tablist" aria-label={metricScope === "core" ? "핵심 3지표" : "9대 패닉지수"}>
+        {scopeRows.map((row, rowIdx) => (
           <div key={`picker-row-${rowIdx}`} className="panic-history-picker__row">
             {row.map((m) => {
               const n = metricCounts[m.key] ?? 0

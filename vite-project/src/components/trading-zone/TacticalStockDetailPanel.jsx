@@ -180,15 +180,9 @@ export default function TacticalStockDetailPanel({
       <header className="tactical-zone-detail__head">
         <p className="m-0 tactical-zone-detail__name">
           {position.symbol}
-          {stockEvaluation?.dataReady ? (
-            <span className="tactical-zone-detail__live-score" title="실데이터 종목 점수">
-              {" "}
-              {stockEvaluation.tacticalScore}
-            </span>
-          ) : null}
-          <span className="tactical-zone-detail__trust" title="신뢰도">
+          <span className="tactical-zone-detail__trust font-mono tabular-nums" title="종목 신뢰도">
             {" "}
-            · 신뢰 {confidence.score}
+            신뢰도 {confidence.score}
           </span>
         </p>
         {stockEvalLoading ? (

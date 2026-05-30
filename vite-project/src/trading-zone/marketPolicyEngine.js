@@ -160,6 +160,42 @@ export function buildTodayActionBarRows(range) {
   return rows
 }
 
+/**
+ * @param {ReturnType<typeof buildStockActionRange>} range
+ * @param {{ sectors?: string[] } | null | undefined} sectorBias
+ */
+export function buildTodayActionCompact(range, sectorBias = null) {
+  if (!range) {
+    return {
+      entry: { label: "신규 진입", value: "—", tone: "neutral" },
+      split: { label: "분할매수", value: "—", tone: "neutral" },
+      chase: { label: "추격매수", value: "—", tone: "neutral" },
+      sectors: "—",
+    }
+  }
+
+  const entryValue =
+    range.newEntry === "open" ? "가능" : range.newEntry === "limited" ? "제한" : "금지"
+  const entryTone = range.newEntry === "open" ? "ok" : range.newEntry === "limited" ? "warn" : "danger"
+
+  const splitValue =
+    range.splitBuy === "encourage" ? "강화" : range.splitBuy === "allow" ? "가능" : "보수"
+  const splitTone = range.splitBuy === "strict" ? "warn" : "ok"
+
+  const chaseBlocked = range.chase === "blocked" || range.chase === "discouraged"
+  const chaseValue = chaseBlocked ? "금지" : "허용"
+  const chaseTone = chaseBlocked ? "warn" : "ok"
+
+  const sectors = sectorBias?.sectors?.filter(Boolean).join(" / ") || "—"
+
+  return {
+    entry: { label: "신규 진입", value: entryValue, tone: entryTone },
+    split: { label: "분할매수", value: splitValue, tone: splitTone },
+    chase: { label: "추격매수", value: chaseValue, tone: chaseTone },
+    sectors,
+  }
+}
+
 /** @type {Record<MarketState, number>} */
 const MARKET_STATE_ORDER = {
   panic: 0,

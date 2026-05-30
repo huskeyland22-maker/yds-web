@@ -41,10 +41,8 @@ export default function TacticalMarketStockBridge({
         {bridge.priorities.map((item, index) => {
           const selected = selectedId === item.id
           const stageMeta = TRADING_STAGE_META[item.stage]
-          const reasons = (item.reasons ?? [])
-            .filter((r) => !r.startsWith("⚠"))
-            .slice(0, 2)
-          const coreReasons = reasons.length ? reasons : ["평가 대기"]
+          const displayReasons = (item.reasons ?? []).filter((r) => !r.startsWith("⚠")).slice(0, 2)
+          const coreReasons = displayReasons.length ? displayReasons : ["평가 대기"]
 
           return (
             <li key={item.id} className="tactical-zone-stock-bridge__rank-item">
@@ -58,18 +56,26 @@ export default function TacticalMarketStockBridge({
                 onClick={() => onSelect?.(item.id)}
                 aria-pressed={selected}
               >
-                <div className="tactical-zone-stock-bridge__pick-head">
-                  <span className="tactical-zone-stock-bridge__pick-rank">{index + 1}</span>
-                  <span className="tactical-zone-stock-bridge__pick-symbol">{item.symbol}</span>
-                  <span
-                    className="tactical-zone-stock-bridge__pick-trust font-mono tabular-nums"
-                    title={`신뢰도 ${item.confidence}`}
-                  >
-                    {item.confidence}
-                  </span>
+                <div className="tactical-zone-stock-bridge__pick-top">
+                  <div className="tactical-zone-stock-bridge__pick-head">
+                    <span className="tactical-zone-stock-bridge__pick-rank">{index + 1}</span>
+                    <span className="tactical-zone-stock-bridge__pick-symbol">{item.symbol}</span>
+                    <span
+                      className="tactical-zone-stock-bridge__pick-trust font-mono tabular-nums"
+                      title={`신뢰도 ${item.confidence}`}
+                    >
+                      {item.confidence}
+                    </span>
+                  </div>
+                  <ul className="m-0 tactical-zone-stock-bridge__reasons-stack">
+                    {coreReasons.map((reason) => (
+                      <li key={reason} className="tactical-zone-stock-bridge__reason-line">
+                        ✓ {reason}
+                      </li>
+                    ))}
+                  </ul>
                   <span className="tactical-zone-stock-bridge__pick-stage-mini" data-stage={item.stage}>
-                    <span aria-hidden>{stageMeta?.emoji ?? "⚪"}</span>
-                    {item.stageLabel}
+                    <span aria-hidden>{stageMeta?.emoji ?? "⚪"}</span> {item.stageLabel}
                   </span>
                 </div>
 
@@ -86,14 +92,6 @@ export default function TacticalMarketStockBridge({
                     style={{ width: `${item.confidence}%` }}
                   />
                 </span>
-
-                <p className="m-0 tactical-zone-stock-bridge__reasons-inline">
-                  {coreReasons.map((reason) => (
-                    <span key={reason} className="tactical-zone-stock-bridge__reason-chip">
-                      ✓ {reason}
-                    </span>
-                  ))}
-                </p>
               </button>
             </li>
           )

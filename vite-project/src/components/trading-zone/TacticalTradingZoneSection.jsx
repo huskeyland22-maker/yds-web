@@ -36,7 +36,7 @@ import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStoc
  */
 function StockChip({ position, bucketId, selected, onSelect, evaluation = null }) {
   const badge = tradingStageBadge(position)
-  const displayScore = evaluation?.dataReady ? evaluation.tacticalScore : null
+  const trustScore = evaluation?.dataReady ? evaluation.confidence : null
   const coreReason =
     evaluation?.dataReady && evaluation.strengthHighlights?.[0]
       ? evaluation.strengthHighlights[0]
@@ -44,12 +44,12 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
         ? evaluation.entryRationale[0]
         : null
   const strengthScore =
-    displayScore ?? (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
+    trustScore ?? (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
   const strengthTone =
-    displayScore != null
-      ? displayScore >= 80
+    trustScore != null
+      ? trustScore >= 80
         ? "strong"
-        : displayScore < 58
+        : trustScore < 58
           ? "weak"
           : "normal"
       : strengthScore >= 40
@@ -78,18 +78,13 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
     >
       <span className="tactical-zone-chip__main">
         <span className="tactical-zone-chip__name">{position.symbol}</span>
-        {displayScore != null ? (
-          <span className="tactical-zone-chip__conf" title="신뢰도">
-            신뢰도 {evaluation.confidence}
+        {trustScore != null ? (
+          <span className="tactical-zone-chip__conf font-mono tabular-nums" title="신뢰도">
+            {trustScore}
           </span>
         ) : null}
         {trendLabel ? <span className="tactical-zone-chip__sub">{trendLabel}</span> : null}
       </span>
-      {displayScore != null ? (
-        <span className="tactical-zone-chip__score" title="실데이터 종목 점수">
-          {displayScore}
-        </span>
-      ) : null}
       {coreReason ? (
         <span className="tactical-zone-chip__signal tactical-zone-chip__signal--up">✓ {coreReason}</span>
       ) : null}

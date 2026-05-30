@@ -155,42 +155,56 @@ function buildPriorityReasons(position, ev, ctx) {
   }
   if (ev?.dataReady && ev.entryRationale?.length) {
     for (const line of ev.entryRationale) {
-      if (!reasons.includes(line)) reasons.push(line)
+      const normalized = line.replace(/20MA/gi, "20일선")
+      if (!reasons.includes(normalized)) reasons.push(normalized)
+    }
+  }
+
+  if (ev?.dataReady && ev.auxStrip?.length) {
+    const ma = ev.auxStrip.find((x) => x.key === "20MA")
+    if (ma?.display === "▲" && !reasons.some((r) => /20일선|20MA/.test(r))) {
+      reasons.push("20일선 위")
+    }
+    const vol = ev.auxStrip.find((x) => x.key === "거래량")
+    if (vol?.display === "▲" && !reasons.some((r) => /거래량/.test(r))) {
+      reasons.push("거래량 증가")
     }
   }
 
   if (position.stage === "trend" || position.stage === "pullback") {
     if (!reasons.some((r) => /추세/.test(r))) reasons.push("추세 유지")
-  } else if (position.stage === "interest" && !reasons.length) {
-    reasons.push("관심 구간")
   }
 
   const histLen = position.stageHistory?.length ?? 0
   if (histLen >= 2 && !reasons.some((r) => /거래량/.test(r))) {
     reasons.push("거래량 증가")
-  } else if (histLen <= 1 && !reasons.some((r) => /거래량/.test(r))) {
-    reasons.push("거래량 점검")
   }
 
-  const theme = SYMBOL_SECTOR_THEME[position.symbol]
-  if (theme) {
-    const sectorLine = `${theme} 섹터 강세`
-    if (!reasons.includes(sectorLine)) reasons.push(sectorLine)
-  } else if (ctx.regimeBoost) {
-    reasons.push("패닉지수 연계 우선")
-  }
+  return pickTopDisplayReasons(reasons, 2)
+}
 
-  if (position.stage === ctx.focusStage) {
-    const match = `${TRADING_STAGE_META[position.stage]?.label ?? position.stage} 구간 일치`
-    if (!reasons.includes(match)) reasons.push(match)
+/** @param {string[]} reasons @param {number} limit */
+function pickTopDisplayReasons(reasons, limit = 2) {
+  const skip = /섹터|연계|구간 일치|⚠/
+  const unique = [...new Set(reasons)].filter((r) => r && !skip.test(r))
+  /** @type {((s: string) => boolean)[]} */
+  const priority = [
+    (s) => /추세 유지/.test(s),
+    (s) => /거래량 증가/.test(s),
+    (s) => /20일선/.test(s),
+    (s) => /눌림/.test(s),
+  ]
+  const picked = []
+  for (const test of priority) {
+    const hit = unique.find((r) => test(r))
+    if (hit && !picked.includes(hit)) picked.push(hit)
+    if (picked.length >= limit) return picked
   }
-
-  if (ev?.dataReady && ev.riskFactors?.length) {
-    const warn = ev.riskFactors[0]
-    if (warn && !reasons.includes(warn)) reasons.push(`⚠ ${warn}`)
+  for (const r of unique) {
+    if (!picked.includes(r)) picked.push(r)
+    if (picked.length >= limit) break
   }
-
-  return [...new Set(reasons)].slice(0, 2)
+  return picked
 }
 
 /**
