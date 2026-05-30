@@ -6,8 +6,6 @@ import {
   resolveHorizonStatusLabel,
   resolveHorizonStatusTone,
 } from "../../trading-zone/marketPolicyEngine.js"
-import TacticalMarketStateExplain from "./TacticalMarketStateExplain.jsx"
-
 /**
  * @param {{
  *   link: import("../../trading-zone/tradingZoneEngineLink.js").TradingZoneEngineLink
@@ -37,42 +35,13 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
   const orderedCards = ENGINE_LINK_CARD_ORDER.map((id) => cardById[id]).filter(Boolean)
   const statusLabel = (card) => resolveHorizonStatusLabel(card, marketPolicy?.marketState ?? "neutral")
 
-  const actionLines = marketPolicy?.actionLines ?? link.actionLines ?? null
   const transitionConfidence = marketPolicy?.marketTransition?.transitionConfidence ?? 0
   const showTransition = marketPolicy?.marketTransition?.changed && transitionConfidence >= 40
-
-  const actionRowsRaw = actionLines
-    ? [
-        { key: "primary", icon: "🟢", text: actionLines.primary ?? "", tone: "allow" },
-        { key: "execution", icon: "🧭", text: actionLines.execution ?? "", tone: "allow" },
-        { key: "caution", icon: "⚠", text: actionLines.caution ?? "", tone: "warn" },
-      ].filter((row) => row.text)
-    : (marketPolicy?.actionPolicy?.items?.length ? marketPolicy.actionPolicy.items : link.actions).map((line) => {
-        const text = typeof line === "string" ? line : line.text
-        const level = typeof line === "string" ? (/제한|축소|경계/.test(line) ? "danger" : "safe") : line.level
-        const tone = level === "danger" ? "warn" : level === "caution" ? "warn" : "allow"
-        const icon = typeof line === "string" ? (tone === "warn" ? "⚠" : "🟢") : line.icon
-        return { key: typeof line === "string" ? line : line.key, icon, text, tone }
-      })
-
-  const actionRows = (() => {
-    const seen = new Set()
-    return actionRowsRaw
-      .filter((row) => {
-        const normalized = String(row.text ?? "").replace(/\s+/g, " ").trim()
-        if (!normalized || seen.has(normalized)) return false
-        seen.add(normalized)
-        return true
-      })
-      .slice(0, 3)
-  })()
-
-  const marketBrief = link.marketBrief
 
   return (
     <div className="tactical-zone-engine-link" aria-label="시장 엔진 연계">
       <div className="tactical-zone-engine-link__market-card">
-        <p className="m-0 tactical-zone-engine-link__market-head">현재 시장 상태</p>
+        <p className="m-0 tactical-zone-engine-link__market-head">시장 상태</p>
         <div className="tactical-zone-engine-link__status-grid">
           {orderedCards.map((c) => {
             const dot = ENGINE_LINK_HORIZON_DOT[c.id] ?? "⚪"
@@ -101,8 +70,6 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
           })}
         </div>
       </div>
-
-      <TacticalMarketStateExplain brief={marketBrief} actionRows={actionRows} />
 
       {showTransition || link.macroStage ? (
         <div className="tactical-zone-engine-link__meta">

@@ -365,22 +365,6 @@ export default function TacticalTradingZoneSection({
     window.__YDS_POLICY__ = dump
     console.table([dump])
   }, [marketPolicyView])
-  const actionBanner = useMemo(() => {
-    if (!selectedPosition) return "🟢 종목 선택 후 실전 행동 가이드를 확인하세요"
-    const lead = marketPolicyView.actionPolicy.items[0]?.text ?? "정책 점검"
-    const emoji =
-      marketPolicyView.marketState === "panic"
-        ? "🔴"
-        : marketPolicyView.marketState === "overheat"
-          ? "🟠"
-          : marketPolicyView.marketState === "pullback" || marketPolicyView.marketState === "caution"
-            ? "🟡"
-            : "🟢"
-    const transitionTag = showTransitionTag ? ` ${marketTransition.directionTag}` : ""
-    const local = `${emoji} ${marketPolicyView.marketStateLabel} 정책 · ${lead}${transitionTag}`
-    return strategyState.banner ? `${strategyState.banner} | ${local}` : local
-  }, [selectedPosition, strategyState.banner, marketPolicyView, marketTransition, showTransitionTag])
-
   const marketTemperature = useMemo(() => {
     if (marketPolicyView.marketState === "panic") return { emoji: "🔴", label: "패닉", tone: "panic" }
     if (marketPolicyView.marketState === "overheat") return { emoji: "🟠", label: "과열", tone: "hot" }
@@ -416,28 +400,6 @@ export default function TacticalTradingZoneSection({
           : "노이즈 구간은 관찰 중심으로 유지합니다."
     return `현재 시장은 ${buildPolicyBriefing(marketPolicyView)} ${volatility} 거래량 변화가 나타나고 있습니다. ${strengthLine}`
   }, [panicData, marketPolicyView, showTransitionStrong, showTransitionHighlight, showTransitionTag])
-
-  const actionPriority = useMemo(
-    () => {
-      const normalize = (text) => String(text ?? "").replace(/\s+/g, " ").trim()
-      const source = [
-        marketPolicyView.actionLines.primary,
-        marketPolicyView.actionLines.execution,
-        marketPolicyView.actionLines.caution,
-        ...(marketPolicyView.actionPolicy?.items ?? []).map((item) => item.text),
-      ]
-      const deduped = []
-      const seen = new Set()
-      source.forEach((line) => {
-        const normalized = normalize(line)
-        if (!normalized || seen.has(normalized)) return
-        seen.add(normalized)
-        deduped.push(normalized)
-      })
-      return deduped.slice(0, 3).map((line, i) => `${i + 1}. ${line}`)
-    },
-    [marketPolicyView.actionLines, marketPolicyView.actionPolicy],
-  )
 
   useEffect(() => {
     const delay = 6500
@@ -492,7 +454,7 @@ export default function TacticalTradingZoneSection({
           <p className="m-0 tactical-trading-zone__engine-title">
             <span aria-hidden>📈</span> 시장 엔진 연계
           </p>
-          <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → 종목 실행</p>
+          <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → AI 브리핑 → 우선 종목</p>
         </div>
         <button
           type="button"
@@ -516,7 +478,6 @@ export default function TacticalTradingZoneSection({
         </div>
       ) : null}
 
-      <div className="tactical-trading-zone__action-banner">{actionBanner}</div>
       {tacticalDegrade.recoverable ? (
         <div className="tactical-trading-zone__ultra-summary">
           ⚠ {tacticalDegrade.reasons[0] ?? "일부 데이터 연결 지연"} · 엔진은 정상 동작 중
@@ -526,9 +487,6 @@ export default function TacticalTradingZoneSection({
         <div className="tactical-trading-zone__ultra-summary">AI 브리핑 일시 지연</div>
       ) : null}
       {isStaleFeed ? <div className="tactical-trading-zone__ultra-summary">AI 브리핑 데이터 동기화 중</div> : null}
-      <div className="tactical-trading-zone__ultra-summary tactical-trading-zone__ultra-summary--action">
-        {actionPriority.join(" / ")}
-      </div>
 
       {!focusMode ? (
         <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
@@ -566,14 +524,6 @@ export default function TacticalTradingZoneSection({
               ) : null}
             </div>
           ) : null}
-          <div className="tactical-trading-zone__priority">
-            <p className="m-0 tactical-trading-zone__priority-k">오늘 우선 행동</p>
-            <div className="tactical-trading-zone__priority-lines">
-              {actionPriority.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-            </div>
-          </div>
           <p className="m-0 tactical-trading-zone__backtest-seed">
             백테스트 준비: 평균 유지기간 · 승률 · MDD · 목표 도달률 (샘플 {strategyState.backtestSeed.sampleSize})
           </p>

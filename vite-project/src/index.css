@@ -3718,6 +3718,67 @@
     text-align: center;
   }
 
+  .tactical-zone-stock-bridge__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tactical-zone-stock-bridge__title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: rgba(226, 232, 240, 0.96);
+  }
+
+  .tactical-zone-aux-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tactical-zone-aux-strip__pending {
+    font-size: 12px;
+    color: rgba(148, 163, 184, 0.88);
+  }
+
+  .tactical-zone-aux-metric {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .tactical-zone-aux-metric__key {
+    font-weight: 700;
+    color: rgba(203, 213, 225, 0.92);
+  }
+
+  .tactical-zone-aux-metric__val {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .tactical-zone-aux-metric--up .tactical-zone-aux-metric__val {
+    color: rgba(110, 231, 183, 0.98);
+  }
+
+  .tactical-zone-aux-metric--down .tactical-zone-aux-metric__val {
+    color: rgba(252, 165, 165, 0.98);
+  }
+
+  .tactical-zone-detail__aux-wrap {
+    margin: 8px 0 10px;
+  }
+
   .tactical-zone-stock-bridge__regime-tag {
     display: inline-block;
     margin-left: 6px;

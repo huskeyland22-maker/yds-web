@@ -16,7 +16,7 @@ export default function TacticalMarketStockBridge({
 }) {
   if (!bridge?.ready) {
     return (
-      <section className="tactical-zone-stock-bridge tactical-zone-stock-bridge--pending" aria-label="시장 연계 종목">
+      <section className="tactical-zone-stock-bridge tactical-zone-stock-bridge--pending" aria-label="우선순위 종목">
         <p className="m-0 tactical-zone-stock-bridge__pending">종목 연계 준비 중</p>
       </section>
     )
@@ -25,31 +25,12 @@ export default function TacticalMarketStockBridge({
   const top = bridge.priorities[0] ?? null
 
   return (
-    <section className="tactical-zone-stock-bridge" aria-label="시장 상태에서 우선 종목">
-      <div className="tactical-zone-stock-bridge__flow">
-        <div className="tactical-zone-stock-bridge__flow-step">
-          <p className="m-0 tactical-zone-stock-bridge__flow-k">현재 상태</p>
-          <p className="m-0 tactical-zone-stock-bridge__flow-headline">{bridge.marketHeadline}</p>
-        </div>
-        <p className="m-0 tactical-zone-stock-bridge__flow-arrow" aria-hidden>
-          ↓
-        </p>
-        <div className="tactical-zone-stock-bridge__flow-step">
-          <p className="m-0 tactical-zone-stock-bridge__flow-k">행동</p>
-          <p className="m-0 tactical-zone-stock-bridge__flow-action">{bridge.actionLead}</p>
-        </div>
-        <p className="m-0 tactical-zone-stock-bridge__flow-arrow" aria-hidden>
-          ↓
-        </p>
-        <div className="tactical-zone-stock-bridge__flow-step">
-          <p className="m-0 tactical-zone-stock-bridge__flow-k">우선순위 종목</p>
-          <p className="m-0 tactical-zone-stock-bridge__flow-focus">
-            {bridge.focusLabel}
-            {bridge.regimeLabel ? (
-              <span className="tactical-zone-stock-bridge__regime-tag">{bridge.regimeLabel}</span>
-            ) : null}
-          </p>
-        </div>
+    <section className="tactical-zone-stock-bridge" aria-label="우선순위 종목 TOP5">
+      <div className="tactical-zone-stock-bridge__head">
+        <p className="m-0 tactical-zone-stock-bridge__title">우선순위 종목 TOP5</p>
+        {bridge.regimeLabel ? (
+          <span className="tactical-zone-stock-bridge__regime-tag">{bridge.regimeLabel}</span>
+        ) : null}
       </div>
 
       {loading ? (
@@ -124,7 +105,7 @@ export default function TacticalMarketStockBridge({
           {top.reasons.length ? (
             <ul className="m-0 tactical-zone-stock-bridge__entry-reasons">
               {top.reasons.slice(0, 3).map((r) => (
-                <li key={r}>{r}</li>
+                <li key={r}>✓ {r}</li>
               ))}
             </ul>
           ) : null}

@@ -20,6 +20,7 @@ import { resolvePositionApiCode } from "./tradingZonePositionRegistry.js"
  *   entryRationale: string[]
  *   strengthHighlights: string[]
  *   riskFactors: string[]
+ *   auxStrip: { key: string; display: string; tone: "up" | "down" | "flat" }[]
  *   priceZones: {
  *     current: number | null
  *     entry: string
@@ -129,6 +130,64 @@ export function buildStrengthHighlights(signal, inputs) {
  * @param {ReturnType<typeof computeStockSignal>} signal
  * @param {ReturnType<typeof extractStockEvalInputs>} inputs
  */
+/**
+ * @param {ReturnType<typeof extractStockEvalInputs>} inputs
+ * @returns {{ key: string; display: string; tone: "up" | "down" | "flat" }[]}
+ */
+export function buildAuxMetricStrip(inputs) {
+  /** @type {{ key: string; display: string; tone: "up" | "down" | "flat" }[]} */
+  const items = []
+  const price = inputs.price
+  const ma20 = inputs.ma20
+  const ma10 = inputs.ma10
+
+  if (ma20 != null && price != null) {
+    const above = price >= ma20
+    items.push({
+      key: "20MA",
+      display: above ? "▲" : "▼",
+      tone: above ? "up" : "down",
+    })
+  } else if (ma20 != null) {
+    items.push({ key: "20MA", display: String(Math.round(ma20)), tone: "flat" })
+  }
+
+  if (ma10 != null && price != null) {
+    const above10 = price >= ma10
+    items.push({
+      key: "10MA",
+      display: above10 ? "▲" : "▼",
+      tone: above10 ? "up" : "down",
+    })
+  }
+
+  if (inputs.rsi14 != null) {
+    const rsi = Math.round(inputs.rsi14)
+    let tone = "flat"
+    if (rsi >= 60) tone = "up"
+    else if (rsi <= 40) tone = "down"
+    items.push({ key: "RSI", display: String(rsi), tone })
+  }
+
+  const volPct = inputs.volumeChangePct
+  if (volPct != null) {
+    items.push({
+      key: "거래량",
+      display: volPct >= 8 ? "▲" : volPct <= -8 ? "▼" : "→",
+      tone: volPct >= 8 ? "up" : volPct <= -8 ? "down" : "flat",
+    })
+  } else if (inputs.volumeRatio != null) {
+    const ratio = inputs.volumeRatio
+    items.push({
+      key: "거래량",
+      display: ratio >= 1.25 ? "▲" : ratio <= 0.85 ? "▼" : "→",
+      tone: ratio >= 1.25 ? "up" : ratio <= 0.85 ? "down" : "flat",
+    })
+  }
+
+  return items.slice(0, 4)
+}
+
 export function buildRiskFactors(signal, inputs) {
   /** @type {string[]} */
   const risks = []
@@ -303,6 +362,7 @@ export function evaluateStockFromApi(position, apiBody, panicData = null, evalCo
       entryRationale: [],
       strengthHighlights: [],
       riskFactors: [],
+      auxStrip: [],
       priceZones: null,
       fetchedAt,
       error: apiBody?.message ?? "no data",
@@ -322,6 +382,7 @@ export function evaluateStockFromApi(position, apiBody, panicData = null, evalCo
       entryRationale: [],
       strengthHighlights: [],
       riskFactors: [],
+      auxStrip: [],
       priceZones: null,
       fetchedAt,
       error: "missing price",
@@ -356,6 +417,7 @@ export function evaluateStockFromApi(position, apiBody, panicData = null, evalCo
   const entryRationale = buildEntryRationale(inputs)
   const strengthHighlights = buildStrengthHighlights(signal, inputs)
   const riskFactors = buildRiskFactors(signal, inputs)
+  const auxStrip = buildAuxMetricStrip(inputs)
   const confidence = Math.max(40, Math.min(99, Math.round(tacticalScore * 0.92 + (inputs.ma20 != null ? 5 : 0))))
 
   return {
@@ -369,6 +431,7 @@ export function evaluateStockFromApi(position, apiBody, panicData = null, evalCo
     entryRationale,
     strengthHighlights,
     riskFactors,
+    auxStrip,
     priceZones,
     fetchedAt,
   }

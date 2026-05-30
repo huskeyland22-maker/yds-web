@@ -1,87 +1,74 @@
-import { useMemo } from "react"
-import {
-  TRADING_ZONE_STANDARD_AUX,
-} from "../../trading-zone/tacticalTradingZoneData.js"
 import { buildAuxIndicatorDetail } from "../../trading-zone/tradingZoneAuxIndicators.js"
+import { TRADING_ZONE_STANDARD_AUX } from "../../trading-zone/tacticalTradingZoneData.js"
 
 /**
  * @param {{
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
- *   activeAux: Set<string>
- *   expandedAux: string | null
- *   onToggle: (key: string) => void
+ *   stockEvaluation?: import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | null
  * }} props
  */
-export default function TacticalZoneAuxPanel({ position, activeAux, expandedAux, onToggle }) {
-  const detail = useMemo(() => {
-    if (!expandedAux) return null
-    return buildAuxIndicatorDetail(position, expandedAux)
-  }, [position, expandedAux])
+export default function TacticalZoneAuxPanel({ position, stockEvaluation = null }) {
+  const strip =
+    stockEvaluation?.dataReady && stockEvaluation.auxStrip?.length
+      ? stockEvaluation.auxStrip
+      : null
+
+  if (strip?.length) {
+    return (
+      <div className="tactical-zone-aux-strip" role="list" aria-label="보조지표">
+        {strip.map((item) => (
+          <span
+            key={item.key}
+            className={[
+              "tactical-zone-aux-metric",
+              item.tone ? `tactical-zone-aux-metric--${item.tone}` : "",
+            ].join(" ")}
+            role="listitem"
+          >
+            <span className="tactical-zone-aux-metric__key">{item.key}</span>
+            <span className="tactical-zone-aux-metric__val">{item.display}</span>
+          </span>
+        ))}
+      </div>
+    )
+  }
+
+  const fallback = TRADING_ZONE_STANDARD_AUX.map((tag) => {
+    const detail = buildAuxIndicatorDetail(position, tag)
+    if (!detail) return null
+    const firstLine = detail.lines[0]?.text ?? detail.headlineText
+    const display =
+      tag === "RSI" && firstLine
+        ? firstLine.replace(/[^\d]/g, "").slice(0, 3) || "—"
+        : detail.statusIcon === "🟢"
+          ? "▲"
+          : detail.statusIcon === "🔴"
+            ? "▼"
+            : "→"
+    const tone =
+      display === "▲" ? "up" : display === "▼" ? "down" : ("flat")
+    return { key: tag, display, tone }
+  }).filter(Boolean)
+
+  if (!fallback.length) {
+    return <p className="m-0 tactical-zone-aux-strip__pending">보조지표 데이터 준비 중</p>
+  }
 
   return (
-    <div className="tactical-zone-aux-panel">
-      <div className="tactical-zone-aux-panel__tags" role="group" aria-label="보조지표 선택">
-        {TRADING_ZONE_STANDARD_AUX.map((tag) => {
-          const isSelected = expandedAux === tag
-          const isMonitored = activeAux.has(tag)
-          return (
-            <button
-              key={tag}
-              type="button"
-              className={[
-                "tactical-zone-aux-tag",
-                isSelected ? "tactical-zone-aux-tag--active" : "tactical-zone-aux-tag--idle",
-                isMonitored && !isSelected ? "tactical-zone-aux-tag--monitored" : "",
-              ].join(" ")}
-              aria-pressed={isSelected}
-              aria-expanded={isSelected}
-              onClick={() => onToggle(tag)}
-            >
-              {tag}
-            </button>
-          )
-        })}
-      </div>
-
-      <div
-        className={[
-          "tactical-zone-aux-panel__slot",
-          detail ? "tactical-zone-aux-panel__slot--visible" : "",
-        ].join(" ")}
-        aria-hidden={!detail}
-      >
-        <div
+    <div className="tactical-zone-aux-strip" role="list" aria-label="보조지표">
+      {fallback.map((item) => (
+        <span
+          key={item.key}
           className={[
-            "tactical-zone-aux-detail",
-            detail ? "tactical-zone-aux-detail--visible" : "",
+            "tactical-zone-aux-metric",
+            item.tone ? `tactical-zone-aux-metric--${item.tone}` : "",
           ].join(" ")}
-          data-tone={detail?.statusTone ?? "warn"}
-          role="region"
-          aria-label={detail ? `${detail.title} 상세` : undefined}
+          role="listitem"
         >
-          {detail ? (
-            <div className="tactical-zone-aux-detail__inner">
-              <p className="m-0 tactical-zone-aux-detail__headline">
-                {detail.statusIcon ? (
-                  <span className="tactical-zone-aux-detail__icon" aria-hidden>
-                    {detail.statusIcon}{" "}
-                  </span>
-                ) : null}
-                {detail.headlineText}
-              </p>
-              {detail.lines.length > 0 ? (
-                <ul className="m-0 list-none p-0 tactical-zone-aux-detail__lines">
-                  {detail.lines.map((line) => (
-                    <li key={line.text} className="tactical-zone-aux-detail__line">
-                      {line.text}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </div>
+          <span className="tactical-zone-aux-metric__key">{item.key}</span>
+          <span className="tactical-zone-aux-metric__val">{item.display}</span>
+        </span>
+      ))}
     </div>
   )
 }

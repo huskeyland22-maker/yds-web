@@ -123,8 +123,6 @@ export default function TacticalStockDetailPanel({
   }, [position, stockEvaluation])
   const progress = computeTradingZoneProgress(levels)
   const coreMetrics = useMemo(() => buildTradingCoreMetrics(position), [position])
-  const activeAux = new Set(position.aux ?? [])
-  const [expandedAux, setExpandedAux] = useState(/** @type {string | null} */ (null))
   const [detailsOpen, setDetailsOpen] = useState(false)
 
   const strategicLabelByKey = {
@@ -135,7 +133,6 @@ export default function TacticalStockDetailPanel({
   }
 
   useEffect(() => {
-    setExpandedAux(null)
     setDetailsOpen(false)
   }, [position.id])
 
@@ -158,12 +155,12 @@ export default function TacticalStockDetailPanel({
   }
 
   const confidence = useMemo(() => {
-    const base = buildTradingConfidenceBreakdown({ position, panicData, activeAux })
+    const base = buildTradingConfidenceBreakdown({ position, panicData, activeAux: new Set(position.aux ?? []) })
     if (stockEvaluation?.dataReady) {
       return { ...base, score: stockEvaluation.confidence }
     }
     return base
-  }, [position, panicData, activeAux, stockEvaluation])
+  }, [position, panicData, stockEvaluation])
 
   const policy = useMemo(
     () => marketPolicy ?? buildMarketPolicy({ panicData, position }),
@@ -237,6 +234,11 @@ export default function TacticalStockDetailPanel({
           </p>
         ) : null}
       </header>
+
+      <div className="tactical-zone-detail__aux-wrap">
+        <p className="m-0 tactical-zone-detail__section-label">보조지표</p>
+        <TacticalZoneAuxPanel position={position} stockEvaluation={stockEvaluation} />
+      </div>
 
       {progress ? (
         <div className="tactical-zone-detail__simple-body">
@@ -441,16 +443,6 @@ export default function TacticalStockDetailPanel({
       )}
 
       <footer className="tactical-zone-detail__foot" hidden={!detailsOpen}>
-        <div className="tactical-zone-detail__aux">
-          <p className="m-0 tactical-zone-detail__section-label">보조지표</p>
-          <TacticalZoneAuxPanel
-            position={position}
-            activeAux={activeAux}
-            expandedAux={expandedAux}
-            onToggle={(tag) => setExpandedAux(expandedAux === tag ? null : tag)}
-          />
-        </div>
-
         {historyLog.length ? (
           <div className="tactical-zone-detail__status-history">
             <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
