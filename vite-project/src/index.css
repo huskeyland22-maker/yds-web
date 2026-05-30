@@ -7522,7 +7522,8 @@
     margin-top: 0;
   }
 
-  .panic-history-section {
+  .panic-history-section,
+  .home-v5-core-section {
     padding-top: 10px;
     margin-top: 0 !important;
     margin-bottom: 0;
@@ -7530,7 +7531,8 @@
     max-width: 100%;
   }
 
-  .panic-history-section > .panic-desk-section-header--main {
+  .panic-history-section > .panic-desk-section-header--main,
+  .home-v5-core-section > .panic-desk-section-header--main {
     padding-top: 10px;
     padding-bottom: 0;
     margin-bottom: 14px;
@@ -9086,12 +9088,20 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .panic-v2-desk--terminal .home-v5-preview__zone--core {
-  padding-top: 10px;
+  padding-top: 0;
   padding-bottom: 0.25rem;
 }
 
-.panic-v2-desk--terminal .home-v5-preview__zone--core .panic-desk-section-header--main {
+.panic-v2-desk--terminal .home-v5-core-section {
+  padding-top: 10px;
+}
+
+.panic-v2-desk--terminal .home-v5-core-section .panic-desk-section-header--main {
   margin-bottom: 14px;
+}
+
+.panic-v2-desk--terminal .home-v5-preview__zone--core + .home-v5-preview__zone--market {
+  margin-top: 0.35rem;
 }
 
 .home-v5-preview__zone {
@@ -9103,6 +9113,23 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .home-v5-preview__zone--core {
   padding-bottom: 0.15rem;
+}
+
+.home-v5-core-section {
+  margin-top: 0 !important;
+  margin-bottom: 0;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.home-v5-core-section > .panic-desk-section-header--main {
+  padding-top: 10px;
+  padding-bottom: 0;
+  margin-bottom: 14px;
+}
+
+.home-v5-core-section .home-v5-core-synthesis {
+  margin-top: 0.5rem;
 }
 
 .home-v5-preview--compact .home-v5-preview__zone--core {

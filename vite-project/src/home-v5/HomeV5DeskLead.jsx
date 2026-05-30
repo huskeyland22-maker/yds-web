@@ -39,16 +39,18 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
         .join(" ")}
     >
       <div className="home-v5-preview__zone home-v5-preview__zone--core">
-        <PanicDeskSectionHeader
-          icon="📊"
-          title="핵심지수"
-          description="VIX · CNN · BofA · YDS 종합 판단"
-          tone="cyan"
-          tier="main"
-        />
-        <HomeV5CoreIndices cards={model.core} />
-        <HomeV5CoreSynthesis synthesis={model.synthesis} />
-        {model.strategy ? <HomeV5StrategyRationaleBar strategy={model.strategy} /> : null}
+        <section className="home-v5-core-section trading-card-shell panic-v2-section panic-desk-section panic-desk-section--main overflow-hidden px-2 pb-2 sm:px-2.5">
+          <PanicDeskSectionHeader
+            icon="📊"
+            title="핵심지수"
+            description="VIX · CNN · BofA · YDS 종합 판단"
+            tone="cyan"
+            tier="main"
+          />
+          <HomeV5CoreIndices cards={model.core} />
+          <HomeV5CoreSynthesis synthesis={model.synthesis} />
+          {model.strategy ? <HomeV5StrategyRationaleBar strategy={model.strategy} /> : null}
+        </section>
       </div>
 
       <div className="home-v5-preview__zone home-v5-preview__zone--market">

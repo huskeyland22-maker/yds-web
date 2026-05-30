@@ -67,7 +67,7 @@ export default function PanicDeskDashboard({
         <CycleDataBasisBar updatedAt={panicData?.updatedAt} cycleSource={cycleDataSource} bondSource="FRED" />
       </div>
 
-      <div className="panic-v2-desk__metrics-slot panic-desk-section panic-desk-section--cyan panic-desk-section--lead">
+      <div className="panic-v2-desk__metrics-slot">
         <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
       </div>
 
