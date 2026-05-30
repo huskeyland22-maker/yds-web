@@ -17,6 +17,7 @@ import {
   detectMarketTransition,
 } from "../../trading-zone/marketPolicyEngine.js"
 import { isDataTraceEnabled } from "../../utils/dataFlowTrace.js"
+import { getFinalScore } from "../../utils/tradingScores.js"
 import { buildTradingZoneStrategyState } from "../../trading-zone/tradingZoneStrategyEngine.js"
 import { useTradingZoneStockEvaluations } from "../../trading-zone/useTradingZoneStockEvaluations.js"
 import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
@@ -226,6 +227,7 @@ export default function TacticalTradingZoneSection({
     () => buildTradingZoneEngineLink({ panicData, cycleScore, snapshot, historyRows }),
     [panicData, cycleScore, snapshot, historyRows],
   )
+  const panicScore = useMemo(() => getFinalScore(panicData), [panicData])
 
   const strategyState = useMemo(
     () =>
@@ -317,7 +319,6 @@ export default function TacticalTradingZoneSection({
     const degradeCodes = []
     if (aiReportDegraded) {
       degradeCodes.push("ai_reports_degraded")
-      reasons.push("AI 브리핑 일시 지연")
     }
     if (isStaleFeed) {
       degradeCodes.push("stale_mode")
@@ -454,7 +455,7 @@ export default function TacticalTradingZoneSection({
           <p className="m-0 tactical-trading-zone__engine-title">
             <span aria-hidden>📈</span> 시장 엔진 연계
           </p>
-          <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → AI 브리핑 → 우선 종목</p>
+          <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → 오늘 행동 → 우선 종목</p>
         </div>
         <button
           type="button"
@@ -468,7 +469,12 @@ export default function TacticalTradingZoneSection({
 
       {!focusMode ? (
         <div className="tactical-trading-zone__engine">
-          <TacticalEngineLinkBar link={engineLink} marketPolicy={marketPolicyView} hideTitle />
+          <TacticalEngineLinkBar
+            link={engineLink}
+            marketPolicy={marketPolicyView}
+            panicScore={panicScore}
+            hideTitle
+          />
           <TacticalMarketStockBridge
             bridge={marketStockBridge}
             selectedId={selectedId}
@@ -477,16 +483,6 @@ export default function TacticalTradingZoneSection({
           />
         </div>
       ) : null}
-
-      {tacticalDegrade.recoverable ? (
-        <div className="tactical-trading-zone__ultra-summary">
-          ⚠ {tacticalDegrade.reasons[0] ?? "일부 데이터 연결 지연"} · 엔진은 정상 동작 중
-        </div>
-      ) : null}
-      {aiReportDegraded ? (
-        <div className="tactical-trading-zone__ultra-summary">AI 브리핑 일시 지연</div>
-      ) : null}
-      {isStaleFeed ? <div className="tactical-trading-zone__ultra-summary">AI 브리핑 데이터 동기화 중</div> : null}
 
       {!focusMode ? (
         <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">

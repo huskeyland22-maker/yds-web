@@ -6,20 +6,23 @@ import {
   resolveHorizonStatusLabel,
   resolveHorizonStatusTone,
 } from "../../trading-zone/marketPolicyEngine.js"
+import TacticalTodayActionBar from "./TacticalTodayActionBar.jsx"
+import TacticalMacroProgress from "./TacticalMacroProgress.jsx"
+
 /**
  * @param {{
  *   link: import("../../trading-zone/tradingZoneEngineLink.js").TradingZoneEngineLink
- *   marketPolicy?: {
- *     marketState?: string
- *     riskLevel?: string
- *     marketTransition?: { changed?: boolean; directionTag?: string; transitionStrength?: string } | null
- *     actionLines?: { primary?: string; caution?: string; execution?: string }
- *     actionPolicy?: { items?: { key: string; icon: string; text: string; level: string }[] }
- *   } | null
+ *   marketPolicy?: import("../../trading-zone/marketPolicyEngine.js").ReturnType<typeof import("../../trading-zone/marketPolicyEngine.js").buildMarketPolicy> | null
+ *   panicScore?: number | null
  *   hideTitle?: boolean
  * }} props
  */
-export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideTitle = false }) {
+export default function TacticalEngineLinkBar({
+  link,
+  marketPolicy = null,
+  panicScore = null,
+  hideTitle = false,
+}) {
   if (!link.ready) {
     return (
       <div className="tactical-zone-engine-link tactical-zone-engine-link--pending">
@@ -71,26 +74,17 @@ export default function TacticalEngineLinkBar({ link, marketPolicy = null, hideT
         </div>
       </div>
 
-      {showTransition || link.macroStage ? (
-        <div className="tactical-zone-engine-link__meta">
-          {showTransition ? (
-            <p className="m-0 tactical-zone-engine-link__macro-stage">
-              <span className="tactical-zone-engine-link__macro-stage-head">변화:</span>
-              <span className="tactical-zone-engine-link__macro-stage-val">
-                {transitionConfidence >= 85 ? "🚨 강한 변화 감지 " : ""}
-                {marketPolicy.marketTransition.directionTag} ({transitionConfidence})
-              </span>
-            </p>
-          ) : null}
-          {link.macroStage ? (
-            <p className="m-0 tactical-zone-engine-link__macro-stage">
-              <span className="tactical-zone-engine-link__macro-stage-head">거시단계:</span>
-              <span className="tactical-zone-engine-link__macro-stage-val">
-                <span aria-hidden>{link.macroStage.emoji}</span> {link.macroStage.label}
-              </span>
-            </p>
-          ) : null}
-        </div>
+      <TacticalTodayActionBar marketPolicy={marketPolicy} />
+      <TacticalMacroProgress panicScore={panicScore} />
+
+      {showTransition ? (
+        <p className="m-0 tactical-zone-engine-link__transition">
+          <span className="tactical-zone-engine-link__transition-head">변화</span>
+          <span className="tactical-zone-engine-link__transition-val">
+            {transitionConfidence >= 85 ? "🚨 강한 변화 " : ""}
+            {marketPolicy?.marketTransition?.directionTag} ({transitionConfidence})
+          </span>
+        </p>
       ) : null}
     </div>
   )

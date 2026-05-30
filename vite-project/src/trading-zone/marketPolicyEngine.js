@@ -120,7 +120,7 @@ function buildSectorBias(state) {
   if (state === "overheat") return { label: "고베타 축소", sectors: ["현금", "대형주", "방어주"] }
   if (state === "pullback") return { label: "성장주 눌림 우선", sectors: ["AI", "반도체", "대형 테크"] }
   if (state === "caution") return { label: "균형 방어", sectors: ["대형주", "퀄리티", "현금"] }
-  return { label: "선택 집중", sectors: ["AI", "대형 테크", "반도체"] }
+  return { label: "선택 집중", sectors: ["반도체", "AI", "로봇"] }
 }
 
 /**
@@ -133,6 +133,31 @@ function buildStockActionRange(state) {
   if (state === "pullback") return { newEntry: "open", chase: "discouraged", splitBuy: "encourage", cash: "mid" }
   if (state === "caution") return { newEntry: "limited", chase: "discouraged", splitBuy: "allow", cash: "mid" }
   return { newEntry: "open", chase: "discouraged", splitBuy: "allow", cash: "low" }
+}
+
+/**
+ * @param {ReturnType<typeof buildStockActionRange>} range
+ * @returns {{ icon: string; text: string; tone: "ok" | "warn" | "danger" }[]}
+ */
+export function buildTodayActionBarRows(range) {
+  if (!range) return []
+
+  /** @type {{ icon: string; text: string; tone: "ok" | "warn" | "danger" }[]} */
+  const rows = []
+
+  if (range.newEntry === "open") rows.push({ icon: "✓", text: "신규 진입 가능", tone: "ok" })
+  else if (range.newEntry === "limited") rows.push({ icon: "⚠", text: "신규 진입 제한", tone: "warn" })
+  else rows.push({ icon: "⛔", text: "신규 진입 금지", tone: "danger" })
+
+  if (range.splitBuy === "encourage") rows.push({ icon: "✓", text: "분할매수 강화", tone: "ok" })
+  else if (range.splitBuy === "allow") rows.push({ icon: "✓", text: "분할매수 가능", tone: "ok" })
+  else rows.push({ icon: "⚠", text: "분할매수 보수", tone: "warn" })
+
+  if (range.chase === "blocked") rows.push({ icon: "⚠", text: "추격 금지", tone: "warn" })
+  else if (range.chase === "discouraged") rows.push({ icon: "⚠", text: "추격 진입 제한", tone: "warn" })
+  else rows.push({ icon: "✓", text: "추격 허용", tone: "ok" })
+
+  return rows
 }
 
 /** @type {Record<MarketState, number>} */

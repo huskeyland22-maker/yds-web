@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { TRADING_STAGE_META, tradingStageBadge } from "../../trading-zone/tacticalTradingZoneData.js"
 import TacticalZoneAuxPanel from "./TacticalZoneAuxPanel.jsx"
 import {
@@ -11,10 +11,6 @@ import {
   resolvePositionPriceLevels,
 } from "../../trading-zone/tradingZonePriceProgress.js"
 import { buildMarketPolicy } from "../../trading-zone/marketPolicyEngine.js"
-import {
-  buildStageHistoryTooltipLines,
-  formatStageHistoryLog,
-} from "../../trading-zone/tradingZoneStageHistory.js"
 import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneConfidenceEngine.js"
 import { buildStagePathDisplay } from "../../trading-zone/tradingZoneMarketStockBridge.js"
 
@@ -101,7 +97,6 @@ export default function TacticalStockDetailPanel({
   stockEvalLoading = false,
 }) {
   const badge = tradingStageBadge(position)
-  const historyLog = formatStageHistoryLog(position.stageHistory ?? [])
   const stagePathDisplay = useMemo(
     () => buildStagePathDisplay(position.stageHistory ?? []),
     [position.stageHistory],
@@ -135,24 +130,6 @@ export default function TacticalStockDetailPanel({
   useEffect(() => {
     setDetailsOpen(false)
   }, [position.id])
-
-  const currentStageId =
-    position.stage === "interest" ||
-    position.stage === "pullback" ||
-    position.stage === "trend" ||
-    position.stage === "takeProfit"
-      ? position.stage
-      : null
-
-  let historyHighlightIndex = -1
-  if (historyLog.length && currentStageId) {
-    for (let i = historyLog.length - 1; i >= 0; i -= 1) {
-      if (historyLog[i].stage === currentStageId) {
-        historyHighlightIndex = i
-        break
-      }
-    }
-  }
 
   const confidence = useMemo(() => {
     const base = buildTradingConfidenceBreakdown({ position, panicData, activeAux: new Set(position.aux ?? []) })
@@ -442,50 +419,6 @@ export default function TacticalStockDetailPanel({
         <p className="m-0 tactical-zone-detail__no-price">가격 영역 계산 대기</p>
       )}
 
-      <footer className="tactical-zone-detail__foot" hidden={!detailsOpen}>
-        {historyLog.length ? (
-          <div className="tactical-zone-detail__status-history">
-            <p className="m-0 tactical-zone-detail__section-label">상태 이력</p>
-            <div className="tactical-zone-status-history" aria-label="상태 이력 타임라인">
-              {historyLog.map((h, i) => {
-                const isActive = i === historyHighlightIndex
-                const tip = buildStageHistoryTooltipLines(h)
-                const emoji = TRADING_STAGE_META[h.stage]?.emoji ?? "⚪"
-                return (
-                  <Fragment key={`${h.stage}-${h.dateLabel}-${i}`}>
-                    {i > 0 ? (
-                      <span className="tactical-zone-timeline-connector" aria-hidden>
-                        →
-                      </span>
-                    ) : null}
-                    <div
-                      className={[
-                        "tactical-zone-timeline-node",
-                        isActive ? "tactical-zone-timeline-node--active" : "",
-                      ].join(" ")}
-                      data-stage={h.stage}
-                      tabIndex={0}
-                    >
-                      <span className="tactical-zone-timeline-node__emoji" aria-hidden>
-                        {emoji}
-                      </span>
-                      <span className="tactical-zone-timeline-node__date font-mono tabular-nums">
-                        {h.dateLabel || "—"}
-                      </span>
-                      <span className="sr-only">{h.label}</span>
-                      <div className="tactical-zone-timeline-node__tooltip" role="tooltip">
-                        <span>가격 {tip.price}</span>
-                        <span>점수 {tip.score}</span>
-                        <span>상태 {tip.state}</span>
-                      </div>
-                    </div>
-                  </Fragment>
-                )
-              })}
-            </div>
-          </div>
-        ) : null}
-      </footer>
     </div>
   )
 }

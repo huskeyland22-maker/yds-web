@@ -86,7 +86,7 @@ export default function PanicDeskDashboard({
 
       {/* 전략 연구실 LAB — /cycle(시장 사이클) 전용 · 히스토리 직하 · 실전 매매존과 분리 */}
       <div className="panic-v2-desk__lab-slot" data-page="cycle-strategy-lab">
-        <HomeV5StrategyValidationPanel historyRows={mergedHistory} compact />
+        <HomeV5StrategyValidationPanel historyRows={mergedHistory} compact defaultOpen={false} />
       </div>
 
       <hr className="cycle-desk-divider cycle-desk-divider--reference" aria-hidden />
