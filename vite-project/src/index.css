@@ -4186,51 +4186,47 @@
   .tactical-zone-market-status {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    align-items: center;
+    gap: 1px;
     border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(255, 255, 255, 0.03);
-    padding: 10px 6px 8px;
+    padding: 5px 4px 4px;
     min-width: 0;
-    min-height: 58px;
+    min-height: 50px;
     box-sizing: border-box;
+    text-align: center;
   }
 
-  .tactical-zone-market-status__top-bar {
-    display: block;
-    width: 100%;
-    height: 3px;
-    border-radius: 3px;
-    opacity: 0.85;
-    margin-bottom: 8px;
-    flex-shrink: 0;
-    background: var(--market-top-bar, #94a3b8);
+  .tactical-zone-market-status[data-horizon="short"] .tactical-zone-market-status__period,
+  .tactical-zone-market-status[data-horizon="short"] .tactical-zone-market-status__dot {
+    color: #4ade80;
   }
 
-  .tactical-zone-market-status[data-horizon="short"] {
-    --market-top-bar: #4ade80;
+  .tactical-zone-market-status[data-horizon="mid"] .tactical-zone-market-status__period,
+  .tactical-zone-market-status[data-horizon="mid"] .tactical-zone-market-status__dot {
+    color: #60a5fa;
   }
 
-  .tactical-zone-market-status[data-horizon="mid"] {
-    --market-top-bar: #60a5fa;
+  .tactical-zone-market-status[data-horizon="long"] .tactical-zone-market-status__period,
+  .tactical-zone-market-status[data-horizon="long"] .tactical-zone-market-status__dot {
+    color: #facc15;
   }
 
-  .tactical-zone-market-status[data-horizon="long"] {
-    --market-top-bar: #f59e0b;
-  }
-
-  .tactical-zone-market-status[data-horizon="tactical"] {
-    --market-top-bar: #ef4444;
+  .tactical-zone-market-status[data-horizon="tactical"] .tactical-zone-market-status__period,
+  .tactical-zone-market-status[data-horizon="tactical"] .tactical-zone-market-status__dot {
+    color: #f87171;
   }
 
   .tactical-zone-market-status__period {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 3px;
-    font-size: 12px;
+    margin-top: 1px;
+    font-size: 10px;
     font-weight: 700;
-    line-height: 1.15;
-    color: rgba(148, 163, 184, 0.95);
+    line-height: 1.1;
     white-space: nowrap;
   }
 
@@ -4252,33 +4248,41 @@
 
   .tactical-zone-market-status__dot {
     flex-shrink: 0;
-    font-size: 11px;
+    font-size: 9px;
     line-height: 1;
   }
 
   .tactical-zone-market-status__score {
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1.05;
-    color: rgba(248, 250, 252, 0.98);
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: rgba(248, 250, 252, 0.99);
   }
 
   @media (min-width: 380px) {
     .tactical-zone-market-status__score {
-      font-size: 17px;
+      font-size: 21px;
     }
   }
 
   .tactical-zone-market-status__label {
     margin-top: 2px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.2;
     opacity: 0.98;
     color: rgba(203, 213, 225, 0.95);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  @media (min-width: 380px) {
+    .tactical-zone-market-status__label {
+      font-size: 14px;
+    }
   }
 
   .tactical-zone-engine-link__macro-stage {

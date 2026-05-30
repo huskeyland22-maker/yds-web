@@ -21,9 +21,9 @@ import { getFinalScore } from "../utils/tradingScores.js"
 /** @type {Record<string, string>} */
 export const ENGINE_LINK_HORIZON_DOT = {
   short: "🟢",
-  mid: "🟡",
-  long: "⚪",
-  tactical: "🔵",
+  mid: "🔵",
+  long: "🟡",
+  tactical: "🔴",
 }
 
 /** @type {Record<string, string>} */

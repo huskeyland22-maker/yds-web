@@ -57,15 +57,14 @@ export default function TacticalEngineLinkBar({
                 data-horizon={c.id}
                 data-status-tone={labelTone}
               >
-                <span className="tactical-zone-market-status__top-bar" aria-hidden />
+                <p className="m-0 tactical-zone-market-status__score font-mono tabular-nums">
+                  {c.score ?? "—"}
+                </p>
                 <p className="m-0 tactical-zone-market-status__period">
                   <span className="tactical-zone-market-status__dot" aria-hidden>
                     {dot}
                   </span>
                   {c.period}
-                </p>
-                <p className="m-0 tactical-zone-market-status__score font-mono tabular-nums">
-                  {c.score ?? "—"}
                 </p>
                 <p className="m-0 tactical-zone-market-status__label">{horizonLabel}</p>
               </div>

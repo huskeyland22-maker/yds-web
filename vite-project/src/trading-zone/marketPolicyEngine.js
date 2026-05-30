@@ -349,7 +349,7 @@ const CORE_METRIC_POLICY_HINT = {
   },
   neutral: {
     fearGreed: "추격 금지",
-    vix: "눌림 대기",
+    vix: "종목 탐색",
     bofa: "현금 확보",
   },
   pullback: {
