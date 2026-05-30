@@ -1549,7 +1549,8 @@
     min-height: 0;
   }
 
-  .tactical-trading-zone__detail .tactical-zone-detail--flow {
+  .tactical-trading-zone__detail .tactical-zone-detail--flow,
+  .tactical-trading-zone__detail .tactical-zone-detail--simple {
     min-height: 0;
     width: 100%;
   }
@@ -1820,7 +1821,8 @@
     padding: 8px 10px;
   }
 
-  .tactical-zone-detail--flow {
+  .tactical-zone-detail--flow,
+  .tactical-zone-detail--simple {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -1828,8 +1830,105 @@
     width: 100%;
     max-width: none;
     min-height: 0;
-    padding: 16px 12px;
+    padding: 12px 10px;
     box-sizing: border-box;
+  }
+
+  .tactical-zone-detail--simple .tactical-zone-detail__simple-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  .tactical-zone-detail__block {
+    padding: 8px 8px 9px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .tactical-zone-detail__block-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: rgba(148, 163, 184, 0.9);
+    margin-bottom: 6px;
+  }
+
+  .tactical-zone-detail__position-stage {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tactical-zone-detail[data-stage="interest"] .tactical-zone-detail__position-stage {
+    color: rgba(74, 222, 128, 0.98);
+  }
+
+  .tactical-zone-detail[data-stage="pullback"] .tactical-zone-detail__position-stage {
+    color: rgba(250, 204, 21, 0.98);
+  }
+
+  .tactical-zone-detail[data-stage="trend"] .tactical-zone-detail__position-stage {
+    color: rgba(96, 165, 250, 0.98);
+  }
+
+  .tactical-zone-detail[data-stage="takeProfit"] .tactical-zone-detail__position-stage {
+    color: rgba(251, 146, 60, 0.98);
+  }
+
+  .tactical-zone-detail__position-status {
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: rgba(226, 232, 240, 0.92);
+  }
+
+  .tactical-zone-detail__today-actions {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .tactical-zone-detail__today-action {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .tactical-zone-detail__today-action-icon {
+    flex-shrink: 0;
+    width: 1.1rem;
+    text-align: center;
+  }
+
+  .tactical-zone-detail__entry-rationale {
+    margin-bottom: 4px;
+  }
+
+  .tactical-zone-detail__entry-rationale-list {
+    margin: 4px 0 0;
+    padding-left: 16px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: rgba(186, 198, 214, 0.92);
+  }
+
+  .tactical-zone-detail__no-price {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.88);
   }
 
   .tactical-zone-detail__head {
