@@ -9100,10 +9100,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-bottom: 14px;
 }
 
-.panic-v2-desk--terminal .home-v5-preview__zone--core + .home-v5-preview__zone--market {
-  margin-top: 0.35rem;
-}
-
 .home-v5-preview__zone {
   display: flex;
   flex-direction: column;
@@ -9126,10 +9122,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   padding-top: 10px;
   padding-bottom: 0;
   margin-bottom: 14px;
-}
-
-.home-v5-core-section .home-v5-core-synthesis {
-  margin-top: 0.5rem;
 }
 
 .home-v5-preview--compact .home-v5-preview__zone--core {

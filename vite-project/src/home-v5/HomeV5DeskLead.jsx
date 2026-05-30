@@ -5,12 +5,9 @@ import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { buildHomeV5DeskModel } from "./homeV5DeskModel.js"
 import HomeV5CoreIndices from "./HomeV5CoreIndices.jsx"
-import HomeV5CoreSynthesis from "./HomeV5CoreSynthesis.jsx"
-import HomeV5MarketAnalysis from "./HomeV5MarketAnalysis.jsx"
-import HomeV5StrategyRationaleBar from "./HomeV5StrategyRationaleBar.jsx"
 
 /**
- * 홈 v5 상단 — 핵심지수 · 전략 Hero · 시장 분석
+ * 홈 v5 상단 — 핵심지수 (카드 그리드만)
  * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
  */
 export default function HomeV5DeskLead({ panicData = null, historyRows = [], className = "" }) {
@@ -48,13 +45,7 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
             tier="main"
           />
           <HomeV5CoreIndices cards={model.core} />
-          <HomeV5CoreSynthesis synthesis={model.synthesis} />
-          {model.strategy ? <HomeV5StrategyRationaleBar strategy={model.strategy} /> : null}
         </section>
-      </div>
-
-      <div className="home-v5-preview__zone home-v5-preview__zone--market">
-        <HomeV5MarketAnalysis panicData={panicData} />
       </div>
     </div>
   )
