@@ -46,6 +46,12 @@ export { HOME_V5_CORE_METRIC_ORDER } from "./homeV5CoreMetricOrder.js"
  *   rationale: string[]
  * }} HomeV5StrategyModel */
 
+/** @typedef {{
+ *   regimeId: string
+ *   color: string
+ *   segments: string[]
+ * }} HomeV5StrategyStatusBarModel */
+
 const CORE_ROLES = {
   fearGreed: "심리",
   vix: "변동성",
@@ -106,26 +112,31 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
 
 /**
  * @param {NonNullable<ReturnType<typeof buildHomeV5StrategyEvaluation>>} evaluation
- * @returns {HomeV5CoreCardModel}
+ * @param {ReturnType<typeof buildMarketPolicy>} marketPolicy
+ * @param {object | null | undefined} panicData
+ * @returns {HomeV5StrategyStatusBarModel}
  */
-function buildHomeV5StrategyHudCard(evaluation) {
+export function buildHomeV5StrategyStatusBar(evaluation, marketPolicy, panicData) {
+  /** @type {string[]} */
+  const segments = [evaluation.stageTitle, evaluation.actionLine]
+  const vix = Number(panicData?.vix)
+
+  if (Number.isFinite(vix) && vix < 18) {
+    segments.push("종목 탐색 우선")
+  } else {
+    const primary = marketPolicy?.actionLines?.primary
+    if (primary) segments.push(primary.includes("우선") ? primary : `${primary} 우선`)
+  }
+
+  const caution = marketPolicy?.actionLines?.caution ?? "추격 금지"
+  if (caution && !segments.includes(caution)) segments.push(caution)
+
+  const unique = segments.filter((s) => s && s !== "—")
+
   return {
-    key: "strategy",
-    kind: "strategy",
-    role: "전략",
-    stageId: evaluation.regimeId,
-    value: evaluation.stageTitle,
-    trendLine: `${evaluation.actionLine} · ${evaluation.transitionLine}`,
-    timelineText: "",
-    changeText: evaluation.actionLine,
-    changeDeltaText: evaluation.actionLine,
-    trendArrow: "→",
-    trendDir: "flat",
-    dataStatusLabel: "YDS 단계",
-    policyHint: evaluation.actionLine,
-    recentChangeLabel: evaluation.transitionLine,
-    recentChangeTone: evaluation.transitionTone,
-    accentColor: evaluation.color,
+    regimeId: evaluation.regimeId,
+    color: evaluation.color,
+    segments: unique,
   }
 }
 
@@ -199,6 +210,7 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
  * @param {object[]} [historyRows]
  * @returns {{
  *   core: HomeV5CoreCardModel[]
+ *   strategyBar: HomeV5StrategyStatusBarModel | null
  *   strategy: HomeV5StrategyModel | null
  *   synthesis: import("./homeV5CoreSynthesis.js").HomeV5CoreSynthesisModel
  * }}
@@ -206,19 +218,19 @@ export function buildHomeV5StrategyRationale(panicData, regimeId) {
 export function buildHomeV5DeskModel(panicData, historyRows = []) {
   const marketPolicy = buildMarketPolicy({ panicData })
   const synthesis = buildHomeV5CoreSynthesis(panicData, marketPolicy)
-  const metrics = HOME_V5_CORE_METRIC_ORDER.map((key) =>
+  const core = HOME_V5_CORE_METRIC_ORDER.map((key) =>
     buildHomeV5CoreCard(key, panicData, marketPolicy, historyRows),
   )
 
   const evaluation = buildHomeV5StrategyEvaluation(panicData, historyRows, synthesis)
-  const core = evaluation ? [...metrics, buildHomeV5StrategyHudCard(evaluation)] : metrics
 
   if (!evaluation) {
-    return { core, strategy: null, synthesis }
+    return { core, strategyBar: null, strategy: null, synthesis }
   }
 
   return {
     core,
+    strategyBar: buildHomeV5StrategyStatusBar(evaluation, marketPolicy, panicData),
     synthesis,
     strategy: {
       id: evaluation.regimeId,

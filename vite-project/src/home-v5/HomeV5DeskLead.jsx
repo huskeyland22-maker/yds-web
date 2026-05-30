@@ -44,7 +44,7 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
             tone="cyan"
             tier="main"
           />
-          <HomeV5CoreIndices cards={model.core} />
+          <HomeV5CoreIndices cards={model.core} strategyBar={model.strategyBar} />
         </section>
       </div>
     </div>
