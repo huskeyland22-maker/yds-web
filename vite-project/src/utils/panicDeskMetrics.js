@@ -32,24 +32,50 @@ export const EXPERT_METRICS = [
 /** @type {PanicDeskMetric[]} */
 export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 
-/** 패닉지수 히스토리 — 감정 흐름 3지표 (매매 행동은 실전 매매존) */
-export const PANIC_INDEX_HISTORY_METRICS = [
-  { key: "vix", label: "VIX", chartLabel: "VIX", accent: "#f87171", tooltip: "VIX 변동성" },
-  {
-    key: "fearGreed",
-    label: "CNN Fear & Greed",
-    chartLabel: "CNN",
-    accent: "#fbbf24",
-    tooltip: "CNN Fear & Greed Index",
-  },
-  {
-    key: "bofa",
-    label: "BofA Bull & Bear",
-    chartLabel: "BofA",
-    accent: "#c084fc",
-    tooltip: "BofA Bull & Bear Indicator",
-  },
+/** 패닉지수 히스토리 — 9대 원본 지표 (3×3 선택) */
+export const PANIC_INDEX_HISTORY_ROWS = [
+  [
+    { key: "vix", shortLabel: "VIX", chartLabel: "VIX", accent: "#f87171", tooltip: "VIX 변동성" },
+    {
+      key: "fearGreed",
+      shortLabel: "CNN",
+      chartLabel: "CNN",
+      accent: "#fbbf24",
+      tooltip: "CNN Fear & Greed",
+    },
+    {
+      key: "bofa",
+      shortLabel: "BofA",
+      chartLabel: "BofA",
+      accent: "#c084fc",
+      tooltip: "BofA Bull & Bear",
+    },
+  ],
+  [
+    { key: "vxn", shortLabel: "VXN", chartLabel: "VXN", accent: "#2dd4bf", tooltip: "VXN 나스닥 변동성" },
+    { key: "putCall", shortLabel: "P/C", chartLabel: "P/C", accent: "#60a5fa", tooltip: "Put/Call 비율" },
+    { key: "move", shortLabel: "MOVE", chartLabel: "MOVE", accent: "#fbbf24", tooltip: "MOVE 채권 변동성" },
+  ],
+  [
+    { key: "skew", shortLabel: "SKEW", chartLabel: "SKEW", accent: "#22d3ee", tooltip: "SKEW 꼬리위험" },
+    {
+      key: "highYield",
+      shortLabel: "HY",
+      chartLabel: "HY",
+      accent: "#fb923c",
+      tooltip: "하이일드 OAS",
+    },
+    {
+      key: "gsBullBear",
+      shortLabel: "GS",
+      chartLabel: "GS",
+      accent: "#a78bfa",
+      tooltip: "Goldman Sachs Bull/Bear",
+    },
+  ],
 ]
+
+export const PANIC_INDEX_HISTORY_METRICS = PANIC_INDEX_HISTORY_ROWS.flat()
 
 /** @deprecated 실전/거시 탭 제거 — PANIC_INDEX_HISTORY_METRICS 사용 */
 export const PANIC_V2_HISTORY_TAB = {

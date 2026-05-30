@@ -6878,6 +6878,118 @@
     color: rgba(254, 243, 199, 0.98);
   }
 
+  .panic-history-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .panic-history-picker__row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .panic-history-picker__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    min-height: 36px;
+    padding: 5px 4px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(203, 213, 225, 0.9);
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .panic-history-picker__btn:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .panic-history-picker__btn--active {
+    border-color: color-mix(in srgb, var(--picker-accent, #fbbf24) 55%, transparent);
+    background: color-mix(in srgb, var(--picker-accent, #fbbf24) 14%, transparent);
+    color: rgba(248, 250, 252, 0.98);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--picker-accent, #fbbf24) 25%, transparent);
+  }
+
+  .panic-history-picker__btn-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+  }
+
+  .panic-history-picker__btn-count {
+    font-size: 8px;
+    font-weight: 600;
+    opacity: 0.65;
+    line-height: 1;
+  }
+
+  .panic-history-selection-bar {
+    margin-top: 8px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(0, 0, 0, 0.18);
+  }
+
+  .panic-history-selection-bar__selected {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.95);
+    line-height: 1.3;
+  }
+
+  .panic-history-selection-bar__selected strong {
+    color: rgba(250, 204, 21, 0.98);
+    font-weight: 800;
+  }
+
+  .panic-history-selection-bar__hint {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(148, 163, 184, 0.85);
+  }
+
+  .panic-history-selection-bar__ranges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .panic-history-range-btn {
+    border-radius: 5px;
+    border: 1px solid transparent;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(100, 116, 139, 0.95);
+    background: transparent;
+  }
+
+  .panic-history-range-btn--active {
+    border-color: rgba(34, 211, 238, 0.35);
+    background: rgba(34, 211, 238, 0.12);
+    color: rgba(165, 243, 252, 0.98);
+  }
+
+  .panic-history-selection-bar__days {
+    margin-top: 4px;
+  }
+
   .panic-history-tab--aux {
     opacity: 0.9;
   }

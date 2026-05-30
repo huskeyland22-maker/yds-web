@@ -18,6 +18,9 @@ export const LAB_CHART_RANGES = [
   { id: "ALL", label: "ALL", days: null },
 ]
 
+/** 패닉지수 히스토리 UI — 1M / 3M / 6M / 1Y */
+export const PANIC_INDEX_CHART_RANGES = LAB_CHART_RANGES.filter((r) => r.id !== "ALL")
+
 /**
  * @param {object[]} rows
  * @param {string} rangeId

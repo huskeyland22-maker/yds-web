@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
-import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
-import { PANIC_INDEX_HISTORY_METRICS } from "../utils/panicDeskMetrics.js"
+import { chartRangeStats, PANIC_INDEX_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
+import {
+  PANIC_INDEX_HISTORY_METRICS,
+  PANIC_INDEX_HISTORY_ROWS,
+} from "../utils/panicDeskMetrics.js"
 import {
   buildPanicHistoryInsight,
   mergeInflectionsIntoChartData,
@@ -36,14 +39,12 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   }, [rowsProp, storeRows])
 
   const [activeMetricKey, setActiveMetricKey] = useState(DEFAULT_METRIC_KEY)
-  const [rangeId, setRangeId] = useState("6M")
+  const [rangeId, setRangeId] = useState("3M")
 
-  const metric = useMemo(
-    () =>
-      PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === activeMetricKey) ??
-      PANIC_INDEX_HISTORY_METRICS[0],
-    [activeMetricKey],
-  )
+  const metric = useMemo(() => {
+    const found = PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === activeMetricKey)
+    return found ?? PANIC_INDEX_HISTORY_METRICS[0]
+  }, [activeMetricKey])
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
   const chartRowsSource = slicedRows.length ? slicedRows : history
@@ -84,75 +85,79 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   )
 
   const showHistoryLoading = history.length === 0
+  const rangeStats = chartRangeStats(history, rangeId, "lab")
 
   const showChart =
     !showHistoryLoading && uiState.showChart && chartRows.some((x) => x?.value != null)
 
-  const chartEmptyMessage = `${metric.label} 데이터 준비중`
+  const chartEmptyMessage = `${metric.shortLabel} 원본 데이터 준비중`
 
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
       <PanicDeskSectionHeader
         icon="📈"
         title="패닉지수 히스토리"
-        description="최근 시장 감정 흐름 · VIX · CNN · BofA"
+        description="9대 패닉지수 원본 흐름 · 지표 선택 후 확인"
         tone="amber"
         compact
       />
       <p className="m-0 panic-history-section__meta text-[11px] text-slate-500">
-        시장 판단용 · 매매 행동은 하단 실전 매매존 · {rangeId} ·{" "}
-        {chartRangeStats(history, rangeId, "lab").shown}일
+        원본 지표 데이터 · 매매 판단은 하단 실전 매매존
       </p>
 
-      <div
-        className="panic-history-tabs panic-history-tabs--sentiment mt-1.5 flex flex-wrap items-center gap-1"
-        role="tablist"
-        aria-label="패닉지수 지표"
-      >
-        {PANIC_INDEX_HISTORY_METRICS.map((m) => {
-          const n = metricCounts[m.key] ?? 0
-          const active = activeMetricKey === m.key
-          return (
-            <button
-              key={m.key}
-              type="button"
-              role="tab"
-              onClick={() => setActiveMetricKey(m.key)}
-              className={[
-                "panic-history-tab panic-history-tab--sentiment inline-flex max-w-full items-center gap-1 rounded-md border px-2 py-1",
-                active
-                  ? "border-amber-400/35 bg-amber-500/15 text-amber-50 ring-1 ring-amber-400/25"
-                  : "border-transparent text-slate-400 hover:text-slate-200",
-              ].join(" ")}
-              title={m.tooltip ? `${m.label} · ${n}일` : `${m.label} · ${n}일`}
-              aria-selected={active}
-            >
-              <span className="panic-history-tab__label whitespace-nowrap text-[10px] font-semibold">
-                {m.label}
-              </span>
-              <span className="panic-history-tab__count font-mono text-[8px] opacity-75">{n}</span>
-            </button>
-          )
-        })}
+      <div className="panic-history-picker" role="tablist" aria-label="9대 패닉지수">
+        {PANIC_INDEX_HISTORY_ROWS.map((row, rowIdx) => (
+          <div key={`picker-row-${rowIdx}`} className="panic-history-picker__row">
+            {row.map((m) => {
+              const n = metricCounts[m.key] ?? 0
+              const active = activeMetricKey === m.key
+              return (
+                <button
+                  key={m.key}
+                  type="button"
+                  role="tab"
+                  onClick={() => setActiveMetricKey(m.key)}
+                  className={[
+                    "panic-history-picker__btn",
+                    active ? "panic-history-picker__btn--active" : "",
+                  ].join(" ")}
+                  style={active ? { "--picker-accent": m.accent } : undefined}
+                  title={m.tooltip ? `${m.tooltip} · ${n}일` : `${m.shortLabel} · ${n}일`}
+                  aria-selected={active}
+                >
+                  <span className="panic-history-picker__btn-label">{m.shortLabel}</span>
+                  <span className="panic-history-picker__btn-count font-mono">{n}</span>
+                </button>
+              )
+            })}
+          </div>
+        ))}
       </div>
 
-      <div className="mt-1 flex flex-wrap gap-0.5">
-        {LAB_CHART_RANGES.map((r) => {
-          const st = chartRangeStats(history, r.id, "lab")
-          return (
+      <div className="panic-history-selection-bar">
+        <p className="m-0 panic-history-selection-bar__selected">
+          선택: <strong>{metric.shortLabel}</strong>
+          <span className="panic-history-selection-bar__hint">{metric.tooltip}</span>
+        </p>
+        <div className="panic-history-selection-bar__ranges" role="group" aria-label="기간">
+          {PANIC_INDEX_CHART_RANGES.map((r) => (
             <button
               key={r.id}
               type="button"
               onClick={() => setRangeId(r.id)}
               className={[
-                "rounded px-1.5 py-0.5 font-mono text-[9px] tabular-nums",
-                rangeId === r.id ? "bg-cyan-500/15 text-cyan-100" : "text-slate-600",
+                "panic-history-range-btn font-mono tabular-nums",
+                rangeId === r.id ? "panic-history-range-btn--active" : "",
               ].join(" ")}
+              aria-pressed={rangeId === r.id}
             >
               {r.label}
             </button>
-          )
-        })}
+          ))}
+        </div>
+        <p className="m-0 panic-history-selection-bar__days text-[10px] text-slate-500">
+          {rangeId} · {rangeStats.shown}일 표시
+        </p>
       </div>
 
       <PanicHistoryInsightPanel
