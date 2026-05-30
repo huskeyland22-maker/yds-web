@@ -9245,9 +9245,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card__timeline-mobile,
-.home-v5-hud-card__change-delta-mobile,
-.home-v5-hud-card__change-arrow-inline {
+.home-v5-hud-card__change-delta-mobile {
   display: none;
+}
+
+.home-v5-hud-card__change-arrow-inline {
+  display: inline;
 }
 
 /* 모바일 핵심지표 — 768px 이하: 숫자 → 방향 → 행동 우선 */
@@ -9272,19 +9275,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     padding: 6px 6px 7px;
   }
 
-  .home-v5-hud-card__head .home-v5-hud-card__trend-arrow {
-    display: none;
+  .home-v5-hud-card__symbol {
+    font-size: calc(var(--hud-base) * 1.28);
   }
 
-  .home-v5-hud-card__hero {
-    margin-top: 1px;
-    gap: 6px;
-  }
-
-  .home-v5-hud-card__change-delta {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 2px;
+  .home-v5-hud-card__change-delta--head {
     font-size: var(--hud-delta-size, 14px);
   }
 
@@ -9301,6 +9296,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
   .home-v5-hud-card__change-delta-mobile {
     display: inline;
+  }
+
+  .home-v5-hud-card--metric .home-v5-hud-card__value {
+    margin-top: 3px;
+    font-size: var(--hud-value-size, 18px);
   }
 
   .home-v5-hud-card__timeline {
@@ -9330,10 +9330,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     line-height: 1.3;
   }
 
-  .home-v5-hud-card--metric .home-v5-hud-card__recent-change {
-    display: none;
-  }
-
   .home-v5-hud-card--strategy .home-v5-hud-card__stage-transition {
     display: none;
   }
@@ -9352,14 +9348,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
   .home-v5-hud-card__value--stage {
     font-size: 13px;
-  }
-
-  .home-v5-hud-card__role-ko {
-    font-size: 10px;
-  }
-
-  .home-v5-hud-card__role-en {
-    font-size: 9px;
   }
 }
 
@@ -9472,64 +9460,28 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.95);
 }
 
-.home-v5-hud-card__role-ko {
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.home-v5-hud-card__role-en {
-  font-size: 10px;
-  font-weight: 600;
-  opacity: 0.75;
-}
-
 .home-v5-hud-card__head {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 2px;
+  gap: 6px;
   min-width: 0;
   margin: 0;
 }
 
-.home-v5-hud-card__head .home-v5-hud-card__role {
+.home-v5-hud-card__symbol {
+  margin: 0;
   flex: 1;
   min-width: 0;
-}
-
-.home-v5-hud-card__trend-arrow {
-  flex-shrink: 0;
-  margin: 0;
-  font-size: var(--hud-arrow-size, 32px);
-  font-weight: 600;
+  font-size: calc(var(--hud-base) * 1.3);
+  font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-
-.home-v5-hud-card__trend-arrow--up {
-  color: var(--hud-trend-up, #6ee7a8);
-}
-
-.home-v5-hud-card__trend-arrow--down {
-  color: var(--hud-trend-down, #f0a8a8);
-}
-
-.home-v5-hud-card__trend-arrow--flat {
-  color: var(--hud-trend-flat, #94a3b8);
-}
-
-.home-v5-hud-card__hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 4px;
-  min-width: 0;
-  margin: 0;
+  color: rgba(248, 250, 252, 0.98);
 }
 
 .home-v5-hud-card__value {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: var(--hud-value-size, 20px);
   font-weight: 900;
   line-height: 0.95;
@@ -9538,17 +9490,30 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card--metric .home-v5-hud-card__value {
-  margin-top: 0;
+  margin-top: 4px;
 }
 
 .home-v5-hud-card__change-delta {
   margin: 0;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
   font-size: var(--hud-delta-size, 25px);
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+}
+
+.home-v5-hud-card__change-delta--head {
+  font-size: calc(var(--hud-base) * 0.72);
+}
+
+.home-v5-hud-card__change-arrow-inline {
+  font-size: calc(var(--hud-base) * 0.72);
+  font-weight: 600;
+  line-height: 1;
 }
 
 .home-v5-hud-card__change-delta--up {
@@ -9618,6 +9583,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(186, 198, 214, 0.95);
 }
 
+.home-v5-hud-card--metric .home-v5-hud-card__recent-change {
+  display: none;
+}
+
 .home-v5-hud-card__recent-change {
   margin: 2px 0 0;
   min-width: 0;
@@ -9643,7 +9612,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-hud-card--metric {
-  min-height: 6.25rem;
+  min-height: 5.75rem;
   padding: 5px 6px 6px;
 }
 

@@ -14,7 +14,6 @@ function CoreHudCard({
   dataStatusLabel,
   policyHint,
   recentChangeLabel,
-  recentChangeTone,
   trendLine,
   trendArrow,
   trendDir,
@@ -24,6 +23,7 @@ function CoreHudCard({
   const isStrategy = kind === "strategy"
   const style = accentColor ? { "--home-v5-hud-accent": accentColor } : undefined
   const statusActionParts = [dataStatusLabel, policyHint].filter((v) => v && v !== "—")
+  const deltaDisplay = changeDeltaTextMobile ?? changeDeltaText ?? "—"
 
   return (
     <article
@@ -42,29 +42,19 @@ function CoreHudCard({
       {!isStrategy ? (
         <>
           <header className="home-v5-hud-card__head">
-            <p className="home-v5-hud-card__role">
-              <span className="home-v5-hud-card__role-ko">{role}</span>
-              <span className="home-v5-hud-card__role-en">{symbol}</span>
-            </p>
-            <span
-              className={`home-v5-hud-card__trend-arrow home-v5-hud-card__trend-arrow--${trendDir}`}
-              aria-hidden="true"
+            <p className="home-v5-hud-card__symbol">{symbol}</p>
+            <p
+              className={`home-v5-hud-card__change-delta home-v5-hud-card__change-delta--head home-v5-hud-card__change-delta--${trendDir}`}
+              aria-label={`최근 변화 ${deltaDisplay}`}
             >
-              {trendArrow ?? "→"}
-            </span>
-          </header>
-          <div className="home-v5-hud-card__hero">
-            <p className="home-v5-hud-card__value">{value}</p>
-            <p className={`home-v5-hud-card__change-delta home-v5-hud-card__change-delta--${trendDir}`}>
               <span className="home-v5-hud-card__change-arrow-inline" aria-hidden="true">
                 {trendArrow ?? "→"}
               </span>
               <span className="home-v5-hud-card__change-delta-full">{changeDeltaText ?? "—"}</span>
-              <span className="home-v5-hud-card__change-delta-mobile">
-                {changeDeltaTextMobile ?? changeDeltaText ?? "—"}
-              </span>
+              <span className="home-v5-hud-card__change-delta-mobile">{deltaDisplay}</span>
             </p>
-          </div>
+          </header>
+          <p className="home-v5-hud-card__value">{value}</p>
           <p className="home-v5-hud-card__timeline" title={trendLine ?? timelineText ?? "최근 10일 · 2일 간격"}>
             <span className="home-v5-hud-card__timeline-full">{timelineText ?? "—"}</span>
             <span className="home-v5-hud-card__timeline-mobile">
@@ -88,12 +78,6 @@ function CoreHudCard({
             ) : (
               "—"
             )}
-          </p>
-          <p
-            className={`home-v5-hud-card__recent-change home-v5-hud-card__recent-change--${recentChangeTone ?? "flat"}`}
-            title={recentChangeLabel ?? undefined}
-          >
-            {recentChangeLabel ?? "—"}
           </p>
         </>
       ) : (

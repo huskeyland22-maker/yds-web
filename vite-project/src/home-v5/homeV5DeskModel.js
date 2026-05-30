@@ -3,7 +3,6 @@ import { buildHomeV5CoreTrend } from "./homeV5CoreTrend.js"
 import { resolveHomeV5StrategyRegime } from "./homeV5StrategyRegime.js"
 import { buildMarketPolicy, resolveCoreMetricPolicyHint } from "../trading-zone/marketPolicyEngine.js"
 import { buildHomeV5CoreSynthesis } from "./homeV5CoreSynthesis.js"
-import { resolveCoreMetricRecentChange } from "./homeV5CoreMetricTransition.js"
 import {
   YDS_STAGE_ACTION,
   formatYdsStageTitle,
@@ -78,7 +77,11 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
   const digits = key === "bofa" ? 1 : key === "vix" ? 2 : 0
   const trend = buildHomeV5CoreTrend(key, panicData, historyRows)
   const policy = marketPolicy ?? buildMarketPolicy({ panicData })
-  const recentChange = resolveCoreMetricRecentChange(key, panicData, historyRows)
+  const dataStatusLabel = resolveCoreMetricDataStatus(key, raw)
+  let policyHint = resolveCoreMetricPolicyHint(key, policy)
+  if (key === "vix" && dataStatusLabel === "낮은 변동성") {
+    policyHint = "종목 탐색"
+  }
 
   return {
     key,
@@ -94,10 +97,10 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
     changeDeltaTextMobile: trend.changeDeltaTextMobile,
     trendArrow: trend.trendArrow,
     trendDir: trend.trendDir,
-    dataStatusLabel: resolveCoreMetricDataStatus(key, raw),
-    policyHint: resolveCoreMetricPolicyHint(key, policy),
-    recentChangeLabel: recentChange.label,
-    recentChangeTone: recentChange.tone,
+    dataStatusLabel,
+    policyHint,
+    recentChangeLabel: "",
+    recentChangeTone: "flat",
   }
 }
 
