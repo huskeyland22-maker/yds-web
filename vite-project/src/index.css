@@ -3990,12 +3990,19 @@
     min-width: 0;
   }
 
+  .tactical-zone-stock-bridge__focus-hint {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
   .tactical-zone-stock-bridge__pick {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
     width: 100%;
-    padding: 6px 7px;
+    padding: 8px 9px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.07);
     background: rgba(255, 255, 255, 0.03);
@@ -4021,10 +4028,10 @@
     border-color: rgba(251, 146, 60, 0.32);
   }
 
-  .tactical-zone-stock-bridge__pick-main {
+  .tactical-zone-stock-bridge__pick-head {
     display: flex;
     align-items: baseline;
-    gap: 6px;
+    gap: 8px;
     min-width: 0;
   }
 
@@ -4038,17 +4045,133 @@
   .tactical-zone-stock-bridge__pick-symbol {
     flex: 1;
     min-width: 0;
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: rgba(248, 250, 252, 0.99);
+  }
+
+  .tactical-zone-stock-bridge__pick-trust {
+    flex-shrink: 0;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    color: rgba(52, 211, 153, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__trust-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .tactical-zone-stock-bridge__trust-k {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.88);
+  }
+
+  .tactical-zone-stock-bridge__trust-blocks {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: rgba(34, 211, 238, 0.92);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tactical-zone-stock-bridge__trust-level {
+    flex-shrink: 0;
+    font-size: 10px;
     font-weight: 800;
-    color: rgba(248, 250, 252, 0.98);
+    color: rgba(110, 231, 168, 0.95);
+  }
+
+  .tactical-zone-stock-bridge__reasons {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tactical-zone-stock-bridge__reason {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(167, 243, 208, 0.95);
+  }
+
+  .tactical-zone-stock-bridge__reason--warn {
+    color: rgba(253, 230, 138, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__ladder {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .tactical-zone-stock-bridge__ladder-k {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(148, 163, 184, 0.85);
+  }
+
+  .tactical-zone-stock-bridge__ladder-steps {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .tactical-zone-stock-bridge__ladder-step-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tactical-zone-stock-bridge__ladder-arrow {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(100, 116, 139, 0.95);
+    padding: 1px 0 1px 6px;
+  }
+
+  .tactical-zone-stock-bridge__ladder-step {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: rgba(203, 213, 225, 0.88);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .tactical-zone-stock-bridge__ladder-step[data-active="true"] {
+    color: rgba(125, 211, 252, 0.98);
+    background: rgba(34, 211, 238, 0.12);
+    font-weight: 800;
   }
 
   .tactical-zone-stock-bridge__pick-score {
-    flex-shrink: 0;
-    font-size: 13px;
-    font-weight: 800;
+    margin-left: 4px;
+    font-size: 11px;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: rgba(34, 211, 238, 0.98);
+    color: rgba(148, 163, 184, 0.88);
   }
 
   .tactical-zone-stock-bridge__pick-stage {
@@ -4069,25 +4192,10 @@
     background: rgba(249, 115, 22, 0.18);
   }
 
-  .tactical-zone-stock-bridge__confidence {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .tactical-zone-stock-bridge__confidence-label {
-    flex-shrink: 0;
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(148, 163, 184, 0.88);
-    font-variant-numeric: tabular-nums;
-  }
-
   .tactical-zone-stock-bridge__confidence-bar {
-    flex: 1;
-    min-width: 48px;
-    height: 5px;
+    display: block;
+    width: 100%;
+    height: 6px;
     border-radius: 3px;
     background: rgba(255, 255, 255, 0.08);
     overflow: hidden;
@@ -4098,13 +4206,6 @@
     height: 100%;
     border-radius: 3px;
     background: linear-gradient(90deg, rgba(34, 211, 238, 0.85), rgba(52, 211, 153, 0.9));
-  }
-
-  .tactical-zone-stock-bridge__confidence-level {
-    flex-shrink: 0;
-    font-size: 10px;
-    font-weight: 800;
-    color: rgba(110, 231, 168, 0.95);
   }
 
   .tactical-zone-stock-bridge__path {

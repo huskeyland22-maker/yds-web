@@ -26,7 +26,9 @@ import { TRADING_STAGE_META } from "./tacticalTradingZoneData.js"
  *   confidenceLevel: string
  *   stagePath: string
  *   pathSegments: { dateLabel: string; stage: TradingStageId; label: string }[]
+ *   stageLadder: string[]
  *   reasons: string[]
+ *   confidenceBar: string
  *   regimeBoost: boolean
  * }} MarketLinkedStockPriority */
 
@@ -40,6 +42,29 @@ import { TRADING_STAGE_META } from "./tacticalTradingZoneData.js"
  *   regimeLabel: string | null
  *   priorities: MarketLinkedStockPriority[]
  * }} MarketStockBridgeModel */
+
+/** @type {Record<string, string>} */
+const SYMBOL_SECTOR_THEME = {
+  NVDA: "AI",
+  AVGO: "반도체",
+  META: "AI",
+  SMH: "반도체",
+  SOXL: "반도체",
+  PLTR: "AI",
+  TSLA: "성장",
+  TSLL: "레버리지",
+  TQQQ: "레버리지",
+  "실리콘투": "반도체",
+}
+
+/** @type {Record<TradingStageId, string>} */
+const STAGE_LADDER_SHORT = {
+  interest: "관심",
+  pullback: "눌림",
+  trend: "추세",
+  takeProfit: "익절",
+  risk: "리스크",
+}
 
 /** @type {Record<string, string[]>} */
 const REGIME_SYMBOL_BOOST = {
@@ -86,6 +111,86 @@ export function resolveConfidenceLevel(score) {
   if (score >= 85) return "높음"
   if (score >= 68) return "보통"
   return "낮음"
+}
+
+/**
+ * @param {number} score 0–100
+ * @param {number} [blocks]
+ */
+export function formatConfidenceBlockBar(score, blocks = 10) {
+  const n = Math.max(0, Math.min(blocks, Math.round((Number(score) || 0) / (100 / blocks))))
+  return `${"█".repeat(n)}${"░".repeat(blocks - n)}`
+}
+
+/**
+ * @param {{ stage: TradingStageId; label?: string }[]} segments
+ * @returns {string[]}
+ */
+export function buildCompactStageLadder(segments) {
+  if (!segments?.length) return []
+  /** @type {string[]} */
+  const ladder = []
+  let prev = ""
+  for (const seg of segments) {
+    const short = STAGE_LADDER_SHORT[seg.stage] ?? seg.label ?? seg.stage
+    if (short && short !== prev) {
+      ladder.push(short)
+      prev = short
+    }
+  }
+  return ladder
+}
+
+/**
+ * @param {TradingZonePosition} position
+ * @param {import("./tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | undefined} ev
+ * @param {{ regimeBoost: boolean; focusStage: TradingStageId }} ctx
+ */
+function buildPriorityReasons(position, ev, ctx) {
+  /** @type {string[]} */
+  const reasons = []
+
+  if (ev?.dataReady && ev.strengthHighlights?.length) {
+    reasons.push(...ev.strengthHighlights)
+  }
+  if (ev?.dataReady && ev.entryRationale?.length) {
+    for (const line of ev.entryRationale) {
+      if (!reasons.includes(line)) reasons.push(line)
+    }
+  }
+
+  if (position.stage === "trend" || position.stage === "pullback") {
+    if (!reasons.some((r) => /추세/.test(r))) reasons.push("추세 유지")
+  } else if (position.stage === "interest" && !reasons.length) {
+    reasons.push("관심 구간")
+  }
+
+  const histLen = position.stageHistory?.length ?? 0
+  if (histLen >= 2 && !reasons.some((r) => /거래량/.test(r))) {
+    reasons.push("거래량 증가")
+  } else if (histLen <= 1 && !reasons.some((r) => /거래량/.test(r))) {
+    reasons.push("거래량 점검")
+  }
+
+  const theme = SYMBOL_SECTOR_THEME[position.symbol]
+  if (theme) {
+    const sectorLine = `${theme} 섹터 강세`
+    if (!reasons.includes(sectorLine)) reasons.push(sectorLine)
+  } else if (ctx.regimeBoost) {
+    reasons.push("패닉지수 연계 우선")
+  }
+
+  if (position.stage === ctx.focusStage) {
+    const match = `${TRADING_STAGE_META[position.stage]?.label ?? position.stage} 구간 일치`
+    if (!reasons.includes(match)) reasons.push(match)
+  }
+
+  if (ev?.dataReady && ev.riskFactors?.length) {
+    const warn = ev.riskFactors[0]
+    if (warn && !reasons.includes(warn)) reasons.push(`⚠ ${warn}`)
+  }
+
+  return [...new Set(reasons)].slice(0, 3)
 }
 
 /**
@@ -230,18 +335,11 @@ export function buildMarketStockBridge(input = {}) {
     score = Math.max(35, Math.min(99, Math.round(score)))
     const confidence = ev?.dataReady ? ev.confidence : Math.round(score * 0.92)
     const { path, segments } = buildStagePathDisplay(position.stageHistory)
-
-    /** @type {string[]} */
-    const reasons =
-      ev?.dataReady && ev.strengthHighlights?.length
-        ? [...ev.strengthHighlights]
-        : ev?.dataReady && ev.entryRationale.length
-          ? [...ev.entryRationale]
-          : []
-    if (regimeBoost) reasons.push("패닉지수 연계 우선")
-    if (position.stage === focus.focusStage) {
-      reasons.push(`${TRADING_STAGE_META[position.stage]?.label ?? position.stage} 구간 일치`)
-    }
+    const stageLadder = buildCompactStageLadder(segments)
+    const reasons = buildPriorityReasons(position, ev, {
+      regimeBoost,
+      focusStage: focus.focusStage,
+    })
 
     return {
       id: position.id,
@@ -253,7 +351,9 @@ export function buildMarketStockBridge(input = {}) {
       confidenceLevel: resolveConfidenceLevel(confidence),
       stagePath: path,
       pathSegments: segments,
-      reasons: reasons.slice(0, 4),
+      stageLadder,
+      reasons,
+      confidenceBar: formatConfidenceBlockBar(confidence),
       regimeBoost,
     }
   })
