@@ -1,53 +1,22 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
-import {
-  resolveMacroMarketStatus,
-  resolveTacticalActionStatus,
-} from "../panic-v2/panicEngineStatusUi.js"
-import { computeTacticalTiming } from "../utils/panicTacticalTimingEngine.js"
-import {
-  TACTICAL_EVENT_EMOJI,
-  attachTradeEventsToChartData,
-  buildTacticalTradeEventLog,
-  tacticalEventStageTone,
-} from "../panic-v2/panicTacticalTradeEvents.js"
-import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
 import { chartRangeStats, LAB_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
-import {
-  HISTORY_AUX_METRICS,
-  HISTORY_TAB_METRICS,
-  PANIC_V1_HISTORY_TAB,
-  PANIC_V2_HISTORY_TAB,
-} from "../utils/panicDeskMetrics.js"
+import { PANIC_INDEX_HISTORY_METRICS } from "../utils/panicDeskMetrics.js"
 import {
   buildPanicHistoryInsight,
   mergeInflectionsIntoChartData,
 } from "../utils/buildPanicHistoryInsight.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
-import { PANIC_V2_CHART_DETAIL_METRICS } from "../panic-v2/weights.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
-import {
-  buildPanicV2ChartData,
-  resolveLatestPanicV2HistoryScore,
-} from "../panic-v2/panicV2LatestScore.js"
 import { resolvePanicHistoryUiState } from "../utils/panicHistoryUiState.js"
-import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
-import { countPanicV2ScoredRows } from "../utils/panicHistoryV2Merge.js"
 import { isPanicHubEnabled } from "../config/api.js"
 import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
-import PanicChartEventStrip from "./panic-history/PanicChartEventStrip.jsx"
-import PanicEngineHistoryLog from "./panic-history/PanicEngineHistoryLog.jsx"
-import PanicEngineStatusPanel, {
-  MACRO_MARKET_STATUS_BAR,
-  TACTICAL_ACTION_STATUS_BAR,
-  resolveStatusBarIndex,
-} from "./panic-history/PanicEngineStatusPanel.jsx"
-import PanicV2AuxMetrics from "./panic-history/PanicV2AuxMetrics.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
 import PanicDeskSectionHeader from "./panic-desk/PanicDeskSectionHeader.jsx"
 
 const HISTORY_CHART_HEIGHT = 220
+const DEFAULT_METRIC_KEY = "vix"
 
 /**
  * @param {{ rows?: object[] }} props
@@ -66,315 +35,105 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
 
-  const [activeHistoryTab, setActiveHistoryTab] = useState("panicV2")
+  const [activeMetricKey, setActiveMetricKey] = useState(DEFAULT_METRIC_KEY)
   const [rangeId, setRangeId] = useState("6M")
-  const [v2DetailMetric, setV2DetailMetric] = useState(null)
-  const [v2AuxOpen, setV2AuxOpen] = useState(false)
-  const [auxMetricsOpen, setAuxMetricsOpen] = useState(false)
-
-  const isPanicScoreTab = activeHistoryTab === "panicV2" || activeHistoryTab === "panicV1"
-  const isAuxHistoryTab = HISTORY_AUX_METRICS.some((m) => m.key === activeHistoryTab)
-
-  const toggleAuxMetrics = () => {
-    setAuxMetricsOpen((open) => {
-      const next = !open
-      if (!next && isAuxHistoryTab) {
-        setActiveHistoryTab("panicV2")
-        setV2DetailMetric(null)
-      }
-      return next
-    })
-  }
 
   const metric = useMemo(
-    () => HISTORY_TAB_METRICS.find((m) => m.key === activeHistoryTab) ?? PANIC_V2_HISTORY_TAB,
-    [activeHistoryTab],
+    () =>
+      PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === activeMetricKey) ??
+      PANIC_INDEX_HISTORY_METRICS[0],
+    [activeMetricKey],
   )
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
   const chartRowsSource = slicedRows.length ? slicedRows : history
 
   const metricCounts = useMemo(() => {
+    /** @type {Record<string, number>} */
     const counts = {}
-    for (const m of HISTORY_TAB_METRICS) {
+    for (const m of PANIC_INDEX_HISTORY_METRICS) {
       counts[m.key] = countHistoryMetricPoints(history, m.key)
     }
     return counts
   }, [history])
 
   const chartPayload = useMemo(
-    () =>
-      activeHistoryTab === "panicV2" && v2DetailMetric
-        ? buildHistoryChartPayload(chartRowsSource, v2DetailMetric)
-        : buildHistoryChartPayload(chartRowsSource, activeHistoryTab),
-    [chartRowsSource, activeHistoryTab, v2DetailMetric],
+    () => buildHistoryChartPayload(chartRowsSource, activeMetricKey),
+    [chartRowsSource, activeMetricKey],
   )
-
-  const chartMetric = useMemo(() => {
-    if (activeHistoryTab === "panicV2" && v2DetailMetric) {
-      return PANIC_V2_CHART_DETAIL_METRICS.find((m) => m.key === v2DetailMetric) ?? metric
-    }
-    return metric
-  }, [activeHistoryTab, v2DetailMetric, metric])
 
   const insight = useMemo(
-    () => buildPanicHistoryInsight(chartRowsSource, history, activeHistoryTab),
-    [chartRowsSource, history, activeHistoryTab],
+    () => buildPanicHistoryInsight(chartRowsSource, history, activeMetricKey),
+    [chartRowsSource, history, activeMetricKey],
   )
-
-  const tacticalEventLog = useMemo(
-    () =>
-      activeHistoryTab === "panicV2" && !v2DetailMetric
-        ? buildTacticalTradeEventLog(chartRowsSource, { maxEntries: 10 })
-        : [],
-    [chartRowsSource, activeHistoryTab, v2DetailMetric],
-  )
-
-  const panicV2ChartData = useMemo(
-    () => buildPanicV2ChartData(chartRowsSource),
-    [chartRowsSource],
-  )
-
-  const latestHistoryScore = useMemo(() => resolveLatestPanicV2HistoryScore(history), [history])
-  const currentPanicV2Score = latestHistoryScore ?? 0
 
   const chartRows = useMemo(() => {
-    let base =
-      activeHistoryTab === "panicV2"
-        ? v2DetailMetric
-          ? (chartPayload?.chartData ?? [])
-          : panicV2ChartData
-        : (chartPayload?.chartData ?? [])
-
-    if (activeHistoryTab === "panicV2" && !v2DetailMetric && base.length) {
-      base = attachTradeEventsToChartData(tacticalEventLog, base)
-    } else if (activeHistoryTab !== "panicV2" || v2DetailMetric) {
-      const inflections = insight.inflections
-      base = mergeInflectionsIntoChartData(base, inflections)
-    }
-
-    return base
-  }, [
-    activeHistoryTab,
-    v2DetailMetric,
-    panicV2ChartData,
-    chartPayload?.chartData,
-    insight.inflections,
-    tacticalEventLog,
-  ])
-
-  const latestV1Score = useMemo(() => {
-    if (!history.length) return null
-    const last = [...history].reverse().find((r) => panicV1ScoreForRow(r) != null)
-    return last ? panicV1ScoreForRow(last) : null
-  }, [history])
-
-  const macroMarketStatus = useMemo(() => resolveMacroMarketStatus(latestV1Score), [latestV1Score])
-  const macroBarIndex = useMemo(
-    () => resolveStatusBarIndex(latestV1Score, MACRO_MARKET_STATUS_BAR),
-    [latestV1Score],
-  )
-
-  const latestHistoryRow = useMemo(() => {
-    if (!history.length) return null
-    const rows = [...history].filter((r) => r?.date)
-    return rows.length ? rows[rows.length - 1] : null
-  }, [history])
-
-  const prevHistoryRow = useMemo(() => {
-    if (!history.length) return null
-    const rows = [...history].filter((r) => r?.date)
-    return rows.length >= 2 ? rows[rows.length - 2] : null
-  }, [history])
-
-  const tacticalInterestScore = useMemo(() => {
-    if (!latestHistoryRow) return null
-    return computeTacticalTiming(latestHistoryRow)?.score ?? null
-  }, [latestHistoryRow])
-
-  const prevTacticalInterestScore = useMemo(() => {
-    if (!prevHistoryRow) return null
-    return computeTacticalTiming(prevHistoryRow)?.score ?? null
-  }, [prevHistoryRow])
-
-  const tacticalActionStatus = useMemo(
-    () => resolveTacticalActionStatus(tacticalInterestScore, prevTacticalInterestScore),
-    [tacticalInterestScore, prevTacticalInterestScore],
-  )
-
-  const tacticalBarIndex = tacticalActionStatus?.barIndex ?? 0
-
-  const panicV2Count = useMemo(() => countPanicV2ScoredRows(history), [history])
+    const base = chartPayload?.chartData ?? []
+    return mergeInflectionsIntoChartData(base, insight.inflections)
+  }, [chartPayload?.chartData, insight.inflections])
 
   const uiState = useMemo(
     () =>
       resolvePanicHistoryUiState({
         historyLength: history.length,
-        panicV2Count: activeHistoryTab === "panicV2" ? panicV2Count : metricCounts.panicV2 ?? 0,
+        panicV2Count: metricCounts[activeMetricKey] ?? 0,
         syncStatus: panicHistoryV2SyncStatus,
         hubEnabled: isPanicHubEnabled(),
       }),
-    [history.length, panicV2Count, activeHistoryTab, metricCounts.panicV2, panicHistoryV2SyncStatus],
+    [history.length, metricCounts, activeMetricKey, panicHistoryV2SyncStatus],
   )
-
-  const headerCurrentText =
-    activeHistoryTab === "panicV2"
-      ? history.length > 0
-        ? String(currentPanicV2Score)
-        : "데이터 준비중"
-      : activeHistoryTab === "panicV1"
-        ? latestV1Score != null
-          ? String(latestV1Score)
-          : "데이터 준비중"
-        : uiState.currentText ??
-          (insight.header.currentText === "—" ? "데이터 준비중" : insight.header.currentText)
 
   const showHistoryLoading = history.length === 0
 
-  const showChart = useMemo(() => {
-    if (showHistoryLoading) return false
-    if (activeHistoryTab === "panicV2") {
-      const series = v2DetailMetric ? chartRows : panicV2ChartData
-      return series.some((x) => x?.value != null)
-    }
-    return uiState.showChart && chartRows.some((x) => x?.value != null)
-  }, [
-    showHistoryLoading,
-    activeHistoryTab,
-    v2DetailMetric,
-    chartRows,
-    panicV2ChartData,
-    uiState.showChart,
-  ])
+  const showChart =
+    !showHistoryLoading && uiState.showChart && chartRows.some((x) => x?.value != null)
 
-  const v2AuxMetricCounts = useMemo(() => {
-    /** @type {Record<string, number>} */
-    const counts = {}
-    for (const m of PANIC_V2_CHART_DETAIL_METRICS) {
-      counts[m.key] = countHistoryMetricPoints(chartRowsSource, m.key)
-    }
-    return counts
-  }, [chartRowsSource])
-
-  const v2DetailMetricReady = v2DetailMetric ? (v2AuxMetricCounts[v2DetailMetric] ?? 0) > 0 : true
-
-  const chartEmptyMessage = useMemo(() => {
-    if (activeHistoryTab === "panicV2" && v2DetailMetric) {
-      if (!v2DetailMetricReady) return "히스토리 준비중"
-      const m = PANIC_V2_CHART_DETAIL_METRICS.find((x) => x.key === v2DetailMetric)
-      return `${m?.tabLabel ?? m?.label ?? "지표"} 데이터 준비중`
-    }
-    return "데이터 준비중"
-  }, [activeHistoryTab, v2DetailMetric, v2DetailMetricReady])
-
-  const toggleV2Aux = () => {
-    setV2AuxOpen((open) => {
-      const next = !open
-      if (!next) setV2DetailMetric(null)
-      return next
-    })
-  }
+  const chartEmptyMessage = `${metric.label} 데이터 준비중`
 
   return (
     <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
       <PanicDeskSectionHeader
         icon="📈"
-        title="시장엔진 히스토리"
-        description="시장 변화 추적 / 관심→눌림→추세"
+        title="패닉지수 히스토리"
+        description="최근 시장 감정 흐름 · VIX · CNN · BofA"
         tone="amber"
         compact
       />
       <p className="m-0 panic-history-section__meta text-[11px] text-slate-500">
-        거시 V1 = 시장 국면 · 실전 V2 = 매매 이벤트
-        {activeHistoryTab !== "panicV1" && activeHistoryTab !== "panicV2" ? ` · ${metric.label}` : ""} ·{" "}
-        {rangeId} · {chartRangeStats(history, rangeId, "lab").shown}일
+        시장 판단용 · 매매 행동은 하단 실전 매매존 · {rangeId} ·{" "}
+        {chartRangeStats(history, rangeId, "lab").shown}일
       </p>
 
-      <div className="panic-history-tabs mt-1.5 flex flex-wrap items-center gap-1">
-        <button
-          type="button"
-          onClick={() => {
-            setActiveHistoryTab("panicV2")
-            setV2DetailMetric(null)
-          }}
-          title={PANIC_V2_HISTORY_TAB.tooltip}
-          className={[
-            "panic-history-tab panic-history-tab--main inline-flex items-center gap-0.5",
-            activeHistoryTab === "panicV2"
-              ? "border-orange-400/35 bg-orange-500/15 text-orange-50 ring-1 ring-orange-400/25"
-              : "border-transparent text-slate-400",
-          ].join(" ")}
-          aria-pressed={activeHistoryTab === "panicV2"}
-        >
-          <span className="panic-history-tab__label">{PANIC_V2_HISTORY_TAB.label}</span>
-          <span className="text-[7px] font-bold uppercase tracking-wide opacity-80">
-            {PANIC_V2_HISTORY_TAB.badge}
-          </span>
-          <span className="panic-history-tab__count font-mono text-[8px] opacity-75">
-            {metricCounts.panicV2 ?? 0}
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveHistoryTab("panicV1")}
-          title={PANIC_V1_HISTORY_TAB.tooltip}
-          className={[
-            "panic-history-tab panic-history-tab--main inline-flex items-center gap-0.5",
-            activeHistoryTab === "panicV1"
-              ? "border-cyan-400/35 bg-cyan-500/15 text-cyan-50 ring-1 ring-cyan-400/25"
-              : "border-transparent text-slate-500",
-          ].join(" ")}
-          aria-pressed={activeHistoryTab === "panicV1"}
-        >
-          <span className="panic-history-tab__label">{PANIC_V1_HISTORY_TAB.label}</span>
-          <span className="text-[7px] font-bold uppercase tracking-wide opacity-80">
-            {PANIC_V1_HISTORY_TAB.badge}
-          </span>
-          <span className="panic-history-tab__count font-mono text-[8px] opacity-75">
-            {metricCounts.panicV1 ?? 0}
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={toggleAuxMetrics}
-          className={[
-            "panic-history-tab panic-history-tab--aux-toggle inline-flex max-w-full items-center rounded-md border px-1.5 py-0.5",
-            auxMetricsOpen
-              ? "border-sky-400/25 bg-sky-500/10 text-sky-100"
-              : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
-          ].join(" ")}
-          aria-expanded={auxMetricsOpen}
-          aria-controls="panic-history-aux-tabs"
-        >
-          <span className="panic-history-tab__label whitespace-nowrap text-[9px] font-semibold">
-            {auxMetricsOpen ? "보조지표 −" : "보조지표 +"}
-          </span>
-        </button>
-        {auxMetricsOpen ? (
-          <span id="panic-history-aux-tabs" className="contents">
-            {HISTORY_AUX_METRICS.map((m) => {
-              const n = metricCounts[m.key] ?? 0
-              const active = activeHistoryTab === m.key
-              return (
-                <button
-                  key={m.key}
-                  type="button"
-                  onClick={() => setActiveHistoryTab(m.key)}
-                  className={[
-                    "panic-history-tab panic-history-tab--aux inline-flex max-w-full items-center gap-0.5 rounded-md border px-1.5 py-0.5",
-                    active
-                      ? "border-white/20 bg-white/10 text-slate-100"
-                      : "border-transparent bg-transparent text-slate-500 hover:text-slate-300",
-                  ].join(" ")}
-                  title={m.tooltip ? `${m.label} · ${n}일` : `${m.label} · ${n}일`}
-                  aria-pressed={active}
-                >
-                  <span className="panic-history-tab__label whitespace-nowrap text-[9px]">{m.label}</span>
-                </button>
-              )
-            })}
-          </span>
-        ) : null}
+      <div
+        className="panic-history-tabs panic-history-tabs--sentiment mt-1.5 flex flex-wrap items-center gap-1"
+        role="tablist"
+        aria-label="패닉지수 지표"
+      >
+        {PANIC_INDEX_HISTORY_METRICS.map((m) => {
+          const n = metricCounts[m.key] ?? 0
+          const active = activeMetricKey === m.key
+          return (
+            <button
+              key={m.key}
+              type="button"
+              role="tab"
+              onClick={() => setActiveMetricKey(m.key)}
+              className={[
+                "panic-history-tab panic-history-tab--sentiment inline-flex max-w-full items-center gap-1 rounded-md border px-2 py-1",
+                active
+                  ? "border-amber-400/35 bg-amber-500/15 text-amber-50 ring-1 ring-amber-400/25"
+                  : "border-transparent text-slate-400 hover:text-slate-200",
+              ].join(" ")}
+              title={m.tooltip ? `${m.label} · ${n}일` : `${m.label} · ${n}일`}
+              aria-selected={active}
+            >
+              <span className="panic-history-tab__label whitespace-nowrap text-[10px] font-semibold">
+                {m.label}
+              </span>
+              <span className="panic-history-tab__count font-mono text-[8px] opacity-75">{n}</span>
+            </button>
+          )
+        })}
       </div>
 
       <div className="mt-1 flex flex-wrap gap-0.5">
@@ -396,65 +155,28 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         })}
       </div>
 
-      {activeHistoryTab === "panicV2" && !v2DetailMetric && tacticalEventLog.length > 0 ? (
-        <PanicEngineHistoryLog
-          title="매매 이벤트 기록"
-          entries={tacticalEventLog.map((e) => ({
-            axisLabel: e.axisLabel,
-            primary: e.eventLabel,
-            secondary: e.reason,
-            emoji: TACTICAL_EVENT_EMOJI[e.eventId],
-            stageTone: tacticalEventStageTone(e.eventId),
-          }))}
-        />
-      ) : null}
-
-      {isPanicScoreTab ? (
-        <div className="mt-1.5">
-          {activeHistoryTab === "panicV1" ? (
-            <PanicEngineStatusPanel
-              variant="macro"
-              score={headerCurrentText}
-              scoreLabel="거시"
-              status={macroMarketStatus}
-              barSegments={MACRO_MARKET_STATUS_BAR}
-              activeBarIndex={macroBarIndex}
-            />
-          ) : (
-            <PanicEngineStatusPanel
-              variant="tactical"
-              score={headerCurrentText}
-              scoreLabel="실전"
-              status={tacticalActionStatus}
-              barSegments={TACTICAL_ACTION_STATUS_BAR}
-              activeBarIndex={tacticalBarIndex}
-            />
-          )}
-        </div>
-      ) : (
-        <PanicHistoryInsightPanel
-          header={insight.header}
-          changeStrip={insight.changeStrip}
-          interpretationLines={insight.interpretationLines}
-          bottomInsight={insight.bottomInsight}
-          metricKey={activeHistoryTab}
-          accent={metric.accent}
-        />
-      )}
+      <PanicHistoryInsightPanel
+        header={insight.header}
+        changeStrip={insight.changeStrip}
+        interpretationLines={insight.interpretationLines}
+        bottomInsight={insight.bottomInsight}
+        metricKey={activeMetricKey}
+        accent={metric.accent}
+      />
 
       <div className="panic-history-section__chart mt-1 pb-1">
         {showChart ? (
           <PanicHistoryLineChart
-            key={`panic-hist-${activeHistoryTab}-${rangeId}-${v2DetailMetric ?? "score"}`}
+            key={`panic-hist-${activeMetricKey}-${rangeId}`}
             rows={chartRowsSource}
             chartData={chartRows}
             dataKey={chartPayload?.dataKey ?? "value"}
-            metricField={chartPayload?.selectedField ?? activeHistoryTab}
-            dataLabel={chartMetric.chartLabel}
-            stroke={chartMetric.accent}
+            metricField={chartPayload?.selectedField ?? activeMetricKey}
+            dataLabel={metric.chartLabel}
+            stroke={metric.accent}
             showZoneBands={false}
-            insightZones={isPanicScoreTab && !v2DetailMetric}
-            connectNulls={activeHistoryTab !== "panicV2" || Boolean(v2DetailMetric)}
+            insightZones={false}
+            connectNulls
             height={HISTORY_CHART_HEIGHT}
             emptyMessage={chartEmptyMessage}
           />
@@ -464,24 +186,6 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           </div>
         )}
       </div>
-
-      {activeHistoryTab === "panicV2" && !v2DetailMetric && showChart && tacticalEventLog.length > 0 ? (
-        <PanicChartEventStrip events={tacticalEventLog} />
-      ) : null}
-
-      {activeHistoryTab === "panicV2" ? (
-        <div className="mt-0.5">
-          <PanicV2AuxMetrics
-            open={v2AuxOpen}
-            onToggle={toggleV2Aux}
-            scoreSelected={!v2DetailMetric}
-            detailMetric={v2DetailMetric}
-            metricCounts={v2AuxMetricCounts}
-            onSelectScore={() => setV2DetailMetric(null)}
-            onSelectMetric={setV2DetailMetric}
-          />
-        </div>
-      ) : null}
     </section>
   )
 }

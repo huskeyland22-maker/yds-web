@@ -32,7 +32,26 @@ export const EXPERT_METRICS = [
 /** @type {PanicDeskMetric[]} */
 export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 
-/** 패닉 히스토리 — 실전 V2 (단기 타점) */
+/** 패닉지수 히스토리 — 감정 흐름 3지표 (매매 행동은 실전 매매존) */
+export const PANIC_INDEX_HISTORY_METRICS = [
+  { key: "vix", label: "VIX", chartLabel: "VIX", accent: "#f87171", tooltip: "VIX 변동성" },
+  {
+    key: "fearGreed",
+    label: "CNN Fear & Greed",
+    chartLabel: "CNN",
+    accent: "#fbbf24",
+    tooltip: "CNN Fear & Greed Index",
+  },
+  {
+    key: "bofa",
+    label: "BofA Bull & Bear",
+    chartLabel: "BofA",
+    accent: "#c084fc",
+    tooltip: "BofA Bull & Bear Indicator",
+  },
+]
+
+/** @deprecated 실전/거시 탭 제거 — PANIC_INDEX_HISTORY_METRICS 사용 */
 export const PANIC_V2_HISTORY_TAB = {
   key: "panicV2",
   label: "실전 V2",
@@ -42,7 +61,7 @@ export const PANIC_V2_HISTORY_TAB = {
   tooltip: "실전판단 · 매수타점 + 관심종목",
 }
 
-/** 패닉 히스토리 — 거시 V1 (장기 사이클) */
+/** @deprecated */
 export const PANIC_V1_HISTORY_TAB = {
   key: "panicV1",
   label: "거시 V1",
@@ -52,7 +71,7 @@ export const PANIC_V1_HISTORY_TAB = {
   tooltip: "거시판단 · 장기보유 + 비중조절",
 }
 
-/** 보조 탭 — 개별 지표 */
+/** 보조 탭 — 개별 지표 (전체) */
 export const HISTORY_AUX_METRICS = [
   { key: "vix", label: "VIX · 변동성", chartLabel: "VIX", accent: "#f87171", tooltip: "S&P 500 내재 변동성" },
   { key: "vxn", label: "VXN · 나스닥", chartLabel: "VXN", accent: "#2dd4bf", tooltip: "나스닥 변동성 지수" },
@@ -71,14 +90,20 @@ export const HISTORY_AUX_METRICS = [
   { key: "gsBullBear", label: "GS · 강약", chartLabel: "GS", accent: "#a78bfa", tooltip: "Goldman Sachs 강세·약세" },
 ]
 
-/** @deprecated HISTORY_AUX_METRICS + PANIC_V2_HISTORY_TAB 사용 */
+/** @deprecated PANIC_INDEX_HISTORY_METRICS 사용 */
 export const HISTORY_SECTION_METRICS = HISTORY_AUX_METRICS
 
-/** 히스토리 UI 탭 순서 (메인 + 보조) */
-export const HISTORY_TAB_METRICS = [PANIC_V2_HISTORY_TAB, PANIC_V1_HISTORY_TAB, ...HISTORY_AUX_METRICS]
+/** @deprecated PANIC_INDEX_HISTORY_METRICS 사용 */
+export const HISTORY_TAB_METRICS = [
+  PANIC_V2_HISTORY_TAB,
+  PANIC_V1_HISTORY_TAB,
+  ...HISTORY_AUX_METRICS,
+]
 
 /** @param {string} key */
 export function findChartMetric(key) {
+  const fromPanic = PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === key)
+  if (fromPanic) return fromPanic
   if (key === "panicV2") return PANIC_V2_HISTORY_TAB
   if (key === "panicV1") return PANIC_V1_HISTORY_TAB
   return ALL_CHART_METRICS.find((m) => m.key === key) ?? HISTORY_AUX_METRICS.find((m) => m.key === key) ?? null

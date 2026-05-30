@@ -6863,12 +6863,19 @@
     align-self: center;
   }
 
-  .panic-history-tab--main {
+  .panic-history-tab--main,
+  .panic-history-tab--sentiment {
     border-radius: 6px;
     border: 1px solid transparent;
     padding: 4px 8px;
     font-size: 10px;
     font-weight: 700;
+  }
+
+  .panic-history-tabs--sentiment .panic-history-tab--sentiment[aria-selected="true"] {
+    border-color: rgba(251, 191, 36, 0.35);
+    background: rgba(245, 158, 11, 0.12);
+    color: rgba(254, 243, 199, 0.98);
   }
 
   .panic-history-tab--aux {
@@ -10113,7 +10120,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-top: 0;
 }
 
-/* ── 시장엔진 히스토리 가독성 (레이아웃·로직 변경 없음) ── */
+/* ── 패닉지수 히스토리 가독성 ── */
 .panic-history-section .panic-desk-section-header__desc {
   font-size: 12px;
   color: rgba(226, 232, 240, 0.9);
@@ -10204,7 +10211,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   opacity: 1;
 }
 
-/* v5 상단 밀도 — 시장 분석 ↔ 시장엔진 히스토리 간격 축소 */
+/* v5 상단 밀도 — 시장 분석 ↔ 패닉지수 히스토리 간격 축소 */
 .panic-v2-desk--terminal > .panic-v2-desk__metrics-slot + .panic-v2-desk__history-slot.panic-desk-section {
   margin-top: 0.35rem;
   padding-top: 0.5rem;
