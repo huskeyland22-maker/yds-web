@@ -4471,6 +4471,50 @@
     margin-bottom: 8px;
   }
 
+  /* 메인 섹션 H2 — 핵심지수 · 패닉지수 히스토리 · 실전 매매존 동일 계층 */
+  .panic-desk-section-header--main {
+    margin-top: 0;
+    margin-bottom: 14px;
+    padding-left: 14px;
+    border-left-width: 4px;
+  }
+
+  .panic-desk-section-header--main .panic-desk-section-header__title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .panic-desk-section-header--main .panic-desk-section-header__icon {
+    font-size: 1.05em;
+    line-height: 1;
+  }
+
+  .panic-desk-section-header--main .panic-desk-section-header__desc {
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: rgba(203, 213, 225, 0.65);
+    opacity: 0.65;
+  }
+
+  @media (min-width: 640px) {
+    .panic-desk-section-header--main .panic-desk-section-header__title {
+      font-size: 22px;
+    }
+
+    .panic-desk-section-header--main .panic-desk-section-header__desc {
+      font-size: 12px;
+    }
+  }
+
+  .panic-v2-desk--terminal .panic-desk-section-header--main {
+    margin-bottom: 14px;
+  }
+
   .tactical-trading-zone .panic-desk-section-header--compact {
     margin-top: 0;
     margin-bottom: 14px;
@@ -7465,10 +7509,10 @@
     max-width: 100%;
   }
 
-  .panic-history-section > .panic-desk-section-header--compact {
+  .panic-history-section > .panic-desk-section-header--main {
     padding-top: 10px;
-    padding-bottom: 8px;
-    margin-bottom: 6px;
+    padding-bottom: 0;
+    margin-bottom: 14px;
   }
 
   .panic-history-section__head {
@@ -9003,20 +9047,30 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.125rem;
 }
 
-.home-v5-preview--compact .panic-desk-section-header--compact {
+/* /preview 전용 압축 — 라이브 데스크(.panic-v2-desk) 메인 섹션 헤더에는 미적용 */
+.home-v5-preview-page .home-v5-preview--compact .panic-desk-section-header--compact {
   margin-bottom: 0.2rem;
   padding-left: 0.55rem;
   border-left-width: 3px;
 }
 
-.home-v5-preview--compact .panic-desk-section-header__title {
+.home-v5-preview-page .home-v5-preview--compact .panic-desk-section-header--compact .panic-desk-section-header__title {
   font-size: 0.8125rem;
   font-weight: 700;
   gap: 0.25rem;
 }
 
-.home-v5-preview--compact .panic-desk-section-header__icon {
+.home-v5-preview-page .home-v5-preview--compact .panic-desk-section-header--compact .panic-desk-section-header__icon {
   font-size: 0.9em;
+}
+
+.panic-v2-desk--terminal .home-v5-preview__zone--core {
+  padding-top: 10px;
+  padding-bottom: 0.25rem;
+}
+
+.panic-v2-desk--terminal .home-v5-preview__zone--core .panic-desk-section-header--main {
+  margin-bottom: 14px;
 }
 
 .home-v5-preview__zone {
@@ -10329,8 +10383,14 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   padding-top: 0.5rem;
 }
 
-.panic-v2-desk--terminal > .panic-v2-desk__history-slot .panic-desk-section-header--compact {
-  margin-bottom: 0.35rem;
+.panic-v2-desk--terminal > .panic-v2-desk__history-slot .panic-desk-section-header--main {
+  margin-bottom: 14px;
+}
+
+.panic-v2-desk--terminal .tactical-trading-zone .panic-desk-section-header--main {
+  margin-top: 0;
+  margin-bottom: 14px;
+  padding-top: 10px;
 }
 
 @media (min-width: 640px) {

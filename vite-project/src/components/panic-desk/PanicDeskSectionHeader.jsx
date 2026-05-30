@@ -1,6 +1,6 @@
 /**
- * 패닉 데스크 메인 섹션 헤더 (핵심지수 · 시장엔진 · 실전매매존)
- * @param {{ icon: string; title: string; description?: string; tone?: "cyan" | "amber" | "green"; compact?: boolean }} props
+ * 패닉 데스크 메인 섹션 헤더 (핵심지수 · 패닉지수 히스토리 · 실전매매존)
+ * @param {{ icon: string; title: string; description?: string; tone?: "cyan" | "amber" | "green"; compact?: boolean; tier?: "main" | "compact" }} props
  */
 export default function PanicDeskSectionHeader({
   icon,
@@ -8,13 +8,17 @@ export default function PanicDeskSectionHeader({
   description = "",
   tone = "cyan",
   compact = false,
+  tier = compact ? "compact" : "main",
 }) {
+  const tierClass =
+    tier === "main" ? "panic-desk-section-header--main" : "panic-desk-section-header--compact"
+
   return (
     <header
       className={[
         "panic-desk-section-header",
         `panic-desk-section-header--${tone}`,
-        compact ? "panic-desk-section-header--compact" : "",
+        tierClass,
       ].join(" ")}
     >
       <p className="m-0 panic-desk-section-header__title">

@@ -99,7 +99,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         title="패닉지수 히스토리"
         description="9대 패닉지수 원본 흐름 · 지표 선택 후 확인"
         tone="amber"
-        compact
+        tier="main"
       />
       <p className="m-0 panic-history-section__meta text-[11px] text-slate-500">
         원본 지표 데이터 · 매매 판단은 하단 실전 매매존

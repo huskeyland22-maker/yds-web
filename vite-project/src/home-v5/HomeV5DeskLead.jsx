@@ -39,7 +39,13 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
         .join(" ")}
     >
       <div className="home-v5-preview__zone home-v5-preview__zone--core">
-        <PanicDeskSectionHeader icon="📊" title="핵심 지수" tone="cyan" compact />
+        <PanicDeskSectionHeader
+          icon="📊"
+          title="핵심지수"
+          description="VIX · CNN · BofA · YDS 종합 판단"
+          tone="cyan"
+          tier="main"
+        />
         <HomeV5CoreIndices cards={model.core} />
         <HomeV5CoreSynthesis synthesis={model.synthesis} />
         {model.strategy ? <HomeV5StrategyRationaleBar strategy={model.strategy} /> : null}
