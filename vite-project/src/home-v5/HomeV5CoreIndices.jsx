@@ -14,6 +14,7 @@ function CoreHudCard({
   dataStatusLabel,
   policyHint,
   recentChangeLabel,
+  recentChangeTone,
   trendLine,
   trendArrow,
   trendDir,
