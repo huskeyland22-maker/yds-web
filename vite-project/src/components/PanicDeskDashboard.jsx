@@ -71,7 +71,7 @@ export default function PanicDeskDashboard({
         <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
       </div>
 
-      <div className="panic-v2-desk__history-slot panic-desk-section panic-desk-section--amber">
+      <div className="panic-v2-desk__history-slot panic-desk-section panic-desk-section--amber panic-desk-section--main">
         <SectionErrorBoundary
           label="패닉지수 히스토리"
           fallback={
@@ -99,7 +99,7 @@ export default function PanicDeskDashboard({
         />
       </div>
 
-      <div className="panic-v2-desk__trading-zone-slot panic-desk-section-slot">
+      <div className="panic-v2-desk__trading-zone-slot">
         <SectionErrorBoundary
           label="실전 매매 존"
           fallback={

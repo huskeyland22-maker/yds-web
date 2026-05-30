@@ -423,7 +423,7 @@ export default function TacticalTradingZoneSection({
 
   if (tacticalDegrade.fatal) {
     return (
-      <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
+      <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--main overflow-hidden px-2 pb-2 sm:px-2.5">
         <p className="m-0 text-sm font-semibold text-amber-300">⚠ 일부 데이터 연결 지연</p>
         <p className="m-0 mt-1 text-xs text-slate-300">마지막 정상 정책을 유지하며 자동 복구를 시도 중입니다.</p>
       </section>
@@ -431,7 +431,7 @@ export default function TacticalTradingZoneSection({
   }
 
   return (
-    <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--green overflow-hidden px-2 pb-2 sm:px-2.5">
+    <section className="tactical-trading-zone trading-card-shell panic-v2-section panic-desk-section panic-desk-section--main overflow-hidden px-2 pb-2 sm:px-2.5">
       <PanicDeskSectionHeader
         icon="🎯"
         title="실전 매매존"
