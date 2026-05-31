@@ -10,6 +10,7 @@ import {
   formatStageHistoryLog,
 } from "./tradingZoneStageHistory.js"
 import { TRADING_STAGE_META } from "./tacticalTradingZoneData.js"
+import { filterLiveEligiblePositions } from "./tradingZoneLiveBuckets.js"
 
 /** @typedef {import("./tacticalTradingZoneData.js").TradingZonePosition} TradingZonePosition */
 /** @typedef {import("./tacticalTradingZoneData.js").TradingStageId} TradingStageId */
@@ -49,11 +50,8 @@ const SYMBOL_SECTOR_THEME = {
   AVGO: "반도체",
   META: "AI",
   SMH: "반도체",
-  SOXL: "반도체",
   PLTR: "AI",
   TSLA: "성장",
-  TSLL: "레버리지",
-  TQQQ: "레버리지",
   "실리콘투": "반도체",
 }
 
@@ -70,10 +68,10 @@ const STAGE_LADDER_SHORT = {
 const REGIME_SYMBOL_BOOST = {
   neutral: ["SMH", "META", "PLTR", "NVDA"],
   interest: ["PLTR", "META", "NVDA", "TSLA"],
-  pullback: ["SMH", "SOXL", "AVGO", "META"],
+  pullback: ["SMH", "AVGO", "META"],
   trend: ["NVDA", "SMH", "실리콘투"],
-  dca: ["SOXL", "TSLL", "TQQQ", "SMH"],
-  panicBuy: ["SOXL", "TSLL", "TQQQ", "SMH"],
+  dca: ["SMH", "META", "PLTR"],
+  panicBuy: ["SMH", "META", "NVDA"],
   overheated: ["META", "NVDA"],
 }
 
@@ -327,7 +325,7 @@ export function buildMarketStockBridge(input = {}) {
   }
   const focusRank = stageRank[focus.focusStage] ?? 0
 
-  const filtered = positions.filter((p) => p.market === market)
+  const filtered = filterLiveEligiblePositions(positions, market)
 
   /** @type {MarketLinkedStockPriority[]} */
   const ranked = filtered.map((position) => {

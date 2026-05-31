@@ -1664,6 +1664,103 @@
     line-height: 1.15;
   }
 
+  .tactical-zone-bucket__subtitle {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(148, 163, 184, 0.88);
+    letter-spacing: 0;
+  }
+
+  .tactical-zone-today-pick {
+    margin: 0 0 8px;
+  }
+
+  .tactical-zone-today-pick__kicker {
+    margin: 0 0 4px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(251, 191, 36, 0.95);
+  }
+
+  .tactical-zone-today-pick__card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(251, 191, 36, 0.42);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(34, 211, 238, 0.06));
+    box-shadow: 0 0 18px rgba(251, 191, 36, 0.12);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .tactical-zone-today-pick__card:hover {
+    border-color: rgba(251, 191, 36, 0.58);
+    box-shadow: 0 0 22px rgba(251, 191, 36, 0.2);
+  }
+
+  .tactical-zone-today-pick__card--selected {
+    border-color: rgba(34, 211, 238, 0.5);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.22);
+  }
+
+  .tactical-zone-today-pick__main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .tactical-zone-today-pick__symbol {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tactical-zone-today-pick__score {
+    font-size: 15px;
+    font-weight: 800;
+    color: rgba(226, 232, 240, 0.96);
+  }
+
+  .tactical-zone-today-pick__grade .tactical-confidence-grade__score {
+    display: none;
+  }
+
+  .tactical-zone-today-pick__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    color: rgba(253, 224, 71, 0.98);
+    background: rgba(251, 191, 36, 0.1);
+  }
+
+  .tactical-zone-today-pick__hint {
+    flex: 1 1 100%;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.9);
+  }
+
   .tactical-zone-bucket__list {
     display: flex;
     flex-direction: column;

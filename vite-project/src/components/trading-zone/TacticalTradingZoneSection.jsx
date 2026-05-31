@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import {
   TRADING_BUCKET_META,
-  TRADING_BUCKET_ORDER,
   TRADING_MARKETS,
   TRADING_ZONE_TAKE_PROFIT_EMPTY,
   getTradingZonePositions,
-  groupPositionsByBucket,
   resolveDefaultTradingPositionId,
   tradingStageBadge,
 } from "../../trading-zone/tacticalTradingZoneData.js"
+import {
+  LIVE_DISPLAY_BUCKET_ORDER,
+  buildLiveTradingBuckets,
+} from "../../trading-zone/tradingZoneLiveBuckets.js"
 import { buildTradingZoneEngineLink } from "../../trading-zone/tradingZoneEngineLink.js"
 import {
   appendTransitionHistory,
@@ -100,6 +102,7 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
 /**
  * @param {{
  *   title: string
+ *   subtitle?: string
  *   bucketId: import("../../trading-zone/tacticalTradingZoneData.js").TradingBucketId
  *   positions: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition[]
  *   selectedId: string | null
@@ -107,7 +110,49 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
  *   onSelect: (id: string) => void
  * }} props
  */
-function BucketCard({ title, bucketId, positions, selectedId, onSelect, evalMap = {} }) {
+/**
+ * @param {{
+ *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
+ *   confidence: number | null
+ *   evaluation?: import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | null
+ *   selected: boolean
+ *   onSelect: (id: string) => void
+ * }} props
+ */
+function TodayPickCard({ position, confidence, evaluation = null, selected, onSelect }) {
+  const badge = tradingStageBadge(position)
+  return (
+    <section className="tactical-zone-today-pick" aria-label="오늘의 추천">
+      <p className="m-0 tactical-zone-today-pick__kicker">오늘의 추천</p>
+      <button
+        type="button"
+        className={["tactical-zone-today-pick__card", selected ? "tactical-zone-today-pick__card--selected" : ""]
+          .filter(Boolean)
+          .join(" ")}
+        onClick={() => onSelect(position.id)}
+      >
+        <span className="tactical-zone-today-pick__main">
+          <span className="tactical-zone-today-pick__symbol">{position.symbol}</span>
+          {confidence != null ? (
+            <>
+              <span className="tactical-zone-today-pick__score font-mono tabular-nums">{confidence}</span>
+              <TacticalConfidenceGrade score={confidence} compact className="tactical-zone-today-pick__grade" />
+            </>
+          ) : null}
+        </span>
+        <span className="tactical-zone-today-pick__badge" data-stage={position.stage}>
+          <span aria-hidden>●</span>
+          {badge.label}
+        </span>
+        {evaluation?.dataReady && evaluation.signalLabel ? (
+          <span className="tactical-zone-today-pick__hint">{evaluation.signalLabel}</span>
+        ) : null}
+      </button>
+    </section>
+  )
+}
+
+function BucketCard({ title, subtitle, bucketId, positions, selectedId, onSelect, evalMap = {} }) {
   const sorted = useMemo(() => {
     return [...positions].sort((a, b) => {
       const sa = evalMap[a.id]?.dataReady ? evalMap[a.id].tacticalScore : 0
@@ -118,7 +163,10 @@ function BucketCard({ title, bucketId, positions, selectedId, onSelect, evalMap 
 
   return (
     <div className="tactical-zone-bucket" data-bucket={bucketId}>
-      <p className="m-0 tactical-zone-bucket__title">{title}</p>
+      <p className="m-0 tactical-zone-bucket__title">
+        {title}
+        {subtitle ? <span className="tactical-zone-bucket__subtitle">{subtitle}</span> : null}
+      </p>
       <div className="tactical-zone-bucket__list">
         {sorted.length === 0 ? (
           bucketId === "takeProfit" ? (
@@ -176,7 +224,6 @@ export default function TacticalTradingZoneSection({
 }) {
   const positions = useMemo(() => getTradingZonePositions(), [])
   const [market, setMarket] = useState("us")
-  const [mode, setMode] = useState(/** @type {"live" | "analysis"} */ ("live"))
   const [focusMode, setFocusMode] = useState(() => {
     if (typeof window === "undefined") return false
     return window.matchMedia("(max-width: 640px)").matches
@@ -210,9 +257,9 @@ export default function TacticalTradingZoneSection({
         positions,
         panicData,
         engineLink,
-        disableStageShift: mode === "live",
+        disableStageShift: true,
       }),
-    [positions, panicData, engineLink, mode],
+    [positions, panicData, engineLink],
   )
 
   const baseMarketPolicy = useMemo(() => buildMarketPolicy({ panicData }), [panicData])
@@ -224,19 +271,25 @@ export default function TacticalTradingZoneSection({
     macroBehavior: strategyState.behavior,
     marketPolicy: baseMarketPolicy,
     cycleScore,
-    enabled: mode === "live",
+    enabled: true,
   })
 
-  const livePositions = mode === "live" ? enrichedPositions : strategyState.adjustedPositions
+  const livePositions = enrichedPositions
 
-  const bucketGroups = useMemo(
-    () => groupPositionsByBucket(market, livePositions),
-    [market, livePositions],
+  const liveBuckets = useMemo(
+    () =>
+      buildLiveTradingBuckets({
+        positions: livePositions,
+        evalMap,
+        market,
+        panicData,
+      }),
+    [livePositions, evalMap, market, panicData],
   )
 
   const visibleBuckets = useMemo(
-    () => TRADING_BUCKET_ORDER.filter((bucketId) => (bucketGroups[bucketId]?.length ?? 0) > 0),
-    [bucketGroups],
+    () => LIVE_DISPLAY_BUCKET_ORDER.filter((bucketId) => (liveBuckets.buckets[bucketId]?.length ?? 0) > 0),
+    [liveBuckets],
   )
 
   const marketPositions = useMemo(
@@ -251,8 +304,16 @@ export default function TacticalTradingZoneSection({
 
   const onMarketChange = (id) => {
     setMarket(id)
-    const next = positions.filter((p) => p.market === id)
-    setSelectedId(resolveDefaultTradingPositionId(id, next))
+    const marketPositions = livePositions.filter((p) => p.market === id)
+    const buckets = buildLiveTradingBuckets({
+      positions: livePositions,
+      evalMap,
+      market: id,
+      panicData,
+    })
+    setSelectedId(
+      buckets.todayPick?.id ?? resolveDefaultTradingPositionId(id, marketPositions),
+    )
   }
   const marketPolicy = useMemo(
     () => buildMarketPolicy({ panicData, position: selectedPosition }),
@@ -391,7 +452,7 @@ export default function TacticalTradingZoneSection({
       <PanicDeskSectionHeader
         icon="🎯"
         title="실전 매매존"
-        description="미국·한국 실전 진입 관리"
+        description="오늘의 추천 · 관심 · 추세 — 신뢰도 자동 분류"
         tone="sky"
         tier="main"
       />
@@ -427,7 +488,7 @@ export default function TacticalTradingZoneSection({
             bridge={marketStockBridge}
             selectedId={selectedId}
             onSelect={setSelectedId}
-            loading={mode === "live" && stockEvalLoading}
+            loading={stockEvalLoading}
           />
         </div>
       ) : null}
@@ -489,6 +550,16 @@ export default function TacticalTradingZoneSection({
         ))}
       </div>
 
+      {liveBuckets.todayPick ? (
+        <TodayPickCard
+          position={liveBuckets.todayPick}
+          confidence={liveBuckets.todayPickConfidence}
+          evaluation={evalMap[liveBuckets.todayPick.id] ?? null}
+          selected={selectedId === liveBuckets.todayPick.id}
+          onSelect={setSelectedId}
+        />
+      ) : null}
+
       {visibleBuckets.length ? (
         <div
           className="tactical-trading-zone__buckets"
@@ -499,7 +570,8 @@ export default function TacticalTradingZoneSection({
               key={bucketId}
               bucketId={bucketId}
               title={TRADING_BUCKET_META[bucketId].title}
-              positions={bucketGroups[bucketId]}
+              subtitle={TRADING_BUCKET_META[bucketId].hint}
+              positions={liveBuckets.buckets[bucketId]}
               selectedId={selectedId}
               evalMap={evalMap}
               onSelect={setSelectedId}
@@ -512,7 +584,6 @@ export default function TacticalTradingZoneSection({
         <div className="tactical-trading-zone__detail">
           <TacticalStockDetailPanel
             position={selectedPosition}
-            mode={mode}
             panicData={panicData}
             marketPolicy={marketPolicyView}
             focusMode={focusMode}

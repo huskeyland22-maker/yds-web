@@ -258,9 +258,9 @@ export function computeTacticalStockScore(inputs, panicData = null, ctx = {}) {
   const regimeBoost = {
     neutral: ["SMH", "META", "PLTR", "NVDA"],
     interest: ["PLTR", "META", "NVDA"],
-    dca: ["SOXL", "TSLL", "TQQQ"],
-    panicBuy: ["SOXL", "TSLL", "TQQQ", "SMH"],
-    pullback: ["SMH", "SOXL", "AVGO"],
+    dca: ["SMH", "META", "PLTR"],
+    panicBuy: ["SMH", "META", "NVDA"],
+    pullback: ["SMH", "AVGO", "META"],
     overheated: ["META", "NVDA"],
   }
   const boostList = regimeId ? regimeBoost[regimeId] : null

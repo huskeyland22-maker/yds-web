@@ -63,9 +63,9 @@ export const TRADING_STAGE_FLOW = ["interest", "pullback", "trend", "takeProfit"
 
 /** @type {Record<TradingBucketId, { title: string }>} */
 export const TRADING_BUCKET_META = {
-  interest: { title: "관심종목" },
+  interest: { title: "관심종목", hint: "신뢰도 60~79 · 눌림·관망" },
   pullback: { title: "눌림목" },
-  trend: { title: "추세" },
+  trend: { title: "추세종목", hint: "신뢰도 80+ · 추세 유지" },
   takeProfit: { title: "익절관리" },
 }
 
@@ -165,57 +165,6 @@ const SEED_POSITIONS = [
     target: "275",
     aux: ["10MA", "20MA"],
     stageHistory: [{ stage: "interest", at: "2026-05-20" }],
-  },
-  {
-    id: "us-tsll",
-    symbol: "TSLL",
-    market: "us",
-    stage: "pullback",
-    entry: "12 ~ 13",
-    stop: "11",
-    target: "15",
-    stopNum: 11,
-    targetNum: 15,
-    currentPrice: 12.5,
-    aux: ["10MA", "20MA"],
-    stageHistory: [
-      { stage: "interest", at: "2026-05-12" },
-      { stage: "pullback", at: "2026-05-20" },
-    ],
-  },
-  {
-    id: "us-tqqq",
-    symbol: "TQQQ",
-    market: "us",
-    stage: "pullback",
-    entry: "58 ~ 62",
-    stop: "54",
-    target: "68",
-    stopNum: 54,
-    targetNum: 68,
-    currentPrice: 60,
-    aux: ["10MA", "20MA"],
-    stageHistory: [
-      { stage: "interest", at: "2026-05-14" },
-      { stage: "pullback", at: "2026-05-21" },
-    ],
-  },
-  {
-    id: "us-soxl",
-    symbol: "SOXL",
-    market: "us",
-    stage: "pullback",
-    entry: "28 ~ 30",
-    stop: "26",
-    target: "34",
-    stopNum: 26,
-    targetNum: 34,
-    currentPrice: 29,
-    aux: ["10MA", "20MA"],
-    stageHistory: [
-      { stage: "interest", at: "2026-05-17" },
-      { stage: "pullback", at: "2026-05-22" },
-    ],
   },
   {
     id: "us-smh",

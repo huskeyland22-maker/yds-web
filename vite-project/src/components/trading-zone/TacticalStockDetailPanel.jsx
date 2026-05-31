@@ -81,7 +81,6 @@ function buildTodayActions(stage, policyItems) {
 /**
  * @param {{
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
- *   mode?: "live" | "analysis"
  *   focusMode?: boolean
  *   marketPolicy?: object | null
  *   stockEvaluation?: import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | null
@@ -90,7 +89,6 @@ function buildTodayActions(stage, policyItems) {
  */
 export default function TacticalStockDetailPanel({
   position,
-  mode = "live",
   panicData = null,
   marketPolicy = null,
   focusMode = false,
@@ -341,9 +339,6 @@ export default function TacticalStockDetailPanel({
         <p className="m-0 tactical-zone-detail__no-price">가격 영역 계산 대기</p>
       )}
 
-      {mode === "analysis" ? (
-        <p className="m-0 tactical-zone-detail__mode-hint">분석 모드</p>
-      ) : null}
     </div>
   )
 }
