@@ -32,19 +32,75 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module">
-      // Boot loader: 원격 build-version.json 과 HTML meta buildId 대조.
-      // 신규 배포 시 토스트로 안내(자동 hard reload 없음). chunk 404 등만 강제 eviction.
-      import { checkAndEvictStaleBuild, installChunkLoadFailureRecovery } from "/src/utils/pwaFreshness.js"
+    <!-- 모듈 로드 전: 삭제된 /assets/*.js 404 시 화이트 스크린 방지 -->
+    <script>
+      ;(function () {
+        var OVERLAY_ID = "yds-chunk-recovery-overlay"
+        var recovering = false
 
-      async function bootstrap() {
-        installChunkLoadFailureRecovery()
-        const result = await checkAndEvictStaleBuild()
-        if (result.reloaded) return
-        await import("/src/main.jsx")
-      }
+        function showOverlay() {
+          if (document.getElementById(OVERLAY_ID)) return
+          var el = document.createElement("div")
+          el.id = OVERLAY_ID
+          el.setAttribute("role", "alertdialog")
+          el.innerHTML =
+            '<div style="width:min(100%,20rem);text-align:center;padding:20px 18px;border-radius:12px;border:1px solid rgba(56,189,248,0.28);background:rgba(15,23,42,0.96);font-family:system-ui,sans-serif">' +
+            '<p style="margin:0;font-size:15px;font-weight:700;color:#e2e8f0">업데이트 감지됨</p>' +
+            '<p style="margin:8px 0 0;font-size:13px;color:#94a3b8">새 버전 적용 중…</p>' +
+            '<button type="button" style="margin-top:16px;width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(56,189,248,0.45);background:rgba(14,116,144,0.35);color:#f0f9ff;font-size:14px;font-weight:700;cursor:pointer">새로고침</button>' +
+            "</div>"
+          el.style.cssText =
+            "position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#0B0E14"
+          el.querySelector("button").addEventListener("click", function () {
+            recover("user-reload")
+          })
+          ;(document.body || document.documentElement).appendChild(el)
+        }
 
-      void bootstrap()
+        function recover(reason) {
+          if (recovering) return
+          recovering = true
+          showOverlay()
+          try {
+            if ("serviceWorker" in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function (regs) {
+                return Promise.all(regs.map(function (r) { return r.unregister() }))
+              })
+            }
+            if ("caches" in window) {
+              caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (k) { return caches.delete(k) }))
+              })
+            }
+          } catch (e) {}
+          setTimeout(function () {
+            var u = new URL(window.location.href)
+            u.searchParams.set("pwa_v", String(Date.now()))
+            u.searchParams.set("reason", reason || "chunk-404")
+            window.location.replace(u.pathname + u.search + u.hash)
+          }, 400)
+        }
+
+        window.addEventListener(
+          "error",
+          function (ev) {
+            var t = ev && ev.target
+            if (!t || t === window) return
+            if (t.tagName !== "SCRIPT" && t.tagName !== "LINK") return
+            var src = t.src || t.href || ""
+            if (src.indexOf("/assets/") !== -1) recover("chunk-asset-404")
+          },
+          true,
+        )
+
+        window.addEventListener("unhandledrejection", function (ev) {
+          var msg = String((ev && ev.reason && ev.reason.message) || ev.reason || "")
+          if (/dynamically imported module|module script failed|ChunkLoadError|404/i.test(msg)) {
+            recover("chunk-import-fail")
+          }
+        })
+      })()
     </script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

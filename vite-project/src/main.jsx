@@ -115,23 +115,23 @@ async function bootstrapApp() {
     }
   }
 
-  // index.html's boot loader has already run the freshness gate, but if a user
-  // arrives via bfcache (iOS sometimes restores a frozen WebView without re-
-  // running module scripts) the gate is re-armed here as a second line of
-  // defense. checkAndEvictStaleBuild() short-circuits if everything matches.
-  // index.html 부트에서 이미 freshness gate 실행 — reloaded 여도 앱은 항상 마운트 (iOS 빈 화면 방지)
   const gate = await checkAndEvictStaleBuild()
+  if (gate.reloaded) return
 
   try {
     const { registerSW } = await import("virtual:pwa-register")
     let applySwUpdate = () => {
       window.location.reload()
     }
+    let swRefreshing = false
     const updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
         notifyUpdateAvailable("sw-need-refresh", gate.remote)
-        applySwUpdate(true)
+        void applySwUpdate()
+      },
+      onOfflineReady() {
+        // no-op
       },
       onRegisteredSW(_swUrl, registration) {
         if (!registration) return
@@ -151,6 +151,9 @@ async function bootstrapApp() {
         })
         registration.addEventListener("controllerchange", () => {
           void cleanupLegacyRuntimeCaches(APP_BUILD_ID)
+          if (swRefreshing) return
+          swRefreshing = true
+          window.location.reload()
         })
         window.setInterval(() => {
           void registration.update()

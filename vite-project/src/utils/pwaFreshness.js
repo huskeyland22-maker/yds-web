@@ -647,17 +647,13 @@ export async function checkAndEvictStaleBuild() {
   }
 
   if (htmlBuildId && htmlBuildId !== remoteBuildId) {
-    if (!isPwaUpdateToastDismissed(remoteBuildId)) {
-      notifyUpdateAvailable("html-build-mismatch", remote)
-    }
-    return { remote, reloaded: false, updateAvailable: true }
+    const reloaded = await evictStaleBuildAndReload("html-build-mismatch", remote, { force: true })
+    return { remote, reloaded, updateAvailable: !reloaded }
   }
 
   if (storedBuildId && String(storedBuildId) !== remoteBuildId) {
-    if (!isPwaUpdateToastDismissed(remoteBuildId)) {
-      notifyUpdateAvailable("client-build-mismatch", remote)
-    }
-    return { remote, reloaded: false, updateAvailable: true }
+    const reloaded = await evictStaleBuildAndReload("client-build-mismatch", remote, { force: true })
+    return { remote, reloaded, updateAvailable: !reloaded }
   }
 
   if (remoteVersion && storedVersion && storedVersion !== remoteVersion) {

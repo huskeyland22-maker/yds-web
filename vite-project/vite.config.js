@@ -59,18 +59,19 @@ function htmlBuildIdPlugin() {
 }
 
 // https://vite.dev/config/
-// Network-first app: only hashed /assets/* are long-cache immutable; never add Workbox precache for JSON/API.
+// Network-first shell: index.html always from network; hashed /assets/* never precached (404 after deploy).
 export default defineConfig({
   define: {
     "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(BUILD_ID),
     "import.meta.env.VITE_APP_VERSION_LABEL": JSON.stringify(APP_VERSION_LABEL),
   },
   build: {
+    emptyOutDir: true,
     rollupOptions: {
       output: {
-        entryFileNames: `assets/[name]-[hash]-${BUILD_ID}.js`,
-        chunkFileNames: `assets/[name]-[hash]-${BUILD_ID}.js`,
-        assetFileNames: `assets/[name]-[hash]-${BUILD_ID}[extname]`,
+        entryFileNames: `assets/[name]-[hash].js`,
+        chunkFileNames: `assets/[name]-[hash].js`,
+        assetFileNames: `assets/[name]-[hash][extname]`,
       },
     },
   },
@@ -78,7 +79,7 @@ export default defineConfig({
     react(),
     htmlBuildIdPlugin(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       injectRegister: false,
       filename: "sw.js",
       manifest: false,
@@ -86,10 +87,20 @@ export default defineConfig({
         enabled: false,
       },
       workbox: {
-        /** 배포마다 변경 → 이전 precache·runtime 캐시 일괄 무효화 */
+        /** 배포마다 변경 → 이전 Workbox precache·runtime 그룹 무효화 */
         cacheId: `yds-pwa-${BUILD_ID}`,
-        globPatterns: ["**/*.{html,js,css,svg,ico,png,woff2,webp}"],
+        /** 해시 JS/CSS는 precache 금지 — 삭제된 chunk 404·화이트 스크린 방지 */
+        globPatterns: [
+          "favicon.svg",
+          "icon.svg",
+          "icon-maskable.svg",
+          "icons.svg",
+          "icon-192.png",
+          "icon-512.png",
+        ],
         globIgnores: [
+          "**/assets/**",
+          "**/index.html",
           "**/build-version.json",
           "**/manifest.webmanifest",
           "**/manifest.json",
@@ -98,29 +109,20 @@ export default defineConfig({
           "**/value-chain-data.js",
           "**/stats.html",
           "**/report.html",
+          "**/sw.js",
+          "**/workbox-*.js",
         ],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/assets\//],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === "navigate",
-            handler: "NetworkFirst",
-            options: {
-              cacheName: `yds-cache-${BUILD_ID}-html-pages`,
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 },
-            },
+            handler: "NetworkOnly",
           },
           {
-            urlPattern: ({ request, url }) =>
-              url.origin === self.location.origin &&
-              (request.destination === "script" || request.destination === "style"),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: `yds-cache-${BUILD_ID}-js-css`,
-              networkTimeoutSeconds: 8,
-              expiration: { maxEntries: 64, maxAgeSeconds: 24 * 60 * 60 },
-            },
+            urlPattern: ({ url }) =>
+              url.origin === self.location.origin && url.pathname.startsWith("/assets/"),
+            handler: "NetworkOnly",
           },
           {
             urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.startsWith("/api/"),
