@@ -26,6 +26,7 @@ import TacticalRecommendationTrack from "./TacticalRecommendationTrack.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStockBridge.js"
+import { STAGE_STATUS_SHORT } from "../../trading-zone/tradingZoneDetailMobile.js"
 
 /**
  * @param {{
@@ -39,12 +40,12 @@ import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStoc
 function StockChip({ position, bucketId, selected, onSelect, evaluation = null }) {
   const badge = tradingStageBadge(position)
   const trustScore = evaluation?.dataReady ? evaluation.confidence : null
-  const coreReason =
-    evaluation?.dataReady && evaluation.strengthHighlights?.[0]
-      ? evaluation.strengthHighlights[0]
-      : evaluation?.dataReady && evaluation.entryRationale?.[0]
-        ? evaluation.entryRationale[0]
-        : null
+  const watchLabel =
+    evaluation?.dataReady && evaluation.signalId === "watch"
+      ? "관망·대기"
+      : evaluation?.dataReady && evaluation.signalLabel
+        ? evaluation.signalLabel
+        : STAGE_STATUS_SHORT[position.stage] ?? "관망"
   const strengthScore =
     trustScore ?? (position.stageHistory?.length ?? 0) * 12 + (position.aux?.length ?? 0) * 8
   const strengthTone =
@@ -59,14 +60,6 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
         : strengthScore <= 20
           ? "weak"
           : "normal"
-  const stageWatchLabel =
-    position.stage === "trend"
-      ? "추세"
-      : position.stage === "takeProfit"
-        ? "익절"
-        : position.stage === "risk"
-          ? "방어"
-          : "관망"
   return (
     <button
       type="button"
@@ -80,33 +73,26 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
         strengthTone === "weak" ? "tactical-zone-chip--weak" : "",
       ].join(" ")}
     >
-      <span className="tactical-zone-chip__dense" aria-hidden={false}>
+      <span className="tactical-zone-chip__head">
         <span className="tactical-zone-chip__name">{position.symbol}</span>
         {trustScore != null ? (
           <>
-            <span className="tactical-zone-chip__dense-score font-mono tabular-nums">{trustScore}</span>
+            <span className="tactical-zone-chip__score font-mono tabular-nums">{trustScore}</span>
             <TacticalConfidenceGrade score={trustScore} compact className="tactical-zone-chip__grade" />
           </>
         ) : null}
-        <span className="tactical-zone-chip__dense-watch">{stageWatchLabel}</span>
+        <span
+          className="tactical-zone-chip__badge"
+          data-stage={position.stage}
+          title={badge.label}
+        >
+          <span className="tactical-zone-chip__badge-dot" aria-hidden>
+            ●
+          </span>
+          <span className="tactical-zone-chip__badge-label">{badge.label}</span>
+        </span>
       </span>
-      <span className="tactical-zone-chip__main">
-        <span className="tactical-zone-chip__name">{position.symbol}</span>
-        {trustScore != null ? (
-          <TacticalConfidenceGrade score={trustScore} compact className="tactical-zone-chip__grade" />
-        ) : null}
-      </span>
-      {coreReason ? (
-        <span className="tactical-zone-chip__signal tactical-zone-chip__signal--up">✓ {coreReason}</span>
-      ) : null}
-      <span
-        className="tactical-zone-chip__badge"
-        data-stage={position.stage}
-        title={badge.label}
-      >
-        <span aria-hidden>{badge.emoji}</span>
-        <span className="tactical-zone-chip__badge-label">{badge.label}</span>
-      </span>
+      <span className="tactical-zone-chip__watch">{watchLabel}</span>
     </button>
   )
 }
