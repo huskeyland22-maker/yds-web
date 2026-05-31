@@ -1,21 +1,16 @@
 import { NavLink } from "react-router-dom"
+import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import { getPrimaryNavItems } from "../../utils/appNavItems.js"
 
 /**
  * @param {{
  *   sidebarPulse: object
- *   deskPanicData: object | null
  *   onOpenInputPanel: () => void
  * }} props
  */
-export default function AppSidebar({ sidebarPulse, deskPanicData, onOpenInputPanel }) {
+export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
   const navItems = getPrimaryNavItems()
-  const vix =
-    sidebarPulse.vix ??
-    (Number.isFinite(Number(deskPanicData?.vix)) ? Number(deskPanicData.vix).toFixed(1) : "—")
-  const fg =
-    sidebarPulse.fearGreed ??
-    (Number.isFinite(Number(deskPanicData?.fearGreed)) ? String(Math.round(Number(deskPanicData.fearGreed))) : "—")
+  const aiStatus = sidebarPulse?.aiReportStatus ?? null
 
   return (
     <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
@@ -53,27 +48,7 @@ export default function AppSidebar({ sidebarPulse, deskPanicData, onOpenInputPan
         ))}
       </nav>
       <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-2 lg:pb-3 lg:pt-2.5">
-        <p className="m-0 text-trading-2xs font-semibold tracking-[0.1em] text-slate-500">시장 상태</p>
-        <dl className="m-0 mt-2 space-y-1.5 text-trading-xs leading-snug">
-          <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-            <dt className="shrink-0 text-slate-500">시장</dt>
-            <dd className="text-right font-medium text-indigo-200/90">{sidebarPulse.marketLabel ?? "—"}</dd>
-          </div>
-          <div className="flex justify-between gap-2 border-b border-white/[0.04] pb-2">
-            <dt className="shrink-0 text-slate-500">VIX</dt>
-            <dd className="text-right font-mono tabular-nums text-slate-200">{vix}</dd>
-          </div>
-          <div className="flex justify-between gap-2 pt-0.5">
-            <dt className="shrink-0 text-slate-500">F&amp;G</dt>
-            <dd className="text-right font-mono tabular-nums text-slate-200">{fg}</dd>
-          </div>
-        </dl>
-        {sidebarPulse.updateTimestampLine ? (
-          <p className="m-0 mt-2 text-[9px] leading-relaxed text-slate-500">{sidebarPulse.updateTimestampLine}</p>
-        ) : null}
-        {sidebarPulse.basisLine ? (
-          <p className="m-0 mt-0.5 text-[9px] leading-relaxed text-slate-500">{sidebarPulse.basisLine}</p>
-        ) : null}
+        {aiStatus ? <AiReportMarketStatusBlock status={aiStatus} compact /> : null}
         <button
           type="button"
           onClick={onOpenInputPanel}

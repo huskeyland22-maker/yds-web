@@ -1070,8 +1070,8 @@ function App() {
   const marketCycleStage = marketState.label
   const safeRecentMemos = Array.isArray(recentMemos) ? recentMemos : []
   const sidebarPulse = useMemo(
-    () => buildMarketSidebarPulse(deskPanicData, marketCycleStage),
-    [deskPanicData, marketCycleStage],
+    () => buildMarketSidebarPulse(deskPanicData, marketCycleStage, cycleMetricHistory ?? []),
+    [deskPanicData, marketCycleStage, cycleMetricHistory],
   )
   const insightRows = useMemo(() => buildMemoInsightRows(safeRecentMemos), [recentMemos])
   const flowStats = useMemo(() => buildMemoFlowStats(safeRecentMemos), [recentMemos])
@@ -1244,7 +1244,7 @@ function App() {
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
-      <AppSidebar sidebarPulse={sidebarPulse} deskPanicData={deskPanicData} onOpenInputPanel={openInputPanel} />
+      <AppSidebar sidebarPulse={sidebarPulse} onOpenInputPanel={openInputPanel} />
 
       <div className="app-column-host flex min-w-0 flex-1 flex-col overflow-visible">
         <MobileAppHeader

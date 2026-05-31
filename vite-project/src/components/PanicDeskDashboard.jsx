@@ -1,5 +1,7 @@
 import { useMemo } from "react"
+import { buildAiReportMarketStatus } from "../utils/buildAiReportMarketStatus.js"
 import { getFinalScore } from "../utils/tradingScores.js"
+import AiReportMarketStatusBlock from "./AiReportMarketStatusBlock.jsx"
 import CycleBondLiquiditySection from "./cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "./cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../home-v5/HomeV5DeskLead.jsx"
@@ -49,6 +51,11 @@ export default function PanicDeskDashboard({
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
 
+  const aiReportStatus = useMemo(
+    () => buildAiReportMarketStatus(panicData, safeHistory),
+    [panicData, safeHistory],
+  )
+
   if (!panicData && safeHistory.length === 0) {
     return (
       <div className="panic-v2-desk relative px-3 py-8 text-center" role="status">
@@ -65,6 +72,9 @@ export default function PanicDeskDashboard({
     <div className="panic-v2-desk panic-v2-desk--terminal relative">
       <div className="sticky top-0 z-20 -mx-0.5 border-b border-white/[0.04] bg-[#0B0E14]/90 px-1 py-1 backdrop-blur-sm">
         <CycleDataBasisBar updatedAt={panicData?.updatedAt} cycleSource={cycleDataSource} bondSource="FRED" />
+        <div className="panic-v2-desk__ai-status px-1.5 pb-1 lg:hidden">
+          <AiReportMarketStatusBlock status={aiReportStatus} />
+        </div>
       </div>
 
       <div className="panic-v2-desk__metrics-slot">
