@@ -1198,14 +1198,6 @@
     margin-bottom: 8px;
   }
 
-.tactical-trading-zone__hud-head {
-  margin-top: 2px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
   .tactical-trading-zone__engine-title {
     font-size: 14px;
     font-weight: 800;
@@ -1253,23 +1245,6 @@
   background: rgba(8, 47, 73, 0.46);
   color: rgba(224, 242, 254, 0.98);
   font-weight: 800;
-}
-
-.tactical-trading-zone__focus-btn {
-  border: 1px solid rgba(100, 116, 139, 0.42);
-  background: rgba(15, 23, 42, 0.45);
-  color: rgba(148, 163, 184, 0.95);
-  border-radius: 999px;
-  padding: 5px 10px;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.tactical-trading-zone__focus-btn.is-on {
-  border-color: rgba(56, 189, 248, 0.68);
-  background: rgba(8, 47, 73, 0.76);
-  color: rgba(224, 242, 254, 0.98);
 }
 
 .tactical-trading-zone__priority-rank {
@@ -3103,15 +3078,6 @@
 }
 
 @media (max-width: 640px) {
-  .tactical-trading-zone__hud-head {
-    align-items: center;
-  }
-
-  .tactical-trading-zone__focus-btn {
-    font-size: 10px;
-    padding: 5px 9px;
-  }
-
   .tactical-trading-zone__priority-rank,
   .tactical-trading-zone__ai-briefing {
     padding: 7px 8px;

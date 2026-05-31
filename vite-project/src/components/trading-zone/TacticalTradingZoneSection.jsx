@@ -224,10 +224,6 @@ export default function TacticalTradingZoneSection({
 }) {
   const positions = useMemo(() => getTradingZonePositions(), [])
   const [market, setMarket] = useState("us")
-  const [focusMode, setFocusMode] = useState(() => {
-    if (typeof window === "undefined") return false
-    return window.matchMedia("(max-width: 640px)").matches
-  })
   const [marketTransition, setMarketTransition] = useState(() => ({
     changed: false,
     transitionState: "no-change",
@@ -287,8 +283,12 @@ export default function TacticalTradingZoneSection({
     [livePositions, evalMap, market, panicData],
   )
 
-  const visibleBuckets = useMemo(
-    () => LIVE_DISPLAY_BUCKET_ORDER.filter((bucketId) => (liveBuckets.buckets[bucketId]?.length ?? 0) > 0),
+  const interestPositions = liveBuckets.buckets.interest ?? []
+  const secondaryBucketIds = useMemo(
+    () =>
+      LIVE_DISPLAY_BUCKET_ORDER.filter(
+        (bucketId) => bucketId !== "interest" && (liveBuckets.buckets[bucketId]?.length ?? 0) > 0,
+      ),
     [liveBuckets],
   )
 
@@ -459,50 +459,30 @@ export default function TacticalTradingZoneSection({
 
       <hr className="tactical-trading-zone__divider" aria-hidden />
 
-      <div className="tactical-trading-zone__hud-head">
-        <div className="tactical-trading-zone__engine-head">
-          <p className="m-0 tactical-trading-zone__engine-title">
-            <span aria-hidden>📈</span> 시장 엔진 연계
-          </p>
-          <p className="m-0 tactical-trading-zone__engine-sub">시장 상태 → 오늘 행동 → 우선 종목</p>
-        </div>
-        <button
-          type="button"
-          className={["tactical-trading-zone__focus-btn", focusMode ? "is-on" : ""].join(" ")}
-          onClick={() => setFocusMode((v) => !v)}
-          aria-pressed={focusMode}
-        >
-          {focusMode ? "Focus ON" : "Focus OFF"}
-        </button>
+      <div className="tactical-trading-zone__engine">
+        <TacticalEngineLinkBar
+          link={engineLink}
+          marketPolicy={marketPolicyView}
+          panicScore={panicScore}
+          hideTitle
+        />
       </div>
 
-      {!focusMode ? (
-        <div className="tactical-trading-zone__engine">
-          <TacticalEngineLinkBar
-            link={engineLink}
-            marketPolicy={marketPolicyView}
-            panicScore={panicScore}
-            hideTitle
-          />
-          <TacticalMarketStockBridge
-            bridge={marketStockBridge}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            loading={stockEvalLoading}
-          />
-        </div>
-      ) : null}
+      <TacticalMarketStockBridge
+        bridge={marketStockBridge}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        loading={stockEvalLoading}
+      />
 
-      {!focusMode ? (
-        <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
-          <p className="m-0 tactical-trading-zone__ai-title">🤖 AI 브리핑</p>
-          <ul className="m-0 tactical-trading-zone__ai-lines">
-            {aiBriefSummary.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
+        <p className="m-0 tactical-trading-zone__ai-title">🤖 AI 브리핑</p>
+        <ul className="m-0 tactical-trading-zone__ai-lines">
+          {aiBriefSummary.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </section>
 
       {stockEvalLoading ? (
         <p className="m-0 tactical-trading-zone__stock-sync" role="status">
@@ -527,6 +507,18 @@ export default function TacticalTradingZoneSection({
         ))}
       </div>
 
+      {interestPositions.length ? (
+        <BucketCard
+          bucketId="interest"
+          title={TRADING_BUCKET_META.interest.title}
+          subtitle={TRADING_BUCKET_META.interest.hint}
+          positions={interestPositions}
+          selectedId={selectedId}
+          evalMap={evalMap}
+          onSelect={setSelectedId}
+        />
+      ) : null}
+
       {liveBuckets.todayPick ? (
         <TodayPickCard
           position={liveBuckets.todayPick}
@@ -537,12 +529,12 @@ export default function TacticalTradingZoneSection({
         />
       ) : null}
 
-      {visibleBuckets.length ? (
+      {secondaryBucketIds.length ? (
         <div
           className="tactical-trading-zone__buckets"
-          style={{ "--bucket-cols": visibleBuckets.length }}
+          style={{ "--bucket-cols": secondaryBucketIds.length }}
         >
-          {visibleBuckets.map((bucketId) => (
+          {secondaryBucketIds.map((bucketId) => (
             <BucketCard
               key={bucketId}
               bucketId={bucketId}
@@ -563,20 +555,17 @@ export default function TacticalTradingZoneSection({
             position={selectedPosition}
             panicData={panicData}
             marketPolicy={marketPolicyView}
-            focusMode={focusMode}
             stockEvaluation={evalMap[selectedPosition.id] ?? null}
             stockEvalLoading={stockEvalLoading}
           />
         </div>
       ) : null}
 
-      {!focusMode ? (
-        <TacticalRecommendationTrack
-          positions={livePositions}
-          priorityIds={recommendPriorityIds}
-          liveById={recommendLiveById}
-        />
-      ) : null}
+      <TacticalRecommendationTrack
+        positions={livePositions}
+        priorityIds={recommendPriorityIds}
+        liveById={recommendLiveById}
+      />
     </section>
   )
 }

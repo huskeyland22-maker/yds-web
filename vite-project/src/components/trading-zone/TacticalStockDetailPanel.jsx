@@ -81,7 +81,6 @@ function buildTodayActions(stage, policyItems) {
 /**
  * @param {{
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
- *   focusMode?: boolean
  *   marketPolicy?: object | null
  *   stockEvaluation?: import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | null
  *   stockEvalLoading?: boolean
@@ -91,7 +90,6 @@ export default function TacticalStockDetailPanel({
   position,
   panicData = null,
   marketPolicy = null,
-  focusMode = false,
   stockEvaluation = null,
   stockEvalLoading = false,
 }) {
@@ -322,7 +320,7 @@ export default function TacticalStockDetailPanel({
             />
           </section>
 
-          {!focusMode && (entryRationale.length || riskFactors.length) ? (
+          {entryRationale.length || riskFactors.length ? (
             <ul className="m-0 tactical-zone-detail__quick-factors">
               {entryRationale.map((line) => (
                 <li key={line}>✓ {line}</li>
