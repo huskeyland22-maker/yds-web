@@ -504,30 +504,7 @@ export default function TacticalTradingZoneSection({
         </section>
       ) : null}
 
-      {!focusMode ? (
-        <div className="tactical-trading-zone__mode-toggle" role="tablist" aria-label="실전/분석 모드">
-          <button
-            type="button"
-            className={["tactical-trading-zone__mode-btn", mode === "live" ? "is-active" : ""].join(" ")}
-            onClick={() => setMode("live")}
-            role="tab"
-            aria-selected={mode === "live"}
-          >
-            실전 모드
-          </button>
-          <button
-            type="button"
-            className={["tactical-trading-zone__mode-btn", mode === "analysis" ? "is-active" : ""].join(" ")}
-            onClick={() => setMode("analysis")}
-            role="tab"
-            aria-selected={mode === "analysis"}
-          >
-            분석 모드
-          </button>
-        </div>
-      ) : null}
-
-      {mode === "live" && stockEvalLoading ? (
+      {stockEvalLoading ? (
         <p className="m-0 tactical-trading-zone__stock-sync" role="status">
           📡 종목 실데이터 평가 중…
         </p>
