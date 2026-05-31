@@ -25,6 +25,26 @@ export function formatRecommendPrice(price, market = "us") {
   return `${price.toFixed(2)}달러`
 }
 
+/** 터미널 한 줄 표시 — 단위 생략 */
+export function formatRecommendPriceCompact(price, market = "us") {
+  if (!Number.isFinite(price)) return "—"
+  if (market === "kr") return Math.round(price).toLocaleString("ko-KR")
+  if (price >= 100) return Math.round(price).toLocaleString("en-US")
+  return price.toFixed(2)
+}
+
+/**
+ * @param {number | null | undefined} from
+ * @param {number | null | undefined} to
+ * @param {"us" | "kr"} market
+ */
+export function formatRecommendPriceRangeCompact(from, to, market = "us") {
+  const a = formatRecommendPriceCompact(from, market)
+  const b = formatRecommendPriceCompact(to, market)
+  if (a === "—" && b === "—") return "—"
+  return `${a} → ${b}`
+}
+
 /**
  * @param {number} recommended
  * @param {number} current
@@ -106,7 +126,7 @@ export function buildRecommendationTrackRows(positions, priorityIds = [], liveBy
     if (seen.has(row.symbol)) continue
     seen.add(row.symbol)
     out.push(row)
-    if (out.length >= 8) break
+    if (out.length >= 16) break
   }
   return out
 }
