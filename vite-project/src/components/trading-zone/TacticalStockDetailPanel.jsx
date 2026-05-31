@@ -8,6 +8,8 @@ import { buildMarketPolicy } from "../../trading-zone/marketPolicyEngine.js"
 import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneConfidenceEngine.js"
 import { buildStagePathDisplay } from "../../trading-zone/tradingZoneMarketStockBridge.js"
 import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
+import TacticalTodayActionChips from "./TacticalTodayActionChips.jsx"
+import { stageActionsToTodayActionChips } from "../../trading-zone/tradingZoneTodayActionChips.js"
 
 /** @type {Record<string, string>} */
 const POSITION_STATUS_LINE = {
@@ -143,6 +145,11 @@ export default function TacticalStockDetailPanel({
   const todayActions = useMemo(
     () => buildTodayActions(position.stage, keyActionItems),
     [position.stage, keyActionItems],
+  )
+
+  const todayActionChips = useMemo(
+    () => stageActionsToTodayActionChips(todayActions),
+    [todayActions],
   )
 
   const entryRationale = useMemo(() => {
@@ -284,16 +291,10 @@ export default function TacticalStockDetailPanel({
             <h3 id={`${position.id}-action`} className="m-0 tactical-zone-detail__block-title">
               오늘 행동
             </h3>
-            <ul className="m-0 tactical-zone-detail__today-actions">
-              {todayActions.map((item) => (
-                <li key={item.text} className="tactical-zone-detail__today-action">
-                  <span className="tactical-zone-detail__today-action-icon" aria-hidden>
-                    {item.icon}
-                  </span>
-                  <span>{item.text}</span>
-                </li>
-              ))}
-            </ul>
+            <TacticalTodayActionChips
+              chips={todayActionChips}
+              className="tactical-zone-detail__today-chips"
+            />
           </section>
 
           {!focusMode && (entryRationale.length || riskFactors.length) ? (

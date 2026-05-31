@@ -1942,28 +1942,8 @@
     color: rgba(226, 232, 240, 0.92);
   }
 
-  .tactical-zone-detail__today-actions {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .tactical-zone-detail__today-action {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.35;
-    color: rgba(226, 232, 240, 0.95);
-  }
-
-  .tactical-zone-detail__today-action-icon {
-    flex-shrink: 0;
-    width: 1.1rem;
-    text-align: center;
+  .tactical-zone-detail__block:has(.tactical-zone-detail__today-chips) {
+    margin-bottom: 2px;
   }
 
   .tactical-zone-detail__entry-rationale {
@@ -3448,71 +3428,92 @@
   }
 
   .tactical-zone-today-action {
-    margin-top: 8px;
-    padding: 8px 9px;
-    border-radius: 8px;
-    border: 1px solid rgba(34, 211, 238, 0.22);
-    background: linear-gradient(180deg, rgba(8, 47, 73, 0.35) 0%, rgba(10, 14, 24, 0.5) 100%);
+    margin-top: 6px;
+    padding: 5px 7px;
+    border-radius: 7px;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    background: linear-gradient(180deg, rgba(8, 47, 73, 0.28) 0%, rgba(10, 14, 24, 0.42) 100%);
   }
 
   .tactical-zone-today-action--compact {
-    padding: 6px 8px;
+    padding: 4px 6px;
   }
 
   .tactical-zone-today-action__head {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
-    letter-spacing: 0.02em;
-    color: rgba(125, 211, 252, 0.98);
-    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+    color: rgba(125, 211, 252, 0.95);
+    margin-bottom: 3px;
   }
 
-  .tactical-zone-today-action__grid {
+  .tactical-today-chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px 10px;
+    gap: 3px;
   }
 
-  .tactical-zone-today-action__cell {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 6px;
-    min-width: 0;
+  @media (min-width: 640px) {
+    .tactical-today-chips {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
-  .tactical-zone-today-action__cell-k {
-    font-size: 11px;
+  .tactical-today-chips__chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 22px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.22);
+    font-size: 10px;
     font-weight: 700;
-    color: rgba(148, 163, 184, 0.92);
+    line-height: 1.15;
+    color: rgba(226, 232, 240, 0.95);
     white-space: nowrap;
-  }
-
-  .tactical-zone-today-action__cell-v {
-    font-size: 12px;
-    font-weight: 800;
-    color: rgba(226, 232, 240, 0.96);
-    text-align: right;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
-  .tactical-zone-today-action__cell--ok .tactical-zone-today-action__cell-v {
+  .tactical-today-chips__icon {
+    flex-shrink: 0;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .tactical-today-chips__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tactical-today-chips__chip--ok {
+    border-color: rgba(52, 211, 153, 0.22);
     color: rgba(167, 243, 208, 0.98);
   }
 
-  .tactical-zone-today-action__cell--warn .tactical-zone-today-action__cell-v {
+  .tactical-today-chips__chip--warn {
+    border-color: rgba(251, 191, 36, 0.25);
     color: rgba(253, 230, 138, 0.98);
   }
 
-  .tactical-zone-today-action__cell--danger .tactical-zone-today-action__cell-v {
+  .tactical-today-chips__chip--danger {
+    border-color: rgba(248, 113, 113, 0.28);
     color: rgba(252, 165, 165, 0.98);
   }
 
-  .tactical-zone-today-action__cell--sector .tactical-zone-today-action__cell-v {
-    font-size: 11px;
-    font-weight: 700;
+  .tactical-today-chips__chip--sector {
+    border-color: rgba(129, 140, 248, 0.22);
+    color: rgba(199, 210, 254, 0.95);
+  }
+
+  .tactical-zone-detail__today-chips {
+    margin-top: 2px;
   }
 
   .tactical-zone-today-action__list {
