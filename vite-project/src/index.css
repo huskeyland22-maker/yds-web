@@ -2451,7 +2451,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 0;
     margin: 0;
     padding: 0;
     font-size: 14px;
@@ -2490,6 +2490,7 @@
   }
 
   .tactical-zone-detail__achieve-label {
+    margin-top: 11px;
     font-size: 11px;
     color: rgba(203, 213, 225, 0.92);
     font-weight: 600;
@@ -10170,12 +10171,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: inline;
 }
 
-/* 모바일 핵심지표 — 768px 이하: 숫자 → 방향 → 행동 우선 */
+/* 모바일 핵심지표 — 768px 이하: 1열 스택 · 4행 카드 */
 @media (max-width: 768px) {
   .home-v5-core-grid--hud,
   .home-v5-core-grid--metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 5px;
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .home-v5-core-strategy-bar {
@@ -10208,51 +10209,53 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .home-v5-hud-card--metric {
-    --hud-base: 10px;
-    --hud-value-size: 16px;
-    --hud-delta-size: 11px;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
-      "sym"
-      "val"
-      "delta";
-    align-content: start;
-    gap: 0;
-    min-height: 3.35rem;
-    padding: 4px 5px 5px;
+    --hud-base: 11px;
+    --hud-value-size: 22px;
+    --hud-delta-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    min-height: 7rem;
+    max-height: none;
+    padding: 12px;
   }
 
   .home-v5-hud-card--strategy {
     min-height: 3.25rem;
-    padding: 4px 5px 5px;
+    padding: 8px 10px;
   }
 
   .home-v5-hud-card__head {
-    display: contents;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
   }
 
   .home-v5-hud-card__symbol {
-    grid-area: sym;
-    font-size: 10px;
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.04em;
-    color: rgba(148, 163, 184, 0.95);
-    line-height: 1.1;
+    letter-spacing: 0.03em;
+    color: rgba(248, 250, 252, 0.98);
+    line-height: 1.15;
   }
 
   .home-v5-hud-card__change-delta--head {
-    grid-area: delta;
-    justify-self: start;
-    margin-top: 1px;
-    font-size: var(--hud-delta-size, 11px);
+    flex-shrink: 0;
+    margin-top: 0;
+    font-size: var(--hud-delta-size, 12px);
     font-weight: 700;
   }
 
   .home-v5-hud-card__change-arrow-inline {
     display: inline;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     line-height: 1;
   }
@@ -10266,15 +10269,42 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .home-v5-hud-card--metric .home-v5-hud-card__value {
-    grid-area: val;
-    margin-top: 0;
-    font-size: var(--hud-value-size, 16px);
-    line-height: 1.05;
+    margin-top: 2px;
+    font-size: var(--hud-value-size, 22px);
+    line-height: 1;
+    font-weight: 900;
   }
 
-  .home-v5-hud-card__timeline,
+  .home-v5-hud-card__timeline {
+    display: block;
+    margin-top: 0;
+    font-size: 11px;
+    line-height: 1.25;
+    opacity: 0.88;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .home-v5-hud-card__timeline-full {
+    display: none;
+  }
+
+  .home-v5-hud-card__timeline-mobile {
+    display: inline;
+  }
+
   .home-v5-hud-card__status-action {
-    display: none !important;
+    display: block;
+    margin-top: 0;
+    font-size: 11px;
+    line-height: 1.2;
+    color: rgba(203, 213, 225, 0.9);
+  }
+
+  .home-v5-hud-card__status-action-a,
+  .home-v5-hud-card__status-action-sep {
+    display: none;
   }
 
   .home-v5-hud-card--strategy .home-v5-hud-card__stage-transition {
@@ -10313,7 +10343,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .home-v5-hud-card--metric {
-    min-height: 3.25rem;
+    min-height: 7rem;
   }
 
   .home-v5-hud-card--strategy {
