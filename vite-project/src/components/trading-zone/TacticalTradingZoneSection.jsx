@@ -24,6 +24,7 @@ import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalMarketStockBridge from "./TacticalMarketStockBridge.jsx"
 import TacticalRecommendationTrack from "./TacticalRecommendationTrack.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
+import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStockBridge.js"
 
 /**
@@ -80,9 +81,7 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
       <span className="tactical-zone-chip__main">
         <span className="tactical-zone-chip__name">{position.symbol}</span>
         {trustScore != null ? (
-          <span className="tactical-zone-chip__conf font-mono tabular-nums" title="신뢰도">
-            {trustScore}
-          </span>
+          <TacticalConfidenceGrade score={trustScore} compact className="tactical-zone-chip__grade" />
         ) : null}
         {trendLabel ? <span className="tactical-zone-chip__sub">{trendLabel}</span> : null}
       </span>
@@ -433,11 +432,6 @@ export default function TacticalTradingZoneSection({
             onSelect={setSelectedId}
             loading={mode === "live" && stockEvalLoading}
           />
-          <TacticalRecommendationTrack
-            positions={livePositions}
-            priorityIds={recommendPriorityIds}
-            liveById={recommendLiveById}
-          />
         </div>
       ) : null}
 
@@ -529,6 +523,14 @@ export default function TacticalTradingZoneSection({
             stockEvalLoading={stockEvalLoading}
           />
         </div>
+      ) : null}
+
+      {!focusMode ? (
+        <TacticalRecommendationTrack
+          positions={livePositions}
+          priorityIds={recommendPriorityIds}
+          liveById={recommendLiveById}
+        />
       ) : null}
     </section>
   )

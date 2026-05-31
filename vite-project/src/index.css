@@ -3717,8 +3717,56 @@
     color: rgba(226, 232, 240, 0.98);
   }
 
+  .tactical-confidence-grade {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    line-height: 1.2;
+    vertical-align: middle;
+  }
+
+  .tactical-confidence-grade__score {
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(226, 232, 240, 0.98);
+  }
+
+  .tactical-confidence-grade__letter {
+    font-size: 9px;
+    font-weight: 800;
+    color: rgba(129, 140, 248, 0.95);
+  }
+
+  .tactical-confidence-grade__stars {
+    font-size: 9px;
+    letter-spacing: -0.04em;
+    color: rgba(250, 204, 21, 0.92);
+  }
+
+  .tactical-confidence-grade--compact .tactical-confidence-grade__score {
+    font-size: 10px;
+  }
+
+  .tactical-confidence-grade--compact .tactical-confidence-grade__stars {
+    font-size: 8px;
+  }
+
+  .tactical-zone-detail__name .tactical-confidence-grade {
+    margin-left: 6px;
+  }
+
+  .tactical-zone-chip__grade {
+    flex-shrink: 0;
+  }
+
+  .tactical-zone-stock-bridge__pick-grade {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
   .tactical-zone-recommend-track {
-    margin-top: 8px;
+    margin-top: 10px;
     padding: 8px 10px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -11913,6 +11961,87 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.9);
   cursor: pointer;
   text-decoration: underline;
+}
+
+.panic-validation-vs {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.05rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  background: linear-gradient(165deg, rgba(30, 27, 75, 0.55) 0%, rgba(14, 18, 28, 0.75) 100%);
+}
+
+.panic-validation-vs__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.panic-validation-vs__sub {
+  margin: 0.35rem 0 0.75rem;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: rgba(148, 163, 184, 0.92);
+}
+
+.panic-validation-vs__head-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panic-validation-vs__col-head {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-align: right;
+  color: rgba(203, 213, 225, 0.95);
+}
+
+.panic-validation-vs__col-head:last-child {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.panic-validation-vs__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.panic-validation-vs__metric {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 1fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.panic-validation-vs__metric-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.panic-validation-vs__metric-val {
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.96);
+}
+
+.panic-validation-vs__metric-val--up {
+  color: rgba(52, 211, 153, 0.98);
+}
+
+.panic-validation-vs__metric-val--down {
+  color: rgba(248, 113, 113, 0.98);
+}
+
+.panic-validation-year-table--vs th:nth-child(n + 2),
+.panic-validation-year-table--vs td:nth-child(n + 2) {
+  text-align: right;
 }
 
 .panic-validation-page {

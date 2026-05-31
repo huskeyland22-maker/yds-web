@@ -9,6 +9,9 @@ import { PANIC_VALIDATION_EXTENDED_HISTORY } from "./panicValidationExtendedHist
 const MIN_YEARS = 5
 const CASH_WEEKLY_DRIFT = 0.00012
 
+/** @type {string[]} */
+export const PANIC_VALIDATION_DISPLAY_YEARS = ["2022", "2023", "2024", "2025", "2026"]
+
 /** @param {object} row */
 function rowDateKey(row) {
   return String(row?.date ?? row?.ts ?? "").slice(0, 10)
@@ -86,11 +89,14 @@ export function runPanicIndexAllocationBacktest(historyRows) {
       spanYears,
       sampleWeeks: steps.length,
       yearlyReturns: [],
+      yearlyComparison: [],
       avgReturnPct: null,
       mddPct: null,
       winRatePct: null,
       totalReturnPct: null,
       benchmarkReturnPct: null,
+      benchmarkMddPct: null,
+      benchmarkWinRatePct: null,
       usesExtendedHistory: true,
     }
   }
@@ -98,17 +104,23 @@ export function runPanicIndexAllocationBacktest(historyRows) {
   let equity = 100
   let bench = 100
   let peak = 100
+  let benchPeak = 100
   let mdd = 0
+  let benchMdd = 0
   let wins = 0
+  let benchWins = 0
   let periods = 0
 
   /** @type {Record<string, { start: number; end: number }>} */
   const yearEquity = {}
+  /** @type {Record<string, { start: number; end: number }>} */
+  const yearBench = {}
 
   for (let i = 1; i < steps.length; i++) {
     const prev = steps[i - 1]
     const cur = steps[i]
     const eqBefore = equity
+    const benchBefore = bench
     const panic = cycleRowToPanicData(prev) ?? panicDataFromCycleRow(prev)
     const score = panic ? getFinalScore(panic) : null
     const regime = resolveMacroV1Status(score)
@@ -123,14 +135,20 @@ export function runPanicIndexAllocationBacktest(historyRows) {
     equity *= 1 + portRet
     bench *= 1 + benchRet
     peak = Math.max(peak, equity)
+    benchPeak = Math.max(benchPeak, bench)
     const dd = peak > 0 ? ((peak - equity) / peak) * 100 : 0
+    const benchDd = benchPeak > 0 ? ((benchPeak - bench) / benchPeak) * 100 : 0
     mdd = Math.max(mdd, dd)
+    benchMdd = Math.max(benchMdd, benchDd)
     if (portRet > 0) wins++
+    if (benchRet > 0) benchWins++
     periods++
 
     const y = rowDateKey(cur).slice(0, 4)
     if (!yearEquity[y]) yearEquity[y] = { start: eqBefore, end: equity }
     else yearEquity[y].end = equity
+    if (!yearBench[y]) yearBench[y] = { start: benchBefore, end: bench }
+    else yearBench[y].end = bench
   }
 
   const yearlyReturns = Object.keys(yearEquity)
@@ -140,6 +158,15 @@ export function runPanicIndexAllocationBacktest(historyRows) {
       const ret = start > 0 ? ((end - start) / start) * 100 : 0
       return { year, returnPct: ret }
     })
+
+  const yearlyComparison = PANIC_VALIDATION_DISPLAY_YEARS.map((year) => {
+    const strat = yearEquity[year]
+    const spy = yearBench[year]
+    const strategyPct =
+      strat && strat.start > 0 ? ((strat.end - strat.start) / strat.start) * 100 : null
+    const spyPct = spy && spy.start > 0 ? ((spy.end - spy.start) / spy.start) * 100 : null
+    return { year, strategyPct, spyPct }
+  })
 
   const avgReturnPct = yearlyReturns.length
     ? yearlyReturns.reduce((s, y) => s + y.returnPct, 0) / yearlyReturns.length
@@ -155,11 +182,14 @@ export function runPanicIndexAllocationBacktest(historyRows) {
     spanYears,
     sampleWeeks: periods,
     yearlyReturns,
+    yearlyComparison,
     avgReturnPct,
     mddPct: mdd,
     winRatePct,
     totalReturnPct,
     benchmarkReturnPct,
+    benchmarkMddPct: benchMdd,
+    benchmarkWinRatePct: periods ? (benchWins / periods) * 100 : null,
     usesExtendedHistory: true,
     periodStart: first,
     periodEnd: last,

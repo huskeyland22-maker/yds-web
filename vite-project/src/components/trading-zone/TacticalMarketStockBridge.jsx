@@ -1,4 +1,5 @@
 import { TRADING_STAGE_META } from "../../trading-zone/tacticalTradingZoneData.js"
+import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 
 /**
  * @param {{
@@ -60,12 +61,11 @@ export default function TacticalMarketStockBridge({
                   <div className="tactical-zone-stock-bridge__pick-head">
                     <span className="tactical-zone-stock-bridge__pick-rank">{index + 1}</span>
                     <span className="tactical-zone-stock-bridge__pick-symbol">{item.symbol}</span>
-                    <span
-                      className="tactical-zone-stock-bridge__pick-trust font-mono tabular-nums"
-                      title={`신뢰도 ${item.confidence}`}
-                    >
-                      {item.confidence}
-                    </span>
+                    <TacticalConfidenceGrade
+                      score={item.confidence}
+                      compact
+                      className="tactical-zone-stock-bridge__pick-grade"
+                    />
                   </div>
                   <ul className="m-0 tactical-zone-stock-bridge__reasons-stack">
                     {coreReasons.map((reason) => (

@@ -1,6 +1,5 @@
 import { useMemo } from "react"
 import { TRADING_STAGE_META, tradingStageBadge } from "../../trading-zone/tacticalTradingZoneData.js"
-import TacticalZoneAuxPanel from "./TacticalZoneAuxPanel.jsx"
 import {
   computeTradingZoneProgress,
   resolvePositionPriceLevels,
@@ -8,6 +7,7 @@ import {
 import { buildMarketPolicy } from "../../trading-zone/marketPolicyEngine.js"
 import { buildTradingConfidenceBreakdown } from "../../trading-zone/tradingZoneConfidenceEngine.js"
 import { buildStagePathDisplay } from "../../trading-zone/tradingZoneMarketStockBridge.js"
+import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 
 /** @type {Record<string, string>} */
 const POSITION_STATUS_LINE = {
@@ -180,10 +180,7 @@ export default function TacticalStockDetailPanel({
       <header className="tactical-zone-detail__head">
         <p className="m-0 tactical-zone-detail__name">
           {position.symbol}
-          <span className="tactical-zone-detail__trust font-mono tabular-nums" title="종목 신뢰도">
-            {" "}
-            신뢰도 {confidence.score}
-          </span>
+          <TacticalConfidenceGrade score={confidence.score} className="tactical-zone-detail__grade" />
         </p>
         {stockEvalLoading ? (
           <p className="m-0 tactical-zone-detail__eval-hint" role="status">
@@ -315,13 +312,6 @@ export default function TacticalStockDetailPanel({
       ) : (
         <p className="m-0 tactical-zone-detail__no-price">가격 영역 계산 대기</p>
       )}
-
-      <details className="tactical-zone-detail__fold">
-        <summary className="tactical-zone-detail__fold-summary">보조지표</summary>
-        <div className="tactical-zone-detail__fold-body">
-          <TacticalZoneAuxPanel position={position} stockEvaluation={stockEvaluation} />
-        </div>
-      </details>
 
       {mode === "analysis" ? (
         <p className="m-0 tactical-zone-detail__mode-hint">분석 모드</p>
