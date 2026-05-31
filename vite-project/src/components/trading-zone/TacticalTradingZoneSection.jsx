@@ -395,7 +395,7 @@ export default function TacticalTradingZoneSection({
         icon="🎯"
         title="실전 매매존"
         description="미국·한국 실전 진입 관리"
-        tone="green"
+        tone="sky"
         tier="main"
       />
 

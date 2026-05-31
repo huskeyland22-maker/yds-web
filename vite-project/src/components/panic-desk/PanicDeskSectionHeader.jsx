@@ -1,6 +1,6 @@
 /**
  * 패닉 데스크 메인 섹션 헤더 (핵심지수 · 패닉지수 히스토리 · 실전매매존)
- * @param {{ icon: string; title: string; description?: string; tone?: "cyan" | "amber" | "green"; compact?: boolean; tier?: "main" | "compact" }} props
+ * @param {{ icon: string; title: string; description?: string; tone?: "cyan" | "amber" | "green" | "sky"; compact?: boolean; tier?: "main" | "compact" }} props
  */
 export default function PanicDeskSectionHeader({
   icon,

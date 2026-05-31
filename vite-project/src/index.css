@@ -5231,12 +5231,53 @@
     margin-bottom: 8px;
   }
 
-  /* 메인 섹션 H2 — 핵심지수 · 패닉지수 히스토리 · 실전 매매존 동일 계층 */
+  /* 메인 섹션 H2 — 핵심지수 · 패닉지수 히스토리 · 실전 매매존 (유리판 헤더) */
   .panic-desk-section-header--main {
     margin-top: 0;
     margin-bottom: 14px;
-    padding-left: 14px;
+    padding-top: 10px;
+    padding-bottom: 8px;
+    padding-left: calc(14px + 0.5rem);
+    padding-right: 0.5rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
     border-left-width: 4px;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+  }
+
+  @media (min-width: 640px) {
+    .panic-desk-section-header--main {
+      margin-left: -0.625rem;
+      margin-right: -0.625rem;
+      padding-left: calc(14px + 0.625rem);
+      padding-right: 0.625rem;
+    }
+  }
+
+  @supports ((-webkit-backdrop-filter: blur(4px)) or (backdrop-filter: blur(4px))) {
+    .panic-desk-section-header--main {
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+  }
+
+  .panic-desk-section-header--main.panic-desk-section-header--cyan {
+    background: rgba(0, 255, 200, 0.04);
+    border-bottom-color: rgba(0, 255, 200, 0.12);
+    border-left-color: rgba(0, 255, 200, 0.85);
+  }
+
+  .panic-desk-section-header--main.panic-desk-section-header--amber {
+    background: rgba(255, 180, 0, 0.04);
+    border-bottom-color: rgba(255, 180, 0, 0.12);
+    border-left-color: rgba(255, 180, 0, 0.88);
+  }
+
+  .panic-desk-section-header--main.panic-desk-section-header--sky {
+    background: rgba(0, 180, 255, 0.04);
+    border-bottom-color: rgba(0, 180, 255, 0.12);
+    border-left-color: rgba(0, 180, 255, 0.88);
   }
 
   .panic-desk-section-header--main .panic-desk-section-header__title {
@@ -5291,6 +5332,10 @@
 
   .panic-desk-section-header--green {
     border-left-color: rgba(74, 222, 128, 0.88);
+  }
+
+  .panic-desk-section-header--sky {
+    border-left-color: rgba(0, 180, 255, 0.88);
   }
 
   .panic-desk-section-header__title {
@@ -8293,8 +8338,6 @@
 
   .panic-history-section > .panic-desk-section-header--main,
   .home-v5-core-section > .panic-desk-section-header--main {
-    padding-top: 10px;
-    padding-bottom: 0;
     margin-bottom: 14px;
   }
 
@@ -9879,8 +9922,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .home-v5-core-section > .panic-desk-section-header--main {
-  padding-top: 10px;
-  padding-bottom: 0;
   margin-bottom: 14px;
 }
 
@@ -11275,7 +11316,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .panic-v2-desk--terminal .tactical-trading-zone .panic-desk-section-header--main {
   margin-top: 0;
   margin-bottom: 14px;
-  padding-top: 10px;
 }
 
 @media (min-width: 640px) {
