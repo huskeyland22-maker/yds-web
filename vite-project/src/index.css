@@ -10177,33 +10177,68 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     font-size: 11px;
   }
 
+  .home-v5-core-stack {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home-v5-core-strategy-bar {
+    order: -1;
+    margin-bottom: 5px;
+  }
+
+  .home-v5-core-grid--hud,
+  .home-v5-core-grid--metrics {
+    order: 0;
+  }
+
   .home-v5-hud-card--metric {
-    --hud-base: 16px;
-    --hud-value-size: 18px;
-    --hud-delta-size: 14px;
-    --hud-arrow-size: 14px;
-    --hud-meta-size: 11px;
-    min-height: 6.75rem;
-    padding: 6px 6px 7px;
+    --hud-base: 10px;
+    --hud-value-size: 16px;
+    --hud-delta-size: 11px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "sym"
+      "val"
+      "delta";
+    align-content: start;
+    gap: 0;
+    min-height: 3.35rem;
+    padding: 4px 5px 5px;
   }
 
   .home-v5-hud-card--strategy {
-    min-height: 6.5rem;
-    padding: 6px 6px 7px;
+    min-height: 3.25rem;
+    padding: 4px 5px 5px;
+  }
+
+  .home-v5-hud-card__head {
+    display: contents;
   }
 
   .home-v5-hud-card__symbol {
-    font-size: calc(var(--hud-base) * 1.55);
+    grid-area: sym;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: rgba(148, 163, 184, 0.95);
+    line-height: 1.1;
   }
 
   .home-v5-hud-card__change-delta--head {
-    font-size: var(--hud-delta-size, 14px);
+    grid-area: delta;
+    justify-self: start;
+    margin-top: 1px;
+    font-size: var(--hud-delta-size, 11px);
+    font-weight: 700;
   }
 
   .home-v5-hud-card__change-arrow-inline {
     display: inline;
-    font-size: var(--hud-arrow-size, 14px);
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     line-height: 1;
   }
 
@@ -10216,35 +10251,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .home-v5-hud-card--metric .home-v5-hud-card__value {
-    margin-top: 3px;
-    font-size: var(--hud-value-size, 18px);
+    grid-area: val;
+    margin-top: 0;
+    font-size: var(--hud-value-size, 16px);
+    line-height: 1.05;
   }
 
-  .home-v5-hud-card__timeline {
-    font-size: 10px;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-  }
-
-  .home-v5-hud-card__timeline-full {
-    display: none;
-  }
-
-  .home-v5-hud-card__timeline-mobile {
-    display: inline;
-  }
-
+  .home-v5-hud-card__timeline,
   .home-v5-hud-card__status-action {
-    margin-top: 3px;
-    overflow: visible;
-    text-overflow: unset;
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    font-size: var(--hud-meta-size, 11px);
-    line-height: 1.3;
+    display: none !important;
   }
 
   .home-v5-hud-card--strategy .home-v5-hud-card__stage-transition {
@@ -10283,11 +10298,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .home-v5-hud-card--metric {
-    min-height: 7rem;
+    min-height: 3.25rem;
   }
 
   .home-v5-hud-card--strategy {
-    min-height: 6.75rem;
+    min-height: 3.15rem;
   }
 }
 
@@ -12285,4 +12300,243 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .panic-validation-year-table__down {
   font-weight: 700;
   color: rgba(248, 113, 113, 0.98);
+}
+
+/* ── 모바일 데스크 최적화 (PC 769px+ 변경 없음) ── */
+.home-v5-core-strategy-bar__mobile-hero,
+.home-v5-core-strategy-bar__mobile-more {
+  display: none;
+}
+
+.home-v5-core-strategy-bar__line--desktop {
+  display: block;
+}
+
+.tactical-zone-detail__position-oneline,
+.tactical-zone-chip__dense {
+  display: none;
+}
+
+.panic-history-scope-toggle__label-short {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .panic-desk-section-header--main .panic-desk-section-header__desc {
+    display: none;
+  }
+
+  .panic-desk-section-header--main {
+    padding-top: 6px;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+  }
+
+  .home-v5-core-strategy-bar {
+    min-height: auto;
+    padding: 5px 7px;
+  }
+
+  .home-v5-core-strategy-bar__line--desktop {
+    display: none;
+  }
+
+  .home-v5-core-strategy-bar__mobile-hero {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    line-height: 1.2;
+  }
+
+  .home-v5-core-strategy-bar__mobile-stage {
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .home-v5-core-strategy-bar__mobile-hint {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(203, 213, 225, 0.92);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-v5-core-strategy-bar__mobile-more {
+    display: block;
+    margin-top: 3px;
+  }
+
+  .home-v5-core-strategy-bar__mobile-more-summary {
+    list-style: none;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.9);
+    user-select: none;
+  }
+
+  .home-v5-core-strategy-bar__mobile-more-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .home-v5-core-strategy-bar__mobile-more-body {
+    margin-top: 3px;
+    font-size: 10px;
+    line-height: 1.35;
+    color: rgba(148, 163, 184, 0.92);
+  }
+
+  .panic-history-scope-toggle {
+    margin: 4px 0 6px;
+    gap: 4px;
+  }
+
+  .panic-history-scope-toggle__btn {
+    min-height: 20px;
+    padding: 3px 6px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+
+  .panic-history-scope-toggle__label-full {
+    display: none;
+  }
+
+  .panic-history-scope-toggle__label-short {
+    display: inline;
+  }
+
+  .tactical-zone-chip__dense {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr;
+    align-items: center;
+    gap: 0 5px;
+    width: 100%;
+  }
+
+  .tactical-zone-chip__main,
+  .tactical-zone-chip__signal,
+  .tactical-zone-chip__badge {
+    display: none !important;
+  }
+
+  .tactical-zone-chip {
+    min-height: 22px;
+    height: auto;
+    padding: 2px 6px;
+    flex-wrap: nowrap;
+  }
+
+  .tactical-zone-chip__dense-score {
+    font-size: 10px;
+    font-weight: 800;
+    color: rgba(226, 232, 240, 0.96);
+  }
+
+  .tactical-zone-chip__dense-watch {
+    justify-self: end;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.92);
+  }
+
+  .tactical-zone-chip__grade .tactical-confidence-grade__score {
+    display: none;
+  }
+
+  .tactical-zone-chip__grade .tactical-confidence-grade__stars {
+    font-size: 7px;
+  }
+
+  .tactical-zone-bucket {
+    min-height: auto;
+    padding: 5px 5px 6px;
+  }
+
+  .tactical-zone-bucket__title {
+    font-size: 10px;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+  }
+
+  .tactical-zone-bucket__list {
+    gap: 2px;
+  }
+
+  .tactical-zone-detail__position-oneline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: rgba(226, 232, 240, 0.96);
+  }
+
+  .tactical-zone-detail__position-oneline-sep {
+    color: rgba(100, 116, 139, 0.85);
+    font-weight: 500;
+  }
+
+  .tactical-zone-detail__position-stage--desktop,
+  .tactical-zone-detail__position-status--desktop {
+    display: none !important;
+  }
+
+  .tactical-zone-detail__block-title {
+    display: none;
+  }
+
+  .tactical-zone-detail__block--position,
+  .tactical-zone-detail__block--price,
+  .tactical-zone-detail__block--action {
+    margin-bottom: 4px;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .tactical-zone-detail__stage-path {
+    margin-top: 2px;
+    font-size: 9px;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .tactical-zone-detail__block--price .price-label-row {
+    font-size: 8px;
+  }
+
+  .tactical-zone-detail__achieve {
+    display: none;
+  }
+
+  .tactical-zone-detail__block--price .tactical-zone-trade-line-container {
+    margin-top: 2px;
+  }
+
+  .tactical-zone-detail__block--price .trade-progress-group {
+    margin-top: 0;
+  }
+
+  .tactical-zone-detail__quick-factors {
+    margin-top: 4px;
+    font-size: 10px;
+    gap: 2px;
+  }
+
+  .tactical-zone-detail--compact .tactical-zone-detail__simple-body {
+    gap: 4px;
+  }
+
+  .tactical-zone-detail__head {
+    margin-bottom: 4px;
+  }
+
+  .panic-v2-desk--terminal .home-v5-preview__zone--core {
+    padding-bottom: 0;
+  }
 }

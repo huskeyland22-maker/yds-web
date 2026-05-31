@@ -59,12 +59,14 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
         : strengthScore <= 20
           ? "weak"
           : "normal"
-  const trendLabel =
-    position.stage === "trend" && (position.stageHistory?.length ?? 0) >= 3
-      ? "🔥 강추세"
-      : position.stage === "trend"
-        ? "↗ 상승추세 유지"
-        : null
+  const stageWatchLabel =
+    position.stage === "trend"
+      ? "추세"
+      : position.stage === "takeProfit"
+        ? "익절"
+        : position.stage === "risk"
+          ? "방어"
+          : "관망"
   return (
     <button
       type="button"
@@ -78,12 +80,21 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
         strengthTone === "weak" ? "tactical-zone-chip--weak" : "",
       ].join(" ")}
     >
+      <span className="tactical-zone-chip__dense" aria-hidden={false}>
+        <span className="tactical-zone-chip__name">{position.symbol}</span>
+        {trustScore != null ? (
+          <>
+            <span className="tactical-zone-chip__dense-score font-mono tabular-nums">{trustScore}</span>
+            <TacticalConfidenceGrade score={trustScore} compact className="tactical-zone-chip__grade" />
+          </>
+        ) : null}
+        <span className="tactical-zone-chip__dense-watch">{stageWatchLabel}</span>
+      </span>
       <span className="tactical-zone-chip__main">
         <span className="tactical-zone-chip__name">{position.symbol}</span>
         {trustScore != null ? (
           <TacticalConfidenceGrade score={trustScore} compact className="tactical-zone-chip__grade" />
         ) : null}
-        {trendLabel ? <span className="tactical-zone-chip__sub">{trendLabel}</span> : null}
       </span>
       {coreReason ? (
         <span className="tactical-zone-chip__signal tactical-zone-chip__signal--up">✓ {coreReason}</span>
@@ -94,7 +105,7 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
         title={badge.label}
       >
         <span aria-hidden>{badge.emoji}</span>
-        {badge.label}
+        <span className="tactical-zone-chip__badge-label">{badge.label}</span>
       </span>
     </button>
   )

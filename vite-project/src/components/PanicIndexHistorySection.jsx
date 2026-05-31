@@ -133,7 +133,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           aria-selected={metricScope === "core"}
           onClick={() => setMetricScope("core")}
         >
-          핵심 3지표
+          <span className="panic-history-scope-toggle__label-full">핵심 3지표</span>
+          <span className="panic-history-scope-toggle__label-short">핵심</span>
         </button>
         <button
           type="button"
@@ -142,7 +143,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           aria-selected={metricScope === "all"}
           onClick={() => setMetricScope("all")}
         >
-          전체 9지표
+          <span className="panic-history-scope-toggle__label-full">전체 9지표</span>
+          <span className="panic-history-scope-toggle__label-short">전체</span>
         </button>
       </div>
 

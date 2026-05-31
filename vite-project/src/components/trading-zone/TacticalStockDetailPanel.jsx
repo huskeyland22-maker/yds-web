@@ -10,6 +10,10 @@ import { buildStagePathDisplay } from "../../trading-zone/tradingZoneMarketStock
 import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 import TacticalTodayActionChips from "./TacticalTodayActionChips.jsx"
 import { stageActionsToTodayActionChips } from "../../trading-zone/tradingZoneTodayActionChips.js"
+import {
+  STAGE_STATUS_SHORT,
+  formatStagePathDateOnly,
+} from "../../trading-zone/tradingZoneDetailMobile.js"
 
 /** @type {Record<string, string>} */
 const POSITION_STATUS_LINE = {
@@ -98,6 +102,11 @@ export default function TacticalStockDetailPanel({
     () => buildStagePathDisplay(position.stageHistory ?? []),
     [position.stageHistory],
   )
+  const stagePathDates = useMemo(
+    () => formatStagePathDateOnly(stagePathDisplay.segments),
+    [stagePathDisplay.segments],
+  )
+  const stageStatusShort = STAGE_STATUS_SHORT[position.stage] ?? badge.label
   const levels = useMemo(() => {
     const base = resolvePositionPriceLevels(position)
     const zones = stockEvaluation?.priceZones
@@ -198,24 +207,39 @@ export default function TacticalStockDetailPanel({
 
       {progress ? (
         <div className="tactical-zone-detail__simple-body">
-          <section className="tactical-zone-detail__block" aria-labelledby={`${position.id}-position`}>
+          <section
+            className="tactical-zone-detail__block tactical-zone-detail__block--position"
+            aria-labelledby={`${position.id}-position`}
+          >
             <h3 id={`${position.id}-position`} className="m-0 tactical-zone-detail__block-title">
               현재 위치
             </h3>
-            <p className="m-0 tactical-zone-detail__position-stage" data-stage={position.stage}>
+            <p className="m-0 tactical-zone-detail__position-oneline" data-stage={position.stage}>
+              <span className="tactical-zone-detail__position-oneline-stage">
+                <span aria-hidden>{badge.emoji}</span> {STAGE_LABEL[position.stage] ?? badge.label}
+              </span>
+              <span className="tactical-zone-detail__position-oneline-sep" aria-hidden>
+                |
+              </span>
+              <span className="tactical-zone-detail__position-oneline-status">{stageStatusShort}</span>
+            </p>
+            <p className="m-0 tactical-zone-detail__position-stage tactical-zone-detail__position-stage--desktop" data-stage={position.stage}>
               <span aria-hidden>{badge.emoji}</span> {STAGE_LABEL[position.stage] ?? badge.label}
             </p>
-            <p className="m-0 tactical-zone-detail__position-status">
+            <p className="m-0 tactical-zone-detail__position-status tactical-zone-detail__position-status--desktop">
               {POSITION_STATUS_LINE[position.stage] ?? "실전 대응 구간"}
             </p>
-            {stagePathDisplay.path && stagePathDisplay.path !== "—" ? (
-              <p className="m-0 tactical-zone-detail__stage-path" title="최근 이동 경로">
-                {stagePathDisplay.path}
+            {stagePathDates && stagePathDates !== "—" ? (
+              <p className="m-0 tactical-zone-detail__stage-path" title={stagePathDisplay.path}>
+                {stagePathDates}
               </p>
             ) : null}
           </section>
 
-          <section className="tactical-zone-detail__block" aria-labelledby={`${position.id}-price`}>
+          <section
+            className="tactical-zone-detail__block tactical-zone-detail__block--price"
+            aria-labelledby={`${position.id}-price`}
+          >
             <h3 id={`${position.id}-price`} className="m-0 tactical-zone-detail__block-title">
               가격 위치
             </h3>
@@ -287,7 +311,10 @@ export default function TacticalStockDetailPanel({
             </div>
           </section>
 
-          <section className="tactical-zone-detail__block" aria-labelledby={`${position.id}-action`}>
+          <section
+            className="tactical-zone-detail__block tactical-zone-detail__block--action"
+            aria-labelledby={`${position.id}-action`}
+          >
             <h3 id={`${position.id}-action`} className="m-0 tactical-zone-detail__block-title">
               오늘 행동
             </h3>
