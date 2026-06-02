@@ -168,6 +168,13 @@ export const YDS_VALIDATION_EVENT_DATASET = RAW_EVENTS.map((event) => ({
     climax: event.keyDates.extreme,
     recovery: event.keyDates.recovery,
   },
+  milestoneIndicators: {
+    start: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
+    rise: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
+    fearExpansion: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
+    climax: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
+    recovery: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
+  },
   durationDays: calcDurationDays(event.startDate, event.endDate),
 }))
 
