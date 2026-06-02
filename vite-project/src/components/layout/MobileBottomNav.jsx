@@ -12,6 +12,7 @@ const SHORT_LABEL = {
   "/cycle": "사이클",
   "/value-chain": "코리아",
   "/trading-log": "로그",
+  "/recommendation-history": "추천이력",
 }
 
 function buildNavItems() {
@@ -35,6 +36,7 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
     const p = location.pathname
     if (p.startsWith("/value-chain")) return "value_chain"
     if (p.startsWith("/trading-log")) return "trading_log"
+    if (p.startsWith("/recommendation-history")) return "recommendation_history"
     if (p.startsWith("/cycle") || p === "/") return "cycle"
     return "cycle"
   })()

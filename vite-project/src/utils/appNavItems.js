@@ -8,5 +8,6 @@ export function getPrimaryNavItems() {
     { label: "코리아 밸류체인", path: "/value-chain" },
     { label: "트레이딩 로그", path: "/trading-log" },
     { label: "패닉지수 검증", path: "/panic-validation" },
+    { label: "추천 이력", path: "/recommendation-history" },
   ]
 }

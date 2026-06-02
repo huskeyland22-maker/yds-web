@@ -30,6 +30,17 @@ import { buildStockDisplayReasons } from "./tradingZoneStockDisplayReasons.js"
  *   pathSegments: { dateLabel: string; stage: TradingStageId; label: string }[]
  *   stageLadder: string[]
  *   reasons: string[]
+ *   strengths: string[]
+ *   weaknesses: string[]
+ *   riskLevel: "낮음" | "보통" | "높음"
+ *   scoreBreakdown: {
+ *     trend: number
+ *     volume: number
+ *     ma20: number
+ *     sector: number
+ *     yds: number
+ *     total: number
+ *   }
  *   confidenceBar: string
  *   regimeBoost: boolean
  * }} MarketLinkedStockPriority */
@@ -216,6 +227,64 @@ function baseStockScore(position, evalMap, panicData) {
 }
 
 /**
+ * @param {TradingZonePosition} position
+ * @param {import("./tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | undefined} ev
+ * @param {number} confidence
+ * @param {boolean} regimeBoost
+ */
+function buildStockExplainModel(position, ev, confidence, regimeBoost) {
+  const hasTrend = ev?.signalId === "trend" || ev?.strengthHighlights?.some((x) => /추세/.test(x))
+  const hasVolume =
+    ev?.strengthHighlights?.some((x) => /거래량 증가/.test(x)) ||
+    ev?.entryRationale?.some((x) => /거래량 증가/.test(x))
+  const hasMa20 =
+    ev?.strengthHighlights?.some((x) => /20일선 위/.test(x)) ||
+    ev?.entryRationale?.some((x) => /20MA 상회|20MA 지지/.test(x)) ||
+    ev?.auxStrip?.some((x) => x.key === "20MA" && x.tone === "up")
+  const sectorTheme = SYMBOL_SECTOR_THEME[position.symbol] ?? null
+  const trend = hasTrend ? 25 : 16
+  const volume = hasVolume ? 20 : 12
+  const ma20 = hasMa20 ? 15 : 9
+  const sector = sectorTheme ? 10 : 6
+  const yds = confidence - (trend + volume + ma20 + sector)
+
+  const strengths = [
+    hasVolume ? "거래량 증가" : null,
+    hasTrend ? "상승 추세 유지" : null,
+    sectorTheme ? `${sectorTheme} 섹터 강세` : "시장 중립 환경",
+  ].filter(Boolean)
+
+  const weaknesses = [
+    ev?.riskFactors?.some((x) => /RSI 과열|과열/.test(x)) ? "단기 과열" : null,
+    ev?.riskFactors?.some((x) => /52주 고점/.test(x)) ? "고점 근접" : null,
+    "추격매수 주의",
+  ]
+    .filter(Boolean)
+    .slice(0, 2)
+
+  const riskScore =
+    (ev?.riskFactors?.length ?? 0) * 2 +
+    (confidence < 70 ? 1 : 0) +
+    (confidence < 60 ? 1 : 0) +
+    (regimeBoost ? 0 : 1)
+  const riskLevel = riskScore >= 5 ? "높음" : riskScore >= 3 ? "보통" : "낮음"
+
+  return {
+    strengths: strengths.slice(0, 3),
+    weaknesses,
+    riskLevel,
+    scoreBreakdown: {
+      trend,
+      volume,
+      ma20,
+      sector,
+      yds,
+      total: confidence,
+    },
+  }
+}
+
+/**
  * @param {{
  *   positions: TradingZonePosition[]
  *   evalMap?: Record<string, import("./tradingZoneStockEvaluation.js").TradingZoneStockEvaluation>
@@ -281,6 +350,7 @@ export function buildMarketStockBridge(input = {}) {
 
     score = Math.max(35, Math.min(99, Math.round(score)))
     const confidence = ev?.dataReady ? ev.confidence : Math.round(score * 0.92)
+    const explain = buildStockExplainModel(position, ev, confidence, regimeBoost)
     const { path, segments } = buildStagePathDisplay(position.stageHistory)
     const stageLadder = buildCompactStageLadder(segments)
     const reasons = buildStockDisplayReasons(position, ev, {
@@ -301,6 +371,10 @@ export function buildMarketStockBridge(input = {}) {
       pathSegments: segments,
       stageLadder,
       reasons,
+      strengths: explain.strengths,
+      weaknesses: explain.weaknesses,
+      riskLevel: explain.riskLevel,
+      scoreBreakdown: explain.scoreBreakdown,
       confidenceBar: formatConfidenceBlockBar(confidence),
       regimeBoost,
     }

@@ -23,6 +23,9 @@ export default function TacticalMarketStockBridge({
     )
   }
 
+  const focusItem =
+    bridge.priorities.find((item) => item.id === selectedId) ?? bridge.priorities[0] ?? null
+
   return (
     <section
       className="tactical-zone-stock-bridge tactical-zone-stock-bridge--list"
@@ -92,6 +95,87 @@ export default function TacticalMarketStockBridge({
           )
         })}
       </ol>
+
+      {focusItem ? (
+        <section className="tactical-zone-stock-bridge__analysis" aria-label="추천 종목 근거 분석 센터">
+          <div className="tactical-zone-stock-bridge__analysis-head">
+            <p className="m-0 tactical-zone-stock-bridge__analysis-title">추천 종목 근거 분석 센터</p>
+            <p className="m-0 tactical-zone-stock-bridge__analysis-symbol font-mono tabular-nums">
+              {focusItem.symbol} {focusItem.confidence}
+            </p>
+          </div>
+
+          <div className="tactical-zone-stock-bridge__score-breakdown">
+            <p className="m-0 tactical-zone-stock-bridge__score-row">
+              <span>추세</span>
+              <strong className="font-mono tabular-nums">+{focusItem.scoreBreakdown?.trend ?? 0}</strong>
+            </p>
+            <p className="m-0 tactical-zone-stock-bridge__score-row">
+              <span>거래량</span>
+              <strong className="font-mono tabular-nums">+{focusItem.scoreBreakdown?.volume ?? 0}</strong>
+            </p>
+            <p className="m-0 tactical-zone-stock-bridge__score-row">
+              <span>20일선</span>
+              <strong className="font-mono tabular-nums">+{focusItem.scoreBreakdown?.ma20 ?? 0}</strong>
+            </p>
+            <p className="m-0 tactical-zone-stock-bridge__score-row">
+              <span>섹터강도</span>
+              <strong className="font-mono tabular-nums">+{focusItem.scoreBreakdown?.sector ?? 0}</strong>
+            </p>
+            <p className="m-0 tactical-zone-stock-bridge__score-row">
+              <span>YDS환경</span>
+              <strong className="font-mono tabular-nums">
+                {focusItem.scoreBreakdown?.yds > 0 ? "+" : ""}
+                {focusItem.scoreBreakdown?.yds ?? 0}
+              </strong>
+            </p>
+            <p className="m-0 tactical-zone-stock-bridge__score-row tactical-zone-stock-bridge__score-row--sum">
+              <span>합계</span>
+              <strong className="font-mono tabular-nums">{focusItem.scoreBreakdown?.total ?? focusItem.confidence}</strong>
+            </p>
+          </div>
+
+          <div className="tactical-zone-stock-bridge__strength-weakness">
+            <div>
+              <p className="m-0 tactical-zone-stock-bridge__analysis-subtitle">강점</p>
+              {(focusItem.strengths ?? []).map((line) => (
+                <p key={`str-${line}`} className="m-0 tactical-zone-stock-bridge__analysis-line">
+                  ✓ {line}
+                </p>
+              ))}
+            </div>
+            <div>
+              <p className="m-0 tactical-zone-stock-bridge__analysis-subtitle">약점</p>
+              {(focusItem.weaknesses ?? []).map((line) => (
+                <p key={`weak-${line}`} className="m-0 tactical-zone-stock-bridge__analysis-line tactical-zone-stock-bridge__analysis-line--weak">
+                  △ {line}
+                </p>
+              ))}
+            </div>
+          </div>
+          <p className="m-0 tactical-zone-stock-bridge__risk">위험도 : {focusItem.riskLevel ?? "보통"}</p>
+        </section>
+      ) : null}
+
+      <section className="tactical-zone-stock-bridge__compare" aria-label="추천 종목 비교 모드">
+        <p className="m-0 tactical-zone-stock-bridge__compare-title">추천 종목 비교 모드</p>
+        <div className="tactical-zone-stock-bridge__compare-table" role="table" aria-label="TOP5 비교표">
+          <p className="m-0 tactical-zone-stock-bridge__compare-head" role="row">
+            <span>종목명</span>
+            <span>점수</span>
+            <span>위험도</span>
+            <span>상태</span>
+          </p>
+          {bridge.priorities.map((item) => (
+            <p key={`cmp-${item.id}`} className="m-0 tactical-zone-stock-bridge__compare-row" role="row">
+              <span>{item.symbol}</span>
+              <span className="font-mono tabular-nums">{item.confidence}</span>
+              <span>{item.riskLevel ?? "보통"}</span>
+              <span>{item.stageLabel ?? tradingStageBadge({ stage: item.stage }).label}</span>
+            </p>
+          ))}
+        </div>
+      </section>
     </section>
   )
 }

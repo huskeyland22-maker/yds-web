@@ -25,12 +25,12 @@ import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalMarketStockBridge from "./TacticalMarketStockBridge.jsx"
 import TacticalRecommendationTrack from "./TacticalRecommendationTrack.jsx"
-import TacticalRecommendationValidationCard from "./TacticalRecommendationValidationCard.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 import StockPickReasonList from "./StockPickReasonList.jsx"
 import { buildStockDisplayReasons } from "../../trading-zone/tradingZoneStockDisplayReasons.js"
 import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStockBridge.js"
+import { buildRecommendationTrackRows, formatRecommendPriceRangeCompact } from "../../trading-zone/tradingZoneRecommendationTrack.js"
 import { STAGE_STATUS_SHORT } from "../../trading-zone/tradingZoneDetailMobile.js"
 
 /**
@@ -123,12 +123,34 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
  *   onSelect: (id: string) => void
  * }} props
  */
-function TodayPickCard({ position, confidence, evaluation = null, reasons = [], selected, onSelect }) {
+function TodayPickCard({
+  position,
+  confidence,
+  evaluation = null,
+  reasons = [],
+  selected,
+  onSelect,
+  marketPolicy = null,
+  recommendRows = [],
+}) {
   const badge = tradingStageBadge(position)
   const displayReasons =
     reasons.length > 0
       ? reasons
       : buildStockDisplayReasons(position, evaluation, { limit: 3 })
+  const [detailOpen, setDetailOpen] = useState(false)
+  const zones = evaluation?.priceZones ?? null
+  const goalRate = (() => {
+    const entry = Number(zones?.entryNum)
+    const target = Number(zones?.targetNum)
+    const current = Number(zones?.current)
+    if (!Number.isFinite(entry) || !Number.isFinite(target) || !Number.isFinite(current) || target <= entry) return null
+    const raw = ((current - entry) / (target - entry)) * 100
+    return Math.max(0, Math.min(100, Math.round(raw)))
+  })()
+  const todayAction = marketPolicy?.actionLines?.primary ?? "종목 탐색 우선"
+  const myRecs = recommendRows.filter((r) => r.symbol === position.symbol)
+  const latestRec = myRecs[0] ?? null
 
   return (
     <section className="tactical-zone-today-pick" aria-label="오늘의 추천">
@@ -154,6 +176,20 @@ function TodayPickCard({ position, confidence, evaluation = null, reasons = [], 
           <span aria-hidden>●</span>
           {badge.label}
         </span>
+        <div className="tactical-zone-today-pick__meta-grid">
+          <p className="m-0 tactical-zone-today-pick__meta-row">
+            <span>현재 구간</span>
+            <strong>{badge.label}</strong>
+          </p>
+          <p className="m-0 tactical-zone-today-pick__meta-row">
+            <span>목표도달률</span>
+            <strong className="font-mono tabular-nums">{goalRate != null ? `${goalRate}%` : "—"}</strong>
+          </p>
+          <p className="m-0 tactical-zone-today-pick__meta-row tactical-zone-today-pick__meta-row--full">
+            <span>오늘 행동</span>
+            <strong>{todayAction}</strong>
+          </p>
+        </div>
         {displayReasons.length ? (
           <div className="tactical-zone-today-pick__reasons-block">
             <p className="m-0 tactical-zone-today-pick__reasons-title">추천 이유</p>
@@ -161,6 +197,61 @@ function TodayPickCard({ position, confidence, evaluation = null, reasons = [], 
           </div>
         ) : evaluation?.dataReady && evaluation.signalLabel ? (
           <span className="tactical-zone-today-pick__hint">{evaluation.signalLabel}</span>
+        ) : null}
+        <span
+          role="button"
+          tabIndex={0}
+          className="tactical-zone-today-pick__detail-toggle"
+          onClick={(e) => {
+            e.stopPropagation()
+            setDetailOpen((v) => !v)
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              e.stopPropagation()
+              setDetailOpen((v) => !v)
+            }
+          }}
+        >
+          {detailOpen ? "상세 닫기 ▲" : "상세 보기 ▼"}
+        </span>
+        {detailOpen ? (
+          <div className="tactical-zone-today-pick__detail-panel">
+            <div className="tactical-zone-today-pick__progress">
+              <p className="m-0 tactical-zone-today-pick__detail-title">가격 위치 바</p>
+              <div className="tactical-zone-today-pick__progress-bar">
+                <span style={{ width: `${goalRate ?? 0}%` }} />
+              </div>
+              <p className="m-0 tactical-zone-today-pick__progress-caption">
+                {formatRecommendPriceRangeCompact(zones?.entryNum, zones?.current, position.market)} / 목표{" "}
+                {formatRecommendPriceRangeCompact(zones?.targetNum, zones?.targetNum, position.market)}
+              </p>
+            </div>
+            <div className="tactical-zone-today-pick__history">
+              <p className="m-0 tactical-zone-today-pick__detail-title">추천 성과 기록</p>
+              <p className="m-0 tactical-zone-today-pick__history-line">
+                {latestRec
+                  ? `${latestRec.recommendedAt} · ${
+                      latestRec.returnPct != null
+                        ? `${latestRec.returnPct > 0 ? "+" : ""}${latestRec.returnPct.toFixed(1)}%`
+                        : "—"
+                    }`
+                  : "기록 없음"}
+              </p>
+              <p className="m-0 tactical-zone-today-pick__detail-title">과거 추천 내역</p>
+              <ul className="m-0 tactical-zone-today-pick__history-list">
+                {myRecs.slice(0, 3).map((r) => (
+                  <li key={`${r.id}-${r.recommendedAt}`}>{`${r.recommendedAt} · ${formatRecommendPriceRangeCompact(
+                    r.recommendedPrice,
+                    r.currentPrice,
+                    r.market,
+                  )}`}</li>
+                ))}
+                {!myRecs.length ? <li>기록 없음</li> : null}
+              </ul>
+            </div>
+          </div>
         ) : null}
       </button>
     </section>
@@ -379,6 +470,10 @@ export default function TacticalTradingZoneSection({
     }
     return out
   }, [evalMap])
+  const recommendRows = useMemo(
+    () => buildRecommendationTrackRows(livePositions, recommendPriorityIds, recommendLiveById),
+    [livePositions, recommendPriorityIds, recommendLiveById],
+  )
 
   const tacticalDegrade = useMemo(() => {
     const reasons = []
@@ -543,6 +638,8 @@ export default function TacticalTradingZoneSection({
           reasons={
             marketStockBridge.priorities.find((p) => p.id === liveBuckets.todayPick?.id)?.reasons ?? []
           }
+          marketPolicy={marketPolicyView}
+          recommendRows={recommendRows}
           selected={selectedId === liveBuckets.todayPick.id}
           onSelect={setSelectedId}
         />
@@ -581,11 +678,6 @@ export default function TacticalTradingZoneSection({
       ) : null}
 
       <TacticalRecommendationTrack
-        positions={livePositions}
-        priorityIds={recommendPriorityIds}
-        liveById={recommendLiveById}
-      />
-      <TacticalRecommendationValidationCard
         positions={livePositions}
         priorityIds={recommendPriorityIds}
         liveById={recommendLiveById}

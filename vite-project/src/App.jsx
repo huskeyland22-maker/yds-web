@@ -30,6 +30,7 @@ import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
+import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
 import HomeV5StrategyValidationPage from "./pages/HomeV5StrategyValidationPage.jsx"
@@ -994,6 +995,7 @@ function App() {
       path === "/cycle" ||
       path === "/macro-risk" ||
       path === "/trading-log" ||
+      path === "/recommendation-history" ||
       path === "/panic-validation" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
@@ -1359,6 +1361,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="트레이딩 로그">
                   <TradingLogPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/recommendation-history"
+              element={
+                <SectionErrorBoundary label="추천 이력">
+                  <RecommendationHistoryPage />
                 </SectionErrorBoundary>
               }
             />

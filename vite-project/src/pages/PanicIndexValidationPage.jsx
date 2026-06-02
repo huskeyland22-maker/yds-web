@@ -112,9 +112,14 @@ export default function PanicIndexValidationPage() {
     <div className="panic-validation-page min-w-0 px-3 py-4 sm:px-4">
       <header className="panic-validation-page__head">
         <div>
+          <p className="panic-validation-page__lab-badge">[ LAB ] 시장 프록시 기반 연구용 검증</p>
           <h1 className="panic-validation-page__title">패닉지수 검증</h1>
           <p className="panic-validation-page__sub">
             YDS 패닉전략 백테스트 · {backtest.periodStart ?? "—"} ~ {backtest.periodEnd ?? "—"}
+          </p>
+          <p className="panic-validation-page__sub">
+            현재 수치는 Fear&amp;Greed + VIX 기반 시장 프록시 시뮬레이션이며, 실제 SPX/SPY 종가 기반
+            백테스트는 추후 구현 예정입니다.
           </p>
         </div>
         <Link to="/cycle" className="panic-validation-page__link">
@@ -137,7 +142,7 @@ export default function PanicIndexValidationPage() {
           </p>
         </div>
         <div className="panic-validation-kpi__card">
-          <p className="panic-validation-kpi__label">S&amp;P500 대비</p>
+          <p className="panic-validation-kpi__label">시장 프록시 대비</p>
           <p
             className={`panic-validation-kpi__value panic-validation-kpi__value--${
               tone(
@@ -164,7 +169,7 @@ export default function PanicIndexValidationPage() {
 
       <section className="panic-validation-vs" aria-labelledby="panic-validation-vs-title">
         <h2 id="panic-validation-vs-title" className="panic-validation-vs__title">
-          패닉지수 전략 VS S&amp;P500
+          패닉지수 전략 VS 시장 프록시
         </h2>
         <p className="panic-validation-vs__sub">
           전략: 거시 구간별 주식·현금 비중 · 벤치마크: 동일 기간 100% 주식(시장 프록시)
@@ -173,7 +178,7 @@ export default function PanicIndexValidationPage() {
         <div className="panic-validation-vs__head-row" aria-hidden>
           <span />
           <span className="panic-validation-vs__col-head">패닉지수 전략</span>
-          <span className="panic-validation-vs__col-head">S&amp;P500</span>
+          <span className="panic-validation-vs__col-head">시장 프록시</span>
         </div>
 
         <div className="panic-validation-vs__metrics">
@@ -201,7 +206,7 @@ export default function PanicIndexValidationPage() {
 
       <section className="panic-validation-panel" aria-labelledby="panic-validation-spy-chart">
         <h2 id="panic-validation-spy-chart" className="panic-validation-panel__h2">
-          S&amp;P500 검증 차트 (신호 마커)
+          시장 프록시 검증 차트 (신호 마커)
         </h2>
         <div className="panic-validation-spy-chart">
           <ResponsiveContainer width="100%" height={220}>
@@ -210,7 +215,7 @@ export default function PanicIndexValidationPage() {
               <XAxis dataKey="date" tick={{ fill: "rgba(148,163,184,0.9)", fontSize: 10 }} />
               <YAxis tick={{ fill: "rgba(148,163,184,0.9)", fontSize: 10 }} width={42} />
               <Tooltip
-                formatter={(value) => [`${Number(value).toFixed(1)}`, "S&P500 지수(기준 100)"]}
+                formatter={(value) => [`${Number(value).toFixed(1)}`, "시장 프록시 지수(기준 100)"]}
                 labelFormatter={(v) => `일자 ${v}`}
               />
               <Line
@@ -292,7 +297,7 @@ export default function PanicIndexValidationPage() {
             <tr>
               <th scope="col">연도</th>
               <th scope="col">패닉지수 전략</th>
-              <th scope="col">S&amp;P500</th>
+              <th scope="col">시장 프록시</th>
               <th scope="col">차이</th>
             </tr>
           </thead>
