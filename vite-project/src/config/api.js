@@ -277,6 +277,7 @@ export async function fetchAiReports(options = {}) {
 
 /** @alias fetchPanicIndexHistory — 디버그 로그 포함 */
 export async function fetchHistory(options = {}) {
+  if (options?.debugLog) console.log("[YDS][loadHistory] fetchHistory alias called")
   return fetchPanicIndexHistory(options)
 }
 
@@ -290,6 +291,14 @@ export async function fetchPanicIndexHistory(options = {}) {
   void probePanicIndexHistoryDirect()
 
   const limit = options.limit ?? 120
+  if (options.debugLog) {
+    console.log("[YDS][loadHistory] request", {
+      limit,
+      from: options.from ?? null,
+      to: options.to ?? null,
+      withCycle: Boolean(options.withCycle),
+    })
+  }
   const extra = { limit: String(limit) }
   if (options.from) extra.from = String(options.from).slice(0, 10)
   if (options.to) extra.to = String(options.to).slice(0, 10)
@@ -304,6 +313,13 @@ export async function fetchPanicIndexHistory(options = {}) {
   }
   const json = await res.json()
   const parsed = parsePanicHistoryPayload(json)
+  if (options.debugLog) {
+    console.log("[YDS][loadHistory] response rows", parsed.rows.length, {
+      cycleRows: parsed.cycleRows.length,
+      firstDate: parsed.rows[0]?.date ?? null,
+      lastDate: parsed.rows[parsed.rows.length - 1]?.date ?? null,
+    })
+  }
   if (!parsed.rows.length) {
     if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: 0, note: "empty_or_invalid" })
     console.warn("[YDS] fetchHistory: API empty or invalid", json)

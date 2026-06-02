@@ -117,6 +117,24 @@ export default function PanicIndexValidationPage() {
     console.log("[권장 CYCLE_HISTORY_MAX]", recommendedMax)
     console.groupEnd()
   }, [ydsDistribution, cycleDiag])
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    ;(async () => {
+      try {
+        const res = await fetch("/api/supabase/health?panic_verify=1", { cache: "no-store" })
+        const json = await res.json()
+        const checks = json?.checks ?? {}
+        console.groupCollapsed("[YDS DB 진단] panic_index_history")
+        console.log("DB 전체 row 수:", checks.totalHistoryCount?.count ?? "—")
+        console.log("최초 created_at:", checks.createdAtRange?.minCreatedAt ?? "—")
+        console.log("최종 created_at:", checks.createdAtRange?.maxCreatedAt ?? "—")
+        console.log("실제 사용 row 수(cycle merge 후):", cycleDiag.slicedCount)
+        console.groupEnd()
+      } catch (e) {
+        console.warn("[YDS DB 진단] supabase health fetch failed", e)
+      }
+    })()
+  }, [cycleDiag.slicedCount])
   const recommendation30d = useMemo(() => {
     const rows = buildRecommendationTrackRows(getTradingZonePositions(), [], {})
     const today = new Date().toISOString().slice(0, 10)

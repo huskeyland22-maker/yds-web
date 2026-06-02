@@ -73,7 +73,7 @@ function mergePanicHistoryRowsByDate(...rowLists) {
  */
 export function loadStoredPanicHistory() {
   let stored = readJsonArray(PANIC_HISTORY_LS_KEY)
-  console.log("loaded history", stored.length, stored)
+  console.log("[YDS][loadHistory][localStorage] loaded history", stored.length, stored)
 
   if (stored.length === 0) {
     const seededHistory = [...PANIC_HISTORY_SEED]
@@ -172,7 +172,7 @@ export function saveHistory(historyRows, opts = { merge: true }) {
   const trimmed = rows.slice(-MAX_ROWS)
   writeJsonArray(PANIC_HISTORY_LS_KEY, trimmed)
   if (trimmed.length) console.log("history save", trimmed[trimmed.length - 1])
-  console.log("history rows", trimmed.length)
+  console.log("[YDS][saveHistory][localStorage] history rows", trimmed.length)
   return trimmed
 }
 

@@ -74,6 +74,7 @@ export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   const tradeDate = resolvePanicTradeDate(body, opts.tradeDate)
   const snap = normalizePanicPayload(body, { tradeDate, source: opts.source })
   const row = panicIndexHistoryRowFromSnapshot(snap)
+  console.log("[YDS][upsertHistory] start", { tradeDate: row?.date ?? tradeDate ?? null })
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(row.date))) {
     return { ok: false, skipped: true, reason: "invalid_date", row }
   }
@@ -82,6 +83,7 @@ export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   }
   const previous = await fetchPanicHistoryRowBefore(row.date)
   await postPanicIndexHistoryRow(row, snap, previous)
+  console.log("[YDS][upsertHistory] ok", { tradeDate: row.date })
   return { ok: true, date: row.date }
 }
 

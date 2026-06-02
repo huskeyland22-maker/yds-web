@@ -68,13 +68,22 @@ export function normalizeCycleHistoryRows(raw) {
 
 export function mergeCycleRows(rowsA, rowsB) {
   const out = new Map()
-  for (const row of filterFreshCycleHistoryRows([...(rowsA || []), ...(rowsB || [])])) {
+  const raw = filterFreshCycleHistoryRows([...(rowsA || []), ...(rowsB || [])])
+  for (const row of raw) {
     const key = rowCalendarKey(row)
     if (!key || isStaleHistoryCalendarDate(key)) continue
     const prevRow = out.get(key)
     out.set(key, prevRow ? { ...prevRow, ...row } : { ...row })
   }
-  return [...out.values()].sort((a, b) => String(a.ts).localeCompare(String(b.ts))).slice(-CYCLE_HISTORY_MAX)
+  const mergedNoSlice = [...out.values()].sort((a, b) => String(a.ts).localeCompare(String(b.ts)))
+  const sliced = mergedNoSlice.slice(-CYCLE_HISTORY_MAX)
+  console.log("[YDS][mergeCycleRows]", {
+    cycleHistoryMax: CYCLE_HISTORY_MAX,
+    rawHistory: raw.length,
+    afterMerge: mergedNoSlice.length,
+    afterSlice: sliced.length,
+  })
+  return sliced
 }
 
 /**

@@ -57,6 +57,24 @@ async function fetchAllHistoryDates() {
   return rows.map((r) => String(r.date ?? "").slice(0, 10)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
 }
 
+async function fetchCreatedAtRange() {
+  try {
+    const [oldestRows, newestRows] = await Promise.all([
+      supabaseRest("panic_index_history?select=created_at&order=created_at.asc&limit=1", { method: "GET" }),
+      supabaseRest("panic_index_history?select=created_at&order=created_at.desc&limit=1", { method: "GET" }),
+    ])
+    return {
+      minCreatedAt: Array.isArray(oldestRows) && oldestRows[0] ? oldestRows[0].created_at ?? null : null,
+      maxCreatedAt: Array.isArray(newestRows) && newestRows[0] ? newestRows[0].created_at ?? null : null,
+    }
+  } catch {
+    return {
+      minCreatedAt: null,
+      maxCreatedAt: null,
+    }
+  }
+}
+
 function findDuplicateDates(dates) {
   const counts = new Map()
   for (const d of dates) {
@@ -125,12 +143,13 @@ export async function verifyPanicHistoryStorage() {
   }
 
   const checkedAt = new Date().toISOString()
-  const [sample, latest, cycleSample, allDates, totalCount] = await Promise.all([
+  const [sample, latest, cycleSample, allDates, totalCount, createdAtRange] = await Promise.all([
     fetchHistorySample(30),
     fetchLatestPanicMetrics(),
     fetchMarketCycleSample(30),
     fetchAllHistoryDates(),
     fetchTableCount("panic_index_history"),
+    fetchCreatedAtRange(),
   ])
 
   const topHistory = sample[0] ?? null
@@ -185,6 +204,12 @@ export async function verifyPanicHistoryStorage() {
       count: totalCount,
       uniqueDates: allDates.length,
       targetNote: "매일 +1 저장 시 uniqueDates ≈ count, 1년 목표 365",
+    },
+    createdAtRange: {
+      ok: Boolean(createdAtRange.minCreatedAt || createdAtRange.maxCreatedAt),
+      minCreatedAt: createdAtRange.minCreatedAt,
+      maxCreatedAt: createdAtRange.maxCreatedAt,
+      required: "SELECT COUNT(*), MIN(created_at), MAX(created_at) FROM panic_index_history",
     },
     dateSequence: dateSeq,
   }
