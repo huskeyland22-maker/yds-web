@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import ReplayViewer from "./ReplayViewer.jsx"
 import { isEventComplete } from "../../trading-zone/ydsHistoricalEventCompletions.js"
 import {
@@ -8,6 +9,8 @@ import {
   YDS_MILESTONE_STEP_LABEL,
 } from "../../trading-zone/ydsHistoricalEventTypes.js"
 import { YDS_VALIDATION_EVENT_CATEGORY_LABEL } from "../../trading-zone/ydsHistoricalValidationEvents.js"
+import { buildEventMilestoneBreakdowns } from "../../trading-zone/ydsScoreBreakdown.js"
+import YdsScoreBreakdownTable from "./YdsScoreBreakdownTable.jsx"
 
 /**
  * @param {{ eventItem: import("../../trading-zone/ydsHistoricalEventTypes.js").EventDetailData | null }} props
@@ -17,6 +20,7 @@ export default function YdsEventDetailPanel({ eventItem }) {
 
   const complete = isEventComplete(eventItem)
   const perf = eventItem.marketPerformance ?? {}
+  const milestoneBreakdowns = useMemo(() => buildEventMilestoneBreakdowns(eventItem), [eventItem])
 
   return (
     <section className="yds-event-detail" aria-label="이벤트 상세">
@@ -129,7 +133,22 @@ export default function YdsEventDetailPanel({ eventItem }) {
       </div>
 
       <div className="yds-event-detail__block">
-        <p className="m-0 yds-event-detail__head">3. 시장 성과 (S&amp;P500)</p>
+        <p className="m-0 yds-event-detail__head">3. YDS Score Breakdown (계산 검증)</p>
+        <p className="m-0 yds-event-detail__hint">
+          기존 `getFinalScore` 엔진 동일 경로 · 지표별 최종 기여도(점) = 정규화점수 × 단기/중기 가중 × 동적 가중
+        </p>
+        {milestoneBreakdowns.map((item) => (
+          <div key={`bd-${item.milestoneKey}`} className="yds-event-detail__breakdown-item">
+            <p className="m-0 panic-validation-panel__h3">
+              {YDS_MILESTONE_STEP_LABEL[item.milestoneKey]} · {item.date ?? "—"}
+            </p>
+            <YdsScoreBreakdownTable breakdown={item} />
+          </div>
+        ))}
+      </div>
+
+      <div className="yds-event-detail__block">
+        <p className="m-0 yds-event-detail__head">4. 시장 성과 (S&amp;P500)</p>
         <dl className="yds-event-detail__perf">
           <div>
             <dt>최대 낙폭 (MDD)</dt>

@@ -6,15 +6,29 @@ import {
   PANIC_VALIDATION_COMPARE_IDS,
 } from "../../trading-zone/ydsPanicEventValidation.js"
 import { YDS_VALIDATION_EVENT_DATASET } from "../../trading-zone/ydsHistoricalValidationEvents.js"
+import { buildMilestoneBreakdown } from "../../trading-zone/ydsScoreBreakdown.js"
+import { YdsClimaxAnalysisCard } from "./YdsScoreBreakdownTable.jsx"
 
 /**
  * @param {{ events?: import("../../trading-zone/ydsHistoricalEventTypes.js").EventDetailData[] }} props
  */
 export default function YdsPanicEventValidationSection({ events = YDS_VALIDATION_EVENT_DATASET }) {
-  const report = useMemo(() => {
-    const targets = events.filter((e) => PANIC_VALIDATION_COMPARE_IDS.includes(e.id))
-    return buildPanicEventValidationReport(targets)
-  }, [events])
+  const targets = useMemo(
+    () => events.filter((e) => PANIC_VALIDATION_COMPARE_IDS.includes(e.id)),
+    [events],
+  )
+
+  const report = useMemo(() => buildPanicEventValidationReport(targets), [targets])
+
+  const climaxAnalyses = useMemo(() => {
+    const covid = targets.find((e) => e.id === "panic-2020-covid")
+    const svb = targets.find((e) => e.id === "panic-2023-svb")
+    return {
+      covidClimax: covid ? buildMilestoneBreakdown(covid, "climax") : null,
+      covidFear: covid ? buildMilestoneBreakdown(covid, "fearExpansion") : null,
+      svbClimax: svb ? buildMilestoneBreakdown(svb, "climax") : null,
+    }
+  }, [targets])
 
   const { summary, rows, ranked, stageChecks } = report
 
@@ -137,7 +151,26 @@ export default function YdsPanicEventValidationSection({ events = YDS_VALIDATION
       </div>
 
       <div className="yds-panic-validation__block">
-        <p className="m-0 panic-validation-panel__h3">3. 단계 판정 검증</p>
+        <p className="m-0 panic-validation-panel__h3">3. YDS 계산 과정 검증 (신뢰성)</p>
+        <p className="m-0 panic-validation-panel__note">
+          극단 공포(VIX 80+, CNN 10대)인데 YDS가 80 미만일 때, 동적 가중·중기 지표·VIX 캡이 원인인지 확인합니다.
+        </p>
+        {climaxAnalyses.covidFear && (
+          <YdsClimaxAnalysisCard
+            title="코로나 · 공포확대 (VIX 82.7 / CNN 12 참고 시점)"
+            breakdown={climaxAnalyses.covidFear}
+          />
+        )}
+        {climaxAnalyses.covidClimax && (
+          <YdsClimaxAnalysisCard title="코로나 · 극점 — 왜 YDS 66인가?" breakdown={climaxAnalyses.covidClimax} />
+        )}
+        {climaxAnalyses.svbClimax && (
+          <YdsClimaxAnalysisCard title="SVB · 극점 — 왜 YDS 60인가?" breakdown={climaxAnalyses.svbClimax} />
+        )}
+      </div>
+
+      <div className="yds-panic-validation__block">
+        <p className="m-0 panic-validation-panel__h3">4. 단계 판정 검증</p>
         <p className="m-0 panic-validation-panel__note">
           검증 목표: 극점이 🟠 분할매수(60~79) 또는 🔴 패닉매수(80+) 구간인지 확인
         </p>
