@@ -77,6 +77,42 @@ export function mergeCycleRows(rowsA, rowsB) {
   return [...out.values()].sort((a, b) => String(a.ts).localeCompare(String(b.ts))).slice(-CYCLE_HISTORY_MAX)
 }
 
+/**
+ * mergeCycleRows 진단용 단계별 카운트/기간 정보
+ * @param {object[] | undefined} rowsA
+ * @param {object[] | undefined} rowsB
+ */
+export function diagnoseCycleMerge(rowsA, rowsB) {
+  const raw = filterFreshCycleHistoryRows([...(rowsA || []), ...(rowsB || [])])
+  const out = new Map()
+  for (const row of raw) {
+    const key = rowCalendarKey(row)
+    if (!key || isStaleHistoryCalendarDate(key)) continue
+    const prevRow = out.get(key)
+    out.set(key, prevRow ? { ...prevRow, ...row } : { ...row })
+  }
+  const mergedNoSlice = [...out.values()].sort((a, b) => String(a.ts).localeCompare(String(b.ts)))
+  const afterSlice = mergedNoSlice.slice(-CYCLE_HISTORY_MAX)
+  const firstDate = mergedNoSlice[0]?.date ?? mergedNoSlice[0]?.ts?.slice(0, 10) ?? null
+  const lastDate =
+    mergedNoSlice[mergedNoSlice.length - 1]?.date ??
+    mergedNoSlice[mergedNoSlice.length - 1]?.ts?.slice(0, 10) ??
+    null
+  return {
+    cycleHistoryMax: CYCLE_HISTORY_MAX,
+    rawCount: raw.length,
+    mergedCount: mergedNoSlice.length,
+    slicedCount: afterSlice.length,
+    firstDate,
+    lastDate,
+    expectedByMax: {
+      365: Math.min(mergedNoSlice.length, 365),
+      730: Math.min(mergedNoSlice.length, 730),
+      2000: Math.min(mergedNoSlice.length, 2000),
+    },
+  }
+}
+
 /** panicData 스냅샷으로 당일 행 1개 생성 */
 export function buildCycleRowFromPanic(panicData) {
   if (!panicData || typeof panicData !== "object") return null

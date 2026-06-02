@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
-import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
+import { diagnoseCycleMerge, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import {
   buildPanicBuyForwardReturns,
@@ -76,6 +76,7 @@ export default function PanicIndexValidationPage() {
     () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
     [storeRows],
   )
+  const cycleDiag = useMemo(() => diagnoseCycleMerge(storeRows ?? [], []), [storeRows])
 
   const backtest = useMemo(() => runPanicIndexAllocationBacktest(history), [history])
   const panicBuyEvents = useMemo(() => buildPanicBuyForwardReturns(history, 8), [history])
@@ -93,8 +94,29 @@ export default function PanicIndexValidationPage() {
     console.log("최근1년 표본:", `${samples.recent1yRows}건`)
     console.log("최근3년 표본:", `${samples.recent3yRows}건`)
     console.log("전체 표본:", `${samples.allRows}건`)
+    console.log("[Cycle Merge 진단] CYCLE_HISTORY_MAX:", cycleDiag.cycleHistoryMax)
+    console.log("[Cycle Merge 진단] raw history =", cycleDiag.rawCount)
+    console.log("[Cycle Merge 진단] after merge =", cycleDiag.mergedCount)
+    console.log("[Cycle Merge 진단] after slice =", cycleDiag.slicedCount)
+    console.log("[Cycle Merge 진단] slice 적용 전/후 =", {
+      before: cycleDiag.mergedCount,
+      after: cycleDiag.slicedCount,
+    })
+    console.log("[검증센터 데이터 소스]", {
+      dailyHistory: "resolveCycleHistoryRows(...) 결과(history)",
+      cycleHistory: "storeRows -> mergeCycleRows -> resolveCycleHistoryRows",
+      stageHistory: "별도 배열 미사용(점수→단계 실시간 계산)",
+    })
+    console.log("[예상 건수 시뮬레이션]", {
+      max365: cycleDiag.expectedByMax[365],
+      max730: cycleDiag.expectedByMax[730],
+      max2000: cycleDiag.expectedByMax[2000],
+    })
+    const recommendedMax =
+      cycleDiag.mergedCount > 730 ? 2000 : cycleDiag.mergedCount > 365 ? 730 : 365
+    console.log("[권장 CYCLE_HISTORY_MAX]", recommendedMax)
     console.groupEnd()
-  }, [ydsDistribution])
+  }, [ydsDistribution, cycleDiag])
   const recommendation30d = useMemo(() => {
     const rows = buildRecommendationTrackRows(getTradingZonePositions(), [], {})
     const today = new Date().toISOString().slice(0, 10)
@@ -403,6 +425,9 @@ export default function PanicIndexValidationPage() {
         <h2 id="panic-validation-yds-distribution" className="panic-validation-panel__h2">
           YDS 점수 분포 검증 센터
         </h2>
+        <p className="m-0 panic-validation-panel__note">
+          원본 데이터: {cycleDiag.firstDate ?? "—"} ~ {cycleDiag.lastDate ?? "—"} · 총 {cycleDiag.mergedCount}건
+        </p>
         <div className="panic-validation-yds-tabs" role="tablist" aria-label="YDS 분석 기간">
           <button
             type="button"
