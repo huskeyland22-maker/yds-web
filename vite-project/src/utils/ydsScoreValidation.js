@@ -40,11 +40,12 @@ function calcStdDev(values, avg) {
  * @param {object[]} rows
  */
 function analyzeWindow(rows = []) {
+  const validDateRows = (rows ?? []).filter((row) => /^\d{4}-\d{2}-\d{2}$/.test(toDateKey(row)))
   const scores = []
   const stageCounts = Object.fromEntries(STAGE_META.map((m) => [m.id, 0]))
   const scoreBinCounts = Object.fromEntries(SCORE_BINS.map((b) => [b.id, 0]))
 
-  for (const row of rows ?? []) {
+  for (const row of validDateRows) {
     const panic = panicDataFromCycleRow(row)
     if (!panic) continue
     const score = getFinalScore(panic)
@@ -106,6 +107,7 @@ function analyzeWindow(rows = []) {
           : "현재 체계 적합도 : D · 특정 구간 집중이 커 점수 경계 재설계 검토가 필요합니다."
 
   return {
+    rowCount: validDateRows.length,
     total,
     avgScore,
     maxScore,
@@ -137,6 +139,16 @@ export function analyzeYdsScoreDistributionWindows(historyRows = []) {
   const latestKey = toDateKey(rows[rows.length - 1] ?? null)
   if (!latestKey) {
     return {
+      source: {
+        totalRows: 0,
+        firstDate: null,
+        lastDate: null,
+      },
+      sampleCounts: {
+        recent1yRows: 0,
+        recent3yRows: 0,
+        allRows: 0,
+      },
       recent1y: analyzeWindow([]),
       recent3y: analyzeWindow([]),
       all: analyzeWindow([]),
@@ -148,6 +160,16 @@ export function analyzeYdsScoreDistributionWindows(historyRows = []) {
   const recent1yRows = rows.filter((row) => new Date(`${toDateKey(row)}T12:00:00`).getTime() >= year1Cut)
   const recent3yRows = rows.filter((row) => new Date(`${toDateKey(row)}T12:00:00`).getTime() >= year3Cut)
   return {
+    source: {
+      totalRows: rows.length,
+      firstDate: toDateKey(rows[0]),
+      lastDate: latestKey,
+    },
+    sampleCounts: {
+      recent1yRows: recent1yRows.length,
+      recent3yRows: recent3yRows.length,
+      allRows: rows.length,
+    },
     recent1y: analyzeWindow(recent1yRows),
     recent3y: analyzeWindow(recent3yRows),
     all: analyzeWindow(rows),

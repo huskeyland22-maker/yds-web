@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
@@ -82,6 +82,19 @@ export default function PanicIndexValidationPage() {
   const benchmarkSeries = useMemo(() => buildValidationBenchmarkSeries(history), [history])
   const ydsDistribution = useMemo(() => analyzeYdsScoreDistributionWindows(history), [history])
   const ydsView = ydsDistribution[ydsTab] ?? ydsDistribution.recent1y
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const src = ydsDistribution.source
+    const samples = ydsDistribution.sampleCounts
+    console.groupCollapsed("[YDS Distribution] source diagnostics")
+    console.log("원본 데이터 건수:", src.totalRows)
+    console.log("최초 날짜:", src.firstDate ?? "—")
+    console.log("마지막 날짜:", src.lastDate ?? "—")
+    console.log("최근1년 표본:", `${samples.recent1yRows}건`)
+    console.log("최근3년 표본:", `${samples.recent3yRows}건`)
+    console.log("전체 표본:", `${samples.allRows}건`)
+    console.groupEnd()
+  }, [ydsDistribution])
   const recommendation30d = useMemo(() => {
     const rows = buildRecommendationTrackRows(getTradingZonePositions(), [], {})
     const today = new Date().toISOString().slice(0, 10)
@@ -413,6 +426,9 @@ export default function PanicIndexValidationPage() {
             전체
           </button>
         </div>
+        <p className="m-0 panic-validation-panel__note">
+          사용 표본 수 · 최근1년 n={ydsDistribution.sampleCounts.recent1yRows} / 최근3년 n={ydsDistribution.sampleCounts.recent3yRows} / 전체 n={ydsDistribution.sampleCounts.allRows}
+        </p>
         <article className="panic-validation-yds-window">
           <div className="panic-validation-kpi">
             <div className="panic-validation-kpi__card">
