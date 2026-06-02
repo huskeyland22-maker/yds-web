@@ -179,6 +179,7 @@ export function formatMetric(value, digits = 1) {
 }
 
 function toFiniteOrNull(value) {
+  if (value == null || value === "") return null
   const n = Number(value)
   return Number.isFinite(n) ? n : null
 }

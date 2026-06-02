@@ -13228,6 +13228,121 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(186, 230, 253, 0.98);
 }
 
+.yds-panic-validation__summary {
+  margin-top: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  background: rgba(6, 78, 59, 0.18);
+}
+
+.yds-panic-validation__summary-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: rgba(167, 243, 208, 0.98);
+}
+
+.yds-panic-validation__summary-sub {
+  margin-top: 0.12rem;
+  font-size: 0.68rem;
+  color: rgba(203, 213, 225, 0.92);
+}
+
+.yds-panic-validation__summary-list {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-panic-validation__summary-item {
+  display: grid;
+  grid-template-columns: 1.4fr auto auto auto;
+  gap: 0.35rem 0.5rem;
+  align-items: center;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.68rem;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.yds-panic-validation__hit-rate {
+  margin-top: 0.45rem;
+  font-size: 0.72rem;
+  color: rgba(186, 230, 253, 0.98);
+}
+
+.yds-panic-validation__hit-detail {
+  font-size: 0.64rem;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.yds-panic-validation__pass {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: rgba(167, 243, 208, 0.98);
+}
+
+.yds-panic-validation__fail {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: rgba(252, 165, 165, 0.98);
+}
+
+.yds-panic-validation__pass-note {
+  margin-top: 0.25rem;
+  font-size: 0.64rem;
+  color: rgba(167, 243, 208, 0.95);
+}
+
+.yds-panic-validation__block {
+  margin-top: 0.65rem;
+}
+
+.yds-panic-validation__table {
+  margin-top: 0.35rem;
+}
+
+.yds-panic-validation__row-muted td {
+  color: rgba(148, 163, 184, 0.85);
+  font-size: 0.66rem;
+}
+
+.yds-panic-validation__stage-checks {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-panic-validation__stage-checks li {
+  display: grid;
+  grid-template-columns: 1.2fr auto 1fr;
+  gap: 0.35rem 0.5rem;
+  align-items: center;
+  padding: 0.28rem 0.4rem;
+  margin-top: 0.2rem;
+  border-radius: 0.35rem;
+  font-size: 0.68rem;
+}
+
+.yds-panic-validation__stage-check--pass {
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  background: rgba(6, 78, 59, 0.22);
+}
+
+.yds-panic-validation__stage-check--fail {
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.2);
+}
+
+.yds-panic-validation__stage-check-name {
+  font-weight: 700;
+}
+
+.yds-panic-validation__stage-check-note {
+  color: rgba(148, 163, 184, 0.95);
+  font-size: 0.64rem;
+}
+
 .panic-validation-event-complete {
   display: inline-block;
   margin-left: 0.35rem;
