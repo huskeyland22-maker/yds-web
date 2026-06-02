@@ -609,7 +609,7 @@ export default function PanicIndexValidationPage() {
           YDS 역사 검증 이벤트 데이터셋 (기초 설계)
         </h2>
         <p className="panic-validation-panel__note">
-          카테고리별 대표 구간 {YDS_VALIDATION_EVENT_DATASET.length}건 · 각 이벤트는 60~90일 이상 중기 구간 중심
+          카테고리별 대표 구간 {YDS_VALIDATION_EVENT_DATASET.length}건 · 실제 역사적 사건 기반 · 이벤트별 대표 날짜 5개 제공
         </p>
         {["panic", "dca", "interest", "overheated"].map((category) => {
           const rows = YDS_VALIDATION_EVENT_DATASET.filter((e) => e.category === category)
@@ -624,7 +624,7 @@ export default function PanicIndexValidationPage() {
                     <th scope="col">이벤트명</th>
                     <th scope="col">시작일</th>
                     <th scope="col">종료일</th>
-                    <th scope="col">기간</th>
+                    <th scope="col">대표 날짜 5개</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -633,7 +633,13 @@ export default function PanicIndexValidationPage() {
                       <td>{row.name}</td>
                       <td className="font-mono tabular-nums">{row.startDate}</td>
                       <td className="font-mono tabular-nums">{row.endDate}</td>
-                      <td className="font-mono tabular-nums">{row.durationDays != null ? `${row.durationDays}일` : "—"}</td>
+                      <td className="font-mono tabular-nums">
+                        시작 {row.keyDates.start} · 상승 {row.keyDates.rally}
+                        <br />
+                        공포확대 {row.keyDates.fearExpansion} · 극점 {row.keyDates.extreme}
+                        <br />
+                        회복 {row.keyDates.recovery} ({row.durationDays != null ? `${row.durationDays}일` : "—"})
+                      </td>
                     </tr>
                   ))}
                 </tbody>
