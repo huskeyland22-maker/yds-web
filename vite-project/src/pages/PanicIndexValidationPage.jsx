@@ -13,6 +13,10 @@ import { getTradingZonePositions } from "../trading-zone/tacticalTradingZoneData
 import { buildRecommendationTrackRows } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { analyzeYdsScoreDistributionWindows } from "../utils/ydsScoreValidation.js"
 import {
+  YDS_VALIDATION_EVENT_CATEGORY_LABEL,
+  YDS_VALIDATION_EVENT_DATASET,
+} from "../trading-zone/ydsHistoricalValidationEvents.js"
+import {
   CartesianGrid,
   Dot,
   Line,
@@ -598,6 +602,45 @@ export default function PanicIndexValidationPage() {
           </tbody>
         </table>
         <p className="panic-validation-panel__note">시장 프록시 기준 누적 수익률(주간 스텝 합성)</p>
+      </section>
+
+      <section className="panic-validation-panel" aria-labelledby="panic-validation-event-dataset">
+        <h2 id="panic-validation-event-dataset" className="panic-validation-panel__h2">
+          YDS 역사 검증 이벤트 데이터셋 (기초 설계)
+        </h2>
+        <p className="panic-validation-panel__note">
+          카테고리별 대표 구간 {YDS_VALIDATION_EVENT_DATASET.length}건 · 각 이벤트는 60~90일 이상 중기 구간 중심
+        </p>
+        {["panic", "dca", "interest", "overheated"].map((category) => {
+          const rows = YDS_VALIDATION_EVENT_DATASET.filter((e) => e.category === category)
+          return (
+            <div key={category} className="mt-2">
+              <p className="m-0 panic-validation-panel__h3">
+                {YDS_VALIDATION_EVENT_CATEGORY_LABEL[category] ?? category} ({rows.length}건)
+              </p>
+              <table className="panic-validation-year-table panic-validation-year-table--vs">
+                <thead>
+                  <tr>
+                    <th scope="col">이벤트명</th>
+                    <th scope="col">시작일</th>
+                    <th scope="col">종료일</th>
+                    <th scope="col">기간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.id}>
+                      <td>{row.name}</td>
+                      <td className="font-mono tabular-nums">{row.startDate}</td>
+                      <td className="font-mono tabular-nums">{row.endDate}</td>
+                      <td className="font-mono tabular-nums">{row.durationDays != null ? `${row.durationDays}일` : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        })}
       </section>
     </div>
   )
