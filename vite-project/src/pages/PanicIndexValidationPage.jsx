@@ -16,6 +16,7 @@ import {
   YDS_VALIDATION_EVENT_CATEGORY_LABEL,
   YDS_VALIDATION_EVENT_DATASET,
 } from "../trading-zone/ydsHistoricalValidationEvents.js"
+import YdsEventDetailPanel from "../components/validation/YdsEventDetailPanel.jsx"
 import {
   CartesianGrid,
   Dot,
@@ -75,6 +76,7 @@ function daysBetween(isoA, isoB) {
 
 export default function PanicIndexValidationPage() {
   const [ydsTab, setYdsTab] = useState("recent1y")
+  const [selectedEventId, setSelectedEventId] = useState(() => YDS_VALIDATION_EVENT_DATASET[0]?.id ?? null)
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
     () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
@@ -625,6 +627,7 @@ export default function PanicIndexValidationPage() {
                     <th scope="col">시작일</th>
                     <th scope="col">종료일</th>
                     <th scope="col">대표 날짜 5개</th>
+                    <th scope="col">상세</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -634,11 +637,20 @@ export default function PanicIndexValidationPage() {
                       <td className="font-mono tabular-nums">{row.startDate}</td>
                       <td className="font-mono tabular-nums">{row.endDate}</td>
                       <td className="font-mono tabular-nums">
-                        시작 {row.keyDates.start} · 상승 {row.keyDates.rally}
+                        시작 {row.milestones.start.date} · 상승 {row.milestones.rise.date}
                         <br />
-                        공포확대 {row.keyDates.fearExpansion} · 극점 {row.keyDates.extreme}
+                        공포확대 {row.milestones.fearExpansion.date} · 극점 {row.milestones.climax.date}
                         <br />
-                        회복 {row.keyDates.recovery} ({row.durationDays != null ? `${row.durationDays}일` : "—"})
+                        회복 {row.milestones.recovery.date} ({row.durationDays != null ? `${row.durationDays}일` : "—"})
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className={selectedEventId === row.id ? "panic-validation-event-select is-active" : "panic-validation-event-select"}
+                          onClick={() => setSelectedEventId(row.id)}
+                        >
+                          보기
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -647,6 +659,9 @@ export default function PanicIndexValidationPage() {
             </div>
           )
         })}
+        <YdsEventDetailPanel
+          eventItem={YDS_VALIDATION_EVENT_DATASET.find((item) => item.id === selectedEventId) ?? null}
+        />
       </section>
     </div>
   )

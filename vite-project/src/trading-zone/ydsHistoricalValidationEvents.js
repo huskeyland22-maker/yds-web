@@ -157,23 +157,36 @@ function calcDurationDays(startDate, endDate) {
   return Math.round((e - s) / 86_400_000) + 1
 }
 
+function buildHistoryData(date) {
+  return {
+    date,
+    yds: null,
+    vix: null,
+    cnn: null,
+    bofa: null,
+    hy: null,
+    putCall: null,
+    sp500: null,
+  }
+}
+
+export const YDS_MILESTONE_ORDER = ["start", "rise", "fearExpansion", "climax", "recovery"]
+
 export const YDS_VALIDATION_EVENT_DATASET = RAW_EVENTS.map((event) => ({
   ...event,
   phase: event.category,
   event: event.name,
   milestones: {
-    start: event.keyDates.start,
-    rise: event.keyDates.rally,
-    fearExpansion: event.keyDates.fearExpansion,
-    climax: event.keyDates.extreme,
-    recovery: event.keyDates.recovery,
+    start: { date: event.keyDates.start, historyData: buildHistoryData(event.keyDates.start) },
+    rise: { date: event.keyDates.rally, historyData: buildHistoryData(event.keyDates.rally) },
+    fearExpansion: { date: event.keyDates.fearExpansion, historyData: buildHistoryData(event.keyDates.fearExpansion) },
+    climax: { date: event.keyDates.extreme, historyData: buildHistoryData(event.keyDates.extreme) },
+    recovery: { date: event.keyDates.recovery, historyData: buildHistoryData(event.keyDates.recovery) },
   },
-  milestoneIndicators: {
-    start: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
-    rise: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
-    fearExpansion: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
-    climax: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
-    recovery: { yds: null, vix: null, cnnFearGreed: null, bofaBullBear: null, highYieldSpread: null, putCallRatio: null, sp500: null },
+  marketPerformance: {
+    eventPeriodSp500Pct: null,
+    after6mSp500Pct: null,
+    after12mSp500Pct: null,
   },
   durationDays: calcDurationDays(event.startDate, event.endDate),
 }))
