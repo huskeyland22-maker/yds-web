@@ -13080,6 +13080,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.92);
 }
 
+.panic-validation-panel__note--warn {
+  color: rgba(251, 191, 36, 0.96);
+}
+
 .panic-validation-yds-distribution {
   margin-top: 0.5rem;
   display: grid;
@@ -13103,6 +13107,25 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-top: 0.55rem;
   padding-top: 0.45rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panic-validation-yds-distribution-tabs {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.panic-validation-yds-window {
+  padding: 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.32);
+}
+
+.panic-validation-yds-window__title {
+  margin-bottom: 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: rgba(147, 197, 253, 0.96);
 }
 
 .panic-validation-panel__warn {

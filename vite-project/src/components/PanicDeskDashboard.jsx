@@ -77,7 +77,7 @@ export default function PanicDeskDashboard({
       min: ydsDistribution.minScore ?? "—",
     })
     console.table(stageObj)
-    console.log("구간 재설정 제안:", ydsDistribution.suggestions)
+    console.log("불균형 경고:", ydsDistribution.imbalanceWarnings)
     console.groupEnd()
   }, [ydsDistribution])
 
