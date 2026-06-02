@@ -1,5 +1,9 @@
+import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { buildRecommendationTrackRows } from "../../trading-zone/tradingZoneRecommendationTrack.js"
+import {
+  buildRecommendationTrackRows,
+  summarizeRecommendationPerformance,
+} from "../../trading-zone/tradingZoneRecommendationTrack.js"
 
 /**
  * @param {{
@@ -13,18 +17,16 @@ export default function TacticalRecommendationValidationCard({
   priorityIds = [],
   liveById = {},
 }) {
-  const rows = buildRecommendationTrackRows(positions, priorityIds, liveById)
-  if (!rows.length) return null
-
-  const withRet = rows.filter((r) => Number.isFinite(r.returnPct))
-  const winRate = withRet.length
-    ? (withRet.filter((r) => Number(r.returnPct) > 0).length / withRet.length) * 100
-    : null
-  const avgReturn = withRet.length
-    ? withRet.reduce((sum, r) => sum + Number(r.returnPct), 0) / withRet.length
-    : null
-  const sorted = [...withRet].sort((a, b) => Number(b.returnPct) - Number(a.returnPct))
-  const best = sorted[0] ?? null
+  const [windowDays, setWindowDays] = useState(30)
+  const summary = useMemo(() => {
+    const minDate = new Date(Date.now() - windowDays * 86_400_000).toISOString().slice(0, 10)
+    const filtered = (positions ?? []).map((p) => ({
+      ...p,
+      stageHistory: (p.stageHistory ?? []).filter((h) => String(h.at ?? "").slice(0, 10) >= minDate),
+    }))
+    const rows = buildRecommendationTrackRows(filtered, priorityIds, liveById)
+    return summarizeRecommendationPerformance(rows)
+  }, [positions, priorityIds, liveById, windowDays])
 
   const fmtPct = (v) => {
     if (v == null || !Number.isFinite(v)) return "—"
@@ -35,6 +37,14 @@ export default function TacticalRecommendationValidationCard({
     <section className="tactical-zone-validation-card" aria-label="추천엔진 검증 요약">
       <div className="tactical-zone-validation-card__head">
         <p className="m-0 tactical-zone-validation-card__title">추천엔진 검증 요약</p>
+        <div className="tactical-zone-validation-card__toggle">
+          <button type="button" className={windowDays === 30 ? "is-active" : ""} onClick={() => setWindowDays(30)}>
+            최근 30일
+          </button>
+          <button type="button" className={windowDays === 90 ? "is-active" : ""} onClick={() => setWindowDays(90)}>
+            최근 90일
+          </button>
+        </div>
         <Link to="/panic-validation" className="tactical-zone-validation-card__link">
           전체 검증 보기
         </Link>
@@ -42,16 +52,36 @@ export default function TacticalRecommendationValidationCard({
       <div className="tactical-zone-validation-card__grid">
         <p className="m-0 tactical-zone-validation-card__item">
           <span>승률</span>
-          <strong className="font-mono tabular-nums">{winRate != null ? `${winRate.toFixed(1)}%` : "—"}</strong>
+          <strong className="font-mono tabular-nums">
+            {summary.successRate != null ? `${summary.successRate.toFixed(1)}%` : "—"}
+          </strong>
         </p>
         <p className="m-0 tactical-zone-validation-card__item">
           <span>평균 수익률</span>
-          <strong className="font-mono tabular-nums">{fmtPct(avgReturn)}</strong>
+          <strong className="font-mono tabular-nums">{fmtPct(summary.avgReturn)}</strong>
+        </p>
+        <p className="m-0 tactical-zone-validation-card__item">
+          <span>성공률</span>
+          <strong className="font-mono tabular-nums">
+            {summary.successRate != null ? `${summary.successRate.toFixed(1)}%` : "—"}
+          </strong>
+        </p>
+        <p className="m-0 tactical-zone-validation-card__item">
+          <span>진행중 비율</span>
+          <strong className="font-mono tabular-nums">
+            {summary.ongoingRate != null ? `${summary.ongoingRate.toFixed(1)}%` : "—"}
+          </strong>
+        </p>
+        <p className="m-0 tactical-zone-validation-card__item">
+          <span>실패율</span>
+          <strong className="font-mono tabular-nums">
+            {summary.failRate != null ? `${summary.failRate.toFixed(1)}%` : "—"}
+          </strong>
         </p>
         <p className="m-0 tactical-zone-validation-card__item tactical-zone-validation-card__item--full">
-          <span>최고 수익 종목</span>
+          <span>표본</span>
           <strong className="font-mono tabular-nums">
-            {best ? `${best.symbol} ${fmtPct(best.returnPct)}` : "—"}
+            {windowDays}일 기준 · {summary.total}건
           </strong>
         </p>
       </div>

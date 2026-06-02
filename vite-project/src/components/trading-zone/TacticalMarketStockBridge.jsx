@@ -1,6 +1,16 @@
 import { TRADING_STAGE_META, tradingStageBadge } from "../../trading-zone/tacticalTradingZoneData.js"
 import StockPickReasonList from "./StockPickReasonList.jsx"
 
+function resolvePositionPhase(score) {
+  const s = Number(score)
+  if (!Number.isFinite(s)) return { phase: "주의관망", action: "관망 대기" }
+  if (s >= 90) return { phase: "집중보유", action: "추가매수 금지" }
+  if (s >= 80) return { phase: "추가매수", action: "눌림목 분할매수 가능" }
+  if (s >= 70) return { phase: "1차 진입", action: "분할매수 가능" }
+  if (s >= 60) return { phase: "관심", action: "관망 대기" }
+  return { phase: "주의관망", action: "관망 대기" }
+}
+
 /**
  * @param {{
  *   bridge: import("../../trading-zone/tradingZoneMarketStockBridge.js").MarketStockBridgeModel
@@ -14,6 +24,7 @@ export default function TacticalMarketStockBridge({
   selectedId = null,
   onSelect,
   loading = false,
+  trustById = {},
 }) {
   if (!bridge?.ready) {
     return (
@@ -50,6 +61,9 @@ export default function TacticalMarketStockBridge({
           const badge = tradingStageBadge({ stage: item.stage })
           const stageMeta = TRADING_STAGE_META[item.stage]
           const reasons = item.reasons ?? []
+
+          const trust = trustById[item.id] ?? null
+          const phaseView = resolvePositionPhase(item.confidence)
 
           return (
             <li key={item.id} className="tactical-zone-stock-bridge__list-item">
@@ -90,6 +104,17 @@ export default function TacticalMarketStockBridge({
                     className="tactical-zone-stock-bridge__row-reasons"
                   />
                 ) : null}
+                <span className="tactical-zone-stock-bridge__trust-inline">
+                  신뢰도 {trust?.grade ?? "C"} · 승률{" "}
+                  {trust?.winRate != null ? `${trust.winRate.toFixed(0)}%` : "—"} · 평균{" "}
+                  {trust?.avgReturn != null ? `${trust.avgReturn > 0 ? "+" : ""}${trust.avgReturn.toFixed(1)}%` : "—"}
+                </span>
+                <span className="tactical-zone-stock-bridge__trust-inline">
+                  유사 추천 성공률 {trust?.successRate != null ? `${trust.successRate.toFixed(0)}%` : "—"}
+                </span>
+                <span className="tactical-zone-stock-bridge__trust-inline">
+                  현재 단계 {phaseView.phase} · 행동 {phaseView.action}
+                </span>
               </button>
             </li>
           )
@@ -104,6 +129,16 @@ export default function TacticalMarketStockBridge({
               {focusItem.symbol} {focusItem.confidence}
             </p>
           </div>
+          <p className="m-0 tactical-zone-stock-bridge__trust-focus">
+            신뢰도 {trustById[focusItem.id]?.grade ?? "C"} · 최근 검증 승률{" "}
+            {trustById[focusItem.id]?.winRate != null
+              ? `${trustById[focusItem.id].winRate.toFixed(0)}%`
+              : "—"}{" "}
+            · 평균수익{" "}
+            {trustById[focusItem.id]?.avgReturn != null
+              ? `${trustById[focusItem.id].avgReturn > 0 ? "+" : ""}${trustById[focusItem.id].avgReturn.toFixed(1)}%`
+              : "—"}
+          </p>
 
           <div className="tactical-zone-stock-bridge__score-breakdown">
             <p className="m-0 tactical-zone-stock-bridge__score-row">
@@ -163,6 +198,7 @@ export default function TacticalMarketStockBridge({
           <p className="m-0 tactical-zone-stock-bridge__compare-head" role="row">
             <span>종목명</span>
             <span>점수</span>
+            <span>현재 단계</span>
             <span>위험도</span>
             <span>상태</span>
           </p>
@@ -170,6 +206,7 @@ export default function TacticalMarketStockBridge({
             <p key={`cmp-${item.id}`} className="m-0 tactical-zone-stock-bridge__compare-row" role="row">
               <span>{item.symbol}</span>
               <span className="font-mono tabular-nums">{item.confidence}</span>
+              <span>{resolvePositionPhase(item.confidence).phase}</span>
               <span>{item.riskLevel ?? "보통"}</span>
               <span>{item.stageLabel ?? tradingStageBadge({ stage: item.stage }).label}</span>
             </p>

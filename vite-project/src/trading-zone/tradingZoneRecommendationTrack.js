@@ -55,6 +55,64 @@ export function calcRecommendReturnPct(recommended, current) {
 }
 
 /**
+ * @param {number | null | undefined} returnPct
+ */
+export function resolveRecommendationPerformance(returnPct) {
+  const v = Number(returnPct)
+  if (!Number.isFinite(v)) {
+    return { id: "pending", label: "기록대기", emoji: "•", tone: "flat" }
+  }
+  if (v >= 100) return { id: "jackpot", label: "대박", emoji: "🏆", tone: "up" }
+  if (v >= 50) return { id: "excellent", label: "우수", emoji: "⭐", tone: "up" }
+  if (v >= 20) return { id: "success", label: "성공", emoji: "✅", tone: "up" }
+  if (v <= -20) return { id: "fail", label: "실패", emoji: "❌", tone: "down" }
+  return { id: "ongoing", label: "진행중", emoji: "⏳", tone: "flat" }
+}
+
+/**
+ * @param {Array<{ returnPct: number | null | undefined }>} rows
+ */
+export function summarizeRecommendationPerformance(rows = []) {
+  const withRet = rows.filter((row) => Number.isFinite(Number(row.returnPct)))
+  const byBand = {
+    jackpot: 0,
+    excellent: 0,
+    success: 0,
+    ongoing: 0,
+    fail: 0,
+  }
+  for (const row of withRet) {
+    const perf = resolveRecommendationPerformance(row.returnPct)
+    if (perf.id in byBand) byBand[perf.id] += 1
+  }
+  const successCount = byBand.jackpot + byBand.excellent + byBand.success
+  const total = withRet.length
+  const successRate = total ? (successCount / total) * 100 : null
+  const failRate = total ? (byBand.fail / total) * 100 : null
+  const ongoingRate = total ? (byBand.ongoing / total) * 100 : null
+  const avgReturn = total
+    ? withRet.reduce((sum, row) => sum + Number(row.returnPct), 0) / total
+    : null
+  const best = [...withRet].sort((a, b) => Number(b.returnPct) - Number(a.returnPct))[0] ?? null
+  const topSuccesses = withRet
+    .filter((row) => Number(row.returnPct) >= 20)
+    .sort((a, b) => Number(b.returnPct) - Number(a.returnPct))
+    .slice(0, 2)
+  return {
+    total,
+    withRet,
+    byBand,
+    successCount,
+    successRate,
+    failRate,
+    ongoingRate,
+    avgReturn,
+    best,
+    topSuccesses,
+  }
+}
+
+/**
  * @param {TradingZonePosition} position
  * @param {{ livePrice?: number | null }} [opts]
  */

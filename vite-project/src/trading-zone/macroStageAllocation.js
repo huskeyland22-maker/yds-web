@@ -17,10 +17,10 @@
 /** @type {Record<MacroV1StatusId, MacroStageAllocation>} */
 export const MACRO_STAGE_ALLOCATION = {
   overheated: {
-    stockPct: 50,
-    cashPct: 50,
-    stockLabel: "주식 50%",
-    cashLabel: "현금 50%",
+    stockPct: 40,
+    cashPct: 60,
+    stockLabel: "주식 40%",
+    cashLabel: "현금 60%",
     note: "과열 — 비중 축소·현금 확보",
   },
   neutral: {

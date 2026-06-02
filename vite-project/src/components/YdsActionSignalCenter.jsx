@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -69,6 +69,7 @@ function buildSignalTemplate(stageId) {
  * @param {{ panicData?: object | null; historyRows?: object[] }} props
  */
 export default function YdsActionSignalCenter({ panicData = null, historyRows = [] }) {
+  const [templateOpen, setTemplateOpen] = useState(false)
   const view = useMemo(() => {
     if (!panicData) return null
     const score = getFinalScore(panicData)
@@ -108,51 +109,69 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
 
   return (
     <section className="yds-action-signal trading-card-shell panic-v2-section" aria-label="YDS 행동 시그널 센터">
-      <p className="m-0 yds-action-signal__title">오늘의 시그널</p>
-      <p className="m-0 yds-action-signal__headline">
-        {view.stageEmoji} {view.template.headline}
-      </p>
-      <p className="m-0 yds-action-signal__line">⚠ {view.template.caution}</p>
-      {view.template.do.slice(0, 2).map((line) => (
-        <p key={line} className="m-0 yds-action-signal__line">
-          ✓ {line}
-        </p>
-      ))}
-
-      <div className="yds-action-signal__block">
-        <p className="m-0 yds-action-signal__block-title">최근 변화</p>
-        <p className="m-0 yds-action-signal__change-score font-mono tabular-nums">
-          YDS {view.prevScore != null ? `${view.prevScore} → ${view.score}` : `${view.score}`}
-        </p>
-        {view.changeReasons.map((line) => (
-          <p key={line} className="m-0 yds-action-signal__change-line">
-            ✓ {line}
+      <p className="m-0 yds-action-signal__title">YDS 행동센터 · Compact</p>
+      <div className="yds-action-signal__cards">
+        <div className="yds-action-signal__card">
+          <p className="m-0 yds-action-signal__block-title">오늘의 행동</p>
+          <p className="m-0 yds-action-signal__headline">
+            {view.stageEmoji} {view.template.headline}
           </p>
-        ))}
-        <p className="m-0 yds-action-signal__change-conclusion">결론 · {view.template.conclusion}</p>
+          <p className="m-0 yds-action-signal__line">✓ {view.template.do[0] ?? "종목 탐색"}</p>
+          <p className="m-0 yds-action-signal__line">✓ {view.template.do[1] ?? "기존 보유 유지"}</p>
+          <p className="m-0 yds-action-signal__line yds-action-signal__line--warn">⚠ {view.template.caution}</p>
+        </div>
+
+        <div className="yds-action-signal__card">
+          <p className="m-0 yds-action-signal__block-title">최근 변화</p>
+          <p className="m-0 yds-action-signal__change-score font-mono tabular-nums">
+            {view.prevScore != null ? `${view.prevScore} → ${view.score}` : `${view.score} → ${view.score}`}
+          </p>
+          {view.changeReasons.map((line) => (
+            <p key={line} className="m-0 yds-action-signal__change-line">
+              ✓ {line}
+            </p>
+          ))}
+          <p className="m-0 yds-action-signal__change-conclusion">결론 · {view.template.conclusion}</p>
+        </div>
+
+        <div className="yds-action-signal__card">
+          <p className="m-0 yds-action-signal__block-title">오늘 우선순위</p>
+          {view.template.priority.slice(0, 3).map((line, idx) => (
+            <p key={line} className="m-0 yds-action-signal__priority-line">
+              {idx + 1} {line}
+            </p>
+          ))}
+        </div>
       </div>
 
       <div className="yds-action-signal__block">
-        <p className="m-0 yds-action-signal__block-title">{view.stageLabel} 행동 템플릿</p>
-        {view.template.do.map((line) => (
-          <p key={`do-${line}`} className="m-0 yds-action-signal__template-line">
-            ✓ {line}
-          </p>
-        ))}
-        {view.template.avoid.map((line) => (
-          <p key={`avoid-${line}`} className="m-0 yds-action-signal__template-line yds-action-signal__template-line--avoid">
-            ✗ {line}
-          </p>
-        ))}
+        <button
+          type="button"
+          className="yds-action-signal__toggle"
+          onClick={() => setTemplateOpen((v) => !v)}
+        >
+          {view.stageLabel} 행동 템플릿 {templateOpen ? "닫기 ▲" : "자세히 보기 ▼"}
+        </button>
+        {templateOpen ? (
+          <div className="yds-action-signal__template-panel">
+            {view.template.do.map((line) => (
+              <p key={`do-${line}`} className="m-0 yds-action-signal__template-line">
+                ✓ {line}
+              </p>
+            ))}
+            {view.template.avoid.map((line) => (
+              <p key={`avoid-${line}`} className="m-0 yds-action-signal__template-line yds-action-signal__template-line--avoid">
+                ✗ {line}
+              </p>
+            ))}
+          </div>
+        ) : null}
       </div>
 
-      <div className="yds-action-signal__block">
-        <p className="m-0 yds-action-signal__block-title">오늘의 우선순위</p>
-        {view.template.priority.map((line, idx) => (
-          <p key={line} className="m-0 yds-action-signal__priority-line">
-            {idx + 1}순위 {line}
-          </p>
-        ))}
+      <div className="yds-action-signal__philosophy" aria-label="YDS 철학">
+        <p className="m-0 yds-action-signal__philosophy-title">YDS 철학</p>
+        <p className="m-0 yds-action-signal__philosophy-stages">🔵 과열 · 🟢 중립 · 🟡 관심 · 🟠 분할매수 · 🔴 패닉매수</p>
+        <p className="m-0 yds-action-signal__philosophy-quote">공포를 피하는 것이 아니라 공포에서 기회를 찾는다.</p>
       </div>
     </section>
   )

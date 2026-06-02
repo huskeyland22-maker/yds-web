@@ -216,11 +216,11 @@ export default function HomeV5StrategyValidationPanel({
             <span className="home-v5-strategy-validation__chevron" aria-hidden>
               {open ? "▲" : "▼"}
             </span>
-            <span>전략 연구실</span>
+            <span>{open ? "전략 연구실 닫기" : "전략 연구실 보기"}</span>
             <span className="home-v5-strategy-validation__lab-tag">LAB</span>
           </span>
         </span>
-        <span className="home-v5-strategy-validation__hint">전략 검증 / 백테스트</span>
+        <span className="home-v5-strategy-validation__hint">{open ? "전략 검증 / 백테스트" : "기본 접힘"}</span>
       </button>
 
       <div id={panelId} className="home-v5-strategy-validation__panel" hidden={!open}>

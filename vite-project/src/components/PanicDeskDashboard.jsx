@@ -14,8 +14,8 @@ import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import TacticalTradingZoneSection from "./trading-zone/TacticalTradingZoneSection.jsx"
 import YdsActionSignalCenter from "./YdsActionSignalCenter.jsx"
+import YdsAllocationCenter from "./YdsAllocationCenter.jsx"
 import YdsCompositeHero from "./YdsCompositeHero.jsx"
-import YdsPhilosophyCard from "./YdsPhilosophyCard.jsx"
 
 /**
  * @param {{
@@ -83,7 +83,7 @@ export default function PanicDeskDashboard({
       <div className="panic-v2-desk__metrics-slot">
         <YdsCompositeHero panicData={panicData} historyRows={safeHistory} />
         <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
-        <YdsPhilosophyCard />
+        <YdsAllocationCenter panicData={panicData} />
         <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
       </div>
 

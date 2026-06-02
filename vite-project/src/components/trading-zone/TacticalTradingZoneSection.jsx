@@ -25,13 +25,29 @@ import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalMarketStockBridge from "./TacticalMarketStockBridge.jsx"
 import TacticalRecommendationTrack from "./TacticalRecommendationTrack.jsx"
+import TacticalRecommendationValidationCard from "./TacticalRecommendationValidationCard.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 import StockPickReasonList from "./StockPickReasonList.jsx"
 import { buildStockDisplayReasons } from "../../trading-zone/tradingZoneStockDisplayReasons.js"
 import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStockBridge.js"
-import { buildRecommendationTrackRows, formatRecommendPriceRangeCompact } from "../../trading-zone/tradingZoneRecommendationTrack.js"
+import {
+  buildRecommendationTrackRows,
+  formatRecommendPriceRangeCompact,
+  summarizeRecommendationPerformance,
+} from "../../trading-zone/tradingZoneRecommendationTrack.js"
+import { buildTrustSnapshotMap, resolveTrustGrade } from "../../trading-zone/tradingZoneRecommendationTrust.js"
 import { STAGE_STATUS_SHORT } from "../../trading-zone/tradingZoneDetailMobile.js"
+
+function resolvePositionPhase(score) {
+  const s = Number(score)
+  if (!Number.isFinite(s)) return { phase: "주의관망", action: "관망 대기" }
+  if (s >= 90) return { phase: "집중보유", action: "추가매수 금지" }
+  if (s >= 80) return { phase: "추가매수", action: "눌림목 분할매수 가능" }
+  if (s >= 70) return { phase: "1차 진입", action: "분할매수 가능" }
+  if (s >= 60) return { phase: "관심", action: "관망 대기" }
+  return { phase: "주의관망", action: "관망 대기" }
+}
 
 /**
  * @param {{
@@ -132,6 +148,7 @@ function TodayPickCard({
   onSelect,
   marketPolicy = null,
   recommendRows = [],
+  trust = null,
 }) {
   const badge = tradingStageBadge(position)
   const displayReasons =
@@ -151,6 +168,8 @@ function TodayPickCard({
   const todayAction = marketPolicy?.actionLines?.primary ?? "종목 탐색 우선"
   const myRecs = recommendRows.filter((r) => r.symbol === position.symbol)
   const latestRec = myRecs[0] ?? null
+  const trustGrade = trust?.grade ?? resolveTrustGrade(null)
+  const phaseView = resolvePositionPhase(confidence)
 
   return (
     <section className="tactical-zone-today-pick" aria-label="오늘의 추천">
@@ -185,9 +204,38 @@ function TodayPickCard({
             <span>목표도달률</span>
             <strong className="font-mono tabular-nums">{goalRate != null ? `${goalRate}%` : "—"}</strong>
           </p>
+          <p className="m-0 tactical-zone-today-pick__meta-row">
+            <span>신뢰도 등급</span>
+            <strong>{trustGrade}</strong>
+          </p>
+          <p className="m-0 tactical-zone-today-pick__meta-row">
+            <span>현재 단계</span>
+            <strong>{phaseView.phase}</strong>
+          </p>
           <p className="m-0 tactical-zone-today-pick__meta-row tactical-zone-today-pick__meta-row--full">
             <span>오늘 행동</span>
             <strong>{todayAction}</strong>
+          </p>
+          <p className="m-0 tactical-zone-today-pick__meta-row tactical-zone-today-pick__meta-row--full">
+            <span>권장 행동</span>
+            <strong>{phaseView.action}</strong>
+          </p>
+          <p className="m-0 tactical-zone-today-pick__meta-row tactical-zone-today-pick__meta-row--full">
+            <span>최근 검증</span>
+            <strong>
+              승률 {trust?.winRate != null ? `${trust.winRate.toFixed(0)}%` : "—"} · 평균{" "}
+              {trust?.avgReturn != null
+                ? `${trust.avgReturn > 0 ? "+" : ""}${trust.avgReturn.toFixed(1)}%`
+                : "—"}
+            </strong>
+          </p>
+          <p className="m-0 tactical-zone-today-pick__meta-row tactical-zone-today-pick__meta-row--full">
+            <span>최고 수익 사례</span>
+            <strong>
+              {trust?.bestReturn != null
+                ? `${trust.bestReturn > 0 ? "+" : ""}${trust.bestReturn.toFixed(1)}%`
+                : "—"}
+            </strong>
           </p>
         </div>
         {displayReasons.length ? (
@@ -474,6 +522,7 @@ export default function TacticalTradingZoneSection({
     () => buildRecommendationTrackRows(livePositions, recommendPriorityIds, recommendLiveById),
     [livePositions, recommendPriorityIds, recommendLiveById],
   )
+  const trustById = useMemo(() => buildTrustSnapshotMap(livePositions, 30), [livePositions])
 
   const tacticalDegrade = useMemo(() => {
     const reasons = []
@@ -544,9 +593,20 @@ export default function TacticalTradingZoneSection({
       .map((p) => p.symbol)
       .join(" · ")
     const priorityLine = symbols ? `우선 종목 ${symbols}` : "우선 종목 선정 중"
+    const top = marketStockBridge.priorities[0]
+    const topPhase = top ? resolvePositionPhase(top.confidence) : null
+    const topLine = top
+      ? `${top.symbol} · 현재 단계 ${topPhase.phase} · 행동 ${topPhase.action}`
+      : "단계 산출 대기"
+    const perf = summarizeRecommendationPerformance(recommendRows)
+    const perfLine = `최근 추천 성과 성공 ${perf.successCount}건 · 진행중 ${perf.byBand.ongoing}건 · 실패 ${perf.byBand.fail}건`
+    const successSymbols = perf.topSuccesses
+      .map((row) => `${row.symbol} ${row.returnPct > 0 ? "+" : ""}${Number(row.returnPct).toFixed(0)}%`)
+      .join(" · ")
+    const successLine = successSymbols ? `최근 성공 종목 ${successSymbols}` : "최근 성공 종목 집계 대기"
 
-    return [posture, chaseLine, priorityLine]
-  }, [panicData, marketPolicyView, marketStockBridge.priorities])
+    return [posture, chaseLine, priorityLine, topLine, perfLine, successLine]
+  }, [panicData, marketPolicyView, marketStockBridge.priorities, recommendRows])
 
   if (tacticalDegrade.fatal) {
     return (
@@ -584,6 +644,7 @@ export default function TacticalTradingZoneSection({
         selectedId={selectedId}
         onSelect={setSelectedId}
         loading={stockEvalLoading}
+        trustById={trustById}
       />
 
       <section className="tactical-trading-zone__ai-briefing" aria-label="AI 브리핑">
@@ -640,6 +701,7 @@ export default function TacticalTradingZoneSection({
           }
           marketPolicy={marketPolicyView}
           recommendRows={recommendRows}
+          trust={trustById[liveBuckets.todayPick.id] ?? null}
           selected={selectedId === liveBuckets.todayPick.id}
           onSelect={setSelectedId}
         />
@@ -678,6 +740,11 @@ export default function TacticalTradingZoneSection({
       ) : null}
 
       <TacticalRecommendationTrack
+        positions={livePositions}
+        priorityIds={recommendPriorityIds}
+        liveById={recommendLiveById}
+      />
+      <TacticalRecommendationValidationCard
         positions={livePositions}
         priorityIds={recommendPriorityIds}
         liveById={recommendLiveById}

@@ -3,7 +3,9 @@ import { Link } from "react-router-dom"
 import {
   buildRecommendationTrackRows,
   formatRecommendDateShort,
-  formatRecommendPriceRangeCompact,
+  formatRecommendPriceCompact,
+  resolveRecommendationPerformance,
+  summarizeRecommendationPerformance,
 } from "../../trading-zone/tradingZoneRecommendationTrack.js"
 
 /**
@@ -21,17 +23,7 @@ export default function TacticalRecommendationTrack({
   const [open, setOpen] = useState(false)
   const rows = buildRecommendationTrackRows(positions, priorityIds, liveById)
   if (!rows.length) return null
-  const summary = useMemo(() => {
-    const withRet = rows.filter((r) => Number.isFinite(r.returnPct))
-    const winRate = withRet.length
-      ? (withRet.filter((r) => Number(r.returnPct) > 0).length / withRet.length) * 100
-      : null
-    const avg = withRet.length
-      ? withRet.reduce((sum, r) => sum + Number(r.returnPct), 0) / withRet.length
-      : null
-    const best = [...withRet].sort((a, b) => Number(b.returnPct) - Number(a.returnPct))[0] ?? null
-    return { winRate, avg, best }
-  }, [rows])
+  const summary = useMemo(() => summarizeRecommendationPerformance(rows), [rows])
 
   return (
     <section
@@ -48,13 +40,15 @@ export default function TacticalRecommendationTrack({
         <p className="m-0 tactical-zone-recommend-track__summary-item">
           <span>승률</span>
           <strong className="font-mono tabular-nums">
-            {summary.winRate != null ? `${summary.winRate.toFixed(1)}%` : "—"}
+            {summary.successRate != null ? `${summary.successRate.toFixed(1)}%` : "—"}
           </strong>
         </p>
         <p className="m-0 tactical-zone-recommend-track__summary-item">
           <span>평균 수익률</span>
           <strong className="font-mono tabular-nums">
-            {summary.avg != null ? `${summary.avg > 0 ? "+" : ""}${summary.avg.toFixed(1)}%` : "—"}
+            {summary.avgReturn != null
+              ? `${summary.avgReturn > 0 ? "+" : ""}${summary.avgReturn.toFixed(1)}%`
+              : "—"}
           </strong>
         </p>
         <p className="m-0 tactical-zone-recommend-track__summary-item tactical-zone-recommend-track__summary-item--full">
@@ -74,16 +68,22 @@ export default function TacticalRecommendationTrack({
         {open ? "전체 성과 닫기 ▲" : "전체 성과 보기 ▼"}
       </button>
       {open ? <ul className="m-0 tactical-zone-recommend-track__list">
+        <li className="tactical-zone-recommend-track__row tactical-zone-recommend-track__row--head" aria-hidden>
+          <span>종목</span>
+          <span>추천일</span>
+          <span>추천가</span>
+          <span>현재가</span>
+          <span>수익률</span>
+          <span>상태</span>
+        </li>
         {rows.map((row) => {
           const ret = row.returnPct
-          const retTone = ret == null ? "flat" : ret > 0 ? "up" : ret < 0 ? "down" : "flat"
+          const perf = resolveRecommendationPerformance(ret)
+          const retTone = perf.tone
           const retLabel =
             ret == null ? "—" : `${ret > 0 ? "+" : ""}${ret.toFixed(1)}%`
-          const priceRange = formatRecommendPriceRangeCompact(
-            row.recommendedPrice,
-            row.currentPrice,
-            row.market,
-          )
+          const recommendedPrice = formatRecommendPriceCompact(row.recommendedPrice, row.market)
+          const currentPrice = formatRecommendPriceCompact(row.currentPrice, row.market)
 
           return (
             <li key={row.id} className="tactical-zone-recommend-track__row">
@@ -91,11 +91,11 @@ export default function TacticalRecommendationTrack({
               <span className="tactical-zone-recommend-track__date font-mono tabular-nums">
                 {formatRecommendDateShort(row.recommendedAt)}
               </span>
-              <span
-                className="tactical-zone-recommend-track__range font-mono tabular-nums"
-                title={`추천가 → 현재가 · ${priceRange}`}
-              >
-                {priceRange}
+              <span className="tactical-zone-recommend-track__price font-mono tabular-nums">
+                {recommendedPrice}
+              </span>
+              <span className="tactical-zone-recommend-track__price font-mono tabular-nums">
+                {currentPrice}
               </span>
               <span
                 className={[
@@ -104,6 +104,15 @@ export default function TacticalRecommendationTrack({
                 ].join(" ")}
               >
                 {retLabel}
+              </span>
+              <span
+                className={[
+                  "tactical-zone-recommend-track__status",
+                  `tactical-zone-recommend-track__status--${perf.id}`,
+                ].join(" ")}
+                title={`${perf.label} 기준`}
+              >
+                {`${perf.emoji} ${perf.label}`}
               </span>
             </li>
           )

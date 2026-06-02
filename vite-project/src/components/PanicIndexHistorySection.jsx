@@ -46,6 +46,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const [metricScope, setMetricScope] = useState(/** @type {"core" | "yds" | "all"} */ ("core"))
   const [activeMetricKey, setActiveMetricKey] = useState(DEFAULT_METRIC_KEY)
   const [rangeId, setRangeId] = useState("3M")
+  const [chartOpen, setChartOpen] = useState(false)
 
   const scopeRows =
     metricScope === "core"
@@ -142,6 +143,21 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       dateLabel: latestRaw?.date ?? "—",
     }
   }, [history])
+  const compactLine = useMemo(() => {
+    if (!ydsSummary) return "YDS — · 데이터 준비 중"
+    const latest = history[history.length - 1]
+    const prev = history.length >= 2 ? history[history.length - 2] : null
+    const vixNow = Number(latest?.vix)
+    const vixPrev = Number(prev?.vix)
+    let vixLine = "VIX 확인중"
+    if (Number.isFinite(vixNow) && Number.isFinite(vixPrev)) {
+      const delta = vixNow - vixPrev
+      if (Math.abs(delta) < 0.2) vixLine = "VIX 변화 없음"
+      else if (delta < 0) vixLine = "VIX 안정"
+      else vixLine = "VIX 상승"
+    }
+    return `YDS ${ydsSummary.score}점 · ${ydsSummary.stageLabel} · 최근 ${ydsSummary.trendLine} · ${vixLine}`
+  }, [ydsSummary, history])
 
   return (
     <section
@@ -160,12 +176,22 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     >
       <PanicDeskSectionHeader
         icon="📈"
-        title="패닉지수 히스토리"
-        description="핵심 3지표 · YDS 종합 · 전체 9지표"
+        title="패닉지수 히스토리 요약 모드"
+        description="요약 우선 · 차트는 필요 시 펼쳐보기"
         tone="amber"
         tier="main"
       />
-      <div className="panic-history-scope-toggle" role="tablist" aria-label="지표 범위">
+      <div className="panic-history-compact-summary" role="status" aria-label="패닉지수 히스토리 요약">
+        <p className="m-0 panic-history-compact-summary__line">{compactLine}</p>
+        <button
+          type="button"
+          className="panic-history-compact-summary__toggle"
+          onClick={() => setChartOpen((v) => !v)}
+        >
+          {chartOpen ? "차트 닫기 ▲" : "차트 보기 ▼"}
+        </button>
+      </div>
+      {chartOpen ? <div className="panic-history-scope-toggle" role="tablist" aria-label="지표 범위">
         <button
           type="button"
           role="tab"
@@ -196,9 +222,9 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           <span className="panic-history-scope-toggle__label-full">전체 9지표</span>
           <span className="panic-history-scope-toggle__label-short">전체</span>
         </button>
-      </div>
+      </div> : null}
 
-      <div className="panic-history-picker" role="tablist" aria-label={metricScope === "core" ? "핵심 3지표" : "9대 패닉지수"}>
+      {chartOpen ? <div className="panic-history-picker" role="tablist" aria-label={metricScope === "core" ? "핵심 3지표" : "9대 패닉지수"}>
         {scopeRows.map((row, rowIdx) => (
           <div key={`picker-row-${rowIdx}`} className="panic-history-picker__row">
             {row.map((m) => {
@@ -225,9 +251,9 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             })}
           </div>
         ))}
-      </div>
+      </div> : null}
 
-      <div className="panic-history-selection-bar">
+      {chartOpen ? <div className="panic-history-selection-bar">
         <p className="m-0 panic-history-selection-bar__selected">
           선택: <strong>{metric.shortLabel}</strong>
           <span className="panic-history-selection-bar__hint">{metric.tooltip}</span>
@@ -251,8 +277,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         <p className="m-0 panic-history-selection-bar__days text-[10px] text-slate-500">
           {rangeId} · {rangeStats.shown}일 표시
         </p>
-      </div>
-      {ydsSummary ? (
+      </div> : null}
+      {ydsSummary && chartOpen ? (
         <div className="panic-history-yds-summary" role="status" aria-label="YDS 종합점수 요약">
           <p className="m-0 panic-history-yds-summary__score">
             YDS {ydsSummary.score}점
@@ -273,16 +299,16 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         </div>
       ) : null}
 
-      <PanicHistoryInsightPanel
+      {chartOpen ? <PanicHistoryInsightPanel
         header={insight.header}
         changeStrip={insight.changeStrip}
         interpretationLines={insight.interpretationLines}
         bottomInsight={insight.bottomInsight}
         metricKey={activeMetricKey}
         accent={metric.accent}
-      />
+      /> : null}
 
-      <div className="panic-history-section__chart mt-1 pb-1">
+      {chartOpen ? <div className="panic-history-section__chart mt-1 pb-1">
         {showChart ? (
           <PanicHistoryLineChart
             key={`panic-hist-${activeMetricKey}-${rangeId}`}
@@ -303,7 +329,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
             {chartEmptyMessage}
           </div>
         )}
-      </div>
+      </div> : null}
     </section>
   )
 }
