@@ -159,6 +159,15 @@ function calcDurationDays(startDate, endDate) {
 
 export const YDS_VALIDATION_EVENT_DATASET = RAW_EVENTS.map((event) => ({
   ...event,
+  phase: event.category,
+  event: event.name,
+  milestones: {
+    start: event.keyDates.start,
+    rise: event.keyDates.rally,
+    fearExpansion: event.keyDates.fearExpansion,
+    climax: event.keyDates.extreme,
+    recovery: event.keyDates.recovery,
+  },
   durationDays: calcDurationDays(event.startDate, event.endDate),
 }))
 
