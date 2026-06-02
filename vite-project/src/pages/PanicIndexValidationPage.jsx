@@ -19,6 +19,7 @@ import {
 import YdsEventDetailPanel from "../components/validation/YdsEventDetailPanel.jsx"
 import YdsPanicEventValidationSection from "../components/validation/YdsPanicEventValidationSection.jsx"
 import YdsFearClimaxAnalysisSection from "../components/validation/YdsFearClimaxAnalysisSection.jsx"
+import YdsStageSimulationSection from "../components/validation/YdsStageSimulationSection.jsx"
 import { isEventComplete } from "../trading-zone/ydsHistoricalEventCompletions.js"
 import {
   CartesianGrid,
@@ -609,6 +610,7 @@ export default function PanicIndexValidationPage() {
         <p className="panic-validation-panel__note">시장 프록시 기준 누적 수익률(주간 스텝 합성)</p>
       </section>
 
+      <YdsStageSimulationSection events={YDS_VALIDATION_EVENT_DATASET} />
       <YdsFearClimaxAnalysisSection events={YDS_VALIDATION_EVENT_DATASET} />
       <YdsPanicEventValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
 
