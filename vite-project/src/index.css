@@ -13114,6 +13114,28 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.65rem;
 }
 
+.panic-validation-yds-tabs {
+  display: inline-flex;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.panic-validation-yds-tabs button {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.4);
+  color: rgba(148, 163, 184, 0.95);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.panic-validation-yds-tabs button.is-active {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.14);
+  color: rgba(186, 230, 253, 0.98);
+}
+
 .panic-validation-yds-window {
   padding: 0.55rem;
   border-radius: 0.45rem;
@@ -13126,6 +13148,68 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.8125rem;
   font-weight: 800;
   color: rgba(147, 197, 253, 0.96);
+}
+
+.panic-validation-yds-histogram {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.panic-validation-yds-histogram__row {
+  display: grid;
+  grid-template-columns: 3.1rem minmax(0, 1fr) 5.8rem;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.panic-validation-yds-histogram__label {
+  font-size: 0.6875rem;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.panic-validation-yds-histogram__bar-wrap {
+  height: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.42);
+  overflow: hidden;
+}
+
+.panic-validation-yds-histogram__bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.95), rgba(14, 165, 233, 0.68));
+}
+
+.panic-validation-yds-histogram__value {
+  justify-self: end;
+  font-size: 0.65rem;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.panic-validation-yds-grade {
+  margin-top: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: rgba(8, 47, 73, 0.24);
+}
+
+.panic-validation-yds-grade__badge {
+  margin-top: 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.8rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.45);
+  background: rgba(15, 23, 42, 0.55);
+  color: rgba(186, 230, 253, 0.98);
+  font-size: 0.75rem;
+  font-weight: 900;
 }
 
 .panic-validation-panel__warn {

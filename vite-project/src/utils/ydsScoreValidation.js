@@ -10,6 +10,14 @@ const STAGE_META = [
   { id: "panicBuy", emoji: "🔴", label: "패닉매수" },
 ]
 
+const SCORE_BINS = [
+  { id: "bin0", label: "0~20", min: 0, max: 20 },
+  { id: "bin1", label: "20~40", min: 20, max: 40 },
+  { id: "bin2", label: "40~60", min: 40, max: 60 },
+  { id: "bin3", label: "60~80", min: 60, max: 80 },
+  { id: "bin4", label: "80~100", min: 80, max: 101 },
+]
+
 function toDateKey(row) {
   return String(row?.date ?? row?.ts ?? "").slice(0, 10)
 }
@@ -34,6 +42,7 @@ function calcStdDev(values, avg) {
 function analyzeWindow(rows = []) {
   const scores = []
   const stageCounts = Object.fromEntries(STAGE_META.map((m) => [m.id, 0]))
+  const scoreBinCounts = Object.fromEntries(SCORE_BINS.map((b) => [b.id, 0]))
 
   for (const row of rows ?? []) {
     const panic = panicDataFromCycleRow(row)
@@ -44,6 +53,8 @@ function analyzeWindow(rows = []) {
     if (!stage) continue
     scores.push(score)
     if (stage.id in stageCounts) stageCounts[stage.id] += 1
+    const bin = SCORE_BINS.find((b) => score >= b.min && score < b.max)
+    if (bin) scoreBinCounts[bin.id] += 1
   }
 
   const total = scores.length
@@ -63,9 +74,36 @@ function analyzeWindow(rows = []) {
           : null
     return { ...meta, count, pct, warning }
   })
+  const scoreBins = SCORE_BINS.map((bin) => {
+    const count = scoreBinCounts[bin.id] ?? 0
+    const pct = total ? (count / total) * 100 : 0
+    const warning =
+      pct > 60
+        ? `${bin.label} 구간 비중 ${pct.toFixed(1)}% (과도 집중)`
+        : pct > 0 && pct < 3
+          ? `${bin.label} 구간 비중 ${pct.toFixed(1)}% (희소)`
+          : null
+    return { ...bin, count, pct, warning }
+  })
   const imbalanceWarnings = stageStats
     .map((s) => s.warning)
     .filter(Boolean)
+    .concat(scoreBins.map((b) => b.warning).filter(Boolean))
+
+  const severe = imbalanceWarnings.filter((w) => /(과다|과도|희소|과소)/.test(w)).length
+  let fitnessGrade = "A"
+  if (severe >= 4) fitnessGrade = "D"
+  else if (severe >= 3) fitnessGrade = "C"
+  else if (severe >= 1) fitnessGrade = "B"
+
+  const recommendation =
+    fitnessGrade === "A"
+      ? "현재 체계 적합도 : A · 구간 분포 균형이 우수하여 실전 활용성이 높습니다."
+      : fitnessGrade === "B"
+        ? "현재 체계 적합도 : B · 일부 구간 쏠림이 있으나 실전 활용 가능한 수준입니다."
+        : fitnessGrade === "C"
+          ? "현재 체계 적합도 : C · 중간 이상 왜곡이 있어 구간 경계 재점검이 필요합니다."
+          : "현재 체계 적합도 : D · 특정 구간 집중이 커 점수 경계 재설계 검토가 필요합니다."
 
   return {
     total,
@@ -75,7 +113,10 @@ function analyzeWindow(rows = []) {
     medianScore,
     stdDev,
     stageStats,
+    scoreBins,
     imbalanceWarnings,
+    fitnessGrade,
+    recommendation,
   }
 }
 

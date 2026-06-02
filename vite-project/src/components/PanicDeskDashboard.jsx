@@ -77,6 +77,11 @@ export default function PanicDeskDashboard({
       min: ydsDistribution.minScore ?? "—",
     })
     console.table(stageObj)
+    console.log(
+      "점수 히스토그램:",
+      ydsDistribution.scoreBins.map((b) => `${b.label} ${b.pct.toFixed(1)}% (${b.count})`),
+    )
+    console.log("적합도:", ydsDistribution.fitnessGrade)
     console.log("불균형 경고:", ydsDistribution.imbalanceWarnings)
     console.groupEnd()
   }, [ydsDistribution])

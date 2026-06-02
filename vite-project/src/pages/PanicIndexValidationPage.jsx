@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
@@ -70,6 +70,7 @@ function daysBetween(isoA, isoB) {
 }
 
 export default function PanicIndexValidationPage() {
+  const [ydsTab, setYdsTab] = useState("recent1y")
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
     () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
@@ -80,6 +81,7 @@ export default function PanicIndexValidationPage() {
   const panicBuyEvents = useMemo(() => buildPanicBuyForwardReturns(history, 8), [history])
   const benchmarkSeries = useMemo(() => buildValidationBenchmarkSeries(history), [history])
   const ydsDistribution = useMemo(() => analyzeYdsScoreDistributionWindows(history), [history])
+  const ydsView = ydsDistribution[ydsTab] ?? ydsDistribution.recent1y
   const recommendation30d = useMemo(() => {
     const rows = buildRecommendationTrackRows(getTradingZonePositions(), [], {})
     const today = new Date().toISOString().slice(0, 10)
@@ -388,71 +390,108 @@ export default function PanicIndexValidationPage() {
         <h2 id="panic-validation-yds-distribution" className="panic-validation-panel__h2">
           YDS 점수 분포 검증 센터
         </h2>
-        <div className="panic-validation-yds-distribution-tabs">
-          {[
-            { key: "recent1y", label: "최근 1년", data: ydsDistribution.recent1y },
-            { key: "recent3y", label: "최근 3년", data: ydsDistribution.recent3y },
-            { key: "all", label: "전체 기간", data: ydsDistribution.all },
-          ].map((window) => (
-            <article key={window.key} className="panic-validation-yds-window">
-              <p className="m-0 panic-validation-yds-window__title">{window.label}</p>
-              <div className="panic-validation-kpi">
-                <div className="panic-validation-kpi__card">
-                  <p className="panic-validation-kpi__label">최저 점수</p>
-                  <p className="panic-validation-kpi__value font-mono tabular-nums">
-                    {window.data.minScore != null ? Math.round(window.data.minScore) : "—"}
-                  </p>
-                </div>
-                <div className="panic-validation-kpi__card">
-                  <p className="panic-validation-kpi__label">최고 점수</p>
-                  <p className="panic-validation-kpi__value font-mono tabular-nums">
-                    {window.data.maxScore != null ? Math.round(window.data.maxScore) : "—"}
-                  </p>
-                </div>
-                <div className="panic-validation-kpi__card">
-                  <p className="panic-validation-kpi__label">평균 점수</p>
-                  <p className="panic-validation-kpi__value font-mono tabular-nums">
-                    {window.data.avgScore != null ? window.data.avgScore.toFixed(1) : "—"}
-                  </p>
-                </div>
-                <div className="panic-validation-kpi__card">
-                  <p className="panic-validation-kpi__label">중앙값</p>
-                  <p className="panic-validation-kpi__value font-mono tabular-nums">
-                    {window.data.medianScore != null ? window.data.medianScore.toFixed(1) : "—"}
-                  </p>
-                </div>
-                <div className="panic-validation-kpi__card">
-                  <p className="panic-validation-kpi__label">표준편차</p>
-                  <p className="panic-validation-kpi__value font-mono tabular-nums">
-                    {window.data.stdDev != null ? window.data.stdDev.toFixed(2) : "—"}
-                  </p>
-                </div>
-                <div className="panic-validation-kpi__card">
-                  <p className="panic-validation-kpi__label">표본</p>
-                  <p className="panic-validation-kpi__value font-mono tabular-nums">{window.data.total}건</p>
-                </div>
-              </div>
-              <div className="panic-validation-yds-distribution">
-                {window.data.stageStats.map((stage) => (
-                  <p key={`${window.key}-${stage.id}`} className="m-0 panic-validation-yds-distribution__row">
-                    <span>{stage.emoji} {stage.label}</span>
-                    <strong className="font-mono tabular-nums">{stage.pct.toFixed(1)}%</strong>
-                  </p>
-                ))}
-              </div>
-              {window.data.imbalanceWarnings.length ? (
-                <div className="panic-validation-yds-distribution__suggestions">
-                  <p className="m-0 panic-validation-panel__h3">불균형 경고</p>
-                  {window.data.imbalanceWarnings.map((line) => (
-                    <p key={`${window.key}-${line}`} className="m-0 panic-validation-panel__note panic-validation-panel__note--warn">
-                      - {line}
-                    </p>
-                  ))}
-                </div>
-              ) : null}
-            </article>
-          ))}
+        <div className="panic-validation-yds-tabs" role="tablist" aria-label="YDS 분석 기간">
+          <button
+            type="button"
+            className={ydsTab === "recent1y" ? "is-active" : ""}
+            onClick={() => setYdsTab("recent1y")}
+          >
+            최근 1년
+          </button>
+          <button
+            type="button"
+            className={ydsTab === "recent3y" ? "is-active" : ""}
+            onClick={() => setYdsTab("recent3y")}
+          >
+            최근 3년
+          </button>
+          <button
+            type="button"
+            className={ydsTab === "all" ? "is-active" : ""}
+            onClick={() => setYdsTab("all")}
+          >
+            전체
+          </button>
         </div>
+        <article className="panic-validation-yds-window">
+          <div className="panic-validation-kpi">
+            <div className="panic-validation-kpi__card">
+              <p className="panic-validation-kpi__label">최저 점수</p>
+              <p className="panic-validation-kpi__value font-mono tabular-nums">
+                {ydsView.minScore != null ? Math.round(ydsView.minScore) : "—"}
+              </p>
+            </div>
+            <div className="panic-validation-kpi__card">
+              <p className="panic-validation-kpi__label">최고 점수</p>
+              <p className="panic-validation-kpi__value font-mono tabular-nums">
+                {ydsView.maxScore != null ? Math.round(ydsView.maxScore) : "—"}
+              </p>
+            </div>
+            <div className="panic-validation-kpi__card">
+              <p className="panic-validation-kpi__label">평균 점수</p>
+              <p className="panic-validation-kpi__value font-mono tabular-nums">
+                {ydsView.avgScore != null ? ydsView.avgScore.toFixed(1) : "—"}
+              </p>
+            </div>
+            <div className="panic-validation-kpi__card">
+              <p className="panic-validation-kpi__label">중앙값</p>
+              <p className="panic-validation-kpi__value font-mono tabular-nums">
+                {ydsView.medianScore != null ? ydsView.medianScore.toFixed(1) : "—"}
+              </p>
+            </div>
+            <div className="panic-validation-kpi__card">
+              <p className="panic-validation-kpi__label">표준편차</p>
+              <p className="panic-validation-kpi__value font-mono tabular-nums">
+                {ydsView.stdDev != null ? ydsView.stdDev.toFixed(2) : "—"}
+              </p>
+            </div>
+            <div className="panic-validation-kpi__card">
+              <p className="panic-validation-kpi__label">표본</p>
+              <p className="panic-validation-kpi__value font-mono tabular-nums">{ydsView.total}건</p>
+            </div>
+          </div>
+          <p className="m-0 panic-validation-panel__h3">단계 비중</p>
+          <div className="panic-validation-yds-distribution">
+            {ydsView.stageStats.map((stage) => (
+              <p key={stage.id} className="m-0 panic-validation-yds-distribution__row">
+                <span>{stage.emoji} {stage.label}</span>
+                <strong className="font-mono tabular-nums">{stage.pct.toFixed(1)}%</strong>
+              </p>
+            ))}
+          </div>
+          <p className="m-0 panic-validation-panel__h3">YDS 점수 히스토그램</p>
+          <div className="panic-validation-yds-histogram">
+            {ydsView.scoreBins.map((bin) => (
+              <div key={bin.id} className="panic-validation-yds-histogram__row">
+                <span className="panic-validation-yds-histogram__label">{bin.label}</span>
+                <div className="panic-validation-yds-histogram__bar-wrap">
+                  <span
+                    className="panic-validation-yds-histogram__bar"
+                    style={{ width: `${Math.max(4, Math.min(100, bin.pct))}%` }}
+                  />
+                </div>
+                <span className="panic-validation-yds-histogram__value font-mono tabular-nums">
+                  {bin.count}건 · {bin.pct.toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="panic-validation-yds-grade">
+            <p className="m-0 panic-validation-kpi__label">점수 체계 적합도</p>
+            <p className="m-0 panic-validation-yds-grade__badge">{ydsView.fitnessGrade}</p>
+            <p className="m-0 panic-validation-panel__note">{ydsView.recommendation}</p>
+          </div>
+          {ydsView.imbalanceWarnings.length ? (
+            <div className="panic-validation-yds-distribution__suggestions">
+              <p className="m-0 panic-validation-panel__h3">자동 평가 경고</p>
+              {ydsView.imbalanceWarnings.map((line) => (
+                <p key={line} className="m-0 panic-validation-panel__note panic-validation-panel__note--warn">
+                  ⚠ {line}
+                </p>
+              ))}
+            </div>
+          ) : null}
+        </article>
       </section>
 
       <section className="panic-validation-panel" aria-labelledby="panic-validation-panicbuy-forward">
