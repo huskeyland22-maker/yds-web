@@ -3136,6 +3136,48 @@
 }
 
 @media (max-width: 640px) {
+  .tactical-zone-stock-bridge--list {
+    padding: 4px 5px 5px;
+  }
+
+  .tactical-zone-stock-bridge--list .tactical-zone-stock-bridge__head {
+    margin-bottom: 3px;
+  }
+
+  .tactical-zone-stock-bridge--list .tactical-zone-stock-bridge__title {
+    font-size: 10px;
+  }
+
+  .tactical-zone-stock-bridge__list {
+    gap: 1px;
+  }
+
+  .tactical-zone-stock-bridge__row {
+    grid-template-columns: 1rem minmax(0, 1fr) auto auto;
+    gap: 4px;
+    min-height: 26px;
+    padding: 3px 5px;
+    border-radius: 5px;
+  }
+
+  .tactical-zone-stock-bridge__row-rank {
+    font-size: 9px;
+  }
+
+  .tactical-zone-stock-bridge__row-symbol {
+    font-size: 12px;
+  }
+
+  .tactical-zone-stock-bridge__row-score {
+    font-size: 13px;
+  }
+
+  .tactical-zone-stock-bridge__row-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+    max-width: 2.75rem;
+  }
+
   .tactical-trading-zone__priority-rank,
   .tactical-trading-zone__ai-briefing {
     padding: 7px 8px;
@@ -4238,6 +4280,114 @@
     border-radius: 10px;
     border: 1px solid rgba(34, 211, 238, 0.22);
     background: rgba(8, 18, 32, 0.55);
+  }
+
+  /* TOP5 — 컴팩트 리스트 (종목·점수·배지만) */
+  .tactical-zone-stock-bridge--list {
+    margin-top: 6px;
+    padding: 5px 6px 6px;
+  }
+
+  .tactical-zone-stock-bridge--list .tactical-zone-stock-bridge__head {
+    margin-bottom: 4px;
+  }
+
+  .tactical-zone-stock-bridge--list .tactical-zone-stock-bridge__title {
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .tactical-zone-stock-bridge--list .tactical-zone-stock-bridge__sync {
+    margin: 2px 0 4px;
+    font-size: 10px;
+  }
+
+  .tactical-zone-stock-bridge__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tactical-zone-stock-bridge__list-item {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .tactical-zone-stock-bridge__row {
+    display: grid;
+    grid-template-columns: 1.1rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 30px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.025);
+    text-align: left;
+    color: inherit;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .tactical-zone-stock-bridge__row:hover {
+    border-color: rgba(34, 211, 238, 0.32);
+    background: rgba(34, 211, 238, 0.07);
+  }
+
+  .tactical-zone-stock-bridge__row--selected {
+    border-color: rgba(34, 211, 238, 0.42);
+    background: rgba(34, 211, 238, 0.11);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.12);
+  }
+
+  .tactical-zone-stock-bridge__row--boost {
+    border-color: rgba(251, 146, 60, 0.28);
+  }
+
+  .tactical-zone-stock-bridge__row-rank {
+    font-size: 10px;
+    font-weight: 800;
+    color: rgba(100, 116, 139, 0.95);
+    text-align: center;
+  }
+
+  .tactical-zone-stock-bridge__row-symbol {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .tactical-zone-stock-bridge__row-score {
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+    color: rgba(52, 211, 153, 0.96);
+  }
+
+  .tactical-zone-stock-bridge__row-badge {
+    flex-shrink: 0;
+    max-width: 3.25rem;
+  }
+
+  .tactical-zone-stock-bridge__row-badge .tactical-zone-chip__badge-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tactical-zone-stock-bridge--list .tactical-zone-stock-bridge__confidence-bar {
+    display: none;
   }
 
   .tactical-zone-stock-bridge--pending {

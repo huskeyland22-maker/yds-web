@@ -1,5 +1,4 @@
-import { TRADING_STAGE_META } from "../../trading-zone/tacticalTradingZoneData.js"
-import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
+import { TRADING_STAGE_META, tradingStageBadge } from "../../trading-zone/tacticalTradingZoneData.js"
 
 /**
  * @param {{
@@ -24,7 +23,10 @@ export default function TacticalMarketStockBridge({
   }
 
   return (
-    <section className="tactical-zone-stock-bridge tactical-zone-stock-bridge--compact" aria-label="우선순위 종목 TOP5">
+    <section
+      className="tactical-zone-stock-bridge tactical-zone-stock-bridge--list"
+      aria-label="우선순위 종목 TOP5"
+    >
       <div className="tactical-zone-stock-bridge__head">
         <p className="m-0 tactical-zone-stock-bridge__title">우선순위 종목 TOP5</p>
         {bridge.regimeLabel ? (
@@ -38,59 +40,41 @@ export default function TacticalMarketStockBridge({
         </p>
       ) : null}
 
-      <ol className="tactical-zone-stock-bridge__rank">
+      <ol className="tactical-zone-stock-bridge__list">
         {bridge.priorities.map((item, index) => {
           const selected = selectedId === item.id
+          const badge = tradingStageBadge({ stage: item.stage })
           const stageMeta = TRADING_STAGE_META[item.stage]
-          const displayReasons = (item.reasons ?? []).filter((r) => !r.startsWith("⚠")).slice(0, 2)
-          const coreReasons = displayReasons.length ? displayReasons : ["평가 대기"]
 
           return (
-            <li key={item.id} className="tactical-zone-stock-bridge__rank-item">
+            <li key={item.id} className="tactical-zone-stock-bridge__list-item">
               <button
                 type="button"
                 className={[
-                  "tactical-zone-stock-bridge__pick",
-                  selected ? "tactical-zone-stock-bridge__pick--selected" : "",
-                  item.regimeBoost ? "tactical-zone-stock-bridge__pick--boost" : "",
+                  "tactical-zone-stock-bridge__row",
+                  selected ? "tactical-zone-stock-bridge__row--selected" : "",
+                  item.regimeBoost ? "tactical-zone-stock-bridge__row--boost" : "",
                 ].join(" ")}
                 onClick={() => onSelect?.(item.id)}
                 aria-pressed={selected}
+                aria-label={`${item.symbol} 신뢰도 ${item.confidence} ${item.stageLabel ?? badge.label}`}
               >
-                <div className="tactical-zone-stock-bridge__pick-top">
-                  <div className="tactical-zone-stock-bridge__pick-head">
-                    <span className="tactical-zone-stock-bridge__pick-rank">{index + 1}</span>
-                    <span className="tactical-zone-stock-bridge__pick-symbol">{item.symbol}</span>
-                    <TacticalConfidenceGrade
-                      score={item.confidence}
-                      compact
-                      className="tactical-zone-stock-bridge__pick-grade"
-                    />
-                  </div>
-                  <ul className="m-0 tactical-zone-stock-bridge__reasons-stack">
-                    {coreReasons.map((reason) => (
-                      <li key={reason} className="tactical-zone-stock-bridge__reason-line">
-                        ✓ {reason}
-                      </li>
-                    ))}
-                  </ul>
-                  <span className="tactical-zone-stock-bridge__pick-stage-mini" data-stage={item.stage}>
-                    <span aria-hidden>{stageMeta?.emoji ?? "⚪"}</span> {item.stageLabel}
-                  </span>
-                </div>
-
+                <span className="tactical-zone-stock-bridge__row-rank" aria-hidden>
+                  {index + 1}
+                </span>
+                <span className="tactical-zone-stock-bridge__row-symbol">{item.symbol}</span>
+                <span className="tactical-zone-stock-bridge__row-score font-mono tabular-nums">
+                  {item.confidence}
+                </span>
                 <span
-                  className="tactical-zone-stock-bridge__confidence-bar"
-                  role="meter"
-                  aria-valuenow={item.confidence}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`신뢰도 ${item.confidence}`}
+                  className="tactical-zone-chip__badge tactical-zone-stock-bridge__row-badge"
+                  data-stage={item.stage}
+                  title={item.stageLabel ?? stageMeta?.label}
                 >
-                  <span
-                    className="tactical-zone-stock-bridge__confidence-fill"
-                    style={{ width: `${item.confidence}%` }}
-                  />
+                  <span className="tactical-zone-chip__badge-dot" aria-hidden>
+                    ●
+                  </span>
+                  <span className="tactical-zone-chip__badge-label">{badge.label}</span>
                 </span>
               </button>
             </li>
