@@ -12782,6 +12782,56 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(248, 113, 113, 0.98);
 }
 
+.yds-composite-hero {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(167, 139, 250, 0.26);
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.32), rgba(8, 47, 73, 0.32));
+}
+
+.yds-composite-hero__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.yds-composite-hero__title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(196, 181, 253, 0.96);
+}
+
+.yds-composite-hero__score {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.yds-composite-hero__stage {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.98);
+}
+
+.yds-composite-hero__trend {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(196, 181, 253, 0.95);
+}
+
+.yds-composite-hero__guide {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.96);
+}
+
 /* ── 모바일 데스크 최적화 (PC 769px+ 변경 없음) ── */
 .home-v5-core-strategy-bar__mobile-hero,
 .home-v5-core-strategy-bar__mobile-more {

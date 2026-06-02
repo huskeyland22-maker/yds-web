@@ -13,6 +13,7 @@ import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "./SectionErrorBoundary.jsx"
 import TacticalTradingZoneSection from "./trading-zone/TacticalTradingZoneSection.jsx"
+import YdsCompositeHero from "./YdsCompositeHero.jsx"
 
 /**
  * @param {{
@@ -78,6 +79,7 @@ export default function PanicDeskDashboard({
       </div>
 
       <div className="panic-v2-desk__metrics-slot">
+        <YdsCompositeHero panicData={panicData} historyRows={safeHistory} />
         <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
       </div>
 

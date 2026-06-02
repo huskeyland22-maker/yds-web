@@ -3,8 +3,13 @@ import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
-import { runPanicIndexAllocationBacktest } from "../trading-zone/panicIndexValidationBacktest.js"
+import {
+  buildPanicBuyForwardReturns,
+  runPanicIndexAllocationBacktest,
+} from "../trading-zone/panicIndexValidationBacktest.js"
 import { MACRO_STAGE_ALLOCATION } from "../trading-zone/macroStageAllocation.js"
+import { getTradingZonePositions } from "../trading-zone/tacticalTradingZoneData.js"
+import { buildRecommendationTrackRows } from "../trading-zone/tradingZoneRecommendationTrack.js"
 
 function formatPct(v, digits = 1) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -45,6 +50,13 @@ function VsMetricRow({ label, strategy, spy, strategyTone = "", spyTone = "" }) 
   )
 }
 
+function daysBetween(isoA, isoB) {
+  const a = new Date(`${String(isoA).slice(0, 10)}T12:00:00`).getTime()
+  const b = new Date(`${String(isoB).slice(0, 10)}T12:00:00`).getTime()
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+  return Math.round((b - a) / 86_400_000)
+}
+
 export default function PanicIndexValidationPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -53,6 +65,27 @@ export default function PanicIndexValidationPage() {
   )
 
   const backtest = useMemo(() => runPanicIndexAllocationBacktest(history), [history])
+  const panicBuyEvents = useMemo(() => buildPanicBuyForwardReturns(history, 8), [history])
+  const recommendation30d = useMemo(() => {
+    const rows = buildRecommendationTrackRows(getTradingZonePositions(), [], {})
+    const today = new Date().toISOString().slice(0, 10)
+    const recent = rows.filter((r) => {
+      const diff = daysBetween(r.recommendedAt, today)
+      return diff != null && diff >= 0 && diff <= 30
+    })
+    const withRet = recent.filter((r) => Number.isFinite(r.returnPct))
+    const winCount = withRet.filter((r) => Number(r.returnPct) > 0).length
+    const avg =
+      withRet.length > 0 ? withRet.reduce((sum, r) => sum + Number(r.returnPct), 0) / withRet.length : null
+    const sorted = [...withRet].sort((a, b) => Number(b.returnPct) - Number(a.returnPct))
+    return {
+      count: recent.length,
+      winRate: withRet.length ? (winCount / withRet.length) * 100 : null,
+      avgReturn: avg,
+      best: sorted[0] ?? null,
+      worst: sorted[sorted.length - 1] ?? null,
+    }
+  }, [])
 
   const strategyTotal = backtest.totalReturnPct
   const spyTotal = backtest.benchmarkReturnPct
@@ -154,6 +187,46 @@ export default function PanicIndexValidationPage() {
         </div>
       </section>
 
+      <section className="panic-validation-panel" aria-labelledby="panic-validation-reco-30d">
+        <h2 id="panic-validation-reco-30d" className="panic-validation-panel__h2">
+          추천종목 검증 시스템 (최근 30일)
+        </h2>
+        <div className="panic-validation-kpi">
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">추천 횟수</p>
+            <p className="panic-validation-kpi__value font-mono tabular-nums">{recommendation30d.count}회</p>
+          </div>
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">승률</p>
+            <p className="panic-validation-kpi__value font-mono tabular-nums">
+              {recommendation30d.winRate != null ? `${recommendation30d.winRate.toFixed(1)}%` : "—"}
+            </p>
+          </div>
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">평균 수익률</p>
+            <p
+              className={`panic-validation-kpi__value panic-validation-kpi__value--${
+                tone(recommendation30d.avgReturn) || "flat"
+              } font-mono tabular-nums`}
+            >
+              {formatPct(recommendation30d.avgReturn)}
+            </p>
+          </div>
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">최고/최악 종목</p>
+            <p className="panic-validation-kpi__value text-[13px]">
+              {recommendation30d.best
+                ? `${recommendation30d.best.symbol} ${formatPct(recommendation30d.best.returnPct)}`
+                : "—"}
+              <span className="mx-1 text-slate-500">/</span>
+              {recommendation30d.worst
+                ? `${recommendation30d.worst.symbol} ${formatPct(recommendation30d.worst.returnPct)}`
+                : "—"}
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="panic-validation-panel" aria-labelledby="panic-validation-yearly">
         <h2 id="panic-validation-yearly" className="panic-validation-panel__h2">
           연도별 성과
@@ -246,6 +319,53 @@ export default function PanicIndexValidationPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="panic-validation-panel" aria-labelledby="panic-validation-panicbuy-forward">
+        <h2 id="panic-validation-panicbuy-forward" className="panic-validation-panel__h2">
+          패닉매수 발생 시점 이후 수익률
+        </h2>
+        <table className="panic-validation-year-table panic-validation-year-table--vs">
+          <thead>
+            <tr>
+              <th scope="col">발생일</th>
+              <th scope="col">점수</th>
+              <th scope="col">1개월</th>
+              <th scope="col">3개월</th>
+              <th scope="col">6개월</th>
+              <th scope="col">12개월</th>
+            </tr>
+          </thead>
+          <tbody>
+            {panicBuyEvents.length ? (
+              panicBuyEvents.map((row) => (
+                <tr key={row.date}>
+                  <td className="font-mono tabular-nums">{row.date}</td>
+                  <td className="font-mono tabular-nums">{row.score}</td>
+                  <td className={row.returns.m1 != null && row.returns.m1 > 0 ? "panic-validation-year-table__up" : row.returns.m1 != null && row.returns.m1 < 0 ? "panic-validation-year-table__down" : ""}>
+                    {formatPct(row.returns.m1)}
+                  </td>
+                  <td className={row.returns.m3 != null && row.returns.m3 > 0 ? "panic-validation-year-table__up" : row.returns.m3 != null && row.returns.m3 < 0 ? "panic-validation-year-table__down" : ""}>
+                    {formatPct(row.returns.m3)}
+                  </td>
+                  <td className={row.returns.m6 != null && row.returns.m6 > 0 ? "panic-validation-year-table__up" : row.returns.m6 != null && row.returns.m6 < 0 ? "panic-validation-year-table__down" : ""}>
+                    {formatPct(row.returns.m6)}
+                  </td>
+                  <td className={row.returns.m12 != null && row.returns.m12 > 0 ? "panic-validation-year-table__up" : row.returns.m12 != null && row.returns.m12 < 0 ? "panic-validation-year-table__down" : ""}>
+                    {formatPct(row.returns.m12)}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-slate-500">
+                  패닉매수 시점 데이터 준비 중
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <p className="panic-validation-panel__note">시장 프록시 기준 누적 수익률(주간 스텝 합성)</p>
       </section>
     </div>
   )

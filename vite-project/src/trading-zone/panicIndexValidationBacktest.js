@@ -195,3 +195,66 @@ export function runPanicIndexAllocationBacktest(historyRows) {
     periodEnd: last,
   }
 }
+
+/**
+ * 패닉매수(panicBuy) 시점 이후 시장 프록시 수익률.
+ * @param {object[]} historyRows
+ * @param {number} [maxEvents]
+ */
+export function buildPanicBuyForwardReturns(historyRows, maxEvents = 10) {
+  const merged = mergePanicValidationHistory(historyRows)
+  const steps = pickWeeklySteps(merged)
+  if (steps.length < 8) return []
+
+  const horizons = [
+    { key: "m1", minDays: 30 },
+    { key: "m3", minDays: 90 },
+    { key: "m6", minDays: 180 },
+    { key: "m12", minDays: 365 },
+  ]
+
+  /** @type {Array<{ date: string; score: number; returns: Record<string, number | null> }>} */
+  const out = []
+
+  for (let i = 0; i < steps.length - 1; i++) {
+    const entry = steps[i]
+    const panic = cycleRowToPanicData(entry) ?? panicDataFromCycleRow(entry)
+    const score = panic ? getFinalScore(panic) : null
+    const regime = resolveMacroV1Status(score)
+    if (regime?.id !== "panicBuy") continue
+
+    const entryDate = rowDateKey(entry)
+    if (!entryDate) continue
+    const entryTs = new Date(`${entryDate}T12:00:00`).getTime()
+
+    /** @type {Record<string, number | null>} */
+    const returns = { m1: null, m3: null, m6: null, m12: null }
+    for (const h of horizons) {
+      let growth = 1
+      let found = false
+      for (let j = i + 1; j < steps.length; j++) {
+        const prev = steps[j - 1]
+        const cur = steps[j]
+        const d = rowDateKey(cur)
+        if (!d) continue
+        const curTs = new Date(`${d}T12:00:00`).getTime()
+        growth *= 1 + estimateMarketPeriodReturn(prev, cur)
+        if ((curTs - entryTs) / 86_400_000 >= h.minDays) {
+          returns[h.key] = (growth - 1) * 100
+          found = true
+          break
+        }
+      }
+      if (!found) returns[h.key] = null
+    }
+
+    out.push({
+      date: entryDate,
+      score: Number.isFinite(score) ? Math.round(Number(score)) : 0,
+      returns,
+    })
+    if (out.length >= maxEvents) break
+  }
+
+  return out
+}
