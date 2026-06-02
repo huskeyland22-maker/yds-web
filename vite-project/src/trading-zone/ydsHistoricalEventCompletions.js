@@ -47,6 +47,25 @@ export const YDS_EVENT_COMPLETIONS = {
       recovery: { historyData: { yds: null, vix: 41.2, cnn: null, bofa: null, highYield: null, putCall: null } },
     },
   }),
+
+  "panic-2023-svb": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "최대 낙폭: S&P500 2023-02-10~2023-03-13 구간. 6·12개월 수익률: 극점(2023-03-13) 종가 기준.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -5.7,
+      after6mSp500Pct: 15.8,
+      after12mSp500Pct: 33.9,
+      performanceAnchorDate: "2023-03-13",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 20.5, cnn: 55, bofa: null, highYield: 4.4, putCall: 0.84 } },
+      rise: { historyData: { yds: null, vix: 22.9, cnn: 44, bofa: null, highYield: 4.8, putCall: 0.92 } },
+      fearExpansion: { historyData: { yds: null, vix: 24.8, cnn: 18, bofa: null, highYield: 5.6, putCall: 1.05 } },
+      climax: { historyData: { yds: null, vix: 26.5, cnn: 20, bofa: null, highYield: 5.9, putCall: 1.08 } },
+      recovery: { historyData: { yds: null, vix: 17.0, cnn: 66, bofa: null, highYield: 4.4, putCall: 0.82 } },
+    },
+  }),
 }
 
 /** @param {import("./ydsHistoricalEventTypes.js").EventDetailData} event */
