@@ -1,4 +1,5 @@
 import {
+  computeYdsScore,
   createEventCompletion,
   buildMarketMetrics,
 } from "./ydsHistoricalEventTypes.js"
@@ -21,11 +22,11 @@ export const YDS_EVENT_COMPLETIONS = {
       performanceAnchorDate: "2020-03-23",
     }),
     milestones: {
-      start: { historyData: { yds: null, vix: 14.4, cnn: 76, bofa: null, highYield: null, putCall: null } },
-      rise: { historyData: { yds: null, vix: 31.0, cnn: 41, bofa: null, highYield: null, putCall: null } },
-      fearExpansion: { historyData: { yds: null, vix: 75.5, cnn: 17, bofa: null, highYield: null, putCall: null } },
-      climax: { historyData: { yds: null, vix: 61.6, cnn: 29, bofa: null, highYield: null, putCall: null } },
-      recovery: { historyData: { yds: null, vix: 25.1, cnn: 53, bofa: null, highYield: null, putCall: null } },
+      start: { historyData: { yds: null, vix: 14.4, cnn: 76, bofa: 5.8, highYield: 3.6, putCall: 0.79 } },
+      rise: { historyData: { yds: null, vix: 31.0, cnn: 41, bofa: 4.8, highYield: 5.3, putCall: 0.92 } },
+      fearExpansion: { historyData: { yds: null, vix: 75.5, cnn: 17, bofa: 2.7, highYield: 7.9, putCall: 1.11 } },
+      climax: { historyData: { yds: null, vix: 61.6, cnn: 29, bofa: 3.6, highYield: 6.8, putCall: 1.02 } },
+      recovery: { historyData: { yds: null, vix: 25.1, cnn: 53, bofa: 4.9, highYield: 5.1, putCall: 0.87 } },
     },
   }),
 
@@ -59,11 +60,11 @@ export const YDS_EVENT_COMPLETIONS = {
       performanceAnchorDate: "2023-03-13",
     }),
     milestones: {
-      start: { historyData: { yds: null, vix: 20.5, cnn: 55, bofa: null, highYield: 4.4, putCall: 0.84 } },
-      rise: { historyData: { yds: null, vix: 22.9, cnn: 44, bofa: null, highYield: 4.8, putCall: 0.92 } },
-      fearExpansion: { historyData: { yds: null, vix: 24.8, cnn: 18, bofa: null, highYield: 5.6, putCall: 1.05 } },
-      climax: { historyData: { yds: null, vix: 26.5, cnn: 20, bofa: null, highYield: 5.9, putCall: 1.08 } },
-      recovery: { historyData: { yds: null, vix: 17.0, cnn: 66, bofa: null, highYield: 4.4, putCall: 0.82 } },
+      start: { historyData: { yds: null, vix: 20.5, cnn: 55, bofa: 5.3, highYield: 4.4, putCall: 0.84 } },
+      rise: { historyData: { yds: null, vix: 22.9, cnn: 44, bofa: 4.9, highYield: 4.8, putCall: 0.92 } },
+      fearExpansion: { historyData: { yds: null, vix: 24.8, cnn: 18, bofa: 4.0, highYield: 5.6, putCall: 1.05 } },
+      climax: { historyData: { yds: null, vix: 26.5, cnn: 20, bofa: 3.8, highYield: 5.9, putCall: 1.08 } },
+      recovery: { historyData: { yds: null, vix: 17.0, cnn: 66, bofa: 5.8, highYield: 4.4, putCall: 0.82 } },
     },
   }),
 }
@@ -86,6 +87,11 @@ export function applyEventCompletion(event) {
           ...base.historyData,
           ...(patch.historyData ?? {}),
         },
+      }
+      const ydsScore = computeYdsScore(mergedMilestones[key].historyData)
+      mergedMilestones[key].historyData = {
+        ...mergedMilestones[key].historyData,
+        yds: ydsScore,
       }
     }
   }

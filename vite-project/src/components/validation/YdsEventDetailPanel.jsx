@@ -3,6 +3,7 @@ import { isEventComplete } from "../../trading-zone/ydsHistoricalEventCompletion
 import {
   formatMetric,
   formatPct,
+  resolveYdsStage,
   YDS_MILESTONE_ORDER,
   YDS_MILESTONE_STEP_LABEL,
 } from "../../trading-zone/ydsHistoricalEventTypes.js"
@@ -77,6 +78,7 @@ export default function YdsEventDetailPanel({ eventItem }) {
           <tbody>
             {YDS_MILESTONE_ORDER.map((key) => {
               const h = eventItem.milestones?.[key]?.historyData
+              const ydsStage = resolveYdsStage(h?.yds)
               return (
                 <tr key={`ind-${key}`}>
                   <td>{YDS_MILESTONE_STEP_LABEL[key]}</td>
@@ -85,6 +87,11 @@ export default function YdsEventDetailPanel({ eventItem }) {
                     <span className="yds-event-detail__field" data-empty={h?.yds == null}>
                       {formatMetric(h?.yds)}
                     </span>
+                    {h?.yds != null && (
+                      <span className="yds-event-detail__stage-chip">
+                        {ydsStage?.emoji ?? ""} {ydsStage?.label ?? ""}
+                      </span>
+                    )}
                   </td>
                   <td>
                     <span className="yds-event-detail__field" data-empty={h?.vix == null}>

@@ -4,6 +4,8 @@
  * @typedef {"skeleton" | "complete"} YdsEventCompletionStatus
  * @typedef {"start" | "rise" | "fearExpansion" | "climax" | "recovery"} ReplayMilestoneKey
  */
+import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
+import { getFinalScore } from "../utils/tradingScores.js"
 
 /** @type {ReplayMilestoneKey[]} */
 export const YDS_MILESTONE_ORDER = ["start", "rise", "fearExpansion", "climax", "recovery"]
@@ -174,4 +176,38 @@ export function formatPct(value) {
 export function formatMetric(value, digits = 1) {
   if (value == null || !Number.isFinite(value)) return "—"
   return Number(value).toFixed(digits)
+}
+
+function toFiniteOrNull(value) {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
+export function canComputeYds(historyData) {
+  if (!historyData || typeof historyData !== "object") return false
+  const vix = toFiniteOrNull(historyData.vix)
+  const fearGreed = toFiniteOrNull(historyData.cnn)
+  const bofa = toFiniteOrNull(historyData.bofa)
+  const putCall = toFiniteOrNull(historyData.putCall)
+  const highYield = toFiniteOrNull(historyData.highYield)
+  return [vix, fearGreed, bofa, putCall, highYield].every((v) => v != null)
+}
+
+export function computeYdsScore(historyData) {
+  if (!canComputeYds(historyData)) return null
+  const score = getFinalScore({
+    vix: Number(historyData.vix),
+    fearGreed: Number(historyData.cnn),
+    bofa: Number(historyData.bofa),
+    putCall: Number(historyData.putCall),
+    highYield: Number(historyData.highYield),
+  })
+  return Number.isFinite(score) ? Math.round(score) : null
+}
+
+export function resolveYdsStage(score) {
+  const stage = resolveMacroV1Status(score)
+  return stage
+    ? { id: stage.id, label: stage.label, emoji: stage.emoji }
+    : null
 }

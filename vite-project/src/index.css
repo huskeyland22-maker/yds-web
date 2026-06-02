@@ -13327,6 +13327,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.75);
 }
 
+.yds-event-detail__stage-chip {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.3rem;
+  padding: 0.08rem 0.32rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(186, 230, 253, 0.98);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: rgba(15, 23, 42, 0.5);
+}
+
 .yds-event-detail__hint {
   margin-top: 0.3rem;
   font-size: 0.64rem;
