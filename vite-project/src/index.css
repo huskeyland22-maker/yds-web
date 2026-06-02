@@ -13403,6 +13403,86 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.95);
 }
 
+.yds-fear-climax-analysis__verdict {
+  margin-top: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-fear-climax-analysis__verdict-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: rgba(186, 230, 253, 0.98);
+}
+
+.yds-fear-climax-analysis__insights {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.66rem;
+  color: rgba(203, 213, 225, 0.94);
+  line-height: 1.4;
+}
+
+.yds-fear-climax-analysis__insights--accent {
+  border-left: 3px solid rgba(56, 189, 248, 0.45);
+  padding-left: 0.65rem;
+  margin-left: 0.15rem;
+}
+
+.yds-fear-climax-analysis__event-card {
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-fear-climax-analysis__event-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.98);
+}
+
+.yds-fear-climax-analysis__event-metrics {
+  margin-top: 0.12rem;
+  font-size: 0.66rem;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.yds-fear-climax-analysis__mini-table {
+  margin-top: 0.3rem;
+  font-size: 0.64rem;
+}
+
+.yds-fear-climax-analysis__factors {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0;
+}
+
+.yds-fear-climax-analysis__factors div {
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.yds-fear-climax-analysis__factors dt {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: rgba(186, 230, 253, 0.95);
+}
+
+.yds-fear-climax-analysis__factors dd {
+  margin: 0.2rem 0 0;
+  font-size: 0.64rem;
+  color: rgba(203, 213, 225, 0.92);
+  line-height: 1.35;
+}
+
 .panic-validation-event-complete {
   display: inline-block;
   margin-left: 0.35rem;
