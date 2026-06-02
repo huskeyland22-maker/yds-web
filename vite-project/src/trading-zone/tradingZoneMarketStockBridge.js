@@ -11,6 +11,7 @@ import {
 } from "./tradingZoneStageHistory.js"
 import { TRADING_STAGE_META } from "./tacticalTradingZoneData.js"
 import { filterLiveEligiblePositions } from "./tradingZoneLiveBuckets.js"
+import { buildStockDisplayReasons } from "./tradingZoneStockDisplayReasons.js"
 
 /** @typedef {import("./tacticalTradingZoneData.js").TradingZonePosition} TradingZonePosition */
 /** @typedef {import("./tacticalTradingZoneData.js").TradingStageId} TradingStageId */
@@ -137,72 +138,6 @@ export function buildCompactStageLadder(segments) {
     }
   }
   return ladder
-}
-
-/**
- * @param {TradingZonePosition} position
- * @param {import("./tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | undefined} ev
- * @param {{ regimeBoost: boolean; focusStage: TradingStageId }} ctx
- */
-function buildPriorityReasons(position, ev, ctx) {
-  /** @type {string[]} */
-  const reasons = []
-
-  if (ev?.dataReady && ev.strengthHighlights?.length) {
-    reasons.push(...ev.strengthHighlights)
-  }
-  if (ev?.dataReady && ev.entryRationale?.length) {
-    for (const line of ev.entryRationale) {
-      const normalized = line.replace(/20MA/gi, "20일선")
-      if (!reasons.includes(normalized)) reasons.push(normalized)
-    }
-  }
-
-  if (ev?.dataReady && ev.auxStrip?.length) {
-    const ma = ev.auxStrip.find((x) => x.key === "20MA")
-    if (ma?.display === "▲" && !reasons.some((r) => /20일선|20MA/.test(r))) {
-      reasons.push("20일선 위")
-    }
-    const vol = ev.auxStrip.find((x) => x.key === "거래량")
-    if (vol?.display === "▲" && !reasons.some((r) => /거래량/.test(r))) {
-      reasons.push("거래량 증가")
-    }
-  }
-
-  if (position.stage === "trend" || position.stage === "pullback") {
-    if (!reasons.some((r) => /추세/.test(r))) reasons.push("추세 유지")
-  }
-
-  const histLen = position.stageHistory?.length ?? 0
-  if (histLen >= 2 && !reasons.some((r) => /거래량/.test(r))) {
-    reasons.push("거래량 증가")
-  }
-
-  return pickTopDisplayReasons(reasons, 2)
-}
-
-/** @param {string[]} reasons @param {number} limit */
-function pickTopDisplayReasons(reasons, limit = 2) {
-  const skip = /섹터|연계|구간 일치|⚠/
-  const unique = [...new Set(reasons)].filter((r) => r && !skip.test(r))
-  /** @type {((s: string) => boolean)[]} */
-  const priority = [
-    (s) => /추세 유지/.test(s),
-    (s) => /거래량 증가/.test(s),
-    (s) => /20일선/.test(s),
-    (s) => /눌림/.test(s),
-  ]
-  const picked = []
-  for (const test of priority) {
-    const hit = unique.find((r) => test(r))
-    if (hit && !picked.includes(hit)) picked.push(hit)
-    if (picked.length >= limit) return picked
-  }
-  for (const r of unique) {
-    if (!picked.includes(r)) picked.push(r)
-    if (picked.length >= limit) break
-  }
-  return picked
 }
 
 /**
@@ -348,9 +283,10 @@ export function buildMarketStockBridge(input = {}) {
     const confidence = ev?.dataReady ? ev.confidence : Math.round(score * 0.92)
     const { path, segments } = buildStagePathDisplay(position.stageHistory)
     const stageLadder = buildCompactStageLadder(segments)
-    const reasons = buildPriorityReasons(position, ev, {
+    const reasons = buildStockDisplayReasons(position, ev, {
       regimeBoost,
       focusStage: focus.focusStage,
+      limit: 3,
     })
 
     return {

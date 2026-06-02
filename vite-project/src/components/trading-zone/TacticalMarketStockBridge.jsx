@@ -1,4 +1,5 @@
 import { TRADING_STAGE_META, tradingStageBadge } from "../../trading-zone/tacticalTradingZoneData.js"
+import StockPickReasonList from "./StockPickReasonList.jsx"
 
 /**
  * @param {{
@@ -45,6 +46,7 @@ export default function TacticalMarketStockBridge({
           const selected = selectedId === item.id
           const badge = tradingStageBadge({ stage: item.stage })
           const stageMeta = TRADING_STAGE_META[item.stage]
+          const reasons = item.reasons ?? []
 
           return (
             <li key={item.id} className="tactical-zone-stock-bridge__list-item">
@@ -59,23 +61,32 @@ export default function TacticalMarketStockBridge({
                 aria-pressed={selected}
                 aria-label={`${item.symbol} 신뢰도 ${item.confidence} ${item.stageLabel ?? badge.label}`}
               >
-                <span className="tactical-zone-stock-bridge__row-rank" aria-hidden>
-                  {index + 1}
-                </span>
-                <span className="tactical-zone-stock-bridge__row-symbol">{item.symbol}</span>
-                <span className="tactical-zone-stock-bridge__row-score font-mono tabular-nums">
-                  {item.confidence}
-                </span>
-                <span
-                  className="tactical-zone-chip__badge tactical-zone-stock-bridge__row-badge"
-                  data-stage={item.stage}
-                  title={item.stageLabel ?? stageMeta?.label}
-                >
-                  <span className="tactical-zone-chip__badge-dot" aria-hidden>
-                    ●
+                <span className="tactical-zone-stock-bridge__row-main">
+                  <span className="tactical-zone-stock-bridge__row-rank" aria-hidden>
+                    {index + 1}
                   </span>
-                  <span className="tactical-zone-chip__badge-label">{badge.label}</span>
+                  <span className="tactical-zone-stock-bridge__row-symbol">{item.symbol}</span>
+                  <span className="tactical-zone-stock-bridge__row-score font-mono tabular-nums">
+                    {item.confidence}
+                  </span>
+                  <span
+                    className="tactical-zone-chip__badge tactical-zone-stock-bridge__row-badge"
+                    data-stage={item.stage}
+                    title={item.stageLabel ?? stageMeta?.label}
+                  >
+                    <span className="tactical-zone-chip__badge-dot" aria-hidden>
+                      ●
+                    </span>
+                    <span className="tactical-zone-chip__badge-label">{badge.label}</span>
+                  </span>
                 </span>
+                {reasons.length ? (
+                  <StockPickReasonList
+                    reasons={reasons}
+                    max={3}
+                    className="tactical-zone-stock-bridge__row-reasons"
+                  />
+                ) : null}
               </button>
             </li>
           )

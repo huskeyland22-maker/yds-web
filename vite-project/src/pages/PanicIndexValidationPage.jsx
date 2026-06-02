@@ -69,13 +69,53 @@ export default function PanicIndexValidationPage() {
         <div>
           <h1 className="panic-validation-page__title">패닉지수 검증</h1>
           <p className="panic-validation-page__sub">
-            {backtest.periodStart ?? "—"} ~ {backtest.periodEnd ?? "—"} · 동일 시장 프록시 기준
+            YDS 패닉전략 백테스트 · {backtest.periodStart ?? "—"} ~ {backtest.periodEnd ?? "—"}
           </p>
         </div>
         <Link to="/cycle" className="panic-validation-page__link">
           매매존으로
         </Link>
       </header>
+
+      {!backtest.ok && backtest.reason === "insufficient_data" ? (
+        <p className="panic-validation-panel__warn" role="status">
+          표본이 부족합니다(주간 {backtest.sampleWeeks ?? 0}회). Cycle 히스토리를 더 쌓거나 확장 앵커 데이터를
+          확인해 주세요.
+        </p>
+      ) : null}
+
+      <section className="panic-validation-kpi" aria-label="핵심 지표 요약">
+        <div className="panic-validation-kpi__card">
+          <p className="panic-validation-kpi__label">누적 수익률</p>
+          <p className={`panic-validation-kpi__value panic-validation-kpi__value--${tone(strategyTotal) || "flat"}`}>
+            {formatPct(strategyTotal)}
+          </p>
+        </div>
+        <div className="panic-validation-kpi__card">
+          <p className="panic-validation-kpi__label">S&amp;P500 대비</p>
+          <p
+            className={`panic-validation-kpi__value panic-validation-kpi__value--${
+              tone(
+                strategyTotal != null && spyTotal != null ? strategyTotal - spyTotal : null,
+              ) || "flat"
+            }`}
+          >
+            {strategyTotal != null && spyTotal != null
+              ? formatPct(strategyTotal - spyTotal)
+              : "—"}
+          </p>
+        </div>
+        <div className="panic-validation-kpi__card">
+          <p className="panic-validation-kpi__label">승률</p>
+          <p className="panic-validation-kpi__value">{strategyWin != null ? `${strategyWin.toFixed(1)}%` : "—"}</p>
+        </div>
+        <div className="panic-validation-kpi__card">
+          <p className="panic-validation-kpi__label">MDD</p>
+          <p className="panic-validation-kpi__value panic-validation-kpi__value--down">
+            {strategyMdd != null ? `-${strategyMdd.toFixed(1)}%` : "—"}
+          </p>
+        </div>
+      </section>
 
       <section className="panic-validation-vs" aria-labelledby="panic-validation-vs-title">
         <h2 id="panic-validation-vs-title" className="panic-validation-vs__title">
@@ -175,6 +215,7 @@ export default function PanicIndexValidationPage() {
         <p className="panic-validation-panel__note">
           시장 수익은 Fear&amp;Greed·VIX 변화로 근사합니다. 월간 앵커·실측 히스토리 병합 · 표본 주{" "}
           {backtest.sampleWeeks ?? 0}
+          {backtest.usesExtendedHistory ? " · 확장 앵커 포함" : ""}
         </p>
       </section>
 
@@ -182,6 +223,9 @@ export default function PanicIndexValidationPage() {
         <h2 id="panic-validation-allocation" className="panic-validation-panel__h2">
           거시 단계 → 권장 비중
         </h2>
+        <p className="panic-validation-panel__bench">
+          실전 매매존 시장 상태와 동일 규칙 · 중립구간 주식 70% / 패닉매수 주식 100% 등
+        </p>
         <ul className="panic-validation-allocation">
           {Object.entries(MACRO_STAGE_ALLOCATION).map(([id, alloc]) => (
             <li key={id} className="panic-validation-allocation__item" data-regime={id}>

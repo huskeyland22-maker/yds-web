@@ -82,6 +82,15 @@ export const PANIC_INDEX_CORE_HISTORY_ROWS = [PANIC_INDEX_HISTORY_ROWS[0]]
 
 export const PANIC_INDEX_CORE_HISTORY_METRICS = PANIC_INDEX_CORE_HISTORY_ROWS.flat()
 
+/** YDS 종합점수 — VIX·CNN·BofA·HY 가중 합산 */
+export const YDS_COMPOSITE_HISTORY_METRIC = {
+  key: "ydsComposite",
+  shortLabel: "YDS",
+  chartLabel: "YDS",
+  accent: "#a78bfa",
+  tooltip: "YDS 종합점수 (단기·중기 가중)",
+}
+
 /** @deprecated 실전/거시 탭 제거 — PANIC_INDEX_HISTORY_METRICS 사용 */
 export const PANIC_V2_HISTORY_TAB = {
   key: "panicV2",
@@ -135,6 +144,7 @@ export const HISTORY_TAB_METRICS = [
 export function findChartMetric(key) {
   const fromPanic = PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === key)
   if (fromPanic) return fromPanic
+  if (key === "ydsComposite") return YDS_COMPOSITE_HISTORY_METRIC
   if (key === "panicV2") return PANIC_V2_HISTORY_TAB
   if (key === "panicV1") return PANIC_V1_HISTORY_TAB
   return ALL_CHART_METRICS.find((m) => m.key === key) ?? HISTORY_AUX_METRICS.find((m) => m.key === key) ?? null

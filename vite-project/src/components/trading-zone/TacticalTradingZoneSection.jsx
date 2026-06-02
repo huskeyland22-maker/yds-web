@@ -27,6 +27,8 @@ import TacticalMarketStockBridge from "./TacticalMarketStockBridge.jsx"
 import TacticalRecommendationTrack from "./TacticalRecommendationTrack.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
+import StockPickReasonList from "./StockPickReasonList.jsx"
+import { buildStockDisplayReasons } from "../../trading-zone/tradingZoneStockDisplayReasons.js"
 import { buildMarketStockBridge } from "../../trading-zone/tradingZoneMarketStockBridge.js"
 import { STAGE_STATUS_SHORT } from "../../trading-zone/tradingZoneDetailMobile.js"
 
@@ -115,12 +117,18 @@ function StockChip({ position, bucketId, selected, onSelect, evaluation = null }
  *   position: import("../../trading-zone/tacticalTradingZoneData.js").TradingZonePosition
  *   confidence: number | null
  *   evaluation?: import("../../trading-zone/tradingZoneStockEvaluation.js").TradingZoneStockEvaluation | null
+ *   reasons?: string[]
  *   selected: boolean
  *   onSelect: (id: string) => void
  * }} props
  */
-function TodayPickCard({ position, confidence, evaluation = null, selected, onSelect }) {
+function TodayPickCard({ position, confidence, evaluation = null, reasons = [], selected, onSelect }) {
   const badge = tradingStageBadge(position)
+  const displayReasons =
+    reasons.length > 0
+      ? reasons
+      : buildStockDisplayReasons(position, evaluation, { limit: 3 })
+
   return (
     <section className="tactical-zone-today-pick" aria-label="오늘의 추천">
       <p className="m-0 tactical-zone-today-pick__kicker">오늘의 추천</p>
@@ -131,20 +139,26 @@ function TodayPickCard({ position, confidence, evaluation = null, selected, onSe
           .join(" ")}
         onClick={() => onSelect(position.id)}
       >
-        <span className="tactical-zone-today-pick__main">
+        <div className="tactical-zone-today-pick__head-row">
           <span className="tactical-zone-today-pick__symbol">{position.symbol}</span>
           {confidence != null ? (
-            <>
+            <span className="tactical-zone-today-pick__score-wrap">
+              <span className="tactical-zone-today-pick__score-label">신뢰도</span>
               <span className="tactical-zone-today-pick__score font-mono tabular-nums">{confidence}</span>
               <TacticalConfidenceGrade score={confidence} compact className="tactical-zone-today-pick__grade" />
-            </>
+            </span>
           ) : null}
-        </span>
+        </div>
         <span className="tactical-zone-today-pick__badge" data-stage={position.stage}>
           <span aria-hidden>●</span>
           {badge.label}
         </span>
-        {evaluation?.dataReady && evaluation.signalLabel ? (
+        {displayReasons.length ? (
+          <div className="tactical-zone-today-pick__reasons-block">
+            <p className="m-0 tactical-zone-today-pick__reasons-title">추천 이유</p>
+            <StockPickReasonList reasons={displayReasons} max={3} />
+          </div>
+        ) : evaluation?.dataReady && evaluation.signalLabel ? (
           <span className="tactical-zone-today-pick__hint">{evaluation.signalLabel}</span>
         ) : null}
       </button>
@@ -464,6 +478,7 @@ export default function TacticalTradingZoneSection({
           link={engineLink}
           marketPolicy={marketPolicyView}
           panicScore={panicScore}
+          panicData={panicData}
           hideTitle
         />
       </div>
@@ -524,6 +539,9 @@ export default function TacticalTradingZoneSection({
           position={liveBuckets.todayPick}
           confidence={liveBuckets.todayPickConfidence}
           evaluation={evalMap[liveBuckets.todayPick.id] ?? null}
+          reasons={
+            marketStockBridge.priorities.find((p) => p.id === liveBuckets.todayPick?.id)?.reasons ?? []
+          }
           selected={selectedId === liveBuckets.todayPick.id}
           onSelect={setSelectedId}
         />

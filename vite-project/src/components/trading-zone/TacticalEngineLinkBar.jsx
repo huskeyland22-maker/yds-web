@@ -6,6 +6,7 @@ import {
   resolveHorizonStatusLabel,
   resolveHorizonStatusTone,
 } from "../../trading-zone/marketPolicyEngine.js"
+import MacroStageAllocationStrip from "./MacroStageAllocationStrip.jsx"
 import TacticalTodayActionBar from "./TacticalTodayActionBar.jsx"
 import TacticalMacroProgress from "./TacticalMacroProgress.jsx"
 
@@ -14,6 +15,7 @@ import TacticalMacroProgress from "./TacticalMacroProgress.jsx"
  *   link: import("../../trading-zone/tradingZoneEngineLink.js").TradingZoneEngineLink
  *   marketPolicy?: import("../../trading-zone/marketPolicyEngine.js").ReturnType<typeof import("../../trading-zone/marketPolicyEngine.js").buildMarketPolicy> | null
  *   panicScore?: number | null
+ *   panicData?: object | null
  *   hideTitle?: boolean
  * }} props
  */
@@ -21,6 +23,7 @@ export default function TacticalEngineLinkBar({
   link,
   marketPolicy = null,
   panicScore = null,
+  panicData = null,
   hideTitle = false,
 }) {
   if (!link.ready) {
@@ -73,6 +76,7 @@ export default function TacticalEngineLinkBar({
         </div>
       </div>
 
+      <MacroStageAllocationStrip panicData={panicData} className="tactical-zone-engine-link__allocation" />
       <TacticalTodayActionBar marketPolicy={marketPolicy} />
       <TacticalMacroProgress panicScore={panicScore} />
 

@@ -8,6 +8,8 @@ import { panicV1ScoreForRow } from "../panic-v2/panicV1History.js"
 import { panicV2ScoreForRow } from "../panic-v2/panicV2History.js"
 import { panicV2ScoreFromRow } from "../panic-v2/panicHistoryV2Backfill.js"
 import { buildPanicV2DynamicSeries } from "../panic-v2/panicV2Dynamic.js"
+import { panicDataFromCycleRow } from "./cycleHistoryUtils.js"
+import { getFinalScore } from "./tradingScores.js"
 import {
   loadStoredPanicHistory,
   panicHistoryLocalToCycleRows,
@@ -93,6 +95,12 @@ function rowValue(row, key) {
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
   if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
   if (key === "panicScore") return Number(row.panicScore ?? row.panic_score)
+  if (key === "ydsComposite") {
+    const panic = panicDataFromCycleRow(row)
+    if (!panic) return null
+    const score = getFinalScore(panic)
+    return Number.isFinite(score) ? score : null
+  }
   return Number(row[key])
 }
 

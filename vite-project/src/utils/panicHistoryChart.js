@@ -4,7 +4,9 @@
 
 import { buildPanicV1HistoryChartData } from "../panic-v2/panicV1History.js"
 import { buildPanicV2DynamicChartData } from "../panic-v2/panicV2Dynamic.js"
+import { getFinalScore } from "./tradingScores.js"
 import { formatChartAxisMd } from "./chartDateFormat.js"
+import { panicDataFromCycleRow } from "./cycleHistoryUtils.js"
 import { sortHistoryRowsAsc } from "./panicHistoryDesk.js"
 
 /** UI 탭 id → cycle row 필드 */
@@ -26,6 +28,7 @@ export const HISTORY_CHART_FIELD_MAP = {
   skew: "skew",
   gs: "gsBullBear",
   gsBullBear: "gsBullBear",
+  ydsComposite: "ydsComposite",
 }
 
 /** @param {object} row @param {string} field */
@@ -73,6 +76,25 @@ export function buildSingleMetricChartData(history, selectedField) {
     .filter(Boolean)
 }
 
+/** VIX·CNN·BofA 등으로 계산한 YDS 종합점수(0~100) 시계열 */
+export function buildYdsCompositeChartData(history) {
+  return sortHistoryRowsAsc(history)
+    .map((row) => {
+      const date = String(row.date ?? row.ts ?? "").slice(0, 10)
+      const panic = panicDataFromCycleRow(row)
+      if (!panic) return null
+      const score = getFinalScore(panic)
+      if (!Number.isFinite(score)) return null
+      return {
+        date,
+        axisLabel: formatChartAxisMd(date),
+        value: score,
+        ydsComposite: score,
+      }
+    })
+    .filter(Boolean)
+}
+
 /** DB·병합된 panic_v2 점수로 차트 (1건 이상이면 즉시 표시) */
 export function buildPanicV2StoredChartData(history) {
   return sortHistoryRowsAsc(history)
@@ -101,6 +123,14 @@ export function buildPanicV2StoredChartData(history) {
  * @param {string} activeHistoryTab
  */
 export function buildHistoryChartPayload(history, activeHistoryTab) {
+  if (activeHistoryTab === "ydsComposite") {
+    const chartData = buildYdsCompositeChartData(history)
+    return {
+      selectedField: "ydsComposite",
+      dataKey: "value",
+      chartData,
+    }
+  }
   if (activeHistoryTab === "panicV2") {
     const stored = buildPanicV2StoredChartData(history)
     const chartData = stored.length >= 1 ? stored : buildPanicV2DynamicChartData(history)

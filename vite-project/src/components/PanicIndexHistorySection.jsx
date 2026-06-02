@@ -6,6 +6,7 @@ import {
   PANIC_INDEX_CORE_HISTORY_ROWS,
   PANIC_INDEX_HISTORY_METRICS,
   PANIC_INDEX_HISTORY_ROWS,
+  YDS_COMPOSITE_HISTORY_METRIC,
 } from "../utils/panicDeskMetrics.js"
 import {
   buildPanicHistoryInsight,
@@ -40,14 +41,28 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
 
-  const [metricScope, setMetricScope] = useState(/** @type {"core" | "all"} */ ("core"))
+  const [metricScope, setMetricScope] = useState(/** @type {"core" | "yds" | "all"} */ ("core"))
   const [activeMetricKey, setActiveMetricKey] = useState(DEFAULT_METRIC_KEY)
   const [rangeId, setRangeId] = useState("3M")
 
-  const scopeRows = metricScope === "core" ? PANIC_INDEX_CORE_HISTORY_ROWS : PANIC_INDEX_HISTORY_ROWS
-  const scopeMetrics = metricScope === "core" ? PANIC_INDEX_CORE_HISTORY_METRICS : PANIC_INDEX_HISTORY_METRICS
+  const scopeRows =
+    metricScope === "core"
+      ? PANIC_INDEX_CORE_HISTORY_ROWS
+      : metricScope === "yds"
+        ? [[YDS_COMPOSITE_HISTORY_METRIC]]
+        : PANIC_INDEX_HISTORY_ROWS
+  const scopeMetrics =
+    metricScope === "core"
+      ? PANIC_INDEX_CORE_HISTORY_METRICS
+      : metricScope === "yds"
+        ? [YDS_COMPOSITE_HISTORY_METRIC]
+        : PANIC_INDEX_HISTORY_METRICS
 
   useEffect(() => {
+    if (metricScope === "yds") {
+      setActiveMetricKey("ydsComposite")
+      return
+    }
     if (scopeMetrics.some((m) => m.key === activeMetricKey)) return
     setActiveMetricKey(scopeMetrics[0]?.key ?? DEFAULT_METRIC_KEY)
   }, [metricScope, scopeMetrics, activeMetricKey])
@@ -121,7 +136,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       <PanicDeskSectionHeader
         icon="📈"
         title="패닉지수 히스토리"
-        description="핵심·전체 지표 토글 · 원본 흐름"
+        description="핵심 3지표 · YDS 종합 · 전체 9지표"
         tone="amber"
         tier="main"
       />
@@ -135,6 +150,16 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         >
           <span className="panic-history-scope-toggle__label-full">핵심 3지표</span>
           <span className="panic-history-scope-toggle__label-short">핵심</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={["panic-history-scope-toggle__btn", metricScope === "yds" ? "is-active" : ""].join(" ")}
+          aria-selected={metricScope === "yds"}
+          onClick={() => setMetricScope("yds")}
+        >
+          <span className="panic-history-scope-toggle__label-full">YDS 종합</span>
+          <span className="panic-history-scope-toggle__label-short">YDS</span>
         </button>
         <button
           type="button"

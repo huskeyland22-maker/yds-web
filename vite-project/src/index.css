@@ -1699,9 +1699,9 @@
 
   .tactical-zone-today-pick__card {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
     width: 100%;
     padding: 10px 12px;
     border-radius: 8px;
@@ -1724,6 +1724,43 @@
   .tactical-zone-today-pick__card--selected {
     border-color: rgba(34, 211, 238, 0.5);
     box-shadow: 0 0 20px rgba(34, 211, 238, 0.22);
+  }
+
+  .tactical-zone-today-pick__head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .tactical-zone-today-pick__score-wrap {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .tactical-zone-today-pick__score-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.9);
+  }
+
+  .tactical-zone-today-pick__reasons-block {
+    margin-top: 2px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    width: 100%;
+  }
+
+  .tactical-zone-today-pick__reasons-title {
+    margin: 0 0 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(148, 163, 184, 0.88);
   }
 
   .tactical-zone-today-pick__main {
@@ -3153,11 +3190,21 @@
   }
 
   .tactical-zone-stock-bridge__row {
+    padding: 3px 5px 4px;
+    border-radius: 5px;
+  }
+
+  .tactical-zone-stock-bridge__row-main {
     grid-template-columns: 1rem minmax(0, 1fr) auto auto;
     gap: 4px;
-    min-height: 26px;
-    padding: 3px 5px;
-    border-radius: 5px;
+  }
+
+  .tactical-zone-stock-bridge__row-reasons {
+    padding-left: 1rem;
+  }
+
+  .stock-pick-reasons__item {
+    font-size: 9px;
   }
 
   .tactical-zone-stock-bridge__row-rank {
@@ -4317,13 +4364,13 @@
   }
 
   .tactical-zone-stock-bridge__row {
-    display: grid;
-    grid-template-columns: 1.1rem minmax(0, 1fr) auto auto;
-    align-items: center;
-    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
     width: 100%;
-    min-height: 30px;
-    padding: 4px 6px;
+    min-height: auto;
+    padding: 4px 6px 5px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(255, 255, 255, 0.025);
@@ -4332,6 +4379,18 @@
     transition:
       border-color 0.15s ease,
       background 0.15s ease;
+  }
+
+  .tactical-zone-stock-bridge__row-main {
+    display: grid;
+    grid-template-columns: 1.1rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .tactical-zone-stock-bridge__row-reasons {
+    padding-left: 1.1rem;
   }
 
   .tactical-zone-stock-bridge__row:hover {
@@ -12559,6 +12618,86 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 1rem;
   font-weight: 800;
   color: rgba(248, 250, 252, 0.98);
+}
+
+.panic-validation-kpi__value--up {
+  color: rgba(52, 211, 153, 0.98);
+}
+
+.panic-validation-kpi__value--down {
+  color: rgba(248, 113, 113, 0.98);
+}
+
+.panic-validation-panel__bench {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.stock-pick-reasons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stock-pick-reasons__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(167, 243, 208, 0.94);
+  word-break: keep-all;
+}
+
+.stock-pick-reasons__mark {
+  flex-shrink: 0;
+  color: rgba(52, 211, 153, 0.95);
+}
+
+.macro-stage-allocation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.tactical-zone-engine-link__allocation {
+  margin-top: 4px;
+}
+
+.macro-stage-allocation__stage {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.macro-stage-allocation__split {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.macro-stage-allocation__sep {
+  margin: 0 4px;
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.macro-stage-allocation__note {
+  width: 100%;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.88);
 }
 
 .panic-validation-year-table {
