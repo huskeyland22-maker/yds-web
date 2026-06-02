@@ -1,3 +1,5 @@
+import { applyEventCompletion } from "./ydsHistoricalEventCompletions.js"
+
 /**
  * YDS 역사 검증용 대표 이벤트 데이터셋 (2차)
  * - 실제 역사적 사건 기반 이벤트만 유지
@@ -184,12 +186,13 @@ export const YDS_VALIDATION_EVENT_DATASET = RAW_EVENTS.map((event) => ({
     recovery: { date: event.keyDates.recovery, historyData: buildHistoryData(event.keyDates.recovery) },
   },
   marketPerformance: {
-    eventPeriodSp500Pct: null,
+    maxDrawdownPct: null,
     after6mSp500Pct: null,
     after12mSp500Pct: null,
+    performanceAnchorDate: null,
   },
   durationDays: calcDurationDays(event.startDate, event.endDate),
-}))
+})).map(applyEventCompletion)
 
 export const YDS_VALIDATION_EVENT_CATEGORY_LABEL = {
   panic: "패닉 이벤트",

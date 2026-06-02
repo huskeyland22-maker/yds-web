@@ -17,6 +17,7 @@ import {
   YDS_VALIDATION_EVENT_DATASET,
 } from "../trading-zone/ydsHistoricalValidationEvents.js"
 import YdsEventDetailPanel from "../components/validation/YdsEventDetailPanel.jsx"
+import { isEventComplete } from "../trading-zone/ydsHistoricalEventCompletions.js"
 import {
   CartesianGrid,
   Dot,
@@ -633,7 +634,14 @@ export default function PanicIndexValidationPage() {
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.id}>
-                      <td>{row.name}</td>
+                      <td>
+                        {row.name}
+                        {isEventComplete(row) ? (
+                          <span className="panic-validation-event-complete" title="지표·성과 데이터 완성">
+                            완성
+                          </span>
+                        ) : null}
+                      </td>
                       <td className="font-mono tabular-nums">{row.startDate}</td>
                       <td className="font-mono tabular-nums">{row.endDate}</td>
                       <td className="font-mono tabular-nums">

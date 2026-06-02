@@ -9,8 +9,13 @@ const STEP_LABEL = {
   recovery: "회복",
 }
 
+function formatMetric(value, digits = 1) {
+  if (value == null || !Number.isFinite(value)) return "—"
+  return Number(value).toFixed(digits)
+}
+
 /**
- * @param {{ eventItem: any }} props
+ * @param {{ eventItem: Record<string, unknown> }} props
  */
 export default function ReplayViewer({ eventItem }) {
   const [idx, setIdx] = useState(0)
@@ -18,6 +23,7 @@ export default function ReplayViewer({ eventItem }) {
   if (!eventItem || !keys.length) return null
   const currentKey = keys[Math.max(0, Math.min(idx, keys.length - 1))]
   const current = eventItem.milestones[currentKey]
+  const h = current?.historyData
   const canPrev = idx > 0
   const canNext = idx < keys.length - 1
 
@@ -33,9 +39,12 @@ export default function ReplayViewer({ eventItem }) {
         </button>
       </div>
       <p className="m-0 yds-replay-viewer__status">
-        현재 단계: {STEP_LABEL[currentKey] ?? currentKey} · {current?.date ?? "—"}
+        현재 단계: {STEP_LABEL[currentKey] ?? currentKey} ·{" "}
+        <span className="font-mono tabular-nums">{current?.date ?? "—"}</span>
+      </p>
+      <p className="m-0 yds-replay-viewer__metrics font-mono tabular-nums">
+        VIX {formatMetric(h?.vix)} · CNN {formatMetric(h?.cnn, 0)}
       </p>
     </div>
   )
 }
-

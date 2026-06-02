@@ -13228,6 +13228,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(186, 230, 253, 0.98);
 }
 
+.panic-validation-event-complete {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: rgba(167, 243, 208, 0.98);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  background: rgba(6, 78, 59, 0.3);
+  vertical-align: middle;
+}
+
 .yds-event-detail {
   margin-top: 0.7rem;
   padding: 0.6rem;
@@ -13236,10 +13249,117 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: rgba(2, 6, 23, 0.36);
 }
 
+.yds-event-detail__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+}
+
 .yds-event-detail__title {
   font-size: 0.82rem;
   font-weight: 800;
   color: rgba(186, 230, 253, 0.98);
+}
+
+.yds-event-detail__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.08rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: rgba(148, 163, 184, 0.95);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-event-detail__badge--complete {
+  border-color: rgba(52, 211, 153, 0.35);
+  color: rgba(167, 243, 208, 0.98);
+  background: rgba(6, 78, 59, 0.35);
+}
+
+.yds-event-detail__meta {
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  color: rgba(203, 213, 225, 0.92);
+}
+
+.yds-event-detail__table {
+  width: 100%;
+  margin-top: 0.35rem;
+  border-collapse: collapse;
+  font-size: 0.68rem;
+}
+
+.yds-event-detail__table th,
+.yds-event-detail__table td {
+  padding: 0.22rem 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+.yds-event-detail__table th {
+  font-weight: 800;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.yds-event-detail__table td {
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.yds-event-detail__field {
+  display: inline-block;
+  min-width: 2.8rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: rgba(15, 23, 42, 0.55);
+  font-family: ui-monospace, monospace;
+  font-size: 0.68rem;
+  text-align: right;
+}
+
+.yds-event-detail__field[data-empty="true"] {
+  border-style: dashed;
+  border-color: rgba(148, 163, 184, 0.22);
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.yds-event-detail__hint {
+  margin-top: 0.3rem;
+  font-size: 0.64rem;
+  color: rgba(148, 163, 184, 0.9);
+  line-height: 1.35;
+}
+
+.yds-event-detail__perf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+}
+
+.yds-event-detail__perf div {
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.yds-event-detail__perf dt {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.yds-event-detail__perf dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.98);
 }
 
 .yds-event-detail__block {
@@ -13294,6 +13414,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-top: 0.3rem;
   font-size: 0.72rem;
   color: rgba(226, 232, 240, 0.95);
+}
+
+.yds-replay-viewer__metrics {
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  color: rgba(125, 211, 252, 0.95);
 }
 
 .panic-validation-panel__warn {
