@@ -60,14 +60,18 @@ export default function YdsEventDetailPanel({ eventItem }) {
       </div>
 
       <div className="yds-event-detail__block">
-        <p className="m-0 yds-event-detail__head">2. 지표 데이터 (VIX · CNN Fear &amp; Greed)</p>
+        <p className="m-0 yds-event-detail__head">2. 지표 데이터 (YDS 핵심 5지표)</p>
         <table className="yds-event-detail__table yds-event-detail__table--indicators">
           <thead>
             <tr>
               <th scope="col">단계</th>
               <th scope="col">날짜</th>
+              <th scope="col">YDS</th>
               <th scope="col">VIX</th>
               <th scope="col">CNN F&amp;G</th>
+              <th scope="col">BofA</th>
+              <th scope="col">HY</th>
+              <th scope="col">Put/Call</th>
             </tr>
           </thead>
           <tbody>
@@ -78,6 +82,11 @@ export default function YdsEventDetailPanel({ eventItem }) {
                   <td>{YDS_MILESTONE_STEP_LABEL[key]}</td>
                   <td className="font-mono tabular-nums">{h?.date ?? "—"}</td>
                   <td>
+                    <span className="yds-event-detail__field" data-empty={h?.yds == null}>
+                      {formatMetric(h?.yds)}
+                    </span>
+                  </td>
+                  <td>
                     <span className="yds-event-detail__field" data-empty={h?.vix == null}>
                       {formatMetric(h?.vix)}
                     </span>
@@ -85,6 +94,21 @@ export default function YdsEventDetailPanel({ eventItem }) {
                   <td>
                     <span className="yds-event-detail__field" data-empty={h?.cnn == null}>
                       {formatMetric(h?.cnn, 0)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="yds-event-detail__field" data-empty={h?.bofa == null}>
+                      {formatMetric(h?.bofa)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="yds-event-detail__field" data-empty={h?.highYield == null}>
+                      {formatMetric(h?.highYield)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="yds-event-detail__field" data-empty={h?.putCall == null}>
+                      {formatMetric(h?.putCall)}
                     </span>
                   </td>
                 </tr>

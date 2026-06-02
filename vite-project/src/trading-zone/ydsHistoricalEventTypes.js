@@ -23,7 +23,7 @@ export const YDS_MILESTONE_STEP_LABEL = {
  * @property {number | null} vix
  * @property {number | null} cnn
  * @property {number | null} bofa
- * @property {number | null} hy
+ * @property {number | null} highYield
  * @property {number | null} putCall
  * @property {number | null} sp500
  */
@@ -64,7 +64,7 @@ export const YDS_MILESTONE_STEP_LABEL = {
  * @property {YdsEventCompletionStatus} completionStatus
  * @property {string} [performanceNotes]
  * @property {Partial<MarketMetrics>} marketPerformance
- * @property {Partial<Record<ReplayMilestoneKey, { historyData?: Partial<Pick<MilestoneIndicatorData, "vix" | "cnn" | "yds" | "bofa" | "hy" | "putCall" | "sp500">> }>>} [milestones]
+ * @property {Partial<Record<ReplayMilestoneKey, { historyData?: Partial<Pick<MilestoneIndicatorData, "yds" | "vix" | "cnn" | "bofa" | "highYield" | "putCall" | "sp500">> }>>} [milestones]
  */
 
 /** @param {string} date */
@@ -75,7 +75,7 @@ export function buildHistoryData(date) {
     vix: null,
     cnn: null,
     bofa: null,
-    hy: null,
+    highYield: null,
     putCall: null,
     sp500: null,
   }

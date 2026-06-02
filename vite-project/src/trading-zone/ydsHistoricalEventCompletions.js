@@ -21,11 +21,11 @@ export const YDS_EVENT_COMPLETIONS = {
       performanceAnchorDate: "2020-03-23",
     }),
     milestones: {
-      start: { historyData: { vix: 14.4, cnn: 76 } },
-      rise: { historyData: { vix: 31.0, cnn: 41 } },
-      fearExpansion: { historyData: { vix: 75.5, cnn: 17 } },
-      climax: { historyData: { vix: 61.6, cnn: 29 } },
-      recovery: { historyData: { vix: 25.1, cnn: 53 } },
+      start: { historyData: { yds: null, vix: 14.4, cnn: 76, bofa: null, highYield: null, putCall: null } },
+      rise: { historyData: { yds: null, vix: 31.0, cnn: 41, bofa: null, highYield: null, putCall: null } },
+      fearExpansion: { historyData: { yds: null, vix: 75.5, cnn: 17, bofa: null, highYield: null, putCall: null } },
+      climax: { historyData: { yds: null, vix: 61.6, cnn: 29, bofa: null, highYield: null, putCall: null } },
+      recovery: { historyData: { yds: null, vix: 25.1, cnn: 53, bofa: null, highYield: null, putCall: null } },
     },
   }),
 
@@ -40,11 +40,11 @@ export const YDS_EVENT_COMPLETIONS = {
       performanceAnchorDate: "2009-03-09",
     }),
     milestones: {
-      start: { historyData: { vix: 25.0, cnn: null } },
-      rise: { historyData: { vix: 34.7, cnn: null } },
-      fearExpansion: { historyData: { vix: 76.9, cnn: null } },
-      climax: { historyData: { vix: 49.7, cnn: null } },
-      recovery: { historyData: { vix: 41.2, cnn: null } },
+      start: { historyData: { yds: null, vix: 25.0, cnn: null, bofa: null, highYield: null, putCall: null } },
+      rise: { historyData: { yds: null, vix: 34.7, cnn: null, bofa: null, highYield: null, putCall: null } },
+      fearExpansion: { historyData: { yds: null, vix: 76.9, cnn: null, bofa: null, highYield: null, putCall: null } },
+      climax: { historyData: { yds: null, vix: 49.7, cnn: null, bofa: null, highYield: null, putCall: null } },
+      recovery: { historyData: { yds: null, vix: 41.2, cnn: null, bofa: null, highYield: null, putCall: null } },
     },
   }),
 }
