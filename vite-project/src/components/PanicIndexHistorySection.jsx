@@ -12,10 +12,12 @@ import {
   buildPanicHistoryInsight,
   mergeInflectionsIntoChartData,
 } from "../utils/buildPanicHistoryInsight.js"
+import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { resolvePanicHistoryUiState } from "../utils/panicHistoryUiState.js"
+import { getFinalScore } from "../utils/tradingScores.js"
 import { isPanicHubEnabled } from "../config/api.js"
 import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
@@ -117,6 +119,29 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     !showHistoryLoading && uiState.showChart && chartRows.some((x) => x?.value != null)
 
   const chartEmptyMessage = `${metric.shortLabel} 원본 데이터 준비중`
+  const ydsSummary = useMemo(() => {
+    const rows = buildHistoryChartPayload(history, "ydsComposite").chartData ?? []
+    const latest = rows[rows.length - 1]
+    const latestScore = Number(latest?.value)
+    if (!Number.isFinite(latestScore)) return null
+    const stage = resolveMacroV1Status(latestScore)
+    const latestRaw = history[history.length - 1]
+    const flow = rows
+      .slice(-4)
+      .map((r) => Math.round(Number(r?.value)))
+      .filter(Number.isFinite)
+    return {
+      score: Math.round(latestScore),
+      stageLabel: stage?.label ?? "—",
+      stageEmoji: stage?.emoji ?? "⚪",
+      trendLine: flow.length ? flow.join(" → ") : "—",
+      delta:
+        history.length >= 2
+          ? Math.round(getFinalScore(history[history.length - 1]) - getFinalScore(history[history.length - 2]))
+          : 0,
+      dateLabel: latestRaw?.date ?? "—",
+    }
+  }, [history])
 
   return (
     <section
@@ -227,6 +252,26 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           {rangeId} · {rangeStats.shown}일 표시
         </p>
       </div>
+      {ydsSummary ? (
+        <div className="panic-history-yds-summary" role="status" aria-label="YDS 종합점수 요약">
+          <p className="m-0 panic-history-yds-summary__score">
+            YDS {ydsSummary.score}점
+            <span
+              className={[
+                "panic-history-yds-summary__delta",
+                ydsSummary.delta > 0 ? "is-up" : ydsSummary.delta < 0 ? "is-down" : "is-flat",
+              ].join(" ")}
+            >
+              {ydsSummary.delta > 0 ? `+${ydsSummary.delta}` : ydsSummary.delta}
+            </span>
+          </p>
+          <p className="m-0 panic-history-yds-summary__stage">
+            {ydsSummary.stageEmoji} {ydsSummary.stageLabel}
+          </p>
+          <p className="m-0 panic-history-yds-summary__trend">최근 흐름 {ydsSummary.trendLine}</p>
+          <p className="m-0 panic-history-yds-summary__date">{ydsSummary.dateLabel}</p>
+        </div>
+      ) : null}
 
       <PanicHistoryInsightPanel
         header={insight.header}

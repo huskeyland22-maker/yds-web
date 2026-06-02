@@ -8212,6 +8212,60 @@
     margin-top: 4px;
   }
 
+  .panic-history-yds-summary {
+    margin-top: 6px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(167, 139, 250, 0.24);
+    background: rgba(139, 92, 246, 0.08);
+  }
+
+  .panic-history-yds-summary__score {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .panic-history-yds-summary__delta {
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .panic-history-yds-summary__delta.is-up {
+    color: rgba(52, 211, 153, 0.98);
+  }
+
+  .panic-history-yds-summary__delta.is-down {
+    color: rgba(248, 113, 113, 0.98);
+  }
+
+  .panic-history-yds-summary__delta.is-flat {
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .panic-history-yds-summary__stage {
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .panic-history-yds-summary__trend {
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(196, 181, 253, 0.96);
+  }
+
+  .panic-history-yds-summary__date {
+    margin-top: 2px;
+    font-size: 10px;
+    color: rgba(148, 163, 184, 0.88);
+  }
+
   .panic-history-tab--aux {
     opacity: 0.9;
   }
