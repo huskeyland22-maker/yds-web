@@ -38,7 +38,7 @@ export default function YdsPanicEventValidationSection({ events = YDS_VALIDATION
         YDS 패닉 이벤트 검증
       </h2>
       <p className="panic-validation-panel__note">
-        패닉 표본 5건(2011·코로나·2022·SVB·2024) 극점(climax) 기준 · 기존 YDS 계산 엔진(`getFinalScore`) 재사용
+        패닉 표본 6건(리먼·코로나·2022·SVB·엔캐리·관세) 극점(climax) 기준 · 기존 YDS 계산 엔진(`getFinalScore`) 재사용
       </p>
 
       <article className="yds-panic-validation__summary" aria-label="YDS 역사 검증 결과">

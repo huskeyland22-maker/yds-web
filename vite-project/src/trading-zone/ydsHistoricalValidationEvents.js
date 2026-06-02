@@ -99,6 +99,20 @@ const RAW_EVENTS = [
       recovery: "2024-08-30",
     },
   },
+  {
+    id: "panic-2025-tariff-shock",
+    category: "panic",
+    name: "2025 관세 쇼크 (Tariff Shock)",
+    startDate: "2025-02-19",
+    endDate: "2025-06-30",
+    keyDates: {
+      start: "2025-02-19",
+      rally: "2025-04-02",
+      fearExpansion: "2025-04-04",
+      extreme: "2025-04-07",
+      recovery: "2025-05-13",
+    },
+  },
 
   {
     id: "dca-2020-reopening",

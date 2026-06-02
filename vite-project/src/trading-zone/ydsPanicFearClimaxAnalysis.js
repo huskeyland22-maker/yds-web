@@ -3,12 +3,13 @@ import { computeYdsScore, resolveYdsStage } from "./ydsHistoricalEventTypes.js"
 import { buildYdsScoreBreakdown } from "./ydsScoreBreakdown.js"
 import { formatStageBadge } from "./ydsPanicEventValidation.js"
 
-/** 공포확대 vs 극점 최종 검증 대상 (YDS 계산 가능 4건) */
+/** 공포확대 vs 극점 최종 검증 대상 (YDS 계산 가능 · 관세 쇼크 포함) */
 export const FEAR_CLIMAX_ANALYSIS_IDS = [
   "panic-2020-covid",
   "panic-2022-tightening",
   "panic-2023-svb",
   "panic-2024-yen-carry",
+  "panic-2025-tariff-shock",
 ]
 
 /**
@@ -120,6 +121,12 @@ function buildEventFearClimaxInsights(event, ctx) {
     )
   }
 
+  if (event.id === "panic-2025-tariff-shock" && climax.yds > fear.yds) {
+    lines.push(
+      `관세 쇼크: 극점 HY ${climax.highYield}%(공포확대 ${fear.highYield}%보다 낮음) → HY>6 규칙 해제·단기 70% 가중. VIX 46·BofA ${climax.bofa}로 극점 YDS ${climax.yds}이 공포확대 ${fear.yds}보다 높음.`,
+    )
+  }
+
   return lines
 }
 
@@ -138,7 +145,14 @@ export function buildFearClimaxAnalysisReport(events) {
   const yen = rows.find((r) => r.id === "panic-2024-yen-carry")
   const covid = rows.find((r) => r.id === "panic-2020-covid")
 
-  const globalInsights = buildGlobalInsights(rows, { yen, covid, fearPeakCount, climaxPeakCount, fearHigherCount })
+  const globalInsights = buildGlobalInsights(rows, {
+    yen,
+    covid,
+    fearPeakCount,
+    climaxPeakCount,
+    fearHigherCount,
+    compared: rows.length,
+  })
 
   return {
     rows,
@@ -158,7 +172,7 @@ function buildGlobalInsights(rows, stats) {
   const lines = []
 
   lines.push(
-    `4건 중 최고 YDS가 공포확대인 경우 ${stats.fearPeakCount}건 · 극점인 경우 ${stats.climaxPeakCount}건.`,
+    `${stats.compared ?? rows.length}건 중 최고 YDS가 공포확대인 경우 ${stats.fearPeakCount}건 · 극점인 경우 ${stats.climaxPeakCount}건.`,
   )
   lines.push(
     `공포확대 YDS > 극점 YDS: ${stats.fearHigherCount}건 → 단기 공포 선행 감지 패턴.`,
@@ -167,10 +181,10 @@ function buildGlobalInsights(rows, stats) {
   const vixCapAtFear = rows.filter((r) => r.fear.vixCapped).length
   const hy60AtClimax = rows.filter((r) => r.climax.hyWeighted60).length
   lines.push(
-    `VIX 캡(40+) 영향: 공포확대 시점 ${vixCapAtFear}/4건에서 scoreVIX=100 상한 적용.`,
+    `VIX 캡(40+) 영향: 공포확대 시점 ${vixCapAtFear}/${rows.length}건에서 scoreVIX=100 상한 적용.`,
   )
   lines.push(
-    `HY 가중(60%) 영향: 극점 시점 ${hy60AtClimax}/4건에서 HY>6 → 단기(VIX) 기여가 40%로 축소.`,
+    `HY 가중(60%) 영향: 극점 시점 ${hy60AtClimax}/${rows.length}건에서 HY>6 → 단기(VIX) 기여가 40%로 축소.`,
   )
 
   if (stats.fearPeakCount >= stats.climaxPeakCount) {

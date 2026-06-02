@@ -5,11 +5,11 @@ import { formatStageBadge } from "./ydsPanicEventValidation.js"
 /** 최고 YDS 순위 산출 대상 (리먼 포함 · 엔진/현재 구간만) */
 export const PANIC_PEAK_RANKING_IDS = [
   "panic-2008-lehman",
-  "panic-2011-us-downgrade",
   "panic-2020-covid",
   "panic-2022-tightening",
   "panic-2023-svb",
   "panic-2024-yen-carry",
+  "panic-2025-tariff-shock",
 ]
 
 const HISTORIC_PANIC_MIN_SCORE = 85

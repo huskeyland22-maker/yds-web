@@ -5,13 +5,14 @@ import {
   resolveYdsStage,
 } from "./ydsHistoricalEventTypes.js"
 
-/** 패닉 이벤트 비교 검증 표본 (최소 5건 · 엔진 튜닝 전 확대 단계) */
+/** 패닉 이벤트 비교 검증 표본 (정식 역사 검증 · 리먼·관세 포함) */
 export const PANIC_VALIDATION_COMPARE_IDS = [
-  "panic-2011-us-downgrade",
+  "panic-2008-lehman",
   "panic-2020-covid",
   "panic-2022-tightening",
   "panic-2023-svb",
   "panic-2024-yen-carry",
+  "panic-2025-tariff-shock",
 ]
 
 /** 극점이 기대되는 YDS 단계 */

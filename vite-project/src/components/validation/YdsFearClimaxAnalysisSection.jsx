@@ -32,7 +32,7 @@ export default function YdsFearClimaxAnalysisSection({ events = YDS_VALIDATION_E
         YDS 최종 검증 — 공포확대 vs 극점
       </h2>
       <p className="panic-validation-panel__note">
-        엔진 튜닝 전 분석 전용 · 가중치/캡 수정 없음 · 코로나·2022·SVB·엔캐리 4건
+        엔진 튜닝 전 분석 전용 · 가중치/캡 수정 없음 · 코로나·2022·SVB·엔캐리·관세 5건
       </p>
 
       <article className="yds-fear-climax-analysis__verdict" aria-label="종합 판정">

@@ -106,6 +106,25 @@ export const YDS_EVENT_COMPLETIONS = {
     },
   }),
 
+  "panic-2025-tariff-shock": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "최대 낙폭: S&P500 2025-02-19 고점 대비 2025-04-07 저점(약 -17.2%). 6·12개월 수익률: 극점(2025-04-07) 종가 기준. VIX 45.31(4/4)·관세 발표(4/2 Liberation Day) 등 공개 시장 데이터 반영.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -17.2,
+      after6mSp500Pct: 22.4,
+      after12mSp500Pct: 28.6,
+      performanceAnchorDate: "2025-04-07",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 15.5, cnn: 65, bofa: 6.0, highYield: 3.3, putCall: 0.76 } },
+      rise: { historyData: { yds: null, vix: 26.0, cnn: 38, bofa: 4.6, highYield: 4.0, putCall: 0.92 } },
+      fearExpansion: { historyData: { yds: null, vix: 45.3, cnn: 15, bofa: 3.2, highYield: 6.2, putCall: 1.08 } },
+      climax: { historyData: { yds: null, vix: 46.0, cnn: 18, bofa: 2.2, highYield: 4.8, putCall: 0.95 } },
+      recovery: { historyData: { yds: null, vix: 17.5, cnn: 54, bofa: 5.5, highYield: 3.5, putCall: 0.82 } },
+    },
+  }),
+
   "panic-2023-svb": createEventCompletion({
     completionStatus: "complete",
     performanceNotes:
