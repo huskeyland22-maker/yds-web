@@ -5,6 +5,12 @@ import { panicDataFromCycleRow } from "../utils/cycleHistoryUtils.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { resolveMacroStageAllocation } from "./macroStageAllocation.js"
 import { PANIC_VALIDATION_EXTENDED_HISTORY } from "./panicValidationExtendedHistory.js"
+import {
+  buildYdsSignalHistory,
+  estimateYdsMarketPeriodReturn,
+  mergeYdsSourceHistory,
+  pickYdsWeeklySteps,
+} from "./ydsSignalHistory.js"
 
 const MIN_YEARS = 5
 const CASH_WEEKLY_DRIFT = 0.00012
@@ -202,61 +208,15 @@ export function runPanicIndexAllocationBacktest(historyRows) {
  * @param {number} [maxEvents]
  */
 export function buildPanicBuyForwardReturns(historyRows, maxEvents = 10) {
-  const merged = mergePanicValidationHistory(historyRows)
-  const steps = pickWeeklySteps(merged)
-  if (steps.length < 8) return []
-
-  const horizons = [
-    { key: "m1", minDays: 30 },
-    { key: "m3", minDays: 90 },
-    { key: "m6", minDays: 180 },
-    { key: "m12", minDays: 365 },
-  ]
-
-  /** @type {Array<{ date: string; score: number; returns: Record<string, number | null> }>} */
-  const out = []
-
-  for (let i = 0; i < steps.length - 1; i++) {
-    const entry = steps[i]
-    const panic = cycleRowToPanicData(entry) ?? panicDataFromCycleRow(entry)
-    const score = panic ? getFinalScore(panic) : null
-    const regime = resolveMacroV1Status(score)
-    if (regime?.id !== "panicBuy") continue
-
-    const entryDate = rowDateKey(entry)
-    if (!entryDate) continue
-    const entryTs = new Date(`${entryDate}T12:00:00`).getTime()
-
-    /** @type {Record<string, number | null>} */
-    const returns = { m1: null, m3: null, m6: null, m12: null }
-    for (const h of horizons) {
-      let growth = 1
-      let found = false
-      for (let j = i + 1; j < steps.length; j++) {
-        const prev = steps[j - 1]
-        const cur = steps[j]
-        const d = rowDateKey(cur)
-        if (!d) continue
-        const curTs = new Date(`${d}T12:00:00`).getTime()
-        growth *= 1 + estimateMarketPeriodReturn(prev, cur)
-        if ((curTs - entryTs) / 86_400_000 >= h.minDays) {
-          returns[h.key] = (growth - 1) * 100
-          found = true
-          break
-        }
-      }
-      if (!found) returns[h.key] = null
-    }
-
-    out.push({
-      date: entryDate,
-      score: Number.isFinite(score) ? Math.round(Number(score)) : 0,
-      returns,
-    })
-    if (out.length >= maxEvents) break
-  }
-
-  return out
+  const signals = buildYdsSignalHistory(historyRows, { maxRecords: maxEvents * 2 })
+  return signals
+    .filter((s) => s.marketStageId === "panicBuy")
+    .slice(0, maxEvents)
+    .map((s) => ({
+      date: s.date,
+      score: s.ydsScore,
+      returns: s.forwardReturns,
+    }))
 }
 
 /**
@@ -264,9 +224,12 @@ export function buildPanicBuyForwardReturns(historyRows, maxEvents = 10) {
  * @param {object[]} historyRows
  */
 export function buildValidationBenchmarkSeries(historyRows) {
-  const merged = mergePanicValidationHistory(historyRows)
-  const steps = pickWeeklySteps(merged)
+  const merged = mergeYdsSourceHistory(historyRows)
+  const steps = pickYdsWeeklySteps(merged)
   if (steps.length < 2) return { points: [], markers: [] }
+  const signalMap = new Map(
+    buildYdsSignalHistory(historyRows, { maxRecords: 300 }).map((s) => [s.date, s]),
+  )
 
   let bench = 100
   /** @type {Array<{ date: string; bench: number }>} */
@@ -277,20 +240,15 @@ export function buildValidationBenchmarkSeries(historyRows) {
   for (let i = 1; i < steps.length; i++) {
     const prev = steps[i - 1]
     const cur = steps[i]
-    const marketRet = estimateMarketPeriodReturn(prev, cur)
+    const marketRet = estimateYdsMarketPeriodReturn(prev, cur)
     bench *= 1 + marketRet
     const date = rowDateKey(cur)
     points.push({ date, bench })
 
-    const panic = cycleRowToPanicData(prev) ?? panicDataFromCycleRow(prev)
-    const score = panic ? getFinalScore(panic) : null
-    const regime = resolveMacroV1Status(score)
-    if (regime?.id === "panicBuy" || regime?.id === "dca") {
-      markers.push({
-        date,
-        type: regime.id,
-        score: Number.isFinite(score) ? Math.round(Number(score)) : 0,
-      })
+    // 마커는 공통 YDS 신호 엔진 레코드 기준으로 정합 유지
+    const signal = signalMap.get(date)
+    if (signal && (signal.marketStageId === "panicBuy" || signal.marketStageId === "dca")) {
+      markers.push({ date, type: signal.marketStageId, score: signal.ydsScore })
     }
   }
 
