@@ -1,31 +1,15 @@
 import ReplayViewer from "./ReplayViewer.jsx"
 import { isEventComplete } from "../../trading-zone/ydsHistoricalEventCompletions.js"
 import {
+  formatMetric,
+  formatPct,
   YDS_MILESTONE_ORDER,
-  YDS_VALIDATION_EVENT_CATEGORY_LABEL,
-} from "../../trading-zone/ydsHistoricalValidationEvents.js"
-
-const STEP_LABEL = {
-  start: "시작",
-  rise: "상승",
-  fearExpansion: "공포확대",
-  climax: "극점",
-  recovery: "회복",
-}
-
-function formatPct(value) {
-  if (value == null || !Number.isFinite(value)) return "—"
-  const sign = value > 0 ? "+" : ""
-  return `${sign}${value.toFixed(1)}%`
-}
-
-function formatMetric(value, digits = 1) {
-  if (value == null || !Number.isFinite(value)) return "—"
-  return Number(value).toFixed(digits)
-}
+  YDS_MILESTONE_STEP_LABEL,
+} from "../../trading-zone/ydsHistoricalEventTypes.js"
+import { YDS_VALIDATION_EVENT_CATEGORY_LABEL } from "../../trading-zone/ydsHistoricalValidationEvents.js"
 
 /**
- * @param {{ eventItem: Record<string, unknown> | null }} props
+ * @param {{ eventItem: import("../../trading-zone/ydsHistoricalEventTypes.js").EventDetailData | null }} props
  */
 export default function YdsEventDetailPanel({ eventItem }) {
   if (!eventItem) return null
@@ -67,7 +51,7 @@ export default function YdsEventDetailPanel({ eventItem }) {
           <tbody>
             {YDS_MILESTONE_ORDER.map((key) => (
               <tr key={key}>
-                <td>{STEP_LABEL[key]}</td>
+                <td>{YDS_MILESTONE_STEP_LABEL[key]}</td>
                 <td className="font-mono tabular-nums">{eventItem.milestones?.[key]?.date ?? "—"}</td>
               </tr>
             ))}
@@ -91,7 +75,7 @@ export default function YdsEventDetailPanel({ eventItem }) {
               const h = eventItem.milestones?.[key]?.historyData
               return (
                 <tr key={`ind-${key}`}>
-                  <td>{STEP_LABEL[key]}</td>
+                  <td>{YDS_MILESTONE_STEP_LABEL[key]}</td>
                   <td className="font-mono tabular-nums">{h?.date ?? "—"}</td>
                   <td>
                     <span className="yds-event-detail__field" data-empty={h?.vix == null}>
@@ -109,7 +93,7 @@ export default function YdsEventDetailPanel({ eventItem }) {
           </tbody>
         </table>
         {!complete && (
-          <p className="m-0 yds-event-detail__hint">미입력 지표는 null(—)로 표시됩니다. 코로나 이벤트부터 순차 완성합니다.</p>
+          <p className="m-0 yds-event-detail__hint">미입력 지표는 null(—)로 표시됩니다. 코로나·리먼 순으로 완성합니다.</p>
         )}
       </div>
 

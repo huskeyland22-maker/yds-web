@@ -1,49 +1,55 @@
+import {
+  createEventCompletion,
+  buildMarketMetrics,
+} from "./ydsHistoricalEventTypes.js"
+
 /**
  * YDS 역사 검증관 — 이벤트별 완성 데이터 오버레이
- * 코로나 → 리먼 → SVB 순으로 확장. 미완성 이벤트는 스켈레톤(null) 유지.
- *
- * 지표 출처(코로나): VIX 종가(CBOE), CNN Fear & Greed 일별 지수(공개 역사값 근사)
- * 시장 성과: S&P500(SPX) 종가 — 전고(2020-02-19) 대비 저점(2020-03-23) MDD,
- *            저점 기준 6·12개월 후 수익률
+ * 코로나 → 리먼 → SVB 순 확장
  */
 
-/** @typedef {"skeleton" | "complete"} YdsEventCompletionStatus */
-
-/**
- * @type {Record<string, {
- *   completionStatus: YdsEventCompletionStatus
- *   performanceNotes?: string
- *   marketPerformance: {
- *     maxDrawdownPct: number | null
- *     after6mSp500Pct: number | null
- *     after12mSp500Pct: number | null
- *     performanceAnchorDate?: string | null
- *   }
- *   milestones?: Partial<Record<"start"|"rise"|"fearExpansion"|"climax"|"recovery", { historyData?: Partial<{ vix: number | null, cnn: number | null }> }>>
- * }>}
- */
+/** @type {Record<string, import("./ydsHistoricalEventTypes.js").EventCompletionPayload>} */
 export const YDS_EVENT_COMPLETIONS = {
-  "panic-2020-covid": {
+  "panic-2020-covid": createEventCompletion({
     completionStatus: "complete",
     performanceNotes:
       "최대 낙폭: S&P500 전고(2020-02-19) 대비 저점(2020-03-23). 6·12개월 수익률: 저점 종가 기준.",
-    marketPerformance: {
+    marketPerformance: buildMarketMetrics({
       maxDrawdownPct: -33.9,
       after6mSp500Pct: 48.2,
       after12mSp500Pct: 75.0,
       performanceAnchorDate: "2020-03-23",
-    },
+    }),
     milestones: {
       start: { historyData: { vix: 14.4, cnn: 76 } },
-      rise: { historyData: { vix: 61.6, cnn: 29 } },
+      rise: { historyData: { vix: 31.0, cnn: 41 } },
       fearExpansion: { historyData: { vix: 75.5, cnn: 17 } },
-      climax: { historyData: { vix: 82.7, cnn: 12 } },
+      climax: { historyData: { vix: 61.6, cnn: 29 } },
       recovery: { historyData: { vix: 25.1, cnn: 53 } },
     },
-  },
+  }),
+
+  "panic-2008-lehman": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "최대 낙폭: S&P500 2008-09-01~2009-03-09 구간. 6·12개월 수익률: 저점(2009-03-09) 종가 기준. CNN F&G는 2012년 이전 미제공 → null.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -44.9,
+      after6mSp500Pct: 60.8,
+      after12mSp500Pct: 69.4,
+      performanceAnchorDate: "2009-03-09",
+    }),
+    milestones: {
+      start: { historyData: { vix: 25.0, cnn: null } },
+      rise: { historyData: { vix: 34.7, cnn: null } },
+      fearExpansion: { historyData: { vix: 76.9, cnn: null } },
+      climax: { historyData: { vix: 49.7, cnn: null } },
+      recovery: { historyData: { vix: 41.2, cnn: null } },
+    },
+  }),
 }
 
-/** @param {Record<string, unknown>} event */
+/** @param {import("./ydsHistoricalEventTypes.js").EventDetailData} event */
 export function applyEventCompletion(event) {
   const completion = YDS_EVENT_COMPLETIONS[event.id]
   if (!completion) {
