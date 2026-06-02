@@ -38,7 +38,7 @@ export default function YdsPanicEventValidationSection({ events = YDS_VALIDATION
         YDS 패닉 이벤트 검증
       </h2>
       <p className="panic-validation-panel__note">
-        리먼 · 코로나 · SVB 극점(climax) 기준 · 기존 YDS 계산 엔진(`getFinalScore`) 재사용 · 이벤트 추가 없음
+        패닉 표본 5건(2011·코로나·2022·SVB·2024) 극점(climax) 기준 · 기존 YDS 계산 엔진(`getFinalScore`) 재사용
       </p>
 
       <article className="yds-panic-validation__summary" aria-label="YDS 역사 검증 결과">
@@ -112,7 +112,7 @@ export default function YdsPanicEventValidationSection({ events = YDS_VALIDATION
       </div>
 
       <div className="yds-panic-validation__block">
-        <p className="m-0 panic-validation-panel__h3">2. 극점 YDS 정렬 (높은 순)</p>
+        <p className="m-0 panic-validation-panel__h3">2. 극점 YDS 순위 (높은 순 · 엔진 튜닝 전 베이스라인)</p>
         <table className="panic-validation-year-table panic-validation-year-table--vs yds-panic-validation__table">
           <thead>
             <tr>

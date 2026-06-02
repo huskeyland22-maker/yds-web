@@ -6,7 +6,7 @@ import {
 
 /**
  * YDS 역사 검증관 — 이벤트별 완성 데이터 오버레이
- * 코로나 → 리먼 → SVB 순 확장
+ * 패닉 검증 표본 확대 (2011·2022·2024 추가)
  */
 
 /** @type {Record<string, import("./ydsHistoricalEventTypes.js").EventCompletionPayload>} */
@@ -46,6 +46,63 @@ export const YDS_EVENT_COMPLETIONS = {
       fearExpansion: { historyData: { yds: null, vix: 76.9, cnn: null, bofa: null, highYield: null, putCall: null } },
       climax: { historyData: { yds: null, vix: 49.7, cnn: null, bofa: null, highYield: null, putCall: null } },
       recovery: { historyData: { yds: null, vix: 41.2, cnn: null, bofa: null, highYield: null, putCall: null } },
+    },
+  }),
+
+  "panic-2011-us-downgrade": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "최대 낙폭: S&P500 2011-07-15~2011-08-09 구간. 6·12개월 수익률: 극점(2011-08-09) 기준. CNN F&G(2012년 이전) 미제공 → null.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -16.8,
+      after6mSp500Pct: 12.4,
+      after12mSp500Pct: 8.6,
+      performanceAnchorDate: "2011-08-09",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 18.0, cnn: null, bofa: 5.1, highYield: 4.2, putCall: 0.85 } },
+      rise: { historyData: { yds: null, vix: 21.0, cnn: null, bofa: 4.9, highYield: 4.3, putCall: 0.87 } },
+      fearExpansion: { historyData: { yds: null, vix: 48.0, cnn: null, bofa: 3.2, highYield: 5.3, putCall: 1.06 } },
+      climax: { historyData: { yds: null, vix: 42.0, cnn: null, bofa: 3.4, highYield: 5.1, putCall: 1.03 } },
+      recovery: { historyData: { yds: null, vix: 30.0, cnn: null, bofa: 4.6, highYield: 4.4, putCall: 0.9 } },
+    },
+  }),
+
+  "panic-2022-tightening": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "최대 낙폭: S&P500 2022-01-03~2022-10-13 베어마켓. 6·12개월 수익률: 극점(2022-10-13) 종가 기준.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -24.5,
+      after6mSp500Pct: 15.2,
+      after12mSp500Pct: 26.8,
+      performanceAnchorDate: "2022-10-13",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 17.0, cnn: 55, bofa: 5.5, highYield: 4.0, putCall: 0.82 } },
+      rise: { historyData: { yds: null, vix: 23.0, cnn: 42, bofa: 5.0, highYield: 4.2, putCall: 0.88 } },
+      fearExpansion: { historyData: { yds: null, vix: 32.0, cnn: 22, bofa: 4.1, highYield: 5.3, putCall: 0.98 } },
+      climax: { historyData: { yds: null, vix: 31.0, cnn: 28, bofa: 4.4, highYield: 5.0, putCall: 1.0 } },
+      recovery: { historyData: { yds: null, vix: 24.0, cnn: 35, bofa: 4.6, highYield: 4.8, putCall: 0.92 } },
+    },
+  }),
+
+  "panic-2024-yen-carry": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "최대 낙폭: S&P500 2024-07-01~2024-08-05 엔캐리 청산 쇼크. 6·12개월 수익률: 극점(2024-08-05) 종가 기준.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -8.4,
+      after6mSp500Pct: 11.6,
+      after12mSp500Pct: 22.3,
+      performanceAnchorDate: "2024-08-05",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 12.5, cnn: 72, bofa: 6.0, highYield: 3.3, putCall: 0.75 } },
+      rise: { historyData: { yds: null, vix: 14.0, cnn: 65, bofa: 5.8, highYield: 3.4, putCall: 0.78 } },
+      fearExpansion: { historyData: { yds: null, vix: 23.0, cnn: 35, bofa: 5.0, highYield: 4.1, putCall: 0.9 } },
+      climax: { historyData: { yds: null, vix: 38.5, cnn: 25, bofa: 4.5, highYield: 4.5, putCall: 0.95 } },
+      recovery: { historyData: { yds: null, vix: 16.0, cnn: 58, bofa: 5.6, highYield: 3.6, putCall: 0.8 } },
     },
   }),
 
