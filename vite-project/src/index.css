@@ -13506,6 +13506,52 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+.yds-peak-ranking__row-lehman td {
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.yds-peak-ranking__compare-table {
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+}
+
+.yds-peak-ranking__insights {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.66rem;
+  color: rgba(203, 213, 225, 0.94);
+  line-height: 1.4;
+}
+
+.yds-peak-ranking__stage-list {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-peak-ranking__stage-list li {
+  display: grid;
+  grid-template-columns: 1.3fr auto auto;
+  gap: 0.35rem 0.5rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.68rem;
+}
+
+.yds-peak-ranking__historic {
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  background: rgba(69, 26, 3, 0.2);
+}
+
+.yds-peak-ranking__historic-verdict {
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: rgba(253, 230, 138, 0.98);
+}
+
 .panic-validation-event-complete {
   display: inline-block;
   margin-left: 0.35rem;

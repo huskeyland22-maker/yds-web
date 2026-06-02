@@ -33,7 +33,7 @@ export const YDS_EVENT_COMPLETIONS = {
   "panic-2008-lehman": createEventCompletion({
     completionStatus: "complete",
     performanceNotes:
-      "최대 낙폭: S&P500 2008-09-01~2009-03-09 구간. 6·12개월 수익률: 저점(2009-03-09) 종가 기준. CNN F&G는 2012년 이전 미제공 → null.",
+      "최대 낙폭: S&P500 2008-09-01~2009-03-09. 6·12개월 수익률: 저점(2009-03-09) 기준. CNN은 2012년 이전 F&G 미출시 → VIX·신용스트레스 기반 근사값(검증용).",
     marketPerformance: buildMarketMetrics({
       maxDrawdownPct: -44.9,
       after6mSp500Pct: 60.8,
@@ -41,11 +41,11 @@ export const YDS_EVENT_COMPLETIONS = {
       performanceAnchorDate: "2009-03-09",
     }),
     milestones: {
-      start: { historyData: { yds: null, vix: 25.0, cnn: null, bofa: null, highYield: null, putCall: null } },
-      rise: { historyData: { yds: null, vix: 34.7, cnn: null, bofa: null, highYield: null, putCall: null } },
-      fearExpansion: { historyData: { yds: null, vix: 76.9, cnn: null, bofa: null, highYield: null, putCall: null } },
-      climax: { historyData: { yds: null, vix: 49.7, cnn: null, bofa: null, highYield: null, putCall: null } },
-      recovery: { historyData: { yds: null, vix: 41.2, cnn: null, bofa: null, highYield: null, putCall: null } },
+      start: { historyData: { yds: null, vix: 25.0, cnn: 50, bofa: 4.6, highYield: 5.4, putCall: 0.9 } },
+      rise: { historyData: { yds: null, vix: 34.7, cnn: 36, bofa: 4.0, highYield: 6.5, putCall: 1.0 } },
+      fearExpansion: { historyData: { yds: null, vix: 76.9, cnn: 8, bofa: 1.8, highYield: 9.8, putCall: 1.18 } },
+      climax: { historyData: { yds: null, vix: 49.7, cnn: 18, bofa: 2.5, highYield: 10.2, putCall: 1.1 } },
+      recovery: { historyData: { yds: null, vix: 41.2, cnn: 26, bofa: 3.4, highYield: 9.0, putCall: 1.02 } },
     },
   }),
 
