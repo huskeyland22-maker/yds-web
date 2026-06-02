@@ -11,6 +11,7 @@ import {
 import { MACRO_STAGE_ALLOCATION } from "../trading-zone/macroStageAllocation.js"
 import { getTradingZonePositions } from "../trading-zone/tacticalTradingZoneData.js"
 import { buildRecommendationTrackRows } from "../trading-zone/tradingZoneRecommendationTrack.js"
+import { analyzeYdsScoreDistribution } from "../utils/ydsScoreValidation.js"
 import {
   CartesianGrid,
   Dot,
@@ -78,6 +79,7 @@ export default function PanicIndexValidationPage() {
   const backtest = useMemo(() => runPanicIndexAllocationBacktest(history), [history])
   const panicBuyEvents = useMemo(() => buildPanicBuyForwardReturns(history, 8), [history])
   const benchmarkSeries = useMemo(() => buildValidationBenchmarkSeries(history), [history])
+  const ydsDistribution = useMemo(() => analyzeYdsScoreDistribution(history), [history])
   const recommendation30d = useMemo(() => {
     const rows = buildRecommendationTrackRows(getTradingZonePositions(), [], {})
     const today = new Date().toISOString().slice(0, 10)
@@ -380,6 +382,52 @@ export default function PanicIndexValidationPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="panic-validation-panel" aria-labelledby="panic-validation-yds-distribution">
+        <h2 id="panic-validation-yds-distribution" className="panic-validation-panel__h2">
+          YDS 점수 체계 검증 (전체 데이터)
+        </h2>
+        <div className="panic-validation-kpi">
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">평균 점수</p>
+            <p className="panic-validation-kpi__value font-mono tabular-nums">
+              {ydsDistribution.avgScore != null ? ydsDistribution.avgScore.toFixed(1) : "—"}
+            </p>
+          </div>
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">최고 점수</p>
+            <p className="panic-validation-kpi__value font-mono tabular-nums">
+              {ydsDistribution.maxScore != null ? Math.round(ydsDistribution.maxScore) : "—"}
+            </p>
+          </div>
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">최저 점수</p>
+            <p className="panic-validation-kpi__value font-mono tabular-nums">
+              {ydsDistribution.minScore != null ? Math.round(ydsDistribution.minScore) : "—"}
+            </p>
+          </div>
+          <div className="panic-validation-kpi__card">
+            <p className="panic-validation-kpi__label">분석 표본</p>
+            <p className="panic-validation-kpi__value font-mono tabular-nums">{ydsDistribution.total}건</p>
+          </div>
+        </div>
+        <div className="panic-validation-yds-distribution">
+          {ydsDistribution.stageStats.map((stage) => (
+            <p key={stage.id} className="m-0 panic-validation-yds-distribution__row">
+              <span>{stage.emoji} {stage.label} 발생 비중</span>
+              <strong className="font-mono tabular-nums">{stage.pct.toFixed(1)}%</strong>
+            </p>
+          ))}
+        </div>
+        <div className="panic-validation-yds-distribution__suggestions">
+          <p className="m-0 panic-validation-panel__h3">구간 재설정 제안 (분석 결과)</p>
+          {ydsDistribution.suggestions.map((line) => (
+            <p key={line} className="m-0 panic-validation-panel__note">
+              - {line}
+            </p>
+          ))}
+        </div>
       </section>
 
       <section className="panic-validation-panel" aria-labelledby="panic-validation-panicbuy-forward">

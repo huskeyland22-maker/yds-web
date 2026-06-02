@@ -13080,6 +13080,31 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.92);
 }
 
+.panic-validation-yds-distribution {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.75rem;
+}
+
+.panic-validation-yds-distribution__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.panic-validation-yds-distribution__row strong {
+  color: rgba(125, 211, 252, 0.98);
+}
+
+.panic-validation-yds-distribution__suggestions {
+  margin-top: 0.55rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .panic-validation-panel__warn {
   margin: 0;
   font-size: 0.75rem;
@@ -13262,8 +13287,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-composite-hero {
   margin-bottom: 8px;
   padding: 10px 12px;
-  border: 1px solid rgba(167, 139, 250, 0.26);
-  background: linear-gradient(135deg, rgba(76, 29, 149, 0.32), rgba(8, 47, 73, 0.32));
+  border: 1px solid rgba(59, 130, 246, 0.24);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.9));
 }
 
 .yds-composite-hero__head {
@@ -13278,7 +13303,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: rgba(196, 181, 253, 0.96);
+  color: rgba(147, 197, 253, 0.96);
 }
 
 .yds-composite-hero__score {
@@ -13298,29 +13323,51 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-composite-hero__stage-rail {
   margin-top: 5px;
   display: grid;
-  gap: 3px;
-}
-
-.yds-composite-hero__stage-line {
-  font-size: 12px;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow-x: auto;
-  color: rgba(226, 232, 240, 0.96);
-}
-
-.yds-composite-hero__stage-line-part strong {
-  color: rgba(250, 204, 21, 0.98);
-  margin-left: 1px;
-}
-
-.yds-composite-hero__stage-labels {
-  display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 3px;
+  gap: 4px;
+}
+
+.yds-composite-hero__stage-chip {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.65);
+  padding: 2px 6px;
   font-size: 10px;
+  font-weight: 700;
   color: rgba(148, 163, 184, 0.92);
-  text-align: center;
+}
+
+.yds-composite-hero__stage-chip--active {
+  border-width: 1px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.yds-composite-hero__stage-chip--active[data-stage="overheated"] {
+  color: rgba(125, 211, 252, 0.98);
+  border-color: rgba(125, 211, 252, 0.45);
+}
+
+.yds-composite-hero__stage-chip--active[data-stage="neutral"] {
+  color: rgba(74, 222, 128, 0.98);
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.yds-composite-hero__stage-chip--active[data-stage="interest"] {
+  color: rgba(250, 204, 21, 0.98);
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
+.yds-composite-hero__stage-chip--active[data-stage="dca"] {
+  color: rgba(251, 146, 60, 0.98);
+  border-color: rgba(251, 146, 60, 0.45);
+}
+
+.yds-composite-hero__stage-chip--active[data-stage="panicBuy"] {
+  color: rgba(248, 113, 113, 0.98);
+  border-color: rgba(248, 113, 113, 0.45);
 }
 
 .yds-composite-hero__topline {
@@ -13540,15 +13587,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-action-signal {
   margin-bottom: 8px;
   padding: 6px 8px;
-  border: 1px solid rgba(34, 197, 94, 0.22);
-  background: linear-gradient(135deg, rgba(6, 78, 59, 0.24), rgba(8, 47, 73, 0.24));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
 }
 
 .yds-action-signal__title {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.04em;
-  color: rgba(134, 239, 172, 0.98);
+  color: rgba(147, 197, 253, 0.98);
   text-transform: uppercase;
 }
 
@@ -13669,8 +13716,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-allocation-center {
   margin-bottom: 8px;
   padding: 7px 8px;
-  border: 1px solid rgba(56, 189, 248, 0.24);
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.18), rgba(15, 23, 42, 0.36));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
 }
 
 .yds-allocation-center__head {
@@ -13778,7 +13825,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-allocation-center__map-row--active strong {
-  color: rgba(186, 230, 253, 0.98);
+  color: rgba(147, 197, 253, 0.98);
 }
 
 .yds-allocation-center__action {
@@ -13802,6 +13849,14 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 @media (max-width: 768px) {
+  .panic-validation-yds-distribution {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-composite-hero__stage-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .yds-action-signal__cards {
     grid-template-columns: 1fr;
   }

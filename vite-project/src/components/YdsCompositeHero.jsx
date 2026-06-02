@@ -196,8 +196,6 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
     }
     const stageGuide = buildStageGuide(stage?.id)
     const todayActions = buildTodayActions(stage?.id)
-    const stageIndex = Math.max(0, STAGE_RAIL.findIndex((s) => s.id === (stage?.id ?? "neutral")))
-
     return {
       score: nowScore,
       scoreDisplay: `${nowScore} / 100`,
@@ -211,7 +209,6 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
       explainLines,
       stageGuide,
       todayActions,
-      stageIndex,
       prevScore,
       scoreDelta,
       changeCause: changeCause.slice(0, 3),
@@ -229,21 +226,19 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
       <p className="m-0 yds-composite-hero__stage">
         {view.stageEmoji} {view.stageLabel}
       </p>
-      <div className="yds-composite-hero__stage-rail" aria-label="시장 단계 게이지">
-        <p className="m-0 yds-composite-hero__stage-line" aria-hidden>
-          {STAGE_RAIL.map((step, idx) => (
-            <span key={`g-${step.id}`} className="yds-composite-hero__stage-line-part">
-              {step.emoji}
-              {view.stageIndex === idx ? <strong>●</strong> : null}
-              {idx < STAGE_RAIL.length - 1 ? "────" : ""}
-            </span>
-          ))}
-        </p>
-        <p className="m-0 yds-composite-hero__stage-labels">
-          {STAGE_RAIL.map((step) => (
-            <span key={step.id}>{step.short}</span>
-          ))}
-        </p>
+      <div className="yds-composite-hero__stage-rail" aria-label="시장 5단계 위치">
+        {STAGE_RAIL.map((step) => (
+          <span
+            key={step.id}
+            className={[
+              "yds-composite-hero__stage-chip",
+              view.stageId === step.id ? "yds-composite-hero__stage-chip--active" : "",
+            ].join(" ")}
+            data-stage={step.id}
+          >
+            {step.emoji} {step.short}
+          </span>
+        ))}
       </div>
       <div className="yds-composite-hero__topline">
         <p className="m-0 yds-composite-hero__guide-title">오늘의 행동</p>

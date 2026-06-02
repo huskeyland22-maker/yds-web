@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { buildAiReportMarketStatus } from "../utils/buildAiReportMarketStatus.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import AiReportMarketStatusBlock from "./AiReportMarketStatusBlock.jsx"
@@ -8,6 +8,7 @@ import HomeV5DeskLead from "../home-v5/HomeV5DeskLead.jsx"
 import HomeV5StrategyValidationPanel from "../home-v5/HomeV5StrategyValidationPanel.jsx"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
+import { analyzeYdsScoreDistribution } from "../utils/ydsScoreValidation.js"
 import { isMacroRiskEnabled } from "../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "./PanicIndexHistorySection.jsx"
@@ -58,6 +59,27 @@ export default function PanicDeskDashboard({
     () => buildAiReportMarketStatus(panicData, safeHistory),
     [panicData, safeHistory],
   )
+  const ydsDistribution = useMemo(
+    () => analyzeYdsScoreDistribution(safeHistory),
+    [safeHistory],
+  )
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (!ydsDistribution.total) return
+    const stageObj = Object.fromEntries(
+      ydsDistribution.stageStats.map((s) => [s.label, `${s.pct.toFixed(1)}% (${s.count})`]),
+    )
+    console.groupCollapsed("[YDS Validation] score distribution")
+    console.log("표본:", ydsDistribution.total)
+    console.log("평균/최고/최저:", {
+      avg: ydsDistribution.avgScore?.toFixed(1) ?? "—",
+      max: ydsDistribution.maxScore ?? "—",
+      min: ydsDistribution.minScore ?? "—",
+    })
+    console.table(stageObj)
+    console.log("구간 재설정 제안:", ydsDistribution.suggestions)
+    console.groupEnd()
+  }, [ydsDistribution])
 
   if (!panicData && safeHistory.length === 0) {
     return (
