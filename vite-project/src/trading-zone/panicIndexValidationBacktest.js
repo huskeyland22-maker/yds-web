@@ -258,3 +258,41 @@ export function buildPanicBuyForwardReturns(historyRows, maxEvents = 10) {
 
   return out
 }
+
+/**
+ * S&P500 검증 차트용 시계열 + 분할/패닉 마커
+ * @param {object[]} historyRows
+ */
+export function buildValidationBenchmarkSeries(historyRows) {
+  const merged = mergePanicValidationHistory(historyRows)
+  const steps = pickWeeklySteps(merged)
+  if (steps.length < 2) return { points: [], markers: [] }
+
+  let bench = 100
+  /** @type {Array<{ date: string; bench: number }>} */
+  const points = [{ date: rowDateKey(steps[0]), bench }]
+  /** @type {Array<{ date: string; type: "panicBuy" | "dca"; score: number }>} */
+  const markers = []
+
+  for (let i = 1; i < steps.length; i++) {
+    const prev = steps[i - 1]
+    const cur = steps[i]
+    const marketRet = estimateMarketPeriodReturn(prev, cur)
+    bench *= 1 + marketRet
+    const date = rowDateKey(cur)
+    points.push({ date, bench })
+
+    const panic = cycleRowToPanicData(prev) ?? panicDataFromCycleRow(prev)
+    const score = panic ? getFinalScore(panic) : null
+    const regime = resolveMacroV1Status(score)
+    if (regime?.id === "panicBuy" || regime?.id === "dca") {
+      markers.push({
+        date,
+        type: regime.id,
+        score: Number.isFinite(score) ? Math.round(Number(score)) : 0,
+      })
+    }
+  }
+
+  return { points, markers }
+}

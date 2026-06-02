@@ -12832,6 +12832,93 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(148, 163, 184, 0.96);
 }
 
+.yds-philosophy-card {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  background: rgba(30, 41, 59, 0.35);
+}
+
+.yds-philosophy-card__title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: rgba(191, 219, 254, 0.98);
+}
+
+.yds-philosophy-card__stages {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.97);
+}
+
+.yds-philosophy-card__quote {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.tactical-zone-validation-card {
+  margin-top: 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(125, 211, 252, 0.25);
+  background: rgba(8, 47, 73, 0.32);
+}
+
+.tactical-zone-validation-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tactical-zone-validation-card__title {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(224, 242, 254, 0.98);
+}
+
+.tactical-zone-validation-card__link {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(125, 211, 252, 0.98);
+}
+
+.tactical-zone-validation-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tactical-zone-validation-card__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: rgba(148, 163, 184, 0.92);
+}
+
+.tactical-zone-validation-card__item strong {
+  font-size: 12px;
+  color: rgba(248, 250, 252, 0.98);
+}
+
+.tactical-zone-validation-card__item--full {
+  grid-column: 1 / -1;
+}
+
+.panic-validation-spy-chart {
+  margin-top: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 8px 2px;
+}
+
 /* ── 모바일 데스크 최적화 (PC 769px+ 변경 없음) ── */
 .home-v5-core-strategy-bar__mobile-hero,
 .home-v5-core-strategy-bar__mobile-more {

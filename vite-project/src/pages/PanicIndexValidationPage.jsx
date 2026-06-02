@@ -5,11 +5,22 @@ import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import {
   buildPanicBuyForwardReturns,
+  buildValidationBenchmarkSeries,
   runPanicIndexAllocationBacktest,
 } from "../trading-zone/panicIndexValidationBacktest.js"
 import { MACRO_STAGE_ALLOCATION } from "../trading-zone/macroStageAllocation.js"
 import { getTradingZonePositions } from "../trading-zone/tacticalTradingZoneData.js"
 import { buildRecommendationTrackRows } from "../trading-zone/tradingZoneRecommendationTrack.js"
+import {
+  CartesianGrid,
+  Dot,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 function formatPct(v, digits = 1) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -66,6 +77,7 @@ export default function PanicIndexValidationPage() {
 
   const backtest = useMemo(() => runPanicIndexAllocationBacktest(history), [history])
   const panicBuyEvents = useMemo(() => buildPanicBuyForwardReturns(history, 8), [history])
+  const benchmarkSeries = useMemo(() => buildValidationBenchmarkSeries(history), [history])
   const recommendation30d = useMemo(() => {
     const rows = buildRecommendationTrackRows(getTradingZonePositions(), [], {})
     const today = new Date().toISOString().slice(0, 10)
@@ -185,6 +197,50 @@ export default function PanicIndexValidationPage() {
             spyTone="down"
           />
         </div>
+      </section>
+
+      <section className="panic-validation-panel" aria-labelledby="panic-validation-spy-chart">
+        <h2 id="panic-validation-spy-chart" className="panic-validation-panel__h2">
+          S&amp;P500 검증 차트 (신호 마커)
+        </h2>
+        <div className="panic-validation-spy-chart">
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={benchmarkSeries.points} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke="rgba(148,163,184,0.16)" strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fill: "rgba(148,163,184,0.9)", fontSize: 10 }} />
+              <YAxis tick={{ fill: "rgba(148,163,184,0.9)", fontSize: 10 }} width={42} />
+              <Tooltip
+                formatter={(value) => [`${Number(value).toFixed(1)}`, "S&P500 지수(기준 100)"]}
+                labelFormatter={(v) => `일자 ${v}`}
+              />
+              <Line
+                type="monotone"
+                dataKey="bench"
+                stroke="#38bdf8"
+                strokeWidth={2}
+                dot={(props) => {
+                  const payload = props?.payload
+                  const m = benchmarkSeries.markers.find((x) => x.date === payload?.date)
+                  if (!m) return null
+                  return (
+                    <Dot
+                      cx={props.cx}
+                      cy={props.cy}
+                      r={4}
+                      fill={m.type === "panicBuy" ? "#ef4444" : "#f97316"}
+                      stroke="#fff"
+                      strokeWidth={1}
+                    />
+                  )
+                }}
+                activeDot={{ r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="panic-validation-panel__note">
+          ● 주황=분할매수 시점, ● 빨강=패닉매수 시점
+        </p>
       </section>
 
       <section className="panic-validation-panel" aria-labelledby="panic-validation-reco-30d">

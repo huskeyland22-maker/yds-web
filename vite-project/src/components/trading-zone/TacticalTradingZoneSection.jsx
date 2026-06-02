@@ -25,6 +25,7 @@ import PanicDeskSectionHeader from "../panic-desk/PanicDeskSectionHeader.jsx"
 import TacticalEngineLinkBar from "./TacticalEngineLinkBar.jsx"
 import TacticalMarketStockBridge from "./TacticalMarketStockBridge.jsx"
 import TacticalRecommendationTrack from "./TacticalRecommendationTrack.jsx"
+import TacticalRecommendationValidationCard from "./TacticalRecommendationValidationCard.jsx"
 import TacticalStockDetailPanel from "./TacticalStockDetailPanel.jsx"
 import TacticalConfidenceGrade from "./TacticalConfidenceGrade.jsx"
 import StockPickReasonList from "./StockPickReasonList.jsx"
@@ -580,6 +581,11 @@ export default function TacticalTradingZoneSection({
       ) : null}
 
       <TacticalRecommendationTrack
+        positions={livePositions}
+        priorityIds={recommendPriorityIds}
+        liveById={recommendLiveById}
+      />
+      <TacticalRecommendationValidationCard
         positions={livePositions}
         priorityIds={recommendPriorityIds}
         liveById={recommendLiveById}
