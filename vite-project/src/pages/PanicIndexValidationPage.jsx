@@ -26,6 +26,7 @@ import YdsPrecursorEnginePhase2Section from "../components/validation/YdsPrecurs
 import YdsPrecursorEnginePhase3Section from "../components/validation/YdsPrecursorEnginePhase3Section.jsx"
 import YdsPrecursorEnginePhase4Section from "../components/validation/YdsPrecursorEnginePhase4Section.jsx"
 import YdsPrecursorEnginePhase5Section from "../components/validation/YdsPrecursorEnginePhase5Section.jsx"
+import YdsPrecursorEnginePhase6Section from "../components/validation/YdsPrecursorEnginePhase6Section.jsx"
 import YdsProductionCandidateSection from "../components/validation/YdsProductionCandidateSection.jsx"
 import YdsHyWeightSensitivityLabSection from "../components/validation/YdsHyWeightSensitivityLabSection.jsx"
 import YdsTariffShockDeepValidationSection from "../components/validation/YdsTariffShockDeepValidationSection.jsx"
@@ -623,6 +624,10 @@ export default function PanicIndexValidationPage() {
       </section>
 
       <YdsEngineCandidateV3Section events={YDS_VALIDATION_EVENT_DATASET} />
+      <YdsPrecursorEnginePhase6Section
+        events={YDS_VALIDATION_EVENT_DATASET}
+        latestCycleRow={history[history.length - 1] ?? null}
+      />
       <YdsPrecursorEnginePhase5Section
         events={YDS_VALIDATION_EVENT_DATASET}
         latestCycleRow={history[history.length - 1] ?? null}

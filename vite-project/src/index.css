@@ -13839,6 +13839,149 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p6__radar-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(8, 20, 36, 0.55);
+}
+
+.yds-precursor-engine-p6__alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.yds-precursor-engine-p6__alert--normal {
+  background: rgba(52, 211, 153, 0.15);
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p6__alert--caution {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.yds-precursor-engine-p6__alert--danger {
+  background: rgba(251, 146, 60, 0.18);
+  color: #fb923c;
+}
+
+.yds-precursor-engine-p6__alert--critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.yds-precursor-engine-p6__interpretation {
+  flex: 1;
+  min-width: 12rem;
+  font-size: 15px;
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+
+.yds-precursor-engine-p6__block {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p6__inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.yds-precursor-engine-p6__input-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  background: rgba(15, 23, 42, 0.6);
+  font-size: 12px;
+}
+
+.yds-precursor-engine-p6__input-key {
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p6__similarity-list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-precursor-engine-p6__similarity-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 3rem;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.yds-precursor-engine-p6__pattern-name {
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p6__bar-track {
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(30, 41, 59, 0.8);
+  overflow: hidden;
+}
+
+.yds-precursor-engine-p6__bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.yds-precursor-engine-p6__bar-fill--lehman {
+  background: linear-gradient(90deg, #7f1d1d, #dc2626);
+}
+
+.yds-precursor-engine-p6__bar-fill--covid {
+  background: linear-gradient(90deg, #831843, #db2777);
+}
+
+.yds-precursor-engine-p6__bar-fill--tariff {
+  background: linear-gradient(90deg, #7c2d12, #ea580c);
+}
+
+.yds-precursor-engine-p6__bar-fill--svb {
+  background: linear-gradient(90deg, #713f12, #ca8a04);
+}
+
+.yds-precursor-engine-p6__bar-fill--bull {
+  background: linear-gradient(90deg, #14532d, #22c55e);
+}
+
+.yds-precursor-engine-p6__pct {
+  text-align: right;
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p6__top3-table td {
+  text-align: center;
+}
+
+.yds-precursor-engine-p6__row-top td {
+  background: rgba(56, 189, 248, 0.1);
+  font-weight: 600;
+}
+
 .yds-precursor-engine-p5__block {
   margin-top: 1rem;
 }
