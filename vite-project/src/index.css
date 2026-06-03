@@ -13742,6 +13742,111 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+.yds-engine-candidate__bands {
+  margin-bottom: 0.55rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  background: rgba(6, 44, 34, 0.2);
+}
+
+.yds-engine-candidate__band-list {
+  margin: 0.3rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.66rem;
+  color: rgba(209, 250, 229, 0.92);
+}
+
+.yds-engine-candidate__row-changed td {
+  background: rgba(251, 191, 36, 0.07);
+}
+
+.yds-engine-candidate__v3-score {
+  color: rgba(251, 191, 36, 0.95);
+  font-weight: 600;
+}
+
+.yds-engine-candidate__validation {
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.yds-engine-candidate__check-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.68rem;
+  color: rgba(226, 232, 240, 0.94);
+  line-height: 1.5;
+}
+
+.yds-engine-candidate__check-list li {
+  margin-bottom: 0.35rem;
+}
+
+.yds-engine-candidate__check-detail {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.64rem;
+  color: rgba(148, 163, 184, 0.95);
+  font-weight: 400;
+}
+
+.yds-engine-candidate__verdict {
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.4rem;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.yds-engine-candidate__verdict--adopt {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(6, 44, 34, 0.35);
+}
+
+.yds-engine-candidate__verdict--needs_validation {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(41, 32, 8, 0.3);
+}
+
+.yds-engine-candidate__verdict--reject {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(69, 10, 10, 0.25);
+}
+
+.yds-engine-candidate__verdict-label {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(253, 230, 138, 0.98);
+}
+
+.yds-engine-candidate__verdict--adopt .yds-engine-candidate__verdict-label {
+  color: rgba(167, 243, 208, 0.98);
+}
+
+.yds-engine-candidate__verdict-summary {
+  margin-top: 0.3rem;
+  font-size: 0.67rem;
+  color: rgba(226, 232, 240, 0.92);
+  line-height: 1.45;
+}
+
+.yds-engine-candidate__notes {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.64rem;
+  color: rgba(148, 163, 184, 0.95);
+  line-height: 1.35;
+}
+
 .yds-hy-weight-lab__rules {
   display: grid;
   grid-template-columns: 1fr 1fr;
