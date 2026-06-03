@@ -20,6 +20,7 @@ import { buildPhase3ValidationDataset, PRECURSOR_PHASE3_PANIC_IDS } from "./ydsP
 import { buildPrecursorEnginePhase2Event } from "./ydsPrecursorEnginePhase2.js"
 import { offsetPrecursorDay, parsePrecursorDay } from "./ydsPrecursorInterpolation.js"
 import { PATTERN_LABELS } from "./ydsPrecursorEnginePhase7.js"
+import { regimeDisplayForId } from "./ydsPrecursorRegimeDisplay.js"
 
 export const PRECURSOR_ENGINE_PHASE9_LABEL =
   "YDS Precursor Engine — Phase 9 (Pattern History & Regime Tracker)"
@@ -296,35 +297,23 @@ function resolveRegimeState(history) {
   const regimeShift = topNow[0]?.id !== topPast[0]?.id
 
   if ((last.priA ?? 0) >= 55 || (last.priB ?? 0) >= 55 || (panicSim >= 60 && priDelta7 >= 5)) {
-    return {
-      id: "panic",
-      label: "Panic Building",
-      emoji: "🔴",
+    return regimeDisplayForId("panic", {
       reason: `PRI-A ${last.priA} · 패닉 유사도 ${Math.round(panicSim)}% · 7일 PRI Δ${Math.round(priDelta7)}`,
-    }
+    })
   }
   if (priDelta7 >= 6 || panicDelta7 >= 12 || bullDrop7 >= 15) {
-    return {
-      id: "risk",
-      label: "Risk Rising",
-      emoji: "🟠",
+    return regimeDisplayForId("risk", {
       reason: `7일 PRI-A Δ${Math.round(priDelta7)} · 패닉유사도 Δ${Math.round(panicDelta7)}`,
-    }
+    })
   }
   if (regimeShift || Math.abs(priDelta7) >= 4) {
-    return {
-      id: "transition",
-      label: "Transition",
-      emoji: "🟡",
+    return regimeDisplayForId("transition", {
       reason: `우세패턴 ${PATTERN_LABELS[topPast[0]?.id] ?? "—"} → ${PATTERN_LABELS[topNow[0]?.id] ?? "—"}`,
-    }
+    })
   }
-  return {
-    id: "stable",
-    label: "Stable",
-    emoji: "🟢",
+  return regimeDisplayForId("stable", {
     reason: `우세 ${PATTERN_LABELS[topNow[0]?.id] ?? "—"} 유지 · PRI·유사도 안정`,
-  }
+  })
 }
 
 function startRowSim(history, offsetDays, key) {

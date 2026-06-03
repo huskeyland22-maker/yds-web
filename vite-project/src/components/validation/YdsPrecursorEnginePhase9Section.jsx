@@ -134,11 +134,13 @@ export default function YdsPrecursorEnginePhase9Section({
               </p>
             </div>
             <div className="yds-precursor-engine-p9__summary-card">
-              <p className="yds-precursor-engine-p9__summary-label">체제 변화</p>
+              <p className="yds-precursor-engine-p9__summary-label">현재 국면</p>
               <p className="yds-precursor-engine-p9__summary-value">
-                {summary.regimeChanged ? "있음" : "없음"}
+                {summary.regime?.emoji} {summary.regime?.label ?? "—"}
               </p>
-              <p className="yds-precursor-engine-p9__summary-sub">{summary.topRotation}</p>
+              <p className="yds-precursor-engine-p9__summary-sub">
+                체제 변화 {summary.regimeChanged ? "있음" : "없음"} · {summary.topRotation}
+              </p>
             </div>
           </div>
           <p className="m-0 yds-precursor-engine-p9__as-of">기준일 {summary.asOf ?? "—"}</p>

@@ -6,6 +6,7 @@ import {
   buildPrecursorEnginePhase10Report,
   PRECURSOR_ENGINE_PHASE10_LABEL,
   REGIME_STATES,
+  REGIME_SEQUENCE_LABEL_KO,
 } from "../../trading-zone/ydsPrecursorEnginePhase10.js"
 
 function fmt(v, d = 0) {
@@ -141,7 +142,7 @@ export default function YdsPrecursorEnginePhase10Section({
           </span>
         </div>
         <p className="panic-validation-panel__note m-0">
-          Stable → Transition → Risk Rising → Panic Building 단조 진행 검증
+          {REGIME_SEQUENCE_LABEL_KO} 단조 진행 검증
         </p>
 
         {replays.map((replay) => (
@@ -164,8 +165,8 @@ export default function YdsPrecursorEnginePhase10Section({
                   {replay.validation.sequenceSummary || "—"}
                 </p>
                 <p className="m-0 yds-precursor-engine-p10__replay-meta">
-                  {replay.eventName} · 단조 {replay.validation.monotonic ? "✓" : "✗"} · Risk{" "}
-                  {replay.validation.reachedRisk ? "✓" : "✗"} · Panic{" "}
+                  {replay.eventName} · 단조 {replay.validation.monotonic ? "✓" : "✗"} · 경계{" "}
+                  {replay.validation.reachedRisk ? "✓" : "✗"} · 위기{" "}
                   {replay.validation.reachedPanic ? "✓" : "✗"}
                   {replay.validation.backwardSteps > 0
                     ? ` · 역행 ${replay.validation.backwardSteps}회`
@@ -211,8 +212,17 @@ export default function YdsPrecursorEnginePhase10Section({
         <p className="m-0 panic-validation-panel__h3">체제 정의 (30일 Δ 우선)</p>
         <ul className="yds-precursor-engine-p10__regime-legend">
           {REGIME_STATES.map((s) => (
-            <li key={s.id}>
-              {s.emoji} <strong>{s.label}</strong>
+            <li key={s.id} className="yds-precursor-engine-p10__regime-legend-item">
+              <span className="yds-precursor-engine-p10__regime-legend-head">
+                {s.emoji} <strong>{s.label}</strong>
+              </span>
+              {s.hints?.length ? (
+                <ul className="yds-precursor-engine-p10__regime-hints">
+                  {s.hints.map((hint) => (
+                    <li key={hint}>{hint}</li>
+                  ))}
+                </ul>
+              ) : null}
             </li>
           ))}
         </ul>

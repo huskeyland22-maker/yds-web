@@ -13983,6 +13983,23 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+.yds-precursor-engine-p10__regime-legend-item {
+  margin-bottom: 0.45rem;
+}
+
+.yds-precursor-engine-p10__regime-legend-head {
+  display: inline-block;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p10__regime-hints {
+  margin: 0.2rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.72rem;
+  color: #64748b;
+  list-style: disc;
+}
+
 .yds-precursor-engine-p9__summary {
   margin-top: 0.75rem;
   padding: 0.85rem 1rem;

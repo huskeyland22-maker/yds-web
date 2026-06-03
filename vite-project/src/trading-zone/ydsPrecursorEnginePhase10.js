@@ -33,17 +33,22 @@ export const PRECURSOR_ENGINE_PHASE10_LABEL =
 
 export const REGIME_CHANGE_LOOKBACK_DAYS = 30
 
-/** @typedef {"stable" | "transition" | "risk" | "panic"} RegimeId */
+import {
+  REGIME_STATES,
+  REGIME_BY_ID,
+  formatRegimeSequenceSummary,
+  regimeDisplayForId,
+} from "./ydsPrecursorRegimeDisplay.js"
 
-export const REGIME_STATES = [
-  { id: "stable", order: 0, label: "Stable", emoji: "🟢" },
-  { id: "transition", order: 1, label: "Transition", emoji: "🟡" },
-  { id: "risk", order: 2, label: "Risk Rising", emoji: "🟠" },
-  { id: "panic", order: 3, label: "Panic Building", emoji: "🔴" },
-]
+/** @typedef {import("./ydsPrecursorRegimeDisplay.js").PrecursorRegimeId} RegimeId */
 
-/** @type {Record<RegimeId, typeof REGIME_STATES[number]>} */
-export const REGIME_BY_ID = Object.fromEntries(REGIME_STATES.map((s) => [s.id, s]))
+export {
+  REGIME_STATES,
+  REGIME_BY_ID,
+  REGIME_SEQUENCE_LABEL_KO,
+  formatRegimeSequenceSummary,
+  regimeDisplayForId,
+} from "./ydsPrecursorRegimeDisplay.js"
 
 export const REPLAY_SCENARIOS = [
   {
@@ -310,34 +315,30 @@ export function resolveRegimeFromThirtyDayChange(current, deltas30) {
   const ydsRise = deltas30.ydsScore ?? 0
 
   if (stressScore >= REGIME_SCORE_BANDS.panic) {
-    return {
-      ...REGIME_BY_ID.panic,
+    return regimeDisplayForId("panic", {
       reason: `30일 스트레스 ${stressScore} · 패닉유사도 Δ${panicDelta} · PRI-A Δ${priDeltaA}`,
       scores: { stressScore, panicDelta, priDeltaA, ydsRise },
-    }
+    })
   }
   if (stressScore >= REGIME_SCORE_BANDS.risk) {
-    return {
-      ...REGIME_BY_ID.risk,
+    return regimeDisplayForId("risk", {
       reason: `30일 스트레스 ${stressScore} · PRI-A Δ${priDeltaA} · YDS Δ${ydsRise}`,
       scores: { stressScore, panicDelta, priDeltaA, ydsRise },
-    }
+    })
   }
   if (stressScore >= REGIME_SCORE_BANDS.transition) {
-    return {
-      ...REGIME_BY_ID.transition,
+    return regimeDisplayForId("transition", {
       reason: deltas30.dominantShift
         ? `30일 스트레스 ${stressScore} · 우세 패턴 전환`
         : `30일 스트레스 ${stressScore} · PRI-A Δ${priDeltaA}`,
       scores: { stressScore, panicDelta, priDeltaA, ydsRise },
-    }
+    })
   }
 
-  return {
-    ...REGIME_BY_ID.stable,
+  return regimeDisplayForId("stable", {
     reason: `30일 스트레스 ${stressScore} · 변화율 안정`,
     scores: { stressScore, panicDelta, priDeltaA, ydsRise },
-  }
+  })
 }
 
 /**
@@ -373,14 +374,14 @@ export function buildLiveRegimeDetection(history) {
       current: null,
       past: null,
       deltas30: null,
-      regime: { ...REGIME_BY_ID.stable, reason: "데이터 없음", scores: {} },
+      regime: regimeDisplayForId("stable", { reason: "데이터 없음", scores: {} }),
     }
   }
   const past = getPastPointForDelta(history)
   const deltas30 = past ? buildThirtyDayDeltas(current, past) : null
   const regime = deltas30
     ? resolveRegimeFromThirtyDayChange(current, deltas30)
-    : { ...REGIME_BY_ID.stable, reason: "30일 과거 시점 없음", scores: {} }
+    : regimeDisplayForId("stable", { reason: "30일 과거 시점 없음", scores: {} })
 
   return {
     current,
@@ -440,31 +441,27 @@ function resolveReplayRegimeFromThirtyDayChange(point, deltas30) {
   const ydsRise = deltas30.ydsScore ?? 0
 
   if (stressScore >= REGIME_SCORE_BANDS.panic) {
-    return {
-      ...REGIME_BY_ID.panic,
+    return regimeDisplayForId("panic", {
       reason: `Replay 스트레스 ${stressScore} (Δ${deltaScore} + 진행 ${Math.round(progress * 100)}%)`,
       scores: { stressScore, panicDelta, priDeltaA, ydsRise, progress },
-    }
+    })
   }
   if (stressScore >= REGIME_SCORE_BANDS.risk) {
-    return {
-      ...REGIME_BY_ID.risk,
+    return regimeDisplayForId("risk", {
       reason: `Replay 스트레스 ${stressScore} · PRI-A Δ${priDeltaA}`,
       scores: { stressScore, panicDelta, priDeltaA, ydsRise, progress },
-    }
+    })
   }
   if (stressScore >= REGIME_SCORE_BANDS.transition) {
-    return {
-      ...REGIME_BY_ID.transition,
+    return regimeDisplayForId("transition", {
       reason: `Replay 스트레스 ${stressScore} · 패닉유사도 Δ${panicDelta}`,
       scores: { stressScore, panicDelta, priDeltaA, ydsRise, progress },
-    }
+    })
   }
-  return {
-    ...REGIME_BY_ID.stable,
+  return regimeDisplayForId("stable", {
     reason: `Replay 스트레스 ${stressScore} · 초기 안정`,
     scores: { stressScore, panicDelta, priDeltaA, ydsRise, progress },
-  }
+  })
 }
 
 function annotateReplayTimeline(timeline) {
@@ -563,9 +560,7 @@ function validateRegimeEscalation(annotated) {
     compressedLabels: compressed.map((o) => REGIME_STATES.find((s) => s.order === o)?.label ?? "?"),
     idealPathHits: idealHits,
     idealPathLength: idealPath.length,
-    sequenceSummary: compressed
-      .map((o) => REGIME_STATES.find((s) => s.order === o)?.emoji ?? "")
-      .join(" → "),
+    sequenceSummary: formatRegimeSequenceSummary(compressed),
   }
 }
 
