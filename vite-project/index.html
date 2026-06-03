@@ -35,50 +35,52 @@
     <!-- 모듈 로드 전: 삭제된 /assets/*.js 404 시 화이트 스크린 방지 -->
     <script>
       ;(function () {
-        var OVERLAY_ID = "yds-chunk-recovery-overlay"
+        var RECOVERY_KEY = "yds_chunk_recovery"
         var recovering = false
-
-        function showOverlay() {
-          if (document.getElementById(OVERLAY_ID)) return
-          var el = document.createElement("div")
-          el.id = OVERLAY_ID
-          el.setAttribute("role", "alertdialog")
-          el.innerHTML =
-            '<div style="width:min(100%,20rem);text-align:center;padding:20px 18px;border-radius:12px;border:1px solid rgba(56,189,248,0.28);background:rgba(15,23,42,0.96);font-family:system-ui,sans-serif">' +
-            '<p style="margin:0;font-size:15px;font-weight:700;color:#e2e8f0">업데이트 감지됨</p>' +
-            '<p style="margin:8px 0 0;font-size:13px;color:#94a3b8">새 버전 적용 중…</p>' +
-            '<button type="button" style="margin-top:16px;width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(56,189,248,0.45);background:rgba(14,116,144,0.35);color:#f0f9ff;font-size:14px;font-weight:700;cursor:pointer">새로고침</button>' +
-            "</div>"
-          el.style.cssText =
-            "position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#0B0E14"
-          el.querySelector("button").addEventListener("click", function () {
-            recover("user-reload")
-          })
-          ;(document.body || document.documentElement).appendChild(el)
-        }
 
         function recover(reason) {
           if (recovering) return
+          try {
+            if (localStorage.getItem(RECOVERY_KEY) === "true") {
+              console.warn("[Chunk Recovery] skip — recovery flag already set", reason)
+              return
+            }
+          } catch (e) {}
           recovering = true
-          showOverlay()
+
+          var done = function () {
+            try {
+              sessionStorage.clear()
+            } catch (e) {}
+            try {
+              localStorage.setItem(RECOVERY_KEY, "true")
+            } catch (e) {}
+            console.log("[Chunk Recovery] Hard reload", reason || "chunk-asset-404")
+            window.location.replace("/?recovered=1")
+          }
+
+          var swP = Promise.resolve()
+          var cacheP = Promise.resolve()
           try {
             if ("serviceWorker" in navigator) {
-              navigator.serviceWorker.getRegistrations().then(function (regs) {
+              swP = navigator.serviceWorker.getRegistrations().then(function (regs) {
                 return Promise.all(regs.map(function (r) { return r.unregister() }))
+              }).then(function () {
+                console.log("[Chunk Recovery] SW removed")
               })
             }
             if ("caches" in window) {
-              caches.keys().then(function (keys) {
+              cacheP = caches.keys().then(function (keys) {
                 return Promise.all(keys.map(function (k) { return caches.delete(k) }))
+              }).then(function () {
+                console.log("[Chunk Recovery] Cache cleared")
               })
             }
-          } catch (e) {}
-          setTimeout(function () {
-            var u = new URL(window.location.href)
-            u.searchParams.set("pwa_v", String(Date.now()))
-            u.searchParams.set("reason", reason || "chunk-404")
-            window.location.replace(u.pathname + u.search + u.hash)
-          }, 400)
+          } catch (e) {
+            done()
+            return
+          }
+          Promise.all([swP, cacheP]).then(done).catch(done)
         }
 
         window.addEventListener(

@@ -4,7 +4,8 @@
 // 정상 갱신: Workbox(NetworkFirst HTML, SWR JS/CSS, NetworkOnly API/panic) + 토스트
 // (`yds:pwa-update-available`) → 사용자가 "지금 업데이트" 시 reload / updateSW(true).
 //
-// Chunk 404·dynamic import·preload 실패 → recoverFromChunkLoadFailure (cooldown 없음, 즉시 reload).
+// Chunk 404·dynamic import·preload 실패 → recoverFromChunk404 (SW·캐시 제거 후 /?recovered=1).
+// yds_chunk_recovery=true 이면 재복구 금지. chunk 404 시 updateAvailable·업데이트 토스트 미발생.
 // evictStaleBuildAndReload: stale-panic·html-stale-shell·사용자 "지금 업데이트" 등.
 // html-build-mismatch 는 더 이상 자동 hard reload 하지 않음.
 // -----------------------------------------------------------------------------
@@ -19,6 +20,8 @@ const PWA_LAST_SYNC_KEY = "yds-pwa-last-check-at"
 export const PWA_UPDATE_EVENT = "yds:pwa-update-available"
 const PWA_TOAST_DISMISS_KEY = "yds-pwa-toast-dismiss"
 const PWA_HTML_HEAL_PREFIX = "yds-pwa-html-heal-"
+/** chunk 404 1회 복구 후 재진입 시 무한 루프 방지 */
+export const CHUNK_RECOVERY_FLAG_KEY = "yds_chunk_recovery"
 const HARD_RELOAD_COOLDOWN_MS = 6000
 const VERSION_POLL_COOLDOWN_MS = 8000
 const UPDATE_NOTIFY_COOLDOWN_MS = 12_000
@@ -310,6 +313,10 @@ export async function triggerServiceWorkerUpdate() {
  */
 export function notifyUpdateAvailable(reason, remoteMeta) {
   if (typeof window === "undefined") return
+  if (isChunkRecoveryPending()) {
+    console.warn("[PWA] skip update notify during chunk recovery", reason)
+    return
+  }
   const remoteBuildId = remoteMeta?.buildId != null ? String(remoteMeta.buildId) : null
   if (remoteBuildId && isPwaUpdateToastDismissed(remoteBuildId)) return
 
@@ -467,7 +474,7 @@ export function showChunkRecoveryFallback() {
           "cursor:pointer",
         ].join(";")
         btn.addEventListener("click", () => {
-          void recoverFromChunkLoadFailure("user-reload")
+          void recoverFromChunk404("user-reload")
         })
       }
       ;(document.body || document.documentElement).appendChild(el)
@@ -485,12 +492,79 @@ export function showChunkRecoveryFallback() {
   }
 }
 
+export function isChunkRecoveryActive() {
+  return safeRead("localStorage", CHUNK_RECOVERY_FLAG_KEY) === "true"
+}
+
+/** URL ?recovered=1 또는 복구 플래그 — 업데이트 토스트·stale auto-reload 억제 */
+export function isChunkRecoveryPending() {
+  if (typeof window === "undefined") return false
+  if (isChunkRecoveryActive()) return true
+  try {
+    return new URL(window.location.href).searchParams.get("recovered") === "1"
+  } catch {
+    return false
+  }
+}
+
+export function clearChunkRecoveryFlag() {
+  safeRemove("localStorage", CHUNK_RECOVERY_FLAG_KEY)
+}
+
+let chunkRecoveryInFlight = false
+
 /**
- * Chunk 404 / dynamic import / preload 실패 — cooldown 없이 SW·캐시 정리 후 즉시 reload.
+ * Chunk asset 404 — SW·캐시 제거 후 hard replace (업데이트 모달·updateAvailable 없음).
+ * yds_chunk_recovery=true 이미 있으면 재실행하지 않음.
+ * @param {string} [reason]
+ */
+export async function recoverFromChunk404(reason = "chunk-asset-404") {
+  if (typeof window === "undefined") return
+
+  if (isChunkRecoveryActive()) {
+    console.warn("[Chunk Recovery] skip — recovery flag already set", { reason })
+    return
+  }
+
+  if (chunkRecoveryInFlight) return
+  chunkRecoveryInFlight = true
+
+  try {
+    await unregisterAllServiceWorkers()
+    console.log("[Chunk Recovery] SW removed")
+  } catch {
+    // ignore
+  }
+
+  try {
+    await clearAllCacheStorage()
+    console.log("[Chunk Recovery] Cache cleared")
+  } catch {
+    // ignore
+  }
+
+  try {
+    window.sessionStorage?.clear()
+  } catch {
+    // ignore
+  }
+
+  safeWrite("localStorage", CHUNK_RECOVERY_FLAG_KEY, "true")
+
+  console.log("[Chunk Recovery] Hard reload", { reason })
+  window.location.replace("/?recovered=1")
+}
+
+/**
+ * @deprecated chunk 404는 recoverFromChunk404 사용
  * @param {string} [reason]
  * @param {{ showFallback?: boolean }} [options]
  */
 export async function recoverFromChunkLoadFailure(reason = "chunk-load-error", options = {}) {
+  if (/chunk-asset-404|chunk-404|vite-preload-error|chunk-load-error|chunk-import-fail/i.test(reason)) {
+    return recoverFromChunk404(reason)
+  }
+
   if (typeof window === "undefined") return
 
   if (options.showFallback !== false) {
@@ -591,6 +665,22 @@ export async function fetchLatestBuildMeta() {
 export async function checkAndEvictStaleBuild() {
   if (typeof window === "undefined") return { remote: null, reloaded: false }
 
+  if (isChunkRecoveryPending()) {
+    const remote = await fetchLatestBuildMeta()
+    if (remote?.buildId) {
+      safeWrite("localStorage", BUILD_ID_KEY, String(remote.buildId))
+      if (typeof remote.version === "string" && remote.version) {
+        safeWrite("localStorage", BUILD_VERSION_KEY, remote.version)
+      }
+    }
+    publishBuildProbeSnapshot({
+      probeNote: "chunk-recovery-pending",
+      reloaded: false,
+      remoteBuildId: remote?.buildId != null ? String(remote.buildId) : null,
+    })
+    return { remote, reloaded: false }
+  }
+
   const htmlBuildId = readHtmlBuildId()
   const storedBuildId = safeRead("localStorage", BUILD_ID_KEY)
   const storedVersion = (safeRead("localStorage", BUILD_VERSION_KEY) || "").trim()
@@ -635,7 +725,7 @@ export async function checkAndEvictStaleBuild() {
     if (!safeRead("sessionStorage", healKey)) {
       safeWrite("sessionStorage", healKey, "1")
       const reloaded = await evictStaleBuildAndReload("html-stale-shell", remote, { force: true })
-      return { remote, reloaded, updateAvailable: !reloaded }
+      return { remote, reloaded }
     }
   }
 
@@ -643,24 +733,24 @@ export async function checkAndEvictStaleBuild() {
     if (!isPwaUpdateToastDismissed(remoteBuildId)) {
       notifyUpdateAvailable("html-local-build-desync", remote)
     }
-    return { remote, reloaded: false, updateAvailable: true }
+    return { remote, reloaded: false }
   }
 
   if (htmlBuildId && htmlBuildId !== remoteBuildId) {
     const reloaded = await evictStaleBuildAndReload("html-build-mismatch", remote, { force: true })
-    return { remote, reloaded, updateAvailable: !reloaded }
+    return { remote, reloaded }
   }
 
   if (storedBuildId && String(storedBuildId) !== remoteBuildId) {
     const reloaded = await evictStaleBuildAndReload("client-build-mismatch", remote, { force: true })
-    return { remote, reloaded, updateAvailable: !reloaded }
+    return { remote, reloaded }
   }
 
   if (remoteVersion && storedVersion && storedVersion !== remoteVersion) {
     if (!isPwaUpdateToastDismissed(remoteBuildId)) {
       notifyUpdateAvailable("client-version-mismatch", remote)
     }
-    return { remote, reloaded: false, updateAvailable: true }
+    return { remote, reloaded: false }
   }
 
   safeWrite("localStorage", BUILD_ID_KEY, remoteBuildId)
@@ -832,15 +922,10 @@ export function installLifecycleVersionPoller() {
 /**
  * When a hashed asset file 404s (typical when the HTML is stale and refers to
  * a chunk that no longer exists on Vercel), or when a dynamic import fails,
- * treat it as a definitive "the app is stale" signal and run the full eviction
- * pipeline. The hash-mismatch path is the most common iOS PWA failure mode.
+ * run recoverFromChunk404 — no update toast, no updateAvailable.
  */
-let chunkRecoveryInFlight = false
-
 function triggerChunkRecovery(reason) {
-  if (chunkRecoveryInFlight) return
-  chunkRecoveryInFlight = true
-  void recoverFromChunkLoadFailure(reason)
+  void recoverFromChunk404(reason)
 }
 
 export function installChunkLoadFailureRecovery() {
@@ -882,6 +967,7 @@ export const __testing__ = {
   BUILD_VERSION_KEY,
   HARD_RELOAD_AT_KEY,
   PWA_UPDATE_EVENT,
+  CHUNK_RECOVERY_FLAG_KEY,
   HARD_RELOAD_COOLDOWN_MS,
   VERSION_POLL_COOLDOWN_MS,
   UPDATE_NOTIFY_COOLDOWN_MS,

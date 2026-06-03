@@ -8,9 +8,11 @@ import { bootSupabaseEnvReport } from "./utils/supabaseEnvBoot.js"
 import {
   checkAndEvictStaleBuild,
   clearAllCacheStorage,
+  clearChunkRecoveryFlag,
   installChunkLoadFailureRecovery,
   installLifecycleVersionPoller,
   installOnlineBuildRecheck,
+  isChunkRecoveryPending,
   isIosStandalone,
   notifyUpdateAvailable,
   unregisterAllServiceWorkers,
@@ -127,6 +129,7 @@ async function bootstrapApp() {
     const updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
+        if (isChunkRecoveryPending()) return
         notifyUpdateAvailable("sw-need-refresh", gate.remote)
         void applySwUpdate()
       },
@@ -181,6 +184,17 @@ async function bootstrapApp() {
     iosStandalone: isIosStandalone(),
     remoteBuildId: gate.remote?.buildId ?? null,
   })
+
+  clearChunkRecoveryFlag()
+  try {
+    const bootUrl = new URL(window.location.href)
+    if (bootUrl.searchParams.get("recovered") === "1") {
+      bootUrl.searchParams.delete("recovered")
+      window.history.replaceState(null, "", `${bootUrl.pathname}${bootUrl.search}${bootUrl.hash}`)
+    }
+  } catch {
+    // ignore
+  }
 
   try {
     const rootEl = document.getElementById("root")
