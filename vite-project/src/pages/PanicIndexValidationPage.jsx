@@ -19,6 +19,7 @@ import {
 import YdsEventDetailPanel from "../components/validation/YdsEventDetailPanel.jsx"
 import YdsPanicEventValidationSection from "../components/validation/YdsPanicEventValidationSection.jsx"
 import YdsFearClimaxAnalysisSection from "../components/validation/YdsFearClimaxAnalysisSection.jsx"
+import YdsTariffShockDeepValidationSection from "../components/validation/YdsTariffShockDeepValidationSection.jsx"
 import YdsVixSensitivityLabSection from "../components/validation/YdsVixSensitivityLabSection.jsx"
 import YdsPanicPeakRankingSection from "../components/validation/YdsPanicPeakRankingSection.jsx"
 import YdsStageSimulationSection from "../components/validation/YdsStageSimulationSection.jsx"
@@ -612,6 +613,7 @@ export default function PanicIndexValidationPage() {
         <p className="panic-validation-panel__note">시장 프록시 기준 누적 수익률(주간 스텝 합성)</p>
       </section>
 
+      <YdsTariffShockDeepValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
       <YdsVixSensitivityLabSection events={YDS_VALIDATION_EVENT_DATASET} />
       <YdsPanicPeakRankingSection events={YDS_VALIDATION_EVENT_DATASET} />
       <YdsStageSimulationSection events={YDS_VALIDATION_EVENT_DATASET} />

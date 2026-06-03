@@ -13611,6 +13611,50 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+.yds-tariff-deep__row-tariff td {
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.yds-tariff-deep__compare-table,
+.yds-tariff-deep__contrib-table,
+.yds-tariff-deep__diff-table {
+  margin-top: 0.35rem;
+  font-size: 0.66rem;
+}
+
+.yds-tariff-deep__contrib-total td {
+  font-weight: 600;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.yds-tariff-deep__delta {
+  color: rgba(253, 186, 116, 0.95);
+}
+
+.yds-tariff-deep__interpret {
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  background: rgba(6, 44, 34, 0.25);
+}
+
+.yds-tariff-deep__interpret-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.67rem;
+  color: rgba(209, 250, 229, 0.94);
+  line-height: 1.45;
+}
+
+.yds-tariff-deep__notes {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.64rem;
+  color: rgba(148, 163, 184, 0.95);
+  line-height: 1.35;
+}
+
 .panic-validation-event-complete {
   display: inline-block;
   margin-left: 0.35rem;
