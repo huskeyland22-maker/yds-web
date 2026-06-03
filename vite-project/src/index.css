@@ -13556,6 +13556,40 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-bottom: 0.55rem;
 }
 
+.yds-vix-lab__anchors-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+@media (max-width: 640px) {
+  .yds-vix-lab__anchors-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.yds-vix-lab__exp-v2 {
+  color: rgba(196, 181, 253, 0.95);
+}
+
+.yds-vix-lab__triple-table {
+  font-size: 0.64rem;
+}
+
+.yds-vix-lab__final-report {
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  background: rgba(41, 32, 8, 0.25);
+}
+
+.yds-vix-lab__final-table {
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+}
+
 .yds-vix-lab__anchor-table {
   margin-top: 0.35rem;
   font-size: 0.68rem;
