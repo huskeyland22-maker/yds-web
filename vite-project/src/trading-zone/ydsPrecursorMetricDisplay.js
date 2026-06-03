@@ -65,6 +65,45 @@ export function getPrecursorComparisonRowLabel(row) {
   return row?.label ?? "—"
 }
 
+/** @type {Record<string, { id: string; emoji: string; name: string; subtitle: string; description: string }>} */
+export const RISK_PATTERN_UI = {
+  lehman: {
+    id: "lehman",
+    emoji: "🏦",
+    name: "리먼형",
+    subtitle: "시스템 위기",
+    description: "금융 시스템·신용 붕괴로 확산되는 패닉 전조 패턴",
+  },
+  covid: {
+    id: "covid",
+    emoji: "😱",
+    name: "코로나형",
+    subtitle: "공포 패닉",
+    description: "변동성·공포지수가 급격히 확대되는 전염형 패닉 패턴",
+  },
+  tariff: {
+    id: "tariff",
+    emoji: "📜",
+    name: "관세형",
+    subtitle: "정책 충격",
+    description: "정책 변화와 불확실성으로 인한 시장 충격 패턴",
+  },
+  svb: {
+    id: "svb",
+    emoji: "🏛️",
+    name: "SVB형",
+    subtitle: "금융 사고",
+    description: "은행·금융 사고가 시장 전반으로 번지는 위기 패턴",
+  },
+  bull: {
+    id: "bull",
+    emoji: "🚀",
+    name: "강세장형",
+    subtitle: "유동성 확대",
+    description: "변동성 완화·위험 선호가 우세한 저스트레스 구간",
+  },
+}
+
 const PATTERN_LABEL_KO = {
   lehman: "리먼형",
   covid: "코로나형",
@@ -78,14 +117,59 @@ const PATTERN_LABEL_KO = {
   "강세장형": "강세장형",
 }
 
+const LABEL_TO_PATTERN_ID = {
+  리먼형: "lehman",
+  코로나형: "covid",
+  관세형: "tariff",
+  SVB형: "svb",
+  강세장형: "bull",
+}
+
+/**
+ * @param {string | null | undefined} patternId
+ * @param {string | null | undefined} patternLabel
+ */
+export function resolveRiskPatternId(patternId, patternLabel) {
+  if (patternId && RISK_PATTERN_UI[patternId]) return patternId
+  if (patternLabel && RISK_PATTERN_UI[patternLabel]) return patternLabel
+  if (patternLabel && LABEL_TO_PATTERN_ID[patternLabel]) return LABEL_TO_PATTERN_ID[patternLabel]
+  if (patternLabel && PATTERN_LABEL_KO[patternLabel] && RISK_PATTERN_UI[PATTERN_LABEL_KO[patternLabel]]) {
+    return PATTERN_LABEL_KO[patternLabel]
+  }
+  return null
+}
+
+/** @param {string | null | undefined} patternId */
+export function getRiskPatternDisplay(patternId, patternLabel) {
+  const id = resolveRiskPatternId(patternId, patternLabel)
+  if (id && RISK_PATTERN_UI[id]) return RISK_PATTERN_UI[id]
+  const fallbackName =
+    patternLabel?.endsWith("형") ? patternLabel : patternLabel ? `${patternLabel}형` : "—"
+  return {
+    id: id ?? patternId ?? "unknown",
+    emoji: "❓",
+    name: fallbackName,
+    subtitle: "",
+    description: "패턴 설명 준비 중",
+  }
+}
+
 /**
  * @param {string | null | undefined} patternId
  * @param {string | null | undefined} patternLabel
  */
 export function formatRiskPatternLabel(patternId, patternLabel) {
-  if (patternId && PATTERN_LABEL_KO[patternId]) return PATTERN_LABEL_KO[patternId]
-  if (patternLabel && PATTERN_LABEL_KO[patternLabel]) return PATTERN_LABEL_KO[patternLabel]
-  if (patternLabel?.endsWith("형")) return patternLabel
-  if (patternLabel) return `${patternLabel}형`
-  return "—"
+  const d = getRiskPatternDisplay(patternId, patternLabel)
+  return d.name !== "—" ? d.name : "—"
+}
+
+/**
+ * UI 한 줄 표시: 🏦 리먼형 (시스템 위기)
+ * @param {string | null | undefined} patternId
+ * @param {string | null | undefined} patternLabel
+ */
+export function formatRiskPatternDisplayLine(patternId, patternLabel) {
+  const d = getRiskPatternDisplay(patternId, patternLabel)
+  if (d.name === "—") return "—"
+  return d.subtitle ? `${d.emoji} ${d.name} (${d.subtitle})` : `${d.emoji} ${d.name}`
 }

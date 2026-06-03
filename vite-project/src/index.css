@@ -14218,6 +14218,228 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+.yds-precursor-action-guide__footer {
+  margin-top: 0.35rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.45);
+}
+
+.yds-precursor-dashboard__hero {
+  flex-wrap: wrap;
+}
+
+.yds-precursor-dashboard__card-footer {
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.35);
+  width: 100%;
+}
+
+.yds-precursor-dashboard__action-wrap {
+  margin: 0.65rem 0;
+}
+
+.yds-precursor-confidence {
+  margin: 0.65rem 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(10, 22, 40, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+}
+
+.yds-precursor-confidence--compact {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.yds-precursor-confidence__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.yds-precursor-confidence__title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #a5b4fc;
+}
+
+.yds-precursor-confidence__score {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.yds-precursor-confidence__pct {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.yds-precursor-confidence__score--high .yds-precursor-confidence__pct,
+.yds-precursor-confidence__score--high .yds-precursor-confidence__label {
+  color: #6ee7b7;
+}
+
+.yds-precursor-confidence__score--good .yds-precursor-confidence__pct,
+.yds-precursor-confidence__score--good .yds-precursor-confidence__label {
+  color: #7dd3fc;
+}
+
+.yds-precursor-confidence__score--mid .yds-precursor-confidence__pct,
+.yds-precursor-confidence__score--mid .yds-precursor-confidence__label {
+  color: #fbbf24;
+}
+
+.yds-precursor-confidence__score--low .yds-precursor-confidence__pct,
+.yds-precursor-confidence__score--low .yds-precursor-confidence__label {
+  color: #f87171;
+}
+
+.yds-precursor-confidence__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.yds-precursor-confidence__badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  background: rgba(30, 41, 59, 0.8);
+  color: #94a3b8;
+}
+
+.yds-precursor-confidence__badge--high {
+  color: #6ee7b7;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.yds-precursor-confidence__badge--good {
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.yds-precursor-confidence__badge--mid {
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.yds-precursor-confidence__badge--low {
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.yds-precursor-confidence__components {
+  margin: 0 0 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-precursor-confidence__component {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 2rem;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+  color: #94a3b8;
+  margin-bottom: 0.3rem;
+}
+
+.yds-precursor-confidence__component-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(30, 41, 59, 0.9);
+  overflow: hidden;
+}
+
+.yds-precursor-confidence__component-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #6366f1, #38bdf8);
+}
+
+.yds-precursor-confidence__component-score {
+  text-align: right;
+  color: #cbd5e1;
+}
+
+.yds-precursor-confidence__narrative {
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.45);
+}
+
+.yds-precursor-confidence__narrative-line {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin-bottom: 0.35rem;
+}
+
+.yds-precursor-confidence__narrative-line:last-child {
+  margin-bottom: 0;
+}
+
+.yds-risk-pattern-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.yds-risk-pattern-label__text {
+  line-height: 1.35;
+}
+
+.yds-risk-pattern-label__emoji {
+  font-size: 1em;
+}
+
+.yds-risk-pattern-label__info {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 1rem;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.8);
+  color: #94a3b8;
+  cursor: help;
+}
+
+.yds-risk-pattern-label__tip {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  top: calc(100% + 4px);
+  min-width: 12rem;
+  max-width: 16rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.yds-precursor-engine-p16__pattern-preview {
+  margin: 0.35rem 0 0.65rem;
+  font-size: 0.95rem;
+}
+
 .yds-precursor-engine-p13__toolbar {
   display: flex;
   flex-wrap: wrap;

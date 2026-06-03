@@ -18,10 +18,8 @@ import {
   PATTERN_HISTORY_KEYS,
   PRECURSOR_ENGINE_PHASE9_LABEL,
 } from "../../trading-zone/ydsPrecursorEnginePhase9.js"
-import {
-  formatRiskPatternLabel,
-  getPrecursorMetricDisplay,
-} from "../../trading-zone/ydsPrecursorMetricDisplay.js"
+import { getPrecursorMetricDisplay } from "../../trading-zone/ydsPrecursorMetricDisplay.js"
+import YdsRiskPatternLabel from "./YdsRiskPatternLabel.jsx"
 
 function fmt(v, d = 0) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -118,14 +116,14 @@ export default function YdsPrecursorEnginePhase9Section({
             <div className="yds-precursor-engine-p9__summary-card">
               <p className="yds-precursor-engine-p9__summary-label">우세 {m("pattern").label}</p>
               <p className="yds-precursor-engine-p9__summary-value">
-                {formatRiskPatternLabel(null, summary.dominantPattern)}{" "}
+                <YdsRiskPatternLabel patternLabel={summary.dominantPattern} />{" "}
                 <span className="font-mono tabular-nums">{fmt(summary.dominantSimilarity)}%</span>
               </p>
             </div>
             <div className="yds-precursor-engine-p9__summary-card">
               <p className="yds-precursor-engine-p9__summary-label">2위 {m("pattern").label}</p>
               <p className="yds-precursor-engine-p9__summary-value">
-                {formatRiskPatternLabel(null, summary.secondPattern)}{" "}
+                <YdsRiskPatternLabel patternLabel={summary.secondPattern} />{" "}
                 <span className="font-mono tabular-nums">{fmt(summary.secondSimilarity)}%</span>
               </p>
             </div>

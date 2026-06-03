@@ -2,9 +2,12 @@ import { getPrecursorMetricDisplay } from "../../trading-zone/ydsPrecursorMetric
 import { formatMetric } from "../../trading-zone/ydsHistoricalEventTypes.js"
 
 /**
- * @param {{ report: ReturnType<import("../../trading-zone/ydsPrecursorEnginePhase15.js").buildPrecursorEnginePhase15Report> }} props
+ * @param {{
+ *   report: ReturnType<import("../../trading-zone/ydsPrecursorEnginePhase15.js").buildPrecursorEnginePhase15Report>
+ *   confidenceFooter?: import("react").ReactNode
+ * }} props
  */
-export default function YdsPrecursorActionGuidePanel({ report }) {
+export default function YdsPrecursorActionGuidePanel({ report, confidenceFooter = null }) {
   const { currentAction, recommendedAction, rationale, oneLiner, trend30 } = report
 
   return (
@@ -56,6 +59,10 @@ export default function YdsPrecursorActionGuidePanel({ report }) {
           <p className="m-0 yds-precursor-action-guide__trend-muted">{trend30.direction.label}</p>
         )}
       </article>
+
+      {confidenceFooter ? (
+        <div className="yds-precursor-action-guide__footer">{confidenceFooter}</div>
+      ) : null}
     </div>
   )
 }

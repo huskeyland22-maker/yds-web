@@ -12,10 +12,10 @@ import {
   loadPrecursorValidationLog,
 } from "../../trading-zone/ydsPrecursorValidationLogStorage.js"
 import {
-  formatRiskPatternLabel,
   getPrecursorComparisonRowLabel,
   getPrecursorMetricDisplay,
 } from "../../trading-zone/ydsPrecursorMetricDisplay.js"
+import YdsRiskPatternLabel from "./YdsRiskPatternLabel.jsx"
 
 function fmt(v, d = 0) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -140,7 +140,10 @@ export default function YdsPrecursorEnginePhase13Section({
             {live.regimeEmoji} {live.regimeLabel}
           </span>
           <span>
-            {formatRiskPatternLabel(live.dominantPatternId, live.dominantPatternLabel)}{" "}
+            <YdsRiskPatternLabel
+              patternId={live.dominantPatternId}
+              patternLabel={live.dominantPatternLabel}
+            />{" "}
             {fmt(live.dominantSimilarity)}%
           </span>
         </div>

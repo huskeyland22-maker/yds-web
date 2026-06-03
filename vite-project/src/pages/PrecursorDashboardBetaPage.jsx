@@ -6,12 +6,12 @@ import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { YDS_VALIDATION_EVENT_DATASET } from "../trading-zone/ydsHistoricalValidationEvents.js"
 import { buildPrecursorDashboardBetaReport } from "../trading-zone/ydsPrecursorEnginePhase12.js"
 import { buildPrecursorEnginePhase15Report } from "../trading-zone/ydsPrecursorEnginePhase15.js"
+import { buildPrecursorEnginePhase16Report } from "../trading-zone/ydsPrecursorEnginePhase16.js"
 import { loadPrecursorValidationLog } from "../trading-zone/ydsPrecursorValidationLogStorage.js"
-import {
-  formatRiskPatternLabel,
-  getPrecursorMetricDisplay,
-} from "../trading-zone/ydsPrecursorMetricDisplay.js"
+import { getPrecursorMetricDisplay } from "../trading-zone/ydsPrecursorMetricDisplay.js"
 import YdsPrecursorActionGuidePanel from "../components/validation/YdsPrecursorActionGuidePanel.jsx"
+import YdsPrecursorConfidencePanel from "../components/validation/YdsPrecursorConfidencePanel.jsx"
+import YdsRiskPatternLabel from "../components/validation/YdsRiskPatternLabel.jsx"
 
 /**
  * @param {number | null} value
@@ -39,32 +39,33 @@ export default function PrecursorDashboardBetaPage() {
     return latestCycleRow
   }, [latestCycleRow])
 
-  const report = useMemo(
-    () =>
-      buildPrecursorDashboardBetaReport(YDS_VALIDATION_EVENT_DATASET, {
-        latestSnapshot,
-        extraRows: history,
-      }),
+  const engineOptions = useMemo(
+    () => ({
+      latestSnapshot,
+      extraRows: history,
+      log: loadPrecursorValidationLog(),
+    }),
     [latestSnapshot, history],
   )
 
+  const report = useMemo(
+    () => buildPrecursorDashboardBetaReport(YDS_VALIDATION_EVENT_DATASET, engineOptions),
+    [engineOptions],
+  )
+
   const actionReport = useMemo(
-    () =>
-      buildPrecursorEnginePhase15Report(YDS_VALIDATION_EVENT_DATASET, {
-        latestSnapshot,
-        extraRows: history,
-        log: loadPrecursorValidationLog(),
-      }),
-    [latestSnapshot, history],
+    () => buildPrecursorEnginePhase15Report(YDS_VALIDATION_EVENT_DATASET, engineOptions),
+    [engineOptions],
+  )
+
+  const confidenceReport = useMemo(
+    () => buildPrecursorEnginePhase16Report(YDS_VALIDATION_EVENT_DATASET, engineOptions),
+    [engineOptions],
   )
 
   const { cards, asOf, meta, notes } = report
   const regime = cards.regime
   const m = getPrecursorMetricDisplay
-  const patternDisplay = formatRiskPatternLabel(
-    cards.pattern.patternId,
-    cards.pattern.label,
-  )
 
   return (
     <div className="yds-precursor-dashboard">
@@ -93,9 +94,17 @@ export default function PrecursorDashboardBetaPage() {
           <p className="m-0 yds-precursor-dashboard__hero-label">{regime.label}</p>
           <p className="m-0 yds-precursor-dashboard__hero-duration">{regime.durationLabel}</p>
         </div>
+        <div className="yds-precursor-dashboard__card-footer">
+          <YdsPrecursorConfidencePanel report={confidenceReport} compact />
+        </div>
       </section>
 
-      <YdsPrecursorActionGuidePanel report={actionReport} />
+      <div className="yds-precursor-dashboard__action-wrap">
+        <YdsPrecursorActionGuidePanel
+          report={actionReport}
+          confidenceFooter={<YdsPrecursorConfidencePanel report={confidenceReport} compact />}
+        />
+      </div>
 
       <div className="yds-precursor-dashboard__grid" aria-label="핵심 지표">
         <article
@@ -142,13 +151,23 @@ export default function PrecursorDashboardBetaPage() {
           title={m("pattern").hint}
         >
           <p className="yds-precursor-dashboard__card-label">{m("pattern").label}</p>
-          <p className="yds-precursor-dashboard__pattern-name">{patternDisplay}</p>
+          <p className="yds-precursor-dashboard__pattern-name">
+            <YdsRiskPatternLabel
+              patternId={cards.pattern.patternId}
+              patternLabel={cards.pattern.label}
+            />
+          </p>
           <p className="yds-precursor-dashboard__metric-val font-mono tabular-nums">
             {cards.pattern.similarity != null ? `${Math.round(cards.pattern.similarity)}%` : "—"}
             <span className="yds-precursor-dashboard__card-sub-inline"> 유사</span>
           </p>
+          <div className="yds-precursor-dashboard__card-footer">
+            <YdsPrecursorConfidencePanel report={confidenceReport} compact />
+          </div>
         </article>
       </div>
+
+      <YdsPrecursorConfidencePanel report={confidenceReport} />
 
       <article className="yds-precursor-dashboard__interpret" aria-label={m("interpretation").label}>
         <div className="yds-precursor-dashboard__interpret-head">

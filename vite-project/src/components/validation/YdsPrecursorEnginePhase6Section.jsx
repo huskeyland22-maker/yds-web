@@ -7,6 +7,8 @@ import {
   PRECURSOR_ENGINE_PHASE6_LABEL,
   RADAR_INPUT_LABELS,
 } from "../../trading-zone/ydsPrecursorEnginePhase6.js"
+import { getPrecursorMetricDisplay } from "../../trading-zone/ydsPrecursorMetricDisplay.js"
+import YdsRiskPatternLabel from "./YdsRiskPatternLabel.jsx"
 
 function fmt(v, d = 1) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -50,6 +52,7 @@ export default function YdsPrecursorEnginePhase6Section({
   )
 
   const { inputs, patternSimilarity, top3, radarAlert, interpretation, notes } = report
+  const m = getPrecursorMetricDisplay
 
   return (
     <section
@@ -100,12 +103,14 @@ export default function YdsPrecursorEnginePhase6Section({
         </div>
       </article>
 
-      <article className="yds-precursor-engine-p6__block" aria-label="A. Pattern Similarity">
-        <p className="m-0 panic-validation-panel__h3">A. Pattern Similarity</p>
+      <article className="yds-precursor-engine-p6__block" aria-label={`A. ${m("pattern").label} 유사도`}>
+        <p className="m-0 panic-validation-panel__h3">A. {m("pattern").label} 유사도</p>
         <ul className="yds-precursor-engine-p6__similarity-list">
           {patternSimilarity.map((row) => (
             <li key={row.patternId} className="yds-precursor-engine-p6__similarity-row">
-              <span className="yds-precursor-engine-p6__pattern-name">{row.patternLabel}</span>
+              <span className="yds-precursor-engine-p6__pattern-name">
+                <YdsRiskPatternLabel patternId={row.patternId} patternLabel={row.patternLabel} />
+              </span>
               <div className="yds-precursor-engine-p6__bar-track">
                 <div
                   className={`yds-precursor-engine-p6__bar-fill yds-precursor-engine-p6__bar-fill--${row.patternId}`}
@@ -134,7 +139,9 @@ export default function YdsPrecursorEnginePhase6Section({
             {top3.map((row) => (
               <tr key={row.patternId} className={row.rank === 1 ? "yds-precursor-engine-p6__row-top" : ""}>
                 <td className="font-mono tabular-nums">{row.rank}</td>
-                <td>{row.patternLabel}</td>
+                <td>
+                  <YdsRiskPatternLabel patternId={row.patternId} patternLabel={row.patternLabel} />
+                </td>
                 <td className="font-mono tabular-nums">{row.similarity}%</td>
               </tr>
             ))}
