@@ -135,7 +135,7 @@ function buildConfusionMatrix(rows) {
 /**
  * @param {ReturnType<typeof buildConfusionMatrix>} confusion
  */
-function findMostConfusedPairs(confusion) {
+export function findMostConfusedPairs(confusion) {
   /** @type {{ pair: string; actualId: string; predId: string; count: number }[]} */
   const pairs = []
   for (const actualId of PATTERN_IDS) {
