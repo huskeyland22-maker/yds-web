@@ -14440,6 +14440,223 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.95rem;
 }
 
+.yds-precursor-engine-p17__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.yds-precursor-engine-p17__btn-save {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  background: rgba(46, 16, 101, 0.55);
+  color: #c4b5fd;
+  cursor: pointer;
+}
+
+.yds-precursor-engine-p17__btn-clear {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.72rem;
+  border-radius: 8px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: transparent;
+  color: #fca5a5;
+  cursor: pointer;
+}
+
+.yds-precursor-engine-p17__storage-meta,
+.yds-precursor-engine-p17__save-msg {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-precursor-engine-p17__save-msg {
+  margin-top: 0.35rem;
+  color: #a78bfa;
+}
+
+.yds-precursor-engine-p17__snapshot {
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(167, 139, 250, 0.22);
+}
+
+.yds-precursor-engine-p17__snapshot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.75rem;
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p17__block {
+  margin-top: 0.75rem;
+}
+
+.yds-precursor-engine-p17__table {
+  margin-top: 0.4rem;
+}
+
+.yds-precursor-engine-p17__delta-up {
+  color: #fbbf24;
+}
+
+.yds-precursor-engine-p17__delta-down {
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p17__changed-tag {
+  font-size: 0.62rem;
+  color: #a78bfa;
+  margin-left: 0.25rem;
+}
+
+.yds-precursor-engine-p17__two-col {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .yds-precursor-engine-p17__two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yds-precursor-engine-p17__log-list {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p17__log-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.yds-precursor-engine-p17__leading {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(51, 65, 85, 0.55);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-precursor-engine-p17__leading--found {
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.yds-precursor-engine-p17__leading-val {
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p17__leading-reason {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-precursor-engine-p17__leading-list {
+  margin: 0.45rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p17__journal {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-precursor-engine-p17__journal-item {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+}
+
+.yds-precursor-engine-p17__journal-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  font-size: 0.72rem;
+}
+
+.yds-precursor-engine-p17__journal-meta {
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p17__journal-pattern {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p17__journal-text {
+  margin-top: 0.35rem;
+  font-size: 0.65rem;
+  line-height: 1.45;
+  color: #94a3b8;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+.yds-precursor-engine-p17__daily-scroll {
+  overflow-x: auto;
+  margin-top: 0.4rem;
+}
+
+.yds-precursor-engine-p17__daily-table {
+  min-width: 28rem;
+  font-size: 0.68rem;
+}
+
+.yds-precursor-engine-p17__summaries {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .yds-precursor-engine-p17__summaries {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yds-precursor-engine-p17__summary-list {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p17__summary-list li {
+  margin-bottom: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yds-precursor-engine-p17__summary-sub {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
 .yds-precursor-engine-p13__toolbar {
   display: flex;
   flex-wrap: wrap;
