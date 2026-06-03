@@ -13839,6 +13839,58 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p1__block {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p1__scroll {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.yds-precursor-engine-p1__data-table {
+  min-width: 52rem;
+}
+
+.yds-precursor-engine-p1__row-climax td {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.yds-precursor-engine-p1__signal-grid {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p1__signal-table td,
+.yds-precursor-engine-p1__pattern-table td {
+  text-align: center;
+}
+
+.yds-precursor-engine-p1__signal-on {
+  color: #f87171;
+  font-weight: 700;
+}
+
+.yds-precursor-engine-p1__draft {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: rgba(8, 20, 36, 0.45);
+}
+
+.yds-precursor-engine-p1__draft-objective {
+  margin: 0.35rem 0 0;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p1__ladder,
+.yds-precursor-engine-p1__rules {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
 .yds-precursor-validation__insights {
   margin-top: 0.75rem;
   padding: 0.85rem 1rem;
