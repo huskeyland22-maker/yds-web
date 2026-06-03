@@ -13122,6 +13122,78 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-decoration: underline;
 }
 
+/* 검증 페이지 Phase 1–17 아코디언 (기본 접힘 · Phase 17만 펼침) */
+.validation-phase-accordion-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.validation-phase-accordion {
+  border-radius: 10px;
+  border: 1px solid rgba(51, 65, 85, 0.55);
+  background: rgba(8, 16, 28, 0.45);
+  overflow: hidden;
+}
+
+.validation-phase-accordion.is-open {
+  border-color: rgba(56, 189, 248, 0.28);
+}
+
+.validation-phase-accordion__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: none;
+  background: rgba(15, 23, 42, 0.65);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.validation-phase-accordion__toggle:hover {
+  background: rgba(30, 41, 59, 0.85);
+}
+
+.validation-phase-accordion__chevron {
+  flex-shrink: 0;
+  width: 1rem;
+  font-size: 0.7rem;
+  color: #7dd3fc;
+  line-height: 1;
+}
+
+.validation-phase-accordion__title {
+  flex-shrink: 0;
+}
+
+.validation-phase-accordion__subtitle {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.validation-phase-accordion__panel {
+  border-top: 1px solid rgba(51, 65, 85, 0.45);
+}
+
+.validation-phase-accordion__panel .panic-validation-panel {
+  margin-top: 0;
+  border-radius: 0;
+  border: none;
+}
+
 .panic-validation-panel {
   margin-bottom: 1.25rem;
   padding: 0.85rem 1rem;
