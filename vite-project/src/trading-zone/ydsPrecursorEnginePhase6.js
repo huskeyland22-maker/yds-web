@@ -47,7 +47,7 @@ const PRI_A_KEYS = ["cnn", "highYield", "move", "bofa"]
 /**
  * @param {ReturnType<typeof buildPrecursorEnginePhase2Event>} report
  */
-function getPatternSnapContext(report) {
+export function getEventPatternSnapContext(report) {
   const baseline =
     report.timeSeries.find((s) => s.offsetDays === PRECURSOR_ENGINE_PHASE2_BASELINE_OFFSET) ?? null
   const lead = report.timeSeries.filter((s) => s.inLeadWindow)
@@ -92,7 +92,7 @@ export function buildStressFeatureVector(baseline, snap) {
 /**
  * @param {object} snap
  */
-function buildCalmFeatureVector(snap) {
+export function buildCalmFeatureVector(snap) {
   if (!snap) return null
   /** @type {Record<string, number>} */
   const vec = {}
@@ -139,7 +139,7 @@ export function buildRadarPatternCentroids(eventReports) {
   for (const pattern of Object.values(RADAR_PATTERNS)) {
     const ref = eventReports.find((r) => r.id === pattern.referenceEventId)
     if (!ref) continue
-    const ctx = getPatternSnapContext(ref)
+    const ctx = getEventPatternSnapContext(ref)
     const isCalm = pattern.kind === "calm"
     const vec = isCalm
       ? buildCalmFeatureVector(ctx.calmSnap ?? ctx.analysisSnap)

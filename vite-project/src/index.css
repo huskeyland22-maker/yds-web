@@ -13839,6 +13839,108 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p7__metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.yds-precursor-engine-p7__metric {
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(8, 20, 36, 0.5);
+}
+
+.yds-precursor-engine-p7__metric-label {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.yds-precursor-engine-p7__metric-val {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 20px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p7__block {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p7__scroll {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.yds-precursor-engine-p7__matrix td,
+.yds-precursor-engine-p7__ref-table td,
+.yds-precursor-engine-p7__detail-table td {
+  text-align: center;
+}
+
+.yds-precursor-engine-p7__matrix th[scope="row"] {
+  text-align: left;
+}
+
+.yds-precursor-engine-p7__cell-hit {
+  background: rgba(52, 211, 153, 0.15);
+  font-weight: 700;
+}
+
+.yds-precursor-engine-p7__cell-miss {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.yds-precursor-engine-p7__row-hit td {
+  background: rgba(52, 211, 153, 0.05);
+}
+
+.yds-precursor-engine-p7__row-miss td {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.yds-precursor-engine-p7__confused-pair {
+  margin: 0.35rem 0 0;
+  font-size: 15px;
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.yds-precursor-engine-p7__pair-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p7__verdict {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+}
+
+.yds-precursor-engine-p7__verdict--success {
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  background: rgba(8, 24, 20, 0.45);
+}
+
+.yds-precursor-engine-p7__verdict--tuning {
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: rgba(24, 20, 8, 0.45);
+}
+
+.yds-precursor-engine-p7__verdict-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
 .yds-precursor-engine-p6__radar-header {
   display: flex;
   flex-wrap: wrap;
