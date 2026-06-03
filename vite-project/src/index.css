@@ -13839,6 +13839,60 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p5__block {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p5__scroll {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.yds-precursor-engine-p5__tp-table {
+  min-width: 48rem;
+}
+
+.yds-precursor-engine-p5__row-tp td {
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.yds-precursor-engine-p5__row-nearest td {
+  background: rgba(56, 189, 248, 0.1);
+  font-weight: 600;
+}
+
+.yds-precursor-engine-p5__contrib-table td,
+.yds-precursor-engine-p5__cluster-table td,
+.yds-precursor-engine-p5__sim-table td {
+  text-align: center;
+}
+
+.yds-precursor-engine-p5__tp-table td:first-child,
+.yds-precursor-engine-p5__cluster-table td:last-child {
+  text-align: left;
+}
+
+.yds-precursor-engine-p5__archetype-legend,
+.yds-precursor-engine-p5__dict-entries {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p5__final {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  background: rgba(8, 24, 20, 0.4);
+}
+
+.yds-precursor-engine-p5__dict-summary {
+  margin: 0.35rem 0 0;
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
 .yds-precursor-engine-p4__block {
   margin-top: 1rem;
 }
