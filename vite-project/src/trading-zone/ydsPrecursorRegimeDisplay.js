@@ -28,14 +28,14 @@ export const PRECURSOR_REGIME_DISPLAY = [
     order: 2,
     label: "경계국면",
     emoji: "🟠",
-    hints: ["위험 증가 진행", "PRI-A 상승", "패닉 패턴 유사도 확대"],
+    hints: ["위험 증가 진행", "조기경보 상승", "위험 패턴 유사도 확대"],
   },
   {
     id: "panic",
     order: 3,
     label: "위기국면",
     emoji: "🔴",
-    hints: ["패닉 전조 심화", "PRI-A/PRI-B 고위험", "패닉 패턴 우세"],
+    hints: ["패닉 전조 심화", "조기경보·충격감지 고위험", "위험 패턴 우세"],
   },
 ]
 

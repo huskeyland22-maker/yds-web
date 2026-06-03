@@ -11,6 +11,11 @@ import {
   clearPrecursorValidationLog,
   loadPrecursorValidationLog,
 } from "../../trading-zone/ydsPrecursorValidationLogStorage.js"
+import {
+  formatRiskPatternLabel,
+  getPrecursorComparisonRowLabel,
+  getPrecursorMetricDisplay,
+} from "../../trading-zone/ydsPrecursorMetricDisplay.js"
 
 function fmt(v, d = 0) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -92,6 +97,7 @@ export default function YdsPrecursorEnginePhase13Section({
     journal,
     notes,
   } = report
+  const m = getPrecursorMetricDisplay
 
   return (
     <section
@@ -121,14 +127,21 @@ export default function YdsPrecursorEnginePhase13Section({
       <article className="yds-precursor-engine-p13__live" aria-label="오늘 실측">
         <p className="m-0 panic-validation-panel__h3">오늘 실측 (저장 전 미리보기)</p>
         <div className="yds-precursor-engine-p13__live-grid font-mono tabular-nums">
-          <span>YDS {fmt(live.ydsScore)}</span>
-          <span>PRI-A {fmt(live.priA)}</span>
-          <span>PRI-B {fmt(live.priB)}</span>
+          <span>
+            {m("yds").label} {fmt(live.ydsScore)}
+          </span>
+          <span>
+            {m("priA").label} {fmt(live.priA)}
+          </span>
+          <span>
+            {m("priB").label} {fmt(live.priB)}
+          </span>
           <span>
             {live.regimeEmoji} {live.regimeLabel}
           </span>
           <span>
-            {live.dominantPatternLabel} {fmt(live.dominantSimilarity)}%
+            {formatRiskPatternLabel(live.dominantPatternId, live.dominantPatternLabel)}{" "}
+            {fmt(live.dominantSimilarity)}%
           </span>
         </div>
       </article>
@@ -152,7 +165,7 @@ export default function YdsPrecursorEnginePhase13Section({
           <tbody>
             {comparison30.rows.map((row) => (
               <tr key={row.key}>
-                <td>{row.label}</td>
+                <td>{getPrecursorComparisonRowLabel(row)}</td>
                 <td>
                   <DeltaCell value={row.delta} label={row.deltaLabel} />
                   {row.changed ? (
@@ -235,7 +248,8 @@ export default function YdsPrecursorEnginePhase13Section({
                 <div className="yds-precursor-engine-p13__journal-head">
                   <span className="font-mono tabular-nums">{entry.date}</span>
                   <span className="yds-precursor-engine-p13__journal-meta">
-                    {entry.regimeLabel} · YDS {fmt(entry.yds)} · PRI {fmt(entry.priA)}/{fmt(entry.priB)}
+                    {entry.regimeLabel} · {m("yds").label} {fmt(entry.yds)} · {m("priA").label}{" "}
+                    {fmt(entry.priA)}/{fmt(entry.priB)}
                   </span>
                 </div>
                 <p className="m-0 yds-precursor-engine-p13__journal-text">{entry.interpretation}</p>

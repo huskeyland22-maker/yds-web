@@ -13925,6 +13925,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1;
 }
 
+.yds-precursor-dashboard__hero-kicker {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.15rem;
+}
+
 .yds-precursor-dashboard__hero-label {
   font-size: 1.25rem;
   font-weight: 800;
@@ -14074,6 +14083,139 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   .yds-precursor-dashboard__metric-val {
     font-size: 1.85rem;
   }
+}
+
+.yds-precursor-action-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0.75rem 0;
+}
+
+.yds-precursor-action-guide__hero {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: linear-gradient(135deg, rgba(8, 47, 73, 0.55), rgba(15, 23, 42, 0.85));
+}
+
+.yds-precursor-action-guide__hero--cash_prep,
+.yds-precursor-action-guide__hero--watch {
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.yds-precursor-action-guide__hero--track,
+.yds-precursor-action-guide__hero--dca_prep {
+  border-color: rgba(234, 179, 8, 0.35);
+}
+
+.yds-precursor-action-guide__hero--dca_active,
+.yds-precursor-action-guide__hero--panic_buy {
+  border-color: rgba(249, 115, 22, 0.45);
+}
+
+.yds-precursor-action-guide__hero--historic {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.yds-precursor-action-guide__hero-emoji {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.yds-precursor-action-guide__hero-label {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+}
+
+.yds-precursor-action-guide__hero-action {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-precursor-action-guide__oneliner {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.6);
+  border-left: 3px solid rgba(56, 189, 248, 0.5);
+}
+
+.yds-precursor-action-guide__block {
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.yds-precursor-action-guide__block-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+}
+
+.yds-precursor-action-guide__alloc {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.yds-precursor-action-guide__alloc-sub {
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-precursor-action-guide__rationale {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.yds-precursor-action-guide__rationale li + li {
+  margin-top: 0.35rem;
+}
+
+.yds-precursor-action-guide__rationale-key {
+  display: inline-block;
+  min-width: 4.5rem;
+  font-weight: 600;
+  color: #7dd3fc;
+  margin-right: 0.35rem;
+}
+
+.yds-precursor-action-guide__trend {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+}
+
+.yds-precursor-action-guide__trend-muted {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.yds-precursor-action-guide__trend-dir--up {
+  color: #fbbf24;
+}
+
+.yds-precursor-action-guide__trend-dir--down {
+  color: #6ee7b7;
+}
+
+.yds-precursor-action-guide__trend-dir--flat {
+  color: #94a3b8;
 }
 
 .yds-precursor-engine-p13__toolbar {

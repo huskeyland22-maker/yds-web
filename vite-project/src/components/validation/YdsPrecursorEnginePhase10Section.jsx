@@ -8,6 +8,7 @@ import {
   REGIME_STATES,
   REGIME_SEQUENCE_LABEL_KO,
 } from "../../trading-zone/ydsPrecursorEnginePhase10.js"
+import { getPrecursorMetricDisplay } from "../../trading-zone/ydsPrecursorMetricDisplay.js"
 
 function fmt(v, d = 0) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -69,6 +70,7 @@ export default function YdsPrecursorEnginePhase10Section({
 
   const { live, deltas30Display, replays, replaySummary, notes } = report
   const regime = live.regime
+  const m = getPrecursorMetricDisplay
 
   return (
     <section
@@ -84,7 +86,7 @@ export default function YdsPrecursorEnginePhase10Section({
 
       <article
         className={`yds-precursor-engine-p10__regime yds-precursor-engine-p10__regime--${regime.id}`}
-        aria-label="현재 체제"
+        aria-label={`현재 ${m("regime").label}`}
       >
         <span className="yds-precursor-engine-p10__regime-emoji">{regime.emoji}</span>
         <div>
@@ -92,8 +94,8 @@ export default function YdsPrecursorEnginePhase10Section({
           <p className="m-0 yds-precursor-engine-p10__regime-reason">{regime.reason}</p>
           {live.current ? (
             <p className="m-0 yds-precursor-engine-p10__regime-metrics font-mono tabular-nums">
-              YDS {fmt(live.current.ydsScore)} · PRI-A {fmt(live.current.priA)} · PRI-B{" "}
-              {fmt(live.current.priB)}
+              {m("yds").label} {fmt(live.current.ydsScore)} · {m("priA").label}{" "}
+              {fmt(live.current.priA)} · {m("priB").label} {fmt(live.current.priB)}
               {live.past ? ` · 30일 전 ${live.past.date}` : ""}
             </p>
           ) : null}
@@ -177,9 +179,9 @@ export default function YdsPrecursorEnginePhase10Section({
                     <tr>
                       <th scope="col">시점</th>
                       <th scope="col">체제</th>
-                      <th scope="col">PRI-A</th>
+                      <th scope="col">{m("priA").label}</th>
                       <th scope="col">패닉유사 Δ30</th>
-                      <th scope="col">YDS</th>
+                      <th scope="col">{m("yds").label}</th>
                     </tr>
                   </thead>
                   <tbody>

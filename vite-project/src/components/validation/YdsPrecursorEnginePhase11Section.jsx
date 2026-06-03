@@ -76,8 +76,8 @@ export default function YdsPrecursorEnginePhase11Section({
         </div>
       </article>
 
-      <article className="yds-precursor-engine-p11__summary" aria-label="Summary">
-        <p className="m-0 panic-validation-panel__h3">Summary</p>
+      <article className="yds-precursor-engine-p11__summary" aria-label="요약 카드">
+        <p className="m-0 panic-validation-panel__h3">요약</p>
         <div className="yds-precursor-engine-p11__summary-grid">
           <div className="yds-precursor-engine-p11__summary-card">
             <p className="yds-precursor-engine-p11__summary-key">현재 국면</p>

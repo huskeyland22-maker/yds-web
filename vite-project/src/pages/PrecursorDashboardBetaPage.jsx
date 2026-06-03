@@ -5,6 +5,13 @@ import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtil
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { YDS_VALIDATION_EVENT_DATASET } from "../trading-zone/ydsHistoricalValidationEvents.js"
 import { buildPrecursorDashboardBetaReport } from "../trading-zone/ydsPrecursorEnginePhase12.js"
+import { buildPrecursorEnginePhase15Report } from "../trading-zone/ydsPrecursorEnginePhase15.js"
+import { loadPrecursorValidationLog } from "../trading-zone/ydsPrecursorValidationLogStorage.js"
+import {
+  formatRiskPatternLabel,
+  getPrecursorMetricDisplay,
+} from "../trading-zone/ydsPrecursorMetricDisplay.js"
+import YdsPrecursorActionGuidePanel from "../components/validation/YdsPrecursorActionGuidePanel.jsx"
 
 /**
  * @param {number | null} value
@@ -41,8 +48,23 @@ export default function PrecursorDashboardBetaPage() {
     [latestSnapshot, history],
   )
 
+  const actionReport = useMemo(
+    () =>
+      buildPrecursorEnginePhase15Report(YDS_VALIDATION_EVENT_DATASET, {
+        latestSnapshot,
+        extraRows: history,
+        log: loadPrecursorValidationLog(),
+      }),
+    [latestSnapshot, history],
+  )
+
   const { cards, asOf, meta, notes } = report
   const regime = cards.regime
+  const m = getPrecursorMetricDisplay
+  const patternDisplay = formatRiskPatternLabel(
+    cards.pattern.patternId,
+    cards.pattern.label,
+  )
 
   return (
     <div className="yds-precursor-dashboard">
@@ -61,20 +83,26 @@ export default function PrecursorDashboardBetaPage() {
 
       <section
         className={`yds-precursor-dashboard__hero yds-precursor-dashboard__hero--${regime.regimeId}`}
-        aria-label="현재 국면"
+        aria-label={m("regime").label}
       >
         <span className="yds-precursor-dashboard__hero-emoji" aria-hidden>
           {regime.emoji}
         </span>
         <div className="yds-precursor-dashboard__hero-body">
+          <p className="m-0 yds-precursor-dashboard__hero-kicker">{m("regime").label}</p>
           <p className="m-0 yds-precursor-dashboard__hero-label">{regime.label}</p>
           <p className="m-0 yds-precursor-dashboard__hero-duration">{regime.durationLabel}</p>
         </div>
       </section>
 
+      <YdsPrecursorActionGuidePanel report={actionReport} />
+
       <div className="yds-precursor-dashboard__grid" aria-label="핵심 지표">
-        <article className="yds-precursor-dashboard__card yds-precursor-dashboard__card--yds">
-          <p className="yds-precursor-dashboard__card-label">{cards.yds.title}</p>
+        <article
+          className="yds-precursor-dashboard__card yds-precursor-dashboard__card--yds"
+          title={m("yds").hint}
+        >
+          <p className="yds-precursor-dashboard__card-label">{m("yds").label}</p>
           <p
             className={[
               "yds-precursor-dashboard__metric-val font-mono tabular-nums",
@@ -85,8 +113,8 @@ export default function PrecursorDashboardBetaPage() {
           </p>
           <p className="yds-precursor-dashboard__card-sub">{cards.yds.sub}</p>
         </article>
-        <article className="yds-precursor-dashboard__card">
-          <p className="yds-precursor-dashboard__card-label">{cards.priA.title}</p>
+        <article className="yds-precursor-dashboard__card" title={m("priA").hint}>
+          <p className="yds-precursor-dashboard__card-label">{m("priA").label}</p>
           <p
             className={[
               "yds-precursor-dashboard__metric-val font-mono tabular-nums",
@@ -97,8 +125,8 @@ export default function PrecursorDashboardBetaPage() {
           </p>
           <p className="yds-precursor-dashboard__card-sub">{cards.priA.sub}</p>
         </article>
-        <article className="yds-precursor-dashboard__card">
-          <p className="yds-precursor-dashboard__card-label">{cards.priB.title}</p>
+        <article className="yds-precursor-dashboard__card" title={m("priB").hint}>
+          <p className="yds-precursor-dashboard__card-label">{m("priB").label}</p>
           <p
             className={[
               "yds-precursor-dashboard__metric-val font-mono tabular-nums",
@@ -109,9 +137,12 @@ export default function PrecursorDashboardBetaPage() {
           </p>
           <p className="yds-precursor-dashboard__card-sub">{cards.priB.sub}</p>
         </article>
-        <article className="yds-precursor-dashboard__card yds-precursor-dashboard__card--pattern">
-          <p className="yds-precursor-dashboard__card-label">{cards.pattern.title}</p>
-          <p className="yds-precursor-dashboard__pattern-name">{cards.pattern.label}</p>
+        <article
+          className="yds-precursor-dashboard__card yds-precursor-dashboard__card--pattern"
+          title={m("pattern").hint}
+        >
+          <p className="yds-precursor-dashboard__card-label">{m("pattern").label}</p>
+          <p className="yds-precursor-dashboard__pattern-name">{patternDisplay}</p>
           <p className="yds-precursor-dashboard__metric-val font-mono tabular-nums">
             {cards.pattern.similarity != null ? `${Math.round(cards.pattern.similarity)}%` : "—"}
             <span className="yds-precursor-dashboard__card-sub-inline"> 유사</span>
@@ -119,9 +150,9 @@ export default function PrecursorDashboardBetaPage() {
         </article>
       </div>
 
-      <article className="yds-precursor-dashboard__interpret" aria-label="시장 해석">
+      <article className="yds-precursor-dashboard__interpret" aria-label={m("interpretation").label}>
         <div className="yds-precursor-dashboard__interpret-head">
-          <p className="m-0 yds-precursor-dashboard__card-label">{cards.interpretation.title}</p>
+          <p className="m-0 yds-precursor-dashboard__card-label">{m("interpretation").label}</p>
           {cards.interpretation.radarAlert ? (
             <span
               className={`yds-precursor-dashboard__alert yds-precursor-dashboard__alert--${cards.interpretation.radarAlert.id}`}

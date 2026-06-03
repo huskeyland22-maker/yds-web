@@ -18,6 +18,10 @@ import {
   PATTERN_HISTORY_KEYS,
   PRECURSOR_ENGINE_PHASE9_LABEL,
 } from "../../trading-zone/ydsPrecursorEnginePhase9.js"
+import {
+  formatRiskPatternLabel,
+  getPrecursorMetricDisplay,
+} from "../../trading-zone/ydsPrecursorMetricDisplay.js"
 
 function fmt(v, d = 0) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -94,6 +98,7 @@ export default function YdsPrecursorEnginePhase9Section({
   }, [report.windows, windowDays])
 
   const { summary, regime, patternRotation, similarityTrends, storeMeta, notes } = report
+  const m = getPrecursorMetricDisplay
 
   return (
     <section
@@ -108,33 +113,35 @@ export default function YdsPrecursorEnginePhase9Section({
       </p>
 
       {summary ? (
-        <article className="yds-precursor-engine-p9__summary" aria-label="Summary Card">
+        <article className="yds-precursor-engine-p9__summary" aria-label="요약 카드">
           <div className="yds-precursor-engine-p9__summary-grid">
             <div className="yds-precursor-engine-p9__summary-card">
-              <p className="yds-precursor-engine-p9__summary-label">우세 패턴</p>
+              <p className="yds-precursor-engine-p9__summary-label">우세 {m("pattern").label}</p>
               <p className="yds-precursor-engine-p9__summary-value">
-                {summary.dominantPattern}{" "}
+                {formatRiskPatternLabel(null, summary.dominantPattern)}{" "}
                 <span className="font-mono tabular-nums">{fmt(summary.dominantSimilarity)}%</span>
               </p>
             </div>
             <div className="yds-precursor-engine-p9__summary-card">
-              <p className="yds-precursor-engine-p9__summary-label">2위 패턴</p>
+              <p className="yds-precursor-engine-p9__summary-label">2위 {m("pattern").label}</p>
               <p className="yds-precursor-engine-p9__summary-value">
-                {summary.secondPattern}{" "}
+                {formatRiskPatternLabel(null, summary.secondPattern)}{" "}
                 <span className="font-mono tabular-nums">{fmt(summary.secondSimilarity)}%</span>
               </p>
             </div>
             <div className="yds-precursor-engine-p9__summary-card">
-              <p className="yds-precursor-engine-p9__summary-label">PRI-A / B (현재)</p>
+              <p className="yds-precursor-engine-p9__summary-label">
+                {m("priA").label} / {m("priB").label}
+              </p>
               <p className="yds-precursor-engine-p9__summary-value font-mono tabular-nums">
                 {fmt(summary.priA)} / {fmt(summary.priB)}
               </p>
               <p className="yds-precursor-engine-p9__summary-sub">
-                30일 PRI-A Δ {summary.priAChange30d}
+                30일 {m("priA").label} Δ {summary.priAChange30d}
               </p>
             </div>
             <div className="yds-precursor-engine-p9__summary-card">
-              <p className="yds-precursor-engine-p9__summary-label">현재 국면</p>
+              <p className="yds-precursor-engine-p9__summary-label">현재 {m("regime").label}</p>
               <p className="yds-precursor-engine-p9__summary-value">
                 {summary.regime?.emoji} {summary.regime?.label ?? "—"}
               </p>
@@ -149,7 +156,7 @@ export default function YdsPrecursorEnginePhase9Section({
 
       <article
         className={`yds-precursor-engine-p9__regime yds-precursor-engine-p9__regime--${regime.id}`}
-        aria-label="Regime Tracker"
+        aria-label={m("regime").label}
       >
         <span className="yds-precursor-engine-p9__regime-emoji">{regime.emoji}</span>
         <div>
@@ -158,9 +165,9 @@ export default function YdsPrecursorEnginePhase9Section({
         </div>
       </article>
 
-      <article className="yds-precursor-engine-p9__block" aria-label="Pattern History">
+      <article className="yds-precursor-engine-p9__block" aria-label={`${m("pattern").label} 히스토리`}>
         <div className="yds-precursor-engine-p9__block-head">
-          <p className="m-0 panic-validation-panel__h3">Pattern History</p>
+          <p className="m-0 panic-validation-panel__h3">{m("pattern").label} 히스토리</p>
           <div className="yds-precursor-engine-p9__window-tabs" role="tablist">
             {HISTORY_WINDOWS.map((w) => (
               <button
@@ -224,7 +231,7 @@ export default function YdsPrecursorEnginePhase9Section({
                 yAxisId="pri"
                 type="monotone"
                 dataKey="priA"
-                name="PRI-A"
+                name={m("priA").label}
                 stroke="#38bdf8"
                 strokeWidth={2}
                 strokeDasharray="4 2"
@@ -235,7 +242,7 @@ export default function YdsPrecursorEnginePhase9Section({
                 yAxisId="pri"
                 type="monotone"
                 dataKey="priB"
-                name="PRI-B"
+                name={m("priB").label}
                 stroke="#a78bfa"
                 strokeWidth={2}
                 strokeDasharray="4 2"
@@ -273,8 +280,8 @@ export default function YdsPrecursorEnginePhase9Section({
         </table>
       </article>
 
-      <article className="yds-precursor-engine-p9__block" aria-label="Pattern Rotation">
-        <p className="m-0 panic-validation-panel__h3">Pattern Rotation (최근 30일)</p>
+      <article className="yds-precursor-engine-p9__block" aria-label={`${m("pattern").label} 로테이션`}>
+        <p className="m-0 panic-validation-panel__h3">{m("pattern").label} 로테이션 (최근 30일)</p>
         <ul className="yds-precursor-engine-p9__rotation-list">
           {patternRotation.map((r) => (
             <li key={r.key} className="yds-precursor-engine-p9__rotation-item">

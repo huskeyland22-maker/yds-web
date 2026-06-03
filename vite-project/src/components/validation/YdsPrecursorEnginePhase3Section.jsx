@@ -95,8 +95,8 @@ export default function YdsPrecursorEnginePhase3Section({
       </p>
 
       <div className="yds-precursor-engine-p3__live-grid">
-        <article className="yds-precursor-engine-p3__card" aria-label="PRI-A 실시간">
-          <p className="m-0 yds-precursor-engine-p3__card-title">PRI-A · 조기경보</p>
+        <article className="yds-precursor-engine-p3__card" aria-label="조기경보 실시간">
+          <p className="m-0 yds-precursor-engine-p3__card-title">조기경보</p>
           {priACard ? (
             <>
               <p className="m-0 yds-precursor-engine-p3__score font-mono tabular-nums">
@@ -127,8 +127,8 @@ export default function YdsPrecursorEnginePhase3Section({
           <p className="m-0 yds-precursor-engine-p3__disclaimer">{cashGuide.disclaimer}</p>
         </article>
 
-        <article className="yds-precursor-engine-p3__card" aria-label="PRI-B 실시간">
-          <p className="m-0 yds-precursor-engine-p3__card-title">PRI-B · 충격확인</p>
+        <article className="yds-precursor-engine-p3__card" aria-label="충격감지 실시간">
+          <p className="m-0 yds-precursor-engine-p3__card-title">충격감지</p>
           {priBCard ? (
             <>
               <p className="m-0 yds-precursor-engine-p3__score font-mono tabular-nums">
@@ -169,7 +169,7 @@ export default function YdsPrecursorEnginePhase3Section({
           </thead>
           <tbody>
             <tr>
-              <td>PRI-A</td>
+              <td>조기경보</td>
               <td className="font-mono tabular-nums">
                 {metricsA.precision != null ? `${metricsA.precision}%` : "—"}
               </td>
@@ -187,7 +187,7 @@ export default function YdsPrecursorEnginePhase3Section({
               </td>
             </tr>
             <tr>
-              <td>PRI-B</td>
+              <td>충격감지</td>
               <td className="font-mono tabular-nums">
                 {metricsB.precision != null ? `${metricsB.precision}%` : "—"}
               </td>
@@ -207,8 +207,8 @@ export default function YdsPrecursorEnginePhase3Section({
           </tbody>
         </table>
 
-        <ConfusionMatrixTable matrix={metricsA.confusionMatrix} title="PRI-A Confusion Matrix" />
-        <ConfusionMatrixTable matrix={metricsB.confusionMatrix} title="PRI-B Confusion Matrix" />
+        <ConfusionMatrixTable matrix={metricsA.confusionMatrix} title="조기경보 Confusion Matrix" />
+        <ConfusionMatrixTable matrix={metricsB.confusionMatrix} title="충격감지 Confusion Matrix" />
 
         <ul className="yds-engine-candidate__notes">
           {report.notes.map((n) => (

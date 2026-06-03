@@ -218,9 +218,9 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
   if (!view) return null
 
   return (
-    <section className="yds-composite-hero trading-card-shell panic-v2-section" aria-label="YDS 종합점수">
+    <section className="yds-composite-hero trading-card-shell panic-v2-section" aria-label="시장 위치">
       <div className="yds-composite-hero__head">
-        <p className="m-0 yds-composite-hero__title">YDS MARKET SCORE</p>
+        <p className="m-0 yds-composite-hero__title">시장 위치</p>
         <p className="m-0 yds-composite-hero__score font-mono tabular-nums">{view.scoreDisplay}</p>
       </div>
       <p className="m-0 yds-composite-hero__stage">
@@ -253,7 +253,7 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
         <p className="m-0 yds-composite-hero__alloc-label">현금</p>
       </div>
       <p className="m-0 yds-composite-hero__recent">
-        YDS 변화{" "}
+        시장 위치 변화{" "}
         <span className="font-mono tabular-nums">
           {view.prevScore != null ? `${view.prevScore} → ${view.score}` : view.trendLine}
         </span>{" "}
@@ -267,9 +267,9 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
           평균 수익률 {recSummary.avgReturn != null ? `${recSummary.avgReturn > 0 ? "+" : ""}${recSummary.avgReturn.toFixed(0)}%` : "—"}
         </span>
       </div>
-      <div className="yds-composite-hero__breakdown" role="status" aria-label="YDS 점수 분해">
+      <div className="yds-composite-hero__breakdown" role="status" aria-label="시장 위치 점수 분해">
         <p className="m-0 yds-composite-hero__break-row">
-          <span>YDS 점수</span>
+          <span>시장 위치 점수</span>
           <strong className="font-mono tabular-nums">{view.score}</strong>
         </p>
         <p className="m-0 yds-composite-hero__break-row">

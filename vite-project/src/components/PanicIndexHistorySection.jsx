@@ -144,7 +144,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
     }
   }, [history])
   const compactLine = useMemo(() => {
-    if (!ydsSummary) return "YDS — · 데이터 준비 중"
+    if (!ydsSummary) return "시장 위치 — · 데이터 준비 중"
     const latest = history[history.length - 1]
     const prev = history.length >= 2 ? history[history.length - 2] : null
     const vixNow = Number(latest?.vix)
@@ -156,7 +156,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       else if (delta < 0) vixLine = "VIX 안정"
       else vixLine = "VIX 상승"
     }
-    return `YDS ${ydsSummary.score}점 · ${ydsSummary.stageLabel} · 최근 ${ydsSummary.trendLine} · ${vixLine}`
+    return `시장 위치 ${ydsSummary.score}점 · ${ydsSummary.stageLabel} · 최근 ${ydsSummary.trendLine} · ${vixLine}`
   }, [ydsSummary, history])
 
   return (
@@ -209,8 +209,8 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           aria-selected={metricScope === "yds"}
           onClick={() => setMetricScope("yds")}
         >
-          <span className="panic-history-scope-toggle__label-full">YDS 종합</span>
-          <span className="panic-history-scope-toggle__label-short">YDS</span>
+          <span className="panic-history-scope-toggle__label-full">시장 위치</span>
+          <span className="panic-history-scope-toggle__label-short">위치</span>
         </button>
         <button
           type="button"
@@ -279,9 +279,9 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         </p>
       </div> : null}
       {ydsSummary && chartOpen ? (
-        <div className="panic-history-yds-summary" role="status" aria-label="YDS 종합점수 요약">
+        <div className="panic-history-yds-summary" role="status" aria-label="시장 위치 요약">
           <p className="m-0 panic-history-yds-summary__score">
-            YDS {ydsSummary.score}점
+            시장 위치 {ydsSummary.score}점
             <span
               className={[
                 "panic-history-yds-summary__delta",
