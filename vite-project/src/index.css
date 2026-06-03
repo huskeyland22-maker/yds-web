@@ -13839,6 +13839,215 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p11__current {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.yds-precursor-engine-p11__current--stable {
+  background: rgba(8, 28, 18, 0.45);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.yds-precursor-engine-p11__current--transition {
+  background: rgba(40, 32, 8, 0.45);
+  border-color: rgba(250, 204, 21, 0.35);
+}
+
+.yds-precursor-engine-p11__current--risk {
+  background: rgba(40, 20, 8, 0.45);
+  border-color: rgba(251, 146, 60, 0.35);
+}
+
+.yds-precursor-engine-p11__current--panic {
+  background: rgba(40, 8, 8, 0.45);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.yds-precursor-engine-p11__current-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.yds-precursor-engine-p11__current-label {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p11__duration {
+  margin-top: 0.15rem !important;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p11__summary {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p11__summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.45rem;
+}
+
+.yds-precursor-engine-p11__summary-card {
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.yds-precursor-engine-p11__summary-key {
+  margin: 0;
+  font-size: 0.65rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.yds-precursor-engine-p11__summary-val {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p11__direction--up {
+  color: #f87171;
+}
+
+.yds-precursor-engine-p11__direction--down {
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p11__direction--flat {
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p11__block {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p11__block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.yds-precursor-engine-p11__window-tabs {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.yds-precursor-engine-p11__window-tab {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.yds-precursor-engine-p11__window-tab--active {
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #7dd3fc;
+  background: rgba(8, 47, 73, 0.45);
+}
+
+.yds-precursor-engine-p11__changelog {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-precursor-engine-p11__changelog-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: 0.82rem;
+}
+
+.yds-precursor-engine-p11__changelog-date {
+  color: #64748b;
+  min-width: 6.5rem;
+}
+
+.yds-precursor-engine-p11__changelog-flow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  color: #cbd5e1;
+}
+
+.yds-precursor-engine-p11__changelog-arrow {
+  color: #64748b;
+}
+
+.yds-precursor-engine-p11__change-count {
+  margin: 0.35rem 0 0.5rem !important;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p11__timeline {
+  display: flex;
+  width: 100%;
+  height: 1.25rem;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.yds-precursor-engine-p11__timeline-seg {
+  min-width: 2px;
+  height: 100%;
+}
+
+.yds-precursor-engine-p11__timeline-seg--stable {
+  background: rgba(34, 197, 94, 0.75);
+}
+
+.yds-precursor-engine-p11__timeline-seg--transition {
+  background: rgba(250, 204, 21, 0.8);
+}
+
+.yds-precursor-engine-p11__timeline-seg--risk {
+  background: rgba(251, 146, 60, 0.85);
+}
+
+.yds-precursor-engine-p11__timeline-seg--panic {
+  background: rgba(248, 113, 113, 0.9);
+}
+
+.yds-precursor-engine-p11__timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  margin-top: 0.45rem;
+}
+
+.yds-precursor-engine-p11__timeline-tag {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.5);
+  color: #94a3b8;
+}
+
 .yds-precursor-engine-p10__regime {
   display: flex;
   align-items: flex-start;
