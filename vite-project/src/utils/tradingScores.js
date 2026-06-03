@@ -101,7 +101,7 @@ export function describeDynamicWeights(vix, highYield) {
   return `동적 가중: 단기 ${pct(wShort)} · 중기 ${pct(wMid)}`
 }
 
-/** 서버 data → 최종 0~100 */
+/** 서버 data → 최종 0~100 (legacy · 프로덕션 기본) */
 export function getFinalScore(data) {
   const short = getShortScore(data.vix, data.putCall)
   const mid = getMidScore(data.fearGreed, data.bofa, data.highYield)

@@ -13839,6 +13839,115 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-validation__insights {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: rgba(8, 20, 36, 0.45);
+}
+
+.yds-precursor-validation__insight-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.yds-precursor-validation__event-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #7dd3fc;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.yds-precursor-validation__row-active td {
+  background: rgba(14, 116, 144, 0.12);
+}
+
+.yds-precursor-validation__row-event td {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.yds-precursor-validation__yds {
+  font-weight: 700;
+  color: #f0f9ff;
+}
+
+.yds-precursor-validation__timeline-table {
+  margin-top: 0.5rem;
+}
+
+.yds-precursor-validation__analysis {
+  margin-top: 1rem;
+}
+
+.yds-precursor-validation__analysis-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.yds-precursor-validation__thresholds {
+  margin-top: 1rem;
+}
+
+.yds-precursor-validation__threshold-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.yds-production-candidate__flag {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: rgba(8, 20, 36, 0.5);
+}
+
+.yds-production-candidate__flag-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.yds-production-candidate__flag-btn {
+  margin-top: 0.65rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(14, 116, 144, 0.25);
+  color: #e0f2fe;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.yds-v3-prod-sim__current {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: rgba(8, 20, 36, 0.45);
+}
+
+.yds-v3-prod-sim__input-table {
+  margin-top: 0.5rem;
+}
+
+.yds-v3-prod-sim__goals {
+  margin-top: 1rem;
+}
+
 .yds-engine-candidate__notes {
   margin: 0.5rem 0 0;
   padding-left: 1rem;
