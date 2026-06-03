@@ -21,6 +21,7 @@ import YdsPanicEventValidationSection from "../components/validation/YdsPanicEve
 import YdsFearClimaxAnalysisSection from "../components/validation/YdsFearClimaxAnalysisSection.jsx"
 import YdsEngineCandidateV3Section from "../components/validation/YdsEngineCandidateV3Section.jsx"
 import YdsPrecursorValidationSection from "../components/validation/YdsPrecursorValidationSection.jsx"
+import YdsProductionCandidateSection from "../components/validation/YdsProductionCandidateSection.jsx"
 import YdsHyWeightSensitivityLabSection from "../components/validation/YdsHyWeightSensitivityLabSection.jsx"
 import YdsTariffShockDeepValidationSection from "../components/validation/YdsTariffShockDeepValidationSection.jsx"
 import YdsVixSensitivityLabSection from "../components/validation/YdsVixSensitivityLabSection.jsx"
