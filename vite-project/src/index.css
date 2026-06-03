@@ -13563,10 +13563,63 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-bottom: 0.55rem;
 }
 
+.yds-vix-lab__anchors-grid--triple {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+  .yds-vix-lab__anchors-grid--triple {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .yds-vix-lab__anchors-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.yds-vix-lab__exp-v3 {
+  color: rgba(251, 191, 36, 0.95);
+  font-weight: 600;
+}
+
+.yds-vix-lab__scroll-wrap {
+  overflow-x: auto;
+}
+
+.yds-vix-lab__quad-table {
+  font-size: 0.62rem;
+  min-width: 36rem;
+}
+
+.yds-vix-lab__ranking {
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.yds-vix-lab__rank-table {
+  margin-top: 0.35rem;
+  font-size: 0.66rem;
+}
+
+.yds-vix-lab__interpret-v3 {
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  background: rgba(41, 32, 8, 0.3);
+}
+
+.yds-vix-lab__interpret-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.67rem;
+  color: rgba(253, 230, 138, 0.94);
+  line-height: 1.45;
 }
 
 .yds-vix-lab__exp-v2 {
