@@ -13839,6 +13839,60 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p4__block {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p4__scroll {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.yds-precursor-engine-p4__fn-table {
+  min-width: 44rem;
+}
+
+.yds-precursor-engine-p4__row-success td {
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.yds-precursor-engine-p4__row-failure td {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.yds-precursor-engine-p4__reason-legend,
+.yds-precursor-engine-p4__severity-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p4__breakdown-table td,
+.yds-precursor-engine-p4__list-table td,
+.yds-precursor-engine-p4__metrics-table td {
+  text-align: center;
+}
+
+.yds-precursor-engine-p4__list-table td:first-child,
+.yds-precursor-engine-p4__fn-table td:first-child {
+  text-align: left;
+}
+
+.yds-precursor-engine-p4__final {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  background: rgba(24, 20, 8, 0.35);
+}
+
+.yds-precursor-engine-p4__priorities {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
 .yds-precursor-engine-p3__live-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
