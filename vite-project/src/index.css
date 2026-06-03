@@ -13839,6 +13839,150 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p10__regime {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.yds-precursor-engine-p10__regime--stable {
+  background: rgba(8, 28, 18, 0.45);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.yds-precursor-engine-p10__regime--transition {
+  background: rgba(40, 32, 8, 0.45);
+  border-color: rgba(250, 204, 21, 0.35);
+}
+
+.yds-precursor-engine-p10__regime--risk {
+  background: rgba(40, 20, 8, 0.45);
+  border-color: rgba(251, 146, 60, 0.35);
+}
+
+.yds-precursor-engine-p10__regime--panic {
+  background: rgba(40, 8, 8, 0.45);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.yds-precursor-engine-p10__regime-emoji {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.yds-precursor-engine-p10__regime-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p10__regime-reason,
+.yds-precursor-engine-p10__regime-metrics {
+  margin-top: 0.2rem !important;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p10__block {
+  margin-top: 1rem;
+}
+
+.yds-precursor-engine-p10__delta-table td {
+  text-align: center;
+}
+
+.yds-precursor-engine-p10__delta-table td:first-child {
+  text-align: left;
+}
+
+.yds-precursor-engine-p10__delta-up {
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p10__delta-down {
+  color: #f87171;
+}
+
+.yds-precursor-engine-p10__replay-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.yds-precursor-engine-p10__replay-badge {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #fca5a5;
+}
+
+.yds-precursor-engine-p10__replay-badge--pass {
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p10__replay-card {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.yds-precursor-engine-p10__replay-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yds-precursor-engine-p10__replay-title {
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p10__replay-status {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.yds-precursor-engine-p10__replay-status--pass {
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p10__replay-seq {
+  margin-top: 0.35rem !important;
+  font-size: 0.95rem;
+}
+
+.yds-precursor-engine-p10__replay-meta {
+  margin-top: 0.2rem !important;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p10__replay-table {
+  margin-top: 0.45rem;
+}
+
+.yds-precursor-engine-p10__replay-table td {
+  font-size: 0.78rem;
+}
+
+.yds-precursor-engine-p10__regime-legend {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
 .yds-precursor-engine-p9__summary {
   margin-top: 0.75rem;
   padding: 0.85rem 1rem;
