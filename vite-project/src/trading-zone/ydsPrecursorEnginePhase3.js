@@ -63,7 +63,7 @@ function rowToSnapshot(row) {
  * @param {ReturnType<typeof rowToSnapshot>[]} series
  * @param {string} targetDate
  */
-function interpolateSeriesAt(series, targetDate) {
+export function interpolateSeriesAt(series, targetDate) {
   if (!series.length) return null
   const targetTs = parsePrecursorDay(targetDate)
   const sorted = [...series].filter((s) => s?.date).sort((a, b) => parsePrecursorDay(a.date) - parsePrecursorDay(b.date))
