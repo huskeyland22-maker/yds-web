@@ -4,6 +4,7 @@
  */
 export function getPrimaryNavItems() {
   return [
+    { label: "시장 대시보드", path: "/market-dashboard" },
     { label: "시장 사이클", path: "/cycle" },
     { label: "코리아 밸류체인", path: "/value-chain" },
     { label: "트레이딩 로그", path: "/trading-log" },

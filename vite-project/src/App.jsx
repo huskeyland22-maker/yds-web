@@ -30,6 +30,7 @@ import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
+import PrecursorDashboardBetaPage from "./pages/PrecursorDashboardBetaPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
@@ -1320,6 +1321,14 @@ function App() {
         <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
+            <Route
+              path="/market-dashboard"
+              element={
+                <SectionErrorBoundary label="시장 대시보드 Beta">
+                  <PrecursorDashboardBetaPage />
+                </SectionErrorBoundary>
+              }
+            />
             <Route
               path="/cycle"
               element={
