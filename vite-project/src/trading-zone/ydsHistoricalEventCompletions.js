@@ -143,6 +143,99 @@ export const YDS_EVENT_COMPLETIONS = {
       recovery: { historyData: { yds: null, vix: 17.0, cnn: 66, bofa: 5.8, highYield: 4.4, putCall: 0.82 } },
     },
   }),
+
+  "nonpanic-2023-ai-rally": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "Phase 2 비패닉 검증 — 2023 AI 랠리(과열·상승). climax=8/18 국지 조정 전 고점. 공개 월간 앵커 기반.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -4.2,
+      after6mSp500Pct: 8.5,
+      after12mSp500Pct: 18.2,
+      performanceAnchorDate: "2023-08-18",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 17.0, cnn: 58, bofa: 5.6, highYield: 3.8, putCall: 0.8 } },
+      rise: { historyData: { yds: null, vix: 14.5, cnn: 65, bofa: 5.9, highYield: 3.6, putCall: 0.76 } },
+      fearExpansion: { historyData: { yds: null, vix: 14.0, cnn: 68, bofa: 6.0, highYield: 3.5, putCall: 0.75 } },
+      climax: { historyData: { yds: null, vix: 18.0, cnn: 52, bofa: 5.5, highYield: 3.9, putCall: 0.82 } },
+      recovery: { historyData: { yds: null, vix: 16.0, cnn: 55, bofa: 5.4, highYield: 4.0, putCall: 0.84 } },
+    },
+  }),
+
+  "nonpanic-2024-bull-market": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "Phase 2 비패닉 — 2024 상반기 강세장. climax=7/11 국지 고점. VIX·신용 스트레스 낮은 구간.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -2.8,
+      after6mSp500Pct: 6.2,
+      after12mSp500Pct: 14.5,
+      performanceAnchorDate: "2024-07-11",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 13.0, cnn: 70, bofa: 6.1, highYield: 3.3, putCall: 0.72 } },
+      rise: { historyData: { yds: null, vix: 14.0, cnn: 66, bofa: 6.0, highYield: 3.4, putCall: 0.74 } },
+      fearExpansion: { historyData: { yds: null, vix: 18.0, cnn: 48, bofa: 5.5, highYield: 3.8, putCall: 0.84 } },
+      climax: { historyData: { yds: null, vix: 15.0, cnn: 62, bofa: 5.8, highYield: 3.5, putCall: 0.78 } },
+      recovery: { historyData: { yds: null, vix: 17.0, cnn: 55, bofa: 5.4, highYield: 3.7, putCall: 0.82 } },
+    },
+  }),
+
+  "nonpanic-2024-ath-breakout": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes: "Phase 2 비패닉 — 2024 연말 ATH 돌파. climax=12/20 단기 고점.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -1.5,
+      after6mSp500Pct: 4.8,
+      after12mSp500Pct: 9.2,
+      performanceAnchorDate: "2024-12-20",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 21.0, cnn: 42, bofa: 5.2, highYield: 4.0, putCall: 0.86 } },
+      rise: { historyData: { yds: null, vix: 19.0, cnn: 48, bofa: 5.4, highYield: 3.8, putCall: 0.84 } },
+      fearExpansion: { historyData: { yds: null, vix: 18.0, cnn: 52, bofa: 5.5, highYield: 3.7, putCall: 0.83 } },
+      climax: { historyData: { yds: null, vix: 17.0, cnn: 54, bofa: 5.6, highYield: 3.6, putCall: 0.81 } },
+      recovery: { historyData: { yds: null, vix: 16.0, cnn: 58, bofa: 5.7, highYield: 3.5, putCall: 0.8 } },
+    },
+  }),
+
+  "nonpanic-2025-bull-continuation": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes: "Phase 2 비패닉 — 2025 하반기 강세 지속. climax=11/07.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -2.1,
+      after6mSp500Pct: null,
+      after12mSp500Pct: null,
+      performanceAnchorDate: "2025-11-07",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 17.5, cnn: 54, bofa: 5.5, highYield: 3.5, putCall: 0.82 } },
+      rise: { historyData: { yds: null, vix: 18.0, cnn: 52, bofa: 5.6, highYield: 3.6, putCall: 0.82 } },
+      fearExpansion: { historyData: { yds: null, vix: 17.5, cnn: 50, bofa: 5.5, highYield: 3.6, putCall: 0.83 } },
+      climax: { historyData: { yds: null, vix: 19.0, cnn: 46, bofa: 5.4, highYield: 3.7, putCall: 0.85 } },
+      recovery: { historyData: { yds: null, vix: 17.0, cnn: 55, bofa: 5.8, highYield: 3.4, putCall: 0.81 } },
+    },
+  }),
+
+  "nonpanic-current-market": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes:
+      "Phase 2 비패닉 — 현재 시장(2026-03-06 앵커). PANIC_VALIDATION_EXTENDED_HISTORY 최신 스냅샷.",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: null,
+      after6mSp500Pct: null,
+      after12mSp500Pct: null,
+      performanceAnchorDate: "2026-03-06",
+    }),
+    milestones: {
+      start: { historyData: { yds: null, vix: 19.0, cnn: 46, bofa: 5.4, highYield: 3.7, putCall: 0.85 } },
+      rise: { historyData: { yds: null, vix: 17.0, cnn: 55, bofa: 5.8, highYield: 3.4, putCall: 0.81 } },
+      fearExpansion: { historyData: { yds: null, vix: 18.5, cnn: 48, bofa: 5.5, highYield: 3.8, putCall: 0.84 } },
+      climax: { historyData: { yds: null, vix: 20.0, cnn: 40, bofa: 5.1, highYield: 4.0, putCall: 0.88 } },
+      recovery: { historyData: { yds: null, vix: 20.0, cnn: 40, bofa: 5.1, highYield: 4.0, putCall: 0.88 } },
+    },
+  }),
 }
 
 /** @param {import("./ydsHistoricalEventTypes.js").EventDetailData} event */

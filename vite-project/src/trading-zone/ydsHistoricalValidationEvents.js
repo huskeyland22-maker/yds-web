@@ -270,6 +270,77 @@ const RAW_EVENTS = [
       recovery: "2025-01-24",
     },
   },
+
+  {
+    id: "nonpanic-2023-ai-rally",
+    category: "overheated",
+    name: "2023 AI Rally",
+    startDate: "2023-05-01",
+    endDate: "2023-08-31",
+    keyDates: {
+      start: "2023-05-01",
+      rally: "2023-05-26",
+      fearExpansion: "2023-07-14",
+      extreme: "2023-08-18",
+      recovery: "2023-09-14",
+    },
+  },
+  {
+    id: "nonpanic-2024-bull-market",
+    category: "overheated",
+    name: "2024 Bull Market",
+    startDate: "2024-01-02",
+    endDate: "2024-07-16",
+    keyDates: {
+      start: "2024-01-02",
+      rally: "2024-03-01",
+      fearExpansion: "2024-04-19",
+      extreme: "2024-07-11",
+      recovery: "2024-09-30",
+    },
+  },
+  {
+    id: "nonpanic-2024-ath-breakout",
+    category: "overheated",
+    name: "2024 ATH Breakout",
+    startDate: "2024-10-01",
+    endDate: "2024-12-20",
+    keyDates: {
+      start: "2024-10-01",
+      rally: "2024-11-06",
+      fearExpansion: "2024-11-20",
+      extreme: "2024-12-20",
+      recovery: "2025-01-24",
+    },
+  },
+  {
+    id: "nonpanic-2025-bull-continuation",
+    category: "overheated",
+    name: "2025 Bull Continuation",
+    startDate: "2025-05-13",
+    endDate: "2025-11-07",
+    keyDates: {
+      start: "2025-05-13",
+      rally: "2025-08-01",
+      fearExpansion: "2025-09-15",
+      extreme: "2025-11-07",
+      recovery: "2026-01-09",
+    },
+  },
+  {
+    id: "nonpanic-current-market",
+    category: "overheated",
+    name: "Current Market",
+    startDate: "2025-11-07",
+    endDate: "2026-03-06",
+    keyDates: {
+      start: "2025-11-07",
+      rally: "2026-01-09",
+      fearExpansion: "2026-02-10",
+      extreme: "2026-03-06",
+      recovery: "2026-03-10",
+    },
+  },
 ]
 
 function calcDurationDays(startDate, endDate) {
