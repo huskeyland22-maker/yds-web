@@ -151,10 +151,15 @@ export function resolvePrecursorPhase2Events(events) {
 /**
  * @param {import("./ydsHistoricalEventTypes.js").EventDetailData} event
  */
-export function buildPrecursorEnginePhase2Event(event) {
+/**
+ * @param {import("./ydsHistoricalEventTypes.js").EventDetailData} event
+ * @param {{ panicIds?: readonly string[] }} [options]
+ */
+export function buildPrecursorEnginePhase2Event(event, options = {}) {
+  const panicIds = options.panicIds ?? PRECURSOR_ENGINE_PHASE2_PANIC_IDS
   const climaxDate = event?.milestones?.[PRECURSOR_ENGINE_PHASE2_ANCHOR]?.date?.slice(0, 10) ?? null
   const series = getEventMilestoneSeries(event)
-  const isPanic = PRECURSOR_ENGINE_PHASE2_PANIC_IDS.includes(event.id)
+  const isPanic = panicIds.includes(event.id)
 
   const snapshots = PRECURSOR_ENGINE_PHASE2_T_OFFSETS.map((offsetDays) => {
     const date = climaxDate ? offsetPrecursorDay(climaxDate, -offsetDays) : null
@@ -237,7 +242,7 @@ export function buildPrecursorEnginePhase2Event(event) {
 /**
  * @param {ReturnType<typeof buildPrecursorEnginePhase2Event>[]} eventReports
  */
-function buildClassificationMetrics(eventReports, scoreKey, warnThreshold) {
+export function buildPrecursorClassificationMetrics(eventReports, scoreKey, warnThreshold) {
   const panic = eventReports.filter((e) => e.isPanic)
   const nonPanic = eventReports.filter((e) => !e.isPanic)
 
@@ -299,8 +304,16 @@ export function buildPrecursorEnginePhase2Report(events) {
     })),
   )
 
-  const metricsPriA = buildClassificationMetrics(eventReports, "priA", PRECURSOR_ENGINE_PHASE2_WARN_PRI_A)
-  const metricsPriB = buildClassificationMetrics(eventReports, "priB", PRECURSOR_ENGINE_PHASE2_WARN_PRI_B)
+  const metricsPriA = buildPrecursorClassificationMetrics(
+    eventReports,
+    "priA",
+    PRECURSOR_ENGINE_PHASE2_WARN_PRI_A,
+  )
+  const metricsPriB = buildPrecursorClassificationMetrics(
+    eventReports,
+    "priB",
+    PRECURSOR_ENGINE_PHASE2_WARN_PRI_B,
+  )
 
   const panicHitsA = eventReports.filter((e) => e.isPanic && e.outcome.hitPriA).length
   const panicHitsB = eventReports.filter((e) => e.isPanic && e.outcome.hitPriB).length
@@ -343,4 +356,20 @@ export function buildPrecursorEnginePhase2Report(events) {
 export function formatPhase2Cell(value, digits = 0) {
   if (value == null || !Number.isFinite(value)) return "—"
   return formatMetric(value, digits)
+}
+
+/** @param {ReturnType<typeof buildPrecursorClassificationMetrics>} metrics */
+export function formatPrecursorConfusionMatrix(metrics) {
+  const { tp, fp, tn, fn } = metrics.confusion
+  return {
+    columns: ["예측: 경고", "예측: 정상"],
+    rows: [
+      { label: "실제: 패닉", cells: [tp, fn] },
+      { label: "실제: 비패닉", cells: [fp, tn] },
+    ],
+    tp,
+    fp,
+    tn,
+    fn,
+  }
 }

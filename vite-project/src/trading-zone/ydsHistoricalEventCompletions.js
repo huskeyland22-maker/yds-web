@@ -218,6 +218,54 @@ export const YDS_EVENT_COMPLETIONS = {
     },
   }),
 
+  "interest-2016-brexit": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes: "Phase 3 패닉 표본 — 브렉시트 쇼크",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -5.6,
+      performanceAnchorDate: "2016-06-27",
+    }),
+    milestones: {
+      start: { historyData: { vix: 14.0, cnn: 58, bofa: 5.6, highYield: 3.8, putCall: 0.8 } },
+      rise: { historyData: { vix: 17.0, cnn: 48, bofa: 5.2, highYield: 4.0, putCall: 0.86 } },
+      fearExpansion: { historyData: { vix: 26.0, cnn: 22, bofa: 4.4, highYield: 4.8, putCall: 0.98 } },
+      climax: { historyData: { vix: 25.0, cnn: 24, bofa: 4.5, highYield: 4.7, putCall: 0.97 } },
+      recovery: { historyData: { vix: 15.0, cnn: 52, bofa: 5.5, highYield: 3.9, putCall: 0.84 } },
+    },
+  }),
+
+  "interest-2018-trade-war": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes: "Phase 3 패닉 표본 — 미중 무역분쟁",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -7.2,
+      performanceAnchorDate: "2018-06-28",
+    }),
+    milestones: {
+      start: { historyData: { vix: 16.0, cnn: 52, bofa: 5.4, highYield: 3.9, putCall: 0.84 } },
+      rise: { historyData: { vix: 18.0, cnn: 44, bofa: 5.0, highYield: 4.1, putCall: 0.9 } },
+      fearExpansion: { historyData: { vix: 24.0, cnn: 28, bofa: 4.5, highYield: 4.6, putCall: 0.96 } },
+      climax: { historyData: { vix: 23.0, cnn: 30, bofa: 4.6, highYield: 4.5, putCall: 0.95 } },
+      recovery: { historyData: { vix: 14.0, cnn: 55, bofa: 5.5, highYield: 3.8, putCall: 0.83 } },
+    },
+  }),
+
+  "overheated-2000-dotcom": createEventCompletion({
+    completionStatus: "complete",
+    performanceNotes: "Phase 3 패닉 표본 — 닷컴 붕괴",
+    marketPerformance: buildMarketMetrics({
+      maxDrawdownPct: -11.5,
+      performanceAnchorDate: "2000-03-24",
+    }),
+    milestones: {
+      start: { historyData: { vix: 18.0, cnn: 62, bofa: 5.8, highYield: 3.5, putCall: 0.78 } },
+      rise: { historyData: { vix: 22.0, cnn: 48, bofa: 5.2, highYield: 4.0, putCall: 0.88 } },
+      fearExpansion: { historyData: { vix: 32.0, cnn: 20, bofa: 4.0, highYield: 5.2, putCall: 1.02 } },
+      climax: { historyData: { vix: 35.0, cnn: 16, bofa: 3.6, highYield: 5.6, putCall: 1.06 } },
+      recovery: { historyData: { vix: 26.0, cnn: 28, bofa: 4.4, highYield: 5.0, putCall: 0.96 } },
+    },
+  }),
+
   "nonpanic-current-market": createEventCompletion({
     completionStatus: "complete",
     performanceNotes:

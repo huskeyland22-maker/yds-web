@@ -13839,6 +13839,87 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.45;
 }
 
+.yds-precursor-engine-p3__live-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.yds-precursor-engine-p3__card {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(8, 20, 36, 0.5);
+}
+
+.yds-precursor-engine-p3__card--cash {
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.yds-precursor-engine-p3__card-title {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.yds-precursor-engine-p3__score {
+  margin: 0.4rem 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p3__tier {
+  margin-left: 0.5rem;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.yds-precursor-engine-p3__cash {
+  margin: 0.4rem 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p3__warn {
+  margin: 0.35rem 0 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p3__warn--on {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.yds-precursor-engine-p3__disclaimer {
+  margin: 0.5rem 0 0;
+  font-size: 11px;
+  color: #64748b;
+  font-style: italic;
+}
+
+.yds-precursor-engine-p3__block {
+  margin-top: 1.25rem;
+}
+
+.yds-precursor-engine-p3__metrics-table td,
+.yds-precursor-engine-p3__matrix td {
+  text-align: center;
+}
+
+.yds-precursor-engine-p3__matrix-wrap {
+  margin-top: 0.75rem;
+}
+
+.yds-precursor-engine-p3__matrix {
+  max-width: 28rem;
+  margin-top: 0.35rem;
+}
+
 .yds-precursor-engine-p2__block {
   margin-top: 1rem;
 }
