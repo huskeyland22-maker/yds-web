@@ -137,7 +137,9 @@ export default function CurrentMarketAnalysisPage() {
 
       <section className="yds-market-analysis__block" aria-label="행동 가이드">
         <h2 className="yds-market-analysis__section-title">행동 가이드</h2>
-        <p className="yds-market-analysis__section-sub">YDS 5단계 · 현재 위치 표시</p>
+        <p className="yds-market-analysis__section-sub">
+          YDS 5단계 · 현재 위치 · 권장 비중 (주식% / 현금%)
+        </p>
         <div className="yds-market-analysis__ladder" role="list">
           {actionGuide.stageLadder.map((step) => (
             <div
@@ -153,12 +155,20 @@ export default function CurrentMarketAnalysisPage() {
             >
               <span className="yds-market-analysis__ladder-emoji">{step.emoji}</span>
               <span className="yds-market-analysis__ladder-label">{step.shortLabel}</span>
+              {step.stockPct != null && step.cashPct != null ? (
+                <span className="yds-market-analysis__ladder-split font-mono tabular-nums">
+                  {step.stockPct} / {step.cashPct}
+                </span>
+              ) : null}
               {step.active ? (
                 <span className="yds-market-analysis__ladder-current">현재</span>
               ) : null}
             </div>
           ))}
         </div>
+        <p className="yds-market-analysis__ladder-foot">
+          패닉이 깊어질수록 주식 비중을 높이고, 과열·중립 구간에서 현금을 모아 패닉매수에 투입합니다.
+        </p>
       </section>
 
       <section className="yds-market-analysis__block" aria-label="권장 포트폴리오">

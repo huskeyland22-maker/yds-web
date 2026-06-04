@@ -14,6 +14,7 @@ import { buildTimeMachineEventReport } from "./ydsPrecursorEnginePhase20.js"
 import { MACRO_V1_STATUS_BANDS } from "../panic-v2/panicMacroV1Status.js"
 import { loadPrecursorValidationLog } from "./ydsPrecursorValidationLogStorage.js"
 import { buildPortfolioRecommendation } from "./ydsPrecursorEnginePhase23.js"
+import { resolveMacroStageAllocation } from "./macroStageAllocation.js"
 
 export const CURRENT_MARKET_ANALYSIS_LABEL = "현재 시장 분석"
 
@@ -304,10 +305,17 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
   const centroids = buildRadarPatternCentroids(eventReports)
   const similarCases = enrichSimilarCases(events, comparison.topSimilarEvents, centroids)
 
-  const stageLadder = YDS_STAGE_LADDER.map((s) => ({
-    ...s,
-    active: stage?.id === s.id,
-  }))
+  const stageLadder = YDS_STAGE_LADDER.map((s) => {
+    const alloc = resolveMacroStageAllocation(s.id)
+    return {
+      ...s,
+      active: stage?.id === s.id,
+      stockPct: alloc?.stockPct ?? null,
+      cashPct: alloc?.cashPct ?? null,
+      allocationLabel:
+        alloc != null ? `${alloc.stockPct} / ${alloc.cashPct}` : "— / —",
+    }
+  })
 
   const ladderMeta = stageLadder.find((s) => s.active)
   const actionStageHero = buildActionStageHero(stage, ladderMeta, action.oneLiner)

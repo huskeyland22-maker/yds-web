@@ -7,16 +7,11 @@ export const PRECURSOR_ENGINE_PHASE23_LABEL = "Portfolio Engine — Phase 23"
 /** @typedef {import("../panic-v2/panicMacroV1Status.js").MacroV1StatusId} MacroV1StatusId */
 
 export const PORTFOLIO_STAGE_DESCRIPTIONS = {
-  overheated:
-    "시장이 과열 구간입니다. 주식 비중을 줄이고 현금을 확보하며, 추격 매수보다 관망·리밸런싱에 집중하는 것이 좋습니다.",
-  neutral:
-    "시장은 정상 범위에 있으며 관심 종목 위주로 추적 가능한 구간입니다.",
-  interest:
-    "공포 지표가 상승하기 시작한 관심 구간입니다. 현금 비중을 유지하면서 우량 종목을 선별·추적하세요.",
-  dca:
-    "분할매수에 적합한 구간입니다. 현금을 단계적으로 투입하며 낙폭 구간에서 비중을 확대할 수 있습니다.",
-  panicBuy:
-    "극단적 공포 구간입니다. 준비된 현금을 활용해 역사적 저점 매수를 검토할 수 있는 단계입니다.",
+  overheated: "과열 구간. 현금 확보 우선.",
+  neutral: "기본 포지션 유지. 추가 기회를 위한 현금 확보.",
+  interest: "조정 가능성 증가. 우량주 선별 매수 시작.",
+  dca: "공포 확대. 분할매수 적극 진행.",
+  panicBuy: "역사적 패닉 구간. 계획된 현금 최대 투입.",
 }
 
 /**

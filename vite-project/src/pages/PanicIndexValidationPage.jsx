@@ -457,7 +457,7 @@ export default function PanicIndexValidationPage() {
           거시 단계 → 권장 비중
         </h2>
         <p className="panic-validation-panel__bench">
-          실전 매매존 시장 상태와 동일 규칙 · 중립구간 주식 70% / 패닉매수 주식 100% 등
+          실전 매매존 시장 상태와 동일 규칙 · 중립 60/40 · 패닉매수 100/0 등
         </p>
         <ul className="panic-validation-allocation">
           {Object.entries(MACRO_STAGE_ALLOCATION).map(([id, alloc]) => (

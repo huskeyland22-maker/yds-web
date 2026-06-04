@@ -14638,6 +14638,26 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
+.yds-market-analysis__ladder-split {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.56rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.yds-market-analysis__ladder-step--active .yds-market-analysis__ladder-split {
+  color: #e2e8f0;
+}
+
+.yds-market-analysis__ladder-foot {
+  margin: 0.5rem 0 0;
+  font-size: 0.65rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
 .yds-market-analysis__action-oneliner {
   margin: 0.55rem 0 0;
   font-size: 0.78rem;
