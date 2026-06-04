@@ -138,7 +138,7 @@ export default function CurrentMarketAnalysisPage() {
       <section className="yds-market-analysis__block" aria-label="행동 가이드">
         <h2 className="yds-market-analysis__section-title">행동 가이드</h2>
         <p className="yds-market-analysis__section-sub">
-          YDS 5단계 · 현재 위치 · 권장 비중 (주식% / 현금%)
+          YDS 5단계 · 현재 위치 · 권장 비중
         </p>
         <div className="yds-market-analysis__ladder" role="list">
           {actionGuide.stageLadder.map((step) => (
@@ -156,9 +156,20 @@ export default function CurrentMarketAnalysisPage() {
               <span className="yds-market-analysis__ladder-emoji">{step.emoji}</span>
               <span className="yds-market-analysis__ladder-label">{step.shortLabel}</span>
               {step.stockPct != null && step.cashPct != null ? (
-                <span className="yds-market-analysis__ladder-split font-mono tabular-nums">
-                  {step.stockPct} / {step.cashPct}
-                </span>
+                <div className="yds-market-analysis__ladder-alloc" aria-label={`주식 ${step.stockPct}% 현금 ${step.cashPct}%`}>
+                  <div className="yds-market-analysis__ladder-alloc-col">
+                    <span className="yds-market-analysis__ladder-alloc-pct font-mono tabular-nums">
+                      {step.stockPct}%
+                    </span>
+                    <span className="yds-market-analysis__ladder-alloc-label">주식</span>
+                  </div>
+                  <div className="yds-market-analysis__ladder-alloc-col">
+                    <span className="yds-market-analysis__ladder-alloc-pct font-mono tabular-nums">
+                      {step.cashPct}%
+                    </span>
+                    <span className="yds-market-analysis__ladder-alloc-label">현금</span>
+                  </div>
+                </div>
               ) : null}
               {step.active ? (
                 <span className="yds-market-analysis__ladder-current">현재</span>
