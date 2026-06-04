@@ -16,6 +16,7 @@ import { loadPrecursorValidationLog } from "./ydsPrecursorValidationLogStorage.j
 import { buildPortfolioRecommendation } from "./ydsPrecursorEnginePhase23.js"
 import { buildSectorRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase25.js"
 import { buildStockRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase26.js"
+import { buildEntryRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase27.js"
 import { resolveMacroStageAllocation } from "./macroStageAllocation.js"
 
 export const CURRENT_MARKET_ANALYSIS_LABEL = "현재 시장 분석"
@@ -390,6 +391,12 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     phase6,
     sectorRadar,
   })
+  const entryRadar = buildEntryRadarFromPrecursorContext({
+    dashboard,
+    phase6,
+    sectorRadar,
+    stockRadar,
+  })
 
   const marketEnvironment = {
     title: "시장 환경",
@@ -482,6 +489,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     portfolio: buildPortfolioRecommendation(ydsScore),
     sectorRadar,
     stockRadar,
+    entryRadar,
     expectedReturns: comparison.historicalOutcomes.map((h) => ({
       horizon: h.horizon,
       label: h.label,
@@ -490,7 +498,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
       maxMdd: h.maxMdd,
     })),
     notes: [
-      "Phase 12·15·16·22·23·25·26 읽기 전용 집약 · 검증 엔진 미수정",
+      "Phase 12·15·16·22·23·25·26·27 읽기 전용 집약 · 검증 엔진 미수정",
       "유사 사례·기대 수익률은 역사적 패턴 추정(투자 조언 아님)",
     ],
   }

@@ -11,6 +11,7 @@ import {
 } from "../trading-zone/ydsCurrentMarketAnalysis.js"
 import { formatSectorRadarScore } from "../trading-zone/ydsPrecursorEnginePhase25.js"
 import { formatStockRadarScore } from "../trading-zone/ydsPrecursorEnginePhase26.js"
+import { formatEntryRadarScore } from "../trading-zone/ydsPrecursorEnginePhase27.js"
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -45,6 +46,7 @@ export default function CurrentMarketAnalysisPage() {
     portfolio,
     sectorRadar,
     stockRadar,
+    entryRadar,
     expectedReturns,
   } = report
 
@@ -306,6 +308,40 @@ export default function CurrentMarketAnalysisPage() {
           </ol>
         ) : (
           <p className="yds-market-analysis__empty">매수 후보를 산출할 수 없습니다.</p>
+        )}
+      </section>
+
+      <section
+        className="yds-market-analysis__block yds-market-analysis__entry-radar"
+        aria-label="실전 매매 후보"
+      >
+        <h2 className="yds-market-analysis__section-title">{entryRadar.title}</h2>
+        <p className="yds-market-analysis__section-sub">
+          Entry Radar · {entryRadar.scoreWeightsDisplay}
+        </p>
+        {entryRadar.available ? (
+          <ul className="yds-market-analysis__entry-list">
+            {entryRadar.tradeCandidates.map((c) => (
+              <li
+                key={c.id}
+                className={`yds-market-analysis__entry-card yds-market-analysis__entry-card--${c.grade.id}`}
+              >
+                <div className="yds-market-analysis__entry-head">
+                  <strong className="yds-market-analysis__entry-name">{c.name}</strong>
+                  <span className="yds-market-analysis__entry-score font-mono tabular-nums">
+                    점수 {formatEntryRadarScore(c.score)}
+                  </span>
+                </div>
+                <div className="yds-market-analysis__entry-meta">
+                  <span>{c.status.display}</span>
+                  <span className="yds-market-analysis__entry-grade">진입등급 {c.grade.id}</span>
+                </div>
+                <p className="yds-market-analysis__entry-action">{c.grade.action}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="yds-market-analysis__empty">실전 매매 후보를 산출할 수 없습니다.</p>
         )}
       </section>
 

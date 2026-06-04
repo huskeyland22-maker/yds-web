@@ -62,7 +62,7 @@ export const STOCK_RADAR_PIPELINE = [
   {
     id: "trade-candidates",
     label: "매매 후보",
-    status: "planned",
+    status: "active",
     consumes: "stockRadar.topBuys",
     outputKey: "candidates",
   },
