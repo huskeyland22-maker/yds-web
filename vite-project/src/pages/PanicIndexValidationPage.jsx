@@ -22,6 +22,7 @@ import YdsFearClimaxAnalysisSection from "../components/validation/YdsFearClimax
 import YdsEngineCandidateV3Section from "../components/validation/YdsEngineCandidateV3Section.jsx"
 import YdsPrecursorValidationSection from "../components/validation/YdsPrecursorValidationSection.jsx"
 import ResearchCoreLinks from "../components/validation/ResearchCoreLinks.jsx"
+import ResearchCategoryAccordion from "../components/validation/ResearchCategoryAccordion.jsx"
 import ResearchLabCategorizedSections from "../components/validation/ResearchLabCategorizedSections.jsx"
 import YdsProductionCandidateSection from "../components/validation/YdsProductionCandidateSection.jsx"
 import YdsHyWeightSensitivityLabSection from "../components/validation/YdsHyWeightSensitivityLabSection.jsx"
@@ -633,22 +634,24 @@ export default function PanicIndexValidationPage() {
         latestCycleRow={history[history.length - 1] ?? null}
         historyRows={history}
       />
-      <YdsPrecursorValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
-      <YdsProductionCandidateSection
-        events={YDS_VALIDATION_EVENT_DATASET}
-        latestCycleRow={history[history.length - 1] ?? null}
-      />
-      <YdsHyWeightSensitivityLabSection events={YDS_VALIDATION_EVENT_DATASET} />
-      <YdsTariffShockDeepValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
-      <YdsVixSensitivityLabSection events={YDS_VALIDATION_EVENT_DATASET} />
-      <YdsPanicPeakRankingSection events={YDS_VALIDATION_EVENT_DATASET} />
-      <YdsStageSimulationSection events={YDS_VALIDATION_EVENT_DATASET} />
-      <YdsFearClimaxAnalysisSection events={YDS_VALIDATION_EVENT_DATASET} />
-      <YdsPanicEventValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
 
-      <section className="panic-validation-panel" aria-labelledby="panic-validation-event-dataset">
+      <ResearchCategoryAccordion title="검증 리포트 (확장)" description="민감도 · 이벤트 · 프로덕션 후보">
+        <YdsPrecursorValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
+        <YdsProductionCandidateSection
+          events={YDS_VALIDATION_EVENT_DATASET}
+          latestCycleRow={history[history.length - 1] ?? null}
+        />
+        <YdsHyWeightSensitivityLabSection events={YDS_VALIDATION_EVENT_DATASET} />
+        <YdsTariffShockDeepValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
+        <YdsVixSensitivityLabSection events={YDS_VALIDATION_EVENT_DATASET} />
+        <YdsPanicPeakRankingSection events={YDS_VALIDATION_EVENT_DATASET} />
+        <YdsStageSimulationSection events={YDS_VALIDATION_EVENT_DATASET} />
+        <YdsFearClimaxAnalysisSection events={YDS_VALIDATION_EVENT_DATASET} />
+        <YdsPanicEventValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
+
+        <section className="panic-validation-panel" aria-labelledby="panic-validation-event-dataset">
         <h2 id="panic-validation-event-dataset" className="panic-validation-panel__h2">
-          YDS 역사 검증 이벤트 데이터셋 (기초 설계)
+          역사 검증 이벤트 데이터셋
         </h2>
         <p className="panic-validation-panel__note">
           카테고리별 대표 구간 {YDS_VALIDATION_EVENT_DATASET.length}건 · 실제 역사적 사건 기반 · 이벤트별 대표 날짜 5개 제공
@@ -709,7 +712,8 @@ export default function PanicIndexValidationPage() {
         <YdsEventDetailPanel
           eventItem={YDS_VALIDATION_EVENT_DATASET.find((item) => item.id === selectedEventId) ?? null}
         />
-      </section>
+        </section>
+      </ResearchCategoryAccordion>
     </div>
   )
 }

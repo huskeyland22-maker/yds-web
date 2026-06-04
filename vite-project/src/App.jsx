@@ -35,6 +35,7 @@ import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import WatchlistCenterPage from "./pages/WatchlistCenterPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
+import GlossaryPage from "./pages/GlossaryPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
@@ -1012,6 +1013,7 @@ function App() {
       path === "/ai-daily-report" ||
       path === "/watchlist" ||
       path === "/alert-center" ||
+      path === "/glossary" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
     document.body.classList.toggle("scroll-doc-route", scrollDoc)
@@ -1375,6 +1377,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="Alert Center">
                   <AlertCenterPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/glossary"
+              element={
+                <SectionErrorBoundary label="용어 설명">
+                  <GlossaryPage />
                 </SectionErrorBoundary>
               }
             />

@@ -1,10 +1,17 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
+import { useAppDataStore } from "../store/appDataStore.js"
+import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
+import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
+import { YDS_VALIDATION_EVENT_DATASET } from "../trading-zone/ydsHistoricalValidationEvents.js"
+import { buildCurrentMarketAnalysisReport } from "../trading-zone/ydsCurrentMarketAnalysis.js"
 import {
   buildPerformanceCenterFromPaperTrading,
   buildMonthlyTableForYearFromPaper,
   PERFORMANCE_CENTER_LABEL,
 } from "../trading-zone/ydsPerformanceCenterEngine.js"
+import PerformanceTradingTools from "../components/performance/PerformanceTradingTools.jsx"
+import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 
 function StatCard({ label, value, tone = "neutral" }) {
   const toneClass =
@@ -18,6 +25,28 @@ function StatCard({ label, value, tone = "neutral" }) {
 }
 
 export default function PerformanceCenterPage() {
+  const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
+  const history = useMemo(
+    () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
+    [storeRows],
+  )
+  const latestCycleRow = history[history.length - 1] ?? null
+  const latestSnapshot = useMemo(() => {
+    if (!latestCycleRow) return null
+    const panic = panicDataFromCycleRow(latestCycleRow)
+    if (panic) return { ...latestCycleRow, ...panic, date: latestCycleRow.date ?? panic.updatedAt }
+    return latestCycleRow
+  }, [latestCycleRow])
+
+  const marketReport = useMemo(
+    () =>
+      buildCurrentMarketAnalysisReport(YDS_VALIDATION_EVENT_DATASET, {
+        latestSnapshot,
+        extraRows: history,
+      }),
+    [latestSnapshot, history],
+  )
+
   const report = useMemo(() => buildPerformanceCenterFromPaperTrading(), [])
   const [year, setYear] = useState(report.sectionC.defaultYear)
 
@@ -32,10 +61,11 @@ export default function PerformanceCenterPage() {
     <div className="yds-perf-center min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-perf-center__header">
         <div>
+          <YdsV1ReleaseBadge compact />
           <p className="yds-perf-center__kicker">{PERFORMANCE_CENTER_LABEL}</p>
           <h1 className="yds-perf-center__title">{report.title}</h1>
           <p className="yds-perf-center__sub">
-            YDS 추천 성과 공개 · Paper Trading · OPEN {counts.open} · CLOSED {counts.closed}
+            시장 위치 추천 성과 · Paper Trading · OPEN {counts.open} · CLOSED {counts.closed}
           </p>
         </div>
         <Link to="/market-analysis" className="yds-perf-center__link">
@@ -246,6 +276,11 @@ export default function PerformanceCenterPage() {
               </article>
             </div>
           </section>
+
+          <PerformanceTradingTools
+            entryRadar={marketReport.entryRadar}
+            tradingJournal={marketReport.tradingJournal}
+          />
 
           <ul className="yds-perf-center__footnotes">
             {report.notes.map((n) => (

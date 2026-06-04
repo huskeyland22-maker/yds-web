@@ -22798,3 +22798,306 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .research-section-accordion {
   margin-left: 0.25rem;
 }
+
+/* YDS V1 RC — Hub · Trust · Glossary */
+.yds-v1-rc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid rgba(129, 140, 248, 0.45);
+  background: rgba(99, 102, 241, 0.12);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #c7d2fe;
+  letter-spacing: 0.03em;
+}
+
+.yds-v1-rc-badge--compact {
+  font-size: 0.58rem;
+}
+
+.yds-v1-rc-badge__rc {
+  font-weight: 600;
+  color: #a5b4fc;
+}
+
+.yds-confidence-badge {
+  display: inline-block;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.yds-confidence-badge--high {
+  background: rgba(74, 222, 128, 0.15);
+  color: #86efac;
+}
+
+.yds-confidence-badge--mid {
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+}
+
+.yds-confidence-badge--warn {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fdba74;
+}
+
+.yds-why-explain {
+  position: relative;
+  display: inline-flex;
+}
+
+.yds-why-explain__btn {
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(14, 165, 233, 0.1);
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #7dd3fc;
+  cursor: pointer;
+}
+
+.yds-why-explain__panel {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 20;
+  min-width: 10rem;
+  max-width: 16rem;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(42, 54, 72, 0.65);
+  background: #0f172a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.yds-why-explain__panel ul {
+  margin: 0.2rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.6rem;
+  color: #cbd5e1;
+}
+
+.yds-why-explain__title {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.yds-hub-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yds-hub-top__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.yds-hub-top__glossary-link {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.yds-hub-top__card {
+  padding: 0.6rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(42, 54, 72, 0.55);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-hub-top__card--stage {
+  border-color: color-mix(in srgb, var(--stage-color, #64748b) 40%, transparent);
+}
+
+.yds-hub-top__card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-hub-top__h2 {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-hub-top__stage-main {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-hub-top__stage-desc,
+.yds-hub-top__lead,
+.yds-hub-top__action {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.yds-hub-top__score {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.yds-hub-top__reasons {
+  margin: 0.4rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.yds-hub-top__alloc-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.yds-hub-top__alloc-bar {
+  display: flex;
+  height: 6px;
+  margin-top: 0.35rem;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.yds-hub-top__alloc-bar span {
+  background: #38bdf8;
+}
+
+.yds-hub-top__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-hub-top__list li {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr auto auto;
+  gap: 0.3rem;
+  padding: 0.2rem 0;
+  font-size: 0.68rem;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.35);
+}
+
+.yds-hub-top__muted {
+  color: #64748b;
+  font-size: 0.62rem;
+}
+
+.yds-hub-top__foot {
+  margin: 0.45rem 0 0;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-hub-top__foot a {
+  color: #60a5fa;
+}
+
+.yds-glossary {
+  max-width: 640px;
+  margin: 0 auto;
+  color: #d1d4dc;
+}
+
+.yds-glossary__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.yds-glossary__title {
+  margin: 0.35rem 0 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-glossary__sub {
+  margin: 0.3rem 0 0;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-glossary__link {
+  font-size: 0.72rem;
+  color: #60a5fa;
+}
+
+.yds-glossary__item {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.45);
+}
+
+.yds-glossary__item dt {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-glossary__item dd {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: #94a3b8;
+}
+
+.yds-perf-tools__block {
+  margin-top: 0.55rem;
+}
+
+.yds-perf-tools__h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.research-analytics-tools__h3 {
+  margin: 0.5rem 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+@media (max-width: 430px) {
+  .yds-hub-top__list li {
+    grid-template-columns: 1rem 1fr auto;
+  }
+
+  .yds-hub-top__list li .yds-hub-top__muted {
+    grid-column: 2 / -1;
+  }
+
+  .yds-why-explain__panel {
+    left: 0;
+    right: auto;
+    max-width: min(16rem, 92vw);
+  }
+}

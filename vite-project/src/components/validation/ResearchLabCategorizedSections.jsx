@@ -20,6 +20,7 @@ import YdsPrecursorEnginePhase18Section from "./YdsPrecursorEnginePhase18Section
 import YdsPrecursorEnginePhase20Section from "./YdsPrecursorEnginePhase20Section.jsx"
 import YdsPrecursorEnginePhase21Section from "./YdsPrecursorEnginePhase21Section.jsx"
 import YdsPrecursorEnginePhase22Section from "./YdsPrecursorEnginePhase22Section.jsx"
+import ResearchAnalyticsTools from "./ResearchAnalyticsTools.jsx"
 
 /**
  * @param {{
@@ -33,9 +34,11 @@ export default function ResearchLabCategorizedSections({ events, latestCycleRow,
 
   return (
     <div className="research-lab-categories" aria-label="Research 카테고리">
+      <ResearchAnalyticsTools latestCycleRow={latestCycleRow} historyRows={historyRows} />
+
       <ResearchCategoryAccordion
-        title="전조엔진"
-        description="PRI · 조기경보 · 행동가이드 · 신뢰도"
+        title="전조 엔진"
+        description="조기경보 · 충격감지 · 행동가이드 · 신뢰도"
       >
         <ResearchSectionAccordion title={VALIDATION_PHASE_SUBTITLES[1]}>
           <YdsPrecursorEnginePhase1Section events={events} />
@@ -63,7 +66,7 @@ export default function ResearchLabCategorizedSections({ events, latestCycleRow,
         </ResearchSectionAccordion>
       </ResearchCategoryAccordion>
 
-      <ResearchCategoryAccordion title="패턴분석" description="TP · Pattern Radar · 국면 탐지">
+      <ResearchCategoryAccordion title="패턴 분석" description="TP · 위험 패턴 Radar · 국면 탐지">
         <ResearchSectionAccordion title={VALIDATION_PHASE_SUBTITLES[5]}>
           <YdsPrecursorEnginePhase5Section {...cycleProps} />
         </ResearchSectionAccordion>
@@ -93,7 +96,7 @@ export default function ResearchLabCategorizedSections({ events, latestCycleRow,
         </ResearchSectionAccordion>
       </ResearchCategoryAccordion>
 
-      <ResearchCategoryAccordion title="검증" description="실시장 로그 · 스코어카드 · 라이브 비교">
+      <ResearchCategoryAccordion title="검증 리포트" description="실시장 로그 · 스코어카드 · 라이브 비교">
         <ResearchSectionAccordion title={VALIDATION_PHASE_SUBTITLES[13]}>
           <YdsPrecursorEnginePhase13Section events={events} latestCycleRow={latestCycleRow} />
         </ResearchSectionAccordion>
