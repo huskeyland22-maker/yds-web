@@ -14479,6 +14479,93 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+.yds-market-analysis__portfolio-card {
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.yds-market-analysis__portfolio-card--neutral {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.yds-market-analysis__portfolio-card--overheated {
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.yds-market-analysis__portfolio-card--interest {
+  border-color: rgba(234, 179, 8, 0.35);
+}
+
+.yds-market-analysis__portfolio-card--dca {
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+.yds-market-analysis__portfolio-card--panicBuy {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.yds-market-analysis__portfolio-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.78rem;
+}
+
+.yds-market-analysis__portfolio-key {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-market-analysis__portfolio-row strong {
+  color: #e2e8f0;
+  font-size: 0.88rem;
+}
+
+.yds-market-analysis__portfolio-split {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.yds-market-analysis__portfolio-split strong {
+  font-size: 0.82rem;
+}
+
+.yds-market-analysis__portfolio-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 0.5rem 0 0.55rem;
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.yds-market-analysis__portfolio-bar-stock {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+  transition: width 0.35s ease;
+}
+
+.yds-market-analysis__portfolio-bar-cash {
+  display: block;
+  height: 100%;
+  background: rgba(100, 116, 139, 0.75);
+  transition: width 0.35s ease;
+}
+
+.yds-market-analysis__portfolio-desc {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
 .yds-market-analysis__returns-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

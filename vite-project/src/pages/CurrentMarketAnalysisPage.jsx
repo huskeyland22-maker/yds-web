@@ -51,6 +51,7 @@ export default function CurrentMarketAnalysisPage() {
     similarCases,
     positionMapping,
     actionGuide,
+    portfolio,
     expectedReturns,
   } = report
 
@@ -175,6 +176,50 @@ export default function CurrentMarketAnalysisPage() {
         <p className="yds-market-analysis__action-rec">
           추천: {actionGuide.recommended.allocation}
         </p>
+      </section>
+
+      <section className="yds-market-analysis__block" aria-label="권장 포트폴리오">
+        <h2 className="yds-market-analysis__section-title">{portfolio.title}</h2>
+        {portfolio.available && portfolio.stage && portfolio.allocation ? (
+          <article
+            className={[
+              "yds-market-analysis__portfolio-card",
+              `yds-market-analysis__portfolio-card--${portfolio.stage.id}`,
+            ].join(" ")}
+            style={{ "--stage-color": portfolio.stage.color }}
+          >
+            <div className="yds-market-analysis__portfolio-row">
+              <span className="yds-market-analysis__portfolio-key">현재 단계</span>
+              <strong>
+                {portfolio.stage.emoji} {portfolio.stage.shortLabel}
+              </strong>
+            </div>
+            <div className="yds-market-analysis__portfolio-row">
+              <span className="yds-market-analysis__portfolio-key">권장 비중</span>
+              <div className="yds-market-analysis__portfolio-split">
+                <strong>{portfolio.allocation.stockLabel}</strong>
+                <strong>{portfolio.allocation.cashLabel}</strong>
+              </div>
+            </div>
+            <div
+              className="yds-market-analysis__portfolio-bar"
+              role="img"
+              aria-label={`주식 ${portfolio.allocation.stockPct}% 현금 ${portfolio.allocation.cashPct}%`}
+            >
+              <span
+                className="yds-market-analysis__portfolio-bar-stock"
+                style={{ width: `${portfolio.allocation.stockPct}%` }}
+              />
+              <span
+                className="yds-market-analysis__portfolio-bar-cash"
+                style={{ width: `${portfolio.allocation.cashPct}%` }}
+              />
+            </div>
+            <p className="yds-market-analysis__portfolio-desc">{portfolio.description}</p>
+          </article>
+        ) : (
+          <p className="yds-market-analysis__empty">{portfolio.description}</p>
+        )}
       </section>
 
       <section className="yds-market-analysis__block" aria-label="기대 수익률">

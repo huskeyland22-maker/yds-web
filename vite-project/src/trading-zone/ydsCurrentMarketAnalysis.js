@@ -12,6 +12,7 @@ import { buildRadarPatternCentroids } from "./ydsPrecursorEnginePhase6.js"
 import { buildTimeMachineEventReport } from "./ydsPrecursorEnginePhase20.js"
 import { MACRO_V1_STATUS_BANDS } from "../panic-v2/panicMacroV1Status.js"
 import { loadPrecursorValidationLog } from "./ydsPrecursorValidationLogStorage.js"
+import { buildPortfolioRecommendation } from "./ydsPrecursorEnginePhase23.js"
 
 export const CURRENT_MARKET_ANALYSIS_LABEL = "현재 시장 분석"
 
@@ -171,6 +172,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
       stageLadder,
       currentStageId: stage?.id ?? null,
     },
+    portfolio: buildPortfolioRecommendation(ydsScore),
     expectedReturns: comparison.historicalOutcomes.map((h) => ({
       horizon: h.horizon,
       label: h.label,
@@ -179,7 +181,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
       maxMdd: h.maxMdd,
     })),
     notes: [
-      "Phase 12·15·16·22 읽기 전용 집약 · 검증 엔진 미수정",
+      "Phase 12·15·16·22·23 읽기 전용 집약 · 검증 엔진 미수정",
       "유사 사례·기대 수익률은 역사적 패턴 추정(투자 조언 아님)",
     ],
   }
