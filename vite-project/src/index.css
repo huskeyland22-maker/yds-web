@@ -22363,3 +22363,275 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.62rem;
   color: #64748b;
 }
+
+/* Alert Center — Phase 36 */
+.yds-alert-center {
+  --ac-border: rgba(42, 54, 72, 0.65);
+  --ac-muted: #787b86;
+  --ac-accent: #f472b6;
+  max-width: 720px;
+  margin: 0 auto;
+  color: #d1d4dc;
+}
+
+.yds-alert-center--lab {
+  max-width: none;
+  padding: 0;
+}
+
+.yds-alert-center__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.yds-alert-center__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ac-muted);
+}
+
+.yds-alert-center__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-alert-center__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.68rem;
+  color: var(--ac-muted);
+  line-height: 1.45;
+}
+
+.yds-alert-center__link {
+  font-size: 0.72rem;
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.yds-alert-center__section {
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--ac-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-alert-center__h2 {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f9a8d4;
+  letter-spacing: 0.02em;
+}
+
+.yds-alert-center__h3 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.yds-alert-center__grade-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
+}
+
+.yds-alert-center__grade-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.yds-alert-center__grade-chips button {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--ac-border);
+  background: rgba(15, 23, 42, 0.6);
+  font-size: 0.62rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.yds-alert-center__grade-chips button.is-active {
+  border-color: rgba(244, 114, 182, 0.5);
+  color: #fce7f3;
+  background: rgba(244, 114, 182, 0.12);
+}
+
+.yds-alert-center__grade-legend {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.6rem;
+  color: var(--ac-muted);
+}
+
+.yds-alert-center__grade-legend li {
+  padding: 0.12rem 0;
+}
+
+.yds-alert-center__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.yds-alert-center__list--history {
+  max-height: 420px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yds-alert-center__row {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.45rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(42, 54, 72, 0.45);
+  background: rgba(8, 15, 30, 0.5);
+}
+
+.yds-alert-center__grade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.yds-alert-center__grade--S {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.yds-alert-center__grade--A {
+  background: rgba(74, 222, 128, 0.15);
+  color: #86efac;
+}
+
+.yds-alert-center__grade--B {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+
+.yds-alert-center__grade--C {
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+}
+
+.yds-alert-center__row-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.yds-alert-center__row-text {
+  margin: 0.15rem 0 0;
+  font-size: 0.65rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yds-alert-center__row-meta {
+  margin: 0.2rem 0 0;
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.58rem;
+  color: var(--ac-muted);
+}
+
+.yds-alert-center__stock-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-alert-center__stock-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.35rem;
+  padding: 0.22rem 0;
+  font-size: 0.68rem;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.35);
+}
+
+.yds-alert-center__stock-name {
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.yds-alert-center__market-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-alert-center__market-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.45rem;
+  margin-bottom: 0.25rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  border: 1px solid transparent;
+}
+
+.yds-alert-center__market-list li.is-active {
+  border-color: rgba(244, 114, 182, 0.45);
+  background: rgba(244, 114, 182, 0.1);
+}
+
+.yds-alert-center__active-tag {
+  margin-left: auto;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #f9a8d4;
+}
+
+.yds-alert-center__muted {
+  margin: 0;
+  font-size: 0.65rem;
+  color: var(--ac-muted);
+}
+
+.yds-alert-center__empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ac-muted);
+  border: 1px dashed var(--ac-border);
+  border-radius: 10px;
+}
+
+.yds-alert-center__footnotes {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-alert-center__lab-line {
+  margin: 0.25rem 0;
+  font-size: 0.65rem;
+  color: #cbd5e1;
+}

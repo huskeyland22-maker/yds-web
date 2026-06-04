@@ -45,6 +45,7 @@ import YdsPerformanceDashboardPhase29Section from "../components/validation/YdsP
 import YdsConvictionEnginePhase30Section from "../components/validation/YdsConvictionEnginePhase30Section.jsx"
 import YdsPortfolioBuilderPhase31Section from "../components/validation/YdsPortfolioBuilderPhase31Section.jsx"
 import YdsWatchlistCenterPhase35Section from "../components/validation/YdsWatchlistCenterPhase35Section.jsx"
+import YdsAlertCenterPhase36Section from "../components/validation/YdsAlertCenterPhase36Section.jsx"
 import ValidationPhaseAccordion, {
   VALIDATION_PHASE_SUBTITLES,
 } from "../components/validation/ValidationPhaseAccordion.jsx"
@@ -653,7 +654,14 @@ export default function PanicIndexValidationPage() {
 
       <YdsEngineCandidateV3Section events={YDS_VALIDATION_EVENT_DATASET} />
 
-      <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–35">
+      <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–36">
+        <ValidationPhaseAccordion phase={36} subtitle={VALIDATION_PHASE_SUBTITLES[36]}>
+          <YdsAlertCenterPhase36Section
+            events={YDS_VALIDATION_EVENT_DATASET}
+            latestCycleRow={history[history.length - 1] ?? null}
+            historyRows={history}
+          />
+        </ValidationPhaseAccordion>
         <ValidationPhaseAccordion phase={35} subtitle={VALIDATION_PHASE_SUBTITLES[35]}>
           <YdsWatchlistCenterPhase35Section
             events={YDS_VALIDATION_EVENT_DATASET}

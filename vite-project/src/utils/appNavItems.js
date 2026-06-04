@@ -13,5 +13,6 @@ export function getPrimaryNavItems() {
     { label: "성과센터", path: "/performance-center" },
     { label: "AI 리포트", path: "/ai-daily-report" },
     { label: "Watchlist", path: "/watchlist" },
+    { label: "Alert Center", path: "/alert-center" },
   ]
 }
