@@ -46,13 +46,26 @@ function resolveAppVersionLabel() {
 
 const APP_VERSION_LABEL = resolveAppVersionLabel()
 
+function resolveReleaseChannel(mode) {
+  const fromEnv = String(process.env.VITE_APP_RELEASE_CHANNEL ?? "").trim().toLowerCase()
+  if (fromEnv === "rc" || fromEnv === "release-candidate") return "rc"
+  if (fromEnv === "dev") return "dev"
+  return mode === "development" ? "dev" : "prod"
+}
+
+const APP_RELEASE_CHANNEL = resolveReleaseChannel(process.env.NODE_ENV)
+
 function htmlBuildIdPlugin() {
   return {
     name: "html-build-id",
     transformIndexHtml() {
       return [
         { tag: "meta", attrs: { name: "app-build-id", content: BUILD_ID }, injectTo: "head" },
-        { tag: "meta", attrs: { name: "app-build-channel", content: "stable" }, injectTo: "head" },
+        {
+          tag: "meta",
+          attrs: { name: "app-release-channel", content: APP_RELEASE_CHANNEL },
+          injectTo: "head",
+        },
       ]
     },
   }
@@ -64,6 +77,7 @@ export default defineConfig({
   define: {
     "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(BUILD_ID),
     "import.meta.env.VITE_APP_VERSION_LABEL": JSON.stringify(APP_VERSION_LABEL),
+    "import.meta.env.VITE_APP_RELEASE_CHANNEL": JSON.stringify(APP_RELEASE_CHANNEL),
   },
   build: {
     emptyOutDir: true,

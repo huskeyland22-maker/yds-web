@@ -14252,6 +14252,37 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-bottom: 0.75rem;
 }
 
+.app-release-env-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.app-release-env-badge--dev {
+  color: #fcd34d;
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.app-release-env-badge--rc {
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.app-release-env-badge--prod {
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.08);
+}
+
 .yds-market-analysis__title {
   margin: 0;
   font-size: 1.35rem;
@@ -14334,6 +14365,46 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
+.yds-market-analysis__brief {
+  margin-bottom: 0.85rem;
+}
+
+.yds-market-analysis__brief-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.yds-market-analysis__brief-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.5);
+  min-height: 0;
+}
+
+.yds-market-analysis__brief-card--primary {
+  border-color: color-mix(in srgb, var(--stage-color, #22c55e) 35%, rgba(148, 163, 184, 0.18));
+  background: color-mix(in srgb, var(--stage-color, #22c55e) 8%, rgba(15, 23, 42, 0.55));
+}
+
+.yds-market-analysis__brief-key {
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.yds-market-analysis__brief-val {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #f1f5f9;
+}
+
 .yds-market-analysis__env {
   padding: 0.75rem 0.85rem;
   border-radius: 12px;
@@ -14368,6 +14439,41 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-weight: 500;
   line-height: 1.5;
   color: #cbd5e1;
+}
+
+.yds-market-analysis__env-body {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 5.5rem) 1fr;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.yds-market-analysis__yds-spotlight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.25rem;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: linear-gradient(165deg, rgba(8, 47, 73, 0.45), rgba(15, 23, 42, 0.75));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.yds-market-analysis__yds-spotlight-kicker {
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #7dd3fc;
+}
+
+.yds-market-analysis__yds-spotlight-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #f8fafc;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
 }
 
 .yds-market-analysis__env-grid {
@@ -14450,12 +14556,57 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
-.yds-market-analysis__env-summary {
-  margin: 0.55rem 0 0;
+.yds-market-analysis__similar-strip {
+  margin-top: 0.45rem;
+}
+
+.yds-market-analysis__similar-strip-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
+
+.yds-market-analysis__similar-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.yds-market-analysis__similar-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.55);
+  min-width: 0;
+}
+
+.yds-market-analysis__similar-badge {
   font-size: 0.72rem;
+  line-height: 1;
+}
+
+.yds-market-analysis__similar-name {
+  font-size: 0.62rem;
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.25;
   color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.yds-market-analysis__similar-pct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f1f5f9;
 }
 
 .yds-market-analysis__env-hint {
@@ -14617,6 +14768,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+  align-items: flex-end;
 }
 
 .yds-market-analysis__ladder-step {
@@ -14627,14 +14779,26 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   border: 1px solid rgba(148, 163, 184, 0.15);
   background: rgba(15, 23, 42, 0.45);
   text-align: center;
-  opacity: 0.55;
+  opacity: 0.42;
+  transform: scale(1);
+  transform-origin: center bottom;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .yds-market-analysis__ladder-step--active {
   opacity: 1;
+  transform: scale(1.12);
+  z-index: 1;
   border-color: var(--stage-color, #38bdf8);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--stage-color, #38bdf8) 35%, transparent);
-  background: color-mix(in srgb, var(--stage-color, #38bdf8) 12%, rgba(15, 23, 42, 0.65));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--stage-color, #38bdf8) 45%, transparent),
+    0 0 14px color-mix(in srgb, var(--stage-color, #38bdf8) 35%, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+  background: color-mix(in srgb, var(--stage-color, #38bdf8) 14%, rgba(15, 23, 42, 0.72));
 }
 
 .yds-market-analysis__ladder-emoji {

@@ -9,7 +9,6 @@ import {
   formatAnalysisPct,
   CURRENT_MARKET_ANALYSIS_LABEL,
 } from "../trading-zone/ydsCurrentMarketAnalysis.js"
-
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -38,6 +37,7 @@ export default function CurrentMarketAnalysisPage() {
     asOf,
     hasLive,
     actionStageHero,
+    marketBrief,
     marketEnvironment,
     actionGuide,
     portfolio,
@@ -54,7 +54,7 @@ export default function CurrentMarketAnalysisPage() {
           </p>
         </div>
         <Link to="/lab" className="yds-market-analysis__lab-link">
-          연구실
+            연구실
         </Link>
       </header>
 
@@ -78,58 +78,112 @@ export default function CurrentMarketAnalysisPage() {
         <p className="yds-market-analysis__action-hero-desc">{actionStageHero.description}</p>
       </section>
 
+      <section
+        className="yds-market-analysis__brief"
+        style={{ "--stage-color": actionStageHero.color }}
+        aria-label={marketBrief.title}
+      >
+        <h2 className="yds-market-analysis__section-title">{marketBrief.title}</h2>
+        <div className="yds-market-analysis__brief-grid">
+          {marketBrief.cards.map((card) => (
+            <article
+              key={card.id}
+              className={[
+                "yds-market-analysis__brief-card",
+                card.tone ? `yds-market-analysis__brief-card--${card.tone}` : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <span className="yds-market-analysis__brief-key">{card.label}</span>
+              <strong className="yds-market-analysis__brief-val">{card.value}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="yds-market-analysis__env" aria-label="시장 환경">
         <div className="yds-market-analysis__env-head">
           <h2 className="yds-market-analysis__section-title">{marketEnvironment.title}</h2>
           <span className="yds-market-analysis__env-kicker">{marketEnvironment.kicker}</span>
         </div>
         <p className="yds-market-analysis__env-philosophy">{marketEnvironment.philosophyNote}</p>
-        <div className="yds-market-analysis__env-grid">
-          <div className="yds-market-analysis__env-row">
-            <span className="yds-market-analysis__env-key">시장 환경</span>
-            <strong
-              className={[
-                "yds-market-analysis__env-val",
-                "yds-market-analysis__env-val--level",
-                marketEnvironment.marketCondition.levelId
-                  ? `yds-market-analysis__env-val--${marketEnvironment.marketCondition.levelId}`
-                  : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              title={marketEnvironment.marketCondition.fullLabel}
-            >
-              {marketEnvironment.marketCondition.emoji}{" "}
-              {marketEnvironment.marketCondition.label}
-            </strong>
-          </div>
-          <div className="yds-market-analysis__env-row yds-market-analysis__env-row--desc">
-            <span className="yds-market-analysis__env-key" />
-            <span className="yds-market-analysis__env-desc">
-              {marketEnvironment.marketCondition.description}
+
+        <div className="yds-market-analysis__env-body">
+          <div
+            className="yds-market-analysis__yds-spotlight"
+            aria-label={`YDS 점수 ${marketEnvironment.ydsDisplay}`}
+          >
+            <span className="yds-market-analysis__yds-spotlight-kicker">YDS SCORE</span>
+            <span className="yds-market-analysis__yds-spotlight-value font-mono tabular-nums">
+              {marketEnvironment.ydsDisplay}
             </span>
           </div>
-          <div className="yds-market-analysis__env-row">
-            <span className="yds-market-analysis__env-key">YDS 점수</span>
-            <strong className="yds-market-analysis__env-val">{marketEnvironment.ydsDisplay}</strong>
-          </div>
-          {marketEnvironment.bullSimilarity != null ? (
+
+          <div className="yds-market-analysis__env-grid">
             <div className="yds-market-analysis__env-row">
-              <span className="yds-market-analysis__env-key">강세장 유사도</span>
-              <strong className="yds-market-analysis__env-val">
-                {marketEnvironment.bullSimilarity}%
+              <span className="yds-market-analysis__env-key">시장 환경</span>
+              <strong
+                className={[
+                  "yds-market-analysis__env-val",
+                  "yds-market-analysis__env-val--level",
+                  marketEnvironment.marketCondition.levelId
+                    ? `yds-market-analysis__env-val--${marketEnvironment.marketCondition.levelId}`
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                title={marketEnvironment.marketCondition.fullLabel}
+              >
+                {marketEnvironment.marketCondition.emoji}{" "}
+                {marketEnvironment.marketCondition.label}
               </strong>
             </div>
-          ) : null}
-          <div className="yds-market-analysis__env-row">
-            <span className="yds-market-analysis__env-key">신뢰도</span>
-            <strong className="yds-market-analysis__env-val">
-              {marketEnvironment.confidenceScore ?? "—"}%
-            </strong>
+            <div className="yds-market-analysis__env-row yds-market-analysis__env-row--desc">
+              <span className="yds-market-analysis__env-key" />
+              <span className="yds-market-analysis__env-desc">
+                {marketEnvironment.marketCondition.description}
+              </span>
+            </div>
+            {marketEnvironment.bullSimilarity != null ? (
+              <div className="yds-market-analysis__env-row">
+                <span className="yds-market-analysis__env-key">강세장 유사도</span>
+                <strong className="yds-market-analysis__env-val">
+                  {marketEnvironment.bullSimilarity}%
+                </strong>
+              </div>
+            ) : null}
+            <div className="yds-market-analysis__env-row">
+              <span className="yds-market-analysis__env-key">신뢰도</span>
+              <strong className="yds-market-analysis__env-val">
+                {marketEnvironment.confidenceScore ?? "—"}%
+              </strong>
+            </div>
           </div>
         </div>
+
+        {marketEnvironment.similarCaseCards?.length ? (
+          <div className="yds-market-analysis__similar-strip" aria-label="유사 사례">
+            <span className="yds-market-analysis__similar-strip-label">유사 사례</span>
+            <div className="yds-market-analysis__similar-cards">
+              {marketEnvironment.similarCaseCards.map((c) => (
+                <article key={c.rank} className="yds-market-analysis__similar-card">
+                  <span className="yds-market-analysis__similar-badge" aria-hidden>
+                    {c.badge}
+                  </span>
+                  <span className="yds-market-analysis__similar-name">
+                    {c.emoji} {c.name}
+                  </span>
+                  <strong className="yds-market-analysis__similar-pct font-mono tabular-nums">
+                    {c.similarityDisplay}
+                  </strong>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <p className="yds-market-analysis__env-contrast">{marketEnvironment.contrastNote}</p>
-        <p className="yds-market-analysis__env-summary">{marketEnvironment.similarSummary}</p>
         {marketEnvironment.positionHint ? (
           <p className="yds-market-analysis__env-hint">{marketEnvironment.positionHint}</p>
         ) : null}
@@ -156,7 +210,10 @@ export default function CurrentMarketAnalysisPage() {
               <span className="yds-market-analysis__ladder-emoji">{step.emoji}</span>
               <span className="yds-market-analysis__ladder-label">{step.shortLabel}</span>
               {step.stockPct != null && step.cashPct != null ? (
-                <div className="yds-market-analysis__ladder-alloc" aria-label={`주식 ${step.stockPct}% 현금 ${step.cashPct}%`}>
+                <div
+                  className="yds-market-analysis__ladder-alloc"
+                  aria-label={`주식 ${step.stockPct}% 현금 ${step.cashPct}%`}
+                >
                   <div className="yds-market-analysis__ladder-alloc-col">
                     <span className="yds-market-analysis__ladder-alloc-pct font-mono tabular-nums">
                       {step.stockPct}%

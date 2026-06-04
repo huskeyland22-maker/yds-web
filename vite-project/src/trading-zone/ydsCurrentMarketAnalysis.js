@@ -50,6 +50,42 @@ const ACTION_STAGE_HERO_COPY = {
     "극단적 공포 구간입니다. 역사적 저점 매수를 검토할 수 있는 패닉매수 단계입니다.",
 }
 
+/** @type {Record<string, { focus: string; limit: string }>} */
+const MARKET_BRIEF_BY_STAGE = {
+  overheated: { focus: "현금 확보", limit: "추격매수 제한" },
+  neutral: { focus: "종목 탐색 우선", limit: "추격매수 제한" },
+  interest: { focus: "관심 종목 관찰", limit: "추격매수 제한" },
+  dca: { focus: "분할매수 진행", limit: "일괄 매수 제한" },
+  panicBuy: { focus: "계획 매수 집행", limit: "레버리지 과다 금지" },
+}
+
+/**
+ * @param {ReturnType<typeof resolveYdsStage>} stage
+ */
+function buildMarketBriefCards(stage) {
+  const brief = stage?.id ? MARKET_BRIEF_BY_STAGE[stage.id] : null
+  return [
+    {
+      id: "market",
+      label: "현재 시장",
+      value: stage ? `${stage.emoji} ${stage.label}` : "—",
+      tone: "primary",
+    },
+    {
+      id: "focus",
+      label: "우선",
+      value: brief?.focus ?? "—",
+      tone: "accent",
+    },
+    {
+      id: "limit",
+      label: "제한",
+      value: brief?.limit ?? "—",
+      tone: "caution",
+    },
+  ]
+}
+
 /** 사용자-facing 시장 환경 4단계 (행동 단계에 종속) */
 export const MARKET_ENVIRONMENT_LEVELS = [
   {
@@ -369,6 +405,15 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
         }
       : null,
     similarSummary: buildSimilarCasesSummary(similarCases),
+    similarCaseCards: similarCases.map((c) => ({
+      rank: c.rank,
+      medal: c.medal,
+      name: c.name,
+      emoji: c.emoji,
+      similarity: c.similarity,
+      similarityDisplay: `${formatMetric(c.similarity)}%`,
+      badge: c.medal || `#${c.rank}`,
+    })),
     positionHint: positionMapping
       ? `${positionMapping.eventEmoji} ${positionMapping.eventLabel} ${positionMapping.offsetLabel} · 유사 ${formatMetric(positionMapping.similarity)}%`
       : null,
@@ -380,6 +425,10 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     asOf: dashboard.asOf,
     hasLive: comparison.meta.hasLive,
     actionStageHero,
+    marketBrief: {
+      title: "시장 요약",
+      cards: buildMarketBriefCards(stage),
+    },
     marketEnvironment,
     headline: {
       regime: dashboard.cards.regime,
