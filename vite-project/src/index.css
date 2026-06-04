@@ -13122,6 +13122,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-decoration: underline;
 }
 
+.panic-validation-page__inline-link {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.panic-validation-page__inline-link:hover {
+  color: #bae6fd;
+}
+
 /* 검증 페이지 Phase 1–17 아코디언 (기본 접힘 · Phase 17만 펼침) */
 .validation-phase-accordion-stack {
   display: flex;
@@ -14227,6 +14237,286 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   .yds-precursor-dashboard__metric-val {
     font-size: 1.85rem;
   }
+}
+
+.yds-market-analysis {
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.yds-market-analysis__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.yds-market-analysis__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-market-analysis__sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.yds-market-analysis__lab-link {
+  flex-shrink: 0;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+.yds-market-analysis__lab-link:hover {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+.yds-market-analysis__hero {
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.55);
+  margin-bottom: 0.85rem;
+}
+
+.yds-market-analysis__hero--stable {
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.yds-market-analysis__hero--transition {
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.yds-market-analysis__hero--risk {
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+.yds-market-analysis__hero--panic {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.yds-market-analysis__hero-emoji {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.yds-market-analysis__hero-kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.yds-market-analysis__hero-regime {
+  margin: 0.15rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-market-analysis__hero-text {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yds-market-analysis__hero-position {
+  margin: 0.4rem 0 0;
+  font-size: 0.68rem;
+  color: #7dd3fc;
+}
+
+.yds-market-analysis__section-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-market-analysis__section-sub {
+  margin: -0.25rem 0 0.45rem;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-market-analysis__state-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+}
+
+.yds-market-analysis__state-card {
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.yds-market-analysis__state-key {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-market-analysis__state-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-market-analysis__state-val--yds {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.yds-market-analysis__conf--high {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.yds-market-analysis__block {
+  margin-top: 0.95rem;
+}
+
+.yds-market-analysis__similar-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-market-analysis__similar-list li {
+  display: flex;
+  gap: 0.55rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-analysis__medal {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.yds-market-analysis__similar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.yds-market-analysis__similar-body strong {
+  font-size: 0.82rem;
+  color: #e2e8f0;
+}
+
+.yds-market-analysis__similar-stage {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+.yds-market-analysis__ladder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.yds-market-analysis__ladder-step {
+  flex: 1 1 calc(20% - 0.35rem);
+  min-width: 3.5rem;
+  padding: 0.4rem 0.25rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.45);
+  text-align: center;
+  opacity: 0.55;
+}
+
+.yds-market-analysis__ladder-step--active {
+  opacity: 1;
+  border-color: var(--stage-color, #38bdf8);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--stage-color, #38bdf8) 35%, transparent);
+  background: color-mix(in srgb, var(--stage-color, #38bdf8) 12%, rgba(15, 23, 42, 0.65));
+}
+
+.yds-market-analysis__ladder-emoji {
+  display: block;
+  font-size: 1rem;
+}
+
+.yds-market-analysis__ladder-label {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-market-analysis__action-oneliner {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.yds-market-analysis__action-rec {
+  margin: 0.25rem 0 0;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-market-analysis__returns-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+}
+
+.yds-market-analysis__returns-card {
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-market-analysis__returns-horizon {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 0.3rem;
+}
+
+.yds-market-analysis__returns-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+  color: #64748b;
+  padding: 0.12rem 0;
+}
+
+.yds-market-analysis__returns-row strong {
+  color: #cbd5e1;
+  font-size: 0.68rem;
+}
+
+.yds-market-analysis__empty {
+  font-size: 0.78rem;
+  color: #94a3b8;
 }
 
 .yds-precursor-action-guide {

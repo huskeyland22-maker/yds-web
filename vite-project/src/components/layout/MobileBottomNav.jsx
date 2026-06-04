@@ -3,16 +3,19 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { getPrimaryNavItems } from "../../utils/appNavItems.js"
 
 const ICON_BY_PATH = {
+  "/market-analysis": Activity,
   "/cycle": Activity,
   "/value-chain": Layers,
   "/trading-log": ScrollText,
 }
 
 const SHORT_LABEL = {
+  "/market-analysis": "시장분석",
   "/cycle": "사이클",
   "/value-chain": "코리아",
   "/trading-log": "로그",
   "/recommendation-history": "추천이력",
+  "/lab": "연구실",
 }
 
 function buildNavItems() {
@@ -34,9 +37,11 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
 
   const activeId = (() => {
     const p = location.pathname
+    if (p.startsWith("/market-analysis") || p.startsWith("/market-dashboard")) return "market_analysis"
     if (p.startsWith("/value-chain")) return "value_chain"
     if (p.startsWith("/trading-log")) return "trading_log"
     if (p.startsWith("/recommendation-history")) return "recommendation_history"
+    if (p.startsWith("/lab") || p.startsWith("/panic-validation")) return "lab"
     if (p.startsWith("/cycle") || p === "/") return "cycle"
     return "cycle"
   })()

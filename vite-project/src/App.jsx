@@ -30,7 +30,7 @@ import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
-import PrecursorDashboardBetaPage from "./pages/PrecursorDashboardBetaPage.jsx"
+import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
@@ -998,6 +998,9 @@ function App() {
       path === "/trading-log" ||
       path === "/recommendation-history" ||
       path === "/panic-validation" ||
+      path === "/lab" ||
+      path === "/market-analysis" ||
+      path === "/market-dashboard" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
     document.body.classList.toggle("scroll-doc-route", scrollDoc)
@@ -1322,13 +1325,14 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/cycle" replace />} />
             <Route
-              path="/market-dashboard"
+              path="/market-analysis"
               element={
-                <SectionErrorBoundary label="시장 대시보드 Beta">
-                  <PrecursorDashboardBetaPage />
+                <SectionErrorBoundary label="현재 시장 분석">
+                  <CurrentMarketAnalysisPage />
                 </SectionErrorBoundary>
               }
             />
+            <Route path="/market-dashboard" element={<Navigate to="/market-analysis" replace />} />
             <Route
               path="/cycle"
               element={
@@ -1381,13 +1385,15 @@ function App() {
                 </SectionErrorBoundary>
               }
             />
-            <Route
-              path="/panic-validation"
-              element={
-                <SectionErrorBoundary label="패닉지수 검증">
+            <Route path="/lab" element={
+                <SectionErrorBoundary label="연구실">
                   <PanicIndexValidationPage />
                 </SectionErrorBoundary>
               }
+            />
+            <Route
+              path="/panic-validation"
+              element={<Navigate to="/lab" replace />}
             />
             <Route path="/insights" element={<Navigate to="/value-chain" replace />} />
             <Route

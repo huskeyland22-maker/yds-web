@@ -77,8 +77,8 @@ export default function PrecursorDashboardBetaPage() {
             5초 스캔 · {asOf ? `기준 ${String(asOf).slice(0, 10)}` : "데이터 준비 중"}
           </p>
         </div>
-        <Link to="/panic-validation" className="yds-precursor-dashboard__link">
-          검증 상세
+        <Link to="/lab" className="yds-precursor-dashboard__link">
+          연구실
         </Link>
       </header>
 

@@ -32,7 +32,7 @@ export default function TacticalRecommendationTrack({
     >
       <div className="tactical-zone-recommend-track__head">
         <p className="m-0 tactical-zone-recommend-track__title">추천 종목 성과</p>
-        <Link to="/panic-validation" className="tactical-zone-recommend-track__link">
+        <Link to="/lab" className="tactical-zone-recommend-track__link">
           검증
         </Link>
       </div>

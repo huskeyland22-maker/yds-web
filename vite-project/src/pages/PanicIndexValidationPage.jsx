@@ -208,18 +208,21 @@ export default function PanicIndexValidationPage() {
     <div className="panic-validation-page min-w-0 px-3 py-4 sm:px-4">
       <header className="panic-validation-page__head">
         <div>
-          <p className="panic-validation-page__lab-badge">[ LAB ] 시장 프록시 기반 연구용 검증</p>
-          <h1 className="panic-validation-page__title">패닉지수 검증</h1>
+          <p className="panic-validation-page__lab-badge">[ LAB ] YDS 연구실</p>
+          <h1 className="panic-validation-page__title">연구실</h1>
           <p className="panic-validation-page__sub">
-            YDS 패닉전략 백테스트 · {backtest.periodStart ?? "—"} ~ {backtest.periodEnd ?? "—"}
+            Phase 1~22 · 백테스트 · 엔진 검증 · {backtest.periodStart ?? "—"} ~ {backtest.periodEnd ?? "—"}
           </p>
           <p className="panic-validation-page__sub">
-            현재 수치는 Fear&amp;Greed + VIX 기반 시장 프록시 시뮬레이션이며, 실제 SPX/SPY 종가 기반
-            백테스트는 추후 구현 예정입니다.
+            일반 사용자는{" "}
+            <Link to="/market-analysis" className="panic-validation-page__inline-link">
+              현재 시장 분석
+            </Link>
+            페이지를 이용하세요.
           </p>
         </div>
-        <Link to="/cycle" className="panic-validation-page__link">
-          매매존으로
+        <Link to="/market-analysis" className="panic-validation-page__link">
+          시장 분석
         </Link>
       </header>
 
@@ -642,11 +645,7 @@ export default function PanicIndexValidationPage() {
       <YdsEngineCandidateV3Section events={YDS_VALIDATION_EVENT_DATASET} />
 
       <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–22">
-        <ValidationPhaseAccordion
-          phase={21}
-          subtitle={VALIDATION_PHASE_SUBTITLES[21]}
-          defaultOpen
-        >
+        <ValidationPhaseAccordion phase={21} subtitle={VALIDATION_PHASE_SUBTITLES[21]}>
           <YdsPrecursorEnginePhase21Section events={YDS_VALIDATION_EVENT_DATASET} />
         </ValidationPhaseAccordion>
         <ValidationPhaseAccordion phase={20} subtitle={VALIDATION_PHASE_SUBTITLES[20]}>

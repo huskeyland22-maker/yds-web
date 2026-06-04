@@ -45,7 +45,7 @@ export default function TacticalRecommendationValidationCard({
             최근 90일
           </button>
         </div>
-        <Link to="/panic-validation" className="tactical-zone-validation-card__link">
+        <Link to="/lab" className="tactical-zone-validation-card__link">
           전체 검증 보기
         </Link>
       </div>
