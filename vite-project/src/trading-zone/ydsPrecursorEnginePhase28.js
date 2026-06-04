@@ -16,12 +16,13 @@ export const PRECURSOR_ENGINE_PHASE28_LABEL = "Trading Journal — Phase 28"
 
 export const TRADING_JOURNAL_PIPELINE = [
   { id: "entry-radar", label: "Entry Radar", status: "active" },
+  { id: "paper-trading", label: "Paper Trading", status: "active" },
   { id: "trading-journal", label: "Trading Journal", status: "active", outputKey: "trades" },
   {
     id: "performance-dashboard",
     label: "Performance Dashboard",
-    status: "planned",
-    consumes: "tradingJournal.stats",
+    status: "active",
+    consumes: "paperTrading.positions",
   },
 ]
 
@@ -166,7 +167,7 @@ export function buildTradingJournalFromTrades(input) {
     notes: [
       "Entry Radar 추천 종목의 실제 진입·청산 기록 (localStorage)",
       "최근 20건 표시 · YDS 엔진 미수정",
-      "exportForPerformanceDashboard → Phase 29 Performance Dashboard 예정",
+      "exportForPerformanceDashboard → Phase 29 Performance Dashboard (Paper Trading 집계)",
     ],
   }
 }

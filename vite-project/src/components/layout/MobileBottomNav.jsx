@@ -1,9 +1,10 @@
-import { Activity, Layers, ScrollText } from "lucide-react"
+import { Activity, BarChart3, Layers, ScrollText } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { getPrimaryNavItems } from "../../utils/appNavItems.js"
 
 const ICON_BY_PATH = {
   "/market-analysis": Activity,
+  "/performance-dashboard": BarChart3,
   "/cycle": Activity,
   "/value-chain": Layers,
   "/trading-log": ScrollText,
@@ -11,6 +12,7 @@ const ICON_BY_PATH = {
 
 const SHORT_LABEL = {
   "/market-analysis": "시장분석",
+  "/performance-dashboard": "성과",
   "/cycle": "사이클",
   "/value-chain": "코리아",
   "/trading-log": "로그",
@@ -38,6 +40,7 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
   const activeId = (() => {
     const p = location.pathname
     if (p.startsWith("/market-analysis") || p.startsWith("/market-dashboard")) return "market_analysis"
+    if (p.startsWith("/performance-dashboard")) return "performance_dashboard"
     if (p.startsWith("/value-chain")) return "value_chain"
     if (p.startsWith("/trading-log")) return "trading_log"
     if (p.startsWith("/recommendation-history")) return "recommendation_history"

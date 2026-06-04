@@ -13,6 +13,9 @@ import { formatSectorRadarScore } from "../trading-zone/ydsPrecursorEnginePhase2
 import { formatStockRadarScore } from "../trading-zone/ydsPrecursorEnginePhase26.js"
 import { formatEntryRadarScore } from "../trading-zone/ydsPrecursorEnginePhase27.js"
 import TradingJournalPanel from "../components/trading/TradingJournalPanel.jsx"
+import PaperTradingPanel from "../components/trading/PaperTradingPanel.jsx"
+import ConvictionEnginePanel from "../components/trading/ConvictionEnginePanel.jsx"
+import PortfolioBuilderPanel from "../components/trading/PortfolioBuilderPanel.jsx"
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -48,6 +51,8 @@ export default function CurrentMarketAnalysisPage() {
     sectorRadar,
     stockRadar,
     entryRadar,
+    convictionEngine,
+    portfolioBuilder,
     tradingJournal,
     expectedReturns,
   } = report
@@ -345,6 +350,46 @@ export default function CurrentMarketAnalysisPage() {
         ) : (
           <p className="yds-market-analysis__empty">실전 매매 후보를 산출할 수 없습니다.</p>
         )}
+      </section>
+
+      <section
+        className="yds-market-analysis__block yds-market-analysis__conviction"
+        aria-label="확신도 엔진"
+      >
+        <h2 className="yds-market-analysis__section-title">{convictionEngine.title}</h2>
+        <p className="yds-market-analysis__section-sub">
+          Conviction Engine · {convictionEngine.scoreWeightsDisplay}
+        </p>
+        <ConvictionEnginePanel conviction={convictionEngine} compact />
+      </section>
+
+      <section
+        className="yds-market-analysis__block yds-market-analysis__portfolio-builder"
+        aria-label="추천 포트폴리오"
+      >
+        <h2 className="yds-market-analysis__section-title">{portfolioBuilder.title}</h2>
+        <p className="yds-market-analysis__section-sub">
+          Portfolio Builder · Conviction + 행동 단계 현금 비중
+        </p>
+        <PortfolioBuilderPanel
+          sectorRadar={sectorRadar}
+          stockRadar={stockRadar}
+          entryRadar={entryRadar}
+          convictionEngine={convictionEngine}
+          actionGuide={actionGuide}
+          compact
+        />
+      </section>
+
+      <section
+        className="yds-market-analysis__block yds-market-analysis__paper-trading"
+        aria-label="Paper Trading"
+      >
+        <h2 className="yds-market-analysis__section-title">Paper Trading</h2>
+        <p className="yds-market-analysis__section-sub">
+          Auto Paper Trading · A 자동 · B 선택 · 가상매매 실시간 추적
+        </p>
+        <PaperTradingPanel entryRadar={entryRadar} compact />
       </section>
 
       <section

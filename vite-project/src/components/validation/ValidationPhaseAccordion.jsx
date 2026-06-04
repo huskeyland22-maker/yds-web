@@ -2,6 +2,10 @@ import { useId, useState } from "react"
 
 /** @type {Record<number, string>} */
 export const VALIDATION_PHASE_SUBTITLES = {
+  32: "Portfolio Builder",
+  31: "Conviction Engine",
+  30: "Performance Dashboard",
+  29: "Auto Paper Trading (28.5)",
   28: "Trading Journal",
   27: "Entry Radar",
   26: "Stock Radar",

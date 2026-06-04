@@ -18,6 +18,8 @@ import { buildSectorRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase2
 import { buildStockRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase26.js"
 import { buildEntryRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase27.js"
 import { buildTradingJournalFromPrecursorContext } from "./ydsPrecursorEnginePhase28.js"
+import { buildConvictionEngineFromPrecursorContext } from "./ydsConvictionEngine.js"
+import { buildPortfolioBuilderFromPrecursorContext } from "./ydsPortfolioBuilderEngine.js"
 import { loadPrecursorTradingJournal } from "./ydsPrecursorTradingJournalStorage.js"
 import { resolveMacroStageAllocation } from "./macroStageAllocation.js"
 
@@ -410,6 +412,34 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     asOf: dashboard.asOf,
   })
 
+  const convictionEngine = buildConvictionEngineFromPrecursorContext({
+    sectorRadar,
+    stockRadar,
+    entryRadar,
+    confidence: {
+      score: confidence.confidence.score,
+      label: confidence.confidence.label?.label ?? "—",
+      tone: confidence.confidence.label?.tone,
+    },
+  })
+
+  const actionGuidePayload = {
+    current: action.currentAction,
+    recommended: action.recommendedAction,
+    oneLiner: action.oneLiner,
+    stageLadder,
+    currentStageId: stage?.id ?? null,
+  }
+
+  const portfolioBuilder = buildPortfolioBuilderFromPrecursorContext({
+    sectorRadar,
+    stockRadar,
+    entryRadar,
+    convictionEngine,
+    actionGuide: actionGuidePayload,
+    riskMode: "neutral",
+  })
+
   const marketEnvironment = {
     title: "시장 환경",
     kicker: "보조 정보 · Market Condition",
@@ -491,17 +521,13 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     },
     similarCases,
     positionMapping,
-    actionGuide: {
-      current: action.currentAction,
-      recommended: action.recommendedAction,
-      oneLiner: action.oneLiner,
-      stageLadder,
-      currentStageId: stage?.id ?? null,
-    },
+    actionGuide: actionGuidePayload,
     portfolio: buildPortfolioRecommendation(ydsScore),
     sectorRadar,
     stockRadar,
     entryRadar,
+    convictionEngine,
+    portfolioBuilder,
     tradingJournal,
     expectedReturns: comparison.historicalOutcomes.map((h) => ({
       horizon: h.horizon,
@@ -511,7 +537,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
       maxMdd: h.maxMdd,
     })),
     notes: [
-      "Phase 12·15·16·22·23·25·26·27·28 읽기 전용 집약 · 검증 엔진 미수정",
+      "Phase 12·15·16·22·23·25·26·27·28·30·31 읽기 전용 집약 · 검증 엔진 미수정",
       "유사 사례·기대 수익률은 역사적 패턴 추정(투자 조언 아님)",
     ],
   }

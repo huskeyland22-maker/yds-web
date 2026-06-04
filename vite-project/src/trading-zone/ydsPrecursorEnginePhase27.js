@@ -88,7 +88,26 @@ const REGIME_RISK_PENALTY = {
 
 export const ENTRY_RADAR_PIPELINE = [
   { id: "entry-radar", label: "Entry Radar", status: "active", outputKey: "tradeCandidates" },
-  { id: "trading-log", label: "트레이딩 로그", status: "active", consumes: "entryRadar.executed" },
+  {
+    id: "conviction-engine",
+    label: "Conviction Engine",
+    status: "active",
+    consumes: "entryRadar.tradeCandidates",
+  },
+  {
+    id: "portfolio-builder",
+    label: "Portfolio Builder",
+    status: "active",
+    consumes: "convictionEngine.allocations",
+  },
+  {
+    id: "paper-trading",
+    label: "Paper Trading",
+    status: "active",
+    consumes: "entryRadar.tradeCandidates",
+    outputKey: "paperPositions",
+  },
+  { id: "trading-log", label: "트레이딩 로그", status: "active", consumes: "paperTrading.closed" },
   { id: "returns-disclosure", label: "실제 수익 공개", status: "planned", consumes: "tradingLog.returns" },
 ]
 

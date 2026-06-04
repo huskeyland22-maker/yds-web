@@ -40,6 +40,10 @@ import YdsPrecursorEnginePhase25Section from "../components/validation/YdsPrecur
 import YdsPrecursorEnginePhase26Section from "../components/validation/YdsPrecursorEnginePhase26Section.jsx"
 import YdsPrecursorEnginePhase27Section from "../components/validation/YdsPrecursorEnginePhase27Section.jsx"
 import YdsPrecursorEnginePhase28Section from "../components/validation/YdsPrecursorEnginePhase28Section.jsx"
+import YdsPaperTradingPhase285Section from "../components/validation/YdsPaperTradingPhase285Section.jsx"
+import YdsPerformanceDashboardPhase29Section from "../components/validation/YdsPerformanceDashboardPhase29Section.jsx"
+import YdsConvictionEnginePhase30Section from "../components/validation/YdsConvictionEnginePhase30Section.jsx"
+import YdsPortfolioBuilderPhase31Section from "../components/validation/YdsPortfolioBuilderPhase31Section.jsx"
 import ValidationPhaseAccordion, {
   VALIDATION_PHASE_SUBTITLES,
 } from "../components/validation/ValidationPhaseAccordion.jsx"
@@ -648,7 +652,31 @@ export default function PanicIndexValidationPage() {
 
       <YdsEngineCandidateV3Section events={YDS_VALIDATION_EVENT_DATASET} />
 
-      <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–28">
+      <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–32">
+        <ValidationPhaseAccordion phase={32} subtitle={VALIDATION_PHASE_SUBTITLES[32]}>
+          <YdsPortfolioBuilderPhase31Section
+            events={YDS_VALIDATION_EVENT_DATASET}
+            latestCycleRow={history[history.length - 1] ?? null}
+            historyRows={history}
+          />
+        </ValidationPhaseAccordion>
+        <ValidationPhaseAccordion phase={31} subtitle={VALIDATION_PHASE_SUBTITLES[31]}>
+          <YdsConvictionEnginePhase30Section
+            events={YDS_VALIDATION_EVENT_DATASET}
+            latestCycleRow={history[history.length - 1] ?? null}
+            historyRows={history}
+          />
+        </ValidationPhaseAccordion>
+        <ValidationPhaseAccordion phase={30} subtitle={VALIDATION_PHASE_SUBTITLES[30]}>
+          <YdsPerformanceDashboardPhase29Section />
+        </ValidationPhaseAccordion>
+        <ValidationPhaseAccordion phase={29} subtitle={VALIDATION_PHASE_SUBTITLES[29]}>
+          <YdsPaperTradingPhase285Section
+            events={YDS_VALIDATION_EVENT_DATASET}
+            latestCycleRow={history[history.length - 1] ?? null}
+            historyRows={history}
+          />
+        </ValidationPhaseAccordion>
         <ValidationPhaseAccordion phase={28} subtitle={VALIDATION_PHASE_SUBTITLES[28]}>
           <YdsPrecursorEnginePhase28Section
             events={YDS_VALIDATION_EVENT_DATASET}
