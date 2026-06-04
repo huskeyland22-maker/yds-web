@@ -15079,6 +15079,232 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
+/* Trading Journal — Phase 28 · TradingView-style */
+.yds-trading-journal {
+  --tj-bg: #0b0f14;
+  --tj-border: rgba(42, 54, 72, 0.85);
+  --tj-header: #131722;
+  --tj-text: #d1d4dc;
+  --tj-muted: #787b86;
+  --tj-up: #26a69a;
+  --tj-down: #ef5350;
+  color: var(--tj-text);
+}
+
+.yds-trading-journal__asof {
+  margin: 0 0 0.5rem;
+  font-size: 0.65rem;
+  color: var(--tj-muted);
+}
+
+.yds-trading-journal__empty {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.yds-trading-journal__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.yds-trading-journal__stat {
+  padding: 0.4rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid var(--tj-border);
+  background: var(--tj-header);
+}
+
+.yds-trading-journal__stat-key {
+  display: block;
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tj-muted);
+}
+
+.yds-trading-journal__stat-val {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--tj-text);
+}
+
+.yds-trading-journal__stat-val--up {
+  color: var(--tj-up);
+}
+
+.yds-trading-journal__stat-val--down {
+  color: var(--tj-down);
+}
+
+.yds-trading-journal__table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--tj-border);
+  background: var(--tj-bg);
+}
+
+.yds-trading-journal__table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.yds-trading-journal__table thead {
+  background: var(--tj-header);
+}
+
+.yds-trading-journal__table th {
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tj-muted);
+  border-bottom: 1px solid var(--tj-border);
+}
+
+.yds-trading-journal__table td {
+  padding: 0.42rem 0.55rem;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.45);
+  vertical-align: middle;
+}
+
+.yds-trading-journal__table tbody tr:hover {
+  background: rgba(38, 166, 154, 0.06);
+}
+
+.yds-trading-journal__num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.yds-trading-journal__name {
+  font-weight: 700;
+  color: #f0f3fa;
+}
+
+.yds-trading-journal__grade {
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.yds-trading-journal__date {
+  color: var(--tj-muted);
+}
+
+.yds-trading-journal__pct--up {
+  color: var(--tj-up);
+  font-weight: 700;
+}
+
+.yds-trading-journal__pct--down {
+  color: var(--tj-down);
+  font-weight: 700;
+}
+
+.yds-trading-journal__status {
+  display: inline-block;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.yds-trading-journal__status--holding {
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.yds-trading-journal__status--takeProfit {
+  color: var(--tj-up);
+  background: rgba(38, 166, 154, 0.15);
+}
+
+.yds-trading-journal__status--stopLoss {
+  color: var(--tj-down);
+  background: rgba(239, 83, 80, 0.12);
+}
+
+.yds-trading-journal__foot {
+  margin: 0.5rem 0 0;
+  font-size: 0.65rem;
+  color: var(--tj-muted);
+}
+
+.yds-trading-journal__link {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.yds-trading-journal--compact .yds-trading-journal__stats {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.yds-precursor-engine-p28__h3 {
+  margin: 0 0 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p28__block {
+  margin-top: 0.85rem;
+}
+
+.yds-precursor-engine-p28__pipeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-precursor-engine-p28__pipeline li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.2rem 0;
+  font-size: 0.72rem;
+}
+
+.yds-precursor-engine-p28__pipe--active {
+  color: #4ade80;
+  font-size: 0.62rem;
+}
+
+.yds-precursor-engine-p28__pipe--planned {
+  color: #64748b;
+  font-size: 0.62rem;
+}
+
+.yds-precursor-engine-p28__pipe-arrow {
+  width: 100%;
+  text-align: center;
+  color: #475569;
+}
+
+.yds-precursor-engine-p28__export-json {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem;
+  font-size: 0.58rem;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.65);
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  overflow-x: auto;
+}
+
 .yds-precursor-engine-p27__h3 {
   margin: 0 0 0.45rem;
   font-size: 0.82rem;

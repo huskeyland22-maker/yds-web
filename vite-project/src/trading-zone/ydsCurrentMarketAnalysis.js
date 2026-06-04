@@ -17,6 +17,8 @@ import { buildPortfolioRecommendation } from "./ydsPrecursorEnginePhase23.js"
 import { buildSectorRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase25.js"
 import { buildStockRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase26.js"
 import { buildEntryRadarFromPrecursorContext } from "./ydsPrecursorEnginePhase27.js"
+import { buildTradingJournalFromPrecursorContext } from "./ydsPrecursorEnginePhase28.js"
+import { loadPrecursorTradingJournal } from "./ydsPrecursorTradingJournalStorage.js"
 import { resolveMacroStageAllocation } from "./macroStageAllocation.js"
 
 export const CURRENT_MARKET_ANALYSIS_LABEL = "현재 시장 분석"
@@ -398,6 +400,16 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     stockRadar,
   })
 
+  const journalTrades =
+    typeof window !== "undefined"
+      ? loadPrecursorTradingJournal().trades
+      : undefined
+  const tradingJournal = buildTradingJournalFromPrecursorContext({
+    trades: journalTrades,
+    entryRadar,
+    asOf: dashboard.asOf,
+  })
+
   const marketEnvironment = {
     title: "시장 환경",
     kicker: "보조 정보 · Market Condition",
@@ -490,6 +502,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     sectorRadar,
     stockRadar,
     entryRadar,
+    tradingJournal,
     expectedReturns: comparison.historicalOutcomes.map((h) => ({
       horizon: h.horizon,
       label: h.label,
@@ -498,7 +511,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
       maxMdd: h.maxMdd,
     })),
     notes: [
-      "Phase 12·15·16·22·23·25·26·27 읽기 전용 집약 · 검증 엔진 미수정",
+      "Phase 12·15·16·22·23·25·26·27·28 읽기 전용 집약 · 검증 엔진 미수정",
       "유사 사례·기대 수익률은 역사적 패턴 추정(투자 조언 아님)",
     ],
   }

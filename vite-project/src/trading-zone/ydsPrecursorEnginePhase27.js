@@ -88,7 +88,7 @@ const REGIME_RISK_PENALTY = {
 
 export const ENTRY_RADAR_PIPELINE = [
   { id: "entry-radar", label: "Entry Radar", status: "active", outputKey: "tradeCandidates" },
-  { id: "trading-log", label: "트레이딩 로그", status: "planned", consumes: "entryRadar.executed" },
+  { id: "trading-log", label: "트레이딩 로그", status: "active", consumes: "entryRadar.executed" },
   { id: "returns-disclosure", label: "실제 수익 공개", status: "planned", consumes: "tradingLog.returns" },
 ]
 

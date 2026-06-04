@@ -12,6 +12,7 @@ import {
 import { formatSectorRadarScore } from "../trading-zone/ydsPrecursorEnginePhase25.js"
 import { formatStockRadarScore } from "../trading-zone/ydsPrecursorEnginePhase26.js"
 import { formatEntryRadarScore } from "../trading-zone/ydsPrecursorEnginePhase27.js"
+import TradingJournalPanel from "../components/trading/TradingJournalPanel.jsx"
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -47,6 +48,7 @@ export default function CurrentMarketAnalysisPage() {
     sectorRadar,
     stockRadar,
     entryRadar,
+    tradingJournal,
     expectedReturns,
   } = report
 
@@ -343,6 +345,17 @@ export default function CurrentMarketAnalysisPage() {
         ) : (
           <p className="yds-market-analysis__empty">실전 매매 후보를 산출할 수 없습니다.</p>
         )}
+      </section>
+
+      <section
+        className="yds-market-analysis__block yds-market-analysis__trading-journal"
+        aria-label="트레이드 로그"
+      >
+        <h2 className="yds-market-analysis__section-title">{tradingJournal.title}</h2>
+        <p className="yds-market-analysis__section-sub">
+          Trading Journal · Entry Radar 추적 · 최근 20건
+        </p>
+        <TradingJournalPanel journal={tradingJournal} compact />
       </section>
 
       <section className="yds-market-analysis__block" aria-label="권장 포트폴리오">
