@@ -32,6 +32,7 @@ import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
+import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
@@ -1006,6 +1007,7 @@ function App() {
       path === "/market-dashboard" ||
       path === "/performance-dashboard" ||
       path === "/performance-center" ||
+      path === "/ai-daily-report" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
     document.body.classList.toggle("scroll-doc-route", scrollDoc)
@@ -1348,6 +1350,14 @@ function App() {
               }
             />
             <Route path="/performance-dashboard" element={<Navigate to="/performance-center" replace />} />
+            <Route
+              path="/ai-daily-report"
+              element={
+                <SectionErrorBoundary label="AI 리포트">
+                  <AiDailyReportPage />
+                </SectionErrorBoundary>
+              }
+            />
             <Route
               path="/cycle"
               element={

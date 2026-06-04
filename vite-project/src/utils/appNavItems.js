@@ -11,5 +11,6 @@ export function getPrimaryNavItems() {
     { label: "연구실", path: "/lab" },
     { label: "추천 이력", path: "/recommendation-history" },
     { label: "성과센터", path: "/performance-center" },
+    { label: "AI 리포트", path: "/ai-daily-report" },
   ]
 }

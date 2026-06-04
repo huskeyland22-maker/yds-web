@@ -16474,6 +16474,161 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   overflow-x: auto;
 }
 
+/* AI Daily Report — Phase 34 */
+.yds-ai-report {
+  --ar-border: rgba(42, 54, 72, 0.65);
+  --ar-muted: #787b86;
+  --ar-accent: #a78bfa;
+  max-width: 720px;
+  margin: 0 auto;
+  color: #d1d4dc;
+}
+
+.yds-ai-report__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.yds-ai-report__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ar-muted);
+}
+
+.yds-ai-report__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-ai-report__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.68rem;
+  color: var(--ar-muted);
+  line-height: 1.45;
+}
+
+.yds-ai-report__link {
+  font-size: 0.72rem;
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.yds-ai-report__narrative {
+  margin-bottom: 1rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.12) 0%,
+    rgba(15, 23, 42, 0.75) 100%
+  );
+}
+
+.yds-ai-report__narrative-text {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.65;
+  color: #e9d5ff;
+}
+
+.yds-ai-report__section {
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--ar-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-ai-report__h2 {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #c4b5fd;
+  letter-spacing: 0.02em;
+}
+
+.yds-ai-report__lead {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #f1f5f9;
+}
+
+.yds-ai-report__card-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.yds-ai-report__body {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.yds-ai-report__body--action {
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+.yds-ai-report__meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.65rem;
+  color: var(--ar-muted);
+  line-height: 1.45;
+}
+
+.yds-ai-report__list {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-ai-report__list li {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr auto;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.22rem 0;
+  font-size: 0.72rem;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.35);
+}
+
+.yds-ai-report__rank {
+  color: var(--ar-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.yds-ai-report__empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ar-muted);
+  border: 1px dashed var(--ar-border);
+  border-radius: 10px;
+}
+
+.yds-ai-report__footnotes {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
 /* Performance Center — Phase 33 */
 .yds-perf-center {
   --pc-border: rgba(42, 54, 72, 0.65);
