@@ -33,6 +33,7 @@ import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
+import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
 import HomeV5StrategyValidationPage from "./pages/HomeV5StrategyValidationPage.jsx"
 import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
@@ -1398,6 +1399,14 @@ function App() {
               element={<Navigate to="/lab" replace />}
             />
             <Route path="/insights" element={<Navigate to="/value-chain" replace />} />
+            <Route
+              path="/admin"
+              element={
+                <SectionErrorBoundary label="운영자 대시보드">
+                  <AdminDashboardPage />
+                </SectionErrorBoundary>
+              }
+            />
             <Route
               path="/debug-data"
               element={

@@ -58,6 +58,13 @@ export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion 
           {isDevMode() ? (
             <>
               <Link
+                to="/admin"
+                onClick={onClose}
+                className="rounded-md px-3 py-2 text-[11px] text-cyan-400/90"
+              >
+                운영자 대시보드
+              </Link>
+              <Link
                 to="/debug-data"
                 onClick={onClose}
                 className="rounded-md px-3 py-2 text-[11px] text-amber-400/90"
