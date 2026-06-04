@@ -9,6 +9,8 @@ import {
   formatAnalysisPct,
   CURRENT_MARKET_ANALYSIS_LABEL,
 } from "../trading-zone/ydsCurrentMarketAnalysis.js"
+import { formatSectorRadarScore } from "../trading-zone/ydsPrecursorEnginePhase25.js"
+import { formatStockRadarScore } from "../trading-zone/ydsPrecursorEnginePhase26.js"
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -41,6 +43,8 @@ export default function CurrentMarketAnalysisPage() {
     marketEnvironment,
     actionGuide,
     portfolio,
+    sectorRadar,
+    stockRadar,
     expectedReturns,
   } = report
 
@@ -237,6 +241,72 @@ export default function CurrentMarketAnalysisPage() {
         <p className="yds-market-analysis__ladder-foot">
           패닉이 깊어질수록 주식 비중을 높이고, 과열·중립 구간에서 현금을 모아 패닉매수에 투입합니다.
         </p>
+      </section>
+
+      <section className="yds-market-analysis__block yds-market-analysis__sector-radar" aria-label="Sector Radar">
+        <h2 className="yds-market-analysis__section-title">추천 섹터</h2>
+        <p className="yds-market-analysis__section-sub">Sector Radar · YDS 단계·국면·패턴 집약</p>
+        {sectorRadar.available ? (
+          <>
+            <div className="yds-market-analysis__sector-market">
+              <span className="yds-market-analysis__sector-market-key">현재 시장</span>
+              <strong>{sectorRadar.currentMarket.display}</strong>
+            </div>
+            {sectorRadar.stagePolicy ? (
+              <p className="yds-market-analysis__sector-policy">{sectorRadar.stagePolicy.display}</p>
+            ) : null}
+            <ol className="yds-market-analysis__sector-rank">
+              {sectorRadar.topSectors.map((s) => (
+                <li key={s.id}>
+                  <span className="yds-market-analysis__sector-rank-n">{s.rank}위</span>
+                  <span className="yds-market-analysis__sector-rank-label">{s.label}</span>
+                  <span className="yds-market-analysis__sector-rank-score font-mono tabular-nums">
+                    점수 {formatSectorRadarScore(s.score)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <div className="yds-market-analysis__sector-status">
+              <article className="yds-market-analysis__sector-status-card yds-market-analysis__sector-status-card--strong">
+                <span>
+                  {sectorRadar.sectorStatus.strong.emoji} {sectorRadar.sectorStatus.strong.title}
+                </span>
+                <p>{sectorRadar.sectorStatus.strong.labels.join(" · ")}</p>
+              </article>
+              <article className="yds-market-analysis__sector-status-card yds-market-analysis__sector-status-card--weak">
+                <span>
+                  {sectorRadar.sectorStatus.weak.emoji} {sectorRadar.sectorStatus.weak.title}
+                </span>
+                <p>{sectorRadar.sectorStatus.weak.labels.join(" · ")}</p>
+              </article>
+            </div>
+          </>
+        ) : (
+          <p className="yds-market-analysis__empty">섹터 추천을 산출할 수 없습니다.</p>
+        )}
+      </section>
+
+      <section className="yds-market-analysis__block yds-market-analysis__stock-radar" aria-label="Stock Radar">
+        <h2 className="yds-market-analysis__section-title">매수 후보</h2>
+        <p className="yds-market-analysis__section-sub">
+          Stock Radar · {stockRadar.scoreWeightsDisplay}
+        </p>
+        {stockRadar.available ? (
+          <ol className="yds-market-analysis__stock-rank">
+            {stockRadar.topBuys.map((s) => (
+              <li key={s.id}>
+                <span className="yds-market-analysis__stock-rank-n">{s.rank}.</span>
+                <span className="yds-market-analysis__stock-rank-name">{s.name}</span>
+                <span className="yds-market-analysis__stock-rank-score font-mono tabular-nums">
+                  점수 {formatStockRadarScore(s.score)}
+                </span>
+                <span className="yds-market-analysis__stock-rank-status">{s.status.display}</span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="yds-market-analysis__empty">매수 후보를 산출할 수 없습니다.</p>
+        )}
       </section>
 
       <section className="yds-market-analysis__block" aria-label="권장 포트폴리오">

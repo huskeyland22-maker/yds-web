@@ -36,6 +36,8 @@ import YdsPrecursorEnginePhase18Section from "../components/validation/YdsPrecur
 import YdsPrecursorEnginePhase20Section from "../components/validation/YdsPrecursorEnginePhase20Section.jsx"
 import YdsPrecursorEnginePhase21Section from "../components/validation/YdsPrecursorEnginePhase21Section.jsx"
 import YdsPrecursorEnginePhase22Section from "../components/validation/YdsPrecursorEnginePhase22Section.jsx"
+import YdsPrecursorEnginePhase25Section from "../components/validation/YdsPrecursorEnginePhase25Section.jsx"
+import YdsPrecursorEnginePhase26Section from "../components/validation/YdsPrecursorEnginePhase26Section.jsx"
 import ValidationPhaseAccordion, {
   VALIDATION_PHASE_SUBTITLES,
 } from "../components/validation/ValidationPhaseAccordion.jsx"
@@ -644,7 +646,21 @@ export default function PanicIndexValidationPage() {
 
       <YdsEngineCandidateV3Section events={YDS_VALIDATION_EVENT_DATASET} />
 
-      <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–22">
+      <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–26">
+        <ValidationPhaseAccordion phase={26} subtitle={VALIDATION_PHASE_SUBTITLES[26]}>
+          <YdsPrecursorEnginePhase26Section
+            events={YDS_VALIDATION_EVENT_DATASET}
+            latestCycleRow={history[history.length - 1] ?? null}
+            historyRows={history}
+          />
+        </ValidationPhaseAccordion>
+        <ValidationPhaseAccordion phase={25} subtitle={VALIDATION_PHASE_SUBTITLES[25]}>
+          <YdsPrecursorEnginePhase25Section
+            events={YDS_VALIDATION_EVENT_DATASET}
+            latestCycleRow={history[history.length - 1] ?? null}
+            historyRows={history}
+          />
+        </ValidationPhaseAccordion>
         <ValidationPhaseAccordion phase={21} subtitle={VALIDATION_PHASE_SUBTITLES[21]}>
           <YdsPrecursorEnginePhase21Section events={YDS_VALIDATION_EVENT_DATASET} />
         </ValidationPhaseAccordion>
