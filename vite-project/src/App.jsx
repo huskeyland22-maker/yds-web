@@ -36,6 +36,12 @@ import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import WatchlistCenterPage from "./pages/WatchlistCenterPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
 import GlossaryPage from "./pages/GlossaryPage.jsx"
+import YdsIntroPage from "./pages/YdsIntroPage.jsx"
+import StartGuidePage from "./pages/StartGuidePage.jsx"
+import FaqPage from "./pages/FaqPage.jsx"
+import AboutPage from "./pages/AboutPage.jsx"
+import FeedbackPage from "./pages/FeedbackPage.jsx"
+import NotFoundPage from "./pages/NotFoundPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
@@ -1389,6 +1395,46 @@ function App() {
               }
             />
             <Route
+              path="/intro"
+              element={
+                <SectionErrorBoundary label="YDS 소개">
+                  <YdsIntroPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/start"
+              element={
+                <SectionErrorBoundary label="시작하기 가이드">
+                  <StartGuidePage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/faq"
+              element={
+                <SectionErrorBoundary label="FAQ">
+                  <FaqPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <SectionErrorBoundary label="About">
+                  <AboutPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/feedback"
+              element={
+                <SectionErrorBoundary label="피드백">
+                  <FeedbackPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
               path="/cycle"
               element={
                 <div id="desk" className="market-cycle-page min-w-0">
@@ -1497,7 +1543,7 @@ function App() {
                 )
               }
             />
-            <Route path="*" element={<Navigate to="/cycle" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
       </div>

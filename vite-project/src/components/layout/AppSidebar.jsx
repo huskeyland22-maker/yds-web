@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
 import { getPrimaryNavItems } from "../../utils/appNavItems.js"
+import { LAUNCH_FOOTER_LINKS } from "../../content/ydsLaunchContent.js"
 
 /**
  * @param {{
@@ -47,6 +48,30 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
                 <span className="min-w-0 truncate font-medium leading-tight tracking-tight">{item.label}</span>
               </>
             )}
+          </NavLink>
+        ))}
+      </nav>
+      <nav
+        className="mt-2 hidden flex-col gap-0.5 border-t border-white/[0.06] px-2 pt-2 lg:flex"
+        aria-label="출시 안내"
+      >
+        <p className="m-0 px-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-600">
+          출시 안내
+        </p>
+        {LAUNCH_FOOTER_LINKS.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              [
+                "rounded-md px-2 py-1 text-[10px] font-medium transition",
+                isActive
+                  ? "bg-white/[0.06] text-slate-200"
+                  : "text-slate-500 hover:text-slate-300",
+              ].join(" ")
+            }
+          >
+            {item.label}
           </NavLink>
         ))}
       </nav>

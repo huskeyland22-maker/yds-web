@@ -7,9 +7,12 @@ import WhyExplainButton from "../trust/WhyExplainButton.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
 
 /**
- * @param {{ report: ReturnType<typeof import("../../trading-zone/ydsCurrentMarketAnalysis.js").buildCurrentMarketAnalysisReport> }} props
+ * @param {{
+ *   report: ReturnType<typeof import("../../trading-zone/ydsCurrentMarketAnalysis.js").buildCurrentMarketAnalysisReport>
+ *   simplified?: boolean
+ * }} props
  */
-export default function MarketAnalysisHubTop({ report }) {
+export default function MarketAnalysisHubTop({ report, simplified = false }) {
   const hub = buildMarketHubTopViewModel(report)
   if (!hub.available) {
     return <p className="yds-market-analysis__empty">시장분석 데이터를 불러오는 중입니다.</p>
@@ -18,6 +21,69 @@ export default function MarketAnalysisHubTop({ report }) {
   const { stage, allocation } = hub
   const stockPct = allocation.stockPct ?? 0
   const cashPct = allocation.cashPct ?? 100
+
+  if (simplified) {
+    return (
+      <div className="yds-hub-top yds-hub-top--simple" aria-label="시장분석 첫 화면">
+        <section
+          className={[
+            "yds-hub-top__card yds-hub-top__card--stage",
+            stage.id ? `yds-hub-top__card--${stage.id}` : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          style={{ "--stage-color": stage.color }}
+        >
+          <h2 className="yds-hub-top__h2">현재 시장</h2>
+          <p className="yds-hub-top__stage-main">
+            <span aria-hidden>{stage.emoji}</span> {stage.shortLabel}
+          </p>
+          <p className="yds-hub-top__simple-pos font-mono tabular-nums">
+            시장 위치 {hub.marketPosition.display}
+          </p>
+        </section>
+
+        <section className="yds-hub-top__card">
+          <h2 className="yds-hub-top__h2">추천 행동</h2>
+          <p className="yds-hub-top__action">{hub.recommendedAction}</p>
+        </section>
+
+        <section className="yds-hub-top__card">
+          <h2 className="yds-hub-top__h2">추천 섹터</h2>
+          {hub.hasSectors ? (
+            <ol className="yds-hub-top__list">
+              {hub.topSectors.map((s) => (
+                <li key={s.id}>
+                  <span className="font-mono">{s.rank}</span>
+                  <span>{s.label}</span>
+                  <span className="font-mono tabular-nums">{formatSectorRadarScore(s.score)}</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="yds-hub-top__muted">—</p>
+          )}
+        </section>
+
+        <section className="yds-hub-top__card">
+          <h2 className="yds-hub-top__h2">추천 종목</h2>
+          {hub.hasStocks ? (
+            <ol className="yds-hub-top__list">
+              {hub.topStocks.map((s) => (
+                <li key={s.id}>
+                  <span className="font-mono">{s.rank}</span>
+                  <span>{s.name}</span>
+                  <span className="font-mono tabular-nums">{formatStockRadarScore(s.score)}</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="yds-hub-top__muted">—</p>
+          )}
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="yds-hub-top" aria-label="시장분석 Hub">
@@ -138,7 +204,7 @@ export default function MarketAnalysisHubTop({ report }) {
         )}
         <p className="yds-hub-top__foot">
           <Link to="/watchlist">Watchlist</Link> · <Link to="/alert-center">알림</Link> ·{" "}
-          <Link to="/performance-center">성과</Link>에서 Paper·Journal 확인
+          <Link to="/performance-center">성과</Link>
         </p>
       </section>
     </div>

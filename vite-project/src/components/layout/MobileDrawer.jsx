@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { isDevMode } from "../../utils/devMode.js"
 import { getPrimaryNavItems } from "../../utils/appNavItems.js"
+import { LAUNCH_FOOTER_LINKS } from "../../content/ydsLaunchContent.js"
 import PanicHistoryVerifyPanel from "../settings/PanicHistoryVerifyPanel.jsx"
 import PwaDeveloperPanel from "../settings/PwaDeveloperPanel.jsx"
 
@@ -45,13 +46,33 @@ export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion 
               {item.label}
             </NavLink>
           ))}
+          <p className="mt-3 mb-1 px-3 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+            출시 안내
+          </p>
+          {LAUNCH_FOOTER_LINKS.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={onClose}
+              className={({ isActive }) =>
+                [
+                  "rounded-md px-3 py-2 text-[12px] font-medium transition",
+                  isActive
+                    ? "bg-white/[0.06] text-slate-200"
+                    : "text-slate-500 hover:bg-white/[0.03] hover:text-slate-300",
+                ].join(" ")
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
           <button
             type="button"
             onClick={() => {
               onClose()
               onOpenInput?.()
             }}
-            className="mt-1 rounded-md border border-violet-500/30 bg-violet-500/10 px-3 py-2.5 text-left text-[13px] font-medium text-violet-200"
+            className="mt-2 rounded-md border border-violet-500/30 bg-violet-500/10 px-3 py-2.5 text-left text-[13px] font-medium text-violet-200"
           >
             AI 지표 입력
           </button>
