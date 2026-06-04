@@ -2,6 +2,7 @@ import { useId, useState } from "react"
 
 /** @type {Record<number, string>} */
 export const VALIDATION_PHASE_SUBTITLES = {
+  18: "Action Performance Scoreboard",
   17: "Market Validation Journal",
   16: "신뢰도 · 시장 해석",
   15: "행동 가이드",

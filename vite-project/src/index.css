@@ -14801,6 +14801,122 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+.yds-precursor-engine-p18__meta {
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-precursor-engine-p18__empty {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p18__horizon-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.65rem 0 0.5rem;
+}
+
+.yds-precursor-engine-p18__horizon-tab {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.5);
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.yds-precursor-engine-p18__horizon-tab--active {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(91, 33, 182, 0.25);
+  color: #c4b5fd;
+}
+
+.yds-precursor-engine-p18__block {
+  margin-top: 0.75rem;
+}
+
+.yds-precursor-engine-p18__table {
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+}
+
+.yds-precursor-engine-p18__table--compact {
+  font-size: 0.65rem;
+}
+
+.yds-precursor-engine-p18__up {
+  color: #6ee7b7;
+}
+
+.yds-precursor-engine-p18__down {
+  color: #f87171;
+}
+
+.yds-precursor-engine-p18__two-col {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .yds-precursor-engine-p18__two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yds-precursor-engine-p18__rank-list {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.yds-precursor-engine-p18__rank-sub {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.yds-precursor-engine-p18__extreme {
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  background: rgba(15, 23, 42, 0.45);
+  font-size: 0.78rem;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p18__extreme--best {
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.yds-precursor-engine-p18__extreme--worst {
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.yds-precursor-engine-p18__extreme-sub {
+  margin-top: 0.25rem;
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+.yds-precursor-engine-p18__chart {
+  margin-top: 0.45rem;
+}
+
+.yds-precursor-engine-p18__chart-legend {
+  margin: 0.4rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
 .yds-precursor-engine-p13__toolbar {
   display: flex;
   flex-wrap: wrap;
