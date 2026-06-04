@@ -15204,6 +15204,209 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+.yds-precursor-engine-p21__h3 {
+  margin: 0 0 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p21__block {
+  margin-top: 0.85rem;
+}
+
+.yds-precursor-engine-p21__final {
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(8, 47, 73, 0.4);
+}
+
+.yds-precursor-engine-p21__final-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.yds-precursor-engine-p21__final-stat,
+.yds-precursor-engine-p21__final-grade {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p21__final-stat strong,
+.yds-precursor-engine-p21__final-grade strong {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+}
+
+.yds-precursor-engine-p21__stat-key {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-precursor-engine-p21__grade-badge {
+  font-size: 1.35rem !important;
+  line-height: 1;
+}
+
+.yds-precursor-engine-p21__grade-desc {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-precursor-engine-p21__grade--s .yds-precursor-engine-p21__grade-badge,
+.yds-precursor-engine-p21__grade-pill.yds-precursor-engine-p21__grade--s {
+  color: #fbbf24;
+}
+
+.yds-precursor-engine-p21__grade--a .yds-precursor-engine-p21__grade-badge,
+.yds-precursor-engine-p21__grade-pill.yds-precursor-engine-p21__grade--a {
+  color: #34d399;
+}
+
+.yds-precursor-engine-p21__grade--b .yds-precursor-engine-p21__grade-badge,
+.yds-precursor-engine-p21__grade-pill.yds-precursor-engine-p21__grade--b {
+  color: #fb923c;
+}
+
+.yds-precursor-engine-p21__grade--c .yds-precursor-engine-p21__grade-badge,
+.yds-precursor-engine-p21__grade-pill.yds-precursor-engine-p21__grade--c {
+  color: #f87171;
+}
+
+.yds-precursor-engine-p21__grade-pill {
+  display: inline-block;
+  min-width: 1.4rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.yds-precursor-engine-p21__table-wrap {
+  overflow-x: auto;
+}
+
+.yds-precursor-engine-p21__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.68rem;
+}
+
+.yds-precursor-engine-p21__table th,
+.yds-precursor-engine-p21__table td {
+  padding: 0.35rem 0.45rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.yds-precursor-engine-p21__table th {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.yds-precursor-engine-p21__row--tm {
+  background: rgba(8, 47, 73, 0.25);
+}
+
+.yds-precursor-engine-p21__tm-badge {
+  margin-left: 0.25rem;
+  padding: 0.05rem 0.25rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  border-radius: 3px;
+  background: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+}
+
+.yds-precursor-engine-p21__hit {
+  color: #34d399;
+}
+
+.yds-precursor-engine-p21__detect--ok {
+  color: #34d399;
+  font-weight: 700;
+}
+
+.yds-precursor-engine-p21__detect--fail {
+  color: #f87171;
+  font-weight: 700;
+}
+
+.yds-precursor-engine-p21__table-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-precursor-engine-p21__two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .yds-precursor-engine-p21__two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.yds-precursor-engine-p21__avg-list,
+.yds-precursor-engine-p21__grade-list,
+.yds-precursor-engine-p21__case-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-precursor-engine-p21__avg-list li,
+.yds-precursor-engine-p21__grade-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  font-size: 0.72rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-precursor-engine-p21__avg-list small {
+  font-size: 0.62rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.yds-precursor-engine-p21__grade-list li {
+  flex-wrap: wrap;
+}
+
+.yds-precursor-engine-p21__case-list li {
+  padding: 0.35rem 0;
+  font-size: 0.72rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.yds-precursor-engine-p21__case-list span {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p21__empty {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
 .yds-precursor-engine-p13__toolbar {
   display: flex;
   flex-wrap: wrap;
