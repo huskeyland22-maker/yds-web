@@ -321,8 +321,8 @@ export function buildPortfolioBuilderFromPrecursorContext(ctx) {
     },
     allocation: allocation
       ? {
-          stockPct,
-          cashPct,
+          stockPct: allocation.stockPct ?? 0,
+          cashPct: allocation.cashPct ?? 100,
           stockLabel: allocation.stockLabel,
           cashLabel: allocation.cashLabel,
           summary: `${allocation.stockLabel} · ${allocation.cashLabel}`,

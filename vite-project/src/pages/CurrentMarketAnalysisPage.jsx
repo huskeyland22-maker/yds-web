@@ -423,15 +423,15 @@ export default function CurrentMarketAnalysisPage() {
             <div
               className="yds-market-analysis__portfolio-bar"
               role="img"
-              aria-label={`주식 ${portfolio.allocation.stockPct}% 현금 ${portfolio.allocation.cashPct}%`}
+              aria-label={`주식 ${portfolio.allocation.stockPct ?? 0}% 현금 ${portfolio.allocation.cashPct ?? 100}%`}
             >
               <span
                 className="yds-market-analysis__portfolio-bar-stock"
-                style={{ width: `${portfolio.allocation.stockPct}%` }}
+                style={{ width: `${portfolio.allocation.stockPct ?? 0}%` }}
               />
               <span
                 className="yds-market-analysis__portfolio-bar-cash"
-                style={{ width: `${portfolio.allocation.cashPct}%` }}
+                style={{ width: `${portfolio.allocation.cashPct ?? 100}%` }}
               />
             </div>
             <p className="yds-market-analysis__portfolio-desc">{portfolio.description}</p>
