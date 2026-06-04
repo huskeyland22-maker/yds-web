@@ -34,6 +34,65 @@ export const YDS_STAGE_LADDER = MACRO_V1_STATUS_BANDS.map((s) => ({
   color: s.color,
 }))
 
+/** @type {Record<string, string>} */
+const ACTION_STAGE_HERO_COPY = {
+  overheated:
+    "시장이 과열 구간입니다. 추격 매수보다 비중 축소·현금 확보와 관망이 우선입니다.",
+  neutral:
+    "현재는 패닉매수 단계가 아닌 관찰 및 선별 단계입니다.",
+  interest:
+    "공포 신호가 올라오는 관심 구간입니다. 매수보다 우량 종목 추적·현금 유지에 집중하세요.",
+  dca:
+    "분할매수에 적합한 구간입니다. 준비된 현금을 나눠 투입하며 낙폭 구간을 활용하세요.",
+  panicBuy:
+    "극단적 공포 구간입니다. 역사적 저점 매수를 검토할 수 있는 패닉매수 단계입니다.",
+}
+
+/** Precursor 국면 → 보조 표시 (시장 환경) */
+const REGIME_CONDITION_SHORT = {
+  stable: { label: "안정", emoji: "🟢" },
+  transition: { label: "전환", emoji: "🟡" },
+  risk: { label: "경계", emoji: "🟠" },
+  panic: { label: "위기", emoji: "🔴" },
+  unknown: { label: "—", emoji: "⚪" },
+}
+
+/**
+ * @param {ReturnType<typeof enrichSimilarCases>} similarCases
+ */
+function buildSimilarCasesSummary(similarCases) {
+  if (!similarCases.length) return "유사 과거 사례 데이터 없음"
+  const parts = similarCases.map((c) => `${c.name}(${formatMetric(c.similarity)}%)`)
+  return `유사 사례 기준 ${parts.join(", ")} 패턴과 유사`
+}
+
+/**
+ * @param {ReturnType<typeof resolveYdsStage>} stage
+ * @param {typeof YDS_STAGE_LADDER[number] | undefined} ladderMeta
+ * @param {string} [fallbackDescription]
+ */
+function buildActionStageHero(stage, ladderMeta, fallbackDescription = "") {
+  if (!stage) {
+    return {
+      kicker: "현재 행동 단계",
+      emoji: "⚪",
+      label: "—",
+      shortLabel: "—",
+      color: "#64748b",
+      description: "YDS 점수가 없어 행동 단계를 표시할 수 없습니다.",
+    }
+  }
+  return {
+    kicker: "현재 행동 단계",
+    id: stage.id,
+    emoji: stage.emoji,
+    label: stage.label,
+    shortLabel: ladderMeta?.shortLabel ?? stage.label,
+    color: ladderMeta?.color ?? "#64748b",
+    description: ACTION_STAGE_HERO_COPY[stage.id] ?? fallbackDescription,
+  }
+}
+
 /** @type {Record<string, { label: string; emoji: string; tone: string }>} */
 const RISK_FROM_RADAR = {
   normal: { label: "낮음", emoji: "🟢", tone: "low" },
@@ -125,10 +184,47 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
     active: stage?.id === s.id,
   }))
 
+  const ladderMeta = stageLadder.find((s) => s.active)
+  const actionStageHero = buildActionStageHero(stage, ladderMeta, action.oneLiner)
+
+  const positionMapping = comparison.currentPosition
+    ? {
+        offsetLabel: comparison.currentPosition.offsetLabel,
+        similarity: comparison.currentPosition.similarity,
+        eventLabel: comparison.currentPosition.eventLabel,
+        eventEmoji: comparison.currentPosition.eventEmoji,
+      }
+    : null
+
+  const regimeId = dashboard.cards.regime.regimeId ?? "unknown"
+  const regimeShort =
+    REGIME_CONDITION_SHORT[regimeId] ?? REGIME_CONDITION_SHORT.unknown
+
+  const marketEnvironment = {
+    title: "시장 환경",
+    kicker: "보조 정보 · Market Condition",
+    marketCondition: {
+      regimeId,
+      emoji: regimeShort.emoji,
+      label: regimeShort.label,
+      fullLabel: dashboard.cards.regime.label,
+    },
+    ydsScore: ydsScore,
+    ydsDisplay: dashboard.cards.yds.display,
+    confidenceScore: confidence.confidence.score,
+    confidenceLabel: confidence.confidence.label?.label ?? "—",
+    similarSummary: buildSimilarCasesSummary(similarCases),
+    positionHint: positionMapping
+      ? `${positionMapping.eventEmoji} ${positionMapping.eventLabel} ${positionMapping.offsetLabel} · 유사 ${formatMetric(positionMapping.similarity)}%`
+      : null,
+  }
+
   return {
     label: CURRENT_MARKET_ANALYSIS_LABEL,
     asOf: dashboard.asOf,
     hasLive: comparison.meta.hasLive,
+    actionStageHero,
+    marketEnvironment,
     headline: {
       regime: dashboard.cards.regime,
       interpretation: dashboard.cards.interpretation.text,
@@ -157,14 +253,7 @@ export function buildCurrentMarketAnalysisReport(events, options = {}) {
       regime: dashboard.cards.regime,
     },
     similarCases,
-    positionMapping: comparison.currentPosition
-      ? {
-          offsetLabel: comparison.currentPosition.offsetLabel,
-          similarity: comparison.currentPosition.similarity,
-          eventLabel: comparison.currentPosition.eventLabel,
-          eventEmoji: comparison.currentPosition.eventEmoji,
-        }
-      : null,
+    positionMapping,
     actionGuide: {
       current: action.currentAction,
       recommended: action.recommendedAction,

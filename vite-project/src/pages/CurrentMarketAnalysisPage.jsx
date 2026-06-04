@@ -10,15 +10,6 @@ import {
   CURRENT_MARKET_ANALYSIS_LABEL,
 } from "../trading-zone/ydsCurrentMarketAnalysis.js"
 
-/**
- * @param {string} tone
- */
-function confidenceToneClass(tone) {
-  if (tone === "high" || tone === "good") return "yds-market-analysis__conf--high"
-  if (tone === "mid" || tone === "medium") return "yds-market-analysis__conf--mid"
-  return "yds-market-analysis__conf--low"
-}
-
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -46,10 +37,8 @@ export default function CurrentMarketAnalysisPage() {
   const {
     asOf,
     hasLive,
-    headline,
-    currentState,
-    similarCases,
-    positionMapping,
+    actionStageHero,
+    marketEnvironment,
     actionGuide,
     portfolio,
     expectedReturns,
@@ -70,90 +59,60 @@ export default function CurrentMarketAnalysisPage() {
       </header>
 
       <section
-        className={`yds-market-analysis__hero yds-market-analysis__hero--${headline.regime.regimeId}`}
-        aria-label="시장 해석"
+        className={[
+          "yds-market-analysis__action-hero",
+          actionStageHero.id ? `yds-market-analysis__action-hero--${actionStageHero.id}` : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        style={{ "--stage-color": actionStageHero.color }}
+        aria-label="현재 행동 단계"
       >
-        <span className="yds-market-analysis__hero-emoji" aria-hidden>
-          {headline.regime.emoji}
-        </span>
-        <div className="yds-market-analysis__hero-body">
-          <p className="yds-market-analysis__hero-kicker">현재 시장 해석</p>
-          <p className="yds-market-analysis__hero-regime">{headline.regime.label}</p>
-          <p className="yds-market-analysis__hero-text">{headline.interpretation}</p>
-          {positionMapping ? (
-            <p className="yds-market-analysis__hero-position">
-              {positionMapping.eventEmoji} {positionMapping.eventLabel} 타임라인 ·{" "}
-              {positionMapping.offsetLabel} · 유사도 {formatAnalysisPct(positionMapping.similarity)}
-            </p>
-          ) : null}
-        </div>
+        <p className="yds-market-analysis__action-hero-kicker">{actionStageHero.kicker}</p>
+        <p className="yds-market-analysis__action-hero-stage">
+          <span className="yds-market-analysis__action-hero-emoji" aria-hidden>
+            {actionStageHero.emoji}
+          </span>
+          {actionStageHero.label}
+        </p>
+        <p className="yds-market-analysis__action-hero-desc">{actionStageHero.description}</p>
       </section>
 
-      <section className="yds-market-analysis__state" aria-label="현재 시장 상태">
-        <h2 className="yds-market-analysis__section-title">현재 시장 상태</h2>
-        <div className="yds-market-analysis__state-grid">
-          <article className="yds-market-analysis__state-card">
-            <span className="yds-market-analysis__state-key">현재 YDS</span>
-            <strong className="yds-market-analysis__state-val yds-market-analysis__state-val--yds">
-              {currentState.yds.display}
-            </strong>
-          </article>
-          <article className="yds-market-analysis__state-card">
-            <span className="yds-market-analysis__state-key">현재 단계</span>
-            <strong className="yds-market-analysis__state-val">
-              {currentState.yds.stage
-                ? `${currentState.yds.stage.emoji} ${currentState.yds.stage.label}`
-                : "—"}
-            </strong>
-          </article>
-          <article className="yds-market-analysis__state-card">
-            <span className="yds-market-analysis__state-key">위험도</span>
-            <strong className="yds-market-analysis__state-val">
-              {currentState.risk.emoji} {currentState.risk.label}
-            </strong>
-          </article>
-          <article
-            className={[
-              "yds-market-analysis__state-card",
-              confidenceToneClass(currentState.confidence.tone),
-            ].join(" ")}
-          >
-            <span className="yds-market-analysis__state-key">신뢰도</span>
-            <strong className="yds-market-analysis__state-val">
-              {currentState.confidence.score ?? "—"} · {currentState.confidence.label}
-            </strong>
-          </article>
+      <section className="yds-market-analysis__env" aria-label="시장 환경">
+        <div className="yds-market-analysis__env-head">
+          <h2 className="yds-market-analysis__section-title">{marketEnvironment.title}</h2>
+          <span className="yds-market-analysis__env-kicker">{marketEnvironment.kicker}</span>
         </div>
-      </section>
-
-      <section className="yds-market-analysis__block" aria-label="유사 과거 사례">
-        <h2 className="yds-market-analysis__section-title">유사 과거 사례</h2>
-        {!hasLive ? (
-          <p className="yds-market-analysis__empty">패닉 허브 데이터 동기화 후 표시됩니다.</p>
-        ) : (
-          <ol className="yds-market-analysis__similar-list">
-            {similarCases.map((c) => (
-              <li key={c.eventId}>
-                <span className="yds-market-analysis__medal" aria-hidden>
-                  {c.medal}
-                </span>
-                <div className="yds-market-analysis__similar-body">
-                  <strong>
-                    {c.emoji} {c.name}
-                  </strong>
-                  <span>유사도 {formatAnalysisPct(c.similarity)}</span>
-                  <span className="yds-market-analysis__similar-stage">
-                    당시 {c.timelineLabel} · {c.historicalStageLabel}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
+        <div className="yds-market-analysis__env-grid">
+          <div className="yds-market-analysis__env-row">
+            <span className="yds-market-analysis__env-key">시장 상태</span>
+            <strong
+              className="yds-market-analysis__env-val yds-market-analysis__env-val--secondary"
+              title={marketEnvironment.marketCondition.fullLabel}
+            >
+              {marketEnvironment.marketCondition.emoji} {marketEnvironment.marketCondition.label}
+            </strong>
+          </div>
+          <div className="yds-market-analysis__env-row">
+            <span className="yds-market-analysis__env-key">YDS 점수</span>
+            <strong className="yds-market-analysis__env-val">{marketEnvironment.ydsDisplay}</strong>
+          </div>
+          <div className="yds-market-analysis__env-row">
+            <span className="yds-market-analysis__env-key">신뢰도</span>
+            <strong className="yds-market-analysis__env-val">
+              {marketEnvironment.confidenceScore ?? "—"}%
+            </strong>
+          </div>
+        </div>
+        <p className="yds-market-analysis__env-summary">{marketEnvironment.similarSummary}</p>
+        {marketEnvironment.positionHint ? (
+          <p className="yds-market-analysis__env-hint">{marketEnvironment.positionHint}</p>
+        ) : null}
       </section>
 
       <section className="yds-market-analysis__block" aria-label="행동 가이드">
         <h2 className="yds-market-analysis__section-title">행동 가이드</h2>
+        <p className="yds-market-analysis__section-sub">YDS 5단계 · 현재 위치 표시</p>
         <div className="yds-market-analysis__ladder" role="list">
           {actionGuide.stageLadder.map((step) => (
             <div
@@ -169,13 +128,12 @@ export default function CurrentMarketAnalysisPage() {
             >
               <span className="yds-market-analysis__ladder-emoji">{step.emoji}</span>
               <span className="yds-market-analysis__ladder-label">{step.shortLabel}</span>
+              {step.active ? (
+                <span className="yds-market-analysis__ladder-current">현재</span>
+              ) : null}
             </div>
           ))}
         </div>
-        <p className="yds-market-analysis__action-oneliner">{actionGuide.oneLiner}</p>
-        <p className="yds-market-analysis__action-rec">
-          추천: {actionGuide.recommended.allocation}
-        </p>
       </section>
 
       <section className="yds-market-analysis__block" aria-label="권장 포트폴리오">
@@ -188,12 +146,6 @@ export default function CurrentMarketAnalysisPage() {
             ].join(" ")}
             style={{ "--stage-color": portfolio.stage.color }}
           >
-            <div className="yds-market-analysis__portfolio-row">
-              <span className="yds-market-analysis__portfolio-key">현재 단계</span>
-              <strong>
-                {portfolio.stage.emoji} {portfolio.stage.shortLabel}
-              </strong>
-            </div>
             <div className="yds-market-analysis__portfolio-row">
               <span className="yds-market-analysis__portfolio-key">권장 비중</span>
               <div className="yds-market-analysis__portfolio-split">
