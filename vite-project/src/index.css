@@ -14359,6 +14359,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #475569;
 }
 
+.yds-market-analysis__env-philosophy {
+  margin: 0 0 0.5rem;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
 .yds-market-analysis__env-grid {
   display: flex;
   flex-direction: column;
@@ -14387,6 +14394,50 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-analysis__env-val--secondary {
   font-size: 0.78rem;
   font-weight: 600;
+  color: #94a3b8;
+}
+
+.yds-market-analysis__env-val--level {
+  font-weight: 700;
+}
+
+.yds-market-analysis__env-val--stable {
+  color: #4ade80;
+}
+
+.yds-market-analysis__env-val--watch {
+  color: #facc15;
+}
+
+.yds-market-analysis__env-val--danger {
+  color: #fb923c;
+}
+
+.yds-market-analysis__env-val--crisis {
+  color: #f87171;
+}
+
+.yds-market-analysis__env-row--desc {
+  padding-top: 0;
+  margin-top: -0.15rem;
+}
+
+.yds-market-analysis__env-desc {
+  flex: 1;
+  text-align: right;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.yds-market-analysis__env-contrast {
+  margin: 0.5rem 0 0;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(30, 41, 59, 0.35);
+  font-size: 0.68rem;
+  line-height: 1.55;
   color: #94a3b8;
 }
 

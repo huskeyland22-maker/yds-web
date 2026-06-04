@@ -73,7 +73,7 @@ export default function CurrentMarketAnalysisPage() {
           <span className="yds-market-analysis__action-hero-emoji" aria-hidden>
             {actionStageHero.emoji}
           </span>
-          {actionStageHero.label}
+          {actionStageHero.shortLabel}
         </p>
         <p className="yds-market-analysis__action-hero-desc">{actionStageHero.description}</p>
       </section>
@@ -83,20 +83,44 @@ export default function CurrentMarketAnalysisPage() {
           <h2 className="yds-market-analysis__section-title">{marketEnvironment.title}</h2>
           <span className="yds-market-analysis__env-kicker">{marketEnvironment.kicker}</span>
         </div>
+        <p className="yds-market-analysis__env-philosophy">{marketEnvironment.philosophyNote}</p>
         <div className="yds-market-analysis__env-grid">
           <div className="yds-market-analysis__env-row">
-            <span className="yds-market-analysis__env-key">시장 상태</span>
+            <span className="yds-market-analysis__env-key">시장 환경</span>
             <strong
-              className="yds-market-analysis__env-val yds-market-analysis__env-val--secondary"
+              className={[
+                "yds-market-analysis__env-val",
+                "yds-market-analysis__env-val--level",
+                marketEnvironment.marketCondition.levelId
+                  ? `yds-market-analysis__env-val--${marketEnvironment.marketCondition.levelId}`
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
               title={marketEnvironment.marketCondition.fullLabel}
             >
-              {marketEnvironment.marketCondition.emoji} {marketEnvironment.marketCondition.label}
+              {marketEnvironment.marketCondition.emoji}{" "}
+              {marketEnvironment.marketCondition.label}
             </strong>
+          </div>
+          <div className="yds-market-analysis__env-row yds-market-analysis__env-row--desc">
+            <span className="yds-market-analysis__env-key" />
+            <span className="yds-market-analysis__env-desc">
+              {marketEnvironment.marketCondition.description}
+            </span>
           </div>
           <div className="yds-market-analysis__env-row">
             <span className="yds-market-analysis__env-key">YDS 점수</span>
             <strong className="yds-market-analysis__env-val">{marketEnvironment.ydsDisplay}</strong>
           </div>
+          {marketEnvironment.bullSimilarity != null ? (
+            <div className="yds-market-analysis__env-row">
+              <span className="yds-market-analysis__env-key">강세장 유사도</span>
+              <strong className="yds-market-analysis__env-val">
+                {marketEnvironment.bullSimilarity}%
+              </strong>
+            </div>
+          ) : null}
           <div className="yds-market-analysis__env-row">
             <span className="yds-market-analysis__env-key">신뢰도</span>
             <strong className="yds-market-analysis__env-val">
@@ -104,6 +128,7 @@ export default function CurrentMarketAnalysisPage() {
             </strong>
           </div>
         </div>
+        <p className="yds-market-analysis__env-contrast">{marketEnvironment.contrastNote}</p>
         <p className="yds-market-analysis__env-summary">{marketEnvironment.similarSummary}</p>
         {marketEnvironment.positionHint ? (
           <p className="yds-market-analysis__env-hint">{marketEnvironment.positionHint}</p>
