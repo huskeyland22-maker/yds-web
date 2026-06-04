@@ -16,6 +16,7 @@ import TradingJournalPanel from "../components/trading/TradingJournalPanel.jsx"
 import PaperTradingPanel from "../components/trading/PaperTradingPanel.jsx"
 import ConvictionEnginePanel from "../components/trading/ConvictionEnginePanel.jsx"
 import PortfolioBuilderPanel from "../components/trading/PortfolioBuilderPanel.jsx"
+import MarketAnalysisDashboardSummary from "../components/market-analysis/MarketAnalysisDashboardSummary.jsx"
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
@@ -90,6 +91,15 @@ export default function CurrentMarketAnalysisPage() {
         </p>
         <p className="yds-market-analysis__action-hero-desc">{actionStageHero.description}</p>
       </section>
+
+      <MarketAnalysisDashboardSummary
+        actionStageHero={actionStageHero}
+        actionGuide={actionGuide}
+        marketEnvironment={marketEnvironment}
+        sectorRadar={sectorRadar}
+        entryRadar={entryRadar}
+        portfolio={portfolio}
+      />
 
       <section
         className="yds-market-analysis__brief"

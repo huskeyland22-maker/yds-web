@@ -14365,6 +14365,216 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
+/* Dashboard Summary — Phase 32 (표시 레이어) */
+.yds-dash-summary {
+  margin-bottom: 0.85rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(11, 15, 23, 0.82);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.yds-dash-summary__kicker {
+  margin: 0 0 0.55rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-dash-summary__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+@media (min-width: 480px) {
+  .yds-dash-summary__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .yds-dash-summary__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.yds-dash-summary__card {
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(42, 54, 72, 0.55);
+  background: rgba(15, 23, 42, 0.5);
+  min-width: 0;
+}
+
+.yds-dash-summary__card--wide {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 900px) {
+  .yds-dash-summary__card--wide {
+    grid-column: span 3;
+  }
+}
+
+.yds-dash-summary__card--status {
+  border-color: color-mix(in srgb, var(--dash-stage-color, #38bdf8) 35%, transparent);
+}
+
+.yds-dash-summary__key {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-dash-summary__status-val {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  line-height: 1.2;
+}
+
+.yds-dash-summary__status-emoji {
+  font-size: 1.1rem;
+}
+
+.yds-dash-summary__env {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+
+.yds-dash-summary__action-val {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.35;
+}
+
+.yds-dash-summary__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-dash-summary__list li {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr auto;
+  gap: 0.25rem 0.35rem;
+  align-items: center;
+  padding: 0.18rem 0;
+  font-size: 0.68rem;
+}
+
+.yds-dash-summary__rank {
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.yds-dash-summary__name {
+  color: #e2e8f0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yds-dash-summary__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.yds-dash-summary__score {
+  color: #93c5fd;
+  font-size: 0.62rem;
+}
+
+.yds-dash-summary__grade {
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 0.05rem 0.2rem;
+  border-radius: 3px;
+}
+
+.yds-dash-summary__grade--A {
+  color: #4ade80;
+}
+.yds-dash-summary__grade--B {
+  color: #60a5fa;
+}
+.yds-dash-summary__grade--C {
+  color: #fbbf24;
+}
+.yds-dash-summary__grade--D {
+  color: #94a3b8;
+}
+
+.yds-dash-summary__empty {
+  margin: 0;
+  font-size: 0.68rem;
+  color: #475569;
+}
+
+.yds-dash-summary__alloc-row {
+  display: flex;
+  gap: 0.45rem;
+  margin-bottom: 0.4rem;
+}
+
+.yds-dash-summary__alloc-pill {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+}
+
+.yds-dash-summary__alloc-pill--stock {
+  background: rgba(99, 102, 241, 0.15);
+  color: #c7d2fe;
+}
+
+.yds-dash-summary__alloc-pill--cash {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+}
+
+.yds-dash-summary__alloc-label {
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+
+.yds-dash-summary__alloc-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.yds-dash-summary__alloc-bar-stock {
+  background: linear-gradient(90deg, #6366f1, var(--dash-stage-color, #38bdf8));
+}
+
+.yds-dash-summary__alloc-bar-cash {
+  background: rgba(148, 163, 184, 0.35);
+}
+
 .yds-market-analysis__brief {
   margin-bottom: 0.85rem;
 }
