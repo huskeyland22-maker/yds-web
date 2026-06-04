@@ -1,36 +1,29 @@
-import { Activity, BarChart3, Bell, FileText, Layers, ListChecks, ScrollText } from "lucide-react"
+import { Activity, BarChart3, Bell, FileText, FlaskConical, ListChecks } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { getPrimaryNavItems } from "../../utils/appNavItems.js"
 
 const ICON_BY_PATH = {
   "/market-analysis": Activity,
-  "/performance-center": BarChart3,
-  "/performance-dashboard": BarChart3,
-  "/ai-daily-report": FileText,
   "/watchlist": ListChecks,
   "/alert-center": Bell,
-  "/cycle": Activity,
-  "/value-chain": Layers,
-  "/trading-log": ScrollText,
+  "/ai-daily-report": FileText,
+  "/performance-center": BarChart3,
+  "/performance-dashboard": BarChart3,
+  "/lab": FlaskConical,
 }
 
 const SHORT_LABEL = {
   "/market-analysis": "시장분석",
-  "/performance-center": "성과센터",
-  "/performance-dashboard": "성과센터",
-  "/ai-daily-report": "AI리포트",
-  "/watchlist": "Watchlist",
+  "/watchlist": "Watch",
   "/alert-center": "알림",
-  "/cycle": "사이클",
-  "/value-chain": "코리아",
-  "/trading-log": "로그",
-  "/recommendation-history": "추천이력",
-  "/lab": "연구실",
+  "/ai-daily-report": "AI",
+  "/performance-center": "성과",
+  "/lab": "Research",
 }
 
 function buildNavItems() {
   return getPrimaryNavItems().map((item) => ({
-    id: item.path.slice(1).replace(/-/g, "_") || "cycle",
+    id: item.path.slice(1).replace(/-/g, "_") || "market_analysis",
     path: item.path,
     label: SHORT_LABEL[item.path] ?? item.label,
     icon: ICON_BY_PATH[item.path] ?? Activity,
@@ -47,18 +40,20 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
 
   const activeId = (() => {
     const p = location.pathname
-    if (p.startsWith("/market-analysis") || p.startsWith("/market-dashboard")) return "market_analysis"
-    if (p.startsWith("/performance-center") || p.startsWith("/performance-dashboard"))
-      return "performance_center"
-    if (p.startsWith("/ai-daily-report")) return "ai_daily_report"
+    if (
+      p.startsWith("/market-analysis") ||
+      p.startsWith("/market-dashboard") ||
+      p.startsWith("/cycle") ||
+      p === "/"
+    )
+      return "market_analysis"
     if (p.startsWith("/watchlist")) return "watchlist"
     if (p.startsWith("/alert-center")) return "alert_center"
-    if (p.startsWith("/value-chain")) return "value_chain"
-    if (p.startsWith("/trading-log")) return "trading_log"
-    if (p.startsWith("/recommendation-history")) return "recommendation_history"
+    if (p.startsWith("/ai-daily-report")) return "ai_daily_report"
+    if (p.startsWith("/performance-center") || p.startsWith("/performance-dashboard"))
+      return "performance_center"
     if (p.startsWith("/lab") || p.startsWith("/panic-validation")) return "lab"
-    if (p.startsWith("/cycle") || p === "/") return "cycle"
-    return "cycle"
+    return null
   })()
 
   return (

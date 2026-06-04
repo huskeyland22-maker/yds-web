@@ -1335,7 +1335,7 @@ function App() {
 
         <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
-            <Route path="/" element={<Navigate to="/cycle" replace />} />
+            <Route path="/" element={<Navigate to="/market-analysis" replace />} />
             <Route
               path="/market-analysis"
               element={
@@ -1430,8 +1430,10 @@ function App() {
                 </SectionErrorBoundary>
               }
             />
-            <Route path="/lab" element={
-                <SectionErrorBoundary label="연구실">
+            <Route
+              path="/lab"
+              element={
+                <SectionErrorBoundary label="Research">
                   <PanicIndexValidationPage />
                 </SectionErrorBoundary>
               }

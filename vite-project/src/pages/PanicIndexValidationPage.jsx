@@ -21,38 +21,8 @@ import YdsPanicEventValidationSection from "../components/validation/YdsPanicEve
 import YdsFearClimaxAnalysisSection from "../components/validation/YdsFearClimaxAnalysisSection.jsx"
 import YdsEngineCandidateV3Section from "../components/validation/YdsEngineCandidateV3Section.jsx"
 import YdsPrecursorValidationSection from "../components/validation/YdsPrecursorValidationSection.jsx"
-import YdsPrecursorEnginePhase1Section from "../components/validation/YdsPrecursorEnginePhase1Section.jsx"
-import YdsPrecursorEnginePhase2Section from "../components/validation/YdsPrecursorEnginePhase2Section.jsx"
-import YdsPrecursorEnginePhase3Section from "../components/validation/YdsPrecursorEnginePhase3Section.jsx"
-import YdsPrecursorEnginePhase4Section from "../components/validation/YdsPrecursorEnginePhase4Section.jsx"
-import YdsPrecursorEnginePhase5Section from "../components/validation/YdsPrecursorEnginePhase5Section.jsx"
-import YdsPrecursorEnginePhase6Section from "../components/validation/YdsPrecursorEnginePhase6Section.jsx"
-import YdsPrecursorEnginePhase7Section from "../components/validation/YdsPrecursorEnginePhase7Section.jsx"
-import YdsPrecursorEnginePhase8Section from "../components/validation/YdsPrecursorEnginePhase8Section.jsx"
-import YdsPrecursorEnginePhase9Section from "../components/validation/YdsPrecursorEnginePhase9Section.jsx"
-import YdsPrecursorEnginePhase10Section from "../components/validation/YdsPrecursorEnginePhase10Section.jsx"
-import YdsPrecursorEnginePhase11Section from "../components/validation/YdsPrecursorEnginePhase11Section.jsx"
-import YdsPrecursorEnginePhase18Section from "../components/validation/YdsPrecursorEnginePhase18Section.jsx"
-import YdsPrecursorEnginePhase20Section from "../components/validation/YdsPrecursorEnginePhase20Section.jsx"
-import YdsPrecursorEnginePhase21Section from "../components/validation/YdsPrecursorEnginePhase21Section.jsx"
-import YdsPrecursorEnginePhase22Section from "../components/validation/YdsPrecursorEnginePhase22Section.jsx"
-import YdsPrecursorEnginePhase25Section from "../components/validation/YdsPrecursorEnginePhase25Section.jsx"
-import YdsPrecursorEnginePhase26Section from "../components/validation/YdsPrecursorEnginePhase26Section.jsx"
-import YdsPrecursorEnginePhase27Section from "../components/validation/YdsPrecursorEnginePhase27Section.jsx"
-import YdsPrecursorEnginePhase28Section from "../components/validation/YdsPrecursorEnginePhase28Section.jsx"
-import YdsPaperTradingPhase285Section from "../components/validation/YdsPaperTradingPhase285Section.jsx"
-import YdsPerformanceDashboardPhase29Section from "../components/validation/YdsPerformanceDashboardPhase29Section.jsx"
-import YdsConvictionEnginePhase30Section from "../components/validation/YdsConvictionEnginePhase30Section.jsx"
-import YdsPortfolioBuilderPhase31Section from "../components/validation/YdsPortfolioBuilderPhase31Section.jsx"
-import YdsWatchlistCenterPhase35Section from "../components/validation/YdsWatchlistCenterPhase35Section.jsx"
-import YdsAlertCenterPhase36Section from "../components/validation/YdsAlertCenterPhase36Section.jsx"
-import ValidationPhaseAccordion, {
-  VALIDATION_PHASE_SUBTITLES,
-} from "../components/validation/ValidationPhaseAccordion.jsx"
-import YdsPrecursorEnginePhase17Section from "../components/validation/YdsPrecursorEnginePhase17Section.jsx"
-import YdsPrecursorEnginePhase16Section from "../components/validation/YdsPrecursorEnginePhase16Section.jsx"
-import YdsPrecursorEnginePhase15Section from "../components/validation/YdsPrecursorEnginePhase15Section.jsx"
-import YdsPrecursorEnginePhase13Section from "../components/validation/YdsPrecursorEnginePhase13Section.jsx"
+import ResearchCoreLinks from "../components/validation/ResearchCoreLinks.jsx"
+import ResearchLabCategorizedSections from "../components/validation/ResearchLabCategorizedSections.jsx"
 import YdsProductionCandidateSection from "../components/validation/YdsProductionCandidateSection.jsx"
 import YdsHyWeightSensitivityLabSection from "../components/validation/YdsHyWeightSensitivityLabSection.jsx"
 import YdsTariffShockDeepValidationSection from "../components/validation/YdsTariffShockDeepValidationSection.jsx"
@@ -218,10 +188,11 @@ export default function PanicIndexValidationPage() {
     <div className="panic-validation-page min-w-0 px-3 py-4 sm:px-4">
       <header className="panic-validation-page__head">
         <div>
-          <p className="panic-validation-page__lab-badge">[ LAB ] YDS 연구실</p>
-          <h1 className="panic-validation-page__title">연구실</h1>
+          <p className="panic-validation-page__lab-badge">[ Research ] YDS V1</p>
+          <h1 className="panic-validation-page__title">Research</h1>
           <p className="panic-validation-page__sub">
-            Phase 1~22 · 백테스트 · 엔진 검증 · {backtest.periodStart ?? "—"} ~ {backtest.periodEnd ?? "—"}
+            백테스트 · 전조엔진 · 패턴분석 · 검증 · 타임머신 · {backtest.periodStart ?? "—"} ~{" "}
+            {backtest.periodEnd ?? "—"}
           </p>
           <p className="panic-validation-page__sub">
             일반 사용자는{" "}
@@ -243,6 +214,9 @@ export default function PanicIndexValidationPage() {
         </p>
       ) : null}
 
+      <ResearchCoreLinks />
+
+      <h2 className="panic-validation-page__category-h2">백테스트</h2>
       <section className="panic-validation-kpi" aria-label="핵심 지표 요약">
         <div className="panic-validation-kpi__card">
           <p className="panic-validation-kpi__label">누적 수익률</p>
@@ -654,167 +628,11 @@ export default function PanicIndexValidationPage() {
 
       <YdsEngineCandidateV3Section events={YDS_VALIDATION_EVENT_DATASET} />
 
-      <div className="validation-phase-accordion-stack" aria-label="Precursor Engine Phase 1–36">
-        <ValidationPhaseAccordion phase={36} subtitle={VALIDATION_PHASE_SUBTITLES[36]}>
-          <YdsAlertCenterPhase36Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={35} subtitle={VALIDATION_PHASE_SUBTITLES[35]}>
-          <YdsWatchlistCenterPhase35Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={32} subtitle={VALIDATION_PHASE_SUBTITLES[32]}>
-          <YdsPortfolioBuilderPhase31Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={31} subtitle={VALIDATION_PHASE_SUBTITLES[31]}>
-          <YdsConvictionEnginePhase30Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={30} subtitle={VALIDATION_PHASE_SUBTITLES[30]}>
-          <YdsPerformanceDashboardPhase29Section />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={29} subtitle={VALIDATION_PHASE_SUBTITLES[29]}>
-          <YdsPaperTradingPhase285Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={28} subtitle={VALIDATION_PHASE_SUBTITLES[28]}>
-          <YdsPrecursorEnginePhase28Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={27} subtitle={VALIDATION_PHASE_SUBTITLES[27]}>
-          <YdsPrecursorEnginePhase27Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={26} subtitle={VALIDATION_PHASE_SUBTITLES[26]}>
-          <YdsPrecursorEnginePhase26Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={25} subtitle={VALIDATION_PHASE_SUBTITLES[25]}>
-          <YdsPrecursorEnginePhase25Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={21} subtitle={VALIDATION_PHASE_SUBTITLES[21]}>
-          <YdsPrecursorEnginePhase21Section events={YDS_VALIDATION_EVENT_DATASET} />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={20} subtitle={VALIDATION_PHASE_SUBTITLES[20]}>
-          <YdsPrecursorEnginePhase20Section events={YDS_VALIDATION_EVENT_DATASET} />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={18} subtitle={VALIDATION_PHASE_SUBTITLES[18]}>
-          <YdsPrecursorEnginePhase18Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            historyRows={history}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={17} subtitle={VALIDATION_PHASE_SUBTITLES[17]}>
-          <YdsPrecursorEnginePhase17Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={16} subtitle={VALIDATION_PHASE_SUBTITLES[16]}>
-          <YdsPrecursorEnginePhase16Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={15} subtitle={VALIDATION_PHASE_SUBTITLES[15]}>
-          <YdsPrecursorEnginePhase15Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={13} subtitle={VALIDATION_PHASE_SUBTITLES[13]}>
-          <YdsPrecursorEnginePhase13Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={11} subtitle={VALIDATION_PHASE_SUBTITLES[11]}>
-          <YdsPrecursorEnginePhase11Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={10} subtitle={VALIDATION_PHASE_SUBTITLES[10]}>
-          <YdsPrecursorEnginePhase10Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={9} subtitle={VALIDATION_PHASE_SUBTITLES[9]}>
-          <YdsPrecursorEnginePhase9Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={8} subtitle={VALIDATION_PHASE_SUBTITLES[8]}>
-          <YdsPrecursorEnginePhase8Section events={YDS_VALIDATION_EVENT_DATASET} />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={7} subtitle={VALIDATION_PHASE_SUBTITLES[7]}>
-          <YdsPrecursorEnginePhase7Section events={YDS_VALIDATION_EVENT_DATASET} />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={6} subtitle={VALIDATION_PHASE_SUBTITLES[6]}>
-          <YdsPrecursorEnginePhase6Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={5} subtitle={VALIDATION_PHASE_SUBTITLES[5]}>
-          <YdsPrecursorEnginePhase5Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={4} subtitle={VALIDATION_PHASE_SUBTITLES[4]}>
-          <YdsPrecursorEnginePhase4Section events={YDS_VALIDATION_EVENT_DATASET} />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={3} subtitle={VALIDATION_PHASE_SUBTITLES[3]}>
-          <YdsPrecursorEnginePhase3Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={2} subtitle={VALIDATION_PHASE_SUBTITLES[2]}>
-          <YdsPrecursorEnginePhase2Section events={YDS_VALIDATION_EVENT_DATASET} />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={1} subtitle={VALIDATION_PHASE_SUBTITLES[1]}>
-          <YdsPrecursorEnginePhase1Section events={YDS_VALIDATION_EVENT_DATASET} />
-        </ValidationPhaseAccordion>
-        <ValidationPhaseAccordion phase={22} subtitle={VALIDATION_PHASE_SUBTITLES[22]}>
-          <YdsPrecursorEnginePhase22Section
-            events={YDS_VALIDATION_EVENT_DATASET}
-            latestCycleRow={history[history.length - 1] ?? null}
-          />
-        </ValidationPhaseAccordion>
-      </div>
+      <ResearchLabCategorizedSections
+        events={YDS_VALIDATION_EVENT_DATASET}
+        latestCycleRow={history[history.length - 1] ?? null}
+        historyRows={history}
+      />
       <YdsPrecursorValidationSection events={YDS_VALIDATION_EVENT_DATASET} />
       <YdsProductionCandidateSection
         events={YDS_VALIDATION_EVENT_DATASET}

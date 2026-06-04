@@ -18,7 +18,7 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
         <p className="m-0 font-display text-[17px] font-bold leading-none tracking-[0.03em] text-slate-50">
           Y&apos;ds
         </p>
-        <p className="m-0 mt-1.5 text-[9px] font-medium tracking-[0.16em] text-slate-300/65">Market Cycle Lab</p>
+        <p className="m-0 mt-1.5 text-[9px] font-medium tracking-[0.16em] text-slate-300/65">YDS V1</p>
       </div>
       <nav className="flex flex-col gap-0.5 px-2 py-2" aria-label="주요 메뉴">
         {navItems.map((item, i) => (

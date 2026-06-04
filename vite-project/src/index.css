@@ -22635,3 +22635,166 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.65rem;
   color: #cbd5e1;
 }
+
+/* YDS V1 — 시장분석 Hub */
+.yds-market-analysis__core-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  font-size: 0.68rem;
+}
+
+.yds-market-analysis__core-links a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.yds-market-analysis__tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.yds-market-analysis__tab {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 54, 72, 0.65);
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+.yds-market-analysis__tab.is-active {
+  border-color: rgba(96, 165, 250, 0.45);
+  color: #e0f2fe;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.yds-market-analysis__action-oneliner {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.yds-market-analysis__hub-foot {
+  margin: 0.55rem 0 0;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-market-analysis__hub-foot a {
+  color: #60a5fa;
+}
+
+/* Research V1 */
+.panic-validation-page__category-h2 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #a5b4fc;
+}
+
+.research-core-links {
+  margin-bottom: 0.85rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(30, 27, 75, 0.25);
+}
+
+.research-core-links__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  letter-spacing: 0.04em;
+}
+
+.research-core-links__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.research-core-links__list a {
+  font-size: 0.68rem;
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.research-core-links__note {
+  margin: 0.4rem 0 0;
+  font-size: 0.58rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.research-lab-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0.75rem 0;
+}
+
+.research-category-accordion,
+.research-section-accordion {
+  border: 1px solid rgba(42, 54, 72, 0.55);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.research-category-accordion.is-open,
+.research-section-accordion.is-open {
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.research-category-accordion__toggle,
+.research-section-accordion__toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.research-category-accordion__title {
+  font-weight: 700;
+  color: #c4b5fd;
+}
+
+.research-category-accordion__desc {
+  margin-left: auto;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.research-section-accordion__title {
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.research-category-accordion__panel {
+  padding: 0.35rem 0.5rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.research-section-accordion__panel {
+  padding: 0.35rem 0.45rem 0.5rem;
+}
+
+.research-section-accordion {
+  margin-left: 0.25rem;
+}
