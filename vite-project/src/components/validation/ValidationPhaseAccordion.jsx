@@ -2,6 +2,7 @@ import { useId, useState } from "react"
 
 /** @type {Record<number, string>} */
 export const VALIDATION_PHASE_SUBTITLES = {
+  35: "Watchlist Center",
   32: "Portfolio Builder",
   31: "Conviction Engine",
   30: "Performance Dashboard",

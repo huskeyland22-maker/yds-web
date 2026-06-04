@@ -33,6 +33,7 @@ import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
+import WatchlistCenterPage from "./pages/WatchlistCenterPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
@@ -1008,6 +1009,7 @@ function App() {
       path === "/performance-dashboard" ||
       path === "/performance-center" ||
       path === "/ai-daily-report" ||
+      path === "/watchlist" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
     document.body.classList.toggle("scroll-doc-route", scrollDoc)
@@ -1355,6 +1357,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="AI 리포트">
                   <AiDailyReportPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/watchlist"
+              element={
+                <SectionErrorBoundary label="Watchlist">
+                  <WatchlistCenterPage />
                 </SectionErrorBoundary>
               }
             />

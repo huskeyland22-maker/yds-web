@@ -22023,3 +22023,343 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-transform: uppercase;
   color: #64748b;
 }
+
+/* Watchlist Center — Phase 35 */
+.yds-watchlist {
+  --wl-border: rgba(42, 54, 72, 0.65);
+  --wl-muted: #787b86;
+  --wl-accent: #38bdf8;
+  max-width: 720px;
+  margin: 0 auto;
+  color: #d1d4dc;
+}
+
+.yds-watchlist--lab {
+  max-width: none;
+  padding: 0;
+}
+
+.yds-watchlist__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.yds-watchlist__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wl-muted);
+}
+
+.yds-watchlist__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-watchlist__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.68rem;
+  color: var(--wl-muted);
+  line-height: 1.45;
+}
+
+.yds-watchlist__link {
+  font-size: 0.72rem;
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.yds-watchlist__section {
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--wl-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-watchlist__h2 {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7dd3fc;
+  letter-spacing: 0.02em;
+}
+
+.yds-watchlist__stage-lead {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.yds-watchlist__stage-hint {
+  margin: 0.3rem 0 0;
+  font-size: 0.72rem;
+  color: #bae6fd;
+}
+
+.yds-watchlist__stage-guide {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.65rem;
+  color: var(--wl-muted);
+}
+
+.yds-watchlist__stage-bands {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-watchlist__stage-bands li {
+  display: grid;
+  grid-template-columns: 1.5rem 4.5rem 1fr;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.35rem 0.4rem;
+  margin-bottom: 0.25rem;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  border: 1px solid transparent;
+}
+
+.yds-watchlist__stage-bands li.is-active {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(14, 165, 233, 0.12);
+}
+
+.yds-watchlist__stage-mul {
+  color: var(--wl-muted);
+  text-align: right;
+}
+
+.yds-watchlist__top-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-watchlist__top-list li {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr auto auto;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.28rem 0;
+  font-size: 0.72rem;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.35);
+}
+
+.yds-watchlist__top-name {
+  font-weight: 600;
+  color: #e2e8f0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yds-watchlist__state-chips,
+.yds-watchlist__prio-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
+}
+
+.yds-watchlist__state-chips::-webkit-scrollbar,
+.yds-watchlist__prio-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.yds-watchlist__state-chips button,
+.yds-watchlist__prio-chips button {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--wl-border);
+  background: rgba(15, 23, 42, 0.6);
+  font-size: 0.62rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.yds-watchlist__state-chips button.is-active,
+.yds-watchlist__prio-chips button.is-active {
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #e0f2fe;
+  background: rgba(14, 165, 233, 0.15);
+}
+
+.yds-watchlist__filter-note {
+  margin: 0 0 0.45rem;
+  font-size: 0.62rem;
+  color: var(--wl-muted);
+}
+
+.yds-watchlist__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.yds-watchlist__card {
+  padding: 0.65rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--wl-border);
+  background: rgba(8, 15, 30, 0.55);
+}
+
+.yds-watchlist__card-head {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  gap: 0.4rem;
+  align-items: start;
+}
+
+.yds-watchlist__rank {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--wl-muted);
+}
+
+.yds-watchlist__card-name {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.yds-watchlist__card-symbol {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--wl-muted);
+}
+
+.yds-watchlist__card-score {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.yds-watchlist__card-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.5rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.62rem;
+}
+
+.yds-watchlist__card-meta dt {
+  margin: 0;
+  color: var(--wl-muted);
+}
+
+.yds-watchlist__card-meta dd {
+  margin: 0.1rem 0 0;
+  color: #e2e8f0;
+}
+
+.yds-watchlist__pill {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.58rem;
+  font-weight: 600;
+}
+
+.yds-watchlist__pill--ready {
+  background: rgba(74, 222, 128, 0.15);
+  color: #86efac;
+}
+
+.yds-watchlist__pill--watch,
+.yds-watchlist__pill--dip {
+  background: rgba(250, 204, 21, 0.12);
+  color: #fde047;
+}
+
+.yds-watchlist__pill--hold {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+
+.yds-watchlist__pill--tp {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fdba74;
+}
+
+.yds-watchlist__pill--neutral {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+}
+
+.yds-watchlist__plan {
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(42, 54, 72, 0.45);
+}
+
+.yds-watchlist__plan-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #7dd3fc;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.yds-watchlist__plan ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-watchlist__plan li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.18rem 0;
+  font-size: 0.65rem;
+}
+
+.yds-watchlist__plan li span {
+  color: var(--wl-muted);
+  flex-shrink: 0;
+}
+
+.yds-watchlist__plan li strong {
+  text-align: right;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.yds-watchlist__paper-tag {
+  margin: 0.35rem 0 0;
+  font-size: 0.58rem;
+  color: #86efac;
+}
+
+.yds-watchlist__empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--wl-muted);
+  border: 1px dashed var(--wl-border);
+  border-radius: 10px;
+}
+
+.yds-watchlist__footnotes {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.62rem;
+  color: #64748b;
+}
