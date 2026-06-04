@@ -5,11 +5,11 @@
 export function getPrimaryNavItems() {
   return [
     { label: "현재 시장 분석", path: "/market-analysis" },
-    { label: "성과 대시보드", path: "/performance-dashboard" },
     { label: "시장 사이클", path: "/cycle" },
     { label: "코리아 밸류체인", path: "/value-chain" },
     { label: "트레이딩 로그", path: "/trading-log" },
     { label: "연구실", path: "/lab" },
     { label: "추천 이력", path: "/recommendation-history" },
+    { label: "성과센터", path: "/performance-center" },
   ]
 }

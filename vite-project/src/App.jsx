@@ -31,7 +31,7 @@ import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
-import PerformanceDashboardPage from "./pages/PerformanceDashboardPage.jsx"
+import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
@@ -1005,6 +1005,7 @@ function App() {
       path === "/market-analysis" ||
       path === "/market-dashboard" ||
       path === "/performance-dashboard" ||
+      path === "/performance-center" ||
       path.startsWith("/value-chain") ||
       path === "/timing"
     document.body.classList.toggle("scroll-doc-route", scrollDoc)
@@ -1339,13 +1340,14 @@ function App() {
             />
             <Route path="/market-dashboard" element={<Navigate to="/market-analysis" replace />} />
             <Route
-              path="/performance-dashboard"
+              path="/performance-center"
               element={
-                <SectionErrorBoundary label="성과 대시보드">
-                  <PerformanceDashboardPage />
+                <SectionErrorBoundary label="성과센터">
+                  <PerformanceCenterPage />
                 </SectionErrorBoundary>
               }
             />
+            <Route path="/performance-dashboard" element={<Navigate to="/performance-center" replace />} />
             <Route
               path="/cycle"
               element={

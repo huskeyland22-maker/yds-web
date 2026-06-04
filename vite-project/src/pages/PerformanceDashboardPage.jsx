@@ -52,6 +52,9 @@ export default function PerformanceDashboardPage() {
         <Link to="/market-analysis" className="yds-perf-dash__link">
           현재 시장 분석
         </Link>
+        <Link to="/performance-center" className="yds-perf-dash__link">
+          성과센터
+        </Link>
       </header>
 
       <div className="yds-perf-dash__filters" role="tablist" aria-label="기간 필터">
