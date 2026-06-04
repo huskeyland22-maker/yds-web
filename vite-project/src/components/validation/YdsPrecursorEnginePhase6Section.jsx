@@ -9,6 +9,7 @@ import {
 } from "../../trading-zone/ydsPrecursorEnginePhase6.js"
 import { getPrecursorMetricDisplay } from "../../trading-zone/ydsPrecursorMetricDisplay.js"
 import YdsRiskPatternLabel from "./YdsRiskPatternLabel.jsx"
+import { buildPatternExplainBlock } from "../../trading-zone/ydsPatternExplain.js"
 
 function fmt(v, d = 1) {
   if (v == null || !Number.isFinite(v)) return "—"
@@ -147,6 +148,42 @@ export default function YdsPrecursorEnginePhase6Section({
             ))}
           </tbody>
         </table>
+        {top3[0] ? (
+          <div className="yds-pattern-explain">
+            {(() => {
+              const block = buildPatternExplainBlock({
+                patternId: top3[0].patternId,
+                similarity: top3[0].similarity,
+                inputs: {
+                  vix: inputs.vix,
+                  cnn: inputs.cnn,
+                  move: inputs.move,
+                  highYield: inputs.highYield,
+                  priA: inputs.priA,
+                  priB: inputs.priB,
+                },
+              })
+              return (
+                <>
+                  <p className="yds-pattern-explain__lead">왜 {top3[0].patternLabel}인가</p>
+                  <ul className="yds-pattern-explain__why">
+                    {block.whyLines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                  <p className="yds-pattern-explain__sub">지표 기여</p>
+                  <ul className="yds-pattern-explain__contrib">
+                    {block.contributors.map((c) => (
+                      <li key={c.metric}>
+                        {c.metric} — {c.note}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )
+            })()}
+          </div>
+        ) : null}
       </article>
 
       <ul className="yds-engine-candidate__notes">

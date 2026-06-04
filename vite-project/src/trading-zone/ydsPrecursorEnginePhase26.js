@@ -7,6 +7,7 @@ import {
   getTradingZonePositions,
   TRADING_STAGE_META,
 } from "./tacticalTradingZoneData.js"
+import { enrichStockRadarPicks } from "./ydsStockRadarExplain.js"
 
 export const PRECURSOR_ENGINE_PHASE26_LABEL = "Stock Radar — Phase 26"
 
@@ -343,7 +344,7 @@ export function buildStockRadarFromPrecursorContext(ctx) {
     kr: ranked.filter((r) => r.market === "kr").slice(0, 10),
   }
 
-  return {
+  const baseReport = {
     label: PRECURSOR_ENGINE_PHASE26_LABEL,
     available: sectorRadar.available && topBuys.length > 0,
     asOf: sectorRadar.asOf ?? dashboard.asOf,
@@ -386,8 +387,11 @@ export function buildStockRadarFromPrecursorContext(ctx) {
       "Sector Radar(Phase 25) + Phase 12·6 읽기 전용 · YDS 엔진 미수정",
       "exportForTradeCandidates → 향후 매매 후보·트레이딩 로그 입력",
       "종목 유니버스는 STOCK_RADAR_UNIVERSE에서 버전 관리·자동 갱신 가능",
+      "V2 explain — ydsStockRadarExplain (점수 엔진 동일)",
     ],
   }
+
+  return enrichStockRadarPicks(baseReport, sectorMap)
 }
 
 /**

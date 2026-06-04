@@ -42,6 +42,31 @@ function alertId(parts) {
   return `al-${parts.join("-")}`
 }
 
+/**
+ * @param {import("./ydsAlertCenterStorage.js").AlertRow} partial
+ * @param {string[]} causes
+ */
+function withCauses(partial, causes) {
+  return { ...partial, causes: causes.filter(Boolean).slice(0, 5) }
+}
+
+/**
+ * @param {ReturnType<typeof buildWatchlistCenterFromMarketAnalysis>["sectionA"]["items"][number]} item
+ * @param {ReturnType<typeof buildCurrentMarketAnalysisReport>} market
+ */
+function stockAlertCauses(item, market) {
+  /** @type {string[]} */
+  const lines = []
+  if (item.score != null) lines.push(`종합점수 ${item.scoreDisplay ?? item.score}`)
+  if (item.sectorLabel) lines.push(`${item.sectorLabel} 섹터`)
+  if (item.watchStateLabel) lines.push(`Watchlist · ${item.watchStateLabel}`)
+  const stock = market.stockRadar?.topBuys?.find((s) => s.id === item.id)
+  if (stock?.explain?.recommendReasons?.length) {
+    lines.push(...stock.explain.recommendReasons.slice(0, 2))
+  }
+  return lines
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -141,15 +166,20 @@ function diffSnapshotToAlerts(prev, next, market, watchlist) {
       if (oldRank != null && Math.abs(oldRank - s.rank) >= 2) {
         const label =
           market.sectorRadar?.topSectors?.find((x) => x.id === s.id)?.label ?? s.id
-        out.push({
-          id: alertId(["B", "sector", s.id, String(s.rank), at.slice(0, 16)]),
-          grade: "B",
-          category: "realtime",
-          subtype: "sector_rank",
-          title: "섹터 순위 변화",
-          body: `${label} · ${oldRank}위 → ${s.rank}위`,
-          at,
-        })
+        out.push(
+          withCauses(
+            {
+              id: alertId(["B", "sector", s.id, String(s.rank), at.slice(0, 16)]),
+              grade: "B",
+              category: "realtime",
+              subtype: "sector_rank",
+              title: "섹터 순위 변화",
+              body: `${label} · ${oldRank}위 → ${s.rank}위`,
+              at,
+            },
+            [`섹터 순위 ${oldRank}위 → ${s.rank}위`, label],
+          ),
+        )
       }
     }
     if (prevTop3[0]?.id && nextTop3[0]?.id && prevTop3[0].id !== nextTop3[0].id) {
@@ -180,32 +210,50 @@ function diffSnapshotToAlerts(prev, next, market, watchlist) {
     if (!changed || !stockSubtype) continue
 
     if (stockSubtype === "entry_ready") {
-      out.push({
-        id: alertId(["A", item.id, at.slice(0, 16)]),
-        grade: "A",
-        category: "realtime",
-        subtype: "entry_ready",
-        title: "진입가능 종목 발생",
-        body: `${item.name} (${item.symbol}) · Entry ${item.entryGrade} · ${item.sectorLabel}`,
-        at,
-        symbol: item.symbol,
-        stockName: item.name,
-      })
+      out.push(
+        withCauses(
+          {
+            id: alertId(["A", item.id, at.slice(0, 16)]),
+            grade: "A",
+            category: "realtime",
+            subtype: "entry_ready",
+            title: "진입가능 종목 발생",
+            body: `${item.name} (${item.symbol}) · Entry ${item.entryGrade} · ${item.sectorLabel}`,
+            at,
+            symbol: item.symbol,
+            stockName: item.name,
+          },
+          [
+            "진입가능 상태 전환",
+            ...stockAlertCauses(item, market),
+            item.entryGrade !== "—" ? `Entry 등급 ${item.entryGrade}` : null,
+          ],
+        ),
+      )
       continue
     }
 
     const typeMeta = STOCK_ALERT_TYPES.find((t) => t.id === stockSubtype)
-    out.push({
-      id: alertId(["stock", stockSubtype, item.id, at.slice(0, 16)]),
-      grade: "C",
-      category: "stock",
-      subtype: stockSubtype,
-      title: typeMeta?.label ?? stockSubtype,
-      body: `${item.name} · ${item.watchStateLabel} · 점수 ${item.adjustedScoreDisplay}`,
-      at,
-      symbol: item.symbol,
-      stockName: item.name,
-    })
+    out.push(
+      withCauses(
+        {
+          id: alertId(["stock", stockSubtype, item.id, at.slice(0, 16)]),
+          grade: "C",
+          category: "stock",
+          subtype: stockSubtype,
+          title: typeMeta?.label ?? stockSubtype,
+          body: `${item.name} · ${item.watchStateLabel} · 점수 ${item.adjustedScoreDisplay}`,
+          at,
+          symbol: item.symbol,
+          stockName: item.name,
+        },
+        [
+          `${typeMeta?.label ?? stockSubtype} 신호`,
+          ...stockAlertCauses(item, market),
+          item.stockStatus?.label ? `종목 상태 · ${item.stockStatus.label}` : null,
+        ],
+      ),
+    )
   }
 
   return out
@@ -327,6 +375,19 @@ export function buildAlertCenterFromMarketAnalysis(market, options = {}) {
  */
 export function filterAlertHistory(history, gradeFilter) {
   return filterByGrade(history, gradeFilter)
+}
+
+/**
+ * @param {import("./ydsAlertCenterStorage.js").AlertRow[]} history
+ * @param {7 | 30 | 90 | null} days
+ */
+export function filterAlertHistoryByDays(history, days) {
+  if (!days) return history
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000
+  return history.filter((a) => {
+    const t = Date.parse(a.at)
+    return Number.isFinite(t) && t >= cutoff
+  })
 }
 
 /**

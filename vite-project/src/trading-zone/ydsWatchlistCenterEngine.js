@@ -6,6 +6,7 @@ import { buildCurrentMarketAnalysisReport } from "./ydsCurrentMarketAnalysis.js"
 import { getTradingZonePositions } from "./tacticalTradingZoneData.js"
 import { loadPaperTrading, refreshPaperTradingPrices } from "./ydsPaperTradingStorage.js"
 import { loadPrecursorValidationLog } from "./ydsPrecursorValidationLogStorage.js"
+import { buildWatchlistItemExplain } from "./ydsWatchlistExplain.js"
 
 export const WATCHLIST_CENTER_LABEL = "Watchlist Center — Phase 35"
 
@@ -169,6 +170,21 @@ export function buildWatchlistCenterFromMarketAnalysis(market) {
           ? stageMeta.dip
           : stageMeta.observe
     const adjustedScore = Math.round(stock.score * intensityMul * 10) / 10
+    const explain = buildWatchlistItemExplain({
+      watchStateId,
+      watchStateLabel: watchState.label,
+      priorityId,
+      sectorLabel: SECTOR_LABEL_BY_ID[stock.sectorRadarId] ?? stock.sectorRadarId,
+      score: stock.score,
+      stockStatus: stock.status,
+      scoreBreakdown: stock.scoreBreakdown
+        ? {
+            marketFit: stock.scoreBreakdown.marketFit,
+            sectorStrength: stock.scoreBreakdown.sectorStrength,
+            technicalTrend: stock.scoreBreakdown.technicalTrend,
+          }
+        : null,
+    })
 
     return {
       id: stock.id,
@@ -190,6 +206,7 @@ export function buildWatchlistCenterFromMarketAnalysis(market) {
       priorityLabel: priority.label,
       tradePlan: buildTradePlan(tzPos, stock.status.id),
       paperLinked: Boolean(paper),
+      explain,
     }
   })
 

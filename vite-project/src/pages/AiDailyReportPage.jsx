@@ -61,14 +61,14 @@ export default function AiDailyReportPage() {
 
           <section className="yds-ai-report__section" aria-labelledby="ai-report-a">
             <h2 id="ai-report-a" className="yds-ai-report__h2">
-              A. 오늘의 시장 한줄 요약
+              현재 시장
             </h2>
             <p className="yds-ai-report__lead">{sectionA.headline}</p>
           </section>
 
           <section className="yds-ai-report__section" aria-labelledby="ai-report-b">
             <h2 id="ai-report-b" className="yds-ai-report__h2">
-              B. 현재 단계 설명
+              시장 단계
             </h2>
             <p className="yds-ai-report__card-title">{sectionB.title}</p>
             <p className="yds-ai-report__body">{sectionB.body}</p>
@@ -79,7 +79,7 @@ export default function AiDailyReportPage() {
 
           <section className="yds-ai-report__section" aria-labelledby="ai-report-c">
             <h2 id="ai-report-c" className="yds-ai-report__h2">
-              C. 시장 위험도 해석
+              핵심 위험
             </h2>
             <p className="yds-ai-report__card-title">{sectionC.title}</p>
             <p className="yds-ai-report__body">{sectionC.body}</p>
@@ -92,7 +92,7 @@ export default function AiDailyReportPage() {
 
           <section className="yds-ai-report__section" aria-labelledby="ai-report-d">
             <h2 id="ai-report-d" className="yds-ai-report__h2">
-              D. 추천 섹터 Top3
+              기회 요인 · 추천 섹터
             </h2>
             <p className="yds-ai-report__lead">{sectionD.summary}</p>
             {sectionD.items.length ? (
@@ -110,7 +110,7 @@ export default function AiDailyReportPage() {
 
           <section className="yds-ai-report__section" aria-labelledby="ai-report-e">
             <h2 id="ai-report-e" className="yds-ai-report__h2">
-              E. 추천 종목 Top3
+              기회 요인 · 추천 종목
             </h2>
             <p className="yds-ai-report__lead">{sectionE.summary}</p>
             {sectionE.items.length ? (
@@ -127,7 +127,7 @@ export default function AiDailyReportPage() {
 
           <section className="yds-ai-report__section" aria-labelledby="ai-report-f">
             <h2 id="ai-report-f" className="yds-ai-report__h2">
-              F. 오늘의 행동 가이드
+              추천 행동
             </h2>
             <p className="yds-ai-report__card-title">
               현재 행동 · {sectionF.action}

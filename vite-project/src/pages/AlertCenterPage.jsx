@@ -7,6 +7,7 @@ import { YDS_VALIDATION_EVENT_DATASET } from "../trading-zone/ydsHistoricalValid
 import {
   buildAlertCenterReport,
   filterAlertHistory,
+  filterAlertHistoryByDays,
   ALERT_CENTER_LABEL,
   ALERT_GRADES,
 } from "../trading-zone/ydsAlertCenterEngine.js"
@@ -23,6 +24,16 @@ function AlertRowItem({ alert }) {
       <div className="yds-alert-center__row-body">
         <h3 className="yds-alert-center__row-title">{alert.title}</h3>
         <p className="yds-alert-center__row-text">{alert.body}</p>
+        {alert.causes?.length ? (
+          <div className="yds-alert-center__causes">
+            <p className="yds-alert-center__causes-label">원인</p>
+            <ul>
+              {alert.causes.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <p className="yds-alert-center__row-meta">
           {alert.symbol ? (
             <span className="font-mono">{alert.symbol}</span>
@@ -60,16 +71,25 @@ export default function AlertCenterPage() {
   )
 
   const [gradeFilter, setGradeFilter] = useState(/** @type {string | null} */ (null))
+  const [daysFilter, setDaysFilter] = useState(/** @type {7 | 30 | 90 | null} */ (30))
 
-  const filteredRealtime = useMemo(
-    () => filterAlertHistory(report.sectionA.items, /** @type {import("../trading-zone/ydsAlertCenterEngine.js").AlertGradeId | null} */ (gradeFilter)),
-    [report.sectionA.items, gradeFilter],
-  )
+  const filteredRealtime = useMemo(() => {
+    let rows = filterAlertHistory(
+      report.sectionA.items,
+      /** @type {import("../trading-zone/ydsAlertCenterEngine.js").AlertGradeId | null} */ (gradeFilter),
+    )
+    rows = filterAlertHistoryByDays(rows, daysFilter)
+    return rows
+  }, [report.sectionA.items, gradeFilter, daysFilter])
 
-  const filteredHistory = useMemo(
-    () => filterAlertHistory(report.sectionD.items, /** @type {import("../trading-zone/ydsAlertCenterEngine.js").AlertGradeId | null} */ (gradeFilter)),
-    [report.sectionD.items, gradeFilter],
-  )
+  const filteredHistory = useMemo(() => {
+    let rows = filterAlertHistory(
+      report.sectionD.items,
+      /** @type {import("../trading-zone/ydsAlertCenterEngine.js").AlertGradeId | null} */ (gradeFilter),
+    )
+    rows = filterAlertHistoryByDays(rows, daysFilter)
+    return rows
+  }, [report.sectionD.items, gradeFilter, daysFilter])
 
   const { sectionA, sectionB, sectionC, sectionD, stage } = report
 
@@ -194,6 +214,25 @@ export default function AlertCenterPage() {
             <h2 id="alert-d" className="yds-alert-center__h2">
               D. 알림 히스토리
             </h2>
+            <div className="yds-alert-center__days-chips" role="tablist" aria-label="기간 필터">
+              {[
+                { id: 7, label: "7일" },
+                { id: 30, label: "30일" },
+                { id: 90, label: "90일" },
+                { id: null, label: "전체" },
+              ].map((d) => (
+                <button
+                  key={String(d.id)}
+                  type="button"
+                  role="tab"
+                  aria-selected={daysFilter === d.id}
+                  className={daysFilter === d.id ? "is-active" : ""}
+                  onClick={() => setDaysFilter(d.id)}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
             <p className="yds-alert-center__muted">
               최근 {report.historyMax}건 저장 · {filteredHistory.length}건 표시
             </p>

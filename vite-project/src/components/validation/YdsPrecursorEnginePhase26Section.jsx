@@ -9,6 +9,7 @@ import {
   STOCK_RADAR_PIPELINE,
   STOCK_RADAR_SCORE_WEIGHTS,
 } from "../../trading-zone/ydsPrecursorEnginePhase26.js"
+import StockRadarPickCard from "../stock-radar/StockRadarPickCard.jsx"
 
 /**
  * @param {{
@@ -47,10 +48,10 @@ export default function YdsPrecursorEnginePhase26Section({
       aria-labelledby="yds-precursor-engine-p26-title"
     >
       <h2 id="yds-precursor-engine-p26-title" className="panic-validation-panel__h2">
-        {PRECURSOR_ENGINE_PHASE26_LABEL}
+        Stock Radar · 설명 가능 추천 (V2)
       </h2>
       <p className="panic-validation-panel__note">
-        Sector Radar → 매수 후보 Top 10 · Phase 12·6·25 읽기 전용
+        점수 엔진 동일 · Breakdown·추천 이유·경고·전략 기반 신뢰도 표시
       </p>
       <p className="yds-precursor-engine-p26__weights">{scoreWeightsDisplay}</p>
 
@@ -87,28 +88,13 @@ export default function YdsPrecursorEnginePhase26Section({
             </div>
           </dl>
 
-          <div className="yds-precursor-engine-p26__block">
+          <div className="yds-precursor-engine-p26__block yds-precursor-engine-p26__block--cards">
             <h3 className="yds-precursor-engine-p26__h3">매수 후보 TOP 10</h3>
-            <ol className="yds-precursor-engine-p26__rank-list">
+            <div className="yds-precursor-engine-p26__cards">
               {topBuys.map((s) => (
-                <li key={s.id}>
-                  <span className="yds-precursor-engine-p26__rank">{s.rank}.</span>
-                  <span className="yds-precursor-engine-p26__name">{s.name}</span>
-                  <span className="yds-precursor-engine-p26__score">점수 {formatStockRadarScore(s.score)}</span>
-                  <span className="yds-precursor-engine-p26__status">{s.status.display}</span>
-                  <span className="yds-precursor-engine-p26__meta">
-                    {s.marketLabel}
-                    {s.tradingStage ? ` · ${s.tradingStage}` : ""}
-                  </span>
-                  <span className="yds-precursor-engine-p26__breakdown">
-                    시장 {formatStockRadarScore(s.scoreBreakdown.marketFit)} · 섹터{" "}
-                    {formatStockRadarScore(s.scoreBreakdown.sectorStrength)} · 추세{" "}
-                    {formatStockRadarScore(s.scoreBreakdown.technicalTrend)} · 거래량{" "}
-                    {formatStockRadarScore(s.scoreBreakdown.volume)}
-                  </span>
-                </li>
+                <StockRadarPickCard key={s.id} pick={s} />
               ))}
-            </ol>
+            </div>
           </div>
 
           <div className="yds-precursor-engine-p26__block">

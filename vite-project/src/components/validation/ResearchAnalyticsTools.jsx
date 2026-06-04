@@ -5,6 +5,7 @@ import { buildCurrentMarketAnalysisReport } from "../../trading-zone/ydsCurrentM
 import ConvictionEnginePanel from "../trading/ConvictionEnginePanel.jsx"
 import PortfolioBuilderPanel from "../trading/PortfolioBuilderPanel.jsx"
 import ResearchCategoryAccordion from "./ResearchCategoryAccordion.jsx"
+import YdsPrecursorEnginePhase26Section from "./YdsPrecursorEnginePhase26Section.jsx"
 
 /**
  * @param {{
@@ -33,6 +34,13 @@ export default function ResearchAnalyticsTools({
   )
 
   return (
+    <>
+    <ResearchCategoryAccordion
+      title="Stock Radar"
+      description="종목 추천 · Breakdown · 추천 이유 (V2)"
+    >
+      <YdsPrecursorEnginePhase26Section latestCycleRow={latestCycleRow} historyRows={historyRows} />
+    </ResearchCategoryAccordion>
     <ResearchCategoryAccordion
       title="포트폴리오 분석"
       description="Conviction · Portfolio Builder (시장분석 Hub에서 이동)"
@@ -51,5 +59,6 @@ export default function ResearchAnalyticsTools({
         />
       </div>
     </ResearchCategoryAccordion>
+    </>
   )
 }

@@ -23483,3 +23483,257 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #60a5fa;
   text-decoration: none;
 }
+
+/* —— V1 Polish: Stock Radar · Watchlist · Alert · Pattern · Confidence —— */
+.yds-stock-pick {
+  padding: 0.65rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(42, 54, 72, 0.55);
+  background: rgba(11, 15, 23, 0.75);
+  margin-bottom: 0.5rem;
+}
+
+.yds-stock-pick--compact {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.35rem 0;
+  border: none;
+  background: transparent;
+  margin: 0;
+}
+
+.yds-stock-pick__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.yds-stock-pick__name {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.yds-stock-pick__sym {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-stock-pick__score-block {
+  margin-left: auto;
+  text-align: right;
+}
+
+.yds-stock-pick__score {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #7dd3fc;
+}
+
+.yds-stock-pick__conf {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-stock-pick__breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 0.5rem;
+  margin: 0.45rem 0 0;
+  font-size: 0.65rem;
+}
+
+.yds-stock-pick__breakdown dt {
+  color: #64748b;
+}
+
+.yds-stock-pick__breakdown dd {
+  margin: 0;
+  text-align: right;
+  color: #cbd5e1;
+}
+
+.yds-stock-pick__sub {
+  margin: 0.4rem 0 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.yds-stock-pick__reasons ul,
+.yds-stock-pick__warn ul {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-stock-pick__strength {
+  margin: 0.25rem 0 0;
+  font-size: 0.66rem;
+  color: #86efac;
+}
+
+.yds-stock-pick__weak {
+  margin: 0.2rem 0 0;
+  font-size: 0.66rem;
+  color: #fcd34d;
+}
+
+.yds-stock-pick__warn ul {
+  color: #fca5a5;
+}
+
+.yds-stock-pick__formula {
+  margin: 0.45rem 0 0;
+  font-size: 0.6rem;
+  color: #475569;
+}
+
+.yds-hub-top__stock-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yds-hub-top__details {
+  margin-top: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(42, 54, 72, 0.45);
+  padding: 0.35rem 0.55rem;
+}
+
+.yds-hub-top__details summary {
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 0.35rem 0;
+}
+
+.yds-watchlist__explain {
+  margin: 0.45rem 0;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.55);
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-watchlist__explain-title {
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-watchlist__explain ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.yds-watchlist__explain-priority {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-alert-center__causes {
+  margin-top: 0.35rem;
+}
+
+.yds-alert-center__causes-label {
+  margin: 0 0 0.15rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-alert-center__causes ul {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.66rem;
+  color: #94a3b8;
+}
+
+.yds-alert-center__days-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.yds-alert-center__days-chips button {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+  background: transparent;
+  cursor: pointer;
+}
+
+.yds-alert-center__days-chips button.is-active {
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.yds-pattern-explain {
+  margin-top: 0.65rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.5);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.yds-pattern-explain__lead {
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-confidence-explain {
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.45);
+  font-size: 0.68rem;
+}
+
+.yds-confidence-explain__summary {
+  margin: 0 0 0.35rem;
+  color: #cbd5e1;
+}
+
+.yds-confidence-explain__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-confidence-explain__list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.35rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.35);
+  color: #94a3b8;
+}
+
+.yds-precursor-engine-p26__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}

@@ -75,13 +75,11 @@ export function buildMarketHubTopViewModel(report) {
       report.portfolio?.description ?? report.portfolio?.allocation?.stockLabel ?? null,
     ].filter(Boolean),
     topSectors: summary.topSectors,
-    topStocks: (report.stockRadar?.topBuys ?? []).slice(0, 5).map((s) => ({
-      id: s.id,
-      rank: s.rank,
-      name: s.name,
-      score: s.score,
-      status: s.status?.label ?? "—",
-    })),
+    topStocks: (report.stockRadar?.topBuys ?? []).slice(0, 5),
+    stockRadarMeta: {
+      confidenceLabel: report.stockRadar?.topBuys?.[0]?.explain?.confidence?.label ?? "전략 기반",
+      weightsDisplay: report.stockRadar?.scoreWeightsDisplay ?? null,
+    },
     allocation: summary.allocation,
     hasSectors: summary.hasSectors,
     hasStocks: (report.stockRadar?.topBuys ?? []).length > 0,

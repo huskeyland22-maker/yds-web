@@ -51,6 +51,11 @@ export const GLOSSARY_ENTRIES = [
   { id: "tariff", title: "관세형", body: "무역·정책 충격형 프로파일." },
   { id: "svb", title: "SVB형", body: "2023 지역은행·유동성 쇼크형 프로파일." },
   { id: "bull", title: "강세장형", body: "공포가 낮고 추세가 양호한 구간 프로파일." },
+  {
+    id: "stock-radar",
+    title: "Stock Radar 점수",
+    body: "V1은 전략 기반 점수입니다. 종합 = 0.4×시장적합 + 0.25×섹터 + 0.2×기술추세 + 0.15×거래량점수. 거래량·RSI·이평은 Trading Zone·PRI 기반 추정이며 실시간 시세는 Phase 26.1 예정입니다. 상세: docs/STOCK_RADAR_SCORING.md",
+  },
 ]
 
 /**

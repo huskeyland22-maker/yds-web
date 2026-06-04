@@ -25,6 +25,17 @@ function WatchlistCard({ item }) {
         </div>
         <span className="yds-watchlist__card-score font-mono tabular-nums">{item.adjustedScoreDisplay}</span>
       </header>
+      {item.explain ? (
+        <div className="yds-watchlist__explain">
+          <p className="yds-watchlist__explain-title">왜 {item.explain.stateTitle}인가</p>
+          <ul>
+            {item.explain.stateBullets.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <p className="yds-watchlist__explain-priority">{item.explain.priorityHint}</p>
+        </div>
+      ) : null}
       <dl className="yds-watchlist__card-meta">
         <div>
           <dt>섹터</dt>

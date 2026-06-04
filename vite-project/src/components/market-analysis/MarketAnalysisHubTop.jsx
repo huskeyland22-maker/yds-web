@@ -3,8 +3,11 @@ import { buildMarketHubTopViewModel } from "../../utils/ydsMarketHubPresentation
 import { formatSectorRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase25.js"
 import { formatStockRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase26.js"
 import ConfidenceBadge from "../trust/ConfidenceBadge.jsx"
+import ConfidenceExplainPanel from "../trust/ConfidenceExplainPanel.jsx"
 import WhyExplainButton from "../trust/WhyExplainButton.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
+import StockRadarPickCard from "../stock-radar/StockRadarPickCard.jsx"
+import { buildRegimeExplainBlock } from "../../trading-zone/ydsRegimeExplain.js"
 
 /**
  * @param {{
@@ -21,6 +24,15 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
   const { stage, allocation } = hub
   const stockPct = allocation.stockPct ?? 0
   const cashPct = allocation.cashPct ?? 100
+  const regimeExplain = buildRegimeExplainBlock({
+    regimeId: report.currentState?.regime?.id ?? null,
+    regimeLabel: report.currentState?.regime?.label ?? null,
+    reason: report.currentState?.regime?.reason ?? null,
+    priA: report.currentState?.risk?.priA ?? null,
+    priB: report.currentState?.risk?.priB ?? null,
+    dominantPattern: report.marketEnvironment?.dominantPattern?.label ?? null,
+    durationLabel: report.marketEnvironment?.regimeDuration ?? null,
+  })
 
   if (simplified) {
     return (
@@ -119,50 +131,10 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
 
       <section className="yds-hub-top__card">
         <div className="yds-hub-top__card-head">
-          <h2 className="yds-hub-top__h2">시장 위치</h2>
-          <WhyExplainButton lines={hub.marketPosition.whyLines} />
-        </div>
-        <p className="yds-hub-top__score font-mono tabular-nums">{hub.marketPosition.display}</p>
-      </section>
-
-      <section className="yds-hub-top__card yds-hub-top__card--interpret">
-        <div className="yds-hub-top__card-head">
-          <h2 className="yds-hub-top__h2">시장 해석</h2>
-          <ConfidenceBadge level={hub.confidence.level} tone={hub.confidence.tone} score={hub.confidenceScore} />
-        </div>
-        <p className="yds-hub-top__lead">{hub.interpretationLine}</p>
-        {hub.interpretationReasons.length ? (
-          <ul className="yds-hub-top__reasons">
-            {hub.interpretationReasons.map((r) => (
-              <li key={r}>{r}</li>
-            ))}
-          </ul>
-        ) : null}
-      </section>
-
-      <section className="yds-hub-top__card">
-        <div className="yds-hub-top__card-head">
           <h2 className="yds-hub-top__h2">추천 행동</h2>
           <WhyExplainButton lines={hub.actionWhyLines} />
         </div>
         <p className="yds-hub-top__action">{hub.recommendedAction}</p>
-      </section>
-
-      <section className="yds-hub-top__card">
-        <div className="yds-hub-top__card-head">
-          <h2 className="yds-hub-top__h2">권장 비중</h2>
-        </div>
-        <div className="yds-hub-top__alloc-row">
-          <span>주식 {stockPct}%</span>
-          <span>현금 {cashPct}%</span>
-        </div>
-        <div
-          className="yds-hub-top__alloc-bar"
-          role="img"
-          aria-label={`주식 ${stockPct}% 현금 ${cashPct}%`}
-        >
-          <span style={{ width: `${stockPct}%` }} />
-        </div>
       </section>
 
       <section className="yds-hub-top__card">
@@ -184,29 +156,86 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
         )}
       </section>
 
-      <section className="yds-hub-top__card">
+      <section className="yds-hub-top__card yds-hub-top__card--stocks">
         <div className="yds-hub-top__card-head">
           <h2 className="yds-hub-top__h2">추천 종목</h2>
+          {hub.stockRadarMeta?.weightsDisplay ? (
+            <span className="yds-hub-top__muted">{hub.stockRadarMeta.weightsDisplay}</span>
+          ) : null}
         </div>
         {hub.hasStocks ? (
-          <ol className="yds-hub-top__list">
-            {hub.topStocks.map((s) => (
-              <li key={s.id}>
-                <span className="font-mono">{s.rank}</span>
-                <span>{s.name}</span>
-                <span className="font-mono tabular-nums">{formatStockRadarScore(s.score)}</span>
-                <span className="yds-hub-top__muted">{s.status}</span>
-              </li>
+          <div className="yds-hub-top__stock-cards">
+            {hub.topStocks.slice(0, 3).map((s) => (
+              <StockRadarPickCard key={s.id} pick={s} />
             ))}
-          </ol>
+          </div>
         ) : (
           <p className="yds-hub-top__muted">—</p>
         )}
         <p className="yds-hub-top__foot">
-          <Link to="/watchlist">Watchlist</Link> · <Link to="/alert-center">알림</Link> ·{" "}
-          <Link to="/performance-center">성과</Link>
+          <Link to="/watchlist">Watchlist Top 10</Link> · <Link to="/lab">Stock Radar 상세</Link>
         </p>
       </section>
+
+      <details className="yds-hub-top__details">
+        <summary>상세 · 시장 위치 · 해석 · 비중 · 신뢰도</summary>
+        <section className="yds-hub-top__card">
+          <div className="yds-hub-top__card-head">
+            <h2 className="yds-hub-top__h2">시장 위치</h2>
+            <WhyExplainButton lines={hub.marketPosition.whyLines} />
+          </div>
+          <p className="yds-hub-top__score font-mono tabular-nums">{hub.marketPosition.display}</p>
+        </section>
+
+        <section className="yds-hub-top__card yds-hub-top__card--interpret">
+          <div className="yds-hub-top__card-head">
+            <h2 className="yds-hub-top__h2">시장 해석</h2>
+            <ConfidenceBadge level={hub.confidence.level} tone={hub.confidence.tone} score={hub.confidenceScore} />
+          </div>
+          <p className="yds-hub-top__lead">{hub.interpretationLine}</p>
+          {hub.interpretationReasons.length ? (
+            <ul className="yds-hub-top__reasons">
+              {hub.interpretationReasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+
+        <section className="yds-hub-top__card">
+          <h2 className="yds-hub-top__h2">시장 국면</h2>
+          <p className="yds-hub-top__lead">{regimeExplain.regimeLabel}</p>
+          <ul className="yds-hub-top__reasons">
+            {regimeExplain.whyLines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="yds-hub-top__card">
+          <h2 className="yds-hub-top__h2">권장 비중</h2>
+          <div className="yds-hub-top__alloc-row">
+            <span>주식 {stockPct}%</span>
+            <span>현금 {cashPct}%</span>
+          </div>
+          <div
+            className="yds-hub-top__alloc-bar"
+            role="img"
+            aria-label={`주식 ${stockPct}% 현금 ${cashPct}%`}
+          >
+            <span style={{ width: `${stockPct}%` }} />
+          </div>
+        </section>
+
+        <ConfidenceExplainPanel
+          confidenceScore={hub.confidenceScore}
+          bullSimilarity={report.marketEnvironment?.bullSimilarity ?? null}
+          regimeId={report.currentState?.regime?.id ?? null}
+          priA={report.currentState?.risk?.priA ?? null}
+          priB={report.currentState?.risk?.priB ?? null}
+          patternSimilarity={report.marketEnvironment?.dominantPattern?.similarity ?? null}
+        />
+      </details>
     </div>
   )
 }
