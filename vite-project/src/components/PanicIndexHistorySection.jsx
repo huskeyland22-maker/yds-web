@@ -27,9 +27,13 @@ const HISTORY_CHART_HEIGHT = 220
 const DEFAULT_METRIC_KEY = "vix"
 
 /**
- * @param {{ rows?: object[] }} props
+ * @param {{ rows?: object[]; defaultChartOpen?: boolean; inlineChart?: boolean }} props
  */
-export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
+export default function PanicIndexHistorySection({
+  rows: rowsProp = [],
+  defaultChartOpen = false,
+  inlineChart = false,
+}) {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
   const panicHistoryV2SyncStatus = useAppDataStore((s) => s.panicHistoryV2SyncStatus)
@@ -46,7 +50,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const [metricScope, setMetricScope] = useState(/** @type {"core" | "yds" | "all"} */ ("core"))
   const [activeMetricKey, setActiveMetricKey] = useState(DEFAULT_METRIC_KEY)
   const [rangeId, setRangeId] = useState("3M")
-  const [chartOpen, setChartOpen] = useState(false)
+  const [chartOpen, setChartOpen] = useState(defaultChartOpen || inlineChart)
 
   const scopeRows =
     metricScope === "core"
@@ -116,8 +120,10 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
   const showHistoryLoading = history.length === 0
   const rangeStats = chartRangeStats(history, rangeId, "lab")
 
-  const showChart =
-    !showHistoryLoading && uiState.showChart && chartRows.some((x) => x?.value != null)
+  const hasChartData = chartRows.length > 0 && chartRows.some((x) => x?.value != null)
+  const showChart = !showHistoryLoading && hasChartData
+
+  const chartUiExpanded = inlineChart || chartOpen
 
   const chartEmptyMessage = `${metric.shortLabel} 원본 데이터 준비중`
   const ydsSummary = useMemo(() => {
@@ -183,15 +189,17 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
       />
       <div className="panic-history-compact-summary" role="status" aria-label="패닉지수 히스토리 요약">
         <p className="m-0 panic-history-compact-summary__line">{compactLine}</p>
-        <button
-          type="button"
-          className="panic-history-compact-summary__toggle"
-          onClick={() => setChartOpen((v) => !v)}
-        >
-          {chartOpen ? "차트 닫기 ▲" : "차트 보기 ▼"}
-        </button>
+        {!inlineChart ? (
+          <button
+            type="button"
+            className="panic-history-compact-summary__toggle"
+            onClick={() => setChartOpen((v) => !v)}
+          >
+            {chartOpen ? "차트 닫기 ▲" : "차트 보기 ▼"}
+          </button>
+        ) : null}
       </div>
-      {chartOpen ? <div className="panic-history-scope-toggle" role="tablist" aria-label="지표 범위">
+      {chartUiExpanded ? <div className="panic-history-scope-toggle" role="tablist" aria-label="지표 범위">
         <button
           type="button"
           role="tab"
@@ -224,7 +232,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         </button>
       </div> : null}
 
-      {chartOpen ? <div className="panic-history-picker" role="tablist" aria-label={metricScope === "core" ? "핵심 3지표" : "9대 패닉지수"}>
+      {chartUiExpanded ? <div className="panic-history-picker" role="tablist" aria-label={metricScope === "core" ? "핵심 3지표" : "9대 패닉지수"}>
         {scopeRows.map((row, rowIdx) => (
           <div key={`picker-row-${rowIdx}`} className="panic-history-picker__row">
             {row.map((m) => {
@@ -253,7 +261,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         ))}
       </div> : null}
 
-      {chartOpen ? <div className="panic-history-selection-bar">
+      {chartUiExpanded ? <div className="panic-history-selection-bar">
         <p className="m-0 panic-history-selection-bar__selected">
           선택: <strong>{metric.shortLabel}</strong>
           <span className="panic-history-selection-bar__hint">{metric.tooltip}</span>
@@ -278,7 +286,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           {rangeId} · {rangeStats.shown}일 표시
         </p>
       </div> : null}
-      {ydsSummary && chartOpen ? (
+      {ydsSummary && chartUiExpanded ? (
         <div className="panic-history-yds-summary" role="status" aria-label="시장 위치 요약">
           <p className="m-0 panic-history-yds-summary__score">
             시장 위치 {ydsSummary.score}점
@@ -299,7 +307,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         </div>
       ) : null}
 
-      {chartOpen ? <PanicHistoryInsightPanel
+      {chartUiExpanded ? <PanicHistoryInsightPanel
         header={insight.header}
         changeStrip={insight.changeStrip}
         interpretationLines={insight.interpretationLines}
@@ -308,7 +316,7 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
         accent={metric.accent}
       /> : null}
 
-      {chartOpen ? <div className="panic-history-section__chart mt-1 pb-1">
+      {chartUiExpanded ? <div className="panic-history-section__chart mt-1 pb-1">
         {showChart ? (
           <PanicHistoryLineChart
             key={`panic-hist-${activeMetricKey}-${rangeId}`}
@@ -326,7 +334,11 @@ export default function PanicIndexHistorySection({ rows: rowsProp = [] }) {
           />
         ) : (
           <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
-            {chartEmptyMessage}
+            {showHistoryLoading
+              ? uiState.chartMessage ?? "데이터 준비중"
+              : hasChartData
+                ? chartEmptyMessage
+                : (uiState.chartMessage ?? chartEmptyMessage)}
           </div>
         )}
       </div> : null}

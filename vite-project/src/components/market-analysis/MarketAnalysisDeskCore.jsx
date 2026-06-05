@@ -13,8 +13,7 @@ import YdsAllocationCenter from "../YdsAllocationCenter.jsx"
 import YdsCompositeHero from "../YdsCompositeHero.jsx"
 
 /**
- * 시장분석 3계층 데스크
- * A 핵심 · B 중요 · C 상세(접기)
+ * 시장분석 데스크 — 핵심지수 → 패닉 히스토리 → YDS 카드 그리드
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -44,49 +43,61 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
   return (
     <div className="yds-market-desk" id="market-desk" aria-label="시장 위치·행동·히스토리">
-      {/* A — 5초 핵심: YDS · 행동 · 비중 */}
-      <section className="yds-market-desk__tier yds-market-desk__tier--a" aria-labelledby="market-tier-a">
-        <h2 id="market-tier-a" className="yds-market-desk__tier-label">
-          핵심
-        </h2>
-        <div className="yds-market-desk__basis">
-          <CycleDataBasisBar
-            updatedAt={panicData?.updatedAt}
-            cycleSource={cycleDataSource}
-            bondSource="FRED"
-          />
-          <div className="yds-market-desk__ai-status lg:hidden">
-            <AiReportMarketStatusBlock status={aiReportStatus} />
-          </div>
+      <div className="yds-market-desk__basis">
+        <CycleDataBasisBar
+          updatedAt={panicData?.updatedAt}
+          cycleSource={cycleDataSource}
+          bondSource="FRED"
+        />
+        <div className="yds-market-desk__ai-status lg:hidden">
+          <AiReportMarketStatusBlock status={aiReportStatus} />
         </div>
-        <div className="yds-market-desk__core-grid">
-          <YdsCompositeHero panicData={panicData} historyRows={safeHistory} />
-          <div className="yds-market-desk__core-aside">
-            <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
-            <YdsAllocationCenter panicData={panicData} />
-          </div>
-        </div>
-      </section>
+      </div>
 
-      {/* B — 핵심지수 · 패닉지수 차트 */}
-      <section className="yds-market-desk__tier yds-market-desk__tier--b" aria-labelledby="market-tier-b">
-        <h2 id="market-tier-b" className="yds-market-desk__tier-label">
-          중요
+      {/* 1. 핵심지수 */}
+      <section className="yds-market-desk__block" aria-labelledby="market-block-indices">
+        <h2 id="market-block-indices" className="yds-market-desk__block-label">
+          핵심지수
         </h2>
         <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
+      </section>
+
+      {/* 2. 패닉지수 히스토리 (요약 + 차트) */}
+      <section className="yds-market-desk__block" aria-labelledby="market-block-history">
+        <h2 id="market-block-history" className="yds-market-desk__block-label">
+          패닉지수 흐름
+        </h2>
         <SectionErrorBoundary
           label="패닉지수 히스토리"
           fallback={
             <p className="yds-market-desk__fallback">패닉지수 히스토리를 불러올 수 없습니다.</p>
           }
         >
-          <PanicIndexHistorySection rows={safeHistory} />
+          <PanicIndexHistorySection rows={safeHistory} inlineChart defaultChartOpen />
         </SectionErrorBoundary>
       </section>
 
-      {/* C — 채권·유동성 (기본 접힘) */}
-      <details className="yds-market-desk__tier yds-market-desk__tier--c yds-market-desk__detail">
-        <summary className="yds-market-desk__detail-summary">상세 · 채권·유동성</summary>
+      {/* 3. 시장위치 · 행동 · 자산배분 */}
+      <section className="yds-market-desk__block" aria-labelledby="market-block-actions">
+        <h2 id="market-block-actions" className="yds-market-desk__block-label">
+          YDS 판단
+        </h2>
+        <div className="yds-market-desk__action-grid">
+          <div className="yds-market-desk__card-slot">
+            <YdsCompositeHero panicData={panicData} historyRows={safeHistory} />
+          </div>
+          <div className="yds-market-desk__card-slot">
+            <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
+          </div>
+          <div className="yds-market-desk__card-slot yds-market-desk__card-slot--alloc">
+            <YdsAllocationCenter panicData={panicData} />
+          </div>
+        </div>
+      </section>
+
+      {/* 4. 세부 — 채권·유동성 (접기) */}
+      <details className="yds-market-desk__detail">
+        <summary className="yds-market-desk__detail-summary">세부 분석 · 채권·유동성</summary>
         <CycleBondLiquiditySection
           panicData={panicData}
           snapshot={bondSnapshot.snapshot}

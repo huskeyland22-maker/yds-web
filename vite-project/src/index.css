@@ -20904,10 +20904,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-composite-hero {
-  margin-bottom: 8px;
+  margin-bottom: 0;
   padding: 10px 12px;
   border: 1px solid rgba(59, 130, 246, 0.24);
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.9));
+  overflow: auto;
 }
 
 .yds-composite-hero__head {
@@ -21204,10 +21205,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-action-signal {
-  margin-bottom: 8px;
+  margin-bottom: 0;
   padding: 6px 8px;
   border: 1px solid rgba(59, 130, 246, 0.2);
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
+  overflow: auto;
 }
 
 .yds-action-signal__title {
@@ -21333,10 +21335,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-allocation-center {
-  margin-bottom: 8px;
+  margin-bottom: 0;
   padding: 7px 8px;
   border: 1px solid rgba(59, 130, 246, 0.2);
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
+  overflow: auto;
 }
 
 .yds-allocation-center__head {
@@ -24476,6 +24479,61 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-market-desk__tier--a {
   padding-bottom: 0.25rem;
+}
+
+.yds-market-desk__block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.yds-market-desk__block-label {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-market-desk__action-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.yds-market-desk__card-slot {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.yds-market-desk__card-slot > section {
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .yds-market-desk__action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .yds-market-desk__card-slot > section {
+    min-height: 22rem;
+    height: 100%;
+  }
+
+  .yds-market-desk__card-slot--alloc {
+    grid-column: 1 / -1;
+  }
+
+  .yds-market-desk__card-slot--alloc > section {
+    min-height: auto;
+  }
 }
 
 .yds-market-desk__core-grid {
