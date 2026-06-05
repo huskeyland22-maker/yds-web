@@ -46,7 +46,7 @@ export default function CurrentMarketAnalysisPage() {
   const { asOf, hasLive } = report
 
   return (
-    <div className="yds-market-analysis min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-market-analysis min-w-0 w-full">
       <header className="yds-market-analysis__header">
         <div>
           {!simplified ? <YdsV1ReleaseBadge compact /> : null}
@@ -82,10 +82,10 @@ export default function CurrentMarketAnalysisPage() {
           시장 지표를 동기화하고 있습니다. 잠시만 기다려 주세요.
         </div>
       ) : (
-        <>
+        <div className="yds-market-analysis__body">
           <MarketAnalysisDeskCore panicData={panicData} cycleMetricHistory={history} />
-          <MarketAnalysisHubTop report={report} marketOnly />
-        </>
+          <MarketAnalysisHubTop report={report} marketOnly tier="detail" />
+        </div>
       )}
 
       {simplified ? <LaunchFooterNav /> : null}

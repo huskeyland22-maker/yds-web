@@ -36,9 +36,15 @@ function patternLabelToId(label) {
  *   report: ReturnType<typeof import("../../trading-zone/ydsCurrentMarketAnalysis.js").buildCurrentMarketAnalysisReport>
  *   simplified?: boolean
  *   marketOnly?: boolean
+ *   tier?: "detail"
  * }} props
  */
-export default function MarketAnalysisHubTop({ report, simplified = false, marketOnly = false }) {
+export default function MarketAnalysisHubTop({
+  report,
+  simplified = false,
+  marketOnly = false,
+  tier = undefined,
+}) {
   const hub = buildMarketHubTopViewModel(report)
   if (!hub.available) {
     return (
@@ -85,8 +91,17 @@ export default function MarketAnalysisHubTop({ report, simplified = false, marke
       : null
 
   return (
-    <div className={`yds-hub-top ${simplified ? "yds-hub-top--simple" : ""}`} aria-label="시장분석 Hub">
-      {!simplified ? (
+    <div
+      className={[
+        "yds-hub-top",
+        simplified ? "yds-hub-top--simple" : "",
+        tier === "detail" ? "yds-hub-top--tier-c" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      aria-label="시장분석 Hub"
+    >
+      {!simplified && !marketOnly ? (
         <div className="yds-hub-top__head">
           <YdsV1ReleaseBadge />
           <ConfidenceBadge
@@ -102,22 +117,14 @@ export default function MarketAnalysisHubTop({ report, simplified = false, marke
 
       {!marketOnly ? <MarketDashboardSummary hub={hub} report={report} compact={simplified} /> : null}
 
-      {!marketOnly ? <RecommendationJourneyStrip step="hub" /> : (
-        <nav className="yds-journey-strip" aria-label="다음 단계">
-          <span className="yds-journey-strip__label">다음 단계</span>
-          <div className="yds-journey-strip__links">
-            <Link to="/stock-picks" className="yds-journey-strip__link yds-journey-strip__link--primary">
-              {UI_PAGE.stockPicks?.title ?? "종목추천"}
-            </Link>
-            <Link to="/alert-center" className="yds-journey-strip__link">
-              알림
-            </Link>
-          </div>
-        </nav>
-      )}
+      {!marketOnly ? <RecommendationJourneyStrip step="hub" /> : null}
 
-      <details className="yds-hub-top__details" open={marketOnly || undefined}>
-        <summary>{marketOnly ? "시장 해설 · 국면 · 패턴" : `${UI_BTN.detail} · 점수 구성 · 해석 · 패턴`}</summary>
+      <details className="yds-hub-top__details yds-hub-top__details--tier-c">
+        <summary>
+          {marketOnly || tier === "detail"
+            ? "상세 · 시장 해설 · 국면 · 패턴 · 신뢰도"
+            : `${UI_BTN.detail} · 점수 구성 · 해석 · 패턴`}
+        </summary>
 
         {!marketOnly && hub.hasStocks ? (
           <section className="yds-hub-top__card yds-hub-top__card--stocks">
@@ -205,7 +212,32 @@ export default function MarketAnalysisHubTop({ report, simplified = false, marke
           priB={report.currentState?.risk?.priB ?? null}
           patternSimilarity={report.marketEnvironment?.dominantPattern?.similarity ?? null}
         />
+
+        {(marketOnly || tier === "detail") ? (
+          <nav className="yds-hub-top__tier-links" aria-label="다음 단계">
+            <Link to="/stock-picks" className="yds-hub-top__tier-cta yds-hub-top__tier-cta--primary">
+              {UI_PAGE.stockPicks?.title ?? "종목추천"} →
+            </Link>
+            <Link to="/lab" className="yds-hub-top__tier-cta">
+              {UI_PAGE.research?.title ?? "연구실"} →
+            </Link>
+          </nav>
+        ) : null}
       </details>
+
+      {marketOnly || tier === "detail" ? (
+        <nav className="yds-journey-strip yds-journey-strip--market" aria-label="다음 단계">
+          <span className="yds-journey-strip__label">다음 단계</span>
+          <div className="yds-journey-strip__links">
+            <Link to="/stock-picks" className="yds-journey-strip__link yds-journey-strip__link--primary">
+              {UI_PAGE.stockPicks?.title ?? "종목추천"}
+            </Link>
+            <Link to="/alert-center" className="yds-journey-strip__link">
+              알림
+            </Link>
+          </div>
+        </nav>
+      ) : null}
     </div>
   )
 }
