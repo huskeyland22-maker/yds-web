@@ -70,17 +70,19 @@ export function buildAiDailyReportFromMarketAnalysis(report) {
   const topSectors = (report.sectorRadar?.topSectors ?? []).slice(0, 3)
   const sectorLabels = topSectors.map((s) => s.label)
 
-  const topStocksFromRadar = (report.stockRadar?.topBuys ?? []).slice(0, 3).map((s) => s.name)
+  const topStocksFromRadar = (report.stockRadar?.topBuys ?? []).slice(0, 3)
   const topStocksFromEntry = [...(report.entryRadar?.tradeCandidates ?? [])]
     .sort((a, b) => (b.entryScore ?? 0) - (a.entryScore ?? 0))
     .slice(0, 3)
     .map((c) => c.name)
-  const stockNames =
-    topStocksFromRadar.length >= 3
-      ? topStocksFromRadar
+  const stockPicks =
+    topStocksFromRadar.length >= 1
+      ? topStocksFromRadar.slice(0, 3)
       : topStocksFromEntry.length
-        ? topStocksFromEntry
+        ? topStocksFromEntry.map((name, i) => ({ id: null, name, rank: i + 1, score: null }))
         : topStocksFromRadar
+
+  const stockNames = stockPicks.map((s) => (typeof s === "string" ? s : s.name))
 
   const allocation = report.portfolio?.allocation
 
@@ -133,7 +135,11 @@ export function buildAiDailyReportFromMarketAnalysis(report) {
   }
 
   const sectionE = {
-    items: stockNames.map((name, i) => ({ rank: i + 1, name })),
+    items: stockPicks.map((s, i) =>
+      typeof s === "string"
+        ? { rank: i + 1, name: s, id: null, score: null }
+        : { rank: s.rank ?? i + 1, name: s.name, id: s.id ?? null, score: s.score ?? null },
+    ),
     summary:
       stockNames.length > 0
         ? `${joinKoreanNames(stockNames)}를 우선 관찰하십시오.`

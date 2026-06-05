@@ -9,6 +9,7 @@ import {
   AI_DAILY_REPORT_LABEL,
 } from "../trading-zone/ydsAiDailyReportEngine.js"
 import { formatSectorRadarScore } from "../trading-zone/ydsPrecursorEnginePhase25.js"
+import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
 
 export default function AiDailyReportPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
@@ -50,6 +51,8 @@ export default function AiDailyReportPage() {
           현재 시장 분석
         </Link>
       </header>
+
+      <RecommendationJourneyStrip />
 
       {!report.available ? (
         <p className="yds-ai-report__empty">시장 분석 데이터가 없어 일일 리포트를 생성할 수 없습니다.</p>
@@ -118,7 +121,16 @@ export default function AiDailyReportPage() {
                 {sectionE.items.map((s) => (
                   <li key={`${s.rank}-${s.name}`}>
                     <span className="yds-ai-report__rank">{s.rank}</span>
-                    <span>{s.name}</span>
+                    {s.id ? (
+                      <Link to={`/watchlist#watchlist-${s.id}`} className="yds-ai-report__stock-link">
+                        {s.name}
+                      </Link>
+                    ) : (
+                      <span>{s.name}</span>
+                    )}
+                    {s.score != null ? (
+                      <span className="font-mono tabular-nums">{Math.round(s.score)}</span>
+                    ) : null}
                   </li>
                 ))}
               </ol>

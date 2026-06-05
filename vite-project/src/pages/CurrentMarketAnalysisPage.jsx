@@ -93,7 +93,7 @@ export default function CurrentMarketAnalysisPage() {
               ["yds-market-analysis__tab", isActive ? "is-active" : ""].filter(Boolean).join(" ")
             }
           >
-            시장 사이클
+            시장 사이클 (상세)
           </NavLink>
         </nav>
       ) : null}

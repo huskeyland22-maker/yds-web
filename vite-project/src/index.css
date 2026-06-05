@@ -24022,3 +24022,119 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     font-size: max(0.72rem, 12px);
   }
 }
+
+.yds-data-scope {
+  margin: 0 0 0.45rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  line-height: 1.45;
+  color: #64748b;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(42, 54, 72, 0.45);
+}
+
+.yds-data-scope strong {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.yds-data-scope a {
+  color: #60a5fa;
+}
+
+.yds-data-scope--compact {
+  font-size: max(0.6rem, 10px);
+}
+
+.yds-cycle-scope {
+  margin: 0 0.5rem 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.yds-cycle-scope__text {
+  margin: 0;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-cycle-scope__text a {
+  color: #7dd3fc;
+  font-weight: 600;
+}
+
+.reco-history-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.reco-history-search__label {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.reco-history-search__input {
+  flex: 1;
+  min-width: 10rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.72rem;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.6);
+  color: #e2e8f0;
+}
+
+.reco-history-search__clear {
+  font-size: 0.66rem;
+  color: #94a3b8;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.reco-history-page__link {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+  color: #60a5fa;
+}
+
+.reco-history-table__watch-link {
+  display: block;
+  font-size: 0.58rem;
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.reco-history-table__row--hit {
+  outline: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 4px;
+}
+
+.reco-history-table__empty {
+  padding: 0.75rem;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.yds-ai-report__stock-link {
+  color: #7dd3fc;
+  text-decoration: none;
+}
+
+.yds-perf-center__name-link {
+  color: #7dd3fc;
+  text-decoration: none;
+}
+
+.yds-perf-center__name-link:hover {
+  text-decoration: underline;
+}

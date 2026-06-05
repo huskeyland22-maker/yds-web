@@ -57,6 +57,11 @@ export default function PerformanceCenterPage() {
 
   const { sectionA, sectionB, sectionD, sectionE, counts } = report
 
+  const recoHistoryHref =
+    sectionE.bestStock?.name != null
+      ? `/recommendation-history?q=${encodeURIComponent(sectionE.bestStock.name)}`
+      : "/recommendation-history"
+
   return (
     <div className="yds-perf-center min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-perf-center__header">
@@ -71,7 +76,7 @@ export default function PerformanceCenterPage() {
         <Link to="/market-analysis" className="yds-perf-center__link">
           현재 시장 분석
         </Link>
-        <Link to="/recommendation-history" className="yds-perf-center__link">
+        <Link to={recoHistoryHref} className="yds-perf-center__link">
           추천 당시 기록
         </Link>
       </header>
@@ -196,7 +201,14 @@ export default function PerformanceCenterPage() {
                   {sectionD.rows.map((row) => (
                     <tr key={row.id}>
                       <td className="font-mono tabular-nums">{String(row.recommendedAt).slice(0, 10)}</td>
-                      <td className="yds-perf-center__name">{row.name}</td>
+                      <td className="yds-perf-center__name">
+                        <Link
+                          to={`/recommendation-history?q=${encodeURIComponent(row.name)}`}
+                          className="yds-perf-center__name-link"
+                        >
+                          {row.name}
+                        </Link>
+                      </td>
                       <td className="font-mono tabular-nums">{row.scoreDisplay}</td>
                       <td
                         className={[
@@ -237,7 +249,12 @@ export default function PerformanceCenterPage() {
                 <span className="yds-perf-center__top-key">최고 수익 종목</span>
                 {sectionE.bestStock ? (
                   <>
-                    <strong>{sectionE.bestStock.name}</strong>
+                    <Link
+                      to={`/recommendation-history?q=${encodeURIComponent(sectionE.bestStock.name)}`}
+                      className="yds-perf-center__name-link"
+                    >
+                      <strong>{sectionE.bestStock.name}</strong>
+                    </Link>
                     <span className="yds-perf-center__pct--up font-mono tabular-nums">
                       {sectionE.bestStock.returnDisplay}
                     </span>

@@ -30,7 +30,7 @@ import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
-import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
+import YdsCycleScopeBanner from "./components/market-analysis/YdsCycleScopeBanner.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import WatchlistCenterPage from "./pages/WatchlistCenterPage.jsx"
@@ -1438,6 +1438,7 @@ function App() {
               path="/cycle"
               element={
                 <div id="desk" className="market-cycle-page min-w-0">
+                  <YdsCycleScopeBanner />
                   <CycleErrorBoundary>
                     <PanicDeskDashboard
                       panicData={deskPanicData}

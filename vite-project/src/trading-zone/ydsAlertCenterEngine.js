@@ -117,17 +117,27 @@ function diffSnapshotToAlerts(prev, next, market, watchlist) {
   if (!prev) {
     for (const item of watchlist.sectionA.items.slice(0, 3)) {
       if (item.watchStateId !== "observe") continue
-      out.push({
-        id: alertId(["C", "boot", item.id]),
-        grade: "C",
-        category: "realtime",
-        subtype: "observe",
-        title: "일반 관찰",
-        body: `${item.name} (${item.symbol}) · ${item.sectorLabel} · Top ${item.rank}`,
-        at,
-        symbol: item.symbol,
-        stockName: item.name,
-      })
+      out.push(
+        withCauses(
+          {
+            id: alertId(["C", "boot", item.id]),
+            grade: "C",
+            category: "realtime",
+            subtype: "observe",
+            title: "일반 관찰",
+            body: `${item.name} (${item.symbol}) · ${item.sectorLabel} · Top ${item.rank}`,
+            at,
+            symbol: item.symbol,
+            stockName: item.name,
+            stockId: item.id,
+          },
+          [
+            "Watchlist 초기 스냅샷",
+            `Top ${item.rank} · ${item.sectorLabel}`,
+            item.explain?.stateBullets?.[0] ?? "관찰 상태",
+          ],
+        ),
+      )
     }
     return out
   }

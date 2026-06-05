@@ -94,7 +94,7 @@ function WatchlistCard({ item }) {
         <Link to="/alert-center" className="yds-watchlist__card-cta">
           알림 확인
         </Link>
-        <Link to="/recommendation-history" className="yds-watchlist__card-cta">
+        <Link to={`/recommendation-history?q=${encodeURIComponent(item.symbol)}`} className="yds-watchlist__card-cta">
           추천 기록
         </Link>
       </div>

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import { formatSectorRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase25.js"
 import { formatStockRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase26.js"
 import WhyExplainButton from "../trust/WhyExplainButton.jsx"
+import YdsV1DataScopeNotice from "../trust/YdsV1DataScopeNotice.jsx"
 
 /**
  * @param {{
@@ -31,6 +32,7 @@ export default function MarketDashboardSummary({ hub, report, compact = false })
 
   return (
     <div className="yds-dash-summary-v2" aria-label="5초 시장 요약">
+      <YdsV1DataScopeNotice compact />
       <div className="yds-dash-summary-v2__metrics">
         <div className="yds-dash-summary-v2__metric">
           <span className="yds-dash-summary-v2__key">
