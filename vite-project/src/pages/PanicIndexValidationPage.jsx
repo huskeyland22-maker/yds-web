@@ -24,6 +24,7 @@ import YdsPrecursorValidationSection from "../components/validation/YdsPrecursor
 import ResearchCoreLinks from "../components/validation/ResearchCoreLinks.jsx"
 import ResearchCategoryAccordion from "../components/validation/ResearchCategoryAccordion.jsx"
 import ResearchLabCategorizedSections from "../components/validation/ResearchLabCategorizedSections.jsx"
+import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 import YdsProductionCandidateSection from "../components/validation/YdsProductionCandidateSection.jsx"
 import YdsHyWeightSensitivityLabSection from "../components/validation/YdsHyWeightSensitivityLabSection.jsx"
 import YdsTariffShockDeepValidationSection from "../components/validation/YdsTariffShockDeepValidationSection.jsx"
@@ -209,10 +210,14 @@ export default function PanicIndexValidationPage() {
       </header>
 
       {!backtest.ok && backtest.reason === "insufficient_data" ? (
-        <p className="panic-validation-panel__warn" role="status">
-          표본이 부족합니다(주간 {backtest.sampleWeeks ?? 0}회). Cycle 히스토리를 더 쌓거나 확장 앵커 데이터를
-          확인해 주세요.
-        </p>
+        <YdsEmptyState
+          icon="📉"
+          title="Research 표본 부족"
+          description={`백테스트 주간 표본 ${backtest.sampleWeeks ?? 0}회 — Cycle 히스토리를 더 쌓거나 운영 데이터 연동 후 다시 확인하세요. 일반 투자 판단은 시장분석을 이용하세요.`}
+          primaryTo="/market-analysis"
+          primaryLabel="시장분석"
+          className="yds-empty-state--research"
+        />
       ) : null}
 
       <ResearchCoreLinks />

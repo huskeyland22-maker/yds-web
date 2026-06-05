@@ -11,6 +11,7 @@ import {
 } from "../trading-zone/ydsWatchlistCenterEngine.js"
 import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
 import WhyExplainButton from "../components/trust/WhyExplainButton.jsx"
+import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 
 /**
  * @param {import("../trading-zone/ydsWatchlistCenterEngine.js").buildWatchlistCenterFromMarketAnalysis extends (...args: any) => infer R ? R extends { sectionA: { items: (infer I)[] } } ? I : never : never} item
@@ -163,7 +164,15 @@ export default function WatchlistCenterPage() {
       <RecommendationJourneyStrip step="watchlist" />
 
       {!report.available ? (
-        <p className="yds-watchlist__empty">추천 종목 데이터가 없습니다. 현재 시장 분석을 먼저 확인하세요.</p>
+        <YdsEmptyState
+          icon="📋"
+          title="Watchlist 데이터 없음"
+          description="시장 분석이 준비되면 Stock Radar Top10이 표시됩니다. Cycle 데이터가 비어 있으면 기본 검증 데이터셋으로 표시됩니다."
+          primaryTo="/market-analysis"
+          primaryLabel="시장분석으로 이동"
+          secondaryTo="/start"
+          secondaryLabel="시작 가이드"
+        />
       ) : (
         <>
           <section className="yds-watchlist__section" aria-labelledby="watchlist-f">
@@ -271,9 +280,18 @@ export default function WatchlistCenterPage() {
               {stateFilter || priorityFilter ? " (필터 적용)" : ""}
             </p>
             <div className="yds-watchlist__cards">
-              {filteredItems.map((item) => (
-                <WatchlistCard key={item.id} item={item} />
-              ))}
+              {filteredItems.length ? (
+                filteredItems.map((item) => <WatchlistCard key={item.id} item={item} />)
+              ) : (
+                <YdsEmptyState
+                  icon="🔍"
+                  title="필터 결과 없음"
+                  description="선택한 상태·우선순위에 맞는 종목이 없습니다. 필터를 해제하거나 시장분석에서 추천 강도를 확인하세요."
+                  primaryTo="/market-analysis"
+                  primaryLabel="시장분석"
+                  className="yds-empty-state--inline"
+                />
+              )}
             </div>
           </section>
 

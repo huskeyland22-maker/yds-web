@@ -10,6 +10,7 @@ import {
 } from "../trading-zone/ydsAiDailyReportEngine.js"
 import { formatSectorRadarScore } from "../trading-zone/ydsPrecursorEnginePhase25.js"
 import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
+import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 
 export default function AiDailyReportPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
@@ -55,7 +56,13 @@ export default function AiDailyReportPage() {
       <RecommendationJourneyStrip />
 
       {!report.available ? (
-        <p className="yds-ai-report__empty">시장 분석 데이터가 없어 일일 리포트를 생성할 수 없습니다.</p>
+        <YdsEmptyState
+          icon="📝"
+          title="AI 리포트 생성 불가"
+          description="시장 단계 데이터가 준비되면 템플릿 기반 일일 리포트가 자동 생성됩니다."
+          primaryTo="/market-analysis"
+          primaryLabel="시장분석"
+        />
       ) : (
         <>
           <article className="yds-ai-report__narrative" aria-label="오늘의 종합 해석">

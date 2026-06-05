@@ -33,6 +33,56 @@ export default function MarketDashboardSummary({ hub, report, compact = false })
   return (
     <div className="yds-dash-summary-v2" aria-label="5초 시장 요약">
       <YdsV1DataScopeNotice compact />
+
+      <section className="yds-dash-summary-v2__hero" aria-label="5초 핵심 요약">
+        <div className="yds-dash-summary-v2__hero-market">
+          <span className="yds-dash-summary-v2__hero-emoji" aria-hidden>
+            {hub.stage?.emoji ?? "—"}
+          </span>
+          <div className="yds-dash-summary-v2__hero-block">
+            <p className="yds-dash-summary-v2__hero-label">현재 시장</p>
+            <p className="yds-dash-summary-v2__hero-value">
+              {regime?.label ?? hub.stage?.shortLabel ?? "—"}
+            </p>
+            <p className="yds-dash-summary-v2__hero-sub font-mono tabular-nums">
+              {hub.marketPosition.display}
+            </p>
+          </div>
+        </div>
+
+        <div className="yds-dash-summary-v2__hero-action">
+          <div className="yds-dash-summary-v2__hero-action-head">
+            <p className="yds-dash-summary-v2__hero-label">추천 행동</p>
+            <WhyExplainButton lines={hub.actionWhyLines} />
+          </div>
+          <p className="yds-dash-summary-v2__hero-action-text">{hub.recommendedAction}</p>
+        </div>
+
+        <div className="yds-dash-summary-v2__hero-stocks">
+          <div className="yds-dash-summary-v2__hero-stocks-head">
+            <p className="yds-dash-summary-v2__hero-label">추천 종목</p>
+            <Link to="/watchlist" className="yds-dash-summary-v2__hero-more">
+              Watchlist
+            </Link>
+          </div>
+          {stocks.length ? (
+            <ul className="yds-dash-summary-v2__hero-stock-list">
+              {stocks.map((s) => (
+                <li key={s.id}>
+                  <Link to={`/watchlist#watchlist-${s.id}`} className="yds-dash-summary-v2__hero-stock">
+                    <span className="font-mono tabular-nums">{s.rank}</span>
+                    <span>{s.name}</span>
+                    <span className="font-mono tabular-nums">{formatStockRadarScore(s.score)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="yds-dash-summary-v2__muted">추천 종목 산출 대기</p>
+          )}
+        </div>
+      </section>
+
       <div className="yds-dash-summary-v2__metrics">
         <div className="yds-dash-summary-v2__metric">
           <span className="yds-dash-summary-v2__key">
@@ -63,14 +113,6 @@ export default function MarketDashboardSummary({ hub, report, compact = false })
           <strong className="font-mono tabular-nums">{risk?.priB ?? "—"}</strong>
         </div>
       </div>
-
-      <section className="yds-dash-summary-v2__action">
-        <div className="yds-dash-summary-v2__action-head">
-          <h2 className="yds-dash-summary-v2__h2">추천 행동</h2>
-          <WhyExplainButton lines={hub.actionWhyLines} />
-        </div>
-        <p className="yds-dash-summary-v2__action-text">{hub.recommendedAction}</p>
-      </section>
 
       <div className="yds-dash-summary-v2__cols">
         <section className="yds-dash-summary-v2__col">

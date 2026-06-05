@@ -7,6 +7,7 @@ import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
 import StockRadarPickCard from "../stock-radar/StockRadarPickCard.jsx"
 import MarketDashboardSummary from "./MarketDashboardSummary.jsx"
 import RecommendationJourneyStrip from "../journey/RecommendationJourneyStrip.jsx"
+import YdsEmptyState from "../trust/YdsEmptyState.jsx"
 import { buildRegimeExplainBlock } from "../../trading-zone/ydsRegimeExplain.js"
 import { buildPatternExplainBlock } from "../../trading-zone/ydsPatternExplain.js"
 
@@ -36,7 +37,17 @@ function patternLabelToId(label) {
 export default function MarketAnalysisHubTop({ report, simplified = false }) {
   const hub = buildMarketHubTopViewModel(report)
   if (!hub.available) {
-    return <p className="yds-market-analysis__empty">시장분석 데이터를 불러오는 중입니다.</p>
+    return (
+      <YdsEmptyState
+        icon="⏳"
+        title="시장분석 준비 중"
+        description="Cycle 스냅샷을 불러오는 중입니다. 잠시 후 다시 시도하거나 시작 가이드를 확인하세요."
+        primaryTo="/start"
+        primaryLabel="시작 가이드"
+        secondaryTo="/faq"
+        secondaryLabel="FAQ"
+      />
+    )
   }
 
   const regimeExplain = buildRegimeExplainBlock({

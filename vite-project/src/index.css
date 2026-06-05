@@ -24138,3 +24138,269 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-perf-center__name-link:hover {
   text-decoration: underline;
 }
+
+/* —— Final UI Polish · 5초 Hero · Empty State —— */
+.yds-dash-summary-v2__hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(11, 18, 32, 0.75));
+}
+
+@media (min-width: 480px) {
+  .yds-dash-summary-v2__hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.yds-dash-summary-v2__hero-market {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.yds-dash-summary-v2__hero-emoji {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.yds-dash-summary-v2__hero-block {
+  min-width: 0;
+}
+
+.yds-dash-summary-v2__hero-label {
+  margin: 0 0 0.12rem;
+  font-size: max(0.62rem, 10px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-dash-summary-v2__hero-value {
+  margin: 0;
+  font-size: max(0.88rem, 14px);
+  font-weight: 700;
+  line-height: 1.3;
+  color: #f1f5f9;
+}
+
+.yds-dash-summary-v2__hero-sub {
+  margin: 0.15rem 0 0;
+  font-size: max(0.68rem, 11px);
+  color: #94a3b8;
+}
+
+.yds-dash-summary-v2__hero-action {
+  padding: 0.35rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: rgba(56, 189, 248, 0.05);
+  min-width: 0;
+}
+
+.yds-dash-summary-v2__hero-action-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.yds-dash-summary-v2__hero-action-text {
+  margin: 0.2rem 0 0;
+  font-size: max(0.8rem, 13px);
+  line-height: 1.45;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.yds-dash-summary-v2__hero-stocks {
+  min-width: 0;
+}
+
+.yds-dash-summary-v2__hero-stocks-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-bottom: 0.2rem;
+}
+
+.yds-dash-summary-v2__hero-more {
+  font-size: max(0.62rem, 10px);
+  font-weight: 600;
+  color: #7dd3fc;
+  text-decoration: none;
+}
+
+.yds-dash-summary-v2__hero-stock-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-dash-summary-v2__hero-stock {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr auto;
+  gap: 0.3rem;
+  align-items: center;
+  padding: 0.22rem 0;
+  font-size: max(0.72rem, 12px);
+  color: #cbd5e1;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.35);
+}
+
+.yds-dash-summary-v2__hero-stock:last-child {
+  border-bottom: none;
+}
+
+.yds-dash-summary-v2__hero-stock:hover {
+  color: #7dd3fc;
+}
+
+.yds-dash-summary-v2 {
+  margin-bottom: 0.75rem;
+}
+
+.yds-dash-summary-v2__metrics {
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.yds-dash-summary-v2__metric {
+  padding: 0.45rem 0.5rem;
+}
+
+.yds-dash-summary-v2__key {
+  font-size: max(0.62rem, 10px);
+}
+
+.yds-dash-summary-v2__metric strong {
+  font-size: max(0.76rem, 12px);
+}
+
+.yds-dash-summary-v2__h2 {
+  font-size: max(0.72rem, 11px);
+}
+
+.yds-dash-summary-v2__cols {
+  gap: 0.5rem;
+}
+
+.yds-dash-summary-v2__col {
+  padding: 0.5rem 0.55rem;
+}
+
+.yds-dash-summary-v2__list {
+  font-size: max(0.72rem, 12px);
+}
+
+.yds-empty-state {
+  margin: 0.75rem 0;
+  padding: 1.35rem 1rem;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.yds-empty-state--inline {
+  margin: 0.5rem 0 0;
+  grid-column: 1 / -1;
+}
+
+.yds-empty-state--research {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.yds-empty-state__icon {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-empty-state__title {
+  margin: 0 0 0.35rem;
+  font-size: max(0.88rem, 14px);
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-empty-state__desc {
+  margin: 0 auto 0.65rem;
+  max-width: 28rem;
+  font-size: max(0.74rem, 12px);
+  line-height: 1.55;
+  color: #94a3b8;
+}
+
+.yds-empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.yds-empty-state__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.75rem;
+  font-size: max(0.72rem, 12px);
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.yds-empty-state__btn--primary {
+  color: #0f172a;
+  border-color: rgba(56, 189, 248, 0.45);
+  background: #7dd3fc;
+}
+
+.yds-watchlist__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.yds-watchlist__card-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+  font-size: max(0.68rem, 11px);
+}
+
+.yds-watchlist__title,
+.yds-alert-center__title,
+.yds-perf-center__title,
+.panic-validation-page__title {
+  font-size: max(1.05rem, 18px);
+}
+
+@media (max-width: 430px) {
+  .yds-dash-summary-v2__hero {
+    padding: 0.5rem;
+  }
+
+  .yds-dash-summary-v2__hero-value,
+  .yds-dash-summary-v2__hero-action-text {
+    font-size: max(0.82rem, 13px);
+  }
+}

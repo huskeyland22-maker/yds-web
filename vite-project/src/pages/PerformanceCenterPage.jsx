@@ -12,6 +12,7 @@ import {
 } from "../trading-zone/ydsPerformanceCenterEngine.js"
 import PerformanceTradingTools from "../components/performance/PerformanceTradingTools.jsx"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
+import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 
 function StatCard({ label, value, tone = "neutral" }) {
   const toneClass =
@@ -82,9 +83,15 @@ export default function PerformanceCenterPage() {
       </header>
 
       {!report.available ? (
-        <p className="yds-perf-center__empty">
-          Paper Trading 기록이 없습니다. 현재 시장 분석에서 Entry Radar A/B 동기화 후 다시 확인하세요.
-        </p>
+        <YdsEmptyState
+          icon="📊"
+          title="성과 데이터 없음"
+          description="Paper Trading 기록이 없습니다. 시장분석 Entry Radar에서 A/B 동기화 후 성과·추천 이력을 확인할 수 있습니다."
+          primaryTo="/market-analysis"
+          primaryLabel="시장분석"
+          secondaryTo="/recommendation-history"
+          secondaryLabel="추천 이력"
+        />
       ) : (
         <>
           <section className="yds-perf-center__section" aria-labelledby="perf-center-a">

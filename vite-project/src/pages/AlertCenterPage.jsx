@@ -13,6 +13,7 @@ import {
 } from "../trading-zone/ydsAlertCenterEngine.js"
 import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
 import WhyExplainButton from "../components/trust/WhyExplainButton.jsx"
+import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 
 /**
  * @param {import("../trading-zone/ydsAlertCenterStorage.js").AlertRow} alert
@@ -125,7 +126,15 @@ export default function AlertCenterPage() {
       <RecommendationJourneyStrip step="alert" />
 
       {!report.available ? (
-        <p className="yds-alert-center__empty">알림을 생성할 수 없습니다. 시장 분석 데이터를 확인하세요.</p>
+        <YdsEmptyState
+          icon="🔔"
+          title="알림을 생성할 수 없음"
+          description="시장 분석 데이터가 준비되면 단계·종목·섹터 변화에 따라 알림이 자동 생성됩니다."
+          primaryTo="/market-analysis"
+          primaryLabel="시장분석 확인"
+          secondaryTo="/watchlist"
+          secondaryLabel="Watchlist"
+        />
       ) : (
         <>
           <section className="yds-alert-center__section" aria-labelledby="alert-e">
