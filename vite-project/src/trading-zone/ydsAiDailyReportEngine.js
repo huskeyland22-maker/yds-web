@@ -187,7 +187,7 @@ export function buildAiDailyReportFromMarketAnalysis(report) {
     sectionE,
     sectionF,
     notes: [
-      "현재 시장 분석·Sector/Stock/Entry Radar 읽기 전용 집약",
+      "현재 시장 분석·추천 섹터/종목/진입 신호 읽기 전용 집약",
       "투자 조언이 아닌 YDS 시그널 해석용 내부 리포트",
       "YDS 엔진 미수정",
     ],

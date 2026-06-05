@@ -15,7 +15,12 @@ export const TERM_REPLACE = {
   regime: "시장 국면",
   Pattern: "위험 패턴",
   pattern: "위험 패턴",
-  "Pattern Radar": "위험 패턴 Radar",
+  "Stock Radar": "종목 추천",
+  "Sector Radar": "추천 섹터",
+  "Entry Radar": "진입 신호",
+  Watchlist: "관심종목",
+  Research: "연구실",
+  Confidence: "신뢰도",
   "Live Pattern Radar": "실시간 위험 패턴",
 }
 
@@ -53,7 +58,7 @@ export const GLOSSARY_ENTRIES = [
   { id: "bull", title: "강세장형", body: "공포가 낮고 추세가 양호한 구간 프로파일." },
   {
     id: "stock-radar",
-    title: "Stock Radar 점수",
+    title: "종목 추천 점수",
     body: "V1은 전략 기반 점수입니다. 종합 = 0.4×시장적합 + 0.25×섹터 + 0.2×기술추세 + 0.15×거래량점수. 거래량·RSI·이평은 Trading Zone·PRI 기반 추정이며 실시간 시세는 Phase 26.1 예정입니다. 상세: docs/STOCK_RADAR_SCORING.md",
   },
 ]

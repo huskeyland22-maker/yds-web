@@ -2,16 +2,16 @@ import { useId, useState } from "react"
 
 /** @type {Record<number, string>} */
 export const VALIDATION_PHASE_SUBTITLES = {
-  36: "Alert Center",
-  35: "Watchlist Center",
+  36: "알림",
+  35: "관심종목",
   32: "Portfolio Builder",
   31: "Conviction Engine",
   30: "Performance Dashboard",
   29: "Auto Paper Trading (28.5)",
   28: "Trading Journal",
-  27: "Entry Radar",
-  26: "Stock Radar",
-  25: "Sector Radar",
+  27: "진입 신호",
+  26: "종목 추천",
+  25: "추천 섹터",
   22: "라이브 시장 비교",
   21: "조기경보 스코어카드",
   20: "패닉 타임머신",

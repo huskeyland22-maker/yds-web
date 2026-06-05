@@ -56,7 +56,7 @@ export const STOCK_RADAR_MARKET_FILTERS = {
 export const STOCK_RADAR_PIPELINE = [
   {
     id: "stock-radar",
-    label: "Stock Radar",
+    label: "종목 추천",
     status: "active",
     outputKey: "topBuys",
   },

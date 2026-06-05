@@ -1374,7 +1374,7 @@ function App() {
             <Route
               path="/watchlist"
               element={
-                <SectionErrorBoundary label="Watchlist">
+                <SectionErrorBoundary label="관심종목">
                   <WatchlistCenterPage />
                 </SectionErrorBoundary>
               }
@@ -1382,7 +1382,7 @@ function App() {
             <Route
               path="/alert-center"
               element={
-                <SectionErrorBoundary label="Alert Center">
+                <SectionErrorBoundary label="알림">
                   <AlertCenterPage />
                 </SectionErrorBoundary>
               }
@@ -1491,7 +1491,7 @@ function App() {
             <Route
               path="/lab"
               element={
-                <SectionErrorBoundary label="Research">
+                <SectionErrorBoundary label="연구실">
                   <PanicIndexValidationPage />
                 </SectionErrorBoundary>
               }

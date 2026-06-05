@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { UI_PAGE } from "../../utils/ydsUiLabels.js"
 
 /**
  * @param {{
@@ -21,7 +22,7 @@ export default function RecommendationJourneyStrip({ step = "hub", stockId = nul
         ) : null}
         {step !== "watchlist" ? (
           <Link to={`/watchlist${watchHash}`} className="yds-journey-strip__link yds-journey-strip__link--primary">
-            {stockName ? `${stockName} · Watchlist` : "Watchlist"}
+            {stockName ? `${stockName} · ${UI_PAGE.watchlist.title}` : UI_PAGE.watchlist.title}
           </Link>
         ) : null}
         {step !== "alert" ? (

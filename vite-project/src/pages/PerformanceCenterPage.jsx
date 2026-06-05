@@ -13,6 +13,7 @@ import {
 import PerformanceTradingTools from "../components/performance/PerformanceTradingTools.jsx"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
+import { UI_PAGE } from "../utils/ydsUiLabels.js"
 
 function StatCard({ label, value, tone = "neutral" }) {
   const toneClass =
@@ -69,7 +70,7 @@ export default function PerformanceCenterPage() {
         <div>
           <YdsV1ReleaseBadge compact />
           <p className="yds-perf-center__kicker">{PERFORMANCE_CENTER_LABEL}</p>
-          <h1 className="yds-perf-center__title">{report.title}</h1>
+          <h1 className="yds-perf-center__title">{UI_PAGE.performance.title}</h1>
           <p className="yds-perf-center__sub">
             시장 위치 추천 성과 · Paper Trading · OPEN {counts.open} · CLOSED {counts.closed}
           </p>
@@ -86,7 +87,7 @@ export default function PerformanceCenterPage() {
         <YdsEmptyState
           icon="📊"
           title="성과 데이터 없음"
-          description="Paper Trading 기록이 없습니다. 시장분석 Entry Radar에서 A/B 동기화 후 성과·추천 이력을 확인할 수 있습니다."
+          description="Paper Trading 기록이 없습니다. 시장분석 진입 신호에서 A/B 동기화 후 성과·추천 이력을 확인할 수 있습니다."
           primaryTo="/market-analysis"
           primaryLabel="시장분석"
           secondaryTo="/recommendation-history"

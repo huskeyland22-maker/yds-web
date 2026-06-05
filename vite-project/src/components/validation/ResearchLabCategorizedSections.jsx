@@ -33,7 +33,7 @@ export default function ResearchLabCategorizedSections({ events, latestCycleRow,
   const cycleProps = { events, latestCycleRow, historyRows }
 
   return (
-    <div className="research-lab-categories" aria-label="Research 카테고리">
+    <div className="research-lab-categories" aria-label="연구실 카테고리">
       <ResearchAnalyticsTools latestCycleRow={latestCycleRow} historyRows={historyRows} />
 
       <ResearchCategoryAccordion
@@ -66,7 +66,7 @@ export default function ResearchLabCategorizedSections({ events, latestCycleRow,
         </ResearchSectionAccordion>
       </ResearchCategoryAccordion>
 
-      <ResearchCategoryAccordion title="패턴 분석" description="TP · 위험 패턴 Radar · 국면 탐지">
+      <ResearchCategoryAccordion title="패턴 분석" description="TP · 위험 패턴 · 국면 탐지">
         <ResearchSectionAccordion title={VALIDATION_PHASE_SUBTITLES[5]}>
           <YdsPrecursorEnginePhase5Section {...cycleProps} />
         </ResearchSectionAccordion>

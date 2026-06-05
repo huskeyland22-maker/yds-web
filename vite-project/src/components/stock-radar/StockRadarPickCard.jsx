@@ -1,3 +1,4 @@
+import { UI_BTN } from "../../utils/ydsUiLabels.js"
 import { Link } from "react-router-dom"
 import { formatStockRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase26.js"
 import WhyExplainButton from "../trust/WhyExplainButton.jsx"
@@ -46,7 +47,7 @@ export default function StockRadarPickCard({ pick, compact = false, showJourney 
             {ex.confidence.label}
           </span>
         </div>
-        <WhyExplainButton label="왜 추천?" lines={ex.recommendReasons} />
+        <WhyExplainButton label={UI_BTN.whyRecommend} lines={ex.recommendReasons} />
       </header>
 
       {pick.status?.display ? <p className="yds-stock-pick__status-line">{pick.status.display}</p> : null}
@@ -74,7 +75,7 @@ export default function StockRadarPickCard({ pick, compact = false, showJourney 
       {showJourney && pick.id ? (
         <div className="yds-stock-pick__journey">
           <Link to={`/watchlist#watchlist-${pick.id}`} className="yds-stock-pick__cta">
-            Watchlist에서 보기
+            {UI_BTN.watchlist}
           </Link>
           <Link to="/alert-center" className="yds-stock-pick__cta yds-stock-pick__cta--muted">
             알림 확인

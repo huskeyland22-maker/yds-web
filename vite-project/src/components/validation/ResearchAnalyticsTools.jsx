@@ -36,7 +36,7 @@ export default function ResearchAnalyticsTools({
   return (
     <>
     <ResearchCategoryAccordion
-      title="Stock Radar"
+      title="종목 추천"
       description="종목 추천 · Breakdown · 추천 이유 (V2)"
     >
       <YdsPrecursorEnginePhase26Section latestCycleRow={latestCycleRow} historyRows={historyRows} />

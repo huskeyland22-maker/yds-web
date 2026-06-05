@@ -8,6 +8,9 @@ import StockRadarPickCard from "../stock-radar/StockRadarPickCard.jsx"
 import MarketDashboardSummary from "./MarketDashboardSummary.jsx"
 import RecommendationJourneyStrip from "../journey/RecommendationJourneyStrip.jsx"
 import YdsEmptyState from "../trust/YdsEmptyState.jsx"
+import YdsRiskPatternLabel from "../validation/YdsRiskPatternLabel.jsx"
+import { getPatternProfile } from "../../trading-zone/ydsPatternExplain.js"
+import { UI_BTN } from "../../utils/ydsUiLabels.js"
 import { buildRegimeExplainBlock } from "../../trading-zone/ydsRegimeExplain.js"
 import { buildPatternExplainBlock } from "../../trading-zone/ydsPatternExplain.js"
 
@@ -101,7 +104,7 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
       <RecommendationJourneyStrip step="hub" />
 
       <details className="yds-hub-top__details">
-        <summary>상세 보기 · 종목 Breakdown · 해석 · 패턴</summary>
+        <summary>{UI_BTN.detail} · 점수 구성 · 해석 · 패턴</summary>
 
         {hub.hasStocks ? (
           <section className="yds-hub-top__card yds-hub-top__card--stocks">
@@ -135,15 +138,42 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
           </ul>
         </section>
 
-        {patternExplain ? (
-          <section className="yds-hub-top__card">
-            <div className="yds-hub-top__card-head">
-              <h2 className="yds-hub-top__h2">위험 패턴</h2>
-              <WhyExplainButton
-                label="왜 관세형?"
-                lines={patternExplain.whyLines}
-              />
+        <section className="yds-hub-top__card yds-hub-top__card--pattern">
+          <div className="yds-hub-top__card-head">
+            <h2 className="yds-hub-top__h2">위험 패턴</h2>
+            {patternExplain ? (
+              <WhyExplainButton label="왜 이 패턴?" lines={patternExplain.whyLines} />
+            ) : null}
+          </div>
+          {topPattern?.label || topPattern?.id ? (
+            <div className="yds-hub-top__pattern-profile">
+              <p className="yds-hub-top__pattern-line">
+                <YdsRiskPatternLabel
+                  patternId={topPattern.id}
+                  patternLabel={topPattern.label}
+                  showInfo={false}
+                />
+              </p>
+              {(() => {
+                const pid = topPattern.id ?? patternLabelToId(topPattern.label)
+                const profile = getPatternProfile(pid)
+                return profile ? (
+                  <p className="yds-hub-top__pattern-explain">
+                    <span className="yds-hub-top__pattern-tagline">({profile.tagline})</span>{" "}
+                    {profile.explain}
+                  </p>
+                ) : null
+              })()}
+              {topPattern.similarity != null ? (
+                <p className="yds-hub-top__pattern-sim font-mono tabular-nums">
+                  유사도 {Math.round(topPattern.similarity)}%
+                </p>
+              ) : null}
             </div>
+          ) : (
+            <p className="yds-hub-top__muted">우세 위험 패턴 없음</p>
+          )}
+          {patternExplain?.contributors?.length ? (
             <ul className="yds-hub-top__reasons">
               {patternExplain.contributors.map((c) => (
                 <li key={c.metric}>
@@ -151,8 +181,8 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
                 </li>
               ))}
             </ul>
-          </section>
-        ) : null}
+          ) : null}
+        </section>
 
         <ConfidenceExplainPanel
           confidenceScore={hub.confidenceScore}

@@ -6,7 +6,7 @@
 export const WATCH_STATE_EXPLAIN = {
   observe: {
     title: "관찰",
-    bullets: ["진입 신호 대기", "Stock Radar·Entry 등급 점검", "시장 단계와 섹터 강도 확인"],
+    bullets: ["진입 신호 대기", "종목 추천·진입 등급 점검", "시장 단계와 섹터 강도 확인"],
   },
   dip_wait: {
     title: "눌림대기",

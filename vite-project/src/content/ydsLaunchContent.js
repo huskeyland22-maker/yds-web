@@ -48,11 +48,11 @@ export const START_GUIDE_STEPS = [
   },
   {
     step: 2,
-    title: "Watchlist 확인",
+    title: "관심종목 확인",
     time: "약 1분",
     body: "진입 가능·눌림·익절 대기 등 매매 준비 상태를 종목 카드로 관리합니다.",
     path: "/watchlist",
-    cta: "Watchlist",
+    cta: "관심종목",
   },
   {
     step: 3,

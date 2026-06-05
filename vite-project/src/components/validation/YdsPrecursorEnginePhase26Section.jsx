@@ -48,7 +48,7 @@ export default function YdsPrecursorEnginePhase26Section({
       aria-labelledby="yds-precursor-engine-p26-title"
     >
       <h2 id="yds-precursor-engine-p26-title" className="panic-validation-panel__h2">
-        Stock Radar · 설명 가능 추천 (V2)
+        종목 추천 · 설명 가능 추천 (V2)
       </h2>
       <p className="panic-validation-panel__note">
         점수 엔진 동일 · Breakdown·추천 이유·경고·전략 기반 신뢰도 표시
@@ -60,7 +60,7 @@ export default function YdsPrecursorEnginePhase26Section({
       ) : null}
 
       {!available ? (
-        <p className="yds-precursor-engine-p26__empty">Sector Radar 또는 시장 데이터가 없어 산출할 수 없습니다.</p>
+        <p className="yds-precursor-engine-p26__empty">추천 섹터 또는 시장 데이터가 없어 산출할 수 없습니다.</p>
       ) : (
         <>
           <dl className="yds-precursor-engine-p26__inputs">

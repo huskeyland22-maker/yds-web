@@ -14,6 +14,7 @@ import {
 import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
 import WhyExplainButton from "../components/trust/WhyExplainButton.jsx"
 import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
+import { UI_BTN, UI_PAGE } from "../utils/ydsUiLabels.js"
 
 /**
  * @param {import("../trading-zone/ydsAlertCenterStorage.js").AlertRow} alert
@@ -29,7 +30,7 @@ function AlertRowItem({ alert }) {
         <div className="yds-alert-center__row-title-row">
           <h3 className="yds-alert-center__row-title">{alert.title}</h3>
           {alert.causes?.length ? (
-            <WhyExplainButton label="왜 알림?" lines={alert.causes} />
+            <WhyExplainButton label={UI_BTN.whyAlert} lines={alert.causes} />
           ) : null}
         </div>
         <p className="yds-alert-center__row-text">{alert.body}</p>
@@ -51,7 +52,7 @@ function AlertRowItem({ alert }) {
         </p>
         {alert.stockId || alert.stockName ? (
           <Link to={watchLink} className="yds-alert-center__row-cta">
-            {alert.stockName ?? alert.symbol} · Watchlist에서 보기
+            {alert.stockName ?? alert.symbol} · {UI_BTN.watchlistFromAlert}
           </Link>
         ) : null}
       </div>
@@ -112,7 +113,7 @@ export default function AlertCenterPage() {
       <header className="yds-alert-center__header">
         <div>
           <p className="yds-alert-center__kicker">{ALERT_CENTER_LABEL}</p>
-          <h1 className="yds-alert-center__title">{report.title}</h1>
+          <h1 className="yds-alert-center__title">{UI_PAGE.alert.title}</h1>
           <p className="yds-alert-center__sub">
             {stage.display} · 기준 {report.asOf ?? "—"} · 히스토리 {report.historyCount}/
             {report.historyMax}
@@ -133,7 +134,7 @@ export default function AlertCenterPage() {
           primaryTo="/market-analysis"
           primaryLabel="시장분석 확인"
           secondaryTo="/watchlist"
-          secondaryLabel="Watchlist"
+          secondaryLabel={UI_PAGE.watchlist.title}
         />
       ) : (
         <>

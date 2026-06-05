@@ -36,6 +36,6 @@ export function buildRegimeExplainBlock(input) {
     regimeLabel: regimeLabel ?? "—",
     whyLines: whyLines.slice(0, 5),
     changeHints30d: changeHints.slice(0, 4),
-    note: "30일 상세 시계열은 Research · 국면 탐지에서 확인 (V1: 스냅샷·검증 로그 기반).",
+    note: "30일 상세 시계열은 연구실 · 국면 탐지에서 확인 (V1: 스냅샷·검증 로그 기반).",
   }
 }

@@ -1,6 +1,6 @@
 import { Activity, BarChart3, Bell, FileText, FlaskConical, ListChecks } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { getPrimaryNavItems } from "../../utils/appNavItems.js"
+import { getPrimaryNavItems, NAV_MOBILE_SHORT } from "../../utils/ydsUiLabels.js"
 
 const ICON_BY_PATH = {
   "/market-analysis": Activity,
@@ -12,14 +12,7 @@ const ICON_BY_PATH = {
   "/lab": FlaskConical,
 }
 
-const SHORT_LABEL = {
-  "/market-analysis": "시장분석",
-  "/watchlist": "Watch",
-  "/alert-center": "알림",
-  "/ai-daily-report": "AI",
-  "/performance-center": "성과",
-  "/lab": "Research",
-}
+const SHORT_LABEL = NAV_MOBILE_SHORT
 
 function buildNavItems() {
   return getPrimaryNavItems().map((item) => ({

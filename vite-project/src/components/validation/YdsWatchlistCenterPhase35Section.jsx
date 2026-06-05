@@ -36,7 +36,7 @@ export default function YdsWatchlistCenterPhase35Section({
   )
 
   if (!report.available) {
-    return <p className="yds-watchlist__empty">Watchlist를 생성할 수 없습니다.</p>
+    return <p className="yds-watchlist__empty">관심종목을 생성할 수 없습니다.</p>
   }
 
   return (
@@ -45,7 +45,7 @@ export default function YdsWatchlistCenterPhase35Section({
       <p className="yds-watchlist__sub">
         {report.stage.display} · Top {report.sectionA.items.length} ·{" "}
         <Link to="/watchlist" className="yds-watchlist__link">
-          Watchlist 센터 열기 →
+          관심종목 열기 →
         </Link>
       </p>
       <ol className="yds-watchlist__top-list">

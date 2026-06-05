@@ -11,7 +11,7 @@ import {
   ALERT_HISTORY_MAX,
 } from "./ydsAlertCenterStorage.js"
 
-export const ALERT_CENTER_LABEL = "Alert Center — Phase 36"
+export const ALERT_CENTER_LABEL = "알림 · YDS V1"
 
 /** @typedef {'S' | 'A' | 'B' | 'C'} AlertGradeId */
 
@@ -59,7 +59,7 @@ function stockAlertCauses(item, market) {
   const lines = []
   if (item.score != null) lines.push(`종합점수 ${item.scoreDisplay ?? item.score}`)
   if (item.sectorLabel) lines.push(`${item.sectorLabel} 섹터`)
-  if (item.watchStateLabel) lines.push(`Watchlist · ${item.watchStateLabel}`)
+  if (item.watchStateLabel) lines.push(`관심종목 · ${item.watchStateLabel}`)
   const stock = market.stockRadar?.topBuys?.find((s) => s.id === item.id)
   if (stock?.explain?.recommendReasons?.length) {
     lines.push(...stock.explain.recommendReasons.slice(0, 2))
@@ -132,7 +132,7 @@ function diffSnapshotToAlerts(prev, next, market, watchlist) {
             stockId: item.id,
           },
           [
-            "Watchlist 초기 스냅샷",
+            "관심종목 초기 스냅샷",
             `Top ${item.rank} · ${item.sectorLabel}`,
             item.explain?.stateBullets?.[0] ?? "관찰 상태",
           ],
@@ -341,7 +341,7 @@ export function buildAlertCenterFromMarketAnalysis(market, options = {}) {
 
   return {
     label: ALERT_CENTER_LABEL,
-    title: "Alert Center",
+    title: "알림",
     available: Boolean(market.stockRadar?.available ?? market.sectorRadar?.available),
     asOf: market.asOf,
     stage: {
@@ -374,7 +374,7 @@ export function buildAlertCenterFromMarketAnalysis(market, options = {}) {
       grades: ALERT_GRADES,
     },
     notes: [
-      "Market Analysis · Sector/Stock Radar · Watchlist 스냅샷 diff",
+      "시장분석 · 추천 섹터/종목 · 관심종목 스냅샷 diff",
       "히스토리 최근 100건 · localStorage",
       "YDS 엔진 미수정",
     ],

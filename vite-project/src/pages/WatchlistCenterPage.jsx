@@ -12,6 +12,7 @@ import {
 import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
 import WhyExplainButton from "../components/trust/WhyExplainButton.jsx"
 import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
+import { UI_BTN, UI_PAGE } from "../utils/ydsUiLabels.js"
 
 /**
  * @param {import("../trading-zone/ydsWatchlistCenterEngine.js").buildWatchlistCenterFromMarketAnalysis extends (...args: any) => infer R ? R extends { sectionA: { items: (infer I)[] } } ? I : never : never} item
@@ -31,7 +32,7 @@ function WatchlistCard({ item }) {
         </div>
         <span className="yds-watchlist__card-score font-mono tabular-nums">{item.adjustedScoreDisplay}</span>
         {item.explain ? (
-          <WhyExplainButton label="왜 관찰?" lines={item.explain.stateBullets} />
+          <WhyExplainButton label={UI_BTN.whyWatch} lines={item.explain.stateBullets} />
         ) : null}
       </header>
       {item.explain ? (
@@ -151,9 +152,9 @@ export default function WatchlistCenterPage() {
       <header className="yds-watchlist__header">
         <div>
           <p className="yds-watchlist__kicker">{WATCHLIST_CENTER_LABEL}</p>
-          <h1 className="yds-watchlist__title">{report.title}</h1>
+          <h1 className="yds-watchlist__title">{UI_PAGE.watchlist.title}</h1>
           <p className="yds-watchlist__sub">
-            Stock Radar Top10 · 기준 {report.asOf ?? "—"} · {stage.display}
+            {UI_PAGE.watchlist.subtitleSuffix} · 기준 {report.asOf ?? "—"} · {stage.display}
           </p>
         </div>
         <Link to="/market-analysis" className="yds-watchlist__link">
@@ -166,8 +167,8 @@ export default function WatchlistCenterPage() {
       {!report.available ? (
         <YdsEmptyState
           icon="📋"
-          title="Watchlist 데이터 없음"
-          description="시장 분석이 준비되면 Stock Radar Top10이 표시됩니다. Cycle 데이터가 비어 있으면 기본 검증 데이터셋으로 표시됩니다."
+          title="관심종목 데이터 없음"
+          description="시장 분석이 준비되면 종목 추천 Top10이 표시됩니다. Cycle 데이터가 비어 있으면 기본 검증 데이터셋으로 표시됩니다."
           primaryTo="/market-analysis"
           primaryLabel="시장분석으로 이동"
           secondaryTo="/start"

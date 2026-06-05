@@ -1,3 +1,4 @@
+import { UI_BTN, UI_PAGE } from "../../utils/ydsUiLabels.js"
 import { Link } from "react-router-dom"
 import { formatSectorRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase25.js"
 import { formatStockRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase26.js"
@@ -62,7 +63,7 @@ export default function MarketDashboardSummary({ hub, report, compact = false })
           <div className="yds-dash-summary-v2__hero-stocks-head">
             <p className="yds-dash-summary-v2__hero-label">추천 종목</p>
             <Link to="/watchlist" className="yds-dash-summary-v2__hero-more">
-              Watchlist
+              {UI_PAGE.watchlist.title}
             </Link>
           </div>
           {stocks.length ? (

@@ -43,7 +43,7 @@ export default function YdsAlertCenterPhase36Section({
         히스토리 {report.historyCount}건 · S {report.sectionA.counts.S} / A{" "}
         {report.sectionA.counts.A} ·{" "}
         <Link to="/alert-center" className="yds-alert-center__link">
-          Alert Center →
+          알림 →
         </Link>
       </p>
       {report.sectionA.items.slice(0, 5).map((a) => (

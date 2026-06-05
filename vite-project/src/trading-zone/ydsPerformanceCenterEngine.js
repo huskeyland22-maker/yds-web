@@ -10,7 +10,7 @@ import {
   inferPaperPositionSectorKey,
 } from "./ydsPaperTradingStorage.js"
 
-export const PERFORMANCE_CENTER_LABEL = "Performance Center — Phase 33"
+export const PERFORMANCE_CENTER_LABEL = "성과센터 · YDS V1"
 
 /** 동기간 벤치마크 추정용 연율 프록시(검증·공개 레이어, 실시간 시세 아님) */
 const BENCHMARK_ANNUAL_PROXY = {

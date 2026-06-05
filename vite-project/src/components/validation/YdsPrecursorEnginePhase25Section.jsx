@@ -66,7 +66,7 @@ export default function YdsPrecursorEnginePhase25Section({
       ) : null}
 
       {!available ? (
-        <p className="yds-precursor-engine-p25__empty">YDS 점수가 없어 Sector Radar를 산출할 수 없습니다.</p>
+        <p className="yds-precursor-engine-p25__empty">YDS 점수가 없어 추천 섹터를 산출할 수 없습니다.</p>
       ) : (
         <>
           <div className="yds-precursor-engine-p25__market-row">

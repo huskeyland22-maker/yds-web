@@ -8,7 +8,7 @@ import { loadPaperTrading, refreshPaperTradingPrices } from "./ydsPaperTradingSt
 import { loadPrecursorValidationLog } from "./ydsPrecursorValidationLogStorage.js"
 import { buildWatchlistItemExplain } from "./ydsWatchlistExplain.js"
 
-export const WATCHLIST_CENTER_LABEL = "Watchlist Center — Phase 35"
+export const WATCHLIST_CENTER_LABEL = "관심종목 · YDS V1"
 
 /** @typedef {'observe' | 'dip_wait' | 'entry_ready' | 'holding' | 'take_profit_wait'} WatchStateId */
 /** @typedef {'today' | 'week' | 'long_term'} WatchPriorityId */
@@ -222,7 +222,7 @@ export function buildWatchlistCenterFromMarketAnalysis(market) {
 
   return {
     label: WATCHLIST_CENTER_LABEL,
-    title: "Watchlist",
+    title: "관심종목",
     available: items.length > 0,
     asOf: market.asOf,
     stage: {
@@ -275,7 +275,7 @@ export function buildWatchlistCenterFromMarketAnalysis(market) {
       }),
     },
     notes: [
-      "Stock Radar Top10 + Entry Radar + Paper Trading + 트레이딩존 가격대",
+      "종목 추천 Top10 + 진입 신호 + Paper Trading + 트레이딩존 가격대",
       "YDS 엔진 미수정 · 매매 계획은 시드 가격대 기준",
       "실제 매매 전 본인 확인 필수",
     ],

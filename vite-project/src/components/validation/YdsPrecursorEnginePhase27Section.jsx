@@ -59,7 +59,7 @@ export default function YdsPrecursorEnginePhase27Section({
         {PRECURSOR_ENGINE_PHASE27_LABEL}
       </h2>
       <p className="panic-validation-panel__note">
-        Stock Radar → 진입등급 A~D · 지금 들어갈 종목 판단 (읽기 전용)
+        종목 추천 → 진입등급 A~D · 지금 들어갈 종목 판단 (읽기 전용)
       </p>
       <p className="yds-precursor-engine-p27__weights">{scoreWeightsDisplay}</p>
 
@@ -77,7 +77,7 @@ export default function YdsPrecursorEnginePhase27Section({
       </div>
 
       {!available ? (
-        <p className="yds-precursor-engine-p27__empty">Stock Radar 결과가 없어 Entry Radar를 산출할 수 없습니다.</p>
+        <p className="yds-precursor-engine-p27__empty">종목 추천 결과가 없어 진입 신호를 산출할 수 없습니다.</p>
       ) : (
         <>
           <div className="yds-precursor-engine-p27__block">

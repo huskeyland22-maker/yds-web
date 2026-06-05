@@ -15,7 +15,7 @@ export const PRECURSOR_ENGINE_PHASE25_LABEL = "Sector Radar — Phase 25"
 export const SECTOR_RADAR_PIPELINE = [
   {
     id: "sector-radar",
-    label: "Sector Radar",
+    label: "추천 섹터",
     status: "active",
     outputKey: "topSectors",
   },

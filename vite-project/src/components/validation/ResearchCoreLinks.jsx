@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 
 const CORE_LINKS = [
   { label: "시장분석", path: "/market-analysis" },
-  { label: "Watchlist", path: "/watchlist" },
+  { label: "관심종목", path: "/watchlist" },
   { label: "알림", path: "/alert-center" },
   { label: "AI 리포트", path: "/ai-daily-report" },
   { label: "성과", path: "/performance-center" },
@@ -20,7 +20,7 @@ export default function ResearchCoreLinks() {
         ))}
       </ul>
       <p className="research-core-links__note">
-        Radar·Paper·Journal Lab 미리보기는 V1에서 제거되었습니다. 시장분석 Hub·성과·Watchlist를 이용하세요.
+        Paper·Journal Lab 미리보기는 V1에서 제거되었습니다. 시장분석 Hub·성과·관심종목을 이용하세요.
       </p>
     </nav>
   )

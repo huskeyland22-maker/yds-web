@@ -74,7 +74,7 @@ export default function PerformanceDashboardPage() {
 
       {!report.available ? (
         <p className="yds-perf-dash__empty">
-          Paper Trading 기록이 없습니다. 현재 시장 분석에서 Entry Radar A/B 동기화 후 다시 확인하세요.
+          Paper Trading 기록이 없습니다. 현재 시장 분석에서 진입 신호 A/B 동기화 후 다시 확인하세요.
         </p>
       ) : (
         <>

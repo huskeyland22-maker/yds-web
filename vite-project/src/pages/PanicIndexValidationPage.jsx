@@ -25,6 +25,7 @@ import ResearchCoreLinks from "../components/validation/ResearchCoreLinks.jsx"
 import ResearchCategoryAccordion from "../components/validation/ResearchCategoryAccordion.jsx"
 import ResearchLabCategorizedSections from "../components/validation/ResearchLabCategorizedSections.jsx"
 import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
+import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import YdsProductionCandidateSection from "../components/validation/YdsProductionCandidateSection.jsx"
 import YdsHyWeightSensitivityLabSection from "../components/validation/YdsHyWeightSensitivityLabSection.jsx"
 import YdsTariffShockDeepValidationSection from "../components/validation/YdsTariffShockDeepValidationSection.jsx"
@@ -190,8 +191,8 @@ export default function PanicIndexValidationPage() {
     <div className="panic-validation-page min-w-0 px-3 py-4 sm:px-4">
       <header className="panic-validation-page__head">
         <div>
-          <p className="panic-validation-page__lab-badge">[ Research ] YDS V1</p>
-          <h1 className="panic-validation-page__title">Research</h1>
+          <p className="panic-validation-page__lab-badge">[ 연구실 ] YDS V1</p>
+          <h1 className="panic-validation-page__title">{UI_PAGE.research.title}</h1>
           <p className="panic-validation-page__sub">
             백테스트 · 전조엔진 · 패턴분석 · 검증 · 타임머신 · {backtest.periodStart ?? "—"} ~{" "}
             {backtest.periodEnd ?? "—"}
@@ -212,7 +213,7 @@ export default function PanicIndexValidationPage() {
       {!backtest.ok && backtest.reason === "insufficient_data" ? (
         <YdsEmptyState
           icon="📉"
-          title="Research 표본 부족"
+          title="연구실 표본 부족"
           description={`백테스트 주간 표본 ${backtest.sampleWeeks ?? 0}회 — Cycle 히스토리를 더 쌓거나 운영 데이터 연동 후 다시 확인하세요. 일반 투자 판단은 시장분석을 이용하세요.`}
           primaryTo="/market-analysis"
           primaryLabel="시장분석"

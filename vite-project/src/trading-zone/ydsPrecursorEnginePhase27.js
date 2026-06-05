@@ -87,7 +87,7 @@ const REGIME_RISK_PENALTY = {
 }
 
 export const ENTRY_RADAR_PIPELINE = [
-  { id: "entry-radar", label: "Entry Radar", status: "active", outputKey: "tradeCandidates" },
+  { id: "entry-radar", label: "진입 신호", status: "active", outputKey: "tradeCandidates" },
   {
     id: "conviction-engine",
     label: "Conviction Engine",

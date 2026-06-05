@@ -7,6 +7,7 @@ import { YDS_VALIDATION_EVENT_DATASET } from "../trading-zone/ydsHistoricalValid
 import { buildCurrentMarketAnalysisReport } from "../trading-zone/ydsCurrentMarketAnalysis.js"
 import MarketAnalysisHubTop from "../components/market-analysis/MarketAnalysisHubTop.jsx"
 import LaunchFirstVisitPanel from "../components/launch/LaunchFirstVisitPanel.jsx"
+import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import LaunchFooterNav from "../components/launch/LaunchFooterNav.jsx"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import {
@@ -57,11 +58,11 @@ export default function CurrentMarketAnalysisPage() {
         </div>
         {!simplified ? (
           <nav className="yds-market-analysis__core-links" aria-label="CORE 바로가기">
-            <Link to="/watchlist">Watchlist</Link>
-            <Link to="/alert-center">알림</Link>
+            <Link to="/watchlist">{UI_PAGE.watchlist.title}</Link>
+            <Link to="/alert-center">{UI_PAGE.alert.title}</Link>
             <Link to="/ai-daily-report">AI 리포트</Link>
-            <Link to="/performance-center">성과</Link>
-            <Link to="/lab">Research</Link>
+            <Link to="/performance-center">{UI_PAGE.performance.title}</Link>
+            <Link to="/lab">{UI_PAGE.research.title}</Link>
             <Link to="/glossary">용어</Link>
           </nav>
         ) : null}

@@ -193,7 +193,7 @@ export default function RecommendationHistoryPage() {
                   {row.symbol}
                   {row.watchId ? (
                     <Link to={`/watchlist#watchlist-${row.watchId}`} className="reco-history-table__watch-link">
-                      Watchlist
+                      관심종목
                     </Link>
                   ) : null}
                 </span>
