@@ -1,13 +1,31 @@
 import { Link } from "react-router-dom"
 import { buildMarketHubTopViewModel } from "../../utils/ydsMarketHubPresentation.js"
-import { formatSectorRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase25.js"
-import { formatStockRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase26.js"
 import ConfidenceBadge from "../trust/ConfidenceBadge.jsx"
 import ConfidenceExplainPanel from "../trust/ConfidenceExplainPanel.jsx"
 import WhyExplainButton from "../trust/WhyExplainButton.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
 import StockRadarPickCard from "../stock-radar/StockRadarPickCard.jsx"
+import MarketDashboardSummary from "./MarketDashboardSummary.jsx"
+import RecommendationJourneyStrip from "../journey/RecommendationJourneyStrip.jsx"
 import { buildRegimeExplainBlock } from "../../trading-zone/ydsRegimeExplain.js"
+import { buildPatternExplainBlock } from "../../trading-zone/ydsPatternExplain.js"
+
+/** @param {string | null | undefined} label */
+function patternLabelToId(label) {
+  if (!label) return null
+  const map = {
+    리먼형: "lehman",
+    코로나형: "covid",
+    관세형: "tariff",
+    SVB형: "svb",
+    강세장형: "bull",
+    엔캐리형: "yen_carry",
+  }
+  for (const [key, id] of Object.entries(map)) {
+    if (label.includes(key)) return id
+  }
+  return null
+}
 
 /**
  * @param {{
@@ -21,9 +39,6 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
     return <p className="yds-market-analysis__empty">시장분석 데이터를 불러오는 중입니다.</p>
   }
 
-  const { stage, allocation } = hub
-  const stockPct = allocation.stockPct ?? 0
-  const cashPct = allocation.cashPct ?? 100
   const regimeExplain = buildRegimeExplainBlock({
     regimeId: report.currentState?.regime?.id ?? null,
     regimeLabel: report.currentState?.regime?.label ?? null,
@@ -31,201 +46,102 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
     priA: report.currentState?.risk?.priA ?? null,
     priB: report.currentState?.risk?.priB ?? null,
     dominantPattern: report.marketEnvironment?.dominantPattern?.label ?? null,
-    durationLabel: report.marketEnvironment?.regimeDuration ?? null,
+    durationLabel: null,
   })
 
-  if (simplified) {
-    return (
-      <div className="yds-hub-top yds-hub-top--simple" aria-label="시장분석 첫 화면">
-        <section
-          className={[
-            "yds-hub-top__card yds-hub-top__card--stage",
-            stage.id ? `yds-hub-top__card--${stage.id}` : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          style={{ "--stage-color": stage.color }}
-        >
-          <h2 className="yds-hub-top__h2">현재 시장</h2>
-          <p className="yds-hub-top__stage-main">
-            <span aria-hidden>{stage.emoji}</span> {stage.shortLabel}
-          </p>
-          <p className="yds-hub-top__simple-pos font-mono tabular-nums">
-            시장 위치 {hub.marketPosition.display}
-          </p>
-        </section>
+  const topPattern = report.stockRadar?.inputs?.dominantPattern
+    ? {
+        id: patternLabelToId(report.stockRadar.inputs.dominantPattern),
+        label: report.stockRadar.inputs.dominantPattern,
+        similarity: report.marketEnvironment?.dominantPattern?.similarity ?? null,
+      }
+    : report.marketEnvironment?.dominantPattern
 
-        <section className="yds-hub-top__card">
-          <h2 className="yds-hub-top__h2">추천 행동</h2>
-          <p className="yds-hub-top__action">{hub.recommendedAction}</p>
-        </section>
-
-        <section className="yds-hub-top__card">
-          <h2 className="yds-hub-top__h2">추천 섹터</h2>
-          {hub.hasSectors ? (
-            <ol className="yds-hub-top__list">
-              {hub.topSectors.map((s) => (
-                <li key={s.id}>
-                  <span className="font-mono">{s.rank}</span>
-                  <span>{s.label}</span>
-                  <span className="font-mono tabular-nums">{formatSectorRadarScore(s.score)}</span>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="yds-hub-top__muted">—</p>
-          )}
-        </section>
-
-        <section className="yds-hub-top__card">
-          <h2 className="yds-hub-top__h2">추천 종목</h2>
-          {hub.hasStocks ? (
-            <ol className="yds-hub-top__list">
-              {hub.topStocks.map((s) => (
-                <li key={s.id}>
-                  <span className="font-mono">{s.rank}</span>
-                  <span>{s.name}</span>
-                  <span className="font-mono tabular-nums">{formatStockRadarScore(s.score)}</span>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="yds-hub-top__muted">—</p>
-          )}
-        </section>
-      </div>
-    )
-  }
+  const patternExplain =
+    topPattern?.id || topPattern?.label
+      ? buildPatternExplainBlock({
+          patternId: topPattern.id ?? patternLabelToId(topPattern.label),
+          similarity: topPattern.similarity ?? null,
+          inputs: {
+            priA: report.currentState?.risk?.priA ?? null,
+            priB: report.currentState?.risk?.priB ?? null,
+          },
+        })
+      : null
 
   return (
-    <div className="yds-hub-top" aria-label="시장분석 Hub">
-      <div className="yds-hub-top__head">
-        <YdsV1ReleaseBadge />
-        <ConfidenceBadge
-          level={hub.confidence.level}
-          tone={hub.confidence.tone}
-          score={hub.confidenceScore}
-        />
-        <Link to="/glossary" className="yds-hub-top__glossary-link">
-          용어 설명
-        </Link>
-      </div>
-
-      <section
-        className={[
-          "yds-hub-top__card yds-hub-top__card--stage",
-          stage.id ? `yds-hub-top__card--${stage.id}` : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        style={{ "--stage-color": stage.color }}
-      >
-        <div className="yds-hub-top__card-head">
-          <h2 className="yds-hub-top__h2">현재 단계</h2>
+    <div className={`yds-hub-top ${simplified ? "yds-hub-top--simple" : ""}`} aria-label="시장분석 Hub">
+      {!simplified ? (
+        <div className="yds-hub-top__head">
+          <YdsV1ReleaseBadge />
+          <ConfidenceBadge
+            level={hub.confidence.level}
+            tone={hub.confidence.tone}
+            score={hub.confidenceScore}
+          />
+          <Link to="/glossary" className="yds-hub-top__glossary-link">
+            용어
+          </Link>
         </div>
-        <p className="yds-hub-top__stage-main">
-          <span aria-hidden>{stage.emoji}</span> {stage.shortLabel}
-        </p>
-        <p className="yds-hub-top__stage-desc">{stage.description}</p>
-      </section>
+      ) : null}
 
-      <section className="yds-hub-top__card">
-        <div className="yds-hub-top__card-head">
-          <h2 className="yds-hub-top__h2">추천 행동</h2>
-          <WhyExplainButton lines={hub.actionWhyLines} />
-        </div>
-        <p className="yds-hub-top__action">{hub.recommendedAction}</p>
-      </section>
+      <MarketDashboardSummary hub={hub} report={report} compact={simplified} />
 
-      <section className="yds-hub-top__card">
-        <div className="yds-hub-top__card-head">
-          <h2 className="yds-hub-top__h2">추천 섹터</h2>
-        </div>
-        {hub.hasSectors ? (
-          <ol className="yds-hub-top__list">
-            {hub.topSectors.map((s) => (
-              <li key={s.id}>
-                <span className="font-mono">{s.rank}</span>
-                <span>{s.label}</span>
-                <span className="font-mono tabular-nums">{formatSectorRadarScore(s.score)}</span>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="yds-hub-top__muted">—</p>
-        )}
-      </section>
-
-      <section className="yds-hub-top__card yds-hub-top__card--stocks">
-        <div className="yds-hub-top__card-head">
-          <h2 className="yds-hub-top__h2">추천 종목</h2>
-          {hub.stockRadarMeta?.weightsDisplay ? (
-            <span className="yds-hub-top__muted">{hub.stockRadarMeta.weightsDisplay}</span>
-          ) : null}
-        </div>
-        {hub.hasStocks ? (
-          <div className="yds-hub-top__stock-cards">
-            {hub.topStocks.slice(0, 3).map((s) => (
-              <StockRadarPickCard key={s.id} pick={s} />
-            ))}
-          </div>
-        ) : (
-          <p className="yds-hub-top__muted">—</p>
-        )}
-        <p className="yds-hub-top__foot">
-          <Link to="/watchlist">Watchlist Top 10</Link> · <Link to="/lab">Stock Radar 상세</Link>
-        </p>
-      </section>
+      <RecommendationJourneyStrip step="hub" />
 
       <details className="yds-hub-top__details">
-        <summary>상세 · 시장 위치 · 해석 · 비중 · 신뢰도</summary>
-        <section className="yds-hub-top__card">
-          <div className="yds-hub-top__card-head">
-            <h2 className="yds-hub-top__h2">시장 위치</h2>
-            <WhyExplainButton lines={hub.marketPosition.whyLines} />
-          </div>
-          <p className="yds-hub-top__score font-mono tabular-nums">{hub.marketPosition.display}</p>
-        </section>
+        <summary>상세 보기 · 종목 Breakdown · 해석 · 패턴</summary>
+
+        {hub.hasStocks ? (
+          <section className="yds-hub-top__card yds-hub-top__card--stocks">
+            <h2 className="yds-hub-top__h2">추천 종목 상세</h2>
+            <div className="yds-hub-top__stock-cards">
+              {hub.topStocks.slice(0, 3).map((s) => (
+                <StockRadarPickCard key={s.id} pick={s} showJourney />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="yds-hub-top__card yds-hub-top__card--interpret">
           <div className="yds-hub-top__card-head">
             <h2 className="yds-hub-top__h2">시장 해석</h2>
-            <ConfidenceBadge level={hub.confidence.level} tone={hub.confidence.tone} score={hub.confidenceScore} />
+            <WhyExplainButton lines={hub.interpretationReasons} />
           </div>
           <p className="yds-hub-top__lead">{hub.interpretationLine}</p>
-          {hub.interpretationReasons.length ? (
-            <ul className="yds-hub-top__reasons">
-              {hub.interpretationReasons.map((r) => (
-                <li key={r}>{r}</li>
-              ))}
-            </ul>
-          ) : null}
         </section>
 
         <section className="yds-hub-top__card">
-          <h2 className="yds-hub-top__h2">시장 국면</h2>
+          <div className="yds-hub-top__card-head">
+            <h2 className="yds-hub-top__h2">시장 국면</h2>
+            <WhyExplainButton label="왜 경계?" lines={regimeExplain.whyLines} />
+          </div>
           <p className="yds-hub-top__lead">{regimeExplain.regimeLabel}</p>
           <ul className="yds-hub-top__reasons">
-            {regimeExplain.whyLines.map((line) => (
+            {regimeExplain.changeHints30d.map((line) => (
               <li key={line}>{line}</li>
             ))}
           </ul>
         </section>
 
-        <section className="yds-hub-top__card">
-          <h2 className="yds-hub-top__h2">권장 비중</h2>
-          <div className="yds-hub-top__alloc-row">
-            <span>주식 {stockPct}%</span>
-            <span>현금 {cashPct}%</span>
-          </div>
-          <div
-            className="yds-hub-top__alloc-bar"
-            role="img"
-            aria-label={`주식 ${stockPct}% 현금 ${cashPct}%`}
-          >
-            <span style={{ width: `${stockPct}%` }} />
-          </div>
-        </section>
+        {patternExplain ? (
+          <section className="yds-hub-top__card">
+            <div className="yds-hub-top__card-head">
+              <h2 className="yds-hub-top__h2">위험 패턴</h2>
+              <WhyExplainButton
+                label="왜 관세형?"
+                lines={patternExplain.whyLines}
+              />
+            </div>
+            <ul className="yds-hub-top__reasons">
+              {patternExplain.contributors.map((c) => (
+                <li key={c.metric}>
+                  {c.metric} — {c.note}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <ConfidenceExplainPanel
           confidenceScore={hub.confidenceScore}

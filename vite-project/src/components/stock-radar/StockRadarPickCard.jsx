@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom"
 import { formatStockRadarScore } from "../../trading-zone/ydsPrecursorEnginePhase26.js"
+import WhyExplainButton from "../trust/WhyExplainButton.jsx"
 
 /**
  * @param {{
  *   pick: {
+ *     id?: string
  *     rank?: number
  *     name: string
  *     symbol?: string
@@ -12,9 +14,10 @@ import { formatStockRadarScore } from "../../trading-zone/ydsPrecursorEnginePhas
  *     explain?: import("../../trading-zone/ydsStockRadarExplain.js").buildStockPickExplainability extends (...args: any) => infer R ? R : never
  *   }
  *   compact?: boolean
+ *   showJourney?: boolean
  * }} props
  */
-export default function StockRadarPickCard({ pick, compact = false }) {
+export default function StockRadarPickCard({ pick, compact = false, showJourney = true }) {
   const ex = pick.explain
   if (compact || !ex) {
     return (
@@ -39,18 +42,14 @@ export default function StockRadarPickCard({ pick, compact = false }) {
           <span className="yds-stock-pick__score font-mono tabular-nums">
             {formatStockRadarScore(pick.score)}
           </span>
-          <span
-            className="yds-stock-pick__conf"
-            title={ex.confidenceNote}
-          >
+          <span className="yds-stock-pick__conf" title={ex.confidenceNote}>
             {ex.confidence.label}
           </span>
         </div>
+        <WhyExplainButton label="왜 추천?" lines={ex.recommendReasons} />
       </header>
 
-      {pick.status?.display ? (
-        <p className="yds-stock-pick__status-line">{pick.status.display}</p>
-      ) : null}
+      {pick.status?.display ? <p className="yds-stock-pick__status-line">{pick.status.display}</p> : null}
 
       <dl className="yds-stock-pick__breakdown">
         {ex.breakdownRows.map((row) => (
@@ -60,32 +59,6 @@ export default function StockRadarPickCard({ pick, compact = false }) {
           </div>
         ))}
       </dl>
-
-      {ex.recommendReasons.length ? (
-        <div className="yds-stock-pick__reasons">
-          <p className="yds-stock-pick__sub">추천 이유</p>
-          <ul>
-            {ex.recommendReasons.map((r) => (
-              <li key={r}>{r}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {ex.strengths.length || ex.weaknesses.length ? (
-        <div className="yds-stock-pick__swot">
-          {ex.strengths.map((s) => (
-            <p key={s.label} className="yds-stock-pick__strength">
-              <span>강점</span> {s.label} — {s.detail}
-            </p>
-          ))}
-          {ex.weaknesses.map((w) => (
-            <p key={w.label} className="yds-stock-pick__weak">
-              <span>약점</span> {w.label} — {w.detail}
-            </p>
-          ))}
-        </div>
-      ) : null}
 
       {ex.warnings.length ? (
         <div className="yds-stock-pick__warn">
@@ -98,8 +71,19 @@ export default function StockRadarPickCard({ pick, compact = false }) {
         </div>
       ) : null}
 
+      {showJourney && pick.id ? (
+        <div className="yds-stock-pick__journey">
+          <Link to={`/watchlist#watchlist-${pick.id}`} className="yds-stock-pick__cta">
+            Watchlist에서 보기
+          </Link>
+          <Link to="/alert-center" className="yds-stock-pick__cta yds-stock-pick__cta--muted">
+            알림 확인
+          </Link>
+        </div>
+      ) : null}
+
       <p className="yds-stock-pick__formula">
-        <Link to="/glossary">산식 설명</Link> · {ex.formulaSummary}
+        <Link to="/glossary#stock-radar">산식 설명</Link>
       </p>
     </article>
   )

@@ -18,7 +18,7 @@ export default function GlossaryPage() {
 
       <dl className="yds-glossary__list">
         {GLOSSARY_ENTRIES.map((e) => (
-          <div key={e.id} className="yds-glossary__item">
+          <div key={e.id} id={e.id} className="yds-glossary__item">
             <dt>{e.title}</dt>
             <dd>{e.body}</dd>
           </div>

@@ -11,18 +11,26 @@ import {
   ALERT_CENTER_LABEL,
   ALERT_GRADES,
 } from "../trading-zone/ydsAlertCenterEngine.js"
+import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
+import WhyExplainButton from "../components/trust/WhyExplainButton.jsx"
 
 /**
  * @param {import("../trading-zone/ydsAlertCenterStorage.js").AlertRow} alert
  */
 function AlertRowItem({ alert }) {
+  const watchLink = alert.stockId ? `/watchlist#watchlist-${alert.stockId}` : "/watchlist"
   return (
     <article className={`yds-alert-center__row yds-alert-center__row--${alert.grade}`}>
       <span className={`yds-alert-center__grade yds-alert-center__grade--${alert.grade}`}>
         {alert.grade}
       </span>
       <div className="yds-alert-center__row-body">
-        <h3 className="yds-alert-center__row-title">{alert.title}</h3>
+        <div className="yds-alert-center__row-title-row">
+          <h3 className="yds-alert-center__row-title">{alert.title}</h3>
+          {alert.causes?.length ? (
+            <WhyExplainButton label="왜 알림?" lines={alert.causes} />
+          ) : null}
+        </div>
         <p className="yds-alert-center__row-text">{alert.body}</p>
         {alert.causes?.length ? (
           <div className="yds-alert-center__causes">
@@ -40,6 +48,11 @@ function AlertRowItem({ alert }) {
           ) : null}
           <time dateTime={alert.at}>{alert.at.slice(0, 16).replace("T", " ")}</time>
         </p>
+        {alert.stockId || alert.stockName ? (
+          <Link to={watchLink} className="yds-alert-center__row-cta">
+            {alert.stockName ?? alert.symbol} · Watchlist에서 보기
+          </Link>
+        ) : null}
       </div>
     </article>
   )
@@ -108,6 +121,8 @@ export default function AlertCenterPage() {
           현재 시장 분석
         </Link>
       </header>
+
+      <RecommendationJourneyStrip step="alert" />
 
       {!report.available ? (
         <p className="yds-alert-center__empty">알림을 생성할 수 없습니다. 시장 분석 데이터를 확인하세요.</p>

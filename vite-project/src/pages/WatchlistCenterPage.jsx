@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
@@ -9,6 +9,8 @@ import {
   WATCHLIST_CENTER_LABEL,
   WATCH_PRIORITIES,
 } from "../trading-zone/ydsWatchlistCenterEngine.js"
+import RecommendationJourneyStrip from "../components/journey/RecommendationJourneyStrip.jsx"
+import WhyExplainButton from "../components/trust/WhyExplainButton.jsx"
 
 /**
  * @param {import("../trading-zone/ydsWatchlistCenterEngine.js").buildWatchlistCenterFromMarketAnalysis extends (...args: any) => infer R ? R extends { sectionA: { items: (infer I)[] } } ? I : never : never} item
@@ -16,7 +18,10 @@ import {
 function WatchlistCard({ item }) {
   const { tradePlan: tp } = item
   return (
-    <article className={`yds-watchlist__card yds-watchlist__card--${item.watchStateTone}`}>
+    <article
+      id={`watchlist-${item.id}`}
+      className={`yds-watchlist__card yds-watchlist__card--${item.watchStateTone}`}
+    >
       <header className="yds-watchlist__card-head">
         <span className="yds-watchlist__rank font-mono tabular-nums">{item.rank}</span>
         <div className="yds-watchlist__card-titles">
@@ -24,6 +29,9 @@ function WatchlistCard({ item }) {
           <span className="yds-watchlist__card-symbol font-mono">{item.symbol}</span>
         </div>
         <span className="yds-watchlist__card-score font-mono tabular-nums">{item.adjustedScoreDisplay}</span>
+        {item.explain ? (
+          <WhyExplainButton label="왜 관찰?" lines={item.explain.stateBullets} />
+        ) : null}
       </header>
       {item.explain ? (
         <div className="yds-watchlist__explain">
@@ -82,6 +90,14 @@ function WatchlistCard({ item }) {
       {item.paperLinked ? (
         <p className="yds-watchlist__paper-tag">Paper Trading 연동</p>
       ) : null}
+      <div className="yds-watchlist__card-actions">
+        <Link to="/alert-center" className="yds-watchlist__card-cta">
+          알림 확인
+        </Link>
+        <Link to="/recommendation-history" className="yds-watchlist__card-cta">
+          추천 기록
+        </Link>
+      </div>
     </article>
   )
 }
@@ -122,6 +138,13 @@ export default function WatchlistCenterPage() {
 
   const { sectionB, sectionE, sectionF, stage } = report
 
+  useEffect(() => {
+    const hash = window.location.hash?.replace("#", "")
+    if (!hash) return
+    const el = document.getElementById(hash)
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [filteredItems.length])
+
   return (
     <div className="yds-watchlist min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-watchlist__header">
@@ -136,6 +159,8 @@ export default function WatchlistCenterPage() {
           현재 시장 분석
         </Link>
       </header>
+
+      <RecommendationJourneyStrip step="watchlist" />
 
       {!report.available ? (
         <p className="yds-watchlist__empty">추천 종목 데이터가 없습니다. 현재 시장 분석을 먼저 확인하세요.</p>

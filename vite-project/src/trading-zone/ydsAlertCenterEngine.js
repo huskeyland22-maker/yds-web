@@ -222,6 +222,7 @@ function diffSnapshotToAlerts(prev, next, market, watchlist) {
             at,
             symbol: item.symbol,
             stockName: item.name,
+            stockId: item.id,
           },
           [
             "진입가능 상태 전환",
@@ -246,6 +247,7 @@ function diffSnapshotToAlerts(prev, next, market, watchlist) {
           at,
           symbol: item.symbol,
           stockName: item.name,
+          stockId: item.id,
         },
         [
           `${typeMeta?.label ?? stockSubtype} 신호`,

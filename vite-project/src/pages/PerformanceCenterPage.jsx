@@ -71,6 +71,9 @@ export default function PerformanceCenterPage() {
         <Link to="/market-analysis" className="yds-perf-center__link">
           현재 시장 분석
         </Link>
+        <Link to="/recommendation-history" className="yds-perf-center__link">
+          추천 당시 기록
+        </Link>
       </header>
 
       {!report.available ? (

@@ -12,6 +12,7 @@ export const ALERT_HISTORY_MAX = 100
  *   at: string
  *   symbol?: string | null
  *   stockName?: string | null
+ *   stockId?: string | null
  *   causes?: string[]
  * }} AlertRow
  */
