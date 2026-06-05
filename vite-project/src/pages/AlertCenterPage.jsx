@@ -20,7 +20,7 @@ import { UI_BTN, UI_PAGE } from "../utils/ydsUiLabels.js"
  * @param {import("../trading-zone/ydsAlertCenterStorage.js").AlertRow} alert
  */
 function AlertRowItem({ alert }) {
-  const watchLink = alert.stockId ? `/watchlist#watchlist-${alert.stockId}` : "/watchlist"
+  const watchLink = alert.stockId ? `/stock-picks#watchlist-${alert.stockId}` : "/stock-picks"
   return (
     <article className={`yds-alert-center__row yds-alert-center__row--${alert.grade}`}>
       <span className={`yds-alert-center__grade yds-alert-center__grade--${alert.grade}`}>
@@ -133,7 +133,7 @@ export default function AlertCenterPage() {
           description="시장 분석 데이터가 준비되면 단계·종목·섹터 변화에 따라 알림이 자동 생성됩니다."
           primaryTo="/market-analysis"
           primaryLabel="시장분석 확인"
-          secondaryTo="/watchlist"
+          secondaryTo="/stock-picks"
           secondaryLabel={UI_PAGE.watchlist.title}
         />
       ) : (

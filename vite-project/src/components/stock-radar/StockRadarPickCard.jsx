@@ -74,7 +74,7 @@ export default function StockRadarPickCard({ pick, compact = false, showJourney 
 
       {showJourney && pick.id ? (
         <div className="yds-stock-pick__journey">
-          <Link to={`/watchlist#watchlist-${pick.id}`} className="yds-stock-pick__cta">
+          <Link to={`/stock-picks#watchlist-${pick.id}`} className="yds-stock-pick__cta">
             {UI_BTN.watchlist}
           </Link>
           <Link to="/alert-center" className="yds-stock-pick__cta yds-stock-pick__cta--muted">

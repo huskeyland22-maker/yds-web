@@ -25,16 +25,14 @@ import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
 import PwaUpdateToast from "./components/PwaUpdateToast.jsx"
 import SupabaseRawDebugPanel from "./components/SupabaseRawDebugPanel.jsx"
-import CycleErrorBoundary from "./components/CycleErrorBoundary.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
 import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
-import YdsCycleScopeBanner from "./components/market-analysis/YdsCycleScopeBanner.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
-import WatchlistCenterPage from "./pages/WatchlistCenterPage.jsx"
+import StockRecommendationPage from "./pages/StockRecommendationPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
 import GlossaryPage from "./pages/GlossaryPage.jsx"
 import YdsIntroPage from "./pages/YdsIntroPage.jsx"
@@ -52,8 +50,6 @@ import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
 import { isHomeV5ValidationRoute } from "./home-preview/homeV5ValidationRoute.js"
 import AppSidebar from "./components/layout/AppSidebar.jsx"
 import AppReleaseEnvBadge from "./components/AppReleaseEnvBadge.jsx"
-import PanicDeskDashboard from "./components/PanicDeskDashboard.jsx"
-import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
 import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
 import MobileDrawer from "./components/layout/MobileDrawer.jsx"
 import MobileShellDebugOverlay from "./components/layout/MobileShellDebugOverlay.jsx"
@@ -115,6 +111,11 @@ const FIELD_LABELS = {
   putCall: "Put/Call",
   highYield: "High Yield",
   gsBullBear: "GS B/B",
+}
+
+function WatchlistToStockPicksRedirect() {
+  const location = useLocation()
+  return <Navigate to={`/stock-picks${location.hash}`} replace />
 }
 
 function isIosStandalonePwa() {
@@ -1018,6 +1019,7 @@ function App() {
       path === "/performance-dashboard" ||
       path === "/performance-center" ||
       path === "/ai-daily-report" ||
+      path === "/stock-picks" ||
       path === "/watchlist" ||
       path === "/alert-center" ||
       path === "/glossary" ||
@@ -1372,11 +1374,17 @@ function App() {
               }
             />
             <Route
+              path="/stock-picks"
+              element={
+                <SectionErrorBoundary label="종목추천">
+                  <StockRecommendationPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
               path="/watchlist"
               element={
-                <SectionErrorBoundary label="관심종목">
-                  <WatchlistCenterPage />
-                </SectionErrorBoundary>
+                <WatchlistToStockPicksRedirect />
               }
             />
             <Route
@@ -1435,29 +1443,8 @@ function App() {
                 </SectionErrorBoundary>
               }
             />
-            <Route
-              path="/cycle"
-              element={
-                <div id="desk" className="market-cycle-page min-w-0">
-                  <YdsCycleScopeBanner />
-                  <CycleErrorBoundary>
-                    <PanicDeskDashboard
-                      panicData={deskPanicData}
-                      cycleMetricHistory={cycleMetricHistory}
-                      isStale={panicDataStale}
-                      asOfDateLabel={cycleDeskMeta.asOfDateLabel}
-                      aiReportDegraded={deskMarketReportDegraded}
-                      aiReportWarning={deskMarketReportWarning}
-                      tacticalView={tacticalView}
-                      strategicView={strategicView}
-                      macroView={macroView}
-                      marketState={marketState}
-                    />
-                  </CycleErrorBoundary>
-                </div>
-              }
-            />
-            <Route path="/macro-risk" element={<Navigate to="/cycle#bond-liquidity" replace />} />
+            <Route path="/cycle" element={<Navigate to="/market-analysis#market-desk" replace />} />
+            <Route path="/macro-risk" element={<Navigate to="/market-analysis#bond-liquidity" replace />} />
             <Route
               path="/value-chain"
               element={
@@ -1517,7 +1504,7 @@ function App() {
                     <DebugDataPage />
                   </SectionErrorBoundary>
                 ) : (
-                  <Navigate to="/cycle" replace />
+                  <Navigate to="/market-analysis" replace />
                 )
               }
             />
@@ -1529,7 +1516,7 @@ function App() {
                     <HomeV5PreviewPage />
                   </SectionErrorBoundary>
                 ) : (
-                  <Navigate to="/cycle" replace />
+                  <Navigate to="/market-analysis" replace />
                 )
               }
             />
@@ -1541,7 +1528,7 @@ function App() {
                     <HomeV5StrategyValidationPage />
                   </SectionErrorBoundary>
                 ) : (
-                  <Navigate to="/cycle" replace />
+                  <Navigate to="/market-analysis" replace />
                 )
               }
             />

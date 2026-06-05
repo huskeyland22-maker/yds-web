@@ -183,7 +183,7 @@ export default function AdminDashboardPage() {
           <button type="button" className="yds-admin__btn" onClick={() => void refresh()} disabled={refreshing}>
             새로고침
           </button>
-          <Link to="/cycle" className="yds-admin__link">
+          <Link to="/market-analysis" className="yds-admin__link">
             사이트
           </Link>
         </div>

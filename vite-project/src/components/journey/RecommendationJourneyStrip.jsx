@@ -21,8 +21,13 @@ export default function RecommendationJourneyStrip({ step = "hub", stockId = nul
           </Link>
         ) : null}
         {step !== "watchlist" ? (
-          <Link to={`/watchlist${watchHash}`} className="yds-journey-strip__link yds-journey-strip__link--primary">
-            {stockName ? `${stockName} · ${UI_PAGE.watchlist.title}` : UI_PAGE.watchlist.title}
+          <Link
+            to={`/stock-picks${watchHash}`}
+            className="yds-journey-strip__link yds-journey-strip__link--primary"
+          >
+            {stockName
+              ? `${stockName} · ${UI_PAGE.stockPicks?.title ?? UI_PAGE.watchlist.title}`
+              : (UI_PAGE.stockPicks?.title ?? UI_PAGE.watchlist.title)}
           </Link>
         ) : null}
         {step !== "alert" ? (

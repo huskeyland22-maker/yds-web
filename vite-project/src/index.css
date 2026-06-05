@@ -24418,6 +24418,153 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+
+/* IA V2 — 시장분석 데스크 / 종목추천 페이지 */
+.yds-market-desk {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.yds-market-desk__basis {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yds-market-desk__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.yds-market-desk__fallback {
+  margin: 0;
+  padding: 0.75rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.yds-stock-reco {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.yds-stock-reco__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.yds-stock-reco__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-stock-reco__title {
+  margin: 0.15rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-stock-reco__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-stock-reco__sub a {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.yds-stock-reco__link {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7dd3fc;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.yds-stock-reco__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.yds-stock-reco__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.yds-stock-reco__h2 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-stock-reco__glossary {
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-stock-reco__sector-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yds-stock-reco__sector-list li {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.45);
+  font-size: 0.78rem;
+  color: #cbd5e1;
+}
+
+.yds-stock-reco__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.65rem;
+}
+
+.yds-stock-reco__hint {
+  margin: 0;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-watchlist--embedded {
+  padding: 0;
+}
+
+.yds-watchlist--embedded .yds-watchlist__section:first-child {
+  margin-top: 0;
+}
+
 @media (max-width: 430px) {
   .yds-dash-summary-v2__hero {
     padding: 0.5rem;

@@ -4,6 +4,7 @@ import { getPrimaryNavItems, NAV_MOBILE_SHORT } from "../../utils/ydsUiLabels.js
 
 const ICON_BY_PATH = {
   "/market-analysis": Activity,
+  "/stock-picks": ListChecks,
   "/watchlist": ListChecks,
   "/alert-center": Bell,
   "/ai-daily-report": FileText,
@@ -40,7 +41,7 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
       p === "/"
     )
       return "market_analysis"
-    if (p.startsWith("/watchlist")) return "watchlist"
+    if (p.startsWith("/watchlist") || p.startsWith("/stock-picks")) return "stock_picks"
     if (p.startsWith("/alert-center")) return "alert_center"
     if (p.startsWith("/ai-daily-report")) return "ai_daily_report"
     if (p.startsWith("/performance-center") || p.startsWith("/performance-dashboard"))

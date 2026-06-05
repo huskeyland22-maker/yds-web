@@ -10,7 +10,7 @@ import RecommendationJourneyStrip from "../journey/RecommendationJourneyStrip.js
 import YdsEmptyState from "../trust/YdsEmptyState.jsx"
 import YdsRiskPatternLabel from "../validation/YdsRiskPatternLabel.jsx"
 import { getPatternProfile } from "../../trading-zone/ydsPatternExplain.js"
-import { UI_BTN } from "../../utils/ydsUiLabels.js"
+import { UI_BTN, UI_PAGE } from "../../utils/ydsUiLabels.js"
 import { buildRegimeExplainBlock } from "../../trading-zone/ydsRegimeExplain.js"
 import { buildPatternExplainBlock } from "../../trading-zone/ydsPatternExplain.js"
 
@@ -35,9 +35,10 @@ function patternLabelToId(label) {
  * @param {{
  *   report: ReturnType<typeof import("../../trading-zone/ydsCurrentMarketAnalysis.js").buildCurrentMarketAnalysisReport>
  *   simplified?: boolean
+ *   marketOnly?: boolean
  * }} props
  */
-export default function MarketAnalysisHubTop({ report, simplified = false }) {
+export default function MarketAnalysisHubTop({ report, simplified = false, marketOnly = false }) {
   const hub = buildMarketHubTopViewModel(report)
   if (!hub.available) {
     return (
@@ -99,14 +100,26 @@ export default function MarketAnalysisHubTop({ report, simplified = false }) {
         </div>
       ) : null}
 
-      <MarketDashboardSummary hub={hub} report={report} compact={simplified} />
+      {!marketOnly ? <MarketDashboardSummary hub={hub} report={report} compact={simplified} /> : null}
 
-      <RecommendationJourneyStrip step="hub" />
+      {!marketOnly ? <RecommendationJourneyStrip step="hub" /> : (
+        <nav className="yds-journey-strip" aria-label="다음 단계">
+          <span className="yds-journey-strip__label">다음 단계</span>
+          <div className="yds-journey-strip__links">
+            <Link to="/stock-picks" className="yds-journey-strip__link yds-journey-strip__link--primary">
+              {UI_PAGE.stockPicks?.title ?? "종목추천"}
+            </Link>
+            <Link to="/alert-center" className="yds-journey-strip__link">
+              알림
+            </Link>
+          </div>
+        </nav>
+      )}
 
-      <details className="yds-hub-top__details">
-        <summary>{UI_BTN.detail} · 점수 구성 · 해석 · 패턴</summary>
+      <details className="yds-hub-top__details" open={marketOnly || undefined}>
+        <summary>{marketOnly ? "시장 해설 · 국면 · 패턴" : `${UI_BTN.detail} · 점수 구성 · 해석 · 패턴`}</summary>
 
-        {hub.hasStocks ? (
+        {!marketOnly && hub.hasStocks ? (
           <section className="yds-hub-top__card yds-hub-top__card--stocks">
             <h2 className="yds-hub-top__h2">추천 종목 상세</h2>
             <div className="yds-hub-top__stock-cards">

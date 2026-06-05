@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react"
-import { Link, NavLink } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import { YDS_VALIDATION_EVENT_DATASET } from "../trading-zone/ydsHistoricalValidationEvents.js"
 import { buildCurrentMarketAnalysisReport } from "../trading-zone/ydsCurrentMarketAnalysis.js"
 import MarketAnalysisHubTop from "../components/market-analysis/MarketAnalysisHubTop.jsx"
+import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import LaunchFirstVisitPanel from "../components/launch/LaunchFirstVisitPanel.jsx"
 import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import LaunchFooterNav from "../components/launch/LaunchFooterNav.jsx"
@@ -26,7 +27,7 @@ export default function CurrentMarketAnalysisPage() {
   )
   const latestCycleRow = history[history.length - 1] ?? null
 
-  const latestSnapshot = useMemo(() => {
+  const panicData = useMemo(() => {
     if (!latestCycleRow) return null
     const panic = panicDataFromCycleRow(latestCycleRow)
     if (panic) return { ...latestCycleRow, ...panic, date: latestCycleRow.date ?? panic.updatedAt }
@@ -36,10 +37,10 @@ export default function CurrentMarketAnalysisPage() {
   const report = useMemo(
     () =>
       buildCurrentMarketAnalysisReport(YDS_VALIDATION_EVENT_DATASET, {
-        latestSnapshot,
+        latestSnapshot: panicData,
         extraRows: history,
       }),
-    [latestSnapshot, history],
+    [panicData, history],
   )
 
   const { asOf, hasLive } = report
@@ -58,7 +59,7 @@ export default function CurrentMarketAnalysisPage() {
         </div>
         {!simplified ? (
           <nav className="yds-market-analysis__core-links" aria-label="CORE 바로가기">
-            <Link to="/watchlist">{UI_PAGE.watchlist.title}</Link>
+            <Link to="/stock-picks">{UI_PAGE.stockPicks.title}</Link>
             <Link to="/alert-center">{UI_PAGE.alert.title}</Link>
             <Link to="/ai-daily-report">AI 리포트</Link>
             <Link to="/performance-center">{UI_PAGE.performance.title}</Link>
@@ -75,37 +76,16 @@ export default function CurrentMarketAnalysisPage() {
             setShowFull(true)
           }}
         />
-      ) : null}
-
-      {!simplified ? (
-        <nav className="yds-market-analysis__tabs" aria-label="시장분석 보기">
-          <NavLink
-            to="/market-analysis"
-            end
-            className={({ isActive }) =>
-              ["yds-market-analysis__tab", isActive ? "is-active" : ""].filter(Boolean).join(" ")
-            }
-          >
-            Hub
-          </NavLink>
-          <NavLink
-            to="/cycle"
-            className={({ isActive }) =>
-              ["yds-market-analysis__tab", isActive ? "is-active" : ""].filter(Boolean).join(" ")
-            }
-          >
-            시장 사이클 (상세)
-          </NavLink>
-        </nav>
-      ) : null}
-
-      {!hasLive ? (
+      ) : !hasLive ? (
         <div className="yds-market-analysis__loading" role="status" aria-live="polite">
           <span className="yds-market-analysis__loading-dot" aria-hidden />
           시장 지표를 동기화하고 있습니다. 잠시만 기다려 주세요.
         </div>
       ) : (
-        <MarketAnalysisHubTop report={report} simplified={simplified} />
+        <>
+          <MarketAnalysisDeskCore panicData={panicData} cycleMetricHistory={history} />
+          <MarketAnalysisHubTop report={report} marketOnly />
+        </>
       )}
 
       {simplified ? <LaunchFooterNav /> : null}

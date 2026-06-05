@@ -62,15 +62,15 @@ export default function MarketDashboardSummary({ hub, report, compact = false })
         <div className="yds-dash-summary-v2__hero-stocks">
           <div className="yds-dash-summary-v2__hero-stocks-head">
             <p className="yds-dash-summary-v2__hero-label">추천 종목</p>
-            <Link to="/watchlist" className="yds-dash-summary-v2__hero-more">
-              {UI_PAGE.watchlist.title}
+            <Link to="/stock-picks" className="yds-dash-summary-v2__hero-more">
+              {UI_PAGE.stockPicks?.title ?? UI_PAGE.watchlist.title}
             </Link>
           </div>
           {stocks.length ? (
             <ul className="yds-dash-summary-v2__hero-stock-list">
               {stocks.map((s) => (
                 <li key={s.id}>
-                  <Link to={`/watchlist#watchlist-${s.id}`} className="yds-dash-summary-v2__hero-stock">
+                  <Link to={`/stock-picks#watchlist-${s.id}`} className="yds-dash-summary-v2__hero-stock">
                     <span className="font-mono tabular-nums">{s.rank}</span>
                     <span>{s.name}</span>
                     <span className="font-mono tabular-nums">{formatStockRadarScore(s.score)}</span>
@@ -140,7 +140,7 @@ export default function MarketDashboardSummary({ hub, report, compact = false })
               {stocks.map((s) => (
                 <li key={s.id}>
                   <span className="font-mono">{s.rank}</span>
-                  <Link to={`/watchlist#watchlist-${s.id}`} className="yds-dash-summary-v2__stock-link">
+                  <Link to={`/stock-picks#watchlist-${s.id}`} className="yds-dash-summary-v2__stock-link">
                     {s.name}
                   </Link>
                   <span className="font-mono tabular-nums">{formatStockRadarScore(s.score)}</span>

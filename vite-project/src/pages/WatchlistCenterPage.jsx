@@ -104,7 +104,7 @@ function WatchlistCard({ item }) {
   )
 }
 
-export default function WatchlistCenterPage() {
+export default function WatchlistCenterPage({ embedded = false }) {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
     () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
@@ -148,21 +148,28 @@ export default function WatchlistCenterPage() {
   }, [filteredItems.length])
 
   return (
-    <div className="yds-watchlist min-w-0 px-3 py-4 sm:px-4">
-      <header className="yds-watchlist__header">
-        <div>
-          <p className="yds-watchlist__kicker">{WATCHLIST_CENTER_LABEL}</p>
-          <h1 className="yds-watchlist__title">{UI_PAGE.watchlist.title}</h1>
-          <p className="yds-watchlist__sub">
-            {UI_PAGE.watchlist.subtitleSuffix} · 기준 {report.asOf ?? "—"} · {stage.display}
-          </p>
-        </div>
-        <Link to="/market-analysis" className="yds-watchlist__link">
-          현재 시장 분석
-        </Link>
-      </header>
+    <div
+      className={[
+        "yds-watchlist min-w-0",
+        embedded ? "yds-watchlist--embedded" : "px-3 py-4 sm:px-4",
+      ].join(" ")}
+    >
+      {!embedded ? (
+        <header className="yds-watchlist__header">
+          <div>
+            <p className="yds-watchlist__kicker">{WATCHLIST_CENTER_LABEL}</p>
+            <h1 className="yds-watchlist__title">{UI_PAGE.watchlist.title}</h1>
+            <p className="yds-watchlist__sub">
+              {UI_PAGE.watchlist.subtitleSuffix} · 기준 {report.asOf ?? "—"} · {stage.display}
+            </p>
+          </div>
+          <Link to="/market-analysis" className="yds-watchlist__link">
+            현재 시장 분석
+          </Link>
+        </header>
+      ) : null}
 
-      <RecommendationJourneyStrip step="watchlist" />
+      {!embedded ? <RecommendationJourneyStrip step="watchlist" /> : null}
 
       {!report.available ? (
         <YdsEmptyState

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 
 const CORE_LINKS = [
   { label: "시장분석", path: "/market-analysis" },
-  { label: "관심종목", path: "/watchlist" },
+  { label: "종목추천", path: "/stock-picks" },
   { label: "알림", path: "/alert-center" },
   { label: "AI 리포트", path: "/ai-daily-report" },
   { label: "성과", path: "/performance-center" },
