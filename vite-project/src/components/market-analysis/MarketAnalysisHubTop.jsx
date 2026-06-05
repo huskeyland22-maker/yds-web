@@ -10,7 +10,7 @@ import RecommendationJourneyStrip from "../journey/RecommendationJourneyStrip.js
 import YdsEmptyState from "../trust/YdsEmptyState.jsx"
 import YdsRiskPatternLabel from "../validation/YdsRiskPatternLabel.jsx"
 import { getPatternProfile } from "../../trading-zone/ydsPatternExplain.js"
-import { UI_BTN, UI_PAGE } from "../../utils/ydsUiLabels.js"
+import { UI_BTN } from "../../utils/ydsUiLabels.js"
 import { buildRegimeExplainBlock } from "../../trading-zone/ydsRegimeExplain.js"
 import { buildPatternExplainBlock } from "../../trading-zone/ydsPatternExplain.js"
 
@@ -212,32 +212,7 @@ export default function MarketAnalysisHubTop({
           priB={report.currentState?.risk?.priB ?? null}
           patternSimilarity={report.marketEnvironment?.dominantPattern?.similarity ?? null}
         />
-
-        {(marketOnly || tier === "detail") ? (
-          <nav className="yds-hub-top__tier-links" aria-label="다음 단계">
-            <Link to="/stock-picks" className="yds-hub-top__tier-cta yds-hub-top__tier-cta--primary">
-              {UI_PAGE.stockPicks?.title ?? "종목추천"} →
-            </Link>
-            <Link to="/lab" className="yds-hub-top__tier-cta">
-              {UI_PAGE.research?.title ?? "연구실"} →
-            </Link>
-          </nav>
-        ) : null}
       </details>
-
-      {marketOnly || tier === "detail" ? (
-        <nav className="yds-journey-strip yds-journey-strip--market" aria-label="다음 단계">
-          <span className="yds-journey-strip__label">다음 단계</span>
-          <div className="yds-journey-strip__links">
-            <Link to="/stock-picks" className="yds-journey-strip__link yds-journey-strip__link--primary">
-              {UI_PAGE.stockPicks?.title ?? "종목추천"}
-            </Link>
-            <Link to="/alert-center" className="yds-journey-strip__link">
-              알림
-            </Link>
-          </div>
-        </nav>
-      ) : null}
     </div>
   )
 }

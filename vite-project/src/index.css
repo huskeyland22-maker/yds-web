@@ -14261,20 +14261,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-analysis__body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.yds-market-analysis__core-links {
-  display: none;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.65rem;
-  font-size: 0.68rem;
-}
-
-@media (min-width: 1024px) {
-  .yds-market-analysis__core-links {
-    display: flex;
-  }
+  gap: 0.75rem;
 }
 
 .yds-market-analysis__header {
@@ -22673,18 +22660,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 /* YDS V1 — 시장분석 Hub */
-.yds-market-analysis__core-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.55rem;
-  font-size: 0.68rem;
-}
-
-.yds-market-analysis__core-links a {
-  color: #60a5fa;
-  text-decoration: none;
-}
-
 .yds-market-analysis__tabs {
   display: flex;
   gap: 0.35rem;
@@ -24583,6 +24558,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-hub-top--tier-c {
   margin-top: 0;
+  margin-bottom: 0;
 }
 
 .yds-hub-top__details--tier-c {
@@ -24602,30 +24578,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-hub-top__details--tier-c > summary::-webkit-details-marker {
   display: none;
-}
-
-.yds-hub-top__tier-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
-  margin-top: 0.75rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-}
-
-.yds-hub-top__tier-cta {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #94a3b8;
-  text-decoration: none;
-}
-
-.yds-hub-top__tier-cta--primary {
-  color: #7dd3fc;
-}
-
-.yds-journey-strip--market {
-  margin-top: 0.25rem;
 }
 
 .yds-market-desk__basis {

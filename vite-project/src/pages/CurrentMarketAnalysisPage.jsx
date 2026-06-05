@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
@@ -8,7 +7,6 @@ import { buildCurrentMarketAnalysisReport } from "../trading-zone/ydsCurrentMark
 import MarketAnalysisHubTop from "../components/market-analysis/MarketAnalysisHubTop.jsx"
 import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import LaunchFirstVisitPanel from "../components/launch/LaunchFirstVisitPanel.jsx"
-import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import LaunchFooterNav from "../components/launch/LaunchFooterNav.jsx"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import {
@@ -57,16 +55,6 @@ export default function CurrentMarketAnalysisPage() {
               : "시장 데이터를 불러오는 중…"}
           </p>
         </div>
-        {!simplified ? (
-          <nav className="yds-market-analysis__core-links" aria-label="CORE 바로가기">
-            <Link to="/stock-picks">{UI_PAGE.stockPicks.title}</Link>
-            <Link to="/alert-center">{UI_PAGE.alert.title}</Link>
-            <Link to="/ai-daily-report">AI 리포트</Link>
-            <Link to="/performance-center">{UI_PAGE.performance.title}</Link>
-            <Link to="/lab">{UI_PAGE.research.title}</Link>
-            <Link to="/glossary">용어</Link>
-          </nav>
-        ) : null}
       </header>
 
       {simplified ? (
