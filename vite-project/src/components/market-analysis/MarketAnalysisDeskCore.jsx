@@ -58,8 +58,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <YdsBrandHero />
-      <YdsDualCycleHero panicData={panicData} />
-      <YdsDualCycleSummaryCard panicData={panicData} />
+      <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
+      <YdsDualCycleSummaryCard panicData={panicData} historyRows={safeHistory} />
 
       <section className="yds-market-desk__block" aria-labelledby="market-block-indices">
         <h2 id="market-block-indices" className="yds-market-desk__block-label">

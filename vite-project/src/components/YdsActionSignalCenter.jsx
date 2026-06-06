@@ -7,6 +7,7 @@ import {
 import {
   resolveMarketCycleStage,
 } from "../content/ydsMarketCycleDisplay.js"
+import { resolveMomentumLayer } from "../content/ydsMomentumLayer.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -105,6 +106,7 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
     if (!changeReasons.length) changeReasons.push("핵심 지표 변화 제한적")
 
     const marketStage = resolveMarketCycleStage(panicData?.fearGreed, panicData?.bofa)
+    const momentum = resolveMomentumLayer(panicData, historyRows ?? [])
 
     return {
       stageLabel: stage?.label ?? "중립구간",
@@ -114,6 +116,7 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
       template,
       changeReasons: changeReasons.slice(0, 2),
       marketStage,
+      momentum,
     }
   }, [panicData, historyRows])
 
@@ -155,6 +158,27 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
             <>
               <p className="m-0 yds-action-signal__headline">🟢 정상 — 보유 유지</p>
               <p className="m-0 yds-action-signal__line">✓ CNN·BofA 탐욕 임계 미만</p>
+            </>
+          )}
+        </div>
+
+        <div className="yds-action-signal__card">
+          <p className="m-0 yds-action-signal__block-title">단기 · Momentum</p>
+          {view.momentum.level !== "none" ? (
+            <>
+              <p className="m-0 yds-action-signal__headline yds-action-signal__headline--momentum">
+                {view.momentum.emoji} {view.momentum.shortLabel}
+              </p>
+              {view.momentum.explainLines.slice(0, 2).map((line) => (
+                <p key={line} className="m-0 yds-action-signal__line yds-action-signal__line--warn">
+                  ⚠ {line}
+                </p>
+              ))}
+            </>
+          ) : (
+            <>
+              <p className="m-0 yds-action-signal__headline">🟢 단기 안정</p>
+              <p className="m-0 yds-action-signal__line">CNN·BofA 급변 임계 미만</p>
             </>
           )}
         </div>

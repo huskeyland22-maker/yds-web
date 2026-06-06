@@ -8,7 +8,9 @@ import {
 } from "../../content/ydsMarketCycleDisplay.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import { resolveYdsStageNavigation } from "../../utils/ydsStageNavigation.js"
+import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import YdsDualCyclePositionNav from "./YdsDualCyclePositionNav.jsx"
+import YdsMomentumLayerCard from "./YdsMomentumLayerCard.jsx"
 
 function toNum(v) {
   const n = Number(v)
@@ -22,10 +24,10 @@ function fmtMetric(v, digits = 1) {
 }
 
 /**
- * Dual Cycle Hero — 공포(YDS) + 시장(CNN·BofA) 2축
- * @param {{ panicData?: object | null }} props
+ * Dual Cycle Hero — 공포(YDS) + 시장(CNN·BofA) 2축 + Momentum
+ * @param {{ panicData?: object | null; historyRows?: object[] }} props
  */
-export default function YdsDualCycleHero({ panicData = null }) {
+export default function YdsDualCycleHero({ panicData = null, historyRows = [] }) {
   const model = useMemo(() => {
     if (!panicData) return null
     const score = getFinalScore(panicData)
@@ -42,6 +44,9 @@ export default function YdsDualCycleHero({ panicData = null }) {
     const fearNav = resolveYdsStageNavigation(rounded)
     const marketNav = resolveMarketCycleNavigation(marketStage.id)
     const philosophy = getStagePhilosophy(fearStage.id)
+    const momentum = resolveMomentumLayer(panicData, historyRows, {
+      fearStageLabel: fearStage.label,
+    })
 
     return {
       score: rounded,
@@ -52,8 +57,9 @@ export default function YdsDualCycleHero({ panicData = null }) {
       bofa,
       marketStage,
       marketNav,
+      momentum,
     }
-  }, [panicData])
+  }, [panicData, historyRows])
 
   if (!model) {
     return (
@@ -146,6 +152,14 @@ export default function YdsDualCycleHero({ panicData = null }) {
       </div>
 
       <YdsDualCyclePositionNav fearNav={model.fearNav} marketNav={model.marketNav} />
+
+      {model.momentum.level !== "none" ? (
+        <YdsMomentumLayerCard
+          panicData={panicData}
+          historyRows={historyRows}
+          fearStageLabel={model.fearStage.label}
+        />
+      ) : null}
     </section>
   )
 }
