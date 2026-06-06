@@ -4,6 +4,7 @@ import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
+import MarketPositionSpotlight from "./MarketPositionSpotlight.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "../PanicIndexHistorySection.jsx"
@@ -61,6 +62,9 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         </h2>
         <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
       </section>
+
+      {/* 1.5 현재 시장 위치 — 1초 핵심 */}
+      <MarketPositionSpotlight panicData={panicData} />
 
       {/* 2. 패닉지수 히스토리 (요약 + 차트) */}
       <section className="yds-market-desk__block" aria-labelledby="market-block-history">

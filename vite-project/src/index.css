@@ -24728,3 +24728,165 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     font-size: max(0.82rem, 13px);
   }
 }
+
+/* 📍 현재 시장 위치 — 1초 스포트라이트 */
+.yds-market-spotlight {
+  padding: 0.85rem 1rem 1rem;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: linear-gradient(165deg, rgba(15, 23, 42, 0.96), rgba(8, 15, 28, 0.92));
+}
+
+.yds-market-spotlight--empty {
+  padding: 0.75rem 1rem;
+}
+
+.yds-market-spotlight__title {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #e2e8f0;
+}
+
+.yds-market-spotlight__empty {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.yds-market-spotlight__hero {
+  text-align: center;
+  margin-bottom: 0.85rem;
+}
+
+.yds-market-spotlight__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-market-spotlight__score {
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.75rem, 4.5vw, 2.35rem);
+  font-weight: 900;
+  line-height: 1.05;
+  color: #f8fafc;
+}
+
+.yds-market-spotlight__stage {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.35rem, 3.8vw, 1.85rem);
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--spotlight-stage-color, #22c55e);
+}
+
+.yds-market-spotlight__rail-wrap {
+  position: relative;
+  padding-bottom: 2.75rem;
+  min-width: 0;
+}
+
+.yds-market-spotlight__rail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(2px, 0.6vw, 6px);
+  width: 100%;
+  min-width: 0;
+}
+
+.yds-market-spotlight__segment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0.35rem 0.15rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--segment-color) 35%, transparent);
+  background: color-mix(in srgb, var(--segment-color) 12%, rgba(15, 23, 42, 0.6));
+  opacity: 0.72;
+  transition: opacity 0.15s ease;
+}
+
+.yds-market-spotlight__segment.is-active {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--segment-color) 65%, transparent);
+  background: color-mix(in srgb, var(--segment-color) 22%, rgba(15, 23, 42, 0.75));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--segment-color) 25%, transparent);
+}
+
+.yds-market-spotlight__segment-emoji {
+  font-size: clamp(0.75rem, 2.2vw, 1rem);
+  line-height: 1;
+}
+
+.yds-market-spotlight__segment-label {
+  font-size: clamp(0.52rem, 1.8vw, 0.68rem);
+  font-weight: 700;
+  color: #cbd5e1;
+  text-align: center;
+  line-height: 1.15;
+  word-break: keep-all;
+}
+
+.yds-market-spotlight__segment.is-active .yds-market-spotlight__segment-label {
+  color: #f1f5f9;
+}
+
+.yds-market-spotlight__marker {
+  position: absolute;
+  top: calc(100% + 0.15rem);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  pointer-events: none;
+  min-width: 4.5rem;
+}
+
+.yds-market-spotlight__marker-arrow {
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--marker-color, #22c55e);
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--marker-color) 50%, transparent));
+}
+
+.yds-market-spotlight__marker-score {
+  font-size: clamp(0.62rem, 1.9vw, 0.72rem);
+  font-weight: 800;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.yds-market-spotlight__marker-stage {
+  font-size: clamp(0.55rem, 1.6vw, 0.65rem);
+  font-weight: 700;
+  color: var(--marker-color, #22c55e);
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .yds-market-spotlight {
+    padding: 1rem 1.15rem 1.1rem;
+  }
+
+  .yds-market-spotlight__rail {
+    gap: 6px;
+  }
+
+  .yds-market-spotlight__segment {
+    flex-direction: row;
+    gap: 0.35rem;
+    padding: 0.45rem 0.35rem;
+  }
+
+  .yds-market-spotlight__segment-label {
+    font-size: 0.72rem;
+  }
+}
