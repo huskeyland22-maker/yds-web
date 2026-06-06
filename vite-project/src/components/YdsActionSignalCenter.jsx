@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react"
 import {
   YDS_CYCLE_TAGLINE,
+  YDS_HARVEST_TAGLINE,
   YDS_STAGE_RAIL_LABELS,
 } from "../content/ydsCyclePhilosophy.js"
+import {
+  resolveMarketCycleStage,
+} from "../content/ydsMarketCycleDisplay.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -99,6 +103,9 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
       }
     }
     if (!changeReasons.length) changeReasons.push("핵심 지표 변화 제한적")
+
+    const marketStage = resolveMarketCycleStage(panicData?.fearGreed, panicData?.bofa)
+
     return {
       stageLabel: stage?.label ?? "중립구간",
       stageEmoji: stage?.emoji ?? "⚪",
@@ -106,6 +113,7 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
       prevScore,
       template,
       changeReasons: changeReasons.slice(0, 2),
+      marketStage,
     }
   }, [panicData, historyRows])
 
@@ -113,16 +121,42 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
 
   return (
     <section className="yds-action-signal trading-card-shell panic-v2-section" aria-label="YDS 행동 시그널 센터">
-      <p className="m-0 yds-action-signal__title">YDS 행동센터 · Compact</p>
+      <p className="m-0 yds-action-signal__title">오늘의 행동 · 공포 + 시장 사이클</p>
       <div className="yds-action-signal__cards">
         <div className="yds-action-signal__card">
-          <p className="m-0 yds-action-signal__block-title">오늘의 행동</p>
+          <p className="m-0 yds-action-signal__block-title">매수 · 공포 사이클</p>
           <p className="m-0 yds-action-signal__headline">
             {view.stageEmoji} {view.template.headline}
           </p>
           <p className="m-0 yds-action-signal__line">✓ {view.template.do[0] ?? "종목 탐색"}</p>
           <p className="m-0 yds-action-signal__line">✓ {view.template.do[1] ?? "기존 보유 유지"}</p>
           <p className="m-0 yds-action-signal__line yds-action-signal__line--warn">⚠ {view.template.caution}</p>
+        </div>
+
+        <div className="yds-action-signal__card">
+          <p className="m-0 yds-action-signal__block-title">
+            수확 · 시장 사이클
+            {view.marketStage ? (
+              <>
+                {" "}
+                {view.marketStage.emoji} {view.marketStage.label}
+              </>
+            ) : null}
+          </p>
+          {view.marketStage && view.marketStage.id !== "normal" ? (
+            <>
+              <p className="m-0 yds-action-signal__headline yds-action-signal__headline--harvest">
+                {view.marketStage.harvestGuide}
+              </p>
+              <p className="m-0 yds-action-signal__line">✓ 비중·현금 점검</p>
+              <p className="m-0 yds-action-signal__line yds-action-signal__line--warn">⚠ 추격매수·레버리지 자제</p>
+            </>
+          ) : (
+            <>
+              <p className="m-0 yds-action-signal__headline">🟢 정상 — 보유 유지</p>
+              <p className="m-0 yds-action-signal__line">✓ CNN·BofA 탐욕 임계 미만</p>
+            </>
+          )}
         </div>
 
         <div className="yds-action-signal__card">
@@ -176,6 +210,9 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
         <p className="m-0 yds-action-signal__philosophy-title">YDS 철학</p>
         <p className="m-0 yds-action-signal__philosophy-stages">{YDS_STAGE_RAIL_LABELS}</p>
         <p className="m-0 yds-action-signal__philosophy-quote">{YDS_CYCLE_TAGLINE}</p>
+        <p className="m-0 yds-action-signal__philosophy-quote yds-action-signal__philosophy-quote--harvest">
+          {YDS_HARVEST_TAGLINE}
+        </p>
       </div>
     </section>
   )

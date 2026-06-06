@@ -10,6 +10,7 @@ export const YDS_STAGE_PHILOSOPHY = {
   overheated: {
     role: "리스크 관리",
     flowLabel: "리스크 관리",
+    segmentLabel: "리스크 관리 단계",
     hint: "현금 확보 · 추격 자제",
     introLine: "과열 — 리스크 관리",
     actionGuide: "추격 제한 · 현금 비중 확대",
@@ -18,6 +19,7 @@ export const YDS_STAGE_PHILOSOPHY = {
   neutral: {
     role: "관찰",
     flowLabel: "관찰",
+    segmentLabel: "관찰 단계",
     hint: "시장 모니터링 · 종목 리스트",
     introLine: "중립 — 관찰",
     actionGuide: "시장 모니터링 · 추격매수 제한",
@@ -26,6 +28,7 @@ export const YDS_STAGE_PHILOSOPHY = {
   interest: {
     role: "매수 준비",
     flowLabel: "쌓기",
+    segmentLabel: "쌓기 · 발굴 · 현금 확보",
     hint: "종목 발굴 · 현금 확보 · 매수 준비",
     introLine: "준비 — 종목 발굴 · 현금 확보 · 매수 준비",
     actionGuide: "종목 발굴 · 현금 확보 · 소량 진입 검토",
@@ -34,6 +37,7 @@ export const YDS_STAGE_PHILOSOPHY = {
   dca: {
     role: "핵심 매집",
     flowLabel: "실행",
+    segmentLabel: "핵심 실행 · 비중 확대",
     hint: "비중 확대 · 주력 투자",
     introLine: "분할매수 — 핵심 매집 · 비중 확대 · 주력 투자",
     actionGuide: "핵심 매집 · 분할매수 실행 · 우량주 중심",
@@ -42,6 +46,7 @@ export const YDS_STAGE_PHILOSOPHY = {
   panicBuy: {
     role: "보너스",
     flowLabel: "보너스",
+    segmentLabel: "보너스 · 극단 공포",
     hint: "극단적 공포 · 드문 기회",
     introLine: "패닉매수 — 보너스 · 극단적 공포",
     actionGuide: "보너스 구간 · 계획 현금 투입 · 80+만이 기회는 아님",
@@ -56,6 +61,20 @@ export const YDS_CYCLE_TAGLINE =
 
 export const YDS_CYCLE_TAGLINE_SUB =
   "패닉을 기다리는 시스템이 아닙니다. 준비·분할매수가 실전 기회의 중심입니다."
+
+export const YDS_HARVEST_TAGLINE = "과열을 예측하지 않는다. 과열을 관리한다."
+
+export const YDS_DUAL_CYCLE_DISCOVERY =
+  "YDS 총점 = 공포 사이클 · CNN + BofA = 시장 사이클"
+
+/** @type {{ id: YdsStageId; emoji: string; short: string; segment: string }[]} */
+export const YDS_FEAR_CYCLE_RAIL = [
+  { id: "overheated", emoji: "🔵", short: "과열", segment: "리스크 관리" },
+  { id: "neutral", emoji: "🟢", short: "중립", segment: "관찰" },
+  { id: "interest", emoji: "🟡", short: "준비", segment: "쌓기" },
+  { id: "dca", emoji: "🟠", short: "분할매수", segment: "실행" },
+  { id: "panicBuy", emoji: "🔴", short: "패닉", segment: "보너스" },
+]
 
 /** @type {{ id: YdsStageId; emoji: string; short: string }[]} */
 export const YDS_STAGE_FLOW_RAIL = [

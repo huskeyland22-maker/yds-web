@@ -1,4 +1,8 @@
-import { YDS_CYCLE_TAGLINE, YDS_STAGE_RAIL_LABELS } from "../content/ydsCyclePhilosophy.js"
+import {
+  YDS_CYCLE_TAGLINE,
+  YDS_HARVEST_TAGLINE,
+  YDS_STAGE_RAIL_LABELS,
+} from "../content/ydsCyclePhilosophy.js"
 
 export default function YdsPhilosophyCard() {
   return (
@@ -6,6 +10,7 @@ export default function YdsPhilosophyCard() {
       <p className="m-0 yds-philosophy-card__title">YDS 철학</p>
       <p className="m-0 yds-philosophy-card__stages">{YDS_STAGE_RAIL_LABELS}</p>
       <p className="m-0 yds-philosophy-card__quote">{YDS_CYCLE_TAGLINE}</p>
+      <p className="m-0 yds-philosophy-card__quote yds-philosophy-card__quote--harvest">{YDS_HARVEST_TAGLINE}</p>
     </section>
   )
 }
