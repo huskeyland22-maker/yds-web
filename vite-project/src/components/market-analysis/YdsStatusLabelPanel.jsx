@@ -4,7 +4,7 @@ import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveYdsStatusSnapshot } from "../../content/ydsStatusLabels.js"
 
 /**
- * 3초 이해용 Status Label 패널 — 상태 문구 우선 · 점수 보조
+ * Hero 핵심 — 사이클·패닉 점수 중심 (1초·2초·3초 이해)
  * @param {{ panicData?: object | null; historyRows?: object[] }} props
  */
 export default function YdsStatusLabelPanel({ panicData = null, historyRows = [] }) {
@@ -23,66 +23,58 @@ export default function YdsStatusLabelPanel({ panicData = null, historyRows = []
 
   return (
     <section className="yds-status-panel" aria-label="시장 상태 한눈에">
+      <div className="yds-status-panel__hero-grid">
+        <article
+          className="yds-status-panel__score-card"
+          aria-label={`사이클 위치 ${cycle.score}`}
+        >
+          <p className="yds-status-panel__card-label">사이클 위치</p>
+          <p className="yds-status-panel__hero-score font-mono tabular-nums">{cycle.score}</p>
+          <p
+            className="yds-status-panel__hero-status"
+            style={{ "--status-color": cycle.color }}
+          >
+            {cycle.emoji} {cycle.label}
+          </p>
+        </article>
+
+        <article
+          className="yds-status-panel__score-card"
+          aria-label={`패닉 강도 ${ydsScore}`}
+        >
+          <p className="yds-status-panel__card-label">패닉 강도</p>
+          <p className="yds-status-panel__hero-score font-mono tabular-nums">{ydsScore}</p>
+          <p
+            className="yds-status-panel__hero-status"
+            style={{ "--status-color": panic.color }}
+          >
+            {panic.emoji} {panic.label}
+          </p>
+        </article>
+      </div>
+
+      <div className="yds-status-panel__momentum">
+        <p className="yds-status-panel__momentum-key">Momentum</p>
+        <p
+          className="yds-status-panel__momentum-value"
+          style={{ "--status-color": momentum.color }}
+        >
+          {momentum.emoji} {momentum.label}
+        </p>
+        <p className="yds-status-panel__momentum-meta font-mono tabular-nums">
+          {momentumData.cnnDelta3d != null ? (
+            <span>CNN {momentumData.cnnDelta3d > 0 ? "+" : ""}{Math.round(momentumData.cnnDelta3d)}p</span>
+          ) : (
+            <span className="yds-status-panel__meta-muted">—</span>
+          )}
+        </p>
+      </div>
+
       {headline ? (
         <p className="yds-status-panel__headline">
           {headline.emoji} {headline.text}
         </p>
       ) : null}
-
-      <h2 className="yds-status-panel__title">지금 시장 상태</h2>
-
-      <div className="yds-status-panel__rows">
-        <div className="yds-status-panel__row">
-          <p className="yds-status-panel__key">사이클</p>
-          <p
-            className="yds-status-panel__status"
-            style={{ "--status-color": cycle.color }}
-          >
-            <span className="yds-status-panel__status-main">
-              {cycle.emoji} {cycle.label}
-            </span>
-          </p>
-          <p className="yds-status-panel__score font-mono tabular-nums">
-            {cycle.score}
-            <span className="yds-status-panel__score-denom"> / 100</span>
-          </p>
-        </div>
-
-        <div className="yds-status-panel__row">
-          <p className="yds-status-panel__key">패닉</p>
-          <p
-            className="yds-status-panel__status"
-            style={{ "--status-color": panic.color }}
-          >
-            <span className="yds-status-panel__status-main">
-              {panic.emoji} {panic.label}
-            </span>
-          </p>
-          <p className="yds-status-panel__score font-mono tabular-nums">
-            {ydsScore}
-            <span className="yds-status-panel__score-denom"> / 100</span>
-          </p>
-        </div>
-
-        <div className="yds-status-panel__row">
-          <p className="yds-status-panel__key">Momentum</p>
-          <p
-            className="yds-status-panel__status"
-            style={{ "--status-color": momentum.color }}
-          >
-            <span className="yds-status-panel__status-main">
-              {momentum.emoji} {momentum.label}
-            </span>
-          </p>
-          <p className="yds-status-panel__meta font-mono tabular-nums">
-            {momentumData.cnnDelta3d != null ? (
-              <span>CNN {momentumData.cnnDelta3d > 0 ? "+" : ""}{Math.round(momentumData.cnnDelta3d)}p</span>
-            ) : (
-              <span className="yds-status-panel__meta-muted">—</span>
-            )}
-          </p>
-        </div>
-      </div>
     </section>
   )
 }
