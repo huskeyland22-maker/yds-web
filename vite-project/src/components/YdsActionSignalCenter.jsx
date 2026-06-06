@@ -1,4 +1,8 @@
 import { useMemo, useState } from "react"
+import {
+  YDS_CYCLE_TAGLINE,
+  YDS_STAGE_RAIL_LABELS,
+} from "../content/ydsCyclePhilosophy.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -37,31 +41,31 @@ function buildSignalTemplate(stageId) {
   }
   if (stageId === "interest") {
     return {
-      headline: "분할 진입 준비",
-      caution: "성급한 비중 확대 금지",
-      do: ["분할 진입 준비", "관심 종목 압축"],
-      avoid: ["한 번에 비중 확대"],
-      priority: ["분할 진입 준비", "관심 종목 관찰", "현금 비중 유지"],
-      conclusion: "분할 진입 준비 강화",
+      headline: "1차 기회 · 좋은 기업 탐색",
+      caution: "패닉(80+)만 기다리지 않기",
+      do: ["좋은 기업 탐색", "소량 분할 검토", "관심 종목 압축"],
+      avoid: ["추격·일괄 매수"],
+      priority: ["좋은 기업 탐색", "분할 준비", "현금 비중 유지"],
+      conclusion: "1차 기회 · 준비 강화",
     }
   }
   if (stageId === "dca") {
     return {
-      headline: "분할매수 시작",
+      headline: "핵심 매집 · 분할매수 실행",
       caution: "일괄 매수 금지",
-      do: ["분할매수 시작", "우량주 중심 진입"],
+      do: ["분할매수 실행", "비중 확대", "우량주 중심"],
       avoid: ["일괄 매수"],
-      priority: ["분할매수 실행", "우량주 선별", "리스크 분산"],
-      conclusion: "분할매수 실행 우위",
+      priority: ["핵심 매집", "분할매수 집행", "리스크 분산"],
+      conclusion: "핵심 매집 실행",
     }
   }
   return {
-    headline: "적극 매수",
+    headline: "보너스 · 드문 극단 공포",
     caution: "레버리지 과도 사용 금지",
-    do: ["적극 매수", "계획된 분할 집행"],
-    avoid: ["감정적 추격 대응"],
-    priority: ["매수 실행", "현금 투입 관리", "리스크 점검"],
-    conclusion: "매수 실행 우위 강화",
+    do: ["계획 현금 투입", "분할 가속"],
+    avoid: ["감정적 일괄 매수"],
+    priority: ["보너스 투입", "현금 집행", "리스크 점검"],
+    conclusion: "보너스 구간 대응",
   }
 }
 
@@ -170,8 +174,8 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
 
       <div className="yds-action-signal__philosophy" aria-label="YDS 철학">
         <p className="m-0 yds-action-signal__philosophy-title">YDS 철학</p>
-        <p className="m-0 yds-action-signal__philosophy-stages">🔵 과열 · 🟢 중립 · 🟡 관심 · 🟠 분할매수 · 🔴 패닉매수</p>
-        <p className="m-0 yds-action-signal__philosophy-quote">공포를 피하는 것이 아니라 공포에서 기회를 찾는다.</p>
+        <p className="m-0 yds-action-signal__philosophy-stages">{YDS_STAGE_RAIL_LABELS}</p>
+        <p className="m-0 yds-action-signal__philosophy-quote">{YDS_CYCLE_TAGLINE}</p>
       </div>
     </section>
   )

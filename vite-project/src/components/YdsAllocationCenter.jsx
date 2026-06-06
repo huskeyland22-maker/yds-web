@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { getStagePhilosophy } from "../content/ydsCyclePhilosophy.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { resolveMacroStageAllocation } from "../trading-zone/macroStageAllocation.js"
 import { getFinalScore } from "../utils/tradingScores.js"
@@ -31,20 +32,22 @@ export default function YdsAllocationCenter({ panicData = null }) {
     const alloc = resolveMacroStageAllocation(stage?.id ?? "neutral")
     if (!alloc) return null
     const stockBuckets = distributeStockBuckets(alloc.stockPct)
+    const philosophy = getStagePhilosophy(stage?.id)
     const actionLines =
       stage?.id === "overheated"
         ? ["현금 비중 확대 우선", `현금 ${alloc.cashPct}% 유지 권장`]
         : stage?.id === "neutral"
-          ? ["AI 성장주 비중 확대 가능", `현금 ${alloc.cashPct}% 유지 권장`]
+          ? ["관심 종목 정리 · 탐색", `현금 ${alloc.cashPct}% 유지 권장`]
           : stage?.id === "interest"
-            ? ["관심 종목 분할 진입 준비", `현금 ${alloc.cashPct}% 유지 권장`]
+            ? ["1차 기회 · 좋은 기업 탐색", `현금 ${alloc.cashPct}% · 분할 준비`]
             : stage?.id === "dca"
-              ? ["AI/대형주 분할매수 실행", `현금 ${alloc.cashPct}%만 유지`]
-              : ["패닉매수 계획 집행", "현금 0%까지 투입 가능"]
+              ? ["핵심 매집 · 분할매수 실행", `현금 ${alloc.cashPct}%만 유지`]
+              : ["보너스 · 계획 현금 투입", "드문 극단 공포 구간"]
     return {
       stageId: stage?.id ?? "neutral",
       stageLabel: stage?.label ?? "중립구간",
       stageEmoji: stage?.emoji ?? "🟢",
+      stageRole: philosophy.role,
       stockPct: alloc.stockPct,
       cashPct: alloc.cashPct,
       stockBuckets,
@@ -60,6 +63,7 @@ export default function YdsAllocationCenter({ panicData = null }) {
         <p className="m-0 yds-allocation-center__title">YDS 자산 배분</p>
         <p className="m-0 yds-allocation-center__stage">
           {view.stageEmoji} {view.stageLabel}
+          <span className="yds-allocation-center__stage-role"> · {view.stageRole}</span>
         </p>
       </div>
 

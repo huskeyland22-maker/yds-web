@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { buildYdsScoreBreakdown } from "../trading-zone/ydsScoreBreakdown.js"
+import { getStagePhilosophy, YDS_CYCLE_TAGLINE } from "../content/ydsCyclePhilosophy.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { resolveMacroStageAllocation } from "../trading-zone/macroStageAllocation.js"
@@ -53,27 +54,6 @@ function toStateSentence(id, value) {
 }
 
 function buildStageGuide(stageId) {
-  if (stageId === "panicBuy") {
-    return {
-      recommend: ["분할매수 실행", "현금 우선 투입"],
-      caution: ["하락 중 전액 진입 금지"],
-      avoid: ["레버리지 집중 매수"],
-    }
-  }
-  if (stageId === "dca") {
-    return {
-      recommend: ["기존 보유 유지", "우량주 분할 진입"],
-      caution: ["한 번에 비중 확대 금지"],
-      avoid: ["실적 약한 종목 신규 진입"],
-    }
-  }
-  if (stageId === "interest") {
-    return {
-      recommend: ["관심 종목 관찰", "눌림 구간 대기"],
-      caution: ["추격매수 금지"],
-      avoid: ["단기 고점 추격"],
-    }
-  }
   if (stageId === "overheated") {
     return {
       recommend: ["기존 보유 점검", "현금 비중 확대"],
@@ -81,8 +61,29 @@ function buildStageGuide(stageId) {
       avoid: ["레버리지 신규 진입"],
     }
   }
+  if (stageId === "interest") {
+    return {
+      recommend: ["좋은 기업 탐색", "소량 분할 진입 검토"],
+      caution: ["패닉(80+)만 기다리지 않기", "추격매수 금지"],
+      avoid: ["일괄·추격 매수"],
+    }
+  }
+  if (stageId === "dca") {
+    return {
+      recommend: ["핵심 매집 · 분할매수 실행", "우량주 중심 비중 확대"],
+      caution: ["한 번에 올인 금지"],
+      avoid: ["실적 약한 종목 집중"],
+    }
+  }
+  if (stageId === "panicBuy") {
+    return {
+      recommend: ["보너스 구간 · 계획 현금 투입", "분할 가속"],
+      caution: ["레버리지 과다 금지"],
+      avoid: ["감정적 일괄 매수"],
+    }
+  }
   return {
-    recommend: ["기존 보유 유지", "관심 종목 관찰"],
+    recommend: ["기존 보유 유지", "관심 종목 정리"],
     caution: ["추격매수 금지"],
     avoid: ["레버리지 신규 진입"],
   }
@@ -93,13 +94,13 @@ function buildTodayActions(stageId) {
     return ["현금 확보", "기존 보유 수익 보호", "추격매수 금지"]
   }
   if (stageId === "interest") {
-    return ["분할 진입 준비", "관심 종목 관찰", "추격매수 금지"]
+    return ["좋은 기업 탐색", "분할 준비", "추격매수 금지"]
   }
   if (stageId === "dca") {
-    return ["분할매수 시작", "기존 보유 유지", "일괄 매수 금지"]
+    return ["핵심 매집 실행", "분할매수 집행", "일괄 매수 금지"]
   }
   if (stageId === "panicBuy") {
-    return ["적극 매수", "분할 집행", "레버리지 과다 금지"]
+    return ["보너스 현금 투입", "분할 가속", "레버리지 과다 금지"]
   }
   return ["종목 탐색", "기존 보유 유지", "추격매수 금지"]
 }
@@ -133,16 +134,8 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
       .map((n) => Math.round(n))
     const nowScore = Math.round(score)
     const trendLine = [...flow, Math.round(score)].slice(-4).join(" → ")
-    const actionGuide =
-      stage?.id === "panicBuy"
-        ? "분할매수 실행 · 현금 우선 투입"
-        : stage?.id === "dca"
-          ? "분할 진입 확대 · 우량주 우선"
-          : stage?.id === "interest"
-            ? "관심 종목 선별 · 눌림 대기"
-            : stage?.id === "overheated"
-              ? "추격 제한 · 현금 비중 확대"
-              : "종목 탐색 우선 · 추격매수 제한"
+    const philosophy = getStagePhilosophy(stage?.id)
+    const actionGuide = philosophy.actionGuide
     const breakdownModel = buildYdsScoreBreakdown({
       vix: panicData?.vix,
       cnn: panicData?.fearGreed,
@@ -161,19 +154,11 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
         }
       : { vixPts: 0, cnnPts: 0, bofaPts: 0, pcPts: 0, hyPts: 0, sumPoints: nowScore }
     const explainLines = [
-      `현재 시장은 ${stage?.label ?? "중립구간"}입니다.`,
+      `현재 ${stage?.label ?? "중립구간"} — ${philosophy.role}.`,
       toStateSentence("vix", toNum(panicData?.vix)),
       toStateSentence("cnn", toNum(panicData?.fearGreed)),
       toStateSentence("bofa", toNum(panicData?.bofa)),
-      stage?.id === "overheated"
-        ? "공격적 신규 진입보다 보유 종목 리스크 관리가 유리합니다."
-        : stage?.id === "neutral"
-          ? "공격적 신규 진입보다 기존 보유 종목 관리가 유리합니다."
-          : stage?.id === "interest"
-            ? "성급한 진입보다 관심 종목 관찰과 눌림 대기가 유리합니다."
-            : stage?.id === "dca"
-              ? "분할매수 원칙을 유지하며 우량주 중심으로 접근하는 구간입니다."
-              : "과도한 공포 구간이므로 계획된 분할매수를 실행하는 구간입니다.",
+      philosophy.explain,
     ].filter(Boolean)
 
     const historyPayload = (historyRows ?? [])
@@ -358,6 +343,7 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
           </p>
         ) : null}
       </div>
+      <p className="m-0 yds-composite-hero__philosophy">{YDS_CYCLE_TAGLINE}</p>
     </section>
   )
 }

@@ -1,5 +1,11 @@
 import { useMemo } from "react"
 import { MACRO_V1_STATUS_BANDS, resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
+import {
+  getStagePhilosophy,
+  YDS_CYCLE_TAGLINE,
+  YDS_STAGE_INTRO_LIST,
+  YDS_STAGE_PHILOSOPHY,
+} from "../../content/ydsCyclePhilosophy.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 
 const STAGE_SHORT = {
@@ -11,7 +17,7 @@ const STAGE_SHORT = {
 }
 
 /**
- * YDS 총점 — CNN F&G 스타일 컴팩트 (≤120px)
+ * YDS 총점 — CNN F&G 스타일 컴팩트
  * @param {{ panicData?: object | null }} props
  */
 export default function MarketPositionSpotlight({ panicData = null }) {
@@ -22,6 +28,7 @@ export default function MarketPositionSpotlight({ panicData = null }) {
     const score = Math.max(0, Math.min(100, Math.round(raw)))
     const stage = resolveMacroV1Status(score)
     if (!stage) return null
+    const philosophy = getStagePhilosophy(stage.id)
     return {
       score,
       stageId: stage.id,
@@ -29,6 +36,7 @@ export default function MarketPositionSpotlight({ panicData = null }) {
       stageEmoji: stage.emoji,
       stageColor: stage.color,
       markerPct: score,
+      philosophy,
     }
   }, [panicData])
 
@@ -53,6 +61,9 @@ export default function MarketPositionSpotlight({ panicData = null }) {
           style={{ "--spotlight-stage-color": model.stageColor }}
         >
           <span aria-hidden>{model.stageEmoji}</span> {model.stageLabel}
+        </p>
+        <p className="yds-market-spotlight__philosophy-hint">
+          {model.philosophy.role} · {model.philosophy.hint}
         </p>
       </div>
 
@@ -80,26 +91,43 @@ export default function MarketPositionSpotlight({ panicData = null }) {
           </div>
 
           <div className="yds-market-spotlight__zone-rail" aria-hidden>
-            {MACRO_V1_STATUS_BANDS.map((band) => (
-              <span
-                key={band.id}
-                className={[
-                  "yds-market-spotlight__zone-label",
-                  band.id === model.stageId ? "is-current" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                style={{ "--zone-color": band.color }}
-              >
-                <span className="yds-market-spotlight__zone-emoji">{band.emoji}</span>
-                <span className="yds-market-spotlight__zone-name">
-                  {STAGE_SHORT[band.id] ?? band.label}
+            {MACRO_V1_STATUS_BANDS.map((band) => {
+              const zonePhilosophy = YDS_STAGE_PHILOSOPHY[band.id]
+              const isCurrent = band.id === model.stageId
+              return (
+                <span
+                  key={band.id}
+                  className={[
+                    "yds-market-spotlight__zone-label",
+                    isCurrent ? "is-current" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  style={{ "--zone-color": band.color }}
+                >
+                  <span className="yds-market-spotlight__zone-emoji">{band.emoji}</span>
+                  <span className="yds-market-spotlight__zone-name">
+                    {STAGE_SHORT[band.id] ?? band.label}
+                  </span>
+                  {isCurrent ? (
+                    <span className="yds-market-spotlight__zone-role">{zonePhilosophy.role}</span>
+                  ) : null}
                 </span>
-              </span>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
+
+      <details className="yds-market-spotlight__cycle-guide">
+        <summary>5단계 사이클 안내</summary>
+        <p className="yds-market-spotlight__cycle-tagline">{YDS_CYCLE_TAGLINE}</p>
+        <ul className="yds-market-spotlight__cycle-list">
+          {YDS_STAGE_INTRO_LIST.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </details>
     </section>
   )
 }
