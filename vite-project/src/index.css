@@ -25308,7 +25308,163 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   letter-spacing: 0.02em;
 }
 
-/* Status Label Panel — Hero 점수 중심 */
+/* Market Hero Stack — V1.3 */
+.yds-market-hero {
+  margin: 0 0 0.5rem;
+  padding: 0.75rem 0.7rem 0.65rem;
+  border-radius: 0.65rem;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.yds-market-hero__long-term {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.yds-market-hero__score-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.55rem 0.4rem 0.5rem;
+  border-radius: 0.55rem;
+  background: rgba(2, 6, 23, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  text-align: center;
+}
+
+.yds-market-hero__card-label {
+  margin: 0 0 0.15rem;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-market-hero__score {
+  margin: 0;
+  font-size: clamp(3rem, 14vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #f8fafc;
+}
+
+.yds-market-hero__status {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1rem, 4.2vw, 1.125rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--hero-color, #f1f5f9);
+  letter-spacing: -0.02em;
+}
+
+.yds-market-hero__momentum-card {
+  margin-bottom: 0.45rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-market-hero__momentum-card--active {
+  background: rgba(120, 53, 15, 0.12);
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+.yds-market-hero__momentum-card--risk {
+  background: rgba(127, 29, 29, 0.15);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.yds-market-hero__momentum-title {
+  margin: 0 0 0.2rem;
+  font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+  font-weight: 800;
+  color: var(--hero-color, #e2e8f0);
+}
+
+.yds-market-hero__momentum-metric {
+  margin: 0 0 0.15rem;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.yds-market-hero__momentum-metric-sep {
+  color: #64748b;
+}
+
+.yds-market-hero__momentum-detail {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.1vw, 0.85rem);
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-market-hero__headline {
+  margin: 0 0 0.45rem;
+  padding: 0.45rem 0 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: clamp(0.92rem, 3vw, 1.05rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.yds-market-hero__action {
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-hero__action-title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.yds-market-hero__action-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.yds-market-hero__action-item {
+  margin: 0;
+  font-size: clamp(0.78rem, 2.2vw, 0.92rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: #f1f5f9;
+}
+
+.yds-market-hero__muted {
+  color: #64748b;
+}
+
+@media (max-width: 360px) {
+  .yds-market-hero__score {
+    font-size: 2.75rem;
+  }
+
+  .yds-market-hero__status {
+    font-size: 0.95rem;
+  }
+}
+
+/* Status Label Panel (legacy) */
 .yds-status-panel {
   margin: 0 0 0.5rem;
   padding: 0.75rem 0.7rem 0.65rem;

@@ -5,9 +5,8 @@ import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsBrandHero from "./YdsBrandHero.jsx"
-import YdsStatusLabelPanel from "./YdsStatusLabelPanel.jsx"
+import YdsMarketHeroStack from "./YdsMarketHeroStack.jsx"
 import YdsDualCycleHero from "./YdsDualCycleHero.jsx"
-import YdsDualCycleSummaryCard from "./YdsDualCycleSummaryCard.jsx"
 import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
@@ -60,9 +59,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <YdsBrandHero />
-      <YdsStatusLabelPanel panicData={panicData} historyRows={safeHistory} />
+      <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
       <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
-      <YdsDualCycleSummaryCard panicData={panicData} historyRows={safeHistory} />
       <YdsEventLayerCard panicData={panicData} historyRows={safeHistory} />
 
       <section className="yds-market-desk__block" aria-labelledby="market-block-indices">

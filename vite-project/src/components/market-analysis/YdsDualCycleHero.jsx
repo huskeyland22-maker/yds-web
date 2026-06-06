@@ -11,7 +11,6 @@ import { resolveYdsStageNavigation } from "../../utils/ydsStageNavigation.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import YdsDualCyclePositionNav from "./YdsDualCyclePositionNav.jsx"
-import YdsMomentumLayerCard from "./YdsMomentumLayerCard.jsx"
 import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
 function toNum(v) {
@@ -162,14 +161,6 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
       />
 
       <YdsDualCyclePositionNav fearNav={model.fearNav} marketNav={model.marketNav} />
-
-      {model.momentum.level !== "none" ? (
-        <YdsMomentumLayerCard
-          panicData={panicData}
-          historyRows={historyRows}
-          fearStageLabel={model.fearStage.label}
-        />
-      ) : null}
     </section>
   )
 }

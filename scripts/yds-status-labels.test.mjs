@@ -1,7 +1,7 @@
 /**
  * Status labels smoke test — node scripts/yds-status-labels.test.mjs
  */
-import { resolveCycleStatusLabel, resolvePanicStatusLabel, resolveMarketHeadline } from "../vite-project/src/content/ydsStatusLabels.js"
+import { resolveCycleStatusLabel, resolvePanicStatusLabel, resolveMarketHeadline, resolveMomentumPositionLabel } from "../vite-project/src/content/ydsStatusLabels.js"
 import { resolveMomentumLayer } from "../vite-project/src/content/ydsMomentumLayer.js"
 import { resolveMomentumStatusLabel } from "../vite-project/src/content/ydsStatusLabels.js"
 
@@ -22,6 +22,12 @@ const history = [
 const mom = resolveMomentumLayer({ date: "2026-06-05", fearGreed: 42, bofa: 6.0 }, history)
 const momStatus = resolveMomentumStatusLabel(mom)
 assert(momStatus.label === "투자심리 급랭" || momStatus.label === "투자심리 둔화", momStatus.label)
+
+const momPosition = resolveMomentumPositionLabel(mom)
+assert(
+  momPosition.title === "단기 악재 포지션" || momPosition.title === "단기 위험 확대",
+  momPosition.title,
+)
 
 const headline68 = resolveMarketHeadline(cycle68.id, panic38.id)
 assert(headline68?.text === "중반 이후 시장 · 매수기회 부족", headline68?.text)

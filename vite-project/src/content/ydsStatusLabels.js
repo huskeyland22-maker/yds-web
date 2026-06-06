@@ -156,6 +156,29 @@ export function resolveMarketHeadline(cycleId, panicId) {
   return { text, emoji: "📍" }
 }
 
+/** @type {Record<MomentumStatusTier, { emoji: string; title: string; color: string }>} */
+export const MOMENTUM_POSITION_LABELS = {
+  calm: { emoji: "🟢", title: "단기 안정", color: "#22c55e" },
+  slowdown: { emoji: "⚠️", title: "단기 악재 포지션", color: "#eab308" },
+  sharpDrop: { emoji: "⚠️", title: "단기 악재 포지션", color: "#f97316" },
+  riskOff: { emoji: "🚨", title: "단기 위험 확대", color: "#ef4444" },
+}
+
+/**
+ * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} momentum
+ */
+export function resolveMomentumPositionLabel(momentum) {
+  const status = resolveMomentumStatusLabel(momentum)
+  const position = MOMENTUM_POSITION_LABELS[status.tier]
+  return {
+    tier: status.tier,
+    emoji: position.emoji,
+    title: position.title,
+    detail: status.label,
+    color: position.color,
+  }
+}
+
 /**
  * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} momentum
  */
