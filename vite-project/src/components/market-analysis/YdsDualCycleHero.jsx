@@ -81,9 +81,9 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
           className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--fear"
           aria-label="공포 사이클"
         >
-          <p className="yds-dual-cycle-hero__axis-label">공포 사이클</p>
-          <p className="yds-dual-cycle-hero__score font-mono tabular-nums">
-            YDS 총점 <strong>{model.score}</strong>
+          <p className="yds-dual-cycle-hero__axis-label">공포 사이클 · 장기</p>
+          <p className="yds-dual-cycle-hero__score-secondary font-mono tabular-nums">
+            YDS <span>{model.score}</span>
           </p>
           <p
             className="yds-dual-cycle-hero__stage"

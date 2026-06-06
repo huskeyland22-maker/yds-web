@@ -6,6 +6,7 @@ import {
 } from "../../content/ydsMarketCycleDisplay.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
+import { resolveYdsStatusSnapshot } from "../../content/ydsStatusLabels.js"
 import { resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import YdsMomentumLayerCard from "./YdsMomentumLayerCard.jsx"
@@ -29,6 +30,7 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
       fearStageLabel: fearStage.label,
     })
     const eventLayer = resolveEventLayer(panicData, historyRows)
+    const status = resolveYdsStatusSnapshot(Math.round(score), momentum)
 
     return {
       fearStage,
@@ -37,14 +39,13 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
       marketMood: marketStage.mood,
       momentum,
       eventLayer,
+      status,
       score: Math.round(score),
       interpretation: buildDualCycleInterpretation(fearStage.id, marketStage.id),
     }
   }, [panicData, historyRows])
 
   if (!view) return null
-
-  const longTermLine = `${view.fearStage.emoji} ${view.fearStage.label}`
 
   return (
     <section className="yds-dual-summary" aria-label="현재 시장 요약">
@@ -58,16 +59,31 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
 
       <div className="yds-dual-summary__long-short">
         <div className="yds-dual-summary__long-short-row">
-          <span className="yds-dual-summary__long-short-label">장기 상태</span>
+          <span className="yds-dual-summary__long-short-label">사이클</span>
           <span
             className="yds-dual-summary__long-short-value"
-            style={{ "--summary-color": view.fearStage.color }}
+            style={{ "--summary-color": view.status.cycle?.color }}
           >
-            {longTermLine}
+            {view.status.cycle?.emoji} {view.status.cycle?.label}
+            <span className="yds-dual-summary__long-short-score font-mono tabular-nums">
+              {view.status.cycle?.score}
+            </span>
           </span>
         </div>
         <div className="yds-dual-summary__long-short-row">
-          <span className="yds-dual-summary__long-short-label">단기 상태</span>
+          <span className="yds-dual-summary__long-short-label">패닉</span>
+          <span
+            className="yds-dual-summary__long-short-value"
+            style={{ "--summary-color": view.status.panic?.color }}
+          >
+            {view.status.panic?.emoji} {view.status.panic?.label}
+            <span className="yds-dual-summary__long-short-score font-mono tabular-nums">
+              {view.status.ydsScore}
+            </span>
+          </span>
+        </div>
+        <div className="yds-dual-summary__long-short-row">
+          <span className="yds-dual-summary__long-short-label">Momentum</span>
           <span
             className={[
               "yds-dual-summary__long-short-value",
@@ -75,8 +91,9 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
             ]
               .filter(Boolean)
               .join(" ")}
+            style={{ "--summary-color": view.status.momentum?.color }}
           >
-            {view.momentum.level === "none" ? "🟢 단기 안정" : `${view.momentum.emoji} ${view.momentum.shortLabel}`}
+            {view.status.momentum?.emoji} {view.status.momentum?.label}
           </span>
         </div>
       </div>

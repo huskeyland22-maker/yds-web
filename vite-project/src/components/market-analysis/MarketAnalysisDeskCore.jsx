@@ -5,6 +5,7 @@ import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsBrandHero from "./YdsBrandHero.jsx"
+import YdsStatusLabelPanel from "./YdsStatusLabelPanel.jsx"
 import YdsDualCycleHero from "./YdsDualCycleHero.jsx"
 import YdsDualCycleSummaryCard from "./YdsDualCycleSummaryCard.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
@@ -58,6 +59,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <YdsBrandHero />
+      <YdsStatusLabelPanel panicData={panicData} historyRows={safeHistory} />
       <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
       <YdsDualCycleSummaryCard panicData={panicData} historyRows={safeHistory} />
 

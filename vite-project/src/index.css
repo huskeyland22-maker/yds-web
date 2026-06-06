@@ -25308,6 +25308,95 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   letter-spacing: 0.02em;
 }
 
+/* Status Label Panel — 3초 이해 */
+.yds-status-panel {
+  margin: 0 0 0.5rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.65rem;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.yds-status-panel__title {
+  margin: 0 0 0.45rem;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-status-panel__rows {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.yds-status-panel__row {
+  display: grid;
+  grid-template-columns: 3.6rem 1fr auto;
+  gap: 0.35rem 0.5rem;
+  align-items: center;
+}
+
+.yds-status-panel__key {
+  margin: 0;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.yds-status-panel__status {
+  margin: 0;
+  min-width: 0;
+}
+
+.yds-status-panel__status-main {
+  display: block;
+  font-size: clamp(0.82rem, 2.6vw, 1rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--status-color, #f1f5f9);
+  letter-spacing: -0.01em;
+}
+
+.yds-status-panel__score {
+  margin: 0;
+  font-size: clamp(0.58rem, 1.6vw, 0.68rem);
+  font-weight: 600;
+  color: #64748b;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.yds-status-panel__score-denom {
+  font-weight: 500;
+  color: #475569;
+}
+
+.yds-status-panel__meta {
+  margin: 0;
+  font-size: clamp(0.55rem, 1.5vw, 0.65rem);
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.yds-status-panel__meta-muted {
+  color: #475569;
+}
+
+@media (max-width: 360px) {
+  .yds-status-panel__row {
+    grid-template-columns: 3.2rem 1fr auto;
+  }
+
+  .yds-status-panel__status-main {
+    font-size: 0.78rem;
+  }
+}
+
 /* Dual Cycle Hero */
 .yds-dual-cycle-hero {
   margin: 0 0 0.45rem;
@@ -25348,6 +25437,18 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #64748b;
+}
+
+.yds-dual-cycle-hero__score-secondary {
+  margin: 0 0 0.1rem;
+  font-size: clamp(0.52rem, 1.5vw, 0.6rem);
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-dual-cycle-hero__score-secondary span {
+  font-weight: 700;
+  color: #94a3b8;
 }
 
 .yds-dual-cycle-hero__score {
@@ -25585,6 +25686,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-dual-summary__long-short-value--warn {
   color: #fbbf24;
+}
+
+.yds-dual-summary__long-short-score {
+  margin-left: 0.35rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #64748b;
 }
 
 /* Momentum Layer */
