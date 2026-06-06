@@ -1,20 +1,12 @@
 import { useMemo } from "react"
-import {
-  buildDualCycleInterpretation,
-  fearCycleMood,
-  resolveMarketCycleStage,
-} from "../../content/ydsMarketCycleDisplay.js"
+import { resolveTodayActions } from "../../content/ydsActionGuide.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
-import { resolveYdsStatusSnapshot } from "../../content/ydsStatusLabels.js"
-import { resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
-import YdsMomentumLayerCard from "./YdsMomentumLayerCard.jsx"
 import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
-import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
 /**
- * Hero 하단 — 장기(절대값) + 단기(Momentum) 요약
+ * 오늘의 행동 — 상태 패널과 분리된 Action 영역
  * @param {{ panicData?: object | null; historyRows?: object[] }} props
  */
 export default function YdsDualCycleSummaryCard({ panicData = null, historyRows = [] }) {
@@ -22,120 +14,40 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
     if (!panicData) return null
     const score = getFinalScore(panicData)
     if (!Number.isFinite(score)) return null
-    const fearStage = resolveMacroV1Status(Math.round(score))
-    const marketStage = resolveMarketCycleStage(panicData.fearGreed, panicData.bofa)
-    if (!fearStage || !marketStage) return null
 
-    const momentum = resolveMomentumLayer(panicData, historyRows, {
-      fearStageLabel: fearStage.label,
-    })
+    const momentum = resolveMomentumLayer(panicData, historyRows)
     const eventLayer = resolveEventLayer(panicData, historyRows)
-    const status = resolveYdsStatusSnapshot(Math.round(score), momentum)
+    const actions = resolveTodayActions(Math.round(score), momentum)
+    if (!actions) return null
 
-    return {
-      fearStage,
-      marketStage,
-      fearMood: fearCycleMood(fearStage.id),
-      marketMood: marketStage.mood,
-      momentum,
-      eventLayer,
-      status,
-      score: Math.round(score),
-      interpretation: buildDualCycleInterpretation(fearStage.id, marketStage.id),
-    }
+    return { actions, eventLayer }
   }, [panicData, historyRows])
 
   if (!view) return null
 
+  const { band, actions: actionItems, momentumHint } = view.actions
+
   return (
-    <section className="yds-dual-summary" aria-label="현재 시장 요약">
-      <h2 className="yds-dual-summary__title">현재 시장 요약</h2>
+    <section className="yds-action-card" aria-label="오늘의 행동">
+      <h2 className="yds-action-card__title">오늘의 행동</h2>
 
-      <YdsLayerStackIndicator
-        ydsScore={view.score}
-        momentumLevel={view.momentum.level}
-        eventLevel={view.eventLayer.level}
-      />
+      <p className="yds-action-card__band" style={{ "--action-color": band.color }}>
+        {band.emoji} {band.label}
+      </p>
 
-      <div className="yds-dual-summary__long-short">
-        <div className="yds-dual-summary__long-short-row">
-          <span className="yds-dual-summary__long-short-label">사이클</span>
-          <span
-            className="yds-dual-summary__long-short-value"
-            style={{ "--summary-color": view.status.cycle?.color }}
-          >
-            {view.status.cycle?.emoji} {view.status.cycle?.label}
-            <span className="yds-dual-summary__long-short-score font-mono tabular-nums">
-              {view.status.cycle?.score}
-            </span>
-          </span>
-        </div>
-        <div className="yds-dual-summary__long-short-row">
-          <span className="yds-dual-summary__long-short-label">패닉</span>
-          <span
-            className="yds-dual-summary__long-short-value"
-            style={{ "--summary-color": view.status.panic?.color }}
-          >
-            {view.status.panic?.emoji} {view.status.panic?.label}
-            <span className="yds-dual-summary__long-short-score font-mono tabular-nums">
-              {view.status.ydsScore}
-            </span>
-          </span>
-        </div>
-        <div className="yds-dual-summary__long-short-row">
-          <span className="yds-dual-summary__long-short-label">Momentum</span>
-          <span
-            className={[
-              "yds-dual-summary__long-short-value",
-              view.momentum.level !== "none" ? "yds-dual-summary__long-short-value--warn" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            style={{ "--summary-color": view.status.momentum?.color }}
-          >
-            {view.status.momentum?.emoji} {view.status.momentum?.label}
-          </span>
-        </div>
-      </div>
-
-      <div className="yds-dual-summary__grid">
-        <div className="yds-dual-summary__cell">
-          <p className="yds-dual-summary__axis">공포 사이클 · 장기</p>
-          <p
-            className="yds-dual-summary__stage"
-            style={{ "--summary-color": view.fearStage.color }}
-          >
-            {view.fearStage.emoji} {view.fearStage.label.replace("구간", "")}
-          </p>
-          <p className="yds-dual-summary__mood">{view.fearMood}</p>
-        </div>
-        <div className="yds-dual-summary__cell">
-          <p className="yds-dual-summary__axis">시장 사이클 · 장기</p>
-          <p
-            className="yds-dual-summary__stage"
-            style={{ "--summary-color": view.marketStage.color }}
-          >
-            {view.marketStage.emoji} {view.marketStage.label}
-          </p>
-          <p className="yds-dual-summary__mood">{view.marketMood}</p>
-        </div>
-      </div>
-
-      {view.momentum.level !== "none" ? (
-        <YdsMomentumLayerCard
-          panicData={panicData}
-          historyRows={historyRows}
-          fearStageLabel={view.fearStage.label}
-          compact
-        />
-      ) : null}
+      <ul className="yds-action-card__list">
+        {actionItems.map((item) => (
+          <li key={item} className="yds-action-card__item">
+            ✓ {item}
+          </li>
+        ))}
+        {momentumHint ? (
+          <li className="yds-action-card__item yds-action-card__item--warn">✓ {momentumHint}</li>
+        ) : null}
+      </ul>
 
       {view.eventLayer.hasEvents ? (
         <YdsEventLayerCard panicData={panicData} historyRows={historyRows} compact />
-      ) : null}
-
-      {view.momentum.level === "none" && !view.eventLayer.hasEvents ? (
-        <p className="yds-dual-summary__interpretation">{view.interpretation}</p>
       ) : null}
     </section>
   )
