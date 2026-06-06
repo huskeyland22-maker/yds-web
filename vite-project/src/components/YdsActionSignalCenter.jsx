@@ -8,6 +8,7 @@ import {
   resolveMarketCycleStage,
 } from "../content/ydsMarketCycleDisplay.js"
 import { resolveMomentumLayer } from "../content/ydsMomentumLayer.js"
+import { resolveEventLayer } from "../content/ydsEventLayer.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -107,6 +108,7 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
 
     const marketStage = resolveMarketCycleStage(panicData?.fearGreed, panicData?.bofa)
     const momentum = resolveMomentumLayer(panicData, historyRows ?? [])
+    const eventLayer = resolveEventLayer(panicData, historyRows ?? [])
 
     return {
       stageLabel: stage?.label ?? "중립구간",
@@ -117,6 +119,7 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
       changeReasons: changeReasons.slice(0, 2),
       marketStage,
       momentum,
+      eventLayer,
     }
   }, [panicData, historyRows])
 
@@ -182,6 +185,24 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
             </>
           )}
         </div>
+
+        {view.eventLayer.hasEvents ? (
+          <div className="yds-action-signal__card yds-action-signal__card--event">
+            <p className="m-0 yds-action-signal__block-title">📢 Event · 구간 이탈</p>
+            {view.eventLayer.events.slice(0, 2).map((ev) => (
+              <div key={ev.id}>
+                <p className="m-0 yds-action-signal__headline yds-action-signal__headline--event">
+                  {ev.headline}
+                </p>
+                {ev.explainLines.slice(0, 1).map((line) => (
+                  <p key={line} className="m-0 yds-action-signal__line">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : null}
 
         <div className="yds-action-signal__card">
           <p className="m-0 yds-action-signal__block-title">최근 변화</p>

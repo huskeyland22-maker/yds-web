@@ -25680,6 +25680,110 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+/* Event Layer */
+.yds-event-layer {
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.45rem;
+  background: rgba(30, 58, 138, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+}
+
+.yds-event-layer--compact {
+  margin-top: 0.35rem;
+  padding: 0.4rem 0.5rem;
+}
+
+.yds-event-layer--strong {
+  border-color: rgba(129, 140, 248, 0.5);
+  background: rgba(49, 46, 129, 0.2);
+}
+
+.yds-event-layer__title {
+  margin: 0 0 0.3rem;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 800;
+  color: #93c5fd;
+  letter-spacing: 0.02em;
+}
+
+.yds-event-layer__item + .yds-event-layer__item {
+  margin-top: 0.35rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-event-layer__headline {
+  margin: 0 0 0.2rem;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: #e0f2fe;
+}
+
+.yds-event-layer__line {
+  margin: 0;
+  font-size: clamp(0.6rem, 1.7vw, 0.7rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.yds-event-layer__line + .yds-event-layer__line {
+  margin-top: 0.12rem;
+}
+
+/* 3-tier Layer Stack */
+.yds-layer-stack {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.4rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.4rem;
+  background: rgba(2, 6, 23, 0.35);
+  border: 1px dashed rgba(148, 163, 184, 0.15);
+}
+
+.yds-layer-stack__row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.35rem;
+  align-items: baseline;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+}
+
+.yds-layer-stack__tier {
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-layer-stack__state {
+  font-weight: 700;
+  color: #94a3b8;
+  text-align: right;
+}
+
+.yds-layer-stack__row--base .yds-layer-stack__state {
+  color: #e2e8f0;
+}
+
+.yds-layer-stack__row--active .yds-layer-stack__state {
+  color: #fbbf24;
+}
+
+.yds-layer-stack__row--event .yds-layer-stack__state {
+  color: #93c5fd;
+}
+
+.yds-action-signal__headline--event {
+  color: #93c5fd;
+  font-size: 0.72rem;
+}
+
+.yds-action-signal__card--event {
+  border-color: rgba(96, 165, 250, 0.25);
+}
+
 .yds-action-signal__headline--momentum {
   color: #fbbf24;
 }

@@ -9,8 +9,11 @@ import {
 import { getFinalScore } from "../../utils/tradingScores.js"
 import { resolveYdsStageNavigation } from "../../utils/ydsStageNavigation.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
+import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import YdsDualCyclePositionNav from "./YdsDualCyclePositionNav.jsx"
 import YdsMomentumLayerCard from "./YdsMomentumLayerCard.jsx"
+import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
+import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
 function toNum(v) {
   const n = Number(v)
@@ -47,6 +50,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
     const momentum = resolveMomentumLayer(panicData, historyRows, {
       fearStageLabel: fearStage.label,
     })
+    const eventLayer = resolveEventLayer(panicData, historyRows)
 
     return {
       score: rounded,
@@ -58,6 +62,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
       marketStage,
       marketNav,
       momentum,
+      eventLayer,
     }
   }, [panicData, historyRows])
 
@@ -151,6 +156,12 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
         </article>
       </div>
 
+      <YdsLayerStackIndicator
+        ydsScore={model.score}
+        momentumLevel={model.momentum.level}
+        eventLevel={model.eventLayer.level}
+      />
+
       <YdsDualCyclePositionNav fearNav={model.fearNav} marketNav={model.marketNav} />
 
       {model.momentum.level !== "none" ? (
@@ -159,6 +170,10 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
           historyRows={historyRows}
           fearStageLabel={model.fearStage.label}
         />
+      ) : null}
+
+      {model.eventLayer.hasEvents ? (
+        <YdsEventLayerCard panicData={panicData} historyRows={historyRows} />
       ) : null}
     </section>
   )

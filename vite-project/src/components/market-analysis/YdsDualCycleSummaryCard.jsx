@@ -5,9 +5,12 @@ import {
   resolveMarketCycleStage,
 } from "../../content/ydsMarketCycleDisplay.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
+import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import { resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import YdsMomentumLayerCard from "./YdsMomentumLayerCard.jsx"
+import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
+import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
 /**
  * Hero 하단 — 장기(절대값) + 단기(Momentum) 요약
@@ -25,6 +28,7 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
     const momentum = resolveMomentumLayer(panicData, historyRows, {
       fearStageLabel: fearStage.label,
     })
+    const eventLayer = resolveEventLayer(panicData, historyRows)
 
     return {
       fearStage,
@@ -32,6 +36,8 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
       fearMood: fearCycleMood(fearStage.id),
       marketMood: marketStage.mood,
       momentum,
+      eventLayer,
+      score: Math.round(score),
       interpretation: buildDualCycleInterpretation(fearStage.id, marketStage.id),
     }
   }, [panicData, historyRows])
@@ -43,6 +49,12 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
   return (
     <section className="yds-dual-summary" aria-label="현재 시장 요약">
       <h2 className="yds-dual-summary__title">현재 시장 요약</h2>
+
+      <YdsLayerStackIndicator
+        ydsScore={view.score}
+        momentumLevel={view.momentum.level}
+        eventLevel={view.eventLayer.level}
+      />
 
       <div className="yds-dual-summary__long-short">
         <div className="yds-dual-summary__long-short-row">
@@ -101,7 +113,11 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
         />
       ) : null}
 
-      {view.momentum.level === "none" ? (
+      {view.eventLayer.hasEvents ? (
+        <YdsEventLayerCard panicData={panicData} historyRows={historyRows} compact />
+      ) : null}
+
+      {view.momentum.level === "none" && !view.eventLayer.hasEvents ? (
         <p className="yds-dual-summary__interpretation">{view.interpretation}</p>
       ) : null}
     </section>

@@ -33,54 +33,7 @@ export const MOMENTUM_RULES = {
   },
 }
 
-function toNum(v) {
-  const n = Number(v)
-  return Number.isFinite(n) ? n : null
-}
-
-/** @param {object | null | undefined} row */
-function rowDate(row) {
-  if (!row || typeof row !== "object") return null
-  const d = String(row.date ?? row.ts ?? "").trim().slice(0, 10)
-  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null
-}
-
-/**
- * @param {object[]} rows
- * @param {string | null} asOfDate YYYY-MM-DD
- */
-function normalizeHistoryRows(rows, asOfDate) {
-  const map = new Map()
-  for (const row of rows ?? []) {
-    const d = rowDate(row)
-    if (!d) continue
-    map.set(d, { ...map.get(d), ...row, date: d })
-  }
-  if (asOfDate && /^\d{4}-\d{2}-\d{2}$/.test(asOfDate)) {
-    map.set(asOfDate, { ...map.get(asOfDate), date: asOfDate })
-  }
-  return [...map.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
-}
-
-/**
- * @param {object[]} sorted ascending by date
- * @param {number} daysBack calendar days
- */
-function findRowDaysBefore(sorted, daysBack) {
-  if (!sorted.length) return null
-  const latest = sorted[sorted.length - 1]
-  const latestDate = latest.date
-  const base = new Date(`${latestDate}T12:00:00.000Z`)
-  base.setUTCDate(base.getUTCDate() - daysBack)
-  const target = base.toISOString().slice(0, 10)
-
-  let best = null
-  for (const row of sorted) {
-    if (row.date <= target) best = row
-    else break
-  }
-  return best
-}
+import { findRowDaysBefore, mergeLayerHistory, rowDate, toNum } from "./ydsLayerHistory.js"
 
 /** @param {number | null} delta @param {{ warningDelta: number; strongDelta: number }} rule */
 function levelFromDelta(delta, rule) {
@@ -155,17 +108,7 @@ function buildExplainLines(ctx) {
  */
 export function resolveMomentumLayer(panicData, historyRows = [], opts = {}) {
   const asOf = rowDate(panicData) ?? rowDate(historyRows[historyRows.length - 1])
-  const merged = normalizeHistoryRows(historyRows, asOf)
-
-  if (panicData && asOf) {
-    const last = merged[merged.length - 1]
-    merged[merged.length - 1] = {
-      ...last,
-      date: asOf,
-      fearGreed: toNum(panicData.fearGreed) ?? toNum(last?.fearGreed),
-      bofa: toNum(panicData.bofa) ?? toNum(last?.bofa),
-    }
-  }
+  const merged = mergeLayerHistory(historyRows, asOf, panicData)
 
   const latest = merged[merged.length - 1] ?? null
   const cnnNow = toNum(latest?.fearGreed)

@@ -65,7 +65,7 @@ export const YDS_CYCLE_TAGLINE_SUB =
 export const YDS_HARVEST_TAGLINE = "과열을 예측하지 않는다. 과열을 관리한다."
 
 export const YDS_DUAL_CYCLE_DISCOVERY =
-  "YDS 총점 = 공포 사이클 · CNN + BofA = 시장 사이클"
+  "YDS 총점(장기) → Momentum(변화율) → Event(구간 이탈) · 3계층"
 
 /** @type {{ id: YdsStageId; emoji: string; short: string; segment: string }[]} */
 export const YDS_FEAR_CYCLE_RAIL = [
