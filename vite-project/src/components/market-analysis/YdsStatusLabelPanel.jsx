@@ -19,10 +19,16 @@ export default function YdsStatusLabelPanel({ panicData = null, historyRows = []
 
   if (!view?.cycle || !view.panic) return null
 
-  const { cycle, panic, momentum, ydsScore, momentumData } = view
+  const { cycle, panic, momentum, ydsScore, momentumData, headline } = view
 
   return (
     <section className="yds-status-panel" aria-label="시장 상태 한눈에">
+      {headline ? (
+        <p className="yds-status-panel__headline">
+          {headline.emoji} {headline.text}
+        </p>
+      ) : null}
+
       <h2 className="yds-status-panel__title">지금 시장 상태</h2>
 
       <div className="yds-status-panel__rows">

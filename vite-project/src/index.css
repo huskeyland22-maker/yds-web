@@ -25318,6 +25318,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
+.yds-status-panel__headline {
+  margin: 0 0 0.5rem;
+  font-size: clamp(0.92rem, 3vw, 1.12rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
 .yds-status-panel__title {
   margin: 0 0 0.45rem;
   font-size: clamp(0.52rem, 1.5vw, 0.62rem);

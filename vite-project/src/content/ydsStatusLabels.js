@@ -98,6 +98,64 @@ export function resolvePanicStatusLabel(ydsScore) {
   return resolveBandExclusive(ydsScore, PANIC_STATUS_BANDS)
 }
 
+/** @typedef {typeof CYCLE_STATUS_BANDS[number]["id"]} CycleBandId */
+/** @typedef {typeof PANIC_STATUS_BANDS[number]["id"]} PanicBandId */
+
+/**
+ * 사이클 × 패닉 → 최종 한줄 요약 (15~20자 · UI 전용)
+ * @type {Record<CycleBandId, Record<PanicBandId, string>>}
+ */
+export const MARKET_HEADLINE_MAP = {
+  depression: {
+    noFear: "극단 침체 · 바닥 확인",
+    lowFear: "극단 침체 · 관망 유지",
+    interest: "깊은 침체 · 매수 검토",
+    dca: "공포 확대 · 분할매수",
+    lifePoint: "역사적 매수 기회",
+  },
+  recovery: {
+    noFear: "회복 초기 · 공포 미약",
+    lowFear: "회복 시작 · 매수 준비",
+    interest: "회복 구간 · 분할 준비",
+    dca: "공포 확대 · 분할매수 진행",
+    lifePoint: "공포 정점 · 적극 매수",
+  },
+  neutral: {
+    noFear: "중립 시장 · 안정 유지",
+    lowFear: "중립 구간 · 관망",
+    interest: "조정 관찰 · 분할매수 준비",
+    dca: "공포 상승 · 매수 진행",
+    lifePoint: "공포 정점 · 분할매수",
+  },
+  neutralHigh: {
+    noFear: "중반 이후 · 과열 주의",
+    lowFear: "중반 이후 시장 · 매수기회 부족",
+    interest: "고점 근접 · 관망",
+    dca: "조정 초입 · 분할매수",
+    lifePoint: "급락 조정 · 매수 기회",
+  },
+  overheat: {
+    noFear: "과열권 진입 · 현금 확보 우위",
+    lowFear: "과열 지속 · 현금 비중 확대",
+    interest: "고점 근접 · 현금 준비",
+    dca: "과열 조정 · 분할매수",
+    lifePoint: "역사적 고점 · 현금 확보",
+  },
+}
+
+/**
+ * @param {CycleBandId | null | undefined} cycleId
+ * @param {PanicBandId | null | undefined} panicId
+ */
+export function resolveMarketHeadline(cycleId, panicId) {
+  if (!cycleId || !panicId) return null
+  const row = MARKET_HEADLINE_MAP[cycleId]
+  if (!row) return null
+  const text = row[panicId]
+  if (!text) return null
+  return { text, emoji: "📍" }
+}
+
 /**
  * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} momentum
  */
@@ -132,10 +190,13 @@ export function resolveMomentumStatusLabel(momentum) {
  */
 export function resolveYdsStatusSnapshot(ydsScore, momentum) {
   const yds = clampScore(ydsScore)
+  const cycle = resolveCycleStatusLabel(yds)
+  const panic = resolvePanicStatusLabel(yds)
   return {
     ydsScore: yds,
-    cycle: resolveCycleStatusLabel(yds),
-    panic: resolvePanicStatusLabel(yds),
+    cycle,
+    panic,
     momentum: resolveMomentumStatusLabel(momentum),
+    headline: resolveMarketHeadline(cycle?.id, panic?.id),
   }
 }
