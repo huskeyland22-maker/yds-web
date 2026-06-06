@@ -188,17 +188,13 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
 
         {view.eventLayer.hasEvents ? (
           <div className="yds-action-signal__card yds-action-signal__card--event">
-            <p className="m-0 yds-action-signal__block-title">📢 Event · 구간 이탈</p>
+            <p className="m-0 yds-action-signal__block-title">📢 Event · 시장 이벤트</p>
             {view.eventLayer.events.slice(0, 2).map((ev) => (
               <div key={ev.id}>
                 <p className="m-0 yds-action-signal__headline yds-action-signal__headline--event">
-                  {ev.headline}
+                  📢 {ev.title}
                 </p>
-                {ev.explainLines.slice(0, 1).map((line) => (
-                  <p key={line} className="m-0 yds-action-signal__line">
-                    {line}
-                  </p>
-                ))}
+                <p className="m-0 yds-action-signal__line">{ev.summary}</p>
               </div>
             ))}
           </div>

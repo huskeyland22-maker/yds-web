@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 
 /**
- * Event Layer — 구간 이탈 이벤트 (Momentum·YDS와 분리)
+ * Event Layer V1.3 — 최근 시장 변화 (State·Action과 분리)
  * @param {{ panicData?: object | null; historyRows?: object[]; compact?: boolean }} props
  */
 export default function YdsEventLayerCard({ panicData = null, historyRows = [], compact = false }) {
@@ -14,24 +14,18 @@ export default function YdsEventLayerCard({ panicData = null, historyRows = [], 
     <section
       className={[
         "yds-event-layer",
-        compact ? "yds-event-layer--compact" : "",
-        view.level === "strongExit" ? "yds-event-layer--strong" : "",
+        compact ? "yds-event-layer--compact" : "yds-event-layer--desk",
+        view.level === "panicEntry" ? "yds-event-layer--strong" : "",
       ]
         .filter(Boolean)
         .join(" ")}
-      aria-label="주요 이벤트 Event Layer"
+      aria-label="주요 시장 이벤트"
     >
-      <p className="yds-event-layer__title">📢 주요 이벤트</p>
+      <h2 className="yds-event-layer__title">📢 주요 시장 이벤트</h2>
       {view.events.map((ev) => (
         <article key={ev.id} className="yds-event-layer__item">
-          <p className="yds-event-layer__headline">{ev.headline}</p>
-          <div className="yds-event-layer__explain">
-            {ev.explainLines.map((line) => (
-              <p key={line} className="yds-event-layer__line">
-                {line}
-              </p>
-            ))}
-          </div>
+          <p className="yds-event-layer__headline">📢 {ev.title}</p>
+          <p className="yds-event-layer__line">{ev.summary}</p>
         </article>
       ))}
     </section>

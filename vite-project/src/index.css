@@ -25649,12 +25649,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #fbbf24;
 }
 
-.yds-action-card .yds-event-layer {
-  margin-top: 0.45rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
-}
-
 /* Dual Cycle Summary Card (legacy) */
 .yds-dual-summary {
   margin: 0 0 0.65rem;
@@ -25862,17 +25856,24 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   padding: 0.4rem 0.5rem;
 }
 
+.yds-event-layer--desk {
+  margin: 0 0 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.55rem;
+}
+
 .yds-event-layer--strong {
   border-color: rgba(129, 140, 248, 0.5);
   background: rgba(49, 46, 129, 0.2);
 }
 
 .yds-event-layer__title {
-  margin: 0 0 0.3rem;
-  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  margin: 0 0 0.4rem;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
   font-weight: 800;
+  letter-spacing: 0.04em;
   color: #93c5fd;
-  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .yds-event-layer__item + .yds-event-layer__item {

@@ -1,9 +1,7 @@
 import { useMemo } from "react"
 import { resolveTodayActions } from "../../content/ydsActionGuide.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
-import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
-import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
 
 /**
  * 오늘의 행동 — 상태 패널과 분리된 Action 영역
@@ -16,11 +14,10 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
     if (!Number.isFinite(score)) return null
 
     const momentum = resolveMomentumLayer(panicData, historyRows)
-    const eventLayer = resolveEventLayer(panicData, historyRows)
     const actions = resolveTodayActions(Math.round(score), momentum)
     if (!actions) return null
 
-    return { actions, eventLayer }
+    return { actions }
   }, [panicData, historyRows])
 
   if (!view) return null
@@ -45,10 +42,6 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
           <li className="yds-action-card__item yds-action-card__item--warn">✓ {momentumHint}</li>
         ) : null}
       </ul>
-
-      {view.eventLayer.hasEvents ? (
-        <YdsEventLayerCard panicData={panicData} historyRows={historyRows} compact />
-      ) : null}
     </section>
   )
 }

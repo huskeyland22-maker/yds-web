@@ -45,7 +45,7 @@ export default function YdsLayerStackIndicator({
       >
         <span className="yds-layer-stack__tier">③ Event</span>
         <span className="yds-layer-stack__state">
-          {eventActive ? "📢 구간 이탈" : "—"}
+          {eventActive ? "📢 시장 이벤트" : "—"}
         </span>
       </div>
     </div>
