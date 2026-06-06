@@ -26,7 +26,7 @@ const POSITION_STATUS_LINE = {
 
 /** @type {Record<string, string>} */
 const STAGE_LABEL = {
-  interest: "관심구간",
+  interest: "준비구간",
   pullback: "눌림구간",
   trend: "추세구간",
   takeProfit: "익절구간",

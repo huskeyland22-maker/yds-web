@@ -38,7 +38,7 @@ export const MACRO_MARKET_GUIDANCE = {
     hint: "시장 균형 · 일반 대응",
   },
   interest: {
-    badge: "관심구간",
+    badge: "준비구간",
     hint: "변동성 확대 가능 · 관심 종목 관찰",
   },
   dca: {

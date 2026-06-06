@@ -102,7 +102,7 @@ export default function YdsScoreBreakdownPanel({ panicData = null, historyRows =
 
       {nearInterest ? (
         <p className="yds-score-breakdown__flag">
-          관심구간(40+) 임박 — VIX·CNN 변화가 누적되면 구간 전환 가능
+          준비구간(40+) 임박 — VIX·CNN 변화가 누적되면 구간 전환 가능
         </p>
       ) : null}
 

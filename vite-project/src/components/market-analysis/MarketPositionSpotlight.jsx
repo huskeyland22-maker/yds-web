@@ -7,11 +7,12 @@ import {
   YDS_STAGE_PHILOSOPHY,
 } from "../../content/ydsCyclePhilosophy.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
+import YdsStagePositionNav from "./YdsStagePositionNav.jsx"
 
 const STAGE_SHORT = {
   overheated: "과열",
   neutral: "중립",
-  interest: "관심",
+  interest: "준비",
   dca: "분할매수",
   panicBuy: "패닉매수",
 }
@@ -110,7 +111,7 @@ export default function MarketPositionSpotlight({ panicData = null }) {
                     {STAGE_SHORT[band.id] ?? band.label}
                   </span>
                   {isCurrent ? (
-                    <span className="yds-market-spotlight__zone-role">{zonePhilosophy.role}</span>
+                    <span className="yds-market-spotlight__zone-role">{zonePhilosophy.flowLabel}</span>
                   ) : null}
                 </span>
               )
@@ -118,6 +119,8 @@ export default function MarketPositionSpotlight({ panicData = null }) {
           </div>
         </div>
       </div>
+
+      <YdsStagePositionNav score={model.score} compact />
 
       <details className="yds-market-spotlight__cycle-guide">
         <summary>5단계 사이클 안내</summary>

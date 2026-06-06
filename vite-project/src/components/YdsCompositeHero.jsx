@@ -10,7 +10,7 @@ import { buildRecommendationTrackRows } from "../trading-zone/tradingZoneRecomme
 const STAGE_RAIL = [
   { id: "overheated", short: "과열", emoji: "🔵" },
   { id: "neutral", short: "중립", emoji: "🟢" },
-  { id: "interest", short: "관심", emoji: "🟡" },
+  { id: "interest", short: "준비", emoji: "🟡" },
   { id: "dca", short: "분할매수", emoji: "🟠" },
   { id: "panicBuy", short: "패닉매수", emoji: "🔴" },
 ]
@@ -63,7 +63,7 @@ function buildStageGuide(stageId) {
   }
   if (stageId === "interest") {
     return {
-      recommend: ["좋은 기업 탐색", "소량 분할 진입 검토"],
+      recommend: ["종목 발굴 · 현금 확보", "소량 분할 진입 검토"],
       caution: ["패닉(80+)만 기다리지 않기", "추격매수 금지"],
       avoid: ["일괄·추격 매수"],
     }
@@ -83,7 +83,7 @@ function buildStageGuide(stageId) {
     }
   }
   return {
-    recommend: ["기존 보유 유지", "관심 종목 정리"],
+    recommend: ["기존 보유 유지", "종목 리스트 정리"],
     caution: ["추격매수 금지"],
     avoid: ["레버리지 신규 진입"],
   }
@@ -94,7 +94,7 @@ function buildTodayActions(stageId) {
     return ["현금 확보", "기존 보유 수익 보호", "추격매수 금지"]
   }
   if (stageId === "interest") {
-    return ["좋은 기업 탐색", "분할 준비", "추격매수 금지"]
+    return ["종목 발굴 · 현금 확보", "매수 준비", "추격매수 금지"]
   }
   if (stageId === "dca") {
     return ["핵심 매집 실행", "분할매수 집행", "일괄 매수 금지"]

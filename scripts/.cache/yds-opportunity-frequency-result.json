@@ -1,0 +1,370 @@
+{
+  "generatedAt": "2026-06-06T02:20:44.282Z",
+  "methodology": {
+    "engine": "getFinalScore (unmodified)",
+    "dcaZone": "60–79 (분할매수)",
+    "interestZone": "40–59 (관심)",
+    "dataSource": "PANIC_VALIDATION_EXTENDED_HISTORY (monthly anchors)",
+    "anchorCount": 35,
+    "period": {
+      "first": "2019-01-04",
+      "last": "2026-03-06",
+      "spanYears": 7.2
+    },
+    "episodeMethod": "contiguous calendar-day segments while anchor-assigned stage = target",
+    "entryMethod": "stage transition on weekly steps",
+    "limitations": [
+      "Monthly anchors (~35) — daily Supabase would refine episode length",
+      "Episode end date = first anchor after zone exit (upper bound approximate)"
+    ]
+  },
+  "dca": {
+    "dwellPctCalendar": 12.337662337662337,
+    "dwellDaysTotal": 323,
+    "episodeCount": 3,
+    "entryCount": 3,
+    "entriesPerYear": 0.4185446906035141,
+    "episodesPerYear": 0.4185446906035141,
+    "avgEpisodeDays": 107.66666666666667,
+    "medianEpisodeDays": 88,
+    "episodes": [
+      {
+        "start": "2020-03-16",
+        "end": "2020-06-12",
+        "days": 88,
+        "startScore": 75,
+        "endScore": 48
+      },
+      {
+        "start": "2022-06-17",
+        "end": "2022-12-30",
+        "days": 196,
+        "startScore": 64,
+        "endScore": 45
+      },
+      {
+        "start": "2025-04-04",
+        "end": "2025-05-13",
+        "days": 39,
+        "startScore": 74,
+        "endScore": 34
+      }
+    ],
+    "entries": [
+      {
+        "date": "2020-03-16",
+        "stageId": "dca",
+        "score": 75
+      },
+      {
+        "date": "2022-06-17",
+        "stageId": "dca",
+        "score": 64
+      },
+      {
+        "date": "2025-04-07",
+        "stageId": "dca",
+        "score": 78
+      }
+    ],
+    "yearlyEntryCount": {
+      "2020": 1,
+      "2022": 1,
+      "2025": 1
+    }
+  },
+  "interest": {
+    "dwellPctCalendar": 43.9266615737204,
+    "episodeCount": 10,
+    "entryCount": 10
+  },
+  "interestToDca": {
+    "directTransitions": [
+      {
+        "date": "2022-06-17",
+        "from": "interest",
+        "to": "dca",
+        "score": 64
+      },
+      {
+        "date": "2025-04-07",
+        "from": "interest",
+        "to": "dca",
+        "score": 78
+      }
+    ],
+    "directTransitionCount": 2,
+    "interestEntryCount": 10,
+    "reachedDcaCount": 9,
+    "conversionPct": 90,
+    "details": [
+      {
+        "interestDate": "2019-01-04",
+        "dcaDate": "2020-03-16",
+        "daysToDca": 437
+      },
+      {
+        "interestDate": "2019-08-02",
+        "dcaDate": "2020-03-16",
+        "daysToDca": 227
+      },
+      {
+        "interestDate": "2020-06-12",
+        "dcaDate": "2022-06-17",
+        "daysToDca": 735
+      },
+      {
+        "interestDate": "2020-11-06",
+        "dcaDate": "2022-06-17",
+        "daysToDca": 588
+      },
+      {
+        "interestDate": "2021-09-17",
+        "dcaDate": "2022-06-17",
+        "daysToDca": 273
+      },
+      {
+        "interestDate": "2022-12-30",
+        "dcaDate": "2025-04-07",
+        "daysToDca": 829
+      },
+      {
+        "interestDate": "2023-10-27",
+        "dcaDate": "2025-04-07",
+        "daysToDca": 528
+      },
+      {
+        "interestDate": "2024-08-02",
+        "dcaDate": "2025-04-07",
+        "daysToDca": 248
+      },
+      {
+        "interestDate": "2025-04-02",
+        "dcaDate": "2025-04-07",
+        "daysToDca": 5
+      },
+      {
+        "interestDate": "2026-03-06",
+        "dcaDate": null,
+        "daysToDca": null
+      }
+    ]
+  },
+  "anchorTimeline": [
+    {
+      "date": "2019-01-04",
+      "score": 47,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2019-04-05",
+      "score": 25,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2019-08-02",
+      "score": 41,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2019-12-06",
+      "score": 21,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2020-02-07",
+      "score": 30,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2020-03-16",
+      "score": 75,
+      "stage": "dca",
+      "stageLabel": "분할매수"
+    },
+    {
+      "date": "2020-04-17",
+      "score": 65,
+      "stage": "dca",
+      "stageLabel": "분할매수"
+    },
+    {
+      "date": "2020-06-12",
+      "score": 48,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2020-08-14",
+      "score": 39,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2020-11-06",
+      "score": 46,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2021-01-08",
+      "score": 40,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2021-03-19",
+      "score": 32,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2021-09-17",
+      "score": 43,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2021-12-17",
+      "score": 42,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2022-01-21",
+      "score": 56,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2022-06-17",
+      "score": 64,
+      "stage": "dca",
+      "stageLabel": "분할매수"
+    },
+    {
+      "date": "2022-09-30",
+      "score": 64,
+      "stage": "dca",
+      "stageLabel": "분할매수"
+    },
+    {
+      "date": "2022-12-30",
+      "score": 45,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2023-03-17",
+      "score": 52,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2023-07-14",
+      "score": 24,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2023-10-27",
+      "score": 44,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2024-01-12",
+      "score": 22,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2024-04-19",
+      "score": 36,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2024-08-02",
+      "score": 47,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2024-11-01",
+      "score": 41,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2025-02-07",
+      "score": 31,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2025-02-19",
+      "score": 27,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2025-04-02",
+      "score": 50,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    },
+    {
+      "date": "2025-04-04",
+      "score": 74,
+      "stage": "dca",
+      "stageLabel": "분할매수"
+    },
+    {
+      "date": "2025-04-07",
+      "score": 78,
+      "stage": "dca",
+      "stageLabel": "분할매수"
+    },
+    {
+      "date": "2025-05-13",
+      "score": 34,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2025-08-01",
+      "score": 34,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2025-11-07",
+      "score": 38,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2026-01-09",
+      "score": 32,
+      "stage": "neutral",
+      "stageLabel": "중립구간"
+    },
+    {
+      "date": "2026-03-06",
+      "score": 42,
+      "stage": "interest",
+      "stageLabel": "관심구간"
+    }
+  ],
+  "recommendation": {
+    "code": "A",
+    "label": "유지",
+    "rationale": "관심→분할 전환과 체류 빈도가 사이클 엔진 설계(드문 고품질 매집)와 정합. UI는 관심 준비·분할 실행 철학 유지."
+  }
+}

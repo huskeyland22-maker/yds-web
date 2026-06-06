@@ -41,12 +41,12 @@ function buildSignalTemplate(stageId) {
   }
   if (stageId === "interest") {
     return {
-      headline: "1차 기회 · 좋은 기업 탐색",
+      headline: "매수 준비 · 종목 발굴",
       caution: "패닉(80+)만 기다리지 않기",
-      do: ["좋은 기업 탐색", "소량 분할 검토", "관심 종목 압축"],
+      do: ["종목 발굴 · 현금 확보", "소량 분할 검토", "우량주 리스트 압축"],
       avoid: ["추격·일괄 매수"],
-      priority: ["좋은 기업 탐색", "분할 준비", "현금 비중 유지"],
-      conclusion: "1차 기회 · 준비 강화",
+      priority: ["종목 발굴", "현금 확보", "매수 준비"],
+      conclusion: "준비구간 · 매수 준비 강화",
     }
   }
   if (stageId === "dca") {

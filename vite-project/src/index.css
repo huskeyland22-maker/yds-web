@@ -25255,3 +25255,145 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.62rem;
   color: #64748b;
 }
+
+/* YDS Brand Hero — 시장분석 최상단 */
+.yds-brand-hero {
+  margin: 0 0 0.65rem;
+  padding: 0.75rem 0.85rem 0.7rem;
+  border-radius: 0.65rem;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(11, 14, 20, 0.98));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.yds-brand-hero__eyebrow {
+  margin: 0 0 0.2rem;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-brand-hero__title {
+  margin: 0;
+  font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
+.yds-brand-hero__motto {
+  margin: 0.45rem 0 0.55rem;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 600;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yds-brand-hero__flow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+
+.yds-brand-hero__flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.08rem;
+  min-width: 0;
+  padding: 0.25rem 0.1rem;
+  border-radius: 0.4rem;
+  background: rgba(148, 163, 184, 0.06);
+}
+
+.yds-brand-hero__flow-emoji {
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.yds-brand-hero__flow-name {
+  font-size: clamp(0.48rem, 1.4vw, 0.58rem);
+  font-weight: 700;
+  color: #e2e8f0;
+  text-align: center;
+  line-height: 1.1;
+  word-break: keep-all;
+}
+
+.yds-brand-hero__flow-role {
+  font-size: clamp(0.42rem, 1.2vw, 0.5rem);
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* YDS Stage Position Nav — 현재 위치 · 다음 단계 · 행동 */
+.yds-stage-nav {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0.15rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.45rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-stage-nav--compact {
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.5rem;
+}
+
+.yds-stage-nav__row {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.yds-stage-nav__row--action {
+  padding-top: 0.15rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.yds-stage-nav__label {
+  margin: 0;
+  font-size: clamp(0.52rem, 1.6vw, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.yds-stage-nav__value {
+  margin: 0;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--stage-color, #e2e8f0);
+}
+
+.yds-stage-nav__value--next {
+  color: #eab308;
+  font-weight: 600;
+}
+
+.yds-stage-nav__action {
+  margin: 0;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: #cbd5e1;
+}
+
+@media (max-width: 360px) {
+  .yds-brand-hero__flow-role {
+    display: none;
+  }
+
+  .yds-stage-nav__row {
+    grid-template-columns: 3.5rem 1fr;
+  }
+}

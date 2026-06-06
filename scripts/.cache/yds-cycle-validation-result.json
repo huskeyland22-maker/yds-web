@@ -1,0 +1,558 @@
+{
+  "generatedAt": "2026-06-06T01:23:46.486Z",
+  "methodology": {
+    "engine": "getFinalScore (legacy, unmodified)",
+    "zones": [
+      {
+        "id": "overheated",
+        "min": 0,
+        "max": 19,
+        "label": "과열구간"
+      },
+      {
+        "id": "neutral",
+        "min": 20,
+        "max": 39,
+        "label": "중립구간"
+      },
+      {
+        "id": "interest",
+        "min": 40,
+        "max": 59,
+        "label": "관심구간"
+      },
+      {
+        "id": "dca",
+        "min": 60,
+        "max": 79,
+        "label": "분할매수"
+      },
+      {
+        "id": "panicBuy",
+        "min": 80,
+        "max": 100,
+        "label": "패닉매수"
+      }
+    ],
+    "dataSource": "PANIC_VALIDATION_EXTENDED_HISTORY (monthly anchors 2019–2026)",
+    "anchorCount": 35,
+    "weeklySteps": 34,
+    "spanYears": 7.2,
+    "period": {
+      "first": "2019-01-04",
+      "last": "2026-03-06"
+    },
+    "dwellMethod": "calendar-day weight between consecutive anchors",
+    "forwardReturnMethods": {
+      "proxy": "estimateYdsMarketPeriodReturn (VIX/F&G proxy, same as validation page)",
+      "spy": "^GSPC daily (2621 days from C:\\Users\\huske\\OneDrive\\바탕 화면\\커서 AI\\yds web\\scripts\\.cache\\gspc-daily.json)"
+    },
+    "limitations": [
+      "Monthly anchors (~35 points) — not full daily Supabase history",
+      "Dwell % is interpolated between anchors, not exchange-calendar trading days",
+      "Zone entry = stage transition on weekly steps",
+      "Supabase daily export would refine all figures"
+    ]
+  },
+  "dwellPct": {
+    "overheated": 0,
+    "neutral": 43.73567608861727,
+    "interest": 43.9266615737204,
+    "dca": 12.337662337662337,
+    "panicBuy": 0
+  },
+  "dwellDays": {
+    "overheated": 0,
+    "neutral": 1145,
+    "interest": 1150,
+    "dca": 323,
+    "panicBuy": 0
+  },
+  "distributionAll": [
+    {
+      "id": "overheated",
+      "emoji": "🔵",
+      "label": "과열",
+      "count": 0,
+      "pct": 0,
+      "warning": null
+    },
+    {
+      "id": "neutral",
+      "emoji": "🟢",
+      "label": "중립",
+      "count": 14,
+      "pct": 40,
+      "warning": null
+    },
+    {
+      "id": "interest",
+      "emoji": "🟡",
+      "label": "관심",
+      "count": 15,
+      "pct": 42.857142857142854,
+      "warning": null
+    },
+    {
+      "id": "dca",
+      "emoji": "🟠",
+      "label": "분할매수",
+      "count": 6,
+      "pct": 17.142857142857142,
+      "warning": null
+    },
+    {
+      "id": "panicBuy",
+      "emoji": "🔴",
+      "label": "패닉매수",
+      "count": 0,
+      "pct": 0,
+      "warning": null
+    }
+  ],
+  "zoneEntries": [
+    {
+      "date": "2019-01-04",
+      "stageId": "interest",
+      "score": 47,
+      "idx": 0
+    },
+    {
+      "date": "2019-04-05",
+      "stageId": "neutral",
+      "score": 25,
+      "idx": 1
+    },
+    {
+      "date": "2019-08-02",
+      "stageId": "interest",
+      "score": 41,
+      "idx": 2
+    },
+    {
+      "date": "2019-12-06",
+      "stageId": "neutral",
+      "score": 21,
+      "idx": 3
+    },
+    {
+      "date": "2020-03-16",
+      "stageId": "dca",
+      "score": 75,
+      "idx": 5
+    },
+    {
+      "date": "2020-06-12",
+      "stageId": "interest",
+      "score": 48,
+      "idx": 7
+    },
+    {
+      "date": "2020-08-14",
+      "stageId": "neutral",
+      "score": 39,
+      "idx": 8
+    },
+    {
+      "date": "2020-11-06",
+      "stageId": "interest",
+      "score": 46,
+      "idx": 9
+    },
+    {
+      "date": "2021-03-19",
+      "stageId": "neutral",
+      "score": 32,
+      "idx": 11
+    },
+    {
+      "date": "2021-09-17",
+      "stageId": "interest",
+      "score": 43,
+      "idx": 12
+    },
+    {
+      "date": "2022-06-17",
+      "stageId": "dca",
+      "score": 64,
+      "idx": 15
+    },
+    {
+      "date": "2022-12-30",
+      "stageId": "interest",
+      "score": 45,
+      "idx": 17
+    },
+    {
+      "date": "2023-07-14",
+      "stageId": "neutral",
+      "score": 24,
+      "idx": 19
+    },
+    {
+      "date": "2023-10-27",
+      "stageId": "interest",
+      "score": 44,
+      "idx": 20
+    },
+    {
+      "date": "2024-01-12",
+      "stageId": "neutral",
+      "score": 22,
+      "idx": 21
+    },
+    {
+      "date": "2024-08-02",
+      "stageId": "interest",
+      "score": 47,
+      "idx": 23
+    },
+    {
+      "date": "2025-02-07",
+      "stageId": "neutral",
+      "score": 31,
+      "idx": 25
+    },
+    {
+      "date": "2025-04-02",
+      "stageId": "interest",
+      "score": 50,
+      "idx": 27
+    },
+    {
+      "date": "2025-04-07",
+      "stageId": "dca",
+      "score": 78,
+      "idx": 28
+    },
+    {
+      "date": "2025-05-13",
+      "stageId": "neutral",
+      "score": 34,
+      "idx": 29
+    },
+    {
+      "date": "2026-03-06",
+      "stageId": "interest",
+      "score": 42,
+      "idx": 33
+    }
+  ],
+  "opportunityEntryCount": 13,
+  "forwardReturnsProxy": {
+    "overheated": {
+      "entryCount": 0,
+      "m1": null,
+      "m3": null,
+      "m6": null,
+      "m12": null,
+      "samples": {
+        "m1": 0,
+        "m3": 0,
+        "m6": 0,
+        "m12": 0
+      }
+    },
+    "neutral": {
+      "entryCount": 8,
+      "m1": -8.64072656570981,
+      "m3": -16.15992221265948,
+      "m6": -12.457101427246121,
+      "m12": -27.25268517185858,
+      "samples": {
+        "m1": 8,
+        "m3": 8,
+        "m6": 8,
+        "m12": 7
+      }
+    },
+    "interest": {
+      "entryCount": 10,
+      "m1": 5.280440459719799,
+      "m3": 5.505030017326265,
+      "m6": 1.2514796544448086,
+      "m12": -7.387181738770262,
+      "samples": {
+        "m1": 9,
+        "m3": 9,
+        "m6": 9,
+        "m12": 8
+      }
+    },
+    "dca": {
+      "entryCount": 3,
+      "m1": 9.59846339897102,
+      "m3": 13.89212322321769,
+      "m6": 13.626684158096305,
+      "m12": 24.903944902186748,
+      "samples": {
+        "m1": 3,
+        "m3": 3,
+        "m6": 3,
+        "m12": 2
+      }
+    },
+    "panicBuy": {
+      "entryCount": 0,
+      "m1": null,
+      "m3": null,
+      "m6": null,
+      "m12": null,
+      "samples": {
+        "m1": 0,
+        "m3": 0,
+        "m6": 0,
+        "m12": 0
+      }
+    }
+  },
+  "forwardReturnsSpy": {
+    "overheated": {
+      "entryCount": 0,
+      "m1": null,
+      "m3": null,
+      "m6": null,
+      "m12": null,
+      "samples": {
+        "m1": 0,
+        "m3": 0,
+        "m6": 0,
+        "m12": 0
+      }
+    },
+    "neutral": {
+      "entryCount": 8,
+      "m1": 1.4711432147460406,
+      "m3": 2.467706133589445,
+      "m6": 9.35272669380132,
+      "m12": 18.161292448721195,
+      "samples": {
+        "m1": 8,
+        "m3": 8,
+        "m6": 8,
+        "m12": 8
+      }
+    },
+    "interest": {
+      "entryCount": 10,
+      "m1": 3.383987472188508,
+      "m3": 9.565871592075336,
+      "m6": 15.041887012870951,
+      "m12": 22.430263958465662,
+      "samples": {
+        "m1": 10,
+        "m3": 10,
+        "m6": 9,
+        "m12": 9
+      }
+    },
+    "dca": {
+      "entryCount": 3,
+      "m1": 10.71115573204605,
+      "m3": 19.249507591087553,
+      "m6": 27.88971782158967,
+      "m12": 38.7360742648816,
+      "samples": {
+        "m1": 3,
+        "m3": 3,
+        "m6": 3,
+        "m12": 3
+      }
+    },
+    "panicBuy": {
+      "entryCount": 0,
+      "m1": null,
+      "m3": null,
+      "m6": null,
+      "m12": null,
+      "samples": {
+        "m1": 0,
+        "m3": 0,
+        "m6": 0,
+        "m12": 0
+      }
+    }
+  },
+  "anchorScores": [
+    {
+      "date": "2019-01-04",
+      "score": 47,
+      "stage": "interest"
+    },
+    {
+      "date": "2019-04-05",
+      "score": 25,
+      "stage": "neutral"
+    },
+    {
+      "date": "2019-08-02",
+      "score": 41,
+      "stage": "interest"
+    },
+    {
+      "date": "2019-12-06",
+      "score": 21,
+      "stage": "neutral"
+    },
+    {
+      "date": "2020-02-07",
+      "score": 30,
+      "stage": "neutral"
+    },
+    {
+      "date": "2020-03-16",
+      "score": 75,
+      "stage": "dca"
+    },
+    {
+      "date": "2020-04-17",
+      "score": 65,
+      "stage": "dca"
+    },
+    {
+      "date": "2020-06-12",
+      "score": 48,
+      "stage": "interest"
+    },
+    {
+      "date": "2020-08-14",
+      "score": 39,
+      "stage": "neutral"
+    },
+    {
+      "date": "2020-11-06",
+      "score": 46,
+      "stage": "interest"
+    },
+    {
+      "date": "2021-01-08",
+      "score": 40,
+      "stage": "interest"
+    },
+    {
+      "date": "2021-03-19",
+      "score": 32,
+      "stage": "neutral"
+    },
+    {
+      "date": "2021-09-17",
+      "score": 43,
+      "stage": "interest"
+    },
+    {
+      "date": "2021-12-17",
+      "score": 42,
+      "stage": "interest"
+    },
+    {
+      "date": "2022-01-21",
+      "score": 56,
+      "stage": "interest"
+    },
+    {
+      "date": "2022-06-17",
+      "score": 64,
+      "stage": "dca"
+    },
+    {
+      "date": "2022-09-30",
+      "score": 64,
+      "stage": "dca"
+    },
+    {
+      "date": "2022-12-30",
+      "score": 45,
+      "stage": "interest"
+    },
+    {
+      "date": "2023-03-17",
+      "score": 52,
+      "stage": "interest"
+    },
+    {
+      "date": "2023-07-14",
+      "score": 24,
+      "stage": "neutral"
+    },
+    {
+      "date": "2023-10-27",
+      "score": 44,
+      "stage": "interest"
+    },
+    {
+      "date": "2024-01-12",
+      "score": 22,
+      "stage": "neutral"
+    },
+    {
+      "date": "2024-04-19",
+      "score": 36,
+      "stage": "neutral"
+    },
+    {
+      "date": "2024-08-02",
+      "score": 47,
+      "stage": "interest"
+    },
+    {
+      "date": "2024-11-01",
+      "score": 41,
+      "stage": "interest"
+    },
+    {
+      "date": "2025-02-07",
+      "score": 31,
+      "stage": "neutral"
+    },
+    {
+      "date": "2025-02-19",
+      "score": 27,
+      "stage": "neutral"
+    },
+    {
+      "date": "2025-04-02",
+      "score": 50,
+      "stage": "interest"
+    },
+    {
+      "date": "2025-04-04",
+      "score": 74,
+      "stage": "dca"
+    },
+    {
+      "date": "2025-04-07",
+      "score": 78,
+      "stage": "dca"
+    },
+    {
+      "date": "2025-05-13",
+      "score": 34,
+      "stage": "neutral"
+    },
+    {
+      "date": "2025-08-01",
+      "score": 34,
+      "stage": "neutral"
+    },
+    {
+      "date": "2025-11-07",
+      "score": 38,
+      "stage": "neutral"
+    },
+    {
+      "date": "2026-01-09",
+      "score": 32,
+      "stage": "neutral"
+    },
+    {
+      "date": "2026-03-06",
+      "score": 42,
+      "stage": "interest"
+    }
+  ],
+  "recommendation": {
+    "code": "C",
+    "label": "분할매수 확대 (UI·가이드)",
+    "rationale": "7년간 패닉매수(80+) 구간 체류 0% — 엔진은 패닉 탐지기가 아니라 분할매수·관심 중심. COVID(VIX 83)도 75점(분할). UI·철학을 「분할=핵심·패닉=보너스」로 정렬."
+  }
+}

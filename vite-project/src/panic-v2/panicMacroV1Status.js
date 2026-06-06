@@ -19,7 +19,7 @@
 export const MACRO_V1_STATUS_BANDS = [
   { id: "overheated", label: "과열구간", emoji: "🔵", min: 0, max: 19, color: "#3b82f6" },
   { id: "neutral", label: "중립구간", emoji: "🟢", min: 20, max: 39, color: "#22c55e" },
-  { id: "interest", label: "관심구간", emoji: "🟡", min: 40, max: 59, color: "#eab308" },
+  { id: "interest", label: "준비구간", emoji: "🟡", min: 40, max: 59, color: "#eab308" },
   { id: "dca", label: "분할매수", emoji: "🟠", min: 60, max: 79, color: "#f97316" },
   { id: "panicBuy", label: "패닉매수", emoji: "🔴", min: 80, max: 100, color: "#ef4444" },
 ]

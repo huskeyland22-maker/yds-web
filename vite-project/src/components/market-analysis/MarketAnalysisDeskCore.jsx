@@ -4,6 +4,7 @@ import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
+import YdsBrandHero from "./YdsBrandHero.jsx"
 import MarketPositionSpotlight from "./MarketPositionSpotlight.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
@@ -54,6 +55,9 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           <AiReportMarketStatusBlock status={aiReportStatus} />
         </div>
       </div>
+
+      {/* 0. YDS 브랜드 Hero — 사이클 철학 시작점 */}
+      <YdsBrandHero />
 
       {/* 1. 핵심지수 */}
       <section className="yds-market-desk__block" aria-labelledby="market-block-indices">

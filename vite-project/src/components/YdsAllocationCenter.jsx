@@ -7,7 +7,7 @@ import { getFinalScore } from "../utils/tradingScores.js"
 const STAGE_GUIDE = [
   { id: "overheated", emoji: "🔵", label: "과열" },
   { id: "neutral", emoji: "🟢", label: "중립" },
-  { id: "interest", emoji: "🟡", label: "관심" },
+  { id: "interest", emoji: "🟡", label: "준비" },
   { id: "dca", emoji: "🟠", label: "분할매수" },
   { id: "panicBuy", emoji: "🔴", label: "패닉매수" },
 ]
@@ -37,9 +37,9 @@ export default function YdsAllocationCenter({ panicData = null }) {
       stage?.id === "overheated"
         ? ["현금 비중 확대 우선", `현금 ${alloc.cashPct}% 유지 권장`]
         : stage?.id === "neutral"
-          ? ["관심 종목 정리 · 탐색", `현금 ${alloc.cashPct}% 유지 권장`]
+          ? ["종목 리스트 · 탐색", `현금 ${alloc.cashPct}% 유지 권장`]
           : stage?.id === "interest"
-            ? ["1차 기회 · 좋은 기업 탐색", `현금 ${alloc.cashPct}% · 분할 준비`]
+            ? ["종목 발굴 · 현금 확보", `현금 ${alloc.cashPct}% · 매수 준비`]
             : stage?.id === "dca"
               ? ["핵심 매집 · 분할매수 실행", `현금 ${alloc.cashPct}%만 유지`]
               : ["보너스 · 계획 현금 투입", "드문 극단 공포 구간"]

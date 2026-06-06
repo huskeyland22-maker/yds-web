@@ -1,5 +1,12 @@
 /** YDS V1 사용자-facing 용어 (엔진 ID는 유지 · UI 라벨만 통일) */
 
+import {
+  YDS_BRAND_HERO_TITLE,
+  YDS_CYCLE_TAGLINE,
+  YDS_STAGE_RAIL_LABELS,
+} from "../content/ydsCyclePhilosophy.js"
+import { YDS_OG_DESCRIPTION } from "../content/ydsLaunchContent.js"
+
 export const YDS_V1_VERSION = "YDS V1"
 export const YDS_V1_RC_LABEL = "Release Candidate"
 
@@ -29,9 +36,34 @@ export const TERM_REPLACE = {
 /** @type {{ id: string; title: string; body: string }[]} */
 export const GLOSSARY_ENTRIES = [
   {
+    id: "cycle-system",
+    title: "시장 사이클 투자 시스템",
+    body: `${YDS_BRAND_HERO_TITLE}. ${YDS_CYCLE_TAGLINE} 패닉지수만 보는 도구가 아니라, 과열→중립→준비→분할매수→패닉매수 5단계로 행동을 안내합니다.`,
+  },
+  {
     id: "market-position",
     title: "YDS 총점",
-    body: "공포·탐욕 지표를 종합한 0~100 점수입니다. 높을수록 패닉에 가깝고, 낮을수록 과열에 가깝습니다.",
+    body: "공포·탐욕 지표를 종합한 0~100 점수입니다. 높을수록 공포·매집 기회에 가깝고, 낮을수록 과열에 가깝습니다. 현재 위치와 다음 단계를 함께 확인하세요.",
+  },
+  {
+    id: "prep-zone",
+    title: "준비구간",
+    body: "YDS 40–59 구간(엔진 ID: interest). 분할매수 전 단계로 종목 발굴·현금 확보·매수 준비를 권장합니다. 관심종목(Watchlist) 기능과는 별개입니다.",
+  },
+  {
+    id: "five-stages",
+    title: "5단계 사이클",
+    body: `${YDS_STAGE_RAIL_LABELS}. 🔵 과열=리스크 관리 · 🟢 중립=관찰 · 🟡 준비=쌓기 · 🟠 분할매수=실행 · 🔴 패닉매수=보너스.`,
+  },
+  {
+    id: "cycle-tagline",
+    title: "YDS 철학",
+    body: YDS_CYCLE_TAGLINE,
+  },
+  {
+    id: "og-share",
+    title: "공유용 설명",
+    body: YDS_OG_DESCRIPTION,
   },
   {
     id: "early-warning",

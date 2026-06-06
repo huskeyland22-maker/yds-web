@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { GLOSSARY_ENTRIES } from "../utils/ydsTerminology.js"
+import { YDS_CYCLE_TAGLINE } from "../content/ydsCyclePhilosophy.js"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 
 export default function GlossaryPage() {
@@ -9,7 +10,7 @@ export default function GlossaryPage() {
         <div>
           <YdsV1ReleaseBadge />
           <h1 className="yds-glossary__title">YDS 용어 설명</h1>
-          <p className="yds-glossary__sub">V1 Release Candidate · 사용자-facing 용어 사전</p>
+          <p className="yds-glossary__sub">V1 Release Candidate · {YDS_CYCLE_TAGLINE}</p>
         </div>
         <Link to="/market-analysis" className="yds-glossary__link">
           시장분석
