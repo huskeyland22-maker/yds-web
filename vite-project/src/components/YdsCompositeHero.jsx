@@ -1,6 +1,7 @@
 import { useMemo } from "react"
+import { buildYdsScoreBreakdown } from "../trading-zone/ydsScoreBreakdown.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
-import { getFinalScore, scoreBofa, scoreFearGreed, scoreVIX } from "../utils/tradingScores.js"
+import { getFinalScore } from "../utils/tradingScores.js"
 import { resolveMacroStageAllocation } from "../trading-zone/macroStageAllocation.js"
 import { getTradingZonePositions } from "../trading-zone/tacticalTradingZoneData.js"
 import { buildRecommendationTrackRows } from "../trading-zone/tradingZoneRecommendationTrack.js"
@@ -142,11 +143,23 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
             : stage?.id === "overheated"
               ? "추격 제한 · 현금 비중 확대"
               : "종목 탐색 우선 · 추격매수 제한"
-    const vixPts = Math.round(scoreVIX(panicData?.vix) * 0.3)
-    const cnnPts = Math.round(scoreFearGreed(panicData?.fearGreed) * 0.2)
-    const bofaPts = Math.round(scoreBofa(panicData?.bofa) * 0.175)
-    const otherPts = nowScore - (vixPts + cnnPts + bofaPts)
-    const sumPoints = vixPts + cnnPts + bofaPts + otherPts
+    const breakdownModel = buildYdsScoreBreakdown({
+      vix: panicData?.vix,
+      cnn: panicData?.fearGreed,
+      bofa: panicData?.bofa,
+      putCall: panicData?.putCall,
+      highYield: panicData?.highYield,
+    })
+    const breakdown = breakdownModel.computable
+      ? {
+          vixPts: breakdownModel.contributions.vix,
+          cnnPts: breakdownModel.contributions.cnn,
+          bofaPts: breakdownModel.contributions.bofa,
+          pcPts: breakdownModel.contributions.putCall,
+          hyPts: breakdownModel.contributions.highYield,
+          sumPoints: breakdownModel.sumContributions,
+        }
+      : { vixPts: 0, cnnPts: 0, bofaPts: 0, pcPts: 0, hyPts: 0, sumPoints: nowScore }
     const explainLines = [
       `현재 시장은 ${stage?.label ?? "중립구간"}입니다.`,
       toStateSentence("vix", toNum(panicData?.vix)),
@@ -205,7 +218,7 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
       trendLine: trendLine || "—",
       actionGuide,
       allocation,
-      breakdown: { vixPts, cnnPts, bofaPts, otherPts, sumPoints },
+      breakdown,
       explainLines,
       stageGuide,
       todayActions,
@@ -218,9 +231,9 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
   if (!view) return null
 
   return (
-    <section className="yds-composite-hero trading-card-shell panic-v2-section" aria-label="시장 위치">
+    <section className="yds-composite-hero trading-card-shell panic-v2-section" aria-label="YDS 총점">
       <div className="yds-composite-hero__head">
-        <p className="m-0 yds-composite-hero__title">시장 위치</p>
+        <p className="m-0 yds-composite-hero__title">YDS 총점</p>
         <p className="m-0 yds-composite-hero__score font-mono tabular-nums">{view.scoreDisplay}</p>
       </div>
       <p className="m-0 yds-composite-hero__stage">
@@ -253,7 +266,7 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
         <p className="m-0 yds-composite-hero__alloc-label">현금</p>
       </div>
       <p className="m-0 yds-composite-hero__recent">
-        시장 위치 변화{" "}
+        YDS 총점 변화{" "}
         <span className="font-mono tabular-nums">
           {view.prevScore != null ? `${view.prevScore} → ${view.score}` : view.trendLine}
         </span>{" "}
@@ -267,9 +280,9 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
           평균 수익률 {recSummary.avgReturn != null ? `${recSummary.avgReturn > 0 ? "+" : ""}${recSummary.avgReturn.toFixed(0)}%` : "—"}
         </span>
       </div>
-      <div className="yds-composite-hero__breakdown" role="status" aria-label="시장 위치 점수 분해">
+      <div className="yds-composite-hero__breakdown" role="status" aria-label="YDS 총점 점수 분해">
         <p className="m-0 yds-composite-hero__break-row">
-          <span>시장 위치 점수</span>
+          <span>YDS 총점</span>
           <strong className="font-mono tabular-nums">{view.score}</strong>
         </p>
         <p className="m-0 yds-composite-hero__break-row">
@@ -285,8 +298,12 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
           <strong className="font-mono tabular-nums">+{view.breakdown.bofaPts}</strong>
         </p>
         <p className="m-0 yds-composite-hero__break-row">
-          <span>기타(PC/HY)</span>
-          <strong className="font-mono tabular-nums">+{view.breakdown.otherPts}</strong>
+          <span>P/C</span>
+          <strong className="font-mono tabular-nums">+{view.breakdown.pcPts}</strong>
+        </p>
+        <p className="m-0 yds-composite-hero__break-row">
+          <span>HY</span>
+          <strong className="font-mono tabular-nums">+{view.breakdown.hyPts}</strong>
         </p>
         <p className="m-0 yds-composite-hero__break-row yds-composite-hero__break-row--sum">
           <span>합계</span>

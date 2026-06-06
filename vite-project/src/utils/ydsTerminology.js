@@ -5,9 +5,11 @@ export const YDS_V1_RC_LABEL = "Release Candidate"
 
 /** @type {Record<string, string>} */
 export const TERM_REPLACE = {
-  YDS: "시장 위치",
-  "YDS 점수": "시장 위치 점수",
-  "YDS SCORE": "시장 위치",
+  YDS: "YDS 총점",
+  "YDS 점수": "YDS 총점",
+  "YDS SCORE": "YDS 총점",
+  "시장 위치": "YDS 총점",
+  "시장 위치 점수": "YDS 총점",
   "PRI-A": "조기경보",
   "PRI-B": "충격감지",
   "PRI-A/B": "조기경보 · 충격감지",
@@ -28,7 +30,7 @@ export const TERM_REPLACE = {
 export const GLOSSARY_ENTRIES = [
   {
     id: "market-position",
-    title: "시장 위치",
+    title: "YDS 총점",
     body: "공포·탐욕 지표를 종합한 0~100 점수입니다. 높을수록 패닉에 가깝고, 낮을수록 과열에 가깝습니다.",
   },
   {

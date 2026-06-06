@@ -1,17 +1,12 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
-import { chartRangeStats, PANIC_INDEX_CHART_RANGES, sliceHistoryByLabRange } from "../utils/chartRange.js"
+import { chartRangeStats, sliceHistoryByLabRange } from "../utils/chartRange.js"
 import {
   PANIC_INDEX_CORE_HISTORY_METRICS,
-  PANIC_INDEX_CORE_HISTORY_ROWS,
   PANIC_INDEX_HISTORY_METRICS,
-  PANIC_INDEX_HISTORY_ROWS,
   YDS_COMPOSITE_HISTORY_METRIC,
 } from "../utils/panicDeskMetrics.js"
-import {
-  buildPanicHistoryInsight,
-  mergeInflectionsIntoChartData,
-} from "../utils/buildPanicHistoryInsight.js"
+import { mergeInflectionsIntoChartData } from "../utils/buildPanicHistoryInsight.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
@@ -19,20 +14,48 @@ import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/pani
 import { resolvePanicHistoryUiState } from "../utils/panicHistoryUiState.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { isPanicHubEnabled } from "../config/api.js"
-import PanicHistoryInsightPanel from "./panic-history/PanicHistoryInsightPanel.jsx"
 import PanicHistoryLineChart from "./PanicHistoryLineChart.jsx"
-import PanicDeskSectionHeader from "./panic-desk/PanicDeskSectionHeader.jsx"
+import YdsScoreBreakdownPanel from "./market-analysis/YdsScoreBreakdownPanel.jsx"
 
-const HISTORY_CHART_HEIGHT = 220
-const DEFAULT_METRIC_KEY = "vix"
+const HISTORY_CHART_HEIGHT = 200
+const YDS_RANGE_OPTIONS = [
+  { id: "1M", label: "30일" },
+  { id: "3M", label: "3개월" },
+  { id: "1Y", label: "1년" },
+]
+
+function toNum(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
+function pickPanicPayload(row) {
+  if (!row || typeof row !== "object") return null
+  if (row.panicData && typeof row.panicData === "object") return row.panicData
+  return row
+}
+
+function formatMetricValue(key, value) {
+  if (!Number.isFinite(value)) return "—"
+  if (key === "fearGreed") return String(Math.round(value))
+  if (key === "bofa") return value.toFixed(1)
+  if (key === "vix") return value.toFixed(2)
+  return value.toFixed(2)
+}
 
 /**
- * @param {{ rows?: object[]; defaultChartOpen?: boolean; inlineChart?: boolean }} props
+ * @param {{
+ *   rows?: object[]
+ *   defaultChartOpen?: boolean
+ *   inlineChart?: boolean
+ *   panicData?: object | null
+ * }} props
  */
 export default function PanicIndexHistorySection({
   rows: rowsProp = [],
   defaultChartOpen = false,
   inlineChart = false,
+  panicData = null,
 }) {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
@@ -47,37 +70,12 @@ export default function PanicIndexHistorySection({
     return resolveCycleHistoryRows(propsMerged)
   }, [rowsProp, storeRows])
 
-  const [metricScope, setMetricScope] = useState(/** @type {"core" | "yds" | "all"} */ ("core"))
-  const [activeMetricKey, setActiveMetricKey] = useState(DEFAULT_METRIC_KEY)
   const [rangeId, setRangeId] = useState("3M")
   const [chartOpen, setChartOpen] = useState(defaultChartOpen || inlineChart)
+  const [expandedMetricKey, setExpandedMetricKey] = useState(/** @type {string | null} */ (null))
 
-  const scopeRows =
-    metricScope === "core"
-      ? PANIC_INDEX_CORE_HISTORY_ROWS
-      : metricScope === "yds"
-        ? [[YDS_COMPOSITE_HISTORY_METRIC]]
-        : PANIC_INDEX_HISTORY_ROWS
-  const scopeMetrics =
-    metricScope === "core"
-      ? PANIC_INDEX_CORE_HISTORY_METRICS
-      : metricScope === "yds"
-        ? [YDS_COMPOSITE_HISTORY_METRIC]
-        : PANIC_INDEX_HISTORY_METRICS
-
-  useEffect(() => {
-    if (metricScope === "yds") {
-      setActiveMetricKey("ydsComposite")
-      return
-    }
-    if (scopeMetrics.some((m) => m.key === activeMetricKey)) return
-    setActiveMetricKey(scopeMetrics[0]?.key ?? DEFAULT_METRIC_KEY)
-  }, [metricScope, scopeMetrics, activeMetricKey])
-
-  const metric = useMemo(() => {
-    const found = scopeMetrics.find((m) => m.key === activeMetricKey)
-    return found ?? scopeMetrics[0] ?? PANIC_INDEX_HISTORY_METRICS[0]
-  }, [activeMetricKey, scopeMetrics])
+  const ydsMetric = YDS_COMPOSITE_HISTORY_METRIC
+  const activeMetricKey = expandedMetricKey ?? "ydsComposite"
 
   const slicedRows = useMemo(() => sliceHistoryByLabRange(history, rangeId), [history, rangeId])
   const chartRowsSource = slicedRows.length ? slicedRows : history
@@ -96,200 +94,242 @@ export default function PanicIndexHistorySection({
     [chartRowsSource, activeMetricKey],
   )
 
-  const insight = useMemo(
-    () => buildPanicHistoryInsight(chartRowsSource, history, activeMetricKey),
-    [chartRowsSource, history, activeMetricKey],
-  )
-
-  const chartRows = useMemo(() => {
-    const base = chartPayload?.chartData ?? []
-    return mergeInflectionsIntoChartData(base, insight.inflections)
-  }, [chartPayload?.chartData, insight.inflections])
+  const chartRows = useMemo(() => chartPayload?.chartData ?? [], [chartPayload?.chartData])
 
   const uiState = useMemo(
     () =>
       resolvePanicHistoryUiState({
         historyLength: history.length,
-        panicV2Count: metricCounts[activeMetricKey] ?? 0,
+        panicV2Count: metricCounts.ydsComposite ?? 0,
         syncStatus: panicHistoryV2SyncStatus,
         hubEnabled: isPanicHubEnabled(),
       }),
-    [history.length, metricCounts, activeMetricKey, panicHistoryV2SyncStatus],
+    [history.length, metricCounts, panicHistoryV2SyncStatus],
   )
 
   const showHistoryLoading = history.length === 0
   const rangeStats = chartRangeStats(history, rangeId, "lab")
-
   const hasChartData = chartRows.length > 0 && chartRows.some((x) => x?.value != null)
   const showChart = !showHistoryLoading && hasChartData
-
   const chartUiExpanded = inlineChart || chartOpen
 
-  const chartEmptyMessage = `${metric.shortLabel} 원본 데이터 준비중`
   const ydsSummary = useMemo(() => {
-    const rows = buildHistoryChartPayload(history, "ydsComposite").chartData ?? []
-    const latest = rows[rows.length - 1]
-    const latestScore = Number(latest?.value)
-    if (!Number.isFinite(latestScore)) return null
-    const stage = resolveMacroV1Status(latestScore)
-    const latestRaw = history[history.length - 1]
-    const flow = rows
+    const source = panicData ?? pickPanicPayload(history[history.length - 1])
+    const scoreRaw = source ? getFinalScore(source) : NaN
+    if (!Number.isFinite(scoreRaw)) return null
+    const score = Math.round(scoreRaw)
+    const stage = resolveMacroV1Status(score)
+    const flow = (history ?? [])
       .slice(-4)
-      .map((r) => Math.round(Number(r?.value)))
+      .map((row) => getFinalScore(pickPanicPayload(row) ?? {}))
       .filter(Number.isFinite)
+      .map((n) => Math.round(n))
+    const prevScore =
+      history.length >= 2 ? Math.round(getFinalScore(pickPanicPayload(history[history.length - 2]) ?? {})) : null
     return {
-      score: Math.round(latestScore),
+      score,
+      scoreDisplay: `${score} / 100`,
       stageLabel: stage?.label ?? "—",
       stageEmoji: stage?.emoji ?? "⚪",
       trendLine: flow.length ? flow.join(" → ") : "—",
-      delta:
-        history.length >= 2
-          ? Math.round(getFinalScore(history[history.length - 1]) - getFinalScore(history[history.length - 2]))
-          : 0,
-      dateLabel: latestRaw?.date ?? "—",
+      delta: prevScore != null ? score - prevScore : 0,
+      prevScore,
     }
-  }, [history])
-  const compactLine = useMemo(() => {
-    if (!ydsSummary) return "시장 위치 — · 데이터 준비 중"
-    const latest = history[history.length - 1]
-    const prev = history.length >= 2 ? history[history.length - 2] : null
-    const vixNow = Number(latest?.vix)
-    const vixPrev = Number(prev?.vix)
-    let vixLine = "VIX 확인중"
-    if (Number.isFinite(vixNow) && Number.isFinite(vixPrev)) {
-      const delta = vixNow - vixPrev
-      if (Math.abs(delta) < 0.2) vixLine = "VIX 변화 없음"
-      else if (delta < 0) vixLine = "VIX 안정"
-      else vixLine = "VIX 상승"
-    }
-    return `시장 위치 ${ydsSummary.score}점 · ${ydsSummary.stageLabel} · 최근 ${ydsSummary.trendLine} · ${vixLine}`
-  }, [ydsSummary, history])
+  }, [history, panicData])
+
+  const coreCards = useMemo(() => {
+    const source = panicData ?? pickPanicPayload(history[history.length - 1])
+    if (!source) return []
+    return PANIC_INDEX_CORE_HISTORY_METRICS.map((m) => {
+      const field = m.key === "fearGreed" ? "fearGreed" : m.key
+      const value = toNum(source[field])
+      return {
+        key: m.key,
+        label: m.shortLabel ?? m.chartLabel,
+        accent: m.accent,
+        value,
+        display: formatMetricValue(m.key, value),
+      }
+    })
+  }, [panicData, history])
+
+  const allNineRows = useMemo(() => {
+    const source = panicData ?? pickPanicPayload(history[history.length - 1])
+    if (!source) return []
+    return PANIC_INDEX_HISTORY_METRICS.map((m) => {
+      const field = m.key
+      let value = toNum(source[field])
+      if (m.key === "fearGreed") value = toNum(source.fearGreed)
+      if (m.key === "gsBullBear") value = toNum(source.gsBullBear ?? source.gsSentiment)
+      if (m.key === "highYield") value = toNum(source.highYield ?? source.hyOas)
+      return {
+        key: m.key,
+        label: m.shortLabel,
+        tooltip: m.tooltip,
+        accent: m.accent,
+        display: formatMetricValue(m.key, value ?? NaN),
+        count: metricCounts[m.key] ?? 0,
+      }
+    })
+  }, [panicData, history, metricCounts])
+
+  if (inlineChart) {
+    return (
+      <section className="panic-history-v2 trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
+        {ydsSummary ? (
+          <div className="panic-history-v2__hero" aria-label="YDS 총점">
+            <p className="panic-history-v2__hero-label">YDS 총점</p>
+            <p className="panic-history-v2__hero-score font-mono tabular-nums">{ydsSummary.scoreDisplay}</p>
+            <p className="panic-history-v2__hero-stage">
+              {ydsSummary.stageEmoji} {ydsSummary.stageLabel}
+            </p>
+            <p className="panic-history-v2__hero-flow">
+              최근 흐름 <span className="font-mono tabular-nums">{ydsSummary.trendLine}</span>
+              {ydsSummary.prevScore != null ? (
+                <span
+                  className={[
+                    "panic-history-v2__hero-delta",
+                    ydsSummary.delta > 0 ? "is-up" : ydsSummary.delta < 0 ? "is-down" : "is-flat",
+                  ].join(" ")}
+                >
+                  {ydsSummary.delta > 0 ? ` +${ydsSummary.delta}` : ydsSummary.delta < 0 ? ` ${ydsSummary.delta}` : ""}
+                </span>
+              ) : null}
+            </p>
+          </div>
+        ) : (
+          <p className="panic-history-v2__loading">YDS 총점 데이터 준비 중…</p>
+        )}
+
+        <div className="panic-history-v2__chart-block">
+          <div className="panic-history-v2__chart-head">
+            <p className="panic-history-v2__chart-title">YDS 총점 히스토리</p>
+            <div className="panic-history-v2__ranges" role="group" aria-label="기간">
+              {YDS_RANGE_OPTIONS.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setRangeId(r.id)}
+                  className={[
+                    "panic-history-v2__range-btn font-mono tabular-nums",
+                    rangeId === r.id ? "is-active" : "",
+                  ].join(" ")}
+                  aria-pressed={rangeId === r.id}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="panic-history-v2__chart">
+            {showChart ? (
+              <PanicHistoryLineChart
+                key={`yds-hist-${rangeId}`}
+                rows={chartRowsSource}
+                chartData={chartRows}
+                dataKey="value"
+                metricField="ydsComposite"
+                dataLabel={ydsMetric.chartLabel}
+                stroke={ydsMetric.accent}
+                showZoneBands
+                insightZones={false}
+                connectNulls
+                height={HISTORY_CHART_HEIGHT}
+                emptyMessage="YDS 총점 원본 데이터 준비중"
+              />
+            ) : (
+              <div className="panic-history-v2__chart-empty">
+                {showHistoryLoading ? (uiState.chartMessage ?? "데이터 준비중") : "YDS 총점 원본 데이터 준비중"}
+              </div>
+            )}
+          </div>
+          <p className="panic-history-v2__chart-meta font-mono tabular-nums">
+            {rangeId} · {rangeStats.shown}일 표시
+          </p>
+        </div>
+
+        <details className="panic-history-v2__breakdown">
+          <summary>점수 산출 근거 · 지표별 기여도</summary>
+          <YdsScoreBreakdownPanel panicData={panicData ?? pickPanicPayload(history[history.length - 1])} historyRows={history} />
+        </details>
+
+        {coreCards.length ? (
+          <div className="panic-history-v2__core" aria-label="핵심지표">
+            <p className="panic-history-v2__section-label">핵심지표</p>
+            <div className="panic-history-v2__core-grid">
+              {coreCards.map((card) => (
+                <article key={card.key} className="panic-history-v2__core-card" style={{ "--card-accent": card.accent }}>
+                  <p className="panic-history-v2__core-label">{card.label}</p>
+                  <p className="panic-history-v2__core-value font-mono tabular-nums">{card.display}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <details className="panic-history-v2__all-nine">
+          <summary>전체 9대 지표</summary>
+          <div className="panic-history-v2__nine-grid">
+            {allNineRows.map((row) => (
+              <button
+                key={row.key}
+                type="button"
+                className={[
+                  "panic-history-v2__nine-btn",
+                  expandedMetricKey === row.key ? "is-active" : "",
+                ].join(" ")}
+                style={{ "--nine-accent": row.accent }}
+                onClick={() => setExpandedMetricKey((prev) => (prev === row.key ? null : row.key))}
+              >
+                <span className="panic-history-v2__nine-label">{row.label}</span>
+                <span className="panic-history-v2__nine-value font-mono tabular-nums">{row.display}</span>
+                <span className="panic-history-v2__nine-count font-mono">{row.count}일</span>
+              </button>
+            ))}
+          </div>
+          {expandedMetricKey && expandedMetricKey !== "ydsComposite" ? (
+            <div className="panic-history-v2__nine-chart">
+              <PanicHistoryLineChart
+                key={`nine-${expandedMetricKey}-${rangeId}`}
+                rows={chartRowsSource}
+                chartData={buildHistoryChartPayload(chartRowsSource, expandedMetricKey).chartData ?? []}
+                dataKey="value"
+                metricField={expandedMetricKey}
+                dataLabel={PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === expandedMetricKey)?.chartLabel ?? expandedMetricKey}
+                stroke={PANIC_INDEX_HISTORY_METRICS.find((m) => m.key === expandedMetricKey)?.accent ?? "#94a3b8"}
+                showZoneBands={false}
+                connectNulls
+                height={160}
+                emptyMessage="원본 데이터 준비중"
+              />
+            </div>
+          ) : null}
+        </details>
+      </section>
+    )
+  }
 
   return (
-    <section
-      className={[
-        "panic-history-section",
-        "trading-card-shell",
-        "panic-v2-section",
-        "overflow-hidden",
-        "px-2",
-        "pb-2",
-        "sm:px-2.5",
-        metricScope === "core" ? "panic-history-section--core" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <PanicDeskSectionHeader
-        icon="📈"
-        title="패닉지수 히스토리 요약 모드"
-        description="요약 우선 · 차트는 필요 시 펼쳐보기"
-        tone="amber"
-        tier="main"
-      />
-      <div className="panic-history-compact-summary" role="status" aria-label="패닉지수 히스토리 요약">
-        <p className="m-0 panic-history-compact-summary__line">{compactLine}</p>
-        {!inlineChart ? (
-          <button
-            type="button"
-            className="panic-history-compact-summary__toggle"
-            onClick={() => setChartOpen((v) => !v)}
-          >
-            {chartOpen ? "차트 닫기 ▲" : "차트 보기 ▼"}
-          </button>
-        ) : null}
+    <section className="panic-history-section trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
+      <div className="panic-history-compact-summary" role="status">
+        <p className="m-0 panic-history-compact-summary__line">
+          {ydsSummary
+            ? `YDS 총점 ${ydsSummary.score}점 · ${ydsSummary.stageLabel} · 최근 ${ydsSummary.trendLine}`
+            : "YDS 총점 — · 데이터 준비 중"}
+        </p>
+        <button
+          type="button"
+          className="panic-history-compact-summary__toggle"
+          onClick={() => setChartOpen((v) => !v)}
+        >
+          {chartOpen ? "차트 닫기 ▲" : "차트 보기 ▼"}
+        </button>
       </div>
-      {chartUiExpanded ? <div className="panic-history-scope-toggle" role="tablist" aria-label="지표 범위">
-        <button
-          type="button"
-          role="tab"
-          className={["panic-history-scope-toggle__btn", metricScope === "core" ? "is-active" : ""].join(" ")}
-          aria-selected={metricScope === "core"}
-          onClick={() => setMetricScope("core")}
-        >
-          <span className="panic-history-scope-toggle__label-full">핵심 3지표</span>
-          <span className="panic-history-scope-toggle__label-short">핵심</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          className={["panic-history-scope-toggle__btn", metricScope === "yds" ? "is-active" : ""].join(" ")}
-          aria-selected={metricScope === "yds"}
-          onClick={() => setMetricScope("yds")}
-        >
-          <span className="panic-history-scope-toggle__label-full">시장 위치</span>
-          <span className="panic-history-scope-toggle__label-short">위치</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          className={["panic-history-scope-toggle__btn", metricScope === "all" ? "is-active" : ""].join(" ")}
-          aria-selected={metricScope === "all"}
-          onClick={() => setMetricScope("all")}
-        >
-          <span className="panic-history-scope-toggle__label-full">전체 9지표</span>
-          <span className="panic-history-scope-toggle__label-short">전체</span>
-        </button>
-      </div> : null}
 
-      {chartUiExpanded ? <div className="panic-history-picker" role="tablist" aria-label={metricScope === "core" ? "핵심 3지표" : "9대 패닉지수"}>
-        {scopeRows.map((row, rowIdx) => (
-          <div key={`picker-row-${rowIdx}`} className="panic-history-picker__row">
-            {row.map((m) => {
-              const n = metricCounts[m.key] ?? 0
-              const active = activeMetricKey === m.key
-              return (
-                <button
-                  key={m.key}
-                  type="button"
-                  role="tab"
-                  onClick={() => setActiveMetricKey(m.key)}
-                  className={[
-                    "panic-history-picker__btn",
-                    active ? "panic-history-picker__btn--active" : "",
-                  ].join(" ")}
-                  style={active ? { "--picker-accent": m.accent } : undefined}
-                  title={m.tooltip ? `${m.tooltip} · ${n}일` : `${m.shortLabel} · ${n}일`}
-                  aria-selected={active}
-                >
-                  <span className="panic-history-picker__btn-label">{m.shortLabel}</span>
-                  <span className="panic-history-picker__btn-count font-mono">{n}</span>
-                </button>
-              )
-            })}
-          </div>
-        ))}
-      </div> : null}
-
-      {chartUiExpanded ? <div className="panic-history-selection-bar">
-        <p className="m-0 panic-history-selection-bar__selected">
-          선택: <strong>{metric.shortLabel}</strong>
-          <span className="panic-history-selection-bar__hint">{metric.tooltip}</span>
-        </p>
-        <div className="panic-history-selection-bar__ranges" role="group" aria-label="기간">
-          {PANIC_INDEX_CHART_RANGES.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setRangeId(r.id)}
-              className={[
-                "panic-history-range-btn font-mono tabular-nums",
-                rangeId === r.id ? "panic-history-range-btn--active" : "",
-              ].join(" ")}
-              aria-pressed={rangeId === r.id}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
-        <p className="m-0 panic-history-selection-bar__days text-[10px] text-slate-500">
-          {rangeId} · {rangeStats.shown}일 표시
-        </p>
-      </div> : null}
-      {ydsSummary && chartUiExpanded ? (
-        <div className="panic-history-yds-summary" role="status" aria-label="시장 위치 요약">
+      {chartUiExpanded && ydsSummary ? (
+        <div className="panic-history-yds-summary" role="status" aria-label="YDS 총점 요약">
           <p className="m-0 panic-history-yds-summary__score">
-            시장 위치 {ydsSummary.score}점
+            YDS 총점 {ydsSummary.score}점
             <span
               className={[
                 "panic-history-yds-summary__delta",
@@ -303,45 +343,32 @@ export default function PanicIndexHistorySection({
             {ydsSummary.stageEmoji} {ydsSummary.stageLabel}
           </p>
           <p className="m-0 panic-history-yds-summary__trend">최근 흐름 {ydsSummary.trendLine}</p>
-          <p className="m-0 panic-history-yds-summary__date">{ydsSummary.dateLabel}</p>
         </div>
       ) : null}
 
-      {chartUiExpanded ? <PanicHistoryInsightPanel
-        header={insight.header}
-        changeStrip={insight.changeStrip}
-        interpretationLines={insight.interpretationLines}
-        bottomInsight={insight.bottomInsight}
-        metricKey={activeMetricKey}
-        accent={metric.accent}
-      /> : null}
-
-      {chartUiExpanded ? <div className="panic-history-section__chart mt-1 pb-1">
-        {showChart ? (
-          <PanicHistoryLineChart
-            key={`panic-hist-${activeMetricKey}-${rangeId}`}
-            rows={chartRowsSource}
-            chartData={chartRows}
-            dataKey={chartPayload?.dataKey ?? "value"}
-            metricField={chartPayload?.selectedField ?? activeMetricKey}
-            dataLabel={metric.chartLabel}
-            stroke={metric.accent}
-            showZoneBands={false}
-            insightZones={false}
-            connectNulls
-            height={HISTORY_CHART_HEIGHT}
-            emptyMessage={chartEmptyMessage}
-          />
-        ) : (
-          <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
-            {showHistoryLoading
-              ? uiState.chartMessage ?? "데이터 준비중"
-              : hasChartData
-                ? chartEmptyMessage
-                : (uiState.chartMessage ?? chartEmptyMessage)}
-          </div>
-        )}
-      </div> : null}
+      {chartUiExpanded ? (
+        <div className="panic-history-section__chart mt-1 pb-1">
+          {showChart ? (
+            <PanicHistoryLineChart
+              key={`panic-hist-yds-${rangeId}`}
+              rows={chartRowsSource}
+              chartData={chartRows}
+              dataKey="value"
+              metricField="ydsComposite"
+              dataLabel={ydsMetric.chartLabel}
+              stroke={ydsMetric.accent}
+              showZoneBands
+              connectNulls
+              height={HISTORY_CHART_HEIGHT}
+              emptyMessage="YDS 총점 원본 데이터 준비중"
+            />
+          ) : (
+            <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
+              {showHistoryLoading ? (uiState.chartMessage ?? "데이터 준비중") : "YDS 총점 원본 데이터 준비중"}
+            </div>
+          )}
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -151,6 +151,121 @@ function buildBreakdownInsights(ctx) {
   return lines
 }
 
+const CONTRIB_LABELS = {
+  vix: "VIX",
+  cnn: "CNN",
+  bofa: "BofA",
+  highYield: "HY",
+  putCall: "P/C",
+}
+
+/**
+ * 전일 대비 지표별 기여도 변화 (getFinalScore 경로 동일)
+ * @param {Record<string, unknown>} currentData
+ * @param {Record<string, unknown>} previousData
+ */
+export function buildYdsScoreDeltaBreakdown(currentData, previousData) {
+  const today = buildYdsScoreBreakdown({
+    vix: currentData?.vix,
+    cnn: currentData?.fearGreed ?? currentData?.cnn,
+    bofa: currentData?.bofa,
+    putCall: currentData?.putCall,
+    highYield: currentData?.highYield,
+  })
+  const prev = buildYdsScoreBreakdown({
+    vix: previousData?.vix,
+    cnn: previousData?.fearGreed ?? previousData?.cnn,
+    bofa: previousData?.bofa,
+    putCall: previousData?.putCall,
+    highYield: previousData?.highYield,
+  })
+
+  if (!today.computable || !prev.computable) {
+    return {
+      computable: false,
+      today,
+      prev,
+      finalDelta: null,
+      contributionDeltas: null,
+      drivers: [],
+    }
+  }
+
+  /** @type {Record<string, number>} */
+  const contributionDeltas = {}
+  for (const key of Object.keys(CONTRIB_LABELS)) {
+    contributionDeltas[key] =
+      Math.round(((today.contributions?.[key] ?? 0) - (prev.contributions?.[key] ?? 0)) * 10) / 10
+  }
+
+  const finalDelta = today.finalYds - prev.finalYds
+  const drivers = Object.entries(contributionDeltas)
+    .filter(([, d]) => Math.abs(d) >= 0.1)
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+    .map(([key, delta]) => ({
+      key,
+      label: CONTRIB_LABELS[key],
+      delta,
+      todayContribution: today.contributions[key],
+      prevContribution: prev.contributions[key],
+    }))
+
+  return {
+    computable: true,
+    today,
+    prev,
+    finalDelta,
+    contributionDeltas,
+    drivers,
+  }
+}
+
+/**
+ * panicData + historyRows → 검증용 요약
+ * @param {object | null} panicData
+ * @param {object[]} historyRows
+ */
+export function buildYdsScoreVerification(panicData, historyRows = []) {
+  if (!panicData) return null
+
+  const payload = historyDataToPanicPayload({
+    vix: panicData.vix,
+    cnn: panicData.fearGreed,
+    bofa: panicData.bofa,
+    putCall: panicData.putCall,
+    highYield: panicData.highYield,
+  })
+
+  const today = buildYdsScoreBreakdown({
+    vix: payload.vix,
+    cnn: payload.fearGreed,
+    bofa: payload.bofa,
+    putCall: payload.putCall,
+    highYield: payload.highYield,
+  })
+
+  const rows = Array.isArray(historyRows) ? historyRows : []
+  const prevRow = rows.length >= 2 ? rows[rows.length - 2] : null
+  const prevPanic = prevRow?.panicData ?? prevRow ?? null
+  const delta =
+    prevPanic != null
+      ? buildYdsScoreDeltaBreakdown(panicData, prevPanic)
+      : { computable: false, today, prev: null, finalDelta: null, contributionDeltas: null, drivers: [] }
+
+  const stage = resolveYdsStage(today.finalYds ?? 0)
+  const interestThreshold = 40
+  const nearInterest = today.finalYds != null && today.finalYds >= 36 && today.finalYds < interestThreshold
+
+  return {
+    today,
+    delta,
+    stage,
+    interestThreshold,
+    nearInterest,
+    moveNote: "MOVE·SKEW·VXN·GS는 YDS 총점(getFinalScore) 산출에 미포함 · Panic V2 보조 지표",
+  }
+}
+
 /**
  * @param {import("./ydsHistoricalEventTypes.js").EventDetailData} event
  * @param {import("./ydsHistoricalEventTypes.js").ReplayMilestoneKey} milestoneKey

@@ -43,7 +43,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   }
 
   return (
-    <div className="yds-market-desk" id="market-desk" aria-label="시장 위치·행동·히스토리">
+    <div className="yds-market-desk" id="market-desk" aria-label="YDS 총점·행동·히스토리">
       <div className="yds-market-desk__basis">
         <CycleDataBasisBar
           updatedAt={panicData?.updatedAt}
@@ -63,21 +63,26 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
       </section>
 
-      {/* 1.5 현재 시장 위치 — 1초 핵심 */}
+      {/* 1.5 YDS 총점 — 1초 핵심 (CNN 스타일) */}
       <MarketPositionSpotlight panicData={panicData} />
 
-      {/* 2. 패닉지수 히스토리 (요약 + 차트) */}
+      {/* 2. YDS 총점 히스토리 (요약 + 차트) */}
       <section className="yds-market-desk__block" aria-labelledby="market-block-history">
         <h2 id="market-block-history" className="yds-market-desk__block-label">
-          패닉지수 흐름
+          YDS 총점 히스토리
         </h2>
         <SectionErrorBoundary
-          label="패닉지수 히스토리"
+          label="YDS 총점 히스토리"
           fallback={
-            <p className="yds-market-desk__fallback">패닉지수 히스토리를 불러올 수 없습니다.</p>
+            <p className="yds-market-desk__fallback">YDS 총점 히스토리를 불러올 수 없습니다.</p>
           }
         >
-          <PanicIndexHistorySection rows={safeHistory} inlineChart defaultChartOpen />
+          <PanicIndexHistorySection
+            rows={safeHistory}
+            panicData={panicData}
+            inlineChart
+            defaultChartOpen
+          />
         </SectionErrorBoundary>
       </section>
 

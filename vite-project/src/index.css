@@ -24729,59 +24729,45 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 }
 
-/* 현재 시장 위치 — 연속 사이클 트랙 (기관형) */
+/* YDS 총점 — CNN F&G 스타일 컴팩트 (≤120px) */
 .yds-market-spotlight {
-  padding: 1rem 1.1rem 1.15rem;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: linear-gradient(180deg, rgba(11, 14, 20, 0.98), rgba(8, 12, 18, 0.96));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  max-height: 120px;
+  padding: 0.55rem 0.15rem 0.35rem;
+  margin: 0.15rem 0 0.35rem;
+  min-width: 0;
 }
 
 .yds-market-spotlight--empty {
-  padding: 0.85rem 1rem;
-}
-
-.yds-market-spotlight__eyebrow {
-  margin: 0;
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #475569;
-}
-
-.yds-market-spotlight__title {
-  margin: 0.2rem 0 0.85rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #94a3b8;
+  padding: 0.5rem 0.15rem;
 }
 
 .yds-market-spotlight__empty {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #64748b;
-}
-
-.yds-market-spotlight__hero {
   text-align: center;
-  margin-bottom: 1.1rem;
-  padding-bottom: 0.15rem;
 }
 
-.yds-market-spotlight__kicker {
+.yds-market-spotlight__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.45rem;
+}
+
+.yds-market-spotlight__label {
   margin: 0;
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: #64748b;
 }
 
 .yds-market-spotlight__score {
-  margin: 0.25rem 0 0;
-  font-size: clamp(2rem, 5vw, 2.75rem);
+  margin: 0;
+  font-size: clamp(1.35rem, 4.5vw, 1.75rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -24789,81 +24775,43 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-spotlight__stage {
-  margin: 0.4rem 0 0;
-  font-size: clamp(1.4rem, 4vw, 1.95rem);
-  font-weight: 800;
+  margin: 0;
+  font-size: clamp(0.72rem, 2.2vw, 0.85rem);
+  font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.01em;
   color: var(--spotlight-stage-color, #22c55e);
 }
 
 .yds-market-spotlight__track {
-  position: relative;
-  min-width: 0;
-}
-
-.yds-market-spotlight__axis {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
   min-width: 0;
 }
 
 .yds-market-spotlight__bar-column {
   position: relative;
-  flex: 1;
   min-width: 0;
-  padding-bottom: 0.25rem;
-}
-
-.yds-market-spotlight__axis-end {
-  flex-shrink: 0;
-  width: 1.35rem;
-  font-size: 0.62rem;
-  font-weight: 600;
-  color: #475569;
-  text-align: center;
 }
 
 .yds-market-spotlight__bar-shell {
   position: relative;
-  flex: 1;
-  min-width: 0;
-  height: 10px;
+  height: 8px;
   border-radius: 999px;
-  overflow: visible;
 }
 
-.yds-market-spotlight__bar-gradient {
+.yds-market-spotlight__bar-track {
   position: absolute;
   inset: 0;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    #3b82f6 0%,
-    #3b82f6 20%,
-    #22c55e 20%,
-    #22c55e 40%,
-    #eab308 40%,
-    #eab308 60%,
-    #f97316 60%,
-    #f97316 80%,
-    #ef4444 80%,
-    #ef4444 100%
-  );
-  opacity: 0.88;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 1px 3px rgba(0, 0, 0, 0.35);
+  background: rgba(148, 163, 184, 0.18);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.yds-market-spotlight__bar-tick {
+.yds-market-spotlight__bar-fill {
   position: absolute;
-  top: -2px;
-  bottom: -2px;
-  width: 1px;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.35);
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px 0 0 999px;
+  background: color-mix(in srgb, var(--fill-color, #22c55e) 55%, transparent);
   pointer-events: none;
 }
 
@@ -24877,59 +24825,28 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-market-spotlight__pin-dot {
   display: block;
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--pin-color, #22c55e);
   border: 2px solid #0b0e14;
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--pin-color) 70%, transparent),
-    0 0 10px color-mix(in srgb, var(--pin-color) 55%, transparent);
-}
-
-.yds-market-spotlight__callout {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.08rem;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 1;
-}
-
-.yds-market-spotlight__callout-arrow {
-  font-size: 0.7rem;
-  line-height: 1;
-  color: var(--callout-color, #22c55e);
-  opacity: 0.95;
-}
-
-.yds-market-spotlight__callout-score {
-  font-size: clamp(0.65rem, 1.85vw, 0.75rem);
-  font-weight: 700;
-  color: #cbd5e1;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pin-color) 60%, transparent);
 }
 
 .yds-market-spotlight__zone-rail {
-  position: relative;
-  margin-top: 2.5rem;
-  height: 2rem;
-  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.15rem;
+  margin-top: 0.35rem;
 }
 
 .yds-market-spotlight__zone-label {
-  position: absolute;
-  top: 0;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
-  max-width: 3.25rem;
-  opacity: 0.55;
+  gap: 0.05rem;
+  opacity: 0.35;
+  min-width: 0;
 }
 
 .yds-market-spotlight__zone-label.is-current {
@@ -24942,52 +24859,322 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-spotlight__zone-emoji {
-  font-size: clamp(0.55rem, 1.6vw, 0.65rem);
+  font-size: 0.52rem;
   line-height: 1;
 }
 
 .yds-market-spotlight__zone-name {
-  font-size: clamp(0.48rem, 1.45vw, 0.6rem);
+  font-size: clamp(0.42rem, 1.35vw, 0.52rem);
   font-weight: 600;
   color: #64748b;
   text-align: center;
-  line-height: 1.15;
+  line-height: 1.1;
   word-break: keep-all;
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 430px) {
   .yds-market-spotlight {
-    padding: 1.15rem 1.35rem 1.25rem;
-  }
-
-  .yds-market-spotlight__bar-shell {
-    height: 12px;
+    max-height: 118px;
+    padding-inline: 0.05rem;
   }
 
   .yds-market-spotlight__zone-name {
-    font-size: 0.62rem;
-  }
-
-  .yds-market-spotlight__zone-label {
-    max-width: 4rem;
+    font-size: 0.42rem;
   }
 }
 
-@media (max-width: 390px) {
-  .yds-market-spotlight__axis {
-    gap: 0.35rem;
+@media (min-width: 1024px) {
+  .yds-market-spotlight__bar-shell {
+    height: 9px;
   }
+}
 
-  .yds-market-spotlight__axis-end {
-    width: 1.1rem;
-    font-size: 0.55rem;
-  }
+/* YDS 총점 히스토리 v2 */
+.panic-history-v2__hero {
+  text-align: center;
+  padding: 0.65rem 0.35rem 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
 
-  .yds-market-spotlight__zone-label {
-    max-width: 2.65rem;
-  }
+.panic-history-v2__hero-label {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #64748b;
+}
 
-  .yds-market-spotlight__zone-name {
-    font-size: 0.46rem;
-  }
+.panic-history-v2__hero-score {
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.panic-history-v2__hero-stage {
+  margin: 0.25rem 0 0;
+  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  font-weight: 700;
+  color: #22c55e;
+}
+
+.panic-history-v2__hero-flow {
+  margin: 0.35rem 0 0;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.panic-history-v2__hero-delta.is-up {
+  color: #f87171;
+}
+
+.panic-history-v2__hero-delta.is-down {
+  color: #34d399;
+}
+
+.panic-history-v2__loading {
+  margin: 0;
+  padding: 0.75rem;
+  font-size: 0.72rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.panic-history-v2__chart-block {
+  padding: 0.65rem 0.25rem 0.5rem;
+}
+
+.panic-history-v2__chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.45rem;
+}
+
+.panic-history-v2__chart-title {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.panic-history-v2__ranges {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.panic-history-v2__range-btn {
+  padding: 0.2rem 0.45rem;
+  font-size: 0.58rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.5);
+  color: #94a3b8;
+}
+
+.panic-history-v2__range-btn.is-active {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(167, 139, 250, 0.12);
+  color: #ddd6fe;
+}
+
+.panic-history-v2__chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  font-size: 0.65rem;
+  color: #64748b;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.panic-history-v2__chart-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.55rem;
+  color: #475569;
+  text-align: right;
+}
+
+.panic-history-v2__breakdown,
+.panic-history-v2__all-nine {
+  margin-top: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.panic-history-v2__breakdown summary,
+.panic-history-v2__all-nine summary {
+  padding: 0.55rem 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.panic-history-v2__section-label {
+  margin: 0 0 0.4rem;
+  padding: 0 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.panic-history-v2__core {
+  padding: 0.55rem 0.25rem 0.65rem;
+}
+
+.panic-history-v2__core-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.panic-history-v2__core-card {
+  padding: 0.45rem 0.35rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(15, 23, 42, 0.45);
+  border-top: 2px solid var(--card-accent, #64748b);
+}
+
+.panic-history-v2__core-label {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.panic-history-v2__core-value {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.panic-history-v2__nine-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+  padding: 0 0.25rem 0.55rem;
+}
+
+.panic-history-v2__nine-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.08rem;
+  padding: 0.4rem 0.35rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(15, 23, 42, 0.35);
+  text-align: left;
+}
+
+.panic-history-v2__nine-btn.is-active {
+  border-color: color-mix(in srgb, var(--nine-accent, #94a3b8) 55%, transparent);
+  background: color-mix(in srgb, var(--nine-accent, #94a3b8) 8%, rgba(15, 23, 42, 0.5));
+}
+
+.panic-history-v2__nine-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.panic-history-v2__nine-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.panic-history-v2__nine-count {
+  font-size: 0.48rem;
+  color: #475569;
+}
+
+.panic-history-v2__nine-chart {
+  padding: 0 0.25rem 0.65rem;
+}
+
+.yds-score-breakdown {
+  padding: 0.35rem 0.25rem 0.65rem;
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+
+.yds-score-breakdown__formula {
+  margin: 0 0 0.25rem;
+}
+
+.yds-score-breakdown__note {
+  margin: 0 0 0.45rem;
+  color: #64748b;
+}
+
+.yds-score-breakdown__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.58rem;
+}
+
+.yds-score-breakdown__table th,
+.yds-score-breakdown__table td {
+  padding: 0.25rem 0.35rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  text-align: left;
+}
+
+.yds-score-breakdown__sum td {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-score-breakdown__delta {
+  margin-top: 0.45rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.yds-score-breakdown__delta-head .is-up {
+  color: #f87171;
+}
+
+.yds-score-breakdown__delta-head .is-down {
+  color: #34d399;
+}
+
+.yds-score-breakdown__delta-list {
+  margin: 0.25rem 0 0;
+  padding-left: 1rem;
+}
+
+.yds-score-breakdown__insights {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  color: #64748b;
+}
+
+.yds-score-breakdown__flag {
+  margin: 0.35rem 0 0;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  background: rgba(234, 179, 8, 0.08);
+  color: #fbbf24;
+}
+
+.yds-score-breakdown__footnote {
+  margin: 0.35rem 0 0;
+  font-size: 0.52rem;
+  color: #475569;
+}
+
+.yds-score-breakdown__empty {
+  margin: 0;
+  padding: 0.35rem 0.25rem;
+  font-size: 0.62rem;
+  color: #64748b;
 }
