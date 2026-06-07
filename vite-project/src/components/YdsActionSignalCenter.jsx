@@ -9,6 +9,7 @@ import {
 } from "../content/ydsMarketCycleDisplay.js"
 import { resolveMomentumLayer } from "../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../content/ydsEventLayer.js"
+import { macroStageDisplayLabel } from "../content/ydsLanguage.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
@@ -52,7 +53,7 @@ function buildSignalTemplate(stageId) {
       do: ["종목 발굴 · 현금 확보", "소량 분할 검토", "우량주 리스트 압축"],
       avoid: ["추격·일괄 매수"],
       priority: ["종목 발굴", "현금 확보", "매수 준비"],
-      conclusion: "준비구간 · 매수 준비 강화",
+      conclusion: "관심 · 매수 준비 강화",
     }
   }
   if (stageId === "dca") {
@@ -111,7 +112,7 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
     const eventLayer = resolveEventLayer(panicData, historyRows ?? [])
 
     return {
-      stageLabel: stage?.label ?? "중립구간",
+      stageLabel: stage?.label ?? macroStageDisplayLabel("neutral"),
       stageEmoji: stage?.emoji ?? "⚪",
       score: nowScore,
       prevScore,

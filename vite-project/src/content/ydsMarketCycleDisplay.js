@@ -23,8 +23,8 @@
 export const MARKET_CYCLE_STAGES = [
   {
     id: "normal",
-    label: "정상",
-    emoji: "🟢",
+    label: "성장",
+    emoji: "🟡",
     color: "#22c55e",
     role: "보유 유지 · 추격 자제",
     mood: "균형",
@@ -34,8 +34,8 @@ export const MARKET_CYCLE_STAGES = [
   },
   {
     id: "warning",
-    label: "과열주의",
-    emoji: "🟡",
+    label: "사이클 후반",
+    emoji: "🟠",
     color: "#eab308",
     role: "수익 관리 점검 단계",
     mood: "탐욕 증가",
@@ -45,8 +45,8 @@ export const MARKET_CYCLE_STAGES = [
   },
   {
     id: "cashPrep",
-    label: "현금준비",
-    emoji: "🔵",
+    label: "최고 과열",
+    emoji: "🔴",
     color: "#3b82f6",
     role: "수확·현금 확대 검토",
     mood: "탐욕·과열",
@@ -56,8 +56,8 @@ export const MARKET_CYCLE_STAGES = [
   },
   {
     id: "partialCash",
-    label: "일부현금확보",
-    emoji: "🔵",
+    label: "최고 과열",
+    emoji: "🔴",
     color: "#2563eb",
     role: "일부 현금화 · confirm",
     mood: "극단 탐욕",

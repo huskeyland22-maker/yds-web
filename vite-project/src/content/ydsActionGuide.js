@@ -23,7 +23,7 @@ export const PANIC_ACTION_GUIDE = {
     id: "overheat",
     macroId: "overheated",
     emoji: "🔵",
-    label: "과열",
+    label: "공포 없음",
     actions: (cashPct) => [
       cashPct != null ? `현금 ${cashPct}% 확보` : "현금 확보",
       "신규 진입 축소",
@@ -34,7 +34,7 @@ export const PANIC_ACTION_GUIDE = {
     id: "neutral",
     macroId: "neutral",
     emoji: "🟢",
-    label: "중립",
+    label: "공포 부족",
     actions: (cashPct) => [
       "추격매수 금지",
       cashPct != null ? `현금 ${cashPct}% 유지` : "현금 유지",

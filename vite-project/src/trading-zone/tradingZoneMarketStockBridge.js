@@ -107,11 +107,11 @@ const FOCUS_LABEL = {
 
 /** @type {Record<string, string>} */
 const REGIME_LABEL = {
-  neutral: "중립구간",
-  interest: "준비구간",
-  dca: "분할매수 구간",
-  panicBuy: "패닉매수 구간",
-  overheated: "과열구간",
+  neutral: "공포 부족",
+  interest: "관심",
+  dca: "분할매수",
+  panicBuy: "인생 타점",
+  overheated: "공포 없음",
 }
 
 /**

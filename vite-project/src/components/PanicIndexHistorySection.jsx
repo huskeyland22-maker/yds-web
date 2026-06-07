@@ -9,6 +9,7 @@ import {
 import { mergeInflectionsIntoChartData } from "../utils/buildPanicHistoryInsight.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { YDS_CYCLE_TAGLINE } from "../content/ydsCyclePhilosophy.js"
+import { YDS_LABEL_PANIC_HISTORY, YDS_LABEL_PANIC_SCORE } from "../content/ydsLanguage.js"
 import YdsStagePositionNav from "./market-analysis/YdsStagePositionNav.jsx"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
@@ -179,8 +180,8 @@ export default function PanicIndexHistorySection({
     return (
       <section className="panic-history-v2 trading-card-shell panic-v2-section overflow-hidden px-2 pb-2 sm:px-2.5">
         {ydsSummary ? (
-          <div className="panic-history-v2__hero" aria-label="YDS 총점">
-            <p className="panic-history-v2__hero-label">YDS 총점</p>
+          <div className="panic-history-v2__hero" aria-label={YDS_LABEL_PANIC_SCORE}>
+            <p className="panic-history-v2__hero-label">{YDS_LABEL_PANIC_SCORE}</p>
             <p className="panic-history-v2__hero-score font-mono tabular-nums">{ydsSummary.scoreDisplay}</p>
             <p className="panic-history-v2__hero-stage">
               {ydsSummary.stageEmoji} {ydsSummary.stageLabel}
@@ -202,12 +203,12 @@ export default function PanicIndexHistorySection({
             </p>
           </div>
         ) : (
-          <p className="panic-history-v2__loading">YDS 총점 데이터 준비 중…</p>
+          <p className="panic-history-v2__loading">{YDS_LABEL_PANIC_SCORE} 데이터 준비 중…</p>
         )}
 
         <div className="panic-history-v2__chart-block">
           <div className="panic-history-v2__chart-head">
-            <p className="panic-history-v2__chart-title">YDS 총점 히스토리</p>
+            <p className="panic-history-v2__chart-title">{YDS_LABEL_PANIC_HISTORY}</p>
             <div className="panic-history-v2__ranges" role="group" aria-label="기간">
               {YDS_RANGE_OPTIONS.map((r) => (
                 <button
@@ -239,11 +240,11 @@ export default function PanicIndexHistorySection({
                 insightZones={false}
                 connectNulls
                 height={HISTORY_CHART_HEIGHT}
-                emptyMessage="YDS 총점 원본 데이터 준비중"
+                emptyMessage={`${YDS_LABEL_PANIC_SCORE} 원본 데이터 준비중`}
               />
             ) : (
               <div className="panic-history-v2__chart-empty">
-                {showHistoryLoading ? (uiState.chartMessage ?? "데이터 준비중") : "YDS 총점 원본 데이터 준비중"}
+                {showHistoryLoading ? (uiState.chartMessage ?? "데이터 준비중") : `${YDS_LABEL_PANIC_SCORE} 원본 데이터 준비중`}
               </div>
             )}
           </div>
@@ -318,8 +319,8 @@ export default function PanicIndexHistorySection({
       <div className="panic-history-compact-summary" role="status">
         <p className="m-0 panic-history-compact-summary__line">
           {ydsSummary
-            ? `YDS 총점 ${ydsSummary.score}점 · ${ydsSummary.stageLabel} · 최근 ${ydsSummary.trendLine}`
-            : "YDS 총점 — · 데이터 준비 중"}
+            ? `${YDS_LABEL_PANIC_SCORE} ${ydsSummary.score}점 · ${ydsSummary.stageLabel} · 최근 ${ydsSummary.trendLine}`
+            : `${YDS_LABEL_PANIC_SCORE} — · 데이터 준비 중`}
         </p>
         <button
           type="button"
@@ -331,9 +332,9 @@ export default function PanicIndexHistorySection({
       </div>
 
       {chartUiExpanded && ydsSummary ? (
-        <div className="panic-history-yds-summary" role="status" aria-label="YDS 총점 요약">
+        <div className="panic-history-yds-summary" role="status" aria-label={`${YDS_LABEL_PANIC_SCORE} 요약`}>
           <p className="m-0 panic-history-yds-summary__score">
-            YDS 총점 {ydsSummary.score}점
+            {YDS_LABEL_PANIC_SCORE} {ydsSummary.score}점
             <span
               className={[
                 "panic-history-yds-summary__delta",
@@ -364,11 +365,11 @@ export default function PanicIndexHistorySection({
               showZoneBands
               connectNulls
               height={HISTORY_CHART_HEIGHT}
-              emptyMessage="YDS 총점 원본 데이터 준비중"
+              emptyMessage={`${YDS_LABEL_PANIC_SCORE} 원본 데이터 준비중`}
             />
           ) : (
             <div className="flex h-[72px] items-center justify-center rounded border border-white/[0.06] bg-black/20 text-[10px] text-slate-500">
-              {showHistoryLoading ? (uiState.chartMessage ?? "데이터 준비중") : "YDS 총점 원본 데이터 준비중"}
+              {showHistoryLoading ? (uiState.chartMessage ?? "데이터 준비중") : `${YDS_LABEL_PANIC_SCORE} 원본 데이터 준비중`}
             </div>
           )}
         </div>

@@ -33,7 +33,7 @@ const STAGE_FIT_LABEL = {
   neutral: "중립 구간 적합",
   interest: "관심 구간 적합",
   dca: "분할매수 구간 적합",
-  panicBuy: "패닉매수 구간 검토",
+  panicBuy: "인생 타점 구간 검토",
 }
 
 /** @type {Record<string, string>} */

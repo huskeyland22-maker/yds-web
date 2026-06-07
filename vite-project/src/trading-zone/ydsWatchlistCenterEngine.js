@@ -38,7 +38,7 @@ const STAGE_INTENSITY = {
   neutral: { entry: 0.85, dip: 0.88, observe: 1, label: "중립 — 선별 관찰" },
   interest: { entry: 1, dip: 0.95, observe: 0.92, label: "관심 — 눌림·관찰 병행" },
   dca: { entry: 1.12, dip: 1.08, observe: 0.82, label: "분할매수 — 진입 적극" },
-  panicBuy: { entry: 1.2, dip: 1.15, observe: 0.75, label: "패닉매수 — 핵심 종목 우선" },
+  panicBuy: { entry: 1.2, dip: 1.15, observe: 0.75, label: "인생 타점 — 핵심 종목 우선" },
 }
 
 /**

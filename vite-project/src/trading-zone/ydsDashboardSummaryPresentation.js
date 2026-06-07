@@ -6,7 +6,7 @@ const RECOMMENDED_ACTION_BY_STAGE = {
   neutral: "종목 탐색 우선",
   interest: "관심 종목 관찰 · 현금 유지",
   dca: "분할매수 시작",
-  panicBuy: "패닉매수 적극 실행",
+  panicBuy: "인생 타점 적극 실행",
 }
 
 /**

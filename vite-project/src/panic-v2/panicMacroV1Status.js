@@ -1,8 +1,15 @@
 /**
- * 거시 V1 — 패닉지수 구간 (높을수록 장기 분할·패닉 매수 기회)
+ * 거시 V1 — 패닉 강도 구간 (높을수록 매수 기회 · V1.8 패닉 언어)
  */
 
-/** @typedef {"overheated" | "neutral" | "interest" | "dca" | "panicBuy"} MacroV1StatusId */
+import { PANIC_STATUS_BANDS } from "../content/ydsStatusLabels.js"
+import {
+  MACRO_STAGE_BOUNDS,
+  MACRO_STAGE_ORDER,
+  MACRO_STAGE_TO_PANIC_BAND,
+} from "../content/ydsLanguage.js"
+
+/** @typedef {import("../content/ydsLanguage.js").MacroV1StatusId} MacroV1StatusId */
 
 /**
  * @typedef {{
@@ -16,13 +23,19 @@
  */
 
 /** @type {MacroV1Status[]} */
-export const MACRO_V1_STATUS_BANDS = [
-  { id: "overheated", label: "과열구간", emoji: "🔵", min: 0, max: 19, color: "#3b82f6" },
-  { id: "neutral", label: "중립구간", emoji: "🟢", min: 20, max: 39, color: "#22c55e" },
-  { id: "interest", label: "준비구간", emoji: "🟡", min: 40, max: 59, color: "#eab308" },
-  { id: "dca", label: "분할매수", emoji: "🟠", min: 60, max: 79, color: "#f97316" },
-  { id: "panicBuy", label: "패닉매수", emoji: "🔴", min: 80, max: 100, color: "#ef4444" },
-]
+export const MACRO_V1_STATUS_BANDS = MACRO_STAGE_ORDER.map((id) => {
+  const panicId = MACRO_STAGE_TO_PANIC_BAND[id]
+  const panic = PANIC_STATUS_BANDS.find((b) => b.id === panicId)
+  const bounds = MACRO_STAGE_BOUNDS[id]
+  return {
+    id,
+    label: panic?.label ?? id,
+    emoji: panic?.emoji ?? "—",
+    min: bounds.min,
+    max: bounds.max,
+    color: panic?.color ?? "#94a3b8",
+  }
+})
 
 /** @param {number | null | undefined} score @returns {MacroV1Status | null} */
 export function resolveMacroV1Status(score) {
@@ -37,11 +50,11 @@ export function resolveMacroV1Status(score) {
 
 /** @returns {{ y1: number; y2: number; label: string; color: string; area: boolean }[]} */
 export function macroV1ZoneBands() {
-  return [
-    { y1: 0, y2: 20, label: "", color: "#3b82f6", area: true },
-    { y1: 20, y2: 40, label: "", color: "#22c55e", area: true },
-    { y1: 40, y2: 60, label: "", color: "#eab308", area: true },
-    { y1: 60, y2: 80, label: "", color: "#f97316", area: true },
-    { y1: 80, y2: 100, label: "", color: "#ef4444", area: true },
-  ]
+  return MACRO_V1_STATUS_BANDS.map((b) => ({
+    y1: b.min,
+    y2: b.id === "panicBuy" ? 100 : b.max + 1,
+    label: b.label,
+    color: b.color,
+    area: true,
+  }))
 }

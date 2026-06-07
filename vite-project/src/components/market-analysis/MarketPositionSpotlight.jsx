@@ -7,18 +7,11 @@ import {
   YDS_STAGE_PHILOSOPHY,
 } from "../../content/ydsCyclePhilosophy.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
+import { YDS_LABEL_PANIC_SCORE } from "../../content/ydsLanguage.js"
 import YdsStagePositionNav from "./YdsStagePositionNav.jsx"
 
-const STAGE_SHORT = {
-  overheated: "과열",
-  neutral: "중립",
-  interest: "준비",
-  dca: "분할매수",
-  panicBuy: "패닉매수",
-}
-
 /**
- * YDS 총점 — CNN F&G 스타일 컴팩트
+ * 패닉 강도 — CNN F&G 스타일 컴팩트
  * @param {{ panicData?: object | null }} props
  */
 export default function MarketPositionSpotlight({ panicData = null }) {
@@ -43,8 +36,8 @@ export default function MarketPositionSpotlight({ panicData = null }) {
 
   if (!model) {
     return (
-      <section className="yds-market-spotlight yds-market-spotlight--empty" aria-label="YDS 총점">
-        <p className="yds-market-spotlight__empty">YDS 총점 불러오는 중…</p>
+      <section className="yds-market-spotlight yds-market-spotlight--empty" aria-label={YDS_LABEL_PANIC_SCORE}>
+        <p className="yds-market-spotlight__empty">{YDS_LABEL_PANIC_SCORE} 불러오는 중…</p>
       </section>
     )
   }
@@ -52,10 +45,10 @@ export default function MarketPositionSpotlight({ panicData = null }) {
   return (
     <section
       className="yds-market-spotlight"
-      aria-label={`YDS 총점 ${model.score} · ${model.stageLabel}`}
+      aria-label={`${YDS_LABEL_PANIC_SCORE} ${model.score} · ${model.stageLabel}`}
     >
       <div className="yds-market-spotlight__head">
-        <p className="yds-market-spotlight__label">YDS 총점</p>
+        <p className="yds-market-spotlight__label">{YDS_LABEL_PANIC_SCORE}</p>
         <p className="yds-market-spotlight__score font-mono tabular-nums">{model.score}</p>
         <p
           className="yds-market-spotlight__stage"
@@ -108,7 +101,7 @@ export default function MarketPositionSpotlight({ panicData = null }) {
                 >
                   <span className="yds-market-spotlight__zone-emoji">{band.emoji}</span>
                   <span className="yds-market-spotlight__zone-name">
-                    {STAGE_SHORT[band.id] ?? band.label}
+                    {band.label}
                   </span>
                   {isCurrent ? (
                     <span className="yds-market-spotlight__zone-role">{zonePhilosophy.flowLabel}</span>

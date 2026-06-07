@@ -9,13 +9,13 @@ function assert(cond, msg) {
 }
 
 const neutral38 = resolveTodayActions(38)
-assert(neutral38?.band.label === "중립", neutral38?.band.label)
+assert(neutral38?.band.label === "공포 부족", neutral38?.band.label)
 assert(neutral38.actions.includes("추격매수 금지"), neutral38.actions.join("|"))
 assert(neutral38.actions.some((a) => a.includes("현금 40%")), neutral38.actions.join("|"))
 assert(neutral38.actions.includes("관심종목 관찰"), neutral38.actions.join("|"))
 
 const overheat10 = resolveTodayActions(10)
-assert(overheat10?.band.label === "과열", overheat10?.band.label)
+assert(overheat10?.band.label === "공포 없음", overheat10?.band.label)
 assert(overheat10.actions.includes("신규 진입 축소"), overheat10.actions.join("|"))
 
 const interest50 = resolveTodayActions(50)

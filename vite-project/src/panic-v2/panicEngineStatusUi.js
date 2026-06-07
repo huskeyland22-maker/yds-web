@@ -30,24 +30,24 @@ export const TACTICAL_ACTION_STATUS_BAR = [
 /** @type {Record<string, { badge: string; hint: string }>} */
 export const MACRO_MARKET_GUIDANCE = {
   overheated: {
-    badge: "과열구간",
-    hint: "시장 과열 / 리스크 존재 · 비중 확대보다 관찰 우선",
+    badge: "공포 없음",
+    hint: "매수 기회 적음 · 비중 확대보다 관찰 우선",
   },
   neutral: {
-    badge: "중립구간",
-    hint: "시장 균형 · 일반 대응",
+    badge: "공포 부족",
+    hint: "공포 미약 · 추격 자제 · 관찰",
   },
   interest: {
-    badge: "준비구간",
-    hint: "변동성 확대 가능 · 관심 종목 관찰",
+    badge: "관심",
+    hint: "변동성 확대 가능 · 종목 발굴·현금 확보",
   },
   dca: {
     badge: "분할매수",
     hint: "공포 확대 · 장기 분할매수 시작",
   },
   panicBuy: {
-    badge: "패닉매수",
-    hint: "극단 공포 · 장기 저점 기회",
+    badge: "인생 타점",
+    hint: "극단 공포 · 드문 보너스 기회",
   },
 }
 

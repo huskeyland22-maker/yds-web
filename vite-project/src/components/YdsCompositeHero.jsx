@@ -1,19 +1,14 @@
 import { useMemo } from "react"
 import { buildYdsScoreBreakdown } from "../trading-zone/ydsScoreBreakdown.js"
-import { getStagePhilosophy, YDS_CYCLE_TAGLINE } from "../content/ydsCyclePhilosophy.js"
+import { getStagePhilosophy, YDS_CYCLE_TAGLINE, YDS_FEAR_CYCLE_RAIL } from "../content/ydsCyclePhilosophy.js"
+import { YDS_LABEL_PANIC_SCORE, macroStageDisplayLabel } from "../content/ydsLanguage.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { resolveMacroStageAllocation } from "../trading-zone/macroStageAllocation.js"
 import { getTradingZonePositions } from "../trading-zone/tacticalTradingZoneData.js"
 import { buildRecommendationTrackRows } from "../trading-zone/tradingZoneRecommendationTrack.js"
 
-const STAGE_RAIL = [
-  { id: "overheated", short: "과열", emoji: "🔵" },
-  { id: "neutral", short: "중립", emoji: "🟢" },
-  { id: "interest", short: "준비", emoji: "🟡" },
-  { id: "dca", short: "분할매수", emoji: "🟠" },
-  { id: "panicBuy", short: "패닉매수", emoji: "🔴" },
-]
+const STAGE_RAIL = YDS_FEAR_CYCLE_RAIL.map(({ id, emoji, short }) => ({ id, short, emoji }))
 
 function toNum(v) {
   const n = Number(v)
@@ -154,7 +149,7 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
         }
       : { vixPts: 0, cnnPts: 0, bofaPts: 0, pcPts: 0, hyPts: 0, sumPoints: nowScore }
     const explainLines = [
-      `현재 ${stage?.label ?? "중립구간"} — ${philosophy.role}.`,
+      `현재 ${stage?.label ?? macroStageDisplayLabel("neutral")} — ${philosophy.role}.`,
       toStateSentence("vix", toNum(panicData?.vix)),
       toStateSentence("cnn", toNum(panicData?.fearGreed)),
       toStateSentence("bofa", toNum(panicData?.bofa)),
@@ -197,7 +192,7 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
     return {
       score: nowScore,
       scoreDisplay: `${nowScore} / 100`,
-      stageLabel: stage?.label ?? "중립구간",
+      stageLabel: stage?.label ?? macroStageDisplayLabel("neutral"),
       stageEmoji: stage?.emoji ?? "⚪",
       stageId: stage?.id ?? "neutral",
       trendLine: trendLine || "—",
@@ -216,9 +211,9 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
   if (!view) return null
 
   return (
-    <section className="yds-composite-hero trading-card-shell panic-v2-section" aria-label="YDS 총점">
+    <section className="yds-composite-hero trading-card-shell panic-v2-section" aria-label={YDS_LABEL_PANIC_SCORE}>
       <div className="yds-composite-hero__head">
-        <p className="m-0 yds-composite-hero__title">YDS 총점</p>
+        <p className="m-0 yds-composite-hero__title">{YDS_LABEL_PANIC_SCORE}</p>
         <p className="m-0 yds-composite-hero__score font-mono tabular-nums">{view.scoreDisplay}</p>
       </div>
       <p className="m-0 yds-composite-hero__stage">
@@ -251,7 +246,7 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
         <p className="m-0 yds-composite-hero__alloc-label">현금</p>
       </div>
       <p className="m-0 yds-composite-hero__recent">
-        YDS 총점 변화{" "}
+        {YDS_LABEL_PANIC_SCORE} 변화{" "}
         <span className="font-mono tabular-nums">
           {view.prevScore != null ? `${view.prevScore} → ${view.score}` : view.trendLine}
         </span>{" "}
@@ -265,9 +260,9 @@ export default function YdsCompositeHero({ panicData = null, historyRows = [] })
           평균 수익률 {recSummary.avgReturn != null ? `${recSummary.avgReturn > 0 ? "+" : ""}${recSummary.avgReturn.toFixed(0)}%` : "—"}
         </span>
       </div>
-      <div className="yds-composite-hero__breakdown" role="status" aria-label="YDS 총점 점수 분해">
+      <div className="yds-composite-hero__breakdown" role="status" aria-label={`${YDS_LABEL_PANIC_SCORE} 점수 분해`}>
         <p className="m-0 yds-composite-hero__break-row">
-          <span>YDS 총점</span>
+          <span>{YDS_LABEL_PANIC_SCORE}</span>
           <strong className="font-mono tabular-nums">{view.score}</strong>
         </p>
         <p className="m-0 yds-composite-hero__break-row">

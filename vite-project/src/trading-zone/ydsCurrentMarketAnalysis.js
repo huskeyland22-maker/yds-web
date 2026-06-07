@@ -29,32 +29,23 @@ export const CURRENT_MARKET_ANALYSIS_LABEL = "현재 시장 분석"
 export const YDS_STAGE_LADDER = MACRO_V1_STATUS_BANDS.map((s) => ({
   id: s.id,
   emoji: s.emoji,
-  label: s.label.replace("구간", "").replace("분할매수", "분할매수"),
-  shortLabel:
-    s.id === "overheated"
-      ? "과열"
-      : s.id === "neutral"
-        ? "중립"
-        : s.id === "interest"
-          ? "관심"
-          : s.id === "dca"
-            ? "분할매수"
-            : "패닉매수",
+  label: s.label,
+  shortLabel: s.label,
   color: s.color,
 }))
 
 /** @type {Record<string, string>} */
 const ACTION_STAGE_HERO_COPY = {
   overheated:
-    "시장이 과열 구간입니다. 추격 매수보다 비중 축소·현금 확보와 관망이 우선입니다.",
+    "공포 없음 구간입니다. 추격 매수보다 비중 축소·현금 확보와 관망이 우선입니다.",
   neutral:
-    "현재는 패닉매수 단계가 아닌 관찰 및 선별 단계입니다.",
+    "공포 부족 구간입니다. 관찰 및 종목 선별 단계입니다.",
   interest:
-    "공포 신호가 올라오는 관심 구간입니다. 매수보다 우량 종목 추적·현금 유지에 집중하세요.",
+    "관심 구간입니다. 매수보다 우량 종목 추적·현금 유지에 집중하세요.",
   dca:
     "분할매수에 적합한 구간입니다. 준비된 현금을 나눠 투입하며 낙폭 구간을 활용하세요.",
   panicBuy:
-    "극단적 공포 구간입니다. 역사적 저점 매수를 검토할 수 있는 패닉매수 단계입니다.",
+    "인생 타점에 가까운 보너스 구간입니다. 계획된 현금을 분할 투입할 수 있습니다.",
 }
 
 /** @type {Record<string, { focus: string; limit: string }>} */
@@ -222,7 +213,7 @@ function buildMarketEnvironmentContrast(actionHero, envLevel) {
   if (envLevel.id === "stable" && actionHero.id === "overheated") {
     return `시장 환경 : ${env} · 행동 단계 : ${action} → 리스크는 낮으나 시장 과열로 비중 축소·관망이 우선입니다.`
   }
-  return `시장 환경 : ${env} · 행동 단계 : ${action} → 일부 위험 신호는 있으나 아직 공격적인 패닉매수 구간은 아님.`
+  return `시장 환경 : ${env} · 행동 단계 : ${action} → 일부 위험 신호는 있으나 아직 공격적인 인생 타점 구간은 아님.`
 }
 
 /**

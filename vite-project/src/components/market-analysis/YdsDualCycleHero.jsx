@@ -79,7 +79,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
           className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--fear"
           aria-label="공포 사이클"
         >
-          <p className="yds-dual-cycle-hero__axis-label">공포 사이클 · 장기</p>
+          <p className="yds-dual-cycle-hero__axis-label">패닉 강도 · 장기</p>
           <p className="yds-dual-cycle-hero__score-secondary font-mono tabular-nums">
             YDS <span>{model.score}</span>
           </p>
@@ -146,7 +146,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
                   style={active ? { "--chip-color": step.color } : undefined}
                 >
                   {step.emoji}{" "}
-                  {step.id === "partialCash" ? "일부" : step.label.replace("과열주의", "주의")}
+                  {step.id === "partialCash" ? "일부" : step.label}
                 </span>
               )
             })}

@@ -1,22 +1,32 @@
-/** YDS V1 사용자-facing 용어 (엔진 ID는 유지 · UI 라벨만 통일) */
+/** YDS V1.8 사용자-facing 용어 (엔진 ID는 유지 · UI 라벨만 통일) */
 
 import {
   YDS_BRAND_HERO_TITLE,
   YDS_CYCLE_TAGLINE,
   YDS_STAGE_RAIL_LABELS,
 } from "../content/ydsCyclePhilosophy.js"
+import {
+  YDS_CYCLE_RAIL_LABELS,
+  YDS_LABEL_PANIC_SCORE,
+  YDS_PANIC_RAIL_LABELS,
+} from "../content/ydsLanguage.js"
 import { YDS_OG_DESCRIPTION } from "../content/ydsLaunchContent.js"
 
-export const YDS_V1_VERSION = "YDS V1"
+export const YDS_V1_VERSION = "YDS V1.8"
 export const YDS_V1_RC_LABEL = "Release Candidate"
 
 /** @type {Record<string, string>} */
 export const TERM_REPLACE = {
-  YDS: "YDS 총점",
-  "YDS 점수": "YDS 총점",
-  "YDS SCORE": "YDS 총점",
-  "시장 위치": "YDS 총점",
-  "시장 위치 점수": "YDS 총점",
+  "YDS 총점": YDS_LABEL_PANIC_SCORE,
+  "YDS 점수": YDS_LABEL_PANIC_SCORE,
+  "YDS SCORE": YDS_LABEL_PANIC_SCORE,
+  YDS: YDS_LABEL_PANIC_SCORE,
+  과열구간: "공포 없음",
+  중립구간: "공포 부족",
+  준비구간: "관심",
+  관심구간: "관심",
+  패닉매수: "인생 타점",
+  과열주의: "사이클 후반",
   "PRI-A": "조기경보",
   "PRI-B": "충격감지",
   "PRI-A/B": "조기경보 · 충격감지",
@@ -38,22 +48,27 @@ export const GLOSSARY_ENTRIES = [
   {
     id: "cycle-system",
     title: "시장 사이클 투자 시스템",
-    body: `${YDS_BRAND_HERO_TITLE}. ${YDS_CYCLE_TAGLINE} 패닉지수만 보는 도구가 아니라, 과열→중립→준비→분할매수→패닉매수 5단계로 행동을 안내합니다.`,
+    body: `${YDS_BRAND_HERO_TITLE}. ${YDS_CYCLE_TAGLINE} 패닉지수만 보는 도구가 아니라, ${YDS_PANIC_RAIL_LABELS} 5단계로 매수 기회를 안내합니다.`,
   },
   {
     id: "market-position",
-    title: "YDS 총점",
-    body: "공포·탐욕 지표를 종합한 0~100 점수입니다. 높을수록 공포·매집 기회에 가깝고, 낮을수록 과열에 가깝습니다. 현재 위치와 다음 단계를 함께 확인하세요.",
+    title: YDS_LABEL_PANIC_SCORE,
+    body: "공포·탐욕 지표를 종합한 0~100 점수입니다. 높을수록 매수 기회에 가깝고, 낮을수록 공포 없음에 가깝습니다. 사이클 위치(100−점수)와 함께 확인하세요.",
+  },
+  {
+    id: "cycle-position",
+    title: "사이클 위치",
+    body: `${YDS_CYCLE_RAIL_LABELS}. 시장이 경기 사이클 어디쯤 왔는지를 나타냅니다.`,
   },
   {
     id: "prep-zone",
-    title: "준비구간",
-    body: "YDS 40–59 구간(엔진 ID: interest). 분할매수 전 단계로 종목 발굴·현금 확보·매수 준비를 권장합니다. 관심종목(Watchlist) 기능과는 별개입니다.",
+    title: "관심",
+    body: "패닉 강도 40–59 구간(엔진 ID: interest). 분할매수 전 단계로 종목 발굴·현금 확보·매수 준비를 권장합니다.",
   },
   {
     id: "five-stages",
-    title: "5단계 사이클",
-    body: `${YDS_STAGE_RAIL_LABELS}. 🔵 과열=리스크 관리 · 🟢 중립=관찰 · 🟡 준비=쌓기 · 🟠 분할매수=실행 · 🔴 패닉매수=보너스.`,
+    title: "패닉 5단계",
+    body: `${YDS_STAGE_RAIL_LABELS}. 🔵 공포 없음=리스크 관리 · 🟢 공포 부족=관찰 · 🟡 관심=쌓기 · 🟠 분할매수=실행 · 🔴 인생 타점=보너스.`,
   },
   {
     id: "cycle-tagline",

@@ -35,7 +35,7 @@ const MARKET_STAGE_ENTRY_LABEL = {
   neutral: "중립 진입",
   interest: "관심 진입",
   dca: "분할매수 진입",
-  panicBuy: "패닉매수 진입",
+  panicBuy: "인생 타점 진입",
 }
 
 function alertId(parts) {

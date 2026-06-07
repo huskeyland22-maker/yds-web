@@ -145,7 +145,7 @@ function buildBreakdownInsights(ctx) {
   }
 
   if (finalYds < 80 && componentScores.vix >= 99) {
-    lines.push("VIX는 극단 공포 수준이나, 중기 지표·동적 가중 때문에 패닉매수(80+) 구간에 도달하지 못했습니다.")
+    lines.push("VIX는 극단 공포 수준이나, 중기 지표·동적 가중 때문에 인생 타점(80+) 구간에 도달하지 못했습니다.")
   }
 
   return lines
@@ -262,7 +262,7 @@ export function buildYdsScoreVerification(panicData, historyRows = []) {
     stage,
     interestThreshold,
     nearInterest,
-    moveNote: "MOVE·SKEW·VXN·GS는 YDS 총점(getFinalScore) 산출에 미포함 · Panic V2 보조 지표",
+    moveNote: "MOVE·SKEW·VXN·GS는 패닉 강도(getFinalScore) 산출에 미포함 · Panic V2 보조 지표",
   }
 }
 

@@ -15,6 +15,10 @@ import SectionErrorBoundary from "../SectionErrorBoundary.jsx"
 import YdsActionSignalCenter from "../YdsActionSignalCenter.jsx"
 import YdsAllocationCenter from "../YdsAllocationCenter.jsx"
 import YdsScoreBreakdownPanel from "./YdsScoreBreakdownPanel.jsx"
+import {
+  YDS_LABEL_PANIC_BREAKDOWN,
+  YDS_LABEL_PANIC_HISTORY,
+} from "../../content/ydsLanguage.js"
 
 /**
  * 시장분석 데스크 — Dual Cycle Hero → 요약 → 핵심지수 → 히스토리 → 행동
@@ -72,12 +76,12 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
       <section className="yds-market-desk__block" aria-labelledby="market-block-history">
         <h2 id="market-block-history" className="yds-market-desk__block-label">
-          YDS 총점 히스토리
+          {YDS_LABEL_PANIC_HISTORY}
         </h2>
         <SectionErrorBoundary
-          label="YDS 총점 히스토리"
+          label={YDS_LABEL_PANIC_HISTORY}
           fallback={
-            <p className="yds-market-desk__fallback">YDS 총점 히스토리를 불러올 수 없습니다.</p>
+            <p className="yds-market-desk__fallback">{YDS_LABEL_PANIC_HISTORY}를 불러올 수 없습니다.</p>
           }
         >
           <PanicIndexHistorySection
@@ -102,7 +106,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           </div>
         </div>
         <details className="yds-market-desk__score-detail">
-          <summary className="yds-market-desk__score-detail-summary">YDS 총점 산출 근거</summary>
+          <summary className="yds-market-desk__score-detail-summary">{YDS_LABEL_PANIC_BREAKDOWN}</summary>
           <YdsScoreBreakdownPanel panicData={panicData} historyRows={safeHistory} />
         </details>
       </section>

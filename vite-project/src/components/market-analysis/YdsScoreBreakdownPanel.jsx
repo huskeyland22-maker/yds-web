@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { buildYdsScoreVerification } from "../../trading-zone/ydsScoreBreakdown.js"
+import { YDS_LABEL_PANIC_BREAKDOWN } from "../../content/ydsLanguage.js"
 
 const ROWS = [
   { key: "vix", label: "VIX" },
@@ -22,7 +23,7 @@ function fmtSigned(n) {
 }
 
 /**
- * YDS 총점 산출·변동 근거 (getFinalScore 경로)
+ * 패닉 강도 산출·변동 근거 (getFinalScore 경로)
  * @param {{ panicData?: object | null; historyRows?: object[] }} props
  */
 export default function YdsScoreBreakdownPanel({ panicData = null, historyRows = [] }) {
@@ -102,7 +103,7 @@ export default function YdsScoreBreakdownPanel({ panicData = null, historyRows =
 
       {nearInterest ? (
         <p className="yds-score-breakdown__flag">
-          준비구간(40+) 임박 — VIX·CNN 변화가 누적되면 구간 전환 가능
+          관심(40+) 임박 — VIX·CNN 변화가 누적되면 구간 전환 가능
         </p>
       ) : null}
 

@@ -1,16 +1,15 @@
 import { useMemo } from "react"
-import { getStagePhilosophy } from "../content/ydsCyclePhilosophy.js"
+import { getStagePhilosophy, YDS_FEAR_CYCLE_RAIL } from "../content/ydsCyclePhilosophy.js"
+import { macroStageDisplayLabel } from "../content/ydsLanguage.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { resolveMacroStageAllocation } from "../trading-zone/macroStageAllocation.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
-const STAGE_GUIDE = [
-  { id: "overheated", emoji: "🔵", label: "과열" },
-  { id: "neutral", emoji: "🟢", label: "중립" },
-  { id: "interest", emoji: "🟡", label: "준비" },
-  { id: "dca", emoji: "🟠", label: "분할매수" },
-  { id: "panicBuy", emoji: "🔴", label: "패닉매수" },
-]
+const STAGE_GUIDE = YDS_FEAR_CYCLE_RAIL.map(({ id, emoji, short }) => ({
+  id,
+  emoji,
+  label: short,
+}))
 
 function distributeStockBuckets(stockPct) {
   if (!Number.isFinite(stockPct)) return { largeCap: 40, aiGrowth: 20, dividend: 10 }
@@ -45,7 +44,7 @@ export default function YdsAllocationCenter({ panicData = null }) {
               : ["보너스 · 계획 현금 투입", "드문 극단 공포 구간"]
     return {
       stageId: stage?.id ?? "neutral",
-      stageLabel: stage?.label ?? "중립구간",
+      stageLabel: stage?.label ?? macroStageDisplayLabel("neutral"),
       stageEmoji: stage?.emoji ?? "🟢",
       stageRole: philosophy.role,
       stockPct: alloc.stockPct,

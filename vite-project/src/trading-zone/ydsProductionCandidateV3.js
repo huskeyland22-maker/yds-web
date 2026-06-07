@@ -29,11 +29,11 @@ export const PRODUCTION_CANDIDATE_V3_NOTE = `${VIX_V3_ENGINE_NOTE} · Feature Fl
 
 /** @type {ProductionCandidateStageBand[]} */
 export const PRODUCTION_CANDIDATE_V3_STAGE_BANDS = [
-  { id: "overheated", label: "과열구간", emoji: "🔵", min: 0, max: 24 },
-  { id: "neutral", label: "중립구간", emoji: "🟢", min: 25, max: 49 },
-  { id: "interest", label: "관심구간", emoji: "🟡", min: 50, max: 64 },
+  { id: "overheated", label: "공포 없음", emoji: "🔵", min: 0, max: 24 },
+  { id: "neutral", label: "공포 부족", emoji: "🟢", min: 25, max: 49 },
+  { id: "interest", label: "관심", emoji: "🟡", min: 50, max: 64 },
   { id: "dca", label: "분할매수", emoji: "🟠", min: 65, max: 79 },
-  { id: "panicBuy", label: "패닉매수", emoji: "🔴", min: 80, max: 99 },
+  { id: "panicBuy", label: "인생 타점", emoji: "🔴", min: 80, max: 99 },
   { id: "historicPanic", label: "역사적 패닉", emoji: "🟥", min: 100, max: null },
 ]
 
