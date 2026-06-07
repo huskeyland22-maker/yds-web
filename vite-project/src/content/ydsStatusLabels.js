@@ -1,6 +1,6 @@
 /**
- * YDS V1.2 Status Labels — UI 해석 전용 (점수·구간·가중치 무관)
- * 사이클 위치 = 100 − YDS (침체↔과열) · 패닉 강도 = YDS (공포↔타점)
+ * YDS V1.7 Status Labels — UI 해석 전용 (점수·구간·가중치 무관)
+ * 사이클 위치 = 100 − YDS (시장은 어디쯤?) · 패닉 강도 = YDS (얼마나 싼가?)
  */
 
 /** @typedef {{
@@ -12,20 +12,20 @@
  *   color: string
  * }} StatusBand */
 
-/** @type {StatusBand[]} */
+/** @type {StatusBand[]} — 시장 위치 (20~80 구간이 실전 판단의 중심) */
 export const CYCLE_STATUS_BANDS = [
-  { id: "depression", min: 0, max: 20, emoji: "🔴", label: "극단적 침체", color: "#ef4444" },
-  { id: "recovery", min: 20, max: 40, emoji: "🟠", label: "회복 초기", color: "#f97316" },
-  { id: "neutral", min: 40, max: 60, emoji: "🟡", label: "중립", color: "#eab308" },
-  { id: "neutralHigh", min: 60, max: 80, emoji: "🟢", label: "중립 상단", color: "#22c55e" },
-  { id: "overheat", min: 80, max: 100, emoji: "🔵", label: "과열", color: "#3b82f6" },
+  { id: "depression", min: 0, max: 20, emoji: "🔵", label: "침체", color: "#3b82f6" },
+  { id: "recovery", min: 20, max: 40, emoji: "🟢", label: "회복", color: "#22c55e" },
+  { id: "growth", min: 40, max: 60, emoji: "🟡", label: "성장", color: "#eab308" },
+  { id: "lateCycle", min: 60, max: 80, emoji: "🟠", label: "사이클 후반", color: "#f97316" },
+  { id: "peakOverheat", min: 80, max: 100, emoji: "🔴", label: "최고 과열", color: "#ef4444" },
 ]
 
-/** @type {StatusBand[]} */
+/** @type {StatusBand[]} — 기회 강도 (인생 타점은 드문 보너스) */
 export const PANIC_STATUS_BANDS = [
   { id: "noFear", min: 0, max: 20, emoji: "🔵", label: "공포 없음", color: "#3b82f6" },
   { id: "lowFear", min: 20, max: 40, emoji: "🟢", label: "공포 부족", color: "#22c55e" },
-  { id: "interest", min: 40, max: 60, emoji: "🟡", label: "관심 구간", color: "#eab308" },
+  { id: "interest", min: 40, max: 60, emoji: "🟡", label: "관심", color: "#eab308" },
   { id: "dca", min: 60, max: 80, emoji: "🟠", label: "분할매수", color: "#f97316" },
   { id: "lifePoint", min: 80, max: 100, emoji: "🔴", label: "인생 타점", color: "#ef4444" },
 ]
@@ -102,44 +102,44 @@ export function resolvePanicStatusLabel(ydsScore) {
 /** @typedef {typeof PANIC_STATUS_BANDS[number]["id"]} PanicBandId */
 
 /**
- * 사이클 × 패닉 → 최종 한줄 요약 (15~20자 · UI 전용)
+ * 사이클 위치 × 패닉 기회 → 한줄 요약 (UI 전용)
  * @type {Record<CycleBandId, Record<PanicBandId, string>>}
  */
 export const MARKET_HEADLINE_MAP = {
   depression: {
-    noFear: "극단 침체 · 바닥 확인",
-    lowFear: "극단 침체 · 관망 유지",
-    interest: "깊은 침체 · 매수 검토",
-    dca: "공포 확대 · 분할매수",
-    lifePoint: "역사적 매수 기회",
+    noFear: "침체 바닥 · 공포 없음",
+    lowFear: "깊은 침체 · 관망",
+    interest: "침체 구간 · 매수 검토",
+    dca: "침체·공포 확대 · 분할매수",
+    lifePoint: "역사적 침체 · 극단 매수",
   },
   recovery: {
-    noFear: "회복 초기 · 공포 미약",
-    lowFear: "회복 시작 · 매수 준비",
-    interest: "회복 구간 · 분할 준비",
-    dca: "공포 확대 · 분할매수 진행",
-    lifePoint: "공포 정점 · 적극 매수",
+    noFear: "회복 국면 · 공포 미약",
+    lowFear: "회복 중 · 매수 준비",
+    interest: "회복·조정 관찰 · 준비",
+    dca: "회복·공포 확대 · 분할매수",
+    lifePoint: "회복 중 공포 정점 · 매수",
   },
-  neutral: {
-    noFear: "중립 시장 · 안정 유지",
-    lowFear: "중립 구간 · 관망",
-    interest: "조정 관찰 · 분할매수 준비",
-    dca: "공포 상승 · 매수 진행",
-    lifePoint: "공포 정점 · 분할매수",
+  growth: {
+    noFear: "성장 국면 · 안정",
+    lowFear: "성장 중 · 관망",
+    interest: "성장·조정 관찰 · 준비",
+    dca: "성장 중 조정 · 분할매수",
+    lifePoint: "성장 중 급락 · 매수 기회",
   },
-  neutralHigh: {
-    noFear: "중반 이후 · 과열 주의",
-    lowFear: "중반 이후 시장 · 매수기회 부족",
-    interest: "고점 근접 · 관망",
-    dca: "조정 초입 · 분할매수",
-    lifePoint: "급락 조정 · 매수 기회",
+  lateCycle: {
+    noFear: "사이클 후반 · 과열 주의",
+    lowFear: "사이클 후반 · 매수기회 부족",
+    interest: "후반 고점 근접 · 관망",
+    dca: "후반 조정 · 분할매수",
+    lifePoint: "후반 급락 · 매수 기회",
   },
-  overheat: {
-    noFear: "과열권 진입 · 현금 확보 우위",
-    lowFear: "과열 지속 · 현금 비중 확대",
-    interest: "고점 근접 · 현금 준비",
-    dca: "과열 조정 · 분할매수",
-    lifePoint: "역사적 고점 · 현금 확보",
+  peakOverheat: {
+    noFear: "최고 과열 · 현금 확보",
+    lowFear: "극과열 · 현금 비중 확대",
+    interest: "극과열 고점 · 현금 준비",
+    dca: "극과열 조정 · 분할매수",
+    lifePoint: "극과열·공포 정점 · 역사적 기회",
   },
 }
 
