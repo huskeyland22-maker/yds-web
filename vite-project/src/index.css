@@ -25742,6 +25742,44 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
+.yds-market-hero__current-market {
+  margin-bottom: 0.45rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-hero__current-market-label {
+  margin: 0 0 0.25rem;
+  font-size: clamp(0.92rem, 2.8vw, 1.05rem);
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--hero-color, #f1f5f9);
+}
+
+.yds-market-hero__current-market-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin: 0 0 0.2rem;
+}
+
+.yds-market-hero__current-market-metric {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.1vw, 0.85rem);
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.yds-market-hero__current-market-cause {
+  margin: 0;
+  font-size: clamp(0.75rem, 2.2vw, 0.88rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: #cbd5e1;
+}
+
 .yds-market-hero__action {
   padding-top: 0.45rem;
   border-top: 1px solid rgba(148, 163, 184, 0.12);

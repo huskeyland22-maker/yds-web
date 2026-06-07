@@ -68,11 +68,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <YdsBrandHero />
-      <YdsMarketHeroStack
-        panicData={panicData}
-        historyRows={safeHistory}
-        scorecardByType={scorecardByType}
-      />
+      <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
       <YdsMarketTimelineSection panicData={panicData} historyRows={safeHistory} />
       <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
       <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
