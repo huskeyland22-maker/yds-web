@@ -23,7 +23,7 @@ import {
 } from "../../content/ydsLanguage.js"
 
 /**
- * 시장분석 데스크 — Dual Cycle Hero → 요약 → 핵심지수 → 히스토리 → 행동
+ * 시장분석 데스크 — 전환점 → Hero → 핵심지수 → 히스토리 → 행동
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -68,8 +68,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <YdsBrandHero />
-      <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
       <YdsMarketTimelineSection panicData={panicData} historyRows={safeHistory} />
+      <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
       <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
       <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
 
