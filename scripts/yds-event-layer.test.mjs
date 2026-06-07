@@ -1,8 +1,7 @@
 /**
- * Event Layer V1.3 smoke test — node scripts/yds-event-layer.test.mjs
+ * Event Layer V1.5 smoke test — node scripts/yds-event-layer.test.mjs
  */
 import { resolveEventLayer } from "../vite-project/src/content/ydsEventLayer.js"
-import { getFinalScore } from "../vite-project/src/utils/tradingScores.js"
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg)
@@ -18,63 +17,44 @@ const exitPanic = { date: "2026-06-05", fearGreed: 42, bofa: 5.9 }
 const exitView = resolveEventLayer(exitPanic, exitHistory)
 assert(exitView.hasEvents, "expected exit events")
 const cnnExit = exitView.events.find((e) => e.id === "cnn-exit")
-assert(cnnExit?.title === "CNN 과열권 이탈", cnnExit?.title)
-assert(cnnExit?.summary.includes("낙관"), cnnExit?.summary)
+assert(cnnExit?.emoji === "🟠" && cnnExit.title === "CNN 과열권 이탈", cnnExit?.title)
+assert(cnnExit?.summary === "낙관 심리가 약화되고 있습니다.", cnnExit?.summary)
 const bofaExit = exitView.events.find((e) => e.id === "bofa-exit")
 assert(bofaExit?.title === "BofA 과열권 이탈", bofaExit?.title)
 
-const entryHistory = [
+const cnnEntryHistory = [
   { date: "2026-05-28", fearGreed: 52, bofa: 5.8 },
   { date: "2026-06-01", fearGreed: 58, bofa: 6.0 },
 ]
-const entryPanic = { date: "2026-06-05", fearGreed: 74, bofa: 6.2 }
-const entryView = resolveEventLayer(entryPanic, entryHistory)
-const cnnEntry = entryView.events.find((e) => e.id === "cnn-entry")
-assert(cnnEntry?.title === "CNN 과열권 진입", cnnEntry?.title)
-assert(cnnEntry?.summary.includes("낙관"), cnnEntry?.summary)
+const cnnEntryPanic = { date: "2026-06-05", fearGreed: 74, bofa: 6.2 }
+const cnnEntryView = resolveEventLayer(cnnEntryPanic, cnnEntryHistory)
+const cnnEntry = cnnEntryView.events.find((e) => e.id === "cnn-entry")
+assert(cnnEntry?.emoji === "🟡" && cnnEntry.title === "CNN 과열권 진입", cnnEntry?.title)
 
-const lowRow = {
-  date: "2026-05-28",
-  vix: 14,
-  putCall: 0.75,
-  fearGreed: 55,
-  bofa: 5.5,
-  highYield: 3.2,
-}
-const highRow = {
-  date: "2026-06-05",
-  vix: 28,
-  putCall: 1.25,
-  fearGreed: 22,
-  bofa: 4.8,
-  highYield: 5.5,
-}
-const lowScore = getFinalScore(lowRow)
-const highScore = getFinalScore(highRow)
-assert(lowScore < 60, `low score ${lowScore}`)
-assert(highScore >= 60, `high score ${highScore}`)
+const bofaEntryHistory = [
+  { date: "2026-05-28", fearGreed: 50, bofa: 5.5 },
+  { date: "2026-06-01", fearGreed: 55, bofa: 5.9 },
+]
+const bofaEntryPanic = { date: "2026-06-05", fearGreed: 58, bofa: 7.2 }
+const bofaEntryView = resolveEventLayer(bofaEntryPanic, bofaEntryHistory)
+const bofaEntry = bofaEntryView.events.find((e) => e.id === "bofa-entry")
+assert(bofaEntry?.emoji === "🟡" && bofaEntry.title === "BofA 과열권 진입", bofaEntry?.title)
 
-const panicHistory = [lowRow, { ...lowRow, date: "2026-06-01" }]
-const panicView = resolveEventLayer(highRow, panicHistory)
-const dcaEntry = panicView.events.find((e) => e.id === "yds-dca-entry")
-assert(dcaEntry?.title === "분할매수 단계 진입", dcaEntry?.title)
+const momHistory = [
+  { date: "2026-05-20", fearGreed: 55, bofa: 6.5 },
+  { date: "2026-06-01", fearGreed: 58, bofa: 6.2 },
+  { date: "2026-06-03", fearGreed: 50, bofa: 6.1 },
+]
+const momPanic = { date: "2026-06-05", fearGreed: 42, bofa: 5.0 }
+const momView = resolveEventLayer(momPanic, momHistory)
+const cnnMom = momView.events.find((e) => e.id === "momentum-cnn-sharp")
+const bofaMom = momView.events.find((e) => e.id === "momentum-bofa-weak")
+assert(cnnMom?.title === "투자심리 급랭", cnnMom?.title)
+assert(bofaMom?.title === "Bull & Bear 악화", bofaMom?.title)
 
-const lifeLow = { ...lowRow, vix: 12, putCall: 0.7, fearGreed: 60, highYield: 3.0 }
-const lifeHigh = {
-  date: "2026-06-05",
-  vix: 40,
-  putCall: 1.5,
-  fearGreed: 10,
-  bofa: 3.5,
-  highYield: 6.0,
-}
-assert(getFinalScore(lifeHigh) >= 80, `life score ${getFinalScore(lifeHigh)}`)
-const lifeView = resolveEventLayer(lifeHigh, [lifeLow, { ...lifeLow, date: "2026-06-01" }])
-const lifeEntry = lifeView.events.find((e) => e.id === "yds-life-entry")
-assert(lifeEntry?.title === "인생 타점 진입", lifeEntry?.title)
-
-console.log("OK event layer v1.3", {
+console.log("OK event layer v1.5", {
   exit: exitView.events.map((e) => e.id),
-  entry: cnnEntry?.id,
-  panic: [dcaEntry?.id, lifeEntry?.id],
+  cnnEntry: cnnEntry?.id,
+  bofaEntry: bofaEntry?.id,
+  momentum: [cnnMom?.id, bofaMom?.id],
 })

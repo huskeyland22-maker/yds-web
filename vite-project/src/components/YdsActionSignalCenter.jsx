@@ -192,7 +192,7 @@ export default function YdsActionSignalCenter({ panicData = null, historyRows = 
             {view.eventLayer.events.slice(0, 2).map((ev) => (
               <div key={ev.id}>
                 <p className="m-0 yds-action-signal__headline yds-action-signal__headline--event">
-                  📢 {ev.title}
+                  {ev.emoji} {ev.title}
                 </p>
                 <p className="m-0 yds-action-signal__line">{ev.summary}</p>
               </div>

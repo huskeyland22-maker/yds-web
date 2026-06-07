@@ -2,11 +2,13 @@ import { useMemo } from "react"
 import { resolveTodayActions } from "../../content/ydsActionGuide.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveOverheatLayer } from "../../content/ydsOverheatLayer.js"
+import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import {
   resolveMomentumPositionLabel,
   resolveYdsStatusSnapshot,
 } from "../../content/ydsStatusLabels.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
+import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
 
 /**
  * V1.3 Hero — 장기(사이클·패닉) → 단기(Momentum) → 해석 → 실행
@@ -23,9 +25,10 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
     const snapshot = resolveYdsStatusSnapshot(Math.round(score), momentumData)
     const momentum = resolveMomentumPositionLabel(momentumData)
     const actions = resolveTodayActions(Math.round(score), momentumData)
+    const eventLayer = resolveEventLayer(panicData, historyRows)
     if (!snapshot.cycle || !snapshot.panic || !actions || !overheat) return null
 
-    return { ...snapshot, momentumData, momentum, overheat, actions }
+    return { ...snapshot, momentumData, momentum, overheat, actions, eventLayer }
   }, [panicData, historyRows])
 
   if (!view) return null
@@ -126,6 +129,8 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
         </p>
         <p className="yds-market-hero__momentum-detail">{momentum.detail}</p>
       </article>
+
+      <YdsEventLayerCard panicData={panicData} historyRows={historyRows} embedded />
 
       {headline ? (
         <p className="yds-market-hero__headline">
