@@ -25824,13 +25824,17 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 }
 
-/* Market Timeline V1.6 */
+/* Market Timeline V1.8 */
 .yds-market-timeline {
   margin: 0 0 0.65rem;
-  padding: 0.55rem 0.65rem;
+  padding: 0.45rem 0.55rem 0.5rem;
   border-radius: 0.55rem;
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.45), rgba(15, 23, 42, 0.88));
   border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-timeline--collapsed {
+  padding-bottom: 0.4rem;
 }
 
 .yds-market-timeline__head {
@@ -25838,7 +25842,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.28rem;
 }
 
 .yds-market-timeline__title {
@@ -25865,11 +25869,56 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.35rem;
 }
 
+.yds-market-timeline--collapsed .yds-market-timeline__list {
+  gap: 0.18rem;
+}
+
 .yds-market-timeline__item {
   display: grid;
   grid-template-columns: 2.6rem 1fr;
   gap: 0.45rem;
   align-items: start;
+}
+
+.yds-market-timeline__item--compact {
+  display: block;
+}
+
+.yds-market-timeline__compact-line {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.1vw, 0.84rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: #e2e8f0;
+}
+
+.yds-market-timeline__compact-date {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.yds-market-timeline__toggle {
+  display: block;
+  width: 100%;
+  margin: 0.28rem 0 0;
+  padding: 0.2rem 0;
+  border: 0;
+  background: transparent;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 700;
+  color: #64748b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.yds-market-timeline__toggle:hover {
+  color: #94a3b8;
+}
+
+.yds-market-timeline__toggle:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.45);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
 }
 
 .yds-market-timeline__date {
