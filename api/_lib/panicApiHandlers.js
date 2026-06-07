@@ -140,7 +140,20 @@ export async function handlePanicModeHistory(req, res) {
       const raw = await fetchMarketCycleHistoryRows({ limit, from, to })
       cycleRows = raw.map(marketCycleRowToClient).filter(Boolean)
     }
-    res.status(200).json({ ok: true, rows, cycleRows: includeCycle ? cycleRows : undefined })
+    console.log("[YDS_DATA] reliability:api-server", {
+      stage: "api",
+      dbRows: rows.length,
+      cycleRows: cycleRows.length,
+      limit,
+      from: from || null,
+      to: to || null,
+    })
+    res.status(200).json({
+      ok: true,
+      rows,
+      cycleRows: includeCycle ? cycleRows : undefined,
+      meta: { dbRowCount: rows.length, cycleRowCount: cycleRows.length },
+    })
   } catch (e) {
     const msg = e instanceof Error ? e.message : "fetch_failed"
     console.warn("[panic] mode=history", msg)

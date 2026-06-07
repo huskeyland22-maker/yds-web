@@ -52,6 +52,12 @@ import {
   logFetchSuccess,
   logStoreWrite,
 } from "../utils/dataFlowTrace.js"
+import { probePanicIndexHistoryDirect } from "../utils/panicHistoryFetchDebug.js"
+import {
+  buildCycleDataReliability,
+  diagnoseZeroHistoryRows,
+  logReliabilityPipeline,
+} from "../utils/ydsDataReliability.js"
 
 /** @typedef {'none' | 'supabase-index-history' | 'static-json' | 'localStorage'} CycleHistorySource */
 
@@ -74,6 +80,26 @@ export const useAppDataStore = create((set, get) => ({
   cycleHistorySource: "none",
   cycleHistoryUpdatedAt: null,
   cycleHistoryRealtime: false,
+
+  /** V1.6.1 — panic_index_history 파이프라인·배지 상태 */
+  cycleDataReliability: {
+    badge: "none",
+    badgeLabel: "Local Fallback",
+    badgeEmoji: "🔴",
+    pipeline: {
+      dbRows: null,
+      apiRows: null,
+      hubRows: null,
+      mappedCycleRows: null,
+      clientRows: null,
+      localRows: null,
+    },
+    fallbackUsed: false,
+    fallbackReason: null,
+    invalidReason: null,
+    diagnosis: null,
+    updatedAt: null,
+  },
 
   cycleStaticFetchedAt: null,
   panicIndexFetchedAt: null,
@@ -319,11 +345,31 @@ export const useAppDataStore = create((set, get) => ({
     if (fresh.length > 0) {
       persistHistoryFromCycleRows(fresh)
     }
+    const prevReliability = get().cycleDataReliability
+    const pipeline = {
+      ...prevReliability.pipeline,
+      clientRows: fresh.length,
+    }
+    const reliability = buildCycleDataReliability(pipeline, {
+      source: meta.source ?? get().cycleHistorySource,
+      realtime: Boolean(meta.realtime),
+      fallbackUsed: prevReliability.fallbackUsed,
+      fallbackReason: prevReliability.fallbackReason,
+      invalidReason: prevReliability.invalidReason,
+      diagnosis: prevReliability.diagnosis,
+    })
     set({
       cycleMetricHistory: fresh,
       cycleHistorySource: meta.source ?? get().cycleHistorySource,
       cycleHistoryUpdatedAt: meta.updatedAt ?? Date.now(),
       cycleHistoryRealtime: Boolean(meta.realtime),
+      cycleDataReliability: reliability,
+    })
+    logReliabilityPipeline("client", {
+      clientRows: fresh.length,
+      source: meta.source,
+      badge: reliability.badge,
+      fallbackUsed: reliability.fallbackUsed,
     })
     if (fresh.length > 0) {
       const chartData = buildChartDataFromHistory(fresh, "vix")
@@ -513,6 +559,9 @@ export const useAppDataStore = create((set, get) => ({
 
     if (hubOn) {
       try {
+        const dbProbe = await probePanicIndexHistoryDirect()
+        const dbRows = dbProbe.count
+
         const bundle = await fetchPanicIndexHistory({
           limit,
           withCycle: true,
@@ -520,33 +569,96 @@ export const useAppDataStore = create((set, get) => ({
           debugRange: "6M",
         })
         const hubRows = bundle.rows ?? []
-        console.log("[YDS] loadCycleHistoryBundle hubRows", hubRows.length, hubRows)
+        const apiRows = hubRows.length
         const fromHub = historyRowsToCycleRows(hubRows)
-        console.log("[YDS] loadCycleHistoryBundle cycleRows", fromHub.length, fromHub)
+        const mappedCycleRows = fromHub.length
+
+        logReliabilityPipeline("api", {
+          dbRows,
+          apiRows,
+          hubRows: hubRows.length,
+          mappedCycleRows,
+          invalidReason: bundle.invalidReason ?? null,
+          schemaIssues: bundle.schemaIssues ?? [],
+        })
+
         replacePanicIndexHistory(hubRows)
         if (bundle.cycleRows?.length) {
           set({ marketCycleHistory: bundle.cycleRows })
         }
 
         let cycleRows = mergeCycleRows(fromHub, localCycleRows)
+        let fallbackUsed = false
+        let fallbackReason = null
+
         if (cycleRows.length < localCycleRows.length && localCycleRows.length > 0) {
           cycleRows = localCycleRows
-          console.log("[YDS] loadCycleHistoryBundle prefer local seed", cycleRows.length)
+          fallbackUsed = true
+          fallbackReason = "prefer_local_seed"
+          console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — prefer local seed", {
+            localRows: localCycleRows.length,
+            hubRows: hubRows.length,
+          })
+          logReliabilityPipeline("fallback", { reason: fallbackReason, localRows: localCycleRows.length })
         }
         if (cycleRows.length < 1 && hubRows.length > 0) {
           cycleRows = historyRowsToCycleRows(hubRows)
         }
         if (cycleRows.length < 1 && localCycleRows.length > 0) {
           cycleRows = localCycleRows
-          console.log("[YDS] loadCycleHistoryBundle local fallback", cycleRows.length)
+          fallbackUsed = true
+          fallbackReason = hubRows.length === 0 ? "api_empty" : "mapping_zero"
+          console.warn("[YDS] loadCycleHistoryBundle localStorage fallback", {
+            reason: fallbackReason,
+            localRows: localCycleRows.length,
+            hubRows: hubRows.length,
+            mappedCycleRows,
+          })
+          logReliabilityPipeline("fallback", { reason: fallbackReason, localRows: localCycleRows.length })
         }
         if (cycleRows.length < 1) {
           const v2OnlySync = await get().syncPanicHistoryV2([])
           if (v2OnlySync.rows?.length >= 1) {
             cycleRows = v2OnlySync.rows
-            console.log("[YDS] loadCycleHistoryBundle v2-only fallback", cycleRows.length)
+            fallbackUsed = true
+            fallbackReason = "v2_only"
+            console.warn("[YDS] loadCycleHistoryBundle v2-only fallback", cycleRows.length)
+            logReliabilityPipeline("fallback", { reason: fallbackReason, rows: cycleRows.length })
           }
         }
+
+        const diagnosis = diagnoseZeroHistoryRows({
+          dbRows,
+          apiRows,
+          hubRows: hubRows.length,
+          mappedCycleRows,
+          localCycleRows: localCycleRows.length,
+          invalidReason: bundle.invalidReason ?? null,
+          schemaIssues: bundle.schemaIssues ?? [],
+          hubEnabled: true,
+        })
+        if (hubRows.length === 0 || mappedCycleRows === 0) {
+          logReliabilityPipeline("diagnosis", { ...diagnosis, hubRows: hubRows.length, mappedCycleRows })
+          console.warn("[YDS] hubRows/cycleRows diagnosis", diagnosis)
+        }
+
+        const pipeline = {
+          dbRows,
+          apiRows,
+          hubRows: hubRows.length,
+          mappedCycleRows,
+          clientRows: cycleRows.length,
+          localRows: localCycleRows.length,
+        }
+        const reliability = buildCycleDataReliability(pipeline, {
+          source: fallbackUsed ? "localStorage" : "supabase-index-history",
+          realtime: !fallbackUsed,
+          fallbackUsed,
+          fallbackReason,
+          invalidReason: bundle.invalidReason ?? null,
+          diagnosis,
+        })
+        set({ cycleDataReliability: reliability })
 
         if (cycleRows.length < 1) {
           set({
@@ -554,7 +666,13 @@ export const useAppDataStore = create((set, get) => ({
             panicIndexFetchedAt: Date.now(),
           })
           get()._commitCycleHistory([], { source: "none", realtime: true })
-          logFetchSuccess("cycle-history-bundle", { hubRows: 0, merged: 0, source: "none", localHistory: localHistory.length })
+          logFetchSuccess("cycle-history-bundle", {
+            hubRows: 0,
+            merged: 0,
+            source: "none",
+            localHistory: localHistory.length,
+            diagnosis,
+          })
           return { hubRows: [], fetchedAt: null, merged: [] }
         }
 
@@ -566,24 +684,55 @@ export const useAppDataStore = create((set, get) => ({
         })
         const v2Sync = await get().syncPanicHistoryV2(cycleRows)
         const mergedWithV2 = v2Sync?.rows ?? cycleRows
-        get()._commitCycleHistory(mergedWithV2, { source: "supabase-index-history", realtime: true })
+        get()._commitCycleHistory(mergedWithV2, {
+          source: fallbackUsed ? "localStorage" : "supabase-index-history",
+          realtime: !fallbackUsed,
+        })
         const latestRow = hubRows.length ? hubRows[hubRows.length - 1] : null
         if (latestRow) set({ latestHistoryRow: latestRow })
         get().refreshDeskResolvedPanicData()
         logFetchSuccess("cycle-history-bundle", {
           hubRows: cycleRows.length,
           merged: cycleRows.length,
-          source: "supabase-index-history",
+          source: fallbackUsed ? "localStorage" : "supabase-index-history",
+          fallbackUsed,
         })
         return { hubRows, fetchedAt: t, merged: cycleRows }
       } catch (e) {
         logFetchFail("cycle-history-bundle", e)
+        logReliabilityPipeline("fallback", {
+          reason: "api_error",
+          message: e instanceof Error ? e.message : String(e),
+        })
+        const fromLs = readCycleMetricHistoryFromLS()
+        const pipeline = {
+          dbRows: null,
+          apiRows: 0,
+          hubRows: 0,
+          mappedCycleRows: 0,
+          clientRows: fromLs.length,
+          localRows: localCycleRows.length,
+        }
         set({
           lastCycleBundleError: String(e instanceof Error ? e.message : e),
-          cycleMetricHistory: [],
-          cycleHistorySource: "none",
+          cycleMetricHistory: fromLs,
+          cycleHistorySource: fromLs.length ? "localStorage" : "none",
+          cycleDataReliability: buildCycleDataReliability(pipeline, {
+            source: "localStorage",
+            realtime: false,
+            fallbackUsed: true,
+            fallbackReason: "api_error",
+            diagnosis: diagnoseZeroHistoryRows({
+              apiRows: 0,
+              hubRows: 0,
+              mappedCycleRows: 0,
+              localCycleRows: localCycleRows.length,
+              hubEnabled: true,
+            }),
+          }),
         })
-        return { hubRows: [], fetchedAt: null, error: e, merged: [] }
+        console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — api_error", fromLs.length)
+        return { hubRows: [], fetchedAt: null, error: e, merged: fromLs }
       }
     }
 
@@ -593,8 +742,32 @@ export const useAppDataStore = create((set, get) => ({
       const prev = force ? [] : readCycleMetricHistoryFromLS()
       const merged = mergeCycleRows(mergeCycleRows(prev, normalized), [])
       const source = normalized.length > 0 ? "static-json" : prev.length ? "localStorage" : "none"
+      const fallbackUsed = source === "localStorage"
       const t = Date.now()
-      set({ cycleStaticFetchedAt: t, lastCycleBundleError: null })
+      set({
+        cycleStaticFetchedAt: t,
+        lastCycleBundleError: null,
+        cycleDataReliability: buildCycleDataReliability(
+          {
+            dbRows: null,
+            apiRows: normalized.length,
+            hubRows: 0,
+            mappedCycleRows: normalized.length,
+            clientRows: merged.length,
+            localRows: prev.length,
+          },
+          {
+            source,
+            realtime: false,
+            fallbackUsed,
+            fallbackReason: fallbackUsed ? "static_fetch_failed_use_ls" : null,
+          },
+        ),
+      })
+      if (fallbackUsed) {
+        logReliabilityPipeline("fallback", { reason: "static_json_use_ls", localRows: prev.length })
+        console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — static path", prev.length)
+      }
       get()._commitCycleHistory(merged, { source, realtime: false })
       logFetchSuccess("cycle-history-bundle", { staticRows: normalized.length, merged: merged.length, source })
       return { staticRows: normalized, hubRows: [], fetchedAt: t, merged }
@@ -605,7 +778,25 @@ export const useAppDataStore = create((set, get) => ({
         lastCycleBundleError: String(e instanceof Error ? e.message : e),
         cycleMetricHistory: fromLs,
         cycleHistorySource: fromLs.length ? "localStorage" : "none",
+        cycleDataReliability: buildCycleDataReliability(
+          {
+            dbRows: null,
+            apiRows: 0,
+            hubRows: 0,
+            mappedCycleRows: 0,
+            clientRows: fromLs.length,
+            localRows: fromLs.length,
+          },
+          {
+            source: "localStorage",
+            realtime: false,
+            fallbackUsed: true,
+            fallbackReason: "static_fetch_error",
+          },
+        ),
       })
+      logReliabilityPipeline("fallback", { reason: "static_fetch_error", localRows: fromLs.length })
+      console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — static error", fromLs.length)
       return { staticRows: [], hubRows: [], fetchedAt: null, error: e, merged: fromLs }
     }
   },

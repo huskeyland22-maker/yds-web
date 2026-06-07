@@ -4,6 +4,7 @@
 
 import { getSupabaseBrowserClient } from "../lib/supabaseBrowser.js"
 import { HISTORY_SECTION_METRICS } from "./panicDeskMetrics.js"
+import { logReliabilityPipeline } from "./ydsDataReliability.js"
 
 /** 기간 슬라이스 임시 OFF (데이터 확인 후 false) */
 export const PANIC_HISTORY_DISABLE_RANGE_SLICE = true
@@ -87,16 +88,22 @@ export async function probePanicIndexHistoryDirect() {
   const client = getSupabaseBrowserClient()
   if (!client) {
     console.warn("[YDS] probePanicIndexHistoryDirect: Supabase client unavailable")
-    return { data: null, error: { message: "supabase_client_unavailable" } }
+    logReliabilityPipeline("db", { dbRows: null, error: "supabase_client_unavailable" })
+    return { data: null, error: { message: "supabase_client_unavailable" }, count: null }
   }
   const { data, error } = await client
     .from("panic_index_history")
-    .select("*")
+    .select("date,created_at")
     .order("created_at", { ascending: true })
-  console.log("[YDS] supabase panic_index_history (order created_at asc)", data)
-  console.log("[YDS] supabase panic_index_history error", error)
+  const count = Array.isArray(data) ? data.length : 0
+  logReliabilityPipeline("db", {
+    dbRows: count,
+    error: error?.message ?? null,
+    firstDate: data?.[0]?.date ?? null,
+    lastDate: data?.length ? data[data.length - 1]?.date ?? null : null,
+  })
   if (error) {
     console.error("[YDS] panic_index_history query error:", error.message, error)
   }
-  return { data, error }
+  return { data, error, count }
 }

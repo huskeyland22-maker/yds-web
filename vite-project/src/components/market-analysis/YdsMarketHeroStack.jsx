@@ -9,6 +9,7 @@ import {
 } from "../../content/ydsStatusLabels.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
+import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 
 /**
  * V1.3 Hero — 장기(사이클·패닉) → 단기(Momentum) → 해석 → 실행
@@ -39,6 +40,10 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
 
   return (
     <section className="yds-market-hero" aria-label="YDS 시장 Hero">
+      <div className="yds-market-hero__header">
+        <span className="yds-market-hero__header-spacer" aria-hidden />
+        <YdsDataSourceBadge />
+      </div>
       <div className="yds-market-hero__long-term">
         <article
           className="yds-market-hero__score-card"

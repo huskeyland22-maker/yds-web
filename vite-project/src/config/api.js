@@ -14,8 +14,11 @@ import {
 import { panicDataFromHistoryApiRow } from "../utils/resolveLatestPanicMetrics.js"
 import {
   logHistoryFetchDebug,
-  probePanicIndexHistoryDirect,
 } from "../utils/panicHistoryFetchDebug.js"
+import {
+  logReliabilityPipeline,
+  validatePanicHistoryPayload,
+} from "../utils/ydsDataReliability.js"
 import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
 import {
   coercePanicSavePayload,
@@ -74,25 +77,17 @@ export function panicApiUrl(mode, extra = {}) {
  * @param {unknown} json
  */
 export function parsePanicHistoryPayload(json) {
-  if (Array.isArray(json)) {
-    return { rows: json, cycleRows: [], ok: true }
+  const validated = validatePanicHistoryPayload(json)
+  const obj = json && typeof json === "object" && !Array.isArray(json) ? json : {}
+  return {
+    rows: validated.rows,
+    cycleRows: validated.cycleRows,
+    ok: validated.ok,
+    warning: validated.warning ?? obj.warning,
+    invalidReason: validated.invalidReason,
+    schemaIssues: validated.schemaIssues,
+    meta: validated.meta,
   }
-  if (!json || typeof json !== "object") {
-    return { rows: [], cycleRows: [], ok: false }
-  }
-  const obj = /** @type {Record<string, unknown>} */ (json)
-  const dataField = obj.data
-  const rowsFromData = Array.isArray(dataField)
-    ? dataField
-    : dataField &&
-        typeof dataField === "object" &&
-        Array.isArray(/** @type {{ rows?: unknown }} */ (dataField).rows)
-      ? /** @type {{ rows: unknown[] }} */ (dataField).rows
-      : []
-  const rows = Array.isArray(obj.rows) ? obj.rows : rowsFromData
-  const cycleRows = Array.isArray(obj.cycleRows) ? obj.cycleRows : []
-  const ok = obj.ok !== false && rows.length > 0
-  return { rows, cycleRows, ok: ok || rows.length > 0, warning: obj.warning }
 }
 
 export async function fetchPanicHubLatest(options = {}) {
@@ -288,8 +283,6 @@ export async function fetchPanicIndexHistory(options = {}) {
     return options.withCycle ? { rows: [], cycleRows: [] } : []
   }
 
-  void probePanicIndexHistoryDirect()
-
   const limit = options.limit ?? 120
   if (options.debugLog) {
     console.log("[YDS][loadHistory] request", {
@@ -313,18 +306,46 @@ export async function fetchPanicIndexHistory(options = {}) {
   }
   const json = await res.json()
   const parsed = parsePanicHistoryPayload(json)
+  logReliabilityPipeline("api", {
+    apiRows: parsed.rows.length,
+    cycleRows: parsed.cycleRows.length,
+    invalidReason: parsed.invalidReason ?? null,
+    schemaIssues: parsed.schemaIssues ?? [],
+    dbRows: parsed.meta?.dbRowCount ?? null,
+    warning: parsed.warning ?? null,
+  })
   if (options.debugLog) {
     console.log("[YDS][loadHistory] response rows", parsed.rows.length, {
       cycleRows: parsed.cycleRows.length,
       firstDate: parsed.rows[0]?.date ?? null,
       lastDate: parsed.rows[parsed.rows.length - 1]?.date ?? null,
+      invalidReason: parsed.invalidReason ?? null,
+      schemaIssues: parsed.schemaIssues ?? [],
     })
   }
   if (!parsed.rows.length) {
-    if (isDataTraceEnabled()) logFetchSuccess("panic-index-history", { rows: 0, note: "empty_or_invalid" })
-    console.warn("[YDS] fetchHistory: API empty or invalid", json)
+    if (isDataTraceEnabled()) {
+      logFetchSuccess("panic-index-history", {
+        rows: 0,
+        note: "empty_or_invalid",
+        invalidReason: parsed.invalidReason,
+        schemaIssues: parsed.schemaIssues,
+      })
+    }
+    console.warn("[YDS] fetchHistory: API empty or invalid", {
+      invalidReason: parsed.invalidReason,
+      schemaIssues: parsed.schemaIssues,
+      warning: parsed.warning,
+      raw: json,
+    })
     logHistoryFetchDebug([], options.debugMetric, options.debugRange)
-    return options.withCycle ? { rows: [], cycleRows: [] } : []
+    const empty = {
+      rows: [],
+      cycleRows: [],
+      invalidReason: parsed.invalidReason,
+      schemaIssues: parsed.schemaIssues,
+    }
+    return options.withCycle ? empty : []
   }
   logHistoryFetchDebug(parsed.rows, options.debugMetric, options.debugRange)
   if (parsed.rows.length) {
@@ -342,6 +363,9 @@ export async function fetchPanicIndexHistory(options = {}) {
     return {
       rows: parsed.rows,
       cycleRows: parsed.cycleRows,
+      invalidReason: parsed.invalidReason ?? null,
+      schemaIssues: parsed.schemaIssues ?? [],
+      meta: parsed.meta ?? null,
     }
   }
   return parsed.rows
