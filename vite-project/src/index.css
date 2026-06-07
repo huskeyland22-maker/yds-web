@@ -25284,7 +25284,86 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
-/* YDS Brand Hero — 시장분석 최상단 */
+/* YDS Philosophy Header — 시장분석 최상단 */
+.yds-philosophy-header {
+  margin: 0 0 0.45rem;
+  padding: 0.55rem 0.65rem 0.5rem;
+  border-radius: 0.55rem;
+  background: linear-gradient(145deg, rgba(30, 58, 138, 0.22), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.yds-philosophy-header__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.88rem, 2.8vw, 1.02rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
+.yds-philosophy-header__body {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-philosophy-header__line {
+  margin: 0;
+  font-size: clamp(0.68rem, 2vw, 0.76rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+.yds-philosophy-header__line--primary {
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.yds-philosophy-header__layers {
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-philosophy-header__layer-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.2rem;
+}
+
+.yds-philosophy-header__layer-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.yds-philosophy-header__layer-arrow {
+  font-size: clamp(0.58rem, 1.6vw, 0.66rem);
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-philosophy-header__layer-label {
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: #93c5fd;
+  white-space: nowrap;
+}
+
+.yds-philosophy-header__layer-tag {
+  margin: 0.2rem 0 0;
+  font-size: clamp(0.52rem, 1.5vw, 0.6rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+/* legacy alias — kept for reference */
 .yds-brand-hero {
   margin: 0 0 0.5rem;
   padding: 0.75rem 0.85rem 0.65rem;

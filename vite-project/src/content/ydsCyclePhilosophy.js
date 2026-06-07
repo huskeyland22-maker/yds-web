@@ -63,7 +63,25 @@ export const YDS_STAGE_PHILOSOPHY = {
   },
 }
 
-export const YDS_BRAND_HERO_TITLE = "Y'DS의 시장 사이클 투자 시스템"
+export const YDS_BRAND_HERO_TITLE = "Y'DS 시장 사이클 투자 시스템"
+
+/** Philosophy Header — 시장분석 최상단 카드 */
+export const YDS_PHILOSOPHY_HEADER_TITLE = YDS_BRAND_HERO_TITLE
+
+export const YDS_PHILOSOPHY_EXECUTION_LINE =
+  "관심에서 쌓고, 분할매수에서 실행한다. 인생 타점은 보너스다."
+
+export const YDS_PHILOSOPHY_DEFENSE_LINE =
+  "최고점을 예측하지 않는다. 과열을 관리하고, 패닉을 기다린다."
+
+/** @type {{ label: string }[]} */
+export const YDS_PHILOSOPHY_LAYER_STEPS = [
+  { label: "패닉 강도(장기)" },
+  { label: "Momentum(변화율)" },
+  { label: "Event(전환 신호)" },
+]
+
+export const YDS_PHILOSOPHY_LAYERS_TAG = "3계층 시장 해석 시스템"
 
 export const YDS_CYCLE_TAGLINE = YDS_CYCLE_TAGLINE_V18
 export const YDS_CYCLE_TAGLINE_SUB = YDS_CYCLE_TAGLINE_SUB_V18
