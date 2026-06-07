@@ -25373,6 +25373,61 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
+.yds-market-hero__layer-tag {
+  margin: 0 0 0.2rem;
+  font-size: clamp(0.48rem, 1.4vw, 0.56rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-market-hero__overheat-card {
+  margin-bottom: 0.45rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-market-hero__overheat-card--active {
+  background: rgba(30, 58, 138, 0.12);
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+.yds-market-hero__overheat-card--critical {
+  background: rgba(30, 64, 175, 0.18);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.yds-market-hero__overheat-title {
+  margin: 0 0 0.15rem;
+  font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+  font-weight: 800;
+  color: var(--hero-color, #e2e8f0);
+}
+
+.yds-market-hero__overheat-summary {
+  margin: 0 0 0.1rem;
+  font-size: clamp(0.72rem, 2.1vw, 0.85rem);
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-market-hero__overheat-action {
+  margin: 0 0 0.15rem;
+  font-size: clamp(0.68rem, 2vw, 0.8rem);
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-market-hero__overheat-metric {
+  margin: 0;
+  font-size: clamp(0.58rem, 1.6vw, 0.68rem);
+  font-weight: 600;
+  color: #64748b;
+}
+
 .yds-market-hero__momentum-card--active {
   background: rgba(120, 53, 15, 0.12);
   border-color: rgba(251, 191, 36, 0.25);

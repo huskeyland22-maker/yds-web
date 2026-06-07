@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { resolveTodayActions } from "../../content/ydsActionGuide.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
+import { resolveOverheatLayer } from "../../content/ydsOverheatLayer.js"
 import {
   resolveMomentumPositionLabel,
   resolveYdsStatusSnapshot,
@@ -18,18 +19,20 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
     if (!Number.isFinite(score)) return null
 
     const momentumData = resolveMomentumLayer(panicData, historyRows)
+    const overheat = resolveOverheatLayer(panicData)
     const snapshot = resolveYdsStatusSnapshot(Math.round(score), momentumData)
     const momentum = resolveMomentumPositionLabel(momentumData)
     const actions = resolveTodayActions(Math.round(score), momentumData)
-    if (!snapshot.cycle || !snapshot.panic || !actions) return null
+    if (!snapshot.cycle || !snapshot.panic || !actions || !overheat) return null
 
-    return { ...snapshot, momentumData, momentum, actions }
+    return { ...snapshot, momentumData, momentum, overheat, actions }
   }, [panicData, historyRows])
 
   if (!view) return null
 
-  const { cycle, panic, ydsScore, headline, momentum, momentumData, actions } = view
+  const { cycle, panic, ydsScore, headline, momentum, momentumData, overheat, actions } = view
   const momentumActive = momentum.tier !== "calm"
+  const overheatActive = overheat.id !== "normal"
 
   return (
     <section className="yds-market-hero" aria-label="YDS 시장 Hero">
@@ -65,6 +68,30 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
 
       <article
         className={[
+          "yds-market-hero__overheat-card",
+          overheatActive ? "yds-market-hero__overheat-card--active" : "",
+          overheat.level === "critical" ? "yds-market-hero__overheat-card--critical" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-label="Overheat Layer"
+      >
+        <p className="yds-market-hero__layer-tag">Overheat · 언제 덜어내는가</p>
+        <p
+          className="yds-market-hero__overheat-title"
+          style={{ "--hero-color": overheat.color }}
+        >
+          {overheat.emoji} {overheat.label}
+        </p>
+        <p className="yds-market-hero__overheat-summary">{overheat.summary}</p>
+        <p className="yds-market-hero__overheat-action">{overheat.action}</p>
+        <p className="yds-market-hero__overheat-metric font-mono tabular-nums">
+          CNN {Math.round(overheat.cnn)} · BofA {overheat.bofa.toFixed(1)}
+        </p>
+      </article>
+
+      <article
+        className={[
           "yds-market-hero__momentum-card",
           momentumActive ? "yds-market-hero__momentum-card--active" : "",
           momentum.tier === "riskOff" ? "yds-market-hero__momentum-card--risk" : "",
@@ -73,6 +100,7 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
           .join(" ")}
         aria-label="단기 Momentum"
       >
+        <p className="yds-market-hero__layer-tag">Momentum · 단기 변화</p>
         <p
           className="yds-market-hero__momentum-title"
           style={{ "--hero-color": momentum.color }}
