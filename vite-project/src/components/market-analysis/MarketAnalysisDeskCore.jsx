@@ -7,7 +7,9 @@ import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsBrandHero from "./YdsBrandHero.jsx"
 import YdsMarketHeroStack from "./YdsMarketHeroStack.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
+import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
 import YdsDualCycleHero from "./YdsDualCycleHero.jsx"
+import { useEventScorecard } from "../../hooks/useEventScorecard.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "../PanicIndexHistorySection.jsx"
@@ -45,6 +47,9 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     [panicData, safeHistory],
   )
 
+  const { byType: scorecardByType, rows: scorecardRows, loading: scorecardLoading } =
+    useEventScorecard(safeHistory, panicData)
+
   if (!panicData && safeHistory.length === 0) {
     return null
   }
@@ -63,8 +68,13 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <YdsBrandHero />
-      <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
+      <YdsMarketHeroStack
+        panicData={panicData}
+        historyRows={safeHistory}
+        scorecardByType={scorecardByType}
+      />
       <YdsMarketTimelineSection panicData={panicData} historyRows={safeHistory} />
+      <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
       <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
 
       <section className="yds-market-desk__block" aria-labelledby="market-block-indices">

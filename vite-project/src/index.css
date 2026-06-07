@@ -25677,6 +25677,119 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+/* Event Scorecard V1.9 */
+.yds-event-scorecard {
+  margin: 0 0 0.65rem;
+  padding: 0.55rem 0.65rem 0.6rem;
+  border-radius: 0.55rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.95));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.yds-event-scorecard__head {
+  margin-bottom: 0.45rem;
+}
+
+.yds-event-scorecard__title {
+  margin: 0;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.yds-event-scorecard__sub {
+  margin: 0.15rem 0 0;
+  font-size: clamp(0.58rem, 1.6vw, 0.66rem);
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-event-scorecard__loading {
+  margin: 0;
+  font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+  color: #64748b;
+}
+
+.yds-event-scorecard__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yds-event-scorecard__table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: clamp(0.58rem, 1.6vw, 0.68rem);
+}
+
+.yds-event-scorecard__table th,
+.yds-event-scorecard__table td {
+  padding: 0.28rem 0.35rem;
+  text-align: right;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  white-space: nowrap;
+}
+
+.yds-event-scorecard__table th:first-child,
+.yds-event-scorecard__table td:first-child {
+  text-align: left;
+}
+
+.yds-event-scorecard__table th {
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+.yds-event-scorecard__event {
+  font-weight: 700;
+  color: #e2e8f0;
+  max-width: 9rem;
+  white-space: normal;
+}
+
+.yds-event-scorecard__grade {
+  display: inline-block;
+  padding: 0.08rem 0.35rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.62rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+}
+
+.yds-event-scorecard__grade--a {
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #86efac;
+}
+
+.yds-event-scorecard__grade--b {
+  border-color: rgba(234, 179, 8, 0.35);
+  color: #fde047;
+}
+
+.yds-event-scorecard__grade--c {
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #cbd5e1;
+}
+
+.yds-event-scorecard__grade--d,
+.yds-event-scorecard__grade--insufficient {
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+.yds-event-layer__confidence,
+.yds-market-hero__event-headline .yds-event-layer__confidence {
+  margin-left: 0.35rem;
+  font-size: 0.72em;
+  font-weight: 700;
+  color: #fde047;
+  letter-spacing: 0.01em;
+}
+
 /* Status Label Panel (legacy) */
 .yds-status-panel {
   margin: 0 0 0.5rem;

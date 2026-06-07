@@ -13,9 +13,9 @@ import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 
 /**
  * V1.3 Hero — 장기(사이클·패닉) → 단기(Momentum) → 해석 → 실행
- * @param {{ panicData?: object | null; historyRows?: object[] }} props
+ * @param {{ panicData?: object | null; historyRows?: object[]; scorecardByType?: import("../../content/ydsEventScorecard.js").EventScorecardMap | null }} props
  */
-export default function YdsMarketHeroStack({ panicData = null, historyRows = [] }) {
+export default function YdsMarketHeroStack({ panicData = null, historyRows = [], scorecardByType = null }) {
   const view = useMemo(() => {
     if (!panicData) return null
     const score = getFinalScore(panicData)
@@ -135,7 +135,12 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
         <p className="yds-market-hero__momentum-detail">{momentum.detail}</p>
       </article>
 
-      <YdsEventLayerCard panicData={panicData} historyRows={historyRows} embedded />
+      <YdsEventLayerCard
+        panicData={panicData}
+        historyRows={historyRows}
+        embedded
+        scorecardByType={scorecardByType}
+      />
 
       {headline ? (
         <p className="yds-market-hero__headline">

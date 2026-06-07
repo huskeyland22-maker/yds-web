@@ -1,14 +1,21 @@
 import { useMemo } from "react"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
+import { scorecardGradeForEvent } from "../../content/ydsEventScorecard.js"
 
 /**
  * Event Layer V1.5 — Hero 내 또는 독립 섹션
- * @param {{ panicData?: object | null; historyRows?: object[]; embedded?: boolean }} props
+ * @param {{
+ *   panicData?: object | null
+ *   historyRows?: object[]
+ *   embedded?: boolean
+ *   scorecardByType?: import("../../content/ydsEventScorecard.js").EventScorecardMap | null
+ * }} props
  */
 export default function YdsEventLayerCard({
   panicData = null,
   historyRows = [],
   embedded = false,
+  scorecardByType = null,
 }) {
   const view = useMemo(() => resolveEventLayer(panicData, historyRows), [panicData, historyRows])
 
@@ -27,10 +34,15 @@ export default function YdsEventLayerCard({
       <h2 className={embedded ? "yds-market-hero__event-title" : "yds-event-layer__title"}>
         📢 주요 시장 이벤트
       </h2>
-      {view.events.map((ev) => (
+      {view.events.map((ev) => {
+        const confidence = scorecardGradeForEvent(ev.id, scorecardByType)
+        return (
         <article key={ev.id} className={embedded ? "yds-market-hero__event-item" : "yds-event-layer__item"}>
           <p className={embedded ? "yds-market-hero__event-headline" : "yds-event-layer__headline"}>
             {ev.emoji} {ev.title}
+            {confidence ? (
+              <span className="yds-event-layer__confidence">신뢰도 {confidence}</span>
+            ) : null}
           </p>
           {ev.summary ? (
             <p className={embedded ? "yds-market-hero__event-line" : "yds-event-layer__line"}>
@@ -38,7 +50,8 @@ export default function YdsEventLayerCard({
             </p>
           ) : null}
         </article>
-      ))}
+        )
+      })}
     </section>
   )
 }
