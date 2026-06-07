@@ -26,9 +26,9 @@ function distributeStockBuckets(stockPct) {
 }
 
 /**
- * @param {{ panicData?: object | null }} props
+ * @param {{ panicData?: object | null; compact?: boolean }} props
  */
-export default function YdsAllocationCenter({ panicData = null }) {
+export default function YdsAllocationCenter({ panicData = null, compact = false }) {
   const view = useMemo(() => {
     if (!panicData) return null
     const score = getFinalScore(panicData)
@@ -78,6 +78,22 @@ export default function YdsAllocationCenter({ panicData = null }) {
   }, [panicData])
 
   if (!view) return null
+
+  if (compact) {
+    return (
+      <section className="yds-allocation-center yds-allocation-center--compact" aria-label="YDS 자산 배분">
+        <p className="m-0 yds-allocation-center__title">YDS 자산 배분</p>
+        <div className="yds-allocation-center__hero yds-allocation-center__hero--compact">
+          <div className="yds-allocation-center__hero-grid yds-allocation-center__hero-grid--compact">
+            <p className="m-0 yds-allocation-center__hero-value font-mono tabular-nums">{view.stockPct}%</p>
+            <p className="m-0 yds-allocation-center__hero-name">주식</p>
+            <p className="m-0 yds-allocation-center__hero-value font-mono tabular-nums">{view.cashPct}%</p>
+            <p className="m-0 yds-allocation-center__hero-name">현금</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="yds-allocation-center trading-card-shell panic-v2-section" aria-label="YDS 자산 배분">

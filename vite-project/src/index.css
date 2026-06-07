@@ -21204,18 +21204,131 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-action-signal {
   margin-bottom: 0;
-  padding: 6px 8px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(96, 165, 250, 0.22);
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
-  overflow: auto;
+  min-height: 100%;
 }
 
 .yds-action-signal__title {
-  font-size: 11px;
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
   font-weight: 800;
   letter-spacing: 0.04em;
-  color: rgba(147, 197, 253, 0.98);
+  color: #93c5fd;
   text-transform: uppercase;
+}
+
+.yds-action-signal__list {
+  margin: 0 0 0.4rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.yds-action-signal__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: clamp(0.78rem, 2.2vw, 0.92rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: #f1f5f9;
+}
+
+.yds-action-signal__emoji {
+  flex-shrink: 0;
+  width: 1.1rem;
+  text-align: center;
+}
+
+.yds-action-signal__text {
+  min-width: 0;
+}
+
+.yds-action-signal__state {
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-action-signal__state-label {
+  margin: 0 0 0.12rem;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-action-signal__state-value {
+  font-size: clamp(0.75rem, 2.2vw, 0.88rem);
+  font-weight: 800;
+  color: var(--signal-color, #e2e8f0);
+}
+
+.yds-judgment-panel__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.yds-judgment-panel__slot > section {
+  height: 100%;
+}
+
+.yds-allocation-center--compact {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
+}
+
+.yds-allocation-center--compact .yds-allocation-center__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #93c5fd;
+  text-transform: uppercase;
+}
+
+.yds-allocation-center__hero--compact {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.yds-allocation-center__hero-grid--compact {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.5rem;
+  align-items: baseline;
+}
+
+.yds-allocation-center__hero-grid--compact .yds-allocation-center__hero-value {
+  font-size: clamp(1.35rem, 5vw, 1.65rem);
+  font-weight: 800;
+  color: #f8fafc;
+  text-align: right;
+}
+
+.yds-allocation-center__hero-grid--compact .yds-allocation-center__hero-name {
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .yds-judgment-panel__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .yds-action-signal__headline {

@@ -104,12 +104,14 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         <h2 id="market-block-actions" className="yds-market-desk__block-label">
           YDS 판단
         </h2>
-        <div className="yds-market-desk__action-grid yds-market-desk__action-grid--dual">
-          <div className="yds-market-desk__card-slot">
-            <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
-          </div>
-          <div className="yds-market-desk__card-slot yds-market-desk__card-slot--alloc">
-            <YdsAllocationCenter panicData={panicData} />
+        <div className="yds-judgment-panel">
+          <div className="yds-judgment-panel__grid">
+            <div className="yds-judgment-panel__slot yds-judgment-panel__slot--signal">
+              <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
+            </div>
+            <div className="yds-judgment-panel__slot yds-judgment-panel__slot--alloc">
+              <YdsAllocationCenter panicData={panicData} compact />
+            </div>
           </div>
         </div>
         <details className="yds-market-desk__score-detail">
