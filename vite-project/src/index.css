@@ -25682,6 +25682,44 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+.yds-regime-level__block--state {
+  border-color: rgba(249, 115, 22, 0.22);
+}
+
+.yds-regime-level__value--secondary {
+  font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+}
+
+.yds-regime-level__subtitles {
+  margin: 0.15rem 0 0.25rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.yds-regime-level__subtitles li {
+  font-size: clamp(0.68rem, 2vw, 0.8rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
+.yds-dual-cycle-hero__state-subs {
+  margin: 0.12rem 0 0.2rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.yds-dual-cycle-hero__state-subs li {
+  font-size: clamp(0.65rem, 1.9vw, 0.76rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
 .yds-regime-level__summary {
   margin: 0;
   font-size: clamp(0.68rem, 2vw, 0.8rem);

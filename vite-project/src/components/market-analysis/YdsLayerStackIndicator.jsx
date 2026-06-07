@@ -21,7 +21,7 @@ export default function YdsLayerStackIndicator({
   return (
     <div className="yds-layer-stack" aria-label="YDS 4계층 분석 스택">
       <div className="yds-layer-stack__row yds-layer-stack__row--base">
-        <span className="yds-layer-stack__tier">① Level</span>
+        <span className="yds-layer-stack__tier">① State</span>
         <span className="yds-layer-stack__state">
           {levelLabel ?? (ydsScore != null ? `${ydsScore} · 장기` : "—")}
         </span>

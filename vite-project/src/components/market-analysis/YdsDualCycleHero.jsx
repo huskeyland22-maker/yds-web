@@ -11,6 +11,7 @@ import { resolveYdsStageNavigation } from "../../utils/ydsStageNavigation.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import { resolveMarketLevelRegime } from "../../content/ydsRegimeLayer.js"
+import { resolveMarketState } from "../../content/ydsStateEngine.js"
 import YdsDualCyclePositionNav from "./YdsDualCyclePositionNav.jsx"
 import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
@@ -51,6 +52,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
     })
     const eventLayer = resolveEventLayer(panicData, historyRows)
     const levelRegime = resolveMarketLevelRegime(panicData, historyRows, momentum)
+    const marketState = resolveMarketState(panicData, historyRows, momentum)
 
     return {
       score: rounded,
@@ -64,6 +66,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
       momentum,
       eventLayer,
       levelRegime,
+      marketState,
     }
   }, [panicData, historyRows])
 
@@ -119,19 +122,39 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
 
         <article
           className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--market"
-          aria-label="시장 사이클"
+          aria-label="시장 상태"
         >
-          <p className="yds-dual-cycle-hero__axis-label">시장 사이클</p>
-          <p
-            className="yds-dual-cycle-hero__stage yds-dual-cycle-hero__stage--market"
-            style={{ "--axis-color": model.marketStage.color }}
-          >
-            <span aria-hidden>{model.marketStage.emoji}</span> {model.marketStage.label}
-          </p>
+          <p className="yds-dual-cycle-hero__axis-label">시장 상태</p>
+          {model.marketState ? (
+            <>
+              <p
+                className="yds-dual-cycle-hero__stage yds-dual-cycle-hero__stage--market"
+                style={{ "--axis-color": model.marketState.color }}
+              >
+                <span aria-hidden>{model.marketState.emoji}</span> {model.marketState.label}
+              </p>
+              {model.marketState.subtitles.length ? (
+                <ul className="yds-dual-cycle-hero__state-subs">
+                  {model.marketState.subtitles.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </>
+          ) : (
+            <p
+              className="yds-dual-cycle-hero__stage yds-dual-cycle-hero__stage--market"
+              style={{ "--axis-color": model.marketStage.color }}
+            >
+              <span aria-hidden>{model.marketStage.emoji}</span> {model.marketStage.label}
+            </p>
+          )}
           <p className="yds-dual-cycle-hero__metrics font-mono tabular-nums">
             CNN {fmtMetric(model.cnn, 0)} · BofA {fmtMetric(model.bofa)}
           </p>
-          <p className="yds-dual-cycle-hero__segment">{model.marketStage.role}</p>
+          <p className="yds-dual-cycle-hero__segment">
+            {model.levelRegime?.regime?.summary ?? model.marketStage.role}
+          </p>
 
           <div className="yds-dual-cycle-hero__rail" aria-hidden>
             {MARKET_CYCLE_STAGES.map((step) => {
@@ -159,9 +182,11 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
 
       <YdsLayerStackIndicator
         levelLabel={
-          model.levelRegime?.level
-            ? `${model.levelRegime.level.emoji} ${model.levelRegime.level.label}`
-            : null
+          model.marketState
+            ? `${model.marketState.emoji} ${model.marketState.label}`
+            : model.levelRegime?.level
+              ? `${model.levelRegime.level.emoji} ${model.levelRegime.level.label}`
+              : null
         }
         regimeLabel={
           model.levelRegime?.regime
