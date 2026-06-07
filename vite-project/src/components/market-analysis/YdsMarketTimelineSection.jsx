@@ -66,10 +66,10 @@ export default function YdsMarketTimelineSection({
       ]
         .filter(Boolean)
         .join(" ")}
-      aria-label="시장 전환점"
+      aria-label="최근 전환 신호"
     >
       <div className="yds-market-timeline__head">
-        <h2 className="yds-market-timeline__title">📍 시장 전환점</h2>
+        <h2 className="yds-market-timeline__title">최근 전환 신호</h2>
       </div>
 
       <ol className="yds-market-timeline__list">
@@ -86,8 +86,10 @@ export default function YdsMarketTimelineSection({
                 <p className="yds-market-timeline__compact-line">
                   <span className="yds-market-timeline__compact-date font-mono tabular-nums">
                     {dateLabel}
-                  </span>{" "}
-                  {emoji} {ev.title}
+                  </span>
+                  <span className="yds-market-timeline__compact-event">
+                    {emoji} {ev.title}
+                  </span>
                 </p>
               </li>
             )

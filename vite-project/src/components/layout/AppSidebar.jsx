@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
-import { getPrimaryNavItems } from "../../utils/appNavItems.js"
+import { getPrimaryNavItems, getSecondaryNavItems } from "../../utils/appNavItems.js"
 import { LAUNCH_FOOTER_LINKS } from "../../content/ydsLaunchContent.js"
 
 /**
@@ -12,6 +12,7 @@ import { LAUNCH_FOOTER_LINKS } from "../../content/ydsLaunchContent.js"
  */
 export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
   const navItems = getPrimaryNavItems()
+  const secondaryNavItems = getSecondaryNavItems()
   const aiStatus = sidebarPulse?.aiReportStatus ?? null
 
   return (
@@ -48,6 +49,24 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
                 <span className="min-w-0 truncate font-medium leading-tight tracking-tight">{item.label}</span>
               </>
             )}
+          </NavLink>
+        ))}
+      </nav>
+      <nav className="flex flex-col gap-0.5 px-2 pb-2" aria-label="보조 메뉴">
+        {secondaryNavItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              [
+                "flex w-full items-center rounded-card border px-2 py-1.5 text-[11px] transition",
+                isActive
+                  ? "border-indigo-500/30 bg-indigo-500/[0.14] text-slate-50"
+                  : "border-transparent text-slate-500 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-slate-300",
+              ].join(" ")
+            }
+          >
+            {item.label}
           </NavLink>
         ))}
       </nav>

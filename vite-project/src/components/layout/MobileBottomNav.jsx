@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Bell, FileText, FlaskConical, ListChecks } from "lucide-react"
+import { Activity, Briefcase, Lightbulb, ListChecks } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { getPrimaryNavItems, NAV_MOBILE_SHORT } from "../../utils/ydsUiLabels.js"
 
@@ -6,11 +6,9 @@ const ICON_BY_PATH = {
   "/market-analysis": Activity,
   "/stock-picks": ListChecks,
   "/watchlist": ListChecks,
-  "/alert-center": Bell,
-  "/ai-daily-report": FileText,
-  "/performance-center": BarChart3,
-  "/performance-dashboard": BarChart3,
-  "/lab": FlaskConical,
+  "/performance-center": Briefcase,
+  "/performance-dashboard": Briefcase,
+  "/ai-daily-report": Lightbulb,
 }
 
 const SHORT_LABEL = NAV_MOBILE_SHORT
@@ -42,11 +40,9 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
     )
       return "market_analysis"
     if (p.startsWith("/watchlist") || p.startsWith("/stock-picks")) return "stock_picks"
-    if (p.startsWith("/alert-center")) return "alert_center"
-    if (p.startsWith("/ai-daily-report")) return "ai_daily_report"
-    if (p.startsWith("/performance-center") || p.startsWith("/performance-dashboard"))
+    if (p.startsWith("/performance-center") || p.startsWith("/performance-dashboard") || p.startsWith("/portfolio"))
       return "performance_center"
-    if (p.startsWith("/lab") || p.startsWith("/panic-validation")) return "lab"
+    if (p.startsWith("/ai-daily-report") || p.startsWith("/insights")) return "ai_daily_report"
     return null
   })()
 

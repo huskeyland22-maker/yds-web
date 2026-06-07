@@ -1366,6 +1366,7 @@ function App() {
               }
             />
             <Route path="/performance-dashboard" element={<Navigate to="/performance-center" replace />} />
+            <Route path="/portfolio" element={<Navigate to="/performance-center" replace />} />
             <Route
               path="/ai-daily-report"
               element={
@@ -1488,7 +1489,7 @@ function App() {
               path="/panic-validation"
               element={<Navigate to="/lab" replace />}
             />
-            <Route path="/insights" element={<Navigate to="/value-chain" replace />} />
+            <Route path="/insights" element={<Navigate to="/ai-daily-report" replace />} />
             <Route
               path="/admin"
               element={

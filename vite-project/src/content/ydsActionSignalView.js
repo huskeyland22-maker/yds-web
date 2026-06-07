@@ -17,10 +17,11 @@ import { getFinalScore } from "../utils/tradingScores.js"
 
 /**
  * @typedef {{
+ *   strategyEmoji: string
+ *   strategyLabel: string
+ *   strategyColor: string
  *   signals: ActionSignalLine[]
- *   stateLabel: string
- *   stateEmoji: string
- *   stateColor: string
+ *   contextLine: string
  * }} ActionSignalView
  */
 
@@ -30,8 +31,36 @@ function iconForAction(text) {
   if (/추격|금지|보류|중단|관망/.test(t)) return "🚫"
   if (/현금/.test(t)) return "💵"
   if (/관심|탐색|관찰|발굴|리스트/.test(t)) return "👀"
-  if (/매수|익절|정리|분할|집중/.test(t)) return "📌"
+  if (/익절/.test(t)) return "✈"
+  if (/매수|정리|분할|집중/.test(t)) return "📌"
   return "✓"
+}
+
+/**
+ * @param {ReturnType<typeof resolveTodayActions>} actions
+ * @param {import("./ydsOverheatAllocation.js").EffectiveMarketAllocation | null} effective
+ * @param {import("./ydsCurrentMarketView.js").CurrentMarketView} market
+ */
+function resolveStrategyMode(actions, effective, market) {
+  const defensive =
+    effective?.mode === "overheat" ||
+    /과열|조정/.test(market.label ?? "") ||
+    actions.band.id === "overheat" ||
+    actions.band.id === "neutral"
+
+  if (defensive) {
+    return {
+      emoji: "🟠",
+      label: "방어 모드",
+      color: market.color,
+    }
+  }
+
+  return {
+    emoji: actions.band.emoji,
+    label: actions.band.label,
+    color: actions.band.color,
+  }
 }
 
 /**
@@ -74,10 +103,13 @@ export function resolveActionSignalView(panicData, historyRows = []) {
     signals.push({ emoji: "✓", text: "기존 포지션 유지" })
   }
 
+  const strategy = resolveStrategyMode(actions, effective, market)
+
   return {
+    strategyEmoji: strategy.emoji,
+    strategyLabel: strategy.label,
+    strategyColor: strategy.color,
     signals: signals.slice(0, 3),
-    stateLabel: market.label,
-    stateEmoji: market.emoji,
-    stateColor: market.color,
+    contextLine: market.cause ?? "",
   }
 }

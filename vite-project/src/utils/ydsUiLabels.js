@@ -5,9 +5,15 @@ export function getPrimaryNavItems() {
   return [
     { label: "📊 시장분석", path: "/market-analysis" },
     { label: "⭐ 종목추천", path: "/stock-picks" },
+    { label: "💼 포트폴리오", path: "/performance-center" },
+    { label: "💡 인사이트", path: "/ai-daily-report" },
+  ]
+}
+
+/** @returns {{ label: string; path: string }[]} */
+export function getSecondaryNavItems() {
+  return [
     { label: "🔔 알림", path: "/alert-center" },
-    { label: "🤖 AI 리포트", path: "/ai-daily-report" },
-    { label: "📈 성과", path: "/performance-center" },
     { label: "🧪 연구실", path: "/lab" },
   ]
 }
@@ -17,9 +23,10 @@ export const NAV_MOBILE_SHORT = {
   "/market-analysis": "📊 시장",
   "/stock-picks": "⭐ 종목",
   "/watchlist": "⭐ 종목",
+  "/performance-center": "💼 포트",
+  "/performance-dashboard": "💼 포트",
+  "/ai-daily-report": "💡 인사이트",
   "/alert-center": "🔔 알림",
-  "/ai-daily-report": "🤖 AI",
-  "/performance-center": "📈 성과",
   "/lab": "🧪 연구",
 }
 
@@ -32,7 +39,7 @@ export const UI_RADAR = {
 export const UI_PAGE = {
   stockPicks: {
     title: "종목추천",
-    kicker: "종목추천 · YDS V1",
+    kicker: "종목추천 · Phase 2-1",
     path: "/stock-picks",
   },
   watchlist: {

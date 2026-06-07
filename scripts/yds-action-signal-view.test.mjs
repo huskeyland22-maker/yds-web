@@ -17,9 +17,10 @@ const view = resolveActionSignalView(panic, history)
 assert(view != null, "view required")
 assert(view.signals.length === 3, view.signals.length)
 assert(view.signals[0].emoji.length > 0, "emoji")
-assert(view.stateLabel.length > 0, "state")
+assert(view.strategyLabel.length > 0, "strategy")
 
 console.log("OK action signal view", {
+  strategy: `${view.strategyEmoji} ${view.strategyLabel}`,
   signals: view.signals.map((s) => `${s.emoji} ${s.text}`),
-  state: `${view.stateEmoji} ${view.stateLabel}`,
+  context: view.contextLine,
 })

@@ -1,1 +1,1 @@
-export { getPrimaryNavItems } from "./ydsUiLabels.js"
+export { getPrimaryNavItems, getSecondaryNavItems } from "./ydsUiLabels.js"

@@ -78,11 +78,6 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
           >
             {currentMarket.emoji} {currentMarket.label}
           </p>
-          <p className="yds-market-hero__current-market-metrics font-mono tabular-nums">
-            CNN {Math.round(currentMarket.cnn ?? 0)}
-            <span className="yds-market-hero__current-market-metric-sep"> · </span>
-            BofA {(currentMarket.bofa ?? 0).toFixed(1)}
-          </p>
           {currentMarket.cause ? (
             <p className="yds-market-hero__current-market-cause">{currentMarket.cause}</p>
           ) : null}
