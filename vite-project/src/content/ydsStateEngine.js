@@ -4,7 +4,6 @@
  */
 
 import { resolveMarketLevel } from "./ydsLevelLayer.js"
-import { resolveMarketRegime } from "./ydsRegimeLayer.js"
 import {
   findRowDaysBefore,
   mergeLayerHistory,
@@ -238,107 +237,4 @@ export function resolveMarketState(panicData, historyRows = [], momentum = null)
   const level = resolveMarketLevel(cnn, bofa)
   if (!level) return null
   return stateFromAbsoluteLevel(level, ctx)
-}
-
-/**
- * @typedef {MarketStateView & {
- *   contextLines: string[]
- *   regimeId: import("./ydsRegimeLayer.js").MarketRegimeId | null
- * }} UnifiedMarketRegimeView
- */
-
-/**
- * @param {import("./ydsRegimeLayer.js").MarketRegimeView | null} regime
- * @param {MarketStateView} state
- */
-function regimeContextLine(regime, state) {
-  if (!regime) return null
-  if (regime.id === "lateCycle") return "사이클 후반 진입"
-  if (regime.id === "earlyCycle") return "초기 회복 국면"
-  if (regime.id === "extreme") return "극과열 구간"
-  if (regime.id === "midCycle" && state.id === "optimismExpand") return null
-  return null
-}
-
-/** @param {string} a @param {string} b */
-function sameMeaning(a, b) {
-  if (a === b) return true
-  if (a.includes(b) || b.includes(a)) return true
-  return false
-}
-
-/**
- * State + Regime → 단일 Market Regime (중복 문구 제거)
- * @param {object | null | undefined} panicData
- * @param {object[]} [historyRows]
- * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} [momentum]
- * @returns {UnifiedMarketRegimeView | null}
- */
-export function resolveUnifiedMarketRegime(panicData, historyRows = [], momentum = null) {
-  const state = resolveMarketState(panicData, historyRows, momentum)
-  if (!state) return null
-
-  const regime = resolveMarketRegime(panicData, historyRows, {
-    cnnDelta3d: momentum?.cnnDelta3d ?? null,
-  })
-
-  /** @type {string[]} */
-  const contextLines = []
-  /** @type {Set<string>} */
-  const seen = new Set()
-
-  const add = (line) => {
-    const text = String(line ?? "").trim()
-    if (!text || seen.has(text)) return
-    if (sameMeaning(text, state.label)) return
-    for (const existing of contextLines) {
-      if (sameMeaning(text, existing)) return
-    }
-    if (regime?.summary && sameMeaning(text, regime.summary)) return
-    seen.add(text)
-    contextLines.push(text)
-  }
-
-  for (const sub of state.subtitles) add(sub)
-
-  const regimeLine = regimeContextLine(regime, state)
-  if (regimeLine) add(regimeLine)
-
-  return {
-    ...state,
-    contextLines,
-    regimeId: regime?.id ?? null,
-  }
-}
-
-/**
- * 5초 Quick Read용 — 사이클 아래 2줄 맥락 (상태 라벨 + 부제, 사이클과 중복 제거)
- * @param {string} cycleLabel
- * @param {UnifiedMarketRegimeView | null} regime
- */
-export function buildQuickReadContext(cycleLabel, regime) {
-  /** @type {string[]} */
-  const lines = []
-  if (!regime) return lines
-
-  const add = (line) => {
-    const text = String(line ?? "").trim()
-    if (!text || sameMeaning(text, cycleLabel)) return
-    if (lines.some((l) => sameMeaning(l, text))) return
-    lines.push(text)
-  }
-
-  for (const sub of regime.subtitles) add(sub)
-  add(regime.label)
-
-  if (lines.length > 2) {
-    const labelIdx = lines.findIndex((l) => sameMeaning(l, regime.label))
-    if (labelIdx > 1) {
-      const label = lines[labelIdx]
-      const rest = lines.filter((_, i) => i !== labelIdx)
-      return [rest[0], label].filter(Boolean)
-    }
-  }
-
-  return lines.slice(0, 2)
 }
