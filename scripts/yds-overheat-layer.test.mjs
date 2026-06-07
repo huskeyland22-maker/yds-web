@@ -19,10 +19,10 @@ assert(prep?.summary === "과열권 접근 중", prep?.summary)
 assert(prep?.action === "추격매수 금지", prep?.action)
 
 const partial = resolveOverheatLayer({ fearGreed: 75, bofa: 7.3 })
-assert(partial?.label === "일부 현금 확보", partial?.label)
+assert(partial?.label === "현금 확보", partial?.label)
 
 const boundary = resolveOverheatLayer({ fearGreed: 85, bofa: 8.5 })
-assert(boundary?.label === "과열 경계", boundary?.label)
+assert(boundary?.label === "최고 과열", boundary?.label)
 assert(boundary?.level === "critical", boundary?.level)
 
 console.log("OK overheat layer", {

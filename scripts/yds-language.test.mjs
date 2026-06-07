@@ -3,6 +3,7 @@
  */
 import { MACRO_V1_STATUS_BANDS, resolveMacroV1Status } from "../vite-project/src/panic-v2/panicMacroV1Status.js"
 import {
+  YDS_CYCLE_RAIL_LABELS,
   YDS_LABEL_PANIC_SCORE,
   YDS_LABEL_PANIC_HISTORY,
   macroStageDisplayLabel,
@@ -29,5 +30,7 @@ assert(resolvePanicBandForMacroStage("dca")?.label === "분할매수")
 assert(MACRO_V1_STATUS_BANDS.every((b) => !b.label.includes("구간")), "legacy 구간 label")
 assert(YDS_STAGE_RAIL_LABELS.includes("인생 타점"), YDS_STAGE_RAIL_LABELS)
 assert(!YDS_STAGE_RAIL_LABELS.includes("패닉매수"), YDS_STAGE_RAIL_LABELS)
+assert(YDS_CYCLE_RAIL_LABELS.includes("현금 준비"), YDS_CYCLE_RAIL_LABELS)
+assert(!YDS_CYCLE_RAIL_LABELS.includes("일부"), YDS_CYCLE_RAIL_LABELS)
 
 console.log("OK yds-language.test.mjs")

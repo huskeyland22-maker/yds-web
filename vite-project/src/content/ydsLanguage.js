@@ -17,7 +17,7 @@ export const YDS_PANIC_RAIL_LABELS =
   "🔵 공포 없음 · 🟢 공포 부족 · 🟡 관심 · 🟠 분할매수 · 🔴 인생 타점"
 
 export const YDS_CYCLE_RAIL_LABELS =
-  "🔵 침체 · 🟢 회복 · 🟡 성장 · 🟠 사이클 후반 · 🔴 최고 과열"
+  "🔵 침체 · 🟢 회복 · 🟡 성장 · 🟠 사이클 후반 · 🔴 현금 준비 · 🔴 최고 과열"
 
 export const YDS_CYCLE_TAGLINE_V18 =
   "관심에서 쌓고, 분할매수에서 실행한다. 인생 타점은 보너스다."

@@ -6,6 +6,9 @@ import {
   YDS_STAGE_RAIL_LABELS,
 } from "../content/ydsCyclePhilosophy.js"
 import {
+  MARKET_CYCLE_RAIL_LABELS,
+} from "../content/ydsMarketCycleDisplay.js"
+import {
   YDS_CYCLE_RAIL_LABELS,
   YDS_LABEL_PANIC_SCORE,
   YDS_PANIC_RAIL_LABELS,
@@ -27,6 +30,8 @@ export const TERM_REPLACE = {
   관심구간: "관심",
   패닉매수: "인생 타점",
   과열주의: "사이클 후반",
+  일부현금확보: "현금 확보",
+  "일부 현금 확보": "현금 확보",
   "PRI-A": "조기경보",
   "PRI-B": "충격감지",
   "PRI-A/B": "조기경보 · 충격감지",
@@ -59,6 +64,11 @@ export const GLOSSARY_ENTRIES = [
     id: "cycle-position",
     title: "사이클 위치",
     body: `${YDS_CYCLE_RAIL_LABELS}. 시장이 경기 사이클 어디쯤 왔는지를 나타냅니다.`,
+  },
+  {
+    id: "market-cycle",
+    title: "시장 사이클 (CNN·BofA)",
+    body: `${MARKET_CYCLE_RAIL_LABELS}. CNN 60+/BofA 6+는 현금 준비, CNN 80+/BofA 8+는 최고 과열입니다.`,
   },
   {
     id: "prep-zone",

@@ -25,7 +25,7 @@ export const SCORECARD_EVENT_CONFIG = [
   { type: "momentum-cnn-sharp", title: "투자심리 급랭", winDirection: "up" },
   { type: "momentum-bofa-weak", title: "Bull & Bear 악화", winDirection: "up" },
   { type: "overheat-cashPrep", title: "현금 준비 진입", winDirection: "down" },
-  { type: "overheat-partialCash", title: "일부 현금 확보", winDirection: "down" },
+  { type: "overheat-partialCash", title: "현금 확보 진입", winDirection: "down" },
   { type: "overheat-boundary", title: "과열 경계", winDirection: "down" },
 ]
 

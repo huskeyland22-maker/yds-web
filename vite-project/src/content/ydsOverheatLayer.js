@@ -47,18 +47,18 @@ export const OVERHEAT_TIER_COPY = {
   partialCash: {
     id: "partialCash",
     emoji: "🟠",
-    label: "일부 현금 확보",
+    label: "현금 확보",
     color: "#f97316",
     summary: "과열권 진입",
     action: "신규 진입 축소",
   },
   boundary: {
     id: "boundary",
-    emoji: "🔵",
-    label: "과열 경계",
-    color: "#3b82f6",
+    emoji: "🔴",
+    label: "최고 과열",
+    color: "#ef4444",
     summary: "극단적 탐욕 구간",
-    action: "현금 확보 우선",
+    action: "적극적 현금 확보",
   },
 }
 

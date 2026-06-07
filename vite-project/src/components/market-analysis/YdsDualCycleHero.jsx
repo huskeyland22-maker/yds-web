@@ -169,10 +169,10 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
                     .filter(Boolean)
                     .join(" ")}
                   data-market={step.id}
+                  title={step.tooltip}
                   style={active ? { "--chip-color": step.color } : undefined}
                 >
-                  {step.emoji}{" "}
-                  {step.id === "partialCash" ? "일부" : step.label}
+                  {step.emoji} {step.short}
                 </span>
               )
             })}

@@ -9,11 +9,13 @@
  * @typedef {{
  *   id: MarketCycleStageId
  *   label: string
+ *   short: string
  *   emoji: string
  *   color: string
  *   role: string
  *   mood: string
  *   harvestGuide: string
+ *   tooltip: string
  *   cnnMin: number | null
  *   bofaMin: number | null
  * }} MarketCycleStage
@@ -24,52 +26,64 @@ export const MARKET_CYCLE_STAGES = [
   {
     id: "normal",
     label: "성장",
+    short: "성장",
     emoji: "🟡",
     color: "#22c55e",
     role: "보유 유지 · 추격 자제",
     mood: "균형",
     harvestGuide: "보유 유지 · 추격매수 자제",
+    tooltip: "CNN·BofA 중립 — 성장 국면 · 추격 자제",
     cnnMin: null,
     bofaMin: null,
   },
   {
     id: "warning",
     label: "사이클 후반",
+    short: "사이클 후반",
     emoji: "🟠",
     color: "#eab308",
     role: "수익 관리 점검 단계",
     mood: "탐욕 증가",
     harvestGuide: "비중 점검 · 추격 자제 · 수익 관리",
+    tooltip: "CNN 55+ · BofA 6+ — 사이클 후반 · 수익 관리",
     cnnMin: 55,
     bofaMin: 6,
   },
   {
     id: "cashPrep",
-    label: "최고 과열",
+    label: "현금 준비",
+    short: "현금 준비",
     emoji: "🔴",
-    color: "#3b82f6",
-    role: "수확·현금 확대 검토",
+    color: "#ef4444",
+    role: "과열권 접근 · 신규 진입 축소",
     mood: "탐욕·과열",
-    harvestGuide: "현금 비중 확대 · 신규 추격 제한",
+    harvestGuide: "현금 비중 준비 · 추격매수 금지",
+    tooltip: "CNN 60+ · BofA 6+ · 과열권 접근 · 신규 진입 축소 · 현금 비중 준비",
     cnnMin: 60,
     bofaMin: 6,
   },
   {
     id: "partialCash",
     label: "최고 과열",
+    short: "최고 과열",
     emoji: "🔴",
-    color: "#2563eb",
-    role: "일부 현금화 · confirm",
+    color: "#dc2626",
+    role: "극단적 탐욕 · 적극적 현금 확보",
     mood: "극단 탐욕",
-    harvestGuide: "일부 현금 확보 · 비중 단계적 축소",
-    cnnMin: 70,
-    bofaMin: 7,
+    harvestGuide: "적극적 현금 확보 · 비중 축소",
+    tooltip: "CNN 80+ · BofA 8+ · 극단적 탐욕 · 적극적 현금 확보",
+    cnnMin: 80,
+    bofaMin: 8,
   },
 ]
 
+/** 시장 사이클 레일 범례 (CNN·BofA) */
+export const MARKET_CYCLE_RAIL_LABELS =
+  "🟡 성장 · 🟠 사이클 후반 · 🔴 현금 준비 · 🔴 최고 과열"
+
 /** @type {{ id: MarketCycleStageId; cnnMin: number; bofaMin: number }[]} */
 const MARKET_CYCLE_THRESHOLDS = [
-  { id: "partialCash", cnnMin: 70, bofaMin: 7 },
+  { id: "partialCash", cnnMin: 80, bofaMin: 8 },
   { id: "cashPrep", cnnMin: 60, bofaMin: 6 },
   { id: "warning", cnnMin: 55, bofaMin: 6 },
 ]
@@ -128,7 +142,7 @@ export function buildDualCycleInterpretation(fearStageId, marketStageId) {
     return "매수 기회는 아니지만 수익 관리가 필요한 구간"
   }
   if (fear === "neutral" && market.id === "partialCash") {
-    return "매수는 관찰 · 수확·현금화 우선 검토"
+    return "매수는 관찰 · 적극적 현금 확보 우선"
   }
   if (fear === "neutral" && market.id === "normal") {
     return "공포·탐욕 모두 중립 — 관찰·리스트 정리"
@@ -161,4 +175,11 @@ export function fearCycleMood(fearStageId) {
     panicBuy: "극단 공포",
   }
   return map[fearStageId] ?? "—"
+}
+
+/**
+ * @param {MarketCycleStageId} id
+ */
+export function marketCycleTooltip(id) {
+  return stageById(id).tooltip
 }
