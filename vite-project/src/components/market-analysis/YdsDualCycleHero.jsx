@@ -1,8 +1,7 @@
 import { useMemo } from "react"
-import { MACRO_V1_STATUS_BANDS, resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
-import { YDS_FEAR_CYCLE_RAIL, getStagePhilosophy } from "../../content/ydsCyclePhilosophy.js"
+import { resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
+import { getStagePhilosophy } from "../../content/ydsCyclePhilosophy.js"
 import {
-  MARKET_CYCLE_STAGES,
   resolveMarketCycleNavigation,
   resolveMarketCycleStage,
 } from "../../content/ydsMarketCycleDisplay.js"
@@ -11,7 +10,7 @@ import { resolveYdsStageNavigation } from "../../utils/ydsStageNavigation.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import { resolveMarketLevelRegime } from "../../content/ydsRegimeLayer.js"
-import { resolveMarketState } from "../../content/ydsStateEngine.js"
+import { resolveUnifiedMarketRegime } from "../../content/ydsStateEngine.js"
 import YdsDualCyclePositionNav from "./YdsDualCyclePositionNav.jsx"
 import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
@@ -52,7 +51,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
     })
     const eventLayer = resolveEventLayer(panicData, historyRows)
     const levelRegime = resolveMarketLevelRegime(panicData, historyRows, momentum)
-    const marketState = resolveMarketState(panicData, historyRows, momentum)
+    const unifiedRegime = resolveUnifiedMarketRegime(panicData, historyRows, momentum)
 
     return {
       score: rounded,
@@ -66,7 +65,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
       momentum,
       eventLayer,
       levelRegime,
-      marketState,
+      unifiedRegime,
     }
   }, [panicData, historyRows])
 
@@ -96,46 +95,24 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
             <span aria-hidden>{model.fearStage.emoji}</span> {model.fearStage.label}
           </p>
           <p className="yds-dual-cycle-hero__segment">{model.philosophy.segmentLabel}</p>
-
-          <div className="yds-dual-cycle-hero__rail" aria-hidden>
-            {YDS_FEAR_CYCLE_RAIL.map((step) => {
-              const active = step.id === model.fearStage.id
-              const band = MACRO_V1_STATUS_BANDS.find((b) => b.id === step.id)
-              return (
-                <span
-                  key={step.id}
-                  className={[
-                    "yds-dual-cycle-hero__chip",
-                    active ? "yds-dual-cycle-hero__chip--active" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  data-stage={step.id}
-                  style={active ? { "--chip-color": band?.color ?? "#94a3b8" } : undefined}
-                >
-                  {step.emoji} {step.short}
-                </span>
-              )
-            })}
-          </div>
         </article>
 
         <article
           className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--market"
           aria-label="시장 상태"
         >
-          <p className="yds-dual-cycle-hero__axis-label">시장 상태</p>
-          {model.marketState ? (
+          <p className="yds-dual-cycle-hero__axis-label">Market Regime</p>
+          {model.unifiedRegime ? (
             <>
               <p
                 className="yds-dual-cycle-hero__stage yds-dual-cycle-hero__stage--market"
-                style={{ "--axis-color": model.marketState.color }}
+                style={{ "--axis-color": model.unifiedRegime.color }}
               >
-                <span aria-hidden>{model.marketState.emoji}</span> {model.marketState.label}
+                <span aria-hidden>{model.unifiedRegime.emoji}</span> {model.unifiedRegime.label}
               </p>
-              {model.marketState.subtitles.length ? (
+              {model.unifiedRegime.contextLines.length ? (
                 <ul className="yds-dual-cycle-hero__state-subs">
-                  {model.marketState.subtitles.map((line) => (
+                  {model.unifiedRegime.contextLines.map((line) => (
                     <li key={line}>{line}</li>
                   ))}
                 </ul>
@@ -152,41 +129,14 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
           <p className="yds-dual-cycle-hero__metrics font-mono tabular-nums">
             CNN {fmtMetric(model.cnn, 0)} · BofA {fmtMetric(model.bofa)}
           </p>
-          <p className="yds-dual-cycle-hero__segment">
-            {model.levelRegime?.regime?.summary ?? model.marketStage.role}
-          </p>
-
-          <div className="yds-dual-cycle-hero__rail" aria-hidden>
-            {MARKET_CYCLE_STAGES.map((step) => {
-              const active = step.id === model.marketStage.id
-              return (
-                <span
-                  key={step.id}
-                  className={[
-                    "yds-dual-cycle-hero__chip",
-                    active ? "yds-dual-cycle-hero__chip--active" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  data-market={step.id}
-                  style={active ? { "--chip-color": step.color } : undefined}
-                >
-                  {step.emoji}{" "}
-                  {step.id === "partialCash" ? "일부" : step.label}
-                </span>
-              )
-            })}
-          </div>
         </article>
       </div>
 
       <YdsLayerStackIndicator
         levelLabel={
-          model.marketState
-            ? `${model.marketState.emoji} ${model.marketState.label}`
-            : model.levelRegime?.level
-              ? `${model.levelRegime.level.emoji} ${model.levelRegime.level.label}`
-              : null
+          model.unifiedRegime
+            ? `${model.unifiedRegime.emoji} ${model.unifiedRegime.label}`
+            : null
         }
         regimeLabel={
           model.levelRegime?.regime

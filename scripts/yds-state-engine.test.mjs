@@ -1,7 +1,7 @@
 /**
  * State Engine smoke test — node scripts/yds-state-engine.test.mjs
  */
-import { resolveMarketState, buildStateSubtitles } from "../vite-project/src/content/ydsStateEngine.js"
+import { resolveMarketState, buildStateSubtitles, resolveUnifiedMarketRegime, buildQuickReadContext } from "../vite-project/src/content/ydsStateEngine.js"
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg)
@@ -76,6 +76,18 @@ const subs = buildStateSubtitles("overheatUnwind", {
   momentumLevel: "warning",
 })
 assert(subs[0] === "최근 과열권 이탈", subs.join("|"))
+
+const unified = resolveUnifiedMarketRegime(
+  { date: "2026-06-01", fearGreed: 42, bofa: 6.6 },
+  postPeakHistory,
+  { level: "warning", cnnDelta3d: -12, bofaDelta2w: -0.4, cnnLevel: "warning", bofaLevel: "none" },
+)
+assert(unified?.label === "과열 해소 진행", unified?.label)
+assert(unified?.contextLines.includes("최근 과열권 이탈"), unified?.contextLines.join("|"))
+assert(unified?.contextLines.includes("사이클 후반 진입"), unified?.contextLines.join("|"))
+assert(!unified?.contextLines.some((l) => l.includes("후기 사이클")), "no duplicate regime label")
+const quick = buildQuickReadContext("사이클 후반", unified)
+assert(quick.includes("최근 과열권 이탈") && quick.includes("과열 해소 진행"), quick.join("|"))
 
 console.log("OK state engine", {
   unwind: `${unwind?.label} · ${unwind?.subtitles.join(" · ")}`,
