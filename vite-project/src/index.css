@@ -25558,6 +25558,77 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 }
 
+/* Market Timeline V1.6 */
+.yds-market-timeline {
+  margin: 0 0 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.55rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.45), rgba(15, 23, 42, 0.88));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-timeline__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.yds-market-timeline__title {
+  margin: 0;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.yds-market-timeline__meta {
+  margin: 0;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-market-timeline__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.yds-market-timeline__item {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr;
+  gap: 0.45rem;
+  align-items: start;
+}
+
+.yds-market-timeline__date {
+  margin: 0;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-market-timeline__event-title {
+  margin: 0;
+  font-size: clamp(0.75rem, 2.1vw, 0.88rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: #f1f5f9;
+}
+
+.yds-market-timeline__event-desc {
+  margin: 0.1rem 0 0;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
 /* Status Label Panel (legacy) */
 .yds-status-panel {
   margin: 0 0 0.5rem;
