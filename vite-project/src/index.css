@@ -25562,6 +25562,61 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-align: center;
 }
 
+/* Panic Distance V1.9 */
+.yds-panic-distance {
+  margin: 0 0 0.45rem;
+  padding: 0.5rem 0.55rem 0.55rem;
+  border-radius: 0.55rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.yds-panic-distance__tag {
+  margin: 0 0 0.2rem;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.yds-panic-distance__title {
+  margin: 0 0 0.25rem;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.yds-panic-distance__score {
+  margin: 0 0 0.4rem;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-panic-distance__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.32rem;
+}
+
+.yds-panic-distance__item {
+  font-size: clamp(0.88rem, 2.6vw, 1.02rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+}
+
+.yds-panic-distance__item--entered {
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
 .yds-market-hero__action {
   padding-top: 0.45rem;
   border-top: 1px solid rgba(148, 163, 184, 0.12);

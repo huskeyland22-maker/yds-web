@@ -9,6 +9,7 @@ import {
 } from "../../content/ydsStatusLabels.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
+import YdsPanicDistanceCard from "./YdsPanicDistanceCard.jsx"
 import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 
 /**
@@ -147,6 +148,8 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
           {headline.emoji} {headline.text}
         </p>
       ) : null}
+
+      <YdsPanicDistanceCard score={ydsScore} />
 
       <div className="yds-market-hero__action" aria-label="오늘의 행동">
         <h2 className="yds-market-hero__action-title">오늘의 행동</h2>
