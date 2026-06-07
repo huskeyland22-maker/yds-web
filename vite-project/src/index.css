@@ -25857,6 +25857,22 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+.yds-market-timeline__event-metrics {
+  margin: 0.08rem 0 0;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
+.yds-market-timeline__event-action {
+  margin: 0.12rem 0 0;
+  font-size: clamp(0.68rem, 2vw, 0.8rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: #e2e8f0;
+}
+
 /* Event Scorecard V1.9 */
 .yds-event-scorecard {
   margin: 0 0 0.65rem;

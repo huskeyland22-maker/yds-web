@@ -12,7 +12,7 @@ import {
 } from "../../content/ydsMarketEventHistoryStorage.js"
 
 /**
- * V1.6 Market Timeline — 최근 5~10개 주요 변화
+ * V1.8 시장 전환점 — 상태 → 수치 → 행동
  * @param {{ panicData?: object | null; historyRows?: object[]; limit?: number }} props
  */
 export default function YdsMarketTimelineSection({
@@ -51,30 +51,37 @@ export default function YdsMarketTimelineSection({
   if (!view.displayEvents.length) return null
 
   return (
-    <section className="yds-market-timeline" aria-label="최근 주요 변화">
+    <section className="yds-market-timeline" aria-label="시장 전환점">
       <div className="yds-market-timeline__head">
-        <h2 className="yds-market-timeline__title">최근 주요 변화</h2>
+        <h2 className="yds-market-timeline__title">시장 전환점</h2>
         <p className="yds-market-timeline__meta font-mono tabular-nums">
           {view.displayEvents.length} / {view.totalCount}
         </p>
       </div>
 
       <ol className="yds-market-timeline__list">
-        {view.displayEvents.map((ev) => (
-          <li key={`${ev.date}:${ev.type}`} className="yds-market-timeline__item">
-            <p className="yds-market-timeline__date font-mono tabular-nums">
-              {formatTimelineDateLabel(ev.date)}
-            </p>
-            <div className="yds-market-timeline__body">
-              <p className="yds-market-timeline__event-title">
-                {timelineEventEmoji(ev.type)} {ev.title}
+        {view.displayEvents.map((ev) => {
+          const metrics = ev.metrics || (ev.description !== ev.title ? ev.description : "")
+          const action = ev.action || ""
+          return (
+            <li key={`${ev.date}:${ev.type}`} className="yds-market-timeline__item">
+              <p className="yds-market-timeline__date font-mono tabular-nums">
+                {formatTimelineDateLabel(ev.date)}
               </p>
-              {ev.description && ev.description !== ev.title ? (
-                <p className="yds-market-timeline__event-desc">{ev.description}</p>
-              ) : null}
-            </div>
-          </li>
-        ))}
+              <div className="yds-market-timeline__body">
+                <p className="yds-market-timeline__event-title">
+                  {timelineEventEmoji(ev.type)} {ev.title}
+                </p>
+                {metrics ? (
+                  <p className="yds-market-timeline__event-metrics font-mono tabular-nums">
+                    {metrics}
+                  </p>
+                ) : null}
+                {action ? <p className="yds-market-timeline__event-action">{action}</p> : null}
+              </div>
+            </li>
+          )
+        })}
       </ol>
     </section>
   )

@@ -135,7 +135,7 @@ function detectMomentumEvents(panicData, historyRows) {
       metric: "cnn",
       level: "momentum",
       emoji: "🟠",
-      title: "투자심리 급랭",
+      title: "투자심리 급락",
       summary: "",
     })
   }

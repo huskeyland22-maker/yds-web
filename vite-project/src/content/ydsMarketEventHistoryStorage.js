@@ -33,7 +33,9 @@ export function normalizeEventHistoryEvents(raw) {
         type: String(row.type ?? ""),
         severity: row.severity === "high" || row.severity === "low" ? row.severity : "medium",
         title: String(row.title ?? ""),
-        description: String(row.description ?? ""),
+        metrics: String(row.metrics ?? ""),
+        action: String(row.action ?? row.description ?? ""),
+        description: String(row.description ?? row.action ?? ""),
       }
     })
     .filter((ev) => /^\d{4}-\d{2}-\d{2}$/.test(ev.date) && ev.type && ev.title)
