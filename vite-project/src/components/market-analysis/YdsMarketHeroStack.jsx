@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { resolveTodayActions } from "../../content/ydsActionGuide.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
-import { resolveOverheatLayer } from "../../content/ydsOverheatLayer.js"
+import { resolveOverheatCardView } from "../../content/ydsOverheatLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import {
   resolveMomentumPositionLabel,
@@ -24,7 +24,7 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
     if (!Number.isFinite(score)) return null
 
     const momentumData = resolveMomentumLayer(panicData, historyRows)
-    const overheat = resolveOverheatLayer(panicData)
+    const overheat = resolveOverheatCardView(panicData, historyRows, momentumData)
     const snapshot = resolveYdsStatusSnapshot(Math.round(score), momentumData)
     const momentum = resolveMomentumPositionLabel(momentumData)
     const actions = resolveTodayActions(Math.round(score), momentumData)
@@ -97,20 +97,17 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
           className="yds-market-hero__overheat-title"
           style={{ "--hero-color": overheat.color }}
         >
-          {overheat.emoji} {overheat.label}
+          {overheat.emoji} {overheat.title}
         </p>
-        <p className="yds-market-hero__overheat-summary">{overheat.summary}</p>
+        <p className="yds-market-hero__overheat-summary">{overheat.cause}</p>
         <p className="yds-market-hero__overheat-action">{overheat.action}</p>
-        <p className="yds-market-hero__overheat-metric font-mono tabular-nums">
-          CNN {Math.round(overheat.cnn)} · BofA {overheat.bofa.toFixed(1)}
-        </p>
       </article>
 
       <article
         className={[
           "yds-market-hero__momentum-card",
           momentumActive ? "yds-market-hero__momentum-card--active" : "",
-          momentum.tier === "riskOff" ? "yds-market-hero__momentum-card--risk" : "",
+          momentumData.level === "strong" ? "yds-market-hero__momentum-card--risk" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -119,9 +116,9 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
         <p className="yds-market-hero__layer-tag">Momentum · 단기 변화</p>
         <p
           className="yds-market-hero__momentum-title"
-          style={{ "--hero-color": momentum.color }}
+          style={{ "--hero-color": momentumData.level !== "none" ? "#f97316" : "#22c55e" }}
         >
-          {momentum.emoji} {momentum.title}
+          {momentumData.emoji} {momentumData.cardTitle}
         </p>
         <p className="yds-market-hero__momentum-metric font-mono tabular-nums">
           {momentumData.cnnDelta3d != null ? (
@@ -140,7 +137,8 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
             <span className="yds-market-hero__muted">CNN · BofA 데이터 수집 중</span>
           )}
         </p>
-        <p className="yds-market-hero__momentum-detail">{momentum.detail}</p>
+        <p className="yds-market-hero__momentum-cause">{momentumData.cardCause}</p>
+        <p className="yds-market-hero__momentum-action">{momentumData.cardAction}</p>
       </article>
 
       <YdsEventLayerCard

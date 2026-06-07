@@ -10,6 +10,9 @@
  *   score: number
  *   shortLabel: string
  *   emoji: string
+ *   cardTitle: string
+ *   cardCause: string
+ *   cardAction: string
  *   cnnDelta3d: number | null
  *   bofaDelta2w: number | null
  *   cnnLevel: MomentumLevel
@@ -74,6 +77,72 @@ function buildShortLabel(level, cnnLevel, bofaLevel) {
 }
 
 /**
+ * Hero Momentum 카드 — [상태] · [원인] · [행동]
+ * @param {{
+ *   level: MomentumLevel
+ *   cnnDelta3d: number | null
+ *   bofaDelta2w: number | null
+ *   cnnLevel: MomentumLevel
+ *   bofaLevel: MomentumLevel
+ * }} layer
+ */
+export function resolveMomentumCardCopy(layer) {
+  const { cnnDelta3d, cnnLevel, bofaLevel, level } = layer
+
+  if (level === "strong" || cnnLevel === "strong") {
+    return {
+      emoji: "🔴",
+      cardTitle: "급락 경고",
+      cardCause: "CNN 급락",
+      cardAction: "신규 진입 보류",
+    }
+  }
+
+  if (level === "warning" || cnnLevel === "warning" || (cnnDelta3d != null && cnnDelta3d <= -8)) {
+    return {
+      emoji: "🟠",
+      cardTitle: "둔화 진행",
+      cardCause: "CNN 하락",
+      cardAction: "관망 우선",
+    }
+  }
+
+  if (cnnDelta3d != null && cnnDelta3d >= 8) {
+    return {
+      emoji: "🟢",
+      cardTitle: "상승 강화",
+      cardCause: "CNN 상승",
+      cardAction: "매수세 유입",
+    }
+  }
+
+  if (cnnDelta3d == null || Math.abs(cnnDelta3d) < 3) {
+    return {
+      emoji: "🟢",
+      cardTitle: "단기 안정",
+      cardCause: "변화 없음",
+      cardAction: "방향성 확인 중",
+    }
+  }
+
+  if (cnnDelta3d > 0) {
+    return {
+      emoji: "🟢",
+      cardTitle: "상승 강화",
+      cardCause: "CNN 상승",
+      cardAction: "매수세 관찰",
+    }
+  }
+
+  return {
+    emoji: "🟠",
+    cardTitle: "둔화 진행",
+    cardCause: "CNN 하락",
+    cardAction: "관망 우선",
+  }
+}
+
+/**
  * @param {{
  *   cnnDelta: number | null
  *   bofaDelta: number | null
@@ -135,6 +204,7 @@ export function resolveMomentumLayer(panicData, historyRows = [], opts = {}) {
   else if (bofaLevel === "warning") triggers.push("BofA 2주 Δ ≤ −1.0")
 
   const shortLabel = buildShortLabel(level, cnnLevel, bofaLevel)
+  const card = resolveMomentumCardCopy({ level, cnnDelta3d, bofaDelta2w, cnnLevel, bofaLevel })
   const explainLines = buildExplainLines({
     cnnDelta: cnnDelta3d,
     bofaDelta: bofaDelta2w,
@@ -147,7 +217,10 @@ export function resolveMomentumLayer(panicData, historyRows = [], opts = {}) {
     level,
     score: level === "strong" ? 2 : level === "warning" ? 1 : 0,
     shortLabel,
-    emoji: level === "none" ? "🟢" : level === "strong" ? "⚠️" : "⚠️",
+    emoji: card.emoji,
+    cardTitle: card.cardTitle,
+    cardCause: card.cardCause,
+    cardAction: card.cardAction,
     cnnDelta3d,
     bofaDelta2w,
     cnnLevel,

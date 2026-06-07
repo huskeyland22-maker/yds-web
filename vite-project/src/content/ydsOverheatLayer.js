@@ -1,18 +1,23 @@
 /**
  * Overheat Layer V1.4 — 과열 대응 신호 (표시·행동 전용 · 점수 무관)
  * 패닉 = 언제 사는가 · Overheat = 언제 덜어내는가
+ * Hero 카드: [상태] · [원인] · [행동]
  */
 
-/** @typedef {"normal"|"cashPrep"|"partialCash"|"boundary"} OverheatTierId */
+import { resolveMarketState } from "./ydsStateEngine.js"
+
+/** @typedef {"normal"|"cashPrep"|"partialCash"|"boundary"|"unwind"} OverheatTierId */
 
 /**
  * @typedef {{
  *   id: OverheatTierId
  *   emoji: string
- *   label: string
- *   color: string
- *   summary: string
+ *   title: string
+ *   cause: string
  *   action: string
+ *   label: string
+ *   summary: string
+ *   color: string
  *   cnn: number | null
  *   bofa: number | null
  *   level: "none"|"watch"|"elevated"|"critical"
@@ -26,41 +31,52 @@ export const OVERHEAT_RULES = [
   { id: "cashPrep", cnnAbove: 60, bofaAbove: 6, level: "watch" },
 ]
 
-/** @type {Record<OverheatTierId, Omit<OverheatLayerView, "id"|"cnn"|"bofa"|"level">> & { id: OverheatTierId }} */
-export const OVERHEAT_TIER_COPY = {
+/** @type {Record<"normal"|"cashPrep"|"partialCash"|"boundary", { emoji: string; color: string; title: string; cause: string; action: string }>} */
+export const OVERHEAT_CARD_COPY = {
   normal: {
-    id: "normal",
     emoji: "🟢",
-    label: "정상",
     color: "#22c55e",
-    summary: "과열 신호 없음",
-    action: "보유 유지",
+    title: "보유 구간",
+    cause: "과열 신호 없음",
+    action: "기존 포지션 유지",
   },
   cashPrep: {
-    id: "cashPrep",
     emoji: "🟡",
-    label: "현금 준비",
     color: "#eab308",
-    summary: "과열권 접근 중",
-    action: "추격매수 금지",
-  },
-  partialCash: {
-    id: "partialCash",
-    emoji: "🟠",
-    label: "현금 확보",
-    color: "#f97316",
-    summary: "과열권 진입",
+    title: "현금 준비",
+    cause: "과열권 접근",
     action: "신규 진입 축소",
   },
+  partialCash: {
+    emoji: "🟠",
+    color: "#f97316",
+    title: "차익실현 구간",
+    cause: "과열 신호 발생",
+    action: "현금 확보 우선",
+  },
   boundary: {
-    id: "boundary",
     emoji: "🔴",
-    label: "최고 과열",
     color: "#ef4444",
-    summary: "극단적 탐욕 구간",
-    action: "적극적 현금 확보",
+    title: "차익실현 구간",
+    cause: "과열 신호 발생",
+    action: "현금 확보 우선",
   },
 }
+
+/** @deprecated timeline — tier id 라벨 */
+export const OVERHEAT_TIER_COPY = Object.fromEntries(
+  Object.entries(OVERHEAT_CARD_COPY).map(([id, copy]) => [
+    id,
+    {
+      id,
+      emoji: copy.emoji,
+      label: copy.title,
+      color: copy.color,
+      summary: copy.cause,
+      action: copy.action,
+    },
+  ]),
+)
 
 function toNum(v) {
   const n = Number(v)
@@ -82,6 +98,27 @@ function resolveOverheatTierId(cnn, bofa) {
 }
 
 /**
+ * @param {"normal"|"cashPrep"|"partialCash"|"boundary"} tierId
+ * @param {{ cnn: number; bofa: number; level: OverheatLayerView["level"] }} metrics
+ */
+function buildOverheatView(tierId, metrics) {
+  const copy = OVERHEAT_CARD_COPY[tierId]
+  return {
+    id: tierId,
+    emoji: copy.emoji,
+    title: copy.title,
+    cause: copy.cause,
+    action: copy.action,
+    label: copy.title,
+    summary: copy.cause,
+    color: copy.color,
+    cnn: metrics.cnn,
+    bofa: metrics.bofa,
+    level: metrics.level,
+  }
+}
+
+/**
  * @param {object | null | undefined} panicData
  * @returns {OverheatLayerView | null}
  */
@@ -92,18 +129,42 @@ export function resolveOverheatLayer(panicData) {
   if (cnn == null || bofa == null) return null
 
   const tierId = resolveOverheatTierId(cnn, bofa)
-  const copy = OVERHEAT_TIER_COPY[tierId]
   const rule = OVERHEAT_RULES.find((r) => r.id === tierId)
 
-  return {
-    id: tierId,
-    emoji: copy.emoji,
-    label: copy.label,
-    color: copy.color,
-    summary: copy.summary,
-    action: copy.action,
+  return buildOverheatView(tierId, {
     cnn,
     bofa,
     level: rule?.level ?? "none",
+  })
+}
+
+/**
+ * Hero Overheat 카드 — 과열 해소(unwind) 등 맥락 반영
+ * @param {object | null | undefined} panicData
+ * @param {object[]} [historyRows]
+ * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} [momentum]
+ */
+export function resolveOverheatCardView(panicData, historyRows = [], momentum = null) {
+  const base = resolveOverheatLayer(panicData)
+  if (!base) return null
+
+  if (base.id === "normal" && historyRows.length) {
+    const regime = resolveMarketState(panicData, historyRows, momentum)
+    if (regime?.id === "overheatUnwind") {
+      return {
+        ...base,
+        id: "unwind",
+        emoji: "🟠",
+        color: "#f97316",
+        title: "과열 해소 진행",
+        cause: "최근 과열권 이탈",
+        action: "추격 매수 금지",
+        label: "과열 해소 진행",
+        summary: "최근 과열권 이탈",
+        level: "elevated",
+      }
+    }
   }
+
+  return base
 }

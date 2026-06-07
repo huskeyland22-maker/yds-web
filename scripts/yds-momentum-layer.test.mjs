@@ -24,8 +24,18 @@ assert(view.cnnLevel === "warning", `expected CNN warning, got ${view.cnnLevel} 
 assert(view.shortLabel.includes("투자심리"), "label mentions sentiment")
 assert(view.explainLines.length >= 2, "has explain lines")
 
+const calm = resolveMomentumLayer({ fearGreed: 50, bofa: 6.0 }, [
+  { date: "2026-06-01", fearGreed: 50, bofa: 6.0 },
+  { date: "2026-06-03", fearGreed: 50, bofa: 6.0 },
+])
+assert(calm.cardTitle === "단기 안정", calm.cardTitle)
+assert(calm.cardCause === "변화 없음", calm.cardCause)
+assert(calm.cardAction === "방향성 확인 중", calm.cardAction)
+assert(calm.cardAction !== calm.cardTitle, "action must not duplicate title")
+
 console.log("OK momentum layer", {
   cnnDelta3d: view.cnnDelta3d,
   cnnLevel: view.cnnLevel,
   shortLabel: view.shortLabel,
+  calmAction: calm.cardAction,
 })
