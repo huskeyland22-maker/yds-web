@@ -66,34 +66,44 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
         </article>
       </div>
 
-      <article className="yds-market-hero__current-market" aria-label="현재 시장">
-        <p className="yds-market-hero__layer-tag">현재 시장</p>
-        <p
-          className="yds-market-hero__current-market-label"
-          style={{ "--hero-color": currentMarket.color }}
-        >
-          {currentMarket.emoji} {currentMarket.label}
-        </p>
-        <div className="yds-market-hero__current-market-metrics font-mono tabular-nums">
-          <p className="yds-market-hero__current-market-metric">CNN {Math.round(currentMarket.cnn ?? 0)}</p>
-          <p className="yds-market-hero__current-market-metric">
+      <div className="yds-market-hero__dual-row">
+        <article className="yds-market-hero__current-market" aria-label="현재 시장">
+          <p className="yds-market-hero__layer-tag">현재 시장</p>
+          <p
+            className="yds-market-hero__current-market-label"
+            style={{ "--hero-color": currentMarket.color }}
+          >
+            {currentMarket.emoji} {currentMarket.label}
+          </p>
+          <p className="yds-market-hero__current-market-metrics font-mono tabular-nums">
+            CNN {Math.round(currentMarket.cnn ?? 0)}
+            <span className="yds-market-hero__current-market-metric-sep"> · </span>
             BofA {(currentMarket.bofa ?? 0).toFixed(1)}
           </p>
-        </div>
-        {currentMarket.cause ? (
-          <p className="yds-market-hero__current-market-cause">{currentMarket.cause}</p>
-        ) : null}
-      </article>
+          {currentMarket.cause ? (
+            <p className="yds-market-hero__current-market-cause">{currentMarket.cause}</p>
+          ) : null}
+        </article>
 
-      <div className="yds-market-hero__action" aria-label="오늘 행동">
-        <h2 className="yds-market-hero__action-title">오늘 행동</h2>
-        <ul className="yds-market-hero__action-list">
-          {actions.actions.map((item) => (
-            <li key={item} className="yds-market-hero__action-item">
-              ✓ {item}
-            </li>
-          ))}
-        </ul>
+        <article className="yds-market-hero__action" aria-label="오늘의 행동">
+          <p className="yds-market-hero__layer-tag">오늘의 행동</p>
+          <p
+            className="yds-market-hero__action-band"
+            style={{ "--hero-color": actions.band.color }}
+          >
+            {actions.band.emoji} {actions.band.label}
+          </p>
+          <ul className="yds-market-hero__action-list">
+            {actions.actions.map((item) => (
+              <li key={item} className="yds-market-hero__action-item">
+                ✓ {item}
+              </li>
+            ))}
+          </ul>
+          {actions.momentumHint ? (
+            <p className="yds-market-hero__action-priority">{actions.momentumHint}</p>
+          ) : null}
+        </article>
       </div>
     </section>
   )
