@@ -7,11 +7,15 @@ import {
 } from "../../content/ydsCyclePhilosophy.js"
 
 /**
- * 시장분석 최상단 — YDS 철학 헤더 (Hero 바로 위)
+ * 시장분석 최상단 — YDS 철학 헤더
+ * @param {{ className?: string }} props
  */
-export default function YdsBrandHero() {
+export default function YdsBrandHero({ className = "" }) {
   return (
-    <section className="yds-philosophy-header" aria-label="YDS 철학">
+    <section
+      className={["yds-philosophy-header", className].filter(Boolean).join(" ")}
+      aria-label="YDS 철학"
+    >
       <h2 className="yds-philosophy-header__title">{YDS_PHILOSOPHY_HEADER_TITLE}</h2>
 
       <div className="yds-philosophy-header__body">

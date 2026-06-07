@@ -15,11 +15,12 @@ const COLLAPSED_VISIBLE = 2
 
 /**
  * V1.8 시장 전환점 — 기본 2건 · 더보기/접기
- * @param {{ panicData?: object | null; historyRows?: object[] }} props
+ * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
  */
 export default function YdsMarketTimelineSection({
   panicData = null,
   historyRows = [],
+  className = "",
 }) {
   const [storedEvents, setStoredEvents] = useState(() => loadStoredEventHistory())
   const [seedLoaded, setSeedLoaded] = useState(false)
@@ -61,6 +62,7 @@ export default function YdsMarketTimelineSection({
       className={[
         "yds-market-timeline",
         expanded ? "yds-market-timeline--expanded" : "yds-market-timeline--collapsed",
+        className,
       ]
         .filter(Boolean)
         .join(" ")}

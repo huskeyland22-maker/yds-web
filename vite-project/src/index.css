@@ -26914,6 +26914,52 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #93c5fd;
 }
 
+/* Mobile market desk — judgment-first · hide duplicate layers */
+@media (max-width: 1023px) {
+  .yds-market-desk {
+    gap: 0.55rem;
+  }
+
+  .yds-market-desk__stream {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .yds-market-hero--desk {
+    display: contents;
+  }
+
+  .yds-market-hero__slot--judgment {
+    order: 1;
+  }
+
+  .yds-market-desk__slot--timeline {
+    order: 2;
+  }
+
+  .yds-market-desk__slot--philosophy {
+    order: 3;
+  }
+
+  .yds-market-hero__slot--scores {
+    order: 4;
+  }
+
+  .yds-market-desk__slot--indices {
+    order: 5;
+  }
+
+  .yds-market-hero__slot--meta {
+    order: 6;
+  }
+
+  .yds-dual-cycle-hero,
+  .yds-event-scorecard {
+    display: none !important;
+  }
+}
+
 @media (max-width: 480px) {
   .yds-dual-cycle-hero__grid {
     grid-template-columns: 1fr;

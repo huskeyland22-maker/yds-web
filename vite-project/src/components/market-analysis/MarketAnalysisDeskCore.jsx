@@ -1,6 +1,4 @@
 import { useMemo } from "react"
-import { buildAiReportMarketStatus } from "../../utils/buildAiReportMarketStatus.js"
-import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
@@ -42,13 +40,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
 
-  const aiReportStatus = useMemo(
-    () => buildAiReportMarketStatus(panicData, safeHistory),
-    [panicData, safeHistory],
-  )
-
-  const { byType: scorecardByType, rows: scorecardRows, loading: scorecardLoading } =
-    useEventScorecard(safeHistory, panicData)
+  const { rows: scorecardRows, loading: scorecardLoading } = useEventScorecard(safeHistory, panicData)
 
   if (!panicData && safeHistory.length === 0) {
     return null
@@ -62,25 +54,31 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           cycleSource={cycleDataSource}
           bondSource="FRED"
         />
-        <div className="yds-market-desk__ai-status lg:hidden">
-          <AiReportMarketStatusBlock status={aiReportStatus} />
-        </div>
       </div>
 
-      <YdsBrandHero />
-      <YdsMarketTimelineSection panicData={panicData} historyRows={safeHistory} />
-      <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
-      <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
-      <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
+      <div className="yds-market-desk__stream">
+        <YdsBrandHero className="yds-market-desk__slot yds-market-desk__slot--philosophy" />
+        <YdsMarketTimelineSection
+          className="yds-market-desk__slot yds-market-desk__slot--timeline"
+          panicData={panicData}
+          historyRows={safeHistory}
+        />
+        <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
+        <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
+        <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
 
-      <section className="yds-market-desk__block" aria-labelledby="market-block-indices">
-        <h2 id="market-block-indices" className="yds-market-desk__block-label">
-          핵심지수
-        </h2>
-        <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
-      </section>
+        <section
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
+          aria-labelledby="market-block-indices"
+        >
+          <h2 id="market-block-indices" className="yds-market-desk__block-label">
+            핵심지수
+          </h2>
+          <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
+        </section>
+      </div>
 
-      <section className="yds-market-desk__block" aria-labelledby="market-block-history">
+      <section className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--history" aria-labelledby="market-block-history">
         <h2 id="market-block-history" className="yds-market-desk__block-label">
           {YDS_LABEL_PANIC_HISTORY}
         </h2>
@@ -99,7 +97,10 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         </SectionErrorBoundary>
       </section>
 
-      <section className="yds-market-desk__block" aria-labelledby="market-block-actions">
+      <section
+        className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--actions"
+        aria-labelledby="market-block-actions"
+      >
         <h2 id="market-block-actions" className="yds-market-desk__block-label">
           YDS 판단
         </h2>

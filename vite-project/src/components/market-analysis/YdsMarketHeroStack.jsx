@@ -8,9 +8,9 @@ import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 
 /**
  * V1.9 Hero — 사이클·패닉 → 현재 시장 → 오늘 행동 (5초 판단)
- * @param {{ panicData?: object | null; historyRows?: object[] }} props
+ * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
  */
-export default function YdsMarketHeroStack({ panicData = null, historyRows = [] }) {
+export default function YdsMarketHeroStack({ panicData = null, historyRows = [], className = "" }) {
   const view = useMemo(() => {
     if (!panicData) return null
     const score = getFinalScore(panicData)
@@ -30,13 +30,16 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
   const { cycle, panic, ydsScore, currentMarket, actions } = view
 
   return (
-    <section className="yds-market-hero" aria-label="YDS 시장 Hero">
-      <div className="yds-market-hero__header">
+    <section
+      className={["yds-market-hero", "yds-market-hero--desk", className].filter(Boolean).join(" ")}
+      aria-label="YDS 시장 Hero"
+    >
+      <div className="yds-market-hero__header yds-market-hero__slot yds-market-hero__slot--meta">
         <span className="yds-market-hero__header-spacer" aria-hidden />
         <YdsDataSourceBadge />
       </div>
 
-      <div className="yds-market-hero__long-term">
+      <div className="yds-market-hero__long-term yds-market-hero__slot yds-market-hero__slot--scores">
         <article
           className="yds-market-hero__score-card"
           aria-label={`사이클 위치 ${cycle.score}`}
@@ -66,7 +69,7 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
         </article>
       </div>
 
-      <div className="yds-market-hero__dual-row">
+      <div className="yds-market-hero__dual-row yds-market-hero__slot yds-market-hero__slot--judgment">
         <article className="yds-market-hero__current-market" aria-label="현재 시장">
           <p className="yds-market-hero__layer-tag">현재 시장</p>
           <p
