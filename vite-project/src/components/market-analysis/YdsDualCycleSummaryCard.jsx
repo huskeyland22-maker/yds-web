@@ -14,7 +14,7 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
     if (!Number.isFinite(score)) return null
 
     const momentum = resolveMomentumLayer(panicData, historyRows)
-    const actions = resolveTodayActions(Math.round(score), momentum)
+    const actions = resolveTodayActions(Math.round(score), momentum, panicData)
     if (!actions) return null
 
     return { actions }

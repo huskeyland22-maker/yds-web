@@ -19,7 +19,7 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [] 
     const momentumData = resolveMomentumLayer(panicData, historyRows)
     const currentMarket = resolveCurrentMarketView(panicData, historyRows)
     const snapshot = resolveYdsStatusSnapshot(Math.round(score), momentumData)
-    const actions = resolveTodayActions(Math.round(score), momentumData)
+    const actions = resolveTodayActions(Math.round(score), momentumData, panicData)
     if (!snapshot.cycle || !snapshot.panic || !actions || !currentMarket) return null
 
     return { ...snapshot, currentMarket, actions }

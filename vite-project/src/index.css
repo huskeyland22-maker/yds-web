@@ -21473,6 +21473,26 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: rgba(226, 232, 240, 0.95);
 }
 
+.yds-allocation-center__philosophy {
+  margin-top: 6px;
+  padding: 5px 6px;
+  border-radius: 7px;
+  background: rgba(120, 53, 15, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+}
+
+.yds-allocation-center__philosophy-line {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #fcd34d;
+}
+
+.yds-allocation-center__philosophy-line + .yds-allocation-center__philosophy-line {
+  margin-top: 3px;
+}
+
 @media (max-width: 768px) {
   .panic-validation-yds-distribution {
     grid-template-columns: 1fr;

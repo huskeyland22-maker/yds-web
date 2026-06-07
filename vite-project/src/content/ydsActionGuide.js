@@ -4,6 +4,10 @@
  */
 
 import { resolvePanicStatusLabel } from "./ydsStatusLabels.js"
+import {
+  formatOverheatActionLines,
+  resolveEffectiveMarketAllocation,
+} from "./ydsOverheatAllocation.js"
 import { resolveMacroStageAllocation } from "../trading-zone/macroStageAllocation.js"
 
 /** @typedef {typeof PANIC_ACTION_GUIDE[keyof typeof PANIC_ACTION_GUIDE]["id"]} PanicActionBandId */
@@ -96,17 +100,24 @@ function resolveMomentumActionHint(momentum) {
 /**
  * @param {number | null | undefined} ydsScore
  * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} [momentum]
+ * @param {object | null | undefined} [panicData]
  */
-export function resolveTodayActions(ydsScore, momentum) {
+export function resolveTodayActions(ydsScore, momentum, panicData = null) {
   const panic = resolvePanicStatusLabel(ydsScore)
   if (!panic?.id) return null
 
   const guide = PANIC_ACTION_GUIDE[panic.id]
   if (!guide) return null
 
+  const effective = panicData ? resolveEffectiveMarketAllocation(panicData) : null
   const alloc = resolveMacroStageAllocation(guide.macroId)
-  const cashPct = alloc?.cashPct ?? null
-  const actions = guide.actions(cashPct)
+  const cashPct = effective?.cashPct ?? alloc?.cashPct ?? null
+
+  let actions = guide.actions(cashPct)
+  if (effective?.mode === "overheat" && effective.tier) {
+    actions = formatOverheatActionLines(effective.tier, cashPct)
+  }
+
   const momentumHint = resolveMomentumActionHint(momentum)
 
   return {
