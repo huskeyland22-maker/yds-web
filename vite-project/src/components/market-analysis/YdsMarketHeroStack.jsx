@@ -10,6 +10,7 @@ import {
 import { getFinalScore } from "../../utils/tradingScores.js"
 import YdsEventLayerCard from "./YdsEventLayerCard.jsx"
 import YdsPanicDistanceCard from "./YdsPanicDistanceCard.jsx"
+import YdsRegimeLevelCard from "./YdsRegimeLevelCard.jsx"
 import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 
 /**
@@ -74,6 +75,12 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
           </p>
         </article>
       </div>
+
+      <YdsRegimeLevelCard
+        panicData={panicData}
+        historyRows={historyRows}
+        momentumData={momentumData}
+      />
 
       <article
         className={[

@@ -10,6 +10,7 @@ import { getFinalScore } from "../../utils/tradingScores.js"
 import { resolveYdsStageNavigation } from "../../utils/ydsStageNavigation.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
+import { resolveMarketLevelRegime } from "../../content/ydsRegimeLayer.js"
 import YdsDualCyclePositionNav from "./YdsDualCyclePositionNav.jsx"
 import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
@@ -49,6 +50,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
       fearStageLabel: fearStage.label,
     })
     const eventLayer = resolveEventLayer(panicData, historyRows)
+    const levelRegime = resolveMarketLevelRegime(panicData, historyRows, momentum)
 
     return {
       score: rounded,
@@ -61,6 +63,7 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
       marketNav,
       momentum,
       eventLayer,
+      levelRegime,
     }
   }, [panicData, historyRows])
 
@@ -155,6 +158,16 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
       </div>
 
       <YdsLayerStackIndicator
+        levelLabel={
+          model.levelRegime?.level
+            ? `${model.levelRegime.level.emoji} ${model.levelRegime.level.label}`
+            : null
+        }
+        regimeLabel={
+          model.levelRegime?.regime
+            ? `${model.levelRegime.regime.emoji} ${model.levelRegime.regime.label}`
+            : null
+        }
         ydsScore={model.score}
         momentumLevel={model.momentum.level}
         eventLevel={model.eventLayer.level}

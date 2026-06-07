@@ -25617,6 +25617,79 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-weight: 700;
 }
 
+/* Regime Layer V2.0 — Level + Regime */
+.yds-regime-level {
+  margin: 0 0 0.55rem;
+  padding: 0.55rem 0.6rem 0.6rem;
+  border-radius: 0.55rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.94));
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.yds-regime-level__tag {
+  margin: 0 0 0.4rem;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.yds-regime-level__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+@media (max-width: 420px) {
+  .yds-regime-level__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.yds-regime-level__block {
+  padding: 0.4rem 0.45rem;
+  border-radius: 0.45rem;
+  background: rgba(2, 6, 23, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-regime-level__block--regime {
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+.yds-regime-level__label {
+  margin: 0 0 0.2rem;
+  font-size: clamp(0.52rem, 1.5vw, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #64748b;
+}
+
+.yds-regime-level__value {
+  margin: 0 0 0.15rem;
+  font-size: clamp(0.88rem, 2.6vw, 1.02rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--regime-color, #f1f5f9);
+  letter-spacing: -0.01em;
+}
+
+.yds-regime-level__metric {
+  margin: 0;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-regime-level__summary {
+  margin: 0;
+  font-size: clamp(0.68rem, 2vw, 0.8rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
 .yds-market-hero__action {
   padding-top: 0.45rem;
   border-top: 1px solid rgba(148, 163, 184, 0.12);

@@ -1,12 +1,16 @@
 /**
- * 3계층 Layer Stack — YDS Score → Momentum → Event (표시 전용)
+ * 4계층 Layer Stack — Level → Momentum → Regime → Event (표시 전용)
  * @param {{
+ *   levelLabel?: string | null
+ *   regimeLabel?: string | null
  *   ydsScore?: number | null
  *   momentumLevel?: string
  *   eventLevel?: string
  * }} props
  */
 export default function YdsLayerStackIndicator({
+  levelLabel = null,
+  regimeLabel = null,
   ydsScore = null,
   momentumLevel = "none",
   eventLevel = "none",
@@ -15,11 +19,11 @@ export default function YdsLayerStackIndicator({
   const eventActive = eventLevel !== "none"
 
   return (
-    <div className="yds-layer-stack" aria-label="YDS 3계층 분석 스택">
+    <div className="yds-layer-stack" aria-label="YDS 4계층 분석 스택">
       <div className="yds-layer-stack__row yds-layer-stack__row--base">
-        <span className="yds-layer-stack__tier">① YDS Score</span>
-        <span className="yds-layer-stack__state font-mono tabular-nums">
-          {ydsScore != null ? `${ydsScore} · 장기` : "—"}
+        <span className="yds-layer-stack__tier">① Level</span>
+        <span className="yds-layer-stack__state">
+          {levelLabel ?? (ydsScore != null ? `${ydsScore} · 장기` : "—")}
         </span>
       </div>
       <div
@@ -35,6 +39,10 @@ export default function YdsLayerStackIndicator({
           {momentumActive ? "⚠️ 단기 변화" : "🟢 안정"}
         </span>
       </div>
+      <div className="yds-layer-stack__row">
+        <span className="yds-layer-stack__tier">③ Regime</span>
+        <span className="yds-layer-stack__state">{regimeLabel ?? "—"}</span>
+      </div>
       <div
         className={[
           "yds-layer-stack__row",
@@ -43,7 +51,7 @@ export default function YdsLayerStackIndicator({
           .filter(Boolean)
           .join(" ")}
       >
-        <span className="yds-layer-stack__tier">③ Event</span>
+        <span className="yds-layer-stack__tier">④ Event</span>
         <span className="yds-layer-stack__state">
           {eventActive ? "📢 시장 이벤트" : "—"}
         </span>
