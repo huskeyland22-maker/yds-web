@@ -1,0 +1,470 @@
+/* YDS Phase 2-1 — 종목추천 플랫폼 (시장분석 CSS와 분리) */
+
+.yds-spick-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.yds-spick-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.yds-spick-page__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-spick-page__title {
+  margin: 0;
+  font-size: clamp(1.2rem, 4vw, 1.45rem);
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-spick-page__sub {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.1vw, 0.84rem);
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-spick-page__sub a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.yds-spick-platform {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.yds-spick-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.yds-spick-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.65);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.yds-spick-toolbar__btn--active {
+  border-color: rgba(251, 191, 36, 0.45);
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.yds-spick-toolbar__count {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+.yds-spick-section__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(0.95rem, 2.8vw, 1.08rem);
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-spick-top3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.yds-spick-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 7rem;
+  padding: 0.6rem 0.65rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.78);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.yds-spick-card:hover {
+  border-color: rgba(96, 165, 250, 0.35);
+  transform: translateY(-1px);
+}
+
+.yds-spick-card--top3 {
+  min-height: 9.5rem;
+  padding: 0.75rem 0.8rem;
+  border-color: rgba(251, 191, 36, 0.28);
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.88));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.yds-spick-card--compact {
+  min-height: 5.5rem;
+}
+
+.yds-spick-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.yds-spick-card__medal {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.yds-spick-card__rank {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yds-spick-fav {
+  margin-left: auto;
+  padding: 0.1rem 0.25rem;
+  border: 0;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.yds-spick-fav--active {
+  opacity: 1;
+}
+
+.yds-spick-card__stars {
+  margin: 0 0 0.15rem;
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fbbf24;
+}
+
+.yds-spick-card--top3 .yds-spick-card__stars {
+  font-size: clamp(0.72rem, 2.1vw, 0.82rem);
+}
+
+.yds-spick-card__name {
+  margin: 0;
+  font-size: clamp(0.82rem, 2.4vw, 0.96rem);
+  font-weight: 800;
+  line-height: 1.3;
+  color: #f1f5f9;
+}
+
+.yds-spick-card--top3 .yds-spick-card__name {
+  font-size: clamp(0.95rem, 2.8vw, 1.1rem);
+}
+
+.yds-spick-card__ticker {
+  margin: 0.1rem 0 0.2rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-spick-card__status {
+  margin: 0;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-spick-card__comment {
+  margin: 0.35rem 0 0;
+  font-size: clamp(0.65rem, 1.9vw, 0.75rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+.yds-spick-ranking {
+  border-radius: 0.55rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  overflow: hidden;
+}
+
+.yds-spick-ranking__head {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 4.5rem 3.5rem;
+  gap: 0.35rem;
+  padding: 0.4rem 0.55rem;
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-spick-ranking__th {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #64748b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.yds-spick-ranking__th--static {
+  cursor: default;
+}
+
+.yds-spick-ranking__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yds-spick-ranking__row {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.yds-spick-ranking__row:last-child {
+  border-bottom: 0;
+}
+
+.yds-spick-ranking__link {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 4.5rem 3.5rem;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.45rem 0.55rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.yds-spick-ranking__link:hover {
+  background: rgba(96, 165, 250, 0.06);
+}
+
+.yds-spick-ranking__rank {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.yds-spick-ranking__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.yds-spick-ranking__name strong {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-spick-ranking__ticker {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-spick-ranking__status {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-spick-ranking__score {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #93c5fd;
+  text-align: right;
+}
+
+.yds-spick-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.yds-spick-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.yds-spick-tabs__btn {
+  flex-shrink: 0;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.55);
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 700;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.yds-spick-tabs__btn--active {
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #e2e8f0;
+  background: rgba(96, 165, 250, 0.12);
+}
+
+.yds-spick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.yds-spick-grid--all {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yds-spick-empty {
+  margin: 0;
+  padding: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+}
+
+.yds-spick-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.yds-spick-detail__back {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.yds-spick-detail__hero {
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.78);
+}
+
+.yds-spick-detail__head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.yds-spick-detail__title {
+  margin: 0;
+  font-size: clamp(1.1rem, 3.5vw, 1.35rem);
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-spick-detail__ticker {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.yds-spick-detail__stars {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.yds-spick-detail__status {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-spick-detail__score {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #93c5fd;
+}
+
+.yds-spick-detail__comment {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-spick-detail__future {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.55rem;
+  border: 1px dashed rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-spick-detail__future-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-spick-detail__future-list {
+  margin: 0;
+  padding: 0 0 0 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.yds-spick-detail__future-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+@media (max-width: 720px) {
+  .yds-spick-top3 {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-spick-ranking__head,
+  .yds-spick-ranking__link {
+    grid-template-columns: 2rem 1fr 3.8rem 2.8rem;
+  }
+
+  .yds-spick-grid,
+  .yds-spick-grid--all {
+    grid-template-columns: 1fr;
+  }
+}

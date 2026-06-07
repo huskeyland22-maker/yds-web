@@ -33,6 +33,7 @@ import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import StockRecommendationPage from "./pages/StockRecommendationPage.jsx"
+import StockPickDetailPage from "./pages/StockPickDetailPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
 import GlossaryPage from "./pages/GlossaryPage.jsx"
 import YdsIntroPage from "./pages/YdsIntroPage.jsx"
@@ -1372,6 +1373,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="AI 리포트">
                   <AiDailyReportPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/stock-picks/:ticker"
+              element={
+                <SectionErrorBoundary label="종목 상세">
+                  <StockPickDetailPage />
                 </SectionErrorBoundary>
               }
             />

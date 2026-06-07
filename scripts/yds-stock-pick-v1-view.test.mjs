@@ -1,30 +1,38 @@
 /**
- * Stock pick V1 UI smoke test — node scripts/yds-stock-pick-v1-view.test.mjs
+ * Stock pick platform smoke test — node scripts/yds-stock-pick-v1-view.test.mjs
  */
 import {
-  resolveStockPickV1View,
-  STOCK_PICK_V1_STATUS,
-  STOCK_PICK_SECTOR_GROUPS,
-} from "../vite-project/src/content/ydsStockPickV1View.js"
+  getStockPickUniverse,
+  getTop3Stocks,
+  getRankingStocks,
+  filterBySector,
+  getStockPickByTicker,
+  STOCK_PICK_STATUS,
+} from "../vite-project/src/content/ydsStockPickModel.js"
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg)
 }
 
-const view = resolveStockPickV1View()
-assert(view != null, "view required")
-assert(view.starGroups.length === 3, `star groups ${view.starGroups.length}`)
-assert(view.sectorGroups.length === STOCK_PICK_SECTOR_GROUPS.length, "sectors")
+const all = getStockPickUniverse()
+assert(all.length === 20, `universe ${all.length}`)
 
-const tier5 = view.starGroups.find((g) => g.tier === 5)
-assert(tier5?.picks.length === 3, "tier5 count")
-assert(tier5.picks.every((p) => p.stars === "★★★★★"), "tier5 stars")
-assert(tier5.picks[0].status.label.length > 0, "status label")
+const top3 = getTop3Stocks(all)
+assert(top3.length === 3, "top3")
+assert(top3[0].ticker === "NVDA", "nvda #1")
 
-assert(STOCK_PICK_V1_STATUS.trend.label === "추세", "short trend label")
-assert(view.sectorGroups.some((s) => s.label === "전력"), "power sector")
+const ranking = getRankingStocks(all, 5)
+assert(ranking.length === 5, "ranking5")
 
-console.log("OK stock pick v1 ui", {
-  tiers: view.starGroups.map((g) => `${g.stars} ${g.picks.map((p) => p.name).join(", ")}`),
-  sectors: view.sectorGroups.map((s) => `${s.label}(${s.picks.length})`),
+const ai = filterBySector(all, "ai")
+assert(ai.length >= 5, `ai sector ${ai.length}`)
+
+const nvda = getStockPickByTicker("NVDA")
+assert(nvda?.comment.length > 0, "comment")
+assert(STOCK_PICK_STATUS.trend.label === "추세", "status label")
+
+console.log("OK stock pick platform", {
+  total: all.length,
+  top3: top3.map((s) => s.name),
+  ranking: ranking.map((s) => `${s.rank} ${s.name} ${s.score}`),
 })

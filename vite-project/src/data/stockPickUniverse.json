@@ -1,0 +1,26 @@
+{
+  "version": "phase-2-1",
+  "updatedAt": "2026-06-08",
+  "stocks": [
+    { "ticker": "NVDA", "name": "엔비디아", "nameEn": "NVIDIA", "sector": "ai", "country": "US", "status": "trend", "rating": 5, "score": 92, "rank": 1, "comment": "AI 대형주 최상위 추세" },
+    { "ticker": "AVGO", "name": "브로드컴", "nameEn": "Broadcom", "sector": "semi", "country": "US", "status": "trend", "rating": 5, "score": 89, "rank": 2, "comment": "AI·반도체 인프라 핵심" },
+    { "ticker": "META", "name": "메타", "nameEn": "Meta", "sector": "ai", "country": "US", "status": "interest", "rating": 5, "score": 86, "rank": 3, "comment": "AI 투자 확대 · 광고 회복" },
+    { "ticker": "TSM", "name": "TSMC", "nameEn": "TSMC", "sector": "semi", "country": "US", "status": "interest", "rating": 4, "score": 84, "rank": 4, "comment": "파운드리 수요 견조" },
+    { "ticker": "GEV", "name": "GE Vernova", "nameEn": "GE Vernova", "sector": "power", "country": "US", "status": "trend", "rating": 4, "score": 82, "rank": 5, "comment": "전력·그리드 인프라 수혜" },
+    { "ticker": "PLTR", "name": "팔란티어", "nameEn": "Palantir", "sector": "ai", "country": "US", "status": "dip", "rating": 4, "score": 80, "rank": 6, "comment": "AI 소프트웨어 · 변동성 주의" },
+    { "ticker": "NFLX", "name": "넷플릭스", "nameEn": "Netflix", "sector": "ai", "country": "US", "status": "interest", "rating": 4, "score": 78, "rank": 7, "comment": "콘텐츠·AI 추천 강화" },
+    { "ticker": "AMD", "name": "AMD", "nameEn": "AMD", "sector": "semi", "country": "US", "status": "dip", "rating": 4, "score": 77, "rank": 8, "comment": "AI GPU 경쟁 · 눌림 관찰" },
+    { "ticker": "MSFT", "name": "마이크로소프트", "nameEn": "Microsoft", "sector": "ai", "country": "US", "status": "trend", "rating": 5, "score": 76, "rank": 9, "comment": "클라우드·AI 플랫폼 리더" },
+    { "ticker": "AMZN", "name": "아마존", "nameEn": "Amazon", "sector": "ai", "country": "US", "status": "interest", "rating": 4, "score": 75, "rank": 10, "comment": "AWS·AI 인프라 확장" },
+    { "ticker": "298040", "name": "효성중공업", "nameEn": "Hyosung Heavy", "sector": "power", "country": "KR", "status": "trend", "rating": 4, "score": 81, "rank": 11, "comment": "전력·변압기 수출 강세" },
+    { "ticker": "010120", "name": "LS ELECTRIC", "nameEn": "LS Electric", "sector": "power", "country": "KR", "status": "trend", "rating": 4, "score": 79, "rank": 12, "comment": "전력 인프라·배전 수혜" },
+    { "ticker": "012450", "name": "한화에어로스페이스", "nameEn": "Hanwha Aero", "sector": "defense", "country": "KR", "status": "trend", "rating": 5, "score": 83, "rank": 13, "comment": "방산 수출·수주 모멘텀" },
+    { "ticker": "064350", "name": "현대로템", "nameEn": "Hyundai Rotem", "sector": "defense", "country": "KR", "status": "interest", "rating": 4, "score": 74, "rank": 14, "comment": "방산·철도 복합" },
+    { "ticker": "034020", "name": "두산에너빌리티", "nameEn": "Doosan Enerbility", "sector": "power", "country": "KR", "status": "dip", "rating": 3, "score": 72, "rank": 15, "comment": "원전·에너지 · 눌림 구간" },
+    { "ticker": "089030", "name": "테크윙", "nameEn": "Techwing", "sector": "semi", "country": "KR", "status": "dip", "rating": 3, "score": 71, "rank": 16, "comment": "HBM 테스트 장비" },
+    { "ticker": "058610", "name": "에스피지", "nameEn": "SPG", "sector": "robot", "country": "KR", "status": "interest", "rating": 3, "score": 70, "rank": 17, "comment": "로봇·자동화 부품" },
+    { "ticker": "257720", "name": "실리콘투", "nameEn": "Silicon2", "sector": "semi", "country": "KR", "status": "overheat", "rating": 3, "score": 68, "rank": 18, "comment": "단기 과열 · 관망" },
+    { "ticker": "267260", "name": "HD현대일렉트릭", "nameEn": "HD Hyundai Electric", "sector": "power", "country": "KR", "status": "trend", "rating": 4, "score": 78, "rank": 19, "comment": "북미 전력 수주 확대" },
+    { "ticker": "042700", "name": "한미반도체", "nameEn": "Hanmi Semi", "sector": "semi", "country": "KR", "status": "interest", "rating": 4, "score": 73, "rank": 20, "comment": "고급 패키징 장비" }
+  ]
+}
