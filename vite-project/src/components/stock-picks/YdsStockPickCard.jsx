@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
-import YdsStockScoreBreakdown from "./YdsStockScoreBreakdown.jsx"
+import YdsStockPickActionBlock from "./YdsStockPickActionBlock.jsx"
+import YdsStockPickReasons from "./YdsStockPickReasons.jsx"
 
 /**
  * @param {{
@@ -21,48 +22,58 @@ export default function YdsStockPickCard({
   onToggleFavorite,
 }) {
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
-  const showBreakdown = variant !== "compact"
+  const isTop3 = variant === "top3"
+  const isCompact = variant === "compact"
 
   return (
     <Link
       to={to}
       className={[
         "yds-spick-card",
-        variant === "top3" ? "yds-spick-card--top3" : "",
-        variant === "compact" ? "yds-spick-card--compact" : "",
+        isTop3 ? "yds-spick-card--top3" : "",
+        isCompact ? "yds-spick-card--compact" : "",
       ]
         .filter(Boolean)
         .join(" ")}
     >
       <div className="yds-spick-card__head">
         {medal ? <span className="yds-spick-card__medal">{medal}</span> : null}
-        {rankLabel ? <span className="yds-spick-card__rank">{rankLabel}</span> : null}
+        {rankLabel && !isTop3 ? (
+          <span className="yds-spick-card__rank">{rankLabel}</span>
+        ) : null}
         <YdsStockPickFavoriteButton
           active={isFavorite}
           onToggle={() => onToggleFavorite(stock.ticker)}
         />
       </div>
 
-      <p className="yds-spick-card__stars">{stock.stars}</p>
       <h3 className="yds-spick-card__name">{stock.name}</h3>
-      <p className="yds-spick-card__ticker font-mono tabular-nums">{stock.ticker}</p>
+      {!isCompact ? (
+        <p className="yds-spick-card__ticker font-mono tabular-nums">{stock.ticker}</p>
+      ) : null}
 
-      {showBreakdown ? (
-        <YdsStockScoreBreakdown
-          scores={stock.scores}
-          rows={stock.scoreRows}
-          variant={variant === "top3" ? "detail" : "card"}
-        />
+      {isTop3 ? (
+        <>
+          <p className="yds-spick-card__top3-action">
+            <span aria-hidden>{stock.stockAction.emoji}</span> {stock.stockAction.label}
+          </p>
+          <p className="yds-spick-card__top3-score font-mono tabular-nums">
+            YDS {stock.scores.totalScore}
+          </p>
+        </>
       ) : (
-        <p className="yds-spick-card__score-mini font-mono tabular-nums">
-          YDS {stock.scores.totalScore}
-        </p>
+        <YdsStockPickActionBlock
+          stock={stock}
+          variant={isCompact ? "inline" : "card"}
+        />
       )}
 
-      <p className="yds-spick-card__status-label">상태</p>
-      <p className="yds-spick-card__status">{stock.statusPhrase}</p>
+      <YdsStockPickReasons
+        reasons={stock.recommendReasons}
+        variant={isTop3 ? "top3" : isCompact ? "inline" : "card"}
+      />
 
-      {showBreakdown ? (
+      {!isTop3 && !isCompact ? (
         <>
           <p className="yds-spick-card__eval-label">한줄 평가</p>
           <p className="yds-spick-card__comment">{stock.comment}</p>

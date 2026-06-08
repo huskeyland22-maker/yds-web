@@ -1,9 +1,14 @@
 /**
- * YDS Phase 2-3 — 종목추천 데이터 모델 (계산 엔진 연동)
+ * YDS Phase 2-6 — 종목추천 데이터 모델 (점수 · 행동 · 추천 이유)
  */
 
 import universe from "../data/stockPickUniverse.json" with { type: "json" }
-import { buildStockPriceSnapshot } from "./stockPickSnapshotProfiles.js"
+import { deriveStockAction } from "./ydsStockActionEngine.js"
+import {
+  buildRecommendReasons,
+  formatRecommendReasonSummary,
+} from "./ydsStockRecommendReasons.js"
+import { getStockSnapshot, toEngineSnapshot } from "./stockPickSnapshotProvider.js"
 import { computeStockScores } from "./ydsStockScoreEngine.js"
 import {
   formatScoreBreakdownRows,
@@ -16,11 +21,17 @@ import {
 
 export { YDS_SCORE_WEIGHTS }
 
+export {
+  STOCK_ACTION_VIEWS,
+  STOCK_STATUS_VIEWS,
+} from "./ydsStockActionEngine.js"
+
+/** @deprecated JSON status — 화면은 deriveStockAction 결과 사용 */
 export const STOCK_PICK_STATUS = {
-  trend: { id: "trend", emoji: "🟢", label: "추세", phrase: "강한 추세" },
-  dip: { id: "dip", emoji: "🟡", label: "눌림", phrase: "눌림 대기" },
-  interest: { id: "interest", emoji: "🟠", label: "관심", phrase: "관심 구간" },
-  overheat: { id: "overheat", emoji: "🔴", label: "과열", phrase: "과열 구간" },
+  trend: { id: "trend", emoji: "🟢", label: "추세 유지", phrase: "추세 유지" },
+  dip: { id: "dip", emoji: "🟡", label: "눌림 대기", phrase: "눌림 대기" },
+  interest: { id: "interest", emoji: "🟠", label: "관심 구간", phrase: "관심 구간" },
+  overheat: { id: "overheat", emoji: "🔴", label: "과열 구간", phrase: "과열 구간" },
 }
 
 /** @typedef {'US' | 'KR'} StockPickCountryId */
@@ -73,20 +84,28 @@ export const RATING_STARS = {
  *   scores: import("./ydsStockScoreConfig.js").YdsScoreBreakdown
  *   scoreRows: ReturnType<typeof formatScoreBreakdownRows>
  *   scoreMeta: import("./ydsStockScoreEngine.js").StockScoreComputeMeta
- *   statusView: typeof STOCK_PICK_STATUS[keyof typeof STOCK_PICK_STATUS]
+ *   statusView: import("./ydsStockActionEngine.js").StockStatusView
  *   statusPhrase: string
+ *   stockStatus: import("./ydsStockActionEngine.js").StockStatusView
+ *   stockAction: import("./ydsStockActionEngine.js").StockActionView
+ *   actionReason: string
+ *   recommendReasons: import("./ydsStockRecommendReasons.js").RecommendReason[]
+ *   recommendReasonSummary: string
  *   sectorLabel: string
  * }} StockPickView
  */
 
 /** @param {StockPickRecord} row */
 function enrichStock(row) {
-  const statusView = STOCK_PICK_STATUS[row.status] ?? STOCK_PICK_STATUS.interest
   const sectorLabel =
     STOCK_PICK_SECTORS.find((s) => s.id === row.sector)?.label ?? row.sector
 
-  const snapshot = buildStockPriceSnapshot(row.ticker, row.status)
-  const computed = computeStockScores(snapshot, {
+  const marketSnapshot = getStockSnapshot({
+    ticker: row.ticker,
+    country: row.country,
+    status: row.status,
+  })
+  const computed = computeStockScores(toEngineSnapshot(marketSnapshot), {
     marketFitScore: row.marketFitScore,
   })
 
@@ -99,6 +118,9 @@ function enrichStock(row) {
       totalScore: row.marketFitScore ?? 0,
     }
 
+  const recommendReasons = buildRecommendReasons(scores, computed.meta)
+  const action = deriveStockAction(scores, computed.meta, recommendReasons)
+
   return {
     ...row,
     id: row.ticker,
@@ -108,8 +130,14 @@ function enrichStock(row) {
     scores,
     scoreRows: formatScoreBreakdownRows(scores),
     scoreMeta: computed.meta,
-    statusView,
-    statusPhrase: statusView.phrase,
+    snapshot: marketSnapshot,
+    statusView: action.stockStatus,
+    statusPhrase: action.stockStatus.label,
+    stockStatus: action.stockStatus,
+    stockAction: action.stockAction,
+    actionReason: action.actionReason,
+    recommendReasons,
+    recommendReasonSummary: formatRecommendReasonSummary(recommendReasons),
     sectorLabel,
   }
 }

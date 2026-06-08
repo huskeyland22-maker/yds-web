@@ -31,6 +31,10 @@ assert(
   "total equals sum",
 )
 assert(nvda.scoreMeta.volumeRatio > 0, "score meta")
+assert(nvda.recommendReasons.length >= 2, "recommend reasons")
+assert(nvda.stockAction.label.length > 0, "stock action")
+assert(nvda.stockStatus.label.length > 0, "stock status")
+assert(nvda.snapshot?.country === "US", "snapshot provider")
 
 const top3 = getTop3Stocks(all)
 assert(top3.length === 3, "top3")
@@ -69,7 +73,7 @@ assert(
   "top3 disjoint",
 )
 
-console.log("OK stock pick phase 2-3.5", {
+console.log("OK stock pick phase 2-6", {
   total: all.length,
   top3: top3.map((s) => `${s.name} ${s.scores.totalScore} (T${s.scores.trendScore})`),
   usTop3: usTop3.map((s) => s.name),
@@ -77,4 +81,6 @@ console.log("OK stock pick phase 2-3.5", {
   nvdaGlobalRank,
   nvdaUsRank,
   nvdaTrend: nvda.scores.trendScore,
+  nvdaAction: nvda.stockAction.label,
+  nvdaReasons: nvda.recommendReasons.map((r) => r.text),
 })

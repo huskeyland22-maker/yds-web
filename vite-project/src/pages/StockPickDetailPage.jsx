@@ -2,6 +2,8 @@ import { Link, useParams } from "react-router-dom"
 import { getStockPickByTicker, STOCK_PICK_COUNTRIES } from "../content/ydsStockPickModel.js"
 import { useStockPickFavorites } from "../hooks/useStockPickFavorites.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
+import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
+import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
 import "../styles/stock-picks-platform.css"
 
@@ -46,30 +48,33 @@ export default function StockPickDetailPage() {
             </span>
           ) : null}
         </p>
-        <p className="yds-spick-detail__stars">{stock.stars}</p>
 
-        <YdsStockScoreBreakdown
-          scores={stock.scores}
-          rows={stock.scoreRows}
-          variant="detail"
-        />
+        <YdsStockPickActionBlock stock={stock} variant="detail" />
+        <YdsStockPickReasons reasons={stock.recommendReasons} variant="detail" />
 
-        <p className="yds-spick-detail__status-label">상태</p>
-        <p className="yds-spick-detail__status">{stock.statusPhrase}</p>
+        <details className="yds-spick-detail__scores">
+          <summary className="yds-spick-detail__scores-summary">점수 근거</summary>
+          <YdsStockScoreBreakdown
+            scores={stock.scores}
+            rows={stock.scoreRows}
+            variant="detail"
+          />
+        </details>
 
         <p className="yds-spick-detail__eval-label">한줄 평가</p>
         <p className="yds-spick-detail__comment">{stock.comment}</p>
 
         <p className="yds-spick-detail__schema-note">
-          추세·거래량·위치는 스냅샷 기반 자동 계산 · 시장 적합도는 수동값 (향후 시장분석 연동)
+          추세·거래량·위치는 스냅샷 Provider 기반 자동 계산 · 시장 적합도는 수동값 (Phase
+          2-7 시장분석 연동 예정)
         </p>
       </header>
 
       <section className="yds-spick-detail__future" aria-label="향후 확장 영역">
-        <h2 className="yds-spick-detail__future-title">Phase 2-4 연동 예정</h2>
+        <h2 className="yds-spick-detail__future-title">Phase 2-7 연동 예정</h2>
         <ul className="yds-spick-detail__future-list">
-          <li>실시간 가격·거래량 스냅샷</li>
-          <li>시장 적합도 (YDS 시장분석)</li>
+          <li>시장 적합도 자동화 (YDS 시장분석 → 종목추천)</li>
+          <li>실시간 Yahoo · Naver Snapshot Provider</li>
           <li>차트 · 실적 · 뉴스</li>
         </ul>
       </section>
