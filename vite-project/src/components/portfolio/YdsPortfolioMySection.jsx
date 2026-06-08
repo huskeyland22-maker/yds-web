@@ -49,7 +49,7 @@ export default function YdsPortfolioMySection() {
       </h2>
 
       <p className="yds-portfolio-v2__hint-inline">
-        거래 기록 + 현재가 연동 · 보유·비중 자동 계산
+        종목 검색 거래 + 현재가 연동 · 보유·비중 자동 계산
       </p>
 
       <div className="yds-portfolio-v5__hero" aria-label="포트폴리오 요약">

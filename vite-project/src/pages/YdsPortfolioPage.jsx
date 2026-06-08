@@ -43,7 +43,7 @@ export default function YdsPortfolioPage() {
       </PortfolioStateProvider>
 
       <p className="yds-portfolio__footnote">
-        거래를 기록한다 · 현재가를 연결하면 계좌가 자동 완성된다
+        아는 정보만 입력한다 · 종목·코드·국가는 시스템이 채운다
       </p>
     </div>
   )
