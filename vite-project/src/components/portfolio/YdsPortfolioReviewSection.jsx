@@ -29,7 +29,9 @@ export default function YdsPortfolioReviewSection() {
         ))}
       </div>
 
-      <p className="yds-portfolio-v3__review-future">향후 · 종목별 복기 연결 준비</p>
+      <p className="yds-portfolio-v3__review-future">
+        종목별 복기(매수 이유·배운 점·다음 행동)는 각 보유 종목 카드에서 입력할 수 있습니다.
+      </p>
       <p className="yds-portfolio-v2__review-note">로컬 저장</p>
     </section>
   )

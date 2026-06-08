@@ -783,6 +783,216 @@
   color: #64748b;
 }
 
+/* —— Portfolio V6.4 (실제 계좌 모드) —— */
+
+.yds-portfolio-v64__hero {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.yds-portfolio-v64__hero-metric {
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.yds-portfolio-v64__hero-metric--primary {
+  border-color: rgba(96, 165, 250, 0.28);
+  background: linear-gradient(145deg, rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.85));
+}
+
+.yds-portfolio-v64__hero-label {
+  margin: 0 0 0.2rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.yds-portfolio-v64__hero-value {
+  margin: 0;
+  font-size: clamp(1rem, 2.8vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #f8fafc;
+}
+
+.yds-portfolio-v64__pnl-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.yds-portfolio-v64__pnl-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.35rem;
+  border: 1px dashed rgba(148, 163, 184, 0.16);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-portfolio-v64__pnl-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-portfolio-v64__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.55rem;
+}
+
+.yds-portfolio-v64__card {
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.yds-portfolio-v64__card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+}
+
+.yds-portfolio-v64__card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-portfolio-v64__card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+.yds-portfolio-v64__card-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.yds-portfolio-v64__card-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-portfolio-v64__card-value {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-portfolio-v64__card-yds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-portfolio-v64__card-action strong {
+  color: #93c5fd;
+}
+
+.yds-portfolio-v64__card-reason {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-portfolio-v64__card-realized {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-portfolio-v64__card-review-toggle {
+  width: 100%;
+  margin-top: 0.15rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(30, 41, 59, 0.55);
+  color: #cbd5e1;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.yds-portfolio-v64__card-review-toggle:hover {
+  background: rgba(51, 65, 85, 0.65);
+}
+
+.yds-portfolio-v64__card-review {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-portfolio-v64__search-hint {
+  margin: 0.2rem 0 0.15rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-portfolio-v64__search-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  background: rgba(30, 58, 138, 0.2);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #bfdbfe;
+}
+
+.yds-portfolio-v64__search-chip-clear {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #93c5fd;
+  font-size: 0.62rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.yds-portfolio-v64__search-mark {
+  padding: 0;
+  border-radius: 0.1rem;
+  background: rgba(251, 191, 36, 0.28);
+  color: #fef3c7;
+}
+
 .yds-portfolio-v2__section {
   padding: 0.75rem 0.85rem;
   border-radius: 0.55rem;
@@ -1203,6 +1413,10 @@
   .yds-portfolio-v3__hero,
   .yds-portfolio-v5__hero,
   .yds-portfolio-v6__hero,
+  .yds-portfolio-v64__hero,
+  .yds-portfolio-v64__pnl-strip,
+  .yds-portfolio-v64__card-metrics,
+  .yds-portfolio-v64__card-yds,
   .yds-portfolio-v3__compare-grid,
   .yds-portfolio-v3__compare-metrics {
     grid-template-columns: 1fr;

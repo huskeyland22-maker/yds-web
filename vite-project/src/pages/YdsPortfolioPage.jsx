@@ -24,15 +24,16 @@ export default function YdsPortfolioPage() {
   }, [location.hash])
 
   return (
-    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 yds-portfolio--v5 yds-portfolio--v6 min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 yds-portfolio--v5 yds-portfolio--v6 yds-portfolio--v64 min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-portfolio__header">
         <p className="yds-portfolio__kicker">{UI_PAGE.portfolio.kicker}</p>
         <h1 className="yds-portfolio__title">{UI_PAGE.portfolio.title}</h1>
         <p className="yds-portfolio__sub">
-          YDS 최종 실행 · 판단{" "}
+          실제 계좌 관리 · 판단{" "}
           <Link to="/market-analysis">시장분석</Link>
           {" · "}후보{" "}
           <Link to="/stock-picks">종목추천</Link>
+          {" · "}실행 여기
         </p>
       </header>
 

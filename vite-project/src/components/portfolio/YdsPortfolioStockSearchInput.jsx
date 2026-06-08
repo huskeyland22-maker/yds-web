@@ -1,7 +1,29 @@
-import { useEffect, useId, useRef, useState } from "react"
-import { searchPortfolioStocks } from "../../content/ydsPortfolioStockSearch.js"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
+import {
+  PORTFOLIO_STOCK_CATALOG,
+  searchPortfolioStocks,
+} from "../../content/ydsPortfolioStockSearch.js"
 
 /** @typedef {import("../../content/ydsPortfolioStockSearch.js").PortfolioStockOption} PortfolioStockOption */
+
+const POPULAR_TICKERS = ["005380", "NVDA", "AAPL", "005930", "AVGO", "TSLA"]
+
+/**
+ * @param {string} text
+ * @param {string} query
+ */
+function highlightParts(text, query) {
+  const q = String(query ?? "").trim().toLowerCase()
+  if (!q || !text) return [{ text, match: false }]
+  const lower = text.toLowerCase()
+  const idx = lower.indexOf(q)
+  if (idx < 0) return [{ text, match: false }]
+  return [
+    { text: text.slice(0, idx), match: false },
+    { text: text.slice(idx, idx + q.length), match: true },
+    { text: text.slice(idx + q.length), match: false },
+  ].filter((p) => p.text)
+}
 
 /**
  * @param {{
@@ -18,7 +40,22 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const results = searchPortfolioStocks(query)
+  const popularStocks = useMemo(
+    () =>
+      POPULAR_TICKERS.map((ticker) =>
+        PORTFOLIO_STOCK_CATALOG.find((s) => s.ticker === ticker),
+      ).filter(Boolean),
+    [],
+  )
+
+  const results = useMemo(() => {
+    const q = query.trim()
+    if (!q) return popularStocks.slice(0, 6)
+    return searchPortfolioStocks(q, 8)
+  }, [query, popularStocks])
+
+  const showList = open && results.length > 0
+  const isBrowseMode = !query.trim()
 
   useEffect(() => {
     setQuery(value?.name ?? "")
@@ -38,10 +75,17 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
     setActiveIndex(0)
   }, [query])
 
+  /** @param {PortfolioStockOption} stock */
   function selectStock(stock) {
     onChange(stock)
     setQuery(stock.name)
     setOpen(false)
+  }
+
+  function clearSelection() {
+    onChange(null)
+    setQuery("")
+    setOpen(true)
   }
 
   function handleInputChange(e) {
@@ -54,7 +98,7 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
   }
 
   function handleKeyDown(e) {
-    if (!open || !results.length) return
+    if (!showList) return
 
     if (e.key === "ArrowDown") {
       e.preventDefault()
@@ -71,7 +115,7 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
   }
 
   return (
-    <div className="yds-portfolio-v5__search" ref={rootRef}>
+    <div className="yds-portfolio-v5__search yds-portfolio-v64__search" ref={rootRef}>
       <label className="yds-portfolio-v5__search-label">
         <span>종목 검색</span>
         <input
@@ -80,10 +124,10 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
           onChange={handleInputChange}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="현, 엔비디아, NVDA…"
+          placeholder="현대차, 엔비디아, NVDA…"
           autoComplete="off"
           role="combobox"
-          aria-expanded={open && results.length > 0}
+          aria-expanded={showList}
           aria-controls={listId}
           aria-autocomplete="list"
           required={required}
@@ -91,31 +135,66 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
         />
       </label>
 
-      {open && query.trim() && results.length > 0 ? (
-        <ul id={listId} className="yds-portfolio-v5__search-list" role="listbox">
-          {results.map((stock, index) => (
-            <li key={stock.id} role="presentation">
-              <button
-                type="button"
-                role="option"
-                aria-selected={index === activeIndex}
-                className={[
-                  "yds-portfolio-v5__search-item",
-                  index === activeIndex ? "yds-portfolio-v5__search-item--active" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => selectStock(stock)}
-              >
-                <span className="yds-portfolio-v5__search-name">{stock.name}</span>
-                <span className="yds-portfolio-v5__search-meta font-mono tabular-nums">
-                  {stock.country === "kr" ? "🇰🇷" : "🇺🇸"} {stock.ticker}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      {value ? (
+        <div className="yds-portfolio-v64__search-chip">
+          <span className="font-mono tabular-nums">
+            {value.country === "kr" ? "🇰🇷" : "🇺🇸"} {value.ticker}
+          </span>
+          <button type="button" className="yds-portfolio-v64__search-chip-clear" onClick={clearSelection}>
+            변경
+          </button>
+        </div>
+      ) : null}
+
+      {showList ? (
+        <>
+          {isBrowseMode ? (
+            <p className="yds-portfolio-v64__search-hint">자주 쓰는 종목 · 이름·티커·초성 검색</p>
+          ) : null}
+          <ul id={listId} className="yds-portfolio-v5__search-list" role="listbox">
+            {results.map((stock, index) => (
+              <li key={stock.id} role="presentation">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  className={[
+                    "yds-portfolio-v5__search-item",
+                    index === activeIndex ? "yds-portfolio-v5__search-item--active" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => selectStock(stock)}
+                >
+                  <span className="yds-portfolio-v5__search-name">
+                    {highlightParts(stock.name, query).map((part, i) =>
+                      part.match ? (
+                        <mark key={i} className="yds-portfolio-v64__search-mark">
+                          {part.text}
+                        </mark>
+                      ) : (
+                        <span key={i}>{part.text}</span>
+                      ),
+                    )}
+                  </span>
+                  <span className="yds-portfolio-v5__search-meta font-mono tabular-nums">
+                    {stock.country === "kr" ? "🇰🇷" : "🇺🇸"}{" "}
+                    {highlightParts(stock.ticker, query).map((part, i) =>
+                      part.match ? (
+                        <mark key={i} className="yds-portfolio-v64__search-mark">
+                          {part.text}
+                        </mark>
+                      ) : (
+                        <span key={i}>{part.text}</span>
+                      ),
+                    )}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       ) : null}
 
       {open && query.trim() && results.length === 0 ? (
