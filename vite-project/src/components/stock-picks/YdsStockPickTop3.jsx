@@ -1,4 +1,4 @@
-import { TOP3_MEDALS } from "../../content/ydsStockPickModel.js"
+import { TOP5_MEDALS } from "../../content/ydsStockPickModel.js"
 import YdsStockPickCard from "./YdsStockPickCard.jsx"
 
 /**
@@ -6,29 +6,34 @@ import YdsStockPickCard from "./YdsStockPickCard.jsx"
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   isFavorite: (ticker: string) => boolean
  *   onToggleFavorite: (ticker: string) => void
+ *   loading?: boolean
  * }} props
  */
-export default function YdsStockPickTop3({ stocks, isFavorite, onToggleFavorite }) {
-  if (!stocks.length) return null
-
+export default function YdsStockPickTop3({ stocks, isFavorite, onToggleFavorite, loading }) {
   return (
-    <section className="yds-spick-section" aria-labelledby="spick-top3">
-      <h2 id="spick-top3" className="yds-spick-section__title">
-        오늘의 TOP3
+    <section className="yds-spick-section yds-spick-section--hero" aria-labelledby="spick-top5">
+      <h2 id="spick-top5" className="yds-spick-section__title">
+        오늘의 TOP5
       </h2>
-      <div className="yds-spick-top3">
-        {stocks.map((stock, index) => (
-          <YdsStockPickCard
-            key={stock.ticker}
-            stock={stock}
-            variant="top3"
-            medal={TOP3_MEDALS[index]}
-            rankLabel={`${index + 1}위`}
-            isFavorite={isFavorite(stock.ticker)}
-            onToggleFavorite={onToggleFavorite}
-          />
-        ))}
-      </div>
+      {loading && !stocks.length ? (
+        <p className="yds-spick-empty">시세 조회 중…</p>
+      ) : null}
+      {stocks.length ? (
+        <div className="yds-spick-top5">
+          {stocks.map((stock, index) => (
+            <YdsStockPickCard
+              key={stock.ticker}
+              stock={stock}
+              variant="top5"
+              medal={TOP5_MEDALS[index]}
+              isFavorite={isFavorite(stock.ticker)}
+              onToggleFavorite={onToggleFavorite}
+            />
+          ))}
+        </div>
+      ) : !loading ? (
+        <p className="yds-spick-empty">표시할 종목이 없습니다.</p>
+      ) : null}
     </section>
   )
 }

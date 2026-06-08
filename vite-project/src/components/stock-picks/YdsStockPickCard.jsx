@@ -6,7 +6,7 @@ import YdsStockPickReasons from "./YdsStockPickReasons.jsx"
 /**
  * @param {{
  *   stock: import("../../content/ydsStockPickModel.js").StockPickView
- *   variant?: 'default' | 'top3' | 'compact'
+ *   variant?: 'default' | 'top3' | 'top5' | 'compact'
  *   medal?: string
  *   rankLabel?: string
  *   isFavorite: boolean
@@ -22,7 +22,7 @@ export default function YdsStockPickCard({
   onToggleFavorite,
 }) {
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
-  const isTop3 = variant === "top3"
+  const isHero = variant === "top3" || variant === "top5"
   const isCompact = variant === "compact"
 
   return (
@@ -30,7 +30,7 @@ export default function YdsStockPickCard({
       to={to}
       className={[
         "yds-spick-card",
-        isTop3 ? "yds-spick-card--top3" : "",
+        isHero ? "yds-spick-card--top5" : "",
         isCompact ? "yds-spick-card--compact" : "",
       ]
         .filter(Boolean)
@@ -38,7 +38,7 @@ export default function YdsStockPickCard({
     >
       <div className="yds-spick-card__head">
         {medal ? <span className="yds-spick-card__medal">{medal}</span> : null}
-        {rankLabel && !isTop3 ? (
+        {rankLabel && !isHero ? (
           <span className="yds-spick-card__rank">{rankLabel}</span>
         ) : null}
         <YdsStockPickFavoriteButton
@@ -48,20 +48,20 @@ export default function YdsStockPickCard({
       </div>
 
       <h3 className="yds-spick-card__name">{stock.name}</h3>
-      {!isCompact ? (
+      {!isCompact && !isHero ? (
         <p className="yds-spick-card__ticker font-mono tabular-nums">{stock.ticker}</p>
       ) : null}
 
       <YdsStockPickActionBlock
         stock={stock}
-        variant={isTop3 ? "top3" : isCompact ? "inline" : "card"}
+        variant={isHero ? "top5" : isCompact ? "compact" : "card"}
       />
 
       <YdsStockPickReasons
         reasons={stock.recommendReasons}
-        variant={isTop3 ? "top3" : isCompact ? "inline" : "card"}
-        maxItems={isTop3 || isCompact ? 1 : undefined}
-        title={isTop3 || isCompact ? "" : "추천 이유"}
+        variant={isHero ? "top3" : isCompact ? "inline" : "card"}
+        maxItems={isHero || isCompact ? 1 : undefined}
+        title={isHero || isCompact ? "" : "추천 이유"}
       />
     </Link>
   )

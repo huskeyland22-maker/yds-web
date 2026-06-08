@@ -1,12 +1,10 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import {
   filterBySector,
-  getRankingStocks,
-  getTop3Stocks,
+  getTop5Stocks,
   STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
 import YdsStockPickTop3 from "./YdsStockPickTop3.jsx"
-import YdsStockPickRanking from "./YdsStockPickRanking.jsx"
 import YdsStockPickSectorPanel from "./YdsStockPickSectorPanel.jsx"
 import YdsStockPickCard from "./YdsStockPickCard.jsx"
 
@@ -20,6 +18,7 @@ import YdsStockPickCard from "./YdsStockPickCard.jsx"
  *   onToggleFavorite: (ticker: string) => void
  *   showCountryHead?: boolean
  *   allSectionId?: string
+ *   loading?: boolean
  * }} props
  */
 export default function YdsStockPickCountryPanel({
@@ -31,11 +30,12 @@ export default function YdsStockPickCountryPanel({
   onToggleFavorite,
   showCountryHead = false,
   allSectionId = "spick-all",
+  loading = false,
 }) {
   const countryMeta = STOCK_PICK_COUNTRIES.find((c) => c.id === countryId)
+  const [showAll, setShowAll] = useState(false)
 
-  const top3 = useMemo(() => getTop3Stocks(stocks), [stocks])
-  const ranking = useMemo(() => getRankingStocks(stocks, 5), [stocks])
+  const top5 = useMemo(() => getTop5Stocks(stocks), [stocks])
   const sectorStocks = useMemo(
     () => filterBySector(stocks, sectorId),
     [stocks, sectorId],
@@ -53,37 +53,48 @@ export default function YdsStockPickCountryPanel({
       ) : null}
 
       <YdsStockPickTop3
-        stocks={top3}
+        stocks={top5}
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
+        loading={loading}
       />
-
-      <YdsStockPickRanking stocks={ranking} />
 
       <YdsStockPickSectorPanel
         stocks={sectorStocks}
         sectorId={sectorId}
         onSectorChange={onSectorChange}
-        isFavorite={isFavorite}
-        onToggleFavorite={onToggleFavorite}
       />
 
-      <section className="yds-spick-section" aria-labelledby={allSectionId}>
-        <h2 id={allSectionId} className="yds-spick-section__title">
-          전체 종목
-        </h2>
-        <div className="yds-spick-grid yds-spick-grid--all">
-          {stocks.map((stock) => (
-            <YdsStockPickCard
-              key={stock.ticker}
-              stock={stock}
-              variant="compact"
-              isFavorite={isFavorite(stock.ticker)}
-              onToggleFavorite={onToggleFavorite}
-            />
-          ))}
+      <section className="yds-spick-section yds-spick-section--all" aria-labelledby={allSectionId}>
+        <div className="yds-spick-section__head-row">
+          <h2 id={allSectionId} className="yds-spick-section__title yds-spick-section__title--inline">
+            전체 종목
+          </h2>
+          <button
+            type="button"
+            className="yds-spick-section__toggle"
+            aria-expanded={showAll}
+            onClick={() => setShowAll((v) => !v)}
+          >
+            {showAll ? "접기" : "전체 보기"}
+          </button>
         </div>
-        {!stocks.length ? <p className="yds-spick-empty">표시할 종목이 없습니다.</p> : null}
+        {showAll ? (
+          <div className="yds-spick-grid yds-spick-grid--all">
+            {stocks.map((stock) => (
+              <YdsStockPickCard
+                key={stock.ticker}
+                stock={stock}
+                variant="compact"
+                isFavorite={isFavorite(stock.ticker)}
+                onToggleFavorite={onToggleFavorite}
+              />
+            ))}
+          </div>
+        ) : null}
+        {showAll && !stocks.length ? (
+          <p className="yds-spick-empty">표시할 종목이 없습니다.</p>
+        ) : null}
       </section>
     </div>
   )

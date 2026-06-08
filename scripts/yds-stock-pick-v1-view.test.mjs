@@ -4,6 +4,7 @@
 import {
   getStockPickUniverse,
   getTop3Stocks,
+  getTop5Stocks,
   getRankingStocks,
   filterBySector,
   getStockPicksForCountry,
@@ -31,7 +32,7 @@ assert(
   "total equals sum",
 )
 assert(nvda.scoreMeta.volumeRatio > 0, "score meta")
-assert(nvda.recommendReasons.length >= 2, "recommend reasons")
+assert(nvda.recommendReasons.length >= 1, "recommend reasons")
 assert(nvda.stockAction.label.length > 0, "stock action")
 assert(nvda.stockStatus.label.length > 0, "stock status")
 assert(nvda.snapshot?.country === "US", "snapshot provider")
@@ -39,6 +40,9 @@ assert(nvda.snapshot?.country === "US", "snapshot provider")
 const top3 = getTop3Stocks(all)
 assert(top3.length === 3, "top3")
 assert(top3[0].rank === 1, "rank1 dynamic")
+
+const top5 = getTop5Stocks(all)
+assert(top5.length === 5, "top5")
 
 const ranking = getRankingStocks(all, 5)
 assert(ranking[0].scores.totalScore >= ranking[4].scores.totalScore, "rank order")

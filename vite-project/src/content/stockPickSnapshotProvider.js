@@ -64,10 +64,9 @@ export function toStockMarketSnapshot(raw, request) {
 const dummyProvider = {
   id: "dummy",
   getSnapshot(request) {
-    const status = request.status ?? "interest"
     const raw = buildStockPriceSnapshot(
       request.ticker,
-      status,
+      "interest",
       request.basePrice ?? 100,
     )
     return toStockMarketSnapshot(raw, request)

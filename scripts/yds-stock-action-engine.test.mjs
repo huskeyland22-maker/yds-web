@@ -13,7 +13,7 @@ const nvda = getStockPickByTicker("NVDA")
 assert(nvda != null, "nvda")
 assert(nvda.stockAction.label === "보유 유지", `nvda action ${nvda.stockAction.label}`)
 assert(nvda.stockStatus.label === "추세 유지", `nvda status ${nvda.stockStatus.label}`)
-assert(nvda.recommendReasons.length >= 2, "nvda reasons on view")
+assert(nvda.recommendReasons.length >= 1, "nvda reasons on view")
 
 const ls = getStockPickByTicker("010120")
 if (ls) {

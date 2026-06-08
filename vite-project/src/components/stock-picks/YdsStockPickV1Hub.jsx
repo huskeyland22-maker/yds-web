@@ -3,10 +3,10 @@ import { captureTodayPickSnapshots } from "../../content/ydsValidationEngine.js"
 import {
   assignRanks,
   filterByCountry,
-  getStockPickUniverse,
   STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
+import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
@@ -34,14 +34,12 @@ function useDualCountryLayout() {
 export default function YdsStockPickV1Hub() {
   const dualLayout = useDualCountryLayout()
   const marketContext = useYdsMarketContext()
-  const allStocks = useMemo(
-    () => getStockPickUniverse(marketContext),
-    [marketContext],
-  )
+  const { stocks: allStocks, loading, errors, lastSyncAt } = useStockPickLiveData(marketContext)
 
   useEffect(() => {
-    captureTodayPickSnapshots(marketContext)
-  }, [marketContext])
+    if (loading || !allStocks.length) return
+    captureTodayPickSnapshots(marketContext, 10, allStocks)
+  }, [marketContext, loading, allStocks])
   const {
     favoritesOnly,
     setFavoritesOnly,
@@ -71,6 +69,11 @@ export default function YdsStockPickV1Hub() {
 
   return (
     <div className="yds-spick-platform">
+      {errors.length > 0 ? (
+        <p className="yds-spick-sync-note" role="status">
+          시세 조회 실패 {errors.length}건 · {lastSyncAt ? "부분 갱신" : "오프라인 폴백"}
+        </p>
+      ) : null}
       <div className="yds-spick-toolbar">
         <button
           type="button"
@@ -124,6 +127,7 @@ export default function YdsStockPickV1Hub() {
                 onToggleFavorite={toggleFavorite}
                 showCountryHead
                 allSectionId={panelId}
+                loading={loading}
               />
             </div>
           )

@@ -154,15 +154,16 @@ function refreshPickPrice(record, today) {
 /**
  * @param {YdsMarketAdapterContext | null | undefined} marketContext
  * @param {number} [rankLimit]
+ * @param {import("./ydsStockPickModel.js").StockPickView[]} [universeOverride]
  */
-export function captureTodayPickSnapshots(marketContext, rankLimit = 10) {
+export function captureTodayPickSnapshots(marketContext, rankLimit = 10, universeOverride = null) {
   const today = todayDateKey()
   const existing = loadValidationPicks()
   const existingToday = new Set(
     existing.filter((r) => r.recommendedAt === today).map((r) => r.id),
   )
 
-  const universe = getStockPickUniverse(marketContext ?? null)
+  const universe = universeOverride ?? getStockPickUniverse(marketContext ?? null)
   const usRanked = getRankingStocks(filterByCountry(universe, "US"), rankLimit)
   const krRanked = getRankingStocks(filterByCountry(universe, "KR"), rankLimit)
 

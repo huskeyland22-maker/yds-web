@@ -1,26 +1,18 @@
+import { Link } from "react-router-dom"
 import { STOCK_PICK_SECTORS } from "../../content/ydsStockPickModel.js"
-import YdsStockPickCard from "./YdsStockPickCard.jsx"
 
 /**
  * @param {{
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   sectorId: string
  *   onSectorChange: (id: string) => void
- *   isFavorite: (ticker: string) => boolean
- *   onToggleFavorite: (ticker: string) => void
  * }} props
  */
-export default function YdsStockPickSectorPanel({
-  stocks,
-  sectorId,
-  onSectorChange,
-  isFavorite,
-  onToggleFavorite,
-}) {
+export default function YdsStockPickSectorPanel({ stocks, sectorId, onSectorChange }) {
   return (
-    <section className="yds-spick-section" aria-labelledby="spick-sector">
+    <section className="yds-spick-section yds-spick-section--sector" aria-labelledby="spick-sector">
       <h2 id="spick-sector" className="yds-spick-section__title">
-        섹터별 보기
+        섹터 보기
       </h2>
 
       <div className="yds-spick-tabs" role="tablist" aria-label="섹터 필터">
@@ -43,20 +35,28 @@ export default function YdsStockPickSectorPanel({
         ))}
       </div>
 
-      <div className="yds-spick-grid" role="tabpanel">
+      <ul className="yds-spick-sector-list" role="tabpanel">
         {stocks.length ? (
           stocks.map((stock) => (
-            <YdsStockPickCard
-              key={stock.ticker}
-              stock={stock}
-              isFavorite={isFavorite(stock.ticker)}
-              onToggleFavorite={onToggleFavorite}
-            />
+            <li key={stock.ticker} className="yds-spick-sector-list__item">
+              <Link
+                to={`/stock-picks/${encodeURIComponent(stock.ticker)}`}
+                className="yds-spick-sector-list__link"
+              >
+                <span className="yds-spick-sector-list__name">{stock.name}</span>
+                <span className="yds-spick-sector-list__status">
+                  <span aria-hidden>{stock.stockStatus.emoji}</span> {stock.stockStatus.label}
+                </span>
+                <span className="yds-spick-sector-list__action">
+                  <span aria-hidden>{stock.stockAction.emoji}</span> {stock.stockAction.label}
+                </span>
+              </Link>
+            </li>
           ))
         ) : (
-          <p className="yds-spick-empty">해당 섹터 종목이 없습니다.</p>
+          <li className="yds-spick-empty">해당 섹터 종목이 없습니다.</li>
         )}
-      </div>
+      </ul>
     </section>
   )
 }
