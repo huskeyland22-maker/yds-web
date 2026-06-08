@@ -112,8 +112,6 @@ export function auditStockPickSnapshot(ticker, snapshot, meta = {}) {
     ["ma20", snapshot?.ma20],
     ["ma60", snapshot?.ma60],
     ["high52w", snapshot?.high52w],
-    ["volumeAvg20", snapshot?.volumeAvg20],
-    ["volumeToday", snapshot?.volumeToday],
   ]
 
   /** @type {string[]} */

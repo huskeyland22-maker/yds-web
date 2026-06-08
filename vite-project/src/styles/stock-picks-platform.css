@@ -122,14 +122,63 @@
   line-height: 1;
 }
 
+.yds-spick-country-tabs__count {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.yds-spick-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.45rem;
+  margin: 0.1rem 0 0.15rem;
+}
+
+.yds-spick-price--compact {
+  margin: 0.05rem 0 0.1rem;
+}
+
+.yds-spick-price__value {
+  font-size: clamp(0.72rem, 2vw, 0.82rem);
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-spick-price__chg {
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.yds-spick-price__chg--up {
+  color: #4ade80;
+}
+
+.yds-spick-price__chg--down {
+  color: #f87171;
+}
+
+.yds-spick-price__chg--flat {
+  color: #94a3b8;
+}
+
+.yds-spick-price__time {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
 .yds-spick-dual {
   display: flex;
   flex-direction: column;
   gap: 1.15rem;
 }
 
-.yds-spick-dual__col:not(.yds-spick-dual__col--active) {
-  display: none;
+@media (max-width: 1023px) {
+  .yds-spick-dual__col:not(.yds-spick-dual__col--active) {
+    display: none;
+  }
 }
 
 .yds-spick-country-panel {

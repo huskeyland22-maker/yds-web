@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
 import YdsStockPickActionBlock from "./YdsStockPickActionBlock.jsx"
+import YdsStockPickPriceLine from "./YdsStockPickPriceLine.jsx"
 import YdsStockPickReasons from "./YdsStockPickReasons.jsx"
 
 /**
@@ -48,9 +49,7 @@ export default function YdsStockPickCard({
       </div>
 
       <h3 className="yds-spick-card__name">{stock.name}</h3>
-      {!isCompact && !isHero ? (
-        <p className="yds-spick-card__ticker font-mono tabular-nums">{stock.ticker}</p>
-      ) : null}
+      <YdsStockPickPriceLine stock={stock} compact={isCompact} />
 
       <YdsStockPickActionBlock
         stock={stock}

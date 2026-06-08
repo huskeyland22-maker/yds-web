@@ -4,6 +4,7 @@ import { useStockPickFavorites } from "../hooks/useStockPickFavorites.js"
 import { useStockPickDetailLive } from "../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
+import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLine.jsx"
 import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
 import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
@@ -53,6 +54,8 @@ export default function StockPickDetailPage() {
             onToggle={() => toggleFavorite(stock.ticker)}
           />
         </div>
+        <YdsStockPickPriceLine stock={stock} />
+
         <p className="yds-spick-detail__ticker font-mono tabular-nums">
           {stock.ticker}
           {countryMeta ? (
@@ -64,7 +67,10 @@ export default function StockPickDetailPage() {
         </p>
 
         <YdsStockPickActionBlock stock={stock} variant="detail" />
-        <YdsStockPickReasons reasons={stock.recommendReasons} variant="detail" />
+        <YdsStockPickReasons
+          reasons={stock.recommendReasonsDetail ?? stock.recommendReasons}
+          variant="detail"
+        />
 
         <details className="yds-spick-detail__scores">
           <summary className="yds-spick-detail__scores-summary">점수 근거</summary>

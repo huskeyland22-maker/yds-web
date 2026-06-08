@@ -34,7 +34,8 @@ function useDualCountryLayout() {
 export default function YdsStockPickV1Hub() {
   const dualLayout = useDualCountryLayout()
   const marketContext = useYdsMarketContext()
-  const { stocks: allStocks, loading, errors, lastSyncAt } = useStockPickLiveData(marketContext)
+  const { stocks: allStocks, loading, errors, lastSyncAt, liveReady } =
+    useStockPickLiveData(marketContext)
 
   useEffect(() => {
     if (loading || !allStocks.length) return
@@ -69,9 +70,11 @@ export default function YdsStockPickV1Hub() {
 
   return (
     <div className="yds-spick-platform">
-      {errors.length > 0 ? (
+      {!loading && (errors.length > 0 || liveReady) ? (
         <p className="yds-spick-sync-note" role="status">
-          시세 조회 실패 {errors.length}건 · {lastSyncAt ? "부분 갱신" : "오프라인 폴백"}
+          {liveReady ? "실시간 시세 반영" : "오프라인 폴백"}
+          {errors.length > 0 ? ` · 조회 실패 ${errors.length}건` : ""}
+          {lastSyncAt ? ` · ${new Date(lastSyncAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false })}` : ""}
         </p>
       ) : null}
       <div className="yds-spick-toolbar">
@@ -97,6 +100,10 @@ export default function YdsStockPickV1Hub() {
         countryId={countryId}
         onCountryChange={setCountryId}
         className="yds-spick-country-tabs--mobile"
+        counts={{
+          US: stocksByCountry.US.length,
+          KR: stocksByCountry.KR.length,
+        }}
       />
 
       <div className="yds-spick-dual">

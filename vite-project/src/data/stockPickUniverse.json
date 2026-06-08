@@ -511,6 +511,50 @@
       "rating": 3,
       "comment": "농기계·스마트 인프라",
       "marketFitScore": 14
+    },
+    {
+      "ticker": "005380",
+      "name": "현대차",
+      "nameEn": "Hyundai Motor",
+      "sector": "infra",
+      "country": "KR",
+      "status": "interest",
+      "rating": 4,
+      "comment": "전기차·수출 회복",
+      "marketFitScore": 16
+    },
+    {
+      "ticker": "000270",
+      "name": "기아",
+      "nameEn": "Kia",
+      "sector": "infra",
+      "country": "KR",
+      "status": "interest",
+      "rating": 4,
+      "comment": "SUV·전기차 수출 확대",
+      "marketFitScore": 16
+    },
+    {
+      "ticker": "042660",
+      "name": "한화오션",
+      "nameEn": "Hanwha Ocean",
+      "sector": "defense",
+      "country": "KR",
+      "status": "trend",
+      "rating": 4,
+      "comment": "조선·방산 수주 모멘텀",
+      "marketFitScore": 16
+    },
+    {
+      "ticker": "009540",
+      "name": "HD한국조선해양",
+      "nameEn": "HD Korea Shipbuilding",
+      "sector": "defense",
+      "country": "KR",
+      "status": "interest",
+      "rating": 4,
+      "comment": "조선·해양 플랫폼",
+      "marketFitScore": 16
     }
   ]
 }

@@ -17,7 +17,7 @@ function assert(cond, msg) {
 }
 
 const all = getStockPickUniverse()
-assert(all.length === 45, `universe ${all.length}`)
+assert(all.length === 49, `universe ${all.length}`)
 
 const nvda = getStockPickByTicker("NVDA")
 assert(nvda != null, "nvda")
@@ -48,12 +48,33 @@ const ranking = getRankingStocks(all, 5)
 assert(ranking[0].scores.totalScore >= ranking[4].scores.totalScore, "rank order")
 
 assert(filterBySector(all, "nuclear").length >= 4, "nuclear sector")
+
+const requiredKr = [
+  "012450",
+  "010120",
+  "298040",
+  "267260",
+  "089030",
+  "257720",
+  "064350",
+  "034020",
+  "042700",
+  "000660",
+  "005930",
+  "005380",
+  "000270",
+  "042660",
+  "009540",
+]
+for (const t of requiredKr) {
+  assert(all.some((s) => s.ticker === t && s.country === "KR"), `kr ticker ${t}`)
+}
 assert(YDS_SCORE_WEIGHTS.trend === 40, "weights")
 
 const us = getStockPicksForCountry("US")
 const kr = getStockPicksForCountry("KR")
 assert(us.length === 26, `us count ${us.length}`)
-assert(kr.length === 19, `kr count ${kr.length}`)
+assert(kr.length === 23, `kr count ${kr.length}`)
 assert(us[0].country === "US" && us[0].rank === 1, "us rank1")
 assert(kr[0].country === "KR" && kr[0].rank === 1, "kr rank1")
 

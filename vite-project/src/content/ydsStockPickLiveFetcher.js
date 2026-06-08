@@ -9,6 +9,11 @@ import {
   auditStockPickSnapshot,
   extractSnapshotExtras,
 } from "./ydsStockPickLiveSnapshot.js"
+import {
+  apiBodyToPickQuote,
+  fetchStockPickQuotesBatch,
+  mergePickQuote,
+} from "./ydsStockPickQuoteService.js"
 import { buildStockPickViews, assignRanks } from "./ydsStockPickModel.js"
 
 const CONCURRENCY = 4
@@ -35,6 +40,7 @@ async function mapPool(items, limit, worker) {
  *   engineSnapshot: import("./ydsStockScoreEngine.js").StockPriceSnapshot
  *   extras: ReturnType<typeof extractSnapshotExtras>
  *   apiBody: object
+ *   quote: import("./ydsStockPickQuoteService.js").StockPickQuoteView | null
  *   fetchedAt: string
  * }} LivePickSnapshotEntry
  */
@@ -64,18 +70,20 @@ export async function fetchStockPickLiveSnapshots(marketContext = null, signal) 
         dataSource: apiBody.dataSource,
       })
 
-      if (!engineSnapshot || !ok) {
-        errors.push({
-          ticker: row.ticker,
-          error: "snapshot incomplete",
-        })
+      if (!engineSnapshot) {
+        errors.push({ ticker: row.ticker, error: "snapshot incomplete" })
         return
+      }
+
+      if (!ok) {
+        console.warn("[stock-pick-live] partial snapshot", { ticker: row.ticker })
       }
 
       map.set(row.ticker, {
         engineSnapshot,
         extras,
         apiBody,
+        quote: mergePickQuote(null, apiBody, row.country),
         fetchedAt: apiBody.updatedAt ?? new Date().toISOString(),
       })
     } catch (e) {
@@ -87,6 +95,20 @@ export async function fetchStockPickLiveSnapshots(marketContext = null, signal) 
       })
     }
   })
+
+  try {
+    const { quotes: portfolioQuotes } = await fetchStockPickQuotesBatch()
+    for (const [ticker, entry] of map) {
+      const row = universe.stocks.find((s) => s.ticker === ticker)
+      const country = row?.country ?? "US"
+      entry.quote =
+        portfolioQuotes.get(ticker) ??
+        entry.quote ??
+        apiBodyToPickQuote(entry.apiBody, country)
+    }
+  } catch (e) {
+    console.warn("[stock-pick-live] portfolio quote batch failed", e?.message ?? e)
+  }
 
   return { snapshots: map, errors, fetchedAt: new Date().toISOString() }
 }
@@ -132,6 +154,7 @@ export async function fetchStockPickByTickerLive(ticker, marketContext = null, s
         engineSnapshot,
         extras,
         apiBody,
+        quote: mergePickQuote(null, apiBody, row.country),
         fetchedAt: apiBody.updatedAt ?? new Date().toISOString(),
       })
     }

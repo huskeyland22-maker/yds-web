@@ -26,9 +26,33 @@ const THRESHOLDS = {
 }
 
 /**
+ * @param {import("./ydsStockScoreEngine.js").StockPriceSnapshot} [snapshot]
+ */
+function build52wProximityReason(snapshot) {
+  if (!snapshot) return null
+  const close = snapshot.close
+  const high52w = snapshot.high52w
+  if (!Number.isFinite(close) || !Number.isFinite(high52w) || high52w <= 0) return null
+  const ratio = close / high52w
+  if (ratio < 0.96) return null
+  const gapPct = Math.max(0, Math.round((1 - ratio) * 100))
+  return {
+    id: "52w-near",
+    emoji: "🟡",
+    text: `52주 신고가 ${gapPct}% 이내`,
+    tone: /** @type {const} */ ("neutral"),
+  }
+}
+
+/**
  * @param {import("./ydsStockScoreConfig.js").YdsScoreBreakdown} scores
  * @param {import("./ydsStockScoreEngine.js").StockScoreComputeMeta} meta
- * @param {{ limit?: number; skipMarketFit?: boolean; marketFitReasons?: RecommendReason[] }} [options]
+ * @param {{
+ *   limit?: number
+ *   skipMarketFit?: boolean
+ *   marketFitReasons?: RecommendReason[]
+ *   engineSnapshot?: import("./ydsStockScoreEngine.js").StockPriceSnapshot
+ * }} [options]
  * @returns {RecommendReason[]}
  */
 export function buildRecommendReasons(scores, meta, options = {}) {
@@ -38,6 +62,7 @@ export function buildRecommendReasons(scores, meta, options = {}) {
   const reasons = []
   const { trendScore, volumeScore, positionScore, marketFitScore } = scores
   const drawdownPct = meta.drawdownPct ?? 0
+  const near52 = build52wProximityReason(options.engineSnapshot)
 
   if (trendScore >= THRESHOLDS.trendHigh) {
     reasons.push({ id: "trend-strong", emoji: "🟢", text: "강한 추세", tone: "positive" })
@@ -51,7 +76,9 @@ export function buildRecommendReasons(scores, meta, options = {}) {
     reasons.push({ id: "volume-ok", emoji: "🟡", text: "거래량 양호", tone: "neutral" })
   }
 
-  if (positionScore >= THRESHOLDS.positionHigh && drawdownPct <= 6) {
+  if (near52) {
+    reasons.push(near52)
+  } else if (positionScore >= THRESHOLDS.positionHigh && drawdownPct <= 6) {
     reasons.push({ id: "near-high", emoji: "🟡", text: "신고가 근처", tone: "neutral" })
   } else if (positionScore >= THRESHOLDS.positionMid && drawdownPct >= 5) {
     reasons.push({ id: "pullback", emoji: "🟡", text: "눌림 구간", tone: "neutral" })

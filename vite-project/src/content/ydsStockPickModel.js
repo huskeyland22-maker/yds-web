@@ -100,6 +100,9 @@ export const RATING_STARS = {
  *   recommendReasonSummary: string
  *   marketFitSource: 'adapter' | 'manual'
  *   sectorLabel: string
+ *   dataSource: 'live' | 'fallback'
+ *   quote: import("./ydsStockPickQuoteService.js").StockPickQuoteView | null
+ *   recommendReasonsDetail: import("./ydsStockRecommendReasons.js").RecommendReason[]
  * }} StockPickView
  */
 
@@ -171,10 +174,20 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     ? buildMarketFitReasons(ctx, statusId, marketFitScore)
     : []
 
-  const recommendReasons = buildRecommendReasons(scores, computed.meta, {
-    limit: 1,
+  const reasonOpts = {
     skipMarketFit: Boolean(ctx),
     marketFitReasons,
+    engineSnapshot,
+  }
+
+  const recommendReasonsDetail = buildRecommendReasons(scores, computed.meta, {
+    ...reasonOpts,
+    limit: 4,
+  })
+
+  const recommendReasons = buildRecommendReasons(scores, computed.meta, {
+    ...reasonOpts,
+    limit: 1,
   })
 
   const action = actionFromStatus(statusId, recommendReasons)
@@ -195,10 +208,12 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     stockAction: action.stockAction,
     actionReason: action.actionReason,
     recommendReasons,
+    recommendReasonsDetail,
     recommendReasonSummary: formatRecommendReasonSummary(recommendReasons),
     marketFitSource: ctx ? "adapter" : "manual",
     sectorLabel,
     dataSource: liveEntry ? "live" : "fallback",
+    quote: liveEntry?.quote ?? null,
   }
 }
 

@@ -5,9 +5,15 @@ import { STOCK_PICK_COUNTRIES } from "../../content/ydsStockPickModel.js"
  *   countryId: import("../../content/ydsStockPickModel.js").StockPickCountryId
  *   onCountryChange: (id: import("../../content/ydsStockPickModel.js").StockPickCountryId) => void
  *   className?: string
+ *   counts?: Partial<Record<import("../../content/ydsStockPickModel.js").StockPickCountryId, number>>
  * }} props
  */
-export default function YdsStockPickCountryTabs({ countryId, onCountryChange, className = "" }) {
+export default function YdsStockPickCountryTabs({
+  countryId,
+  onCountryChange,
+  className = "",
+  counts = {},
+}) {
   return (
     <div
       className={["yds-spick-country-tabs", className].filter(Boolean).join(" ")}
@@ -32,6 +38,11 @@ export default function YdsStockPickCountryTabs({ countryId, onCountryChange, cl
             {country.emoji}
           </span>
           {country.label}
+          {counts[country.id] != null ? (
+            <span className="yds-spick-country-tabs__count font-mono tabular-nums">
+              {counts[country.id]}
+            </span>
+          ) : null}
         </button>
       ))}
     </div>
