@@ -8,6 +8,7 @@ import {
 
 const EMPTY = {
   buyReason: "",
+  sellReason: "",
   lessons: "",
   nextAction: "",
   updatedAt: 0,

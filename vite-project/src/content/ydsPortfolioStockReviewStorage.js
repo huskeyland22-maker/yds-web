@@ -7,6 +7,7 @@ export const PORTFOLIO_STOCK_REVIEW_KEY = "yds-portfolio-stock-review-v1"
 /**
  * @typedef {{
  *   buyReason: string
+ *   sellReason: string
  *   lessons: string
  *   nextAction: string
  *   updatedAt: number
@@ -15,6 +16,7 @@ export const PORTFOLIO_STOCK_REVIEW_KEY = "yds-portfolio-stock-review-v1"
 
 const EMPTY_ENTRY = {
   buyReason: "",
+  sellReason: "",
   lessons: "",
   nextAction: "",
   updatedAt: 0,
@@ -33,6 +35,7 @@ export function loadPortfolioStockReviews() {
       if (!id || !entry || typeof entry !== "object") continue
       out[id] = {
         buyReason: String(entry.buyReason ?? ""),
+        sellReason: String(entry.sellReason ?? ""),
         lessons: String(entry.lessons ?? ""),
         nextAction: String(entry.nextAction ?? ""),
         updatedAt: Number(entry.updatedAt) || 0,

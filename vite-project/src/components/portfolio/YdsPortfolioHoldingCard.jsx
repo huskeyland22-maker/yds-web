@@ -24,6 +24,7 @@ function toneFromNumber(n) {
 
 const REVIEW_FIELDS = [
   { key: "buyReason", label: "매수 이유", placeholder: "왜 샀는지" },
+  { key: "sellReason", label: "매도 이유", placeholder: "왜 팔았는지 (보유 중이면 계획)" },
   { key: "lessons", label: "배운 점", placeholder: "이 종목에서 배운 것" },
   { key: "nextAction", label: "다음 행동", placeholder: "이번 주 할 일" },
 ]

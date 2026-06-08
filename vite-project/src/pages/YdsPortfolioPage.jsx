@@ -4,6 +4,7 @@ import YdsPortfolioCashSection from "../components/portfolio/YdsPortfolioCashSec
 import YdsPortfolioMySection from "../components/portfolio/YdsPortfolioMySection.jsx"
 import YdsPortfolioReviewSection from "../components/portfolio/YdsPortfolioReviewSection.jsx"
 import YdsPortfolioTradesSection from "../components/portfolio/YdsPortfolioTradesSection.jsx"
+import YdsPortfolioValidationSection from "../components/portfolio/YdsPortfolioValidationSection.jsx"
 import YdsPortfolioYdsCompareSection from "../components/portfolio/YdsPortfolioYdsCompareSection.jsx"
 import { PortfolioStateProvider } from "../context/PortfolioStateContext.jsx"
 import { UI_PAGE } from "../utils/ydsUiLabels.js"
@@ -24,7 +25,7 @@ export default function YdsPortfolioPage() {
   }, [location.hash])
 
   return (
-    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 yds-portfolio--v5 yds-portfolio--v6 yds-portfolio--v64 min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 yds-portfolio--v5 yds-portfolio--v6 yds-portfolio--v64 yds-portfolio--p7 min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-portfolio__header">
         <p className="yds-portfolio__kicker">{UI_PAGE.portfolio.kicker}</p>
         <h1 className="yds-portfolio__title">{UI_PAGE.portfolio.title}</h1>
@@ -43,6 +44,7 @@ export default function YdsPortfolioPage() {
         <YdsPortfolioTradesSection />
         <YdsPortfolioCashSection />
         <YdsPortfolioReviewSection />
+        <YdsPortfolioValidationSection />
       </PortfolioStateProvider>
 
       <p className="yds-portfolio__footnote">
