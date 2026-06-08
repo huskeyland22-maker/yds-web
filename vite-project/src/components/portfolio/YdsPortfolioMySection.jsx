@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { buildPositionRows } from "../../content/ydsPortfolioV2Engine.js"
+import { buildPortfolioSummary } from "../../content/ydsPortfolioV2Engine.js"
 import { usePortfolioCash } from "../../hooks/usePortfolioCash.js"
 import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
 
@@ -8,7 +8,7 @@ function formatPct(v) {
   return `${v > 0 ? "+" : ""}${v}%`
 }
 
-export default function YdsPortfolioHoldingsSection() {
+export default function YdsPortfolioMySection() {
   const { cashAmount } = usePortfolioCash()
   const { positions, manualPositions, addManualPosition, removeManualPosition } =
     usePortfolioHoldings()
@@ -18,8 +18,8 @@ export default function YdsPortfolioHoldingsSection() {
   const [avgPrice, setAvgPrice] = useState("")
   const [quantity, setQuantity] = useState("")
 
-  const { rows } = useMemo(
-    () => buildPositionRows(positions, cashAmount),
+  const summary = useMemo(
+    () => buildPortfolioSummary(positions, cashAmount),
     [positions, cashAmount],
   )
 
@@ -39,35 +39,64 @@ export default function YdsPortfolioHoldingsSection() {
   }
 
   return (
-    <section className="yds-portfolio__section yds-portfolio-v2__section" aria-labelledby="pf-holdings">
-      <h2 id="pf-holdings" className="yds-portfolio__section-title">
-        1 · 현재 보유 종목
+    <section
+      className="yds-portfolio__section yds-portfolio-v2__section yds-portfolio-v3__my"
+      aria-labelledby="pf-my"
+    >
+      <h2 id="pf-my" className="yds-portfolio__section-title">
+        1 · 내 포트폴리오
       </h2>
 
-      <p className="yds-portfolio-v2__hint-inline">
-        매매 기록에서 자동 반영 · 평가금액·비중·수익률은 자동 계산
-      </p>
+      <div className="yds-portfolio-v3__hero" aria-label="포트폴리오 요약">
+        <div className="yds-portfolio-v3__metric yds-portfolio-v3__metric--primary">
+          <p className="yds-portfolio-v3__metric-label">총 평가금액</p>
+          <p className="yds-portfolio-v3__metric-value font-mono tabular-nums">
+            {summary.totalValue > 0 ? summary.totalValue.toLocaleString("ko-KR") : "—"}
+            {summary.totalValue > 0 ? <span className="yds-portfolio-v3__metric-unit">원</span> : null}
+          </p>
+        </div>
+        <div className="yds-portfolio-v3__metric">
+          <p className="yds-portfolio-v3__metric-label">총 수익률</p>
+          <p
+            className={[
+              "yds-portfolio-v3__metric-value font-mono tabular-nums",
+              summary.totalReturnPct != null && summary.totalReturnPct > 0
+                ? "yds-portfolio-v2__up"
+                : "",
+              summary.totalReturnPct != null && summary.totalReturnPct < 0
+                ? "yds-portfolio-v2__down"
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {formatPct(summary.totalReturnPct)}
+          </p>
+        </div>
+        <div className="yds-portfolio-v3__metric">
+          <p className="yds-portfolio-v3__metric-label">현금 비중</p>
+          <p className="yds-portfolio-v3__metric-value font-mono tabular-nums">
+            {summary.totalValue > 0 ? `${summary.cashPct}%` : "—"}
+          </p>
+        </div>
+      </div>
 
-      {!rows.length ? (
+      {!summary.rows.length ? (
         <p className="yds-portfolio-v2__empty">
-          매수 기록을 남기면 보유 종목이 자동으로 채워집니다.
+          매수 기록을 남기면 보유 종목이 자동으로 표시됩니다.
         </p>
       ) : (
         <div className="yds-portfolio-v2__table-wrap">
-          <table className="yds-portfolio-v2__table">
+          <table className="yds-portfolio-v2__table yds-portfolio-v3__holdings-table">
             <thead>
               <tr>
-                <th scope="col">종목명</th>
-                <th scope="col">매수일</th>
-                <th scope="col">평균단가</th>
-                <th scope="col">보유수량</th>
-                <th scope="col">평가금액</th>
+                <th scope="col">보유 종목</th>
                 <th scope="col">수익률</th>
                 <th scope="col">비중</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
+              {summary.rows.map((row) => (
                 <tr key={row.id}>
                   <td>
                     <strong>{row.name}</strong>
@@ -75,10 +104,6 @@ export default function YdsPortfolioHoldingsSection() {
                       <span className="yds-portfolio-v2__tag">직접입력</span>
                     ) : null}
                   </td>
-                  <td className="font-mono tabular-nums">{row.buyDate}</td>
-                  <td className="font-mono tabular-nums">{row.avgPrice.toLocaleString("ko-KR")}</td>
-                  <td className="font-mono tabular-nums">{row.quantity.toLocaleString("ko-KR")}</td>
-                  <td className="font-mono tabular-nums">{row.valuation.toLocaleString("ko-KR")}</td>
                   <td
                     className={[
                       "font-mono tabular-nums",
@@ -140,17 +165,17 @@ export default function YdsPortfolioHoldingsSection() {
         {manualPositions.length ? (
           <ul className="yds-portfolio-v2__manual-list">
             {manualPositions.map((p) => (
-                <li key={p.id}>
-                  <span>{p.name}</span>
-                  <button
-                    type="button"
-                    className="yds-portfolio-v2__btn yds-portfolio-v2__btn--danger"
-                    onClick={() => removeManualPosition(p.id)}
-                  >
-                    삭제
-                  </button>
-                </li>
-              ))}
+              <li key={p.id}>
+                <span>{p.name}</span>
+                <button
+                  type="button"
+                  className="yds-portfolio-v2__btn yds-portfolio-v2__btn--danger"
+                  onClick={() => removeManualPosition(p.id)}
+                >
+                  삭제
+                </button>
+              </li>
+            ))}
           </ul>
         ) : null}
       </details>

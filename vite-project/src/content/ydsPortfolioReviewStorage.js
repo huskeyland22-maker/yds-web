@@ -10,6 +10,7 @@ export const PORTFOLIO_REVIEW_KEY = "yds-portfolio-review-v1"
  *   panic: string
  *   mistakes: string
  *   lessons: string
+ *   nextAction: string
  *   updatedAt: number
  * }} PortfolioReview
  */
@@ -19,6 +20,7 @@ const EMPTY = {
   panic: "",
   mistakes: "",
   lessons: "",
+  nextAction: "",
   updatedAt: 0,
 }
 
@@ -33,6 +35,7 @@ export function loadPortfolioReview() {
       panic: String(parsed.panic ?? ""),
       mistakes: String(parsed.mistakes ?? ""),
       lessons: String(parsed.lessons ?? ""),
+      nextAction: String(parsed.nextAction ?? ""),
       updatedAt: Number(parsed.updatedAt) || 0,
     }
   } catch {

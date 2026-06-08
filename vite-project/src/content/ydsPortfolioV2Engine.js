@@ -113,7 +113,34 @@ export function buildPortfolioV2Analysis(positions, cashAmount, context) {
 export function buildPositionRows(positions, cashAmount) {
   const asset = computeActualAssetAllocation(positions, cashAmount)
   const rows = positions.map((p) => computePositionRow(p, asset.total))
-  return { rows, totalValue: asset.total }
+  return { rows, totalValue: asset.total, asset }
+}
+
+/**
+ * @param {PortfolioPosition[]} positions
+ * @param {number} cashAmount
+ */
+export function buildPortfolioSummary(positions, cashAmount) {
+  const { rows, totalValue, asset } = buildPositionRows(positions, cashAmount)
+  const costBasis = positions.reduce(
+    (sum, p) => sum + Math.round(p.avgPrice * p.quantity),
+    0,
+  )
+  const stockVal = rows.reduce((sum, r) => sum + r.valuation, 0)
+  const totalReturnPct =
+    costBasis > 0 ? Math.round(((stockVal - costBasis) / costBasis) * 1000) / 10 : null
+  const cashPct =
+    totalValue > 0 ? Math.round((asset.cashVal / totalValue) * 1000) / 10 : 0
+
+  return {
+    rows,
+    totalValue,
+    totalReturnPct,
+    cashPct,
+    stockVal,
+    cashAmount: asset.cashVal,
+    costBasis,
+  }
 }
 
 /** @param {'buy' | 'sell' | 'watch'} action */

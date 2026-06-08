@@ -1,10 +1,9 @@
 import { usePortfolioReview } from "../../hooks/usePortfolioReview.js"
 
 const FIELDS = [
-  { key: "overheating", label: "과열권 대응", placeholder: "과열 구간에서 취한 행동" },
-  { key: "panic", label: "패닉 대응", placeholder: "패닉 구간에서 취한 행동" },
   { key: "mistakes", label: "실수", placeholder: "되돌아보고 싶은 판단" },
   { key: "lessons", label: "배운 점", placeholder: "다음에 적용할 원칙" },
+  { key: "nextAction", label: "다음 행동", placeholder: "이번 주 실행할 한 가지" },
 ]
 
 export default function YdsPortfolioReviewSection() {
@@ -16,7 +15,7 @@ export default function YdsPortfolioReviewSection() {
         4 · 투자 복기
       </h2>
 
-      <div className="yds-portfolio-v2__review-grid">
+      <div className="yds-portfolio-v3__review-grid">
         {FIELDS.map((field) => (
           <label key={field.key} className="yds-portfolio-v2__review-field">
             <span>{field.label}</span>
@@ -30,7 +29,8 @@ export default function YdsPortfolioReviewSection() {
         ))}
       </div>
 
-      <p className="yds-portfolio-v2__review-note">로컬 저장 · 포트폴리오와 함께 관리</p>
+      <p className="yds-portfolio-v3__review-future">향후 · 종목별 복기 연결 준비</p>
+      <p className="yds-portfolio-v2__review-note">로컬 저장</p>
     </section>
   )
 }

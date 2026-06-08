@@ -2,6 +2,7 @@
  * Portfolio V2 — node scripts/yds-portfolio-v2.test.mjs
  */
 import {
+  buildPortfolioSummary,
   buildPortfolioV2Analysis,
   buildPositionRows,
   computeActualAssetAllocation,
@@ -62,6 +63,11 @@ assert(row.valuation === 1200, `valuation ${row.valuation}`)
 const { rows, totalValue } = buildPositionRows(positions, 500_000)
 assert(rows.length === 2, "rows")
 assert(totalValue === asset.total, "total value")
+
+const summary = buildPortfolioSummary(positions, 500_000)
+assert(summary.totalValue === 851200, `summary total ${summary.totalValue}`)
+assert(summary.totalReturnPct != null && summary.totalReturnPct > 0, `summary return ${summary.totalReturnPct}`)
+assert(summary.cashPct > 0, `cash pct ${summary.cashPct}`)
 
 const analysis = buildPortfolioV2Analysis(positions, 500_000, ctx)
 assert(analysis.recommended.usPct > 0, "recommended")

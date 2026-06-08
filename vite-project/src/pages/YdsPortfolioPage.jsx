@@ -1,9 +1,9 @@
 import { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
-import YdsPortfolioAnalysisSection from "../components/portfolio/YdsPortfolioAnalysisSection.jsx"
-import YdsPortfolioHoldingsSection from "../components/portfolio/YdsPortfolioHoldingsSection.jsx"
+import YdsPortfolioMySection from "../components/portfolio/YdsPortfolioMySection.jsx"
 import YdsPortfolioReviewSection from "../components/portfolio/YdsPortfolioReviewSection.jsx"
 import YdsPortfolioTradesSection from "../components/portfolio/YdsPortfolioTradesSection.jsx"
+import YdsPortfolioYdsCompareSection from "../components/portfolio/YdsPortfolioYdsCompareSection.jsx"
 import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import "../styles/yds-portfolio.css"
 
@@ -22,25 +22,25 @@ export default function YdsPortfolioPage() {
   }, [location.hash])
 
   return (
-    <div className="yds-portfolio yds-portfolio--v2 min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-portfolio__header">
         <p className="yds-portfolio__kicker">{UI_PAGE.portfolio.kicker}</p>
         <h1 className="yds-portfolio__title">{UI_PAGE.portfolio.title}</h1>
         <p className="yds-portfolio__sub">
-          투자 운영 센터 · 타이밍{" "}
+          YDS 최종 실행 · 판단{" "}
           <Link to="/market-analysis">시장분석</Link>
-          {" · "}종목{" "}
+          {" · "}후보{" "}
           <Link to="/stock-picks">종목추천</Link>
         </p>
       </header>
 
-      <YdsPortfolioHoldingsSection />
+      <YdsPortfolioMySection />
+      <YdsPortfolioYdsCompareSection />
       <YdsPortfolioTradesSection />
-      <YdsPortfolioAnalysisSection />
       <YdsPortfolioReviewSection />
 
       <p className="yds-portfolio__footnote">
-        매매 기록 한 번 · 보유·분석 자동 · 같은 정보 두 번 입력하지 않음
+        시장분석은 판단 · 종목추천은 후보 · 포트폴리오는 실행
       </p>
     </div>
   )

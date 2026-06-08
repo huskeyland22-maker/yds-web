@@ -60,7 +60,7 @@ export default function YdsPortfolioTradesSection() {
       aria-labelledby="pf-trades"
     >
       <h2 id="pf-trades" className="yds-portfolio__section-title">
-        2 · 매매 기록
+        3 · 매매 기록
       </h2>
 
       <p className="yds-portfolio-v2__hint-inline">

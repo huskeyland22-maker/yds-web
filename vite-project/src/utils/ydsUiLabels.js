@@ -43,7 +43,7 @@ export const UI_PAGE = {
   },
   portfolio: {
     title: "포트폴리오",
-    kicker: "투자 운영 센터 · V2.1",
+    kicker: "투자 운영 센터 · V3",
     path: "/portfolio",
   },
   watchlist: {
