@@ -28,11 +28,12 @@ const THRESHOLDS = {
 /**
  * @param {import("./ydsStockScoreConfig.js").YdsScoreBreakdown} scores
  * @param {import("./ydsStockScoreEngine.js").StockScoreComputeMeta} meta
- * @param {{ limit?: number }} [options]
+ * @param {{ limit?: number; skipMarketFit?: boolean; marketFitReasons?: RecommendReason[] }} [options]
  * @returns {RecommendReason[]}
  */
 export function buildRecommendReasons(scores, meta, options = {}) {
   const limit = options.limit ?? 3
+  const skipMarketFit = options.skipMarketFit ?? false
   /** @type {RecommendReason[]} */
   const reasons = []
   const { trendScore, volumeScore, positionScore, marketFitScore } = scores
@@ -56,7 +57,9 @@ export function buildRecommendReasons(scores, meta, options = {}) {
     reasons.push({ id: "pullback", emoji: "🟡", text: "눌림 구간", tone: "neutral" })
   }
 
-  if (marketFitScore >= THRESHOLDS.marketFitHigh) {
+  if (options.marketFitReasons?.length) {
+    reasons.push(...options.marketFitReasons)
+  } else if (!skipMarketFit && marketFitScore >= THRESHOLDS.marketFitHigh) {
     reasons.push({
       id: "market-fit",
       emoji: "🟢",

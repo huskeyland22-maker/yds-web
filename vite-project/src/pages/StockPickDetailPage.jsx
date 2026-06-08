@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom"
 import { getStockPickByTicker, STOCK_PICK_COUNTRIES } from "../content/ydsStockPickModel.js"
 import { useStockPickFavorites } from "../hooks/useStockPickFavorites.js"
+import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
 import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
 import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
@@ -9,7 +10,8 @@ import "../styles/stock-picks-platform.css"
 
 export default function StockPickDetailPage() {
   const { ticker = "" } = useParams()
-  const stock = getStockPickByTicker(ticker)
+  const marketContext = useYdsMarketContext()
+  const stock = getStockPickByTicker(ticker, marketContext)
   const { isFavorite, toggleFavorite } = useStockPickFavorites()
 
   if (!stock) {
@@ -65,16 +67,17 @@ export default function StockPickDetailPage() {
         <p className="yds-spick-detail__comment">{stock.comment}</p>
 
         <p className="yds-spick-detail__schema-note">
-          추세·거래량·위치는 스냅샷 Provider 기반 자동 계산 · 시장 적합도는 수동값 (Phase
-          2-7 시장분석 연동 예정)
+          추세·거래량·위치는 스냅샷 Provider · 시장 적합도는
+          {stock.marketFitSource === "adapter" ? " 시장분석 Adapter 자동" : " 수동값"}
+          {marketContext.ready ? ` (${marketContext.strategyLabel})` : ""}
         </p>
       </header>
 
       <section className="yds-spick-detail__future" aria-label="향후 확장 영역">
-        <h2 className="yds-spick-detail__future-title">Phase 2-7 연동 예정</h2>
+        <h2 className="yds-spick-detail__future-title">향후 확장</h2>
         <ul className="yds-spick-detail__future-list">
-          <li>시장 적합도 자동화 (YDS 시장분석 → 종목추천)</li>
           <li>실시간 Yahoo · Naver Snapshot Provider</li>
+          <li>포트폴리오 비중 연동</li>
           <li>차트 · 실적 · 뉴스</li>
         </ul>
       </section>

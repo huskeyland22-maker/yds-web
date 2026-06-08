@@ -8,6 +8,10 @@ import {
   buildRecommendReasons,
   formatRecommendReasonSummary,
 } from "./ydsStockRecommendReasons.js"
+import {
+  buildMarketFitReasons,
+  computeMarketFitScore,
+} from "./ydsMarketAdapter.js"
 import { getStockSnapshot, toEngineSnapshot } from "./stockPickSnapshotProvider.js"
 import { computeStockScores } from "./ydsStockScoreEngine.js"
 import {
@@ -91,14 +95,20 @@ export const RATING_STARS = {
  *   actionReason: string
  *   recommendReasons: import("./ydsStockRecommendReasons.js").RecommendReason[]
  *   recommendReasonSummary: string
+ *   marketFitSource: 'adapter' | 'manual'
  *   sectorLabel: string
  * }} StockPickView
  */
 
-/** @param {StockPickRecord} row */
-function enrichStock(row) {
+/**
+ * @param {StockPickRecord} row
+ * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
+ */
+function enrichStock(row, marketContext = null) {
   const sectorLabel =
     STOCK_PICK_SECTORS.find((s) => s.id === row.sector)?.label ?? row.sector
+
+  const ctx = marketContext?.ready ? marketContext : null
 
   const marketSnapshot = getStockSnapshot({
     ticker: row.ticker,
@@ -106,20 +116,45 @@ function enrichStock(row) {
     status: row.status,
   })
   const computed = computeStockScores(toEngineSnapshot(marketSnapshot), {
-    marketFitScore: row.marketFitScore,
+    marketFitScore: 0,
   })
 
-  const scores =
+  const baseScores =
     normalizeScoreBreakdown(computed.scores) ?? {
       trendScore: 0,
       volumeScore: 0,
       positionScore: 0,
-      marketFitScore: row.marketFitScore ?? 0,
-      totalScore: row.marketFitScore ?? 0,
+      marketFitScore: 0,
+      totalScore: 0,
     }
 
-  const recommendReasons = buildRecommendReasons(scores, computed.meta)
-  const action = deriveStockAction(scores, computed.meta, recommendReasons)
+  const draftReasons = buildRecommendReasons(baseScores, computed.meta, {
+    limit: 3,
+    skipMarketFit: true,
+  })
+  const action = deriveStockAction(baseScores, computed.meta, draftReasons)
+
+  const marketFitScore = ctx
+    ? computeMarketFitScore(ctx, action.statusId, baseScores)
+    : row.marketFitScore ?? 0
+
+  const scores =
+    normalizeScoreBreakdown({
+      trendScore: baseScores.trendScore,
+      volumeScore: baseScores.volumeScore,
+      positionScore: baseScores.positionScore,
+      marketFitScore,
+    }) ?? baseScores
+
+  const marketFitReasons = ctx
+    ? buildMarketFitReasons(ctx, action.statusId, marketFitScore)
+    : []
+
+  const recommendReasons = buildRecommendReasons(scores, computed.meta, {
+    limit: 4,
+    skipMarketFit: Boolean(ctx),
+    marketFitReasons,
+  })
 
   return {
     ...row,
@@ -138,13 +173,17 @@ function enrichStock(row) {
     actionReason: action.actionReason,
     recommendReasons,
     recommendReasonSummary: formatRecommendReasonSummary(recommendReasons),
+    marketFitSource: ctx ? "adapter" : "manual",
     sectorLabel,
   }
 }
 
-/** @returns {StockPickView[]} */
-export function getStockPickUniverse() {
-  const enriched = universe.stocks.map(enrichStock)
+/**
+ * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
+ * @returns {StockPickView[]}
+ */
+export function getStockPickUniverse(marketContext = null) {
+  const enriched = universe.stocks.map((row) => enrichStock(row, marketContext))
   const sorted = [...enriched].sort((a, b) => b.scores.totalScore - a.scores.totalScore)
   return sorted.map((row, index) => ({ ...row, rank: index + 1 }))
 }
@@ -161,15 +200,18 @@ export function filterByCountry(stocks, countryId) {
   return stocks.filter((s) => s.country === countryId)
 }
 
-/** @param {StockPickCountryId} countryId */
-export function getStockPicksForCountry(countryId) {
-  return assignRanks(filterByCountry(getStockPickUniverse(), countryId))
+/** @param {StockPickCountryId} countryId @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext] */
+export function getStockPicksForCountry(countryId, marketContext = null) {
+  return assignRanks(filterByCountry(getStockPickUniverse(marketContext), countryId))
 }
 
-/** @param {string} ticker */
-export function getStockPickByTicker(ticker) {
+/**
+ * @param {string} ticker
+ * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
+ */
+export function getStockPickByTicker(ticker, marketContext = null) {
   const key = String(ticker ?? "").toUpperCase()
-  const all = getStockPickUniverse()
+  const all = getStockPickUniverse(marketContext)
   const stock = all.find((s) => s.ticker.toUpperCase() === key) ?? null
   if (!stock) return null
   return assignRanks(filterByCountry(all, stock.country)).find(
@@ -214,5 +256,7 @@ export function filterBySector(stocks, sectorId) {
   if (!sectorId || sectorId === "all") return stocks
   return stocks.filter((s) => s.sector === sectorId)
 }
+
+export { DEFAULT_MARKET_CONTEXT } from "./ydsMarketAdapter.js"
 
 export const TOP3_MEDALS = ["🥇", "🥈", "🥉"]

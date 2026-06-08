@@ -5,7 +5,7 @@ export function getPrimaryNavItems() {
   return [
     { label: "📊 시장분석", path: "/market-analysis" },
     { label: "⭐ 종목추천", path: "/stock-picks" },
-    { label: "💼 포트폴리오", path: "/performance-center" },
+    { label: "💼 포트폴리오", path: "/portfolio" },
     { label: "💡 인사이트", path: "/ai-daily-report" },
   ]
 }
@@ -23,7 +23,7 @@ export const NAV_MOBILE_SHORT = {
   "/market-analysis": "📊 시장",
   "/stock-picks": "⭐ 종목",
   "/watchlist": "⭐ 종목",
-  "/performance-center": "💼 포트",
+  "/portfolio": "💼 포트",
   "/performance-dashboard": "💼 포트",
   "/ai-daily-report": "💡 인사이트",
   "/alert-center": "🔔 알림",
@@ -39,8 +39,13 @@ export const UI_RADAR = {
 export const UI_PAGE = {
   stockPicks: {
     title: "종목추천",
-    kicker: "종목추천 · Phase 2-6",
+    kicker: "종목추천 · Phase 2-7",
     path: "/stock-picks",
+  },
+  portfolio: {
+    title: "포트폴리오",
+    kicker: "포트폴리오 · Phase 3-1",
+    path: "/portfolio",
   },
   watchlist: {
     title: "관심종목",

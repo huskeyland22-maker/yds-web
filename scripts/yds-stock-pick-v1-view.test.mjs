@@ -21,7 +21,7 @@ assert(all.length === 45, `universe ${all.length}`)
 const nvda = getStockPickByTicker("NVDA")
 assert(nvda != null, "nvda")
 assert(nvda.scores.trendScore > 0, "computed trend")
-assert(nvda.scores.marketFitScore === 19, "manual market fit")
+assert(nvda.scores.marketFitScore === 19, "manual market fit fallback")
 assert(
   nvda.scores.totalScore ===
     nvda.scores.trendScore +
@@ -73,7 +73,7 @@ assert(
   "top3 disjoint",
 )
 
-console.log("OK stock pick phase 2-6", {
+console.log("OK stock pick phase 2-7", {
   total: all.length,
   top3: top3.map((s) => `${s.name} ${s.scores.totalScore} (T${s.scores.trendScore})`),
   usTop3: usTop3.map((s) => s.name),

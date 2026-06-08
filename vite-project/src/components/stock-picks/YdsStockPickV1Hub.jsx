@@ -6,6 +6,7 @@ import {
   STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
+import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 
@@ -31,7 +32,11 @@ function useDualCountryLayout() {
 
 export default function YdsStockPickV1Hub() {
   const dualLayout = useDualCountryLayout()
-  const allStocks = useMemo(() => getStockPickUniverse(), [])
+  const marketContext = useYdsMarketContext()
+  const allStocks = useMemo(
+    () => getStockPickUniverse(marketContext),
+    [marketContext],
+  )
   const {
     favoritesOnly,
     setFavoritesOnly,
