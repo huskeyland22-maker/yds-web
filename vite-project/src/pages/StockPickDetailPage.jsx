@@ -4,7 +4,9 @@ import { useStockPickFavorites } from "../hooks/useStockPickFavorites.js"
 import { useStockPickDetailLive } from "../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
+import YdsStockPickDataBadge from "../components/stock-picks/YdsStockPickDataBadge.jsx"
 import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLine.jsx"
+import YdsStockPickTransparencyPanel from "../components/stock-picks/YdsStockPickTransparencyPanel.jsx"
 import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
 import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
@@ -49,6 +51,7 @@ export default function StockPickDetailPage() {
       <header className="yds-spick-detail__hero">
         <div className="yds-spick-detail__head-row">
           <h1 className="yds-spick-detail__title">{stock.name}</h1>
+          <YdsStockPickDataBadge mode={stock.dataSource === "live" ? "live" : "fallback"} />
           <YdsStockPickFavoriteButton
             active={isFavorite(stock.ticker)}
             onToggle={() => toggleFavorite(stock.ticker)}
@@ -66,6 +69,7 @@ export default function StockPickDetailPage() {
           ) : null}
         </p>
 
+        <YdsStockPickTransparencyPanel stock={stock} variant="detail" />
         <YdsStockPickActionBlock stock={stock} variant="detail" />
         <YdsStockPickReasons
           reasons={stock.recommendReasonsDetail ?? stock.recommendReasons}

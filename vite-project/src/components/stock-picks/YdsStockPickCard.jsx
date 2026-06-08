@@ -1,5 +1,9 @@
+import { useMemo } from "react"
 import { Link } from "react-router-dom"
+import { buildStockPickTransparency } from "../../content/ydsStockPickTransparency.js"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
+import YdsStockPickDataBadge from "./YdsStockPickDataBadge.jsx"
+import YdsStockPickTransparencyPanel from "./YdsStockPickTransparencyPanel.jsx"
 import YdsStockPickActionBlock from "./YdsStockPickActionBlock.jsx"
 import YdsStockPickPriceLine from "./YdsStockPickPriceLine.jsx"
 import YdsStockPickReasons from "./YdsStockPickReasons.jsx"
@@ -25,6 +29,10 @@ export default function YdsStockPickCard({
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
   const isHero = variant === "top3" || variant === "top5"
   const isCompact = variant === "compact"
+  const transparency = useMemo(
+    () => (isHero || isCompact ? buildStockPickTransparency(stock) : null),
+    [stock, isHero, isCompact],
+  )
 
   return (
     <Link
@@ -33,12 +41,23 @@ export default function YdsStockPickCard({
         "yds-spick-card",
         isHero ? "yds-spick-card--top5" : "",
         isCompact ? "yds-spick-card--compact" : "",
+        transparency?.badge === "live" ? "yds-spick-card--live" : "yds-spick-card--fallback",
       ]
         .filter(Boolean)
         .join(" ")}
     >
       <div className="yds-spick-card__head">
         {medal ? <span className="yds-spick-card__medal">{medal}</span> : null}
+        {isHero && transparency ? (
+          <span className="yds-spick-card__flag" aria-hidden>
+            {transparency.countryFlag}
+          </span>
+        ) : null}
+        {transparency ? (
+          <YdsStockPickDataBadge mode={transparency.badge} />
+        ) : (
+          <YdsStockPickDataBadge mode={stock.dataSource === "live" ? "live" : "fallback"} />
+        )}
         {rankLabel && !isHero ? (
           <span className="yds-spick-card__rank">{rankLabel}</span>
         ) : null}
@@ -49,19 +68,22 @@ export default function YdsStockPickCard({
       </div>
 
       <h3 className="yds-spick-card__name">{stock.name}</h3>
-      <YdsStockPickPriceLine stock={stock} compact={isCompact} />
 
-      <YdsStockPickActionBlock
-        stock={stock}
-        variant={isHero ? "top5" : isCompact ? "compact" : "card"}
-      />
-
-      <YdsStockPickReasons
-        reasons={stock.recommendReasons}
-        variant={isHero ? "top3" : isCompact ? "inline" : "card"}
-        maxItems={isHero || isCompact ? 1 : undefined}
-        title={isHero || isCompact ? "" : "추천 이유"}
-      />
+      {isHero ? (
+        <YdsStockPickTransparencyPanel stock={stock} variant="top5" />
+      ) : (
+        <>
+          <YdsStockPickPriceLine stock={stock} compact={isCompact} />
+          {isCompact ? (
+            <YdsStockPickTransparencyPanel stock={stock} variant="compact" />
+          ) : (
+            <>
+              <YdsStockPickActionBlock stock={stock} variant="card" />
+              <YdsStockPickReasons reasons={stock.recommendReasons} variant="card" />
+            </>
+          )}
+        </>
+      )}
     </Link>
   )
 }

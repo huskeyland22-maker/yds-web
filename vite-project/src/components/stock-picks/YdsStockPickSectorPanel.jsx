@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { STOCK_PICK_SECTORS } from "../../content/ydsStockPickModel.js"
+import YdsStockPickDataBadge from "./YdsStockPickDataBadge.jsx"
 
 /**
  * @param {{
@@ -43,7 +44,12 @@ export default function YdsStockPickSectorPanel({ stocks, sectorId, onSectorChan
                 to={`/stock-picks/${encodeURIComponent(stock.ticker)}`}
                 className="yds-spick-sector-list__link"
               >
-                <span className="yds-spick-sector-list__name">{stock.name}</span>
+                <span className="yds-spick-sector-list__name">
+                  {stock.name}
+                  <YdsStockPickDataBadge
+                    mode={stock.dataSource === "live" ? "live" : "fallback"}
+                  />
+                </span>
                 <span className="yds-spick-sector-list__status">
                   <span aria-hidden>{stock.stockStatus.emoji}</span> {stock.stockStatus.label}
                 </span>
