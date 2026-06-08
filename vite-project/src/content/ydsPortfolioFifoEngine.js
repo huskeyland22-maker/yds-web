@@ -96,8 +96,9 @@ export function replayPortfolioFifoFromTrades(trades) {
   /** @type {Map<string, { lot: PositionLot, fifo: FifoBuyLot[] }>} */
   const map = new Map()
   let totalRealizedPnl = 0
+  const safeTrades = Array.isArray(trades) ? trades : []
 
-  for (const trade of sortTrades(trades)) {
+  for (const trade of sortTrades(safeTrades)) {
     if (trade.action === "watch") continue
 
     const name = String(trade.name ?? "").trim()

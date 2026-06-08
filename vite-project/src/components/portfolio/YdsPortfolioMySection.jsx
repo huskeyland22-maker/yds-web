@@ -54,17 +54,17 @@ export default function YdsPortfolioMySection() {
   const { portfolio, sortBy, setSortBy, quotesLoading, quotesFetchedAt, quotesError } =
     usePortfolioHoldings()
   const {
-    rows,
-    totalAssets,
-    stockTotal,
-    totalCostKrw,
-    totalPnl,
-    totalReturnPct,
-    cashAmount,
-    cashPct,
-    totalRealizedPnl,
-    totalUnrealizedPnl,
-  } = portfolio
+    rows = [],
+    totalAssets = 0,
+    stockTotal = 0,
+    totalCostKrw = 0,
+    totalPnl = 0,
+    totalReturnPct = null,
+    cashAmount = 0,
+    cashPct = 0,
+    totalRealizedPnl = 0,
+    totalUnrealizedPnl = 0,
+  } = portfolio ?? {}
 
   return (
     <section

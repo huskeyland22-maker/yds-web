@@ -32,12 +32,38 @@ import {
 
 const REFRESH_MS = 60_000
 
+/** @returns {PortfolioQuoteState} */
+function emptyQuoteResult(error = null) {
+  return { quoteMap: new Map(), usdkrw: null, fetchedAt: null, loading: false, error }
+}
+
+/**
+ * @param {QuoteFetchLot[]} lots
+ * @param {Record<string, PortfolioQuote>} cache
+ */
+function quoteMapFromCache(lots, cache) {
+  /** @type {Map<string, PortfolioQuote>} */
+  const quoteMap = new Map()
+  for (const lot of lots ?? []) {
+    if (!lot?.priceReady || !lot.ticker) continue
+    const country = lot.country === "kr" ? "kr" : "us"
+    const cacheKey = quoteCacheKey(country, lot.ticker)
+    const cached = cache?.[cacheKey]
+    if (cached?.price != null && cached.price > 0) {
+      quoteMap.set(lot.id, { ...cached, status: "delayed", stale: true })
+    }
+  }
+  return quoteMap
+}
+
 /**
  * @param {QuoteFetchLot[]} lots
  */
 export async function fetchPortfolioQuotes(lots) {
-  const items = lots
-    .filter((l) => l.priceReady && l.ticker)
+  const safeLots = Array.isArray(lots) ? lots : []
+
+  const items = safeLots
+    .filter((l) => l?.priceReady && l.ticker)
     .map((l) => ({
       lotId: l.id,
       ticker: l.ticker,
@@ -45,7 +71,7 @@ export async function fetchPortfolioQuotes(lots) {
     }))
 
   if (!items.length) {
-    return { quoteMap: new Map(), usdkrw: null, fetchedAt: null, error: null }
+    return emptyQuoteResult()
   }
 
   const cache = loadPortfolioQuoteCache()
@@ -63,15 +89,27 @@ export async function fetchPortfolioQuotes(lots) {
       throw new Error(`quote_http_${res.status}`)
     }
 
-    const data = await res.json()
+    let data = {}
+    try {
+      data = await res.json()
+    } catch {
+      throw new Error("quote_json_invalid")
+    }
+    if (!data || typeof data !== "object") {
+      throw new Error("quote_payload_invalid")
+    }
+
+    const byLotId = data.byLotId && typeof data.byLotId === "object" ? data.byLotId : {}
+    const quotes = data.quotes && typeof data.quotes === "object" ? data.quotes : {}
+
     /** @type {Map<string, PortfolioQuote>} */
     const quoteMap = new Map()
 
-    for (const lot of lots) {
-      if (!lot.priceReady || !lot.ticker) continue
+    for (const lot of safeLots) {
+      if (!lot?.priceReady || !lot.ticker) continue
       const country = lot.country === "kr" ? "kr" : "us"
       const cacheKey = quoteCacheKey(country, lot.ticker)
-      const fresh = data.byLotId?.[lot.id] ?? data.quotes?.[cacheKey] ?? null
+      const fresh = byLotId[lot.id] ?? quotes[cacheKey] ?? null
       const merged = mergeQuoteWithCache(fresh, cache[cacheKey])
       if (merged) {
         quoteMap.set(lot.id, merged)
@@ -87,25 +125,15 @@ export async function fetchPortfolioQuotes(lots) {
       quoteMap,
       usdkrw: data.usdkrw ?? null,
       fetchedAt: data.fetchedAt ?? new Date().toISOString(),
+      loading: false,
       error: null,
     }
   } catch (e) {
-    /** @type {Map<string, PortfolioQuote>} */
-    const quoteMap = new Map()
-    for (const lot of lots) {
-      if (!lot.priceReady || !lot.ticker) continue
-      const country = lot.country === "kr" ? "kr" : "us"
-      const cacheKey = quoteCacheKey(country, lot.ticker)
-      const cached = cache[cacheKey]
-      if (cached) {
-        quoteMap.set(lot.id, { ...cached, status: "delayed", stale: true })
-      }
-    }
-
     return {
-      quoteMap,
+      quoteMap: quoteMapFromCache(safeLots, cache),
       usdkrw: null,
       fetchedAt: null,
+      loading: false,
       error: e instanceof Error ? e.message : "quote_fetch_failed",
     }
   }

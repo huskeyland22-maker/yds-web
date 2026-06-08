@@ -86,7 +86,25 @@ function qtyAndUnit(trade) {
  * @param {PortfolioTrade[]} trades
  */
 export function replayPortfolioFromTrades(trades) {
-  return replayPortfolioFifoFromTrades(trades)
+  return replayPortfolioFifoFromTrades(trades ?? [])
+}
+
+/** @returns {ReturnType<typeof buildV5Holdings>} */
+export function emptyPortfolioHoldings() {
+  return {
+    rows: [],
+    lots: [],
+    totalValue: 0,
+    totalAssets: 0,
+    stockTotal: 0,
+    cashAmount: 0,
+    cashPct: 0,
+    totalCostKrw: 0,
+    totalRealizedPnl: 0,
+    totalUnrealizedPnl: 0,
+    totalPnl: 0,
+    totalReturnPct: null,
+  }
 }
 
 /**
@@ -160,12 +178,14 @@ export function sortHoldingRows(rows, sortBy) {
  * @param {number} [usdkrw]
  */
 export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPct", usdkrw) {
-  const { lots, totalRealizedPnl } = replayPortfolioFromTrades(trades)
+  const safeTrades = Array.isArray(trades) ? trades : []
+  const safeQuoteMap = quoteMap instanceof Map ? quoteMap : new Map()
+  const { lots, totalRealizedPnl } = replayPortfolioFromTrades(safeTrades)
   const cash = Math.max(0, Number(cashAmount) || 0)
 
   /** @type {HoldingRow[]} */
   let rows = lots.map((lot) => {
-    const quote = quoteMap?.get(lot.id)
+    const quote = safeQuoteMap.get(lot.id)
     return enrichLot(lot, quote, usdkrw)
   })
 
@@ -211,9 +231,11 @@ export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPc
 export function computeAllocationFromLots(lots, quoteMap, cashAmount, usdkrw) {
   let usVal = 0
   let krVal = 0
+  const safeLots = Array.isArray(lots) ? lots : []
+  const safeQuoteMap = quoteMap instanceof Map ? quoteMap : new Map()
 
-  for (const lot of lots) {
-    const quote = quoteMap?.get(lot.id)
+  for (const lot of safeLots) {
+    const quote = safeQuoteMap.get(lot.id)
     const row = enrichLot(lot, quote, usdkrw)
     if (lot.country === "kr") krVal += row.marketValueKrw
     else usVal += row.marketValueKrw
@@ -246,9 +268,11 @@ export function computeAllocationFromLots(lots, quoteMap, cashAmount, usdkrw) {
  * @param {number} [usdkrw]
  */
 export function buildV5Analysis(trades, cashAmount, context, quoteMap, usdkrw) {
-  const { lots } = replayPortfolioFromTrades(trades)
-  const asset = computeAllocationFromLots(lots, quoteMap, cashAmount, usdkrw)
-  const recommended = computeRecommendedAssetAllocation(context)
+  const safeTrades = Array.isArray(trades) ? trades : []
+  const safeQuoteMap = quoteMap instanceof Map ? quoteMap : new Map()
+  const { lots } = replayPortfolioFromTrades(safeTrades)
+  const asset = computeAllocationFromLots(lots, safeQuoteMap, cashAmount ?? 0, usdkrw)
+  const recommended = computeRecommendedAssetAllocation(context ?? {})
   const actual = { usPct: asset.usPct, krPct: asset.krPct, cashPct: asset.cashPct }
   const compliance = computeCompliance(recommended, actual)
   const rebalance = deriveAssetRebalance(recommended, actual)

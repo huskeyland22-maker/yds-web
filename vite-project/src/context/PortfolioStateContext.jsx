@@ -8,6 +8,7 @@ import {
 } from "../content/ydsPortfolioQuoteService.js"
 import {
   buildV5Holdings,
+  emptyPortfolioHoldings,
   replayPortfolioFromTrades,
   tradeAmountKrw,
 } from "../content/ydsPortfolioV5Engine.js"
@@ -27,8 +28,21 @@ import {
 const PortfolioStateContext = createContext(null)
 
 function usePortfolioStateValue() {
-  const [trades, setTrades] = useState(() => loadPortfolioTrades())
-  const [cashBalance, setCashBalanceState] = useState(() => loadCashBalance())
+  const [trades, setTrades] = useState(() => {
+    try {
+      const loaded = loadPortfolioTrades()
+      return Array.isArray(loaded) ? loaded : []
+    } catch {
+      return []
+    }
+  })
+  const [cashBalance, setCashBalanceState] = useState(() => {
+    try {
+      return loadCashBalance() ?? 0
+    } catch {
+      return 0
+    }
+  })
   const [sortBy, setSortBy] = useState(/** @type {HoldingsSortKey} */ ("returnPct"))
   /** @type {[Map<string, PortfolioQuote>, import("react").Dispatch<import("react").SetStateAction<Map<string, PortfolioQuote>>>]} */
   const [quoteMap, setQuoteMap] = useState(() => new Map())
@@ -58,23 +72,32 @@ function usePortfolioStateValue() {
     const { lots } = replayPortfolioFromTrades(trades)
 
     async function refreshQuotes() {
-      if (!lots.some((l) => l.priceReady && l.ticker)) {
-        setQuoteMap(new Map())
-        return
-      }
+      try {
+        if (!lots.some((l) => l?.priceReady && l.ticker)) {
+          setQuoteMap(new Map())
+          return
+        }
 
-      setQuotesLoading(true)
-      const result = await fetchPortfolioQuotes(lots)
-      if (cancelled) return
+        setQuotesLoading(true)
+        const result = await fetchPortfolioQuotes(lots)
+        if (cancelled) return
 
-      setQuoteMap(result.quoteMap)
-      if (result.usdkrw != null && result.usdkrw > 0) {
-        setPortfolioUsdKrw(result.usdkrw)
-        setUsdkrw(result.usdkrw)
+        setQuoteMap(result?.quoteMap instanceof Map ? result.quoteMap : new Map())
+        if (result?.usdkrw != null && result.usdkrw > 0) {
+          setPortfolioUsdKrw(result.usdkrw)
+          setUsdkrw(result.usdkrw)
+        }
+        setQuotesFetchedAt(result?.fetchedAt ?? null)
+        setQuotesError(result?.error ?? null)
+      } catch (e) {
+        if (!cancelled) {
+          console.error("[PortfolioState] quote refresh failed", e)
+          setQuoteMap(new Map())
+          setQuotesError(e instanceof Error ? e.message : "quote_refresh_failed")
+        }
+      } finally {
+        if (!cancelled) setQuotesLoading(false)
       }
-      setQuotesFetchedAt(result.fetchedAt)
-      setQuotesError(result.error)
-      setQuotesLoading(false)
     }
 
     refreshQuotes()
@@ -143,10 +166,14 @@ function usePortfolioStateValue() {
   const cashAmount = cashBalance
   const fxRate = usdkrw ?? getPortfolioUsdKrw()
 
-  const portfolio = useMemo(
-    () => buildV5Holdings(trades, cashAmount, quoteMap, sortBy, fxRate),
-    [trades, cashAmount, quoteMap, sortBy, fxRate],
-  )
+  const portfolio = useMemo(() => {
+    try {
+      return buildV5Holdings(trades ?? [], cashAmount ?? 0, quoteMap, sortBy, fxRate)
+    } catch (e) {
+      console.error("[PortfolioState] buildV5Holdings failed", e)
+      return emptyPortfolioHoldings()
+    }
+  }, [trades, cashAmount, quoteMap, sortBy, fxRate])
 
   return {
     trades,

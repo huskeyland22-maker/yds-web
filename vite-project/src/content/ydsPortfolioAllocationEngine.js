@@ -43,19 +43,20 @@ function clampPct(n) {
  * @returns {AssetAllocation}
  */
 export function computeRecommendedAssetAllocation(context) {
-  const macroId = context.macroId ?? "neutral"
+  const ctx = context && typeof context === "object" ? context : {}
+  const macroId = ctx.macroId ?? "neutral"
   const base = BASE_ASSET[macroId] ?? BASE_ASSET.neutral
 
   let usPct = base.us
   let krPct = base.kr
   let cashPct = base.cash
 
-  const adj = CYCLE_ASSET_ADJUST[context.cycleStageId] ?? CYCLE_ASSET_ADJUST.normal
+  const adj = CYCLE_ASSET_ADJUST[ctx.cycleStageId] ?? CYCLE_ASSET_ADJUST.normal
   usPct += adj.us
   krPct += adj.kr
   cashPct += adj.cash
 
-  if (context.isDefensive && macroId === "neutral") {
+  if (ctx.isDefensive && macroId === "neutral") {
     cashPct = Math.max(cashPct, 55)
     const stockTotal = 100 - cashPct
     usPct = Math.round(stockTotal * 0.625)
