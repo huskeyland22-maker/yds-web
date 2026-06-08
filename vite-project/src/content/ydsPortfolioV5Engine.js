@@ -11,7 +11,8 @@ import { toKrwValue } from "./ydsPortfolioPriceProvider.js"
 import { quotePrice } from "./ydsPortfolioQuoteTypes.js"
 
 /** @typedef {import("./ydsPortfolioQuoteTypes.js").PortfolioQuote} PortfolioQuote */
-import { inferCountryFromName, normalizePositionName } from "./ydsPortfolioTradeSync.js"
+import { replayPortfolioFifoFromTrades } from "./ydsPortfolioFifoEngine.js"
+import { computePortfolioCash } from "./ydsPortfolioCashEngine.js"
 
 /** @typedef {import("./ydsPortfolioTradesStorage.js").PortfolioTrade} PortfolioTrade */
 /** @typedef {import("./ydsMarketAdapter.js").YdsMarketAdapterContext} YdsMarketAdapterContext */
@@ -84,160 +85,8 @@ function qtyAndUnit(trade) {
 /**
  * @param {PortfolioTrade[]} trades
  */
-function sortTrades(trades) {
-  return [...trades].sort((a, b) => {
-    const byDate = a.date.localeCompare(b.date)
-    if (byDate !== 0) return byDate
-    return a.createdAt - b.createdAt
-  })
-}
-
-/**
- * @param {PortfolioTrade[]} trades
- */
 export function replayPortfolioFromTrades(trades) {
-  /** @type {Map<string, PositionLot>} */
-  const map = new Map()
-  let totalRealizedPnl = 0
-
-  for (const trade of sortTrades(trades)) {
-    if (trade.action === "watch") continue
-
-    const name = String(trade.name ?? "").trim()
-    if (!name) continue
-
-    const key = normalizePositionName(name)
-    const country = trade.country === "kr" ? "kr" : "us"
-    const ticker = String(trade.ticker ?? "").trim()
-
-    if (qtyAndUnit(trade)) {
-      const qty = Number(trade.quantity) || 0
-      const unitPrice = Number(trade.unitPrice) || 0
-      const localAmount = qty * unitPrice
-
-      if (trade.action === "buy") {
-        const existing = map.get(key)
-        if (existing?.priceReady) {
-          const newQty = existing.quantity + qty
-          const newCost = existing.costBasisLocal + localAmount
-          existing.quantity = newQty
-          existing.costBasisLocal = newCost
-          existing.avgUnitPrice = newQty > 0 ? newCost / newQty : unitPrice
-          if (ticker) existing.ticker = ticker
-          if (!existing.country && country) existing.country = country
-        } else if (existing && existing.quantity > 0) {
-          const newQty = existing.quantity + qty
-          const newCost = existing.costBasisLocal + localAmount
-          existing.quantity = newQty
-          existing.costBasisLocal = newCost
-          existing.avgUnitPrice = newQty > 0 ? newCost / newQty : unitPrice
-          if (ticker) {
-            existing.ticker = ticker
-            existing.priceReady = true
-          }
-          if (!existing.country && country) existing.country = country
-        } else {
-          map.set(key, {
-            id: key,
-            name,
-            ticker: ticker || "",
-            country,
-            quantity: qty,
-            avgUnitPrice: unitPrice,
-            costBasisLocal: localAmount,
-            realizedPnl: 0,
-            firstBuyDate: trade.date,
-            priceReady: Boolean(ticker),
-          })
-        }
-        continue
-      }
-
-      if (trade.action === "sell") {
-        const lot = map.get(key)
-        if (!lot || !lot.priceReady || lot.quantity <= 0) continue
-
-        const proceeds = localAmount
-        if (qty >= lot.quantity) {
-          const realized = proceeds - lot.costBasisLocal
-          totalRealizedPnl += toKrwValue(lot.country, realized)
-          map.delete(key)
-        } else {
-          const proportion = qty / lot.quantity
-          const costRemoved = lot.costBasisLocal * proportion
-          const realized = proceeds - costRemoved
-          lot.realizedPnl += toKrwValue(lot.country, realized)
-          totalRealizedPnl += toKrwValue(lot.country, realized)
-          lot.costBasisLocal -= costRemoved
-          lot.quantity -= qty
-          lot.avgUnitPrice = lot.quantity > 0 ? lot.costBasisLocal / lot.quantity : 0
-        }
-      }
-      continue
-    }
-
-    const amountKrw = tradeAmountKrw(trade)
-    if (amountKrw <= 0) continue
-
-    if (trade.action === "buy") {
-      const existing = map.get(key)
-      if (existing?.priceReady) continue
-
-      if (!existing) {
-        map.set(key, {
-          id: key,
-          name,
-          ticker: ticker || "",
-          country,
-          quantity: 0,
-          avgUnitPrice: 0,
-          costBasisLocal: 0,
-          realizedPnl: 0,
-          firstBuyDate: trade.date,
-          priceReady: false,
-          holdingAmount: amountKrw,
-          costBasis: amountKrw,
-        })
-      } else {
-        existing.holdingAmount = (existing.holdingAmount ?? 0) + amountKrw
-        existing.costBasis = (existing.costBasis ?? 0) + amountKrw
-        if (!existing.country && country) existing.country = country
-      }
-      continue
-    }
-
-    if (trade.action === "sell") {
-      const lot = map.get(key)
-      if (!lot) continue
-
-      if (lot.priceReady) continue
-
-      const holding = lot.holdingAmount ?? 0
-      if (holding <= 0) continue
-
-      const proceeds = amountKrw
-      if (proceeds >= holding) {
-        const realized = proceeds - (lot.costBasis ?? 0)
-        totalRealizedPnl += realized
-        map.delete(key)
-      } else {
-        const proportion = proceeds / holding
-        const costRemoved = Math.round((lot.costBasis ?? 0) * proportion)
-        const realized = proceeds - costRemoved
-        lot.realizedPnl += realized
-        totalRealizedPnl += realized
-        lot.costBasis = (lot.costBasis ?? 0) - costRemoved
-        lot.holdingAmount = holding - proceeds
-      }
-    }
-  }
-
-  const lots = Array.from(map.values()).filter((l) => {
-    if (l.priceReady) return l.quantity > 0
-    return (l.holdingAmount ?? 0) > 0
-  })
-
-  return { lots, totalRealizedPnl }
+  return replayPortfolioFifoFromTrades(trades)
 }
 
 /**
@@ -321,17 +170,18 @@ export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPc
   })
 
   const stockTotal = rows.reduce((sum, r) => sum + r.marketValueKrw, 0)
-  const totalValue = stockTotal + cash
+  const totalAssets = stockTotal + cash
+  const totalValue = totalAssets
   const totalCostKrw = rows.reduce((sum, r) => sum + r.costBasisKrw, 0)
   const totalUnrealizedPnl = rows.reduce((sum, r) => sum + (r.unrealizedPnl ?? 0), 0)
   const totalPnl = totalRealizedPnl + totalUnrealizedPnl
   const totalReturnPct =
     totalCostKrw > 0 ? Math.round((totalPnl / totalCostKrw) * 1000) / 10 : null
-  const cashPct = totalValue > 0 ? Math.round((cash / totalValue) * 1000) / 10 : 0
+  const cashPct = totalAssets > 0 ? Math.round((cash / totalAssets) * 1000) / 10 : 0
 
   rows = rows.map((row) => ({
     ...row,
-    weightPct: totalValue > 0 ? Math.round((row.marketValueKrw / totalValue) * 1000) / 10 : 0,
+    weightPct: totalAssets > 0 ? Math.round((row.marketValueKrw / totalAssets) * 1000) / 10 : 0,
   }))
 
   rows = sortHoldingRows(rows, sortBy)
@@ -340,6 +190,7 @@ export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPc
     rows,
     lots,
     totalValue,
+    totalAssets,
     stockTotal,
     cashAmount: cash,
     cashPct,
@@ -415,12 +266,7 @@ export function buildV5Analysis(trades, cashAmount, context, quoteMap, usdkrw) {
 
 /** @param {PortfolioTrade[]} trades */
 export function deriveCashFromTrades(trades) {
-  let cash = 0
-  for (const t of sortTrades(trades)) {
-    const amt = tradeAmountKrw(t)
-    if (amt <= 0) continue
-    if (t.action === "sell") cash += amt
-    if (t.action === "buy") cash -= amt
-  }
-  return Math.max(0, cash)
+  return computePortfolioCash(trades, [])
 }
+
+export { computePortfolioCash }

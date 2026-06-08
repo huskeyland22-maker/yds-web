@@ -31,7 +31,7 @@ export default function YdsPortfolioYdsCompareSection() {
       </h2>
 
       <p className="yds-portfolio-v3__compare-lead">
-        {marketContext.strategyEmoji} {marketContext.strategyLabel} · 현재가 반영 자동 분석
+        {marketContext.strategyEmoji} {marketContext.strategyLabel} · 주식 평가 + 현금 비중 비교
       </p>
 
       <div className="yds-portfolio-v4__alloc-bars">

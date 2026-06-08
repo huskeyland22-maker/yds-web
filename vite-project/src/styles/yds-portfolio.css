@@ -720,6 +720,27 @@
   color: #64748b;
 }
 
+.yds-portfolio-v6__hero {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.yds-portfolio-v6__cash-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-portfolio-v6__cash-summary strong {
+  color: #93c5fd;
+}
+
 .yds-portfolio-v2__section {
   padding: 0.75rem 0.85rem;
   border-radius: 0.55rem;
@@ -1139,6 +1160,7 @@
 
   .yds-portfolio-v3__hero,
   .yds-portfolio-v5__hero,
+  .yds-portfolio-v6__hero,
   .yds-portfolio-v3__compare-grid,
   .yds-portfolio-v3__compare-metrics {
     grid-template-columns: 1fr;

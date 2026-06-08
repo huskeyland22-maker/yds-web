@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
+import YdsPortfolioCashSection from "../components/portfolio/YdsPortfolioCashSection.jsx"
 import YdsPortfolioMySection from "../components/portfolio/YdsPortfolioMySection.jsx"
 import YdsPortfolioReviewSection from "../components/portfolio/YdsPortfolioReviewSection.jsx"
 import YdsPortfolioTradesSection from "../components/portfolio/YdsPortfolioTradesSection.jsx"
@@ -39,6 +40,7 @@ export default function YdsPortfolioPage() {
         <YdsPortfolioMySection />
         <YdsPortfolioYdsCompareSection />
         <YdsPortfolioTradesSection />
+        <YdsPortfolioCashSection />
         <YdsPortfolioReviewSection />
       </PortfolioStateProvider>
 

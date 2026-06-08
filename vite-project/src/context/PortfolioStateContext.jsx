@@ -1,4 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { computePortfolioCash } from "../content/ydsPortfolioCashEngine.js"
+import {
+  createCashLedgerId,
+  loadCashLedger,
+  saveCashLedger,
+} from "../content/ydsPortfolioCashLedgerStorage.js"
 import { setPortfolioUsdKrw, getPortfolioUsdKrw } from "../content/ydsPortfolioPriceProvider.js"
 import {
   fetchPortfolioQuotes,
@@ -6,7 +12,6 @@ import {
 } from "../content/ydsPortfolioQuoteService.js"
 import {
   buildV5Holdings,
-  deriveCashFromTrades,
   replayPortfolioFromTrades,
   tradeAmountKrw,
 } from "../content/ydsPortfolioV5Engine.js"
@@ -21,12 +26,15 @@ import {
 /** @typedef {import("../content/ydsPortfolioTradesStorage.js").TradeAction} TradeAction */
 /** @typedef {import("../content/ydsPortfolioV5Engine.js").HoldingsSortKey} HoldingsSortKey */
 /** @typedef {import("../content/ydsPortfolioQuoteTypes.js").PortfolioQuote} PortfolioQuote */
+/** @typedef {import("../content/ydsPortfolioCashLedgerStorage.js").CashLedgerEntry} CashLedgerEntry */
+/** @typedef {import("../content/ydsPortfolioCashLedgerStorage.js").CashLedgerType} CashLedgerType */
 
 /** @type {import("react").Context<null | ReturnType<typeof usePortfolioStateValue>>} */
 const PortfolioStateContext = createContext(null)
 
 function usePortfolioStateValue() {
   const [trades, setTrades] = useState(() => loadPortfolioTrades())
+  const [cashLedger, setCashLedger] = useState(() => loadCashLedger())
   const [sortBy, setSortBy] = useState(/** @type {HoldingsSortKey} */ ("returnPct"))
   /** @type {[Map<string, PortfolioQuote>, import("react").Dispatch<import("react").SetStateAction<Map<string, PortfolioQuote>>>]} */
   const [quoteMap, setQuoteMap] = useState(() => new Map())
@@ -38,6 +46,10 @@ function usePortfolioStateValue() {
   useEffect(() => {
     savePortfolioTrades(trades)
   }, [trades])
+
+  useEffect(() => {
+    saveCashLedger(cashLedger)
+  }, [cashLedger])
 
   const lotsSignature = useMemo(() => {
     const { lots } = replayPortfolioFromTrades(trades)
@@ -129,7 +141,38 @@ function usePortfolioStateValue() {
     setTrades((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  const cashAmount = useMemo(() => deriveCashFromTrades(trades), [trades])
+  /**
+   * @param {{
+   *   type: CashLedgerType
+   *   amount: number
+   *   memo?: string
+   *   date?: string
+   * }} input
+   */
+  const addCashEntry = useCallback((input) => {
+    const now = Date.now()
+    const entry = {
+      id: createCashLedgerId(),
+      date: input.date ?? todayDateKey(),
+      type: input.type,
+      amount: Math.round(Number(input.amount) || 0),
+      memo: String(input.memo ?? "").trim(),
+      createdAt: now,
+    }
+    if (entry.amount <= 0) return null
+    setCashLedger((prev) => [entry, ...prev])
+    return entry
+  }, [])
+
+  /** @param {string} id */
+  const removeCashEntry = useCallback((id) => {
+    setCashLedger((prev) => prev.filter((e) => e.id !== id))
+  }, [])
+
+  const cashAmount = useMemo(
+    () => computePortfolioCash(trades, cashLedger),
+    [trades, cashLedger],
+  )
   const fxRate = usdkrw ?? getPortfolioUsdKrw()
 
   const portfolio = useMemo(
@@ -141,6 +184,9 @@ function usePortfolioStateValue() {
     trades,
     addTrade,
     removeTrade,
+    cashLedger,
+    addCashEntry,
+    removeCashEntry,
     portfolio,
     cashAmount,
     quoteMap,
