@@ -245,6 +245,32 @@
   line-height: 1.65;
 }
 
+.yds-portfolio__execution {
+  margin-top: 0.25rem;
+}
+
+.yds-portfolio__action-log-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-portfolio__compliance {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #93c5fd;
+}
+
+.yds-portfolio__action-log.yds-action-log {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.65rem;
+}
+
 .yds-portfolio__detail {
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 0.55rem;

@@ -6,15 +6,12 @@ export function getPrimaryNavItems() {
     { label: "📊 시장분석", path: "/market-analysis" },
     { label: "⭐ 종목추천", path: "/stock-picks" },
     { label: "💼 포트폴리오", path: "/portfolio" },
-    { label: "💡 인사이트", path: "/ai-daily-report" },
   ]
 }
 
 /** @returns {{ label: string; path: string }[]} */
 export function getSecondaryNavItems() {
   return [
-    { label: "📋 운영", path: "/ops-dashboard" },
-    { label: "📝 행동 로그", path: "/action-log" },
     { label: "🔔 알림", path: "/alert-center" },
     { label: "🧪 연구실", path: "/lab" },
   ]
@@ -28,9 +25,6 @@ export const NAV_MOBILE_SHORT = {
   "/portfolio": "💼 포트",
   "/performance-dashboard": "💼 포트",
   "/ai-daily-report": "💡 인사이트",
-  "/action-log": "📝 로그",
-  "/yds-compare": "📊 비교",
-  "/ops-dashboard": "📋 운영",
   "/alert-center": "🔔 알림",
   "/lab": "🧪 연구",
 }
@@ -49,23 +43,8 @@ export const UI_PAGE = {
   },
   portfolio: {
     title: "포트폴리오",
-    kicker: "포트폴리오 · V1",
+    kicker: "포트폴리오 · 실행",
     path: "/portfolio",
-  },
-  actionLog: {
-    title: "YDS 행동 로그",
-    kicker: "행동 로그 · 10초 기록",
-    path: "/action-log",
-  },
-  compare: {
-    title: "YDS vs 실제",
-    kicker: "비교 · Phase 4-4",
-    path: "/yds-compare",
-  },
-  opsDashboard: {
-    title: "YDS 운영 대시보드",
-    kicker: "운영 · 5초 점검",
-    path: "/ops-dashboard",
   },
   watchlist: {
     title: "관심종목",

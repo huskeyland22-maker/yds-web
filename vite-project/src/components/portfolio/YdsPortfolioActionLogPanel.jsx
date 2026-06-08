@@ -1,14 +1,11 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
-import { computePeriodCompliance } from "../content/ydsComplianceEngine.js"
-import { quickActionLabel } from "../content/ydsActionLogEngine.js"
-import { computeRecommendedAssetAllocation } from "../content/ydsPortfolioAllocationEngine.js"
-import { computeReturnStats } from "../content/ydsReturnEngine.js"
-import { usePortfolioHoldings } from "../hooks/usePortfolioHoldings.js"
-import { useYdsActionLog } from "../hooks/useYdsActionLog.js"
-import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
-import { UI_PAGE } from "../utils/ydsUiLabels.js"
-import "../styles/yds-action-log.css"
+import { computePeriodCompliance } from "../../content/ydsComplianceEngine.js"
+import { quickActionLabel } from "../../content/ydsActionLogEngine.js"
+import { computeReturnStats } from "../../content/ydsReturnEngine.js"
+import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
+import { useYdsActionLog } from "../../hooks/useYdsActionLog.js"
+import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
+import "../../styles/yds-action-log.css"
 
 const QUICK_ACTIONS = [
   { id: "buy", label: "매수" },
@@ -23,15 +20,12 @@ const RETURN_PERIODS = [
   { id: "365", label: "1년" },
 ]
 
-export default function YdsActionLogPage() {
+const RECENT_LIMIT = 5
+
+export default function YdsPortfolioActionLogPanel() {
   const marketContext = useYdsMarketContext()
   const { holdings } = usePortfolioHoldings()
   const { entries, addEntry, updateEntry, removeEntry } = useYdsActionLog()
-
-  const recommended = useMemo(
-    () => computeRecommendedAssetAllocation(marketContext),
-    [marketContext],
-  )
 
   const compliance = useMemo(
     () => computePeriodCompliance(entries, "30"),
@@ -54,6 +48,8 @@ export default function YdsActionLogPage() {
     () => computeReturnStats(entries, /** @type {'30'|'90'|'180'|'365'} */ (returnPeriod)),
     [entries, returnPeriod],
   )
+
+  const recentEntries = entries.slice(0, RECENT_LIMIT)
 
   function resetForm() {
     setQuickAction("watch")
@@ -94,7 +90,7 @@ export default function YdsActionLogPage() {
     resetForm()
   }
 
-  /** @param {import("../content/ydsActionLogStorage.js").YdsActionLogEntry} entry */
+  /** @param {import("../../content/ydsActionLogStorage.js").YdsActionLogEntry} entry */
   function startEdit(entry) {
     setEditingId(entry.id)
     if (entry.quickAction) {
@@ -113,34 +109,85 @@ export default function YdsActionLogPage() {
     }
   }
 
-  return (
-    <div className="yds-action-log min-w-0 px-3 py-4 sm:px-4">
-      <header className="yds-action-log__header">
-        <p className="yds-action-log__kicker">{UI_PAGE.actionLog.kicker}</p>
-        <h1 className="yds-action-log__title">{UI_PAGE.actionLog.title}</h1>
-        <p className="yds-action-log__sub">
-          10초 기록 ·{" "}
-          <Link to="/ops-dashboard">운영 대시보드</Link>
-          {" · "}
-          <Link to="/portfolio">포트폴리오</Link>
-        </p>
-      </header>
+  /** @param {import("../../content/ydsActionLogStorage.js").YdsActionLogEntry} entry */
+  function renderEntry(entry) {
+    return (
+      <li key={entry.id} className="yds-action-log__item">
+        <div className="yds-action-log__item-head">
+          <strong className="yds-action-log__item-date">{entry.date}</strong>
+          {entry.quickAction ? (
+            <span className="yds-action-log__item-action">
+              {quickActionLabel(entry.quickAction)}
+              {entry.ticker ? ` · ${entry.ticker}` : ""}
+            </span>
+          ) : (
+            <span className="yds-action-log__item-badge font-mono tabular-nums">
+              준수 {entry.compliancePct}%
+            </span>
+          )}
+        </div>
 
-      <section className="yds-action-log__hero" aria-label="준수율">
-        <p className="yds-action-log__hero-label">YDS 준수율 (30일)</p>
-        <p className="yds-action-log__hero-value font-mono tabular-nums">
+        {entry.memo ? <p className="yds-action-log__item-memo">{entry.memo}</p> : null}
+
+        <details className="yds-action-log__item-detail">
+          <summary>비중 · 준수 {entry.compliancePct}%</summary>
+          <div className="yds-action-log__item-grid">
+            <div>
+              <p className="yds-action-log__item-label">YDS 권장</p>
+              <p className="yds-action-log__item-val font-mono tabular-nums">
+                🇺🇸 {entry.recommended.usPct} · 🇰🇷 {entry.recommended.krPct} · 💵{" "}
+                {entry.recommended.cashPct}
+              </p>
+            </div>
+            <div>
+              <p className="yds-action-log__item-label">실제</p>
+              <p className="yds-action-log__item-val font-mono tabular-nums">
+                🇺🇸 {entry.actual.usPct} · 🇰🇷 {entry.actual.krPct} · 💵 {entry.actual.cashPct}
+              </p>
+            </div>
+          </div>
+          {entry.returnPct != null ? (
+            <p className="yds-action-log__item-return font-mono tabular-nums">
+              수익률 {entry.returnPct > 0 ? "+" : ""}
+              {entry.returnPct}%
+            </p>
+          ) : null}
+        </details>
+
+        <div className="yds-action-log__item-actions">
+          <button
+            type="button"
+            className="yds-action-log__btn yds-action-log__btn--ghost"
+            onClick={() => startEdit(entry)}
+          >
+            수정
+          </button>
+          <button
+            type="button"
+            className="yds-action-log__btn yds-action-log__btn--danger"
+            onClick={() => removeEntry(entry.id)}
+          >
+            삭제
+          </button>
+        </div>
+      </li>
+    )
+  }
+
+  return (
+    <div className="yds-portfolio__action-log yds-action-log">
+      <div className="yds-portfolio__action-log-head">
+        <h2 className="yds-portfolio__section-title">실행 기록</h2>
+        <p className="yds-portfolio__compliance font-mono tabular-nums">
+          30일 준수{" "}
           {compliance.overallCompliance != null ? `${compliance.overallCompliance}%` : "—"}
         </p>
-        <p className="yds-action-log__hero-meta">
-          오늘 권장 🇺🇸 {recommended.usPct}% · 🇰🇷 {recommended.krPct}% · 💵{" "}
-          {recommended.cashPct}%
-        </p>
-      </section>
+      </div>
 
       <form className="yds-action-log__form" onSubmit={handleSubmit}>
-        <h2 className="yds-action-log__section-title">
+        <h3 className="yds-action-log__section-title">
           {editingId ? "기록 수정" : "오늘 행동"}
-        </h2>
+        </h3>
 
         {!advancedMode ? (
           <>
@@ -282,122 +329,65 @@ export default function YdsActionLogPage() {
         </div>
       </form>
 
-      <section className="yds-action-log__history" aria-labelledby="action-log-history">
-        <h2 id="action-log-history" className="yds-action-log__section-title">
-          최근 행동
-        </h2>
-        {!entries.length ? (
-          <p className="yds-action-log__empty">아직 행동 기록이 없습니다.</p>
-        ) : (
-          <ul className="yds-action-log__list">
-            {entries.map((entry) => (
-              <li key={entry.id} className="yds-action-log__item">
-                <div className="yds-action-log__item-head">
-                  <strong className="yds-action-log__item-date">{entry.date}</strong>
-                  {entry.quickAction ? (
-                    <span className="yds-action-log__item-action">
-                      {quickActionLabel(entry.quickAction)}
-                      {entry.ticker ? ` · ${entry.ticker}` : ""}
-                    </span>
-                  ) : (
-                    <span className="yds-action-log__item-badge font-mono tabular-nums">
-                      준수 {entry.compliancePct}%
-                    </span>
-                  )}
+      {!entries.length ? (
+        <p className="yds-action-log__empty">아직 실행 기록이 없습니다.</p>
+      ) : (
+        <ul className="yds-action-log__list">{recentEntries.map(renderEntry)}</ul>
+      )}
+
+      {entries.length > RECENT_LIMIT ? (
+        <details className="yds-action-log__detail">
+          <summary className="yds-action-log__detail-summary">
+            이전 기록 · 수익률 통계 ({entries.length}건)
+          </summary>
+          <div className="yds-action-log__detail-body">
+            <ul className="yds-action-log__list">{entries.slice(RECENT_LIMIT).map(renderEntry)}</ul>
+            <div className="yds-action-log__stat-card">
+              <div className="yds-action-log__stat-head">
+                <h3 className="yds-action-log__stat-title">실제 수익률</h3>
+                <div className="yds-action-log__tabs" role="tablist">
+                  {RETURN_PERIODS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={returnPeriod === p.id}
+                      className={[
+                        "yds-action-log__tab",
+                        returnPeriod === p.id ? "yds-action-log__tab--active" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onClick={() => setReturnPeriod(p.id)}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
                 </div>
-
-                {entry.memo ? <p className="yds-action-log__item-memo">{entry.memo}</p> : null}
-
-                <details className="yds-action-log__item-detail">
-                  <summary>비중 · 준수 {entry.compliancePct}%</summary>
-                  <div className="yds-action-log__item-grid">
-                    <div>
-                      <p className="yds-action-log__item-label">YDS 권장</p>
-                      <p className="yds-action-log__item-val font-mono tabular-nums">
-                        🇺🇸 {entry.recommended.usPct} · 🇰🇷 {entry.recommended.krPct} · 💵{" "}
-                        {entry.recommended.cashPct}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="yds-action-log__item-label">실제</p>
-                      <p className="yds-action-log__item-val font-mono tabular-nums">
-                        🇺🇸 {entry.actual.usPct} · 🇰🇷 {entry.actual.krPct} · 💵 {entry.actual.cashPct}
-                      </p>
-                    </div>
-                  </div>
-                  {entry.returnPct != null ? (
-                    <p className="yds-action-log__item-return font-mono tabular-nums">
-                      수익률 {entry.returnPct > 0 ? "+" : ""}
-                      {entry.returnPct}%
-                    </p>
-                  ) : null}
-                </details>
-
-                <div className="yds-action-log__item-actions">
-                  <button
-                    type="button"
-                    className="yds-action-log__btn yds-action-log__btn--ghost"
-                    onClick={() => startEdit(entry)}
-                  >
-                    수정
-                  </button>
-                  <button
-                    type="button"
-                    className="yds-action-log__btn yds-action-log__btn--danger"
-                    onClick={() => removeEntry(entry.id)}
-                  >
-                    삭제
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <details className="yds-action-log__detail">
-        <summary className="yds-action-log__detail-summary">수익률 · 상세 통계</summary>
-        <div className="yds-action-log__detail-body">
-          <div className="yds-action-log__stat-card">
-            <div className="yds-action-log__stat-head">
-              <h2 className="yds-action-log__stat-title">실제 수익률</h2>
-              <div className="yds-action-log__tabs" role="tablist">
-                {RETURN_PERIODS.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={returnPeriod === p.id}
-                    className={[
-                      "yds-action-log__tab",
-                      returnPeriod === p.id ? "yds-action-log__tab--active" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    onClick={() => setReturnPeriod(p.id)}
-                  >
-                    {p.label}
-                  </button>
-                ))}
               </div>
+              <p className="yds-action-log__stat-value font-mono tabular-nums">
+                {returnStats.avgReturnPct != null
+                  ? `${returnStats.avgReturnPct > 0 ? "+" : ""}${returnStats.avgReturnPct}%`
+                  : "—"}
+              </p>
             </div>
-            <p className="yds-action-log__stat-value font-mono tabular-nums">
-              {returnStats.avgReturnPct != null
-                ? `${returnStats.avgReturnPct > 0 ? "+" : ""}${returnStats.avgReturnPct}%`
-                : "—"}
-            </p>
-            <p className="yds-action-log__stat-meta">
-              {returnStats.count > 0
-                ? `${returnStats.count}건 수익률 기록`
-                : "비중·자산 상세 기록 시 수익률 집계"}
-            </p>
           </div>
-        </div>
-      </details>
-
-      <p className="yds-action-log__footnote">
-        YDS는 예측이 아닌 실행 시스템 · 기록은 로컬 저장
-      </p>
+        </details>
+      ) : entries.length > 0 ? (
+        <details className="yds-action-log__detail">
+          <summary className="yds-action-log__detail-summary">수익률 통계</summary>
+          <div className="yds-action-log__detail-body">
+            <div className="yds-action-log__stat-card">
+              <p className="yds-action-log__stat-value font-mono tabular-nums">
+                {returnStats.avgReturnPct != null
+                  ? `${returnStats.avgReturnPct > 0 ? "+" : ""}${returnStats.avgReturnPct}%`
+                  : "—"}
+              </p>
+              <p className="yds-action-log__stat-meta">90일 평균 · 비중·자산 상세 기록 시 집계</p>
+            </div>
+          </div>
+        </details>
+      ) : null}
     </div>
   )
 }

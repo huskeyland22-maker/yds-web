@@ -34,9 +34,6 @@ import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import StockRecommendationPage from "./pages/StockRecommendationPage.jsx"
 import YdsPortfolioPage from "./pages/YdsPortfolioPage.jsx"
-import YdsActionLogPage from "./pages/YdsActionLogPage.jsx"
-import YdsComparePage from "./pages/YdsComparePage.jsx"
-import YdsOpsDashboardPage from "./pages/YdsOpsDashboardPage.jsx"
 import StockPickDetailPage from "./pages/StockPickDetailPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
 import GlossaryPage from "./pages/GlossaryPage.jsx"
@@ -1383,30 +1380,9 @@ function App() {
                 </SectionErrorBoundary>
               }
             />
-            <Route
-              path="/action-log"
-              element={
-                <SectionErrorBoundary label="행동 로그">
-                  <YdsActionLogPage />
-                </SectionErrorBoundary>
-              }
-            />
-            <Route
-              path="/yds-compare"
-              element={
-                <SectionErrorBoundary label="YDS 비교">
-                  <YdsComparePage />
-                </SectionErrorBoundary>
-              }
-            />
-            <Route
-              path="/ops-dashboard"
-              element={
-                <SectionErrorBoundary label="운영 대시보드">
-                  <YdsOpsDashboardPage />
-                </SectionErrorBoundary>
-              }
-            />
+            <Route path="/action-log" element={<Navigate to="/portfolio#execution-log" replace />} />
+            <Route path="/yds-compare" element={<Navigate to="/portfolio#execution-log" replace />} />
+            <Route path="/ops-dashboard" element={<Navigate to="/portfolio" replace />} />
             <Route
               path="/ai-daily-report"
               element={

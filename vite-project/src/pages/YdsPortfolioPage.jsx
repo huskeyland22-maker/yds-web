@@ -1,18 +1,25 @@
-import { useMemo } from "react"
-import { Link } from "react-router-dom"
+import { useEffect, useMemo } from "react"
+import { Link, useLocation } from "react-router-dom"
 import {
   buildPortfolioView,
   computeRecommendedAllocation,
   derivePortfolioRebalance,
 } from "../content/ydsPortfolioEngine.js"
+import YdsPortfolioActionLogPanel from "../components/portfolio/YdsPortfolioActionLogPanel.jsx"
 import { usePortfolioHoldings } from "../hooks/usePortfolioHoldings.js"
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import "../styles/yds-portfolio.css"
 
 export default function YdsPortfolioPage() {
+  const location = useLocation()
   const marketContext = useYdsMarketContext()
   const { holdings, setStockPct } = usePortfolioHoldings()
+
+  useEffect(() => {
+    if (location.hash !== "#execution-log") return
+    document.getElementById("execution-log")?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [location.hash])
 
   const view = useMemo(() => {
     const recommended = computeRecommendedAllocation(marketContext)
@@ -70,6 +77,10 @@ export default function YdsPortfolioPage() {
             <li key={action}>{action}</li>
           ))}
         </ul>
+      </section>
+
+      <section className="yds-portfolio__execution" id="execution-log" aria-label="실행 기록">
+        <YdsPortfolioActionLogPanel />
       </section>
 
       <details className="yds-portfolio__detail">
@@ -168,9 +179,7 @@ export default function YdsPortfolioPage() {
       </details>
 
       <p className="yds-portfolio__footnote">
-        개별 종목 매매가 아닌 시장분석 기반 비중 전략 ·{" "}
-        <Link to="/action-log">YDS 행동 로그</Link>
-        {" "}에서 실행 기록
+        시장분석 → 종목추천 → 포트폴리오 · 실행 기록은 이 페이지에서 완료
       </p>
     </div>
   )
