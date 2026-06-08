@@ -2,13 +2,13 @@ import { useMemo } from "react"
 import { Link } from "react-router-dom"
 import { buildPortfolioV2Analysis } from "../../content/ydsPortfolioV2Engine.js"
 import { usePortfolioCash } from "../../hooks/usePortfolioCash.js"
-import { usePortfolioPositions } from "../../hooks/usePortfolioPositions.js"
+import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 
 export default function YdsPortfolioAnalysisSection() {
   const marketContext = useYdsMarketContext()
-  const { positions } = usePortfolioPositions()
-  const { cashAmount, setCashAmount } = usePortfolioCash()
+  const { positions } = usePortfolioHoldings()
+  const { cashAmount } = usePortfolioCash()
 
   const analysis = useMemo(
     () => buildPortfolioV2Analysis(positions, cashAmount, marketContext),
@@ -24,22 +24,13 @@ export default function YdsPortfolioAnalysisSection() {
       </h2>
 
       <p className="yds-portfolio-v2__lead">
-        {marketContext.strategyEmoji} {marketContext.strategyLabel} · YDS 권장 대비 실제 배분
+        {marketContext.strategyEmoji} {marketContext.strategyLabel} · 보유 종목 기준 자동 계산
       </p>
 
-      <label className="yds-portfolio-v2__cash-row">
-        <span>현금 보유액</span>
-        <input
-          type="number"
-          min={0}
-          step={10000}
-          value={cashAmount || ""}
-          onChange={(e) => setCashAmount(e.target.value)}
-          placeholder="0"
-          className="font-mono tabular-nums"
-        />
-        <span className="yds-portfolio-v2__cash-hint">원 · 총자산 {asset.total.toLocaleString("ko-KR")}원</span>
-      </label>
+      <p className="yds-portfolio-v2__asset-total font-mono tabular-nums">
+        총자산 {asset.total.toLocaleString("ko-KR")}원
+        {cashAmount > 0 ? ` · 현금 ${cashAmount.toLocaleString("ko-KR")}원` : ""}
+      </p>
 
       <div className="yds-portfolio-v2__alloc-grid">
         <div className="yds-portfolio-v2__alloc-card">
@@ -69,10 +60,8 @@ export default function YdsPortfolioAnalysisSection() {
 
       <p className="yds-portfolio-v2__conclusion">{rebalance.conclusion}</p>
 
-      {!positions.length && cashAmount <= 0 ? (
-        <p className="yds-portfolio-v2__hint">
-          보유 종목·현금을 입력하면 실제 비중이 계산됩니다.
-        </p>
+      {!positions.length ? (
+        <p className="yds-portfolio-v2__hint">매매 기록 또는 보유 입력 후 분석이 표시됩니다.</p>
       ) : null}
 
       <p className="yds-portfolio-v2__market-link">

@@ -127,3 +127,14 @@ export function formatKrw(n) {
   if (n == null || !Number.isFinite(n)) return "—"
   return `${Math.round(n).toLocaleString("ko-KR")}원`
 }
+
+/**
+ * @param {number} amount
+ * @param {number} quantity
+ */
+export function deriveUnitPrice(amount, quantity) {
+  const qty = Number(quantity) || 0
+  const amt = Number(amount) || 0
+  if (qty <= 0 || amt <= 0) return 0
+  return Math.round(amt / qty)
+}

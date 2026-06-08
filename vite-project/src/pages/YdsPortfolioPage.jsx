@@ -40,7 +40,7 @@ export default function YdsPortfolioPage() {
       <YdsPortfolioReviewSection />
 
       <p className="yds-portfolio__footnote">
-        보유 → 기록 → 분석 → 복기 · 모든 기록은 포트폴리오 중심
+        매매 기록 한 번 · 보유·분석 자동 · 같은 정보 두 번 입력하지 않음
       </p>
     </div>
   )

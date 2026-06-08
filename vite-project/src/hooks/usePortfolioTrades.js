@@ -21,6 +21,7 @@ export function usePortfolioTrades() {
    *   action: TradeAction
    *   name: string
    *   amount?: number | null
+   *   quantity?: number | null
    *   memo?: string
    *   date?: string
    * }} input
@@ -33,6 +34,10 @@ export function usePortfolioTrades() {
       action: input.action,
       name: String(input.name ?? "").trim(),
       amount: input.amount != null && Number.isFinite(input.amount) ? Math.round(input.amount) : null,
+      quantity:
+        input.quantity != null && Number.isFinite(input.quantity)
+          ? Math.max(0, Math.round(input.quantity))
+          : null,
       memo: String(input.memo ?? "").trim(),
       createdAt: now,
       updatedAt: now,

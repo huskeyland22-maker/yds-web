@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { formatKrw, tradeActionLabel } from "../../content/ydsPortfolioV2Engine.js"
+import { deriveUnitPrice, formatKrw, tradeActionLabel } from "../../content/ydsPortfolioV2Engine.js"
 import { todayDateKey } from "../../content/ydsPortfolioTradesStorage.js"
-import { usePortfolioTrades } from "../../hooks/usePortfolioTrades.js"
+import { usePortfolioCash } from "../../hooks/usePortfolioCash.js"
+import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
 
 const ACTIONS = [
   { id: "buy", label: "매수" },
@@ -10,27 +11,45 @@ const ACTIONS = [
 ]
 
 export default function YdsPortfolioTradesSection() {
-  const { trades, addTrade, removeTrade } = usePortfolioTrades()
+  const { cashAmount, setCashAmount } = usePortfolioCash()
+  const { trades, addTrade, removeTrade } = usePortfolioHoldings()
 
-  const [action, setAction] = useState(/** @type {'buy'|'sell'|'watch'} */ ("watch"))
+  const [action, setAction] = useState(/** @type {'buy'|'sell'|'watch'} */ ("buy"))
   const [name, setName] = useState("")
   const [amount, setAmount] = useState("")
+  const [quantity, setQuantity] = useState("")
   const [memo, setMemo] = useState("")
   const [date, setDate] = useState(todayDateKey())
 
+  const needsQty = action === "buy" || action === "sell"
+
   function handleSubmit(e) {
     e.preventDefault()
+    const qty = quantity ? Number(quantity) : null
+    const amt = amount ? Number(amount) : null
+
+    if (needsQty && (!qty || qty <= 0)) return
+
     addTrade({
       action,
       name,
-      amount: amount ? Number(amount) : null,
+      amount: amt,
+      quantity: qty,
       memo,
       date,
     })
+
+    if (action === "buy" && amt && amt > 0) {
+      setCashAmount(Math.max(0, cashAmount - amt))
+    } else if (action === "sell" && amt && amt > 0) {
+      setCashAmount(cashAmount + amt)
+    }
+
     setName("")
     setAmount("")
+    setQuantity("")
     setMemo("")
-    setAction("watch")
+    setAction("buy")
     setDate(todayDateKey())
   }
 
@@ -43,6 +62,10 @@ export default function YdsPortfolioTradesSection() {
       <h2 id="pf-trades" className="yds-portfolio__section-title">
         2 · 매매 기록
       </h2>
+
+      <p className="yds-portfolio-v2__hint-inline">
+        매수 → 보유 자동 추가 · 매도 → 수량 자동 차감
+      </p>
 
       <form className="yds-portfolio-v2__form yds-portfolio-v2__form--trade" onSubmit={handleSubmit}>
         <fieldset className="yds-portfolio-v2__actions">
@@ -71,8 +94,23 @@ export default function YdsPortfolioTradesSection() {
             <span>종목</span>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="엔비디아" required />
           </label>
+          {needsQty ? (
+            <label>
+              <span>수량</span>
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                placeholder="10"
+                className="font-mono tabular-nums"
+                required
+              />
+            </label>
+          ) : null}
           <label>
-            <span>금액</span>
+            <span>금액{needsQty ? " (평균단가 자동)" : ""}</span>
             <input
               type="number"
               min={0}
@@ -82,6 +120,11 @@ export default function YdsPortfolioTradesSection() {
               className="font-mono tabular-nums"
             />
           </label>
+          {needsQty && amount && quantity ? (
+            <p className="yds-portfolio-v2__derived font-mono tabular-nums">
+              체결단가 {deriveUnitPrice(Number(amount), Number(quantity)).toLocaleString("ko-KR")}원
+            </p>
+          ) : null}
           <label className="yds-portfolio-v2__field-wide">
             <span>메모</span>
             <input value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="일부 익절" />
@@ -103,6 +146,7 @@ export default function YdsPortfolioTradesSection() {
                 <th scope="col">날짜</th>
                 <th scope="col">구분</th>
                 <th scope="col">종목</th>
+                <th scope="col">수량</th>
                 <th scope="col">금액</th>
                 <th scope="col">메모</th>
                 <th scope="col" aria-label="관리" />
@@ -118,6 +162,9 @@ export default function YdsPortfolioTradesSection() {
                     </span>
                   </td>
                   <td>{trade.name}</td>
+                  <td className="font-mono tabular-nums">
+                    {trade.quantity != null ? trade.quantity.toLocaleString("ko-KR") : "—"}
+                  </td>
                   <td className="font-mono tabular-nums">{formatKrw(trade.amount)}</td>
                   <td className="yds-portfolio-v2__memo">{trade.memo || "—"}</td>
                   <td>

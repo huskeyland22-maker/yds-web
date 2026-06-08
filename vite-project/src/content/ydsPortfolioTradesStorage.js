@@ -18,6 +18,7 @@ export const PORTFOLIO_TRADES_MIGRATED_KEY = "yds-portfolio-trades-migrated-v1"
  *   action: TradeAction
  *   name: string
  *   amount: number | null
+ *   quantity: number | null
  *   memo: string
  *   createdAt: number
  *   updatedAt: number
@@ -64,6 +65,7 @@ function migrateTradesFromActionLog() {
     amount: entry.endAsset != null && entry.startAsset != null
       ? Math.abs(entry.endAsset - entry.startAsset)
       : null,
+    quantity: null,
     memo: entry.memo ?? "",
     createdAt: entry.createdAt ?? now,
     updatedAt: entry.updatedAt ?? now,

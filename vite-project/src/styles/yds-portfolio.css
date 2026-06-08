@@ -325,6 +325,80 @@
   color: #64748b;
 }
 
+.yds-portfolio-v2__hint-inline {
+  margin: 0 0 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-portfolio-v2__tag {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 999px;
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.yds-portfolio-v2__manual {
+  margin-top: 0.35rem;
+  border: 1px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.55rem;
+}
+
+.yds-portfolio-v2__manual-summary {
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #94a3b8;
+  list-style: none;
+}
+
+.yds-portfolio-v2__manual-summary::-webkit-details-marker {
+  display: none;
+}
+
+.yds-portfolio-v2__form-grid--manual {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yds-portfolio-v2__manual-list {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-portfolio-v2__manual-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.yds-portfolio-v2__derived {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.yds-portfolio-v2__asset-total {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
 .yds-portfolio-v2__table-wrap {
   overflow-x: auto;
   margin-bottom: 0.55rem;
