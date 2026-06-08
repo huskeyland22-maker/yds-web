@@ -34,6 +34,7 @@ import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import StockRecommendationPage from "./pages/StockRecommendationPage.jsx"
 import YdsPortfolioPage from "./pages/YdsPortfolioPage.jsx"
+import YdsActionLogPage from "./pages/YdsActionLogPage.jsx"
 import StockPickDetailPage from "./pages/StockPickDetailPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
 import GlossaryPage from "./pages/GlossaryPage.jsx"
@@ -1022,6 +1023,7 @@ function App() {
       path === "/performance-dashboard" ||
       path === "/performance-center" ||
       path === "/portfolio" ||
+      path === "/action-log" ||
       path === "/ai-daily-report" ||
       path === "/stock-picks" ||
       path === "/watchlist" ||
@@ -1374,6 +1376,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="포트폴리오">
                   <YdsPortfolioPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/action-log"
+              element={
+                <SectionErrorBoundary label="행동 로그">
+                  <YdsActionLogPage />
                 </SectionErrorBoundary>
               }
             />

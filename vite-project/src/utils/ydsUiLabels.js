@@ -13,6 +13,7 @@ export function getPrimaryNavItems() {
 /** @returns {{ label: string; path: string }[]} */
 export function getSecondaryNavItems() {
   return [
+    { label: "📝 행동 로그", path: "/action-log" },
     { label: "🔔 알림", path: "/alert-center" },
     { label: "🧪 연구실", path: "/lab" },
   ]
@@ -26,6 +27,7 @@ export const NAV_MOBILE_SHORT = {
   "/portfolio": "💼 포트",
   "/performance-dashboard": "💼 포트",
   "/ai-daily-report": "💡 인사이트",
+  "/action-log": "📝 로그",
   "/alert-center": "🔔 알림",
   "/lab": "🧪 연구",
 }
@@ -46,6 +48,11 @@ export const UI_PAGE = {
     title: "포트폴리오",
     kicker: "포트폴리오 · Phase 3-1",
     path: "/portfolio",
+  },
+  actionLog: {
+    title: "YDS 행동 로그",
+    kicker: "행동 로그 · Phase 4-1",
+    path: "/action-log",
   },
   watchlist: {
     title: "관심종목",

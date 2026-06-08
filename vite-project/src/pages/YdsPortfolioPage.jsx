@@ -163,7 +163,9 @@ export default function YdsPortfolioPage() {
       </section>
 
       <p className="yds-portfolio__footnote">
-        개별 종목 매매가 아닌 시장분석 기반 비중 전략 · 보유 비중은 로컬 저장
+        개별 종목 매매가 아닌 시장분석 기반 비중 전략 ·{" "}
+        <Link to="/action-log">YDS 행동 로그</Link>
+        {" "}에서 실행 기록
       </p>
     </div>
   )
