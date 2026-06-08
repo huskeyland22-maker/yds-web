@@ -11,6 +11,8 @@ const EMPTY = {
   sellReason: "",
   lessons: "",
   nextAction: "",
+  stockName: "",
+  ticker: "",
   updatedAt: 0,
 }
 

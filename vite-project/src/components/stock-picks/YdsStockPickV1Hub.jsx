@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { captureTodayPickSnapshots } from "../../content/ydsValidationEngine.js"
 import {
   assignRanks,
   filterByCountry,
@@ -37,6 +38,10 @@ export default function YdsStockPickV1Hub() {
     () => getStockPickUniverse(marketContext),
     [marketContext],
   )
+
+  useEffect(() => {
+    captureTodayPickSnapshots(marketContext)
+  }, [marketContext])
   const {
     favoritesOnly,
     setFavoritesOnly,

@@ -141,7 +141,13 @@ export default function YdsPortfolioHoldingCard({ row, marketContext, getReview,
               <textarea
                 rows={2}
                 value={review[field.key]}
-                onChange={(e) => updateReview(row.id, { [field.key]: e.target.value })}
+                onChange={(e) =>
+                  updateReview(row.id, {
+                    [field.key]: e.target.value,
+                    stockName: row.name,
+                    ticker: row.ticker ?? "",
+                  })
+                }
                 placeholder={field.placeholder}
               />
             </label>

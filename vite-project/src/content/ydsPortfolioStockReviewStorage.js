@@ -10,6 +10,8 @@ export const PORTFOLIO_STOCK_REVIEW_KEY = "yds-portfolio-stock-review-v1"
  *   sellReason: string
  *   lessons: string
  *   nextAction: string
+ *   stockName?: string
+ *   ticker?: string
  *   updatedAt: number
  * }} PortfolioStockReview
  */
@@ -19,6 +21,8 @@ const EMPTY_ENTRY = {
   sellReason: "",
   lessons: "",
   nextAction: "",
+  stockName: "",
+  ticker: "",
   updatedAt: 0,
 }
 
@@ -38,6 +42,8 @@ export function loadPortfolioStockReviews() {
         sellReason: String(entry.sellReason ?? ""),
         lessons: String(entry.lessons ?? ""),
         nextAction: String(entry.nextAction ?? ""),
+        stockName: String(entry.stockName ?? ""),
+        ticker: String(entry.ticker ?? ""),
         updatedAt: Number(entry.updatedAt) || 0,
       }
     }
