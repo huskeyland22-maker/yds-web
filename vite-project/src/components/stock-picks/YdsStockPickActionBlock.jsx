@@ -6,6 +6,7 @@
  */
 export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
   const { stockStatus, stockAction, scores } = stock
+  const showScore = variant === "detail"
 
   return (
     <div
@@ -23,13 +24,15 @@ export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
           {stockStatus.emoji}
         </span>
         <span className="yds-spick-action__status-label">{stockStatus.label}</span>
-        <span className="yds-spick-action__score font-mono tabular-nums">
-          {scores.totalScore}점
-        </span>
+        {showScore ? (
+          <span className="yds-spick-action__score font-mono tabular-nums">
+            {scores.totalScore}점
+          </span>
+        ) : null}
       </div>
 
       <div className="yds-spick-action__row">
-        <span className="yds-spick-action__action-label">행동</span>
+        {showScore ? <span className="yds-spick-action__action-label">행동</span> : null}
         <span className="yds-spick-action__action-value">
           <span className="yds-spick-action__action-emoji" aria-hidden>
             {stockAction.emoji}

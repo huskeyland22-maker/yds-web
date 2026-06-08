@@ -2,7 +2,6 @@ import { useMemo } from "react"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
-import YdsBrandHero from "./YdsBrandHero.jsx"
 import YdsMarketHeroStack from "./YdsMarketHeroStack.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
 import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
@@ -13,7 +12,6 @@ import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "../PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "../SectionErrorBoundary.jsx"
 import YdsActionSignalCenter from "../YdsActionSignalCenter.jsx"
-import YdsAllocationCenter from "../YdsAllocationCenter.jsx"
 import YdsScoreBreakdownPanel from "./YdsScoreBreakdownPanel.jsx"
 import {
   YDS_LABEL_PANIC_BREAKDOWN,
@@ -57,15 +55,17 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <div className="yds-market-desk__stream">
-        <YdsBrandHero className="yds-market-desk__slot yds-market-desk__slot--philosophy" />
-        <YdsMarketTimelineSection
-          className="yds-market-desk__slot yds-market-desk__slot--timeline"
-          panicData={panicData}
-          historyRows={safeHistory}
-        />
         <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
-        <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
-        <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
+
+        <section
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--actions"
+          aria-labelledby="market-block-actions"
+        >
+          <h2 id="market-block-actions" className="yds-market-desk__block-label">
+            오늘의 행동
+          </h2>
+          <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
+        </section>
 
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
@@ -78,47 +78,35 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         </section>
       </div>
 
-      <section className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--history" aria-labelledby="market-block-history">
-        <h2 id="market-block-history" className="yds-market-desk__block-label">
-          {YDS_LABEL_PANIC_HISTORY}
-        </h2>
-        <SectionErrorBoundary
-          label={YDS_LABEL_PANIC_HISTORY}
-          fallback={
-            <p className="yds-market-desk__fallback">{YDS_LABEL_PANIC_HISTORY}를 불러올 수 없습니다.</p>
-          }
-        >
-          <PanicIndexHistorySection
-            rows={safeHistory}
+      <details className="yds-market-desk__detail yds-market-desk__detail--stream">
+        <summary className="yds-market-desk__detail-summary">근거 · 히스토리 · 세부 분석</summary>
+        <div className="yds-market-desk__detail-body">
+          <YdsMarketTimelineSection
+            className="yds-market-desk__slot yds-market-desk__slot--timeline"
             panicData={panicData}
-            inlineChart
-            defaultChartOpen
+            historyRows={safeHistory}
           />
-        </SectionErrorBoundary>
-      </section>
-
-      <section
-        className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--actions"
-        aria-labelledby="market-block-actions"
-      >
-        <h2 id="market-block-actions" className="yds-market-desk__block-label">
-          YDS 판단
-        </h2>
-        <div className="yds-judgment-panel">
-          <div className="yds-judgment-panel__grid">
-            <div className="yds-judgment-panel__slot yds-judgment-panel__slot--signal">
-              <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
-            </div>
-            <div className="yds-judgment-panel__slot yds-judgment-panel__slot--alloc">
-              <YdsAllocationCenter panicData={panicData} compact />
-            </div>
-          </div>
+          <SectionErrorBoundary
+            label={YDS_LABEL_PANIC_HISTORY}
+            fallback={
+              <p className="yds-market-desk__fallback">{YDS_LABEL_PANIC_HISTORY}를 불러올 수 없습니다.</p>
+            }
+          >
+            <PanicIndexHistorySection
+              rows={safeHistory}
+              panicData={panicData}
+              inlineChart
+              defaultChartOpen={false}
+            />
+          </SectionErrorBoundary>
+          <details className="yds-market-desk__score-detail">
+            <summary className="yds-market-desk__score-detail-summary">{YDS_LABEL_PANIC_BREAKDOWN}</summary>
+            <YdsScoreBreakdownPanel panicData={panicData} historyRows={safeHistory} />
+          </details>
+          <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
+          <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
         </div>
-        <details className="yds-market-desk__score-detail">
-          <summary className="yds-market-desk__score-detail-summary">{YDS_LABEL_PANIC_BREAKDOWN}</summary>
-          <YdsScoreBreakdownPanel panicData={panicData} historyRows={safeHistory} />
-        </details>
-      </section>
+      </details>
 
       <details className="yds-market-desk__detail">
         <summary className="yds-market-desk__detail-summary">세부 분석 · 채권·유동성</summary>

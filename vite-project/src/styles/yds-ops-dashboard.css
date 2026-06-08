@@ -206,6 +206,60 @@
   color: #93c5fd;
 }
 
+.yds-ops__grid--core4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yds-ops__card-lead {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+  color: #f1f5f9;
+}
+
+.yds-ops__kv--compact {
+  gap: 0.2rem;
+}
+
+.yds-ops__compliance-hero {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
+  font-weight: 800;
+  color: #93c5fd;
+}
+
+.yds-ops__compliance-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-ops__detail {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.65rem;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.yds-ops__detail-summary {
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  list-style: none;
+}
+
+.yds-ops__detail-summary::-webkit-details-marker {
+  display: none;
+}
+
+.yds-ops__detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
 .yds-ops__footnote {
   margin: 0;
   font-size: 0.62rem;

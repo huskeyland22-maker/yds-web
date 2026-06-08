@@ -35,6 +35,8 @@ export const ACTION_LOG_STORAGE_KEY = "yds-action-log-v1"
  *   startAsset: number | null
  *   endAsset: number | null
  *   returnPct: number | null
+ *   quickAction?: 'buy' | 'sell' | 'watch' | null
+ *   ticker?: string
  * }} YdsActionLogEntry
  */
 

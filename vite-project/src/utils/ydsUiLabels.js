@@ -49,12 +49,12 @@ export const UI_PAGE = {
   },
   portfolio: {
     title: "포트폴리오",
-    kicker: "포트폴리오 · Phase 3-1",
+    kicker: "포트폴리오 · V1",
     path: "/portfolio",
   },
   actionLog: {
     title: "YDS 행동 로그",
-    kicker: "행동 로그 · Phase 4-1",
+    kicker: "행동 로그 · 10초 기록",
     path: "/action-log",
   },
   compare: {
@@ -64,7 +64,7 @@ export const UI_PAGE = {
   },
   opsDashboard: {
     title: "YDS 운영 대시보드",
-    kicker: "운영 · Phase 5-1",
+    kicker: "운영 · 5초 점검",
     path: "/ops-dashboard",
   },
   watchlist: {

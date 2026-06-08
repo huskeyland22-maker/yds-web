@@ -47,9 +47,6 @@ export default function YdsStockPickRanking({ stocks }) {
           </button>
           <span className="yds-spick-ranking__th yds-spick-ranking__th--static">상태</span>
           <span className="yds-spick-ranking__th yds-spick-ranking__th--static">행동</span>
-          <button type="button" className="yds-spick-ranking__th" onClick={() => toggleSort("totalScore")}>
-            YDS{sortIndicator("totalScore")}
-          </button>
         </div>
 
         <ol className="yds-spick-ranking__list">
@@ -68,9 +65,6 @@ export default function YdsStockPickRanking({ stocks }) {
                 </span>
                 <span className="yds-spick-ranking__action">
                   {stock.stockAction.emoji} {stock.stockAction.label}
-                </span>
-                <span className="yds-spick-ranking__score font-mono tabular-nums">
-                  {stock.scores.totalScore}
                 </span>
               </Link>
             </li>

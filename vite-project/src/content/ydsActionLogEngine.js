@@ -14,17 +14,25 @@ import {
 
 /** @typedef {import("./ydsMarketAdapter.js").YdsMarketAdapterContext} YdsMarketAdapterContext */
 
+/** @typedef {'buy' | 'sell' | 'watch'} QuickActionType */
+
 /**
  * @typedef {{
- *   usPct: number
- *   krPct: number
- *   cashPct: number
+ *   usPct?: number
+ *   krPct?: number
+ *   cashPct?: number
+ *   quickAction?: QuickActionType | null
+ *   ticker?: string
  *   memo?: string
  *   date?: string
  *   startAsset?: number | null
  *   endAsset?: number | null
+ *   useExplicitAllocation?: boolean
+ *   holdings?: PortfolioStockHoldings
  * }} ActionLogInput
  */
+
+/** @typedef {{ stockPct: number; cashPct: number }} PortfolioStockHoldings */
 
 /**
  * @param {YdsMarketAdapterContext} context
@@ -47,6 +55,48 @@ export function snapshotYdsState(context) {
  * @param {Partial<YdsActionLogEntry>} [existing]
  * @returns {YdsActionLogEntry}
  */
+/**
+ * @param {import("./ydsPortfolioAllocationEngine.js").AssetAllocation} recommended
+ * @param {PortfolioStockHoldings} [holdings]
+ */
+export function deriveActualFromPortfolioHoldings(recommended, holdings) {
+  const stockPct = holdings?.stockPct ?? recommended.usPct + recommended.krPct
+  const cashPct = holdings?.cashPct ?? recommended.cashPct
+  const stockRec = recommended.usPct + recommended.krPct
+  if (stockRec <= 0) {
+    return { usPct: 0, krPct: 0, cashPct: clampPct(cashPct) }
+  }
+  const usShare = recommended.usPct / stockRec
+  const usPct = Math.round(stockPct * usShare)
+  const krPct = stockPct - usPct
+  return { usPct, krPct, cashPct: clampPct(cashPct) }
+}
+
+/**
+ * @param {ActionLogInput} input
+ * @param {import("./ydsPortfolioAllocationEngine.js").AssetAllocation} recommended
+ */
+export function resolveActionLogAllocation(input, recommended) {
+  const holdings = input.holdings
+  if (input.useExplicitAllocation) {
+    return normalizeTriple(input)
+  }
+  if (input.quickAction === "watch") {
+    return {
+      usPct: recommended.usPct,
+      krPct: recommended.krPct,
+      cashPct: recommended.cashPct,
+    }
+  }
+  if (input.quickAction === "buy" || input.quickAction === "sell") {
+    return deriveActualFromPortfolioHoldings(recommended, holdings)
+  }
+  if (input.usPct != null && input.krPct != null && input.cashPct != null) {
+    return normalizeTriple(input)
+  }
+  return deriveActualFromPortfolioHoldings(recommended, holdings)
+}
+
 export function buildActionLogEntry(context, input, existing = {}) {
   const recommendedAlloc = existing.recommended
     ? {
@@ -57,7 +107,7 @@ export function buildActionLogEntry(context, input, existing = {}) {
         note: "",
       }
     : computeRecommendedAssetAllocation(context)
-  const actual = normalizeTriple(input)
+  const actual = resolveActionLogAllocation(input, recommendedAlloc)
   const compliance = computeCompliance(recommendedAlloc, actual)
   const returnPct = computeReturnPct(input.startAsset, input.endAsset)
   const now = Date.now()
@@ -81,6 +131,8 @@ export function buildActionLogEntry(context, input, existing = {}) {
     startAsset: parseAsset(input.startAsset ?? existing.startAsset),
     endAsset: parseAsset(input.endAsset ?? existing.endAsset),
     returnPct,
+    quickAction: input.quickAction ?? existing.quickAction ?? null,
+    ticker: String(input.ticker ?? existing.ticker ?? "").trim(),
   }
 }
 
@@ -123,11 +175,23 @@ export function updateActionLogEntry(entry, context, updates) {
       usPct: updates.usPct ?? entry.actual.usPct,
       krPct: updates.krPct ?? entry.actual.krPct,
       cashPct: updates.cashPct ?? entry.actual.cashPct,
+      quickAction: updates.quickAction !== undefined ? updates.quickAction : entry.quickAction,
+      ticker: updates.ticker !== undefined ? updates.ticker : entry.ticker,
       memo: updates.memo ?? entry.memo,
       date: updates.date ?? entry.date,
       startAsset: updates.startAsset !== undefined ? updates.startAsset : entry.startAsset,
       endAsset: updates.endAsset !== undefined ? updates.endAsset : entry.endAsset,
+      useExplicitAllocation: updates.useExplicitAllocation ?? Boolean(updates.usPct != null),
+      holdings: updates.holdings,
     },
     entry,
   )
+}
+
+/** @param {QuickActionType | null | undefined} action */
+export function quickActionLabel(action) {
+  if (action === "buy") return "매수"
+  if (action === "sell") return "매도"
+  if (action === "watch") return "관망"
+  return ""
 }

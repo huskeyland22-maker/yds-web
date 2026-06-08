@@ -245,6 +245,32 @@
   line-height: 1.65;
 }
 
+.yds-portfolio__detail {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.55rem;
+  background: rgba(15, 23, 42, 0.45);
+  padding: 0.5rem 0.65rem;
+}
+
+.yds-portfolio__detail-summary {
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  list-style: none;
+}
+
+.yds-portfolio__detail-summary::-webkit-details-marker {
+  display: none;
+}
+
+.yds-portfolio__detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+}
+
 .yds-portfolio__footnote {
   margin: 0;
   font-size: 0.62rem;

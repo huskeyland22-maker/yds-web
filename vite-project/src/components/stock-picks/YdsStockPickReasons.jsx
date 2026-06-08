@@ -3,14 +3,18 @@
  *   reasons: import("../../content/ydsStockRecommendReasons.js").RecommendReason[]
  *   variant?: 'card' | 'top3' | 'detail' | 'inline'
  *   title?: string
+ *   maxItems?: number
  * }} props
  */
 export default function YdsStockPickReasons({
   reasons,
   variant = "card",
   title = "추천 이유",
+  maxItems,
 }) {
   if (!reasons.length) return null
+
+  const visible = maxItems != null ? reasons.slice(0, maxItems) : reasons
 
   return (
     <div
@@ -23,9 +27,9 @@ export default function YdsStockPickReasons({
         .filter(Boolean)
         .join(" ")}
     >
-      <p className="yds-spick-reasons__title">{title}</p>
+      {title ? <p className="yds-spick-reasons__title">{title}</p> : null}
       <ul className="yds-spick-reasons__list">
-        {reasons.map((reason) => (
+        {visible.map((reason) => (
           <li
             key={reason.id}
             className={[

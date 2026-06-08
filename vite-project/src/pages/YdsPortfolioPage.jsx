@@ -54,96 +54,6 @@ export default function YdsPortfolioPage() {
         <p className="yds-portfolio__hero-note">{recommended.note}</p>
       </section>
 
-      <section className="yds-portfolio__section" aria-labelledby="portfolio-market">
-        <h2 id="portfolio-market" className="yds-portfolio__section-title">
-          1 · 현재 시장
-        </h2>
-        <div className="yds-portfolio__market-grid">
-          <div className="yds-portfolio__market-item">
-            <span className="yds-portfolio__market-key">패닉 강도</span>
-            <span className="yds-portfolio__market-val">
-              {marketContext.macroEmoji} {market.panicLabel}
-            </span>
-          </div>
-          <div className="yds-portfolio__market-item">
-            <span className="yds-portfolio__market-key">현재 전략</span>
-            <span className="yds-portfolio__market-val">
-              {marketContext.strategyEmoji} {market.strategyLabel}
-            </span>
-          </div>
-          <div className="yds-portfolio__market-item">
-            <span className="yds-portfolio__market-key">사이클</span>
-            <span className="yds-portfolio__market-val">
-              {marketContext.cycleEmoji} {market.cycleLabel}
-            </span>
-          </div>
-          <div className="yds-portfolio__market-item">
-            <span className="yds-portfolio__market-key">시장 상태</span>
-            <span className="yds-portfolio__market-val">
-              {marketContext.marketEmoji} {market.marketLabel}
-            </span>
-          </div>
-        </div>
-        {!market.ready ? (
-          <p className="yds-portfolio__hint">시장 데이터 로딩 중 · 기본 권장 비중 적용</p>
-        ) : null}
-      </section>
-
-      <section className="yds-portfolio__section" aria-labelledby="portfolio-compare">
-        <h2 id="portfolio-compare" className="yds-portfolio__section-title">
-          2 · 권장 vs 현재
-        </h2>
-        <div className="yds-portfolio__compare">
-          <div className="yds-portfolio__compare-col">
-            <p className="yds-portfolio__compare-head">권장</p>
-            <p className="yds-portfolio__compare-row font-mono tabular-nums">
-              주식 {recommended.stockPct}%
-            </p>
-            <p className="yds-portfolio__compare-row font-mono tabular-nums">
-              현금 {recommended.cashPct}%
-            </p>
-          </div>
-          <div className="yds-portfolio__compare-col">
-            <p className="yds-portfolio__compare-head">현재 보유</p>
-            <label className="yds-portfolio__slider-row">
-              <span>주식</span>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={5}
-                value={current.stockPct}
-                onChange={(e) => setStockPct(Number(e.target.value))}
-                className="yds-portfolio__slider"
-              />
-              <span className="font-mono tabular-nums">{current.stockPct}%</span>
-            </label>
-            <p className="yds-portfolio__compare-row font-mono tabular-nums">
-              현금 {current.cashPct}%
-            </p>
-          </div>
-          <div className="yds-portfolio__compare-col">
-            <p className="yds-portfolio__compare-head">차이</p>
-            <p
-              className={[
-                "yds-portfolio__diff font-mono tabular-nums",
-                rebalance.stockDiff > 0 ? "yds-portfolio__diff--high" : "",
-                rebalance.stockDiff < 0 ? "yds-portfolio__diff--low" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              주식 {rebalance.stockDiff > 0 ? "+" : ""}
-              {rebalance.stockDiff}%
-            </p>
-            <p className="yds-portfolio__compare-row font-mono tabular-nums">
-              현금 {rebalance.cashDiff > 0 ? "+" : ""}
-              {rebalance.cashDiff}%
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section
         className={[
           "yds-portfolio__conclusion",
@@ -152,7 +62,7 @@ export default function YdsPortfolioPage() {
         aria-labelledby="portfolio-action"
       >
         <h2 id="portfolio-action" className="yds-portfolio__section-title">
-          3 · 결론 · 행동
+          결론 · 행동
         </h2>
         <p className="yds-portfolio__conclusion-text">{rebalance.conclusion}</p>
         <ul className="yds-portfolio__action-list">
@@ -161,6 +71,101 @@ export default function YdsPortfolioPage() {
           ))}
         </ul>
       </section>
+
+      <details className="yds-portfolio__detail">
+        <summary className="yds-portfolio__detail-summary">근거 · 현재 보유 · 비교</summary>
+        <div className="yds-portfolio__detail-body">
+          <section className="yds-portfolio__section" aria-labelledby="portfolio-market">
+            <h2 id="portfolio-market" className="yds-portfolio__section-title">
+              현재 시장
+            </h2>
+            <div className="yds-portfolio__market-grid">
+              <div className="yds-portfolio__market-item">
+                <span className="yds-portfolio__market-key">패닉 강도</span>
+                <span className="yds-portfolio__market-val">
+                  {marketContext.macroEmoji} {market.panicLabel}
+                </span>
+              </div>
+              <div className="yds-portfolio__market-item">
+                <span className="yds-portfolio__market-key">현재 전략</span>
+                <span className="yds-portfolio__market-val">
+                  {marketContext.strategyEmoji} {market.strategyLabel}
+                </span>
+              </div>
+              <div className="yds-portfolio__market-item">
+                <span className="yds-portfolio__market-key">사이클</span>
+                <span className="yds-portfolio__market-val">
+                  {marketContext.cycleEmoji} {market.cycleLabel}
+                </span>
+              </div>
+              <div className="yds-portfolio__market-item">
+                <span className="yds-portfolio__market-key">시장 상태</span>
+                <span className="yds-portfolio__market-val">
+                  {marketContext.marketEmoji} {market.marketLabel}
+                </span>
+              </div>
+            </div>
+            {!market.ready ? (
+              <p className="yds-portfolio__hint">시장 데이터 로딩 중 · 기본 권장 비중 적용</p>
+            ) : null}
+          </section>
+
+          <section className="yds-portfolio__section" aria-labelledby="portfolio-compare">
+            <h2 id="portfolio-compare" className="yds-portfolio__section-title">
+              권장 vs 현재
+            </h2>
+            <div className="yds-portfolio__compare">
+              <div className="yds-portfolio__compare-col">
+                <p className="yds-portfolio__compare-head">권장</p>
+                <p className="yds-portfolio__compare-row font-mono tabular-nums">
+                  주식 {recommended.stockPct}%
+                </p>
+                <p className="yds-portfolio__compare-row font-mono tabular-nums">
+                  현금 {recommended.cashPct}%
+                </p>
+              </div>
+              <div className="yds-portfolio__compare-col">
+                <p className="yds-portfolio__compare-head">현재 보유</p>
+                <label className="yds-portfolio__slider-row">
+                  <span>주식</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={current.stockPct}
+                    onChange={(e) => setStockPct(Number(e.target.value))}
+                    className="yds-portfolio__slider"
+                  />
+                  <span className="font-mono tabular-nums">{current.stockPct}%</span>
+                </label>
+                <p className="yds-portfolio__compare-row font-mono tabular-nums">
+                  현금 {current.cashPct}%
+                </p>
+              </div>
+              <div className="yds-portfolio__compare-col">
+                <p className="yds-portfolio__compare-head">차이</p>
+                <p
+                  className={[
+                    "yds-portfolio__diff font-mono tabular-nums",
+                    rebalance.stockDiff > 0 ? "yds-portfolio__diff--high" : "",
+                    rebalance.stockDiff < 0 ? "yds-portfolio__diff--low" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  주식 {rebalance.stockDiff > 0 ? "+" : ""}
+                  {rebalance.stockDiff}%
+                </p>
+                <p className="yds-portfolio__compare-row font-mono tabular-nums">
+                  현금 {rebalance.cashDiff > 0 ? "+" : ""}
+                  {rebalance.cashDiff}%
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </details>
 
       <p className="yds-portfolio__footnote">
         개별 종목 매매가 아닌 시장분석 기반 비중 전략 ·{" "}

@@ -52,33 +52,17 @@ export default function YdsStockPickCard({
         <p className="yds-spick-card__ticker font-mono tabular-nums">{stock.ticker}</p>
       ) : null}
 
-      {isTop3 ? (
-        <>
-          <p className="yds-spick-card__top3-action">
-            <span aria-hidden>{stock.stockAction.emoji}</span> {stock.stockAction.label}
-          </p>
-          <p className="yds-spick-card__top3-score font-mono tabular-nums">
-            YDS {stock.scores.totalScore}
-          </p>
-        </>
-      ) : (
-        <YdsStockPickActionBlock
-          stock={stock}
-          variant={isCompact ? "inline" : "card"}
-        />
-      )}
+      <YdsStockPickActionBlock
+        stock={stock}
+        variant={isTop3 ? "top3" : isCompact ? "inline" : "card"}
+      />
 
       <YdsStockPickReasons
         reasons={stock.recommendReasons}
         variant={isTop3 ? "top3" : isCompact ? "inline" : "card"}
+        maxItems={isTop3 || isCompact ? 1 : undefined}
+        title={isTop3 || isCompact ? "" : "추천 이유"}
       />
-
-      {!isTop3 && !isCompact ? (
-        <>
-          <p className="yds-spick-card__eval-label">한줄 평가</p>
-          <p className="yds-spick-card__comment">{stock.comment}</p>
-        </>
-      ) : null}
     </Link>
   )
 }

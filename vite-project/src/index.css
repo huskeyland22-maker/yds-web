@@ -24758,6 +24758,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
+.yds-market-desk__detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .yds-hub-top--tier-c {
   margin-top: 0;
   margin-bottom: 0;
