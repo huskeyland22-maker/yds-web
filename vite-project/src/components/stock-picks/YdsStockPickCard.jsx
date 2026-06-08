@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
+import YdsStockScoreBreakdown from "./YdsStockScoreBreakdown.jsx"
 
 /**
  * @param {{
@@ -20,6 +21,7 @@ export default function YdsStockPickCard({
   onToggleFavorite,
 }) {
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
+  const showBreakdown = variant !== "compact"
 
   return (
     <Link
@@ -44,11 +46,27 @@ export default function YdsStockPickCard({
       <p className="yds-spick-card__stars">{stock.stars}</p>
       <h3 className="yds-spick-card__name">{stock.name}</h3>
       <p className="yds-spick-card__ticker font-mono tabular-nums">{stock.ticker}</p>
-      <p className="yds-spick-card__status">
-        {stock.statusView.emoji} {stock.statusView.label}
-      </p>
-      {variant !== "compact" ? (
-        <p className="yds-spick-card__comment">{stock.comment}</p>
+
+      {showBreakdown ? (
+        <YdsStockScoreBreakdown
+          scores={stock.scores}
+          rows={stock.scoreRows}
+          variant={variant === "top3" ? "detail" : "card"}
+        />
+      ) : (
+        <p className="yds-spick-card__score-mini font-mono tabular-nums">
+          YDS {stock.scores.totalScore}
+        </p>
+      )}
+
+      <p className="yds-spick-card__status-label">상태</p>
+      <p className="yds-spick-card__status">{stock.statusPhrase}</p>
+
+      {showBreakdown ? (
+        <>
+          <p className="yds-spick-card__eval-label">한줄 평가</p>
+          <p className="yds-spick-card__comment">{stock.comment}</p>
+        </>
       ) : null}
     </Link>
   )

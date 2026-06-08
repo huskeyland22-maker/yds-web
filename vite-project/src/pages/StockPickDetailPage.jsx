@@ -1,7 +1,9 @@
 import { Link, useParams } from "react-router-dom"
 import { getStockPickByTicker } from "../content/ydsStockPickModel.js"
+import { YDS_SCORE_WEIGHTS } from "../content/ydsStockScoreConfig.js"
 import { useStockPickFavorites } from "../hooks/useStockPickFavorites.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
+import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
 import "../styles/stock-picks-platform.css"
 
 export default function StockPickDetailPage() {
@@ -36,22 +38,34 @@ export default function StockPickDetailPage() {
         </div>
         <p className="yds-spick-detail__ticker font-mono tabular-nums">{stock.ticker}</p>
         <p className="yds-spick-detail__stars">{stock.stars}</p>
-        <p className="yds-spick-detail__status">
-          {stock.statusView.emoji} {stock.statusView.label}
-        </p>
-        <p className="yds-spick-detail__score font-mono tabular-nums">YDS 점수 {stock.score}</p>
+
+        <YdsStockScoreBreakdown
+          scores={stock.scores}
+          rows={stock.scoreRows}
+          variant="detail"
+        />
+
+        <p className="yds-spick-detail__status-label">상태</p>
+        <p className="yds-spick-detail__status">{stock.statusPhrase}</p>
+
+        <p className="yds-spick-detail__eval-label">한줄 평가</p>
         <p className="yds-spick-detail__comment">{stock.comment}</p>
+
+        <p className="yds-spick-detail__schema-note">
+          점수 구조 · 추세 {YDS_SCORE_WEIGHTS.trend} · 거래량 {YDS_SCORE_WEIGHTS.volume} · 위치{" "}
+          {YDS_SCORE_WEIGHTS.position} · 시장 적합도 {YDS_SCORE_WEIGHTS.marketFit} (더미)
+        </p>
       </header>
 
       <section className="yds-spick-detail__future" aria-label="향후 확장 영역">
-        <h2 className="yds-spick-detail__future-title">향후 확장</h2>
+        <h2 className="yds-spick-detail__future-title">Phase 2-3 연동 예정</h2>
         <ul className="yds-spick-detail__future-list">
-          <li>차트</li>
-          <li>실적</li>
-          <li>데이터</li>
-          <li>뉴스</li>
+          <li>추세 점수 실데이터</li>
+          <li>거래량 점수</li>
+          <li>위치 점수</li>
+          <li>시장 적합도</li>
+          <li>차트 · 실적 · 뉴스</li>
         </ul>
-        <p className="yds-spick-detail__future-note">Phase 2-2 이후 연동 예정 · 현재 더미 페이지</p>
       </section>
     </div>
   )
