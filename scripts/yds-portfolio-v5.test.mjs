@@ -1,9 +1,6 @@
 /**
- * Portfolio V5 — node scripts/yds-portfolio-v5.test.mjs
+ * Portfolio V5/V6 — node scripts/yds-portfolio-v5.test.mjs
  */
-import {
-  PORTFOLIO_DEMO_CURRENT_PRICES,
-} from "../vite-project/src/content/ydsPortfolioPriceProvider.js"
 import {
   buildV5Analysis,
   buildV5Holdings,
@@ -54,12 +51,33 @@ const trades = [nvdaBuy, lsBuy]
 const replay = replayPortfolioFromTrades(trades)
 assert(replay.lots.length === 2, "two lots")
 
-const priceMap = new Map([
-  [replay.lots.find((l) => l.ticker === "NVDA").id, PORTFOLIO_DEMO_CURRENT_PRICES.NVDA],
-  [replay.lots.find((l) => l.ticker === "010120").id, PORTFOLIO_DEMO_CURRENT_PRICES["010120"]],
+const nvdaLot = replay.lots.find((l) => l.ticker === "NVDA")
+const lsLot = replay.lots.find((l) => l.ticker === "010120")
+
+const quoteMap = new Map([
+  [
+    nvdaLot.id,
+    {
+      price: 145,
+      change: 20.8,
+      currency: "USD",
+      updatedAt: "2025-06-03T12:00:00.000Z",
+      status: "live",
+    },
+  ],
+  [
+    lsLot.id,
+    {
+      price: 221_000,
+      change: -3.9,
+      currency: "KRW",
+      updatedAt: "2025-06-03T15:30:00+09:00",
+      status: "delayed",
+    },
+  ],
 ])
 
-const holdings = buildV5Holdings(trades, 0, priceMap)
+const holdings = buildV5Holdings(trades, 0, quoteMap, "returnPct", 1350)
 const nvdaRow = holdings.rows.find((r) => r.ticker === "NVDA")
 const lsRow = holdings.rows.find((r) => r.ticker === "010120")
 
@@ -67,15 +85,17 @@ assert(nvdaRow.returnPct === 20.8, `nvda return ${nvdaRow.returnPct}`)
 assert(lsRow.returnPct === -3.9, `ls return ${lsRow.returnPct}`)
 assert(nvdaRow.unrealizedPnl > 0, "nvda unrealized profit")
 assert(lsRow.unrealizedPnl < 0, "ls unrealized loss")
+assert(nvdaRow.priceStatus === "live", "nvda live badge")
+assert(lsRow.priceStatus === "delayed", "ls delayed badge")
 assert(holdings.totalValue > holdings.totalCostKrw, "total value above cost")
 
-const analysis = buildV5Analysis(trades, 0, ctx, priceMap)
+const analysis = buildV5Analysis(trades, 0, ctx, quoteMap, 1350)
 assert(analysis.compliance.compliancePct >= 0, "compliance")
 
-const sorted = buildV5Holdings(trades, 0, priceMap, "returnPct")
+const sorted = buildV5Holdings(trades, 0, quoteMap, "returnPct", 1350)
 assert(sorted.rows[0].ticker === "NVDA", "sort by return puts NVDA first")
 
-console.log("OK portfolio v5", {
+console.log("OK portfolio v5/v6", {
   nvdaReturn: nvdaRow.returnPct,
   lsReturn: lsRow.returnPct,
   totalReturn: holdings.totalReturnPct,

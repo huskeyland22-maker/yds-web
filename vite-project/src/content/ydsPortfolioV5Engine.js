@@ -8,6 +8,9 @@ import {
   deriveAssetRebalance,
 } from "./ydsPortfolioAllocationEngine.js"
 import { toKrwValue } from "./ydsPortfolioPriceProvider.js"
+import { quotePrice } from "./ydsPortfolioQuoteTypes.js"
+
+/** @typedef {import("./ydsPortfolioQuoteTypes.js").PortfolioQuote} PortfolioQuote */
 import { inferCountryFromName, normalizePositionName } from "./ydsPortfolioTradeSync.js"
 
 /** @typedef {import("./ydsPortfolioTradesStorage.js").PortfolioTrade} PortfolioTrade */
@@ -42,6 +45,9 @@ import { inferCountryFromName, normalizePositionName } from "./ydsPortfolioTrade
  *   unrealizedPnl: number | null
  *   returnPct: number | null
  *   weightPct: number
+ *   priceStatus: import("./ydsPortfolioQuoteTypes.js").PortfolioQuoteStatus | null
+ *   priceUpdatedAt: string | null
+ *   priceStale: boolean
  * }} HoldingRow
  */
 
@@ -236,9 +242,10 @@ export function replayPortfolioFromTrades(trades) {
 
 /**
  * @param {PositionLot} lot
- * @param {number | undefined} currentPrice
+ * @param {PortfolioQuote | number | null | undefined} quoteOrPrice
+ * @param {number} [usdkrw]
  */
-function enrichLot(lot, currentPrice) {
+function enrichLot(lot, quoteOrPrice, usdkrw) {
   if (!lot.priceReady) {
     const costKrw = lot.costBasis ?? lot.holdingAmount ?? 0
     return {
@@ -249,13 +256,17 @@ function enrichLot(lot, currentPrice) {
       unrealizedPnl: null,
       returnPct: null,
       weightPct: 0,
+      priceStatus: null,
+      priceUpdatedAt: null,
+      priceStale: false,
     }
   }
 
-  const price = currentPrice != null && currentPrice > 0 ? currentPrice : null
-  const costKrw = toKrwValue(lot.country, lot.costBasisLocal)
+  const quote = typeof quoteOrPrice === "object" && quoteOrPrice != null ? quoteOrPrice : null
+  const price = quotePrice(quoteOrPrice)
+  const costKrw = toKrwValue(lot.country, lot.costBasisLocal, usdkrw)
   const marketValueKrw =
-    price != null ? toKrwValue(lot.country, lot.quantity * price) : costKrw
+    price != null ? toKrwValue(lot.country, lot.quantity * price, usdkrw) : costKrw
   const unrealizedPnl = price != null ? marketValueKrw - costKrw : null
   const returnPct =
     price != null && lot.avgUnitPrice > 0
@@ -270,6 +281,9 @@ function enrichLot(lot, currentPrice) {
     unrealizedPnl,
     returnPct,
     weightPct: 0,
+    priceStatus: quote?.status ?? (price != null ? "delayed" : "error"),
+    priceUpdatedAt: quote?.updatedAt ?? null,
+    priceStale: Boolean(quote?.stale),
   }
 }
 
@@ -292,17 +306,18 @@ export function sortHoldingRows(rows, sortBy) {
 /**
  * @param {PortfolioTrade[]} trades
  * @param {number} cashAmount
- * @param {Map<string, number>} [priceMap]
+ * @param {Map<string, PortfolioQuote | number>} [quoteMap]
  * @param {HoldingsSortKey} [sortBy]
+ * @param {number} [usdkrw]
  */
-export function buildV5Holdings(trades, cashAmount, priceMap, sortBy = "returnPct") {
+export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPct", usdkrw) {
   const { lots, totalRealizedPnl } = replayPortfolioFromTrades(trades)
   const cash = Math.max(0, Number(cashAmount) || 0)
 
   /** @type {HoldingRow[]} */
   let rows = lots.map((lot) => {
-    const price = priceMap?.get(lot.id)
-    return enrichLot(lot, price)
+    const quote = quoteMap?.get(lot.id)
+    return enrichLot(lot, quote, usdkrw)
   })
 
   const stockTotal = rows.reduce((sum, r) => sum + r.marketValueKrw, 0)
@@ -338,16 +353,17 @@ export function buildV5Holdings(trades, cashAmount, priceMap, sortBy = "returnPc
 
 /**
  * @param {PositionLot[]} lots
- * @param {Map<string, number>} [priceMap]
+ * @param {Map<string, PortfolioQuote | number>} [quoteMap]
  * @param {number} cashAmount
+ * @param {number} [usdkrw]
  */
-export function computeAllocationFromLots(lots, priceMap, cashAmount) {
+export function computeAllocationFromLots(lots, quoteMap, cashAmount, usdkrw) {
   let usVal = 0
   let krVal = 0
 
   for (const lot of lots) {
-    const price = priceMap?.get(lot.id)
-    const row = enrichLot(lot, price)
+    const quote = quoteMap?.get(lot.id)
+    const row = enrichLot(lot, quote, usdkrw)
     if (lot.country === "kr") krVal += row.marketValueKrw
     else usVal += row.marketValueKrw
   }
@@ -375,11 +391,12 @@ export function computeAllocationFromLots(lots, priceMap, cashAmount) {
  * @param {PortfolioTrade[]} trades
  * @param {number} cashAmount
  * @param {YdsMarketAdapterContext} context
- * @param {Map<string, number>} [priceMap]
+ * @param {Map<string, PortfolioQuote | number>} [quoteMap]
+ * @param {number} [usdkrw]
  */
-export function buildV5Analysis(trades, cashAmount, context, priceMap) {
+export function buildV5Analysis(trades, cashAmount, context, quoteMap, usdkrw) {
   const { lots } = replayPortfolioFromTrades(trades)
-  const asset = computeAllocationFromLots(lots, priceMap, cashAmount)
+  const asset = computeAllocationFromLots(lots, quoteMap, cashAmount, usdkrw)
   const recommended = computeRecommendedAssetAllocation(context)
   const actual = { usPct: asset.usPct, krPct: asset.krPct, cashPct: asset.cashPct }
   const compliance = computeCompliance(recommended, actual)

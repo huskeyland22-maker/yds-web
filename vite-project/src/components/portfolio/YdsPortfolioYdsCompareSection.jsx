@@ -6,11 +6,11 @@ import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 
 export default function YdsPortfolioYdsCompareSection() {
   const marketContext = useYdsMarketContext()
-  const { trades, cashAmount, priceMap } = usePortfolioHoldings()
+  const { trades, cashAmount, quoteMap, usdkrw } = usePortfolioHoldings()
 
   const analysis = useMemo(
-    () => buildV5Analysis(trades, cashAmount, marketContext, priceMap),
-    [trades, cashAmount, marketContext, priceMap],
+    () => buildV5Analysis(trades, cashAmount, marketContext, quoteMap, usdkrw),
+    [trades, cashAmount, marketContext, quoteMap, usdkrw],
   )
 
   const { recommended, actual, compliance, rebalance } = analysis

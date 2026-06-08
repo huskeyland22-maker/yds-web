@@ -31,6 +31,8 @@ const modules = [
   "api/ai/reports.js",
   "api/stock-indicators.js",
   "api/stock.js",
+  "api/_lib/portfolioQuoteProviders.js",
+  "api/portfolio-quote.js",
 ]
 
 let failed = 0

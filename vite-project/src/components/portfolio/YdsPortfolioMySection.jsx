@@ -1,5 +1,7 @@
 import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
 import { formatKrw } from "../../content/ydsPortfolioV2Engine.js"
+import { formatQuoteUpdatedAt } from "../../content/ydsPortfolioQuoteTypes.js"
+import YdsPortfolioQuoteBadge from "./YdsPortfolioQuoteBadge.jsx"
 
 function formatSignedKrw(n) {
   if (n == null || !Number.isFinite(n)) return "—"
@@ -28,7 +30,8 @@ const SORT_OPTIONS = [
 ]
 
 export default function YdsPortfolioMySection() {
-  const { portfolio, sortBy, setSortBy } = usePortfolioHoldings()
+  const { portfolio, sortBy, setSortBy, quotesLoading, quotesFetchedAt, quotesError } =
+    usePortfolioHoldings()
   const {
     rows,
     totalValue,
@@ -41,7 +44,7 @@ export default function YdsPortfolioMySection() {
 
   return (
     <section
-      className="yds-portfolio__section yds-portfolio-v2__section yds-portfolio-v3__my yds-portfolio-v4__my yds-portfolio-v5__my"
+      className="yds-portfolio__section yds-portfolio-v2__section yds-portfolio-v3__my yds-portfolio-v4__my yds-portfolio-v5__my yds-portfolio-v6__my"
       aria-labelledby="pf-my"
     >
       <h2 id="pf-my" className="yds-portfolio__section-title">
@@ -49,7 +52,15 @@ export default function YdsPortfolioMySection() {
       </h2>
 
       <p className="yds-portfolio-v2__hint-inline">
-        종목 검색 거래 + 현재가 연동 · 보유·비중 자동 계산
+        실데이터 현재가 연동 · 보유·손익·비중 자동 계산
+        {quotesLoading ? " · 시세 조회 중…" : null}
+        {!quotesLoading && quotesFetchedAt ? (
+          <span className="yds-portfolio-v6__sync font-mono tabular-nums">
+            {" "}
+            · 갱신 {formatQuoteUpdatedAt(quotesFetchedAt)}
+          </span>
+        ) : null}
+        {quotesError ? <span className="yds-portfolio-v6__sync-error"> · 시세 지연</span> : null}
       </p>
 
       <div className="yds-portfolio-v5__hero" aria-label="포트폴리오 요약">
@@ -107,7 +118,7 @@ export default function YdsPortfolioMySection() {
 
       {!rows.length ? (
         <p className="yds-portfolio-v2__empty">
-          거래 기록(종목코드·수량·단가)을 남기면 현재가가 연동된 보유 종목이 자동 생성됩니다.
+          거래 기록을 남기면 실시간 시세가 연동된 보유 종목이 자동 생성됩니다.
         </p>
       ) : (
         <>
@@ -140,6 +151,7 @@ export default function YdsPortfolioMySection() {
                   <th scope="col">평가금액</th>
                   <th scope="col">평가손익</th>
                   <th scope="col">비중</th>
+                  <th scope="col">시세</th>
                 </tr>
               </thead>
               <tbody>
@@ -165,7 +177,16 @@ export default function YdsPortfolioMySection() {
                         : formatKrw(row.costBasisKrw)}
                     </td>
                     <td className="font-mono tabular-nums">
-                      {formatUnitPrice(row.country, row.currentPrice)}
+                      <div className="yds-portfolio-v6__price-cell">
+                        {formatUnitPrice(row.country, row.currentPrice)}
+                        {row.priceStatus ? (
+                          <YdsPortfolioQuoteBadge
+                            status={row.priceStatus}
+                            stale={row.priceStale}
+                            compact
+                          />
+                        ) : null}
+                      </div>
                     </td>
                     <td
                       className={[
@@ -191,6 +212,13 @@ export default function YdsPortfolioMySection() {
                       {formatSignedKrw(row.unrealizedPnl)}
                     </td>
                     <td className="font-mono tabular-nums">{row.weightPct}%</td>
+                    <td>
+                      <YdsPortfolioQuoteBadge
+                        status={row.priceStatus}
+                        stale={row.priceStale}
+                        updatedAt={row.priceUpdatedAt}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -23,7 +23,7 @@ export default function YdsPortfolioPage() {
   }, [location.hash])
 
   return (
-    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 yds-portfolio--v5 min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 yds-portfolio--v5 yds-portfolio--v6 min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-portfolio__header">
         <p className="yds-portfolio__kicker">{UI_PAGE.portfolio.kicker}</p>
         <h1 className="yds-portfolio__title">{UI_PAGE.portfolio.title}</h1>
@@ -43,7 +43,7 @@ export default function YdsPortfolioPage() {
       </PortfolioStateProvider>
 
       <p className="yds-portfolio__footnote">
-        아는 정보만 입력한다 · 종목·코드·국가는 시스템이 채운다
+        거래만 기록한다 · 현재가는 시스템이 조회한다 · 계좌가 자동 완성된다
       </p>
     </div>
   )
