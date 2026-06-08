@@ -4,6 +4,7 @@ import YdsPortfolioMySection from "../components/portfolio/YdsPortfolioMySection
 import YdsPortfolioReviewSection from "../components/portfolio/YdsPortfolioReviewSection.jsx"
 import YdsPortfolioTradesSection from "../components/portfolio/YdsPortfolioTradesSection.jsx"
 import YdsPortfolioYdsCompareSection from "../components/portfolio/YdsPortfolioYdsCompareSection.jsx"
+import { PortfolioStateProvider } from "../context/PortfolioStateContext.jsx"
 import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import "../styles/yds-portfolio.css"
 
@@ -22,7 +23,7 @@ export default function YdsPortfolioPage() {
   }, [location.hash])
 
   return (
-    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 yds-portfolio--v5 min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-portfolio__header">
         <p className="yds-portfolio__kicker">{UI_PAGE.portfolio.kicker}</p>
         <h1 className="yds-portfolio__title">{UI_PAGE.portfolio.title}</h1>
@@ -34,13 +35,15 @@ export default function YdsPortfolioPage() {
         </p>
       </header>
 
-      <YdsPortfolioMySection />
-      <YdsPortfolioYdsCompareSection />
-      <YdsPortfolioTradesSection />
-      <YdsPortfolioReviewSection />
+      <PortfolioStateProvider>
+        <YdsPortfolioMySection />
+        <YdsPortfolioYdsCompareSection />
+        <YdsPortfolioTradesSection />
+        <YdsPortfolioReviewSection />
+      </PortfolioStateProvider>
 
       <p className="yds-portfolio__footnote">
-        거래를 기록한다 · 포트폴리오는 거래 결과로 자동 생성된다
+        거래를 기록한다 · 현재가를 연결하면 계좌가 자동 완성된다
       </p>
     </div>
   )

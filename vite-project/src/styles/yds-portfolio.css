@@ -512,6 +512,57 @@
   font-weight: 600;
 }
 
+/* —— Portfolio V5 —— */
+
+.yds-portfolio-v5__hero {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.yds-portfolio-v5__hero-sub {
+  margin: 0.1rem 0 0;
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-portfolio-v5__sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+.yds-portfolio-v5__sort-btn {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.55);
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.yds-portfolio-v5__sort-btn--active {
+  border-color: rgba(147, 197, 253, 0.35);
+  color: #93c5fd;
+  background: rgba(30, 58, 138, 0.22);
+}
+
+.yds-portfolio-v5__qty {
+  display: block;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-portfolio-v5__holdings-table th:nth-child(n + 2),
+.yds-portfolio-v5__holdings-table td:nth-child(n + 2) {
+  text-align: right;
+}
+
 .yds-portfolio-v2__section {
   padding: 0.75rem 0.85rem;
   border-radius: 0.55rem;
@@ -930,6 +981,7 @@
   }
 
   .yds-portfolio-v3__hero,
+  .yds-portfolio-v5__hero,
   .yds-portfolio-v3__compare-grid,
   .yds-portfolio-v3__compare-metrics {
     grid-template-columns: 1fr;

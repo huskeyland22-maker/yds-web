@@ -19,9 +19,11 @@ const MANUAL_POSITIONS_KEY = "yds-portfolio-manual-v1"
  *   date: string
  *   action: TradeAction
  *   name: string
+ *   ticker?: string
  *   country?: 'us' | 'kr'
  *   amount: number | null
  *   quantity?: number | null
+ *   unitPrice?: number | null
  *   memo: string
  *   createdAt: number
  *   updatedAt: number
@@ -53,7 +55,10 @@ function migrateManualPositionsToTrades(trades) {
           date: p.buyDate || todayDateKey(),
           action: "buy",
           name: String(p.name).trim(),
+          ticker: String(p.ticker ?? "").trim() || undefined,
           country: p.country === "kr" ? "kr" : "us",
+          quantity: qty > 0 ? qty : null,
+          unitPrice: price > 0 ? price : null,
           amount: Math.round(price * qty) || null,
           memo: "V4 이전 보유 이전",
           createdAt: p.createdAt ?? now,

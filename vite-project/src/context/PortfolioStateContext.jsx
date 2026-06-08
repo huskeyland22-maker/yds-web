@@ -1,5 +1,11 @@
-import { useCallback, useEffect, useState } from "react"
-import { tradeAmountKrw } from "../content/ydsPortfolioV5Engine.js"
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { resolvePortfolioPrices } from "../content/ydsPortfolioPriceProvider.js"
+import {
+  buildV5Holdings,
+  deriveCashFromTrades,
+  replayPortfolioFromTrades,
+  tradeAmountKrw,
+} from "../content/ydsPortfolioV5Engine.js"
 import {
   createTradeId,
   loadPortfolioTrades,
@@ -9,9 +15,14 @@ import {
 
 /** @typedef {import("../content/ydsPortfolioTradesStorage.js").PortfolioTrade} PortfolioTrade */
 /** @typedef {import("../content/ydsPortfolioTradesStorage.js").TradeAction} TradeAction */
+/** @typedef {import("../content/ydsPortfolioV5Engine.js").HoldingsSortKey} HoldingsSortKey */
 
-export function usePortfolioTrades() {
+/** @type {import("react").Context<null | ReturnType<typeof usePortfolioStateValue>>} */
+const PortfolioStateContext = createContext(null)
+
+function usePortfolioStateValue() {
   const [trades, setTrades] = useState(() => loadPortfolioTrades())
+  const [sortBy, setSortBy] = useState(/** @type {HoldingsSortKey} */ ("returnPct"))
 
   useEffect(() => {
     savePortfolioTrades(trades)
@@ -62,20 +73,45 @@ export function usePortfolioTrades() {
     return trade
   }, [])
 
-  /**
-   * @param {string} id
-   * @param {Partial<PortfolioTrade>} updates
-   */
-  const updateTrade = useCallback((id, updates) => {
-    setTrades((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...updates, updatedAt: Date.now() } : t)),
-    )
-  }, [])
-
   /** @param {string} id */
   const removeTrade = useCallback((id) => {
     setTrades((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  return { trades, addTrade, updateTrade, removeTrade }
+  const cashAmount = useMemo(() => deriveCashFromTrades(trades), [trades])
+
+  const priceMap = useMemo(() => {
+    const { lots } = replayPortfolioFromTrades(trades)
+    return resolvePortfolioPrices(lots)
+  }, [trades])
+
+  const portfolio = useMemo(
+    () => buildV5Holdings(trades, cashAmount, priceMap, sortBy),
+    [trades, cashAmount, priceMap, sortBy],
+  )
+
+  return {
+    trades,
+    addTrade,
+    removeTrade,
+    portfolio,
+    cashAmount,
+    priceMap,
+    sortBy,
+    setSortBy,
+  }
+}
+
+/** @param {{ children: import("react").ReactNode }} props */
+export function PortfolioStateProvider({ children }) {
+  const value = usePortfolioStateValue()
+  return <PortfolioStateContext.Provider value={value}>{children}</PortfolioStateContext.Provider>
+}
+
+export function usePortfolioHoldings() {
+  const ctx = useContext(PortfolioStateContext)
+  if (!ctx) {
+    throw new Error("usePortfolioHoldings must be used within PortfolioStateProvider")
+  }
+  return ctx
 }
