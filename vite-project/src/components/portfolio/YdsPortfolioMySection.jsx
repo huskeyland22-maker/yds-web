@@ -76,7 +76,7 @@ export default function YdsPortfolioMySection() {
       </h2>
 
       <p className="yds-portfolio-v2__hint-inline">
-        총자산 = 주식 평가 + 현금 · FIFO 실현손익 · YDS 비중 비교
+        현재 현금 + 주식 평가 = 총자산 · FIFO 실현손익 · YDS 비중 비교
         {quotesLoading ? " · 시세 조회 중…" : null}
         {!quotesLoading && quotesFetchedAt ? (
           <span className="yds-portfolio-v6__sync font-mono tabular-nums">
@@ -147,7 +147,7 @@ export default function YdsPortfolioMySection() {
 
       {!rows.length && cashAmount <= 0 ? (
         <p className="yds-portfolio-v2__empty">
-          현금 입금과 거래 기록을 남기면 실제 계좌 기준 포트폴리오가 생성됩니다.
+          현재 현금과 거래 기록을 입력하면 실제 계좌 기준 포트폴리오가 생성됩니다.
         </p>
       ) : !rows.length ? (
         <p className="yds-portfolio-v2__empty">현금만 보유 중입니다. 종목 거래를 기록해 보세요.</p>

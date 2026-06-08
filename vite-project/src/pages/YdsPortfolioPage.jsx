@@ -45,7 +45,7 @@ export default function YdsPortfolioPage() {
       </PortfolioStateProvider>
 
       <p className="yds-portfolio__footnote">
-        거래만 기록한다 · 현재가는 시스템이 조회한다 · 계좌가 자동 완성된다
+        거래와 현재 현금만 입력한다 · 나머지는 시스템이 계산한다
       </p>
     </div>
   )

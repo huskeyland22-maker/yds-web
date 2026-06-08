@@ -741,6 +741,48 @@
   color: #93c5fd;
 }
 
+/* —— Portfolio V7 (현금 단순화) —— */
+
+.yds-portfolio-v7__cash-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-portfolio-v7__cash-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1 1 12rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.yds-portfolio-v7__cash-label input {
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.8);
+  color: #f1f5f9;
+  font-size: 0.75rem;
+}
+
+.yds-portfolio-v7__cash-readout {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-portfolio-v7__cash-meta {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
 .yds-portfolio-v2__section {
   padding: 0.75rem 0.85rem;
   border-radius: 0.55rem;

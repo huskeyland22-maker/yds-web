@@ -1,8 +1,12 @@
 /**
- * Phase 6-2 — node scripts/yds-portfolio-account.test.mjs
+ * Portfolio account — node scripts/yds-portfolio-account.test.mjs
  */
-import { computePortfolioCash } from "../vite-project/src/content/ydsPortfolioCashEngine.js"
+import {
+  computePortfolioCash,
+  normalizeCashBalance,
+} from "../vite-project/src/content/ydsPortfolioCashEngine.js"
 import { replayPortfolioFifoFromTrades } from "../vite-project/src/content/ydsPortfolioFifoEngine.js"
+import { replayPortfolioFromTrades } from "../vite-project/src/content/ydsPortfolioV5Engine.js"
 import {
   buildV5Analysis,
   buildV5Holdings,
@@ -17,17 +21,6 @@ const ctx = resolveMarketAdapterContext(
   { fearGreed: 58, bofa: 6.5, vix: 15, putCall: 0.8 },
   [],
 )
-
-const ledger = [
-  {
-    id: "c1",
-    date: "2025-01-01",
-    type: "deposit",
-    amount: 10_000_000,
-    memo: "초기 입금",
-    createdAt: 1,
-  },
-]
 
 const hyundaiBuy = {
   id: "t1",
@@ -45,12 +38,16 @@ const hyundaiBuy = {
 }
 
 const trades = [hyundaiBuy]
-const cash = computePortfolioCash(trades, ledger)
+const cash = computePortfolioCash(trades, 3_850_000)
 assert(cash === 3_850_000, `cash ${cash}`)
+assert(normalizeCashBalance(-100) === 0, "clamp negative")
+
+const replay = replayPortfolioFromTrades(trades)
+const lotId = replay.lots[0].id
 
 const quoteMap = new Map([
   [
-    "현대차",
+    lotId,
     {
       price: 615_000,
       change: 0,
@@ -121,7 +118,7 @@ assert(fifo.totalRealizedPnl === 500, `fifo realized ${fifo.totalRealizedPnl}`)
 assert(fifo.lots[0].quantity === 10, "remaining qty")
 assert(fifo.lots[0].avgUnitPrice === 120, `avg ${fifo.lots[0].avgUnitPrice}`)
 
-console.log("OK portfolio account 6-2", {
+console.log("OK portfolio account", {
   cash,
   totalAssets: holdings.totalAssets,
   fifoRealized: fifo.totalRealizedPnl,

@@ -1,6 +1,5 @@
 /**
- * Phase 6-2 — 총자산 현금 엔진
- * 현금 = 입금·배당 − 출금 + 매도대금 − 매수대금
+ * 포트폴리오 현금 — 현재 보유액만 사용
  */
 
 import { tradeAmountKrw } from "./ydsPortfolioV5Engine.js"
@@ -9,10 +8,28 @@ import { tradeAmountKrw } from "./ydsPortfolioV5Engine.js"
 /** @typedef {import("./ydsPortfolioCashLedgerStorage.js").CashLedgerEntry} CashLedgerEntry */
 
 /**
- * @param {PortfolioTrade[]} trades
- * @param {CashLedgerEntry[]} [ledger]
+ * @param {number | null | undefined} amount
+ * @returns {number}
  */
-export function computePortfolioCash(trades, ledger = []) {
+export function normalizeCashBalance(amount) {
+  const n = Math.round(Number(amount) || 0)
+  return Number.isFinite(n) && n >= 0 ? n : 0
+}
+
+/**
+ * @param {PortfolioTrade[]} _trades
+ * @param {number} cashBalance
+ */
+export function computePortfolioCash(_trades, cashBalance) {
+  return normalizeCashBalance(cashBalance)
+}
+
+/**
+ * V6-2 장부 → 단일 잔액 이전용 (신규 저장소에서만 호출)
+ * @param {PortfolioTrade[]} trades
+ * @param {CashLedgerEntry[]} ledger
+ */
+export function computePortfolioCashFromLedger(trades, ledger) {
   let cash = 0
 
   for (const entry of ledger) {
@@ -39,7 +56,7 @@ export function computePortfolioCash(trades, ledger = []) {
   return Math.max(0, Math.round(cash))
 }
 
-/** @deprecated use computePortfolioCash */
+/** @param {PortfolioTrade[]} trades */
 export function deriveCashFromTrades(trades) {
-  return computePortfolioCash(trades, [])
+  return computePortfolioCashFromLedger(trades, [])
 }
