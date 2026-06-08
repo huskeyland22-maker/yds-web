@@ -23,6 +23,13 @@ export const STOCK_PICK_STATUS = {
   overheat: { id: "overheat", emoji: "🔴", label: "과열", phrase: "과열 구간" },
 }
 
+/** @typedef {'US' | 'KR'} StockPickCountryId */
+
+export const STOCK_PICK_COUNTRIES = [
+  { id: "US", emoji: "🇺🇸", label: "미국" },
+  { id: "KR", emoji: "🇰🇷", label: "한국" },
+]
+
 export const STOCK_PICK_SECTORS = [
   { id: "all", label: "전체" },
   { id: "ai", label: "AI" },
@@ -114,10 +121,32 @@ export function getStockPickUniverse() {
   return sorted.map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
+/** @param {StockPickView[]} stocks */
+export function assignRanks(stocks) {
+  const sorted = sortStockPicks(stocks, "totalScore", "desc")
+  return sorted.map((row, index) => ({ ...row, rank: index + 1 }))
+}
+
+/** @param {StockPickView[]} stocks @param {StockPickCountryId} countryId */
+export function filterByCountry(stocks, countryId) {
+  if (!countryId) return stocks
+  return stocks.filter((s) => s.country === countryId)
+}
+
+/** @param {StockPickCountryId} countryId */
+export function getStockPicksForCountry(countryId) {
+  return assignRanks(filterByCountry(getStockPickUniverse(), countryId))
+}
+
 /** @param {string} ticker */
 export function getStockPickByTicker(ticker) {
   const key = String(ticker ?? "").toUpperCase()
-  return getStockPickUniverse().find((s) => s.ticker.toUpperCase() === key) ?? null
+  const all = getStockPickUniverse()
+  const stock = all.find((s) => s.ticker.toUpperCase() === key) ?? null
+  if (!stock) return null
+  return assignRanks(filterByCountry(all, stock.country)).find(
+    (s) => s.ticker.toUpperCase() === key,
+  ) ?? stock
 }
 
 /** @typedef {'totalScore' | 'trendScore' | 'volumeScore' | 'positionScore' | 'marketFitScore' | 'rating' | 'rank' | 'name'} StockPickSortKey */

@@ -79,6 +79,76 @@
   color: #94a3b8;
 }
 
+.yds-spick-country-tabs {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.yds-spick-country-tabs__btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.65);
+  font-size: clamp(0.78rem, 2.2vw, 0.88rem);
+  font-weight: 800;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.yds-spick-country-tabs__btn--active {
+  border-color: rgba(96, 165, 250, 0.45);
+  color: #e2e8f0;
+  background: rgba(96, 165, 250, 0.12);
+}
+
+.yds-spick-country-tabs__emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.yds-spick-dual {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.yds-spick-dual__col:not(.yds-spick-dual__col--active) {
+  display: none;
+}
+
+.yds-spick-country-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  min-width: 0;
+}
+
+.yds-spick-country-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.yds-spick-country-panel__emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.yds-spick-country-panel__title {
+  margin: 0;
+  font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
 .yds-spick-section__title {
   margin: 0 0 0.5rem;
   font-size: clamp(0.95rem, 2.8vw, 1.08rem);
@@ -463,6 +533,11 @@
   color: #64748b;
 }
 
+.yds-spick-detail__country {
+  font-weight: 700;
+  color: #94a3b8;
+}
+
 .yds-spick-detail__stars {
   margin: 0.45rem 0 0;
   font-size: 0.82rem;
@@ -521,6 +596,37 @@
   margin: 0.4rem 0 0;
   font-size: 0.65rem;
   color: #64748b;
+}
+
+@media (min-width: 1024px) {
+  .yds-spick-page--countries {
+    max-width: 76rem;
+  }
+
+  .yds-spick-country-tabs--mobile {
+    display: none;
+  }
+
+  .yds-spick-dual {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .yds-spick-dual__col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yds-spick-dual .yds-spick-top3 {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-spick-dual .yds-spick-grid,
+  .yds-spick-dual .yds-spick-grid--all {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {

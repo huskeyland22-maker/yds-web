@@ -5,7 +5,7 @@ import "../styles/stock-picks-platform.css"
 
 export default function StockRecommendationPage() {
   return (
-    <div className="yds-spick-page min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-spick-page yds-spick-page--countries min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-spick-page__header">
         <p className="yds-spick-page__kicker">{UI_PAGE.stockPicks.kicker}</p>
         <h1 className="yds-spick-page__title">{UI_PAGE.stockPicks.title}</h1>

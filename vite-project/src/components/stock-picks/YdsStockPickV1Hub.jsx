@@ -1,17 +1,36 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
-  filterBySector,
-  getRankingStocks,
+  assignRanks,
+  filterByCountry,
   getStockPickUniverse,
-  getTop3Stocks,
+  STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
-import YdsStockPickTop3 from "./YdsStockPickTop3.jsx"
-import YdsStockPickRanking from "./YdsStockPickRanking.jsx"
-import YdsStockPickSectorPanel from "./YdsStockPickSectorPanel.jsx"
-import YdsStockPickCard from "./YdsStockPickCard.jsx"
+import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
+import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
+
+const INITIAL_SECTOR = { US: "all", KR: "all" }
+const DUAL_LAYOUT_MQ = "(min-width: 1024px)"
+
+function useDualCountryLayout() {
+  const [dualLayout, setDualLayout] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia(DUAL_LAYOUT_MQ).matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia(DUAL_LAYOUT_MQ)
+    const onChange = () => setDualLayout(mq.matches)
+    mq.addEventListener("change", onChange)
+    return () => mq.removeEventListener("change", onChange)
+  }, [])
+
+  return dualLayout
+}
 
 export default function YdsStockPickV1Hub() {
+  const dualLayout = useDualCountryLayout()
   const allStocks = useMemo(() => getStockPickUniverse(), [])
   const {
     favoritesOnly,
@@ -22,15 +41,23 @@ export default function YdsStockPickV1Hub() {
     favoriteCount,
   } = useStockPickFavorites()
 
-  const [sectorId, setSectorId] = useState("all")
+  const [countryId, setCountryId] = useState("US")
+  const [sectorByCountry, setSectorByCountry] = useState(INITIAL_SECTOR)
 
-  const visible = useMemo(() => applyFavoriteFilter(allStocks), [allStocks, applyFavoriteFilter])
-  const top3 = useMemo(() => getTop3Stocks(visible), [visible])
-  const ranking = useMemo(() => getRankingStocks(visible, 5), [visible])
-  const sectorStocks = useMemo(
-    () => filterBySector(visible, sectorId),
-    [visible, sectorId],
-  )
+  const stocksByCountry = useMemo(() => {
+    const ranked = {
+      US: assignRanks(filterByCountry(allStocks, "US")),
+      KR: assignRanks(filterByCountry(allStocks, "KR")),
+    }
+    return {
+      US: applyFavoriteFilter(ranked.US),
+      KR: applyFavoriteFilter(ranked.KR),
+    }
+  }, [allStocks, applyFavoriteFilter])
+
+  const setSectorForCountry = (country, sectorId) => {
+    setSectorByCountry((prev) => ({ ...prev, [country]: sectorId }))
+  }
 
   return (
     <div className="yds-spick-platform">
@@ -53,39 +80,45 @@ export default function YdsStockPickV1Hub() {
         </button>
       </div>
 
-      <YdsStockPickTop3
-        stocks={top3}
-        isFavorite={isFavorite}
-        onToggleFavorite={toggleFavorite}
+      <YdsStockPickCountryTabs
+        countryId={countryId}
+        onCountryChange={setCountryId}
+        className="yds-spick-country-tabs--mobile"
       />
 
-      <YdsStockPickRanking stocks={ranking} />
+      <div className="yds-spick-dual">
+        {STOCK_PICK_COUNTRIES.map((country) => {
+          const isActive = countryId === country.id
+          const panelId =
+            country.id === "US" ? "spick-all-us" : "spick-all-kr"
 
-      <YdsStockPickSectorPanel
-        stocks={sectorStocks}
-        sectorId={sectorId}
-        onSectorChange={setSectorId}
-        isFavorite={isFavorite}
-        onToggleFavorite={toggleFavorite}
-      />
-
-      <section className="yds-spick-section" aria-labelledby="spick-all">
-        <h2 id="spick-all" className="yds-spick-section__title">
-          전체 종목
-        </h2>
-        <div className="yds-spick-grid yds-spick-grid--all">
-          {visible.map((stock) => (
-            <YdsStockPickCard
-              key={stock.ticker}
-              stock={stock}
-              variant="compact"
-              isFavorite={isFavorite(stock.ticker)}
-              onToggleFavorite={toggleFavorite}
-            />
-          ))}
-        </div>
-        {!visible.length ? <p className="yds-spick-empty">표시할 종목이 없습니다.</p> : null}
-      </section>
+          return (
+            <div
+              key={country.id}
+              className={[
+                "yds-spick-dual__col",
+                isActive ? "yds-spick-dual__col--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              role="tabpanel"
+              aria-label={`${country.label} 종목추천`}
+              aria-hidden={dualLayout ? false : !isActive}
+            >
+              <YdsStockPickCountryPanel
+                countryId={country.id}
+                stocks={stocksByCountry[country.id]}
+                sectorId={sectorByCountry[country.id]}
+                onSectorChange={(id) => setSectorForCountry(country.id, id)}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
+                showCountryHead
+                allSectionId={panelId}
+              />
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

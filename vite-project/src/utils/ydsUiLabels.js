@@ -39,7 +39,7 @@ export const UI_RADAR = {
 export const UI_PAGE = {
   stockPicks: {
     title: "종목추천",
-    kicker: "종목추천 · Phase 2-3",
+    kicker: "종목추천 · Phase 2-3.5",
     path: "/stock-picks",
   },
   watchlist: {

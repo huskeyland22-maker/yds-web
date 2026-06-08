@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom"
-import { getStockPickByTicker } from "../content/ydsStockPickModel.js"
+import { getStockPickByTicker, STOCK_PICK_COUNTRIES } from "../content/ydsStockPickModel.js"
 import { useStockPickFavorites } from "../hooks/useStockPickFavorites.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
@@ -21,6 +21,8 @@ export default function StockPickDetailPage() {
     )
   }
 
+  const countryMeta = STOCK_PICK_COUNTRIES.find((c) => c.id === stock.country)
+
   return (
     <div className="yds-spick-detail min-w-0 px-3 py-4 sm:px-4">
       <Link to="/stock-picks" className="yds-spick-detail__back">
@@ -35,7 +37,15 @@ export default function StockPickDetailPage() {
             onToggle={() => toggleFavorite(stock.ticker)}
           />
         </div>
-        <p className="yds-spick-detail__ticker font-mono tabular-nums">{stock.ticker}</p>
+        <p className="yds-spick-detail__ticker font-mono tabular-nums">
+          {stock.ticker}
+          {countryMeta ? (
+            <span className="yds-spick-detail__country">
+              {" "}
+              · {countryMeta.emoji} {countryMeta.label} {stock.rank}위
+            </span>
+          ) : null}
+        </p>
         <p className="yds-spick-detail__stars">{stock.stars}</p>
 
         <YdsStockScoreBreakdown
