@@ -1,5 +1,5 @@
 /**
- * Stock pick Phase 2-2 smoke test — node scripts/yds-stock-pick-v1-view.test.mjs
+ * Stock pick Phase 2-3 integration test — node scripts/yds-stock-pick-v1-view.test.mjs
  */
 import {
   getStockPickUniverse,
@@ -7,9 +7,8 @@ import {
   getRankingStocks,
   filterBySector,
   getStockPickByTicker,
-  STOCK_PICK_STATUS,
 } from "../vite-project/src/content/ydsStockPickModel.js"
-import { YDS_SCORE_WEIGHTS, formatScoreBreakdownRows } from "../vite-project/src/content/ydsStockScoreConfig.js"
+import { YDS_SCORE_WEIGHTS } from "../vite-project/src/content/ydsStockScoreConfig.js"
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg)
@@ -17,30 +16,33 @@ function assert(cond, msg) {
 
 const all = getStockPickUniverse()
 assert(all.length === 45, `universe ${all.length}`)
-assert(all[0].scores.totalScore === all[0].score, "score alias")
 
 const nvda = getStockPickByTicker("NVDA")
-assert(nvda?.scores.trendScore === 38, "nvda trend")
-assert(nvda?.scoreRows.length === 4, "score rows")
-assert(nvda?.statusPhrase === "강한 추세", "status phrase")
+assert(nvda != null, "nvda")
+assert(nvda.scores.trendScore > 0, "computed trend")
+assert(nvda.scores.marketFitScore === 19, "manual market fit")
+assert(
+  nvda.scores.totalScore ===
+    nvda.scores.trendScore +
+      nvda.scores.volumeScore +
+      nvda.scores.positionScore +
+      nvda.scores.marketFitScore,
+  "total equals sum",
+)
+assert(nvda.scoreMeta.volumeRatio > 0, "score meta")
 
 const top3 = getTop3Stocks(all)
-assert(top3[0].ticker === "NVDA", "top1")
+assert(top3.length === 3, "top3")
+assert(top3[0].rank === 1, "rank1 dynamic")
 
-const nuclear = filterBySector(all, "nuclear")
-assert(nuclear.length >= 4, `nuclear ${nuclear.length}`)
+const ranking = getRankingStocks(all, 5)
+assert(ranking[0].scores.totalScore >= ranking[4].scores.totalScore, "rank order")
 
-const infra = filterBySector(all, "infra")
-assert(infra.length >= 4, `infra ${infra.length}`)
+assert(filterBySector(all, "nuclear").length >= 4, "nuclear sector")
+assert(YDS_SCORE_WEIGHTS.trend === 40, "weights")
 
-assert(YDS_SCORE_WEIGHTS.trend === 40, "trend weight")
-assert(STOCK_PICK_STATUS.trend.phrase === "강한 추세", "phrase")
-
-const rows = formatScoreBreakdownRows(nvda.scores)
-assert(rows[0].display === "38/40", rows[0].display)
-
-console.log("OK stock pick phase 2-2", {
+console.log("OK stock pick phase 2-3", {
   total: all.length,
-  top3: top3.map((s) => `${s.name} ${s.scores.totalScore}`),
-  sectors: ["ai", "nuclear", "infra"].map((id) => `${id}:${filterBySector(all, id).length}`),
+  top3: top3.map((s) => `${s.name} ${s.scores.totalScore} (T${s.scores.trendScore})`),
+  nvdaTrend: nvda.scores.trendScore,
 })

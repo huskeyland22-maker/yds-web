@@ -1,6 +1,5 @@
 import { Link, useParams } from "react-router-dom"
 import { getStockPickByTicker } from "../content/ydsStockPickModel.js"
-import { YDS_SCORE_WEIGHTS } from "../content/ydsStockScoreConfig.js"
 import { useStockPickFavorites } from "../hooks/useStockPickFavorites.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
@@ -52,18 +51,15 @@ export default function StockPickDetailPage() {
         <p className="yds-spick-detail__comment">{stock.comment}</p>
 
         <p className="yds-spick-detail__schema-note">
-          점수 구조 · 추세 {YDS_SCORE_WEIGHTS.trend} · 거래량 {YDS_SCORE_WEIGHTS.volume} · 위치{" "}
-          {YDS_SCORE_WEIGHTS.position} · 시장 적합도 {YDS_SCORE_WEIGHTS.marketFit} (더미)
+          추세·거래량·위치는 스냅샷 기반 자동 계산 · 시장 적합도는 수동값 (향후 시장분석 연동)
         </p>
       </header>
 
       <section className="yds-spick-detail__future" aria-label="향후 확장 영역">
-        <h2 className="yds-spick-detail__future-title">Phase 2-3 연동 예정</h2>
+        <h2 className="yds-spick-detail__future-title">Phase 2-4 연동 예정</h2>
         <ul className="yds-spick-detail__future-list">
-          <li>추세 점수 실데이터</li>
-          <li>거래량 점수</li>
-          <li>위치 점수</li>
-          <li>시장 적합도</li>
+          <li>실시간 가격·거래량 스냅샷</li>
+          <li>시장 적합도 (YDS 시장분석)</li>
           <li>차트 · 실적 · 뉴스</li>
         </ul>
       </section>

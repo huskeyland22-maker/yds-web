@@ -1,6 +1,5 @@
 /**
- * YDS Phase 2-2 — 종목 점수 구조 (설계 전용 · 계산 엔진 없음)
- * Phase 2-3에서 실데이터 연결 예정
+ * YDS Phase 2-3 — 종목 점수 구조 · 계산 엔진 연동
  */
 
 export const YDS_SCORE_WEIGHTS = {
