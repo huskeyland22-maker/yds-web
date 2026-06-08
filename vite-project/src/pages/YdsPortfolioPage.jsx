@@ -22,7 +22,7 @@ export default function YdsPortfolioPage() {
   }, [location.hash])
 
   return (
-    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 min-w-0 px-3 py-4 sm:px-4">
+    <div className="yds-portfolio yds-portfolio--v2 yds-portfolio--v3 yds-portfolio--v4 min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-portfolio__header">
         <p className="yds-portfolio__kicker">{UI_PAGE.portfolio.kicker}</p>
         <h1 className="yds-portfolio__title">{UI_PAGE.portfolio.title}</h1>
@@ -40,7 +40,7 @@ export default function YdsPortfolioPage() {
       <YdsPortfolioReviewSection />
 
       <p className="yds-portfolio__footnote">
-        시장분석은 판단 · 종목추천은 후보 · 포트폴리오는 실행
+        거래를 기록한다 · 포트폴리오는 거래 결과로 자동 생성된다
       </p>
     </div>
   )

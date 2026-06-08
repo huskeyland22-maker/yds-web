@@ -20,8 +20,8 @@ export function usePortfolioTrades() {
    * @param {{
    *   action: TradeAction
    *   name: string
+   *   country?: 'us' | 'kr'
    *   amount?: number | null
-   *   quantity?: number | null
    *   memo?: string
    *   date?: string
    * }} input
@@ -33,11 +33,8 @@ export function usePortfolioTrades() {
       date: input.date ?? todayDateKey(),
       action: input.action,
       name: String(input.name ?? "").trim(),
+      country: input.country === "kr" ? "kr" : "us",
       amount: input.amount != null && Number.isFinite(input.amount) ? Math.round(input.amount) : null,
-      quantity:
-        input.quantity != null && Number.isFinite(input.quantity)
-          ? Math.max(0, Math.round(input.quantity))
-          : null,
       memo: String(input.memo ?? "").trim(),
       createdAt: now,
       updatedAt: now,

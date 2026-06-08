@@ -134,6 +134,7 @@ export function applyTradeToPositions(positions, trade) {
       quantity: qty,
       amount: trade.amount,
       date: trade.date,
+      country: trade.country,
     })
   }
   if (trade.action === "sell") {

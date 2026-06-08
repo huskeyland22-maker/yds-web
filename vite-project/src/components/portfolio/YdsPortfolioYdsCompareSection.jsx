@@ -1,21 +1,20 @@
 import { useMemo } from "react"
 import { Link } from "react-router-dom"
-import { buildPortfolioV2Analysis } from "../../content/ydsPortfolioV2Engine.js"
-import { usePortfolioCash } from "../../hooks/usePortfolioCash.js"
+import { buildV4Analysis } from "../../content/ydsPortfolioV4Engine.js"
 import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 
 export default function YdsPortfolioYdsCompareSection() {
   const marketContext = useYdsMarketContext()
-  const { positions } = usePortfolioHoldings()
-  const { cashAmount } = usePortfolioCash()
+  const { trades, cashAmount } = usePortfolioHoldings()
 
   const analysis = useMemo(
-    () => buildPortfolioV2Analysis(positions, cashAmount, marketContext),
-    [positions, cashAmount, marketContext],
+    () => buildV4Analysis(trades, cashAmount, marketContext),
+    [trades, cashAmount, marketContext],
   )
 
   const { recommended, actual, compliance, rebalance } = analysis
+  const hasData = trades.some((t) => t.action !== "watch" && (t.amount ?? 0) > 0)
 
   return (
     <section
@@ -27,25 +26,24 @@ export default function YdsPortfolioYdsCompareSection() {
       </h2>
 
       <p className="yds-portfolio-v3__compare-lead">
-        {marketContext.strategyEmoji} {marketContext.strategyLabel}
+        {marketContext.strategyEmoji} {marketContext.strategyLabel} · 거래 기반 자동 분석
       </p>
 
-      <div className="yds-portfolio-v3__compare-grid">
-        <div className="yds-portfolio-v3__compare-col">
-          <p className="yds-portfolio-v3__compare-head">현재 비중</p>
-          <ul className="yds-portfolio-v3__compare-list">
-            <li className="font-mono tabular-nums">🇺🇸 미국 {actual.usPct}%</li>
-            <li className="font-mono tabular-nums">🇰🇷 한국 {actual.krPct}%</li>
-            <li className="font-mono tabular-nums">💵 현금 {actual.cashPct}%</li>
-          </ul>
+      <div className="yds-portfolio-v4__alloc-bars">
+        <div className="yds-portfolio-v4__alloc-row">
+          <span>🇺🇸 미국</span>
+          <span className="font-mono tabular-nums">현재 {actual.usPct}%</span>
+          <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">권장 {recommended.usPct}%</span>
         </div>
-        <div className="yds-portfolio-v3__compare-col">
-          <p className="yds-portfolio-v3__compare-head">권장 비중</p>
-          <ul className="yds-portfolio-v3__compare-list">
-            <li className="font-mono tabular-nums">🇺🇸 미국 {recommended.usPct}%</li>
-            <li className="font-mono tabular-nums">🇰🇷 한국 {recommended.krPct}%</li>
-            <li className="font-mono tabular-nums">💵 현금 {recommended.cashPct}%</li>
-          </ul>
+        <div className="yds-portfolio-v4__alloc-row">
+          <span>🇰🇷 한국</span>
+          <span className="font-mono tabular-nums">현재 {actual.krPct}%</span>
+          <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">권장 {recommended.krPct}%</span>
+        </div>
+        <div className="yds-portfolio-v4__alloc-row">
+          <span>💵 현금</span>
+          <span className="font-mono tabular-nums">현재 {actual.cashPct}%</span>
+          <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">권장 {recommended.cashPct}%</span>
         </div>
       </div>
 
@@ -53,13 +51,13 @@ export default function YdsPortfolioYdsCompareSection() {
         <div className="yds-portfolio-v3__compare-metric">
           <span className="yds-portfolio-v3__compare-metric-label">괴리도</span>
           <strong className="yds-portfolio-v3__compare-metric-value font-mono tabular-nums">
-            {positions.length || cashAmount > 0 ? `${compliance.gapPct}%` : "—"}
+            {hasData ? `${compliance.gapPct}%` : "—"}
           </strong>
         </div>
         <div className="yds-portfolio-v3__compare-metric yds-portfolio-v3__compare-metric--accent">
           <span className="yds-portfolio-v3__compare-metric-label">준수율</span>
           <strong className="yds-portfolio-v3__compare-metric-value font-mono tabular-nums">
-            {positions.length || cashAmount > 0 ? `${compliance.compliancePct}%` : "—"}
+            {hasData ? `${compliance.compliancePct}%` : "—"}
           </strong>
         </div>
       </div>
@@ -67,9 +65,8 @@ export default function YdsPortfolioYdsCompareSection() {
       <p className="yds-portfolio-v2__conclusion">{rebalance.conclusion}</p>
 
       <p className="yds-portfolio-v2__market-link">
-        판단 근거 · <Link to="/market-analysis">시장분석</Link>
-        {" · "}
-        <Link to="/stock-picks">종목추천</Link>
+        판단 · <Link to="/market-analysis">시장분석</Link>
+        {" · "}후보 · <Link to="/stock-picks">종목추천</Link>
       </p>
     </section>
   )

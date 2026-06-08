@@ -1,184 +1,104 @@
-import { useMemo, useState } from "react"
-import { buildPortfolioSummary } from "../../content/ydsPortfolioV2Engine.js"
-import { usePortfolioCash } from "../../hooks/usePortfolioCash.js"
 import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
+import { formatKrw } from "../../content/ydsPortfolioV2Engine.js"
 
-function formatPct(v) {
-  if (v == null || !Number.isFinite(v)) return "—"
-  return `${v > 0 ? "+" : ""}${v}%`
+function formatSignedKrw(n) {
+  if (n == null || !Number.isFinite(n)) return "—"
+  const sign = n > 0 ? "+" : ""
+  return `${sign}${Math.round(n).toLocaleString("ko-KR")}원`
 }
 
 export default function YdsPortfolioMySection() {
-  const { cashAmount } = usePortfolioCash()
-  const { positions, manualPositions, addManualPosition, removeManualPosition } =
-    usePortfolioHoldings()
-
-  const [name, setName] = useState("")
-  const [buyDate, setBuyDate] = useState("")
-  const [avgPrice, setAvgPrice] = useState("")
-  const [quantity, setQuantity] = useState("")
-
-  const summary = useMemo(
-    () => buildPortfolioSummary(positions, cashAmount),
-    [positions, cashAmount],
-  )
-
-  function handleManualAdd(e) {
-    e.preventDefault()
-    if (!name.trim()) return
-    addManualPosition({
-      name: name.trim(),
-      buyDate: buyDate || new Date().toISOString().slice(0, 10),
-      avgPrice: Number(avgPrice) || 0,
-      quantity: Number(quantity) || 0,
-    })
-    setName("")
-    setBuyDate("")
-    setAvgPrice("")
-    setQuantity("")
-  }
+  const { portfolio } = usePortfolioHoldings()
+  const { rows, totalValue, cashPct, totalRealizedPnl } = portfolio
 
   return (
     <section
-      className="yds-portfolio__section yds-portfolio-v2__section yds-portfolio-v3__my"
+      className="yds-portfolio__section yds-portfolio-v2__section yds-portfolio-v3__my yds-portfolio-v4__my"
       aria-labelledby="pf-my"
     >
       <h2 id="pf-my" className="yds-portfolio__section-title">
         1 · 내 포트폴리오
       </h2>
 
+      <p className="yds-portfolio-v2__hint-inline">거래 기록에서 자동 생성 · 직접 입력 없음</p>
+
       <div className="yds-portfolio-v3__hero" aria-label="포트폴리오 요약">
         <div className="yds-portfolio-v3__metric yds-portfolio-v3__metric--primary">
           <p className="yds-portfolio-v3__metric-label">총 평가금액</p>
           <p className="yds-portfolio-v3__metric-value font-mono tabular-nums">
-            {summary.totalValue > 0 ? summary.totalValue.toLocaleString("ko-KR") : "—"}
-            {summary.totalValue > 0 ? <span className="yds-portfolio-v3__metric-unit">원</span> : null}
+            {totalValue > 0 ? totalValue.toLocaleString("ko-KR") : "—"}
+            {totalValue > 0 ? <span className="yds-portfolio-v3__metric-unit">원</span> : null}
           </p>
         </div>
         <div className="yds-portfolio-v3__metric">
-          <p className="yds-portfolio-v3__metric-label">총 수익률</p>
+          <p className="yds-portfolio-v3__metric-label">실현손익</p>
           <p
             className={[
               "yds-portfolio-v3__metric-value font-mono tabular-nums",
-              summary.totalReturnPct != null && summary.totalReturnPct > 0
-                ? "yds-portfolio-v2__up"
-                : "",
-              summary.totalReturnPct != null && summary.totalReturnPct < 0
-                ? "yds-portfolio-v2__down"
-                : "",
+              totalRealizedPnl > 0 ? "yds-portfolio-v2__up" : "",
+              totalRealizedPnl < 0 ? "yds-portfolio-v2__down" : "",
             ]
               .filter(Boolean)
               .join(" ")}
           >
-            {formatPct(summary.totalReturnPct)}
+            {totalValue > 0 || totalRealizedPnl !== 0
+              ? formatSignedKrw(totalRealizedPnl)
+              : "—"}
           </p>
         </div>
         <div className="yds-portfolio-v3__metric">
           <p className="yds-portfolio-v3__metric-label">현금 비중</p>
           <p className="yds-portfolio-v3__metric-value font-mono tabular-nums">
-            {summary.totalValue > 0 ? `${summary.cashPct}%` : "—"}
+            {totalValue > 0 ? `${cashPct}%` : "—"}
           </p>
         </div>
       </div>
 
-      {!summary.rows.length ? (
-        <p className="yds-portfolio-v2__empty">
-          매수 기록을 남기면 보유 종목이 자동으로 표시됩니다.
-        </p>
+      {!rows.length ? (
+        <p className="yds-portfolio-v2__empty">매매 기록을 남기면 보유 종목이 자동으로 생성됩니다.</p>
       ) : (
         <div className="yds-portfolio-v2__table-wrap">
-          <table className="yds-portfolio-v2__table yds-portfolio-v3__holdings-table">
+          <table className="yds-portfolio-v2__table yds-portfolio-v4__holdings-table">
             <thead>
               <tr>
-                <th scope="col">보유 종목</th>
-                <th scope="col">수익률</th>
+                <th scope="col">종목명</th>
+                <th scope="col">매입금액</th>
+                <th scope="col">현재 보유금액</th>
                 <th scope="col">비중</th>
+                <th scope="col">실현손익</th>
+                <th scope="col">미실현손익</th>
               </tr>
             </thead>
             <tbody>
-              {summary.rows.map((row) => (
+              {rows.map((row) => (
                 <tr key={row.id}>
                   <td>
                     <strong>{row.name}</strong>
-                    {row.source === "manual" ? (
-                      <span className="yds-portfolio-v2__tag">직접입력</span>
-                    ) : null}
+                    <span className="yds-portfolio-v4__country">
+                      {row.country === "kr" ? "🇰🇷" : "🇺🇸"}
+                    </span>
                   </td>
+                  <td className="font-mono tabular-nums">{formatKrw(row.purchaseAmount)}</td>
+                  <td className="font-mono tabular-nums">{formatKrw(row.holdingAmount)}</td>
+                  <td className="font-mono tabular-nums">{row.weightPct}%</td>
                   <td
                     className={[
                       "font-mono tabular-nums",
-                      row.returnPct != null && row.returnPct > 0 ? "yds-portfolio-v2__up" : "",
-                      row.returnPct != null && row.returnPct < 0 ? "yds-portfolio-v2__down" : "",
+                      row.realizedPnl > 0 ? "yds-portfolio-v2__up" : "",
+                      row.realizedPnl < 0 ? "yds-portfolio-v2__down" : "",
                     ]
                       .filter(Boolean)
                       .join(" ")}
                   >
-                    {formatPct(row.returnPct)}
+                    {formatSignedKrw(row.realizedPnl)}
                   </td>
-                  <td className="font-mono tabular-nums">{row.weightPct}%</td>
+                  <td className="yds-portfolio-v4__future font-mono tabular-nums">—</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-
-      <details className="yds-portfolio-v2__manual">
-        <summary className="yds-portfolio-v2__manual-summary">보유 직접 입력 (선택)</summary>
-        <form className="yds-portfolio-v2__form" onSubmit={handleManualAdd}>
-          <div className="yds-portfolio-v2__form-grid yds-portfolio-v2__form-grid--manual">
-            <label>
-              <span>종목명</span>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="엔비디아" required />
-            </label>
-            <label>
-              <span>매수일</span>
-              <input type="date" value={buyDate} onChange={(e) => setBuyDate(e.target.value)} />
-            </label>
-            <label>
-              <span>평균단가</span>
-              <input
-                type="number"
-                min={0}
-                value={avgPrice}
-                onChange={(e) => setAvgPrice(e.target.value)}
-                className="font-mono tabular-nums"
-                required
-              />
-            </label>
-            <label>
-              <span>보유수량</span>
-              <input
-                type="number"
-                min={0}
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                className="font-mono tabular-nums"
-                required
-              />
-            </label>
-          </div>
-          <button type="submit" className="yds-portfolio-v2__btn yds-portfolio-v2__btn--primary">
-            추가
-          </button>
-        </form>
-        {manualPositions.length ? (
-          <ul className="yds-portfolio-v2__manual-list">
-            {manualPositions.map((p) => (
-              <li key={p.id}>
-                <span>{p.name}</span>
-                <button
-                  type="button"
-                  className="yds-portfolio-v2__btn yds-portfolio-v2__btn--danger"
-                  onClick={() => removeManualPosition(p.id)}
-                >
-                  삭제
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </details>
     </section>
   )
 }
