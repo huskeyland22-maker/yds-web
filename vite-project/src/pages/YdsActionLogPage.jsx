@@ -96,7 +96,11 @@ export default function YdsActionLogPage() {
         <p className="yds-action-log__kicker">{UI_PAGE.actionLog.kicker}</p>
         <h1 className="yds-action-log__title">{UI_PAGE.actionLog.title}</h1>
         <p className="yds-action-log__sub">
-          실행 기록 · 권장과 비교 ·{" "}
+          실행 기록 ·{" "}
+          <Link to="/yds-compare">YDS vs 실제</Link>
+          {" · "}
+          <Link to="/ops-dashboard">운영 대시보드</Link>
+          {" · "}
           <Link to="/portfolio">포트폴리오</Link>
         </p>
       </header>

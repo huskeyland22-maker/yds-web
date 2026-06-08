@@ -1,0 +1,221 @@
+/* YDS Phase 5-1 — 운영 대시보드 */
+
+.yds-ops {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.yds-ops__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.yds-ops__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-ops__title {
+  margin: 0;
+  font-size: clamp(1.2rem, 4vw, 1.45rem);
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-ops__sub {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.yds-ops__sub a {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.yds-ops__summary {
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.95), rgba(30, 58, 95, 0.5));
+}
+
+.yds-ops__summary-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-ops__summary-emoji {
+  font-size: 1.1rem;
+}
+
+.yds-ops__summary-metrics {
+  margin: 0.3rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.yds-ops__summary-note {
+  margin: 0.3rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-ops__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.yds-ops__card {
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.yds-ops__card--wide {
+  grid-column: 1 / -1;
+}
+
+.yds-ops__card-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.yds-ops__kv {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.yds-ops__kv li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.yds-ops__kv li span:last-child {
+  color: #e2e8f0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.yds-ops__alloc-hero {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-ops__link {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.yds-ops__log-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yds-ops__log-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.yds-ops__log-date {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-ops__log-val {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.yds-ops__log-memo {
+  flex: 1 1 100%;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-ops__metric-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-ops__metric-sub {
+  margin-left: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-ops__empty {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.yds-ops__empty a {
+  color: #93c5fd;
+}
+
+.yds-ops__footnote {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .yds-ops__grid {
+    grid-template-columns: 1fr;
+  }
+}
