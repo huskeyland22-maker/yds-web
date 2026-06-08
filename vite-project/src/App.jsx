@@ -1380,8 +1380,8 @@ function App() {
                 </SectionErrorBoundary>
               }
             />
-            <Route path="/action-log" element={<Navigate to="/portfolio#execution-log" replace />} />
-            <Route path="/yds-compare" element={<Navigate to="/portfolio#execution-log" replace />} />
+            <Route path="/action-log" element={<Navigate to="/portfolio#portfolio-trades" replace />} />
+            <Route path="/yds-compare" element={<Navigate to="/portfolio#portfolio-trades" replace />} />
             <Route path="/ops-dashboard" element={<Navigate to="/portfolio" replace />} />
             <Route
               path="/ai-daily-report"
