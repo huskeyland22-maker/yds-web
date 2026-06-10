@@ -5,26 +5,41 @@ import {
   timelineEventEmoji,
 } from "../../content/ydsMarketTimeline.js"
 import {
+  clearLegacyEventHistoryStorage,
   fetchSeedEventHistory,
   loadStoredEventHistory,
   mergeSeedAndStored,
   saveStoredEventHistory,
 } from "../../content/ydsMarketEventHistoryStorage.js"
 
-const COLLAPSED_VISIBLE = 2
+const DEFAULT_COLLAPSED = 3
 
 /**
- * V1.8 시장 전환점 — 기본 2건 · 더보기/접기
- * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
+ * V2 시장 전환점 — stream(3건+히스토리 링크) · full(details 전체)
+ * @param {{
+ *   panicData?: object | null
+ *   historyRows?: object[]
+ *   className?: string
+ *   variant?: "stream" | "full"
+ *   collapsedVisible?: number
+ *   onViewAllHistory?: () => void
+ * }} props
  */
 export default function YdsMarketTimelineSection({
   panicData = null,
   historyRows = [],
   className = "",
+  variant = "full",
+  collapsedVisible = DEFAULT_COLLAPSED,
+  onViewAllHistory,
 }) {
   const [storedEvents, setStoredEvents] = useState(() => loadStoredEventHistory())
   const [seedLoaded, setSeedLoaded] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(variant === "full")
+
+  useEffect(() => {
+    clearLegacyEventHistoryStorage()
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -47,21 +62,24 @@ export default function YdsMarketTimelineSection({
 
   useEffect(() => {
     if (!seedLoaded && storedEvents.length === 0) return
-    if (view.events.length === 0) return
     saveStoredEventHistory(view.events)
   }, [view.events, seedLoaded, storedEvents.length])
 
   if (!view.events.length) return null
 
-  const hiddenCount = Math.max(0, view.events.length - COLLAPSED_VISIBLE)
-  const visibleEvents = expanded ? view.events : view.events.slice(0, COLLAPSED_VISIBLE)
-  const showToggle = hiddenCount > 0
+  const isStream = variant === "stream"
+  const visibleCap = isStream ? collapsedVisible : expanded ? view.events.length : collapsedVisible
+  const visibleEvents = expanded ? view.events : view.events.slice(0, visibleCap)
+  const hiddenCount = Math.max(0, view.events.length - visibleCap)
+  const showExpandToggle = !isStream && hiddenCount > 0
+  const showHistoryLink = isStream && hiddenCount > 0 && typeof onViewAllHistory === "function"
 
   return (
     <section
       className={[
         "yds-market-timeline",
         expanded ? "yds-market-timeline--expanded" : "yds-market-timeline--collapsed",
+        isStream ? "yds-market-timeline--stream" : "",
         className,
       ]
         .filter(Boolean)
@@ -116,7 +134,17 @@ export default function YdsMarketTimelineSection({
         })}
       </ol>
 
-      {showToggle ? (
+      {showHistoryLink ? (
+        <button
+          type="button"
+          className="yds-market-timeline__history-link"
+          onClick={onViewAllHistory}
+        >
+          전체 히스토리 보기
+        </button>
+      ) : null}
+
+      {showExpandToggle ? (
         <button
           type="button"
           className="yds-market-timeline__toggle"

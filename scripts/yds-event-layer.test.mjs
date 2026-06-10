@@ -49,7 +49,7 @@ const momPanic = { date: "2026-06-05", fearGreed: 42, bofa: 5.0 }
 const momView = resolveEventLayer(momPanic, momHistory)
 const cnnMom = momView.events.find((e) => e.id === "momentum-cnn-sharp")
 const bofaMom = momView.events.find((e) => e.id === "momentum-bofa-weak")
-assert(cnnMom?.title === "투자심리 급랭", cnnMom?.title)
+assert(cnnMom?.title === "투자심리 급락", cnnMom?.title)
 assert(bofaMom?.title === "Bull & Bear 악화", bofaMom?.title)
 
 console.log("OK event layer v1.5", {

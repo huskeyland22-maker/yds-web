@@ -3,6 +3,7 @@
  * State · Overheat · Momentum · Event · Action
  */
 
+import { computeCnnDeltas, resolveActiveCnnEventSpec } from "./ydsCnnEventEngine.js"
 import { mergeLayerHistory, rowDate, rowsWithinDays, toNum } from "./ydsLayerHistory.js"
 import { MOMENTUM_RULES, resolveMomentumLayer } from "./ydsMomentumLayer.js"
 
@@ -128,14 +129,16 @@ function detectMomentumEvents(panicData, historyRows) {
   /** @type {MarketEvent[]} */
   const events = []
 
-  if (mom.cnnDelta3d != null && mom.cnnDelta3d <= MOMENTUM_RULES.cnn.warningDelta) {
+  const { delta3d, delta1d } = computeCnnDeltas(panicData, historyRows)
+  const cnnSpec = resolveActiveCnnEventSpec(delta3d, delta1d)
+  if (cnnSpec) {
     events.push({
-      id: "momentum-cnn-sharp",
+      id: cnnSpec.id,
       kind: "momentum",
       metric: "cnn",
-      level: "momentum",
-      emoji: "🟠",
-      title: "투자심리 급락",
+      level: cnnSpec.severity === "high" ? "exit" : "momentum",
+      emoji: cnnSpec.emoji,
+      title: cnnSpec.title,
       summary: "",
     })
   }

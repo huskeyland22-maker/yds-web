@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useCallback, useMemo, useRef } from "react"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
@@ -11,7 +11,6 @@ import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import PanicIndexHistorySection from "../PanicIndexHistorySection.jsx"
 import SectionErrorBoundary from "../SectionErrorBoundary.jsx"
-import YdsActionSignalCenter from "../YdsActionSignalCenter.jsx"
 import YdsScoreBreakdownPanel from "./YdsScoreBreakdownPanel.jsx"
 import {
   YDS_LABEL_PANIC_BREAKDOWN,
@@ -19,7 +18,7 @@ import {
 } from "../../content/ydsLanguage.js"
 
 /**
- * 시장분석 데스크 — 전환점 → Hero → 핵심지수 → 히스토리 → 행동
+ * 시장분석 데스크 — 현재 시장 → 행동 → 사이클 → 전환 신호 → 핵심지수
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -27,6 +26,7 @@ import {
  */
 export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
+  const historyDetailsRef = useRef(null)
 
   const cycleDataSource = useMemo(() => {
     if (panicData?.__fromHub) return "Panic Hub"
@@ -39,6 +39,13 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
 
   const { rows: scorecardRows, loading: scorecardLoading } = useEventScorecard(safeHistory, panicData)
+
+  const openHistoryDetails = useCallback(() => {
+    const el = historyDetailsRef.current
+    if (!el) return
+    el.open = true
+    el.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
 
   if (!panicData && safeHistory.length === 0) {
     return null
@@ -58,13 +65,16 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
 
         <section
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--actions"
-          aria-labelledby="market-block-actions"
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--timeline"
+          aria-labelledby="market-block-timeline"
         >
-          <h2 id="market-block-actions" className="yds-market-desk__block-label">
-            오늘의 행동
-          </h2>
-          <YdsActionSignalCenter panicData={panicData} historyRows={safeHistory} />
+          <YdsMarketTimelineSection
+            variant="stream"
+            collapsedVisible={3}
+            panicData={panicData}
+            historyRows={safeHistory}
+            onViewAllHistory={openHistoryDetails}
+          />
         </section>
 
         <section
@@ -78,11 +88,16 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         </section>
       </div>
 
-      <details className="yds-market-desk__detail yds-market-desk__detail--stream">
+      <details
+        ref={historyDetailsRef}
+        id="market-analysis-history"
+        className="yds-market-desk__detail yds-market-desk__detail--stream"
+      >
         <summary className="yds-market-desk__detail-summary">근거 · 히스토리 · 세부 분석</summary>
         <div className="yds-market-desk__detail-body">
           <YdsMarketTimelineSection
-            className="yds-market-desk__slot yds-market-desk__slot--timeline"
+            className="yds-market-desk__slot yds-market-desk__slot--timeline-full"
+            variant="full"
             panicData={panicData}
             historyRows={safeHistory}
           />

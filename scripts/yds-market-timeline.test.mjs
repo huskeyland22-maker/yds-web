@@ -4,7 +4,7 @@
 import {
   formatTimelineDateLabel,
   formatTurningPointMetrics,
-  mergeTimelineEventHistory,
+  reconcileTimelineEventHistory,
   resolveMarketTimeline,
   resolveOverheatTransitionCopy,
   scanTimelineEventsFromSeries,
@@ -37,19 +37,19 @@ const exit = scanned.find((e) => e.type === "overheat-normal" || e.type === "cnn
 assert(exit?.title === "과열권 이탈", exit?.title)
 assert(exit?.action === "추격매수 금지" || exit?.action === "과열 해소 시작", exit?.action)
 
-const momentumTypes = scanned.filter((e) => e.type === "momentum-cnn-sharp")
-const momentumByDate = new Set(momentumTypes.map((e) => e.date))
-assert(momentumTypes.length === momentumByDate.size, "momentum should not repeat same day")
+const cnnMomentum = scanned.filter((e) => e.type.startsWith("momentum-cnn-"))
+const cnnByDate = new Set(cnnMomentum.map((e) => e.date))
+assert(cnnMomentum.length === cnnByDate.size, "cnn momentum should not repeat same day")
 
 const view = resolveMarketTimeline(series.slice(0, -1), series[series.length - 1], { limit: 8 })
 assert(view.displayEvents.length >= 3, `display ${view.displayEvents.length}`)
 assert(formatTimelineDateLabel("2026-06-07") === "06/07")
 
-const merged = mergeTimelineEventHistory(
+const merged = reconcileTimelineEventHistory(
   [{ date: "2026-01-01", type: "cnn-entry", severity: "low", title: "test", metrics: "", action: "d", description: "d" }],
   scanned,
 )
-assert(merged.length >= scanned.length)
+assert(merged.length === scanned.length, "stale stored events should be removed")
 
 const doc = normalizeEventHistoryEvents({
   version: 1,

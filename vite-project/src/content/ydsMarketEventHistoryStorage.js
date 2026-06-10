@@ -4,7 +4,8 @@
 
 /** @typedef {import("./ydsMarketTimeline.js").TimelineEventRecord} TimelineEventRecord */
 
-export const EVENT_HISTORY_STORAGE_KEY = "yds-event-history-v1"
+export const EVENT_HISTORY_STORAGE_KEY = "yds-event-history-v2"
+export const EVENT_HISTORY_STORAGE_KEY_LEGACY = "yds-event-history-v1"
 export const EVENT_HISTORY_JSON_PATH = "/data/eventHistory.json"
 export const EVENT_HISTORY_MAX_STORED = 500
 
@@ -45,10 +46,23 @@ export function normalizeEventHistoryEvents(raw) {
 export function loadStoredEventHistory() {
   if (typeof window === "undefined") return []
   try {
-    const raw = JSON.parse(window.localStorage.getItem(EVENT_HISTORY_STORAGE_KEY) || "{}")
-    return normalizeEventHistoryEvents(raw)
+    const rawV2 = window.localStorage.getItem(EVENT_HISTORY_STORAGE_KEY)
+    if (rawV2) {
+      return normalizeEventHistoryEvents(JSON.parse(rawV2))
+    }
+    return []
   } catch {
     return []
+  }
+}
+
+/** V1 저장 키 제거 — 재스캔 정합성 확보 */
+export function clearLegacyEventHistoryStorage() {
+  if (typeof window === "undefined") return
+  try {
+    window.localStorage.removeItem(EVENT_HISTORY_STORAGE_KEY_LEGACY)
+  } catch {
+    /* ignore */
   }
 }
 
