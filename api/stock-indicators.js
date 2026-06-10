@@ -4,6 +4,7 @@ import {
   fetchKisDailyRows,
   getKisBaseUrl,
   getKisEnvStatus,
+  getKisTokenCacheStatus,
   KisApiError,
   kisFailurePayload,
   normalizeDomesticStockCode,
@@ -586,7 +587,7 @@ function readCodesQuery(req) {
     .split(/[,;\s]+/)
     .map((s) => s.trim())
     .filter(Boolean)
-    .slice(0, 16)
+    .slice(0, 30)
 }
 
 async function persistPayloadSignal(payload) {
@@ -641,32 +642,46 @@ export default async function handler(req, res) {
     if (!codes.length) return res.status(400).json({ error: "missing codes" })
     const results = {}
     const errors = {}
-    await Promise.all(
-      codes.map(async (rawCode) => {
-        const c = classifyStockInput(rawCode)
-        if (c.kind !== "domestic_krx" || !c.code) {
-          errors[rawCode] = "invalid_domestic_code"
-          return
-        }
-        try {
-          const payload = await fetchKisDomesticPayload({
-            code: c.code,
-            name: "",
-            sectorScore,
-            panicIndex,
-          })
-          await persistPayloadSignal(payload)
-          results[c.code] = {
-            stockSignal: payload.stockSignal,
-            price: payload.price,
-            rsi14: payload.rsi14,
-          }
-        } catch (e) {
-          errors[c.code] = toErrorMessage(e?.message, "fetch_failed")
-        }
-      }),
-    )
-    return res.status(200).json({ ok: true, results, errors, panicIndex })
+    const tokenStatusStart = getKisTokenCacheStatus()
+
+    for (const rawCode of codes) {
+      const c = classifyStockInput(rawCode)
+      if (c.kind !== "domestic_krx" || !c.code) {
+        errors[rawCode] = "invalid_domestic_code"
+        continue
+      }
+      try {
+        const payload = await fetchKisDomesticPayload({
+          code: c.code,
+          name: "",
+          sectorScore,
+          panicIndex,
+        })
+        await persistPayloadSignal(payload)
+        results[c.code] = payload
+      } catch (e) {
+        errors[c.code] = toErrorMessage(e?.message, "fetch_failed")
+      }
+    }
+
+    const tokenStatusEnd = getKisTokenCacheStatus()
+    console.log("[KIS] batch complete", {
+      codeCount: codes.length,
+      successCount: Object.keys(results).length,
+      errorCount: Object.keys(errors).length,
+      tokenIssueCount: tokenStatusEnd.tokenIssueCount,
+      tokenReuseCount: tokenStatusEnd.tokenReuseCount,
+      tokenAtStart: tokenStatusStart,
+      tokenAtEnd: tokenStatusEnd,
+    })
+
+    return res.status(200).json({
+      ok: true,
+      results,
+      errors,
+      panicIndex,
+      tokenStats: tokenStatusEnd,
+    })
   }
 
   if (classified.kind === "invalid" || !classified.code) {

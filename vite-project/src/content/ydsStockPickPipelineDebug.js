@@ -41,6 +41,7 @@ export function computeStockPickPipelineDebug(
     filtered: filteredStocks.length,
     fallbackAfterScore: scoredStocks.length - liveAfterScore,
     fetchErrors: errors.length,
+    krBatchMode: true,
     loading: false,
   }
 }

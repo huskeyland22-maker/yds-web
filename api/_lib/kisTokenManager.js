@@ -1,6 +1,8 @@
 /**
  * KIS access token — 서버 전용 자동 발급·캐시·갱신.
  * APP_KEY / APP_SECRET 은 process.env (Vercel) 만 사용. 브라우저 노출 없음.
+ *
+ * Vercel serverless: globalThis 에 캐시해 동일 인스턴스 내 모든 종목 요청이 토큰 재사용.
  */
 
 import { logKis, logKisError, logKisHttpRequest, logKisHttpResponse, logKisTokenResult, logKisWarn } from "./kisDebugLog.js"
@@ -12,15 +14,32 @@ export const KIS_TOKEN_REFRESH_BEFORE_MS = 5 * 60 * 1000
 /** 만료 시각 파싱 여유 */
 const EXPIRY_SKEW_MS = 30_000
 
-/** @type {{ accessToken: string | null; expiresAtMs: number; issuedAtMs: number }} */
-let tokenCache = {
-  accessToken: null,
-  expiresAtMs: 0,
-  issuedAtMs: 0,
-}
+const GLOBAL_STATE_KEY = "__ydsKisTokenState"
 
-/** 동시 요청 시 토큰 발급 1회만 */
-let refreshInFlight = null
+/**
+ * @returns {{
+ *   accessToken: string | null
+ *   expiresAtMs: number
+ *   issuedAtMs: number
+ *   refreshInFlight: Promise<string> | null
+ *   tokenIssueCount: number
+ *   tokenReuseCount: number
+ * }}
+ */
+function getTokenState() {
+  const g = /** @type {Record<string, unknown>} */ (globalThis)
+  if (!g[GLOBAL_STATE_KEY]) {
+    g[GLOBAL_STATE_KEY] = {
+      accessToken: null,
+      expiresAtMs: 0,
+      issuedAtMs: 0,
+      refreshInFlight: null,
+      tokenIssueCount: 0,
+      tokenReuseCount: 0,
+    }
+  }
+  return /** @type {ReturnType<typeof getTokenState>} */ (g[GLOBAL_STATE_KEY])
+}
 
 function getKisBaseUrl() {
   const custom = process.env.KIS_BASE_URL?.trim()
@@ -76,13 +95,17 @@ function assertValidAccessToken(tok) {
  * @param {number} [now]
  */
 export function isKisTokenCacheValid(now = Date.now()) {
-  if (!tokenCache.accessToken || !tokenCache.expiresAtMs) return false
-  return now < tokenCache.expiresAtMs - KIS_TOKEN_REFRESH_BEFORE_MS
+  const state = getTokenState()
+  if (!state.accessToken || !state.expiresAtMs) return false
+  return now < state.expiresAtMs - KIS_TOKEN_REFRESH_BEFORE_MS
 }
 
 export function invalidateKisTokenCache(reason = "manual") {
-  logKisWarn("token cache invalidate", { reason, hadToken: Boolean(tokenCache.accessToken) })
-  tokenCache = { accessToken: null, expiresAtMs: 0, issuedAtMs: 0 }
+  const state = getTokenState()
+  logKisWarn("token cache invalidate", { reason, hadToken: Boolean(state.accessToken) })
+  state.accessToken = null
+  state.expiresAtMs = 0
+  state.issuedAtMs = 0
 }
 
 /**
@@ -94,30 +117,32 @@ export function isKisTokenAuthFailure(httpStatus, data) {
   if (!data || typeof data !== "object") return false
   const d = /** @type {Record<string, unknown>} */ (data)
   const blob = `${d.msg1 ?? ""} ${d.msg_cd ?? ""} ${d.message ?? ""}`.toLowerCase()
-  return /token|oauth|인증|만료|expired|unauthorized|appkey|appsecret|egw00123/.test(blob)
+  return /token|oauth|인증|만료|expired|unauthorized|appkey|appsecret|egw00123|접근토큰/.test(blob)
 }
 
 export function getKisTokenCacheStatus(now = Date.now()) {
+  const state = getTokenState()
   const valid = isKisTokenCacheValid(now)
   const msUntilRefresh =
-    tokenCache.expiresAtMs > 0
-      ? tokenCache.expiresAtMs - KIS_TOKEN_REFRESH_BEFORE_MS - now
-      : null
+    state.expiresAtMs > 0 ? state.expiresAtMs - KIS_TOKEN_REFRESH_BEFORE_MS - now : null
   return {
-    cached: Boolean(tokenCache.accessToken),
+    cached: Boolean(state.accessToken),
     valid,
-    issuedAtMs: tokenCache.issuedAtMs || null,
-    expiresAtMs: tokenCache.expiresAtMs || null,
+    issuedAtMs: state.issuedAtMs || null,
+    expiresAtMs: state.expiresAtMs || null,
     expiresInSec:
-      tokenCache.expiresAtMs > now ? Math.max(0, Math.floor((tokenCache.expiresAtMs - now) / 1000)) : 0,
+      state.expiresAtMs > now ? Math.max(0, Math.floor((state.expiresAtMs - now) / 1000)) : 0,
     refreshBeforeMs: KIS_TOKEN_REFRESH_BEFORE_MS,
     refreshInSec:
       msUntilRefresh != null && msUntilRefresh > 0 ? Math.floor(msUntilRefresh / 1000) : 0,
-    refreshInFlight: Boolean(refreshInFlight),
+    refreshInFlight: Boolean(state.refreshInFlight),
+    tokenIssueCount: state.tokenIssueCount,
+    tokenReuseCount: state.tokenReuseCount,
   }
 }
 
 async function requestNewAccessToken() {
+  const state = getTokenState()
   const { appKey, appSecret } = getKisCredentialsFromEnv()
   const baseUrl = getKisBaseUrl()
   const virtual = isKisVirtualMode()
@@ -169,11 +194,17 @@ async function requestNewAccessToken() {
   const parsed = parseKisExpiryMs(body.access_token_token_expired)
   if (parsed != null) expMs = Math.min(expMs, parsed - EXPIRY_SKEW_MS)
 
-  tokenCache = {
-    accessToken: tok,
+  state.accessToken = tok
+  state.expiresAtMs = expMs
+  state.issuedAtMs = now
+  state.tokenIssueCount += 1
+
+  console.log("TOKEN_REFRESH", {
+    tokenIssueCount: state.tokenIssueCount,
+    tokenReuseCount: state.tokenReuseCount,
     expiresAtMs: expMs,
-    issuedAtMs: now,
-  }
+    expiresInSec: Math.floor((expMs - now) / 1000),
+  })
 
   logKisTokenResult({
     mode,
@@ -185,6 +216,7 @@ async function requestNewAccessToken() {
     expiresAtMs: expMs,
     refreshBeforeMs: KIS_TOKEN_REFRESH_BEFORE_MS,
     accessToken: tok,
+    tokenIssueCount: state.tokenIssueCount,
   })
 
   return tok
@@ -195,39 +227,49 @@ async function requestNewAccessToken() {
  * @param {{ forceRefresh?: boolean }} [opts]
  */
 export async function getKisAccessToken(opts = {}) {
+  const state = getTokenState()
+
   if (opts.forceRefresh) {
     invalidateKisTokenCache("force_refresh")
   }
 
   const now = Date.now()
-  if (isKisTokenCacheValid(now) && tokenCache.accessToken) {
+  if (isKisTokenCacheValid(now) && state.accessToken) {
+    state.tokenReuseCount += 1
+    console.log("TOKEN_REUSED", {
+      tokenIssueCount: state.tokenIssueCount,
+      tokenReuseCount: state.tokenReuseCount,
+      expiresInSec: Math.floor((state.expiresAtMs - now) / 1000),
+    })
     logKisTokenResult({
       mode: getKisModeLabel(),
       virtual: isKisVirtualMode(),
       source: "cache",
-      expiresAtMs: tokenCache.expiresAtMs,
-      expiresInSec: Math.floor((tokenCache.expiresAtMs - now) / 1000),
-      refreshInSec: Math.floor((tokenCache.expiresAtMs - KIS_TOKEN_REFRESH_BEFORE_MS - now) / 1000),
-      accessToken: tokenCache.accessToken,
+      expiresAtMs: state.expiresAtMs,
+      expiresInSec: Math.floor((state.expiresAtMs - now) / 1000),
+      refreshInSec: Math.floor((state.expiresAtMs - KIS_TOKEN_REFRESH_BEFORE_MS - now) / 1000),
+      accessToken: state.accessToken,
+      tokenIssueCount: state.tokenIssueCount,
+      tokenReuseCount: state.tokenReuseCount,
     })
-    return tokenCache.accessToken
+    return state.accessToken
   }
 
-  const reason = tokenCache.accessToken ? "expiring_soon_or_expired" : "cold_start"
+  const reason = state.accessToken ? "expiring_soon_or_expired" : "cold_start"
   logKis("token auto renew", { reason, ...getKisTokenCacheStatus(now) })
 
-  if (!refreshInFlight) {
-    refreshInFlight = requestNewAccessToken()
+  if (!state.refreshInFlight) {
+    state.refreshInFlight = requestNewAccessToken()
       .catch((e) => {
         logKisError("token auto renew failed", e, { reason })
         throw e
       })
       .finally(() => {
-        refreshInFlight = null
+        state.refreshInFlight = null
       })
   }
 
-  return refreshInFlight
+  return state.refreshInFlight
 }
 
 /**

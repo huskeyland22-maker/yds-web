@@ -552,5 +552,7 @@ export function getKisEnvStatus() {
     tokenValid: token.valid,
     tokenExpiresInSec: token.expiresInSec,
     tokenRefreshInSec: token.refreshInSec,
+    tokenIssueCount: token.tokenIssueCount,
+    tokenReuseCount: token.tokenReuseCount,
   }
 }

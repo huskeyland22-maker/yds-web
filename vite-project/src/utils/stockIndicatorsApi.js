@@ -132,3 +132,53 @@ export async function fetchStockIndicators({
     if (userSignal) userSignal.removeEventListener("abort", onUserAbort)
   }
 }
+
+/**
+ * 국내 종목 일괄 조회 — 서버 1회 호출·KIS 토큰 1회 재사용
+ * @param {{ codes: string[]; panicIndex?: number; signal?: AbortSignal }} opts
+ */
+export async function fetchKrStockIndicatorsBatch({ codes, panicIndex, signal } = {}) {
+  const list = (codes ?? []).map((c) => normalizeStockCodeParam(c)).filter(Boolean)
+  if (!list.length) {
+    return { results: {}, errors: {}, tokenStats: null }
+  }
+
+  const qs = new URLSearchParams()
+  qs.set("batch", "1")
+  qs.set("codes", list.join(","))
+  if (panicIndex != null && Number.isFinite(Number(panicIndex))) {
+    qs.set("panicIndex", String(panicIndex))
+  }
+
+  const apiUrl = withNoStoreQuery(`${STOCK_API_PATH}?${qs.toString()}`)
+  logClient("KR batch request (single token reuse)", {
+    apiUrl,
+    codeCount: list.length,
+    kisDirectCall: false,
+  })
+
+  const res = await fetch(apiUrl, {
+    ...LIVE_JSON_GET_INIT,
+    signal,
+  })
+  const body = await res.json().catch(() => ({}))
+
+  if (!res.ok) {
+    const stockError = stockApiErrorFromBody(body, res.status)
+    const err = new Error(stockError.detail || stockError.title)
+    err.stockError = stockError
+    throw err
+  }
+
+  logClient("KR batch success", {
+    successCount: Object.keys(body?.results ?? {}).length,
+    errorCount: Object.keys(body?.errors ?? {}).length,
+    tokenStats: body?.tokenStats,
+  })
+
+  return {
+    results: body?.results ?? {},
+    errors: body?.errors ?? {},
+    tokenStats: body?.tokenStats ?? null,
+  }
+}

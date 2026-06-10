@@ -3,7 +3,10 @@
  */
 
 import universe from "../data/stockPickUniverse.json" with { type: "json" }
-import { fetchStockIndicators } from "../utils/stockIndicatorsApi.js"
+import {
+  fetchKrStockIndicatorsBatch,
+  fetchStockIndicators,
+} from "../utils/stockIndicatorsApi.js"
 import {
   apiBodyToEngineSnapshot,
   auditStockPickSnapshot,
@@ -16,7 +19,7 @@ import {
 } from "./ydsStockPickQuoteService.js"
 import { buildStockPickViews, assignRanks } from "./ydsStockPickModel.js"
 
-const CONCURRENCY = 4
+const US_CONCURRENCY = 4
 
 /**
  * @template T
@@ -46,6 +49,37 @@ async function mapPool(items, limit, worker) {
  */
 
 /**
+ * @param {Map<string, LivePickSnapshotEntry>} map
+ * @param {{ ticker: string; name: string; country: 'US' | 'KR' }} row
+ * @param {object} apiBody
+ * @param {{ ticker: string; error: string }[]} errors
+ */
+function ingestLiveSnapshot(map, row, apiBody, errors) {
+  const engineSnapshot = apiBodyToEngineSnapshot(apiBody)
+  const extras = extractSnapshotExtras(apiBody)
+  const ok = auditStockPickSnapshot(row.ticker, engineSnapshot, {
+    dataSource: apiBody.dataSource,
+  })
+
+  if (!engineSnapshot) {
+    errors.push({ ticker: row.ticker, error: "snapshot incomplete" })
+    return
+  }
+
+  if (!ok) {
+    console.warn("[stock-pick-live] partial snapshot", { ticker: row.ticker })
+  }
+
+  map.set(row.ticker, {
+    engineSnapshot,
+    extras,
+    apiBody,
+    quote: mergePickQuote(null, apiBody, row.country),
+    fetchedAt: apiBody.updatedAt ?? new Date().toISOString(),
+  })
+}
+
+/**
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
  * @param {AbortSignal} [signal]
  */
@@ -55,37 +89,50 @@ export async function fetchStockPickLiveSnapshots(marketContext = null, signal) 
   /** @type {{ ticker: string; error: string }[]} */
   const errors = []
 
-  await mapPool(universe.stocks, CONCURRENCY, async (row) => {
+  const krRows = universe.stocks.filter((s) => s.country === "KR")
+  const usRows = universe.stocks.filter((s) => s.country === "US")
+  const panicIndex = marketContext?.panicIndex ?? undefined
+
+  if (krRows.length && !signal?.aborted) {
+    try {
+      const batch = await fetchKrStockIndicatorsBatch({
+        codes: krRows.map((r) => r.ticker),
+        panicIndex,
+        signal,
+      })
+
+      for (const row of krRows) {
+        const apiBody = batch.results[row.ticker]
+        if (apiBody) {
+          ingestLiveSnapshot(map, row, apiBody, errors)
+        } else {
+          const errMsg = batch.errors[row.ticker] ?? "batch missing"
+          errors.push({ ticker: row.ticker, error: String(errMsg) })
+        }
+      }
+
+      if (batch.tokenStats) {
+        console.info("[stock-pick-live] KR batch token stats", batch.tokenStats)
+      }
+    } catch (e) {
+      const message = e?.message ?? String(e)
+      console.warn("[stock-pick-live] KR batch failed", message)
+      for (const row of krRows) {
+        errors.push({ ticker: row.ticker, error: message })
+      }
+    }
+  }
+
+  await mapPool(usRows, US_CONCURRENCY, async (row) => {
     if (signal?.aborted) return
     try {
       const apiBody = await fetchStockIndicators({
         code: row.ticker,
         name: row.name,
         signal,
-        panicIndex: marketContext?.panicIndex ?? undefined,
+        panicIndex,
       })
-      const engineSnapshot = apiBodyToEngineSnapshot(apiBody)
-      const extras = extractSnapshotExtras(apiBody)
-      const ok = auditStockPickSnapshot(row.ticker, engineSnapshot, {
-        dataSource: apiBody.dataSource,
-      })
-
-      if (!engineSnapshot) {
-        errors.push({ ticker: row.ticker, error: "snapshot incomplete" })
-        return
-      }
-
-      if (!ok) {
-        console.warn("[stock-pick-live] partial snapshot", { ticker: row.ticker })
-      }
-
-      map.set(row.ticker, {
-        engineSnapshot,
-        extras,
-        apiBody,
-        quote: mergePickQuote(null, apiBody, row.country),
-        fetchedAt: apiBody.updatedAt ?? new Date().toISOString(),
-      })
+      ingestLiveSnapshot(map, row, apiBody, errors)
     } catch (e) {
       const message = e?.message ?? String(e)
       errors.push({ ticker: row.ticker, error: message })

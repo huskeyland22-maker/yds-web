@@ -66,6 +66,10 @@ export default function YdsStockPickDebugBox({ debug, loading = false }) {
           </div>
         ) : null}
         <div>
+          <dt>KR Batch</dt>
+          <dd className="font-mono tabular-nums">{debug.krBatchMode ? "on" : "off"}</dd>
+        </div>
+        <div>
           <dt>Fetch Err</dt>
           <dd className="font-mono tabular-nums">{debug.fetchErrors}</dd>
         </div>
