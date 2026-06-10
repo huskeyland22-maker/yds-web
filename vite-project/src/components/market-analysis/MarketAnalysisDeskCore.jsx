@@ -2,9 +2,8 @@ import { useCallback, useMemo, useRef } from "react"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
+import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketHeroStack from "./YdsMarketHeroStack.jsx"
-import YdsMarketStateCard from "./YdsMarketStateCard.jsx"
-import YdsMarketPanicCard from "./YdsMarketPanicCard.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
 import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
 import YdsDualCycleHero from "./YdsDualCycleHero.jsx"
@@ -20,7 +19,7 @@ import {
 } from "../../content/ydsLanguage.js"
 
 /**
- * 시장분석 데스크 — 현재 시장 → 행동 → 시장 상태 → 전환 신호 → 패닉 강도 → 핵심지수
+ * 시장분석 데스크 — 시장 상태·패닉 → 현재 시장 → 행동 → 전환 신호 → 핵심지수
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -64,13 +63,13 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <div className="yds-market-desk__stream">
-        <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
-
-        <YdsMarketStateCard
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--state"
+        <YdsMarketScoreHero
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
           historyRows={safeHistory}
         />
+
+        <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
 
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--timeline"
@@ -84,12 +83,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             onViewAllHistory={openHistoryDetails}
           />
         </section>
-
-        <YdsMarketPanicCard
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--panic"
-          panicData={panicData}
-          historyRows={safeHistory}
-        />
 
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"

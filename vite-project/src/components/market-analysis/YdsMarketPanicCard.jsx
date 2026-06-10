@@ -8,9 +8,14 @@ import { getFinalScore } from "../../utils/tradingScores.js"
 
 /**
  * 패닉 강도 — 지금 행동해야 하는지
- * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
+ * @param {{ panicData?: object | null; historyRows?: object[]; className?: string; embedded?: boolean }} props
  */
-export default function YdsMarketPanicCard({ panicData = null, historyRows = [], className = "" }) {
+export default function YdsMarketPanicCard({
+  panicData = null,
+  historyRows = [],
+  className = "",
+  embedded = false,
+}) {
   const view = useMemo(() => {
     if (!panicData) return null
     const score = getFinalScore(panicData)
@@ -25,19 +30,33 @@ export default function YdsMarketPanicCard({ panicData = null, historyRows = [],
 
   const { panic, ydsScore } = view
 
-  return (
-    <section
-      className={["yds-market-panic-card", className].filter(Boolean).join(" ")}
+  const scoreCard = (
+    <article
+      className={[
+        "yds-market-hero__score-card",
+        embedded ? "yds-market-hero__score-card--embedded" : "yds-market-hero__score-card--solo",
+      ].join(" ")}
       aria-label={`${MARKET_LABEL_PANIC_INTENSITY} ${ydsScore}`}
     >
+      <p className="yds-market-hero__card-label">{MARKET_LABEL_PANIC_INTENSITY}</p>
+      <p className="yds-market-hero__score font-mono tabular-nums">{ydsScore}</p>
+      <p className="yds-market-hero__status" style={{ "--hero-color": panic.color }}>
+        {panic.emoji} {panic.label}
+      </p>
+      {panic.hint && !embedded ? (
+        <p className="yds-market-hero__status-hint">{panic.hint}</p>
+      ) : null}
+    </article>
+  )
+
+  if (embedded) {
+    return scoreCard
+  }
+
+  return (
+    <section className={["yds-market-panic-card", className].filter(Boolean).join(" ")}>
       <h2 className="yds-market-desk__block-label">{MARKET_LABEL_PANIC_INTENSITY}</h2>
-      <article className="yds-market-hero__score-card yds-market-hero__score-card--solo">
-        <p className="yds-market-hero__score font-mono tabular-nums">{ydsScore}</p>
-        <p className="yds-market-hero__status" style={{ "--hero-color": panic.color }}>
-          {panic.emoji} {panic.label}
-        </p>
-        {panic.hint ? <p className="yds-market-hero__status-hint">{panic.hint}</p> : null}
-      </article>
+      {scoreCard}
     </section>
   )
 }

@@ -26304,7 +26304,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 @media (max-width: 300px) {
-  .yds-market-hero__dual-row {
+  .yds-market-hero__dual-row,
+  .yds-market-score-hero__dual-row {
     grid-template-columns: 1fr;
   }
 }
@@ -26451,6 +26452,23 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+.yds-market-score-hero {
+  margin-bottom: 0.15rem;
+}
+
+.yds-market-score-hero__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.yds-market-score-hero__dual-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
 .yds-market-state-card,
 .yds-market-panic-card {
   margin-bottom: 0.35rem;
@@ -26458,6 +26476,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-market-hero__score-card--solo {
   margin-top: 0.25rem;
+}
+
+.yds-market-hero__score-card--embedded {
+  padding: 0.65rem 0.45rem 0.55rem;
 }
 
 .yds-market-timeline__history-link {
@@ -27357,27 +27379,27 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     display: contents;
   }
 
-  .yds-market-hero__slot--judgment {
+  .yds-market-desk__slot--scores-meta {
     order: 1;
   }
 
-  .yds-market-desk__slot--timeline {
+  .yds-market-desk__slot--scores {
     order: 2;
   }
 
-  .yds-market-desk__slot--philosophy {
+  .yds-market-hero__slot--judgment {
     order: 3;
   }
 
-  .yds-market-hero__slot--scores {
+  .yds-market-desk__slot--timeline {
     order: 4;
   }
 
-  .yds-market-desk__slot--indices {
+  .yds-market-desk__slot--philosophy {
     order: 5;
   }
 
-  .yds-market-hero__slot--meta {
+  .yds-market-desk__slot--indices {
     order: 6;
   }
 

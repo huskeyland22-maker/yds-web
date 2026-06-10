@@ -3,8 +3,6 @@ import { resolveTodayActions } from "../../content/ydsActionGuide.js"
 import { resolveCurrentMarketView } from "../../content/ydsCurrentMarketView.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
-import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
-
 /**
  * Hero — 현재 시장 · 오늘의 행동 (3초 판단)
  * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
@@ -32,11 +30,6 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
       className={["yds-market-hero", "yds-market-hero--desk", className].filter(Boolean).join(" ")}
       aria-label="YDS 시장 Hero"
     >
-      <div className="yds-market-hero__header yds-market-hero__slot yds-market-hero__slot--meta">
-        <span className="yds-market-hero__header-spacer" aria-hidden />
-        <YdsDataSourceBadge />
-      </div>
-
       <div className="yds-market-hero__dual-row yds-market-hero__slot yds-market-hero__slot--judgment">
         <article className="yds-market-hero__current-market" aria-label="현재 시장">
           <p className="yds-market-hero__layer-tag">현재 시장</p>
