@@ -251,6 +251,64 @@
   gap: 0.45rem;
 }
 
+.yds-spick-debug {
+  margin: 0 0 0.4rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.55);
+  font-size: 0.62rem;
+}
+
+.yds-spick-debug--alert {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(127, 29, 29, 0.15);
+}
+
+.yds-spick-debug__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yds-spick-debug__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.2rem 0.45rem;
+  margin: 0;
+}
+
+.yds-spick-debug__grid dt {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.yds-spick-debug__grid dd {
+  margin: 0;
+  color: #e2e8f0;
+  font-weight: 800;
+}
+
+.yds-spick-debug__row {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.yds-spick-debug__note,
+.yds-spick-debug__warn {
+  margin: 0.25rem 0 0;
+  font-weight: 700;
+  color: #fde68a;
+}
+
+.yds-spick-debug__warn {
+  color: #fca5a5;
+}
+
 .yds-spick-load-banner {
   display: flex;
   flex-wrap: wrap;

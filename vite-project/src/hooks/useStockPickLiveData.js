@@ -5,6 +5,10 @@ import {
   filterRecommendableStockPicks,
 } from "../content/ydsStockPickModel.js"
 import { computeStockPickLoadStats } from "../content/ydsStockPickLoadStats.js"
+import {
+  computeStockPickPipelineDebug,
+  logStockPickPipelineDebug,
+} from "../content/ydsStockPickPipelineDebug.js"
 import { fetchStockPickLiveSnapshots } from "../content/ydsStockPickLiveFetcher.js"
 
 /**
@@ -53,10 +57,21 @@ export function useStockPickLiveData(marketContext) {
 
   const loadStats = useMemo(() => computeStockPickLoadStats(allStocks), [allStocks])
 
+  const pipelineDebug = useMemo(
+    () => computeStockPickPipelineDebug(snapshotMap, allStocks, stocks, errors),
+    [snapshotMap, allStocks, stocks, errors],
+  )
+
+  useEffect(() => {
+    if (loading) return
+    logStockPickPipelineDebug(pipelineDebug)
+  }, [loading, pipelineDebug])
+
   return {
     stocks,
     allStocks,
     loadStats,
+    pipelineDebug,
     loading,
     errors,
     lastSyncAt,

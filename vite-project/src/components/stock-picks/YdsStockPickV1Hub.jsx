@@ -10,6 +10,7 @@ import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
 import { useStockPickStatusChanges } from "../../hooks/useStockPickStatusChanges.js"
+import YdsStockPickDebugBox from "./YdsStockPickDebugBox.jsx"
 import YdsStockPickLoadBanner from "./YdsStockPickLoadBanner.jsx"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
@@ -37,7 +38,7 @@ function useDualCountryLayout() {
 export default function YdsStockPickV1Hub() {
   const dualLayout = useDualCountryLayout()
   const marketContext = useYdsMarketContext()
-  const { stocks: liveStocks, loadStats, loading, lastSyncAt } =
+  const { stocks: liveStocks, loadStats, pipelineDebug, loading, lastSyncAt } =
     useStockPickLiveData(marketContext)
   const heldTickers = useStockPickHeldTickers()
   const statusChanges = useStockPickStatusChanges(liveStocks)
@@ -73,8 +74,19 @@ export default function YdsStockPickV1Hub() {
     setSectorByCountry((prev) => ({ ...prev, [country]: sectorId }))
   }
 
+  const debugView = useMemo(
+    () => ({
+      ...pipelineDebug,
+      displayUs: stocksByCountry.US.length,
+      displayKr: stocksByCountry.KR.length,
+      favoritesOnly,
+    }),
+    [pipelineDebug, stocksByCountry.US.length, stocksByCountry.KR.length, favoritesOnly],
+  )
+
   return (
     <div className="yds-spick-platform">
+      <YdsStockPickDebugBox debug={debugView} loading={loading} />
       <YdsStockPickLoadBanner stats={loadStats} loading={loading} />
       {lastSyncAt ? (
         <p className="yds-spick-sync-note" role="status">
