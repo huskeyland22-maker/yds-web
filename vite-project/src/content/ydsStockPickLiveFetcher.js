@@ -6,6 +6,7 @@ import universe from "../data/stockPickUniverse.json" with { type: "json" }
 import {
   fetchKrStockIndicatorsBatch,
   fetchStockIndicators,
+  fetchUsStockIndicatorsBatch,
 } from "../utils/stockIndicatorsApi.js"
 import {
   apiBodyToEngineSnapshot,
@@ -18,25 +19,7 @@ import {
   mergePickQuote,
 } from "./ydsStockPickQuoteService.js"
 import { buildStockPickViews, assignRanks } from "./ydsStockPickModel.js"
-
-const US_CONCURRENCY = 4
-
-/**
- * @template T
- * @param {T[]} items
- * @param {number} limit
- * @param {(item: T) => Promise<void>} worker
- */
-async function mapPool(items, limit, worker) {
-  let index = 0
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (index < items.length) {
-      const i = index++
-      await worker(items[i])
-    }
-  })
-  await Promise.all(runners)
-}
+import { recordStockPickFetchSegments } from "./ydsStockPickPerf.js"
 
 /**
  * @typedef {{
@@ -93,69 +76,135 @@ export async function fetchStockPickLiveSnapshots(marketContext = null, signal) 
   const usRows = universe.stocks.filter((s) => s.country === "US")
   const panicIndex = marketContext?.panicIndex ?? undefined
 
-  if (krRows.length && !signal?.aborted) {
+  const perf = {
+    usFetchCount: usRows.length,
+    usHttpCallCount: usRows.length ? 1 : 0,
+    usParallelCount: 0,
+    usBatchDurationMs: 0,
+    krFetchCount: krRows.length,
+    krHttpCallCount: krRows.length ? 1 : 0,
+    krParallelCount: 0,
+    krBatchDurationMs: 0,
+    portfolioDurationMs: 0,
+  }
+
+  const krPromise = (async () => {
+    if (!krRows.length || signal?.aborted) return { batch: null, error: null }
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now()
     try {
       const batch = await fetchKrStockIndicatorsBatch({
         codes: krRows.map((r) => r.ticker),
         panicIndex,
         signal,
       })
-
-      for (const row of krRows) {
-        const apiBody = batch.results[row.ticker]
-        if (apiBody) {
-          ingestLiveSnapshot(map, row, apiBody, errors)
-        } else {
-          const errMsg = batch.errors[row.ticker] ?? "batch missing"
-          errors.push({ ticker: row.ticker, error: String(errMsg) })
-        }
-      }
-
-      if (batch.tokenStats) {
-        console.info("[stock-pick-live] KR batch token stats", batch.tokenStats)
-      }
+      perf.krBatchDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      perf.krParallelCount = batch.batchMeta?.parallelConcurrency ?? 1
+      return { batch, error: null }
     } catch (e) {
-      const message = e?.message ?? String(e)
-      console.warn("[stock-pick-live] KR batch failed", message)
-      for (const row of krRows) {
-        errors.push({ ticker: row.ticker, error: message })
-      }
+      perf.krBatchDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      return { batch: null, error: e }
     }
-  }
+  })()
 
-  await mapPool(usRows, US_CONCURRENCY, async (row) => {
-    if (signal?.aborted) return
+  const usPromise = (async () => {
+    if (!usRows.length || signal?.aborted) return { batch: null, error: null }
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now()
     try {
-      const apiBody = await fetchStockIndicators({
-        code: row.ticker,
-        name: row.name,
-        signal,
+      const batch = await fetchUsStockIndicatorsBatch({
+        codes: usRows.map((r) => r.ticker),
         panicIndex,
+        signal,
       })
-      ingestLiveSnapshot(map, row, apiBody, errors)
+      perf.usBatchDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      perf.usParallelCount = batch.batchMeta?.parallelConcurrency ?? 1
+      return { batch, error: null }
     } catch (e) {
-      const message = e?.message ?? String(e)
-      errors.push({ ticker: row.ticker, error: message })
-      console.warn("[stock-pick-live] fetch failed", {
-        ticker: row.ticker,
-        error: message,
-      })
+      perf.usBatchDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      return { batch: null, error: e }
     }
-  })
+  })()
 
-  try {
-    const { quotes: portfolioQuotes } = await fetchStockPickQuotesBatch()
-    for (const [ticker, entry] of map) {
-      const row = universe.stocks.find((s) => s.ticker === ticker)
-      const country = row?.country ?? "US"
-      entry.quote =
-        portfolioQuotes.get(ticker) ??
-        entry.quote ??
-        apiBodyToPickQuote(entry.apiBody, country)
+  const portfolioPromise = (async () => {
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now()
+    try {
+      const result = await fetchStockPickQuotesBatch()
+      perf.portfolioDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      return result
+    } catch (e) {
+      perf.portfolioDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      console.warn("[stock-pick-live] portfolio quote batch failed", e?.message ?? e)
+      return { quotes: new Map(), fetchedAt: null }
     }
-  } catch (e) {
-    console.warn("[stock-pick-live] portfolio quote batch failed", e?.message ?? e)
+  })()
+
+  const [krResult, usResult, portfolioResult] = await Promise.all([
+    krPromise,
+    usPromise,
+    portfolioPromise,
+  ])
+
+  if (krResult.batch) {
+    for (const row of krRows) {
+      const apiBody = krResult.batch.results[row.ticker]
+      if (apiBody) {
+        ingestLiveSnapshot(map, row, apiBody, errors)
+      } else {
+        const errMsg = krResult.batch.errors[row.ticker] ?? "batch missing"
+        errors.push({ ticker: row.ticker, error: String(errMsg) })
+      }
+    }
+    if (krResult.batch.tokenStats) {
+      console.info("[stock-pick-live] KR batch token stats", krResult.batch.tokenStats)
+    }
+  } else if (krResult.error) {
+    const message = krResult.error?.message ?? String(krResult.error)
+    console.warn("[stock-pick-live] KR batch failed", message)
+    for (const row of krRows) {
+      errors.push({ ticker: row.ticker, error: message })
+    }
   }
+
+  if (usResult.batch) {
+    for (const row of usRows) {
+      const apiBody = usResult.batch.results[row.ticker]
+      if (apiBody) {
+        ingestLiveSnapshot(map, row, apiBody, errors)
+      } else {
+        const errMsg = usResult.batch.errors[row.ticker] ?? "batch missing"
+        errors.push({ ticker: row.ticker, error: String(errMsg) })
+      }
+    }
+  } else if (usResult.error) {
+    const message = usResult.error?.message ?? String(usResult.error)
+    console.warn("[stock-pick-live] US batch failed", message)
+    for (const row of usRows) {
+      errors.push({ ticker: row.ticker, error: message })
+    }
+  }
+
+  const { quotes: portfolioQuotes } = portfolioResult
+  for (const [ticker, entry] of map) {
+    const row = universe.stocks.find((s) => s.ticker === ticker)
+    const country = row?.country ?? "US"
+    entry.quote =
+      portfolioQuotes.get(ticker) ??
+      entry.quote ??
+      apiBodyToPickQuote(entry.apiBody, country)
+  }
+
+  recordStockPickFetchSegments(perf)
 
   return { snapshots: map, errors, fetchedAt: new Date().toISOString() }
 }

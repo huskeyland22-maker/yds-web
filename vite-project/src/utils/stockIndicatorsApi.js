@@ -3,6 +3,7 @@ import { stockApiErrorFromBody, stockFetchErrorFromException } from "./errorMess
 
 /** 서버 API Route — KIS 직접 호출 금지 */
 const STOCK_API_PATH = "/api/stock"
+const STOCK_BATCH_API_PATH = "/api/stock-batch"
 
 /** @param {string} raw */
 export function normalizeStockCodeParam(raw) {
@@ -180,5 +181,55 @@ export async function fetchKrStockIndicatorsBatch({ codes, panicIndex, signal } 
     results: body?.results ?? {},
     errors: body?.errors ?? {},
     tokenStats: body?.tokenStats ?? null,
+    batchMeta: body?.batchMeta ?? null,
+  }
+}
+
+/**
+ * 미국·해외 종목 일괄 조회 — 서버 1회 호출 · Yahoo 병렬 fetch
+ * @param {{ codes: string[]; panicIndex?: number; signal?: AbortSignal }} opts
+ */
+export async function fetchUsStockIndicatorsBatch({ codes, panicIndex, signal } = {}) {
+  const list = (codes ?? []).map((c) => normalizeStockCodeParam(c)).filter(Boolean)
+  if (!list.length) {
+    return { results: {}, errors: {}, batchMeta: null }
+  }
+
+  const qs = new URLSearchParams()
+  qs.set("codes", list.join(","))
+  if (panicIndex != null && Number.isFinite(Number(panicIndex))) {
+    qs.set("panicIndex", String(panicIndex))
+  }
+
+  const apiUrl = withNoStoreQuery(`${STOCK_BATCH_API_PATH}?${qs.toString()}`)
+  logClient("US batch request (single HTTP, server parallel Yahoo)", {
+    apiUrl,
+    codeCount: list.length,
+    httpCallCount: 1,
+  })
+
+  const res = await fetch(apiUrl, {
+    ...LIVE_JSON_GET_INIT,
+    signal,
+  })
+  const body = await res.json().catch(() => ({}))
+
+  if (!res.ok) {
+    const stockError = stockApiErrorFromBody(body, res.status)
+    const err = new Error(stockError.detail || stockError.title)
+    err.stockError = stockError
+    throw err
+  }
+
+  logClient("US batch success", {
+    successCount: Object.keys(body?.results ?? {}).length,
+    errorCount: Object.keys(body?.errors ?? {}).length,
+    batchMeta: body?.batchMeta,
+  })
+
+  return {
+    results: body?.results ?? {},
+    errors: body?.errors ?? {},
+    batchMeta: body?.batchMeta ?? null,
   }
 }

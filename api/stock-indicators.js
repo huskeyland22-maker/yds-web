@@ -587,8 +587,140 @@ function readCodesQuery(req) {
     .split(/[,;\s]+/)
     .map((s) => s.trim())
     .filter(Boolean)
-    .slice(0, 30)
+    .slice(0, 40)
 }
+
+const KR_BATCH_CONCURRENCY = 8
+const US_BATCH_CONCURRENCY = 12
+
+/**
+ * @template T
+ * @param {T[]} items
+ * @param {number} limit
+ * @param {(item: T) => Promise<void>} worker
+ */
+async function mapPool(items, limit, worker) {
+  let index = 0
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (index < items.length) {
+      const i = index++
+      await worker(items[i])
+    }
+  })
+  await Promise.all(runners)
+}
+
+async function fetchYahooStockPayload({ code, name, sectorScore, panicIndex }) {
+  const classified = classifyStockInput(code)
+  const yahooTicker = classified.yahooTicker || classified.code || code
+  const { rows, meta, ticker: yahooSymbol } = await fetchYahooChart(yahooTicker)
+  const asOfIso = meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : null
+  const payload = buildPayload({
+    code: yahooSymbol,
+    name,
+    rows,
+    rawRows: rows,
+    dataSource: "yahoo",
+    marketKind: "yahoo_global",
+    yahooSymbol,
+    asOfIso,
+    metaName: meta.shortName || meta.longName || "",
+    yahooMeta: meta,
+    sectorScore,
+    panicIndex,
+  })
+  await persistPayloadSignal(payload)
+  return payload
+}
+
+/**
+ * @param {string[]} codes
+ * @param {{ sectorScore?: number | null; panicIndex?: number | null }} opts
+ */
+async function runUsStockBatch(codes, { sectorScore, panicIndex } = {}) {
+  const results = {}
+  const errors = {}
+  const t0 = Date.now()
+
+  await mapPool(codes, US_BATCH_CONCURRENCY, async (rawCode) => {
+    const c = classifyStockInput(rawCode)
+    if (c.kind !== "yahoo_global" || !c.code) {
+      errors[rawCode] = "invalid_yahoo_ticker"
+      return
+    }
+    try {
+      const payload = await fetchYahooStockPayload({
+        code: c.code,
+        name: "",
+        sectorScore,
+        panicIndex,
+      })
+      results[c.code] = payload
+    } catch (e) {
+      errors[c.code] = toErrorMessage(e?.message, "fetch_failed")
+    }
+  })
+
+  const durationMs = Date.now() - t0
+  console.log("[Yahoo] batch complete", {
+    codeCount: codes.length,
+    successCount: Object.keys(results).length,
+    errorCount: Object.keys(errors).length,
+    parallelConcurrency: US_BATCH_CONCURRENCY,
+    durationMs,
+  })
+
+  return { results, errors, durationMs, parallelConcurrency: US_BATCH_CONCURRENCY }
+}
+
+/**
+ * @param {string[]} codes
+ * @param {{ sectorScore?: number | null; panicIndex?: number | null }} opts
+ */
+async function runKrStockBatch(codes, { sectorScore, panicIndex } = {}) {
+  const results = {}
+  const errors = {}
+  const tokenStatusStart = getKisTokenCacheStatus()
+  const t0 = Date.now()
+
+  await mapPool(codes, KR_BATCH_CONCURRENCY, async (rawCode) => {
+    const c = classifyStockInput(rawCode)
+    if (c.kind !== "domestic_krx" || !c.code) {
+      errors[rawCode] = "invalid_domestic_code"
+      return
+    }
+    try {
+      const payload = await fetchKisDomesticPayload({
+        code: c.code,
+        name: "",
+        sectorScore,
+        panicIndex,
+      })
+      await persistPayloadSignal(payload)
+      results[c.code] = payload
+    } catch (e) {
+      errors[c.code] = toErrorMessage(e?.message, "fetch_failed")
+    }
+  })
+
+  const tokenStatusEnd = getKisTokenCacheStatus()
+  const durationMs = Date.now() - t0
+  console.log("[KIS] batch complete", {
+    codeCount: codes.length,
+    successCount: Object.keys(results).length,
+    errorCount: Object.keys(errors).length,
+    parallelConcurrency: KR_BATCH_CONCURRENCY,
+    durationMs,
+    tokenIssueCount: tokenStatusEnd.tokenIssueCount,
+    tokenReuseCount: tokenStatusEnd.tokenReuseCount,
+    tokenAtStart: tokenStatusStart,
+    tokenAtEnd: tokenStatusEnd,
+  })
+
+  return { results, errors, durationMs, parallelConcurrency: KR_BATCH_CONCURRENCY, tokenStats: tokenStatusEnd }
+}
+
+export { runUsStockBatch, runKrStockBatch }
 
 async function persistPayloadSignal(payload) {
   if (!payload?.symbol || !payload?.stockSignal?.signal) return
@@ -637,42 +769,28 @@ export default async function handler(req, res) {
     }
   }
 
+  if (req.query?.batch === "us" || req.query?.batch === "yahoo") {
+    const codes = readCodesQuery(req)
+    if (!codes.length) return res.status(400).json({ error: "missing codes" })
+    const { results, errors, durationMs, parallelConcurrency } = await runUsStockBatch(codes, {
+      sectorScore,
+      panicIndex,
+    })
+    return res.status(200).json({
+      ok: true,
+      results,
+      errors,
+      panicIndex,
+      batchMeta: { durationMs, parallelConcurrency, codeCount: codes.length },
+    })
+  }
+
   if (req.query?.batch === "1") {
     const codes = readCodesQuery(req)
     if (!codes.length) return res.status(400).json({ error: "missing codes" })
-    const results = {}
-    const errors = {}
-    const tokenStatusStart = getKisTokenCacheStatus()
-
-    for (const rawCode of codes) {
-      const c = classifyStockInput(rawCode)
-      if (c.kind !== "domestic_krx" || !c.code) {
-        errors[rawCode] = "invalid_domestic_code"
-        continue
-      }
-      try {
-        const payload = await fetchKisDomesticPayload({
-          code: c.code,
-          name: "",
-          sectorScore,
-          panicIndex,
-        })
-        await persistPayloadSignal(payload)
-        results[c.code] = payload
-      } catch (e) {
-        errors[c.code] = toErrorMessage(e?.message, "fetch_failed")
-      }
-    }
-
-    const tokenStatusEnd = getKisTokenCacheStatus()
-    console.log("[KIS] batch complete", {
-      codeCount: codes.length,
-      successCount: Object.keys(results).length,
-      errorCount: Object.keys(errors).length,
-      tokenIssueCount: tokenStatusEnd.tokenIssueCount,
-      tokenReuseCount: tokenStatusEnd.tokenReuseCount,
-      tokenAtStart: tokenStatusStart,
-      tokenAtEnd: tokenStatusEnd,
+    const { results, errors, tokenStats, durationMs, parallelConcurrency } = await runKrStockBatch(codes, {
+      sectorScore,
+      panicIndex,
     })
 
     return res.status(200).json({
@@ -680,7 +798,8 @@ export default async function handler(req, res) {
       results,
       errors,
       panicIndex,
-      tokenStats: tokenStatusEnd,
+      tokenStats,
+      batchMeta: { durationMs, parallelConcurrency, codeCount: codes.length },
     })
   }
 
@@ -721,23 +840,12 @@ export default async function handler(req, res) {
 
   const yahooTicker = classified.yahooTicker || code
   try {
-    const { rows, meta, ticker: yahooSymbol } = await fetchYahooChart(yahooTicker)
-    const asOfIso = meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : null
-    const payload = buildPayload({
-      code: yahooSymbol,
+    const payload = await fetchYahooStockPayload({
+      code: yahooTicker,
       name,
-      rows,
-      rawRows: rows,
-      dataSource: "yahoo",
-      marketKind: "yahoo_global",
-      yahooSymbol,
-      asOfIso,
-      metaName: meta.shortName || meta.longName || "",
-      yahooMeta: meta,
       sectorScore,
       panicIndex,
     })
-    await persistPayloadSignal(payload)
     return res.status(200).json(payload)
   } catch (e) {
     return res.status(502).json({
