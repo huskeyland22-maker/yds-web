@@ -1,133 +1,74 @@
 /**
- * YDS 오늘의 행동 — UI 전용 (점수·가중치·구간 로직 무관)
- * 패닉 구간 기준 행동 지시 · 현금 비중은 macroStageAllocation 참조
+ * YDS 오늘의 행동 — UI 전용
+ * 시장 상태(cycle) 단계와 동일한 YDS 판정 · momentum은 타임라인 전용
  */
 
-import { resolvePanicStatusLabel } from "./ydsStatusLabels.js"
+import {
+  MARKET_CYCLE_ACTION_ITEMS,
+  resolveMarketStageSnapshot,
+} from "./ydsMarketStageLabels.js"
 import {
   formatOverheatActionLines,
   resolveEffectiveMarketAllocation,
 } from "./ydsOverheatAllocation.js"
-import { resolveMacroStageAllocation } from "../trading-zone/macroStageAllocation.js"
 
-/** @typedef {typeof PANIC_ACTION_GUIDE[keyof typeof PANIC_ACTION_GUIDE]["id"]} PanicActionBandId */
+/** @typedef {typeof MARKET_CYCLE_ACTION_ITEMS[keyof typeof MARKET_CYCLE_ACTION_ITEMS] extends string[] ? keyof typeof MARKET_CYCLE_ACTION_ITEMS : never} CycleActionBandId */
 
 /** @typedef {{
- *   id: PanicActionBandId
- *   macroId: import("../panic-v2/panicMacroV1Status.js").MacroV1StatusId
+ *   id: CycleActionBandId
  *   emoji: string
  *   label: string
+ *   color: string
  *   actions: string[]
- * }} PanicActionGuide
+ * }} CycleActionGuide
  */
-
-/** @type {Record<string, Omit<PanicActionGuide, "actions"> & { actions: (cashPct: number | null) => string[] }>} */
-export const PANIC_ACTION_GUIDE = {
-  noFear: {
-    id: "overheat",
-    macroId: "overheated",
-    emoji: "🔵",
-    label: "공포 없음",
-    actions: (cashPct) => [
-      cashPct != null ? `현금 ${cashPct}% 확보` : "현금 확보",
-      "신규 진입 축소",
-      "수익 보호",
-    ],
-  },
-  lowFear: {
-    id: "neutral",
-    macroId: "neutral",
-    emoji: "🟢",
-    label: "공포 부족",
-    actions: (cashPct) => [
-      "추격매수 금지",
-      cashPct != null ? `현금 ${cashPct}% 유지` : "현금 유지",
-      "관심종목 관찰",
-    ],
-  },
-  interest: {
-    id: "interest",
-    macroId: "interest",
-    emoji: "🟡",
-    label: "관심",
-    actions: (cashPct) => [
-      "관심종목 확대",
-      "분할 진입 준비",
-      cashPct != null ? `현금 ${cashPct}% 활용 검토` : "현금 활용 검토",
-    ],
-  },
-  dca: {
-    id: "dca",
-    macroId: "dca",
-    emoji: "🟠",
-    label: "분할매수",
-    actions: () => ["1차 매수", "분할 접근", "공포 활용"],
-  },
-  lifePoint: {
-    id: "lifePoint",
-    macroId: "panicBuy",
-    emoji: "🔴",
-    label: "인생 타점",
-    actions: () => ["공격적 분할매수", "우량주 집중", "장기 시각 유지"],
-  },
-}
-
-/** @type {Record<import("./ydsMomentumLayer.js").MomentumLayerView["level"] extends infer L ? L : never, string | null>} */
-const MOMENTUM_ACTION_HINT = {
-  none: null,
-  warning: "단기 둔화 · 매수 속도 유지",
-  strong: "급락 경고 · 분할 속도 조절",
-}
 
 /**
- * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} momentum
+ * @param {ReturnType<typeof resolveMarketStageSnapshot>} snapshot
+ * @param {object | null | undefined} [panicData]
  */
-function resolveMomentumActionHint(momentum) {
-  if (!momentum || momentum.level === "none") return null
-  const { level, cnnLevel, bofaLevel, cnnDelta3d } = momentum
-  const cnnCritical =
-    cnnLevel === "strong" || (cnnDelta3d != null && cnnDelta3d <= -25)
-  const bofaStrong = bofaLevel === "strong"
-  if (cnnCritical && (bofaStrong || (cnnDelta3d != null && cnnDelta3d <= -25))) {
-    return "위험회피 · 신규 진입 보류"
+export function resolveTodayActionsFromSnapshot(snapshot, panicData = null) {
+  if (!snapshot?.cycle) return null
+
+  const cycle = snapshot.cycle
+  const baseActions = MARKET_CYCLE_ACTION_ITEMS[cycle.id]
+  if (!baseActions?.length) return null
+
+  const effective = panicData ? resolveEffectiveMarketAllocation(panicData) : null
+  let actions = [...baseActions]
+  if (effective?.mode === "overheat" && effective.tier) {
+    const cashPct = effective.cashPct ?? null
+    actions = formatOverheatActionLines(effective.tier, cashPct)
   }
-  if (level === "strong" || cnnLevel === "strong") {
-    return MOMENTUM_ACTION_HINT.strong
+
+  return {
+    band: {
+      id: cycle.id,
+      emoji: cycle.emoji,
+      label: cycle.label,
+      color: cycle.color,
+    },
+    actions,
+    panicId: snapshot.panic?.id ?? null,
+    ydsScore: snapshot.ydsScore ?? null,
   }
-  return MOMENTUM_ACTION_HINT.warning
 }
 
 /**
  * @param {number | null | undefined} ydsScore
- * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} [momentum]
+ * @param {import("./ydsMomentumLayer.js").MomentumLayerView | null | undefined} [_momentum] — 하위 호환 (미사용)
  * @param {object | null | undefined} [panicData]
  */
-export function resolveTodayActions(ydsScore, momentum, panicData = null) {
-  const panic = resolvePanicStatusLabel(ydsScore)
-  if (!panic?.id) return null
+export function resolveTodayActions(ydsScore, _momentum, panicData = null) {
+  const snapshot = resolveMarketStageSnapshot(ydsScore)
+  return resolveTodayActionsFromSnapshot(snapshot, panicData)
+}
 
-  const guide = PANIC_ACTION_GUIDE[panic.id]
-  if (!guide) return null
-
-  const effective = panicData ? resolveEffectiveMarketAllocation(panicData) : null
-  const alloc = resolveMacroStageAllocation(guide.macroId)
-  const cashPct = effective?.cashPct ?? alloc?.cashPct ?? null
-
-  let actions = guide.actions(cashPct)
-  if (effective?.mode === "overheat" && effective.tier) {
-    actions = formatOverheatActionLines(effective.tier, cashPct)
-  }
-
-  const momentumHint = resolveMomentumActionHint(momentum)
-
-  return {
-    band: {
-      id: guide.id,
-      emoji: guide.emoji,
-      label: guide.label,
-      color: panic.color,
-    },
-    actions,
-    momentumHint,
-  }
+/** @deprecated PANIC_ACTION_GUIDE — 종목추천 macro 연동용 레거시 */
+export const PANIC_ACTION_GUIDE = {
+  noFear: { id: "overheat", macroId: "overheated", emoji: "🔵", label: "공포 없음" },
+  lowFear: { id: "neutral", macroId: "neutral", emoji: "🟢", label: "공포 부족" },
+  interest: { id: "interest", macroId: "interest", emoji: "🟡", label: "관심" },
+  dca: { id: "dca", macroId: "dca", emoji: "🟠", label: "분할매수" },
+  lifePoint: { id: "lifePoint", macroId: "panicBuy", emoji: "🔴", label: "인생 타점" },
 }

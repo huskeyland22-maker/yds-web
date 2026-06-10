@@ -19,7 +19,7 @@ import {
 } from "../../content/ydsLanguage.js"
 
 /**
- * 시장분석 데스크 — 시장 상태·패닉 → 현재 시장 → 행동 → 전환 신호 → 핵심지수
+ * 시장분석 데스크 — 시장 상태·패닉(YDS) → 현재 시장 상태·행동 → 최근 전환 신호 → 핵심지수
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]

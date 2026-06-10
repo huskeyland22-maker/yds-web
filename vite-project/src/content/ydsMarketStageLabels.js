@@ -175,6 +175,15 @@ export function resolveMarketStageSnapshot(ydsScore, momentum) {
   return applyMarketStageLabels(resolveYdsStatusSnapshot(ydsScore, momentum))
 }
 
+/** @type {Record<CycleBandId, string[]>} — Hero·행동 카드 (시장 상태 단계 기준) */
+export const MARKET_CYCLE_ACTION_ITEMS = {
+  depression: ["바닥 확인 후 대응", "분할 접근 준비", "추격 매수 금지"],
+  recovery: ["회복 흐름 관찰", "종목 리스트 정리", "추격 매수 금지"],
+  growth: ["기본 비중 유지", "종목 감시", "추격 매수 자제"],
+  lateCycle: ["기본 비중 유지", "종목 감시", "추격 매수 금지"],
+  peakOverheat: ["현금 비중 확대", "신규 진입 축소", "수익 보호"],
+}
+
 /** 시장분석 레일 범례 (행동 중심) */
 export const MARKET_STAGE_RAIL_LABELS =
   "🔵 극단 침체 · 🟢 회복 관찰 · 🟡 보유 구간 · 🟠 기회 대기 · 🔴 현금 확보"

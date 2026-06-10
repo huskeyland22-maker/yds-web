@@ -1,11 +1,11 @@
 /**
- * YDS 행동 신호 — 표시 전용 (3초 판단)
+ * YDS 행동 신호 — 표시 전용 (YDS 단일 판정)
  */
 
-import { resolveTodayActions } from "./ydsActionGuide.js"
-import { resolveCurrentMarketView } from "./ydsCurrentMarketView.js"
+import { resolveTodayActionsFromSnapshot } from "./ydsActionGuide.js"
+import { currentMarketViewFromSnapshot } from "./ydsCurrentMarketView.js"
 import { resolveEffectiveMarketAllocation } from "./ydsOverheatAllocation.js"
-import { resolveMomentumLayer } from "./ydsMomentumLayer.js"
+import { resolveMarketStageSnapshot } from "./ydsMarketStageLabels.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
 /**
@@ -30,25 +30,24 @@ function iconForAction(text) {
   const t = String(text ?? "")
   if (/추격|금지|보류|중단|관망/.test(t)) return "🚫"
   if (/현금/.test(t)) return "💵"
-  if (/관심|탐색|관찰|발굴|리스트/.test(t)) return "👀"
+  if (/관심|탐색|관찰|발굴|리스트|감시/.test(t)) return "👀"
   if (/익절/.test(t)) return "✈"
   if (/매수|정리|분할|집중/.test(t)) return "📌"
   return "✓"
 }
 
 /**
- * @param {ReturnType<typeof resolveTodayActions>} actions
+ * @param {ReturnType<typeof resolveTodayActionsFromSnapshot>} actions
  * @param {import("./ydsOverheatAllocation.js").EffectiveMarketAllocation | null} effective
  * @param {import("./ydsCurrentMarketView.js").CurrentMarketView} market
  */
 function resolveStrategyMode(actions, effective, market) {
   const defensive =
     effective?.mode === "overheat" ||
-    /과열|조정/.test(market.label ?? "") ||
-    actions.band.id === "overheat" ||
-    actions.band.id === "neutral"
+    market.cycleId === "peakOverheat" ||
+    market.cycleId === "lateCycle"
 
-  if (defensive) {
+  if (defensive && effective?.mode === "overheat") {
     return {
       emoji: "🟠",
       label: "방어 모드",
@@ -78,22 +77,22 @@ function formatCashSignalLine(effective) {
 
 /**
  * @param {object | null | undefined} panicData
- * @param {object[]} [historyRows]
+ * @param {object[]} [_historyRows]
  * @returns {ActionSignalView | null}
  */
-export function resolveActionSignalView(panicData, historyRows = []) {
+export function resolveActionSignalView(panicData, _historyRows = []) {
   if (!panicData) return null
   const score = getFinalScore(panicData)
   if (!Number.isFinite(score)) return null
 
-  const momentum = resolveMomentumLayer(panicData, historyRows)
-  const actions = resolveTodayActions(Math.round(score), momentum, panicData)
-  const market = resolveCurrentMarketView(panicData, historyRows)
+  const snapshot = resolveMarketStageSnapshot(Math.round(score))
+  const actions = resolveTodayActionsFromSnapshot(snapshot, panicData)
+  const market = currentMarketViewFromSnapshot(snapshot)
   const effective = resolveEffectiveMarketAllocation(panicData)
   if (!actions || !market) return null
 
   const raw = actions.actions.slice(0, 3)
-  const signals = raw.map((text, index) => {
+  const signals = raw.map((text) => {
     const isCash = /현금/.test(text)
     const line = isCash ? formatCashSignalLine(effective) : text
     return { emoji: iconForAction(line), text: line }
@@ -110,6 +109,6 @@ export function resolveActionSignalView(panicData, historyRows = []) {
     strategyLabel: strategy.label,
     strategyColor: strategy.color,
     signals: signals.slice(0, 3),
-    contextLine: market.cause ?? "",
+    contextLine: market.hint ?? "",
   }
 }

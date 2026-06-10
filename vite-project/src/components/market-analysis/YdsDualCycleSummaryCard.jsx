@@ -1,6 +1,6 @@
 import { useMemo } from "react"
-import { resolveTodayActions } from "../../content/ydsActionGuide.js"
-import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
+import { resolveTodayActionsFromSnapshot } from "../../content/ydsActionGuide.js"
+import { resolveMarketStageSnapshot } from "../../content/ydsMarketStageLabels.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 
 /**
@@ -13,16 +13,16 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
     const score = getFinalScore(panicData)
     if (!Number.isFinite(score)) return null
 
-    const momentum = resolveMomentumLayer(panicData, historyRows)
-    const actions = resolveTodayActions(Math.round(score), momentum, panicData)
+    const snapshot = resolveMarketStageSnapshot(Math.round(score))
+    const actions = resolveTodayActionsFromSnapshot(snapshot, panicData)
     if (!actions) return null
 
     return { actions }
-  }, [panicData, historyRows])
+  }, [panicData])
 
   if (!view) return null
 
-  const { band, actions: actionItems, momentumHint } = view.actions
+  const { band, actions: actionItems } = view.actions
 
   return (
     <section className="yds-action-card" aria-label="오늘의 행동">
@@ -38,9 +38,6 @@ export default function YdsDualCycleSummaryCard({ panicData = null, historyRows 
             ✓ {item}
           </li>
         ))}
-        {momentumHint ? (
-          <li className="yds-action-card__item yds-action-card__item--warn">✓ {momentumHint}</li>
-        ) : null}
       </ul>
     </section>
   )

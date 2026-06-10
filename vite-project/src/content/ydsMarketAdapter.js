@@ -4,8 +4,9 @@
  */
 
 import { resolveActionSignalView } from "./ydsActionSignalView.js"
-import { PANIC_ACTION_GUIDE, resolveTodayActions } from "./ydsActionGuide.js"
+import { resolveTodayActions } from "./ydsActionGuide.js"
 import { resolveCurrentMarketView } from "./ydsCurrentMarketView.js"
+import { resolveMarketStageSnapshot } from "./ydsMarketStageLabels.js"
 import { resolveMarketCycleStage } from "./ydsMarketCycleDisplay.js"
 import { resolveMarketState } from "./ydsStateEngine.js"
 import { resolveMomentumLayer } from "./ydsMomentumLayer.js"
@@ -83,19 +84,18 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
   const ydsScore = getFinalScore(panicData)
   if (!Number.isFinite(ydsScore)) return { ...DEFAULT_MARKET_CONTEXT }
 
+  const rounded = Math.round(ydsScore)
+  const snapshot = resolveMarketStageSnapshot(rounded)
   const momentum = resolveMomentumLayer(panicData, historyRows)
-  const macro = resolveMacroV1Status(Math.round(ydsScore))
-  const actions = resolveTodayActions(Math.round(ydsScore), momentum, panicData)
+  const macro = resolveMacroV1Status(rounded)
+  const actions = resolveTodayActions(rounded, momentum, panicData)
   const market = resolveCurrentMarketView(panicData, historyRows)
   const signal = resolveActionSignalView(panicData, historyRows)
   const state = resolveMarketState(panicData, historyRows, momentum)
   const cycle = resolveMarketCycleStage(panicData.fearGreed, panicData.bofa)
 
   const macroId = macro?.id ?? "neutral"
-  const guide = actions?.band?.id
-    ? Object.values(PANIC_ACTION_GUIDE).find((g) => g.id === actions.band.id)
-    : null
-  const panicBandId = guide?.macroId ?? macroId
+  const panicBandId = snapshot?.panic?.id ?? macroId
 
   const isDefensive =
     signal?.strategyLabel === "방어 모드" ||
@@ -112,8 +112,8 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
     macroLabel: macro?.label ?? DEFAULT_MARKET_CONTEXT.macroLabel,
     macroEmoji: macro?.emoji ?? DEFAULT_MARKET_CONTEXT.macroEmoji,
     panicBandId,
-    panicLabel: actions?.band?.label ?? macro?.label ?? DEFAULT_MARKET_CONTEXT.panicLabel,
-    strategyLabel: signal?.strategyLabel ?? actions?.band?.label ?? DEFAULT_MARKET_CONTEXT.strategyLabel,
+    panicLabel: snapshot?.panic?.label ?? macro?.label ?? DEFAULT_MARKET_CONTEXT.panicLabel,
+    strategyLabel: signal?.strategyLabel ?? market?.label ?? actions?.band?.label ?? DEFAULT_MARKET_CONTEXT.strategyLabel,
     strategyEmoji: signal?.strategyEmoji ?? actions?.band?.emoji ?? DEFAULT_MARKET_CONTEXT.strategyEmoji,
     isDefensive,
     marketLabel: market?.label ?? "—",
@@ -123,7 +123,7 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
     cycleEmoji: cycle?.emoji ?? "🟡",
     marketStateId: state?.id ?? null,
     marketStateLabel: state?.label ?? null,
-    contextLine: signal?.contextLine ?? market?.cause ?? "",
+    contextLine: signal?.contextLine ?? market?.hint ?? "",
   }
 }
 

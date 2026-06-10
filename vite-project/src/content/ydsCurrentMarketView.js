@@ -1,62 +1,49 @@
 /**
- * V1.9 현재 시장 — Hero 단일 카드 (표시 전용)
- * State · Regime · Overheat · Momentum을 하나로 통합
+ * 현재 시장 상태 — Hero 카드 (YDS 단일 판정 · resolveMarketStageSnapshot)
  */
 
-import { resolveMomentumLayer } from "./ydsMomentumLayer.js"
-import { resolveOverheatCardView } from "./ydsOverheatLayer.js"
-import { resolveMarketState } from "./ydsStateEngine.js"
-import { toNum } from "./ydsLayerHistory.js"
+import { getFinalScore } from "../utils/tradingScores.js"
+import { resolveMarketStageSnapshot } from "./ydsMarketStageLabels.js"
 
 /**
  * @typedef {{
  *   emoji: string
  *   label: string
  *   color: string
- *   cnn: number | null
- *   bofa: number | null
- *   cause: string
+ *   hint: string
+ *   cycleId: import("./ydsStatusLabels.js").CycleBandId
+ *   panicId: import("./ydsStatusLabels.js").PanicBandId | null
+ *   cycleScore: number | null
+ *   ydsScore: number | null
  * }} CurrentMarketView
  */
 
 /**
- * @param {object | null | undefined} panicData
- * @param {object[]} [historyRows]
+ * @param {ReturnType<typeof resolveMarketStageSnapshot>} snapshot
  * @returns {CurrentMarketView | null}
  */
-export function resolveCurrentMarketView(panicData, historyRows = []) {
+export function currentMarketViewFromSnapshot(snapshot) {
+  if (!snapshot?.cycle) return null
+  return {
+    emoji: snapshot.cycle.emoji,
+    label: snapshot.cycle.label,
+    color: snapshot.cycle.color,
+    hint: snapshot.cycle.hint ?? "",
+    cycleId: snapshot.cycle.id,
+    panicId: snapshot.panic?.id ?? null,
+    cycleScore: snapshot.cycle.score ?? null,
+    ydsScore: snapshot.ydsScore ?? null,
+  }
+}
+
+/**
+ * @param {object | null | undefined} panicData
+ * @param {object[]} [_historyRows] — 하위 호환 (미사용 · momentum/state 엔진 분리)
+ * @returns {CurrentMarketView | null}
+ */
+export function resolveCurrentMarketView(panicData, _historyRows = []) {
   if (!panicData) return null
-
-  const momentum = resolveMomentumLayer(panicData, historyRows)
-  const state = resolveMarketState(panicData, historyRows, momentum)
-  const overheat = resolveOverheatCardView(panicData, historyRows, momentum)
-
-  const cnn = toNum(panicData.fearGreed)
-  const bofa = toNum(panicData.bofa)
-  if (cnn == null || bofa == null) return null
-
-  if (state) {
-    const cause = state.subtitles[0] ?? (overheat?.id !== "normal" ? overheat.cause : "")
-    return {
-      emoji: state.emoji,
-      label: state.label,
-      color: state.color,
-      cnn,
-      bofa,
-      cause,
-    }
-  }
-
-  if (overheat) {
-    return {
-      emoji: overheat.emoji,
-      label: overheat.title,
-      color: overheat.color,
-      cnn,
-      bofa,
-      cause: overheat.cause,
-    }
-  }
-
-  return null
+  const score = getFinalScore(panicData)
+  if (!Number.isFinite(score)) return null
+  return currentMarketViewFromSnapshot(resolveMarketStageSnapshot(Math.round(score)))
 }
