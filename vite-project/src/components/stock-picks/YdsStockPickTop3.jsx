@@ -54,6 +54,7 @@ export default function YdsStockPickTop3({
               stock={stock}
               variant="top5"
               medal={TOP5_MEDALS[index]}
+              rankIndex={index}
               isFavorite={isFavorite(stock.ticker)}
               onToggleFavorite={onToggleFavorite}
               isHeld={heldTickers.has(stock.ticker.toUpperCase())}

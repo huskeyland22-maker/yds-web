@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { STOCK_STATUS_VIEWS } from "../content/ydsStockActionEngine.js"
+import { getUxStatusById, resolveStockPickUxStatus } from "../content/ydsStockPickUxStatus.js"
 
 const STORAGE_KEY = "yds-stock-pick-status-prev"
 
@@ -40,15 +40,14 @@ export function useStockPickStatusChanges(liveStocks) {
     const delta = new Map()
 
     for (const stock of liveStocks) {
-      const to = stock.stockStatus?.id ?? stock.statusView?.id
-      if (!to) continue
+      const to = resolveStockPickUxStatus(stock).id
       const from = prev[stock.ticker]
       if (from && from !== to) {
         delta.set(stock.ticker, {
           from,
           to,
-          fromLabel: STOCK_STATUS_VIEWS[from]?.label ?? from,
-          toLabel: STOCK_STATUS_VIEWS[to]?.label ?? to,
+          fromLabel: getUxStatusById(from).label,
+          toLabel: getUxStatusById(to).label,
         })
       }
       next[stock.ticker] = to

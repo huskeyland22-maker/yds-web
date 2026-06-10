@@ -2,11 +2,14 @@ import { useLayoutEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { STOCK_PICK_SECTORS } from "../../content/ydsStockPickModel.js"
 import { formatTransparencyPrice } from "../../content/ydsStockPickTransparency.js"
+import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
 import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
+import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 
 /**
  * @param {{
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
+ *   allStocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   sectorId: string
  *   onSectorChange: (id: string) => void
  *   heldTickers?: Set<string>
@@ -14,6 +17,7 @@ import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
  */
 export default function YdsStockPickSectorPanel({
   stocks,
+  allStocks,
   sectorId,
   onSectorChange,
   heldTickers = new Set(),
@@ -25,6 +29,15 @@ export default function YdsStockPickSectorPanel({
       count: stocks.length,
     })
   }, [stocks.length])
+
+  const sectorCounts = STOCK_PICK_SECTORS.reduce((acc, sector) => {
+    if (sector.id === "all") {
+      acc[sector.id] = allStocks.length
+    } else {
+      acc[sector.id] = allStocks.filter((s) => s.sector === sector.id).length
+    }
+    return acc
+  }, /** @type {Record<string, number>} */ ({}))
 
   return (
     <section className="yds-spick-section yds-spick-section--sector" aria-labelledby="spick-sector">
@@ -47,7 +60,7 @@ export default function YdsStockPickSectorPanel({
               .join(" ")}
             onClick={() => onSectorChange(sector.id)}
           >
-            {sector.label}
+            {sector.label} ({sectorCounts[sector.id] ?? 0})
           </button>
         ))}
       </div>
@@ -66,8 +79,11 @@ export default function YdsStockPickSectorPanel({
                     <span className="yds-spick-sector-list__held">보유</span>
                   ) : null}
                 </span>
+                <span className="yds-spick-sector-list__score font-mono tabular-nums">
+                  {getStockPickTotalScore(stock) ?? "—"}
+                </span>
                 <span className="yds-spick-sector-list__status">
-                  <span aria-hidden>{stock.stockStatus.emoji}</span> {stock.stockStatus.label}
+                  <YdsStockPickUxStatusBadge stock={stock} />
                 </span>
                 <span className="yds-spick-sector-list__price font-mono tabular-nums">
                   {formatTransparencyPrice(

@@ -4,7 +4,9 @@ import {
   buildStockPickTransparency,
   formatTransparencyPrice,
 } from "../../content/ydsStockPickTransparency.js"
+import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
+import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 
 /**
  * @param {{
@@ -16,6 +18,7 @@ import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
  *   onToggleFavorite: (ticker: string) => void
  *   isHeld?: boolean
  *   statusChange?: { fromLabel: string; toLabel: string } | null
+ *   rankIndex?: number
  * }} props
  */
 export default function YdsStockPickCard({
@@ -27,6 +30,7 @@ export default function YdsStockPickCard({
   onToggleFavorite,
   isHeld = false,
   statusChange = null,
+  rankIndex,
 }) {
   if (stock.dataSource !== "live") {
     return null
@@ -44,6 +48,15 @@ export default function YdsStockPickCard({
     position52w != null && Number.isFinite(position52w)
       ? `52주 ${Math.round(position52w)}%`
       : "—"
+  const totalScore = getStockPickTotalScore(stock)
+  const rankClass =
+    rankIndex === 0
+      ? "yds-spick-card--rank-1"
+      : rankIndex === 1
+        ? "yds-spick-card--rank-2"
+        : rankIndex === 2
+          ? "yds-spick-card--rank-3"
+          : ""
 
   return (
     <article
@@ -51,6 +64,7 @@ export default function YdsStockPickCard({
         "yds-spick-card",
         "yds-spick-card--live",
         isHero ? "yds-spick-card--top5" : "",
+        rankClass,
         variant === "compact" ? "yds-spick-card--compact" : "",
       ]
         .filter(Boolean)
@@ -74,10 +88,14 @@ export default function YdsStockPickCard({
       <Link to={to} className="yds-spick-card__link">
         <h3 className="yds-spick-card__name">{stock.name}</h3>
 
-        <div className="yds-spick-card__core">
-          <p className="yds-spick-card__status">
-            <span aria-hidden>{stock.stockStatus.emoji}</span> {stock.stockStatus.label}
+        {totalScore != null ? (
+          <p className="yds-spick-card__score font-mono tabular-nums">
+            종합점수 {totalScore}
           </p>
+        ) : null}
+
+        <div className="yds-spick-card__core">
+          <YdsStockPickUxStatusBadge stock={stock} className="yds-spick-card__status" />
           <p className="yds-spick-card__price font-mono tabular-nums">{price}</p>
         </div>
 

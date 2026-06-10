@@ -98,6 +98,7 @@ export default function YdsStockPickCountryPanel({
         <>
           <YdsStockPickSectorPanel
             stocks={sectorStocks}
+            allStocks={stocks}
             sectorId={sectorId}
             onSectorChange={onSectorChange}
             heldTickers={heldTickers}

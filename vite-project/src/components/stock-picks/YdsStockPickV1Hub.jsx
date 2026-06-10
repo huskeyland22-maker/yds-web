@@ -19,6 +19,7 @@ import YdsStockPickLoadBanner from "./YdsStockPickLoadBanner.jsx"
 import YdsStockPickSearchBar from "./YdsStockPickSearchBar.jsx"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
+import YdsStockPickTodaySignal from "./YdsStockPickTodaySignal.jsx"
 
 const INITIAL_SECTOR = { US: "all", KR: "all" }
 const DUAL_LAYOUT_MQ = "(min-width: 1024px)"
@@ -160,6 +161,11 @@ export default function YdsStockPickV1Hub() {
           })}
         </p>
       ) : null}
+
+      <YdsStockPickTodaySignal
+        stocks={liveStocks}
+        loading={loading && !liveStocks.length}
+      />
 
       <YdsStockPickSearchBar
         value={searchQuery}

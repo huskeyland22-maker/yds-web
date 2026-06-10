@@ -1,3 +1,6 @@
+import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
+import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
+
 /**
  * @param {{
  *   stock: import("../../content/ydsStockPickModel.js").StockPickView
@@ -5,10 +8,11 @@
  * }} props
  */
 export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
-  const { stockStatus, stockAction, scores } = stock
+  const { stockAction } = stock
   const showScore = variant === "detail"
   const actionOnly = variant === "top5" || variant === "top3" || variant === "compact"
   const showStatus = !actionOnly
+  const totalScore = getStockPickTotalScore(stock)
 
   return (
     <div
@@ -22,17 +26,14 @@ export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
         .filter(Boolean)
         .join(" ")}
     >
+      {showStatus && showScore && totalScore != null ? (
+        <p className="yds-spick-action__score-lead font-mono tabular-nums">
+          종합점수 {totalScore}
+        </p>
+      ) : null}
       {showStatus ? (
         <div className="yds-spick-action__status">
-          <span className="yds-spick-action__status-emoji" aria-hidden>
-            {stockStatus.emoji}
-          </span>
-          <span className="yds-spick-action__status-label">{stockStatus.label}</span>
-          {showScore ? (
-            <span className="yds-spick-action__score font-mono tabular-nums">
-              {scores.totalScore}점
-            </span>
-          ) : null}
+          <YdsStockPickUxStatusBadge stock={stock} />
         </div>
       ) : null}
 
