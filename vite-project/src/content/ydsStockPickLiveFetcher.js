@@ -19,6 +19,7 @@ import {
   mergePickQuote,
 } from "./ydsStockPickQuoteService.js"
 import { buildStockPickViews, assignRanks } from "./ydsStockPickModel.js"
+import { runStockPickFetchOnce } from "./ydsStockPickFetchSession.js"
 import { recordStockPickFetchSegments } from "./ydsStockPickPerf.js"
 
 /**
@@ -62,17 +63,6 @@ function ingestLiveSnapshot(map, row, apiBody, errors) {
   })
 }
 
-const SESSION_KEY = "__ydsStockPickLiveSession__"
-
-/** @returns {{ promise: Promise<object> | null; key: string | null; gen: number }} */
-function getLiveFetchSession() {
-  const g = globalThis
-  if (!g[SESSION_KEY]) {
-    g[SESSION_KEY] = { promise: null, key: null, gen: 0 }
-  }
-  return g[SESSION_KEY]
-}
-
 /**
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
  * @param {AbortSignal} [signal]
@@ -80,27 +70,12 @@ function getLiveFetchSession() {
  */
 export async function fetchStockPickLiveSnapshots(marketContext = null, signal, opts = {}) {
   const callsite = opts.callsite ?? "fetchStockPickLiveSnapshots"
-  const sessionKey = `mount:${marketContext?.ready ?? false}:${marketContext?.panicIndex ?? "na"}`
-  const session = getLiveFetchSession()
+  console.log("[stock-pick-fetch]", callsite, { force: Boolean(opts.force) })
 
-  console.log("[stock-pick-fetch]", callsite, { sessionKey, force: Boolean(opts.force) })
-
-  if (session.promise && session.key === sessionKey && !opts.force) {
-    console.log("[stock-pick-fetch] join in-flight session", { callsite, sessionKey })
-    return session.promise
-  }
-
-  const gen = ++session.gen
-  session.key = sessionKey
-  session.promise = runStockPickLiveSnapshots(marketContext, signal, callsite)
-
-  try {
-    return await session.promise
-  } finally {
-    if (session.gen === gen) {
-      session.promise = null
-    }
-  }
+  return runStockPickFetchOnce(
+    () => runStockPickLiveSnapshots(marketContext, signal, callsite),
+    { callsite, force: opts.force },
+  )
 }
 
 /**
@@ -174,28 +149,7 @@ async function runStockPickLiveSnapshots(marketContext = null, signal, callsite 
     }
   })()
 
-  const portfolioPromise = (async () => {
-    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now()
-    try {
-      const result = await fetchStockPickQuotesBatch()
-      perf.portfolioDurationMs = Math.round(
-        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
-      )
-      return result
-    } catch (e) {
-      perf.portfolioDurationMs = Math.round(
-        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
-      )
-      console.warn("[stock-pick-live] portfolio quote batch failed", e?.message ?? e)
-      return { quotes: new Map(), fetchedAt: null }
-    }
-  })()
-
-  const [krResult, usResult, portfolioResult] = await Promise.all([
-    krPromise,
-    usPromise,
-    portfolioPromise,
-  ])
+  const [krResult, usResult] = await Promise.all([krPromise, usPromise])
 
   if (krResult.batch) {
     for (const row of krRows) {
@@ -236,14 +190,37 @@ async function runStockPickLiveSnapshots(marketContext = null, signal, callsite 
     }
   }
 
-  const { quotes: portfolioQuotes } = portfolioResult
   for (const [ticker, entry] of map) {
     const row = universe.stocks.find((s) => s.ticker === ticker)
     const country = row?.country ?? "US"
-    entry.quote =
-      portfolioQuotes.get(ticker) ??
-      entry.quote ??
-      apiBodyToPickQuote(entry.apiBody, country)
+    entry.quote = entry.quote ?? apiBodyToPickQuote(entry.apiBody, country)
+  }
+
+  const enrichPortfolioQuotes = async () => {
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now()
+    try {
+      const { quotes: portfolioQuotes } = await fetchStockPickQuotesBatch()
+      perf.portfolioDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      for (const [ticker, entry] of map) {
+        const row = universe.stocks.find((s) => s.ticker === ticker)
+        const country = row?.country ?? "US"
+        const pq = portfolioQuotes.get(ticker)
+        if (pq) entry.quote = pq
+      }
+    } catch (e) {
+      perf.portfolioDurationMs = Math.round(
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
+      )
+      console.warn("[stock-pick-live] portfolio quote batch failed", e?.message ?? e)
+    }
+  }
+
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(() => enrichPortfolioQuotes(), { timeout: 4000 })
+  } else {
+    setTimeout(() => enrichPortfolioQuotes(), 0)
   }
 
   recordStockPickFetchSegments(perf)

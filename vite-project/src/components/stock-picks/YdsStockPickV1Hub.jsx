@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { traceStockPickMount } from "../../content/ydsStockPickMountTrace.js"
 import { captureTodayPickSnapshots } from "../../content/ydsValidationEngine.js"
 import {
   assignRanks,
@@ -40,6 +41,11 @@ function useDualCountryLayout() {
 }
 
 export default function YdsStockPickV1Hub() {
+  useEffect(() => {
+    traceStockPickMount("YdsStockPickV1Hub", "mount")
+    return () => traceStockPickMount("YdsStockPickV1Hub", "unmount")
+  }, [])
+
   const dualLayout = useDualCountryLayout()
   const marketContext = useYdsMarketContext()
   const {

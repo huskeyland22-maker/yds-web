@@ -21,6 +21,10 @@ import {
   logStockPickApiDuplicateAudit,
   resetStockPickApiCounter,
 } from "../content/ydsStockPickApiCounter.js"
+import { traceStockPickMount } from "../content/ydsStockPickMountTrace.js"
+import {
+  isStockPickFetchSessionDone,
+} from "../content/ydsStockPickFetchSession.js"
 import {
   markPostApiComplete,
   recordRenderPhase,
@@ -31,8 +35,8 @@ import { fetchStockPickLiveSnapshots } from "../content/ydsStockPickLiveFetcher.
 
 const bootCache = readInitialStockPickSnapshots()
 
-/** StrictMode 이중 effect 차단 (2초 이내 재실행 무시) */
-let lastMountFetchAt = 0
+/** 컴포넌트 remount 시 effect 재실행 차단 (StrictMode·부모 remount) */
+let hookMountFetchCommitted = false
 
 /**
  * @param {import("../content/ydsMarketAdapter.js").YdsMarketAdapterContext | null} marketContext
@@ -46,8 +50,22 @@ export function useStockPickLiveData(marketContext) {
   const [fromCache, setFromCache] = useState(() => bootCache.fromCache)
   const requestIdRef = useRef(0)
   const perfInitRef = useRef(false)
+  const fetchGuardRef = useRef(false)
   const marketContextRef = useRef(marketContext)
   marketContextRef.current = marketContext
+
+  useEffect(() => {
+    traceStockPickMount("useStockPickLiveData", "mount", {
+      hookMountFetchCommitted,
+      sessionDone: isStockPickFetchSessionDone(),
+    })
+    return () => {
+      traceStockPickMount("useStockPickLiveData", "unmount", {
+        hookMountFetchCommitted,
+        sessionDone: isStockPickFetchSessionDone(),
+      })
+    }
+  }, [])
 
   useEffect(() => {
     if (perfInitRef.current) return
@@ -58,14 +76,16 @@ export function useStockPickLiveData(marketContext) {
   }, [])
 
   useEffect(() => {
-    const now = Date.now()
-    if (now - lastMountFetchAt < 2000) {
-      console.log("[stock-pick] skip duplicate mount fetch (StrictMode guard)", {
-        deltaMs: now - lastMountFetchAt,
+    if (fetchGuardRef.current || hookMountFetchCommitted) {
+      console.log("[stock-pick] skip duplicate hook fetch", {
+        fetchGuardRef: fetchGuardRef.current,
+        hookMountFetchCommitted,
+        sessionDone: isStockPickFetchSessionDone(),
       })
       return undefined
     }
-    lastMountFetchAt = now
+    fetchGuardRef.current = true
+    hookMountFetchCommitted = true
 
     const ac = new AbortController()
     const requestId = ++requestIdRef.current

@@ -1,6 +1,5 @@
-import { createClient } from "@supabase/supabase-js"
 import { fetchPanicHubLatest, isPanicHubEnabled } from "../config/api.js"
-import { getSupabaseEnv } from "../lib/supabaseBrowser.js"
+import { getSupabaseBrowserClient, getSupabaseEnv } from "../lib/supabaseBrowser.js"
 import {
   classifyDataFailure,
   debugError,
@@ -286,9 +285,10 @@ export async function runAllRawSupabaseProbes() {
     return results
   }
 
-  const client = createClient(url, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  const client = getSupabaseBrowserClient()
+  if (!client) {
+    return results
+  }
 
   for (const spec of SUPABASE_RAW_TABLE_PROBES) {
     results.push(await runRawTableProbe(client, spec))

@@ -1,9 +1,16 @@
+import { useEffect } from "react"
 import { Link } from "react-router-dom"
+import { traceStockPickMount } from "../content/ydsStockPickMountTrace.js"
 import YdsStockPickV1Hub from "../components/stock-picks/YdsStockPickV1Hub.jsx"
 import { UI_PAGE } from "../utils/ydsUiLabels.js"
 import "../styles/stock-picks-platform.css"
 
 export default function StockRecommendationPage() {
+  useEffect(() => {
+    traceStockPickMount("StockRecommendationPage", "mount")
+    return () => traceStockPickMount("StockRecommendationPage", "unmount")
+  }, [])
+
   return (
     <div className="yds-spick-page yds-spick-page--countries min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-spick-page__header">

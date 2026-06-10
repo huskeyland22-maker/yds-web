@@ -1,5 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
-import { getSupabaseEnv } from "./supabaseBrowser.js"
+import { getSupabaseBrowserClient, getSupabaseEnv } from "./supabaseBrowser.js"
 import { assertSupabaseClientEnv } from "../utils/supabaseEnvBoot.js"
 
 /**
@@ -13,14 +12,14 @@ export function subscribePanicHubRealtime({ onChange }) {
     console.warn("[YDS] realtime skipped:", check.message)
     return () => {}
   }
-  const { url, anonKey } = getSupabaseEnv()
-  if (typeof window === "undefined" || !url || !anonKey) {
+  if (typeof window === "undefined") {
     return () => {}
   }
 
-  const client = createClient(String(url), String(anonKey), {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+  const client = getSupabaseBrowserClient()
+  if (!client) {
+    return () => {}
+  }
 
   const channel = client
     .channel("yds-panic-hub")
