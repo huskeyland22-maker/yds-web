@@ -26453,20 +26453,21 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-score-hero {
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.45rem;
 }
 
 .yds-market-score-hero__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
 }
 
 .yds-market-score-hero__dual-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  align-items: stretch;
 }
 
 .yds-market-state-card,
@@ -26479,7 +26480,20 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-hero__score-card--embedded {
-  padding: 0.65rem 0.45rem 0.55rem;
+  min-height: 100%;
+  padding: 0.5rem 0.55rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-hero__score-card--embedded .yds-market-hero__score {
+  font-size: clamp(2.1rem, 10vw, 2.75rem);
+}
+
+.yds-market-hero__score-card--embedded .yds-market-hero__status-hint {
+  margin-top: auto;
+  padding-top: 0.3rem;
+  text-align: center;
 }
 
 .yds-market-timeline__history-link {

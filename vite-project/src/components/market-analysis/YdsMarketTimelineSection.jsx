@@ -23,7 +23,6 @@ const DEFAULT_COLLAPSED = 5
  *   className?: string
  *   variant?: "stream" | "full"
  *   collapsedVisible?: number
- *   onViewAllHistory?: () => void
  * }} props
  */
 export default function YdsMarketTimelineSection({
@@ -32,11 +31,11 @@ export default function YdsMarketTimelineSection({
   className = "",
   variant = "full",
   collapsedVisible = DEFAULT_COLLAPSED,
-  onViewAllHistory,
 }) {
   const [storedEvents, setStoredEvents] = useState(() => loadStoredEventHistory())
   const [seedLoaded, setSeedLoaded] = useState(false)
   const [expanded, setExpanded] = useState(variant === "full")
+  const [streamExpanded, setStreamExpanded] = useState(false)
 
   useEffect(() => {
     clearLegacyEventHistoryStorage()
@@ -69,17 +68,18 @@ export default function YdsMarketTimelineSection({
   if (!view.events.length) return null
 
   const isStream = variant === "stream"
-  const visibleCap = isStream ? collapsedVisible : expanded ? view.events.length : collapsedVisible
-  const visibleEvents = expanded ? view.events : view.events.slice(0, visibleCap)
+  const isExpanded = isStream ? streamExpanded : expanded
+  const visibleCap = isExpanded ? view.events.length : collapsedVisible
+  const visibleEvents = view.events.slice(0, visibleCap)
   const hiddenCount = Math.max(0, view.events.length - visibleCap)
   const showExpandToggle = !isStream && hiddenCount > 0
-  const showHistoryLink = isStream && hiddenCount > 0 && typeof onViewAllHistory === "function"
+  const showStreamToggle = isStream && view.events.length > collapsedVisible
 
   return (
     <section
       className={[
         "yds-market-timeline",
-        expanded ? "yds-market-timeline--expanded" : "yds-market-timeline--collapsed",
+        isExpanded ? "yds-market-timeline--expanded" : "yds-market-timeline--collapsed",
         isStream ? "yds-market-timeline--stream" : "",
         className,
       ]
@@ -97,7 +97,7 @@ export default function YdsMarketTimelineSection({
           const emoji = timelineEventEmoji(ev.type)
           const lead = formatTimelineStreamLead(ev)
 
-          if (!expanded) {
+          if (!isExpanded) {
             return (
               <li
                 key={`${ev.date}:${ev.type}`}
@@ -138,13 +138,14 @@ export default function YdsMarketTimelineSection({
         })}
       </ol>
 
-      {showHistoryLink ? (
+      {showStreamToggle ? (
         <button
           type="button"
           className="yds-market-timeline__history-link"
-          onClick={onViewAllHistory}
+          aria-expanded={streamExpanded}
+          onClick={() => setStreamExpanded((open) => !open)}
         >
-          전체 보기
+          {streamExpanded ? "접기" : "전체 보기"}
         </button>
       ) : null}
 

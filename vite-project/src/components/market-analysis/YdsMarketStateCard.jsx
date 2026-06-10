@@ -40,9 +40,7 @@ export default function YdsMarketStateCard({
       <p className="yds-market-hero__status" style={{ "--hero-color": cycle.color }}>
         {cycle.emoji} {cycle.label}
       </p>
-      {cycle.hint && !embedded ? (
-        <p className="yds-market-hero__status-hint">{cycle.hint}</p>
-      ) : null}
+      {cycle.hint ? <p className="yds-market-hero__status-hint">{cycle.hint}</p> : null}
     </article>
   )
 

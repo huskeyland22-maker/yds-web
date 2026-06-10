@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react"
+import { useMemo } from "react"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
@@ -27,7 +27,6 @@ import {
  */
 export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
-  const historyDetailsRef = useRef(null)
 
   const cycleDataSource = useMemo(() => {
     if (panicData?.__fromHub) return "Panic Hub"
@@ -40,13 +39,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
 
   const { rows: scorecardRows, loading: scorecardLoading } = useEventScorecard(safeHistory, panicData)
-
-  const openHistoryDetails = useCallback(() => {
-    const el = historyDetailsRef.current
-    if (!el) return
-    el.open = true
-    el.scrollIntoView({ behavior: "smooth", block: "start" })
-  }, [])
 
   if (!panicData && safeHistory.length === 0) {
     return null
@@ -80,7 +72,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             collapsedVisible={5}
             panicData={panicData}
             historyRows={safeHistory}
-            onViewAllHistory={openHistoryDetails}
           />
         </section>
 
@@ -96,18 +87,11 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       </div>
 
       <details
-        ref={historyDetailsRef}
         id="market-analysis-history"
         className="yds-market-desk__detail yds-market-desk__detail--stream"
       >
         <summary className="yds-market-desk__detail-summary">근거 · 히스토리 · 세부 분석</summary>
         <div className="yds-market-desk__detail-body">
-          <YdsMarketTimelineSection
-            className="yds-market-desk__slot yds-market-desk__slot--timeline-full"
-            variant="full"
-            panicData={panicData}
-            historyRows={safeHistory}
-          />
           <SectionErrorBoundary
             label={YDS_LABEL_PANIC_HISTORY}
             fallback={

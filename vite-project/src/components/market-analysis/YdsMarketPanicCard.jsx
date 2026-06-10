@@ -43,9 +43,7 @@ export default function YdsMarketPanicCard({
       <p className="yds-market-hero__status" style={{ "--hero-color": panic.color }}>
         {panic.emoji} {panic.label}
       </p>
-      {panic.hint && !embedded ? (
-        <p className="yds-market-hero__status-hint">{panic.hint}</p>
-      ) : null}
+      {panic.hint ? <p className="yds-market-hero__status-hint">{panic.hint}</p> : null}
     </article>
   )
 
