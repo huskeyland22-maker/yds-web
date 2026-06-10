@@ -16,6 +16,11 @@ import {
   resetStockPickPerfSession,
   syncPostApiMark,
 } from "../content/ydsStockPickPerf.js"
+import { markTimeline } from "../content/ydsFirstEntryTimeline.js"
+import {
+  logStockPickApiDuplicateAudit,
+  resetStockPickApiCounter,
+} from "../content/ydsStockPickApiCounter.js"
 import {
   markPostApiComplete,
   recordRenderPhase,
@@ -25,6 +30,9 @@ import { readInitialStockPickSnapshots, saveStockPickSnapshotCache } from "../co
 import { fetchStockPickLiveSnapshots } from "../content/ydsStockPickLiveFetcher.js"
 
 const bootCache = readInitialStockPickSnapshots()
+
+/** StrictMode 이중 effect 차단 (2초 이내 재실행 무시) */
+let lastMountFetchAt = 0
 
 /**
  * @param {import("../content/ydsMarketAdapter.js").YdsMarketAdapterContext | null} marketContext
@@ -38,15 +46,27 @@ export function useStockPickLiveData(marketContext) {
   const [fromCache, setFromCache] = useState(() => bootCache.fromCache)
   const requestIdRef = useRef(0)
   const perfInitRef = useRef(false)
+  const marketContextRef = useRef(marketContext)
+  marketContextRef.current = marketContext
 
   useEffect(() => {
     if (perfInitRef.current) return
     perfInitRef.current = true
     resetStockPickPerfSession({ fromCache: bootCache.fromCache })
     resetStockPickRenderPerf()
+    resetStockPickApiCounter()
   }, [])
 
   useEffect(() => {
+    const now = Date.now()
+    if (now - lastMountFetchAt < 2000) {
+      console.log("[stock-pick] skip duplicate mount fetch (StrictMode guard)", {
+        deltaMs: now - lastMountFetchAt,
+      })
+      return undefined
+    }
+    lastMountFetchAt = now
+
     const ac = new AbortController()
     const requestId = ++requestIdRef.current
     const hasDisplayData = snapshotMap.size > 0
@@ -59,12 +79,17 @@ export function useStockPickLiveData(marketContext) {
     }
 
     mark("api fetch start")
+    markTimeline("API_START", { segment: "stockApi" })
 
     ;(async () => {
-      const result = await fetchStockPickLiveSnapshots(marketContext, ac.signal)
+      const result = await fetchStockPickLiveSnapshots(marketContextRef.current, ac.signal, {
+        callsite: "useStockPickLiveData.useEffect.mount",
+      })
       if (requestId !== requestIdRef.current) return
+      if (ac.signal.aborted) return
 
       measure("api fetch", "api fetch start")
+      markTimeline("API_END", { segment: "stockApi" })
       markPostApiComplete()
       syncPostApiMark()
 
@@ -88,6 +113,7 @@ export function useStockPickLiveData(marketContext) {
 
       setLoading(false)
       setRefreshing(false)
+      logStockPickApiDuplicateAudit()
     })().catch(() => {
       if (requestId === requestIdRef.current) {
         setLoading(false)
@@ -95,8 +121,10 @@ export function useStockPickLiveData(marketContext) {
       }
     })
 
-    return () => ac.abort()
-  }, [marketContext])
+    return () => {
+      ac.abort()
+    }
+  }, [])
 
   const allStocks = useMemo(
     () => buildStockPickViews(marketContext, snapshotMap),

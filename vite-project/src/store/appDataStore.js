@@ -58,6 +58,7 @@ import {
   diagnoseZeroHistoryRows,
   logReliabilityPipeline,
 } from "../utils/ydsDataReliability.js"
+import { markTimeline } from "../content/ydsFirstEntryTimeline.js"
 
 /** @typedef {'none' | 'supabase-index-history' | 'static-json' | 'localStorage'} CycleHistorySource */
 
@@ -539,6 +540,8 @@ export const useAppDataStore = create((set, get) => ({
     const force = Boolean(opts.force)
     if (force) get().invalidateCycleHistoryCache()
     logFetchStart("cycle-history-bundle", { limit, force })
+    markTimeline("SUPABASE_START", { segment: "supabase" })
+    try {
     get().purgeLegacyCycleStorage()
 
     let localHistory = loadStoredPanicHistory()
@@ -564,7 +567,7 @@ export const useAppDataStore = create((set, get) => ({
 
         const bundle = await fetchPanicIndexHistory({
           limit,
-          withCycle: true,
+          withCycle: false,
           debugMetric: "vix",
           debugRange: "6M",
         })
@@ -798,6 +801,9 @@ export const useAppDataStore = create((set, get) => ({
       logReliabilityPipeline("fallback", { reason: "static_fetch_error", localRows: fromLs.length })
       console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — static error", fromLs.length)
       return { staticRows: [], hubRows: [], fetchedAt: null, error: e, merged: fromLs }
+    }
+    } finally {
+      markTimeline("SUPABASE_END", { segment: "supabase" })
     }
   },
 

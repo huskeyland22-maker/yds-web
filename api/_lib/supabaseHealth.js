@@ -6,7 +6,6 @@ const TABLES = [
   "panic_index_history",
   "panic_history_v2",
   "panic_index_history_v2",
-  "market_cycle_history",
   "market_status",
   "ai_reports",
   "stock_signal_history",

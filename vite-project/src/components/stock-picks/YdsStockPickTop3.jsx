@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react"
 import { TOP5_MEDALS } from "../../content/ydsStockPickModel.js"
+import { markTimeline } from "../../content/ydsFirstEntryTimeline.js"
 import { markTop5Paint } from "../../content/ydsStockPickPerf.js"
 import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 import YdsStockPickCard from "./YdsStockPickCard.jsx"
@@ -33,6 +34,7 @@ export default function YdsStockPickTop3({
     recordComponentMount("top5", performance.now() - renderT0.current, {
       count: stocks.length,
     })
+    markTimeline("FIRST_RENDER")
     markTop5Paint()
   }, [loading, stocks.length])
 

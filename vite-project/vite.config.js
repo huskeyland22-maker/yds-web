@@ -126,8 +126,8 @@ export default defineConfig({
           "**/sw.js",
           "**/workbox-*.js",
         ],
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//, /^\/assets\//],
+        // navigateFallback 제거: index.html은 precache 제외 → non-precached-url 경고·불필요한 SW navigate 지연
+        // SPA 라우팅은 BrowserRouter + navigate 요청은 아래 NetworkOnly로 처리
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === "navigate",

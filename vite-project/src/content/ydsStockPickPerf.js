@@ -3,6 +3,8 @@
  */
 
 import { buildRenderPerfAnalysis } from "./ydsStockPickRenderPerf.js"
+import { emitFirstEntryTimelineReport, markTimeline } from "./ydsFirstEntryTimeline.js"
+import { getStockPickApiCount } from "./ydsStockPickApiCounter.js"
 
 /** @type {Record<string, number>} */
 const marks = {}
@@ -86,6 +88,7 @@ export function markTop5Paint() {
 export function markFirstRender() {
   if (marks["first render"]) return
   marks["render"] = performance.now()
+  markTimeline("FIRST_PAINT")
   measure("first paint", "load start")
   if (marks["post-api start"] != null) {
     const postApiToPaint = Math.round(marks["render"] - marks["post-api start"])
@@ -172,6 +175,8 @@ export function emitStockPickPerfReport(meta = {}) {
     },
     refreshing: Boolean(meta.refreshing),
   }
+
+  emitFirstEntryTimelineReport({ apiCount: getStockPickApiCount() })
 
   console.log("[stock-pick-perf] === 최종 보고 ===", report)
   console.log(

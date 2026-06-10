@@ -5,6 +5,7 @@ import "./index.css"
 import App from "./App.jsx"
 import RootErrorBoundary from "./components/RootErrorBoundary.jsx"
 import { bootSupabaseEnvReport } from "./utils/supabaseEnvBoot.js"
+import { resetFirstEntryTimeline, markTimeline } from "./content/ydsFirstEntryTimeline.js"
 import {
   checkAndEvictStaleBuild,
   clearAllCacheStorage,
@@ -98,6 +99,7 @@ function cleanupStaleAutoSnapshot() {
 }
 
 async function bootstrapApp() {
+  resetFirstEntryTimeline()
   installChunkLoadFailureRecovery()
 
   if (typeof window !== "undefined") {
@@ -117,6 +119,7 @@ async function bootstrapApp() {
     }
   }
 
+  markTimeline("SW_START", { segment: "sw" })
   const gate = await checkAndEvictStaleBuild()
   if (gate.reloaded) return
 
@@ -170,6 +173,7 @@ async function bootstrapApp() {
   } catch (e) {
     console.warn("[PWA] Service Worker registration unavailable", e)
   }
+  markTimeline("SW_END", { segment: "sw" })
 
   cleanupStaleAutoSnapshot()
 

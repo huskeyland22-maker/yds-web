@@ -15,6 +15,7 @@ import {
   logStoreWrite,
   maybeWarnPayloadStale,
 } from "../utils/dataFlowTrace.js"
+import { markTimeline } from "../content/ydsFirstEntryTimeline.js"
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 import { useAppDataStore } from "./appDataStore.js"
 import { deskReportKey, generatePanicMarketReport } from "../utils/panicMarketReportEngine.js"
@@ -236,6 +237,7 @@ export const usePanicStore = create((set, get) => ({
     useAppDataStore.getState().purgeLegacyCycleStorage()
     const hydrationStart = typeof performance !== "undefined" ? performance.now() : Date.now()
     emitDebugEvent("HYDRATION_START", { source: "panicStore.initialize" })
+    markTimeline("HYDRATE_START", { segment: "hydration" })
     let envelope = readMainEnvelope()
     if (isPanicHubEnabled() && envelope && !envelope.isManual) {
       addFlow(set, "hub-skip-non-manual-local-cache")
@@ -275,6 +277,7 @@ export const usePanicStore = create((set, get) => ({
         addFlow(set, "restore-main-manual-engine-off", { updatedAt: restored?.updatedAt ?? null })
         emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage", manualMode: true, restoredItemCount: 1 })
       }
+      markTimeline("HYDRATE_END", { segment: "hydration" })
       emitDebugEvent("HYDRATION_DONE", {
         source: "panicStore.initialize",
         restored: Boolean(fallbackManualEnvelope),
@@ -299,6 +302,7 @@ export const usePanicStore = create((set, get) => ({
       addFlow(set, "restore-main-manual-offline-fallback", { updatedAt: restored?.updatedAt ?? null })
       emitDebugEvent("HYDRATION_RESTORE", { source: "localStorage-offline-fallback", manualMode: true, restoredItemCount: 1 })
     }
+    markTimeline("HYDRATE_END", { segment: "hydration" })
     emitDebugEvent("HYDRATION_DONE", {
       source: "panicStore.initialize",
       restored: Boolean(fallbackManualEnvelope && get().manualMode),

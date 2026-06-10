@@ -1,4 +1,5 @@
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
+import { trackStockPickApi } from "../content/ydsStockPickApiCounter.js"
 import { stockApiErrorFromBody, stockFetchErrorFromException } from "./errorMessage.js"
 
 /** 서버 API Route — KIS 직접 호출 금지 */
@@ -52,6 +53,7 @@ export async function fetchStockIndicators({
   }
 
   const apiUrl = withNoStoreQuery(`${STOCK_API_PATH}?${qs.toString()}`)
+  trackStockPickApi(apiUrl, "stock-single", "fetchStockIndicators")
   logClient("request start (API route only, not KIS direct)", {
     apiRoute: STOCK_API_PATH,
     apiUrl,
@@ -152,6 +154,7 @@ export async function fetchKrStockIndicatorsBatch({ codes, panicIndex, signal } 
   }
 
   const apiUrl = withNoStoreQuery(`${STOCK_API_PATH}?${qs.toString()}`)
+  trackStockPickApi(apiUrl, "stock-kr-batch", "fetchKrStockIndicatorsBatch")
   logClient("KR batch request (single token reuse)", {
     apiUrl,
     codeCount: list.length,
@@ -202,6 +205,7 @@ export async function fetchUsStockIndicatorsBatch({ codes, panicIndex, signal } 
   }
 
   const apiUrl = withNoStoreQuery(`${STOCK_BATCH_API_PATH}?${qs.toString()}`)
+  trackStockPickApi(apiUrl, "stock-us-batch", "fetchUsStockIndicatorsBatch")
   logClient("US batch request (single HTTP, server parallel Yahoo)", {
     apiUrl,
     codeCount: list.length,

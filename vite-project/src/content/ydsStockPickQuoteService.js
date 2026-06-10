@@ -4,6 +4,7 @@
 
 import universe from "../data/stockPickUniverse.json" with { type: "json" }
 import { fetchPortfolioQuotes } from "./ydsPortfolioPriceProviders.js"
+import { trackStockPickApi } from "./ydsStockPickApiCounter.js"
 import { formatQuoteUpdatedAt } from "./ydsPortfolioQuoteTypes.js"
 
 /** @typedef {import("./ydsPortfolioQuoteTypes.js").PortfolioQuote} PortfolioQuote */
@@ -104,6 +105,7 @@ export async function fetchStockPickQuotesBatch() {
     priceReady: true,
   }))
 
+  trackStockPickApi("/api/portfolio-quote", "portfolio-quote", "fetchStockPickQuotesBatch")
   const result = await fetchPortfolioQuotes(lots)
   /** @type {Map<string, StockPickQuoteView>} */
   const quotes = new Map()

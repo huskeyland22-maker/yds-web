@@ -137,8 +137,13 @@ export async function handlePanicModeHistory(req, res) {
     const includeCycle = q.get("cycle") === "1"
     let cycleRows = []
     if (includeCycle) {
-      const raw = await fetchMarketCycleHistoryRows({ limit, from, to })
-      cycleRows = raw.map(marketCycleRowToClient).filter(Boolean)
+      try {
+        const raw = await fetchMarketCycleHistoryRows({ limit, from, to })
+        cycleRows = raw.map(marketCycleRowToClient).filter(Boolean)
+      } catch (e) {
+        console.warn("[panic] market_cycle_history skip", e instanceof Error ? e.message : e)
+        cycleRows = []
+      }
     }
     console.log("[YDS_DATA] reliability:api-server", {
       stage: "api",

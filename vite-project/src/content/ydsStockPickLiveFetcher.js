@@ -62,11 +62,53 @@ function ingestLiveSnapshot(map, row, apiBody, errors) {
   })
 }
 
+const SESSION_KEY = "__ydsStockPickLiveSession__"
+
+/** @returns {{ promise: Promise<object> | null; key: string | null; gen: number }} */
+function getLiveFetchSession() {
+  const g = globalThis
+  if (!g[SESSION_KEY]) {
+    g[SESSION_KEY] = { promise: null, key: null, gen: 0 }
+  }
+  return g[SESSION_KEY]
+}
+
 /**
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
  * @param {AbortSignal} [signal]
+ * @param {{ callsite?: string; force?: boolean }} [opts]
  */
-export async function fetchStockPickLiveSnapshots(marketContext = null, signal) {
+export async function fetchStockPickLiveSnapshots(marketContext = null, signal, opts = {}) {
+  const callsite = opts.callsite ?? "fetchStockPickLiveSnapshots"
+  const sessionKey = `mount:${marketContext?.ready ?? false}:${marketContext?.panicIndex ?? "na"}`
+  const session = getLiveFetchSession()
+
+  console.log("[stock-pick-fetch]", callsite, { sessionKey, force: Boolean(opts.force) })
+
+  if (session.promise && session.key === sessionKey && !opts.force) {
+    console.log("[stock-pick-fetch] join in-flight session", { callsite, sessionKey })
+    return session.promise
+  }
+
+  const gen = ++session.gen
+  session.key = sessionKey
+  session.promise = runStockPickLiveSnapshots(marketContext, signal, callsite)
+
+  try {
+    return await session.promise
+  } finally {
+    if (session.gen === gen) {
+      session.promise = null
+    }
+  }
+}
+
+/**
+ * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
+ * @param {AbortSignal} [signal]
+ * @param {string} callsite
+ */
+async function runStockPickLiveSnapshots(marketContext = null, signal, callsite = "unknown") {
   /** @type {Map<string, LivePickSnapshotEntry>} */
   const map = new Map()
   /** @type {{ ticker: string; error: string }[]} */
@@ -205,6 +247,7 @@ export async function fetchStockPickLiveSnapshots(marketContext = null, signal) 
   }
 
   recordStockPickFetchSegments(perf)
+  console.log("[stock-pick-fetch] complete", { callsite, snapshotCount: map.size })
 
   return { snapshots: map, errors, fetchedAt: new Date().toISOString() }
 }
@@ -217,6 +260,7 @@ export async function fetchStockPickUniverseLive(marketContext = null, signal) {
   const { snapshots, errors, fetchedAt } = await fetchStockPickLiveSnapshots(
     marketContext,
     signal,
+    { callsite: "fetchStockPickUniverseLive" },
   )
   const stocks = assignRanks(buildStockPickViews(marketContext, snapshots))
   return { stocks, errors, fetchedAt, snapshotCount: snapshots.size }
@@ -227,7 +271,7 @@ export async function fetchStockPickUniverseLive(marketContext = null, signal) {
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
  * @param {AbortSignal} [signal]
  */
-export async function fetchStockPickByTickerLive(ticker, marketContext = null, signal) {
+export async function fetchStockPickByTickerLive(ticker, marketContext = null, signal, opts = {}) {
   const key = String(ticker ?? "").toUpperCase()
   const row = universe.stocks.find((s) => s.ticker.toUpperCase() === key)
   if (!row) return { stock: null, error: "not found" }
