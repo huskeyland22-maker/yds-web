@@ -69,7 +69,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         >
           <YdsMarketTimelineSection
             variant="stream"
-            collapsedVisible={5}
+            collapsedVisible={3}
             panicData={panicData}
             historyRows={safeHistory}
           />

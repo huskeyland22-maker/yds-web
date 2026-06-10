@@ -13,10 +13,10 @@ import {
   saveStoredEventHistory,
 } from "../../content/ydsMarketEventHistoryStorage.js"
 
-const DEFAULT_COLLAPSED = 5
+const DEFAULT_COLLAPSED = 3
 
 /**
- * V3 시장 변화 기록 — stream(5건+전체보기) · full(details)
+ * V3 시장 변화 기록 — stream(3건 1줄 요약) · full(details)
  * @param {{
  *   panicData?: object | null
  *   historyRows?: object[]
@@ -94,26 +94,26 @@ export default function YdsMarketTimelineSection({
       <ol className="yds-market-timeline__list">
         {visibleEvents.map((ev) => {
           const dateLabel = formatTimelineDateLabel(ev.date)
-          const emoji = timelineEventEmoji(ev.type)
           const lead = formatTimelineStreamLead(ev)
 
-          if (!isExpanded) {
+          if (isStream) {
             return (
               <li
                 key={`${ev.date}:${ev.type}`}
-                className="yds-market-timeline__item yds-market-timeline__item--stream"
+                className="yds-market-timeline__item yds-market-timeline__item--stream yds-market-timeline__item--compact"
               >
-                <p className="yds-market-timeline__stream-date font-mono tabular-nums">{dateLabel}</p>
-                {lead ? (
-                  <p className="yds-market-timeline__stream-metric font-mono tabular-nums">
-                    {emoji} {lead}
-                  </p>
-                ) : null}
-                <p className="yds-market-timeline__stream-title">{ev.title}</p>
+                <p className="yds-market-timeline__compact-line yds-market-timeline__compact-line--stream font-mono tabular-nums">
+                  <span className="yds-market-timeline__compact-date">{dateLabel}</span>
+                  {lead ? (
+                    <span className="yds-market-timeline__compact-metric">{lead}</span>
+                  ) : null}
+                  <span className="yds-market-timeline__compact-summary">{ev.title}</span>
+                </p>
               </li>
             )
           }
 
+          const emoji = timelineEventEmoji(ev.type)
           const metrics = ev.metrics || (ev.description !== ev.title ? ev.description : "")
           const action = ev.action || ""
           return (
@@ -145,7 +145,7 @@ export default function YdsMarketTimelineSection({
           aria-expanded={streamExpanded}
           onClick={() => setStreamExpanded((open) => !open)}
         >
-          {streamExpanded ? "접기" : "전체 보기"}
+          {streamExpanded ? "접기" : "최근 기록 더 보기"}
         </button>
       ) : null}
 
