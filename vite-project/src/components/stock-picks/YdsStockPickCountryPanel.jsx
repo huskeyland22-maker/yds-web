@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import {
   filterBySector,
   getTop5Stocks,
   STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
+import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 import YdsStockPickTop3 from "./YdsStockPickTop3.jsx"
 import YdsStockPickSectorPanel from "./YdsStockPickSectorPanel.jsx"
 import YdsStockPickCard from "./YdsStockPickCard.jsx"
@@ -39,6 +40,7 @@ export default function YdsStockPickCountryPanel({
   const countryMeta = STOCK_PICK_COUNTRIES.find((c) => c.id === countryId)
   const [showAll, setShowAll] = useState(false)
   const [showSecondary, setShowSecondary] = useState(false)
+  const allCardsMountT0 = useRef(0)
 
   const top5 = useMemo(() => getTop5Stocks(stocks), [stocks])
   const sectorStocks = useMemo(
@@ -60,6 +62,17 @@ export default function YdsStockPickCountryPanel({
     const id = window.setTimeout(() => setShowSecondary(true), 0)
     return () => window.clearTimeout(id)
   }, [stocks])
+
+  useEffect(() => {
+    if (showAll) allCardsMountT0.current = performance.now()
+  }, [showAll])
+
+  useLayoutEffect(() => {
+    if (!showAll || !stocks.length || !allCardsMountT0.current) return
+    recordComponentMount("all cards", performance.now() - allCardsMountT0.current, {
+      count: stocks.length,
+    })
+  }, [showAll, stocks.length])
 
   return (
     <div className="yds-spick-country-panel">

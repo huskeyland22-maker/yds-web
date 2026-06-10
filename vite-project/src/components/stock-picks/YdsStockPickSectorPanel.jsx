@@ -1,6 +1,8 @@
+import { useLayoutEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { STOCK_PICK_SECTORS } from "../../content/ydsStockPickModel.js"
 import { formatTransparencyPrice } from "../../content/ydsStockPickTransparency.js"
+import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 
 /**
  * @param {{
@@ -16,6 +18,14 @@ export default function YdsStockPickSectorPanel({
   onSectorChange,
   heldTickers = new Set(),
 }) {
+  const mountT0 = useRef(performance.now())
+
+  useLayoutEffect(() => {
+    recordComponentMount("sector", performance.now() - mountT0.current, {
+      count: stocks.length,
+    })
+  }, [stocks.length])
+
   return (
     <section className="yds-spick-section yds-spick-section--sector" aria-labelledby="spick-sector">
       <h2 id="spick-sector" className="yds-spick-section__title">

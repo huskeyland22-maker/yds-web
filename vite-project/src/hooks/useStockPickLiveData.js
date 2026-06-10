@@ -14,7 +14,13 @@ import {
   mark,
   measure,
   resetStockPickPerfSession,
+  syncPostApiMark,
 } from "../content/ydsStockPickPerf.js"
+import {
+  markPostApiComplete,
+  recordRenderPhase,
+  resetStockPickRenderPerf,
+} from "../content/ydsStockPickRenderPerf.js"
 import { readInitialStockPickSnapshots, saveStockPickSnapshotCache } from "../content/ydsStockPickSnapshotCache.js"
 import { fetchStockPickLiveSnapshots } from "../content/ydsStockPickLiveFetcher.js"
 
@@ -37,6 +43,7 @@ export function useStockPickLiveData(marketContext) {
     if (perfInitRef.current) return
     perfInitRef.current = true
     resetStockPickPerfSession({ fromCache: bootCache.fromCache })
+    resetStockPickRenderPerf()
   }, [])
 
   useEffect(() => {
@@ -58,12 +65,26 @@ export function useStockPickLiveData(marketContext) {
       if (requestId !== requestIdRef.current) return
 
       measure("api fetch", "api fetch start")
+      markPostApiComplete()
+      syncPostApiMark()
 
       setSnapshotMap(result.snapshots)
       setErrors(result.errors)
       setLastSyncAt(result.fetchedAt)
       setFromCache(false)
-      saveStockPickSnapshotCache(result.snapshots, result.fetchedAt, result.errors)
+
+      const persistCache = () => {
+        const t0 = typeof performance !== "undefined" ? performance.now() : 0
+        saveStockPickSnapshotCache(result.snapshots, result.fetchedAt, result.errors)
+        if (typeof performance !== "undefined") {
+          recordRenderPhase("cache save", performance.now() - t0)
+        }
+      }
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(persistCache, { timeout: 2000 })
+      } else {
+        setTimeout(persistCache, 0)
+      }
 
       setLoading(false)
       setRefreshing(false)
@@ -83,12 +104,18 @@ export function useStockPickLiveData(marketContext) {
   )
 
   const stocks = useMemo(() => {
-    if (typeof performance !== "undefined") {
-      mark("score calc start")
-    }
-    const result = assignRanks(filterRecommendableStockPicks(allStocks))
-    if (typeof performance !== "undefined" && result.length) {
-      measure("score calc", "score calc start")
+    const canPerf = typeof performance !== "undefined"
+    if (canPerf) mark("score calc start")
+
+    const filterT0 = canPerf ? performance.now() : 0
+    const filtered = filterRecommendableStockPicks(allStocks)
+    if (canPerf) recordRenderPhase("filter live", performance.now() - filterT0)
+
+    const sortT0 = canPerf ? performance.now() : 0
+    const result = assignRanks(filtered)
+    if (canPerf) {
+      recordRenderPhase("sort", performance.now() - sortT0)
+      if (result.length) measure("score calc", "score calc start")
     }
     return result
   }, [allStocks])

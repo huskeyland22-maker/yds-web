@@ -1,4 +1,7 @@
+import { useLayoutEffect, useRef } from "react"
 import { TOP5_MEDALS } from "../../content/ydsStockPickModel.js"
+import { markTop5Paint } from "../../content/ydsStockPickPerf.js"
+import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 import YdsStockPickCard from "./YdsStockPickCard.jsx"
 
 /**
@@ -19,6 +22,20 @@ export default function YdsStockPickTop3({
   statusChanges = new Map(),
   loading,
 }) {
+  const renderT0 = useRef(null)
+
+  if (stocks.length && !loading && renderT0.current == null) {
+    renderT0.current = performance.now()
+  }
+
+  useLayoutEffect(() => {
+    if (loading || !stocks.length || renderT0.current == null) return
+    recordComponentMount("top5", performance.now() - renderT0.current, {
+      count: stocks.length,
+    })
+    markTop5Paint()
+  }, [loading, stocks.length])
+
   return (
     <section className="yds-spick-section yds-spick-section--hero" aria-labelledby="spick-top5">
       <h2 id="spick-top5" className="yds-spick-section__title">

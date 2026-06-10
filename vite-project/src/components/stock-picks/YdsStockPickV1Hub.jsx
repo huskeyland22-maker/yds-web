@@ -6,6 +6,7 @@ import {
   STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
 import { markFirstRender, recordSearchFilterMs } from "../../content/ydsStockPickPerf.js"
+import { recordRenderPhase } from "../../content/ydsStockPickRenderPerf.js"
 import { filterStockPicksByQuery } from "../../content/ydsStockPickSearch.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
@@ -55,7 +56,13 @@ export default function YdsStockPickV1Hub() {
 
   useEffect(() => {
     if (loading || !liveStocks.length) return
-    captureTodayPickSnapshots(marketContext, 10, liveStocks)
+    const run = () => captureTodayPickSnapshots(marketContext, 10, liveStocks)
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(run, { timeout: 3000 })
+      return () => cancelIdleCallback(id)
+    }
+    const id = setTimeout(run, 0)
+    return () => clearTimeout(id)
   }, [marketContext, loading, liveStocks])
 
   const {
@@ -81,9 +88,14 @@ export default function YdsStockPickV1Hub() {
   }, [liveStocks, searchQuery])
 
   const stocksByCountry = useMemo(() => {
+    const canPerf = typeof performance !== "undefined"
+    const t0 = canPerf ? performance.now() : 0
     const ranked = {
       US: assignRanks(filterByCountry(searchedStocks, "US")),
       KR: assignRanks(filterByCountry(searchedStocks, "KR")),
+    }
+    if (canPerf) {
+      recordRenderPhase("country split+sort", performance.now() - t0)
     }
     return {
       US: applyFavoriteFilter(ranked.US),
@@ -183,6 +195,7 @@ export default function YdsStockPickV1Hub() {
           const isActive = countryId === country.id
           const panelId =
             country.id === "US" ? "spick-all-us" : "spick-all-kr"
+          const mountPanel = dualLayout || isActive
 
           return (
             <div
@@ -197,6 +210,7 @@ export default function YdsStockPickV1Hub() {
               aria-label={`${country.label} 종목추천`}
               aria-hidden={dualLayout ? false : !isActive}
             >
+              {mountPanel ? (
               <YdsStockPickCountryPanel
                 countryId={country.id}
                 stocks={stocksByCountry[country.id]}
@@ -210,6 +224,7 @@ export default function YdsStockPickV1Hub() {
                 allSectionId={panelId}
                 loading={loading && !stocksByCountry[country.id].length}
               />
+              ) : null}
             </div>
           )
         })}

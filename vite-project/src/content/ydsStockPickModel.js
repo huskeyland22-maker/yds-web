@@ -22,6 +22,12 @@ import {
   logStockPickStatusVerification,
 } from "./ydsStockPickStatusDiag.js"
 import {
+  accumulateComputeMs,
+  beginComputePass,
+  flushComputePass,
+  recordRenderPhase,
+} from "./ydsStockPickRenderPerf.js"
+import {
   formatScoreBreakdownRows,
   normalizeScoreBreakdown,
   YDS_SCORE_WEIGHTS,
@@ -174,9 +180,13 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
         country: row.country,
       })
 
+  const scoreT0 = typeof performance !== "undefined" ? performance.now() : 0
   const computed = computeStockScores(engineSnapshot, {
     marketFitScore: 0,
   })
+  if (typeof performance !== "undefined") {
+    accumulateComputeMs("score", performance.now() - scoreT0)
+  }
 
   const baseScores =
     normalizeScoreBreakdown(computed.scores) ?? {
@@ -187,10 +197,14 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
       totalScore: 0,
     }
 
+  const statusT0 = typeof performance !== "undefined" ? performance.now() : 0
   const statusId = deriveStatusFromSnapshot(
     engineSnapshot,
     liveEntry?.extras ?? {},
   )
+  if (typeof performance !== "undefined") {
+    accumulateComputeMs("status", performance.now() - statusT0)
+  }
 
   const marketFitScore = ctx
     ? computeMarketFitScore(ctx, statusId, baseScores)
@@ -231,12 +245,18 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     : null
 
   if (isLive && statusDiag && typeof globalThis.window !== "undefined") {
-    logStockPickStatusVerification({
+    const verifyPayload = {
       name: row.name,
       ticker: row.ticker,
       dataSource: "live",
       statusDiag,
-    })
+    }
+    const logVerify = () => logStockPickStatusVerification(verifyPayload)
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(logVerify, { timeout: 3000 })
+    } else {
+      setTimeout(logVerify, 0)
+    }
   }
 
   return {
@@ -272,9 +292,20 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
  * @returns {StockPickView[]}
  */
 export function buildStockPickViews(marketContext = null, liveSnapshots = new Map()) {
-  return universe.stocks.map((row) =>
+  const canPerf = typeof performance !== "undefined"
+  if (canPerf) beginComputePass()
+  const t0 = canPerf ? performance.now() : 0
+
+  const views = universe.stocks.map((row) =>
     enrichStock(row, marketContext, liveSnapshots.get(row.ticker) ?? null),
   )
+
+  if (canPerf) {
+    recordRenderPhase("view build", performance.now() - t0)
+    flushComputePass()
+  }
+
+  return views
 }
 
 /**
