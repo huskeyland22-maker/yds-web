@@ -4,8 +4,8 @@
 
 /** @typedef {import("./ydsMarketTimeline.js").TimelineEventRecord} TimelineEventRecord */
 
-export const EVENT_HISTORY_STORAGE_KEY = "yds-event-history-v2"
-export const EVENT_HISTORY_STORAGE_KEY_LEGACY = "yds-event-history-v1"
+export const EVENT_HISTORY_STORAGE_KEY = "yds-event-history-v3"
+export const EVENT_HISTORY_STORAGE_KEY_LEGACY = "yds-event-history-v2"
 export const EVENT_HISTORY_JSON_PATH = "/data/eventHistory.json"
 export const EVENT_HISTORY_MAX_STORED = 500
 
@@ -56,11 +56,12 @@ export function loadStoredEventHistory() {
   }
 }
 
-/** V1 저장 키 제거 — 재스캔 정합성 확보 */
+/** 이전 버전 저장 키 제거 — 재스캔 정합성 확보 */
 export function clearLegacyEventHistoryStorage() {
   if (typeof window === "undefined") return
   try {
     window.localStorage.removeItem(EVENT_HISTORY_STORAGE_KEY_LEGACY)
+    window.localStorage.removeItem("yds-event-history-v1")
   } catch {
     /* ignore */
   }

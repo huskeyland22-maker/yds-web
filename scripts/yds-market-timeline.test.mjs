@@ -34,7 +34,7 @@ assert(cashPrep.metrics.includes("CNN"), cashPrep.metrics)
 assert(cashPrep.action.length > 0, "action required")
 
 const exit = scanned.find((e) => e.type === "overheat-normal" || e.type === "cnn-exit")
-assert(exit?.title === "과열권 이탈", exit?.title)
+assert(exit?.title === "과열 해소" || exit?.title === "과열권 이탈", exit?.title)
 assert(exit?.action === "추격매수 금지" || exit?.action === "과열 해소 시작", exit?.action)
 
 const cnnMomentum = scanned.filter((e) => e.type.startsWith("momentum-cnn-"))

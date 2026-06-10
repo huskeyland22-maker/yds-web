@@ -2,16 +2,11 @@ import { useMemo } from "react"
 import { resolveTodayActions } from "../../content/ydsActionGuide.js"
 import { resolveCurrentMarketView } from "../../content/ydsCurrentMarketView.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
-import {
-  MARKET_LABEL_CURRENT_STAGE,
-  MARKET_LABEL_PANIC_INTENSITY,
-  resolveMarketStageSnapshot,
-} from "../../content/ydsMarketStageLabels.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 
 /**
- * V1.9 Hero — 사이클·패닉 → 현재 시장 → 오늘 행동 (5초 판단)
+ * Hero — 현재 시장 · 오늘의 행동 (3초 판단)
  * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
  */
 export default function YdsMarketHeroStack({ panicData = null, historyRows = [], className = "" }) {
@@ -22,16 +17,15 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
 
     const momentumData = resolveMomentumLayer(panicData, historyRows)
     const currentMarket = resolveCurrentMarketView(panicData, historyRows)
-    const snapshot = resolveMarketStageSnapshot(Math.round(score), momentumData)
     const actions = resolveTodayActions(Math.round(score), momentumData, panicData)
-    if (!snapshot.cycle || !snapshot.panic || !actions || !currentMarket) return null
+    if (!actions || !currentMarket) return null
 
-    return { ...snapshot, currentMarket, actions }
+    return { currentMarket, actions }
   }, [panicData, historyRows])
 
   if (!view) return null
 
-  const { cycle, panic, ydsScore, currentMarket, actions } = view
+  const { currentMarket, actions } = view
 
   return (
     <section
@@ -74,42 +68,6 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows = [],
           </ul>
           {actions.momentumHint ? (
             <p className="yds-market-hero__action-priority">{actions.momentumHint}</p>
-          ) : null}
-        </article>
-      </div>
-
-      <div className="yds-market-hero__long-term yds-market-hero__slot yds-market-hero__slot--scores">
-        <article
-          className="yds-market-hero__score-card"
-          aria-label={`${MARKET_LABEL_CURRENT_STAGE} ${cycle.score}`}
-        >
-          <p className="yds-market-hero__card-label">{MARKET_LABEL_CURRENT_STAGE}</p>
-          <p className="yds-market-hero__score font-mono tabular-nums">{cycle.score}</p>
-          <p
-            className="yds-market-hero__status"
-            style={{ "--hero-color": cycle.color }}
-          >
-            {cycle.emoji} {cycle.label}
-          </p>
-          {cycle.hint ? (
-            <p className="yds-market-hero__status-hint">{cycle.hint}</p>
-          ) : null}
-        </article>
-
-        <article
-          className="yds-market-hero__score-card"
-          aria-label={`${MARKET_LABEL_PANIC_INTENSITY} ${ydsScore}`}
-        >
-          <p className="yds-market-hero__card-label">{MARKET_LABEL_PANIC_INTENSITY}</p>
-          <p className="yds-market-hero__score font-mono tabular-nums">{ydsScore}</p>
-          <p
-            className="yds-market-hero__status"
-            style={{ "--hero-color": panic.color }}
-          >
-            {panic.emoji} {panic.label}
-          </p>
-          {panic.hint ? (
-            <p className="yds-market-hero__status-hint">{panic.hint}</p>
           ) : null}
         </article>
       </div>

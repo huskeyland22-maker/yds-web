@@ -3,6 +3,8 @@ import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketHeroStack from "./YdsMarketHeroStack.jsx"
+import YdsMarketStateCard from "./YdsMarketStateCard.jsx"
+import YdsMarketPanicCard from "./YdsMarketPanicCard.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
 import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
 import YdsDualCycleHero from "./YdsDualCycleHero.jsx"
@@ -18,7 +20,7 @@ import {
 } from "../../content/ydsLanguage.js"
 
 /**
- * 시장분석 데스크 — 현재 시장 → 행동 → 사이클 → 전환 신호 → 핵심지수
+ * 시장분석 데스크 — 현재 시장 → 행동 → 시장 상태 → 전환 신호 → 패닉 강도 → 핵심지수
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -64,25 +66,37 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
       <div className="yds-market-desk__stream">
         <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
 
+        <YdsMarketStateCard
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--state"
+          panicData={panicData}
+          historyRows={safeHistory}
+        />
+
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--timeline"
           aria-labelledby="market-block-timeline"
         >
           <YdsMarketTimelineSection
             variant="stream"
-            collapsedVisible={3}
+            collapsedVisible={5}
             panicData={panicData}
             historyRows={safeHistory}
             onViewAllHistory={openHistoryDetails}
           />
         </section>
 
+        <YdsMarketPanicCard
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--panic"
+          panicData={panicData}
+          historyRows={safeHistory}
+        />
+
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
           aria-labelledby="market-block-indices"
         >
           <h2 id="market-block-indices" className="yds-market-desk__block-label">
-            핵심지수
+            핵심 지수
           </h2>
           <HomeV5DeskLead panicData={panicData} historyRows={safeHistory} />
         </section>

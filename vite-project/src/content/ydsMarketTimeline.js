@@ -1,16 +1,13 @@
 /**
- * Market Timeline V2 — 시장 전환점 (표시·누적 전용)
- * Hero = 현재 · Timeline = 전환점 연대기 · History = 장기 기록
- * 카드 구조: [상태] → [수치] → [행동]
+ * Market Timeline V3 — 시장 변화 기록 (표시·누적 전용)
+ * 이벤트 발생이 아니라 시장 흐름 설명서
  */
 
 import { getFinalScore } from "../utils/tradingScores.js"
 import {
   cnnEventSpec,
   computeCnnDeltas,
-  resolveCnnDownTier,
   resolveCnnTimelineEventType,
-  resolveCnnUpTier,
 } from "./ydsCnnEventEngine.js"
 import { resolveEventLayer } from "./ydsEventLayer.js"
 import { resolveOverheatLayer } from "./ydsOverheatLayer.js"
@@ -46,6 +43,7 @@ export const TIMELINE_EMOJI = {
   "cnn-entry": "🟡",
   "bofa-entry": "🟡",
   "momentum-cnn-day-shock": "🟠",
+  "momentum-cnn-soft-fall": "🟠",
   "momentum-cnn-day-bounce": "🟢",
   "momentum-cnn-crash": "🔴",
   "momentum-cnn-sharp": "🟠",
@@ -68,6 +66,7 @@ const TYPE_SEVERITY = {
   "cnn-entry": "low",
   "bofa-entry": "low",
   "momentum-cnn-day-shock": "medium",
+  "momentum-cnn-soft-fall": "medium",
   "momentum-cnn-day-bounce": "low",
   "momentum-cnn-crash": "high",
   "momentum-cnn-sharp": "medium",
@@ -84,6 +83,34 @@ const TYPE_SEVERITY = {
 }
 
 const OVERHEAT_RANK = { normal: 0, cashPrep: 1, partialCash: 2, boundary: 3 }
+
+/** 날짜당 1건 · 스트림 우선순위 (높을수록 우선) */
+export const TIMELINE_TYPE_PRIORITY = {
+  "overheat-boundary": 100,
+  "overheat-partialCash": 96,
+  "overheat-cashPrep": 92,
+  "cnn-entry": 90,
+  "bofa-entry": 89,
+  "overheat-normal": 88,
+  "cnn-exit": 87,
+  "bofa-exit": 86,
+  "panic-life-entry": 84,
+  "panic-dca-entry": 80,
+  "momentum-cnn-day-shock": 72,
+  "momentum-cnn-crash": 68,
+  "momentum-cnn-sharp": 66,
+  "momentum-cnn-soft-fall": 64,
+  "momentum-cnn-weaken": 62,
+  "momentum-cnn-day-bounce": 58,
+  "momentum-cnn-surge": 56,
+  "momentum-cnn-recovery": 54,
+  "momentum-bofa-weak": 50,
+}
+
+/** @param {string} type */
+export function timelineTypePriority(type) {
+  return TIMELINE_TYPE_PRIORITY[type] ?? 40
+}
 
 /**
  * @param {object | null | undefined} row
@@ -132,7 +159,7 @@ export function resolveOverheatTransitionCopy(fromId, toId) {
 
   if (toRank < fromRank) {
     if (toId === "normal") {
-      return { title: "과열권 이탈", action: "추격매수 금지", emoji: "🟠", severity: "medium" }
+      return { title: "과열 해소", action: "추격매수 금지", emoji: "🟡", severity: "medium" }
     }
     if (toId === "cashPrep") {
       return { title: "과열권 완화", action: "현금 준비 유지", emoji: "🟡", severity: "low" }
@@ -152,12 +179,13 @@ const EVENT_TURNING_COPY = {
   "bofa-entry": { title: "과열권 진입", action: "현금 준비 시작" },
   "bofa-exit": { title: "과열권 이탈", action: "추격매수 금지" },
   "momentum-cnn-day-shock": { title: "투자심리 급변", action: "단기 변동성 확대" },
+  "momentum-cnn-soft-fall": { title: "투자심리 추가 악화", action: "하락 흐름 지속" },
   "momentum-cnn-day-bounce": { title: "투자심리 급회복", action: "매수세 재유입 관찰" },
-  "momentum-cnn-crash": { title: "투자심리 급랭", action: "신규 진입 보류" },
-  "momentum-cnn-sharp": { title: "투자심리 급락", action: "과열 해소 시작" },
-  "momentum-cnn-weaken": { title: "투자심리 악화", action: "관망 우선" },
-  "momentum-cnn-surge": { title: "투자심리 급반등", action: "매수세 유입 관찰" },
-  "momentum-cnn-recovery": { title: "투자심리 회복", action: "심리 개선 관찰" },
+  "momentum-cnn-crash": { title: "CNN 급락", action: "신규 진입 보류" },
+  "momentum-cnn-sharp": { title: "CNN 급락", action: "과열 해소 진행" },
+  "momentum-cnn-weaken": { title: "CNN 악화", action: "관망 우선" },
+  "momentum-cnn-surge": { title: "CNN 급반등", action: "매수세 유입 관찰" },
+  "momentum-cnn-recovery": { title: "CNN 회복", action: "심리 개선 관찰" },
   "momentum-bofa-weak": { title: "투자심리 악화", action: "관망 우선" },
   "panic-dca-entry": { title: "패닉 발생", action: "분할매수 시작" },
   "panic-life-entry": { title: "극단 패닉", action: "인생타점 검토" },
@@ -208,6 +236,36 @@ function makeRecord(date, type, title, metrics, action, severityOverride) {
   }
 }
 
+/** @param {string} metrics */
+export function extractCnnFromMetrics(metrics) {
+  const m = String(metrics ?? "").match(/CNN\s+([\d.]+)/)
+  return m ? m[1] : null
+}
+
+/** @param {TimelineEventRecord} ev */
+export function formatTimelineStreamLead(ev) {
+  const cnn = extractCnnFromMetrics(ev.metrics)
+  if (cnn != null) return `CNN ${cnn}`
+  const bofa = String(ev.metrics ?? "").match(/BofA\s+([\d.]+)/)
+  if (bofa) return `BofA ${bofa[1]}`
+  return ev.metrics?.split(" · ")[0] ?? ""
+}
+
+/**
+ * @param {TimelineEventRecord[]} events
+ */
+export function consolidateTimelinePerDay(events) {
+  const byDate = new Map()
+  for (const ev of events ?? []) {
+    if (!ev?.date) continue
+    const prev = byDate.get(ev.date)
+    if (!prev || timelineTypePriority(ev.type) > timelineTypePriority(prev.type)) {
+      byDate.set(ev.date, ev)
+    }
+  }
+  return [...byDate.values()].sort((a, b) => b.date.localeCompare(a.date))
+}
+
 /**
  * @param {object[]} series
  */
@@ -225,9 +283,6 @@ export function scanTimelineEventsFromSeries(series) {
     seenDayType.add(key)
     records.push(makeRecord(date, type, title, metrics, action, severity))
   }
-
-  let prevCnnDownTier = /** @type {import("./ydsCnnEventEngine.js").CnnDownTier} */ ("none")
-  let prevCnnUpTier = /** @type {import("./ydsCnnEventEngine.js").CnnUpTier} */ ("none")
 
   for (let i = 0; i < series.length; i += 1) {
     const current = series[i]
@@ -279,12 +334,7 @@ export function scanTimelineEventsFromSeries(series) {
     }
 
     const { delta3d, delta1d } = computeCnnDeltas(current, prior)
-    const cnnEventType = resolveCnnTimelineEventType(
-      delta3d,
-      delta1d,
-      prevCnnDownTier,
-      prevCnnUpTier,
-    )
+    const cnnEventType = resolveCnnTimelineEventType(delta3d, delta1d)
     if (cnnEventType) {
       const spec = cnnEventSpec(cnnEventType)
       const copy = EVENT_TURNING_COPY[cnnEventType]
@@ -297,9 +347,6 @@ export function scanTimelineEventsFromSeries(series) {
         spec?.severity,
       )
     }
-    prevCnnDownTier = resolveCnnDownTier(delta3d)
-    prevCnnUpTier = resolveCnnUpTier(delta3d)
-
     const momentum = resolveMomentumLayer(current, prior)
     const prevMomentum = prev ? resolveMomentumLayer(prev, series.slice(0, i)) : null
     const momentumBecameActive =
@@ -339,7 +386,7 @@ export function scanTimelineEventsFromSeries(series) {
     }
   }
 
-  return records.sort((a, b) => b.date.localeCompare(a.date))
+  return consolidateTimelinePerDay(records)
 }
 
 /**
@@ -357,17 +404,24 @@ export function mergeTimelineEventHistory(stored, detected) {
  * @param {TimelineEventRecord[]} detected
  */
 export function reconcileTimelineEventHistory(stored, detected) {
+  const detectedKeys = new Set(
+    (detected ?? []).map((ev) => `${ev.date}:${ev.type}`).filter(Boolean),
+  )
   const storedMap = new Map()
   for (const ev of stored ?? []) {
     if (!ev?.date || !ev?.type) continue
+    if (!detectedKeys.has(`${ev.date}:${ev.type}`)) continue
     storedMap.set(`${ev.date}:${ev.type}`, ev)
   }
-  return (detected ?? [])
-    .map((ev) => {
-      const prev = storedMap.get(`${ev.date}:${ev.type}`)
-      return prev ? { ...prev, ...ev } : ev
-    })
-    .sort((a, b) => b.date.localeCompare(a.date))
+  const merged = (detected ?? []).map((ev) => {
+    const prev = storedMap.get(`${ev.date}:${ev.type}`)
+    return prev ? { ...prev, ...ev } : ev
+  })
+  const deduped = new Map()
+  for (const ev of merged) {
+    deduped.set(`${ev.date}:${ev.type}`, ev)
+  }
+  return consolidateTimelinePerDay([...deduped.values()])
 }
 
 /**
@@ -376,7 +430,7 @@ export function reconcileTimelineEventHistory(stored, detected) {
  * @param {{ limit?: number; stored?: TimelineEventRecord[] }} [opts]
  */
 export function resolveMarketTimeline(historyRows, panicData, opts = {}) {
-  const limit = Math.max(5, Math.min(10, opts.limit ?? 8))
+  const limit = Math.max(5, Math.min(12, opts.limit ?? 7))
   const series = buildTimelineSeries(historyRows, panicData)
   const detected = scanTimelineEventsFromSeries(series)
   const merged = reconcileTimelineEventHistory(opts.stored ?? [], detected)

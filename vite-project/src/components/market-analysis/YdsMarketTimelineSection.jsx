@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import {
   formatTimelineDateLabel,
+  formatTimelineStreamLead,
   resolveMarketTimeline,
   timelineEventEmoji,
 } from "../../content/ydsMarketTimeline.js"
@@ -12,10 +13,10 @@ import {
   saveStoredEventHistory,
 } from "../../content/ydsMarketEventHistoryStorage.js"
 
-const DEFAULT_COLLAPSED = 3
+const DEFAULT_COLLAPSED = 5
 
 /**
- * V2 시장 전환점 — stream(3건+히스토리 링크) · full(details 전체)
+ * V3 시장 변화 기록 — stream(5건+전체보기) · full(details)
  * @param {{
  *   panicData?: object | null
  *   historyRows?: object[]
@@ -94,21 +95,21 @@ export default function YdsMarketTimelineSection({
         {visibleEvents.map((ev) => {
           const dateLabel = formatTimelineDateLabel(ev.date)
           const emoji = timelineEventEmoji(ev.type)
+          const lead = formatTimelineStreamLead(ev)
 
           if (!expanded) {
             return (
               <li
                 key={`${ev.date}:${ev.type}`}
-                className="yds-market-timeline__item yds-market-timeline__item--compact"
+                className="yds-market-timeline__item yds-market-timeline__item--stream"
               >
-                <p className="yds-market-timeline__compact-line">
-                  <span className="yds-market-timeline__compact-date font-mono tabular-nums">
-                    {dateLabel}
-                  </span>
-                  <span className="yds-market-timeline__compact-event">
-                    {emoji} {ev.title}
-                  </span>
-                </p>
+                <p className="yds-market-timeline__stream-date font-mono tabular-nums">{dateLabel}</p>
+                {lead ? (
+                  <p className="yds-market-timeline__stream-metric font-mono tabular-nums">
+                    {emoji} {lead}
+                  </p>
+                ) : null}
+                <p className="yds-market-timeline__stream-title">{ev.title}</p>
               </li>
             )
           }
@@ -119,10 +120,13 @@ export default function YdsMarketTimelineSection({
             <li key={`${ev.date}:${ev.type}`} className="yds-market-timeline__item">
               <p className="yds-market-timeline__date font-mono tabular-nums">{dateLabel}</p>
               <div className="yds-market-timeline__body">
-                <p className="yds-market-timeline__event-title">
-                  {emoji} {ev.title}
-                </p>
-                {metrics ? (
+                {lead ? (
+                  <p className="yds-market-timeline__event-metrics font-mono tabular-nums">
+                    {emoji} {lead}
+                  </p>
+                ) : null}
+                <p className="yds-market-timeline__event-title">{ev.title}</p>
+                {!lead && metrics ? (
                   <p className="yds-market-timeline__event-metrics font-mono tabular-nums">
                     {metrics}
                   </p>
@@ -140,7 +144,7 @@ export default function YdsMarketTimelineSection({
           className="yds-market-timeline__history-link"
           onClick={onViewAllHistory}
         >
-          전체 히스토리 보기
+          전체 보기
         </button>
       ) : null}
 

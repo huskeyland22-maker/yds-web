@@ -2,7 +2,7 @@
  * Market stage labels — node scripts/yds-market-stage-labels.test.mjs
  */
 import {
-  MARKET_LABEL_CURRENT_STAGE,
+  MARKET_LABEL_MARKET_STATE,
   MARKET_PANIC_ACTION,
   MARKET_STAGE_ACTION,
   resolveMarketStageSnapshot,
@@ -12,10 +12,10 @@ function assert(cond, msg) {
   if (!cond) throw new Error(msg)
 }
 
-assert(MARKET_LABEL_CURRENT_STAGE === "현재 단계")
+assert(MARKET_LABEL_MARKET_STATE === "시장 상태")
 assert(MARKET_STAGE_ACTION.lateCycle.label === "기회 대기")
 assert(
-  MARKET_STAGE_ACTION.lateCycle.hint.includes("아직 충분한 공포는 아닙니다"),
+  MARKET_STAGE_ACTION.lateCycle.hint.includes("과열이 상당 부분 해소"),
   MARKET_STAGE_ACTION.lateCycle.hint,
 )
 

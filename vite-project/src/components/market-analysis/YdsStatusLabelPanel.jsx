@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import {
-  MARKET_LABEL_CURRENT_STAGE,
+  MARKET_LABEL_MARKET_STATE,
   MARKET_LABEL_PANIC_INTENSITY,
   resolveMarketStageSnapshot,
 } from "../../content/ydsMarketStageLabels.js"
@@ -30,9 +30,9 @@ export default function YdsStatusLabelPanel({ panicData = null, historyRows = []
       <div className="yds-status-panel__hero-grid">
         <article
           className="yds-status-panel__score-card"
-          aria-label={`${MARKET_LABEL_CURRENT_STAGE} ${cycle.score}`}
+          aria-label={`${MARKET_LABEL_MARKET_STATE} ${cycle.score}`}
         >
-          <p className="yds-status-panel__card-label">{MARKET_LABEL_CURRENT_STAGE}</p>
+          <p className="yds-status-panel__card-label">{MARKET_LABEL_MARKET_STATE}</p>
           <p className="yds-status-panel__hero-score font-mono tabular-nums">{cycle.score}</p>
           <p
             className="yds-status-panel__hero-status"

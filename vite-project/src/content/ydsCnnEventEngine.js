@@ -1,6 +1,6 @@
 /**
- * CNN Event Engine V2 — 타임라인·Event Layer 공통 (표시 전용)
- * 3일·1일 변화량 기반 투자심리 이벤트
+ * CNN Event Engine V3 — 타임라인·Event Layer 공통 (표시 전용)
+ * 시장 변화 기록: 3일·1일 변화량 + 지속 악화 감지
  */
 
 import { findRowDaysBefore, mergeLayerHistory, rowDate, toNum } from "./ydsLayerHistory.js"
@@ -29,7 +29,7 @@ export const CNN_EVENT_SPECS = {
     action: "단기 변동성 확대",
     emoji: "🟠",
     severity: "medium",
-    priority: 100,
+    priority: 72,
   },
   "momentum-cnn-day-bounce": {
     id: "momentum-cnn-day-bounce",
@@ -37,47 +37,55 @@ export const CNN_EVENT_SPECS = {
     action: "매수세 재유입 관찰",
     emoji: "🟢",
     severity: "low",
-    priority: 95,
+    priority: 71,
+  },
+  "momentum-cnn-soft-fall": {
+    id: "momentum-cnn-soft-fall",
+    title: "투자심리 추가 악화",
+    action: "하락 흐름 지속",
+    emoji: "🟠",
+    severity: "medium",
+    priority: 64,
   },
   "momentum-cnn-crash": {
     id: "momentum-cnn-crash",
-    title: "투자심리 급랭",
+    title: "CNN 급락",
     action: "신규 진입 보류",
     emoji: "🔴",
     severity: "high",
-    priority: 80,
+    priority: 68,
   },
   "momentum-cnn-sharp": {
     id: "momentum-cnn-sharp",
-    title: "투자심리 급락",
-    action: "과열 해소 시작",
+    title: "CNN 급락",
+    action: "과열 해소 진행",
     emoji: "🟠",
     severity: "medium",
-    priority: 70,
+    priority: 66,
   },
   "momentum-cnn-weaken": {
     id: "momentum-cnn-weaken",
-    title: "투자심리 악화",
+    title: "CNN 악화",
     action: "관망 우선",
     emoji: "🟠",
     severity: "medium",
-    priority: 60,
+    priority: 62,
   },
   "momentum-cnn-surge": {
     id: "momentum-cnn-surge",
-    title: "투자심리 급반등",
+    title: "CNN 급반등",
     action: "매수세 유입 관찰",
     emoji: "🟢",
     severity: "medium",
-    priority: 55,
+    priority: 58,
   },
   "momentum-cnn-recovery": {
     id: "momentum-cnn-recovery",
-    title: "투자심리 회복",
+    title: "CNN 회복",
     action: "심리 개선 관찰",
     emoji: "🟢",
     severity: "low",
-    priority: 50,
+    priority: 56,
   },
 }
 
@@ -138,14 +146,12 @@ function upTierToType(tier) {
 }
 
 /**
- * 타임라인 — 그날 기록할 CNN 이벤트 1건 (우선순위·전환 기준)
+ * 타임라인 V3 — 그날 CNN 시장 변화 1건 (활성 tier·일일 변화 기록)
  * @param {number | null} delta3d
  * @param {number | null} delta1d
- * @param {CnnDownTier} prevDownTier
- * @param {CnnUpTier} prevUpTier
  * @returns {string | null} event type id
  */
-export function resolveCnnTimelineEventType(delta3d, delta1d, prevDownTier, prevUpTier) {
+export function resolveCnnTimelineEventType(delta3d, delta1d) {
   /** @type {string[]} */
   const candidates = []
 
@@ -153,19 +159,15 @@ export function resolveCnnTimelineEventType(delta3d, delta1d, prevDownTier, prev
     candidates.push("momentum-cnn-day-shock")
   } else if (delta1d != null && delta1d >= 10) {
     candidates.push("momentum-cnn-day-bounce")
+  } else if (delta1d != null && delta1d <= -5) {
+    candidates.push("momentum-cnn-soft-fall")
   }
 
-  const downTier = resolveCnnDownTier(delta3d)
-  const upTier = resolveCnnUpTier(delta3d)
+  const downType = downTierToType(resolveCnnDownTier(delta3d))
+  if (downType) candidates.push(downType)
 
-  if (DOWN_RANK[downTier] > DOWN_RANK[prevDownTier]) {
-    const type = downTierToType(downTier)
-    if (type) candidates.push(type)
-  }
-  if (UP_RANK[upTier] > UP_RANK[prevUpTier]) {
-    const type = upTierToType(upTier)
-    if (type) candidates.push(type)
-  }
+  const upType = upTierToType(resolveCnnUpTier(delta3d))
+  if (upType) candidates.push(upType)
 
   if (!candidates.length) return null
 
@@ -186,6 +188,7 @@ export function resolveActiveCnnEventSpec(delta3d, delta1d) {
   const active = []
 
   if (delta1d != null && delta1d <= -10) active.push("momentum-cnn-day-shock")
+  else if (delta1d != null && delta1d <= -5) active.push("momentum-cnn-soft-fall")
   if (delta1d != null && delta1d >= 10) active.push("momentum-cnn-day-bounce")
 
   const downType = downTierToType(resolveCnnDownTier(delta3d))

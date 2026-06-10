@@ -9,7 +9,9 @@ import { resolveYdsStatusSnapshot } from "./ydsStatusLabels.js"
 /** @typedef {import("./ydsStatusLabels.js").CycleBandId} CycleBandId */
 /** @typedef {import("./ydsStatusLabels.js").PanicBandId} PanicBandId */
 
-export const MARKET_LABEL_CURRENT_STAGE = "현재 단계"
+/** @deprecated MARKET_LABEL_MARKET_STATE 사용 */
+export const MARKET_LABEL_CURRENT_STAGE = "시장 상태"
+export const MARKET_LABEL_MARKET_STATE = "시장 상태"
 export const MARKET_LABEL_PANIC_INTENSITY = "패닉 강도"
 
 /**
@@ -32,7 +34,7 @@ export const MARKET_STAGE_ACTION = {
   },
   lateCycle: {
     label: "기회 대기",
-    hint: "아직 충분한 공포는 아닙니다. 좋은 기회를 기다리는 구간입니다.",
+    hint: "현재는 과열이 상당 부분 해소되었지만 아직 충분한 공포는 아닙니다. 좋은 기회를 기다리는 구간입니다.",
   },
   peakOverheat: {
     label: "현금 확보",
