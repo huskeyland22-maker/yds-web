@@ -1,5 +1,4 @@
 import {
-  formatPickChangePct,
   formatPickPrice,
   formatQuoteUpdatedAt,
 } from "../../content/ydsStockPickQuoteService.js"
@@ -11,12 +10,11 @@ import {
  * }} props
  */
 export default function YdsStockPickPriceLine({ stock, compact = false }) {
-  const quote = stock.quote
-  if (!quote?.price) return null
+  const snap = stock.snapshot
+  const close = snap?.price ?? snap?.close
+  if (close == null || !Number.isFinite(Number(close))) return null
 
-  const changePct = quote.changePct
-  const tone =
-    changePct == null ? "flat" : changePct > 0 ? "up" : changePct < 0 ? "down" : "flat"
+  const updatedAt = snap?.fetchedAt ?? stock.quote?.updatedAt ?? null
 
   return (
     <div
@@ -28,18 +26,10 @@ export default function YdsStockPickPriceLine({ stock, compact = false }) {
         .join(" ")}
     >
       <span className="yds-spick-price__value font-mono tabular-nums">
-        {formatPickPrice(quote.price, stock.country)}
+        {formatPickPrice(close, stock.country)}
       </span>
-      <span
-        className={[
-          "yds-spick-price__chg font-mono tabular-nums",
-          `yds-spick-price__chg--${tone}`,
-        ].join(" ")}
-      >
-        {formatPickChangePct(changePct)}
-      </span>
-      {!compact && quote.updatedAt ? (
-        <span className="yds-spick-price__time">{formatQuoteUpdatedAt(quote.updatedAt)}</span>
+      {!compact && updatedAt ? (
+        <span className="yds-spick-price__time">{formatQuoteUpdatedAt(updatedAt)}</span>
       ) : null}
     </div>
   )

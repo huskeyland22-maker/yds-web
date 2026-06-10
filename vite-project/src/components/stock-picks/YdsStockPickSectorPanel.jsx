@@ -71,7 +71,7 @@ export default function YdsStockPickSectorPanel({
                 </span>
                 <span className="yds-spick-sector-list__price font-mono tabular-nums">
                   {formatTransparencyPrice(
-                    stock.quote?.price ?? stock.snapshot?.close,
+                    stock.snapshot?.price ?? stock.snapshot?.close,
                     stock.country === "KR" ? "KR" : "US",
                   )}
                 </span>

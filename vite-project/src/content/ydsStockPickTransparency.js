@@ -35,7 +35,7 @@ export function formatVolumeRatioLabel(ratio) {
  */
 function resolveSnapshotNumbers(stock) {
   const snap = stock.snapshot ?? {}
-  const close = toNum(stock.quote?.price ?? snap.price ?? snap.close)
+  const close = toNum(snap.price ?? snap.close)
   return {
     close,
     ma20: toNum(snap.ma20),

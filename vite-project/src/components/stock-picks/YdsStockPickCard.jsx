@@ -36,7 +36,7 @@ export default function YdsStockPickCard({
   const isHero = variant === "top3" || variant === "top5"
   const transparency = useMemo(() => buildStockPickTransparency(stock), [stock])
   const country = stock.country === "KR" ? "KR" : "US"
-  const closeRaw = stock.quote?.price ?? stock.snapshot?.close ?? stock.snapshot?.price
+  const closeRaw = stock.snapshot?.price ?? stock.snapshot?.close
   const price = formatTransparencyPrice(closeRaw, country)
 
   const position52w = stock.statusDiag?.inputs?.position52w

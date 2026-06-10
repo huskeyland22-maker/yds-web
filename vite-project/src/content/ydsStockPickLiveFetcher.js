@@ -204,9 +204,21 @@ async function runStockPickLiveSnapshots(marketContext = null, signal, callsite 
         (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0,
       )
       for (const [ticker, entry] of map) {
-        const row = universe.stocks.find((s) => s.ticker === ticker)
-        const country = row?.country ?? "US"
         const pq = portfolioQuotes.get(ticker)
+        const snapClose = entry.engineSnapshot?.close
+        const pqPrice = pq?.price
+        if (pq && snapClose != null && pqPrice != null && snapClose > 0) {
+          const diff = Math.abs(pqPrice - snapClose) / snapClose
+          if (diff >= 0.2) {
+            console.warn("[stock-pick-live] skip portfolio quote — snapshot mismatch", {
+              ticker,
+              portfolioPrice: pqPrice,
+              snapshotClose: snapClose,
+              diffPct: Math.round(diff * 1000) / 10,
+            })
+            continue
+          }
+        }
         if (pq) entry.quote = pq
       }
     } catch (e) {

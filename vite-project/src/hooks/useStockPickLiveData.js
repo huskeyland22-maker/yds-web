@@ -37,6 +37,7 @@ import {
   saveStockPickSnapshotCache,
 } from "../content/ydsStockPickSnapshotCache.js"
 import { fetchStockPickLiveSnapshots } from "../content/ydsStockPickLiveFetcher.js"
+import { logStockPickPriceSourceCheck } from "../content/ydsStockPickPriceSourceCheck.js"
 
 const bootCache = readInitialStockPickSnapshots()
 
@@ -256,7 +257,8 @@ export function useStockPickLiveData(marketContext) {
   useEffect(() => {
     if (loading && !stocks.length) return
     logStockPickPipelineDebug(pipelineDebug)
-  }, [loading, stocks.length, pipelineDebug])
+    logStockPickPriceSourceCheck(stocks)
+  }, [loading, stocks.length, pipelineDebug, stocks])
 
   useEffect(() => {
     if (loading || refreshing) return
