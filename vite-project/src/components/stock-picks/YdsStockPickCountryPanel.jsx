@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   filterBySector,
   getTop5Stocks,
@@ -38,12 +38,28 @@ export default function YdsStockPickCountryPanel({
 }) {
   const countryMeta = STOCK_PICK_COUNTRIES.find((c) => c.id === countryId)
   const [showAll, setShowAll] = useState(false)
+  const [showSecondary, setShowSecondary] = useState(false)
 
   const top5 = useMemo(() => getTop5Stocks(stocks), [stocks])
   const sectorStocks = useMemo(
     () => filterBySector(stocks, sectorId),
     [stocks, sectorId],
   )
+
+  useEffect(() => {
+    if (!stocks.length) {
+      setShowSecondary(false)
+      return undefined
+    }
+
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(() => setShowSecondary(true), { timeout: 150 })
+      return () => cancelIdleCallback(id)
+    }
+
+    const id = window.setTimeout(() => setShowSecondary(true), 0)
+    return () => window.clearTimeout(id)
+  }, [stocks])
 
   return (
     <div className="yds-spick-country-panel">
@@ -65,46 +81,50 @@ export default function YdsStockPickCountryPanel({
         loading={loading}
       />
 
-      <YdsStockPickSectorPanel
-        stocks={sectorStocks}
-        sectorId={sectorId}
-        onSectorChange={onSectorChange}
-        heldTickers={heldTickers}
-      />
+      {showSecondary ? (
+        <>
+          <YdsStockPickSectorPanel
+            stocks={sectorStocks}
+            sectorId={sectorId}
+            onSectorChange={onSectorChange}
+            heldTickers={heldTickers}
+          />
 
-      <section className="yds-spick-section yds-spick-section--all" aria-labelledby={allSectionId}>
-        <div className="yds-spick-section__head-row">
-          <h2 id={allSectionId} className="yds-spick-section__title yds-spick-section__title--inline">
-            전체 종목
-          </h2>
-          <button
-            type="button"
-            className="yds-spick-section__toggle"
-            aria-expanded={showAll}
-            onClick={() => setShowAll((v) => !v)}
-          >
-            {showAll ? "접기" : "전체 보기"}
-          </button>
-        </div>
-        {showAll ? (
-          <div className="yds-spick-grid yds-spick-grid--all">
-            {stocks.map((stock) => (
-              <YdsStockPickCard
-                key={stock.ticker}
-                stock={stock}
-                variant="compact"
-                isFavorite={isFavorite(stock.ticker)}
-                onToggleFavorite={onToggleFavorite}
-                isHeld={heldTickers.has(stock.ticker.toUpperCase())}
-                statusChange={statusChanges.get(stock.ticker) ?? null}
-              />
-            ))}
-          </div>
-        ) : null}
-        {showAll && !stocks.length ? (
-          <p className="yds-spick-empty">표시할 종목이 없습니다.</p>
-        ) : null}
-      </section>
+          <section className="yds-spick-section yds-spick-section--all" aria-labelledby={allSectionId}>
+            <div className="yds-spick-section__head-row">
+              <h2 id={allSectionId} className="yds-spick-section__title yds-spick-section__title--inline">
+                전체 종목
+              </h2>
+              <button
+                type="button"
+                className="yds-spick-section__toggle"
+                aria-expanded={showAll}
+                onClick={() => setShowAll((v) => !v)}
+              >
+                {showAll ? "접기" : "전체 보기"}
+              </button>
+            </div>
+            {showAll ? (
+              <div className="yds-spick-grid yds-spick-grid--all">
+                {stocks.map((stock) => (
+                  <YdsStockPickCard
+                    key={stock.ticker}
+                    stock={stock}
+                    variant="compact"
+                    isFavorite={isFavorite(stock.ticker)}
+                    onToggleFavorite={onToggleFavorite}
+                    isHeld={heldTickers.has(stock.ticker.toUpperCase())}
+                    statusChange={statusChanges.get(stock.ticker) ?? null}
+                  />
+                ))}
+              </div>
+            ) : null}
+            {showAll && !stocks.length ? (
+              <p className="yds-spick-empty">표시할 종목이 없습니다.</p>
+            ) : null}
+          </section>
+        </>
+      ) : null}
     </div>
   )
 }

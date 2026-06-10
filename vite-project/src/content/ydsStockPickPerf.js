@@ -1,0 +1,91 @@
+/**
+ * 종목추천 페이지 성능 측정
+ */
+
+/** @type {Record<string, number>} */
+const marks = {}
+
+/** @type {Record<string, number>} */
+const measures = {}
+
+let visitType = "first"
+let searchMs = 0
+let reported = false
+
+export function resetStockPickPerfSession(opts = {}) {
+  visitType = opts.fromCache ? "revisit" : "first"
+  searchMs = 0
+  reported = false
+  for (const key of Object.keys(marks)) delete marks[key]
+  for (const key of Object.keys(measures)) delete measures[key]
+  mark("load start")
+}
+
+export function mark(name) {
+  if (typeof performance === "undefined") return
+  marks[name] = performance.now()
+  console.log(`[stock-pick-perf] ${name}`)
+}
+
+/**
+ * @param {string} label
+ * @param {string} startMark
+ */
+export function measure(label, startMark) {
+  if (typeof performance === "undefined") return 0
+  const start = marks[startMark]
+  if (start == null) return 0
+  const ms = Math.round(performance.now() - start)
+  measures[label] = ms
+  console.log(`[stock-pick-perf] ${label}: ${ms}ms`)
+  return ms
+}
+
+/** @param {number} ms */
+export function recordSearchFilterMs(ms) {
+  searchMs = Math.round(ms)
+  measures["search filter"] = searchMs
+  console.log(`[stock-pick-perf] search filter: ${searchMs}ms (local only, no fetch)`)
+}
+
+export function markFirstRender() {
+  if (marks["first render"]) return
+  marks["render"] = performance.now()
+  measure("first paint", "load start")
+  marks["first render"] = marks["render"]
+  console.log("[stock-pick-perf] render")
+}
+
+/**
+ * @param {{ fromCache?: boolean; refreshing?: boolean }} [meta]
+ */
+export function emitStockPickPerfReport(meta = {}) {
+  if (reported) return
+  reported = true
+
+  const entries = Object.entries(measures)
+  const slowest = entries.length
+    ? entries.reduce((a, b) => (b[1] > a[1] ? b : a))
+    : ["none", 0]
+
+  const report = {
+    visit: visitType,
+    fromCache: Boolean(meta.fromCache),
+    firstEntryMs: measures["first paint"] ?? measures["api fetch"] ?? null,
+    revisitMs: visitType === "revisit" ? measures["first paint"] ?? null : null,
+    apiFetchMs: measures["api fetch"] ?? null,
+    scoreCalcMs: measures["score calc"] ?? null,
+    renderMs: measures["first paint"] ?? null,
+    searchMs: searchMs || null,
+    slowestLabel: slowest[0],
+    slowestMs: slowest[1],
+    refreshing: Boolean(meta.refreshing),
+  }
+
+  console.log("[stock-pick-perf] === 최종 보고 ===", report)
+  return report
+}
+
+export function getStockPickPerfMeasures() {
+  return { ...measures, searchMs, visitType }
+}

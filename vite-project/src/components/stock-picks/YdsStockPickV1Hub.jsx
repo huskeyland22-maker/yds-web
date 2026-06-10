@@ -5,6 +5,8 @@ import {
   filterByCountry,
   STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
+import { markFirstRender, recordSearchFilterMs } from "../../content/ydsStockPickPerf.js"
+import { filterStockPicksByQuery } from "../../content/ydsStockPickSearch.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
@@ -12,6 +14,7 @@ import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
 import { useStockPickStatusChanges } from "../../hooks/useStockPickStatusChanges.js"
 import YdsStockPickDebugBox from "./YdsStockPickDebugBox.jsx"
 import YdsStockPickLoadBanner from "./YdsStockPickLoadBanner.jsx"
+import YdsStockPickSearchBar from "./YdsStockPickSearchBar.jsx"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 
@@ -38,8 +41,15 @@ function useDualCountryLayout() {
 export default function YdsStockPickV1Hub() {
   const dualLayout = useDualCountryLayout()
   const marketContext = useYdsMarketContext()
-  const { stocks: liveStocks, loadStats, pipelineDebug, loading, lastSyncAt } =
-    useStockPickLiveData(marketContext)
+  const {
+    stocks: liveStocks,
+    loadStats,
+    pipelineDebug,
+    loading,
+    refreshing,
+    fromCache,
+    lastSyncAt,
+  } = useStockPickLiveData(marketContext)
   const heldTickers = useStockPickHeldTickers()
   const statusChanges = useStockPickStatusChanges(liveStocks)
 
@@ -47,6 +57,7 @@ export default function YdsStockPickV1Hub() {
     if (loading || !liveStocks.length) return
     captureTodayPickSnapshots(marketContext, 10, liveStocks)
   }, [marketContext, loading, liveStocks])
+
   const {
     favoritesOnly,
     setFavoritesOnly,
@@ -58,17 +69,33 @@ export default function YdsStockPickV1Hub() {
 
   const [countryId, setCountryId] = useState("US")
   const [sectorByCountry, setSectorByCountry] = useState(INITIAL_SECTOR)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const searchedStocks = useMemo(() => {
+    const t0 = typeof performance !== "undefined" ? performance.now() : 0
+    const result = filterStockPicksByQuery(liveStocks, searchQuery)
+    if (typeof performance !== "undefined" && searchQuery.trim()) {
+      recordSearchFilterMs(performance.now() - t0)
+    }
+    return result
+  }, [liveStocks, searchQuery])
 
   const stocksByCountry = useMemo(() => {
     const ranked = {
-      US: assignRanks(filterByCountry(liveStocks, "US")),
-      KR: assignRanks(filterByCountry(liveStocks, "KR")),
+      US: assignRanks(filterByCountry(searchedStocks, "US")),
+      KR: assignRanks(filterByCountry(searchedStocks, "KR")),
     }
     return {
       US: applyFavoriteFilter(ranked.US),
       KR: applyFavoriteFilter(ranked.KR),
     }
-  }, [liveStocks, applyFavoriteFilter])
+  }, [searchedStocks, applyFavoriteFilter])
+
+  useEffect(() => {
+    if (stocksByCountry.US.length || stocksByCountry.KR.length) {
+      markFirstRender()
+    }
+  }, [stocksByCountry.US.length, stocksByCountry.KR.length])
 
   const setSectorForCountry = (country, sectorId) => {
     setSectorByCountry((prev) => ({ ...prev, [country]: sectorId }))
@@ -80,16 +107,33 @@ export default function YdsStockPickV1Hub() {
       displayUs: stocksByCountry.US.length,
       displayKr: stocksByCountry.KR.length,
       favoritesOnly,
+      fromCache,
+      refreshing,
     }),
-    [pipelineDebug, stocksByCountry.US.length, stocksByCountry.KR.length, favoritesOnly],
+    [
+      pipelineDebug,
+      stocksByCountry.US.length,
+      stocksByCountry.KR.length,
+      favoritesOnly,
+      fromCache,
+      refreshing,
+    ],
   )
+
+  const searchResultCount = searchedStocks.length
 
   return (
     <div className="yds-spick-platform">
-      <YdsStockPickDebugBox debug={debugView} loading={loading} />
-      <YdsStockPickLoadBanner stats={loadStats} loading={loading} />
+      <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} />
+      <YdsStockPickLoadBanner stats={loadStats} loading={loading && !liveStocks.length} />
+      {refreshing ? (
+        <p className="yds-spick-sync-note yds-spick-sync-note--refresh" role="status">
+          백그라운드 갱신 중…
+        </p>
+      ) : null}
       {lastSyncAt ? (
         <p className="yds-spick-sync-note" role="status">
+          {fromCache ? "캐시 표시 · " : ""}
           마지막 동기화{" "}
           {new Date(lastSyncAt).toLocaleTimeString("ko-KR", {
             hour: "2-digit",
@@ -98,6 +142,13 @@ export default function YdsStockPickV1Hub() {
           })}
         </p>
       ) : null}
+
+      <YdsStockPickSearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        resultCount={searchResultCount}
+      />
+
       <div className="yds-spick-toolbar">
         <button
           type="button"
@@ -157,7 +208,7 @@ export default function YdsStockPickV1Hub() {
                 statusChanges={statusChanges}
                 showCountryHead
                 allSectionId={panelId}
-                loading={loading}
+                loading={loading && !stocksByCountry[country.id].length}
               />
             </div>
           )
