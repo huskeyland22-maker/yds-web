@@ -19,6 +19,10 @@ export function isStockPickFetchSessionDone() {
   return session().done
 }
 
+export function isStockPickFetchSessionInFlight() {
+  return Boolean(session().promise)
+}
+
 export function getStockPickFetchSessionCallsite() {
   return session().lastCallsite
 }

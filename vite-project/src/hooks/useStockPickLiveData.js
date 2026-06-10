@@ -24,19 +24,33 @@ import {
 import { traceStockPickMount } from "../content/ydsStockPickMountTrace.js"
 import {
   isStockPickFetchSessionDone,
+  isStockPickFetchSessionInFlight,
 } from "../content/ydsStockPickFetchSession.js"
 import {
   markPostApiComplete,
   recordRenderPhase,
   resetStockPickRenderPerf,
 } from "../content/ydsStockPickRenderPerf.js"
-import { readInitialStockPickSnapshots, saveStockPickSnapshotCache } from "../content/ydsStockPickSnapshotCache.js"
+import {
+  loadStockPickSnapshotCache,
+  readInitialStockPickSnapshots,
+  saveStockPickSnapshotCache,
+} from "../content/ydsStockPickSnapshotCache.js"
 import { fetchStockPickLiveSnapshots } from "../content/ydsStockPickLiveFetcher.js"
 
 const bootCache = readInitialStockPickSnapshots()
 
-/** 컴포넌트 remount 시 effect 재실행 차단 (StrictMode·부모 remount) */
+/** 컴포넌트 remount 시 HTTP 중복 시작 차단 — hydrate/join은 항상 허용 */
 let hookMountFetchCommitted = false
+
+/**
+ * @param {Map<string, object>} map
+ * @param {import("../content/ydsMarketAdapter.js").YdsMarketAdapterContext | null} marketContext
+ */
+function countRecommendableFromMap(map, marketContext) {
+  if (!map?.size) return 0
+  return filterRecommendableStockPicks(buildStockPickViews(marketContext, map)).length
+}
 
 /**
  * @param {import("../content/ydsMarketAdapter.js").YdsMarketAdapterContext | null} marketContext
@@ -76,51 +90,75 @@ export function useStockPickLiveData(marketContext) {
   }, [])
 
   useEffect(() => {
-    if (fetchGuardRef.current || hookMountFetchCommitted) {
-      console.log("[stock-pick] skip duplicate hook fetch", {
-        fetchGuardRef: fetchGuardRef.current,
-        hookMountFetchCommitted,
-        sessionDone: isStockPickFetchSessionDone(),
-      })
+    if (fetchGuardRef.current) {
+      setLoading(false)
+      setRefreshing(false)
       return undefined
     }
     fetchGuardRef.current = true
-    hookMountFetchCommitted = true
 
     const ac = new AbortController()
     const requestId = ++requestIdRef.current
-    const hasDisplayData = snapshotMap.size > 0
+    const isSessionReuse = hookMountFetchCommitted
 
-    if (hasDisplayData) {
-      setRefreshing(true)
+    if (!isSessionReuse) {
+      hookMountFetchCommitted = true
+    }
+
+    const cachedPayload = loadStockPickSnapshotCache()
+    let displayMap = snapshotMap
+    let displayCount = snapshotMap.size
+
+    if (!displayCount && cachedPayload?.snapshots?.size) {
+      displayMap = cachedPayload.snapshots
+      displayCount = cachedPayload.snapshots.size
+      setSnapshotMap(cachedPayload.snapshots)
+      setErrors(cachedPayload.errors ?? [])
+      setLastSyncAt(cachedPayload.fetchedAt)
+      setFromCache(true)
+    }
+
+    if (isSessionReuse) {
+      console.log("[stock-pick] skip duplicate hook fetch", {
+        hookMountFetchCommitted: true,
+        loading,
+        snapshotMapSize: displayCount,
+        stocksLength: countRecommendableFromMap(displayMap, marketContextRef.current),
+        sessionDone: isStockPickFetchSessionDone(),
+        sessionInFlight: isStockPickFetchSessionInFlight(),
+        hydratedFromCache: Boolean(cachedPayload?.snapshots?.size && !snapshotMap.size),
+      })
+    }
+
+    const sessionInFlight = isStockPickFetchSessionInFlight()
+    const needsNetwork = displayCount === 0
+
+    if (displayCount > 0) {
       setLoading(false)
+      if (!isSessionReuse || sessionInFlight) {
+        setRefreshing(true)
+      }
     } else {
       setLoading(true)
     }
 
-    mark("api fetch start")
-    markTimeline("API_START", { segment: "stockApi" })
+    if (!isSessionReuse && needsNetwork) {
+      mark("api fetch start")
+      markTimeline("API_START", { segment: "stockApi" })
+    } else if (needsNetwork) {
+      markTimeline("API_START", { segment: "stockApi", reuse: true })
+    }
 
-    ;(async () => {
-      const result = await fetchStockPickLiveSnapshots(marketContextRef.current, ac.signal, {
-        callsite: "useStockPickLiveData.useEffect.mount",
-      })
+    const finishLoading = () => {
       if (requestId !== requestIdRef.current) return
-      if (ac.signal.aborted) return
+      setLoading(false)
+      setRefreshing(false)
+    }
 
-      measure("api fetch", "api fetch start")
-      markTimeline("API_END", { segment: "stockApi" })
-      markPostApiComplete()
-      syncPostApiMark()
-
-      setSnapshotMap(result.snapshots)
-      setErrors(result.errors)
-      setLastSyncAt(result.fetchedAt)
-      setFromCache(false)
-
+    const persistSnapshotCache = (snapshots, fetchedAt, fetchErrors) => {
       const persistCache = () => {
         const t0 = typeof performance !== "undefined" ? performance.now() : 0
-        saveStockPickSnapshotCache(result.snapshots, result.fetchedAt, result.errors)
+        saveStockPickSnapshotCache(snapshots, fetchedAt, fetchErrors)
         if (typeof performance !== "undefined") {
           recordRenderPhase("cache save", performance.now() - t0)
         }
@@ -130,16 +168,56 @@ export function useStockPickLiveData(marketContext) {
       } else {
         setTimeout(persistCache, 0)
       }
+    }
 
-      setLoading(false)
-      setRefreshing(false)
-      logStockPickApiDuplicateAudit()
-    })().catch(() => {
-      if (requestId === requestIdRef.current) {
-        setLoading(false)
-        setRefreshing(false)
+    ;(async () => {
+      if (!needsNetwork && !sessionInFlight && isStockPickFetchSessionDone()) {
+        finishLoading()
+        return
       }
-    })
+
+      try {
+        const result = await fetchStockPickLiveSnapshots(marketContextRef.current, ac.signal, {
+          callsite: isSessionReuse
+            ? "useStockPickLiveData.useEffect.sessionReuse"
+            : "useStockPickLiveData.useEffect.mount",
+        })
+
+        if (requestId !== requestIdRef.current) {
+          finishLoading()
+          return
+        }
+        if (ac.signal.aborted) {
+          finishLoading()
+          return
+        }
+
+        if (!isSessionReuse && !result.fromSessionCache) {
+          measure("api fetch", "api fetch start")
+          markTimeline("API_END", { segment: "stockApi" })
+          markPostApiComplete()
+          syncPostApiMark()
+        } else if (needsNetwork) {
+          markTimeline("API_END", { segment: "stockApi", reuse: true })
+        }
+
+        setSnapshotMap(result.snapshots)
+        setErrors(result.errors ?? [])
+        setLastSyncAt(result.fetchedAt)
+        setFromCache(Boolean(result.fromSessionCache))
+
+        if (!result.fromSessionCache && result.snapshots?.size) {
+          persistSnapshotCache(result.snapshots, result.fetchedAt, result.errors ?? [])
+        }
+
+        finishLoading()
+        if (!isSessionReuse && !result.fromSessionCache) {
+          logStockPickApiDuplicateAudit()
+        }
+      } catch {
+        finishLoading()
+      }
+    })()
 
     return () => {
       ac.abort()
