@@ -25,8 +25,8 @@
 export const MARKET_CYCLE_STAGES = [
   {
     id: "normal",
-    label: "성장",
-    short: "성장",
+    label: "보유 구간",
+    short: "보유 구간",
     emoji: "🟡",
     color: "#22c55e",
     role: "보유 유지 · 추격 자제",
@@ -38,14 +38,14 @@ export const MARKET_CYCLE_STAGES = [
   },
   {
     id: "warning",
-    label: "사이클 후반",
-    short: "사이클 후반",
+    label: "기회 대기",
+    short: "기회 대기",
     emoji: "🟠",
     color: "#eab308",
-    role: "수익 관리 점검 단계",
+    role: "좋은 기회를 기다리는 구간",
     mood: "탐욕 증가",
     harvestGuide: "비중 점검 · 추격 자제 · 수익 관리",
-    tooltip: "CNN 55+ · BofA 6+ — 사이클 후반 · 수익 관리",
+    tooltip: "CNN 55+ · BofA 6+ — 기회 대기 · 수익 관리",
     cnnMin: 55,
     bofaMin: 6,
   },
@@ -64,8 +64,8 @@ export const MARKET_CYCLE_STAGES = [
   },
   {
     id: "partialCash",
-    label: "최고 과열",
-    short: "최고 과열",
+    label: "현금 확보",
+    short: "현금 확보",
     emoji: "🔴",
     color: "#dc2626",
     role: "극단적 탐욕 · 적극적 현금 확보",
@@ -79,7 +79,7 @@ export const MARKET_CYCLE_STAGES = [
 
 /** 시장 사이클 레일 범례 (CNN·BofA) */
 export const MARKET_CYCLE_RAIL_LABELS =
-  "🟡 성장 · 🟠 사이클 후반 · 🔴 현금 준비 · 🔴 최고 과열"
+  "🟡 보유 구간 · 🟠 기회 대기 · 🔴 현금 준비 · 🔴 현금 확보"
 
 /** @type {{ id: MarketCycleStageId; cnnMin: number; bofaMin: number }[]} */
 const MARKET_CYCLE_THRESHOLDS = [
@@ -169,7 +169,7 @@ export function buildDualCycleInterpretation(fearStageId, marketStageId) {
 export function fearCycleMood(fearStageId) {
   const map = {
     overheated: "극단 탐욕(공포 최저)",
-    neutral: "공포 없음",
+    neutral: "관망 유지",
     interest: "공포 증가 · 준비",
     dca: "공포 확대 · 실행",
     panicBuy: "극단 공포",

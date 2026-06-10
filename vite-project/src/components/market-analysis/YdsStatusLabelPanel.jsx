@@ -1,7 +1,11 @@
 import { useMemo } from "react"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
-import { resolveYdsStatusSnapshot } from "../../content/ydsStatusLabels.js"
+import {
+  MARKET_LABEL_CURRENT_STAGE,
+  MARKET_LABEL_PANIC_INTENSITY,
+  resolveMarketStageSnapshot,
+} from "../../content/ydsMarketStageLabels.js"
 
 /**
  * Hero 핵심 — 사이클·패닉 점수 중심 (1초·2초·3초 이해)
@@ -13,7 +17,7 @@ export default function YdsStatusLabelPanel({ panicData = null, historyRows = []
     const score = getFinalScore(panicData)
     if (!Number.isFinite(score)) return null
     const momentum = resolveMomentumLayer(panicData, historyRows)
-    const snapshot = resolveYdsStatusSnapshot(Math.round(score), momentum)
+    const snapshot = resolveMarketStageSnapshot(Math.round(score), momentum)
     return { ...snapshot, momentumData: momentum }
   }, [panicData, historyRows])
 
@@ -26,9 +30,9 @@ export default function YdsStatusLabelPanel({ panicData = null, historyRows = []
       <div className="yds-status-panel__hero-grid">
         <article
           className="yds-status-panel__score-card"
-          aria-label={`사이클 위치 ${cycle.score}`}
+          aria-label={`${MARKET_LABEL_CURRENT_STAGE} ${cycle.score}`}
         >
-          <p className="yds-status-panel__card-label">사이클 위치</p>
+          <p className="yds-status-panel__card-label">{MARKET_LABEL_CURRENT_STAGE}</p>
           <p className="yds-status-panel__hero-score font-mono tabular-nums">{cycle.score}</p>
           <p
             className="yds-status-panel__hero-status"
@@ -40,9 +44,9 @@ export default function YdsStatusLabelPanel({ panicData = null, historyRows = []
 
         <article
           className="yds-status-panel__score-card"
-          aria-label={`패닉 강도 ${ydsScore}`}
+          aria-label={`${MARKET_LABEL_PANIC_INTENSITY} ${ydsScore}`}
         >
-          <p className="yds-status-panel__card-label">패닉 강도</p>
+          <p className="yds-status-panel__card-label">{MARKET_LABEL_PANIC_INTENSITY}</p>
           <p className="yds-status-panel__hero-score font-mono tabular-nums">{ydsScore}</p>
           <p
             className="yds-status-panel__hero-status"

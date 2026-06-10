@@ -112,6 +112,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
               panicData={panicData}
               inlineChart
               defaultChartOpen={false}
+              marketActionLabels
             />
           </SectionErrorBoundary>
           <details className="yds-market-desk__score-detail">

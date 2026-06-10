@@ -8,6 +8,8 @@ import {
 } from "../../content/ydsCyclePhilosophy.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import { YDS_LABEL_PANIC_SCORE } from "../../content/ydsLanguage.js"
+import { MACRO_STAGE_TO_PANIC_BAND } from "../../content/ydsLanguage.js"
+import { MARKET_PANIC_ACTION } from "../../content/ydsMarketStageLabels.js"
 import YdsStagePositionNav from "./YdsStagePositionNav.jsx"
 
 /**
@@ -23,10 +25,12 @@ export default function MarketPositionSpotlight({ panicData = null }) {
     const stage = resolveMacroV1Status(score)
     if (!stage) return null
     const philosophy = getStagePhilosophy(stage.id)
+    const panicBandId = MACRO_STAGE_TO_PANIC_BAND[stage.id]
+    const marketLabel = MARKET_PANIC_ACTION[panicBandId]?.label ?? stage.label
     return {
       score,
       stageId: stage.id,
-      stageLabel: stage.label,
+      stageLabel: marketLabel,
       stageEmoji: stage.emoji,
       stageColor: stage.color,
       markerPct: score,
@@ -101,7 +105,7 @@ export default function MarketPositionSpotlight({ panicData = null }) {
                 >
                   <span className="yds-market-spotlight__zone-emoji">{band.emoji}</span>
                   <span className="yds-market-spotlight__zone-name">
-                    {band.label}
+                    {MARKET_PANIC_ACTION[MACRO_STAGE_TO_PANIC_BAND[band.id]]?.label ?? band.label}
                   </span>
                   {isCurrent ? (
                     <span className="yds-market-spotlight__zone-role">{zonePhilosophy.flowLabel}</span>
@@ -113,7 +117,7 @@ export default function MarketPositionSpotlight({ panicData = null }) {
         </div>
       </div>
 
-      <YdsStagePositionNav score={model.score} compact />
+      <YdsStagePositionNav score={model.score} compact marketActionLabels />
 
       <details className="yds-market-spotlight__cycle-guide">
         <summary>5단계 사이클 안내</summary>

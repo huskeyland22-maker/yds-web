@@ -10,6 +10,7 @@ import { mergeInflectionsIntoChartData } from "../utils/buildPanicHistoryInsight
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { YDS_CYCLE_TAGLINE } from "../content/ydsCyclePhilosophy.js"
 import { YDS_LABEL_PANIC_HISTORY, YDS_LABEL_PANIC_SCORE } from "../content/ydsLanguage.js"
+import { marketPanicLabelForMacroStage } from "../content/ydsMarketStageLabels.js"
 import YdsStagePositionNav from "./market-analysis/YdsStagePositionNav.jsx"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
@@ -52,6 +53,7 @@ function formatMetricValue(key, value) {
  *   defaultChartOpen?: boolean
  *   inlineChart?: boolean
  *   panicData?: object | null
+ *   marketActionLabels?: boolean
  * }} props
  */
 export default function PanicIndexHistorySection({
@@ -59,6 +61,7 @@ export default function PanicIndexHistorySection({
   defaultChartOpen = false,
   inlineChart = false,
   panicData = null,
+  marketActionLabels = false,
 }) {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
@@ -122,6 +125,9 @@ export default function PanicIndexHistorySection({
     if (!Number.isFinite(scoreRaw)) return null
     const score = Math.round(scoreRaw)
     const stage = resolveMacroV1Status(score)
+    const stageLabel = marketActionLabels
+      ? marketPanicLabelForMacroStage(stage?.id) ?? stage?.label ?? "—"
+      : stage?.label ?? "—"
     const flow = (history ?? [])
       .slice(-4)
       .map((row) => getFinalScore(pickPanicPayload(row) ?? {}))
@@ -132,13 +138,13 @@ export default function PanicIndexHistorySection({
     return {
       score,
       scoreDisplay: `${score} / 100`,
-      stageLabel: stage?.label ?? "—",
+      stageLabel,
       stageEmoji: stage?.emoji ?? "⚪",
       trendLine: flow.length ? flow.join(" → ") : "—",
       delta: prevScore != null ? score - prevScore : 0,
       prevScore,
     }
-  }, [history, panicData])
+  }, [history, panicData, marketActionLabels])
 
   const coreCards = useMemo(() => {
     const source = panicData ?? pickPanicPayload(history[history.length - 1])
@@ -187,7 +193,7 @@ export default function PanicIndexHistorySection({
               {ydsSummary.stageEmoji} {ydsSummary.stageLabel}
             </p>
             <p className="panic-history-v2__hero-philosophy">{YDS_CYCLE_TAGLINE}</p>
-            <YdsStagePositionNav score={ydsSummary.score} compact />
+            <YdsStagePositionNav score={ydsSummary.score} compact marketActionLabels={marketActionLabels} />
             <p className="panic-history-v2__hero-flow">
               최근 흐름 <span className="font-mono tabular-nums">{ydsSummary.trendLine}</span>
               {ydsSummary.prevScore != null ? (
