@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { buildStockPickViews, assignRanks } from "../content/ydsStockPickModel.js"
+import {
+  assignRanks,
+  buildStockPickViews,
+  filterRecommendableStockPicks,
+} from "../content/ydsStockPickModel.js"
+import { computeStockPickLoadStats } from "../content/ydsStockPickLoadStats.js"
 import { fetchStockPickLiveSnapshots } from "../content/ydsStockPickLiveFetcher.js"
 
 /**
@@ -36,12 +41,27 @@ export function useStockPickLiveData(marketContext) {
     return () => ac.abort()
   }, [marketContext])
 
-  const stocks = useMemo(
-    () => assignRanks(buildStockPickViews(marketContext, snapshotMap)),
+  const allStocks = useMemo(
+    () => buildStockPickViews(marketContext, snapshotMap),
     [marketContext, snapshotMap],
   )
 
-  return { stocks, loading, errors, lastSyncAt, liveReady: snapshotMap.size > 0 }
+  const stocks = useMemo(
+    () => assignRanks(filterRecommendableStockPicks(allStocks)),
+    [allStocks],
+  )
+
+  const loadStats = useMemo(() => computeStockPickLoadStats(allStocks), [allStocks])
+
+  return {
+    stocks,
+    allStocks,
+    loadStats,
+    loading,
+    errors,
+    lastSyncAt,
+    liveReady: loadStats.totalLive > 0,
+  }
 }
 
 /**

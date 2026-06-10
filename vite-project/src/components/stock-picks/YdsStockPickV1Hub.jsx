@@ -8,6 +8,9 @@ import {
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
+import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
+import { useStockPickStatusChanges } from "../../hooks/useStockPickStatusChanges.js"
+import YdsStockPickLoadBanner from "./YdsStockPickLoadBanner.jsx"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 
@@ -34,13 +37,15 @@ function useDualCountryLayout() {
 export default function YdsStockPickV1Hub() {
   const dualLayout = useDualCountryLayout()
   const marketContext = useYdsMarketContext()
-  const { stocks: allStocks, loading, errors, lastSyncAt, liveReady } =
+  const { stocks: liveStocks, loadStats, loading, lastSyncAt } =
     useStockPickLiveData(marketContext)
+  const heldTickers = useStockPickHeldTickers()
+  const statusChanges = useStockPickStatusChanges(liveStocks)
 
   useEffect(() => {
-    if (loading || !allStocks.length) return
-    captureTodayPickSnapshots(marketContext, 10, allStocks)
-  }, [marketContext, loading, allStocks])
+    if (loading || !liveStocks.length) return
+    captureTodayPickSnapshots(marketContext, 10, liveStocks)
+  }, [marketContext, loading, liveStocks])
   const {
     favoritesOnly,
     setFavoritesOnly,
@@ -55,14 +60,14 @@ export default function YdsStockPickV1Hub() {
 
   const stocksByCountry = useMemo(() => {
     const ranked = {
-      US: assignRanks(filterByCountry(allStocks, "US")),
-      KR: assignRanks(filterByCountry(allStocks, "KR")),
+      US: assignRanks(filterByCountry(liveStocks, "US")),
+      KR: assignRanks(filterByCountry(liveStocks, "KR")),
     }
     return {
       US: applyFavoriteFilter(ranked.US),
       KR: applyFavoriteFilter(ranked.KR),
     }
-  }, [allStocks, applyFavoriteFilter])
+  }, [liveStocks, applyFavoriteFilter])
 
   const setSectorForCountry = (country, sectorId) => {
     setSectorByCountry((prev) => ({ ...prev, [country]: sectorId }))
@@ -70,11 +75,15 @@ export default function YdsStockPickV1Hub() {
 
   return (
     <div className="yds-spick-platform">
-      {!loading && (errors.length > 0 || liveReady) ? (
+      <YdsStockPickLoadBanner stats={loadStats} loading={loading} />
+      {lastSyncAt ? (
         <p className="yds-spick-sync-note" role="status">
-          {liveReady ? "실시간 시세 반영" : "오프라인 폴백"}
-          {errors.length > 0 ? ` · 조회 실패 ${errors.length}건` : ""}
-          {lastSyncAt ? ` · ${new Date(lastSyncAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false })}` : ""}
+          마지막 동기화{" "}
+          {new Date(lastSyncAt).toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })}
         </p>
       ) : null}
       <div className="yds-spick-toolbar">
@@ -89,7 +98,7 @@ export default function YdsStockPickV1Hub() {
           aria-pressed={favoritesOnly}
           onClick={() => setFavoritesOnly((v) => !v)}
         >
-          {favoritesOnly ? "⭐ 즐겨찾기만" : "☆ 즐겨찾기만 보기"}
+          {favoritesOnly ? "⭐ 관심종목만" : "☆ 관심종목만 보기"}
           {favoriteCount > 0 ? (
             <span className="yds-spick-toolbar__count font-mono tabular-nums">{favoriteCount}</span>
           ) : null}
@@ -132,6 +141,8 @@ export default function YdsStockPickV1Hub() {
                 onSectorChange={(id) => setSectorForCountry(country.id, id)}
                 isFavorite={isFavorite}
                 onToggleFavorite={toggleFavorite}
+                heldTickers={heldTickers}
+                statusChanges={statusChanges}
                 showCountryHead
                 allSectionId={panelId}
                 loading={loading}

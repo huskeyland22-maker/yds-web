@@ -16,6 +16,8 @@ import YdsStockPickCard from "./YdsStockPickCard.jsx"
  *   onSectorChange: (id: string) => void
  *   isFavorite: (ticker: string) => boolean
  *   onToggleFavorite: (ticker: string) => void
+ *   heldTickers?: Set<string>
+ *   statusChanges?: Map<string, { fromLabel: string; toLabel: string }>
  *   showCountryHead?: boolean
  *   allSectionId?: string
  *   loading?: boolean
@@ -28,6 +30,8 @@ export default function YdsStockPickCountryPanel({
   onSectorChange,
   isFavorite,
   onToggleFavorite,
+  heldTickers = new Set(),
+  statusChanges = new Map(),
   showCountryHead = false,
   allSectionId = "spick-all",
   loading = false,
@@ -56,6 +60,8 @@ export default function YdsStockPickCountryPanel({
         stocks={top5}
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
+        heldTickers={heldTickers}
+        statusChanges={statusChanges}
         loading={loading}
       />
 
@@ -63,6 +69,7 @@ export default function YdsStockPickCountryPanel({
         stocks={sectorStocks}
         sectorId={sectorId}
         onSectorChange={onSectorChange}
+        heldTickers={heldTickers}
       />
 
       <section className="yds-spick-section yds-spick-section--all" aria-labelledby={allSectionId}>
@@ -88,6 +95,8 @@ export default function YdsStockPickCountryPanel({
                 variant="compact"
                 isFavorite={isFavorite(stock.ticker)}
                 onToggleFavorite={onToggleFavorite}
+                isHeld={heldTickers.has(stock.ticker.toUpperCase())}
+                statusChange={statusChanges.get(stock.ticker) ?? null}
               />
             ))}
           </div>

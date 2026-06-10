@@ -1,15 +1,21 @@
 import { Link } from "react-router-dom"
 import { STOCK_PICK_SECTORS } from "../../content/ydsStockPickModel.js"
-import YdsStockPickDataBadge from "./YdsStockPickDataBadge.jsx"
+import { formatTransparencyPrice } from "../../content/ydsStockPickTransparency.js"
 
 /**
  * @param {{
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   sectorId: string
  *   onSectorChange: (id: string) => void
+ *   heldTickers?: Set<string>
  * }} props
  */
-export default function YdsStockPickSectorPanel({ stocks, sectorId, onSectorChange }) {
+export default function YdsStockPickSectorPanel({
+  stocks,
+  sectorId,
+  onSectorChange,
+  heldTickers = new Set(),
+}) {
   return (
     <section className="yds-spick-section yds-spick-section--sector" aria-labelledby="spick-sector">
       <h2 id="spick-sector" className="yds-spick-section__title">
@@ -46,15 +52,18 @@ export default function YdsStockPickSectorPanel({ stocks, sectorId, onSectorChan
               >
                 <span className="yds-spick-sector-list__name">
                   {stock.name}
-                  <YdsStockPickDataBadge
-                    mode={stock.dataSource === "live" ? "live" : "fallback"}
-                  />
+                  {heldTickers.has(stock.ticker.toUpperCase()) ? (
+                    <span className="yds-spick-sector-list__held">보유</span>
+                  ) : null}
                 </span>
                 <span className="yds-spick-sector-list__status">
                   <span aria-hidden>{stock.stockStatus.emoji}</span> {stock.stockStatus.label}
                 </span>
-                <span className="yds-spick-sector-list__action">
-                  <span aria-hidden>{stock.stockAction.emoji}</span> {stock.stockAction.label}
+                <span className="yds-spick-sector-list__price font-mono tabular-nums">
+                  {formatTransparencyPrice(
+                    stock.quote?.price ?? stock.snapshot?.close,
+                    stock.country === "KR" ? "KR" : "US",
+                  )}
                 </span>
               </Link>
             </li>

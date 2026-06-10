@@ -7,6 +7,7 @@ import {
   getTop5Stocks,
   getRankingStocks,
   filterBySector,
+  filterRecommendableStockPicks,
   getStockPicksForCountry,
   getStockPickByTicker,
 } from "../vite-project/src/content/ydsStockPickModel.js"
@@ -37,17 +38,24 @@ assert(nvda.stockAction.label.length > 0, "stock action")
 assert(nvda.stockStatus.label.length > 0, "stock status")
 assert(nvda.snapshot?.country === "US", "snapshot provider")
 
-const top3 = getTop3Stocks(all)
-assert(top3.length === 3, "top3")
+assert(getTop5Stocks(all).length === 0, "top5 excludes fallback offline")
+
+const mockLive = all.slice(0, 8).map((s) => ({ ...s, dataSource: "live" }))
+const top3 = getTop3Stocks(mockLive)
+assert(top3.length === 3, "top3 live only")
 assert(top3[0].rank === 1, "rank1 dynamic")
+const top5 = getTop5Stocks(mockLive)
+assert(top5.length === 5, "top5 from live mock")
 
-const top5 = getTop5Stocks(all)
-assert(top5.length === 5, "top5")
-
-const ranking = getRankingStocks(all, 5)
+const ranking = getRankingStocks(mockLive, 5)
 assert(ranking[0].scores.totalScore >= ranking[4].scores.totalScore, "rank order")
 
-assert(filterBySector(all, "nuclear").length >= 4, "nuclear sector")
+const mockLiveNuclear = all
+  .filter((s) => s.sector === "nuclear")
+  .slice(0, 4)
+  .map((s) => ({ ...s, dataSource: "live" }))
+assert(filterBySector(mockLiveNuclear, "nuclear").length >= 1, "nuclear sector live")
+assert(filterRecommendableStockPicks(all).length === 0, "recommendable empty offline")
 
 const requiredKr = [
   "012450",

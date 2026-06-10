@@ -18,6 +18,10 @@ import {
   deriveStatusFromSnapshot,
 } from "./ydsStockPickStatusEngine.js"
 import {
+  explainStatusFromSnapshot,
+  logStockPickStatusVerification,
+} from "./ydsStockPickStatusDiag.js"
+import {
   formatScoreBreakdownRows,
   normalizeScoreBreakdown,
   YDS_SCORE_WEIGHTS,
@@ -101,10 +105,40 @@ export const RATING_STARS = {
  *   marketFitSource: 'adapter' | 'manual'
  *   sectorLabel: string
  *   dataSource: 'live' | 'fallback'
+ *   quoteSource: string | null
+ *   statusDiag: ReturnType<typeof explainStatusFromSnapshot> | null
  *   quote: import("./ydsStockPickQuoteService.js").StockPickQuoteView | null
  *   recommendReasonsDetail: import("./ydsStockRecommendReasons.js").RecommendReason[]
  * }} StockPickView
  */
+
+/** @param {import("./ydsStockPickLiveFetcher.js").LivePickSnapshotEntry | null} liveEntry */
+function resolveQuoteSource(liveEntry) {
+  const raw = liveEntry?.apiBody?.dataSource ?? liveEntry?.apiBody?.dataSourceBadgeKey
+  if (!raw) return liveEntry ? "API" : null
+  const key = String(raw).toLowerCase()
+  if (key.includes("kis") || key === "krx_close") return "KIS"
+  if (key.includes("yahoo")) return "Yahoo"
+  if (key.includes("naver")) return "Naver"
+  return String(raw)
+}
+
+/** @param {StockPickView | null | undefined} stock */
+export function isLiveStockPick(stock) {
+  return stock?.dataSource === "live"
+}
+
+/** @param {StockPickView[]} stocks */
+export function filterLiveStockPicks(stocks) {
+  return stocks.filter(isLiveStockPick)
+}
+
+/**
+ * @param {StockPickView[]} stocks
+ */
+export function filterRecommendableStockPicks(stocks) {
+  return filterLiveStockPicks(stocks)
+}
 
 /**
  * @param {StockPickRecord} row
@@ -191,6 +225,19 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
   })
 
   const action = actionFromStatus(statusId, recommendReasons)
+  const isLive = Boolean(liveEntry)
+  const statusDiag = isLive
+    ? explainStatusFromSnapshot(engineSnapshot, liveEntry.extras ?? {})
+    : null
+
+  if (isLive && statusDiag && typeof globalThis.window !== "undefined") {
+    logStockPickStatusVerification({
+      name: row.name,
+      ticker: row.ticker,
+      dataSource: "live",
+      statusDiag,
+    })
+  }
 
   return {
     ...row,
@@ -212,7 +259,9 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     recommendReasonSummary: formatRecommendReasonSummary(recommendReasons),
     marketFitSource: ctx ? "adapter" : "manual",
     sectorLabel,
-    dataSource: liveEntry ? "live" : "fallback",
+    dataSource: isLive ? "live" : "fallback",
+    quoteSource: resolveQuoteSource(liveEntry),
+    statusDiag,
     quote: liveEntry?.quote ?? null,
   }
 }
@@ -298,18 +347,19 @@ export function getTop3Stocks(stocks) {
 
 /** @param {StockPickView[]} stocks */
 export function getTop5Stocks(stocks) {
-  return sortStockPicks(stocks, "rank", "asc").slice(0, 5)
+  return sortStockPicks(filterRecommendableStockPicks(stocks), "rank", "asc").slice(0, 5)
 }
 
 /** @param {StockPickView[]} stocks */
 export function getRankingStocks(stocks, limit = 5) {
-  return sortStockPicks(stocks, "rank", "asc").slice(0, limit)
+  return sortStockPicks(filterRecommendableStockPicks(stocks), "rank", "asc").slice(0, limit)
 }
 
 /** @param {StockPickView[]} stocks @param {string} sectorId */
 export function filterBySector(stocks, sectorId) {
-  if (!sectorId || sectorId === "all") return stocks
-  return stocks.filter((s) => s.sector === sectorId)
+  const base = filterRecommendableStockPicks(stocks)
+  if (!sectorId || sectorId === "all") return base
+  return base.filter((s) => s.sector === sectorId)
 }
 
 export { DEFAULT_MARKET_CONTEXT } from "./ydsMarketAdapter.js"

@@ -6,10 +6,19 @@ import YdsStockPickCard from "./YdsStockPickCard.jsx"
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   isFavorite: (ticker: string) => boolean
  *   onToggleFavorite: (ticker: string) => void
+ *   heldTickers?: Set<string>
+ *   statusChanges?: Map<string, { fromLabel: string; toLabel: string }>
  *   loading?: boolean
  * }} props
  */
-export default function YdsStockPickTop3({ stocks, isFavorite, onToggleFavorite, loading }) {
+export default function YdsStockPickTop3({
+  stocks,
+  isFavorite,
+  onToggleFavorite,
+  heldTickers = new Set(),
+  statusChanges = new Map(),
+  loading,
+}) {
   return (
     <section className="yds-spick-section yds-spick-section--hero" aria-labelledby="spick-top5">
       <h2 id="spick-top5" className="yds-spick-section__title">
@@ -28,6 +37,8 @@ export default function YdsStockPickTop3({ stocks, isFavorite, onToggleFavorite,
               medal={TOP5_MEDALS[index]}
               isFavorite={isFavorite(stock.ticker)}
               onToggleFavorite={onToggleFavorite}
+              isHeld={heldTickers.has(stock.ticker.toUpperCase())}
+              statusChange={statusChanges.get(stock.ticker) ?? null}
             />
           ))}
         </div>
