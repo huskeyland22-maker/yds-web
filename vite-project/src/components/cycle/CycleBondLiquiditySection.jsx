@@ -1,18 +1,21 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
-import { metricDisplayTooltip } from "../../macro-risk/metricLabels.js"
 import {
   bondCollectionAlertLine,
   buildBondLiquidityGroups,
   bondStatusSummaryLine,
 } from "../../market-os/bondLiquidityReference.js"
 import { resolveMarketUpdateTime } from "../../utils/marketUpdateTime.js"
-import { slopeArrow } from "../../macro-risk/seriesMath.js"
-
 const EXPERT_KEYS = ["REAL_YIELD", "BEI"]
 
 const PANEL_TITLE = "장기 참고 지표 (미국장 종가 기준)"
+
+/** @type {Record<string, string>} */
+const EXPERT_TAG = {
+  REAL_YIELD: "실질금리",
+  BEI: "인플레 기대",
+}
 
 /**
  * @param {string} key
@@ -78,6 +81,31 @@ function MetricGroup({ title, lines }) {
 }
 
 /**
+ * @param {Record<string, object>} tierByKey
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
+ * @returns {import("../../market-os/bondLiquidityReference.js").BondCompactLine[]}
+ */
+function buildExpertCompactLines(tierByKey, formatValue) {
+  return EXPERT_KEYS.map((key) => {
+    const row = tierByKey[key]
+    const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
+    const n = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
+    const slope = row?.slope ?? "flat"
+    const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
+
+    return {
+      key,
+      shortLabel: key === "REAL_YIELD" ? "REAL" : "BEI",
+      value: n != null ? formatValue(key, n, fmt) : "—",
+      arrow,
+      warn: false,
+      tag: EXPERT_TAG[key] ?? key,
+      missing: n == null,
+    }
+  })
+}
+
+/**
  * @param {{
  *   snapshot?: import("../../macro-risk/engine.js").MacroRiskSnapshot | null
  *   panicData?: object | null
@@ -85,6 +113,7 @@ function MetricGroup({ title, lines }) {
  *   fetchFailed?: boolean
  *   timedOut?: boolean
  *   error?: string | null
+ *   variant?: "default" | "desk"
  * }} props
  */
 export default function CycleBondLiquiditySection({
@@ -94,17 +123,12 @@ export default function CycleBondLiquiditySection({
   fetchFailed = false,
   timedOut = false,
   error = null,
+  variant = "default",
 }) {
   const enabled = isMacroRiskEnabled()
-  const [expertOpen, setExpertOpen] = useState(false)
+  const isDesk = variant === "desk"
 
   const marketUpdateTime = useMemo(() => resolveMarketUpdateTime(panicData), [panicData])
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash === "#bond-liquidity") {
-      setExpertOpen(true)
-    }
-  }, [])
 
   const hardFetchFailed = timedOut || Boolean(error)
 
@@ -116,13 +140,17 @@ export default function CycleBondLiquiditySection({
     [snapshot, panicData?.move, hardFetchFailed],
   )
 
-  const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
-  const collectionAlert = useMemo(() => bondCollectionAlertLine(snapshot), [snapshot])
-
   const tierByKey = useMemo(() => {
     const rows = [...(snapshot?.tieredMetrics?.tier1 ?? []), ...(snapshot?.tieredMetrics?.tier2 ?? [])]
     return Object.fromEntries(rows.map((r) => [r.key, r]))
   }, [snapshot])
+
+  const expertLines = useMemo(() => buildExpertCompactLines(tierByKey, fmtBondValue), [tierByKey])
+
+  const bondLines = useMemo(() => [...groups.bond, ...expertLines], [groups.bond, expertLines])
+
+  const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
+  const collectionAlert = useMemo(() => bondCollectionAlertLine(snapshot), [snapshot])
 
   const showInitialLoading = loading && !snapshot && !timedOut
   const showBody = !showInitialLoading
@@ -140,21 +168,46 @@ export default function CycleBondLiquiditySection({
   return (
     <section
       id="bond-liquidity"
-      className="cycle-bond-section cycle-bond-section--reference scroll-mt-24"
-      aria-label={PANEL_TITLE}
+      className={[
+        "cycle-bond-section",
+        "cycle-bond-section--reference",
+        isDesk ? "cycle-bond-section--desk" : "",
+        "scroll-mt-24",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      aria-label={isDesk ? "채권 · 유동성" : PANEL_TITLE}
     >
-      <div className="cycle-bond-panel cycle-bond-panel--compact cycle-bond-panel--reference">
-        <header className="cycle-bond-panel__header cycle-bond-panel__header--compact">
-          <div className="min-w-0 flex-1">
-            <p className="m-0 cycle-bond-panel__title-ref">{PANEL_TITLE}</p>
-            <div className="mt-0.5">
-              <p className="m-0 text-[9px] font-medium text-slate-500">{marketUpdateTime.basisNote}</p>
-              <p className="m-0 font-mono text-[10px] font-semibold tabular-nums text-slate-300">
-                {marketUpdateTime.kstLabel ?? "—"}
-              </p>
+      <div
+        className={[
+          "cycle-bond-panel",
+          "cycle-bond-panel--compact",
+          "cycle-bond-panel--reference",
+          isDesk ? "cycle-bond-panel--desk" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {!isDesk ? (
+          <header className="cycle-bond-panel__header cycle-bond-panel__header--compact">
+            <div className="min-w-0 flex-1">
+              <p className="m-0 cycle-bond-panel__title-ref">{PANEL_TITLE}</p>
+              <div className="mt-0.5">
+                <p className="m-0 text-[9px] font-medium text-slate-500">{marketUpdateTime.basisNote}</p>
+                <p className="m-0 font-mono text-[10px] font-semibold tabular-nums text-slate-300">
+                  {marketUpdateTime.kstLabel ?? "—"}
+                </p>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        ) : (
+          <p className="m-0 cycle-bond-panel__desk-meta">
+            <span className="cycle-bond-panel__desk-meta-note">{marketUpdateTime.basisNote}</span>
+            <span className="cycle-bond-panel__desk-meta-time font-mono tabular-nums">
+              {marketUpdateTime.kstLabel ?? "—"}
+            </span>
+          </p>
+        )}
 
         {showInitialLoading ? (
           <p className="m-0 cycle-bond-panel__body cycle-bond-placeholder" role="status">
@@ -174,50 +227,9 @@ export default function CycleBondLiquiditySection({
             </p>
 
             <div className="cycle-bond-split">
-              <MetricGroup title="채권" lines={groups.bond} />
+              <MetricGroup title="채권" lines={bondLines} />
               <MetricGroup title="유동성" lines={groups.liquidity} />
             </div>
-
-            {snapshot ? (
-              <div className="cycle-bond-expert">
-                <button
-                  type="button"
-                  onClick={() => setExpertOpen((v) => !v)}
-                  className="cycle-bond-expert-toggle"
-                  aria-expanded={expertOpen}
-                >
-                  <span>전문가 보기</span>
-                  <span className="cycle-data-basis__muted">{expertOpen ? "▲" : "▼"}</span>
-                </button>
-                {expertOpen ? (
-                  <div className="cycle-bond-expert-body">
-                    <div className="cycle-bond-expert-grid">
-                      {EXPERT_KEYS.map((key) => {
-                        const row = tierByKey[key]
-                        const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
-                        const value =
-                          row?.current != null && Number.isFinite(Number(row.current))
-                            ? fmtBondValue(key, Number(row.current), fmt)
-                            : "—"
-                        const title = key === "REAL_YIELD" ? "REAL" : "BEI"
-                        const hint = metricDisplayTooltip(key) ?? "—"
-
-                        return (
-                          <article key={key} className="cycle-bond-expert-card">
-                            <p className="m-0 cycle-bond-expert-card__head">
-                              <span className="font-bold text-slate-200">{title}</span>
-                              <span className="font-mono tabular-nums text-slate-50">{value}</span>
-                              <span className="text-slate-400">{slopeArrow(row?.slope ?? "flat")}</span>
-                            </p>
-                            <p className="m-0 cycle-bond-expert-card__hint">{hint}</p>
-                          </article>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
           </div>
         ) : null}
       </div>

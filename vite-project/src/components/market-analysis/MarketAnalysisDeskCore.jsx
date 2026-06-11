@@ -90,12 +90,16 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           rows={scorecardRows}
           loading={scorecardLoading}
         />
-      </div>
 
-      <details className="yds-market-desk__detail">
-        <summary className="yds-market-desk__detail-summary">채권 · 유동성</summary>
-        <div className="yds-market-desk__detail-body">
+        <section
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--bond"
+          aria-labelledby="market-block-bond"
+        >
+          <h2 id="market-block-bond" className="yds-market-desk__block-label">
+            채권 · 유동성
+          </h2>
           <CycleBondLiquiditySection
+            variant="desk"
             panicData={panicData}
             snapshot={bondSnapshot.snapshot}
             loading={bondSnapshot.loading}
@@ -103,8 +107,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             timedOut={bondSnapshot.timedOut}
             error={bondSnapshot.error}
           />
-        </div>
-      </details>
+        </section>
+      </div>
     </div>
   )
 }

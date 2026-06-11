@@ -26725,6 +26725,38 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 
+.yds-market-desk__slot--bond {
+  margin-bottom: 0.15rem;
+}
+
+.cycle-bond-section--desk {
+  margin: 0;
+}
+
+.cycle-bond-panel--desk {
+  padding: 0.5rem 0.55rem 0.55rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 0.55rem;
+}
+
+.cycle-bond-panel__desk-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.2rem 0.45rem;
+  margin-bottom: 0.35rem;
+  font-size: clamp(0.48rem, 1.35vw, 0.56rem);
+  color: #64748b;
+}
+
+.cycle-bond-panel__desk-meta-time {
+  font-size: clamp(0.5rem, 1.4vw, 0.58rem);
+  font-weight: 600;
+  color: #94a3b8;
+}
+
 @media (max-width: 720px) {
   .yds-market-trend__grid {
     grid-template-columns: 1fr;
