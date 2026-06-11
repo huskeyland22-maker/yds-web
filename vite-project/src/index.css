@@ -26502,6 +26502,62 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.35rem;
 }
 
+.yds-market-hero__score-card--minimal {
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0.45rem 0.5rem 0.5rem;
+  gap: 0.15rem;
+  text-align: center;
+}
+
+.yds-market-hero__score-card--minimal .yds-market-hero__card-label {
+  margin-bottom: 0.05rem;
+}
+
+.yds-market-hero__score-card--minimal .yds-market-hero__score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 3.25rem;
+  margin: 0.05rem 0 0.15rem;
+  font-size: clamp(2.85rem, 13vw, 3.45rem);
+  color: #f8fafc;
+}
+
+.yds-market-hero__score-card--panic.yds-market-hero__score-card--minimal .yds-market-hero__score {
+  color: #93c5fd;
+}
+
+.yds-market-hero__stage-rail {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.14rem;
+}
+
+.yds-market-hero__stage-rail-item {
+  padding: 0.2rem 0.3rem;
+  border-radius: 0.38rem;
+  font-size: clamp(0.56rem, 1.6vw, 0.66rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: #64748b;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.yds-market-hero__stage-rail-item--active {
+  color: #e2e8f0;
+  font-weight: 800;
+  background: color-mix(in srgb, var(--stage-color, #94a3b8) 9%, transparent);
+  border-color: color-mix(in srgb, var(--stage-color, #94a3b8) 26%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--stage-color, #94a3b8) 11%, transparent);
+}
+
 .yds-market-hero__score-card--state {
   border-color: rgba(251, 191, 36, 0.18);
 }

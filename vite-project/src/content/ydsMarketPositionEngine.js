@@ -41,15 +41,15 @@ export const MARKET_POSITION_STAGES = [
   {
     id: "fear",
     emoji: "🟢",
-    label: "공포",
-    short: "공포",
+    label: "위축",
+    short: "위축",
     color: "#22c55e",
   },
   {
     id: "panic",
     emoji: "🔵",
-    label: "패닉",
-    short: "패닉",
+    label: "충격",
+    short: "충격",
     color: "#3b82f6",
   },
 ]
@@ -102,6 +102,31 @@ export function resolveMarketPositionId(cnn, vix, bofa) {
   return "adjustment"
 }
 
+/** @type {Record<MarketPositionId, number>} */
+const STAGE_SCORE_ANCHOR = {
+  overheat: 85,
+  boundary: 68,
+  adjustment: 52,
+  fear: 34,
+  panic: 16,
+}
+
+/**
+ * 시장 상태 카드 표시용 0~100 점수 (높을수록 과열·낙관)
+ * @param {number | null} cnn
+ * @param {number | null} vix
+ * @param {number | null} bofa
+ * @param {MarketPositionId} stageId
+ */
+export function computeMarketPositionScore(cnn, vix, bofa, stageId) {
+  const anchor = STAGE_SCORE_ANCHOR[stageId] ?? 50
+  const c = cnn ?? 50
+  const v = vix ?? 20
+  const b = bofa ?? 5.5
+  const nudge = (c - 50) * 0.12 + (20 - v) * 0.35 + (b - 5.5) * 1.2
+  return Math.max(0, Math.min(100, Math.round(anchor + nudge)))
+}
+
 /**
  * @param {object | null | undefined} panicData
  */
@@ -149,16 +174,19 @@ export function resolveMarketPositionView(panicData) {
   const position = resolveMarketPosition(panicData)
   if (!position) return null
 
-  const nav = resolveMarketPositionNavigation(position.id)
+  const score = computeMarketPositionScore(position.cnn, position.vix, position.bofa, position.id)
+  const rail = MARKET_POSITION_STAGES.map((stage) => ({
+    id: stage.id,
+    emoji: stage.emoji,
+    label: stage.label,
+    color: stage.color,
+    active: stage.id === position.id,
+  }))
 
   return {
     position,
-    nav,
-    metricsLine: [
-      position.cnn != null ? `CNN ${Math.round(position.cnn)}` : null,
-      position.vix != null ? `VIX ${position.vix.toFixed(1)}` : null,
-    ]
-      .filter(Boolean)
-      .join(" · "),
+    score,
+    rail,
+    nav: resolveMarketPositionNavigation(position.id),
   }
 }
