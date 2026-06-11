@@ -3,7 +3,6 @@ import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
-import YdsMarketHeroStack from "./YdsMarketHeroStack.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
 import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
 import YdsDualCycleHero from "./YdsDualCycleHero.jsx"
@@ -60,8 +59,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           panicData={panicData}
           historyRows={safeHistory}
         />
-
-        <YdsMarketHeroStack panicData={panicData} historyRows={safeHistory} />
 
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--timeline"

@@ -82,45 +82,6 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
     <section className="yds-dual-cycle-hero" aria-label="공포·시장 Dual Cycle">
       <div className="yds-dual-cycle-hero__grid">
         <article
-          className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--fear"
-          aria-label="공포 사이클"
-        >
-          <p className="yds-dual-cycle-hero__axis-label">패닉 강도 · 장기</p>
-          <p className="yds-dual-cycle-hero__score-secondary font-mono tabular-nums">
-            YDS <span>{model.score}</span>
-          </p>
-          <p
-            className="yds-dual-cycle-hero__stage"
-            style={{ "--axis-color": model.fearStage.color }}
-          >
-            <span aria-hidden>{model.fearStage.emoji}</span> {model.fearStage.label}
-          </p>
-          <p className="yds-dual-cycle-hero__segment">{model.philosophy.segmentLabel}</p>
-
-          <div className="yds-dual-cycle-hero__rail" aria-hidden>
-            {YDS_FEAR_CYCLE_RAIL.map((step) => {
-              const active = step.id === model.fearStage.id
-              const band = MACRO_V1_STATUS_BANDS.find((b) => b.id === step.id)
-              return (
-                <span
-                  key={step.id}
-                  className={[
-                    "yds-dual-cycle-hero__chip",
-                    active ? "yds-dual-cycle-hero__chip--active" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  data-stage={step.id}
-                  style={active ? { "--chip-color": band?.color ?? "#94a3b8" } : undefined}
-                >
-                  {step.emoji} {step.short}
-                </span>
-              )
-            })}
-          </div>
-        </article>
-
-        <article
           className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--market"
           aria-label="시장 상태"
         >
@@ -152,9 +113,6 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
           <p className="yds-dual-cycle-hero__metrics font-mono tabular-nums">
             CNN {fmtMetric(model.cnn, 0)} · BofA {fmtMetric(model.bofa)}
           </p>
-          <p className="yds-dual-cycle-hero__segment">
-            {model.levelRegime?.regime?.summary ?? model.marketStage.role}
-          </p>
 
           <div className="yds-dual-cycle-hero__rail" aria-hidden>
             {MARKET_CYCLE_STAGES.map((step) => {
@@ -171,6 +129,44 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
                   data-market={step.id}
                   title={step.tooltip}
                   style={active ? { "--chip-color": step.color } : undefined}
+                >
+                  {step.emoji} {step.short}
+                </span>
+              )
+            })}
+          </div>
+        </article>
+
+        <article
+          className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--fear"
+          aria-label="패닉 강도"
+        >
+          <p className="yds-dual-cycle-hero__axis-label">패닉 강도</p>
+          <p className="yds-dual-cycle-hero__score-secondary font-mono tabular-nums">
+            YDS <span>{model.score}</span>
+          </p>
+          <p
+            className="yds-dual-cycle-hero__stage"
+            style={{ "--axis-color": model.fearStage.color }}
+          >
+            <span aria-hidden>{model.fearStage.emoji}</span> {model.fearStage.label}
+          </p>
+
+          <div className="yds-dual-cycle-hero__rail" aria-hidden>
+            {YDS_FEAR_CYCLE_RAIL.map((step) => {
+              const active = step.id === model.fearStage.id
+              const band = MACRO_V1_STATUS_BANDS.find((b) => b.id === step.id)
+              return (
+                <span
+                  key={step.id}
+                  className={[
+                    "yds-dual-cycle-hero__chip",
+                    active ? "yds-dual-cycle-hero__chip--active" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  data-stage={step.id}
+                  style={active ? { "--chip-color": band?.color ?? "#94a3b8" } : undefined}
                 >
                   {step.emoji} {step.short}
                 </span>

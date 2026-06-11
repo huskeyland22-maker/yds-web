@@ -16,7 +16,7 @@ export default function YdsMarketScoreHero({
       className={["yds-market-score-hero", "yds-market-hero--desk", className]
         .filter(Boolean)
         .join(" ")}
-      aria-label="YDS 시장 상태 · 패닉 강도"
+      aria-label="시장 상태 · 패닉 강도"
     >
       <div className="yds-market-score-hero__header yds-market-desk__slot yds-market-desk__slot--scores-meta">
         <span className="yds-market-hero__header-spacer" aria-hidden />
