@@ -132,6 +132,39 @@ const SHORT_LABEL = {
   MOVE: "MOVE",
 }
 
+/** @type {Record<string, string>} */
+const BOND_CORE_LABELS = {
+  US10Y: "10Y 수익률",
+  US30Y: "30Y 수익률",
+  REAL_YIELD: "실질금리(REAL)",
+  BEI: "기대인플레이션(BEI)",
+}
+
+export const BOND_CORE_KEYS = ["US10Y", "US30Y", "REAL_YIELD", "BEI"]
+
+/**
+ * @typedef {{
+ *   key: string
+ *   label: string
+ *   value: string
+ *   arrow: "↑" | "↓" | null
+ *   warn: boolean
+ *   stale: boolean
+ * }} BondCoreMetricLine
+ */
+
+/**
+ * @typedef {"collecting" | "ready" | "fetch_failed" | "no_data"} BondCoreUiPhase
+ */
+
+/**
+ * @typedef {{
+ *   phase: BondCoreUiPhase
+ *   lines: BondCoreMetricLine[]
+ *   badge: string | null
+ * }} BondCoreUiState
+ */
+
 /**
  * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
  * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
@@ -297,6 +330,118 @@ export function buildBondLiquidityGroups(snapshot, formatValue, panicMove = null
     bond,
     liquidity: [dxyLine, buildMoveCompactLine(panicMove, formatValue)],
   }
+}
+
+/**
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
+ * @param {string} key
+ * @returns {{ cur: number; stale: boolean } | null}
+ */
+function resolveBondCoreNumeric(snapshot, key) {
+  const { cur, stale } = resolveMetricSpot(snapshot, key)
+  if (cur == null || !Number.isFinite(cur)) return null
+  if ((key === "US10Y" || key === "US30Y") && !isValidUsTreasuryYield(cur)) return null
+  return { cur, stale }
+}
+
+/**
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
+ * @returns {BondCoreMetricLine[]}
+ */
+export function buildBondCoreMetricLines(snapshot, formatValue) {
+  if (!snapshot) return []
+
+  const statuses = deriveBondReferenceStatuses(snapshot)
+
+  /** @type {BondCoreMetricLine[]} */
+  const lines = []
+  for (const key of BOND_CORE_KEYS) {
+    const resolved = resolveBondCoreNumeric(snapshot, key)
+    if (!resolved) continue
+
+    const row = metricRow(snapshot, key)
+    const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
+    let value = formatValue(key, resolved.cur, fmt)
+    if (resolved.stale) value = `${value} ${STALE_VALUE_SUFFIX}`
+
+    const slope = row?.slope ?? "flat"
+    const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : null
+
+    lines.push({
+      key,
+      label: BOND_CORE_LABELS[key] ?? key,
+      value,
+      arrow,
+      warn: key === "US30Y" && (statuses.includes("장기채 경고") || resolved.cur >= 5),
+      stale: resolved.stale,
+    })
+  }
+  return lines
+}
+
+/**
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
+ * @returns {boolean}
+ */
+export function hasBondCoreMetricData(snapshot, formatValue) {
+  return buildBondCoreMetricLines(snapshot, formatValue).length > 0
+}
+
+/**
+ * @param {{
+ *   loading?: boolean
+ *   fetchFailed?: boolean
+ *   error?: string | null
+ *   timedOut?: boolean
+ *   snapshot?: import("../macro-risk/engine.js").MacroRiskSnapshot | null
+ *   formatValue: (key: string, n: number | null, fmt?: string) => string
+ * }} input
+ * @returns {BondCoreUiState}
+ */
+export function resolveBondCoreUiState({
+  loading = false,
+  fetchFailed = false,
+  error = null,
+  timedOut = false,
+  snapshot = null,
+  formatValue,
+}) {
+  const lines = buildBondCoreMetricLines(snapshot, formatValue)
+  if (lines.length > 0) {
+    return { phase: "ready", lines, badge: null }
+  }
+  if (loading) {
+    return { phase: "collecting", lines: [], badge: "채권 데이터 수집 중" }
+  }
+  if (fetchFailed || timedOut || Boolean(error)) {
+    return { phase: "fetch_failed", lines: [], badge: "채권 데이터 미수신" }
+  }
+  return { phase: "no_data", lines: [], badge: "채권 데이터 미수신" }
+}
+
+/**
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
+ * @returns {BondCompactLine[]}
+ */
+export function buildLiquidityMetricLines(snapshot, formatValue, panicMove = null) {
+  const statuses = snapshot ? deriveBondReferenceStatuses(snapshot) : []
+  const lines = []
+
+  if (snapshot) {
+    const dxy = buildMetricCompactLine(snapshot, formatValue, statuses, "DXY")
+    if (!dxy.missing) lines.push(dxy)
+  } else {
+    const dxy = placeholderBondLine("DXY", formatValue)
+    if (!dxy.missing) lines.push(dxy)
+  }
+
+  const move = buildMoveCompactLine(panicMove, formatValue)
+  if (!move.missing) lines.push(move)
+
+  return lines
 }
 
 /** @deprecated Use buildBondLiquidityGroups */

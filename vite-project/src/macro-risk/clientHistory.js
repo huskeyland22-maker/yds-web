@@ -159,6 +159,7 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
     bondFetchErrors = {
       _client: /timeout/i.test(msg) ? "market-data_timeout" : "market-data_fetch_failed",
     }
+    console.warn("[bond-liquidity] market-data 수집 실패", { message: msg, bondFetchErrors })
   }
 
   const cycleUpdatedAt = String(panicContext?.updatedAt ?? "").trim()

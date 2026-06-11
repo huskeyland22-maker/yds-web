@@ -139,6 +139,9 @@ export default function PanicDeskDashboard({
           panicData={panicData}
           snapshot={bondSnapshot.snapshot}
           loading={bondSnapshot.loading}
+          fetchFailed={bondSnapshot.fetchFailed}
+          timedOut={bondSnapshot.timedOut}
+          error={bondSnapshot.error}
         />
       </div>
 

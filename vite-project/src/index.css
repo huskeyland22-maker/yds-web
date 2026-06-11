@@ -6958,6 +6958,80 @@
     color: rgba(148, 163, 184, 0.82);
   }
 
+  .cycle-bond-status-badge {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 5px 10px;
+    border-radius: 0.45rem;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    background: rgba(251, 191, 36, 0.12);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(253, 224, 71, 0.95);
+  }
+
+  .cycle-bond-core-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .cycle-bond-core-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+  }
+
+  .cycle-bond-core-line__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(203, 213, 225, 0.88);
+  }
+
+  .cycle-bond-core-line__value {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(241, 245, 249, 0.96);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .cycle-bond-core-line__value--stale {
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .cycle-bond-core-line__arrow {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(203, 213, 225, 0.75);
+    min-width: 1ch;
+    text-align: center;
+  }
+
+  .cycle-bond-core-line__arrow--up {
+    color: rgba(248, 113, 113, 0.95);
+  }
+
+  .cycle-bond-core-line__arrow--down {
+    color: rgba(52, 211, 153, 0.95);
+  }
+
+  .cycle-bond-core-line__warn {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .cycle-bond-core-line__tag {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(100, 116, 139, 0.95);
+    white-space: nowrap;
+  }
+
   .cycle-bond-compact-line__value--stale {
     color: rgba(148, 163, 184, 0.95);
   }

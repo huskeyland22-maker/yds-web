@@ -1,22 +1,14 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
-import { hasBondLiquiditySpotCache, getBondLiquiditySpotCache } from "../../macro-risk/bondLiquiditySpotCache.js"
 import {
-  bondDataDelayed,
-  buildBondLiquidityGroups,
   bondStatusSummaryLine,
+  buildLiquidityMetricLines,
+  resolveBondCoreUiState,
 } from "../../market-os/bondLiquidityReference.js"
 import { resolveMarketUpdateTime } from "../../utils/marketUpdateTime.js"
-const EXPERT_KEYS = ["REAL_YIELD", "BEI"]
 
 const PANEL_TITLE = "장기 참고 지표 (미국장 종가 기준)"
-
-/** @type {Record<string, string>} */
-const EXPERT_TAG = {
-  REAL_YIELD: "실질금리",
-  BEI: "인플레 기대",
-}
 
 /**
  * @param {string} key
@@ -25,90 +17,97 @@ const EXPERT_TAG = {
  */
 function fmtBondValue(key, n, fmt = "rate") {
   if (n == null || !Number.isFinite(n)) return "—"
-  if ((key === "US10Y" || key === "US30Y" || key === "US2Y") && n <= 0.05) return "데이터 없음"
+  if ((key === "US10Y" || key === "US30Y" || key === "US2Y") && n <= 0.05) return "—"
   return formatCurrent(n, fmt)
 }
 
-/**
- * @param {import("../../market-os/bondLiquidityReference.js").BondCompactLine} line
- */
-function CompactMetricLine({ line }) {
+/** @param {{ text: string }} props */
+function BondStatusBadge({ text }) {
   return (
-    <div className="cycle-bond-compact-line">
-      <span className="cycle-bond-compact-line__metric">{line.shortLabel}</span>
+    <p className="m-0 cycle-bond-status-badge" role="status">
+      {text}
+    </p>
+  )
+}
+
+/**
+ * @param {import("../../market-os/bondLiquidityReference.js").BondCoreMetricLine} line
+ */
+function BondCoreMetricRow({ line }) {
+  return (
+    <div className="cycle-bond-core-line">
+      <span className="cycle-bond-core-line__label">{line.label}</span>
       <span
         className={[
-          "cycle-bond-compact-line__value font-mono tabular-nums",
-          line.missing ? "cycle-bond-compact-line__value--missing" : "",
-          line.stale ? "cycle-bond-compact-line__value--stale" : "",
-          line.failed ? "cycle-bond-compact-line__value--failed" : "",
+          "cycle-bond-core-line__value font-mono tabular-nums",
+          line.stale ? "cycle-bond-core-line__value--stale" : "",
         ]
           .filter(Boolean)
           .join(" ")}
       >
         {line.value}
       </span>
+      {line.warn ? (
+        <span className="cycle-bond-core-line__warn" aria-hidden>
+          ⚠
+        </span>
+      ) : line.arrow ? (
+        <span
+          className={[
+            "cycle-bond-core-line__arrow",
+            line.arrow === "↑" ? "cycle-bond-core-line__arrow--up" : "",
+            line.arrow === "↓" ? "cycle-bond-core-line__arrow--down" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-hidden
+        >
+          {line.arrow}
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+/**
+ * @param {import("../../market-os/bondLiquidityReference.js").BondCompactLine} line
+ */
+function LiquidityMetricRow({ line }) {
+  const showArrow = line.arrow === "↑" || line.arrow === "↓"
+  return (
+    <div className="cycle-bond-core-line">
+      <span className="cycle-bond-core-line__label">{line.shortLabel}</span>
       <span
         className={[
-          "cycle-bond-compact-line__arrow",
-          line.arrow === "↑" ? "cycle-bond-compact-line__arrow--up" : "",
-          line.arrow === "↓" ? "cycle-bond-compact-line__arrow--down" : "",
+          "cycle-bond-core-line__value font-mono tabular-nums",
+          line.stale ? "cycle-bond-core-line__value--stale" : "",
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        {line.warn ? "⚠" : line.arrow}
+        {line.value}
       </span>
-      <span className="cycle-bond-compact-line__tag">{line.tag}</span>
+      {line.warn ? (
+        <span className="cycle-bond-core-line__warn" aria-hidden>
+          ⚠
+        </span>
+      ) : showArrow ? (
+        <span
+          className={[
+            "cycle-bond-core-line__arrow",
+            line.arrow === "↑" ? "cycle-bond-core-line__arrow--up" : "",
+            line.arrow === "↓" ? "cycle-bond-core-line__arrow--down" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-hidden
+        >
+          {line.arrow}
+        </span>
+      ) : null}
+      <span className="cycle-bond-core-line__tag">{line.tag}</span>
     </div>
   )
-}
-
-/**
- * @param {{ title: string; lines: import("../../market-os/bondLiquidityReference.js").BondCompactLine[] }} props
- */
-function MetricGroup({ title, lines }) {
-  if (!lines.length) return null
-  return (
-    <div className="cycle-bond-group">
-      <p className="m-0 cycle-bond-group__title">{title}</p>
-      <div className="cycle-bond-compact-grid">
-        {lines.map((line) => (
-          <CompactMetricLine key={line.key} line={line} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/**
- * @param {Record<string, object>} tierByKey
- * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
- * @returns {import("../../market-os/bondLiquidityReference.js").BondCompactLine[]}
- */
-function buildExpertCompactLines(tierByKey, formatValue) {
-  return EXPERT_KEYS.map((key) => {
-    const row = tierByKey[key]
-    const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
-    const live = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
-    const cached = live == null ? getBondLiquiditySpotCache(key) : null
-    const n = live ?? cached
-    const fromCache = live == null && cached != null
-    const slope = row?.slope ?? "flat"
-    const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
-    const base = n != null ? formatValue(key, n, fmt) : "—"
-
-    return {
-      key,
-      shortLabel: key === "REAL_YIELD" ? "REAL" : "BEI",
-      value: fromCache ? `${base} (최근 저장값)` : base,
-      arrow,
-      warn: false,
-      tag: EXPERT_TAG[key] ?? key,
-      missing: n == null,
-      stale: fromCache,
-    }
-  })
 }
 
 /**
@@ -133,34 +132,55 @@ export default function CycleBondLiquiditySection({
 }) {
   const enabled = isMacroRiskEnabled()
   const isDesk = variant === "desk"
+  const lastLoggedPhaseRef = useRef(null)
 
   const marketUpdateTime = useMemo(() => resolveMarketUpdateTime(panicData), [panicData])
 
-  const groups = useMemo(
-    () => buildBondLiquidityGroups(snapshot, fmtBondValue, panicData?.move),
+  const bondCore = useMemo(
+    () =>
+      resolveBondCoreUiState({
+        loading,
+        fetchFailed,
+        error,
+        timedOut,
+        snapshot,
+        formatValue: fmtBondValue,
+      }),
+    [loading, fetchFailed, error, timedOut, snapshot],
+  )
+
+  const liquidityLines = useMemo(
+    () => buildLiquidityMetricLines(snapshot, fmtBondValue, panicData?.move),
     [snapshot, panicData?.move],
   )
 
-  const tierByKey = useMemo(() => {
-    const rows = [...(snapshot?.tieredMetrics?.tier1 ?? []), ...(snapshot?.tieredMetrics?.tier2 ?? [])]
-    return Object.fromEntries(rows.map((r) => [r.key, r]))
-  }, [snapshot])
-
-  const expertLines = useMemo(() => buildExpertCompactLines(tierByKey, fmtBondValue), [tierByKey])
-
-  const bondLines = useMemo(() => [...groups.bond, ...expertLines], [groups.bond, expertLines])
-
   const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
 
-  const hasFallback =
-    hasBondLiquiditySpotCache() || Number.isFinite(Number(panicData?.move))
-  const showInitialLoading = loading && !snapshot && !hasFallback
-  const showBody = !showInitialLoading
+  useEffect(() => {
+    if (loading || bondCore.phase === "ready" || bondCore.phase === "collecting") {
+      lastLoggedPhaseRef.current = null
+      return
+    }
+    if (lastLoggedPhaseRef.current === bondCore.phase) return
+    lastLoggedPhaseRef.current = bondCore.phase
 
-  const dataDelayed = useMemo(
-    () => fetchFailed || timedOut || Boolean(error) || bondDataDelayed(snapshot),
-    [fetchFailed, timedOut, error, snapshot],
-  )
+    const bondErrors = snapshot?.bondCollection?.errors ?? []
+    const payload = {
+      fetchFailed,
+      timedOut,
+      error,
+      liveFetchOk: snapshot?.liveDataStatus?.liveFetchOk,
+      bondErrors,
+      bondAsOfNy: snapshot?.bondAsOfNy ?? null,
+    }
+
+    if (bondCore.phase === "fetch_failed") {
+      console.warn("[bond-liquidity] 채권 데이터 수집 실패", payload)
+      return
+    }
+
+    console.warn("[bond-liquidity] 채권 데이터 없음 (미수신)", payload)
+  }, [loading, bondCore.phase, fetchFailed, timedOut, error, snapshot])
 
   if (!enabled) return null
 
@@ -170,6 +190,7 @@ export default function CycleBondLiquiditySection({
       className={[
         "cycle-bond-section",
         "cycle-bond-section--reference",
+        "cycle-bond-section--always-open",
         isDesk ? "cycle-bond-section--desk" : "",
         "scroll-mt-24",
       ]
@@ -182,6 +203,7 @@ export default function CycleBondLiquiditySection({
           "cycle-bond-panel",
           "cycle-bond-panel--compact",
           "cycle-bond-panel--reference",
+          "cycle-bond-panel--always-open",
           isDesk ? "cycle-bond-panel--desk" : "",
         ]
           .filter(Boolean)
@@ -208,29 +230,39 @@ export default function CycleBondLiquiditySection({
           </p>
         )}
 
-        {showInitialLoading ? (
-          <p className="m-0 cycle-bond-panel__body cycle-bond-placeholder" role="status">
-            불러오는 중…
-          </p>
-        ) : null}
-
-        {showBody ? (
-          <div className="cycle-bond-panel__body cycle-bond-panel__body--compact">
-            {dataDelayed ? (
-              <p className="m-0 cycle-bond-delay-hint" role="status">
-                ⚠ 실시간 데이터 지연
-              </p>
-            ) : null}
+        <div className="cycle-bond-panel__body cycle-bond-panel__body--compact">
+          {bondCore.phase === "ready" ? (
             <p className="m-0 cycle-bond-status-summary" role="status">
               {statusLine}
             </p>
+          ) : null}
 
-            <div className="cycle-bond-split">
-              <MetricGroup title="채권" lines={bondLines} />
-              <MetricGroup title="유동성" lines={groups.liquidity} />
+          <div className="cycle-bond-split">
+            <div className="cycle-bond-group">
+              <p className="m-0 cycle-bond-group__title">채권</p>
+              {bondCore.phase === "ready" ? (
+                <div className="cycle-bond-core-grid">
+                  {bondCore.lines.map((line) => (
+                    <BondCoreMetricRow key={line.key} line={line} />
+                  ))}
+                </div>
+              ) : bondCore.badge ? (
+                <BondStatusBadge text={bondCore.badge} />
+              ) : null}
             </div>
+
+            {liquidityLines.length > 0 ? (
+              <div className="cycle-bond-group">
+                <p className="m-0 cycle-bond-group__title">유동성</p>
+                <div className="cycle-bond-core-grid">
+                  {liquidityLines.map((line) => (
+                    <LiquidityMetricRow key={line.key} line={line} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
-        ) : null}
+        </div>
       </div>
     </section>
   )
