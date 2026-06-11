@@ -8,8 +8,6 @@ import {
 } from "./bondSyncMeta.js"
 import { loadMacroRiskSnapshot } from "./fetchMacroRisk.js"
 
-const BOND_LOAD_TIMEOUT_MS = 5000
-
 /**
  * @param {object | null} panicContext — read-only (vxn 등). 패닉 저장소/로직 미변경.
  */
@@ -45,16 +43,13 @@ export function useMacroRiskSnapshot(panicContext = null) {
       const ctx =
         vxn != null || move != null || updatedAt != null ? { vxn, move, updatedAt } : null
 
-      const timeoutHandle = window.setTimeout(() => {
-        if (requestIdRef.current !== requestId) return
-        setTimedOut(true)
-      }, BOND_LOAD_TIMEOUT_MS)
-
       loadMacroRiskSnapshot(ctx, { forceBondSync })
         .then((s) => {
           if (cancelled || requestIdRef.current !== requestId) return
           setSnapshot(s)
-          setFetchFailed(!s?.liveDataStatus?.liveFetchOk)
+          const liveOk = Boolean(s?.liveDataStatus?.liveFetchOk)
+          setFetchFailed(!liveOk)
+          setTimedOut(!liveOk)
           const metaAt = loadBondSyncMeta()?.at
           const at = forceBondSync ? metaAt ?? new Date().toISOString() : metaAt ?? s.updatedAt ?? null
           if (at) setLastBondSyncAt(at)
@@ -71,7 +66,6 @@ export function useMacroRiskSnapshot(panicContext = null) {
           setTimedOut(/timeout/i.test(message))
         })
         .finally(() => {
-          window.clearTimeout(timeoutHandle)
           if (requestIdRef.current !== requestId) return
           setLoading(false)
           setSyncingBond(false)

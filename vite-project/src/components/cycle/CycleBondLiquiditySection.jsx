@@ -1,8 +1,9 @@
 import { useMemo } from "react"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
+import { hasBondLiquiditySpotCache, getBondLiquiditySpotCache } from "../../macro-risk/bondLiquiditySpotCache.js"
 import {
-  bondCollectionAlertLine,
+  bondDataDelayed,
   buildBondLiquidityGroups,
   bondStatusSummaryLine,
 } from "../../market-os/bondLiquidityReference.js"
@@ -89,18 +90,23 @@ function buildExpertCompactLines(tierByKey, formatValue) {
   return EXPERT_KEYS.map((key) => {
     const row = tierByKey[key]
     const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
-    const n = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
+    const live = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
+    const cached = live == null ? getBondLiquiditySpotCache(key) : null
+    const n = live ?? cached
+    const fromCache = live == null && cached != null
     const slope = row?.slope ?? "flat"
     const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
+    const base = n != null ? formatValue(key, n, fmt) : "—"
 
     return {
       key,
       shortLabel: key === "REAL_YIELD" ? "REAL" : "BEI",
-      value: n != null ? formatValue(key, n, fmt) : "—",
+      value: fromCache ? `${base} (최근 저장값)` : base,
       arrow,
       warn: false,
       tag: EXPERT_TAG[key] ?? key,
       missing: n == null,
+      stale: fromCache,
     }
   })
 }
@@ -130,14 +136,9 @@ export default function CycleBondLiquiditySection({
 
   const marketUpdateTime = useMemo(() => resolveMarketUpdateTime(panicData), [panicData])
 
-  const hardFetchFailed = timedOut || Boolean(error)
-
   const groups = useMemo(
-    () =>
-      buildBondLiquidityGroups(snapshot, fmtBondValue, panicData?.move, {
-        fetchFailed: hardFetchFailed,
-      }),
-    [snapshot, panicData?.move, hardFetchFailed],
+    () => buildBondLiquidityGroups(snapshot, fmtBondValue, panicData?.move),
+    [snapshot, panicData?.move],
   )
 
   const tierByKey = useMemo(() => {
@@ -150,18 +151,16 @@ export default function CycleBondLiquiditySection({
   const bondLines = useMemo(() => [...groups.bond, ...expertLines], [groups.bond, expertLines])
 
   const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
-  const collectionAlert = useMemo(() => bondCollectionAlertLine(snapshot), [snapshot])
 
-  const showInitialLoading = loading && !snapshot && !timedOut
+  const hasFallback =
+    hasBondLiquiditySpotCache() || Number.isFinite(Number(panicData?.move))
+  const showInitialLoading = loading && !snapshot && !hasFallback
   const showBody = !showInitialLoading
 
-  const failureBanner = useMemo(() => {
-    if (timedOut) return "데이터 수집 실패 · 응답 시간 초과 (5초)"
-    if (error && /timeout/i.test(error)) return "데이터 수집 실패 · 응답 시간 초과 (5초)"
-    if (collectionAlert) return collectionAlert
-    if (fetchFailed) return "일부 채권 지표 수집 실패 · 캐시·최근값으로 보완 중"
-    return null
-  }, [timedOut, error, collectionAlert, fetchFailed])
+  const dataDelayed = useMemo(
+    () => fetchFailed || timedOut || Boolean(error) || bondDataDelayed(snapshot),
+    [fetchFailed, timedOut, error, snapshot],
+  )
 
   if (!enabled) return null
 
@@ -217,9 +216,9 @@ export default function CycleBondLiquiditySection({
 
         {showBody ? (
           <div className="cycle-bond-panel__body cycle-bond-panel__body--compact">
-            {failureBanner ? (
-              <p className="m-0 cycle-bond-collection-alert cycle-bond-collection-alert--fail" role="status">
-                {failureBanner}
+            {dataDelayed ? (
+              <p className="m-0 cycle-bond-delay-hint" role="status">
+                ⚠ 실시간 데이터 지연
               </p>
             ) : null}
             <p className="m-0 cycle-bond-status-summary" role="status">

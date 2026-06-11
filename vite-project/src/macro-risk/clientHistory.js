@@ -1,4 +1,9 @@
-import { fetchMarketData } from "../config/api.js"
+import { fetchMarketDataWithRetry } from "./fetchMarketDataWithRetry.js"
+import {
+  applyBondLiquiditySpotCacheToHistory,
+  persistBondLiquiditySpotCacheFromSnapshot,
+} from "./bondLiquiditySpotCache.js"
+import { buildMacroRiskSnapshot } from "./engine.js"
 import { BOND_FRED_SERIES_MAP } from "./bondFredPolicy.js"
 import { clearBondFredSnapshot, resolveBondFredFromMarket } from "./bondFredSnapshotStore.js"
 import { recordBondSyncMeta } from "./bondSyncMeta.js"
@@ -124,7 +129,7 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
 
   try {
     if (opts.forceBondSync) clearBondFredSnapshot()
-    const market = await fetchMarketData({ cacheBust: true, timeoutMs: 5000 })
+    const market = await fetchMarketDataWithRetry({ cacheBust: true })
     liveFetchOk = true
     const built = buildMacroRiskHistoryFromMarket(market, panicContext, opts)
     history = built.history
@@ -132,6 +137,15 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
     bondAsOfNy = built.bondAsOfNy
     bondFetchErrors = built.bondFetchErrors ?? {}
     bondLiveCount = built.bondLiveCount ?? 0
+    const liveSnapshot = buildMacroRiskSnapshot(history, panicContext, {
+      sources,
+      liveFetchOk: true,
+      updatedAt: market.updatedAt ?? new Date().toISOString(),
+      bondAsOfNy,
+      bondFetchErrors,
+      bondLiveCount,
+    })
+    persistBondLiquiditySpotCacheFromSnapshot(liveSnapshot, panicContext?.move)
     if (market.bondFred?.asOfNy) {
       updatedAt = `${market.bondFred.asOfNy}T21:00:00.000Z`
     } else if (market.updatedAt) {
@@ -158,6 +172,7 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
     history = built.history
     sources = { ...sources, ...built.sources }
     bondAsOfNy = built.bondAsOfNy ?? bondAsOfNy
+    applyBondLiquiditySpotCacheToHistory(history, sources, synthesizeHistoryFromSpot)
     if (!bondFetchErrors._client) {
       bondFetchErrors = { ...bondFetchErrors, _client: "market-data_fetch_failed" }
     }

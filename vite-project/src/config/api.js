@@ -709,7 +709,7 @@ export async function submitManualTextData(rawText) {
   return normalizeManualPayload(out?.data)
 }
 
-const MARKET_DATA_FETCH_TIMEOUT_MS = 5000
+const MARKET_DATA_FETCH_TIMEOUT_MS = 15000
 
 /**
  * @param {{ cacheBust?: boolean; timeoutMs?: number }} [opts] — Bond Sync: PWA/중간 캐시 우회용 추가 bust

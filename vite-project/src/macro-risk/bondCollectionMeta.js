@@ -50,7 +50,8 @@ export function readBondLastKnown(history, sources = {}) {
   for (const key of ["US10Y", "US30Y"]) {
     const src = sources[key] ?? ""
     if (src === "fred-h15") sourceByKey[key] = "live"
-    else if (src.includes("fred-h15-stale") || src.includes("cache")) sourceByKey[key] = "cache"
+    else if (src === "spot-cache" || src.includes("fred-h15-stale") || src.includes("cache"))
+      sourceByKey[key] = "cache"
     else if (src.includes("staticSeed")) sourceByKey[key] = "seed"
     else if (lastKnown[key] != null) sourceByKey[key] = "seed"
     else sourceByKey[key] = "missing"

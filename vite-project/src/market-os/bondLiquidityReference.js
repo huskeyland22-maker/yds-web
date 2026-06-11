@@ -2,9 +2,11 @@
  * 채권·유동성 — 참고·힌트 전용 (판단권·점수·추천·섹터 결정 없음)
  */
 
+import { getBondLiquiditySpotCache } from "../macro-risk/bondLiquiditySpotCache.js"
 import { isValidUsTreasuryYield } from "../macro-risk/bondYieldValidity.js"
 
-const BOND_YIELD_MISSING_LABEL = "데이터 없음"
+const BOND_YIELD_MISSING_LABEL = "—"
+const STALE_VALUE_SUFFIX = "(최근 저장값)"
 
 /** @typedef {{ statusLabels: string[]; hintLines: string[] }} BondReferenceDisplay */
 
@@ -137,29 +139,48 @@ const SHORT_LABEL = {
  * @param {string} key
  * @returns {BondCompactLine}
  */
-function buildMetricCompactLine(snapshot, formatValue, statuses, key) {
+/**
+ * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
+ * @param {string} key
+ * @returns {{ cur: number | null; stale: boolean }}
+ */
+function resolveMetricSpot(snapshot, key) {
   const row = metricRow(snapshot, key)
-  const fmt = row?.format === "pct" ? "level" : row?.format ?? (key === "DXY" ? "level" : "rate")
   const raw = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
   const isBondYield = key === "US10Y" || key === "US30Y" || key === "US2Y"
   const bondMeta = snapshot?.bondCollection
   const sourceKind = bondMeta?.sourceByKey?.[key]
-  const liveOk = sourceKind === "live" && isValidUsTreasuryYield(raw)
-  const cur = isBondYield ? (liveOk ? raw : null) : raw
 
-  let value = formatValue(key, cur, fmt)
-  let missing = false
-  let stale = false
-
-  if (isBondYield && cur == null) {
-    missing = true
-    const lastKnown = bondMeta?.lastKnown?.[key]
-    if (isValidUsTreasuryYield(lastKnown)) {
-      stale = true
-      value = `${BOND_YIELD_MISSING_LABEL} (최근 정상값: ${Number(lastKnown).toFixed(2)}%)`
-    } else {
-      value = BOND_YIELD_MISSING_LABEL
+  if (isBondYield) {
+    if (isValidUsTreasuryYield(raw)) {
+      return { cur: raw, stale: sourceKind != null && sourceKind !== "live" }
     }
+    const lastKnown = bondMeta?.lastKnown?.[key]
+    const cached = getBondLiquiditySpotCache(key)
+    const fallback = isValidUsTreasuryYield(lastKnown)
+      ? Number(lastKnown)
+      : cached != null
+        ? cached
+        : null
+    return { cur: fallback, stale: fallback != null }
+  }
+
+  if (raw != null) return { cur: raw, stale: false }
+  const cached = getBondLiquiditySpotCache(key)
+  return { cur: cached, stale: cached != null }
+}
+
+function buildMetricCompactLine(snapshot, formatValue, statuses, key) {
+  const row = metricRow(snapshot, key)
+  const fmt = row?.format === "pct" ? "level" : row?.format ?? (key === "DXY" ? "level" : "rate")
+  const { cur, stale: fromResolve } = resolveMetricSpot(snapshot, key)
+
+  let value = cur != null ? formatValue(key, cur, fmt) : BOND_YIELD_MISSING_LABEL
+  let missing = cur == null
+  let stale = fromResolve
+
+  if (cur != null && stale) {
+    value = `${value} ${STALE_VALUE_SUFFIX}`
   }
 
   const slope = row?.slope ?? "flat"
@@ -186,7 +207,9 @@ function buildMetricCompactLine(snapshot, formatValue, statuses, key) {
  * @returns {BondCompactLine}
  */
 function buildMoveCompactLine(panicMove, formatValue) {
-  const m = Number(panicMove)
+  const panic = Number(panicMove)
+  const fromCache = !Number.isFinite(panic)
+  const m = Number.isFinite(panic) ? panic : getBondLiquiditySpotCache("MOVE")
   if (!Number.isFinite(m)) {
     return {
       key: "MOVE",
@@ -195,6 +218,7 @@ function buildMoveCompactLine(panicMove, formatValue) {
       arrow: "→",
       warn: false,
       tag: ROLE_TAG.MOVE,
+      missing: true,
     }
   }
   let slope = "flat"
@@ -202,13 +226,15 @@ function buildMoveCompactLine(panicMove, formatValue) {
   else if (m <= 90) slope = "down"
   const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
 
+  const base = formatValue("MOVE", m, "index")
   return {
     key: "MOVE",
     shortLabel: "MOVE",
-    value: formatValue("MOVE", m, "index"),
+    value: fromCache ? `${base} ${STALE_VALUE_SUFFIX}` : base,
     arrow,
     warn: m >= 120,
     tag: ROLE_TAG.MOVE,
+    stale: fromCache,
   }
 }
 
@@ -221,19 +247,31 @@ function buildMoveCompactLine(panicMove, formatValue) {
 
 /**
  * @param {string} key
- * @param {"fail" | "missing"} [mode]
+ * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
  * @returns {BondCompactLine}
  */
-function placeholderBondLine(key, mode = "missing") {
+function placeholderBondLine(key, formatValue) {
+  const cached = getBondLiquiditySpotCache(key)
+  if (cached != null && (key === "DXY" || key === "US10Y" || key === "US30Y")) {
+    const fmt = key === "DXY" ? "level" : "rate"
+    return {
+      key,
+      shortLabel: SHORT_LABEL[key] ?? key,
+      value: `${formatValue(key, cached, fmt)} ${STALE_VALUE_SUFFIX}`,
+      arrow: "→",
+      warn: false,
+      tag: ROLE_TAG[key] ?? key,
+      stale: true,
+    }
+  }
   return {
     key,
     shortLabel: SHORT_LABEL[key] ?? key,
-    value: mode === "fail" ? "데이터 수집 실패" : BOND_YIELD_MISSING_LABEL,
+    value: BOND_YIELD_MISSING_LABEL,
     arrow: "→",
     warn: false,
     tag: ROLE_TAG[key] ?? key,
     missing: true,
-    failed: mode === "fail",
   }
 }
 
@@ -241,32 +279,19 @@ function placeholderBondLine(key, mode = "missing") {
  * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
  * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
  * @param {number | null | undefined} [panicMove]
- * @param {{ fetchFailed?: boolean }} [opts]
  * @returns {BondLiquidityGroups}
  */
-export function buildBondLiquidityGroups(snapshot, formatValue, panicMove = null, opts = {}) {
-  const fetchFailed = Boolean(opts.fetchFailed)
+export function buildBondLiquidityGroups(snapshot, formatValue, panicMove = null) {
   const statuses = snapshot ? deriveBondReferenceStatuses(snapshot) : []
 
   const bond = ["US10Y", "US30Y"].map((key) => {
-    if (!snapshot) return placeholderBondLine(key, fetchFailed ? "fail" : "missing")
-    const line = buildMetricCompactLine(snapshot, formatValue, statuses, key)
-    if (line.missing && fetchFailed && !line.stale) {
-      return { ...line, value: "데이터 수집 실패", failed: true }
-    }
-    return line
+    if (!snapshot) return placeholderBondLine(key, formatValue)
+    return buildMetricCompactLine(snapshot, formatValue, statuses, key)
   })
 
-  let dxyLine
-  if (!snapshot) {
-    dxyLine = placeholderBondLine("DXY", fetchFailed ? "fail" : "missing")
-  } else {
-    dxyLine = buildMetricCompactLine(snapshot, formatValue, statuses, "DXY")
-    const dxyRaw = metricRow(snapshot, "DXY")?.current
-    if ((dxyRaw == null || !Number.isFinite(Number(dxyRaw))) && fetchFailed) {
-      dxyLine = { ...dxyLine, value: "데이터 수집 실패", missing: true, failed: true }
-    }
-  }
+  const dxyLine = !snapshot
+    ? placeholderBondLine("DXY", formatValue)
+    : buildMetricCompactLine(snapshot, formatValue, statuses, "DXY")
 
   return {
     bond,
@@ -291,9 +316,12 @@ export function bondStatusSummaryLine(snapshot) {
 export function bondCollectionAlertLine(snapshot) {
   const bond = snapshot?.bondCollection
   if (!bond || bond.liveBondOk) return null
-  if (bond.usedStaleFallback) {
-    const asOf = bond.asOfNy ? ` · FRED ${bond.asOfNy}` : ""
-    return `⚠ 채권 데이터 수집 실패 · 최근 정상 데이터 사용 중${asOf}`
-  }
-  return "⚠ 채권 데이터 업데이트 대기"
+  return null
+}
+
+/** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot @returns {boolean} */
+export function bondDataDelayed(snapshot) {
+  if (!snapshot) return false
+  if (!snapshot.liveDataStatus?.liveFetchOk) return true
+  return Boolean(snapshot.bondCollection?.usedStaleFallback)
 }
