@@ -105,6 +105,9 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             panicData={panicData}
             snapshot={bondSnapshot.snapshot}
             loading={bondSnapshot.loading}
+            fetchFailed={bondSnapshot.fetchFailed}
+            timedOut={bondSnapshot.timedOut}
+            error={bondSnapshot.error}
           />
         </div>
       </details>

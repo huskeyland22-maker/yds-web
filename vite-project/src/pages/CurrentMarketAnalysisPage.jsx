@@ -2,9 +2,6 @@ import { useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
-import { YDS_VALIDATION_EVENT_DATASET } from "../trading-zone/ydsHistoricalValidationEvents.js"
-import { buildCurrentMarketAnalysisReport } from "../trading-zone/ydsCurrentMarketAnalysis.js"
-import MarketAnalysisHubTop from "../components/market-analysis/MarketAnalysisHubTop.jsx"
 import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import LaunchFirstVisitPanel from "../components/launch/LaunchFirstVisitPanel.jsx"
 import LaunchFooterNav from "../components/launch/LaunchFooterNav.jsx"
@@ -39,16 +36,8 @@ export default function CurrentMarketAnalysisPage() {
     return latestCycleRow
   }, [latestCycleRow])
 
-  const report = useMemo(
-    () =>
-      buildCurrentMarketAnalysisReport(YDS_VALIDATION_EVENT_DATASET, {
-        latestSnapshot: panicData,
-        extraRows: history,
-      }),
-    [panicData, history],
-  )
-
-  const { asOf, hasLive } = report
+  const hasLive = Boolean(panicData)
+  const asOf = panicData?.date ?? panicData?.updatedAt
 
   return (
     <div className="yds-market-analysis min-w-0 w-full">
@@ -79,7 +68,6 @@ export default function CurrentMarketAnalysisPage() {
       ) : (
         <div className="yds-market-analysis__body">
           <MarketAnalysisDeskCore panicData={panicData} cycleMetricHistory={history} />
-          <MarketAnalysisHubTop report={report} marketOnly tier="detail" />
         </div>
       )}
 

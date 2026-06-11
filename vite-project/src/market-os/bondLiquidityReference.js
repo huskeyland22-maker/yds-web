@@ -220,23 +220,57 @@ function buildMoveCompactLine(panicMove, formatValue) {
  */
 
 /**
+ * @param {string} key
+ * @param {"fail" | "missing"} [mode]
+ * @returns {BondCompactLine}
+ */
+function placeholderBondLine(key, mode = "missing") {
+  return {
+    key,
+    shortLabel: SHORT_LABEL[key] ?? key,
+    value: mode === "fail" ? "데이터 수집 실패" : BOND_YIELD_MISSING_LABEL,
+    arrow: "→",
+    warn: false,
+    tag: ROLE_TAG[key] ?? key,
+    missing: true,
+    failed: mode === "fail",
+  }
+}
+
+/**
  * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
  * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
  * @param {number | null | undefined} [panicMove]
+ * @param {{ fetchFailed?: boolean }} [opts]
  * @returns {BondLiquidityGroups}
  */
-export function buildBondLiquidityGroups(snapshot, formatValue, panicMove = null) {
+export function buildBondLiquidityGroups(snapshot, formatValue, panicMove = null, opts = {}) {
+  const fetchFailed = Boolean(opts.fetchFailed)
+  const statuses = snapshot ? deriveBondReferenceStatuses(snapshot) : []
+
+  const bond = ["US10Y", "US30Y"].map((key) => {
+    if (!snapshot) return placeholderBondLine(key, fetchFailed ? "fail" : "missing")
+    const line = buildMetricCompactLine(snapshot, formatValue, statuses, key)
+    if (line.missing && fetchFailed && !line.stale) {
+      return { ...line, value: "데이터 수집 실패", failed: true }
+    }
+    return line
+  })
+
+  let dxyLine
   if (!snapshot) {
-    return { bond: [], liquidity: [buildMoveCompactLine(panicMove, formatValue)] }
+    dxyLine = placeholderBondLine("DXY", fetchFailed ? "fail" : "missing")
+  } else {
+    dxyLine = buildMetricCompactLine(snapshot, formatValue, statuses, "DXY")
+    const dxyRaw = metricRow(snapshot, "DXY")?.current
+    if ((dxyRaw == null || !Number.isFinite(Number(dxyRaw))) && fetchFailed) {
+      dxyLine = { ...dxyLine, value: "데이터 수집 실패", missing: true, failed: true }
+    }
   }
 
-  const statuses = deriveBondReferenceStatuses(snapshot)
   return {
-    bond: ["US10Y", "US30Y"].map((key) => buildMetricCompactLine(snapshot, formatValue, statuses, key)),
-    liquidity: [
-      buildMetricCompactLine(snapshot, formatValue, statuses, "DXY"),
-      buildMoveCompactLine(panicMove, formatValue),
-    ],
+    bond,
+    liquidity: [dxyLine, buildMoveCompactLine(panicMove, formatValue)],
   }
 }
 

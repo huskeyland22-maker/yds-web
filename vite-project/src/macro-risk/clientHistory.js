@@ -124,7 +124,7 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
 
   try {
     if (opts.forceBondSync) clearBondFredSnapshot()
-    const market = await fetchMarketData({ cacheBust: true })
+    const market = await fetchMarketData({ cacheBust: true, timeoutMs: 5000 })
     liveFetchOk = true
     const built = buildMacroRiskHistoryFromMarket(market, panicContext, opts)
     history = built.history
@@ -140,8 +140,11 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
     if (opts.forceBondSync) {
       recordBondSyncMeta({ asOfNy: bondAsOfNy })
     }
-  } catch {
-    /* LIVE 실패 — 빈 히스토리 */
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    bondFetchErrors = {
+      _client: /timeout/i.test(msg) ? "market-data_timeout" : "market-data_fetch_failed",
+    }
   }
 
   const cycleUpdatedAt = String(panicContext?.updatedAt ?? "").trim()
@@ -155,7 +158,9 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
     history = built.history
     sources = { ...sources, ...built.sources }
     bondAsOfNy = built.bondAsOfNy ?? bondAsOfNy
-    bondFetchErrors = { _client: "market-data_fetch_failed" }
+    if (!bondFetchErrors._client) {
+      bondFetchErrors = { ...bondFetchErrors, _client: "market-data_fetch_failed" }
+    }
   }
 
   return { history, updatedAt, sources, liveFetchOk, bondAsOfNy, bondFetchErrors, bondLiveCount }

@@ -37,6 +37,7 @@ function CompactMetricLine({ line }) {
           "cycle-bond-compact-line__value font-mono tabular-nums",
           line.missing ? "cycle-bond-compact-line__value--missing" : "",
           line.stale ? "cycle-bond-compact-line__value--stale" : "",
+          line.failed ? "cycle-bond-compact-line__value--failed" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -81,12 +82,18 @@ function MetricGroup({ title, lines }) {
  *   snapshot?: import("../../macro-risk/engine.js").MacroRiskSnapshot | null
  *   panicData?: object | null
  *   loading?: boolean
+ *   fetchFailed?: boolean
+ *   timedOut?: boolean
+ *   error?: string | null
  * }} props
  */
 export default function CycleBondLiquiditySection({
   snapshot = null,
   panicData = null,
   loading = false,
+  fetchFailed = false,
+  timedOut = false,
+  error = null,
 }) {
   const enabled = isMacroRiskEnabled()
   const [expertOpen, setExpertOpen] = useState(false)
@@ -99,9 +106,14 @@ export default function CycleBondLiquiditySection({
     }
   }, [])
 
+  const hardFetchFailed = timedOut || Boolean(error)
+
   const groups = useMemo(
-    () => buildBondLiquidityGroups(snapshot, fmtBondValue, panicData?.move),
-    [snapshot, panicData?.move],
+    () =>
+      buildBondLiquidityGroups(snapshot, fmtBondValue, panicData?.move, {
+        fetchFailed: hardFetchFailed,
+      }),
+    [snapshot, panicData?.move, hardFetchFailed],
   )
 
   const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
@@ -111,6 +123,17 @@ export default function CycleBondLiquiditySection({
     const rows = [...(snapshot?.tieredMetrics?.tier1 ?? []), ...(snapshot?.tieredMetrics?.tier2 ?? [])]
     return Object.fromEntries(rows.map((r) => [r.key, r]))
   }, [snapshot])
+
+  const showInitialLoading = loading && !snapshot && !timedOut
+  const showBody = !showInitialLoading
+
+  const failureBanner = useMemo(() => {
+    if (timedOut) return "데이터 수집 실패 · 응답 시간 초과 (5초)"
+    if (error && /timeout/i.test(error)) return "데이터 수집 실패 · 응답 시간 초과 (5초)"
+    if (collectionAlert) return collectionAlert
+    if (fetchFailed) return "일부 채권 지표 수집 실패 · 캐시·최근값으로 보완 중"
+    return null
+  }, [timedOut, error, collectionAlert, fetchFailed])
 
   if (!enabled) return null
 
@@ -133,15 +156,17 @@ export default function CycleBondLiquiditySection({
           </div>
         </header>
 
-        {loading && !snapshot ? (
-          <p className="m-0 cycle-bond-panel__body cycle-bond-placeholder">불러오는 중…</p>
+        {showInitialLoading ? (
+          <p className="m-0 cycle-bond-panel__body cycle-bond-placeholder" role="status">
+            불러오는 중…
+          </p>
         ) : null}
 
-        {snapshot ? (
+        {showBody ? (
           <div className="cycle-bond-panel__body cycle-bond-panel__body--compact">
-            {collectionAlert ? (
-              <p className="m-0 cycle-bond-collection-alert" role="status">
-                {collectionAlert}
+            {failureBanner ? (
+              <p className="m-0 cycle-bond-collection-alert cycle-bond-collection-alert--fail" role="status">
+                {failureBanner}
               </p>
             ) : null}
             <p className="m-0 cycle-bond-status-summary" role="status">
@@ -153,44 +178,46 @@ export default function CycleBondLiquiditySection({
               <MetricGroup title="유동성" lines={groups.liquidity} />
             </div>
 
-            <div className="cycle-bond-expert">
-              <button
-                type="button"
-                onClick={() => setExpertOpen((v) => !v)}
-                className="cycle-bond-expert-toggle"
-                aria-expanded={expertOpen}
-              >
-                <span>전문가 보기</span>
-                <span className="cycle-data-basis__muted">{expertOpen ? "▲" : "▼"}</span>
-              </button>
-              {expertOpen ? (
-                <div className="cycle-bond-expert-body">
-                  <div className="cycle-bond-expert-grid">
-                    {EXPERT_KEYS.map((key) => {
-                      const row = tierByKey[key]
-                      const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
-                      const value =
-                        row?.current != null && Number.isFinite(Number(row.current))
-                          ? fmtBondValue(key, Number(row.current), fmt)
-                          : "—"
-                      const title = key === "REAL_YIELD" ? "REAL" : "BEI"
-                      const hint = metricDisplayTooltip(key) ?? "—"
+            {snapshot ? (
+              <div className="cycle-bond-expert">
+                <button
+                  type="button"
+                  onClick={() => setExpertOpen((v) => !v)}
+                  className="cycle-bond-expert-toggle"
+                  aria-expanded={expertOpen}
+                >
+                  <span>전문가 보기</span>
+                  <span className="cycle-data-basis__muted">{expertOpen ? "▲" : "▼"}</span>
+                </button>
+                {expertOpen ? (
+                  <div className="cycle-bond-expert-body">
+                    <div className="cycle-bond-expert-grid">
+                      {EXPERT_KEYS.map((key) => {
+                        const row = tierByKey[key]
+                        const fmt = row?.format === "pct" ? "level" : row?.format ?? "rate"
+                        const value =
+                          row?.current != null && Number.isFinite(Number(row.current))
+                            ? fmtBondValue(key, Number(row.current), fmt)
+                            : "—"
+                        const title = key === "REAL_YIELD" ? "REAL" : "BEI"
+                        const hint = metricDisplayTooltip(key) ?? "—"
 
-                      return (
-                        <article key={key} className="cycle-bond-expert-card">
-                          <p className="m-0 cycle-bond-expert-card__head">
-                            <span className="font-bold text-slate-200">{title}</span>
-                            <span className="font-mono tabular-nums text-slate-50">{value}</span>
-                            <span className="text-slate-400">{slopeArrow(row?.slope ?? "flat")}</span>
-                          </p>
-                          <p className="m-0 cycle-bond-expert-card__hint">{hint}</p>
-                        </article>
-                      )
-                    })}
+                        return (
+                          <article key={key} className="cycle-bond-expert-card">
+                            <p className="m-0 cycle-bond-expert-card__head">
+                              <span className="font-bold text-slate-200">{title}</span>
+                              <span className="font-mono tabular-nums text-slate-50">{value}</span>
+                              <span className="text-slate-400">{slopeArrow(row?.slope ?? "flat")}</span>
+                            </p>
+                            <p className="m-0 cycle-bond-expert-card__hint">{hint}</p>
+                          </article>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              ) : null}
-            </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

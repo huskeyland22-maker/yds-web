@@ -709,12 +709,27 @@ export async function submitManualTextData(rawText) {
   return normalizeManualPayload(out?.data)
 }
 
+const MARKET_DATA_FETCH_TIMEOUT_MS = 5000
+
 /**
- * @param {{ cacheBust?: boolean }} [opts] — Bond Sync: PWA/중간 캐시 우회용 추가 bust
+ * @param {{ cacheBust?: boolean; timeoutMs?: number }} [opts] — Bond Sync: PWA/중간 캐시 우회용 추가 bust
  */
 export async function fetchMarketData(opts = {}) {
   const path = opts.cacheBust ? "/api/market-data?bondSync=1" : "/api/market-data"
-  const res = await fetch(withNoStoreQuery(path), LIVE_JSON_GET_INIT)
+  const timeoutMs = opts.timeoutMs ?? MARKET_DATA_FETCH_TIMEOUT_MS
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs)
+  let res
+  try {
+    res = await fetch(withNoStoreQuery(path), { ...LIVE_JSON_GET_INIT, signal: ctrl.signal })
+  } catch (e) {
+    if (e?.name === "AbortError") {
+      throw new Error(`market-data: timeout after ${timeoutMs}ms`)
+    }
+    throw e
+  } finally {
+    clearTimeout(timer)
+  }
   if (!res.ok) {
     throw new Error(`market-data HTTP ${res.status}`)
   }

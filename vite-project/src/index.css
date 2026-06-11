@@ -6936,6 +6936,19 @@
     line-height: 1.25;
   }
 
+  .cycle-bond-compact-line__value--failed {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(251, 146, 60, 0.98);
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .cycle-bond-collection-alert--fail {
+    color: rgba(251, 146, 60, 0.95);
+    font-weight: 700;
+  }
+
   .cycle-bond-compact-line__value--stale {
     color: rgba(148, 163, 184, 0.95);
   }

@@ -20,25 +20,36 @@ function readMacroDevUiFlag() {
  * @param {{ forceBondSync?: boolean }} [opts]
  */
 export async function loadMacroRiskSnapshot(panicContext = null, opts = {}) {
-  const {
-    history,
-    updatedAt,
-    sources,
-    liveFetchOk,
-    bondAsOfNy,
-    bondFetchErrors,
-    bondLiveCount,
-  } = await loadMacroRiskHistory(panicContext, opts)
-  const snapshot = buildMacroRiskSnapshot(history, panicContext, {
-    sources,
-    liveFetchOk,
-    updatedAt,
-    bondAsOfNy,
-    bondFetchErrors,
-    bondLiveCount,
-    includeDev: readMacroDevUiFlag() || (isDevMode() && isShowDebugPanel()),
-  })
-  snapshot.updatedAt = updatedAt
-  snapshot.bondAsOfNy = bondAsOfNy ?? null
-  return snapshot
+  try {
+    const {
+      history,
+      updatedAt,
+      sources,
+      liveFetchOk,
+      bondAsOfNy,
+      bondFetchErrors,
+      bondLiveCount,
+    } = await loadMacroRiskHistory(panicContext, opts)
+    const snapshot = buildMacroRiskSnapshot(history, panicContext, {
+      sources,
+      liveFetchOk,
+      updatedAt,
+      bondAsOfNy,
+      bondFetchErrors,
+      bondLiveCount,
+      includeDev: readMacroDevUiFlag() || (isDevMode() && isShowDebugPanel()),
+    })
+    snapshot.updatedAt = updatedAt
+    snapshot.bondAsOfNy = bondAsOfNy ?? null
+    return snapshot
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e)
+    const snapshot = buildMacroRiskSnapshot({}, panicContext, {
+      liveFetchOk: false,
+      bondFetchErrors: { _client: message || "snapshot_build_failed" },
+      updatedAt: new Date().toISOString(),
+    })
+    snapshot.updatedAt = snapshot.updatedAt ?? new Date().toISOString()
+    return snapshot
+  }
 }
