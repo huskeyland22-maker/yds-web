@@ -1,111 +1,68 @@
-import { useEffect, useMemo, useRef } from "react"
+import { useMemo } from "react"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
-import {
-  bondStatusSummaryLine,
-  buildLiquidityMetricLines,
-  resolveBondCoreUiState,
-} from "../../market-os/bondLiquidityReference.js"
+import { buildLiquidityEnvironmentCard } from "../../market-os/liquidityEnvironment.js"
 import { resolveMarketUpdateTime } from "../../utils/marketUpdateTime.js"
 
-const PANEL_TITLE = "장기 참고 지표 (미국장 종가 기준)"
+const CARD_TITLE = "유동성 환경"
 
 /**
  * @param {string} key
  * @param {number | null} n
  * @param {string} [fmt]
  */
-function fmtBondValue(key, n, fmt = "rate") {
+function fmtMetricValue(key, n, fmt = "rate") {
   if (n == null || !Number.isFinite(n)) return "—"
-  if ((key === "US10Y" || key === "US30Y" || key === "US2Y") && n <= 0.05) return "—"
   return formatCurrent(n, fmt)
 }
 
-/** @param {{ text: string }} props */
-function BondStatusBadge({ text }) {
-  return (
-    <p className="m-0 cycle-bond-status-badge" role="status">
-      {text}
-    </p>
-  )
-}
-
 /**
- * @param {import("../../market-os/bondLiquidityReference.js").BondCoreMetricLine} line
+ * @param {{
+ *   label: string
+ *   side: import("../../market-os/liquidityEnvironment.js").LiquidityMetricSide | null
+ *   align: "left" | "right"
+ *   loading?: boolean
+ * }} props
  */
-function BondCoreMetricRow({ line }) {
-  return (
-    <div className="cycle-bond-core-line">
-      <span className="cycle-bond-core-line__label">{line.label}</span>
-      <span
-        className={[
-          "cycle-bond-core-line__value font-mono tabular-nums",
-          line.stale ? "cycle-bond-core-line__value--stale" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        {line.value}
-      </span>
-      {line.warn ? (
-        <span className="cycle-bond-core-line__warn" aria-hidden>
-          ⚠
-        </span>
-      ) : line.arrow ? (
-        <span
-          className={[
-            "cycle-bond-core-line__arrow",
-            line.arrow === "↑" ? "cycle-bond-core-line__arrow--up" : "",
-            line.arrow === "↓" ? "cycle-bond-core-line__arrow--down" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          aria-hidden
-        >
-          {line.arrow}
-        </span>
-      ) : null}
-    </div>
-  )
-}
+function LiquiditySideMetric({ label, side, align, loading = false }) {
+  const alignClass =
+    align === "left" ? "liq-env-card__metric--left" : "liq-env-card__metric--right"
 
-/**
- * @param {import("../../market-os/bondLiquidityReference.js").BondCompactLine} line
- */
-function LiquidityMetricRow({ line }) {
-  const showArrow = line.arrow === "↑" || line.arrow === "↓"
   return (
-    <div className="cycle-bond-core-line">
-      <span className="cycle-bond-core-line__label">{line.shortLabel}</span>
-      <span
-        className={[
-          "cycle-bond-core-line__value font-mono tabular-nums",
-          line.stale ? "cycle-bond-core-line__value--stale" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        {line.value}
-      </span>
-      {line.warn ? (
-        <span className="cycle-bond-core-line__warn" aria-hidden>
-          ⚠
-        </span>
-      ) : showArrow ? (
-        <span
-          className={[
-            "cycle-bond-core-line__arrow",
-            line.arrow === "↑" ? "cycle-bond-core-line__arrow--up" : "",
-            line.arrow === "↓" ? "cycle-bond-core-line__arrow--down" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          aria-hidden
-        >
-          {line.arrow}
-        </span>
-      ) : null}
-      <span className="cycle-bond-core-line__tag">{line.tag}</span>
+    <div className={["liq-env-card__metric", alignClass].join(" ")}>
+      <p className="m-0 liq-env-card__metric-label">{label}</p>
+      {side ? (
+        <div className="liq-env-card__metric-body">
+          <span
+            className={[
+              "liq-env-card__metric-value font-mono tabular-nums",
+              side.stale ? "liq-env-card__metric-value--stale" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {side.display}
+          </span>
+          {side.arrow ? (
+            <span
+              className={[
+                "liq-env-card__metric-arrow",
+                side.arrow === "↑" ? "liq-env-card__metric-arrow--up" : "",
+                side.arrow === "↓" ? "liq-env-card__metric-arrow--down" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-hidden
+            >
+              {side.arrow}
+            </span>
+          ) : null}
+        </div>
+      ) : (
+        <p className="m-0 liq-env-card__metric-placeholder" role="status">
+          {loading ? "수집 중" : "—"}
+        </p>
+      )}
     </div>
   )
 }
@@ -125,62 +82,17 @@ export default function CycleBondLiquiditySection({
   snapshot = null,
   panicData = null,
   loading = false,
-  fetchFailed = false,
-  timedOut = false,
-  error = null,
   variant = "default",
 }) {
   const enabled = isMacroRiskEnabled()
   const isDesk = variant === "desk"
-  const lastLoggedPhaseRef = useRef(null)
 
   const marketUpdateTime = useMemo(() => resolveMarketUpdateTime(panicData), [panicData])
 
-  const bondCore = useMemo(
-    () =>
-      resolveBondCoreUiState({
-        loading,
-        fetchFailed,
-        error,
-        timedOut,
-        snapshot,
-        formatValue: fmtBondValue,
-      }),
-    [loading, fetchFailed, error, timedOut, snapshot],
-  )
-
-  const liquidityLines = useMemo(
-    () => buildLiquidityMetricLines(snapshot, fmtBondValue, panicData?.move),
+  const card = useMemo(
+    () => buildLiquidityEnvironmentCard(snapshot, panicData?.move, fmtMetricValue),
     [snapshot, panicData?.move],
   )
-
-  const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
-
-  useEffect(() => {
-    if (loading || bondCore.phase === "ready" || bondCore.phase === "collecting") {
-      lastLoggedPhaseRef.current = null
-      return
-    }
-    if (lastLoggedPhaseRef.current === bondCore.phase) return
-    lastLoggedPhaseRef.current = bondCore.phase
-
-    const bondErrors = snapshot?.bondCollection?.errors ?? []
-    const payload = {
-      fetchFailed,
-      timedOut,
-      error,
-      liveFetchOk: snapshot?.liveDataStatus?.liveFetchOk,
-      bondErrors,
-      bondAsOfNy: snapshot?.bondAsOfNy ?? null,
-    }
-
-    if (bondCore.phase === "fetch_failed") {
-      console.warn("[bond-liquidity] 채권 데이터 수집 실패", payload)
-      return
-    }
-
-    console.warn("[bond-liquidity] 채권 데이터 없음 (미수신)", payload)
-  }, [loading, bondCore.phase, fetchFailed, timedOut, error, snapshot])
 
   if (!enabled) return null
 
@@ -191,12 +103,13 @@ export default function CycleBondLiquiditySection({
         "cycle-bond-section",
         "cycle-bond-section--reference",
         "cycle-bond-section--always-open",
+        "liq-env-section",
         isDesk ? "cycle-bond-section--desk" : "",
         "scroll-mt-24",
       ]
         .filter(Boolean)
         .join(" ")}
-      aria-label={isDesk ? "채권 · 유동성" : PANEL_TITLE}
+      aria-label={CARD_TITLE}
     >
       <div
         className={[
@@ -204,6 +117,7 @@ export default function CycleBondLiquiditySection({
           "cycle-bond-panel--compact",
           "cycle-bond-panel--reference",
           "cycle-bond-panel--always-open",
+          "liq-env-card",
           isDesk ? "cycle-bond-panel--desk" : "",
         ]
           .filter(Boolean)
@@ -212,7 +126,7 @@ export default function CycleBondLiquiditySection({
         {!isDesk ? (
           <header className="cycle-bond-panel__header cycle-bond-panel__header--compact">
             <div className="min-w-0 flex-1">
-              <p className="m-0 cycle-bond-panel__title-ref">{PANEL_TITLE}</p>
+              <p className="m-0 cycle-bond-panel__title-ref">{CARD_TITLE}</p>
               <div className="mt-0.5">
                 <p className="m-0 text-[9px] font-medium text-slate-500">{marketUpdateTime.basisNote}</p>
                 <p className="m-0 font-mono text-[10px] font-semibold tabular-nums text-slate-300">
@@ -230,38 +144,27 @@ export default function CycleBondLiquiditySection({
           </p>
         )}
 
-        <div className="cycle-bond-panel__body cycle-bond-panel__body--compact">
-          {bondCore.phase === "ready" ? (
-            <p className="m-0 cycle-bond-status-summary" role="status">
-              {statusLine}
-            </p>
-          ) : null}
+        <div className="cycle-bond-panel__body cycle-bond-panel__body--compact liq-env-card__body">
+          <div className="liq-env-card__row">
+            <LiquiditySideMetric label="DXY" side={card.dxy} align="left" loading={loading} />
 
-          <div className="cycle-bond-split">
-            <div className="cycle-bond-group">
-              <p className="m-0 cycle-bond-group__title">채권</p>
-              {bondCore.phase === "ready" ? (
-                <div className="cycle-bond-core-grid">
-                  {bondCore.lines.map((line) => (
-                    <BondCoreMetricRow key={line.key} line={line} />
-                  ))}
-                </div>
-              ) : bondCore.badge ? (
-                <BondStatusBadge text={bondCore.badge} />
-              ) : null}
+            <div className="liq-env-card__verdict" role="status">
+              <span
+                className={[
+                  "liq-env-card__verdict-pill",
+                  `liq-env-card__verdict-pill--${card.verdict.tone}`,
+                ].join(" ")}
+              >
+                {card.verdict.label}
+              </span>
             </div>
 
-            {liquidityLines.length > 0 ? (
-              <div className="cycle-bond-group">
-                <p className="m-0 cycle-bond-group__title">유동성</p>
-                <div className="cycle-bond-core-grid">
-                  {liquidityLines.map((line) => (
-                    <LiquidityMetricRow key={line.key} line={line} />
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            <LiquiditySideMetric label="MOVE" side={card.move} align="right" loading={loading} />
           </div>
+
+          <p className="m-0 liq-env-card__summary" role="note">
+            {card.summary}
+          </p>
         </div>
       </div>
     </section>

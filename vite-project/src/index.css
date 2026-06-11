@@ -7032,6 +7032,155 @@
     white-space: nowrap;
   }
 
+  .liq-env-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .liq-env-card__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px 12px;
+  }
+
+  .liq-env-card__metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .liq-env-card__metric--left {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .liq-env-card__metric--right {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .liq-env-card__metric-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(148, 163, 184, 0.9);
+    text-transform: uppercase;
+  }
+
+  .liq-env-card__metric-body {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .liq-env-card__metric-value {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: rgba(241, 245, 249, 0.98);
+  }
+
+  .liq-env-card__metric-value--stale {
+    font-size: 12px;
+    color: rgba(148, 163, 184, 0.95);
+  }
+
+  .liq-env-card__metric-arrow {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .liq-env-card__metric-arrow--up {
+    color: rgba(248, 113, 113, 0.95);
+  }
+
+  .liq-env-card__metric-arrow--down {
+    color: rgba(52, 211, 153, 0.95);
+  }
+
+  .liq-env-card__metric-placeholder {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(100, 116, 139, 0.9);
+  }
+
+  .liq-env-card__verdict {
+    display: flex;
+    justify-content: center;
+    padding: 0 4px;
+  }
+
+  .liq-env-card__verdict-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .liq-env-card__verdict-pill--favorable {
+    border-color: rgba(52, 211, 153, 0.35);
+    background: rgba(16, 185, 129, 0.12);
+    color: rgba(110, 231, 183, 0.98);
+  }
+
+  .liq-env-card__verdict-pill--neutral {
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(100, 116, 139, 0.14);
+    color: rgba(226, 232, 240, 0.95);
+  }
+
+  .liq-env-card__verdict-pill--tightening {
+    border-color: rgba(251, 191, 36, 0.35);
+    background: rgba(251, 191, 36, 0.12);
+    color: rgba(253, 224, 71, 0.98);
+  }
+
+  .liq-env-card__verdict-pill--alert {
+    border-color: rgba(248, 113, 113, 0.38);
+    background: rgba(239, 68, 68, 0.14);
+    color: rgba(252, 165, 165, 0.98);
+  }
+
+  .liq-env-card__summary {
+    padding-top: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: rgba(148, 163, 184, 0.92);
+    text-align: center;
+  }
+
+  @media (max-width: 420px) {
+    .liq-env-card__row {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 8px;
+    }
+
+    .liq-env-card__metric--left,
+    .liq-env-card__metric--right {
+      align-items: center;
+      text-align: center;
+      width: 100%;
+    }
+
+    .liq-env-card__metric-body {
+      justify-content: center;
+    }
+  }
+
   .cycle-bond-compact-line__value--stale {
     color: rgba(148, 163, 184, 0.95);
   }

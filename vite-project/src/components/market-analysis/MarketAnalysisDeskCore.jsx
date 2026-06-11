@@ -96,7 +96,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           aria-labelledby="market-block-bond"
         >
           <h2 id="market-block-bond" className="yds-market-desk__block-label">
-            채권 · 유동성
+            유동성 환경
           </h2>
           <CycleBondLiquiditySection
             variant="desk"
