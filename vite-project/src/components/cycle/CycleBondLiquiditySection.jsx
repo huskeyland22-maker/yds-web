@@ -3,6 +3,7 @@ import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { metricDisplayTooltip } from "../../macro-risk/metricLabels.js"
 import {
+  bondCollectionAlertLine,
   buildBondLiquidityGroups,
   bondStatusSummaryLine,
 } from "../../market-os/bondLiquidityReference.js"
@@ -34,7 +35,8 @@ function CompactMetricLine({ line }) {
       <span
         className={[
           "cycle-bond-compact-line__value font-mono tabular-nums",
-          line.value === "데이터 없음" ? "cycle-bond-compact-line__value--missing" : "",
+          line.missing ? "cycle-bond-compact-line__value--missing" : "",
+          line.stale ? "cycle-bond-compact-line__value--stale" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -103,6 +105,7 @@ export default function CycleBondLiquiditySection({
   )
 
   const statusLine = useMemo(() => bondStatusSummaryLine(snapshot), [snapshot])
+  const collectionAlert = useMemo(() => bondCollectionAlertLine(snapshot), [snapshot])
 
   const tierByKey = useMemo(() => {
     const rows = [...(snapshot?.tieredMetrics?.tier1 ?? []), ...(snapshot?.tieredMetrics?.tier2 ?? [])]
@@ -136,6 +139,11 @@ export default function CycleBondLiquiditySection({
 
         {snapshot ? (
           <div className="cycle-bond-panel__body cycle-bond-panel__body--compact">
+            {collectionAlert ? (
+              <p className="m-0 cycle-bond-collection-alert" role="status">
+                {collectionAlert}
+              </p>
+            ) : null}
             <p className="m-0 cycle-bond-status-summary" role="status">
               {statusLine}
             </p>

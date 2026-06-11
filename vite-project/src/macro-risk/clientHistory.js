@@ -2,6 +2,7 @@ import { fetchMarketData } from "../config/api.js"
 import { BOND_FRED_SERIES_MAP } from "./bondFredPolicy.js"
 import { clearBondFredSnapshot, resolveBondFredFromMarket } from "./bondFredSnapshotStore.js"
 import { recordBondSyncMeta } from "./bondSyncMeta.js"
+import { applyBondStaleFallback } from "./bondCollectionMeta.js"
 import {
   filterValidTreasuryYields,
   isValidUsTreasuryYield,
@@ -88,7 +89,18 @@ export function buildMacroRiskHistoryFromMarket(market, _panicContext = null, op
 
   applySpotFallback("DXY", pd.dxy, cd.dxy, "market-data")
 
-  return { history, sources, bondAsOfNy: fredResolved.asOfNy }
+  applyBondStaleFallback(history, sources)
+
+  const bondFetchErrors = market?.bondFred?.fetch?.errors ?? {}
+  const bondLiveCount = market?.bondFred?.fetch?.liveCount ?? 0
+
+  return {
+    history,
+    sources,
+    bondAsOfNy: fredResolved.asOfNy,
+    bondFetchErrors,
+    bondLiveCount,
+  }
 }
 
 /**
@@ -106,6 +118,9 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
   let updatedAt = new Date().toISOString()
   let liveFetchOk = false
   let bondAsOfNy = null
+  /** @type {Record<string, string>} */
+  let bondFetchErrors = {}
+  let bondLiveCount = 0
 
   try {
     if (opts.forceBondSync) clearBondFredSnapshot()
@@ -115,6 +130,8 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
     history = built.history
     sources = { ...sources, ...built.sources }
     bondAsOfNy = built.bondAsOfNy
+    bondFetchErrors = built.bondFetchErrors ?? {}
+    bondLiveCount = built.bondLiveCount ?? 0
     if (market.bondFred?.asOfNy) {
       updatedAt = `${market.bondFred.asOfNy}T21:00:00.000Z`
     } else if (market.updatedAt) {
@@ -133,5 +150,13 @@ export async function loadMacroRiskHistory(panicContext = null, opts = {}) {
     if (Number.isFinite(t)) updatedAt = new Date(t).toISOString()
   }
 
-  return { history, updatedAt, sources, liveFetchOk, bondAsOfNy }
+  if (!liveFetchOk) {
+    const built = buildMacroRiskHistoryFromMarket({ parsedData: {}, changeData: {} }, panicContext, opts)
+    history = built.history
+    sources = { ...sources, ...built.sources }
+    bondAsOfNy = built.bondAsOfNy ?? bondAsOfNy
+    bondFetchErrors = { _client: "market-data_fetch_failed" }
+  }
+
+  return { history, updatedAt, sources, liveFetchOk, bondAsOfNy, bondFetchErrors, bondLiveCount }
 }

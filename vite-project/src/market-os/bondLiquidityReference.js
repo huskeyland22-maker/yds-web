@@ -109,6 +109,8 @@ export function buildBondReferenceDisplay(snapshot) {
  *   arrow: string
  *   warn: boolean
  *   tag: string
+ *   missing?: boolean
+ *   stale?: boolean
  * }} BondCompactLine
  */
 
@@ -140,9 +142,26 @@ function buildMetricCompactLine(snapshot, formatValue, statuses, key) {
   const fmt = row?.format === "pct" ? "level" : row?.format ?? (key === "DXY" ? "level" : "rate")
   const raw = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
   const isBondYield = key === "US10Y" || key === "US30Y" || key === "US2Y"
-  const cur = isBondYield ? (isValidUsTreasuryYield(raw) ? raw : null) : raw
-  const value =
-    cur == null && isBondYield ? BOND_YIELD_MISSING_LABEL : formatValue(key, cur, fmt)
+  const bondMeta = snapshot?.bondCollection
+  const sourceKind = bondMeta?.sourceByKey?.[key]
+  const liveOk = sourceKind === "live" && isValidUsTreasuryYield(raw)
+  const cur = isBondYield ? (liveOk ? raw : null) : raw
+
+  let value = formatValue(key, cur, fmt)
+  let missing = false
+  let stale = false
+
+  if (isBondYield && cur == null) {
+    missing = true
+    const lastKnown = bondMeta?.lastKnown?.[key]
+    if (isValidUsTreasuryYield(lastKnown)) {
+      stale = true
+      value = `${BOND_YIELD_MISSING_LABEL} (최근 정상값: ${Number(lastKnown).toFixed(2)}%)`
+    } else {
+      value = BOND_YIELD_MISSING_LABEL
+    }
+  }
+
   const slope = row?.slope ?? "flat"
   const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
   const warn =
@@ -156,6 +175,8 @@ function buildMetricCompactLine(snapshot, formatValue, statuses, key) {
     arrow,
     warn,
     tag: ROLE_TAG[key] ?? key,
+    missing,
+    stale,
   }
 }
 
@@ -227,6 +248,18 @@ export function buildBondCompactLines(snapshot, formatValue) {
 
 /** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot @returns {string} */
 export function bondStatusSummaryLine(snapshot) {
+  const bond = snapshot?.bondCollection
   const labels = deriveBondReferenceStatuses(snapshot)
   return labels.length ? labels.join(" · ") : "특이 신호 없음"
+}
+
+/** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot */
+export function bondCollectionAlertLine(snapshot) {
+  const bond = snapshot?.bondCollection
+  if (!bond || bond.liveBondOk) return null
+  if (bond.usedStaleFallback) {
+    const asOf = bond.asOfNy ? ` · FRED ${bond.asOfNy}` : ""
+    return `⚠ 채권 데이터 수집 실패 · 최근 정상 데이터 사용 중${asOf}`
+  }
+  return "⚠ 채권 데이터 업데이트 대기"
 }

@@ -8,10 +8,8 @@ import {
 } from "../utils/panicDeskMetrics.js"
 import { mergeInflectionsIntoChartData } from "../utils/buildPanicHistoryInsight.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
-import { YDS_CYCLE_TAGLINE } from "../content/ydsCyclePhilosophy.js"
 import { YDS_LABEL_PANIC_HISTORY, YDS_LABEL_PANIC_SCORE } from "../content/ydsLanguage.js"
 import { marketPanicLabelForMacroStage } from "../content/ydsMarketStageLabels.js"
-import YdsStagePositionNav from "./market-analysis/YdsStagePositionNav.jsx"
 import { mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { buildHistoryChartPayload } from "../utils/panicHistoryChart.js"
 import { countHistoryMetricPoints, resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
@@ -189,11 +187,6 @@ export default function PanicIndexHistorySection({
           <div className="panic-history-v2__hero" aria-label={YDS_LABEL_PANIC_SCORE}>
             <p className="panic-history-v2__hero-label">{YDS_LABEL_PANIC_SCORE}</p>
             <p className="panic-history-v2__hero-score font-mono tabular-nums">{ydsSummary.scoreDisplay}</p>
-            <p className="panic-history-v2__hero-stage">
-              {ydsSummary.stageEmoji} {ydsSummary.stageLabel}
-            </p>
-            <p className="panic-history-v2__hero-philosophy">{YDS_CYCLE_TAGLINE}</p>
-            <YdsStagePositionNav score={ydsSummary.score} compact marketActionLabels={marketActionLabels} />
             <p className="panic-history-v2__hero-flow">
               최근 흐름 <span className="font-mono tabular-nums">{ydsSummary.trendLine}</span>
               {ydsSummary.prevScore != null ? (

@@ -85,13 +85,18 @@ export default async function handler(_req, res) {
     changeData[key] = quote.changePct
   })
 
-  /** @type {Record<string, { values: number[]; dates: string[]; current: number; changePct: number|null; asOfNy: string|null }>} */
+  /** @type {Record<string, { values: number[]; dates: string[]; current: number; changePct: number|null; asOfNy: string|null; source?: string }>} */
   const bondSeries = {}
   let bondAsOfNy = null
+  /** @type {Record<string, string>} */
+  let bondFetchErrors = {}
+  let bondLiveCount = 0
 
   try {
     const fred = await fetchAllBondFredSeries(90)
     bondAsOfNy = fred.asOfNy
+    bondFetchErrors = fred.errors ?? {}
+    bondLiveCount = fred.liveCount ?? 0
 
     for (const def of BOND_FRED_SERIES) {
       const hist = fred.bySeriesId[def.series]
@@ -102,6 +107,7 @@ export default async function handler(_req, res) {
         current: hist.current,
         changePct: hist.changePct,
         asOfNy: hist.asOfNy,
+        source: hist.source,
       }
       if (Number.isFinite(hist.current) && hist.current > 0.05) {
         parsedData[def.key] = hist.current
@@ -112,8 +118,10 @@ export default async function handler(_req, res) {
         }
       }
     }
-  } catch {
-    /* Bond FRED 전체 실패 시 채권 필드 null — Yahoo TNX 등 혼합 금지 */
+  } catch (e) {
+    bondFetchErrors = {
+      _all: e instanceof Error ? e.message : String(e),
+    }
   }
 
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -129,6 +137,12 @@ export default async function handler(_req, res) {
       snapshotRule: "us_close_confirmed_preferred_kst_0800",
       asOfNy: bondAsOfNy,
       series: bondSeries,
+      fetch: {
+        liveCount: bondLiveCount,
+        totalCount: BOND_FRED_SERIES.length,
+        errors: bondFetchErrors,
+        hasApiKey: Boolean(String(process.env.FRED_API_KEY || "").trim()),
+      },
     },
   })
 }

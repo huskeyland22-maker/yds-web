@@ -1,3 +1,4 @@
+import { buildBondCollectionMeta } from "./bondCollectionMeta.js"
 import { buildDevValidation } from "./devValidation.js"
 import { buildLiveDataStatus } from "./liveDataStatus.js"
 import { buildNormalizeLayer } from "./normalizeLayer.js"
@@ -32,6 +33,7 @@ import { evaluateCompositeTriggers } from "./triggers.js"
  * @property {NonNullable<ReturnType<computeMacroRiskScore>['breakdown']>} scoreBreakdown
  * @property {string} updatedAt
  * @property {string|null} [bondAsOfNy]
+ * @property {import('./bondCollectionMeta.js').BondCollectionMeta} bondCollection
  */
 
 /**
@@ -86,6 +88,12 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
       })
     : null
 
+  const bondCollection = buildBondCollectionMeta(apiHistory, meta.sources ?? {}, {
+    errors: meta.bondFetchErrors ?? {},
+    liveCount: meta.bondLiveCount ?? 0,
+    bondAsOfNy: meta.bondAsOfNy ?? null,
+  })
+
   return {
     score,
     headline,
@@ -106,5 +114,6 @@ export function buildMacroRiskSnapshot(apiHistory = {}, panicContext = null, met
     scoreBreakdown: scored.breakdown,
     updatedAt: meta.updatedAt ?? new Date().toISOString(),
     bondAsOfNy: meta.bondAsOfNy ?? null,
+    bondCollection,
   }
 }
