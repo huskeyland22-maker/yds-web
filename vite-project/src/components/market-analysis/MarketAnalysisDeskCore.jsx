@@ -5,7 +5,6 @@ import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
 import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
-import YdsDualCycleHero from "./YdsDualCycleHero.jsx"
 import { useEventScorecard } from "../../hooks/useEventScorecard.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
@@ -18,7 +17,7 @@ import {
 } from "../../content/ydsLanguage.js"
 
 /**
- * 시장분석 데스크 — 시장 상태·패닉(YDS) → 현재 시장 상태·행동 → 최근 전환 신호 → 핵심지수
+ * 시장분석 데스크 — 상단 카드(결론) → 최근 전환 신호(이력) → 핵심지수(근거) → 세부 분석(상세)
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -108,7 +107,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             <YdsScoreBreakdownPanel panicData={panicData} historyRows={safeHistory} />
           </details>
           <YdsEventScorecardSection rows={scorecardRows} loading={scorecardLoading} />
-          <YdsDualCycleHero panicData={panicData} historyRows={safeHistory} />
         </div>
       </details>
 
