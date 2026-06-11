@@ -4,6 +4,7 @@ import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom"
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
+import { clearStoredEventHistory } from "./content/ydsMarketEventHistoryStorage.js"
 import { persistHistory } from "./utils/panicHistoryLocalPersist.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
 import { CYCLE_HISTORY_MAX, latestCycleHistoryRow, panicDataFromCycleRow } from "./utils/cycleHistoryUtils.js"
@@ -734,6 +735,7 @@ function App() {
         resetAiReportInput()
         pulseSaveFeedback()
         showSaveSuccessToast()
+        clearStoredEventHistory()
 
         if (db) {
           void (async () => {

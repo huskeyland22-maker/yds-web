@@ -46,6 +46,7 @@ import {
   persistHistory,
   persistHistoryFromCycleRows,
 } from "../utils/panicHistoryLocalPersist.js"
+import { clearStoredEventHistory } from "../content/ydsMarketEventHistoryStorage.js"
 import {
   logFetchFail,
   logFetchStart,
@@ -381,6 +382,7 @@ export const useAppDataStore = create((set, get) => ({
       rows: fresh.length,
       realtime: Boolean(meta.realtime),
     })
+    clearStoredEventHistory()
   },
 
   /**

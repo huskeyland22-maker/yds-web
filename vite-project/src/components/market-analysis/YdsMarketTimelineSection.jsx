@@ -2,21 +2,20 @@ import { useEffect, useMemo, useState } from "react"
 import {
   formatTimelineDateLabel,
   formatTimelineStreamLead,
-  resolveMarketTimeline,
+  rebuildMarketTimelineFromHistory,
   timelineEventEmoji,
+  validateMarketTimelineAgainstHistory,
 } from "../../content/ydsMarketTimeline.js"
 import {
   clearLegacyEventHistoryStorage,
-  fetchSeedEventHistory,
-  loadStoredEventHistory,
-  mergeSeedAndStored,
-  saveStoredEventHistory,
+  clearStoredEventHistory,
+  computePanicHistoryFingerprint,
 } from "../../content/ydsMarketEventHistoryStorage.js"
 
 const DEFAULT_COLLAPSED = 3
 
 /**
- * V3 시장 변화 기록 — stream(3건 1줄 요약) · full(details)
+ * V3 시장 변화 기록 — 패닉 히스토리 전체 재스캔 (localStorage 누적 없음)
  * @param {{
  *   panicData?: object | null
  *   historyRows?: object[]
@@ -32,38 +31,35 @@ export default function YdsMarketTimelineSection({
   variant = "full",
   collapsedVisible = DEFAULT_COLLAPSED,
 }) {
-  const [storedEvents, setStoredEvents] = useState(() => loadStoredEventHistory())
-  const [seedLoaded, setSeedLoaded] = useState(false)
   const [expanded, setExpanded] = useState(variant === "full")
   const [streamExpanded, setStreamExpanded] = useState(false)
 
+  const historyFingerprint = useMemo(
+    () => computePanicHistoryFingerprint(historyRows, panicData),
+    [historyRows, panicData],
+  )
+
   useEffect(() => {
     clearLegacyEventHistoryStorage()
+    clearStoredEventHistory()
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    fetchSeedEventHistory().then((seed) => {
-      if (cancelled) return
-      setStoredEvents((prev) => mergeSeedAndStored(prev, seed))
-      setSeedLoaded(true)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    clearStoredEventHistory()
+  }, [historyFingerprint])
 
   const view = useMemo(() => {
-    return resolveMarketTimeline(historyRows, panicData, {
-      limit: 50,
-      stored: storedEvents,
-    })
-  }, [historyRows, panicData, storedEvents])
-
-  useEffect(() => {
-    if (!seedLoaded && storedEvents.length === 0) return
-    saveStoredEventHistory(view.events)
-  }, [view.events, seedLoaded, storedEvents.length])
+    const rebuilt = rebuildMarketTimelineFromHistory(historyRows, panicData, { limit: 50 })
+    const validation = validateMarketTimelineAgainstHistory(
+      rebuilt.events,
+      historyRows,
+      panicData,
+    )
+    if (!validation.ok && typeof console !== "undefined") {
+      console.warn("[YDS] 최근 전환 신호 날짜 불일치", validation)
+    }
+    return { ...rebuilt, validation }
+  }, [historyRows, panicData])
 
   if (!view.events.length) return null
 

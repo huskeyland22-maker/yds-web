@@ -2,13 +2,17 @@
  * Market Timeline smoke test — node scripts/yds-market-timeline.test.mjs
  */
 import {
+  buildTimelineSeries,
   formatTimelineDateLabel,
   formatTurningPointMetrics,
+  rebuildMarketTimelineFromHistory,
   reconcileTimelineEventHistory,
+  resolveLatestPanicHistoryDate,
   resolveMarketTimeline,
   resolveOverheatTransitionCopy,
   scanTimelineEventsFromSeries,
   timelineEventEmoji,
+  validateMarketTimelineAgainstHistory,
 } from "../vite-project/src/content/ydsMarketTimeline.js"
 import { normalizeEventHistoryEvents } from "../vite-project/src/content/ydsMarketEventHistoryStorage.js"
 
@@ -74,6 +78,46 @@ assert(prepCopy?.action === "현금 준비 시작", prepCopy?.action)
 
 const metrics = formatTurningPointMetrics({ fearGreed: 61, bofa: 6.4 })
 assert(metrics === "CNN 61 · BofA 6.4", metrics)
+
+const historyOnly = [
+  { date: "2026-06-05", fearGreed: 72, bofa: 7.2 },
+  { date: "2026-06-10", fearGreed: 74, bofa: 7.4 },
+]
+const stalePanic = {
+  date: "2026-06-11",
+  updatedAt: "2026-06-11T12:00:00.000Z",
+  fearGreed: 74,
+  bofa: 7.4,
+}
+const seriesFixed = buildTimelineSeries(historyOnly, stalePanic)
+assert(
+  !seriesFixed.some((r) => r.date === "2026-06-11"),
+  "stale panic date must not create phantom history row",
+)
+assert(resolveLatestPanicHistoryDate(historyOnly, stalePanic) === "2026-06-10")
+
+const rebuilt = rebuildMarketTimelineFromHistory(historyOnly, stalePanic, { limit: 20 })
+const validation = validateMarketTimelineAgainstHistory(rebuilt.events, historyOnly, stalePanic)
+assert(validation.ok, validation.message ?? "timeline should align with history")
+
+const withStaleStored = resolveMarketTimeline(historyOnly, stalePanic, {
+  limit: 8,
+  stored: [
+    {
+      date: "2026-06-11",
+      type: "overheat-cashPrep",
+      severity: "low",
+      title: "stale",
+      metrics: "",
+      action: "",
+      description: "",
+    },
+  ],
+})
+assert(
+  !withStaleStored.events.some((e) => e.date === "2026-06-11"),
+  "stored stale events must not appear after rebuild",
+)
 
 console.log("OK market timeline", {
   count: scanned.length,

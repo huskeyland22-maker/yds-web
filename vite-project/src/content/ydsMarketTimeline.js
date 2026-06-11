@@ -192,20 +192,43 @@ const EVENT_TURNING_COPY = {
 }
 
 /**
+ * 패닉 히스토리 최신 날짜 (YYYY-MM-DD)
+ * @param {object[]} historyRows
+ * @param {object | null | undefined} [panicData]
+ */
+export function resolveLatestPanicHistoryDate(historyRows, panicData = null) {
+  const series = buildTimelineSeries(historyRows, panicData)
+  if (!series.length) return null
+  return rowDate(series[series.length - 1])
+}
+
+/**
+ * panic_index_history 단일 소스 — 스냅샷은 히스토리에 존재하는 날짜에만 병합
  * @param {object[]} historyRows
  * @param {object | null | undefined} panicData
  */
-function buildTimelineSeries(historyRows, panicData) {
+export function buildTimelineSeries(historyRows, panicData) {
   const map = new Map()
   for (const row of historyRows ?? []) {
     const d = rowDate(row)
     if (!d) continue
     map.set(d, { ...map.get(d), ...row, date: d })
   }
-  const asOf = rowDate(panicData)
-  if (asOf) {
-    map.set(asOf, { ...map.get(asOf), ...panicData, date: asOf })
+
+  if (!panicData) {
+    return [...map.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
   }
+
+  const sortedDates = [...map.keys()].sort((a, b) => a.localeCompare(b))
+  const latestHistoryDate = sortedDates[sortedDates.length - 1] ?? null
+  const asOf = rowDate(panicData)
+  const targetDate =
+    asOf && map.has(asOf) ? asOf : latestHistoryDate ?? (asOf && /^\d{4}-\d{2}-\d{2}$/.test(asOf) ? asOf : null)
+
+  if (targetDate) {
+    map.set(targetDate, { ...map.get(targetDate), ...panicData, date: targetDate })
+  }
+
   return [...map.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
 }
 
@@ -424,23 +447,73 @@ export function reconcileTimelineEventHistory(stored, detected) {
   return consolidateTimelinePerDay([...deduped.values()])
 }
 
+/** @alias scanTimelineEventsFromSeries */
+export const generateSignals = scanTimelineEventsFromSeries
+
+/**
+ * 패닉 히스토리 전체 스캔 → 전환신호 재생성 (저장소 병합 없음)
+ * @param {object[]} historyRows
+ * @param {object | null | undefined} panicData
+ * @param {{ limit?: number }} [opts]
+ */
+export function rebuildMarketTimelineFromHistory(historyRows, panicData, opts = {}) {
+  const limit = Math.max(5, Math.min(50, opts.limit ?? 7))
+  const series = buildTimelineSeries(historyRows, panicData)
+  const events = consolidateTimelinePerDay(generateSignals(series))
+
+  return {
+    events,
+    displayEvents: events.slice(0, limit),
+    totalCount: events.length,
+    detectedCount: events.length,
+  }
+}
+
+/** @alias rebuildMarketTimelineFromHistory */
+export const rebuildSignals = rebuildMarketTimelineFromHistory
+
+/**
+ * 표시 전환신호가 패닉 히스토리 최신일과 정합한지 검증
+ * @param {TimelineEventRecord[]} events 날짜 내림차순
+ * @param {object[]} historyRows
+ * @param {object | null | undefined} panicData
+ */
+export function validateMarketTimelineAgainstHistory(events, historyRows, panicData) {
+  const latestHistoryDate = resolveLatestPanicHistoryDate(historyRows, panicData)
+  const latestEventDate = events?.[0]?.date ?? null
+  const ok =
+    !latestHistoryDate ||
+    !latestEventDate ||
+    latestEventDate <= latestHistoryDate
+
+  return {
+    ok,
+    latestHistoryDate,
+    latestEventDate,
+    message: ok
+      ? null
+      : `전환신호 최신일(${latestEventDate})이 패닉 히스토리 최신일(${latestHistoryDate})보다 늦습니다`,
+  }
+}
+
 /**
  * @param {object[]} historyRows
  * @param {object | null | undefined} panicData
  * @param {{ limit?: number; stored?: TimelineEventRecord[] }} [opts]
  */
 export function resolveMarketTimeline(historyRows, panicData, opts = {}) {
-  const limit = Math.max(5, Math.min(12, opts.limit ?? 7))
-  const series = buildTimelineSeries(historyRows, panicData)
-  const detected = scanTimelineEventsFromSeries(series)
-  const merged = reconcileTimelineEventHistory(opts.stored ?? [], detected)
+  const rebuilt = rebuildMarketTimelineFromHistory(historyRows, panicData, opts)
+  const validation = validateMarketTimelineAgainstHistory(
+    rebuilt.events,
+    historyRows,
+    panicData,
+  )
 
-  return {
-    events: merged,
-    displayEvents: merged.slice(0, limit),
-    totalCount: merged.length,
-    detectedCount: detected.length,
+  if (!validation.ok && typeof console !== "undefined") {
+    console.warn("[YDS] market timeline validation", validation)
   }
+
+  return { ...rebuilt, validation }
 }
 
 /** @param {string} isoDate YYYY-MM-DD */

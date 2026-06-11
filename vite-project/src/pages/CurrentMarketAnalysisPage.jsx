@@ -28,7 +28,14 @@ export default function CurrentMarketAnalysisPage() {
   const panicData = useMemo(() => {
     if (!latestCycleRow) return null
     const panic = panicDataFromCycleRow(latestCycleRow)
-    if (panic) return { ...latestCycleRow, ...panic, date: latestCycleRow.date ?? panic.updatedAt }
+    const rowDate = String(latestCycleRow.date ?? "").slice(0, 10)
+    if (panic) {
+      return {
+        ...latestCycleRow,
+        ...panic,
+        date: /^\d{4}-\d{2}-\d{2}$/.test(rowDate) ? rowDate : latestCycleRow.date,
+      }
+    }
     return latestCycleRow
   }, [latestCycleRow])
 

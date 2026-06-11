@@ -1,5 +1,5 @@
 /**
- * eventHistory.json 호환 누적 저장 (localStorage)
+ * eventHistory.json / localStorage — 레거시 누적 저장 (V4부터 전환신호는 히스토리 재스캔만 사용)
  */
 
 /** @typedef {import("./ydsMarketTimeline.js").TimelineEventRecord} TimelineEventRecord */
@@ -42,6 +42,35 @@ export function normalizeEventHistoryEvents(raw) {
     .filter((ev) => /^\d{4}-\d{2}-\d{2}$/.test(ev.date) && ev.type && ev.title)
 }
 
+/** 패닉 히스토리 변경 감지 — 전환신호 캐시 무효화용 */
+export function computePanicHistoryFingerprint(historyRows, panicData = null) {
+  /** @type {string[]} */
+  const dates = []
+  for (const row of historyRows ?? []) {
+    const d = String(row?.date ?? row?.ts ?? "").slice(0, 10)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) dates.push(d)
+  }
+  const asOf = String(panicData?.date ?? panicData?.ts ?? panicData?.updatedAt ?? "")
+    .slice(0, 10)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(asOf)) dates.push(asOf)
+  const sorted = [...new Set(dates)].sort((a, b) => a.localeCompare(b))
+  const latest = sorted[sorted.length - 1] ?? ""
+  const earliest = sorted[0] ?? ""
+  return `${sorted.length}|${earliest}|${latest}`
+}
+
+/** 레거시 localStorage 전환신호 캐시 제거 */
+export function clearStoredEventHistory() {
+  if (typeof window === "undefined") return
+  try {
+    window.localStorage.removeItem(EVENT_HISTORY_STORAGE_KEY)
+    window.localStorage.removeItem(EVENT_HISTORY_STORAGE_KEY_LEGACY)
+    window.localStorage.removeItem("yds-event-history-v1")
+  } catch {
+    /* ignore */
+  }
+}
+
 /** @returns {TimelineEventRecord[]} */
 export function loadStoredEventHistory() {
   if (typeof window === "undefined") return []
@@ -58,13 +87,7 @@ export function loadStoredEventHistory() {
 
 /** 이전 버전 저장 키 제거 — 재스캔 정합성 확보 */
 export function clearLegacyEventHistoryStorage() {
-  if (typeof window === "undefined") return
-  try {
-    window.localStorage.removeItem(EVENT_HISTORY_STORAGE_KEY_LEGACY)
-    window.localStorage.removeItem("yds-event-history-v1")
-  } catch {
-    /* ignore */
-  }
+  clearStoredEventHistory()
 }
 
 /**
