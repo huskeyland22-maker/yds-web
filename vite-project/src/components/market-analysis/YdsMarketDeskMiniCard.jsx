@@ -1,15 +1,6 @@
 import { Fragment } from "react"
 
 /**
- * @param {string} label
- */
-function compactStageLabel(label) {
-  return String(label ?? "")
-    .replace(/\s+/g, "")
-    .trim()
-}
-
-/**
  * 시장분석 상단 미니 카드 — 큰 수치 + 가로 단계바
  * @param {{
  *   title: string
@@ -38,7 +29,7 @@ export default function YdsMarketDeskMiniCard({
         variant === "state" ? "yds-market-hero__score-card--state" : "yds-market-hero__score-card--panic",
         embedded ? "yds-market-hero__score-card--embedded" : "yds-market-hero__score-card--solo",
       ].join(" ")}
-      aria-label={ariaLabel ?? `${title} ${score}, 현재 ${activeStep?.label ?? ""}`}
+      aria-label={ariaLabel ?? `${title} ${score}, 현재 ${activeStep?.emoji ?? ""} ${activeStep?.label ?? ""}`}
     >
       <p className="yds-market-hero__card-label">{title}</p>
       <p className="yds-market-hero__score font-mono tabular-nums">{score}</p>
@@ -57,11 +48,14 @@ export default function YdsMarketDeskMiniCard({
               ]
                 .filter(Boolean)
                 .join(" ")}
-              style={step.active ? { "--stage-color": step.color } : undefined}
+              style={{ "--stage-color": step.color }}
               aria-current={step.active ? "step" : undefined}
-              title={step.label}
+              title={`${step.emoji} ${step.label}`}
             >
-              {compactStageLabel(step.label)}
+              <span className="yds-market-hero__stage-emoji" aria-hidden>
+                {step.emoji}
+              </span>
+              <span className="yds-market-hero__stage-name">{step.label}</span>
             </li>
           </Fragment>
         ))}

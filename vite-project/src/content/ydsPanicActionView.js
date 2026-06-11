@@ -4,7 +4,7 @@
 
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { YDS_PANIC_RAIL_LABELS, resolvePanicBandForMacroStage } from "./ydsLanguage.js"
-import { PANIC_STATUS_BANDS } from "./ydsStatusLabels.js"
+import { PANIC_HERO_RAIL_STAGES } from "./ydsMarketHeroRails.js"
 import { resolveYdsStageNavigation } from "../utils/ydsStageNavigation.js"
 
 /** @typedef {import("../panic-v2/panicMacroV1Status.js").MacroV1Status} MacroV1Status */
@@ -29,12 +29,12 @@ export function resolvePanicActionView(ydsScore) {
       : `${nextBand.emoji} ${nextBand.label} (+${nav.pointsToNext})`
     : null
 
-  const rail = PANIC_STATUS_BANDS.map((band) => ({
-    id: band.id,
-    emoji: band.emoji,
-    label: band.label,
-    color: band.color,
-    active: currentBand?.id === band.id,
+  const rail = PANIC_HERO_RAIL_STAGES.map((stage) => ({
+    id: stage.id,
+    emoji: stage.emoji,
+    label: stage.label,
+    color: stage.color,
+    active: currentBand?.id === stage.id,
   }))
 
   return {
