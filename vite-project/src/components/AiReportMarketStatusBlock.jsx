@@ -10,20 +10,17 @@ export default function AiReportMarketStatusBlock({ status, compact = false }) {
         .filter(Boolean)
         .join(" ")}
       role="status"
-      aria-label={`현재 시장: ${status.stageLabel}`}
-      style={status.accentColor ? { "--ai-report-accent": status.accentColor } : undefined}
-      data-regime={status.regimeId ?? undefined}
+      aria-label={status.memoLines.join(" ")}
     >
-      <p className="m-0 ai-report-market-status__headline">{status.headline}</p>
-      <p className="m-0 ai-report-market-status__stage">{status.ready ? status.stageLabel : "—"}</p>
-      {status.actionLines.length ? (
-        <ul className="m-0 ai-report-market-status__actions">
-          {status.actionLines.map((line) => (
-            <li key={line} className="ai-report-market-status__action">
+      <p className="m-0 ai-report-market-status__title">{status.title}</p>
+      {status.memoLines.length ? (
+        <div className="ai-report-market-status__memo">
+          {status.memoLines.map((line) => (
+            <p key={line} className="m-0 ai-report-market-status__memo-line">
               {line}
-            </li>
+            </p>
           ))}
-        </ul>
+        </div>
       ) : null}
       <p className="m-0 ai-report-market-status__update">{status.updateLine}</p>
       {status.basisLine ? (

@@ -12,9 +12,11 @@ export function buildMarketSidebarPulse(panicData, _cycleStage, historyRows = []
   const status = buildAiReportMarketStatus(panicData, historyRows)
   const ms = resolveMarketState(panicData)
 
+  const memoSummary = status.memoLines?.filter(Boolean).join(" ") || "—"
+
   return {
     aiReportStatus: status,
-    marketLabel: status.stageLabel,
+    marketLabel: memoSummary,
     updateTimestampLine: status.updateLine,
     basisLine: status.basisLine,
     /** @deprecated VIX/F&G는 핵심지수 카드에서만 표시 */
@@ -26,7 +28,7 @@ export function buildMarketSidebarPulse(panicData, _cycleStage, historyRows = []
     marketStateLabel: ms.label,
     leadingSector: "AI · 반도체",
     volatility: ms.volatility,
-    cycleStage: status.stageLabel,
+    cycleStage: status.memoLines?.[0] ?? "—",
   }
 }
 
