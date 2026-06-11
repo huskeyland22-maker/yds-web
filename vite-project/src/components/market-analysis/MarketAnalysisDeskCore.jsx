@@ -3,7 +3,6 @@ import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
-import YdsTodayMarketInterpretation from "./YdsTodayMarketInterpretation.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
 import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
@@ -12,7 +11,7 @@ import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 
 /**
- * 시장분석 데스크 — 결론 → 해석 → 추이 → 변화 → 근거 → 이벤트 → 채권
+ * 시장분석 데스크 — 결론 → 추이 → 변화 → 근거 → 이벤트 → 채권 (해석은 사이드바)
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -52,11 +51,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
           historyRows={safeHistory}
-        />
-
-        <YdsTodayMarketInterpretation
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--interpretation"
-          panicData={panicData}
         />
 
         <YdsMarketTrendSection

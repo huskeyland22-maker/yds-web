@@ -26562,40 +26562,6 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: clamp(0.58rem, 1.65vw, 0.68rem);
 }
 
-.yds-market-desk__interpretation {
-  padding: 0.55rem 0.65rem;
-  margin-bottom: 0.35rem;
-  border-radius: 0.55rem;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: rgba(15, 23, 42, 0.55);
-}
-
-.yds-market-desk__interpretation-title {
-  margin: 0 0 0.35rem;
-  font-size: clamp(0.62rem, 1.75vw, 0.72rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #94a3b8;
-}
-
-.yds-market-desk__interpretation-body {
-  display: grid;
-  gap: 0.12rem;
-}
-
-.yds-market-desk__interpretation-line {
-  margin: 0;
-  font-size: clamp(0.68rem, 1.95vw, 0.8rem);
-  font-weight: 500;
-  line-height: 1.45;
-  color: #e2e8f0;
-}
-
-.yds-market-desk__interpretation-line:first-of-type {
-  font-weight: 700;
-  color: #f8fafc;
-}
-
 .yds-market-score-hero {
   margin-bottom: 0.45rem;
 }
