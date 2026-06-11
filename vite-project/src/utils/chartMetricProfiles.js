@@ -159,6 +159,18 @@ export const chartProfiles = {
     strokeWidth: 3,
     activeDotR: 5,
   },
+  marketStateScore: {
+    tickCount: 6,
+    tickDecimals: 0,
+    strokeWidth: 2.5,
+    activeDotR: 5,
+  },
+  panicIntensity: {
+    tickCount: 6,
+    tickDecimals: 0,
+    strokeWidth: 2.5,
+    activeDotR: 5,
+  },
   panicV1: {
     tickCount: 5,
     tickDecimals: 0,
@@ -192,6 +204,8 @@ export const yDomainConfigs = {
   gsBullBear: { mode: "fixed", fixed: [0, 100] },
   panicV2: { mode: "auto", paddingMin: 3 },
   panicV1: { mode: "auto", paddingMin: 3 },
+  marketStateScore: { mode: "fixed", fixed: [0, 100] },
+  panicIntensity: { mode: "fixed", fixed: [0, 100] },
 }
 
 /** @param {string} metricKey */

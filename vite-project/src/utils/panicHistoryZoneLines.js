@@ -18,13 +18,13 @@ export const INSIGHT_ZONE_COLORS = {
   risk: "#ef4444",
 }
 
-/** 패닉 V1/V2 차트 배경 — 0~100 (라벨은 상단 상태바만, 차트에는 색만) */
+/** 패닉 V1/V2 · 시장 추이 차트 배경 — 0~100 5단 (파랑→빨강) */
 const PANIC_SCORE_ZONE_BANDS = [
-  { y1: 0, y2: 20, label: "", color: "#22d3ee", area: true },
-  { y1: 20, y2: 40, label: "", color: "#38bdf8", area: true },
-  { y1: 40, y2: 60, label: "", color: "#f97316", area: true },
-  { y1: 60, y2: 80, label: "", color: "#ef4444", area: true },
-  { y1: 80, y2: 100, label: "", color: "#dc2626", area: true },
+  { y1: 0, y2: 20, label: "", color: "#3b82f6", area: true },
+  { y1: 20, y2: 40, label: "", color: "#22c55e", area: true },
+  { y1: 40, y2: 60, label: "", color: "#eab308", area: true },
+  { y1: 60, y2: 80, label: "", color: "#f97316", area: true },
+  { y1: 80, y2: 100, label: "", color: "#ef4444", area: true },
 ]
 
 /** @param {string} metricKey @returns {MetricZoneBand[]} */
@@ -32,7 +32,7 @@ export function metricZoneBands(metricKey) {
   if (metricKey === "panicV1") {
     return macroV1ZoneBands()
   }
-  if (metricKey === "panicV2") {
+  if (metricKey === "panicV2" || metricKey === "marketStateScore" || metricKey === "panicIntensity") {
     return PANIC_SCORE_ZONE_BANDS
   }
   if (metricKey === "fearGreed") {

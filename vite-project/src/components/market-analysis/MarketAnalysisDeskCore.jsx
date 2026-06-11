@@ -3,6 +3,7 @@ import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
+import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
 import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
 import { useEventScorecard } from "../../hooks/useEventScorecard.js"
@@ -17,7 +18,7 @@ import {
 } from "../../content/ydsLanguage.js"
 
 /**
- * 시장분석 데스크 — 상단 카드(결론) → 최근 전환 신호(이력) → 핵심지수(근거) → 세부 분석(상세)
+ * 시장분석 데스크 — 상단 카드(결론) → 30일 추이 → 최근 전환 신호(이력) → 핵심지수(근거) → 세부 분석(상세)
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -56,6 +57,11 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         <YdsMarketScoreHero
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
+          historyRows={safeHistory}
+        />
+
+        <YdsMarketTrendSection
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--trend"
           historyRows={safeHistory}
         />
 
