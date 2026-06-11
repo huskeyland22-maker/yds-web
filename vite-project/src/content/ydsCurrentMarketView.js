@@ -1,9 +1,8 @@
 /**
- * 현재 시장 상태 — Hero 카드 (YDS 단일 판정 · resolveMarketStageSnapshot)
+ * 현재 시장 상태 — Hero 카드 (시장 위치 · CNN/VIX/BofA)
  */
 
-import { getFinalScore } from "../utils/tradingScores.js"
-import { resolveMarketStageSnapshot } from "./ydsMarketStageLabels.js"
+import { resolveMarketPositionView } from "./ydsMarketPositionEngine.js"
 
 /**
  * @typedef {{
@@ -11,17 +10,31 @@ import { resolveMarketStageSnapshot } from "./ydsMarketStageLabels.js"
  *   label: string
  *   color: string
  *   hint: string
- *   cycleId: import("./ydsStatusLabels.js").CycleBandId
- *   panicId: import("./ydsStatusLabels.js").PanicBandId | null
- *   cycleScore: number | null
+ *   positionId: import("./ydsMarketPositionEngine.js").MarketPositionId
  *   ydsScore: number | null
  * }} CurrentMarketView
  */
 
 /**
- * @param {ReturnType<typeof resolveMarketStageSnapshot>} snapshot
+ * @param {object | null | undefined} panicData
  * @returns {CurrentMarketView | null}
  */
+export function resolveCurrentMarketView(panicData) {
+  const view = resolveMarketPositionView(panicData)
+  if (!view) return null
+
+  const { position } = view
+  return {
+    emoji: position.emoji,
+    label: position.label,
+    color: position.color,
+    hint: position.descriptions[0] ?? "",
+    positionId: position.id,
+    ydsScore: null,
+  }
+}
+
+/** @deprecated snapshot 경로 — 시장 위치 엔진 사용 */
 export function currentMarketViewFromSnapshot(snapshot) {
   if (!snapshot?.cycle) return null
   return {
@@ -29,21 +42,7 @@ export function currentMarketViewFromSnapshot(snapshot) {
     label: snapshot.cycle.label,
     color: snapshot.cycle.color,
     hint: snapshot.cycle.hint ?? "",
-    cycleId: snapshot.cycle.id,
-    panicId: snapshot.panic?.id ?? null,
-    cycleScore: snapshot.cycle.score ?? null,
+    positionId: "adjustment",
     ydsScore: snapshot.ydsScore ?? null,
   }
-}
-
-/**
- * @param {object | null | undefined} panicData
- * @param {object[]} [_historyRows] — 하위 호환 (미사용 · momentum/state 엔진 분리)
- * @returns {CurrentMarketView | null}
- */
-export function resolveCurrentMarketView(panicData, _historyRows = []) {
-  if (!panicData) return null
-  const score = getFinalScore(panicData)
-  if (!Number.isFinite(score)) return null
-  return currentMarketViewFromSnapshot(resolveMarketStageSnapshot(Math.round(score)))
 }

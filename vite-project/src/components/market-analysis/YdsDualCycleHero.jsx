@@ -1,17 +1,17 @@
 import { useMemo } from "react"
-import { MACRO_V1_STATUS_BANDS, resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
-import { YDS_FEAR_CYCLE_RAIL, getStagePhilosophy } from "../../content/ydsCyclePhilosophy.js"
+import { resolveMacroV1Status } from "../../panic-v2/panicMacroV1Status.js"
+import { getStagePhilosophy } from "../../content/ydsCyclePhilosophy.js"
 import {
-  MARKET_CYCLE_STAGES,
-  resolveMarketCycleNavigation,
-  resolveMarketCycleStage,
-} from "../../content/ydsMarketCycleDisplay.js"
+  MARKET_POSITION_STAGES,
+  resolveMarketPositionNavigation,
+  resolveMarketPositionView,
+} from "../../content/ydsMarketPositionEngine.js"
+import { resolvePanicActionView } from "../../content/ydsPanicActionView.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 import { resolveYdsStageNavigation } from "../../utils/ydsStageNavigation.js"
 import { resolveMomentumLayer } from "../../content/ydsMomentumLayer.js"
 import { resolveEventLayer } from "../../content/ydsEventLayer.js"
 import { resolveMarketLevelRegime } from "../../content/ydsRegimeLayer.js"
-import { resolveMarketState } from "../../content/ydsStateEngine.js"
 import YdsDualCyclePositionNav from "./YdsDualCyclePositionNav.jsx"
 import YdsLayerStackIndicator from "./YdsLayerStackIndicator.jsx"
 
@@ -27,7 +27,7 @@ function fmtMetric(v, digits = 1) {
 }
 
 /**
- * Dual Cycle Hero — 공포(YDS) + 시장(CNN·BofA) 2축 + Momentum
+ * Dual Cycle Hero — 시장 위치 + 패닉 강도
  * @param {{ panicData?: object | null; historyRows?: object[] }} props
  */
 export default function YdsDualCycleHero({ panicData = null, historyRows = [] }) {
@@ -37,36 +37,30 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
     if (!Number.isFinite(score)) return null
     const rounded = Math.max(0, Math.min(100, Math.round(score)))
     const fearStage = resolveMacroV1Status(rounded)
-    if (!fearStage) return null
-
-    const cnn = toNum(panicData.fearGreed)
-    const bofa = toNum(panicData.bofa)
-    const marketStage = resolveMarketCycleStage(cnn, bofa)
-    if (!marketStage) return null
+    const marketView = resolveMarketPositionView(panicData)
+    const panicView = resolvePanicActionView(rounded)
+    if (!fearStage || !marketView || !panicView) return null
 
     const fearNav = resolveYdsStageNavigation(rounded)
-    const marketNav = resolveMarketCycleNavigation(marketStage.id)
+    const marketNav = resolveMarketPositionNavigation(marketView.position.id)
     const philosophy = getStagePhilosophy(fearStage.id)
     const momentum = resolveMomentumLayer(panicData, historyRows, {
       fearStageLabel: fearStage.label,
     })
     const eventLayer = resolveEventLayer(panicData, historyRows)
     const levelRegime = resolveMarketLevelRegime(panicData, historyRows, momentum)
-    const marketState = resolveMarketState(panicData, historyRows, momentum)
 
     return {
       score: rounded,
       fearStage,
       fearNav,
       philosophy,
-      cnn,
-      bofa,
-      marketStage,
+      marketView,
       marketNav,
+      panicView,
       momentum,
       eventLayer,
       levelRegime,
-      marketState,
     }
   }, [panicData, historyRows])
 
@@ -78,45 +72,37 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
     )
   }
 
+  const { position } = model.marketView
+
   return (
-    <section className="yds-dual-cycle-hero" aria-label="공포·시장 Dual Cycle">
+    <section className="yds-dual-cycle-hero" aria-label="시장 위치 · 패닉 강도">
       <div className="yds-dual-cycle-hero__grid">
         <article
           className="yds-dual-cycle-hero__axis yds-dual-cycle-hero__axis--market"
           aria-label="시장 상태"
         >
           <p className="yds-dual-cycle-hero__axis-label">시장 상태</p>
-          {model.marketState ? (
-            <>
-              <p
-                className="yds-dual-cycle-hero__stage yds-dual-cycle-hero__stage--market"
-                style={{ "--axis-color": model.marketState.color }}
-              >
-                <span aria-hidden>{model.marketState.emoji}</span> {model.marketState.label}
-              </p>
-              {model.marketState.subtitles.length ? (
-                <ul className="yds-dual-cycle-hero__state-subs">
-                  {model.marketState.subtitles.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </>
-          ) : (
-            <p
-              className="yds-dual-cycle-hero__stage yds-dual-cycle-hero__stage--market"
-              style={{ "--axis-color": model.marketStage.color }}
-            >
-              <span aria-hidden>{model.marketStage.emoji}</span> {model.marketStage.label}
-            </p>
-          )}
+          <p
+            className="yds-dual-cycle-hero__stage yds-dual-cycle-hero__stage--market"
+            style={{ "--axis-color": position.color }}
+          >
+            <span aria-hidden>{position.emoji}</span> {position.label}
+          </p>
+          {position.descriptions.length ? (
+            <ul className="yds-dual-cycle-hero__state-subs">
+              {position.descriptions.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
           <p className="yds-dual-cycle-hero__metrics font-mono tabular-nums">
-            CNN {fmtMetric(model.cnn, 0)} · BofA {fmtMetric(model.bofa)}
+            CNN {fmtMetric(position.cnn, 0)} · VIX {fmtMetric(position.vix)} · BofA{" "}
+            {fmtMetric(position.bofa)}
           </p>
 
           <div className="yds-dual-cycle-hero__rail" aria-hidden>
-            {MARKET_CYCLE_STAGES.map((step) => {
-              const active = step.id === model.marketStage.id
+            {MARKET_POSITION_STAGES.map((step) => {
+              const active = step.id === position.id
               return (
                 <span
                   key={step.id}
@@ -126,8 +112,6 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
                   ]
                     .filter(Boolean)
                     .join(" ")}
-                  data-market={step.id}
-                  title={step.tooltip}
                   style={active ? { "--chip-color": step.color } : undefined}
                 >
                   {step.emoji} {step.short}
@@ -143,47 +127,39 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
         >
           <p className="yds-dual-cycle-hero__axis-label">패닉 강도</p>
           <p className="yds-dual-cycle-hero__score-secondary font-mono tabular-nums">
-            YDS <span>{model.score}</span>
+            {model.panicView.scoreDisplay}
           </p>
           <p
             className="yds-dual-cycle-hero__stage"
             style={{ "--axis-color": model.fearStage.color }}
           >
-            <span aria-hidden>{model.fearStage.emoji}</span> {model.fearStage.label}
+            {model.panicView.currentLine}
           </p>
+          {model.panicView.nextLine ? (
+            <p className="yds-dual-cycle-hero__segment">{model.panicView.nextLine}</p>
+          ) : null}
 
           <div className="yds-dual-cycle-hero__rail" aria-hidden>
-            {YDS_FEAR_CYCLE_RAIL.map((step) => {
-              const active = step.id === model.fearStage.id
-              const band = MACRO_V1_STATUS_BANDS.find((b) => b.id === step.id)
-              return (
-                <span
-                  key={step.id}
-                  className={[
-                    "yds-dual-cycle-hero__chip",
-                    active ? "yds-dual-cycle-hero__chip--active" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  data-stage={step.id}
-                  style={active ? { "--chip-color": band?.color ?? "#94a3b8" } : undefined}
-                >
-                  {step.emoji} {step.short}
-                </span>
-              )
-            })}
+            {model.panicView.rail.map((step) => (
+              <span
+                key={step.id}
+                className={[
+                  "yds-dual-cycle-hero__chip",
+                  step.active ? "yds-dual-cycle-hero__chip--active" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={step.active ? { "--chip-color": step.color } : undefined}
+              >
+                {step.emoji} {step.label}
+              </span>
+            ))}
           </div>
         </article>
       </div>
 
       <YdsLayerStackIndicator
-        levelLabel={
-          model.marketState
-            ? `${model.marketState.emoji} ${model.marketState.label}`
-            : model.levelRegime?.level
-              ? `${model.levelRegime.level.emoji} ${model.levelRegime.level.label}`
-              : null
-        }
+        levelLabel={`${position.emoji} ${position.label}`}
         regimeLabel={
           model.levelRegime?.regime
             ? `${model.levelRegime.regime.emoji} ${model.levelRegime.regime.label}`
@@ -194,7 +170,16 @@ export default function YdsDualCycleHero({ panicData = null, historyRows = [] })
         eventLevel={model.eventLayer.level}
       />
 
-      <YdsDualCyclePositionNav fearNav={model.fearNav} marketNav={model.marketNav} />
+      <YdsDualCyclePositionNav
+        fearNav={model.fearNav}
+        marketNav={{
+          currentStage: model.marketNav.current,
+          nextStage: model.marketNav.next,
+          nextLine: model.marketNav.next
+            ? `다음 ${model.marketNav.nextLine}`
+            : model.marketNav.nextLine,
+        }}
+      />
     </section>
   )
 }

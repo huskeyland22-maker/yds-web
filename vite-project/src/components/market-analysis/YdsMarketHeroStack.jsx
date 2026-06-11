@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { resolveTodayActionsFromSnapshot } from "../../content/ydsActionGuide.js"
-import { currentMarketViewFromSnapshot } from "../../content/ydsCurrentMarketView.js"
+import { resolveCurrentMarketView } from "../../content/ydsCurrentMarketView.js"
 import { resolveMarketStageSnapshot } from "../../content/ydsMarketStageLabels.js"
 import { getFinalScore } from "../../utils/tradingScores.js"
 
@@ -15,7 +15,7 @@ export default function YdsMarketHeroStack({ panicData = null, historyRows: _his
     if (!Number.isFinite(score)) return null
 
     const snapshot = resolveMarketStageSnapshot(Math.round(score))
-    const currentMarket = currentMarketViewFromSnapshot(snapshot)
+    const currentMarket = resolveCurrentMarketView(panicData)
     const actions = resolveTodayActionsFromSnapshot(snapshot, panicData)
     if (!actions || !currentMarket) return null
 

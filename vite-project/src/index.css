@@ -26535,6 +26535,59 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #93c5fd;
 }
 
+.yds-market-hero__score-hero {
+  margin: 0.1rem 0 0.25rem;
+  font-size: clamp(1.85rem, 8vw, 2.35rem);
+  font-weight: 800;
+  color: #93c5fd;
+  line-height: 1.1;
+}
+
+.yds-market-hero__stage-row {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.yds-market-hero__stage-value {
+  margin: 0;
+  font-size: clamp(0.88rem, 2.5vw, 1rem);
+  font-weight: 800;
+  color: var(--hero-color, #f1f5f9);
+  line-height: 1.25;
+}
+
+.yds-market-hero__next-line--inline {
+  font-size: clamp(0.82rem, 2.3vw, 0.94rem);
+}
+
+.yds-market-hero__desc-list {
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.1rem;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.yds-market-hero__metrics-inline {
+  margin: 0.2rem 0 0;
+  font-size: clamp(0.72rem, 2.1vw, 0.84rem);
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-market-hero__position-block--lead {
+  margin-top: 0;
+}
+
+.yds-market-hero__position-block--rail {
+  margin-top: auto;
+  padding-top: 0.15rem;
+}
+
 .yds-market-hero__section-label {
   margin: 0 0 0.15rem;
   font-size: clamp(0.52rem, 1.5vw, 0.6rem);
