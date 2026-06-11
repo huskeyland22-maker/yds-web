@@ -2,6 +2,10 @@
  * 채권·유동성 — 참고·힌트 전용 (판단권·점수·추천·섹터 결정 없음)
  */
 
+import { isValidUsTreasuryYield } from "../macro-risk/bondYieldValidity.js"
+
+const BOND_YIELD_MISSING_LABEL = "데이터 없음"
+
 /** @typedef {{ statusLabels: string[]; hintLines: string[] }} BondReferenceDisplay */
 
 const REFERENCE_STATUS_PRIORITY = ["금리 재평가", "장기채 경고", "유동성 주의", "유동성 축소"]
@@ -134,8 +138,11 @@ const SHORT_LABEL = {
 function buildMetricCompactLine(snapshot, formatValue, statuses, key) {
   const row = metricRow(snapshot, key)
   const fmt = row?.format === "pct" ? "level" : row?.format ?? (key === "DXY" ? "level" : "rate")
-  const cur = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
-  const value = formatValue(key, cur, fmt)
+  const raw = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
+  const isBondYield = key === "US10Y" || key === "US30Y" || key === "US2Y"
+  const cur = isBondYield ? (isValidUsTreasuryYield(raw) ? raw : null) : raw
+  const value =
+    cur == null && isBondYield ? BOND_YIELD_MISSING_LABEL : formatValue(key, cur, fmt)
   const slope = row?.slope ?? "flat"
   const arrow = slope === "up" ? "↑" : slope === "down" ? "↓" : "→"
   const warn =

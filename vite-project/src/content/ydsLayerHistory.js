@@ -7,11 +7,23 @@ export function toNum(v) {
   return Number.isFinite(n) ? n : null
 }
 
+/**
+ * 전환신호·레이어 — 실제 데이터 날짜 (updatedAt·생성일 제외)
+ * @param {object | null | undefined} row
+ */
+export function resolveTimelineDataDate(row) {
+  if (!row || typeof row !== "object") return null
+  const candidates = [row.date, row.tradeDate, row.trade_date, row.ts]
+  for (const raw of candidates) {
+    const d = String(raw ?? "").trim().slice(0, 10)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d
+  }
+  return null
+}
+
 /** @param {object | null | undefined} row */
 export function rowDate(row) {
-  if (!row || typeof row !== "object") return null
-  const d = String(row.date ?? row.ts ?? "").trim().slice(0, 10)
-  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null
+  return resolveTimelineDataDate(row)
 }
 
 /**

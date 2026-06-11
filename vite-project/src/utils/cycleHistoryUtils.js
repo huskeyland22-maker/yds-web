@@ -156,8 +156,10 @@ export function panicDataFromCycleRow(row) {
     const n = Number(row[k])
     return Number.isFinite(n) ? n : null
   }
-  const ts = row.ts ?? (row.date ? `${String(row.date).slice(0, 10)}T12:00:00.000Z` : null)
+  const date = row.date ? String(row.date).slice(0, 10) : null
+  const ts = row.ts ?? (date ? `${date}T12:00:00.000Z` : null)
   return {
+    date,
     vix: pick("vix"),
     vxn: pick("vxn"),
     fearGreed: pick("fearGreed"),

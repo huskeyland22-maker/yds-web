@@ -1,4 +1,5 @@
 import { BOND_FRED_SERIES_MAP } from "./bondFredPolicy.js"
+import { filterValidTreasuryYields, isValidUsTreasuryYield } from "./bondYieldValidity.js"
 
 const STORAGE_KEY = "yds-bond-fred-snapshot-v1"
 
@@ -25,10 +26,12 @@ export function bondFredPayloadToSnapshot(bondFred) {
 
   for (const row of BOND_FRED_SERIES_MAP) {
     const block = bondFred.series[row.fredId]
-    const values = Array.isArray(block?.values)
-      ? block.values.map(Number).filter((n) => Number.isFinite(n))
-      : []
-    if (values.length < 2) continue
+    const rawValues = Array.isArray(block?.values) ? block.values.map(Number) : []
+    const values =
+      row.macroKey === "US10Y" || row.macroKey === "US30Y" || row.macroKey === "US2Y"
+        ? filterValidTreasuryYields(rawValues)
+        : rawValues.filter((n) => Number.isFinite(n))
+    if (values.length < 2 || !isValidUsTreasuryYield(values[values.length - 1])) continue
     historyByMacroKey[row.macroKey] = values
     sources[row.macroKey] = "fred-h15"
     if (!asOfNy && block?.asOfNy) asOfNy = block.asOfNy
@@ -52,6 +55,17 @@ export function loadBondFredSnapshot() {
     if (!raw) return null
     const parsed = JSON.parse(raw)
     if (!parsed?.asOfNy || !parsed?.historyByMacroKey) return null
+    const us10 = parsed.historyByMacroKey?.US10Y
+    const us30 = parsed.historyByMacroKey?.US30Y
+    const last10 = Array.isArray(us10) ? us10[us10.length - 1] : null
+    const last30 = Array.isArray(us30) ? us30[us30.length - 1] : null
+    if (
+      (us10 && !isValidUsTreasuryYield(last10)) ||
+      (us30 && !isValidUsTreasuryYield(last30))
+    ) {
+      window.localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
     return parsed
   } catch {
     return null

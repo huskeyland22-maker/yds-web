@@ -67,6 +67,8 @@ export default async function handler(_req, res) {
     t10yie: null,
     us2y: null,
     us30y: null,
+    yield10: null,
+    yield30: null,
     realYield: null,
     bei: null,
   }
@@ -101,11 +103,13 @@ export default async function handler(_req, res) {
         changePct: hist.changePct,
         asOfNy: hist.asOfNy,
       }
-      parsedData[def.key] = hist.current
-      changeData[def.key] = hist.changePct
-      for (const alias of def.aliasKeys ?? []) {
-        parsedData[alias] = hist.current
-        changeData[alias] = hist.changePct
+      if (Number.isFinite(hist.current) && hist.current > 0.05) {
+        parsedData[def.key] = hist.current
+        changeData[def.key] = hist.changePct
+        for (const alias of def.aliasKeys ?? []) {
+          parsedData[alias] = hist.current
+          changeData[alias] = hist.changePct
+        }
       }
     }
   } catch {

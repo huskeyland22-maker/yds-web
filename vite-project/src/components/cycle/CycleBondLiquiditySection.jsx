@@ -20,6 +20,7 @@ const PANEL_TITLE = "장기 참고 지표 (미국장 종가 기준)"
  */
 function fmtBondValue(key, n, fmt = "rate") {
   if (n == null || !Number.isFinite(n)) return "—"
+  if ((key === "US10Y" || key === "US30Y" || key === "US2Y") && n <= 0.05) return "데이터 없음"
   return formatCurrent(n, fmt)
 }
 
@@ -30,7 +31,16 @@ function CompactMetricLine({ line }) {
   return (
     <div className="cycle-bond-compact-line">
       <span className="cycle-bond-compact-line__metric">{line.shortLabel}</span>
-      <span className="cycle-bond-compact-line__value font-mono tabular-nums">{line.value}</span>
+      <span
+        className={[
+          "cycle-bond-compact-line__value font-mono tabular-nums",
+          line.value === "데이터 없음" ? "cycle-bond-compact-line__value--missing" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {line.value}
+      </span>
       <span
         className={[
           "cycle-bond-compact-line__arrow",

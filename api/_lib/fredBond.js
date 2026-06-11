@@ -7,9 +7,9 @@
 
 /** @type {FredBondSeriesDef[]} */
 export const BOND_FRED_SERIES = [
-  { key: "dgs10", series: "DGS10", aliasKeys: ["us10y"] },
-  { key: "dgs2", series: "DGS2", aliasKeys: ["us2y"] },
-  { key: "dgs30", series: "DGS30", aliasKeys: ["us30y"] },
+  { key: "dgs10", series: "DGS10", aliasKeys: ["us10y", "yield10"] },
+  { key: "dgs2", series: "DGS2", aliasKeys: ["us2y", "yield2"] },
+  { key: "dgs30", series: "DGS30", aliasKeys: ["us30y", "yield30"] },
   { key: "dfii10", series: "DFII10", aliasKeys: ["realYield"] },
   { key: "t10yie", series: "T10YIE", aliasKeys: ["bei"] },
 ]

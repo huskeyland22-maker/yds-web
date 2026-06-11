@@ -2,6 +2,11 @@ import { fetchMarketData } from "../config/api.js"
 import { BOND_FRED_SERIES_MAP } from "./bondFredPolicy.js"
 import { clearBondFredSnapshot, resolveBondFredFromMarket } from "./bondFredSnapshotStore.js"
 import { recordBondSyncMeta } from "./bondSyncMeta.js"
+import {
+  filterValidTreasuryYields,
+  isValidUsTreasuryYield,
+  normalizeUsTreasuryYield,
+} from "./bondYieldValidity.js"
 
 const HISTORY_LEN = 22
 const SOURCE_PRIORITY = {
@@ -43,20 +48,24 @@ export function buildMacroRiskHistoryFromMarket(market, _panicContext = null, op
   const sources = {}
 
   const applySeries = (key, seriesValues, source) => {
-    if (!Array.isArray(seriesValues) || seriesValues.length < 2) return
+    const isBondKey = key === "US10Y" || key === "US30Y" || key === "US2Y"
+    const cleaned = isBondKey ? filterValidTreasuryYields(seriesValues) : seriesValues
+    if (!Array.isArray(cleaned) || cleaned.length < 2) return
     const prevPri = SOURCE_PRIORITY[sources[key]] ?? 0
     const nextPri = SOURCE_PRIORITY[source] ?? 0
     if (nextPri < prevPri) return
-    history[key] = seriesValues.slice(-HISTORY_LEN)
+    history[key] = cleaned.slice(-HISTORY_LEN)
     sources[key] = source
   }
 
   const applySpotFallback = (key, current, change, source) => {
-    if (!Number.isFinite(Number(current))) return
+    const isBondKey = key === "US10Y" || key === "US30Y" || key === "US2Y"
+    const spot = isBondKey ? normalizeUsTreasuryYield(current) : Number(current)
+    if (!Number.isFinite(spot)) return
     const prevPri = SOURCE_PRIORITY[sources[key]] ?? 0
     const nextPri = SOURCE_PRIORITY[source] ?? 0
     if (nextPri < prevPri) return
-    history[key] = synthesizeHistoryFromSpot(current, change)
+    history[key] = synthesizeHistoryFromSpot(spot, change)
     sources[key] = source
   }
 
@@ -68,10 +77,12 @@ export function buildMacroRiskHistoryFromMarket(market, _panicContext = null, op
       applySeries(row.macroKey, hist, "fred-h15")
       continue
     }
-    const current = row.apiKeys.map((k) => pd[k]).find((v) => Number.isFinite(Number(v)))
+    const current = row.apiKeys
+      .map((k) => normalizeUsTreasuryYield(pd[k]))
+      .find((v) => v != null)
     const changeKey = row.apiKeys.find((k) => cd[k] != null) ?? row.apiKeys[0]
-    if (Number.isFinite(Number(current))) {
-      applySpotFallback(row.macroKey, Number(current), cd[changeKey], "fred-h15")
+    if (current != null) {
+      applySpotFallback(row.macroKey, current, cd[changeKey], "fred-h15")
     }
   }
 

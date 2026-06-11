@@ -225,18 +225,6 @@ const EVENT_TURNING_COPY = {
   "vix-expansion": { title: "변동성 확대", action: "포지션 크기 점검" },
 }
 
-/** @param {object | null | undefined} row */
-function rowMetricFingerprint(row) {
-  if (!row) return ""
-  const yds = rowYdsScore(row)
-  return [
-    toNum(row?.fearGreed)?.toFixed(1) ?? "—",
-    toNum(row?.vix)?.toFixed(1) ?? "—",
-    toNum(row?.bofa)?.toFixed(1) ?? "—",
-    yds ?? "—",
-  ].join("|")
-}
-
 /**
  * @param {import("./ydsMarketPositionEngine.js").MarketPositionId | null | undefined} fromId
  * @param {import("./ydsMarketPositionEngine.js").MarketPositionId} toId
@@ -312,38 +300,16 @@ export function resolveLatestPanicHistoryDate(historyRows, panicData = null) {
 }
 
 /**
- * panic_index_history 단일 소스 — 스냅샷은 히스토리에 존재하는 날짜에만 병합
+ * panic_index_history 단일 소스 — live panicData 병합 없음 (날짜 오염 방지)
  * @param {object[]} historyRows
- * @param {object | null | undefined} panicData
+ * @param {object | null | undefined} [_panicData] — 레거시 호환 (미사용)
  */
-export function buildTimelineSeries(historyRows, panicData) {
+export function buildTimelineSeries(historyRows, _panicData = null) {
   const map = new Map()
   for (const row of historyRows ?? []) {
     const d = rowDate(row)
     if (!d) continue
     map.set(d, { ...map.get(d), ...row, date: d })
-  }
-
-  if (!panicData) {
-    return [...map.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
-  }
-
-  const sortedDates = [...map.keys()].sort((a, b) => a.localeCompare(b))
-  const latestHistoryDate = sortedDates[sortedDates.length - 1] ?? null
-  const asOf = rowDate(panicData)
-  const targetDate =
-    asOf && map.has(asOf) ? asOf : latestHistoryDate ?? (asOf && /^\d{4}-\d{2}-\d{2}$/.test(asOf) ? asOf : null)
-
-  if (targetDate) {
-    const fp = rowMetricFingerprint(panicData)
-    if (fp) {
-      for (const [d, row] of [...map.entries()]) {
-        if (d !== targetDate && rowMetricFingerprint(row) === fp) {
-          map.delete(d)
-        }
-      }
-    }
-    map.set(targetDate, { ...map.get(targetDate), ...panicData, date: targetDate })
   }
 
   return [...map.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))

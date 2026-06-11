@@ -75,6 +75,7 @@ export function panicDeskDataFromHistory(cycleRows) {
   }
   const date = rowDateKey(last)
   return {
+    date,
     vix: pick("vix"),
     vxn: pick("vxn"),
     fearGreed: pick("fearGreed"),
@@ -84,6 +85,7 @@ export function panicDeskDataFromHistory(cycleRows) {
     skew: pick("skew"),
     highYield: pick("highYield"),
     gsBullBear: pick("gsBullBear"),
+    ts: last.ts ?? `${date}T12:00:00.000Z`,
     updatedAt: last.ts ?? `${date}T12:00:00.000Z`,
     accessTier: "pro",
     __fromHistory: true,

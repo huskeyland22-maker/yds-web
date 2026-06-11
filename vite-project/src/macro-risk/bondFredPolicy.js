@@ -5,8 +5,8 @@
 export const BOND_FRED_POLICY_LABEL = "FRED H.15 · 미국장 종가 확정"
 
 export const BOND_FRED_SERIES_MAP = [
-  { macroKey: "US10Y", fredId: "DGS10", apiKeys: ["dgs10", "us10y"] },
-  { macroKey: "US30Y", fredId: "DGS30", apiKeys: ["dgs30", "us30y"] },
+  { macroKey: "US10Y", fredId: "DGS10", apiKeys: ["dgs10", "us10y", "yield10"] },
+  { macroKey: "US30Y", fredId: "DGS30", apiKeys: ["dgs30", "us30y", "yield30"] },
   { macroKey: "US2Y", fredId: "DGS2", apiKeys: ["dgs2", "us2y"] },
   { macroKey: "REAL_YIELD", fredId: "DFII10", apiKeys: ["dfii10", "realYield"] },
   { macroKey: "BEI", fredId: "T10YIE", apiKeys: ["t10yie", "bei"] },

@@ -55,6 +55,7 @@ export function panicDataFromHistoryApiRow(row) {
   if (!row || typeof row !== "object") return null
   const date = String(row.date ?? "").slice(0, 10)
   const out = {
+    date: /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null,
     vix: toNum(row.vix),
     vxn: toNum(row.vxn),
     fearGreed: toNum(row.fearGreed),

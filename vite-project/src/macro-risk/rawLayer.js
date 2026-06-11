@@ -1,4 +1,5 @@
 import { absDelta, lastFinite, slopeDirection, valueAtOffset } from "./seriesMath.js"
+import { filterValidTreasuryYields } from "./bondYieldValidity.js"
 
 /**
  * @typedef {Object} MetricSeries
@@ -67,7 +68,11 @@ export function buildRawLayer(apiHistory = {}) {
 
   const allKeys = [...rateKeys, ...inflKeys, ...liqKeys]
   for (const key of allKeys) {
-    const hist = apiHistory[key] ?? []
+    const rawHist = apiHistory[key] ?? []
+    const hist =
+      key === "US10Y" || key === "US30Y" || key === "US2Y"
+        ? filterValidTreasuryYields(rawHist)
+        : rawHist
     const mode = rateKeys.includes(key) || key === "REAL_YIELD" || key === "BEI" ? "rate" : "index"
     out[key] = buildMetricSeries(key, hist, { mode })
   }
