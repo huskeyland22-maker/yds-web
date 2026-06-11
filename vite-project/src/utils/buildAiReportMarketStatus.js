@@ -29,7 +29,7 @@ export function buildAiReportMarketStatus(panicData, _historyRows = []) {
   if (!memo) {
     return {
       ready: false,
-      title: "오늘의 한줄",
+      title: "오늘의 해석",
       memoLines: ["시장 데이터를 불러오는 중입니다."],
       updateLine,
       basisLine: ts.basisLine,

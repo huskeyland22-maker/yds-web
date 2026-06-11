@@ -4,6 +4,7 @@ import {
   rebuildMarketTimelineFromHistory,
   validateMarketTimelineAgainstHistory,
 } from "../../content/ydsMarketTimeline.js"
+import { enrichTimelineEventsWithScoreDeltas } from "../../content/ydsTimelineScoreDelta.js"
 import {
   clearLegacyEventHistoryStorage,
   clearStoredEventHistory,
@@ -56,7 +57,8 @@ export default function YdsMarketTimelineSection({
     if (!validation.ok && typeof console !== "undefined") {
       console.warn("[YDS] 최근 전환 신호 날짜 불일치", validation)
     }
-    return { ...rebuilt, validation }
+    const events = enrichTimelineEventsWithScoreDeltas(historyRows, rebuilt.events)
+    return { ...rebuilt, events, validation }
   }, [historyRows, panicData])
 
   if (!view.events.length) return null
@@ -89,6 +91,7 @@ export default function YdsMarketTimelineSection({
         {visibleEvents.map((ev) => {
           const dateLabel = formatTimelineDateLabel(ev.date)
           const action = ev.action || ""
+          const scoreDelta = ev.scoreDelta?.text
 
           if (isStream) {
             return (
@@ -96,15 +99,24 @@ export default function YdsMarketTimelineSection({
                 key={`${ev.date}:${ev.type}`}
                 className="yds-market-timeline__item yds-market-timeline__item--stream yds-market-timeline__item--compact"
               >
-                <p className="yds-market-timeline__compact-line yds-market-timeline__compact-line--stream">
-                  <span className="yds-market-timeline__compact-date font-mono tabular-nums">
-                    {dateLabel}
-                  </span>
-                  <span className="yds-market-timeline__compact-summary">{ev.title}</span>
-                  {action ? (
-                    <span className="yds-market-timeline__compact-action">{action}</span>
+                <div className="yds-market-timeline__stream-block">
+                  <p className="yds-market-timeline__compact-line yds-market-timeline__compact-line--stream">
+                    <span className="yds-market-timeline__compact-date font-mono tabular-nums">
+                      {dateLabel}
+                    </span>
+                    <span className="yds-market-timeline__compact-summary">{ev.title}</span>
+                  </p>
+                  {scoreDelta ? (
+                    <p className="yds-market-timeline__score-delta font-mono tabular-nums">
+                      {scoreDelta}
+                    </p>
                   ) : null}
-                </p>
+                  {action ? (
+                    <p className="yds-market-timeline__compact-action yds-market-timeline__compact-action--sub">
+                      {action}
+                    </p>
+                  ) : null}
+                </div>
               </li>
             )
           }
@@ -114,6 +126,11 @@ export default function YdsMarketTimelineSection({
               <p className="yds-market-timeline__date font-mono tabular-nums">{dateLabel}</p>
               <div className="yds-market-timeline__body">
                 <p className="yds-market-timeline__event-title">{ev.title}</p>
+                {scoreDelta ? (
+                  <p className="yds-market-timeline__score-delta font-mono tabular-nums">
+                    {scoreDelta}
+                  </p>
+                ) : null}
                 {action ? <p className="yds-market-timeline__event-action">{action}</p> : null}
               </div>
             </li>

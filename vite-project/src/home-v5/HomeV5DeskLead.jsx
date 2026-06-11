@@ -8,9 +8,21 @@ import HomeV5CoreIndices from "./HomeV5CoreIndices.jsx"
 
 /**
  * 홈 v5 상단 — 핵심지수 (카드 그리드만)
- * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
+ * @param {{
+ *   panicData?: object | null
+ *   historyRows?: object[]
+ *   className?: string
+ *   hideSectionHeader?: boolean
+ *   metricTwoLine?: boolean
+ * }} props
  */
-export default function HomeV5DeskLead({ panicData = null, historyRows = [], className = "" }) {
+export default function HomeV5DeskLead({
+  panicData = null,
+  historyRows = [],
+  className = "",
+  hideSectionHeader = false,
+  metricTwoLine = false,
+}) {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const mergedHistory = useMemo(
     () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], historyRows ?? [])),
@@ -36,15 +48,31 @@ export default function HomeV5DeskLead({ panicData = null, historyRows = [], cla
         .join(" ")}
     >
       <div className="home-v5-preview__zone home-v5-preview__zone--core">
-        <section className="home-v5-core-section trading-card-shell panic-v2-section panic-desk-section panic-desk-section--main overflow-hidden px-2 pb-2 sm:px-2.5">
-          <PanicDeskSectionHeader
-            icon="📊"
-            title="핵심지수"
-            description="VIX · CNN · BofA · YDS 종합 판단"
-            tone="cyan"
-            tier="main"
+        <section
+          className={[
+            "home-v5-core-section",
+            "trading-card-shell",
+            "panic-v2-section",
+            "panic-desk-section",
+            "panic-desk-section--main",
+            "overflow-hidden",
+            hideSectionHeader ? "home-v5-core-section--desk" : "px-2 pb-2 sm:px-2.5",
+          ].join(" ")}
+        >
+          {hideSectionHeader ? null : (
+            <PanicDeskSectionHeader
+              icon="📊"
+              title="핵심지수"
+              description="VIX · CNN · BofA · YDS 종합 판단"
+              tone="cyan"
+              tier="main"
+            />
+          )}
+          <HomeV5CoreIndices
+            cards={model.core}
+            strategyBar={model.strategyBar}
+            metricTwoLine={metricTwoLine}
           />
-          <HomeV5CoreIndices cards={model.core} strategyBar={model.strategyBar} />
         </section>
       </div>
     </div>

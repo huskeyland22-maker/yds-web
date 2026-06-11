@@ -29,21 +29,6 @@ export default function YdsMarketTrendSection({ historyRows = [], className = ""
             current={view.market.current}
             currentMeta={view.market.currentMeta}
           />
-          {view.market.changes.length > 0 ? (
-            <div className="yds-market-trend__changes">
-              <p className="yds-market-trend__changes-label">최근 주요 변화</p>
-              <ul className="yds-market-trend__changes-list">
-                {view.market.changes.map((item) => (
-                  <li key={`${item.date}:${item.title}`} className="yds-market-trend__changes-item">
-                    <span className="yds-market-trend__changes-date font-mono tabular-nums">
-                      {item.dateLabel}
-                    </span>
-                    <span className="yds-market-trend__changes-title">{item.title}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </div>
 
         <div className="yds-market-trend__panel">
@@ -54,21 +39,6 @@ export default function YdsMarketTrendSection({ historyRows = [], className = ""
             current={view.panic.current}
             currentMeta={view.panic.currentMeta}
           />
-          {view.panic.changes.length > 0 ? (
-            <div className="yds-market-trend__changes">
-              <p className="yds-market-trend__changes-label">최근 주요 변화</p>
-              <ul className="yds-market-trend__changes-list">
-                {view.panic.changes.map((item) => (
-                  <li key={`${item.date}:${item.title}`} className="yds-market-trend__changes-item">
-                    <span className="yds-market-trend__changes-date font-mono tabular-nums">
-                      {item.dateLabel}
-                    </span>
-                    <span className="yds-market-trend__changes-title">{item.title}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </div>
       </div>
     </section>

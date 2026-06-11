@@ -22,10 +22,10 @@ export function resolveCoreMetricDataStatus(key, value) {
   }
 
   if (key === "vix") {
-    if (n >= 30) return "높은 변동성"
-    if (n >= 22) return "확대된 변동성"
-    if (n >= 18) return "보통 변동성"
-    return "낮은 변동성"
+    if (n >= 30) return "변동성 극대"
+    if (n >= 22) return "변동성 확대"
+    if (n >= 18) return "변동성 보통"
+    return "변동성 안정"
   }
 
   if (key === "bofa") {

@@ -16,9 +16,12 @@ function CoreHudCard({
   trendLine,
   trendArrow,
   trendDir,
+  metricTwoLine = false,
 }) {
   const statusActionParts = [dataStatusLabel, policyHint].filter((v) => v && v !== "—")
   const deltaDisplay = changeDeltaTextMobile ?? changeDeltaText ?? "—"
+  const statusLine = dataStatusLabel && dataStatusLabel !== "—" ? dataStatusLabel : null
+  const actionLine = policyHint && policyHint !== "—" ? policyHint : null
 
   return (
     <article
@@ -43,24 +46,31 @@ function CoreHudCard({
         <span className="home-v5-hud-card__timeline-full">{timelineText ?? "—"}</span>
         <span className="home-v5-hud-card__timeline-mobile">{timelineTextMobile ?? timelineText ?? "—"}</span>
       </p>
-      <p
-        className="home-v5-hud-card__status-action"
-        title={statusActionParts.length ? statusActionParts.join(" · ") : undefined}
-      >
-        {statusActionParts.length ? (
-          <>
-            <span className="home-v5-hud-card__status-action-s">{statusActionParts[0]}</span>
-            {statusActionParts[1] ? (
-              <>
-                <span className="home-v5-hud-card__status-action-sep"> · </span>
-                <span className="home-v5-hud-card__status-action-a">{statusActionParts[1]}</span>
-              </>
-            ) : null}
-          </>
-        ) : (
-          "—"
-        )}
-      </p>
+      {metricTwoLine ? (
+        <div className="home-v5-hud-card__metric-copy">
+          <p className="home-v5-hud-card__metric-status">{statusLine ?? "—"}</p>
+          <p className="home-v5-hud-card__metric-action">{actionLine ?? "—"}</p>
+        </div>
+      ) : (
+        <p
+          className="home-v5-hud-card__status-action"
+          title={statusActionParts.length ? statusActionParts.join(" · ") : undefined}
+        >
+          {statusActionParts.length ? (
+            <>
+              <span className="home-v5-hud-card__status-action-s">{statusActionParts[0]}</span>
+              {statusActionParts[1] ? (
+                <>
+                  <span className="home-v5-hud-card__status-action-sep"> · </span>
+                  <span className="home-v5-hud-card__status-action-a">{statusActionParts[1]}</span>
+                </>
+              ) : null}
+            </>
+          ) : (
+            "—"
+          )}
+        </p>
+      )}
     </article>
   )
 }
@@ -69,19 +79,20 @@ function CoreHudCard({
  * @param {{
  *   cards: import("./homeV5DeskModel.js").HomeV5CoreCardModel[]
  *   strategyBar?: import("./homeV5DeskModel.js").HomeV5StrategyStatusBarModel | null
+ *   metricTwoLine?: boolean
  * }} props
  */
-export default function HomeV5CoreIndices({ cards, strategyBar = null }) {
+export default function HomeV5CoreIndices({ cards, strategyBar = null, metricTwoLine = false }) {
   const metrics = cards.filter((card) => card.kind === "metric")
 
   return (
     <div className="home-v5-core-stack">
       <div className="home-v5-core-grid home-v5-core-grid--hero home-v5-core-grid--hud home-v5-core-grid--metrics">
         {metrics.map((card) => (
-          <CoreHudCard key={card.key} {...card} />
+          <CoreHudCard key={card.key} {...card} metricTwoLine={metricTwoLine} />
         ))}
       </div>
-      {strategyBar ? <HomeV5CoreStrategyBar bar={strategyBar} /> : null}
+      {strategyBar && !metricTwoLine ? <HomeV5CoreStrategyBar bar={strategyBar} /> : null}
     </div>
   )
 }

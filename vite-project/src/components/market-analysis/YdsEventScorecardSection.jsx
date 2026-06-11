@@ -12,15 +12,22 @@ function fmtWinRate(v) {
 
 /**
  * V1.9 Event Scorecard — Timeline 아래
- * @param {{ rows?: import("../../content/ydsEventScorecard.js").EventTypeScorecard[]; loading?: boolean }} props
+ * @param {{
+ *   rows?: import("../../content/ydsEventScorecard.js").EventTypeScorecard[]
+ *   loading?: boolean
+ *   className?: string
+ * }} props
  */
-export default function YdsEventScorecardSection({ rows = [], loading = false }) {
+export default function YdsEventScorecardSection({ rows = [], loading = false, className = "" }) {
   const displayRows = rows.filter((r) => r.eventCount > 0)
 
   if (!loading && displayRows.length === 0) return null
 
   return (
-    <section className="yds-event-scorecard" aria-label="Event Scorecard">
+    <section
+      className={["yds-event-scorecard", className].filter(Boolean).join(" ")}
+      aria-label="Event Scorecard"
+    >
       <div className="yds-event-scorecard__head">
         <h2 className="yds-event-scorecard__title">Event Scorecard</h2>
         <p className="yds-event-scorecard__sub">SPY 발생 후 수익률 · 과거 적중률 (3·7·14 거래일)</p>

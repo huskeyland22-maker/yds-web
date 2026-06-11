@@ -84,10 +84,7 @@ export function buildHomeV5CoreCard(key, panicData, marketPolicy = null, history
   const trend = buildHomeV5CoreTrend(key, panicData, historyRows)
   const policy = marketPolicy ?? buildMarketPolicy({ panicData })
   const dataStatusLabel = resolveCoreMetricDataStatus(key, raw)
-  let policyHint = resolveCoreMetricPolicyHint(key, policy)
-  if (key === "vix" && Number.isFinite(n) && n < 20) {
-    policyHint = "종목 탐색"
-  }
+  const policyHint = resolveCoreMetricPolicyHint(key, policy)
 
   return {
     key,
