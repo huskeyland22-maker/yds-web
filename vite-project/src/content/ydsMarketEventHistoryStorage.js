@@ -45,18 +45,22 @@ export function normalizeEventHistoryEvents(raw) {
 /** 패닉 히스토리 변경 감지 — 전환신호 캐시 무효화용 */
 export function computePanicHistoryFingerprint(historyRows, panicData = null) {
   /** @type {string[]} */
-  const dates = []
+  const parts = []
   for (const row of historyRows ?? []) {
     const d = String(row?.date ?? row?.ts ?? "").slice(0, 10)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) dates.push(d)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) continue
+    const cnn = row?.fearGreed ?? ""
+    const vix = row?.vix ?? ""
+    const bofa = row?.bofa ?? ""
+    parts.push(`${d}:${cnn}:${vix}:${bofa}`)
   }
-  const asOf = String(panicData?.date ?? panicData?.ts ?? panicData?.updatedAt ?? "")
-    .slice(0, 10)
-  if (/^\d{4}-\d{2}-\d{2}$/.test(asOf)) dates.push(asOf)
-  const sorted = [...new Set(dates)].sort((a, b) => a.localeCompare(b))
-  const latest = sorted[sorted.length - 1] ?? ""
-  const earliest = sorted[0] ?? ""
-  return `${sorted.length}|${earliest}|${latest}`
+  parts.sort((a, b) => a.localeCompare(b))
+  const asOf = String(panicData?.date ?? panicData?.ts ?? panicData?.updatedAt ?? "").slice(0, 10)
+  const snap =
+    panicData && /^\d{4}-\d{2}-\d{2}$/.test(asOf)
+      ? `${asOf}:${panicData?.fearGreed ?? ""}:${panicData?.vix ?? ""}:${panicData?.bofa ?? ""}`
+      : ""
+  return `${parts.length}|${parts.join(";")}|${snap}`
 }
 
 /** 레거시 localStorage 전환신호 캐시 제거 */

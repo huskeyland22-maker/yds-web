@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import {
   formatTimelineDateLabel,
-  formatTimelineStreamLead,
   rebuildMarketTimelineFromHistory,
-  timelineEventEmoji,
   validateMarketTimelineAgainstHistory,
 } from "../../content/ydsMarketTimeline.js"
 import {
@@ -90,7 +88,7 @@ export default function YdsMarketTimelineSection({
       <ol className="yds-market-timeline__list">
         {visibleEvents.map((ev) => {
           const dateLabel = formatTimelineDateLabel(ev.date)
-          const lead = formatTimelineStreamLead(ev)
+          const action = ev.action || ""
 
           if (isStream) {
             return (
@@ -98,35 +96,24 @@ export default function YdsMarketTimelineSection({
                 key={`${ev.date}:${ev.type}`}
                 className="yds-market-timeline__item yds-market-timeline__item--stream yds-market-timeline__item--compact"
               >
-                <p className="yds-market-timeline__compact-line yds-market-timeline__compact-line--stream font-mono tabular-nums">
-                  <span className="yds-market-timeline__compact-date">{dateLabel}</span>
-                  {lead ? (
-                    <span className="yds-market-timeline__compact-metric">{lead}</span>
-                  ) : null}
+                <p className="yds-market-timeline__compact-line yds-market-timeline__compact-line--stream">
+                  <span className="yds-market-timeline__compact-date font-mono tabular-nums">
+                    {dateLabel}
+                  </span>
                   <span className="yds-market-timeline__compact-summary">{ev.title}</span>
+                  {action ? (
+                    <span className="yds-market-timeline__compact-action">{action}</span>
+                  ) : null}
                 </p>
               </li>
             )
           }
 
-          const emoji = timelineEventEmoji(ev.type)
-          const metrics = ev.metrics || (ev.description !== ev.title ? ev.description : "")
-          const action = ev.action || ""
           return (
             <li key={`${ev.date}:${ev.type}`} className="yds-market-timeline__item">
               <p className="yds-market-timeline__date font-mono tabular-nums">{dateLabel}</p>
               <div className="yds-market-timeline__body">
-                {lead ? (
-                  <p className="yds-market-timeline__event-metrics font-mono tabular-nums">
-                    {emoji} {lead}
-                  </p>
-                ) : null}
                 <p className="yds-market-timeline__event-title">{ev.title}</p>
-                {!lead && metrics ? (
-                  <p className="yds-market-timeline__event-metrics font-mono tabular-nums">
-                    {metrics}
-                  </p>
-                ) : null}
                 {action ? <p className="yds-market-timeline__event-action">{action}</p> : null}
               </div>
             </li>

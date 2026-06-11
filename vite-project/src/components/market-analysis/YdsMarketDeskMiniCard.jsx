@@ -1,5 +1,16 @@
+import { Fragment } from "react"
+
 /**
- * 시장분석 상단 미니 카드 — 큰 수치 + 단계 레일만
+ * @param {string} label
+ */
+function compactStageLabel(label) {
+  return String(label ?? "")
+    .replace(/\s+/g, "")
+    .trim()
+}
+
+/**
+ * 시장분석 상단 미니 카드 — 큰 수치 + 가로 단계바
  * @param {{
  *   title: string
  *   score: number
@@ -17,6 +28,8 @@ export default function YdsMarketDeskMiniCard({
   embedded = false,
   ariaLabel,
 }) {
+  const activeStep = stages.find((step) => step.active)
+
   return (
     <article
       className={[
@@ -25,25 +38,32 @@ export default function YdsMarketDeskMiniCard({
         variant === "state" ? "yds-market-hero__score-card--state" : "yds-market-hero__score-card--panic",
         embedded ? "yds-market-hero__score-card--embedded" : "yds-market-hero__score-card--solo",
       ].join(" ")}
-      aria-label={ariaLabel ?? `${title} ${score}`}
+      aria-label={ariaLabel ?? `${title} ${score}, 현재 ${activeStep?.label ?? ""}`}
     >
       <p className="yds-market-hero__card-label">{title}</p>
       <p className="yds-market-hero__score font-mono tabular-nums">{score}</p>
       <ul className="yds-market-hero__stage-rail" aria-label={`${title} 단계`}>
-        {stages.map((step) => (
-          <li
-            key={step.id}
-            className={[
-              "yds-market-hero__stage-rail-item",
-              step.active ? "yds-market-hero__stage-rail-item--active" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            style={step.active ? { "--stage-color": step.color } : undefined}
-            aria-current={step.active ? "step" : undefined}
-          >
-            <span aria-hidden>{step.emoji}</span> {step.label}
-          </li>
+        {stages.map((step, index) => (
+          <Fragment key={step.id}>
+            {index > 0 ? (
+              <li className="yds-market-hero__stage-sep" aria-hidden>
+                |
+              </li>
+            ) : null}
+            <li
+              className={[
+                "yds-market-hero__stage-rail-item",
+                step.active ? "yds-market-hero__stage-rail-item--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              style={step.active ? { "--stage-color": step.color } : undefined}
+              aria-current={step.active ? "step" : undefined}
+              title={step.label}
+            >
+              {compactStageLabel(step.label)}
+            </li>
+          </Fragment>
         ))}
       </ul>
     </article>
