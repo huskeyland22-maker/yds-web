@@ -32,6 +32,7 @@ import {
   normalizeScoreBreakdown,
   YDS_SCORE_WEIGHTS,
 } from "./ydsStockScoreConfig.js"
+import { resolveStockPickThemes } from "./ydsStockPickThemes.js"
 
 /** @typedef {'trend' | 'dip' | 'interest' | 'overheat'} StockPickStatusId */
 /** @typedef {'ai' | 'power' | 'defense' | 'semi' | 'robot' | 'nuclear' | 'infra'} StockPickSectorId */
@@ -115,6 +116,7 @@ export const RATING_STARS = {
  *   statusDiag: ReturnType<typeof explainStatusFromSnapshot> | null
  *   quote: import("./ydsStockPickQuoteService.js").StockPickQuoteView | null
  *   recommendReasonsDetail: import("./ydsStockRecommendReasons.js").RecommendReason[]
+ *   investThemes: string[]
  * }} StockPickView
  */
 
@@ -279,6 +281,7 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     recommendReasonSummary: formatRecommendReasonSummary(recommendReasons),
     marketFitSource: ctx ? "adapter" : "manual",
     sectorLabel,
+    investThemes: resolveStockPickThemes(row),
     dataSource: isLive ? "live" : "fallback",
     quoteSource: resolveQuoteSource(liveEntry),
     statusDiag,
@@ -379,6 +382,11 @@ export function getTop3Stocks(stocks) {
 /** @param {StockPickView[]} stocks */
 export function getTop5Stocks(stocks) {
   return sortStockPicks(filterRecommendableStockPicks(stocks), "rank", "asc").slice(0, 5)
+}
+
+/** @param {StockPickView[]} stocks */
+export function getTop10Stocks(stocks) {
+  return getRankingStocks(stocks, 10)
 }
 
 /** @param {StockPickView[]} stocks */

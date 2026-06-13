@@ -6,6 +6,7 @@ import {
 } from "../../content/ydsStockPickTransparency.js"
 import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
+import YdsStockPickThemeBadges from "./YdsStockPickThemeBadges.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 
 /**
@@ -87,6 +88,8 @@ export default function YdsStockPickCard({
 
       <Link to={to} className="yds-spick-card__link">
         <h3 className="yds-spick-card__name">{stock.name}</h3>
+
+        <YdsStockPickThemeBadges themes={stock.investThemes ?? []} className="yds-spick-card__themes" />
 
         {totalScore != null ? (
           <p className="yds-spick-card__score font-mono tabular-nums">

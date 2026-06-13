@@ -6,6 +6,7 @@ import {
 } from "../../content/ydsStockPickModel.js"
 import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 import YdsStockPickTop3 from "./YdsStockPickTop3.jsx"
+import YdsStockPickTop10WhySection from "./YdsStockPickTop10WhySection.jsx"
 import YdsStockPickSectorPanel from "./YdsStockPickSectorPanel.jsx"
 import YdsStockPickCard from "./YdsStockPickCard.jsx"
 
@@ -93,6 +94,10 @@ export default function YdsStockPickCountryPanel({
         statusChanges={statusChanges}
         loading={loading}
       />
+
+      {showSecondary ? (
+        <YdsStockPickTop10WhySection stocks={stocks} loading={loading} />
+      ) : null}
 
       {showSecondary ? (
         <>
