@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useEffect, useRef } from "react"
 import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
@@ -9,6 +9,7 @@ import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
 import { useEventScorecard } from "../../hooks/useEventScorecard.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
+import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 
 /**
  * 시장분석 데스크 — 결론 → 추이 → 변화 → 근거 → 이벤트 → 채권 (해석은 사이드바)
@@ -31,6 +32,16 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
 
   const { rows: scorecardRows, loading: scorecardLoading } = useEventScorecard(safeHistory, panicData)
+
+  const lastAuditKeyRef = useRef("")
+  useEffect(() => {
+    if (safeHistory.length < 1) return
+    const tail = safeHistory.slice(-2)
+    const key = tail.map((r) => `${r.date}:${r.vix}:${r.fearGreed}:${r.bofa}:${r.putCall}:${r.highYield}`).join("|")
+    if (key === lastAuditKeyRef.current) return
+    lastAuditKeyRef.current = key
+    logPanicIntensityAudit(safeHistory, { days: 2 })
+  }, [safeHistory])
 
   if (!panicData && safeHistory.length === 0) {
     return null
