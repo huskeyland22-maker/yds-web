@@ -8,6 +8,7 @@ import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLi
 import YdsStockPickTransparencyPanel from "../components/stock-picks/YdsStockPickTransparencyPanel.jsx"
 import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
 import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
+import YdsStockPickScoreDebugPanel from "../components/stock-picks/YdsStockPickScoreDebugPanel.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
 import "../styles/stock-picks-platform.css"
 
@@ -84,9 +85,12 @@ export default function StockPickDetailPage() {
           <YdsStockScoreBreakdown
             scores={stock.scores}
             rows={stock.scoreRows}
+            decomposed={stock.decomposedScores}
             variant="detail"
           />
         </details>
+
+        <YdsStockPickScoreDebugPanel sample={stock} />
 
         <p className="yds-spick-detail__eval-label">한줄 평가</p>
         <p className="yds-spick-detail__comment">{stock.comment}</p>

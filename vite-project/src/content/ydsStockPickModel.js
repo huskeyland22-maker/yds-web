@@ -33,6 +33,10 @@ import {
   YDS_SCORE_WEIGHTS,
 } from "./ydsStockScoreConfig.js"
 import { resolveStockPickThemes } from "./ydsStockPickThemes.js"
+import {
+  computeDecomposedStockScores,
+  logDecomposedScoreDebug,
+} from "./ydsStockPickDecomposedScores.js"
 
 /** @typedef {'trend' | 'dip' | 'interest' | 'overheat'} StockPickStatusId */
 /** @typedef {'ai' | 'power' | 'defense' | 'semi' | 'robot' | 'nuclear' | 'infra'} StockPickSectorId */
@@ -117,6 +121,7 @@ export const RATING_STARS = {
  *   quote: import("./ydsStockPickQuoteService.js").StockPickQuoteView | null
  *   recommendReasonsDetail: import("./ydsStockRecommendReasons.js").RecommendReason[]
  *   investThemes: string[]
+ *   decomposedScores: import("./ydsStockPickDecomposedScores.js").DecomposedStockScores
  * }} StockPickView
  */
 
@@ -242,6 +247,19 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
 
   const action = actionFromStatus(statusId, recommendReasons)
   const isLive = Boolean(liveEntry)
+
+  const decomposedScores = computeDecomposedStockScores({
+    ticker: row.ticker,
+    name: row.name,
+    rating: row.rating,
+    marketFitScore: row.marketFitScore,
+    scores,
+    scoreMeta: computed.meta,
+    marketFitSource: ctx ? "adapter" : "manual",
+  })
+
+  scores.totalScore = decomposedScores.total
+
   const statusDiag = isLive
     ? explainStatusFromSnapshot(engineSnapshot, liveEntry.extras ?? {})
     : null
@@ -261,7 +279,7 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     }
   }
 
-  return {
+  const enriched = {
     ...row,
     id: row.ticker,
     rank: 0,
@@ -282,11 +300,23 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     marketFitSource: ctx ? "adapter" : "manual",
     sectorLabel,
     investThemes: resolveStockPickThemes(row),
+    decomposedScores,
     dataSource: isLive ? "live" : "fallback",
     quoteSource: resolveQuoteSource(liveEntry),
     statusDiag,
     quote: liveEntry?.quote ?? null,
   }
+
+  if (isLive) {
+    const logScore = () => logDecomposedScoreDebug(enriched)
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(logScore, { timeout: 4000 })
+    } else {
+      setTimeout(logScore, 0)
+    }
+  }
+
+  return enriched
 }
 
 /**

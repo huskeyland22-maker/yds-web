@@ -1014,6 +1014,141 @@
   color: #e2e8f0;
 }
 
+.yds-spick-scores__legacy {
+  margin-top: 0.45rem;
+}
+
+.yds-spick-scores__legacy-summary {
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* ── 5축 점수 그리드 ── */
+.yds-spick-score-grid {
+  margin: 0.15rem 0 0.1rem;
+}
+
+.yds-spick-score-grid__total {
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.78rem, 2.4vw, 0.92rem);
+  font-weight: 800;
+  color: #93c5fd;
+  line-height: 1.2;
+}
+
+.yds-spick-score-grid__total strong {
+  font-size: 1.05em;
+}
+
+.yds-spick-score-grid__subs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.28rem 0.45rem;
+}
+
+.yds-spick-score-grid__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.yds-spick-score-grid__label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.yds-spick-score-grid__value {
+  font-size: clamp(0.72rem, 2.1vw, 0.82rem);
+  font-weight: 800;
+  color: #e2e8f0;
+  line-height: 1.15;
+}
+
+.yds-spick-score-grid--compact .yds-spick-score-grid__subs {
+  gap: 0.22rem 0.35rem;
+}
+
+.yds-spick-score-grid--compact .yds-spick-score-grid__value {
+  font-size: 0.68rem;
+}
+
+.yds-spick-score-grid--why {
+  margin: 0.35rem 0 0.5rem;
+}
+
+.yds-spick-score-debug {
+  margin: 0.35rem 0 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.yds-spick-score-debug__summary {
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.yds-spick-score-debug__formula {
+  margin: 0.35rem 0 0.45rem;
+  font-size: 0.65rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yds-spick-score-debug__grid {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.yds-spick-score-debug__grid dt {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.yds-spick-score-debug__grid dd {
+  margin: 0.08rem 0 0;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.yds-spick-score-debug__pre {
+  margin: 0.35rem 0 0;
+  padding: 0.45rem;
+  border-radius: 0.35rem;
+  background: rgba(2, 6, 23, 0.65);
+  font-size: 0.58rem;
+  line-height: 1.35;
+  color: #94a3b8;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.yds-spick-score-debug__sample-title,
+.yds-spick-score-debug__note {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+@media (min-width: 640px) {
+  .yds-spick-score-grid__subs {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem 0.5rem;
+  }
+}
+
 .yds-spick-ranking {
   border-radius: 0.55rem;
   border: 1px solid rgba(148, 163, 184, 0.14);

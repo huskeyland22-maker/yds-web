@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import { buildStockPickWhyBrief } from "../../content/ydsStockPickWhyBrief.js"
 import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
+import YdsStockPickScoreGrid from "./YdsStockPickScoreGrid.jsx"
 import YdsStockPickThemeBadges from "./YdsStockPickThemeBadges.jsx"
 
 const ROWS = [
@@ -36,6 +37,8 @@ export default function YdsStockPickWhyCard({ stock, rank }) {
           <span className="yds-spick-why-card__score font-mono tabular-nums">{totalScore}</span>
         ) : null}
       </header>
+
+      <YdsStockPickScoreGrid decomposed={stock.decomposedScores} variant="why" showTotal={false} />
 
       <p className="yds-spick-why-card__lead">왜 이 종목인가?</p>
 

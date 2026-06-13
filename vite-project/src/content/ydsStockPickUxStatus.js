@@ -136,6 +136,8 @@ export function pickTodaySignalStock(stocks, countryId) {
  * @returns {number | null}
  */
 export function getStockPickTotalScore(stock) {
+  const decomposed = stock.decomposedScores?.total
+  if (Number.isFinite(decomposed)) return Math.round(decomposed)
   const score = stock.scores?.totalScore ?? stock.score
   return Number.isFinite(score) ? Math.round(score) : null
 }

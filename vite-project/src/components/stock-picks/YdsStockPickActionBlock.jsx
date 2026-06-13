@@ -1,6 +1,5 @@
-import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
+import YdsStockPickScoreGrid from "./YdsStockPickScoreGrid.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
-
 /**
  * @param {{
  *   stock: import("../../content/ydsStockPickModel.js").StockPickView
@@ -12,7 +11,6 @@ export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
   const showScore = variant === "detail"
   const actionOnly = variant === "top5" || variant === "top3" || variant === "compact"
   const showStatus = !actionOnly
-  const totalScore = getStockPickTotalScore(stock)
 
   return (
     <div
@@ -26,10 +24,8 @@ export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
         .filter(Boolean)
         .join(" ")}
     >
-      {showStatus && showScore && totalScore != null ? (
-        <p className="yds-spick-action__score-lead font-mono tabular-nums">
-          종합점수 {totalScore}
-        </p>
+      {showStatus && showScore ? (
+        <YdsStockPickScoreGrid decomposed={stock.decomposedScores} variant="detail" />
       ) : null}
       {showStatus ? (
         <div className="yds-spick-action__status">

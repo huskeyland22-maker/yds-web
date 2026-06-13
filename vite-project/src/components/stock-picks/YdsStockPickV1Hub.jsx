@@ -14,6 +14,7 @@ import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
 import { useStockPickStatusChanges } from "../../hooks/useStockPickStatusChanges.js"
+import YdsStockPickScoreDebugPanel from "./YdsStockPickScoreDebugPanel.jsx"
 import YdsStockPickDebugBox from "./YdsStockPickDebugBox.jsx"
 import YdsStockPickLoadBanner from "./YdsStockPickLoadBanner.jsx"
 import YdsStockPickSearchBar from "./YdsStockPickSearchBar.jsx"
@@ -140,10 +141,12 @@ export default function YdsStockPickV1Hub() {
   )
 
   const searchResultCount = searchedStocks.length
+  const scoreDebugSample = stocksByCountry.US[0] ?? stocksByCountry.KR[0] ?? null
 
   return (
     <div className="yds-spick-platform">
       <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} />
+      <YdsStockPickScoreDebugPanel sample={scoreDebugSample} />
       <YdsStockPickLoadBanner stats={loadStats} loading={loading && !liveStocks.length} />
       {refreshing ? (
         <p className="yds-spick-sync-note yds-spick-sync-note--refresh" role="status">
