@@ -1,4 +1,4 @@
-import YdsStockPickScoreGrid from "./YdsStockPickScoreGrid.jsx"
+import YdsStockPickPhase3Breakdown from "./YdsStockPickPhase3Breakdown.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 /**
  * @param {{
@@ -25,7 +25,11 @@ export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
         .join(" ")}
     >
       {showStatus && showScore ? (
-        <YdsStockPickScoreGrid decomposed={stock.decomposedScores} variant="detail" />
+        <YdsStockPickPhase3Breakdown
+          breakdown={stock.scoreBreakdown}
+          technical={stock.technicalScore}
+          variant="detail"
+        />
       ) : null}
       {showStatus ? (
         <div className="yds-spick-action__status">

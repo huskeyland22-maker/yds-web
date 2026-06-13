@@ -8,6 +8,7 @@ import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLi
 import YdsStockPickTransparencyPanel from "../components/stock-picks/YdsStockPickTransparencyPanel.jsx"
 import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
 import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
+import YdsStockPickOpinionBlock from "../components/stock-picks/YdsStockPickOpinionBlock.jsx"
 import YdsStockPickScoreDebugPanel from "../components/stock-picks/YdsStockPickScoreDebugPanel.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
 import "../styles/stock-picks-platform.css"
@@ -80,11 +81,15 @@ export default function StockPickDetailPage() {
           variant="detail"
         />
 
-        <details className="yds-spick-detail__scores">
-          <summary className="yds-spick-detail__scores-summary">점수 근거</summary>
+        <YdsStockPickOpinionBlock opinion={stock.opinion} variant="detail" />
+
+        <details className="yds-spick-detail__scores" open>
+          <summary className="yds-spick-detail__scores-summary">점수 구성</summary>
           <YdsStockScoreBreakdown
             scores={stock.scores}
             rows={stock.scoreRows}
+            breakdown={stock.scoreBreakdown}
+            technical={stock.technicalScore}
             decomposed={stock.decomposedScores}
             variant="detail"
           />

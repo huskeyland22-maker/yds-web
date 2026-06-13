@@ -23,6 +23,7 @@ import YdsStockPickCard from "./YdsStockPickCard.jsx"
  *   showCountryHead?: boolean
  *   allSectionId?: string
  *   loading?: boolean
+ *   universeStocks?: import("../../content/ydsStockPickModel.js").StockPickView[]
  * }} props
  */
 export default function YdsStockPickCountryPanel({
@@ -37,6 +38,7 @@ export default function YdsStockPickCountryPanel({
   showCountryHead = false,
   allSectionId = "spick-all",
   loading = false,
+  universeStocks = [],
 }) {
   const countryMeta = STOCK_PICK_COUNTRIES.find((c) => c.id === countryId)
   const [showAll, setShowAll] = useState(false)
@@ -104,6 +106,7 @@ export default function YdsStockPickCountryPanel({
           <YdsStockPickSectorPanel
             stocks={sectorStocks}
             allStocks={stocks}
+            universeStocks={universeStocks.length ? universeStocks : stocks}
             sectorId={sectorId}
             onSectorChange={onSectorChange}
             heldTickers={heldTickers}

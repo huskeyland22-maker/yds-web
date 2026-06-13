@@ -1,7 +1,11 @@
-import { useLayoutEffect, useRef } from "react"
+import { useLayoutEffect, useMemo, useRef } from "react"
 import { Link } from "react-router-dom"
 import { STOCK_PICK_SECTORS } from "../../content/ydsStockPickModel.js"
 import { formatTransparencyPrice } from "../../content/ydsStockPickTransparency.js"
+import {
+  buildSectorStrengthMap,
+  getSectorTopStocks,
+} from "../../content/ydsStockPickSectorStrength.js"
 import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
 import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
@@ -10,6 +14,7 @@ import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
  * @param {{
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   allStocks: import("../../content/ydsStockPickModel.js").StockPickView[]
+ *   universeStocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   sectorId: string
  *   onSectorChange: (id: string) => void
  *   heldTickers?: Set<string>
@@ -18,6 +23,7 @@ import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 export default function YdsStockPickSectorPanel({
   stocks,
   allStocks,
+  universeStocks,
   sectorId,
   onSectorChange,
   heldTickers = new Set(),
@@ -30,14 +36,17 @@ export default function YdsStockPickSectorPanel({
     })
   }, [stocks.length])
 
-  const sectorCounts = STOCK_PICK_SECTORS.reduce((acc, sector) => {
-    if (sector.id === "all") {
-      acc[sector.id] = allStocks.length
-    } else {
-      acc[sector.id] = allStocks.filter((s) => s.sector === sector.id).length
-    }
-    return acc
-  }, /** @type {Record<string, number>} */ ({}))
+  const strengthMap = useMemo(
+    () => buildSectorStrengthMap(universeStocks),
+    [universeStocks],
+  )
+
+  const sectorTop5 = useMemo(
+    () => getSectorTopStocks(universeStocks, sectorId, 5),
+    [universeStocks, sectorId],
+  )
+
+  const activeSector = STOCK_PICK_SECTORS.find((s) => s.id === sectorId)
 
   return (
     <section className="yds-spick-section yds-spick-section--sector" aria-labelledby="spick-sector">
@@ -46,24 +55,67 @@ export default function YdsStockPickSectorPanel({
       </h2>
 
       <div className="yds-spick-tabs" role="tablist" aria-label="섹터 필터">
-        {STOCK_PICK_SECTORS.map((sector) => (
-          <button
-            key={sector.id}
-            type="button"
-            role="tab"
-            aria-selected={sectorId === sector.id}
-            className={[
-              "yds-spick-tabs__btn",
-              sectorId === sector.id ? "yds-spick-tabs__btn--active" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            onClick={() => onSectorChange(sector.id)}
-          >
-            {sector.label} ({sectorCounts[sector.id] ?? 0})
-          </button>
-        ))}
+        {STOCK_PICK_SECTORS.map((sector) => {
+          const strength = strengthMap[sector.id]?.strength
+          const count = sector.id === "all" ? allStocks.length : strengthMap[sector.id]?.count ?? 0
+          const tabLabel =
+            sector.id === "all"
+              ? `${sector.label} (${count})`
+              : strength != null
+                ? `${sector.label} (${strength}점)`
+                : `${sector.label} (${count})`
+
+          return (
+            <button
+              key={sector.id}
+              type="button"
+              role="tab"
+              aria-selected={sectorId === sector.id}
+              className={[
+                "yds-spick-tabs__btn",
+                sectorId === sector.id ? "yds-spick-tabs__btn--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => onSectorChange(sector.id)}
+            >
+              {tabLabel}
+            </button>
+          )
+        })}
       </div>
+
+      {sectorId !== "all" && sectorTop5.length ? (
+        <div className="yds-spick-sector-top5" role="tabpanel">
+          <h3 className="yds-spick-sector-top5__title">
+            {activeSector?.label ?? sectorId} TOP5
+          </h3>
+          <ol className="yds-spick-sector-top5__list">
+            {sectorTop5.map((stock, index) => (
+              <li key={stock.ticker} className="yds-spick-sector-top5__item">
+                <span className="yds-spick-sector-top5__rank font-mono tabular-nums">
+                  {index + 1}
+                </span>
+                <Link
+                  to={`/stock-picks/${encodeURIComponent(stock.ticker)}`}
+                  className="yds-spick-sector-top5__link"
+                >
+                  {stock.name}
+                </Link>
+                <span className="yds-spick-sector-top5__score font-mono tabular-nums">
+                  {getStockPickTotalScore(stock) ?? "—"}
+                </span>
+                {stock.dataSource !== "live" ? (
+                  <span className="yds-spick-sector-top5__badge">수집중</span>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+          <p className="yds-spick-sector-top5__note">
+            섹터 강도 {strengthMap[sectorId]?.strength ?? "—"}점 · TOP3 평균 종합점수
+          </p>
+        </div>
+      ) : null}
 
       <ul className="yds-spick-sector-list" role="tabpanel">
         {stocks.length ? (
@@ -95,7 +147,7 @@ export default function YdsStockPickSectorPanel({
             </li>
           ))
         ) : (
-          <li className="yds-spick-empty">해당 섹터 종목이 없습니다.</li>
+          <li className="yds-spick-empty">해당 섹터 추천 종목이 없습니다.</li>
         )}
       </ul>
     </section>

@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom"
 import {
   buildTodaySignalReasons,
+  getStockPickTotalScore,
   pickTodaySignalStock,
 } from "../../content/ydsStockPickUxStatus.js"
-import YdsStockPickScoreGrid from "./YdsStockPickScoreGrid.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 
 /**
@@ -68,7 +68,11 @@ function SignalCard({ stock, countryLabel }) {
       <span className="yds-spick-signal-card__country">{countryLabel}</span>
       <Link to={to} className="yds-spick-signal-card__link">
         <h3 className="yds-spick-signal-card__name">{stock.name}</h3>
-        <YdsStockPickScoreGrid decomposed={stock.decomposedScores} variant="compact" />
+        {getStockPickTotalScore(stock) != null ? (
+          <p className="yds-spick-signal-card__score font-mono tabular-nums">
+            종합점수 <strong>{getStockPickTotalScore(stock)}</strong>
+          </p>
+        ) : null}
         <YdsStockPickUxStatusBadge
           stock={stock}
           className="yds-spick-signal-card__status"

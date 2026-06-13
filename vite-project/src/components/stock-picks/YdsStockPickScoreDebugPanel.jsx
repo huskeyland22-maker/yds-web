@@ -1,8 +1,7 @@
 import {
-  DECOMPOSED_SCORE_LABELS,
-  DECOMPOSED_SCORE_WEIGHTS,
-  isStockPickScoreDebugEnabled,
-} from "../../content/ydsStockPickDecomposedScores.js"
+  PHASE3_SCORE_COMPONENTS,
+  isPhase3ScoreDebugEnabled,
+} from "../../content/ydsStockPickPhase3Breakdown.js"
 
 /**
  * @param {{
@@ -10,39 +9,40 @@ import {
  * }} props
  */
 export default function YdsStockPickScoreDebugPanel({ sample = null }) {
-  if (!isStockPickScoreDebugEnabled()) return null
+  if (!isPhase3ScoreDebugEnabled()) return null
 
-  const decomposed = sample?.decomposedScores
+  const breakdown = sample?.scoreBreakdown
 
   return (
     <details className="yds-spick-score-debug">
-      <summary className="yds-spick-score-debug__summary">점수 분해 Debug</summary>
+      <summary className="yds-spick-score-debug__summary">Phase 3 점수 Debug</summary>
       <div className="yds-spick-score-debug__body">
         <p className="yds-spick-score-debug__formula">
-          종합점수 = 실적×20% + 기술×20% + 모멘텀×20% + 섹터×20% + 시장환경×20%
+          종합 = 실적(30) + 산업(25) + 섹터(20) + 시장환경(15) + 기술적분석(5) + 거래량(5)
         </p>
         <dl className="yds-spick-score-debug__grid">
-          {Object.entries(DECOMPOSED_SCORE_LABELS).map(([key, label]) => (
-            <div key={key}>
-              <dt>{label}</dt>
-              <dd>
-                가중 {Math.round(DECOMPOSED_SCORE_WEIGHTS[key] * 100)}% ·{" "}
-                {key === "performance" && "rating·수동 marketFit"}
-                {key === "technology" && "position·trend"}
-                {key === "momentum" && "trend·volume"}
-                {key === "sector" && "marketFit·rating"}
-                {key === "marketEnv" && "marketFit·volume·trend"}
-              </dd>
+          {PHASE3_SCORE_COMPONENTS.map((c) => (
+            <div key={c.id}>
+              <dt>{c.label}</dt>
+              <dd>최대 {c.max}점</dd>
             </div>
           ))}
         </dl>
-        {decomposed ? (
+        {breakdown ? (
           <>
             <p className="yds-spick-score-debug__sample-title">
               샘플: {sample?.name} ({sample?.ticker})
             </p>
             <pre className="yds-spick-score-debug__pre">
-              {JSON.stringify(decomposed.debug, null, 2)}
+              {JSON.stringify(
+                {
+                  phase3: breakdown.debug,
+                  technical: sample?.technicalScore,
+                  legacy: sample?.scores,
+                },
+                null,
+                2,
+              )}
             </pre>
           </>
         ) : (

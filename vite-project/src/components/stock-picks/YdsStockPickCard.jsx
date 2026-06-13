@@ -5,9 +5,9 @@ import {
   formatTransparencyPrice,
 } from "../../content/ydsStockPickTransparency.js"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
-import YdsStockPickScoreGrid from "./YdsStockPickScoreGrid.jsx"
 import YdsStockPickThemeBadges from "./YdsStockPickThemeBadges.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
+import { getStockPickTotalScore } from "../../content/ydsStockPickUxStatus.js"
 
 /**
  * @param {{
@@ -90,10 +90,11 @@ export default function YdsStockPickCard({
 
         <YdsStockPickThemeBadges themes={stock.investThemes ?? []} className="yds-spick-card__themes" />
 
-        <YdsStockPickScoreGrid
-          decomposed={stock.decomposedScores}
-          variant={variant === "compact" ? "compact" : "card"}
-        />
+        {getStockPickTotalScore(stock) != null ? (
+          <p className="yds-spick-card__total font-mono tabular-nums">
+            종합점수 <strong>{getStockPickTotalScore(stock)}</strong>
+          </p>
+        ) : null}
 
         <div className="yds-spick-card__core">
           <YdsStockPickUxStatusBadge stock={stock} className="yds-spick-card__status" />

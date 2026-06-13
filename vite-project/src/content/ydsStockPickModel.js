@@ -37,6 +37,12 @@ import {
   computeDecomposedStockScores,
   logDecomposedScoreDebug,
 } from "./ydsStockPickDecomposedScores.js"
+import {
+  computePhase3ScoreBreakdown,
+  logPhase3ScoreDebug,
+} from "./ydsStockPickPhase3Breakdown.js"
+import { computeTechnicalScore } from "./ydsStockTechnicalScore.js"
+import { buildStockPickOpinion } from "./ydsStockPickOpinion.js"
 
 /** @typedef {'trend' | 'dip' | 'interest' | 'overheat'} StockPickStatusId */
 /** @typedef {'ai' | 'power' | 'defense' | 'semi' | 'robot' | 'nuclear' | 'infra'} StockPickSectorId */
@@ -122,6 +128,9 @@ export const RATING_STARS = {
  *   recommendReasonsDetail: import("./ydsStockRecommendReasons.js").RecommendReason[]
  *   investThemes: string[]
  *   decomposedScores: import("./ydsStockPickDecomposedScores.js").DecomposedStockScores
+ *   scoreBreakdown: import("./ydsStockPickPhase3Breakdown.js").Phase3ScoreBreakdown
+ *   technicalScore: import("./ydsStockTechnicalScore.js").TechnicalScoreResult
+ *   opinion: import("./ydsStockPickOpinion.js").StockPickOpinion
  * }} StockPickView
  */
 
@@ -258,7 +267,20 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     marketFitSource: ctx ? "adapter" : "manual",
   })
 
-  scores.totalScore = decomposedScores.total
+  const scoreBreakdown = computePhase3ScoreBreakdown({
+    ticker: row.ticker,
+    name: row.name,
+    rating: row.rating,
+    manualMarketFit: row.marketFitScore,
+    scores,
+  })
+
+  const technicalScore = computeTechnicalScore(
+    engineSnapshot,
+    liveEntry?.extras ?? {},
+  )
+
+  scores.totalScore = scoreBreakdown.total
 
   const statusDiag = isLive
     ? explainStatusFromSnapshot(engineSnapshot, liveEntry.extras ?? {})
@@ -301,14 +323,21 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     sectorLabel,
     investThemes: resolveStockPickThemes(row),
     decomposedScores,
+    scoreBreakdown,
+    technicalScore,
     dataSource: isLive ? "live" : "fallback",
     quoteSource: resolveQuoteSource(liveEntry),
     statusDiag,
     quote: liveEntry?.quote ?? null,
   }
 
+  enriched.opinion = buildStockPickOpinion(enriched)
+
   if (isLive) {
-    const logScore = () => logDecomposedScoreDebug(enriched)
+    const logScore = () => {
+      logDecomposedScoreDebug(enriched)
+      logPhase3ScoreDebug(enriched)
+    }
     if (typeof requestIdleCallback === "function") {
       requestIdleCallback(logScore, { timeout: 4000 })
     } else {

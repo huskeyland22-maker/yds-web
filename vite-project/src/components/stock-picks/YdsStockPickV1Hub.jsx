@@ -52,6 +52,7 @@ export default function YdsStockPickV1Hub() {
   const marketContext = useYdsMarketContext()
   const {
     stocks: liveStocks,
+    allStocks,
     loadStats,
     pipelineDebug,
     loading,
@@ -110,6 +111,14 @@ export default function YdsStockPickV1Hub() {
       KR: applyFavoriteFilter(ranked.KR),
     }
   }, [searchedStocks, applyFavoriteFilter])
+
+  const universeByCountry = useMemo(
+    () => ({
+      US: filterByCountry(allStocks, "US"),
+      KR: filterByCountry(allStocks, "KR"),
+    }),
+    [allStocks],
+  )
 
   useEffect(() => {
     if (stocksByCountry.US.length || stocksByCountry.KR.length) {
@@ -229,6 +238,7 @@ export default function YdsStockPickV1Hub() {
               <YdsStockPickCountryPanel
                 countryId={country.id}
                 stocks={stocksByCountry[country.id]}
+                universeStocks={universeByCountry[country.id]}
                 sectorId={sectorByCountry[country.id]}
                 onSectorChange={(id) => setSectorForCountry(country.id, id)}
                 isFavorite={isFavorite}
