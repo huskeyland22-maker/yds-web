@@ -1,8 +1,7 @@
 /**
- * Phase 3 — YDS 투자 의견 (룰 기반, OpenAI 미사용)
+ * V4 — YDS 실전 의견 (룰 기반, OpenAI 미사용)
  */
 
-import { getStockPickTotalScore } from "./ydsStockPickUxStatus.js"
 import { resolveStockPickUxStatus } from "./ydsStockPickUxStatus.js"
 
 /**
@@ -11,8 +10,31 @@ import { resolveStockPickUxStatus } from "./ydsStockPickUxStatus.js"
  *   bullets: string[]
  *   action: string
  *   fullText: string
+ *   qualityLine: string
+ *   timingLine: string
+ *   summary: string
+ *   holderAction: string
+ *   nonHolderAction: string
  * }} StockPickOpinion
  */
+
+/** @param {import("./ydsStockPickV4Scoring.js").ScoreLetterGrade} grade */
+function qualityPhrase(grade) {
+  if (grade === "A") return "기업품질 매우 우수"
+  if (grade === "B") return "기업품질 양호"
+  if (grade === "C") return "기업품질 보통"
+  if (grade === "D") return "기업품질 다소 약함"
+  return "기업품질 주의"
+}
+
+/** @param {import("./ydsStockPickV4Scoring.js").ScoreLetterGrade} grade */
+function timingPhrase(grade) {
+  if (grade === "A") return "현재 타이밍 매우 좋음"
+  if (grade === "B") return "타이밍 양호"
+  if (grade === "C") return "현재 추세는 보통"
+  if (grade === "D") return "현재 추세는 약함"
+  return "타이밍 매우 불리"
+}
 
 /**
  * @param {import("./ydsStockPickModel.js").StockPickView} stock
@@ -23,20 +45,26 @@ export function buildStockPickOpinion(stock, sectorInfo = null) {
   /** @type {string[]} */
   const bullets = []
   const breakdown = stock.scoreBreakdown
-  const tech = stock.technicalScore
+  const v4 = stock.v4Score
   const ux = resolveStockPickUxStatus(stock)
   const themes = stock.investThemes ?? []
   const sectorLabel = stock.sectorLabel ?? sectorInfo?.label ?? ""
-  const total = getStockPickTotalScore(stock)
 
-  if (breakdown?.performance >= 24) {
-    bullets.push("실적 강세")
+  const qualityLine = v4
+    ? `${qualityPhrase(v4.qualityGrade)} (${v4.qualityDisplay})`
+    : "기업품질 분석 중"
+  const timingLine = v4
+    ? `${timingPhrase(v4.timingGrade)} (${v4.timingDisplay})`
+    : "타이밍 분석 중"
+
+  if (v4?.qualityGrade === "A" || breakdown?.performance >= 24) {
+    bullets.push("실적·펀더멘털 강세")
   } else if (breakdown?.performance >= 18) {
     bullets.push("실적 양호")
   }
 
   if (themes.length) {
-    bullets.push(`${themes[0]} 수요·테마 부각`)
+    bullets.push(`${themes[0]} 장기 성장`)
   } else if (stock.comment) {
     bullets.push(stock.comment)
   }
@@ -48,44 +76,73 @@ export function buildStockPickOpinion(stock, sectorInfo = null) {
   }
 
   const statusId = stock.stockStatus?.id ?? stock.statusDiag?.statusId
-  if (statusId === "trend") {
-    bullets.push("현재 상승 추세 유지")
+  if (statusId === "trend" && (v4?.timingGrade === "A" || v4?.timingGrade === "B")) {
+    bullets.push("상승 추세 + 양호한 타이밍")
+  } else if (statusId === "trend") {
+    bullets.push("추세는 유지 중")
   } else if (statusId === "dip") {
-    bullets.push("단기 조정·눌림 구간")
-  } else if (statusId === "overheat") {
+    bullets.push("단기 눌림·조정 구간")
+  } else if (statusId === "overheat" || v4?.timingGrade === "F") {
     bullets.push("단기 과열·급등 구간")
-  }
-
-  if (tech?.score >= 7) {
-    bullets.push("기술적 조건 양호")
-  } else if (tech?.checks?.some((c) => c.id === "rsi" && !c.pass)) {
-    bullets.push("RSI 과열 — 진입 타이밍 주의")
+  } else if (v4?.timingGrade === "C" || v4?.timingGrade === "D") {
+    bullets.push("현재 추세는 약함")
   }
 
   /** @type {string} */
-  let action = ""
-  if (ux.id === "buy") {
-    action =
-      total != null && total >= 75
-        ? "추세 유지 중. 분할 접근 가능."
-        : "조건 충족. 분할 접근 검토."
-  } else if (ux.id === "wait") {
-    action =
-      statusId === "dip"
-        ? "눌림 발생 시 분할 접근 가능."
-        : "신규 진입은 눌림·지지 확인 필요."
+  let summary = ""
+  if (ux.id === "aggressiveBuy") {
+    summary = "기업·타이밍 모두 우수. 분할 접근 적극 검토."
+  } else if (ux.id === "buy") {
+    summary = "좋은 기업 + 매수 가능 타이밍. 분할 접근 가능."
+  } else if (ux.id === "scaleIn") {
+    summary = "좋은 기업이나 타이밍 보통. 소량 분할 접근."
+  } else if (ux.id === "watch") {
+    summary = "신규 진입은 추격보다 눌림 대기 유리."
   } else {
-    action = "최근 상승폭이 커 신규 진입은 눌림 확인 필요."
+    summary = "최근 상승폭이 커 신규 진입은 눌림 확인 필요."
+  }
+
+  /** @type {string} */
+  let holderAction = "보유자 : 홀딩"
+  /** @type {string} */
+  let nonHolderAction = "미보유자 : 관망"
+
+  if (ux.id === "aggressiveBuy" || ux.id === "buy") {
+    holderAction = "보유자 : 홀딩 · 추가는 분할"
+    nonHolderAction = "미보유자 : 분할 접근"
+  } else if (ux.id === "scaleIn") {
+    holderAction = "보유자 : 홀딩"
+    nonHolderAction = "미보유자 : 소량 분할 접근"
+  } else if (ux.id === "watch") {
+    holderAction = "보유자 : 홀딩"
+    nonHolderAction = "미보유자 : 눌림 대기"
+  } else {
+    holderAction = "보유자 : 일부 차익·비중 조절 검토"
+    nonHolderAction = "미보유자 : 추격 금지"
   }
 
   const uniqueBullets = [...new Set(bullets.filter(Boolean))].slice(0, 4)
   const headline = `[${stock.name}]`
-  const fullText = [headline, ...uniqueBullets, action].join("\n")
+  const action = summary
+  const fullText = [
+    headline,
+    qualityLine,
+    ...uniqueBullets,
+    timingLine,
+    summary,
+    holderAction,
+    nonHolderAction,
+  ].join("\n")
 
   return {
     headline,
     bullets: uniqueBullets,
     action,
     fullText,
+    qualityLine,
+    timingLine,
+    summary,
+    holderAction,
+    nonHolderAction,
   }
 }

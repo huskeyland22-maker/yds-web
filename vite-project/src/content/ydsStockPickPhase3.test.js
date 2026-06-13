@@ -1,11 +1,23 @@
 import { describe, expect, it } from "vitest"
 import { computePhase3ScoreBreakdown } from "./ydsStockPickPhase3Breakdown.js"
+import { computeTimingScore } from "./ydsStockPickTimingScore.js"
 import { computeTechnicalScore } from "./ydsStockTechnicalScore.js"
 import { buildSectorStrengthMap, getSectorTopStocks } from "./ydsStockPickSectorStrength.js"
 import { buildStockPickOpinion } from "./ydsStockPickOpinion.js"
 
 describe("computePhase3ScoreBreakdown", () => {
-  it("sums six components to total max 100", () => {
+  it("sums quality + timing to total max 100", () => {
+    const snapshot = {
+      close: 110,
+      ma20: 100,
+      ma60: 95,
+      ma120: 90,
+      high52w: 112,
+      recentHigh: 112,
+      volumeToday: 1500,
+      volumeAvg20: 1000,
+    }
+    const timingScore = computeTimingScore(snapshot, { rsi14: 55 }, { drawdownPct: 2 })
     const result = computePhase3ScoreBreakdown({
       rating: 5,
       manualMarketFit: 20,
@@ -15,12 +27,12 @@ describe("computePhase3ScoreBreakdown", () => {
         positionScore: 20,
         marketFitScore: 20,
       },
+      timingScore,
     })
-    expect(result.total).toBe(100)
     expect(result.quality).toBe(75)
-    expect(result.timing).toBe(25)
+    expect(result.total).toBe(result.quality + result.timing)
+    expect(result.total).toBeLessThanOrEqual(100)
     expect(result.rows).toHaveLength(6)
-    expect(result.rows[0].display).toBe("30/30")
   })
 
   it("matches example-style partial scores", () => {
@@ -89,7 +101,8 @@ describe("buildStockPickOpinion", () => {
       ticker: "000660",
       sectorLabel: "반도체",
       investThemes: ["HBM"],
-      scoreBreakdown: { performance: 28, sector: 18, total: 84 },
+      scoreBreakdown: { performance: 28, sector: 18, total: 84, quality: 60, timing: 24 },
+      v4Score: { qualityGrade: "A", timingGrade: "A", recommendStatusId: "aggressiveBuy", total: 84 },
       stockStatus: { id: "trend" },
       technicalScore: { score: 8, checks: [] },
       scores: { totalScore: 84 },

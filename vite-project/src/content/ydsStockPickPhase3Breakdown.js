@@ -53,6 +53,7 @@ export function scaleToMax(value, sourceMax, targetMax) {
  *   scores?: { trendScore?: number; volumeScore?: number; positionScore?: number; marketFitScore?: number }
  *   ticker?: string
  *   name?: string
+ *   timingScore?: import("./ydsStockPickTimingScore.js").TimingScoreResult | null
  * }} input
  * @returns {Phase3ScoreBreakdown}
  */
@@ -67,18 +68,19 @@ export function computePhase3ScoreBreakdown(input) {
   const performance = Number.isFinite(rating) ? clamp((rating / 5) * 30, 0, 30) : 18
   const industry = scaleToMax(manualMarketFit, 20, 25)
   const sector = scaleToMax(liveMarketFit, 20, 20)
+
+  const timingFromModule = input.timingScore?.score
   const marketEnv = scaleToMax(position, 20, 15)
   const technical = scaleToMax(trend, 40, 5)
   const volume = scaleToMax(volumeScore, 20, 5)
 
-  const subs = { performance, industry, sector, marketEnv, technical, volume }
-  const total = clamp(
-    performance + industry + sector + marketEnv + technical + volume,
-    0,
-    100,
-  )
   const quality = performance + industry + sector
-  const timing = marketEnv + technical + volume
+  const timing = Number.isFinite(timingFromModule)
+    ? clamp(timingFromModule, 0, PHASE3_TIMING_MAX)
+    : marketEnv + technical + volume
+
+  const subs = { performance, industry, sector, marketEnv, technical, volume }
+  const total = clamp(quality + timing, 0, 100)
 
   const rows = PHASE3_SCORE_COMPONENTS.map((c) => ({
     key: /** @type {Phase3ScoreKey} */ (c.id),
@@ -104,6 +106,7 @@ export function computePhase3ScoreBreakdown(input) {
     quality,
     timing,
     total,
+    timingSource: Number.isFinite(timingFromModule) ? "v4-module" : "legacy-sum",
     legacySum: trend + volumeScore + position + liveMarketFit,
   }
 
@@ -132,7 +135,8 @@ export function logPhase3ScoreDebug(stock) {
     품질: `${stock.scoreBreakdown.quality}/${PHASE3_QUALITY_MAX}`,
     타이밍: `${stock.scoreBreakdown.timing}/${PHASE3_TIMING_MAX}`,
   })
-  console.info("기술점수", stock.technicalScore)
+  console.info("V4", stock.v4Score)
+  console.info("타이밍", stock.timingScore)
   console.info("계산 입력", stock.scoreBreakdown.debug.inputs)
   console.groupEnd()
 }

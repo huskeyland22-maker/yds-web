@@ -81,7 +81,7 @@ export default function StockPickDetailPage() {
           variant="detail"
         />
 
-        <YdsStockPickOpinionBlock opinion={stock.opinion} variant="detail" />
+        <YdsStockPickOpinionBlock opinion={stock.opinion} variant="practical" />
 
         <details className="yds-spick-detail__scores" open>
           <summary className="yds-spick-detail__scores-summary">점수 구성</summary>
@@ -89,8 +89,8 @@ export default function StockPickDetailPage() {
             scores={stock.scores}
             rows={stock.scoreRows}
             breakdown={stock.scoreBreakdown}
-            technical={stock.technicalScore}
-            decomposed={stock.decomposedScores}
+            v4={stock.v4Score}
+            timing={stock.timingScore}
             variant="detail"
           />
         </details>

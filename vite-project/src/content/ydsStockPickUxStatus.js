@@ -1,8 +1,8 @@
 /**
- * 종목추천 UX — 3단계 행동 지침 상태
+ * V4 — 5단계 추천 상태 (품질×타이밍 매트릭스)
  */
 
-/** @typedef {'buy' | 'wait' | 'noChase'} StockPickUxStatusId */
+/** @typedef {'aggressiveBuy' | 'buy' | 'scaleIn' | 'watch' | 'noChase'} StockPickUxStatusId */
 
 /**
  * @typedef {{
@@ -15,60 +15,70 @@
 
 /** @type {Record<StockPickUxStatusId, StockPickUxStatusView>} */
 export const STOCK_PICK_UX_STATUS = {
+  aggressiveBuy: {
+    id: "aggressiveBuy",
+    emoji: "🔥",
+    label: "적극매수",
+    tooltip: "기업품질·타이밍 모두 우수 — 분할매수 적극 검토",
+  },
   buy: {
     id: "buy",
     emoji: "🟢",
-    label: "매수 가능",
-    tooltip: "현재 조건상 분할매수 가능",
+    label: "매수가능",
+    tooltip: "좋은 기업 + 양호한 타이밍 — 분할매수 가능",
   },
-  wait: {
-    id: "wait",
+  scaleIn: {
+    id: "scaleIn",
     emoji: "🟡",
-    label: "눌림 대기",
-    tooltip: "좋은 종목이나 진입 타이밍 대기",
+    label: "분할진입",
+    tooltip: "좋은 기업이나 타이밍 보통 — 소량 분할 접근",
+  },
+  watch: {
+    id: "watch",
+    emoji: "⚪",
+    label: "관망",
+    tooltip: "기업은 양호하나 지금은 진입 대기",
   },
   noChase: {
     id: "noChase",
     emoji: "🔴",
-    label: "추격 금지",
-    tooltip: "단기 급등으로 위험 대비 보상 불리",
+    label: "추격금지",
+    tooltip: "타이밍 불리 — 신규 추격매수 금지",
   },
 }
 
-/**
- * @param {import("./ydsStockActionEngine.js").StockActionStatusId | string | undefined} statusId
- * @returns {StockPickUxStatusId}
- */
-export function mapEngineStatusToUxId(statusId) {
-  if (statusId === "overheat") return "noChase"
-  if (statusId === "trend") return "buy"
-  if (statusId === "dip" || statusId === "interest") return "wait"
-  return "wait"
+/** @deprecated V4 이전 3단계 ID — localStorage 호환 */
+const LEGACY_UX_MAP = {
+  buy: "buy",
+  wait: "scaleIn",
+  noChase: "noChase",
 }
 
 /**
- * @param {import("./ydsStockPickModel.js").StockPickView | { stockStatus?: { id?: string }; statusDiag?: { statusId?: string } }} stock
+ * @param {import("./ydsStockPickModel.js").StockPickView | { v4Score?: { recommendStatusId?: string }; stockStatus?: { id?: string }; statusDiag?: { statusId?: string } }} stock
  * @returns {StockPickUxStatusView}
  */
 export function resolveStockPickUxStatus(stock) {
-  const statusId =
-    stock.stockStatus?.id ?? stock.statusDiag?.statusId ?? "interest"
-  const uxId = mapEngineStatusToUxId(statusId)
-
-  if (uxId === "buy") {
-    const total = stock.scores?.totalScore ?? 0
-    if (total < 55) return STOCK_PICK_UX_STATUS.wait
+  const v4Id = stock.v4Score?.recommendStatusId
+  if (v4Id && STOCK_PICK_UX_STATUS[v4Id]) {
+    return STOCK_PICK_UX_STATUS[v4Id]
   }
 
-  return STOCK_PICK_UX_STATUS[uxId]
+  const statusId =
+    stock.stockStatus?.id ?? stock.statusDiag?.statusId ?? "interest"
+  if (statusId === "overheat") return STOCK_PICK_UX_STATUS.noChase
+  if (statusId === "trend") return STOCK_PICK_UX_STATUS.buy
+  if (statusId === "dip") return STOCK_PICK_UX_STATUS.scaleIn
+  return STOCK_PICK_UX_STATUS.watch
 }
 
 /**
- * @param {StockPickUxStatusId} uxId
+ * @param {StockPickUxStatusId | string} uxId
  * @returns {StockPickUxStatusView}
  */
 export function getUxStatusById(uxId) {
-  return STOCK_PICK_UX_STATUS[uxId] ?? STOCK_PICK_UX_STATUS.wait
+  const mapped = LEGACY_UX_MAP[uxId] ?? uxId
+  return STOCK_PICK_UX_STATUS[mapped] ?? STOCK_PICK_UX_STATUS.watch
 }
 
 /**
@@ -86,30 +96,22 @@ export function buildTodaySignalReasons(stock, limit = 3) {
   }
 
   const fallback = [...fromDetail]
-  const scores = stock.scores ?? {}
-  const statusId = stock.stockStatus?.id ?? stock.statusDiag?.statusId
+  const v4 = stock.v4Score
 
-  if (
-    fallback.length < limit &&
-    (stock.sector === "ai" || stock.sector === "semiconductor") &&
-    (scores.totalScore ?? 0) >= 75
-  ) {
-    fallback.push("AI 점수 상위")
+  if (fallback.length < limit && v4?.qualityGrade === "A") {
+    fallback.push("기업품질 A")
   }
-  if (fallback.length < limit && statusId === "trend") {
+  if (fallback.length < limit && v4?.timingGrade === "A") {
+    fallback.push("타이밍 A")
+  }
+  if (fallback.length < limit && v4?.recommendStatusId === "aggressiveBuy") {
+    fallback.push("적극매수 구간")
+  }
+  if (fallback.length < limit && stock.stockStatus?.id === "trend") {
     fallback.push("추세 유지")
   }
-  if (fallback.length < limit && scores.volumeScore >= 60) {
+  if (fallback.length < limit && (stock.scores?.volumeScore ?? 0) >= 13) {
     fallback.push("거래량 증가")
-  }
-  if (fallback.length < limit && statusId === "dip") {
-    fallback.push("단기 과열 해소 중")
-  }
-  if (fallback.length < limit && statusId === "interest") {
-    fallback.push("지지구간 접근")
-  }
-  if (fallback.length < limit && scores.trendScore >= 65) {
-    fallback.push("장기 추세 양호")
   }
 
   return fallback.slice(0, limit)
@@ -127,7 +129,7 @@ export function pickTodaySignalStock(stocks, countryId) {
   if (!candidates.length) return null
 
   return [...candidates].sort(
-    (a, b) => (b.scores?.totalScore ?? 0) - (a.scores?.totalScore ?? 0),
+    (a, b) => (b.v4Score?.finalRankScore ?? 0) - (a.v4Score?.finalRankScore ?? 0),
   )[0]
 }
 
@@ -136,10 +138,16 @@ export function pickTodaySignalStock(stocks, countryId) {
  * @returns {number | null}
  */
 export function getStockPickTotalScore(stock) {
+  const v4Total = stock.v4Score?.total ?? stock.scoreBreakdown?.total
+  if (Number.isFinite(v4Total)) return Math.round(v4Total)
   const phase3 = stock.scoreBreakdown?.total
   if (Number.isFinite(phase3)) return Math.round(phase3)
-  const decomposed = stock.decomposedScores?.total
-  if (Number.isFinite(decomposed)) return Math.round(decomposed)
   const score = stock.scores?.totalScore ?? stock.score
   return Number.isFinite(score) ? Math.round(score) : null
+}
+
+/** @param {import("./ydsStockPickModel.js").StockPickView} stock */
+export function getStockPickFinalRankScore(stock) {
+  const v = stock.v4Score?.finalRankScore
+  return Number.isFinite(v) ? v : null
 }

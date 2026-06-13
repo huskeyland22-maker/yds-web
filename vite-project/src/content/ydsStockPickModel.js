@@ -37,10 +37,9 @@ import {
   computeDecomposedStockScores,
   logDecomposedScoreDebug,
 } from "./ydsStockPickDecomposedScores.js"
-import {
-  computePhase3ScoreBreakdown,
-  logPhase3ScoreDebug,
-} from "./ydsStockPickPhase3Breakdown.js"
+import { computePhase3ScoreBreakdown, logPhase3ScoreDebug } from "./ydsStockPickPhase3Breakdown.js"
+import { computeTimingScore } from "./ydsStockPickTimingScore.js"
+import { computeV4Score } from "./ydsStockPickV4Scoring.js"
 import { computeTechnicalScore } from "./ydsStockTechnicalScore.js"
 import { buildStockPickOpinion } from "./ydsStockPickOpinion.js"
 
@@ -129,6 +128,8 @@ export const RATING_STARS = {
  *   investThemes: string[]
  *   decomposedScores: import("./ydsStockPickDecomposedScores.js").DecomposedStockScores
  *   scoreBreakdown: import("./ydsStockPickPhase3Breakdown.js").Phase3ScoreBreakdown
+ *   timingScore: import("./ydsStockPickTimingScore.js").TimingScoreResult
+ *   v4Score: import("./ydsStockPickV4Scoring.js").V4StockScore
  *   technicalScore: import("./ydsStockTechnicalScore.js").TechnicalScoreResult
  *   opinion: import("./ydsStockPickOpinion.js").StockPickOpinion
  * }} StockPickView
@@ -267,13 +268,22 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     marketFitSource: ctx ? "adapter" : "manual",
   })
 
+  const timingScore = computeTimingScore(
+    engineSnapshot,
+    liveEntry?.extras ?? {},
+    computed.meta,
+  )
+
   const scoreBreakdown = computePhase3ScoreBreakdown({
     ticker: row.ticker,
     name: row.name,
     rating: row.rating,
     manualMarketFit: row.marketFitScore,
     scores,
+    timingScore,
   })
+
+  const v4Score = computeV4Score(scoreBreakdown.quality, scoreBreakdown.timing)
 
   const technicalScore = computeTechnicalScore(
     engineSnapshot,
@@ -324,6 +334,8 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     investThemes: resolveStockPickThemes(row),
     decomposedScores,
     scoreBreakdown,
+    timingScore,
+    v4Score,
     technicalScore,
     dataSource: isLive ? "live" : "fallback",
     quoteSource: resolveQuoteSource(liveEntry),
@@ -376,14 +388,20 @@ export function buildStockPickViews(marketContext = null, liveSnapshots = new Ma
  */
 export function getStockPickUniverse(marketContext = null) {
   const enriched = buildStockPickViews(marketContext)
-  const sorted = [...enriched].sort((a, b) => b.scores.totalScore - a.scores.totalScore)
+  const sorted = [...enriched].sort(
+    (a, b) => (b.v4Score?.finalRankScore ?? 0) - (a.v4Score?.finalRankScore ?? 0),
+  )
   return sorted.map((row, index) => ({ ...row, rank: index + 1 }))
 }
 
 /** @param {StockPickView[]} stocks */
 export function assignRanks(stocks) {
-  const sorted = sortStockPicks(stocks, "totalScore", "desc")
-  return sorted.map((row, index) => ({ ...row, rank: index + 1 }))
+  const live = filterRecommendableStockPicks(stocks)
+  const sorted = [...live].sort(
+    (a, b) => (b.v4Score?.finalRankScore ?? 0) - (a.v4Score?.finalRankScore ?? 0),
+  )
+  const rankMap = new Map(sorted.map((s, i) => [s.ticker, i + 1]))
+  return stocks.map((row) => ({ ...row, rank: rankMap.get(row.ticker) ?? 0 }))
 }
 
 /** @param {StockPickView[]} stocks @param {StockPickCountryId} countryId */
@@ -440,7 +458,13 @@ export function getTop3Stocks(stocks) {
 
 /** @param {StockPickView[]} stocks */
 export function getTop5Stocks(stocks) {
-  return sortStockPicks(filterRecommendableStockPicks(stocks), "rank", "asc").slice(0, 5)
+  const eligible = filterRecommendableStockPicks(stocks).filter(
+    (s) => s.v4Score?.top5Eligible ?? false,
+  )
+  const sorted = [...eligible].sort(
+    (a, b) => (b.v4Score?.finalRankScore ?? 0) - (a.v4Score?.finalRankScore ?? 0),
+  )
+  return sorted.slice(0, 5)
 }
 
 /** @param {StockPickView[]} stocks */

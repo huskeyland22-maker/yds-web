@@ -1,23 +1,27 @@
-import {
-  PHASE3_QUALITY_MAX,
-  PHASE3_TIMING_MAX,
-} from "../../content/ydsStockPickPhase3Breakdown.js"
+import YdsStockPickQualityTimingHeader from "./YdsStockPickQualityTimingHeader.jsx"
+import YdsStockPickTimingChecklist from "./YdsStockPickTimingChecklist.jsx"
 
 /**
  * @param {{
  *   breakdown?: import("../../content/ydsStockPickPhase3Breakdown.js").Phase3ScoreBreakdown | null
- *   technical?: import("../../content/ydsStockTechnicalScore.js").TechnicalScoreResult | null
+ *   v4?: import("../../content/ydsStockPickV4Scoring.js").V4StockScore | null
+ *   timing?: import("../../content/ydsStockPickTimingScore.js").TimingScoreResult | null
  *   variant?: 'detail' | 'card' | 'why'
- *   showQualityTiming?: boolean
+ *   showDetails?: boolean
  * }} props
  */
 export default function YdsStockPickPhase3Breakdown({
   breakdown = null,
-  technical = null,
+  v4 = null,
+  timing = null,
   variant = "detail",
-  showQualityTiming = true,
+  showDetails = true,
 }) {
-  if (!breakdown?.rows?.length) return null
+  if (!breakdown && !v4) return null
+
+  const qualityRows = breakdown?.rows?.filter((r) =>
+    ["performance", "industry", "sector"].includes(r.key),
+  )
 
   return (
     <div
@@ -29,40 +33,31 @@ export default function YdsStockPickPhase3Breakdown({
         .filter(Boolean)
         .join(" ")}
     >
-      <p className="yds-spick-p3-breakdown__total font-mono tabular-nums">
-        종합점수 <strong>{breakdown.total}</strong>
-      </p>
+      <YdsStockPickQualityTimingHeader
+        v4={v4}
+        total={breakdown?.total ?? v4?.total}
+        variant={variant === "why" ? "why" : variant === "card" ? "compact" : "detail"}
+      />
 
-      {showQualityTiming ? (
-        <div className="yds-spick-p3-breakdown__split">
-          <span className="yds-spick-p3-breakdown__split-item font-mono tabular-nums">
-            품질 <strong>{breakdown.quality}</strong>/{PHASE3_QUALITY_MAX}
-          </span>
-          <span className="yds-spick-p3-breakdown__split-item font-mono tabular-nums">
-            타이밍 <strong>{breakdown.timing}</strong>/{PHASE3_TIMING_MAX}
-          </span>
-          {technical ? (
-            <span className="yds-spick-p3-breakdown__split-item font-mono tabular-nums">
-              기술 <strong>{technical.score}</strong>/{technical.max}
-            </span>
-          ) : null}
-        </div>
+      {timing ? (
+        <YdsStockPickTimingChecklist timing={timing} variant={variant === "detail" ? "detail" : "compact"} />
       ) : null}
 
-      <ul className="yds-spick-p3-breakdown__list">
-        {breakdown.rows.map((row) => (
-          <li key={row.key} className="yds-spick-p3-breakdown__row">
-            <span className="yds-spick-p3-breakdown__label">{row.label}</span>
-            <span className="yds-spick-p3-breakdown__value font-mono tabular-nums">
-              {row.display}
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      <p className="yds-spick-p3-breakdown__sum font-mono tabular-nums">
-        총점 <strong>{breakdown.total}</strong>
-      </p>
+      {showDetails && qualityRows?.length ? (
+        <>
+          <p className="yds-spick-p3-breakdown__section-label">기업품질 구성</p>
+          <ul className="yds-spick-p3-breakdown__list">
+            {qualityRows.map((row) => (
+              <li key={row.key} className="yds-spick-p3-breakdown__row">
+                <span className="yds-spick-p3-breakdown__label">{row.label}</span>
+                <span className="yds-spick-p3-breakdown__value font-mono tabular-nums">
+                  {row.display}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
     </div>
   )
 }

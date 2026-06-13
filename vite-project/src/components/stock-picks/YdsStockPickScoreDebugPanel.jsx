@@ -1,7 +1,5 @@
-import {
-  PHASE3_SCORE_COMPONENTS,
-  isPhase3ScoreDebugEnabled,
-} from "../../content/ydsStockPickPhase3Breakdown.js"
+import { isPhase3ScoreDebugEnabled } from "../../content/ydsStockPickPhase3Breakdown.js"
+import { PHASE3_SCORE_COMPONENTS } from "../../content/ydsStockPickPhase3Breakdown.js"
 
 /**
  * @param {{
@@ -12,23 +10,24 @@ export default function YdsStockPickScoreDebugPanel({ sample = null }) {
   if (!isPhase3ScoreDebugEnabled()) return null
 
   const breakdown = sample?.scoreBreakdown
+  const v4 = sample?.v4Score
 
   return (
     <details className="yds-spick-score-debug">
-      <summary className="yds-spick-score-debug__summary">Phase 3 점수 Debug</summary>
+      <summary className="yds-spick-score-debug__summary">V4 점수 Debug</summary>
       <div className="yds-spick-score-debug__body">
         <p className="yds-spick-score-debug__formula">
-          종합 = 실적(30) + 산업(25) + 섹터(20) + 시장환경(15) + 기술적분석(5) + 거래량(5)
+          TOP5 = quality×70% + timing×30% (−10 if timing≤10) · timing≤5 제외
         </p>
         <dl className="yds-spick-score-debug__grid">
-          {PHASE3_SCORE_COMPONENTS.map((c) => (
+          {PHASE3_SCORE_COMPONENTS.slice(0, 3).map((c) => (
             <div key={c.id}>
-              <dt>{c.label}</dt>
+              <dt>품질·{c.label}</dt>
               <dd>최대 {c.max}점</dd>
             </div>
           ))}
         </dl>
-        {breakdown ? (
+        {breakdown && v4 ? (
           <>
             <p className="yds-spick-score-debug__sample-title">
               샘플: {sample?.name} ({sample?.ticker})
@@ -36,8 +35,9 @@ export default function YdsStockPickScoreDebugPanel({ sample = null }) {
             <pre className="yds-spick-score-debug__pre">
               {JSON.stringify(
                 {
+                  v4,
                   phase3: breakdown.debug,
-                  technical: sample?.technicalScore,
+                  timing: sample?.timingScore?.debug,
                   legacy: sample?.scores,
                 },
                 null,

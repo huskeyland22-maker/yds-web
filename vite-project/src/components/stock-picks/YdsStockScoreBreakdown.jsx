@@ -1,13 +1,12 @@
 import YdsStockPickPhase3Breakdown from "./YdsStockPickPhase3Breakdown.jsx"
-import YdsStockPickTechnicalChecklist from "./YdsStockPickTechnicalChecklist.jsx"
 
 /**
  * @param {{
  *   scores: import("../../content/ydsStockScoreConfig.js").YdsScoreBreakdown
  *   rows: ReturnType<typeof import("../../content/ydsStockScoreConfig.js").formatScoreBreakdownRows>
  *   breakdown?: import("../../content/ydsStockPickPhase3Breakdown.js").Phase3ScoreBreakdown | null
- *   technical?: import("../../content/ydsStockTechnicalScore.js").TechnicalScoreResult | null
- *   decomposed?: import("../../content/ydsStockPickDecomposedScores.js").DecomposedStockScores | null
+ *   v4?: import("../../content/ydsStockPickV4Scoring.js").V4StockScore | null
+ *   timing?: import("../../content/ydsStockPickTimingScore.js").TimingScoreResult | null
  *   variant?: 'card' | 'detail' | 'inline'
  * }} props
  */
@@ -15,11 +14,11 @@ export default function YdsStockScoreBreakdown({
   scores,
   rows,
   breakdown = null,
-  technical = null,
-  decomposed = null,
+  v4 = null,
+  timing = null,
   variant = "card",
 }) {
-  if (breakdown) {
+  if (breakdown || v4) {
     return (
       <div
         className={[
@@ -32,12 +31,9 @@ export default function YdsStockScoreBreakdown({
       >
         <YdsStockPickPhase3Breakdown
           breakdown={breakdown}
-          technical={technical}
+          v4={v4}
+          timing={timing}
           variant={variant === "detail" ? "detail" : "card"}
-        />
-        <YdsStockPickTechnicalChecklist
-          technical={technical}
-          variant={variant === "detail" ? "detail" : "compact"}
         />
         <details className="yds-spick-scores__legacy">
           <summary className="yds-spick-scores__legacy-summary">

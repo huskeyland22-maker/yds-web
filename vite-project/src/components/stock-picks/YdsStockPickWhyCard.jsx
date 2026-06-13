@@ -41,9 +41,10 @@ export default function YdsStockPickWhyCard({ stock, rank }) {
 
       <YdsStockPickPhase3Breakdown
         breakdown={stock.scoreBreakdown}
-        technical={stock.technicalScore}
+        v4={stock.v4Score}
+        timing={stock.timingScore}
         variant="why"
-        showQualityTiming
+        showDetails={false}
       />
 
       <p className="yds-spick-why-card__lead">왜 이 종목인가?</p>
