@@ -69,9 +69,9 @@ function SignalCard({ stock, countryLabel }) {
       <Link to={to} className="yds-spick-signal-card__link">
         <h3 className="yds-spick-signal-card__name">{stock.name}</h3>
         <YdsStockPickQualityTimingHeader
-          v4={stock.v4Score}
-          total={stock.scoreBreakdown?.total}
+          stock={stock}
           variant="compact"
+          showTotal
         />
         <YdsStockPickUxStatusBadge
           stock={stock}

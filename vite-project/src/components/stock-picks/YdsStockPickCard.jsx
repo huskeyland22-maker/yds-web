@@ -6,6 +6,7 @@ import {
 } from "../../content/ydsStockPickTransparency.js"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
 import YdsStockPickQualityTimingHeader from "./YdsStockPickQualityTimingHeader.jsx"
+import YdsStockPickInsightStrip from "./YdsStockPickInsightStrip.jsx"
 import YdsStockPickThemeBadges from "./YdsStockPickThemeBadges.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 
@@ -91,10 +92,12 @@ export default function YdsStockPickCard({
         <YdsStockPickThemeBadges themes={stock.investThemes ?? []} className="yds-spick-card__themes" />
 
         <YdsStockPickQualityTimingHeader
-          v4={stock.v4Score}
-          total={stock.scoreBreakdown?.total}
+          stock={stock}
           variant="compact"
+          showTotal={false}
         />
+
+        <YdsStockPickInsightStrip stock={stock} />
 
         <div className="yds-spick-card__core">
           <YdsStockPickUxStatusBadge stock={stock} className="yds-spick-card__status" />

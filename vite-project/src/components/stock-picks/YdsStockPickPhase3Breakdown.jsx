@@ -11,17 +11,14 @@ import YdsStockPickTimingChecklist from "./YdsStockPickTimingChecklist.jsx"
  * }} props
  */
 export default function YdsStockPickPhase3Breakdown({
+  stock = null,
   breakdown = null,
   v4 = null,
   timing = null,
   variant = "detail",
   showDetails = true,
 }) {
-  if (!breakdown && !v4) return null
-
-  const qualityRows = breakdown?.rows?.filter((r) =>
-    ["performance", "industry", "sector"].includes(r.key),
-  )
+  if (!breakdown && !v4 && !stock?.v4Score) return null
 
   return (
     <div
@@ -34,20 +31,24 @@ export default function YdsStockPickPhase3Breakdown({
         .join(" ")}
     >
       <YdsStockPickQualityTimingHeader
-        v4={v4}
-        total={breakdown?.total ?? v4?.total}
+        stock={stock}
+        v4={v4 ?? stock?.v4Score}
+        total={breakdown?.total ?? stock?.v4Score?.total}
         variant={variant === "why" ? "why" : variant === "card" ? "compact" : "detail"}
+        showTotal={variant === "detail"}
       />
 
       {timing ? (
         <YdsStockPickTimingChecklist timing={timing} variant={variant === "detail" ? "detail" : "compact"} />
       ) : null}
 
-      {showDetails && qualityRows?.length ? (
+      {showDetails && breakdown?.rows?.length ? (
         <>
           <p className="yds-spick-p3-breakdown__section-label">기업품질 구성</p>
           <ul className="yds-spick-p3-breakdown__list">
-            {qualityRows.map((row) => (
+            {breakdown.rows
+              .filter((r) => ["performance", "industry", "sector"].includes(r.key))
+              .map((row) => (
               <li key={row.key} className="yds-spick-p3-breakdown__row">
                 <span className="yds-spick-p3-breakdown__label">{row.label}</span>
                 <span className="yds-spick-p3-breakdown__value font-mono tabular-nums">

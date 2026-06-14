@@ -5,17 +5,18 @@ import YdsStockPickWhyCard from "./YdsStockPickWhyCard.jsx"
  * @param {{
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   loading?: boolean
+ *   limit?: number
  * }} props
  */
-export default function YdsStockPickTop10WhySection({ stocks, loading = false }) {
-  const top10 = getTop10Stocks(stocks)
+export default function YdsStockPickTop10WhySection({ stocks, loading = false, limit = 10 }) {
+  const top10 = getTop10Stocks(stocks).slice(0, limit)
 
   if (!top10.length && !loading) return null
 
   return (
     <section className="yds-spick-section yds-spick-section--why" aria-labelledby="spick-top10-why">
       <h2 id="spick-top10-why" className="yds-spick-section__title">
-        왜 이 종목인가? · TOP10
+        왜 이 종목인가? · TOP{limit}
       </h2>
       <p className="yds-spick-section__subtitle">상위 추천 종목만 산업·병목·실적·기술·액션 요약</p>
 

@@ -132,6 +132,8 @@ export const RATING_STARS = {
  *   v4Score: import("./ydsStockPickV4Scoring.js").V4StockScore
  *   technicalScore: import("./ydsStockTechnicalScore.js").TechnicalScoreResult
  *   opinion: import("./ydsStockPickOpinion.js").StockPickOpinion
+ *   pickMeta: import("./ydsStockPickBatchEnrich.js").StockPickMeta
+ *   scoreDeltas: ReturnType<typeof import("./ydsStockPickScoreHistory.js").getScoreDeltas>
  * }} StockPickView
  */
 

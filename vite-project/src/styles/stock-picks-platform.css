@@ -1533,6 +1533,71 @@
   }
 }
 
+.yds-spick-insight {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem 0.45rem;
+  margin: 0.2rem 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.yds-spick-insight__position { color: #cbd5e1; }
+.yds-spick-insight__sector-rank {
+  padding: 0.08rem 0.35rem;
+  border-radius: 0.25rem;
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+.yds-spick-insight__delta--up { color: #86efac; }
+.yds-spick-insight__delta--down { color: #fca5a5; }
+.yds-spick-insight__long-hold { color: #fbbf24; }
+
+.yds-spick-no-chase { margin: 0.2rem 0 0; padding: 0; list-style: none; }
+.yds-spick-no-chase__item { font-size: 0.6rem; font-weight: 600; color: #fca5a5; }
+
+.yds-spick-ux-status-wrap { display: flex; flex-direction: column; gap: 0.12rem; }
+
+.yds-spick-regime-banner {
+  margin: 0.35rem 0 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  background: rgba(30, 58, 138, 0.18);
+}
+.yds-spick-regime-banner__copy { margin: 0.25rem 0 0; font-size: 0.68rem; color: #94a3b8; }
+.yds-spick-regime-line { margin: 0 0 0.45rem; font-size: 0.72rem; font-weight: 600; color: #cbd5e1; }
+
+.yds-spick-fav-alerts {
+  margin: 0.35rem 0 0.55rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  background: rgba(120, 53, 15, 0.12);
+}
+.yds-spick-fav-alerts__title { margin: 0 0 0.3rem; font-size: 0.68rem; font-weight: 800; color: #fcd34d; }
+.yds-spick-fav-alerts__list { margin: 0; padding: 0; list-style: none; }
+.yds-spick-fav-alerts__link { color: #fde68a; text-decoration: none; font-size: 0.65rem; }
+
+.yds-spick-sector-list__sector-rank {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.yds-spick-v4-header__grade--q-aplus strong { color: #fde68a; }
+.yds-spick-v4-header__total--ref { font-size: 0.65rem; color: #64748b; }
+.yds-spick-v4-header__ref-note { font-weight: 500; color: #475569; }
+
+.yds-spick-why-card__penalty-title {
+  margin: 0 0 0.15rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #fca5a5;
+}
+
 .yds-spick-ranking {
   border-radius: 0.55rem;
   border: 1px solid rgba(148, 163, 184, 0.14);

@@ -127,6 +127,11 @@ export default function YdsStockPickSectorPanel({
               >
                 <span className="yds-spick-sector-list__name">
                   {stock.name}
+                  {stock.pickMeta?.sectorRank ? (
+                    <span className="yds-spick-sector-list__sector-rank">
+                      {stock.pickMeta.sectorRank.display}
+                    </span>
+                  ) : null}
                   {heldTickers.has(stock.ticker.toUpperCase()) ? (
                     <span className="yds-spick-sector-list__held">보유</span>
                   ) : null}

@@ -40,12 +40,24 @@ export default function YdsStockPickWhyCard({ stock, rank }) {
       </header>
 
       <YdsStockPickPhase3Breakdown
+        stock={stock}
         breakdown={stock.scoreBreakdown}
         v4={stock.v4Score}
         timing={stock.timingScore}
         variant="why"
         showDetails={false}
       />
+
+      {stock.pickMeta?.timingPenaltyReasons?.length ? (
+        <div className="yds-spick-why-card__penalty">
+          <p className="yds-spick-why-card__penalty-title">타이밍 감점</p>
+          <ul className="yds-spick-why-card__penalty-list">
+            {stock.pickMeta.timingPenaltyReasons.map((r) => (
+              <li key={r}>− {r}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <p className="yds-spick-why-card__lead">왜 이 종목인가?</p>
 

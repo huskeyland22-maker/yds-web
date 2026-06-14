@@ -8,13 +8,20 @@ import {
 } from "../../content/ydsStockPickModel.js"
 import { markFirstRender, recordSearchFilterMs } from "../../content/ydsStockPickPerf.js"
 import { recordRenderPhase } from "../../content/ydsStockPickRenderPerf.js"
+import {
+  getRegimeDisplayLimit,
+  getRegimeRecommendationLine,
+} from "../../content/ydsStockPickMarketRegime.js"
 import { filterStockPicksByQuery } from "../../content/ydsStockPickSearch.js"
+import { useStockPickFavoriteAlerts } from "../../hooks/useStockPickFavoriteAlerts.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
 import { useStockPickStatusChanges } from "../../hooks/useStockPickStatusChanges.js"
 import YdsStockPickScoreDebugPanel from "./YdsStockPickScoreDebugPanel.jsx"
+import YdsStockPickFavoriteAlerts from "./YdsStockPickFavoriteAlerts.jsx"
+import YdsStockPickMarketRegimeBanner from "./YdsStockPickMarketRegimeBanner.jsx"
 import YdsStockPickDebugBox from "./YdsStockPickDebugBox.jsx"
 import YdsStockPickLoadBanner from "./YdsStockPickLoadBanner.jsx"
 import YdsStockPickSearchBar from "./YdsStockPickSearchBar.jsx"
@@ -75,6 +82,7 @@ export default function YdsStockPickV1Hub() {
   }, [marketContext, loading, liveStocks])
 
   const {
+    favorites,
     favoritesOnly,
     setFavoritesOnly,
     isFavorite,
@@ -83,6 +91,16 @@ export default function YdsStockPickV1Hub() {
     favoriteCount,
   } = useStockPickFavorites()
 
+  const favoriteAlerts = useStockPickFavoriteAlerts(liveStocks, favorites)
+
+  const regimeLimit = useMemo(
+    () => getRegimeDisplayLimit(marketContext.macroId),
+    [marketContext.macroId],
+  )
+  const regimeLine = useMemo(
+    () => getRegimeRecommendationLine(marketContext),
+    [marketContext],
+  )
   const [countryId, setCountryId] = useState("US")
   const [sectorByCountry, setSectorByCountry] = useState(INITIAL_SECTOR)
   const [searchQuery, setSearchQuery] = useState("")
@@ -174,6 +192,12 @@ export default function YdsStockPickV1Hub() {
         </p>
       ) : null}
 
+      <YdsStockPickMarketRegimeBanner ctx={marketContext} displayLimit={regimeLimit} />
+      {regimeLine ? (
+        <p className="yds-spick-regime-line">{regimeLine}</p>
+      ) : null}
+      <YdsStockPickFavoriteAlerts alerts={favoriteAlerts} />
+
       <YdsStockPickTodaySignal
         stocks={liveStocks}
         loading={loading && !liveStocks.length}
@@ -239,6 +263,7 @@ export default function YdsStockPickV1Hub() {
                 countryId={country.id}
                 stocks={stocksByCountry[country.id]}
                 universeStocks={universeByCountry[country.id]}
+                regimeLimit={regimeLimit}
                 sectorId={sectorByCountry[country.id]}
                 onSectorChange={(id) => setSectorForCountry(country.id, id)}
                 isFavorite={isFavorite}

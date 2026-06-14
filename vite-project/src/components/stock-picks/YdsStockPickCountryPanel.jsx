@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import {
   filterBySector,
-  getTop5Stocks,
   STOCK_PICK_COUNTRIES,
 } from "../../content/ydsStockPickModel.js"
+import { getRegimeTopStocks } from "../../content/ydsStockPickMarketRegime.js"
 import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 import YdsStockPickTop3 from "./YdsStockPickTop3.jsx"
 import YdsStockPickTop10WhySection from "./YdsStockPickTop10WhySection.jsx"
@@ -24,6 +24,7 @@ import YdsStockPickCard from "./YdsStockPickCard.jsx"
  *   allSectionId?: string
  *   loading?: boolean
  *   universeStocks?: import("../../content/ydsStockPickModel.js").StockPickView[]
+ *   regimeLimit?: number
  * }} props
  */
 export default function YdsStockPickCountryPanel({
@@ -39,13 +40,22 @@ export default function YdsStockPickCountryPanel({
   allSectionId = "spick-all",
   loading = false,
   universeStocks = [],
+  regimeLimit = 5,
 }) {
   const countryMeta = STOCK_PICK_COUNTRIES.find((c) => c.id === countryId)
   const [showAll, setShowAll] = useState(false)
   const [showSecondary, setShowSecondary] = useState(false)
   const allCardsMountT0 = useRef(0)
 
-  const top5 = useMemo(() => getTop5Stocks(stocks), [stocks])
+  const topHero = useMemo(
+    () => getRegimeTopStocks(stocks, Math.min(regimeLimit, 5)),
+    [stocks, regimeLimit],
+  )
+
+  const regimeStocks = useMemo(
+    () => getRegimeTopStocks(stocks, regimeLimit),
+    [stocks, regimeLimit],
+  )
   const sectorStocks = useMemo(
     () => filterBySector(stocks, sectorId),
     [stocks, sectorId],
@@ -89,7 +99,7 @@ export default function YdsStockPickCountryPanel({
       ) : null}
 
       <YdsStockPickTop3
-        stocks={top5}
+        stocks={topHero}
         isFavorite={isFavorite}
         onToggleFavorite={onToggleFavorite}
         heldTickers={heldTickers}
@@ -98,7 +108,7 @@ export default function YdsStockPickCountryPanel({
       />
 
       {showSecondary ? (
-        <YdsStockPickTop10WhySection stocks={stocks} loading={loading} />
+        <YdsStockPickTop10WhySection stocks={regimeStocks} loading={loading} limit={Math.min(10, regimeLimit)} />
       ) : null}
 
       {showSecondary ? (

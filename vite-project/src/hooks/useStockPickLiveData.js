@@ -4,6 +4,7 @@ import {
   buildStockPickViews,
   filterRecommendableStockPicks,
 } from "../content/ydsStockPickModel.js"
+import { applyStockPickBatchMeta } from "../content/ydsStockPickBatchEnrich.js"
 import { computeStockPickLoadStats } from "../content/ydsStockPickLoadStats.js"
 import {
   computeStockPickPipelineDebug,
@@ -239,7 +240,8 @@ export function useStockPickLiveData(marketContext) {
     if (canPerf) recordRenderPhase("filter live", performance.now() - filterT0)
 
     const sortT0 = canPerf ? performance.now() : 0
-    const result = assignRanks(filtered)
+    const ranked = assignRanks(filtered)
+    const result = applyStockPickBatchMeta(ranked, allStocks)
     if (canPerf) {
       recordRenderPhase("sort", performance.now() - sortT0)
       if (result.length) measure("score calc", "score calc start")

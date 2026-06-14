@@ -51,13 +51,17 @@ export function buildStockPickOpinion(stock, sectorInfo = null) {
   const sectorLabel = stock.sectorLabel ?? sectorInfo?.label ?? ""
 
   const qualityLine = v4
-    ? `${qualityPhrase(v4.qualityGrade)} (${v4.qualityDisplay})`
+    ? v4.qualityDisplayGrade === "A+"
+      ? `기업품질 최상위 (${v4.qualityDisplay})`
+      : `${qualityPhrase(v4.qualityGrade)} (${v4.qualityDisplay})`
     : "기업품질 분석 중"
   const timingLine = v4
     ? `${timingPhrase(v4.timingGrade)} (${v4.timingDisplay})`
     : "타이밍 분석 중"
 
-  if (v4?.qualityGrade === "A" || breakdown?.performance >= 24) {
+  if (v4?.qualityDisplayGrade === "A+" || v4?.qualityGrade === "A") {
+    bullets.push("기업품질 최상위")
+  } else if (breakdown?.performance >= 24) {
     bullets.push("실적·펀더멘털 강세")
   } else if (breakdown?.performance >= 18) {
     bullets.push("실적 양호")

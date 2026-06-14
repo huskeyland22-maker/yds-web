@@ -8,6 +8,7 @@ import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLi
 import YdsStockPickTransparencyPanel from "../components/stock-picks/YdsStockPickTransparencyPanel.jsx"
 import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
 import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
+import YdsStockPickInsightStrip from "../components/stock-picks/YdsStockPickInsightStrip.jsx"
 import YdsStockPickOpinionBlock from "../components/stock-picks/YdsStockPickOpinionBlock.jsx"
 import YdsStockPickScoreDebugPanel from "../components/stock-picks/YdsStockPickScoreDebugPanel.jsx"
 import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
@@ -82,6 +83,8 @@ export default function StockPickDetailPage() {
         />
 
         <YdsStockPickOpinionBlock opinion={stock.opinion} variant="practical" />
+
+        <YdsStockPickInsightStrip stock={stock} variant="inline" />
 
         <details className="yds-spick-detail__scores" open>
           <summary className="yds-spick-detail__scores-summary">점수 구성</summary>

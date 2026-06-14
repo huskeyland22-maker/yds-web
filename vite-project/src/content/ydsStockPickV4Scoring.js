@@ -14,6 +14,18 @@ export const V4_TIMING_PENALTY_THRESHOLD = 10
 export const V4_TIMING_PENALTY_POINTS = 10
 export const V4_TOP5_MIN_TIMING = 5
 
+/** @typedef {'A+' | 'A' | 'B' | 'C' | 'D' | 'F'} QualityDisplayGrade */
+
+/** @param {number} quality @returns {QualityDisplayGrade} */
+export function qualityToDisplayGrade(quality) {
+  if (quality >= 70) return "A+"
+  if (quality >= 60) return "A"
+  if (quality >= 50) return "B"
+  if (quality >= 40) return "C"
+  if (quality >= 30) return "D"
+  return "F"
+}
+
 /** @param {number} quality @returns {ScoreLetterGrade} */
 export function qualityToGrade(quality) {
   if (quality >= 60) return "A"
@@ -64,6 +76,7 @@ export function isTop5Eligible(timing) {
  *   timing: number
  *   total: number
  *   qualityGrade: ScoreLetterGrade
+ *   qualityDisplayGrade: QualityDisplayGrade
  *   timingGrade: ScoreLetterGrade
  *   qualityDisplay: string
  *   timingDisplay: string
@@ -81,6 +94,7 @@ export function isTop5Eligible(timing) {
  */
 export function computeV4Score(quality, timing) {
   const qualityGrade = qualityToGrade(quality)
+  const qualityDisplayGrade = qualityToDisplayGrade(quality)
   const timingGrade = timingToGrade(timing)
   const recommendStatusId = V4_RECOMMEND_MATRIX[qualityGrade][timingGrade]
   const finalRankScore = computeFinalRankScore(quality, timing)
@@ -92,8 +106,9 @@ export function computeV4Score(quality, timing) {
     timing,
     total,
     qualityGrade,
+    qualityDisplayGrade,
     timingGrade,
-    qualityDisplay: `${qualityGrade} (${quality}/${PHASE3_QUALITY_MAX})`,
+    qualityDisplay: `${qualityDisplayGrade} (${quality}/${PHASE3_QUALITY_MAX})`,
     timingDisplay: `${timingGrade} (${timing}/${TIMING_SCORE_MAX})`,
     finalRankScore,
     top5Eligible,

@@ -26,6 +26,7 @@ export default function YdsStockPickActionBlock({ stock, variant = "card" }) {
     >
       {showStatus && showScore ? (
         <YdsStockPickPhase3Breakdown
+          stock={stock}
           breakdown={stock.scoreBreakdown}
           v4={stock.v4Score}
           timing={stock.timingScore}
