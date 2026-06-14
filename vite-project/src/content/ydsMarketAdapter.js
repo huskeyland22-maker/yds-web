@@ -10,6 +10,8 @@ import { resolveMarketStageSnapshot } from "./ydsMarketStageLabels.js"
 import { resolveMarketCycleStage } from "./ydsMarketCycleDisplay.js"
 import { resolveMarketState } from "./ydsStateEngine.js"
 import { resolveMomentumLayer } from "./ydsMomentumLayer.js"
+import { resolveMarketPosition } from "./ydsMarketPositionEngine.js"
+import { getMarketStatePickLimit } from "./ydsMarketStateCenter.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { clampScore } from "./ydsStockScoreEngine.js"
@@ -38,6 +40,10 @@ import { YDS_SCORE_WEIGHTS } from "./ydsStockScoreConfig.js"
  *   cycleEmoji: string
  *   marketStateId: string | null
  *   marketStateLabel: string | null
+ *   marketPositionId: string | null
+ *   marketPositionLabel: string | null
+ *   marketPositionEmoji: string | null
+ *   pickDisplayLimit: number
  *   contextLine: string
  * }} YdsMarketAdapterContext
  */
@@ -61,6 +67,10 @@ export const DEFAULT_MARKET_CONTEXT = {
   cycleEmoji: "🟡",
   marketStateId: null,
   marketStateLabel: null,
+  marketPositionId: null,
+  marketPositionLabel: null,
+  marketPositionEmoji: null,
+  pickDisplayLimit: 20,
   contextLine: "",
 }
 
@@ -93,6 +103,7 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
   const signal = resolveActionSignalView(panicData, historyRows)
   const state = resolveMarketState(panicData, historyRows, momentum)
   const cycle = resolveMarketCycleStage(panicData.fearGreed, panicData.bofa)
+  const marketPosition = resolveMarketPosition(panicData)
 
   const macroId = macro?.id ?? "neutral"
   const panicBandId = snapshot?.panic?.id ?? macroId
@@ -123,6 +134,10 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
     cycleEmoji: cycle?.emoji ?? "🟡",
     marketStateId: state?.id ?? null,
     marketStateLabel: state?.label ?? null,
+    marketPositionId: marketPosition?.id ?? null,
+    marketPositionLabel: marketPosition?.label ?? null,
+    marketPositionEmoji: marketPosition?.emoji ?? null,
+    pickDisplayLimit: getMarketStatePickLimit(marketPosition?.id),
     contextLine: signal?.contextLine ?? market?.hint ?? "",
   }
 }

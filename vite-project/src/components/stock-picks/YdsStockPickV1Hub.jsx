@@ -94,8 +94,8 @@ export default function YdsStockPickV1Hub() {
   const favoriteAlerts = useStockPickFavoriteAlerts(liveStocks, favorites)
 
   const regimeLimit = useMemo(
-    () => getRegimeDisplayLimit(marketContext.macroId),
-    [marketContext.macroId],
+    () => marketContext.pickDisplayLimit ?? getRegimeDisplayLimit(marketContext.marketPositionId),
+    [marketContext.pickDisplayLimit, marketContext.marketPositionId],
   )
   const regimeLine = useMemo(
     () => getRegimeRecommendationLine(marketContext),

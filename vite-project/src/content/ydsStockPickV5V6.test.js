@@ -46,10 +46,18 @@ describe("V5 sector ranks", () => {
 })
 
 describe("V6 market regime", () => {
-  it("limits display by macro state", () => {
-    expect(getRegimeDisplayLimit("overheated")).toBe(5)
-    expect(getRegimeDisplayLimit("dca")).toBe(50)
-    expect(getRegimeDisplayLimit("panicBuy")).toBe(Infinity)
+  it("limits display by market position (state-first)", () => {
+    expect(getRegimeDisplayLimit("overheat")).toBe(5)
+    expect(getRegimeDisplayLimit("boundary")).toBe(10)
+    expect(getRegimeDisplayLimit("adjustment")).toBe(20)
+    expect(getRegimeDisplayLimit("fear")).toBe(50)
+    expect(getRegimeDisplayLimit("panic")).toBe(Infinity)
+  })
+
+  it("limits display by macro state (legacy)", () => {
+    expect(getRegimeDisplayLimit("overheated", "macro")).toBe(5)
+    expect(getRegimeDisplayLimit("dca", "macro")).toBe(50)
+    expect(getRegimeDisplayLimit("panicBuy", "macro")).toBe(Infinity)
   })
 })
 
