@@ -4,6 +4,7 @@ import {
   buildStockPickTransparency,
   formatTransparencyPrice,
 } from "../../content/ydsStockPickTransparency.js"
+import YdsStockPickV7Signals from "./YdsStockPickV7Signals.jsx"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
 import YdsStockPickQualityTimingHeader from "./YdsStockPickQualityTimingHeader.jsx"
 import YdsStockPickInsightStrip from "./YdsStockPickInsightStrip.jsx"
@@ -88,6 +89,8 @@ export default function YdsStockPickCard({
 
       <Link to={to} className="yds-spick-card__link">
         <h3 className="yds-spick-card__name">{stock.name}</h3>
+
+        <YdsStockPickV7Signals stock={stock} variant={variant === "compact" ? "compact" : "default"} />
 
         <YdsStockPickThemeBadges themes={stock.investThemes ?? []} className="yds-spick-card__themes" />
 

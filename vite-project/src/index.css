@@ -26798,7 +26798,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-bottom: 0.45rem;
 }
 
-.yds-market-score-hero--state-first .yds-market-score-hero__philosophy {
+.yds-market-score-hero--state-first .yds-market-score-hero__philosophy,
+.yds-market-score-hero--v7 .yds-market-score-hero__philosophy {
   margin: 0;
   font-size: clamp(0.58rem, 1.6vw, 0.68rem);
   font-weight: 600;
@@ -26812,6 +26813,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.5rem;
 }
 
+.yds-market-score-hero--v7 .yds-market-score-hero__stack {
+  align-items: stretch;
+}
+
 .yds-market-state-primary {
   display: flex;
   flex-direction: column;
@@ -26820,6 +26825,37 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: rgba(15, 23, 42, 0.62);
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 0.6rem;
+}
+
+.yds-market-state-primary--v7 {
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem 0.85rem;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.55));
+  border-color: rgba(148, 163, 184, 0.22);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+}
+
+.yds-market-state-primary__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.yds-market-state-primary__title {
+  margin: 0;
+  font-size: clamp(0.62rem, 1.75vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+}
+
+.yds-market-state-primary__score {
+  margin: 0;
+  font-size: clamp(2.4rem, 8vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #f8fafc;
+  letter-spacing: -0.03em;
 }
 
 .yds-market-state-primary__zone-label {
@@ -26874,6 +26910,104 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+.yds-market-state-primary__pick-bridge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.65rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+}
+
+.yds-market-state-primary__pick-line {
+  margin: 0;
+  font-size: clamp(0.68rem, 1.9vw, 0.78rem);
+  color: #cbd5e1;
+}
+
+.yds-market-state-primary__pick-line strong {
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+.yds-market-state-primary__pick-link {
+  font-size: clamp(0.62rem, 1.75vw, 0.72rem);
+  font-weight: 600;
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+.yds-market-state-primary__pick-link:hover {
+  text-decoration: underline;
+}
+
+.yds-market-state-timeline {
+  margin: 0;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-state-timeline__label {
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.56rem, 1.55vw, 0.64rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-market-state-timeline__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yds-market-state-timeline__step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.yds-market-state-timeline__arrow {
+  font-size: 0.72rem;
+  line-height: 1;
+  color: #64748b;
+  padding-left: 0.15rem;
+}
+
+.yds-market-state-timeline__node {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+}
+
+.yds-market-state-timeline__date {
+  font-size: clamp(0.62rem, 1.75vw, 0.72rem);
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.yds-market-state-timeline__zone {
+  font-size: clamp(0.68rem, 1.9vw, 0.78rem);
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-market-state-timeline__step--current .yds-market-state-timeline__date {
+  color: #38bdf8;
+}
+
+.yds-market-state-timeline__step--current .yds-market-state-timeline__zone {
+  color: #f8fafc;
+}
+
 .yds-market-panic-secondary {
   display: flex;
   flex-direction: column;
@@ -26883,6 +27017,97 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   border: 1px dashed rgba(148, 163, 184, 0.18);
   border-radius: 0.55rem;
   opacity: 0.95;
+}
+
+.yds-market-panic-secondary:not(.yds-market-panic-secondary--v7) {
+  opacity: 0.95;
+}
+
+.yds-market-panic-secondary--v7 {
+  justify-content: center;
+  text-align: center;
+  min-height: 100%;
+  padding: 0.65rem 0.55rem;
+  gap: 0.25rem;
+}
+
+.yds-market-panic-secondary--v7 .yds-market-panic-secondary__badge {
+  align-self: center;
+}
+
+.yds-market-panic-secondary__title {
+  margin: 0;
+  font-size: clamp(0.58rem, 1.6vw, 0.66rem);
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-market-panic-secondary--v7 .yds-market-panic-secondary__score {
+  margin: 0;
+  font-size: clamp(1.6rem, 4.5vw, 2rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #cbd5e1;
+}
+
+.yds-market-panic-secondary--v7 .yds-market-panic-secondary__level {
+  margin: 0;
+  font-size: clamp(0.68rem, 1.9vw, 0.78rem);
+}
+
+.yds-market-panic-secondary--v7 .yds-market-panic-secondary__intensity {
+  margin: 0;
+  font-size: clamp(0.82rem, 2.2vw, 0.95rem);
+}
+
+.yds-spick-v7-signals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.35rem 0 0.25rem;
+}
+
+.yds-spick-v7-signals--compact {
+  margin: 0.25rem 0 0.15rem;
+  gap: 0.18rem;
+}
+
+.yds-spick-v7-signals__position {
+  font-size: clamp(0.64rem, 1.8vw, 0.74rem);
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.yds-spick-v7-signals__action {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.15rem 0.42rem;
+  border-radius: 999px;
+  font-size: clamp(0.62rem, 1.75vw, 0.72rem);
+  font-weight: 700;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.45);
+  color: #e2e8f0;
+}
+
+.yds-spick-v7-signals__action--entry {
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.yds-spick-v7-signals__action--wait {
+  border-color: rgba(234, 179, 8, 0.35);
+  background: rgba(234, 179, 8, 0.1);
+  color: #fde047;
+}
+
+.yds-spick-v7-signals__action--no-chase {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
 }
 
 .yds-market-panic-secondary__badge {
@@ -26987,6 +27212,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 @media (min-width: 768px) {
+  .yds-market-score-hero--v7 .yds-market-score-hero__stack {
+    display: grid;
+    grid-template-columns: minmax(0, 7.5fr) minmax(0, 2.5fr);
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+
   .yds-market-score-hero__stack {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
@@ -26995,12 +27227,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
   .yds-market-state-primary {
     grid-column: 1;
-    grid-row: 1 / span 2;
   }
 
   .yds-market-panic-secondary {
     grid-column: 2;
-    grid-row: 1;
   }
 }
 

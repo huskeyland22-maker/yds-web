@@ -25,6 +25,9 @@ export default function YdsMarketRecommendStrip({ className = "" }) {
   const limitLabel = Number.isFinite(marketContext.pickDisplayLimit)
     ? `TOP${marketContext.pickDisplayLimit}`
     : "전체"
+  const publicLabel = Number.isFinite(marketContext.pickDisplayLimit)
+    ? `${limitLabel} 공개`
+    : "전체 공개"
 
   if (!marketContext.ready) return null
 
@@ -38,7 +41,7 @@ export default function YdsMarketRecommendStrip({ className = "" }) {
           <h2 className="yds-market-recommend-strip__title">추천 종목</h2>
           <p className="yds-market-recommend-strip__sub">
             {marketContext.marketPositionEmoji} {marketContext.marketPositionLabel}구간 ·{" "}
-            {limitLabel} 기준
+            <strong>{publicLabel}</strong>
           </p>
         </div>
         <Link to="/stock-picks" className="yds-market-recommend-strip__link">
