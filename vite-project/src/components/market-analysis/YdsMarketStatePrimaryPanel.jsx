@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-import { Link } from "react-router-dom"
 import { MARKET_LABEL_MARKET_STATE } from "../../content/ydsMarketStageLabels.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
 import { buildMarketPositionTimeline } from "../../content/ydsMarketPositionTimeline.js"
@@ -25,9 +24,6 @@ export default function YdsMarketStatePrimaryPanel({
   const delta = prevScore != null ? view.positionScore - prevScore : 0
   const deltaSign = delta > 0 ? "▲" : delta < 0 ? "▼" : "•"
   const deltaText = `${deltaSign} ${delta >= 0 ? "+" : ""}${delta}`
-  const pickPublicLabel = Number.isFinite(view.pickLimit)
-    ? `${view.pickLimitLabel} 공개`
-    : "전체 공개"
 
   const card = (
     <div className="yds-market-state-primary yds-market-state-primary--v7">
@@ -47,25 +43,26 @@ export default function YdsMarketStatePrimaryPanel({
         </p>
       </div>
 
-      <article className="yds-market-state-primary__strategy" aria-label="현재 전략">
-        <p className="yds-market-state-primary__layer-tag">현재 전략</p>
-        <ul className="yds-market-state-primary__actions">
-          {view.actions.map((item) => (
-            <li key={item} className="yds-market-state-primary__action-item">
-              ✓ {item}
-            </li>
-          ))}
-        </ul>
-      </article>
+      <ul className="yds-market-state-primary__actions" aria-label="시장 상태 행동 가이드">
+        {view.actions.map((item) => (
+          <li key={item} className="yds-market-state-primary__action-item">
+            ✓ {item}
+          </li>
+        ))}
+      </ul>
 
-      <div className="yds-market-state-primary__pick-bridge">
-        <p className="yds-market-state-primary__pick-line">
-          {view.position.label}구간 · <strong>{pickPublicLabel}</strong>
+      <article className="yds-market-state-primary__strategy" aria-label="현재 시장 전략">
+        <p className="yds-market-state-primary__layer-tag">현재 시장 전략</p>
+        <p className="yds-market-state-primary__strategy-line">{view.strategyPhase}</p>
+        <p className="yds-market-state-primary__strategy-narrative">
+          {view.strategyNarrative.map((line, index) => (
+            <span key={line}>
+              {index > 0 ? <br /> : null}
+              {line}
+            </span>
+          ))}
         </p>
-        <Link to="/stock-picks" className="yds-market-state-primary__pick-link">
-          종목추천 보기 →
-        </Link>
-      </div>
+      </article>
     </div>
   )
 

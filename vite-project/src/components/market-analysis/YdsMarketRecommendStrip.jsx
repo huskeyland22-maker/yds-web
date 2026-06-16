@@ -45,7 +45,7 @@ export default function YdsMarketRecommendStrip({ className = "" }) {
           </p>
         </div>
         <Link to="/stock-picks" className="yds-market-recommend-strip__link">
-          전체 보기 →
+          전체 종목 보기 →
         </Link>
       </div>
 

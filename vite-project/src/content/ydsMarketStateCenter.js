@@ -18,6 +18,8 @@ import { getFinalScore } from "../utils/tradingScores.js"
  *   pickLimit: number
  *   pickLimitLabel: string
  *   headline: string
+ *   strategyPhase: string
+ *   strategyNarrative: string[]
  * }} MarketStateStrategyView
  */
 
@@ -29,34 +31,64 @@ export const MARKET_STATE_STRATEGY = {
     pickLimit: 5,
     pickLimitLabel: "TOP5",
     headline: "과열 구간 — 핵심 종목만 관찰",
+    strategyPhase: "현금 비중 확대 단계",
+    strategyNarrative: [
+      "과열 구간에서는 신규 추격보다",
+      "현금 비중을 늘리고",
+      "익절·리스크 점검에 집중하는 구간입니다.",
+    ],
   },
   boundary: {
     strategy: "비중 점검 · 신규 진입 축소",
-    actions: ["탐욕 확대 주의", "추격 자제", "현금 유지"],
+    actions: ["분할매도 검토", "추격 자제", "현금 유지"],
     pickLimit: 10,
     pickLimitLabel: "TOP10",
     headline: "경계 구간 — 선별적 관찰",
+    strategyPhase: "분할매도 검토 단계",
+    strategyNarrative: [
+      "경계 구간에서는 수익 구간 비중을",
+      "점검하고 분할 매도를 검토하며",
+      "신규 진입은 보수적으로 운용합니다.",
+    ],
   },
   adjustment: {
     strategy: "관심 종목 발굴",
-    actions: ["관심 종목 발굴", "현금 유지", "추격 금지"],
+    actions: ["관심종목 발굴", "현금 유지", "추격 금지"],
     pickLimit: 20,
     pickLimitLabel: "TOP20",
     headline: "조정 구간 — 유망 종목 탐색",
+    strategyPhase: "관심종목 발굴 단계",
+    strategyNarrative: [
+      "성급한 추격 매수보다",
+      "후보 종목을 관찰하며",
+      "기회를 기다리는 구간입니다.",
+    ],
   },
   fear: {
     strategy: "분할 준비 · 우량주 집중",
-    actions: ["분할 매수 준비", "우량주 집중", "소량 접근"],
+    actions: ["분할매수 시작", "우량주 집중", "소량 접근"],
     pickLimit: 50,
     pickLimitLabel: "TOP50",
     headline: "위축 구간 — 우량주 집중 매수",
+    strategyPhase: "분할매수 시작 단계",
+    strategyNarrative: [
+      "공포 심리 확대 구간에서는",
+      "우량주를 소량부터 분할 매수하며",
+      "변동성에 대비하는 구간입니다.",
+    ],
   },
   panic: {
     strategy: "공격적 종목 발굴",
-    actions: ["계획된 현금 투입", "우량주 집중", "분할 대응"],
+    actions: ["적극매수 검토", "우량주 집중", "분할 대응"],
     pickLimit: Infinity,
     pickLimitLabel: "전체",
     headline: "충격 구간 — 공격적 종목 발굴",
+    strategyPhase: "적극매수 검토 단계",
+    strategyNarrative: [
+      "극단적 위험회피 구간에서는",
+      "계획된 현금 투입과 함께",
+      "우량주 적극 매수를 검토하는 구간입니다.",
+    ],
   },
 }
 
@@ -111,6 +143,8 @@ export function resolveMarketStateCenterView(panicData) {
     strategy: strategyBlock.strategy,
     actions: strategyBlock.actions,
     headline: strategyBlock.headline,
+    strategyPhase: strategyBlock.strategyPhase,
+    strategyNarrative: strategyBlock.strategyNarrative,
     pickLimit: strategyBlock.pickLimit,
     pickLimitLabel: strategyBlock.pickLimitLabel,
     panicScore: panicView?.score ?? null,
