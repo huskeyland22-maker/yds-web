@@ -184,10 +184,10 @@ function buildVolatilitySignal(move) {
 
 /** @param {number | null} hy */
 function buildCreditSignal(hy) {
-  if (hy == null) return "신용 위험 중립"
-  if (hy < 4) return "신용 위험 양호"
-  if (hy < 5) return "신용 위험 보통"
-  return "신용 위험 경계"
+  if (hy == null) return "신용위험 중립"
+  if (hy < 4) return "신용위험 양호"
+  if (hy < 5) return "신용위험 보통"
+  return "신용위험 경계"
 }
 
 /**

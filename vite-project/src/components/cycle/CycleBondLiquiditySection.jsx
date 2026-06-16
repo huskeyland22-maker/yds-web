@@ -111,12 +111,15 @@ export default function CycleBondLiquiditySection({
             </div>
           </div>
 
-          <div className="liq-env-v3__signals" role="note" aria-label="유동성 해석">
-            <p className="m-0 liq-env-v3__signal">{card.styleSignal}</p>
-            <p className="m-0 liq-env-v3__signal">{card.ratesSignal}</p>
-            <p className="m-0 liq-env-v3__signal">{card.volatilitySignal}</p>
-            <p className="m-0 liq-env-v3__signal">{card.creditSignal}</p>
-          </div>
+          <ul className="liq-env-v3__signals" role="note" aria-label="유동성 해석">
+            {[card.styleSignal, card.ratesSignal, card.volatilitySignal, card.creditSignal].map(
+              (signal) => (
+                <li key={signal} className="liq-env-v3__signal">
+                  ✓ {signal}
+                </li>
+              ),
+            )}
+          </ul>
         </div>
       </div>
     </section>
