@@ -42,8 +42,6 @@ export default function CycleBondLiquiditySection({
     () => buildLiquidityEnvironmentCard(snapshot, panicData, fmtMetricValue),
     [snapshot, panicData],
   )
-  const verdictIcon =
-    card.verdict.tone === "favorable" ? "🟢" : card.verdict.tone === "neutral" ? "🟡" : "🔴"
 
   if (!enabled) return null
 
@@ -97,30 +95,28 @@ export default function CycleBondLiquiditySection({
 
         <div className="cycle-bond-panel__body cycle-bond-panel__body--compact liq-env-card__body">
           <div className="liq-env-v3__head">
-            <p className="m-0 liq-env-v3__title">
-              {verdictIcon} 유동성 환경 : {card.headline}
-            </p>
-            <span
-              className={[
-                "liq-env-card__verdict-pill",
-                `liq-env-card__verdict-pill--${card.verdict.tone}`,
-              ].join(" ")}
-            >
-              {card.verdict.label}
-            </span>
+            <p className="m-0 liq-env-v3__title">유동성 환경</p>
+            <div className="liq-env-v3__score-block">
+              <p className="m-0 liq-env-v3__score font-mono tabular-nums">
+                {card.score != null ? `${card.score}점` : loading ? "수집 중" : "—"}
+              </p>
+              <span
+                className={[
+                  "liq-env-card__verdict-pill",
+                  `liq-env-card__verdict-pill--${card.verdict.tone}`,
+                ].join(" ")}
+              >
+                {card.verdict.label}
+              </span>
+            </div>
           </div>
 
           <div className="liq-env-v3__signals" role="note" aria-label="유동성 해석">
-            <p className="m-0 liq-env-v3__signal liq-env-v3__signal--core">{card.summary}</p>
             <p className="m-0 liq-env-v3__signal">{card.styleSignal}</p>
             <p className="m-0 liq-env-v3__signal">{card.ratesSignal}</p>
             <p className="m-0 liq-env-v3__signal">{card.volatilitySignal}</p>
             <p className="m-0 liq-env-v3__signal">{card.creditSignal}</p>
           </div>
-
-          <p className="m-0 liq-env-v3__footnote font-mono tabular-nums">
-            유동성 점수 {card.score ?? (loading ? "수집 중" : "—")}
-          </p>
         </div>
       </div>
     </section>

@@ -19,17 +19,18 @@ export default function YdsMarketPanicSecondaryPanel({
   const card = (
     <div className="yds-market-panic-secondary yds-market-panic-secondary--v7">
       <p className="yds-market-panic-secondary__title">{MARKET_LABEL_PANIC_INTENSITY}</p>
-      <p className="yds-market-panic-secondary__score font-mono tabular-nums">
-        {view.panicScore}
-      </p>
-      <p className="yds-market-panic-secondary__level">
-        {view.panicEmoji !== "—" ? `${view.panicEmoji} ` : ""}
-        {view.panicLabel}
-      </p>
-      <p className="yds-market-panic-secondary__meter font-mono tabular-nums">{bar}</p>
-      <p className="yds-market-panic-secondary__intensity font-mono tabular-nums">
-        {view.buyIntensityPct}%
-      </p>
+      <div className="yds-market-panic-secondary__body">
+        <div className="yds-market-panic-secondary__core">
+          <p className="yds-market-panic-secondary__score font-mono tabular-nums">
+            {view.panicScore}
+          </p>
+          <p className="yds-market-panic-secondary__level">{view.panicLabel}</p>
+          <p className="yds-market-panic-secondary__meter font-mono tabular-nums">{bar}</p>
+        </div>
+        <p className="yds-market-panic-secondary__intensity font-mono tabular-nums">
+          {view.buyIntensityLabel}
+        </p>
+      </div>
     </div>
   )
 

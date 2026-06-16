@@ -53,11 +53,11 @@ export const MARKET_STATE_STRATEGY = {
   },
   adjustment: {
     strategy: "관심 종목 발굴",
-    actions: ["관심종목 발굴", "현금 유지", "추격 금지"],
+    actions: ["관심 종목 발굴", "현금 유지", "추격 금지"],
     pickLimit: 20,
     pickLimitLabel: "TOP20",
     headline: "조정 구간 — 유망 종목 탐색",
-    strategyPhase: "관심종목 발굴 단계",
+    strategyPhase: "관심 종목 발굴 단계",
     strategyNarrative: [
       "성급한 추격 매수보다",
       "후보 종목을 관찰하며",

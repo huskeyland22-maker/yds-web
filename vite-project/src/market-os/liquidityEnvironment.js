@@ -168,26 +168,26 @@ function buildLiquiditySummary(metrics, verdict) {
  * @param {number | null} real
  */
 function buildRatesSignal(us10, move, real) {
-  if (real != null && real >= 2.5) return "금리 환경      부담"
-  if (us10 != null && us10 >= 4.7 && move != null && move < 90) return "금리 환경      중립"
-  if (us10 != null && us10 <= 4.1) return "금리 환경      우호"
-  return "금리 환경      중립"
+  if (real != null && real >= 2.5) return "금리 부담"
+  if (us10 != null && us10 >= 4.7 && move != null && move < 90) return "금리 안정"
+  if (us10 != null && us10 <= 4.1) return "금리 우호"
+  return "금리 안정"
 }
 
 /** @param {number | null} move */
 function buildVolatilitySignal(move) {
-  if (move == null) return "채권 변동성    중립"
-  if (move < 90) return "채권 변동성    안정"
-  if (move < 110) return "채권 변동성    보통"
-  return "채권 변동성    불안"
+  if (move == null) return "채권 변동성 중립"
+  if (move < 90) return "채권 변동성 안정"
+  if (move < 110) return "채권 변동성 보통"
+  return "채권 변동성 불안"
 }
 
 /** @param {number | null} hy */
 function buildCreditSignal(hy) {
-  if (hy == null) return "신용 위험      중립"
-  if (hy < 4) return "신용 위험      양호"
-  if (hy < 5) return "신용 위험      보통"
-  return "신용 위험      경계"
+  if (hy == null) return "신용 위험 중립"
+  if (hy < 4) return "신용 위험 양호"
+  if (hy < 5) return "신용 위험 보통"
+  return "신용 위험 경계"
 }
 
 /**
