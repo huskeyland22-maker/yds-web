@@ -10,7 +10,6 @@ import { markFirstRender, recordSearchFilterMs } from "../../content/ydsStockPic
 import { recordRenderPhase } from "../../content/ydsStockPickRenderPerf.js"
 import {
   getRegimeDisplayLimit,
-  getRegimeRecommendationLine,
 } from "../../content/ydsStockPickMarketRegime.js"
 import { filterStockPicksByQuery } from "../../content/ydsStockPickSearch.js"
 import { useStockPickFavoriteAlerts } from "../../hooks/useStockPickFavoriteAlerts.js"
@@ -28,6 +27,7 @@ import YdsStockPickSearchBar from "./YdsStockPickSearchBar.jsx"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 import YdsStockPickTodaySignal from "./YdsStockPickTodaySignal.jsx"
+import { isDevMode } from "../../utils/devMode.js"
 
 const INITIAL_SECTOR = { US: "all", KR: "all" }
 const DUAL_LAYOUT_MQ = "(min-width: 1024px)"
@@ -50,6 +50,7 @@ function useDualCountryLayout() {
 }
 
 export default function YdsStockPickV1Hub() {
+  const showDebug = isDevMode()
   useEffect(() => {
     traceStockPickMount("YdsStockPickV1Hub", "mount")
     return () => traceStockPickMount("YdsStockPickV1Hub", "unmount")
@@ -96,10 +97,6 @@ export default function YdsStockPickV1Hub() {
   const regimeLimit = useMemo(
     () => marketContext.pickDisplayLimit ?? getRegimeDisplayLimit(marketContext.marketPositionId),
     [marketContext.pickDisplayLimit, marketContext.marketPositionId],
-  )
-  const regimeLine = useMemo(
-    () => getRegimeRecommendationLine(marketContext),
-    [marketContext],
   )
   const [countryId, setCountryId] = useState("US")
   const [sectorByCountry, setSectorByCountry] = useState(INITIAL_SECTOR)
@@ -172,9 +169,14 @@ export default function YdsStockPickV1Hub() {
 
   return (
     <div className="yds-spick-platform">
-      <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} />
-      <YdsStockPickScoreDebugPanel sample={scoreDebugSample} />
-      <YdsStockPickLoadBanner stats={loadStats} loading={loading && !liveStocks.length} />
+      {showDebug ? <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} /> : null}
+      {showDebug ? <YdsStockPickScoreDebugPanel sample={scoreDebugSample} /> : null}
+      <YdsStockPickLoadBanner
+        stats={loadStats}
+        lastSyncAt={lastSyncAt}
+        fromCache={fromCache}
+        loading={loading && !liveStocks.length}
+      />
       {refreshing ? (
         <p className="yds-spick-sync-note yds-spick-sync-note--refresh" role="status">
           백그라운드 갱신 중…
@@ -193,9 +195,6 @@ export default function YdsStockPickV1Hub() {
       ) : null}
 
       <YdsStockPickMarketRegimeBanner ctx={marketContext} displayLimit={regimeLimit} />
-      {regimeLine ? (
-        <p className="yds-spick-regime-line">{regimeLine}</p>
-      ) : null}
       <YdsStockPickFavoriteAlerts alerts={favoriteAlerts} />
 
       <YdsStockPickTodaySignal

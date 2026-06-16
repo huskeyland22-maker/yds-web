@@ -1,18 +1,15 @@
 import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 import YdsMarketStatePrimaryPanel from "./YdsMarketStatePrimaryPanel.jsx"
 import YdsMarketPanicSecondaryPanel from "./YdsMarketPanicSecondaryPanel.jsx"
-import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 
 /**
- * V7 Hero — 시장 상태(메인) → 전략/Driver → 패닉(보조) → 추천 종목
- * @param {{ panicData?: object | null; historyRows?: object[]; macroSnapshot?: import("../../macro-risk/engine.js").MacroRiskSnapshot | null; className?: string; showRecommend?: boolean }} props
+ * V8 Hero — 시장 상태(메인) + 패닉 강도(보조)
+ * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
  */
 export default function YdsMarketScoreHero({
   panicData = null,
   historyRows = [],
-  macroSnapshot = null,
   className = "",
-  showRecommend = true,
 }) {
   return (
     <section
@@ -34,18 +31,9 @@ export default function YdsMarketScoreHero({
       </div>
 
       <div className="yds-market-score-hero__stack yds-market-desk__slot yds-market-desk__slot--scores">
-        <YdsMarketStatePrimaryPanel
-          embedded
-          panicData={panicData}
-          historyRows={historyRows}
-          snapshot={macroSnapshot}
-        />
+        <YdsMarketStatePrimaryPanel embedded panicData={panicData} historyRows={historyRows} />
         <YdsMarketPanicSecondaryPanel embedded panicData={panicData} />
       </div>
-
-      {showRecommend ? (
-        <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
-      ) : null}
     </section>
   )
 }

@@ -1,16 +1,16 @@
 /**
  * @param {{
  *   timing?: import("../../content/ydsStockPickTimingScore.js").TimingScoreResult | null
+ *   positionLabel?: string | null
  *   variant?: 'detail' | 'compact'
  * }} props
  */
 export default function YdsStockPickTimingChecklist({
   timing = null,
+  positionLabel = null,
   variant = "detail",
 }) {
   if (!timing?.checks?.length) return null
-
-  const visibleChecks = timing.checks.filter((c) => c.id !== "rsi" || !c.pass || c.id === "rsi")
 
   return (
     <div
@@ -22,7 +22,7 @@ export default function YdsStockPickTimingChecklist({
         .join(" ")}
     >
       <p className="yds-spick-timing-check__title font-mono tabular-nums">
-        타이밍 <strong>{timing.score}</strong>/{timing.max}
+        기술적 위치 <strong>{timing.score}</strong>/{timing.max}
       </p>
       <ul className="yds-spick-timing-check__list">
         {timing.checks.map((item) => (
@@ -42,6 +42,7 @@ export default function YdsStockPickTimingChecklist({
           </li>
         ))}
       </ul>
+      {positionLabel ? <p className="yds-spick-timing-check__position">현재 : {positionLabel}</p> : null}
       {timing.rsiPenalty > 0 ? (
         <p className="yds-spick-timing-check__penalty font-mono tabular-nums">
           RSI 과열 감점 −{timing.rsiPenalty}

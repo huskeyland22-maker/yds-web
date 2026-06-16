@@ -39,7 +39,11 @@ export default function YdsStockPickPhase3Breakdown({
       />
 
       {timing ? (
-        <YdsStockPickTimingChecklist timing={timing} variant={variant === "detail" ? "detail" : "compact"} />
+        <YdsStockPickTimingChecklist
+          timing={timing}
+          positionLabel={stock?.pickMeta?.pricePosition?.label ?? null}
+          variant={variant === "detail" ? "detail" : "compact"}
+        />
       ) : null}
 
       {showDetails && breakdown?.rows?.length ? (

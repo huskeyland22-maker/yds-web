@@ -47,6 +47,7 @@ import NotFoundPage from "./pages/NotFoundPage.jsx"
 import RecommendationHistoryPage from "./pages/RecommendationHistoryPage.jsx"
 import DebugDataPage from "./pages/DebugDataPage.jsx"
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx"
+import AdminStockPickDebugPage from "./pages/AdminStockPickDebugPage.jsx"
 import HomeV5PreviewPage from "./pages/HomeV5PreviewPage.jsx"
 import HomeV5StrategyValidationPage from "./pages/HomeV5StrategyValidationPage.jsx"
 import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
@@ -1522,6 +1523,18 @@ function App() {
                 <SectionErrorBoundary label="운영자 대시보드">
                   <AdminDashboardPage />
                 </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/debug"
+              element={
+                isDevMode() ? (
+                  <SectionErrorBoundary label="종목추천 디버그">
+                    <AdminStockPickDebugPage />
+                  </SectionErrorBoundary>
+                ) : (
+                  <Navigate to="/admin" replace />
+                )
               }
             />
             <Route

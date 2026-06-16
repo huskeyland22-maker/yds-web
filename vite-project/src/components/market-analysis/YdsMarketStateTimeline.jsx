@@ -29,7 +29,8 @@ export default function YdsMarketStateTimeline({ steps, className = "" }) {
             ) : null}
             <span className="yds-market-state-timeline__node">
               <span className="yds-market-state-timeline__date font-mono tabular-nums">
-                {step.isCurrent ? "현재" : step.dateShort}
+                {step.dateShort}
+                {step.isCurrent ? <em className="yds-market-state-timeline__current">현재</em> : null}
               </span>
               <span className="yds-market-state-timeline__zone">
                 {step.emoji} {step.label} {step.phase}
@@ -38,6 +39,9 @@ export default function YdsMarketStateTimeline({ steps, className = "" }) {
                 </span>
               </span>
             </span>
+            <p className="yds-market-state-timeline__strategy">
+              {step.strategy} · {step.pickLabel}
+            </p>
           </li>
         ))}
       </ol>

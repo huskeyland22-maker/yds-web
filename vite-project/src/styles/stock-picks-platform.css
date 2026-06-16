@@ -1494,6 +1494,13 @@
   color: #fbbf24;
 }
 
+.yds-spick-timing-check__position {
+  margin: 0.3rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
 .yds-spick-opinion--practical {
   border-color: rgba(251, 191, 36, 0.28);
   background: rgba(120, 53, 15, 0.12);

@@ -5,13 +5,8 @@ import { useStockPickDetailLive } from "../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
 import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLine.jsx"
-import YdsStockPickTransparencyPanel from "../components/stock-picks/YdsStockPickTransparencyPanel.jsx"
-import YdsStockPickActionBlock from "../components/stock-picks/YdsStockPickActionBlock.jsx"
-import YdsStockPickReasons from "../components/stock-picks/YdsStockPickReasons.jsx"
-import YdsStockPickInsightStrip from "../components/stock-picks/YdsStockPickInsightStrip.jsx"
 import YdsStockPickOpinionBlock from "../components/stock-picks/YdsStockPickOpinionBlock.jsx"
-import YdsStockPickScoreDebugPanel from "../components/stock-picks/YdsStockPickScoreDebugPanel.jsx"
-import YdsStockScoreBreakdown from "../components/stock-picks/YdsStockScoreBreakdown.jsx"
+import YdsStockPickPhase3Breakdown from "../components/stock-picks/YdsStockPickPhase3Breakdown.jsx"
 import "../styles/stock-picks-platform.css"
 
 export default function StockPickDetailPage() {
@@ -67,6 +62,12 @@ export default function StockPickDetailPage() {
 
         <p className="yds-spick-detail__ticker font-mono tabular-nums">
           {stock.ticker}
+          {stock.stockStatus ? (
+            <span className="yds-spick-detail__country">
+              {" "}
+              · {stock.stockStatus.emoji} {stock.stockStatus.label}
+            </span>
+          ) : null}
           {countryMeta ? (
             <span className="yds-spick-detail__country">
               {" "}
@@ -75,40 +76,16 @@ export default function StockPickDetailPage() {
           ) : null}
         </p>
 
-        <YdsStockPickTransparencyPanel stock={stock} variant="detail" />
-        <YdsStockPickActionBlock stock={stock} variant="detail" />
-        <YdsStockPickReasons
-          reasons={stock.recommendReasonsDetail ?? stock.recommendReasons}
+        <YdsStockPickPhase3Breakdown
+          stock={stock}
+          breakdown={stock.scoreBreakdown}
+          v4={stock.v4Score}
+          timing={stock.timingScore}
           variant="detail"
+          showDetails={false}
         />
 
         <YdsStockPickOpinionBlock opinion={stock.opinion} variant="practical" />
-
-        <YdsStockPickInsightStrip stock={stock} variant="inline" />
-
-        <details className="yds-spick-detail__scores" open>
-          <summary className="yds-spick-detail__scores-summary">점수 구성</summary>
-          <YdsStockScoreBreakdown
-            scores={stock.scores}
-            rows={stock.scoreRows}
-            breakdown={stock.scoreBreakdown}
-            v4={stock.v4Score}
-            timing={stock.timingScore}
-            variant="detail"
-          />
-        </details>
-
-        <YdsStockPickScoreDebugPanel sample={stock} />
-
-        <p className="yds-spick-detail__eval-label">한줄 평가</p>
-        <p className="yds-spick-detail__comment">{stock.comment}</p>
-
-        <p className="yds-spick-detail__schema-note">
-          추세·거래량·위치는
-          실시간 시세 · 시장 적합도는
-          {stock.marketFitSource === "adapter" ? " 시장분석 Adapter 자동" : " 수동값"}
-          {marketContext.ready ? ` (${marketContext.strategyLabel})` : ""}
-        </p>
       </header>
     </div>
   )

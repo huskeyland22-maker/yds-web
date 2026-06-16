@@ -8,6 +8,8 @@ export default function YdsStockPickOpinionBlock({ opinion = null, variant = "de
   if (!opinion) return null
 
   const isPractical = variant === "detail" || variant === "practical"
+  const practicalBullets = isPractical ? opinion.bullets.slice(0, 1) : opinion.bullets
+  const stockHeadline = String(opinion.headline ?? "").replace(/^\[(.*)\]$/, "$1")
 
   return (
     <section
@@ -18,20 +20,20 @@ export default function YdsStockPickOpinionBlock({ opinion = null, variant = "de
       ]
         .filter(Boolean)
         .join(" ")}
-      aria-label="YDS 실전 의견"
+      aria-label="YDS 투자의견"
     >
       <h3 className="yds-spick-opinion__title">
-        {isPractical ? "YDS 실전 의견" : "YDS 투자 의견"}
+        YDS 투자의견
       </h3>
-      <p className="yds-spick-opinion__headline">{opinion.headline}</p>
+      <p className="yds-spick-opinion__headline">{stockHeadline || opinion.headline}</p>
 
       {isPractical && opinion.qualityLine ? (
         <p className="yds-spick-opinion__quality">{opinion.qualityLine}</p>
       ) : null}
 
-      {opinion.bullets.length ? (
+      {practicalBullets.length ? (
         <ul className="yds-spick-opinion__bullets">
-          {opinion.bullets.map((line) => (
+          {practicalBullets.map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
@@ -41,7 +43,7 @@ export default function YdsStockPickOpinionBlock({ opinion = null, variant = "de
         <p className="yds-spick-opinion__timing">{opinion.timingLine}</p>
       ) : null}
 
-      {opinion.summary || opinion.action ? (
+      {!isPractical && (opinion.summary || opinion.action) ? (
         <p className="yds-spick-opinion__action">{opinion.summary || opinion.action}</p>
       ) : null}
 

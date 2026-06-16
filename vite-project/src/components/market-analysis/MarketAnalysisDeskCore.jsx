@@ -3,10 +3,12 @@ import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
+import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
-import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
+import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
+import { buildMarketPositionTimeline } from "../../content/ydsMarketPositionTimeline.js"
 import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 
 /**
@@ -18,6 +20,7 @@ import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
  */
 export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
+  const cycleTimeline = useMemo(() => buildMarketPositionTimeline(safeHistory, 5), [safeHistory])
 
   const cycleDataSource = useMemo(() => {
     if (panicData?.__fromHub) return "Panic Hub"
@@ -58,25 +61,24 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
           historyRows={safeHistory}
-          macroSnapshot={bondSnapshot.snapshot}
         />
+
+        <section
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--cycle"
+          aria-labelledby="market-block-cycle"
+        >
+          <h2 id="market-block-cycle" className="yds-market-desk__block-label">
+            시장 사이클
+          </h2>
+          <YdsMarketStateTimeline steps={cycleTimeline} className="yds-market-desk__cycle-timeline" />
+        </section>
+
+        <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
 
         <YdsMarketTrendSection
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--trend"
           historyRows={safeHistory}
         />
-
-        <section
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--timeline"
-          aria-labelledby="market-block-timeline"
-        >
-          <YdsMarketTimelineSection
-            variant="stream"
-            collapsedVisible={5}
-            panicData={panicData}
-            historyRows={safeHistory}
-          />
-        </section>
 
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"

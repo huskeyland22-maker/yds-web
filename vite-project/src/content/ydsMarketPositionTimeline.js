@@ -8,6 +8,7 @@ import {
   MARKET_POSITION_STAGES,
   resolveMarketPositionId,
 } from "./ydsMarketPositionEngine.js"
+import { MARKET_STATE_STRATEGY } from "./ydsMarketStateCenter.js"
 
 /** @typedef {import("./ydsMarketPositionEngine.js").MarketPositionId} MarketPositionId */
 
@@ -20,6 +21,8 @@ import {
  *   emoji: string
  *   score: number
  *   phase: '진입' | '안정화' | '회복중' | '약화'
+ *   strategy: string
+ *   pickLabel: string
  *   isCurrent: boolean
  * }} MarketPositionTimelineStep
  */
@@ -41,10 +44,13 @@ function formatMmDd(dateStr) {
 /** @param {MarketPositionId} id */
 function stageMeta(id) {
   const stage = MARKET_POSITION_STAGES.find((s) => s.id === id)
+  const strategy = MARKET_STATE_STRATEGY[id] ?? MARKET_STATE_STRATEGY.adjustment
   return {
     label: stage?.label ?? id,
     emoji: stage?.emoji ?? "—",
     color: stage?.color ?? "#94a3b8",
+    strategy: strategy.strategy,
+    pickLabel: Number.isFinite(strategy.pickLimit) ? `${strategy.pickLimitLabel} 공개` : "전체 공개",
   }
 }
 
@@ -103,6 +109,8 @@ export function buildMarketPositionTimeline(historyRows, maxSteps = 5) {
         emoji: meta.emoji,
         score,
         phase: "진입",
+        strategy: meta.strategy,
+        pickLabel: meta.pickLabel,
         isCurrent: false,
       })
       prevId = positionId
@@ -125,6 +133,8 @@ export function buildMarketPositionTimeline(historyRows, maxSteps = 5) {
         emoji: meta.emoji,
         score,
         phase: resolvePhase(positionId, delta),
+        strategy: meta.strategy,
+        pickLabel: meta.pickLabel,
         isCurrent: false,
       })
       prevScore = score
@@ -147,6 +157,8 @@ export function buildMarketPositionTimeline(historyRows, maxSteps = 5) {
       emoji: meta.emoji,
       score: currentScore,
       phase: "안정화",
+      strategy: meta.strategy,
+      pickLabel: meta.pickLabel,
       isCurrent: false,
     })
   }

@@ -13,19 +13,21 @@ export default function YdsMarketPanicSecondaryPanel({
 }) {
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
   if (!view || view.panicScore == null) return null
+  const filled = Math.max(0, Math.min(10, Math.round((view.buyIntensityPct ?? 0) / 10)))
+  const bar = `${"■".repeat(filled)}${"□".repeat(10 - filled)}`
 
   const card = (
     <div className="yds-market-panic-secondary yds-market-panic-secondary--v7">
-      <p className="yds-market-panic-secondary__badge">매수 강도</p>
       <p className="yds-market-panic-secondary__title">{MARKET_LABEL_PANIC_INTENSITY}</p>
       <p className="yds-market-panic-secondary__score font-mono tabular-nums">
         {view.panicScore}
       </p>
       <p className="yds-market-panic-secondary__level">
-        {view.panicEmoji} {view.panicLabel}
+        {view.panicLabel}
       </p>
+      <p className="yds-market-panic-secondary__meter font-mono tabular-nums">{bar}</p>
       <p className="yds-market-panic-secondary__intensity font-mono tabular-nums">
-        {view.buyIntensityLabel}
+        {view.buyIntensityPct}%
       </p>
     </div>
   )
