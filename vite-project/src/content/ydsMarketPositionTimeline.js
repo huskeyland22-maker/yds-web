@@ -1,8 +1,10 @@
 /**
- * V7 — 시장 상태 타임라인 (CNN·VIX·BofA → 5구간 전환)
+ * V7 — 시장 상태 이벤트 타임라인
+ * 최근 4~5개 이벤트(진입/안정화/회복중) + 현재 상태 포함
  */
 
 import {
+  computeMarketPositionScore,
   MARKET_POSITION_STAGES,
   resolveMarketPositionId,
 } from "./ydsMarketPositionEngine.js"
@@ -16,6 +18,8 @@ import {
  *   positionId: MarketPositionId
  *   label: string
  *   emoji: string
+ *   score: number
+ *   phase: '진입' | '안정화' | '회복중' | '약화'
  *   isCurrent: boolean
  * }} MarketPositionTimelineStep
  */
@@ -46,10 +50,26 @@ function stageMeta(id) {
 
 /**
  * @param {object} row
- * @returns {MarketPositionId}
  */
-function positionFromRow(row) {
-  return resolveMarketPositionId(toNum(row.fearGreed), toNum(row.vix), toNum(row.bofa))
+function rowPositionState(row) {
+  const cnn = toNum(row?.fearGreed)
+  const vix = toNum(row?.vix)
+  const bofa = toNum(row?.bofa)
+  const positionId = resolveMarketPositionId(cnn, vix, bofa)
+  const score = computeMarketPositionScore(cnn, vix, bofa, positionId)
+  return { positionId, score }
+}
+
+/**
+ * @param {MarketPositionId} id
+ * @param {number} delta
+ * @returns {'안정화' | '회복중' | '약화'}
+ */
+function resolvePhase(id, delta) {
+  if (Math.abs(delta) <= 2) return "안정화"
+  const recoveryFavored = id === "panic" || id === "fear" || id === "adjustment"
+  if (recoveryFavored) return delta >= 0 ? "회복중" : "약화"
+  return delta >= 0 ? "약화" : "회복중"
 }
 
 /**
@@ -57,7 +77,7 @@ function positionFromRow(row) {
  * @param {number} [maxSteps]
  * @returns {MarketPositionTimelineStep[]}
  */
-export function buildMarketPositionTimeline(historyRows, maxSteps = 4) {
+export function buildMarketPositionTimeline(historyRows, maxSteps = 5) {
   if (!Array.isArray(historyRows) || historyRows.length < 1) return []
 
   const sorted = [...historyRows]
@@ -65,28 +85,72 @@ export function buildMarketPositionTimeline(historyRows, maxSteps = 4) {
     .sort((a, b) => String(a.date).localeCompare(String(b.date)))
 
   /** @type {MarketPositionTimelineStep[]} */
-  const transitions = []
-  /** @type {MarketPositionId | null} */
+  const events = []
   let prevId = null
+  let prevScore = null
 
   for (const row of sorted) {
-    const positionId = positionFromRow(row)
-    if (positionId === prevId) continue
-
+    const date = String(row.date).slice(0, 10)
+    const { positionId, score } = rowPositionState(row)
     const meta = stageMeta(positionId)
-    transitions.push({
-      date: String(row.date).slice(0, 10),
-      dateShort: formatMmDd(String(row.date)),
-      positionId,
-      label: meta.label,
-      emoji: meta.emoji,
-      isCurrent: false,
-    })
-    prevId = positionId
+
+    if (prevId == null || positionId !== prevId) {
+      events.push({
+        date,
+        dateShort: formatMmDd(date),
+        positionId,
+        label: meta.label,
+        emoji: meta.emoji,
+        score,
+        phase: "진입",
+        isCurrent: false,
+      })
+      prevId = positionId
+      prevScore = score
+      continue
+    }
+
+    if (prevScore == null) {
+      prevScore = score
+      continue
+    }
+
+    const delta = score - prevScore
+    if (Math.abs(delta) >= 3) {
+      events.push({
+        date,
+        dateShort: formatMmDd(date),
+        positionId,
+        label: meta.label,
+        emoji: meta.emoji,
+        score,
+        phase: resolvePhase(positionId, delta),
+        isCurrent: false,
+      })
+      prevScore = score
+    }
   }
 
-  if (!transitions.length) return []
+  if (!events.length) return []
 
-  transitions[transitions.length - 1].isCurrent = true
-  return transitions.slice(-maxSteps)
+  const lastEvent = events[events.length - 1]
+  const lastRow = sorted[sorted.length - 1]
+  const { positionId: currentId, score: currentScore } = rowPositionState(lastRow)
+
+  if (lastEvent.date !== String(lastRow.date).slice(0, 10) || lastEvent.positionId !== currentId) {
+    const meta = stageMeta(currentId)
+    events.push({
+      date: String(lastRow.date).slice(0, 10),
+      dateShort: formatMmDd(String(lastRow.date)),
+      positionId: currentId,
+      label: meta.label,
+      emoji: meta.emoji,
+      score: currentScore,
+      phase: "안정화",
+      isCurrent: false,
+    })
+  }
+
+  events[events.length - 1].isCurrent = true
+  return events.slice(-Math.max(4, Math.min(5, maxSteps)))
 }

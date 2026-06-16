@@ -27000,12 +27000,70 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #e2e8f0;
 }
 
+.yds-market-state-timeline__score {
+  margin-left: 0.2rem;
+  color: #94a3b8;
+}
+
 .yds-market-state-timeline__step--current .yds-market-state-timeline__date {
   color: #38bdf8;
 }
 
 .yds-market-state-timeline__step--current .yds-market-state-timeline__zone {
   color: #f8fafc;
+}
+
+.liq-env-v2__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.liq-env-v2__score-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.liq-env-v2__score-label {
+  font-size: 0.62rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.liq-env-v2__score {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #f8fafc;
+  font-weight: 800;
+}
+
+.liq-env-v2__metrics {
+  margin-top: 0.4rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.6rem;
+}
+
+.liq-env-v2__metric {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.45rem;
+  padding: 0.28rem 0.38rem;
+  background: rgba(15, 23, 42, 0.34);
+}
+
+.liq-env-v2__metric-label {
+  font-size: 0.56rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.liq-env-v2__metric-value {
+  margin-top: 0.08rem;
+  font-size: 0.72rem;
+  color: #e2e8f0;
+  font-weight: 700;
 }
 
 .yds-market-panic-secondary {

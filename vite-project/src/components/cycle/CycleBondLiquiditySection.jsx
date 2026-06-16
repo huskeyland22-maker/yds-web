@@ -18,51 +18,17 @@ function fmtMetricValue(key, n, fmt = "rate") {
 
 /**
  * @param {{
- *   label: string
- *   side: import("../../market-os/liquidityEnvironment.js").LiquidityMetricSide | null
- *   align: "left" | "right"
+ *   metric: import("../../market-os/liquidityEnvironment.js").LiquidityMetricV2
  *   loading?: boolean
  * }} props
  */
-function LiquiditySideMetric({ label, side, align, loading = false }) {
-  const alignClass =
-    align === "left" ? "liq-env-card__metric--left" : "liq-env-card__metric--right"
-
+function LiquidityMetricItem({ metric, loading = false }) {
   return (
-    <div className={["liq-env-card__metric", alignClass].join(" ")}>
-      <p className="m-0 liq-env-card__metric-label">{label}</p>
-      {side ? (
-        <div className="liq-env-card__metric-body">
-          <span
-            className={[
-              "liq-env-card__metric-value font-mono tabular-nums",
-              side.stale ? "liq-env-card__metric-value--stale" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {side.display}
-          </span>
-          {side.arrow ? (
-            <span
-              className={[
-                "liq-env-card__metric-arrow",
-                side.arrow === "↑" ? "liq-env-card__metric-arrow--up" : "",
-                side.arrow === "↓" ? "liq-env-card__metric-arrow--down" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              aria-hidden
-            >
-              {side.arrow}
-            </span>
-          ) : null}
-        </div>
-      ) : (
-        <p className="m-0 liq-env-card__metric-placeholder" role="status">
-          {loading ? "수집 중" : "—"}
-        </p>
-      )}
+    <div className="liq-env-v2__metric">
+      <p className="m-0 liq-env-v2__metric-label">{metric.label}</p>
+      <p className="m-0 liq-env-v2__metric-value font-mono tabular-nums">
+        {metric.value == null && loading ? "수집 중" : metric.display}
+      </p>
     </div>
   )
 }
@@ -90,8 +56,8 @@ export default function CycleBondLiquiditySection({
   const marketUpdateTime = useMemo(() => resolveMarketUpdateTime(panicData), [panicData])
 
   const card = useMemo(
-    () => buildLiquidityEnvironmentCard(snapshot, panicData?.move, fmtMetricValue),
-    [snapshot, panicData?.move],
+    () => buildLiquidityEnvironmentCard(snapshot, panicData, fmtMetricValue),
+    [snapshot, panicData],
   )
 
   if (!enabled) return null
@@ -145,21 +111,25 @@ export default function CycleBondLiquiditySection({
         )}
 
         <div className="cycle-bond-panel__body cycle-bond-panel__body--compact liq-env-card__body">
-          <div className="liq-env-card__row">
-            <LiquiditySideMetric label="DXY" side={card.dxy} align="left" loading={loading} />
-
-            <div className="liq-env-card__verdict" role="status">
-              <span
-                className={[
-                  "liq-env-card__verdict-pill",
-                  `liq-env-card__verdict-pill--${card.verdict.tone}`,
-                ].join(" ")}
-              >
-                {card.verdict.label}
-              </span>
+          <div className="liq-env-v2__head">
+            <div className="liq-env-v2__score-wrap">
+              <p className="m-0 liq-env-v2__score-label">유동성 점수</p>
+              <p className="m-0 liq-env-v2__score font-mono tabular-nums">{card.score ?? "—"}</p>
             </div>
+            <span
+              className={[
+                "liq-env-card__verdict-pill",
+                `liq-env-card__verdict-pill--${card.verdict.tone}`,
+              ].join(" ")}
+            >
+              {card.verdict.label}
+            </span>
+          </div>
 
-            <LiquiditySideMetric label="MOVE" side={card.move} align="right" loading={loading} />
+          <div className="liq-env-v2__metrics">
+            {card.metrics.map((metric) => (
+              <LiquidityMetricItem key={metric.id} metric={metric} loading={loading} />
+            ))}
           </div>
 
           <p className="m-0 liq-env-card__summary" role="note">

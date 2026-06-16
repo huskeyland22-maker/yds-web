@@ -1,9 +1,9 @@
 {
-  "buildId": "a2cc9e9-1781423749500",
-  "gitCommit": "a2cc9e9",
-  "version": "v2026.06.14.004",
-  "timestamp": 1781423749500,
-  "builtAt": "2026-06-14T07:55:49.415Z",
-  "cacheId": "app-v20260614-004",
-  "swWorkboxCacheId": "yds-pwa-a2cc9e9-1781423749500"
+  "buildId": "bdfa2eb-1781600244366",
+  "gitCommit": "bdfa2eb",
+  "version": "v2026.06.16.002",
+  "timestamp": 1781600244366,
+  "builtAt": "2026-06-16T08:57:24.290Z",
+  "cacheId": "app-v20260616-002",
+  "swWorkboxCacheId": "yds-pwa-bdfa2eb-1781600244366"
 }

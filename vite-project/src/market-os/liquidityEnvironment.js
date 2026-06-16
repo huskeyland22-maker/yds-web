@@ -1,50 +1,44 @@
 /**
- * 유동성 환경 카드 — DXY · MOVE 기반 판정 (채권 지표 UI와 분리)
+ * 유동성 환경 V2 — 점수 기반 보조 필터
+ * 10Y(40%) + Real Yield(30%) + HY OAS(20%) + MOVE(10%)
  */
 
-import { getBondLiquiditySpotCache } from "../macro-risk/bondLiquiditySpotCache.js"
-
-/** @typedef {'down'|'flat'|'up'|'sharp_up'} DxyTrend */
-/** @typedef {'stable'|'up'|'sharp_up'|'down'} MoveTrend */
-/** @typedef {'favorable'|'neutral'|'tightening'|'alert'} LiquidityVerdictId */
-
-const STALE_SUFFIX = "(최근 저장값)"
-
-const DXY_UP_PCT = 0.15
-const DXY_SHARP_PCT = 0.5
-const DXY_DOWN_PCT = -0.15
-
-const MOVE_STABLE_MAX = 109
-const MOVE_UP_MIN = 110
-const MOVE_SHARP_MIN = 130
-
-/** @type {Record<LiquidityVerdictId, { id: LiquidityVerdictId; label: string; tone: string }>} */
-export const LIQUIDITY_VERDICTS = {
-  favorable: { id: "favorable", label: "유동성 우호", tone: "favorable" },
-  neutral: { id: "neutral", label: "유동성 중립", tone: "neutral" },
-  tightening: { id: "tightening", label: "유동성 긴축", tone: "tightening" },
-  alert: { id: "alert", label: "유동성 경계", tone: "alert" },
-}
+/** @typedef {'favorable'|'neutral'|'alert'} LiquidityVerdictId */
 
 /**
  * @typedef {{
- *   value: number
+ *   id: string
+ *   label: string
+ *   value: number | null
  *   display: string
- *   trend: DxyTrend | MoveTrend
- *   arrow: "↑" | "↓" | null
- *   stale: boolean
- * }} LiquidityMetricSide
+ *   weight: number
+ *   score: number | null
+ * }} LiquidityMetricV2
  */
 
 /**
  * @typedef {{
- *   dxy: LiquidityMetricSide | null
- *   move: LiquidityMetricSide | null
- *   verdict: (typeof LIQUIDITY_VERDICTS)[LiquidityVerdictId]
+ *   id: LiquidityVerdictId
+ *   label: string
+ *   tone: 'favorable' | 'neutral' | 'alert'
+ * }} LiquidityVerdict
+ */
+
+/**
+ * @typedef {{
+ *   score: number | null
+ *   verdict: LiquidityVerdict
  *   summary: string
- *   hasPartialData: boolean
+ *   metrics: LiquidityMetricV2[]
  * }} LiquidityEnvironmentCard
  */
+
+/** @type {Record<LiquidityVerdictId, LiquidityVerdict>} */
+export const LIQUIDITY_VERDICTS = {
+  favorable: { id: "favorable", label: "우호", tone: "favorable" },
+  neutral: { id: "neutral", label: "중립", tone: "neutral" },
+  alert: { id: "alert", label: "경계", tone: "alert" },
+}
 
 /** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot @param {string} key */
 function metricRow(snapshot, key) {
@@ -55,185 +49,155 @@ function metricRow(snapshot, key) {
   return rows.find((r) => r.key === key) ?? null
 }
 
-/**
- * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
- * @returns {{ value: number; stale: boolean; row: object | null } | null}
- */
-function resolveDxySpot(snapshot) {
-  const row = snapshot ? metricRow(snapshot, "DXY") : null
-  const raw = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
-  if (raw != null && raw > 0) return { value: raw, stale: false, row }
+/** @param {unknown} v */
+function toNum(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
 
-  const cached = getBondLiquiditySpotCache("DXY")
-  if (cached != null) return { value: cached, stale: true, row: null }
+/** @param {number} n @param {number} min @param {number} max */
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n))
+}
 
-  return null
+/** @param {number | null} v */
+function scoreUs10Y(v) {
+  if (v == null) return null
+  if (v <= 3.8) return 90
+  if (v <= 4.2) return 75
+  if (v <= 4.6) return 55
+  if (v <= 5.0) return 35
+  return 15
+}
+
+/** @param {number | null} v */
+function scoreRealYield(v) {
+  if (v == null) return null
+  if (v <= 1.5) return 92
+  if (v <= 1.9) return 75
+  if (v <= 2.3) return 55
+  if (v <= 2.7) return 35
+  return 15
+}
+
+/** @param {number | null} v */
+function scoreHyOas(v) {
+  if (v == null) return null
+  if (v <= 3.5) return 88
+  if (v <= 4.2) return 70
+  if (v <= 5.0) return 50
+  if (v <= 5.8) return 30
+  return 12
+}
+
+/** @param {number | null} v */
+function scoreMove(v) {
+  if (v == null) return null
+  if (v <= 90) return 85
+  if (v <= 105) return 68
+  if (v <= 120) return 48
+  if (v <= 135) return 30
+  return 12
+}
+
+/** @param {LiquidityMetricV2[]} metrics */
+function weightedLiquidityScore(metrics) {
+  let weighted = 0
+  let weightSum = 0
+  for (const m of metrics) {
+    if (m.score == null) continue
+    weighted += m.score * m.weight
+    weightSum += m.weight
+  }
+  if (!weightSum) return null
+  return Math.round(clamp(weighted / weightSum, 0, 100))
+}
+
+/** @param {number | null} score */
+export function resolveLiquidityVerdict(score) {
+  if (score == null) return LIQUIDITY_VERDICTS.neutral
+  if (score >= 67) return LIQUIDITY_VERDICTS.favorable
+  if (score >= 45) return LIQUIDITY_VERDICTS.neutral
+  return LIQUIDITY_VERDICTS.alert
 }
 
 /**
- * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
- * @param {number | null | undefined} panicMove
- * @returns {{ value: number; stale: boolean; row: object | null } | null}
+ * @param {LiquidityMetricV2[]} metrics
+ * @param {LiquidityVerdict} verdict
  */
-function resolveMoveSpot(snapshot, panicMove) {
-  const panic = Number(panicMove)
-  if (Number.isFinite(panic) && panic > 0) {
-    return { value: panic, stale: false, row: snapshot ? metricRow(snapshot, "MOVE") : null }
+function buildLiquiditySummary(metrics, verdict) {
+  const us10 = metrics.find((m) => m.id === "us10y")?.value
+  const hy = metrics.find((m) => m.id === "hy")?.value
+  const real = metrics.find((m) => m.id === "real")?.value
+
+  if (verdict.id === "favorable") {
+    if (us10 != null && us10 <= 4.2 && hy != null && hy <= 4.2) {
+      return "금리 하락 + 신용 안정 · 유동성 우호 · 성장주 우세"
+    }
+    return "유동성 우호 · 위험자산 선호 환경"
   }
 
-  const row = snapshot ? metricRow(snapshot, "MOVE") : null
-  const raw = row?.current != null && Number.isFinite(Number(row.current)) ? Number(row.current) : null
-  if (raw != null && raw > 0) return { value: raw, stale: false, row }
-
-  const cached = getBondLiquiditySpotCache("MOVE")
-  if (cached != null) return { value: cached, stale: true, row: null }
-
-  return null
-}
-
-/** @param {object | null} row @returns {DxyTrend} */
-function classifyDxyTrend(row) {
-  const change1D = Number(row?.change1D)
-  const slope = row?.slope ?? "flat"
-
-  if (Number.isFinite(change1D) && change1D > DXY_SHARP_PCT) return "sharp_up"
-  if (slope === "up" && Number.isFinite(change1D) && change1D > 0.35) return "sharp_up"
-  if (slope === "down" || (Number.isFinite(change1D) && change1D < DXY_DOWN_PCT)) return "down"
-  if (slope === "up" || (Number.isFinite(change1D) && change1D > DXY_UP_PCT)) return "up"
-  return "flat"
-}
-
-/**
- * @param {number} value
- * @param {object | null} row
- * @returns {MoveTrend}
- */
-function classifyMoveTrend(value, row) {
-  const slope = row?.slope ?? "flat"
-  const change5D = Number(row?.change5D)
-  const change20D = Number(row?.change20D)
-
-  if (value >= MOVE_SHARP_MIN) return "sharp_up"
-  if (slope === "up" && (value >= 125 || (Number.isFinite(change20D) && change20D >= 15))) return "sharp_up"
-  if (value >= MOVE_UP_MIN || slope === "up" || (Number.isFinite(change5D) && change5D >= 8)) return "up"
-  if (value <= 85 || slope === "down") return "down"
-  if (value <= MOVE_STABLE_MAX) return "stable"
-  return "stable"
-}
-
-/**
- * @param {DxyTrend | null} dxyTrend
- * @param {MoveTrend | null} moveTrend
- * @returns {(typeof LIQUIDITY_VERDICTS)[LiquidityVerdictId]}
- */
-export function resolveLiquidityVerdict(dxyTrend, moveTrend) {
-  const dxy = dxyTrend ?? "flat"
-  const move = moveTrend === "down" ? "stable" : (moveTrend ?? "stable")
-
-  if (dxy === "sharp_up" && move === "sharp_up") return LIQUIDITY_VERDICTS.alert
-  if (dxy === "up" && move === "up") return LIQUIDITY_VERDICTS.tightening
-  if (dxy === "down" && move === "stable") return LIQUIDITY_VERDICTS.favorable
-  if (dxy === "flat" && move === "stable") return LIQUIDITY_VERDICTS.neutral
-
-  if (dxy === "sharp_up" || move === "sharp_up") return LIQUIDITY_VERDICTS.alert
-  if (dxy === "up" || move === "up") return LIQUIDITY_VERDICTS.tightening
-  if (dxy === "down") return LIQUIDITY_VERDICTS.favorable
-  return LIQUIDITY_VERDICTS.neutral
-}
-
-/** @param {DxyTrend} trend @returns {string} */
-function dxySummaryPhrase(trend) {
-  if (trend === "down") return "달러 압력 완화"
-  if (trend === "up") return "달러 강세 지속"
-  if (trend === "sharp_up") return "달러 급등 압력"
-  return "달러 압력 보통"
-}
-
-/** @param {MoveTrend} trend @returns {string} */
-function moveSummaryPhrase(trend) {
-  if (trend === "down" || trend === "stable") return "채권 변동성 완화"
-  if (trend === "sharp_up") return "채권 변동성 급등"
-  return "채권 변동성 확대"
-}
-
-/**
- * @param {DxyTrend | null} dxyTrend
- * @param {MoveTrend | null} moveTrend
- * @param {(typeof LIQUIDITY_VERDICTS)[LiquidityVerdictId]} verdict
- */
-function buildLiquiditySummary(dxyTrend, moveTrend, verdict) {
-  const dxyPart = dxySummaryPhrase(dxyTrend ?? "flat")
-  if (verdict.id === "tightening") return `${dxyPart} · 유동성 긴축 주의`
-  if (verdict.id === "alert") return `${dxyPart} · 유동성 경계 주의`
-  const movePart = moveSummaryPhrase(moveTrend === "down" ? "stable" : (moveTrend ?? "stable"))
-  return `${dxyPart} · ${movePart}`
-}
-
-/** @param {DxyTrend | MoveTrend} trend @param {"dxy"|"move"} kind */
-function trendArrow(trend, kind) {
-  if (kind === "dxy") {
-    if (trend === "up" || trend === "sharp_up") return "↑"
-    if (trend === "down") return "↓"
-    return null
+  if (verdict.id === "alert") {
+    if (real != null && real >= 2.3 && hy != null && hy >= 5.0) {
+      return "실질금리 부담 + 신용 스트레스 · 방어 우선"
+    }
+    return "유동성 경계 · 포지션 크기 보수 운영"
   }
-  if (trend === "up" || trend === "sharp_up") return "↑"
-  if (trend === "down") return "↓"
-  return null
+
+  return "유동성 중립 · 선택적 종목 접근"
 }
 
 /**
  * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
- * @param {number | null | undefined} panicMove
+ * @param {object | null | undefined} panicData
  * @param {(key: string, n: number | null, fmt?: string) => string} formatValue
  * @returns {LiquidityEnvironmentCard}
  */
-export function buildLiquidityEnvironmentCard(snapshot, panicMove, formatValue) {
-  const dxySpot = resolveDxySpot(snapshot)
-  const moveSpot = resolveMoveSpot(snapshot, panicMove)
+export function buildLiquidityEnvironmentCard(snapshot, panicData, formatValue) {
+  const us10 = toNum(metricRow(snapshot, "US10Y")?.current)
+  const real = toNum(metricRow(snapshot, "REAL_YIELD")?.current)
+  const hy = toNum(panicData?.highYield ?? panicData?.hyOas)
+  const move = toNum(panicData?.move ?? metricRow(snapshot, "MOVE")?.current)
 
-  /** @type {LiquidityMetricSide | null} */
-  let dxy = null
-  /** @type {LiquidityMetricSide | null} */
-  let move = null
-  /** @type {DxyTrend | null} */
-  let dxyTrend = null
-  /** @type {MoveTrend | null} */
-  let moveTrend = null
+  /** @type {LiquidityMetricV2[]} */
+  const metrics = [
+    {
+      id: "us10y",
+      label: "10Y",
+      value: us10,
+      display: formatValue("US10Y", us10, "rate"),
+      weight: 0.4,
+      score: scoreUs10Y(us10),
+    },
+    {
+      id: "real",
+      label: "Real Yield",
+      value: real,
+      display: formatValue("REAL_YIELD", real, "rate"),
+      weight: 0.3,
+      score: scoreRealYield(real),
+    },
+    {
+      id: "hy",
+      label: "HY OAS",
+      value: hy,
+      display: formatValue("HY_OAS", hy, "rate"),
+      weight: 0.2,
+      score: scoreHyOas(hy),
+    },
+    {
+      id: "move",
+      label: "MOVE",
+      value: move,
+      display: formatValue("MOVE", move, "index"),
+      weight: 0.1,
+      score: scoreMove(move),
+    },
+  ]
 
-  if (dxySpot) {
-    dxyTrend = classifyDxyTrend(dxySpot.row)
-    let display = formatValue("DXY", dxySpot.value, "level")
-    if (dxySpot.stale) display = `${display} ${STALE_SUFFIX}`
-    dxy = {
-      value: dxySpot.value,
-      display,
-      trend: dxyTrend,
-      arrow: trendArrow(dxyTrend, "dxy"),
-      stale: dxySpot.stale,
-    }
-  }
+  const score = weightedLiquidityScore(metrics)
+  const verdict = resolveLiquidityVerdict(score)
+  const summary = buildLiquiditySummary(metrics, verdict)
 
-  if (moveSpot) {
-    moveTrend = classifyMoveTrend(moveSpot.value, moveSpot.row)
-    let display = formatValue("MOVE", moveSpot.value, "index")
-    if (moveSpot.stale) display = `${display} ${STALE_SUFFIX}`
-    move = {
-      value: moveSpot.value,
-      display,
-      trend: moveTrend,
-      arrow: trendArrow(moveTrend, "move"),
-      stale: moveSpot.stale,
-    }
-  }
-
-  const verdict = resolveLiquidityVerdict(dxyTrend, moveTrend)
-  const summary = buildLiquiditySummary(dxyTrend, moveTrend, verdict)
-
-  return {
-    dxy,
-    move,
-    verdict,
-    summary,
-    hasPartialData: Boolean(dxy) !== Boolean(move),
-  }
+  return { score, verdict, summary, metrics }
 }

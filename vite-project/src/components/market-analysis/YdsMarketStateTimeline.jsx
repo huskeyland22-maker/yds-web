@@ -1,5 +1,5 @@
 /**
- * V7 — 시장 상태 타임라인
+ * V7 — 시장 상태 타임라인 (날짜 + 상태 + 점수)
  * @param {{ steps: import("../../content/ydsMarketPositionTimeline.js").MarketPositionTimelineStep[]; className?: string }} props
  */
 export default function YdsMarketStateTimeline({ steps, className = "" }) {
@@ -32,7 +32,10 @@ export default function YdsMarketStateTimeline({ steps, className = "" }) {
                 {step.isCurrent ? "현재" : step.dateShort}
               </span>
               <span className="yds-market-state-timeline__zone">
-                {step.emoji} {step.label}
+                {step.emoji} {step.label} {step.phase}
+                <span className="yds-market-state-timeline__score font-mono tabular-nums">
+                  ({step.score})
+                </span>
               </span>
             </span>
           </li>
