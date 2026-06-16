@@ -27075,11 +27075,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-panic-secondary--v7 {
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
   min-height: 100%;
-  padding: 0.55rem 0.5rem;
-  gap: 0.2rem;
+  padding: 0.62rem 0.55rem 0.66rem;
+  gap: 0.24rem;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(8, 47, 73, 0.48));
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  border-radius: 0.6rem;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.26),
+    0 0 0 1px rgba(56, 189, 248, 0.1),
+    inset 0 1px 0 rgba(148, 163, 184, 0.08);
+  opacity: 1;
 }
 
 .yds-market-panic-secondary--v7 .yds-market-panic-secondary__badge {
@@ -27093,17 +27101,32 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+.yds-market-panic-secondary--v7 .yds-market-panic-secondary__title {
+  font-size: clamp(0.62rem, 1.75vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+  line-height: 1.2;
+  min-height: 0.86rem;
+}
+
 .yds-market-panic-secondary--v7 .yds-market-panic-secondary__score {
-  margin: 0;
-  font-size: clamp(1.45rem, 4vw, 1.85rem);
+  margin: 0.08rem 0 0;
+  font-size: clamp(1.62rem, 4.5vw, 2.08rem);
   font-weight: 800;
   line-height: 1;
-  color: #cbd5e1;
+  color: #f8fafc;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 12px rgba(56, 189, 248, 0.18);
 }
 
 .yds-market-panic-secondary--v7 .yds-market-panic-secondary__level {
-  margin: 0;
-  font-size: clamp(0.62rem, 1.72vw, 0.72rem);
+  margin: 0.06rem 0 0;
+  font-size: clamp(0.76rem, 2.1vw, 0.9rem);
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 .yds-market-panic-secondary__meter {
@@ -27113,9 +27136,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   letter-spacing: 0.04em;
 }
 
+.yds-market-panic-secondary--v7 .yds-market-panic-secondary__meter {
+  margin-top: 0.04rem;
+  font-size: clamp(0.58rem, 1.6vw, 0.66rem);
+  color: #e2e8f0;
+  letter-spacing: 0.05em;
+}
+
 .yds-market-panic-secondary--v7 .yds-market-panic-secondary__intensity {
   margin: 0;
-  font-size: clamp(0.72rem, 1.95vw, 0.82rem);
+  font-size: clamp(0.74rem, 2vw, 0.84rem);
   color: #38bdf8;
   font-weight: 800;
 }

@@ -23,6 +23,7 @@ export default function YdsMarketPanicSecondaryPanel({
         {view.panicScore}
       </p>
       <p className="yds-market-panic-secondary__level">
+        {view.panicEmoji !== "—" ? `${view.panicEmoji} ` : ""}
         {view.panicLabel}
       </p>
       <p className="yds-market-panic-secondary__meter font-mono tabular-nums">{bar}</p>
