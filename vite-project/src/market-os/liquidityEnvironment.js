@@ -29,6 +29,11 @@
  *   score: number | null
  *   verdict: LiquidityVerdict
  *   summary: string
+ *   headline: string
+ *   styleSignal: string
+ *   ratesSignal: string
+ *   volatilitySignal: string
+ *   creditSignal: string
  *   metrics: LiquidityMetricV2[]
  * }} LiquidityEnvironmentCard
  */
@@ -37,7 +42,7 @@
 export const LIQUIDITY_VERDICTS = {
   favorable: { id: "favorable", label: "우호", tone: "favorable" },
   neutral: { id: "neutral", label: "중립", tone: "neutral" },
-  alert: { id: "alert", label: "경계", tone: "alert" },
+  alert: { id: "alert", label: "긴축", tone: "alert" },
 }
 
 /** @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot @param {string} key */
@@ -116,9 +121,19 @@ function weightedLiquidityScore(metrics) {
 /** @param {number | null} score */
 export function resolveLiquidityVerdict(score) {
   if (score == null) return LIQUIDITY_VERDICTS.neutral
-  if (score >= 67) return LIQUIDITY_VERDICTS.favorable
-  if (score >= 45) return LIQUIDITY_VERDICTS.neutral
+  if (score >= 60) return LIQUIDITY_VERDICTS.favorable
+  if (score >= 40) return LIQUIDITY_VERDICTS.neutral
   return LIQUIDITY_VERDICTS.alert
+}
+
+/** @param {number | null} score */
+function resolveLiquidityHeadline(score) {
+  if (score == null) return "중립"
+  if (score >= 80) return "매우 우호"
+  if (score >= 60) return "우호"
+  if (score >= 40) return "중립"
+  if (score >= 20) return "긴축"
+  return "매우 긴축"
 }
 
 /**
@@ -145,6 +160,45 @@ function buildLiquiditySummary(metrics, verdict) {
   }
 
   return "유동성 중립 · 선택적 종목 접근"
+}
+
+/**
+ * @param {number | null} us10
+ * @param {number | null} move
+ * @param {number | null} real
+ */
+function buildRatesSignal(us10, move, real) {
+  if (real != null && real >= 2.5) return "금리 환경      부담"
+  if (us10 != null && us10 >= 4.7 && move != null && move < 90) return "금리 환경      중립"
+  if (us10 != null && us10 <= 4.1) return "금리 환경      우호"
+  return "금리 환경      중립"
+}
+
+/** @param {number | null} move */
+function buildVolatilitySignal(move) {
+  if (move == null) return "채권 변동성    중립"
+  if (move < 90) return "채권 변동성    안정"
+  if (move < 110) return "채권 변동성    보통"
+  return "채권 변동성    불안"
+}
+
+/** @param {number | null} hy */
+function buildCreditSignal(hy) {
+  if (hy == null) return "신용 위험      중립"
+  if (hy < 4) return "신용 위험      양호"
+  if (hy < 5) return "신용 위험      보통"
+  return "신용 위험      경계"
+}
+
+/**
+ * @param {LiquidityVerdict} verdict
+ * @param {number | null} real
+ */
+function buildStyleSignal(verdict, real) {
+  if (real != null && real >= 2.5) return "가치주 방어"
+  if (verdict.id === "favorable") return "성장주 우위"
+  if (verdict.id === "alert") return "방어주 우위"
+  return "종목 선별"
 }
 
 /**
@@ -198,6 +252,21 @@ export function buildLiquidityEnvironmentCard(snapshot, panicData, formatValue) 
   const score = weightedLiquidityScore(metrics)
   const verdict = resolveLiquidityVerdict(score)
   const summary = buildLiquiditySummary(metrics, verdict)
+  const headline = resolveLiquidityHeadline(score)
+  const styleSignal = buildStyleSignal(verdict, real)
+  const ratesSignal = buildRatesSignal(us10, move, real)
+  const volatilitySignal = buildVolatilitySignal(move)
+  const creditSignal = buildCreditSignal(hy)
 
-  return { score, verdict, summary, metrics }
+  return {
+    score,
+    verdict,
+    summary,
+    headline,
+    styleSignal,
+    ratesSignal,
+    volatilitySignal,
+    creditSignal,
+    metrics,
+  }
 }
