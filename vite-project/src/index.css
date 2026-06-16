@@ -26944,6 +26944,45 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-decoration: underline;
 }
 
+.yds-market-state-primary__drivers {
+  margin: 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-state-primary__drivers-title {
+  margin: 0 0 0.28rem;
+  font-size: clamp(0.68rem, 1.9vw, 0.8rem);
+  color: #cbd5e1;
+}
+
+.yds-market-state-primary__drivers-title strong {
+  color: #f8fafc;
+  font-weight: 800;
+}
+
+.yds-market-state-primary__drivers-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+
+.yds-market-state-primary__driver-item {
+  font-size: clamp(0.62rem, 1.72vw, 0.72rem);
+  line-height: 1.35;
+}
+
+.yds-market-state-primary__driver-item--plus {
+  color: #34d399;
+}
+
+.yds-market-state-primary__driver-item--minus {
+  color: #fda4af;
+}
+
 .yds-market-state-timeline {
   margin: 0;
   padding-top: 0.4rem;

@@ -14,6 +14,7 @@ import { resolveOverheatLayer } from "./ydsOverheatLayer.js"
 import { resolveMomentumLayer } from "./ydsMomentumLayer.js"
 import { rowDate, toNum } from "./ydsLayerHistory.js"
 import { resolveMarketPositionId } from "./ydsMarketPositionEngine.js"
+import { shouldEmitTimelineEvent } from "./ydsTimelineScoreDelta.js"
 
 /** @typedef {"low"|"medium"|"high"} TimelineSeverity */
 
@@ -300,16 +301,27 @@ export function resolveLatestPanicHistoryDate(historyRows, panicData = null) {
 }
 
 /**
- * panic_index_history 단일 소스 — live panicData 병합 없음 (날짜 오염 방지)
+ * panic_index_history + 당일 live panicData (최신일 이상만 병합)
  * @param {object[]} historyRows
- * @param {object | null | undefined} [_panicData] — 레거시 호환 (미사용)
+ * @param {object | null | undefined} [panicData]
  */
-export function buildTimelineSeries(historyRows, _panicData = null) {
+export function buildTimelineSeries(historyRows, panicData = null) {
   const map = new Map()
   for (const row of historyRows ?? []) {
     const d = rowDate(row)
     if (!d) continue
     map.set(d, { ...map.get(d), ...row, date: d })
+  }
+
+  if (panicData && typeof panicData === "object") {
+    const liveDate = rowDate(panicData)
+    if (liveDate) {
+      const latestStored = [...map.keys()].sort().pop() ?? null
+      if (!latestStored || liveDate >= latestStored) {
+        const existing = map.get(liveDate)
+        map.set(liveDate, { ...existing, ...panicData, date: liveDate })
+      }
+    }
   }
 
   return [...map.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
@@ -383,13 +395,6 @@ export function scanTimelineEventsFromSeries(series) {
   /** @type {Set<string>} */
   const seenDayType = new Set()
 
-  const push = (date, type, title, metrics, action, severity) => {
-    const key = `${date}:${type}`
-    if (seenDayType.has(key)) return
-    seenDayType.add(key)
-    records.push(makeRecord(date, type, title, metrics, action, severity))
-  }
-
   for (let i = 0; i < series.length; i += 1) {
     const current = series[i]
     const date = rowDate(current)
@@ -397,6 +402,14 @@ export function scanTimelineEventsFromSeries(series) {
 
     const prior = series.slice(0, i)
     const prev = i > 0 ? series[i - 1] : null
+
+    const push = (eventDate, type, title, metrics, action, severity) => {
+      if (prev && !shouldEmitTimelineEvent(prev, current, type)) return
+      const key = `${eventDate}:${type}`
+      if (seenDayType.has(key)) return
+      seenDayType.add(key)
+      records.push(makeRecord(eventDate, type, title, metrics, action, severity))
+    }
 
     const cnn = toNum(current?.fearGreed)
     const vix = toNum(current?.vix)

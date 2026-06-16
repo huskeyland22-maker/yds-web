@@ -8,9 +8,34 @@ import {
   panicIntensityScoreForRow,
 } from "./ydsMarketTrendSeries.js"
 
-const PANIC_EVENT_RE = /^panic-/
-const MARKET_EVENT_RE =
+export const PANIC_EVENT_RE = /^panic-/
+export const MARKET_EVENT_RE =
   /^(position-|overheat-|cnn-entry|cnn-exit|bofa-entry|bofa-exit|momentum-cnn-crash|momentum-cnn-sharp|momentum-bofa-weak|vix-expansion)/
+
+/**
+ * 동일 점수(예: 50→50) 전환 신호는 생성·표시하지 않음
+ * @param {object | null | undefined} prev
+ * @param {object | null | undefined} curr
+ * @param {string} type
+ */
+export function shouldEmitTimelineEvent(prev, curr, type) {
+  if (!prev || !curr) return true
+  const eventType = String(type ?? "")
+
+  if (PANIC_EVENT_RE.test(eventType)) {
+    const from = panicIntensityScoreForRow(prev)
+    const to = panicIntensityScoreForRow(curr)
+    return from != null && to != null && from !== to
+  }
+
+  if (MARKET_EVENT_RE.test(eventType) || eventType.startsWith("momentum-")) {
+    const from = marketStateScoreForRow(prev)
+    const to = marketStateScoreForRow(curr)
+    return from != null && to != null && from !== to
+  }
+
+  return true
+}
 
 /**
  * @param {object[]} historyRows
@@ -34,7 +59,7 @@ export function resolveTimelineScoreDelta(historyRows, event) {
   if (usePanic) {
     const from = panicIntensityScoreForRow(prev)
     const to = panicIntensityScoreForRow(curr)
-    if (from == null || to == null) return null
+    if (from == null || to == null || from === to) return null
     return {
       label: "패닉 강도",
       from,
@@ -46,7 +71,7 @@ export function resolveTimelineScoreDelta(historyRows, event) {
   if (useMarket) {
     const from = marketStateScoreForRow(prev)
     const to = marketStateScoreForRow(curr)
-    if (from == null || to == null) return null
+    if (from == null || to == null || from === to) return null
     return {
       label: "시장 상태",
       from,

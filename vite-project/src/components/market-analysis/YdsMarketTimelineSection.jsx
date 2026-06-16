@@ -6,15 +6,15 @@ import {
 } from "../../content/ydsMarketTimeline.js"
 import { enrichTimelineEventsWithScoreDeltas } from "../../content/ydsTimelineScoreDelta.js"
 import {
+  buildTransitionAudit,
+  logTransitionAudit,
+} from "../../content/ydsTransitionAudit.js"
+import {
   clearLegacyEventHistoryStorage,
   clearStoredEventHistory,
   computePanicHistoryFingerprint,
 } from "../../content/ydsMarketEventHistoryStorage.js"
-import {
-  marketStateScoreForRow,
-  panicIntensityScoreForRow,
-  resolveScoreZoneMeta,
-} from "../../content/ydsMarketTrendSeries.js"
+import { buildTimelineSeries } from "../../content/ydsMarketTimeline.js"
 
 const DEFAULT_COLLAPSED = 3
 
@@ -52,19 +52,31 @@ export default function YdsMarketTimelineSection({
     clearStoredEventHistory()
   }, [historyFingerprint])
 
+  const mergedHistory = useMemo(
+    () => buildTimelineSeries(historyRows, panicData),
+    [historyRows, panicData],
+  )
+
   const view = useMemo(() => {
     const rebuilt = rebuildMarketTimelineFromHistory(historyRows, panicData, { limit: 50 })
     const validation = validateMarketTimelineAgainstHistory(
       rebuilt.events,
-      historyRows,
+      mergedHistory,
       panicData,
     )
     if (!validation.ok && typeof console !== "undefined") {
       console.warn("[YDS] 최근 전환 신호 날짜 불일치", validation)
     }
-    const events = enrichTimelineEventsWithScoreDeltas(historyRows, rebuilt.events)
+    const events = enrichTimelineEventsWithScoreDeltas(mergedHistory, rebuilt.events)
     return { ...rebuilt, events, validation }
-  }, [historyRows, panicData])
+  }, [historyRows, panicData, mergedHistory])
+
+  useEffect(() => {
+    if (typeof console === "undefined") return
+    if (!mergedHistory.length) return
+    const audit = buildTransitionAudit(historyRows, panicData, view.events)
+    logTransitionAudit(audit)
+  }, [historyRows, panicData, mergedHistory, view.events])
 
   if (!view.events.length) return null
 
@@ -75,46 +87,6 @@ export default function YdsMarketTimelineSection({
   const hiddenCount = Math.max(0, view.events.length - visibleCap)
   const showExpandToggle = !isStream && hiddenCount > 0
   const showStreamToggle = isStream && view.events.length > collapsedVisible
-
-  useEffect(() => {
-    if (typeof console === "undefined") return
-    const latestRow = historyRows?.[historyRows.length - 1] ?? panicData ?? null
-    if (!latestRow) return
-
-    const marketState = marketStateScoreForRow(latestRow)
-    const panicIntensity = panicIntensityScoreForRow(latestRow)
-    const marketZone = marketState != null ? resolveScoreZoneMeta(marketState, "market").label : "—"
-    const panicZone = panicIntensity != null ? resolveScoreZoneMeta(panicIntensity, "panic").label : "—"
-    const lastSignal = view.events?.[0] ?? null
-    const prevScore =
-      historyRows?.length > 1 ? marketStateScoreForRow(historyRows[historyRows.length - 2]) : null
-    const prevZone = prevScore != null ? resolveScoreZoneMeta(prevScore, "market").label : "—"
-    const currentZone = marketZone
-    const today = String(latestRow.date ?? latestRow.updatedAt ?? "").slice(0, 10)
-    const signalGenerated = Boolean(lastSignal?.date && today && lastSignal.date === today)
-
-    console.groupCollapsed("[signal-audit]")
-    console.log("today", today || "—")
-    console.log("marketState", marketState ?? "—")
-    console.log("marketZone", marketZone)
-    console.log("panicIntensity", panicIntensity ?? "—")
-    console.log("panicZone", panicZone)
-    console.log("lastSignalDate", lastSignal?.date ?? "—")
-    console.log("lastSignalType", lastSignal?.type ?? "—")
-    console.log("prevZone", prevZone)
-    console.log("currentZone", currentZone)
-    console.log("signalGenerated", signalGenerated)
-    console.log(
-      "recentSignals",
-      view.events.slice(0, 5).map((ev) => ({
-        date: ev.date,
-        type: ev.type,
-        title: ev.title,
-        scoreDelta: ev.scoreDelta?.text ?? "",
-      })),
-    )
-    console.groupEnd()
-  }, [historyRows, panicData, view.events])
 
   return (
     <section

@@ -5,14 +5,12 @@ import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketTimelineSection from "./YdsMarketTimelineSection.jsx"
-import YdsEventScorecardSection from "./YdsEventScorecardSection.jsx"
-import { useEventScorecard } from "../../hooks/useEventScorecard.js"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 
 /**
- * 시장분석 데스크 — 결론 → 추이 → 변화 → 근거 → 이벤트 → 채권 (해석은 사이드바)
+ * 시장분석 데스크 — 결론 → 추이 → 변화 → 근거 → 채권 (해석은 사이드바)
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -30,8 +28,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
-
-  const { rows: scorecardRows, loading: scorecardLoading } = useEventScorecard(safeHistory, panicData)
 
   const lastAuditKeyRef = useRef("")
   useEffect(() => {
@@ -62,6 +58,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
           historyRows={safeHistory}
+          macroSnapshot={bondSnapshot.snapshot}
         />
 
         <YdsMarketTrendSection
@@ -95,12 +92,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             metricTwoLine
           />
         </section>
-
-        <YdsEventScorecardSection
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--scorecard"
-          rows={scorecardRows}
-          loading={scorecardLoading}
-        />
 
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--bond"
