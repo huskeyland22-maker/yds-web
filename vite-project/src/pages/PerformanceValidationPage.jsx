@@ -7,6 +7,7 @@ import {
 } from "../content/ydsPickPerformanceEngine.js"
 import { loadValidationPicks } from "../content/ydsValidationStorage.js"
 import { refreshValidationPicks } from "../content/ydsValidationEngine.js"
+import { buildValidationPriceMap } from "../content/ydsValidationPriceResolver.js"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 
@@ -141,7 +142,8 @@ export default function PerformanceValidationPage() {
   const [picks, setPicks] = useState(() => loadValidationPicks())
 
   useEffect(() => {
-    const refreshed = refreshValidationPicks(loadValidationPicks())
+    const priceMap = buildValidationPriceMap()
+    const refreshed = refreshValidationPicks(loadValidationPicks(), priceMap)
     setPicks(refreshed)
   }, [])
 
@@ -219,6 +221,7 @@ export default function PerformanceValidationPage() {
             </div>
             <p className="yds-perf-val__note">
               수익률은 추천 당시 가격 대비 해당 기간 종가를 1회 잠금합니다. 현재가로 재계산하지 않습니다.
+              가격 조회 실패 시 N/A로 표시합니다(DEV 콘솔 `[perf-validation]` 로그 참고).
             </p>
           </section>
 

@@ -64,6 +64,7 @@ export function toStockMarketSnapshot(raw, request) {
 const dummyProvider = {
   id: "dummy",
   getSnapshot(request) {
+    // 점수 프로필용 더미 — 성과검증(ydsValidationEngine)에서는 사용하지 않음
     const raw = buildStockPriceSnapshot(
       request.ticker,
       "interest",

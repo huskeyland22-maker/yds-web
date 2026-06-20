@@ -45,7 +45,7 @@ const MAX_REGIME_PERIODS = 120
  *   rank: number
  *   isTop3: boolean
  *   recommendedAt: string
- *   recommendedPrice: number
+ *   recommendedPrice: number | null
  *   recommendedScore: number | null
  *   qualityGrade: string
  *   timingGrade: string
@@ -134,7 +134,10 @@ export function normalizePickRecord(raw) {
     rank,
     isTop3: r.isTop3 != null ? Boolean(r.isTop3) : rank > 0 && rank <= 3,
     recommendedAt,
-    recommendedPrice: Number(r.recommendedPrice) || 0,
+    recommendedPrice:
+      r.recommendedPrice != null && Number(r.recommendedPrice) > 0
+        ? Number(r.recommendedPrice)
+        : null,
     recommendedScore,
     qualityGrade: String(snap.qualityGrade ?? r.qualityGrade ?? "—"),
     timingGrade: String(snap.timingGrade ?? r.timingGrade ?? "—"),

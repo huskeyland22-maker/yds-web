@@ -22,7 +22,7 @@ export function formatPerfPct(v) {
 
 /** @param {number | null | undefined} v */
 export function formatPerfPrice(v) {
-  if (v == null || !Number.isFinite(v)) return "—"
+  if (v == null || !Number.isFinite(v) || v <= 0) return "N/A"
   return v >= 1000 ? v.toLocaleString("ko-KR", { maximumFractionDigits: 0 }) : v.toFixed(2)
 }
 

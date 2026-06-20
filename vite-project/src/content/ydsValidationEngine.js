@@ -11,11 +11,18 @@ import { loadPortfolioTrades } from "./ydsPortfolioTradesStorage.js"
 import { STOCK_STATUS_VIEWS } from "./ydsStockActionEngine.js"
 import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
 import {
+  buildValidationPriceMap,
+  resolveValidationLivePrice,
+} from "./ydsValidationPriceResolver.js"
+import {
+  logValidationPickPriceAudit,
+  logValidationPriceLookupFailure,
+} from "./ydsValidationPriceDebug.js"
+import {
   filterByCountry,
   getRankingStocks,
   getStockPickUniverse,
 } from "./ydsStockPickModel.js"
-import { getStockSnapshot } from "./stockPickSnapshotProvider.js"
 import {
   benchmarkReturnsForHorizon,
   captureBenchmarkPrices,
@@ -112,7 +119,7 @@ function pickRecordFromStock(stock, marketContext, recommendedAt) {
     rank: stock.rank,
     isTop3: stock.rank > 0 && stock.rank <= 3,
     recommendedAt,
-    recommendedPrice: Number.isFinite(price) && price > 0 ? price : 0,
+    recommendedPrice: Number.isFinite(price) && price > 0 ? price : null,
     recommendedScore: Number.isFinite(recommendedScore) ? recommendedScore : null,
     qualityGrade,
     timingGrade,
@@ -137,62 +144,113 @@ function pickRecordFromStock(stock, marketContext, recommendedAt) {
  * @param {string} recommendedAt
  * @param {number} horizonDays
  * @param {string} today
- * @param {number | null} currentPrice
+ * @returns {{ price: number | null; targetDate: string; lookupOk: boolean }}
  */
-function resolveHorizonLockPrice(priceLog, recommendedAt, horizonDays, today, currentPrice) {
+function resolveHorizonLockPrice(priceLog, recommendedAt, horizonDays, today) {
   const targetDate = addCalendarDays(recommendedAt, horizonDays)
-  if (today < targetDate) return null
+  if (today < targetDate) {
+    return { price: null, targetDate, lookupOk: false }
+  }
 
   const exact = priceLog[targetDate]
-  if (exact != null && Number.isFinite(exact) && exact > 0) return exact
+  if (exact != null && Number.isFinite(exact) && exact > 0) {
+    return { price: exact, targetDate, lookupOk: true }
+  }
 
   const onOrAfter = Object.keys(priceLog)
     .filter((d) => d >= targetDate)
     .sort()
   for (const d of onOrAfter) {
     const p = priceLog[d]
-    if (p != null && Number.isFinite(p) && p > 0) return p
+    if (p != null && Number.isFinite(p) && p > 0) {
+      return { price: p, targetDate, lookupOk: true }
+    }
   }
 
-  if (currentPrice != null && Number.isFinite(currentPrice) && currentPrice > 0) {
-    return currentPrice
-  }
-  return null
+  return { price: null, targetDate, lookupOk: false }
+}
+
+/** @param {number | null} lockPrice @param {number | null} recommendPrice */
+function isSuspectDummyLock(lockPrice, recommendPrice) {
+  if (lockPrice !== 100) return false
+  if (recommendPrice == null || recommendPrice <= 0) return true
+  return Math.abs(recommendPrice - 100) / recommendPrice > 0.15
 }
 
 /**
  * @param {ValidationPickRecord} record
  * @param {string} today
- * @param {number | null} currentPrice
  */
-function lockPickHorizons(record, today, currentPrice) {
+function lockPickHorizons(record, today) {
   /** @type {ValidationPickRecord["horizonPrices"]} */
   const horizonPrices = { ...record.horizonPrices }
   /** @type {ValidationPickRecord["horizons"]} */
   const horizons = { ...record.horizons }
+  /** @type {import("./ydsValidationPriceDebug.js").HorizonDef[]} */
+  const auditHorizons = []
+
+  const recommendPrice =
+    record.recommendedPrice != null && record.recommendedPrice > 0
+      ? record.recommendedPrice
+      : null
 
   for (const h of HORIZON_DAYS) {
+    if (
+      horizonPrices[h.key] != null &&
+      Number.isFinite(horizonPrices[h.key]) &&
+      isSuspectDummyLock(horizonPrices[h.key], recommendPrice)
+    ) {
+      horizonPrices[h.key] = null
+      horizons[h.key] = null
+    }
+
     if (horizonPrices[h.key] != null && Number.isFinite(horizonPrices[h.key])) {
-      if (horizons[h.key] == null) {
-        const ret = calcRecommendReturnPct(record.recommendedPrice, horizonPrices[h.key])
+      if (horizons[h.key] == null && recommendPrice != null) {
+        const ret = calcRecommendReturnPct(recommendPrice, horizonPrices[h.key])
         horizons[h.key] = ret != null ? Math.round(ret * 10) / 10 : null
       }
+      auditHorizons.push({
+        key: h.key,
+        label: h.label,
+        target_date: addCalendarDays(record.recommendedAt, h.days),
+        price: horizonPrices[h.key],
+        return_pct: horizons[h.key],
+        lookup_ok: true,
+      })
       continue
     }
 
-    const lockPrice = resolveHorizonLockPrice(
+    const resolved = resolveHorizonLockPrice(
       record.priceLog,
       record.recommendedAt,
       h.days,
       today,
-      currentPrice,
     )
-    if (lockPrice == null) continue
 
-    horizonPrices[h.key] = lockPrice
-    const ret = calcRecommendReturnPct(record.recommendedPrice, lockPrice)
+    auditHorizons.push({
+      key: h.key,
+      label: h.label,
+      target_date: resolved.targetDate,
+      price: resolved.price,
+      return_pct: null,
+      lookup_ok: resolved.lookupOk,
+    })
+
+    if (resolved.price == null) continue
+
+    horizonPrices[h.key] = resolved.price
+    if (recommendPrice == null) continue
+
+    const ret = calcRecommendReturnPct(recommendPrice, resolved.price)
     horizons[h.key] = ret != null ? Math.round(ret * 10) / 10 : null
+    auditHorizons[auditHorizons.length - 1].return_pct = horizons[h.key]
   }
+
+  logValidationPickPriceAudit({
+    symbol: record.ticker,
+    recommend_price: recommendPrice,
+    horizons: auditHorizons.filter((x) => x.key === "d7" || x.key === "d14" || x.key === "d30"),
+  })
 
   return { horizonPrices, horizons }
 }
@@ -200,21 +258,33 @@ function lockPickHorizons(record, today, currentPrice) {
 /**
  * @param {ValidationPickRecord} record
  * @param {string} today
+ * @param {Map<string, number>} [priceMap]
  */
-function refreshPickPrice(record, today) {
-  const snap = getStockSnapshot({
-    ticker: record.ticker,
-    country: record.country,
-    status: "interest",
-  })
-  const current = Number(snap?.price ?? snap?.close)
-  const currentPrice = Number.isFinite(current) && current > 0 ? current : null
+function refreshPickPrice(record, today, priceMap) {
+  const resolved = resolveValidationLivePrice(record.ticker, record.country, priceMap)
+  const currentPrice = resolved?.price ?? null
+
+  if (currentPrice == null) {
+    logValidationPriceLookupFailure(record.ticker, "no-live-quote", {
+      country: record.country,
+    })
+  }
+
   const priceLog = { ...record.priceLog }
-  if (currentPrice != null && priceLog[today] == null) priceLog[today] = currentPrice
+  if (currentPrice != null && priceLog[today] == null) {
+    priceLog[today] = currentPrice
+  }
 
   const withLog = { ...record, priceLog }
-  const { horizonPrices, horizons } = lockPickHorizons(withLog, today, currentPrice)
-  const returnPct = calcRecommendReturnPct(record.recommendedPrice, currentPrice)
+  const { horizonPrices, horizons } = lockPickHorizons(withLog, today)
+  const recommendPrice =
+    record.recommendedPrice != null && record.recommendedPrice > 0
+      ? record.recommendedPrice
+      : null
+  const returnPct =
+    recommendPrice != null && currentPrice != null
+      ? calcRecommendReturnPct(recommendPrice, currentPrice)
+      : null
 
   return {
     ...withLog,
@@ -254,10 +324,11 @@ export function captureTodayPickSnapshots(marketContext, rankLimit = 10, univers
   return merged
 }
 
-/** @param {ValidationPickRecord[]} picks */
-export function refreshValidationPicks(picks) {
+/** @param {ValidationPickRecord[]} picks @param {Map<string, number>} [priceMap] */
+export function refreshValidationPicks(picks, priceMap) {
   const today = todayDateKey()
-  const refreshed = picks.map((r) => refreshPickPrice(r, today))
+  const map = priceMap ?? buildValidationPriceMap()
+  const refreshed = picks.map((r) => refreshPickPrice(r, today, map))
   saveValidationPicks(refreshed)
   return refreshed
 }
