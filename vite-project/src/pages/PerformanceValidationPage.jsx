@@ -8,6 +8,12 @@ import {
 import { loadValidationPicks } from "../content/ydsValidationStorage.js"
 import { refreshValidationPicks } from "../content/ydsValidationEngine.js"
 import { buildValidationPriceMap } from "../content/ydsValidationPriceResolver.js"
+import {
+  formatRecommendSnapshotLine,
+  getRecommendSnapshot,
+} from "../content/ydsValidationRecommendSnapshot.js"
+import { useStockPickLiveData } from "../hooks/useStockPickLiveData.js"
+import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 
@@ -87,6 +93,51 @@ function GradeRow({ item }) {
   )
 }
 
+function PickRecommendSnapshot({ row, horizon7Pct }) {
+  const snap = getRecommendSnapshot(row)
+  if (!snap) return null
+  const retClass =
+    horizon7Pct != null && Number.isFinite(horizon7Pct)
+      ? horizon7Pct >= 0
+        ? "yds-perf-val__snap-ret--up"
+        : "yds-perf-val__snap-ret--down"
+      : ""
+
+  return (
+    <div className="yds-perf-val__snap" aria-label="추천 당시 스냅샷">
+      <span className="yds-perf-val__snap-scores">
+        {snap.totalScore != null ? (
+          <span className="yds-perf-val__snap-chip font-mono tabular-nums">
+            총점 {Math.round(snap.totalScore)}
+          </span>
+        ) : null}
+        {snap.qualityGrade !== "—" ? (
+          <span className="yds-perf-val__snap-chip">품질 {snap.qualityGrade}</span>
+        ) : null}
+        {snap.timingGrade !== "—" ? (
+          <span className="yds-perf-val__snap-chip">타이밍 {snap.timingGrade}</span>
+        ) : null}
+        {snap.marketFitGrade !== "—" ? (
+          <span className="yds-perf-val__snap-chip">시장적합 {snap.marketFitGrade}</span>
+        ) : null}
+      </span>
+      <span className="yds-perf-val__snap-meta">
+        {snap.marketStateLabel !== "—" ? (
+          <span className="yds-perf-val__snap-market">{snap.marketStateLabel}</span>
+        ) : null}
+        {snap.panicLabel !== "—" ? (
+          <span className="yds-perf-val__snap-panic">{snap.panicLabel}</span>
+        ) : null}
+        {horizon7Pct != null && Number.isFinite(horizon7Pct) ? (
+          <span className={`yds-perf-val__snap-ret font-mono tabular-nums ${retClass}`}>
+            7일 {formatPerfPct(horizon7Pct)}
+          </span>
+        ) : null}
+      </span>
+    </div>
+  )
+}
+
 function CaseTable({ rows, mode }) {
   if (!rows.length) {
     return <p className="yds-perf-val__note">30일 수익률이 확정된 사례가 없습니다.</p>
@@ -102,12 +153,17 @@ function CaseTable({ rows, mode }) {
             <th>점수</th>
             <th>품질</th>
             <th>타이밍</th>
+            <th>시장적합</th>
+            <th>시장상태</th>
+            <th>패닉</th>
             <th>추천가</th>
             <th>30일</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
+          {rows.map((row, i) => {
+            const snap = getRecommendSnapshot(row)
+            return (
             <tr key={row.id}>
               <td>{i + 1}</td>
               <td className="font-mono tabular-nums">{row.recommendedAt}</td>
@@ -116,12 +172,16 @@ function CaseTable({ rows, mode }) {
                   {row.name}
                 </Link>
                 <span className="yds-perf-val__ticker font-mono">{row.ticker}</span>
+                <PickRecommendSnapshot row={row} horizon7Pct={row.horizons?.d7} />
               </td>
               <td className="font-mono tabular-nums">
                 {row.recommendedScore != null ? Math.round(row.recommendedScore) : "—"}
               </td>
               <td>{row.qualityGrade}</td>
               <td>{row.timingGrade}</td>
+              <td>{row.marketFitGrade}</td>
+              <td>{snap?.marketStateLabel ?? "—"}</td>
+              <td>{snap?.panicLabel ?? "—"}</td>
               <td className="font-mono tabular-nums">{formatPerfPrice(row.recommendedPrice)}</td>
               <td
                 className={`font-mono tabular-nums ${
@@ -131,7 +191,8 @@ function CaseTable({ rows, mode }) {
                 {formatPerfPct(row.lockedReturn)}
               </td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
     </div>
@@ -139,13 +200,19 @@ function CaseTable({ rows, mode }) {
 }
 
 export default function PerformanceValidationPage() {
+  const marketContext = useYdsMarketContext()
+  const { stocks: liveStocks, loading: liveLoading } = useStockPickLiveData(marketContext)
   const [picks, setPicks] = useState(() => loadValidationPicks())
 
   useEffect(() => {
-    const priceMap = buildValidationPriceMap()
-    const refreshed = refreshValidationPicks(loadValidationPicks(), priceMap)
+    if (liveLoading) return
+    const priceMap = buildValidationPriceMap(liveStocks.length ? liveStocks : undefined)
+    const refreshed = refreshValidationPicks(loadValidationPicks(), priceMap, {
+      liveStocks: liveStocks.length ? liveStocks : null,
+      marketContext,
+    })
     setPicks(refreshed)
-  }, [])
+  }, [liveLoading, liveStocks, marketContext])
 
   const report = useMemo(() => buildPickPerformanceReport(picks, 30), [picks])
   const { kpi, gradeBreakdown, topSuccess, topFailure, monthly } = report
@@ -159,7 +226,7 @@ export default function PerformanceValidationPage() {
           <p className="yds-perf-val__kicker">성과 검증 · 백테스트</p>
           <h1 className="yds-perf-val__title">성과 검증</h1>
           <p className="yds-perf-val__sub">
-            추천 당시 가격·등급 스냅샷 기준 · 7/14/30일 수익률 잠금 · 최근 {report.windowDays}일
+            추천 당시 점수·등급·시장상태 스냅샷 기준 · 7/14/30일 수익률 잠금 · 최근 {report.windowDays}일
           </p>
         </div>
         <Link to="/stock-picks" className="yds-perf-val__nav-link">
@@ -220,10 +287,28 @@ export default function PerformanceValidationPage() {
               ))}
             </div>
             <p className="yds-perf-val__note">
-              수익률은 추천 당시 가격 대비 해당 기간 종가를 1회 잠금합니다. 현재가로 재계산하지 않습니다.
-              가격 조회 실패 시 N/A로 표시합니다(DEV 콘솔 `[perf-validation]` 로그 참고).
+              추천 생성 시 총점·품질·타이밍·시장적합·시장상태·패닉강도를 함께 저장합니다. refresh 시
+              스냅샷은 변경되지 않습니다. 수익률은 추천 당시 가격 대비 해당 기간 종가를 1회 잠금합니다.
             </p>
           </section>
+
+          {report.picks.slice(0, 5).some((p) => getRecommendSnapshot(p)?.totalScore != null) ? (
+            <section className="yds-perf-val__section" aria-labelledby="perf-val-snapshots">
+              <h2 id="perf-val-snapshots" className="yds-perf-val__h2">
+                추천 당시 스냅샷 · 최근 사례
+              </h2>
+              <ul className="yds-perf-val__snap-list">
+                {report.picks.slice(0, 8).map((row) => (
+                  <li key={row.id} className="yds-perf-val__snap-card">
+                    <span className="yds-perf-val__snap-card-title">{row.name}</span>
+                    <span className="yds-perf-val__snap-card-line">
+                      {formatRecommendSnapshotLine(row, row.horizons?.d7)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <section className="yds-perf-val__section" aria-labelledby="perf-val-grade">
             <h2 id="perf-val-grade" className="yds-perf-val__h2">
@@ -299,6 +384,8 @@ export default function PerformanceValidationPage() {
                     <th>품질</th>
                     <th>타이밍</th>
                     <th>시장적합</th>
+                    <th>시장상태</th>
+                    <th>패닉</th>
                     <th>추천가</th>
                     <th>7일</th>
                     <th>14일</th>
@@ -309,16 +396,23 @@ export default function PerformanceValidationPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {report.picks.map((row) => (
+                  {report.picks.map((row) => {
+                    const snap = getRecommendSnapshot(row)
+                    return (
                     <tr key={row.id}>
                       <td className="font-mono tabular-nums">{row.recommendedAt}</td>
-                      <td>{row.name}</td>
+                      <td>
+                        <span className="yds-perf-val__pick-name">{row.name}</span>
+                        <PickRecommendSnapshot row={row} horizon7Pct={row.horizons?.d7} />
+                      </td>
                       <td className="font-mono tabular-nums">
                         {row.recommendedScore != null ? Math.round(row.recommendedScore) : "—"}
                       </td>
                       <td>{row.qualityGrade}</td>
                       <td>{row.timingGrade}</td>
                       <td>{row.marketFitGrade}</td>
+                      <td>{snap?.marketStateLabel ?? "—"}</td>
+                      <td>{snap?.panicLabel ?? "—"}</td>
                       <td className="font-mono tabular-nums">{formatPerfPrice(row.recommendedPrice)}</td>
                       <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d7)}</td>
                       <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d14)}</td>
@@ -327,7 +421,8 @@ export default function PerformanceValidationPage() {
                       <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d14)}</td>
                       <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d30)}</td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

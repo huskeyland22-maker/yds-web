@@ -77,7 +77,10 @@ export default function YdsStockPickV1Hub() {
     if (loading || !liveStocks.length) return
     const run = () => {
       captureTodayPickSnapshots(marketContext, 10, liveStocks)
-      refreshValidationPicks(loadValidationPicks(), buildValidationPriceMap(liveStocks))
+      refreshValidationPicks(loadValidationPicks(), buildValidationPriceMap(liveStocks), {
+        liveStocks,
+        marketContext,
+      })
     }
     if (typeof requestIdleCallback === "function") {
       const id = requestIdleCallback(run, { timeout: 3000 })

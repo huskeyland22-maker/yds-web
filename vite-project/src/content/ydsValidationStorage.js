@@ -3,6 +3,7 @@
  */
 
 import { sanitizeValidationPickRecord } from "./ydsValidationPriceSanitize.js"
+import { applySnapshotToRecord, getRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
 
 export const VALIDATION_PICKS_KEY = "yds-validation-picks-v2"
 export const VALIDATION_PORTFOLIO_KEY = "yds-validation-portfolio-v2"
@@ -62,6 +63,7 @@ const MAX_REGIME_PERIODS = 120
  *   regimeId: string
  *   regimeLabel: string
  *   strategyLabel: string
+ *   recommendSnapshot: import("./ydsValidationRecommendSnapshot.js").ValidationRecommendSnapshot | null
  *   recordedAt: number
  *   lastUpdatedAt: number
  * }} ValidationPickRecord
@@ -121,17 +123,21 @@ export function normalizePickRecord(raw) {
   const r = raw && typeof raw === "object" ? raw : {}
   const recommendedAt = String(r.recommendedAt ?? "").slice(0, 10)
   const rank = Number(r.rank) || 0
-  const snap = r.snapshot && typeof r.snapshot === "object" ? r.snapshot : r
-  const recommendedScoreRaw = snap.recommendedScore ?? r.recommendedScore
-  const recommendedScore =
-    recommendedScoreRaw != null && Number.isFinite(Number(recommendedScoreRaw))
-      ? Number(recommendedScoreRaw)
-      : null
+  const legacySnap = r.snapshot && typeof r.snapshot === "object" ? r.snapshot : null
+  const recommendedScoreRaw = legacySnap?.recommendedScore ?? r.recommendedScore
+
+  const recSnap = getRecommendSnapshot(
+    /** @type {ValidationPickRecord} */ ({
+      ...r,
+      recommendSnapshot: r.recommendSnapshot ?? null,
+      recommendedAt,
+    }),
+  )
 
   const record = /** @type {ValidationPickRecord} */ ({
     id: String(r.id ?? `${recommendedAt}:${r.country}:${r.ticker}`),
     ticker: String(r.ticker ?? ""),
-    name: String(r.name ?? ""),
+    name: String(r.name ?? recSnap?.name ?? ""),
     country: r.country === "KR" ? "KR" : "US",
     rank,
     isTop3: r.isTop3 != null ? Boolean(r.isTop3) : rank > 0 && rank <= 3,
@@ -139,11 +145,15 @@ export function normalizePickRecord(raw) {
     recommendedPrice:
       r.recommendedPrice != null && Number(r.recommendedPrice) > 0
         ? Number(r.recommendedPrice)
-        : null,
-    recommendedScore,
-    qualityGrade: String(snap.qualityGrade ?? r.qualityGrade ?? "—"),
-    timingGrade: String(snap.timingGrade ?? r.timingGrade ?? "—"),
-    marketFitGrade: String(snap.marketFitGrade ?? r.marketFitGrade ?? "—"),
+        : (recSnap?.recommendedPrice ?? null),
+    recommendedScore:
+      recSnap?.totalScore ??
+      (recommendedScoreRaw != null && Number.isFinite(Number(recommendedScoreRaw))
+        ? Number(recommendedScoreRaw)
+        : null),
+    qualityGrade: String(recSnap?.qualityGrade ?? r.qualityGrade ?? "—"),
+    timingGrade: String(recSnap?.timingGrade ?? r.timingGrade ?? "—"),
+    marketFitGrade: String(recSnap?.marketFitGrade ?? r.marketFitGrade ?? "—"),
     statusId: String(r.statusId ?? "interest"),
     statusLabel: String(r.statusLabel ?? "—"),
     currentPrice: r.currentPrice != null ? Number(r.currentPrice) : null,
@@ -153,11 +163,12 @@ export function normalizePickRecord(raw) {
     priceLog: r.priceLog && typeof r.priceLog === "object" ? r.priceLog : {},
     regimeId: String(r.regimeId ?? "neutral"),
     regimeLabel: String(r.regimeLabel ?? "—"),
-    strategyLabel: String(r.strategyLabel ?? "—"),
+    strategyLabel: String(recSnap?.marketStateLabel ?? r.strategyLabel ?? "—"),
+    recommendSnapshot: r.recommendSnapshot ?? recSnap ?? null,
     recordedAt: Number(r.recordedAt) || Date.now(),
     lastUpdatedAt: Number(r.lastUpdatedAt) || Date.now(),
   })
-  return sanitizeValidationPickRecord(record)
+  return sanitizeValidationPickRecord(applySnapshotToRecord(record, recSnap))
 }
 
 /** @returns {ValidationPickRecord[]} */

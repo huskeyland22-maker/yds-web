@@ -9,7 +9,6 @@ import { loadPortfolioReview } from "./ydsPortfolioReviewStorage.js"
 import { loadPortfolioStockReviews } from "./ydsPortfolioStockReviewStorage.js"
 import { loadPortfolioTrades } from "./ydsPortfolioTradesStorage.js"
 import { STOCK_STATUS_VIEWS } from "./ydsStockActionEngine.js"
-import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
 import {
   buildValidationPriceMap,
   resolveValidationLivePrice,
@@ -24,6 +23,10 @@ import {
   logValidationPickPriceAudit,
   logValidationPriceLookupFailure,
 } from "./ydsValidationPriceDebug.js"
+import {
+  backfillRecommendSnapshot,
+  buildRecommendSnapshot,
+} from "./ydsValidationRecommendSnapshot.js"
 import {
   filterByCountry,
   getRankingStocks,
@@ -103,43 +106,39 @@ export function regimeFromMarketContext(ctx) {
  * @param {string} recommendedAt
  */
 function pickRecordFromStock(stock, marketContext, recommendedAt) {
-  const price = Number(stock.snapshot?.price ?? stock.snapshot?.close)
+  const snap = buildRecommendSnapshot(stock, marketContext, recommendedAt)
+  const price = snap.recommendedPrice
   const { regimeId, regimeLabel } = regimeFromMarketContext(marketContext)
   const country = stock.country === "KR" ? "KR" : "US"
   const id = `${recommendedAt}:${country}:${stock.ticker}`
   const statusId = stock.stockStatus?.id ?? stock.statusView?.id ?? "interest"
   const statusLabel =
     stock.stockStatus?.label ?? STOCK_STATUS_VIEWS[statusId]?.label ?? "—"
-  const marketFitScore = Number(stock.scoreBreakdown?.marketEnv ?? stock.pickMeta?.marketFitScore ?? 0)
-  const marketFitGrade =
-    stock.pickMeta?.marketFitGrade ?? marketEnvToGrade(marketFitScore, 15)
-  const recommendedScore = Number(stock.v4Score?.finalRankScore ?? stock.score)
-  const qualityGrade = String(stock.v4Score?.qualityGrade ?? "—")
-  const timingGrade = String(stock.v4Score?.timingGrade ?? "—")
 
   return normalizePickRecord({
     id,
     ticker: stock.ticker,
-    name: stock.name,
+    name: snap.name,
     country,
     rank: stock.rank,
     isTop3: stock.rank > 0 && stock.rank <= 3,
     recommendedAt,
-    recommendedPrice: Number.isFinite(price) && price > 0 ? price : null,
-    recommendedScore: Number.isFinite(recommendedScore) ? recommendedScore : null,
-    qualityGrade,
-    timingGrade,
-    marketFitGrade,
+    recommendedPrice: price,
+    recommendedScore: snap.totalScore,
+    qualityGrade: snap.qualityGrade,
+    timingGrade: snap.timingGrade,
+    marketFitGrade: snap.marketFitGrade,
     statusId,
     statusLabel,
     currentPrice: null,
     returnPct: null,
     horizons: { d7: null, d14: null, d30: null, d90: null, d180: null, d365: null },
     horizonPrices: { d7: null, d14: null, d30: null, d90: null, d180: null, d365: null },
-    priceLog: Number.isFinite(price) && price > 0 ? { [recommendedAt]: price } : {},
+    priceLog: price != null ? { [recommendedAt]: price } : {},
     regimeId,
     regimeLabel,
-    strategyLabel: marketContext?.strategyLabel ?? "—",
+    strategyLabel: snap.marketStateLabel,
+    recommendSnapshot: snap,
     recordedAt: Date.now(),
     lastUpdatedAt: Date.now(),
   })
@@ -359,7 +358,11 @@ export function captureTodayPickSnapshots(marketContext, rankLimit = 10, univers
   const krRanked = getRankingStocks(filterByCountry(universe, "KR"), rankLimit)
 
   const fresh = [...usRanked, ...krRanked]
-    .filter((s) => s?.ticker)
+    .filter((s) => {
+      if (!s?.ticker) return false
+      if (universeOverride) return s.dataSource === "live"
+      return true
+    })
     .map((s) => pickRecordFromStock(s, marketContext, today))
     .filter((r) => !existingToday.has(r.id))
 
@@ -370,12 +373,28 @@ export function captureTodayPickSnapshots(marketContext, rankLimit = 10, univers
   return merged
 }
 
-/** @param {ValidationPickRecord[]} picks @param {Map<string, number>} [priceMap] */
-export function refreshValidationPicks(picks, priceMap) {
+/** @typedef {{ liveStocks?: import("./ydsStockPickModel.js").StockPickView[] | null; marketContext?: YdsMarketAdapterContext | null }} RefreshValidationOptions */
+
+/** @param {ValidationPickRecord[]} picks @param {Map<string, number>} [priceMap] @param {RefreshValidationOptions} [options] */
+export function refreshValidationPicks(picks, priceMap, options = {}) {
   const today = todayDateKey()
   const map = priceMap ?? buildValidationPriceMap()
   const sanitized = sanitizeValidationPicks(picks)
-  const refreshed = sanitized.map((r) => refreshPickPrice(r, today, map))
+  const { liveStocks = null, marketContext = null } = options
+  /** @type {Map<string, import("./ydsStockPickModel.js").StockPickView>} */
+  const stockByKey = new Map()
+  if (liveStocks?.length) {
+    for (const s of liveStocks) {
+      if (!s?.ticker) continue
+      const country = s.country === "KR" ? "KR" : "US"
+      stockByKey.set(`${country}:${s.ticker}`, s)
+    }
+  }
+  const refreshed = sanitized.map((r) => {
+    const stock = stockByKey.get(`${r.country}:${r.ticker}`) ?? null
+    const withSnap = backfillRecommendSnapshot(r, stock, marketContext)
+    return refreshPickPrice(withSnap, today, map)
+  })
   saveValidationPicks(refreshed)
   return refreshed
 }
