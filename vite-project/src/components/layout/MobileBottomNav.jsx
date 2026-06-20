@@ -1,4 +1,4 @@
-import { Activity, Briefcase, Lightbulb, ListChecks } from "lucide-react"
+import { Activity, Briefcase, LineChart, ListChecks, Lightbulb } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { getPrimaryNavItems, NAV_MOBILE_SHORT } from "../../utils/ydsUiLabels.js"
 
@@ -6,6 +6,8 @@ const ICON_BY_PATH = {
   "/market-analysis": Activity,
   "/stock-picks": ListChecks,
   "/watchlist": ListChecks,
+  "/portfolio": Briefcase,
+  "/performance-validation": LineChart,
   "/performance-center": Briefcase,
   "/performance-dashboard": Briefcase,
   "/ai-daily-report": Lightbulb,
@@ -39,9 +41,11 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
       p === "/"
     )
       return "market_analysis"
-    if (p.startsWith("/watchlist") || p.startsWith("/stock-picks")) return "stock_picks"
+    if (p.startsWith("/watchlist")) return "watchlist"
+    if (p.startsWith("/stock-picks")) return "stock_picks"
+    if (p.startsWith("/performance-validation")) return "performance_validation"
     if (p.startsWith("/performance-center") || p.startsWith("/performance-dashboard") || p.startsWith("/portfolio"))
-      return "performance_center"
+      return "portfolio"
     if (p.startsWith("/ai-daily-report") || p.startsWith("/insights")) return "ai_daily_report"
     return null
   })()

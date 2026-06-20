@@ -6,13 +6,16 @@ export function getPrimaryNavItems() {
     { label: "📊 시장분석", path: "/market-analysis" },
     { label: "⭐ 종목추천", path: "/stock-picks" },
     { label: "💼 포트폴리오", path: "/portfolio" },
+    { label: "📈 성과검증", path: "/performance-validation" },
   ]
 }
 
 /** @returns {{ label: string; path: string }[]} */
 export function getSecondaryNavItems() {
   return [
+    { label: "⭐ 관심종목", path: "/watchlist" },
     { label: "🔔 알림", path: "/alert-center" },
+    { label: "🧪 패닉 연구실", path: "/panic-lab" },
     { label: "🧪 연구실", path: "/lab" },
   ]
 }
@@ -21,11 +24,13 @@ export function getSecondaryNavItems() {
 export const NAV_MOBILE_SHORT = {
   "/market-analysis": "📊 시장",
   "/stock-picks": "⭐ 종목",
-  "/watchlist": "⭐ 종목",
+  "/watchlist": "⭐ 관심",
   "/portfolio": "💼 포트",
+  "/performance-validation": "📈 검증",
   "/performance-dashboard": "💼 포트",
   "/ai-daily-report": "💡 인사이트",
   "/alert-center": "🔔 알림",
+  "/panic-lab": "🧪 패닉",
   "/lab": "🧪 연구",
 }
 
@@ -42,14 +47,15 @@ export const UI_PAGE = {
     path: "/stock-picks",
   },
   portfolio: {
-    title: "포트폴리오",
-    kicker: "투자 운영 센터 · Phase 7",
+    title: "포트폴리오 센터",
+    kicker: "Portfolio Center · 실제 자산 관리",
     path: "/portfolio",
   },
   watchlist: {
     title: "관심종목",
-    kicker: "관심종목 · YDS V1",
-    subtitleSuffix: "종목 추천 Top10",
+    kicker: "Watchlist · YDS V1",
+    subtitleSuffix: "등록 종목 추적",
+    path: "/watchlist",
   },
   alert: {
     title: "알림",
@@ -59,9 +65,19 @@ export const UI_PAGE = {
     title: "성과",
     kicker: "성과센터 · YDS V1",
   },
+  performanceValidation: {
+    title: "성과 검증",
+    kicker: "백테스트 · YDS V1",
+    path: "/performance-validation",
+  },
   research: {
     title: "연구실",
     kicker: "연구실 · YDS V1",
+  },
+  panicLab: {
+    title: "패닉 연구실",
+    kicker: "Panic Lab · YDS V1",
+    path: "/panic-lab",
   },
 }
 

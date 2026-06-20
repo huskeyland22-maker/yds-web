@@ -9,6 +9,7 @@ import { loadPortfolioReview } from "./ydsPortfolioReviewStorage.js"
 import { loadPortfolioStockReviews } from "./ydsPortfolioStockReviewStorage.js"
 import { loadPortfolioTrades } from "./ydsPortfolioTradesStorage.js"
 import { STOCK_STATUS_VIEWS } from "./ydsStockActionEngine.js"
+import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
 import {
   filterByCountry,
   getRankingStocks,
@@ -41,11 +42,24 @@ import {
 
 export const HORIZON_DAYS = [
   { key: "d7", label: "7일", days: 7 },
+  { key: "d14", label: "14일", days: 14 },
   { key: "d30", label: "30일", days: 30 },
   { key: "d90", label: "90일", days: 90 },
   { key: "d180", label: "180일", days: 180 },
   { key: "d365", label: "365일", days: 365 },
 ]
+
+/** @param {string} dateKey @param {number} days */
+export function addCalendarDays(dateKey, days) {
+  const d = new Date(`${String(dateKey).slice(0, 10)}T12:00:00`)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+/** @param {string} dateKey @param {number} days */
+export function subtractCalendarDays(dateKey, days) {
+  return addCalendarDays(dateKey, -days)
+}
 
 /** @type {Record<string, string>} */
 export const REGIME_LABELS = {
@@ -83,6 +97,12 @@ function pickRecordFromStock(stock, marketContext, recommendedAt) {
   const statusId = stock.stockStatus?.id ?? stock.statusView?.id ?? "interest"
   const statusLabel =
     stock.stockStatus?.label ?? STOCK_STATUS_VIEWS[statusId]?.label ?? "—"
+  const marketFitScore = Number(stock.scoreBreakdown?.marketEnv ?? stock.pickMeta?.marketFitScore ?? 0)
+  const marketFitGrade =
+    stock.pickMeta?.marketFitGrade ?? marketEnvToGrade(marketFitScore, 15)
+  const recommendedScore = Number(stock.v4Score?.finalRankScore ?? stock.score)
+  const qualityGrade = String(stock.v4Score?.qualityGrade ?? "—")
+  const timingGrade = String(stock.v4Score?.timingGrade ?? "—")
 
   return normalizePickRecord({
     id,
@@ -93,11 +113,16 @@ function pickRecordFromStock(stock, marketContext, recommendedAt) {
     isTop3: stock.rank > 0 && stock.rank <= 3,
     recommendedAt,
     recommendedPrice: Number.isFinite(price) && price > 0 ? price : 0,
+    recommendedScore: Number.isFinite(recommendedScore) ? recommendedScore : null,
+    qualityGrade,
+    timingGrade,
+    marketFitGrade,
     statusId,
     statusLabel,
     currentPrice: null,
     returnPct: null,
-    horizons: { d7: null, d30: null, d90: null, d180: null, d365: null },
+    horizons: { d7: null, d14: null, d30: null, d90: null, d180: null, d365: null },
+    horizonPrices: { d7: null, d14: null, d30: null, d90: null, d180: null, d365: null },
     priceLog: Number.isFinite(price) && price > 0 ? { [recommendedAt]: price } : {},
     regimeId,
     regimeLabel,
@@ -108,21 +133,68 @@ function pickRecordFromStock(stock, marketContext, recommendedAt) {
 }
 
 /**
+ * @param {Record<string, number>} priceLog
+ * @param {string} recommendedAt
+ * @param {number} horizonDays
+ * @param {string} today
+ * @param {number | null} currentPrice
+ */
+function resolveHorizonLockPrice(priceLog, recommendedAt, horizonDays, today, currentPrice) {
+  const targetDate = addCalendarDays(recommendedAt, horizonDays)
+  if (today < targetDate) return null
+
+  const exact = priceLog[targetDate]
+  if (exact != null && Number.isFinite(exact) && exact > 0) return exact
+
+  const onOrAfter = Object.keys(priceLog)
+    .filter((d) => d >= targetDate)
+    .sort()
+  for (const d of onOrAfter) {
+    const p = priceLog[d]
+    if (p != null && Number.isFinite(p) && p > 0) return p
+  }
+
+  if (currentPrice != null && Number.isFinite(currentPrice) && currentPrice > 0) {
+    return currentPrice
+  }
+  return null
+}
+
+/**
  * @param {ValidationPickRecord} record
  * @param {string} today
+ * @param {number | null} currentPrice
  */
-function refreshPickHorizons(record, today) {
-  const elapsed = daysBetween(record.recommendedAt, today)
-  const ret = calcRecommendReturnPct(record.recommendedPrice, record.currentPrice)
+function lockPickHorizons(record, today, currentPrice) {
+  /** @type {ValidationPickRecord["horizonPrices"]} */
+  const horizonPrices = { ...record.horizonPrices }
   /** @type {ValidationPickRecord["horizons"]} */
   const horizons = { ...record.horizons }
+
   for (const h of HORIZON_DAYS) {
-    if (horizons[h.key] != null) continue
-    if (elapsed >= h.days && ret != null && Number.isFinite(ret)) {
-      horizons[h.key] = Math.round(ret * 10) / 10
+    if (horizonPrices[h.key] != null && Number.isFinite(horizonPrices[h.key])) {
+      if (horizons[h.key] == null) {
+        const ret = calcRecommendReturnPct(record.recommendedPrice, horizonPrices[h.key])
+        horizons[h.key] = ret != null ? Math.round(ret * 10) / 10 : null
+      }
+      continue
     }
+
+    const lockPrice = resolveHorizonLockPrice(
+      record.priceLog,
+      record.recommendedAt,
+      h.days,
+      today,
+      currentPrice,
+    )
+    if (lockPrice == null) continue
+
+    horizonPrices[h.key] = lockPrice
+    const ret = calcRecommendReturnPct(record.recommendedPrice, lockPrice)
+    horizons[h.key] = ret != null ? Math.round(ret * 10) / 10 : null
   }
-  return horizons
+
+  return { horizonPrices, horizons }
 }
 
 /**
@@ -137,18 +209,21 @@ function refreshPickPrice(record, today) {
   })
   const current = Number(snap?.price ?? snap?.close)
   const currentPrice = Number.isFinite(current) && current > 0 ? current : null
-  const returnPct = calcRecommendReturnPct(record.recommendedPrice, currentPrice)
   const priceLog = { ...record.priceLog }
-  if (currentPrice != null) priceLog[today] = currentPrice
+  if (currentPrice != null && priceLog[today] == null) priceLog[today] = currentPrice
 
-  const next = {
-    ...record,
+  const withLog = { ...record, priceLog }
+  const { horizonPrices, horizons } = lockPickHorizons(withLog, today, currentPrice)
+  const returnPct = calcRecommendReturnPct(record.recommendedPrice, currentPrice)
+
+  return {
+    ...withLog,
     currentPrice,
     returnPct,
-    priceLog,
+    horizonPrices,
+    horizons,
     lastUpdatedAt: Date.now(),
   }
-  return { ...next, horizons: refreshPickHorizons(next, today) }
 }
 
 /**

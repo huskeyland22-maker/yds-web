@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { traceStockPickMount } from "../../content/ydsStockPickMountTrace.js"
-import { captureTodayPickSnapshots } from "../../content/ydsValidationEngine.js"
+import { captureTodayPickSnapshots, refreshValidationPicks } from "../../content/ydsValidationEngine.js"
+import { loadValidationPicks } from "../../content/ydsValidationStorage.js"
 import {
   assignRanks,
   filterByCountry,
@@ -73,7 +74,10 @@ export default function YdsStockPickV1Hub() {
 
   useEffect(() => {
     if (loading || !liveStocks.length) return
-    const run = () => captureTodayPickSnapshots(marketContext, 10, liveStocks)
+    const run = () => {
+      captureTodayPickSnapshots(marketContext, 10, liveStocks)
+      refreshValidationPicks(loadValidationPicks())
+    }
     if (typeof requestIdleCallback === "function") {
       const id = requestIdleCallback(run, { timeout: 3000 })
       return () => cancelIdleCallback(id)

@@ -32,10 +32,13 @@ import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
+import PerformanceValidationPage from "./pages/PerformanceValidationPage.jsx"
+import PanicLabPage from "./pages/PanicLabPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import StockRecommendationPage from "./pages/StockRecommendationPage.jsx"
 import YdsPortfolioPage from "./pages/YdsPortfolioPage.jsx"
 import StockPickDetailPage from "./pages/StockPickDetailPage.jsx"
+import UserWatchlistPage from "./pages/UserWatchlistPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
 import GlossaryPage from "./pages/GlossaryPage.jsx"
 import YdsIntroPage from "./pages/YdsIntroPage.jsx"
@@ -114,11 +117,6 @@ const FIELD_LABELS = {
   skew: "SKEW",
   putCall: "Put/Call",
   highYield: "High Yield",
-}
-
-function WatchlistToStockPicksRedirect() {
-  const location = useLocation()
-  return <Navigate to={`/stock-picks${location.hash}`} replace />
 }
 
 function isIosStandalonePwa() {
@@ -1011,12 +1009,14 @@ function App() {
       path === "/macro-risk" ||
       path === "/trading-log" ||
       path === "/recommendation-history" ||
+      path === "/panic-lab" ||
       path === "/panic-validation" ||
       path === "/lab" ||
       path === "/market-analysis" ||
       path === "/market-dashboard" ||
       path === "/performance-dashboard" ||
       path === "/performance-center" ||
+      path === "/performance-validation" ||
       path === "/portfolio" ||
       path === "/action-log" ||
       path === "/yds-compare" ||
@@ -1367,6 +1367,14 @@ function App() {
             />
             <Route path="/performance-dashboard" element={<Navigate to="/performance-center" replace />} />
             <Route
+              path="/performance-validation"
+              element={
+                <SectionErrorBoundary label="성과 검증">
+                  <PerformanceValidationPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
               path="/portfolio"
               element={
                 <SectionErrorBoundary label="포트폴리오">
@@ -1404,7 +1412,9 @@ function App() {
             <Route
               path="/watchlist"
               element={
-                <WatchlistToStockPicksRedirect />
+                <SectionErrorBoundary label="관심종목">
+                  <UserWatchlistPage />
+                </SectionErrorBoundary>
               }
             />
             <Route
@@ -1492,6 +1502,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="추천 이력">
                   <RecommendationHistoryPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/panic-lab"
+              element={
+                <SectionErrorBoundary label="패닉 연구실">
+                  <PanicLabPage />
                 </SectionErrorBoundary>
               }
             />

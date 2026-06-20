@@ -17,11 +17,23 @@ const MAX_REGIME_PERIODS = 120
 /**
  * @typedef {{
  *   d7: number | null
+ *   d14: number | null
  *   d30: number | null
  *   d90: number | null
  *   d180: number | null
  *   d365: number | null
  * }} ValidationHorizonReturns
+ */
+
+/**
+ * @typedef {{
+ *   d7: number | null
+ *   d14: number | null
+ *   d30: number | null
+ *   d90: number | null
+ *   d180: number | null
+ *   d365: number | null
+ * }} ValidationHorizonPrices
  */
 
 /**
@@ -34,11 +46,16 @@ const MAX_REGIME_PERIODS = 120
  *   isTop3: boolean
  *   recommendedAt: string
  *   recommendedPrice: number
+ *   recommendedScore: number | null
+ *   qualityGrade: string
+ *   timingGrade: string
+ *   marketFitGrade: string
  *   statusId: string
  *   statusLabel: string
  *   currentPrice: number | null
  *   returnPct: number | null
  *   horizons: ValidationHorizonReturns
+ *   horizonPrices: ValidationHorizonPrices
  *   priceLog: Record<string, number>
  *   regimeId: string
  *   regimeLabel: string
@@ -81,6 +98,16 @@ const MAX_REGIME_PERIODS = 120
 
 const EMPTY_HORIZONS = {
   d7: null,
+  d14: null,
+  d30: null,
+  d90: null,
+  d180: null,
+  d365: null,
+}
+
+const EMPTY_HORIZON_PRICES = {
+  d7: null,
+  d14: null,
   d30: null,
   d90: null,
   d180: null,
@@ -92,6 +119,13 @@ export function normalizePickRecord(raw) {
   const r = raw && typeof raw === "object" ? raw : {}
   const recommendedAt = String(r.recommendedAt ?? "").slice(0, 10)
   const rank = Number(r.rank) || 0
+  const snap = r.snapshot && typeof r.snapshot === "object" ? r.snapshot : r
+  const recommendedScoreRaw = snap.recommendedScore ?? r.recommendedScore
+  const recommendedScore =
+    recommendedScoreRaw != null && Number.isFinite(Number(recommendedScoreRaw))
+      ? Number(recommendedScoreRaw)
+      : null
+
   return /** @type {ValidationPickRecord} */ ({
     id: String(r.id ?? `${recommendedAt}:${r.country}:${r.ticker}`),
     ticker: String(r.ticker ?? ""),
@@ -101,11 +135,16 @@ export function normalizePickRecord(raw) {
     isTop3: r.isTop3 != null ? Boolean(r.isTop3) : rank > 0 && rank <= 3,
     recommendedAt,
     recommendedPrice: Number(r.recommendedPrice) || 0,
+    recommendedScore,
+    qualityGrade: String(snap.qualityGrade ?? r.qualityGrade ?? "—"),
+    timingGrade: String(snap.timingGrade ?? r.timingGrade ?? "—"),
+    marketFitGrade: String(snap.marketFitGrade ?? r.marketFitGrade ?? "—"),
     statusId: String(r.statusId ?? "interest"),
     statusLabel: String(r.statusLabel ?? "—"),
     currentPrice: r.currentPrice != null ? Number(r.currentPrice) : null,
     returnPct: r.returnPct != null ? Number(r.returnPct) : null,
     horizons: { ...EMPTY_HORIZONS, ...(r.horizons ?? {}) },
+    horizonPrices: { ...EMPTY_HORIZON_PRICES, ...(r.horizonPrices ?? {}) },
     priceLog: r.priceLog && typeof r.priceLog === "object" ? r.priceLog : {},
     regimeId: String(r.regimeId ?? "neutral"),
     regimeLabel: String(r.regimeLabel ?? "—"),

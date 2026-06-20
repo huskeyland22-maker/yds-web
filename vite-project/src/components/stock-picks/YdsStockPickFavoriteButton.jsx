@@ -7,7 +7,7 @@ export default function YdsStockPickFavoriteButton({ active, onToggle }) {
       type="button"
       className={["yds-spick-fav", active ? "yds-spick-fav--active" : ""].filter(Boolean).join(" ")}
       aria-pressed={active}
-      aria-label={active ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+      aria-label={active ? "관심종목 해제" : "관심종목 등록"}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()

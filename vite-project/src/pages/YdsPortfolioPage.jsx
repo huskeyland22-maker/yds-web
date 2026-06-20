@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
 import YdsPortfolioCashSection from "../components/portfolio/YdsPortfolioCashSection.jsx"
+import YdsPortfolioCenterSection from "../components/portfolio/YdsPortfolioCenterSection.jsx"
 import YdsPortfolioMySection from "../components/portfolio/YdsPortfolioMySection.jsx"
 import YdsPortfolioReviewSection from "../components/portfolio/YdsPortfolioReviewSection.jsx"
 import YdsPortfolioTradesSection from "../components/portfolio/YdsPortfolioTradesSection.jsx"
@@ -30,25 +31,33 @@ export default function YdsPortfolioPage() {
         <p className="yds-portfolio__kicker">{UI_PAGE.portfolio.kicker}</p>
         <h1 className="yds-portfolio__title">{UI_PAGE.portfolio.title}</h1>
         <p className="yds-portfolio__sub">
-          실제 계좌 관리 · 판단{" "}
-          <Link to="/market-analysis">시장분석</Link>
+          실제 보유 자산 ·{" "}
+          <Link to="/market-analysis">시장상태</Link>
           {" · "}후보{" "}
           <Link to="/stock-picks">종목추천</Link>
-          {" · "}실행 여기
+          {" · "}성과{" "}
+          <Link to="/performance-validation">성과검증</Link>
         </p>
       </header>
 
       <PortfolioStateProvider>
-        <YdsPortfolioMySection />
-        <YdsPortfolioYdsCompareSection />
-        <YdsPortfolioTradesSection />
-        <YdsPortfolioCashSection />
-        <YdsPortfolioReviewSection />
-        <YdsPortfolioValidationSection />
+        <YdsPortfolioCenterSection />
+
+        <details className="yds-pf-center__ops">
+          <summary className="yds-pf-center__ops-summary">운영 도구 · 상세 계좌·거래·검증</summary>
+          <div className="yds-pf-center__ops-body">
+            <YdsPortfolioMySection />
+            <YdsPortfolioYdsCompareSection />
+            <YdsPortfolioTradesSection />
+            <YdsPortfolioCashSection />
+            <YdsPortfolioReviewSection />
+            <YdsPortfolioValidationSection />
+          </div>
+        </details>
       </PortfolioStateProvider>
 
       <p className="yds-portfolio__footnote">
-        거래와 현재 현금만 입력한다 · 나머지는 시스템이 계산한다
+        보유·현금만 입력 · 시장상태·리스크·비중은 시스템이 계산
       </p>
     </div>
   )

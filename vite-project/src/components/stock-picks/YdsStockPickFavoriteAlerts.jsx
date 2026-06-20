@@ -14,7 +14,7 @@ export default function YdsStockPickFavoriteAlerts({ alerts = [] }) {
       <ul className="yds-spick-fav-alerts__list">
         {alerts.map((alert) => (
           <li key={`${alert.ticker}-${alert.type}`} className="yds-spick-fav-alerts__item">
-            <Link to={`/stock-picks/${encodeURIComponent(alert.ticker)}`} className="yds-spick-fav-alerts__link">
+            <Link to={`/watchlist#watch-${alert.ticker}`} className="yds-spick-fav-alerts__link">
               <strong>{alert.name}</strong> — {alert.message}
             </Link>
           </li>
