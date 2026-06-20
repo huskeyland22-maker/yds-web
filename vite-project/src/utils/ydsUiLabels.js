@@ -52,7 +52,7 @@ export const UI_PAGE = {
   },
   portfolio: {
     title: "포트폴리오 센터",
-    kicker: "Portfolio Center · 실제 자산 관리",
+    kicker: "Portfolio Center V1",
     path: "/portfolio",
   },
   watchlist: {

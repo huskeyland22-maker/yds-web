@@ -3,21 +3,24 @@
  */
 
 import { readScoreHistory, getWatchlistDeltas } from "./ydsStockPickScoreHistory.js"
-import { resolvePricePosition } from "./ydsStockPickV5Insights.js"
+import { resolveStockPosition } from "./ydsStockPositionEngine.js"
 import { resolveStockPickCardAction } from "./ydsStockPickCardAction.js"
 import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
 
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
 
 export const WATCHLIST_POSITION_SHORT = {
-  dip: "눌림",
   earlyRise: "상승초기",
+  rising: "상승진행",
+  pullback: "눌림",
+  sideways: "횡보",
   overheat: "과열",
+  downturn: "하락",
 }
 
 /** @param {StockPickView} stock */
 export function buildWatchlistItem(stock, history = readScoreHistory()) {
-  const position = stock.pickMeta?.pricePosition ?? resolvePricePosition(stock)
+  const position = stock.pickMeta?.positionState ?? resolveStockPosition(stock)
   const positionShort = WATCHLIST_POSITION_SHORT[position.id] ?? position.label
   const cardAction = resolveStockPickCardAction(stock)
   const marketFitScore = stock.pickMeta?.marketFitScore ?? stock.scoreBreakdown?.marketEnv ?? 0
@@ -38,7 +41,7 @@ export function buildWatchlistItem(stock, history = readScoreHistory()) {
     marketFitScore: Math.round(marketFitScore),
     positionId: position.id,
     positionLabel: positionShort,
-    positionEmoji: position.emoji,
+    positionEmoji: "",
     cardActionId: cardAction.id,
     cardActionLabel: cardAction.label,
     statusId: stock.v4Score?.recommendStatusId ?? "",

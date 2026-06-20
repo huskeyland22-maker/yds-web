@@ -5,9 +5,8 @@ import { useStockPickDetailLive } from "../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
 import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLine.jsx"
-import YdsStockPickOpinionBlock from "../components/stock-picks/YdsStockPickOpinionBlock.jsx"
-import YdsStockInvestmentReport from "../components/stock-picks/YdsStockInvestmentReport.jsx"
-import YdsStockPickPhase3Breakdown from "../components/stock-picks/YdsStockPickPhase3Breakdown.jsx"
+import YdsStockPickScoreDetailPanel from "../components/stock-picks/YdsStockPickScoreDetailPanel.jsx"
+import YdsStockPositionBadge from "../components/stock-picks/YdsStockPositionBadge.jsx"
 import "../styles/stock-picks-platform.css"
 
 export default function StockPickDetailPage() {
@@ -61,14 +60,10 @@ export default function StockPickDetailPage() {
         </div>
         <YdsStockPickPriceLine stock={stock} />
 
+        <YdsStockPositionBadge stock={stock} variant="detail" />
+
         <p className="yds-spick-detail__ticker font-mono tabular-nums">
           {stock.ticker}
-          {stock.stockStatus ? (
-            <span className="yds-spick-detail__country">
-              {" "}
-              · {stock.stockStatus.emoji} {stock.stockStatus.label}
-            </span>
-          ) : null}
           {countryMeta ? (
             <span className="yds-spick-detail__country">
               {" "}
@@ -77,21 +72,7 @@ export default function StockPickDetailPage() {
           ) : null}
         </p>
 
-        <YdsStockPickPhase3Breakdown
-          stock={stock}
-          breakdown={stock.scoreBreakdown}
-          v4={stock.v4Score}
-          timing={stock.timingScore}
-          variant="detail"
-          showDetails={false}
-        />
-
-        <YdsStockInvestmentReport stock={stock} />
-
-        <details className="yds-inv-report__legacy">
-          <summary>요약 의견 (간략)</summary>
-          <YdsStockPickOpinionBlock opinion={stock.opinion} variant="practical" />
-        </details>
+        <YdsStockPickScoreDetailPanel stock={stock} />
       </header>
     </div>
   )

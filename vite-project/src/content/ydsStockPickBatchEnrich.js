@@ -16,6 +16,8 @@ import {
   marketEnvToGrade,
   LONG_HOLD_QUALITY_MIN,
 } from "./ydsStockPickV5Insights.js"
+import { resolveStockPosition } from "./ydsStockPositionEngine.js"
+import { buildStockPickChangeReport } from "./ydsStockPickChangeEngine.js"
 import { computeDataReliability } from "./ydsStockPickReliability.js"
 import { resolveFinalAction } from "./ydsStockPickFinalAction.js"
 
@@ -27,6 +29,8 @@ import { resolveFinalAction } from "./ydsStockPickFinalAction.js"
  *   noChaseReasons: string[]
  *   timingPenaltyReasons: string[]
  *   pricePosition: import("./ydsStockPickV5Insights.js").PricePositionView
+ *   positionState: ReturnType<typeof resolveStockPosition>
+ *   changeReport: ReturnType<typeof buildStockPickChangeReport>
  *   reliability: import("./ydsStockPickReliability.js").DataReliabilityView
  *   finalAction: import("./ydsStockPickFinalAction.js").FinalActionView
  *   marketFitGrade: string
@@ -47,6 +51,7 @@ export function applyStockPickBatchMeta(liveStocks, universeStocks) {
   const enriched = liveStocks.map((stock) => {
     const marketFitScore = stock.scoreBreakdown?.marketEnv ?? 0
     const scoreDeltas = getScoreDeltas(stock.ticker, historyBefore)
+    const positionState = resolveStockPosition(stock)
 
     /** @type {StockPickMeta} */
     const pickMeta = {
@@ -56,12 +61,16 @@ export function applyStockPickBatchMeta(liveStocks, universeStocks) {
       noChaseReasons: buildNoChaseReasons(stock),
       timingPenaltyReasons: buildTimingPenaltyReasons(stock),
       pricePosition: resolvePricePosition(stock),
+      positionState,
       reliability: computeDataReliability(stock),
       finalAction: resolveFinalAction(stock),
       marketFitGrade: marketEnvToGrade(marketFitScore, 15),
       marketFitScore,
       longHoldCandidate: (stock.v4Score?.quality ?? 0) >= LONG_HOLD_QUALITY_MIN,
+      changeReport: null,
     }
+
+    pickMeta.changeReport = buildStockPickChangeReport({ ...stock, pickMeta }, historyBefore)
 
     return { ...stock, pickMeta, scoreDeltas }
   })

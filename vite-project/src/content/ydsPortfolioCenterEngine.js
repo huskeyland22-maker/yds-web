@@ -1,22 +1,15 @@
 /**
- * 포트폴리오 센터 — 시장 연동 분석·종목 의견·리스크
+ * 포트폴리오 센터 V1 — 시장 연동·적합도·리스크 (경량)
  */
 
 import stockPickUniverse from "../data/stockPickUniverse.json" with { type: "json" }
 import { STOCK_PICK_SECTORS } from "./ydsStockPickModel.js"
+import { STOCK_PICK_THEMES_BY_TICKER } from "./ydsStockPickThemes.js"
 import { buildV5Analysis } from "./ydsPortfolioV5Engine.js"
-import { derivePortfolioHoldingAction } from "./ydsPortfolioHoldingAction.js"
 
 /** @typedef {import("./ydsPortfolioV5Engine.js").HoldingRow} HoldingRow */
 /** @typedef {import("./ydsMarketAdapter.js").YdsMarketAdapterContext} YdsMarketAdapterContext */
 /** @typedef {import("./ydsPortfolioTradesStorage.js").PortfolioTrade} PortfolioTrade */
-
-export const HOLDING_OPINIONS = {
-  hold: { id: "hold", label: "홀딩" },
-  increase: { id: "increase", label: "비중확대" },
-  decrease: { id: "decrease", label: "비중축소" },
-  watch: { id: "watch", label: "관망" },
-}
 
 /** @type {Map<string, string>} */
 const SECTOR_LABEL_BY_ID = new Map(STOCK_PICK_SECTORS.map((s) => [s.id, s.label]))
@@ -32,76 +25,19 @@ export function sectorLabelForTicker(ticker) {
   return SECTOR_LABEL_BY_ID.get(key) ?? key
 }
 
-/**
- * @param {HoldingRow} row
- * @param {YdsMarketAdapterContext | null | undefined} ctx
- */
-export function deriveHoldingOpinion(row, ctx) {
-  const action = derivePortfolioHoldingAction(row, ctx)
-  const statusId = action.statusId
-  const ret = row.returnPct
-  const macro = ctx?.macroId ?? "neutral"
-
-  if (statusId === "overheat" || (ret != null && ret >= 22)) {
-    return HOLDING_OPINIONS.decrease
-  }
-
-  if (ctx?.isDefensive && statusId !== "trend") {
-    return HOLDING_OPINIONS.watch
-  }
-
-  if ((macro === "dca" || macro === "panicBuy") && (statusId === "dip" || statusId === "interest")) {
-    return HOLDING_OPINIONS.increase
-  }
-
-  if (statusId === "trend") return HOLDING_OPINIONS.hold
-  if (statusId === "dip") return HOLDING_OPINIONS.watch
-  if (statusId === "interest") return HOLDING_OPINIONS.watch
-
-  return HOLDING_OPINIONS.hold
+/** @param {string | undefined} ticker */
+function themesForTicker(ticker) {
+  const key = String(ticker ?? "")
+  return STOCK_PICK_THEMES_BY_TICKER[key] ?? STOCK_PICK_THEMES_BY_TICKER[key.toUpperCase()] ?? []
 }
 
-/**
- * @param {HoldingRow[]} rows
- */
-function computeConcentration(rows) {
-  if (!rows.length) return { maxWeight: 0, hhi: 0, label: "—" }
-  const weights = rows.map((r) => r.weightPct ?? 0)
-  const maxWeight = Math.max(...weights)
-  const hhi = Math.round(weights.reduce((s, w) => s + (w / 100) ** 2, 0) * 1000) / 10
-  let label = "분산"
-  if (maxWeight >= 35 || hhi >= 0.25) label = "고집중"
-  else if (maxWeight >= 22 || hhi >= 0.18) label = "주의"
-  return { maxWeight, hhi, label }
-}
-
-/**
- * @param {HoldingRow[]} rows
- * @param {YdsMarketAdapterContext | null | undefined} ctx
- */
-function computeRiskLevel(rows, ctx) {
-  const conc = computeConcentration(rows)
-  const overheatCount = rows.filter((r) => {
-    const a = derivePortfolioHoldingAction(r, ctx)
-    return a.statusId === "overheat"
-  }).length
-  const overheatWeight = rows
-    .filter((r) => derivePortfolioHoldingAction(r, ctx).statusId === "overheat")
-    .reduce((s, r) => s + (r.weightPct ?? 0), 0)
-
-  let score = 30
-  if (conc.label === "고집중") score += 35
-  else if (conc.label === "주의") score += 18
-  if (overheatCount >= 2 || overheatWeight >= 25) score += 25
-  else if (overheatCount >= 1) score += 12
-  if (ctx?.isDefensive) score += 10
-  score = Math.min(100, score)
-
-  let label = "낮음"
-  if (score >= 70) label = "높음"
-  else if (score >= 45) label = "중간"
-
-  return { score, label, overheatCount, overheatWeight: Math.round(overheatWeight * 10) / 10 }
+/** @param {number} score */
+export function fitGradeFromScore(score) {
+  if (score >= 85) return { grade: "A", label: "매우 양호" }
+  if (score >= 70) return { grade: "B", label: "양호" }
+  if (score >= 55) return { grade: "C", label: "보통" }
+  if (score >= 40) return { grade: "D", label: "조정 필요" }
+  return { grade: "F", label: "부적합" }
 }
 
 /**
@@ -115,58 +51,97 @@ function buildSectorBreakdown(rows, cashPct) {
     const sector = sectorLabelForTicker(row.ticker)
     map.set(sector, (map.get(sector) ?? 0) + (row.weightPct ?? 0))
   }
-  const sectors = [...map.entries()]
+  return [...map.entries()]
     .map(([sector, weightPct]) => ({
       sector,
       weightPct: Math.round(weightPct * 10) / 10,
     }))
     .sort((a, b) => b.weightPct - a.weightPct)
-
-  return {
-    sectors,
-    cashPct: Math.round(cashPct * 10) / 10,
-    stockPct: Math.round((100 - cashPct) * 10) / 10,
-  }
 }
 
 /**
  * @param {HoldingRow[]} rows
- * @param {{ sectors: { sector: string; weightPct: number }[] }} sectorBreakdown
- * @param {{ overheatCount: number; overheatWeight: number; label: string }} risk
  */
-function buildRiskWarnings(rows, sectorBreakdown, risk) {
-  /** @type {{ level: 'warn' | 'info'; message: string }[]} */
-  const warnings = []
+function buildThemeBreakdown(rows) {
+  /** @type {Map<string, number>} */
+  const map = new Map()
+  for (const row of rows) {
+    const themes = themesForTicker(row.ticker)
+    const list = themes.length ? themes : ["기타"]
+    for (const theme of list) {
+      map.set(theme, (map.get(theme) ?? 0) + (row.weightPct ?? 0) / list.length)
+    }
+  }
+  return [...map.entries()]
+    .map(([theme, weightPct]) => ({
+      theme,
+      weightPct: Math.round(weightPct * 10) / 10,
+    }))
+    .sort((a, b) => b.weightPct - a.weightPct)
+}
 
-  const topSector = sectorBreakdown.sectors[0]
-  if (topSector && topSector.weightPct >= 40) {
-    warnings.push({
-      level: "warn",
-      message: `${topSector.sector} 업종 비중 ${topSector.weightPct}% — 특정 업종 집중`,
+/**
+ * @param {HoldingRow[]} rows
+ * @param {{ sectors: { sector: string; weightPct: number }[] }} sectors
+ * @param {{ themes: { theme: string; weightPct: number }[] }} themes
+ * @param {number} actualCashPct
+ * @param {number} recommendedCashPct
+ */
+function buildRiskChecks(rows, sectors, themes, actualCashPct, recommendedCashPct) {
+  /** @type {{ id: string; label: string; status: 'ok' | 'warn'; message: string }[]} */
+  const checks = []
+
+  const topSector = sectors[0]
+  if (!topSector || topSector.weightPct < 28) {
+    checks.push({ id: "sector", label: "섹터 집중도", status: "ok", message: "업종 분산 양호" })
+  } else if (topSector.weightPct >= 40) {
+    checks.push({
+      id: "sector",
+      label: "섹터 집중도",
+      status: "warn",
+      message: `${topSector.sector} ${topSector.weightPct}% — 업종 과집중`,
     })
-  } else if (topSector && topSector.weightPct >= 28) {
-    warnings.push({
-      level: "info",
-      message: `${topSector.sector} 업종 ${topSector.weightPct}% — 분산 검토`,
+  } else {
+    checks.push({
+      id: "sector",
+      label: "섹터 집중도",
+      status: "warn",
+      message: `${topSector.sector} ${topSector.weightPct}% — 분산 검토`,
     })
   }
 
-  if (risk.overheatCount >= 1) {
-    warnings.push({
-      level: "warn",
-      message: `과열 종목 ${risk.overheatCount}개 · 비중 합 ${risk.overheatWeight}%`,
+  const topTheme = themes[0]
+  if (!topTheme || topTheme.weightPct < 32) {
+    checks.push({ id: "theme", label: "테마 집중도", status: "ok", message: "테마 분산 양호" })
+  } else if (topTheme.weightPct >= 45) {
+    checks.push({
+      id: "theme",
+      label: "테마 집중도",
+      status: "warn",
+      message: `${topTheme.theme} ${topTheme.weightPct}% — 테마 과집중`,
+    })
+  } else {
+    checks.push({
+      id: "theme",
+      label: "테마 집중도",
+      status: "warn",
+      message: `${topTheme.theme} ${topTheme.weightPct}% — 테마 편중`,
     })
   }
 
-  const heavy = rows.filter((r) => (r.weightPct ?? 0) >= 30)
-  for (const row of heavy.slice(0, 2)) {
-    warnings.push({
-      level: "warn",
-      message: `${row.name} 단일 비중 ${row.weightPct}%`,
+  const cashGap = recommendedCashPct - actualCashPct
+  if (cashGap <= 8) {
+    checks.push({ id: "cash", label: "현금 부족", status: "ok", message: `현금 ${actualCashPct}% · 권장 ${recommendedCashPct}%` })
+  } else {
+    checks.push({
+      id: "cash",
+      label: "현금 부족",
+      status: "warn",
+      message: `현금 ${actualCashPct}% · 권장 ${recommendedCashPct}% (${Math.round(cashGap)}%p 부족)`,
     })
   }
 
-  return warnings
+  return checks
 }
 
 /**
@@ -177,7 +152,7 @@ function buildRiskWarnings(rows, sectorBreakdown, risk) {
  * @param {number | null | undefined} usdkrw
  * @param {ReturnType<typeof import("./ydsPortfolioV5Engine.js").buildV5Holdings>} holdings
  */
-export function buildPortfolioCenterReport(
+export function buildPortfolioCenterV1Report(
   trades,
   cashAmount,
   marketContext,
@@ -188,35 +163,36 @@ export function buildPortfolioCenterReport(
   const rows = holdings?.rows ?? []
   const analysis = buildV5Analysis(trades, cashAmount, marketContext, quoteMap, usdkrw)
   const recommended = analysis.recommended
-  const concentration = computeConcentration(rows)
-  const risk = computeRiskLevel(rows, marketContext)
-  const sectorBreakdown = buildSectorBreakdown(rows, holdings?.cashPct ?? 0)
+  const fitScore = analysis.compliancePct ?? 0
+  const fit = fitGradeFromScore(fitScore)
 
-  const holdingsWithOpinion = rows.map((row) => ({
-    ...row,
+  const sectors = buildSectorBreakdown(rows, holdings?.cashPct ?? 0)
+  const themes = buildThemeBreakdown(rows)
+  const actualCashPct = analysis.actual?.cashPct ?? 0
+  const stockPct = Math.round(100 - actualCashPct)
+
+  const riskChecks = buildRiskChecks(rows, sectors, themes, actualCashPct, recommended.cashPct)
+
+  const holdingsSimple = rows.map((row) => ({
+    id: row.id,
+    ticker: row.ticker,
+    name: row.name,
+    quantity: row.quantity,
+    avgUnitPrice: row.avgUnitPrice,
+    weightPct: row.weightPct,
+    returnPct: row.returnPct,
+    marketValueKrw: row.marketValueKrw,
     sectorLabel: sectorLabelForTicker(row.ticker),
-    opinion: deriveHoldingOpinion(row, marketContext),
-    action: derivePortfolioHoldingAction(row, marketContext),
   }))
 
-  const warnings = buildRiskWarnings(rows, sectorBreakdown, risk)
-
   return {
-    hasHoldings: rows.length > 0 || (holdings?.cashAmount ?? 0) > 0,
-    totalAssets: holdings?.totalAssets ?? 0,
-    cashPct: holdings?.cashPct ?? 0,
-    totalReturnPct: holdings?.totalReturnPct ?? null,
-    analysis: {
-      marketFitPct: analysis.compliancePct,
-      marketFitLabel:
-        analysis.compliancePct >= 75
-          ? "양호"
-          : analysis.compliancePct >= 50
-            ? "보통"
-            : "조정 필요",
-      risk,
-      concentration,
-      rebalance: analysis.rebalance,
+    hasData: rows.length > 0 || (holdings?.cashAmount ?? 0) > 0,
+    status: {
+      totalAssets: holdings?.totalAssets ?? 0,
+      totalReturnPct: holdings?.totalReturnPct ?? null,
+      stockPct,
+      cashPct: holdings?.cashPct ?? 0,
+      cashAmount: holdings?.cashAmount ?? 0,
     },
     market: {
       stageLabel: marketContext?.strategyLabel ?? "—",
@@ -224,14 +200,21 @@ export function buildPortfolioCenterReport(
       panicLabel: marketContext?.panicLabel ?? "—",
       recommendedCashPct: recommended.cashPct,
       recommendedStockPct: recommended.stockPct,
-      recommendedUsPct: recommended.usPct,
-      recommendedKrPct: recommended.krPct,
       note: recommended.note,
-      actualCashPct: analysis.actual.cashPct,
-      actualStockPct: 100 - analysis.actual.cashPct,
     },
-    sectorBreakdown,
-    holdings: holdingsWithOpinion,
-    warnings,
+    fit: {
+      score: fitScore,
+      grade: fit.grade,
+      label: fit.label,
+    },
+    riskChecks,
+    sectors,
+    themes,
+    holdings: holdingsSimple,
   }
+}
+
+/** @deprecated V1 사용 — buildPortfolioCenterV1Report */
+export function buildPortfolioCenterReport(...args) {
+  return buildPortfolioCenterV1Report(...args)
 }

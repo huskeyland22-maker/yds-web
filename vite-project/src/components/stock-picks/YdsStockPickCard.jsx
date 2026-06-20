@@ -10,6 +10,8 @@ import YdsStockPickQualityTimingHeader from "./YdsStockPickQualityTimingHeader.j
 import YdsStockPickInsightStrip from "./YdsStockPickInsightStrip.jsx"
 import YdsStockPickThemeBadges from "./YdsStockPickThemeBadges.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
+import YdsStockPositionBadge from "./YdsStockPositionBadge.jsx"
+import YdsStockPickChangeStrip from "./YdsStockPickChangeStrip.jsx"
 
 /**
  * @param {{
@@ -89,6 +91,10 @@ export default function YdsStockPickCard({
 
       <Link to={to} className="yds-spick-card__link">
         <h3 className="yds-spick-card__name">{stock.name}</h3>
+
+        <YdsStockPositionBadge stock={stock} variant="card" showScore={false} />
+
+        <YdsStockPickChangeStrip stock={stock} variant="card" />
 
         <YdsStockPickV7Signals stock={stock} variant={variant === "compact" ? "compact" : "default"} />
 

@@ -1,12 +1,10 @@
-import { resolvePricePosition } from "../../content/ydsStockPickV5Insights.js"
 import { resolveStockPickCardAction } from "../../content/ydsStockPickCardAction.js"
 
 /**
- * V7 — 현재 위치 · 행동 (카드 상단 시그널)
+ * V7 — 행동 시그널 (현재 위치는 YdsStockPositionBadge)
  * @param {{ stock: import("../../content/ydsStockPickModel.js").StockPickView; variant?: 'default' | 'compact' }} props
  */
 export default function YdsStockPickV7Signals({ stock, variant = "default" }) {
-  const position = stock.pickMeta?.pricePosition ?? resolvePricePosition(stock)
   const action = resolveStockPickCardAction(stock)
 
   return (
@@ -18,11 +16,6 @@ export default function YdsStockPickV7Signals({ stock, variant = "default" }) {
         .filter(Boolean)
         .join(" ")}
     >
-      {position ? (
-        <span className="yds-spick-v7-signals__position">
-          현재 위치 {position.emoji} {position.label}
-        </span>
-      ) : null}
       <span
         className={[
           "yds-spick-v7-signals__action",

@@ -5,7 +5,7 @@
 const STORAGE_KEY = "yds-stock-pick-score-history-v1"
 const MAX_DAYS = 30
 
-/** @returns {Record<string, Array<{ date: string; total: number; rank: number; statusId: string; quality: number; timing: number; marketFit: number }>>} */
+/** @returns {Record<string, Array<{ date: string; total: number; rank: number; statusId: string; quality: number; timing: number; marketFit: number; qualityGrade?: string; qualityDisplayGrade?: string; timingGrade?: string; marketFitGrade?: string; positionId?: string }>>} */
 export function readScoreHistory() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -142,9 +142,77 @@ export function getWatchlistDeltas(ticker, history = readScoreHistory()) {
 export function getScoreDeltas(ticker, history = readScoreHistory()) {
   return {
     day1: getScoreDeltaForDays(ticker, 1, history),
-    day7: getScoreDeltaForDays(ticker, 7, history),
-    day14: getScoreDeltaForDays(ticker, 14, history),
+    day5: getScoreDeltaForDays(ticker, 5, history),
+    day20: getScoreDeltaForDays(ticker, 20, history),
+    /** @deprecated use day5 */
+    day7: getScoreDeltaForDays(ticker, 5, history),
+    /** @deprecated use day20 */
+    day14: getScoreDeltaForDays(ticker, 20, history),
   }
+}
+
+/**
+ * @param {string} ticker
+ * @param {number} daysAgo
+ * @param {Record<string, Array<Record<string, unknown>>>} [history]
+ */
+export function getHistoryRowAtDaysAgo(ticker, daysAgo, history = readScoreHistory()) {
+  const rows = history[ticker]
+  if (!rows?.length) return null
+
+  const today = todayKey()
+  const targetDate = daysBefore(today, daysAgo)
+  const exact = rows.find((r) => r.date === targetDate)
+  if (exact) return exact
+
+  const before = rows.filter((r) => r.date <= targetDate)
+  return before.length ? before[before.length - 1] : null
+}
+
+/**
+ * @param {string} ticker
+ * @param {number} daysAgo
+ * @param {Record<string, Array<Record<string, unknown>>>} [history]
+ */
+export function getGradeSnapshotForDays(ticker, daysAgo, history = readScoreHistory()) {
+  const row = getHistoryRowAtDaysAgo(ticker, daysAgo, history)
+  if (!row) return null
+  return {
+    qualityGrade: String(row.qualityDisplayGrade ?? row.qualityGrade ?? ""),
+    timingGrade: String(row.timingGrade ?? ""),
+    marketFitGrade: String(row.marketFitGrade ?? ""),
+  }
+}
+
+/**
+ * @param {string} ticker
+ * @param {number} daysAgo
+ * @param {Record<string, Array<Record<string, unknown>>>} [history]
+ */
+export function getPositionSnapshotForDays(ticker, daysAgo, history = readScoreHistory()) {
+  const row = getHistoryRowAtDaysAgo(ticker, daysAgo, history)
+  if (!row?.positionId) return null
+  return { positionId: String(row.positionId), date: String(row.date) }
+}
+
+/**
+ * @param {string} ticker
+ * @param {number} daysAgo
+ * @param {Record<string, Array<Record<string, unknown>>>} [history]
+ */
+function getHistoryRowForDays(ticker, daysAgo, history) {
+  const rows = history[ticker]
+  if (!rows?.length) return null
+
+  const today = todayKey()
+  const targetDate = daysBefore(today, daysAgo)
+  const currentRow = rows.find((r) => r.date === today) ?? rows[rows.length - 1]
+  const prevRow =
+    rows.find((r) => r.date === targetDate) ??
+    rows.filter((r) => r.date < (currentRow?.date ?? today)).slice(-1)[0]
+
+  if (!prevRow || !currentRow || currentRow.date === prevRow.date) return null
+  return prevRow
 }
 
 /**
@@ -157,16 +225,22 @@ export function recordScoreHistory(stocks, historyBefore = readScoreHistory()) {
 
   for (const stock of stocks) {
     if (stock.dataSource !== "live") continue
-    const total = stock.v4Score?.total ?? stock.scoreBreakdown?.total ?? 0
+    const total = stock.v4Score?.finalRankScore ?? stock.v4Score?.total ?? stock.scoreBreakdown?.total ?? 0
     const marketFit = stock.pickMeta?.marketFitScore ?? stock.scoreBreakdown?.marketEnv ?? 0
+    const v4 = stock.v4Score
     const entry = {
       date: today,
       total: Math.round(total),
       rank: stock.rank ?? 0,
-      statusId: stock.v4Score?.recommendStatusId ?? "",
-      quality: stock.v4Score?.quality ?? 0,
-      timing: stock.v4Score?.timing ?? 0,
+      statusId: v4?.recommendStatusId ?? "",
+      quality: v4?.quality ?? 0,
+      timing: v4?.timing ?? 0,
       marketFit: Math.round(marketFit),
+      qualityGrade: v4?.qualityGrade ?? "",
+      qualityDisplayGrade: v4?.qualityDisplayGrade ?? v4?.qualityGrade ?? "",
+      timingGrade: v4?.timingGrade ?? "",
+      marketFitGrade: stock.pickMeta?.marketFitGrade ?? "",
+      positionId: stock.pickMeta?.positionState?.id ?? "",
     }
 
     const prev = history[stock.ticker] ?? []
