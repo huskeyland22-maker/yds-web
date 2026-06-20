@@ -1,6 +1,10 @@
+import { useMemo } from "react"
 import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 import YdsMarketStatePrimaryPanel from "./YdsMarketStatePrimaryPanel.jsx"
 import YdsMarketPanicSecondaryPanel from "./YdsMarketPanicSecondaryPanel.jsx"
+import YdsInvestmentCalendarStrip from "./YdsInvestmentCalendarStrip.jsx"
+import { buildWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
+import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 
 /**
  * V8 Hero — 시장 상태(메인) + 패닉 강도(보조)
@@ -11,6 +15,12 @@ export default function YdsMarketScoreHero({
   historyRows = [],
   className = "",
 }) {
+  const marketContext = useYdsMarketContext()
+  const calendarStrip = useMemo(
+    () => buildWeekEventStrip(marketContext?.ready ? marketContext : null, 5),
+    [marketContext],
+  )
+
   return (
     <section
       className={[
@@ -34,6 +44,8 @@ export default function YdsMarketScoreHero({
         <YdsMarketStatePrimaryPanel embedded panicData={panicData} historyRows={historyRows} />
         <YdsMarketPanicSecondaryPanel embedded panicData={panicData} />
       </div>
+
+      <YdsInvestmentCalendarStrip report={calendarStrip} />
     </section>
   )
 }

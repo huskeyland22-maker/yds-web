@@ -6,6 +6,7 @@ import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFavoriteButton.jsx"
 import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLine.jsx"
 import YdsStockPickOpinionBlock from "../components/stock-picks/YdsStockPickOpinionBlock.jsx"
+import YdsStockInvestmentReport from "../components/stock-picks/YdsStockInvestmentReport.jsx"
 import YdsStockPickPhase3Breakdown from "../components/stock-picks/YdsStockPickPhase3Breakdown.jsx"
 import "../styles/stock-picks-platform.css"
 
@@ -85,7 +86,12 @@ export default function StockPickDetailPage() {
           showDetails={false}
         />
 
-        <YdsStockPickOpinionBlock opinion={stock.opinion} variant="practical" />
+        <YdsStockInvestmentReport stock={stock} />
+
+        <details className="yds-inv-report__legacy">
+          <summary>요약 의견 (간략)</summary>
+          <YdsStockPickOpinionBlock opinion={stock.opinion} variant="practical" />
+        </details>
       </header>
     </div>
   )

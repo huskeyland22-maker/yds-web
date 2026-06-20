@@ -34,6 +34,8 @@ import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import PerformanceValidationPage from "./pages/PerformanceValidationPage.jsx"
 import PanicLabPage from "./pages/PanicLabPage.jsx"
+import InvestmentCalendarPage from "./pages/InvestmentCalendarPage.jsx"
+import InvestmentPlaybookPage from "./pages/InvestmentPlaybookPage.jsx"
 import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import StockRecommendationPage from "./pages/StockRecommendationPage.jsx"
 import YdsPortfolioPage from "./pages/YdsPortfolioPage.jsx"
@@ -1010,6 +1012,8 @@ function App() {
       path === "/trading-log" ||
       path === "/recommendation-history" ||
       path === "/panic-lab" ||
+      path === "/investment-calendar" ||
+      path === "/investment-playbook" ||
       path === "/panic-validation" ||
       path === "/lab" ||
       path === "/market-analysis" ||
@@ -1510,6 +1514,22 @@ function App() {
               element={
                 <SectionErrorBoundary label="패닉 연구실">
                   <PanicLabPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/investment-calendar"
+              element={
+                <SectionErrorBoundary label="투자 캘린더">
+                  <InvestmentCalendarPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/investment-playbook"
+              element={
+                <SectionErrorBoundary label="투자 원칙 센터">
+                  <InvestmentPlaybookPage />
                 </SectionErrorBoundary>
               }
             />

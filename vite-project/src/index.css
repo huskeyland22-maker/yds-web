@@ -30241,3 +30241,539 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-top: 0.75rem;
 }
 
+/* Investment Calendar */
+.yds-inv-cal {
+  --ic-border: rgba(42, 54, 72, 0.65);
+  --ic-muted: #787b86;
+  --ic-text: #d1d4dc;
+  color: var(--ic-text);
+}
+
+.yds-inv-cal--strip {
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--ic-border);
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.yds-market-score-hero .yds-inv-cal--strip {
+  width: 100%;
+}
+
+.yds-inv-cal__strip-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+}
+
+.yds-inv-cal__strip-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-inv-cal__strip-sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.62rem;
+  color: var(--ic-muted);
+}
+
+.yds-inv-cal__more {
+  font-size: 0.62rem;
+  color: #60a5fa;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.yds-inv-cal__strip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yds-inv-cal__row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr auto;
+  gap: 0.45rem;
+  align-items: start;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(42, 54, 72, 0.4);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-inv-cal__row--compact {
+  padding: 0.35rem 0.45rem;
+}
+
+.yds-inv-cal__date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-inv-cal__weekday {
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-inv-cal__body {
+  min-width: 0;
+}
+
+.yds-inv-cal__head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.12rem;
+}
+
+.yds-inv-cal__cat {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.03em;
+}
+
+.yds-inv-cal__stars {
+  font-size: 0.58rem;
+  color: #fbbf24;
+  letter-spacing: -0.05em;
+}
+
+.yds-inv-cal__title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  line-height: 1.35;
+}
+
+.yds-inv-cal__ticker {
+  margin-left: 0.35rem;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-inv-cal__sub {
+  margin: 0.12rem 0 0;
+  font-size: 0.62rem;
+  color: var(--ic-muted);
+}
+
+.yds-inv-cal__note {
+  margin: 0.15rem 0 0;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-inv-cal__link {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.yds-inv-cal__impact {
+  align-self: center;
+  padding: 0.12rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid var(--ic-border);
+}
+
+.yds-inv-cal__impact--positive {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.yds-inv-cal__impact--neutral {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.yds-inv-cal__impact--negative {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.yds-inv-cal__empty {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--ic-muted);
+}
+
+.yds-inv-cal--page {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.yds-inv-cal__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.yds-inv-cal__kicker {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ic-muted);
+}
+
+.yds-inv-cal__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-inv-cal__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: var(--ic-muted);
+  line-height: 1.45;
+}
+
+.yds-inv-cal__sub a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.yds-inv-cal__week-badge {
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--ic-border);
+  font-size: 0.68rem;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.yds-inv-cal__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  font-size: 0.62rem;
+  color: var(--ic-muted);
+}
+
+.yds-inv-cal__section {
+  margin-bottom: 1.1rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--ic-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-inv-cal__h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-inv-cal__h3 {
+  margin: 0 0 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.yds-inv-cal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.yds-inv-cal__upcoming-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .yds-inv-cal__upcoming-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yds-inv-cal__foot {
+  margin: 0.5rem 0 0;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+/* Investment Playbook */
+.yds-playbook {
+  --pb-border: rgba(42, 54, 72, 0.65);
+  --pb-muted: #787b86;
+  --pb-text: #d1d4dc;
+  max-width: 960px;
+  margin: 0 auto;
+  color: var(--pb-text);
+}
+
+.yds-playbook__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.yds-playbook__kicker {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pb-muted);
+}
+
+.yds-playbook__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.yds-playbook__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: var(--pb-muted);
+  line-height: 1.45;
+}
+
+.yds-playbook__sub a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.yds-playbook__compliance-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--pb-border);
+  background: rgba(15, 23, 42, 0.55);
+  min-width: 5rem;
+}
+
+.yds-playbook__compliance-grade {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.yds-playbook__compliance-pct {
+  font-size: 1rem;
+  color: #f1f5f9;
+}
+
+.yds-playbook__compliance-label {
+  font-size: 0.58rem;
+  color: var(--pb-muted);
+}
+
+.yds-playbook__section {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--pb-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-playbook__h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-playbook__note {
+  margin: 0 0 0.45rem;
+  font-size: 0.62rem;
+  color: var(--pb-muted);
+  line-height: 1.4;
+}
+
+.yds-playbook__note a {
+  color: #60a5fa;
+}
+
+.yds-playbook__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .yds-playbook__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .yds-playbook__grid--panic {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .yds-playbook__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.yds-playbook__card {
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(42, 54, 72, 0.45);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-playbook__card--active {
+  border-color: rgba(99, 102, 241, 0.55);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+.yds-playbook__card-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-playbook__strategy {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.yds-playbook__list {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.65rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yds-playbook__list--avoid {
+  color: #fca5a5;
+}
+
+.yds-playbook__avoid-title {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.yds-playbook__cash {
+  margin: 0.35rem 0 0;
+  font-size: 0.6rem;
+  color: #64748b;
+}
+
+.yds-playbook__split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .yds-playbook__split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yds-playbook__rule-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.45rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.35);
+  font-size: 0.68rem;
+  color: #cbd5e1;
+}
+
+.yds-playbook__rule-row--loss .yds-playbook__rule-th {
+  color: #fca5a5;
+}
+
+.yds-playbook__rule-th {
+  font-weight: 800;
+  color: #86efac;
+}
+
+.yds-playbook__alloc {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .yds-playbook__alloc {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.yds-playbook__alloc-key {
+  display: block;
+  font-size: 0.58rem;
+  color: var(--pb-muted);
+}
+
+.yds-playbook__alloc strong {
+  font-size: 1rem;
+  color: #f8fafc;
+}
+
+.yds-playbook__alloc-actual {
+  display: block;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-playbook__compliance-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yds-playbook__compliance-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 0.45rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+}
+
+.yds-playbook__compliance-row--ok {
+  background: rgba(34, 197, 94, 0.08);
+  color: #86efac;
+}
+
+.yds-playbook__compliance-row--warn {
+  background: rgba(234, 179, 8, 0.08);
+  color: #fde68a;
+}
+
+.yds-playbook__foot {
+  margin: 0.5rem 0 0;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+

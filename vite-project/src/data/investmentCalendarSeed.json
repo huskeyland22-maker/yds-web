@@ -1,0 +1,215 @@
+{
+  "version": 1,
+  "updatedAt": "2026-06-16",
+  "macroEvents": [
+    {
+      "id": "us-cpi-jun-2026",
+      "date": "2026-06-12",
+      "category": "cpi",
+      "title": "미국 CPI (5월)",
+      "subtitle": "소비자물가 · 헤드라인·근원",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-ppi-jun-2026",
+      "date": "2026-06-13",
+      "category": "ppi",
+      "title": "미국 PPI (5월)",
+      "subtitle": "생산자물가",
+      "importance": 2,
+      "region": "US"
+    },
+    {
+      "id": "us-retail-may-2026",
+      "date": "2026-06-17",
+      "category": "other",
+      "title": "미국 소매판매 (5월)",
+      "subtitle": "소비·내수 모멘텀",
+      "importance": 2,
+      "region": "US"
+    },
+    {
+      "id": "fomc-jun-2026",
+      "date": "2026-06-18",
+      "category": "fomc",
+      "title": "FOMC 금리 결정",
+      "subtitle": "연준·점도표·기자회견",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-claims-jun-2026",
+      "date": "2026-06-18",
+      "category": "employment",
+      "title": "미국 신규 실업수당",
+      "subtitle": "고용·노동시장 선행",
+      "importance": 2,
+      "region": "US"
+    },
+    {
+      "id": "us-options-jun-2026",
+      "date": "2026-06-19",
+      "category": "other",
+      "title": "미국 6월 옵션·선물 만기",
+      "subtitle": "Triple Witching · 변동성",
+      "importance": 2,
+      "region": "US"
+    },
+    {
+      "id": "us-pce-may-2026",
+      "date": "2026-06-20",
+      "category": "pce",
+      "title": "미국 PCE (5월)",
+      "subtitle": "연준 선호 인플레 지표",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-gdp-q1-rev-2026",
+      "date": "2026-06-26",
+      "category": "gdp",
+      "title": "미국 GDP 1차 수정치",
+      "subtitle": "1분기 성장률",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-nfp-jul-2026",
+      "date": "2026-07-03",
+      "category": "employment",
+      "title": "미국 고용지표 (6월)",
+      "subtitle": "비농업 NFP · 실업률",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-cpi-jul-2026",
+      "date": "2026-07-11",
+      "category": "cpi",
+      "title": "미국 CPI (6월)",
+      "subtitle": "소비자물가",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-ppi-jul-2026",
+      "date": "2026-07-12",
+      "category": "ppi",
+      "title": "미국 PPI (6월)",
+      "subtitle": "생산자물가",
+      "importance": 2,
+      "region": "US"
+    },
+    {
+      "id": "fomc-jul-2026",
+      "date": "2026-07-30",
+      "category": "fomc",
+      "title": "FOMC 금리 결정",
+      "subtitle": "7월 FOMC",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "kr-cpi-jun-2026",
+      "date": "2026-06-16",
+      "category": "cpi",
+      "title": "한국 CPI (5월)",
+      "subtitle": "통계청 소비자물가",
+      "importance": 2,
+      "region": "KR"
+    },
+    {
+      "id": "kr-bok-jun-2026",
+      "date": "2026-06-19",
+      "category": "fomc",
+      "title": "한국은행 금통위",
+      "subtitle": "기준금리 결정",
+      "importance": 3,
+      "region": "KR"
+    },
+    {
+      "id": "kr-employment-jun-2026",
+      "date": "2026-06-18",
+      "category": "employment",
+      "title": "한국 고용·실업률 (5월)",
+      "subtitle": "경제활동인구",
+      "importance": 2,
+      "region": "KR"
+    }
+  ],
+  "stockEvents": [
+    {
+      "id": "nvda-earnings-q1-2026",
+      "date": "2026-06-17",
+      "ticker": "NVDA",
+      "name": "엔비디아",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "005930-agm-2026",
+      "date": "2026-06-18",
+      "ticker": "005930",
+      "name": "삼성전자",
+      "country": "KR",
+      "category": "agm",
+      "importance": 2
+    },
+    {
+      "id": "000660-earnings-q2-2026",
+      "date": "2026-06-19",
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "country": "KR",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "avgo-div-2026",
+      "date": "2026-06-20",
+      "ticker": "AVGO",
+      "name": "브로드컴",
+      "country": "US",
+      "category": "dividend",
+      "importance": 1
+    },
+    {
+      "id": "meta-earnings-q2-2026",
+      "date": "2026-07-23",
+      "ticker": "META",
+      "name": "메타",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "012450-earnings-q2-2026",
+      "date": "2026-07-24",
+      "ticker": "012450",
+      "name": "한화에어로",
+      "country": "KR",
+      "category": "earnings",
+      "importance": 2
+    },
+    {
+      "id": "005930-div-2026",
+      "date": "2026-07-28",
+      "ticker": "005930",
+      "name": "삼성전자",
+      "country": "KR",
+      "category": "dividend",
+      "importance": 2
+    },
+    {
+      "id": "tsm-earnings-q2-2026",
+      "date": "2026-07-17",
+      "ticker": "TSM",
+      "name": "TSMC",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    }
+  ]
+}

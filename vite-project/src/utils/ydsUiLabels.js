@@ -15,6 +15,8 @@ export function getSecondaryNavItems() {
   return [
     { label: "⭐ 관심종목", path: "/watchlist" },
     { label: "🔔 알림", path: "/alert-center" },
+    { label: "📋 투자 원칙", path: "/investment-playbook" },
+    { label: "📅 투자 캘린더", path: "/investment-calendar" },
     { label: "🧪 패닉 연구실", path: "/panic-lab" },
     { label: "🧪 연구실", path: "/lab" },
   ]
@@ -31,6 +33,8 @@ export const NAV_MOBILE_SHORT = {
   "/ai-daily-report": "💡 인사이트",
   "/alert-center": "🔔 알림",
   "/panic-lab": "🧪 패닉",
+  "/investment-calendar": "📅 캘린더",
+  "/investment-playbook": "📋 원칙",
   "/lab": "🧪 연구",
 }
 

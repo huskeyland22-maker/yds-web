@@ -2274,3 +2274,212 @@
     font-size: 0.68rem;
   }
 }
+
+/* YDS Investment Report — research note style */
+.yds-inv-report {
+  --ir-border: rgba(42, 54, 72, 0.65);
+  --ir-muted: #787b86;
+  --ir-text: #d1d4dc;
+  margin: 1rem 0 0;
+  padding: 0.85rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--ir-border);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.72) 0%, rgba(2, 6, 23, 0.55) 100%);
+  color: var(--ir-text);
+}
+
+.yds-inv-report__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid rgba(42, 54, 72, 0.45);
+}
+
+.yds-inv-report__kicker {
+  margin: 0;
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ir-muted);
+}
+
+.yds-inv-report__title {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.yds-inv-report__verdict {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border: 1px solid var(--ir-border);
+  white-space: nowrap;
+}
+
+.yds-inv-report__verdict--aggressiveBuy,
+.yds-inv-report__verdict--buy {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.yds-inv-report__verdict--scaleIn {
+  color: #fde68a;
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.yds-inv-report__verdict--watch {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.yds-inv-report__verdict--noChase {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.yds-inv-report__key {
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border-left: 3px solid #6366f1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #e2e8f0;
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.yds-inv-report__block {
+  margin-bottom: 0.75rem;
+}
+
+.yds-inv-report__block--muted {
+  padding: 0.5rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.yds-inv-report__h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.yds-inv-report__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.yds-inv-report__list--reasons {
+  list-style: decimal;
+}
+
+.yds-inv-report__list--reasons li {
+  margin: 0.2rem 0;
+}
+
+.yds-inv-report__list--risks {
+  list-style: disc;
+  color: #fca5a5;
+}
+
+.yds-inv-report__list--risks li::marker {
+  color: #f87171;
+}
+
+.yds-inv-report__empty {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--ir-muted);
+}
+
+.yds-inv-report__empty--ok {
+  color: #86efac;
+}
+
+.yds-inv-report__market {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-inv-report__market-grade {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.yds-inv-report__market-score {
+  font-size: 0.68rem;
+  color: var(--ir-muted);
+}
+
+.yds-inv-report__market-text {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.yds-inv-report__strategy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.yds-inv-report__strategy-row {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr;
+  gap: 0.35rem;
+  align-items: start;
+}
+
+.yds-inv-report__strategy-key {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--ir-muted);
+  padding-top: 0.1rem;
+}
+
+.yds-inv-report__strategy-val {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.yds-inv-report__foot {
+  margin: 0.55rem 0 0;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(42, 54, 72, 0.35);
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-inv-report__legacy {
+  margin-top: 0.65rem;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-inv-report__legacy summary {
+  cursor: pointer;
+  color: #94a3b8;
+}
+
+.yds-inv-report--compact .yds-inv-report__block--muted,
+.yds-inv-report--compact .yds-inv-report__foot {
+  display: none;
+}
