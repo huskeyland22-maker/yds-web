@@ -3,7 +3,7 @@
   "name": "Market Pulse AI",
   "short_name": "Market Pulse",
   "description": "AI 기반 시장 해석 및 실전 매매 레이더 플랫폼",
-  "start_url": "/?source=pwa&v=fb4135d-1781996570797",
+  "start_url": "/?source=pwa&v=a4e40b9-1781997157487",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -22,7 +22,7 @@
       "purpose": "maskable"
     }
   ],
-  "version": "v2026.06.21.015",
-  "build_id": "fb4135d-1781996570797",
-  "built_at": "2026-06-20T23:02:50.697Z"
+  "version": "v2026.06.21.017",
+  "build_id": "a4e40b9-1781997157487",
+  "built_at": "2026-06-20T23:12:37.401Z"
 }

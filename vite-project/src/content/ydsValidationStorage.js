@@ -2,6 +2,8 @@
  * Phase 7 — YDS 검증 레이어 저장소
  */
 
+import { sanitizeValidationPickRecord } from "./ydsValidationPriceSanitize.js"
+
 export const VALIDATION_PICKS_KEY = "yds-validation-picks-v2"
 export const VALIDATION_PORTFOLIO_KEY = "yds-validation-portfolio-v2"
 export const VALIDATION_BENCHMARK_KEY = "yds-validation-benchmarks-v1"
@@ -126,7 +128,7 @@ export function normalizePickRecord(raw) {
       ? Number(recommendedScoreRaw)
       : null
 
-  return /** @type {ValidationPickRecord} */ ({
+  const record = /** @type {ValidationPickRecord} */ ({
     id: String(r.id ?? `${recommendedAt}:${r.country}:${r.ticker}`),
     ticker: String(r.ticker ?? ""),
     name: String(r.name ?? ""),
@@ -155,6 +157,7 @@ export function normalizePickRecord(raw) {
     recordedAt: Number(r.recordedAt) || Date.now(),
     lastUpdatedAt: Number(r.lastUpdatedAt) || Date.now(),
   })
+  return sanitizeValidationPickRecord(record)
 }
 
 /** @returns {ValidationPickRecord[]} */

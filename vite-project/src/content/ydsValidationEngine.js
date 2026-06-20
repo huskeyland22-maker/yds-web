@@ -15,6 +15,12 @@ import {
   resolveValidationLivePrice,
 } from "./ydsValidationPriceResolver.js"
 import {
+  isValidationDummyPrice,
+  sanitizeValidationPickRecord,
+  sanitizeValidationPicks,
+  sanitizeValidationPriceLog,
+} from "./ydsValidationPriceSanitize.js"
+import {
   logValidationPickPriceAudit,
   logValidationPriceLookupFailure,
 } from "./ydsValidationPriceDebug.js"
@@ -144,17 +150,31 @@ function pickRecordFromStock(stock, marketContext, recommendedAt) {
  * @param {string} recommendedAt
  * @param {number} horizonDays
  * @param {string} today
- * @returns {{ price: number | null; targetDate: string; lookupOk: boolean }}
+ * @param {number | null} recommendPrice
+ * @param {'US' | 'KR'} country
+ * @returns {{ price: number | null; targetDate: string; lookupOk: boolean; source: string }}
  */
-function resolveHorizonLockPrice(priceLog, recommendedAt, horizonDays, today) {
+function resolveHorizonLockPrice(
+  priceLog,
+  recommendedAt,
+  horizonDays,
+  today,
+  recommendPrice,
+  country,
+) {
   const targetDate = addCalendarDays(recommendedAt, horizonDays)
   if (today < targetDate) {
-    return { price: null, targetDate, lookupOk: false }
+    return { price: null, targetDate, lookupOk: false, source: "pending" }
   }
 
   const exact = priceLog[targetDate]
-  if (exact != null && Number.isFinite(exact) && exact > 0) {
-    return { price: exact, targetDate, lookupOk: true }
+  if (
+    exact != null &&
+    Number.isFinite(exact) &&
+    exact > 0 &&
+    !isValidationDummyPrice(exact, recommendPrice, country)
+  ) {
+    return { price: exact, targetDate, lookupOk: true, source: "priceLog-exact" }
   }
 
   const onOrAfter = Object.keys(priceLog)
@@ -162,19 +182,17 @@ function resolveHorizonLockPrice(priceLog, recommendedAt, horizonDays, today) {
     .sort()
   for (const d of onOrAfter) {
     const p = priceLog[d]
-    if (p != null && Number.isFinite(p) && p > 0) {
-      return { price: p, targetDate, lookupOk: true }
+    if (
+      p != null &&
+      Number.isFinite(p) &&
+      p > 0 &&
+      !isValidationDummyPrice(p, recommendPrice, country)
+    ) {
+      return { price: p, targetDate, lookupOk: true, source: "priceLog-on-or-after" }
     }
   }
 
-  return { price: null, targetDate, lookupOk: false }
-}
-
-/** @param {number | null} lockPrice @param {number | null} recommendPrice */
-function isSuspectDummyLock(lockPrice, recommendPrice) {
-  if (lockPrice !== 100) return false
-  if (recommendPrice == null || recommendPrice <= 0) return true
-  return Math.abs(recommendPrice - 100) / recommendPrice > 0.15
+  return { price: null, targetDate, lookupOk: false, source: "none" }
 }
 
 /**
@@ -193,12 +211,13 @@ function lockPickHorizons(record, today) {
     record.recommendedPrice != null && record.recommendedPrice > 0
       ? record.recommendedPrice
       : null
+  const country = record.country === "KR" ? "KR" : "US"
 
   for (const h of HORIZON_DAYS) {
     if (
       horizonPrices[h.key] != null &&
       Number.isFinite(horizonPrices[h.key]) &&
-      isSuspectDummyLock(horizonPrices[h.key], recommendPrice)
+      isValidationDummyPrice(horizonPrices[h.key], recommendPrice, country)
     ) {
       horizonPrices[h.key] = null
       horizons[h.key] = null
@@ -216,6 +235,7 @@ function lockPickHorizons(record, today) {
         price: horizonPrices[h.key],
         return_pct: horizons[h.key],
         lookup_ok: true,
+        source: "locked-existing",
       })
       continue
     }
@@ -225,6 +245,8 @@ function lockPickHorizons(record, today) {
       record.recommendedAt,
       h.days,
       today,
+      recommendPrice,
+      country,
     )
 
     auditHorizons.push({
@@ -234,6 +256,7 @@ function lockPickHorizons(record, today) {
       price: resolved.price,
       return_pct: null,
       lookup_ok: resolved.lookupOk,
+      source: resolved.source,
     })
 
     if (resolved.price == null) continue
@@ -246,9 +269,12 @@ function lockPickHorizons(record, today) {
     auditHorizons[auditHorizons.length - 1].return_pct = horizons[h.key]
   }
 
+  const d7 = auditHorizons.find((x) => x.key === "d7")
   logValidationPickPriceAudit({
     symbol: record.ticker,
     recommend_price: recommendPrice,
+    price7d: d7?.price ?? null,
+    source: d7?.source ?? "none",
     horizons: auditHorizons.filter((x) => x.key === "d7" || x.key === "d14" || x.key === "d30"),
   })
 
@@ -261,25 +287,45 @@ function lockPickHorizons(record, today) {
  * @param {Map<string, number>} [priceMap]
  */
 function refreshPickPrice(record, today, priceMap) {
-  const resolved = resolveValidationLivePrice(record.ticker, record.country, priceMap)
-  const currentPrice = resolved?.price ?? null
+  const cleaned = sanitizeValidationPickRecord(record)
+  const resolved = resolveValidationLivePrice(
+    cleaned.ticker,
+    cleaned.country,
+    priceMap,
+    cleaned.recommendedPrice,
+  )
+  let currentPrice = resolved?.price ?? null
 
-  if (currentPrice == null) {
-    logValidationPriceLookupFailure(record.ticker, "no-live-quote", {
-      country: record.country,
+  if (
+    currentPrice != null &&
+    isValidationDummyPrice(currentPrice, cleaned.recommendedPrice, cleaned.country)
+  ) {
+    logValidationPriceLookupFailure(cleaned.ticker, "rejected-dummy-100", {
+      source: resolved?.source,
+    })
+    currentPrice = null
+  }
+
+  if (currentPrice == null && resolved == null) {
+    logValidationPriceLookupFailure(cleaned.ticker, "no-live-quote", {
+      country: cleaned.country,
     })
   }
 
-  const priceLog = { ...record.priceLog }
+  let priceLog = sanitizeValidationPriceLog(
+    cleaned.priceLog,
+    cleaned.recommendedPrice,
+    cleaned.country,
+  )
   if (currentPrice != null && priceLog[today] == null) {
     priceLog[today] = currentPrice
   }
 
-  const withLog = { ...record, priceLog }
+  const withLog = { ...cleaned, priceLog }
   const { horizonPrices, horizons } = lockPickHorizons(withLog, today)
   const recommendPrice =
-    record.recommendedPrice != null && record.recommendedPrice > 0
-      ? record.recommendedPrice
+    cleaned.recommendedPrice != null && cleaned.recommendedPrice > 0
+      ? cleaned.recommendedPrice
       : null
   const returnPct =
     recommendPrice != null && currentPrice != null
@@ -328,7 +374,8 @@ export function captureTodayPickSnapshots(marketContext, rankLimit = 10, univers
 export function refreshValidationPicks(picks, priceMap) {
   const today = todayDateKey()
   const map = priceMap ?? buildValidationPriceMap()
-  const refreshed = picks.map((r) => refreshPickPrice(r, today, map))
+  const sanitized = sanitizeValidationPicks(picks)
+  const refreshed = sanitized.map((r) => refreshPickPrice(r, today, map))
   saveValidationPicks(refreshed)
   return refreshed
 }

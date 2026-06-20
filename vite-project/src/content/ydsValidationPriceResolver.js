@@ -3,6 +3,7 @@
  */
 
 import { readInitialStockPickSnapshots } from "./ydsStockPickSnapshotCache.js"
+import { isValidationDummyPrice } from "./ydsValidationPriceSanitize.js"
 
 /** @param {unknown} v */
 function toNum(v) {
@@ -47,7 +48,9 @@ export function buildValidationPriceMap(liveStocks = []) {
 
   for (const stock of liveStocks ?? []) {
     const p = priceFromStockPickView(stock)
-    if (p != null) map.set(stock.ticker, p)
+    if (p != null && !isValidationDummyPrice(p, null, stock.country === "KR" ? "KR" : "US")) {
+      map.set(stock.ticker, p)
+    }
   }
 
   const boot = readInitialStockPickSnapshots()
@@ -64,11 +67,14 @@ export function buildValidationPriceMap(liveStocks = []) {
  * @param {string} ticker
  * @param {'US' | 'KR'} country
  * @param {Map<string, number>} [priceMap]
+ * @param {number | null | undefined} [recommendPrice]
  * @returns {{ price: number; source: string } | null}
  */
-export function resolveValidationLivePrice(ticker, country, priceMap) {
+export function resolveValidationLivePrice(ticker, country, priceMap, recommendPrice = null) {
+  const c = country === "KR" ? "KR" : "US"
   const fromMap = priceMap?.get(ticker)
   if (fromMap != null && fromMap > 0) {
+    if (isValidationDummyPrice(fromMap, recommendPrice, c)) return null
     return { price: fromMap, source: "live-map" }
   }
 
@@ -76,6 +82,7 @@ export function resolveValidationLivePrice(ticker, country, priceMap) {
   const entry = boot.snapshots?.get(ticker)
   const fromCache = priceFromSnapshotEntry(entry)
   if (fromCache != null) {
+    if (isValidationDummyPrice(fromCache, recommendPrice, c)) return null
     return { price: fromCache, source: "snapshot-cache" }
   }
 
