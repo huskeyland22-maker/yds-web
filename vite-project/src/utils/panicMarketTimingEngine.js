@@ -1,5 +1,5 @@
 /**
- * 9대 패닉지표 → 단기 / 중기 / 장기 타점 (0~100 점수 + 행동)
+ * 8대 패닉지표 → 단기 / 중기 / 장기 타점 (0~100 점수 + 행동)
  */
 import { pickMetricValue } from "./panicMarketActionEngine.js"
 import {
@@ -312,7 +312,6 @@ function systemRiskLevel(data) {
   const hy = pickMetricValue(data, "highYield")
   const vix = pickMetricValue(data, "vix")
   const move = pickMetricValue(data, "move")
-  const gs = pickMetricValue(data, "gsBullBear")
 
   if (hy != null) {
     if (hy >= 6.5) stress += 3
@@ -328,8 +327,6 @@ function systemRiskLevel(data) {
     if (move >= 125) stress += 2
     else if (move >= 112) stress += 1
   }
-  if (gs != null && gs >= 78) stress += 1
-
   if (stress >= 5) return "high"
   if (stress >= 3) return "elevated"
   if (stress >= 1) return "moderate"
@@ -585,7 +582,7 @@ function computeShortTiming(data) {
   }
 }
 
-/** ——— 중기: HY OAS, BofA, GS B/B, MOVE ——— */
+/** ——— 중기: HY OAS, BofA, MOVE ——— */
 
 /** @param {number} v */
 function midHyScore(v) {
@@ -606,15 +603,6 @@ function midBofaScore(v) {
 }
 
 /** @param {number} v */
-function midGsScore(v) {
-  if (v <= 30) return 32
-  if (v <= 45) return 52
-  if (v <= 58) return 72
-  if (v < 72) return 62
-  return 38
-}
-
-/** @param {number} v */
 function midMoveScore(v) {
   if (v < 95) return 80
   if (v < 112) return 65
@@ -627,7 +615,6 @@ function midClues(data) {
   const parts = []
   const hy = pickMetricValue(data, "highYield")
   const bofa = pickMetricValue(data, "bofa")
-  const gs = pickMetricValue(data, "gsBullBear")
   const move = pickMetricValue(data, "move")
 
   if (hy != null) {
@@ -639,11 +626,6 @@ function midClues(data) {
     if (bofa >= 7) parts.push("BofA 탐욕")
     else if (bofa <= 3) parts.push("BofA 위축")
     else parts.push("심리 중립")
-  }
-  if (parts.length < 2 && gs != null) {
-    if (gs >= 70) parts.push("GS B/B 과열")
-    else if (gs <= 35) parts.push("GS B/B 공포")
-    else parts.push("센티먼트 균형")
   }
   if (parts.length < 2 && move != null) {
     if (move >= 118) parts.push("금리 변동성 부담")
@@ -679,18 +661,15 @@ function resolveMidAction(score) {
 function buildMidMeta(data, score, resolved) {
   const hy = pickMetricValue(data, "highYield")
   const bofa = pickMetricValue(data, "bofa")
-  const gs = pickMetricValue(data, "gsBullBear")
   const level = systemRiskLevel(data)
 
   let marketState = midClues(data).split(" + ")[0] || resolved.status
   if (hy != null && hy < 3.2) marketState = "신용 안정"
   else if (hy != null && hy >= 6) marketState = "신용 스트레스"
   else if (bofa != null && bofa >= 7.5) marketState = "심리 과열"
-  else if (gs != null && gs >= 72) marketState = "센티먼트 높음"
 
   let risk = "변동성 제한적"
-  if (gs != null && gs >= 75) risk = "과열 잔존"
-  else if (score < 40 || level === "high") risk = "신용·금리 부담"
+  if (score < 40 || level === "high") risk = "신용·금리 부담"
   else if (score >= 68 && level === "low") risk = "리스크 제한적"
   else if (level === "elevated") risk = "구조 리스크 주의"
 
@@ -758,15 +737,14 @@ function computeMidTiming(data, snapshot) {
   }
 }
 
-/** ——— 장기: 구조 지표 가중 (HY·BofA·GS·VIX·MOVE) ——— */
+/** ——— 장기: 구조 지표 가중 (HY·BofA·VIX·MOVE) ——— */
 
 /** @type {{ key: string; label: string; weight: number; score: (v: number) => number }[]} */
 const LONG_CORE_WEIGHTS = [
-  { key: "highYield", label: "HY OAS", weight: 0.3, score: longHyScore },
-  { key: "bofa", label: "BofA", weight: 0.25, score: longBofaScore },
-  { key: "gsBullBear", label: "GS B/B", weight: 0.2, score: longGsScore },
-  { key: "vix", label: "VIX", weight: 0.15, score: longVixScore },
-  { key: "move", label: "MOVE", weight: 0.1, score: longMoveScore },
+  { key: "highYield", label: "HY OAS", weight: 0.375, score: longHyScore },
+  { key: "bofa", label: "BofA", weight: 0.3125, score: longBofaScore },
+  { key: "vix", label: "VIX", weight: 0.1875, score: longVixScore },
+  { key: "move", label: "MOVE", weight: 0.125, score: longMoveScore },
 ]
 
 /** F&G·P/C — 장기 영향 최소 (코어 5개 모두 있을 때만 합산 5%) */
@@ -794,16 +772,6 @@ function longBofaScore(v) {
   if (v <= 7.5) return 62
   if (v < 8.5) return 52
   return 32
-}
-
-/** @param {number} v */
-function longGsScore(v) {
-  if (v <= 28) return 42
-  if (v <= 42) return 56
-  if (v <= 58) return 68
-  if (v <= 72) return 52
-  if (v <= 82) return 40
-  return 24
 }
 
 /** @param {number} v — 적정 변동성 구간 우호 */
@@ -848,7 +816,6 @@ function longClues(data) {
   const parts = []
   const hy = pickMetricValue(data, "highYield")
   const bofa = pickMetricValue(data, "bofa")
-  const gs = pickMetricValue(data, "gsBullBear")
   const vix = pickMetricValue(data, "vix")
   const move = pickMetricValue(data, "move")
 
@@ -870,11 +837,6 @@ function longClues(data) {
     if (bofa >= 7.5) parts.push("BofA 과열")
     else if (bofa <= 3) parts.push("BofA 위축")
     else parts.push("심리 균형")
-  }
-  if (parts.length < 2 && gs != null) {
-    if (gs >= 72) parts.push("GS B/B 높음")
-    else if (gs <= 35) parts.push("GS B/B 낮음")
-    else parts.push("센티먼트 양호")
   }
   return parts.slice(0, 2).join(" + ") || "구조 지표 혼재"
 }
@@ -920,19 +882,16 @@ function resolveLongAction(score) {
 function buildLongMeta(data, score, resolved) {
   const hy = pickMetricValue(data, "highYield")
   const vix = pickMetricValue(data, "vix")
-  const gs = pickMetricValue(data, "gsBullBear")
   const level = systemRiskLevel(data)
 
   let marketState = longClues(data).split(" + ")[0] || resolved.status
   if (hy != null && hy < 3.2) marketState = "신용 안정"
   else if (vix != null && vix <= 20) marketState = "변동성 안정"
-  else if (gs != null && gs >= 72) marketState = "센티먼트 높음"
 
   const marketContext =
     level === "low" ? systemRiskLabel(level) : longClues(data).split(" + ")[1] ?? systemRiskLabel(level)
 
   let risk = longRiskLabel(level, score)
-  if (gs != null && gs >= 75 && score >= 55) risk = "과열 잔존"
 
   let sectors = resolved.sectors
   if (score >= 40 && score < 60) {
@@ -974,17 +933,12 @@ function weightedLongScore(data, defs) {
 function computeLongTiming(data, snapshot) {
   const scores = []
   const used = []
-  const gs = pickMetricValue(data, "gsBullBear")
   const bofa = pickMetricValue(data, "bofa")
   const hy = pickMetricValue(data, "highYield")
   const dxy = pickDxyValue(data)
   const liq = liquidityInterestScore(snapshot)
   const rates = compositeRatesInterestScore(data, snapshot)
 
-  if (gs != null) {
-    scores.push(longGsScore(gs))
-    used.push("GS B/B")
-  }
   if (bofa != null) {
     scores.push(longBofaScore(bofa))
     used.push("BofA")
@@ -1119,7 +1073,7 @@ function buildLongHorizonScoreDebug(data) {
   const tailAvg = tailWSum > 0 ? tailSum / tailWSum : null
   const tailRounded = tailAvg != null ? Math.round(tailAvg) : null
 
-  const hasFullCore = coreComponents.length >= 5
+  const hasFullCore = coreComponents.length >= 4
   let rawRounded = coreRounded
   let blendNote = null
   if (hasFullCore && tailRounded != null) {
@@ -1275,7 +1229,6 @@ export function buildTacticalHudTimingScoreDebug(panicData, snapshot = null) {
   const longDbg = buildAvgHorizonScoreDebugEx(
     panicData,
     [
-      { key: "gsBullBear", label: "GS B/B", scoreFn: longGsScore, scoreFnName: "longGsScore" },
       { key: "bofa", label: "BofA", scoreFn: longBofaScore, scoreFnName: "longBofaScore" },
       { key: "highYield", label: "HY OAS", scoreFn: longHyScore, scoreFnName: "longHyScore" },
       {

@@ -41,7 +41,6 @@ const SESSIONS_6M = 126
 /** @param {object} row @param {string} key */
 function rowValue(row, key) {
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
-  if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
   return Number(row[key])
 }
 
@@ -70,8 +69,6 @@ export function resolvePanicBadge(interp) {
     "스트레스",
     "꼬리위험",
     "위험",
-    "극도 약세",
-    "극도 강세",
     "콜과열",
   ]
   if (overheatStatuses.includes(status) || tone === "danger") {

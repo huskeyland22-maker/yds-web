@@ -125,7 +125,6 @@ export function saveDailyPanicHistory(integration, sourceData = null) {
     bofa: Number(sourceData?.bofa ?? NaN),
     skew: Number(sourceData?.skew ?? NaN),
     hyOas: Number(sourceData?.highYield ?? sourceData?.hyOas ?? NaN),
-    gsSentiment: Number(sourceData?.gsBullBear ?? sourceData?.gsSentiment ?? NaN),
     putCall: Number(sourceData?.putCall ?? NaN),
     highYield: Number(sourceData?.highYield ?? NaN),
     totalScore: Number(integration.sentimentScore ?? 50),

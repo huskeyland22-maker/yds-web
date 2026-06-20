@@ -125,16 +125,6 @@ export function scoreLongMove(v) {
 }
 
 /** @param {number} v */
-export function scoreLongGs(v) {
-  if (v <= 28) return 42
-  if (v <= 42) return 56
-  if (v <= 58) return 68
-  if (v <= 72) return 52
-  if (v <= 82) return 40
-  return 24
-}
-
-/** @param {number} v */
 export function scoreLongBofa(v) {
   if (v <= 2.5) return 38
   if (v <= 4) return 52
@@ -222,14 +212,6 @@ export function driversForHorizon(horizon) {
           status: (v) => statusMove(v),
         },
         {
-          key: "gsBullBear",
-          label: "GS",
-          kind: "sentiment",
-          score: scoreLongGs,
-          weight: 0.2,
-          status: (v) => statusGs(v),
-        },
-        {
           key: "bofa",
           label: "BofA",
           kind: "sentiment",
@@ -303,14 +285,6 @@ function statusMove(v) {
   if (v < 100) return "MOVE 안정"
   if (v >= 118) return "MOVE 부담"
   return "MOVE 중립"
-}
-
-/** @param {number|null} v */
-function statusGs(v) {
-  if (v == null) return "—"
-  if (v >= 72) return "GS 과열"
-  if (v <= 35) return "GS 공포"
-  return "GS 중립"
 }
 
 /** @param {number|null} v */

@@ -1,5 +1,5 @@
 /**
- * 9대 패닉 지표 → 종합 위험 점수 → 시장 행동 가이드
+ * 8대 패닉 지표 → 종합 위험 점수 → 시장 행동 가이드
  * 점수: 공포 쪽 +, 탐욕·과열 쪽 −
  */
 
@@ -99,15 +99,6 @@ function scoreBofa(v) {
 }
 
 /** @param {number} v */
-function scoreGsBullBear(v) {
-  if (v <= 25) return 2
-  if (v <= 40) return 1
-  if (v <= 60) return 0
-  if (v < 75) return -1
-  return -2
-}
-
-/** @param {number} v */
 function scoreVxn(v) {
   if (v >= 28) return 2
   if (v >= 20) return 1
@@ -123,7 +114,6 @@ const METRIC_SCORERS = [
   { key: "move", label: "MOVE", score: scoreMove },
   { key: "skew", label: "SKEW", score: scoreSkew },
   { key: "bofa", label: "BofA", score: scoreBofa },
-  { key: "gsBullBear", label: "GS B/B", score: scoreGsBullBear },
   { key: "vxn", label: "VXN", score: scoreVxn },
 ]
 
@@ -131,7 +121,6 @@ const METRIC_SCORERS = [
 export function pickMetricValue(panicData, key) {
   if (!panicData) return null
   if (key === "highYield") return num(panicData.highYield ?? panicData.hyOas)
-  if (key === "gsBullBear") return num(panicData.gsBullBear ?? panicData.gsSentiment)
   if (key === "ndxDistance") return num(panicData.ndxDistance ?? panicData.ndx_distance)
   if (key === "soxxDistance") return num(panicData.soxxDistance ?? panicData.soxx_distance)
   if (key === "vvix") return num(panicData.vvix)

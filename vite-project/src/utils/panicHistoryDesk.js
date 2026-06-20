@@ -84,7 +84,6 @@ export function panicDeskDataFromHistory(cycleRows) {
     move: pick("move"),
     skew: pick("skew"),
     highYield: pick("highYield"),
-    gsBullBear: pick("gsBullBear"),
     ts: last.ts ?? `${date}T12:00:00.000Z`,
     updatedAt: last.ts ?? `${date}T12:00:00.000Z`,
     accessTier: "pro",

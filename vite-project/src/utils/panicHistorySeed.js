@@ -1,5 +1,5 @@
 /**
- * 패닉 히스토리 수동 seed — 9지표 (2026-05-13 ~ 05-19)
+ * 패닉 히스토리 수동 seed — 8지표 (2026-05-13 ~ 05-19)
  */
 
 /** @typedef {import("./panicHistoryLocalPersist.js").PanicHistoryRow} PanicHistoryRow */
@@ -16,7 +16,6 @@ export const PANIC_HISTORY_SEED = [
     highYield: 2.8,
     move: 70.0,
     skew: 141,
-    gsBullBear: 70,
     panicIndex: 25,
   },
   {
@@ -29,7 +28,6 @@ export const PANIC_HISTORY_SEED = [
     highYield: 2.81,
     move: 70.2,
     skew: 141,
-    gsBullBear: 70,
     panicIndex: 25,
   },
   {
@@ -42,7 +40,6 @@ export const PANIC_HISTORY_SEED = [
     highYield: 2.82,
     move: 70.4,
     skew: 141,
-    gsBullBear: 70,
     panicIndex: 27,
   },
   {
@@ -55,7 +52,6 @@ export const PANIC_HISTORY_SEED = [
     highYield: 2.82,
     move: 70.5,
     skew: 141,
-    gsBullBear: 70,
     panicIndex: 26,
   },
   {
@@ -68,7 +64,6 @@ export const PANIC_HISTORY_SEED = [
     highYield: 2.82,
     move: 71.68,
     skew: 141.51,
-    gsBullBear: 70,
     panicIndex: 26,
   },
 ]
@@ -85,5 +80,4 @@ export const PANIC_HISTORY_METRIC_KEYS = [
   "highYield",
   "move",
   "skew",
-  "gsBullBear",
 ]

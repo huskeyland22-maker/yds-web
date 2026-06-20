@@ -19,20 +19,13 @@ export const EXPERT_METRICS = [
   { key: "move", label: "MOVE 채권", chartLabel: "MOVE", accent: "#fbbf24", tooltip: "채권 변동성 지표" },
   { key: "skew", label: "SKEW 꼬리위험", chartLabel: "SKEW", accent: "#22d3ee", tooltip: "꼬리위험 지표" },
   { key: "bofa", label: "BofA 심리", chartLabel: "BofA", accent: "#c084fc", tooltip: "BofA Bull/Bear 심리" },
-  {
-    key: "gsBullBear",
-    label: "GS 강세약세",
-    chartLabel: "GS B/B",
-    accent: "#a78bfa",
-    tooltip: "Goldman Sachs 강세·약세 지표",
-  },
   { key: "vxn", label: "VXN 나스닥", chartLabel: "VXN", accent: "#2dd4bf", tooltip: "나스닥 변동성 지수" },
 ]
 
 /** @type {PanicDeskMetric[]} */
 export const ALL_CHART_METRICS = [...CORE_METRICS, ...EXPERT_METRICS]
 
-/** 패닉지수 히스토리 — 9대 원본 지표 (3×3 선택) */
+/** 패닉지수 히스토리 — 8대 원본 지표 (4+4 선택) */
 export const PANIC_INDEX_HISTORY_ROWS = [
   [
     { key: "vix", shortLabel: "VIX", chartLabel: "VIX", accent: "#f87171", tooltip: "VIX 변동성" },
@@ -50,13 +43,11 @@ export const PANIC_INDEX_HISTORY_ROWS = [
       accent: "#c084fc",
       tooltip: "BofA Bull & Bear",
     },
+    { key: "vxn", shortLabel: "VXN", chartLabel: "VXN", accent: "#2dd4bf", tooltip: "VXN 나스닥 변동성" },
   ],
   [
-    { key: "vxn", shortLabel: "VXN", chartLabel: "VXN", accent: "#2dd4bf", tooltip: "VXN 나스닥 변동성" },
     { key: "putCall", shortLabel: "P/C", chartLabel: "P/C", accent: "#60a5fa", tooltip: "Put/Call 비율" },
     { key: "move", shortLabel: "MOVE", chartLabel: "MOVE", accent: "#fbbf24", tooltip: "MOVE 채권 변동성" },
-  ],
-  [
     { key: "skew", shortLabel: "SKEW", chartLabel: "SKEW", accent: "#22d3ee", tooltip: "SKEW 꼬리위험" },
     {
       key: "highYield",
@@ -64,13 +55,6 @@ export const PANIC_INDEX_HISTORY_ROWS = [
       chartLabel: "HY",
       accent: "#fb923c",
       tooltip: "하이일드 OAS",
-    },
-    {
-      key: "gsBullBear",
-      shortLabel: "GS",
-      chartLabel: "GS",
-      accent: "#a78bfa",
-      tooltip: "Goldman Sachs Bull/Bear",
     },
   ],
 ]
@@ -127,7 +111,6 @@ export const HISTORY_AUX_METRICS = [
   },
   { key: "move", label: "MOVE · 채권", chartLabel: "MOVE", accent: "#fbbf24", tooltip: "채권 변동성 지표" },
   { key: "skew", label: "SKEW · 꼬리", chartLabel: "SKEW", accent: "#22d3ee", tooltip: "꼬리위험 지표" },
-  { key: "gsBullBear", label: "GS · 강약", chartLabel: "GS", accent: "#a78bfa", tooltip: "Goldman Sachs 강세·약세" },
 ]
 
 /** @deprecated PANIC_INDEX_HISTORY_METRICS 사용 */

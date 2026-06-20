@@ -9,7 +9,7 @@ import { supabaseRest } from "./supabaseRest.js"
 
 export const PANIC_INDEX_HISTORY_V2_TABLE = "panic_index_history_v2"
 export const PANIC_INDEX_HISTORY_V2_SELECT =
-  "date,vix,vxn,fear_greed,put_call,high_yield,move,skew,gs,bofa,panic_index_v2,source,updated_at"
+  "date,vix,vxn,fear_greed,put_call,high_yield,move,skew,bofa,panic_index_v2,source,updated_at"
 
 /** DB에 데이터 있는 테이블 (panic_history_v2) 우선 */
 const LEGACY_TABLE = "panic_history_v2"
@@ -62,7 +62,6 @@ export function cycleRowFromHistorySource(row) {
     highYield: toNum(client.highYield ?? client.hyOas ?? row.high_yield ?? row.hy ?? row.hy_oas),
     move: toNum(client.move ?? row.move),
     skew: toNum(client.skew ?? row.skew),
-    gsBullBear: toNum(client.gsBullBear ?? client.gsSentiment ?? row.gs ?? row.gs_sentiment),
     bofa: toNum(client.bofa ?? row.bofa),
     vvix: toNum(client.vvix ?? row.vvix),
     vixTerm: toNum(client.vixTerm ?? row.vix_term),
@@ -86,7 +85,6 @@ export function panicIndexHistoryV2DbRow(cycleRow, panicIndexV2, source = "yds")
     high_yield: hy,
     move: toNum(cycleRow.move),
     skew: toNum(cycleRow.skew),
-    gs: toNum(cycleRow.gsBullBear ?? cycleRow.gs),
     bofa: toNum(cycleRow.bofa),
     panic_index_v2:
       panicIndexV2 != null && Number.isFinite(panicIndexV2) ? panicIndexV2 : null,
@@ -128,7 +126,6 @@ export function panicHistoryV2RowToClient(row) {
     hy,
     move: toNum(row.move),
     skew: toNum(row.skew),
-    gsBullBear: toNum(row.gs),
     gs: toNum(row.gs),
     bofa: toNum(row.bofa),
     vvix: toNum(row.vvix),
@@ -219,7 +216,6 @@ export async function upsertPanicHistoryV2Rows(dbRows) {
               hy: r.high_yield ?? r.hy,
               move: r.move,
               skew: r.skew,
-              gs: r.gs,
               bofa: r.bofa,
               source: r.source,
               updated_at: r.updated_at,
@@ -315,7 +311,6 @@ export async function upsertPanicHistoryV2ForSnapshot(snap, opts = {}) {
       hy_oas: snap.highYield,
       move: snap.move,
       skew: snap.skew,
-      gs_sentiment: snap.gsBullBear,
       bofa: snap.bofa,
     }),
     vvix: snap.vvix,

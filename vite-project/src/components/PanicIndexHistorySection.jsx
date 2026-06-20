@@ -25,6 +25,7 @@ const YDS_RANGE_OPTIONS = [
   { id: "3M", label: "3개월" },
   { id: "1Y", label: "1년" },
 ]
+const EIGHT_METRIC_KEYS = ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield"]
 
 function toNum(v) {
   const n = Number(v)
@@ -160,14 +161,13 @@ export default function PanicIndexHistorySection({
     })
   }, [panicData, history])
 
-  const allNineRows = useMemo(() => {
+  const allEightRows = useMemo(() => {
     const source = panicData ?? pickPanicPayload(history[history.length - 1])
     if (!source) return []
-    return PANIC_INDEX_HISTORY_METRICS.map((m) => {
+    return PANIC_INDEX_HISTORY_METRICS.filter((m) => EIGHT_METRIC_KEYS.includes(m.key)).map((m) => {
       const field = m.key
       let value = toNum(source[field])
       if (m.key === "fearGreed") value = toNum(source.fearGreed)
-      if (m.key === "gsBullBear") value = toNum(source.gsBullBear ?? source.gsSentiment)
       if (m.key === "highYield") value = toNum(source.highYield ?? source.hyOas)
       return {
         key: m.key,
@@ -272,9 +272,9 @@ export default function PanicIndexHistorySection({
         ) : null}
 
         <details className="panic-history-v2__all-nine">
-          <summary>전체 9대 지표</summary>
+          <summary>전체 8대 지표</summary>
           <div className="panic-history-v2__nine-grid">
-            {allNineRows.map((row) => (
+            {allEightRows.map((row) => (
               <button
                 key={row.key}
                 type="button"

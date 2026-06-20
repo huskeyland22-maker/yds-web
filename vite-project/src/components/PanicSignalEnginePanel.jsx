@@ -23,7 +23,7 @@ export default function PanicSignalEnginePanel({
   if (!sig.ready) {
     return (
       <section className="panic-signal-engine" aria-label="패닉 시그널 엔진">
-        <p className="m-0 panic-signal-engine__placeholder">9대 패닉지수 입력 후 시그널 생성</p>
+        <p className="m-0 panic-signal-engine__placeholder">8대 패닉지수 입력 후 시그널 생성</p>
       </section>
     )
   }

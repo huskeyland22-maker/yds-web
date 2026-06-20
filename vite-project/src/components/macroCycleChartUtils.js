@@ -10,7 +10,6 @@ export const MACRO_SERIES_COLORS = {
   bofa: "#a78bfa",
   skew: "#22d3ee",
   highYield: "#eab308",
-  gsBullBear: "#c084fc",
 }
 
 function hexToRgb(hex) {
@@ -51,7 +50,7 @@ export function pctDelta(rows, key) {
 export function formatMetricValue(key, v) {
   if (!Number.isFinite(v)) return "—"
   if (key === "putCall") return v.toFixed(2)
-  if (key === "fearGreed" || key === "gsBullBear") return String(Math.round(v))
+  if (key === "fearGreed") return String(Math.round(v))
   if (key === "highYield") return v.toFixed(2)
   return Number.isInteger(v) ? String(v) : v.toFixed(2)
 }
@@ -133,7 +132,6 @@ export function buildTierMacroComments(tier, panicData) {
   const bofa = pickPanicNumber(panicData, "bofa")
   const skew = pickPanicNumber(panicData, "skew")
   const hy = pickPanicNumber(panicData, "highYield")
-  const gs = pickPanicNumber(panicData, "gsBullBear")
 
   if (tier === "tactical") {
     const a = []
@@ -170,9 +168,6 @@ export function buildTierMacroComments(tier, panicData) {
   if (Number.isFinite(hy)) {
     a.push(hy >= 5 ? "하이일드 스프레드 확대 · 신용 스트레스 모니터링 강화" : "크레딧 스프레드는 압축 국면 · 리스크 온 가정 유지")
   }
-  if (Number.isFinite(gs)) {
-    a.push(gs >= 70 ? "장기 심리 과열 쪽 · 포지션 크기 점검" : gs <= 35 ? "장기 심리 비관 쪽 · 역발상 분할 검토" : "장기 Bull/Bear 밸런스는 중립")
-  }
   return a.slice(0, 3).length ? a.slice(0, 3) : ["실제 데이터 없음 · 장기 지표 미수신"]
 }
 
@@ -195,7 +190,7 @@ export function pickXAxisLabels(chartRows, count = 4, width = 720, padX = 32) {
 }
 
 /** 서버/레거시에서 내려오는 0 플레이스홀더 — 실제 값 없음으로 취급(잘못된 0 표시 방지). putCall은 제외 */
-const ZERO_SENTINEL_KEYS = new Set(["vix", "vxn", "move", "skew", "bofa", "highYield", "gsBullBear", "fearGreed"])
+const ZERO_SENTINEL_KEYS = new Set(["vix", "vxn", "move", "skew", "bofa", "highYield", "fearGreed"])
 
 function isPlaceholderZero(key, n) {
   return n === 0 && ZERO_SENTINEL_KEYS.has(key)
@@ -239,10 +234,6 @@ export function pickMetricDisplayValue(panicData, rows, key) {
     if (isStaleHistoryCalendarDate(row.date ?? row.ts)) continue
     let n = Number(row[key])
     if (isPlaceholderZero(key, n)) n = NaN
-    if (!Number.isFinite(n) && key === "gsBullBear") {
-      n = Number(row.gsBullBear ?? row.gs)
-      if (isPlaceholderZero(key, n)) n = NaN
-    }
     if (Number.isFinite(n)) return n
   }
   return NaN

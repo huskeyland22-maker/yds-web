@@ -34,7 +34,6 @@ const HIGHER_IS_BAD = {
   move: true,
   skew: true,
   bofa: false,
-  gsBullBear: false,
 }
 
 /** @param {string} label */
@@ -51,7 +50,6 @@ function previousMetricValue(rows, metricKey) {
   const prevRow = rows[rows.length - 2]
   if (!prevRow) return null
   if (key === "highYield") return Number(prevRow.highYield ?? prevRow.hyOas)
-  if (key === "gsBullBear") return Number(prevRow.gsBullBear ?? prevRow.gsSentiment)
   const n = Number(prevRow[key])
   return Number.isFinite(n) ? n : null
 }

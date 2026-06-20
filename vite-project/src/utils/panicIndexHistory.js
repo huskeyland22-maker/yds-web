@@ -40,7 +40,6 @@ export function buildPanicIndexSnapshot(panicData, dateOverride) {
     bofa: toNum(panicData.bofa),
     skew: toNum(panicData.skew),
     hyOas: toNum(panicData.highYield ?? panicData.hyOas),
-    gsSentiment: toNum(panicData.gsBullBear ?? panicData.gsSentiment ?? panicData.gs),
     createdAt: new Date().toISOString(),
   }
 }
@@ -79,7 +78,6 @@ export function normalizePanicIndexHistoryRow(row) {
     bofa: toNum(row.bofa),
     skew: toNum(row.skew),
     hyOas: toNum(row.hyOas ?? row.highYield),
-    gsSentiment: toNum(row.gsSentiment ?? row.gsBullBear ?? row.gs),
     createdAt: row.createdAt ?? row.created_at ?? null,
   }
   const core = ["vix", "fearGreed", "bofa", "hyOas"]
@@ -150,7 +148,6 @@ export function panicIndexRowToCycleChart(row) {
     bofa: toNum(row.bofa),
     skew: toNum(row.skew),
     highYield: toNum(row.highYield ?? row.hyOas ?? row.hy_oas ?? row.high_yield),
-    gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment ?? row.gs_bb),
     panicScore: toNum(row.panicScore ?? row.panic_score),
   }
   const panicV2 = toNum(row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panic_index_v2)

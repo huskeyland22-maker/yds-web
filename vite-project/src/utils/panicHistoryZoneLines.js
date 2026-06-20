@@ -89,15 +89,6 @@ export function metricZoneBands(metricKey) {
       { y1: 140, y2: 180, label: "꼬리위험", color: "#ef4444", area: true },
     ]
   }
-  if (metricKey === "gsBullBear") {
-    return [
-      { y1: 0, y2: 25, label: "극도 약세", color: "#ef4444", area: true },
-      { y1: 25, y2: 40, label: "약세", color: "#f97316", area: true },
-      { y1: 40, y2: 60, label: "중립", color: "#94a3b8", area: true },
-      { y1: 60, y2: 75, label: "강세", color: "#38bdf8", area: true },
-      { y1: 75, y2: 100, label: "극도 강세", color: "#a78bfa", area: true },
-    ]
-  }
   return []
 }
 
@@ -117,7 +108,7 @@ export function zoneBandMidpoints(bands) {
  * @param {number} bandCount
  */
 function insightTierForBand(metricKey, bandIndex, bandCount) {
-  if (metricKey === "fearGreed" || metricKey === "bofa" || metricKey === "gsBullBear") {
+  if (metricKey === "fearGreed" || metricKey === "bofa") {
     if (bandIndex >= bandCount - 1) return "risk"
     if (bandIndex >= Math.floor(bandCount * 0.55)) return "transition"
     return "floor"
@@ -155,6 +146,5 @@ export function metricZoneLineYs(metricKey) {
   if (metricKey === "bofa") return [2, 4, 6, 8]
   if (metricKey === "move") return [90, 110]
   if (metricKey === "skew") return [125, 140]
-  if (metricKey === "gsBullBear") return [25, 40, 60, 75]
   return []
 }

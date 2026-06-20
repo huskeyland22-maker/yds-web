@@ -17,7 +17,6 @@ const DEFAULT_VISIBLE = {
   highYield: false,
   move: false,
   skew: false,
-  gsBullBear: false,
 }
 
 /** @param {{ rows?: object[] }} props */

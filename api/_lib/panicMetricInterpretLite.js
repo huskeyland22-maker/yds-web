@@ -46,14 +46,6 @@ function interpretBofa(v) {
   return { statusLabel: "극도 탐욕", tone: "danger" }
 }
 
-function interpretGsBullBear(v) {
-  if (v <= 25) return { statusLabel: "극도 약세", tone: "danger" }
-  if (v <= 40) return { statusLabel: "약세", tone: "warning" }
-  if (v <= 60) return { statusLabel: "중립", tone: "neutral" }
-  if (v < 75) return { statusLabel: "강세", tone: "positive" }
-  return { statusLabel: "극도 강세", tone: "warning" }
-}
-
 function interpretVxn(v) {
   if (v <= 18) return { statusLabel: "안정", tone: "positive" }
   if (v <= 25) return { statusLabel: "경계", tone: "warning" }
@@ -87,9 +79,6 @@ export function interpretPanicMetric(metricKey, rawValue) {
       break
     case "bofa":
       core = interpretBofa(value)
-      break
-    case "gsBullBear":
-      core = interpretGsBullBear(value)
       break
     case "vxn":
       core = interpretVxn(value)

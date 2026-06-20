@@ -11,7 +11,6 @@ export function panicEmergencyHubPayload() {
     bofa: 5,
     skew: 140,
     highYield: 3.5,
-    gsBullBear: 5,
     accessTier: "pro",
     __emergency: true,
     __fetchSource: "EMERGENCY",

@@ -57,8 +57,6 @@ export function normalizeCycleHistoryRows(raw) {
       take("bofa", pick("bofa"))
       take("skew", pick("skew"))
       take("highYield", pick("highYield"))
-      const gs = pick("gsBullBear")
-      take("gsBullBear", Number.isFinite(gs) ? gs : pick("gs"))
       return o
     })
     .filter(Boolean)
@@ -128,7 +126,7 @@ export function buildCycleRowFromPanic(panicData) {
   const dayKey = calendarKeyFromPanic(panicData)
   if (isStaleHistoryCalendarDate(dayKey)) return null
   const row = { date: dayKey, ts: `${dayKey}T12:00:00.000Z` }
-  const noZeroSentinel = new Set(["vix", "vxn", "move", "skew", "bofa", "highYield", "fearGreed", "gsBullBear"])
+  const noZeroSentinel = new Set(["vix", "vxn", "move", "skew", "bofa", "highYield", "fearGreed"])
   const add = (k, v) => {
     const n = Number(v)
     if (!Number.isFinite(n)) return
@@ -143,7 +141,6 @@ export function buildCycleRowFromPanic(panicData) {
   add("bofa", panicData.bofa)
   add("skew", panicData.skew)
   add("highYield", panicData.highYield)
-  add("gsBullBear", panicData.gsBullBear)
   const validKeys = ["vix", "fearGreed", "putCall", "highYield"]
   if (!validKeys.every((k) => Number.isFinite(row[k]))) return null
   return row
@@ -168,7 +165,6 @@ export function panicDataFromCycleRow(row) {
     move: pick("move"),
     skew: pick("skew"),
     highYield: pick("highYield"),
-    gsBullBear: pick("gsBullBear"),
     vvix: pick("vvix"),
     vixTerm: pick("vixTerm") ?? (row.vix_term != null ? Number(row.vix_term) : null),
     ndxDistance:

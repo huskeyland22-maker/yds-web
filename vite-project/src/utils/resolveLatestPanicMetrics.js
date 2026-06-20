@@ -15,7 +15,6 @@ const METRIC_KEYS = [
   "move",
   "skew",
   "highYield",
-  "gsBullBear",
 ]
 
 function toNum(v) {
@@ -42,7 +41,6 @@ export function panicDataFromHubMetrics(hub) {
     move: toNum(hub.move),
     skew: toNum(hub.skew),
     highYield: toNum(hub.highYield ?? hub.hyOas),
-    gsBullBear: toNum(hub.gsBullBear ?? hub.gsSentiment),
     updatedAt: hub.updatedAt ?? hub.updated_at ?? null,
     accessTier: "pro",
     __fromHub: true,
@@ -64,7 +62,6 @@ export function panicDataFromHistoryApiRow(row) {
     bofa: toNum(row.bofa),
     skew: toNum(row.skew),
     highYield: toNum(row.hyOas ?? row.highYield),
-    gsBullBear: toNum(row.gsSentiment ?? row.gsBullBear),
     updatedAt: row.createdAt ?? row.updated_at ?? (date ? `${date}T12:00:00.000Z` : null),
     accessTier: "pro",
     __fromHistory: true,

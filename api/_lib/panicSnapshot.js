@@ -1,18 +1,7 @@
 /** AI·수동 입력 — panic_metrics / panic_index_history 동일 스냅샷 */
 
 import { toDbDouble } from "./panicNumeric.js"
-
-export const PANIC_METRIC_KEYS = [
-  "vix",
-  "vxn",
-  "fearGreed",
-  "putCall",
-  "bofa",
-  "move",
-  "skew",
-  "highYield",
-  "gsBullBear",
-]
+export { PANIC_METRIC_KEYS } from "./panicMetricKeys.js"
 
 export function toPanicNum(v) {
   return toDbDouble(v)
@@ -50,7 +39,6 @@ export function normalizePanicPayload(body, opts = {}) {
     move: toPanicNum(body?.move),
     skew: toPanicNum(body?.skew),
     highYield: toPanicNum(body?.highYield ?? body?.hyOas ?? body?.hy_oas ?? body?.high_yield),
-    gsBullBear: toPanicNum(body?.gsBullBear ?? body?.gsSentiment ?? body?.gs_bb ?? body?.gs),
     vvix: toPanicNum(body?.vvix),
     vixTerm: toPanicNum(body?.vixTerm ?? body?.vix_term),
     ndxDistance: toPanicNum(body?.ndxDistance ?? body?.ndx_distance),
@@ -63,7 +51,6 @@ export function normalizePanicPayload(body, opts = {}) {
 /** @param {ReturnType<typeof normalizePanicPayload>} snap */
 export function panicIndexHistoryRowFromSnapshot(snap) {
   const hy = snap.highYield
-  const gs = snap.gsBullBear
   return {
     date: snap.tradeDate,
     vix: snap.vix,
@@ -74,7 +61,6 @@ export function panicIndexHistoryRowFromSnapshot(snap) {
     bofa: snap.bofa,
     skew: snap.skew,
     hy_oas: hy,
-    gs_sentiment: gs,
     market: "global",
     source: snap.source,
     updated_at: snap.updatedAt,
@@ -92,7 +78,6 @@ export function panicObjectFromSnapshot(snap) {
     move: snap.move,
     skew: snap.skew,
     highYield: snap.highYield,
-    gsBullBear: snap.gsBullBear,
     updatedAt: snap.updatedAt,
     accessTier: "pro",
     riskRegime: deriveRiskRegimeFromSnap(snap),

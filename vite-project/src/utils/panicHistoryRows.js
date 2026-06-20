@@ -37,7 +37,6 @@ export function rawRowToCycle(row) {
     bofa: toNum(row.bofa),
     skew: toNum(row.skew),
     highYield: toNum(row.highYield ?? row.hyOas ?? row.high_yield),
-    gsBullBear: toNum(row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment),
     panicScore: toNum(row.panicScore ?? row.panic_score),
   }
   const panicV2 = toNum(
@@ -93,7 +92,6 @@ function rowValue(row, key) {
   }
   if (key === "dxy") return Number(row.dxy)
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
-  if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
   if (key === "panicScore") return Number(row.panicScore ?? row.panic_score)
   if (key === "ydsComposite") {
     const panic = panicDataFromCycleRow(row)

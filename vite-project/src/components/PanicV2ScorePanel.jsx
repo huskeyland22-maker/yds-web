@@ -69,7 +69,7 @@ export default function PanicV2ScorePanel({ panicData, legacyScore: legacyScoreP
       {explainOpen ? (
         <div className="panic-v2-panel__explain">
           <p className="panic-v2-panel__explain-lead">
-            9대 지표를 0~100으로 표준화 후 가중 합산 (핵심 70% + 전문가 30%).
+            8대 지표를 0~100으로 표준화 후 가중 합산 (핵심 70% + 전문가 30%).
             {v2.incomplete ? ` 현재 ${v2.completenessPct}% 지표 반영.` : ""}
           </p>
           <ul className="panic-v2-panel__explain-list">

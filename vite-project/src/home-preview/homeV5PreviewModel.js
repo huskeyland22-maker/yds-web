@@ -13,7 +13,6 @@ export const HOME_V5_PREVIEW_MOCK = Object.freeze({
   putCall: 0.85,
   move: 98,
   skew: 132,
-  gsBullBear: 55,
 })
 
 export const HOME_V5_PREVIEW_SCENARIOS = [

@@ -133,7 +133,10 @@ export function finalizePanicHistoryRow(row) {
     market: row.market == null ? "global" : String(row.market),
   }
   for (const key of HISTORY_DOUBLE_KEYS) {
-    if (key in row) out[key] = metricValueForDb(row[key])
+    if (!(key in row)) continue
+    const value = metricValueForDb(row[key])
+    if (key === "gs_sentiment" && value == null) continue
+    out[key] = value
   }
   return out
 }
@@ -167,7 +170,6 @@ export function logPanicPipelineStage(stage, data) {
     "move",
     "skew",
     "highYield",
-    "gsBullBear",
   ]
   for (const key of keys) {
     if (key in data) {

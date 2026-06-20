@@ -12,7 +12,6 @@ export const METRIC_PASTE_KEYS = [
   "skew",
   "putCall",
   "highYield",
-  "gsBullBear",
 ]
 
 const MAX_PASTE_CHARS = 48_000
@@ -44,14 +43,6 @@ export const METRIC_CANONICAL_FROM_SLUG = {
   hyoasfred: "highYield",
   highyield: "highYield",
   bamlh0a0hym2: "highYield",
-  gssentiment: "gsBullBear",
-  gsbb: "gsBullBear",
-  gsbullbear: "gsBullBear",
-  gsriskappetite: "gsBullBear",
-  gssentimentindex: "gsBullBear",
-  goldmansachssentiment: "gsBullBear",
-  goldmansachsbullbear: "gsBullBear",
-  goldmansachsriskappetite: "gsBullBear",
 }
 
 /** @type {{ alias: string, key: string }[]} */
@@ -94,20 +85,6 @@ export const METRIC_PASTE_RULES = [
       /(?:하이\s*일드|HY\s*스프레드|하이일드\s*스프레드)/i,
     ],
   },
-  {
-    key: "gsBullBear",
-    patterns: [
-      /\bGS\s*Sentiment\b/i,
-      /\bGS\s*Sentiment\s*Index\b/i,
-      /\bGS\s*Risk\s*Appetite\b/i,
-      /\bGS\s*B\s*\/\s*B\b/i,
-      /\bGS\s*B\s*&\s*B\b/i,
-      /Goldman\s*Sachs\s*Sentiment/i,
-      /Goldman\s*Sachs\s*Risk\s*Appetite/i,
-      /\bGS\s*Bull\s*Bear\b/i,
-      /(?:GS\s*Bull\s*(?:&|and)\s*Bear|Goldman(?:\s+Sachs)?\s*B\s*\/\s*B)/i,
-    ],
-  },
 ]
 
 const METRIC_LOG_LABEL = {
@@ -119,7 +96,6 @@ const METRIC_LOG_LABEL = {
   skew: "SKEW",
   putCall: "PUTCALL",
   highYield: "HIGH_YIELD",
-  gsBullBear: "GSBB",
 }
 
 let EMOJI_AND_MARKERS_RE = null
@@ -157,9 +133,9 @@ function compilePasteRegexes() {
     /(?:회복|주의|안정|탐욕|공포|과열|낙관|흔들림|패닉|극단|위험|급등|🟢|🟡|🔴|⚪)\b/giu
 }
 
-/** AI 입력 고정 포맷 (9대 패닉 지수) */
+/** AI 입력 고정 포맷 (8대 패닉 지수) */
 export const PANIC_NINE_BLOCK_TEMPLATE = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 9대 패닉 지수 | YYYY-MM-DD 뉴욕 종가
+📊 8대 패닉 지수 | YYYY-MM-DD 뉴욕 종가
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ① VIX        18.43
 ② VXN        24.08
@@ -169,11 +145,10 @@ export const PANIC_NINE_BLOCK_TEMPLATE = `━━━━━━━━━━━━�
 ⑥ BofA B&B     6.6
 ⑦ SKEW      141.51
 ⑧ HY OAS     2.82%
-⑨ GS B/B       70%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
 
-const NINE_PANIC_HEADER_RE = /9대\s*패닉\s*지수|패닉\s*지수\s*\|/i
-const NINE_CIRCLED_PREFIX_RE = /^[\s①②③④⑤⑥⑦⑧⑨\d.]+/u
+const NINE_PANIC_HEADER_RE = /8대\s*패닉\s*지수|패닉\s*지수\s*\|/i
+const NINE_CIRCLED_PREFIX_RE = /^[\s①②③④⑤⑥⑦⑧\d.]+/u
 
 /** @type {{ key: string; label: RegExp }[]} */
 const NINE_PANIC_LINE_RULES = [
@@ -185,7 +160,6 @@ const NINE_PANIC_LINE_RULES = [
   { key: "bofa", label: /BofA\s*B\s*&\s*B|BofA\s*B\s*\/\s*B|\bBofA\b/i },
   { key: "skew", label: /\bSKEW\b/i },
   { key: "highYield", label: /\bHY\s*OAS\b/i },
-  { key: "gsBullBear", label: /\bGS\s*B\s*\/\s*B|\bGS\s*B\s*&\s*B/i },
 ]
 
 export function isNinePanicDeskFormat(text) {
@@ -215,7 +189,7 @@ function extractNinePanicLineValue(line) {
 }
 
 /**
- * 9대 패닉 지수 블록 파싱
+ * 8대 패닉 지수 블록 파싱
  * @param {string} text
  * @returns {{ data: Record<string, number | null>, tradeDate: string | null } | null}
  */

@@ -22,7 +22,6 @@ function rowValue(row, key) {
     return Number.isFinite(v) ? v : null
   }
   if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
-  if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
   return Number(row[key])
 }
 
@@ -70,7 +69,6 @@ export const HIGHER_IS_BAD = {
   skew: true,
   fearGreed: false,
   bofa: false,
-  gsBullBear: false,
 }
 
 /** @param {number | null} pct */

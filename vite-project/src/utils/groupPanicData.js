@@ -23,7 +23,6 @@ export function groupPanicData(data) {
     long: {
       skew: pick(d.skew),
       highYield: pick(d.highYield),
-      gsBullBear: pick(d.gsBullBear ?? d.gs),
     },
   }
 }

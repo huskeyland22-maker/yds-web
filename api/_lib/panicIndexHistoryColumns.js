@@ -1,6 +1,6 @@
 /**
  * panic_index_history — DB 컬럼 ↔ 앱 필드 단일 매핑
- * 프로덕션 기준: HY = hy_oas, GS = gs_sentiment (high_yield / gs_bb 미사용)
+ * 프로덕션 기준: HY = hy_oas (high_yield / hy 등은 읽기 fallback)
  */
 
 /** @type {Record<string, string>} UI/API 키 → PostgREST 컬럼 */
@@ -14,18 +14,16 @@ export const PANIC_METRIC_DB_COLUMN = {
   skew: "skew",
   highYield: "hy_oas",
   hyOas: "hy_oas",
-  gsBullBear: "gs_sentiment",
-  gsSentiment: "gs_sentiment",
   panicScore: "panic_score",
 }
 
 /** 목록·latest 조회용 (존재하지 않는 alias 컬럼 제외) */
 export const PANIC_INDEX_HISTORY_SELECT =
-  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,gs_sentiment,panic_score,updated_at,source,market"
+  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,panic_score,updated_at,source,market"
 
 /** 일부 스키마에서 meta 컬럼 누락 시 */
 export const PANIC_INDEX_HISTORY_SELECT_MINIMAL =
-  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,gs_sentiment,updated_at"
+  "date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,updated_at"
 
 export function isSchemaColumnError(err) {
   const msg = err instanceof Error ? err.message : String(err || "")
@@ -53,17 +51,6 @@ export function pickHyFromRow(row) {
   return null
 }
 
-/** GS — gs_sentiment 우선 */
-export function pickGsFromRow(row) {
-  if (!row || typeof row !== "object") return null
-  const candidates = [row.gs_sentiment, row.gsBullBear, row.gsSentiment, row.gs_bb, row.gs]
-  for (const v of candidates) {
-    const n = Number(v)
-    if (Number.isFinite(n)) return n
-  }
-  return null
-}
-
 /**
  * DB row → 클라이언트 panic_index_history 행
  * @param {Record<string, unknown>} row
@@ -73,7 +60,6 @@ export function mapPanicIndexHistoryRowToClient(row) {
   const dateStr = String(row.date ?? "").slice(0, 10)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null
   const hy = pickHyFromRow(row)
-  const gs = pickGsFromRow(row)
   return {
     date: dateStr,
     vix: pickNum(row, "vix"),
@@ -85,8 +71,6 @@ export function mapPanicIndexHistoryRowToClient(row) {
     hyOas: hy,
     highYield: hy,
     putCall: pickNum(row, "put_call"),
-    gsSentiment: gs,
-    gsBullBear: gs,
     panicScore: pickNum(row, "panic_score"),
     market_state: row.market_state ?? null,
     marketState: row.market_state ?? null,
@@ -103,7 +87,6 @@ export function mapPanicIndexHistoryRowToClient(row) {
  */
 export function panicIndexHistoryDbPayloadFromNormalized(normalized) {
   const hy = pickHyFromRow(normalized) ?? normalized.hy_oas ?? null
-  const gs = pickGsFromRow(normalized) ?? normalized.gs_sentiment ?? null
   return {
     date: normalized.date,
     vix: normalized.vix,
@@ -114,7 +97,6 @@ export function panicIndexHistoryDbPayloadFromNormalized(normalized) {
     bofa: normalized.bofa,
     skew: normalized.skew,
     hy_oas: hy,
-    gs_sentiment: gs,
     market: normalized.market ?? "global",
     source: normalized.source ?? "manual",
     panic_score: normalized.panic_score,

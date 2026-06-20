@@ -25,7 +25,7 @@ const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 *
 function preserveFromExistingRows(rows) {
   const data = panicObjectFromRows(rows)
   const out = {}
-  for (const k of ["bofa", "gsBullBear", "vxn", "skew"]) {
+  for (const k of ["bofa", "vxn", "skew"]) {
     if (data[k] != null) out[k] = data[k]
   }
   return out

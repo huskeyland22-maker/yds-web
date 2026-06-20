@@ -13,7 +13,6 @@ export const PANIC_SAVE_REQUIRED_SPECS = [
   { key: "bofa", label: "BofA", aliases: ["bofa", "BofA"] },
   { key: "skew", label: "SKEW", aliases: ["skew", "SKEW"] },
   { key: "highYield", label: "HY", aliases: ["highYield", "hy_oas", "hyOas", "HY"] },
-  { key: "gsBullBear", label: "GS", aliases: ["gsBullBear", "gs_bb", "gs", "GS"] },
 ]
 
 /** @param {Record<string, unknown>} obj */
@@ -37,7 +36,7 @@ function pickRaw(body, aliases) {
 }
 
 /**
- * VIX·VXN·PC·CNN·MOVE·BofA·SKEW·HY·GS — Number() 강제 (%·쉼표 제거)
+ * VIX·VXN·PC·CNN·MOVE·BofA·SKEW·HY — Number() 강제 (%·쉼표 제거)
  * @param {Record<string, unknown>} body
  */
 export function coercePanicSavePayload(body) {

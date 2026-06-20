@@ -28,7 +28,6 @@ const SCENARIO_FIXTURES = [
       fearGreed: 12,
       skew: 142,
       bofa: 1.5,
-      gsBullBear: 18,
     },
   },
   {
@@ -44,7 +43,6 @@ const SCENARIO_FIXTURES = [
       fearGreed: 22,
       skew: 138,
       bofa: 2.8,
-      gsBullBear: 28,
     },
   },
   {
@@ -60,7 +58,6 @@ const SCENARIO_FIXTURES = [
       fearGreed: 18,
       skew: 145,
       bofa: 2.2,
-      gsBullBear: 22,
     },
   },
   {
@@ -76,7 +73,6 @@ const SCENARIO_FIXTURES = [
       fearGreed: 55,
       skew: 126,
       bofa: 5.0,
-      gsBullBear: 48,
     },
   },
 ]
@@ -84,7 +80,7 @@ const SCENARIO_FIXTURES = [
 /** @param {object} endRow @param {number} days */
 function buildSyntheticPath(endRow, days = 80) {
   const baseDate = new Date(`${endRow.date}T12:00:00Z`)
-  const keys = ["vix", "vxn", "highYield", "move", "putCall", "fearGreed", "skew", "bofa", "gsBullBear"]
+  const keys = ["vix", "vxn", "highYield", "move", "putCall", "fearGreed", "skew", "bofa"]
   const rows = []
   for (let i = 0; i < days; i++) {
     const d = new Date(baseDate)
@@ -115,7 +111,6 @@ function rowToPanicData(row) {
     fearGreed: row.fearGreed,
     skew: row.skew,
     bofa: row.bofa,
-    gsBullBear: row.gsBullBear,
   }
 }
 

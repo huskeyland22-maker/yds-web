@@ -10,14 +10,14 @@ export const PANIC_HISTORY_LS_KEY = "panic_history"
 export const CYCLE_HISTORY_LS_KEY = "cycle_history"
 const MAX_ROWS = 500
 
-/** @typedef {{ date: string, vix?: number | null, vxn?: number | null, fearGreed?: number | null, putCall?: number | null, move?: number | null, bofa?: number | null, skew?: number | null, highYield?: number | null, hyOas?: number | null, gsBullBear?: number | null, gsSentiment?: number | null, panicIndex?: number | null }} PanicHistoryRow */
+/** @typedef {{ date: string, vix?: number | null, vxn?: number | null, fearGreed?: number | null, putCall?: number | null, move?: number | null, bofa?: number | null, skew?: number | null, highYield?: number | null, hyOas?: number | null, panicIndex?: number | null }} PanicHistoryRow */
 
-const SEED_METRIC_CHECK_KEYS = ["vxn", "fearGreed", "bofa", "putCall", "highYield", "move", "skew", "gsBullBear"]
+const SEED_METRIC_CHECK_KEYS = ["vxn", "fearGreed", "bofa", "putCall", "highYield", "move", "skew"]
 
 function rowHasSeedMetrics(row) {
   if (!row) return false
   return SEED_METRIC_CHECK_KEYS.every((k) => {
-    const v = k === "highYield" ? (row.highYield ?? row.hyOas) : k === "gsBullBear" ? (row.gsBullBear ?? row.gsSentiment) : row[k]
+    const v = k === "highYield" ? (row.highYield ?? row.hyOas) : row[k]
     return v != null && Number.isFinite(Number(v))
   })
 }
@@ -102,7 +102,6 @@ export function buildPanicHistoryRow(panicData, tradeDate) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
 
   const highYield = toNum(panicData.highYield ?? panicData.hyOas ?? panicData.hy_oas)
-  const gsBullBear = toNum(panicData.gsBullBear ?? panicData.gsSentiment ?? panicData.gs_sentiment)
   return {
     date,
     vix: toNum(panicData.vix),
@@ -114,8 +113,6 @@ export function buildPanicHistoryRow(panicData, tradeDate) {
     skew: toNum(panicData.skew),
     highYield,
     hyOas: highYield,
-    gsBullBear,
-    gsSentiment: gsBullBear,
     panicIndex: toNum(
       panicData.panicIndex ?? panicData.panicScore ?? panicData.panic_score ?? panicData.finalScore,
     ),
@@ -206,7 +203,6 @@ export function panicHistoryLocalToCycleRows(rows) {
   return rows
     .map((r) => {
       const highYield = r.highYield ?? r.hyOas
-      const gsBullBear = r.gsBullBear ?? r.gsSentiment
       return panicIndexRowToCycleChart({
         date: r.date,
         vix: r.vix,
@@ -222,9 +218,6 @@ export function panicHistoryLocalToCycleRows(rows) {
         high_yield: highYield,
         hyOas: highYield,
         hy_oas: highYield,
-        gsBullBear,
-        gs_sentiment: gsBullBear,
-        gsSentiment: gsBullBear,
         panicScore: r.panicIndex ?? r.panic_score,
       })
     })
@@ -240,7 +233,6 @@ export function persistHistoryFromCycleRows(cycleRows) {
         {
           ...r,
           highYield: r.highYield ?? r.hyOas,
-          gsBullBear: r.gsBullBear ?? r.gsSentiment,
         },
         r.date,
       ),

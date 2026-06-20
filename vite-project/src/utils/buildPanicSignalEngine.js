@@ -1,5 +1,5 @@
 /**
- * 9대 패닉지수 → 실전 판단 시그널 (Risk ON / 중립 / 주의 / 방어)
+ * 8대 패닉지수 → 실전 판단 시그널 (Risk ON / 중립 / 주의 / 방어)
  * 핵심: 패닉 합성점수 + VIX·HY·F&G·MOVE — 채권·유동성은 보조 +1만
  */
 import { deriveBondReferenceStatuses } from "../market-os/bondLiquidityReference.js"

@@ -19,7 +19,6 @@ const seedPayload = {
   skew: 142.5,
   putCall: 0.88,
   highYield: 3.18,
-  gsBullBear: 0.28,
   updatedAt: new Date().toISOString(),
 }
 
@@ -48,7 +47,6 @@ const metrics = [
   ["skew", 142.5],
   ["putCall", 0.88],
   ["highYield", 3.18],
-  ["gsBullBear", 0.28],
 ].map(([metric_key, metric_value]) => ({
   metric_key,
   metric_value,
@@ -82,7 +80,6 @@ await rest("panic_index_history?on_conflict=date", {
     bofa: seedPayload.bofa,
     skew: seedPayload.skew,
     hy_oas: seedPayload.highYield,
-    gs_sentiment: seedPayload.gsBullBear,
     source: "yds-seed-script",
     updated_at: new Date().toISOString(),
   },

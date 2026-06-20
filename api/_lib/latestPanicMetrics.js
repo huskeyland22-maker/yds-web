@@ -2,7 +2,6 @@ import {
   fetchPanicIndexHistoryRaw,
   mapPanicIndexHistoryRowToClient,
   PANIC_INDEX_HISTORY_SELECT,
-  pickGsFromRow,
   pickHyFromRow,
 } from "./panicIndexHistoryColumns.js"
 import { supabaseRest } from "./supabaseRest.js"
@@ -22,7 +21,6 @@ export function latestPanicMetricsRowFromSnapshot(snap) {
     bofa: snap.bofa,
     skew: snap.skew,
     hy_oas: snap.highYield,
-    gs_sentiment: snap.gsBullBear,
     panic_score: getFinalScore({
       vix: snap.vix,
       fearGreed: snap.fearGreed,
@@ -45,7 +43,7 @@ export async function syncLatestPanicMetricsRpc(tradeDate) {
 
 /** metaRisk·reason·slope 등 신규/실험 컬럼 제외 */
 export const LATEST_PANIC_METRICS_CORE_SELECT =
-  "id,date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,gs_sentiment,panic_score,updated_at"
+  "id,date,vix,vxn,put_call,fear_greed,move,bofa,skew,hy_oas,panic_score,updated_at"
 
 /** panic_index_history (panic_history) 핵심 컬럼만 — alias 컬럼 제외 */
 export const PANIC_INDEX_HISTORY_CORE_SELECT = PANIC_INDEX_HISTORY_SELECT
@@ -81,7 +79,6 @@ export function panicObjectFromLatestRow(row) {
     move: row.move,
     skew: row.skew,
     highYield: pickHyFromRow(row),
-    gsBullBear: pickGsFromRow(row),
   }
   const data = panicObjectFromSnapshot(snap)
   if (row.panic_score != null) data.panicIndex = Number(row.panic_score)

@@ -39,7 +39,7 @@ const LEGACY_PANIC_KEYS = [
 const SNAPSHOT_MAX_AGE_MS = 1000 * 60 * 10
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const AUTO_REFRESH_MS = PANIC_DATA_POLL_MS
-const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield", "gsBullBear"]
+const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield"]
 const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
 const HEAL_STALE_PANIC_SESSION_KEY = "yds-stale-panic-heal-once"
@@ -459,7 +459,7 @@ export const usePanicStore = create((set, get) => ({
       )
       console.log("save payload", JSON.stringify(payload, null, 2))
       console.log("[panic pipeline] store-state")
-      for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
+      for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield"]) {
         if (key in payload) {
           console.log("[panic pipeline] store-state", key, payload[key], typeof payload[key])
         }
@@ -524,7 +524,7 @@ export const usePanicStore = create((set, get) => ({
       if (cycleRows.length) {
         saveHistory(
           cycleRows
-            .map((r) => buildPanicHistoryRow({ ...r, highYield: r.highYield, gsBullBear: r.gsBullBear }, r.date))
+            .map((r) => buildPanicHistoryRow({ ...r, highYield: r.highYield }, r.date))
             .filter(Boolean),
         )
         console.log("history rows", cycleRows.length)

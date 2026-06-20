@@ -18,7 +18,7 @@ export default function PanicMarketTimingPanel({ panicData = null }) {
   if (!cards.length) {
     return (
       <div className="border-t border-white/[0.06] px-2 py-1.5">
-        <p className="m-0 text-[9px] text-slate-500">9대 지표 입력 시 타점 자동 계산</p>
+        <p className="m-0 text-[9px] text-slate-500">8대 지표 입력 시 타점 자동 계산</p>
       </div>
     )
   }

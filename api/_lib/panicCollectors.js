@@ -147,9 +147,6 @@ export async function collectPanicMetricsLive(opts = {}) {
   payload.bofa = preserve.bofa ?? bofaEnv ?? null
   if (payload.bofa == null) errors.bofa = errors.bofa || "manual_or_db_required"
 
-  const gsEnv = toNum(process.env.GS_BULL_BEAR ?? process.env.GS_SENTIMENT_MANUAL)
-  payload.gsBullBear = preserve.gsBullBear ?? gsEnv ?? null
-
   if (Object.keys(changes).length) payload.changes = changes
 
   const fetchedCount = ["vix", "fearGreed", "putCall", "move", "highYield"].filter(

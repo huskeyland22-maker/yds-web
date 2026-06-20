@@ -42,8 +42,6 @@ export function pickPanicV2Raw(data, key) {
       return toNum(data.dxy)
     case "highYield":
       return toNum(data.highYield ?? data.hyOas ?? data.hy_oas ?? data.hy)
-    case "gsBullBear":
-      return toNum(data.gsBullBear ?? data.gsSentiment ?? data.gs_sentiment ?? data.gs)
     default:
       return toNum(data[key])
   }

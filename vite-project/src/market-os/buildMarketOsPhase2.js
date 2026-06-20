@@ -19,7 +19,7 @@ import { fearProgressPct, resolveCyclePosition } from "./positionLabels.js"
  */
 
 /**
- * Cycle + Bond 보조 + 9대 패닉 + 트리거 → 행동 변환 (Cycle 최종)
+ * Cycle + Bond 보조 + 8대 패닉 + 트리거 → 행동 변환 (Cycle 최종)
  * @param {{
  *   cycleScore: number|null|undefined;
  *   snapshot: import("../macro-risk/engine.js").MacroRiskSnapshot | null;

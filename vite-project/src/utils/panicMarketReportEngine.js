@@ -1,5 +1,5 @@
 /**
- * 9대 패닉지표 → 자동 시장 리포트 (숫자 기반, 동적 문장)
+ * 8대 패닉지표 → 자동 시장 리포트 (숫자 기반, 동적 문장)
  */
 import { formatMetricValue } from "../components/macroCycleChartUtils.js"
 import { computeMarketAction } from "./panicMarketActionEngine.js"
@@ -29,17 +29,12 @@ const METRIC_ORDER = [
   { key: "move", name: "MOVE" },
   { key: "skew", name: "SKEW" },
   { key: "bofa", name: "BofA" },
-  { key: "gsBullBear", name: "GS B/B" },
 ]
 
 function pick(data, key) {
   if (!data) return null
   if (key === "highYield") {
     const n = Number(data.highYield ?? data.hyOas)
-    return Number.isFinite(n) ? n : null
-  }
-  if (key === "gsBullBear") {
-    const n = Number(data.gsBullBear ?? data.gsSentiment)
     return Number.isFinite(n) ? n : null
   }
   const n = Number(data[key])

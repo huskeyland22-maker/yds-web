@@ -74,7 +74,6 @@ const MID_METRICS = [
 const LONG_METRICS = [
   { key: "skew", title: "SKEW", type: "skew" },
   { key: "highYield", title: "하이일드", type: "highYield" },
-  { key: "gsBullBear", title: "GS Bull/Bear", type: "gsBullBear" },
 ]
 
 export default function PanicIndexCard({
@@ -286,7 +285,7 @@ export default function PanicIndexCard({
           </h2>
           <p className="mt-2 text-xs text-gray-300" style={{ lineHeight: 1.7, letterSpacing: "-0.02em", opacity: 0.92 }}>
             거시 리스크 및 시스템 방어: 블랙스완 및 신용위기 탐지에 사용합니다. 해당 지표: SKEW, High Yield
-            Spread, GS Bull/Bear.
+            Spread.
           </p>
           <div className="mb-0 mt-3 grid w-full gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
             {LONG_METRICS.map((metric) => (

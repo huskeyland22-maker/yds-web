@@ -26,8 +26,6 @@ export const HISTORY_CHART_FIELD_MAP = {
   highYield: "highYield",
   move: "move",
   skew: "skew",
-  gs: "gsBullBear",
-  gsBullBear: "gsBullBear",
   ydsComposite: "ydsComposite",
 }
 
@@ -36,10 +34,6 @@ export function historyRowFieldValue(row, field) {
   if (!row || !field) return null
   if (field === "highYield") {
     const n = Number(row.highYield ?? row.hyOas)
-    return Number.isFinite(n) ? n : null
-  }
-  if (field === "gsBullBear") {
-    const n = Number(row.gsBullBear ?? row.gsSentiment)
     return Number.isFinite(n) ? n : null
   }
   if (field === "vixTerm") return Number(row.vixTerm ?? row.vix_term)

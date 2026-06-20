@@ -1,5 +1,5 @@
 ﻿"""
-9대 패닉지수 업데이트 스크립트.
+8대 패닉지수 업데이트 스크립트.
 
 요구사항:
 - 미국 동부시간 기준 업데이트 시각 저장
@@ -190,7 +190,7 @@ def extract_metric_scalar(node: Any) -> float | None:
 
 
 def build_cycle_history_row(trade_date: str, payload: dict[str, Any]) -> dict[str, Any] | None:
-    """프론트 Macro 차트와 동일 키( gsBullBear )로 일별 스냅샷 생성."""
+    """프론트 Macro 차트와 동일 키로 일별 스냅샷 생성 (8지표)."""
     row: dict[str, Any] = {
         "date": trade_date,
         "vix": extract_metric_scalar(payload.get("vix")),
@@ -201,7 +201,6 @@ def build_cycle_history_row(trade_date: str, payload: dict[str, Any]) -> dict[st
         "skew": extract_metric_scalar(payload.get("skew")),
         "highYield": extract_metric_scalar(payload.get("highYield")),
         "bofa": extract_metric_scalar(payload.get("bofa")),
-        "gsBullBear": extract_metric_scalar(payload.get("gs")),
     }
     core = ("vix", "vxn", "putCall", "fearGreed", "move", "skew", "highYield")
     if not all(row[k] is not None for k in core):
@@ -235,10 +234,6 @@ def cycle_history_row_is_valid(row: dict[str, Any]) -> bool:
     b = row.get("bofa")
     if b is not None:
         if not isinstance(b, (int, float)) or math.isnan(b) or math.isinf(b) or not (0.0 <= b <= 20.0):
-            return False
-    g = row.get("gsBullBear")
-    if g is not None:
-        if not isinstance(g, (int, float)) or math.isnan(g) or math.isinf(g) or not (0.0 <= g <= 100.0):
             return False
     return True
 

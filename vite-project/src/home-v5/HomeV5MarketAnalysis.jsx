@@ -19,7 +19,7 @@ export default function HomeV5MarketAnalysis({ panicData = null }) {
     () => [
       { key: "bofa", label: "BofA Bull & Bear" },
       { key: "putCall", label: "Put/Call Ratio" },
-      ...EXPERT_METRICS.filter((m) => ["move", "skew", "vxn", "gsBullBear"].includes(m.key)),
+      ...EXPERT_METRICS.filter((m) => ["move", "skew", "vxn"].includes(m.key)),
     ],
     [],
   )

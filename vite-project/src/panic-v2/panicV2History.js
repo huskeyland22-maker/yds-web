@@ -19,7 +19,6 @@ export function rowToPanicV2Input(row) {
     fearGreed: pickPanicV2Raw(row, "fearGreed"),
     skew: pickPanicV2Raw(row, "skew"),
     bofa: pickPanicV2Raw(row, "bofa"),
-    gsBullBear: pickPanicV2Raw(row, "gsBullBear"),
   }
 }
 

@@ -128,7 +128,6 @@ export default function PanicUnifiedHistorySection({ rows = [] }) {
       highYield: false,
       move: false,
       skew: false,
-      gsBullBear: false,
     }),
     [tabId],
   )

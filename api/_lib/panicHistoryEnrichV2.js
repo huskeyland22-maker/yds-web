@@ -23,7 +23,6 @@ export function resolvePanicV2ForHistoryRow(clientRow, storedV2) {
     bofa: clientRow.bofa,
     skew: clientRow.skew,
     hy_oas: clientRow.highYield ?? clientRow.hyOas,
-    gs_sentiment: clientRow.gsBullBear ?? clientRow.gsSentiment,
     vvix: clientRow.vvix,
     vix_term: clientRow.vixTerm,
     ndx_distance: clientRow.ndxDistance,

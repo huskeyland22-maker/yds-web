@@ -40,7 +40,7 @@ export default function MarketOsIntegratedPanel({ cycleScore, snapshot }) {
       </div>
 
       <p className="m-0 mt-3 border-t border-white/[0.05] pt-2 text-[8px] leading-relaxed text-slate-600">
-        데이터: 미국장 마감 · CORE LIVE · 패닉 9대 = Cycle 수동 (Bond는 보조)
+        데이터: 미국장 마감 · CORE LIVE · 패닉 8대 = Cycle 수동 (Bond는 보조)
       </p>
     </section>
   )

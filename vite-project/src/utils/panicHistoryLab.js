@@ -62,8 +62,6 @@ export function metricFearScore(key, value) {
       return normalizedFear(v, 80, 140, false)
     case "skew":
       return normalizedFear(v, 125, 165, false)
-    case "gsBullBear":
-      return normalizedFear(v, 0, 1, true)
     default:
       return null
   }

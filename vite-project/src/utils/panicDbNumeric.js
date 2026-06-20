@@ -23,7 +23,6 @@ export const PANIC_SUBMIT_NUMERIC_KEYS = [
   "move",
   "skew",
   "highYield",
-  "gsBullBear",
 ]
 
 /** @param {Record<string, unknown>} data */
@@ -42,9 +41,7 @@ export function normalizePanicSubmitPayload(data) {
           ? data.put_call
           : key === "highYield"
             ? data.hy_oas
-            : key === "gsBullBear"
-              ? data.gs_bb
-              : key === "bofa"
+            : key === "bofa"
                 ? data.bofa_bb
                 : undefined
     const raw = data[key] ?? alt
@@ -52,7 +49,6 @@ export function normalizePanicSubmitPayload(data) {
     out[key] = num
     console.log("[panic submit]", key, raw, typeof raw, "->", num, typeof num)
   }
-  if (data.gs != null && out.gsBullBear == null) out.gsBullBear = metricValueForDb(data.gs)
   return out
 }
 

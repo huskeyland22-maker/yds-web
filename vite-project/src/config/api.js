@@ -186,7 +186,6 @@ function panicIndexHistoryToCycleRow(row) {
     bofa: row.bofa,
     skew: row.skew,
     highYield: row.hyOas,
-    gsBullBear: row.gsSentiment,
   }
 }
 
@@ -580,7 +579,7 @@ export async function fetchOptimizeResult(options = {}) {
 function normalizeManualPayload(data) {
   console.log("[panic pipeline] client-input")
   if (data && typeof data === "object") {
-    for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"]) {
+    for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield"]) {
       if (key in data) console.log("[panic pipeline] client-input", key, data[key], typeof data[key])
     }
   }
@@ -621,7 +620,7 @@ async function postPanicSave(url, payload) {
 export async function submitManualPanicData(inputData) {
   const payload = normalizeManualPayload(inputData)
   console.table(
-    ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield", "gsBullBear"].map((key) => ({
+    ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield"].map((key) => ({
       metric: key,
       value: payload?.[key],
       type: typeof payload?.[key],

@@ -103,14 +103,6 @@ export const chartProfiles = {
     activeDotR: 6,
     showArea: true,
   },
-  gsBullBear: {
-    paddingRatio: 0.05,
-    paddingMin: 2,
-    tickCount: 5,
-    tickDecimals: 0,
-    strokeWidth: 3,
-    activeDotR: 5,
-  },
   vvix: {
     paddingRatio: 0.08,
     paddingMin: 2,
@@ -201,7 +193,6 @@ export const yDomainConfigs = {
   hyOas: { mode: "auto", paddingRatio: 0.08, paddingMin: 0.08, fixed: [1, 5] },
   move: { mode: "auto", paddingRatio: 0.08, paddingMin: 3, fixed: [50, 200] },
   skew: { mode: "auto", paddingRatio: 0.08, paddingMin: 2, fixed: [100, 180] },
-  gsBullBear: { mode: "fixed", fixed: [0, 100] },
   panicV2: { mode: "auto", paddingMin: 3 },
   panicV1: { mode: "auto", paddingMin: 3 },
   marketStateScore: { mode: "fixed", fixed: [0, 100] },

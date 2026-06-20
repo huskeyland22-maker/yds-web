@@ -24,7 +24,6 @@ export function historyMetricValues(rows, key) {
   return rows
     .map((row) => {
       if (key === "highYield" || key === "hyOas") return Number(row.highYield ?? row.hyOas)
-      if (key === "gsBullBear") return Number(row.gsBullBear ?? row.gsSentiment)
       return Number(row[key])
     })
     .filter(Number.isFinite)
@@ -339,48 +338,6 @@ function interpretBofa(v) {
 }
 
 /** @param {number} v */
-function interpretGsBullBear(v) {
-  if (v <= 25) {
-    return {
-      statusLabel: "극도 약세",
-      tone: "danger",
-      headline: "GS 강세·약세 지표가 극단적 약세입니다.",
-      detail: "기관·매크로 심리가 크게 위축된 상태입니다.",
-    }
-  }
-  if (v <= 40) {
-    return {
-      statusLabel: "약세",
-      tone: "warning",
-      headline: "약세 심리가 우세합니다.",
-      detail: "리스크오프·현금 비중 확대와 궁합이 좋습니다.",
-    }
-  }
-  if (v <= 60) {
-    return {
-      statusLabel: "중립",
-      tone: "neutral",
-      headline: "강세·약세 신호가 혼재한 중립권입니다.",
-      detail: "추세 확신보다 이벤트 대응이 유효할 수 있습니다.",
-    }
-  }
-  if (v < 75) {
-    return {
-      statusLabel: "강세",
-      tone: "positive",
-      headline: "강세 심리가 우세합니다.",
-      detail: "위험자산 선호 환경과 정합성이 있습니다.",
-    }
-  }
-  return {
-    statusLabel: "극도 강세",
-    tone: "warning",
-    headline: "극단적 강세 심리 — 과열·되돌림 리스크를 점검하세요.",
-    detail: "모멘텀은 유효하나 밸류에이션 부담이 커질 수 있습니다.",
-  }
-}
-
-/** @param {number} v */
 function interpretVxn(v) {
   if (v <= 18) {
     return {
@@ -446,9 +403,6 @@ export function interpretPanicMetric(metricKey, rawValue, opts = {}) {
     case "bofa":
       core = interpretBofa(value)
       break
-    case "gsBullBear":
-      core = interpretGsBullBear(value)
-      break
     case "vxn":
       core = interpretVxn(value)
       break
@@ -466,7 +420,6 @@ export function interpretPanicMetric(metricKey, rawValue, opts = {}) {
     move: true,
     skew: true,
     bofa: false,
-    gsBullBear: false,
   }
 
   const avgLine = avgComparisonLine(value, avg, valueText, {

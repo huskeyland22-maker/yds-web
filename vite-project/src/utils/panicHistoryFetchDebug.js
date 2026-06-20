@@ -17,7 +17,6 @@ const DB_METRIC_KEYS = [
   "bofa",
   "skew",
   "hy_oas",
-  "gs_sentiment",
 ]
 
 const UI_TO_DB = {
@@ -29,8 +28,6 @@ const UI_TO_DB = {
   skew: "skew",
   highYield: "hy_oas",
   hyOas: "hy_oas",
-  gsBullBear: "gs_sentiment",
-  gsSentiment: "gs_sentiment",
 }
 
 /**
@@ -68,7 +65,6 @@ export function logHistoryMetricMapping(rows) {
           fearGreed: sample.fearGreed ?? sample.fear_greed,
           putCall: sample.putCall ?? sample.put_call,
           hyOas: sample.hyOas ?? sample.highYield ?? sample.hy_oas,
-          gsSentiment: sample.gsSentiment ?? sample.gsBullBear ?? sample.gs_sentiment,
         }
       : null,
   })
@@ -79,7 +75,6 @@ function pickDbMetric(row, uiKey) {
   const db = UI_TO_DB[uiKey]
   if (!row || !db) return null
   if (uiKey === "highYield") return row.highYield ?? row.hyOas ?? row.hy_oas ?? row.high_yield
-  if (uiKey === "gsBullBear") return row.gsBullBear ?? row.gsSentiment ?? row.gs_sentiment ?? row.gs_bb
   return row[uiKey] ?? row[db]
 }
 

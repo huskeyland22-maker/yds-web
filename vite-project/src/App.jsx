@@ -94,9 +94,8 @@ const METRIC_DEFS = [
   { key: "skew", label: "SKEW" },
   { key: "putCall", label: "Put/Call" },
   { key: "highYield", label: "High Yield" },
-  { key: "gsBullBear", label: "GS B/B" },
 ]
-const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield", "gsBullBear"]
+const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield"]
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim()
 const PWA_RESUME_RELOAD_COOLDOWN_MS = 10_000
@@ -115,7 +114,6 @@ const FIELD_LABELS = {
   skew: "SKEW",
   putCall: "Put/Call",
   highYield: "High Yield",
-  gsBullBear: "GS B/B",
 }
 
 function WatchlistToStockPicksRedirect() {
@@ -211,8 +209,6 @@ function interpretMetricState(key, rawValue) {
       return v >= 110 ? "채권 변동성 경고" : "채권 변동성 완화"
     case "skew":
       return v >= 145 ? "꼬리위험 헤지 수요 증가" : "꼬리위험 수요 안정"
-    case "gsBullBear":
-      return v >= 75 ? "강한 낙관 · 과열 주의" : v <= 35 ? "비관 우세" : "중립"
     default:
       return "중립"
   }
@@ -638,7 +634,6 @@ function App() {
     let skew
     let putCall
     let highYield
-    let gsBullBear
     try {
       vix = coerceMetricValue(parsedData?.vix)
       vxn = coerceMetricValue(parsedData?.vxn)
@@ -648,7 +643,6 @@ function App() {
       skew = coerceMetricValue(parsedData?.skew)
       putCall = coerceMetricValue(parsedData?.putCall)
       highYield = coerceMetricValue(parsedData?.highYield)
-      gsBullBear = coerceMetricValue(parsedData?.gsBullBear)
     } catch (err) {
       console.warn("[submitInput] coerce failed", err)
       toast.error("입력 형식을 확인해주세요")
@@ -670,7 +664,6 @@ function App() {
       skew,
       putCall,
       highYield,
-      gsBullBear,
     }
 
     const tradeDate =
@@ -1191,9 +1184,8 @@ function App() {
   const macroView = useMemo(() => {
     const skew = Number(deskPanicData?.skew)
     const hy = Number(deskPanicData?.highYield)
-    const gs = Number(deskPanicData?.gsBullBear)
     const highRisk =
-      (Number.isFinite(skew) && skew >= 145) || (Number.isFinite(hy) && hy >= 5.5) || (Number.isFinite(gs) && gs >= 75)
+      (Number.isFinite(skew) && skew >= 145) || (Number.isFinite(hy) && hy >= 5.5)
     const state = highRisk ? "구조적 리스크 경계" : "시스템 리스크 낮음"
     const action = highRisk ? "방어 비중 확대 필요" : "장기 과열 경고 없음"
     return {
@@ -1202,7 +1194,6 @@ function App() {
       metrics: [
         { k: "SKEW", v: deskPanicData?.skew },
         { k: "하이일드", v: deskPanicData?.highYield },
-        { k: "GS B/B", v: deskPanicData?.gsBullBear },
       ],
     }
   }, [deskPanicData])
@@ -1608,7 +1599,7 @@ function App() {
               <div className="min-w-0">
                 <h3 className="m-0 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
-                  9대 패닉 지수 블록 형식 — ①~⑨ 번호·%는 무시하고 숫자만 추출합니다.
+                  8대 패닉 지수 블록 형식 — ①~⑧ 번호·%는 무시하고 숫자만 추출합니다.
                 </p>
               </div>
               <button
@@ -1782,7 +1773,7 @@ function App() {
           className="fixed top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[10002] max-w-[min(92vw,16rem)] rounded-lg border border-emerald-400/35 bg-[rgba(6,24,18,0.94)] px-3 py-2 shadow-[0_8px_28px_rgba(16,185,129,0.22)] backdrop-blur-md"
         >
           <p className="m-0 text-[13px] font-semibold text-emerald-100">✓ 저장 완료</p>
-          <p className="m-0 mt-0.5 text-[11px] text-emerald-200/80">9대 패닉지수 반영됨</p>
+          <p className="m-0 mt-0.5 text-[11px] text-emerald-200/80">8대 패닉지수 반영됨</p>
         </div>
       ) : null}
       {appToast?.message ? (
