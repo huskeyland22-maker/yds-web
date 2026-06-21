@@ -17941,6 +17941,184 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   white-space: nowrap;
 }
 
+.yds-perf-val__audit {
+  padding: 0.65rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--pv-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-perf-val__audit-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-bottom: 0.55rem;
+}
+
+.yds-perf-val__audit-trust {
+  text-align: right;
+}
+
+.yds-perf-val__audit-trust-label {
+  display: block;
+  font-size: 0.55rem;
+  color: var(--pv-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.yds-perf-val__audit-trust-val {
+  font-size: 1.1rem;
+  color: #86efac;
+}
+
+.yds-perf-val__audit-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+}
+
+@media (min-width: 640px) {
+  .yds-perf-val__audit-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.yds-perf-val__audit-table-wrap {
+  overflow-x: auto;
+}
+
+.yds-perf-val__audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.62rem;
+}
+
+.yds-perf-val__audit-table th,
+.yds-perf-val__audit-table td {
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.yds-perf-val__audit-table th {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.yds-perf-val__audit-name {
+  display: block;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.yds-perf-val__audit-date {
+  display: block;
+  font-size: 0.55rem;
+  color: #64748b;
+}
+
+.yds-perf-val__audit-row--warn {
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.yds-perf-val__audit-ok {
+  color: #86efac;
+  font-weight: 700;
+}
+
+.yds-perf-val__audit-warn {
+  color: #fca5a5;
+  font-weight: 700;
+}
+
+.yds-perf-val__score-corr {
+  padding: 0.65rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--pv-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-perf-val__score-corr-r {
+  text-align: right;
+}
+
+.yds-perf-val__score-corr-r-label {
+  display: block;
+  font-size: 0.55rem;
+  color: var(--pv-muted);
+}
+
+.yds-perf-val__score-corr-r-val {
+  font-size: 1rem;
+  color: #93c5fd;
+}
+
+.yds-perf-val__score-corr-r-sub {
+  display: block;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-perf-val__score-corr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+@media (min-width: 720px) {
+  .yds-perf-val__score-corr-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.yds-perf-val__score-corr-card {
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(30, 41, 59, 0.35);
+  display: grid;
+  gap: 0.12rem;
+}
+
+.yds-perf-val__score-corr-card--empty {
+  opacity: 0.55;
+}
+
+.yds-perf-val__score-corr-band {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-perf-val__score-corr-meta {
+  font-size: 0.55rem;
+  color: #64748b;
+}
+
+.yds-perf-val__score-corr-win {
+  font-size: 0.62rem;
+  color: #cbd5e1;
+}
+
+.yds-perf-val__score-corr-avg {
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+
+.yds-perf-val__score-corr-avg--up {
+  color: #86efac;
+}
+
+.yds-perf-val__score-corr-avg--down {
+  color: #fca5a5;
+}
+
 /* Panic Lab — 패닉 연구실 */
 .yds-panic-lab {
   --pl-border: rgba(42, 54, 72, 0.65);

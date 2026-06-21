@@ -17,6 +17,12 @@ import {
   outcomeCriteriaLabels,
   resolvePickOutcomeView,
 } from "../content/ydsPickOutcomeEngine.js"
+import {
+  buildReliabilityAuditReport,
+} from "../content/ydsPickReliabilityAudit.js"
+import {
+  buildScoreCorrelationReport,
+} from "../content/ydsPickScoreCorrelation.js"
 import { loadValidationPicks } from "../content/ydsValidationStorage.js"
 import { refreshValidationPicks } from "../content/ydsValidationEngine.js"
 import { buildValidationPriceMap } from "../content/ydsValidationPriceResolver.js"
@@ -324,6 +330,145 @@ function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange }) {
   )
 }
 
+function ReliabilityAuditPanel({ report }) {
+  return (
+    <section className="yds-perf-val__section yds-perf-val__audit" aria-labelledby="perf-val-audit">
+      <div className="yds-perf-val__audit-head">
+        <div>
+          <p className="yds-perf-val__pattern-kicker">Data Integrity · 7일만</p>
+          <h2 id="perf-val-audit" className="yds-perf-val__h2">
+            성과 데이터 신뢰도 검증
+          </h2>
+          <p className="yds-perf-val__pattern-lede">
+            추천가·7일 가격·수익률·성공판정을 저장값과 재계산으로 대조 · 14/30일 제외
+          </p>
+        </div>
+        {report.trustPct != null ? (
+          <div className="yds-perf-val__audit-trust">
+            <span className="yds-perf-val__audit-trust-label">신뢰도</span>
+            <strong className="yds-perf-val__audit-trust-val font-mono tabular-nums">
+              {report.trustPct}%
+            </strong>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="yds-perf-val__audit-stats">
+        <StatCard label="7일 잠금 n" value={String(report.totalWithD7)} />
+        <StatCard label="가격 정합" value={`${report.priceOkCount}/${report.totalWithD7}`} />
+        <StatCard label="수익률 일치" value={`${report.returnMatchCount}/${report.totalWithD7}`} />
+        <StatCard label="판정 일치" value={`${report.outcomeMatchCount}/${report.totalWithD7}`} />
+      </div>
+
+      {report.samples.length ? (
+        <div className="yds-perf-val__audit-table-wrap">
+          <table className="yds-perf-val__audit-table">
+            <thead>
+              <tr>
+                <th>종목</th>
+                <th>추천가</th>
+                <th>7일가</th>
+                <th>계산</th>
+                <th>시스템</th>
+                <th>판정</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              {report.samples.map((row) => (
+                <tr
+                  key={row.id}
+                  className={row.trusted ? "" : "yds-perf-val__audit-row--warn"}
+                >
+                  <td>
+                    <span className="yds-perf-val__audit-name">{row.name}</span>
+                    <span className="yds-perf-val__audit-date font-mono tabular-nums">
+                      {row.recommendedAt}
+                    </span>
+                  </td>
+                  <td className="font-mono tabular-nums">{formatPerfPrice(row.recommendPrice)}</td>
+                  <td className="font-mono tabular-nums">{formatPerfPrice(row.priceD7)}</td>
+                  <td className="font-mono tabular-nums">{formatPerfPct(row.calcReturn)}</td>
+                  <td className="font-mono tabular-nums">{formatPerfPct(row.systemReturn)}</td>
+                  <td>{row.outcomeLabel}</td>
+                  <td>
+                    <span
+                      className={
+                        row.trusted
+                          ? "yds-perf-val__audit-ok"
+                          : "yds-perf-val__audit-warn"
+                      }
+                    >
+                      {row.trusted ? "일치" : "불일치"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="yds-perf-val__pattern-empty">
+          7일 수익률이 잠긴 추천이 없습니다. 며칠 후 자동 검증이 가능합니다.
+        </p>
+      )}
+    </section>
+  )
+}
+
+function ScoreCorrelationPanel({ report }) {
+  return (
+    <section className="yds-perf-val__section yds-perf-val__score-corr" aria-labelledby="perf-val-score">
+      <div className="yds-perf-val__audit-head">
+        <div>
+          <p className="yds-perf-val__pattern-kicker">Score vs Return · 7일 실측</p>
+          <h2 id="perf-val-score" className="yds-perf-val__h2">
+            추천 점수 · 실제 성과 상관
+          </h2>
+          <p className="yds-perf-val__pattern-lede">
+            추천 당시 잠금 총점 구간별 승률·평균수익 · 저장 데이터만 사용
+          </p>
+        </div>
+        <div className="yds-perf-val__score-corr-r">
+          <span className="yds-perf-val__score-corr-r-label">상관계수 r</span>
+          <strong className="yds-perf-val__score-corr-r-val font-mono tabular-nums">
+            {report.correlation != null ? report.correlation : "—"}
+          </strong>
+          <span className="yds-perf-val__score-corr-r-sub">{report.correlationLabel}</span>
+        </div>
+      </div>
+
+      <p className="yds-perf-val__note">분석 표본 n={report.total} · {report.horizonLabel} 잠금 수익률</p>
+
+      <div className="yds-perf-val__score-corr-grid">
+        {report.buckets.map((b) => (
+          <article
+            key={b.id}
+            className={`yds-perf-val__score-corr-card ${b.count ? "" : "yds-perf-val__score-corr-card--empty"}`}
+          >
+            <span className="yds-perf-val__score-corr-band font-mono tabular-nums">{b.label}</span>
+            <span className="yds-perf-val__score-corr-meta font-mono tabular-nums">n={b.count}</span>
+            <strong className="yds-perf-val__score-corr-win font-mono tabular-nums">
+              {b.count ? `승률 ${b.winRate}%` : "—"}
+            </strong>
+            <span
+              className={`yds-perf-val__score-corr-avg font-mono tabular-nums ${
+                b.avgReturn != null && b.avgReturn >= 0
+                  ? "yds-perf-val__score-corr-avg--up"
+                  : b.avgReturn != null
+                    ? "yds-perf-val__score-corr-avg--down"
+                    : ""
+              }`}
+            >
+              {b.count ? `평균 ${formatPerfPct(b.avgReturn)}` : "데이터 없음"}
+            </span>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function PickRecommendSnapshot({ row, horizon7Pct }) {
   const snap = getRecommendSnapshot(row)
   if (!snap) return null
@@ -461,6 +606,8 @@ export default function PerformanceValidationPage() {
     () => buildOutcomeSummaryReport(picks, outcomeHorizon),
     [picks, outcomeHorizon],
   )
+  const reliability = useMemo(() => buildReliabilityAuditReport(picks), [picks])
+  const scoreCorrelation = useMemo(() => buildScoreCorrelationReport(picks), [picks])
   const { kpi, gradeBreakdown, topSuccess, topFailure, monthly } = report
   const hasAny = report.allPickCount > 0
 
@@ -495,6 +642,10 @@ export default function PerformanceValidationPage() {
             horizonKey={outcomeHorizon}
             onHorizonChange={setOutcomeHorizon}
           />
+
+          <ReliabilityAuditPanel report={reliability} />
+
+          <ScoreCorrelationPanel report={scoreCorrelation} />
 
           <SuccessPatternPanel
             pattern={pattern}
