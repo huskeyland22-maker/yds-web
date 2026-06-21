@@ -17503,6 +17503,17 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-weight: 600;
 }
 
+.yds-perf-val__outcome-tab--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: #64748b;
+}
+
+.yds-perf-val__outcome-tab--disabled.yds-perf-val__outcome-tab--active {
+  background: transparent;
+  font-weight: 500;
+}
+
 .yds-perf-val__outcome-criteria {
   display: flex;
   flex-wrap: wrap;
@@ -17701,6 +17712,17 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: rgba(51, 65, 85, 0.85);
   color: #e2e8f0;
   font-weight: 600;
+}
+
+.yds-perf-val__pattern-tab--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: #64748b;
+}
+
+.yds-perf-val__pattern-tab--disabled.yds-perf-val__pattern-tab--active {
+  background: transparent;
+  font-weight: 500;
 }
 
 .yds-perf-val__pattern-criteria {

@@ -26,6 +26,18 @@ import {
 import { buildComponentContributionReport } from "../content/ydsPickComponentContribution.js"
 import { buildPanicDeepAnalysisReport } from "../content/ydsPickPanicDeepAnalysis.js"
 import { buildMarketStateStrategyReport } from "../content/ydsPickMarketStateStrategy.js"
+import {
+  buildHorizonAvailability,
+  isComponentContributionPanelVisible,
+  isHorizonTabEnabled,
+  isMarketStrategyPanelVisible,
+  isOutcomePanelVisible,
+  isPanicDeepPanelVisible,
+  isReliabilityPanelVisible,
+  isScoreCorrelationPanelVisible,
+  isSuccessPatternPanelVisible,
+  resolveDefaultHorizon,
+} from "../content/ydsPickPerfPanelVisibility.js"
 import { loadValidationPicks } from "../content/ydsValidationStorage.js"
 import { refreshValidationPicks } from "../content/ydsValidationEngine.js"
 import { buildValidationPriceMap } from "../content/ydsValidationPriceResolver.js"
@@ -135,7 +147,62 @@ function OutcomeBadge({ returnPct, compact = false }) {
   )
 }
 
-function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange }) {
+/**
+ * @param {{
+ *   horizons: { key: string; label: string }[]
+ *   horizonKey: string
+ *   onHorizonChange: (key: string) => void
+ *   availability: Record<string, number>
+ *   className?: string
+ *   ariaLabel?: string
+ *   tabClassPrefix?: string
+ * }} props
+ */
+function HorizonTabBar({
+  horizons,
+  horizonKey,
+  onHorizonChange,
+  availability,
+  className = "yds-perf-val__pattern-horizon",
+  ariaLabel = "분석 기간",
+  tabClassPrefix = "yds-perf-val__pattern-tab",
+}) {
+  return (
+    <div className={className} role="tablist" aria-label={ariaLabel}>
+      {horizons.map((h) => {
+        const enabled = isHorizonTabEnabled(availability, h.key)
+        const active = horizonKey === h.key
+        return (
+          <button
+            key={h.key}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            aria-disabled={!enabled}
+            disabled={!enabled}
+            title={enabled ? undefined : "데이터 수집 중"}
+            className={[
+              tabClassPrefix,
+              active ? `${tabClassPrefix}--active` : "",
+              !enabled ? `${tabClassPrefix}--disabled` : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClick={() => {
+              if (enabled) onHorizonChange(h.key)
+            }}
+          >
+            {enabled ? h.label : `${h.label} · 수집중`}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange, horizonAvailability }) {
+  if (!isOutcomePanelVisible(summary)) return null
+
   const horizons = [
     { key: "d7", label: "7일" },
     { key: "d14", label: "14일" },
@@ -155,20 +222,15 @@ function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange }) {
             잠금 수익률 기준 · 실제 성과만 · 예측 없음
           </p>
         </div>
-        <div className="yds-perf-val__outcome-horizon" role="tablist" aria-label="판정 기간">
-          {horizons.map((h) => (
-            <button
-              key={h.key}
-              type="button"
-              role="tab"
-              aria-selected={horizonKey === h.key}
-              className={`yds-perf-val__outcome-tab ${horizonKey === h.key ? "yds-perf-val__outcome-tab--active" : ""}`}
-              onClick={() => onHorizonChange(h.key)}
-            >
-              {h.label}
-            </button>
-          ))}
-        </div>
+        <HorizonTabBar
+          horizons={horizons}
+          horizonKey={horizonKey}
+          onHorizonChange={onHorizonChange}
+          availability={horizonAvailability}
+          className="yds-perf-val__outcome-horizon"
+          ariaLabel="판정 기간"
+          tabClassPrefix="yds-perf-val__outcome-tab"
+        />
       </div>
 
       <div className="yds-perf-val__outcome-criteria">
@@ -228,7 +290,9 @@ function PatternBucketRow({ item }) {
   )
 }
 
-function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange }) {
+function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange, horizonAvailability }) {
+  if (!isSuccessPatternPanelVisible(pattern)) return null
+
   const horizons = [
     { key: "d7", label: "7일" },
     { key: "d14", label: "14일" },
@@ -247,20 +311,12 @@ function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange }) {
             실제 잠금 수익률 기준 · 등급별 표본 {GRADE_PATTERN_MIN_SAMPLE}개 미만은 참고용 · AI 예측 없음
           </p>
         </div>
-        <div className="yds-perf-val__pattern-horizon" role="tablist" aria-label="분석 기간">
-          {horizons.map((h) => (
-            <button
-              key={h.key}
-              type="button"
-              role="tab"
-              aria-selected={horizonKey === h.key}
-              className={`yds-perf-val__pattern-tab ${horizonKey === h.key ? "yds-perf-val__pattern-tab--active" : ""}`}
-              onClick={() => onHorizonChange(h.key)}
-            >
-              {h.label}
-            </button>
-          ))}
-        </div>
+        <HorizonTabBar
+          horizons={horizons}
+          horizonKey={horizonKey}
+          onHorizonChange={onHorizonChange}
+          availability={horizonAvailability}
+        />
       </div>
 
       <div className="yds-perf-val__pattern-criteria">
@@ -334,6 +390,8 @@ function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange }) {
 }
 
 function ReliabilityAuditPanel({ report }) {
+  if (!isReliabilityPanelVisible(report)) return null
+
   return (
     <section className="yds-perf-val__section yds-perf-val__audit" aria-labelledby="perf-val-audit">
       <div className="yds-perf-val__audit-head">
@@ -420,6 +478,8 @@ function ReliabilityAuditPanel({ report }) {
 }
 
 function ScoreCorrelationPanel({ report }) {
+  if (!isScoreCorrelationPanelVisible(report)) return null
+
   return (
     <section className="yds-perf-val__section yds-perf-val__score-corr" aria-labelledby="perf-val-score">
       <div className="yds-perf-val__audit-head">
@@ -473,6 +533,8 @@ function ScoreCorrelationPanel({ report }) {
 }
 
 function ComponentContributionPanel({ report }) {
+  if (!isComponentContributionPanelVisible(report)) return null
+
   return (
     <section className="yds-perf-val__section yds-perf-val__contrib" aria-labelledby="perf-val-contrib">
       <p className="yds-perf-val__pattern-kicker">Component Impact · 7일 실측</p>
@@ -495,9 +557,7 @@ function ComponentContributionPanel({ report }) {
             </li>
           ))}
         </ol>
-      ) : (
-        <p className="yds-perf-val__pattern-empty">7일 잠금 표본이 부족합니다.</p>
-      )}
+      ) : null}
 
       <div className="yds-perf-val__contrib-grid">
         {report.components.map((comp) => (
@@ -508,7 +568,9 @@ function ComponentContributionPanel({ report }) {
                 <span className="yds-perf-val__contrib-r font-mono tabular-nums"> r={comp.correlation}</span>
               ) : null}
             </h3>
-            {comp.grades.map((g) => (
+            {comp.grades
+              .filter((g) => g.count > 0)
+              .map((g) => (
               <div key={g.grade} className="yds-perf-val__contrib-row">
                 <span className="yds-perf-val__contrib-grade">{g.label}</span>
                 <span className="yds-perf-val__contrib-meta font-mono tabular-nums">n={g.count}</span>
@@ -536,6 +598,10 @@ function ComponentContributionPanel({ report }) {
 }
 
 function PanicDeepPanel({ report }) {
+  if (!isPanicDeepPanelVisible(report)) return null
+
+  const zones = report.zones.filter((z) => z.count > 0)
+
   return (
     <section className="yds-perf-val__section yds-perf-val__panic-deep" aria-labelledby="perf-val-panic">
       <p className="yds-perf-val__pattern-kicker">Panic Zones · 7일 실측</p>
@@ -544,7 +610,7 @@ function PanicDeepPanel({ report }) {
       </h2>
       <p className="yds-perf-val__note">추천 당시 잠금 패닉강도 · n={report.total}</p>
       <div className="yds-perf-val__panic-deep-grid">
-        {report.zones.map((z) => (
+        {zones.map((z) => (
           <article
             key={z.id}
             className={`yds-perf-val__panic-deep-card ${z.count ? "" : "yds-perf-val__score-corr-card--empty"}`}
@@ -578,6 +644,10 @@ function PanicDeepPanel({ report }) {
 }
 
 function MarketStateStrategyPanel({ report }) {
+  if (!isMarketStrategyPanelVisible(report)) return null
+
+  const strategies = report.strategies.filter((s) => s.count > 0)
+
   return (
     <section className="yds-perf-val__section yds-perf-val__mkt-strat" aria-labelledby="perf-val-mkt">
       <p className="yds-perf-val__pattern-kicker">Market Regime · 7일 실측</p>
@@ -587,7 +657,7 @@ function MarketStateStrategyPanel({ report }) {
       <p className="yds-perf-val__note">추천 당시 잠금 시장상태 · n={report.total}</p>
 
       <div className="yds-perf-val__mkt-strat-grid">
-        {report.strategies.map((s) => (
+        {strategies.map((s) => (
           <article key={s.id} className="yds-perf-val__mkt-strat-card">
             <h3 className="yds-perf-val__h3">{s.label}</h3>
             <p className="yds-perf-val__mkt-strat-meta font-mono tabular-nums">
@@ -742,8 +812,8 @@ export default function PerformanceValidationPage() {
   const { stocks: liveStocks, loading: liveLoading } = useStockPickLiveData(marketContext)
   const [picks, setPicks] = useState(() => loadValidationPicks())
 
-  const [patternHorizon, setPatternHorizon] = useState("d30")
-  const [outcomeHorizon, setOutcomeHorizon] = useState("d30")
+  const [patternHorizon, setPatternHorizon] = useState("d7")
+  const [outcomeHorizon, setOutcomeHorizon] = useState("d7")
 
   useEffect(() => {
     if (liveLoading) return
@@ -769,6 +839,18 @@ export default function PerformanceValidationPage() {
   const componentContribution = useMemo(() => buildComponentContributionReport(picks), [picks])
   const panicDeep = useMemo(() => buildPanicDeepAnalysisReport(picks), [picks])
   const marketStrategy = useMemo(() => buildMarketStateStrategyReport(picks), [picks])
+  const horizonAvailability = useMemo(() => buildHorizonAvailability(picks), [picks])
+
+  useEffect(() => {
+    const next = resolveDefaultHorizon(horizonAvailability, patternHorizon)
+    if (next !== patternHorizon) setPatternHorizon(next)
+  }, [horizonAvailability, patternHorizon])
+
+  useEffect(() => {
+    const next = resolveDefaultHorizon(horizonAvailability, outcomeHorizon)
+    if (next !== outcomeHorizon) setOutcomeHorizon(next)
+  }, [horizonAvailability, outcomeHorizon])
+
   const { kpi, gradeBreakdown, topSuccess, topFailure, monthly } = report
   const hasAny = report.allPickCount > 0
 
@@ -802,6 +884,7 @@ export default function PerformanceValidationPage() {
             summary={outcomeSummary}
             horizonKey={outcomeHorizon}
             onHorizonChange={setOutcomeHorizon}
+            horizonAvailability={horizonAvailability}
           />
 
           <ReliabilityAuditPanel report={reliability} />
@@ -818,6 +901,7 @@ export default function PerformanceValidationPage() {
             pattern={pattern}
             horizonKey={patternHorizon}
             onHorizonChange={setPatternHorizon}
+            horizonAvailability={horizonAvailability}
           />
 
           <section className="yds-perf-val__section" aria-labelledby="perf-val-kpi">
