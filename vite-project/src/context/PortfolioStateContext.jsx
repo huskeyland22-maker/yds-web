@@ -10,6 +10,7 @@ import {
   fetchPortfolioQuotes,
   PORTFOLIO_QUOTE_REFRESH_MS,
 } from "../content/ydsPortfolioQuoteService.js"
+import { logPortfolioLoad } from "../content/ydsPortfolioLoadLog.js"
 import { logPortfolioStorageAudit } from "../content/ydsPortfolioStorageDebug.js"
 import {
   buildV5Holdings,
@@ -19,6 +20,7 @@ import {
 } from "../content/ydsPortfolioV5Engine.js"
 import {
   createTradeId,
+  getPortfolioLoadMeta,
   loadPortfolioTrades,
   savePortfolioTrades,
   todayDateKey,
@@ -63,6 +65,7 @@ function usePortfolioStateValue() {
   const skipCloudPushRef = useRef(true)
 
   useEffect(() => {
+    logPortfolioLoad(trades, getPortfolioLoadMeta(), { user, syncMode })
     logPortfolioStorageAudit(trades, { user, syncMode })
   }, [])
 

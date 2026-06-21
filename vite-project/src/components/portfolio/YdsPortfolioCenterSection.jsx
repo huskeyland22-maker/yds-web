@@ -176,7 +176,7 @@ export default function YdsPortfolioCenterSection() {
                 ? syncReady
                   ? "로그인 계정 기준 Supabase 동기화. 모바일에서 등록한 종목은 동일 계정 로그인 후 이 기기에서 불러옵니다."
                   : "계정 포트폴리오 동기화 중…"
-                : "로그인하면 모바일·PC에서 동일 보유종목을 사용할 수 있습니다. 미로그인 시 이 기기 localStorage에만 저장됩니다."}
+                : "키는 모바일·PC 동일(yds-portfolio-trades-v1)하지만 저장소는 기기별입니다. PC 콘솔 [portfolio] 로그로 이 기기 데이터를 확인하세요. 로그인 시 계정 동기화."}
             </p>
           </>
         )}
