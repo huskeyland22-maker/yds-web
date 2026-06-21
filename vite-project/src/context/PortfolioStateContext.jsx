@@ -1,11 +1,16 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { normalizeCashBalance } from "../content/ydsPortfolioCashEngine.js"
 import { loadCashBalance, saveCashBalance } from "../content/ydsPortfolioCashBalanceStorage.js"
+import {
+  pushCloudPortfolio,
+  reconcilePortfolioWithCloud,
+} from "../content/ydsPortfolioCloudSync.js"
 import { setPortfolioUsdKrw, getPortfolioUsdKrw } from "../content/ydsPortfolioPriceProvider.js"
 import {
   fetchPortfolioQuotes,
   PORTFOLIO_QUOTE_REFRESH_MS,
 } from "../content/ydsPortfolioQuoteService.js"
+import { logPortfolioStorageAudit } from "../content/ydsPortfolioStorageDebug.js"
 import {
   buildV5Holdings,
   emptyPortfolioHoldings,
@@ -18,7 +23,7 @@ import {
   savePortfolioTrades,
   todayDateKey,
 } from "../content/ydsPortfolioTradesStorage.js"
-import { logPortfolioStorageAudit } from "../content/ydsPortfolioStorageDebug.js"
+import { useFirebaseAuthUser } from "../hooks/useFirebaseAuthUser.js"
 
 /** @typedef {import("../content/ydsPortfolioTradesStorage.js").PortfolioTrade} PortfolioTrade */
 /** @typedef {import("../content/ydsPortfolioTradesStorage.js").TradeAction} TradeAction */
@@ -29,6 +34,7 @@ import { logPortfolioStorageAudit } from "../content/ydsPortfolioStorageDebug.js
 const PortfolioStateContext = createContext(null)
 
 function usePortfolioStateValue() {
+  const { user, authReady } = useFirebaseAuthUser()
   const [trades, setTrades] = useState(() => {
     try {
       const loaded = loadPortfolioTrades()
@@ -51,9 +57,13 @@ function usePortfolioStateValue() {
   const [quotesLoading, setQuotesLoading] = useState(false)
   const [quotesFetchedAt, setQuotesFetchedAt] = useState(/** @type {string | null} */ (null))
   const [quotesError, setQuotesError] = useState(/** @type {string | null} */ (null))
+  const [syncMode, setSyncMode] = useState(/** @type {string} */ ("device-local"))
+  const [syncReady, setSyncReady] = useState(false)
+  const cloudPushTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null))
+  const skipCloudPushRef = useRef(true)
 
   useEffect(() => {
-    logPortfolioStorageAudit(trades)
+    logPortfolioStorageAudit(trades, { user, syncMode })
   }, [])
 
   useEffect(() => {
@@ -63,6 +73,69 @@ function usePortfolioStateValue() {
   useEffect(() => {
     saveCashBalance(cashBalance)
   }, [cashBalance])
+
+  useEffect(() => {
+    if (!authReady) return
+
+    if (!user?.uid) {
+      setSyncMode("device-local")
+      setSyncReady(true)
+      skipCloudPushRef.current = false
+      return
+    }
+
+    let cancelled = false
+    skipCloudPushRef.current = true
+    setSyncReady(false)
+
+    async function pullAndReconcile() {
+      try {
+        const token = await user.getIdToken()
+        const localTrades = loadPortfolioTrades()
+        const localCash = loadCashBalance() ?? 0
+        const result = await reconcilePortfolioWithCloud(token, localTrades, localCash)
+        if (cancelled) return
+        setTrades(result.trades)
+        setCashBalanceState(result.cashBalance)
+        setSyncMode(result.source === "cloud" ? "account-cloud" : "account-local")
+      } catch (e) {
+        if (!cancelled) {
+          console.error("[portfolio-sync] reconcile failed", e)
+          setSyncMode("account-error")
+        }
+      } finally {
+        if (!cancelled) {
+          setSyncReady(true)
+          skipCloudPushRef.current = false
+        }
+      }
+    }
+
+    void pullAndReconcile()
+    return () => {
+      cancelled = true
+    }
+  }, [authReady, user?.uid])
+
+  useEffect(() => {
+    if (!user?.uid || !syncReady || skipCloudPushRef.current) return
+
+    if (cloudPushTimerRef.current) clearTimeout(cloudPushTimerRef.current)
+    cloudPushTimerRef.current = setTimeout(async () => {
+      try {
+        const token = await user.getIdToken()
+        await pushCloudPortfolio(token, trades, cashBalance)
+        setSyncMode("account-synced")
+      } catch (e) {
+        console.warn("[portfolio-sync] push failed", e)
+        setSyncMode("account-push-error")
+      }
+    }, 900)
+
+    return () => {
+      if (cloudPushTimerRef.current) clearTimeout(cloudPushTimerRef.current)
+    }
+  }, [user?.uid, trades, cashBalance, syncReady])
 
   const lotsSignature = useMemo(() => {
     const { lots } = replayPortfolioFromTrades(trades)
@@ -194,6 +267,9 @@ function usePortfolioStateValue() {
     quotesError,
     sortBy,
     setSortBy,
+    syncMode,
+    syncReady,
+    isLoggedIn: Boolean(user?.uid),
   }
 }
 

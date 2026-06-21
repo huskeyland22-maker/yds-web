@@ -1,5 +1,5 @@
 /**
- * 포트폴리오 저장소 진단 — localStorage 기기별 · Supabase/계정 동기화 없음
+ * 포트폴리오 저장소 진단 — localStorage 캐시 + (로그인 시) Supabase user_portfolio
  */
 
 import { PORTFOLIO_CASH_BALANCE_KEY } from "./ydsPortfolioCashBalanceStorage.js"
@@ -46,7 +46,7 @@ export const PORTFOLIO_STORAGE_KEYS = [
  *   sessionStorageUsed: boolean
  *   supabasePortfolio: boolean
  *   accountSync: boolean
- *   syncMode: "device-local"
+ *   syncMode: string
  *   note: string
  *   keys: PortfolioKeyAudit[]
  *   tradesCount: number
@@ -72,7 +72,7 @@ function safeParseCount(raw) {
 }
 
 /** @returns {PortfolioStorageAudit} */
-export function auditPortfolioStorage() {
+export function auditPortfolioStorage(/** @type {{ loggedIn?: boolean, syncMode?: string }} */ opts = {}) {
   /** @type {PortfolioKeyAudit[]} */
   const keys = []
   let sessionStorageUsed = false
@@ -122,14 +122,18 @@ export function auditPortfolioStorage() {
   const hiddenLegacyOnDevice =
     tradesCount === 0 && (legacyManualCount > 0 || legacyPositionsCount > 0)
 
+  const loggedIn = Boolean(opts.loggedIn)
+  const syncMode = opts.syncMode ?? (loggedIn ? "account-pending" : "device-local")
+
   return {
     storageType: "localStorage",
     sessionStorageUsed,
-    supabasePortfolio: false,
-    accountSync: false,
-    syncMode: "device-local",
-    note:
-      "포트폴리오는 브라우저 localStorage(기기·프로필별). 모바일 PWA와 PC는 저장소가 분리되어 자동 동기화되지 않습니다. 로그인(Firebase)과 Supabase는 패닉/시장 데이터용이며 보유종목은 연동하지 않습니다.",
+    supabasePortfolio: loggedIn,
+    accountSync: loggedIn,
+    syncMode,
+    note: loggedIn
+      ? "로그인: Supabase user_portfolio(Firebase UID)와 동기화. localStorage는 기기 캐시. 모바일·PC 동일 계정이면 동일 데이터."
+      : "미로그인: localStorage(기기·프로필별)만 사용. 로그인하면 계정 기반 동기화가 가능합니다.",
     keys,
     tradesCount,
     legacyManualCount,
@@ -139,9 +143,10 @@ export function auditPortfolioStorage() {
   }
 }
 
-/** @param {import("./ydsPortfolioTradesStorage.js").PortfolioTrade[]} [loadedTrades] */
-export function logPortfolioStorageAudit(loadedTrades) {
-  const audit = auditPortfolioStorage()
+/** @param {import("./ydsPortfolioTradesStorage.js").PortfolioTrade[]} [loadedTrades] @param {{ user?: { uid?: string } | null, syncMode?: string }} [opts] */
+export function logPortfolioStorageAudit(loadedTrades, opts = {}) {
+  const loggedIn = Boolean(opts.user?.uid)
+  const audit = auditPortfolioStorage({ loggedIn, syncMode: opts.syncMode })
   const buyCount = (loadedTrades ?? []).filter((t) => t.action === "buy").length
   const holdingTickers = new Set(
     (loadedTrades ?? []).filter((t) => t.action === "buy" && t.ticker).map((t) => t.ticker),
@@ -187,9 +192,9 @@ export function logPortfolioStorageAudit(loadedTrades) {
     )
   }
 
-  if (audit.tradesCount === 0 && !audit.hiddenLegacyOnDevice) {
+  if (audit.tradesCount === 0 && !audit.hiddenLegacyOnDevice && !loggedIn) {
     console.warn(
-      "[portfolio-storage] no portfolio data on this device/browser profile. Mobile PWA data does not sync here automatically.",
+      "[portfolio-storage] no portfolio on this device. Log in with the same account on mobile to sync holdings.",
     )
   }
 }

@@ -31,9 +31,18 @@ function highlightParts(text, query) {
  *   onChange: (stock: PortfolioStockOption | null) => void
  *   required?: boolean
  *   disabled?: boolean
+ *   hideLabel?: boolean
+ *   inputClassName?: string
  * }} props
  */
-export default function YdsPortfolioStockSearchInput({ value, onChange, required, disabled }) {
+export default function YdsPortfolioStockSearchInput({
+  value,
+  onChange,
+  required,
+  disabled,
+  hideLabel = false,
+  inputClassName = "",
+}) {
   const listId = useId()
   const rootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const [query, setQuery] = useState(value?.name ?? "")
@@ -117,7 +126,7 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
   return (
     <div className="yds-portfolio-v5__search yds-portfolio-v64__search" ref={rootRef}>
       <label className="yds-portfolio-v5__search-label">
-        <span>종목 검색</span>
+        {hideLabel ? null : <span>종목 검색</span>}
         <input
           type="search"
           value={query}
@@ -130,8 +139,10 @@ export default function YdsPortfolioStockSearchInput({ value, onChange, required
           aria-expanded={showList}
           aria-controls={listId}
           aria-autocomplete="list"
+          aria-label={hideLabel ? "종목 검색" : undefined}
           required={required}
           disabled={disabled}
+          className={inputClassName}
         />
       </label>
 

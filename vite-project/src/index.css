@@ -31252,6 +31252,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.45rem;
+  --yds-pf-v1-input-h: 2.35rem;
+  align-items: end;
 }
 
 @media (min-width: 640px) {
@@ -31264,6 +31266,31 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  min-width: 0;
+}
+
+.yds-pf-v1__field-wide .yds-portfolio-v5__search {
+  width: 100%;
+}
+
+.yds-pf-v1__field-wide .yds-portfolio-v5__search-label {
+  gap: 0;
+}
+
+.yds-pf-v1__input,
+.yds-pf-v1__form input.yds-pf-v1__input,
+.yds-pf-v1__field-wide .yds-portfolio-v5__search-label input {
+  box-sizing: border-box;
+  height: var(--yds-pf-v1-input-h);
+  min-height: var(--yds-pf-v1-input-h);
+  padding: 0 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--pf-border);
+  background: rgba(2, 6, 23, 0.55);
+  color: #f1f5f9;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  width: 100%;
 }
 
 .yds-pf-v1__label {
@@ -31277,7 +31304,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.2rem;
 }
 
-.yds-pf-v1__form input {
+.yds-pf-v1__form input:not(.yds-pf-v1__input) {
   padding: 0.4rem 0.5rem;
   border-radius: 6px;
   border: 1px solid var(--pf-border);
@@ -31355,6 +31382,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin: 0.5rem 0 0;
   font-size: 0.68rem;
   color: #64748b;
+}
+
+.yds-pf-v1__sync-line {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  color: #64748b;
+  font-family: ui-monospace, monospace;
 }
 
 .yds-pf-v1__cash-inline {

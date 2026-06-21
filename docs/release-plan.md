@@ -52,6 +52,7 @@
 - [x] **성공 패턴 분석** — 7/14/30일 성공률(+10%↑) · 등급·시장상태·패닉 구간 · n&lt;10 분석 보류 · 성과검증 상단
 - [x] **성공/실패 판정** — 🟢🟡🔴 배지 · 7/14/30일 판정 컬럼 · 요약 카드(성공률·평균수익) · `DEFAULT_OUTCOME_CRITERIA`
 - [x] **포트폴리오 저장 진단** — `[portfolio-storage]` 로그 · localStorage 기기별 · 레거시 key 복구 · 동기화 없음 안내
+- [x] **포트폴리오 계정 동기화** — Supabase `user_portfolio` · `/api/portfolio-sync` · Firebase 로그인 시 모바일↔PC · 입력 높이 통일
 - [x] **투자 캘린더** `/investment-calendar` — FOMC·CPI·실적·배당·중요도·시장 영향·시장분석 연동
 - [x] **투자 원칙 센터** `/investment-playbook` — 시장·패닉·수익/손실·포트폴리오 원칙·준수율
 - [ ] AI 리포트 개선

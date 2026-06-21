@@ -33,6 +33,8 @@ const modules = [
   "api/stock.js",
   "api/_lib/portfolioQuoteProviders.js",
   "api/portfolio-quote.js",
+  "api/_lib/firebaseIdToken.js",
+  "api/portfolio-sync.js",
 ]
 
 let failed = 0

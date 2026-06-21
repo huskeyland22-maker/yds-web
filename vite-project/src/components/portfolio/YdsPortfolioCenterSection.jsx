@@ -28,6 +28,9 @@ export default function YdsPortfolioCenterSection() {
     quoteMap,
     usdkrw,
     quotesLoading,
+    syncMode,
+    syncReady,
+    isLoggedIn,
   } = usePortfolioHoldings()
 
   const [selectedStock, setSelectedStock] = useState(
@@ -108,8 +111,14 @@ export default function YdsPortfolioCenterSection() {
         <form className="yds-pf-v1__form" onSubmit={handleRegister}>
           <div className="yds-pf-v1__form-grid">
             <div className="yds-pf-v1__field-wide">
-              <span className="yds-pf-v1__label">종목명</span>
-              <YdsPortfolioStockSearchInput value={selectedStock} onChange={setSelectedStock} required />
+              <span className="yds-pf-v1__label">종목 검색</span>
+              <YdsPortfolioStockSearchInput
+                value={selectedStock}
+                onChange={setSelectedStock}
+                required
+                hideLabel
+                inputClassName="yds-pf-v1__input font-mono tabular-nums"
+              />
             </div>
             <label>
               <span className="yds-pf-v1__label">수량</span>
@@ -119,7 +128,7 @@ export default function YdsPortfolioCenterSection() {
                 step="any"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="font-mono tabular-nums"
+                className="yds-pf-v1__input font-mono tabular-nums"
                 required
               />
             </label>
@@ -131,7 +140,7 @@ export default function YdsPortfolioCenterSection() {
                 step="any"
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
-                className="font-mono tabular-nums"
+                className="yds-pf-v1__input font-mono tabular-nums"
                 required
               />
             </label>
@@ -163,11 +172,20 @@ export default function YdsPortfolioCenterSection() {
           <>
             <p className="yds-pf-v1__empty">등록된 보유 종목이 없습니다.</p>
             <p className="yds-pf-v1__note">
-              보유종목은 이 기기·브라우저 localStorage에 저장됩니다. 모바일과 PC는 자동 동기화되지 않습니다.
-              콘솔 <span className="font-mono">[portfolio-storage]</span> 로그로 저장 위치를 확인하세요.
+              {isLoggedIn
+                ? syncReady
+                  ? "로그인 계정 기준 Supabase 동기화. 모바일에서 등록한 종목은 동일 계정 로그인 후 이 기기에서 불러옵니다."
+                  : "계정 포트폴리오 동기화 중…"
+                : "로그인하면 모바일·PC에서 동일 보유종목을 사용할 수 있습니다. 미로그인 시 이 기기 localStorage에만 저장됩니다."}
             </p>
           </>
         )}
+
+        {isLoggedIn ? (
+          <p className="yds-pf-v1__sync-line">
+            동기화: {syncReady ? syncMode : "loading…"}
+          </p>
+        ) : null}
 
         <form className="yds-pf-v1__cash-inline" onSubmit={handleCashSave}>
           <label>
@@ -177,7 +195,7 @@ export default function YdsPortfolioCenterSection() {
               min={0}
               value={cashDraft}
               onChange={(e) => setCashDraft(e.target.value)}
-              className="font-mono tabular-nums"
+              className="yds-pf-v1__input font-mono tabular-nums"
               placeholder="0"
             />
           </label>
