@@ -3,6 +3,8 @@
  */
 
 import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
+import { serializeRationalesForSnapshot } from "./ydsStockPickRecommendRationale.js"
+import { serializeActionGuideForSnapshot } from "./ydsStockPickActionGuide.js"
 
 /**
  * @typedef {{
@@ -19,6 +21,8 @@ import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
  *   marketStateLabel: string
  *   panicIntensity: number | null
  *   panicLabel: string
+ *   recommendRationales?: { id: string; category: string; source: string; score: number; max: number; text: string }[]
+ *   actionGuide?: { primaryId: string; timingGrade: string; recommendStatusId: string; summary: string; items: { id: string; source: string; text: string }[] }
  *   capturedAt: string
  *   frozen: boolean
  * }} ValidationRecommendSnapshot
@@ -78,6 +82,8 @@ export function buildRecommendSnapshot(stock, marketContext, recommendedAt) {
   const regimeLabel = regimeLabelFromMarketContext(marketContext)
 
   const totalScore = finiteNum(v4?.finalRankScore ?? v4?.total ?? stock.score)
+  const rationales = serializeRationalesForSnapshot(stock.recommendRationales ?? [])
+  const actionGuide = serializeActionGuideForSnapshot(stock.actionGuide)
 
   return freezeSnapshot({
     name: String(stock.name ?? stock.ticker ?? ""),
@@ -98,6 +104,8 @@ export function buildRecommendSnapshot(stock, marketContext, recommendedAt) {
     ),
     panicIntensity: finiteNum(marketContext?.ydsScore),
     panicLabel: String(marketContext?.panicLabel ?? "—"),
+    recommendRationales: rationales.length ? rationales : undefined,
+    actionGuide,
     capturedAt: recommendedAt,
     frozen: true,
   })

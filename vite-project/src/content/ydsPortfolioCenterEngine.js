@@ -6,6 +6,10 @@ import stockPickUniverse from "../data/stockPickUniverse.json" with { type: "jso
 import { STOCK_PICK_SECTORS } from "./ydsStockPickModel.js"
 import { STOCK_PICK_THEMES_BY_TICKER } from "./ydsStockPickThemes.js"
 import { buildV5Analysis } from "./ydsPortfolioV5Engine.js"
+import { buildAllocationCompareReport } from "./ydsPortfolioAllocationCompare.js"
+import { buildPortfolioFitDetail } from "./ydsPortfolioFitEngine.js"
+
+export { fitGradeFromScore } from "./ydsPortfolioFitEngine.js"
 
 /** @typedef {import("./ydsPortfolioV5Engine.js").HoldingRow} HoldingRow */
 /** @typedef {import("./ydsMarketAdapter.js").YdsMarketAdapterContext} YdsMarketAdapterContext */
@@ -29,15 +33,6 @@ export function sectorLabelForTicker(ticker) {
 function themesForTicker(ticker) {
   const key = String(ticker ?? "")
   return STOCK_PICK_THEMES_BY_TICKER[key] ?? STOCK_PICK_THEMES_BY_TICKER[key.toUpperCase()] ?? []
-}
-
-/** @param {number} score */
-export function fitGradeFromScore(score) {
-  if (score >= 85) return { grade: "A", label: "매우 양호" }
-  if (score >= 70) return { grade: "B", label: "양호" }
-  if (score >= 55) return { grade: "C", label: "보통" }
-  if (score >= 40) return { grade: "D", label: "조정 필요" }
-  return { grade: "F", label: "부적합" }
 }
 
 /**
@@ -163,13 +158,29 @@ export function buildPortfolioCenterV1Report(
   const rows = holdings?.rows ?? []
   const analysis = buildV5Analysis(trades, cashAmount, marketContext, quoteMap, usdkrw)
   const recommended = analysis.recommended
-  const fitScore = analysis.compliancePct ?? 0
-  const fit = fitGradeFromScore(fitScore)
+  const actualStockPct = (analysis.actual?.usPct ?? 0) + (analysis.actual?.krPct ?? 0)
+  const actualCashPct = analysis.actual?.cashPct ?? holdings?.cashPct ?? 0
+
+  const allocationCompare = buildAllocationCompareReport({
+    actualStockPct,
+    actualCashPct,
+    recommendedStockPct: recommended.stockPct,
+    recommendedCashPct: recommended.cashPct,
+  })
 
   const sectors = buildSectorBreakdown(rows, holdings?.cashPct ?? 0)
   const themes = buildThemeBreakdown(rows)
-  const actualCashPct = analysis.actual?.cashPct ?? 0
-  const stockPct = Math.round(100 - actualCashPct)
+
+  const fitDetail = buildPortfolioFitDetail({
+    actualStockPct,
+    actualCashPct,
+    recommendedStockPct: recommended.stockPct,
+    recommendedCashPct: recommended.cashPct,
+    sectors,
+    themes,
+    marketContext: marketContext ?? null,
+    allocationCompare,
+  })
 
   const riskChecks = buildRiskChecks(rows, sectors, themes, actualCashPct, recommended.cashPct)
 
@@ -190,8 +201,8 @@ export function buildPortfolioCenterV1Report(
     status: {
       totalAssets: holdings?.totalAssets ?? 0,
       totalReturnPct: holdings?.totalReturnPct ?? null,
-      stockPct,
-      cashPct: holdings?.cashPct ?? 0,
+      stockPct: actualStockPct,
+      cashPct: actualCashPct,
       cashAmount: holdings?.cashAmount ?? 0,
     },
     market: {
@@ -201,11 +212,13 @@ export function buildPortfolioCenterV1Report(
       recommendedCashPct: recommended.cashPct,
       recommendedStockPct: recommended.stockPct,
       note: recommended.note,
+      allocationCompare,
     },
     fit: {
-      score: fitScore,
-      grade: fit.grade,
-      label: fit.label,
+      score: fitDetail.total,
+      grade: fitDetail.grade,
+      label: fitDetail.label,
+      detail: fitDetail,
     },
     riskChecks,
     sectors,

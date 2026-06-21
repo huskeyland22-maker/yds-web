@@ -16,6 +16,25 @@ function Metric({ label, value, sub, tone = "" }) {
   )
 }
 
+/** @param {{ row: import("../../content/ydsPortfolioAllocationCompare.js").AllocationCompareRow }} props */
+function AllocationCompareRow({ row }) {
+  return (
+    <tr className={`yds-pf-v1__alloc-row yds-pf-v1__alloc-row--${row.status}`}>
+      <th scope="row">{row.label}</th>
+      <td className="font-mono tabular-nums">{row.currentPct}%</td>
+      <td className="font-mono tabular-nums">{row.recommendedPct}%</td>
+      <td className={`font-mono tabular-nums yds-pf-v1__alloc-delta yds-pf-v1__alloc-delta--${row.status}`}>
+        {row.deltaLabel}
+      </td>
+      <td>
+        <span className={`yds-pf-v1__alloc-badge yds-pf-v1__alloc-badge--${row.status}`}>
+          {row.badge} {row.statusLabel}
+        </span>
+      </td>
+    </tr>
+  )
+}
+
 export default function YdsPortfolioCenterSection() {
   const marketContext = useYdsMarketContext()
   const {
@@ -240,18 +259,60 @@ export default function YdsPortfolioCenterSection() {
           {report.market.stageEmoji} {report.market.stageLabel}
           <span className="yds-pf-v1__muted"> · {report.market.panicLabel}</span>
         </p>
-        <div className="yds-pf-v1__alloc">
-          <div>
-            <span className="yds-pf-v1__alloc-key">권장 주식</span>
-            <strong className="font-mono tabular-nums">{report.market.recommendedStockPct}%</strong>
-            <span className="yds-pf-v1__alloc-actual">실제 {report.status.stockPct}%</span>
+
+        {report.market.allocationCompare ? (
+          <div className="yds-pf-v1__alloc-compare">
+            <p
+              className={`yds-pf-v1__alloc-posture yds-pf-v1__alloc-posture--${report.market.allocationCompare.postureTone}`}
+            >
+              {report.market.allocationCompare.postureLabel}
+            </p>
+
+            <div className="yds-pf-v1__alloc-bars" aria-hidden>
+              {[
+                { label: "주식", row: report.market.allocationCompare.stock },
+                { label: "현금", row: report.market.allocationCompare.cash },
+              ].map(({ label, row }) => (
+                <div key={label} className="yds-pf-v1__alloc-bar-group">
+                  <span className="yds-pf-v1__alloc-bar-label">{label}</span>
+                  <div className="yds-pf-v1__alloc-bar-track">
+                    <span
+                      className="yds-pf-v1__alloc-bar yds-pf-v1__alloc-bar--current"
+                      style={{ width: `${Math.min(100, row.currentPct)}%` }}
+                    />
+                    <span
+                      className="yds-pf-v1__alloc-bar yds-pf-v1__alloc-bar--rec"
+                      style={{ width: `${Math.min(100, row.recommendedPct)}%` }}
+                    />
+                  </div>
+                  <span className="yds-pf-v1__alloc-bar-legend font-mono tabular-nums">
+                    현재 {row.currentPct}% · 권장 {row.recommendedPct}%
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="yds-pf-v1__alloc-table-wrap">
+              <table className="yds-pf-v1__alloc-table">
+                <caption className="yds-pf-v1__alloc-caption">실제 보유비중 vs YDS 권장비중</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">구분</th>
+                    <th scope="col">현재</th>
+                    <th scope="col">권장</th>
+                    <th scope="col">차이</th>
+                    <th scope="col">상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AllocationCompareRow row={report.market.allocationCompare.stock} />
+                  <AllocationCompareRow row={report.market.allocationCompare.cash} />
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div>
-            <span className="yds-pf-v1__alloc-key">권장 현금</span>
-            <strong className="font-mono tabular-nums">{report.market.recommendedCashPct}%</strong>
-            <span className="yds-pf-v1__alloc-actual">실제 {report.status.cashPct}%</span>
-          </div>
-        </div>
+        ) : null}
+
         {report.market.note ? <p className="yds-pf-v1__note">{report.market.note}</p> : null}
         <p className="yds-pf-v1__note">
           <Link to="/market-analysis">시장분석</Link> 기준 권장 비중
@@ -271,6 +332,53 @@ export default function YdsPortfolioCenterSection() {
             <span className="yds-pf-v1__fit-label">{report.fit.label}</span>
           </div>
         </div>
+
+        {report.fit.detail ? (
+          <details className="yds-pf-v1__fit-details">
+            <summary className="yds-pf-v1__fit-details-toggle">점수 근거 보기</summary>
+            <div className="yds-pf-v1__fit-details-body">
+              <ul className="yds-pf-v1__fit-breakdown">
+                {report.fit.detail.components.map((row) => (
+                  <li key={row.id} className="yds-pf-v1__fit-breakdown-row">
+                    <span className="yds-pf-v1__fit-breakdown-label">{row.label}</span>
+                    <span className="yds-pf-v1__fit-breakdown-score font-mono tabular-nums">
+                      {row.score}/{row.max}
+                    </span>
+                    <span className="yds-pf-v1__fit-breakdown-detail">{row.detail}</span>
+                  </li>
+                ))}
+                <li className="yds-pf-v1__fit-breakdown-row yds-pf-v1__fit-breakdown-row--total">
+                  <span className="yds-pf-v1__fit-breakdown-label">총점</span>
+                  <strong className="yds-pf-v1__fit-breakdown-score font-mono tabular-nums">
+                    {report.fit.detail.total}
+                  </strong>
+                </li>
+              </ul>
+
+              {report.fit.detail.deductions.length ? (
+                <div className="yds-pf-v1__fit-subblock">
+                  <h3 className="yds-pf-v1__fit-subtitle">감점 사유</h3>
+                  <ul className="yds-pf-v1__fit-list yds-pf-v1__fit-list--warn">
+                    {report.fit.detail.deductions.map((d) => (
+                      <li key={d.id}>{d.reason}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {report.fit.detail.improvements.length ? (
+                <div className="yds-pf-v1__fit-subblock">
+                  <h3 className="yds-pf-v1__fit-subtitle">개선 방법</h3>
+                  <ul className="yds-pf-v1__fit-list yds-pf-v1__fit-list--ok">
+                    {report.fit.detail.improvements.map((item) => (
+                      <li key={item.id}>{item.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          </details>
+        ) : null}
       </section>
 
       <section className="yds-pf-v1__block" aria-labelledby="pfv1-risk">

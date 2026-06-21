@@ -20,6 +20,7 @@ import { resolveStockPosition } from "./ydsStockPositionEngine.js"
 import { buildStockPickChangeReport } from "./ydsStockPickChangeEngine.js"
 import { computeDataReliability } from "./ydsStockPickReliability.js"
 import { resolveFinalAction } from "./ydsStockPickFinalAction.js"
+import { buildActionGuide } from "./ydsStockPickActionGuide.js"
 
 /**
  * @typedef {{
@@ -72,7 +73,9 @@ export function applyStockPickBatchMeta(liveStocks, universeStocks) {
 
     pickMeta.changeReport = buildStockPickChangeReport({ ...stock, pickMeta }, historyBefore)
 
-    return { ...stock, pickMeta, scoreDeltas }
+    const actionGuide = buildActionGuide({ ...stock, pickMeta })
+
+    return { ...stock, pickMeta, scoreDeltas, actionGuide }
   })
 
   recordScoreHistory(enriched, historyBefore)

@@ -12,6 +12,8 @@ import YdsStockPickThemeBadges from "./YdsStockPickThemeBadges.jsx"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 import YdsStockPositionBadge from "./YdsStockPositionBadge.jsx"
 import YdsStockPickChangeStrip from "./YdsStockPickChangeStrip.jsx"
+import YdsStockPickRecommendRationale from "./YdsStockPickRecommendRationale.jsx"
+import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
 
 /**
  * @param {{
@@ -118,6 +120,16 @@ export default function YdsStockPickCard({
             {statusChange.fromLabel} → {statusChange.toLabel}
           </p>
         ) : null}
+
+        <YdsStockPickRecommendRationale
+          items={stock.recommendRationales ?? []}
+          className="yds-spick-card__rationale"
+        />
+
+        <YdsStockPickActionGuide
+          guide={stock.actionGuide}
+          className="yds-spick-card__action-guide"
+        />
       </Link>
 
       <details className="yds-spick-card__details">

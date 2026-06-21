@@ -42,6 +42,11 @@ import { computeTimingScore } from "./ydsStockPickTimingScore.js"
 import { computeV4Score } from "./ydsStockPickV4Scoring.js"
 import { computeTechnicalScore } from "./ydsStockTechnicalScore.js"
 import { buildStockPickOpinion } from "./ydsStockPickOpinion.js"
+import {
+  buildRecommendRationales,
+  serializeRationalesForSnapshot,
+} from "./ydsStockPickRecommendRationale.js"
+import { buildActionGuide } from "./ydsStockPickActionGuide.js"
 
 /** @typedef {'trend' | 'dip' | 'interest' | 'overheat'} StockPickStatusId */
 /** @typedef {'ai' | 'power' | 'defense' | 'semi' | 'robot' | 'nuclear' | 'infra'} StockPickSectorId */
@@ -125,6 +130,8 @@ export const RATING_STARS = {
  *   statusDiag: ReturnType<typeof explainStatusFromSnapshot> | null
  *   quote: import("./ydsStockPickQuoteService.js").StockPickQuoteView | null
  *   recommendReasonsDetail: import("./ydsStockRecommendReasons.js").RecommendReason[]
+ *   recommendRationales: import("./ydsStockPickRecommendRationale.js").RecommendRationale[]
+ *   actionGuide: import("./ydsStockPickActionGuide.js").ActionGuideView
  *   investThemes: string[]
  *   decomposedScores: import("./ydsStockPickDecomposedScores.js").DecomposedStockScores
  *   scoreBreakdown: import("./ydsStockPickPhase3Breakdown.js").Phase3ScoreBreakdown
@@ -313,6 +320,28 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     }
   }
 
+  const recommendRationales = buildRecommendRationales(
+    {
+      ...row,
+      scores,
+      scoreBreakdown,
+      timingScore,
+      v4Score,
+      rating: row.rating,
+    },
+    { strategyLabel: ctx?.strategyLabel },
+  )
+
+  const actionGuide = buildActionGuide({
+    ...row,
+    scores,
+    scoreBreakdown,
+    timingScore,
+    v4Score,
+    stockStatus: action.stockStatus,
+    statusDiag,
+  })
+
   const enriched = {
     ...row,
     id: row.ticker,
@@ -330,6 +359,8 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     actionReason: action.actionReason,
     recommendReasons,
     recommendReasonsDetail,
+    recommendRationales,
+    actionGuide,
     recommendReasonSummary: formatRecommendReasonSummary(recommendReasons),
     marketFitSource: ctx ? "adapter" : "manual",
     sectorLabel,

@@ -54,6 +54,10 @@
 - [x] **포트폴리오 저장 진단** — `[portfolio-storage]` 로그 · localStorage 기기별 · 레거시 key 복구 · 동기화 없음 안내
 - [x] **포트폴리오 계정 동기화** — Supabase `user_portfolio` · `/api/portfolio-sync` · Firebase 로그인 시 모바일↔PC · 입력 높이 통일
 - [x] **포트폴리오 저장키 진단** — `[portfolio] key=… count=…` · 전체 localStorage 스캔 · 레거시 alias 자동 마이그레이션
+- [x] **포트폴리오 적합도 상세** — 5항목 점수·감점·개선안 · 점수 근거 아코디언
+- [x] **실제 vs 권장 비중 비교** — 시장상태 카드 내 표·배지·적합도 연동
+- [x] **추천 근거 카드** — Phase3·V4 점수 기반 4줄 · 성과검증 스냅샷 연계
+- [x] **매수 행동 가이드** — V4·타이밍 등급 기반 1줄 · 추천근거와 분리 · 성과검증 스냅샷 연계
 - [x] **투자 캘린더** `/investment-calendar` — FOMC·CPI·실적·배당·중요도·시장 영향·시장분석 연동
 - [x] **투자 원칙 센터** `/investment-playbook` — 시장·패닉·수익/손실·포트폴리오 원칙·준수율
 - [ ] AI 리포트 개선
