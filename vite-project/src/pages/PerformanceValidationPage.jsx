@@ -5,12 +5,26 @@ import {
   formatPerfPct,
   formatPerfPrice,
 } from "../content/ydsPickPerformanceEngine.js"
+import {
+  buildSuccessPatternReport,
+  formatSuccessRate,
+  OUTCOME_LABELS,
+  PATTERN_MIN_SAMPLE,
+} from "../content/ydsPickSuccessPatternEngine.js"
+import {
+  buildOutcomeSummaryReport,
+  outcomeCriteriaLabels,
+  resolvePickOutcomeView,
+} from "../content/ydsPickOutcomeEngine.js"
 import { loadValidationPicks } from "../content/ydsValidationStorage.js"
 import { refreshValidationPicks } from "../content/ydsValidationEngine.js"
 import { buildValidationPriceMap } from "../content/ydsValidationPriceResolver.js"
 import {
   formatRecommendSnapshotLine,
+  formatSnapshotGradeCell,
+  formatSnapshotTotalScore,
   getRecommendSnapshot,
+  pickDisplayFieldsFromSnapshot,
 } from "../content/ydsValidationRecommendSnapshot.js"
 import { useStockPickLiveData } from "../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
@@ -93,6 +107,222 @@ function GradeRow({ item }) {
   )
 }
 
+function OutcomeBadge({ returnPct, compact = false }) {
+  const view = resolvePickOutcomeView(returnPct)
+  if (!view) {
+    return <span className="yds-perf-val__outcome yds-perf-val__outcome--pending">—</span>
+  }
+  return (
+    <span
+      className={`yds-perf-val__outcome yds-perf-val__outcome--${view.tone}${compact ? " yds-perf-val__outcome--compact" : ""}`}
+      title={`${view.label} · ${returnPct != null ? formatPerfPct(returnPct) : "—"}`}
+    >
+      <span className="yds-perf-val__outcome-emoji" aria-hidden>
+        {view.emoji}
+      </span>
+      {!compact ? <span className="yds-perf-val__outcome-label">{view.label}</span> : null}
+    </span>
+  )
+}
+
+function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange }) {
+  const horizons = [
+    { key: "d7", label: "7일" },
+    { key: "d14", label: "14일" },
+    { key: "d30", label: "30일" },
+  ]
+  const criteriaLabels = outcomeCriteriaLabels(summary.criteria)
+
+  return (
+    <section className="yds-perf-val__section yds-perf-val__outcome-panel" aria-labelledby="perf-val-outcome">
+      <div className="yds-perf-val__outcome-head">
+        <div>
+          <p className="yds-perf-val__outcome-kicker">Verdict · Outcome</p>
+          <h2 id="perf-val-outcome" className="yds-perf-val__h2">
+            성공/실패 판정
+          </h2>
+          <p className="yds-perf-val__outcome-lede">
+            잠금 수익률 기준 · 실제 성과만 · 예측 없음
+          </p>
+        </div>
+        <div className="yds-perf-val__outcome-horizon" role="tablist" aria-label="판정 기간">
+          {horizons.map((h) => (
+            <button
+              key={h.key}
+              type="button"
+              role="tab"
+              aria-selected={horizonKey === h.key}
+              className={`yds-perf-val__outcome-tab ${horizonKey === h.key ? "yds-perf-val__outcome-tab--active" : ""}`}
+              onClick={() => onHorizonChange(h.key)}
+            >
+              {h.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="yds-perf-val__outcome-criteria">
+        {criteriaLabels.map((c) => (
+          <span key={c.id} className="yds-perf-val__outcome-criterion">
+            {c.label}
+          </span>
+        ))}
+      </div>
+
+      <div className="yds-perf-val__outcome-summary">
+        <StatCard label={`총 추천 · ${summary.horizonLabel}`} value={`${summary.total}건`} />
+        <StatCard
+          label="성공"
+          value={`${summary.successCount}건`}
+          tone="up"
+          sub={summary.normalCount ? `보통 ${summary.normalCount}건` : undefined}
+        />
+        <StatCard label="실패" value={`${summary.failureCount}건`} tone="down" />
+        <StatCard
+          label="성공률"
+          value={summary.successRate != null ? `${summary.successRate}%` : "—"}
+          tone={summary.successRate != null && summary.successRate >= 50 ? "up" : "neutral"}
+        />
+        <StatCard
+          label="평균 수익률"
+          value={formatPerfPct(summary.avgReturn)}
+          tone={toneFromPct(summary.avgReturn)}
+        />
+      </div>
+    </section>
+  )
+}
+
+function PatternBucketRow({ item }) {
+  const pending = item.pending
+  const rateClass =
+    !pending && item.successRate != null && item.successRate >= 50
+      ? "yds-perf-val__pattern-rate--up"
+      : !pending && item.successRate != null && item.successRate < 40
+        ? "yds-perf-val__pattern-rate--down"
+        : ""
+
+  return (
+    <div className={`yds-perf-val__pattern-row ${pending ? "yds-perf-val__pattern-row--pending" : ""}`}>
+      <span className="yds-perf-val__pattern-label">{item.label}</span>
+      <span className="yds-perf-val__pattern-meta font-mono tabular-nums">n={item.count}</span>
+      <strong className={`yds-perf-val__pattern-rate font-mono tabular-nums ${rateClass}`}>
+        {formatSuccessRate(item.successRate, pending)}
+      </strong>
+      {!pending && item.avgReturn != null ? (
+        <span className="yds-perf-val__pattern-avg font-mono tabular-nums">
+          평균 {formatPerfPct(item.avgReturn)}
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange }) {
+  const horizons = [
+    { key: "d7", label: "7일" },
+    { key: "d14", label: "14일" },
+    { key: "d30", label: "30일" },
+  ]
+
+  return (
+    <section className="yds-perf-val__section yds-perf-val__pattern" aria-labelledby="perf-val-pattern">
+      <div className="yds-perf-val__pattern-head">
+        <div>
+          <p className="yds-perf-val__pattern-kicker">Research · Pattern Analysis</p>
+          <h2 id="perf-val-pattern" className="yds-perf-val__h2">
+            성공 패턴 분석
+          </h2>
+          <p className="yds-perf-val__pattern-lede">
+            실제 잠금 수익률 기준 · 표본 {PATTERN_MIN_SAMPLE}개 미만 구간은 분석 보류 · AI 예측 없음
+          </p>
+        </div>
+        <div className="yds-perf-val__pattern-horizon" role="tablist" aria-label="분석 기간">
+          {horizons.map((h) => (
+            <button
+              key={h.key}
+              type="button"
+              role="tab"
+              aria-selected={horizonKey === h.key}
+              className={`yds-perf-val__pattern-tab ${horizonKey === h.key ? "yds-perf-val__pattern-tab--active" : ""}`}
+              onClick={() => onHorizonChange(h.key)}
+            >
+              {h.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="yds-perf-val__pattern-criteria">
+        {OUTCOME_LABELS.map((o) => (
+          <span key={o.id} className="yds-perf-val__pattern-criterion">
+            {o.label}
+          </span>
+        ))}
+        <span className="yds-perf-val__pattern-criterion yds-perf-val__pattern-criterion--muted">
+          추적 n={pattern.totalTracked} · {pattern.horizonLabel} 잠금
+        </span>
+      </div>
+
+      {pattern.highlights.length ? (
+        <div className="yds-perf-val__pattern-highlights">
+          {pattern.highlights.map((h) => (
+            <article key={h.id} className="yds-perf-val__pattern-card">
+              <span className="yds-perf-val__pattern-card-key">{h.label}</span>
+              <strong className="yds-perf-val__pattern-card-val font-mono tabular-nums">
+                성공률 {h.successRate}%
+              </strong>
+              <span className="yds-perf-val__pattern-card-sub font-mono tabular-nums">
+                n={h.count} · 평균 {formatPerfPct(h.avgReturn)}
+              </span>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="yds-perf-val__pattern-empty">
+          {pattern.horizonLabel} 수익률이 잠긴 표본이 {PATTERN_MIN_SAMPLE}개 미만입니다. 데이터가 쌓이면 패턴 분석이
+          표시됩니다.
+        </p>
+      )}
+
+      <div className="yds-perf-val__pattern-grid">
+        <div className="yds-perf-val__pattern-block">
+          <h3 className="yds-perf-val__h3">기업품질 · 성공률</h3>
+          {pattern.grades.quality.map((g) => (
+            <PatternBucketRow key={g.id} item={g} />
+          ))}
+        </div>
+        <div className="yds-perf-val__pattern-block">
+          <h3 className="yds-perf-val__h3">타이밍 · 성공률</h3>
+          {pattern.grades.timing.map((g) => (
+            <PatternBucketRow key={g.id} item={g} />
+          ))}
+        </div>
+        <div className="yds-perf-val__pattern-block">
+          <h3 className="yds-perf-val__h3">시장적합 · 성공률</h3>
+          {pattern.grades.marketFit.map((g) => (
+            <PatternBucketRow key={g.id} item={g} />
+          ))}
+        </div>
+        <div className="yds-perf-val__pattern-block">
+          <h3 className="yds-perf-val__h3">시장상태 · 성공률</h3>
+          {pattern.marketStates.length ? (
+            pattern.marketStates.map((g) => <PatternBucketRow key={g.id} item={g} />)
+          ) : (
+            <p className="yds-perf-val__pattern-note">시장상태 스냅샷 없음</p>
+          )}
+        </div>
+        <div className="yds-perf-val__pattern-block yds-perf-val__pattern-block--wide">
+          <h3 className="yds-perf-val__h3">패닉강도 · 성공률</h3>
+          {pattern.panicBands.map((g) => (
+            <PatternBucketRow key={g.id} item={g} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function PickRecommendSnapshot({ row, horizon7Pct }) {
   const snap = getRecommendSnapshot(row)
   if (!snap) return null
@@ -112,13 +342,18 @@ function PickRecommendSnapshot({ row, horizon7Pct }) {
           </span>
         ) : null}
         {snap.qualityGrade !== "—" ? (
-          <span className="yds-perf-val__snap-chip">품질 {snap.qualityGrade}</span>
+          <span className="yds-perf-val__snap-chip">품질 {formatSnapshotGradeCell(snap, "quality")}</span>
         ) : null}
         {snap.timingGrade !== "—" ? (
-          <span className="yds-perf-val__snap-chip">타이밍 {snap.timingGrade}</span>
+          <span className="yds-perf-val__snap-chip">타이밍 {formatSnapshotGradeCell(snap, "timing")}</span>
         ) : null}
         {snap.marketFitGrade !== "—" ? (
-          <span className="yds-perf-val__snap-chip">시장적합 {snap.marketFitGrade}</span>
+          <span className="yds-perf-val__snap-chip">시장적합 {formatSnapshotGradeCell(snap, "marketFit")}</span>
+        ) : null}
+        {snap.recommendedPrice != null ? (
+          <span className="yds-perf-val__snap-chip font-mono tabular-nums">
+            추천가 {formatPerfPrice(snap.recommendedPrice)}
+          </span>
         ) : null}
       </span>
       <span className="yds-perf-val__snap-meta">
@@ -163,26 +398,25 @@ function CaseTable({ rows, mode }) {
         <tbody>
           {rows.map((row, i) => {
             const snap = getRecommendSnapshot(row)
+            const display = pickDisplayFieldsFromSnapshot(row)
             return (
             <tr key={row.id}>
               <td>{i + 1}</td>
-              <td className="font-mono tabular-nums">{row.recommendedAt}</td>
+              <td className="font-mono tabular-nums">{display.recommendedAt}</td>
               <td>
                 <Link to={`/stock-picks/${encodeURIComponent(row.ticker)}`} className="yds-perf-val__link">
-                  {row.name}
+                  {display.name}
                 </Link>
                 <span className="yds-perf-val__ticker font-mono">{row.ticker}</span>
                 <PickRecommendSnapshot row={row} horizon7Pct={row.horizons?.d7} />
               </td>
-              <td className="font-mono tabular-nums">
-                {row.recommendedScore != null ? Math.round(row.recommendedScore) : "—"}
-              </td>
-              <td>{row.qualityGrade}</td>
-              <td>{row.timingGrade}</td>
-              <td>{row.marketFitGrade}</td>
+              <td className="font-mono tabular-nums">{formatSnapshotTotalScore(snap)}</td>
+              <td>{formatSnapshotGradeCell(snap, "quality")}</td>
+              <td>{formatSnapshotGradeCell(snap, "timing")}</td>
+              <td>{formatSnapshotGradeCell(snap, "marketFit")}</td>
               <td>{snap?.marketStateLabel ?? "—"}</td>
               <td>{snap?.panicLabel ?? "—"}</td>
-              <td className="font-mono tabular-nums">{formatPerfPrice(row.recommendedPrice)}</td>
+              <td className="font-mono tabular-nums">{formatPerfPrice(display.recommendedPrice)}</td>
               <td
                 className={`font-mono tabular-nums ${
                   mode === "best" ? "yds-perf-val__ret--up" : "yds-perf-val__ret--down"
@@ -204,6 +438,9 @@ export default function PerformanceValidationPage() {
   const { stocks: liveStocks, loading: liveLoading } = useStockPickLiveData(marketContext)
   const [picks, setPicks] = useState(() => loadValidationPicks())
 
+  const [patternHorizon, setPatternHorizon] = useState("d30")
+  const [outcomeHorizon, setOutcomeHorizon] = useState("d30")
+
   useEffect(() => {
     if (liveLoading) return
     const priceMap = buildValidationPriceMap(liveStocks.length ? liveStocks : undefined)
@@ -215,6 +452,14 @@ export default function PerformanceValidationPage() {
   }, [liveLoading, liveStocks, marketContext])
 
   const report = useMemo(() => buildPickPerformanceReport(picks, 30), [picks])
+  const pattern = useMemo(
+    () => buildSuccessPatternReport(picks, patternHorizon),
+    [picks, patternHorizon],
+  )
+  const outcomeSummary = useMemo(
+    () => buildOutcomeSummaryReport(picks, outcomeHorizon),
+    [picks, outcomeHorizon],
+  )
   const { kpi, gradeBreakdown, topSuccess, topFailure, monthly } = report
   const hasAny = report.allPickCount > 0
 
@@ -244,6 +489,18 @@ export default function PerformanceValidationPage() {
         />
       ) : (
         <>
+          <OutcomeVerdictPanel
+            summary={outcomeSummary}
+            horizonKey={outcomeHorizon}
+            onHorizonChange={setOutcomeHorizon}
+          />
+
+          <SuccessPatternPanel
+            pattern={pattern}
+            horizonKey={patternHorizon}
+            onHorizonChange={setPatternHorizon}
+          />
+
           <section className="yds-perf-val__section" aria-labelledby="perf-val-kpi">
             <h2 id="perf-val-kpi" className="yds-perf-val__h2">
               KPI · 최근 {report.windowDays}일
@@ -287,8 +544,8 @@ export default function PerformanceValidationPage() {
               ))}
             </div>
             <p className="yds-perf-val__note">
-              추천 생성 시 총점·품질·타이밍·시장적합·시장상태·패닉강도를 함께 저장합니다. refresh 시
-              스냅샷은 변경되지 않습니다. 수익률은 추천 당시 가격 대비 해당 기간 종가를 1회 잠금합니다.
+              추천 생성 시 점수·등급·시장상태·패닉강도를 `recommendSnapshot`에 잠금 저장합니다. refresh·재계산 시
+              현재 점수를 사용하지 않으며, 추천 당시 스냅샷만 표시·분석합니다.
             </p>
           </section>
 
@@ -391,35 +648,40 @@ export default function PerformanceValidationPage() {
                     <th>14일</th>
                     <th>30일</th>
                     <th>7일%</th>
+                    <th>7일 판정</th>
                     <th>14일%</th>
+                    <th>14일 판정</th>
                     <th>30일%</th>
+                    <th>30일 판정</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.picks.map((row) => {
                     const snap = getRecommendSnapshot(row)
+                    const display = pickDisplayFieldsFromSnapshot(row)
                     return (
                     <tr key={row.id}>
-                      <td className="font-mono tabular-nums">{row.recommendedAt}</td>
+                      <td className="font-mono tabular-nums">{display.recommendedAt}</td>
                       <td>
-                        <span className="yds-perf-val__pick-name">{row.name}</span>
+                        <span className="yds-perf-val__pick-name">{display.name}</span>
                         <PickRecommendSnapshot row={row} horizon7Pct={row.horizons?.d7} />
                       </td>
-                      <td className="font-mono tabular-nums">
-                        {row.recommendedScore != null ? Math.round(row.recommendedScore) : "—"}
-                      </td>
-                      <td>{row.qualityGrade}</td>
-                      <td>{row.timingGrade}</td>
-                      <td>{row.marketFitGrade}</td>
+                      <td className="font-mono tabular-nums">{formatSnapshotTotalScore(snap)}</td>
+                      <td>{formatSnapshotGradeCell(snap, "quality")}</td>
+                      <td>{formatSnapshotGradeCell(snap, "timing")}</td>
+                      <td>{formatSnapshotGradeCell(snap, "marketFit")}</td>
                       <td>{snap?.marketStateLabel ?? "—"}</td>
                       <td>{snap?.panicLabel ?? "—"}</td>
-                      <td className="font-mono tabular-nums">{formatPerfPrice(row.recommendedPrice)}</td>
+                      <td className="font-mono tabular-nums">{formatPerfPrice(display.recommendedPrice)}</td>
                       <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d7)}</td>
                       <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d14)}</td>
                       <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d30)}</td>
                       <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d7)}</td>
+                      <td><OutcomeBadge returnPct={row.horizons?.d7} /></td>
                       <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d14)}</td>
+                      <td><OutcomeBadge returnPct={row.horizons?.d14} /></td>
                       <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d30)}</td>
+                      <td><OutcomeBadge returnPct={row.horizons?.d30} /></td>
                     </tr>
                     )
                   })}

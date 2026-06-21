@@ -3,7 +3,7 @@
  */
 
 import { sanitizeValidationPickRecord } from "./ydsValidationPriceSanitize.js"
-import { applySnapshotToRecord, getRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
+import { applySnapshotToRecord, getRecommendSnapshot, hasSnapshotScores, migrateRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
 
 export const VALIDATION_PICKS_KEY = "yds-validation-picks-v2"
 export const VALIDATION_PORTFOLIO_KEY = "yds-validation-portfolio-v2"
@@ -168,7 +168,12 @@ export function normalizePickRecord(raw) {
     recordedAt: Number(r.recordedAt) || Date.now(),
     lastUpdatedAt: Number(r.lastUpdatedAt) || Date.now(),
   })
-  return sanitizeValidationPickRecord(applySnapshotToRecord(record, recSnap))
+  const withSnap = record.recommendSnapshot
+    ? applySnapshotToRecord(record, record.recommendSnapshot)
+    : recSnap && hasSnapshotScores(recSnap)
+      ? applySnapshotToRecord(record, recSnap)
+      : record
+  return sanitizeValidationPickRecord(migrateRecommendSnapshot(withSnap))
 }
 
 /** @returns {ValidationPickRecord[]} */

@@ -7,6 +7,7 @@ import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
 /**
  * @typedef {{
  *   name: string
+ *   recommendedAt: string
  *   recommendedPrice: number | null
  *   totalScore: number | null
  *   qualityGrade: string
@@ -19,6 +20,7 @@ import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
  *   panicIntensity: number | null
  *   panicLabel: string
  *   capturedAt: string
+ *   frozen: boolean
  * }} ValidationRecommendSnapshot
  */
 
@@ -31,7 +33,21 @@ function finiteNum(v) {
 /** @param {string | null | undefined} g */
 function normGrade(g) {
   const s = String(g ?? "").trim()
-  return s && s !== "undefined" ? s : "—"
+  return s && s !== "undefined" && s !== "null" ? s : "—"
+}
+
+/** @param {ValidationRecommendSnapshot | null | undefined} snap */
+export function isSnapshotFrozen(snap) {
+  return Boolean(snap?.frozen && snap?.capturedAt)
+}
+
+/** @param {ValidationRecommendSnapshot | null | undefined} snap */
+export function hasSnapshotScores(snap) {
+  if (!snap) return false
+  return (
+    snap.totalScore != null ||
+    (snap.qualityGrade !== "—" && snap.timingGrade !== "—")
+  )
 }
 
 /**
@@ -63,8 +79,9 @@ export function buildRecommendSnapshot(stock, marketContext, recommendedAt) {
 
   const totalScore = finiteNum(v4?.finalRankScore ?? v4?.total ?? stock.score)
 
-  return {
+  return freezeSnapshot({
     name: String(stock.name ?? stock.ticker ?? ""),
+    recommendedAt,
     recommendedPrice: price != null && price > 0 ? price : null,
     totalScore,
     qualityGrade: normGrade(v4?.qualityDisplayGrade ?? v4?.qualityGrade),
@@ -74,12 +91,55 @@ export function buildRecommendSnapshot(stock, marketContext, recommendedAt) {
     marketFitGrade: normGrade(marketFitGrade),
     marketFitScore: marketFitScore,
     marketStateLabel: String(
-      marketContext?.strategyLabel ?? regimeLabel ?? stock.pickMeta?.marketFitGrade ?? "—",
+      marketContext?.marketStateLabel ??
+        marketContext?.strategyLabel ??
+        regimeLabel ??
+        "—",
     ),
     panicIntensity: finiteNum(marketContext?.ydsScore),
     panicLabel: String(marketContext?.panicLabel ?? "—"),
     capturedAt: recommendedAt,
-  }
+    frozen: true,
+  })
+}
+
+/** @param {ValidationRecommendSnapshot} snap */
+function freezeSnapshot(snap) {
+  return Object.freeze({ ...snap, frozen: true })
+}
+
+/** @param {import("./ydsStockPickModel.js").StockPickView} stock */
+export function stockReadyForRecommendCapture(stock) {
+  if (!stock?.ticker || stock.dataSource !== "live") return false
+  const v4 = stock.v4Score
+  if (v4?.finalRankScore != null || v4?.total != null) return true
+  if (v4?.qualityGrade && v4?.timingGrade) return true
+  return finiteNum(stock.score) != null
+}
+
+/**
+ * @param {import("./ydsValidationStorage.js").ValidationPickRecord} record
+ * @param {string} [recommendedAt]
+ */
+export function snapshotFromRecordFields(record, recommendedAt) {
+  const at = recommendedAt ?? record.recommendedAt
+  return freezeSnapshot({
+    name: record.name,
+    recommendedAt: at,
+    recommendedPrice: record.recommendedPrice,
+    totalScore: record.recommendedScore,
+    qualityGrade: normGrade(record.qualityGrade),
+    qualityScore: null,
+    timingGrade: normGrade(record.timingGrade),
+    timingScore: null,
+    marketFitGrade: normGrade(record.marketFitGrade),
+    marketFitScore: null,
+    marketStateLabel: record.strategyLabel ?? record.regimeLabel ?? "—",
+    panicIntensity: record.recommendSnapshot?.panicIntensity ?? null,
+    panicLabel: record.recommendSnapshot?.panicLabel ?? "—",
+    capturedAt: at,
+    frozen: true,
+  })
 }
 
 /**
@@ -96,8 +156,15 @@ export function getRecommendSnapshot(record) {
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord} record */
 function legacySnapshotFromRecord(record) {
   if (!record.ticker) return null
+  const hasGrades =
+    record.recommendedScore != null ||
+    record.qualityGrade !== "—" ||
+    record.timingGrade !== "—"
+  if (!hasGrades && !record.recommendedPrice) return null
+
   return {
     name: record.name,
+    recommendedAt: record.recommendedAt,
     recommendedPrice: record.recommendedPrice,
     totalScore: record.recommendedScore,
     qualityGrade: normGrade(record.qualityGrade),
@@ -110,7 +177,28 @@ function legacySnapshotFromRecord(record) {
     panicIntensity: null,
     panicLabel: "—",
     capturedAt: record.recommendedAt,
+    frozen: false,
   }
+}
+
+/**
+ * @param {import("./ydsValidationStorage.js").ValidationPickRecord} record
+ */
+export function migrateRecommendSnapshot(record) {
+  if (isSnapshotFrozen(record.recommendSnapshot) && hasSnapshotScores(record.recommendSnapshot)) {
+    return applySnapshotToRecord(record, record.recommendSnapshot)
+  }
+
+  if (record.recommendSnapshot?.capturedAt && hasSnapshotScores(record.recommendSnapshot)) {
+    return applySnapshotToRecord(record, freezeSnapshot({ ...record.recommendSnapshot, frozen: true }))
+  }
+
+  const legacy = legacySnapshotFromRecord(record)
+  if (legacy && hasSnapshotScores(legacy)) {
+    return applySnapshotToRecord(record, freezeSnapshot({ ...legacy, frozen: true }))
+  }
+
+  return record
 }
 
 /**
@@ -119,19 +207,26 @@ function legacySnapshotFromRecord(record) {
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null | undefined} marketContext
  */
 export function backfillRecommendSnapshot(record, stock, marketContext) {
-  if (record.recommendSnapshot?.capturedAt) {
+  if (isSnapshotFrozen(record.recommendSnapshot) && hasSnapshotScores(record.recommendSnapshot)) {
     return applySnapshotToRecord(record, record.recommendSnapshot)
   }
+
+  if (record.recommendSnapshot?.capturedAt && hasSnapshotScores(record.recommendSnapshot)) {
+    return applySnapshotToRecord(record, freezeSnapshot({ ...record.recommendSnapshot, frozen: true }))
+  }
+
   const today = new Date().toISOString().slice(0, 10)
   if (
     stock?.ticker &&
     stock.dataSource === "live" &&
-    record.recommendedAt === today
+    record.recommendedAt === today &&
+    stockReadyForRecommendCapture(stock)
   ) {
     const snap = buildRecommendSnapshot(stock, marketContext, record.recommendedAt)
     return applySnapshotToRecord(record, snap)
   }
-  return applySnapshotToRecord(record, getRecommendSnapshot(record))
+
+  return migrateRecommendSnapshot(record)
 }
 
 /**
@@ -140,17 +235,66 @@ export function backfillRecommendSnapshot(record, stock, marketContext) {
  */
 export function applySnapshotToRecord(record, snap) {
   if (!snap) return record
+
+  const existing = record.recommendSnapshot
+  if (
+    isSnapshotFrozen(existing) &&
+    hasSnapshotScores(existing) &&
+    (!hasSnapshotScores(snap) || !snap.frozen)
+  ) {
+    snap = existing
+  }
+
   return {
     ...record,
     name: snap.name || record.name,
+    recommendedAt: snap.recommendedAt || record.recommendedAt,
     recommendedPrice: snap.recommendedPrice ?? record.recommendedPrice,
     recommendedScore: snap.totalScore ?? record.recommendedScore,
     qualityGrade: snap.qualityGrade,
     timingGrade: snap.timingGrade,
     marketFitGrade: snap.marketFitGrade,
     strategyLabel: snap.marketStateLabel || record.strategyLabel,
-    recommendSnapshot: snap,
+    recommendSnapshot: snap.frozen ? snap : freezeSnapshot({ ...snap, frozen: true }),
   }
+}
+
+/** @param {number | null | undefined} price */
+export function formatSnapshotPrice(price) {
+  if (price == null || !Number.isFinite(price) || price <= 0) return "—"
+  return price >= 1000
+    ? price.toLocaleString("ko-KR", { maximumFractionDigits: 2 })
+    : price.toFixed(2)
+}
+
+/**
+ * @param {ValidationRecommendSnapshot | null | undefined} snap
+ * @param {'quality' | 'timing' | 'marketFit'} kind
+ */
+export function formatSnapshotGradeCell(snap, kind) {
+  if (!snap) return "—"
+  const grade =
+    kind === "quality"
+      ? snap.qualityGrade
+      : kind === "timing"
+        ? snap.timingGrade
+        : snap.marketFitGrade
+  const score =
+    kind === "quality"
+      ? snap.qualityScore
+      : kind === "timing"
+        ? snap.timingScore
+        : snap.marketFitScore
+
+  if (grade === "—" && score == null) return "—"
+  if (score != null) return `${grade} (${Math.round(score)})`
+  return grade
+}
+
+/** @param {ValidationRecommendSnapshot | null | undefined} snap */
+export function formatSnapshotTotalScore(snap) {
+  if (!snap || snap.totalScore == null || !Number.isFinite(snap.totalScore)) return "—"
+  return String(Math.round(snap.totalScore))
 }
 
 /**
@@ -166,6 +310,7 @@ export function formatRecommendSnapshotLine(record, horizon7Pct = null) {
     s.qualityGrade !== "—" ? `품질 ${s.qualityGrade}` : null,
     s.timingGrade !== "—" ? `타이밍 ${s.timingGrade}` : null,
     s.marketFitGrade !== "—" ? `시장적합 ${s.marketFitGrade}` : null,
+    s.recommendedPrice != null ? `추천가 ${formatSnapshotPrice(s.recommendedPrice)}` : null,
   ].filter(Boolean)
 
   const ret =
@@ -174,4 +319,25 @@ export function formatRecommendSnapshotLine(record, horizon7Pct = null) {
       : null
 
   return [record.name, ...parts, ret].filter(Boolean).join(" · ")
+}
+
+/**
+ * @param {import("./ydsValidationStorage.js").ValidationPickRecord} record
+ */
+export function pickDisplayFieldsFromSnapshot(record) {
+  const s = getRecommendSnapshot(record)
+  return {
+    name: s?.name ?? record.name,
+    recommendedAt: s?.recommendedAt ?? record.recommendedAt,
+    recommendedPrice: s?.recommendedPrice ?? record.recommendedPrice,
+    totalScore: s?.totalScore ?? record.recommendedScore,
+    qualityGrade: s?.qualityGrade ?? record.qualityGrade,
+    qualityScore: s?.qualityScore ?? null,
+    timingGrade: s?.timingGrade ?? record.timingGrade,
+    timingScore: s?.timingScore ?? null,
+    marketFitGrade: s?.marketFitGrade ?? record.marketFitGrade,
+    marketFitScore: s?.marketFitScore ?? null,
+    marketStateLabel: s?.marketStateLabel ?? record.strategyLabel,
+    panicLabel: s?.panicLabel ?? "—",
+  }
 }

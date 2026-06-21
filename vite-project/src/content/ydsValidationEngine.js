@@ -26,6 +26,7 @@ import {
 import {
   backfillRecommendSnapshot,
   buildRecommendSnapshot,
+  stockReadyForRecommendCapture,
 } from "./ydsValidationRecommendSnapshot.js"
 import {
   filterByCountry,
@@ -337,6 +338,12 @@ function refreshPickPrice(record, today, priceMap) {
     returnPct,
     horizonPrices,
     horizons,
+    recommendSnapshot: cleaned.recommendSnapshot,
+    recommendedScore: cleaned.recommendedScore,
+    qualityGrade: cleaned.qualityGrade,
+    timingGrade: cleaned.timingGrade,
+    marketFitGrade: cleaned.marketFitGrade,
+    strategyLabel: cleaned.strategyLabel,
     lastUpdatedAt: Date.now(),
   }
 }
@@ -360,8 +367,8 @@ export function captureTodayPickSnapshots(marketContext, rankLimit = 10, univers
   const fresh = [...usRanked, ...krRanked]
     .filter((s) => {
       if (!s?.ticker) return false
-      if (universeOverride) return s.dataSource === "live"
-      return true
+      if (universeOverride) return s.dataSource === "live" && stockReadyForRecommendCapture(s)
+      return stockReadyForRecommendCapture(s) || s.dataSource !== "live"
     })
     .map((s) => pickRecordFromStock(s, marketContext, today))
     .filter((r) => !existingToday.has(r.id))
