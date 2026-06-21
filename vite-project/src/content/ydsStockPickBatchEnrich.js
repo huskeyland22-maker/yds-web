@@ -21,6 +21,8 @@ import { buildStockPickChangeReport } from "./ydsStockPickChangeEngine.js"
 import { computeDataReliability } from "./ydsStockPickReliability.js"
 import { resolveFinalAction } from "./ydsStockPickFinalAction.js"
 import { buildActionGuide } from "./ydsStockPickActionGuide.js"
+import { computeRankTrack } from "./ydsStockPickRankTrack.js"
+import { resolveStockLifecycle } from "./ydsStockPickLifecycle.js"
 
 /**
  * @typedef {{
@@ -34,6 +36,8 @@ import { buildActionGuide } from "./ydsStockPickActionGuide.js"
  *   changeReport: ReturnType<typeof buildStockPickChangeReport>
  *   reliability: import("./ydsStockPickReliability.js").DataReliabilityView
  *   finalAction: import("./ydsStockPickFinalAction.js").FinalActionView
+ *   rankTrack: import("./ydsStockPickRankTrack.js").RankTrackView | null
+ *   lifecycle: import("./ydsStockPickLifecycle.js").LifecycleView
  *   marketFitGrade: string
  *   marketFitScore: number
  *   longHoldCandidate: boolean
@@ -73,9 +77,15 @@ export function applyStockPickBatchMeta(liveStocks, universeStocks) {
 
     pickMeta.changeReport = buildStockPickChangeReport({ ...stock, pickMeta }, historyBefore)
 
+    const rankTrack = computeRankTrack(stock, historyBefore)
+    pickMeta.rankTrack = rankTrack
+
+    const lifecycle = resolveStockLifecycle({ ...stock, pickMeta }, historyBefore)
+    pickMeta.lifecycle = lifecycle
+
     const actionGuide = buildActionGuide({ ...stock, pickMeta })
 
-    return { ...stock, pickMeta, scoreDeltas, actionGuide }
+    return { ...stock, pickMeta, scoreDeltas, actionGuide, lifecycle }
   })
 
   recordScoreHistory(enriched, historyBefore)

@@ -29,6 +29,12 @@ export default function YdsStockPickInsightStrip({ stock, variant = "card" }) {
         </span>
       ) : null}
 
+      {meta.rankTrack?.deltaDisplay ? (
+        <span className="yds-spick-insight__rank-delta font-mono tabular-nums">
+          {meta.rankTrack.deltaDisplay}
+        </span>
+      ) : null}
+
       {meta.longHoldCandidate ? (
         <span className="yds-spick-insight__long-hold">🏆 장기보유 후보</span>
       ) : null}

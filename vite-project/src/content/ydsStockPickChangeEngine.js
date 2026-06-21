@@ -209,7 +209,7 @@ function resolveChangeBadge(day1, day5, day20, gradeChanges, positionChange) {
     return { id: "rising", label: "상승중", tone: "rising" }
   }
   if (d1 <= -2 || d5 <= -3) {
-    return { id: "weakening", label: "약화", tone: "weakening" }
+    return { id: "weakening", label: "하락중", tone: "weakening" }
   }
   return { id: "hold", label: "유지", tone: "hold" }
 }

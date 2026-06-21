@@ -140,6 +140,7 @@ export const RATING_STARS = {
  *   technicalScore: import("./ydsStockTechnicalScore.js").TechnicalScoreResult
  *   opinion: import("./ydsStockPickOpinion.js").StockPickOpinion
  *   pickMeta: import("./ydsStockPickBatchEnrich.js").StockPickMeta
+ *   lifecycle: import("./ydsStockPickLifecycle.js").LifecycleView
  *   scoreDeltas: ReturnType<typeof import("./ydsStockPickScoreHistory.js").getScoreDeltas>
  * }} StockPickView
  */

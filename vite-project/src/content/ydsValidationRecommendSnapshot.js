@@ -5,6 +5,8 @@
 import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
 import { serializeRationalesForSnapshot } from "./ydsStockPickRecommendRationale.js"
 import { serializeActionGuideForSnapshot } from "./ydsStockPickActionGuide.js"
+import { serializeRankTrackForSnapshot } from "./ydsStockPickRankTrack.js"
+import { serializeLifecycleForSnapshot } from "./ydsStockPickLifecycle.js"
 
 /**
  * @typedef {{
@@ -23,6 +25,8 @@ import { serializeActionGuideForSnapshot } from "./ydsStockPickActionGuide.js"
  *   panicLabel: string
  *   recommendRationales?: { id: string; category: string; source: string; score: number; max: number; text: string }[]
  *   actionGuide?: { primaryId: string; timingGrade: string; recommendStatusId: string; summary: string; items: { id: string; source: string; text: string }[] }
+ *   rankTrack?: { currentRank: number; previousRank: number | null; delta: number | null; badgeId: string; badgeLabel: string }
+ *   lifecycle?: { id: string; label: string; hint: string }
  *   capturedAt: string
  *   frozen: boolean
  * }} ValidationRecommendSnapshot
@@ -84,6 +88,10 @@ export function buildRecommendSnapshot(stock, marketContext, recommendedAt) {
   const totalScore = finiteNum(v4?.finalRankScore ?? v4?.total ?? stock.score)
   const rationales = serializeRationalesForSnapshot(stock.recommendRationales ?? [])
   const actionGuide = serializeActionGuideForSnapshot(stock.actionGuide)
+  const rankTrack = serializeRankTrackForSnapshot(stock.pickMeta?.rankTrack)
+  const lifecycle = serializeLifecycleForSnapshot(
+    stock.lifecycle ?? stock.pickMeta?.lifecycle ?? { id: "interest", label: "관심", hint: "관찰·등록" },
+  )
 
   return freezeSnapshot({
     name: String(stock.name ?? stock.ticker ?? ""),
@@ -106,6 +114,8 @@ export function buildRecommendSnapshot(stock, marketContext, recommendedAt) {
     panicLabel: String(marketContext?.panicLabel ?? "—"),
     recommendRationales: rationales.length ? rationales : undefined,
     actionGuide,
+    rankTrack,
+    lifecycle: lifecycle.id !== "excluded" ? lifecycle : undefined,
     capturedAt: recommendedAt,
     frozen: true,
   })

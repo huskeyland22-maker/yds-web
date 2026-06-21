@@ -3148,4 +3148,228 @@
   border-color: rgba(42, 54, 72, 0.55);
 }
 
+.yds-spick-rank-track {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+}
+
+.yds-spick-card__rank-track {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.yds-spick-rank-track__rank {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-spick-rank-track__delta {
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.yds-spick-rank-track__delta--up {
+  color: #86efac;
+}
+
+.yds-spick-rank-track__delta--down {
+  color: #fca5a5;
+}
+
+.yds-spick-rank-track__badge {
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 0.08rem 0.3rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.yds-spick-rank-track__badge--surge {
+  color: #fde047;
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.35);
+}
+
+.yds-spick-rank-track__badge--rising {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.yds-spick-rank-track__badge--hold {
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.yds-spick-rank-track__badge--weakening {
+  color: #fdba74;
+  background: rgba(249, 115, 22, 0.1);
+  border-color: rgba(249, 115, 22, 0.28);
+}
+
+.yds-spick-rank-track__badge--red {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.32);
+}
+
+.yds-spick-lifecycle {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.15rem 0 0.25rem;
+}
+
+.yds-spick-lifecycle__state {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.yds-spick-lifecycle__state--green {
+  color: #4ade80;
+}
+
+.yds-spick-lifecycle__state--green-mid {
+  color: #86efac;
+}
+
+.yds-spick-lifecycle__state--orange {
+  color: #fb923c;
+}
+
+.yds-spick-lifecycle__state--red {
+  color: #f87171;
+}
+
+.yds-spick-lifecycle__state--cyan {
+  color: #67e8f9;
+}
+
+.yds-spick-lifecycle__state--slate {
+  color: #cbd5e1;
+}
+
+.yds-spick-lifecycle__hint {
+  font-size: 0.55rem;
+  color: #64748b;
+}
+
+.yds-spick-insight__rank-delta {
+  color: #86efac;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.yds-spick-sector-conc {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.35) 100%);
+}
+
+.yds-spick-country-panel__sector-conc {
+  margin-bottom: 0.65rem;
+}
+
+.yds-spick-sector-conc__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-spick-sector-conc__title {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yds-spick-sector-conc__grade {
+  font-size: 0.55rem;
+  font-weight: 800;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.yds-spick-sector-conc__grade--green {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+.yds-spick-sector-conc__grade--amber {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.yds-spick-sector-conc__grade--red {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.yds-spick-sector-conc__summary {
+  margin: 0 0 0.4rem;
+  font-size: 0.6rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.yds-spick-sector-conc__bars {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.yds-spick-sector-conc__bar-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr 2rem;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.yds-spick-sector-conc__bar-label {
+  font-size: 0.58rem;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yds-spick-sector-conc__bar-track {
+  height: 0.28rem;
+  border-radius: 999px;
+  background: rgba(51, 65, 85, 0.55);
+  overflow: hidden;
+}
+
+.yds-spick-sector-conc__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
+}
+
+.yds-spick-sector-conc__bar-pct {
+  font-size: 0.58rem;
+  color: #e2e8f0;
+  text-align: right;
+}
 

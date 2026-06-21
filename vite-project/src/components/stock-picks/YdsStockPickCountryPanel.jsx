@@ -8,6 +8,7 @@ import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
 import YdsStockPickTop3 from "./YdsStockPickTop3.jsx"
 import YdsStockPickTop10WhySection from "./YdsStockPickTop10WhySection.jsx"
 import YdsStockPickSectorPanel from "./YdsStockPickSectorPanel.jsx"
+import YdsStockPickSectorConcentrationCard from "./YdsStockPickSectorConcentrationCard.jsx"
 import YdsStockPickCard from "./YdsStockPickCard.jsx"
 
 /**
@@ -97,6 +98,12 @@ export default function YdsStockPickCountryPanel({
           <h2 className="yds-spick-country-panel__title">{countryMeta.label}</h2>
         </header>
       ) : null}
+
+      <YdsStockPickSectorConcentrationCard
+        stocks={regimeStocks}
+        limit={Math.min(10, regimeLimit)}
+        className="yds-spick-country-panel__sector-conc"
+      />
 
       <YdsStockPickTop3
         stocks={topHero}

@@ -14,6 +14,8 @@ import YdsStockPositionBadge from "./YdsStockPositionBadge.jsx"
 import YdsStockPickChangeStrip from "./YdsStockPickChangeStrip.jsx"
 import YdsStockPickRecommendRationale from "./YdsStockPickRecommendRationale.jsx"
 import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
+import YdsStockPickRankStrip from "./YdsStockPickRankStrip.jsx"
+import YdsStockPickLifecycleBadge from "./YdsStockPickLifecycleBadge.jsx"
 
 /**
  * @param {{
@@ -64,6 +66,9 @@ export default function YdsStockPickCard({
           ? "yds-spick-card--rank-3"
           : ""
 
+  const rankTrack = stock.pickMeta?.rankTrack
+  const lifecycle = stock.lifecycle ?? stock.pickMeta?.lifecycle
+
   return (
     <article
       className={[
@@ -81,6 +86,9 @@ export default function YdsStockPickCard({
         {rankLabel && !isHero ? (
           <span className="yds-spick-card__rank">{rankLabel}</span>
         ) : null}
+        {rankTrack ? (
+          <YdsStockPickRankStrip track={rankTrack} className="yds-spick-card__rank-track" />
+        ) : null}
         <div className="yds-spick-card__badges">
           {isHeld ? <span className="yds-spick-card__held">🟦 보유중</span> : null}
           {isFavorite ? <span className="yds-spick-card__fav-mark">⭐</span> : null}
@@ -93,6 +101,8 @@ export default function YdsStockPickCard({
 
       <Link to={to} className="yds-spick-card__link">
         <h3 className="yds-spick-card__name">{stock.name}</h3>
+
+        <YdsStockPickLifecycleBadge lifecycle={lifecycle} className="yds-spick-card__lifecycle" />
 
         <YdsStockPositionBadge stock={stock} variant="card" showScore={false} />
 
