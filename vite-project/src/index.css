@@ -18119,6 +18119,196 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #fca5a5;
 }
 
+.yds-perf-val__contrib,
+.yds-perf-val__panic-deep,
+.yds-perf-val__mkt-strat {
+  padding: 0.65rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--pv-border);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-perf-val__contrib-rank {
+  margin: 0.4rem 0 0.55rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.yds-perf-val__contrib-rank-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(56, 189, 248, 0.08);
+  font-size: 0.62rem;
+}
+
+.yds-perf-val__contrib-rank-pos {
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+.yds-perf-val__contrib-rank-r {
+  color: #bae6fd;
+}
+
+.yds-perf-val__contrib-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 720px) {
+  .yds-perf-val__contrib-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.yds-perf-val__contrib-block {
+  padding: 0.4rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-perf-val__contrib-r {
+  font-size: 0.58rem;
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+.yds-perf-val__contrib-row {
+  display: grid;
+  grid-template-columns: 3.2rem 2.2rem 1fr 2.5rem;
+  gap: 0.25rem;
+  align-items: baseline;
+  font-size: 0.58rem;
+  margin-bottom: 0.15rem;
+}
+
+.yds-perf-val__contrib-grade {
+  color: #cbd5e1;
+}
+
+.yds-perf-val__contrib-meta {
+  color: #64748b;
+}
+
+.yds-perf-val__contrib-win {
+  color: #94a3b8;
+}
+
+.yds-perf-val__contrib-avg {
+  text-align: right;
+}
+
+.yds-perf-val__panic-deep-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+@media (min-width: 720px) {
+  .yds-perf-val__panic-deep-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.yds-perf-val__panic-deep-card {
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(30, 41, 59, 0.35);
+  display: grid;
+  gap: 0.1rem;
+}
+
+.yds-perf-val__panic-deep-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-perf-val__panic-deep-range {
+  font-size: 0.55rem;
+  color: #64748b;
+}
+
+.yds-perf-val__mkt-strat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+@media (min-width: 720px) {
+  .yds-perf-val__mkt-strat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.yds-perf-val__mkt-strat-card {
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(30, 41, 59, 0.35);
+}
+
+.yds-perf-val__mkt-strat-meta {
+  margin: 0.15rem 0;
+  font-size: 0.58rem;
+  color: #94a3b8;
+}
+
+.yds-perf-val__mkt-strat-extreme {
+  margin: 0.1rem 0 0;
+  font-size: 0.55rem;
+  line-height: 1.35;
+}
+
+.yds-perf-val__mkt-strat-extreme--up {
+  color: #86efac;
+}
+
+.yds-perf-val__mkt-strat-extreme--down {
+  color: #fca5a5;
+}
+
+.yds-perf-val__mkt-strat-detail {
+  margin-top: 0.5rem;
+}
+
+.yds-perf-val__mkt-strat-summary {
+  font-size: 0.62rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.yds-perf-val__mkt-strat-detail-grid {
+  margin-top: 0.35rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.yds-perf-val__mkt-strat-detail-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem;
+  font-size: 0.58rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-perf-val__mkt-strat-detail-label {
+  color: #cbd5e1;
+}
+
 /* Panic Lab — 패닉 연구실 */
 .yds-panic-lab {
   --pl-border: rgba(42, 54, 72, 0.65);

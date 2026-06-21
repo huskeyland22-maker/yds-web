@@ -23,6 +23,9 @@ import {
 import {
   buildScoreCorrelationReport,
 } from "../content/ydsPickScoreCorrelation.js"
+import { buildComponentContributionReport } from "../content/ydsPickComponentContribution.js"
+import { buildPanicDeepAnalysisReport } from "../content/ydsPickPanicDeepAnalysis.js"
+import { buildMarketStateStrategyReport } from "../content/ydsPickMarketStateStrategy.js"
 import { loadValidationPicks } from "../content/ydsValidationStorage.js"
 import { refreshValidationPicks } from "../content/ydsValidationEngine.js"
 import { buildValidationPriceMap } from "../content/ydsValidationPriceResolver.js"
@@ -469,6 +472,161 @@ function ScoreCorrelationPanel({ report }) {
   )
 }
 
+function ComponentContributionPanel({ report }) {
+  return (
+    <section className="yds-perf-val__section yds-perf-val__contrib" aria-labelledby="perf-val-contrib">
+      <p className="yds-perf-val__pattern-kicker">Component Impact · 7일 실측</p>
+      <h2 id="perf-val-contrib" className="yds-perf-val__h2">
+        점수 구성요소 기여도
+      </h2>
+      <p className="yds-perf-val__pattern-lede">
+        기업품질·타이밍·시장적합 등급별 승률·평균수익 · 요소별 상관계수 순위
+      </p>
+
+      {report.ranking.length ? (
+        <ol className="yds-perf-val__contrib-rank">
+          {report.ranking.map((r) => (
+            <li key={r.id} className="yds-perf-val__contrib-rank-item">
+              <span className="yds-perf-val__contrib-rank-pos font-mono tabular-nums">{r.rank}위</span>
+              <span className="yds-perf-val__contrib-rank-label">{r.label}</span>
+              <strong className="yds-perf-val__contrib-rank-r font-mono tabular-nums">
+                r={r.correlation}
+              </strong>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="yds-perf-val__pattern-empty">7일 잠금 표본이 부족합니다.</p>
+      )}
+
+      <div className="yds-perf-val__contrib-grid">
+        {report.components.map((comp) => (
+          <div key={comp.id} className="yds-perf-val__contrib-block">
+            <h3 className="yds-perf-val__h3">
+              {comp.label}
+              {comp.correlation != null ? (
+                <span className="yds-perf-val__contrib-r font-mono tabular-nums"> r={comp.correlation}</span>
+              ) : null}
+            </h3>
+            {comp.grades.map((g) => (
+              <div key={g.grade} className="yds-perf-val__contrib-row">
+                <span className="yds-perf-val__contrib-grade">{g.label}</span>
+                <span className="yds-perf-val__contrib-meta font-mono tabular-nums">n={g.count}</span>
+                <span className="yds-perf-val__contrib-win font-mono tabular-nums">
+                  {g.count ? `승률 ${g.winRate}%` : "—"}
+                </span>
+                <span
+                  className={`yds-perf-val__contrib-avg font-mono tabular-nums ${
+                    g.avgReturn != null && g.avgReturn >= 0
+                      ? "yds-perf-val__score-corr-avg--up"
+                      : g.avgReturn != null
+                        ? "yds-perf-val__score-corr-avg--down"
+                        : ""
+                  }`}
+                >
+                  {g.count ? formatPerfPct(g.avgReturn) : "—"}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function PanicDeepPanel({ report }) {
+  return (
+    <section className="yds-perf-val__section yds-perf-val__panic-deep" aria-labelledby="perf-val-panic">
+      <p className="yds-perf-val__pattern-kicker">Panic Zones · 7일 실측</p>
+      <h2 id="perf-val-panic" className="yds-perf-val__h2">
+        패닉지수 구간별 성과
+      </h2>
+      <p className="yds-perf-val__note">추천 당시 잠금 패닉강도 · n={report.total}</p>
+      <div className="yds-perf-val__panic-deep-grid">
+        {report.zones.map((z) => (
+          <article
+            key={z.id}
+            className={`yds-perf-val__panic-deep-card ${z.count ? "" : "yds-perf-val__score-corr-card--empty"}`}
+          >
+            <span className="yds-perf-val__panic-deep-label">{z.panicLabel}</span>
+            <span className="yds-perf-val__score-corr-meta font-mono tabular-nums">n={z.count}</span>
+            <strong className="yds-perf-val__score-corr-win font-mono tabular-nums">
+              {z.count ? `승률 ${z.winRate}%` : "—"}
+            </strong>
+            <span
+              className={`yds-perf-val__score-corr-avg font-mono tabular-nums ${
+                z.avgReturn != null && z.avgReturn >= 0
+                  ? "yds-perf-val__score-corr-avg--up"
+                  : z.avgReturn != null
+                    ? "yds-perf-val__score-corr-avg--down"
+                    : ""
+              }`}
+            >
+              {z.count ? `평균 ${formatPerfPct(z.avgReturn)}` : "—"}
+            </span>
+            {z.count ? (
+              <span className="yds-perf-val__panic-deep-range font-mono tabular-nums">
+                최대 {formatPerfPct(z.maxGain)} · 최소 {formatPerfPct(z.maxLoss)}
+              </span>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function MarketStateStrategyPanel({ report }) {
+  return (
+    <section className="yds-perf-val__section yds-perf-val__mkt-strat" aria-labelledby="perf-val-mkt">
+      <p className="yds-perf-val__pattern-kicker">Market Regime · 7일 실측</p>
+      <h2 id="perf-val-mkt" className="yds-perf-val__h2">
+        시장상태별 투자전략 검증
+      </h2>
+      <p className="yds-perf-val__note">추천 당시 잠금 시장상태 · n={report.total}</p>
+
+      <div className="yds-perf-val__mkt-strat-grid">
+        {report.strategies.map((s) => (
+          <article key={s.id} className="yds-perf-val__mkt-strat-card">
+            <h3 className="yds-perf-val__h3">{s.label}</h3>
+            <p className="yds-perf-val__mkt-strat-meta font-mono tabular-nums">
+              n={s.count}
+              {s.count ? ` · 승률 ${s.winRate}% · 평균 ${formatPerfPct(s.avgReturn)}` : ""}
+            </p>
+            {s.best ? (
+              <p className="yds-perf-val__mkt-strat-extreme yds-perf-val__mkt-strat-extreme--up">
+                최고 {s.best.name} {formatPerfPct(s.best.returnPct)}
+              </p>
+            ) : null}
+            {s.worst ? (
+              <p className="yds-perf-val__mkt-strat-extreme yds-perf-val__mkt-strat-extreme--down">
+                최악 {s.worst.name} {formatPerfPct(s.worst.returnPct)}
+              </p>
+            ) : null}
+          </article>
+        ))}
+      </div>
+
+      {report.detailStates.length ? (
+        <details className="yds-perf-val__mkt-strat-detail">
+          <summary className="yds-perf-val__mkt-strat-summary">세부 시장상태</summary>
+          <div className="yds-perf-val__mkt-strat-detail-grid">
+            {report.detailStates.map((s) => (
+              <div key={s.id} className="yds-perf-val__mkt-strat-detail-row">
+                <span className="yds-perf-val__mkt-strat-detail-label">{s.stateLabel}</span>
+                <span className="font-mono tabular-nums">
+                  n={s.count} · 승률 {s.winRate ?? "—"}% · {formatPerfPct(s.avgReturn)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
+    </section>
+  )
+}
+
 function PickRecommendSnapshot({ row, horizon7Pct }) {
   const snap = getRecommendSnapshot(row)
   if (!snap) return null
@@ -608,6 +766,9 @@ export default function PerformanceValidationPage() {
   )
   const reliability = useMemo(() => buildReliabilityAuditReport(picks), [picks])
   const scoreCorrelation = useMemo(() => buildScoreCorrelationReport(picks), [picks])
+  const componentContribution = useMemo(() => buildComponentContributionReport(picks), [picks])
+  const panicDeep = useMemo(() => buildPanicDeepAnalysisReport(picks), [picks])
+  const marketStrategy = useMemo(() => buildMarketStateStrategyReport(picks), [picks])
   const { kpi, gradeBreakdown, topSuccess, topFailure, monthly } = report
   const hasAny = report.allPickCount > 0
 
@@ -646,6 +807,12 @@ export default function PerformanceValidationPage() {
           <ReliabilityAuditPanel report={reliability} />
 
           <ScoreCorrelationPanel report={scoreCorrelation} />
+
+          <ComponentContributionPanel report={componentContribution} />
+
+          <PanicDeepPanel report={panicDeep} />
+
+          <MarketStateStrategyPanel report={marketStrategy} />
 
           <SuccessPatternPanel
             pattern={pattern}
