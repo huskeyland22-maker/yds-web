@@ -33,7 +33,6 @@ const picks = Array.from({ length: 12 }, (_, i) => ({
   recommendedPrice: 100,
   recommendedScore: 90,
   qualityGrade: "A",
-  timingGrade: i % 2 === 0 ? "A" : "B",
   marketFitGrade: "A",
   statusId: "trend",
   statusLabel: "추세",

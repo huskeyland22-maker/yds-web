@@ -8,6 +8,7 @@ import {
 import {
   buildSuccessPatternReport,
   formatSuccessRate,
+  GRADE_PATTERN_MIN_SAMPLE,
   OUTCOME_LABELS,
   PATTERN_MIN_SAMPLE,
 } from "../content/ydsPickSuccessPatternEngine.js"
@@ -207,7 +208,7 @@ function PatternBucketRow({ item }) {
       <span className="yds-perf-val__pattern-label">{item.label}</span>
       <span className="yds-perf-val__pattern-meta font-mono tabular-nums">n={item.count}</span>
       <strong className={`yds-perf-val__pattern-rate font-mono tabular-nums ${rateClass}`}>
-        {formatSuccessRate(item.successRate, pending)}
+        {formatSuccessRate(item.successRate, pending, item.count)}
       </strong>
       {!pending && item.avgReturn != null ? (
         <span className="yds-perf-val__pattern-avg font-mono tabular-nums">
@@ -234,7 +235,7 @@ function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange }) {
             성공 패턴 분석
           </h2>
           <p className="yds-perf-val__pattern-lede">
-            실제 잠금 수익률 기준 · 표본 {PATTERN_MIN_SAMPLE}개 미만 구간은 분석 보류 · AI 예측 없음
+            실제 잠금 수익률 기준 · 등급별 표본 {GRADE_PATTERN_MIN_SAMPLE}개 미만은 참고용 · AI 예측 없음
           </p>
         </div>
         <div className="yds-perf-val__pattern-horizon" role="tablist" aria-label="분석 기간">

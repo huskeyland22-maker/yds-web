@@ -8,6 +8,13 @@ import {
   outcomeCriteriaLabels,
   picksWithLockedOutcome,
 } from "./ydsPickOutcomeEngine.js"
+import {
+  filterPicksByPatternGrade,
+  MARKET_FIT_PATTERN_BUCKETS,
+  patternGradeBucketLabel,
+  QUALITY_PATTERN_BUCKETS,
+  TIMING_PATTERN_BUCKETS,
+} from "./ydsPickPatternGrades.js"
 import { getRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
 import { PERF_HORIZONS } from "./ydsPickPerformanceEngine.js"
 /** @typedef {import("./ydsValidationStorage.js").ValidationPickRecord} ValidationPickRecord */
@@ -15,6 +22,8 @@ import { PERF_HORIZONS } from "./ydsPickPerformanceEngine.js"
 /** @typedef {'success' | 'normal' | 'failure'} OutcomeId */
 
 export const PATTERN_MIN_SAMPLE = 10
+/** 등급별 성공률 — 표본이 적어도 n과 비율을 보여줄 최소값 */
+export const GRADE_PATTERN_MIN_SAMPLE = 3
 
 /** @deprecated use DEFAULT_OUTCOME_CRITERIA */
 export const SUCCESS_CRITERIA = {
@@ -77,8 +86,9 @@ export const PANIC_BUCKETS = [
  * @param {string} id
  * @param {string} label
  * @param {PatternHorizonKey} horizonKey
+ * @param {number} [minSample]
  */
-function aggregateBucketForHorizon(subset, id, label, horizonKey) {
+function aggregateBucketForHorizon(subset, id, label, horizonKey, minSample = PATTERN_MIN_SAMPLE) {
   let successCount = 0
   let normalCount = 0
   let failureCount = 0
@@ -96,11 +106,9 @@ function aggregateBucketForHorizon(subset, id, label, horizonKey) {
     else if (outcome === "failure") failureCount += 1
   }
 
-  const sufficient = tracked >= PATTERN_MIN_SAMPLE
+  const sufficient = tracked >= minSample
   const successRate =
-    sufficient && tracked > 0
-      ? Math.round((successCount / tracked) * 1000) / 10
-      : null
+    tracked > 0 ? Math.round((successCount / tracked) * 1000) / 10 : null
   const avgReturn =
     tracked > 0 ? Math.round((returnSum / tracked) * 10) / 10 : null
 
@@ -192,31 +200,35 @@ function pickHighlights(rows, limit = 4) {
 export function buildSuccessPatternReport(allPicks, horizonKey = "d30") {
   const picks = picksWithLockedHorizon(allPicks, horizonKey)
   const horizonLabel = PERF_HORIZONS.find((h) => h.key === horizonKey)?.label ?? horizonKey
+  const gradeMin = GRADE_PATTERN_MIN_SAMPLE
 
-  const quality = ["A", "B", "C"].map((g) =>
+  const quality = QUALITY_PATTERN_BUCKETS.map((g) =>
     aggregateBucketForHorizon(
-      picks.filter((p) => String(getRecommendSnapshot(p)?.qualityGrade ?? p.qualityGrade ?? "") === g),
+      filterPicksByPatternGrade(picks, "quality", g),
       `quality-${g}`,
-      `품질 ${g}`,
+      patternGradeBucketLabel("quality", g),
       horizonKey,
+      gradeMin,
     ),
   )
 
-  const timing = ["A", "B", "C"].map((g) =>
+  const timing = TIMING_PATTERN_BUCKETS.map((g) =>
     aggregateBucketForHorizon(
-      picks.filter((p) => String(getRecommendSnapshot(p)?.timingGrade ?? p.timingGrade ?? "") === g),
+      filterPicksByPatternGrade(picks, "timing", g),
       `timing-${g}`,
-      `타이밍 ${g}`,
+      patternGradeBucketLabel("timing", g),
       horizonKey,
+      gradeMin,
     ),
   )
 
-  const marketFit = ["A", "B"].map((g) =>
+  const marketFit = MARKET_FIT_PATTERN_BUCKETS.map((g) =>
     aggregateBucketForHorizon(
-      picks.filter((p) => String(getRecommendSnapshot(p)?.marketFitGrade ?? p.marketFitGrade ?? "") === g),
+      filterPicksByPatternGrade(picks, "marketFit", g),
       `marketFit-${g}`,
-      `시장적합 ${g}`,
+      patternGradeBucketLabel("marketFit", g),
       horizonKey,
+      gradeMin,
     ),
   )
 
@@ -267,11 +279,12 @@ export function buildSuccessPatternReport(allPicks, horizonKey = "d30") {
   }
 }
 
-/** @param {number | null | undefined} rate @param {boolean} pending */
-export function formatSuccessRate(rate, pending) {
+/** @param {number | null | undefined} rate @param {boolean} pending @param {number} [count] */
+export function formatSuccessRate(rate, pending, count = 0) {
+  if (pending && count > 0) return `표본 부족 (n=${count})`
   if (pending) return "분석 보류"
   if (rate == null || !Number.isFinite(rate)) return "—"
-  return `${rate}%`
+  return `성공률 ${rate}%`
 }
 
 /** @param {PatternBucketStat} stat */

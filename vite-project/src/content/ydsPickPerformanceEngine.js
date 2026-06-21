@@ -5,6 +5,13 @@
 
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
 import { subtractCalendarDays } from "./ydsValidationEngine.js"
+import {
+  filterPicksByPatternGrade,
+  MARKET_FIT_PATTERN_BUCKETS,
+  patternGradeBucketLabel,
+  QUALITY_PATTERN_BUCKETS,
+  TIMING_PATTERN_BUCKETS,
+} from "./ydsPickPatternGrades.js"
 
 /** @typedef {import("./ydsValidationStorage.js").ValidationPickRecord} ValidationPickRecord */
 
@@ -83,26 +90,26 @@ export function pickBestLockedReturn(pick, preferKeys = ["d30", "d14", "d7"]) {
 
 /**
  * @param {ValidationPickRecord[]} picks
- * @param {string} field
+ * @param {import("./ydsPickPatternGrades.js").PatternGradeField} field
  * @param {string} grade
  * @param {string} horizonKey
  */
 function summarizeGrade(picks, field, grade, horizonKey = "d30") {
-  const subset = (picks ?? []).filter((p) => String(p[field] ?? "") === grade)
+  const subset = filterPicksByPatternGrade(picks, field, grade)
   const stats = summarizeHorizonReturns(subset, horizonKey)
   return {
-    field,
+    field: `${field}Grade`,
     grade,
-    label: gradeLabel(field, grade),
+    label: patternGradeBucketLabel(field, grade),
     ...stats,
   }
 }
 
-/** @param {string} field @param {string} grade */
+/** @param {string} field @param {string} grade @deprecated */
 function gradeLabel(field, grade) {
-  if (field === "qualityGrade") return `기업품질 ${grade}`
-  if (field === "timingGrade") return `타이밍 ${grade}`
-  if (field === "marketFitGrade") return `시장적합 ${grade}`
+  if (field === "qualityGrade") return patternGradeBucketLabel("quality", grade)
+  if (field === "timingGrade") return patternGradeBucketLabel("timing", grade)
+  if (field === "marketFitGrade") return patternGradeBucketLabel("marketFit", grade)
   return `${field} ${grade}`
 }
 
@@ -111,9 +118,11 @@ function gradeLabel(field, grade) {
  * @param {string} horizonKey
  */
 export function buildGradeBreakdown(picks, horizonKey = "d30") {
-  const quality = ["A", "B"].map((g) => summarizeGrade(picks, "qualityGrade", g, horizonKey))
-  const timing = ["A", "B", "C"].map((g) => summarizeGrade(picks, "timingGrade", g, horizonKey))
-  const marketFit = ["A", "B"].map((g) => summarizeGrade(picks, "marketFitGrade", g, horizonKey))
+  const quality = QUALITY_PATTERN_BUCKETS.map((g) => summarizeGrade(picks, "quality", g, horizonKey))
+  const timing = TIMING_PATTERN_BUCKETS.map((g) => summarizeGrade(picks, "timing", g, horizonKey))
+  const marketFit = MARKET_FIT_PATTERN_BUCKETS.map((g) =>
+    summarizeGrade(picks, "marketFit", g, horizonKey),
+  )
   return { quality, timing, marketFit }
 }
 
