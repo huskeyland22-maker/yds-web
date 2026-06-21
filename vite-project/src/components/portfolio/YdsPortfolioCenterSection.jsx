@@ -160,7 +160,13 @@ export default function YdsPortfolioCenterSection() {
             ))}
           </ul>
         ) : (
-          <p className="yds-pf-v1__empty">등록된 보유 종목이 없습니다.</p>
+          <>
+            <p className="yds-pf-v1__empty">등록된 보유 종목이 없습니다.</p>
+            <p className="yds-pf-v1__note">
+              보유종목은 이 기기·브라우저 localStorage에 저장됩니다. 모바일과 PC는 자동 동기화되지 않습니다.
+              콘솔 <span className="font-mono">[portfolio-storage]</span> 로그로 저장 위치를 확인하세요.
+            </p>
+          </>
         )}
 
         <form className="yds-pf-v1__cash-inline" onSubmit={handleCashSave}>

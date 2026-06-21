@@ -18,6 +18,7 @@ import {
   savePortfolioTrades,
   todayDateKey,
 } from "../content/ydsPortfolioTradesStorage.js"
+import { logPortfolioStorageAudit } from "../content/ydsPortfolioStorageDebug.js"
 
 /** @typedef {import("../content/ydsPortfolioTradesStorage.js").PortfolioTrade} PortfolioTrade */
 /** @typedef {import("../content/ydsPortfolioTradesStorage.js").TradeAction} TradeAction */
@@ -50,6 +51,10 @@ function usePortfolioStateValue() {
   const [quotesLoading, setQuotesLoading] = useState(false)
   const [quotesFetchedAt, setQuotesFetchedAt] = useState(/** @type {string | null} */ (null))
   const [quotesError, setQuotesError] = useState(/** @type {string | null} */ (null))
+
+  useEffect(() => {
+    logPortfolioStorageAudit(trades)
+  }, [])
 
   useEffect(() => {
     savePortfolioTrades(trades)
