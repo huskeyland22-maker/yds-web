@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import {
+  buildUnifiedWeekEventStrip,
   buildWeekEventStrip,
   eventBriefLabel,
   importanceTierLabel,
@@ -34,6 +35,13 @@ assert.ok(strip.stripItems.length > 0)
 assert.ok(strip.stripItems.length <= 5)
 assert.ok(strip.stripItems.every((e) => e.kind === "macro"))
 assert.ok(strip.stripItems.every((e) => e.briefLabel && e.importanceTier))
+
+const unified = buildUnifiedWeekEventStrip(null, { macroLimit: 5, stockLimit: 6 }, new Date("2026-06-22T12:00:00"))
+assert.ok(unified.hasEvents)
+assert.ok(unified.macroItems.length > 0)
+assert.ok(unified.stockItems.length > 0)
+assert.ok(unified.macroItems.every((e) => e.kind === "macro"))
+assert.ok(unified.stockItems.every((e) => e.eventTitle && e.impactLine))
 
 const panicData = { fearGreed: 62, vix: 16, bofa: 6.2, putCall: 0.72, highYield: 4.1 }
 const guide = buildDashboardActionGuideReport(panicData, [{ date: "2026-06-21", fearGreed: 70, vix: 15, bofa: 6.5 }], {

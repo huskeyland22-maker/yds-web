@@ -29901,6 +29901,77 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.55rem;
 }
 
+.yds-desk-card__bullet--macro {
+  color: #60a5fa;
+}
+
+.yds-desk-card__bullet--stock {
+  color: #c084fc;
+}
+
+.yds-week-events-unified {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.yds-week-events-unified__section {
+  min-width: 0;
+}
+
+.yds-week-events-unified__head {
+  margin: 0 0 0.35rem;
+}
+
+.yds-week-events-unified__badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.yds-week-events-unified__badge--macro {
+  color: #bfdbfe;
+  background: rgba(37, 99, 235, 0.28);
+  border: 1px solid rgba(96, 165, 250, 0.45);
+}
+
+.yds-week-events-unified__badge--stock {
+  color: #e9d5ff;
+  background: rgba(126, 34, 206, 0.28);
+  border: 1px solid rgba(192, 132, 252, 0.45);
+}
+
+.yds-desk-card__item--stock {
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+}
+
+.yds-desk-card__stock-body {
+  min-width: 0;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.yds-desk-card__stock-link {
+  color: #e2e8f0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.yds-desk-card__stock-link:hover {
+  color: #e9d5ff;
+}
+
+.yds-desk-card__stock-impact {
+  font-size: 0.62rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
 .yds-desk-card__name {
   color: #e2e8f0;
   font-weight: 600;

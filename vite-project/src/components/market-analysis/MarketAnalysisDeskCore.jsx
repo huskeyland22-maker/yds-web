@@ -5,14 +5,13 @@ import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
-import YdsDashboardStockWeekEvents from "./YdsDashboardStockWeekEvents.jsx"
 import YdsDashboardLiquiditySection from "./YdsDashboardLiquiditySection.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { buildMarketCycleFlowReport } from "../../content/ydsMarketCycleFlow.js"
 import { buildDashboardActionGuideReport } from "../../content/ydsDashboardActionGuide.js"
-import { buildWeekEventStrip, buildStockWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
+import { buildUnifiedWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
 import { buildDualLiquidityReport } from "../../market-os/liquidityDualEngine.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
@@ -33,12 +32,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   const marketContext = useYdsMarketContext()
 
   const weekEvents = useMemo(
-    () => buildWeekEventStrip(marketContext?.ready ? marketContext : null, 5),
-    [marketContext],
-  )
-
-  const stockWeekEvents = useMemo(
-    () => buildStockWeekEventStrip(marketContext?.ready ? marketContext : null, 5),
+    () => buildUnifiedWeekEventStrip(marketContext?.ready ? marketContext : null, { macroLimit: 5, stockLimit: 6 }),
     [marketContext],
   )
 
@@ -109,7 +103,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           </section>
 
           <YdsDashboardWeekEvents report={weekEvents} />
-          <YdsDashboardStockWeekEvents report={stockWeekEvents} />
           {macroRiskEnabled ? (
             <YdsDashboardLiquiditySection report={dualLiquidity} loading={bondSnapshot.loading} />
           ) : null}

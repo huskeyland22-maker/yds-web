@@ -490,3 +490,28 @@ export function buildStockWeekEventStrip(marketContext = null, limit = 5, refDat
     hasEvents: stockItems.length > 0,
   }
 }
+
+/**
+ * 대시보드 통합 이벤트 스트립 — 거시 + 종목/실적 단일 카드
+ * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null | undefined} marketContext
+ * @param {{ macroLimit?: number; stockLimit?: number }} [opts]
+ * @param {Date} [refDate]
+ */
+export function buildUnifiedWeekEventStrip(
+  marketContext = null,
+  opts = {},
+  refDate = new Date(),
+) {
+  const macroLimit = opts.macroLimit ?? 5
+  const stockLimit = opts.stockLimit ?? 6
+  const macroPart = buildWeekEventStrip(marketContext, macroLimit, refDate)
+  const stockPart = buildStockWeekEventStrip(marketContext, stockLimit, refDate)
+
+  return {
+    week: macroPart.week,
+    marketStage: macroPart.marketStage,
+    macroItems: macroPart.stripItems,
+    stockItems: stockPart.stockItems,
+    hasEvents: macroPart.stripItems.length > 0 || stockPart.stockItems.length > 0,
+  }
+}
