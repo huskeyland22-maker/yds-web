@@ -8,13 +8,11 @@ import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
-import YdsDashboardMarketStateHistory from "./YdsDashboardMarketStateHistory.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { formatCurrent } from "../../macro-risk/displayMetrics.js"
-import { buildMarketPositionTimeline } from "../../content/ydsMarketPositionTimeline.js"
+import { buildMarketCycleFlowReport } from "../../content/ydsMarketCycleFlow.js"
 import { buildDashboardActionGuideReport } from "../../content/ydsDashboardActionGuide.js"
-import { buildMarketStateHistoryReport } from "../../content/ydsMarketStateHistory.js"
 import { buildWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
 import { buildLiquidityEnvironmentCard } from "../../market-os/liquidityEnvironment.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
@@ -29,7 +27,7 @@ import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
  */
 export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
-  const cycleTimeline = useMemo(() => buildMarketPositionTimeline(safeHistory, 5), [safeHistory])
+  const cycleFlow = useMemo(() => buildMarketCycleFlowReport(safeHistory), [safeHistory])
 
   const cycleDataSource = useMemo(() => {
     if (panicData?.__fromHub) return "Panic Hub"
@@ -57,11 +55,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   const actionGuide = useMemo(
     () => buildDashboardActionGuideReport(panicData, safeHistory, liquidityCard),
     [panicData, safeHistory, liquidityCard],
-  )
-
-  const marketStateHistory = useMemo(
-    () => buildMarketStateHistoryReport(safeHistory),
-    [safeHistory],
   )
 
   const lastAuditKeyRef = useRef("")
@@ -102,7 +95,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           <h2 id="market-block-cycle" className="yds-market-desk__block-label">
             시장 사이클
           </h2>
-          <YdsMarketStateTimeline steps={cycleTimeline} className="yds-market-desk__cycle-timeline" />
+          <YdsMarketStateTimeline flow={cycleFlow} className="yds-market-desk__cycle-timeline" />
         </section>
 
         <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
@@ -151,10 +144,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
         <div className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--action-guide">
           <YdsDashboardActionGuide report={actionGuide} />
-        </div>
-
-        <div className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--state-history">
-          <YdsDashboardMarketStateHistory report={marketStateHistory} />
         </div>
       </div>
     </div>

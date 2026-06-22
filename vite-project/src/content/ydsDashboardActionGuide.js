@@ -3,9 +3,16 @@
  */
 
 import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
-import { buildMarketPositionTimeline } from "./ydsMarketPositionTimeline.js"
 import { resolveMarketRegime } from "./ydsRegimeLayer.js"
 import { getFinalScore } from "../utils/tradingScores.js"
+
+/**
+ * @typedef {{
+ *   buy: number
+ *   watch: number
+ *   cash: number
+ * }} ActionStarRatings
+ */
 
 /**
  * @typedef {{
@@ -14,9 +21,108 @@ import { getFinalScore } from "../utils/tradingScores.js"
  *   marketState: string
  *   panicScore: number | null
  *   liquidityScore: number | null
- *   checklist: string[]
+ *   stars: ActionStarRatings
+ *   buyStars: string
+ *   watchStars: string
+ *   cashStars: string
+ *   recommendedActions: string[]
  * }} DashboardActionGuideReport
  */
+
+/** @param {number} n */
+function toStars(n) {
+  const filled = Math.max(0, Math.min(5, Math.round(n)))
+  return `${"★".repeat(filled)}${"☆".repeat(5 - filled)}`
+}
+
+/**
+ * @param {string} posId
+ * @param {string} macroId
+ * @param {string} liqId
+ * @param {number | null} panicScore
+ */
+function resolveStarRatings(posId, macroId, liqId, panicScore) {
+  let buy = 2
+  let watch = 4
+  let cash = 3
+
+  if (posId === "overheat" || macroId === "overheated") {
+    buy = 1
+    watch = 4
+    cash = 5
+  } else if (posId === "boundary") {
+    buy = 1
+    watch = 5
+    cash = 4
+  } else if (posId === "adjustment") {
+    buy = 2
+    watch = 4
+    cash = 3
+  } else if (posId === "fear") {
+    buy = 3
+    watch = 3
+    cash = 2
+  } else if (posId === "panic" || macroId === "panicBuy") {
+    buy = 4
+    watch = 2
+    cash = 2
+  }
+
+  if (liqId === "favorable") {
+    buy = Math.min(5, buy + 1)
+    cash = Math.max(1, cash - 1)
+  } else if (liqId === "alert") {
+    buy = Math.max(1, buy - 1)
+    watch = Math.min(5, watch + 1)
+    cash = Math.min(5, cash + 1)
+  }
+
+  if (panicScore != null && panicScore >= 70) buy = Math.min(5, buy + 1)
+  if (panicScore != null && panicScore <= 25) {
+    buy = Math.max(1, buy - 1)
+    cash = Math.min(5, cash + 1)
+  }
+
+  return { buy, watch, cash }
+}
+
+/**
+ * @param {string} posId
+ * @param {string} macroId
+ * @param {string} liqId
+ */
+function resolveRecommendedActions(posId, macroId, liqId) {
+  /** @type {string[]} */
+  const actions = []
+
+  if (posId === "overheat" || posId === "boundary" || macroId === "overheated") {
+    actions.push("관심종목만 추적")
+    actions.push("신규 진입은 분할 접근")
+    actions.push("추격매수 금지")
+  } else if (posId === "adjustment" || macroId === "interest") {
+    actions.push("관심종목만 추적")
+    actions.push("신규 진입은 분할 접근")
+    actions.push("추격매수 금지")
+  } else if (posId === "fear" || macroId === "dca") {
+    actions.push("우량주 분할 접근")
+    actions.push("관심종목 추적 강화")
+    actions.push("추격매수 금지")
+  } else if (posId === "panic" || macroId === "panicBuy") {
+    actions.push("계획된 분할매수 검토")
+    actions.push("우량주 중심 접근")
+    actions.push("일괄 진입 금지")
+  } else {
+    actions.push("관심종목만 추적")
+    actions.push("신규 진입은 분할 접근")
+    actions.push("추격매수 금지")
+  }
+
+  if (liqId === "alert" && !actions.includes("현금 비중 점검")) {
+    actions.push("현금 비중 점검")
+  }
+
+  return [...new Set(actions)].slice(0, 4)
+}
 
 /**
  * @param {object | null | undefined} panicData
@@ -29,76 +135,41 @@ export function buildDashboardActionGuideReport(panicData, historyRows = [], liq
   if (!state) {
     return {
       visible: false,
-      title: "오늘의 행동 가이드",
+      title: "오늘 행동 가이드",
       marketState: "—",
       panicScore: null,
       liquidityScore: null,
-      checklist: [],
+      stars: { buy: 0, watch: 0, cash: 0 },
+      buyStars: "☆☆☆☆☆",
+      watchStars: "☆☆☆☆☆",
+      cashStars: "☆☆☆☆☆",
+      recommendedActions: [],
     }
   }
 
   const regime = resolveMarketRegime(panicData, historyRows)
-  const timeline = buildMarketPositionTimeline(historyRows, 5)
-  const currentStep = timeline[timeline.length - 1] ?? null
-  const phaseSuffix =
-    currentStep?.phase && currentStep.phase !== "안정화" ? ` ${currentStep.phase}` : ""
-
-  const marketState =
-    regime?.summary ??
-    `${state.position.label}${phaseSuffix} · ${state.strategyPhase.replace(/ 단계$/, "")}`
+  const marketState = regime?.summary ?? `${state.position.label} · ${state.strategyPhase.replace(/ 단계$/, "")}`
 
   const panicScore =
     state.panicScore ?? (panicData ? Math.round(getFinalScore(panicData) ?? NaN) : null)
   const liquidityScore = liquidity?.score ?? null
-
-  /** @type {string[]} */
-  const checklist = []
   const posId = state.position.id
   const liqId = liquidity?.verdict?.id ?? "neutral"
   const macroId = state.macroId
 
-  if (posId === "overheat" || posId === "boundary" || macroId === "overheated") {
-    checklist.push("공격적 추격매수 금지")
-    checklist.push("현금 일부 유지")
-  }
-
-  if (posId === "adjustment" || posId === "fear" || macroId === "interest" || macroId === "dca") {
-    checklist.push("관심종목 분할 접근")
-  }
-
-  if (posId === "overheat" || posId === "boundary") {
-    checklist.push("단기 급등주 경계")
-  }
-
-  if (liqId === "favorable") {
-    checklist.push("성장주 우위 유지")
-  } else if (liqId === "alert") {
-    checklist.push("포지션 크기 보수 운영")
-    checklist.push("변동성 확대 대비")
-  } else {
-    checklist.push("선별적 종목 접근")
-  }
-
-  if (posId === "panic" || macroId === "panicBuy") {
-    checklist.push("우량주 분할 검토")
-  }
-
-  if (posId === "fear" || (panicScore != null && panicScore >= 55)) {
-    if (!checklist.includes("우량주 분할 검토")) {
-      checklist.push("분할매수 리듬 유지")
-    }
-  }
-
-  if (checklist.length < 3) {
-    checklist.push("비중·현금 비율 점검")
-  }
+  const stars = resolveStarRatings(posId, macroId, liqId, panicScore)
+  const recommendedActions = resolveRecommendedActions(posId, macroId, liqId)
 
   return {
     visible: true,
-    title: "오늘의 행동 가이드",
+    title: "오늘 행동 가이드",
     marketState,
     panicScore: Number.isFinite(panicScore) ? panicScore : null,
     liquidityScore: Number.isFinite(liquidityScore) ? liquidityScore : null,
-    checklist: [...new Set(checklist)].slice(0, 5),
+    stars,
+    buyStars: toStars(stars.buy),
+    watchStars: toStars(stars.watch),
+    cashStars: toStars(stars.cash),
+    recommendedActions,
   }
 }

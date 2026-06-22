@@ -47,7 +47,10 @@ const guide = buildDashboardActionGuideReport(panicData, [{ date: "2026-06-21", 
   metrics: [],
 })
 assert.equal(guide.visible, true)
-assert.ok(guide.checklist.length >= 3 && guide.checklist.length <= 5)
-assert.ok(guide.checklist.some((l) => /추격|분할|성장|현금|선별/.test(l)))
+assert.ok(guide.buyStars.includes("★"))
+assert.ok(guide.watchStars.includes("★"))
+assert.ok(guide.cashStars.includes("★"))
+assert.ok(guide.recommendedActions.length >= 3 && guide.recommendedActions.length <= 4)
+assert.ok(guide.recommendedActions.some((l) => /추격|분할|관심/.test(l)))
 
 console.log("yds-dashboard-briefing.test.mjs OK")

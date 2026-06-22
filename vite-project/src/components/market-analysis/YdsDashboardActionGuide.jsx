@@ -2,7 +2,7 @@
  * @param {{ report: import("../../content/ydsDashboardActionGuide.js").DashboardActionGuideReport }} props
  */
 export default function YdsDashboardActionGuide({ report }) {
-  if (!report?.visible || !report.checklist.length) return null
+  if (!report?.visible) return null
 
   return (
     <section
@@ -14,29 +14,31 @@ export default function YdsDashboardActionGuide({ report }) {
         {report.title}
       </h2>
 
-      <dl className="yds-desk-brief__context">
-        <div className="yds-desk-brief__ctx">
-          <dt>현재 시장 상태</dt>
-          <dd>{report.marketState}</dd>
-        </div>
-        <div className="yds-desk-brief__ctx yds-desk-brief__ctx--metric">
-          <dt>패닉</dt>
-          <dd className="font-mono tabular-nums">
-            {report.panicScore != null ? report.panicScore : "—"}
+      <dl className="yds-desk-brief__action-stars">
+        <div className="yds-desk-brief__action-star">
+          <dt>매수</dt>
+          <dd className="yds-desk-brief__stars" aria-label={`매수 ${report.stars.buy}점`}>
+            {report.buyStars}
           </dd>
         </div>
-        <div className="yds-desk-brief__ctx yds-desk-brief__ctx--metric">
-          <dt>유동성</dt>
-          <dd className="font-mono tabular-nums">
-            {report.liquidityScore != null ? report.liquidityScore : "—"}
+        <div className="yds-desk-brief__action-star">
+          <dt>관망</dt>
+          <dd className="yds-desk-brief__stars" aria-label={`관망 ${report.stars.watch}점`}>
+            {report.watchStars}
+          </dd>
+        </div>
+        <div className="yds-desk-brief__action-star">
+          <dt>현금</dt>
+          <dd className="yds-desk-brief__stars" aria-label={`현금 ${report.stars.cash}점`}>
+            {report.cashStars}
           </dd>
         </div>
       </dl>
 
       <div className="yds-desk-brief__guide">
-        <h3 className="yds-desk-brief__guide-label">행동 가이드</h3>
+        <h3 className="yds-desk-brief__guide-label">추천 행동</h3>
         <ul className="yds-desk-brief__checklist">
-          {report.checklist.map((line) => (
+          {report.recommendedActions.map((line) => (
             <li key={line} className="yds-desk-brief__check">
               <span className="yds-desk-brief__check-mark" aria-hidden>
                 ✓

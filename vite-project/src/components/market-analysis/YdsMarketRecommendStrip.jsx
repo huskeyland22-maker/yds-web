@@ -4,7 +4,7 @@ import { assignRanks, filterByCountry } from "../../content/ydsStockPickModel.js
 import { getRegimeTopStocks } from "../../content/ydsStockPickMarketRegime.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
-import YdsStockPickCard from "../stock-picks/YdsStockPickCard.jsx"
+import YdsMarketRecommendCard from "./YdsMarketRecommendCard.jsx"
 
 const PREVIEW_COUNT = 3
 
@@ -56,13 +56,7 @@ export default function YdsMarketRecommendStrip({ className = "" }) {
       ) : preview.length ? (
         <div className="yds-market-recommend-strip__grid">
           {preview.map((stock) => (
-            <YdsStockPickCard
-              key={stock.ticker}
-              stock={stock}
-              variant="compact"
-              isFavorite={false}
-              onToggleFavorite={() => {}}
-            />
+            <YdsMarketRecommendCard key={stock.ticker} stock={stock} />
           ))}
         </div>
       ) : (
