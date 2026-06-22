@@ -6,9 +6,18 @@ import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
+import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
+import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
+import YdsDashboardMarketStateHistory from "./YdsDashboardMarketStateHistory.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
+import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { buildMarketPositionTimeline } from "../../content/ydsMarketPositionTimeline.js"
+import { buildDashboardActionGuideReport } from "../../content/ydsDashboardActionGuide.js"
+import { buildMarketStateHistoryReport } from "../../content/ydsMarketStateHistory.js"
+import { buildWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
+import { buildLiquidityEnvironmentCard } from "../../market-os/liquidityEnvironment.js"
+import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 
 /**
@@ -31,6 +40,29 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
+  const marketContext = useYdsMarketContext()
+
+  const weekEvents = useMemo(
+    () => buildWeekEventStrip(marketContext?.ready ? marketContext : null, 5),
+    [marketContext],
+  )
+
+  const liquidityCard = useMemo(() => {
+    if (!macroRiskEnabled) return null
+    const fmt = (key, n, fmtType = "rate") =>
+      n == null || !Number.isFinite(n) ? "—" : formatCurrent(n, fmtType)
+    return buildLiquidityEnvironmentCard(bondSnapshot.snapshot, panicData, fmt)
+  }, [macroRiskEnabled, bondSnapshot.snapshot, panicData])
+
+  const actionGuide = useMemo(
+    () => buildDashboardActionGuideReport(panicData, safeHistory, liquidityCard),
+    [panicData, safeHistory, liquidityCard],
+  )
+
+  const marketStateHistory = useMemo(
+    () => buildMarketStateHistoryReport(safeHistory),
+    [safeHistory],
+  )
 
   const lastAuditKeyRef = useRef("")
   useEffect(() => {
@@ -95,6 +127,10 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           />
         </section>
 
+        <div className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--week-events">
+          <YdsDashboardWeekEvents report={weekEvents} />
+        </div>
+
         <section
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--bond"
           aria-labelledby="market-block-bond"
@@ -112,6 +148,14 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             error={bondSnapshot.error}
           />
         </section>
+
+        <div className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--action-guide">
+          <YdsDashboardActionGuide report={actionGuide} />
+        </div>
+
+        <div className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--state-history">
+          <YdsDashboardMarketStateHistory report={marketStateHistory} />
+        </div>
       </div>
     </div>
   )

@@ -74,6 +74,46 @@ export function importanceStars(n) {
   return "★".repeat(c)
 }
 
+/** @param {1|2|3} n */
+export function importanceTierLabel(n) {
+  const c = Math.max(1, Math.min(3, n))
+  if (c >= 3) return "상"
+  if (c === 2) return "중"
+  return "하"
+}
+
+/** @param {CalendarEvent} event */
+export function eventBriefLabel(event) {
+  if (event.kind === "stock") {
+    if (event.category === "earnings") return `${event.name} 실적`
+    if (event.category === "dividend") return `${event.name} 배당`
+    return event.name
+  }
+
+  if (event.category === "fomc") {
+    return event.region === "KR" ? "한국은행 금통위" : "FOMC 회의"
+  }
+  if (event.category === "cpi") return "CPI 발표"
+  if (event.category === "pce") return "PCE 발표"
+  if (event.category === "ppi") return "PPI 발표"
+  if (event.category === "employment") return "고용지표 발표"
+  if (event.category === "gdp") return "GDP 발표"
+  if (/만기|witching/i.test(event.title)) return "옵션 만기일"
+
+  return String(event.title)
+    .replace(/^미국\s+/, "")
+    .replace(/^한국\s+/, "")
+    .split("(")[0]
+    .trim()
+}
+
+/** @param {string} dateKey @param {number} days */
+function addCalendarDaysLocal(dateKey, days) {
+  const d = new Date(`${dateKey}T12:00:00`)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
 /**
  * @param {Date} [ref]
  * @returns {{ start: string; end: string; label: string }}
@@ -227,11 +267,45 @@ export function buildInvestmentCalendarReport(marketContext = null, refDate = ne
 /**
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null | undefined} marketContext
  * @param {number} [limit]
+ * @param {Date} [refDate]
  */
-export function buildWeekEventStrip(marketContext = null, limit = 5) {
-  const report = buildInvestmentCalendarReport(marketContext)
+export function buildWeekEventStrip(marketContext = null, limit = 5, refDate = new Date()) {
+  const report = buildInvestmentCalendarReport(marketContext, refDate)
+  const today = refDate.toISOString().slice(0, 10)
+  const fillEnd = addCalendarDaysLocal(report.week.end, 7)
+
+  /** @type {Set<string>} */
+  const seen = new Set()
+  /** @type {Array<CalendarEvent & { briefLabel: string; importanceTier: string }>} */
+  const stripItems = []
+
+  const push = (/** @type {CalendarEvent} */ event) => {
+    if (seen.has(event.id) || stripItems.length >= limit) return
+    seen.add(event.id)
+    stripItems.push({
+      ...event,
+      briefLabel: eventBriefLabel(event),
+      importanceTier: importanceTierLabel(event.importance),
+    })
+  }
+
+  for (const event of report.thisWeek) push(event)
+
+  if (stripItems.length < limit) {
+    const macroAll = (calendarSeed.macroEvents ?? []).map((e) => enrichMacro(e, marketContext))
+    const stockAll = (calendarSeed.stockEvents ?? []).map((e) => enrichStock(e, marketContext))
+    const pool = sortEvents([...macroAll, ...stockAll]).filter(
+      (e) => e.date >= today && e.date <= fillEnd,
+    )
+    for (const event of pool) {
+      push(event)
+      if (stripItems.length >= limit) break
+    }
+  }
+
   return {
     ...report,
-    stripItems: report.thisWeek.slice(0, limit),
+    stripItems,
+    hasEvents: stripItems.length > 0,
   }
 }
