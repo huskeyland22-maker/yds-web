@@ -105,21 +105,25 @@ export default function YdsStockPickCountryPanel({
         className="yds-spick-country-panel__sector-conc"
       />
 
-      <YdsStockPickTop3
-        stocks={topHero}
-        isFavorite={isFavorite}
-        onToggleFavorite={onToggleFavorite}
-        heldTickers={heldTickers}
-        statusChanges={statusChanges}
-        loading={loading}
-      />
+      <div className="yds-spick-country-panel__report-card">
+        <YdsStockPickTop3
+          stocks={topHero}
+          isFavorite={isFavorite}
+          onToggleFavorite={onToggleFavorite}
+          heldTickers={heldTickers}
+          statusChanges={statusChanges}
+          loading={loading}
+        />
 
-      {showSecondary ? (
-        <YdsStockPickTop10WhySection stocks={regimeStocks} loading={loading} limit={Math.min(10, regimeLimit)} />
-      ) : null}
+        {showSecondary ? (
+          <YdsStockPickTop10WhySection
+            stocks={regimeStocks}
+            loading={loading}
+            limit={Math.min(10, regimeLimit)}
+          />
+        ) : null}
 
-      {showSecondary ? (
-        <>
+        {showSecondary ? (
           <YdsStockPickSectorPanel
             stocks={sectorStocks}
             allStocks={stocks}
@@ -128,7 +132,11 @@ export default function YdsStockPickCountryPanel({
             onSectorChange={onSectorChange}
             heldTickers={heldTickers}
           />
+        ) : null}
+      </div>
 
+      {showSecondary ? (
+        <>
           <section className="yds-spick-section yds-spick-section--all" aria-labelledby={allSectionId}>
             <div className="yds-spick-section__head-row">
               <h2 id={allSectionId} className="yds-spick-section__title yds-spick-section__title--inline">
