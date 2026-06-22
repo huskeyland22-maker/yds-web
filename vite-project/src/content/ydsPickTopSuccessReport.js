@@ -13,7 +13,7 @@ import { getRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
 /** @typedef {import("./ydsValidationStorage.js").ValidationPickRecord} ValidationPickRecord */
 
 const HORIZON_KEY = "d7"
-const CASE_LIMIT = 10
+const CASE_LIMIT = 5
 
 /**
  * @typedef {{
@@ -141,7 +141,18 @@ export function buildTopSuccessReport(picks) {
     }
   }
 
-  const cases = successRows.slice(0, CASE_LIMIT).map((row) => buildCaseRow(row.pick, row.returnPct))
+  /** @type {Set<string>} */
+  const seenTickers = new Set()
+  const uniqueRows = []
+  for (const row of successRows) {
+    const key = String(row.pick.ticker ?? "").trim().toUpperCase()
+    if (!key || seenTickers.has(key)) continue
+    seenTickers.add(key)
+    uniqueRows.push(row)
+    if (uniqueRows.length >= CASE_LIMIT) break
+  }
+
+  const cases = uniqueRows.map((row) => buildCaseRow(row.pick, row.returnPct))
 
   return {
     visible: true,

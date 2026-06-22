@@ -8,13 +8,10 @@ import {
 import {
   buildSuccessPatternReport,
   formatSuccessRate,
-  GRADE_PATTERN_MIN_SAMPLE,
-  OUTCOME_LABELS,
   PATTERN_MIN_SAMPLE,
 } from "../content/ydsPickSuccessPatternEngine.js"
 import {
   buildOutcomeSummaryReport,
-  outcomeCriteriaLabels,
   resolvePickOutcomeView,
 } from "../content/ydsPickOutcomeEngine.js"
 import {
@@ -25,7 +22,6 @@ import {
 } from "../content/ydsPickScoreCorrelation.js"
 import { buildComponentContributionReport } from "../content/ydsPickComponentContribution.js"
 import { buildPanicDeepAnalysisReport } from "../content/ydsPickPanicDeepAnalysis.js"
-import { buildMarketStateStrategyReport } from "../content/ydsPickMarketStateStrategy.js"
 import { buildExpectedValueAnalysisReport } from "../content/ydsPickExpectedValueAnalysis.js"
 import { buildMddAnalysisReport } from "../content/ydsPickMddAnalysis.js"
 import { buildPerfInsightReport } from "../content/ydsPickPerfInsight.js"
@@ -37,9 +33,8 @@ import {
   isExpectedValuePanelVisible,
   isMddAnalysisPanelVisible,
   isHorizonTabEnabled,
-  isMarketStrategyPanelVisible,
+  isMonthlySeriesVisible,
   isOutcomePanelVisible,
-  isPanicDeepPanelVisible,
   isPerfInsightPanelVisible,
   isReliabilityPanelVisible,
   isScoreCorrelationPanelVisible,
@@ -210,7 +205,7 @@ function HorizonTabBar({
   )
 }
 
-function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange, horizonAvailability }) {
+function StrategyScorecardPanel({ summary, horizonKey, onHorizonChange, horizonAvailability }) {
   if (!isOutcomePanelVisible(summary)) return null
 
   const horizons = [
@@ -218,18 +213,16 @@ function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange, horizonAvai
     { key: "d14", label: "14일" },
     { key: "d30", label: "30일" },
   ]
-  const criteriaLabels = outcomeCriteriaLabels(summary.criteria)
 
   return (
-    <section className="yds-perf-val__section yds-perf-val__outcome-panel" aria-labelledby="perf-val-outcome">
+    <section className="yds-perf-val__section yds-perf-val__outcome-panel yds-perf-val__scorecard" aria-labelledby="perf-val-scorecard">
       <div className="yds-perf-val__outcome-head">
         <div>
-          <p className="yds-perf-val__outcome-kicker">Verdict · Outcome</p>
-          <h2 id="perf-val-outcome" className="yds-perf-val__h2">
-            성공/실패 판정
+          <h2 id="perf-val-scorecard" className="yds-perf-val__h2">
+            전략 성적표
           </h2>
           <p className="yds-perf-val__outcome-lede">
-            잠금 수익률 기준 · 실제 성과만 · 예측 없음
+            잠금 수익률 기준 · 실제 성과만
           </p>
         </div>
         <HorizonTabBar
@@ -238,21 +231,13 @@ function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange, horizonAvai
           onHorizonChange={onHorizonChange}
           availability={horizonAvailability}
           className="yds-perf-val__outcome-horizon"
-          ariaLabel="판정 기간"
+          ariaLabel="성적 기간"
           tabClassPrefix="yds-perf-val__outcome-tab"
         />
       </div>
 
-      <div className="yds-perf-val__outcome-criteria">
-        {criteriaLabels.map((c) => (
-          <span key={c.id} className="yds-perf-val__outcome-criterion">
-            {c.label}
-          </span>
-        ))}
-      </div>
-
       <div className="yds-perf-val__outcome-summary">
-        <StatCard label={`총 추천 · ${summary.horizonLabel}`} value={`${summary.total}건`} />
+        <StatCard label={`추천 ${summary.horizonLabel}`} value={`${summary.total}건`} />
         <StatCard
           label="성공"
           value={`${summary.successCount}건`}
@@ -423,17 +408,16 @@ function MddAnalysisPanel({ report }) {
   )
 }
 
-function PerfInsightPanel({ report }) {
+function FinalEvaluationPanel({ report }) {
   if (!isPerfInsightPanelVisible(report)) return null
 
   return (
-    <section className="yds-perf-val__section yds-perf-val__insight" aria-labelledby="perf-val-insight">
-      <p className="yds-perf-val__insight-kicker">Research Note · Interpretation</p>
-      <h2 id="perf-val-insight" className="yds-perf-val__h2">
-        성과 인사이트
+    <section className="yds-perf-val__section yds-perf-val__insight yds-perf-val__final-eval" aria-labelledby="perf-val-final">
+      <h2 id="perf-val-final" className="yds-perf-val__h2">
+        최종 평가
       </h2>
       <p className="yds-perf-val__insight-lede">
-        최근 {report.horizonLabel} 기준 · 잠금 수익률 집계 해석 · AI 예측 없음
+        {report.horizonLabel} 잠금 실측 기준 전략 해석
       </p>
 
       <div className="yds-perf-val__insight-metrics">
@@ -460,19 +444,16 @@ function PerfInsightPanel({ report }) {
         <span className="yds-perf-val__insight-metric-n font-mono tabular-nums">n={report.total}</span>
       </div>
 
-      <div className="yds-perf-val__insight-body">
-        <h3 className="yds-perf-val__insight-h3">분석 결과</h3>
-        <ul className="yds-perf-val__insight-list">
-          {report.insights.map((line) => (
-            <li key={line} className="yds-perf-val__insight-item">
-              <span className="yds-perf-val__insight-check" aria-hidden>
-                ✓
-              </span>
-              {line}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul className="yds-perf-val__insight-list yds-perf-val__final-eval-list">
+        {report.insights.map((line) => (
+          <li key={line} className="yds-perf-val__insight-item">
+            <span className="yds-perf-val__insight-check" aria-hidden>
+              ✓
+            </span>
+            {line}
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
@@ -482,12 +463,11 @@ function TopSuccessReportPanel({ report }) {
 
   return (
     <section className="yds-perf-val__section yds-perf-val__top-success" aria-labelledby="perf-val-top-success">
-      <p className="yds-perf-val__insight-kicker">Case Study · Winners</p>
       <h2 id="perf-val-top-success" className="yds-perf-val__h2">
         TOP 성공 사례
       </h2>
       <p className="yds-perf-val__insight-lede">
-        {report.horizonLabel} 성공(+10%↑) 잠금 실측 · 최근 {report.cases.length}건 · 저장 스냅샷만
+        {report.horizonLabel} 성공(+10%↑) 잠금 실측 · 상위 {report.cases.length}건
       </p>
 
       {report.commonTraits.length ? (
@@ -544,12 +524,11 @@ function TopFailureReportPanel({ report }) {
 
   return (
     <section className="yds-perf-val__section yds-perf-val__top-success yds-perf-val__top-success--failure" aria-labelledby="perf-val-top-failure">
-      <p className="yds-perf-val__insight-kicker">Case Study · Losers</p>
       <h2 id="perf-val-top-failure" className="yds-perf-val__h2">
         TOP 실패 사례
       </h2>
       <p className="yds-perf-val__insight-lede">
-        {report.horizonLabel} 실패(0%↓) 잠금 실측 · 최근 {report.cases.length}건 · 저장 스냅샷만
+        {report.horizonLabel} 실패(0%↓) 잠금 실측 · 상위 {report.cases.length}건
       </p>
 
       {report.commonTraits.length ? (
@@ -587,6 +566,11 @@ function TopFailureReportPanel({ report }) {
               {row.totalScore != null ? <span>총점 {row.totalScore}</span> : null}
             </div>
             <div className="yds-perf-val__top-success-tags">
+              {row.failureReasons?.map((reason) => (
+                <span key={reason} className="yds-perf-val__failure-reason">
+                  {reason}
+                </span>
+              ))}
               {row.qualityGrade ? <span>품질 {row.qualityGrade}</span> : null}
               {row.timingGrade ? <span>타이밍 {row.timingGrade}</span> : null}
               {row.marketFitGrade ? <span>시장적합 {row.marketFitGrade}</span> : null}
@@ -632,17 +616,23 @@ function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange, horizonAvai
     { key: "d14", label: "14일" },
     { key: "d30", label: "30일" },
   ]
+  const displayable = (rows) => rows.filter((g) => g.count >= PATTERN_MIN_SAMPLE)
+
+  const qualityRows = displayable(pattern.grades.quality)
+  const timingRows = displayable(pattern.grades.timing)
+  const marketFitRows = displayable(pattern.grades.marketFit)
+  const marketStateRows = displayable(pattern.marketStates)
+  const panicRows = displayable(pattern.panicBands)
 
   return (
     <section className="yds-perf-val__section yds-perf-val__pattern" aria-labelledby="perf-val-pattern">
       <div className="yds-perf-val__pattern-head">
         <div>
-          <p className="yds-perf-val__pattern-kicker">Research · Pattern Analysis</p>
           <h2 id="perf-val-pattern" className="yds-perf-val__h2">
             성공 패턴 분석
           </h2>
           <p className="yds-perf-val__pattern-lede">
-            실제 잠금 수익률 기준 · 등급별 표본 {GRADE_PATTERN_MIN_SAMPLE}개 미만은 참고용 · AI 예측 없음
+            표본 {PATTERN_MIN_SAMPLE}개 이상 구간만 표시 · 잠금 수익률 기준
           </p>
         </div>
         <HorizonTabBar
@@ -651,17 +641,6 @@ function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange, horizonAvai
           onHorizonChange={onHorizonChange}
           availability={horizonAvailability}
         />
-      </div>
-
-      <div className="yds-perf-val__pattern-criteria">
-        {OUTCOME_LABELS.map((o) => (
-          <span key={o.id} className="yds-perf-val__pattern-criterion">
-            {o.label}
-          </span>
-        ))}
-        <span className="yds-perf-val__pattern-criterion yds-perf-val__pattern-criterion--muted">
-          추적 n={pattern.totalTracked} · {pattern.horizonLabel} 잠금
-        </span>
       </div>
 
       {pattern.highlights.length ? (
@@ -678,46 +657,49 @@ function SuccessPatternPanel({ pattern, horizonKey, onHorizonChange, horizonAvai
             </article>
           ))}
         </div>
-      ) : (
-        <p className="yds-perf-val__pattern-empty">
-          {pattern.horizonLabel} 수익률이 잠긴 표본이 {PATTERN_MIN_SAMPLE}개 미만입니다. 데이터가 쌓이면 패턴 분석이
-          표시됩니다.
-        </p>
-      )}
+      ) : null}
 
       <div className="yds-perf-val__pattern-grid">
-        <div className="yds-perf-val__pattern-block">
-          <h3 className="yds-perf-val__h3">기업품질 · 성공률</h3>
-          {pattern.grades.quality.map((g) => (
-            <PatternBucketRow key={g.id} item={g} />
-          ))}
-        </div>
-        <div className="yds-perf-val__pattern-block">
-          <h3 className="yds-perf-val__h3">타이밍 · 성공률</h3>
-          {pattern.grades.timing.map((g) => (
-            <PatternBucketRow key={g.id} item={g} />
-          ))}
-        </div>
-        <div className="yds-perf-val__pattern-block">
-          <h3 className="yds-perf-val__h3">시장적합 · 성공률</h3>
-          {pattern.grades.marketFit.map((g) => (
-            <PatternBucketRow key={g.id} item={g} />
-          ))}
-        </div>
-        <div className="yds-perf-val__pattern-block">
-          <h3 className="yds-perf-val__h3">시장상태 · 성공률</h3>
-          {pattern.marketStates.length ? (
-            pattern.marketStates.map((g) => <PatternBucketRow key={g.id} item={g} />)
-          ) : (
-            <p className="yds-perf-val__pattern-note">시장상태 스냅샷 없음</p>
-          )}
-        </div>
-        <div className="yds-perf-val__pattern-block yds-perf-val__pattern-block--wide">
-          <h3 className="yds-perf-val__h3">패닉강도 · 성공률</h3>
-          {pattern.panicBands.map((g) => (
-            <PatternBucketRow key={g.id} item={g} />
-          ))}
-        </div>
+        {qualityRows.length ? (
+          <div className="yds-perf-val__pattern-block">
+            <h3 className="yds-perf-val__h3">기업품질 · 성공률</h3>
+            {qualityRows.map((g) => (
+              <PatternBucketRow key={g.id} item={g} />
+            ))}
+          </div>
+        ) : null}
+        {timingRows.length ? (
+          <div className="yds-perf-val__pattern-block">
+            <h3 className="yds-perf-val__h3">타이밍 · 성공률</h3>
+            {timingRows.map((g) => (
+              <PatternBucketRow key={g.id} item={g} />
+            ))}
+          </div>
+        ) : null}
+        {marketFitRows.length ? (
+          <div className="yds-perf-val__pattern-block">
+            <h3 className="yds-perf-val__h3">시장적합 · 성공률</h3>
+            {marketFitRows.map((g) => (
+              <PatternBucketRow key={g.id} item={g} />
+            ))}
+          </div>
+        ) : null}
+        {marketStateRows.length ? (
+          <div className="yds-perf-val__pattern-block">
+            <h3 className="yds-perf-val__h3">시장상태 · 성공률</h3>
+            {marketStateRows.map((g) => (
+              <PatternBucketRow key={g.id} item={g} />
+            ))}
+          </div>
+        ) : null}
+        {panicRows.length ? (
+          <div className="yds-perf-val__pattern-block yds-perf-val__pattern-block--wide">
+            <h3 className="yds-perf-val__h3">패닉강도 · 성공률</h3>
+            {panicRows.map((g) => (
+              <PatternBucketRow key={g.id} item={g} />
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   )
@@ -931,102 +913,49 @@ function ComponentContributionPanel({ report }) {
   )
 }
 
-function PanicDeepPanel({ report }) {
-  if (!isPanicDeepPanelVisible(report)) return null
-
-  const zones = report.zones.filter((z) => z.count > 0)
+function MarketEnvPerformancePanel({ report }) {
+  if (!report?.zones?.length) return null
 
   return (
-    <section className="yds-perf-val__section yds-perf-val__panic-deep" aria-labelledby="perf-val-panic">
-      <p className="yds-perf-val__pattern-kicker">Panic Zones · 7일 실측</p>
-      <h2 id="perf-val-panic" className="yds-perf-val__h2">
-        패닉지수 구간별 성과
+    <section className="yds-perf-val__section yds-perf-val__mkt-env" aria-labelledby="perf-val-mkt-env">
+      <h2 id="perf-val-mkt-env" className="yds-perf-val__h2">
+        시장환경별 성과
       </h2>
-      <p className="yds-perf-val__note">추천 당시 잠금 패닉강도 · n={report.total}</p>
-      <div className="yds-perf-val__panic-deep-grid">
-        {zones.map((z) => (
-          <article
-            key={z.id}
-            className={`yds-perf-val__panic-deep-card ${z.count ? "" : "yds-perf-val__score-corr-card--empty"}`}
-          >
-            <span className="yds-perf-val__panic-deep-label">{z.panicLabel}</span>
-            <span className="yds-perf-val__score-corr-meta font-mono tabular-nums">n={z.count}</span>
-            <strong className="yds-perf-val__score-corr-win font-mono tabular-nums">
-              {z.count ? `승률 ${z.winRate}%` : "—"}
-            </strong>
+      <p className="yds-perf-val__note">추천 당시 패닉 강도 구간 · {report.horizonLabel} 잠금</p>
+
+      <div className="yds-perf-val__mkt-env-table" role="table" aria-label="패닉 구간별 성과">
+        <div className="yds-perf-val__mkt-env-row yds-perf-val__mkt-env-row--head" role="row">
+          <span role="columnheader">구간</span>
+          <span role="columnheader">승률</span>
+          <span role="columnheader">평균수익</span>
+          <span role="columnheader">샘플수</span>
+        </div>
+        {report.zones.map((z) => (
+          <div key={z.id} className="yds-perf-val__mkt-env-row" role="row">
+            <span className="yds-perf-val__mkt-env-label" role="cell">
+              패닉 {z.label}
+            </span>
+            <span className="font-mono tabular-nums" role="cell">
+              {z.count ? `${z.winRate}%` : "—"}
+            </span>
             <span
-              className={`yds-perf-val__score-corr-avg font-mono tabular-nums ${
+              className={`font-mono tabular-nums ${
                 z.avgReturn != null && z.avgReturn >= 0
-                  ? "yds-perf-val__score-corr-avg--up"
+                  ? "yds-perf-val__grade-val--up"
                   : z.avgReturn != null
-                    ? "yds-perf-val__score-corr-avg--down"
+                    ? "yds-perf-val__grade-val--down"
                     : ""
               }`}
+              role="cell"
             >
-              {z.count ? `평균 ${formatPerfPct(z.avgReturn)}` : "—"}
+              {z.count ? formatPerfPct(z.avgReturn) : "—"}
             </span>
-            {z.count ? (
-              <span className="yds-perf-val__panic-deep-range font-mono tabular-nums">
-                최대 {formatPerfPct(z.maxGain)} · 최소 {formatPerfPct(z.maxLoss)}
-              </span>
-            ) : null}
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function MarketStateStrategyPanel({ report }) {
-  if (!isMarketStrategyPanelVisible(report)) return null
-
-  const strategies = report.strategies.filter((s) => s.count > 0)
-
-  return (
-    <section className="yds-perf-val__section yds-perf-val__mkt-strat" aria-labelledby="perf-val-mkt">
-      <p className="yds-perf-val__pattern-kicker">Market Regime · 7일 실측</p>
-      <h2 id="perf-val-mkt" className="yds-perf-val__h2">
-        시장상태별 투자전략 검증
-      </h2>
-      <p className="yds-perf-val__note">추천 당시 잠금 시장상태 · n={report.total}</p>
-
-      <div className="yds-perf-val__mkt-strat-grid">
-        {strategies.map((s) => (
-          <article key={s.id} className="yds-perf-val__mkt-strat-card">
-            <h3 className="yds-perf-val__h3">{s.label}</h3>
-            <p className="yds-perf-val__mkt-strat-meta font-mono tabular-nums">
-              n={s.count}
-              {s.count ? ` · 승률 ${s.winRate}% · 평균 ${formatPerfPct(s.avgReturn)}` : ""}
-            </p>
-            {s.best ? (
-              <p className="yds-perf-val__mkt-strat-extreme yds-perf-val__mkt-strat-extreme--up">
-                최고 {s.best.name} {formatPerfPct(s.best.returnPct)}
-              </p>
-            ) : null}
-            {s.worst ? (
-              <p className="yds-perf-val__mkt-strat-extreme yds-perf-val__mkt-strat-extreme--down">
-                최악 {s.worst.name} {formatPerfPct(s.worst.returnPct)}
-              </p>
-            ) : null}
-          </article>
-        ))}
-      </div>
-
-      {report.detailStates.length ? (
-        <details className="yds-perf-val__mkt-strat-detail">
-          <summary className="yds-perf-val__mkt-strat-summary">세부 시장상태</summary>
-          <div className="yds-perf-val__mkt-strat-detail-grid">
-            {report.detailStates.map((s) => (
-              <div key={s.id} className="yds-perf-val__mkt-strat-detail-row">
-                <span className="yds-perf-val__mkt-strat-detail-label">{s.stateLabel}</span>
-                <span className="font-mono tabular-nums">
-                  n={s.count} · 승률 {s.winRate ?? "—"}% · {formatPerfPct(s.avgReturn)}
-                </span>
-              </div>
-            ))}
+            <span className="font-mono tabular-nums" role="cell">
+              n={z.count}
+            </span>
           </div>
-        </details>
-      ) : null}
+        ))}
+      </div>
     </section>
   )
 }
@@ -1141,6 +1070,233 @@ function CaseTable({ rows, mode }) {
   )
 }
 
+function PerfDetailDataSection({
+  report,
+  pattern,
+  patternHorizon,
+  onPatternHorizonChange,
+  horizonAvailability,
+  reliability,
+  scoreCorrelation,
+  componentContribution,
+  expectedValue,
+  mddAnalysis,
+  gradeBreakdown,
+  topSuccess,
+  topFailure,
+  monthly,
+  kpi,
+}) {
+  return (
+    <details className="yds-perf-val__detail">
+      <summary className="yds-perf-val__detail-summary">상세 데이터 보기</summary>
+      <div className="yds-perf-val__detail-body">
+        <details className="yds-perf-val__system-info">
+          <summary className="yds-perf-val__system-info-summary">시스템 정보</summary>
+          <div className="yds-perf-val__system-info-body">
+            <ReliabilityAuditPanel report={reliability} />
+            <ScoreCorrelationPanel report={scoreCorrelation} />
+            <ComponentContributionPanel report={componentContribution} />
+          </div>
+        </details>
+
+        <SuccessPatternPanel
+          pattern={pattern}
+          horizonKey={patternHorizon}
+          onHorizonChange={onPatternHorizonChange}
+          horizonAvailability={horizonAvailability}
+        />
+
+        <ExpectedValuePanel report={expectedValue} />
+        <MddAnalysisPanel report={mddAnalysis} />
+
+        <section className="yds-perf-val__section" aria-labelledby="perf-val-kpi">
+          <h2 id="perf-val-kpi" className="yds-perf-val__h2">
+            KPI · 최근 {report.windowDays}일
+          </h2>
+          <div className="yds-perf-val__stat-grid yds-perf-val__stat-grid--hero">
+            <StatCard label="추천 종목 수" value={String(kpi.count)} />
+            <StatCard
+              label="30일 평균"
+              value={formatPerfPct(kpi.avgReturn)}
+              tone={toneFromPct(kpi.avgReturn)}
+            />
+            <StatCard label="승률 (30일)" value={kpi.winRate != null ? `${kpi.winRate}%` : "—"} />
+            <StatCard label="최대 수익" value={formatPerfPct(kpi.maxGain)} tone="up" />
+            <StatCard label="최대 손실" value={formatPerfPct(kpi.maxLoss)} tone="down" />
+          </div>
+          <div className="yds-perf-val__horizon-row">
+            {kpi.horizons.map((h) => (
+              <div key={h.key} className="yds-perf-val__horizon-chip">
+                <span className="yds-perf-val__horizon-label">{h.label} 평균</span>
+                <strong
+                  className={`yds-perf-val__horizon-val font-mono tabular-nums ${
+                    h.avgReturn != null && h.avgReturn >= 0
+                      ? "yds-perf-val__horizon-val--up"
+                      : h.avgReturn != null
+                        ? "yds-perf-val__horizon-val--down"
+                        : ""
+                  }`}
+                >
+                  {h.count ? formatPerfPct(h.avgReturn) : "—"}
+                </strong>
+                <span className="yds-perf-val__horizon-n">n={h.count}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {report.picks.slice(0, 5).some((p) => getRecommendSnapshot(p)?.totalScore != null) ? (
+          <section className="yds-perf-val__section" aria-labelledby="perf-val-snapshots">
+            <h2 id="perf-val-snapshots" className="yds-perf-val__h2">
+              추천 당시 스냅샷 · 최근 사례
+            </h2>
+            <ul className="yds-perf-val__snap-list">
+              {report.picks.slice(0, 8).map((row) => (
+                <li key={row.id} className="yds-perf-val__snap-card">
+                  <span className="yds-perf-val__snap-card-title">{row.name}</span>
+                  <span className="yds-perf-val__snap-card-line">
+                    {formatRecommendSnapshotLine(row, row.horizons?.d7)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        <section className="yds-perf-val__section" aria-labelledby="perf-val-grade">
+          <h2 id="perf-val-grade" className="yds-perf-val__h2">
+            등급별 검증 · 30일 평균
+          </h2>
+          <div className="yds-perf-val__grade-grid">
+            <div className="yds-perf-val__grade-block">
+              <h3 className="yds-perf-val__h3">기업품질</h3>
+              {gradeBreakdown.quality.map((g) => (
+                <GradeRow key={g.grade} item={g} />
+              ))}
+            </div>
+            <div className="yds-perf-val__grade-block">
+              <h3 className="yds-perf-val__h3">타이밍</h3>
+              {gradeBreakdown.timing.map((g) => (
+                <GradeRow key={g.grade} item={g} />
+              ))}
+            </div>
+            <div className="yds-perf-val__grade-block">
+              <h3 className="yds-perf-val__h3">시장적합</h3>
+              {gradeBreakdown.marketFit.map((g) => (
+                <GradeRow key={g.grade} item={g} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {topSuccess.length ? (
+          <section className="yds-perf-val__section" aria-labelledby="perf-val-top">
+            <h2 id="perf-val-top" className="yds-perf-val__h2">
+              TOP 성공 · 30일 수익률
+            </h2>
+            <CaseTable rows={topSuccess} mode="best" />
+          </section>
+        ) : null}
+
+        {topFailure.length ? (
+          <section className="yds-perf-val__section" aria-labelledby="perf-val-fail">
+            <h2 id="perf-val-fail" className="yds-perf-val__h2">
+              실패 사례 · 30일 하락률
+            </h2>
+            <CaseTable rows={topFailure} mode="worst" />
+          </section>
+        ) : null}
+
+        {isMonthlySeriesVisible(monthly) ? (
+          <section className="yds-perf-val__section" aria-labelledby="perf-val-charts">
+            <h2 id="perf-val-charts" className="yds-perf-val__h2">
+              월별 추이
+            </h2>
+            <div className="yds-perf-val__chart-grid">
+              <div className="yds-perf-val__chart-panel">
+                <h3 className="yds-perf-val__h3">월별 승률</h3>
+                <BarChart rows={monthly} valueKey="winRate" labelKey="month" unit="%" />
+              </div>
+              <div className="yds-perf-val__chart-panel">
+                <h3 className="yds-perf-val__h3">월별 평균 수익률</h3>
+                <BarChart rows={monthly} valueKey="avgReturn" labelKey="month" unit="%" />
+              </div>
+              <div className="yds-perf-val__chart-panel yds-perf-val__chart-panel--wide">
+                <h3 className="yds-perf-val__h3">누적 성과 (월별 평균 합산)</h3>
+                <BarChart rows={monthly} valueKey="cumulativeReturn" labelKey="month" unit="%" maxBars={18} />
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        <section className="yds-perf-val__section" aria-labelledby="perf-val-data">
+          <h2 id="perf-val-data" className="yds-perf-val__h2">
+            수집 데이터 · 최근 {report.windowDays}일
+          </h2>
+          <div className="yds-perf-val__table-wrap yds-perf-val__table-wrap--scroll">
+            <table className="yds-perf-val__table yds-perf-val__table--dense">
+              <thead>
+                <tr>
+                  <th>추천일</th>
+                  <th>종목</th>
+                  <th>점수</th>
+                  <th>품질</th>
+                  <th>타이밍</th>
+                  <th>시장적합</th>
+                  <th>시장상태</th>
+                  <th>패닉</th>
+                  <th>추천가</th>
+                  <th>7일</th>
+                  <th>14일</th>
+                  <th>30일</th>
+                  <th>7일%</th>
+                  <th>7일 판정</th>
+                  <th>14일%</th>
+                  <th>14일 판정</th>
+                  <th>30일%</th>
+                  <th>30일 판정</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.picks.map((row) => {
+                  const snap = getRecommendSnapshot(row)
+                  const display = pickDisplayFieldsFromSnapshot(row)
+                  return (
+                    <tr key={row.id}>
+                      <td className="font-mono tabular-nums">{display.recommendedAt}</td>
+                      <td>
+                        <span className="yds-perf-val__pick-name">{display.name}</span>
+                        <PickRecommendSnapshot row={row} horizon7Pct={row.horizons?.d7} />
+                      </td>
+                      <td className="font-mono tabular-nums">{formatSnapshotTotalScore(snap)}</td>
+                      <td>{formatSnapshotGradeCell(snap, "quality")}</td>
+                      <td>{formatSnapshotGradeCell(snap, "timing")}</td>
+                      <td>{formatSnapshotGradeCell(snap, "marketFit")}</td>
+                      <td>{snap?.marketStateLabel ?? "—"}</td>
+                      <td>{snap?.panicLabel ?? "—"}</td>
+                      <td className="font-mono tabular-nums">{formatPerfPrice(display.recommendedPrice)}</td>
+                      <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d7)}</td>
+                      <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d14)}</td>
+                      <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d30)}</td>
+                      <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d7)}</td>
+                      <td><OutcomeBadge returnPct={row.horizons?.d7} /></td>
+                      <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d14)}</td>
+                      <td><OutcomeBadge returnPct={row.horizons?.d14} /></td>
+                      <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d30)}</td>
+                      <td><OutcomeBadge returnPct={row.horizons?.d30} /></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </details>
+  )
+}
+
 export default function PerformanceValidationPage() {
   const marketContext = useYdsMarketContext()
   const { stocks: liveStocks, loading: liveLoading } = useStockPickLiveData(marketContext)
@@ -1172,7 +1328,6 @@ export default function PerformanceValidationPage() {
   const scoreCorrelation = useMemo(() => buildScoreCorrelationReport(picks), [picks])
   const componentContribution = useMemo(() => buildComponentContributionReport(picks), [picks])
   const panicDeep = useMemo(() => buildPanicDeepAnalysisReport(picks), [picks])
-  const marketStrategy = useMemo(() => buildMarketStateStrategyReport(picks), [picks])
   const perfInsight = useMemo(() => buildPerfInsightReport(picks), [picks])
   const expectedValue = useMemo(() => buildExpectedValueAnalysisReport(picks), [picks])
   const mddAnalysis = useMemo(() => buildMddAnalysisReport(picks), [picks])
@@ -1219,228 +1374,38 @@ export default function PerformanceValidationPage() {
         />
       ) : (
         <>
-          <OutcomeVerdictPanel
+          <StrategyScorecardPanel
             summary={outcomeSummary}
             horizonKey={outcomeHorizon}
             onHorizonChange={setOutcomeHorizon}
             horizonAvailability={horizonAvailability}
           />
 
-          <ExpectedValuePanel report={expectedValue} />
+          <FinalEvaluationPanel report={perfInsight} />
 
-          <MddAnalysisPanel report={mddAnalysis} />
-
-          <PerfInsightPanel report={perfInsight} />
-
-          <ReliabilityAuditPanel report={reliability} />
-
-          <ScoreCorrelationPanel report={scoreCorrelation} />
-
-          <ComponentContributionPanel report={componentContribution} />
-
-          <PanicDeepPanel report={panicDeep} />
-
-          <MarketStateStrategyPanel report={marketStrategy} />
-
-          <SuccessPatternPanel
-            pattern={pattern}
-            horizonKey={patternHorizon}
-            onHorizonChange={setPatternHorizon}
-            horizonAvailability={horizonAvailability}
-          />
+          <MarketEnvPerformancePanel report={panicDeep} />
 
           <TopSuccessReportPanel report={topSuccessReport} />
 
           <TopFailureReportPanel report={topFailureReport} />
 
-          <section className="yds-perf-val__section" aria-labelledby="perf-val-kpi">
-            <h2 id="perf-val-kpi" className="yds-perf-val__h2">
-              KPI · 최근 {report.windowDays}일
-            </h2>
-            <div className="yds-perf-val__stat-grid yds-perf-val__stat-grid--hero">
-              <StatCard label="추천 종목 수" value={String(kpi.count)} />
-              <StatCard
-                label="30일 평균"
-                value={formatPerfPct(kpi.avgReturn)}
-                tone={toneFromPct(kpi.avgReturn)}
-              />
-              <StatCard label="승률 (30일)" value={kpi.winRate != null ? `${kpi.winRate}%` : "—"} />
-              <StatCard
-                label="최대 수익"
-                value={formatPerfPct(kpi.maxGain)}
-                tone="up"
-              />
-              <StatCard
-                label="최대 손실"
-                value={formatPerfPct(kpi.maxLoss)}
-                tone="down"
-              />
-            </div>
-            <div className="yds-perf-val__horizon-row">
-              {kpi.horizons.map((h) => (
-                <div key={h.key} className="yds-perf-val__horizon-chip">
-                  <span className="yds-perf-val__horizon-label">{h.label} 평균</span>
-                  <strong
-                    className={`yds-perf-val__horizon-val font-mono tabular-nums ${
-                      h.avgReturn != null && h.avgReturn >= 0
-                        ? "yds-perf-val__horizon-val--up"
-                        : h.avgReturn != null
-                          ? "yds-perf-val__horizon-val--down"
-                          : ""
-                    }`}
-                  >
-                    {h.count ? formatPerfPct(h.avgReturn) : "—"}
-                  </strong>
-                  <span className="yds-perf-val__horizon-n">n={h.count}</span>
-                </div>
-              ))}
-            </div>
-            <p className="yds-perf-val__note">
-              추천 생성 시 점수·등급·시장상태·패닉강도를 `recommendSnapshot`에 잠금 저장합니다. refresh·재계산 시
-              현재 점수를 사용하지 않으며, 추천 당시 스냅샷만 표시·분석합니다.
-            </p>
-          </section>
-
-          {report.picks.slice(0, 5).some((p) => getRecommendSnapshot(p)?.totalScore != null) ? (
-            <section className="yds-perf-val__section" aria-labelledby="perf-val-snapshots">
-              <h2 id="perf-val-snapshots" className="yds-perf-val__h2">
-                추천 당시 스냅샷 · 최근 사례
-              </h2>
-              <ul className="yds-perf-val__snap-list">
-                {report.picks.slice(0, 8).map((row) => (
-                  <li key={row.id} className="yds-perf-val__snap-card">
-                    <span className="yds-perf-val__snap-card-title">{row.name}</span>
-                    <span className="yds-perf-val__snap-card-line">
-                      {formatRecommendSnapshotLine(row, row.horizons?.d7)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          <section className="yds-perf-val__section" aria-labelledby="perf-val-grade">
-            <h2 id="perf-val-grade" className="yds-perf-val__h2">
-              등급별 검증 · 30일 평균
-            </h2>
-            <div className="yds-perf-val__grade-grid">
-              <div className="yds-perf-val__grade-block">
-                <h3 className="yds-perf-val__h3">기업품질</h3>
-                {gradeBreakdown.quality.map((g) => (
-                  <GradeRow key={g.grade} item={g} />
-                ))}
-              </div>
-              <div className="yds-perf-val__grade-block">
-                <h3 className="yds-perf-val__h3">타이밍</h3>
-                {gradeBreakdown.timing.map((g) => (
-                  <GradeRow key={g.grade} item={g} />
-                ))}
-              </div>
-              <div className="yds-perf-val__grade-block">
-                <h3 className="yds-perf-val__h3">시장적합</h3>
-                {gradeBreakdown.marketFit.map((g) => (
-                  <GradeRow key={g.grade} item={g} />
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="yds-perf-val__section" aria-labelledby="perf-val-top">
-            <h2 id="perf-val-top" className="yds-perf-val__h2">
-              TOP 성공 · 30일 수익률
-            </h2>
-            <CaseTable rows={topSuccess} mode="best" />
-          </section>
-
-          <section className="yds-perf-val__section" aria-labelledby="perf-val-fail">
-            <h2 id="perf-val-fail" className="yds-perf-val__h2">
-              실패 사례 · 30일 하락률
-            </h2>
-            <CaseTable rows={topFailure} mode="worst" />
-          </section>
-
-          <section className="yds-perf-val__section" aria-labelledby="perf-val-charts">
-            <h2 id="perf-val-charts" className="yds-perf-val__h2">
-              월별 추이
-            </h2>
-            <div className="yds-perf-val__chart-grid">
-              <div className="yds-perf-val__chart-panel">
-                <h3 className="yds-perf-val__h3">월별 승률</h3>
-                <BarChart rows={monthly} valueKey="winRate" labelKey="month" unit="%" />
-              </div>
-              <div className="yds-perf-val__chart-panel">
-                <h3 className="yds-perf-val__h3">월별 평균 수익률</h3>
-                <BarChart rows={monthly} valueKey="avgReturn" labelKey="month" unit="%" />
-              </div>
-              <div className="yds-perf-val__chart-panel yds-perf-val__chart-panel--wide">
-                <h3 className="yds-perf-val__h3">누적 성과 (월별 평균 합산)</h3>
-                <BarChart rows={monthly} valueKey="cumulativeReturn" labelKey="month" unit="%" maxBars={18} />
-              </div>
-            </div>
-          </section>
-
-          <section className="yds-perf-val__section" aria-labelledby="perf-val-data">
-            <h2 id="perf-val-data" className="yds-perf-val__h2">
-              수집 데이터 · 최근 {report.windowDays}일
-            </h2>
-            <div className="yds-perf-val__table-wrap yds-perf-val__table-wrap--scroll">
-              <table className="yds-perf-val__table yds-perf-val__table--dense">
-                <thead>
-                  <tr>
-                    <th>추천일</th>
-                    <th>종목</th>
-                    <th>점수</th>
-                    <th>품질</th>
-                    <th>타이밍</th>
-                    <th>시장적합</th>
-                    <th>시장상태</th>
-                    <th>패닉</th>
-                    <th>추천가</th>
-                    <th>7일</th>
-                    <th>14일</th>
-                    <th>30일</th>
-                    <th>7일%</th>
-                    <th>7일 판정</th>
-                    <th>14일%</th>
-                    <th>14일 판정</th>
-                    <th>30일%</th>
-                    <th>30일 판정</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.picks.map((row) => {
-                    const snap = getRecommendSnapshot(row)
-                    const display = pickDisplayFieldsFromSnapshot(row)
-                    return (
-                    <tr key={row.id}>
-                      <td className="font-mono tabular-nums">{display.recommendedAt}</td>
-                      <td>
-                        <span className="yds-perf-val__pick-name">{display.name}</span>
-                        <PickRecommendSnapshot row={row} horizon7Pct={row.horizons?.d7} />
-                      </td>
-                      <td className="font-mono tabular-nums">{formatSnapshotTotalScore(snap)}</td>
-                      <td>{formatSnapshotGradeCell(snap, "quality")}</td>
-                      <td>{formatSnapshotGradeCell(snap, "timing")}</td>
-                      <td>{formatSnapshotGradeCell(snap, "marketFit")}</td>
-                      <td>{snap?.marketStateLabel ?? "—"}</td>
-                      <td>{snap?.panicLabel ?? "—"}</td>
-                      <td className="font-mono tabular-nums">{formatPerfPrice(display.recommendedPrice)}</td>
-                      <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d7)}</td>
-                      <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d14)}</td>
-                      <td className="font-mono tabular-nums">{formatPerfPrice(row.horizonPrices?.d30)}</td>
-                      <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d7)}</td>
-                      <td><OutcomeBadge returnPct={row.horizons?.d7} /></td>
-                      <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d14)}</td>
-                      <td><OutcomeBadge returnPct={row.horizons?.d14} /></td>
-                      <td className="font-mono tabular-nums">{formatPerfPct(row.horizons?.d30)}</td>
-                      <td><OutcomeBadge returnPct={row.horizons?.d30} /></td>
-                    </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <PerfDetailDataSection
+            report={report}
+            pattern={pattern}
+            patternHorizon={patternHorizon}
+            onPatternHorizonChange={setPatternHorizon}
+            horizonAvailability={horizonAvailability}
+            reliability={reliability}
+            scoreCorrelation={scoreCorrelation}
+            componentContribution={componentContribution}
+            expectedValue={expectedValue}
+            mddAnalysis={mddAnalysis}
+            gradeBreakdown={gradeBreakdown}
+            topSuccess={topSuccess}
+            topFailure={topFailure}
+            monthly={monthly}
+            kpi={kpi}
+          />
         </>
       )}
     </div>

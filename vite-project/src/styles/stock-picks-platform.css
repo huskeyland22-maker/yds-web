@@ -207,6 +207,8 @@
 .yds-spick-country-panel__zone-why .yds-spick-section--why,
 .yds-spick-country-panel__zone-sector .yds-spick-section--sector {
   flex: 1;
+  min-width: 0;
+  width: 100%;
   min-height: 0;
 }
 
@@ -1847,12 +1849,27 @@
 
 .yds-spick-tabs {
   display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 0.35rem;
   margin-bottom: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 0.15rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.yds-spick-section--sector .yds-spick-tabs {
+  margin-inline: calc(-1 * var(--spick-section-x));
+  padding-inline: var(--spick-section-x);
+  width: calc(100% + 2 * var(--spick-section-x));
+  max-width: calc(100% + 2 * var(--spick-section-x));
 }
 
 .yds-spick-tabs::-webkit-scrollbar {
@@ -1860,7 +1877,9 @@
 }
 
 .yds-spick-tabs__btn {
+  flex: 0 0 auto;
   flex-shrink: 0;
+  white-space: nowrap;
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -2312,6 +2331,8 @@
 .yds-spick-section--why,
 .yds-spick-section--sector {
   padding-inline: var(--spick-section-x);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .yds-spick-section--why {

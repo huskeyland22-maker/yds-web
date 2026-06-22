@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { derivePickFailureReasons } from "../vite-project/src/content/ydsPickFailureReasons.js"
 import { buildPerfInsightReport } from "../vite-project/src/content/ydsPickPerfInsight.js"
 import { buildTopFailureReport } from "../vite-project/src/content/ydsPickTopFailureReport.js"
 import { buildTopSuccessReport } from "../vite-project/src/content/ydsPickTopSuccessReport.js"
@@ -113,7 +114,36 @@ assert.equal(failureReport.visible, true)
 assert.equal(failureReport.cases.length, 2)
 assert.equal(failureReport.cases[0].name, "SK하이닉스")
 assert.equal(failureReport.cases[0].returnPct, -4)
+assert.ok(failureReport.cases[0].failureReasons?.length > 0)
 assert.ok(failureReport.commonTraits.some((line) => line.includes("타이밍") || line.includes("품질") || line.includes("부진")))
+
+const timingFail = basePick({
+  id: "fail-timing",
+  horizons: { d7: -6, d14: null, d30: null, d90: null, d180: null, d365: null },
+  recommendSnapshot: {
+    ...basePick().recommendSnapshot,
+    timingGrade: "C",
+    qualityGrade: "C",
+    lifecycle: { id: "overheat", label: "과열", hint: "추격 주의" },
+  },
+})
+const reasons = derivePickFailureReasons(timingFail)
+assert.ok(reasons.includes("과열구간"))
+assert.ok(reasons.includes("실적둔화") || reasons.includes("고평가"))
+
+const dupPicks = [
+  basePick(),
+  basePick({ id: "dup", recommendedAt: "2026-05-02", horizons: { d7: 20, d14: null, d30: null, d90: null, d180: null, d365: null } }),
+  basePick({
+    id: "other",
+    ticker: "AMD",
+    name: "AMD",
+    horizons: { d7: 12, d14: null, d30: null, d90: null, d180: null, d365: null },
+  }),
+]
+const deduped = buildTopSuccessReport(dupPicks)
+assert.equal(deduped.cases.length, 2)
+assert.equal(deduped.cases.filter((c) => c.ticker === "NVDA").length, 1)
 
 const noFailure = buildTopFailureReport([
   basePick({ horizons: { d7: 3, d14: null, d30: null, d90: null, d180: null, d365: null } }),

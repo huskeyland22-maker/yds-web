@@ -1,14 +1,15 @@
 import assert from "node:assert/strict"
 import { buildComponentContributionReport } from "../vite-project/src/content/ydsPickComponentContribution.js"
-import { buildMarketStateStrategyReport } from "../vite-project/src/content/ydsPickMarketStateStrategy.js"
 import { buildOutcomeSummaryReport } from "../vite-project/src/content/ydsPickOutcomeEngine.js"
 import { buildPanicDeepAnalysisReport } from "../vite-project/src/content/ydsPickPanicDeepAnalysis.js"
+import { PATTERN_MIN_SAMPLE } from "../vite-project/src/content/ydsPickSuccessPatternEngine.js"
 import {
   buildHorizonAvailability,
   hasAnyPositiveCount,
+  hasDisplayablePatternBuckets,
   isComponentContributionPanelVisible,
   isHorizonTabEnabled,
-  isMarketStrategyPanelVisible,
+  isMonthlySeriesVisible,
   isOutcomePanelVisible,
   isPanicDeepPanelVisible,
   isScoreCorrelationPanelVisible,
@@ -83,7 +84,19 @@ assert.equal(isOutcomePanelVisible(buildOutcomeSummaryReport(emptyPicks, "d7")),
 assert.equal(isOutcomePanelVisible(buildOutcomeSummaryReport(d7Only, "d7")), true)
 
 assert.equal(isSuccessPatternPanelVisible(buildSuccessPatternReport(emptyPicks, "d7")), false)
-assert.equal(isSuccessPatternPanelVisible(buildSuccessPatternReport(d7Only, "d7")), true)
+assert.equal(isSuccessPatternPanelVisible(buildSuccessPatternReport(d7Only, "d7")), false)
+assert.equal(
+  hasDisplayablePatternBuckets(buildSuccessPatternReport(d7Only, "d7")),
+  false,
+)
+
+const manyPicks = Array.from({ length: PATTERN_MIN_SAMPLE }, (_, i) =>
+  basePick({
+    id: String(i + 1),
+    recommendedAt: `2026-05-${String(i + 1).padStart(2, "0")}`,
+  }),
+)
+assert.equal(isSuccessPatternPanelVisible(buildSuccessPatternReport(manyPicks, "d7")), true)
 
 assert.equal(isScoreCorrelationPanelVisible(buildScoreCorrelationReport(emptyPicks)), false)
 assert.equal(isScoreCorrelationPanelVisible(buildScoreCorrelationReport(d7Only)), true)
@@ -94,7 +107,8 @@ assert.equal(isComponentContributionPanelVisible(buildComponentContributionRepor
 assert.equal(isPanicDeepPanelVisible(buildPanicDeepAnalysisReport(emptyPicks)), false)
 assert.equal(isPanicDeepPanelVisible(buildPanicDeepAnalysisReport(d7Only)), true)
 
-assert.equal(isMarketStrategyPanelVisible(buildMarketStateStrategyReport(emptyPicks)), false)
-assert.equal(isMarketStrategyPanelVisible(buildMarketStateStrategyReport(d7Only)), true)
+assert.equal(isMonthlySeriesVisible([]), false)
+assert.equal(isMonthlySeriesVisible([{ count: 0 }]), false)
+assert.equal(isMonthlySeriesVisible([{ count: 2 }]), true)
 
 console.log("yds-pick-perf-panel-visibility.test.mjs OK")

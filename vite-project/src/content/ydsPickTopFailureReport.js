@@ -8,10 +8,11 @@ import {
   picksWithLockedOutcome,
 } from "./ydsPickOutcomeEngine.js"
 import { getPickPatternGrade } from "./ydsPickPatternGrades.js"
+import { derivePickFailureReasons } from "./ydsPickFailureReasons.js"
 import { getRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
 
 const HORIZON_KEY = "d7"
-const CASE_LIMIT = 10
+const CASE_LIMIT = 5
 
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord} pick @param {number} returnPct */
 function buildCaseRow(pick, returnPct) {
@@ -37,6 +38,7 @@ function buildCaseRow(pick, returnPct) {
       snap?.panicIntensity != null && Number.isFinite(snap.panicIntensity)
         ? Math.round(snap.panicIntensity)
         : null,
+    failureReasons: derivePickFailureReasons(pick),
   }
 }
 
@@ -105,7 +107,18 @@ export function buildTopFailureReport(picks) {
     }
   }
 
-  const cases = failureRows.slice(0, CASE_LIMIT).map((row) => buildCaseRow(row.pick, row.returnPct))
+  /** @type {Set<string>} */
+  const seenTickers = new Set()
+  const uniqueRows = []
+  for (const row of failureRows) {
+    const key = String(row.pick.ticker ?? "").trim().toUpperCase()
+    if (!key || seenTickers.has(key)) continue
+    seenTickers.add(key)
+    uniqueRows.push(row)
+    if (uniqueRows.length >= CASE_LIMIT) break
+  }
+
+  const cases = uniqueRows.map((row) => buildCaseRow(row.pick, row.returnPct))
   return {
     visible: true,
     horizonLabel: "7일",

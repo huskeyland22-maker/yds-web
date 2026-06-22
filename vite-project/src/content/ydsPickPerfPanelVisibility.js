@@ -3,6 +3,7 @@
  */
 
 import { picksWithLockedOutcome } from "./ydsPickOutcomeEngine.js"
+import { PATTERN_MIN_SAMPLE } from "./ydsPickSuccessPatternEngine.js"
 
 /** @typedef {import("./ydsValidationStorage.js").ValidationPickRecord} ValidationPickRecord */
 /** @typedef {'d7' | 'd14' | 'd30'} PerfHorizonKey */
@@ -81,8 +82,26 @@ export function isMarketStrategyPanelVisible(report) {
 }
 
 /** @param {import("./ydsPickSuccessPatternEngine.js").SuccessPatternReport} pattern */
+export function hasDisplayablePatternBuckets(pattern) {
+  const buckets = [
+    ...(pattern?.grades?.quality ?? []),
+    ...(pattern?.grades?.timing ?? []),
+    ...(pattern?.grades?.marketFit ?? []),
+    ...(pattern?.marketStates ?? []),
+    ...(pattern?.panicBands ?? []),
+  ]
+  if (!buckets.some((b) => (b.count ?? 0) > 0)) return false
+  return buckets.some((b) => (b.count ?? 0) >= PATTERN_MIN_SAMPLE)
+}
+
+/** @param {import("./ydsPickSuccessPatternEngine.js").SuccessPatternReport} pattern */
 export function isSuccessPatternPanelVisible(pattern) {
-  return (pattern?.totalTracked ?? 0) > 0
+  return hasDisplayablePatternBuckets(pattern)
+}
+
+/** @param {Array<{ count?: number }> | null | undefined} rows */
+export function isMonthlySeriesVisible(rows) {
+  return hasAnyPositiveCount(rows)
 }
 
 /** @param {import("./ydsPickPerfInsight.js").PerfInsightReport} report */
