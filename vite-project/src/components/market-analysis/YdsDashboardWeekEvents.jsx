@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import YdsDeskCard from "./YdsDeskCard.jsx"
 
 /**
  * @param {{
@@ -9,31 +10,27 @@ export default function YdsDashboardWeekEvents({ report }) {
   if (!report?.hasEvents) return null
 
   return (
-    <section
-      className="yds-desk-brief yds-desk-brief--events"
-      aria-labelledby="desk-week-events-title"
-    >
-      <div className="yds-desk-brief__head">
-        <h2 id="desk-week-events-title" className="yds-desk-brief__title">
-          이번주 주요 이벤트
-        </h2>
-        <Link to="/investment-calendar" className="yds-desk-brief__more">
+    <YdsDeskCard
+      title="이번주 주요 이벤트"
+      titleId="desk-week-events-title"
+      headerExtra={
+        <Link to="/investment-calendar" className="yds-desk-card__more">
           캘린더 →
         </Link>
-      </div>
-
-      <ul className="yds-desk-brief__list">
+      }
+    >
+      <ul className="yds-desk-card__list">
         {report.stripItems.map((event) => {
           const dateLabel = event.date.slice(5).replace("-", "/")
           return (
-            <li key={event.id} className="yds-desk-brief__item">
-              <span className="yds-desk-brief__bullet" aria-hidden>
+            <li key={event.id} className="yds-desk-card__item">
+              <span className="yds-desk-card__bullet" aria-hidden>
                 ■
               </span>
-              <span className="yds-desk-brief__name">{event.briefLabel}</span>
-              <span className="yds-desk-brief__date font-mono tabular-nums">{dateLabel}</span>
+              <span className="yds-desk-card__name">{event.briefLabel}</span>
+              <span className="yds-desk-card__date font-mono tabular-nums">{dateLabel}</span>
               <span
-                className={`yds-desk-brief__tier yds-desk-brief__tier--${event.importance}`}
+                className={`yds-desk-card__tier yds-desk-card__tier--${event.importance}`}
                 aria-label={`중요도 ${event.importanceTier}`}
               >
                 {event.importanceTier}
@@ -42,6 +39,6 @@ export default function YdsDashboardWeekEvents({ report }) {
           )
         })}
       </ul>
-    </section>
+    </YdsDeskCard>
   )
 }

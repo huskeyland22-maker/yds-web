@@ -1,5 +1,4 @@
 import { useMemo, useEffect, useRef } from "react"
-import CycleBondLiquiditySection from "../cycle/CycleBondLiquiditySection.jsx"
 import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
@@ -7,6 +6,7 @@ import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
+import YdsDashboardLiquidityCard from "./YdsDashboardLiquidityCard.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
@@ -120,29 +120,11 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           />
         </section>
 
-        <div className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--week-events">
+        <div className="yds-market-desk__brief-stack">
           <YdsDashboardWeekEvents report={weekEvents} />
-        </div>
-
-        <section
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--bond"
-          aria-labelledby="market-block-bond"
-        >
-          <h2 id="market-block-bond" className="yds-market-desk__block-label">
-            유동성 환경
-          </h2>
-          <CycleBondLiquiditySection
-            variant="desk"
-            panicData={panicData}
-            snapshot={bondSnapshot.snapshot}
-            loading={bondSnapshot.loading}
-            fetchFailed={bondSnapshot.fetchFailed}
-            timedOut={bondSnapshot.timedOut}
-            error={bondSnapshot.error}
-          />
-        </section>
-
-        <div className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--action-guide">
+          {macroRiskEnabled ? (
+            <YdsDashboardLiquidityCard card={liquidityCard} loading={bondSnapshot.loading} />
+          ) : null}
           <YdsDashboardActionGuide report={actionGuide} />
         </div>
       </div>
