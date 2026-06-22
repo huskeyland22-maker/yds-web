@@ -3,6 +3,7 @@
  */
 
 import calendarSeed from "../data/investmentCalendarSeed.json" with { type: "json" }
+import stockUniverse from "../data/stockPickUniverse.json" with { type: "json" }
 
 /** @typedef {'fomc' | 'cpi' | 'ppi' | 'pce' | 'employment' | 'gdp' | 'other'} MacroCategoryId */
 /** @typedef {'earnings' | 'dividend' | 'agm'} StockEventCategoryId */
@@ -45,6 +46,39 @@ import calendarSeed from "../data/investmentCalendarSeed.json" with { type: "jso
  */
 
 /** @typedef {MacroCalendarEvent | StockCalendarEvent} CalendarEvent */
+
+/** @typedef {'pick' | 'sector' | 'mega'} StockEventPriorityTier */
+
+/**
+ * @typedef {StockCalendarEvent & {
+ *   priorityTier: StockEventPriorityTier
+ *   priorityRank: number
+ *   eventTitle: string
+ *   impactLine: string
+ * }} PrioritizedStockEvent
+ */
+
+/** 추천 섹터별 대표 종목 (YDS 유니버스에 없는 벤치마크 포함) */
+export const SECTOR_REPRESENTATIVE_TICKERS = {
+  semi: ["MU", "TSM", "ASML"],
+  power: ["GEV"],
+  ai: ["NVDA"],
+  defense: ["LMT", "RTX"],
+  nuclear: ["CEG", "OKLO"],
+  robot: ["ISRG", "ABB"],
+  infra: ["CAT", "DE"],
+}
+
+/** 시총 상위·시장 벤치마크 (추천·섹터 대표에 없을 때) */
+export const MEGA_CAP_WATCHLIST = [
+  { ticker: "AAPL", name: "애플", sectorLabel: "빅테크" },
+  { ticker: "MSFT", name: "마이크로소프트", sectorLabel: "빅테크" },
+  { ticker: "AMZN", name: "아마존", sectorLabel: "빅테크" },
+  { ticker: "GOOGL", name: "구글", sectorLabel: "빅테크" },
+  { ticker: "GOOG", name: "구글", sectorLabel: "빅테크" },
+  { ticker: "META", name: "메타", sectorLabel: "빅테크" },
+  { ticker: "NKE", name: "나이키", sectorLabel: "소비주" },
+]
 
 export const MACRO_CATEGORY_LABELS = {
   fomc: "FOMC",
@@ -225,6 +259,135 @@ function enrichStock(row, ctx) {
   }
 }
 
+/** @param {StockCalendarEvent} event */
+export function stockEventDisplayTitle(event) {
+  if (event.category === "earnings") return `${event.name} 실적 발표`
+  if (event.category === "dividend") return `${event.name} 배당`
+  if (event.category === "agm") return `${event.name} 주주총회`
+  return event.name
+}
+
+/** @returns {Set<string>} */
+function buildPickTickerSet() {
+  return new Set((stockUniverse.stocks ?? []).map((row) => String(row.ticker).toUpperCase()))
+}
+
+/** @returns {Set<string>} */
+function buildActiveSectorSet() {
+  return new Set((stockUniverse.stocks ?? []).map((row) => row.sector).filter(Boolean))
+}
+
+/**
+ * @param {string} ticker
+ * @param {Set<string>} activeSectors
+ * @returns {{ sectorId: string; label: string } | null}
+ */
+function findSectorRepInfo(ticker, activeSectors) {
+  const upper = ticker.toUpperCase()
+  for (const [sectorId, tickers] of Object.entries(SECTOR_REPRESENTATIVE_TICKERS)) {
+    if (!activeSectors.has(sectorId)) continue
+    if (tickers.some((t) => t.toUpperCase() === upper)) {
+      const label =
+        sectorId === "semi"
+          ? "반도체"
+          : sectorId === "power"
+            ? "전력"
+            : sectorId === "ai"
+              ? "AI"
+              : sectorId === "defense"
+                ? "방산"
+                : sectorId === "nuclear"
+                  ? "원전"
+                  : sectorId === "robot"
+                    ? "로봇"
+                    : sectorId === "infra"
+                      ? "인프라"
+                      : sectorId
+      return { sectorId, label }
+    }
+  }
+  return null
+}
+
+/**
+ * @param {StockCalendarEvent} event
+ * @param {Set<string>} pickTickers
+ * @param {Set<string>} activeSectors
+ * @returns {PrioritizedStockEvent | null}
+ */
+export function classifyStockEventPriority(event, pickTickers, activeSectors) {
+  const ticker = String(event.ticker).toUpperCase()
+  const stars = event.importanceStars
+
+  if (pickTickers.has(ticker)) {
+    return {
+      ...event,
+      priorityTier: /** @type {const} */ ("pick"),
+      priorityRank: 1,
+      eventTitle: stockEventDisplayTitle(event),
+      impactLine: `추천종목 영향도 ${stars}`,
+    }
+  }
+
+  const sectorRep = findSectorRepInfo(ticker, activeSectors)
+  if (sectorRep) {
+    return {
+      ...event,
+      priorityTier: /** @type {const} */ ("sector"),
+      priorityRank: 2,
+      eventTitle: stockEventDisplayTitle(event),
+      impactLine: `${sectorRep.label} 섹터 영향도 ${stars}`,
+    }
+  }
+
+  const mega = MEGA_CAP_WATCHLIST.find((row) => row.ticker.toUpperCase() === ticker)
+  if (mega) {
+    return {
+      ...event,
+      priorityTier: /** @type {const} */ ("mega"),
+      priorityRank: 3,
+      eventTitle: stockEventDisplayTitle(event),
+      impactLine: `${mega.sectorLabel} 영향도 ${stars}`,
+    }
+  }
+
+  return null
+}
+
+/**
+ * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null | undefined} marketContext
+ * @param {Date} [refDate]
+ * @param {number} [limit]
+ * @param {number} [horizonDays]
+ */
+export function buildPrioritizedStockEvents(
+  marketContext = null,
+  refDate = new Date(),
+  limit = 12,
+  horizonDays = 35,
+) {
+  const today = refDate.toISOString().slice(0, 10)
+  const horizonEnd = addCalendarDaysLocal(today, horizonDays)
+  const pickTickers = buildPickTickerSet()
+  const activeSectors = buildActiveSectorSet()
+
+  const pool = (calendarSeed.stockEvents ?? [])
+    .filter((row) => row.date >= today && row.date <= horizonEnd)
+    .map((row) => enrichStock(row, marketContext))
+
+  const classified = pool
+    .map((event) => classifyStockEventPriority(event, pickTickers, activeSectors))
+    .filter(Boolean)
+
+  classified.sort((a, b) => {
+    if (a.priorityRank !== b.priorityRank) return a.priorityRank - b.priorityRank
+    if (a.date !== b.date) return a.date.localeCompare(b.date)
+    return b.importance - a.importance
+  })
+
+  return classified.slice(0, limit)
+}
+
 /** @param {CalendarEvent[]} events */
 function sortEvents(events) {
   return [...events].sort((a, b) => {
@@ -246,6 +409,8 @@ export function buildInvestmentCalendarReport(marketContext = null, refDate = ne
     .filter((e) => inRange(e.date, week.start, week.end))
     .map((e) => enrichStock(e, marketContext))
 
+  const prioritizedStockEvents = buildPrioritizedStockEvents(marketContext, refDate, 16, 35)
+
   const thisWeek = sortEvents([...macro, ...stock])
   const macroAll = sortEvents((calendarSeed.macroEvents ?? []).map((e) => enrichMacro(e, marketContext)))
   const stockAll = sortEvents((calendarSeed.stockEvents ?? []).map((e) => enrichStock(e, marketContext)))
@@ -255,6 +420,7 @@ export function buildInvestmentCalendarReport(marketContext = null, refDate = ne
     thisWeek,
     macroThisWeek: macro,
     stockThisWeek: stock,
+    prioritizedStockEvents,
     macroUpcoming: macroAll.filter((e) => e.date >= week.start).slice(0, 14),
     stockUpcoming: stockAll.filter((e) => e.date >= week.start).slice(0, 14),
     hasEvents: thisWeek.length > 0,
@@ -281,6 +447,7 @@ export function buildWeekEventStrip(marketContext = null, limit = 5, refDate = n
 
   const push = (/** @type {CalendarEvent} */ event) => {
     if (seen.has(event.id) || stripItems.length >= limit) return
+    if (event.kind !== "macro") return
     seen.add(event.id)
     stripItems.push({
       ...event,
@@ -289,14 +456,11 @@ export function buildWeekEventStrip(marketContext = null, limit = 5, refDate = n
     })
   }
 
-  for (const event of report.thisWeek) push(event)
+  for (const event of report.macroThisWeek) push(event)
 
   if (stripItems.length < limit) {
     const macroAll = (calendarSeed.macroEvents ?? []).map((e) => enrichMacro(e, marketContext))
-    const stockAll = (calendarSeed.stockEvents ?? []).map((e) => enrichStock(e, marketContext))
-    const pool = sortEvents([...macroAll, ...stockAll]).filter(
-      (e) => e.date >= today && e.date <= fillEnd,
-    )
+    const pool = sortEvents(macroAll).filter((e) => e.date >= today && e.date <= fillEnd)
     for (const event of pool) {
       push(event)
       if (stripItems.length >= limit) break
@@ -307,5 +471,22 @@ export function buildWeekEventStrip(marketContext = null, limit = 5, refDate = n
     ...report,
     stripItems,
     hasEvents: stripItems.length > 0,
+  }
+}
+
+/**
+ * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null | undefined} marketContext
+ * @param {number} [limit]
+ * @param {Date} [refDate]
+ */
+export function buildStockWeekEventStrip(marketContext = null, limit = 5, refDate = new Date()) {
+  const report = buildInvestmentCalendarReport(marketContext, refDate)
+  const stockItems = buildPrioritizedStockEvents(marketContext, refDate, limit, 35)
+
+  return {
+    week: report.week,
+    marketStage: report.marketStage,
+    stockItems,
+    hasEvents: stockItems.length > 0,
   }
 }

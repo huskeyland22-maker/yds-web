@@ -4,6 +4,7 @@ import { buildInvestmentCalendarReport } from "../content/ydsInvestmentCalendarE
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import { YdsInvestmentCalendarRow } from "../components/market-analysis/YdsInvestmentCalendarStrip.jsx"
+import { YdsPrioritizedStockEventRow } from "../components/market-analysis/YdsDashboardStockWeekEvents.jsx"
 
 function EventSection({ title, id, events, empty }) {
   return (
@@ -19,6 +20,25 @@ function EventSection({ title, id, events, empty }) {
             <YdsInvestmentCalendarRow key={event.id} event={event} />
           ))}
         </div>
+      )}
+    </section>
+  )
+}
+
+function StockEventSection({ title, id, events, empty }) {
+  return (
+    <section className="yds-inv-cal__section" aria-labelledby={id}>
+      <h2 id={id} className="yds-inv-cal__h2">
+        {title}
+      </h2>
+      {!events.length ? (
+        <p className="yds-inv-cal__empty">{empty}</p>
+      ) : (
+        <ul className="yds-stock-week-event-list yds-stock-week-event-list--page">
+          {events.map((event) => (
+            <YdsPrioritizedStockEventRow key={event.id} event={event} />
+          ))}
+        </ul>
       )}
     </section>
   )
@@ -61,11 +81,11 @@ export default function InvestmentCalendarPage() {
         empty="이번 주 거시 지표 일정 없음"
       />
 
-      <EventSection
+      <StockEventSection
         id="inv-stock-week"
-        title="2 · 종목 이벤트 (이번주)"
-        events={report.stockThisWeek}
-        empty="이번 주 종목 이벤트 없음"
+        title="2 · 종목 이벤트 (추천·섹터·대형주)"
+        events={report.prioritizedStockEvents}
+        empty="등록된 주요 종목 이벤트 없음"
       />
 
       <section className="yds-inv-cal__section" aria-labelledby="inv-upcoming">

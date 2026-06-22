@@ -210,6 +210,69 @@
       "country": "US",
       "category": "earnings",
       "importance": 3
+    },
+    {
+      "id": "mu-earnings-q3-2026",
+      "date": "2026-06-25",
+      "ticker": "MU",
+      "name": "마이크론",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "nke-earnings-q4-2026",
+      "date": "2026-06-26",
+      "ticker": "NKE",
+      "name": "나이키",
+      "country": "US",
+      "category": "earnings",
+      "importance": 2
+    },
+    {
+      "id": "asml-earnings-q2-2026",
+      "date": "2026-07-16",
+      "ticker": "ASML",
+      "name": "ASML",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "aapl-earnings-q3-2026",
+      "date": "2026-07-31",
+      "ticker": "AAPL",
+      "name": "애플",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "msft-earnings-q4-2026",
+      "date": "2026-07-29",
+      "ticker": "MSFT",
+      "name": "마이크로소프트",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "amzn-earnings-q2-2026",
+      "date": "2026-07-30",
+      "ticker": "AMZN",
+      "name": "아마존",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
+    },
+    {
+      "id": "googl-earnings-q2-2026",
+      "date": "2026-07-28",
+      "ticker": "GOOGL",
+      "name": "구글",
+      "country": "US",
+      "category": "earnings",
+      "importance": 3
     }
   ]
 }

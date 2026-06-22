@@ -32,6 +32,7 @@ assert.equal(
 const strip = buildWeekEventStrip(null, 5, new Date("2026-06-22T12:00:00"))
 assert.ok(strip.stripItems.length > 0)
 assert.ok(strip.stripItems.length <= 5)
+assert.ok(strip.stripItems.every((e) => e.kind === "macro"))
 assert.ok(strip.stripItems.every((e) => e.briefLabel && e.importanceTier))
 
 const panicData = { fearGreed: 62, vix: 16, bofa: 6.2, putCall: 0.72, highYield: 4.1 }
