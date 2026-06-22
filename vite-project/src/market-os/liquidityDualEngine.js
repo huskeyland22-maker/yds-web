@@ -402,6 +402,44 @@ function buildPolicyLaneActions(policyScore, marketScore) {
   return ["분할매수 유지", "추격매수 자제", "실적·현금흐름 점검"]
 }
 
+/** @param {LiquidityFactorLine[]} environment @param {number | null} score */
+function buildMarketScoreExplain(environment, score) {
+  const positives = environment
+    .filter((f) => f.tone === "ok")
+    .map((f) => f.label.replace("HY 스프레드 안정", "HY 스프레드 축소"))
+  const negatives = environment.filter((f) => f.tone === "warn").map((f) => f.label)
+
+  if (positives.length >= 2 && (score ?? 50) >= 55) {
+  const joined =
+      positives.length === 2
+        ? `${positives[0]}과 ${positives[1]}`
+        : `${positives.slice(0, -1).join(", ")}과 ${positives[positives.length - 1]}`
+    return `현재 유동성은 ${joined}가 긍정적으로 작용하고 있습니다.`
+  }
+
+  if (negatives.length >= 2 && (score ?? 50) < 50) {
+    const joined =
+      negatives.length === 2
+        ? `${negatives[0]}과 ${negatives[1]}`
+        : `${negatives.slice(0, -1).join(", ")}과 ${negatives[negatives.length - 1]}`
+    return `현재 유동성은 ${joined}가 부담으로 작용하고 있습니다.`
+  }
+
+  if (positives.length && negatives.length) {
+    return `긍정 요인(${positives[0]})과 부담 요인(${negatives[0]})이 혼재해 선별적 접근이 필요합니다.`
+  }
+
+  if (positives.length) {
+    return `현재 유동성은 ${positives[0]}이 시장에 우호적으로 작용하고 있습니다.`
+  }
+
+  if (negatives.length) {
+    return `현재 유동성은 ${negatives[0]}이 시장 유동성을 제한하고 있습니다.`
+  }
+
+  return "시장 유동성 지표가 혼조입니다. 급격한 포지션 변경은 지양하세요."
+}
+
 /**
  * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
  * @param {object | null | undefined} panicData
@@ -480,6 +518,8 @@ function buildMarketLiquidity(snapshot, panicData) {
     { label: rateWarn ? "금리 부담" : "금리 안정", tone: rateWarn ? "warn" : "ok" },
   ]
 
+  const scoreExplain = buildMarketScoreExplain(environment, score)
+
   return {
     kind: /** @type {const} */ ("market"),
     title: "시장 유동성",
@@ -491,6 +531,7 @@ function buildMarketLiquidity(snapshot, panicData) {
     investmentLines: [],
     laneActions: [],
     contributions,
+    scoreExplain,
   }
 }
 

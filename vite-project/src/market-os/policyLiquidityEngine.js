@@ -349,15 +349,6 @@ function buildPolicyContributions(metrics, scoreTotal, detail) {
  * @param {import("./liquidityDualEngine.js").LiquidityBand} band
  */
 function buildPolicyScoreExplain(score, band, ctx) {
-  const regime =
-    score < 40
-      ? "긴축~매파"
-      : score < 55
-        ? "중립~매파"
-        : score < 70
-          ? "중립~긴축"
-          : "완화 우호"
-
   /** @type {string[]} */
   const drivers = []
   if (ctx.priceBlockScore < 48 || ctx.cpiTrend.slope === "up") {
@@ -369,9 +360,9 @@ function buildPolicyScoreExplain(score, band, ctx) {
 
   if (!drivers.length) {
     if (score >= 60) {
-      return `현재 정책 환경은 ${regime} 구간. 물가 둔화·완화 기대가 정책 유동성을 지원하고 있음.`
+      return "물가 둔화와 완화 기대가 정책 유동성을 지원하고 있습니다."
     }
-    return `현재 정책 환경은 ${regime} 구간(${band.label}). 주요 지표가 혼조이나 선별적 접근이 필요함.`
+    return `정책 지표가 혼조입니다(${band.label}). 선별적 접근이 필요합니다.`
   }
 
   const joined =
@@ -381,5 +372,5 @@ function buildPolicyScoreExplain(score, band, ctx) {
         ? `${drivers[0]}와 ${drivers[1]}`
         : `${drivers.slice(0, -1).join(", ")}와 ${drivers[drivers.length - 1]}`
 
-  return `현재 정책 환경은 ${regime} 구간. ${joined}가 정책 유동성을 제약하고 있음.`
+  return `${joined}가 정책 유동성을 제한하고 있습니다.`
 }

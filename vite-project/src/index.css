@@ -30407,17 +30407,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
-.yds-liquidity-lane__report-block--explain {
-  border-left: 3px solid rgba(96, 165, 250, 0.45);
-  padding-left: 0.5rem;
-}
-
 .yds-liquidity-lane__score-explain {
-  margin: 0;
-  font-size: 0.7rem;
+  margin: 0 0 0.55rem;
+  padding: 0.48rem 0.55rem;
+  font-size: 0.72rem;
   line-height: 1.55;
   color: #cbd5e1;
   font-weight: 500;
+  border-left: 3px solid rgba(96, 165, 250, 0.45);
+  background: rgba(15, 23, 42, 0.35);
+  border-radius: 0 6px 6px 0;
 }
 
 .yds-liquidity-lane__breakdown {

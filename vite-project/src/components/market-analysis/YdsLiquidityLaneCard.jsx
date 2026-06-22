@@ -8,7 +8,6 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
   const score = lane.score
   const scorePct = score != null ? Math.max(0, Math.min(100, score)) : 0
   const tone = lane.band.tone
-  const contributionTotal = lane.contributions.reduce((sum, row) => sum + row.contribution, 0)
 
   return (
     <article className="yds-liquidity-lane">
@@ -34,6 +33,10 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
       >
         <span className="yds-liquidity-lane__bar-fill" style={{ width: `${scorePct}%` }} />
       </div>
+
+      {lane.scoreExplain ? (
+        <p className="yds-liquidity-lane__score-explain">{lane.scoreExplain}</p>
+      ) : null}
 
       <section className="yds-liquidity-lane__report-block">
         <h4 className="yds-liquidity-lane__report-label">{lane.environmentLabel}</h4>
@@ -95,55 +98,6 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
           ))}
         </ul>
       </section>
-
-      {lane.scoreExplain ? (
-        <section className="yds-liquidity-lane__report-block yds-liquidity-lane__report-block--explain">
-          <h4 className="yds-liquidity-lane__report-label">점수 해설</h4>
-          <p className="yds-liquidity-lane__score-explain">{lane.scoreExplain}</p>
-        </section>
-      ) : null}
-
-      <div className="yds-liquidity-lane__breakdown">
-        <p className="yds-liquidity-lane__breakdown-title">세부 기여도</p>
-        <ul className="yds-liquidity-lane__contrib-list">
-          {lane.contributions.map((row) => (
-            <li key={row.id} className="yds-liquidity-lane__contrib-row">
-              <div className="yds-liquidity-lane__contrib-meta">
-                <span className="yds-liquidity-lane__contrib-label" title={row.tooltip}>
-                  {row.label}
-                  <span className="yds-liquidity-lane__contrib-help" aria-label={row.tooltip}>
-                    ?
-                  </span>
-                </span>
-                <span
-                  className={[
-                    "yds-liquidity-lane__contrib-val",
-                    "font-mono",
-                    "tabular-nums",
-                    `yds-liquidity-lane__contrib-val--${row.tone}`,
-                  ].join(" ")}
-                >
-                  +{row.contribution}
-                </span>
-              </div>
-              <div className="yds-liquidity-lane__contrib-bar" aria-hidden>
-                <span
-                  className={[
-                    "yds-liquidity-lane__contrib-bar-fill",
-                    `yds-liquidity-lane__contrib-bar-fill--${row.tone}`,
-                  ].join(" ")}
-                  style={{ width: `${row.barPct}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-        {score != null ? (
-          <p className="yds-liquidity-lane__contrib-total font-mono tabular-nums">
-            총점 <strong>{contributionTotal}</strong>
-          </p>
-        ) : null}
-      </div>
     </article>
   )
 }
