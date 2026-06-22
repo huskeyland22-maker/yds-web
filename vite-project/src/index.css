@@ -30206,6 +30206,87 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: linear-gradient(90deg, rgba(220, 38, 38, 0.7), rgba(248, 113, 113, 0.9));
 }
 
+.yds-liquidity-lane__bar {
+  margin-bottom: 0.55rem;
+}
+
+.yds-liquidity-lane__report-block {
+  margin-bottom: 0.5rem;
+  padding: 0.42rem 0.48rem;
+  border-radius: 7px;
+  background: rgba(2, 6, 23, 0.32);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-liquidity-lane__report-block--interpret {
+  background: rgba(15, 23, 42, 0.42);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+.yds-liquidity-lane__report-label {
+  margin: 0 0 0.32rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.yds-liquidity-lane__impact-list,
+.yds-liquidity-lane__action-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.yds-liquidity-lane__impact-item {
+  font-size: 0.68rem;
+  line-height: 1.45;
+  font-weight: 600;
+  color: #cbd5e1;
+  padding-left: 0.55rem;
+  position: relative;
+}
+
+.yds-liquidity-lane__impact-item::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: #64748b;
+}
+
+.yds-liquidity-lane__interpret {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.yds-liquidity-lane__interpret-line {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.yds-liquidity-lane__action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.32rem;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  font-weight: 600;
+  color: #d1fae5;
+}
+
+.yds-liquidity-lane__action-mark {
+  flex-shrink: 0;
+  color: #34d399;
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
 .yds-liquidity-lane__factors {
   margin: 0;
   padding: 0;
@@ -30355,6 +30436,58 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-liquidity-lane__contrib-total strong {
   color: #e2e8f0;
   font-weight: 800;
+}
+
+.yds-liquidity-summary {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(165deg, rgba(15, 23, 42, 0.72), rgba(30, 41, 59, 0.38));
+  border-left: 3px solid rgba(96, 165, 250, 0.5);
+}
+
+.yds-liquidity-summary__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.yds-liquidity-summary__headline {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.yds-liquidity-summary__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.yds-liquidity-summary__lines li {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.yds-desk-card__liquidity-lead {
+  margin: 0 0 0.65rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #e2e8f0;
+  border-left: 3px solid rgba(52, 211, 153, 0.55);
+  background: rgba(15, 23, 42, 0.45);
+  border-radius: 0 6px 6px 0;
 }
 
 .yds-desk-brief {

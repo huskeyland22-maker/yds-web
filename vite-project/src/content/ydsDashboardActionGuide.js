@@ -26,6 +26,7 @@ import { getFinalScore } from "../utils/tradingScores.js"
  *   watchStars: string
  *   cashStars: string
  *   recommendedActions: string[]
+ *   liquidityLead: string | null
  * }} DashboardActionGuideReport
  */
 
@@ -180,6 +181,7 @@ export function buildDashboardActionGuideReport(panicData, historyRows = [], dua
       watchStars: "☆☆☆☆☆",
       cashStars: "☆☆☆☆☆",
       recommendedActions: [],
+      liquidityLead: null,
     }
   }
 
@@ -212,5 +214,6 @@ export function buildDashboardActionGuideReport(panicData, historyRows = [], dua
     watchStars: toStars(stars.watch),
     cashStars: toStars(stars.cash),
     recommendedActions,
+    liquidityLead: dualLiquidity?.synthesis?.leadSentence ?? null,
   }
 }

@@ -35,22 +35,61 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
         <span className="yds-liquidity-lane__bar-fill" style={{ width: `${scorePct}%` }} />
       </div>
 
-      <ul className="yds-liquidity-lane__factors">
-        {lane.factors.map((factor) => (
-          <li
-            key={factor.label}
-            className={[
-              "yds-liquidity-lane__factor",
-              factor.tone === "ok" ? "yds-liquidity-lane__factor--ok" : "yds-liquidity-lane__factor--warn",
-            ].join(" ")}
-          >
-            <span className="yds-liquidity-lane__factor-mark" aria-hidden>
-              {factor.tone === "ok" ? "✓" : "△"}
-            </span>
-            {factor.label}
-          </li>
-        ))}
-      </ul>
+      <section className="yds-liquidity-lane__report-block">
+        <h4 className="yds-liquidity-lane__report-label">{lane.environmentLabel}</h4>
+        <ul className="yds-liquidity-lane__factors">
+          {lane.environment.map((factor) => (
+            <li
+              key={factor.label}
+              className={[
+                "yds-liquidity-lane__factor",
+                factor.tone === "ok" ? "yds-liquidity-lane__factor--ok" : "yds-liquidity-lane__factor--warn",
+              ].join(" ")}
+            >
+              <span className="yds-liquidity-lane__factor-mark" aria-hidden>
+                {factor.tone === "ok" ? "✓" : "△"}
+              </span>
+              {factor.label}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="yds-liquidity-lane__report-block">
+        <h4 className="yds-liquidity-lane__report-label">시장 영향</h4>
+        <ul className="yds-liquidity-lane__impact-list">
+          {lane.marketImpacts.map((line) => (
+            <li key={line} className="yds-liquidity-lane__impact-item">
+              {line}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="yds-liquidity-lane__report-block yds-liquidity-lane__report-block--interpret">
+        <h4 className="yds-liquidity-lane__report-label">투자 해석</h4>
+        <div className="yds-liquidity-lane__interpret">
+          {lane.investmentLines.map((line) => (
+            <p key={line} className="yds-liquidity-lane__interpret-line">
+              {line}
+            </p>
+          ))}
+        </div>
+      </section>
+
+      <section className="yds-liquidity-lane__report-block">
+        <h4 className="yds-liquidity-lane__report-label">행동 가이드</h4>
+        <ul className="yds-liquidity-lane__action-list">
+          {lane.laneActions.map((line) => (
+            <li key={line} className="yds-liquidity-lane__action-item">
+              <span className="yds-liquidity-lane__action-mark" aria-hidden>
+                ✓
+              </span>
+              {line}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <div className="yds-liquidity-lane__breakdown">
         <p className="yds-liquidity-lane__breakdown-title">세부 기여도</p>

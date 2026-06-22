@@ -38,13 +38,36 @@ import { dxyInterestScore, pickDxyValue, pickUs10yValue, pickSnapshotMetricValue
 
 /**
  * @typedef {{
+ *   environmentLabel: string
+ *   environment: LiquidityFactorLine[]
+ *   marketImpacts: string[]
+ *   investmentLines: string[]
+ *   laneActions: string[]
+ *   contributions: LiquidityContributionRow[]
+ * }} LiquidityLaneInterpretation
+ */
+
+/**
+ * @typedef {{
  *   kind: 'market' | 'policy'
  *   title: string
  *   score: number | null
  *   band: LiquidityBand
- *   factors: LiquidityFactorLine[]
+ *   environmentLabel: string
+ *   environment: LiquidityFactorLine[]
+ *   marketImpacts: string[]
+ *   investmentLines: string[]
+ *   laneActions: string[]
  *   contributions: LiquidityContributionRow[]
  * }} LiquidityLaneCard
+ */
+
+/**
+ * @typedef {{
+ *   headline: string
+ *   lines: string[]
+ *   leadSentence: string
+ * }} LiquiditySynthesis
  */
 
 /**
@@ -55,6 +78,7 @@ import { dxyInterestScore, pickDxyValue, pickUs10yValue, pickSnapshotMetricValue
  *   marketScore: number | null
  *   policyScore: number | null
  *   actionMode: 'aggressive' | 'defense' | 'short_term' | 'medium_long' | 'balanced'
+ *   synthesis: LiquiditySynthesis
  * }} DualLiquidityReport
  */
 
@@ -145,7 +169,7 @@ export function resolveLiquidityBand(score, kind = "market") {
   if (kind === "policy") {
     if (score >= 80) return { id: "very_favorable", label: "완화 우호", tone: "favorable" }
     if (score >= 60) return { id: "favorable", label: "완화 기조", tone: "favorable" }
-    if (score >= 40) return { id: "neutral", label: "중립", tone: "neutral" }
+    if (score >= 40) return { id: "neutral", label: "중립~긴축", tone: "neutral" }
     if (score >= 20) return { id: "alert", label: "긴축 우려", tone: "alert" }
     return { id: "danger", label: "긴축 강화", tone: "danger" }
   }
@@ -167,6 +191,63 @@ export function resolveLiquidityActionMode(market, policy) {
   if (m > p + 5) return "short_term"
   if (p > m + 5) return "medium_long"
   return "balanced"
+}
+
+/**
+ * 시장·정책 유동성 점수 비교 → 종합 해석 (유동성 카드 하단 · 행동 가이드 핵심 문장)
+ * @param {number | null} market
+ * @param {number | null} policy
+ * @returns {LiquiditySynthesis}
+ */
+export function buildLiquiditySynthesis(market, policy) {
+  const mode = resolveLiquidityActionMode(market, policy)
+
+  if (mode === "aggressive") {
+    return {
+      headline: "시장·정책 유동성 동시 우호",
+      lines: ["유동성과 정책이 동시에 우호적", "공격적 투자 환경"],
+      leadSentence: "유동성·정책 동시 우호 — 공격적 투자 환경",
+    }
+  }
+  if (mode === "defense") {
+    return {
+      headline: "시장·정책 유동성 동시 약세",
+      lines: ["유동성과 정책 모두 비우호", "방어 중심 접근 필요"],
+      leadSentence: "유동성·정책 모두 비우호 — 방어 중심 접근",
+    }
+  }
+  if (mode === "short_term") {
+    return {
+      headline: "시장 유동성 > 정책 유동성",
+      lines: [
+        "현재 시장은 정책보다 자금 흐름이 강한 상태",
+        "단기 상승은 가능하지만",
+        "정책 지원은 제한적",
+      ],
+      leadSentence: "시장이 정책보다 강함 — 단기 상승 가능, 정책 지원은 제한적",
+    }
+  }
+  if (mode === "medium_long") {
+    return {
+      headline: "정책 유동성 > 시장 유동성",
+      lines: [
+        "현재 자금 흐름은 약하지만",
+        "정책 완화 기대가 높은 상태",
+        "중장기 개선 가능성 존재",
+      ],
+      leadSentence: "자금 흐름은 약하나 정책 완화 기대 높음 — 중장기 개선 여지",
+    }
+  }
+
+  return {
+    headline: "시장·정책 유동성 균형",
+    lines: [
+      "시장 자금 흐름과 정책 기조가 비슷한 수준",
+      "선별적 접근 유지",
+      "급격한 포지션 변경은 지양",
+    ],
+    leadSentence: "시장·정책 유동성 균형 — 선별적 접근 유지",
+  }
 }
 
 /** @param {number | null} metricScore */
@@ -224,6 +305,118 @@ const POLICY_CONTRIBUTION_TOOLTIPS = {
   pce: "연준 선호 물가 지표",
   dot: "시장 금리인하 기대",
   fed: "연준 통화정책 스탠스",
+}
+
+/** @param {number | null} score @param {'market' | 'policy'} kind */
+function buildMarketImpacts(score) {
+  const s = score ?? 50
+  if (s >= 60) {
+    return [
+      "위험자산 선호 유지",
+      "성장주 자금 유입 지속",
+      "신용시장 안정",
+      "주식시장 수급 우호",
+    ]
+  }
+  if (s >= 40) {
+    return ["선별적 위험자산 선호", "섹터·종목 차별화", "신용시장 혼조", "수급 중립"]
+  }
+  return ["위험자산 선호 약화", "성장주 자금 유출 우려", "신용시장 경계", "주식시장 수급 부담"]
+}
+
+/** @param {number | null} score */
+function buildPolicyImpacts(score) {
+  const s = score ?? 50
+  if (s >= 60) {
+    return ["금리인하 기대 확대", "성장주 멀티플 확장 여지", "장기금리 하락 압력", "밸류에이션 확장 가능"]
+  }
+  if (s >= 40) {
+    return ["성장주 할인율 부담", "장기금리 상승 압력", "밸류에이션 확장 제한"]
+  }
+  return ["긴축 기조 강화", "성장주 할인율 확대", "장기금리 상승 지속", "밸류에이션 압축"]
+}
+
+/**
+ * @param {number | null} marketScore
+ * @param {number | null} policyScore
+ */
+function buildMarketInvestmentLines(marketScore, policyScore) {
+  const m = marketScore ?? 50
+  const p = policyScore ?? 50
+
+  if (m > p + 5) {
+    return [
+      "현재는 정책 환경보다 실제 시장 자금 흐름이 강한 상태",
+      "단기적으로는 위험자산 우위 환경 유지",
+    ]
+  }
+  if (m < p - 5) {
+    return [
+      "현재는 시장 자금 흐름보다 정책 환경이 상대적으로 우호",
+      "중장기 완화 기대는 있으나 단기 수급은 제한될 수 있음",
+    ]
+  }
+  if (m >= 60) {
+    return ["시장·정책 유동성이 균형적", "위험자산 우위 환경이 유지되는 국면"]
+  }
+  return ["시장·정책 유동성이 혼조", "선별적 접근이 필요한 국면"]
+}
+
+/**
+ * @param {number | null} marketScore
+ * @param {number | null} policyScore
+ */
+function buildPolicyInvestmentLines(marketScore, policyScore) {
+  const m = marketScore ?? 50
+  const p = policyScore ?? 50
+
+  if (p < m - 5) {
+    return [
+      "현재는 시장 유동성보다 정책 환경이 약한 상태",
+      "단기 상승은 가능하지만 멀티플 확장은 제한될 수 있음",
+    ]
+  }
+  if (p > m + 5) {
+    return [
+      "현재는 시장 유동성보다 정책 완화 기대가 상대적으로 강함",
+      "중장기 성장주 우위 환경으로 전환 여지",
+    ]
+  }
+  if (p < 40) {
+    return ["정책 환경이 시장에 부담", "방어적 포지셔닝이 유리할 수 있음"]
+  }
+  return ["정책·시장 유동성이 혼조", "실적·현금흐름 중심 접근이 유리"]
+}
+
+/** @param {number | null} marketScore @param {number | null} policyScore */
+function buildMarketLaneActions(marketScore, policyScore) {
+  const m = marketScore ?? 50
+  const p = policyScore ?? 50
+
+  if (m >= 60 && m > p + 5) {
+    return ["관심종목 분할매수", "성장주 우위 유지", "추격매수는 자제"]
+  }
+  if (m < 40) {
+    return ["신규 매수 축소", "현금 비중 점검", "방어주·현금 우선"]
+  }
+  return ["관심종목만 추적", "분할 접근 유지", "추격매수 자제"]
+}
+
+/** @param {number | null} policyScore @param {number | null} marketScore */
+function buildPolicyLaneActions(policyScore, marketScore) {
+  const p = policyScore ?? 50
+  const m = marketScore ?? 50
+
+  if (p < m - 5 && p < 55) {
+    return ["분할매수 유지", "추격매수 자제", "실적 중심 접근"]
+  }
+  if (p >= 60) {
+    return ["중장기 분할 접근 검토", "성장주 비중 점진 확대", "추격매수 자제"]
+  }
+  if (p < 40) {
+    return ["매수 속도 조절", "현금 비중 확대", "고밸류·실적주 우선"]
+  }
+  return ["분할매수 유지", "추격매수 자제", "실적·현금흐름 점검"]
 }
 
 /** @param {import("../macro-risk/displayMetrics.js").MetricDisplayRow | null | undefined} row */
@@ -305,10 +498,10 @@ function buildMarketLiquidity(snapshot, panicData) {
   const rateWarn = (metrics[3].score ?? 100) < 55
 
   /** @type {LiquidityFactorLine[]} */
-  const factors = [
+  const environment = [
     { label: vixOk ? "VIX 안정" : "VIX 상승", tone: vixOk ? "ok" : "warn" },
-    { label: hyOk ? "신용위험 양호" : "신용위험 경계", tone: hyOk ? "ok" : "warn" },
-    { label: moveOk ? "채권시장 안정" : "채권 변동성 확대", tone: moveOk ? "ok" : "warn" },
+    { label: hyOk ? "HY 스프레드 안정" : "HY 스프레드 확대", tone: hyOk ? "ok" : "warn" },
+    { label: moveOk ? "채권 변동성 안정" : "채권 변동성 확대", tone: moveOk ? "ok" : "warn" },
     { label: dxyWarn ? "달러 강세" : "달러 중립", tone: dxyWarn ? "warn" : "ok" },
     { label: rateWarn ? "금리 부담" : "금리 안정", tone: rateWarn ? "warn" : "ok" },
   ]
@@ -318,7 +511,11 @@ function buildMarketLiquidity(snapshot, panicData) {
     title: "시장 유동성",
     score,
     band,
-    factors,
+    environmentLabel: "현재 시장 환경",
+    environment,
+    marketImpacts: buildMarketImpacts(score),
+    investmentLines: [],
+    laneActions: [],
     contributions,
   }
 }
@@ -394,14 +591,12 @@ function buildPolicyLiquidity(snapshot) {
   const cpiUp = (metrics[0].score ?? 50) < 45
   const cutHopeLow = (metrics[3].score ?? 50) < 45
   const hawkish = (metrics[4].score ?? 50) < 45
-  const recessionLow = (infPillar?.score ?? 50) < 55
 
   /** @type {LiquidityFactorLine[]} */
-  const factors = [
-    { label: cpiUp ? "CPI 재상승" : "CPI 둔화", tone: cpiUp ? "warn" : "ok" },
+  const environment = [
+    { label: cpiUp ? "CPI 재상승 우려" : "CPI 둔화", tone: cpiUp ? "warn" : "ok" },
     { label: cutHopeLow ? "금리인하 기대 감소" : "금리인하 기대 유지", tone: cutHopeLow ? "warn" : "ok" },
-    { label: hawkish ? "연준 매파 발언" : "연준 중립", tone: hawkish ? "warn" : "ok" },
-    { label: recessionLow ? "경기침체 우려 낮음" : "경기 둔화 주의", tone: recessionLow ? "ok" : "warn" },
+    { label: hawkish ? "연준 매파 발언 증가" : "연준 중립", tone: hawkish ? "warn" : "ok" },
   ]
 
   return {
@@ -409,7 +604,11 @@ function buildPolicyLiquidity(snapshot) {
     title: "정책 유동성",
     score,
     band,
-    factors,
+    environmentLabel: "현재 정책 환경",
+    environment,
+    marketImpacts: buildPolicyImpacts(score),
+    investmentLines: [],
+    laneActions: [],
     contributions,
   }
 }
@@ -422,7 +621,14 @@ function buildPolicyLiquidity(snapshot) {
 export function buildDualLiquidityReport(snapshot, panicData = null) {
   const market = buildMarketLiquidity(snapshot, panicData)
   const policy = buildPolicyLiquidity(snapshot)
+
+  market.investmentLines = buildMarketInvestmentLines(market.score, policy.score)
+  market.laneActions = buildMarketLaneActions(market.score, policy.score)
+  policy.investmentLines = buildPolicyInvestmentLines(market.score, policy.score)
+  policy.laneActions = buildPolicyLaneActions(policy.score, market.score)
+
   const actionMode = resolveLiquidityActionMode(market.score, policy.score)
+  const synthesis = buildLiquiditySynthesis(market.score, policy.score)
 
   return {
     visible: market.score != null || policy.score != null,
@@ -431,5 +637,6 @@ export function buildDualLiquidityReport(snapshot, panicData = null) {
     marketScore: market.score,
     policyScore: policy.score,
     actionMode,
+    synthesis,
   }
 }

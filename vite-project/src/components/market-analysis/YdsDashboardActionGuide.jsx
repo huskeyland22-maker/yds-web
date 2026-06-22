@@ -8,6 +8,10 @@ export default function YdsDashboardActionGuide({ report }) {
 
   return (
     <YdsDeskCard title={report.title} titleId="desk-action-guide-title">
+      {report.liquidityLead ? (
+        <p className="yds-desk-card__liquidity-lead">{report.liquidityLead}</p>
+      ) : null}
+
       <dl className="yds-desk-card__panel yds-desk-card__action-stars">
         <div className="yds-desk-card__action-star">
           <dt>매수</dt>
