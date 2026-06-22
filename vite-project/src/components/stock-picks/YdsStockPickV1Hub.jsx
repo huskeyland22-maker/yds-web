@@ -16,7 +16,7 @@ import {
 import { filterStockPicksByQuery } from "../../content/ydsStockPickSearch.js"
 import { useStockPickFavoriteAlerts } from "../../hooks/useStockPickFavoriteAlerts.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
-import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
+import { useStockPickDualColumnAlign } from "../../hooks/useStockPickDualColumnAlign.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
 import { useStockPickStatusChanges } from "../../hooks/useStockPickStatusChanges.js"
@@ -59,6 +59,7 @@ export default function YdsStockPickV1Hub() {
   }, [])
 
   const dualLayout = useDualCountryLayout()
+  const dualRef = useStockPickDualColumnAlign(dualLayout)
   const marketContext = useYdsMarketContext()
   const {
     stocks: liveStocks,
@@ -245,7 +246,7 @@ export default function YdsStockPickV1Hub() {
         }}
       />
 
-      <div className="yds-spick-dual">
+      <div className="yds-spick-dual" ref={dualRef}>
         {STOCK_PICK_COUNTRIES.map((country) => {
           const isActive = countryId === country.id
           const panelId =

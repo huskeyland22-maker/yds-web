@@ -89,45 +89,57 @@ export default function YdsStockPickCountryPanel({
   }, [showAll, stocks.length])
 
   return (
-    <div className="yds-spick-country-panel">
-      {showCountryHead && countryMeta ? (
-        <header className="yds-spick-country-panel__head">
-          <span className="yds-spick-country-panel__emoji" aria-hidden>
-            {countryMeta.emoji}
-          </span>
-          <h2 className="yds-spick-country-panel__title">{countryMeta.label}</h2>
-        </header>
-      ) : null}
+    <div className="yds-spick-country-panel" data-country={countryId}>
+      <div className="yds-spick-country-panel__zone-summary" data-spick-zone="summary">
+        {showCountryHead && countryMeta ? (
+          <header className="yds-spick-country-panel__head">
+            <span className="yds-spick-country-panel__emoji" aria-hidden>
+              {countryMeta.emoji}
+            </span>
+            <h2 className="yds-spick-country-panel__title">{countryMeta.label}</h2>
+          </header>
+        ) : null}
 
-      <YdsStockPickSectorConcentrationCard
-        stocks={regimeStocks}
-        limit={Math.min(10, regimeLimit)}
-        className="yds-spick-country-panel__sector-conc"
-      />
+        <YdsStockPickSectorConcentrationCard
+          stocks={regimeStocks}
+          limit={Math.min(10, regimeLimit)}
+          className="yds-spick-country-panel__sector-conc"
+        />
+      </div>
 
-      <YdsStockPickTop3
-        stocks={topHero}
-        isFavorite={isFavorite}
-        onToggleFavorite={onToggleFavorite}
-        heldTickers={heldTickers}
-        statusChanges={statusChanges}
-        loading={loading}
-      />
+      <div className="yds-spick-country-panel__zone-hero" data-spick-zone="hero">
+        <YdsStockPickTop3
+          stocks={topHero}
+          isFavorite={isFavorite}
+          onToggleFavorite={onToggleFavorite}
+          heldTickers={heldTickers}
+          statusChanges={statusChanges}
+          loading={loading}
+        />
+      </div>
 
       {showSecondary ? (
-        <YdsStockPickTop10WhySection stocks={regimeStocks} loading={loading} limit={Math.min(10, regimeLimit)} />
+        <div className="yds-spick-country-panel__zone-why" data-spick-zone="why">
+          <YdsStockPickTop10WhySection
+            stocks={regimeStocks}
+            loading={loading}
+            limit={Math.min(10, regimeLimit)}
+          />
+        </div>
       ) : null}
 
       {showSecondary ? (
         <>
-          <YdsStockPickSectorPanel
-            stocks={sectorStocks}
-            allStocks={stocks}
-            universeStocks={universeStocks.length ? universeStocks : stocks}
-            sectorId={sectorId}
-            onSectorChange={onSectorChange}
-            heldTickers={heldTickers}
-          />
+          <div className="yds-spick-country-panel__zone-sector" data-spick-zone="sector">
+            <YdsStockPickSectorPanel
+              stocks={sectorStocks}
+              allStocks={stocks}
+              universeStocks={universeStocks.length ? universeStocks : stocks}
+              sectorId={sectorId}
+              onSectorChange={onSectorChange}
+              heldTickers={heldTickers}
+            />
+          </div>
 
           <section className="yds-spick-section yds-spick-section--all" aria-labelledby={allSectionId}>
             <div className="yds-spick-section__head-row">
