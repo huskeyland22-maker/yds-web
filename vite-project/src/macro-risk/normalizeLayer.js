@@ -34,6 +34,7 @@ const METRIC_RULES = {
   CPI: { type: "macro", method: "percent" },
   CORE_CPI: { type: "macro", method: "percent" },
   PCE: { type: "macro", method: "percent" },
+  PPI: { type: "macro", method: "percent" },
 }
 
 /**

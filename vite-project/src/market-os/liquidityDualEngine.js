@@ -3,6 +3,7 @@
  */
 
 import { dxyInterestScore, pickDxyValue, pickUs10yValue, pickSnapshotMetricValue } from "../utils/macroTimingAuxScores.js"
+import { buildPolicyLiquidityLane } from "./policyLiquidityEngine.js"
 
 /** @typedef {'very_favorable'|'favorable'|'neutral'|'alert'|'danger'} LiquidityBandId */
 /** @typedef {'ok'|'warn'} LiquidityFactorTone */
@@ -10,6 +11,7 @@ import { dxyInterestScore, pickDxyValue, pickUs10yValue, pickSnapshotMetricValue
 /**
  * @typedef {{
  *   label: string
+ *   detail?: string
  *   tone: LiquidityFactorTone
  * }} LiquidityFactorLine
  */
@@ -59,6 +61,7 @@ import { dxyInterestScore, pickDxyValue, pickUs10yValue, pickSnapshotMetricValue
  *   investmentLines: string[]
  *   laneActions: string[]
  *   contributions: LiquidityContributionRow[]
+ *   scoreExplain?: string
  * }} LiquidityLaneCard
  */
 
@@ -299,15 +302,7 @@ const MARKET_CONTRIBUTION_TOOLTIPS = {
   dxy: "글로벌 달러 유동성",
 }
 
-const POLICY_CONTRIBUTION_TOOLTIPS = {
-  cpi: "헤드라인 인플레이션 추세",
-  core: "근원 인플레이션 추세",
-  pce: "연준 선호 물가 지표",
-  dot: "시장 금리인하 기대",
-  fed: "연준 통화정책 스탠스",
-}
-
-/** @param {number | null} score @param {'market' | 'policy'} kind */
+/** @param {number | null} score */
 function buildMarketImpacts(score) {
   const s = score ?? 50
   if (s >= 60) {
@@ -322,18 +317,6 @@ function buildMarketImpacts(score) {
     return ["선별적 위험자산 선호", "섹터·종목 차별화", "신용시장 혼조", "수급 중립"]
   }
   return ["위험자산 선호 약화", "성장주 자금 유출 우려", "신용시장 경계", "주식시장 수급 부담"]
-}
-
-/** @param {number | null} score */
-function buildPolicyImpacts(score) {
-  const s = score ?? 50
-  if (s >= 60) {
-    return ["금리인하 기대 확대", "성장주 멀티플 확장 여지", "장기금리 하락 압력", "밸류에이션 확장 가능"]
-  }
-  if (s >= 40) {
-    return ["성장주 할인율 부담", "장기금리 상승 압력", "밸류에이션 확장 제한"]
-  }
-  return ["긴축 기조 강화", "성장주 할인율 확대", "장기금리 상승 지속", "밸류에이션 압축"]
 }
 
 /**
@@ -417,15 +400,6 @@ function buildPolicyLaneActions(policyScore, marketScore) {
     return ["매수 속도 조절", "현금 비중 확대", "고밸류·실적주 우선"]
   }
   return ["분할매수 유지", "추격매수 자제", "실적·현금흐름 점검"]
-}
-
-/** @param {import("../macro-risk/displayMetrics.js").MetricDisplayRow | null | undefined} row */
-function scoreTrendEasing(row) {
-  if (!row) return 50
-  if (row.slope === "down") return 82
-  if (row.slope === "flat") return 54
-  if (row.slope === "up") return 26
-  return 50
 }
 
 /**
@@ -522,105 +496,13 @@ function buildMarketLiquidity(snapshot, panicData) {
 
 /**
  * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
- */
-function buildPolicyLiquidity(snapshot) {
-  const infPillar = snapshot?.pillars?.find((p) => p.id === "inflation")
-  const ratePillar = snapshot?.pillars?.find((p) => p.id === "rate")
-  const bei = metricRow(snapshot, "BEI")
-  const us2y = metricRow(snapshot, "US2Y")
-
-  const cpiScore = infPillar ? clamp(100 - (infPillar.score ?? 50), 0, 100) : 50
-  const coreScore = scoreTrendEasing(bei)
-  const pceLine = infPillar?.lines?.find((l) => l.label === "PCE")
-  const pceScore = pceLine?.text?.includes("둔화") ? 78 : pceLine?.text?.includes("후행") ? 52 : 38
-  const dotScore = scoreTrendEasing(bei)
-  const fedScore = ratePillar ? clamp(100 - (ratePillar.score ?? 50), 0, 100) : scoreTrendEasing(us2y)
-
-  const metrics = [
-    { id: "cpi", weight: 0.2, score: cpiScore },
-    { id: "core", weight: 0.2, score: coreScore },
-    { id: "pce", weight: 0.2, score: pceScore },
-    { id: "dot", weight: 0.2, score: dotScore },
-    { id: "fed", weight: 0.2, score: fedScore },
-  ]
-
-  const score = weightedScore(metrics)
-  const band = resolveLiquidityBand(score, "policy")
-
-  const contributions = buildContributionRows(
-    [
-      {
-        id: "cpi",
-        label: "CPI",
-        weight: 0.2,
-        score: metrics[0].score,
-        tooltip: POLICY_CONTRIBUTION_TOOLTIPS.cpi,
-      },
-      {
-        id: "core",
-        label: "Core CPI",
-        weight: 0.2,
-        score: metrics[1].score,
-        tooltip: POLICY_CONTRIBUTION_TOOLTIPS.core,
-      },
-      {
-        id: "pce",
-        label: "PCE",
-        weight: 0.2,
-        score: metrics[2].score,
-        tooltip: POLICY_CONTRIBUTION_TOOLTIPS.pce,
-      },
-      {
-        id: "dot",
-        label: "Dot Plot",
-        weight: 0.2,
-        score: metrics[3].score,
-        tooltip: POLICY_CONTRIBUTION_TOOLTIPS.dot,
-      },
-      {
-        id: "fed",
-        label: "Fed 발언",
-        weight: 0.2,
-        score: metrics[4].score,
-        tooltip: POLICY_CONTRIBUTION_TOOLTIPS.fed,
-      },
-    ],
-    score,
-  )
-
-  const cpiUp = (metrics[0].score ?? 50) < 45
-  const cutHopeLow = (metrics[3].score ?? 50) < 45
-  const hawkish = (metrics[4].score ?? 50) < 45
-
-  /** @type {LiquidityFactorLine[]} */
-  const environment = [
-    { label: cpiUp ? "CPI 재상승 우려" : "CPI 둔화", tone: cpiUp ? "warn" : "ok" },
-    { label: cutHopeLow ? "금리인하 기대 감소" : "금리인하 기대 유지", tone: cutHopeLow ? "warn" : "ok" },
-    { label: hawkish ? "연준 매파 발언 증가" : "연준 중립", tone: hawkish ? "warn" : "ok" },
-  ]
-
-  return {
-    kind: /** @type {const} */ ("policy"),
-    title: "정책 유동성",
-    score,
-    band,
-    environmentLabel: "현재 정책 환경",
-    environment,
-    marketImpacts: buildPolicyImpacts(score),
-    investmentLines: [],
-    laneActions: [],
-    contributions,
-  }
-}
-
-/**
- * @param {import("../macro-risk/engine.js").MacroRiskSnapshot | null} snapshot
  * @param {object | null | undefined} panicData
+ * @param {Record<string, number[]>} [apiHistory]
  * @returns {DualLiquidityReport}
  */
-export function buildDualLiquidityReport(snapshot, panicData = null) {
+export function buildDualLiquidityReport(snapshot, panicData = null, apiHistory = {}) {
   const market = buildMarketLiquidity(snapshot, panicData)
-  const policy = buildPolicyLiquidity(snapshot)
+  const policy = buildPolicyLiquidityLane(snapshot, apiHistory)
 
   market.investmentLines = buildMarketInvestmentLines(market.score, policy.score)
   market.laneActions = buildMarketLaneActions(market.score, policy.score)

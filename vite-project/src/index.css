@@ -30389,6 +30389,37 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-weight: 800;
 }
 
+.yds-liquidity-lane__factor-text {
+  display: grid;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.yds-liquidity-lane__factor-label {
+  display: block;
+}
+
+.yds-liquidity-lane__factor-detail {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.yds-liquidity-lane__report-block--explain {
+  border-left: 3px solid rgba(96, 165, 250, 0.45);
+  padding-left: 0.5rem;
+}
+
+.yds-liquidity-lane__score-explain {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
 .yds-liquidity-lane__breakdown {
   margin-top: 0.5rem;
   padding-top: 0.45rem;

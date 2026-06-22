@@ -40,7 +40,7 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
         <ul className="yds-liquidity-lane__factors">
           {lane.environment.map((factor) => (
             <li
-              key={factor.label}
+              key={`${factor.label}-${factor.detail ?? ""}`}
               className={[
                 "yds-liquidity-lane__factor",
                 factor.tone === "ok" ? "yds-liquidity-lane__factor--ok" : "yds-liquidity-lane__factor--warn",
@@ -49,7 +49,12 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
               <span className="yds-liquidity-lane__factor-mark" aria-hidden>
                 {factor.tone === "ok" ? "✓" : "△"}
               </span>
-              {factor.label}
+              <span className="yds-liquidity-lane__factor-text">
+                <span className="yds-liquidity-lane__factor-label">{factor.label}</span>
+                {factor.detail ? (
+                  <span className="yds-liquidity-lane__factor-detail">{factor.detail}</span>
+                ) : null}
+              </span>
             </li>
           ))}
         </ul>
@@ -90,6 +95,13 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
           ))}
         </ul>
       </section>
+
+      {lane.scoreExplain ? (
+        <section className="yds-liquidity-lane__report-block yds-liquidity-lane__report-block--explain">
+          <h4 className="yds-liquidity-lane__report-label">점수 해설</h4>
+          <p className="yds-liquidity-lane__score-explain">{lane.scoreExplain}</p>
+        </section>
+      ) : null}
 
       <div className="yds-liquidity-lane__breakdown">
         <p className="yds-liquidity-lane__breakdown-title">세부 기여도</p>

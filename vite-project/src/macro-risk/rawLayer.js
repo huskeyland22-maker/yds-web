@@ -60,7 +60,7 @@ export function buildMetricSeries(key, history, opts = {}) {
  */
 export function buildRawLayer(apiHistory = {}) {
   const rateKeys = ["US10Y", "US30Y", "US2Y", "REAL_YIELD", "MOVE"]
-  const inflKeys = ["BEI", "CPI", "CORE_CPI", "PCE"]
+  const inflKeys = ["BEI", "CPI", "CORE_CPI", "PCE", "PPI"]
   const liqKeys = ["DXY", "QT", "M2", "FED_BALANCE"]
 
   /** @type {Record<string, MetricSeries>} */

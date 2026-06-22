@@ -5,6 +5,7 @@ import {
   resolveLiquidityActionMode,
   resolveLiquidityBand,
 } from "../vite-project/src/market-os/liquidityDualEngine.js"
+import { buildPolicyLiquidityLane } from "../vite-project/src/market-os/policyLiquidityEngine.js"
 import { buildMacroRiskSnapshot } from "../vite-project/src/macro-risk/engine.js"
 import { buildDashboardActionGuideReport } from "../vite-project/src/content/ydsDashboardActionGuide.js"
 
@@ -39,6 +40,11 @@ assert.ok(aggSynth.lines.some((l) => /공격적/.test(l)))
 const defSynth = buildLiquiditySynthesis(30, 28)
 assert.ok(defSynth.lines.some((l) => /방어/.test(l)))
 
+const policyOnly = buildPolicyLiquidityLane(buildMacroRiskSnapshot({}, { vix: 16 }))
+assert.ok(policyOnly.score != null && policyOnly.score < 55)
+assert.equal(policyOnly.contributions.length, 3)
+assert.ok(policyOnly.environment.some((f) => f.detail && /→/.test(f.detail)))
+
 const snapshot = buildMacroRiskSnapshot({}, { vix: 16, highYield: 3.6, move: 92, dxy: 104 })
 const report = buildDualLiquidityReport(snapshot, {
   vix: 16,
@@ -64,7 +70,7 @@ assert.ok(report.policy.investmentLines.length >= 1)
 assert.ok(report.market.laneActions.length >= 3)
 assert.ok(report.policy.laneActions.length >= 3)
 assert.equal(report.market.contributions.length, 5)
-assert.equal(report.policy.contributions.length, 5)
+assert.equal(report.policy.contributions.length, 3)
 assert.equal(
   report.market.contributions.reduce((sum, row) => sum + row.contribution, 0),
   report.market.score,
@@ -74,6 +80,9 @@ assert.equal(
   report.policy.score,
 )
 assert.ok(report.market.contributions.every((row) => row.tooltip && row.label))
+assert.ok(report.policy.environment.some((f) => /CPI.*상승/.test(f.label)))
+assert.ok(!report.policy.environment.some((f) => /물가 둔화/.test(f.label)))
+assert.ok(report.policy.scoreExplain?.includes("정책 환경"))
 assert.ok(report.synthesis?.headline)
 assert.ok(report.synthesis.lines.length >= 2)
 assert.ok(report.synthesis.leadSentence)
