@@ -46,6 +46,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+  --spick-section-x: 1rem;
+  --spick-why-card-h: 21.25rem;
+  --spick-why-gap: 0.55rem;
+  --spick-section-gap: 1.5rem;
 }
 
 .yds-spick-sync-note {
@@ -186,6 +190,7 @@
   flex-direction: column;
   gap: 0.75rem;
   min-width: 0;
+  --spick-country-panel-gap: 0.75rem;
 }
 
 .yds-spick-section--hero {
@@ -1707,6 +1712,18 @@
   color: #fca5a5;
 }
 
+.yds-spick-why-card__penalty {
+  margin: 0 0 0.35rem;
+}
+
+.yds-spick-why-card__penalty-list {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.65rem;
+  line-height: 1.4;
+  color: #fca5a5;
+}
+
 .yds-spick-ranking {
   border-radius: 0.55rem;
   border: 1px solid rgba(148, 163, 184, 0.14);
@@ -2063,12 +2080,18 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem;
-    align-items: start;
+    align-items: stretch;
   }
 
   .yds-spick-dual__col {
     display: flex;
     flex-direction: column;
+    min-height: 100%;
+  }
+
+  .yds-spick-dual .yds-spick-country-panel {
+    flex: 1;
+    height: 100%;
   }
 
   .yds-spick-dual .yds-spick-top3,
@@ -2253,8 +2276,23 @@
 }
 
 /* ── TOP10 왜 이 종목인가 ── */
+.yds-spick-section--why,
+.yds-spick-section--sector {
+  padding-inline: var(--spick-section-x);
+}
+
 .yds-spick-section--why {
   margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+.yds-spick-section--sector {
+  margin-top: calc(var(--spick-section-gap) - var(--spick-country-panel-gap, 0.75rem));
+}
+
+.yds-spick-section--why .yds-spick-section__title,
+.yds-spick-section--sector .yds-spick-section__title {
+  padding-inline: 0;
 }
 
 .yds-spick-section__subtitle {
@@ -2265,16 +2303,40 @@
 }
 
 .yds-spick-why-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
+  display: grid;
+  gap: var(--spick-why-gap);
+  grid-auto-rows: var(--spick-why-card-h);
 }
 
 .yds-spick-why-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: var(--spick-why-card-h);
+  box-sizing: border-box;
   padding: 0.65rem 0.7rem;
   border-radius: 0.65rem;
   border: 1px solid rgba(148, 163, 184, 0.18);
   background: rgba(15, 23, 42, 0.82);
+  overflow: hidden;
+}
+
+.yds-spick-why-card__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 1024px) {
+  .yds-spick-dual .yds-spick-section--why .yds-spick-why-list {
+    min-height: calc(
+      var(--spick-why-slots, 5) * var(--spick-why-card-h) +
+        max(0, var(--spick-why-slots, 5) - 1) * var(--spick-why-gap)
+    );
+  }
 }
 
 .yds-spick-why-card__head {

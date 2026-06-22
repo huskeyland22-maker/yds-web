@@ -14,7 +14,11 @@ export default function YdsStockPickTop10WhySection({ stocks, loading = false, l
   if (!top10.length && !loading) return null
 
   return (
-    <section className="yds-spick-section yds-spick-section--why" aria-labelledby="spick-top10-why">
+    <section
+      className="yds-spick-section yds-spick-section--why"
+      aria-labelledby="spick-top10-why"
+      style={{ "--spick-why-slots": limit }}
+    >
       <h2 id="spick-top10-why" className="yds-spick-section__title">
         왜 이 종목인가? · TOP{limit}
       </h2>

@@ -39,38 +39,40 @@ export default function YdsStockPickWhyCard({ stock, rank }) {
         ) : null}
       </header>
 
-      <YdsStockPickPhase3Breakdown
-        stock={stock}
-        breakdown={stock.scoreBreakdown}
-        v4={stock.v4Score}
-        timing={stock.timingScore}
-        variant="why"
-        showDetails={false}
-      />
+      <div className="yds-spick-why-card__body">
+        <YdsStockPickPhase3Breakdown
+          stock={stock}
+          breakdown={stock.scoreBreakdown}
+          v4={stock.v4Score}
+          timing={stock.timingScore}
+          variant="why"
+          showDetails={false}
+        />
 
-      {stock.pickMeta?.timingPenaltyReasons?.length ? (
-        <div className="yds-spick-why-card__penalty">
-          <p className="yds-spick-why-card__penalty-title">타이밍 감점</p>
-          <ul className="yds-spick-why-card__penalty-list">
-            {stock.pickMeta.timingPenaltyReasons.map((r) => (
-              <li key={r}>− {r}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      <p className="yds-spick-why-card__lead">왜 이 종목인가?</p>
-
-      <YdsStockPickOpinionBlock opinion={stock.opinion} variant="why" />
-
-      <dl className="yds-spick-why-card__grid">
-        {ROWS.map(({ key, label }) => (
-          <div key={key} className="yds-spick-why-card__row">
-            <dt>{label}</dt>
-            <dd>{brief[key]}</dd>
+        {stock.pickMeta?.timingPenaltyReasons?.length ? (
+          <div className="yds-spick-why-card__penalty">
+            <p className="yds-spick-why-card__penalty-title">타이밍 감점</p>
+            <ul className="yds-spick-why-card__penalty-list">
+              {stock.pickMeta.timingPenaltyReasons.map((r) => (
+                <li key={r}>− {r}</li>
+              ))}
+            </ul>
           </div>
-        ))}
-      </dl>
+        ) : null}
+
+        <p className="yds-spick-why-card__lead">왜 이 종목인가?</p>
+
+        <YdsStockPickOpinionBlock opinion={stock.opinion} variant="why" />
+
+        <dl className="yds-spick-why-card__grid">
+          {ROWS.map(({ key, label }) => (
+            <div key={key} className="yds-spick-why-card__row">
+              <dt>{label}</dt>
+              <dd>{brief[key]}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
     </article>
   )
 }
