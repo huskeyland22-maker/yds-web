@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-import YdsDataSourceBadge from "./YdsDataSourceBadge.jsx"
 import YdsMarketStatePrimaryPanel from "./YdsMarketStatePrimaryPanel.jsx"
 import YdsMarketPanicSecondaryPanel from "./YdsMarketPanicSecondaryPanel.jsx"
 
@@ -28,7 +27,6 @@ export default function YdsMarketScoreHero({
         <p className="yds-market-score-hero__philosophy">
           시장 상태 = 전략 · 패닉 강도 = 매수 강도
         </p>
-        <YdsDataSourceBadge />
       </div>
 
       <div className="yds-market-score-hero__stack yds-market-desk__slot yds-market-desk__slot--scores">

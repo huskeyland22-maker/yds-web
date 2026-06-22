@@ -1,5 +1,4 @@
 import { useMemo, useEffect, useRef } from "react"
-import CycleDataBasisBar from "../cycle/CycleDataBasisBar.jsx"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
@@ -28,13 +27,6 @@ import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
   const cycleFlow = useMemo(() => buildMarketCycleFlowReport(safeHistory), [safeHistory])
-
-  const cycleDataSource = useMemo(() => {
-    if (panicData?.__fromHub) return "Panic Hub"
-    if (panicData?.__fromHistory) return "히스토리"
-    if (panicData?.__fromReport) return "리포트"
-    return "수동 입력"
-  }, [panicData])
 
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
@@ -73,14 +65,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
   return (
     <div className="yds-market-desk" id="market-desk" aria-label="YDS 시장분석">
-      <div className="yds-market-desk__basis">
-        <CycleDataBasisBar
-          updatedAt={panicData?.updatedAt}
-          cycleSource={cycleDataSource}
-          bondSource="FRED"
-        />
-      </div>
-
       <div className="yds-market-desk__stream">
         <YdsMarketScoreHero
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
@@ -105,22 +89,22 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           historyRows={safeHistory}
         />
 
-        <section
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
-          aria-labelledby="market-block-indices"
-        >
-          <h2 id="market-block-indices" className="yds-market-desk__block-label">
-            핵심 지수
-          </h2>
-          <HomeV5DeskLead
-            panicData={panicData}
-            historyRows={safeHistory}
-            hideSectionHeader
-            metricTwoLine
-          />
-        </section>
+        <div className="yds-market-desk__section-stack">
+          <section
+            className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
+            aria-labelledby="market-block-indices"
+          >
+            <h2 id="market-block-indices" className="yds-market-desk__block-label">
+              핵심 지수
+            </h2>
+            <HomeV5DeskLead
+              panicData={panicData}
+              historyRows={safeHistory}
+              hideSectionHeader
+              metricTwoLine
+            />
+          </section>
 
-        <div className="yds-market-desk__brief-stack">
           <YdsDashboardWeekEvents report={weekEvents} />
           {macroRiskEnabled ? (
             <YdsDashboardLiquidityCard card={liquidityCard} loading={bondSnapshot.loading} />
