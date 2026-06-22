@@ -1,7 +1,4 @@
-/**
- * 유동성 환경 V2 — 점수 기반 보조 필터
- * 10Y(40%) + Real Yield(30%) + HY OAS(20%) + MOVE(10%)
- */
+import { buildDualLiquidityReport } from "./liquidityDualEngine.js"
 
 /** @typedef {'favorable'|'neutral'|'alert'} LiquidityVerdictId */
 
@@ -208,10 +205,24 @@ function buildStyleSignal(verdict, real) {
  * @returns {LiquidityEnvironmentCard}
  */
 export function buildLiquidityEnvironmentCard(snapshot, panicData, formatValue) {
+  const dual = buildDualLiquidityReport(snapshot, panicData)
+  const market = dual.market
   const us10 = toNum(metricRow(snapshot, "US10Y")?.current)
   const real = toNum(metricRow(snapshot, "REAL_YIELD")?.current)
   const hy = toNum(panicData?.highYield ?? panicData?.hyOas)
   const move = toNum(panicData?.move ?? metricRow(snapshot, "MOVE")?.current)
+
+  const verdict =
+    market.band.id === "very_favorable" || market.band.id === "favorable"
+      ? LIQUIDITY_VERDICTS.favorable
+      : market.band.id === "alert" || market.band.id === "danger"
+        ? LIQUIDITY_VERDICTS.alert
+        : LIQUIDITY_VERDICTS.neutral
+
+  const styleSignal = market.factors.find((f) => f.label.includes("VIX"))?.label ?? "종목 선별"
+  const ratesSignal = market.factors.find((f) => f.label.includes("금리"))?.label ?? "금리 중립"
+  const volatilitySignal = market.factors.find((f) => f.label.includes("채권"))?.label ?? "채권 중립"
+  const creditSignal = market.factors.find((f) => f.label.includes("신용"))?.label ?? "신용 중립"
 
   /** @type {LiquidityMetricV2[]} */
   const metrics = [
@@ -249,20 +260,11 @@ export function buildLiquidityEnvironmentCard(snapshot, panicData, formatValue) 
     },
   ]
 
-  const score = weightedLiquidityScore(metrics)
-  const verdict = resolveLiquidityVerdict(score)
-  const summary = buildLiquiditySummary(metrics, verdict)
-  const headline = resolveLiquidityHeadline(score)
-  const styleSignal = buildStyleSignal(verdict, real)
-  const ratesSignal = buildRatesSignal(us10, move, real)
-  const volatilitySignal = buildVolatilitySignal(move)
-  const creditSignal = buildCreditSignal(hy)
-
   return {
-    score,
+    score: market.score,
     verdict,
-    summary,
-    headline,
+    summary: buildLiquiditySummary(metrics, verdict),
+    headline: market.band.label,
     styleSignal,
     ratesSignal,
     volatilitySignal,

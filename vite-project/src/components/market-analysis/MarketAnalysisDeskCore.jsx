@@ -5,15 +5,14 @@ import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
-import YdsDashboardLiquidityCard from "./YdsDashboardLiquidityCard.jsx"
+import YdsDashboardLiquiditySection from "./YdsDashboardLiquiditySection.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
-import { formatCurrent } from "../../macro-risk/displayMetrics.js"
 import { buildMarketCycleFlowReport } from "../../content/ydsMarketCycleFlow.js"
 import { buildDashboardActionGuideReport } from "../../content/ydsDashboardActionGuide.js"
 import { buildWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
-import { buildLiquidityEnvironmentCard } from "../../market-os/liquidityEnvironment.js"
+import { buildDualLiquidityReport } from "../../market-os/liquidityDualEngine.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 
@@ -37,16 +36,14 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     [marketContext],
   )
 
-  const liquidityCard = useMemo(() => {
+  const dualLiquidity = useMemo(() => {
     if (!macroRiskEnabled) return null
-    const fmt = (key, n, fmtType = "rate") =>
-      n == null || !Number.isFinite(n) ? "—" : formatCurrent(n, fmtType)
-    return buildLiquidityEnvironmentCard(bondSnapshot.snapshot, panicData, fmt)
+    return buildDualLiquidityReport(bondSnapshot.snapshot, panicData)
   }, [macroRiskEnabled, bondSnapshot.snapshot, panicData])
 
   const actionGuide = useMemo(
-    () => buildDashboardActionGuideReport(panicData, safeHistory, liquidityCard),
-    [panicData, safeHistory, liquidityCard],
+    () => buildDashboardActionGuideReport(panicData, safeHistory, dualLiquidity),
+    [panicData, safeHistory, dualLiquidity],
   )
 
   const lastAuditKeyRef = useRef("")
@@ -107,7 +104,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
           <YdsDashboardWeekEvents report={weekEvents} />
           {macroRiskEnabled ? (
-            <YdsDashboardLiquidityCard card={liquidityCard} loading={bondSnapshot.loading} />
+            <YdsDashboardLiquiditySection report={dualLiquidity} loading={bondSnapshot.loading} />
           ) : null}
           <YdsDashboardActionGuide report={actionGuide} />
         </div>

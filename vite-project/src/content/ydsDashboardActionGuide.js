@@ -35,6 +35,13 @@ function toStars(n) {
   return `${"★".repeat(filled)}${"☆".repeat(5 - filled)}`
 }
 
+/** @param {import("../market-os/liquidityDualEngine.js").LiquidityBandId} bandId */
+function bandToLegacyLiqId(bandId) {
+  if (bandId === "very_favorable" || bandId === "favorable") return "favorable"
+  if (bandId === "alert" || bandId === "danger") return "alert"
+  return "neutral"
+}
+
 /**
  * @param {string} posId
  * @param {string} macroId
@@ -91,7 +98,7 @@ function resolveStarRatings(posId, macroId, liqId, panicScore) {
  * @param {string} macroId
  * @param {string} liqId
  */
-function resolveRecommendedActions(posId, macroId, liqId) {
+function resolveBaseActions(posId, macroId, liqId) {
   /** @type {string[]} */
   const actions = []
 
@@ -121,16 +128,45 @@ function resolveRecommendedActions(posId, macroId, liqId) {
     actions.push("현금 비중 점검")
   }
 
+  return actions
+}
+
+/**
+ * @param {ActionStarRatings} stars
+ * @param {string[]} actions
+ * @param {import("../market-os/liquidityDualEngine.js").DualLiquidityReport['actionMode']} mode
+ */
+function applyLiquidityActionMode(stars, actions, mode) {
+  if (!mode || mode === "balanced") return actions
+
+  if (mode === "aggressive") {
+    stars.buy = Math.min(5, stars.buy + 1)
+    stars.watch = Math.max(1, stars.watch - 1)
+    stars.cash = Math.max(1, stars.cash - 1)
+    actions.unshift("공격 모드 · 분할 매수 확대")
+  } else if (mode === "defense") {
+    stars.buy = Math.max(1, stars.buy - 1)
+    stars.watch = Math.min(5, stars.watch + 1)
+    stars.cash = Math.min(5, stars.cash + 1)
+    actions.unshift("방어 모드 · 현금 비중 확대")
+  } else if (mode === "short_term") {
+    stars.buy = Math.min(5, stars.buy + 1)
+    actions.unshift("단기 매수 가능 · 분할 접근")
+  } else if (mode === "medium_long") {
+    stars.watch = Math.max(1, stars.watch - 1)
+    actions.unshift("중장기 우호 · 우량주 중심")
+  }
+
   return [...new Set(actions)].slice(0, 4)
 }
 
 /**
  * @param {object | null | undefined} panicData
  * @param {object[]} historyRows
- * @param {import("../market-os/liquidityEnvironment.js").LiquidityEnvironmentCard | null} liquidity
+ * @param {import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null} dualLiquidity
  * @returns {DashboardActionGuideReport}
  */
-export function buildDashboardActionGuideReport(panicData, historyRows = [], liquidity = null) {
+export function buildDashboardActionGuideReport(panicData, historyRows = [], dualLiquidity = null) {
   const state = resolveMarketStateCenterView(panicData)
   if (!state) {
     return {
@@ -152,13 +188,18 @@ export function buildDashboardActionGuideReport(panicData, historyRows = [], liq
 
   const panicScore =
     state.panicScore ?? (panicData ? Math.round(getFinalScore(panicData) ?? NaN) : null)
-  const liquidityScore = liquidity?.score ?? null
+  const liquidityScore = dualLiquidity?.marketScore ?? null
   const posId = state.position.id
-  const liqId = liquidity?.verdict?.id ?? "neutral"
+  const liqId = bandToLegacyLiqId(dualLiquidity?.market?.band?.id ?? "neutral")
   const macroId = state.macroId
 
   const stars = resolveStarRatings(posId, macroId, liqId, panicScore)
-  const recommendedActions = resolveRecommendedActions(posId, macroId, liqId)
+  const baseActions = resolveBaseActions(posId, macroId, liqId)
+  const recommendedActions = applyLiquidityActionMode(
+    stars,
+    baseActions,
+    dualLiquidity?.actionMode ?? "balanced",
+  )
 
   return {
     visible: true,
