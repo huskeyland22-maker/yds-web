@@ -26,6 +26,8 @@ import {
 import { buildComponentContributionReport } from "../content/ydsPickComponentContribution.js"
 import { buildPanicDeepAnalysisReport } from "../content/ydsPickPanicDeepAnalysis.js"
 import { buildMarketStateStrategyReport } from "../content/ydsPickMarketStateStrategy.js"
+import { buildPerfInsightReport } from "../content/ydsPickPerfInsight.js"
+import { buildTopSuccessReport } from "../content/ydsPickTopSuccessReport.js"
 import {
   buildHorizonAvailability,
   isComponentContributionPanelVisible,
@@ -33,9 +35,11 @@ import {
   isMarketStrategyPanelVisible,
   isOutcomePanelVisible,
   isPanicDeepPanelVisible,
+  isPerfInsightPanelVisible,
   isReliabilityPanelVisible,
   isScoreCorrelationPanelVisible,
   isSuccessPatternPanelVisible,
+  isTopSuccessReportPanelVisible,
   resolveDefaultHorizon,
 } from "../content/ydsPickPerfPanelVisibility.js"
 import { loadValidationPicks } from "../content/ydsValidationStorage.js"
@@ -260,6 +264,122 @@ function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange, horizonAvai
           value={formatPerfPct(summary.avgReturn)}
           tone={toneFromPct(summary.avgReturn)}
         />
+      </div>
+    </section>
+  )
+}
+
+function PerfInsightPanel({ report }) {
+  if (!isPerfInsightPanelVisible(report)) return null
+
+  return (
+    <section className="yds-perf-val__section yds-perf-val__insight" aria-labelledby="perf-val-insight">
+      <p className="yds-perf-val__insight-kicker">Research Note · Interpretation</p>
+      <h2 id="perf-val-insight" className="yds-perf-val__h2">
+        성과 인사이트
+      </h2>
+      <p className="yds-perf-val__insight-lede">
+        최근 {report.horizonLabel} 기준 · 잠금 수익률 집계 해석 · AI 예측 없음
+      </p>
+
+      <div className="yds-perf-val__insight-metrics">
+        <div className="yds-perf-val__insight-metric">
+          <span className="yds-perf-val__insight-metric-key">승률</span>
+          <strong className="yds-perf-val__insight-metric-val font-mono tabular-nums">
+            {report.winRate != null ? `${report.winRate}%` : "—"}
+          </strong>
+        </div>
+        <div className="yds-perf-val__insight-metric">
+          <span className="yds-perf-val__insight-metric-key">평균수익</span>
+          <strong
+            className={`yds-perf-val__insight-metric-val font-mono tabular-nums ${
+              report.avgReturn != null && report.avgReturn >= 0
+                ? "yds-perf-val__insight-metric-val--up"
+                : report.avgReturn != null
+                  ? "yds-perf-val__insight-metric-val--down"
+                  : ""
+            }`}
+          >
+            {formatPerfPct(report.avgReturn)}
+          </strong>
+        </div>
+        <span className="yds-perf-val__insight-metric-n font-mono tabular-nums">n={report.total}</span>
+      </div>
+
+      <div className="yds-perf-val__insight-body">
+        <h3 className="yds-perf-val__insight-h3">분석 결과</h3>
+        <ul className="yds-perf-val__insight-list">
+          {report.insights.map((line) => (
+            <li key={line} className="yds-perf-val__insight-item">
+              <span className="yds-perf-val__insight-check" aria-hidden>
+                ✓
+              </span>
+              {line}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+function TopSuccessReportPanel({ report }) {
+  if (!isTopSuccessReportPanelVisible(report)) return null
+
+  return (
+    <section className="yds-perf-val__section yds-perf-val__top-success" aria-labelledby="perf-val-top-success">
+      <p className="yds-perf-val__insight-kicker">Case Study · Winners</p>
+      <h2 id="perf-val-top-success" className="yds-perf-val__h2">
+        TOP 성공 사례
+      </h2>
+      <p className="yds-perf-val__insight-lede">
+        {report.horizonLabel} 성공(+10%↑) 잠금 실측 · 최근 {report.cases.length}건 · 저장 스냅샷만
+      </p>
+
+      {report.commonTraits.length ? (
+        <div className="yds-perf-val__top-success-traits">
+          <h3 className="yds-perf-val__insight-h3">최근 성공 종목 공통점</h3>
+          <ul className="yds-perf-val__insight-list">
+            {report.commonTraits.map((line) => (
+              <li key={line} className="yds-perf-val__insight-item">
+                <span className="yds-perf-val__insight-check" aria-hidden>
+                  ✓
+                </span>
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="yds-perf-val__top-success-list">
+        {report.cases.map((row) => (
+          <article key={row.id} className="yds-perf-val__top-success-card">
+            <div className="yds-perf-val__top-success-head">
+              <Link
+                to={`/stock-picks/${encodeURIComponent(row.ticker)}`}
+                className="yds-perf-val__top-success-name"
+              >
+                {row.name}
+              </Link>
+              <strong className="yds-perf-val__top-success-ret font-mono tabular-nums">
+                {formatPerfPct(row.returnPct)}
+              </strong>
+            </div>
+            <div className="yds-perf-val__top-success-meta font-mono tabular-nums">
+              {row.recommendedPrice != null ? (
+                <span>추천가 {formatPerfPrice(row.recommendedPrice)}</span>
+              ) : null}
+              {row.totalScore != null ? <span>총점 {row.totalScore}</span> : null}
+            </div>
+            <div className="yds-perf-val__top-success-tags">
+              {row.qualityGrade ? <span>품질 {row.qualityGrade}</span> : null}
+              {row.timingGrade ? <span>타이밍 {row.timingGrade}</span> : null}
+              {row.marketFitGrade ? <span>시장적합 {row.marketFitGrade}</span> : null}
+              {row.panicIntensity != null ? <span>패닉 {row.panicIntensity}</span> : null}
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   )
@@ -839,6 +959,8 @@ export default function PerformanceValidationPage() {
   const componentContribution = useMemo(() => buildComponentContributionReport(picks), [picks])
   const panicDeep = useMemo(() => buildPanicDeepAnalysisReport(picks), [picks])
   const marketStrategy = useMemo(() => buildMarketStateStrategyReport(picks), [picks])
+  const perfInsight = useMemo(() => buildPerfInsightReport(picks), [picks])
+  const topSuccessReport = useMemo(() => buildTopSuccessReport(picks), [picks])
   const horizonAvailability = useMemo(() => buildHorizonAvailability(picks), [picks])
 
   useEffect(() => {
@@ -887,6 +1009,8 @@ export default function PerformanceValidationPage() {
             horizonAvailability={horizonAvailability}
           />
 
+          <PerfInsightPanel report={perfInsight} />
+
           <ReliabilityAuditPanel report={reliability} />
 
           <ScoreCorrelationPanel report={scoreCorrelation} />
@@ -903,6 +1027,8 @@ export default function PerformanceValidationPage() {
             onHorizonChange={setPatternHorizon}
             horizonAvailability={horizonAvailability}
           />
+
+          <TopSuccessReportPanel report={topSuccessReport} />
 
           <section className="yds-perf-val__section" aria-labelledby="perf-val-kpi">
             <h2 id="perf-val-kpi" className="yds-perf-val__h2">

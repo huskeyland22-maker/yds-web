@@ -85,6 +85,16 @@ export function isSuccessPatternPanelVisible(pattern) {
   return (pattern?.totalTracked ?? 0) > 0
 }
 
+/** @param {import("./ydsPickPerfInsight.js").PerfInsightReport} report */
+export function isPerfInsightPanelVisible(report) {
+  return Boolean(report?.visible && (report.insights?.length ?? 0) > 0)
+}
+
+/** @param {import("./ydsPickTopSuccessReport.js").TopSuccessReport} report */
+export function isTopSuccessReportPanelVisible(report) {
+  return Boolean(report?.visible && (report.cases?.length ?? 0) > 0)
+}
+
 /**
  * @param {Record<PerfHorizonKey, number>} availability
  * @param {PerfHorizonKey} horizonKey
