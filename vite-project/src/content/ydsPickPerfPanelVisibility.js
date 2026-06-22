@@ -90,8 +90,23 @@ export function isPerfInsightPanelVisible(report) {
   return Boolean(report?.visible && (report.insights?.length ?? 0) > 0)
 }
 
+/** @param {{ visible?: boolean, horizons?: Array<{ visible?: boolean }> } | null | undefined} report */
+export function isExpectedValuePanelVisible(report) {
+  return Boolean(report?.visible && (report.horizons ?? []).some((h) => h.visible))
+}
+
+/** @param {{ visible?: boolean, horizons?: Array<{ visible?: boolean }> } | null | undefined} report */
+export function isMddAnalysisPanelVisible(report) {
+  return Boolean(report?.visible && (report.horizons ?? []).some((h) => h.visible))
+}
+
 /** @param {import("./ydsPickTopSuccessReport.js").TopSuccessReport} report */
 export function isTopSuccessReportPanelVisible(report) {
+  return Boolean(report?.visible && (report.cases?.length ?? 0) > 0)
+}
+
+/** @param {{ visible?: boolean, cases?: unknown[] } | null | undefined} report */
+export function isTopFailureReportPanelVisible(report) {
   return Boolean(report?.visible && (report.cases?.length ?? 0) > 0)
 }
 

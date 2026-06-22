@@ -26,11 +26,16 @@ import {
 import { buildComponentContributionReport } from "../content/ydsPickComponentContribution.js"
 import { buildPanicDeepAnalysisReport } from "../content/ydsPickPanicDeepAnalysis.js"
 import { buildMarketStateStrategyReport } from "../content/ydsPickMarketStateStrategy.js"
+import { buildExpectedValueAnalysisReport } from "../content/ydsPickExpectedValueAnalysis.js"
+import { buildMddAnalysisReport } from "../content/ydsPickMddAnalysis.js"
 import { buildPerfInsightReport } from "../content/ydsPickPerfInsight.js"
+import { buildTopFailureReport } from "../content/ydsPickTopFailureReport.js"
 import { buildTopSuccessReport } from "../content/ydsPickTopSuccessReport.js"
 import {
   buildHorizonAvailability,
   isComponentContributionPanelVisible,
+  isExpectedValuePanelVisible,
+  isMddAnalysisPanelVisible,
   isHorizonTabEnabled,
   isMarketStrategyPanelVisible,
   isOutcomePanelVisible,
@@ -39,6 +44,7 @@ import {
   isReliabilityPanelVisible,
   isScoreCorrelationPanelVisible,
   isSuccessPatternPanelVisible,
+  isTopFailureReportPanelVisible,
   isTopSuccessReportPanelVisible,
   resolveDefaultHorizon,
 } from "../content/ydsPickPerfPanelVisibility.js"
@@ -269,6 +275,154 @@ function OutcomeVerdictPanel({ summary, horizonKey, onHorizonChange, horizonAvai
   )
 }
 
+function ExpectedValuePanel({ report }) {
+  if (!isExpectedValuePanelVisible(report)) return null
+
+  const visibleHorizons = report.horizons.filter((h) => h.visible)
+
+  return (
+    <section className="yds-perf-val__section yds-perf-val__ev" aria-labelledby="perf-val-ev">
+      <p className="yds-perf-val__ev-kicker">Quant · Expected Value</p>
+      <h2 id="perf-val-ev" className="yds-perf-val__h2">
+        기대값 분석
+      </h2>
+      <p className="yds-perf-val__ev-lede">
+        1회 추천당 기대 수익률 · 잠금 실측 · {report.formula}
+      </p>
+
+      <div className="yds-perf-val__ev-grid">
+        {visibleHorizons.map((row) => (
+          <article key={row.key} className="yds-perf-val__ev-card">
+            <h3 className="yds-perf-val__ev-card-title">{row.label}</h3>
+            <span className="yds-perf-val__ev-card-n font-mono tabular-nums">n={row.total}</span>
+            <dl className="yds-perf-val__ev-metrics">
+              <div className="yds-perf-val__ev-metric">
+                <dt>승률</dt>
+                <dd className="font-mono tabular-nums">
+                  {row.winRate != null ? `${row.winRate}%` : "—"}
+                </dd>
+              </div>
+              <div className="yds-perf-val__ev-metric">
+                <dt>평균 수익</dt>
+                <dd className="yds-perf-val__ev-val--up font-mono tabular-nums">
+                  {row.avgWin != null ? formatPerfPct(row.avgWin) : "—"}
+                </dd>
+              </div>
+              <div className="yds-perf-val__ev-metric">
+                <dt>평균 손실</dt>
+                <dd className="yds-perf-val__ev-val--down font-mono tabular-nums">
+                  {row.avgLoss != null ? formatPerfPct(row.avgLoss) : "—"}
+                </dd>
+              </div>
+              <div className="yds-perf-val__ev-metric yds-perf-val__ev-metric--hero">
+                <dt>기대값</dt>
+                <dd
+                  className={`font-mono tabular-nums ${
+                    row.expectedValue != null && row.expectedValue > 0
+                      ? "yds-perf-val__ev-val--up"
+                      : row.expectedValue != null && row.expectedValue < 0
+                        ? "yds-perf-val__ev-val--down"
+                        : ""
+                  }`}
+                >
+                  {row.expectedValue != null ? formatPerfPct(row.expectedValue) : "—"}
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+
+      {report.interpretations.length ? (
+        <div className="yds-perf-val__ev-interpret">
+          <h3 className="yds-perf-val__insight-h3">해석</h3>
+          <ul className="yds-perf-val__insight-list">
+            {report.interpretations.map((line) => (
+              <li key={line} className="yds-perf-val__insight-item">
+                <span className="yds-perf-val__ev-check" aria-hidden>
+                  ✓
+                </span>
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
+function MddAnalysisPanel({ report }) {
+  if (!isMddAnalysisPanelVisible(report)) return null
+
+  const visibleHorizons = report.horizons.filter((h) => h.visible)
+
+  return (
+    <section className="yds-perf-val__section yds-perf-val__mdd" aria-labelledby="perf-val-mdd">
+      <p className="yds-perf-val__mdd-kicker">Risk · Maximum Drawdown</p>
+      <h2 id="perf-val-mdd" className="yds-perf-val__h2">
+        최대손실(MDD) 분석
+      </h2>
+      <p className="yds-perf-val__mdd-lede">
+        수익·리스크 정량 검증 · 잠금 실측 · 보유 구간 피크 대비 최대 낙폭
+      </p>
+
+      <div className="yds-perf-val__mdd-grid">
+        {visibleHorizons.map((row) => (
+          <article key={row.key} className="yds-perf-val__mdd-card">
+            <h3 className="yds-perf-val__mdd-card-title">{row.label}</h3>
+            <span className="yds-perf-val__mdd-card-n font-mono tabular-nums">n={row.total}</span>
+
+            <div className="yds-perf-val__mdd-extremes">
+              <div className="yds-perf-val__mdd-extreme">
+                <span className="yds-perf-val__mdd-extreme-key">최대 수익 종목</span>
+                <strong className="yds-perf-val__mdd-extreme-name">{row.maxGain?.name ?? "—"}</strong>
+                <span className="yds-perf-val__mdd-extreme-val yds-perf-val__mdd-val--up font-mono tabular-nums">
+                  {row.maxGain ? formatPerfPct(row.maxGain.returnPct) : "—"}
+                </span>
+              </div>
+              <div className="yds-perf-val__mdd-extreme">
+                <span className="yds-perf-val__mdd-extreme-key">최대 손실 종목</span>
+                <strong className="yds-perf-val__mdd-extreme-name">{row.maxLoss?.name ?? "—"}</strong>
+                <span className="yds-perf-val__mdd-extreme-val yds-perf-val__mdd-val--down font-mono tabular-nums">
+                  {row.maxLoss ? formatPerfPct(row.maxLoss.returnPct) : "—"}
+                </span>
+              </div>
+            </div>
+
+            <div className="yds-perf-val__mdd-hero">
+              <span className="yds-perf-val__mdd-hero-key">MDD</span>
+              <strong
+                className={`yds-perf-val__mdd-hero-val font-mono tabular-nums ${
+                  row.mdd != null && row.mdd < 0 ? "yds-perf-val__mdd-val--down" : ""
+                }`}
+              >
+                {row.mdd != null ? formatPerfPct(row.mdd) : "—"}
+              </strong>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {report.interpretations.length ? (
+        <div className="yds-perf-val__mdd-interpret">
+          <h3 className="yds-perf-val__insight-h3">리스크 해석</h3>
+          <ul className="yds-perf-val__insight-list">
+            {report.interpretations.map((line) => (
+              <li key={line} className="yds-perf-val__insight-item">
+                <span className="yds-perf-val__mdd-check" aria-hidden>
+                  ✓
+                </span>
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
 function PerfInsightPanel({ report }) {
   if (!isPerfInsightPanelVisible(report)) return null
 
@@ -370,6 +524,66 @@ function TopSuccessReportPanel({ report }) {
               {row.recommendedPrice != null ? (
                 <span>추천가 {formatPerfPrice(row.recommendedPrice)}</span>
               ) : null}
+              {row.totalScore != null ? <span>총점 {row.totalScore}</span> : null}
+            </div>
+            <div className="yds-perf-val__top-success-tags">
+              {row.qualityGrade ? <span>품질 {row.qualityGrade}</span> : null}
+              {row.timingGrade ? <span>타이밍 {row.timingGrade}</span> : null}
+              {row.marketFitGrade ? <span>시장적합 {row.marketFitGrade}</span> : null}
+              {row.panicIntensity != null ? <span>패닉 {row.panicIntensity}</span> : null}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function TopFailureReportPanel({ report }) {
+  if (!isTopFailureReportPanelVisible(report)) return null
+
+  return (
+    <section className="yds-perf-val__section yds-perf-val__top-success yds-perf-val__top-success--failure" aria-labelledby="perf-val-top-failure">
+      <p className="yds-perf-val__insight-kicker">Case Study · Losers</p>
+      <h2 id="perf-val-top-failure" className="yds-perf-val__h2">
+        TOP 실패 사례
+      </h2>
+      <p className="yds-perf-val__insight-lede">
+        {report.horizonLabel} 실패(0%↓) 잠금 실측 · 최근 {report.cases.length}건 · 저장 스냅샷만
+      </p>
+
+      {report.commonTraits.length ? (
+        <div className="yds-perf-val__top-success-traits yds-perf-val__top-success-traits--failure">
+          <h3 className="yds-perf-val__insight-h3">최근 실패 종목 공통점</h3>
+          <ul className="yds-perf-val__insight-list">
+            {report.commonTraits.map((line) => (
+              <li key={line} className="yds-perf-val__insight-item">
+                <span className="yds-perf-val__insight-check yds-perf-val__insight-check--failure" aria-hidden>
+                  ✓
+                </span>
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="yds-perf-val__top-success-list">
+        {report.cases.map((row) => (
+          <article key={row.id} className="yds-perf-val__top-success-card yds-perf-val__top-success-card--failure">
+            <div className="yds-perf-val__top-success-head">
+              <Link
+                to={`/stock-picks/${encodeURIComponent(row.ticker)}`}
+                className="yds-perf-val__top-success-name"
+              >
+                {row.name}
+              </Link>
+              <strong className="yds-perf-val__top-success-ret yds-perf-val__top-success-ret--failure font-mono tabular-nums">
+                {formatPerfPct(row.returnPct)}
+              </strong>
+            </div>
+            <div className="yds-perf-val__top-success-meta font-mono tabular-nums">
+              {row.recommendedPrice != null ? <span>추천가 {formatPerfPrice(row.recommendedPrice)}</span> : null}
               {row.totalScore != null ? <span>총점 {row.totalScore}</span> : null}
             </div>
             <div className="yds-perf-val__top-success-tags">
@@ -960,7 +1174,10 @@ export default function PerformanceValidationPage() {
   const panicDeep = useMemo(() => buildPanicDeepAnalysisReport(picks), [picks])
   const marketStrategy = useMemo(() => buildMarketStateStrategyReport(picks), [picks])
   const perfInsight = useMemo(() => buildPerfInsightReport(picks), [picks])
+  const expectedValue = useMemo(() => buildExpectedValueAnalysisReport(picks), [picks])
+  const mddAnalysis = useMemo(() => buildMddAnalysisReport(picks), [picks])
   const topSuccessReport = useMemo(() => buildTopSuccessReport(picks), [picks])
+  const topFailureReport = useMemo(() => buildTopFailureReport(picks), [picks])
   const horizonAvailability = useMemo(() => buildHorizonAvailability(picks), [picks])
 
   useEffect(() => {
@@ -1009,6 +1226,10 @@ export default function PerformanceValidationPage() {
             horizonAvailability={horizonAvailability}
           />
 
+          <ExpectedValuePanel report={expectedValue} />
+
+          <MddAnalysisPanel report={mddAnalysis} />
+
           <PerfInsightPanel report={perfInsight} />
 
           <ReliabilityAuditPanel report={reliability} />
@@ -1029,6 +1250,8 @@ export default function PerformanceValidationPage() {
           />
 
           <TopSuccessReportPanel report={topSuccessReport} />
+
+          <TopFailureReportPanel report={topFailureReport} />
 
           <section className="yds-perf-val__section" aria-labelledby="perf-val-kpi">
             <h2 id="perf-val-kpi" className="yds-perf-val__h2">

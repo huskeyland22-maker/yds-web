@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { buildPerfInsightReport } from "../vite-project/src/content/ydsPickPerfInsight.js"
+import { buildTopFailureReport } from "../vite-project/src/content/ydsPickTopFailureReport.js"
 import { buildTopSuccessReport } from "../vite-project/src/content/ydsPickTopSuccessReport.js"
 
 function basePick(overrides = {}) {
@@ -106,5 +107,17 @@ const noSuccess = buildTopSuccessReport([
   basePick({ horizons: { d7: 2, d14: null, d30: null, d90: null, d180: null, d365: null } }),
 ])
 assert.equal(noSuccess.visible, false)
+
+const failureReport = buildTopFailureReport(picks)
+assert.equal(failureReport.visible, true)
+assert.equal(failureReport.cases.length, 2)
+assert.equal(failureReport.cases[0].name, "SK하이닉스")
+assert.equal(failureReport.cases[0].returnPct, -4)
+assert.ok(failureReport.commonTraits.some((line) => line.includes("타이밍") || line.includes("품질") || line.includes("부진")))
+
+const noFailure = buildTopFailureReport([
+  basePick({ horizons: { d7: 3, d14: null, d30: null, d90: null, d180: null, d365: null } }),
+])
+assert.equal(noFailure.visible, false)
 
 console.log("yds-pick-perf-insight-top-success.test.mjs OK")
