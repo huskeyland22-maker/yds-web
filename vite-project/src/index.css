@@ -30119,6 +30119,70 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: rgba(20, 83, 45, 0.35);
 }
 
+.yds-desk-card__tier--s {
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.45);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.yds-desk-card__tier--a {
+  color: #fde68a;
+  background: rgba(120, 53, 15, 0.4);
+}
+
+.yds-desk-card__tier--b {
+  color: #cbd5e1;
+  background: rgba(51, 65, 85, 0.45);
+}
+
+.yds-week-events-unified--mobile {
+  display: none;
+}
+
+.yds-week-events-unified--desktop {
+  display: block;
+}
+
+.yds-week-events-unified__more {
+  display: block;
+  width: 100%;
+  margin-top: 0.45rem;
+  padding: 0.42rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.55);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #93c5fd;
+  cursor: pointer;
+}
+
+.yds-liquidity-summary--solo .yds-liquidity-summary__headline {
+  margin-top: 0;
+}
+
+.yds-market-desk__liquidity-lanes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .yds-liquidity-lane-desk--collapsible-mobile {
+    border: 0;
+    background: transparent;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane-desk__summary {
+    display: none;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane-desk__body {
+    padding: 0;
+  }
+}
+
 .yds-desk-card__action-stars {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -32436,6 +32500,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
   .yds-market-desk__brief-stack,
   .yds-market-desk__section-stack {
+    display: contents;
     gap: 16px;
   }
 
@@ -32443,36 +32508,110 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     display: contents;
   }
 
+  .yds-market-score-hero__stack {
+    display: contents;
+  }
+
   .yds-market-desk__slot--scores-meta {
+    display: none;
+  }
+
+  .yds-market-desk__slot--market-state {
     order: 1;
   }
 
-  .yds-market-desk__slot--scores {
+  .yds-market-desk__slot--panic-intensity {
     order: 2;
   }
 
-  .yds-market-hero__slot--judgment {
-    order: 3;
-  }
-
   .yds-market-desk__slot--cycle {
-    order: 3;
+    order: 12;
   }
 
   .yds-market-desk__slot--recommend {
-    order: 4;
-  }
-
-  .yds-market-desk__slot--philosophy {
-    order: 5;
+    order: 3;
   }
 
   .yds-market-desk__slot--trend {
-    order: 5;
+    order: 4;
   }
 
   .yds-market-desk__slot--indices {
+    order: 5;
+  }
+
+  .yds-market-desk__slot--liquidity-summary {
     order: 6;
+  }
+
+  .yds-market-desk__slot--week-events {
+    order: 7;
+  }
+
+  .yds-market-desk__slot--liquidity-market {
+    order: 8;
+  }
+
+  .yds-market-desk__slot--liquidity-policy {
+    order: 9;
+  }
+
+  .yds-market-desk__liquidity-lanes {
+    display: contents;
+  }
+
+  .yds-market-desk__slot--action-guide {
+    order: 10;
+  }
+
+  .yds-week-events-unified--desktop {
+    display: none;
+  }
+
+  .yds-week-events-unified--mobile {
+    display: block;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile {
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 10px;
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.45));
+    padding: 0;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane-desk__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 0.9rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane-desk__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane-desk__summary-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane-desk__summary-meta {
+    font-size: 0.68rem;
+    color: #94a3b8;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane-desk__body {
+    padding: 0 0.65rem 0.75rem;
+  }
+
+  .yds-liquidity-lane-desk--collapsible-mobile .yds-liquidity-lane {
+    border: 0;
+    padding: 0;
+    background: transparent;
   }
 
   .yds-dual-cycle-hero,

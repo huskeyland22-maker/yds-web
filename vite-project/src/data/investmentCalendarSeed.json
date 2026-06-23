@@ -58,10 +58,19 @@
     },
     {
       "id": "us-pce-may-2026",
-      "date": "2026-06-20",
+      "date": "2026-06-27",
       "category": "pce",
       "title": "미국 PCE (5월)",
       "subtitle": "연준 선호 인플레 지표",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-core-pce-may-2026",
+      "date": "2026-06-27",
+      "category": "pce",
+      "title": "미국 Core PCE (5월)",
+      "subtitle": "근원 PCE",
       "importance": 3,
       "region": "US"
     },

@@ -5,7 +5,8 @@ import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
-import YdsDashboardLiquiditySection from "./YdsDashboardLiquiditySection.jsx"
+import YdsDashboardLiquiditySynthesis from "./YdsDashboardLiquiditySynthesis.jsx"
+import YdsDashboardLiquidityLaneDesk from "./YdsDashboardLiquidityLaneDesk.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
@@ -32,7 +33,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   const marketContext = useYdsMarketContext()
 
   const weekEvents = useMemo(
-    () => buildUnifiedWeekEventStrip(marketContext?.ready ? marketContext : null, { macroLimit: 5, stockLimit: 6 }),
+    () => buildUnifiedWeekEventStrip(marketContext?.ready ? marketContext : null),
     [marketContext],
   )
 
@@ -102,11 +103,41 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             />
           </section>
 
-          <YdsDashboardWeekEvents report={weekEvents} />
           {macroRiskEnabled ? (
-            <YdsDashboardLiquiditySection report={dualLiquidity} loading={bondSnapshot.loading} />
+            <YdsDashboardLiquiditySynthesis
+              report={dualLiquidity}
+              className="yds-market-desk__slot yds-market-desk__slot--liquidity-summary"
+            />
           ) : null}
-          <YdsDashboardActionGuide report={actionGuide} />
+
+          <YdsDashboardWeekEvents
+            report={weekEvents}
+            className="yds-market-desk__slot yds-market-desk__slot--week-events"
+          />
+
+          {macroRiskEnabled && dualLiquidity ? (
+            <div className="yds-market-desk__liquidity-lanes">
+              {dualLiquidity.market ? (
+                <YdsDashboardLiquidityLaneDesk
+                  lane={dualLiquidity.market}
+                  loading={bondSnapshot.loading}
+                  className="yds-market-desk__slot yds-market-desk__slot--liquidity-market"
+                />
+              ) : null}
+              {dualLiquidity.policy ? (
+                <YdsDashboardLiquidityLaneDesk
+                  lane={dualLiquidity.policy}
+                  loading={bondSnapshot.loading}
+                  className="yds-market-desk__slot yds-market-desk__slot--liquidity-policy"
+                />
+              ) : null}
+            </div>
+          ) : null}
+
+          <YdsDashboardActionGuide
+            report={actionGuide}
+            className="yds-market-desk__slot yds-market-desk__slot--action-guide"
+          />
         </div>
       </div>
     </div>

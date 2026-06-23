@@ -30,8 +30,12 @@ export default function YdsMarketScoreHero({
       </div>
 
       <div className="yds-market-score-hero__stack yds-market-desk__slot yds-market-desk__slot--scores">
-        <YdsMarketStatePrimaryPanel embedded panicData={panicData} historyRows={historyRows} />
-        <YdsMarketPanicSecondaryPanel embedded panicData={panicData} />
+        <div className="yds-market-desk__slot yds-market-desk__slot--market-state">
+          <YdsMarketStatePrimaryPanel embedded panicData={panicData} historyRows={historyRows} />
+        </div>
+        <div className="yds-market-desk__slot yds-market-desk__slot--panic-intensity">
+          <YdsMarketPanicSecondaryPanel embedded panicData={panicData} />
+        </div>
       </div>
     </section>
   )

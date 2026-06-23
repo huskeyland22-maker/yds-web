@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import {
   buildUnifiedWeekEventStrip,
   buildWeekEventStrip,
+  classifyMacroMarketTier,
   eventBriefLabel,
   importanceTierLabel,
 } from "../vite-project/src/content/ydsInvestmentCalendarEngine.js"
@@ -30,18 +31,28 @@ assert.equal(
   "엔비디아 실적",
 )
 
-const strip = buildWeekEventStrip(null, 5, new Date("2026-06-22T12:00:00"))
+const strip = buildWeekEventStrip(null, 12, new Date("2026-06-22T12:00:00"))
 assert.ok(strip.stripItems.length > 0)
-assert.ok(strip.stripItems.length <= 5)
 assert.ok(strip.stripItems.every((e) => e.kind === "macro"))
-assert.ok(strip.stripItems.every((e) => e.briefLabel && e.importanceTier))
+assert.ok(strip.stripItems.every((e) => e.briefLabel && e.marketTier))
+assert.ok(strip.stripItems.every((e) => classifyMacroMarketTier(e)))
+const dates = strip.stripItems.map((e) => e.date)
+assert.deepEqual(dates, [...dates].sort())
+assert.ok(strip.stripItems.some((e) => e.briefLabel === "GDP"))
+assert.ok(strip.stripItems.some((e) => /PCE|Core PCE/.test(e.briefLabel)))
 
-const unified = buildUnifiedWeekEventStrip(null, { macroLimit: 5, stockLimit: 6 }, new Date("2026-06-22T12:00:00"))
+const unified = buildUnifiedWeekEventStrip(null, {}, new Date("2026-06-22T12:00:00"))
 assert.ok(unified.hasEvents)
 assert.ok(unified.macroItems.length > 0)
 assert.ok(unified.stockItems.length > 0)
-assert.ok(unified.macroItems.every((e) => e.kind === "macro"))
-assert.ok(unified.stockItems.every((e) => e.eventTitle && e.impactLine))
+assert.ok(unified.flatItems.length >= unified.macroItems.length)
+assert.equal(unified.previewLimit, 3)
+assert.ok(unified.flatItems.every((e) => e.date))
+const flatDates = unified.flatItems.map((e) => e.date)
+assert.deepEqual(flatDates, [...flatDates].sort())
+const stockDates = unified.stockItems.map((e) => e.date)
+assert.deepEqual(stockDates, [...stockDates].sort())
+assert.ok(unified.stockItems.every((e) => e.impactStars && e.impactRelation))
 
 const panicData = { fearGreed: 62, vix: 16, bofa: 6.2, putCall: 0.72, highYield: 4.1 }
 const guide = buildDashboardActionGuideReport(panicData, [{ date: "2026-06-21", fearGreed: 70, vix: 15, bofa: 6.5 }], {

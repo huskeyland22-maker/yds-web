@@ -48,20 +48,22 @@ assert.equal(stockEventDisplayTitle(muEvent), "마이크롼 실적 발표")
 
 const muClass = classifyStockEventPriority(muEvent, pickTickers, activeSectors)
 assert.equal(muClass?.priorityTier, "pick")
-assert.ok(muClass?.impactLine.includes("추천종목"))
+assert.ok(muClass?.impactStars === "★★★")
+assert.ok(muClass?.impactRelation === "직접 관련")
 
 const nkeClass = classifyStockEventPriority(nkeEvent, pickTickers, activeSectors)
 assert.equal(nkeClass?.priorityTier, "mega")
-assert.ok(nkeClass?.impactLine.includes("소비주"))
+assert.ok(nkeClass?.impactStars === "★")
 
 const asmlClass = classifyStockEventPriority(asmlEvent, pickTickers, activeSectors)
 assert.equal(asmlClass?.priorityTier, "sector")
-assert.ok(asmlClass?.impactLine.includes("반도체"))
+assert.ok(asmlClass?.impactStars === "★★")
 
 const list = buildPrioritizedStockEvents(null, refDate, 10, 35)
 assert.ok(list.length > 0)
-assert.ok(list[0].priorityRank <= list[list.length - 1].priorityRank || list[0].date <= list[1].date)
-assert.ok(list.every((row) => row.eventTitle && row.impactLine))
+const listDates = list.map((row) => row.date)
+assert.deepEqual(listDates, [...listDates].sort())
+assert.ok(list.every((row) => row.eventTitle && row.impactStars))
 
 const strip = buildStockWeekEventStrip(null, 5, refDate)
 assert.ok(strip.stockItems.length > 0)

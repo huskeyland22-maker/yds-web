@@ -522,7 +522,7 @@ function buildMarketLiquidity(snapshot, panicData) {
 
   return {
     kind: /** @type {const} */ ("market"),
-    title: "시장 유동성",
+    title: "유동성 환경",
     score,
     band,
     environmentLabel: "현재 시장 환경",

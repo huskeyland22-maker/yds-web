@@ -1,13 +1,13 @@
 import YdsDeskCard from "./YdsDeskCard.jsx"
 
 /**
- * @param {{ report: import("../../content/ydsDashboardActionGuide.js").DashboardActionGuideReport }} props
+ * @param {{ report: import("../../content/ydsDashboardActionGuide.js").DashboardActionGuideReport; className?: string }} props
  */
-export default function YdsDashboardActionGuide({ report }) {
+export default function YdsDashboardActionGuide({ report, className = "" }) {
   if (!report?.visible) return null
 
   return (
-    <YdsDeskCard title={report.title} titleId="desk-action-guide-title">
+    <YdsDeskCard title={report.title} titleId="desk-action-guide-title" className={className}>
       {report.liquidityLead ? (
         <p className="yds-desk-card__liquidity-lead">{report.liquidityLead}</p>
       ) : null}
