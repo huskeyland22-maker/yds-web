@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
+import { buildPanicIntensityComparison } from "../../content/ydsPanicIntensityComparison.js"
 
 /** @param {number} score */
 function resolvePanicAccentTier(score) {
@@ -12,14 +13,20 @@ function resolvePanicAccentTier(score) {
 
 /**
  * V7 — 패닉 강도 보조 카드 (축소)
- * @param {{ panicData?: object | null; className?: string; embedded?: boolean }} props
+ * @param {{ panicData?: object | null; historyRows?: object[]; className?: string; embedded?: boolean }} props
  */
 export default function YdsMarketPanicSecondaryPanel({
   panicData = null,
+  historyRows = [],
   className = "",
   embedded = false,
 }) {
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
+  const comparison = useMemo(
+    () => buildPanicIntensityComparison(historyRows, panicData),
+    [historyRows, panicData],
+  )
+
   if (!view || view.panicScore == null) return null
   const filled = Math.max(0, Math.min(10, Math.round((view.buyIntensityPct ?? 0) / 10)))
   const bar = `${"■".repeat(filled)}${"□".repeat(10 - filled)}`
@@ -50,6 +57,33 @@ export default function YdsMarketPanicSecondaryPanel({
           {view.buyIntensityLabel}
         </p>
       </div>
+
+      {comparison.visible ? (
+        <div className="yds-market-panic-secondary__compare" aria-label="패닉 강도 과거 비교">
+          <div className="yds-market-panic-secondary__compare-row">
+            <span className="yds-market-panic-secondary__compare-key">오늘</span>
+            <strong className="yds-market-panic-secondary__compare-val font-mono tabular-nums">
+              {comparison.today ?? "—"}
+            </strong>
+          </div>
+          <div className="yds-market-panic-secondary__compare-row">
+            <span className="yds-market-panic-secondary__compare-key">1주전</span>
+            <strong className="yds-market-panic-secondary__compare-val font-mono tabular-nums">
+              {comparison.weekAgo ?? "—"}
+            </strong>
+          </div>
+          <div className="yds-market-panic-secondary__compare-row">
+            <span className="yds-market-panic-secondary__compare-key">1개월전</span>
+            <strong className="yds-market-panic-secondary__compare-val font-mono tabular-nums">
+              {comparison.monthAgo ?? "—"}
+            </strong>
+          </div>
+          <p className="yds-market-panic-secondary__compare-conclusion">{comparison.conclusion}</p>
+          {comparison.subConclusion ? (
+            <p className="yds-market-panic-secondary__compare-sub">{comparison.subConclusion}</p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 

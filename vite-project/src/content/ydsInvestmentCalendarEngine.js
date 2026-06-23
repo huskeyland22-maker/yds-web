@@ -132,20 +132,20 @@ export function classifyMacroMarketTier(event) {
   const blob = normMacroText(`${event.title ?? ""} ${event.subtitle ?? ""}`)
   const cat = event.category
 
+  if (/만기|witching|옵션\s*만기|triple/i.test(blob)) return null
+  if (/실업수당|claims|jobless/i.test(blob)) return null
+
   if (cat === "fomc") return "S"
   if (cat === "cpi") return "S"
+  if (cat === "ppi") return "S"
   if (cat === "pce" || /core\s*pce|근원\s*pce/i.test(blob)) return "S"
+  if (cat === "gdp") return "S"
   if (cat === "employment" && /nfp|비농업|고용지표|payroll|고용보고/i.test(blob)) return "S"
 
-  if (cat === "gdp") return "A"
-  if (cat === "ppi") return "A"
-  if (cat === "employment" && /실업/i.test(blob)) return "A"
-  if (/ism.*(제조|manufacturing)|제조업\s*ism/i.test(blob)) return "A"
-  if (/ism.*(서비스|services)|서비스업\s*ism/i.test(blob)) return "A"
-
-  if (/소비자\s*신뢰|consumer confidence/i.test(blob)) return "B"
-  if (/주택|housing|건설|home sales|주택지표/i.test(blob)) return "B"
-  if (cat === "other" && /소매|retail/i.test(blob)) return "B"
+  if (/소매|retail/i.test(blob)) return "A"
+  if (/ism.*(제조|manufacturing)|제조업\s*ism|ism\s*제조/i.test(blob)) return "A"
+  if (/ism.*(서비스|services)|서비스업\s*ism|ism\s*서비스/i.test(blob)) return "A"
+  if (/소비자\s*신뢰|consumer confidence|미시간/i.test(blob)) return "A"
 
   return null
 }
@@ -530,7 +530,7 @@ export function buildInvestmentCalendarReport(marketContext = null, refDate = ne
 export function buildWeekEventStrip(marketContext = null, limit = 12, refDate = new Date()) {
   const week = getWeekRange(refDate)
   const today = refDate.toISOString().slice(0, 10)
-  const horizonEnd = addCalendarDaysLocal(week.end, 14)
+  const horizonEnd = addCalendarDaysLocal(week.end, 45)
 
   const macroAll = (calendarSeed.macroEvents ?? [])
     .map((e) => enrichMacro(e, marketContext))

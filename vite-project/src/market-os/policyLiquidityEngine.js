@@ -109,15 +109,26 @@ export function buildPolicyLiquidityLane(snapshot, apiHistory = {}) {
   const cpiHist = history.CPI ?? []
   const coreHist = history.CORE_CPI ?? []
   const ppiHist = history.PPI ?? []
+  const pceHist = history.PCE ?? []
 
   const cpiTrend = lastNTrend(cpiHist, 3)
   const coreTrend = lastNTrend(coreHist, 3)
   const ppiTrend = lastNTrend(ppiHist, 3)
+  const pceTrend = lastNTrend(pceHist, 3)
 
   const cpiScore = scorePriceOrRateTrend(cpiTrend.slope)
   const coreScore = scorePriceOrRateTrend(coreTrend.slope)
   const ppiScore = scorePriceOrRateTrend(ppiTrend.slope)
-  const priceBlockScore = Math.round(cpiScore * 0.4 + coreScore * 0.35 + ppiScore * 0.25)
+  const pceScore = scorePriceOrRateTrend(pceTrend.slope)
+  const priceBlockScore = Math.round(
+    cpiScore * 0.3 + coreScore * 0.25 + ppiScore * 0.2 + pceScore * 0.25,
+  )
+
+  const inflResurge =
+    cpiTrend.slope === "up" ||
+    coreTrend.slope === "up" ||
+    ppiTrend.slope === "up" ||
+    pceTrend.slope === "up"
 
   const bei = raw.BEI
   const us2y = raw.US2Y
@@ -170,26 +181,44 @@ export function buildPolicyLiquidityLane(snapshot, apiHistory = {}) {
   const environment = []
 
   const pushTrendLine = (name, trend, fmt) => {
-    const slopeKo = trend.slope === "up" ? "상승" : trend.slope === "down" ? "둔화" : "보합"
-    const tone = trend.slope === "up" ? "warn" : trend.slope === "down" ? "ok" : "warn"
     const detail =
       trend.points.length >= 2
         ? formatTrail(trend.points, fmt)
         : trend.slope === "up"
           ? "최근 3개월 연속 상승"
-          : "데이터 부족"
+          : trend.slope === "down"
+            ? "최근 3개월 연속 하락"
+            : "데이터 부족"
+
+    if (trend.slope === "up") {
+      environment.push({
+        label: `${name} 상승 추세`,
+        detail,
+        tone: "warn",
+      })
+      return
+    }
+    if (trend.slope === "down") {
+      environment.push({
+        label: `${name} 둔화 추세`,
+        detail,
+        tone: "ok",
+      })
+      return
+    }
     environment.push({
-      label: `${name} ${slopeKo} 추세`,
+      label: `${name} 보합`,
       detail,
-      tone: /** @type {LiquidityFactorTone} */ (tone),
+      tone: "warn",
     })
   }
 
   pushTrendLine("CPI", cpiTrend, cpiFmt)
   pushTrendLine("Core CPI", coreTrend, coreFmt)
   pushTrendLine("PPI", ppiTrend, "pct")
+  pushTrendLine("PCE", pceTrend, "pct")
 
-  const cutHopeRetreat = dotScore < 45 || fedWatchScore < 45
+  const cutHopeRetreat = inflResurge || dotScore < 45 || fedWatchScore < 45
   environment.push({
     label: cutHopeRetreat ? "금리인하 기대 후퇴" : "금리인하 기대 유지",
     detail: cutHopeRetreat
@@ -242,6 +271,7 @@ export function buildPolicyLiquidityLane(snapshot, apiHistory = {}) {
     cpiScore,
     coreScore,
     ppiScore,
+    pceScore,
     dotScore,
     fedWatchScore,
     fomcScore,
@@ -255,6 +285,10 @@ export function buildPolicyLiquidityLane(snapshot, apiHistory = {}) {
     fedBlockScore,
     rateBlockScore,
     cpiTrend,
+    coreTrend,
+    ppiTrend,
+    pceTrend,
+    inflResurge,
     cutHopeRetreat,
     hawkish,
     longRateBurden,
@@ -298,7 +332,7 @@ function buildPolicyContributions(metrics, scoreTotal, detail) {
       label: "물가 환경",
       weight: 0.4,
       score: detail.priceBlockScore,
-      tooltip: `CPI ${detail.cpiScore} · Core ${detail.coreScore} · PPI ${detail.ppiScore}`,
+      tooltip: `CPI ${detail.cpiScore} · Core ${detail.coreScore} · PPI ${detail.ppiScore} · PCE ${detail.pceScore}`,
     },
     {
       id: "fed",
@@ -351,15 +385,15 @@ function buildPolicyContributions(metrics, scoreTotal, detail) {
 function buildPolicyScoreExplain(score, band, ctx) {
   /** @type {string[]} */
   const drivers = []
-  if (ctx.priceBlockScore < 48 || ctx.cpiTrend.slope === "up") {
+  if (ctx.inflResurge) {
     drivers.push("인플레이션 재상승 우려")
   }
-  if (ctx.cutHopeRetreat) drivers.push("금리 인하 기대 후퇴")
+  if (ctx.cutHopeRetreat) drivers.push("금리인하 기대 후퇴")
   if (ctx.longRateBurden) drivers.push("장기금리 부담")
   if (ctx.hawkish) drivers.push("연준 매파 경계")
 
   if (!drivers.length) {
-    if (score >= 60) {
+    if (score >= 60 && !ctx.inflResurge) {
       return "물가 둔화와 완화 기대가 정책 유동성을 지원하고 있습니다."
     }
     return `정책 지표가 혼조입니다(${band.label}). 선별적 접근이 필요합니다.`

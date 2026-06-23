@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { Link } from "react-router-dom"
 import { buildStockPickDeskPreview } from "../../content/ydsStockPickDeskPreview.js"
+import YdsStockPickRecommendRationale from "../stock-picks/YdsStockPickRecommendRationale.jsx"
 
 /**
  * @param {{
@@ -44,6 +45,13 @@ export default function YdsMarketRecommendCard({ stock }) {
             {preview.returnLabel}
           </strong>
         </div>
+
+        <YdsStockPickRecommendRationale
+          items={stock.recommendRationales ?? []}
+          maxItems={5}
+          title="왜 추천하는가?"
+          className="yds-market-rec-card__rationale"
+        />
       </Link>
     </article>
   )

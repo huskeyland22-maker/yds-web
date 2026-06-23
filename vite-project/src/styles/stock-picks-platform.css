@@ -1896,6 +1896,14 @@
   background: rgba(96, 165, 250, 0.12);
 }
 
+@media (max-width: 480px) {
+  .yds-spick-tabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    row-gap: 0.35rem;
+  }
+}
+
 .yds-spick-sector-list {
   margin: 0;
   padding: 0;

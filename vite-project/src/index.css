@@ -29730,6 +29730,89 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #f87171;
 }
 
+.yds-market-rec-card__rationale {
+  margin-top: 0.45rem;
+}
+
+.yds-market-rec-card__rationale .yds-spick-rationale__title {
+  font-size: 0.62rem;
+}
+
+.yds-market-rec-card__rationale .yds-spick-rationale__text {
+  font-size: 0.62rem;
+}
+
+.yds-market-desk-summary {
+  border-radius: 0.65rem;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.88));
+  padding: 0.55rem 0.7rem;
+}
+
+.yds-market-desk-summary__title {
+  margin: 0 0 0.3rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #93c5fd;
+}
+
+.yds-market-desk-summary__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.yds-market-desk-summary__line {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.35;
+}
+
+.yds-market-panic-secondary__compare {
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  width: 100%;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.yds-market-panic-secondary__compare-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+}
+
+.yds-market-panic-secondary__compare-key {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.yds-market-panic-secondary__compare-val {
+  color: #e2e8f0;
+  font-size: 0.72rem;
+}
+
+.yds-market-panic-secondary__compare-conclusion {
+  margin: 0.15rem 0 0;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.yds-market-panic-secondary__compare-sub {
+  margin: 0;
+  font-size: 0.6rem;
+  color: #94a3b8;
+}
+
 .yds-market-recommend-strip__loading,
 .yds-market-recommend-strip__empty {
   margin: 0;
@@ -30133,6 +30216,29 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-desk-card__tier--b {
   color: #cbd5e1;
   background: rgba(51, 65, 85, 0.45);
+}
+
+.yds-desk-card__impact {
+  justify-self: end;
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 0.08rem 0.35rem;
+  border-radius: 999px;
+}
+
+.yds-desk-card__impact--positive {
+  color: #86efac;
+  background: rgba(20, 83, 45, 0.35);
+}
+
+.yds-desk-card__impact--neutral {
+  color: #fde68a;
+  background: rgba(120, 53, 15, 0.35);
+}
+
+.yds-desk-card__impact--negative {
+  color: #fca5a5;
+  background: rgba(127, 29, 29, 0.35);
 }
 
 .yds-week-events-unified--mobile {
@@ -30607,6 +30713,24 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #94a3b8;
+}
+
+.yds-liquidity-lane__contrib-details {
+  margin-top: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding-top: 0.25rem;
+}
+
+.yds-liquidity-lane__contrib-summary {
+  cursor: pointer;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #93c5fd;
+  list-style: none;
+}
+
+.yds-liquidity-lane__contrib-summary::-webkit-details-marker {
+  display: none;
 }
 
 .yds-liquidity-lane__contrib-list {
@@ -32516,12 +32640,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     display: none;
   }
 
-  .yds-market-desk__slot--market-state {
+  .yds-market-desk__slot--desk-summary {
     order: 1;
   }
 
-  .yds-market-desk__slot--panic-intensity {
+  .yds-market-desk__slot--market-state {
     order: 2;
+  }
+
+  .yds-market-desk__slot--panic-intensity {
+    order: 3;
   }
 
   .yds-market-desk__slot--cycle {
@@ -32529,19 +32657,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .yds-market-desk__slot--recommend {
-    order: 3;
-  }
-
-  .yds-market-desk__slot--trend {
     order: 4;
   }
 
+  .yds-market-desk__slot--trend {
+    order: 8;
+  }
+
   .yds-market-desk__slot--indices {
-    order: 5;
+    order: 9;
   }
 
   .yds-market-desk__slot--liquidity-summary {
-    order: 6;
+    order: 10;
   }
 
   .yds-market-desk__slot--week-events {
@@ -32549,11 +32677,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .yds-market-desk__slot--liquidity-market {
-    order: 8;
+    order: 5;
   }
 
   .yds-market-desk__slot--liquidity-policy {
-    order: 9;
+    order: 6;
   }
 
   .yds-market-desk__liquidity-lanes {

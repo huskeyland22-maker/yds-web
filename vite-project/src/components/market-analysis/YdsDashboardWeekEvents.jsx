@@ -49,8 +49,20 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
                     <span className="yds-desk-card__tier yds-desk-card__tier--s">S</span>
                   ) : tier === "A" ? (
                     <span className="yds-desk-card__tier yds-desk-card__tier--a">A</span>
-                  ) : tier === "B" ? (
-                    <span className="yds-desk-card__tier yds-desk-card__tier--b">B</span>
+                  ) : null}
+                  {event.impactLabel ? (
+                    <span
+                      className={[
+                        "yds-desk-card__impact",
+                        event.impact === "positive"
+                          ? "yds-desk-card__impact--positive"
+                          : event.impact === "negative"
+                            ? "yds-desk-card__impact--negative"
+                            : "yds-desk-card__impact--neutral",
+                      ].join(" ")}
+                    >
+                      {event.impactLabel}
+                    </span>
                   ) : null}
                 </li>
               )
@@ -112,8 +124,20 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
                       <span className="yds-desk-card__tier yds-desk-card__tier--s">S</span>
                     ) : tier === "A" ? (
                       <span className="yds-desk-card__tier yds-desk-card__tier--a">A</span>
-                    ) : tier === "B" ? (
-                      <span className="yds-desk-card__tier yds-desk-card__tier--b">B</span>
+                    ) : null}
+                    {event.impactLabel ? (
+                      <span
+                        className={[
+                          "yds-desk-card__impact",
+                          event.impact === "positive"
+                            ? "yds-desk-card__impact--positive"
+                            : event.impact === "negative"
+                              ? "yds-desk-card__impact--negative"
+                              : "yds-desk-card__impact--neutral",
+                        ].join(" ")}
+                      >
+                        {event.impactLabel}
+                      </span>
                     ) : null}
                   </li>
                 )

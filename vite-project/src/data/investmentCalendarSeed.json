@@ -84,6 +84,24 @@
       "region": "US"
     },
     {
+      "id": "us-consumer-conf-jun-2026",
+      "date": "2026-06-24",
+      "category": "other",
+      "title": "미국 소비자심리지수",
+      "subtitle": "Conference Board",
+      "importance": 2,
+      "region": "US"
+    },
+    {
+      "id": "us-ism-mfg-jul-2026",
+      "date": "2026-07-01",
+      "category": "other",
+      "title": "미국 ISM 제조업",
+      "subtitle": "제조업 PMI",
+      "importance": 2,
+      "region": "US"
+    },
+    {
       "id": "us-nfp-jul-2026",
       "date": "2026-07-03",
       "category": "employment",
@@ -99,6 +117,24 @@
       "title": "미국 CPI (6월)",
       "subtitle": "소비자물가",
       "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-core-cpi-jul-2026",
+      "date": "2026-07-11",
+      "category": "cpi",
+      "title": "미국 Core CPI (6월)",
+      "subtitle": "근원 소비자물가",
+      "importance": 3,
+      "region": "US"
+    },
+    {
+      "id": "us-ism-svc-jul-2026",
+      "date": "2026-07-03",
+      "category": "other",
+      "title": "미국 ISM 서비스업",
+      "subtitle": "서비스 PMI",
+      "importance": 2,
       "region": "US"
     },
     {

@@ -98,6 +98,53 @@ export default function YdsLiquidityLaneCard({ lane, loading = false }) {
           ))}
         </ul>
       </section>
+
+      {lane.contributions?.length ? (
+        <details className="yds-liquidity-lane__contrib-details">
+          <summary className="yds-liquidity-lane__contrib-summary">세부 데이터 보기</summary>
+          <ul className="yds-liquidity-lane__contrib-list">
+            {lane.contributions.map((row) => (
+              <li key={row.id} className="yds-liquidity-lane__contrib-row">
+                <div className="yds-liquidity-lane__contrib-meta">
+                  <span className="yds-liquidity-lane__contrib-label">{row.label}</span>
+                  {row.tooltip ? (
+                    <span className="yds-liquidity-lane__contrib-help" title={row.tooltip}>
+                      ?
+                    </span>
+                  ) : null}
+                  <span
+                    className={[
+                      "yds-liquidity-lane__contrib-val",
+                      "font-mono",
+                      "tabular-nums",
+                      row.tone === "positive"
+                        ? "yds-liquidity-lane__contrib-val--positive"
+                        : row.tone === "negative"
+                          ? "yds-liquidity-lane__contrib-val--negative"
+                          : "yds-liquidity-lane__contrib-val--neutral",
+                    ].join(" ")}
+                  >
+                    {row.contribution > 0 ? `+${row.contribution}` : row.contribution}
+                  </span>
+                </div>
+                <div className="yds-liquidity-lane__contrib-bar" aria-hidden>
+                  <span
+                    className={[
+                      "yds-liquidity-lane__contrib-bar-fill",
+                      row.tone === "positive"
+                        ? "yds-liquidity-lane__contrib-bar-fill--positive"
+                        : row.tone === "negative"
+                          ? "yds-liquidity-lane__contrib-bar-fill--negative"
+                          : "yds-liquidity-lane__contrib-bar-fill--neutral",
+                    ].join(" ")}
+                    style={{ width: `${row.barPct ?? 0}%` }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
     </article>
   )
 }

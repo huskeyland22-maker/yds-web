@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useRef } from "react"
 import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
+import YdsMarketDeskSummary from "./YdsMarketDeskSummary.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
@@ -64,6 +65,12 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   return (
     <div className="yds-market-desk" id="market-desk" aria-label="YDS 시장분석">
       <div className="yds-market-desk__stream">
+        <YdsMarketDeskSummary
+          panicData={panicData}
+          dualLiquidity={dualLiquidity}
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--desk-summary"
+        />
+
         <YdsMarketScoreHero
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
