@@ -28,10 +28,14 @@ import { normalizeSpyPriceSeries } from "./ydsEventScorecard.js"
  */
 
 export const CYCLE_ETF_THRESHOLDS = {
+  qqq2dWarning: -2.5,
+  soxx2dWarning: -4,
   qqq3dWarning: -3,
   soxx3dWarning: -5,
   qqq3dSevere: -5,
   soxx3dSevere: -8,
+  qqq2dSevere: -4,
+  soxx2dSevere: -6,
 }
 
 export const CYCLE_LABEL_RECOVERY_WARNING = "조정회복(경고)"
@@ -118,20 +122,37 @@ export function resolveEtfCycleDowngrade(baseLabel, audit) {
 
   if (!isAdjustmentRecoveryCycleLabel(base)) return none
 
+  const q2 = audit.qqq.d2
   const q3 = audit.qqq.d3
+  const s2 = audit.soxx.d2
   const s3 = audit.soxx.d3
-  const warnQ = q3 != null && q3 <= CYCLE_ETF_THRESHOLDS.qqq3dWarning
-  const warnS = s3 != null && s3 <= CYCLE_ETF_THRESHOLDS.soxx3dWarning
+
+  const warnQ =
+    (q3 != null && q3 <= CYCLE_ETF_THRESHOLDS.qqq3dWarning) ||
+    (q2 != null && q2 <= CYCLE_ETF_THRESHOLDS.qqq2dWarning)
+  const warnS =
+    (s3 != null && s3 <= CYCLE_ETF_THRESHOLDS.soxx3dWarning) ||
+    (s2 != null && s2 <= CYCLE_ETF_THRESHOLDS.soxx2dWarning)
   if (!warnQ && !warnS) return none
 
-  const severeQ = q3 != null && q3 <= CYCLE_ETF_THRESHOLDS.qqq3dSevere
-  const severeS = s3 != null && s3 <= CYCLE_ETF_THRESHOLDS.soxx3dSevere
+  const severeQ =
+    (q3 != null && q3 <= CYCLE_ETF_THRESHOLDS.qqq3dSevere) ||
+    (q2 != null && q2 <= CYCLE_ETF_THRESHOLDS.qqq2dSevere)
+  const severeS =
+    (s3 != null && s3 <= CYCLE_ETF_THRESHOLDS.soxx3dSevere) ||
+    (s2 != null && s2 <= CYCLE_ETF_THRESHOLDS.soxx2dSevere)
   const toStable = severeQ || severeS || (warnQ && warnS)
 
   /** @type {string[]} */
   const triggers = []
-  if (warnQ && q3 != null) triggers.push(`NASDAQ 3일 ${q3}%`)
-  if (warnS && s3 != null) triggers.push(`SOXX 3일 ${s3}%`)
+  if (warnQ) {
+    if (q3 != null && q3 <= CYCLE_ETF_THRESHOLDS.qqq3dWarning) triggers.push(`NASDAQ 3일 ${q3}%`)
+    else if (q2 != null) triggers.push(`NASDAQ 2일 ${q2}%`)
+  }
+  if (warnS) {
+    if (s3 != null && s3 <= CYCLE_ETF_THRESHOLDS.soxx3dWarning) triggers.push(`SOXX 3일 ${s3}%`)
+    else if (s2 != null) triggers.push(`SOXX 2일 ${s2}%`)
+  }
 
   if (toStable) {
     return {
