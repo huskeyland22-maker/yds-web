@@ -31,6 +31,7 @@ export function resolveCycleProgressIndex(cycleLabel) {
   const exact = MARKET_CYCLE_PROGRESS_TRACK.findIndex((stage) => stage.label === label)
   if (exact >= 0) return exact
 
+  if (/조정회복\(경고\)/.test(label)) return 2
   if (/조정회복|회복중/.test(label)) return 2
   if (/조정안정|안정화/.test(label) && /조정|위축|충격|경계/.test(label)) return 1
   if (/진입/.test(label)) return 0

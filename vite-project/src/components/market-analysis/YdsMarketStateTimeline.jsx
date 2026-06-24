@@ -63,6 +63,12 @@ export default function YdsMarketStateTimeline({
           <dt>최근 {progress.windowDays}일 전환</dt>
           <dd className="font-mono tabular-nums">{progress.transitionCount}회</dd>
         </div>
+        {flow.etfSensitivity?.applied && flow.etfSensitivity.reason ? (
+          <div className="yds-market-cycle-progress__etf-note">
+            <dt>지수 민감도</dt>
+            <dd>{flow.etfSensitivity.reason}</dd>
+          </div>
+        ) : null}
       </dl>
     </nav>
   )

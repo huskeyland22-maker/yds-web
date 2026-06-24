@@ -9,6 +9,7 @@ import {
   resolveMarketPositionId,
 } from "./ydsMarketPositionEngine.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
+import { applyEtfSensitivityToCycleFlow } from "./ydsMarketCycleEtfSensitivity.js"
 
 export const MARKET_CYCLE_FLOW_DAYS = 30
 
@@ -33,6 +34,7 @@ export const MARKET_CYCLE_FLOW_DAYS = 30
  *   currentCycleLabel: string
  *   currentDurationDays: number
  *   longestHeldState: string
+ *   etfSensitivity?: import("./ydsMarketCycleEtfSensitivity.js").CycleEtfDowngrade
  * }} MarketCycleFlowReport
  */
 
@@ -201,9 +203,14 @@ function resolveLongestHeldState(entries) {
 /**
  * @param {object[]} historyRows
  * @param {number} [windowDays]
+ * @param {import("./ydsMarketCycleEtfSensitivity.js").CycleEtfContext | null} [etfContext]
  * @returns {MarketCycleFlowReport}
  */
-export function buildMarketCycleFlowReport(historyRows, windowDays = MARKET_CYCLE_FLOW_DAYS) {
+export function buildMarketCycleFlowReport(
+  historyRows,
+  windowDays = MARKET_CYCLE_FLOW_DAYS,
+  etfContext = null,
+) {
   const sorted = sortHistoryRowsAsc(historyRows)
   const windowed = rowsWithinDays(sorted, windowDays)
   const baseEntries = windowed
@@ -225,7 +232,7 @@ export function buildMarketCycleFlowReport(historyRows, windowDays = MARKET_CYCL
 
   const last = entries[entries.length - 1]
 
-  return {
+  const baseReport = {
     visible: steps.length >= 1,
     windowDays,
     steps,
@@ -234,4 +241,6 @@ export function buildMarketCycleFlowReport(historyRows, windowDays = MARKET_CYCL
     currentDurationDays: countCurrentDuration(entries),
     longestHeldState: resolveLongestHeldState(entries),
   }
+
+  return applyEtfSensitivityToCycleFlow(baseReport, etfContext)
 }

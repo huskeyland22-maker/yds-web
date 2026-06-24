@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef } from "react"
+import { useMemo, useEffect, useRef, useState } from "react"
 import YdsPanicEvidencePanel from "./YdsPanicEvidencePanel.jsx"
 import YdsMarketDeskSummary from "./YdsMarketDeskSummary.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
@@ -11,6 +11,7 @@ import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { buildMarketCycleFlowReport } from "../../content/ydsMarketCycleFlow.js"
+import { fetchPanicLabBenchmarks } from "../../content/ydsEtfDailyLoader.js"
 import { buildDashboardActionGuideReport } from "../../content/ydsDashboardActionGuide.js"
 import { buildUnifiedWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
 import { buildDualLiquidityReport } from "../../market-os/liquidityDualEngine.js"
@@ -26,7 +27,39 @@ import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
  */
 export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
-  const cycleFlow = useMemo(() => buildMarketCycleFlowReport(safeHistory), [safeHistory])
+  const [etfPrices, setEtfPrices] = useState(
+    /** @type {{ QQQ: Record<string, number>; SOXX: Record<string, number> } | null} */ (null),
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    fetchPanicLabBenchmarks()
+      .then((benchmarks) => {
+        if (cancelled) return
+        setEtfPrices({
+          QQQ: benchmarks.QQQ ?? {},
+          SOXX: benchmarks.SOX ?? {},
+        })
+      })
+      .catch(() => {
+        if (!cancelled) setEtfPrices(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const cycleFlow = useMemo(() => {
+    const asOfDate = safeHistory[safeHistory.length - 1]?.date ?? null
+    const etfContext = etfPrices
+      ? {
+          qqqPrices: etfPrices.QQQ,
+          soxxPrices: etfPrices.SOX,
+          asOfDate,
+        }
+      : null
+    return buildMarketCycleFlowReport(safeHistory, undefined, etfContext)
+  }, [safeHistory, etfPrices])
 
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)

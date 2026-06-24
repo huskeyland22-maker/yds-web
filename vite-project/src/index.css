@@ -29383,6 +29383,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #e2e8f0;
 }
 
+.yds-market-cycle-progress__etf-note {
+  flex: 1 1 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.yds-market-cycle-progress__etf-note dd {
+  font-weight: 600;
+  color: #fbbf24;
+  line-height: 1.35;
+}
+
 @media (max-width: 767px) {
   .yds-market-state-primary--v7 {
     grid-template-columns: 1fr;
@@ -30328,8 +30341,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-desk__section-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1.75rem;
   min-width: 0;
+  margin-top: 1.75rem;
+}
+
+.yds-market-desk__stream {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.yds-market-desk__slot--trend {
+  margin-top: 1.75rem;
 }
 
 .yds-market-desk__brief-stack {
@@ -32944,7 +32968,23 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   .yds-market-desk__brief-stack,
   .yds-market-desk__section-stack {
     display: contents;
-    gap: 16px;
+    gap: 1.75rem;
+  }
+
+  .yds-market-desk__section-stack {
+    margin-top: 0;
+  }
+
+  .yds-market-desk__slot--trend {
+    margin-top: 1.75rem;
+  }
+
+  .yds-market-desk__slot--indices {
+    margin-top: 1.75rem;
+  }
+
+  .yds-market-desk__slot--liquidity-summary {
+    margin-top: 1.75rem;
   }
 
   .yds-market-hero--desk {
