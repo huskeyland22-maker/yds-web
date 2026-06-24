@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useRef } from "react"
-import HomeV5DeskLead from "../../home-v5/HomeV5DeskLead.jsx"
+import YdsPanicEvidencePanel from "./YdsPanicEvidencePanel.jsx"
 import YdsMarketDeskSummary from "./YdsMarketDeskSummary.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
@@ -97,17 +97,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         <div className="yds-market-desk__section-stack">
           <section
             className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
-            aria-labelledby="market-block-indices"
           >
-            <h2 id="market-block-indices" className="yds-market-desk__block-label">
-              핵심 지수
-            </h2>
-            <HomeV5DeskLead
-              panicData={panicData}
-              historyRows={safeHistory}
-              hideSectionHeader
-              metricTwoLine
-            />
+            <YdsPanicEvidencePanel panicData={panicData} />
           </section>
 
           {macroRiskEnabled ? (

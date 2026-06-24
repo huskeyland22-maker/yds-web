@@ -2,12 +2,14 @@ import { useMemo } from "react"
 import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
 import { buildPanicIntensityComparison } from "../../content/ydsPanicIntensityComparison.js"
+import { buildPanicIntensityInterpretation } from "../../content/ydsPanicIntensityInterpretation.js"
+import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.js"
 
 /** @param {number} score */
 function resolvePanicAccentTier(score) {
-  if (score >= 85) return "critical"
-  if (score >= 70) return "high"
-  if (score >= 40) return "mid"
+  if (score >= 81) return "critical"
+  if (score >= 61) return "high"
+  if (score >= 41) return "mid"
   return "low"
 }
 
@@ -22,40 +24,65 @@ export default function YdsMarketPanicSecondaryPanel({
   embedded = false,
 }) {
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
+  const interpretation = useMemo(
+    () => (view?.panicScore != null ? buildPanicIntensityInterpretation(view.panicScore) : null),
+    [view?.panicScore],
+  )
+  const evidence = useMemo(() => buildPanicEvidenceReport(panicData), [panicData])
   const comparison = useMemo(
     () => buildPanicIntensityComparison(historyRows, panicData),
     [historyRows, panicData],
   )
 
-  if (!view || view.panicScore == null) return null
-  const filled = Math.max(0, Math.min(10, Math.round((view.buyIntensityPct ?? 0) / 10)))
-  const bar = `${"■".repeat(filled)}${"□".repeat(10 - filled)}`
+  if (!view || view.panicScore == null || !interpretation) return null
+
   const accentTier = resolvePanicAccentTier(view.panicScore)
-  const showAggressiveBadge = view.panicScore >= 85
+  const statusLabel = interpretation.label
 
   const card = (
     <div
       className={[
         "yds-market-panic-secondary",
         "yds-market-panic-secondary--v7",
+        "yds-market-panic-secondary--interpret",
         `yds-market-panic-secondary--accent-${accentTier}`,
       ].join(" ")}
     >
       <p className="yds-market-panic-secondary__title">{MARKET_LABEL_PANIC_INTENSITY}</p>
-      {showAggressiveBadge ? (
-        <p className="yds-market-panic-secondary__alert-badge">🚨 적극 매수 구간</p>
-      ) : null}
+
       <div className="yds-market-panic-secondary__body">
-        <div className="yds-market-panic-secondary__core">
-          <p className="yds-market-panic-secondary__score font-mono tabular-nums">
-            {view.panicScore}
-          </p>
-          <p className="yds-market-panic-secondary__level">{view.panicLabel}</p>
-          <p className="yds-market-panic-secondary__meter font-mono tabular-nums">{bar}</p>
-        </div>
-        <p className="yds-market-panic-secondary__intensity font-mono tabular-nums">
-          {view.buyIntensityLabel}
+        <p className="yds-market-panic-secondary__score font-mono tabular-nums">
+          {view.panicScore}
         </p>
+        <p className="yds-market-panic-secondary__level">{statusLabel}</p>
+
+        <div className="yds-market-panic-secondary__interpret">
+          <p className="yds-market-panic-secondary__interpret-label">시장 해석</p>
+          <ul className="yds-market-panic-secondary__interpret-list">
+            {interpretation.interpretationLines.map((line) => (
+              <li key={line} className="yds-market-panic-secondary__interpret-line">
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {interpretation.actionGuide ? (
+          <div className="yds-market-panic-secondary__action">
+            <p className="yds-market-panic-secondary__action-label">행동 가이드</p>
+            <p className="yds-market-panic-secondary__action-line">{interpretation.actionGuide}</p>
+          </div>
+        ) : null}
+
+        {evidence.briefChips.length ? (
+          <ul className="yds-market-panic-secondary__evidence-chips" aria-label="근거 요약">
+            {evidence.briefChips.map((chip) => (
+              <li key={chip.id} className="yds-market-panic-secondary__evidence-chip">
+                {chip.text}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       {comparison.visible ? (
