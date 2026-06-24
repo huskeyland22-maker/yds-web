@@ -11,23 +11,36 @@ import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
 function buildLiquidityDeskSummaryLines(dualLiquidity) {
   const mode = dualLiquidity?.actionMode
   if (mode === "short_term") {
-    return ["시장 자금 흐름은 양호하지만", "정책 환경은 아직 부담"]
+    return ["시장 자금 흐름 양호", "정책 환경 부담"]
   }
   if (mode === "medium_long") {
-    return ["자금 흐름은 아직 약하지만", "정책 완화 기대는 유지"]
+    return ["자금 흐름 약세", "정책 완화 기대 유지"]
   }
   if (mode === "aggressive") {
-    return ["시장·정책 유동성이 동시에 우호", "공격적 접근 여지 확대"]
+    return ["시장·정책 유동성 우호", "공격적 접근 여지"]
   }
   if (mode === "defense") {
-    return ["시장·정책 유동성이 동시에 약세", "방어 중심 접근 필요"]
+    return ["시장·정책 유동성 약세", "방어 중심 접근"]
   }
 
   const lines = dualLiquidity?.synthesis?.lines
   if (Array.isArray(lines) && lines.length >= 2) {
-    return lines.slice(0, 2)
+    return lines.slice(0, 2).map((line) => compressDeskSummaryLine(line))
   }
-  return ["시장·정책 유동성이 균형", "선별적 접근 유지"]
+  return ["시장·정책 유동성 균형", "선별적 접근 유지"]
+}
+
+/** @param {string} line */
+function compressDeskSummaryLine(line) {
+  return String(line ?? "")
+    .replace(/입니다\.?$/, "")
+    .replace(/은\s+/g, " ")
+    .replace(/는\s+/g, " ")
+    .replace(/이\s+/g, " ")
+    .replace(/하지만/g, "")
+    .replace(/아직\s+/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 /**
@@ -37,13 +50,13 @@ function buildLiquidityDeskSummaryLines(dualLiquidity) {
  */
 function buildStrategyDeskSummaryLines(view, cycleLabel = "") {
   if (/회복/.test(cycleLabel)) {
-    return ["관심종목을 모니터링하며", "분할 진입 기회를 찾는 구간"]
+    return ["관심종목 분할진입 구간"]
   }
   if (/안정/.test(cycleLabel) && /조정/.test(cycleLabel)) {
-    return ["급한 진입보다 관찰 우선", "후보 종목 리스트를 정비하는 구간"]
+    return ["관찰 우선 · 후보 정비"]
   }
   if (/진입/.test(cycleLabel)) {
-    return ["조정 흐름이 시작된 구간", "현금·관심종목 균형을 유지"]
+    return ["조정 시작 · 현금·관심 균형"]
   }
 
   const narrative = view?.strategyNarrative ?? []
@@ -67,7 +80,7 @@ export function buildMarketDeskSummary(panicData, dualLiquidity = null, cycleFlo
 
   const cycleLabel = cycleFlow?.currentCycleLabel ?? view.position?.label ?? "시장 상태"
   const panicPart =
-    view.panicScore != null ? `패닉 ${view.panicScore}` : view.panicLabel ?? ""
+    view.panicScore != null ? `패닉${view.panicScore}` : view.panicLabel ?? ""
 
   /** @type {string[]} */
   const lines = [`${cycleLabel} · ${panicPart}`.trim()]
