@@ -4,7 +4,6 @@ import YdsMarketDeskSummary from "./YdsMarketDeskSummary.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
-import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
 import YdsDashboardLiquiditySynthesis from "./YdsDashboardLiquiditySynthesis.jsx"
 import YdsDashboardLiquidityLaneDesk from "./YdsDashboardLiquidityLaneDesk.jsx"
@@ -76,17 +75,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
           historyRows={safeHistory}
+          cycleFlow={cycleFlow}
         />
-
-        <section
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--cycle"
-          aria-labelledby="market-block-cycle"
-        >
-          <h2 id="market-block-cycle" className="yds-market-desk__block-label">
-            시장 사이클
-          </h2>
-          <YdsMarketStateTimeline flow={cycleFlow} className="yds-market-desk__cycle-timeline" />
-        </section>
 
         <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
 

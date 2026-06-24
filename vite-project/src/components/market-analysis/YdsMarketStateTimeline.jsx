@@ -2,18 +2,36 @@ import { useMemo } from "react"
 import { buildMarketCycleProgressReport } from "../../content/ydsMarketCycleProgress.js"
 
 /**
- * @param {{ flow: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport; className?: string }} props
+ * @param {{
+ *   flow: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport
+ *   className?: string
+ *   embedded?: boolean
+ *   showTitle?: boolean
+ * }} props
  */
-export default function YdsMarketStateTimeline({ flow, className = "" }) {
+export default function YdsMarketStateTimeline({
+  flow,
+  className = "",
+  embedded = false,
+  showTitle = false,
+}) {
   const progress = useMemo(() => buildMarketCycleProgressReport(flow), [flow])
 
   if (!progress.visible || !progress.track.length) return null
 
   return (
     <nav
-      className={["yds-market-cycle-progress", className].filter(Boolean).join(" ")}
+      className={[
+        "yds-market-cycle-progress",
+        embedded ? "yds-market-cycle-progress--embedded" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       aria-label="시장 사이클 현재 위치"
     >
+      {showTitle ? <p className="yds-market-cycle-progress__title">시장 사이클</p> : null}
+
       <div className="yds-market-cycle-progress__rail" role="list">
         {progress.track.map((stage, index) => (
           <span key={stage.id} className="yds-market-cycle-progress__segment" role="listitem">

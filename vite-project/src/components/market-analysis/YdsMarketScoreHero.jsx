@@ -4,11 +4,17 @@ import YdsMarketPanicSecondaryPanel from "./YdsMarketPanicSecondaryPanel.jsx"
 
 /**
  * V8 Hero — 시장 상태(메인) + 패닉 강도(보조)
- * @param {{ panicData?: object | null; historyRows?: object[]; className?: string }} props
+ * @param {{
+ *   panicData?: object | null
+ *   historyRows?: object[]
+ *   cycleFlow?: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport | null
+ *   className?: string
+ * }} props
  */
 export default function YdsMarketScoreHero({
   panicData = null,
   historyRows = [],
+  cycleFlow = null,
   className = "",
 }) {
   return (
@@ -25,7 +31,12 @@ export default function YdsMarketScoreHero({
     >
       <div className="yds-market-score-hero__stack yds-market-desk__slot yds-market-desk__slot--scores">
         <div className="yds-market-desk__slot yds-market-desk__slot--market-state">
-          <YdsMarketStatePrimaryPanel embedded panicData={panicData} historyRows={historyRows} />
+          <YdsMarketStatePrimaryPanel
+            embedded
+            panicData={panicData}
+            historyRows={historyRows}
+            cycleFlow={cycleFlow}
+          />
         </div>
         <div className="yds-market-desk__slot yds-market-desk__slot--panic-intensity">
           <YdsMarketPanicSecondaryPanel embedded panicData={panicData} historyRows={historyRows} />

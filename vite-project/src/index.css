@@ -29033,7 +29033,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-state-primary--v7 {
-  gap: 0.55rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: 0.55rem 0.65rem;
+  align-items: stretch;
   padding: 0.62rem 0.74rem 0.66rem;
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.55));
   border-color: rgba(148, 163, 184, 0.22);
@@ -29041,6 +29044,21 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   flex: 1;
   min-height: 100%;
   height: 100%;
+}
+
+.yds-market-state-primary__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.yds-market-state-primary__cycle {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-left: 0.55rem;
+  border-left: 1px solid rgba(148, 163, 184, 0.14);
 }
 
 .yds-market-state-primary__hero {
@@ -29267,6 +29285,42 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-cycle-progress {
   margin: 0;
   padding: 0.1rem 0;
+  height: 100%;
+}
+
+.yds-market-cycle-progress__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(0.58rem, 1.6vw, 0.66rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.yds-market-cycle-progress--embedded {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.yds-market-cycle-progress--embedded .yds-market-cycle-progress__rail {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.14rem;
+}
+
+.yds-market-cycle-progress--embedded .yds-market-cycle-progress__segment {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.yds-market-cycle-progress--embedded .yds-market-cycle-progress__stats {
+  margin-top: auto;
+  padding-top: 0.45rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.28rem;
 }
 
 .yds-market-cycle-progress__rail {
@@ -29330,6 +29384,17 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 @media (max-width: 767px) {
+  .yds-market-state-primary--v7 {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-market-state-primary__cycle {
+    padding-left: 0;
+    padding-top: 0.45rem;
+    border-left: none;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+  }
+
   .yds-market-cycle-progress__rail {
     gap: 0.16rem 0.2rem;
   }
