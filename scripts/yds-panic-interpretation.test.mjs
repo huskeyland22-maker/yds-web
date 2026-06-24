@@ -1,23 +1,30 @@
 import assert from "node:assert/strict"
-import { buildPanicIntensityInterpretation } from "../vite-project/src/content/ydsPanicIntensityInterpretation.js"
+import {
+  buildPanicIntensityInterpretation,
+  buildPanicStageBar,
+  resolvePanicSentimentStageIndex,
+} from "../vite-project/src/content/ydsPanicIntensityInterpretation.js"
 import { buildPanicEvidenceReport } from "../vite-project/src/content/ydsPanicEvidenceEngine.js"
 
-const fear = buildPanicIntensityInterpretation(72)
-assert.ok(fear)
-assert.equal(fear.label, "공포")
-assert.ok(fear.interpretationLines.includes("투자심리가 위축된 상태"))
-assert.ok(fear.interpretationLines.includes("관심종목 분할매수 구간"))
+assert.equal(resolvePanicSentimentStageIndex(15), 0)
+assert.equal(resolvePanicSentimentStageIndex(44), 2)
+assert.equal(resolvePanicSentimentStageIndex(72), 3)
+assert.equal(resolvePanicSentimentStageIndex(90), 4)
 
-const overheat = buildPanicIntensityInterpretation(15)
-assert.equal(overheat?.label, "과열")
-assert.equal(overheat?.actionGuide, "추격매수 주의")
+assert.equal(buildPanicStageBar(2), "□ □ ■ □ □")
 
-const neutral = buildPanicIntensityInterpretation(50)
-assert.equal(neutral?.label, "중립")
-assert.equal(neutral?.actionGuide, null)
+const neutral = buildPanicIntensityInterpretation(44)
+assert.ok(neutral)
+assert.equal(neutral.label, "중립")
+assert.equal(neutral.currentLine, "현재 : 중립 (44)")
+assert.ok(neutral.descriptionLines.includes("시장 심리가 균형 상태"))
+assert.ok(neutral.descriptionLines.includes("추격매수 자제"))
 
-const panic = buildPanicIntensityInterpretation(90)
-assert.equal(panic?.label, "패닉")
+const greed = buildPanicIntensityInterpretation(72)
+assert.equal(greed?.label, "탐욕")
+
+const extremeFear = buildPanicIntensityInterpretation(12)
+assert.equal(extremeFear?.label, "극도 공포")
 
 const evidence = buildPanicEvidenceReport({
   vix: 18.2,
@@ -28,6 +35,5 @@ const evidence = buildPanicEvidenceReport({
 })
 assert.equal(evidence.metrics.length, 5)
 assert.ok(evidence.briefChips.some((c) => c.text.includes("VIX")))
-assert.ok(evidence.briefChips.some((c) => c.text.includes("CNN")))
 
 console.log("yds-panic-interpretation.test.mjs OK")

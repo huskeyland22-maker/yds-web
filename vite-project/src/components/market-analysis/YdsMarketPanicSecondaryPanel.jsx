@@ -7,14 +7,15 @@ import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.j
 
 /** @param {number} score */
 function resolvePanicAccentTier(score) {
-  if (score >= 81) return "critical"
-  if (score >= 61) return "high"
-  if (score >= 41) return "mid"
-  return "low"
+  if (score <= 20) return "critical"
+  if (score <= 40) return "high"
+  if (score <= 60) return "mid"
+  if (score <= 80) return "warm"
+  return "overheat"
 }
 
 /**
- * V7 — 패닉 강도 보조 카드 (축소)
+ * V7 — 패닉 강도 보조 카드
  * @param {{ panicData?: object | null; historyRows?: object[]; className?: string; embedded?: boolean }} props
  */
 export default function YdsMarketPanicSecondaryPanel({
@@ -37,7 +38,6 @@ export default function YdsMarketPanicSecondaryPanel({
   if (!view || view.panicScore == null || !interpretation) return null
 
   const accentTier = resolvePanicAccentTier(view.panicScore)
-  const statusLabel = interpretation.label
 
   const card = (
     <div
@@ -54,25 +54,21 @@ export default function YdsMarketPanicSecondaryPanel({
         <p className="yds-market-panic-secondary__score font-mono tabular-nums">
           {view.panicScore}
         </p>
-        <p className="yds-market-panic-secondary__level">{statusLabel}</p>
 
-        <div className="yds-market-panic-secondary__interpret">
-          <p className="yds-market-panic-secondary__interpret-label">시장 해석</p>
-          <ul className="yds-market-panic-secondary__interpret-list">
-            {interpretation.interpretationLines.map((line) => (
-              <li key={line} className="yds-market-panic-secondary__interpret-line">
-                {line}
-              </li>
-            ))}
-          </ul>
+        <div className="yds-market-panic-secondary__stage" aria-label="패닉 단계">
+          <p className="yds-market-panic-secondary__stage-bar font-mono tabular-nums" aria-hidden>
+            {interpretation.stageBar}
+          </p>
+          <p className="yds-market-panic-secondary__stage-current">{interpretation.currentLine}</p>
         </div>
 
-        {interpretation.actionGuide ? (
-          <div className="yds-market-panic-secondary__action">
-            <p className="yds-market-panic-secondary__action-label">행동 가이드</p>
-            <p className="yds-market-panic-secondary__action-line">{interpretation.actionGuide}</p>
-          </div>
-        ) : null}
+        <ul className="yds-market-panic-secondary__description" aria-label="상태 설명">
+          {interpretation.descriptionLines.map((line) => (
+            <li key={line} className="yds-market-panic-secondary__description-line">
+              {line}
+            </li>
+          ))}
+        </ul>
 
         {evidence.briefChips.length ? (
           <ul className="yds-market-panic-secondary__evidence-chips" aria-label="근거 요약">
