@@ -27117,9 +27117,95 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 /* IA V2 — 시장분석 데스크 / 종목추천 페이지 */
 .yds-market-desk {
+  --yds-desk-space-title: 8px;
+  --yds-desk-space-section: 16px;
+  --yds-desk-space-card: 24px;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0;
+}
+
+/* 시장분석 데스크 — 8 / 16 / 24px 세로 간격 */
+.yds-market-desk__stream {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yds-desk-space-card);
+  min-width: 0;
+}
+
+.yds-market-desk__section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yds-desk-space-card);
+  min-width: 0;
+  margin-top: 0;
+}
+
+.yds-market-desk__slot--desk-summary,
+.yds-market-desk__slot--score-hero,
+.yds-market-desk__slot--recommend,
+.yds-market-desk__slot--trend,
+.yds-market-desk__slot--indices,
+.yds-market-desk__slot--liquidity-summary,
+.yds-market-desk__slot--week-events,
+.yds-market-desk__slot--liquidity-market,
+.yds-market-desk__slot--liquidity-policy,
+.yds-market-desk__slot--action-guide {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.yds-market-desk .yds-market-desk__block {
+  gap: 0;
+}
+
+.yds-market-desk .yds-market-desk-summary__title,
+.yds-market-desk .yds-desk-card__head,
+.yds-market-desk .yds-market-recommend-strip__head,
+.yds-market-desk .yds-market-trend-chart__head,
+.yds-market-desk .yds-week-events-unified__head,
+.yds-market-desk .yds-liquidity-summary__label,
+.yds-market-desk .yds-desk-card__guide-label {
+  margin-bottom: var(--yds-desk-space-title);
+}
+
+.yds-market-desk .yds-desk-card__head {
+  margin-bottom: var(--yds-desk-space-title);
+}
+
+.yds-market-desk .yds-desk-card__head ~ * + * {
+  margin-top: var(--yds-desk-space-section);
+}
+
+.yds-market-desk .yds-market-trend__grid,
+.yds-market-desk .yds-week-events-unified,
+.yds-market-desk .yds-market-score-hero__stack {
+  gap: var(--yds-desk-space-section);
+}
+
+.yds-market-desk .yds-market-desk__liquidity-lanes {
+  gap: var(--yds-desk-space-section);
+}
+
+.yds-market-desk .yds-panic-evidence__list {
+  margin-top: var(--yds-desk-space-title);
+}
+
+.yds-market-desk .yds-liquidity-summary,
+.yds-market-desk .yds-liquidity-summary--solo .yds-liquidity-summary__headline {
+  margin-top: 0;
+}
+
+.yds-market-desk .yds-market-score-hero,
+.yds-market-desk .yds-market-recommend-strip,
+.yds-market-desk .yds-market-trend {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.yds-market-desk .yds-desk-card__action-stars,
+.yds-market-desk .yds-desk-card__liquidity-lead {
+  margin-bottom: 0;
 }
 
 .yds-market-desk__tier {
@@ -29000,7 +29086,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-score-hero {
-  margin-bottom: 0.45rem;
+  margin-bottom: 0;
 }
 
 .yds-market-score-hero--state-first .yds-market-score-hero__philosophy,
@@ -29891,7 +29977,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-recommend-strip {
-  margin-top: 0.45rem;
+  margin-top: 0;
   padding: 0.55rem 0.6rem 0.65rem;
   background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(148, 163, 184, 0.12);
@@ -29903,7 +29989,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0;
 }
 
 .yds-market-recommend-strip__title {
@@ -30068,7 +30154,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-desk__slot--desk-summary {
-  margin-bottom: 1.875rem;
+  margin-bottom: 0;
 }
 
 .yds-market-desk__slot--score-hero {
@@ -30087,7 +30173,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-desk-summary__title {
-  margin: 0 0 0.3rem;
+  margin: 0;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -30202,7 +30288,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-trend {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0;
 }
 
 .yds-market-trend__grid {
@@ -30228,7 +30314,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.35rem;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0;
 }
 
 .yds-market-trend-chart__title {
@@ -30353,19 +30439,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-desk__section-stack {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: var(--yds-desk-space-card, 24px);
   min-width: 0;
-  margin-top: 1.75rem;
-}
-
-.yds-market-desk__stream {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  margin-top: 0;
 }
 
 .yds-market-desk__slot--trend {
-  margin-top: 1.75rem;
+  margin-top: 0;
 }
 
 .yds-market-desk__brief-stack {
@@ -30395,7 +30475,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.45rem;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0;
 }
 
 .yds-desk-card__title {
@@ -30461,7 +30541,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-week-events-unified {
   display: grid;
-  gap: 0.65rem;
+  gap: var(--yds-desk-space-section, 16px);
 }
 
 .yds-week-events-unified__section {
@@ -30469,7 +30549,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-week-events-unified__head {
-  margin: 0 0 0.35rem;
+  margin: 0;
 }
 
 .yds-week-events-unified__badge {
@@ -30648,7 +30728,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.4rem 0.55rem;
-  margin: 0 0 0.55rem;
+  margin: 0;
 }
 
 .yds-desk-card__action-star {
@@ -30670,7 +30750,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-desk-card__guide-label {
-  margin: 0 0 0.4rem;
+  margin: 0;
   font-size: 0.65rem;
   font-weight: 700;
   color: #cbd5e1;
@@ -31204,7 +31284,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-liquidity-summary__label {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -31235,7 +31315,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-desk-card__liquidity-lead {
-  margin: 0 0 0.65rem;
+  margin: 0;
   padding: 0.5rem 0.6rem;
   font-size: 0.76rem;
   font-weight: 600;
@@ -32968,19 +33048,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 /* Mobile market desk — judgment-first · hide duplicate layers */
 @media (max-width: 1023px) {
   .yds-market-desk {
-    gap: 0.55rem;
+    gap: 0;
   }
 
   .yds-market-desk__stream {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: var(--yds-desk-space-card, 24px);
   }
 
   .yds-market-desk__brief-stack,
   .yds-market-desk__section-stack {
     display: contents;
-    gap: 1.75rem;
+    gap: 0;
   }
 
   .yds-market-desk__section-stack {
@@ -32988,15 +33068,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .yds-market-desk__slot--trend {
-    margin-top: 1.75rem;
+    margin-top: 0;
   }
 
   .yds-market-desk__slot--indices {
-    margin-top: 1.75rem;
+    margin-top: 0;
   }
 
   .yds-market-desk__slot--liquidity-summary {
-    margin-top: 1.75rem;
+    margin-top: 0;
   }
 
   .yds-market-hero--desk {
