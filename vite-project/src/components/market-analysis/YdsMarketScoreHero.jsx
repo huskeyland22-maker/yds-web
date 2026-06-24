@@ -23,12 +23,6 @@ export default function YdsMarketScoreHero({
         .join(" ")}
       aria-label="시장 상태 · 패닉 강도"
     >
-      <div className="yds-market-score-hero__header yds-market-desk__slot yds-market-desk__slot--scores-meta">
-        <p className="yds-market-score-hero__philosophy">
-          시장 상태 = 전략 · 패닉 강도 = 매수 강도
-        </p>
-      </div>
-
       <div className="yds-market-score-hero__stack yds-market-desk__slot yds-market-desk__slot--scores">
         <div className="yds-market-desk__slot yds-market-desk__slot--market-state">
           <YdsMarketStatePrimaryPanel embedded panicData={panicData} historyRows={historyRows} />

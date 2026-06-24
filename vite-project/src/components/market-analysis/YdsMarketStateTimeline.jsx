@@ -1,56 +1,49 @@
+import { useMemo } from "react"
+import { buildMarketCycleProgressReport } from "../../content/ydsMarketCycleProgress.js"
+
 /**
  * @param {{ flow: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport; className?: string }} props
  */
 export default function YdsMarketStateTimeline({ flow, className = "" }) {
-  if (!flow?.visible || !flow.steps?.length) return null
+  const progress = useMemo(() => buildMarketCycleProgressReport(flow), [flow])
+
+  if (!progress.visible || !progress.track.length) return null
 
   return (
     <nav
-      className={["yds-market-state-timeline", className].filter(Boolean).join(" ")}
-      aria-label="시장 사이클 흐름"
+      className={["yds-market-cycle-progress", className].filter(Boolean).join(" ")}
+      aria-label="시장 사이클 현재 위치"
     >
-      <p className="yds-market-state-timeline__label">시장 사이클 흐름</p>
-
-      <ol className="yds-market-state-timeline__list">
-        {flow.steps.map((step, index) => (
-          <li
-            key={`${step.date}-${step.label}-${index}`}
-            className={[
-              "yds-market-state-timeline__step",
-              step.isCurrent ? "yds-market-state-timeline__step--current" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {index > 0 && step.daysGap != null ? (
-              <span className="yds-market-state-timeline__arrow font-mono tabular-nums">
-                ↓ {step.daysGap}일
+      <div className="yds-market-cycle-progress__rail" role="list">
+        {progress.track.map((stage, index) => (
+          <span key={stage.id} className="yds-market-cycle-progress__segment" role="listitem">
+            {index > 0 ? (
+              <span className="yds-market-cycle-progress__arrow" aria-hidden>
+                →
               </span>
             ) : null}
-            {step.isCurrent ? (
-              <span className="yds-market-state-timeline__node">
-                <em className="yds-market-state-timeline__current">현재</em>
-                <span className="yds-market-state-timeline__zone">{step.label}</span>
-              </span>
-            ) : (
-              <span className="yds-market-state-timeline__zone">{step.label}</span>
-            )}
-          </li>
+            <span
+              className={[
+                "yds-market-cycle-progress__stage",
+                stage.isCurrent ? "yds-market-cycle-progress__stage--current" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {stage.isCurrent ? `[${stage.label}]` : stage.label}
+            </span>
+          </span>
         ))}
-      </ol>
+      </div>
 
-      <dl className="yds-market-state-timeline__stats">
+      <dl className="yds-market-cycle-progress__stats">
         <div>
-          <dt>현재 상태 지속</dt>
-          <dd className="font-mono tabular-nums">{flow.currentDurationDays}일</dd>
+          <dt>현재 단계 지속</dt>
+          <dd className="font-mono tabular-nums">{progress.currentDurationDays}일</dd>
         </div>
         <div>
-          <dt>최근 {flow.windowDays}일 전환</dt>
-          <dd className="font-mono tabular-nums">{flow.transitionCount}회</dd>
-        </div>
-        <div>
-          <dt>최장 유지 상태</dt>
-          <dd>{flow.longestHeldState}</dd>
+          <dt>최근 {progress.windowDays}일 전환</dt>
+          <dd className="font-mono tabular-nums">{progress.transitionCount}회</dd>
         </div>
       </dl>
     </nav>

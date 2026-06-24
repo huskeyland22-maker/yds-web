@@ -68,6 +68,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         <YdsMarketDeskSummary
           panicData={panicData}
           dualLiquidity={dualLiquidity}
+          cycleFlow={cycleFlow}
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--desk-summary"
         />
 
