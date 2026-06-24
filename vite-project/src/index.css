@@ -27117,15 +27117,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 /* IA V2 — 시장분석 데스크 / 종목추천 페이지 */
 .yds-market-desk {
-  --yds-desk-space-title: 8px;
-  --yds-desk-space-section: 16px;
-  --yds-desk-space-card: 24px;
+  --yds-desk-space-title: 6px;
+  --yds-desk-space-section: 12px;
+  --yds-desk-space-card: 18px;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
-/* 시장분석 데스크 — 8 / 16 / 24px 세로 간격 */
+/* 시장분석 데스크 — 6 / 12 / 18px 세로 간격 */
 .yds-market-desk__stream {
   display: flex;
   flex-direction: column;
@@ -30439,7 +30439,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-desk__section-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--yds-desk-space-card, 24px);
+  gap: var(--yds-desk-space-card, 18px);
   min-width: 0;
   margin-top: 0;
 }
@@ -30451,7 +30451,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-desk__brief-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--yds-desk-space-section, 12px);
   min-width: 0;
 }
 
@@ -30541,7 +30541,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-week-events-unified {
   display: grid;
-  gap: var(--yds-desk-space-section, 16px);
+  gap: var(--yds-desk-space-section, 12px);
 }
 
 .yds-week-events-unified__section {
@@ -30705,7 +30705,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-desk__liquidity-lanes {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--yds-desk-space-section, 12px);
   min-width: 0;
 }
 
@@ -33054,7 +33054,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   .yds-market-desk__stream {
     display: flex;
     flex-direction: column;
-    gap: var(--yds-desk-space-card, 24px);
+    gap: var(--yds-desk-space-card, 18px);
   }
 
   .yds-market-desk__brief-stack,
