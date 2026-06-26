@@ -1,16 +1,17 @@
 import { useMemo, useEffect, useRef, useState } from "react"
 import YdsPanicEvidencePanel from "./YdsPanicEvidencePanel.jsx"
 import YdsMarketDeskSummary from "./YdsMarketDeskSummary.jsx"
+import YdsAiMarketBriefing from "./YdsAiMarketBriefing.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
+import YdsMarketTop20Strip from "./YdsMarketTop20Strip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
 import SectionErrorBoundary from "../SectionErrorBoundary.jsx"
 import YdsDashboardLiquiditySynthesis from "./YdsDashboardLiquiditySynthesis.jsx"
 import YdsDashboardLiquidityLaneDesk from "./YdsDashboardLiquidityLaneDesk.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
-import YdsMarketJudgmentRationale from "./YdsMarketJudgmentRationale.jsx"
-import YdsMarketStateHistory from "./YdsMarketStateHistory.jsx"
+import YdsDeskDailyChecklist from "./YdsDeskDailyChecklist.jsx"
 import YdsDailyMarketReportPanel from "./YdsDailyMarketReportPanel.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
@@ -133,6 +134,13 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--desk-summary"
         />
 
+        <YdsAiMarketBriefing
+          panicData={panicData}
+          cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--ai-briefing"
+        />
+
         <YdsMarketScoreHero
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--score-hero"
           panicData={panicData}
@@ -151,6 +159,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           etfContext={etfContext}
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--daily-report"
         />
+
+        <YdsMarketTop20Strip className="yds-market-desk__slot yds-market-desk__slot--top20" />
 
         <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
 
@@ -203,6 +213,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             report={actionGuide}
             className="yds-market-desk__slot yds-market-desk__slot--action-guide"
           />
+
+          <YdsDeskDailyChecklist className="yds-market-desk__slot yds-market-desk__slot--checklist" />
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter
 import { buildPanicIntensityComparison } from "../../content/ydsPanicIntensityComparison.js"
 import { buildPanicIntensityInterpretation } from "../../content/ydsPanicIntensityInterpretation.js"
 import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.js"
+import YdsPanicScoreComposition from "./YdsPanicScoreComposition.jsx"
 
 /** @param {number} score */
 function resolvePanicAccentTier(score) {
@@ -104,6 +105,8 @@ export default function YdsMarketPanicSecondaryPanel({
           ) : null}
         </div>
       ) : null}
+
+      <YdsPanicScoreComposition panicData={panicData} className="yds-market-panic-secondary__composition" />
     </div>
   )
 

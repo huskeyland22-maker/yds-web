@@ -9,6 +9,7 @@ import {
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
 import YdsMarketJudgmentRationale from "./YdsMarketJudgmentRationale.jsx"
 import YdsMarketStateHistory from "./YdsMarketStateHistory.jsx"
+import YdsMarketStateRecentChanges from "./YdsMarketStateRecentChanges.jsx"
 
 /** @param {object[]} historyRows */
 function resolveScoreDelta(historyRows, currentScore) {
@@ -95,6 +96,14 @@ export default function YdsMarketStatePrimaryPanel({
             전일 대비 <span className="font-mono tabular-nums">{deltaText}</span>
           </p>
         </div>
+
+        <YdsMarketStateRecentChanges
+          historyRows={historyRows}
+          cycleFlow={cycleFlow}
+          panicData={panicData}
+          dualLiquidity={dualLiquidity}
+          className="yds-market-state-primary__recent-changes"
+        />
 
         <ul className="yds-market-state-primary__actions" aria-label="시장 상태 행동 가이드">
           {unifiedGuide.actions.map((item) => (
