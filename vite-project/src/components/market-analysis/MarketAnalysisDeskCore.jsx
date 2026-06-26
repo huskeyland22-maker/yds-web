@@ -8,6 +8,9 @@ import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
 import YdsDashboardLiquiditySynthesis from "./YdsDashboardLiquiditySynthesis.jsx"
 import YdsDashboardLiquidityLaneDesk from "./YdsDashboardLiquidityLaneDesk.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
+import YdsMarketJudgmentRationale from "./YdsMarketJudgmentRationale.jsx"
+import YdsMarketStateHistory from "./YdsMarketStateHistory.jsx"
+import YdsDailyMarketReportPanel from "./YdsDailyMarketReportPanel.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { buildMarketCycleFlowReport } from "../../content/ydsMarketCycleFlow.js"
@@ -17,6 +20,10 @@ import { buildUnifiedWeekEventStrip } from "../../content/ydsInvestmentCalendarE
 import { buildDualLiquidityReport } from "../../market-os/liquidityDualEngine.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
+import { captureTodayMarketStateHistory } from "../../content/ydsMarketStateHistory.js"
+import { resolveUnifiedMarketStateLabel } from "../../content/ydsUnifiedMarketState.js"
+import { getFinalScore } from "../../utils/tradingScores.js"
+import { resolveMarketPositionView } from "../../content/ydsMarketPositionEngine.js"
 
 /**
  * 시장분석 데스크 — 결론 → 추이 → 변화 → 근거 → 채권 (해석은 사이드바)
@@ -28,7 +35,7 @@ import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
   const [etfPrices, setEtfPrices] = useState(
-    /** @type {{ QQQ: Record<string, number>; SOXX: Record<string, number> } | null} */ (null),
+    /** @type {{ QQQ: Record<string, number>; SOXX: Record<string, number>; SPY: Record<string, number> } | null} */ (null),
   )
 
   useEffect(() => {
@@ -39,6 +46,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         setEtfPrices({
           QQQ: benchmarks.QQQ ?? {},
           SOXX: benchmarks.SOX ?? {},
+          SPY: benchmarks.SPY ?? {},
         })
       })
       .catch(() => {
@@ -49,17 +57,21 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     }
   }, [])
 
-  const cycleFlow = useMemo(() => {
+  const etfContext = useMemo(() => {
+    if (!etfPrices) return null
     const asOfDate = safeHistory[safeHistory.length - 1]?.date ?? null
-    const etfContext = etfPrices
-      ? {
-          qqqPrices: etfPrices.QQQ,
-          soxxPrices: etfPrices.SOX,
-          asOfDate,
-        }
-      : null
-    return buildMarketCycleFlowReport(safeHistory, undefined, etfContext)
-  }, [safeHistory, etfPrices])
+    return {
+      qqqPrices: etfPrices.QQQ,
+      soxxPrices: etfPrices.SOX,
+      spyPrices: etfPrices.SPY,
+      asOfDate,
+    }
+  }, [etfPrices, safeHistory])
+
+  const cycleFlow = useMemo(
+    () => buildMarketCycleFlowReport(safeHistory, undefined, etfContext),
+    [safeHistory, etfContext],
+  )
 
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
@@ -90,6 +102,22 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     logPanicIntensityAudit(safeHistory, { days: 2 })
   }, [safeHistory])
 
+  useEffect(() => {
+    if (!panicData || !cycleFlow?.visible) return
+    const date = String(safeHistory[safeHistory.length - 1]?.date ?? "").slice(0, 10)
+    if (!date) return
+    const positionView = resolveMarketPositionView(panicData)
+    const panicScore = Math.round(getFinalScore(panicData) ?? NaN)
+    captureTodayMarketStateHistory({
+      date,
+      unifiedLabel: resolveUnifiedMarketStateLabel(cycleFlow),
+      panicScore: Number.isFinite(panicScore) ? panicScore : null,
+      marketScore: positionView?.score ?? null,
+      liquidityScore: dualLiquidity?.marketScore ?? null,
+      cycleFlow,
+    })
+  }, [panicData, cycleFlow, safeHistory, dualLiquidity?.marketScore])
+
   if (!panicData && safeHistory.length === 0) {
     return null
   }
@@ -109,6 +137,18 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           panicData={panicData}
           historyRows={safeHistory}
           cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
+        />
+
+        <YdsDailyMarketReportPanel
+          panicData={panicData}
+          historyRows={safeHistory}
+          cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          weekEvents={weekEvents}
+          etfContext={etfContext}
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--daily-report"
         />
 
         <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />

@@ -16,6 +16,8 @@ import YdsStockPickRecommendRationale from "./YdsStockPickRecommendRationale.jsx
 import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
 import YdsStockPickRankStrip from "./YdsStockPickRankStrip.jsx"
 import YdsStockPickLifecycleBadge from "./YdsStockPickLifecycleBadge.jsx"
+import YdsStockPickScoreBreakdown from "./YdsStockPickScoreBreakdown.jsx"
+import YdsStockPickValidationPerf from "./YdsStockPickValidationPerf.jsx"
 
 /**
  * @param {{
@@ -141,6 +143,9 @@ export default function YdsStockPickCard({
           className="yds-spick-card__action-guide"
         />
       </Link>
+
+      <YdsStockPickScoreBreakdown stock={stock} className="yds-spick-card__score-breakdown" />
+      <YdsStockPickValidationPerf ticker={stock.ticker} country={country} />
 
       <details className="yds-spick-card__details">
         <summary className="yds-spick-card__details-summary">상세</summary>

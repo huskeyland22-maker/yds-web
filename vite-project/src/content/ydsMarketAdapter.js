@@ -10,7 +10,9 @@ import { resolveMarketStageSnapshot } from "./ydsMarketStageLabels.js"
 import { resolveMarketCycleStage } from "./ydsMarketCycleDisplay.js"
 import { resolveMarketState } from "./ydsStateEngine.js"
 import { resolveMomentumLayer } from "./ydsMomentumLayer.js"
-import { resolveMarketPosition } from "./ydsMarketPositionEngine.js"
+import { resolveMarketPosition, computeMarketPositionScore } from "./ydsMarketPositionEngine.js"
+import { buildMarketCycleFlowReport } from "./ydsMarketCycleFlow.js"
+import { resolveUnifiedMarketStateLabel } from "./ydsUnifiedMarketState.js"
 import { getMarketStatePickLimit } from "./ydsMarketStateCenter.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { getFinalScore } from "../utils/tradingScores.js"
@@ -43,6 +45,8 @@ import { YDS_SCORE_WEIGHTS } from "./ydsStockScoreConfig.js"
  *   marketPositionId: string | null
  *   marketPositionLabel: string | null
  *   marketPositionEmoji: string | null
+ *   unifiedMarketStateLabel: string | null
+ *   marketScore: number | null
  *   pickDisplayLimit: number
  *   contextLine: string
  * }} YdsMarketAdapterContext
@@ -70,6 +74,8 @@ export const DEFAULT_MARKET_CONTEXT = {
   marketPositionId: null,
   marketPositionLabel: null,
   marketPositionEmoji: null,
+  unifiedMarketStateLabel: null,
+  marketScore: null,
   pickDisplayLimit: 20,
   contextLine: "",
 }
@@ -104,6 +110,22 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
   const state = resolveMarketState(panicData, historyRows, momentum)
   const cycle = resolveMarketCycleStage(panicData.fearGreed, panicData.bofa)
   const marketPosition = resolveMarketPosition(panicData)
+  const cycleFlow =
+    Array.isArray(historyRows) && historyRows.length > 0
+      ? buildMarketCycleFlowReport(historyRows)
+      : null
+  const unifiedMarketStateLabel = resolveUnifiedMarketStateLabel(
+    cycleFlow,
+    marketPosition?.label ?? null,
+  )
+  const marketScore = marketPosition
+    ? computeMarketPositionScore(
+        marketPosition.cnn,
+        marketPosition.vix,
+        marketPosition.bofa,
+        marketPosition.id,
+      )
+    : null
 
   const macroId = macro?.id ?? "neutral"
   const panicBandId = snapshot?.panic?.id ?? macroId
@@ -137,6 +159,8 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
     marketPositionId: marketPosition?.id ?? null,
     marketPositionLabel: marketPosition?.label ?? null,
     marketPositionEmoji: marketPosition?.emoji ?? null,
+    unifiedMarketStateLabel,
+    marketScore,
     pickDisplayLimit: getMarketStatePickLimit(marketPosition?.id),
     contextLine: signal?.contextLine ?? market?.hint ?? "",
   }

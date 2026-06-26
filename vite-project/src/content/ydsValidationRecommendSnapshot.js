@@ -21,6 +21,9 @@ import { serializeLifecycleForSnapshot } from "./ydsStockPickLifecycle.js"
  *   marketFitGrade: string
  *   marketFitScore: number | null
  *   marketStateLabel: string
+ *   unifiedMarketStateLabel?: string
+ *   marketScore?: number | null
+ *   liquidityScore?: number | null
  *   panicIntensity: number | null
  *   panicLabel: string
  *   recommendRationales?: { id: string; category: string; source: string; score: number; max: number; text: string }[]
@@ -105,11 +108,17 @@ export function buildRecommendSnapshot(stock, marketContext, recommendedAt) {
     marketFitGrade: normGrade(marketFitGrade),
     marketFitScore: marketFitScore,
     marketStateLabel: String(
-      marketContext?.marketStateLabel ??
+      marketContext?.unifiedMarketStateLabel ??
+        marketContext?.marketStateLabel ??
         marketContext?.strategyLabel ??
         regimeLabel ??
         "—",
     ),
+    unifiedMarketStateLabel: String(
+      marketContext?.unifiedMarketStateLabel ?? marketContext?.marketStateLabel ?? "—",
+    ),
+    marketScore: finiteNum(marketContext?.marketScore),
+    liquidityScore: finiteNum(marketContext?.liquidityScore),
     panicIntensity: finiteNum(marketContext?.ydsScore),
     panicLabel: String(marketContext?.panicLabel ?? "—"),
     recommendRationales: rationales.length ? rationales : undefined,

@@ -69,6 +69,12 @@ export default function YdsMarketStateTimeline({
             <dd>{flow.etfSensitivity.reason}</dd>
           </div>
         ) : null}
+        {flow.recoveryGate?.applied && flow.recoveryGate.reason ? (
+          <div className="yds-market-cycle-progress__etf-note">
+            <dt>회복 확인</dt>
+            <dd>{flow.recoveryGate.reason}</dd>
+          </div>
+        ) : null}
       </dl>
     </nav>
   )

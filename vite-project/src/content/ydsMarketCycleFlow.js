@@ -10,6 +10,10 @@ import {
 } from "./ydsMarketPositionEngine.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { applyEtfSensitivityToCycleFlow } from "./ydsMarketCycleEtfSensitivity.js"
+import {
+  applyRecoveryConfirmationGate,
+  RECOVERY_GATE_THRESHOLDS,
+} from "./ydsMarketCycleRecoveryGate.js"
 
 export const MARKET_CYCLE_FLOW_DAYS = 30
 
@@ -35,6 +39,7 @@ export const MARKET_CYCLE_FLOW_DAYS = 30
  *   currentDurationDays: number
  *   longestHeldState: string
  *   etfSensitivity?: import("./ydsMarketCycleEtfSensitivity.js").CycleEtfDowngrade
+ *   recoveryGate?: import("./ydsMarketCycleRecoveryGate.js").RecoveryGateResult
  * }} MarketCycleFlowReport
  */
 
@@ -101,19 +106,46 @@ function annotateDailyCycleLabels(baseEntries) {
   let prevId = null
   let prevScore = null
   let currentPhase = /** @type {CyclePhase} */ ("진입")
+  let daysInPhase = 0
+  const enterThreshold = RECOVERY_GATE_THRESHOLDS.phaseDeltaEnter
+  const minStableDays = RECOVERY_GATE_THRESHOLDS.minStableDaysBeforeRecovery
 
   for (const entry of baseEntries) {
     if (prevId == null || entry.positionId !== prevId) {
       currentPhase = "진입"
+      daysInPhase = 1
       prevId = entry.positionId
       prevScore = entry.score
     } else {
+      daysInPhase += 1
       const delta = entry.score - (prevScore ?? entry.score)
-      if (Math.abs(delta) >= 3) {
-        currentPhase = resolvePhase(entry.positionId, delta)
-        prevScore = entry.score
-      } else if (currentPhase === "진입") {
+      const recoveryFavored =
+        entry.positionId === "panic" ||
+        entry.positionId === "fear" ||
+        entry.positionId === "adjustment"
+
+      if (currentPhase === "진입") {
         currentPhase = "안정화"
+      } else if (
+        currentPhase === "안정화" &&
+        recoveryFavored &&
+        delta >= enterThreshold &&
+        daysInPhase >= minStableDays
+      ) {
+        currentPhase = "회복중"
+        daysInPhase = 1
+        prevScore = entry.score
+      } else if (currentPhase === "회복중" && delta <= -enterThreshold) {
+        currentPhase = "안정화"
+        daysInPhase = 1
+        prevScore = entry.score
+      } else if (Math.abs(delta) >= enterThreshold) {
+        const nextPhase = resolvePhase(entry.positionId, delta)
+        if (nextPhase !== currentPhase) {
+          currentPhase = nextPhase
+          daysInPhase = 1
+          prevScore = entry.score
+        }
       }
     }
 
@@ -242,5 +274,34 @@ export function buildMarketCycleFlowReport(
     longestHeldState: resolveLongestHeldState(entries),
   }
 
-  return applyEtfSensitivityToCycleFlow(baseReport, etfContext)
+  return finalizeMarketCycleFlow(baseReport, etfContext)
+}
+
+/**
+ * ETF 민감도 + 회복 확인 게이트 적용
+ * @param {MarketCycleFlowReport} report
+ * @param {import("./ydsMarketCycleEtfSensitivity.js").CycleEtfContext | null | undefined} etfContext
+ */
+export function finalizeMarketCycleFlow(report, etfContext = null) {
+  const afterEtf = applyEtfSensitivityToCycleFlow(report, etfContext)
+  const gate = applyRecoveryConfirmationGate(afterEtf.currentCycleLabel, etfContext)
+
+  if (!gate.applied) {
+    return { ...afterEtf, recoveryGate: gate }
+  }
+
+  const steps = Array.isArray(afterEtf.steps) ? [...afterEtf.steps] : []
+  if (steps.length) {
+    steps[steps.length - 1] = {
+      ...steps[steps.length - 1],
+      label: gate.label,
+    }
+  }
+
+  return {
+    ...afterEtf,
+    currentCycleLabel: gate.label,
+    steps,
+    recoveryGate: gate,
+  }
 }

@@ -8,6 +8,8 @@ import YdsMarketPanicSecondaryPanel from "./YdsMarketPanicSecondaryPanel.jsx"
  *   panicData?: object | null
  *   historyRows?: object[]
  *   cycleFlow?: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport | null
+ *   dualLiquidity?: import("../../market-os/liquidityDualEngine.js").DualLiquidityReport | null
+ *   etfContext?: object | null
  *   className?: string
  * }} props
  */
@@ -15,6 +17,8 @@ export default function YdsMarketScoreHero({
   panicData = null,
   historyRows = [],
   cycleFlow = null,
+  dualLiquidity = null,
+  etfContext = null,
   className = "",
 }) {
   return (
@@ -36,6 +40,8 @@ export default function YdsMarketScoreHero({
             panicData={panicData}
             historyRows={historyRows}
             cycleFlow={cycleFlow}
+            dualLiquidity={dualLiquidity}
+            etfContext={etfContext}
           />
         </div>
         <div className="yds-market-desk__slot yds-market-desk__slot--panic-intensity">

@@ -141,7 +141,7 @@ export function resolveEtfCycleDowngrade(baseLabel, audit) {
   const severeS =
     (s3 != null && s3 <= CYCLE_ETF_THRESHOLDS.soxx3dSevere) ||
     (s2 != null && s2 <= CYCLE_ETF_THRESHOLDS.soxx2dSevere)
-  const toStable = severeQ || severeS || (warnQ && warnS)
+  const toStable = severeQ || severeS || (warnQ && warnS) || (q2 != null && q2 <= -3)
 
   /** @type {string[]} */
   const triggers = []
@@ -179,6 +179,7 @@ export function resolveEtfCycleDowngrade(baseLabel, audit) {
  * @typedef {{
  *   qqqPrices?: Record<string, number> | null
  *   soxxPrices?: Record<string, number> | null
+ *   spyPrices?: Record<string, number> | null
  *   asOfDate?: string | null
  * }} CycleEtfContext
  */

@@ -7,6 +7,8 @@ import {
   resolveUnifiedMarketStateLabel,
 } from "../../content/ydsUnifiedMarketState.js"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
+import YdsMarketJudgmentRationale from "./YdsMarketJudgmentRationale.jsx"
+import YdsMarketStateHistory from "./YdsMarketStateHistory.jsx"
 
 /** @param {object[]} historyRows */
 function resolveScoreDelta(historyRows, currentScore) {
@@ -39,6 +41,8 @@ function resolveScoreDelta(historyRows, currentScore) {
  *   panicData?: object | null
  *   historyRows?: object[]
  *   cycleFlow?: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport | null
+ *   dualLiquidity?: import("../../market-os/liquidityDualEngine.js").DualLiquidityReport | null
+ *   etfContext?: object | null
  *   className?: string
  *   embedded?: boolean
  * }} props
@@ -47,6 +51,8 @@ export default function YdsMarketStatePrimaryPanel({
   panicData = null,
   historyRows = [],
   cycleFlow = null,
+  dualLiquidity = null,
+  etfContext = null,
   className = "",
   embedded = false,
 }) {
@@ -115,6 +121,20 @@ export default function YdsMarketStatePrimaryPanel({
       {cycleFlow?.visible ? (
         <div className="yds-market-state-primary__cycle">
           <YdsMarketStateTimeline flow={cycleFlow} embedded showTitle />
+          <YdsMarketJudgmentRationale
+            panicData={panicData}
+            cycleFlow={cycleFlow}
+            dualLiquidity={dualLiquidity}
+            etfContext={etfContext}
+            className="yds-market-state-primary__judgment"
+          />
+          <YdsMarketStateHistory
+            historyRows={historyRows}
+            cycleFlow={cycleFlow}
+            panicData={panicData}
+            dualLiquidity={dualLiquidity}
+            className="yds-market-state-primary__history"
+          />
         </div>
       ) : null}
     </div>
