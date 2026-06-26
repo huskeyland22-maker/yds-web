@@ -27142,6 +27142,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-desk__slot--desk-summary,
+.yds-market-desk__slot--today-conclusion,
 .yds-market-desk__slot--score-hero,
 .yds-market-desk__slot--recommend,
 .yds-market-desk__slot--trend,
@@ -30448,6 +30449,108 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-market-desk__slot--desk-summary {
   margin-bottom: 0;
+}
+
+.yds-today-conclusion {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  background: linear-gradient(135deg, rgba(41, 37, 15, 0.72), rgba(15, 23, 42, 0.92));
+  padding: 0.65rem 0.75rem;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.4) inset;
+}
+
+.yds-today-conclusion--defensive {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: linear-gradient(135deg, rgba(69, 10, 10, 0.55), rgba(15, 23, 42, 0.92));
+}
+
+.yds-today-conclusion--opportunity,
+.yds-today-conclusion--aggressive {
+  border-color: rgba(74, 222, 128, 0.32);
+  background: linear-gradient(135deg, rgba(5, 46, 22, 0.5), rgba(15, 23, 42, 0.92));
+}
+
+.yds-today-conclusion__title {
+  margin: 0 0 0.4rem;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #fde68a;
+}
+
+.yds-today-conclusion--defensive .yds-today-conclusion__title {
+  color: #fca5a5;
+}
+
+.yds-today-conclusion--opportunity .yds-today-conclusion__title,
+.yds-today-conclusion--aggressive .yds-today-conclusion__title {
+  color: #86efac;
+}
+
+.yds-today-conclusion__body {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.yds-today-conclusion__headline {
+  margin: 0;
+  font-size: clamp(0.78rem, 2.4vw, 0.9rem);
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.4;
+}
+
+.yds-today-conclusion__signal {
+  font-size: 0.9em;
+}
+
+.yds-today-conclusion__line {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+  font-weight: 600;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.yds-today-conclusion__actions {
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.yds-today-conclusion__actions-label {
+  margin: 0 0 0.28rem;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
+
+.yds-today-conclusion__action-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+}
+
+.yds-today-conclusion__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: clamp(0.64rem, 1.9vw, 0.72rem);
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-today-conclusion__check {
+  color: #4ade80;
+  font-weight: 800;
+}
+
+.yds-market-desk__slot--today-conclusion {
+  margin-bottom: 0.35rem;
 }
 
 .yds-market-desk__slot--score-hero {
@@ -33814,6 +33917,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
   .yds-market-desk__slot--scores-meta {
     display: none;
+  }
+
+  .yds-market-desk__slot--today-conclusion {
+    order: 0;
   }
 
   .yds-market-desk__slot--desk-summary {

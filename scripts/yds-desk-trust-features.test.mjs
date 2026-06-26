@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { buildPanicScoreCompositionReport } from "../vite-project/src/content/ydsPanicScoreComposition.js"
 import { buildRecentMarketStateChanges } from "../vite-project/src/content/ydsMarketStateRecentChanges.js"
 import { buildAiMarketBriefing } from "../vite-project/src/content/ydsAiMarketBriefing.js"
+import { buildTodayMarketConclusion } from "../vite-project/src/content/ydsTodayMarketConclusion.js"
 import { loadDeskDailyChecklist } from "../vite-project/src/content/ydsDeskDailyChecklist.js"
 import { buildMarketCycleFlowReport } from "../vite-project/src/content/ydsMarketCycleFlow.js"
 import { getFinalScore } from "../vite-project/src/utils/tradingScores.js"
@@ -44,5 +45,11 @@ assert.ok(briefing.lines.length >= 3 && briefing.lines.length <= 5)
 const checklist = loadDeskDailyChecklist()
 assert.ok(checklist.date)
 assert.equal(typeof checklist.items.vix, "boolean")
+
+const conclusion = buildTodayMarketConclusion(panicData, historyRows, null, cycleFlow)
+assert.ok(conclusion.visible)
+assert.ok(conclusion.lines.length >= 1 && conclusion.lines.length <= 3)
+assert.ok(conclusion.actions.length >= 1 && conclusion.actions.length <= 3)
+assert.ok(conclusion.signalEmoji)
 
 console.log("yds-desk-trust-features.test.mjs OK")
