@@ -3,7 +3,10 @@
  */
 
 import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
-import { resolveMarketRegime } from "./ydsRegimeLayer.js"
+import {
+  resolveUnifiedMarketStateGuide,
+  resolveUnifiedMarketStateLabel,
+} from "./ydsUnifiedMarketState.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 
 /**
@@ -165,9 +168,15 @@ function applyLiquidityActionMode(stars, actions, mode) {
  * @param {object | null | undefined} panicData
  * @param {object[]} historyRows
  * @param {import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null} dualLiquidity
+ * @param {import("./ydsMarketCycleFlow.js").MarketCycleFlowReport | null} [cycleFlow]
  * @returns {DashboardActionGuideReport}
  */
-export function buildDashboardActionGuideReport(panicData, historyRows = [], dualLiquidity = null) {
+export function buildDashboardActionGuideReport(
+  panicData,
+  historyRows = [],
+  dualLiquidity = null,
+  cycleFlow = null,
+) {
   const state = resolveMarketStateCenterView(panicData)
   if (!state) {
     return {
@@ -185,8 +194,12 @@ export function buildDashboardActionGuideReport(panicData, historyRows = [], dua
     }
   }
 
-  const regime = resolveMarketRegime(panicData, historyRows)
-  const marketState = regime?.summary ?? `${state.position.label} · ${state.strategyPhase.replace(/ 단계$/, "")}`
+  const unifiedLabel = resolveUnifiedMarketStateLabel(
+    cycleFlow,
+    state.position?.label ?? "—",
+  )
+  const unifiedGuide = resolveUnifiedMarketStateGuide(unifiedLabel)
+  const marketState = `${unifiedLabel} · ${unifiedGuide.strategyPhase.replace(/ 단계$/, "")}`
 
   const panicScore =
     state.panicScore ?? (panicData ? Math.round(getFinalScore(panicData) ?? NaN) : null)
@@ -196,7 +209,10 @@ export function buildDashboardActionGuideReport(panicData, historyRows = [], dua
   const macroId = state.macroId
 
   const stars = resolveStarRatings(posId, macroId, liqId, panicScore)
-  const baseActions = resolveBaseActions(posId, macroId, liqId)
+  const baseActions =
+    unifiedGuide.actions.length > 0
+      ? unifiedGuide.actions
+      : resolveBaseActions(posId, macroId, liqId)
   const recommendedActions = applyLiquidityActionMode(
     stars,
     baseActions,

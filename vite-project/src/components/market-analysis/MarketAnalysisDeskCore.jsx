@@ -76,8 +76,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   }, [macroRiskEnabled, bondSnapshot.snapshot, panicData])
 
   const actionGuide = useMemo(
-    () => buildDashboardActionGuideReport(panicData, safeHistory, dualLiquidity),
-    [panicData, safeHistory, dualLiquidity],
+    () => buildDashboardActionGuideReport(panicData, safeHistory, dualLiquidity, cycleFlow),
+    [panicData, safeHistory, dualLiquidity, cycleFlow],
   )
 
   const lastAuditKeyRef = useRef("")

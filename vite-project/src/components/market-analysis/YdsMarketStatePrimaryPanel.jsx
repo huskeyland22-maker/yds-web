@@ -1,8 +1,37 @@
 import { useMemo } from "react"
 import { MARKET_LABEL_MARKET_STATE } from "../../content/ydsMarketStageLabels.js"
+import { computeMarketPositionScore, resolveMarketPositionId } from "../../content/ydsMarketPositionEngine.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
-import { buildMarketPositionTimeline } from "../../content/ydsMarketPositionTimeline.js"
+import {
+  resolveUnifiedMarketStateGuide,
+  resolveUnifiedMarketStateLabel,
+} from "../../content/ydsUnifiedMarketState.js"
 import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
+
+/** @param {object[]} historyRows */
+function resolveScoreDelta(historyRows, currentScore) {
+  if (!Array.isArray(historyRows) || historyRows.length < 2) return 0
+  const sorted = [...historyRows]
+    .filter((r) => r?.date)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+  const prev = sorted[sorted.length - 2]
+  const cnn = Number(prev?.fearGreed)
+  const vix = Number(prev?.vix)
+  const bofa = Number(prev?.bofa)
+  if (!Number.isFinite(cnn) && !Number.isFinite(vix)) return 0
+  const prevId = resolveMarketPositionId(
+    Number.isFinite(cnn) ? cnn : null,
+    Number.isFinite(vix) ? vix : null,
+    Number.isFinite(bofa) ? bofa : null,
+  )
+  const prevScore = computeMarketPositionScore(
+    Number.isFinite(cnn) ? cnn : null,
+    Number.isFinite(vix) ? vix : null,
+    Number.isFinite(bofa) ? bofa : null,
+    prevId,
+  )
+  return currentScore - prevScore
+}
 
 /**
  * V7 — 시장 상태 메인 카드 (좌: 상태 · 우: 사이클)
@@ -22,14 +51,23 @@ export default function YdsMarketStatePrimaryPanel({
   embedded = false,
 }) {
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
-  const timeline = useMemo(() => buildMarketPositionTimeline(historyRows, 5), [historyRows])
+
+  const unifiedLabel = useMemo(
+    () => resolveUnifiedMarketStateLabel(cycleFlow, view?.position?.label ?? "—"),
+    [cycleFlow, view?.position?.label],
+  )
+  const unifiedGuide = useMemo(
+    () => resolveUnifiedMarketStateGuide(unifiedLabel),
+    [unifiedLabel],
+  )
+
+  const delta = useMemo(
+    () => (view ? resolveScoreDelta(historyRows, view.positionScore) : 0),
+    [historyRows, view],
+  )
 
   if (!view) return null
 
-  const currentStep = timeline[timeline.length - 1] ?? null
-  const phaseLabel = currentStep?.phase ?? "안정화"
-  const prevScore = timeline.length > 1 ? timeline[timeline.length - 2]?.score ?? null : null
-  const delta = prevScore != null ? view.positionScore - prevScore : 0
   const deltaSign = delta > 0 ? "▲" : delta < 0 ? "▼" : "•"
   const deltaText = `${deltaSign} ${delta >= 0 ? "+" : ""}${delta}`
 
@@ -45,7 +83,7 @@ export default function YdsMarketStatePrimaryPanel({
             className="yds-market-state-primary__zone-label"
             style={{ "--hero-color": view.position.color }}
           >
-            {view.position.emoji} {view.position.label} {phaseLabel}
+            {view.position.emoji} {unifiedLabel}
           </p>
           <p className="yds-market-state-primary__delta">
             전일 대비 <span className="font-mono tabular-nums">{deltaText}</span>
@@ -53,7 +91,7 @@ export default function YdsMarketStatePrimaryPanel({
         </div>
 
         <ul className="yds-market-state-primary__actions" aria-label="시장 상태 행동 가이드">
-          {view.actions.map((item) => (
+          {unifiedGuide.actions.map((item) => (
             <li key={item} className="yds-market-state-primary__action-item">
               ✓ {item}
             </li>
@@ -62,9 +100,9 @@ export default function YdsMarketStatePrimaryPanel({
 
         <article className="yds-market-state-primary__strategy" aria-label="현재 시장 전략">
           <p className="yds-market-state-primary__layer-tag">현재 시장 설명</p>
-          <p className="yds-market-state-primary__strategy-line">{view.strategyPhase}</p>
+          <p className="yds-market-state-primary__strategy-line">{unifiedGuide.strategyPhase}</p>
           <p className="yds-market-state-primary__strategy-narrative">
-            {view.strategyNarrative.map((line, index) => (
+            {unifiedGuide.strategyNarrative.map((line, index) => (
               <span key={line}>
                 {index > 0 ? <br /> : null}
                 {line}

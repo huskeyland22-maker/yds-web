@@ -3,6 +3,11 @@
  */
 
 import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
+import {
+  buildUnifiedDeskStrategyLines,
+  resolveUnifiedMarketStateGuide,
+  resolveUnifiedMarketStateLabel,
+} from "./ydsUnifiedMarketState.js"
 
 /**
  * @param {import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null | undefined} dualLiquidity
@@ -43,31 +48,6 @@ function compressDeskSummaryLine(line) {
     .trim()
 }
 
-/**
- * @param {ReturnType<typeof resolveMarketStateCenterView>} view
- * @param {string} [cycleLabel]
- * @returns {string[]}
- */
-function buildStrategyDeskSummaryLines(view, cycleLabel = "") {
-  if (/회복/.test(cycleLabel)) {
-    return ["관심종목 분할진입 구간"]
-  }
-  if (/안정/.test(cycleLabel) && /조정/.test(cycleLabel)) {
-    return ["관찰 우선 · 후보 정비"]
-  }
-  if (/진입/.test(cycleLabel)) {
-    return ["조정 시작 · 현금·관심 균형"]
-  }
-
-  const narrative = view?.strategyNarrative ?? []
-  if (narrative.length >= 2) {
-    return narrative.slice(0, 2).map((line) => line.replace(/입니다\.?$/, ""))
-  }
-  if (view?.strategy) {
-    return [view.strategy]
-  }
-  return []
-}
 
 /**
  * @param {object | null | undefined} panicData
@@ -78,14 +58,15 @@ export function buildMarketDeskSummary(panicData, dualLiquidity = null, cycleFlo
   const view = resolveMarketStateCenterView(panicData)
   if (!view) return null
 
-  const cycleLabel = cycleFlow?.currentCycleLabel ?? view.position?.label ?? "시장 상태"
+  const unifiedLabel = resolveUnifiedMarketStateLabel(cycleFlow, view.position?.label ?? "시장 상태")
+  const unifiedGuide = resolveUnifiedMarketStateGuide(unifiedLabel)
   const panicPart =
     view.panicScore != null ? `패닉${view.panicScore}` : view.panicLabel ?? ""
 
   /** @type {string[]} */
-  const lines = [`${cycleLabel} · ${panicPart}`.trim()]
+  const lines = [`${unifiedLabel} · ${panicPart}`.trim()]
   lines.push(...buildLiquidityDeskSummaryLines(dualLiquidity))
-  lines.push(...buildStrategyDeskSummaryLines(view, cycleLabel))
+  lines.push(...buildUnifiedDeskStrategyLines(unifiedGuide))
 
   return {
     title: "시장 한줄 요약",
