@@ -30858,6 +30858,17 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: var(--yds-desk-space-section, 12px);
 }
 
+.yds-week-events-collapsible {
+  overflow: hidden;
+  opacity: 1;
+}
+
+.yds-week-events-collapsible--animate {
+  transition:
+    max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.32s ease;
+}
+
 .yds-week-events-unified__section {
   min-width: 0;
 }

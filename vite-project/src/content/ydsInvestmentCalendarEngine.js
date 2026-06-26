@@ -591,7 +591,9 @@ export function buildUnifiedWeekEventStrip(
 ) {
   const macroLimit = opts.macroLimit ?? 12
   const stockLimit = opts.stockLimit ?? 12
-  const previewLimit = opts.previewLimit ?? 3
+  const macroPreviewLimit = opts.macroPreviewLimit ?? 6
+  const stockPreviewLimit = opts.stockPreviewLimit ?? 5
+  const previewLimit = opts.previewLimit ?? macroPreviewLimit + stockPreviewLimit
   const macroPart = buildWeekEventStrip(marketContext, macroLimit, refDate)
   const stockPart = buildStockWeekEventStrip(marketContext, stockLimit, refDate)
 
@@ -611,6 +613,8 @@ export function buildUnifiedWeekEventStrip(
     flatItems,
     timelineBuckets,
     previewLimit,
+    macroPreviewLimit,
+    stockPreviewLimit,
     hasEvents: flatItems.length > 0,
   }
 }

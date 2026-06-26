@@ -1,7 +1,10 @@
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import { formatCalendarMonthDay } from "../../utils/calendarDateUtils.js"
 import YdsDeskCard from "./YdsDeskCard.jsx"
+
+export const WEEK_EVENTS_MACRO_PREVIEW = 6
+export const WEEK_EVENTS_STOCK_PREVIEW = 5
 
 /**
  * @param {{ event: Record<string, unknown> }} props
@@ -64,35 +67,81 @@ function WeekEventRow({ event }) {
 
 /**
  * @param {{
+ *   sectionId: string
+ *   label: string
+ *   badgeClass: string
+ *   items: Record<string, unknown>[]
+ *   kind: 'macro' | 'stock'
+ *   previewCount: number
+ *   expanded: boolean
+ * }} props
+ */
+function EventSection({
+  sectionId,
+  label,
+  badgeClass,
+  items,
+  kind,
+  previewCount,
+  expanded,
+}) {
+  if (items.length === 0) return null
+
+  const visibleItems = expanded ? items : items.slice(0, previewCount)
+
+  return (
+    <section className="yds-week-events-unified__section" aria-labelledby={sectionId}>
+      <h3 id={sectionId} className="yds-week-events-unified__head">
+        <span className={["yds-week-events-unified__badge", badgeClass].join(" ")}>
+          {label}
+        </span>
+      </h3>
+      <ul className="yds-desk-card__list">
+        {visibleItems.map((event) => (
+          <WeekEventRow key={event.id} event={{ ...event, kind }} />
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+/**
+ * @param {{
  *   report: ReturnType<typeof import("../../content/ydsInvestmentCalendarEngine.js").buildUnifiedWeekEventStrip>
  *   className?: string
  * }} props
  */
 export default function YdsDashboardWeekEvents({ report, className = "" }) {
   const [expanded, setExpanded] = useState(false)
+  const bodyRef = useRef(null)
+  const [maxHeight, setMaxHeight] = useState("none")
+  const [animate, setAnimate] = useState(false)
 
-  if (!report?.hasEvents) return null
+  const hasEvents = Boolean(report?.hasEvents)
+  const macroPreview =
+    report?.macroPreviewLimit ?? WEEK_EVENTS_MACRO_PREVIEW
+  const stockPreview =
+    report?.stockPreviewLimit ?? WEEK_EVENTS_STOCK_PREVIEW
+  const macroItems = report?.macroItems ?? []
+  const stockItems = report?.stockItems ?? []
 
-  const previewLimit = report.previewLimit ?? 3
-  const timelineBuckets = report.timelineBuckets ?? []
-  const flatCount = report.flatItems?.length ?? 0
-  const showMore = flatCount > previewLimit
+  const hiddenCount =
+    Math.max(0, macroItems.length - macroPreview) +
+    Math.max(0, stockItems.length - stockPreview)
+  const showMore = hiddenCount > 0
 
-  const visibleBuckets = expanded
-    ? timelineBuckets
-    : (() => {
-        let remaining = previewLimit
-        /** @type {typeof timelineBuckets} */
-        const trimmed = []
-        for (const bucket of timelineBuckets) {
-          if (remaining <= 0) break
-          const items = bucket.items.slice(0, remaining)
-          if (items.length === 0) continue
-          trimmed.push({ ...bucket, items })
-          remaining -= items.length
-        }
-        return trimmed
-      })()
+  useLayoutEffect(() => {
+    if (!hasEvents) return
+    const node = bodyRef.current
+    if (!node) return
+    setMaxHeight(`${node.scrollHeight}px`)
+    if (!animate) {
+      const frame = requestAnimationFrame(() => setAnimate(true))
+      return () => cancelAnimationFrame(frame)
+    }
+  }, [expanded, macroItems.length, stockItems.length, animate, hasEvents])
+
+  if (!hasEvents) return null
 
   return (
     <YdsDeskCard
@@ -105,24 +154,35 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
         </Link>
       }
     >
-      <div className="yds-week-events-timeline">
-        {visibleBuckets.map((bucket) => (
-          <section
-            key={bucket.id}
-            className="yds-week-events-timeline__bucket"
-            aria-label={bucket.label}
-          >
-            <h3 className="yds-week-events-timeline__label">
-              <span className="yds-week-events-timeline__dot" aria-hidden />
-              {bucket.label}
-            </h3>
-            <ul className="yds-desk-card__list yds-week-events-timeline__list">
-              {bucket.items.map((event) => (
-                <WeekEventRow key={event.id} event={event} />
-              ))}
-            </ul>
-          </section>
-        ))}
+      <div
+        ref={bodyRef}
+        className={[
+          "yds-week-events-unified",
+          "yds-week-events-collapsible",
+          animate ? "yds-week-events-collapsible--animate" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        style={{ maxHeight }}
+      >
+        <EventSection
+          sectionId="desk-week-events-macro"
+          label="거시경제"
+          badgeClass="yds-week-events-unified__badge--macro"
+          items={macroItems}
+          kind="macro"
+          previewCount={macroPreview}
+          expanded={expanded}
+        />
+        <EventSection
+          sectionId="desk-week-events-stock"
+          label="종목/실적"
+          badgeClass="yds-week-events-unified__badge--stock"
+          items={stockItems}
+          kind="stock"
+          previewCount={stockPreview}
+          expanded={expanded}
+        />
       </div>
 
       {showMore ? (
@@ -132,7 +192,7 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
           onClick={() => setExpanded((value) => !value)}
           aria-expanded={expanded}
         >
-          {expanded ? "접기" : `더보기 (${flatCount - previewLimit}건)`}
+          {expanded ? "접기 ▲" : `더보기 (${hiddenCount}건)`}
         </button>
       ) : null}
     </YdsDeskCard>
