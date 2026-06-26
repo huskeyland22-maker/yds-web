@@ -15,6 +15,7 @@ import {
   computeMarketPositionScore,
   resolveMarketPositionId,
 } from "./ydsMarketPositionEngine.js"
+import { buildPanicIntensityInterpretation } from "./ydsPanicIntensityInterpretation.js"
 
 export const MARKET_TREND_WINDOW_DAYS = 30
 
@@ -28,7 +29,6 @@ export const YDS_SCORE_ZONE_STEPS = [
 ]
 
 const MARKET_ZONE_LABELS = ["충격", "위축", "조정", "경계", "과열"]
-const PANIC_ZONE_LABELS = ["공포없음", "공포부족", "관심", "분할매수", "적극매수"]
 
 const MARKET_TREND_EVENT_RE =
   /^(position-|overheat-|cnn-entry|cnn-exit|bofa-entry|bofa-exit|momentum-cnn-crash|momentum-cnn-sharp|momentum-bofa-weak|vix-expansion)/
@@ -40,14 +40,27 @@ const PANIC_TREND_EVENT_RE = /^panic-/
  */
 export function resolveScoreZoneMeta(score, kind = "panic") {
   const rounded = Math.max(0, Math.min(100, Math.round(Number(score))))
+  if (kind === "panic") {
+    const interp = buildPanicIntensityInterpretation(rounded)
+    if (!interp) {
+      return { score: rounded, color: "#94a3b8", label: "—", zoneIndex: 2 }
+    }
+    return {
+      score: interp.score,
+      color: interp.color,
+      label: interp.label,
+      zoneIndex: interp.index,
+      buyStrength: interp.buyStrength,
+      actionLine: interp.actionLine,
+    }
+  }
   const zoneIdx =
     rounded >= 80 ? 4 : rounded >= 60 ? 3 : rounded >= 40 ? 2 : rounded >= 20 ? 1 : 0
   const zone = YDS_SCORE_ZONE_STEPS[zoneIdx]
-  const labels = kind === "market" ? MARKET_ZONE_LABELS : PANIC_ZONE_LABELS
   return {
     score: rounded,
     color: zone.color,
-    label: labels[zoneIdx] ?? zone.label,
+    label: MARKET_ZONE_LABELS[zoneIdx] ?? zone.label,
     zoneIndex: zoneIdx,
   }
 }

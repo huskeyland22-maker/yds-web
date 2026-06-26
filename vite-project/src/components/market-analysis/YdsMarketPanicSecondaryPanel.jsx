@@ -62,13 +62,10 @@ export default function YdsMarketPanicSecondaryPanel({
           <p className="yds-market-panic-secondary__stage-current">{interpretation.currentLine}</p>
         </div>
 
-        <ul className="yds-market-panic-secondary__description" aria-label="상태 설명">
-          {interpretation.descriptionLines.map((line) => (
-            <li key={line} className="yds-market-panic-secondary__description-line">
-              {line}
-            </li>
-          ))}
-        </ul>
+        <div className="yds-market-panic-secondary__action" aria-label="매수 관점 투자 의견">
+          <p className="yds-market-panic-secondary__buy-strength">{interpretation.buyStrength}</p>
+          <p className="yds-market-panic-secondary__action-line">{interpretation.actionLine}</p>
+        </div>
 
         {evidence.briefChips.length ? (
           <ul className="yds-market-panic-secondary__evidence-chips" aria-label="근거 요약">

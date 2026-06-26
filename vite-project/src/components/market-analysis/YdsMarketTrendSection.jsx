@@ -38,6 +38,7 @@ export default function YdsMarketTrendSection({ historyRows = [], className = ""
             dataKey="panicIntensity"
             current={view.panic.current}
             currentMeta={view.panic.currentMeta}
+            chartKind="panic"
           />
         </div>
       </div>

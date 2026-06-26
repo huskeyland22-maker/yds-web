@@ -9,25 +9,44 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import {
+  buildPanicIntensityInterpretation,
+  panicInvestmentZoneSteps,
+} from "../../content/ydsPanicIntensityInterpretation.js"
 import { YDS_SCORE_ZONE_STEPS } from "../../content/ydsMarketTrendSeries.js"
 
 const CHART_HEIGHT = 210
 const CHART_MARGIN = { top: 18, right: 8, left: 4, bottom: 22 }
 const ZONE_FILL_OPACITY = 0.09
 
-/** @param {boolean} active @param {object[]} payload */
-function TrendTooltip({ active, payload, title }) {
+/** @param {boolean} active @param {object[]} payload @param {string} title @param {"market" | "panic"} chartKind */
+function TrendTooltip({ active, payload, title, chartKind = "market" }) {
   if (!active || !payload?.length) return null
   const row = payload[0]?.payload
   const value = payload[0]?.value
   if (!row) return null
+  const rounded = Math.round(Number(value))
+  const panicInterp =
+    chartKind === "panic" ? buildPanicIntensityInterpretation(rounded) : null
+
   return (
     <div className="yds-market-trend-chart__tooltip">
       <p className="yds-market-trend-chart__tooltip-date">{row.axisLabel ?? row.date}</p>
-      <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
-        {value}
-        <span className="yds-market-trend-chart__tooltip-label">{title}</span>
-      </p>
+      {panicInterp ? (
+        <>
+          <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
+            패닉 {panicInterp.score}
+          </p>
+          <p className="yds-market-trend-chart__tooltip-stage">{panicInterp.label}</p>
+          <p className="yds-market-trend-chart__tooltip-strength">{panicInterp.buyStrength}</p>
+          <p className="yds-market-trend-chart__tooltip-action">{panicInterp.actionLine}</p>
+        </>
+      ) : (
+        <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
+          {value}
+          <span className="yds-market-trend-chart__tooltip-label">{title}</span>
+        </p>
+      )}
     </div>
   )
 }
@@ -52,9 +71,10 @@ function CurrentPointDot({ cx, cy, index, dataLength, color }) {
  *   chartData: object[]
  *   dataKey?: string
  *   current?: number | null
- *   currentMeta?: { score: number; color: string; label: string } | null
+ *   currentMeta?: { score: number; color: string; label: string; buyStrength?: string; actionLine?: string } | null
  *   stroke?: string
  *   emptyMessage?: string
+ *   chartKind?: "market" | "panic"
  * }} props
  */
 export default function YdsMarketTrendChart({
@@ -65,20 +85,20 @@ export default function YdsMarketTrendChart({
   currentMeta = null,
   stroke,
   emptyMessage = "최근 30일 데이터 없음",
+  chartKind = "market",
 }) {
   const lineStroke = stroke ?? currentMeta?.color ?? "#94a3b8"
   const pointCount = chartData.length
   const curveType = pointCount >= 3 ? "monotone" : "linear"
 
-  const zoneBands = useMemo(
-    () =>
-      YDS_SCORE_ZONE_STEPS.map((zone, idx) => ({
-        y1: zone.min,
-        y2: idx === YDS_SCORE_ZONE_STEPS.length - 1 ? 100 : zone.max,
-        color: zone.color,
-      })),
-    [],
-  )
+  const zoneBands = useMemo(() => {
+    const steps = chartKind === "panic" ? panicInvestmentZoneSteps() : YDS_SCORE_ZONE_STEPS
+    return steps.map((zone, idx) => ({
+      y1: zone.min,
+      y2: idx === steps.length - 1 ? 100 : zone.max,
+      color: zone.color,
+    }))
+  }, [chartKind])
 
   if (pointCount < 1) {
     return (
@@ -149,7 +169,9 @@ export default function YdsMarketTrendChart({
               width={28}
             />
             <Tooltip
-              content={(props) => <TrendTooltip {...props} title={title} />}
+              content={(props) => (
+                <TrendTooltip {...props} title={title} chartKind={chartKind} />
+              )}
               cursor={{ stroke: "rgba(148,163,184,0.3)", strokeWidth: 1 }}
             />
             <Line

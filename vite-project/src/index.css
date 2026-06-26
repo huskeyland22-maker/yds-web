@@ -29765,6 +29765,31 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+.yds-market-panic-secondary__action {
+  margin: 0.2rem 0 0;
+  padding: 0.28rem 0 0;
+  width: 100%;
+  text-align: left;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-panic-secondary__buy-strength {
+  margin: 0;
+  font-size: clamp(0.78rem, 2.2vw, 0.92rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fbbf24;
+  line-height: 1.2;
+}
+
+.yds-market-panic-secondary__action-line {
+  margin: 0.22rem 0 0;
+  font-size: clamp(0.64rem, 1.85vw, 0.72rem);
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.42;
+}
+
 .yds-market-panic-secondary__description {
   margin: 0;
   padding: 0.15rem 0 0;
@@ -30390,6 +30415,27 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin-left: 0.25rem;
   font-weight: 500;
   color: #64748b;
+}
+
+.yds-market-trend-chart__tooltip-stage {
+  margin: 0.12rem 0 0;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-market-trend-chart__tooltip-strength {
+  margin: 0.1rem 0 0;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fbbf24;
+}
+
+.yds-market-trend-chart__tooltip-action {
+  margin: 0.14rem 0 0;
+  font-weight: 600;
+  color: #cbd5e1;
+  line-height: 1.35;
+  max-width: 14rem;
 }
 
 .yds-market-trend__changes {
