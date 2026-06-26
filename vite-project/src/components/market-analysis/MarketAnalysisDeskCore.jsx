@@ -12,7 +12,6 @@ import SectionErrorBoundary from "../SectionErrorBoundary.jsx"
 import YdsDashboardLiquiditySynthesis from "./YdsDashboardLiquiditySynthesis.jsx"
 import YdsDashboardLiquidityLaneDesk from "./YdsDashboardLiquidityLaneDesk.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
-import YdsDeskDailyChecklist from "./YdsDeskDailyChecklist.jsx"
 import YdsDailyMarketReportPanel from "./YdsDailyMarketReportPanel.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
@@ -220,10 +219,8 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
           <YdsDashboardActionGuide
             report={actionGuide}
-            className="yds-market-desk__slot yds-market-desk__slot--action-guide"
+            className="yds-market-desk__slot yds-market-desk__slot--action-guide yds-market-desk__slot--desk-tail"
           />
-
-          <YdsDeskDailyChecklist className="yds-market-desk__slot yds-market-desk__slot--checklist" />
         </div>
       </div>
     </div>

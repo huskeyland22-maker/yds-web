@@ -102,6 +102,7 @@ export default function YdsMarketStatePrimaryPanel({
           cycleFlow={cycleFlow}
           panicData={panicData}
           dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
           className="yds-market-state-primary__recent-changes"
         />
 
