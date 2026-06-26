@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom"
+import { formatCalendarMonthDay } from "../../utils/calendarDateUtils.js"
 
 /**
  * @param {{ event: import("../../content/ydsInvestmentCalendarEngine.js").PrioritizedStockEvent }} props
  */
 export function YdsPrioritizedStockEventRow({ event }) {
-  const dateLabel = event.date.slice(5).replace("-", "/")
+  const dateLabel = formatCalendarMonthDay(event.date)
 
   return (
     <li className="yds-stock-week-event">

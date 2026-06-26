@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { formatCalendarMonthDay } from "../../utils/calendarDateUtils.js"
 import YdsDeskCard from "./YdsDeskCard.jsx"
 
 /**
@@ -35,7 +36,7 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
       <div className="yds-week-events-unified yds-week-events-unified--mobile">
         <ul className="yds-desk-card__list">
           {mobileItems.map((event) => {
-            const dateLabel = event.date.slice(5).replace("-", "/")
+            const dateLabel = formatCalendarMonthDay(event.date)
             if (event.kind === "macro") {
               const tier = event.marketTier ?? event.importanceTier
               return (
@@ -111,7 +112,7 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
             </h3>
             <ul className="yds-desk-card__list">
               {report.macroItems.map((event) => {
-                const dateLabel = event.date.slice(5).replace("-", "/")
+                const dateLabel = formatCalendarMonthDay(event.date)
                 const tier = event.marketTier ?? event.importanceTier
                 return (
                   <li key={event.id} className="yds-desk-card__item">
@@ -155,7 +156,7 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
             </h3>
             <ul className="yds-desk-card__list">
               {report.stockItems.map((event) => {
-                const dateLabel = event.date.slice(5).replace("-", "/")
+                const dateLabel = formatCalendarMonthDay(event.date)
                 return (
                   <li key={event.id} className="yds-desk-card__item yds-desk-card__item--stock">
                     <span className="yds-desk-card__bullet yds-desk-card__bullet--stock" aria-hidden>

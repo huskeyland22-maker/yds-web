@@ -4,6 +4,10 @@
 
 import calendarSeed from "../data/investmentCalendarSeed.json" with { type: "json" }
 import stockUniverse from "../data/stockPickUniverse.json" with { type: "json" }
+import {
+  addCalendarDaysLocal,
+  localCalendarDateKey,
+} from "../utils/calendarDateUtils.js"
 
 /** @typedef {'fomc' | 'cpi' | 'ppi' | 'pce' | 'employment' | 'gdp' | 'other'} MacroCategoryId */
 /** @typedef {'earnings' | 'dividend' | 'agm'} StockEventCategoryId */
@@ -192,13 +196,6 @@ export function eventBriefLabel(event) {
     .trim()
 }
 
-/** @param {string} dateKey @param {number} days */
-function addCalendarDaysLocal(dateKey, days) {
-  const d = new Date(`${dateKey}T12:00:00`)
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
 /**
  * @param {Date} [ref]
  * @returns {{ start: string; end: string; label: string }}
@@ -213,9 +210,8 @@ export function getWeekRange(ref = new Date()) {
   const sun = new Date(mon)
   sun.setDate(mon.getDate() + 6)
 
-  const fmt = (/** @type {Date} */ x) => x.toISOString().slice(0, 10)
-  const start = fmt(mon)
-  const end = fmt(sun)
+  const start = localCalendarDateKey(mon)
+  const end = localCalendarDateKey(sun)
   const label = `${start.slice(5).replace("-", "/")} – ${end.slice(5).replace("-", "/")}`
   return { start, end, label }
 }
@@ -459,7 +455,7 @@ export function buildPrioritizedStockEvents(
   limit = 12,
   horizonDays = 35,
 ) {
-  const today = refDate.toISOString().slice(0, 10)
+  const today = localCalendarDateKey(refDate)
   const horizonEnd = addCalendarDaysLocal(today, horizonDays)
   const pickTickers = buildPickTickerSet()
   const activeSectors = buildActiveSectorSet()
@@ -529,7 +525,7 @@ export function buildInvestmentCalendarReport(marketContext = null, refDate = ne
  */
 export function buildWeekEventStrip(marketContext = null, limit = 12, refDate = new Date()) {
   const week = getWeekRange(refDate)
-  const today = refDate.toISOString().slice(0, 10)
+  const today = localCalendarDateKey(refDate)
   const horizonEnd = addCalendarDaysLocal(week.end, 45)
 
   const macroAll = (calendarSeed.macroEvents ?? [])

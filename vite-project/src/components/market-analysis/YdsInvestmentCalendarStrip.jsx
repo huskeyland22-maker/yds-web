@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { formatCalendarMonthDay, formatCalendarWeekdayShort } from "../../utils/calendarDateUtils.js"
 
 /**
  * @param {{ event: import("../../content/ydsInvestmentCalendarEngine.js").CalendarEvent }} props
@@ -19,8 +20,8 @@ function ImpactBadge({ event }) {
  */
 export function YdsInvestmentCalendarRow({ event, compact = false }) {
   const isMacro = event.kind === "macro"
-  const dateLabel = event.date.slice(5).replace("-", "/")
-  const weekday = new Date(`${event.date}T12:00:00`).toLocaleDateString("ko-KR", { weekday: "short" })
+  const dateLabel = formatCalendarMonthDay(event.date)
+  const weekday = formatCalendarWeekdayShort(event.date)
 
   return (
     <article className={`yds-inv-cal__row ${compact ? "yds-inv-cal__row--compact" : ""}`}>

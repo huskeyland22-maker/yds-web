@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-16",
+  "updatedAt": "2026-06-24",
   "macroEvents": [
     {
       "id": "us-cpi-jun-2026",
@@ -58,7 +58,7 @@
     },
     {
       "id": "us-pce-may-2026",
-      "date": "2026-06-27",
+      "date": "2026-06-25",
       "category": "pce",
       "title": "미국 PCE (5월)",
       "subtitle": "연준 선호 인플레 지표",
@@ -67,7 +67,7 @@
     },
     {
       "id": "us-core-pce-may-2026",
-      "date": "2026-06-27",
+      "date": "2026-06-25",
       "category": "pce",
       "title": "미국 Core PCE (5월)",
       "subtitle": "근원 PCE",
@@ -76,10 +76,10 @@
     },
     {
       "id": "us-gdp-q1-rev-2026",
-      "date": "2026-06-26",
+      "date": "2026-06-25",
       "category": "gdp",
-      "title": "미국 GDP 1차 수정치",
-      "subtitle": "1분기 성장률",
+      "title": "미국 GDP (3차)",
+      "subtitle": "1분기 성장률 · 3차 수정치",
       "importance": 3,
       "region": "US"
     },
