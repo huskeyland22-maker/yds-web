@@ -1,7 +1,8 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { buildStockPickDeskPreview } from "../../content/ydsStockPickDeskPreview.js"
 import YdsStockPickRecommendRationale from "../stock-picks/YdsStockPickRecommendRationale.jsx"
+import YdsStockPickDetailPanel from "../stock-picks/YdsStockPickDetailPanel.jsx"
 
 /**
  * @param {{
@@ -9,14 +10,27 @@ import YdsStockPickRecommendRationale from "../stock-picks/YdsStockPickRecommend
  * }} props
  */
 export default function YdsMarketRecommendCard({ stock }) {
+  const [expanded, setExpanded] = useState(false)
   const preview = useMemo(() => buildStockPickDeskPreview(stock), [stock])
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
   const retTone =
     preview.returnSinceRecommend != null && preview.returnSinceRecommend >= 0 ? "up" : "down"
 
   return (
-    <article className="yds-market-rec-card">
-      <Link to={to} className="yds-market-rec-card__link">
+    <article
+      className={[
+        "yds-market-rec-card",
+        expanded ? "yds-market-rec-card--expanded" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <button
+        type="button"
+        className="yds-market-rec-card__toggle"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+      >
         <div className="yds-market-rec-card__head">
           <h3 className="yds-market-rec-card__name">{stock.name}</h3>
           <span
@@ -48,10 +62,22 @@ export default function YdsMarketRecommendCard({ stock }) {
 
         <YdsStockPickRecommendRationale
           items={stock.recommendRationales ?? []}
-          maxItems={5}
+          maxItems={3}
           title="왜 추천하는가?"
           className="yds-market-rec-card__rationale"
         />
+
+        <span className="yds-market-rec-card__expand-hint">
+          {expanded ? "▲ 상세 접기" : "▼ AI 상세 분석"}
+        </span>
+      </button>
+
+      {expanded ? (
+        <YdsStockPickDetailPanel stock={stock} className="yds-market-rec-card__detail" />
+      ) : null}
+
+      <Link to={to} className="yds-market-rec-card__page-link">
+        종목 페이지
       </Link>
     </article>
   )

@@ -12,6 +12,7 @@ import { markFirstRender, recordSearchFilterMs } from "../../content/ydsStockPic
 import { recordRenderPhase } from "../../content/ydsStockPickRenderPerf.js"
 import {
   getRegimeDisplayLimit,
+  getRegimeTopStocks,
 } from "../../content/ydsStockPickMarketRegime.js"
 import { filterStockPicksByQuery } from "../../content/ydsStockPickSearch.js"
 import { useStockPickFavoriteAlerts } from "../../hooks/useStockPickFavoriteAlerts.js"
@@ -30,6 +31,8 @@ import YdsStockPickSearchBar from "./YdsStockPickSearchBar.jsx"
 import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 import YdsStockPickTodaySignal from "./YdsStockPickTodaySignal.jsx"
+import YdsRecommendPerformanceReport from "./YdsRecommendPerformanceReport.jsx"
+import YdsAiPortfolioRecommend from "./YdsAiPortfolioRecommend.jsx"
 import { isDevMode } from "../../utils/devMode.js"
 
 const INITIAL_SECTOR = { US: "all", KR: "all" }
@@ -108,6 +111,12 @@ export default function YdsStockPickV1Hub() {
     () => marketContext.pickDisplayLimit ?? getRegimeDisplayLimit(marketContext.marketPositionId),
     [marketContext.pickDisplayLimit, marketContext.marketPositionId],
   )
+
+  const usPortfolioStocks = useMemo(() => {
+    const us = assignRanks(filterByCountry(liveStocks, "US"))
+    return getRegimeTopStocks(us, regimeLimit)
+  }, [liveStocks, regimeLimit])
+
   const [countryId, setCountryId] = useState("US")
   const [sectorByCountry, setSectorByCountry] = useState(INITIAL_SECTOR)
   const [searchQuery, setSearchQuery] = useState("")
@@ -205,6 +214,10 @@ export default function YdsStockPickV1Hub() {
       ) : null}
 
       <YdsStockPickMarketRegimeBanner ctx={marketContext} displayLimit={regimeLimit} />
+
+      <YdsRecommendPerformanceReport className="yds-spick-hub__perf-report" />
+      <YdsAiPortfolioRecommend stocks={usPortfolioStocks} className="yds-spick-hub__portfolio" />
+
       <YdsStockPickFavoriteAlerts alerts={favoriteAlerts} />
 
       <YdsStockPickTodaySignal

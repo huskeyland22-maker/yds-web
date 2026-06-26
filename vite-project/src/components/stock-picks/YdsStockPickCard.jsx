@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import {
   buildStockPickTransparency,
@@ -18,6 +18,7 @@ import YdsStockPickRankStrip from "./YdsStockPickRankStrip.jsx"
 import YdsStockPickLifecycleBadge from "./YdsStockPickLifecycleBadge.jsx"
 import YdsStockPickScoreBreakdown from "./YdsStockPickScoreBreakdown.jsx"
 import YdsStockPickValidationPerf from "./YdsStockPickValidationPerf.jsx"
+import YdsStockPickDetailPanel from "./YdsStockPickDetailPanel.jsx"
 
 /**
  * @param {{
@@ -43,6 +44,8 @@ export default function YdsStockPickCard({
   statusChange = null,
   rankIndex,
 }) {
+  const [expanded, setExpanded] = useState(false)
+
   if (stock.dataSource !== "live") {
     return null
   }
@@ -80,6 +83,7 @@ export default function YdsStockPickCard({
         isHero ? "yds-spick-card--top5" : "",
         rankClass,
         variant === "compact" ? "yds-spick-card--compact" : "",
+        expanded ? "yds-spick-card--expanded" : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -148,6 +152,19 @@ export default function YdsStockPickCard({
 
       <YdsStockPickScoreBreakdown stock={stock} className="yds-spick-card__score-breakdown" />
       <YdsStockPickValidationPerf ticker={stock.ticker} country={country} />
+
+      <button
+        type="button"
+        className="yds-spick-card__detail-toggle"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+      >
+        {expanded ? "▲ AI 상세 분석 접기" : "▼ AI 상세 분석"}
+      </button>
+
+      {expanded ? (
+        <YdsStockPickDetailPanel stock={stock} className="yds-spick-card__detail-panel" />
+      ) : null}
 
       <details className="yds-spick-card__details">
         <summary className="yds-spick-card__details-summary">상세</summary>
