@@ -1,3 +1,4 @@
+import { ACTION_DIMENSION_LABELS } from "../../content/ydsDashboardActionGuide.js"
 import YdsDeskCard from "./YdsDeskCard.jsx"
 
 /**
@@ -13,24 +14,24 @@ export default function YdsDashboardActionGuide({ report, className = "" }) {
       ) : null}
 
       <dl className="yds-desk-card__panel yds-desk-card__action-stars">
-        <div className="yds-desk-card__action-star">
-          <dt>매수</dt>
-          <dd className="yds-desk-card__stars" aria-label={`매수 ${report.stars.buy}점`}>
-            {report.buyStars}
-          </dd>
-        </div>
-        <div className="yds-desk-card__action-star">
-          <dt>관망</dt>
-          <dd className="yds-desk-card__stars" aria-label={`관망 ${report.stars.watch}점`}>
-            {report.watchStars}
-          </dd>
-        </div>
-        <div className="yds-desk-card__action-star">
-          <dt>현금</dt>
-          <dd className="yds-desk-card__stars" aria-label={`현금 ${report.stars.cash}점`}>
-            {report.cashStars}
-          </dd>
-        </div>
+        {ACTION_DIMENSION_LABELS.map(({ key, label, hint }) => (
+          <div key={key} className="yds-desk-card__action-star">
+            <dt>
+              {label}
+              <span className="yds-desk-card__action-hint">{hint}</span>
+            </dt>
+            <dd
+              className="yds-desk-card__stars"
+              aria-label={`${label} ${report.stars[key]}점`}
+            >
+              {key === "buy"
+                ? report.buyStars
+                : key === "watch"
+                  ? report.watchStars
+                  : report.cashStars}
+            </dd>
+          </div>
+        ))}
       </dl>
 
       <div className="yds-desk-card__guide">

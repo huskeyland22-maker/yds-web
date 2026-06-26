@@ -8,6 +8,7 @@ import {
   addCalendarDaysLocal,
   localCalendarDateKey,
 } from "../utils/calendarDateUtils.js"
+import { bucketEventsByTimeline } from "./ydsEventTimelineBuckets.js"
 
 /** @typedef {'fomc' | 'cpi' | 'ppi' | 'pce' | 'employment' | 'gdp' | 'other'} MacroCategoryId */
 /** @typedef {'earnings' | 'dividend' | 'agm'} StockEventCategoryId */
@@ -600,12 +601,15 @@ export function buildUnifiedWeekEventStrip(
     ...stockPart.stockItems.map((event) => ({ ...event, kind: /** @type {const} */ ("stock") })),
   ].sort((a, b) => a.date.localeCompare(b.date))
 
+  const timelineBuckets = bucketEventsByTimeline(flatItems, refDate)
+
   return {
     week: macroPart.week,
     marketStage: macroPart.marketStage,
     macroItems: macroPart.stripItems,
     stockItems: stockPart.stockItems,
     flatItems,
+    timelineBuckets,
     previewLimit,
     hasEvents: flatItems.length > 0,
   }

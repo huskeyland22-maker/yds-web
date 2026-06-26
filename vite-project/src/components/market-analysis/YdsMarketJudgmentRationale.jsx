@@ -36,6 +36,19 @@ export default function YdsMarketJudgmentRationale({
       aria-label="시장 판단 근거"
     >
       <p className="yds-market-judgment__title">시장 판단 근거</p>
+
+      <div className="yds-market-judgment__counts">
+        <span className="yds-market-judgment__count yds-market-judgment__count--positive">
+          긍정 {report.positiveCount}
+        </span>
+        <span className="yds-market-judgment__count yds-market-judgment__count--negative">
+          부정 {report.negativeCount}
+        </span>
+      </div>
+
+      <p className="yds-market-judgment__stage">{report.unifiedLabel}</p>
+      <p className="yds-market-judgment__conclusion">{report.conclusion}</p>
+
       <ul className="yds-market-judgment__list">
         {report.factors.map((factor) => (
           <li
@@ -52,10 +65,6 @@ export default function YdsMarketJudgmentRationale({
           </li>
         ))}
       </ul>
-      <p className="yds-market-judgment__conclusion">
-        <span className="yds-market-judgment__conclusion-label">최종 판단</span>
-        {report.conclusion}
-      </p>
     </section>
   )
 }

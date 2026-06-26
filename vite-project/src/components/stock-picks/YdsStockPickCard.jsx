@@ -8,7 +8,7 @@ import YdsStockPickV7Signals from "./YdsStockPickV7Signals.jsx"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
 import YdsStockPickQualityTimingHeader from "./YdsStockPickQualityTimingHeader.jsx"
 import YdsStockPickInsightStrip from "./YdsStockPickInsightStrip.jsx"
-import YdsStockPickThemeBadges from "./YdsStockPickThemeBadges.jsx"
+import { resolveStockPickSectorBadge } from "../../content/ydsStockPickSectorBadge.js"
 import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
 import YdsStockPositionBadge from "./YdsStockPositionBadge.jsx"
 import YdsStockPickChangeStrip from "./YdsStockPickChangeStrip.jsx"
@@ -70,6 +70,7 @@ export default function YdsStockPickCard({
 
   const rankTrack = stock.pickMeta?.rankTrack
   const lifecycle = stock.lifecycle ?? stock.pickMeta?.lifecycle
+  const sectorBadge = resolveStockPickSectorBadge(stock)
 
   return (
     <article
@@ -103,6 +104,9 @@ export default function YdsStockPickCard({
 
       <Link to={to} className="yds-spick-card__link">
         <h3 className="yds-spick-card__name">{stock.name}</h3>
+        {sectorBadge ? (
+          <span className="yds-spick-card__sector-badge">{sectorBadge}</span>
+        ) : null}
 
         <YdsStockPickLifecycleBadge lifecycle={lifecycle} className="yds-spick-card__lifecycle" />
 
@@ -111,8 +115,6 @@ export default function YdsStockPickCard({
         <YdsStockPickChangeStrip stock={stock} variant="card" />
 
         <YdsStockPickV7Signals stock={stock} variant={variant === "compact" ? "compact" : "default"} />
-
-        <YdsStockPickThemeBadges themes={stock.investThemes ?? []} className="yds-spick-card__themes" />
 
         <YdsStockPickQualityTimingHeader
           stock={stock}

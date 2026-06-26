@@ -94,8 +94,32 @@ function resolveStarRatings(posId, macroId, liqId, panicScore) {
     cash = Math.min(5, cash + 1)
   }
 
-  return { buy, watch, cash }
+  return distinctifyActionDimensions({ buy, watch, cash })
 }
+
+/**
+ * 분할매수·관망·현금비중 — 서로 겹치지 않게 정규화
+ * @param {{ buy: number; watch: number; cash: number }} raw
+ */
+function distinctifyActionDimensions(raw) {
+  const scaleIn = raw.buy
+  const cashWeight = raw.cash
+  let watch = Math.round((6 - scaleIn) * 0.38 + (6 - cashWeight) * 0.28 + 1)
+  watch = Math.max(1, Math.min(5, watch))
+
+  if (scaleIn >= 4 && cashWeight <= 2) watch = Math.min(watch, 2)
+  if (cashWeight >= 4 && scaleIn <= 2) watch = Math.max(watch, 3)
+  if (scaleIn <= 2 && cashWeight <= 2) watch = Math.max(watch, 4)
+
+  return { buy: scaleIn, watch, cash: cashWeight }
+}
+
+/** @type {ReadonlyArray<{ key: 'buy' | 'watch' | 'cash'; label: string; hint: string }>} */
+export const ACTION_DIMENSION_LABELS = [
+  { key: "buy", label: "분할매수", hint: "신규 비중 확대 강도" },
+  { key: "watch", label: "관망", hint: "관찰·대기 성향" },
+  { key: "cash", label: "현금비중", hint: "현금 유지·확대" },
+]
 
 /**
  * @param {string} posId
@@ -218,6 +242,7 @@ export function buildDashboardActionGuideReport(
     baseActions,
     dualLiquidity?.actionMode ?? "balanced",
   )
+  const finalStars = distinctifyActionDimensions(stars)
 
   return {
     visible: true,
@@ -225,10 +250,10 @@ export function buildDashboardActionGuideReport(
     marketState,
     panicScore: Number.isFinite(panicScore) ? panicScore : null,
     liquidityScore: Number.isFinite(liquidityScore) ? liquidityScore : null,
-    stars,
-    buyStars: toStars(stars.buy),
-    watchStars: toStars(stars.watch),
-    cashStars: toStars(stars.cash),
+    stars: finalStars,
+    buyStars: toStars(finalStars.buy),
+    watchStars: toStars(finalStars.watch),
+    cashStars: toStars(finalStars.cash),
     recommendedActions,
     liquidityLead: dualLiquidity?.synthesis?.leadSentence ?? null,
   }

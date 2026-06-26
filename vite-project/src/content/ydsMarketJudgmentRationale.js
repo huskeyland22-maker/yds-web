@@ -25,6 +25,8 @@ import { computeMa20Status, countConsecutiveUpDays } from "./ydsMarketCycleRecov
  *   factors: JudgmentFactor[]
  *   conclusion: string
  *   unifiedLabel: string
+ *   positiveCount: number
+ *   negativeCount: number
  * }} MarketJudgmentRationaleReport
  */
 
@@ -57,7 +59,14 @@ export function buildMarketJudgmentRationale(input = {}) {
   const unifiedLabel = resolveUnifiedMarketStateLabel(cycleFlow, "—")
 
   if (!panicData && !cycleFlow?.visible) {
-    return { visible: false, factors: [], conclusion: "—", unifiedLabel }
+    return {
+      visible: false,
+      factors: [],
+      conclusion: "—",
+      unifiedLabel,
+      positiveCount: 0,
+      negativeCount: 0,
+    }
   }
 
   /** @type {JudgmentFactor[]} */
@@ -214,5 +223,7 @@ export function buildMarketJudgmentRationale(input = {}) {
     factors,
     conclusion,
     unifiedLabel,
+    positiveCount: posCount,
+    negativeCount: negCount,
   }
 }
