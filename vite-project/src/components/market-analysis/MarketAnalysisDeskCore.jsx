@@ -5,6 +5,7 @@ import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
 import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
+import SectionErrorBoundary from "../SectionErrorBoundary.jsx"
 import YdsDashboardLiquiditySynthesis from "./YdsDashboardLiquiditySynthesis.jsx"
 import YdsDashboardLiquidityLaneDesk from "./YdsDashboardLiquidityLaneDesk.jsx"
 import YdsDashboardActionGuide from "./YdsDashboardActionGuide.jsx"
@@ -172,10 +173,12 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             />
           ) : null}
 
-          <YdsDashboardWeekEvents
-            report={weekEvents}
-            className="yds-market-desk__slot yds-market-desk__slot--week-events"
-          />
+          <SectionErrorBoundary label="이번주 주요 이벤트">
+            <YdsDashboardWeekEvents
+              report={weekEvents}
+              className="yds-market-desk__slot yds-market-desk__slot--week-events"
+            />
+          </SectionErrorBoundary>
 
           {macroRiskEnabled && dualLiquidity ? (
             <div className="yds-market-desk__liquidity-lanes">

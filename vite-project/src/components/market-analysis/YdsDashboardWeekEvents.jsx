@@ -85,9 +85,10 @@ function EventSection({
   previewCount,
   expanded,
 }) {
-  if (items.length === 0) return null
+  const safeItems = Array.isArray(items) ? items : []
+  if (safeItems.length === 0) return null
 
-  const visibleItems = expanded ? items : items.slice(0, previewCount)
+  const visibleItems = expanded ? safeItems : safeItems.slice(0, previewCount)
 
   return (
     <section className="yds-week-events-unified__section" aria-labelledby={sectionId}>
@@ -114,16 +115,16 @@ function EventSection({
 export default function YdsDashboardWeekEvents({ report, className = "" }) {
   const [expanded, setExpanded] = useState(false)
   const bodyRef = useRef(null)
-  const [maxHeight, setMaxHeight] = useState("none")
-  const [animate, setAnimate] = useState(false)
+  const [maxHeight, setMaxHeight] = useState(undefined)
+  const animateReadyRef = useRef(false)
 
   const hasEvents = Boolean(report?.hasEvents)
   const macroPreview =
     report?.macroPreviewLimit ?? WEEK_EVENTS_MACRO_PREVIEW
   const stockPreview =
     report?.stockPreviewLimit ?? WEEK_EVENTS_STOCK_PREVIEW
-  const macroItems = report?.macroItems ?? []
-  const stockItems = report?.stockItems ?? []
+  const macroItems = Array.isArray(report?.macroItems) ? report.macroItems : []
+  const stockItems = Array.isArray(report?.stockItems) ? report.stockItems : []
 
   const hiddenCount =
     Math.max(0, macroItems.length - macroPreview) +
@@ -134,12 +135,21 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
     if (!hasEvents) return
     const node = bodyRef.current
     if (!node) return
-    setMaxHeight(`${node.scrollHeight}px`)
-    if (!animate) {
-      const frame = requestAnimationFrame(() => setAnimate(true))
-      return () => cancelAnimationFrame(frame)
+
+    const nextHeight = node.scrollHeight
+    setMaxHeight((prev) => {
+      const prevPx = prev == null ? null : Number.parseInt(String(prev), 10)
+      if (prevPx != null && Math.abs(prevPx - nextHeight) <= 1) return prev
+      return `${nextHeight}px`
+    })
+
+    if (!animateReadyRef.current) {
+      animateReadyRef.current = true
+      requestAnimationFrame(() => {
+        node.classList.add("yds-week-events-collapsible--animate")
+      })
     }
-  }, [expanded, macroItems.length, stockItems.length, animate, hasEvents])
+  }, [expanded, macroItems.length, stockItems.length, hasEvents])
 
   if (!hasEvents) return null
 
@@ -156,14 +166,8 @@ export default function YdsDashboardWeekEvents({ report, className = "" }) {
     >
       <div
         ref={bodyRef}
-        className={[
-          "yds-week-events-unified",
-          "yds-week-events-collapsible",
-          animate ? "yds-week-events-collapsible--animate" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        style={{ maxHeight }}
+        className="yds-week-events-unified yds-week-events-collapsible"
+        style={maxHeight != null ? { maxHeight } : undefined}
       >
         <EventSection
           sectionId="desk-week-events-macro"

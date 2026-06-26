@@ -22,7 +22,12 @@ export default class RootErrorBoundary extends Component {
   }
 
   componentDidCatch(err, info) {
-    console.error("[RootErrorBoundary]", err, info?.componentStack)
+    const stack = info?.componentStack ?? ""
+    const firstLine = stack.split("\n").map((line) => line.trim()).find(Boolean) ?? ""
+    console.error("[RootErrorBoundary]", err, stack)
+    if (firstLine) {
+      console.error("[RootErrorBoundary] component:", firstLine)
+    }
   }
 
   render() {

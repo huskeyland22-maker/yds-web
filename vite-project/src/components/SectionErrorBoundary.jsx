@@ -12,7 +12,12 @@ export default class SectionErrorBoundary extends Component {
   }
 
   componentDidCatch(err, info) {
-    console.error(`[SectionErrorBoundary:${this.props.label ?? "section"}]`, err, info?.componentStack)
+    const stack = info?.componentStack ?? ""
+    const firstLine = stack.split("\n").map((line) => line.trim()).find(Boolean) ?? ""
+    console.error(`[SectionErrorBoundary:${this.props.label ?? "section"}]`, err, stack)
+    if (firstLine) {
+      console.error(`[SectionErrorBoundary:${this.props.label ?? "section"}] at`, firstLine)
+    }
   }
 
   render() {
