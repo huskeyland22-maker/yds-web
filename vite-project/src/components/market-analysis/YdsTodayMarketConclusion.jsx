@@ -7,6 +7,7 @@ import { buildTodayMarketConclusion } from "../../content/ydsTodayMarketConclusi
  *   historyRows?: object[]
  *   cycleFlow?: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport | null
  *   dualLiquidity?: import("../../market-os/liquidityDualEngine.js").DualLiquidityReport | null
+ *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number>; asOfDate?: string | null } | null
  *   className?: string
  * }} props
  */
@@ -15,11 +16,17 @@ export default function YdsTodayMarketConclusion({
   historyRows = [],
   cycleFlow = null,
   dualLiquidity = null,
+  etfContext = null,
   className = "",
 }) {
   const report = useMemo(
-    () => buildTodayMarketConclusion(panicData, historyRows, dualLiquidity, cycleFlow),
-    [panicData, historyRows, dualLiquidity, cycleFlow],
+    () =>
+      buildTodayMarketConclusion(panicData, historyRows, dualLiquidity, cycleFlow, {
+        spyPrices: etfContext?.spyPrices,
+        qqqPrices: etfContext?.qqqPrices,
+        asOfDate: etfContext?.asOfDate ?? null,
+      }),
+    [panicData, historyRows, dualLiquidity, cycleFlow, etfContext],
   )
 
   if (!report.visible) return null

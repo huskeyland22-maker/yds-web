@@ -10,10 +10,12 @@ import {
 } from "./ydsMarketPositionEngine.js"
 import { sortHistoryRowsAsc } from "../utils/panicHistoryDesk.js"
 import { applyEtfSensitivityToCycleFlow } from "./ydsMarketCycleEtfSensitivity.js"
+import { applyRecoveryConfirmationGate, RECOVERY_GATE_THRESHOLDS } from "./ydsMarketCycleRecoveryGate.js"
 import {
-  applyRecoveryConfirmationGate,
-  RECOVERY_GATE_THRESHOLDS,
-} from "./ydsMarketCycleRecoveryGate.js"
+  applyPriceGatesToCycleLabel,
+  buildCompositeEntryFromRow,
+} from "./ydsMarketStateCompositeEngine.js"
+import { buildMarketStatePriceStructureReport } from "./ydsMarketStatePriceStructure.js"
 
 export const MARKET_CYCLE_FLOW_DAYS = 30
 
@@ -82,9 +84,21 @@ function resolvePhase(id, delta) {
   return delta >= 0 ? "약화" : "회복중"
 }
 
-/** @param {object} row */
-function baseEntryFromRow(row) {
+/** @param {object} row @param {{ qqqPrices?: Record<string, number>; spyPrices?: Record<string, number> } | null} [priceMaps] */
+function baseEntryFromRow(row, priceMaps = null) {
   if (!row?.date) return null
+
+  if (priceMaps?.qqqPrices || priceMaps?.spyPrices) {
+    const composite = buildCompositeEntryFromRow(row, priceMaps.qqqPrices, priceMaps.spyPrices)
+    if (composite) {
+      return {
+        date: composite.date,
+        positionId: composite.positionId,
+        score: composite.score,
+      }
+    }
+  }
+
   const cnn = toNum(row.fearGreed)
   const vix = toNum(row.vix)
   const bofa = toNum(row.bofa)
@@ -245,8 +259,12 @@ export function buildMarketCycleFlowReport(
 ) {
   const sorted = sortHistoryRowsAsc(historyRows)
   const windowed = rowsWithinDays(sorted, windowDays)
+  const priceMaps =
+    etfContext?.qqqPrices || etfContext?.spyPrices
+      ? { qqqPrices: etfContext.qqqPrices, spyPrices: etfContext.spyPrices }
+      : null
   const baseEntries = windowed
-    .map((row) => baseEntryFromRow(row))
+    .map((row) => baseEntryFromRow(row, priceMaps))
     .filter((e) => e != null)
 
   const entries = annotateDailyCycleLabels(baseEntries)
@@ -283,7 +301,25 @@ export function buildMarketCycleFlowReport(
  * @param {import("./ydsMarketCycleEtfSensitivity.js").CycleEtfContext | null | undefined} etfContext
  */
 export function finalizeMarketCycleFlow(report, etfContext = null) {
-  const afterEtf = applyEtfSensitivityToCycleFlow(report, etfContext)
+  const priceReport = buildMarketStatePriceStructureReport({
+    qqqPrices: etfContext?.qqqPrices,
+    spyPrices: etfContext?.spyPrices,
+    asOfDate: etfContext?.asOfDate ?? null,
+  })
+
+  let working = { ...report }
+  if (priceReport && working.currentCycleLabel) {
+    const gated = applyPriceGatesToCycleLabel(working.currentCycleLabel, priceReport)
+    if (gated !== working.currentCycleLabel) {
+      const steps = Array.isArray(working.steps) ? [...working.steps] : []
+      if (steps.length) {
+        steps[steps.length - 1] = { ...steps[steps.length - 1], label: gated }
+      }
+      working = { ...working, currentCycleLabel: gated, steps }
+    }
+  }
+
+  const afterEtf = applyEtfSensitivityToCycleFlow(working, etfContext)
   const gate = applyRecoveryConfirmationGate(afterEtf.currentCycleLabel, etfContext)
 
   if (!gate.applied) {

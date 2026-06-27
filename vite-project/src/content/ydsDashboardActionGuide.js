@@ -8,6 +8,7 @@ import {
   resolveUnifiedMarketStateLabel,
 } from "./ydsUnifiedMarketState.js"
 import { getFinalScore } from "../utils/tradingScores.js"
+import { buildPanicCompositeVerdictReport } from "./ydsPanicCompositeVerdict.js"
 
 /**
  * @typedef {{
@@ -50,9 +51,9 @@ function bandToLegacyLiqId(bandId) {
  * @param {string} posId
  * @param {string} macroId
  * @param {string} liqId
- * @param {number | null} panicScore
+ * @param {import("./ydsPanicCompositeVerdict.js").PanicCompositeVerdictId | null | undefined} verdictId
  */
-function resolveStarRatings(posId, macroId, liqId, panicScore) {
+function resolveStarRatings(posId, macroId, liqId, verdictId) {
   let buy = 2
   let watch = 4
   let cash = 3
@@ -88,10 +89,22 @@ function resolveStarRatings(posId, macroId, liqId, panicScore) {
     cash = Math.min(5, cash + 1)
   }
 
-  if (panicScore != null && panicScore >= 70) buy = Math.min(5, buy + 1)
-  if (panicScore != null && panicScore <= 25) {
-    buy = Math.max(1, buy - 1)
+  if (verdictId === "trueFear") {
+    buy = Math.max(buy, 5)
+    watch = Math.min(watch, 2)
+    cash = Math.min(cash, 2)
+  } else if (verdictId === "earlyRecovery") {
+    buy = Math.max(buy, 4)
+    watch = Math.min(watch, 3)
+    cash = Math.max(1, cash - 1)
+  } else if (verdictId === "laggingFear") {
+    buy = Math.min(buy, 2)
+    watch = Math.max(watch, 4)
     cash = Math.min(5, cash + 1)
+  } else if (verdictId === "overheat") {
+    buy = Math.min(buy, 1)
+    watch = Math.max(watch, 3)
+    cash = Math.max(cash, 4)
   }
 
   return distinctifyActionDimensions({ buy, watch, cash })
@@ -193,6 +206,11 @@ function applyLiquidityActionMode(stars, actions, mode) {
  * @param {object[]} historyRows
  * @param {import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null} dualLiquidity
  * @param {import("./ydsMarketCycleFlow.js").MarketCycleFlowReport | null} [cycleFlow]
+ * @param {{
+ *   spyPrices?: Record<string, number>
+ *   qqqPrices?: Record<string, number>
+ *   asOfDate?: string | null
+ * } | null} [priceContext]
  * @returns {DashboardActionGuideReport}
  */
 export function buildDashboardActionGuideReport(
@@ -200,8 +218,18 @@ export function buildDashboardActionGuideReport(
   historyRows = [],
   dualLiquidity = null,
   cycleFlow = null,
+  priceContext = null,
 ) {
-  const state = resolveMarketStateCenterView(panicData)
+  const state = resolveMarketStateCenterView(panicData, {
+    etfContext: priceContext
+      ? {
+          spyPrices: priceContext.spyPrices,
+          qqqPrices: priceContext.qqqPrices,
+          asOfDate: priceContext.asOfDate ?? null,
+        }
+      : null,
+    dualLiquidity,
+  })
   if (!state) {
     return {
       visible: false,
@@ -232,7 +260,8 @@ export function buildDashboardActionGuideReport(
   const liqId = bandToLegacyLiqId(dualLiquidity?.market?.band?.id ?? "neutral")
   const macroId = state.macroId
 
-  const stars = resolveStarRatings(posId, macroId, liqId, panicScore)
+  const composite = buildPanicCompositeVerdictReport(panicData, priceContext ?? undefined)
+  const stars = resolveStarRatings(posId, macroId, liqId, composite.verdictId)
   const baseActions =
     unifiedGuide.actions.length > 0
       ? unifiedGuide.actions

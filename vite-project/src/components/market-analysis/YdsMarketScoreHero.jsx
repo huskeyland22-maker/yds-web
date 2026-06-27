@@ -45,7 +45,12 @@ export default function YdsMarketScoreHero({
           />
         </div>
         <div className="yds-market-desk__slot yds-market-desk__slot--panic-intensity">
-          <YdsMarketPanicSecondaryPanel embedded panicData={panicData} historyRows={historyRows} />
+          <YdsMarketPanicSecondaryPanel
+            embedded
+            panicData={panicData}
+            historyRows={historyRows}
+            etfContext={etfContext}
+          />
         </div>
       </div>
     </section>

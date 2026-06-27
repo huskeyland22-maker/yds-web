@@ -3,8 +3,8 @@
  */
 
 import { getFinalScore } from "../utils/tradingScores.js"
-import { buildPanicIntensityInterpretation } from "./ydsPanicIntensityInterpretation.js"
-import { computeMarketPositionScore, resolveMarketPosition } from "./ydsMarketPositionEngine.js"
+import { buildMarketStatePriceStructureReport, isPriceBearishStructure } from "./ydsMarketStatePriceStructure.js"
+import { buildMarketStateCompositeReport } from "./ydsMarketStateCompositeEngine.js"
 import { resolveUnifiedMarketStateLabel } from "./ydsUnifiedMarketState.js"
 import { computeMa20Status, countConsecutiveUpDays } from "./ydsMarketCycleRecoveryGate.js"
 
@@ -72,6 +72,47 @@ export function buildMarketJudgmentRationale(input = {}) {
   /** @type {JudgmentFactor[]} */
   const factors = []
 
+  const asOfDate = etfContext?.asOfDate ?? cycleFlow?.steps?.[cycleFlow.steps.length - 1]?.date ?? null
+  const priceReport = buildMarketStatePriceStructureReport({
+    qqqPrices: etfContext?.qqqPrices,
+    spyPrices: etfContext?.spyPrices,
+    asOfDate,
+  })
+
+  if (priceReport) {
+    for (const bullet of priceReport.bullets.slice(0, 4)) {
+      factors.push({
+        id: `price-${bullet.slice(0, 12)}`,
+        icon: "✓",
+        text: bullet,
+        tone: /하락|Lower|하회|둔화|하향/.test(bullet) ? "negative" : /상승|Higher|유지|지지/.test(bullet) ? "positive" : "neutral",
+      })
+    }
+    if (isPriceBearishStructure(priceReport)) {
+      factors.push({
+        id: "price-bearish",
+        icon: "▼",
+        text: "가격 구조 — 하락 전환 (회복 신호 제한)",
+        tone: "negative",
+      })
+    }
+  }
+
+  const composite = buildMarketStateCompositeReport({
+    panicData,
+    etfContext,
+    dualLiquidity,
+    asOfDate,
+  })
+  if (composite.visible && composite.compositeScore != null) {
+    factors.push({
+      id: "composite-score",
+      icon: "•",
+      text: `종합 점수 ${composite.compositeScore} (가격60·심리30·유동성10)`,
+      tone: "neutral",
+    })
+  }
+
   const vix = Number(panicData?.vix)
   if (Number.isFinite(vix)) {
     const tone = toneFromBand(vix, 18, 28)
@@ -131,8 +172,8 @@ export function buildMarketJudgmentRationale(input = {}) {
     })
   }
 
-  const asOfDate = etfContext?.asOfDate ?? cycleFlow?.steps?.[cycleFlow.steps.length - 1]?.date ?? null
-  const ma20 = computeMa20Status(etfContext?.qqqPrices, asOfDate)
+  const asOfDate2 = etfContext?.asOfDate ?? cycleFlow?.steps?.[cycleFlow.steps.length - 1]?.date ?? null
+  const ma20 = computeMa20Status(etfContext?.qqqPrices, asOfDate2)
   if (ma20.above != null) {
     const tone = ma20.above ? "positive" : "negative"
     factors.push({
@@ -169,7 +210,7 @@ export function buildMarketJudgmentRationale(input = {}) {
     })
   }
 
-  const upDays = countConsecutiveUpDays(etfContext?.qqqPrices, asOfDate)
+  const upDays = countConsecutiveUpDays(etfContext?.qqqPrices, asOfDate2)
   if (upDays >= 0 && etfContext?.qqqPrices) {
     const tone = upDays >= 2 ? "positive" : upDays === 0 ? "negative" : "neutral"
     factors.push({
@@ -185,24 +226,10 @@ export function buildMarketJudgmentRationale(input = {}) {
 
   const panicScore = panicData ? Math.round(getFinalScore(panicData) ?? NaN) : null
   if (Number.isFinite(panicScore)) {
-    const interp = buildPanicIntensityInterpretation(panicScore)
-    const tone =
-      panicScore >= 60 ? "negative" : panicScore <= 40 ? "positive" : "neutral"
     factors.push({
       id: "panic",
-      icon: iconForTone(tone),
-      text: `패닉 ${panicScore} · ${interp?.label ?? "—"}`,
-      tone,
-    })
-  }
-
-  const pos = resolveMarketPosition(panicData)
-  if (pos) {
-    const score = computeMarketPositionScore(pos.cnn, pos.vix, pos.bofa, pos.id)
-    factors.push({
-      id: "market-score",
       icon: "•",
-      text: `시장 점수 ${score}`,
+      text: `심리 보조 — 패닉 ${panicScore}`,
       tone: "neutral",
     })
   }

@@ -2,8 +2,7 @@
  * AI 시장 브리핑 — 규칙 기반 3~5줄 (상태 · 패닉 · 사이클)
  */
 
-import { getFinalScore } from "../utils/tradingScores.js"
-import { buildPanicIntensityInterpretation } from "./ydsPanicIntensityInterpretation.js"
+import { buildPanicCompositeVerdictReport } from "./ydsPanicCompositeVerdict.js"
 import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
 import {
   resolveUnifiedMarketStateGuide,
@@ -23,11 +22,12 @@ import {
  *   panicData?: object | null
  *   cycleFlow?: import("./ydsMarketCycleFlow.js").MarketCycleFlowReport | null
  *   dualLiquidity?: import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null
+ *   priceContext?: { spyPrices?: Record<string, number>; qqqPrices?: Record<string, number>; asOfDate?: string | null }
  * }} input
  * @returns {AiMarketBriefingReport}
  */
 export function buildAiMarketBriefing(input = {}) {
-  const { panicData, cycleFlow, dualLiquidity } = input
+  const { panicData, cycleFlow, dualLiquidity, priceContext } = input
   const view = resolveMarketStateCenterView(panicData)
   if (!view) {
     return { visible: false, title: "AI 시장 브리핑", lines: [] }
@@ -35,18 +35,19 @@ export function buildAiMarketBriefing(input = {}) {
 
   const unifiedLabel = resolveUnifiedMarketStateLabel(cycleFlow, view.position?.label ?? "—")
   const guide = resolveUnifiedMarketStateGuide(unifiedLabel)
-  const panicScore = Math.round(getFinalScore(panicData) ?? view.panicScore ?? NaN)
-  const panicInterp = Number.isFinite(panicScore)
-    ? buildPanicIntensityInterpretation(panicScore)
-    : null
+  const composite = buildPanicCompositeVerdictReport(panicData, priceContext)
 
   /** @type {string[]} */
   const lines = []
 
   lines.push(`현재 시장은 ${unifiedLabel} 구간으로 판단됩니다.`)
 
-  if (panicInterp) {
-    lines.push(`패닉 강도 ${panicScore} · ${panicInterp.label} — ${panicInterp.actionLine}`)
+  if (composite.visible) {
+    lines.push(
+      `심리 ${composite.psychLabel} · 가격 ${composite.priceLabel} → ${composite.verdictLabel} (${composite.actionLine})`,
+    )
+  } else if (view.panicScore != null) {
+    lines.push(`패닉 강도 ${view.panicScore} — 심리 지표만으로는 타이밍 판단이 제한됩니다.`)
   }
 
   const marketScore = dualLiquidity?.marketScore

@@ -3,13 +3,12 @@
  */
 
 import { buildDashboardActionGuideReport } from "./ydsDashboardActionGuide.js"
-import { buildPanicIntensityInterpretation } from "./ydsPanicIntensityInterpretation.js"
+import { buildPanicCompositeVerdictReport } from "./ydsPanicCompositeVerdict.js"
 import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
 import {
   resolveUnifiedMarketStateGuide,
   resolveUnifiedMarketStateLabel,
 } from "./ydsUnifiedMarketState.js"
-import { getFinalScore } from "../utils/tradingScores.js"
 
 /**
  * @typedef {'defensive' | 'cautious' | 'neutral' | 'opportunity' | 'aggressive'} ConclusionSignalId
@@ -79,10 +78,10 @@ function resolveConclusionSignal(input) {
   else if (/위축|충격/.test(unifiedLabel)) score += 1.5
   else if (/상승초기|경계회복/.test(unifiedLabel)) score += 0.5
 
-  if (panicStageId === "extremeFear" || panicStageId === "fear") score += 1.5
+  if (panicStageId === "trueFear" || panicStageId === "earlyRecovery") score += 1.5
+  else if (panicStageId === "laggingFear") score -= 0.8
+  else if (panicStageId === "overheat") score -= 2
   else if (panicStageId === "neutral") score += 0
-  else if (panicStageId === "interest") score -= 1
-  else if (panicStageId === "overheat") score -= 1.5
 
   if (liqId === "favorable" || liquidityMode === "aggressive" || liquidityMode === "short_term") {
     score += 0.5
@@ -194,6 +193,11 @@ function buildActionTags(stars, signalId, guideActions) {
  * @param {object[]} historyRows
  * @param {import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null} dualLiquidity
  * @param {import("./ydsMarketCycleFlow.js").MarketCycleFlowReport | null} cycleFlow
+ * @param {{
+ *   spyPrices?: Record<string, number>
+ *   qqqPrices?: Record<string, number>
+ *   asOfDate?: string | null
+ * } | null} [priceContext]
  * @returns {TodayMarketConclusionReport}
  */
 export function buildTodayMarketConclusion(
@@ -201,8 +205,11 @@ export function buildTodayMarketConclusion(
   historyRows = [],
   dualLiquidity = null,
   cycleFlow = null,
+  priceContext = null,
 ) {
-  const view = resolveMarketStateCenterView(panicData)
+  const view = resolveMarketStateCenterView(panicData, {
+    etfContext: priceContext ?? null,
+  })
   if (!view) {
     return {
       visible: false,
@@ -219,28 +226,41 @@ export function buildTodayMarketConclusion(
     historyRows,
     dualLiquidity,
     cycleFlow,
+    priceContext,
   )
   const unifiedLabel = resolveUnifiedMarketStateLabel(cycleFlow, view.position?.label ?? "—")
   const guide = resolveUnifiedMarketStateGuide(unifiedLabel)
-  const panicScore = Math.round(getFinalScore(panicData) ?? view.panicScore ?? NaN)
-  const panicInterp = Number.isFinite(panicScore)
-    ? buildPanicIntensityInterpretation(panicScore)
-    : null
+  const composite = buildPanicCompositeVerdictReport(panicData, priceContext ?? undefined)
 
   const liqId = bandToLegacyLiqId(dualLiquidity?.market?.band?.id ?? "neutral")
-  const signalId = resolveConclusionSignal({
+  let signalId = resolveConclusionSignal({
     posId: view.position.id,
     macroId: view.macroId,
     liqId,
-    panicStageId: panicInterp?.id ?? "neutral",
+    panicStageId: composite.verdictId ?? "neutral",
     liquidityMode: dualLiquidity?.actionMode ?? "balanced",
     unifiedLabel,
   })
 
+  if (composite.visible) {
+    if (composite.verdictId === "trueFear") signalId = "aggressive"
+    else if (composite.verdictId === "earlyRecovery") signalId = "opportunity"
+    else if (composite.verdictId === "laggingFear") signalId = "cautious"
+    else if (composite.verdictId === "overheat") signalId = "defensive"
+  }
+
   const headline = SIGNAL_HEADLINE[signalId]
-  const body = buildBodyLines(signalId, guide, dualLiquidity)
+  let body = buildBodyLines(signalId, guide, dualLiquidity)
+  if (composite.visible && composite.verdictId === "laggingFear") {
+    body = composite.narrative.slice(0, 2)
+  } else if (composite.visible && composite.narrative.length >= 2) {
+    body = composite.narrative.slice(0, 2)
+  }
   const lines = [headline, ...body].filter(Boolean).slice(0, 3)
-  const actions = buildActionTags(actionGuide.stars, signalId, guide.actions)
+  let actions = buildActionTags(actionGuide.stars, signalId, guide.actions)
+  if (composite.visible && composite.verdictId === "laggingFear" && !actions.includes("추격 금지")) {
+    actions = ["추격 금지", ...actions.filter((a) => a !== "추격 금지")].slice(0, 3)
+  }
 
   return {
     visible: lines.length > 0,

@@ -121,9 +121,13 @@ export function getPanicBuyIntensityPct(macroId) {
 
 /**
  * @param {object | null | undefined} panicData
+ * @param {{
+ *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number>; asOfDate?: string | null } | null
+ *   dualLiquidity?: import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null
+ * } | null} [context]
  */
-export function resolveMarketStateCenterView(panicData) {
-  const positionView = resolveMarketPositionView(panicData)
+export function resolveMarketStateCenterView(panicData, context = null) {
+  const positionView = resolveMarketPositionView(panicData, context)
   if (!positionView) return null
 
   const ydsScore = panicData ? getFinalScore(panicData) : null
@@ -154,5 +158,6 @@ export function resolveMarketStateCenterView(panicData) {
     macroId,
     buyIntensityPct,
     buyIntensityLabel: `매수 강도 ${buyIntensityPct}%`,
+    composite: positionView.composite ?? null,
   }
 }

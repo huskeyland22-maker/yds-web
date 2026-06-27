@@ -90,8 +90,13 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   }, [macroRiskEnabled, bondSnapshot.snapshot, panicData])
 
   const actionGuide = useMemo(
-    () => buildDashboardActionGuideReport(panicData, safeHistory, dualLiquidity, cycleFlow),
-    [panicData, safeHistory, dualLiquidity, cycleFlow],
+    () =>
+      buildDashboardActionGuideReport(panicData, safeHistory, dualLiquidity, cycleFlow, {
+        spyPrices: etfContext?.spyPrices,
+        qqqPrices: etfContext?.qqqPrices,
+        asOfDate: etfContext?.asOfDate ?? null,
+      }),
+    [panicData, safeHistory, dualLiquidity, cycleFlow, etfContext],
   )
 
   const lastAuditKeyRef = useRef("")
@@ -132,6 +137,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           historyRows={safeHistory}
           cycleFlow={cycleFlow}
           dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--today-conclusion"
         />
 
@@ -146,6 +152,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           panicData={panicData}
           cycleFlow={cycleFlow}
           dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--ai-briefing"
         />
 

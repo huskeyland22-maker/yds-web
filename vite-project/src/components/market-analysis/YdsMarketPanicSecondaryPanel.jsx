@@ -1,34 +1,57 @@
 import { useMemo } from "react"
 import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
+import { resolvePanicActionView } from "../../content/ydsPanicActionView.js"
 import { buildPanicIntensityComparison } from "../../content/ydsPanicIntensityComparison.js"
 import { buildPanicIntensityInterpretation } from "../../content/ydsPanicIntensityInterpretation.js"
+import { resolvePanicCompositeActionView } from "../../content/ydsPanicCompositeVerdict.js"
 import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.js"
 import YdsPanicScoreComposition from "./YdsPanicScoreComposition.jsx"
+import YdsPanicCompositeVerdict from "./YdsPanicCompositeVerdict.jsx"
 
 /** @param {number} score */
 function resolvePanicAccentTier(score) {
-  if (score <= 20) return "critical"
-  if (score <= 40) return "high"
-  if (score <= 60) return "mid"
-  if (score <= 80) return "warm"
+  if (score >= 80) return "critical"
+  if (score >= 60) return "high"
+  if (score >= 40) return "mid"
+  if (score >= 20) return "warm"
   return "overheat"
 }
 
 /**
  * V7 — 패닉 강도 보조 카드
- * @param {{ panicData?: object | null; historyRows?: object[]; className?: string; embedded?: boolean }} props
+ * @param {{
+ *   panicData?: object | null
+ *   historyRows?: object[]
+ *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number>; asOfDate?: string | null } | null
+ *   className?: string
+ *   embedded?: boolean
+ * }} props
  */
 export default function YdsMarketPanicSecondaryPanel({
   panicData = null,
   historyRows = [],
+  etfContext = null,
   className = "",
   embedded = false,
 }) {
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
+  const panicAction = useMemo(
+    () => (view?.panicScore != null ? resolvePanicActionView(view.panicScore) : null),
+    [view?.panicScore],
+  )
   const interpretation = useMemo(
     () => (view?.panicScore != null ? buildPanicIntensityInterpretation(view.panicScore) : null),
     [view?.panicScore],
+  )
+  const compositeAction = useMemo(
+    () =>
+      resolvePanicCompositeActionView(panicData, {
+        spyPrices: etfContext?.spyPrices,
+        qqqPrices: etfContext?.qqqPrices,
+        asOfDate: etfContext?.asOfDate ?? null,
+      }),
+    [panicData, etfContext],
   )
   const evidence = useMemo(() => buildPanicEvidenceReport(panicData), [panicData])
   const comparison = useMemo(
@@ -39,6 +62,9 @@ export default function YdsMarketPanicSecondaryPanel({
   if (!view || view.panicScore == null || !interpretation) return null
 
   const accentTier = resolvePanicAccentTier(view.panicScore)
+  const buyStrength = compositeAction?.buyStrength ?? interpretation.buyStrength
+  const actionLine = compositeAction?.actionLine ?? interpretation.actionLine
+  const stageLine = panicAction?.currentLine ?? interpretation.currentLine
 
   const card = (
     <div
@@ -60,12 +86,17 @@ export default function YdsMarketPanicSecondaryPanel({
           <p className="yds-market-panic-secondary__stage-bar font-mono tabular-nums" aria-hidden>
             {interpretation.stageBar}
           </p>
-          <p className="yds-market-panic-secondary__stage-current">{interpretation.currentLine}</p>
+          <p className="yds-market-panic-secondary__stage-current">{stageLine}</p>
         </div>
 
         <div className="yds-market-panic-secondary__action" aria-label="매수 관점 투자 의견">
-          <p className="yds-market-panic-secondary__buy-strength">{interpretation.buyStrength}</p>
-          <p className="yds-market-panic-secondary__action-line">{interpretation.actionLine}</p>
+          <p className="yds-market-panic-secondary__buy-strength">{buyStrength}</p>
+          <p className="yds-market-panic-secondary__action-line">{actionLine}</p>
+          {compositeAction ? (
+            <p className="yds-market-panic-secondary__action-note">
+              심리·가격·추세 종합 판정
+            </p>
+          ) : null}
         </div>
 
         {evidence.briefChips.length ? (
@@ -107,6 +138,12 @@ export default function YdsMarketPanicSecondaryPanel({
       ) : null}
 
       <YdsPanicScoreComposition panicData={panicData} className="yds-market-panic-secondary__composition" />
+
+      <YdsPanicCompositeVerdict
+        panicData={panicData}
+        etfContext={etfContext}
+        className="yds-market-panic-secondary__composite"
+      />
     </div>
   )
 

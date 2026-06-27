@@ -6,7 +6,7 @@ import { buildMarketDeskSummary } from "./ydsMarketDeskSummary.js"
 import { buildDashboardActionGuideReport } from "./ydsDashboardActionGuide.js"
 import { buildMarketJudgmentRationale } from "./ydsMarketJudgmentRationale.js"
 import { resolveUnifiedMarketStateGuide, resolveUnifiedMarketStateLabel } from "./ydsUnifiedMarketState.js"
-import { buildPanicIntensityInterpretation } from "./ydsPanicIntensityInterpretation.js"
+import { buildPanicCompositeVerdictReport } from "./ydsPanicCompositeVerdict.js"
 import { getFinalScore } from "../utils/tradingScores.js"
 import { resolveMarketPositionView } from "./ydsMarketPositionEngine.js"
 
@@ -36,11 +36,17 @@ export function buildDailyMarketReport(input = {}) {
   const unifiedLabel = resolveUnifiedMarketStateLabel(cycleFlow, "—")
   const guide = resolveUnifiedMarketStateGuide(unifiedLabel)
   const deskSummary = buildMarketDeskSummary(panicData, dualLiquidity, cycleFlow)
+  const priceContext = {
+    spyPrices: etfContext?.spyPrices,
+    qqqPrices: etfContext?.qqqPrices,
+    asOfDate: etfContext?.asOfDate ?? null,
+  }
   const actionGuide = buildDashboardActionGuideReport(
     panicData,
     historyRows,
     dualLiquidity,
     cycleFlow,
+    priceContext,
   )
   const judgment = buildMarketJudgmentRationale({
     panicData,
@@ -50,10 +56,7 @@ export function buildDailyMarketReport(input = {}) {
   })
 
   const panicScore = panicData ? Math.round(getFinalScore(panicData) ?? NaN) : null
-  const panicInterp =
-    panicScore != null && Number.isFinite(panicScore)
-      ? buildPanicIntensityInterpretation(panicScore)
-      : null
+  const composite = buildPanicCompositeVerdictReport(panicData, priceContext)
   const positionView = resolveMarketPositionView(panicData)
 
   const weekItems = (weekEvents?.flatItems ?? weekEvents?.macroItems ?? []).slice(0, 8)
@@ -66,7 +69,10 @@ export function buildDailyMarketReport(input = {}) {
   if (judgment.factors.some((f) => f.id === "liq-policy" && f.tone === "negative")) {
     risks.push("정책 유동성 부담")
   }
-  if (panicScore != null && panicScore >= 70) risks.push("패닉 과열 구간")
+  if (composite.visible && composite.verdictId === "overheat") risks.push("패닉·가격 과열 구간")
+  else if (composite.visible && composite.verdictId === "laggingFear") {
+    risks.push("늦은 공포 — 추격매수 주의")
+  }
   if (!risks.length) risks.push("급격한 변동성 확대")
 
   /** @type {string[]} */
@@ -88,9 +94,11 @@ export function buildDailyMarketReport(input = {}) {
     },
     panic: {
       score: panicScore,
-      label: panicInterp?.label ?? "—",
-      buyStrength: panicInterp?.buyStrength ?? "—",
-      action: panicInterp?.actionLine ?? "—",
+      label: composite.visible ? composite.verdictLabel : "—",
+      buyStrength: composite.visible ? composite.buyStrength : "—",
+      action: composite.visible ? composite.actionLine : "—",
+      psychLabel: composite.visible ? composite.psychLabel : "—",
+      priceLabel: composite.visible ? composite.priceLabel : "—",
     },
     liquidity: {
       market: dualLiquidity?.market?.band?.label ?? "—",
@@ -126,9 +134,10 @@ export function buildDailyMarketReportMarkdown(sections) {
     `- ${sections.marketState.phase}`,
     ...sections.marketState.narrative.map((l) => `- ${l}`),
     "",
-    "## 3. 패닉 강도 분석",
-    `- 점수: ${sections.panic.score ?? "—"}`,
-    `- 단계: ${sections.panic.label}`,
+    "## 3. 패닉 강도 · 심리+가격 종합",
+    `- 심리 점수: ${sections.panic.score ?? "—"} · ${sections.panic.psychLabel ?? "—"}`,
+    `- 가격 위치: ${sections.panic.priceLabel ?? "—"}`,
+    `- 종합: ${sections.panic.label}`,
     `- 매수 강도: ${sections.panic.buyStrength}`,
     `- 권장: ${sections.panic.action}`,
     "",
@@ -191,7 +200,7 @@ ul{padding-left:1.2rem}
 <h1>${esc(sections.title)}</h1>
 <h2>1. 오늘 시장 요약</h2><ul>${list(sections.summary)}</ul>
 <h2>2. 시장 상태 분석</h2><p><strong>${esc(sections.marketState.label)}</strong> · 점수 ${esc(sections.marketState.score)}</p><ul>${list([sections.marketState.phase, ...sections.marketState.narrative])}</ul>
-<h2>3. 패닉 강도</h2><ul>${list([`점수 ${sections.panic.score}`, sections.panic.label, sections.panic.buyStrength, sections.panic.action])}</ul>
+<h2>3. 패닉 · 심리+가격 종합</h2><ul>${list([`심리 ${sections.panic.score} · ${sections.panic.psychLabel}`, `가격 ${sections.panic.priceLabel}`, sections.panic.label, sections.panic.buyStrength, sections.panic.action])}</ul>
 <h2>4. 유동성</h2><ul>${list([sections.liquidity.market, sections.liquidity.policy, sections.liquidity.lead])}</ul>
 <h2>5. 이번주 이벤트</h2><ul>${list(sections.weekEvents.length ? sections.weekEvents : ["없음"])}</ul>
 <h2>6. 추천 종목</h2><ul>${list(sections.picks.length ? sections.picks : ["없음"])}</ul>

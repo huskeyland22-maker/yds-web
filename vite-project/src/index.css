@@ -29250,6 +29250,60 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+.yds-market-state-primary__rationale {
+  margin: 0.4rem 0 0;
+  padding: 0.42rem 0.48rem;
+  border-radius: 0.45rem;
+  background: rgba(2, 6, 23, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.yds-market-state-primary__rationale-title {
+  margin: 0 0 0.28rem;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #93c5fd;
+}
+
+.yds-market-state-primary__rationale-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.yds-market-state-primary__rationale-item {
+  font-size: clamp(0.6rem, 1.75vw, 0.72rem);
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.38;
+}
+
+.yds-market-state-primary__rationale-final-label {
+  margin: 0.32rem 0 0.12rem;
+  font-size: 0.56rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.yds-market-state-primary__rationale-final {
+  margin: 0;
+  font-size: clamp(0.62rem, 1.85vw, 0.74rem);
+  font-weight: 700;
+  color: #fbbf24;
+  line-height: 1.42;
+}
+
+.yds-market-state-primary__rationale-sentiment {
+  margin: 0.22rem 0 0;
+  font-size: 0.54rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
 .yds-market-state-timeline {
   margin: 0;
   padding-top: 0;
@@ -31194,6 +31248,142 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin: 0.28rem 0 0;
   font-size: 0.56rem;
   color: #64748b;
+}
+
+.yds-market-panic-secondary__action-note {
+  margin: 0.2rem 0 0;
+  font-size: 0.54rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-panic-composite {
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.yds-panic-composite__title {
+  margin: 0 0 0.32rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #93c5fd;
+}
+
+.yds-panic-composite__axes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.28rem;
+  margin: 0 0 0.38rem;
+}
+
+.yds-panic-composite__axes dt {
+  font-size: 0.54rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.yds-panic-composite__axes dd {
+  margin: 0.06rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-panic-composite__score {
+  margin-left: 0.25rem;
+  font-size: 0.58rem;
+  color: #94a3b8;
+}
+
+.yds-panic-composite__verdict {
+  padding: 0.42rem 0.48rem;
+  border-radius: 0.45rem;
+  background: rgba(2, 6, 23, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.yds-panic-composite__verdict--trueFear {
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+.yds-panic-composite__verdict--earlyRecovery {
+  border-color: rgba(74, 222, 128, 0.25);
+}
+
+.yds-panic-composite__verdict--laggingFear {
+  border-color: rgba(251, 146, 60, 0.35);
+  background: rgba(67, 20, 7, 0.25);
+}
+
+.yds-panic-composite__verdict--overheat {
+  border-color: rgba(250, 204, 21, 0.25);
+}
+
+.yds-panic-composite__verdict-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.45rem;
+  margin: 0 0 0.18rem;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  color: #f8fafc;
+}
+
+.yds-panic-composite__verdict-label {
+  font-size: 0.56rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.yds-panic-composite__stars {
+  margin-left: auto;
+  font-size: 0.62rem;
+  color: #fbbf24;
+  letter-spacing: 0.04em;
+}
+
+.yds-panic-composite__action {
+  margin: 0 0 0.22rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #93c5fd;
+}
+
+.yds-panic-composite__narrative p {
+  margin: 0.12rem 0 0;
+  font-size: clamp(0.62rem, 1.85vw, 0.72rem);
+  font-weight: 600;
+  color: #cbd5e1;
+  line-height: 1.42;
+}
+
+.yds-panic-composite__metrics {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.14rem 0.35rem;
+}
+
+.yds-panic-composite__metric {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  font-size: 0.54rem;
+  color: #94a3b8;
+}
+
+@media (max-width: 480px) {
+  .yds-panic-composite__axes {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-panic-composite__metrics {
+    grid-template-columns: 1fr;
+  }
 }
 
 .yds-market-state-timeline {

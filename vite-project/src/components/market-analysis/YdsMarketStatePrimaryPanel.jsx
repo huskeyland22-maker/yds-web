@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { MARKET_LABEL_MARKET_STATE } from "../../content/ydsMarketStageLabels.js"
 import { computeMarketPositionScore, resolveMarketPositionId } from "../../content/ydsMarketPositionEngine.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
+import { buildMarketStateRationaleReport } from "../../content/ydsMarketStateCompositeEngine.js"
 import {
   resolveUnifiedMarketStateGuide,
   resolveUnifiedMarketStateLabel,
@@ -57,7 +58,15 @@ export default function YdsMarketStatePrimaryPanel({
   className = "",
   embedded = false,
 }) {
-  const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
+  const stateContext = useMemo(
+    () => ({ etfContext, dualLiquidity }),
+    [etfContext, dualLiquidity],
+  )
+
+  const view = useMemo(
+    () => resolveMarketStateCenterView(panicData, stateContext),
+    [panicData, stateContext],
+  )
 
   const unifiedLabel = useMemo(
     () => resolveUnifiedMarketStateLabel(cycleFlow, view?.position?.label ?? "—"),
@@ -66,6 +75,11 @@ export default function YdsMarketStatePrimaryPanel({
   const unifiedGuide = useMemo(
     () => resolveUnifiedMarketStateGuide(unifiedLabel),
     [unifiedLabel],
+  )
+
+  const rationale = useMemo(
+    () => buildMarketStateRationaleReport(unifiedLabel, view?.composite ?? null),
+    [unifiedLabel, view?.composite],
   )
 
   const delta = useMemo(
@@ -106,6 +120,26 @@ export default function YdsMarketStatePrimaryPanel({
           className="yds-market-state-primary__recent-changes"
         />
 
+        {rationale.visible ? (
+          <article className="yds-market-state-primary__rationale" aria-label="시장 상태 판단 근거">
+            <p className="yds-market-state-primary__rationale-title">판단 근거</p>
+            <ul className="yds-market-state-primary__rationale-list">
+              {rationale.priceBullets.map((item) => (
+                <li key={item} className="yds-market-state-primary__rationale-item">
+                  ✓ {item}
+                </li>
+              ))}
+            </ul>
+            <p className="yds-market-state-primary__rationale-final-label">최종 판단</p>
+            <p className="yds-market-state-primary__rationale-final">{rationale.conclusion}</p>
+            {rationale.sentimentNotes.length ? (
+              <p className="yds-market-state-primary__rationale-sentiment">
+                {rationale.sentimentNotes.join(" · ")}
+              </p>
+            ) : null}
+          </article>
+        ) : null}
+
         <ul className="yds-market-state-primary__actions" aria-label="시장 상태 행동 가이드">
           {unifiedGuide.actions.map((item) => (
             <li key={item} className="yds-market-state-primary__action-item">
@@ -115,7 +149,7 @@ export default function YdsMarketStatePrimaryPanel({
         </ul>
 
         <article className="yds-market-state-primary__strategy" aria-label="현재 시장 전략">
-          <p className="yds-market-state-primary__layer-tag">현재 시장 설명</p>
+          <p className="yds-market-state-primary__layer-tag">전략 요약</p>
           <p className="yds-market-state-primary__strategy-line">{unifiedGuide.strategyPhase}</p>
           <p className="yds-market-state-primary__strategy-narrative">
             {unifiedGuide.strategyNarrative.map((line, index) => (

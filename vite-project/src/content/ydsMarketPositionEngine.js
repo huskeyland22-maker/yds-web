@@ -1,7 +1,9 @@
 /**
- * YDS 시장 위치 — CNN · VIX · BofA 기반 5단계 (표시 전용)
+ * YDS 시장 위치 — CNN · VIX · BofA + 가격 구조 복합 (표시 전용)
  * 시장 상태 = 시장이 어디쯤인가 (과열 → 패닉)
  */
+
+import { buildMarketStateCompositeReport } from "./ydsMarketStateCompositeEngine.js"
 
 /** @typedef {"overheat" | "boundary" | "adjustment" | "fear" | "panic"} MarketPositionId */
 
@@ -169,8 +171,44 @@ export function resolveMarketPositionNavigation(currentId) {
 
 /**
  * @param {object | null | undefined} panicData
+ * @param {{
+ *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number>; asOfDate?: string | null } | null
+ *   dualLiquidity?: import("./ydsMarketStateCompositeEngine.js").DualLiquidityReport | null
+ * } | null} [context]
  */
-export function resolveMarketPositionView(panicData) {
+export function resolveMarketPositionView(panicData, context = null) {
+  if (context?.etfContext?.qqqPrices || context?.etfContext?.spyPrices) {
+    const composite = buildMarketStateCompositeReport({
+      panicData,
+      etfContext: context.etfContext,
+      dualLiquidity: context.dualLiquidity,
+    })
+    if (composite.visible && composite.hasPriceData) {
+      const position = {
+        ...composite.stage,
+        id: composite.positionId,
+        cnn: Number(panicData?.fearGreed) || null,
+        vix: Number(panicData?.vix) || null,
+        bofa: Number(panicData?.bofa) || null,
+        descriptions: MARKET_POSITION_DESCRIPTIONS[composite.positionId] ?? [],
+      }
+      const rail = MARKET_POSITION_STAGES.map((stage) => ({
+        id: stage.id,
+        emoji: stage.emoji,
+        label: stage.label,
+        color: stage.color,
+        active: stage.id === composite.positionId,
+      }))
+      return {
+        position,
+        score: composite.compositeScore,
+        rail,
+        nav: resolveMarketPositionNavigation(composite.positionId),
+        composite,
+      }
+    }
+  }
+
   const position = resolveMarketPosition(panicData)
   if (!position) return null
 
