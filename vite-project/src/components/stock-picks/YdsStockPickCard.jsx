@@ -74,6 +74,7 @@ export default function YdsStockPickCard({
   const rankTrack = stock.pickMeta?.rankTrack
   const lifecycle = stock.lifecycle ?? stock.pickMeta?.lifecycle
   const sectorBadge = resolveStockPickSectorBadge(stock)
+  const trust = stock.trustReport
 
   return (
     <article
@@ -139,7 +140,13 @@ export default function YdsStockPickCard({
           </p>
         ) : null}
 
+        {trust?.excludeReason ? (
+          <p className="yds-spick-card__exclude">제외: {trust.excludeReason}</p>
+        ) : null}
+
         <YdsStockPickRecommendRationale
+          topReasons={trust?.topReasons}
+          detailReasons={trust?.detailReasons}
           items={stock.recommendRationales ?? []}
           title="왜 추천하는가"
           className="yds-spick-card__rationale"

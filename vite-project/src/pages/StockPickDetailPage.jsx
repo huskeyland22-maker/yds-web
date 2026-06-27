@@ -7,6 +7,8 @@ import YdsStockPickFavoriteButton from "../components/stock-picks/YdsStockPickFa
 import YdsStockPickPriceLine from "../components/stock-picks/YdsStockPickPriceLine.jsx"
 import YdsStockPickScoreDetailPanel from "../components/stock-picks/YdsStockPickScoreDetailPanel.jsx"
 import YdsStockPositionBadge from "../components/stock-picks/YdsStockPositionBadge.jsx"
+import YdsStockPickTrustExtras from "../components/stock-picks/YdsStockPickTrustExtras.jsx"
+import YdsStockPickScoreBreakdown from "../components/stock-picks/YdsStockPickScoreBreakdown.jsx"
 import "../styles/stock-picks-platform.css"
 
 export default function StockPickDetailPage() {
@@ -61,6 +63,10 @@ export default function StockPickDetailPage() {
         <YdsStockPickPriceLine stock={stock} />
 
         <YdsStockPositionBadge stock={stock} variant="detail" />
+
+        <YdsStockPickScoreBreakdown stock={stock} className="yds-spick-detail__score-breakdown" />
+
+        <YdsStockPickTrustExtras trustReport={stock.trustReport} className="yds-spick-detail__trust" />
 
         <p className="yds-spick-detail__ticker font-mono tabular-nums">
           {stock.ticker}

@@ -20,8 +20,14 @@ export default function YdsStockPositionBadge({
     [stock],
   )
   const totalScore = Math.round(
-    stock.v4Score?.finalRankScore ?? stock.v4Score?.total ?? stock.score ?? 0,
+    stock.trustReport?.recommendScore ??
+      stock.recommendEngine?.compositeScore ??
+      stock.v4Score?.finalRankScore ??
+      stock.v4Score?.total ??
+      stock.score ??
+      0,
   )
+  const aiConfidence = stock.trustReport?.aiConfidence
 
   if (variant === "inline") {
     return (
@@ -54,6 +60,13 @@ export default function YdsStockPositionBadge({
       {showScore ? (
         <p className="yds-spick-position__score font-mono tabular-nums">
           추천점수 <strong>{totalScore}</strong>
+          {aiConfidence ? (
+            <>
+              {" · "}
+              AI Confidence <strong>{aiConfidence.score}</strong>{" "}
+              <span className="yds-spick-position__conf-label">({aiConfidence.label})</span>
+            </>
+          ) : null}
         </p>
       ) : null}
       <div className="yds-spick-position__row">

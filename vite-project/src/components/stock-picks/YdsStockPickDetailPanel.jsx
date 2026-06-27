@@ -6,6 +6,7 @@ import { buildStockPickRecommendHistoryReport } from "../../content/ydsStockPick
 import { buildStockPickTradeScenarioReport } from "../../content/ydsStockPickTradeScenario.js"
 import YdsStockPickRecommendHistory from "./YdsStockPickRecommendHistory.jsx"
 import YdsStockPickTradeScenario from "./YdsStockPickTradeScenario.jsx"
+import YdsStockPickTrustExtras from "./YdsStockPickTrustExtras.jsx"
 
 /**
  * @param {{
@@ -33,6 +34,10 @@ export default function YdsStockPickDetailPanel({ stock, dualLiquidity = null, c
 
   if (!report.visible) return null
 
+  const trust = stock.trustReport
+  const scoreBars = trust?.scoreBars?.length ? trust.scoreBars : report.scoreBars
+  const topReasons = trust?.topReasons?.map((r) => r.text) ?? report.reasons
+
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
 
   return (
@@ -40,8 +45,10 @@ export default function YdsStockPickDetailPanel({ stock, dualLiquidity = null, c
       className={["yds-spick-detail-panel", className].filter(Boolean).join(" ")}
       aria-label={`${stock.name} AI 상세 분석`}
     >
+      <YdsStockPickTrustExtras trustReport={trust} embedded className="yds-spick-detail-panel__trust" />
+
       <div className="yds-spick-detail-panel__scores">
-        {report.scoreBars.map((bar) => (
+        {scoreBars.map((bar) => (
           <div key={bar.id} className="yds-spick-detail-panel__score-row">
             <div className="yds-spick-detail-panel__score-head">
               <span className="yds-spick-detail-panel__score-label">{bar.label}</span>
@@ -69,14 +76,24 @@ export default function YdsStockPickDetailPanel({ stock, dualLiquidity = null, c
         <p className="yds-spick-detail-panel__opinion">{report.aiOpinion}</p>
       </div>
 
-      {report.reasons.length ? (
+      {topReasons.length ? (
         <div className="yds-spick-detail-panel__section">
           <p className="yds-spick-detail-panel__section-title">추천 이유</p>
           <ul className="yds-spick-detail-panel__reasons">
-            {report.reasons.map((reason) => (
+            {topReasons.map((reason) => (
               <li key={reason}>{reason}</li>
             ))}
           </ul>
+          {trust?.detailReasons?.length ? (
+            <details className="yds-spick-detail-panel__reason-details">
+              <summary>상세 데이터</summary>
+              <ul className="yds-spick-detail-panel__reasons">
+                {trust.detailReasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
         </div>
       ) : null}
 

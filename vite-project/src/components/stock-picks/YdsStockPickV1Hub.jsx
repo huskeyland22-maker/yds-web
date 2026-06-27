@@ -33,6 +33,12 @@ import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 import YdsStockPickTodaySignal from "./YdsStockPickTodaySignal.jsx"
 import YdsRecommendPerformanceReport from "./YdsRecommendPerformanceReport.jsx"
 import YdsAiPortfolioRecommend from "./YdsAiPortfolioRecommend.jsx"
+import {
+  buildTodayRecommendBriefing,
+  buildStockPickHubHistoryReport,
+} from "../../content/ydsStockPickTrustEngine.js"
+import YdsStockPickTodayBriefing from "./YdsStockPickTodayBriefing.jsx"
+import YdsStockPickHubHistory from "./YdsStockPickHubHistory.jsx"
 import { isDevMode } from "../../utils/devMode.js"
 
 const INITIAL_SECTOR = { US: "all", KR: "all" }
@@ -186,6 +192,21 @@ export default function YdsStockPickV1Hub() {
   const searchResultCount = searchedStocks.length
   const scoreDebugSample = stocksByCountry.US[0] ?? stocksByCountry.KR[0] ?? null
 
+  const todayBriefing = useMemo(
+    () =>
+      buildTodayRecommendBriefing(
+        liveStocks,
+        marketContext?.ready ? marketContext : null,
+        regimeLimit,
+      ),
+    [liveStocks, marketContext, regimeLimit],
+  )
+
+  const hubHistory = useMemo(
+    () => buildStockPickHubHistoryReport(liveStocks),
+    [liveStocks],
+  )
+
   return (
     <div className="yds-spick-platform">
       {showDebug ? <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} /> : null}
@@ -213,7 +234,11 @@ export default function YdsStockPickV1Hub() {
         </p>
       ) : null}
 
+      <YdsStockPickTodayBriefing report={todayBriefing} />
+
       <YdsStockPickMarketRegimeBanner ctx={marketContext} displayLimit={regimeLimit} />
+
+      <YdsStockPickHubHistory report={hubHistory} />
 
       <YdsRecommendPerformanceReport className="yds-spick-hub__perf-report" />
       <YdsAiPortfolioRecommend stocks={usPortfolioStocks} className="yds-spick-hub__portfolio" />

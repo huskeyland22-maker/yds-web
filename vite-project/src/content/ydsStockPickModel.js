@@ -47,7 +47,11 @@ import {
   serializeRationalesForSnapshot,
 } from "./ydsStockPickRecommendRationale.js"
 import { buildActionGuide } from "./ydsStockPickActionGuide.js"
-import { computeRecommendEngineReport, getRecommendEngineSortScore } from "./ydsStockRecommendEngine.js"
+import {
+  computeRecommendEngineReport,
+  getRecommendEngineSortScore,
+} from "./ydsStockRecommendEngine.js"
+import { buildStockPickTrustReport } from "./ydsStockPickTrustEngine.js"
 
 /** @typedef {'trend' | 'dip' | 'interest' | 'overheat'} StockPickStatusId */
 /** @typedef {'ai' | 'power' | 'defense' | 'semi' | 'robot' | 'nuclear' | 'infra'} StockPickSectorId */
@@ -144,6 +148,7 @@ export const RATING_STARS = {
  *   lifecycle: import("./ydsStockPickLifecycle.js").LifecycleView
  *   scoreDeltas: ReturnType<typeof import("./ydsStockPickScoreHistory.js").getScoreDeltas>
  *   recommendEngine: import("./ydsStockRecommendEngine.js").RecommendEngineReport
+ *   trustReport: import("./ydsStockPickTrustEngine.js").ReturnType<typeof buildStockPickTrustReport>
  * }} StockPickView
  */
 
@@ -402,6 +407,8 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
   }
 
   enriched.opinion = buildStockPickOpinion(enriched)
+
+  enriched.trustReport = buildStockPickTrustReport(enriched, ctx)
 
   if (isLive) {
     const logScore = () => {
