@@ -141,6 +141,7 @@ export default function YdsStockPickCard({
 
         <YdsStockPickRecommendRationale
           items={stock.recommendRationales ?? []}
+          title="왜 추천하는가"
           className="yds-spick-card__rationale"
         />
 

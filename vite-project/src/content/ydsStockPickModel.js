@@ -47,6 +47,7 @@ import {
   serializeRationalesForSnapshot,
 } from "./ydsStockPickRecommendRationale.js"
 import { buildActionGuide } from "./ydsStockPickActionGuide.js"
+import { computeRecommendEngineReport, getRecommendEngineSortScore } from "./ydsStockRecommendEngine.js"
 
 /** @typedef {'trend' | 'dip' | 'interest' | 'overheat'} StockPickStatusId */
 /** @typedef {'ai' | 'power' | 'defense' | 'semi' | 'robot' | 'nuclear' | 'infra'} StockPickSectorId */
@@ -142,6 +143,7 @@ export const RATING_STARS = {
  *   pickMeta: import("./ydsStockPickBatchEnrich.js").StockPickMeta
  *   lifecycle: import("./ydsStockPickLifecycle.js").LifecycleView
  *   scoreDeltas: ReturnType<typeof import("./ydsStockPickScoreHistory.js").getScoreDeltas>
+ *   recommendEngine: import("./ydsStockRecommendEngine.js").RecommendEngineReport
  * }} StockPickView
  */
 
@@ -321,7 +323,7 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     }
   }
 
-  const recommendRationales = buildRecommendRationales(
+  const recommendRationalesLegacy = buildRecommendRationales(
     {
       ...row,
       scores,
@@ -332,6 +334,25 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     },
     { strategyLabel: ctx?.strategyLabel },
   )
+
+  const recommendEngine = computeRecommendEngineReport({
+    ticker: row.ticker,
+    sector: row.sector,
+    rating: row.rating,
+    scores,
+    scoreMeta: computed.meta,
+    technicalScore,
+    scoreBreakdown,
+    timingScore,
+    engineSnapshot,
+    statusId,
+    marketFitReasons,
+  })
+
+  const recommendRationales =
+    recommendEngine.rationales.length > 0
+      ? recommendEngine.rationales
+      : recommendRationalesLegacy
 
   const actionGuide = buildActionGuide({
     ...row,
@@ -361,8 +382,11 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     recommendReasons,
     recommendReasonsDetail,
     recommendRationales,
+    recommendEngine,
     actionGuide,
-    recommendReasonSummary: formatRecommendReasonSummary(recommendReasons),
+    recommendReasonSummary:
+      recommendEngine.reasons.map((r) => r.text).join(" · ") ||
+      formatRecommendReasonSummary(recommendReasons),
     marketFitSource: ctx ? "adapter" : "manual",
     sectorLabel,
     investThemes: resolveStockPickThemes(row),
@@ -423,7 +447,7 @@ export function buildStockPickViews(marketContext = null, liveSnapshots = new Ma
 export function getStockPickUniverse(marketContext = null) {
   const enriched = buildStockPickViews(marketContext)
   const sorted = [...enriched].sort(
-    (a, b) => (b.v4Score?.finalRankScore ?? 0) - (a.v4Score?.finalRankScore ?? 0),
+    (a, b) => getRecommendEngineSortScore(b) - getRecommendEngineSortScore(a),
   )
   return sorted.map((row, index) => ({ ...row, rank: index + 1 }))
 }
@@ -432,7 +456,7 @@ export function getStockPickUniverse(marketContext = null) {
 export function assignRanks(stocks) {
   const live = filterRecommendableStockPicks(stocks)
   const sorted = [...live].sort(
-    (a, b) => (b.v4Score?.finalRankScore ?? 0) - (a.v4Score?.finalRankScore ?? 0),
+    (a, b) => getRecommendEngineSortScore(b) - getRecommendEngineSortScore(a),
   )
   const rankMap = new Map(sorted.map((s, i) => [s.ticker, i + 1]))
   return stocks.map((row) => ({ ...row, rank: rankMap.get(row.ticker) ?? 0 }))
@@ -496,7 +520,7 @@ export function getTop5Stocks(stocks) {
     (s) => s.v4Score?.top5Eligible ?? false,
   )
   const sorted = [...eligible].sort(
-    (a, b) => (b.v4Score?.finalRankScore ?? 0) - (a.v4Score?.finalRankScore ?? 0),
+    (a, b) => getRecommendEngineSortScore(b) - getRecommendEngineSortScore(a),
   )
   return sorted.slice(0, 5)
 }
@@ -519,6 +543,7 @@ export function filterBySector(stocks, sectorId) {
 }
 
 export { DEFAULT_MARKET_CONTEXT } from "./ydsMarketAdapter.js"
+export { getRecommendEngineSortScore } from "./ydsStockRecommendEngine.js"
 
 export const TOP3_MEDALS = ["🥇", "🥈", "🥉"]
 export const TOP5_MEDALS = ["🥇", "🥈", "🥉", "4", "5"]

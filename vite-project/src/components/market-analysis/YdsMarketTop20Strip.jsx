@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { assignRanks, filterByCountry } from "../../content/ydsStockPickModel.js"
+import { assignRanks, filterByCountry, getRecommendEngineSortScore } from "../../content/ydsStockPickModel.js"
 import { getRegimeTopStocks } from "../../content/ydsStockPickMarketRegime.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
@@ -20,7 +20,7 @@ const TOP20_LIMIT = 20
  * @param {Top20SortKey} sortKey
  */
 function sortValue(stock, sortKey) {
-  if (sortKey === "recommend") return stock.v4Score?.finalRankScore ?? 0
+  if (sortKey === "recommend") return getRecommendEngineSortScore(stock)
   if (sortKey === "ai") return stock.scoreBreakdown?.quality ?? stock.v4Score?.quality ?? 0
   return stock.v4Score?.timing ?? stock.scoreBreakdown?.timing ?? 0
 }
