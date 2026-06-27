@@ -12,7 +12,7 @@ export default function YdsStockPickTodayBriefing({ report, className = "" }) {
       className={["yds-spick-section", "yds-spick-section--briefing", className].filter(Boolean).join(" ")}
       aria-label={report.title}
     >
-      <h2 className="yds-spick-section__title">{report.title}</h2>
+      <h2 className="yds-spick-section__title yds-spick-section__title--tier">① {report.title}</h2>
       <div className="yds-spick-briefing">
         {report.lines.map((line) => (
           <p key={line} className="yds-spick-briefing__line">

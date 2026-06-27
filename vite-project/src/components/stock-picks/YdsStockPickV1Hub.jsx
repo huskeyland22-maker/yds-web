@@ -21,7 +21,6 @@ import { useStockPickDualColumnAlign } from "../../hooks/useStockPickDualColumnA
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
-import { useStockPickStatusChanges } from "../../hooks/useStockPickStatusChanges.js"
 import YdsStockPickScoreDebugPanel from "./YdsStockPickScoreDebugPanel.jsx"
 import YdsStockPickFavoriteAlerts from "./YdsStockPickFavoriteAlerts.jsx"
 import YdsStockPickMarketRegimeBanner from "./YdsStockPickMarketRegimeBanner.jsx"
@@ -32,7 +31,7 @@ import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 import YdsStockPickTodaySignal from "./YdsStockPickTodaySignal.jsx"
 import YdsRecommendPerformanceReport from "./YdsRecommendPerformanceReport.jsx"
-import YdsAiPortfolioRecommend from "./YdsAiPortfolioRecommend.jsx"
+import YdsStockPickHubExtras from "./YdsStockPickHubExtras.jsx"
 import {
   buildTodayRecommendBriefing,
   buildStockPickHubHistoryReport,
@@ -82,7 +81,6 @@ export default function YdsStockPickV1Hub() {
     lastSyncAt,
   } = useStockPickLiveData(marketContext)
   const heldTickers = useStockPickHeldTickers()
-  const statusChanges = useStockPickStatusChanges(liveStocks)
 
   useEffect(() => {
     if (loading || !liveStocks.length) return
@@ -207,8 +205,14 @@ export default function YdsStockPickV1Hub() {
     [liveStocks],
   )
 
+  const activeStocks = stocksByCountry[countryId]
+  const activeRegimeStocks = useMemo(
+    () => getRegimeTopStocks(activeStocks, regimeLimit),
+    [activeStocks, regimeLimit],
+  )
+
   return (
-    <div className="yds-spick-platform">
+    <div className="yds-spick-platform yds-spick-platform--report">
       {showDebug ? <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} /> : null}
       {showDebug ? <YdsStockPickScoreDebugPanel sample={scoreDebugSample} /> : null}
       <YdsStockPickLoadBanner
@@ -236,19 +240,21 @@ export default function YdsStockPickV1Hub() {
 
       <YdsStockPickTodayBriefing report={todayBriefing} />
 
-      <YdsStockPickMarketRegimeBanner ctx={marketContext} displayLimit={regimeLimit} />
-
-      <YdsStockPickHubHistory report={hubHistory} />
-
-      <YdsRecommendPerformanceReport className="yds-spick-hub__perf-report" />
-      <YdsAiPortfolioRecommend stocks={usPortfolioStocks} className="yds-spick-hub__portfolio" />
+      <section className="yds-spick-hub-today" aria-label="오늘의 추천">
+        <h2 className="yds-spick-section__title yds-spick-section__title--tier">② 오늘의 추천</h2>
+        <YdsStockPickMarketRegimeBanner
+          ctx={marketContext}
+          displayLimit={regimeLimit}
+          compact
+        />
+        <YdsStockPickTodaySignal
+          stocks={liveStocks}
+          loading={loading && !liveStocks.length}
+          embedded
+        />
+      </section>
 
       <YdsStockPickFavoriteAlerts alerts={favoriteAlerts} />
-
-      <YdsStockPickTodaySignal
-        stocks={liveStocks}
-        loading={loading && !liveStocks.length}
-      />
 
       <YdsStockPickSearchBar
         value={searchQuery}
@@ -268,7 +274,7 @@ export default function YdsStockPickV1Hub() {
           aria-pressed={favoritesOnly}
           onClick={() => setFavoritesOnly((v) => !v)}
         >
-          {favoritesOnly ? "⭐ 관심종목만" : "☆ 관심종목만 보기"}
+          {favoritesOnly ? "관심종목" : "관심종목"}
           {favoriteCount > 0 ? (
             <span className="yds-spick-toolbar__count font-mono tabular-nums">{favoriteCount}</span>
           ) : null}
@@ -309,23 +315,36 @@ export default function YdsStockPickV1Hub() {
               <YdsStockPickCountryPanel
                 countryId={country.id}
                 stocks={stocksByCountry[country.id]}
-                universeStocks={universeByCountry[country.id]}
-                regimeLimit={regimeLimit}
                 sectorId={sectorByCountry[country.id]}
-                onSectorChange={(id) => setSectorForCountry(country.id, id)}
                 isFavorite={isFavorite}
                 onToggleFavorite={toggleFavorite}
                 heldTickers={heldTickers}
-                statusChanges={statusChanges}
                 showCountryHead
                 allSectionId={panelId}
                 loading={loading && !stocksByCountry[country.id].length}
+                regimeLimit={regimeLimit}
               />
               ) : null}
             </div>
           )
         })}
       </div>
+
+      <YdsStockPickHubExtras
+        stocks={activeStocks}
+        regimeStocks={activeRegimeStocks}
+        universeStocks={universeByCountry[countryId]}
+        sectorId={sectorByCountry[countryId]}
+        onSectorChange={(id) => setSectorForCountry(countryId, id)}
+        regimeLimit={regimeLimit}
+        portfolioStocks={usPortfolioStocks}
+        heldTickers={heldTickers}
+        loading={loading && !activeStocks.length}
+      />
+
+      <YdsStockPickHubHistory report={hubHistory} />
+
+      <YdsRecommendPerformanceReport className="yds-spick-hub__perf-report" />
     </div>
   )
 }

@@ -10,21 +10,23 @@ import YdsStockPickUxStatusBadge from "./YdsStockPickUxStatusBadge.jsx"
  * @param {{
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
  *   loading?: boolean
+ *   embedded?: boolean
  * }} props
  */
-export default function YdsStockPickTodaySignal({ stocks, loading = false }) {
+export default function YdsStockPickTodaySignal({ stocks, loading = false, embedded = false }) {
   const usStock = pickTodaySignalStock(stocks, "US")
   const krStock = pickTodaySignalStock(stocks, "KR")
   const hasSignal = Boolean(usStock || krStock)
 
   if (loading && !hasSignal) {
+    if (embedded) return <p className="yds-spick-empty">시세 조회 중…</p>
     return (
       <section
         className="yds-spick-section yds-spick-section--signal"
         aria-labelledby="spick-today-signal"
       >
         <h2 id="spick-today-signal" className="yds-spick-section__title">
-          🔥 오늘의 시그널
+          오늘의 시그널
         </h2>
         <p className="yds-spick-empty">시세 조회 중…</p>
       </section>
@@ -33,22 +35,24 @@ export default function YdsStockPickTodaySignal({ stocks, loading = false }) {
 
   if (!hasSignal) return null
 
+  const grid = (
+    <div className="yds-spick-signal-grid">
+      {usStock ? <SignalCard stock={usStock} countryLabel="US" /> : null}
+      {krStock ? <SignalCard stock={krStock} countryLabel="KR" /> : null}
+    </div>
+  )
+
+  if (embedded) return grid
+
   return (
     <section
       className="yds-spick-section yds-spick-section--signal"
       aria-labelledby="spick-today-signal"
     >
       <h2 id="spick-today-signal" className="yds-spick-section__title">
-        🔥 오늘의 시그널
+        오늘의 시그널
       </h2>
-      <div className="yds-spick-signal-grid">
-        {usStock ? (
-          <SignalCard stock={usStock} countryLabel="US" />
-        ) : null}
-        {krStock ? (
-          <SignalCard stock={krStock} countryLabel="KR" />
-        ) : null}
-      </div>
+      {grid}
     </section>
   )
 }

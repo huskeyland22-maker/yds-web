@@ -3,7 +3,7 @@ import { TOP5_MEDALS } from "../../content/ydsStockPickModel.js"
 import { markTimeline } from "../../content/ydsFirstEntryTimeline.js"
 import { markTop5Paint } from "../../content/ydsStockPickPerf.js"
 import { recordComponentMount } from "../../content/ydsStockPickRenderPerf.js"
-import YdsStockPickCard from "./YdsStockPickCard.jsx"
+import YdsStockPickHeroCard from "./YdsStockPickHeroCard.jsx"
 
 /**
  * @param {{
@@ -13,6 +13,7 @@ import YdsStockPickCard from "./YdsStockPickCard.jsx"
  *   heldTickers?: Set<string>
  *   statusChanges?: Map<string, { fromLabel: string; toLabel: string }>
  *   loading?: boolean
+ *   sectionId?: string
  * }} props
  */
 export default function YdsStockPickTop3({
@@ -20,8 +21,8 @@ export default function YdsStockPickTop3({
   isFavorite,
   onToggleFavorite,
   heldTickers = new Set(),
-  statusChanges = new Map(),
   loading,
+  sectionId = "spick-top5",
 }) {
   const renderT0 = useRef(null)
 
@@ -39,26 +40,24 @@ export default function YdsStockPickTop3({
   }, [loading, stocks.length])
 
   return (
-    <section className="yds-spick-section yds-spick-section--hero" aria-labelledby="spick-top5">
-      <h2 id="spick-top5" className="yds-spick-section__title">
-        오늘의 TOP5
+    <section className="yds-spick-section yds-spick-section--hero" aria-labelledby={sectionId}>
+      <h2 id={sectionId} className="yds-spick-section__title yds-spick-section__title--tier">
+        ③ TOP5
       </h2>
       {loading && !stocks.length ? (
         <p className="yds-spick-empty">시세 조회 중…</p>
       ) : null}
       {stocks.length ? (
-        <div className="yds-spick-top5">
+        <div className="yds-spick-top5 yds-spick-top5--hero">
           {stocks.map((stock, index) => (
-            <YdsStockPickCard
+            <YdsStockPickHeroCard
               key={stock.ticker}
               stock={stock}
-              variant="top5"
               medal={TOP5_MEDALS[index]}
               rankIndex={index}
               isFavorite={isFavorite(stock.ticker)}
               onToggleFavorite={onToggleFavorite}
               isHeld={heldTickers.has(stock.ticker.toUpperCase())}
-              statusChange={statusChanges.get(stock.ticker) ?? null}
             />
           ))}
         </div>

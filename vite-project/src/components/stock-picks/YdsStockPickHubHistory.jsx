@@ -12,7 +12,7 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
       className={["yds-spick-section", "yds-spick-hub-history", className].filter(Boolean).join(" ")}
       aria-label={report.title}
     >
-      <h2 className="yds-spick-section__title">{report.title}</h2>
+      <h2 className="yds-spick-section__title yds-spick-section__title--tier">⑤ {report.title}</h2>
       <div className="yds-spick-hub-history__scroll">
         <table className="yds-spick-hub-history__table">
           <thead>

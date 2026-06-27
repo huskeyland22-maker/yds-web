@@ -3720,3 +3720,449 @@
   margin-top: 0.65rem;
 }
 
+/* —— GO #67–71: 기관 리포트 레이아웃 —— */
+
+.yds-spick-platform--report {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.yds-spick-section__title--tier {
+  margin-bottom: 0.35rem;
+  font-size: clamp(0.82rem, 2.2vw, 0.95rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+}
+
+.yds-spick-hub-today {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.yds-spick-regime-banner--compact {
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(51, 65, 85, 0.55);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.yds-spick-regime-banner--compact .yds-spick-regime-banner__head {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  font-size: 0.68rem;
+  color: #e2e8f0;
+}
+
+.yds-spick-regime-banner__meta {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-spick-hub-extras {
+  margin-top: 0.25rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.45);
+  padding-top: 0.35rem;
+}
+
+.yds-spick-hub-extras__summary {
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #64748b;
+  list-style: none;
+}
+
+.yds-spick-hub-extras__summary::-webkit-details-marker {
+  display: none;
+}
+
+.yds-spick-hub-extras__body {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.45rem;
+}
+
+.yds-spick-country-panel__head--inline {
+  margin-bottom: 0.35rem;
+}
+
+.yds-spick-country-panel__zone-all {
+  margin-top: 0.45rem;
+}
+
+.yds-spick-top5--hero {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.yds-spick-hero-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  min-height: 6rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(71, 85, 105, 0.65);
+  background: linear-gradient(165deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.82));
+}
+
+.yds-spick-hero-card--rank-1 {
+  border-color: rgba(251, 191, 36, 0.55);
+}
+
+.yds-spick-hero-card--rank-2 {
+  border-color: rgba(203, 213, 225, 0.45);
+}
+
+.yds-spick-hero-card--rank-3 {
+  border-color: rgba(217, 119, 6, 0.45);
+}
+
+.yds-spick-hero-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.yds-spick-hero-card__medal {
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.yds-spick-hero-card__name-link {
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.yds-spick-hero-card__name {
+  margin: 0;
+  font-size: clamp(0.78rem, 2vw, 0.92rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #f8fafc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yds-spick-hero-card__name-link:hover .yds-spick-hero-card__name {
+  color: #93c5fd;
+}
+
+.yds-spick-hero-card__tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+}
+
+.yds-spick-hero-card__held {
+  font-size: 0.5rem;
+  font-weight: 800;
+  color: #93c5fd;
+}
+
+.yds-spick-hero-card__grade {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-spick-hero-card__status-row {
+  display: flex;
+}
+
+.yds-spick-hero-card__status {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-spick-hero-card__price-line {
+  margin: 0;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.yds-spick-hero-card__rec {
+  color: #64748b;
+}
+
+.yds-spick-hero-card__arrow {
+  color: #475569;
+}
+
+.yds-spick-hero-card__return {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.yds-spick-hero-card__return--up {
+  color: #4ade80;
+}
+
+.yds-spick-hero-card__return--down {
+  color: #f87171;
+}
+
+.yds-spick-hero-card__return--muted {
+  color: #64748b;
+}
+
+.yds-spick-hero-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.15rem 0.25rem;
+  margin: 0;
+  font-size: 0.55rem;
+}
+
+.yds-spick-hero-card__metrics dt {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.yds-spick-hero-card__metrics dd {
+  margin: 0;
+  color: #e2e8f0;
+  font-weight: 800;
+}
+
+.yds-spick-hero-card__action {
+  margin: 0;
+  font-size: 0.58rem;
+  line-height: 1.35;
+  color: #bae6fd;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yds-spick-hero-card__accordion {
+  margin-top: 0.1rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.45);
+  padding-top: 0.15rem;
+}
+
+.yds-spick-hero-card__accordion-summary {
+  cursor: pointer;
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: #64748b;
+  list-style: none;
+}
+
+.yds-spick-hero-card__accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.yds-spick-hero-card__accordion-body {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.yds-spick-hero-card__tech {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.15rem 0.3rem;
+  margin: 0;
+  font-size: 0.52rem;
+}
+
+.yds-spick-hero-card__tech dt {
+  margin: 0;
+  color: #64748b;
+}
+
+.yds-spick-hero-card__tech dd {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.yds-spick-hero-card__detail-toggle {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.yds-spick-all-table__scroll {
+  overflow-x: auto;
+}
+
+.yds-spick-all-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.58rem;
+}
+
+.yds-spick-all-table th,
+.yds-spick-all-table td {
+  padding: 0.32rem 0.35rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.55);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.yds-spick-all-table th {
+  color: #64748b;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.yds-spick-all-table td {
+  color: #cbd5e1;
+}
+
+.yds-spick-all-table__name {
+  font-weight: 800;
+  color: #f1f5f9;
+  text-decoration: none;
+}
+
+.yds-spick-all-table__name:hover {
+  color: #93c5fd;
+}
+
+.yds-spick-all-table__grade {
+  white-space: nowrap;
+}
+
+.yds-spick-all-table__sector {
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #94a3b8;
+}
+
+.yds-spick-all-table__ret--up {
+  color: #4ade80;
+  font-weight: 800;
+}
+
+.yds-spick-all-table__ret--down {
+  color: #f87171;
+  font-weight: 800;
+}
+
+.yds-spick-all-table__ret--muted {
+  color: #64748b;
+}
+
+.yds-spick-all-table__sorts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.yds-spick-all-table__sort {
+  padding: 0.12rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(71, 85, 105, 0.65);
+  background: transparent;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.yds-spick-all-table__sort--active {
+  color: #e2e8f0;
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.yds-spick-conf-bar__track {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.yds-spick-conf-bar__blocks {
+  font-size: 0.55rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: #60a5fa;
+}
+
+.yds-spick-conf-bar--very-high .yds-spick-conf-bar__blocks {
+  color: #4ade80;
+}
+
+.yds-spick-conf-bar--high .yds-spick-conf-bar__blocks {
+  color: #38bdf8;
+}
+
+.yds-spick-conf-bar--mid .yds-spick-conf-bar__blocks {
+  color: #fbbf24;
+}
+
+.yds-spick-conf-bar--warn .yds-spick-conf-bar__blocks {
+  color: #fb923c;
+}
+
+.yds-spick-conf-bar--low .yds-spick-conf-bar__blocks {
+  color: #f87171;
+}
+
+.yds-spick-conf-bar__pct {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-spick-conf-bar__meta {
+  margin: 0.08rem 0 0;
+  font-size: 0.52rem;
+  color: #64748b;
+}
+
+.yds-spick-conf-bar--compact .yds-spick-conf-bar__blocks {
+  font-size: 0.5rem;
+}
+
+.yds-spick-section--briefing .yds-spick-briefing {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.yds-spick-section--briefing .yds-spick-briefing__line {
+  font-size: clamp(0.72rem, 2vw, 0.82rem);
+  color: #e2e8f0;
+}
+
+@media (max-width: 1100px) {
+  .yds-spick-top5--hero {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .yds-spick-top5--hero {
+    grid-template-columns: 1fr;
+  }
+
+  .yds-spick-hero-card__name {
+    white-space: normal;
+  }
+}
+

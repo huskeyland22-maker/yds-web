@@ -1,3 +1,5 @@
+import YdsStockPickAiConfidenceBar from "./YdsStockPickAiConfidenceBar.jsx"
+
 /**
  * @param {{
  *   stock: import("../../content/ydsStockPickModel.js").StockPickView
@@ -17,15 +19,10 @@ export default function YdsStockPickScoreBreakdown({ stock, className = "" }) {
       <summary className="yds-spick-score-breakdown__summary">
         추천점수{" "}
         <strong className="font-mono tabular-nums">{Math.round(recScore)}</strong>
-        {conf ? (
-          <>
-            {" · "}
-            AI Confidence{" "}
-            <strong className="font-mono tabular-nums">{conf.score}</strong>{" "}
-            <span className="yds-spick-score-breakdown__conf-label">({conf.label})</span>
-          </>
-        ) : null}
       </summary>
+      {conf ? (
+        <YdsStockPickAiConfidenceBar score={conf.score} className="yds-spick-score-breakdown__conf" />
+      ) : null}
       {bars.length ? (
         <div className="yds-spick-detail-panel__scores yds-spick-score-breakdown__bars">
           {bars.map((bar) => (
