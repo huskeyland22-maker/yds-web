@@ -1,52 +1,100 @@
 /**
- * 패닉 V2 — 심리 + 가격 위치 + 추세 종합 판정
+ * 패닉 V2 — 심리(State) vs 최종 투자 해석(Action) 분리
  *
- * YDS 패닉 점수: 높을수록 공포·매수 기회 (역발상)
+ * 패닉 점수: 시장 심리만 (예: 46 = 중립)
+ * 최종 해석: 패닉 40% + 가격 구조 40% + 추세/모멘텀 20%
  */
 
 import { getFinalScore } from "../utils/tradingScores.js"
-import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
-import { buildPanicPricePositionReport } from "./ydsPanicPricePosition.js"
+import { buildMarketStatePriceStructureReport } from "./ydsMarketStatePriceStructure.js"
 
-/** @typedef {'trueFear' | 'earlyRecovery' | 'laggingFear' | 'overheat'} PanicCompositeVerdictId */
+/** @typedef {'trueFear' | 'scaleInStart' | 'scaleInPrep' | 'recoveryEarly' | 'watch' | 'bottomSearch' | 'adjustmentProgress' | 'uptrendContinue' | 'laggingFear' | 'reduceExposure'} PanicActionVerdictId */
 
 /**
  * @typedef {{
- *   id: PanicCompositeVerdictId
+ *   id: PanicActionVerdictId
  *   label: string
  *   emoji: string
  *   buyStrength: string
  *   actionLine: string
  *   narrative: string[]
  *   tone: string
- * }} PanicCompositeVerdictDef
+ * }} PanicActionVerdictDef
  */
 
-/** @type {Record<PanicCompositeVerdictId, PanicCompositeVerdictDef>} */
-export const PANIC_COMPOSITE_VERDICTS = {
+/** @type {Record<PanicActionVerdictId, PanicActionVerdictDef>} */
+export const PANIC_ACTION_VERDICTS = {
   trueFear: {
     id: "trueFear",
     label: "진짜 공포",
     emoji: "🔴",
     buyStrength: "★★★★★",
     actionLine: "적극 분할매수",
-    narrative: [
-      "심리 지표와 가격 위치 모두 공포·저점 구간입니다.",
-      "역사적으로 분할매수 우선순위가 높은 구간입니다.",
-    ],
+    narrative: ["심리·가격 모두 공포·저점 구간", "분할매수 우선순위가 높습니다"],
     tone: "strong-buy",
   },
-  earlyRecovery: {
-    id: "earlyRecovery",
+  scaleInStart: {
+    id: "scaleInStart",
+    label: "분할매수 시작",
+    emoji: "🟢",
+    buyStrength: "★★★★☆",
+    actionLine: "분할매수 시작",
+    narrative: ["가격 지지 확인 · 반등 신호", "계획된 비중으로 분할 접근"],
+    tone: "buy",
+  },
+  scaleInPrep: {
+    id: "scaleInPrep",
+    label: "분할매수 준비",
+    emoji: "🟡",
+    buyStrength: "★★★☆☆",
+    actionLine: "분할매수 준비",
+    narrative: ["공포 심리와 가격 지지가 겹치는 구간", "관심 종목 위주로 준비"],
+    tone: "prepare",
+  },
+  recoveryEarly: {
+    id: "recoveryEarly",
     label: "회복 초기",
     emoji: "🟢",
     buyStrength: "★★★★☆",
     actionLine: "분할매수",
-    narrative: [
-      "공포 이후 반등이 시작되지만 아직 과열 구간은 아닙니다.",
-      "계획된 비중으로 분할 접근을 검토하세요.",
-    ],
+    narrative: ["차트상 회복 국면 확인", "과열 전 분할 접근 검토"],
     tone: "buy",
+  },
+  watch: {
+    id: "watch",
+    label: "관찰 단계",
+    emoji: "🟡",
+    buyStrength: "★★☆☆☆",
+    actionLine: "관찰 · 대기",
+    narrative: ["방향 확인 전", "추격매수 없이 관찰"],
+    tone: "watch",
+  },
+  bottomSearch: {
+    id: "bottomSearch",
+    label: "바닥 탐색",
+    emoji: "🔵",
+    buyStrength: "★★☆☆☆",
+    actionLine: "바닥 확인 대기",
+    narrative: ["하락 진행 중 · 바닥 미확인", "분할 속도를 늦추고 지지 확인"],
+    tone: "wait",
+  },
+  adjustmentProgress: {
+    id: "adjustmentProgress",
+    label: "조정 진행",
+    emoji: "🟠",
+    buyStrength: "★★☆☆☆",
+    actionLine: "조정 진행 중 · 바닥 확인 전",
+    narrative: ["가격 구조 하락 · 추세 약화", "신규 추격매수 자제"],
+    tone: "caution",
+  },
+  uptrendContinue: {
+    id: "uptrendContinue",
+    label: "상승 지속",
+    emoji: "🟢",
+    buyStrength: "★★★☆☆",
+    actionLine: "상승 추세 유지",
+    narrative: ["가격·추세 강세", "보유 비중 점검 · 선별적 접근"],
+    tone: "hold",
   },
   laggingFear: {
     id: "laggingFear",
@@ -54,64 +102,150 @@ export const PANIC_COMPOSITE_VERDICTS = {
     emoji: "🟠",
     buyStrength: "★★☆☆☆",
     actionLine: "추격매수 금지",
-    narrative: [
-      "심리는 아직 위축되어 있지만",
-      "가격은 이미 저점 대비 충분히 상승했습니다.",
-      "신규 추격매수보다 조정을 기다리는 것이 유리합니다.",
-    ],
+    narrative: ["심리는 위축 · 가격은 이미 회복", "조정 대기가 유리"],
     tone: "caution",
   },
-  overheat: {
-    id: "overheat",
-    label: "과열",
+  reduceExposure: {
+    id: "reduceExposure",
+    label: "비중 축소",
     emoji: "🟡",
     buyStrength: "★☆☆☆☆",
     actionLine: "비중 축소",
-    narrative: [
-      "심리·가격 모두 매수 우선순위가 낮은 구간입니다.",
-      "신규 비중 확대보다 익절·현금 비중 점검을 우선하세요.",
-    ],
+    narrative: ["심리·가격 모두 매수 우선순위 낮음", "익절·현금 비중 점검"],
     tone: "reduce",
   },
 }
 
-/** @param {number | null} psychScore */
-export function resolvePsychologyLabel(psychScore) {
+/** @deprecated use PANIC_ACTION_VERDICTS */
+export const PANIC_COMPOSITE_VERDICTS = PANIC_ACTION_VERDICTS
+
+/**
+ * 패닉 점수 → 심리 상태만 (투자 행동 없음)
+ * @param {number | null} psychScore
+ */
+export function resolvePanicStateLabel(psychScore) {
   if (psychScore == null || !Number.isFinite(psychScore)) return "—"
-  const stage = resolveMacroV1Status(psychScore)
-  if (stage) return stage.label
-  if (psychScore >= 75) return "인생 타점"
-  if (psychScore >= 60) return "분할매수"
-  if (psychScore >= 45) return "관심"
-  if (psychScore >= 30) return "공포 부족"
+  const s = Math.round(psychScore)
+  if (s >= 75) return "극단 공포"
+  if (s >= 60) return "공포"
+  if (s >= 45) return "중립"
+  if (s >= 30) return "공포 부족"
   return "공포 없음"
 }
 
+/** @param {number | null} psychScore */
+export function resolvePsychologyLabel(psychScore) {
+  return resolvePanicStateLabel(psychScore)
+}
+
 /**
- * @param {number | null} psychScore
- * @param {import("./ydsPanicPricePosition.js").PanicPricePositionReport | null} price
+ * @param {import("./ydsMarketStatePriceStructure.js").MarketStatePriceStructureReport | null} price
  */
-function resolveCompositeVerdictId(psychScore, price) {
+export function resolvePriceStructureLabel(price) {
+  if (!price) return "데이터 없음"
+  const s = price.structureScore ?? 50
+  const r5 = price.return5d ?? 0
+  const r10 = price.return10d ?? 0
+
+  if (price.lowerHigh && price.lowerLow && r5 < 0) return "하락 진행"
+  if (r5 < -2 && r10 < -3) return "하락 진행"
+  if (price.higherHigh && price.higherLow && s >= 58) return "상승 지속"
+  if (price.aboveMa20 && (price.ma20SlopePct ?? 0) > 0 && r5 >= 0) return "상승 지속"
+  if (price.aboveMa20 === false && (price.ma20GapPct ?? 0) > -2 && (price.ma60SlopePct ?? 0) > 0) {
+    return "지지 확인"
+  }
+  if (s <= 35 && r10 <= -3) return "바닥 탐색"
+  if (s <= 42 && r5 <= 0) return "조정 진행"
+  if (s >= 55 && r5 >= 1) return "회복 진행"
+  return price.trendLabel ?? "횡보·전환"
+}
+
+/**
+ * @param {import("./ydsMarketStatePriceStructure.js").MarketStatePriceStructureReport | null} price
+ */
+export function resolveTrendMomentumLabel(price) {
+  if (!price) return "—"
+  const r5 = price.return5d ?? 0
+  const r10 = price.return10d ?? 0
+  const ma20 = price.ma20SlopePct ?? 0
+
+  if (r5 >= 2 && r10 >= 3 && ma20 > 0) return "강세"
+  if (r5 >= 0.5 && r10 >= 0 && ma20 >= 0) return "반등 시작"
+  if (r5 <= -2 && r10 <= -1) return "약화"
+  if (r5 < 0 && ma20 < 0) return "하락"
+  if (Math.abs(r5) <= 1 && Math.abs(r10) <= 2) return "횡보"
+  return "혼조"
+}
+
+/** @param {number | null} v */
+function clamp100(v) {
+  if (v == null || !Number.isFinite(v)) return 50
+  return Math.max(0, Math.min(100, Math.round(v)))
+}
+
+/**
+ * @param {import("./ydsMarketStatePriceStructure.js").MarketStatePriceStructureReport | null} price
+ */
+function computeTrendMomentumScore(price) {
+  if (!price) return 50
+  let score = 50
+  if (price.return5d != null) score += Math.max(-15, Math.min(15, price.return5d * 2.5))
+  if (price.return10d != null) score += Math.max(-12, Math.min(12, price.return10d * 1.5))
+  if (price.ma20SlopePct != null) score += Math.max(-10, Math.min(10, price.ma20SlopePct * 3))
+  if (price.higherHigh) score += 5
+  if (price.higherLow) score += 4
+  if (price.lowerHigh) score -= 6
+  if (price.lowerLow) score -= 6
+  return clamp100(score)
+}
+
+/**
+ * @param {number} psychScore
+ * @param {import("./ydsMarketStatePriceStructure.js").MarketStatePriceStructureReport | null} price
+ * @param {number} trendScore
+ * @returns {PanicActionVerdictId}
+ */
+function resolveActionVerdictId(psychScore, price, trendScore) {
   const psych = psychScore ?? 50
-  const pos = price?.positionScore ?? 50
+  const struct = price?.structureScore ?? 50
+  const r5 = price?.return5d ?? 0
   const r10 = price?.return10d ?? 0
-  const r20 = price?.return20d ?? 0
-  const rsi = price?.rsi14 ?? 50
-  const dd = price?.drawdownFromHighPct ?? 0
+  const trend = trendScore ?? 50
 
   const psychFear = psych >= 55
   const psychLow = psych <= 35
-  const priceLow = pos <= 38 && r10 <= 4 && dd >= 6
-  const priceRecovered = pos >= 62 || r10 >= 8 || r20 >= 12 || (price?.ma20GapPct ?? 0) >= 3
-  const priceOverheat = pos >= 78 || rsi >= 72 || r20 >= 15
+  const priceDeclining = struct <= 38 || (r5 < -1.5 && r10 < -2) || price?.lowerHigh === true
+  const priceRecovering =
+    r5 >= 1 &&
+    r10 >= -1 &&
+    (price?.aboveMa20 === true || (price?.ma20GapPct ?? -99) > -2) &&
+    trend >= 52
+  const recoveryConfirmed =
+    priceRecovering &&
+    (price?.higherLow === true || r10 >= 2) &&
+    (price?.ma20SlopePct ?? 0) >= -0.1
+  const priceRecovered = struct >= 62 || r10 >= 8 || (price?.ma20GapPct ?? 0) >= 3
+  const strongUptrend = struct >= 65 && trend >= 62 && (price?.ma20SlopePct ?? 0) > 0
+  const supportHold =
+    price?.aboveMa60 === true ||
+    ((price?.ma20GapPct ?? -99) > -2.5 && (price?.ma60SlopePct ?? 0) > 0)
 
-  if (psychFear && priceLow) return "trueFear"
-  if (psychFear && priceRecovered) return "laggingFear"
-  if (psychLow || priceOverheat) return "overheat"
-  if (psych >= 48 && pos >= 35 && pos <= 62 && r10 >= 1 && r10 <= 10) return "earlyRecovery"
-  if (psychFear && !priceRecovered) return "trueFear"
-  if (psych >= 45) return "earlyRecovery"
-  return "overheat"
+  if (psychFear && struct <= 32 && r10 <= 2 && !priceRecovered) return "trueFear"
+  if (psychFear && priceRecovered && !recoveryConfirmed) return "laggingFear"
+  if (psychLow && struct >= 55) return "reduceExposure"
+  if (strongUptrend && !psychFear) return "uptrendContinue"
+  if (recoveryConfirmed && psychFear && supportHold) return "scaleInStart"
+  if (recoveryConfirmed) return "recoveryEarly"
+  if (psychFear && supportHold && r5 >= -1 && !priceDeclining) return "scaleInPrep"
+  if (priceDeclining && !supportHold) {
+    if (struct <= 30 && r10 <= -4) return "bottomSearch"
+    return "adjustmentProgress"
+  }
+  if (priceDeclining) return "watch"
+  if (psychFear && struct <= 45) return "scaleInPrep"
+  if (trend >= 58 && struct >= 55) return "uptrendContinue"
+  if (psych >= 45 && psych <= 60 && struct <= 45 && trend <= 45) return "adjustmentProgress"
+  return "watch"
 }
 
 /**
@@ -124,33 +258,45 @@ function resolveCompositeVerdictId(psychScore, price) {
  */
 export function buildPanicCompositeVerdictReport(panicData, priceContext = {}) {
   if (!panicData) {
-    return { visible: false, title: "심리 + 가격 종합 판정" }
+    return { visible: false, title: "최종 투자 해석" }
   }
 
   const psychScore = Math.round(getFinalScore(panicData) ?? NaN)
   if (!Number.isFinite(psychScore)) {
-    return { visible: false, title: "심리 + 가격 종합 판정" }
+    return { visible: false, title: "최종 투자 해석" }
   }
 
-  const priceReport = buildPanicPricePositionReport({
+  const priceReport = buildMarketStatePriceStructureReport({
     spyPrices: priceContext.spyPrices,
     qqqPrices: priceContext.qqqPrices,
     asOfDate: priceContext.asOfDate,
   })
 
-  const verdictId = resolveCompositeVerdictId(psychScore, priceReport)
-  const verdict = PANIC_COMPOSITE_VERDICTS[verdictId]
+  const trendScore = computeTrendMomentumScore(priceReport)
+  const actionCompositeScore = clamp100(
+    psychScore * 0.4 + (priceReport?.structureScore ?? 50) * 0.4 + trendScore * 0.2,
+  )
 
-  const priceLabel = priceReport?.label ?? "데이터 없음"
-  const trendLabel = priceReport?.trendLabel ?? "—"
+  const verdictId = resolveActionVerdictId(psychScore, priceReport, trendScore)
+  const verdict = PANIC_ACTION_VERDICTS[verdictId]
+
+  const stateLabel = resolvePanicStateLabel(psychScore)
+  const priceLabel = resolvePriceStructureLabel(priceReport)
+  const trendLabel = resolveTrendMomentumLabel(priceReport)
 
   return {
     visible: true,
-    title: "심리 + 가격 종합 판정",
+    title: "최종 투자 해석",
+    stateTitle: "패닉 (심리)",
     psychScore,
-    psychLabel: resolvePsychologyLabel(psychScore),
+    psychLabel: stateLabel,
+    stateLabel,
     priceLabel,
     trendLabel,
+    structureScore: priceReport?.structureScore ?? null,
+    trendScore,
+    actionCompositeScore,
+    weights: { panic: 0.4, structure: 0.4, trend: 0.2 },
     verdictId,
     verdictLabel: verdict.label,
     verdictEmoji: verdict.emoji,
@@ -160,39 +306,18 @@ export function buildPanicCompositeVerdictReport(panicData, priceContext = {}) {
     tone: verdict.tone,
     priceMetrics: priceReport
       ? [
-          { id: "r10", label: "10일 상승률", value: priceReport.return10d, display: fmtPct(priceReport.return10d) },
-          { id: "r20", label: "20일 상승률", value: priceReport.return20d, display: fmtPct(priceReport.return20d) },
+          { id: "r5", label: "5일 수익률", value: priceReport.return5d, display: fmtPct(priceReport.return5d) },
+          { id: "r10", label: "10일 수익률", value: priceReport.return10d, display: fmtPct(priceReport.return10d) },
+          { id: "ma20", label: "MA20 괴리", value: priceReport.ma20GapPct, display: fmtPct(priceReport.ma20GapPct) },
+          { id: "ma60", label: "MA60 괴리", value: priceReport.ma60GapPct, display: fmtPct(priceReport.ma60GapPct) },
           {
-            id: "dd",
-            label: "고점 대비 하락",
-            value: priceReport.drawdownFromHighPct,
-            display: fmtPct(priceReport.drawdownFromHighPct),
-          },
-          {
-            id: "ma20",
-            label: "MA20 괴리",
-            value: priceReport.ma20GapPct,
-            display: fmtPct(priceReport.ma20GapPct),
-          },
-          {
-            id: "ma60",
-            label: "MA60 괴리",
-            value: priceReport.ma60GapPct,
-            display: fmtPct(priceReport.ma60GapPct),
-          },
-          {
-            id: "rsi",
-            label: "RSI",
-            value: priceReport.rsi14,
-            display: priceReport.rsi14 != null ? String(priceReport.rsi14) : "—",
-          },
-          {
-            id: "bb",
-            label: "볼린저 위치",
-            value: priceReport.bollingerPctB,
-            display:
-              priceReport.bollingerPctB != null
-                ? `${Math.round(priceReport.bollingerPctB * 100)}%`
+            id: "swing",
+            label: "스윙",
+            value: null,
+            display: priceReport.lowerHigh
+              ? "Lower High"
+              : priceReport.higherHigh
+                ? "Higher High"
                 : "—",
           },
         ]
@@ -208,7 +333,6 @@ function fmtPct(v) {
 }
 
 /**
- * 종합 판정 기반 매수 의견 (패닉 점수 단독 사용 금지)
  * @param {object | null | undefined} panicData
  * @param {Parameters<typeof buildPanicCompositeVerdictReport>[1]} [priceContext]
  */
@@ -222,7 +346,11 @@ export function resolvePanicCompositeActionView(panicData, priceContext) {
     verdictLabel: report.verdictLabel,
     verdictEmoji: report.verdictEmoji,
     narrative: report.narrative,
-    psychLabel: report.psychLabel,
+    stateLabel: report.stateLabel,
+    psychLabel: report.stateLabel,
     priceLabel: report.priceLabel,
+    trendLabel: report.trendLabel,
   }
 }
+
+/** @typedef {PanicActionVerdictId} PanicCompositeVerdictId */

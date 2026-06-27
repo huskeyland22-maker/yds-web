@@ -51,7 +51,7 @@ function bandToLegacyLiqId(bandId) {
  * @param {string} posId
  * @param {string} macroId
  * @param {string} liqId
- * @param {import("./ydsPanicCompositeVerdict.js").PanicCompositeVerdictId | null | undefined} verdictId
+ * @param {import("./ydsPanicCompositeVerdict.js").PanicActionVerdictId | null | undefined} verdictId
  */
 function resolveStarRatings(posId, macroId, liqId, verdictId) {
   let buy = 2
@@ -93,18 +93,29 @@ function resolveStarRatings(posId, macroId, liqId, verdictId) {
     buy = Math.max(buy, 5)
     watch = Math.min(watch, 2)
     cash = Math.min(cash, 2)
-  } else if (verdictId === "earlyRecovery") {
+  } else if (verdictId === "scaleInStart" || verdictId === "recoveryEarly") {
     buy = Math.max(buy, 4)
     watch = Math.min(watch, 3)
     cash = Math.max(1, cash - 1)
-  } else if (verdictId === "laggingFear") {
+  } else if (verdictId === "scaleInPrep") {
+    buy = Math.max(buy, 3)
+    watch = Math.min(watch, 4)
+  } else if (
+    verdictId === "laggingFear" ||
+    verdictId === "adjustmentProgress" ||
+    verdictId === "bottomSearch" ||
+    verdictId === "watch"
+  ) {
     buy = Math.min(buy, 2)
     watch = Math.max(watch, 4)
     cash = Math.min(5, cash + 1)
-  } else if (verdictId === "overheat") {
+  } else if (verdictId === "reduceExposure") {
     buy = Math.min(buy, 1)
     watch = Math.max(watch, 3)
     cash = Math.max(cash, 4)
+  } else if (verdictId === "uptrendContinue") {
+    buy = Math.min(Math.max(buy, 3), 4)
+    watch = Math.max(2, watch - 1)
   }
 
   return distinctifyActionDimensions({ buy, watch, cash })

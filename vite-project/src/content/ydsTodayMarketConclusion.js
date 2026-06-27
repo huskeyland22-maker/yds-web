@@ -78,10 +78,18 @@ function resolveConclusionSignal(input) {
   else if (/위축|충격/.test(unifiedLabel)) score += 1.5
   else if (/상승초기|경계회복/.test(unifiedLabel)) score += 0.5
 
-  if (panicStageId === "trueFear" || panicStageId === "earlyRecovery") score += 1.5
-  else if (panicStageId === "laggingFear") score -= 0.8
-  else if (panicStageId === "overheat") score -= 2
-  else if (panicStageId === "neutral") score += 0
+  if (panicStageId === "trueFear" || panicStageId === "scaleInStart" || panicStageId === "recoveryEarly") {
+    score += 1.5
+  } else if (panicStageId === "scaleInPrep") score += 0.8
+  else if (
+    panicStageId === "laggingFear" ||
+    panicStageId === "adjustmentProgress" ||
+    panicStageId === "bottomSearch" ||
+    panicStageId === "watch"
+  ) {
+    score -= 0.8
+  } else if (panicStageId === "reduceExposure") score -= 2
+  else if (panicStageId === "uptrendContinue") score += 0.3
 
   if (liqId === "favorable" || liquidityMode === "aggressive" || liquidityMode === "short_term") {
     score += 0.5
@@ -243,22 +251,44 @@ export function buildTodayMarketConclusion(
   })
 
   if (composite.visible) {
-    if (composite.verdictId === "trueFear") signalId = "aggressive"
-    else if (composite.verdictId === "earlyRecovery") signalId = "opportunity"
-    else if (composite.verdictId === "laggingFear") signalId = "cautious"
-    else if (composite.verdictId === "overheat") signalId = "defensive"
+    if (composite.verdictId === "trueFear" || composite.verdictId === "scaleInStart") {
+      signalId = "aggressive"
+    } else if (composite.verdictId === "recoveryEarly" || composite.verdictId === "scaleInPrep") {
+      signalId = "opportunity"
+    } else if (
+      composite.verdictId === "laggingFear" ||
+      composite.verdictId === "adjustmentProgress" ||
+      composite.verdictId === "bottomSearch" ||
+      composite.verdictId === "watch"
+    ) {
+      signalId = "cautious"
+    } else if (composite.verdictId === "reduceExposure") {
+      signalId = "defensive"
+    } else if (composite.verdictId === "uptrendContinue") {
+      signalId = "neutral"
+    }
   }
 
   const headline = SIGNAL_HEADLINE[signalId]
   let body = buildBodyLines(signalId, guide, dualLiquidity)
-  if (composite.visible && composite.verdictId === "laggingFear") {
+  if (
+    composite.visible &&
+    (composite.verdictId === "laggingFear" ||
+      composite.verdictId === "adjustmentProgress" ||
+      composite.verdictId === "bottomSearch")
+  ) {
     body = composite.narrative.slice(0, 2)
   } else if (composite.visible && composite.narrative.length >= 2) {
     body = composite.narrative.slice(0, 2)
   }
   const lines = [headline, ...body].filter(Boolean).slice(0, 3)
   let actions = buildActionTags(actionGuide.stars, signalId, guide.actions)
-  if (composite.visible && composite.verdictId === "laggingFear" && !actions.includes("추격 금지")) {
+  if (
+    composite.visible &&
+    (composite.verdictId === "laggingFear" ||
+      composite.verdictId === "adjustmentProgress") &&
+    !actions.includes("추격 금지")
+  ) {
     actions = ["추격 금지", ...actions.filter((a) => a !== "추격 금지")].slice(0, 3)
   }
 

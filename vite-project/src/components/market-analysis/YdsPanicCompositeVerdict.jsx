@@ -30,20 +30,26 @@ export default function YdsPanicCompositeVerdict({
       className={["yds-panic-composite", className].filter(Boolean).join(" ")}
       aria-label={report.title}
     >
-      <p className="yds-panic-composite__title">{report.title}</p>
+      <div className="yds-panic-composite__state" aria-label={report.stateTitle}>
+        <p className="yds-panic-composite__state-title">{report.stateTitle}</p>
+        <p className="yds-panic-composite__state-line">
+          <span className="yds-panic-composite__state-score font-mono tabular-nums">
+            {report.psychScore}
+          </span>
+          <span className="yds-panic-composite__state-label">({report.stateLabel})</span>
+        </p>
+      </div>
 
       <dl className="yds-panic-composite__axes">
         <div>
-          <dt>심리</dt>
+          <dt>패닉</dt>
           <dd>
-            {report.psychLabel}
-            <span className="yds-panic-composite__score font-mono tabular-nums">
-              {report.psychScore}
-            </span>
+            {report.psychScore}
+            <span className="yds-panic-composite__score-note"> {report.stateLabel}</span>
           </dd>
         </div>
         <div>
-          <dt>가격</dt>
+          <dt>가격 구조</dt>
           <dd>{report.priceLabel}</dd>
         </div>
         <div>
@@ -54,7 +60,7 @@ export default function YdsPanicCompositeVerdict({
 
       <div className={`yds-panic-composite__verdict yds-panic-composite__verdict--${report.verdictId}`}>
         <p className="yds-panic-composite__verdict-head">
-          <span className="yds-panic-composite__verdict-label">최종</span>
+          <span className="yds-panic-composite__verdict-label">최종 해석</span>
           <strong>
             {report.verdictEmoji} {report.verdictLabel}
           </strong>
@@ -69,7 +75,7 @@ export default function YdsPanicCompositeVerdict({
       </div>
 
       {report.priceMetrics.length ? (
-        <ul className="yds-panic-composite__metrics" aria-label="가격 위치 지표">
+        <ul className="yds-panic-composite__metrics" aria-label="가격 구조 지표">
           {report.priceMetrics.map((m) => (
             <li key={m.id} className="yds-panic-composite__metric">
               <span>{m.label}</span>

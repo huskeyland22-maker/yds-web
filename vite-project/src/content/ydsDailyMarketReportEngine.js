@@ -69,8 +69,11 @@ export function buildDailyMarketReport(input = {}) {
   if (judgment.factors.some((f) => f.id === "liq-policy" && f.tone === "negative")) {
     risks.push("정책 유동성 부담")
   }
-  if (composite.visible && composite.verdictId === "overheat") risks.push("패닉·가격 과열 구간")
-  else if (composite.visible && composite.verdictId === "laggingFear") {
+  if (composite.visible && composite.verdictId === "reduceExposure") risks.push("패닉·가격 과열 구간")
+  else if (
+    composite.visible &&
+    (composite.verdictId === "laggingFear" || composite.verdictId === "adjustmentProgress")
+  ) {
     risks.push("늦은 공포 — 추격매수 주의")
   }
   if (!risks.length) risks.push("급격한 변동성 확대")

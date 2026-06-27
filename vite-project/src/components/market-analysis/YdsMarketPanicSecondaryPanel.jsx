@@ -1,10 +1,8 @@
 import { useMemo } from "react"
 import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
-import { resolvePanicActionView } from "../../content/ydsPanicActionView.js"
 import { buildPanicIntensityComparison, formatPanicCompareDelta } from "../../content/ydsPanicIntensityComparison.js"
-import { buildPanicIntensityInterpretation } from "../../content/ydsPanicIntensityInterpretation.js"
-import { resolvePanicCompositeActionView } from "../../content/ydsPanicCompositeVerdict.js"
+import { resolvePanicStateLabel, resolvePanicCompositeActionView } from "../../content/ydsPanicCompositeVerdict.js"
 import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.js"
 import YdsPanicScoreComposition from "./YdsPanicScoreComposition.jsx"
 import YdsPanicCompositeVerdict from "./YdsPanicCompositeVerdict.jsx"
@@ -36,12 +34,8 @@ export default function YdsMarketPanicSecondaryPanel({
   embedded = false,
 }) {
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
-  const panicAction = useMemo(
-    () => (view?.panicScore != null ? resolvePanicActionView(view.panicScore) : null),
-    [view?.panicScore],
-  )
-  const interpretation = useMemo(
-    () => (view?.panicScore != null ? buildPanicIntensityInterpretation(view.panicScore) : null),
+  const stateLabel = useMemo(
+    () => (view?.panicScore != null ? resolvePanicStateLabel(view.panicScore) : null),
     [view?.panicScore],
   )
   const compositeAction = useMemo(
@@ -59,12 +53,9 @@ export default function YdsMarketPanicSecondaryPanel({
     [historyRows, panicData],
   )
 
-  if (!view || view.panicScore == null || !interpretation) return null
+  if (!view || view.panicScore == null || !stateLabel) return null
 
   const accentTier = resolvePanicAccentTier(view.panicScore)
-  const buyStrength = compositeAction?.buyStrength ?? interpretation.buyStrength
-  const actionLine = compositeAction?.actionLine ?? interpretation.actionLine
-  const stageLine = panicAction?.currentLine ?? interpretation.currentLine
 
   const card = (
     <div
@@ -82,22 +73,19 @@ export default function YdsMarketPanicSecondaryPanel({
           {view.panicScore}
         </p>
 
-        <div className="yds-market-panic-secondary__stage" aria-label="패닉 단계">
-          <p className="yds-market-panic-secondary__stage-bar font-mono tabular-nums" aria-hidden>
-            {interpretation.stageBar}
+        <div className="yds-market-panic-secondary__stage" aria-label="패닉 심리 상태">
+          <p className="yds-market-panic-secondary__stage-current yds-market-panic-secondary__state-only">
+            {stateLabel}
           </p>
-          <p className="yds-market-panic-secondary__stage-current">{stageLine}</p>
         </div>
 
-        <div className="yds-market-panic-secondary__action" aria-label="매수 관점 투자 의견">
-          <p className="yds-market-panic-secondary__buy-strength">{buyStrength}</p>
-          <p className="yds-market-panic-secondary__action-line">{actionLine}</p>
-          {compositeAction ? (
-            <p className="yds-market-panic-secondary__action-note">
-              심리·가격·추세 종합 판정
-            </p>
-          ) : null}
-        </div>
+        {compositeAction ? (
+          <div className="yds-market-panic-secondary__action" aria-label="최종 투자 해석">
+            <p className="yds-market-panic-secondary__buy-strength">{compositeAction.buyStrength}</p>
+            <p className="yds-market-panic-secondary__action-line">{compositeAction.actionLine}</p>
+            <p className="yds-market-panic-secondary__action-note">최종 투자 해석 · 가격·추세 반영</p>
+          </div>
+        ) : null}
 
         {evidence.briefChips.length ? (
           <ul className="yds-market-panic-secondary__evidence-chips" aria-label="근거 요약">

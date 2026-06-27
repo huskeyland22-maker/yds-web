@@ -44,8 +44,9 @@ export function buildAiMarketBriefing(input = {}) {
 
   if (composite.visible) {
     lines.push(
-      `심리 ${composite.psychLabel} · 가격 ${composite.priceLabel} → ${composite.verdictLabel} (${composite.actionLine})`,
+      `패닉 ${composite.psychScore}(${composite.stateLabel}) · 가격 ${composite.priceLabel} · 추세 ${composite.trendLabel}`,
     )
+    lines.push(`최종 해석: ${composite.verdictLabel} — ${composite.actionLine}`)
   } else if (view.panicScore != null) {
     lines.push(`패닉 강도 ${view.panicScore} — 심리 지표만으로는 타이밍 판단이 제한됩니다.`)
   }
