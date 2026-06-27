@@ -1,21 +1,60 @@
 /**
- * AI 시장 브리핑 — 규칙 기반 3~5줄 (상태 · 패닉 · 사이클)
+ * AI 시장 브리핑 — 판단 근거 (결론·행동 반복 없음)
  */
 
 import { buildPanicCompositeVerdictReport } from "./ydsPanicCompositeVerdict.js"
-import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
-import {
-  resolveUnifiedMarketStateGuide,
-  resolveUnifiedMarketStateLabel,
-} from "./ydsUnifiedMarketState.js"
+import { buildMarketStatePriceStructureReport } from "./ydsMarketStatePriceStructure.js"
 
 /**
  * @typedef {{
  *   visible: boolean
  *   title: string
- *   lines: string[]
+ *   reasons: string[]
+ *   narrative: string[]
  * }} AiMarketBriefingReport
  */
+
+/**
+ * @param {import("./ydsMarketStatePriceStructure.js").MarketStatePriceStructureReport | null} price
+ * @param {ReturnType<typeof buildPanicCompositeVerdictReport> | null} composite
+ * @returns {string[]}
+ */
+function buildBriefingNarrative(price, composite) {
+  /** @type {string[]} */
+  const lines = []
+
+  if (price?.aboveMa60 && (price.return5d ?? 0) < 0) {
+    lines.push("장기 상승추세는 유지되지만 단기 조정이 진행 중입니다.")
+  } else if (price?.aboveMa60 && (price.ma60SlopePct ?? 0) > 0) {
+    lines.push("장기 이동평균선이 상승하며 추세가 유지되고 있습니다.")
+  } else if (price?.aboveMa60 === false && (price.ma60SlopePct ?? 0) < 0) {
+    lines.push("장기 이동평균선 아래에서 약세 흐름이 이어지고 있습니다.")
+  }
+
+  if ((price?.return5d ?? 0) < -2.5) {
+    lines.push("최근 5일 수익률이 마이너스로 단기 하락 압력이 있습니다.")
+  } else if ((price?.return5d ?? 0) > 2 && (price?.return10d ?? 0) > 0) {
+    lines.push("단기·중기 수익률이 양호해 반등 흐름이 관찰됩니다.")
+  }
+
+  if (price?.lowerHigh && (price.return5d ?? 0) <= 0) {
+    lines.push("고점이 낮아지며 단기 모멘텀이 둔화되고 있습니다.")
+  } else if (price?.aboveMa20 === false && (price.ma20GapPct ?? 0) > -2.5) {
+    lines.push("MA20 부근에서 지지를 테스트하는 구간입니다.")
+  }
+
+  if (composite?.visible && lines.length < 3) {
+    if (composite.priceLabel === "하락 진행" && !lines.some((l) => /조정|하락/.test(l))) {
+      lines.push("가격 구조상 하락 흐름이 우선입니다.")
+    } else if (composite.priceLabel === "지지 확인") {
+      lines.push("주요 이동평균선 부근에서 지지를 확인하는 구간입니다.")
+    } else if (composite.trendLabel === "약화" || composite.trendLabel === "하락") {
+      lines.push("추세·모멘텀 지표가 약화 국면입니다.")
+    }
+  }
+
+  return [...new Set(lines)].slice(0, 3)
+}
 
 /**
  * @param {{
@@ -27,56 +66,44 @@ import {
  * @returns {AiMarketBriefingReport}
  */
 export function buildAiMarketBriefing(input = {}) {
-  const { panicData, cycleFlow, dualLiquidity, priceContext } = input
-  const view = resolveMarketStateCenterView(panicData)
-  if (!view) {
-    return { visible: false, title: "AI 시장 브리핑", lines: [] }
-  }
+  const { panicData, dualLiquidity, priceContext } = input
 
-  const unifiedLabel = resolveUnifiedMarketStateLabel(cycleFlow, view.position?.label ?? "—")
-  const guide = resolveUnifiedMarketStateGuide(unifiedLabel)
+  const priceReport = buildMarketStatePriceStructureReport({
+    spyPrices: priceContext?.spyPrices,
+    qqqPrices: priceContext?.qqqPrices,
+    asOfDate: priceContext?.asOfDate ?? null,
+  })
   const composite = buildPanicCompositeVerdictReport(panicData, priceContext)
 
   /** @type {string[]} */
-  const lines = []
+  const reasons = []
 
-  lines.push(`현재 시장은 ${unifiedLabel} 구간으로 판단됩니다.`)
-
-  if (composite.visible) {
-    lines.push(
-      `패닉 ${composite.psychScore}(${composite.stateLabel}) · 가격 ${composite.priceLabel} · 추세 ${composite.trendLabel}`,
-    )
-    lines.push(`최종 해석: ${composite.verdictLabel} — ${composite.actionLine}`)
-  } else if (view.panicScore != null) {
-    lines.push(`패닉 강도 ${view.panicScore} — 심리 지표만으로는 타이밍 판단이 제한됩니다.`)
+  if (priceReport?.bullets?.length) {
+    reasons.push(...priceReport.bullets.slice(0, 4))
+  } else if (composite.visible) {
+    if (composite.psychScore != null) {
+      reasons.push(`패닉 ${composite.psychScore} (${composite.stateLabel})`)
+    }
+    if (composite.priceLabel) reasons.push(`가격 ${composite.priceLabel}`)
+    if (composite.trendLabel) reasons.push(`추세 ${composite.trendLabel}`)
   }
 
   const marketScore = dualLiquidity?.marketScore
   const policyScore = dualLiquidity?.policyScore
-  if (marketScore != null && policyScore != null) {
+  if (reasons.length < 4 && marketScore != null && policyScore != null) {
     if (marketScore >= 55 && policyScore < 45) {
-      lines.push("시장 유동성은 양호하지만 정책 환경은 아직 부담입니다.")
+      reasons.push("시장 유동성 양호 · 정책 부담")
     } else if (marketScore < 45 && policyScore >= 55) {
-      lines.push("정책 환경은 비교적 우호적이나 시장 자금 흐름은 제한적입니다.")
-    } else if (marketScore >= 55 && policyScore >= 55) {
-      lines.push("시장·정책 유동성이 함께 우호적인 환경입니다.")
-    } else {
-      lines.push("시장·정책 유동성 모두 중립~부담 구간입니다.")
+      reasons.push("정책 우호 · 시장 자금 제한")
     }
-  } else if (dualLiquidity?.synthesis?.headline) {
-    lines.push(String(dualLiquidity.synthesis.headline).replace(/\.$/, ""))
   }
 
-  const strategyLine = guide.actions[0] ?? guide.strategyPhase.replace(/ 단계$/, "")
-  if (/추격|분할|관망|현금|방어/.test(strategyLine)) {
-    lines.push(`${strategyLine} 중심의 전략이 적합합니다.`)
-  } else {
-    lines.push(`${guide.strategyNarrative[0] ?? "선별적 접근을 유지하세요."}`)
-  }
+  const narrative = buildBriefingNarrative(priceReport, composite)
 
   return {
-    visible: lines.length > 0,
+    visible: reasons.length > 0 || narrative.length > 0,
     title: "AI 시장 브리핑",
-    lines: lines.slice(0, 5),
+    reasons: reasons.slice(0, 4),
+    narrative,
   }
 }

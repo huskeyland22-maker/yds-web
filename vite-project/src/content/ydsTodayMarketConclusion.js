@@ -1,5 +1,5 @@
 /**
- * 오늘 시장 한줄 결론 — 시장상태 · 사이클 · 패닉 · 유동성 종합 (최대 3줄)
+ * 오늘 시장 한줄 결론 + 추천 행동 (역할 분리)
  */
 
 import { buildDashboardActionGuideReport } from "./ydsDashboardActionGuide.js"
@@ -20,7 +20,7 @@ import {
  *   title: string
  *   signalId: ConclusionSignalId
  *   signalEmoji: string
- *   lines: string[]
+ *   headline: string
  *   actions: string[]
  * }} TodayMarketConclusionReport
  */
@@ -39,7 +39,7 @@ const SIGNAL_HEADLINE = {
   defensive: "지금은 공격 매수보다 방어가 우선입니다.",
   cautious: "아직 공격적으로 매수할 구간은 아닙니다.",
   neutral: "선별적 접근이 필요한 구간입니다.",
-  opportunity: "분할매수 기회를 검토할 수 있습니다.",
+  opportunity: "분할매수를 시작할 수 있는 구간입니다.",
   aggressive: "공격적 분할매수 구간에 가깝습니다.",
 }
 
@@ -103,52 +103,12 @@ function resolveConclusionSignal(input) {
   return "aggressive"
 }
 
-/** @param {string} line */
-function compressLine(line) {
-  return String(line ?? "")
-    .replace(/입니다\.?$/, "")
-    .replace(/하세요\.?$/, "하세요")
-    .replace(/\s+/g, " ")
-    .trim()
-}
-
-/**
- * @param {ConclusionSignalId} signalId
- * @param {ReturnType<typeof resolveUnifiedMarketStateGuide>} guide
- * @param {import("../market-os/liquidityDualEngine.js").DualLiquidityReport | null} dualLiquidity
- * @returns {string[]}
- */
-function buildBodyLines(signalId, guide, dualLiquidity) {
-  const narrative = guide.strategyNarrative.map(compressLine).filter(Boolean)
-  if (narrative.length >= 2) {
-    return narrative.slice(0, 2)
-  }
-
-  const mode = dualLiquidity?.actionMode
-  if (signalId === "defensive") {
-    return ["현금 비중을 늘리고", "보유 종목 익절·비중을 점검하세요"]
-  }
-  if (signalId === "cautious") {
-    return ["관심 종목을 정리하면서", "분할매수를 준비하세요"]
-  }
-  if (signalId === "opportunity" || signalId === "aggressive") {
-    return ["우량주 중심으로", "계획된 비중으로 접근하세요"]
-  }
-  if (mode === "defense") {
-    return ["유동성 부담을 감안해", "방어적 비중을 유지하세요"]
-  }
-  return narrative.length === 1
-    ? [narrative[0], "추격매수는 자제하세요"]
-    : ["관심 종목을 추리며", "분할 접근을 준비하세요"]
-}
-
 /**
  * @param {import("./ydsDashboardActionGuide.js").DashboardActionGuideReport['stars']} stars
  * @param {ConclusionSignalId} signalId
- * @param {string[]} guideActions
  * @returns {string[]}
  */
-function buildActionTags(stars, signalId, guideActions) {
+function buildActionTags(stars, signalId) {
   /** @type {string[]} */
   const tags = []
 
@@ -159,31 +119,14 @@ function buildActionTags(stars, signalId, guideActions) {
   ].sort((a, b) => b.score - a.score)
 
   for (const item of ranked) {
-    if (item.score >= 3 && tags.length < 2 && !tags.includes(item.label)) {
+    if (item.score >= 3 && tags.length < 3 && !tags.includes(item.label)) {
       tags.push(item.label)
     }
   }
 
-  const shortFromGuide = guideActions
-    .map((action) =>
-      String(action)
-        .replace(/신규\s*/g, "")
-        .replace(/접근/g, "")
-        .replace(/·.*/g, "")
-        .trim(),
-    )
-    .filter((action) => action.length <= 8)
-
-  for (const action of shortFromGuide) {
-    if (tags.length >= 2) break
-    const normalized =
-      /분할/.test(action) ? "분할매수" : /현금/.test(action) ? "현금 유지" : /관망|관찰/.test(action) ? "관망" : null
-    if (normalized && !tags.includes(normalized)) tags.push(normalized)
-  }
-
   if (signalId !== "aggressive" && !tags.includes("추격 금지")) {
     tags.push("추격 금지")
-  } else if (signalId === "aggressive" && tags.length < 3) {
+  } else if (signalId === "aggressive" && !tags.includes("일괄 진입 금지")) {
     tags.push("일괄 진입 금지")
   }
 
@@ -193,7 +136,7 @@ function buildActionTags(stars, signalId, guideActions) {
     tags.push(fallback.label)
   }
 
-  return [...new Set(tags)].slice(0, 3)
+  return [...new Set(tags)].slice(0, 4)
 }
 
 /**
@@ -224,7 +167,7 @@ export function buildTodayMarketConclusion(
       title: "오늘 한줄 결론",
       signalId: "neutral",
       signalEmoji: "🟡",
-      lines: [],
+      headline: "",
       actions: [],
     }
   }
@@ -237,7 +180,6 @@ export function buildTodayMarketConclusion(
     priceContext,
   )
   const unifiedLabel = resolveUnifiedMarketStateLabel(cycleFlow, view.position?.label ?? "—")
-  const guide = resolveUnifiedMarketStateGuide(unifiedLabel)
   const composite = buildPanicCompositeVerdictReport(panicData, priceContext ?? undefined)
 
   const liqId = bandToLegacyLiqId(dualLiquidity?.market?.band?.id ?? "neutral")
@@ -270,34 +212,22 @@ export function buildTodayMarketConclusion(
   }
 
   const headline = SIGNAL_HEADLINE[signalId]
-  let body = buildBodyLines(signalId, guide, dualLiquidity)
-  if (
-    composite.visible &&
-    (composite.verdictId === "laggingFear" ||
-      composite.verdictId === "adjustmentProgress" ||
-      composite.verdictId === "bottomSearch")
-  ) {
-    body = composite.narrative.slice(0, 2)
-  } else if (composite.visible && composite.narrative.length >= 2) {
-    body = composite.narrative.slice(0, 2)
-  }
-  const lines = [headline, ...body].filter(Boolean).slice(0, 3)
-  let actions = buildActionTags(actionGuide.stars, signalId, guide.actions)
+  let actions = buildActionTags(actionGuide.stars, signalId)
   if (
     composite.visible &&
     (composite.verdictId === "laggingFear" ||
       composite.verdictId === "adjustmentProgress") &&
     !actions.includes("추격 금지")
   ) {
-    actions = ["추격 금지", ...actions.filter((a) => a !== "추격 금지")].slice(0, 3)
+    actions = ["추격 금지", ...actions.filter((a) => a !== "추격 금지")].slice(0, 4)
   }
 
   return {
-    visible: lines.length > 0,
+    visible: Boolean(headline),
     title: "오늘 한줄 결론",
     signalId,
     signalEmoji: SIGNAL_EMOJI[signalId],
-    lines,
+    headline,
     actions,
   }
 }

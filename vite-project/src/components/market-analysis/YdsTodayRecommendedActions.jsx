@@ -11,7 +11,7 @@ import { buildTodayMarketConclusion } from "../../content/ydsTodayMarketConclusi
  *   className?: string
  * }} props
  */
-export default function YdsTodayMarketConclusion({
+export default function YdsTodayRecommendedActions({
   panicData = null,
   historyRows = [],
   cycleFlow = null,
@@ -29,26 +29,24 @@ export default function YdsTodayMarketConclusion({
     [panicData, historyRows, dualLiquidity, cycleFlow, etfContext],
   )
 
-  if (!report.visible || !report.headline) return null
+  if (!report.actions.length) return null
 
   return (
     <section
-      className={[
-        "yds-today-conclusion",
-        `yds-today-conclusion--${report.signalId}`,
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      aria-label={report.title}
+      className={["yds-today-actions", className].filter(Boolean).join(" ")}
+      aria-label="추천 행동"
     >
-      <p className="yds-today-conclusion__title">{report.title}</p>
-      <p className="yds-today-conclusion__headline">
-        <span className="yds-today-conclusion__signal" aria-hidden>
-          {report.signalEmoji}
-        </span>{" "}
-        {report.headline}
-      </p>
+      <p className="yds-today-actions__title">추천 행동</p>
+      <ul className="yds-today-actions__list">
+        {report.actions.map((action) => (
+          <li key={action} className="yds-today-actions__item">
+            <span className="yds-today-actions__check" aria-hidden>
+              ✓
+            </span>
+            {action}
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

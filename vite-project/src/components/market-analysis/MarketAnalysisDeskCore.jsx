@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef, useState } from "react"
 import YdsPanicEvidencePanel from "./YdsPanicEvidencePanel.jsx"
 import YdsTodayMarketConclusion from "./YdsTodayMarketConclusion.jsx"
-import YdsMarketDeskSummary from "./YdsMarketDeskSummary.jsx"
+import YdsTodayRecommendedActions from "./YdsTodayRecommendedActions.jsx"
 import YdsAiMarketBriefing from "./YdsAiMarketBriefing.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
@@ -141,11 +141,13 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--today-conclusion"
         />
 
-        <YdsMarketDeskSummary
+        <YdsTodayRecommendedActions
           panicData={panicData}
-          dualLiquidity={dualLiquidity}
+          historyRows={safeHistory}
           cycleFlow={cycleFlow}
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--desk-summary"
+          dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--today-actions"
         />
 
         <YdsAiMarketBriefing

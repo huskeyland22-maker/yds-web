@@ -40,13 +40,29 @@ export default function YdsAiMarketBriefing({
       aria-label={report.title}
     >
       <p className="yds-ai-market-briefing__title">{report.title}</p>
-      <div className="yds-ai-market-briefing__body">
-        {report.lines.map((line) => (
-          <p key={line} className="yds-ai-market-briefing__line">
-            {line}
-          </p>
-        ))}
-      </div>
+
+      {report.reasons.length ? (
+        <ul className="yds-ai-market-briefing__reasons">
+          {report.reasons.map((reason) => (
+            <li key={reason} className="yds-ai-market-briefing__reason">
+              <span className="yds-ai-market-briefing__check" aria-hidden>
+                ✔
+              </span>
+              {reason}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {report.narrative.length ? (
+        <div className="yds-ai-market-briefing__narrative">
+          {report.narrative.map((line) => (
+            <p key={line} className="yds-ai-market-briefing__line">
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : null}
     </section>
   )
 }
