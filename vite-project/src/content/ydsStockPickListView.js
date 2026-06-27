@@ -5,7 +5,7 @@
 import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
-import { resolveStockPosition } from "./ydsStockPositionEngine.js"
+import { resolveRecommendStatusView } from "./ydsStockPickRecommendColors.js"
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
 
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
@@ -54,7 +54,7 @@ export function buildStockPickListRow(stock) {
   const recPrice = pick?.recommendedPrice ?? null
   const currentRaw = Number(stock.snapshot?.price ?? stock.snapshot?.close)
   const returnPct = calcRecommendReturnPct(recPrice, currentRaw)
-  const position = stock.pickMeta?.positionState ?? resolveStockPosition(stock)
+  const recStatus = resolveRecommendStatusView(stock)
   const conf = stock.trustReport?.aiConfidence
 
   return {
@@ -63,8 +63,9 @@ export function buildStockPickListRow(stock) {
     aiScore: resolveAiScore(stock),
     recommendGrade: resolveRecommendGradeLabel(stock),
     recommendGradeSort: resolveRecommendGradeSort(stock),
-    statusLabel: position.label,
-    statusTone: position.tone,
+    recommendStatusId: recStatus.id,
+    statusLabel: recStatus.label,
+    statusTone: recStatus.tone,
     sector: stock.sectorLabel || stock.sector || "—",
     recommendedPrice: recPrice,
     recommendedPriceLabel:

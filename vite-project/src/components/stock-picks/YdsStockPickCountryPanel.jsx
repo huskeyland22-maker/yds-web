@@ -10,7 +10,8 @@ import YdsStockPickAllTable from "./YdsStockPickAllTable.jsx"
  * @param {{
  *   countryId: import("../../content/ydsStockPickModel.js").StockPickCountryId
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
- *   sectorId: string
+ *   filters: import("../../content/ydsStockPickFilterEngine.js").StockPickFilterState
+ *   onFiltersChange: (f: import("../../content/ydsStockPickFilterEngine.js").StockPickFilterState) => void
  *   isFavorite: (ticker: string) => boolean
  *   onToggleFavorite: (ticker: string) => void
  *   heldTickers?: Set<string>
@@ -18,12 +19,15 @@ import YdsStockPickAllTable from "./YdsStockPickAllTable.jsx"
  *   allSectionId?: string
  *   loading?: boolean
  *   regimeLimit?: number
+ *   showTableFilters?: boolean
+ *   filterResultCount?: number
  * }} props
  */
 export default function YdsStockPickCountryPanel({
   countryId,
   stocks,
-  sectorId,
+  filters,
+  onFiltersChange,
   isFavorite,
   onToggleFavorite,
   heldTickers = new Set(),
@@ -31,6 +35,8 @@ export default function YdsStockPickCountryPanel({
   allSectionId = "spick-all",
   loading = false,
   regimeLimit = 5,
+  showTableFilters = false,
+  filterResultCount,
 }) {
   const countryMeta = STOCK_PICK_COUNTRIES.find((c) => c.id === countryId)
 
@@ -64,11 +70,13 @@ export default function YdsStockPickCountryPanel({
       <div className="yds-spick-country-panel__zone-all" data-spick-zone="all">
         <YdsStockPickAllTable
           stocks={stocks}
-          sectorId={sectorId}
+          filters={filters}
+          onFiltersChange={onFiltersChange}
           isFavorite={isFavorite}
-          onToggleFavorite={onToggleFavorite}
           sectionId={allSectionId}
           loading={loading}
+          showFilters={showTableFilters}
+          filterResultCount={filterResultCount}
         />
       </div>
     </div>

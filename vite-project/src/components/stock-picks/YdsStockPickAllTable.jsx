@@ -4,9 +4,9 @@ import {
   buildStockPickListRow,
   sortStockPickList,
 } from "../../content/ydsStockPickListView.js"
-import { filterBySector } from "../../content/ydsStockPickModel.js"
-import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
-import YdsStockPickAiConfidenceBar from "./YdsStockPickAiConfidenceBar.jsx"
+import { applyStockPickFilters } from "../../content/ydsStockPickFilterEngine.js"
+import YdsStockPickFilterBar from "./YdsStockPickFilterBar.jsx"
+import YdsStockPickRecommendStatusBadge from "./YdsStockPickRecommendStatusBadge.jsx"
 
 /** @typedef {import("../../content/ydsStockPickListView.js").StockPickListSortKey} SortKey */
 
@@ -19,28 +19,31 @@ const SORT_OPTIONS = [
 /**
  * @param {{
  *   stocks: import("../../content/ydsStockPickModel.js").StockPickView[]
- *   sectorId?: string
- *   onSectorChange?: (id: string) => void
+ *   filters: import("../../content/ydsStockPickFilterEngine.js").StockPickFilterState
+ *   onFiltersChange: (f: import("../../content/ydsStockPickFilterEngine.js").StockPickFilterState) => void
  *   isFavorite: (ticker: string) => boolean
- *   onToggleFavorite: (ticker: string) => void
  *   sectionId?: string
  *   loading?: boolean
+ *   showFilters?: boolean
+ *   filterResultCount?: number
  * }} props
  */
 export default function YdsStockPickAllTable({
   stocks,
-  sectorId = "all",
+  filters,
+  onFiltersChange,
   isFavorite,
-  onToggleFavorite,
   sectionId = "spick-all",
   loading = false,
+  showFilters = false,
+  filterResultCount,
 }) {
   const [sortKey, setSortKey] = useState(/** @type {SortKey} */ ("aiScore"))
   const [sortDir, setSortDir] = useState(/** @type {'asc' | 'desc'} */ ("desc"))
 
   const filtered = useMemo(
-    () => filterBySector(stocks, sectorId),
-    [stocks, sectorId],
+    () => applyStockPickFilters(stocks, filters, { isFavorite }),
+    [stocks, filters, isFavorite],
   )
 
   const sorted = useMemo(
@@ -87,12 +90,21 @@ export default function YdsStockPickAllTable({
         </div>
       </div>
 
+      {showFilters ? (
+        <YdsStockPickFilterBar
+          filters={filters}
+          onChange={onFiltersChange}
+          resultCount={filterResultCount ?? sorted.length}
+          className="yds-spick-all-table__filters"
+        />
+      ) : null}
+
       {loading && !sorted.length ? (
         <p className="yds-spick-empty">시세 조회 중…</p>
       ) : null}
 
       {!loading && !sorted.length ? (
-        <p className="yds-spick-empty">표시할 종목이 없습니다.</p>
+        <p className="yds-spick-empty">조건에 맞는 종목이 없습니다.</p>
       ) : null}
 
       {sorted.length ? (
@@ -104,12 +116,9 @@ export default function YdsStockPickAllTable({
                 <th scope="col">AI</th>
                 <th scope="col">등급</th>
                 <th scope="col">상태</th>
-                <th scope="col">섹터</th>
                 <th scope="col">추천가</th>
                 <th scope="col">현재가</th>
                 <th scope="col">수익률</th>
-                <th scope="col">신뢰도</th>
-                <th scope="col" aria-label="관심등록" />
               </tr>
             </thead>
             <tbody>
@@ -130,13 +139,8 @@ export default function YdsStockPickAllTable({
                       {row.recommendGrade}
                     </td>
                     <td>
-                      <span
-                        className={`yds-spick-all-table__status yds-spick-all-table__status--${row.statusTone}`}
-                      >
-                        {row.statusLabel}
-                      </span>
+                      <YdsStockPickRecommendStatusBadge stock={stock} compact />
                     </td>
-                    <td className="yds-spick-all-table__sector">{row.sector}</td>
                     <td className="font-mono tabular-nums">{row.recommendedPriceLabel}</td>
                     <td className="font-mono tabular-nums">{row.currentPriceLabel}</td>
                     <td
@@ -146,19 +150,6 @@ export default function YdsStockPickAllTable({
                       ].join(" ")}
                     >
                       {row.returnLabel}
-                    </td>
-                    <td className="yds-spick-all-table__conf">
-                      <YdsStockPickAiConfidenceBar
-                        score={row.confidenceScore}
-                        compact
-                        showMeta={false}
-                      />
-                    </td>
-                    <td>
-                      <YdsStockPickFavoriteButton
-                        active={isFavorite(stock.ticker)}
-                        onToggle={() => onToggleFavorite(stock.ticker)}
-                      />
                     </td>
                   </tr>
                 )

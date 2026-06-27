@@ -36,8 +36,15 @@ import {
   buildTodayRecommendBriefing,
   buildStockPickHubHistoryReport,
 } from "../../content/ydsStockPickTrustEngine.js"
+import { buildStockPickInvestDashboard } from "../../content/ydsStockPickDashboardEngine.js"
+import {
+  DEFAULT_STOCK_PICK_FILTERS,
+  applyStockPickFilters,
+} from "../../content/ydsStockPickFilterEngine.js"
 import YdsStockPickTodayBriefing from "./YdsStockPickTodayBriefing.jsx"
 import YdsStockPickHubHistory from "./YdsStockPickHubHistory.jsx"
+import YdsStockPickInvestDashboard from "./YdsStockPickInvestDashboard.jsx"
+import YdsStockPickFilterBar from "./YdsStockPickFilterBar.jsx"
 import { isDevMode } from "../../utils/devMode.js"
 
 const INITIAL_SECTOR = { US: "all", KR: "all" }
@@ -101,12 +108,8 @@ export default function YdsStockPickV1Hub() {
 
   const {
     favorites,
-    favoritesOnly,
-    setFavoritesOnly,
     isFavorite,
     toggleFavorite,
-    applyFavoriteFilter,
-    favoriteCount,
   } = useStockPickFavorites()
 
   const favoriteAlerts = useStockPickFavoriteAlerts(liveStocks, favorites)
@@ -124,6 +127,7 @@ export default function YdsStockPickV1Hub() {
   const [countryId, setCountryId] = useState("US")
   const [sectorByCountry, setSectorByCountry] = useState(INITIAL_SECTOR)
   const [searchQuery, setSearchQuery] = useState("")
+  const [listFilters, setListFilters] = useState(() => ({ ...DEFAULT_STOCK_PICK_FILTERS }))
 
   const searchedStocks = useMemo(() => {
     const t0 = typeof performance !== "undefined" ? performance.now() : 0
@@ -145,10 +149,10 @@ export default function YdsStockPickV1Hub() {
       recordRenderPhase("country split+sort", performance.now() - t0)
     }
     return {
-      US: applyFavoriteFilter(ranked.US),
-      KR: applyFavoriteFilter(ranked.KR),
+      US: ranked.US,
+      KR: ranked.KR,
     }
-  }, [searchedStocks, applyFavoriteFilter])
+  }, [searchedStocks])
 
   const universeByCountry = useMemo(
     () => ({
@@ -166,6 +170,20 @@ export default function YdsStockPickV1Hub() {
 
   const setSectorForCountry = (country, sectorId) => {
     setSectorByCountry((prev) => ({ ...prev, [country]: sectorId }))
+    setListFilters((prev) => ({ ...prev, sector: sectorId }))
+  }
+
+  const handleListFiltersChange = (next) => {
+    setListFilters(next)
+    if (next.country && next.country !== "all") {
+      setCountryId(next.country)
+    }
+    if (next.sector) {
+      setSectorByCountry((prev) => ({
+        ...prev,
+        [countryId]: next.sector,
+      }))
+    }
   }
 
   const debugView = useMemo(
@@ -173,7 +191,6 @@ export default function YdsStockPickV1Hub() {
       ...pipelineDebug,
       displayUs: stocksByCountry.US.length,
       displayKr: stocksByCountry.KR.length,
-      favoritesOnly,
       fromCache,
       refreshing,
     }),
@@ -181,7 +198,6 @@ export default function YdsStockPickV1Hub() {
       pipelineDebug,
       stocksByCountry.US.length,
       stocksByCountry.KR.length,
-      favoritesOnly,
       fromCache,
       refreshing,
     ],
@@ -211,6 +227,16 @@ export default function YdsStockPickV1Hub() {
     [activeStocks, regimeLimit],
   )
 
+  const investDashboard = useMemo(
+    () => buildStockPickInvestDashboard(liveStocks, regimeLimit),
+    [liveStocks, regimeLimit],
+  )
+
+  const filteredActiveCount = useMemo(
+    () => applyStockPickFilters(activeStocks, listFilters, { isFavorite }).length,
+    [activeStocks, listFilters, isFavorite],
+  )
+
   return (
     <div className="yds-spick-platform yds-spick-platform--report">
       {showDebug ? <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} /> : null}
@@ -238,6 +264,8 @@ export default function YdsStockPickV1Hub() {
         </p>
       ) : null}
 
+      <YdsStockPickInvestDashboard report={investDashboard} />
+
       <YdsStockPickTodayBriefing report={todayBriefing} />
 
       <section className="yds-spick-hub-today" aria-label="오늘의 추천">
@@ -262,28 +290,19 @@ export default function YdsStockPickV1Hub() {
         resultCount={searchResultCount}
       />
 
-      <div className="yds-spick-toolbar">
-        <button
-          type="button"
-          className={[
-            "yds-spick-toolbar__btn",
-            favoritesOnly ? "yds-spick-toolbar__btn--active" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          aria-pressed={favoritesOnly}
-          onClick={() => setFavoritesOnly((v) => !v)}
-        >
-          {favoritesOnly ? "관심종목" : "관심종목"}
-          {favoriteCount > 0 ? (
-            <span className="yds-spick-toolbar__count font-mono tabular-nums">{favoriteCount}</span>
-          ) : null}
-        </button>
-      </div>
+      <YdsStockPickFilterBar
+        filters={listFilters}
+        onChange={handleListFiltersChange}
+        resultCount={filteredActiveCount}
+        className="yds-spick-hub__filters"
+      />
 
       <YdsStockPickCountryTabs
         countryId={countryId}
-        onCountryChange={setCountryId}
+        onCountryChange={(id) => {
+          setCountryId(id)
+          setListFilters((prev) => ({ ...prev, country: id }))
+        }}
         className="yds-spick-country-tabs--mobile"
         counts={{
           US: stocksByCountry.US.length,
@@ -315,7 +334,8 @@ export default function YdsStockPickV1Hub() {
               <YdsStockPickCountryPanel
                 countryId={country.id}
                 stocks={stocksByCountry[country.id]}
-                sectorId={sectorByCountry[country.id]}
+                filters={listFilters}
+                onFiltersChange={handleListFiltersChange}
                 isFavorite={isFavorite}
                 onToggleFavorite={toggleFavorite}
                 heldTickers={heldTickers}
@@ -323,6 +343,7 @@ export default function YdsStockPickV1Hub() {
                 allSectionId={panelId}
                 loading={loading && !stocksByCountry[country.id].length}
                 regimeLimit={regimeLimit}
+                filterResultCount={country.id === countryId ? filteredActiveCount : undefined}
               />
               ) : null}
             </div>

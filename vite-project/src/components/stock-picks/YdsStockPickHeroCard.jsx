@@ -1,17 +1,12 @@
-import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import {
-  buildStockPickTransparency,
-  formatTransparencyPrice,
-} from "../../content/ydsStockPickTransparency.js"
-import { buildStockPickListRow } from "../../content/ydsStockPickListView.js"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
 import YdsStockPickAiConfidenceBar from "./YdsStockPickAiConfidenceBar.jsx"
 import YdsStockPickRecommendRationale from "./YdsStockPickRecommendRationale.jsx"
-import YdsStockPickScoreBreakdown from "./YdsStockPickScoreBreakdown.jsx"
-import YdsStockPickDetailPanel from "./YdsStockPickDetailPanel.jsx"
+import YdsStockPickRecommendStatusBadge from "./YdsStockPickRecommendStatusBadge.jsx"
+import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
 
 /**
+ * GO #72 — TOP5: WHY · AI 의견 · 행동 · 신뢰도 · 상태 (비교 수치는 전체 종목)
  * @param {{
  *   stock: import("../../content/ydsStockPickModel.js").StockPickView
  *   medal?: string
@@ -29,13 +24,9 @@ export default function YdsStockPickHeroCard({
   onToggleFavorite,
   isHeld = false,
 }) {
-  const [detailOpen, setDetailOpen] = useState(false)
-  const row = useMemo(() => buildStockPickListRow(stock), [stock])
-  const transparency = useMemo(() => buildStockPickTransparency(stock), [stock])
   const trust = stock.trustReport
-  const v4 = stock.v4Score
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
-  const country = stock.country === "KR" ? "KR" : "US"
+  const aiOpinion = stock.opinion?.summary || stock.opinion?.headline || stock.recommendReasonSummary
 
   const rankClass =
     rankIndex === 0
@@ -46,23 +37,11 @@ export default function YdsStockPickHeroCard({
           ? "yds-spick-hero-card--rank-3"
           : ""
 
-  const position52w = stock.statusDiag?.inputs?.position52w
-  const positionLabel =
-    position52w != null && Number.isFinite(position52w)
-      ? `52주 ${Math.round(position52w)}%`
-      : "—"
-
-  const returnTone =
-    row.returnPct == null
-      ? "muted"
-      : row.returnPct >= 0
-        ? "up"
-        : "down"
-
   return (
     <article
       className={[
         "yds-spick-hero-card",
+        "yds-spick-hero-card--why",
         rankClass,
         isHeld ? "yds-spick-hero-card--held" : "",
       ]
@@ -83,42 +62,25 @@ export default function YdsStockPickHeroCard({
         </div>
       </div>
 
-      <p className="yds-spick-hero-card__grade font-mono tabular-nums">{row.recommendGrade}</p>
+      <YdsStockPickRecommendStatusBadge stock={stock} compact className="yds-spick-hero-card__status" />
 
-      <div className="yds-spick-hero-card__status-row">
-        <span className={`yds-spick-hero-card__status yds-spick-hero-card__status--${row.statusTone}`}>
-          {row.statusLabel}
-        </span>
-      </div>
+      <YdsStockPickRecommendRationale
+        topReasons={trust?.topReasons}
+        detailReasons={[]}
+        items={stock.recommendRationales ?? []}
+        title="왜 추천하는가"
+        maxItems={3}
+        className="yds-spick-hero-card__rationale"
+      />
 
-      <p className="yds-spick-hero-card__price-line font-mono tabular-nums">
-        {row.recommendedPriceLabel !== "—" ? (
-          <>
-            <span className="yds-spick-hero-card__rec">{row.recommendedPriceLabel}</span>
-            <span className="yds-spick-hero-card__arrow"> → </span>
-          </>
-        ) : null}
-        <span>{row.currentPriceLabel}</span>
-      </p>
+      {aiOpinion ? (
+        <p className="yds-spick-hero-card__opinion">{aiOpinion}</p>
+      ) : null}
 
-      <p className={`yds-spick-hero-card__return font-mono tabular-nums yds-spick-hero-card__return--${returnTone}`}>
-        {row.returnLabel}
-      </p>
-
-      <dl className="yds-spick-hero-card__metrics">
-        <div>
-          <dt>AI</dt>
-          <dd className="font-mono tabular-nums">{row.aiScore}</dd>
-        </div>
-        <div>
-          <dt>품질</dt>
-          <dd className="font-mono tabular-nums">{v4?.qualityDisplayGrade ?? v4?.qualityGrade ?? "—"}</dd>
-        </div>
-        <div>
-          <dt>타이밍</dt>
-          <dd className="font-mono tabular-nums">{v4?.timingGrade ?? "—"}</dd>
-        </div>
-      </dl>
+      <YdsStockPickActionGuide
+        guide={stock.actionGuide}
+        className="yds-spick-hero-card__action-guide"
+      />
 
       <YdsStockPickAiConfidenceBar
         score={trust?.aiConfidence?.score}
@@ -126,56 +88,9 @@ export default function YdsStockPickHeroCard({
         className="yds-spick-hero-card__conf"
       />
 
-      {stock.actionGuide?.summary ? (
-        <p className="yds-spick-hero-card__action">{stock.actionGuide.summary}</p>
-      ) : null}
-
-      <details className="yds-spick-hero-card__accordion">
-        <summary className="yds-spick-hero-card__accordion-summary">세부 지표</summary>
-        <div className="yds-spick-hero-card__accordion-body">
-          <YdsStockPickRecommendRationale
-            topReasons={trust?.topReasons}
-            detailReasons={trust?.detailReasons}
-            items={stock.recommendRationales ?? []}
-            title="핵심 이유"
-            className="yds-spick-hero-card__rationale"
-          />
-          <YdsStockPickScoreBreakdown stock={stock} className="yds-spick-hero-card__scores" />
-          <dl className="yds-spick-hero-card__tech">
-            <div>
-              <dt>20일선</dt>
-              <dd className="font-mono tabular-nums">
-                {transparency.metrics.find((m) => m.id === "ma20")?.value ?? "—"}
-              </dd>
-            </div>
-            <div>
-              <dt>60일선</dt>
-              <dd className="font-mono tabular-nums">
-                {transparency.metrics.find((m) => m.id === "ma60")?.value ?? "—"}
-              </dd>
-            </div>
-            <div>
-              <dt>거래량</dt>
-              <dd>{transparency.metrics.find((m) => m.id === "volume")?.value ?? "—"}</dd>
-            </div>
-            <div>
-              <dt>52주</dt>
-              <dd className="font-mono tabular-nums">{positionLabel}</dd>
-            </div>
-          </dl>
-          <button
-            type="button"
-            className="yds-spick-hero-card__detail-toggle"
-            aria-expanded={detailOpen}
-            onClick={() => setDetailOpen((v) => !v)}
-          >
-            {detailOpen ? "AI 분석 접기" : "AI 분석 펼치기"}
-          </button>
-          {detailOpen ? (
-            <YdsStockPickDetailPanel stock={stock} className="yds-spick-hero-card__detail" />
-          ) : null}
-        </div>
-      </details>
+      <Link to={to} className="yds-spick-hero-card__cta">
+        AI 상세 분석 보기
+      </Link>
     </article>
   )
 }
