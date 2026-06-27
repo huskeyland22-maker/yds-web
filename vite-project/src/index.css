@@ -31677,6 +31677,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.72rem;
 }
 
+.yds-market-panic-secondary__compare-delta {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
 .yds-market-panic-secondary__compare-conclusion {
   margin: 0.15rem 0 0;
   font-size: 0.66rem;
