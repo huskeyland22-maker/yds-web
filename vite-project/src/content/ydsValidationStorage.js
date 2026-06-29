@@ -4,6 +4,7 @@
 
 import { sanitizeValidationPickRecord } from "./ydsValidationPriceSanitize.js"
 import { applySnapshotToRecord, getRecommendSnapshot, hasSnapshotScores, migrateRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
+import { migratePickLifecycle } from "./ydsPickLifecycleEngine.js"
 
 export const VALIDATION_PICKS_KEY = "yds-validation-picks-v2"
 export const VALIDATION_PORTFOLIO_KEY = "yds-validation-portfolio-v2"
@@ -13,7 +14,7 @@ export const VALIDATION_REGIME_KEY = "yds-validation-regime-periods-v1"
 const LEGACY_PICKS_KEY = "yds-validation-picks-v1"
 const LEGACY_PORTFOLIO_KEY = "yds-validation-portfolio-v1"
 
-const MAX_PICKS = 600
+const MAX_PICKS = 2000
 const MAX_PORTFOLIO_SNAPSHOTS = 400
 const MAX_REGIME_PERIODS = 120
 
@@ -63,6 +64,11 @@ const MAX_REGIME_PERIODS = 120
  *   regimeId: string
  *   regimeLabel: string
  *   strategyLabel: string
+ *   lifecycleId: 'active' | 'targetHit' | 'stopLoss' | 'ended'
+ *   lifecycleLabel: string
+ *   closedAt: string | null
+ *   closeReason: string | null
+ *   finalReturnPct: number | null
  *   recommendSnapshot: import("./ydsValidationRecommendSnapshot.js").ValidationRecommendSnapshot | null
  *   recordedAt: number
  *   lastUpdatedAt: number
@@ -164,6 +170,14 @@ export function normalizePickRecord(raw) {
     regimeId: String(r.regimeId ?? "neutral"),
     regimeLabel: String(r.regimeLabel ?? "—"),
     strategyLabel: String(recSnap?.marketStateLabel ?? r.strategyLabel ?? "—"),
+    lifecycleId: r.lifecycleId ?? "active",
+    lifecycleLabel: String(r.lifecycleLabel ?? "추천중 (현재 보유 중)"),
+    closedAt: r.closedAt ? String(r.closedAt).slice(0, 10) : null,
+    closeReason: r.closeReason ? String(r.closeReason) : null,
+    finalReturnPct:
+      r.finalReturnPct != null && Number.isFinite(Number(r.finalReturnPct))
+        ? Number(r.finalReturnPct)
+        : null,
     recommendSnapshot: r.recommendSnapshot ?? recSnap ?? null,
     recordedAt: Number(r.recordedAt) || Date.now(),
     lastUpdatedAt: Number(r.lastUpdatedAt) || Date.now(),
@@ -173,7 +187,7 @@ export function normalizePickRecord(raw) {
     : recSnap && hasSnapshotScores(recSnap)
       ? applySnapshotToRecord(record, recSnap)
       : record
-  return sanitizeValidationPickRecord(migrateRecommendSnapshot(withSnap))
+  return migratePickLifecycle(sanitizeValidationPickRecord(migrateRecommendSnapshot(withSnap)))
 }
 
 /** @returns {ValidationPickRecord[]} */

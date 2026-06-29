@@ -3584,6 +3584,57 @@
   border-color: rgba(148, 163, 184, 0.5);
 }
 
+.yds-spick-hub-history__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-spick-hub-history__filter {
+  padding: 0.2rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.56rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.yds-spick-hub-history__filter--active {
+  border-color: rgba(96, 165, 250, 0.4);
+  background: rgba(30, 58, 138, 0.25);
+  color: #bfdbfe;
+}
+
+.yds-spick-hub-history__status {
+  font-size: 0.56rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.yds-spick-hub-history__status--active { color: #86efac; }
+.yds-spick-hub-history__status--success { color: #93c5fd; }
+.yds-spick-hub-history__status--failure { color: #fca5a5; }
+.yds-spick-hub-history__status--ended { color: #94a3b8; }
+
+.yds-spick-hub-history__badge {
+  font-size: 0.56rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.yds-spick-hub-history__empty {
+  margin: 0 0 0.35rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px dashed rgba(148, 163, 184, 0.25);
+  font-size: 0.6rem;
+  color: #64748b;
+  text-align: center;
+}
+
 .yds-spick-hub-history__table {
   width: 100%;
   border-collapse: collapse;

@@ -1,5 +1,6 @@
 /**
  * 추천 성과 리포트 — 저장된 검증 데이터 기반 (7·14·30일)
+ * GO #80: 종료·실패 포함 전체 추천 기준 신뢰 성과
  */
 
 import {
@@ -7,74 +8,17 @@ import {
   filterPicksInWindow,
   formatPerfPct,
   PERF_HORIZONS,
-  summarizeHorizonReturns,
 } from "./ydsPickPerformanceEngine.js"
 import { loadValidationBenchmarkLog } from "./ydsValidationStorage.js"
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
 import { subtractCalendarDays } from "./ydsValidationEngine.js"
-import { classifyPickOutcome } from "./ydsPickOutcomeEngine.js"
+import {
+  buildPickTrustPerfStats,
+  daysBetweenPickDates,
+  resolvePickLifecycleView,
+} from "./ydsPickLifecycleEngine.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
-
-/**
- * @param {import("./ydsValidationStorage.js").ValidationPickRecord[]} picks
- * @param {string} horizonKey
- */
-function computeExtendedStats(picks, horizonKey) {
-  const rows = (picks ?? []).filter((p) => {
-    const ret = p.horizons?.[horizonKey]
-    return ret != null && Number.isFinite(ret)
-  })
-  if (!rows.length) {
-    return {
-      count: 0,
-      successRate: null,
-      avgReturn: null,
-      avgLoss: null,
-      profitFactor: null,
-      avgHoldDays: null,
-      alpha: null,
-    }
-  }
-
-  const returns = rows.map((r) => Number(r.horizons[horizonKey]))
-  const wins = returns.filter((v) => v > 0)
-  const losses = returns.filter((v) => v < 0)
-  const avgReturn = returns.reduce((s, v) => s + v, 0) / returns.length
-  const avgWin = wins.length ? wins.reduce((s, v) => s + v, 0) / wins.length : 0
-  const avgLoss = losses.length
-    ? losses.reduce((s, v) => s + v, 0) / losses.length
-    : null
-  const profitFactor =
-    avgLoss != null && avgLoss < 0 && avgWin > 0
-      ? Math.round((avgWin / Math.abs(avgLoss)) * 100) / 100
-      : null
-
-  const today = todayDateKey()
-  const avgHoldDays = Math.round(
-    rows.reduce((s, r) => {
-      const start = String(r.recommendedAt).slice(0, 10)
-      const end = subtractCalendarDays(today, 0)
-      const d0 = Date.parse(start)
-      const d1 = Date.parse(end)
-      const days = Number.isFinite(d0) && Number.isFinite(d1) ? Math.max(0, (d1 - d0) / 86400000) : 0
-      return s + days
-    }, 0) / rows.length,
-  )
-
-  const successCount = returns.filter((v) => classifyPickOutcome(v) === "success").length
-  const successRate = Math.round((successCount / returns.length) * 1000) / 10
-
-  return {
-    count: rows.length,
-    successRate,
-    avgReturn: Math.round(avgReturn * 10) / 10,
-    avgLoss: avgLoss != null ? Math.round(avgLoss * 10) / 10 : null,
-    profitFactor,
-    avgHoldDays,
-    alpha: null,
-  }
-}
 
 /**
  * @param {import("./ydsValidationStorage.js").ValidationPickRecord[]} picks
@@ -82,11 +26,24 @@ function computeExtendedStats(picks, horizonKey) {
  */
 function estimateAlpha(picks, horizonKey) {
   const horizonDays = PERF_HORIZONS.find((h) => h.key === horizonKey)?.days ?? 30
-  const rows = (picks ?? []).filter((p) => p.horizons?.[horizonKey] != null)
+  const rows = (picks ?? []).filter((p) => {
+    const ret =
+      p.finalReturnPct ??
+      p.horizons?.[horizonKey] ??
+      p.returnPct
+    return ret != null && Number.isFinite(ret)
+  })
   if (!rows.length) return null
 
   const pickAvg =
-    rows.reduce((s, p) => s + Number(p.horizons[horizonKey]), 0) / rows.length
+    rows.reduce((s, p) => {
+      const ret =
+        p.finalReturnPct ??
+        p.horizons?.[horizonKey] ??
+        p.returnPct ??
+        0
+      return s + Number(ret)
+    }, 0) / rows.length
 
   const benchLog = loadValidationBenchmarkLog()
   const dates = Object.keys(benchLog).sort()
@@ -110,26 +67,31 @@ function estimateAlpha(picks, horizonKey) {
 export function buildRecommendPerfReport(allPicks, windowDays = 30) {
   const base = buildPickPerformanceReport(allPicks, windowDays)
   const picks = filterPicksInWindow(allPicks, windowDays)
+  const trustStats = buildPickTrustPerfStats(allPicks, windowDays)
 
   const horizons = PERF_HORIZONS.map((h) => {
-    const stats = computeExtendedStats(picks, h.key)
     const alpha = estimateAlpha(picks, h.key)
     return {
       ...h,
-      ...stats,
+      ...trustStats,
       alpha,
-      winRate: stats.successRate,
+      winRate: trustStats.winRate,
+      successRate: trustStats.winRate,
+      maxGain: trustStats.maxGain,
+      maxLoss: trustStats.maxLoss,
     }
   })
 
   const activeHorizon = horizons.find((h) => h.key === "d30") ?? horizons[2]
+  const today = todayDateKey()
 
   const recentPicks = [...picks]
     .sort((a, b) => b.recommendedAt.localeCompare(a.recommendedAt))
-    .slice(0, 12)
+    .slice(0, 20)
     .map((p) => {
       const country = p.country === "KR" ? "KR" : "US"
       const ret =
+        p.finalReturnPct ??
         p.returnPct ??
         p.horizons?.d30 ??
         p.horizons?.d14 ??
@@ -143,14 +105,8 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
           if (minRet == null || v < minRet) minRet = v
         }
       }
-      const today = todayDateKey()
-      const daysHeld = Math.max(
-        0,
-        Math.round(
-          (Date.parse(today) - Date.parse(String(p.recommendedAt).slice(0, 10))) / 86400000,
-        ),
-      )
-      const outcome = classifyPickOutcome(ret)
+      const daysHeld = daysBetweenPickDates(p.recommendedAt, p.closedAt ?? today)
+      const lifecycle = resolvePickLifecycleView(p.lifecycleId ?? "active")
       return {
         ticker: p.ticker,
         name: p.name,
@@ -162,8 +118,10 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
         maxReturnLabel: formatPerfPct(maxRet),
         maxLossLabel: formatPerfPct(minRet),
         daysHeldLabel: `${daysHeld}일`,
-        success: outcome === "success",
-        successLabel: outcome === "success" ? "성공" : outcome === "failure" ? "실패" : "보통",
+        lifecycleId: lifecycle.id,
+        resultBadge: `${lifecycle.badgeEmoji} ${lifecycle.badgeLabel}`,
+        successLabel: `${lifecycle.badgeEmoji} ${lifecycle.badgeLabel}`,
+        statusLabel: `${lifecycle.emoji} ${lifecycle.label}`,
       }
     })
 
@@ -172,6 +130,7 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
     windowDays,
     horizons,
     kpi: activeHorizon,
+    trustStats,
     recentPicks,
     pickCount: picks.length,
     visible: picks.length > 0 || (allPicks ?? []).length > 0,

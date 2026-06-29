@@ -28,6 +28,7 @@ import {
   buildRecommendSnapshot,
   stockReadyForRecommendCapture,
 } from "./ydsValidationRecommendSnapshot.js"
+import { updatePickLifecycle } from "./ydsPickLifecycleEngine.js"
 import {
   filterByCountry,
   getRankingStocks,
@@ -400,7 +401,8 @@ export function refreshValidationPicks(picks, priceMap, options = {}) {
   const refreshed = sanitized.map((r) => {
     const stock = stockByKey.get(`${r.country}:${r.ticker}`) ?? null
     const withSnap = backfillRecommendSnapshot(r, stock, marketContext)
-    return refreshPickPrice(withSnap, today, map)
+    const priced = refreshPickPrice(withSnap, today, map)
+    return updatePickLifecycle(priced, today, stock)
   })
   saveValidationPicks(refreshed)
   return refreshed

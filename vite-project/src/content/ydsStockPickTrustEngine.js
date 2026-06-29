@@ -7,6 +7,10 @@ import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
 import { loadValidationPicks } from "./ydsValidationStorage.js"
+import {
+  computePickReturnExtremes,
+  resolvePickLifecycleView,
+} from "./ydsPickLifecycleEngine.js"
 import { getRegimeTopStocks } from "./ydsStockPickMarketRegime.js"
 import { RECOMMEND_ENGINE_LABELS } from "./ydsStockRecommendEngine.js"
 import { buildAiRationaleProgressBars } from "./ydsStockPickAiAnalysisEngine.js"
@@ -398,22 +402,19 @@ export function buildStockPickHubHistoryReport(stocks) {
     const sym = String(pick.ticker).toUpperCase()
     const currentPrice = priceByTicker.get(sym) ?? pick.currentPrice ?? null
     const recPrice = pick.recommendedPrice ?? null
-    const ret = calcRecommendReturnPct(recPrice, currentPrice)
-    let maxRet = ret
-    let minRet = ret
-    for (const v of Object.values(pick.horizons ?? {})) {
-      if (v != null && Number.isFinite(v)) {
-        if (maxRet == null || v > maxRet) maxRet = v
-        if (minRet == null || v < minRet) minRet = v
-      }
-    }
+    const ret =
+      pick.finalReturnPct ??
+      calcRecommendReturnPct(recPrice, currentPrice) ??
+      pick.returnPct ??
+      null
+    const { maxRet, minRet } = computePickReturnExtremes({
+      ...pick,
+      returnPct: ret,
+      currentPrice,
+    })
 
-    const today = new Date().toISOString().slice(0, 10)
-    const days =
-      (Date.parse(today) - Date.parse(String(pick.recommendedAt).slice(0, 10))) / 86400000
-    let statusLabel = "추천중"
-    if (days > 45) statusLabel = "종료"
-    else if (pick.statusId === "watch" || pick.statusId === "scaleIn") statusLabel = "관찰"
+    const lifecycleId = pick.lifecycleId ?? "active"
+    const lifecycle = resolvePickLifecycleView(lifecycleId)
 
     return {
       pickId: pick.id,
@@ -426,7 +427,12 @@ export function buildStockPickHubHistoryReport(stocks) {
       returnLabel: formatPerfPct(ret),
       maxReturnLabel: formatPerfPct(maxRet),
       minReturnLabel: formatPerfPct(minRet),
-      statusLabel,
+      lifecycleId,
+      statusLabel: `${lifecycle.emoji} ${lifecycle.label}`,
+      statusTone: lifecycle.tone,
+      resultBadge: `${lifecycle.badgeEmoji} ${lifecycle.badgeLabel}`,
+      closedAt: pick.closedAt ?? null,
+      closeReason: pick.closeReason ?? null,
     }
   })
 

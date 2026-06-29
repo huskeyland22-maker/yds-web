@@ -6,6 +6,11 @@ import { loadValidationPicks } from "./ydsValidationStorage.js"
 import { readScoreHistory } from "./ydsStockPickScoreHistory.js"
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
+import {
+  computePickReturnExtremes,
+  migratePickLifecycle,
+  resolvePickLifecycleView,
+} from "./ydsPickLifecycleEngine.js"
 
 /** @param {string} dateKey */
 function formatMdDot(dateKey) {
@@ -32,14 +37,9 @@ export function findAllValidationPicksForTicker(ticker, country = "US") {
  * @param {import("./ydsValidationStorage.js").ValidationPickRecord} record
  */
 function resolveRecommendStatus(record) {
-  const today = new Date().toISOString().slice(0, 10)
-  const days =
-    (Date.parse(today) - Date.parse(String(record.recommendedAt).slice(0, 10))) / 86400000
-  if (days > 45) return { id: "ended", label: "종료" }
-  if (record.statusId === "watch" || record.statusId === "scaleIn") {
-    return { id: "watch", label: "관찰" }
-  }
-  return { id: "active", label: "추천중" }
+  const migrated = migratePickLifecycle(record)
+  const view = resolvePickLifecycleView(migrated.lifecycleId ?? "active")
+  return { id: view.filterGroup, label: view.label, lifecycleId: migrated.lifecycleId }
 }
 
 /**
@@ -97,13 +97,8 @@ export function buildStockPickRecommendHistoryReport(stock) {
 
   let maxReturn = currentReturn
   for (const pick of validationRows) {
-    const vals = Object.values(pick.horizons ?? {}).filter((v) => v != null && Number.isFinite(v))
-    for (const v of vals) {
-      if (maxReturn == null || v > maxReturn) maxReturn = v
-    }
-    if (pick.returnPct != null && (maxReturn == null || pick.returnPct > maxReturn)) {
-      maxReturn = pick.returnPct
-    }
+    const { maxRet } = computePickReturnExtremes(pick)
+    if (maxRet != null && (maxReturn == null || maxRet > maxReturn)) maxReturn = maxRet
   }
 
   const status = latestPick
@@ -129,6 +124,8 @@ export function buildStockPickRecommendHistoryReport(stock) {
     maxReturnLabel: formatPerfPct(maxReturn),
     currentReturn,
     currentReturnLabel: formatPerfPct(currentReturn),
-    endedPicks: validationRows.filter((p) => resolveRecommendStatus(p).id === "ended").length,
+    endedPicks: validationRows.filter(
+      (p) => (migratePickLifecycle(p).lifecycleId ?? "active") !== "active",
+    ).length,
   }
 }

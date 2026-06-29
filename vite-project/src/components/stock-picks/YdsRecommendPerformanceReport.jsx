@@ -16,8 +16,8 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
   }, [windowDays])
 
   const kpi = report.horizons.find((h) => h.key === horizonKey) ?? report.kpi
-  const winRate =
-    kpi.winRate != null ? `${kpi.winRate}%` : kpi.successRate != null ? `${kpi.successRate}%` : "—"
+  const stats = report.trustStats ?? kpi
+  const winRate = stats.winRate != null ? `${stats.winRate}%` : "—"
 
   if (!report.visible) {
     return (
@@ -53,15 +53,33 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
         <dl className="yds-rec-perf-report__summary-kpi">
           <div>
             <dt>추천</dt>
-            <dd className="font-mono tabular-nums">{kpi.count}건</dd>
+            <dd className="font-mono tabular-nums">{stats.count}건</dd>
           </div>
           <div>
             <dt>평균수익</dt>
-            <dd className="font-mono tabular-nums">{formatPerfPct(kpi.avgReturn)}</dd>
+            <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgReturn)}</dd>
           </div>
           <div>
             <dt>승률</dt>
             <dd className="font-mono tabular-nums">{winRate}</dd>
+          </div>
+        </dl>
+        <dl className="yds-rec-perf-report__summary-breakdown">
+          <div>
+            <dt>성공</dt>
+            <dd className="font-mono tabular-nums">{stats.successCount ?? 0}</dd>
+          </div>
+          <div>
+            <dt>실패</dt>
+            <dd className="font-mono tabular-nums">{stats.failureCount ?? 0}</dd>
+          </div>
+          <div>
+            <dt>종료</dt>
+            <dd className="font-mono tabular-nums">{stats.endedCount ?? 0}</dd>
+          </div>
+          <div>
+            <dt>보유중</dt>
+            <dd className="font-mono tabular-nums">{stats.holdingCount ?? 0}</dd>
           </div>
         </dl>
 
@@ -99,8 +117,24 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
 
           <dl className="yds-rec-perf-report__kpi">
             <div>
-              <dt>추천 종목 수</dt>
-              <dd className="font-mono tabular-nums">{kpi.count}</dd>
+              <dt>추천 건수</dt>
+              <dd className="font-mono tabular-nums">{stats.count}</dd>
+            </div>
+            <div>
+              <dt>성공</dt>
+              <dd className="font-mono tabular-nums">{stats.successCount ?? 0}</dd>
+            </div>
+            <div>
+              <dt>실패</dt>
+              <dd className="font-mono tabular-nums">{stats.failureCount ?? 0}</dd>
+            </div>
+            <div>
+              <dt>종료</dt>
+              <dd className="font-mono tabular-nums">{stats.endedCount ?? 0}</dd>
+            </div>
+            <div>
+              <dt>보유중</dt>
+              <dd className="font-mono tabular-nums">{stats.holdingCount ?? 0}</dd>
             </div>
             <div>
               <dt>승률</dt>
@@ -108,21 +142,27 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
             </div>
             <div>
               <dt>평균 수익률</dt>
-              <dd className="font-mono tabular-nums">{formatPerfPct(kpi.avgReturn)}</dd>
+              <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgReturn)}</dd>
             </div>
             <div>
               <dt>평균 손실률</dt>
-              <dd className="font-mono tabular-nums">{formatPerfPct(kpi.avgLoss)}</dd>
+              <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgLoss)}</dd>
             </div>
             <div>
-              <dt>손익비</dt>
-              <dd className="font-mono tabular-nums">
-                {kpi.profitFactor != null ? kpi.profitFactor.toFixed(2) : "—"}
+              <dt>최고수익</dt>
+              <dd className="font-mono tabular-nums yds-rec-perf-report__up">
+                {formatPerfPct(stats.maxGain)}
+              </dd>
+            </div>
+            <div>
+              <dt>최대손실</dt>
+              <dd className="font-mono tabular-nums yds-rec-perf-report__down">
+                {formatPerfPct(stats.maxLoss)}
               </dd>
             </div>
             <div>
               <dt>평균 보유기간</dt>
-              <dd>{kpi.avgHoldDays != null ? `${kpi.avgHoldDays}일` : "—"}</dd>
+              <dd>{stats.avgHoldDays != null ? `${stats.avgHoldDays}일` : "—"}</dd>
             </div>
             <div>
               <dt>Alpha (SPY 대비)</dt>
@@ -144,6 +184,7 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
                     <th>최고</th>
                     <th>최대손실</th>
                     <th>유지일</th>
+                    <th>상태</th>
                     <th>결과</th>
                   </tr>
                 </thead>
@@ -167,7 +208,10 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
                       <td className="font-mono tabular-nums yds-rec-perf-report__up">{row.maxReturnLabel}</td>
                       <td className="font-mono tabular-nums yds-rec-perf-report__down">{row.maxLossLabel}</td>
                       <td>{row.daysHeldLabel}</td>
-                      <td>{row.successLabel}</td>
+                      <td>{row.statusLabel}</td>
+                      <td>
+                        <span className="yds-rec-perf-report__result-badge">{row.resultBadge}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
