@@ -31660,6 +31660,159 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   transform: translateY(0);
 }
 
+/* —— 시장 상태 변화 이력 (GO: 사이클·점수·행동) —— */
+
+.yds-market-state-timeline--rich {
+  padding: 0.5rem 0.55rem 0.45rem;
+}
+
+.yds-market-state-cycle-strip {
+  margin: 0 0 0.45rem;
+  padding: 0.38rem 0.42rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(2, 6, 23, 0.55);
+}
+
+.yds-market-state-cycle-strip__track {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem 0.1rem;
+}
+
+.yds-market-state-cycle-strip__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-market-state-cycle-strip__step--current {
+  color: var(--cycle-color, #fde68a);
+}
+
+.yds-market-state-cycle-strip__step--current .yds-market-state-cycle-strip__label {
+  color: var(--cycle-color, #fde68a);
+  font-weight: 900;
+}
+
+.yds-market-state-cycle-strip__dash {
+  color: #475569;
+  margin: 0 0.05rem;
+  font-weight: 400;
+}
+
+.yds-market-state-cycle-strip__marker {
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: var(--cycle-color, #facc15);
+  white-space: nowrap;
+}
+
+.yds-market-state-timeline--rich .yds-market-state-timeline__item {
+  grid-template-columns: 0.85rem 1fr;
+  margin-bottom: 0.35rem;
+}
+
+.yds-market-state-timeline__card {
+  padding: 0.42rem 0.48rem;
+  border-radius: 0.42rem;
+  border: 1px solid color-mix(in srgb, var(--state-color, #64748b) 35%, transparent);
+  border-left: 3px solid var(--state-color, #64748b);
+  background: color-mix(in srgb, var(--state-color, #64748b) 8%, rgba(2, 6, 23, 0.65));
+}
+
+.yds-market-state-timeline__item--current .yds-market-state-timeline__card {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--state-color, #facc15) 25%, transparent);
+}
+
+.yds-market-state-timeline--rich .yds-market-state-timeline__label {
+  color: var(--state-color, #94a3b8);
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+}
+
+.yds-market-state-timeline--rich .yds-market-state-timeline__duration {
+  color: #94a3b8;
+  font-size: 0.58rem;
+}
+
+.yds-market-state-timeline--rich .yds-market-state-timeline__dates {
+  font-size: 0.58rem;
+  color: #cbd5e1;
+  margin-bottom: 0.28rem;
+}
+
+.yds-market-state-timeline__scores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.22rem 0.35rem;
+  margin: 0 0 0.32rem;
+  padding: 0.28rem 0.32rem;
+  border-radius: 0.32rem;
+  background: rgba(15, 23, 42, 0.45);
+  font-size: 0.54rem;
+}
+
+.yds-market-state-timeline__scores dt {
+  margin: 0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.yds-market-state-timeline__scores dd {
+  margin: 0.06rem 0 0;
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.yds-market-state-timeline__action {
+  margin-top: 0.15rem;
+  padding-top: 0.28rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-state-timeline__action-title {
+  margin: 0 0 0.15rem;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.yds-market-state-timeline__action-line {
+  margin: 0 0 0.12rem;
+  font-size: 0.6rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.yds-market-state-timeline__action-line:last-child {
+  margin-bottom: 0;
+}
+
+.yds-market-state-timeline--rich .yds-market-state-timeline__dot {
+  color: var(--state-color, #facc15);
+}
+
+.yds-market-state-timeline--rich .yds-market-state-timeline__node {
+  background: var(--state-color, #64748b);
+}
+
+@media (max-width: 480px) {
+  .yds-market-state-timeline__scores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .yds-market-state-cycle-strip__track {
+    justify-content: flex-start;
+  }
+}
+
 .yds-market-desk__slot--desk-tail {
   margin-bottom: 0;
 }

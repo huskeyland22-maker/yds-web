@@ -45,6 +45,9 @@ assert.ok(timeline.segments.length >= 1 && timeline.segments.length <= 5)
 assert.ok(timeline.segments.every((seg) => seg.durationDays >= 1))
 assert.ok(timeline.segments[timeline.segments.length - 1].isCurrent)
 assert.ok(timeline.segments[timeline.segments.length - 1].dateRangeLabel.includes("진행중"))
+assert.ok(timeline.cycleStrip?.stages?.length === 5)
+assert.ok(timeline.segments.every((seg) => seg.scoreRows && seg.investmentActionLines?.length))
+assert.ok(timeline.segments.every((seg) => seg.color))
 
 const changes = buildRecentMarketStateChanges(
   historyRows,

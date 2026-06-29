@@ -29,12 +29,47 @@ export default function YdsMarketStateRecentChanges({
 
   if (!report.visible) return null
 
+  const { cycleStrip } = report
+
   return (
     <section
-      className={["yds-market-state-timeline", className].filter(Boolean).join(" ")}
+      className={["yds-market-state-timeline", "yds-market-state-timeline--rich", className]
+        .filter(Boolean)
+        .join(" ")}
       aria-label={report.title}
     >
       <p className="yds-market-state-timeline__title">{report.title}</p>
+
+      <div className="yds-market-state-cycle-strip" aria-label="시장 사이클">
+        <div className="yds-market-state-cycle-strip__track">
+          {cycleStrip.stages.map((stage, index) => {
+            const isCurrent = stage.id === cycleStrip.currentId
+            return (
+              <div
+                key={stage.id}
+                className={[
+                  "yds-market-state-cycle-strip__step",
+                  isCurrent ? "yds-market-state-cycle-strip__step--current" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={{ "--cycle-color": stage.color }}
+              >
+                {index > 0 ? (
+                  <span className="yds-market-state-cycle-strip__dash" aria-hidden>
+                    ─
+                  </span>
+                ) : null}
+                <span className="yds-market-state-cycle-strip__label">{stage.label}</span>
+                {isCurrent ? (
+                  <span className="yds-market-state-cycle-strip__marker">▲ 현재</span>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
       <ol className="yds-market-state-timeline__list">
         {report.segments.map((seg, index) => (
           <li
@@ -45,6 +80,7 @@ export default function YdsMarketStateRecentChanges({
             ]
               .filter(Boolean)
               .join(" ")}
+            style={{ "--state-color": seg.color }}
           >
             <div className="yds-market-state-timeline__rail" aria-hidden>
               {seg.isCurrent ? (
@@ -57,29 +93,36 @@ export default function YdsMarketStateRecentChanges({
               ) : null}
             </div>
 
-            <div
-              className="yds-market-state-timeline__body"
-              tabIndex={0}
-              title={seg.tooltipLines.join(" · ")}
-            >
+            <article className="yds-market-state-timeline__card">
               <div className="yds-market-state-timeline__head">
                 <span className="yds-market-state-timeline__label">{seg.label}</span>
                 <span className="yds-market-state-timeline__duration">{seg.durationLabel}</span>
               </div>
+
               <p className="yds-market-state-timeline__dates">{seg.dateRangeLabel}</p>
-              {seg.isCurrent ? (
-                <span className="yds-market-state-timeline__now">현재</span>
+
+              {seg.scoreRows.length ? (
+                <dl className="yds-market-state-timeline__scores">
+                  {seg.scoreRows.map((row) => (
+                    <div key={row.key}>
+                      <dt>{row.label}</dt>
+                      <dd className="font-mono tabular-nums">{row.value}</dd>
+                    </div>
+                  ))}
+                </dl>
               ) : null}
-              {seg.tooltipLines.length > 0 ? (
-                <div className="yds-market-state-timeline__tooltip" role="tooltip">
-                  {seg.tooltipLines.map((line) => (
-                    <span key={line} className="yds-market-state-timeline__tooltip-line">
+
+              {seg.investmentActionLines.length ? (
+                <div className="yds-market-state-timeline__action">
+                  <p className="yds-market-state-timeline__action-title">투자 행동</p>
+                  {seg.investmentActionLines.map((line) => (
+                    <p key={line} className="yds-market-state-timeline__action-line">
                       {line}
-                    </span>
+                    </p>
                   ))}
                 </div>
               ) : null}
-            </div>
+            </article>
           </li>
         ))}
       </ol>

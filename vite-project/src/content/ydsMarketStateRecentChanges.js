@@ -7,6 +7,13 @@ import { localCalendarDateKey, parseCalendarDateKey } from "../utils/calendarDat
 import { computeMarketPositionScore, resolveMarketPositionId } from "./ydsMarketPositionEngine.js"
 import { toNum } from "./ydsLayerHistory.js"
 import { buildMarketCycleFlowReport } from "./ydsMarketCycleFlow.js"
+import {
+  buildMarketCycleStrip,
+  buildMarketStateInvestmentAction,
+  buildMarketStateScoreRows,
+  cycleFamilyColor,
+  resolveCycleFamilyFromLabel,
+} from "./ydsMarketStateCycleVisual.js"
 
 /**
  * @typedef {{
@@ -29,6 +36,11 @@ import { buildMarketCycleFlowReport } from "./ydsMarketCycleFlow.js"
  *   isCurrent: boolean
  *   snapshot: MarketStateTimelineSnapshot
  *   tooltipLines: string[]
+ *   cycleFamilyId: import("./ydsMarketStateCycleVisual.js").MarketCycleFamilyId
+ *   color: string
+ *   scoreRows: { key: string; label: string; value: string }[]
+ *   investmentAction: string
+ *   investmentActionLines: string[]
  * }} MarketStateTimelineSegment
  */
 
@@ -36,6 +48,7 @@ import { buildMarketCycleFlowReport } from "./ydsMarketCycleFlow.js"
  * @typedef {{
  *   visible: boolean
  *   title: string
+ *   cycleStrip: ReturnType<typeof buildMarketCycleStrip>
  *   segments: MarketStateTimelineSegment[]
  * }} MarketStateChangeTimelineReport
  */
@@ -125,7 +138,12 @@ export function buildMarketStateChangeTimeline(
   const windowed = sorted.slice(-windowDays)
 
   if (!windowed.length) {
-    return { visible: false, title: "시장 상태 변화 이력", segments: [] }
+    return {
+      visible: false,
+      title: "시장 상태 변화 이력",
+      cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel),
+      segments: [],
+    }
   }
 
   /** @type {Array<{
@@ -191,7 +209,12 @@ export function buildMarketStateChangeTimeline(
   }
 
   if (!rawSegments.length) {
-    return { visible: false, title: "시장 상태 변화 이력", segments: [] }
+    return {
+      visible: false,
+      title: "시장 상태 변화 이력",
+      cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel),
+      segments: [],
+    }
   }
 
   const lastSegment = rawSegments[rawSegments.length - 1]
@@ -230,6 +253,8 @@ export function buildMarketStateChangeTimeline(
     const dateRangeLabel = isCurrent
       ? `${formatDateDot(seg.startDate)} ~ 진행중`
       : `${formatDateDot(seg.startDate)} ~ ${formatDateDot(seg.endDate)}`
+    const cycleFamilyId = resolveCycleFamilyFromLabel(seg.label)
+    const investmentAction = buildMarketStateInvestmentAction(seg.label)
 
     return {
       label: seg.label,
@@ -241,12 +266,21 @@ export function buildMarketStateChangeTimeline(
       isCurrent,
       snapshot: seg.snapshot,
       tooltipLines: buildTooltipLines(seg.snapshot),
+      cycleFamilyId,
+      color: cycleFamilyColor(cycleFamilyId),
+      scoreRows: buildMarketStateScoreRows(seg.snapshot),
+      investmentAction,
+      investmentActionLines: investmentAction.split("\n").filter(Boolean),
     }
   })
+
+  const currentLabel =
+    cycleFlow?.currentCycleLabel ?? segments[segments.length - 1]?.label ?? ""
 
   return {
     visible: segments.length > 0,
     title: "시장 상태 변화 이력",
+    cycleStrip: buildMarketCycleStrip(currentLabel),
     segments,
   }
 }
