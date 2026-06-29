@@ -12,16 +12,24 @@ import {
  * @param {string} ticker
  * @param {string} [country]
  */
-export function findValidationPickByTicker(ticker, country = "US") {
+function picksForTicker(ticker, country = "US") {
   const sym = String(ticker ?? "").toUpperCase()
-  const picks = loadValidationPicks()
-  const matches = picks.filter(
+  return loadValidationPicks().filter(
     (p) =>
       String(p.ticker ?? "").toUpperCase() === sym &&
       (country === "KR" ? p.country === "KR" : p.country !== "KR"),
   )
+}
+
+export function findValidationPickByTicker(ticker, country = "US") {
+  const matches = picksForTicker(ticker, country)
   matches.sort((a, b) => String(b.recommendedAt).localeCompare(String(a.recommendedAt)))
   return matches[0] ?? null
+}
+
+/** @param {string} ticker @param {string} [country] */
+export function countValidationPicksByTicker(ticker, country = "US") {
+  return picksForTicker(ticker, country).length
 }
 
 /**

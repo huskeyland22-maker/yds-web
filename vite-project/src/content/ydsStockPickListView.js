@@ -2,11 +2,21 @@
  * 종목추천 리스트 · 테이블 · TOP5 카드 공통 표시 데이터
  */
 
-import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
+import {
+  countValidationPicksByTicker,
+  findValidationPickByTicker,
+} from "./ydsPickValidationLink.js"
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { resolveRecommendStatusView } from "./ydsStockPickRecommendColors.js"
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
+import { daysBetweenPickDates } from "./ydsPickLifecycleEngine.js"
+import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
+import { getRecommendScoreDelta } from "./ydsStockPickScoreHistory.js"
+import {
+  estimateHoldPeriodLabel,
+  estimateUpsidePct,
+} from "./ydsStockPickDashboardEngine.js"
 
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
 
@@ -47,6 +57,26 @@ export function resolveRecommendGradeSort(stock) {
   return (v4.finalRankScore ?? v4.total ?? 0) + (v4.quality ?? 0) * 0.01
 }
 
+/**
+ * @param {import("./ydsValidationStorage.js").ValidationPickRecord | null} pick
+ * @param {number | null} currentReturn
+ */
+function resolvePickReturnExtremes(pick, currentReturn) {
+  let maxRet = currentReturn
+  let minRet = currentReturn
+  for (const v of Object.values(pick?.horizons ?? {})) {
+    if (v != null && Number.isFinite(v)) {
+      if (maxRet == null || v > maxRet) maxRet = v
+      if (minRet == null || v < minRet) minRet = v
+    }
+  }
+  if (pick?.finalReturnPct != null && Number.isFinite(pick.finalReturnPct)) {
+    if (maxRet == null || pick.finalReturnPct > maxRet) maxRet = pick.finalReturnPct
+    if (minRet == null || pick.finalReturnPct < minRet) minRet = pick.finalReturnPct
+  }
+  return { maxRet, minRet, mdd: minRet }
+}
+
 /** @param {StockPickView} stock */
 export function buildStockPickListRow(stock) {
   const country = stock.country === "KR" ? "KR" : "US"
@@ -56,6 +86,18 @@ export function buildStockPickListRow(stock) {
   const returnPct = calcRecommendReturnPct(recPrice, currentRaw)
   const recStatus = resolveRecommendStatusView(stock)
   const conf = stock.trustReport?.aiConfidence
+  const { maxRet, mdd } = resolvePickReturnExtremes(pick, returnPct)
+  const recommendedAt = pick?.recommendedAt ? String(pick.recommendedAt).slice(0, 10) : null
+  const today = todayDateKey()
+  const daysSinceRecommend = recommendedAt
+    ? daysBetweenPickDates(recommendedAt, today)
+    : null
+  const scoreDelta = getRecommendScoreDelta(stock.ticker)
+  const aiDelta =
+    scoreDelta?.delta != null && Number.isFinite(scoreDelta.delta) ? scoreDelta.delta : null
+  const upside = estimateUpsidePct(stock, Math.max(0, (stock.rank ?? 1) - 1))
+  const holdPeriod = estimateHoldPeriodLabel(recStatus.id)
+  const recommendCount = countValidationPicksByTicker(stock.ticker, country)
 
   return {
     ticker: stock.ticker,
@@ -67,19 +109,92 @@ export function buildStockPickListRow(stock) {
     statusLabel: recStatus.label,
     statusTone: recStatus.tone,
     sector: stock.sectorLabel || stock.sector || "—",
+    recommendedAt,
+    daysSinceRecommend,
     recommendedPrice: recPrice,
     recommendedPriceLabel:
       recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
     currentPriceLabel: formatTransparencyPrice(currentRaw, country),
     returnPct,
     returnLabel: formatPerfPct(returnPct),
+    maxReturnPct: maxRet,
+    maxReturnLabel: formatPerfPct(maxRet),
+    mddPct: mdd,
+    mddLabel: formatPerfPct(mdd),
+    aiDelta,
+    aiDeltaLabel:
+      aiDelta == null
+        ? "—"
+        : aiDelta > 0
+          ? `+${aiDelta}`
+          : aiDelta < 0
+            ? `${aiDelta}`
+            : "0",
+    recommendCount,
     confidenceScore: conf?.score ?? null,
     confidenceTier: conf ? confidenceDisplayTier(conf.score) : null,
+    expectedReturnPct: upside,
+    expectedReturnLabel: formatPerfPct(upside),
+    holdPeriodLabel: holdPeriod,
     rank: stock.rank,
   }
 }
 
-/** @typedef {'aiScore' | 'recommendGrade' | 'returnPct'} StockPickListSortKey */
+/** @typedef {keyof ReturnType<typeof buildStockPickListRow> | 'name'} StockPickListSortKey */
+
+/** @type {ReadonlyArray<{ id: StockPickListSortKey; label: string; defaultVisible?: boolean }>} */
+export const STOCK_PICK_TABLE_COLUMNS = [
+  { id: "name", label: "종목", defaultVisible: true },
+  { id: "aiScore", label: "AI", defaultVisible: true },
+  { id: "recommendGrade", label: "등급", defaultVisible: true },
+  { id: "recommendStatusId", label: "상태", defaultVisible: true },
+  { id: "recommendedAt", label: "추천일", defaultVisible: true },
+  { id: "daysSinceRecommend", label: "경과일", defaultVisible: true },
+  { id: "recommendedPrice", label: "추천가", defaultVisible: true },
+  { id: "currentPriceLabel", label: "현재가", defaultVisible: true },
+  { id: "maxReturnPct", label: "최고수익", defaultVisible: true },
+  { id: "returnPct", label: "현재수익", defaultVisible: true },
+  { id: "mddPct", label: "MDD", defaultVisible: true },
+  { id: "aiDelta", label: "AI 변화", defaultVisible: true },
+  { id: "sector", label: "섹터", defaultVisible: false },
+  { id: "recommendCount", label: "추천횟수", defaultVisible: true },
+]
+
+const COLUMN_STORAGE_KEY = "yds-spick-table-columns"
+
+/** @returns {Set<StockPickListSortKey>} */
+export function loadStockPickTableColumnPrefs() {
+  if (typeof localStorage === "undefined") {
+    return new Set(
+      STOCK_PICK_TABLE_COLUMNS.filter((c) => c.defaultVisible !== false).map((c) => c.id),
+    )
+  }
+  try {
+    const raw = localStorage.getItem(COLUMN_STORAGE_KEY)
+    if (!raw) {
+      return new Set(
+        STOCK_PICK_TABLE_COLUMNS.filter((c) => c.defaultVisible !== false).map((c) => c.id),
+      )
+    }
+    const ids = JSON.parse(raw)
+    if (!Array.isArray(ids) || !ids.length) {
+      return new Set(
+        STOCK_PICK_TABLE_COLUMNS.filter((c) => c.defaultVisible !== false).map((c) => c.id),
+      )
+    }
+    return new Set(ids)
+  } catch {
+    return new Set(
+      STOCK_PICK_TABLE_COLUMNS.filter((c) => c.defaultVisible !== false).map((c) => c.id),
+    )
+  }
+}
+
+/** @param {Set<StockPickListSortKey>} cols */
+export function saveStockPickTableColumnPrefs(cols) {
+  if (typeof localStorage === "undefined") return
+  localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify([...cols]))
+}
 
 /**
  * @param {StockPickView[]} stocks
@@ -91,14 +206,36 @@ export function sortStockPickList(stocks, sortKey, direction = "desc") {
   return stocks.slice().sort((a, b) => {
     const ra = buildStockPickListRow(a)
     const rb = buildStockPickListRow(b)
-    let diff = 0
-    if (sortKey === "aiScore") diff = ra.aiScore - rb.aiScore
-    else if (sortKey === "recommendGrade") diff = ra.recommendGradeSort - rb.recommendGradeSort
-    else if (sortKey === "returnPct") {
-      const av = ra.returnPct ?? -9999
-      const bv = rb.returnPct ?? -9999
-      diff = av - bv
-    } else diff = (a.rank ?? 999) - (b.rank ?? 999)
+    let av
+    let bv
+    if (sortKey === "name") {
+      av = ra.name
+      bv = rb.name
+      const diff = String(av).localeCompare(String(bv), "ko")
+      return diff * sign
+    }
+    if (sortKey === "recommendStatusId") {
+      av = ra.statusLabel
+      bv = rb.statusLabel
+      const diff = String(av).localeCompare(String(bv), "ko")
+      return diff * sign
+    }
+    if (sortKey === "recommendedAt") {
+      av = ra.recommendedAt ?? ""
+      bv = rb.recommendedAt ?? ""
+      const diff = String(av).localeCompare(String(bv))
+      return diff * sign
+    }
+    if (sortKey === "currentPriceLabel") {
+      av = Number(a.snapshot?.price ?? a.snapshot?.close) || 0
+      bv = Number(b.snapshot?.price ?? b.snapshot?.close) || 0
+    } else {
+      av = ra[sortKey]
+      bv = rb[sortKey]
+    }
+    const aNum = av == null || av === "—" ? -9999 : Number(av)
+    const bNum = bv == null || bv === "—" ? -9999 : Number(bv)
+    let diff = aNum - bNum
     if (diff === 0) diff = ra.aiScore - rb.aiScore
     return diff * sign
   })

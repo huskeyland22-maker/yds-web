@@ -2,7 +2,10 @@ import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import {
   buildStockPickListRow,
+  loadStockPickTableColumnPrefs,
+  saveStockPickTableColumnPrefs,
   sortStockPickList,
+  STOCK_PICK_TABLE_COLUMNS,
 } from "../../content/ydsStockPickListView.js"
 import { applyStockPickFilters } from "../../content/ydsStockPickFilterEngine.js"
 import YdsStockPickFilterBar from "./YdsStockPickFilterBar.jsx"
@@ -10,11 +13,60 @@ import YdsStockPickRecommendStatusBadge from "./YdsStockPickRecommendStatusBadge
 
 /** @typedef {import("../../content/ydsStockPickListView.js").StockPickListSortKey} SortKey */
 
-const SORT_OPTIONS = [
-  { id: "aiScore", label: "AI점수" },
-  { id: "recommendGrade", label: "추천등급" },
-  { id: "returnPct", label: "수익률" },
-]
+/**
+ * @param {SortKey} colId
+ * @param {ReturnType<typeof buildStockPickListRow>} row
+ * @param {import("../../content/ydsStockPickModel.js").StockPickView} stock
+ */
+function renderCell(colId, row, stock) {
+  const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
+  switch (colId) {
+    case "name":
+      return (
+        <Link to={to} className="yds-spick-all-table__name">
+          {stock.name}
+        </Link>
+      )
+    case "recommendStatusId":
+      return <YdsStockPickRecommendStatusBadge stock={stock} compact />
+    case "recommendedAt":
+      return row.recommendedAt ?? "—"
+    case "daysSinceRecommend":
+      return row.daysSinceRecommend != null ? `${row.daysSinceRecommend}일` : "—"
+    case "recommendedPrice":
+      return row.recommendedPriceLabel
+    case "currentPriceLabel":
+      return row.currentPriceLabel
+    case "maxReturnPct": {
+      const tone = row.maxReturnPct == null ? "muted" : row.maxReturnPct >= 0 ? "up" : "down"
+      return (
+        <span className={`yds-spick-all-table__ret--${tone}`}>{row.maxReturnLabel}</span>
+      )
+    }
+    case "returnPct": {
+      const tone = row.returnPct == null ? "muted" : row.returnPct >= 0 ? "up" : "down"
+      return (
+        <span className={`yds-spick-all-table__ret--${tone}`}>{row.returnLabel}</span>
+      )
+    }
+    case "mddPct": {
+      const tone = row.mddPct == null ? "muted" : row.mddPct >= 0 ? "up" : "down"
+      return (
+        <span className={`yds-spick-all-table__ret--${tone}`}>{row.mddLabel}</span>
+      )
+    }
+    case "aiDelta": {
+      const tone = row.aiDelta == null ? "muted" : row.aiDelta > 0 ? "up" : row.aiDelta < 0 ? "down" : "muted"
+      return (
+        <span className={`yds-spick-all-table__ret--${tone}`}>{row.aiDeltaLabel}</span>
+      )
+    }
+    case "recommendGrade":
+      return <span className="yds-spick-all-table__grade">{row.recommendGrade}</span>
+    default:
+      return row[colId] ?? "—"
+  }
+}
 
 /**
  * @param {{
@@ -40,6 +92,8 @@ export default function YdsStockPickAllTable({
 }) {
   const [sortKey, setSortKey] = useState(/** @type {SortKey} */ ("aiScore"))
   const [sortDir, setSortDir] = useState(/** @type {'asc' | 'desc'} */ ("desc"))
+  const [visibleCols, setVisibleCols] = useState(() => loadStockPickTableColumnPrefs())
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const filtered = useMemo(
     () => applyStockPickFilters(stocks, filters, { isFavorite }),
@@ -51,6 +105,11 @@ export default function YdsStockPickAllTable({
     [filtered, sortKey, sortDir],
   )
 
+  const columns = useMemo(
+    () => STOCK_PICK_TABLE_COLUMNS.filter((c) => visibleCols.has(c.id)),
+    [visibleCols],
+  )
+
   const toggleSort = (key) => {
     if (sortKey === key) {
       setSortDir((d) => (d === "desc" ? "asc" : "desc"))
@@ -58,6 +117,20 @@ export default function YdsStockPickAllTable({
     }
     setSortKey(key)
     setSortDir("desc")
+  }
+
+  const toggleColumn = (id) => {
+    setVisibleCols((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        if (next.size <= 3) return prev
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      saveStockPickTableColumnPrefs(next)
+      return next
+    })
   }
 
   return (
@@ -69,26 +142,32 @@ export default function YdsStockPickAllTable({
         <h2 id={sectionId} className="yds-spick-section__title yds-spick-section__title--inline yds-spick-section__title--tier">
           ④ 전체 종목
         </h2>
-        <div className="yds-spick-all-table__sorts" role="group" aria-label="정렬">
-          {SORT_OPTIONS.map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              className={[
-                "yds-spick-all-table__sort",
-                sortKey === opt.id ? "yds-spick-all-table__sort--active" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              aria-pressed={sortKey === opt.id}
-              onClick={() => toggleSort(/** @type {SortKey} */ (opt.id))}
-            >
-              {opt.label}
-              {sortKey === opt.id ? (sortDir === "desc" ? " ↓" : " ↑") : null}
-            </button>
-          ))}
+        <div className="yds-spick-all-table__tools">
+          <button
+            type="button"
+            className="yds-spick-all-table__col-btn"
+            aria-expanded={pickerOpen}
+            onClick={() => setPickerOpen((v) => !v)}
+          >
+            컬럼 {pickerOpen ? "▲" : "▼"}
+          </button>
         </div>
       </div>
+
+      {pickerOpen ? (
+        <div className="yds-spick-all-table__col-picker" role="group" aria-label="표시 컬럼">
+          {STOCK_PICK_TABLE_COLUMNS.map((col) => (
+            <label key={col.id} className="yds-spick-all-table__col-opt">
+              <input
+                type="checkbox"
+                checked={visibleCols.has(col.id)}
+                onChange={() => toggleColumn(col.id)}
+              />
+              {col.label}
+            </label>
+          ))}
+        </div>
+      ) : null}
 
       {showFilters ? (
         <YdsStockPickFilterBar
@@ -100,7 +179,7 @@ export default function YdsStockPickAllTable({
       ) : null}
 
       {loading && !sorted.length ? (
-        <p className="yds-spick-empty">시세 조회 중…</p>
+        <div className="yds-spick-skeleton__table" aria-hidden />
       ) : null}
 
       {!loading && !sorted.length ? (
@@ -112,45 +191,45 @@ export default function YdsStockPickAllTable({
           <table className="yds-spick-all-table">
             <thead>
               <tr>
-                <th scope="col">종목</th>
-                <th scope="col">AI</th>
-                <th scope="col">등급</th>
-                <th scope="col">상태</th>
-                <th scope="col">추천가</th>
-                <th scope="col">현재가</th>
-                <th scope="col">수익률</th>
+                {columns.map((col) => (
+                  <th key={col.id} scope="col">
+                    <button
+                      type="button"
+                      className={[
+                        "yds-spick-all-table__th-sort",
+                        sortKey === col.id ? "yds-spick-all-table__th-sort--active" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onClick={() => toggleSort(col.id)}
+                    >
+                      {col.label}
+                      {sortKey === col.id ? (sortDir === "desc" ? " ↓" : " ↑") : null}
+                    </button>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {sorted.map((stock) => {
                 const row = buildStockPickListRow(stock)
-                const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
-                const retTone =
-                  row.returnPct == null ? "muted" : row.returnPct >= 0 ? "up" : "down"
                 return (
                   <tr key={stock.ticker}>
-                    <td>
-                      <Link to={to} className="yds-spick-all-table__name">
-                        {stock.name}
-                      </Link>
-                    </td>
-                    <td className="font-mono tabular-nums">{row.aiScore}</td>
-                    <td className="font-mono tabular-nums yds-spick-all-table__grade">
-                      {row.recommendGrade}
-                    </td>
-                    <td>
-                      <YdsStockPickRecommendStatusBadge stock={stock} compact />
-                    </td>
-                    <td className="font-mono tabular-nums">{row.recommendedPriceLabel}</td>
-                    <td className="font-mono tabular-nums">{row.currentPriceLabel}</td>
-                    <td
-                      className={[
-                        "font-mono tabular-nums",
-                        `yds-spick-all-table__ret--${retTone}`,
-                      ].join(" ")}
-                    >
-                      {row.returnLabel}
-                    </td>
+                    {columns.map((col) => (
+                      <td
+                        key={col.id}
+                        className={[
+                          "font-mono tabular-nums",
+                          col.id === "name" || col.id === "sector" || col.id === "recommendStatusId"
+                            ? "yds-spick-all-table__td--text"
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        {renderCell(col.id, row, stock)}
+                      </td>
+                    ))}
                   </tr>
                 )
               })}

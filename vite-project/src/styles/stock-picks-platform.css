@@ -4021,7 +4021,7 @@
 }
 
 .yds-spick-country-panel__zone-all {
-  margin-top: 0.45rem;
+  margin-top: 0.2rem;
 }
 
 .yds-spick-top5--hero {
@@ -5206,6 +5206,273 @@
 @media (max-width: 720px) {
   .yds-spick-validation-kpi,
   .yds-spick-backtest-kpi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* —— GO #82–86: 종목추천 허브 완성도 —— */
+
+.yds-spick-platform--report {
+  gap: 0.4rem;
+}
+
+.yds-spick-hub-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 0.2rem;
+  background: linear-gradient(180deg, rgba(2, 6, 23, 0.98) 0%, rgba(2, 6, 23, 0.92) 85%, transparent 100%);
+  backdrop-filter: blur(8px);
+}
+
+.yds-spick-invest-dash--sticky {
+  margin-bottom: 0;
+}
+
+.yds-spick-hub__filters--sticky {
+  margin: 0;
+  padding: 0.3rem 0.35rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(51, 65, 85, 0.55);
+  background: rgba(15, 23, 42, 0.88);
+}
+
+.yds-rec-perf-report__summary-kpi--secondary {
+  margin-top: 0.15rem;
+}
+
+.yds-spick-hub-history__groups {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.yds-spick-hub-history__group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.yds-spick-hub-history__group {
+  border-radius: 0.35rem;
+  border: 1px solid rgba(51, 65, 85, 0.55);
+  background: rgba(15, 23, 42, 0.45);
+  overflow: hidden;
+}
+
+.yds-spick-hub-history__group-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.32rem 0.45rem;
+  border: 0;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 0.64rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+}
+
+.yds-spick-hub-history__group-head:hover {
+  background: rgba(30, 41, 59, 0.55);
+}
+
+.yds-spick-hub-history__group-meta {
+  font-size: 0.56rem;
+  font-weight: 700;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.yds-spick-hub-history__group-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  padding: 0 0.45rem 0.32rem;
+  font-size: 0.56rem;
+  color: #94a3b8;
+}
+
+.yds-spick-hub-history__entries {
+  list-style: none;
+  margin: 0;
+  padding: 0.15rem 0.45rem 0.35rem;
+  display: grid;
+  gap: 0.2rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.45);
+}
+
+.yds-spick-hub-history__entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+  font-size: 0.56rem;
+  color: #cbd5e1;
+}
+
+.yds-spick-hub-history__entry-date {
+  min-width: 4.5rem;
+  color: #94a3b8;
+}
+
+.yds-spick-hero-card--compact {
+  min-height: 4.5rem;
+  gap: 0.15rem;
+  padding: 0.38rem 0.42rem;
+}
+
+.yds-spick-hero-card__grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.12rem 0.35rem;
+  margin: 0;
+  font-size: 0.56rem;
+}
+
+.yds-spick-hero-card__grid2 dt {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.yds-spick-hero-card__grid2 dd {
+  margin: 0;
+  color: #e2e8f0;
+  font-weight: 800;
+}
+
+.yds-spick-hero-card__rationale--compact,
+.yds-spick-hero-card__action-guide--compact {
+  font-size: 0.54rem;
+}
+
+.yds-spick-hero-card__cta {
+  margin-top: 0.12rem;
+  padding: 0.22rem 0.3rem;
+  font-size: 0.54rem;
+}
+
+.yds-spick-all-table__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.yds-spick-all-table__col-btn {
+  padding: 0.18rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.55);
+  color: #94a3b8;
+  font-size: 0.56rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.yds-spick-all-table__col-btn:hover {
+  color: #cbd5e1;
+}
+
+.yds-spick-all-table__col-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.45rem;
+  margin-bottom: 0.35rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.yds-spick-all-table__col-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.56rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.yds-spick-all-table__th-sort {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.yds-spick-all-table__th-sort--active {
+  color: #93c5fd;
+}
+
+.yds-spick-all-table__td--text {
+  font-family: inherit;
+}
+
+.yds-spick-skeleton {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.yds-spick-skeleton__dash,
+.yds-spick-skeleton__row,
+.yds-spick-skeleton__card,
+.yds-spick-skeleton__table {
+  border-radius: 0.4rem;
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.55) 0%,
+    rgba(51, 65, 85, 0.75) 50%,
+    rgba(30, 41, 59, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  animation: yds-spick-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.yds-spick-skeleton__dash {
+  height: 3.5rem;
+}
+
+.yds-spick-skeleton__row {
+  height: 1.5rem;
+}
+
+.yds-spick-skeleton__cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.yds-spick-skeleton__card {
+  height: 4.5rem;
+}
+
+.yds-spick-skeleton__table {
+  height: 12rem;
+}
+
+.yds-spick-hub-skeleton--dual .yds-spick-skeleton__cards {
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+}
+
+@keyframes yds-spick-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (max-width: 1024px) {
+  .yds-spick-skeleton__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

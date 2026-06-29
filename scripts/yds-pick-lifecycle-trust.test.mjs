@@ -117,11 +117,33 @@ const stats = buildPickTrustPerfStats(
   30,
 )
 assert.equal(stats.count, 4)
+assert.equal(stats.initialRecommendCount, 4)
+assert.equal(stats.reRecommendCount, 0)
+assert.equal(stats.uniqueTickerCount, 4)
 assert.equal(stats.successCount, 1)
 assert.equal(stats.failureCount, 1)
 assert.equal(stats.endedCount, 1)
 assert.equal(stats.holdingCount, 1)
 assert.equal(stats.winRate, 50)
+
+const dupStats = buildPickTrustPerfStats(
+  [
+    pick({ recommendedAt: "2026-06-01", lifecycleId: "active" }),
+    pick({
+      id: "2026-06-10:US:NVDA",
+      recommendedAt: "2026-06-10",
+      lifecycleId: "targetHit",
+      finalReturnPct: 15,
+      closedAt: "2026-06-20",
+    }),
+  ],
+  30,
+)
+assert.equal(dupStats.initialRecommendCount, 1)
+assert.equal(dupStats.reRecommendCount, 1)
+assert.equal(dupStats.uniqueTickerCount, 1)
+assert.equal(dupStats.count, 1)
+assert.equal(dupStats.successCount, 1)
 
 const perf = buildRecommendPerfReport(
   [

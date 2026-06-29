@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { HUB_HISTORY_LIMIT_STEPS, resolveHubHistoryLimit } from "../../content/ydsStockPickHubHistoryEngine.js"
 import { filterHubHistoryRows, HUB_HISTORY_FILTERS } from "../../content/ydsPickLifecycleEngine.js"
+import {
+  filterHubHistoryByPeriod,
+  groupHubHistoryByTicker,
+  HUB_HISTORY_PERIOD_FILTERS,
+} from "../../content/ydsStockPickHubHistoryGroupEngine.js"
 
 /**
  * @param {{
@@ -10,32 +14,27 @@ import { filterHubHistoryRows, HUB_HISTORY_FILTERS } from "../../content/ydsPick
  * }} props
  */
 export default function YdsStockPickHubHistory({ report, className = "" }) {
-  const [limitStep, setLimitStep] = useState(0)
   const [statusFilter, setStatusFilter] = useState("all")
+  const [periodFilter, setPeriodFilter] = useState(/** @type {import("../../content/ydsStockPickHubHistoryGroupEngine.js").HubHistoryPeriodId} */ ("all"))
+  const [expandedTickers, setExpandedTickers] = useState(() => new Set())
 
-  const filteredRows = useMemo(
-    () => filterHubHistoryRows(report?.rows ?? [], statusFilter),
-    [report?.rows, statusFilter],
-  )
+  const filteredRows = useMemo(() => {
+    const byStatus = filterHubHistoryRows(report?.rows ?? [], statusFilter)
+    return filterHubHistoryByPeriod(byStatus, periodFilter)
+  }, [report?.rows, statusFilter, periodFilter])
 
-  const limit = resolveHubHistoryLimit(limitStep)
-  const total = filteredRows.length
+  const groups = useMemo(() => groupHubHistoryByTicker(filteredRows), [filteredRows])
 
-  const visibleRows = useMemo(() => {
-    if (!filteredRows.length) return []
-    if (limit === Infinity) return filteredRows
-    return filteredRows.slice(0, limit)
-  }, [filteredRows, limit])
+  const toggleGroup = (ticker) => {
+    setExpandedTickers((prev) => {
+      const next = new Set(prev)
+      if (next.has(ticker)) next.delete(ticker)
+      else next.add(ticker)
+      return next
+    })
+  }
 
   if (!report?.visible || !report.rows?.length) return null
-
-  const atMax = limitStep >= HUB_HISTORY_LIMIT_STEPS.length - 1
-  const currentLimit = HUB_HISTORY_LIMIT_STEPS[limitStep]
-  const canExpand = !atMax && total > currentLimit
-
-  const nextStep = HUB_HISTORY_LIMIT_STEPS[limitStep + 1]
-  const expandLabel =
-    nextStep === Infinity ? "더보기 ▼ (전체)" : `더보기 ▼ (${nextStep}건)`
 
   return (
     <section
@@ -47,8 +46,28 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
           {report.title}
         </h2>
         <span className="yds-spick-hub-history__count font-mono tabular-nums">
-          {visibleRows.length}/{total}건
+          {groups.length}종목 · {filteredRows.length}건
         </span>
+      </div>
+
+      <div className="yds-spick-hub-history__filters" role="tablist" aria-label="기간 필터">
+        {HUB_HISTORY_PERIOD_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            role="tab"
+            aria-selected={periodFilter === f.id}
+            className={[
+              "yds-spick-hub-history__filter",
+              periodFilter === f.id ? "yds-spick-hub-history__filter--active" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClick={() => setPeriodFilter(f.id)}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
 
       <div className="yds-spick-hub-history__filters" role="tablist" aria-label="추천 상태 필터">
@@ -64,92 +83,86 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
             ]
               .filter(Boolean)
               .join(" ")}
-            onClick={() => {
-              setStatusFilter(f.id)
-              setLimitStep(0)
-            }}
+            onClick={() => setStatusFilter(f.id)}
           >
             {f.label}
           </button>
         ))}
       </div>
 
-      {!visibleRows.length ? (
-        <p className="yds-spick-hub-history__empty">해당 상태의 추천 이력이 없습니다.</p>
+      {!groups.length ? (
+        <p className="yds-spick-hub-history__empty">해당 조건의 추천 이력이 없습니다.</p>
       ) : (
-        <div className="yds-spick-hub-history__scroll yds-spick-hub-table-scroll">
-          <table className="yds-spick-hub-history__table">
-            <thead>
-              <tr>
-                <th scope="col">추천일</th>
-                <th scope="col">종목</th>
-                <th scope="col">추천가</th>
-                <th scope="col">현재가</th>
-                <th scope="col">수익률</th>
-                <th scope="col">최고</th>
-                <th scope="col">최대손실</th>
-                <th scope="col">상태</th>
-                <th scope="col">결과</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleRows.map((row) => (
-                <tr key={`${row.ticker}-${row.recommendedAt}`}>
-                  <td className="font-mono tabular-nums">{String(row.recommendedAt).slice(0, 10)}</td>
-                  <td>{row.name}</td>
-                  <td className="font-mono tabular-nums">{row.recommendedPrice ?? "—"}</td>
-                  <td className="font-mono tabular-nums">{row.currentPrice ?? "—"}</td>
-                  <td className="font-mono tabular-nums">{row.returnLabel}</td>
-                  <td className="font-mono tabular-nums">{row.maxReturnLabel}</td>
-                  <td className="font-mono tabular-nums">{row.minReturnLabel}</td>
-                  <td>
-                    <span
-                      className={[
-                        "yds-spick-hub-history__status",
-                        `yds-spick-hub-history__status--${row.statusTone ?? "active"}`,
-                      ].join(" ")}
-                    >
-                      {row.statusLabel}
+        <div className="yds-spick-hub-history__groups yds-spick-hub-table-scroll">
+          <ul className="yds-spick-hub-history__group-list">
+            {groups.map((group) => {
+              const expanded = expandedTickers.has(group.ticker)
+              const latest = group.rows[0]
+              return (
+                <li key={group.ticker} className="yds-spick-hub-history__group">
+                  <button
+                    type="button"
+                    className="yds-spick-hub-history__group-head"
+                    aria-expanded={expanded}
+                    onClick={() => toggleGroup(group.ticker)}
+                  >
+                    <span className="yds-spick-hub-history__group-name">{group.name}</span>
+                    <span className="yds-spick-hub-history__group-meta font-mono tabular-nums">
+                      {expanded ? "▲" : "▼"} 추천 {group.count}회
                     </span>
-                  </td>
-                  <td>
-                    <span className="yds-spick-hub-history__badge">{row.resultBadge}</span>
-                  </td>
-                  <td>
-                    {row.pickId ? (
-                      <Link
-                        to={`/performance-validation/pick/${encodeURIComponent(row.pickId)}`}
-                        className="yds-spick-hub-history__link"
+                  </button>
+
+                  {!expanded ? (
+                    <div className="yds-spick-hub-history__group-preview">
+                      <span className="font-mono tabular-nums">
+                        {String(latest?.recommendedAt ?? "").slice(0, 10)}
+                      </span>
+                      <span
+                        className={[
+                          "yds-spick-hub-history__status",
+                          `yds-spick-hub-history__status--${latest?.statusTone ?? "active"}`,
+                        ].join(" ")}
                       >
-                        상세
-                      </Link>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        {latest?.statusLabel}
+                      </span>
+                      <span className="font-mono tabular-nums">{latest?.returnLabel}</span>
+                    </div>
+                  ) : (
+                    <ul className="yds-spick-hub-history__entries">
+                      {group.rows.map((row) => (
+                        <li key={`${row.ticker}-${row.recommendedAt}`} className="yds-spick-hub-history__entry">
+                          <span className="yds-spick-hub-history__entry-date font-mono tabular-nums">
+                            {String(row.recommendedAt).slice(0, 10)}
+                          </span>
+                          <span className="font-mono tabular-nums">{row.recommendedPrice ?? "—"}</span>
+                          <span className="font-mono tabular-nums">{row.returnLabel}</span>
+                          <span
+                            className={[
+                              "yds-spick-hub-history__status",
+                              `yds-spick-hub-history__status--${row.statusTone ?? "active"}`,
+                            ].join(" ")}
+                          >
+                            {row.statusLabel}
+                          </span>
+                          <span className="yds-spick-hub-history__badge">{row.resultBadge}</span>
+                          {row.pickId ? (
+                            <Link
+                              to={`/performance-validation/pick/${encodeURIComponent(row.pickId)}`}
+                              className="yds-spick-hub-history__link"
+                            >
+                              상세
+                            </Link>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
         </div>
       )}
-
-      {canExpand ? (
-        <button
-          type="button"
-          className="yds-spick-hub-history__more"
-          onClick={() => setLimitStep((s) => s + 1)}
-        >
-          {expandLabel}
-        </button>
-      ) : atMax && limitStep > 0 ? (
-        <button
-          type="button"
-          className="yds-spick-hub-history__more"
-          onClick={() => setLimitStep(0)}
-        >
-          접기 ▲
-        </button>
-      ) : null}
     </section>
   )
 }

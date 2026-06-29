@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom"
 import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
-import YdsStockPickAiConfidenceBar from "./YdsStockPickAiConfidenceBar.jsx"
 import YdsStockPickRecommendRationale from "./YdsStockPickRecommendRationale.jsx"
 import YdsStockPickRecommendStatusBadge from "./YdsStockPickRecommendStatusBadge.jsx"
 import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
+import { buildStockPickListRow } from "../../content/ydsStockPickListView.js"
 
 /**
- * GO #72 — TOP5: WHY · AI 의견 · 행동 · 신뢰도 · 상태 (비교 수치는 전체 종목)
+ * GO #84 — TOP5 2열 압축 레이아웃
  * @param {{
  *   stock: import("../../content/ydsStockPickModel.js").StockPickView
  *   medal?: string
@@ -25,13 +25,11 @@ export default function YdsStockPickHeroCard({
   isHeld = false,
 }) {
   const trust = stock.trustReport
-  const aiAnalysis = stock.aiAnalysisReport
+  const row = buildStockPickListRow(stock)
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
-  const aiOpinion =
-    aiAnalysis?.comprehensiveOpinion?.text ||
-    stock.opinion?.summary ||
-    stock.opinion?.headline ||
-    stock.recommendReasonSummary
+  const confLabel = row.confidenceTier?.label ?? "—"
+  const retTone =
+    row.returnPct == null ? "muted" : row.returnPct >= 0 ? "up" : "down"
 
   const rankClass =
     rankIndex === 0
@@ -47,6 +45,7 @@ export default function YdsStockPickHeroCard({
       className={[
         "yds-spick-hero-card",
         "yds-spick-hero-card--why",
+        "yds-spick-hero-card--compact",
         rankClass,
         isHeld ? "yds-spick-hero-card--held" : "",
       ]
@@ -69,42 +68,59 @@ export default function YdsStockPickHeroCard({
 
       <YdsStockPickRecommendStatusBadge stock={stock} compact className="yds-spick-hero-card__status" />
 
+      <dl className="yds-spick-hero-card__grid2">
+        <div>
+          <dt>추천가</dt>
+          <dd className="font-mono tabular-nums">{row.recommendedPriceLabel}</dd>
+        </div>
+        <div>
+          <dt>현재가</dt>
+          <dd className="font-mono tabular-nums">{row.currentPriceLabel}</dd>
+        </div>
+        <div>
+          <dt>AI점수</dt>
+          <dd className="font-mono tabular-nums">{row.aiScore}</dd>
+        </div>
+        <div>
+          <dt>신뢰도</dt>
+          <dd>{confLabel}</dd>
+        </div>
+        <div>
+          <dt>예상수익</dt>
+          <dd className="font-mono tabular-nums">{row.expectedReturnLabel}</dd>
+        </div>
+        <div>
+          <dt>보유기간</dt>
+          <dd>{row.holdPeriodLabel}</dd>
+        </div>
+      </dl>
+
+      <p
+        className={[
+          "yds-spick-hero-card__return",
+          `yds-spick-hero-card__return--${retTone}`,
+          "font-mono tabular-nums",
+        ].join(" ")}
+      >
+        추천 후 {row.returnLabel}
+      </p>
+
       <YdsStockPickRecommendRationale
         topReasons={trust?.topReasons}
         detailReasons={[]}
         items={stock.recommendRationales ?? []}
-        title="왜 추천하는가"
-        maxItems={3}
-        className="yds-spick-hero-card__rationale"
+        title="추천이유"
+        maxItems={2}
+        className="yds-spick-hero-card__rationale yds-spick-hero-card__rationale--compact"
       />
-
-      {aiOpinion ? (
-        <div className="yds-spick-hero-card__opinion-block">
-          <p className="yds-spick-hero-card__opinion-label">AI 종합 의견</p>
-          <p className="yds-spick-hero-card__opinion">{aiOpinion}</p>
-        </div>
-      ) : null}
-
-      {aiAnalysis?.scoreChange?.visible && aiAnalysis.scoreChange.previousScore != null ? (
-        <p className="yds-spick-hero-card__score-delta font-mono tabular-nums">
-          {aiAnalysis.scoreChange.previousScore}점 → {aiAnalysis.scoreChange.currentScore}점
-          {aiAnalysis.scoreChange.deltaLabel ? ` (${aiAnalysis.scoreChange.deltaLabel})` : ""}
-        </p>
-      ) : null}
 
       <YdsStockPickActionGuide
         guide={stock.actionGuide}
-        className="yds-spick-hero-card__action-guide"
-      />
-
-      <YdsStockPickAiConfidenceBar
-        score={trust?.aiConfidence?.score}
-        compact
-        className="yds-spick-hero-card__conf"
+        className="yds-spick-hero-card__action-guide yds-spick-hero-card__action-guide--compact"
       />
 
       <Link to={to} className="yds-spick-hero-card__cta">
-        AI 상세 분석 보기
+        AI 상세 분석
       </Link>
     </article>
   )

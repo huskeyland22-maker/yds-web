@@ -18,6 +18,9 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
   const kpi = report.horizons.find((h) => h.key === horizonKey) ?? report.kpi
   const stats = report.trustStats ?? kpi
   const winRate = stats.winRate != null ? `${stats.winRate}%` : "—"
+  const initialCount = stats.initialRecommendCount ?? stats.count ?? 0
+  const reCount = stats.reRecommendCount ?? 0
+  const uniqueTickers = stats.uniqueTickerCount ?? initialCount
 
   if (!report.visible) {
     return (
@@ -43,7 +46,7 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
         <div className="yds-rec-perf-report__summary-head">
           <div>
             <h2 className="yds-rec-perf-report__title">{report.title}</h2>
-            <p className="yds-rec-perf-report__sub">최근 {windowDays}일</p>
+            <p className="yds-rec-perf-report__sub">최근 {windowDays}일 · 최초 추천 기준</p>
           </div>
           <Link to="/performance-validation/picks" className="yds-rec-perf-report__link">
             상세 검증 →
@@ -53,8 +56,18 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
         <dl className="yds-rec-perf-report__summary-kpi">
           <div>
             <dt>추천</dt>
-            <dd className="font-mono tabular-nums">{stats.count}건</dd>
+            <dd className="font-mono tabular-nums">{initialCount}건</dd>
           </div>
+          <div>
+            <dt>재추천</dt>
+            <dd className="font-mono tabular-nums">{reCount}건</dd>
+          </div>
+          <div>
+            <dt>고유 종목</dt>
+            <dd className="font-mono tabular-nums">{uniqueTickers}개</dd>
+          </div>
+        </dl>
+        <dl className="yds-rec-perf-report__summary-kpi yds-rec-perf-report__summary-kpi--secondary">
           <div>
             <dt>평균수익</dt>
             <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgReturn)}</dd>
@@ -117,8 +130,16 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
 
           <dl className="yds-rec-perf-report__kpi">
             <div>
-              <dt>추천 건수</dt>
-              <dd className="font-mono tabular-nums">{stats.count}</dd>
+              <dt>추천 (최초)</dt>
+              <dd className="font-mono tabular-nums">{initialCount}</dd>
+            </div>
+            <div>
+              <dt>재추천</dt>
+              <dd className="font-mono tabular-nums">{reCount}</dd>
+            </div>
+            <div>
+              <dt>고유 종목</dt>
+              <dd className="font-mono tabular-nums">{uniqueTickers}</dd>
             </div>
             <div>
               <dt>성공</dt>

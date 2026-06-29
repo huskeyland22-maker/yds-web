@@ -47,6 +47,8 @@ import YdsStockPickTodayBriefing from "./YdsStockPickTodayBriefing.jsx"
 import YdsStockPickHubHistory from "./YdsStockPickHubHistory.jsx"
 import YdsStockPickInvestDashboard from "./YdsStockPickInvestDashboard.jsx"
 import YdsStockPickFilterBar from "./YdsStockPickFilterBar.jsx"
+import { useStockPickHubScrollRestore } from "../../hooks/useStockPickHubScrollRestore.js"
+import YdsStockPickHubSkeleton from "./YdsStockPickHubSkeleton.jsx"
 import { isDevMode } from "../../utils/devMode.js"
 
 const INITIAL_SECTOR = { US: "all", KR: "all" }
@@ -71,6 +73,7 @@ function useDualCountryLayout() {
 
 export default function YdsStockPickV1Hub() {
   const showDebug = isDevMode()
+  useStockPickHubScrollRestore()
   useEffect(() => {
     traceStockPickMount("YdsStockPickV1Hub", "mount")
     return () => traceStockPickMount("YdsStockPickV1Hub", "unmount")
@@ -240,15 +243,17 @@ export default function YdsStockPickV1Hub() {
     [activeStocks, listFilters, isFavorite],
   )
 
+  const initialLoading = loading && !liveStocks.length
+
   return (
     <div className="yds-spick-platform yds-spick-platform--report">
-      {showDebug ? <YdsStockPickDebugBox debug={debugView} loading={loading && !liveStocks.length} /> : null}
+      {showDebug ? <YdsStockPickDebugBox debug={debugView} loading={initialLoading} /> : null}
       {showDebug ? <YdsStockPickScoreDebugPanel sample={scoreDebugSample} /> : null}
       <YdsStockPickLoadBanner
         stats={loadStats}
         lastSyncAt={lastSyncAt}
         fromCache={fromCache}
-        loading={loading && !liveStocks.length}
+        loading={initialLoading}
       />
       {refreshing ? (
         <p className="yds-spick-sync-note yds-spick-sync-note--refresh" role="status">
@@ -267,7 +272,19 @@ export default function YdsStockPickV1Hub() {
         </p>
       ) : null}
 
-      <YdsStockPickInvestDashboard report={investDashboard} />
+      <div className="yds-spick-hub-sticky">
+        <YdsStockPickInvestDashboard
+          report={investDashboard}
+          className="yds-spick-invest-dash--sticky"
+        />
+
+        <YdsStockPickFilterBar
+          filters={listFilters}
+          onChange={handleListFiltersChange}
+          resultCount={filteredActiveCount}
+          className="yds-spick-hub__filters yds-spick-hub__filters--sticky"
+        />
+      </div>
 
       <nav className="yds-spick-hub-quick" aria-label="추천 도구">
         <Link to="/stock-picks/ranking" className="yds-spick-hub-quick__link">
@@ -314,13 +331,6 @@ export default function YdsStockPickV1Hub() {
         resultCount={searchResultCount}
       />
 
-      <YdsStockPickFilterBar
-        filters={listFilters}
-        onChange={handleListFiltersChange}
-        resultCount={filteredActiveCount}
-        className="yds-spick-hub__filters"
-      />
-
       <YdsStockPickCountryTabs
         countryId={countryId}
         onCountryChange={(id) => {
@@ -335,7 +345,10 @@ export default function YdsStockPickV1Hub() {
       />
 
       <div className="yds-spick-dual" ref={dualRef}>
-        {STOCK_PICK_COUNTRIES.map((country) => {
+        {initialLoading ? (
+          <YdsStockPickHubSkeleton rows={5} className="yds-spick-hub-skeleton--dual" />
+        ) : (
+        STOCK_PICK_COUNTRIES.map((country) => {
           const isActive = countryId === country.id
           const panelId =
             country.id === "US" ? "spick-all-us" : "spick-all-kr"
@@ -372,7 +385,8 @@ export default function YdsStockPickV1Hub() {
               ) : null}
             </div>
           )
-        })}
+        })
+        )}
       </div>
 
       <YdsStockPickHubExtras

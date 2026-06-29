@@ -256,6 +256,42 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
     (p) => p.recommendedAt >= cutoffKey && p.recommendedAt <= today,
   )
 
+  const allSorted = [...(picks ?? [])].sort((a, b) =>
+    String(a.recommendedAt).localeCompare(String(b.recommendedAt)),
+  )
+  /** @type {Map<string, string>} */
+  const firstEverByKey = new Map()
+  for (const p of allSorted) {
+    const key = `${p.country}:${String(p.ticker).toUpperCase()}`
+    if (!firstEverByKey.has(key)) firstEverByKey.set(key, String(p.recommendedAt).slice(0, 10))
+  }
+
+  let initialRecommendCount = 0
+  let reRecommendCount = 0
+  const uniqueTickerKeys = new Set()
+
+  for (const p of windowPicks) {
+    const key = `${p.country}:${String(p.ticker).toUpperCase()}`
+    uniqueTickerKeys.add(key)
+    const firstDate = firstEverByKey.get(key)
+    const at = String(p.recommendedAt).slice(0, 10)
+    if (firstDate === at) initialRecommendCount += 1
+    else reRecommendCount += 1
+  }
+
+  const uniqueTickerCount = uniqueTickerKeys.size
+  const rawCount = windowPicks.length
+
+  /** 최신 1건만 성과 집계에 사용 (일별 재추천 중복 완화) */
+  /** @type {Map<string, typeof windowPicks[0]>} */
+  const latestPerTicker = new Map()
+  for (const p of windowPicks) {
+    const key = `${p.country}:${String(p.ticker).toUpperCase()}`
+    const prev = latestPerTicker.get(key)
+    if (!prev || p.recommendedAt > prev.recommendedAt) latestPerTicker.set(key, p)
+  }
+  const dedupedPicks = [...latestPerTicker.values()]
+
   let successCount = 0
   let failureCount = 0
   let endedCount = 0
@@ -269,7 +305,7 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
   let maxGain = null
   let maxLoss = null
 
-  for (const p of windowPicks) {
+  for (const p of dedupedPicks) {
     const lc = /** @type {PickLifecycleId} */ (p.lifecycleId ?? "active")
     if (lc === "targetHit") successCount += 1
     else if (lc === "stopLoss") failureCount += 1
@@ -326,7 +362,11 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
       : null
 
   return {
-    count: windowPicks.length,
+    count: initialRecommendCount,
+    rawCount,
+    initialRecommendCount,
+    reRecommendCount,
+    uniqueTickerCount,
     successCount,
     failureCount,
     endedCount,
