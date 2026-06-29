@@ -13,6 +13,27 @@ import YdsStockPickRecommendStatusBadge from "./YdsStockPickRecommendStatusBadge
 
 /** @typedef {import("../../content/ydsStockPickListView.js").StockPickListSortKey} SortKey */
 
+/** @param {SortKey} colId */
+function cellClass(colId) {
+  const base = ["yds-spick-all-table__td"]
+  if (colId === "name" || colId === "sector" || colId === "recommendStatusId") {
+    base.push("yds-spick-all-table__td--text")
+  } else if (colId === "recommendedPrice" || colId === "currentPriceLabel") {
+    base.push("yds-spick-all-table__td--price", "font-mono", "tabular-nums")
+  } else if (
+    colId === "maxReturnPct" ||
+    colId === "returnPct" ||
+    colId === "mddPct" ||
+    colId === "aiDelta" ||
+    colId === "recommendCount"
+  ) {
+    base.push("yds-spick-all-table__td--emph", "font-mono", "tabular-nums")
+  } else {
+    base.push("font-mono", "tabular-nums")
+  }
+  return base.join(" ")
+}
+
 /**
  * @param {SortKey} colId
  * @param {ReturnType<typeof buildStockPickListRow>} row
@@ -30,7 +51,7 @@ function renderCell(colId, row, stock) {
     case "recommendStatusId":
       return <YdsStockPickRecommendStatusBadge stock={stock} compact />
     case "recommendedAt":
-      return row.recommendedAt ?? "—"
+      return row.recommendedAtLabel ?? "—"
     case "daysSinceRecommend":
       return row.daysSinceRecommend != null ? `${row.daysSinceRecommend}일` : "—"
     case "recommendedPrice":
@@ -63,6 +84,12 @@ function renderCell(colId, row, stock) {
     }
     case "recommendGrade":
       return <span className="yds-spick-all-table__grade">{row.recommendGrade}</span>
+    case "recommendCount":
+      return (
+        <span className="yds-spick-all-table__count font-mono tabular-nums">
+          {row.recommendCount}회
+        </span>
+      )
     default:
       return row[colId] ?? "—"
   }
@@ -214,19 +241,9 @@ export default function YdsStockPickAllTable({
               {sorted.map((stock) => {
                 const row = buildStockPickListRow(stock)
                 return (
-                  <tr key={stock.ticker}>
+                  <tr key={stock.ticker} className="yds-spick-all-table__row">
                     {columns.map((col) => (
-                      <td
-                        key={col.id}
-                        className={[
-                          "font-mono tabular-nums",
-                          col.id === "name" || col.id === "sector" || col.id === "recommendStatusId"
-                            ? "yds-spick-all-table__td--text"
-                            : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
+                      <td key={col.id} className={cellClass(col.id)}>
                         {renderCell(col.id, row, stock)}
                       </td>
                     ))}

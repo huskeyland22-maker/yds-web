@@ -17,8 +17,11 @@ import {
   estimateHoldPeriodLabel,
   estimateUpsidePct,
 } from "./ydsStockPickDashboardEngine.js"
+import { formatHubHistoryDateMMDD } from "./ydsStockPickHubHistoryGroupEngine.js"
 
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
+
+export { formatHubHistoryDateMMDD as formatPickDateMMDD }
 
 /** @param {number} score */
 export function confidenceDisplayTier(score) {
@@ -110,6 +113,7 @@ export function buildStockPickListRow(stock) {
     statusTone: recStatus.tone,
     sector: stock.sectorLabel || stock.sector || "—",
     recommendedAt,
+    recommendedAtLabel: formatHubHistoryDateMMDD(recommendedAt),
     daysSinceRecommend,
     recommendedPrice: recPrice,
     recommendedPriceLabel:

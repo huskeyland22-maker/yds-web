@@ -19,6 +19,7 @@ import {
   resolvePickLifecycleView,
 } from "./ydsPickLifecycleEngine.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
+import { buildRecommendPerfBriefing } from "./ydsRecommendPerfBriefingEngine.js"
 
 /**
  * @param {import("./ydsValidationStorage.js").ValidationPickRecord[]} picks
@@ -68,12 +69,15 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
   const base = buildPickPerformanceReport(allPicks, windowDays)
   const picks = filterPicksInWindow(allPicks, windowDays)
   const trustStats = buildPickTrustPerfStats(allPicks, windowDays)
+  const alpha30 = estimateAlpha(picks, "d30")
+  const trustWithAlpha = { ...trustStats, alpha: alpha30 ?? trustStats.alpha }
+  const briefing = buildRecommendPerfBriefing(trustWithAlpha, windowDays)
 
   const horizons = PERF_HORIZONS.map((h) => {
     const alpha = estimateAlpha(picks, h.key)
     return {
       ...h,
-      ...trustStats,
+      ...trustWithAlpha,
       alpha,
       winRate: trustStats.winRate,
       successRate: trustStats.winRate,
@@ -130,7 +134,8 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
     windowDays,
     horizons,
     kpi: activeHorizon,
-    trustStats,
+    trustStats: trustWithAlpha,
+    briefing,
     recentPicks,
     pickCount: picks.length,
     visible: picks.length > 0 || (allPicks ?? []).length > 0,

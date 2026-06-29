@@ -6,7 +6,7 @@ import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
 import { buildStockPickListRow } from "../../content/ydsStockPickListView.js"
 
 /**
- * GO #84 — TOP5 2열 압축 레이아웃
+ * GO #87 — 현재수익 우선 강조 레이아웃
  * @param {{
  *   stock: import("../../content/ydsStockPickModel.js").StockPickView
  *   medal?: string
@@ -46,6 +46,7 @@ export default function YdsStockPickHeroCard({
         "yds-spick-hero-card",
         "yds-spick-hero-card--why",
         "yds-spick-hero-card--compact",
+        "yds-spick-hero-card--priority",
         rankClass,
         isHeld ? "yds-spick-hero-card--held" : "",
       ]
@@ -68,60 +69,61 @@ export default function YdsStockPickHeroCard({
 
       <YdsStockPickRecommendStatusBadge stock={stock} compact className="yds-spick-hero-card__status" />
 
-      <dl className="yds-spick-hero-card__grid2">
-        <div>
-          <dt>추천가</dt>
-          <dd className="font-mono tabular-nums">{row.recommendedPriceLabel}</dd>
-        </div>
-        <div>
+      <div className="yds-spick-hero-card__hero-return">
+        <span className="yds-spick-hero-card__hero-return-label">추천 후 수익</span>
+        <span
+          className={[
+            "yds-spick-hero-card__hero-return-value",
+            "font-mono tabular-nums",
+            `yds-spick-hero-card__return--${retTone}`,
+          ].join(" ")}
+        >
+          {row.returnLabel}
+        </span>
+      </div>
+
+      <dl className="yds-spick-hero-card__priority-metrics">
+        <div className="yds-spick-hero-card__metric yds-spick-hero-card__metric--price">
           <dt>현재가</dt>
           <dd className="font-mono tabular-nums">{row.currentPriceLabel}</dd>
         </div>
-        <div>
+        <div className="yds-spick-hero-card__metric yds-spick-hero-card__metric--price">
+          <dt>추천가</dt>
+          <dd className="font-mono tabular-nums">{row.recommendedPriceLabel}</dd>
+        </div>
+        <div className="yds-spick-hero-card__metric">
           <dt>AI점수</dt>
           <dd className="font-mono tabular-nums">{row.aiScore}</dd>
         </div>
-        <div>
+        <div className="yds-spick-hero-card__metric">
           <dt>신뢰도</dt>
           <dd>{confLabel}</dd>
         </div>
-        <div>
-          <dt>예상수익</dt>
-          <dd className="font-mono tabular-nums">{row.expectedReturnLabel}</dd>
-        </div>
-        <div>
-          <dt>보유기간</dt>
+        <div className="yds-spick-hero-card__metric yds-spick-hero-card__metric--wide">
+          <dt>예상보유</dt>
           <dd>{row.holdPeriodLabel}</dd>
         </div>
       </dl>
 
-      <p
-        className={[
-          "yds-spick-hero-card__return",
-          `yds-spick-hero-card__return--${retTone}`,
-          "font-mono tabular-nums",
-        ].join(" ")}
-      >
-        추천 후 {row.returnLabel}
-      </p>
+      <div className="yds-spick-hero-card__footer">
+        <YdsStockPickRecommendRationale
+          topReasons={trust?.topReasons}
+          detailReasons={[]}
+          items={stock.recommendRationales ?? []}
+          title="추천이유"
+          maxItems={2}
+          className="yds-spick-hero-card__rationale yds-spick-hero-card__rationale--compact"
+        />
 
-      <YdsStockPickRecommendRationale
-        topReasons={trust?.topReasons}
-        detailReasons={[]}
-        items={stock.recommendRationales ?? []}
-        title="추천이유"
-        maxItems={2}
-        className="yds-spick-hero-card__rationale yds-spick-hero-card__rationale--compact"
-      />
+        <YdsStockPickActionGuide
+          guide={stock.actionGuide}
+          className="yds-spick-hero-card__action-guide yds-spick-hero-card__action-guide--compact"
+        />
 
-      <YdsStockPickActionGuide
-        guide={stock.actionGuide}
-        className="yds-spick-hero-card__action-guide yds-spick-hero-card__action-guide--compact"
-      />
-
-      <Link to={to} className="yds-spick-hero-card__cta">
-        AI 상세 분석
-      </Link>
+        <Link to={to} className="yds-spick-hero-card__cta">
+          AI 상세 분석
+        </Link>
+      </div>
     </article>
   )
 }

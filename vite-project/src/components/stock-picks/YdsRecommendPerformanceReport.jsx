@@ -21,6 +21,7 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
   const initialCount = stats.initialRecommendCount ?? stats.count ?? 0
   const reCount = stats.reRecommendCount ?? 0
   const uniqueTickers = stats.uniqueTickerCount ?? initialCount
+  const alpha = stats.alpha ?? kpi.alpha
 
   if (!report.visible) {
     return (
@@ -53,6 +54,10 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
           </Link>
         </div>
 
+        {report.briefing ? (
+          <p className="yds-rec-perf-report__briefing">{report.briefing}</p>
+        ) : null}
+
         <dl className="yds-rec-perf-report__summary-kpi">
           <div>
             <dt>추천</dt>
@@ -71,6 +76,10 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
           <div>
             <dt>평균수익</dt>
             <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgReturn)}</dd>
+          </div>
+          <div>
+            <dt>S&P 초과</dt>
+            <dd className="font-mono tabular-nums">{formatPerfPct(alpha)}</dd>
           </div>
           <div>
             <dt>승률</dt>
@@ -142,6 +151,46 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
               <dd className="font-mono tabular-nums">{uniqueTickers}</dd>
             </div>
             <div>
+              <dt>S&P500 초과수익</dt>
+              <dd className="font-mono tabular-nums">{formatPerfPct(alpha)}</dd>
+            </div>
+            <div>
+              <dt>평균 익절</dt>
+              <dd className="font-mono tabular-nums yds-rec-perf-report__up">
+                {formatPerfPct(stats.avgTakeProfit)}
+              </dd>
+            </div>
+            <div>
+              <dt>평균 손절</dt>
+              <dd className="font-mono tabular-nums yds-rec-perf-report__down">
+                {formatPerfPct(stats.avgStopLoss)}
+              </dd>
+            </div>
+            <div>
+              <dt>최장 보유</dt>
+              <dd>{stats.maxHoldDays != null ? `${stats.maxHoldDays}일` : "—"}</dd>
+            </div>
+            <div>
+              <dt>최단 보유</dt>
+              <dd>{stats.minHoldDays != null ? `${stats.minHoldDays}일` : "—"}</dd>
+            </div>
+            <div>
+              <dt>평균 AI점수</dt>
+              <dd className="font-mono tabular-nums">{stats.avgAiScore ?? "—"}</dd>
+            </div>
+            <div>
+              <dt>평균 최고수익</dt>
+              <dd className="font-mono tabular-nums yds-rec-perf-report__up">
+                {formatPerfPct(stats.avgMaxReturn)}
+              </dd>
+            </div>
+            <div>
+              <dt>평균 MDD</dt>
+              <dd className="font-mono tabular-nums yds-rec-perf-report__down">
+                {formatPerfPct(stats.avgMdd)}
+              </dd>
+            </div>
+            <div>
               <dt>성공</dt>
               <dd className="font-mono tabular-nums">{stats.successCount ?? 0}</dd>
             </div>
@@ -184,10 +233,6 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
             <div>
               <dt>평균 보유기간</dt>
               <dd>{stats.avgHoldDays != null ? `${stats.avgHoldDays}일` : "—"}</dd>
-            </div>
-            <div>
-              <dt>Alpha (SPY 대비)</dt>
-              <dd className="font-mono tabular-nums">{formatPerfPct(kpi.alpha)}</dd>
             </div>
           </dl>
 

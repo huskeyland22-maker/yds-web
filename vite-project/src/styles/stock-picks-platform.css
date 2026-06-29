@@ -5477,3 +5477,193 @@
   }
 }
 
+/* —— GO #87–91: 정보 우선순위 · 가독성 · UX 마감 —— */
+
+.yds-spick-platform--report {
+  --spick-card-gap: 0.32rem;
+  --spick-section-title-size: clamp(0.82rem, 2.2vw, 0.95rem);
+  --spick-btn-height: 1.65rem;
+  --spick-table-row-h: 1.85rem;
+  gap: 0.38rem;
+}
+
+.yds-spick-section__title--tier {
+  font-size: var(--spick-section-title-size);
+  margin-bottom: 0.28rem;
+}
+
+.yds-spick-top5--hero {
+  align-items: stretch;
+}
+
+.yds-spick-hero-card--priority {
+  min-height: 7.25rem;
+  height: 100%;
+}
+
+.yds-spick-hero-card__hero-return {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.08rem;
+  padding: 0.28rem 0.2rem;
+  margin: 0.1rem 0 0.12rem;
+  border-radius: 0.35rem;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(51, 65, 85, 0.55);
+}
+
+.yds-spick-hero-card__hero-return-label {
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.yds-spick-hero-card__hero-return-value {
+  font-size: clamp(1rem, 2.8vw, 1.28rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.yds-spick-hero-card__priority-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.1rem 0.3rem;
+  margin: 0;
+  font-size: 0.54rem;
+}
+
+.yds-spick-hero-card__metric dt {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.yds-spick-hero-card__metric dd {
+  margin: 0;
+  color: #e2e8f0;
+  font-weight: 800;
+}
+
+.yds-spick-hero-card__metric--price dd {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.yds-spick-hero-card__metric--wide {
+  grid-column: 1 / -1;
+}
+
+.yds-spick-hero-card__footer {
+  margin-top: auto;
+  display: grid;
+  gap: 0.12rem;
+  padding-top: 0.12rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.4);
+}
+
+.yds-spick-all-table__row {
+  transition: background 0.12s ease;
+}
+
+.yds-spick-all-table__row:hover {
+  background: rgba(30, 58, 138, 0.14);
+}
+
+.yds-spick-all-table th,
+.yds-spick-all-table td {
+  height: var(--spick-table-row-h);
+  padding: 0.22rem 0.38rem;
+  vertical-align: middle;
+}
+
+.yds-spick-all-table__td--price {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.yds-spick-all-table__td--emph {
+  font-weight: 800;
+}
+
+.yds-spick-all-table__count {
+  color: #93c5fd;
+  font-weight: 800;
+}
+
+.yds-spick-hub-history__group-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.yds-spick-hub-history__group-chevron {
+  font-size: 0.52rem;
+  color: #64748b;
+}
+
+.yds-spick-hub-history__group-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.28rem 0.55rem;
+  padding: 0 0.45rem 0.35rem;
+  font-size: 0.54rem;
+}
+
+.yds-spick-hub-history__summary-item {
+  white-space: nowrap;
+}
+
+.yds-spick-hub-history__ret--up {
+  color: #4ade80;
+  font-weight: 800;
+}
+
+.yds-spick-hub-history__ret--down {
+  color: #f87171;
+  font-weight: 800;
+}
+
+.yds-spick-hub-history__ret--muted {
+  color: #64748b;
+}
+
+.yds-rec-perf-report__briefing {
+  margin: 0.25rem 0 0.35rem;
+  padding: 0.42rem 0.5rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(15, 23, 42, 0.55);
+  font-size: 0.62rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.yds-spick-hub-history__filter,
+.yds-spick-all-table__col-btn,
+.yds-rec-perf-report__toggle {
+  min-height: var(--spick-btn-height);
+}
+
+.yds-spick-hero-card__cta {
+  min-height: var(--spick-btn-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 720px) {
+  .yds-spick-hub-history__group-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.2rem 0.35rem;
+  }
+
+  .yds-spick-hero-card__hero-return-value {
+    font-size: 1.05rem;
+  }
+}
+

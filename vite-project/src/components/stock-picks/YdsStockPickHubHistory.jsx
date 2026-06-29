@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { filterHubHistoryRows, HUB_HISTORY_FILTERS } from "../../content/ydsPickLifecycleEngine.js"
 import {
   filterHubHistoryByPeriod,
+  formatHubHistoryDateMMDD,
   groupHubHistoryByTicker,
   HUB_HISTORY_PERIOD_FILTERS,
 } from "../../content/ydsStockPickHubHistoryGroupEngine.js"
@@ -97,7 +98,12 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
           <ul className="yds-spick-hub-history__group-list">
             {groups.map((group) => {
               const expanded = expandedTickers.has(group.ticker)
-              const latest = group.rows[0]
+              const maxTone =
+                group.maxReturnPct == null
+                  ? "muted"
+                  : group.maxReturnPct >= 0
+                    ? "up"
+                    : "down"
               return (
                 <li key={group.ticker} className="yds-spick-hub-history__group">
                   <button
@@ -107,54 +113,84 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
                     onClick={() => toggleGroup(group.ticker)}
                   >
                     <span className="yds-spick-hub-history__group-name">{group.name}</span>
-                    <span className="yds-spick-hub-history__group-meta font-mono tabular-nums">
-                      {expanded ? "▲" : "▼"} 추천 {group.count}회
+                    <span className="yds-spick-hub-history__group-chevron" aria-hidden>
+                      {expanded ? "▲" : "▼"}
                     </span>
                   </button>
 
                   {!expanded ? (
-                    <div className="yds-spick-hub-history__group-preview">
-                      <span className="font-mono tabular-nums">
-                        {String(latest?.recommendedAt ?? "").slice(0, 10)}
+                    <div className="yds-spick-hub-history__group-summary">
+                      <span className="yds-spick-hub-history__summary-item font-mono tabular-nums">
+                        추천 {group.count}회
                       </span>
                       <span
                         className={[
-                          "yds-spick-hub-history__status",
-                          `yds-spick-hub-history__status--${latest?.statusTone ?? "active"}`,
+                          "yds-spick-hub-history__summary-item",
+                          "font-mono tabular-nums",
+                          `yds-spick-hub-history__ret--${maxTone}`,
                         ].join(" ")}
                       >
-                        {latest?.statusLabel}
+                        최고 {group.maxReturnLabel}
                       </span>
-                      <span className="font-mono tabular-nums">{latest?.returnLabel}</span>
+                      <span
+                        className={[
+                          "yds-spick-hub-history__summary-item",
+                          "yds-spick-hub-history__status",
+                          `yds-spick-hub-history__status--${group.statusTone}`,
+                        ].join(" ")}
+                      >
+                        {group.statusShort}
+                      </span>
+                      <span className="yds-spick-hub-history__summary-item font-mono tabular-nums">
+                        최초 {group.firstAtLabel}
+                      </span>
+                      <span className="yds-spick-hub-history__summary-item font-mono tabular-nums">
+                        최근 {group.latestAtLabel}
+                      </span>
                     </div>
                   ) : (
                     <ul className="yds-spick-hub-history__entries">
-                      {group.rows.map((row) => (
-                        <li key={`${row.ticker}-${row.recommendedAt}`} className="yds-spick-hub-history__entry">
-                          <span className="yds-spick-hub-history__entry-date font-mono tabular-nums">
-                            {String(row.recommendedAt).slice(0, 10)}
-                          </span>
-                          <span className="font-mono tabular-nums">{row.recommendedPrice ?? "—"}</span>
-                          <span className="font-mono tabular-nums">{row.returnLabel}</span>
-                          <span
-                            className={[
-                              "yds-spick-hub-history__status",
-                              `yds-spick-hub-history__status--${row.statusTone ?? "active"}`,
-                            ].join(" ")}
-                          >
-                            {row.statusLabel}
-                          </span>
-                          <span className="yds-spick-hub-history__badge">{row.resultBadge}</span>
-                          {row.pickId ? (
-                            <Link
-                              to={`/performance-validation/pick/${encodeURIComponent(row.pickId)}`}
-                              className="yds-spick-hub-history__link"
+                      {group.rows.map((row) => {
+                        const retTone =
+                          row.returnPct == null
+                            ? "muted"
+                            : Number(row.returnPct) >= 0
+                              ? "up"
+                              : "down"
+                        return (
+                          <li key={`${row.ticker}-${row.recommendedAt}`} className="yds-spick-hub-history__entry">
+                            <span className="yds-spick-hub-history__entry-date font-mono tabular-nums">
+                              {formatHubHistoryDateMMDD(row.recommendedAt)}
+                            </span>
+                            <span className="font-mono tabular-nums">{row.recommendedPrice ?? "—"}</span>
+                            <span
+                              className={[
+                                "font-mono tabular-nums",
+                                `yds-spick-hub-history__ret--${retTone}`,
+                              ].join(" ")}
                             >
-                              상세
-                            </Link>
-                          ) : null}
-                        </li>
-                      ))}
+                              {row.returnLabel}
+                            </span>
+                            <span
+                              className={[
+                                "yds-spick-hub-history__status",
+                                `yds-spick-hub-history__status--${row.statusTone ?? "active"}`,
+                              ].join(" ")}
+                            >
+                              {row.statusLabel}
+                            </span>
+                            <span className="yds-spick-hub-history__badge">{row.resultBadge}</span>
+                            {row.pickId ? (
+                              <Link
+                                to={`/performance-validation/pick/${encodeURIComponent(row.pickId)}`}
+                                className="yds-spick-hub-history__link"
+                              >
+                                상세
+                              </Link>
+                            ) : null}
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </li>

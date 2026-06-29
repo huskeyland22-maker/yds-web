@@ -1,8 +1,10 @@
 /**
- * GO #83 — 추천 히스토리 기간 필터 · 종목별 그룹
+ * GO #83 · #89 — 추천 히스토리 기간 필터 · 종목별 그룹 요약
  */
 
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
+import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
+import { PICK_LIFECYCLE_VIEWS } from "./ydsPickLifecycleEngine.js"
 
 /** @typedef {'today' | 'week' | 'month' | 'all'} HubHistoryPeriodId */
 
@@ -13,6 +15,24 @@ export const HUB_HISTORY_PERIOD_FILTERS = [
   { id: "month", label: "이번달" },
   { id: "all", label: "전체" },
 ]
+
+/**
+ * @param {string} [dateKey]
+ */
+export function formatHubHistoryDateMMDD(dateKey) {
+  const d = String(dateKey ?? "").slice(0, 10)
+  if (d.length < 10) return "—"
+  return `${d.slice(5, 7)}-${d.slice(8, 10)}`
+}
+
+/**
+ * @param {string} [lifecycleId]
+ */
+export function resolveHubHistoryStatusShort(lifecycleId) {
+  const id = lifecycleId ?? "active"
+  if (id === "active") return "현재 보유"
+  return PICK_LIFECYCLE_VIEWS[id]?.label ?? "—"
+}
 
 /**
  * @param {string} [refDate]
@@ -56,7 +76,7 @@ export function filterHubHistoryByPeriod(rows, periodId, refDate = todayDateKey(
  * @param {Array<Record<string, unknown>>} rows
  */
 export function groupHubHistoryByTicker(rows) {
-  /** @type {Map<string, { ticker: string; name: string; latestAt: string; rows: Record<string, unknown>[] }>} */
+  /** @type {Map<string, { ticker: string; name: string; latestAt: string; firstAt: string; rows: Record<string, unknown>[] }>} */
   const map = new Map()
 
   for (const row of rows ?? []) {
@@ -65,20 +85,42 @@ export function groupHubHistoryByTicker(rows) {
     const at = String(row.recommendedAt ?? "").slice(0, 10)
     let group = map.get(ticker)
     if (!group) {
-      group = { ticker, name: String(row.name ?? ticker), latestAt: at, rows: [] }
+      group = { ticker, name: String(row.name ?? ticker), latestAt: at, firstAt: at, rows: [] }
       map.set(ticker, group)
     }
     group.rows.push(row)
     if (at > group.latestAt) group.latestAt = at
+    if (at < group.firstAt) group.firstAt = at
   }
 
   return [...map.values()]
-    .map((g) => ({
-      ...g,
-      count: g.rows.length,
-      rows: g.rows.sort((a, b) =>
+    .map((g) => {
+      const sortedRows = g.rows.sort((a, b) =>
         String(b.recommendedAt ?? "").localeCompare(String(a.recommendedAt ?? "")),
-      ),
-    }))
+      )
+      const latest = sortedRows[0] ?? {}
+      let maxReturnPct = null
+      for (const row of sortedRows) {
+        const candidates = [row.maxReturnPct, row.returnPct]
+        for (const v of candidates) {
+          const n = Number(v)
+          if (Number.isFinite(n) && (maxReturnPct == null || n > maxReturnPct)) {
+            maxReturnPct = n
+          }
+        }
+      }
+      const lifecycleId = String(latest.lifecycleId ?? "active")
+      return {
+        ...g,
+        count: sortedRows.length,
+        rows: sortedRows,
+        firstAtLabel: formatHubHistoryDateMMDD(g.firstAt),
+        latestAtLabel: formatHubHistoryDateMMDD(g.latestAt),
+        maxReturnLabel: formatPerfPct(maxReturnPct),
+        maxReturnPct,
+        statusShort: resolveHubHistoryStatusShort(lifecycleId),
+        statusTone: String(latest.statusTone ?? "active"),
+      }
+    })
     .sort((a, b) => b.latestAt.localeCompare(a.latestAt))
 }

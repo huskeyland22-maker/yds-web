@@ -302,6 +302,16 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
   const lossReturns = []
   /** @type {number[]} */
   const holdDays = []
+  /** @type {number[]} */
+  const winReturns = []
+  /** @type {number[]} */
+  const stopLossReturns = []
+  /** @type {number[]} */
+  const aiScores = []
+  /** @type {number[]} */
+  const maxReturns = []
+  /** @type {number[]} */
+  const mddValues = []
   let maxGain = null
   let maxLoss = null
 
@@ -312,6 +322,7 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
     else if (lc === "ended") endedCount += 1
     else holdingCount += 1
 
+    const { maxRet, minRet } = computePickReturnExtremes(p)
     const ret =
       p.finalReturnPct ??
       p.returnPct ??
@@ -320,11 +331,26 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
       p.horizons?.d7 ??
       null
 
+    if (p.recommendedScore != null && Number.isFinite(p.recommendedScore)) {
+      aiScores.push(p.recommendedScore)
+    }
+    if (maxRet != null && Number.isFinite(maxRet)) maxReturns.push(maxRet)
+    if (minRet != null && Number.isFinite(minRet)) mddValues.push(minRet)
+
     if (ret != null && Number.isFinite(ret)) {
       returns.push(ret)
       if (ret < 0) lossReturns.push(ret)
       if (maxGain == null || ret > maxGain) maxGain = ret
       if (maxLoss == null || ret < maxLoss) maxLoss = ret
+    }
+
+    if (lc === "targetHit") {
+      const winVal = ret ?? maxRet
+      if (winVal != null && Number.isFinite(winVal)) winReturns.push(winVal)
+    }
+    if (lc === "stopLoss") {
+      const lossVal = ret ?? minRet
+      if (lossVal != null && Number.isFinite(lossVal)) stopLossReturns.push(lossVal)
     }
 
     const end = p.closedAt ?? today
@@ -361,6 +387,34 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
       ? Math.round((avgWin / Math.abs(avgLossAbs)) * 100) / 100
       : null
 
+  const avgTakeProfit =
+    winReturns.length > 0
+      ? Math.round((winReturns.reduce((s, v) => s + v, 0) / winReturns.length) * 10) / 10
+      : null
+
+  const avgStopLoss =
+    stopLossReturns.length > 0
+      ? Math.round((stopLossReturns.reduce((s, v) => s + v, 0) / stopLossReturns.length) * 10) / 10
+      : null
+
+  const maxHoldDays = holdDays.length ? Math.max(...holdDays) : null
+  const minHoldDays = holdDays.length ? Math.min(...holdDays) : null
+
+  const avgAiScore =
+    aiScores.length > 0
+      ? Math.round(aiScores.reduce((s, v) => s + v, 0) / aiScores.length)
+      : null
+
+  const avgMaxReturn =
+    maxReturns.length > 0
+      ? Math.round((maxReturns.reduce((s, v) => s + v, 0) / maxReturns.length) * 10) / 10
+      : null
+
+  const avgMdd =
+    mddValues.length > 0
+      ? Math.round((mddValues.reduce((s, v) => s + v, 0) / mddValues.length) * 10) / 10
+      : null
+
   return {
     count: initialRecommendCount,
     rawCount,
@@ -378,6 +432,13 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
     maxLoss,
     avgHoldDays,
     profitFactor,
+    avgTakeProfit,
+    avgStopLoss,
+    maxHoldDays,
+    minHoldDays,
+    avgAiScore,
+    avgMaxReturn,
+    avgMdd,
     alpha: null,
   }
 }

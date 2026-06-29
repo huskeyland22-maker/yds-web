@@ -425,6 +425,7 @@ export function buildStockPickHubHistoryReport(stocks) {
       currentPrice,
       returnPct: ret,
       returnLabel: formatPerfPct(ret),
+      maxReturnPct: maxRet,
       maxReturnLabel: formatPerfPct(maxRet),
       minReturnLabel: formatPerfPct(minRet),
       lifecycleId,
