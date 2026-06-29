@@ -40,6 +40,11 @@ import AiDailyReportPage from "./pages/AiDailyReportPage.jsx"
 import StockRecommendationPage from "./pages/StockRecommendationPage.jsx"
 import YdsPortfolioPage from "./pages/YdsPortfolioPage.jsx"
 import StockPickDetailPage from "./pages/StockPickDetailPage.jsx"
+import StockPickRankingPage from "./pages/StockPickRankingPage.jsx"
+import StockPickComparePage from "./pages/StockPickComparePage.jsx"
+import StockPickValidationPicksPage from "./pages/StockPickValidationPicksPage.jsx"
+import StockPickValidationDetailPage from "./pages/StockPickValidationDetailPage.jsx"
+import StockPickBacktestPage from "./pages/StockPickBacktestPage.jsx"
 import UserWatchlistPage from "./pages/UserWatchlistPage.jsx"
 import AlertCenterPage from "./pages/AlertCenterPage.jsx"
 import GlossaryPage from "./pages/GlossaryPage.jsx"
@@ -1021,12 +1026,14 @@ function App() {
       path === "/performance-dashboard" ||
       path === "/performance-center" ||
       path === "/performance-validation" ||
+      path.startsWith("/performance-validation/") ||
       path === "/portfolio" ||
       path === "/action-log" ||
       path === "/yds-compare" ||
       path === "/ops-dashboard" ||
       path === "/ai-daily-report" ||
       path === "/stock-picks" ||
+      path.startsWith("/stock-picks/") ||
       path === "/watchlist" ||
       path === "/alert-center" ||
       path === "/glossary" ||
@@ -1371,6 +1378,30 @@ function App() {
             />
             <Route path="/performance-dashboard" element={<Navigate to="/performance-center" replace />} />
             <Route
+              path="/performance-validation/picks"
+              element={
+                <SectionErrorBoundary label="추천 상세 검증">
+                  <StockPickValidationPicksPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/performance-validation/pick/:pickId"
+              element={
+                <SectionErrorBoundary label="추천 검증 상세">
+                  <StockPickValidationDetailPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/performance-validation/backtest"
+              element={
+                <SectionErrorBoundary label="AI 백테스트">
+                  <StockPickBacktestPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
               path="/performance-validation"
               element={
                 <SectionErrorBoundary label="성과 검증">
@@ -1394,6 +1425,22 @@ function App() {
               element={
                 <SectionErrorBoundary label="AI 리포트">
                   <AiDailyReportPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/stock-picks/compare"
+              element={
+                <SectionErrorBoundary label="종목 비교">
+                  <StockPickComparePage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/stock-picks/ranking"
+              element={
+                <SectionErrorBoundary label="AI 랭킹">
+                  <StockPickRankingPage />
                 </SectionErrorBoundary>
               }
             />

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"
+
 /**
  * @param {{
  *   report: import("../../content/ydsStockPickTrustEngine.js").ReturnType<typeof import("../../content/ydsStockPickTrustEngine.js").buildStockPickHubHistoryReport>
@@ -25,6 +27,7 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
               <th scope="col">최고</th>
               <th scope="col">최대손실</th>
               <th scope="col">상태</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
@@ -38,6 +41,16 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
                 <td className="font-mono tabular-nums">{row.maxReturnLabel}</td>
                 <td className="font-mono tabular-nums">{row.minReturnLabel}</td>
                 <td>{row.statusLabel}</td>
+                <td>
+                  {row.pickId ? (
+                    <Link
+                      to={`/performance-validation/pick/${encodeURIComponent(row.pickId)}`}
+                      className="yds-spick-hub-history__link"
+                    >
+                      상세
+                    </Link>
+                  ) : null}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
+import { countUnreadPickAlerts, loadPickAlertFeed, markAllPickAlertsRead } from "../content/ydsStockPickAlertStorage.js"
+import { requestPickAlertPermission } from "../content/ydsStockPickAlertEngine.js"
+import YdsStockPickAlertFeed from "../components/stock-picks/YdsStockPickAlertFeed.jsx"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
@@ -106,6 +109,9 @@ export default function AlertCenterPage() {
     return rows
   }, [report.sectionD.items, gradeFilter, daysFilter])
 
+  const [pickFeed, setPickFeed] = useState(() => loadPickAlertFeed())
+  const pickUnread = useMemo(() => countUnreadPickAlerts(), [pickFeed])
+
   const { sectionA, sectionB, sectionC, sectionD, stage } = report
 
   return (
@@ -188,6 +194,15 @@ export default function AlertCenterPage() {
                 <p className="yds-alert-center__muted">표시할 알림이 없습니다. 시장·종목 변화 시 자동 생성됩니다.</p>
               )}
             </div>
+          </section>
+
+          <section id="pick-alerts" className="yds-alert-center__section" aria-labelledby="alert-pick">
+            <YdsStockPickAlertFeed
+              feed={pickFeed}
+              unread={pickUnread}
+              onMarkRead={() => setPickFeed(markAllPickAlertsRead())}
+              onEnableBrowser={requestPickAlertPermission}
+            />
           </section>
 
           <section className="yds-alert-center__section" aria-labelledby="alert-b">

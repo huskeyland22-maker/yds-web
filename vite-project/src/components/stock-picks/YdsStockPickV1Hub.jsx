@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { traceStockPickMount } from "../../content/ydsStockPickMountTrace.js"
 import { captureTodayPickSnapshots, refreshValidationPicks } from "../../content/ydsValidationEngine.js"
 import { buildValidationPriceMap } from "../../content/ydsValidationPriceResolver.js"
@@ -16,6 +17,7 @@ import {
 } from "../../content/ydsStockPickMarketRegime.js"
 import { filterStockPicksByQuery } from "../../content/ydsStockPickSearch.js"
 import { useStockPickFavoriteAlerts } from "../../hooks/useStockPickFavoriteAlerts.js"
+import { useStockPickAlerts } from "../../hooks/useStockPickAlerts.js"
 import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
 import { useStockPickDualColumnAlign } from "../../hooks/useStockPickDualColumnAlign.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
@@ -31,6 +33,7 @@ import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 import YdsStockPickTodaySignal from "./YdsStockPickTodaySignal.jsx"
 import YdsRecommendPerformanceReport from "./YdsRecommendPerformanceReport.jsx"
+import YdsStockPickAlertFeed from "./YdsStockPickAlertFeed.jsx"
 import YdsStockPickHubExtras from "./YdsStockPickHubExtras.jsx"
 import {
   buildTodayRecommendBriefing,
@@ -113,6 +116,7 @@ export default function YdsStockPickV1Hub() {
   } = useStockPickFavorites()
 
   const favoriteAlerts = useStockPickFavoriteAlerts(liveStocks, favorites)
+  const pickAlerts = useStockPickAlerts(liveStocks)
 
   const regimeLimit = useMemo(
     () => marketContext.pickDisplayLimit ?? getRegimeDisplayLimit(marketContext.marketPositionId),
@@ -266,6 +270,27 @@ export default function YdsStockPickV1Hub() {
 
       <YdsStockPickInvestDashboard report={investDashboard} />
 
+      <nav className="yds-spick-hub-quick" aria-label="추천 도구">
+        <Link to="/stock-picks/ranking" className="yds-spick-hub-quick__link">
+          AI 랭킹
+        </Link>
+        <Link to="/stock-picks/compare" className="yds-spick-hub-quick__link">
+          종목 비교
+        </Link>
+        <Link to="/performance-validation/picks" className="yds-spick-hub-quick__link">
+          상세 검증
+        </Link>
+        <Link to="/performance-validation/backtest" className="yds-spick-hub-quick__link">
+          백테스트
+        </Link>
+        <Link to="/alert-center#pick-alerts" className="yds-spick-hub-quick__link">
+          알림센터
+          {pickAlerts.unread > 0 ? (
+            <span className="yds-spick-hub-quick__badge">{pickAlerts.unread}</span>
+          ) : null}
+        </Link>
+      </nav>
+
       <YdsStockPickTodayBriefing report={todayBriefing} />
 
       <section className="yds-spick-hub-today" aria-label="오늘의 추천">
@@ -364,6 +389,15 @@ export default function YdsStockPickV1Hub() {
       />
 
       <YdsStockPickHubHistory report={hubHistory} />
+
+      <YdsStockPickAlertFeed
+        feed={pickAlerts.feed}
+        unread={pickAlerts.unread}
+        onMarkRead={pickAlerts.markRead}
+        onEnableBrowser={pickAlerts.enableBrowser}
+        compact
+        className="yds-spick-hub__alert-feed"
+      />
 
       <YdsRecommendPerformanceReport className="yds-spick-hub__perf-report" />
     </div>

@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom"
+import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
 import { getPrimaryNavItems, getSecondaryNavItems } from "../../utils/appNavItems.js"
@@ -14,6 +15,7 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
   const navItems = getPrimaryNavItems()
   const secondaryNavItems = getSecondaryNavItems()
   const aiStatus = sidebarPulse?.aiReportStatus ?? null
+  const pickAlertUnread = countUnreadPickAlerts()
 
   return (
     <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
@@ -47,6 +49,11 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="min-w-0 truncate font-medium leading-tight tracking-tight">{item.label}</span>
+                {item.path === "/stock-picks" && pickAlertUnread > 0 ? (
+                  <span className="ml-auto rounded-full bg-rose-500/90 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                    {pickAlertUnread}
+                  </span>
+                ) : null}
               </>
             )}
           </NavLink>

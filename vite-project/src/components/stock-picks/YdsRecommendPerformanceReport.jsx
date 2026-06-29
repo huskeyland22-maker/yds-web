@@ -35,7 +35,7 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
           <h2 className="yds-rec-perf-report__title">{report.title}</h2>
           <p className="yds-rec-perf-report__sub">최근 {windowDays}일 · 실제 저장 추천 기준</p>
         </div>
-        <Link to="/performance-validation" className="yds-rec-perf-report__link">
+        <Link to="/performance-validation/picks" className="yds-rec-perf-report__link">
           상세 검증 →
         </Link>
       </div>

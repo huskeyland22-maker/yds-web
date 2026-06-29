@@ -417,6 +417,7 @@ export function buildStockPickHubHistoryReport(stocks) {
     else if (pick.statusId === "watch" || pick.statusId === "scaleIn") statusLabel = "관찰"
 
     return {
+      pickId: pick.id,
       recommendedAt: pick.recommendedAt,
       ticker: pick.ticker,
       name: nameByTicker.get(sym) ?? pick.name ?? pick.ticker,
