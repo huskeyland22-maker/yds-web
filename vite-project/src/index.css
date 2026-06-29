@@ -30912,6 +30912,67 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+.yds-rec-perf-report--collapsed {
+  padding-bottom: 0.55rem;
+}
+
+.yds-rec-perf-report__summary-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-rec-perf-report__summary-kpi {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0 0 0.35rem;
+}
+
+.yds-rec-perf-report__summary-kpi dt {
+  margin: 0;
+  font-size: 0.54rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-rec-perf-report__summary-kpi dd {
+  margin: 0.08rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-rec-perf-report__toggle {
+  display: block;
+  width: 100%;
+  padding: 0.32rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.35);
+  color: #94a3b8;
+  font-size: 0.6rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.yds-rec-perf-report__toggle:hover {
+  color: #cbd5e1;
+}
+
+.yds-rec-perf-report__detail {
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.yds-rec-perf-report__table-wrap.yds-spick-hub-table-scroll {
+  max-height: 420px;
+  overflow: auto;
+}
+
 .yds-ai-portfolio__summary {
   margin: 0 0 0.4rem;
   font-size: 0.62rem;

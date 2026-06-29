@@ -6,6 +6,10 @@ import {
   computeAiConfidence,
   confidenceLabelFromScore,
 } from "../vite-project/src/content/ydsStockPickTrustEngine.js"
+import {
+  HUB_HISTORY_LIMIT_STEPS,
+  resolveHubHistoryLimit,
+} from "../vite-project/src/content/ydsStockPickHubHistoryEngine.js"
 import { computeRecommendEngineReport } from "../vite-project/src/content/ydsStockRecommendEngine.js"
 
 const baseStock = {
@@ -90,5 +94,11 @@ assert.ok(briefing.lines.length <= 3)
 
 const history = buildStockPickHubHistoryReport([stock])
 assert.ok(typeof history.visible === "boolean")
+
+assert.equal(resolveHubHistoryLimit(0), 10)
+assert.equal(resolveHubHistoryLimit(1), 20)
+assert.equal(resolveHubHistoryLimit(2), 50)
+assert.equal(resolveHubHistoryLimit(3), Infinity)
+assert.equal(HUB_HISTORY_LIMIT_STEPS.length, 4)
 
 console.log("yds-stock-pick-trust.test.mjs OK")

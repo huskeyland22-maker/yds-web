@@ -388,7 +388,6 @@ export function buildStockPickHubHistoryReport(stocks) {
   const picks = loadValidationPicks()
     .slice()
     .sort((a, b) => b.recommendedAt.localeCompare(a.recommendedAt))
-    .slice(0, 30)
 
   const priceByTicker = new Map(
     stocks.map((s) => [String(s.ticker).toUpperCase(), Number(s.snapshot?.price ?? s.snapshot?.close)]),

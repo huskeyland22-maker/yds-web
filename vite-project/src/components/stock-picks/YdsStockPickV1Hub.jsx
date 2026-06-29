@@ -33,7 +33,6 @@ import YdsStockPickCountryTabs from "./YdsStockPickCountryTabs.jsx"
 import YdsStockPickCountryPanel from "./YdsStockPickCountryPanel.jsx"
 import YdsStockPickTodaySignal from "./YdsStockPickTodaySignal.jsx"
 import YdsRecommendPerformanceReport from "./YdsRecommendPerformanceReport.jsx"
-import YdsStockPickAlertFeed from "./YdsStockPickAlertFeed.jsx"
 import YdsStockPickHubExtras from "./YdsStockPickHubExtras.jsx"
 import {
   buildTodayRecommendBriefing,
@@ -389,15 +388,6 @@ export default function YdsStockPickV1Hub() {
       />
 
       <YdsStockPickHubHistory report={hubHistory} />
-
-      <YdsStockPickAlertFeed
-        feed={pickAlerts.feed}
-        unread={pickAlerts.unread}
-        onMarkRead={pickAlerts.markRead}
-        onEnableBrowser={pickAlerts.enableBrowser}
-        compact
-        className="yds-spick-hub__alert-feed"
-      />
 
       <YdsRecommendPerformanceReport className="yds-spick-hub__perf-report" />
     </div>
