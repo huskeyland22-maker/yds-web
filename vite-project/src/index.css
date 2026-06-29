@@ -31927,6 +31927,283 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+/* —— GO #78: 시장분석 대시보드 레이아웃 —— */
+
+.yds-market-state-primary--dashboard {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.yds-market-state-primary__hero--compact {
+  padding: 0.35rem 0.45rem 0.3rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-market-state-primary__hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.65rem;
+}
+
+.yds-market-state-primary__hero--compact .yds-market-state-primary__score {
+  margin: 0;
+  font-size: clamp(1.35rem, 4vw, 1.65rem);
+}
+
+.yds-market-state-primary__hero--compact .yds-market-state-primary__zone-label {
+  margin: 0;
+  font-size: clamp(0.72rem, 2.2vw, 0.85rem);
+}
+
+.yds-market-state-primary__hero--compact .yds-market-state-primary__delta {
+  margin: 0;
+  font-size: 0.58rem;
+}
+
+.yds-desk-card {
+  margin: 0;
+  padding: 0.48rem 0.52rem 0.45rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.35);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.yds-desk-card__title {
+  margin: 0 0 0.38rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #93c5fd;
+  line-height: 1.2;
+  min-height: 0.74rem;
+}
+
+.yds-market-dashboard__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
+.yds-market-dashboard__row > .yds-desk-card {
+  height: 100%;
+}
+
+.yds-market-judgment-card__stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.45rem;
+  margin-bottom: 0.38rem;
+  padding-bottom: 0.32rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-judgment-card__stage-label {
+  font-size: 0.56rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-market-judgment-card__stage-value {
+  font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+  font-weight: 900;
+  color: #fde68a;
+}
+
+.yds-market-judgment-card__block {
+  margin-bottom: 0.32rem;
+}
+
+.yds-market-judgment-card__block:last-child {
+  margin-bottom: 0;
+}
+
+.yds-market-judgment-card__block-title {
+  margin: 0 0 0.18rem;
+  font-size: 0.54rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #64748b;
+}
+
+.yds-market-judgment-card__chips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.18rem;
+}
+
+.yds-market-judgment-card__chip {
+  padding: 0.12rem 0.32rem;
+  border-radius: 999px;
+  font-size: 0.54rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.yds-market-judgment-card__chip--up {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+}
+
+.yds-market-judgment-card__chip--down {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.yds-market-judgment-card__checks,
+.yds-market-judgment-card__warns,
+.yds-today-action-card__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.12rem;
+}
+
+.yds-market-judgment-card__checks li,
+.yds-today-action-card__list li {
+  font-size: 0.58rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.yds-market-judgment-card__warns li {
+  font-size: 0.58rem;
+  line-height: 1.4;
+  color: #fca5a5;
+}
+
+.yds-today-action-card__block {
+  margin-bottom: 0.35rem;
+}
+
+.yds-today-action-card__block:last-child {
+  margin-bottom: 0;
+  margin-top: auto;
+}
+
+.yds-today-action-card__block-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.54rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.yds-today-action-card__alloc {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.28rem 0.32rem;
+  border-radius: 0.35rem;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-today-action-card__alloc dt {
+  margin: 0;
+  font-size: 0.52rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-today-action-card__alloc dd {
+  margin: 0.06rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-market-state-history-mini__list {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.yds-market-state-mini-card {
+  padding: 0.28rem 0.35rem;
+  border-radius: 0.38rem;
+  border: 1px solid color-mix(in srgb, var(--state-color, #64748b) 30%, transparent);
+  border-left: 3px solid var(--state-color, #64748b);
+  background: color-mix(in srgb, var(--state-color, #64748b) 6%, rgba(2, 6, 23, 0.55));
+}
+
+.yds-market-state-mini-card--current {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--state-color, #facc15) 22%, transparent);
+}
+
+.yds-market-state-mini-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.22rem 0.4rem;
+  margin-bottom: 0.12rem;
+}
+
+.yds-market-state-mini-card__label {
+  font-size: clamp(0.64rem, 1.9vw, 0.72rem);
+  font-weight: 800;
+  color: var(--state-color, #94a3b8);
+}
+
+.yds-market-state-mini-card__duration {
+  font-size: 0.54rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.yds-market-state-mini-card__badge {
+  padding: 0.06rem 0.28rem;
+  border-radius: 999px;
+  font-size: 0.48rem;
+  font-weight: 800;
+  color: #0f172a;
+  background: var(--state-color, #facc15);
+}
+
+.yds-market-state-mini-card__scores {
+  margin: 0 0 0.1rem;
+  font-size: 0.54rem;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.yds-market-state-mini-card__action {
+  margin: 0;
+  font-size: 0.56rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.yds-market-state-history-mini__past {
+  margin-top: 0.28rem;
+}
+
+.yds-market-state-history-mini__footer {
+  margin: 0.28rem 0 0;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: 0.52rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+@media (max-width: 640px) {
+  .yds-market-dashboard__row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .yds-market-desk__slot--desk-tail {
   margin-bottom: 0;
 }

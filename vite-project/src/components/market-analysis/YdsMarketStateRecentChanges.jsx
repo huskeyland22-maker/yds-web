@@ -69,11 +69,48 @@ function MarketStateTimelineCard({ segment, pinned = false, showConnector = fals
 
 /**
  * @param {{
+ *   segment: import("../../content/ydsMarketStateRecentChanges.js").MarketStateTimelineSegment
+ * }} props
+ */
+function MarketStateMiniCard({ segment }) {
+  const scoreLine = segment.scoreRows.map((row) => `${row.label} ${row.value}`).join(" · ")
+  const actionLine = segment.investmentActionLines[0] ?? segment.investmentAction ?? ""
+
+  return (
+    <article
+      className={[
+        "yds-market-state-mini-card",
+        segment.isCurrent ? "yds-market-state-mini-card--current" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={{ "--state-color": segment.color }}
+    >
+      <div className="yds-market-state-mini-card__head">
+        <span className="yds-market-state-mini-card__label">{segment.label}</span>
+        <span className="yds-market-state-mini-card__duration">{segment.durationLabel}</span>
+        {segment.isCurrent ? (
+          <span className="yds-market-state-mini-card__badge">진행중</span>
+        ) : null}
+      </div>
+      {scoreLine ? (
+        <p className="yds-market-state-mini-card__scores font-mono tabular-nums">{scoreLine}</p>
+      ) : null}
+      {actionLine ? (
+        <p className="yds-market-state-mini-card__action">"{actionLine}"</p>
+      ) : null}
+    </article>
+  )
+}
+
+/**
+ * @param {{
  *   historyRows?: object[]
  *   cycleFlow?: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport | null
  *   panicData?: object | null
  *   dualLiquidity?: import("../../market-os/liquidityDualEngine.js").DualLiquidityReport | null
  *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number> } | null
+ *   variant?: "default" | "mini"
  *   className?: string
  * }} props
  */
@@ -83,6 +120,7 @@ export default function YdsMarketStateRecentChanges({
   panicData = null,
   dualLiquidity = null,
   etfContext = null,
+  variant = "default",
   className = "",
 }) {
   const [pastOpen, setPastOpen] = useState(false)
@@ -109,6 +147,49 @@ export default function YdsMarketStateRecentChanges({
   if (!report.visible || !layout.current) return null
 
   const { cycleStrip, summary, hiddenSegmentCount } = report
+  const isMini = variant === "mini"
+
+  if (isMini) {
+    return (
+      <section
+        className={[
+          "yds-desk-card",
+          "yds-market-state-history-mini",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-label={report.title}
+      >
+        <h3 className="yds-desk-card__title">{report.title}</h3>
+        <div className="yds-market-state-history-mini__list">
+          {layout.recent ? <MarketStateMiniCard segment={layout.recent} /> : null}
+          <MarketStateMiniCard segment={layout.current} />
+        </div>
+
+        {hiddenSegmentCount > 0 ? (
+          <details
+            className="yds-market-state-timeline__past yds-market-state-history-mini__past"
+            open={pastOpen}
+            onToggle={(e) => setPastOpen(e.currentTarget.open)}
+          >
+            <summary className="yds-market-state-timeline__past-summary">
+              이전 상태 보기 ({hiddenSegmentCount}개)
+            </summary>
+            <div className="yds-market-state-history-mini__list yds-market-state-history-mini__list--past">
+              {[...layout.hidden].reverse().map((seg) => (
+                <MarketStateMiniCard key={`${seg.startDate}-${seg.label}`} segment={seg} />
+              ))}
+            </div>
+          </details>
+        ) : null}
+
+        <p className="yds-market-state-history-mini__footer font-mono tabular-nums">
+          현재 {summary.currentDurationDays}일 · 30일 전환 {summary.transitionCount30d}회
+        </p>
+      </section>
+    )
+  }
 
   return (
     <section

@@ -6,6 +6,12 @@ import {
 } from "../vite-project/src/content/ydsMarketStateRecentChanges.js"
 import { buildAiMarketBriefing } from "../vite-project/src/content/ydsAiMarketBriefing.js"
 import { buildTodayMarketConclusion } from "../vite-project/src/content/ydsTodayMarketConclusion.js"
+import {
+  buildMarketJudgmentDashboardReport,
+  buildTodayActionDashboardReport,
+  starsToAllocationPct,
+} from "../vite-project/src/content/ydsMarketJudgmentDashboardEngine.js"
+import { buildDashboardActionGuideReport } from "../vite-project/src/content/ydsDashboardActionGuide.js"
 import { buildMarketCycleFlowReport } from "../vite-project/src/content/ydsMarketCycleFlow.js"
 import { getFinalScore } from "../vite-project/src/utils/tradingScores.js"
 
@@ -74,5 +80,29 @@ assert.ok(conclusion.headline)
 assert.ok(!conclusion.lines)
 assert.ok(conclusion.actions.length >= 1 && conclusion.actions.length <= 4)
 assert.ok(conclusion.signalEmoji)
+
+const judgmentDash = buildMarketJudgmentDashboardReport({
+  panicData,
+  cycleFlow,
+  dualLiquidity: null,
+})
+assert.ok(judgmentDash.visible)
+assert.equal(judgmentDash.title, "시장 판단")
+assert.ok(judgmentDash.currentStage)
+assert.ok(judgmentDash.strongSignals.length <= 6)
+assert.ok(judgmentDash.riskFactors.length <= 3)
+assert.ok(judgmentDash.keyRationale.length <= 4)
+assert.ok(judgmentDash.warnings.length <= 3)
+
+const actionGuide = buildDashboardActionGuideReport(panicData, historyRows, null, cycleFlow)
+const todayAction = buildTodayActionDashboardReport(actionGuide)
+assert.ok(todayAction.visible)
+assert.ok(todayAction.strategies.length >= 1)
+assert.ok(Number.isFinite(todayAction.cashPct))
+assert.equal(todayAction.cashPct + todayAction.stockPct, 100)
+
+const alloc = starsToAllocationPct({ buy: 3, watch: 3, cash: 3 })
+assert.equal(alloc.cashPct, 35)
+assert.equal(alloc.stockPct, 65)
 
 console.log("yds-desk-trust-features.test.mjs OK")

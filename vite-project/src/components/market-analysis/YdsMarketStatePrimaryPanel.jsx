@@ -2,15 +2,12 @@ import { useMemo } from "react"
 import { MARKET_LABEL_MARKET_STATE } from "../../content/ydsMarketStageLabels.js"
 import { computeMarketPositionScore, resolveMarketPositionId } from "../../content/ydsMarketPositionEngine.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
-import { buildMarketStateRationaleReport } from "../../content/ydsMarketStateCompositeEngine.js"
 import {
-  resolveUnifiedMarketStateGuide,
   resolveUnifiedMarketStateLabel,
 } from "../../content/ydsUnifiedMarketState.js"
-import YdsMarketStateTimeline from "./YdsMarketStateTimeline.jsx"
-import YdsMarketJudgmentRationale from "./YdsMarketJudgmentRationale.jsx"
-import YdsMarketStateHistory from "./YdsMarketStateHistory.jsx"
 import YdsMarketStateRecentChanges from "./YdsMarketStateRecentChanges.jsx"
+import YdsMarketJudgmentCard from "./YdsMarketJudgmentCard.jsx"
+import YdsTodayActionCard from "./YdsTodayActionCard.jsx"
 
 /** @param {object[]} historyRows */
 function resolveScoreDelta(historyRows, currentScore) {
@@ -38,16 +35,7 @@ function resolveScoreDelta(historyRows, currentScore) {
 }
 
 /**
- * V7 — 시장 상태 메인 카드 (좌: 상태 · 우: 사이클)
- * @param {{
- *   panicData?: object | null
- *   historyRows?: object[]
- *   cycleFlow?: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport | null
- *   dualLiquidity?: import("../../market-os/liquidityDualEngine.js").DualLiquidityReport | null
- *   etfContext?: object | null
- *   className?: string
- *   embedded?: boolean
- * }} props
+ * V7 — 시장 상태 투자 대시보드
  */
 export default function YdsMarketStatePrimaryPanel({
   panicData = null,
@@ -72,15 +60,6 @@ export default function YdsMarketStatePrimaryPanel({
     () => resolveUnifiedMarketStateLabel(cycleFlow, view?.position?.label ?? "—"),
     [cycleFlow, view?.position?.label],
   )
-  const unifiedGuide = useMemo(
-    () => resolveUnifiedMarketStateGuide(unifiedLabel),
-    [unifiedLabel],
-  )
-
-  const rationale = useMemo(
-    () => buildMarketStateRationaleReport(unifiedLabel, view?.composite ?? null),
-    [unifiedLabel, view?.composite],
-  )
 
   const delta = useMemo(
     () => (view ? resolveScoreDelta(historyRows, view.positionScore) : 0),
@@ -93,10 +72,10 @@ export default function YdsMarketStatePrimaryPanel({
   const deltaText = `${deltaSign} ${delta >= 0 ? "+" : ""}${delta}`
 
   const card = (
-    <div className="yds-market-state-primary yds-market-state-primary--v7">
-      <div className="yds-market-state-primary__main">
-        <div className="yds-market-state-primary__hero">
-          <p className="yds-market-state-primary__title">{MARKET_LABEL_MARKET_STATE}</p>
+    <div className="yds-market-state-primary yds-market-state-primary--dashboard">
+      <div className="yds-market-state-primary__hero yds-market-state-primary__hero--compact">
+        <p className="yds-market-state-primary__title">{MARKET_LABEL_MARKET_STATE}</p>
+        <div className="yds-market-state-primary__hero-row">
           <p className="yds-market-state-primary__score font-mono tabular-nums">
             {view.positionScore}
           </p>
@@ -107,80 +86,36 @@ export default function YdsMarketStatePrimaryPanel({
             {view.position.emoji} {unifiedLabel}
           </p>
           <p className="yds-market-state-primary__delta">
-            전일 대비 <span className="font-mono tabular-nums">{deltaText}</span>
+            전일 <span className="font-mono tabular-nums">{deltaText}</span>
           </p>
         </div>
-
-        <YdsMarketStateRecentChanges
-          historyRows={historyRows}
-          cycleFlow={cycleFlow}
-          panicData={panicData}
-          dualLiquidity={dualLiquidity}
-          etfContext={etfContext}
-          className="yds-market-state-primary__recent-changes"
-        />
-
-        {rationale.visible ? (
-          <article className="yds-market-state-primary__rationale" aria-label="시장 상태 판단 근거">
-            <p className="yds-market-state-primary__rationale-title">판단 근거</p>
-            <ul className="yds-market-state-primary__rationale-list">
-              {rationale.priceBullets.map((item) => (
-                <li key={item} className="yds-market-state-primary__rationale-item">
-                  ✓ {item}
-                </li>
-              ))}
-            </ul>
-            <p className="yds-market-state-primary__rationale-final-label">최종 판단</p>
-            <p className="yds-market-state-primary__rationale-final">{rationale.conclusion}</p>
-            {rationale.sentimentNotes.length ? (
-              <p className="yds-market-state-primary__rationale-sentiment">
-                {rationale.sentimentNotes.join(" · ")}
-              </p>
-            ) : null}
-          </article>
-        ) : null}
-
-        <ul className="yds-market-state-primary__actions" aria-label="시장 상태 행동 가이드">
-          {unifiedGuide.actions.map((item) => (
-            <li key={item} className="yds-market-state-primary__action-item">
-              ✓ {item}
-            </li>
-          ))}
-        </ul>
-
-        <article className="yds-market-state-primary__strategy" aria-label="현재 시장 전략">
-          <p className="yds-market-state-primary__layer-tag">전략 요약</p>
-          <p className="yds-market-state-primary__strategy-line">{unifiedGuide.strategyPhase}</p>
-          <p className="yds-market-state-primary__strategy-narrative">
-            {unifiedGuide.strategyNarrative.map((line, index) => (
-              <span key={line}>
-                {index > 0 ? <br /> : null}
-                {line}
-              </span>
-            ))}
-          </p>
-        </article>
       </div>
 
-      {cycleFlow?.visible ? (
-        <div className="yds-market-state-primary__cycle">
-          <YdsMarketStateTimeline flow={cycleFlow} embedded showTitle />
-          <YdsMarketJudgmentRationale
-            panicData={panicData}
-            cycleFlow={cycleFlow}
-            dualLiquidity={dualLiquidity}
-            etfContext={etfContext}
-            className="yds-market-state-primary__judgment"
-          />
-          <YdsMarketStateHistory
-            historyRows={historyRows}
-            cycleFlow={cycleFlow}
-            panicData={panicData}
-            dualLiquidity={dualLiquidity}
-            className="yds-market-state-primary__history"
-          />
-        </div>
-      ) : null}
+      <YdsMarketStateRecentChanges
+        historyRows={historyRows}
+        cycleFlow={cycleFlow}
+        panicData={panicData}
+        dualLiquidity={dualLiquidity}
+        etfContext={etfContext}
+        variant="mini"
+        className="yds-market-state-primary__recent-changes"
+      />
+
+      <div className="yds-market-dashboard__row">
+        <YdsMarketJudgmentCard
+          panicData={panicData}
+          cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
+        />
+        <YdsTodayActionCard
+          panicData={panicData}
+          historyRows={historyRows}
+          cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
+        />
+      </div>
     </div>
   )
 
