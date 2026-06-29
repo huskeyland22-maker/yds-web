@@ -9,6 +9,7 @@ import YdsStockPickScoreDetailPanel from "../components/stock-picks/YdsStockPick
 import YdsStockPositionBadge from "../components/stock-picks/YdsStockPositionBadge.jsx"
 import YdsStockPickTrustExtras from "../components/stock-picks/YdsStockPickTrustExtras.jsx"
 import YdsStockPickScoreBreakdown from "../components/stock-picks/YdsStockPickScoreBreakdown.jsx"
+import YdsStockPickAiAnalysisPanel from "../components/stock-picks/YdsStockPickAiAnalysisPanel.jsx"
 import "../styles/stock-picks-platform.css"
 
 export default function StockPickDetailPage() {
@@ -65,6 +66,11 @@ export default function StockPickDetailPage() {
         <YdsStockPositionBadge stock={stock} variant="detail" />
 
         <YdsStockPickScoreBreakdown stock={stock} className="yds-spick-detail__score-breakdown" />
+
+        <YdsStockPickAiAnalysisPanel
+          report={stock.aiAnalysisReport}
+          className="yds-spick-detail__ai-analysis"
+        />
 
         <YdsStockPickTrustExtras trustReport={stock.trustReport} className="yds-spick-detail__trust" />
 

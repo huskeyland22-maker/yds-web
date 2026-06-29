@@ -9,6 +9,7 @@ import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
 import { loadValidationPicks } from "./ydsValidationStorage.js"
 import { getRegimeTopStocks } from "./ydsStockPickMarketRegime.js"
 import { RECOMMEND_ENGINE_LABELS } from "./ydsStockRecommendEngine.js"
+import { buildAiRationaleProgressBars } from "./ydsStockPickAiAnalysisEngine.js"
 
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
 /** @typedef {import("./ydsMarketAdapter.js").YdsMarketAdapterContext} YdsMarketAdapterContext */
@@ -137,23 +138,9 @@ function buildPrimaryExcludeReason(stock, marketContext = null) {
  * @param {StockPickView} stock
  */
 function buildScoreBarsFromEngine(stock) {
-  const engine = stock.recommendEngine
-  if (!engine?.scores) return []
-
-  const map = [
-    { id: "marketFit", key: "marketFit", label: "시장적합" },
-    { id: "technical", key: "technical", label: "기술" },
-    { id: "earnings", key: "earnings", label: "실적" },
-    { id: "momentum", key: "momentum", label: "산업" },
-    { id: "risk", key: "risk", label: "리스크", invertTone: true },
-  ]
-
-  return map.map(({ id, key, label, invertTone }) => ({
-    id,
-    label,
-    score: engine.scores[key] ?? 0,
+  return buildAiRationaleProgressBars(stock).map((bar) => ({
+    ...bar,
     max: 100,
-    invertTone: Boolean(invertTone),
   }))
 }
 

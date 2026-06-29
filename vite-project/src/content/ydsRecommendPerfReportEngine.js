@@ -135,6 +135,21 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
         p.horizons?.d14 ??
         p.horizons?.d7 ??
         null
+      let maxRet = ret
+      let minRet = ret
+      for (const v of Object.values(p.horizons ?? {})) {
+        if (v != null && Number.isFinite(v)) {
+          if (maxRet == null || v > maxRet) maxRet = v
+          if (minRet == null || v < minRet) minRet = v
+        }
+      }
+      const today = todayDateKey()
+      const daysHeld = Math.max(
+        0,
+        Math.round(
+          (Date.parse(today) - Date.parse(String(p.recommendedAt).slice(0, 10))) / 86400000,
+        ),
+      )
       const outcome = classifyPickOutcome(ret)
       return {
         ticker: p.ticker,
@@ -144,6 +159,9 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
         currentPrice: formatTransparencyPrice(p.currentPrice, country),
         returnPct: ret,
         returnLabel: formatPerfPct(ret),
+        maxReturnLabel: formatPerfPct(maxRet),
+        maxLossLabel: formatPerfPct(minRet),
+        daysHeldLabel: `${daysHeld}일`,
         success: outcome === "success",
         successLabel: outcome === "success" ? "성공" : outcome === "failure" ? "실패" : "보통",
       }

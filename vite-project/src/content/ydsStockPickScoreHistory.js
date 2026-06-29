@@ -144,11 +144,54 @@ export function getScoreDeltas(ticker, history = readScoreHistory()) {
     day1: getScoreDeltaForDays(ticker, 1, history),
     day5: getScoreDeltaForDays(ticker, 5, history),
     day20: getScoreDeltaForDays(ticker, 20, history),
+    recommendDay1: getRecommendScoreDeltaForDays(ticker, 1, history),
     /** @deprecated use day5 */
     day7: getScoreDeltaForDays(ticker, 5, history),
     /** @deprecated use day20 */
     day14: getScoreDeltaForDays(ticker, 20, history),
   }
+}
+
+/**
+ * @param {string} ticker
+ * @param {number} daysAgo
+ * @param {Record<string, Array<{ date: string; recommendScore?: number; total?: number }>>} [history]
+ */
+function getRecommendScoreDeltaForDays(ticker, daysAgo, history = readScoreHistory()) {
+  const rows = history[ticker]
+  if (!rows?.length) return null
+
+  const today = todayKey()
+  const targetDate = daysBefore(today, daysAgo)
+  const currentRow = rows.find((r) => r.date === today) ?? rows[rows.length - 1]
+  const prevRow =
+    rows.find((r) => r.date === targetDate) ??
+    rows.filter((r) => r.date < (currentRow?.date ?? today)).slice(-1)[0]
+
+  if (!currentRow || !prevRow || currentRow.date === prevRow.date) return null
+
+  const cur = Number(currentRow.recommendScore ?? currentRow.total)
+  const prev = Number(prevRow.recommendScore ?? prevRow.total)
+  if (!Number.isFinite(cur) || !Number.isFinite(prev)) return null
+
+  const delta = cur - prev
+  if (delta === 0) {
+    return { current: cur, previous: prev, delta: 0, direction: "flat", display: "→ 0" }
+  }
+  const direction = delta > 0 ? "up" : "down"
+  const sign = delta > 0 ? "+" : ""
+  return {
+    current: cur,
+    previous: prev,
+    delta,
+    direction,
+    display: `${delta > 0 ? "▲" : "▼"} ${sign}${delta}`,
+  }
+}
+
+/** @param {string} ticker @param {Record<string, Array<Record<string, unknown>>>} [history] */
+export function getRecommendScoreDelta(ticker, history = readScoreHistory()) {
+  return getRecommendScoreDeltaForDays(ticker, 1, history)
 }
 
 /**
@@ -228,9 +271,13 @@ export function recordScoreHistory(stocks, historyBefore = readScoreHistory()) {
     const total = stock.v4Score?.finalRankScore ?? stock.v4Score?.total ?? stock.scoreBreakdown?.total ?? 0
     const marketFit = stock.pickMeta?.marketFitScore ?? stock.scoreBreakdown?.marketEnv ?? 0
     const v4 = stock.v4Score
+    const recommendScore = Math.round(
+      stock.recommendEngine?.compositeScore ?? total,
+    )
     const entry = {
       date: today,
       total: Math.round(total),
+      recommendScore,
       rank: stock.rank ?? 0,
       statusId: v4?.recommendStatusId ?? "",
       quality: v4?.quality ?? 0,

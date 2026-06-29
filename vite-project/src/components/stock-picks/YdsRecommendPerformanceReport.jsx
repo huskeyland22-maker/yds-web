@@ -66,9 +66,9 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
           <dd className="font-mono tabular-nums">{kpi.count}</dd>
         </div>
         <div>
-          <dt>성공률</dt>
+          <dt>승률</dt>
           <dd className="font-mono tabular-nums">
-            {kpi.successRate != null ? `${kpi.successRate}%` : "—"}
+            {kpi.winRate != null ? `${kpi.winRate}%` : kpi.successRate != null ? `${kpi.successRate}%` : "—"}
           </dd>
         </div>
         <div>
@@ -106,6 +106,9 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
                 <th>추천가</th>
                 <th>현재가</th>
                 <th>수익률</th>
+                <th>최고</th>
+                <th>최대손실</th>
+                <th>유지일</th>
                 <th>결과</th>
               </tr>
             </thead>
@@ -126,6 +129,9 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
                   >
                     {row.returnLabel}
                   </td>
+                  <td className="font-mono tabular-nums yds-rec-perf-report__up">{row.maxReturnLabel}</td>
+                  <td className="font-mono tabular-nums yds-rec-perf-report__down">{row.maxLossLabel}</td>
+                  <td>{row.daysHeldLabel}</td>
                   <td>{row.successLabel}</td>
                 </tr>
               ))}

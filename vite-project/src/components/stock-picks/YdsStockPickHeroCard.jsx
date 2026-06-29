@@ -25,8 +25,13 @@ export default function YdsStockPickHeroCard({
   isHeld = false,
 }) {
   const trust = stock.trustReport
+  const aiAnalysis = stock.aiAnalysisReport
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
-  const aiOpinion = stock.opinion?.summary || stock.opinion?.headline || stock.recommendReasonSummary
+  const aiOpinion =
+    aiAnalysis?.comprehensiveOpinion?.text ||
+    stock.opinion?.summary ||
+    stock.opinion?.headline ||
+    stock.recommendReasonSummary
 
   const rankClass =
     rankIndex === 0
@@ -74,7 +79,17 @@ export default function YdsStockPickHeroCard({
       />
 
       {aiOpinion ? (
-        <p className="yds-spick-hero-card__opinion">{aiOpinion}</p>
+        <div className="yds-spick-hero-card__opinion-block">
+          <p className="yds-spick-hero-card__opinion-label">AI 종합 의견</p>
+          <p className="yds-spick-hero-card__opinion">{aiOpinion}</p>
+        </div>
+      ) : null}
+
+      {aiAnalysis?.scoreChange?.visible && aiAnalysis.scoreChange.previousScore != null ? (
+        <p className="yds-spick-hero-card__score-delta font-mono tabular-nums">
+          {aiAnalysis.scoreChange.previousScore}점 → {aiAnalysis.scoreChange.currentScore}점
+          {aiAnalysis.scoreChange.deltaLabel ? ` (${aiAnalysis.scoreChange.deltaLabel})` : ""}
+        </p>
       ) : null}
 
       <YdsStockPickActionGuide

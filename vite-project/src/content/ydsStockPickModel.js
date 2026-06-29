@@ -52,6 +52,7 @@ import {
   getRecommendEngineSortScore,
 } from "./ydsStockRecommendEngine.js"
 import { buildStockPickTrustReport } from "./ydsStockPickTrustEngine.js"
+import { buildStockPickAiAnalysisReport } from "./ydsStockPickAiAnalysisEngine.js"
 
 /** @typedef {'trend' | 'dip' | 'interest' | 'overheat'} StockPickStatusId */
 /** @typedef {'ai' | 'power' | 'defense' | 'semi' | 'robot' | 'nuclear' | 'infra'} StockPickSectorId */
@@ -409,6 +410,7 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
   enriched.opinion = buildStockPickOpinion(enriched)
 
   enriched.trustReport = buildStockPickTrustReport(enriched, ctx)
+  enriched.aiAnalysisReport = buildStockPickAiAnalysisReport(enriched, ctx)
 
   if (isLive) {
     const logScore = () => {

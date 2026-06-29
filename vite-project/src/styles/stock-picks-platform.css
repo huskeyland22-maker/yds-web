@@ -3716,8 +3716,128 @@
 }
 
 .yds-spick-detail__score-breakdown,
-.yds-spick-detail__trust {
+.yds-spick-detail__trust,
+.yds-spick-detail__ai-analysis {
   margin-top: 0.65rem;
+}
+
+/* —— AI 종합 분석 패널 —— */
+
+.yds-spick-ai-analysis {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.yds-spick-ai-analysis__block {
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(51, 65, 85, 0.65);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.yds-spick-ai-analysis__title {
+  margin: 0 0 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #38bdf8;
+}
+
+.yds-spick-ai-analysis__opinion p {
+  margin: 0 0 0.45rem;
+  font-size: 0.68rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.yds-spick-ai-analysis__opinion p:last-child {
+  margin-bottom: 0;
+}
+
+.yds-spick-ai-analysis__score-delta {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.35rem;
+}
+
+.yds-spick-ai-analysis__score-arrow--up {
+  color: #4ade80;
+  transform: rotate(180deg);
+  display: inline-block;
+}
+
+.yds-spick-ai-analysis__score-arrow--down {
+  color: #f87171;
+}
+
+.yds-spick-ai-analysis__score-chg--up {
+  color: #4ade80;
+}
+
+.yds-spick-ai-analysis__score-chg--down {
+  color: #f87171;
+}
+
+.yds-spick-ai-analysis__reasons {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.6rem;
+  color: #94a3b8;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.yds-spick-ai-analysis__validation {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.28rem 0.45rem;
+  font-size: 0.58rem;
+}
+
+.yds-spick-ai-analysis__validation dt {
+  color: #64748b;
+}
+
+.yds-spick-ai-analysis__validation dd {
+  margin: 0;
+  color: #e2e8f0;
+}
+
+.yds-spick-ai-analysis--compact .yds-spick-ai-analysis__opinion p {
+  font-size: 0.62rem;
+}
+
+.yds-spick-hero-card__opinion-block {
+  margin-top: 0.25rem;
+}
+
+.yds-spick-hero-card__opinion-label {
+  margin: 0 0 0.15rem;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #38bdf8;
+}
+
+.yds-spick-hero-card__opinion {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  white-space: pre-line;
+}
+
+.yds-spick-hero-card__score-delta {
+  margin: 0.2rem 0 0;
+  font-size: 0.58rem;
+  color: #94a3b8;
 }
 
 /* —— GO #67–71: 기관 리포트 레이아웃 —— */

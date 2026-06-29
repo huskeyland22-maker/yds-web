@@ -7,6 +7,7 @@ import { buildStockPickTradeScenarioReport } from "../../content/ydsStockPickTra
 import YdsStockPickRecommendHistory from "./YdsStockPickRecommendHistory.jsx"
 import YdsStockPickTradeScenario from "./YdsStockPickTradeScenario.jsx"
 import YdsStockPickTrustExtras from "./YdsStockPickTrustExtras.jsx"
+import YdsStockPickAiAnalysisPanel from "./YdsStockPickAiAnalysisPanel.jsx"
 
 /**
  * @param {{
@@ -22,15 +23,16 @@ export default function YdsStockPickDetailPanel({ stock, dualLiquidity = null, c
     [stock, marketContext],
   )
   const history = useMemo(() => buildStockPickRecommendHistoryReport(stock), [stock])
-  const scenario = useMemo(
-    () =>
-      buildStockPickTradeScenarioReport(
-        stock,
-        marketContext?.ready ? marketContext : null,
-        dualLiquidity,
-      ),
-    [stock, marketContext, dualLiquidity],
-  )
+  const scenario = useMemo(() => {
+    if (stock.aiAnalysisReport?.investmentScenarios?.visible) {
+      return stock.aiAnalysisReport.investmentScenarios
+    }
+    return buildStockPickTradeScenarioReport(
+      stock,
+      marketContext?.ready ? marketContext : null,
+      dualLiquidity,
+    )
+  }, [stock, marketContext, dualLiquidity])
 
   if (!report.visible) return null
 
@@ -45,6 +47,15 @@ export default function YdsStockPickDetailPanel({ stock, dualLiquidity = null, c
       className={["yds-spick-detail-panel", className].filter(Boolean).join(" ")}
       aria-label={`${stock.name} AI 상세 분석`}
     >
+      <YdsStockPickAiAnalysisPanel
+        report={stock.aiAnalysisReport}
+        embedded
+        compact
+        showScenarios={false}
+        showValidation={false}
+        className="yds-spick-detail-panel__ai"
+      />
+
       <YdsStockPickTrustExtras trustReport={trust} embedded className="yds-spick-detail-panel__trust" />
 
       <div className="yds-spick-detail-panel__scores">
@@ -132,7 +143,7 @@ export default function YdsStockPickDetailPanel({ stock, dualLiquidity = null, c
       </dl>
 
       <YdsStockPickRecommendHistory report={history} embedded />
-      <YdsStockPickTradeScenario report={scenario} embedded />
+      <YdsStockPickTradeScenario report={scenario} embedded enhanced={Boolean(stock.aiAnalysisReport?.visible)} />
 
       <Link to={to} className="yds-spick-detail-panel__more">
         종목 상세 페이지 →

@@ -16,9 +16,9 @@ export function buildStockPickTradeScenarioReport(stock, marketContext = null, d
   const price = Number(stock.snapshot?.price ?? stock.snapshot?.close)
   const levels = detail.priceLevels
 
-  const aiScore = detail.scoreBars.find((b) => b.id === "ai")?.score ?? 50
-  const momentum = detail.scoreBars.find((b) => b.id === "momentum")?.score ?? 50
-  const risk = detail.scoreBars.find((b) => b.id === "risk")?.score ?? 50
+  const aiScore = stock.recommendEngine?.compositeScore ?? detail.scoreBars.find((b) => b.id === "ai")?.score ?? 50
+  const momentum = stock.recommendEngine?.scores?.momentum ?? detail.scoreBars.find((b) => b.id === "momentum")?.score ?? 50
+  const risk = stock.recommendEngine?.scores?.risk ?? detail.scoreBars.find((b) => b.id === "risk")?.score ?? 50
 
   let bull = 30 + momentum * 0.25 + aiScore * 0.15
   let bear = 20 + (100 - risk) * 0.2
@@ -54,7 +54,7 @@ export function buildStockPickTradeScenarioReport(stock, marketContext = null, d
 
   return {
     visible: stock.dataSource === "live",
-    title: "매매 시나리오",
+    title: "AI 투자 시나리오",
     scenarios: [
       {
         id: "bull",
