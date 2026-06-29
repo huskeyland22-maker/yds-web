@@ -269,6 +269,8 @@ export function useStockPickLiveData(marketContext) {
 
   return {
     stocks,
+    /** @deprecated alias — prefer `stocks` */
+    liveStocks: stocks,
     allStocks,
     loadStats,
     pipelineDebug,

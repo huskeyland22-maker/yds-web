@@ -1,5 +1,6 @@
 /**
  * GO #82 — 추천 히스토리 상세 검증 리포트
+ * GO #81 — undefined·null 안전 기본값
  */
 
 import { loadValidationPicks } from "./ydsValidationStorage.js"
@@ -8,6 +9,7 @@ import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendatio
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { buildStockPickAiAnalysisReport } from "./ydsStockPickAiAnalysisEngine.js"
+import { migratePickLifecycle, resolvePickLifecycleView } from "./ydsPickLifecycleEngine.js"
 
 /** @typedef {import("./ydsValidationStorage.js").ValidationPickRecord} ValidationPickRecord */
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
@@ -15,7 +17,9 @@ import { buildStockPickAiAnalysisReport } from "./ydsStockPickAiAnalysisEngine.j
 /** @param {string} pickId */
 export function findValidationPickById(pickId) {
   const id = decodeURIComponent(String(pickId ?? ""))
-  return loadValidationPicks().find((p) => p.id === id) ?? null
+  if (!id) return null
+  const picks = loadValidationPicks() ?? []
+  return picks.find((p) => p?.id === id) ?? null
 }
 
 /**
@@ -75,9 +79,10 @@ function computeMfeMae(pick, priceSeries) {
     return { highPrice: null, lowPrice: null, mfe: null, mae: null }
   }
 
+  const series = priceSeries ?? []
   let high = entry
   let low = entry
-  for (const pt of priceSeries) {
+  for (const pt of series) {
     if (pt.price > high) high = pt.price
     if (pt.price < low) low = pt.price
   }
@@ -94,10 +99,11 @@ function computeMfeMae(pick, priceSeries) {
  * @param {ValidationPickRecord} pick
  */
 function buildScoreSeries(pick) {
-  const rows = readScoreHistory()[pick.ticker] ?? []
+  const history = readScoreHistory() ?? {}
+  const rows = history[pick.ticker] ?? []
   const start = String(pick.recommendedAt).slice(0, 10)
   return rows
-    .filter((r) => r.date >= start)
+    .filter((r) => r?.date >= start)
     .map((r) => ({
       date: r.date,
       axisLabel: r.date.slice(5).replace("-", "/"),
@@ -110,15 +116,16 @@ function buildScoreSeries(pick) {
  * @param {ValidationPickRecord} pick
  */
 function buildStatusTimeline(pick) {
-  const rows = readScoreHistory()[pick.ticker] ?? []
+  const history = readScoreHistory() ?? {}
+  const rows = history[pick.ticker] ?? []
   const start = String(pick.recommendedAt).slice(0, 10)
-  const filtered = rows.filter((r) => r.date >= start)
+  const filtered = rows.filter((r) => r?.date >= start)
   /** @type {{ date: string; dateLabel: string; statusId: string; statusLabel: string; score: number }[]} */
   const timeline = [
     {
       date: start,
       dateLabel: start,
-      statusId: pick.statusId,
+      statusId: pick.statusId ?? "",
       statusLabel: pick.statusLabel || "추천 시작",
       score: Math.round(pick.recommendedScore ?? 0),
     },
@@ -142,6 +149,18 @@ function buildStatusTimeline(pick) {
 }
 
 /**
+ * @param {StockPickView | null} liveStock
+ */
+function safeBuildAiAnalysis(liveStock) {
+  if (!liveStock) return null
+  try {
+    return buildStockPickAiAnalysisReport(liveStock, null)
+  } catch {
+    return null
+  }
+}
+
+/**
  * @param {ValidationPickRecord} pick
  * @param {StockPickView | null} [liveStock]
  */
@@ -149,10 +168,10 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
   if (!pick) return { visible: false }
 
   const country = pick.country === "KR" ? "KR" : "US"
-  const priceSeries = buildPriceSeries(pick)
+  const priceSeries = buildPriceSeries(pick) ?? []
   const { highPrice, lowPrice, mfe, mae } = computeMfeMae(pick, priceSeries)
-  const currentPrice = liveStock?.snapshot?.price ?? pick.currentPrice
-  const recPrice = pick.recommendedPrice
+  const currentPrice = liveStock?.snapshot?.price ?? pick.currentPrice ?? null
+  const recPrice = pick.recommendedPrice ?? null
   const currentRet = calcRecommendReturnPct(recPrice, currentPrice)
 
   const today = new Date().toISOString().slice(0, 10)
@@ -161,25 +180,27 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
     Math.round((Date.parse(today) - Date.parse(String(pick.recommendedAt).slice(0, 10))) / 86400000),
   )
 
-  const scoreSeries = buildScoreSeries(pick)
+  const scoreSeries = buildScoreSeries(pick) ?? []
   const currentAiScore =
     liveStock?.recommendEngine?.compositeScore ??
     scoreSeries[scoreSeries.length - 1]?.score ??
     pick.recommendedScore ??
     null
   const recAiScore = Math.round(pick.recommendedScore ?? pick.recommendSnapshot?.compositeScore ?? 0)
-  const scoreDelta = getRecommendScoreDelta(pick.ticker)
-  const aiAnalysis = liveStock ? buildStockPickAiAnalysisReport(liveStock, null) : null
+  const scoreDelta = pick.ticker ? getRecommendScoreDelta(pick.ticker) : null
+  const aiAnalysis = safeBuildAiAnalysis(liveStock)
 
   const snap = pick.recommendSnapshot
   /** @type {string[]} */
   const recommendReasons = []
-  if (snap?.topReasons?.length) {
-    for (const r of snap.topReasons) recommendReasons.push(String(r))
-  } else if (snap?.rationales?.length) {
-    for (const r of snap.rationales) recommendReasons.push(String(r.text ?? r))
+  const topReasons = snap?.topReasons ?? []
+  const rationales = snap?.rationales ?? []
+  if (topReasons.length) {
+    for (const r of topReasons) recommendReasons.push(String(r))
+  } else if (rationales.length) {
+    for (const r of rationales) recommendReasons.push(String(r.text ?? r))
   } else if (pick.qualityGrade) {
-    recommendReasons.push(`품질 ${pick.qualityGrade} · 타이밍 ${pick.timingGrade}`)
+    recommendReasons.push(`품질 ${pick.qualityGrade} · 타이밍 ${pick.timingGrade ?? "—"}`)
   }
 
   const currentEvaluation =
@@ -190,6 +211,10 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
       : currentRet != null && currentRet < -5
         ? "추천 대비 하락 — 손절·비중 점검 필요"
         : "횡보 구간 — 추세 확인 후 대응")
+
+  const lifecycle = resolvePickLifecycleView(
+    migratePickLifecycle(pick).lifecycleId ?? "active",
+  )
 
   return {
     visible: true,
@@ -221,18 +246,23 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
     currentEvaluation,
     priceSeries,
     scoreSeries,
-    statusTimeline: buildStatusTimeline(pick),
+    statusTimeline: buildStatusTimeline(pick) ?? [],
     regimeLabel: pick.regimeLabel || pick.strategyLabel || "—",
+    lifecycleLabel: `${lifecycle.emoji} ${lifecycle.label}`,
+    resultBadge: `${lifecycle.badgeEmoji} ${lifecycle.badgeLabel}`,
+    closeReason: pick.closeReason ?? null,
+    closedAt: pick.closedAt ?? null,
   }
 }
 
 /** @param {import("./ydsStockPickModel.js").StockPickView[]} [liveStocks] */
 export function buildValidationPickListReport(liveStocks = []) {
+  const stocks = liveStocks ?? []
   const priceByTicker = new Map(
-    liveStocks.map((s) => [String(s.ticker).toUpperCase(), Number(s.snapshot?.price ?? s.snapshot?.close)]),
+    stocks.map((s) => [String(s.ticker).toUpperCase(), Number(s.snapshot?.price ?? s.snapshot?.close)]),
   )
 
-  const rows = loadValidationPicks()
+  const rows = (loadValidationPicks() ?? [])
     .slice()
     .sort((a, b) => b.recommendedAt.localeCompare(a.recommendedAt))
     .slice(0, 100)

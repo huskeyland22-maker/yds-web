@@ -4731,6 +4731,24 @@
   color: #64748b;
 }
 
+.yds-spick-validation-page__lifecycle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.yds-spick-validation-page__badge {
+  padding: 0.08rem 0.32rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  font-size: 0.56rem;
+}
+
 .yds-spick-validation-page__links,
 .yds-spick-validation-page__head,
 .yds-spick-ranking-page__head,

@@ -18,11 +18,12 @@ import {
 import "../styles/stock-picks-platform.css"
 
 function MiniLineChart({ data, dataKey, color = "#38bdf8", suffix = "" }) {
-  if (!data?.length) return <p className="yds-spick-empty">차트 데이터 없음</p>
+  const series = data ?? []
+  if (!series.length) return <p className="yds-spick-empty">데이터 없음</p>
   return (
     <div className="yds-spick-validation-chart">
       <ResponsiveContainer width="100%" height={180}>
-        <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+        <LineChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="rgba(100,116,139,0.2)" strokeDasharray="3 3" />
           <XAxis dataKey="axisLabel" tick={{ fontSize: 10, fill: "#64748b" }} />
           <YAxis tick={{ fontSize: 10, fill: "#64748b" }} width={36} />
@@ -37,15 +38,28 @@ function MiniLineChart({ data, dataKey, color = "#38bdf8", suffix = "" }) {
   )
 }
 
+function ValidationSection({ title, children, empty = false, emptyLabel = "데이터 없음" }) {
+  return (
+    <section className="yds-spick-validation-section">
+      <h2 className="yds-spick-validation-section__title">{title}</h2>
+      {empty ? <p className="yds-spick-empty">{emptyLabel}</p> : children}
+    </section>
+  )
+}
+
 export default function StockPickValidationDetailPage() {
   const { pickId = "" } = useParams()
   const marketContext = useYdsMarketContext()
-  const { liveStocks } = useStockPickLiveData(marketContext?.ready ? marketContext : null)
-  const pick = useMemo(() => findValidationPickById(pickId), [pickId])
-  const liveStock = useMemo(
-    () => liveStocks.find((s) => s.ticker.toUpperCase() === String(pick?.ticker ?? "").toUpperCase()) ?? null,
-    [liveStocks, pick],
+  const { stocks: liveStocks = [] } = useStockPickLiveData(
+    marketContext?.ready ? marketContext : null,
   )
+  const pick = useMemo(() => findValidationPickById(pickId), [pickId])
+  const liveStock = useMemo(() => {
+    const list = liveStocks ?? []
+    const sym = String(pick?.ticker ?? "").toUpperCase()
+    if (!sym) return null
+    return list.find((s) => String(s?.ticker ?? "").toUpperCase() === sym) ?? null
+  }, [liveStocks, pick])
   const report = useMemo(
     () => (pick ? buildPickValidationDetailReport(pick, liveStock) : { visible: false }),
     [pick, liveStock],
@@ -62,6 +76,11 @@ export default function StockPickValidationDetailPage() {
     )
   }
 
+  const priceSeries = report.priceSeries ?? []
+  const scoreSeries = report.scoreSeries ?? []
+  const statusTimeline = report.statusTimeline ?? []
+  const recommendReasons = report.recommendReasons ?? []
+
   return (
     <div className="yds-spick-validation-page min-w-0 px-3 py-4 sm:px-4">
       <Link to="/performance-validation/picks" className="yds-spick-detail__back">
@@ -69,27 +88,35 @@ export default function StockPickValidationDetailPage() {
       </Link>
 
       <header className="yds-spick-validation-page__head">
-        <h1 className="yds-spick-validation-page__title">{report.name}</h1>
+        <h1 className="yds-spick-validation-page__title">{report.name ?? "—"}</h1>
         <p className="yds-spick-validation-page__sub font-mono tabular-nums">
-          {report.ticker} · 추천 {report.recommendedAt} · {report.regimeLabel}
+          {report.ticker ?? "—"} · 추천 {report.recommendedAt ?? "—"} · {report.regimeLabel ?? "—"}
         </p>
-        <Link to={`/stock-picks/${report.ticker}`} className="yds-spick-validation-page__link">
-          현재 AI 분석 →
-        </Link>
+        <p className="yds-spick-validation-page__lifecycle">
+          {report.lifecycleLabel ?? "—"}
+          {report.resultBadge ? (
+            <span className="yds-spick-validation-page__badge">{report.resultBadge}</span>
+          ) : null}
+        </p>
+        {report.ticker ? (
+          <Link to={`/stock-picks/${report.ticker}`} className="yds-spick-validation-page__link">
+            현재 AI 분석 →
+          </Link>
+        ) : null}
       </header>
 
       <dl className="yds-spick-validation-kpi">
-        <div><dt>추천일</dt><dd className="font-mono tabular-nums">{report.recommendedAt}</dd></div>
-        <div><dt>추천가</dt><dd className="font-mono tabular-nums">{report.recommendedPrice}</dd></div>
-        <div><dt>현재가</dt><dd className="font-mono tabular-nums">{report.currentPrice}</dd></div>
-        <div><dt>최고가</dt><dd className="font-mono tabular-nums">{report.highPrice}</dd></div>
-        <div><dt>최저가</dt><dd className="font-mono tabular-nums">{report.lowPrice}</dd></div>
-        <div><dt>현재 수익률</dt><dd className="font-mono tabular-nums">{report.currentReturnLabel}</dd></div>
-        <div><dt>최고 수익(MFE)</dt><dd className="font-mono tabular-nums">{report.mfeLabel}</dd></div>
-        <div><dt>최대 손실(MAE)</dt><dd className="font-mono tabular-nums">{report.maeLabel}</dd></div>
-        <div><dt>보유기간</dt><dd>{report.daysHeld}</dd></div>
-        <div><dt>추천 AI점수</dt><dd className="font-mono tabular-nums">{report.recAiScore}</dd></div>
-        <div><dt>현재 AI점수</dt><dd className="font-mono tabular-nums">{report.currentAiScore}</dd></div>
+        <div><dt>추천일</dt><dd className="font-mono tabular-nums">{report.recommendedAt ?? "—"}</dd></div>
+        <div><dt>추천가</dt><dd className="font-mono tabular-nums">{report.recommendedPrice ?? "—"}</dd></div>
+        <div><dt>현재가</dt><dd className="font-mono tabular-nums">{report.currentPrice ?? "—"}</dd></div>
+        <div><dt>최고가</dt><dd className="font-mono tabular-nums">{report.highPrice ?? "—"}</dd></div>
+        <div><dt>최저가</dt><dd className="font-mono tabular-nums">{report.lowPrice ?? "—"}</dd></div>
+        <div><dt>현재 수익률</dt><dd className="font-mono tabular-nums">{report.currentReturnLabel ?? "—"}</dd></div>
+        <div><dt>최고 수익(MFE)</dt><dd className="font-mono tabular-nums">{report.mfeLabel ?? "—"}</dd></div>
+        <div><dt>최대 손실(MAE)</dt><dd className="font-mono tabular-nums">{report.maeLabel ?? "—"}</dd></div>
+        <div><dt>보유기간</dt><dd>{report.daysHeld ?? "—"}</dd></div>
+        <div><dt>추천 AI점수</dt><dd className="font-mono tabular-nums">{report.recAiScore ?? "—"}</dd></div>
+        <div><dt>현재 AI점수</dt><dd className="font-mono tabular-nums">{report.currentAiScore ?? "—"}</dd></div>
         <div>
           <dt>점수 변화</dt>
           <dd className="font-mono tabular-nums">
@@ -98,22 +125,25 @@ export default function StockPickValidationDetailPage() {
               : "—"}
           </dd>
         </div>
+        {report.closedAt ? (
+          <div>
+            <dt>종료일</dt>
+            <dd className="font-mono tabular-nums">{report.closedAt}</dd>
+          </div>
+        ) : null}
       </dl>
 
-      <section className="yds-spick-validation-section">
-        <h2 className="yds-spick-validation-section__title">가격 변화</h2>
-        <MiniLineChart data={report.priceSeries} dataKey="returnPct" suffix="%" color="#4ade80" />
-      </section>
+      <ValidationSection title="가격 변화" empty={!priceSeries.length}>
+        <MiniLineChart data={priceSeries} dataKey="returnPct" suffix="%" color="#4ade80" />
+      </ValidationSection>
 
-      <section className="yds-spick-validation-section">
-        <h2 className="yds-spick-validation-section__title">AI 점수 변화</h2>
-        <MiniLineChart data={report.scoreSeries} dataKey="score" color="#38bdf8" />
-      </section>
+      <ValidationSection title="AI 점수 변화" empty={!scoreSeries.length}>
+        <MiniLineChart data={scoreSeries} dataKey="score" color="#38bdf8" />
+      </ValidationSection>
 
-      <section className="yds-spick-validation-section">
-        <h2 className="yds-spick-validation-section__title">추천 상태 타임라인</h2>
+      <ValidationSection title="추천 상태 타임라인" empty={!statusTimeline.length}>
         <ol className="yds-spick-validation-timeline">
-          {report.statusTimeline.map((item) => (
+          {statusTimeline.map((item) => (
             <li key={`${item.date}-${item.statusId}`} className="yds-spick-validation-timeline__item">
               <span className="font-mono tabular-nums">{item.dateLabel}</span>
               <span>{item.statusLabel}</span>
@@ -121,21 +151,25 @@ export default function StockPickValidationDetailPage() {
             </li>
           ))}
         </ol>
-      </section>
+      </ValidationSection>
 
-      <section className="yds-spick-validation-section">
-        <h2 className="yds-spick-validation-section__title">추천 이유</h2>
+      <ValidationSection title="추천 이유" empty={!recommendReasons.length} emptyLabel="당시 스냅샷 기록 없음">
         <ul className="yds-spick-validation-reasons">
-          {report.recommendReasons.length
-            ? report.recommendReasons.map((r) => <li key={r}>{r}</li>)
-            : <li>당시 스냅샷 기록 없음</li>}
+          {recommendReasons.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
         </ul>
-      </section>
+      </ValidationSection>
 
-      <section className="yds-spick-validation-section">
-        <h2 className="yds-spick-validation-section__title">현재 평가</h2>
+      <ValidationSection title="현재 평가" empty={!report.currentEvaluation}>
         <p className="yds-spick-validation-eval">{report.currentEvaluation}</p>
-      </section>
+      </ValidationSection>
+
+      {report.closeReason ? (
+        <ValidationSection title="종료 사유">
+          <p className="yds-spick-validation-eval">{report.closeReason}</p>
+        </ValidationSection>
+      ) : null}
     </div>
   )
 }

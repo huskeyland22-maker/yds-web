@@ -7,7 +7,7 @@ import "../styles/stock-picks-platform.css"
 
 export default function StockPickValidationPicksPage() {
   const marketContext = useYdsMarketContext()
-  const { liveStocks } = useStockPickLiveData(marketContext?.ready ? marketContext : null)
+  const { stocks: liveStocks = [] } = useStockPickLiveData(marketContext?.ready ? marketContext : null)
   const report = useMemo(() => buildValidationPickListReport(liveStocks), [liveStocks])
 
   return (

@@ -52,6 +52,16 @@ assert.equal(detail.visible, true)
 assert.ok(detail.priceSeries.length >= 2)
 assert.ok(detail.recommendReasons.length)
 
+const detailNoLive = buildPickValidationDetailReport(pick, null)
+assert.equal(detailNoLive.visible, true)
+assert.ok(Array.isArray(detailNoLive.priceSeries))
+assert.ok(Array.isArray(detailNoLive.statusTimeline))
+
+const sparsePick = { ...pick, recommendSnapshot: null, priceLog: {}, currentPrice: null }
+const detailSparse = buildPickValidationDetailReport(sparsePick, null)
+assert.equal(detailSparse.visible, true)
+assert.equal(detailSparse.priceSeries.length, 1)
+
 const ranking = buildRankingPageReport([stock, { ...stock, ticker: "AMD", name: "AMD", rank: 5 }], "aiScore", "desc")
 assert.ok(ranking.rows.length === 2)
 
