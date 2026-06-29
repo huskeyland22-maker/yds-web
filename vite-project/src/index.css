@@ -31813,6 +31813,120 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 }
 
+/* —— GO #78: 컴팩트 · 아코디언 —— */
+
+.yds-market-state-timeline--compact {
+  padding: 0.42rem 0.48rem 0.38rem;
+}
+
+.yds-market-state-timeline--compact .yds-market-state-cycle-strip {
+  margin-bottom: 0.35rem;
+  padding: 0.3rem 0.35rem;
+}
+
+.yds-market-state-timeline--compact .yds-market-state-timeline__item {
+  margin-bottom: 0.28rem;
+}
+
+.yds-market-state-timeline--compact .yds-market-state-timeline__card {
+  padding: 0.32rem 0.4rem;
+}
+
+.yds-market-state-timeline--compact .yds-market-state-timeline__dates {
+  margin-bottom: 0.2rem;
+}
+
+.yds-market-state-timeline--compact .yds-market-state-timeline__scores {
+  margin-bottom: 0.22rem;
+  padding: 0.22rem 0.28rem;
+  gap: 0.15rem 0.28rem;
+}
+
+.yds-market-state-timeline--compact .yds-market-state-timeline__action {
+  margin-top: 0.08rem;
+  padding-top: 0.2rem;
+}
+
+.yds-market-state-timeline--compact .yds-market-state-timeline__action-line {
+  font-size: 0.58rem;
+  margin-bottom: 0.08rem;
+}
+
+.yds-market-state-timeline__head-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  flex-shrink: 0;
+}
+
+.yds-market-state-timeline__badge {
+  padding: 0.1rem 0.32rem;
+  border-radius: 999px;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #0f172a;
+  background: var(--state-color, #facc15);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--state-color, #facc15) 60%, transparent);
+}
+
+.yds-market-state-timeline__item--pinned {
+  order: -1;
+}
+
+.yds-market-state-timeline__past {
+  margin: 0.15rem 0 0.28rem;
+  padding: 0;
+  border: none;
+}
+
+.yds-market-state-timeline__past-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.28rem 0.38rem;
+  border-radius: 0.35rem;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.35);
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #94a3b8;
+  user-select: none;
+}
+
+.yds-market-state-timeline__past-summary::-webkit-details-marker {
+  display: none;
+}
+
+.yds-market-state-timeline__past-summary::before {
+  content: "▸ ";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.yds-market-state-timeline__past[open] .yds-market-state-timeline__past-summary::before {
+  transform: rotate(90deg);
+}
+
+.yds-market-state-timeline__past[open] .yds-market-state-timeline__past-summary {
+  color: #cbd5e1;
+  border-style: solid;
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.yds-market-state-timeline__list--past {
+  margin-top: 0.28rem;
+}
+
+.yds-market-state-timeline__footer-summary {
+  margin: 0.28rem 0 0;
+  padding-top: 0.28rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  font-size: 0.56rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.35;
+}
+
 .yds-market-desk__slot--desk-tail {
   margin-bottom: 0;
 }

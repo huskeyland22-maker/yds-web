@@ -50,6 +50,8 @@ import {
  *   title: string
  *   cycleStrip: ReturnType<typeof buildMarketCycleStrip>
  *   segments: MarketStateTimelineSegment[]
+ *   summary: { currentDurationDays: number; transitionCount30d: number }
+ *   hiddenSegmentCount: number
  * }} MarketStateChangeTimelineReport
  */
 
@@ -143,6 +145,8 @@ export function buildMarketStateChangeTimeline(
       title: "시장 상태 변화 이력",
       cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel),
       segments: [],
+      summary: { currentDurationDays: 0, transitionCount30d: 0 },
+      hiddenSegmentCount: 0,
     }
   }
 
@@ -214,6 +218,8 @@ export function buildMarketStateChangeTimeline(
       title: "시장 상태 변화 이력",
       cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel),
       segments: [],
+      summary: { currentDurationDays: 0, transitionCount30d: 0 },
+      hiddenSegmentCount: 0,
     }
   }
 
@@ -277,11 +283,29 @@ export function buildMarketStateChangeTimeline(
   const currentLabel =
     cycleFlow?.currentCycleLabel ?? segments[segments.length - 1]?.label ?? ""
 
+  const currentDurationDays = segments[segments.length - 1]?.durationDays ?? 0
+  const cutoff30 = (() => {
+    const d = parseCalendarDateKey(todayKey)
+    if (!d) return todayKey
+    d.setDate(d.getDate() - 30)
+    return localCalendarDateKey(d)
+  })()
+  const transitions30d = Math.max(
+    0,
+    rawSegments.filter((s) => s.startDate >= cutoff30).length - 1,
+  )
+  const hiddenSegmentCount = Math.max(0, segments.length - 2)
+
   return {
     visible: segments.length > 0,
     title: "시장 상태 변화 이력",
     cycleStrip: buildMarketCycleStrip(currentLabel),
     segments,
+    summary: {
+      currentDurationDays,
+      transitionCount30d: transitions30d,
+    },
+    hiddenSegmentCount,
   }
 }
 

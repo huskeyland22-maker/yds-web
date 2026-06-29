@@ -48,6 +48,9 @@ assert.ok(timeline.segments[timeline.segments.length - 1].dateRangeLabel.include
 assert.ok(timeline.cycleStrip?.stages?.length === 5)
 assert.ok(timeline.segments.every((seg) => seg.scoreRows && seg.investmentActionLines?.length))
 assert.ok(timeline.segments.every((seg) => seg.color))
+assert.ok(timeline.summary.currentDurationDays >= 1)
+assert.ok(Number.isFinite(timeline.summary.transitionCount30d))
+assert.ok(timeline.hiddenSegmentCount === Math.max(0, timeline.segments.length - 2))
 
 const changes = buildRecentMarketStateChanges(
   historyRows,

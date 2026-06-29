@@ -1,5 +1,71 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { buildMarketStateChangeTimeline } from "../../content/ydsMarketStateRecentChanges.js"
+
+/**
+ * @param {{
+ *   segment: import("../../content/ydsMarketStateRecentChanges.js").MarketStateTimelineSegment
+ *   pinned?: boolean
+ *   showConnector?: boolean
+ * }} props
+ */
+function MarketStateTimelineCard({ segment, pinned = false, showConnector = false }) {
+  return (
+    <li
+      className={[
+        "yds-market-state-timeline__item",
+        segment.isCurrent ? "yds-market-state-timeline__item--current" : "",
+        pinned ? "yds-market-state-timeline__item--pinned" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={{ "--state-color": segment.color }}
+    >
+      <div className="yds-market-state-timeline__rail" aria-hidden>
+        {segment.isCurrent || pinned ? (
+          <span className="yds-market-state-timeline__dot">●</span>
+        ) : (
+          <span className="yds-market-state-timeline__node" />
+        )}
+        {showConnector ? <span className="yds-market-state-timeline__connector" /> : null}
+      </div>
+
+      <article className="yds-market-state-timeline__card">
+        <div className="yds-market-state-timeline__head">
+          <span className="yds-market-state-timeline__label">{segment.label}</span>
+          <div className="yds-market-state-timeline__head-meta">
+            {segment.isCurrent ? (
+              <span className="yds-market-state-timeline__badge">진행중</span>
+            ) : null}
+            <span className="yds-market-state-timeline__duration">{segment.durationLabel}</span>
+          </div>
+        </div>
+
+        <p className="yds-market-state-timeline__dates">{segment.dateRangeLabel}</p>
+
+        {segment.scoreRows.length ? (
+          <dl className="yds-market-state-timeline__scores">
+            {segment.scoreRows.map((row) => (
+              <div key={row.key}>
+                <dt>{row.label}</dt>
+                <dd className="font-mono tabular-nums">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
+
+        {segment.investmentActionLines.length ? (
+          <div className="yds-market-state-timeline__action">
+            {segment.investmentActionLines.map((line) => (
+              <p key={line} className="yds-market-state-timeline__action-line">
+                {line}
+              </p>
+            ))}
+          </div>
+        ) : null}
+      </article>
+    </li>
+  )
+}
 
 /**
  * @param {{
@@ -19,6 +85,8 @@ export default function YdsMarketStateRecentChanges({
   etfContext = null,
   className = "",
 }) {
+  const [pastOpen, setPastOpen] = useState(false)
+
   const report = useMemo(
     () =>
       buildMarketStateChangeTimeline(historyRows, cycleFlow, panicData, dualLiquidity, {
@@ -27,13 +95,29 @@ export default function YdsMarketStateRecentChanges({
     [historyRows, cycleFlow, panicData, dualLiquidity, etfContext],
   )
 
-  if (!report.visible) return null
+  const layout = useMemo(() => {
+    const segs = report.segments ?? []
+    if (!segs.length) {
+      return { current: null, recent: null, hidden: [] }
+    }
+    const current = segs[segs.length - 1]
+    const recent = segs.length >= 2 ? segs[segs.length - 2] : null
+    const hidden = segs.length > 2 ? segs.slice(0, -2) : []
+    return { current, recent, hidden }
+  }, [report.segments])
 
-  const { cycleStrip } = report
+  if (!report.visible || !layout.current) return null
+
+  const { cycleStrip, summary, hiddenSegmentCount } = report
 
   return (
     <section
-      className={["yds-market-state-timeline", "yds-market-state-timeline--rich", className]
+      className={[
+        "yds-market-state-timeline",
+        "yds-market-state-timeline--rich",
+        "yds-market-state-timeline--compact",
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
       aria-label={report.title}
@@ -70,62 +154,45 @@ export default function YdsMarketStateRecentChanges({
         </div>
       </div>
 
-      <ol className="yds-market-state-timeline__list">
-        {report.segments.map((seg, index) => (
-          <li
-            key={`${seg.startDate}-${seg.label}-${index}`}
-            className={[
-              "yds-market-state-timeline__item",
-              seg.isCurrent ? "yds-market-state-timeline__item--current" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            style={{ "--state-color": seg.color }}
-          >
-            <div className="yds-market-state-timeline__rail" aria-hidden>
-              {seg.isCurrent ? (
-                <span className="yds-market-state-timeline__dot">●</span>
-              ) : (
-                <span className="yds-market-state-timeline__node" />
-              )}
-              {index < report.segments.length - 1 ? (
-                <span className="yds-market-state-timeline__connector" />
-              ) : null}
-            </div>
-
-            <article className="yds-market-state-timeline__card">
-              <div className="yds-market-state-timeline__head">
-                <span className="yds-market-state-timeline__label">{seg.label}</span>
-                <span className="yds-market-state-timeline__duration">{seg.durationLabel}</span>
-              </div>
-
-              <p className="yds-market-state-timeline__dates">{seg.dateRangeLabel}</p>
-
-              {seg.scoreRows.length ? (
-                <dl className="yds-market-state-timeline__scores">
-                  {seg.scoreRows.map((row) => (
-                    <div key={row.key}>
-                      <dt>{row.label}</dt>
-                      <dd className="font-mono tabular-nums">{row.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-
-              {seg.investmentActionLines.length ? (
-                <div className="yds-market-state-timeline__action">
-                  <p className="yds-market-state-timeline__action-title">투자 행동</p>
-                  {seg.investmentActionLines.map((line) => (
-                    <p key={line} className="yds-market-state-timeline__action-line">
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              ) : null}
-            </article>
-          </li>
-        ))}
+      <ol className="yds-market-state-timeline__list yds-market-state-timeline__list--visible">
+        <MarketStateTimelineCard
+          segment={layout.current}
+          pinned
+          showConnector={Boolean(layout.recent || hiddenSegmentCount > 0)}
+        />
+        {layout.recent ? (
+          <MarketStateTimelineCard
+            segment={layout.recent}
+            showConnector={hiddenSegmentCount > 0 && pastOpen}
+          />
+        ) : null}
       </ol>
+
+      {hiddenSegmentCount > 0 ? (
+        <details
+          className="yds-market-state-timeline__past"
+          open={pastOpen}
+          onToggle={(e) => setPastOpen(e.currentTarget.open)}
+        >
+          <summary className="yds-market-state-timeline__past-summary">
+            이전 상태 보기 ({hiddenSegmentCount}개)
+          </summary>
+          <ol className="yds-market-state-timeline__list yds-market-state-timeline__list--past">
+            {[...layout.hidden].reverse().map((seg, index) => (
+              <MarketStateTimelineCard
+                key={`${seg.startDate}-${seg.label}`}
+                segment={seg}
+                showConnector={index < layout.hidden.length - 1}
+              />
+            ))}
+          </ol>
+        </details>
+      ) : null}
+
+      <p className="yds-market-state-timeline__footer-summary font-mono tabular-nums">
+        현재 단계 지속 {summary.currentDurationDays}일 · 최근 30일 전환{" "}
+        {summary.transitionCount30d}회
+      </p>
     </section>
   )
 }
