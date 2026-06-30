@@ -5,6 +5,9 @@ import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter
 import {
   resolveUnifiedMarketStateLabel,
 } from "../../content/ydsUnifiedMarketState.js"
+import { buildMarketStateChangeTimeline } from "../../content/ydsMarketStateRecentChanges.js"
+import { buildMarketCycleStrip, buildMarketStateInvestmentAction } from "../../content/ydsMarketStateCycleVisual.js"
+import YdsMarketCycleStrip from "./YdsMarketCycleStrip.jsx"
 import YdsMarketStateRecentChanges from "./YdsMarketStateRecentChanges.jsx"
 import YdsMarketJudgmentCard from "./YdsMarketJudgmentCard.jsx"
 import YdsTodayActionCard from "./YdsTodayActionCard.jsx"
@@ -66,6 +69,28 @@ export default function YdsMarketStatePrimaryPanel({
     [historyRows, view],
   )
 
+  const timelineReport = useMemo(
+    () =>
+      buildMarketStateChangeTimeline(historyRows, cycleFlow, panicData, dualLiquidity, {
+        etfContext,
+      }),
+    [historyRows, cycleFlow, panicData, dualLiquidity, etfContext],
+  )
+
+  const cycleStrip = useMemo(
+    () =>
+      buildMarketCycleStrip(
+        unifiedLabel,
+        view?.positionScore ?? timelineReport.segments.at(-1)?.snapshot?.marketScore ?? null,
+      ),
+    [unifiedLabel, view?.positionScore, timelineReport.segments],
+  )
+
+  const actionLines = useMemo(() => {
+    const text = buildMarketStateInvestmentAction(unifiedLabel)
+    return text.split("\n").filter(Boolean)
+  }, [unifiedLabel])
+
   if (!view) return null
 
   const deltaSign = delta > 0 ? "▲" : delta < 0 ? "▼" : "•"
@@ -90,6 +115,16 @@ export default function YdsMarketStatePrimaryPanel({
           </p>
         </div>
       </div>
+
+      <YdsMarketCycleStrip
+        cycleStrip={cycleStrip}
+        compact
+        className="yds-market-state-primary__cycle"
+        description={{
+          label: unifiedLabel,
+          lines: actionLines,
+        }}
+      />
 
       <YdsMarketStateRecentChanges
         historyRows={historyRows}

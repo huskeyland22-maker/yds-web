@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react"
 import { buildMarketStateChangeTimeline } from "../../content/ydsMarketStateRecentChanges.js"
+import YdsMarketCycleStrip from "./YdsMarketCycleStrip.jsx"
+import YdsMarketStateCycleFlow from "./YdsMarketStateCycleFlow.jsx"
 
 /**
  * @param {{
@@ -111,6 +113,7 @@ function MarketStateMiniCard({ segment }) {
  *   dualLiquidity?: import("../../market-os/liquidityDualEngine.js").DualLiquidityReport | null
  *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number> } | null
  *   variant?: "default" | "mini"
+ *   hideCycleStrip?: boolean
  *   className?: string
  * }} props
  */
@@ -121,6 +124,7 @@ export default function YdsMarketStateRecentChanges({
   dualLiquidity = null,
   etfContext = null,
   variant = "default",
+  hideCycleStrip = false,
   className = "",
 }) {
   const [pastOpen, setPastOpen] = useState(false)
@@ -150,6 +154,8 @@ export default function YdsMarketStateRecentChanges({
   const isMini = variant === "mini"
 
   if (isMini) {
+    const flowSegments = [...(layout.hidden ?? []), layout.recent, layout.current].filter(Boolean)
+
     return (
       <section
         className={[
@@ -162,10 +168,24 @@ export default function YdsMarketStateRecentChanges({
         aria-label={report.title}
       >
         <h3 className="yds-desk-card__title">{report.title}</h3>
-        <div className="yds-market-state-history-mini__list">
-          {layout.recent ? <MarketStateMiniCard segment={layout.recent} /> : null}
-          <MarketStateMiniCard segment={layout.current} />
-        </div>
+
+        {hideCycleStrip ? null : (
+          <YdsMarketCycleStrip
+            cycleStrip={cycleStrip}
+            title=""
+            compact
+            meta={{
+              entryDate: layout.current.startDate,
+              durationDays: layout.current.durationDays,
+              previousLabel: layout.recent?.label ?? null,
+            }}
+          />
+        )}
+
+        <YdsMarketStateCycleFlow
+          segments={flowSegments}
+          className="yds-market-state-history-mini__flow"
+        />
 
         {hiddenSegmentCount > 0 ? (
           <details
@@ -205,35 +225,24 @@ export default function YdsMarketStateRecentChanges({
     >
       <p className="yds-market-state-timeline__title">{report.title}</p>
 
-      <div className="yds-market-state-cycle-strip" aria-label="시장 사이클">
-        <div className="yds-market-state-cycle-strip__track">
-          {cycleStrip.stages.map((stage, index) => {
-            const isCurrent = stage.id === cycleStrip.currentId
-            return (
-              <div
-                key={stage.id}
-                className={[
-                  "yds-market-state-cycle-strip__step",
-                  isCurrent ? "yds-market-state-cycle-strip__step--current" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                style={{ "--cycle-color": stage.color }}
-              >
-                {index > 0 ? (
-                  <span className="yds-market-state-cycle-strip__dash" aria-hidden>
-                    ─
-                  </span>
-                ) : null}
-                <span className="yds-market-state-cycle-strip__label">{stage.label}</span>
-                {isCurrent ? (
-                  <span className="yds-market-state-cycle-strip__marker">▲ 현재</span>
-                ) : null}
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      <YdsMarketCycleStrip
+        cycleStrip={cycleStrip}
+        compact
+        meta={{
+          entryDate: layout.current.startDate,
+          durationDays: layout.current.durationDays,
+          previousLabel: layout.recent?.label ?? null,
+        }}
+        description={{
+          label: layout.current.label,
+          lines: layout.current.investmentActionLines,
+        }}
+      />
+
+      <YdsMarketStateCycleFlow
+        segments={report.segments}
+        className="yds-market-state-timeline__flow"
+      />
 
       <ol className="yds-market-state-timeline__list yds-market-state-timeline__list--visible">
         <MarketStateTimelineCard

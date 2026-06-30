@@ -7,11 +7,11 @@ import { resolveUnifiedMarketStateGuide } from "./ydsUnifiedMarketState.js"
 /** @typedef {'panic' | 'rebound' | 'adjustment' | 'boundary' | 'overheat'} MarketCycleFamilyId */
 
 export const MARKET_CYCLE_STRIP = [
-  { id: "panic", label: "패닉", color: "#ef4444" },
-  { id: "rebound", label: "반등", color: "#f97316" },
-  { id: "adjustment", label: "조정", color: "#eab308" },
-  { id: "boundary", label: "경계", color: "#22c55e" },
-  { id: "overheat", label: "과열", color: "#a855f7" },
+  { id: "panic", label: "패닉", emoji: "🔴", color: "#ef4444" },
+  { id: "rebound", label: "반등", emoji: "🟠", color: "#f97316" },
+  { id: "adjustment", label: "조정", emoji: "🟡", color: "#eab308" },
+  { id: "boundary", label: "경계", emoji: "🟢", color: "#22c55e" },
+  { id: "overheat", label: "과열", emoji: "🔵", color: "#3b82f6" },
 ]
 
 /** @type {Record<MarketCycleFamilyId, string>} */
@@ -65,14 +65,50 @@ export function buildMarketStateInvestmentAction(label) {
 }
 
 /**
- * @param {string} [currentLabel]
- * @returns {{ stages: typeof MARKET_CYCLE_STRIP; currentId: MarketCycleFamilyId }}
+ * 시장점수 → 사이클 구간 (GO #83)
+ * @param {number | null | undefined} score
+ * @returns {MarketCycleFamilyId | null}
  */
-export function buildMarketCycleStrip(currentLabel) {
-  const currentId = resolveCycleFamilyFromLabel(currentLabel ?? "")
+export function resolveCycleFamilyFromMarketScore(score) {
+  const s = Number(score)
+  if (!Number.isFinite(s)) return null
+  if (s <= 20) return /** @type {MarketCycleFamilyId} */ ("panic")
+  if (s <= 40) return /** @type {MarketCycleFamilyId} */ ("rebound")
+  if (s <= 60) return /** @type {MarketCycleFamilyId} */ ("adjustment")
+  if (s <= 80) return /** @type {MarketCycleFamilyId} */ ("boundary")
+  return /** @type {MarketCycleFamilyId} */ ("overheat")
+}
+
+/** @param {MarketCycleFamilyId} familyId */
+export function cycleFamilyEmoji(familyId) {
+  return MARKET_CYCLE_STRIP.find((s) => s.id === familyId)?.emoji ?? ""
+}
+
+/** @param {string} label */
+export function formatCycleStageLabel(label) {
+  const familyId = resolveCycleFamilyFromLabel(label)
+  const emoji = cycleFamilyEmoji(familyId)
+  const text = String(label ?? "").trim() || "—"
+  return emoji ? `${emoji} ${text}` : text
+}
+
+/**
+ * @param {string} [currentLabel]
+ * @param {number | null | undefined} [marketScore]
+ * @returns {{
+ *   stages: typeof MARKET_CYCLE_STRIP
+ *   currentId: MarketCycleFamilyId
+ *   marketScore: number | null
+ * }}
+ */
+export function buildMarketCycleStrip(currentLabel, marketScore = null) {
+  const fromScore = resolveCycleFamilyFromMarketScore(marketScore)
+  const currentId = fromScore ?? resolveCycleFamilyFromLabel(currentLabel ?? "")
+  const scoreNum = Number(marketScore)
   return {
     stages: MARKET_CYCLE_STRIP,
     currentId,
+    marketScore: Number.isFinite(scoreNum) ? scoreNum : null,
   }
 }
 

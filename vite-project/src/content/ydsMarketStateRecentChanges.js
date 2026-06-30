@@ -143,7 +143,7 @@ export function buildMarketStateChangeTimeline(
     return {
       visible: false,
       title: "시장 상태 변화 이력",
-      cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel),
+      cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel, null),
       segments: [],
       summary: { currentDurationDays: 0, transitionCount30d: 0 },
       hiddenSegmentCount: 0,
@@ -216,7 +216,7 @@ export function buildMarketStateChangeTimeline(
     return {
       visible: false,
       title: "시장 상태 변화 이력",
-      cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel),
+      cycleStrip: buildMarketCycleStrip(cycleFlow?.currentCycleLabel, null),
       segments: [],
       summary: { currentDurationDays: 0, transitionCount30d: 0 },
       hiddenSegmentCount: 0,
@@ -282,6 +282,7 @@ export function buildMarketStateChangeTimeline(
 
   const currentLabel =
     cycleFlow?.currentCycleLabel ?? segments[segments.length - 1]?.label ?? ""
+  const currentMarketScore = segments[segments.length - 1]?.snapshot?.marketScore ?? null
 
   const currentDurationDays = segments[segments.length - 1]?.durationDays ?? 0
   const cutoff30 = (() => {
@@ -299,7 +300,7 @@ export function buildMarketStateChangeTimeline(
   return {
     visible: segments.length > 0,
     title: "시장 상태 변화 이력",
-    cycleStrip: buildMarketCycleStrip(currentLabel),
+    cycleStrip: buildMarketCycleStrip(currentLabel, currentMarketScore),
     segments,
     summary: {
       currentDurationDays,
