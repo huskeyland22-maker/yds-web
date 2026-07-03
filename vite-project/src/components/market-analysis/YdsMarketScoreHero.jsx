@@ -49,8 +49,6 @@ export default function YdsMarketScoreHero({
             embedded
             panicData={panicData}
             historyRows={historyRows}
-            cycleFlow={cycleFlow}
-            dualLiquidity={dualLiquidity}
             etfContext={etfContext}
           />
         </div>
