@@ -6,8 +6,44 @@ import { buildHubHistoryViewRows } from "./ydsHubHistoryViewEngine.js"
 import { benchmarkReturnBetween } from "./ydsValidationBenchmarks.js"
 import { loadValidationBenchmarkLog } from "./ydsValidationStorage.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
+import { SCORE_BUCKETS } from "./ydsPickScoreCorrelation.js"
 
 /** @typedef {'all' | 'd30' | 'd90' | 'year' | 'custom'} DashboardPeriodId */
+
+/**
+ * @typedef {
+ *   | 'kpi-total'
+ *   | 'kpi-active'
+ *   | 'kpi-ended'
+ *   | 'kpi-win'
+ *   | 'kpi-avg-return'
+ *   | 'kpi-avg-hold'
+ *   | 'kpi-max-return'
+ *   | 'kpi-max-loss'
+ *   | `score-${string}`
+ *   | 'country-kr'
+ *   | 'country-us'
+ *   | `market-${string}`
+ *   | `panic-${string}`
+ * } DashboardDrillId
+ */
+
+/** @type {ReadonlyArray<{ id: string; label: string; min: number; max: number }>} */
+export const DASHBOARD_PANIC_DRILL_BUCKETS = [
+  { id: "panic-0-15", label: "0~15", min: 0, max: 15 },
+  { id: "panic-16-30", label: "16~30", min: 16, max: 30 },
+  { id: "panic-31-45", label: "31~45", min: 31, max: 45 },
+  { id: "panic-46-60", label: "46~60", min: 46, max: 60 },
+  { id: "panic-61-80", label: "61~80", min: 61, max: 80 },
+  { id: "panic-81-100", label: "81~100", min: 81, max: 100 },
+]
+
+/** @type {ReadonlyArray<{ id: string; label: string }>} */
+export const DASHBOARD_MARKET_DRILL_GROUPS = [
+  { id: "market-bull", label: "강세" },
+  { id: "market-correct", label: "조정" },
+  { id: "market-bear", label: "약세" },
+]
 
 /** @type {ReadonlyArray<{ id: DashboardPeriodId; label: string }>} */
 export const AI_DASHBOARD_PERIOD_FILTERS = [
@@ -74,6 +110,146 @@ export function isRowInDashboardPeriod(row, periodId, customStart, customEnd) {
  */
 export function filterDashboardRowsByPeriod(rows, periodId, customStart, customEnd) {
   return (rows ?? []).filter((row) => isRowInDashboardPeriod(row, periodId, customStart, customEnd))
+}
+
+/**
+ * @param {ReturnType<typeof buildHubHistoryViewRows>[number]} row
+ */
+export function resolveDashboardMarketDrillId(row) {
+  const label = String(
+    row.marketLedger?.marketStateLabel ?? row.marketLedger?.strategyLabel ?? "",
+  )
+  if (!label || label === "—") return null
+  const lower = label.toLowerCase()
+  if (/강세|리스크.?온|탐욕|상승|bull|risk.?on/.test(lower) || label.includes("강")) {
+    return "market-bull"
+  }
+  if (/약세|리스크.?오프|공포|방어|bear|risk.?off|하락/.test(lower) || label.includes("약")) {
+    return "market-bear"
+  }
+  if (/조정|중립|안정|neutral|sideways/.test(lower) || label.includes("조정")) {
+    return "market-correct"
+  }
+  return "market-correct"
+}
+
+/**
+ * @param {ReturnType<typeof buildHubHistoryViewRows>[number][]} rows
+ * @param {DashboardDrillId | null | undefined} drillId
+ */
+export function filterDashboardRowsByDrilldown(rows, drillId) {
+  if (!drillId || drillId === "all") return rows ?? []
+  const list = rows ?? []
+
+  if (drillId === "kpi-total") return list
+  if (drillId === "kpi-active") return list.filter((row) => row.lifecycleId === "active")
+  if (drillId === "kpi-ended") return list.filter((row) => row.lifecycleId !== "active")
+  if (drillId === "kpi-win") {
+    return list.filter((row) => row.returnPct != null && row.returnPct > 0)
+  }
+  if (drillId === "kpi-avg-return") {
+    return list.filter((row) => row.returnPct != null && Number.isFinite(row.returnPct))
+  }
+  if (drillId === "kpi-avg-hold") {
+    return list.filter((row) => row.daysSinceRecommend != null && Number.isFinite(row.daysSinceRecommend))
+  }
+  if (drillId === "kpi-max-return") {
+    const valid = list.filter((row) => row.returnPct != null && Number.isFinite(row.returnPct))
+    if (!valid.length) return []
+    const max = Math.max(...valid.map((row) => row.returnPct))
+    return valid.filter((row) => row.returnPct === max)
+  }
+  if (drillId === "kpi-max-loss") {
+    const valid = list.filter((row) => row.returnPct != null && Number.isFinite(row.returnPct))
+    if (!valid.length) return []
+    const min = Math.min(...valid.map((row) => row.returnPct))
+    return valid.filter((row) => row.returnPct === min)
+  }
+  if (drillId.startsWith("score-")) {
+    const bucketId = drillId.replace("score-", "")
+    const bucket = SCORE_BUCKETS.find((item) => item.id === bucketId)
+    if (!bucket) return list
+    return list.filter((row) => {
+      if (row.aiScore == null) return false
+      if (bucket.max == null) return row.aiScore >= bucket.min
+      return row.aiScore >= bucket.min && row.aiScore <= bucket.max
+    })
+  }
+  if (drillId === "country-kr") return list.filter((row) => row.country === "KR")
+  if (drillId === "country-us") return list.filter((row) => row.country === "US")
+  if (drillId.startsWith("market-")) {
+    return list.filter((row) => resolveDashboardMarketDrillId(row) === drillId)
+  }
+  if (drillId.startsWith("panic-")) {
+    const bucket = DASHBOARD_PANIC_DRILL_BUCKETS.find((item) => item.id === drillId)
+    if (!bucket) return list
+    return list.filter((row) => {
+      const intensity = row.marketLedger?.panicIntensity ?? row.pickPanicIntensity ?? null
+      if (intensity == null || !Number.isFinite(intensity)) return false
+      return intensity >= bucket.min && intensity <= bucket.max
+    })
+  }
+  return list
+}
+
+/** @param {DashboardDrillId | null | undefined} drillId */
+export function resolveDashboardDrillLabel(drillId) {
+  if (!drillId) return "전체"
+  const kpiLabels = {
+    "kpi-total": "총 추천",
+    "kpi-active": "진행 중",
+    "kpi-ended": "종료",
+    "kpi-win": "승률 (수익)",
+    "kpi-avg-return": "평균 수익률",
+    "kpi-avg-hold": "평균 보유기간",
+    "kpi-max-return": "최고 수익률",
+    "kpi-max-loss": "최대 손실률",
+  }
+  if (kpiLabels[drillId]) return kpiLabels[drillId]
+  if (drillId.startsWith("score-")) {
+    const bucket = SCORE_BUCKETS.find((item) => item.id === drillId.replace("score-", ""))
+    return bucket ? `AI 점수 ${bucket.label}` : drillId
+  }
+  if (drillId === "country-kr") return "KR"
+  if (drillId === "country-us") return "US"
+  const market = DASHBOARD_MARKET_DRILL_GROUPS.find((item) => item.id === drillId)
+  if (market) return `시장 ${market.label}`
+  const panic = DASHBOARD_PANIC_DRILL_BUCKETS.find((item) => item.id === drillId)
+  if (panic) return `패닉 ${panic.label}`
+  return drillId
+}
+
+/**
+ * @param {ReturnType<typeof buildHubHistoryViewRows>[number][]} rows
+ */
+export function buildDashboardAnalysisBreakdown(rows) {
+  const list = rows ?? []
+  return {
+    score: SCORE_BUCKETS.map((bucket) => ({
+      id: /** @type {DashboardDrillId} */ (`score-${bucket.id}`),
+      label: bucket.label,
+      count: filterDashboardRowsByDrilldown(list, `score-${bucket.id}`).length,
+    })).filter((item) => item.count > 0),
+    country: [
+      { id: /** @type {DashboardDrillId} */ ("country-kr"), label: "KR" },
+      { id: /** @type {DashboardDrillId} */ ("country-us"), label: "US" },
+    ]
+      .map((item) => ({
+        ...item,
+        count: filterDashboardRowsByDrilldown(list, item.id).length,
+      }))
+      .filter((item) => item.count > 0),
+    market: DASHBOARD_MARKET_DRILL_GROUPS.map((item) => ({
+      id: /** @type {DashboardDrillId} */ (item.id),
+      label: item.label,
+      count: filterDashboardRowsByDrilldown(list, item.id).length,
+    })).filter((item) => item.count > 0),
+    panic: DASHBOARD_PANIC_DRILL_BUCKETS.map((item) => ({
+      id: /** @type {DashboardDrillId} */ (item.id),
+      label: item.label,
+      count: filterDashboardRowsByDrilldown(list, item.id).length,
+    })).filter((item) => item.count > 0),
+  }
 }
 
 /**
@@ -218,6 +394,7 @@ export function buildAiPerformanceDashboardReport(stocks = [], options = {}) {
       kpis: null,
       monthly: [],
       topMovers: null,
+      analysis: { score: [], country: [], market: [], panic: [] },
       periodLabel: "전체",
       availableRange: { min: null, max: null },
     }
@@ -231,6 +408,7 @@ export function buildAiPerformanceDashboardReport(stocks = [], options = {}) {
     kpis: buildDashboardKpis(rowsWithAlpha),
     monthly: buildMonthlySeries(rowsWithAlpha),
     topMovers: buildTopMovers(rowsWithAlpha),
+    analysis: buildDashboardAnalysisBreakdown(rowsWithAlpha),
     periodLabel:
       AI_DASHBOARD_PERIOD_FILTERS.find((item) => item.id === periodId)?.label ?? "전체",
     availableRange: {

@@ -12,7 +12,6 @@ import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
 import {
   buildRecommendProfitView,
   logRecommendProfitTrace,
-  formatRecommendProfitLabel,
 } from "./ydsRecommendProfitResolver.js"
 import { daysBetweenPickDates } from "./ydsPickLifecycleEngine.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
@@ -134,7 +133,8 @@ export function buildStockPickListRow(stock) {
       recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
     currentPriceLabel: formatTransparencyPrice(currentRaw, country),
     returnPct,
-    returnLabel: formatRecommendProfitLabel(returnPct),
+    returnLabel: profit.returnLabel,
+    returnTone: profit.returnTone,
     maxReturnPct: maxRet,
     maxReturnLabel: formatPerfPct(maxRet),
     mddPct: mdd,

@@ -5,6 +5,8 @@ import { useStockPickLiveData } from "../hooks/useStockPickLiveData.js"
 import {
   AI_DASHBOARD_PERIOD_FILTERS,
   buildAiPerformanceDashboardReport,
+  filterDashboardRowsByDrilldown,
+  resolveDashboardDrillLabel,
 } from "../content/ydsAiPerformanceDashboardEngine.js"
 import "../styles/stock-picks-platform.css"
 
@@ -12,12 +14,81 @@ function formatPct(value) {
   return value == null || !Number.isFinite(value) ? "—" : `${value > 0 ? "+" : ""}${value.toFixed(1)}%`
 }
 
-function DashboardCard({ label, value, tone = "neutral" }) {
+/**
+ * @param {{
+ *   label: string
+ *   value: string
+ *   tone?: string
+ *   drillId?: string
+ *   activeDrillId?: string | null
+ *   onDrill?: (id: string) => void
+ * }} props
+ */
+function DashboardCard({ label, value, tone = "neutral", drillId, activeDrillId, onDrill }) {
+  const clickable = Boolean(drillId && onDrill)
+  const active = clickable && activeDrillId === drillId
   return (
-    <article className={`yds-ai-dashboard__card yds-ai-dashboard__card--${tone}`}>
+    <article
+      className={[
+        "yds-ai-dashboard__card",
+        `yds-ai-dashboard__card--${tone}`,
+        clickable ? "yds-ai-dashboard__card--clickable" : "",
+        active ? "yds-ai-dashboard__card--active" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onClick={clickable ? () => onDrill(drillId) : undefined}
+      onKeyDown={
+        clickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onDrill(drillId)
+              }
+            }
+          : undefined
+      }
+    >
       <span className="yds-ai-dashboard__card-label">{label}</span>
       <strong className="yds-ai-dashboard__card-value font-mono tabular-nums">{value}</strong>
     </article>
+  )
+}
+
+/**
+ * @param {{
+ *   title: string
+ *   items: { id: string; label: string; count: number }[]
+ *   activeDrillId?: string | null
+ *   onDrill?: (id: string) => void
+ * }} props
+ */
+function DrillChipGroup({ title, items, activeDrillId, onDrill }) {
+  if (!items.length) return null
+  return (
+    <div className="yds-ai-dashboard__chip-group">
+      <h3 className="yds-ai-dashboard__chip-title">{title}</h3>
+      <div className="yds-ai-dashboard__chips">
+        {items.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={[
+              "yds-ai-dashboard__chip",
+              activeDrillId === item.id ? "yds-ai-dashboard__chip--active" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClick={() => onDrill?.(item.id)}
+          >
+            <span>{item.label}</span>
+            <span className="yds-ai-dashboard__chip-count font-mono tabular-nums">{item.count}</span>
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -50,12 +121,104 @@ function MiniBars({ rows, valueKey, unit = "%" }) {
   )
 }
 
+/**
+ * @param {{
+ *   rows: ReturnType<typeof filterDashboardRowsByDrilldown>
+ *   drillLabel: string
+ *   onClear: () => void
+ * }} props
+ */
+function DashboardDrilldownTable({ rows, drillLabel, onClear }) {
+  return (
+    <section className="yds-ai-dashboard__drill" aria-label="Drill-down 추천 목록">
+      <div className="yds-ai-dashboard__drill-head">
+        <h2 className="yds-ai-dashboard__h2">
+          {drillLabel} <span className="yds-ai-dashboard__drill-count">({rows.length}건)</span>
+        </h2>
+        <button type="button" className="yds-ai-dashboard__drill-clear" onClick={onClear}>
+          필터 해제
+        </button>
+      </div>
+      {!rows.length ? (
+        <p className="yds-ai-dashboard__empty">해당 조건의 추천이 없습니다.</p>
+      ) : (
+        <div className="yds-ai-dashboard__table-scroll">
+          <table className="yds-ai-dashboard__table yds-ai-dashboard__table--drill">
+            <thead>
+              <tr>
+                <th>추천일</th>
+                <th>종목</th>
+                <th>추천가</th>
+                <th>현재가</th>
+                <th>수익률</th>
+                <th>AI점수</th>
+                <th>시장상태</th>
+                <th>패닉강도</th>
+                <th>추천사유</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => {
+                const panic =
+                  row.marketLedger?.panicIntensity != null &&
+                  Number.isFinite(row.marketLedger.panicIntensity)
+                    ? Math.round(row.marketLedger.panicIntensity)
+                    : "—"
+                const marketLabel =
+                  row.marketLedger?.marketStateLabel ??
+                  row.marketLedger?.strategyLabel ??
+                  "—"
+                return (
+                  <tr key={row.pickId} className="yds-ai-dashboard__drill-row">
+                    <td
+                      className="font-mono tabular-nums"
+                      title={row.recommendedAtLabel ?? undefined}
+                    >
+                      {row.elapsedLabel ?? row.recommendedAtLabel ?? "—"}
+                    </td>
+                    <td>
+                      <Link
+                        to={`/stock-picks/${encodeURIComponent(row.ticker)}`}
+                        className="yds-ai-dashboard__drill-name"
+                      >
+                        {row.name}
+                      </Link>
+                      <span className="yds-ai-dashboard__drill-ticker font-mono tabular-nums">
+                        {row.ticker}
+                      </span>
+                    </td>
+                    <td className="font-mono tabular-nums">{row.recommendedPriceLabel}</td>
+                    <td className="font-mono tabular-nums">{row.currentPriceLabel}</td>
+                    <td
+                      className={[
+                        "font-mono tabular-nums",
+                        `yds-ai-dashboard__ret--${row.returnTone ?? "muted"}`,
+                      ].join(" ")}
+                    >
+                      {row.returnLabel}
+                    </td>
+                    <td className="font-mono tabular-nums">{row.aiScoreLabel}</td>
+                    <td>{marketLabel}</td>
+                    <td className="font-mono tabular-nums">{panic}</td>
+                    <td className="yds-ai-dashboard__drill-reason">{row.reasonLine}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}
+
 export default function AiPerformanceDashboardPage() {
   const marketContext = useYdsMarketContext()
   const { stocks: liveStocks = [] } = useStockPickLiveData(marketContext?.ready ? marketContext : null)
   const [periodId, setPeriodId] = useState("all")
   const [customStart, setCustomStart] = useState("")
   const [customEnd, setCustomEnd] = useState("")
+  const [drillId, setDrillId] = useState(/** @type {string | null} */ (null))
 
   const report = useMemo(
     () =>
@@ -67,8 +230,14 @@ export default function AiPerformanceDashboardPage() {
     [liveStocks, periodId, customStart, customEnd],
   )
 
+  const drillRows = useMemo(
+    () => filterDashboardRowsByDrilldown(report.rows, drillId),
+    [report.rows, drillId],
+  )
+
   const kpis = report.kpis
   const topMovers = report.topMovers
+  const analysis = report.analysis
 
   return (
     <div className="yds-ai-dashboard min-w-0 px-3 py-4 sm:px-4">
@@ -108,7 +277,10 @@ export default function AiPerformanceDashboardPage() {
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={() => setPeriodId(item.id)}
+                onClick={() => {
+                  setPeriodId(item.id)
+                  setDrillId(null)
+                }}
               >
                 {item.label}
               </button>
@@ -142,30 +314,144 @@ export default function AiPerformanceDashboardPage() {
 
           <p className="yds-ai-dashboard__scope">
             집계 범위: {report.periodLabel} · {report.rows.length}건
+            {drillId ? ` · 필터: ${resolveDashboardDrillLabel(drillId)}` : ""}
           </p>
 
           <section className="yds-ai-dashboard__section">
             <h2 className="yds-ai-dashboard__h2">상단 KPI</h2>
+            <p className="yds-ai-dashboard__hint">KPI를 클릭하면 해당 조건의 추천 목록을 확인할 수 있습니다.</p>
             <div className="yds-ai-dashboard__grid">
-              <DashboardCard label="총 추천 수" value={`${kpis.totalCount}건`} />
-              <DashboardCard label="진행 중" value={`${kpis.activeCount}건`} />
-              <DashboardCard label="종료" value={`${kpis.endedCount}건`} />
-              <DashboardCard label="승률" value={formatPct(kpis.winRate)} tone={kpis.winRate >= 50 ? "up" : "neutral"} />
-              <DashboardCard label="평균 수익률" value={formatPct(kpis.avgReturn)} tone={kpis.avgReturn > 0 ? "up" : kpis.avgReturn < 0 ? "down" : "neutral"} />
-              <DashboardCard label="평균 보유기간" value={kpis.avgHoldDays != null ? `${Math.round(kpis.avgHoldDays)}일` : "—"} />
-              <DashboardCard label="최고 수익률" value={formatPct(kpis.maxReturn)} tone="up" />
-              <DashboardCard label="최대 손실률" value={formatPct(kpis.maxLoss)} tone="down" />
+              <DashboardCard
+                label="총 추천 수"
+                value={`${kpis.totalCount}건`}
+                drillId="kpi-total"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="진행 중"
+                value={`${kpis.activeCount}건`}
+                drillId="kpi-active"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="종료"
+                value={`${kpis.endedCount}건`}
+                drillId="kpi-ended"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="승률"
+                value={formatPct(kpis.winRate)}
+                tone={kpis.winRate >= 50 ? "up" : "neutral"}
+                drillId="kpi-win"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="평균 수익률"
+                value={formatPct(kpis.avgReturn)}
+                tone={kpis.avgReturn > 0 ? "up" : kpis.avgReturn < 0 ? "down" : "neutral"}
+                drillId="kpi-avg-return"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="평균 보유기간"
+                value={kpis.avgHoldDays != null ? `${Math.round(kpis.avgHoldDays)}일` : "—"}
+                drillId="kpi-avg-hold"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="최고 수익률"
+                value={formatPct(kpis.maxReturn)}
+                tone="up"
+                drillId="kpi-max-return"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="최대 손실률"
+                value={formatPct(kpis.maxLoss)}
+                tone="down"
+                drillId="kpi-max-loss"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
             </div>
           </section>
 
           <section className="yds-ai-dashboard__section">
+            <h2 className="yds-ai-dashboard__h2">분석 Drill-down</h2>
+            <div className="yds-ai-dashboard__analysis">
+              <DrillChipGroup
+                title="AI 점수별"
+                items={analysis?.score ?? []}
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DrillChipGroup
+                title="국가별"
+                items={analysis?.country ?? []}
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DrillChipGroup
+                title="시장 상태별"
+                items={analysis?.market ?? []}
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DrillChipGroup
+                title="패닉 강도별"
+                items={analysis?.panic ?? []}
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+            </div>
+          </section>
+
+          {drillId ? (
+            <DashboardDrilldownTable
+              rows={drillRows}
+              drillLabel={resolveDashboardDrillLabel(drillId)}
+              onClear={() => setDrillId(null)}
+            />
+          ) : null}
+
+          <section className="yds-ai-dashboard__section">
             <h2 className="yds-ai-dashboard__h2">추가 KPI</h2>
             <div className="yds-ai-dashboard__grid yds-ai-dashboard__grid--compact">
-              <DashboardCard label="AI 90+ 승률" value={formatPct(kpis.score90WinRate)} />
-              <DashboardCard label="KR 승률" value={formatPct(kpis.krWinRate)} />
-              <DashboardCard label="US 승률" value={formatPct(kpis.usWinRate)} />
+              <DashboardCard
+                label="AI 90+ 승률"
+                value={formatPct(kpis.score90WinRate)}
+                drillId="score-g90"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="KR 승률"
+                value={formatPct(kpis.krWinRate)}
+                drillId="country-kr"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
+              <DashboardCard
+                label="US 승률"
+                value={formatPct(kpis.usWinRate)}
+                drillId="country-us"
+                activeDrillId={drillId}
+                onDrill={setDrillId}
+              />
               <DashboardCard label="Outperform 비율" value={formatPct(kpis.outperformRate)} />
-              <DashboardCard label="평균 Alpha" value={formatPct(kpis.avgAlpha)} tone={kpis.avgAlpha > 0 ? "up" : kpis.avgAlpha < 0 ? "down" : "neutral"} />
+              <DashboardCard
+                label="평균 Alpha"
+                value={formatPct(kpis.avgAlpha)}
+                tone={kpis.avgAlpha > 0 ? "up" : kpis.avgAlpha < 0 ? "down" : "neutral"}
+              />
             </div>
           </section>
 
@@ -221,16 +507,24 @@ export default function AiPerformanceDashboardPage() {
           <section className="yds-ai-dashboard__section">
             <h2 className="yds-ai-dashboard__h2">최고/최악 추천</h2>
             <div className="yds-ai-dashboard__movers">
-              <div className="yds-ai-dashboard__mover">
+              <button
+                type="button"
+                className="yds-ai-dashboard__mover yds-ai-dashboard__mover--clickable"
+                onClick={() => setDrillId("kpi-max-return")}
+              >
                 <span>최고 추천</span>
                 <strong>{topMovers?.best?.name ?? "—"}</strong>
                 <span className="font-mono tabular-nums">{formatPct(topMovers?.best?.returnPct ?? null)}</span>
-              </div>
-              <div className="yds-ai-dashboard__mover">
+              </button>
+              <button
+                type="button"
+                className="yds-ai-dashboard__mover yds-ai-dashboard__mover--clickable"
+                onClick={() => setDrillId("kpi-max-loss")}
+              >
                 <span>최악 추천</span>
                 <strong>{topMovers?.worst?.name ?? "—"}</strong>
                 <span className="font-mono tabular-nums">{formatPct(topMovers?.worst?.returnPct ?? null)}</span>
-              </div>
+              </button>
             </div>
           </section>
         </>

@@ -4,6 +4,8 @@
 
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { isDevMode } from "../utils/devMode.js"
+import { daysBetweenPickDates } from "./ydsPickLifecycleEngine.js"
+import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
 
 /** @param {unknown} v */
 function toPositivePrice(v) {
@@ -74,10 +76,24 @@ export function resolveRecommendProfitPct(pick, stock) {
   return computed ?? fromPick
 }
 
-/** @param {number | null | undefined} returnPct */
-export function formatRecommendProfitLabel(returnPct) {
-  if (returnPct == null || !Number.isFinite(returnPct)) return "계산 불가"
+/**
+ * @param {number | null | undefined} returnPct
+ * @param {{ daysSinceRecommend?: number | null; hasPrices?: boolean }} [options]
+ */
+export function formatRecommendProfitLabel(returnPct, options = {}) {
+  const { daysSinceRecommend, hasPrices = true } = options
+  if (daysSinceRecommend === 0) return "측정 시작 전"
+  if (!hasPrices || returnPct == null || !Number.isFinite(returnPct)) return "계산 불가"
   return `${returnPct > 0 ? "+" : ""}${returnPct.toFixed(1)}%`
+}
+
+/** @param {number | null | undefined} returnPct @param {{ daysSinceRecommend?: number | null; hasPrices?: boolean }} [options] */
+export function resolveRecommendProfitTone(returnPct, options = {}) {
+  const { daysSinceRecommend } = options
+  if (daysSinceRecommend === 0) return "pending"
+  if (returnPct == null || !Number.isFinite(returnPct)) return "muted"
+  if (returnPct === 0) return "muted"
+  return returnPct > 0 ? "up" : "down"
 }
 
 /**
@@ -113,12 +129,18 @@ export function buildRecommendProfitView(stock, pick) {
   const recommendPrice = resolveLockedRecommendPrice(pick)
   const currentPrice = resolveRecommendCurrentPrice(pick, stock)
   const returnPct = resolveRecommendProfitPct(pick, stock)
+  const recommendedAt = pick?.recommendedAt ? String(pick.recommendedAt).slice(0, 10) : null
+  const daysSinceRecommend = recommendedAt ? daysBetweenPickDates(recommendedAt, todayDateKey()) : null
+  const hasPrices = recommendPrice != null && currentPrice != null
+  const profitOptions = { daysSinceRecommend, hasPrices }
 
   return {
     recommendPrice,
     currentPrice,
     returnPct,
-    returnLabel: formatRecommendProfitLabel(returnPct),
-    canCalculate: recommendPrice != null && currentPrice != null,
+    daysSinceRecommend,
+    returnLabel: formatRecommendProfitLabel(returnPct, profitOptions),
+    returnTone: resolveRecommendProfitTone(returnPct, profitOptions),
+    canCalculate: hasPrices,
   }
 }

@@ -6,6 +6,7 @@ import { loadValidationPicks } from "./ydsValidationStorage.js"
 import {
   buildRecommendProfitView,
   formatRecommendProfitLabel,
+  resolveRecommendProfitTone,
 } from "./ydsRecommendProfitResolver.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { daysBetweenPickDates, resolvePickLifecycleView } from "./ydsPickLifecycleEngine.js"
@@ -55,10 +56,9 @@ function resolveReasonOneLine(pick) {
   return "—"
 }
 
-/** @param {number | null | undefined} returnPct */
-export function resolveHubReturnTone(returnPct) {
-  if (returnPct == null || returnPct === 0) return "muted"
-  return returnPct > 0 ? "up" : "down"
+/** @param {number | null | undefined} returnPct @param {{ daysSinceRecommend?: number | null }} [options] */
+export function resolveHubReturnTone(returnPct, options = {}) {
+  return resolveRecommendProfitTone(returnPct, options)
 }
 
 /**
@@ -150,8 +150,8 @@ function buildHubHistoryBaseRow(pick, livePrice, liveName) {
         ? formatTransparencyPrice(profit.currentPrice, country)
         : "—",
     returnPct: profit.returnPct,
-    returnLabel: formatRecommendProfitLabel(profit.returnPct),
-    returnTone: resolveHubReturnTone(profit.returnPct),
+    returnLabel: profit.returnLabel,
+    returnTone: profit.returnTone ?? resolveHubReturnTone(profit.returnPct, { daysSinceRecommend: daysSince }),
     maxReturnPct: pick.maxReturnPct ?? profit.returnPct,
     maxReturnLabel: formatRecommendProfitLabel(pick.maxReturnPct ?? profit.returnPct),
     minReturnPct: pick.minReturnPct ?? profit.returnPct,

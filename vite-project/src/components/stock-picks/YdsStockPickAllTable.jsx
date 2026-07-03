@@ -13,6 +13,36 @@ import YdsStockPickRecommendStatusBadge from "./YdsStockPickRecommendStatusBadge
 
 /** @typedef {import("../../content/ydsStockPickListView.js").StockPickListSortKey} SortKey */
 
+/** @param {number | null | undefined} returnPct */
+function resolveReturnTone(returnPct, returnTone) {
+  if (returnTone) return returnTone
+  if (returnPct == null) return "muted"
+  if (returnPct === 0) return "muted"
+  return returnPct > 0 ? "up" : "down"
+}
+
+/** @param {{ score: number }} props */
+function AiScoreBar({ score }) {
+  const pct = Number.isFinite(score) ? Math.max(0, Math.min(100, score)) : 0
+  const tone =
+    score >= 90 ? "very-high" : score >= 80 ? "high" : score >= 70 ? "mid" : "low"
+  return (
+    <span className="yds-spick-ai-score">
+      <span className="font-mono tabular-nums">{Number.isFinite(score) ? score : "—"}</span>
+      <span className={`yds-spick-ai-score__bar yds-spick-ai-score__bar--${tone}`}>
+        <span className="yds-spick-ai-score__fill" style={{ width: `${pct}%` }} />
+      </span>
+    </span>
+  )
+}
+
+/** @param {string | null | undefined} grade */
+function GradeBadge({ grade }) {
+  if (!grade || grade === "—") return "—"
+  const letter = String(grade).split(/[·\s]/)[0]?.trim()
+  if (!letter) return grade
+  return <span className="yds-spick-all-table__grade-badge">{letter}</span>
+}
 /** @param {SortKey} colId */
 function cellClass(colId) {
   const base = ["yds-spick-all-table__td"]
@@ -51,27 +81,34 @@ function renderCell(colId, row, stock) {
     case "recommendStatusId":
       return <YdsStockPickRecommendStatusBadge stock={stock} compact />
     case "recommendedAt":
-      return row.recommendedAtLabel ?? "—"
+      return (
+        <span
+          className="yds-spick-all-table__elapsed font-mono tabular-nums"
+          title={row.recommendedAtLabel ?? row.recommendedAt ?? undefined}
+        >
+          {row.daysSinceRecommend != null ? `D+${row.daysSinceRecommend}` : row.recommendedAtLabel ?? "—"}
+        </span>
+      )
     case "daysSinceRecommend":
-      return row.daysSinceRecommend != null ? `${row.daysSinceRecommend}일` : "—"
+      return row.daysSinceRecommend != null ? `D+${row.daysSinceRecommend}` : "—"
     case "recommendedPrice":
       return row.recommendedPriceLabel
     case "currentPriceLabel":
       return row.currentPriceLabel
     case "maxReturnPct": {
-      const tone = row.maxReturnPct == null ? "muted" : row.maxReturnPct >= 0 ? "up" : "down"
+      const tone = row.maxReturnPct == null ? "muted" : row.maxReturnPct > 0 ? "up" : row.maxReturnPct < 0 ? "down" : "muted"
       return (
         <span className={`yds-spick-all-table__ret--${tone}`}>{row.maxReturnLabel}</span>
       )
     }
     case "returnPct": {
-      const tone = row.returnPct == null ? "muted" : row.returnPct >= 0 ? "up" : "down"
+      const tone = resolveReturnTone(row.returnPct, row.returnTone)
       return (
         <span className={`yds-spick-all-table__ret--${tone}`}>{row.returnLabel}</span>
       )
     }
     case "mddPct": {
-      const tone = row.mddPct == null ? "muted" : row.mddPct >= 0 ? "up" : "down"
+      const tone = row.mddPct == null ? "muted" : row.mddPct > 0 ? "up" : row.mddPct < 0 ? "down" : "muted"
       return (
         <span className={`yds-spick-all-table__ret--${tone}`}>{row.mddLabel}</span>
       )
@@ -82,8 +119,10 @@ function renderCell(colId, row, stock) {
         <span className={`yds-spick-all-table__ret--${tone}`}>{row.aiDeltaLabel}</span>
       )
     }
+    case "aiScore":
+      return <AiScoreBar score={row.aiScore} />
     case "recommendGrade":
-      return <span className="yds-spick-all-table__grade">{row.recommendGrade}</span>
+      return <GradeBadge grade={row.recommendGrade} />
     case "recommendCount":
       return (
         <span className="yds-spick-all-table__count font-mono tabular-nums">

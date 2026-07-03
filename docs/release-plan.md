@@ -56,6 +56,9 @@
 - [x] **AI Track Record** — `/performance-validation/track-record` · 상세 모달 · 점수/시장/패닉/섹터/국가별 승률 · KR/US 필터
 - [x] **영구 원장 파이프라인 검증** — `npm run verify:ledger` · AMD 6시나리오 자동 검증
 - [x] **AI 성과 대시보드** — `/performance-validation/dashboard` · KPI/월별 성과/누적 성과 · 기간 필터 · Alpha/Outperform
+- [x] **AI 성과 대시보드 Drill-down** — KPI·점수/국가/시장/패닉 클릭 → 필터된 추천 목록 (rec-ID 원장)
+- [x] **D+0 수익률 표현** — `측정 시작 전` / `계산 불가` / D+1+ 실제 % 단일 Resolver
+- [x] **TOP5·전체종목 테이블 UI** — Gold TOP1 · Best Pick 배지 · AI 점수 Bar · D+N 우선 · 행 Hover
 - [x] **성과검증 점수 스냅샷** — `recommendSnapshot` 잠금(frozen) · 점수+등급+시장·패닉 · 당시 정보만 표시
 - [x] **성공 패턴 분석** — 7/14/30일 성공률(+10%↑) · 등급·시장상태·패닉 구간 · n&lt;10 분석 보류 · 성과검증 상단
 - [x] **성공/실패 판정** — 🟢🟡🔴 배지 · 7/14/30일 판정 컬럼 · 요약 카드(성공률·평균수익) · `DEFAULT_OUTCOME_CRITERIA`

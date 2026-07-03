@@ -34,8 +34,17 @@ describe("ydsRecommendProfitResolver", () => {
     expect(formatRecommendProfitLabel(null)).toBe("계산 불가")
   })
 
-  it("does not show zero percent when prices unavailable", () => {
-    expect(formatRecommendProfitLabel(0)).toBe("0.0%")
-    expect(formatRecommendProfitLabel(null)).toBe("계산 불가")
+  it("shows pending label on D+0 when prices exist", () => {
+    expect(formatRecommendProfitLabel(0, { daysSinceRecommend: 0, hasPrices: true })).toBe(
+      "측정 시작 전",
+    )
+  })
+
+  it("shows calc unavailable when prices missing", () => {
+    expect(formatRecommendProfitLabel(null, { hasPrices: false })).toBe("계산 불가")
+  })
+
+  it("shows zero percent from D+1", () => {
+    expect(formatRecommendProfitLabel(0, { daysSinceRecommend: 1 })).toBe("0.0%")
   })
 })

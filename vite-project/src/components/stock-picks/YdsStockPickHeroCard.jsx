@@ -13,10 +13,29 @@ function formatRecommendDateDot(dateKey) {
   return `${d.slice(0, 4)}.${d.slice(5, 7)}.${d.slice(8, 10)}`
 }
 
-/** @param {number | null | undefined} returnPct */
-function resolveReturnTone(returnPct) {
-  if (returnPct == null || returnPct === 0) return "muted"
-  return returnPct > 0 ? "up" : "down"
+/** @param {import("../../content/ydsStockPickModel.js").StockPickView} stock */
+function resolveGradeBadge(stock) {
+  const grade =
+    stock.v4Score?.qualityDisplayGrade ?? stock.v4Score?.qualityGrade ?? null
+  if (!grade || grade === "—") return null
+  return String(grade).split(/[·\s]/)[0]?.trim() || null
+}
+
+/**
+ * @param {{ score: number; className?: string }} props
+ */
+function AiScoreBar({ score, className = "" }) {
+  const pct = Number.isFinite(score) ? Math.max(0, Math.min(100, score)) : 0
+  const tone =
+    score >= 90 ? "very-high" : score >= 80 ? "high" : score >= 70 ? "mid" : "low"
+  return (
+    <span className={["yds-spick-ai-score", className].filter(Boolean).join(" ")}>
+      <span className="font-mono tabular-nums">{Number.isFinite(score) ? score : "—"}</span>
+      <span className={`yds-spick-ai-score__bar yds-spick-ai-score__bar--${tone}`}>
+        <span className="yds-spick-ai-score__fill" style={{ width: `${pct}%` }} />
+      </span>
+    </span>
+  )
 }
 
 /**
@@ -42,9 +61,12 @@ export default function YdsStockPickHeroCard({
   const row = buildStockPickListRow(stock)
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
   const confLabel = row.confidenceTier?.label ?? "—"
-  const retTone = resolveReturnTone(row.returnPct)
+  const retTone = row.returnTone ?? "muted"
   const elapsedLabel =
     row.daysSinceRecommend != null ? `D+${row.daysSinceRecommend}` : "—"
+  const rankNum = rankIndex != null ? rankIndex + 1 : stock.rank
+  const isBestPick = rankNum != null && rankNum >= 1 && rankNum <= 3
+  const gradeBadge = resolveGradeBadge(stock)
 
   const rankClass =
     rankIndex === 0
@@ -53,7 +75,9 @@ export default function YdsStockPickHeroCard({
         ? "yds-spick-hero-card--rank-2"
         : rankIndex === 2
           ? "yds-spick-hero-card--rank-3"
-          : ""
+          : rankIndex != null && rankIndex >= 3
+            ? "yds-spick-hero-card--rank-n"
+            : ""
 
   return (
     <article
@@ -68,12 +92,22 @@ export default function YdsStockPickHeroCard({
         .filter(Boolean)
         .join(" ")}
     >
+      {isBestPick ? (
+        <span className="yds-spick-hero-card__best-badge">AI Best Pick</span>
+      ) : null}
+
       <div className="yds-spick-hero-card__head">
+        {rankNum != null ? (
+          <span className="yds-spick-hero-card__rank-num font-mono tabular-nums">#{rankNum}</span>
+        ) : null}
         {medal ? <span className="yds-spick-hero-card__medal">{medal}</span> : null}
         <Link to={to} className="yds-spick-hero-card__name-link">
           <h3 className="yds-spick-hero-card__name">{stock.name}</h3>
         </Link>
         <div className="yds-spick-hero-card__tools">
+          {gradeBadge ? (
+            <span className="yds-spick-hero-card__grade-badge">{gradeBadge}</span>
+          ) : null}
           {isHeld ? <span className="yds-spick-hero-card__held">보유</span> : null}
           <YdsStockPickFavoriteButton
             active={isFavorite}
@@ -122,7 +156,9 @@ export default function YdsStockPickHeroCard({
       <dl className="yds-spick-hero-card__priority-metrics">
         <div className="yds-spick-hero-card__metric">
           <dt>AI점수</dt>
-          <dd className="font-mono tabular-nums">{row.aiScore}</dd>
+          <dd>
+            <AiScoreBar score={row.aiScore} />
+          </dd>
         </div>
         <div className="yds-spick-hero-card__metric">
           <dt>신뢰도</dt>
