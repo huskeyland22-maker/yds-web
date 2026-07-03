@@ -1,9 +1,9 @@
 {
-  "buildId": "fbca32e-1783060780726",
-  "gitCommit": "fbca32e",
-  "version": "v2026.07.03.001",
-  "timestamp": 1783060780726,
-  "builtAt": "2026-07-03T06:39:40.644Z",
-  "cacheId": "app-v20260703-001",
-  "swWorkboxCacheId": "yds-pwa-fbca32e-1783060780726"
+  "buildId": "1d0457f-1783061288764",
+  "gitCommit": "1d0457f",
+  "version": "v2026.07.03.002",
+  "timestamp": 1783061288764,
+  "builtAt": "2026-07-03T06:48:08.680Z",
+  "cacheId": "app-v20260703-002",
+  "swWorkboxCacheId": "yds-pwa-1d0457f-1783061288764"
 }

@@ -15,7 +15,7 @@ import {
   computeMarketPositionScore,
   resolveMarketPositionId,
 } from "./ydsMarketPositionEngine.js"
-import { buildPanicIntensityInterpretation } from "./ydsPanicIntensityInterpretation.js"
+import { buildPanicIntensityLegendView } from "./ydsPanicIntensityLegend.js"
 
 export const MARKET_TREND_WINDOW_DAYS = 30
 
@@ -41,19 +41,17 @@ const PANIC_TREND_EVENT_RE = /^panic-/
 export function resolveScoreZoneMeta(score, kind = "panic") {
   const rounded = Math.max(0, Math.min(100, Math.round(Number(score))))
   if (kind === "panic") {
-    const interp = buildPanicIntensityInterpretation(rounded)
-    if (!interp) {
+    const legend = buildPanicIntensityLegendView(rounded)
+    if (!legend) {
       return { score: rounded, color: "#94a3b8", label: "—", zoneIndex: 2 }
     }
     return {
-      score: interp.score,
-      color: interp.color,
-      label: interp.label,
-      emoji: interp.emoji,
-      zoneIndex: interp.index,
-      buyStrength: interp.buyStrength,
-      actionLine: interp.actionLine,
-      descriptionLines: interp.descriptionLines,
+      score: legend.score,
+      color: legend.color,
+      label: legend.label,
+      emoji: legend.emoji,
+      zoneIndex: legend.index,
+      actionLine: legend.tooltipText,
     }
   }
   const zoneIdx =

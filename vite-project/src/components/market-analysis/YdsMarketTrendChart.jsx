@@ -10,10 +10,12 @@ import {
   YAxis,
 } from "recharts"
 import {
-  buildPanicIntensityInterpretation,
-  panicInvestmentZoneSteps,
-} from "../../content/ydsPanicIntensityInterpretation.js"
+  buildPanicIntensityLegendView,
+  panicIntensityLegendZoneSteps,
+} from "../../content/ydsPanicIntensityLegend.js"
 import { YDS_SCORE_ZONE_STEPS } from "../../content/ydsMarketTrendSeries.js"
+import YdsPanicIntensityLegend from "./YdsPanicIntensityLegend.jsx"
+import YdsPanicIntensityInfoTip from "./YdsPanicIntensityInfoTip.jsx"
 
 const CHART_HEIGHT = 210
 const CHART_MARGIN = { top: 18, right: 8, left: 4, bottom: 22 }
@@ -26,25 +28,21 @@ function TrendTooltip({ active, payload, title, chartKind = "market" }) {
   const value = payload[0]?.value
   if (!row) return null
   const rounded = Math.round(Number(value))
-  const panicInterp =
-    chartKind === "panic" ? buildPanicIntensityInterpretation(rounded) : null
+  const panicLegend =
+    chartKind === "panic" ? buildPanicIntensityLegendView(rounded) : null
 
   return (
     <div className="yds-market-trend-chart__tooltip">
       <p className="yds-market-trend-chart__tooltip-date">{row.axisLabel ?? row.date}</p>
-      {panicInterp ? (
+      {panicLegend ? (
         <>
           <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
-            패닉 {panicInterp.score}
+            패닉 {panicLegend.score}
           </p>
           <p className="yds-market-trend-chart__tooltip-stage">
-            {panicInterp.emoji} {panicInterp.label}
+            {panicLegend.emoji} {panicLegend.label}
           </p>
-          {panicInterp.descriptionLines.map((line) => (
-            <p key={line} className="yds-market-trend-chart__tooltip-action">
-              {line}
-            </p>
-          ))}
+          <p className="yds-market-trend-chart__tooltip-action">{panicLegend.tooltipText}</p>
         </>
       ) : (
         <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
@@ -97,7 +95,7 @@ export default function YdsMarketTrendChart({
   const curveType = pointCount >= 3 ? "monotone" : "linear"
 
   const zoneBands = useMemo(() => {
-    const steps = chartKind === "panic" ? panicInvestmentZoneSteps() : YDS_SCORE_ZONE_STEPS
+    const steps = chartKind === "panic" ? panicIntensityLegendZoneSteps() : YDS_SCORE_ZONE_STEPS
     return steps.map((zone, idx) => ({
       y1: zone.min,
       y2: idx === steps.length - 1 ? 100 : zone.max,
@@ -121,7 +119,10 @@ export default function YdsMarketTrendChart({
   return (
     <article className="yds-market-trend-chart">
       <header className="yds-market-trend-chart__head">
-        <h3 className="yds-market-trend-chart__title">{title}</h3>
+        <div className="yds-market-trend-chart__title-row">
+          <h3 className="yds-market-trend-chart__title">{title}</h3>
+          {chartKind === "panic" ? <YdsPanicIntensityInfoTip /> : null}
+        </div>
         {displayScore != null ? (
           <div
             className="yds-market-trend-chart__badge font-mono tabular-nums"
@@ -207,6 +208,14 @@ export default function YdsMarketTrendChart({
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      {chartKind === "panic" ? (
+        <YdsPanicIntensityLegend
+          score={displayScore}
+          compact
+          className="yds-market-trend-chart__legend"
+        />
+      ) : null}
     </article>
   )
 }

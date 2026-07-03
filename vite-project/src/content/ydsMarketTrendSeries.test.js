@@ -39,14 +39,13 @@ describe("ydsMarketTrendSeries", () => {
 
   it("maps score zones for market and panic labels", () => {
     expect(resolveScoreZoneMeta(85, "market").label).toBe("과열")
-    expect(resolveScoreZoneMeta(35, "panic").label).toBe("약한 공포")
-    expect(resolveScoreZoneMeta(45, "panic").label).toBe("중립")
+    expect(resolveScoreZoneMeta(33, "panic").label).toBe("공포 부족")
     expect(resolveScoreZoneMeta(49, "panic").label).toBe("중립")
-    expect(resolveScoreZoneMeta(15, "panic").label).toBe("공포 부족")
-    expect(resolveScoreZoneMeta(72, "panic").label).toBe("높은 공포")
-    expect(resolveScoreZoneMeta(91, "panic").label).toBe("극심한 공포")
-    expect(resolveScoreZoneMeta(72, "panic").actionLine).toBe(
-      "시장 심리가 위축되고 있습니다.",
+    expect(resolveScoreZoneMeta(15, "panic").label).toBe("극단적 탐욕")
+    expect(resolveScoreZoneMeta(70, "panic").label).toBe("공포")
+    expect(resolveScoreZoneMeta(88, "panic").label).toBe("극단적 공포")
+    expect(resolveScoreZoneMeta(70, "panic").actionLine).toBe(
+      "투자심리가 위축된 구간으로 분할매수를 고려할 수 있습니다.",
     )
   })
 })

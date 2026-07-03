@@ -2,9 +2,11 @@ import { useMemo } from "react"
 import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
 import { buildPanicIntensityComparison, formatPanicCompareDelta } from "../../content/ydsPanicIntensityComparison.js"
-import { buildPanicIntensityInterpretation } from "../../content/ydsPanicIntensityInterpretation.js"
-import { resolvePanicStateLabel, resolvePanicCompositeActionView } from "../../content/ydsPanicCompositeVerdict.js"
+import { buildPanicIntensityLegendView } from "../../content/ydsPanicIntensityLegend.js"
+import { resolvePanicCompositeActionView } from "../../content/ydsPanicCompositeVerdict.js"
 import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.js"
+import YdsPanicIntensityLegend from "./YdsPanicIntensityLegend.jsx"
+import YdsPanicIntensityInfoTip from "./YdsPanicIntensityInfoTip.jsx"
 import YdsPanicScoreComposition from "./YdsPanicScoreComposition.jsx"
 import YdsPanicCompositeVerdict from "./YdsPanicCompositeVerdict.jsx"
 
@@ -35,12 +37,8 @@ export default function YdsMarketPanicSecondaryPanel({
   embedded = false,
 }) {
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
-  const stateLabel = useMemo(
-    () => (view?.panicScore != null ? resolvePanicStateLabel(view.panicScore) : null),
-    [view?.panicScore],
-  )
-  const intensityInterp = useMemo(
-    () => buildPanicIntensityInterpretation(view?.panicScore ?? null),
+  const legendView = useMemo(
+    () => buildPanicIntensityLegendView(view?.panicScore ?? null),
     [view?.panicScore],
   )
   const compositeAction = useMemo(
@@ -58,7 +56,7 @@ export default function YdsMarketPanicSecondaryPanel({
     [historyRows, panicData],
   )
 
-  if (!view || view.panicScore == null || !stateLabel) return null
+  if (!view || view.panicScore == null || !legendView) return null
 
   const accentTier = resolvePanicAccentTier(view.panicScore)
 
@@ -71,27 +69,31 @@ export default function YdsMarketPanicSecondaryPanel({
         `yds-market-panic-secondary--accent-${accentTier}`,
       ].join(" ")}
     >
-      <p className="yds-market-panic-secondary__title">{MARKET_LABEL_PANIC_INTENSITY}</p>
+      <div className="yds-market-panic-secondary__title-row">
+        <p className="yds-market-panic-secondary__title">{MARKET_LABEL_PANIC_INTENSITY}</p>
+        <YdsPanicIntensityInfoTip />
+      </div>
 
       <div className="yds-market-panic-secondary__body">
         <p className="yds-market-panic-secondary__score font-mono tabular-nums">
           {view.panicScore}
+          <span className="yds-market-panic-secondary__score-unit">점</span>
         </p>
 
         <div className="yds-market-panic-secondary__stage" aria-label="패닉 심리 상태">
-          <p className="yds-market-panic-secondary__stage-current yds-market-panic-secondary__state-only">
-            {stateLabel}
+          <p
+            className="yds-market-panic-secondary__stage-current yds-market-panic-secondary__state-only"
+            style={{ "--legend-color": legendView.color }}
+          >
+            {legendView.label}
           </p>
-          {intensityInterp?.descriptionLines.length ? (
-            <div className="yds-market-panic-secondary__stage-desc">
-              {intensityInterp.descriptionLines.map((line) => (
-                <p key={line} className="yds-market-panic-secondary__stage-desc-line">
-                  {line}
-                </p>
-              ))}
-            </div>
-          ) : null}
         </div>
+
+        <YdsPanicIntensityLegend
+          score={view.panicScore}
+          compact
+          className="yds-market-panic-secondary__legend"
+        />
 
         {compositeAction ? (
           <div className="yds-market-panic-secondary__action" aria-label="최종 투자 해석">
