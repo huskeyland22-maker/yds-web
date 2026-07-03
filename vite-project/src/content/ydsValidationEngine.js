@@ -31,6 +31,14 @@ import {
 } from "./ydsValidationRecommendSnapshot.js"
 import { updatePickLifecycle } from "./ydsPickLifecycleEngine.js"
 import {
+  applyMutablePickUpdate,
+  hasAutoCapturePickToday,
+  isPickImmutableSealed,
+  mapLifecycleToLedgerState,
+  resolveRunningReturnExtremes,
+  sealNewRecommendLedgerRecord,
+} from "./ydsRecommendLedger.js"
+import {
   filterByCountry,
   getRankingStocks,
   getStockPickUniverse,
@@ -107,19 +115,19 @@ export function regimeFromMarketContext(ctx) {
  * @param {import("./ydsStockPickModel.js").StockPickView} stock
  * @param {YdsMarketAdapterContext | null | undefined} marketContext
  * @param {string} recommendedAt
+ * @param {{ panicData?: object | null }} [options]
  */
-function pickRecordFromStock(stock, marketContext, recommendedAt) {
+function pickRecordFromStock(stock, marketContext, recommendedAt, options = {}) {
+  const recordedAt = Date.now()
   const snap = buildRecommendSnapshot(stock, marketContext, recommendedAt)
   const price = snap.recommendedPrice
   const { regimeId, regimeLabel } = regimeFromMarketContext(marketContext)
   const country = stock.country === "KR" ? "KR" : "US"
-  const id = `${recommendedAt}:${country}:${stock.ticker}`
   const statusId = stock.stockStatus?.id ?? stock.statusView?.id ?? "interest"
   const statusLabel =
     stock.stockStatus?.label ?? STOCK_STATUS_VIEWS[statusId]?.label ?? "—"
 
-  return normalizePickRecord({
-    id,
+  const draft = normalizePickRecord({
     ticker: stock.ticker,
     name: snap.name,
     country,
@@ -142,9 +150,11 @@ function pickRecordFromStock(stock, marketContext, recommendedAt) {
     regimeLabel,
     strategyLabel: snap.marketStateLabel,
     recommendSnapshot: snap,
-    recordedAt: Date.now(),
-    lastUpdatedAt: Date.now(),
+    recordedAt,
+    lastUpdatedAt: recordedAt,
   })
+
+  return sealNewRecommendLedgerRecord(draft, marketContext, options.panicData ?? null)
 }
 
 /**
@@ -342,33 +352,34 @@ function refreshPickPrice(record, today, priceMap) {
     source: resolved?.source ?? null,
   })
 
-  return {
-    ...withLog,
+  const { maxReturnPct, minReturnPct } = resolveRunningReturnExtremes(cleaned, returnPct)
+
+  return applyMutablePickUpdate(cleaned, {
     currentPrice,
     returnPct,
+    maxReturnPct,
+    minReturnPct,
+    priceLog,
     horizonPrices,
     horizons,
-    recommendSnapshot: cleaned.recommendSnapshot,
-    recommendedScore: cleaned.recommendedScore,
-    qualityGrade: cleaned.qualityGrade,
-    timingGrade: cleaned.timingGrade,
-    marketFitGrade: cleaned.marketFitGrade,
-    strategyLabel: cleaned.strategyLabel,
-    lastUpdatedAt: Date.now(),
-  }
+    ledgerState: mapLifecycleToLedgerState(cleaned.lifecycleId, cleaned.statusId),
+  })
 }
 
 /**
  * @param {YdsMarketAdapterContext | null | undefined} marketContext
  * @param {number} [rankLimit]
  * @param {import("./ydsStockPickModel.js").StockPickView[]} [universeOverride]
+ * @param {{ panicData?: object | null }} [options]
  */
-export function captureTodayPickSnapshots(marketContext, rankLimit = 10, universeOverride = null) {
+export function captureTodayPickSnapshots(
+  marketContext,
+  rankLimit = 10,
+  universeOverride = null,
+  options = {},
+) {
   const today = todayDateKey()
   const existing = loadValidationPicks()
-  const existingToday = new Set(
-    existing.filter((r) => r.recommendedAt === today).map((r) => r.id),
-  )
 
   const universe = universeOverride ?? getStockPickUniverse(marketContext ?? null)
   const usRanked = getRankingStocks(filterByCountry(universe, "US"), rankLimit)
@@ -380,8 +391,11 @@ export function captureTodayPickSnapshots(marketContext, rankLimit = 10, univers
       if (universeOverride) return s.dataSource === "live" && stockReadyForRecommendCapture(s)
       return stockReadyForRecommendCapture(s) || s.dataSource !== "live"
     })
-    .map((s) => pickRecordFromStock(s, marketContext, today))
-    .filter((r) => !existingToday.has(r.id))
+    .filter((s) => {
+      const country = s.country === "KR" ? "KR" : "US"
+      return !hasAutoCapturePickToday(existing, country, s.ticker, today)
+    })
+    .map((s) => pickRecordFromStock(s, marketContext, today, options))
 
   if (!fresh.length) return existing
 
@@ -390,7 +404,7 @@ export function captureTodayPickSnapshots(marketContext, rankLimit = 10, univers
   return merged
 }
 
-/** @typedef {{ liveStocks?: import("./ydsStockPickModel.js").StockPickView[] | null; marketContext?: YdsMarketAdapterContext | null }} RefreshValidationOptions */
+/** @typedef {{ liveStocks?: import("./ydsStockPickModel.js").StockPickView[] | null; marketContext?: YdsMarketAdapterContext | null; panicData?: object | null }} RefreshValidationOptions */
 
 /** @param {ValidationPickRecord[]} picks @param {Map<string, number>} [priceMap] @param {RefreshValidationOptions} [options] */
 export function refreshValidationPicks(picks, priceMap, options = {}) {
@@ -409,9 +423,29 @@ export function refreshValidationPicks(picks, priceMap, options = {}) {
   }
   const refreshed = sanitized.map((r) => {
     const stock = stockByKey.get(`${r.country}:${r.ticker}`) ?? null
-    const withSnap = backfillRecommendSnapshot(r, stock, marketContext)
+    const withSnap = isPickImmutableSealed(r)
+      ? r
+      : backfillRecommendSnapshot(r, stock, marketContext)
     const priced = refreshPickPrice(withSnap, today, map)
-    return updatePickLifecycle(priced, today, stock)
+    const withLifecycle = updatePickLifecycle(priced, today, stock)
+    return applyMutablePickUpdate(r, {
+      currentPrice: withLifecycle.currentPrice,
+      returnPct: withLifecycle.returnPct,
+      maxReturnPct: withLifecycle.maxReturnPct,
+      minReturnPct: withLifecycle.minReturnPct,
+      priceLog: withLifecycle.priceLog,
+      horizonPrices: withLifecycle.horizonPrices,
+      horizons: withLifecycle.horizons,
+      lifecycleId: withLifecycle.lifecycleId,
+      lifecycleLabel: withLifecycle.lifecycleLabel,
+      closedAt: withLifecycle.closedAt,
+      closeReason: withLifecycle.closeReason,
+      finalReturnPct: withLifecycle.finalReturnPct,
+      ledgerState: mapLifecycleToLedgerState(
+        withLifecycle.lifecycleId,
+        withLifecycle.statusId,
+      ),
+    })
   })
   saveValidationPicks(refreshed)
   return refreshed

@@ -22,6 +22,9 @@ import { useStockPickFavorites } from "../../hooks/useStockPickFavorites.js"
 import { useStockPickDualColumnAlign } from "../../hooks/useStockPickDualColumnAlign.js"
 import { useStockPickLiveData } from "../../hooks/useStockPickLiveData.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
+import { useAppDataStore } from "../../store/appDataStore.js"
+import { panicDataFromCycleRow, mergeCycleRows } from "../../utils/cycleHistoryUtils.js"
+import { resolveCycleHistoryRows } from "../../utils/panicHistoryRows.js"
 import { useStockPickHeldTickers } from "../../hooks/useStockPickHeldTickers.js"
 import YdsStockPickScoreDebugPanel from "./YdsStockPickScoreDebugPanel.jsx"
 import YdsStockPickFavoriteAlerts from "./YdsStockPickFavoriteAlerts.jsx"
@@ -82,6 +85,12 @@ export default function YdsStockPickV1Hub() {
   const dualLayout = useDualCountryLayout()
   const dualRef = useStockPickDualColumnAlign(dualLayout)
   const marketContext = useYdsMarketContext()
+  const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
+  const panicData = useMemo(() => {
+    const history = resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], []))
+    const latest = history[history.length - 1] ?? null
+    return latest ? panicDataFromCycleRow(latest) : null
+  }, [storeRows])
   const {
     stocks: liveStocks,
     allStocks,
@@ -99,10 +108,11 @@ export default function YdsStockPickV1Hub() {
   useEffect(() => {
     if (loading || !liveStocks.length) return
     const run = () => {
-      captureTodayPickSnapshots(marketContext, 10, liveStocks)
+      captureTodayPickSnapshots(marketContext, 10, liveStocks, { panicData })
       refreshValidationPicks(loadValidationPicks(), buildValidationPriceMap(liveStocks), {
         liveStocks,
         marketContext,
+        panicData,
       })
       setValidationRevision((v) => v + 1)
     }
@@ -112,7 +122,7 @@ export default function YdsStockPickV1Hub() {
     }
     const id = setTimeout(run, 0)
     return () => clearTimeout(id)
-  }, [marketContext, loading, liveStocks])
+  }, [marketContext, panicData, loading, liveStocks])
 
   const {
     favorites,

@@ -32,6 +32,7 @@ export function formatHubHistoryDateDot(dateKey) {
 
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord} pick */
 function resolveAiGradeLabel(pick) {
+  if (pick.recommendGrade && pick.recommendGrade !== "—") return pick.recommendGrade
   const snap = pick.recommendSnapshot
   const q = snap?.qualityGrade ?? pick.qualityGrade ?? "—"
   const t = snap?.timingGrade ?? pick.timingGrade ?? "—"
@@ -41,6 +42,9 @@ function resolveAiGradeLabel(pick) {
 
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord} pick */
 function resolveReasonOneLine(pick) {
+  if (pick.recommendReason && pick.recommendReason !== "—") {
+    return String(pick.recommendReason).slice(0, 72)
+  }
   const rationales = pick.recommendSnapshot?.recommendRationales ?? []
   const first = rationales.find((r) => r?.text)?.text
   if (first) return String(first).slice(0, 72)
@@ -132,6 +136,7 @@ function buildHubHistoryBaseRow(pick, livePrice, liveName) {
     ticker: pick.ticker,
     name: liveName ?? pick.name ?? pick.ticker,
     recommendedAt: pick.recommendedAt,
+    recommendedAtIso: pick.recommendedAtIso ?? formatHubHistoryDateDot(pick.recommendedAt),
     recommendedAtLabel: formatHubHistoryDateDot(pick.recommendedAt),
     recommendedPrice: profit.recommendPrice,
     recommendedPriceLabel:
@@ -146,10 +151,25 @@ function buildHubHistoryBaseRow(pick, livePrice, liveName) {
     returnPct: profit.returnPct,
     returnLabel: formatRecommendProfitLabel(profit.returnPct),
     returnTone: resolveHubReturnTone(profit.returnPct),
+    maxReturnPct: pick.maxReturnPct ?? profit.returnPct,
+    maxReturnLabel: formatRecommendProfitLabel(pick.maxReturnPct ?? profit.returnPct),
+    minReturnPct: pick.minReturnPct ?? profit.returnPct,
+    minReturnLabel: formatRecommendProfitLabel(pick.minReturnPct ?? profit.returnPct),
     daysSinceRecommend: daysSince,
     elapsedLabel: `D+${daysSince}`,
+    aiScore:
+      pick.recommendedScore != null && Number.isFinite(pick.recommendedScore)
+        ? Math.round(pick.recommendedScore)
+        : null,
+    aiScoreLabel:
+      pick.recommendedScore != null && Number.isFinite(pick.recommendedScore)
+        ? String(Math.round(pick.recommendedScore))
+        : "—",
     aiGradeLabel: resolveAiGradeLabel(pick),
     reasonLine: resolveReasonOneLine(pick),
+    ledgerState: pick.ledgerState ?? (lifecycleId === "active" ? "active" : "ended"),
+    marketLedger: pick.marketLedger ?? null,
+    immutableSealed: Boolean(pick.immutableSealed),
     lifecycleId,
     statusLabel: `${lifecycle.emoji} ${lifecycle.label}`,
     statusTone: lifecycle.tone,
@@ -241,7 +261,15 @@ export function buildRecommendPerfSummaryCards(picks, stocks = []) {
   const rows = buildHubHistoryViewRows(stocks)
   const today = todayDateKey()
 
-  const activeCount = rows.filter((r) => r.lifecycleId === "active").length
+  const activeCount = rows.filter((r) => r.ledgerState === "active" || r.lifecycleId === "active")
+    .length
+  const endedCount = rows.filter(
+    (r) =>
+      r.lifecycleId === "targetHit" ||
+      r.lifecycleId === "stopLoss" ||
+      r.lifecycleId === "ended",
+  ).length
+  const excludedCount = rows.filter((r) => r.ledgerState === "excluded").length
   const returns = rows
     .map((r) => r.returnPct)
     .filter((v) => v != null && Number.isFinite(v))
@@ -250,7 +278,17 @@ export function buildRecommendPerfSummaryCards(picks, stocks = []) {
       ? Math.round((returns.reduce((s, v) => s + v, 0) / returns.length) * 10) / 10
       : null
 
-  const closed = rows.filter((r) => r.lifecycleId === "targetHit" || r.lifecycleId === "stopLoss")
+  const holdDays = rows
+    .map((r) => r.daysSinceRecommend)
+    .filter((v) => v != null && Number.isFinite(v))
+  const avgHoldDays =
+    holdDays.length > 0
+      ? Math.round(holdDays.reduce((s, v) => s + v, 0) / holdDays.length)
+      : null
+
+  const closed = rows.filter(
+    (r) => r.lifecycleId === "targetHit" || r.lifecycleId === "stopLoss",
+  )
   const successClosed = closed.filter((r) => r.lifecycleId === "targetHit").length
   const winRate =
     closed.length > 0 ? Math.round((successClosed / closed.length) * 1000) / 10 : null
@@ -258,16 +296,27 @@ export function buildRecommendPerfSummaryCards(picks, stocks = []) {
   let bestPick = null
   let worstPick = null
   for (const row of rows) {
-    if (row.returnPct == null || !Number.isFinite(row.returnPct)) continue
-    if (!bestPick || row.returnPct > bestPick.returnPct) bestPick = row
-    if (!worstPick || row.returnPct < worstPick.returnPct) worstPick = row
+    const ret = row.maxReturnPct ?? row.returnPct
+    if (ret == null || !Number.isFinite(ret)) continue
+    if (!bestPick || ret > (bestPick.maxReturnPct ?? bestPick.returnPct)) {
+      bestPick = { ...row, returnPct: ret, returnLabel: formatRecommendProfitLabel(ret) }
+    }
+    const loss = row.minReturnPct ?? row.returnPct
+    if (loss == null || !Number.isFinite(loss)) continue
+    if (!worstPick || loss < (worstPick.minReturnPct ?? worstPick.returnPct)) {
+      worstPick = { ...row, returnPct: loss, returnLabel: formatRecommendProfitLabel(loss) }
+    }
   }
 
   return {
     totalCount: allPicks.length,
     activeCount,
+    endedCount,
+    excludedCount,
     avgReturn,
     avgReturnLabel: formatRecommendProfitLabel(avgReturn),
+    avgHoldDays,
+    avgHoldDaysLabel: avgHoldDays != null ? `${avgHoldDays}일` : "—",
     winRate,
     winRateLabel: winRate != null ? `${winRate}%` : "—",
     bestPick: bestPick

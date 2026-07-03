@@ -98,6 +98,14 @@ export default function YdsRecommendPerformanceReport({
               <dt>승률</dt>
               <dd className="font-mono tabular-nums">{summary.winRateLabel}</dd>
             </div>
+            <div className="yds-rec-perf-report__hero-card">
+              <dt>종료</dt>
+              <dd className="font-mono tabular-nums">{summary.endedCount ?? 0}건</dd>
+            </div>
+            <div className="yds-rec-perf-report__hero-card">
+              <dt>평균 보유</dt>
+              <dd className="font-mono tabular-nums">{summary.avgHoldDaysLabel ?? "—"}</dd>
+            </div>
             <div className="yds-rec-perf-report__hero-card yds-rec-perf-report__hero-card--wide">
               <dt>최고 수익 종목</dt>
               <dd>
@@ -114,7 +122,7 @@ export default function YdsRecommendPerformanceReport({
               </dd>
             </div>
             <div className="yds-rec-perf-report__hero-card yds-rec-perf-report__hero-card--wide">
-              <dt>최대 손실 종목</dt>
+              <dt>최악 추천 종목</dt>
               <dd>
                 {summary.worstPick ? (
                   <>

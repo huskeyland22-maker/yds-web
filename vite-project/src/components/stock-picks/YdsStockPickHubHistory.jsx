@@ -107,6 +107,7 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
                 <th>현재가</th>
                 <th>수익률</th>
                 <th>경과</th>
+                <th>AI점수</th>
                 <th>AI 등급</th>
                 <th>추천 사유</th>
                 <th>배지</th>
@@ -136,6 +137,7 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
                     {row.returnLabel}
                   </td>
                   <td className="font-mono tabular-nums">{row.elapsedLabel}</td>
+                  <td className="font-mono tabular-nums">{row.aiScoreLabel ?? "—"}</td>
                   <td>{row.aiGradeLabel}</td>
                   <td className="yds-spick-hub-history__reason" title={row.reasonLine}>
                     {row.reasonLine}

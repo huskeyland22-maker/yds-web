@@ -5,6 +5,7 @@
 import { sanitizeValidationPickRecord } from "./ydsValidationPriceSanitize.js"
 import { applySnapshotToRecord, getRecommendSnapshot, hasSnapshotScores, migrateRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
 import { migratePickLifecycle } from "./ydsPickLifecycleEngine.js"
+import { migratePickToRecommendLedger } from "./ydsRecommendLedger.js"
 
 export const VALIDATION_PICKS_KEY = "yds-validation-picks-v2"
 export const VALIDATION_PORTFOLIO_KEY = "yds-validation-portfolio-v2"
@@ -14,7 +15,7 @@ export const VALIDATION_REGIME_KEY = "yds-validation-regime-periods-v1"
 const LEGACY_PICKS_KEY = "yds-validation-picks-v1"
 const LEGACY_PORTFOLIO_KEY = "yds-validation-portfolio-v1"
 
-const MAX_PICKS = 2000
+const MAX_PICKS = 5000
 const MAX_PORTFOLIO_SNAPSHOTS = 400
 const MAX_REGIME_PERIODS = 120
 
@@ -72,6 +73,18 @@ const MAX_REGIME_PERIODS = 120
  *   recommendSnapshot: import("./ydsValidationRecommendSnapshot.js").ValidationRecommendSnapshot | null
  *   recordedAt: number
  *   lastUpdatedAt: number
+ *   recommendedAtIso?: string
+ *   immutableSealed?: boolean
+ *   ledgerVersion?: number
+ *   lockedRecommendedPrice?: number | null
+ *   lockedRecommendedAt?: string
+ *   lockedRecommendedAtIso?: string
+ *   maxReturnPct?: number | null
+ *   minReturnPct?: number | null
+ *   recommendReason?: string
+ *   recommendGrade?: string
+ *   ledgerState?: 'active' | 'ended' | 'excluded'
+ *   marketLedger?: import("./ydsRecommendLedger.js").RecommendMarketLedger | null
  * }} ValidationPickRecord
  */
 
@@ -181,13 +194,34 @@ export function normalizePickRecord(raw) {
     recommendSnapshot: r.recommendSnapshot ?? recSnap ?? null,
     recordedAt: Number(r.recordedAt) || Date.now(),
     lastUpdatedAt: Number(r.lastUpdatedAt) || Date.now(),
+    recommendedAtIso: r.recommendedAtIso ? String(r.recommendedAtIso) : undefined,
+    immutableSealed: Boolean(r.immutableSealed),
+    ledgerVersion: Number(r.ledgerVersion) || 0,
+    lockedRecommendedPrice:
+      r.lockedRecommendedPrice != null ? Number(r.lockedRecommendedPrice) : null,
+    lockedRecommendedAt: r.lockedRecommendedAt
+      ? String(r.lockedRecommendedAt).slice(0, 10)
+      : undefined,
+    lockedRecommendedAtIso: r.lockedRecommendedAtIso
+      ? String(r.lockedRecommendedAtIso)
+      : undefined,
+    maxReturnPct: r.maxReturnPct != null ? Number(r.maxReturnPct) : null,
+    minReturnPct: r.minReturnPct != null ? Number(r.minReturnPct) : null,
+    recommendReason: r.recommendReason ? String(r.recommendReason) : undefined,
+    recommendGrade: r.recommendGrade ? String(r.recommendGrade) : undefined,
+    ledgerState: r.ledgerState ?? undefined,
+    marketLedger: r.marketLedger && typeof r.marketLedger === "object" ? r.marketLedger : null,
   })
-  const withSnap = record.recommendSnapshot
-    ? applySnapshotToRecord(record, record.recommendSnapshot)
-    : recSnap && hasSnapshotScores(recSnap)
-      ? applySnapshotToRecord(record, recSnap)
-      : record
-  return migratePickLifecycle(sanitizeValidationPickRecord(migrateRecommendSnapshot(withSnap)))
+  const withSnap = record.recommendSnapshot && record.immutableSealed
+    ? record
+    : record.recommendSnapshot
+      ? applySnapshotToRecord(record, record.recommendSnapshot)
+      : recSnap && hasSnapshotScores(recSnap)
+        ? applySnapshotToRecord(record, recSnap)
+        : record
+  return migratePickToRecommendLedger(
+    migratePickLifecycle(sanitizeValidationPickRecord(migrateRecommendSnapshot(withSnap))),
+  )
 }
 
 /** @returns {ValidationPickRecord[]} */

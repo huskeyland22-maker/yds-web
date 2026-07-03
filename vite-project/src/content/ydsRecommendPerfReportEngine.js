@@ -111,7 +111,10 @@ export function buildRecommendPerfReport(
       successLabel: row.resultBadge,
       statusLabel: row.statusLabel,
       aiGradeLabel: row.aiGradeLabel,
+      aiScoreLabel: row.aiScoreLabel,
       reasonLine: row.reasonLine,
+      maxReturnLabel: row.maxReturnLabel,
+      minReturnLabel: row.minReturnLabel,
     }
   })
 
