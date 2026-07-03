@@ -21,6 +21,9 @@ export default function StockPickValidationPicksPage() {
           추천 종목별 상세 검증 · AI 신뢰성 확인
         </p>
         <div className="yds-spick-validation-page__links">
+          <Link to="/performance-validation/dashboard" className="yds-spick-validation-page__link">
+            성과 대시보드 →
+          </Link>
           <Link to="/performance-validation/track-record" className="yds-spick-validation-page__link">
             Track Record →
           </Link>

@@ -55,6 +55,7 @@
 - [x] **추천 이력 영구 원장** — 불변 추천 기록(rec-id) · 재추천=신규 이벤트 · VIX/CNN/BofA 스냅샷 · 성과 통계(종료·평균보유·최고/최악)
 - [x] **AI Track Record** — `/performance-validation/track-record` · 상세 모달 · 점수/시장/패닉/섹터/국가별 승률 · KR/US 필터
 - [x] **영구 원장 파이프라인 검증** — `npm run verify:ledger` · AMD 6시나리오 자동 검증
+- [x] **AI 성과 대시보드** — `/performance-validation/dashboard` · KPI/월별 성과/누적 성과 · 기간 필터 · Alpha/Outperform
 - [x] **성과검증 점수 스냅샷** — `recommendSnapshot` 잠금(frozen) · 점수+등급+시장·패닉 · 당시 정보만 표시
 - [x] **성공 패턴 분석** — 7/14/30일 성공률(+10%↑) · 등급·시장상태·패닉 구간 · n&lt;10 분석 보류 · 성과검증 상단
 - [x] **성공/실패 판정** — 🟢🟡🔴 배지 · 7/14/30일 판정 컬럼 · 요약 카드(성공률·평균수익) · `DEFAULT_OUTCOME_CRITERIA`

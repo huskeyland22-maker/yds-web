@@ -82,6 +82,9 @@ export default function AiTrackRecordPage() {
         <h1 className="yds-track-record-page__title">{report.title}</h1>
         <p className="yds-track-record-page__sub">{report.subtitle}</p>
         <div className="yds-track-record-page__links">
+          <Link to="/performance-validation/dashboard" className="yds-track-record-page__link">
+            성과 대시보드 →
+          </Link>
           <Link to="/performance-validation/picks" className="yds-track-record-page__link">
             상세 검증 →
           </Link>

@@ -6130,3 +6130,261 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* AI Performance Dashboard */
+.yds-ai-dashboard__head,
+.yds-ai-dashboard__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+}
+
+.yds-ai-dashboard__title {
+  margin: 0.5rem 0 0.15rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-ai-dashboard__sub,
+.yds-ai-dashboard__scope,
+.yds-ai-dashboard__empty {
+  margin: 0;
+  font-size: 0.63rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.yds-ai-dashboard__links {
+  margin-top: 0.15rem;
+}
+
+.yds-ai-dashboard__link {
+  color: #38bdf8;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.yds-ai-dashboard__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.8rem 0 0.45rem;
+}
+
+.yds-ai-dashboard__filter {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.45);
+  color: #94a3b8;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.yds-ai-dashboard__filter--active {
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #7dd3fc;
+  background: rgba(14, 116, 144, 0.2);
+}
+
+.yds-ai-dashboard__date-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.yds-ai-dashboard__date-range label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.58rem;
+  color: #94a3b8;
+}
+
+.yds-ai-dashboard__date-range input {
+  min-width: 9rem;
+  padding: 0.32rem 0.4rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.55);
+  color: #e2e8f0;
+}
+
+.yds-ai-dashboard__section {
+  margin-top: 0.85rem;
+  padding: 0.7rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.yds-ai-dashboard__h2 {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.yds-ai-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.yds-ai-dashboard__grid--compact {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.yds-ai-dashboard__card {
+  padding: 0.5rem 0.55rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(2, 6, 23, 0.5);
+}
+
+.yds-ai-dashboard__card-label {
+  display: block;
+  font-size: 0.55rem;
+  color: #94a3b8;
+}
+
+.yds-ai-dashboard__card-value {
+  display: block;
+  margin-top: 0.14rem;
+  font-size: 0.82rem;
+  color: #f8fafc;
+}
+
+.yds-ai-dashboard__card--up .yds-ai-dashboard__card-value { color: #86efac; }
+.yds-ai-dashboard__card--down .yds-ai-dashboard__card-value { color: #fca5a5; }
+
+.yds-ai-dashboard__table-scroll {
+  overflow-x: auto;
+}
+
+.yds-ai-dashboard__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.59rem;
+}
+
+.yds-ai-dashboard__table th,
+.yds-ai-dashboard__table td {
+  padding: 0.38rem 0.42rem;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.18);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.yds-ai-dashboard__table th {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.yds-ai-dashboard__chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+}
+
+.yds-ai-dashboard__chart-box {
+  padding: 0.55rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-ai-dashboard__chart-box--wide {
+  grid-column: 1 / -1;
+}
+
+.yds-ai-dashboard__chart-box h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.yds-ai-dashboard__bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(2.3rem, 1fr));
+  align-items: end;
+  gap: 0.35rem;
+  min-height: 10rem;
+}
+
+.yds-ai-dashboard__bar-col {
+  display: grid;
+  gap: 0.2rem;
+  align-items: end;
+}
+
+.yds-ai-dashboard__bar-value,
+.yds-ai-dashboard__bar-label {
+  font-size: 0.52rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.yds-ai-dashboard__bar-wrap {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  height: 7rem;
+}
+
+.yds-ai-dashboard__bar {
+  width: 100%;
+  min-height: 0.4rem;
+  border-radius: 0.3rem 0.3rem 0 0;
+}
+
+.yds-ai-dashboard__bar--up { background: linear-gradient(180deg, #4ade80, #166534); }
+.yds-ai-dashboard__bar--down { background: linear-gradient(180deg, #f87171, #7f1d1d); }
+
+.yds-ai-dashboard__movers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.yds-ai-dashboard__mover {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-ai-dashboard__mover span:first-child {
+  font-size: 0.56rem;
+  color: #94a3b8;
+}
+
+.yds-ai-dashboard__mover strong {
+  font-size: 0.74rem;
+  color: #f8fafc;
+}
+
+@media (max-width: 900px) {
+  .yds-ai-dashboard__grid,
+  .yds-ai-dashboard__grid--compact,
+  .yds-ai-dashboard__chart-grid,
+  .yds-ai-dashboard__movers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .yds-ai-dashboard__grid,
+  .yds-ai-dashboard__grid--compact,
+  .yds-ai-dashboard__chart-grid,
+  .yds-ai-dashboard__movers {
+    grid-template-columns: 1fr;
+  }
+}

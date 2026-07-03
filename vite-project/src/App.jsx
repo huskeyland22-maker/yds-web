@@ -44,6 +44,7 @@ import StockPickRankingPage from "./pages/StockPickRankingPage.jsx"
 import StockPickComparePage from "./pages/StockPickComparePage.jsx"
 import StockPickValidationPicksPage from "./pages/StockPickValidationPicksPage.jsx"
 import AiTrackRecordPage from "./pages/AiTrackRecordPage.jsx"
+import AiPerformanceDashboardPage from "./pages/AiPerformanceDashboardPage.jsx"
 import StockPickValidationDetailPage from "./pages/StockPickValidationDetailPage.jsx"
 import StockPickBacktestPage from "./pages/StockPickBacktestPage.jsx"
 import UserWatchlistPage from "./pages/UserWatchlistPage.jsx"
@@ -1378,6 +1379,14 @@ function App() {
               }
             />
             <Route path="/performance-dashboard" element={<Navigate to="/performance-center" replace />} />
+            <Route
+              path="/performance-validation/dashboard"
+              element={
+                <SectionErrorBoundary label="AI 성과 대시보드">
+                  <AiPerformanceDashboardPage />
+                </SectionErrorBoundary>
+              }
+            />
             <Route
               path="/performance-validation/track-record"
               element={

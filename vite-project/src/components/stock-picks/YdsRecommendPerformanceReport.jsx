@@ -71,6 +71,9 @@ export default function YdsRecommendPerformanceReport({
             <h2 className="yds-rec-perf-report__title">{report.title}</h2>
             <p className="yds-rec-perf-report__sub">{report.scopeLabel ?? "전체 추천 이력"} · 추천일 내림차순</p>
           </div>
+          <Link to="/performance-validation/dashboard" className="yds-rec-perf-report__link">
+            성과 대시보드 →
+          </Link>
           <Link to="/performance-validation/track-record" className="yds-rec-perf-report__link">
             Track Record →
           </Link>
