@@ -306,6 +306,9 @@ export default function YdsStockPickV1Hub() {
         <Link to="/stock-picks/compare" className="yds-spick-hub-quick__link">
           종목 비교
         </Link>
+        <Link to="/performance-validation/track-record" className="yds-spick-hub-quick__link">
+          Track Record
+        </Link>
         <Link to="/performance-validation/picks" className="yds-spick-hub-quick__link">
           상세 검증
         </Link>
@@ -420,7 +423,7 @@ export default function YdsStockPickV1Hub() {
         stocks={liveStocks}
       />
 
-      <YdsStockPickHubHistory report={hubHistory} />
+      <YdsStockPickHubHistory report={hubHistory} stocks={liveStocks} />
     </div>
   )
 }

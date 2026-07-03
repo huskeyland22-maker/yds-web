@@ -135,6 +135,7 @@ function buildHubHistoryBaseRow(pick, livePrice, liveName) {
     pickId: pick.id,
     ticker: pick.ticker,
     name: liveName ?? pick.name ?? pick.ticker,
+    country,
     recommendedAt: pick.recommendedAt,
     recommendedAtIso: pick.recommendedAtIso ?? formatHubHistoryDateDot(pick.recommendedAt),
     recommendedAtLabel: formatHubHistoryDateDot(pick.recommendedAt),
@@ -204,14 +205,24 @@ export function buildHubHistoryViewRows(stocks = []) {
       return [`${country}:${String(s.ticker).toUpperCase()}`, s.name]
     }),
   )
+  const sectorByKey = new Map(
+    stocks.map((s) => {
+      const country = s.country === "KR" ? "KR" : "US"
+      return [
+        `${country}:${String(s.ticker).toUpperCase()}`,
+        s.sectorLabel ?? s.sector ?? "미분류",
+      ]
+    }),
+  )
 
   const baseRows = picks.map((pick) => {
     const key = `${pick.country}:${String(pick.ticker).toUpperCase()}`
-    return buildHubHistoryBaseRow(
+    const row = buildHubHistoryBaseRow(
       pick,
       priceByKey.get(key) ?? pick.currentPrice ?? null,
       nameByKey.get(key),
     )
+    return { ...row, sectorLabel: sectorByKey.get(key) ?? "미분류" }
   })
 
   const rows = baseRows.map((row) => ({

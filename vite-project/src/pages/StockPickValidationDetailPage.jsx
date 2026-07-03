@@ -106,16 +106,18 @@ export default function StockPickValidationDetailPage() {
       </header>
 
       <dl className="yds-spick-validation-kpi">
+        <div><dt>추천일시</dt><dd className="font-mono tabular-nums">{report.recommendedAtIso ?? report.recommendedAt ?? "—"}</dd></div>
         <div><dt>추천일</dt><dd className="font-mono tabular-nums">{report.recommendedAt ?? "—"}</dd></div>
         <div><dt>추천가</dt><dd className="font-mono tabular-nums">{report.recommendedPrice ?? "—"}</dd></div>
         <div><dt>현재가</dt><dd className="font-mono tabular-nums">{report.currentPrice ?? "—"}</dd></div>
         <div><dt>최고가</dt><dd className="font-mono tabular-nums">{report.highPrice ?? "—"}</dd></div>
         <div><dt>최저가</dt><dd className="font-mono tabular-nums">{report.lowPrice ?? "—"}</dd></div>
         <div><dt>현재 수익률</dt><dd className="font-mono tabular-nums">{report.currentReturnLabel ?? "—"}</dd></div>
-        <div><dt>최고 수익(MFE)</dt><dd className="font-mono tabular-nums">{report.mfeLabel ?? "—"}</dd></div>
-        <div><dt>최대 손실(MAE)</dt><dd className="font-mono tabular-nums">{report.maeLabel ?? "—"}</dd></div>
+        <div><dt>최고 수익</dt><dd className="font-mono tabular-nums">{report.maxReturnLabel ?? report.mfeLabel ?? "—"}</dd></div>
+        <div><dt>최대 손실</dt><dd className="font-mono tabular-nums">{report.minReturnLabel ?? report.maeLabel ?? "—"}</dd></div>
         <div><dt>보유기간</dt><dd>{report.daysHeld ?? "—"}</dd></div>
         <div><dt>추천 AI점수</dt><dd className="font-mono tabular-nums">{report.recAiScore ?? "—"}</dd></div>
+        <div><dt>AI 등급</dt><dd>{report.recommendGrade ?? "—"}</dd></div>
         <div><dt>현재 AI점수</dt><dd className="font-mono tabular-nums">{report.currentAiScore ?? "—"}</dd></div>
         <div>
           <dt>점수 변화</dt>
@@ -132,6 +134,23 @@ export default function StockPickValidationDetailPage() {
           </div>
         ) : null}
       </dl>
+
+      <ValidationSection title="추천 당시 시장 정보">
+        <dl className="yds-spick-validation-kpi">
+          <div><dt>시장 상태</dt><dd>{report.marketStateLabel ?? "—"}</dd></div>
+          <div>
+            <dt>패닉 강도</dt>
+            <dd className="font-mono tabular-nums">
+              {report.panicIntensityLabel != null ? Math.round(report.panicIntensityLabel) : "—"}
+            </dd>
+          </div>
+          <div><dt>시장 사이클</dt><dd>{report.cycleLabel ?? "—"}</dd></div>
+          <div><dt>VIX</dt><dd className="font-mono tabular-nums">{report.vixLabel ?? "—"}</dd></div>
+          <div><dt>CNN Fear &amp; Greed</dt><dd className="font-mono tabular-nums">{report.cnnLabel ?? "—"}</dd></div>
+          <div><dt>BofA Bull &amp; Bear</dt><dd className="font-mono tabular-nums">{report.bofaLabel ?? "—"}</dd></div>
+          <div><dt>원장 상태</dt><dd>{report.ledgerState ?? "—"}</dd></div>
+        </dl>
+      </ValidationSection>
 
       <ValidationSection title="가격 변화" empty={!priceSeries.length}>
         <MiniLineChart data={priceSeries} dataKey="returnPct" suffix="%" color="#4ade80" />

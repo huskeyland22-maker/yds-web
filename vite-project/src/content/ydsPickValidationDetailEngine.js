@@ -216,6 +216,14 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
     migratePickLifecycle(pick).lifecycleId ?? "active",
   )
 
+  const ledger = pick.marketLedger
+  const recommendedAtIso =
+    pick.recommendedAtIso ??
+    pick.lockedRecommendedAtIso ??
+    String(pick.recommendedAt).slice(0, 10)
+  const maxReturnPct = pick.maxReturnPct ?? mfe
+  const minReturnPct = pick.minReturnPct ?? mae
+
   return {
     visible: true,
     pickId: pick.id,
@@ -223,6 +231,7 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
     name: pick.name ?? pick.ticker,
     country,
     recommendedAt: String(pick.recommendedAt).slice(0, 10),
+    recommendedAtIso,
     recommendedPrice: recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
     currentPrice: formatTransparencyPrice(currentPrice, country),
     highPrice: highPrice != null ? formatTransparencyPrice(highPrice, country) : "—",
@@ -230,6 +239,24 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
     currentReturnLabel: formatPerfPct(currentRet),
     mfeLabel: formatPerfPct(mfe),
     maeLabel: formatPerfPct(mae),
+    maxReturnLabel: formatPerfPct(maxReturnPct),
+    minReturnLabel: formatPerfPct(minReturnPct),
+    ledgerState: pick.ledgerState ?? (pick.lifecycleId === "active" ? "active" : "ended"),
+    recommendGrade: pick.recommendGrade ?? "—",
+    recommendReason: pick.recommendReason ?? recommendReasons[0] ?? "—",
+    marketStateLabel:
+      ledger?.marketStateLabel ??
+      snap?.unifiedMarketStateLabel ??
+      snap?.marketStateLabel ??
+      pick.strategyLabel ??
+      "—",
+    panicIntensityLabel:
+      ledger?.panicIntensity ?? snap?.panicIntensity ?? null,
+    panicLabel: ledger?.panicLabel ?? snap?.panicLabel ?? "—",
+    cycleLabel: ledger?.cycleLabel ?? "—",
+    vixLabel: ledger?.vix ?? null,
+    cnnLabel: ledger?.cnn ?? null,
+    bofaLabel: ledger?.bofa ?? null,
     daysHeld: `${daysHeld}일`,
     recAiScore,
     currentAiScore: currentAiScore != null ? Math.round(currentAiScore) : "—",

@@ -8,6 +8,8 @@ import {
   filterHubHistoryViewRows,
   HUB_HISTORY_VIEW_FILTERS,
 } from "../../content/ydsHubHistoryViewEngine.js"
+import { buildTrackRecordDetail } from "../../content/ydsAiTrackRecordEngine.js"
+import YdsAiTrackRecordDetailModal from "./YdsAiTrackRecordDetailModal.jsx"
 import { logRecommendPerfPipelineTrace } from "../../content/ydsRecommendPerfAudit.js"
 import { todayDateKey } from "../../content/ydsPortfolioTradesStorage.js"
 
@@ -15,11 +17,13 @@ import { todayDateKey } from "../../content/ydsPortfolioTradesStorage.js"
  * @param {{
  *   report: import("../../content/ydsStockPickTrustEngine.js").ReturnType<typeof import("../../content/ydsStockPickTrustEngine.js").buildStockPickHubHistoryReport>
  *   className?: string
+ *   stocks?: import("../../content/ydsStockPickModel.js").StockPickView[]
  * }} props
  */
-export default function YdsStockPickHubHistory({ report, className = "" }) {
+export default function YdsStockPickHubHistory({ report, className = "", stocks = [] }) {
   const [statusFilter, setStatusFilter] = useState("all")
   const [periodFilter, setPeriodFilter] = useState(/** @type {import("../../content/ydsStockPickHubHistoryGroupEngine.js").HubHistoryPeriodId} */ ("all"))
+  const [selectedPickId, setSelectedPickId] = useState(/** @type {string | null} */ (null))
 
   const filteredRows = useMemo(() => {
     const byStatus = filterHubHistoryViewRows(report?.rows ?? [], statusFilter)
@@ -38,6 +42,11 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
     })
   }, [report?.rows, statusFilter, periodFilter, filteredRows.length])
 
+  const detail = useMemo(
+    () => (selectedPickId ? buildTrackRecordDetail(selectedPickId, stocks) : { visible: false }),
+    [selectedPickId, stocks],
+  )
+
   if (!report?.visible || !report.rows?.length) return null
 
   return (
@@ -52,6 +61,9 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
         <span className="yds-spick-hub-history__count font-mono tabular-nums">
           {filteredRows.length}건 · 최신순
         </span>
+        <Link to="/performance-validation/track-record" className="yds-spick-hub-history__link">
+          Track Record →
+        </Link>
       </div>
 
       <div className="yds-spick-hub-history__filters" role="tablist" aria-label="상태 필터">
@@ -116,7 +128,18 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
             </thead>
             <tbody>
               {filteredRows.map((row) => (
-                <tr key={row.pickId}>
+                <tr
+                  key={row.pickId}
+                  className="yds-spick-hub-history__row--clickable"
+                  tabIndex={0}
+                  onClick={() => setSelectedPickId(row.pickId)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      setSelectedPickId(row.pickId)
+                    }
+                  }}
+                >
                   <td>
                     <Link
                       to={`/stock-picks/${encodeURIComponent(row.ticker)}`}
@@ -162,6 +185,7 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
                       <Link
                         to={`/performance-validation/pick/${encodeURIComponent(row.pickId)}`}
                         className="yds-spick-hub-history__link"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         상세
                       </Link>
@@ -173,6 +197,10 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
           </table>
         </div>
       )}
+
+      {detail.visible ? (
+        <YdsAiTrackRecordDetailModal detail={detail} onClose={() => setSelectedPickId(null)} />
+      ) : null}
     </section>
   )
 }
