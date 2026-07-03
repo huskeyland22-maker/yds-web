@@ -5513,6 +5513,58 @@
   border: 1px solid rgba(51, 65, 85, 0.55);
 }
 
+.yds-spick-hero-card__perf-grid {
+  margin: 0.08rem 0 0.04rem;
+}
+
+.yds-spick-hero-card__hero-return-label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+}
+
+.yds-spick-recommend-profit-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.yds-spick-recommend-profit-info__btn {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.58rem;
+  line-height: 1;
+  cursor: help;
+}
+
+.yds-spick-recommend-profit-info__btn:hover,
+.yds-spick-recommend-profit-info__btn:focus-visible {
+  color: #94a3b8;
+}
+
+.yds-spick-recommend-profit-info__panel {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: calc(100% + 0.28rem);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 11.5rem;
+  padding: 0.32rem 0.42rem;
+  border-radius: 0.35rem;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(51, 65, 85, 0.75);
+  color: #cbd5e1;
+  font-size: 0.52rem;
+  line-height: 1.45;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.45);
+  pointer-events: none;
+}
+
 .yds-spick-hero-card__hero-return-label {
   font-size: 0.5rem;
   font-weight: 800;

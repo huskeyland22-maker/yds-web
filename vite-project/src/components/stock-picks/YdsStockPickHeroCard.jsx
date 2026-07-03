@@ -3,7 +3,21 @@ import YdsStockPickFavoriteButton from "./YdsStockPickFavoriteButton.jsx"
 import YdsStockPickRecommendRationale from "./YdsStockPickRecommendRationale.jsx"
 import YdsStockPickRecommendStatusBadge from "./YdsStockPickRecommendStatusBadge.jsx"
 import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
+import YdsRecommendProfitInfoTip from "./YdsRecommendProfitInfoTip.jsx"
 import { buildStockPickListRow } from "../../content/ydsStockPickListView.js"
+
+/** @param {string | null | undefined} dateKey */
+function formatRecommendDateDot(dateKey) {
+  const d = String(dateKey ?? "").slice(0, 10)
+  if (d.length < 10) return "—"
+  return `${d.slice(0, 4)}.${d.slice(5, 7)}.${d.slice(8, 10)}`
+}
+
+/** @param {number | null | undefined} returnPct */
+function resolveReturnTone(returnPct) {
+  if (returnPct == null || returnPct === 0) return "muted"
+  return returnPct > 0 ? "up" : "down"
+}
 
 /**
  * GO #87 — 현재수익 우선 강조 레이아웃
@@ -28,8 +42,9 @@ export default function YdsStockPickHeroCard({
   const row = buildStockPickListRow(stock)
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
   const confLabel = row.confidenceTier?.label ?? "—"
-  const retTone =
-    row.returnPct == null ? "muted" : row.returnPct >= 0 ? "up" : "down"
+  const retTone = resolveReturnTone(row.returnPct)
+  const elapsedLabel =
+    row.daysSinceRecommend != null ? `D+${row.daysSinceRecommend}` : "—"
 
   const rankClass =
     rankIndex === 0
@@ -69,8 +84,30 @@ export default function YdsStockPickHeroCard({
 
       <YdsStockPickRecommendStatusBadge stock={stock} compact className="yds-spick-hero-card__status" />
 
+      <dl className="yds-spick-hero-card__grid2 yds-spick-hero-card__perf-grid">
+        <div>
+          <dt>추천일</dt>
+          <dd className="font-mono tabular-nums">{formatRecommendDateDot(row.recommendedAt)}</dd>
+        </div>
+        <div>
+          <dt>현재가</dt>
+          <dd className="font-mono tabular-nums">{row.currentPriceLabel}</dd>
+        </div>
+        <div>
+          <dt>추천가</dt>
+          <dd className="font-mono tabular-nums">{row.recommendedPriceLabel}</dd>
+        </div>
+        <div>
+          <dt>경과</dt>
+          <dd className="font-mono tabular-nums">{elapsedLabel}</dd>
+        </div>
+      </dl>
+
       <div className="yds-spick-hero-card__hero-return">
-        <span className="yds-spick-hero-card__hero-return-label">추천 후 수익</span>
+        <div className="yds-spick-hero-card__hero-return-label-row">
+          <span className="yds-spick-hero-card__hero-return-label">추천 후 수익</span>
+          <YdsRecommendProfitInfoTip />
+        </div>
         <span
           className={[
             "yds-spick-hero-card__hero-return-value",
@@ -83,14 +120,6 @@ export default function YdsStockPickHeroCard({
       </div>
 
       <dl className="yds-spick-hero-card__priority-metrics">
-        <div className="yds-spick-hero-card__metric yds-spick-hero-card__metric--price">
-          <dt>현재가</dt>
-          <dd className="font-mono tabular-nums">{row.currentPriceLabel}</dd>
-        </div>
-        <div className="yds-spick-hero-card__metric yds-spick-hero-card__metric--price">
-          <dt>추천가</dt>
-          <dd className="font-mono tabular-nums">{row.recommendedPriceLabel}</dd>
-        </div>
         <div className="yds-spick-hero-card__metric">
           <dt>AI점수</dt>
           <dd className="font-mono tabular-nums">{row.aiScore}</dd>
