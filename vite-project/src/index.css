@@ -27133,6 +27133,75 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   min-width: 0;
 }
 
+/* Desktop — CSS columns masonry (카드 높이에 따라 빈 공간 없이 채움) */
+@media (min-width: 1024px) {
+  .yds-market-desk__stream {
+    display: block;
+    column-count: 2;
+    column-gap: 0.55rem;
+    column-fill: balance;
+    gap: 0;
+  }
+
+  .yds-market-hero--desk,
+  .yds-market-desk__slot--score-hero,
+  .yds-market-score-hero__stack,
+  .yds-market-desk__section-stack,
+  .yds-market-desk__liquidity-lanes {
+    display: contents;
+  }
+
+  .yds-market-desk__stream :is(
+    .yds-market-desk__slot--action-guide,
+    .yds-market-desk__slot--market-state,
+    .yds-market-desk__slot--panic-intensity,
+    .yds-market-desk__slot--recommend,
+    .yds-market-desk__slot--top20,
+    .yds-market-desk__slot--trend,
+    .yds-market-desk__slot--trend-market,
+    .yds-market-desk__slot--trend-panic,
+    .yds-market-desk__slot--liquidity-summary,
+    .yds-market-desk__slot--liquidity-market,
+    .yds-market-desk__slot--liquidity-policy,
+    .yds-market-desk__slot--week-events,
+    .yds-market-desk__slot--daily-report,
+    .yds-market-desk__slot--indices
+  ) {
+    display: inline-block;
+    width: 100%;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: var(--yds-desk-space-card);
+    vertical-align: top;
+  }
+
+  .yds-market-desk__slot--action-guide-top {
+    column-span: all;
+  }
+
+  .yds-market-desk__slot--market-state,
+  .yds-market-desk__slot--panic-intensity {
+    align-items: flex-start;
+  }
+
+  .yds-market-score-hero--v7 .yds-market-score-hero__stack,
+  .yds-market-score-hero__stack {
+    display: contents;
+    grid-template-columns: unset;
+  }
+
+  .yds-market-panic-secondary--v7,
+  .yds-market-state-primary--v7 {
+    min-height: auto;
+    height: auto;
+  }
+
+  .yds-market-desk .yds-desk-card {
+    min-height: auto;
+  }
+}
+
 .yds-market-desk__section-stack {
   display: flex;
   flex-direction: column;
@@ -32755,25 +32824,25 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .yds-market-score-hero--v7 .yds-market-score-hero__stack {
     display: grid;
     grid-template-columns: minmax(0, 18fr) minmax(0, 7fr);
-    align-items: stretch;
+    align-items: start;
     gap: 0.55rem;
   }
 
   .yds-market-score-hero__stack {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    align-items: stretch;
+    align-items: start;
   }
 
   .yds-market-desk__slot--market-state,
   .yds-market-desk__slot--panic-intensity {
     display: flex;
     min-height: 0;
-    align-items: stretch;
+    align-items: flex-start;
   }
 
   .yds-market-state-primary {
