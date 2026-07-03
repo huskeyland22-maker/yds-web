@@ -244,13 +244,19 @@ export function filterHubHistoryRows(rows, filterId) {
 
 /**
  * @param {ValidationPickRecord[]} picks
- * @param {number} [windowDays]
+ * @param {number | null | undefined} [windowDays]
  */
 export function buildPickTrustPerfStats(picks, windowDays = 30) {
   const today = todayDateKey()
-  const cutoff = new Date(today)
-  cutoff.setDate(cutoff.getDate() - windowDays)
-  const cutoffKey = cutoff.toISOString().slice(0, 10)
+  const useAllHistory = windowDays == null || windowDays <= 0 || !Number.isFinite(windowDays)
+
+  /** @type {string} */
+  let cutoffKey = "1970-01-01"
+  if (!useAllHistory) {
+    const cutoff = new Date(today)
+    cutoff.setDate(cutoff.getDate() - windowDays)
+    cutoffKey = cutoff.toISOString().slice(0, 10)
+  }
 
   const windowPicks = (picks ?? []).filter(
     (p) => p.recommendedAt >= cutoffKey && p.recommendedAt <= today,
@@ -290,7 +296,9 @@ export function buildPickTrustPerfStats(picks, windowDays = 30) {
     const prev = latestPerTicker.get(key)
     if (!prev || p.recommendedAt > prev.recommendedAt) latestPerTicker.set(key, p)
   }
-  const dedupedPicks = [...latestPerTicker.values()]
+  const dedupedPicks = useAllHistory
+    ? windowPicks
+    : [...latestPerTicker.values()]
 
   let successCount = 0
   let failureCount = 0

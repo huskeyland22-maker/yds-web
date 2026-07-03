@@ -52,5 +52,9 @@ export function buildRecommendPerfBriefing(stats, windowDays = 30) {
     tail = " 추가 데이터가 쌓이면 성과 해석이 정교해집니다."
   }
 
+  if (windowDays == null || windowDays <= 0 || !Number.isFinite(windowDays)) {
+    return `전체 AI 추천 이력은 ${strategy}했으며, 평균 수익률은 ${avgLabel}였습니다${alphaPart}${tail}`
+  }
+
   return `최근 ${windowDays}일 AI 추천은 ${strategy}했으며, 평균 수익률은 ${avgLabel}였습니다${alphaPart}${tail}`
 }

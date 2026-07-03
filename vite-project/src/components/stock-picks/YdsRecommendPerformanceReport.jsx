@@ -1,15 +1,20 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { loadValidationPicks } from "../../content/ydsValidationStorage.js"
-import { buildRecommendPerfReport } from "../../content/ydsRecommendPerfReportEngine.js"
+import {
+  buildRecommendPerfReport,
+  RECOMMEND_PERF_ALL_HISTORY_WINDOW,
+} from "../../content/ydsRecommendPerfReportEngine.js"
 import { formatPerfPct } from "../../content/ydsPickPerformanceEngine.js"
+import { logRecommendPerfPipelineTrace } from "../../content/ydsRecommendPerfAudit.js"
+import { todayDateKey } from "../../content/ydsPortfolioTradesStorage.js"
 
 /**
  * @param {{ className?: string; windowDays?: number; refreshKey?: number; stocks?: import("../../content/ydsStockPickModel.js").StockPickView[] }} props
  */
 export default function YdsRecommendPerformanceReport({
   className = "",
-  windowDays = 30,
+  windowDays = RECOMMEND_PERF_ALL_HISTORY_WINDOW,
   refreshKey = 0,
   stocks = [],
 }) {
@@ -17,7 +22,18 @@ export default function YdsRecommendPerformanceReport({
   const [expanded, setExpanded] = useState(false)
   const report = useMemo(() => {
     const picks = loadValidationPicks()
-    return buildRecommendPerfReport(picks, windowDays, stocks)
+    const built = buildRecommendPerfReport(picks, windowDays, stocks)
+    const today = todayDateKey()
+    logRecommendPerfPipelineTrace({
+      stage: "YdsRecommendPerformanceReport",
+      totalFromStorage: picks.length,
+      todayCount: picks.filter((p) => String(p.recommendedAt).slice(0, 10) === today).length,
+      windowDays,
+      afterWindowFilter: built.pickCount,
+      recentPicksCount: built.recentPicks.length,
+      uiDisplayCount: built.recentPicks.length,
+    })
+    return built
   }, [windowDays, refreshKey, stocks])
 
   const kpi = report.horizons.find((h) => h.key === horizonKey) ?? report.kpi
@@ -53,7 +69,7 @@ export default function YdsRecommendPerformanceReport({
         <div className="yds-rec-perf-report__summary-head">
           <div>
             <h2 className="yds-rec-perf-report__title">{report.title}</h2>
-            <p className="yds-rec-perf-report__sub">저장된 추천 이력 기준 · 최신순</p>
+            <p className="yds-rec-perf-report__sub">{report.scopeLabel ?? "전체 추천 이력"} · 추천일 내림차순</p>
           </div>
           <Link to="/performance-validation/picks" className="yds-rec-perf-report__link">
             상세 검증 →
@@ -117,12 +133,12 @@ export default function YdsRecommendPerformanceReport({
 
         <dl className="yds-rec-perf-report__summary-kpi">
           <div>
-            <dt>최근 {windowDays}일 추천</dt>
-            <dd className="font-mono tabular-nums">{initialCount}건</dd>
+            <dt>전체 추천</dt>
+            <dd className="font-mono tabular-nums">{report.totalPickCount ?? summary?.totalCount ?? 0}건</dd>
           </div>
           <div>
-            <dt>재추천</dt>
-            <dd className="font-mono tabular-nums">{reCount}건</dd>
+            <dt>표시 대상</dt>
+            <dd className="font-mono tabular-nums">{report.pickCount}건</dd>
           </div>
           <div>
             <dt>고유 종목</dt>
@@ -131,16 +147,16 @@ export default function YdsRecommendPerformanceReport({
         </dl>
         <dl className="yds-rec-perf-report__summary-kpi yds-rec-perf-report__summary-kpi--secondary">
           <div>
-            <dt>기간 평균수익</dt>
-            <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgReturn)}</dd>
+            <dt>평균 수익률</dt>
+            <dd className="font-mono tabular-nums">{summary?.avgReturnLabel ?? formatPerfPct(stats.avgReturn)}</dd>
           </div>
           <div>
             <dt>S&P 초과</dt>
             <dd className="font-mono tabular-nums">{formatPerfPct(alpha)}</dd>
           </div>
           <div>
-            <dt>기간 승률</dt>
-            <dd className="font-mono tabular-nums">{winRate}</dd>
+            <dt>승률</dt>
+            <dd className="font-mono tabular-nums">{summary?.winRateLabel ?? winRate}</dd>
           </div>
         </dl>
 
@@ -150,9 +166,56 @@ export default function YdsRecommendPerformanceReport({
           aria-expanded={expanded}
           onClick={() => setExpanded((v) => !v)}
         >
-          {expanded ? "접기 ▲" : "상세 보기 ▼"}
+          {expanded ? "상세 KPI 접기 ▲" : "상세 KPI 보기 ▼"}
         </button>
       </div>
+
+      {report.recentPicks.length ? (
+        <div className="yds-rec-perf-report__table-wrap yds-spick-hub-table-scroll">
+          <p className="yds-rec-perf-report__table-title">
+            추천 종목 ({report.recentPicks.length}건 표시 · 전체 {report.totalPickCount ?? report.pickCount}건)
+          </p>
+          <table className="yds-rec-perf-report__table">
+            <thead>
+              <tr>
+                <th>종목</th>
+                <th>추천일</th>
+                <th>추천가</th>
+                <th>현재가</th>
+                <th>수익률</th>
+                <th>경과</th>
+                <th>AI 등급</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              {report.recentPicks.map((row) => (
+                <tr key={`${row.ticker}-${row.recommendedAt}-${row.elapsedLabel}`}>
+                  <td>{row.name}</td>
+                  <td className="font-mono tabular-nums">{row.recommendedAt}</td>
+                  <td className="font-mono tabular-nums">{row.recommendedPrice}</td>
+                  <td className="font-mono tabular-nums">{row.currentPrice}</td>
+                  <td
+                    className={[
+                      "font-mono tabular-nums",
+                      row.returnPct == null || row.returnPct === 0
+                        ? ""
+                        : row.returnPct > 0
+                          ? "yds-rec-perf-report__up"
+                          : "yds-rec-perf-report__down",
+                    ].join(" ")}
+                  >
+                    {row.returnLabel}
+                  </td>
+                  <td className="font-mono tabular-nums">{row.elapsedLabel ?? row.daysHeldLabel}</td>
+                  <td>{row.aiGradeLabel ?? "—"}</td>
+                  <td>{row.statusLabel}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
 
       {expanded ? (
         <div className="yds-rec-perf-report__detail">
@@ -202,47 +265,6 @@ export default function YdsRecommendPerformanceReport({
               <dd className="font-mono tabular-nums">{stats.avgAiScore ?? "—"}</dd>
             </div>
           </dl>
-
-          {report.recentPicks.length ? (
-            <div className="yds-rec-perf-report__table-wrap yds-spick-hub-table-scroll">
-              <p className="yds-rec-perf-report__table-title">최근 추천 종목</p>
-              <table className="yds-rec-perf-report__table">
-                <thead>
-                  <tr>
-                    <th>종목</th>
-                    <th>추천일</th>
-                    <th>추천가</th>
-                    <th>현재가</th>
-                    <th>수익률</th>
-                    <th>유지일</th>
-                    <th>상태</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.recentPicks.map((row) => (
-                    <tr key={`${row.ticker}-${row.recommendedAt}`}>
-                      <td>{row.name}</td>
-                      <td className="font-mono tabular-nums">{row.recommendedAt}</td>
-                      <td className="font-mono tabular-nums">{row.recommendedPrice}</td>
-                      <td className="font-mono tabular-nums">{row.currentPrice}</td>
-                      <td
-                        className={[
-                          "font-mono tabular-nums",
-                          row.returnPct != null && row.returnPct >= 0
-                            ? "yds-rec-perf-report__up"
-                            : "yds-rec-perf-report__down",
-                        ].join(" ")}
-                      >
-                        {row.returnLabel}
-                      </td>
-                      <td>{row.daysHeldLabel}</td>
-                      <td>{row.statusLabel}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
         </div>
       ) : null}
     </section>

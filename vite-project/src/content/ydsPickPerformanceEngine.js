@@ -35,12 +35,16 @@ export function formatPerfPrice(v) {
 
 /**
  * @param {ValidationPickRecord[]} picks
- * @param {number} [windowDays]
+ * @param {number | null | undefined} [windowDays]
  */
 export function filterPicksInWindow(picks, windowDays = 30) {
   const today = todayDateKey()
+  const list = picks ?? []
+  if (windowDays == null || windowDays <= 0 || !Number.isFinite(windowDays)) {
+    return list.filter((p) => String(p.recommendedAt ?? "").slice(0, 10) <= today)
+  }
   const cutoff = subtractCalendarDays(today, windowDays)
-  return (picks ?? []).filter((p) => p.recommendedAt >= cutoff && p.recommendedAt <= today)
+  return list.filter((p) => p.recommendedAt >= cutoff && p.recommendedAt <= today)
 }
 
 /**

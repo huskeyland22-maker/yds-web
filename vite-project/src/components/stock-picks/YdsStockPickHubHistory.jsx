@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import {
   filterHubHistoryByPeriod,
@@ -8,6 +8,8 @@ import {
   filterHubHistoryViewRows,
   HUB_HISTORY_VIEW_FILTERS,
 } from "../../content/ydsHubHistoryViewEngine.js"
+import { logRecommendPerfPipelineTrace } from "../../content/ydsRecommendPerfAudit.js"
+import { todayDateKey } from "../../content/ydsPortfolioTradesStorage.js"
 
 /**
  * @param {{
@@ -23,6 +25,18 @@ export default function YdsStockPickHubHistory({ report, className = "" }) {
     const byStatus = filterHubHistoryViewRows(report?.rows ?? [], statusFilter)
     return filterHubHistoryByPeriod(byStatus, periodFilter)
   }, [report?.rows, statusFilter, periodFilter])
+
+  useEffect(() => {
+    const today = todayDateKey()
+    const allRows = report?.rows ?? []
+    logRecommendPerfPipelineTrace({
+      stage: "YdsStockPickHubHistory",
+      totalFromStorage: allRows.length,
+      todayCount: allRows.filter((r) => String(r.recommendedAt).slice(0, 10) === today).length,
+      afterStatusFilter: filterHubHistoryViewRows(allRows, statusFilter).length,
+      uiDisplayCount: filteredRows.length,
+    })
+  }, [report?.rows, statusFilter, periodFilter, filteredRows.length])
 
   if (!report?.visible || !report.rows?.length) return null
 

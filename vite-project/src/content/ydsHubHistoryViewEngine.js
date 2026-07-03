@@ -10,6 +10,7 @@ import {
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { daysBetweenPickDates, resolvePickLifecycleView } from "./ydsPickLifecycleEngine.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
+import { logRecommendPerfPipelineTrace } from "./ydsRecommendPerfAudit.js"
 
 /** @typedef {'all' | 'active' | 'profit' | 'loss' | 'ended'} HubHistoryViewFilterId */
 
@@ -193,10 +194,21 @@ export function buildHubHistoryViewRows(stocks = []) {
     )
   })
 
-  return baseRows.map((row) => ({
+  const rows = baseRows.map((row) => ({
     ...row,
     badges: buildHubHistoryBadges(baseRows, row.pickId),
   }))
+
+  const today = todayDateKey()
+  logRecommendPerfPipelineTrace({
+    stage: "buildHubHistoryViewRows",
+    totalFromStorage: picks.length,
+    todayCount: picks.filter((p) => String(p.recommendedAt).slice(0, 10) === today).length,
+    historyRowCount: rows.length,
+    uiDisplayCount: rows.length,
+  })
+
+  return rows
 }
 
 /**
