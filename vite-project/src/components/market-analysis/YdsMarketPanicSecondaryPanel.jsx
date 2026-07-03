@@ -9,6 +9,7 @@ import YdsPanicIntensityLegend from "./YdsPanicIntensityLegend.jsx"
 import YdsPanicIntensityInfoTip from "./YdsPanicIntensityInfoTip.jsx"
 import YdsPanicScoreComposition from "./YdsPanicScoreComposition.jsx"
 import YdsPanicCompositeVerdict from "./YdsPanicCompositeVerdict.jsx"
+import YdsMarketHealthCard from "./YdsMarketHealthCard.jsx"
 
 /** @param {number} score */
 function resolvePanicAccentTier(score) {
@@ -24,6 +25,8 @@ function resolvePanicAccentTier(score) {
  * @param {{
  *   panicData?: object | null
  *   historyRows?: object[]
+ *   cycleFlow?: import("../../content/ydsMarketCycleFlow.js").MarketCycleFlowReport | null
+ *   dualLiquidity?: import("../../market-os/liquidityDualEngine.js").DualLiquidityReport | null
  *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number>; asOfDate?: string | null } | null
  *   className?: string
  *   embedded?: boolean
@@ -32,6 +35,8 @@ function resolvePanicAccentTier(score) {
 export default function YdsMarketPanicSecondaryPanel({
   panicData = null,
   historyRows = [],
+  cycleFlow = null,
+  dualLiquidity = null,
   etfContext = null,
   className = "",
   embedded = false,
@@ -93,6 +98,16 @@ export default function YdsMarketPanicSecondaryPanel({
           score={view.panicScore}
           compact
           className="yds-market-panic-secondary__legend"
+        />
+
+        <YdsMarketHealthCard
+          variant="embedded"
+          panicData={panicData}
+          historyRows={historyRows}
+          cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
+          className="yds-market-panic-secondary__health"
         />
 
         {compositeAction ? (

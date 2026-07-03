@@ -30186,6 +30186,48 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   list-style: none;
   justify-content: flex-start;
   width: 100%;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-panic-secondary__health {
+  width: 100%;
+}
+
+.yds-market-health--embedded {
+  margin: 0.2rem 0 0;
+  padding: 0.28rem 0 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  text-align: left;
+}
+
+.yds-market-health--embedded .yds-market-health__head {
+  margin-bottom: 0.28rem;
+}
+
+.yds-market-health--embedded .yds-market-health__title {
+  font-size: clamp(0.58rem, 1.7vw, 0.66rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  text-transform: none;
+}
+
+.yds-market-health--embedded .yds-market-health__list {
+  gap: 0.16rem;
+}
+
+.yds-market-health--embedded .yds-market-health__row {
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: 0.22rem;
+  font-size: clamp(0.6rem, 1.75vw, 0.68rem);
+}
+
+.yds-market-health--embedded .yds-market-health__label {
+  font-weight: 600;
+  color: #cbd5e1;
 }
 
 .yds-market-panic-secondary__evidence-chip {
