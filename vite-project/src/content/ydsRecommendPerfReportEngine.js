@@ -20,6 +20,7 @@ import {
 } from "./ydsPickLifecycleEngine.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { buildRecommendPerfBriefing } from "./ydsRecommendPerfBriefingEngine.js"
+import { buildRecommendPerfSummaryCards } from "./ydsHubHistoryViewEngine.js"
 
 /**
  * @param {import("./ydsValidationStorage.js").ValidationPickRecord[]} picks
@@ -64,8 +65,9 @@ function estimateAlpha(picks, horizonKey) {
 /**
  * @param {import("./ydsValidationStorage.js").ValidationPickRecord[]} allPicks
  * @param {number} [windowDays]
+ * @param {import("./ydsStockPickModel.js").StockPickView[]} [stocks]
  */
-export function buildRecommendPerfReport(allPicks, windowDays = 30) {
+export function buildRecommendPerfReport(allPicks, windowDays = 30, stocks = []) {
   const base = buildPickPerformanceReport(allPicks, windowDays)
   const picks = filterPicksInWindow(allPicks, windowDays)
   const trustStats = buildPickTrustPerfStats(allPicks, windowDays)
@@ -136,6 +138,7 @@ export function buildRecommendPerfReport(allPicks, windowDays = 30) {
     kpi: activeHorizon,
     trustStats: trustWithAlpha,
     briefing,
+    summaryCards: buildRecommendPerfSummaryCards(allPicks, stocks),
     recentPicks,
     pickCount: picks.length,
     visible: picks.length > 0 || (allPicks ?? []).length > 0,

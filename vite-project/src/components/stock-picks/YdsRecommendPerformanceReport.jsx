@@ -5,18 +5,24 @@ import { buildRecommendPerfReport } from "../../content/ydsRecommendPerfReportEn
 import { formatPerfPct } from "../../content/ydsPickPerformanceEngine.js"
 
 /**
- * @param {{ className?: string; windowDays?: number }} props
+ * @param {{ className?: string; windowDays?: number; refreshKey?: number; stocks?: import("../../content/ydsStockPickModel.js").StockPickView[] }} props
  */
-export default function YdsRecommendPerformanceReport({ className = "", windowDays = 30 }) {
+export default function YdsRecommendPerformanceReport({
+  className = "",
+  windowDays = 30,
+  refreshKey = 0,
+  stocks = [],
+}) {
   const [horizonKey, setHorizonKey] = useState("d30")
   const [expanded, setExpanded] = useState(false)
   const report = useMemo(() => {
     const picks = loadValidationPicks()
-    return buildRecommendPerfReport(picks, windowDays)
-  }, [windowDays])
+    return buildRecommendPerfReport(picks, windowDays, stocks)
+  }, [windowDays, refreshKey, stocks])
 
   const kpi = report.horizons.find((h) => h.key === horizonKey) ?? report.kpi
   const stats = report.trustStats ?? kpi
+  const summary = report.summaryCards
   const winRate = stats.winRate != null ? `${stats.winRate}%` : "—"
   const initialCount = stats.initialRecommendCount ?? stats.count ?? 0
   const reCount = stats.reRecommendCount ?? 0
@@ -47,7 +53,7 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
         <div className="yds-rec-perf-report__summary-head">
           <div>
             <h2 className="yds-rec-perf-report__title">{report.title}</h2>
-            <p className="yds-rec-perf-report__sub">최근 {windowDays}일 · 최초 추천 기준</p>
+            <p className="yds-rec-perf-report__sub">저장된 추천 이력 기준 · 최신순</p>
           </div>
           <Link to="/performance-validation/picks" className="yds-rec-perf-report__link">
             상세 검증 →
@@ -58,9 +64,60 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
           <p className="yds-rec-perf-report__briefing">{report.briefing}</p>
         ) : null}
 
+        {summary ? (
+          <dl className="yds-rec-perf-report__hero-cards">
+            <div className="yds-rec-perf-report__hero-card">
+              <dt>총 추천</dt>
+              <dd className="font-mono tabular-nums">{summary.totalCount}건</dd>
+            </div>
+            <div className="yds-rec-perf-report__hero-card">
+              <dt>현재 진행</dt>
+              <dd className="font-mono tabular-nums">{summary.activeCount}건</dd>
+            </div>
+            <div className="yds-rec-perf-report__hero-card">
+              <dt>평균 수익률</dt>
+              <dd className="font-mono tabular-nums">{summary.avgReturnLabel}</dd>
+            </div>
+            <div className="yds-rec-perf-report__hero-card">
+              <dt>승률</dt>
+              <dd className="font-mono tabular-nums">{summary.winRateLabel}</dd>
+            </div>
+            <div className="yds-rec-perf-report__hero-card yds-rec-perf-report__hero-card--wide">
+              <dt>최고 수익 종목</dt>
+              <dd>
+                {summary.bestPick ? (
+                  <>
+                    <span className="yds-rec-perf-report__hero-name">{summary.bestPick.name}</span>
+                    <span className="font-mono tabular-nums yds-rec-perf-report__up">
+                      {summary.bestPick.returnLabel}
+                    </span>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
+            <div className="yds-rec-perf-report__hero-card yds-rec-perf-report__hero-card--wide">
+              <dt>최대 손실 종목</dt>
+              <dd>
+                {summary.worstPick ? (
+                  <>
+                    <span className="yds-rec-perf-report__hero-name">{summary.worstPick.name}</span>
+                    <span className="font-mono tabular-nums yds-rec-perf-report__down">
+                      {summary.worstPick.returnLabel}
+                    </span>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+
         <dl className="yds-rec-perf-report__summary-kpi">
           <div>
-            <dt>추천</dt>
+            <dt>최근 {windowDays}일 추천</dt>
             <dd className="font-mono tabular-nums">{initialCount}건</dd>
           </div>
           <div>
@@ -74,7 +131,7 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
         </dl>
         <dl className="yds-rec-perf-report__summary-kpi yds-rec-perf-report__summary-kpi--secondary">
           <div>
-            <dt>평균수익</dt>
+            <dt>기간 평균수익</dt>
             <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgReturn)}</dd>
           </div>
           <div>
@@ -82,26 +139,8 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
             <dd className="font-mono tabular-nums">{formatPerfPct(alpha)}</dd>
           </div>
           <div>
-            <dt>승률</dt>
+            <dt>기간 승률</dt>
             <dd className="font-mono tabular-nums">{winRate}</dd>
-          </div>
-        </dl>
-        <dl className="yds-rec-perf-report__summary-breakdown">
-          <div>
-            <dt>성공</dt>
-            <dd className="font-mono tabular-nums">{stats.successCount ?? 0}</dd>
-          </div>
-          <div>
-            <dt>실패</dt>
-            <dd className="font-mono tabular-nums">{stats.failureCount ?? 0}</dd>
-          </div>
-          <div>
-            <dt>종료</dt>
-            <dd className="font-mono tabular-nums">{stats.endedCount ?? 0}</dd>
-          </div>
-          <div>
-            <dt>보유중</dt>
-            <dd className="font-mono tabular-nums">{stats.holdingCount ?? 0}</dd>
           </div>
         </dl>
 
@@ -139,58 +178,6 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
 
           <dl className="yds-rec-perf-report__kpi">
             <div>
-              <dt>추천 (최초)</dt>
-              <dd className="font-mono tabular-nums">{initialCount}</dd>
-            </div>
-            <div>
-              <dt>재추천</dt>
-              <dd className="font-mono tabular-nums">{reCount}</dd>
-            </div>
-            <div>
-              <dt>고유 종목</dt>
-              <dd className="font-mono tabular-nums">{uniqueTickers}</dd>
-            </div>
-            <div>
-              <dt>S&P500 초과수익</dt>
-              <dd className="font-mono tabular-nums">{formatPerfPct(alpha)}</dd>
-            </div>
-            <div>
-              <dt>평균 익절</dt>
-              <dd className="font-mono tabular-nums yds-rec-perf-report__up">
-                {formatPerfPct(stats.avgTakeProfit)}
-              </dd>
-            </div>
-            <div>
-              <dt>평균 손절</dt>
-              <dd className="font-mono tabular-nums yds-rec-perf-report__down">
-                {formatPerfPct(stats.avgStopLoss)}
-              </dd>
-            </div>
-            <div>
-              <dt>최장 보유</dt>
-              <dd>{stats.maxHoldDays != null ? `${stats.maxHoldDays}일` : "—"}</dd>
-            </div>
-            <div>
-              <dt>최단 보유</dt>
-              <dd>{stats.minHoldDays != null ? `${stats.minHoldDays}일` : "—"}</dd>
-            </div>
-            <div>
-              <dt>평균 AI점수</dt>
-              <dd className="font-mono tabular-nums">{stats.avgAiScore ?? "—"}</dd>
-            </div>
-            <div>
-              <dt>평균 최고수익</dt>
-              <dd className="font-mono tabular-nums yds-rec-perf-report__up">
-                {formatPerfPct(stats.avgMaxReturn)}
-              </dd>
-            </div>
-            <div>
-              <dt>평균 MDD</dt>
-              <dd className="font-mono tabular-nums yds-rec-perf-report__down">
-                {formatPerfPct(stats.avgMdd)}
-              </dd>
-            </div>
-            <div>
               <dt>성공</dt>
               <dd className="font-mono tabular-nums">{stats.successCount ?? 0}</dd>
             </div>
@@ -207,32 +194,12 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
               <dd className="font-mono tabular-nums">{stats.holdingCount ?? 0}</dd>
             </div>
             <div>
-              <dt>승률</dt>
-              <dd className="font-mono tabular-nums">{winRate}</dd>
-            </div>
-            <div>
-              <dt>평균 수익률</dt>
-              <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgReturn)}</dd>
-            </div>
-            <div>
-              <dt>평균 손실률</dt>
-              <dd className="font-mono tabular-nums">{formatPerfPct(stats.avgLoss)}</dd>
-            </div>
-            <div>
-              <dt>최고수익</dt>
-              <dd className="font-mono tabular-nums yds-rec-perf-report__up">
-                {formatPerfPct(stats.maxGain)}
-              </dd>
-            </div>
-            <div>
-              <dt>최대손실</dt>
-              <dd className="font-mono tabular-nums yds-rec-perf-report__down">
-                {formatPerfPct(stats.maxLoss)}
-              </dd>
-            </div>
-            <div>
               <dt>평균 보유기간</dt>
               <dd>{stats.avgHoldDays != null ? `${stats.avgHoldDays}일` : "—"}</dd>
+            </div>
+            <div>
+              <dt>평균 AI점수</dt>
+              <dd className="font-mono tabular-nums">{stats.avgAiScore ?? "—"}</dd>
             </div>
           </dl>
 
@@ -247,11 +214,8 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
                     <th>추천가</th>
                     <th>현재가</th>
                     <th>수익률</th>
-                    <th>최고</th>
-                    <th>최대손실</th>
                     <th>유지일</th>
                     <th>상태</th>
-                    <th>결과</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -271,13 +235,8 @@ export default function YdsRecommendPerformanceReport({ className = "", windowDa
                       >
                         {row.returnLabel}
                       </td>
-                      <td className="font-mono tabular-nums yds-rec-perf-report__up">{row.maxReturnLabel}</td>
-                      <td className="font-mono tabular-nums yds-rec-perf-report__down">{row.maxLossLabel}</td>
                       <td>{row.daysHeldLabel}</td>
                       <td>{row.statusLabel}</td>
-                      <td>
-                        <span className="yds-rec-perf-report__result-badge">{row.resultBadge}</span>
-                      </td>
                     </tr>
                   ))}
                 </tbody>

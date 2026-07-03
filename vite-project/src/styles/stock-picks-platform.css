@@ -3658,6 +3658,127 @@
   color: #cbd5e1;
 }
 
+.yds-spick-hub-history__table--rich .yds-spick-hub-history__reason {
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.yds-spick-hub-history__name-link {
+  color: #e2e8f0;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.yds-spick-hub-history__name-link:hover {
+  color: #93c5fd;
+}
+
+.yds-spick-hub-history__badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.12rem;
+  max-width: 8.5rem;
+}
+
+.yds-spick-hub-history__badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  padding: 0.08rem 0.22rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  font-size: 0.5rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.yds-spick-hub-history__badge-chip--active {
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.28);
+  background: rgba(20, 83, 45, 0.2);
+}
+
+.yds-spick-hub-history__badge-chip--success {
+  color: #fde68a;
+  border-color: rgba(250, 204, 21, 0.28);
+  background: rgba(113, 63, 18, 0.22);
+}
+
+.yds-spick-hub-history__badge-chip--failure {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.2);
+}
+
+.yds-spick-hub-history__badge-chip--highlight {
+  color: #c4b5fd;
+  border-color: rgba(167, 139, 250, 0.28);
+  background: rgba(76, 29, 149, 0.22);
+}
+
+.yds-rec-perf-report__hero-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.28rem;
+  margin: 0.35rem 0 0.2rem;
+}
+
+.yds-rec-perf-report__hero-card {
+  padding: 0.35rem 0.42rem;
+  border-radius: 0.42rem;
+  border: 1px solid rgba(51, 65, 85, 0.65);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.yds-rec-perf-report__hero-card--wide {
+  grid-column: span 2;
+}
+
+.yds-rec-perf-report__hero-card dt {
+  margin: 0;
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.yds-rec-perf-report__hero-card dd {
+  margin: 0.12rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #e2e8f0;
+}
+
+.yds-rec-perf-report__hero-name {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+@media (max-width: 900px) {
+  .yds-rec-perf-report__hero-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .yds-rec-perf-report__hero-card--wide {
+    grid-column: span 2;
+  }
+
+  .yds-spick-hub-history__table--rich th:nth-child(7),
+  .yds-spick-hub-history__table--rich td:nth-child(7),
+  .yds-spick-hub-history__table--rich th:nth-child(8),
+  .yds-spick-hub-history__table--rich td:nth-child(8) {
+    display: none;
+  }
+}
+
 .yds-spick-card__exclude {
   margin: 0.25rem 0 0;
   font-size: 0.6rem;

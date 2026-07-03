@@ -4,14 +4,8 @@
 
 import { buildStockPickScoreDetail } from "./ydsStockPickScoreDetailEngine.js"
 import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
-import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { buildRecommendProfitView, formatRecommendProfitLabel } from "./ydsRecommendProfitResolver.js"
-import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
-import { loadValidationPicks } from "./ydsValidationStorage.js"
-import {
-  computePickReturnExtremes,
-  resolvePickLifecycleView,
-} from "./ydsPickLifecycleEngine.js"
+import { buildHubHistoryViewRows } from "./ydsHubHistoryViewEngine.js"
 import { getRegimeTopStocks } from "./ydsStockPickMarketRegime.js"
 import { RECOMMEND_ENGINE_LABELS } from "./ydsStockRecommendEngine.js"
 import { buildAiRationaleProgressBars } from "./ydsStockPickAiAnalysisEngine.js"
@@ -389,53 +383,7 @@ export function buildTodayRecommendBriefing(stocks, marketContext = null, limit 
  * @param {StockPickView[]} stocks
  */
 export function buildStockPickHubHistoryReport(stocks) {
-  const picks = loadValidationPicks()
-    .slice()
-    .sort((a, b) => b.recommendedAt.localeCompare(a.recommendedAt))
-
-  const priceByTicker = new Map(
-    stocks.map((s) => [String(s.ticker).toUpperCase(), Number(s.snapshot?.price ?? s.snapshot?.close)]),
-  )
-  const nameByTicker = new Map(stocks.map((s) => [String(s.ticker).toUpperCase(), s.name]))
-
-  const rows = picks.map((pick) => {
-    const sym = String(pick.ticker).toUpperCase()
-    const currentPrice = priceByTicker.get(sym) ?? pick.currentPrice ?? null
-    const recPrice = pick.recommendedPrice ?? null
-    const ret =
-      pick.finalReturnPct ??
-      calcRecommendReturnPct(recPrice, currentPrice) ??
-      pick.returnPct ??
-      null
-    const { maxRet, minRet } = computePickReturnExtremes({
-      ...pick,
-      returnPct: ret,
-      currentPrice,
-    })
-
-    const lifecycleId = pick.lifecycleId ?? "active"
-    const lifecycle = resolvePickLifecycleView(lifecycleId)
-
-    return {
-      pickId: pick.id,
-      recommendedAt: pick.recommendedAt,
-      ticker: pick.ticker,
-      name: nameByTicker.get(sym) ?? pick.name ?? pick.ticker,
-      recommendedPrice: recPrice,
-      currentPrice,
-      returnPct: ret,
-      returnLabel: formatPerfPct(ret),
-      maxReturnPct: maxRet,
-      maxReturnLabel: formatPerfPct(maxRet),
-      minReturnLabel: formatPerfPct(minRet),
-      lifecycleId,
-      statusLabel: `${lifecycle.emoji} ${lifecycle.label}`,
-      statusTone: lifecycle.tone,
-      resultBadge: `${lifecycle.badgeEmoji} ${lifecycle.badgeLabel}`,
-      closedAt: pick.closedAt ?? null,
-      closeReason: pick.closeReason ?? null,
-    }
-  })
+  const rows = buildHubHistoryViewRows(stocks)
 
   return {
     visible: rows.length > 0,

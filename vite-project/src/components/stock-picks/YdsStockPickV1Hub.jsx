@@ -227,7 +227,7 @@ export default function YdsStockPickV1Hub() {
 
   const hubHistory = useMemo(
     () => buildStockPickHubHistoryReport(liveStocks),
-    [liveStocks],
+    [liveStocks, validationRevision],
   )
 
   const activeStocks = stocksByCountry[countryId]
@@ -404,9 +404,13 @@ export default function YdsStockPickV1Hub() {
         loading={loading && !activeStocks.length}
       />
 
-      <YdsStockPickHubHistory report={hubHistory} />
+      <YdsRecommendPerformanceReport
+        className="yds-spick-hub__perf-report"
+        refreshKey={validationRevision}
+        stocks={liveStocks}
+      />
 
-      <YdsRecommendPerformanceReport className="yds-spick-hub__perf-report" />
+      <YdsStockPickHubHistory report={hubHistory} />
     </div>
   )
 }
