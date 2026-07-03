@@ -94,6 +94,8 @@ export default function YdsStockPickV1Hub() {
   } = useStockPickLiveData(marketContext)
   const heldTickers = useStockPickHeldTickers()
 
+  const [validationRevision, setValidationRevision] = useState(0)
+
   useEffect(() => {
     if (loading || !liveStocks.length) return
     const run = () => {
@@ -102,6 +104,7 @@ export default function YdsStockPickV1Hub() {
         liveStocks,
         marketContext,
       })
+      setValidationRevision((v) => v + 1)
     }
     if (typeof requestIdleCallback === "function") {
       const id = requestIdleCallback(run, { timeout: 3000 })

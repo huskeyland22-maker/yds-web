@@ -2,6 +2,8 @@
  * 성과검증 가격·수익률 디버그 로그
  */
 
+import { isDevMode } from "../utils/devMode.js"
+
 /** @typedef {{ key: string; days: number; label: string }} HorizonDef */
 
 /**
@@ -57,5 +59,29 @@ export function logValidationPriceLookupFailure(symbol, reason, detail) {
   console.warn(
     "[perf-validation] price lookup failed",
     JSON.stringify({ symbol, reason, detail: detail ?? null }),
+  )
+}
+
+/**
+ * @param {{
+ *   ticker: string
+ *   recommendPrice: number | null
+ *   currentPrice: number | null
+ *   profitPercent: number | null
+ *   source?: string | null
+ * }} payload
+ */
+export function logRecommendProfitServerTrace(payload) {
+  if (!isDevMode()) return
+  console.info(
+    "[recommend-profit]",
+    JSON.stringify({
+      stage: "validation-refresh",
+      ticker: payload.ticker,
+      recommendPrice: payload.recommendPrice,
+      currentPrice: payload.currentPrice,
+      profitPercent: payload.profitPercent,
+      source: payload.source ?? null,
+    }),
   )
 }

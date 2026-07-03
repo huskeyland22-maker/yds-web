@@ -22,6 +22,7 @@ import {
 import {
   logValidationPickPriceAudit,
   logValidationPriceLookupFailure,
+  logRecommendProfitServerTrace,
 } from "./ydsValidationPriceDebug.js"
 import {
   backfillRecommendSnapshot,
@@ -332,6 +333,14 @@ function refreshPickPrice(record, today, priceMap) {
     recommendPrice != null && currentPrice != null
       ? calcRecommendReturnPct(recommendPrice, currentPrice)
       : null
+
+  logRecommendProfitServerTrace({
+    ticker: cleaned.ticker,
+    recommendPrice,
+    currentPrice,
+    profitPercent: returnPct,
+    source: resolved?.source ?? null,
+  })
 
   return {
     ...withLog,

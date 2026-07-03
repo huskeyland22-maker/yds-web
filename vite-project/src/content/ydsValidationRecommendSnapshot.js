@@ -8,6 +8,19 @@ import { serializeActionGuideForSnapshot } from "./ydsStockPickActionGuide.js"
 import { serializeRankTrackForSnapshot } from "./ydsStockPickRankTrack.js"
 import { serializeLifecycleForSnapshot } from "./ydsStockPickLifecycle.js"
 
+/** @param {import("./ydsValidationStorage.js").ValidationPickRecord} record */
+function resolveLockedRecommendPriceFromRecord(record) {
+  if (record.recommendedPrice != null && record.recommendedPrice > 0) {
+    return record.recommendedPrice
+  }
+  const at = String(record.recommendedAt ?? "").slice(0, 10)
+  const fromLog = at && record.priceLog ? Number(record.priceLog[at]) : NaN
+  if (Number.isFinite(fromLog) && fromLog > 0) return fromLog
+  const fromSnap = record.recommendSnapshot?.recommendedPrice
+  if (fromSnap != null && fromSnap > 0) return fromSnap
+  return null
+}
+
 /**
  * @typedef {{
  *   name: string
@@ -243,11 +256,13 @@ export function backfillRecommendSnapshot(record, stock, marketContext) {
   }
 
   const today = new Date().toISOString().slice(0, 10)
+  const hasLockedPrice = resolveLockedRecommendPriceFromRecord(record) != null
   if (
     stock?.ticker &&
     stock.dataSource === "live" &&
     record.recommendedAt === today &&
-    stockReadyForRecommendCapture(stock)
+    stockReadyForRecommendCapture(stock) &&
+    !hasLockedPrice
   ) {
     const snap = buildRecommendSnapshot(stock, marketContext, record.recommendedAt)
     return applySnapshotToRecord(record, snap)
@@ -276,7 +291,10 @@ export function applySnapshotToRecord(record, snap) {
     ...record,
     name: snap.name || record.name,
     recommendedAt: snap.recommendedAt || record.recommendedAt,
-    recommendedPrice: snap.recommendedPrice ?? record.recommendedPrice,
+    recommendedPrice:
+      resolveLockedRecommendPriceFromRecord(record) ??
+      snap.recommendedPrice ??
+      record.recommendedPrice,
     recommendedScore: snap.totalScore ?? record.recommendedScore,
     qualityGrade: snap.qualityGrade,
     timingGrade: snap.timingGrade,

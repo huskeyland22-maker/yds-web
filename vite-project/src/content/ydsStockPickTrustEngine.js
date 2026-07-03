@@ -5,6 +5,7 @@
 import { buildStockPickScoreDetail } from "./ydsStockPickScoreDetailEngine.js"
 import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
+import { buildRecommendProfitView, formatRecommendProfitLabel } from "./ydsRecommendProfitResolver.js"
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
 import { loadValidationPicks } from "./ydsValidationStorage.js"
 import {
@@ -193,9 +194,8 @@ function buildAiRiskItems(stock) {
 function buildAiTracking(stock) {
   const country = stock.country === "KR" ? "KR" : "US"
   const pick = findValidationPickByTicker(stock.ticker, country)
-  const recPrice = pick?.recommendedPrice ?? null
-  const currentPrice = Number(stock.snapshot?.price ?? stock.snapshot?.close)
-  const retPct = calcRecommendReturnPct(recPrice, currentPrice)
+  const profit = buildRecommendProfitView(stock, pick)
+  const retPct = profit.returnPct
 
   /** @type {'up' | 'sideways' | 'pullback' | 'stop' | 'target' | 'unknown'} */
   let phaseId = "unknown"
@@ -229,7 +229,7 @@ function buildAiTracking(stock) {
     phaseId,
     phaseLabel,
     returnPct: retPct,
-    returnLabel: formatPerfPct(retPct),
+    returnLabel: formatRecommendProfitLabel(retPct),
     milestones,
   }
 }

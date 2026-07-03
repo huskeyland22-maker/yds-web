@@ -6,10 +6,14 @@ import {
   countValidationPicksByTicker,
   findValidationPickByTicker,
 } from "./ydsPickValidationLink.js"
-import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { resolveRecommendStatusView } from "./ydsStockPickRecommendColors.js"
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
+import {
+  buildRecommendProfitView,
+  logRecommendProfitTrace,
+  formatRecommendProfitLabel,
+} from "./ydsRecommendProfitResolver.js"
 import { daysBetweenPickDates } from "./ydsPickLifecycleEngine.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
 import { getRecommendScoreDelta } from "./ydsStockPickScoreHistory.js"
@@ -84,9 +88,19 @@ function resolvePickReturnExtremes(pick, currentReturn) {
 export function buildStockPickListRow(stock) {
   const country = stock.country === "KR" ? "KR" : "US"
   const pick = findValidationPickByTicker(stock.ticker, country)
-  const recPrice = pick?.recommendedPrice ?? null
-  const currentRaw = Number(stock.snapshot?.price ?? stock.snapshot?.close)
-  const returnPct = calcRecommendReturnPct(recPrice, currentRaw)
+  const profit = buildRecommendProfitView(stock, pick)
+  const recPrice = profit.recommendPrice
+  const currentRaw = profit.currentPrice
+  const returnPct = profit.returnPct
+
+  logRecommendProfitTrace({
+    ticker: stock.ticker,
+    recommendPrice: recPrice,
+    currentPrice: currentRaw,
+    profitPercent: returnPct,
+    source: pick?.currentPrice != null ? "validation-pick" : "live-snapshot",
+    stage: "list-row",
+  })
   const recStatus = resolveRecommendStatusView(stock)
   const conf = stock.trustReport?.aiConfidence
   const { maxRet, mdd } = resolvePickReturnExtremes(pick, returnPct)
@@ -120,7 +134,7 @@ export function buildStockPickListRow(stock) {
       recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
     currentPriceLabel: formatTransparencyPrice(currentRaw, country),
     returnPct,
-    returnLabel: formatPerfPct(returnPct),
+    returnLabel: formatRecommendProfitLabel(returnPct),
     maxReturnPct: maxRet,
     maxReturnLabel: formatPerfPct(maxRet),
     mddPct: mdd,
