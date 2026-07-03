@@ -244,7 +244,7 @@ export function buildDashboardActionGuideReport(
   if (!state) {
     return {
       visible: false,
-      title: "오늘 행동 가이드",
+      title: "오늘의 행동 가이드",
       marketState: "—",
       panicScore: null,
       liquidityScore: null,
@@ -286,7 +286,7 @@ export function buildDashboardActionGuideReport(
 
   return {
     visible: true,
-    title: "오늘 행동 가이드",
+    title: "오늘의 행동 가이드",
     marketState,
     panicScore: Number.isFinite(panicScore) ? panicScore : null,
     liquidityScore: Number.isFinite(liquidityScore) ? liquidityScore : null,

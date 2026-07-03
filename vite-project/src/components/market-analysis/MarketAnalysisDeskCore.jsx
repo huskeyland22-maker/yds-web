@@ -1,8 +1,5 @@
 import { useMemo, useEffect, useRef, useState } from "react"
 import YdsPanicEvidencePanel from "./YdsPanicEvidencePanel.jsx"
-import YdsTodayMarketConclusion from "./YdsTodayMarketConclusion.jsx"
-import YdsTodayRecommendedActions from "./YdsTodayRecommendedActions.jsx"
-import YdsAiMarketBriefing from "./YdsAiMarketBriefing.jsx"
 import YdsMarketScoreHero from "./YdsMarketScoreHero.jsx"
 import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
 import YdsMarketTop20Strip from "./YdsMarketTop20Strip.jsx"
@@ -18,6 +15,7 @@ import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { buildMarketCycleFlowReport } from "../../content/ydsMarketCycleFlow.js"
 import { fetchPanicLabBenchmarks } from "../../content/ydsEtfDailyLoader.js"
 import { buildDashboardActionGuideReport } from "../../content/ydsDashboardActionGuide.js"
+import { buildTodayMarketConclusion } from "../../content/ydsTodayMarketConclusion.js"
 import { buildUnifiedWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
 import { buildDualLiquidityReport } from "../../market-os/liquidityDualEngine.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
@@ -28,7 +26,7 @@ import { getFinalScore } from "../../utils/tradingScores.js"
 import { resolveMarketPositionView } from "../../content/ydsMarketPositionEngine.js"
 
 /**
- * 시장분석 데스크 — 결론 → 추이 → 변화 → 근거 → 채권 (해석은 사이드바)
+ * 시장분석 데스크 — 행동 가이드 → 상태 → 패닉 → 추천 → 추이 → 유동성 → 이벤트
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
@@ -89,14 +87,40 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     return buildDualLiquidityReport(bondSnapshot.snapshot, panicData)
   }, [macroRiskEnabled, bondSnapshot.snapshot, panicData])
 
+  const priceContext = useMemo(
+    () =>
+      etfContext
+        ? {
+            spyPrices: etfContext.spyPrices,
+            qqqPrices: etfContext.qqqPrices,
+            asOfDate: etfContext.asOfDate ?? null,
+          }
+        : null,
+    [etfContext],
+  )
+
   const actionGuide = useMemo(
     () =>
-      buildDashboardActionGuideReport(panicData, safeHistory, dualLiquidity, cycleFlow, {
-        spyPrices: etfContext?.spyPrices,
-        qqqPrices: etfContext?.qqqPrices,
-        asOfDate: etfContext?.asOfDate ?? null,
-      }),
-    [panicData, safeHistory, dualLiquidity, cycleFlow, etfContext],
+      buildDashboardActionGuideReport(
+        panicData,
+        safeHistory,
+        dualLiquidity,
+        cycleFlow,
+        priceContext,
+      ),
+    [panicData, safeHistory, dualLiquidity, cycleFlow, priceContext],
+  )
+
+  const todaySummary = useMemo(
+    () =>
+      buildTodayMarketConclusion(
+        panicData,
+        safeHistory,
+        dualLiquidity,
+        cycleFlow,
+        priceContext,
+      ),
+    [panicData, safeHistory, dualLiquidity, cycleFlow, priceContext],
   )
 
   const lastAuditKeyRef = useRef("")
@@ -132,30 +156,18 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
   return (
     <div className="yds-market-desk" id="market-desk" aria-label="YDS 시장분석">
       <div className="yds-market-desk__stream">
-        <YdsTodayMarketConclusion
-          panicData={panicData}
-          historyRows={safeHistory}
-          cycleFlow={cycleFlow}
-          dualLiquidity={dualLiquidity}
-          etfContext={etfContext}
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--today-conclusion"
-        />
-
-        <YdsTodayRecommendedActions
-          panicData={panicData}
-          historyRows={safeHistory}
-          cycleFlow={cycleFlow}
-          dualLiquidity={dualLiquidity}
-          etfContext={etfContext}
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--today-actions"
-        />
-
-        <YdsAiMarketBriefing
-          panicData={panicData}
-          cycleFlow={cycleFlow}
-          dualLiquidity={dualLiquidity}
-          etfContext={etfContext}
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--ai-briefing"
+        <YdsDashboardActionGuide
+          report={actionGuide}
+          summary={
+            todaySummary.visible && todaySummary.headline
+              ? {
+                  headline: todaySummary.headline,
+                  signalEmoji: todaySummary.signalEmoji,
+                  actions: todaySummary.actions,
+                }
+              : null
+          }
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--action-guide yds-market-desk__slot--action-guide-top"
         />
 
         <YdsMarketScoreHero
@@ -167,45 +179,29 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
           etfContext={etfContext}
         />
 
-        <YdsDailyMarketReportPanel
-          panicData={panicData}
-          historyRows={safeHistory}
-          cycleFlow={cycleFlow}
-          dualLiquidity={dualLiquidity}
-          weekEvents={weekEvents}
-          etfContext={etfContext}
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--daily-report"
-        />
+        <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
 
         <YdsMarketTop20Strip className="yds-market-desk__slot yds-market-desk__slot--top20" />
 
-        <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
+        <YdsMarketTrendSection
+          panel="market"
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--trend yds-market-desk__slot--trend-market"
+          historyRows={safeHistory}
+        />
 
         <YdsMarketTrendSection
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--trend"
+          panel="panic"
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--trend yds-market-desk__slot--trend-panic"
           historyRows={safeHistory}
         />
 
         <div className="yds-market-desk__section-stack">
-          <section
-            className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
-          >
-            <YdsPanicEvidencePanel panicData={panicData} />
-          </section>
-
           {macroRiskEnabled ? (
             <YdsDashboardLiquiditySynthesis
               report={dualLiquidity}
               className="yds-market-desk__slot yds-market-desk__slot--liquidity-summary"
             />
           ) : null}
-
-          <SectionErrorBoundary label="이번주 주요 이벤트">
-            <YdsDashboardWeekEvents
-              report={weekEvents}
-              className="yds-market-desk__slot yds-market-desk__slot--week-events"
-            />
-          </SectionErrorBoundary>
 
           {macroRiskEnabled && dualLiquidity ? (
             <div className="yds-market-desk__liquidity-lanes">
@@ -226,11 +222,29 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             </div>
           ) : null}
 
-          <YdsDashboardActionGuide
-            report={actionGuide}
-            className="yds-market-desk__slot yds-market-desk__slot--action-guide yds-market-desk__slot--desk-tail"
-          />
+          <SectionErrorBoundary label="이번주 주요 이벤트">
+            <YdsDashboardWeekEvents
+              report={weekEvents}
+              className="yds-market-desk__slot yds-market-desk__slot--week-events"
+            />
+          </SectionErrorBoundary>
         </div>
+
+        <YdsDailyMarketReportPanel
+          panicData={panicData}
+          historyRows={safeHistory}
+          cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          weekEvents={weekEvents}
+          etfContext={etfContext}
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--daily-report"
+        />
+
+        <section
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--indices"
+        >
+          <YdsPanicEvidencePanel panicData={panicData} />
+        </section>
       </div>
     </div>
   )

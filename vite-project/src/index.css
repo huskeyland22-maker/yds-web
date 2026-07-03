@@ -33987,6 +33987,79 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   border-radius: 0 6px 6px 0;
 }
 
+.yds-desk-card__liquidity-lead--sub {
+  margin-top: 0.28rem;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: #94a3b8;
+  border-left-color: rgba(148, 163, 184, 0.35);
+}
+
+.yds-desk-card__summary-headline {
+  margin: 0 0 0.38rem;
+  font-size: clamp(0.78rem, 2.3vw, 0.9rem);
+  font-weight: 800;
+  line-height: 1.45;
+  color: #f8fafc;
+}
+
+.yds-desk-card__summary-signal {
+  font-size: 0.95em;
+}
+
+.yds-desk-card__checklist--flush {
+  margin-top: 0.32rem;
+  padding-top: 0.28rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-market-desk__slot--action-guide-top {
+  order: -1;
+}
+
+.yds-desk-card__action-block {
+  margin-top: 0.38rem;
+  padding-top: 0.32rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-desk-card__action-block-title {
+  margin: 0 0 0.28rem;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
+
+.yds-desk-card__action-tags {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+}
+
+.yds-desk-card__action-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: clamp(0.64rem, 1.9vw, 0.74rem);
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-desk-card__action-tag-mark {
+  color: #4ade80;
+  font-weight: 800;
+}
+
+.yds-market-trend__single {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.45rem;
+}
+
 .yds-stock-week-event-list {
   margin: 0;
   padding: 0;
@@ -35756,6 +35829,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     order: 0;
   }
 
+  .yds-market-desk__slot--action-guide-top {
+    order: 0;
+  }
+
   .yds-market-desk__slot--desk-summary {
     order: 1;
   }
@@ -35776,6 +35853,14 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     order: 4;
   }
 
+  .yds-market-desk__slot--trend-market {
+    order: 5;
+  }
+
+  .yds-market-desk__slot--trend-panic {
+    order: 6;
+  }
+
   .yds-market-desk__slot--trend {
     order: 8;
   }
@@ -35785,19 +35870,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .yds-market-desk__slot--liquidity-summary {
-    order: 10;
-  }
-
-  .yds-market-desk__slot--week-events {
     order: 7;
   }
 
+  .yds-market-desk__slot--week-events {
+    order: 10;
+  }
+
   .yds-market-desk__slot--liquidity-market {
-    order: 5;
+    order: 8;
   }
 
   .yds-market-desk__slot--liquidity-policy {
-    order: 6;
+    order: 9;
   }
 
   .yds-market-desk__liquidity-lanes {
@@ -35805,7 +35890,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 
   .yds-market-desk__slot--action-guide {
-    order: 10;
+    order: 0;
   }
 
   .yds-week-events-unified--desktop {
