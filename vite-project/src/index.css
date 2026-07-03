@@ -32228,6 +32228,92 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.58rem;
 }
 
+.yds-market-health {
+  margin: 0;
+  padding: 0.42rem 0.48rem 0.4rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.yds-market-health__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-market-health__title {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #cbd5e1;
+}
+
+.yds-market-health__subtitle {
+  margin: 0;
+  font-size: 0.52rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-market-health__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.yds-market-health__row {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: clamp(0.64rem, 1.9vw, 0.74rem);
+  line-height: 1.35;
+}
+
+.yds-market-health__signal {
+  text-align: center;
+  font-size: 0.72em;
+}
+
+.yds-market-health__label {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.yds-market-health__grade {
+  font-weight: 700;
+  font-size: 0.92em;
+  white-space: nowrap;
+}
+
+.yds-market-health__grade--good {
+  color: #86efac;
+}
+
+.yds-market-health__grade--neutral {
+  color: #fde047;
+}
+
+.yds-market-health__grade--risk {
+  color: #fca5a5;
+}
+
+.yds-market-health__summary {
+  margin: 0.38rem 0 0;
+  padding-top: 0.32rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: clamp(0.62rem, 1.85vw, 0.72rem);
+  font-weight: 600;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
 .yds-desk-card {
   margin: 0;
   padding: 0.48rem 0.52rem 0.45rem;

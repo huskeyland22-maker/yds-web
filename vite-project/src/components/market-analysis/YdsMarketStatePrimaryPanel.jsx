@@ -10,6 +10,7 @@ import { buildMarketCycleStrip, buildMarketStateInvestmentAction } from "../../c
 import YdsMarketCycleStrip from "./YdsMarketCycleStrip.jsx"
 import YdsMarketStateRecentChanges from "./YdsMarketStateRecentChanges.jsx"
 import YdsMarketJudgmentCard from "./YdsMarketJudgmentCard.jsx"
+import YdsMarketHealthCard from "./YdsMarketHealthCard.jsx"
 
 /** @param {object[]} historyRows */
 function resolveScoreDelta(historyRows, currentScore) {
@@ -123,6 +124,15 @@ export default function YdsMarketStatePrimaryPanel({
           label: unifiedLabel,
           lines: actionLines,
         }}
+      />
+
+      <YdsMarketHealthCard
+        panicData={panicData}
+        historyRows={historyRows}
+        cycleFlow={cycleFlow}
+        dualLiquidity={dualLiquidity}
+        etfContext={etfContext}
+        className="yds-market-state-primary__health"
       />
 
       <YdsMarketStateRecentChanges
