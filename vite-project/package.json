@@ -9,6 +9,7 @@
     "gen:build-meta": "node ./scripts/generate-build-meta.mjs",
     "embed:client-env": "node ./scripts/embed-client-env-manifest.mjs",
     "verify:api": "node ../scripts/verify-api-modules.mjs",
+    "verify:ledger": "node ./scripts/verify-recommend-ledger-pipeline.mjs",
     "build": "npm run verify:api && npm run gen:build-meta && npm run embed:client-env && vite build",
     "backtest:panic-v2": "node ./scripts/backtest-panic-v2.mjs",
     "lint": "eslint .",

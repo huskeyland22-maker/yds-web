@@ -3,7 +3,7 @@
  * 일반 사용자: debug/RAW/sync·개발자 메뉴 숨김.
  */
 export function isDevMode() {
-  if (import.meta.env.DEV) return true
+  if (import.meta.env?.DEV) return true
   if (typeof window === "undefined") return false
   try {
     const q = new URLSearchParams(window.location.search)
@@ -21,7 +21,7 @@ export function isDevMode() {
  * 일반 사용자 비표시; `isDevMode()`와 함께 쓸 것.
  */
 export function isShowDebugPanel() {
-  const env = String(import.meta.env.VITE_SHOW_DEBUG ?? "").toLowerCase()
+  const env = String(import.meta.env?.VITE_SHOW_DEBUG ?? "").toLowerCase()
   if (env === "1" || env === "true") return true
   if (typeof window === "undefined") return false
   try {
@@ -36,5 +36,5 @@ export function isShowDebugPanel() {
 
 /** 프로덕션 배포 UI — 개발자·검증·디버그 항목 숨김 */
 export function hideDeveloperItems() {
-  return import.meta.env.PROD && !isDevMode()
+  return import.meta.env?.PROD && !isDevMode()
 }
