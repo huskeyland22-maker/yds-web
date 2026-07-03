@@ -21,13 +21,13 @@ export const CYCLE_STATUS_BANDS = [
   { id: "peakOverheat", min: 80, max: 100, emoji: "🔴", label: "최고 과열", color: "#ef4444" },
 ]
 
-/** @type {StatusBand[]} — 기회 강도 (인생 타점은 드문 보너스) */
+/** @type {StatusBand[]} — 패닉 강도 (GO #84 공포 강도 5단계) */
 export const PANIC_STATUS_BANDS = [
-  { id: "noFear", min: 0, max: 20, emoji: "🔵", label: "공포 없음", color: "#3b82f6" },
-  { id: "lowFear", min: 20, max: 40, emoji: "🟢", label: "공포 부족", color: "#22c55e" },
-  { id: "interest", min: 40, max: 60, emoji: "🟡", label: "관심", color: "#eab308" },
-  { id: "dca", min: 60, max: 80, emoji: "🟠", label: "분할매수", color: "#f97316" },
-  { id: "lifePoint", min: 80, max: 100, emoji: "🔴", label: "인생 타점", color: "#ef4444" },
+  { id: "noFear", min: 0, max: 21, emoji: "🔵", label: "공포 부족", color: "#3b82f6" },
+  { id: "lowFear", min: 21, max: 41, emoji: "🟢", label: "약한 공포", color: "#22c55e" },
+  { id: "interest", min: 41, max: 61, emoji: "🟡", label: "중립", color: "#eab308" },
+  { id: "dca", min: 61, max: 81, emoji: "🟠", label: "높은 공포", color: "#f97316" },
+  { id: "lifePoint", min: 81, max: 101, emoji: "🔴", label: "극심한 공포", color: "#ef4444" },
 ]
 
 /** @typedef {"calm"|"slowdown"|"sharpDrop"|"riskOff"} MomentumStatusTier */

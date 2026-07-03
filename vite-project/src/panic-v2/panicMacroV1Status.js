@@ -41,10 +41,10 @@ export const MACRO_V1_STATUS_BANDS = MACRO_STAGE_ORDER.map((id) => {
 export function resolveMacroV1Status(score) {
   if (score == null || !Number.isFinite(score)) return null
   const s = Math.max(0, Math.min(100, Math.round(Number(score))))
-  if (s <= 19) return MACRO_V1_STATUS_BANDS[0]
-  if (s <= 39) return MACRO_V1_STATUS_BANDS[1]
-  if (s <= 59) return MACRO_V1_STATUS_BANDS[2]
-  if (s <= 79) return MACRO_V1_STATUS_BANDS[3]
+  if (s <= 20) return MACRO_V1_STATUS_BANDS[0]
+  if (s <= 40) return MACRO_V1_STATUS_BANDS[1]
+  if (s <= 60) return MACRO_V1_STATUS_BANDS[2]
+  if (s <= 80) return MACRO_V1_STATUS_BANDS[3]
   return MACRO_V1_STATUS_BANDS[4]
 }
 

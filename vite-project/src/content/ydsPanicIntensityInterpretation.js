@@ -1,20 +1,21 @@
 /**
- * 패닉 강도 — 5단계 매수 관점 투자 해석 (카드 · 그래프 · 툴팁 단일 기준)
+ * 패닉 강도 — 5단계 공포 강도 체계 (GO #84 · 카드 · 그래프 · 툴팁 단일 기준)
  *
- * 0~20   극단적 공포
- * 20~40  공포
- * 40~60  중립
- * 60~80  관심
- * 80~100 과열
+ * 0~20   공포 부족
+ * 21~40  약한 공포
+ * 41~60  중립
+ * 61~80  높은 공포
+ * 81~100 극심한 공포
  */
 
-/** @typedef {'extremeFear' | 'fear' | 'neutral' | 'interest' | 'overheat'} PanicInvestmentStageId */
+/** @typedef {'lackOfFear' | 'mildFear' | 'neutral' | 'highFear' | 'extremeFear'} PanicIntensityStageId */
 
 /**
  * @typedef {{
- *   id: PanicInvestmentStageId
+ *   id: PanicIntensityStageId
  *   index: number
  *   label: string
+ *   emoji: string
  *   min: number
  *   max: number
  *   color: string
@@ -28,59 +29,77 @@
  */
 
 /** @type {Array<{
- *   id: PanicInvestmentStageId
+ *   id: PanicIntensityStageId
  *   label: string
+ *   emoji: string
  *   min: number
  *   max: number
  *   color: string
  *   buyStrength: string
- *   actionLine: string
+ *   descriptionLines: string[]
  * }>} */
 export const PANIC_INVESTMENT_STAGES = [
   {
-    id: "extremeFear",
-    label: "극단적 공포",
+    id: "lackOfFear",
+    label: "공포 부족",
+    emoji: "🔵",
     min: 0,
     max: 20,
     color: "#3b82f6",
-    buyStrength: "★★★★★",
-    actionLine: "역사적으로 가장 공격적인 분할매수 구간",
+    buyStrength: "★☆☆☆☆",
+    descriptionLines: [
+      "시장 참여자들의 낙관 심리가 강합니다.",
+      "과도한 낙관은 향후 변동성을 키울 수 있습니다.",
+    ],
   },
   {
-    id: "fear",
-    label: "공포",
+    id: "mildFear",
+    label: "약한 공포",
+    emoji: "🟢",
     min: 21,
     max: 40,
     color: "#22c55e",
-    buyStrength: "★★★★☆",
-    actionLine: "적극적인 분할매수 가능",
+    buyStrength: "★★☆☆☆",
+    descriptionLines: [
+      "공포 심리가 일부 존재하지만 아직 낮은 수준입니다.",
+      "시장 심리는 비교적 안정적입니다.",
+    ],
   },
   {
     id: "neutral",
     label: "중립",
+    emoji: "🟡",
     min: 41,
     max: 60,
     color: "#eab308",
     buyStrength: "★★★☆☆",
-    actionLine: "관심종목 관찰 및 분할 접근",
+    descriptionLines: ["공포와 낙관이 균형을 이루는 상태입니다."],
   },
   {
-    id: "interest",
-    label: "관심",
+    id: "highFear",
+    label: "높은 공포",
+    emoji: "🟠",
     min: 61,
     max: 80,
     color: "#f97316",
-    buyStrength: "★★☆☆☆",
-    actionLine: "신규 매수는 신중, 보유 비중 관리",
+    buyStrength: "★★★★☆",
+    descriptionLines: [
+      "시장 심리가 위축되고 있습니다.",
+      "변동성 확대에 유의해야 합니다.",
+    ],
   },
   {
-    id: "overheat",
-    label: "과열",
+    id: "extremeFear",
+    label: "극심한 공포",
+    emoji: "🔴",
     min: 81,
     max: 100,
     color: "#ef4444",
-    buyStrength: "★☆☆☆☆",
-    actionLine: "추격매수 금지, 차익실현 고려",
+    buyStrength: "★★★★★",
+    descriptionLines: [
+      "투매 심리가 극대화된 구간입니다.",
+      "역발상 관점에서는 장기 매수 기회를 검토할 수 있습니다.",
+    ],
   },
 ]
 
@@ -109,15 +128,26 @@ export function formatPanicCurrentStageLine(score, label) {
   return `현재 : ${label} (${Math.round(score)})`
 }
 
+/**
+ * @param {number | null | undefined} score
+ * @returns {string | null}
+ */
+export function formatPanicIntensityStageDisplay(score) {
+  const interp = buildPanicIntensityInterpretation(score)
+  if (!interp) return null
+  return `${interp.emoji} ${interp.label}`
+}
+
 const PANIC_ZONE_BOUNDARIES = [0, 20, 40, 60, 80, 100]
 
-/** @returns {Array<{ min: number; max: number; color: string; label: string }>} */
+/** @returns {Array<{ min: number; max: number; color: string; label: string; emoji: string }>} */
 export function panicInvestmentZoneSteps() {
   return PANIC_INVESTMENT_STAGES.map((stage, index) => ({
     min: PANIC_ZONE_BOUNDARIES[index],
     max: PANIC_ZONE_BOUNDARIES[index + 1],
     color: stage.color,
     label: stage.label,
+    emoji: stage.emoji,
   }))
 }
 
@@ -134,12 +164,13 @@ export function buildPanicIntensityInterpretation(score) {
     id: stage.id,
     index,
     label: stage.label,
+    emoji: stage.emoji,
     min: stage.min,
     max: stage.max,
     color: stage.color,
     buyStrength: stage.buyStrength,
-    actionLine: stage.actionLine,
-    descriptionLines: [stage.actionLine],
+    actionLine: stage.descriptionLines[0] ?? "",
+    descriptionLines: stage.descriptionLines,
     stageBar: buildPanicStageBar(index),
     currentLine: formatPanicCurrentStageLine(rounded, stage.label),
     score: rounded,

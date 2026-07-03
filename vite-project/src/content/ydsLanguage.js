@@ -14,7 +14,7 @@ export const YDS_LABEL_CYCLE_POSITION = "사이클 위치"
 export const YDS_LABEL_PANIC_BREAKDOWN = "패닉 강도 산출 근거"
 
 export const YDS_PANIC_RAIL_LABELS =
-  "🔵 공포 없음 · 🟢 공포 부족 · 🟡 관심 · 🟠 분할매수 · 🔴 인생 타점"
+  "🔵 공포 부족 · 🟢 약한 공포 · 🟡 중립 · 🟠 높은 공포 · 🔴 극심한 공포"
 
 export const YDS_CYCLE_RAIL_LABELS =
   "🔵 침체 · 🟢 회복 · 🟡 성장 · 🟠 사이클 후반 · 🔴 현금 준비 · 🔴 최고 과열"
@@ -50,7 +50,7 @@ export function resolvePanicBandForMacroStage(stageId) {
  * @param {string | null | undefined} stageId
  */
 export function macroStageDisplayLabel(stageId) {
-  return resolvePanicBandForMacroStage(stageId)?.label ?? "공포 부족"
+  return resolvePanicBandForMacroStage(stageId)?.label ?? "약한 공포"
 }
 
 /**
@@ -62,11 +62,11 @@ export function macroStageDisplayEmoji(stageId) {
 
 /** @type {Record<MacroV1StatusId, { min: number; max: number }>} */
 export const MACRO_STAGE_BOUNDS = {
-  overheated: { min: 0, max: 19 },
-  neutral: { min: 20, max: 39 },
-  interest: { min: 40, max: 59 },
-  dca: { min: 60, max: 79 },
-  panicBuy: { min: 80, max: 100 },
+  overheated: { min: 0, max: 20 },
+  neutral: { min: 21, max: 40 },
+  interest: { min: 41, max: 60 },
+  dca: { min: 61, max: 80 },
+  panicBuy: { min: 81, max: 100 },
 }
 
 /** @type {MacroV1StatusId[]} */

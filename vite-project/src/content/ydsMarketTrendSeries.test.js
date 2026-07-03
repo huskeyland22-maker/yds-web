@@ -39,12 +39,14 @@ describe("ydsMarketTrendSeries", () => {
 
   it("maps score zones for market and panic labels", () => {
     expect(resolveScoreZoneMeta(85, "market").label).toBe("과열")
+    expect(resolveScoreZoneMeta(35, "panic").label).toBe("약한 공포")
     expect(resolveScoreZoneMeta(45, "panic").label).toBe("중립")
-    expect(resolveScoreZoneMeta(46, "panic").label).toBe("중립")
-    expect(resolveScoreZoneMeta(15, "panic").label).toBe("극단적 공포")
-    expect(resolveScoreZoneMeta(72, "panic").buyStrength).toBe("★★☆☆☆")
+    expect(resolveScoreZoneMeta(49, "panic").label).toBe("중립")
+    expect(resolveScoreZoneMeta(15, "panic").label).toBe("공포 부족")
+    expect(resolveScoreZoneMeta(72, "panic").label).toBe("높은 공포")
+    expect(resolveScoreZoneMeta(91, "panic").label).toBe("극심한 공포")
     expect(resolveScoreZoneMeta(72, "panic").actionLine).toBe(
-      "신규 매수는 신중, 보유 비중 관리",
+      "시장 심리가 위축되고 있습니다.",
     )
   })
 })

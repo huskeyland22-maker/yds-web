@@ -49,9 +49,11 @@ export function resolveScoreZoneMeta(score, kind = "panic") {
       score: interp.score,
       color: interp.color,
       label: interp.label,
+      emoji: interp.emoji,
       zoneIndex: interp.index,
       buyStrength: interp.buyStrength,
       actionLine: interp.actionLine,
+      descriptionLines: interp.descriptionLines,
     }
   }
   const zoneIdx =

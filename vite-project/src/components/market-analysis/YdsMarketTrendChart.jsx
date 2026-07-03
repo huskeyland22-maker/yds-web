@@ -37,9 +37,14 @@ function TrendTooltip({ active, payload, title, chartKind = "market" }) {
           <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
             패닉 {panicInterp.score}
           </p>
-          <p className="yds-market-trend-chart__tooltip-stage">{panicInterp.label}</p>
-          <p className="yds-market-trend-chart__tooltip-strength">{panicInterp.buyStrength}</p>
-          <p className="yds-market-trend-chart__tooltip-action">{panicInterp.actionLine}</p>
+          <p className="yds-market-trend-chart__tooltip-stage">
+            {panicInterp.emoji} {panicInterp.label}
+          </p>
+          {panicInterp.descriptionLines.map((line) => (
+            <p key={line} className="yds-market-trend-chart__tooltip-action">
+              {line}
+            </p>
+          ))}
         </>
       ) : (
         <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
@@ -127,7 +132,11 @@ export default function YdsMarketTrendChart({
           >
             <span className="yds-market-trend-chart__badge-score">{displayScore}</span>
             {currentMeta?.label ? (
-              <span className="yds-market-trend-chart__badge-label">{currentMeta.label}</span>
+              <span className="yds-market-trend-chart__badge-label">
+                {chartKind === "panic" && currentMeta?.emoji
+                  ? `${currentMeta.emoji} ${currentMeta.label}`
+                  : currentMeta.label}
+              </span>
             ) : null}
           </div>
         ) : null}

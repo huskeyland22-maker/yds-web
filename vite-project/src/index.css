@@ -30088,6 +30088,21 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 
+.yds-market-panic-secondary__stage-desc {
+  margin-top: 0.22rem;
+}
+
+.yds-market-panic-secondary__stage-desc-line {
+  margin: 0 0 0.1rem;
+  font-size: 0.58rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-market-panic-secondary__stage-desc-line:last-child {
+  margin-bottom: 0;
+}
+
 .yds-market-panic-secondary__action {
   margin: 0.2rem 0 0;
   padding: 0.28rem 0 0;

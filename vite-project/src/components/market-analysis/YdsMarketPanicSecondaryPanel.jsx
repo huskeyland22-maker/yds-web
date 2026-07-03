@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
 import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
 import { buildPanicIntensityComparison, formatPanicCompareDelta } from "../../content/ydsPanicIntensityComparison.js"
+import { buildPanicIntensityInterpretation } from "../../content/ydsPanicIntensityInterpretation.js"
 import { resolvePanicStateLabel, resolvePanicCompositeActionView } from "../../content/ydsPanicCompositeVerdict.js"
 import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.js"
 import YdsPanicScoreComposition from "./YdsPanicScoreComposition.jsx"
@@ -36,6 +37,10 @@ export default function YdsMarketPanicSecondaryPanel({
   const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
   const stateLabel = useMemo(
     () => (view?.panicScore != null ? resolvePanicStateLabel(view.panicScore) : null),
+    [view?.panicScore],
+  )
+  const intensityInterp = useMemo(
+    () => buildPanicIntensityInterpretation(view?.panicScore ?? null),
     [view?.panicScore],
   )
   const compositeAction = useMemo(
@@ -77,6 +82,15 @@ export default function YdsMarketPanicSecondaryPanel({
           <p className="yds-market-panic-secondary__stage-current yds-market-panic-secondary__state-only">
             {stateLabel}
           </p>
+          {intensityInterp?.descriptionLines.length ? (
+            <div className="yds-market-panic-secondary__stage-desc">
+              {intensityInterp.descriptionLines.map((line) => (
+                <p key={line} className="yds-market-panic-secondary__stage-desc-line">
+                  {line}
+                </p>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {compositeAction ? (

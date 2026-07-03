@@ -7,6 +7,7 @@
 
 import { getFinalScore } from "../utils/tradingScores.js"
 import { buildMarketStatePriceStructureReport } from "./ydsMarketStatePriceStructure.js"
+import { formatPanicIntensityStageDisplay } from "./ydsPanicIntensityInterpretation.js"
 
 /** @typedef {'trueFear' | 'scaleInStart' | 'scaleInPrep' | 'recoveryEarly' | 'watch' | 'bottomSearch' | 'adjustmentProgress' | 'uptrendContinue' | 'laggingFear' | 'reduceExposure'} PanicActionVerdictId */
 
@@ -120,17 +121,11 @@ export const PANIC_ACTION_VERDICTS = {
 export const PANIC_COMPOSITE_VERDICTS = PANIC_ACTION_VERDICTS
 
 /**
- * 패닉 점수 → 심리 상태만 (투자 행동 없음)
+ * 패닉 점수 → 공포 강도 단계 (GO #84)
  * @param {number | null} psychScore
  */
 export function resolvePanicStateLabel(psychScore) {
-  if (psychScore == null || !Number.isFinite(psychScore)) return "—"
-  const s = Math.round(psychScore)
-  if (s >= 75) return "극단 공포"
-  if (s >= 60) return "공포"
-  if (s >= 45) return "중립"
-  if (s >= 30) return "공포 부족"
-  return "공포 없음"
+  return formatPanicIntensityStageDisplay(psychScore) ?? "—"
 }
 
 /** @param {number | null} psychScore */
