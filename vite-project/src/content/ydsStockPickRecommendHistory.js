@@ -57,28 +57,36 @@ export function buildStockPickRecommendHistoryReport(stock) {
   const validationRows = findAllValidationPicksForTicker(stock.ticker, country)
   const firstPick = validationRows[0] ?? null
   const latestPick = validationRows[validationRows.length - 1] ?? null
+  const anchorPick =
+    validationRows.find(
+      (pick) =>
+        Number.isFinite(Number(pick?.lockedRecommendedPrice)) ||
+        Number.isFinite(Number(pick?.recommendedPrice)),
+    ) ??
+    firstPick ??
+    latestPick
   const scoreRows = readScoreHistory()[stock.ticker] ?? []
 
   const today = new Date().toISOString().slice(0, 10)
   let daysHeld = null
-  if (firstPick?.recommendedAt) {
+  if (anchorPick?.recommendedAt) {
     daysHeld = Math.max(
       0,
       Math.round(
-        (Date.parse(today) - Date.parse(String(firstPick.recommendedAt).slice(0, 10))) / 86400000,
+        (Date.parse(today) - Date.parse(String(anchorPick.recommendedAt).slice(0, 10))) / 86400000,
       ),
     )
   }
 
-  const firstRecommendedAt = firstPick?.recommendedAt ?? null
+  const firstRecommendedAt = anchorPick?.recommendedAt ?? null
   const firstRecommendedScore =
-    firstPick?.recommendedScore ?? scoreRows[0]?.recommendScore ?? stock.v4Score?.finalRankScore ?? 0
+    anchorPick?.recommendedScore ?? scoreRows[0]?.recommendScore ?? stock.v4Score?.finalRankScore ?? 0
   const timeline = []
 
-  if (firstPick) {
+  if (anchorPick) {
     timeline.push({
-      date: firstPick.recommendedAt,
-      dateLabel: formatMdDot(firstPick.recommendedAt),
+      date: anchorPick.recommendedAt,
+      dateLabel: formatMdDot(anchorPick.recommendedAt),
       score: Math.round(firstRecommendedScore),
       isStart: true,
       isCurrent: false,
@@ -120,7 +128,7 @@ export function buildStockPickRecommendHistoryReport(stock) {
     }
   }
 
-  const recPrice = firstPick?.recommendedPrice ?? latestPick?.recommendedPrice ?? null
+  const recPrice = anchorPick?.lockedRecommendedPrice ?? anchorPick?.recommendedPrice ?? null
   const currentPrice = Number(stock.snapshot?.price ?? stock.snapshot?.close)
   const currentReturn = calcRecommendReturnPct(recPrice, currentPrice)
 
@@ -140,10 +148,10 @@ export function buildStockPickRecommendHistoryReport(stock) {
       : stock.scoreDeltas?.day5?.delta ?? null
 
   const ledger = {
-    recommendedAt: firstPick?.recommendedAt ?? null,
-    recommendedAtIso: firstPick?.recommendedAtIso ?? firstPick?.lockedRecommendedAtIso ?? null,
+    recommendedAt: anchorPick?.recommendedAt ?? null,
+    recommendedAtIso: anchorPick?.recommendedAtIso ?? anchorPick?.lockedRecommendedAtIso ?? null,
     lockedRecommendedPrice:
-      firstPick?.lockedRecommendedPrice ?? firstPick?.recommendedPrice ?? null,
+      anchorPick?.lockedRecommendedPrice ?? anchorPick?.recommendedPrice ?? null,
     recommendedPrice: recPrice,
     currentPrice: Number.isFinite(currentPrice) ? currentPrice : latestPick?.currentPrice ?? null,
     profitPercent: currentReturn,
@@ -187,10 +195,34 @@ export function buildStockPickRecommendHistoryReport(stock) {
     currentStatus: ledger.currentStatus ?? "—",
   }
 
+  console.table({
+    ticker: stock.ticker,
+    recommendedAt: ledger.recommendedAt,
+    recommendedPrice: ledger.recommendedPrice,
+    currentPrice: ledger.currentPrice,
+    lockedRecommendedPrice: ledger.lockedRecommendedPrice,
+    livePrice: Number.isFinite(currentPrice) ? currentPrice : null,
+    latestPrice: latestPick?.currentPrice ?? null,
+  })
+  console.table({
+    validationRow: anchorPick
+      ? {
+          id: anchorPick.id,
+          recommendedAt: anchorPick.recommendedAt,
+          recommendedPrice: anchorPick.recommendedPrice ?? null,
+          lockedRecommendedPrice: anchorPick.lockedRecommendedPrice ?? null,
+          currentPrice: anchorPick.currentPrice ?? null,
+          recommendedScore: anchorPick.recommendedScore ?? null,
+        }
+      : null,
+    ledger,
+    display: historyDisplay,
+  })
+
   return {
     visible: Boolean(firstPick || timeline.length),
     title: "추천 히스토리",
-    firstRecommendedAt: firstPick?.recommendedAt ?? null,
+    firstRecommendedAt: anchorPick?.recommendedAt ?? null,
     daysHeld,
     scoreDelta,
     scoreDeltaLabel:
