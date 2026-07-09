@@ -64,22 +64,39 @@ export function buildStockPickRecommendHistoryReport(stock) {
     )
   }
 
-  const timeline = scoreRows
+  const firstRecommendedAt = firstPick?.recommendedAt ?? null
+  const firstRecommendedScore =
+    firstPick?.recommendedScore ?? scoreRows[0]?.recommendScore ?? stock.v4Score?.finalRankScore ?? 0
+  const timeline = []
+
+  if (firstPick) {
+    timeline.push({
+      date: firstPick.recommendedAt,
+      dateLabel: formatMdDot(firstPick.recommendedAt),
+      score: Math.round(firstRecommendedScore),
+      isStart: true,
+      isCurrent: false,
+      opinion: "추천 시작",
+    })
+  }
+
+  const scoreUpdates = scoreRows
     .filter((row, index, arr) => index === 0 || row.total !== arr[index - 1].total)
-    .slice(-6)
+    .filter((row) => {
+      if (!firstRecommendedAt) return true
+      return String(row.date).slice(0, 10) > String(firstRecommendedAt).slice(0, 10)
+    })
+    .slice(-5)
     .map((row, index, arr) => ({
       date: row.date,
       dateLabel: formatMdDot(row.date),
       score: Math.round(row.total),
-      isStart: index === 0,
+      isStart: false,
       isCurrent: index === arr.length - 1,
-      opinion:
-        index === 0
-          ? "추천 시작"
-          : index === arr.length - 1
-            ? "현재 추천 상태"
-            : "점수 갱신",
+      opinion: index === arr.length - 1 ? "현재 추천 상태" : "점수 갱신",
     }))
+
+  timeline.push(...scoreUpdates)
 
   if (!timeline.length && latestPick) {
     timeline.push({
@@ -90,9 +107,14 @@ export function buildStockPickRecommendHistoryReport(stock) {
       isCurrent: true,
       opinion: "추천 시작",
     })
+  } else if (timeline.length === 1) {
+    timeline[0] = {
+      ...timeline[0],
+      isCurrent: true,
+    }
   }
 
-  const recPrice = latestPick?.recommendedPrice ?? firstPick?.recommendedPrice ?? null
+  const recPrice = firstPick?.recommendedPrice ?? latestPick?.recommendedPrice ?? null
   const currentPrice = Number(stock.snapshot?.price ?? stock.snapshot?.close)
   const currentReturn = calcRecommendReturnPct(recPrice, currentPrice)
 
@@ -129,6 +151,21 @@ export function buildStockPickRecommendHistoryReport(stock) {
         return minValue
       }, /** @type {number | null} */ (currentReturn)),
     currentStatus: status.label,
+  }
+
+  if (firstPick && scoreRows.length) {
+    console.table(
+      validationRows.map((row) => ({
+        id: row.id,
+        recommendedAt: row.recommendedAt,
+        recommendedAtIso: row.recommendedAtIso ?? row.lockedRecommendedAtIso ?? null,
+        lockedRecommendedPrice: row.lockedRecommendedPrice ?? null,
+        recommendedPrice: row.recommendedPrice ?? null,
+        currentPrice: row.currentPrice ?? null,
+        createdAt: row.recordedAt ?? null,
+        updatedAt: row.lastUpdatedAt ?? null,
+      })),
+    )
   }
 
   return {

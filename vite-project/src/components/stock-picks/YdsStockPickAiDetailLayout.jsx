@@ -105,6 +105,15 @@ export default function YdsStockPickAiDetailLayout({ stock }) {
       highestProfit: historyLedger.highestProfit,
       lowestProfit: historyLedger.lowestProfit,
     })
+    console.table({
+      cardRecommendedAt: historyDisplay?.recommendedAt,
+      cardHoldingDays: historyDisplay?.holdingDays,
+      cardRecommendedPrice: historyDisplay?.recommendedPrice,
+      cardCurrentPrice: historyDisplay?.currentPrice,
+      cardHighestProfit: historyDisplay?.highestProfit,
+      cardLowestProfit: historyDisplay?.lowestProfit,
+      cardCurrentProfit: historyDisplay?.currentProfit,
+    })
   }
 
   const validationMetrics = [
