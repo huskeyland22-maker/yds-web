@@ -23,20 +23,22 @@ function picksForTicker(ticker, country = "US") {
 
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord[]} matches */
 function findAnchorPick(matches) {
+  const sorted = [...matches].sort((a, b) =>
+    String(a?.recommendedAt ?? "").localeCompare(String(b?.recommendedAt ?? "")),
+  )
   return (
-    matches.find(
+    sorted.find(
       (pick) =>
         Number.isFinite(Number(pick?.lockedRecommendedPrice)) ||
         Number.isFinite(Number(pick?.recommendedPrice)),
     ) ??
-    matches[0] ??
+    sorted[0] ??
     null
   )
 }
 
 export function findValidationPickByTicker(ticker, country = "US") {
   const matches = picksForTicker(ticker, country)
-  matches.sort((a, b) => String(b.recommendedAt).localeCompare(String(a.recommendedAt)))
   return findAnchorPick(matches)
 }
 
