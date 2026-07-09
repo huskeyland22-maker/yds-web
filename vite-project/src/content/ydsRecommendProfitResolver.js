@@ -6,6 +6,7 @@ import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendatio
 import { isDevMode } from "../utils/devMode.js"
 import { daysBetweenPickDates } from "./ydsPickLifecycleEngine.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
+import { resolvePickMarketDate } from "./ydsRecommendMarketDate.js"
 
 /** @param {unknown} v */
 function toPositivePrice(v) {
@@ -28,7 +29,7 @@ export function resolveLockedRecommendPrice(pick) {
   const fromSnap = toPositivePrice(pick.recommendSnapshot?.recommendedPrice)
   if (fromSnap != null) return fromSnap
 
-  const at = String(pick.lockedRecommendedAt ?? pick.recommendedAt ?? "").slice(0, 10)
+  const at = String(pick.lockedRecommendedAt ?? pick.marketDate ?? pick.recommendedAt ?? "").slice(0, 10)
   if (at && pick.priceLog && typeof pick.priceLog === "object") {
     const fromLog = toPositivePrice(pick.priceLog[at])
     if (fromLog != null) return fromLog
@@ -145,7 +146,7 @@ export function buildRecommendProfitView(stock, pick) {
   const recommendPrice = resolveLockedRecommendPrice(pick)
   const currentPrice = resolveRecommendCurrentPrice(pick, stock)
   const returnPct = resolveRecommendProfitPct(pick, stock)
-  const recommendedAt = pick?.recommendedAt ? String(pick.recommendedAt).slice(0, 10) : null
+  const recommendedAt = resolvePickMarketDate(pick)
   const daysSinceRecommend = recommendedAt ? daysBetweenPickDates(recommendedAt, todayDateKey()) : null
   const hasRecommendPrice = recommendPrice != null
   const hasCurrentPrice = currentPrice != null

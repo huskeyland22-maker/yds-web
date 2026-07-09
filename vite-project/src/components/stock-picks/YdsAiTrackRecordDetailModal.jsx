@@ -47,7 +47,8 @@ export default function YdsAiTrackRecordDetailModal({ detail, onClose }) {
         <section className="yds-track-record-modal__section">
           <h3>성과</h3>
           <dl className="yds-track-record-modal__grid">
-            <div><dt>추천일시</dt><dd className="font-mono tabular-nums">{detail.recommendedAtIso}</dd></div>
+            <div><dt>추천일</dt><dd className="font-mono tabular-nums">{detail.recommendedAtLabel}</dd></div>
+            <div><dt>추천 생성일</dt><dd className="font-mono tabular-nums">{detail.createdAtLabel}</dd></div>
             <div><dt>경과</dt><dd className="font-mono tabular-nums">{detail.elapsedLabel}</dd></div>
             <div><dt>추천가</dt><dd className="font-mono tabular-nums">{detail.recommendedPriceLabel}</dd></div>
             <div><dt>현재가</dt><dd className="font-mono tabular-nums">{detail.currentPriceLabel}</dd></div>

@@ -10,6 +10,11 @@ import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { buildStockPickAiAnalysisReport } from "./ydsStockPickAiAnalysisEngine.js"
 import { migratePickLifecycle, resolvePickLifecycleView } from "./ydsPickLifecycleEngine.js"
+import { resolveLockedRecommendPrice } from "./ydsRecommendProfitResolver.js"
+import {
+  formatPickCreatedAtLabel,
+  resolvePickMarketDate,
+} from "./ydsRecommendMarketDate.js"
 
 /** @typedef {import("./ydsValidationStorage.js").ValidationPickRecord} ValidationPickRecord */
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
@@ -31,7 +36,7 @@ function buildPriceSeries(pick) {
 
   /** @type {{ date: string; price: number; returnPct: number; axisLabel: string }[]} */
   const points = []
-  const start = String(pick.recommendedAt).slice(0, 10)
+  const start = resolvePickMarketDate(pick) ?? String(pick.recommendedAt).slice(0, 10)
   points.push({
     date: start,
     price: entry,
@@ -168,17 +173,17 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
   if (!pick) return { visible: false }
 
   const country = pick.country === "KR" ? "KR" : "US"
+  const marketDate = resolvePickMarketDate(pick)
   const priceSeries = buildPriceSeries(pick) ?? []
   const { highPrice, lowPrice, mfe, mae } = computeMfeMae(pick, priceSeries)
   const currentPrice = liveStock?.snapshot?.price ?? pick.currentPrice ?? null
-  const recPrice = pick.recommendedPrice ?? null
+  const recPrice = resolveLockedRecommendPrice(pick) ?? pick.recommendedPrice ?? null
   const currentRet = calcRecommendReturnPct(recPrice, currentPrice)
 
   const today = new Date().toISOString().slice(0, 10)
-  const daysHeld = Math.max(
-    0,
-    Math.round((Date.parse(today) - Date.parse(String(pick.recommendedAt).slice(0, 10))) / 86400000),
-  )
+  const daysHeld = marketDate
+    ? Math.max(0, Math.round((Date.parse(today) - Date.parse(marketDate)) / 86400000))
+    : 0
 
   const scoreSeries = buildScoreSeries(pick) ?? []
   const currentAiScore =
@@ -217,10 +222,7 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
   )
 
   const ledger = pick.marketLedger
-  const recommendedAtIso =
-    pick.recommendedAtIso ??
-    pick.lockedRecommendedAtIso ??
-    String(pick.recommendedAt).slice(0, 10)
+  const createdAtLabel = formatPickCreatedAtLabel(pick)
   const maxReturnPct = pick.maxReturnPct ?? mfe
   const minReturnPct = pick.minReturnPct ?? mae
 
@@ -230,8 +232,10 @@ export function buildPickValidationDetailReport(pick, liveStock = null) {
     ticker: pick.ticker,
     name: pick.name ?? pick.ticker,
     country,
-    recommendedAt: String(pick.recommendedAt).slice(0, 10),
-    recommendedAtIso,
+    marketDate,
+    createdAtLabel,
+    recommendedAt: marketDate ?? String(pick.recommendedAt).slice(0, 10),
+    recommendedAtIso: createdAtLabel,
     recommendedPrice: recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
     currentPrice: formatTransparencyPrice(currentPrice, country),
     highPrice: highPrice != null ? formatTransparencyPrice(highPrice, country) : "—",

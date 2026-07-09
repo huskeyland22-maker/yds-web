@@ -4,6 +4,7 @@
  */
 
 import { computePickReturnExtremes } from "./ydsPickLifecycleEngine.js"
+import { repairPickMarketFields, resolvePickMarketDate } from "./ydsRecommendMarketDate.js"
 
 export const RECOMMEND_LEDGER_VERSION = 1
 
@@ -96,7 +97,7 @@ function buildMarketLedgerFromSnapshot(snap) {
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord | null | undefined} record */
 export function resolveImmutableRecommendedPrice(record) {
   if (!record) return null
-  const lockedAt = String(record.lockedRecommendedAt ?? record.recommendedAt ?? "").slice(0, 10)
+  const lockedAt = resolvePickMarketDate(record) ?? String(record.recommendedAt ?? "").slice(0, 10)
   return (
     toPositivePrice(record.lockedRecommendedPrice) ??
     (lockedAt ? toPositivePrice(record.priceLog?.[lockedAt]) : null) ??
@@ -108,7 +109,7 @@ export function resolveImmutableRecommendedPrice(record) {
 
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord | null | undefined} record */
 export function resolveImmutableRecommendedAt(record) {
-  return String(record?.lockedRecommendedAt ?? record?.recommendedAt ?? "").slice(0, 10) || null
+  return resolvePickMarketDate(record)
 }
 
 /**
@@ -139,9 +140,14 @@ export function logImmutableLedgerViolation(source, before, after) {
 export function repairImmutableLedgerRecord(record, source = "unknown") {
   if (!isPickImmutableSealed(record)) return record
 
+  const marketFields = repairPickMarketFields(record)
   const lockedPrice = resolveImmutableRecommendedPrice(record)
-  const lockedAt = resolveImmutableRecommendedAt(record) ?? record.recommendedAt
-  const lockedAtIso = record.lockedRecommendedAtIso ?? record.recommendedAtIso
+  const lockedAt = marketFields.marketDate ?? resolveImmutableRecommendedAt(record) ?? record.recommendedAt
+  const createdAt = marketFields.createdAt ?? record.createdAt ?? record.recordedAt
+  const lockedAtIso =
+    record.lockedRecommendedAtIso ??
+    record.recommendedAtIso ??
+    (createdAt ? formatRecommendAtIso(createdAt) : undefined)
   const nextSnapshot = record.recommendSnapshot
     ? Object.freeze({
         ...record.recommendSnapshot,
@@ -159,11 +165,15 @@ export function repairImmutableLedgerRecord(record, source = "unknown") {
 
   const next = {
     ...record,
+    ...marketFields,
+    createdAt,
     recommendedAt: lockedAt,
     recommendedAtIso: lockedAtIso,
     recommendedPrice: lockedPrice,
     lockedRecommendedPrice: lockedPrice,
     lockedRecommendedAt: lockedAt,
+    lockedMarketDate: lockedAt,
+    marketDate: lockedAt,
     lockedRecommendedAtIso: lockedAtIso,
     recommendSnapshot: nextSnapshot,
     marketLedger: nextMarketLedger,
@@ -325,7 +335,10 @@ export function resolveRunningReturnExtremes(record, returnPct) {
 export function sealNewRecommendLedgerRecord(record, marketContext, panicData) {
   const lockedPrice = resolveImmutableRecommendedPrice(record)
   const recordedAt = record.recordedAt || Date.now()
-  const recommendedAt = String(record.recommendedAt ?? "").slice(0, 10)
+  const createdAt = record.createdAt ?? recordedAt
+  const marketDate = String(
+    record.marketDate ?? record.lockedMarketDate ?? record.recommendedAt ?? "",
+  ).slice(0, 10)
   const country = record.country === "KR" ? "KR" : "US"
   const id =
     record.id && String(record.id).startsWith("rec-")
@@ -336,14 +349,17 @@ export function sealNewRecommendLedgerRecord(record, marketContext, panicData) {
     ...record,
     id,
     recordedAt,
-    recommendedAt,
+    createdAt,
+    marketDate,
+    lockedMarketDate: marketDate,
+    recommendedAt: marketDate,
     recommendedPrice: lockedPrice,
-    recommendedAtIso: formatRecommendAtIso(recordedAt),
+    recommendedAtIso: formatRecommendAtIso(createdAt),
     ledgerVersion: RECOMMEND_LEDGER_VERSION,
     immutableSealed: true,
     lockedRecommendedPrice: lockedPrice,
-    lockedRecommendedAt: recommendedAt,
-    lockedRecommendedAtIso: formatRecommendAtIso(recordedAt),
+    lockedRecommendedAt: marketDate,
+    lockedRecommendedAtIso: formatRecommendAtIso(createdAt),
     marketLedger:
       record.marketLedger ??
       buildMarketLedgerSnapshot(marketContext, panicData, lockedPrice) ??
@@ -375,6 +391,17 @@ export function migratePickToRecommendLedger(record) {
   })
 }
 
+export function hasAutoCapturePickForMarketDate(existing, country, ticker, marketDate) {
+  const sym = String(ticker).toUpperCase()
+  const date = String(marketDate).slice(0, 10)
+  return (existing ?? []).some(
+    (p) =>
+      p.country === country &&
+      String(p.ticker).toUpperCase() === sym &&
+      resolvePickMarketDate(p) === date,
+  )
+}
+
 /**
  * @param {import("./ydsValidationStorage.js").ValidationPickRecord[]} existing
  * @param {'US' | 'KR'} country
@@ -382,11 +409,5 @@ export function migratePickToRecommendLedger(record) {
  * @param {string} today
  */
 export function hasAutoCapturePickToday(existing, country, ticker, today) {
-  const sym = String(ticker).toUpperCase()
-  return (existing ?? []).some(
-    (p) =>
-      p.country === country &&
-      String(p.ticker).toUpperCase() === sym &&
-      String(p.recommendedAt).slice(0, 10) === today,
-  )
+  return hasAutoCapturePickForMarketDate(existing, country, ticker, today)
 }

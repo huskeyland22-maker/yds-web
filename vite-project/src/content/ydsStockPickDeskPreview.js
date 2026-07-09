@@ -4,6 +4,7 @@
 
 import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
 import { buildRecommendProfitView } from "./ydsRecommendProfitResolver.js"
+import { resolvePickMarketDate } from "./ydsRecommendMarketDate.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 
 /**
@@ -65,12 +66,14 @@ export function buildStockPickDeskPreview(stock, today = new Date().toISOString(
     recommendedPrice != null ? formatTransparencyPrice(recommendedPrice, country) : "—"
 
   const days =
-    match?.recommendedAt != null ? daysSince(match.recommendedAt, today) : profit.daysSinceRecommend
+    resolvePickMarketDate(match) != null
+      ? daysSince(resolvePickMarketDate(match), today)
+      : profit.daysSinceRecommend
   const badge = resolveValidationBadge(days)
   const cardData = {
     ticker: stock.ticker,
     recId: match?.id ?? null,
-    recommendedAt: match?.recommendedAt ?? null,
+    recommendedAt: resolvePickMarketDate(match),
     recommendedPrice: profit.recommendPrice,
     currentPrice: profit.currentPrice,
     lockedRecommendedPrice: match?.lockedRecommendedPrice ?? null,

@@ -15,6 +15,7 @@ import {
 } from "./ydsRecommendProfitResolver.js"
 import { daysBetweenPickDates } from "./ydsPickLifecycleEngine.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
+import { resolvePickMarketDate } from "./ydsRecommendMarketDate.js"
 import { getRecommendScoreDelta } from "./ydsStockPickScoreHistory.js"
 import {
   estimateHoldPeriodLabel,
@@ -103,7 +104,7 @@ export function buildStockPickListRow(stock) {
   const recStatus = resolveRecommendStatusView(stock)
   const conf = stock.trustReport?.aiConfidence
   const { maxRet, mdd } = resolvePickReturnExtremes(pick, returnPct)
-  const recommendedAt = pick?.recommendedAt ? String(pick.recommendedAt).slice(0, 10) : null
+  const recommendedAt = resolvePickMarketDate(pick)
   const today = todayDateKey()
   const daysSinceRecommend = recommendedAt
     ? daysBetweenPickDates(recommendedAt, today)
@@ -114,32 +115,6 @@ export function buildStockPickListRow(stock) {
   const upside = estimateUpsidePct(stock, Math.max(0, (stock.rank ?? 1) - 1))
   const holdPeriod = estimateHoldPeriodLabel(recStatus.id)
   const recommendCount = countValidationPicksByTicker(stock.ticker, country)
-  console.table({
-    ticker: stock.ticker,
-    recId: pick?.id ?? null,
-    recommendedAt,
-    recommendedPrice: recPrice,
-    currentPrice: currentRaw,
-    lockedRecommendedPrice: pick?.lockedRecommendedPrice ?? null,
-    livePrice: Number(stock.snapshot?.price ?? stock.snapshot?.close) || null,
-    latestPrice: pick?.currentPrice ?? null,
-    ledger: pick
-      ? {
-          recommendedAt: pick.recommendedAt ?? null,
-          recommendedPrice: pick.recommendedPrice ?? null,
-          lockedRecommendedPrice: pick.lockedRecommendedPrice ?? null,
-          currentPrice: pick.currentPrice ?? null,
-          recommendedScore: pick.recommendedScore ?? null,
-          strategyLabel: pick.strategyLabel ?? null,
-        }
-      : null,
-    display: {
-      recommendedPriceLabel:
-        recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
-      currentPriceLabel: formatTransparencyPrice(currentRaw, country),
-      returnLabel: profit.returnLabel,
-    },
-  })
 
   return {
     ticker: stock.ticker,

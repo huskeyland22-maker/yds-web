@@ -82,39 +82,7 @@ export default function YdsStockPickAiDetailLayout({ stock }) {
     },
   ]
 
-  const historyLedger = historyReport.ledger
   const historyDisplay = historyReport.display
-
-  if (
-    historyLedger?.recommendedAt &&
-    (historyDisplay?.recommendedAt === "—" ||
-      historyDisplay?.holdingDays === "—" ||
-      historyDisplay?.recommendedPrice === "—" ||
-      historyDisplay?.currentPrice === "—" ||
-      historyDisplay?.highestProfit === "—" ||
-      historyDisplay?.lowestProfit === "—")
-  ) {
-    console.table({
-      recommendedAt: historyLedger.recommendedAt,
-      recommendedAtIso: historyLedger.recommendedAtIso,
-      lockedRecommendedPrice: historyLedger.lockedRecommendedPrice,
-      recommendedPrice: historyLedger.recommendedPrice,
-      currentPrice: historyLedger.currentPrice,
-      profitPercent: historyLedger.profitPercent,
-      holdingDays: historyLedger.holdingDays,
-      highestProfit: historyLedger.highestProfit,
-      lowestProfit: historyLedger.lowestProfit,
-    })
-    console.table({
-      cardRecommendedAt: historyDisplay?.recommendedAt,
-      cardHoldingDays: historyDisplay?.holdingDays,
-      cardRecommendedPrice: historyDisplay?.recommendedPrice,
-      cardCurrentPrice: historyDisplay?.currentPrice,
-      cardHighestProfit: historyDisplay?.highestProfit,
-      cardLowestProfit: historyDisplay?.lowestProfit,
-      cardCurrentProfit: historyDisplay?.currentProfit,
-    })
-  }
 
   const validationMetrics = [
     { label: "추천일", value: historyDisplay?.recommendedAt ?? "—" },
@@ -129,41 +97,6 @@ export default function YdsStockPickAiDetailLayout({ stock }) {
       tone: returnToneClass(row.returnTone),
     },
   ]
-
-  console.log("[YdsStockPickAiDetailLayout props]", {
-    component: "YdsStockPickAiDetailLayout",
-    ticker: stock.ticker,
-    props: { stock },
-  })
-  console.log("[YdsStockPickAiDetailLayout recommendedAt]", {
-    recommendedAt: historyDisplay?.recommendedAt,
-    historyReportDisplayRecommendedAt: historyReport?.display?.recommendedAt,
-    ledgerRecommendedAt: historyLedger?.recommendedAt,
-    validationRecommendedAt: aiReport?.validation?.recommendedAt,
-  })
-  console.table({
-    "추천 시작일 ->": historyDisplay?.recommendedAt ?? "—",
-    "추천 유지일수 ->": historyDisplay?.holdingDays ?? "—",
-    "현재수익률 ->": historyDisplay?.currentProfit ?? "—",
-    "최고수익률 ->": historyDisplay?.highestProfit ?? "—",
-  })
-  if (typeof window !== "undefined") {
-    window.__YDS_AI_DETAIL_DEBUG = window.__YDS_AI_DETAIL_DEBUG ?? {}
-    window.__YDS_AI_DETAIL_DEBUG[stock.ticker] = {
-      component: "YdsStockPickAiDetailLayout",
-      metricVars: {
-        "추천 시작일": "historyDisplay.recommendedAt",
-        "추천 유지일수": "historyDisplay.holdingDays",
-        "현재수익률": "historyDisplay.currentProfit",
-        "최고수익률": "historyDisplay.highestProfit",
-      },
-      props: { stock },
-      ledger: historyLedger,
-      historyReport,
-      validation: aiReport?.validation ?? null,
-      validationMetrics,
-    }
-  }
 
   const priceTargets = [
     { label: "목표가", value: targetPrice, emphasize: true, tone: "pos" },

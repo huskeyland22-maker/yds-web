@@ -106,8 +106,8 @@ export default function StockPickValidationDetailPage() {
       </header>
 
       <dl className="yds-spick-validation-kpi">
-        <div><dt>추천일시</dt><dd className="font-mono tabular-nums">{report.recommendedAtIso ?? report.recommendedAt ?? "—"}</dd></div>
-        <div><dt>추천일</dt><dd className="font-mono tabular-nums">{report.recommendedAt ?? "—"}</dd></div>
+        <div><dt>추천 생성일</dt><dd className="font-mono tabular-nums">{report.createdAtLabel ?? "—"}</dd></div>
+        <div><dt>추천일</dt><dd className="font-mono tabular-nums">{report.marketDate ?? report.recommendedAt ?? "—"}</dd></div>
         <div><dt>추천가</dt><dd className="font-mono tabular-nums">{report.recommendedPrice ?? "—"}</dd></div>
         <div><dt>현재가</dt><dd className="font-mono tabular-nums">{report.currentPrice ?? "—"}</dd></div>
         <div><dt>최고가</dt><dd className="font-mono tabular-nums">{report.highPrice ?? "—"}</dd></div>

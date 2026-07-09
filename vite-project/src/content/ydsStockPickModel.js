@@ -12,6 +12,7 @@ import {
   computeMarketFitScore,
 } from "./ydsMarketAdapter.js"
 import { getStockSnapshot, toEngineSnapshot, toStockMarketSnapshot } from "./stockPickSnapshotProvider.js"
+import { extractPickMarketMeta } from "./ydsRecommendMarketDate.js"
 import { computeStockScores } from "./ydsStockScoreEngine.js"
 import {
   actionFromStatus,
@@ -405,6 +406,7 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     quoteSource: resolveQuoteSource(liveEntry),
     statusDiag,
     quote: liveEntry?.quote ?? null,
+    pickMarket: liveEntry?.apiBody ? extractPickMarketMeta(liveEntry.apiBody) : null,
   }
 
   enriched.opinion = buildStockPickOpinion(enriched)

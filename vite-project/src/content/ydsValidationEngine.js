@@ -32,7 +32,6 @@ import {
 import { updatePickLifecycle } from "./ydsPickLifecycleEngine.js"
 import {
   applyMutablePickUpdate,
-  hasAutoCapturePickToday,
   isPickImmutableSealed,
   logImmutableLedgerViolation,
   mapLifecycleToLedgerState,
@@ -40,6 +39,10 @@ import {
   resolveRunningReturnExtremes,
   sealNewRecommendLedgerRecord,
 } from "./ydsRecommendLedger.js"
+import {
+  resolveRecommendMarketAnchor,
+  resolvePickMarketDate,
+} from "./ydsRecommendMarketDate.js"
 import {
   filterByCountry,
   getRankingStocks,
@@ -119,12 +122,17 @@ export function regimeFromMarketContext(ctx) {
  * @param {string} recommendedAt
  * @param {{ panicData?: object | null }} [options]
  */
-function pickRecordFromStock(stock, marketContext, recommendedAt, options = {}) {
+function pickRecordFromStock(stock, marketContext, _ignoredDate, options = {}) {
   const recordedAt = Date.now()
-  const snap = buildRecommendSnapshot(stock, marketContext, recommendedAt)
-  const price = snap.recommendedPrice
-  const { regimeId, regimeLabel } = regimeFromMarketContext(marketContext)
+  const createdAt = recordedAt
   const country = stock.country === "KR" ? "KR" : "US"
+  const { marketDate, marketClose } = resolveRecommendMarketAnchor(stock, country)
+  const anchorDate = marketDate ?? new Date().toISOString().slice(0, 10)
+  const price = marketClose ?? null
+  const baseSnap = buildRecommendSnapshot(stock, marketContext, anchorDate)
+  const snap =
+    price != null ? Object.freeze({ ...baseSnap, recommendedPrice: price }) : baseSnap
+  const { regimeId, regimeLabel } = regimeFromMarketContext(marketContext)
   const statusId = stock.stockStatus?.id ?? stock.statusView?.id ?? "interest"
   const statusLabel =
     stock.stockStatus?.label ?? STOCK_STATUS_VIEWS[statusId]?.label ?? "—"
@@ -135,7 +143,9 @@ function pickRecordFromStock(stock, marketContext, recommendedAt, options = {}) 
     country,
     rank: stock.rank,
     isTop3: stock.rank > 0 && stock.rank <= 3,
-    recommendedAt,
+    recommendedAt: anchorDate,
+    marketDate: anchorDate,
+    createdAt,
     recommendedPrice: price,
     recommendedScore: snap.totalScore,
     qualityGrade: snap.qualityGrade,
@@ -147,7 +157,7 @@ function pickRecordFromStock(stock, marketContext, recommendedAt, options = {}) 
     returnPct: null,
     horizons: { d7: null, d14: null, d30: null, d90: null, d180: null, d365: null },
     horizonPrices: { d7: null, d14: null, d30: null, d90: null, d180: null, d365: null },
-    priceLog: price != null ? { [recommendedAt]: price } : {},
+    priceLog: price != null ? { [anchorDate]: price } : {},
     regimeId,
     regimeLabel,
     strategyLabel: snap.marketStateLabel,
@@ -400,7 +410,14 @@ export function captureTodayPickSnapshots(
     })
     .filter((s) => {
       const country = s.country === "KR" ? "KR" : "US"
-      return !hasAutoCapturePickToday(existing, country, s.ticker, today)
+      const { marketDate } = resolveRecommendMarketAnchor(s, country)
+      const anchorDate = marketDate ?? today
+      return !existing.some(
+        (p) =>
+          p.country === country &&
+          String(p.ticker).toUpperCase() === String(s.ticker).toUpperCase() &&
+          resolvePickMarketDate(p) === anchorDate,
+      )
     })
     .map((s) => pickRecordFromStock(s, marketContext, today, options))
 

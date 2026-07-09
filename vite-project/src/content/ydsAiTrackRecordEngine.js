@@ -9,6 +9,7 @@ import {
   formatHubHistoryDateDot,
 } from "./ydsHubHistoryViewEngine.js"
 import { formatRecommendProfitLabel } from "./ydsRecommendProfitResolver.js"
+import { formatPickCreatedAtLabel, resolvePickMarketDate } from "./ydsRecommendMarketDate.js"
 import { resolvePickLifecycleView } from "./ydsPickLifecycleEngine.js"
 import { summarizeLockedReturns } from "./ydsPickReturnStats.js"
 import { SCORE_BUCKETS } from "./ydsPickScoreCorrelation.js"
@@ -215,11 +216,11 @@ export function buildTrackRecordDetail(pickId, stocks = []) {
     name: hubRow?.name ?? pick.name ?? pick.ticker,
     ticker: pick.ticker,
     country,
-    recommendedAtLabel: hubRow?.recommendedAtLabel ?? formatHubHistoryDateDot(pick.recommendedAt),
-    recommendedAtIso:
-      pick.recommendedAtIso ??
-      pick.lockedRecommendedAtIso ??
-      formatHubHistoryDateDot(pick.recommendedAt),
+    recommendedAtLabel:
+      hubRow?.recommendedAtLabel ??
+      formatHubHistoryDateDot(resolvePickMarketDate(pick) ?? pick.recommendedAt),
+    createdAtLabel: formatPickCreatedAtLabel(pick) ?? "—",
+    recommendedAtIso: formatPickCreatedAtLabel(pick) ?? "—",
     recommendedPriceLabel: hubRow?.recommendedPriceLabel ?? "—",
     currentPriceLabel: hubRow?.currentPriceLabel ?? "—",
     returnLabel: hubRow?.returnLabel ?? formatRecommendProfitLabel(pick.returnPct),

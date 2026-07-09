@@ -50,6 +50,9 @@ const MAX_REGIME_PERIODS = 120
  *   rank: number
  *   isTop3: boolean
  *   recommendedAt: string
+ *   marketDate?: string
+ *   lockedMarketDate?: string
+ *   createdAt?: number
  *   recommendedPrice: number | null
  *   recommendedScore: number | null
  *   qualityGrade: string
@@ -140,7 +143,8 @@ const EMPTY_HORIZON_PRICES = {
 /** @param {unknown} raw */
 export function normalizePickRecord(raw) {
   const r = raw && typeof raw === "object" ? raw : {}
-  const recommendedAt = String(r.recommendedAt ?? "").slice(0, 10)
+  const recommendedAt = String(r.marketDate ?? r.recommendedAt ?? "").slice(0, 10)
+  const marketDate = r.marketDate ? String(r.marketDate).slice(0, 10) : recommendedAt || undefined
   const rank = Number(r.rank) || 0
   const legacySnap = r.snapshot && typeof r.snapshot === "object" ? r.snapshot : null
   const recommendedScoreRaw = legacySnap?.recommendedScore ?? r.recommendedScore
@@ -161,6 +165,9 @@ export function normalizePickRecord(raw) {
     rank,
     isTop3: r.isTop3 != null ? Boolean(r.isTop3) : rank > 0 && rank <= 3,
     recommendedAt,
+    marketDate,
+    lockedMarketDate: r.lockedMarketDate ? String(r.lockedMarketDate).slice(0, 10) : undefined,
+    createdAt: r.createdAt != null ? Number(r.createdAt) : undefined,
     recommendedPrice:
       r.recommendedPrice != null && Number(r.recommendedPrice) > 0
         ? Number(r.recommendedPrice)

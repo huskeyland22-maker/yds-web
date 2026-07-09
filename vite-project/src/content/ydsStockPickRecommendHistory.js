@@ -12,6 +12,10 @@ import {
   migratePickLifecycle,
   resolvePickLifecycleView,
 } from "./ydsPickLifecycleEngine.js"
+import {
+  formatPickCreatedAtLabel,
+  resolvePickMarketDate,
+} from "./ydsRecommendMarketDate.js"
 
 /** @param {string} dateKey */
 function formatMdDot(dateKey) {
@@ -68,25 +72,24 @@ export function buildStockPickRecommendHistoryReport(stock) {
   const scoreRows = readScoreHistory()[stock.ticker] ?? []
 
   const today = new Date().toISOString().slice(0, 10)
+  const anchorMarketDate = resolvePickMarketDate(anchorPick)
   let daysHeld = null
-  if (anchorPick?.recommendedAt) {
+  if (anchorMarketDate) {
     daysHeld = Math.max(
       0,
-      Math.round(
-        (Date.parse(today) - Date.parse(String(anchorPick.recommendedAt).slice(0, 10))) / 86400000,
-      ),
+      Math.round((Date.parse(today) - Date.parse(anchorMarketDate)) / 86400000),
     )
   }
 
-  const firstRecommendedAt = anchorPick?.recommendedAt ?? null
+  const firstRecommendedAt = anchorMarketDate
   const firstRecommendedScore =
     anchorPick?.recommendedScore ?? scoreRows[0]?.recommendScore ?? stock.v4Score?.finalRankScore ?? 0
   const timeline = []
 
   if (anchorPick) {
     timeline.push({
-      date: anchorPick.recommendedAt,
-      dateLabel: formatMdDot(anchorPick.recommendedAt),
+      date: anchorMarketDate,
+      dateLabel: formatMdDot(anchorMarketDate),
       score: Math.round(firstRecommendedScore),
       isStart: true,
       isCurrent: false,
@@ -148,8 +151,11 @@ export function buildStockPickRecommendHistoryReport(stock) {
       : stock.scoreDeltas?.day5?.delta ?? null
 
   const ledger = {
-    recommendedAt: anchorPick?.recommendedAt ?? null,
-    recommendedAtIso: anchorPick?.recommendedAtIso ?? anchorPick?.lockedRecommendedAtIso ?? null,
+    marketDate: anchorMarketDate,
+    createdAt: anchorPick?.createdAt ?? anchorPick?.recordedAt ?? null,
+    createdAtLabel: formatPickCreatedAtLabel(anchorPick),
+    recommendedAt: anchorMarketDate,
+    recommendedAtIso: formatPickCreatedAtLabel(anchorPick),
     lockedRecommendedPrice:
       anchorPick?.lockedRecommendedPrice ?? anchorPick?.recommendedPrice ?? null,
     recommendedPrice: recPrice,
@@ -167,7 +173,7 @@ export function buildStockPickRecommendHistoryReport(stock) {
     currentStatus: status.label,
   }
 
-  const displayRecommendedAt = ledger.recommendedAt ?? "—"
+  const displayRecommendedAt = ledger.marketDate ?? ledger.recommendedAt ?? "—"
   const displayHoldingDays =
     ledger.holdingDays != null && Number.isFinite(ledger.holdingDays)
       ? `D+${ledger.holdingDays}`

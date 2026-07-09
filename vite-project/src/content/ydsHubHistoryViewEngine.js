@@ -12,6 +12,7 @@ import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { daysBetweenPickDates, resolvePickLifecycleView } from "./ydsPickLifecycleEngine.js"
 import { todayDateKey } from "./ydsPortfolioTradesStorage.js"
 import { logRecommendPerfPipelineTrace } from "./ydsRecommendPerfAudit.js"
+import { resolvePickMarketDate } from "./ydsRecommendMarketDate.js"
 
 /** @typedef {'all' | 'active' | 'profit' | 'loss' | 'ended'} HubHistoryViewFilterId */
 
@@ -129,16 +130,17 @@ function buildHubHistoryBaseRow(pick, livePrice, liveName) {
   const profit = buildRecommendProfitView(stockStub, pick)
   const lifecycleId = pick.lifecycleId ?? "active"
   const lifecycle = resolvePickLifecycleView(lifecycleId)
-  const daysSince = daysBetweenPickDates(pick.recommendedAt, today)
+  const marketDate = resolvePickMarketDate(pick) ?? pick.recommendedAt
+  const daysSince = daysBetweenPickDates(marketDate, today)
 
   return {
     pickId: pick.id,
     ticker: pick.ticker,
     name: liveName ?? pick.name ?? pick.ticker,
     country,
-    recommendedAt: pick.recommendedAt,
-    recommendedAtIso: pick.recommendedAtIso ?? formatHubHistoryDateDot(pick.recommendedAt),
-    recommendedAtLabel: formatHubHistoryDateDot(pick.recommendedAt),
+    marketDate,
+    recommendedAt: marketDate,
+    recommendedAtLabel: formatHubHistoryDateDot(marketDate),
     recommendedPrice: profit.recommendPrice,
     recommendedPriceLabel:
       profit.recommendPrice != null
