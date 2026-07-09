@@ -13,8 +13,7 @@ export default function YdsMarketRecommendCard({ stock }) {
   const [expanded, setExpanded] = useState(false)
   const preview = useMemo(() => buildStockPickDeskPreview(stock), [stock])
   const to = `/stock-picks/${encodeURIComponent(stock.ticker)}`
-  const retTone =
-    preview.returnSinceRecommend != null && preview.returnSinceRecommend >= 0 ? "up" : "down"
+  const retTone = preview.returnTone ?? "muted"
 
   return (
     <article

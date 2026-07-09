@@ -2,9 +2,9 @@
  * 메인 대시보드 추천 종목 카드 — 검증 스냅샷 연동
  */
 
-import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
+import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
+import { buildRecommendProfitView } from "./ydsRecommendProfitResolver.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
-import { loadValidationPicks } from "./ydsValidationStorage.js"
 
 /**
  * @typedef {{
@@ -21,6 +21,7 @@ import { loadValidationPicks } from "./ydsValidationStorage.js"
  *   currentPriceDisplay: string
  *   returnSinceRecommend: number | null
  *   returnLabel: string
+ *   returnTone: string
  *   daysSinceRecommend: number | null
  * }} StockPickDeskPreview
  */
@@ -49,61 +50,32 @@ function resolveValidationBadge(days) {
   return { id: /** @type {const} */ ("d30"), label: "🟣 30일 검증중" }
 }
 
-/** @param {number | null | undefined} v */
-function formatReturnPct(v) {
-  if (v == null || !Number.isFinite(v)) return "—"
-  return `${v > 0 ? "+" : ""}${v.toFixed(1)}%`
-}
-
 /**
  * @param {import("./ydsStockPickModel.js").StockPickView} stock
  * @param {string} [today]
  */
 export function buildStockPickDeskPreview(stock, today = new Date().toISOString().slice(0, 10)) {
   const country = stock.country === "KR" ? "KR" : "US"
-  const currentRaw = stock.snapshot?.price ?? stock.snapshot?.close
-  const currentPriceDisplay = formatTransparencyPrice(currentRaw, country)
-
-  const picks = loadValidationPicks()
-  const match =
-    picks
-      .filter((p) => p.ticker === stock.ticker)
-      .sort((a, b) => b.recommendedAt.localeCompare(a.recommendedAt))[0] ?? null
-
-  const recommendedPrice = match?.recommendedPrice ?? null
+  const match = findValidationPickByTicker(stock.ticker, country)
+  const profit = buildRecommendProfitView(stock, match)
+  const currentPriceDisplay =
+    profit.currentPrice != null ? formatTransparencyPrice(profit.currentPrice, country) : "—"
+  const recommendedPrice = profit.recommendPrice
   const recommendedPriceDisplay =
-    recommendedPrice != null && recommendedPrice > 0
-      ? formatTransparencyPrice(recommendedPrice, country)
-      : "—"
+    recommendedPrice != null ? formatTransparencyPrice(recommendedPrice, country) : "—"
 
   const days =
-    match?.recommendedAt != null ? daysSince(match.recommendedAt, today) : null
+    match?.recommendedAt != null ? daysSince(match.recommendedAt, today) : profit.daysSinceRecommend
   const badge = resolveValidationBadge(days)
-
-  let returnSinceRecommend = null
-  if (
-    match?.returnPct != null &&
-    Number.isFinite(match.returnPct) &&
-    currentRaw != null &&
-    Number.isFinite(currentRaw)
-  ) {
-    returnSinceRecommend = Number(match.returnPct)
-  } else if (
-    recommendedPrice != null &&
-    recommendedPrice > 0 &&
-    currentRaw != null &&
-    Number.isFinite(currentRaw)
-  ) {
-    returnSinceRecommend = calcRecommendReturnPct(recommendedPrice, currentRaw)
-  }
 
   return {
     badge,
     recommendedPrice,
     recommendedPriceDisplay,
     currentPriceDisplay,
-    returnSinceRecommend,
-    returnLabel: formatReturnPct(returnSinceRecommend),
+    returnSinceRecommend: profit.returnPct,
+    returnLabel: profit.returnLabel,
+    returnTone: profit.returnTone,
     daysSinceRecommend: days,
   }
 }

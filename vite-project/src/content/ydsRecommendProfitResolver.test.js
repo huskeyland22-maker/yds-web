@@ -31,7 +31,7 @@ describe("ydsRecommendProfitResolver", () => {
     expect(
       resolveRecommendProfitPct(null, { snapshot: { price: 120 } }),
     ).toBeNull()
-    expect(formatRecommendProfitLabel(null)).toBe("계산 불가")
+    expect(formatRecommendProfitLabel(null, { hasRecommendPrice: false })).toBe("—")
   })
 
   it("shows pending label on D+0 when prices exist", () => {
@@ -41,7 +41,9 @@ describe("ydsRecommendProfitResolver", () => {
   })
 
   it("shows calc unavailable when prices missing", () => {
-    expect(formatRecommendProfitLabel(null, { hasPrices: false })).toBe("계산 불가")
+    expect(
+      formatRecommendProfitLabel(null, { hasPrices: false, hasCurrentPrice: false }),
+    ).toBe("계산 불가")
   })
 
   it("shows zero percent from D+1", () => {
