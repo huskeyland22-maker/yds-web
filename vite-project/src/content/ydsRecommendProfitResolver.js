@@ -42,15 +42,15 @@ export function resolveLockedRecommendPrice(pick) {
  * @param {import("./ydsStockPickModel.js").StockPickView} stock
  */
 export function resolveRecommendCurrentPrice(pick, stock) {
-  const fromPick = toPositivePrice(pick?.currentPrice)
-  if (fromPick != null) return fromPick
-
   const snap = stock?.snapshot
   const fromStock = toPositivePrice(snap?.price ?? snap?.close)
   if (fromStock != null) return fromStock
 
   const fromQuote = toPositivePrice(stock?.quote?.price)
   if (fromQuote != null) return fromQuote
+
+  const fromPick = toPositivePrice(pick?.currentPrice)
+  if (fromPick != null) return fromPick
 
   return null
 }
