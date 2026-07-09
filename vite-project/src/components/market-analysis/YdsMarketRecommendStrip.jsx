@@ -29,6 +29,30 @@ export default function YdsMarketRecommendStrip({ className = "" }) {
     ? `${limitLabel} 공개`
     : "전체 공개"
 
+  console.table(
+    preview.map((stock) => ({
+      ticker: stock.ticker,
+      snapshotPrice: Number(stock.snapshot?.price ?? stock.snapshot?.close) || null,
+      quotePrice: Number(stock.quote?.price) || null,
+      rank: stock.rank ?? null,
+      dataSource: stock.dataSource ?? null,
+    })),
+  )
+  if (typeof window !== "undefined") {
+    window.__YDS_MARKET_CARD_DEBUG = {
+      loading,
+      liveCount: liveStocks.length,
+      preview: preview.map((stock) => ({
+        ticker: stock.ticker,
+        name: stock.name,
+        snapshotPrice: Number(stock.snapshot?.price ?? stock.snapshot?.close) || null,
+        quotePrice: Number(stock.quote?.price) || null,
+        rank: stock.rank ?? null,
+        dataSource: stock.dataSource ?? null,
+      })),
+    }
+  }
+
   if (!marketContext.ready) return null
 
   return (
