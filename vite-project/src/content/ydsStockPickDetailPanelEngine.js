@@ -125,12 +125,24 @@ export function buildStockPickDetailPanelReport(stock, marketContext = null) {
       : "—"
   const statusLabel = historyReport.status?.label ?? "—"
 
-  if (recommendedAt && daysHeld === "—") {
-    console.error("[detail-panel-ledger-map]", {
-      ticker: stock.ticker,
-      recommendedAt,
-      daysHeldRaw: historyReport.daysHeld,
-      historyVisible: historyReport.visible,
+  if (
+    recommendedAt &&
+    (daysHeld === "—" ||
+      historyReport.display?.recommendedPrice === "—" ||
+      historyReport.display?.currentPrice === "—" ||
+      historyReport.display?.highestProfit === "—" ||
+      historyReport.display?.currentProfit === "—")
+  ) {
+    console.table({
+      recommendedAt: historyReport.ledger?.recommendedAt,
+      recommendedAtIso: historyReport.ledger?.recommendedAtIso,
+      lockedRecommendedPrice: historyReport.ledger?.lockedRecommendedPrice,
+      recommendedPrice: historyReport.ledger?.recommendedPrice,
+      currentPrice: historyReport.ledger?.currentPrice,
+      profitPercent: historyReport.ledger?.profitPercent,
+      holdingDays: historyReport.ledger?.holdingDays,
+      highestProfit: historyReport.ledger?.highestProfit,
+      lowestProfit: historyReport.ledger?.lowestProfit,
     })
   }
 

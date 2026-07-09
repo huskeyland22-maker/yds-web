@@ -174,6 +174,10 @@ export default function YdsStockPickAiAnalysisPanel({
               <dt>추천 유지일</dt>
               <dd>{validation.daysHeld}</dd>
             </div>
+            <div>
+              <dt>현재 추천상태</dt>
+              <dd>{validation.currentStatus ?? "—"}</dd>
+            </div>
           </dl>
         </div>
       ) : null}

@@ -2,10 +2,6 @@
  * AI 종합 분석 — 애널리스트 리포트 · 근거 시각화 · 점수 변화 · 시나리오 · 성과 검증
  */
 
-import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
-import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
-import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
-import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { resolveStockPickUxStatus } from "./ydsStockPickUxStatus.js"
 import { resolveRecommendStatusView } from "./ydsStockPickRecommendColors.js"
 import { buildStockPickTradeScenarioReport } from "./ydsStockPickTradeScenario.js"
@@ -15,6 +11,7 @@ import {
   readScoreHistory,
 } from "./ydsStockPickScoreHistory.js"
 import { estimateHoldPeriodLabel } from "./ydsStockPickDashboardEngine.js"
+import { buildStockPickRecommendHistoryReport } from "./ydsStockPickRecommendHistory.js"
 
 /** @typedef {import("./ydsStockPickModel.js").StockPickView} StockPickView */
 /** @typedef {import("./ydsMarketAdapter.js").YdsMarketAdapterContext} YdsMarketAdapterContext */
@@ -264,43 +261,47 @@ export function buildAiInvestmentScenarios(stock, marketContext = null) {
  * @param {StockPickView} stock
  */
 export function buildStockPickValidationCard(stock) {
-  const country = stock.country === "KR" ? "KR" : "US"
-  const pick = findValidationPickByTicker(stock.ticker, country)
-  if (!pick) {
+  const historyReport = buildStockPickRecommendHistoryReport(stock)
+  const ledger = historyReport.ledger
+  const display = historyReport.display
+  if (!historyReport.visible || !ledger) {
     return { visible: false, title: "추천 성과 검증" }
   }
 
-  const recPrice = pick.recommendedPrice ?? null
-  const currentPrice = Number(stock.snapshot?.price ?? stock.snapshot?.close) ?? pick.currentPrice
-  const ret = calcRecommendReturnPct(recPrice, currentPrice)
-
-  let maxRet = ret
-  let minRet = ret
-  for (const v of Object.values(pick.horizons ?? {})) {
-    if (v != null && Number.isFinite(v)) {
-      if (maxRet == null || v > maxRet) maxRet = v
-      if (minRet == null || v < minRet) minRet = v
-    }
+  if (
+    ledger.recommendedAt &&
+    (display?.recommendedAt === "—" ||
+      display?.holdingDays === "—" ||
+      display?.recommendedPrice === "—" ||
+      display?.currentPrice === "—" ||
+      display?.highestProfit === "—" ||
+      display?.currentProfit === "—")
+  ) {
+    console.table({
+      recommendedAt: ledger.recommendedAt,
+      recommendedAtIso: ledger.recommendedAtIso,
+      lockedRecommendedPrice: ledger.lockedRecommendedPrice,
+      recommendedPrice: ledger.recommendedPrice,
+      currentPrice: ledger.currentPrice,
+      profitPercent: ledger.profitPercent,
+      holdingDays: ledger.holdingDays,
+      highestProfit: ledger.highestProfit,
+      lowestProfit: ledger.lowestProfit,
+    })
   }
-
-  const today = new Date().toISOString().slice(0, 10)
-  const daysHeld = Math.max(
-    0,
-    Math.round(
-      (Date.parse(today) - Date.parse(String(pick.recommendedAt).slice(0, 10))) / 86400000,
-    ),
-  )
 
   return {
     visible: true,
     title: "추천 성과 검증",
-    recommendedAt: String(pick.recommendedAt).slice(0, 10),
-    recommendedPrice: recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
-    currentPrice: formatTransparencyPrice(currentPrice, country),
-    returnLabel: formatPerfPct(ret),
-    maxReturnLabel: formatPerfPct(maxRet),
-    maxLossLabel: formatPerfPct(minRet),
-    daysHeld: `${daysHeld}일`,
+    recommendedAt: display?.recommendedAt ?? "—",
+    recommendedPrice: display?.recommendedPrice ?? "—",
+    currentPrice: display?.currentPrice ?? "—",
+    returnLabel: display?.currentProfit ?? "—",
+    maxReturnLabel: display?.highestProfit ?? "—",
+    maxLossLabel: display?.lowestProfit ?? "—",
+    daysHeld: display?.holdingDays ?? "—",
+    currentStatus: display?.currentStatus ?? "—",
+    ledger,
   }
 }
 
