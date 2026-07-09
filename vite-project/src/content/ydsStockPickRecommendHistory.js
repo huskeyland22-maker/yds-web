@@ -19,6 +19,12 @@ function formatMdDot(dateKey) {
   return m && d ? `${m}/${d}` : dateKey
 }
 
+/** @param {number | null | undefined} value */
+function finiteOrNull(value) {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
 /**
  * @param {string} ticker
  * @param {'US' | 'KR'} [country]
@@ -153,6 +159,22 @@ export function buildStockPickRecommendHistoryReport(stock) {
     currentStatus: status.label,
   }
 
+  const displayRecommendedAt = ledger.recommendedAt ?? "—"
+  const displayHoldingDays =
+    ledger.holdingDays != null && Number.isFinite(ledger.holdingDays)
+      ? `D+${ledger.holdingDays}`
+      : ledger.recommendedAt
+        ? `D+${Math.max(0, Math.round((Date.parse(today) - Date.parse(String(ledger.recommendedAt).slice(0, 10))) / 86400000))}`
+        : "—"
+  const displayProfitPercent =
+    ledger.profitPercent != null && Number.isFinite(ledger.profitPercent)
+      ? ledger.profitPercent
+      : calcRecommendReturnPct(ledger.recommendedPrice, ledger.currentPrice)
+  const displayHighestProfit =
+    ledger.highestProfit != null && Number.isFinite(ledger.highestProfit)
+      ? ledger.highestProfit
+      : finiteOrNull(latestPick?.maxReturnPct ?? latestPick?.peakProfit ?? latestPick?.returnPct)
+
   if (firstPick && scoreRows.length) {
     console.table(
       validationRows.map((row) => ({
@@ -188,18 +210,15 @@ export function buildStockPickRecommendHistoryReport(stock) {
     ).length,
     ledger,
     display: {
-      recommendedAt: ledger.recommendedAt ?? "—",
+      recommendedAt: displayRecommendedAt,
       recommendedPrice:
         ledger.recommendedPrice != null ? formatTransparencyPrice(ledger.recommendedPrice, country) : "—",
       currentPrice:
         ledger.currentPrice != null ? formatTransparencyPrice(ledger.currentPrice, country) : "—",
-      holdingDays:
-        ledger.holdingDays != null && Number.isFinite(ledger.holdingDays)
-          ? `D+${ledger.holdingDays}`
-          : "—",
-      highestProfit: formatPerfPct(ledger.highestProfit),
+      holdingDays: displayHoldingDays,
+      highestProfit: formatPerfPct(displayHighestProfit),
       lowestProfit: formatPerfPct(ledger.lowestProfit),
-      currentProfit: formatPerfPct(ledger.profitPercent),
+      currentProfit: formatPerfPct(displayProfitPercent),
       currentStatus: ledger.currentStatus ?? "—",
     },
   }
