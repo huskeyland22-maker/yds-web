@@ -180,6 +180,7 @@
 - [ ] PWA 캐시 문제
 - [ ] Hydration mismatch
 - [ ] 모바일 새로고침 이슈
+- [x] AI 상세분석 추천 성과 검증 복구 — `repairImmutableLedgerRecord()` 오타로 비어지던 원장 로드 수정
 
 ---
 

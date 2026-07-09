@@ -141,7 +141,7 @@ export function repairImmutableLedgerRecord(record, source = "unknown") {
 
   const lockedPrice = resolveImmutableRecommendedPrice(record)
   const lockedAt = resolveImmutableRecommendedAt(record) ?? record.recommendedAt
-  const lockedAtIso = repaired.lockedRecommendedAtIso ?? repaired.recommendedAtIso
+  const lockedAtIso = record.lockedRecommendedAtIso ?? record.recommendedAtIso
   const nextSnapshot = record.recommendSnapshot
     ? Object.freeze({
         ...record.recommendSnapshot,

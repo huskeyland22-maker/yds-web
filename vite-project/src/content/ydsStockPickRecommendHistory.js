@@ -174,20 +174,17 @@ export function buildStockPickRecommendHistoryReport(stock) {
     ledger.highestProfit != null && Number.isFinite(ledger.highestProfit)
       ? ledger.highestProfit
       : finiteOrNull(latestPick?.maxReturnPct ?? latestPick?.peakProfit ?? latestPick?.returnPct)
-
-  if (firstPick && scoreRows.length) {
-    console.table(
-      validationRows.map((row) => ({
-        id: row.id,
-        recommendedAt: row.recommendedAt,
-        recommendedAtIso: row.recommendedAtIso ?? row.lockedRecommendedAtIso ?? null,
-        lockedRecommendedPrice: row.lockedRecommendedPrice ?? null,
-        recommendedPrice: row.recommendedPrice ?? null,
-        currentPrice: row.currentPrice ?? null,
-        createdAt: row.recordedAt ?? null,
-        updatedAt: row.lastUpdatedAt ?? null,
-      })),
-    )
+  const historyDisplay = {
+    recommendedAt: displayRecommendedAt,
+    recommendedPrice:
+      ledger.recommendedPrice != null ? formatTransparencyPrice(ledger.recommendedPrice, country) : "—",
+    currentPrice:
+      ledger.currentPrice != null ? formatTransparencyPrice(ledger.currentPrice, country) : "—",
+    holdingDays: displayHoldingDays,
+    highestProfit: formatPerfPct(displayHighestProfit),
+    lowestProfit: formatPerfPct(ledger.lowestProfit),
+    currentProfit: formatPerfPct(displayProfitPercent),
+    currentStatus: ledger.currentStatus ?? "—",
   }
 
   return {
@@ -209,17 +206,6 @@ export function buildStockPickRecommendHistoryReport(stock) {
       (p) => (migratePickLifecycle(p).lifecycleId ?? "active") !== "active",
     ).length,
     ledger,
-    display: {
-      recommendedAt: displayRecommendedAt,
-      recommendedPrice:
-        ledger.recommendedPrice != null ? formatTransparencyPrice(ledger.recommendedPrice, country) : "—",
-      currentPrice:
-        ledger.currentPrice != null ? formatTransparencyPrice(ledger.currentPrice, country) : "—",
-      holdingDays: displayHoldingDays,
-      highestProfit: formatPerfPct(displayHighestProfit),
-      lowestProfit: formatPerfPct(ledger.lowestProfit),
-      currentProfit: formatPerfPct(displayProfitPercent),
-      currentStatus: ledger.currentStatus ?? "—",
-    },
+    display: historyDisplay,
   }
 }
