@@ -6,6 +6,7 @@ import { loadValidationPicks } from "./ydsValidationStorage.js"
 import { readScoreHistory } from "./ydsStockPickScoreHistory.js"
 import { calcRecommendReturnPct } from "../trading-zone/tradingZoneRecommendationTrack.js"
 import { formatPerfPct } from "./ydsPickPerformanceEngine.js"
+import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import {
   computePickReturnExtremes,
   migratePickLifecycle,
@@ -110,6 +111,26 @@ export function buildStockPickRecommendHistoryReport(stock) {
       ? timeline[timeline.length - 1].score - timeline[0].score
       : stock.scoreDeltas?.day5?.delta ?? null
 
+  const ledger = {
+    recommendedAt: firstPick?.recommendedAt ?? null,
+    recommendedAtIso: firstPick?.recommendedAtIso ?? firstPick?.lockedRecommendedAtIso ?? null,
+    lockedRecommendedPrice:
+      firstPick?.lockedRecommendedPrice ?? firstPick?.recommendedPrice ?? null,
+    recommendedPrice: recPrice,
+    currentPrice: Number.isFinite(currentPrice) ? currentPrice : latestPick?.currentPrice ?? null,
+    profitPercent: currentReturn,
+    holdingDays: daysHeld,
+    highestProfit: maxReturn,
+    lowestProfit:
+      validationRows.reduce((minValue, pick) => {
+        const { minRet } = computePickReturnExtremes(pick)
+        if (minRet == null || !Number.isFinite(minRet)) return minValue
+        if (minValue == null || minRet < minValue) return minRet
+        return minValue
+      }, /** @type {number | null} */ (currentReturn)),
+    currentStatus: status.label,
+  }
+
   return {
     visible: Boolean(firstPick || timeline.length),
     title: "추천 히스토리",
@@ -124,8 +145,25 @@ export function buildStockPickRecommendHistoryReport(stock) {
     maxReturnLabel: formatPerfPct(maxReturn),
     currentReturn,
     currentReturnLabel: formatPerfPct(currentReturn),
+    lowestProfitLabel: formatPerfPct(ledger.lowestProfit),
     endedPicks: validationRows.filter(
       (p) => (migratePickLifecycle(p).lifecycleId ?? "active") !== "active",
     ).length,
+    ledger,
+    display: {
+      recommendedAt: ledger.recommendedAt ?? "—",
+      recommendedPrice:
+        ledger.recommendedPrice != null ? formatTransparencyPrice(ledger.recommendedPrice, country) : "—",
+      currentPrice:
+        ledger.currentPrice != null ? formatTransparencyPrice(ledger.currentPrice, country) : "—",
+      holdingDays:
+        ledger.holdingDays != null && Number.isFinite(ledger.holdingDays)
+          ? `D+${ledger.holdingDays}`
+          : "—",
+      highestProfit: formatPerfPct(ledger.highestProfit),
+      lowestProfit: formatPerfPct(ledger.lowestProfit),
+      currentProfit: formatPerfPct(ledger.profitPercent),
+      currentStatus: ledger.currentStatus ?? "—",
+    },
   }
 }

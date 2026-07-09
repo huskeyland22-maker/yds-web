@@ -3,6 +3,7 @@ import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { buildStockPickListRow } from "../../content/ydsStockPickListView.js"
 import { buildStockPickAiAnalysisReport } from "../../content/ydsStockPickAiAnalysisEngine.js"
 import { buildStockPickDetailPanelReport } from "../../content/ydsStockPickDetailPanelEngine.js"
+import { buildStockPickRecommendHistoryReport } from "../../content/ydsStockPickRecommendHistory.js"
 import YdsStockPickAiDetailCard, { AiDetailMetricGrid } from "./YdsStockPickAiDetailCard.jsx"
 import YdsStockPickRecommendRationale from "./YdsStockPickRecommendRationale.jsx"
 import YdsStockPickActionGuide from "./YdsStockPickActionGuide.jsx"
@@ -37,9 +38,9 @@ export default function YdsStockPickAiDetailLayout({ stock }) {
     () => buildStockPickDetailPanelReport(stock, marketContext?.ready ? marketContext : null),
     [stock, marketContext],
   )
+  const historyReport = useMemo(() => buildStockPickRecommendHistoryReport(stock), [stock])
 
   const trust = stock.trustReport
-  const validation = aiReport.validation
   const scenarioReport = aiReport.investmentScenarios
   const scoreChange = aiReport.scoreChange
 
@@ -81,33 +82,44 @@ export default function YdsStockPickAiDetailLayout({ stock }) {
     },
   ]
 
-  const validationMetrics = validation?.visible
-    ? [
-        { label: "추천일", value: validation.recommendedAt },
-        { label: "추천가", value: validation.recommendedPrice, emphasize: true },
-        { label: "현재가", value: validation.currentPrice, emphasize: true },
-        { label: "최고수익", value: validation.maxReturnLabel, tone: "pos" },
-        { label: "최대손실", value: validation.maxLossLabel, tone: "risk" },
-        {
-          label: "현재수익",
-          value: row.returnLabel,
-          emphasize: true,
-          tone: returnToneClass(row.returnTone),
-        },
-      ]
-    : [
-        { label: "추천일", value: row.recommendedAtLabel ?? "—" },
-        { label: "추천가", value: row.recommendedPriceLabel, emphasize: true },
-        { label: "현재가", value: row.currentPriceLabel, emphasize: true },
-        { label: "최고수익", value: row.maxReturnLabel, tone: "pos" },
-        { label: "최대손실", value: row.mddLabel, tone: "risk" },
-        {
-          label: "현재수익",
-          value: row.returnLabel,
-          emphasize: true,
-          tone: returnToneClass(row.returnTone),
-        },
-      ]
+  const historyLedger = historyReport.ledger
+  const historyDisplay = historyReport.display
+
+  if (
+    historyLedger?.recommendedAt &&
+    (historyDisplay?.recommendedAt === "—" ||
+      historyDisplay?.holdingDays === "—" ||
+      historyDisplay?.recommendedPrice === "—" ||
+      historyDisplay?.currentPrice === "—" ||
+      historyDisplay?.highestProfit === "—" ||
+      historyDisplay?.lowestProfit === "—")
+  ) {
+    console.table({
+      recommendedAt: historyLedger.recommendedAt,
+      recommendedAtIso: historyLedger.recommendedAtIso,
+      lockedRecommendedPrice: historyLedger.lockedRecommendedPrice,
+      recommendedPrice: historyLedger.recommendedPrice,
+      currentPrice: historyLedger.currentPrice,
+      profitPercent: historyLedger.profitPercent,
+      holdingDays: historyLedger.holdingDays,
+      highestProfit: historyLedger.highestProfit,
+      lowestProfit: historyLedger.lowestProfit,
+    })
+  }
+
+  const validationMetrics = [
+    { label: "추천일", value: historyDisplay?.recommendedAt ?? "—" },
+    { label: "추천가", value: historyDisplay?.recommendedPrice ?? "—", emphasize: true },
+    { label: "현재가", value: historyDisplay?.currentPrice ?? "—", emphasize: true },
+    { label: "최고수익", value: historyDisplay?.highestProfit ?? "—", tone: "pos" },
+    { label: "최대손실", value: historyDisplay?.lowestProfit ?? "—", tone: "risk" },
+    {
+      label: "현재수익",
+      value: historyDisplay?.currentProfit ?? "—",
+      emphasize: true,
+      tone: returnToneClass(row.returnTone),
+    },
+  ]
 
   const priceTargets = [
     { label: "목표가", value: targetPrice, emphasize: true, tone: "pos" },
