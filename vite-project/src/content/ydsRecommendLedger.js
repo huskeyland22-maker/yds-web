@@ -7,6 +7,12 @@ import { computePickReturnExtremes } from "./ydsPickLifecycleEngine.js"
 
 export const RECOMMEND_LEDGER_VERSION = 1
 
+/** @param {unknown} value */
+function toPositivePrice(value) {
+  const n = Number(value)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
 /** @typedef {'active' | 'ended' | 'excluded'} RecommendLedgerState */
 
 /**
@@ -22,6 +28,7 @@ export const RECOMMEND_LEDGER_VERSION = 1
  *   vix: number | null
  *   cnn: number | null
  *   bofa: number | null
+ *   recommendedPrice?: number | null
  * }} RecommendMarketLedger
  */
 
@@ -45,7 +52,7 @@ export function generateRecommendLedgerId(country, ticker, recordedAt) {
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null | undefined} marketContext
  * @param {object | null | undefined} panicData
  */
-export function buildMarketLedgerSnapshot(marketContext, panicData) {
+export function buildMarketLedgerSnapshot(marketContext, panicData, recommendedPrice = null) {
   const toNum = (v) => {
     const n = Number(v)
     return Number.isFinite(n) ? n : null
@@ -63,6 +70,7 @@ export function buildMarketLedgerSnapshot(marketContext, panicData) {
     vix: toNum(panicData?.vix),
     cnn: toNum(panicData?.fearGreed),
     bofa: toNum(panicData?.bofa),
+    recommendedPrice: toNum(recommendedPrice),
   })
 }
 
@@ -81,7 +89,96 @@ function buildMarketLedgerFromSnapshot(snap) {
     vix: null,
     cnn: null,
     bofa: null,
+    recommendedPrice: toPositivePrice(snap.recommendedPrice),
   })
+}
+
+/** @param {import("./ydsValidationStorage.js").ValidationPickRecord | null | undefined} record */
+export function resolveImmutableRecommendedPrice(record) {
+  if (!record) return null
+  const lockedAt = String(record.lockedRecommendedAt ?? record.recommendedAt ?? "").slice(0, 10)
+  return (
+    toPositivePrice(record.lockedRecommendedPrice) ??
+    (lockedAt ? toPositivePrice(record.priceLog?.[lockedAt]) : null) ??
+    toPositivePrice(record.recommendSnapshot?.recommendedPrice) ??
+    toPositivePrice(record.marketLedger?.recommendedPrice) ??
+    toPositivePrice(record.recommendedPrice)
+  )
+}
+
+/** @param {import("./ydsValidationStorage.js").ValidationPickRecord | null | undefined} record */
+export function resolveImmutableRecommendedAt(record) {
+  return String(record?.lockedRecommendedAt ?? record?.recommendedAt ?? "").slice(0, 10) || null
+}
+
+/**
+ * @param {string} source
+ * @param {import("./ydsValidationStorage.js").ValidationPickRecord} before
+ * @param {import("./ydsValidationStorage.js").ValidationPickRecord} after
+ */
+export function logImmutableLedgerViolation(source, before, after) {
+  console.error("[immutable-ledger]", {
+    source,
+    id: before.id,
+    ticker: before.ticker,
+    recommendedAtBefore: before.recommendedAt,
+    recommendedAtAfter: after.recommendedAt,
+    recommendedPriceBefore: before.recommendedPrice,
+    recommendedPriceAfter: after.recommendedPrice,
+    lockedRecommendedPriceBefore: before.lockedRecommendedPrice ?? null,
+    lockedRecommendedPriceAfter: after.lockedRecommendedPrice ?? null,
+    snapshotRecommendedPriceBefore: before.recommendSnapshot?.recommendedPrice ?? null,
+    snapshotRecommendedPriceAfter: after.recommendSnapshot?.recommendedPrice ?? null,
+  })
+}
+
+/**
+ * @param {import("./ydsValidationStorage.js").ValidationPickRecord} record
+ * @param {string} source
+ */
+export function repairImmutableLedgerRecord(record, source = "unknown") {
+  if (!isPickImmutableSealed(record)) return record
+
+  const lockedPrice = resolveImmutableRecommendedPrice(record)
+  const lockedAt = resolveImmutableRecommendedAt(record) ?? record.recommendedAt
+  const lockedAtIso = repaired.lockedRecommendedAtIso ?? repaired.recommendedAtIso
+  const nextSnapshot = record.recommendSnapshot
+    ? Object.freeze({
+        ...record.recommendSnapshot,
+        recommendedAt: lockedAt,
+        recommendedPrice: lockedPrice ?? record.recommendSnapshot.recommendedPrice ?? null,
+        frozen: true,
+      })
+    : record.recommendSnapshot
+  const nextMarketLedger = record.marketLedger
+    ? {
+        ...record.marketLedger,
+        recommendedPrice: lockedPrice ?? record.marketLedger.recommendedPrice ?? null,
+      }
+    : record.marketLedger
+
+  const next = {
+    ...record,
+    recommendedAt: lockedAt,
+    recommendedAtIso: lockedAtIso,
+    recommendedPrice: lockedPrice,
+    lockedRecommendedPrice: lockedPrice,
+    lockedRecommendedAt: lockedAt,
+    lockedRecommendedAtIso: lockedAtIso,
+    recommendSnapshot: nextSnapshot,
+    marketLedger: nextMarketLedger,
+    immutableSealed: true,
+    ledgerVersion: record.ledgerVersion ?? RECOMMEND_LEDGER_VERSION,
+  }
+
+  if (
+    record.recommendedPrice !== next.recommendedPrice ||
+    record.lockedRecommendedPrice !== next.lockedRecommendedPrice ||
+    record.recommendedAt !== next.recommendedAt
+  ) {
+    logImmutableLedgerViolation(`${source}:repair`, record, next)
+  }
+  return next
 }
 
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord} record */
@@ -139,63 +236,63 @@ export function isPickImmutableSealed(record) {
  * }} mutable
  */
 export function applyMutablePickUpdate(record, mutable) {
-  const lockedPrice =
-    record.lockedRecommendedPrice ?? record.recommendedPrice ?? null
-  const lockedAt = record.lockedRecommendedAt ?? record.recommendedAt
+  const repaired = repairImmutableLedgerRecord(record, "applyMutablePickUpdate:input")
+  const lockedPrice = resolveImmutableRecommendedPrice(repaired)
+  const lockedAt = resolveImmutableRecommendedAt(repaired) ?? repaired.recommendedAt
   const lockedAtIso = record.lockedRecommendedAtIso ?? record.recommendedAtIso
-  const snap = record.recommendSnapshot
+  const snap = repaired.recommendSnapshot
 
-  const immutableCore = isPickImmutableSealed(record)
+  const immutableCore = isPickImmutableSealed(repaired)
     ? {
-        id: record.id,
-        ticker: record.ticker,
-        name: snap?.name ?? record.name,
-        country: record.country,
-        rank: record.rank,
-        isTop3: record.isTop3,
+        id: repaired.id,
+        ticker: repaired.ticker,
+        name: snap?.name ?? repaired.name,
+        country: repaired.country,
+        rank: repaired.rank,
+        isTop3: repaired.isTop3,
         recommendedAt: lockedAt,
         recommendedAtIso: lockedAtIso,
         recommendedPrice: lockedPrice,
-        recommendedScore: snap?.totalScore ?? record.recommendedScore,
-        qualityGrade: snap?.qualityGrade ?? record.qualityGrade,
-        timingGrade: snap?.timingGrade ?? record.timingGrade,
-        marketFitGrade: snap?.marketFitGrade ?? record.marketFitGrade,
-        statusId: record.statusId,
-        statusLabel: record.statusLabel,
-        regimeId: record.regimeId,
-        regimeLabel: record.regimeLabel,
-        strategyLabel: snap?.marketStateLabel ?? record.strategyLabel,
-        recommendSnapshot: snap ?? record.recommendSnapshot,
-        marketLedger: record.marketLedger,
-        recommendReason: record.recommendReason,
-        recommendGrade: record.recommendGrade,
-        recordedAt: record.recordedAt,
+        recommendedScore: snap?.totalScore ?? repaired.recommendedScore,
+        qualityGrade: snap?.qualityGrade ?? repaired.qualityGrade,
+        timingGrade: snap?.timingGrade ?? repaired.timingGrade,
+        marketFitGrade: snap?.marketFitGrade ?? repaired.marketFitGrade,
+        statusId: repaired.statusId,
+        statusLabel: repaired.statusLabel,
+        regimeId: repaired.regimeId,
+        regimeLabel: repaired.regimeLabel,
+        strategyLabel: snap?.marketStateLabel ?? repaired.strategyLabel,
+        recommendSnapshot: snap ?? repaired.recommendSnapshot,
+        marketLedger: repaired.marketLedger,
+        recommendReason: repaired.recommendReason,
+        recommendGrade: repaired.recommendGrade,
+        recordedAt: repaired.recordedAt,
         immutableSealed: true,
-        ledgerVersion: record.ledgerVersion ?? RECOMMEND_LEDGER_VERSION,
+        ledgerVersion: repaired.ledgerVersion ?? RECOMMEND_LEDGER_VERSION,
         lockedRecommendedPrice: lockedPrice,
         lockedRecommendedAt: lockedAt,
         lockedRecommendedAtIso: lockedAtIso,
       }
-    : record
+    : repaired
 
   return {
     ...immutableCore,
-    currentPrice: mutable.currentPrice ?? record.currentPrice,
-    returnPct: mutable.returnPct ?? record.returnPct,
-    maxReturnPct: mutable.maxReturnPct ?? record.maxReturnPct,
-    minReturnPct: mutable.minReturnPct ?? record.minReturnPct,
-    priceLog: mutable.priceLog ?? record.priceLog,
-    horizonPrices: mutable.horizonPrices ?? record.horizonPrices,
-    horizons: mutable.horizons ?? record.horizons,
-    lifecycleId: mutable.lifecycleId ?? record.lifecycleId,
-    lifecycleLabel: mutable.lifecycleLabel ?? record.lifecycleLabel,
-    closedAt: mutable.closedAt ?? record.closedAt,
-    closeReason: mutable.closeReason ?? record.closeReason,
-    finalReturnPct: mutable.finalReturnPct ?? record.finalReturnPct,
+    currentPrice: mutable.currentPrice ?? repaired.currentPrice,
+    returnPct: mutable.returnPct ?? repaired.returnPct,
+    maxReturnPct: mutable.maxReturnPct ?? repaired.maxReturnPct,
+    minReturnPct: mutable.minReturnPct ?? repaired.minReturnPct,
+    priceLog: mutable.priceLog ?? repaired.priceLog,
+    horizonPrices: mutable.horizonPrices ?? repaired.horizonPrices,
+    horizons: mutable.horizons ?? repaired.horizons,
+    lifecycleId: mutable.lifecycleId ?? repaired.lifecycleId,
+    lifecycleLabel: mutable.lifecycleLabel ?? repaired.lifecycleLabel,
+    closedAt: mutable.closedAt ?? repaired.closedAt,
+    closeReason: mutable.closeReason ?? repaired.closeReason,
+    finalReturnPct: mutable.finalReturnPct ?? repaired.finalReturnPct,
     ledgerState:
       mutable.ledgerState ??
-      record.ledgerState ??
-      mapLifecycleToLedgerState(record.lifecycleId, record.statusId),
+      repaired.ledgerState ??
+      mapLifecycleToLedgerState(repaired.lifecycleId, repaired.statusId),
     lastUpdatedAt: Date.now(),
   }
 }
@@ -226,6 +323,7 @@ export function resolveRunningReturnExtremes(record, returnPct) {
  * @param {object | null | undefined} [panicData]
  */
 export function sealNewRecommendLedgerRecord(record, marketContext, panicData) {
+  const lockedPrice = resolveImmutableRecommendedPrice(record)
   const recordedAt = record.recordedAt || Date.now()
   const recommendedAt = String(record.recommendedAt ?? "").slice(0, 10)
   const country = record.country === "KR" ? "KR" : "US"
@@ -239,15 +337,16 @@ export function sealNewRecommendLedgerRecord(record, marketContext, panicData) {
     id,
     recordedAt,
     recommendedAt,
+    recommendedPrice: lockedPrice,
     recommendedAtIso: formatRecommendAtIso(recordedAt),
     ledgerVersion: RECOMMEND_LEDGER_VERSION,
     immutableSealed: true,
-    lockedRecommendedPrice: record.recommendedPrice,
+    lockedRecommendedPrice: lockedPrice,
     lockedRecommendedAt: recommendedAt,
     lockedRecommendedAtIso: formatRecommendAtIso(recordedAt),
     marketLedger:
       record.marketLedger ??
-      buildMarketLedgerSnapshot(marketContext, panicData) ??
+      buildMarketLedgerSnapshot(marketContext, panicData, lockedPrice) ??
       buildMarketLedgerFromSnapshot(record.recommendSnapshot),
     recommendReason: record.recommendReason ?? resolveRecommendReasonFromRecord(record),
     recommendGrade: record.recommendGrade ?? resolveRecommendGradeFromRecord(record),
@@ -260,7 +359,7 @@ export function sealNewRecommendLedgerRecord(record, marketContext, panicData) {
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord} record */
 export function migratePickToRecommendLedger(record) {
   if (record.ledgerVersion >= RECOMMEND_LEDGER_VERSION && record.immutableSealed) {
-    return record
+    return repairImmutableLedgerRecord(record, "migratePickToRecommendLedger")
   }
   const recordedAt = record.recordedAt || Date.now()
   return sealNewRecommendLedgerRecord({

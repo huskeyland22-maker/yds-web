@@ -61,6 +61,7 @@
 - [x] **TOP5·전체종목 테이블 UI** — Gold TOP1 · Best Pick 배지 · AI 점수 Bar · D+N 우선 · 행 Hover
 - [x] **AI 상세분석 레이아웃** — 8단계 카드 순서 · 종목요약→판단→목표가→성과→시나리오→Risk→추적→전략
 - [x] **AI 상세분석 UI 통일** — 카드 padding/간격 · 숫자 우측정렬 · 색상 체계(노랑/초록/빨강/파랑/회색)
+- [x] **Immutable Ledger 복구** — sealed 이후 추천가 불변 · refresh 경로 가드 · localStorage 1회 복구 · 위반 시 `console.error`
 - [x] **성과검증 점수 스냅샷** — `recommendSnapshot` 잠금(frozen) · 점수+등급+시장·패닉 · 당시 정보만 표시
 - [x] **성공 패턴 분석** — 7/14/30일 성공률(+10%↑) · 등급·시장상태·패닉 구간 · n&lt;10 분석 보류 · 성과검증 상단
 - [x] **성공/실패 판정** — 🟢🟡🔴 배지 · 7/14/30일 판정 컬럼 · 요약 카드(성공률·평균수익) · `DEFAULT_OUTCOME_CRITERIA`

@@ -34,7 +34,9 @@ import {
   applyMutablePickUpdate,
   hasAutoCapturePickToday,
   isPickImmutableSealed,
+  logImmutableLedgerViolation,
   mapLifecycleToLedgerState,
+  repairImmutableLedgerRecord,
   resolveRunningReturnExtremes,
   sealNewRecommendLedgerRecord,
 } from "./ydsRecommendLedger.js"
@@ -299,7 +301,10 @@ function lockPickHorizons(record, today) {
  * @param {Map<string, number>} [priceMap]
  */
 function refreshPickPrice(record, today, priceMap) {
-  const cleaned = sanitizeValidationPickRecord(record)
+  const cleaned = repairImmutableLedgerRecord(
+    sanitizeValidationPickRecord(record),
+    "refreshPickPrice:input",
+  )
   const resolved = resolveValidationLivePrice(
     cleaned.ticker,
     cleaned.country,
@@ -379,7 +384,9 @@ export function captureTodayPickSnapshots(
   options = {},
 ) {
   const today = todayDateKey()
-  const existing = loadValidationPicks()
+  const existing = loadValidationPicks().map((record) =>
+    repairImmutableLedgerRecord(record, "captureTodayPickSnapshots:existing"),
+  )
 
   const universe = universeOverride ?? getStockPickUniverse(marketContext ?? null)
   const usRanked = getRankingStocks(filterByCountry(universe, "US"), rankLimit)
@@ -410,7 +417,9 @@ export function captureTodayPickSnapshots(
 export function refreshValidationPicks(picks, priceMap, options = {}) {
   const today = todayDateKey()
   const map = priceMap ?? buildValidationPriceMap()
-  const sanitized = sanitizeValidationPicks(picks)
+  const sanitized = sanitizeValidationPicks(picks).map((record) =>
+    repairImmutableLedgerRecord(record, "refreshValidationPicks:sanitize"),
+  )
   const { liveStocks = null, marketContext = null } = options
   /** @type {Map<string, import("./ydsStockPickModel.js").StockPickView>} */
   const stockByKey = new Map()
@@ -422,13 +431,14 @@ export function refreshValidationPicks(picks, priceMap, options = {}) {
     }
   }
   const refreshed = sanitized.map((r) => {
+    const original = repairImmutableLedgerRecord(r, "refreshValidationPicks:before")
     const stock = stockByKey.get(`${r.country}:${r.ticker}`) ?? null
-    const withSnap = isPickImmutableSealed(r)
-      ? r
-      : backfillRecommendSnapshot(r, stock, marketContext)
+    const withSnap = isPickImmutableSealed(original)
+      ? original
+      : backfillRecommendSnapshot(original, stock, marketContext)
     const priced = refreshPickPrice(withSnap, today, map)
     const withLifecycle = updatePickLifecycle(priced, today, stock)
-    return applyMutablePickUpdate(r, {
+    const next = applyMutablePickUpdate(original, {
       currentPrice: withLifecycle.currentPrice,
       returnPct: withLifecycle.returnPct,
       maxReturnPct: withLifecycle.maxReturnPct,
@@ -446,6 +456,15 @@ export function refreshValidationPicks(picks, priceMap, options = {}) {
         withLifecycle.statusId,
       ),
     })
+    if (
+      isPickImmutableSealed(original) &&
+      (next.recommendedPrice !== original.recommendedPrice ||
+        next.lockedRecommendedPrice !== original.lockedRecommendedPrice ||
+        next.recommendedAt !== original.recommendedAt)
+    ) {
+      logImmutableLedgerViolation("refreshValidationPicks", original, next)
+    }
+    return repairImmutableLedgerRecord(next, "refreshValidationPicks:after")
   })
   saveValidationPicks(refreshed)
   return refreshed

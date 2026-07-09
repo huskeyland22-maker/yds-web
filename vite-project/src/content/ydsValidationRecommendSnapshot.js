@@ -2,6 +2,12 @@
  * 성과검증 — 추천 당시 점수·시장 스냅샷 (잠금, refresh 시 변경 없음)
  */
 
+import {
+  isPickImmutableSealed,
+  repairImmutableLedgerRecord,
+  resolveImmutableRecommendedPrice,
+} from "./ydsRecommendLedger.js"
+
 import { marketEnvToGrade } from "./ydsStockPickV5Insights.js"
 import { serializeRationalesForSnapshot } from "./ydsStockPickRecommendRationale.js"
 import { serializeActionGuideForSnapshot } from "./ydsStockPickActionGuide.js"
@@ -10,9 +16,8 @@ import { serializeLifecycleForSnapshot } from "./ydsStockPickLifecycle.js"
 
 /** @param {import("./ydsValidationStorage.js").ValidationPickRecord} record */
 function resolveLockedRecommendPriceFromRecord(record) {
-  if (record.recommendedPrice != null && record.recommendedPrice > 0) {
-    return record.recommendedPrice
-  }
+  const locked = resolveImmutableRecommendedPrice(record)
+  if (locked != null) return locked
   const at = String(record.recommendedAt ?? "").slice(0, 10)
   const fromLog = at && record.priceLog ? Number(record.priceLog[at]) : NaN
   if (Number.isFinite(fromLog) && fromLog > 0) return fromLog
@@ -277,8 +282,11 @@ export function backfillRecommendSnapshot(record, stock, marketContext) {
  */
 export function applySnapshotToRecord(record, snap) {
   if (!snap) return record
+  const base = isPickImmutableSealed(record)
+    ? repairImmutableLedgerRecord(record, "applySnapshotToRecord")
+    : record
 
-  const existing = record.recommendSnapshot
+  const existing = base.recommendSnapshot
   if (
     isSnapshotFrozen(existing) &&
     hasSnapshotScores(existing) &&
@@ -288,18 +296,18 @@ export function applySnapshotToRecord(record, snap) {
   }
 
   return {
-    ...record,
-    name: snap.name || record.name,
-    recommendedAt: snap.recommendedAt || record.recommendedAt,
+    ...base,
+    name: snap.name || base.name,
+    recommendedAt: base.recommendedAt,
     recommendedPrice:
-      resolveLockedRecommendPriceFromRecord(record) ??
+      resolveLockedRecommendPriceFromRecord(base) ??
       snap.recommendedPrice ??
-      record.recommendedPrice,
-    recommendedScore: snap.totalScore ?? record.recommendedScore,
+      base.recommendedPrice,
+    recommendedScore: snap.totalScore ?? base.recommendedScore,
     qualityGrade: snap.qualityGrade,
     timingGrade: snap.timingGrade,
     marketFitGrade: snap.marketFitGrade,
-    strategyLabel: snap.marketStateLabel || record.strategyLabel,
+    strategyLabel: snap.marketStateLabel || base.strategyLabel,
     recommendSnapshot: snap.frozen ? snap : freezeSnapshot({ ...snap, frozen: true }),
   }
 }

@@ -7,6 +7,8 @@ import {
   isPickImmutableSealed,
   mapLifecycleToLedgerState,
   migratePickToRecommendLedger,
+  repairImmutableLedgerRecord,
+  resolveImmutableRecommendedPrice,
   sealNewRecommendLedgerRecord,
 } from "./ydsRecommendLedger.js"
 
@@ -71,6 +73,27 @@ describe("ydsRecommendLedger", () => {
     expect(updated.returnPct).toBe(13.3)
     expect(updated.maxReturnPct).toBe(15)
     expect(updated.minReturnPct).toBe(-2)
+  })
+
+  it("repairs polluted sealed recommend price from price log", () => {
+    const sealed = sealNewRecommendLedgerRecord(basePick(), null, null)
+    const polluted = {
+      ...sealed,
+      recommendedPrice: 190,
+      lockedRecommendedPrice: null,
+      recommendSnapshot: {
+        ...sealed.recommendSnapshot,
+        recommendedPrice: 150,
+      },
+      marketLedger: {
+        ...(sealed.marketLedger ?? {}),
+        recommendedPrice: 150,
+      },
+    }
+    const repaired = repairImmutableLedgerRecord(polluted, "test")
+    expect(resolveImmutableRecommendedPrice(polluted)).toBe(150)
+    expect(repaired.recommendedPrice).toBe(150)
+    expect(repaired.lockedRecommendedPrice).toBe(150)
   })
 
   it("migratePickToRecommendLedger is idempotent", () => {

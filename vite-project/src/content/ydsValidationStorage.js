@@ -5,7 +5,7 @@
 import { sanitizeValidationPickRecord } from "./ydsValidationPriceSanitize.js"
 import { applySnapshotToRecord, getRecommendSnapshot, hasSnapshotScores, migrateRecommendSnapshot } from "./ydsValidationRecommendSnapshot.js"
 import { migratePickLifecycle } from "./ydsPickLifecycleEngine.js"
-import { migratePickToRecommendLedger } from "./ydsRecommendLedger.js"
+import { migratePickToRecommendLedger, repairImmutableLedgerRecord } from "./ydsRecommendLedger.js"
 
 export const VALIDATION_PICKS_KEY = "yds-validation-picks-v2"
 export const VALIDATION_PORTFOLIO_KEY = "yds-validation-portfolio-v2"
@@ -219,8 +219,11 @@ export function normalizePickRecord(raw) {
       : recSnap && hasSnapshotScores(recSnap)
         ? applySnapshotToRecord(record, recSnap)
         : record
-  return migratePickToRecommendLedger(
-    migratePickLifecycle(sanitizeValidationPickRecord(migrateRecommendSnapshot(withSnap))),
+  return repairImmutableLedgerRecord(
+    migratePickToRecommendLedger(
+      migratePickLifecycle(sanitizeValidationPickRecord(migrateRecommendSnapshot(withSnap))),
+    ),
+    "normalizePickRecord",
   )
 }
 
@@ -235,7 +238,16 @@ export function loadValidationPicks() {
     if (!raw) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed.map(normalizePickRecord).filter((r) => r.id && r.ticker)
+    const normalized = parsed.map(normalizePickRecord).filter((r) => r.id && r.ticker)
+    const changed = normalized.some((r, index) => JSON.stringify(r) !== JSON.stringify(parsed[index]))
+    if (changed) {
+      try {
+        localStorage.setItem(VALIDATION_PICKS_KEY, JSON.stringify(normalized.slice(-MAX_PICKS)))
+      } catch {
+        /* ignore repair save failure */
+      }
+    }
+    return normalized
   } catch {
     return []
   }
