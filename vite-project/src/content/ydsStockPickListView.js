@@ -114,6 +114,32 @@ export function buildStockPickListRow(stock) {
   const upside = estimateUpsidePct(stock, Math.max(0, (stock.rank ?? 1) - 1))
   const holdPeriod = estimateHoldPeriodLabel(recStatus.id)
   const recommendCount = countValidationPicksByTicker(stock.ticker, country)
+  console.table({
+    ticker: stock.ticker,
+    recId: pick?.id ?? null,
+    recommendedAt,
+    recommendedPrice: recPrice,
+    currentPrice: currentRaw,
+    lockedRecommendedPrice: pick?.lockedRecommendedPrice ?? null,
+    livePrice: Number(stock.snapshot?.price ?? stock.snapshot?.close) || null,
+    latestPrice: pick?.currentPrice ?? null,
+    ledger: pick
+      ? {
+          recommendedAt: pick.recommendedAt ?? null,
+          recommendedPrice: pick.recommendedPrice ?? null,
+          lockedRecommendedPrice: pick.lockedRecommendedPrice ?? null,
+          currentPrice: pick.currentPrice ?? null,
+          recommendedScore: pick.recommendedScore ?? null,
+          strategyLabel: pick.strategyLabel ?? null,
+        }
+      : null,
+    display: {
+      recommendedPriceLabel:
+        recPrice != null ? formatTransparencyPrice(recPrice, country) : "—",
+      currentPriceLabel: formatTransparencyPrice(currentRaw, country),
+      returnLabel: profit.returnLabel,
+    },
+  })
 
   return {
     ticker: stock.ticker,

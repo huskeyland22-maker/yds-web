@@ -19,13 +19,16 @@ function toPositivePrice(v) {
 export function resolveLockedRecommendPrice(pick) {
   if (!pick) return null
 
+  const fromLocked = toPositivePrice(pick.lockedRecommendedPrice)
+  if (fromLocked != null) return fromLocked
+
   const fromField = toPositivePrice(pick.recommendedPrice)
   if (fromField != null) return fromField
 
   const fromSnap = toPositivePrice(pick.recommendSnapshot?.recommendedPrice)
   if (fromSnap != null) return fromSnap
 
-  const at = String(pick.recommendedAt ?? "").slice(0, 10)
+  const at = String(pick.lockedRecommendedAt ?? pick.recommendedAt ?? "").slice(0, 10)
   if (at && pick.priceLog && typeof pick.priceLog === "object") {
     const fromLog = toPositivePrice(pick.priceLog[at])
     if (fromLog != null) return fromLog

@@ -67,6 +67,33 @@ export function buildStockPickDeskPreview(stock, today = new Date().toISOString(
   const days =
     match?.recommendedAt != null ? daysSince(match.recommendedAt, today) : profit.daysSinceRecommend
   const badge = resolveValidationBadge(days)
+  const cardData = {
+    ticker: stock.ticker,
+    recId: match?.id ?? null,
+    recommendedAt: match?.recommendedAt ?? null,
+    recommendedPrice: profit.recommendPrice,
+    currentPrice: profit.currentPrice,
+    lockedRecommendedPrice: match?.lockedRecommendedPrice ?? null,
+    livePrice: Number(stock.snapshot?.price ?? stock.snapshot?.close) || null,
+    latestPrice: match?.currentPrice ?? null,
+    ledger: match
+      ? {
+          recommendedAt: match.recommendedAt ?? null,
+          recommendedPrice: match.recommendedPrice ?? null,
+          lockedRecommendedPrice: match.lockedRecommendedPrice ?? null,
+          currentPrice: match.currentPrice ?? null,
+          recommendedScore: match.recommendedScore ?? null,
+          strategyLabel: match.strategyLabel ?? null,
+        }
+      : null,
+    display: {
+      recommendedPriceDisplay,
+      currentPriceDisplay,
+      returnLabel: profit.returnLabel,
+      daysSinceRecommend: days,
+    },
+  }
+  console.table(cardData)
 
   return {
     badge,
