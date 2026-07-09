@@ -2,8 +2,8 @@
  * AI 추천 종목 — 상세 분석 패널 리포트
  */
 
-import { findValidationPickByTicker } from "./ydsPickValidationLink.js"
 import { buildStockPickScoreDetail } from "./ydsStockPickScoreDetailEngine.js"
+import { buildStockPickRecommendHistoryReport } from "./ydsStockPickRecommendHistory.js"
 import { formatTransparencyPrice } from "./ydsStockPickTransparency.js"
 import { getScoreDeltas, readScoreHistory } from "./ydsStockPickScoreHistory.js"
 import { PHASE3_QUALITY_MAX } from "./ydsStockPickPhase3Breakdown.js"
@@ -96,19 +96,9 @@ function buildPriceLevels(stock) {
  */
 export function buildStockPickDetailPanelReport(stock, marketContext = null) {
   const detail = buildStockPickScoreDetail(stock, marketContext)
-  const country = stock.country === "KR" ? "KR" : "US"
-  const validation = findValidationPickByTicker(stock.ticker, country)
+  const historyReport = buildStockPickRecommendHistoryReport(stock)
   const history = readScoreHistory()
   const deltas = stock.scoreDeltas ?? getScoreDeltas(stock.ticker, history)
-
-  const today = new Date().toISOString().slice(0, 10)
-  const recommendedAt = validation?.recommendedAt ?? null
-  let daysHeld = null
-  if (recommendedAt) {
-    const d0 = new Date(`${recommendedAt}T12:00:00`)
-    const d1 = new Date(`${today}T12:00:00`)
-    daysHeld = Math.max(0, Math.round((d1.getTime() - d0.getTime()) / 86400000))
-  }
 
   const opinionLine =
     stock.opinion?.summary ??
@@ -128,6 +118,22 @@ export function buildStockPickDetailPanelReport(stock, marketContext = null) {
     deltas?.day1?.display ??
     (deltas?.day5?.delta != null ? `${deltas.day5.delta >= 0 ? "+" : ""}${deltas.day5.delta}점` : "—")
 
+  const recommendedAt = historyReport.firstRecommendedAt ?? null
+  const daysHeld =
+    historyReport.daysHeld != null && Number.isFinite(historyReport.daysHeld)
+      ? `D+${historyReport.daysHeld}`
+      : "—"
+  const statusLabel = historyReport.status?.label ?? "—"
+
+  if (recommendedAt && daysHeld === "—") {
+    console.error("[detail-panel-ledger-map]", {
+      ticker: stock.ticker,
+      recommendedAt,
+      daysHeldRaw: historyReport.daysHeld,
+      historyVisible: historyReport.visible,
+    })
+  }
+
   return {
     visible: stock.dataSource === "live",
     ticker: stock.ticker,
@@ -138,7 +144,8 @@ export function buildStockPickDetailPanelReport(stock, marketContext = null) {
     priceLevels: buildPriceLevels(stock),
     meta: {
       recommendedAt: recommendedAt ?? "—",
-      daysHeld: daysHeld != null ? `${daysHeld}일` : "—",
+      daysHeld,
+      statusLabel,
       scoreChange,
       qualityDisplay: stock.v4Score?.qualityDisplay ?? `${stock.v4Score?.quality ?? 0}/${PHASE3_QUALITY_MAX}`,
       timingDisplay: stock.v4Score?.timingDisplay ?? `${stock.v4Score?.timing ?? 0}/${TIMING_SCORE_MAX}`,

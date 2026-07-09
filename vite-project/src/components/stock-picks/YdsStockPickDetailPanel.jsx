@@ -137,6 +137,10 @@ export default function YdsStockPickDetailPanel({ stock, dualLiquidity = null, c
           <dd>{report.meta.daysHeld}</dd>
         </div>
         <div>
+          <dt>현재 추천상태</dt>
+          <dd>{report.meta.statusLabel}</dd>
+        </div>
+        <div>
           <dt>최근 점수 변화</dt>
           <dd className="font-mono tabular-nums">{report.meta.scoreChange}</dd>
         </div>
