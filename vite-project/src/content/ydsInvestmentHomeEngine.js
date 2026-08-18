@@ -1,4 +1,5 @@
 import { stockList } from "../utils/stockRecommendations.js"
+import { buildCrashReservePlan, resolveMarketStressReport } from "./ydsInvestmentStressResolver.js"
 
 /** @param {number | null | undefined} value */
 function fmtMoney(value) {
@@ -39,7 +40,11 @@ function diffMonthsInclusive(startMonthKey, endMonthKey) {
   return (end.year - start.year) * 12 + (end.month - start.month)
 }
 
-/** @param {number | null | undefined} score */
+/**
+ * 레거시 패닉점수 구간. YDS 2.0 홈은 사용하지 않는다.
+ * 홈 시장 스트레스는 resolveMarketStressReport() → resolveMarketStressLevel()만 사용한다.
+ * @param {number | null | undefined} score
+ */
 export function resolveInvestmentStressStage(score) {
   if (!Number.isFinite(score)) {
     return {
@@ -107,14 +112,17 @@ function safeMoney(value) {
  * @param {number} cashAmount
  * @param {unknown} portfolio
  * @param {import("../hooks/useYdsMarketContext.js").useYdsMarketContext extends (...args: any) => infer R ? R : any} marketContext
- * @param {{ accounts?: Array<{ id: string; name: string; purpose: string; openingValuation: number; openingContribution: number; openingProfitLoss: number; monthlyContributionPlan: number; holdings?: Array<{ ticker: string; name: string; quantity: number; averageCost: number; currentValue: number }> }>; investmentStartMonth: string; targetDurationYears: number }} settings
+ * @param {{ accounts?: Array<{ id: string; name: string; purpose: string; openingValuation: number; openingContribution: number; openingProfitLoss: number; monthlyContributionPlan: number; holdings?: Array<{ ticker: string; name: string; quantity: number; averageCost: number; currentValue: number }> }>; investmentStartMonth: string; targetDurationYears: number; crashReserve?: { targetAmount: number; currentAmount: number; stageCount: number; stagePercentages: number[]; stageStatuses?: boolean[] } }} settings
  */
-export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketContext, settings) {
+export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketContext, settings, panicData) {
   const monthKey = currentMonthKey()
   const accounts = Array.isArray(settings?.accounts) ? settings.accounts : []
   const investmentStartMonth = String(settings?.investmentStartMonth ?? "").trim()
   const targetDurationYears = Math.max(0, Number(settings?.targetDurationYears) || 0)
-  const stage = resolveInvestmentStressStage(marketContext?.ydsScore)
+  // YDS 2.0 홈의 시장 스트레스는 resolveMarketStressReport(panicData)만 사용한다.
+  // marketContext.ydsScore / getFinalScore()는 /market-analysis 패닉지수 전용이며 여기에 넣지 않는다.
+  const stressReport = resolveMarketStressReport(panicData)
+  const stressLevel = stressReport.level
   const totalOpeningValuation = accounts.reduce((sum, account) => sum + safeMoney(account?.openingValuation), 0)
   const totalOpeningContribution = accounts.reduce((sum, account) => sum + safeMoney(account?.openingContribution), 0)
   const totalOpeningProfitLoss = accounts.reduce((sum, account) => sum + Math.round(Number(account?.openingProfitLoss) || 0), 0)
@@ -122,23 +130,24 @@ export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketC
   const annualContributionPlan = monthlyContributionPlan * 12
   const hasOpeningBalance = totalOpeningValuation > 0 || totalOpeningContribution > 0
   const hasMonthlyPlan = monthlyContributionPlan > 0
+  const crashReserve = buildCrashReservePlan(settings?.crashReserve ?? null)
 
   const representativeEtfs = stockList
     .filter((item) => item.type === "etf" && ["SPY", "QQQ", "VGT"].includes(String(item.ticker)))
     .slice(0, 3)
 
   const ydsActionLine =
-    stage.id === "unknown"
+    stressLevel.id === "UNKNOWN"
       ? "시장 데이터가 준비되면 이번 달 YDS 행동이 표시됩니다."
-      : stage.id === "normal"
+      : stressLevel.id === "NORMAL"
         ? "정기 적립을 유지하고 비상자금은 보존합니다."
-        : stage.id === "adjustment"
+        : stressLevel.id === "CAUTION"
           ? "정기 적립을 유지하면서 현금을 준비합니다."
-          : stage.id === "stress"
-            ? "정기 적립은 유지하고 비상자금 투입 여부를 관찰합니다."
-            : stage.id === "fear"
-              ? "정기 적립을 유지하면서 비상자금 1단계 투입을 검토합니다."
-              : "대폭락 구간이므로 비상자금 투입 계획을 실제 행동으로 점검합니다."
+          : stressLevel.id === "HIGH_STRESS"
+            ? "정기 적립은 유지하고 대기자금 투입 준비를 시작합니다."
+            : stressLevel.id === "CRASH"
+              ? "정기 적립을 유지하면서 대기자금 1~2단계 투입을 검토합니다."
+              : "기본 적립은 유지하고 남은 대기자금을 3~5단계로 나눠 검토합니다."
 
   const totalPlanMonths = targetDurationYears > 0 ? targetDurationYears * 12 : null
   const elapsedMonthsRaw =
@@ -156,12 +165,15 @@ export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketC
 
   return {
     monthKey,
-    stage,
+    stage: stressLevel,
     market: {
-      score: marketContext?.ydsScore ?? null,
+      score: stressReport.score,
       strategyLabel: marketContext?.strategyLabel ?? "—",
       panicLabel: marketContext?.panicLabel ?? "—",
       contextLine: marketContext?.contextLine ?? "",
+      updatedAt: stressReport.updatedAt,
+      components: stressReport.components,
+      dataQuality: stressReport.dataQuality,
     },
     openingBalance: {
       totalValuation: hasOpeningBalance ? totalOpeningValuation : null,
@@ -195,13 +207,9 @@ export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketC
         monthlyContributionPlan > 0
           ? "계획 반영됨"
           : "설정 필요",
-      marketLine: stage.label,
+      marketLine: stressLevel.label,
       actionLine:
-        stage.id === "crash"
-          ? "평소 적립을 유지하고 비상자금 추가 투입을 검토합니다."
-          : stage.id === "fear"
-            ? "예정된 적립을 유지하면서 비상자금 사용 여부를 점검합니다."
-            : "예정된 적립만 차분히 진행합니다.",
+        stressLevel.actionGuide,
     },
     progress: {
       planLabel: targetDurationYears > 0 ? `${targetDurationYears}년 투자 계획` : "장기 투자 계획을 설정하세요",
@@ -212,11 +220,7 @@ export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketC
       progressPct: fmtPct(progressPct),
       isConfigured: Boolean(investmentStartMonth && totalPlanMonths),
     },
-    crashReserve: {
-      title: "폭락 대응 대기자금",
-      status: "다음 단계 구현 예정",
-      description: "월 적립 계획과 분리된 별도 대기자금 기능은 다음 단계에서 구현합니다.",
-    },
+    crashReserve: crashReserve,
     accounts: accounts.map((account) => ({
       id: account.id,
       name: account.name,

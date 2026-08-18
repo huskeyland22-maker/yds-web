@@ -26,6 +26,13 @@ const LEGACY_SETTINGS_KEY = "yds-investment-home-settings-v1"
  *   accounts: InvestmentHomeAccount[]
  *   investmentStartMonth: string
  *   targetDurationYears: number
+ *   crashReserve: {
+ *     targetAmount: number
+ *     currentAmount: number
+ *     stageCount: number
+ *     stagePercentages: number[]
+ *     stageStatuses: boolean[]
+ *   }
  * }} InvestmentHomeSettings
  */
 
@@ -71,6 +78,37 @@ export function defaultInvestmentHomeSettings() {
     accounts: defaultAccounts(),
     investmentStartMonth: "",
     targetDurationYears: 10,
+    crashReserve: {
+      targetAmount: 0,
+      currentAmount: 0,
+      stageCount: 5,
+      stagePercentages: [20, 20, 20, 20, 20],
+      stageStatuses: [false, false, false, false, false],
+    },
+  }
+}
+
+/** @param {unknown} raw */
+function normalizeCrashReserve(raw) {
+  const base = defaultInvestmentHomeSettings().crashReserve
+  const row = raw && typeof raw === "object" ? raw : {}
+  const stageCount = Math.max(3, Math.min(5, Math.round(Number(row.stageCount) || base.stageCount)))
+  const stagePercentages = Array.isArray(row.stagePercentages)
+    ? row.stagePercentages.slice(0, stageCount).map((value) => Math.max(0, Math.round(Number(value) || 0)))
+    : base.stagePercentages.slice(0, stageCount)
+  while (stagePercentages.length < stageCount) {
+    stagePercentages.push(base.stagePercentages[stagePercentages.length] ?? 0)
+  }
+  const stageStatuses = Array.isArray(row.stageStatuses)
+    ? row.stageStatuses.slice(0, stageCount).map((value) => Boolean(value))
+    : base.stageStatuses.slice(0, stageCount)
+  while (stageStatuses.length < stageCount) stageStatuses.push(false)
+  return {
+    targetAmount: Math.max(0, Math.round(Number(row.targetAmount) || 0)),
+    currentAmount: Math.max(0, Math.round(Number(row.currentAmount) || 0)),
+    stageCount,
+    stagePercentages,
+    stageStatuses,
   }
 }
 
@@ -121,6 +159,7 @@ function normalizeSettings(raw) {
         ? String(row.investmentStartMonth).trim()
         : "",
     targetDurationYears: Math.max(0, Math.round(Number(row.targetDurationYears) || 0)),
+    crashReserve: normalizeCrashReserve(row.crashReserve),
   }
 }
 
@@ -142,6 +181,7 @@ export function loadInvestmentHomeSettings() {
         })),
         investmentStartMonth: legacy?.investmentStartMonth,
         targetDurationYears: legacy?.targetDurationYears,
+        crashReserve: defaultInvestmentHomeSettings().crashReserve,
       })
     }
     return normalizeSettings(JSON.parse(raw))

@@ -6,6 +6,9 @@ import {
   saveInvestmentHomeSettings,
 } from "../content/ydsInvestmentHomeStorage.js"
 import { useYdsMarketContext } from "../hooks/useYdsMarketContext.js"
+import { useAppDataStore } from "../store/appDataStore.js"
+import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
+import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import "../styles/yds-investment-home.css"
 
 /** @param {number | null | undefined} value */
@@ -38,13 +41,26 @@ function MetricCard({ label, value, sub, tone = "" }) {
 
 function HomeContent() {
   const marketContext = useYdsMarketContext()
+  const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const [settings, setSettings] = useState(() => loadInvestmentHomeSettings())
 
   useEffect(() => {
     saveInvestmentHomeSettings(settings)
   }, [settings])
 
-  const report = useMemo(() => buildInvestmentHomeReport([], 0, null, marketContext, settings), [marketContext, settings])
+  const cycleHistory = useMemo(
+    () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
+    [storeRows],
+  )
+  const latestPanicData = useMemo(() => {
+    const latest = cycleHistory[cycleHistory.length - 1] ?? null
+    return latest ? panicDataFromCycleRow(latest) : null
+  }, [cycleHistory])
+
+  const report = useMemo(
+    () => buildInvestmentHomeReport([], 0, null, marketContext, settings, latestPanicData),
+    [latestPanicData, marketContext, settings],
+  )
 
   return (
     <div className="yds-home min-w-0 px-3 py-4 sm:px-4">
@@ -61,7 +77,7 @@ function HomeContent() {
           <span className="yds-home-stage__eyebrow">보조 지표 · 현재 시장 상태</span>
           <strong className="yds-home-stage__title">{report.stage.label}</strong>
           <span className="yds-home-stage__score">
-            {report.market.score == null ? "시장 데이터 대기" : `시장 스트레스 ${report.market.score}`}
+            {report.market.score == null ? "시장 데이터 대기" : `시장 스트레스 ${report.market.score} / 100`}
           </span>
         </div>
       </header>
@@ -209,8 +225,12 @@ function HomeContent() {
               <dd>{report.actions.actionLine}</dd>
             </div>
             <div>
-              <dt>비상자금</dt>
-              <dd>{report.crashReserve.status}</dd>
+              <dt>대기자금 준비</dt>
+              <dd>
+                {report.crashReserve.targetAmount
+                  ? `${displayMoney(report.crashReserve.currentAmount)} / 목표 ${displayMoney(report.crashReserve.targetAmount)}`
+                  : "설정 필요"}
+              </dd>
             </div>
           </dl>
         </div>
@@ -226,23 +246,31 @@ function HomeContent() {
         <div className="yds-home-market-card">
           <div>
             <strong className="yds-home-market-card__title">
-              {report.stage.id === "normal" && "🟢 "}
-              {report.stage.id === "adjustment" && "🟡 "}
-              {report.stage.id === "stress" && "🟠 "}
-              {report.stage.id === "fear" && "🔴 "}
-              {report.stage.id === "crash" && "🔴🔴 "}
+              {report.stage.id === "NORMAL" && "🟢 "}
+              {report.stage.id === "CAUTION" && "🟡 "}
+              {report.stage.id === "HIGH_STRESS" && "🟠 "}
+              {report.stage.id === "CRASH" && "🔴 "}
+              {report.stage.id === "EXTREME" && "🔴🔴 "}
               {report.stage.label}
             </strong>
-            <p className="yds-home-market-card__desc">{report.ydsActionLine}</p>
+            <p className="yds-home-market-card__desc">{report.stage.actionGuide}</p>
           </div>
           <dl className="yds-home-market-card__meta">
             <div>
-              <dt>적립 중단 필요 여부</dt>
-              <dd>{report.stage.id === "crash" ? "아니오 · 평소 적립은 유지" : "아니오 · 예정된 적립 유지"}</dd>
+              <dt>상태</dt>
+              <dd>{report.stage.label}</dd>
             </div>
             <div>
-              <dt>비상자금 사용 여부</dt>
-              <dd>{report.crashReserve.status}</dd>
+              <dt>행동 가이드</dt>
+              <dd>{report.stage.actionGuide}</dd>
+            </div>
+            <div>
+              <dt>데이터 기준일</dt>
+              <dd>
+                {report.market.dataQuality?.dataDate ?? "미확인"}
+                {report.market.dataQuality?.ageDays != null ? ` · ${report.market.dataQuality.ageDays}일 전` : ""}
+                {report.market.dataQuality?.stale ? " · stale" : ""}
+              </dd>
             </div>
             <div>
               <dt>상세 시장 분석</dt>
@@ -251,6 +279,18 @@ function HomeContent() {
               </dd>
             </div>
           </dl>
+        </div>
+        <div className="yds-home-stress-grid">
+          <article className="yds-home-action-card">
+            <span className="yds-home-action-card__label">단기 공포</span>
+            <strong>{report.market.components.shortTermFear.value == null ? "데이터 대기" : `${report.market.components.shortTermFear.value} / 100`}</strong>
+            <p>VIX · Put/Call · CNN Fear & Greed</p>
+          </article>
+          <article className="yds-home-action-card">
+            <span className="yds-home-action-card__label">중기 위험</span>
+            <strong>{report.market.components.mediumTermRisk.value == null ? "데이터 대기" : `${report.market.components.mediumTermRisk.value} / 100`}</strong>
+            <p>BofA · High Yield 기반</p>
+          </article>
         </div>
       </section>
 
@@ -262,10 +302,133 @@ function HomeContent() {
           </div>
         </div>
         <article className="yds-home-action-card">
-          <span className="yds-home-action-card__label">{report.crashReserve.title}</span>
-          <strong>{report.crashReserve.status}</strong>
-          <p>{report.crashReserve.description}</p>
+          <span className="yds-home-action-card__label">목표 대기자금</span>
+          <strong>{displayMoney(report.crashReserve.targetAmount, "설정 필요")}</strong>
+          <p>월 적립과 분리된 폭락 대응 전용 자금 목표입니다.</p>
         </article>
+        <div className="yds-home-actions yds-home-actions--readiness">
+          <article className="yds-home-action-card">
+            <span className="yds-home-action-card__label">현재 대기자금</span>
+            <strong>{displayMoney(report.crashReserve.currentAmount, "설정 필요")}</strong>
+            <p>현재 확보된 폭락 대응용 자금입니다.</p>
+          </article>
+          <article className="yds-home-action-card">
+            <span className="yds-home-action-card__label">사용 가능</span>
+            <strong>{displayMoney(report.crashReserve.availableAmount, "설정 필요")}</strong>
+            <p>자동 주문 없이 사용자가 직접 판단하는 가이드 금액입니다.</p>
+          </article>
+          <article className="yds-home-action-card">
+            <span className="yds-home-action-card__label">기본 단계 수</span>
+            <strong>{report.crashReserve.stageCount}단계</strong>
+            <p>기본값은 5단계이며 3~5단계로 조정할 수 있습니다.</p>
+          </article>
+          <article className="yds-home-action-card">
+            <span className="yds-home-action-card__label">준비도</span>
+            <strong>{report.crashReserve.readyPct == null ? "설정 필요" : `${report.crashReserve.readyPct}%`}</strong>
+            <p>목표 대비 현재 대기자금 비율입니다.</p>
+          </article>
+          <article className="yds-home-action-card">
+            <span className="yds-home-action-card__label">대응 단계 가이드</span>
+            <strong>{report.stage.label}</strong>
+            <p>{report.stage.actionGuide} 자동 주문 없이 화면 가이드만 표시합니다.</p>
+          </article>
+        </div>
+        <div className="yds-home-crash-stages">
+          {report.crashReserve.stages.map((stage) => (
+            <article key={stage.id} className="yds-home-action-card">
+              <span className="yds-home-action-card__label">{stage.label}</span>
+              <strong>{stage.amount == null ? `${stage.pct}%` : `${stage.pct}% · ${formatMoney(stage.amount)}`}</strong>
+              <p>{stage.completed ? "완료" : "미완료"}</p>
+            </article>
+          ))}
+        </div>
+        <div className="yds-home-form">
+          <label className="yds-home-form__field">
+            <span>대기자금 목표</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={settings.crashReserve.targetAmount}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  crashReserve: {
+                    ...prev.crashReserve,
+                    targetAmount: Math.max(0, Math.round(Number(e.target.value) || 0)),
+                  },
+                }))
+              }
+            />
+          </label>
+          <label className="yds-home-form__field">
+            <span>현재 대기자금</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={settings.crashReserve.currentAmount}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  crashReserve: {
+                    ...prev.crashReserve,
+                    currentAmount: Math.max(0, Math.round(Number(e.target.value) || 0)),
+                  },
+                }))
+              }
+            />
+          </label>
+          <label className="yds-home-form__field">
+            <span>투입 단계 수 (3~5)</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="3"
+              max="5"
+              value={settings.crashReserve.stageCount}
+              onChange={(e) =>
+                setSettings((prev) => {
+                  const stageCount = Math.max(3, Math.min(5, Math.round(Number(e.target.value) || 5)))
+                  return {
+                    ...prev,
+                    crashReserve: {
+                      ...prev.crashReserve,
+                      stageCount,
+                      stagePercentages: prev.crashReserve.stagePercentages.slice(0, stageCount),
+                      stageStatuses: prev.crashReserve.stageStatuses.slice(0, stageCount),
+                    },
+                  }
+                })
+              }
+            />
+          </label>
+        </div>
+        <div className="yds-home-stage-percentages">
+          {settings.crashReserve.stagePercentages.slice(0, settings.crashReserve.stageCount).map((value, index) => (
+            <label key={`stage-pct-${index + 1}`} className="yds-home-form__field">
+              <span>{index + 1}차 비율 (%)</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="0"
+                max="100"
+                value={value}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    crashReserve: {
+                      ...prev.crashReserve,
+                      stagePercentages: prev.crashReserve.stagePercentages.map((pct, pctIndex) =>
+                        pctIndex === index ? Math.max(0, Math.round(Number(e.target.value) || 0)) : pct,
+                      ),
+                    },
+                  }))
+                }
+              />
+            </label>
+          ))}
+        </div>
       </section>
 
       <section className="yds-home__section">

@@ -111,6 +111,9 @@
 .yds-home-progress,
 .yds-home-principles,
 .yds-home-account-grid,
+.yds-home-stress-grid,
+.yds-home-crash-stages,
+.yds-home-stage-percentages,
 .yds-home-form,
 .yds-home-target {
   display: grid;
@@ -351,6 +354,18 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.yds-home-stress-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yds-home-crash-stages {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.yds-home-stage-percentages {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .yds-home-target {
   grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.8fr);
 }
@@ -395,6 +410,9 @@
   .yds-home-actions,
   .yds-home-actions--readiness,
   .yds-home-progress,
+  .yds-home-stress-grid,
+  .yds-home-crash-stages,
+  .yds-home-stage-percentages,
   .yds-home-principles,
   .yds-home-form {
     grid-template-columns: 1fr;
