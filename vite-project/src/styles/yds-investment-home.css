@@ -1,0 +1,306 @@
+.yds-home {
+  display: grid;
+  gap: 1rem;
+}
+
+.yds-home__header,
+.yds-home__section,
+.yds-home-stage,
+.yds-home-priority-card,
+.yds-home-market-card,
+.yds-home-action-card,
+.yds-home-target__main,
+.yds-home-target__aside,
+.yds-home-metric,
+.yds-home-form__field {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.yds-home__header {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  align-items: stretch;
+}
+
+.yds-home__header-main,
+.yds-home__section,
+.yds-home-stage,
+.yds-home-priority-card,
+.yds-home-market-card,
+.yds-home-target__main,
+.yds-home-target__aside {
+  padding: 1rem 1.1rem;
+}
+
+.yds-home__kicker,
+.yds-home__section-head p,
+.yds-home-metric__sub,
+.yds-home-stage__eyebrow,
+.yds-home-form__field span {
+  color: rgba(226, 232, 240, 0.75);
+  font-size: 0.85rem;
+}
+
+.yds-home__title {
+  margin: 0.2rem 0 0.45rem;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.15;
+}
+
+.yds-home__sub {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.88);
+  line-height: 1.55;
+}
+
+.yds-home-stage {
+  display: grid;
+  gap: 0.45rem;
+  align-content: center;
+}
+
+.yds-home-stage__title {
+  font-size: 1.6rem;
+}
+
+.yds-home-stage__score {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.95rem;
+}
+
+.yds-home-stage--stable {
+  background: rgba(15, 118, 110, 0.18);
+}
+
+.yds-home-stage--watch {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.yds-home-stage--stress {
+  background: rgba(245, 158, 11, 0.18);
+}
+
+.yds-home-stage--fear,
+.yds-home-metric--warn {
+  background: rgba(249, 115, 22, 0.18);
+}
+
+.yds-home-stage--crash {
+  background: rgba(220, 38, 38, 0.22);
+}
+
+.yds-home__section {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.yds-home__section-head h2 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.yds-home__section-head p {
+  margin: 0.3rem 0 0;
+}
+
+.yds-home__metrics,
+.yds-home-actions,
+.yds-home-progress,
+.yds-home-principles,
+.yds-home-form,
+.yds-home-target {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.yds-home__metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.yds-home-metric {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem;
+}
+
+.yds-home-metric--accent {
+  background: rgba(37, 99, 235, 0.16);
+}
+
+.yds-home-metric__label {
+  color: rgba(226, 232, 240, 0.84);
+  font-size: 0.92rem;
+}
+
+.yds-home-metric__value {
+  font-size: 1.22rem;
+}
+
+.yds-home-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yds-home-form__field {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.9rem;
+}
+
+.yds-home-form__field input {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.88);
+  color: #f8fafc;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+}
+
+.yds-home-priority-card {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr);
+  background: rgba(37, 99, 235, 0.12);
+}
+
+.yds-home-priority-card__title {
+  display: block;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  margin-bottom: 0.35rem;
+}
+
+.yds-home-priority-card__desc {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.88);
+  line-height: 1.55;
+}
+
+.yds-home-market-card {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 1fr);
+}
+
+.yds-home-market-card__title {
+  display: block;
+  font-size: 1.28rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-home-market-card__desc {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.88);
+  line-height: 1.55;
+}
+
+.yds-home-market-card__meta {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.yds-home-market-card__meta dt {
+  color: rgba(226, 232, 240, 0.7);
+  font-size: 0.82rem;
+  margin-bottom: 0.2rem;
+}
+
+.yds-home-market-card__meta dd {
+  margin: 0;
+}
+
+.yds-home-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.yds-home-actions--readiness {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yds-home-action-card {
+  padding: 0.95rem;
+}
+
+.yds-home-action-card__label {
+  display: block;
+  color: rgba(226, 232, 240, 0.7);
+  font-size: 0.84rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-home-action-card p {
+  margin: 0.45rem 0 0;
+  color: rgba(226, 232, 240, 0.76);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.yds-home-callout {
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  border-radius: 16px;
+  background: rgba(37, 99, 235, 0.12);
+  padding: 0.95rem 1rem;
+}
+
+.yds-home-callout__label {
+  display: block;
+  color: rgba(191, 219, 254, 0.9);
+  font-size: 0.82rem;
+  margin-bottom: 0.35rem;
+}
+
+.yds-home-progress {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.yds-home-target {
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.8fr);
+}
+
+.yds-home-target__main p,
+.yds-home-target__aside p {
+  color: rgba(226, 232, 240, 0.88);
+  line-height: 1.55;
+}
+
+.yds-home-target__badges,
+.yds-home-target__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.yds-home-target__badge {
+  border-radius: 999px;
+  padding: 0.38rem 0.72rem;
+  background: rgba(37, 99, 235, 0.18);
+  color: #dbeafe;
+  font-size: 0.85rem;
+}
+
+.yds-home-target__links a,
+.yds-home__sub a {
+  color: #93c5fd;
+}
+
+.yds-home-principles {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+  .yds-home__header,
+  .yds-home-priority-card,
+  .yds-home-market-card,
+  .yds-home-target,
+  .yds-home__metrics,
+  .yds-home-actions,
+  .yds-home-actions--readiness,
+  .yds-home-progress,
+  .yds-home-principles,
+  .yds-home-form {
+    grid-template-columns: 1fr;
+  }
+}
