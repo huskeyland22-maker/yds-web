@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { PortfolioStateProvider, usePortfolioHoldings } from "../context/PortfolioStateContext.jsx"
 import { buildInvestmentHomeReport } from "../content/ydsInvestmentHomeEngine.js"
 import {
   loadInvestmentHomeSettings,
@@ -15,8 +14,16 @@ function formatMoney(value) {
 }
 
 /** @param {number | null | undefined} value @param {string} fallback */
-function displayMoney(value, fallback = "아직 입력되지 않음") {
+function displayMoney(value, fallback = "미입력") {
   return value == null ? fallback : formatMoney(value)
+}
+
+/** @param {number | null | undefined} value */
+function formatSignedMoney(value) {
+  const n = Math.round(Number(value) || 0)
+  if (n > 0) return `+${n.toLocaleString("ko-KR")}원`
+  if (n < 0) return `-${Math.abs(n).toLocaleString("ko-KR")}원`
+  return "0원"
 }
 
 function MetricCard({ label, value, sub, tone = "" }) {
@@ -31,17 +38,13 @@ function MetricCard({ label, value, sub, tone = "" }) {
 
 function HomeContent() {
   const marketContext = useYdsMarketContext()
-  const { trades, cashAmount, portfolio } = usePortfolioHoldings()
   const [settings, setSettings] = useState(() => loadInvestmentHomeSettings())
 
   useEffect(() => {
     saveInvestmentHomeSettings(settings)
   }, [settings])
 
-  const report = useMemo(
-    () => buildInvestmentHomeReport(trades, cashAmount, portfolio, marketContext, settings),
-    [trades, cashAmount, portfolio, marketContext, settings],
-  )
+  const report = useMemo(() => buildInvestmentHomeReport([], 0, null, marketContext, settings), [marketContext, settings])
 
   return (
     <div className="yds-home min-w-0 px-3 py-4 sm:px-4">
@@ -74,45 +77,112 @@ function HomeContent() {
           <MetricCard
             label="총 투자자산"
             value={displayMoney(report.overview.totalInvestmentAssets)}
-            sub="보유 자산 + 현금"
+            sub="YDS 2.0 시작 자산 기준"
             tone="accent"
           />
           <MetricCard
             label="누적 투자금"
             value={displayMoney(report.overview.cumulativeInvestedAmount)}
-            sub="기존 buy 거래 누적"
+            sub="opening balance 기준 누적 투자금"
           />
           <MetricCard
             label="현재 평가금액"
             value={displayMoney(report.overview.currentValuationAmount)}
-            sub="보유 중인 투자자산 평가"
+            sub="현재 등록된 총 평가금액"
             tone="accent"
+          />
+          <MetricCard
+            label="현재 평가손익"
+            value={report.overview.currentProfitLoss == null ? "미입력" : formatSignedMoney(report.overview.currentProfitLoss)}
+            sub="계좌별 opening balance 손익 합계"
           />
           <MetricCard
             label="이번 달 적립 예정금"
             value={displayMoney(report.overview.monthlyPlannedAmount, "설정 필요")}
-            sub="수동 입력 · 아직 자동 알고리즘 없음"
+            sub="세 계좌 월 적립 계획 합계"
           />
           <MetricCard
-            label="이번 달 실제 투자금"
-            value={displayMoney(report.overview.monthlyInvestedAmount)}
-            sub="기존 buy 거래 합산"
+            label="연간 적립 예정금"
+            value={displayMoney(report.overview.annualPlannedAmount, "설정 필요")}
+            sub="월 적립 계획 x 12"
           />
-          <MetricCard
-            label="대기 현금"
-            value={displayMoney(report.overview.waitingCash)}
-            sub="당장 적립 또는 추가 투입 전까지 보유하는 현금"
-          />
-          <MetricCard
-            label="비상자금"
-            value={displayMoney(report.overview.emergencyCash, "설정 필요")}
-            sub={
-              report.overview.reserveTarget > 0
-                ? `${formatMoney(report.overview.reserveTarget)} 목표`
-                : "설정 필요"
-            }
-            tone="warn"
-          />
+        </div>
+        <div className="yds-home-account-summary">
+          <div className="yds-home-account-summary__head">
+            <strong>계좌별 적립 계획</strong>
+            <span>opening balance와 월 적립 계획을 분리해 표시합니다.</span>
+          </div>
+          <div className="yds-home-account-summary__rows">
+            {report.accounts.map((account) => (
+              <div key={account.id} className="yds-home-account-summary__row">
+                <span>{account.name}</span>
+                <span>{displayMoney(account.openingValuation)}</span>
+                <span>{displayMoney(account.monthlyContributionPlan, "설정 필요")}</span>
+              </div>
+            ))}
+            <div className="yds-home-account-summary__row yds-home-account-summary__row--total">
+              <span>월 합계</span>
+              <span>{displayMoney(report.overview.currentValuationAmount)}</span>
+              <span>{displayMoney(report.overview.monthlyPlannedAmount, "설정 필요")}</span>
+            </div>
+          </div>
+        </div>
+        <div className="yds-home-account-grid">
+          {report.accounts.map((account, index) => (
+            <article key={account.id} className="yds-home-account-card">
+              <div className="yds-home-account-card__head">
+                <strong>{account.name}</strong>
+                <span>{account.purpose}</span>
+              </div>
+              <dl className="yds-home-account-card__stats">
+                <div>
+                  <dt>현재 평가금액</dt>
+                  <dd>{formatMoney(account.openingValuation)}</dd>
+                </div>
+                <div>
+                  <dt>누적 투자금</dt>
+                  <dd>{formatMoney(account.openingContribution)}</dd>
+                </div>
+                <div>
+                  <dt>평가손익</dt>
+                  <dd>{formatSignedMoney(account.openingProfitLoss)}</dd>
+                </div>
+                <div>
+                  <dt>월 적립 예정금</dt>
+                  <dd>
+                    <input
+                      className="yds-home-inline-input"
+                      type="number"
+                      inputMode="numeric"
+                      min="0"
+                      value={settings.accounts[index]?.monthlyContributionPlan ?? 0}
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          accounts: prev.accounts.map((row, rowIndex) =>
+                            rowIndex === index
+                              ? {
+                                  ...row,
+                                  monthlyContributionPlan: Math.max(0, Math.round(Number(e.target.value) || 0)),
+                                }
+                              : row,
+                          ),
+                        }))
+                      }
+                    />
+                  </dd>
+                </div>
+              </dl>
+              <div className="yds-home-account-card__holdings">
+                <span>보유 ETF</span>
+                <p>
+                  {account.holdings.length
+                    ? account.holdings.map((holding) => `${holding.name || holding.ticker}`).join(", ")
+                    : "현재 보유 ETF 내역은 아직 입력되지 않음"}
+                </p>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -140,7 +210,7 @@ function HomeContent() {
             </div>
             <div>
               <dt>비상자금</dt>
-              <dd>{report.overview.reserveStatus}</dd>
+              <dd>{report.crashReserve.status}</dd>
             </div>
           </dl>
         </div>
@@ -172,7 +242,7 @@ function HomeContent() {
             </div>
             <div>
               <dt>비상자금 사용 여부</dt>
-              <dd>{report.stage.id === "crash" ? "검토 가능" : "아직 사용하지 않음"}</dd>
+              <dd>{report.crashReserve.status}</dd>
             </div>
             <div>
               <dt>상세 시장 분석</dt>
@@ -188,63 +258,14 @@ function HomeContent() {
         <div className="yds-home__section-head">
           <div>
             <h2>4. 폭락 대응 준비도</h2>
-            <p>대폭락장이 왔을 때만 사용할 비상자금을 별도로 관리합니다.</p>
+            <p>월 적립 계획과 분리된 별도 대기자금 기능은 다음 단계에서 구현합니다.</p>
           </div>
         </div>
-        <div className="yds-home-actions yds-home-actions--readiness">
-          <article className="yds-home-action-card">
-            <span className="yds-home-action-card__label">비상자금 목표</span>
-            <strong>{report.overview.reserveTarget > 0 ? formatMoney(report.overview.reserveTarget) : "설정 필요"}</strong>
-            <p>생활비와 분리해서 보관할 목표 금액입니다.</p>
-          </article>
-          <article className="yds-home-action-card">
-            <span className="yds-home-action-card__label">현재 비상자금</span>
-            <strong>{displayMoney(report.overview.emergencyCash, "설정 필요")}</strong>
-            <p>{report.overview.reserveStatus}</p>
-          </article>
-          <article className="yds-home-action-card">
-            <span className="yds-home-action-card__label">추가 투입 가능 금액</span>
-            <strong>{displayMoney(report.overview.deployableCashAmount, "설정 필요")}</strong>
-            <p>대폭락 구간에서만 검토하는 추가 투입 여력입니다.</p>
-          </article>
-          <article className="yds-home-action-card">
-            <span className="yds-home-action-card__label">비상자금 준비율</span>
-            <strong>{report.overview.reserveCoveragePct == null ? "설정 필요" : `${Math.round(report.overview.reserveCoveragePct)}%`}</strong>
-            <p>{report.overview.deploymentReadiness}</p>
-          </article>
-        </div>
-        <div className="yds-home-form">
-          <label className="yds-home-form__field">
-            <span>이번 달 적립 예정금</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="0"
-              value={settings.monthlyPlannedAmount}
-              onChange={(e) =>
-                setSettings((prev) => ({
-                  ...prev,
-                  monthlyPlannedAmount: Math.max(0, Math.round(Number(e.target.value) || 0)),
-                }))
-              }
-            />
-          </label>
-          <label className="yds-home-form__field">
-            <span>비상자금 목표/예약금</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="0"
-              value={settings.emergencyCashReserve}
-              onChange={(e) =>
-                setSettings((prev) => ({
-                  ...prev,
-                  emergencyCashReserve: Math.max(0, Math.round(Number(e.target.value) || 0)),
-                }))
-              }
-            />
-          </label>
-        </div>
+        <article className="yds-home-action-card">
+          <span className="yds-home-action-card__label">{report.crashReserve.title}</span>
+          <strong>{report.crashReserve.status}</strong>
+          <p>{report.crashReserve.description}</p>
+        </article>
       </section>
 
       <section className="yds-home__section">
@@ -362,9 +383,5 @@ function HomeContent() {
 }
 
 export default function InvestmentHomePage() {
-  return (
-    <PortfolioStateProvider>
-      <HomeContent />
-    </PortfolioStateProvider>
-  )
+  return <HomeContent />
 }

@@ -1,5 +1,4 @@
 import { stockList } from "../utils/stockRecommendations.js"
-import { tradeAmountKrw } from "./ydsPortfolioV5Engine.js"
 
 /** @param {number | null | undefined} value */
 function fmtMoney(value) {
@@ -98,62 +97,35 @@ export function resolveInvestmentStressStage(score) {
   }
 }
 
+/** @param {number | null | undefined} value */
+function safeMoney(value) {
+  return Math.round(Number(value) || 0)
+}
+
 /**
- * @param {import("./ydsPortfolioTradesStorage.js").PortfolioTrade[]} trades
+ * @param {unknown[]} trades
  * @param {number} cashAmount
- * @param {ReturnType<typeof import("./ydsPortfolioV5Engine.js").buildV5Holdings>} portfolio
+ * @param {unknown} portfolio
  * @param {import("../hooks/useYdsMarketContext.js").useYdsMarketContext extends (...args: any) => infer R ? R : any} marketContext
- * @param {{ monthlyPlannedAmount: number; emergencyCashReserve: number; investmentStartMonth: string; targetDurationYears: number }} settings
+ * @param {{ accounts?: Array<{ id: string; name: string; purpose: string; openingValuation: number; openingContribution: number; openingProfitLoss: number; monthlyContributionPlan: number; holdings?: Array<{ ticker: string; name: string; quantity: number; averageCost: number; currentValue: number }> }>; investmentStartMonth: string; targetDurationYears: number }} settings
  */
-export function buildInvestmentHomeReport(
-  trades,
-  cashAmount,
-  portfolio,
-  marketContext,
-  settings,
-) {
-  const safeTrades = Array.isArray(trades) ? trades : []
+export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketContext, settings) {
   const monthKey = currentMonthKey()
-
-  const buyTrades = safeTrades.filter((trade) => trade?.action === "buy")
-  const monthlyBuyAmount = buyTrades
-    .filter((trade) => String(trade.date ?? "").slice(0, 7) === monthKey)
-    .reduce((sum, trade) => sum + tradeAmountKrw(trade), 0)
-  const cumulativeInvestedAmount = buyTrades.reduce((sum, trade) => sum + tradeAmountKrw(trade), 0)
-
-  const plannedAmount = Math.max(0, Number(settings?.monthlyPlannedAmount) || 0)
-  const emergencyReserve = Math.max(0, Number(settings?.emergencyCashReserve) || 0)
+  const accounts = Array.isArray(settings?.accounts) ? settings.accounts : []
   const investmentStartMonth = String(settings?.investmentStartMonth ?? "").trim()
   const targetDurationYears = Math.max(0, Number(settings?.targetDurationYears) || 0)
-  const actualCash = Math.max(0, Number(cashAmount) || 0)
-  const protectedEmergencyCash = Math.min(actualCash, emergencyReserve)
-  const waitingCash = Math.max(0, actualCash - protectedEmergencyCash)
   const stage = resolveInvestmentStressStage(marketContext?.ydsScore)
-  const hasHoldings = Number(portfolio?.stockTotal ?? 0) > 0
-  const hasCash = actualCash > 0
-  const hasTradeHistory = buyTrades.length > 0
-  const hasAnyInvestmentData = hasHoldings || hasCash || hasTradeHistory
+  const totalOpeningValuation = accounts.reduce((sum, account) => sum + safeMoney(account?.openingValuation), 0)
+  const totalOpeningContribution = accounts.reduce((sum, account) => sum + safeMoney(account?.openingContribution), 0)
+  const totalOpeningProfitLoss = accounts.reduce((sum, account) => sum + Math.round(Number(account?.openingProfitLoss) || 0), 0)
+  const monthlyContributionPlan = accounts.reduce((sum, account) => sum + safeMoney(account?.monthlyContributionPlan), 0)
+  const annualContributionPlan = monthlyContributionPlan * 12
+  const hasOpeningBalance = totalOpeningValuation > 0 || totalOpeningContribution > 0
+  const hasMonthlyPlan = monthlyContributionPlan > 0
 
   const representativeEtfs = stockList
     .filter((item) => item.type === "etf" && ["SPY", "QQQ", "VGT"].includes(String(item.ticker)))
     .slice(0, 3)
-
-  let reserveStatus = "설정 필요"
-  if (emergencyReserve > 0 && protectedEmergencyCash <= 0) {
-    reserveStatus = "비상자금 현금이 아직 입력되지 않음"
-  } else if (emergencyReserve > 0 && protectedEmergencyCash < emergencyReserve) {
-    reserveStatus = "일부 준비됨"
-  } else if (emergencyReserve > 0) {
-    reserveStatus = "준비됨"
-  }
-
-  let deploymentReadiness = "설정 필요"
-  if (emergencyReserve > 0 && protectedEmergencyCash > 0) {
-    deploymentReadiness =
-      stage.id === "crash"
-        ? "비상자금 투입 검토 가능"
-        : "비상자금 보유 중 · 시장 스트레스 확대 시 사용"
-  }
 
   const ydsActionLine =
     stage.id === "unknown"
@@ -167,9 +139,6 @@ export function buildInvestmentHomeReport(
             : stage.id === "fear"
               ? "정기 적립을 유지하면서 비상자금 1단계 투입을 검토합니다."
               : "대폭락 구간이므로 비상자금 투입 계획을 실제 행동으로 점검합니다."
-
-  const reserveCoveragePct =
-    emergencyReserve > 0 ? Math.min(100, (protectedEmergencyCash / emergencyReserve) * 100) : null
 
   const totalPlanMonths = targetDurationYears > 0 ? targetDurationYears * 12 : null
   const elapsedMonthsRaw =
@@ -194,19 +163,22 @@ export function buildInvestmentHomeReport(
       panicLabel: marketContext?.panicLabel ?? "—",
       contextLine: marketContext?.contextLine ?? "",
     },
+    openingBalance: {
+      totalValuation: hasOpeningBalance ? totalOpeningValuation : null,
+      cumulativeContribution: hasOpeningBalance ? totalOpeningContribution : null,
+      currentProfitLoss: hasOpeningBalance ? totalOpeningProfitLoss : null,
+    },
+    monthlyContributionPlan: {
+      monthlyTotal: hasMonthlyPlan ? monthlyContributionPlan : null,
+      annualTotal: hasMonthlyPlan ? annualContributionPlan : null,
+    },
     overview: {
-      totalInvestmentAssets: hasAnyInvestmentData ? portfolio?.totalAssets ?? actualCash : null,
-      cumulativeInvestedAmount: hasTradeHistory ? cumulativeInvestedAmount : null,
-      currentValuationAmount: hasHoldings ? portfolio?.stockTotal ?? 0 : null,
-      monthlyPlannedAmount: plannedAmount > 0 ? plannedAmount : null,
-      monthlyInvestedAmount: hasTradeHistory ? monthlyBuyAmount : null,
-      waitingCash: hasCash ? waitingCash : null,
-      emergencyCash: emergencyReserve > 0 ? protectedEmergencyCash : null,
-      reserveTarget: emergencyReserve,
-      reserveStatus,
-      deploymentReadiness,
-      reserveCoveragePct,
-      deployableCashAmount: emergencyReserve > 0 ? protectedEmergencyCash : null,
+      totalInvestmentAssets: hasOpeningBalance ? totalOpeningValuation : null,
+      cumulativeInvestedAmount: hasOpeningBalance ? totalOpeningContribution : null,
+      currentValuationAmount: hasOpeningBalance ? totalOpeningValuation : null,
+      currentProfitLoss: hasOpeningBalance ? totalOpeningProfitLoss : null,
+      monthlyPlannedAmount: hasMonthlyPlan ? monthlyContributionPlan : null,
+      annualPlannedAmount: hasMonthlyPlan ? annualContributionPlan : null,
     },
     investmentTarget: {
       title: "미국 대표지수 ETF",
@@ -216,16 +188,12 @@ export function buildInvestmentHomeReport(
     },
     actions: {
       monthlyPlanLine:
-        plannedAmount > 0
-          ? `이번 달 여유돈 기준 적립 예정금은 ${fmtMoney(plannedAmount)}입니다.`
+        monthlyContributionPlan > 0
+          ? `이번 달 여유돈 기준 적립 예정금은 ${fmtMoney(monthlyContributionPlan)}입니다.`
           : "이번 달 적립 예정금을 아직 설정하지 않았습니다.",
       monthlyStatus:
-        plannedAmount > 0
-          ? monthlyBuyAmount >= plannedAmount
-            ? "정상 진행"
-            : monthlyBuyAmount > 0
-              ? "진행 중"
-              : "시작 전"
+        monthlyContributionPlan > 0
+          ? "계획 반영됨"
           : "설정 필요",
       marketLine: stage.label,
       actionLine:
@@ -244,6 +212,21 @@ export function buildInvestmentHomeReport(
       progressPct: fmtPct(progressPct),
       isConfigured: Boolean(investmentStartMonth && totalPlanMonths),
     },
+    crashReserve: {
+      title: "폭락 대응 대기자금",
+      status: "다음 단계 구현 예정",
+      description: "월 적립 계획과 분리된 별도 대기자금 기능은 다음 단계에서 구현합니다.",
+    },
+    accounts: accounts.map((account) => ({
+      id: account.id,
+      name: account.name,
+      purpose: account.purpose,
+      openingValuation: safeMoney(account.openingValuation),
+      openingContribution: safeMoney(account.openingContribution),
+      openingProfitLoss: Math.round(Number(account.openingProfitLoss) || 0),
+      monthlyContributionPlan: safeMoney(account.monthlyContributionPlan),
+      holdings: Array.isArray(account.holdings) ? account.holdings : [],
+    })),
     principles: [
       "매달 여유돈으로 적립합니다.",
       "시장을 예측해서 적립을 중단하지 않습니다.",
