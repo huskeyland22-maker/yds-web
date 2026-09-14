@@ -1,0 +1,32 @@
+# Daily lightweight Supabase DB activity (SELECT via existing YDS API).
+# Prevents Free Plan inactivity pause. No INSERT/UPDATE. No CRON_SECRET.
+name: supabase-keepalive
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping YDS Supabase keepalive (SELECT-only)
+        run: |
+          set -e
+          URL="${KEEPALIVE_URL:-https://yds-web-kappa.vercel.app/api/cron/supabase-keepalive}"
+          FALLBACK="${FALLBACK_URL:-https://yds-web-kappa.vercel.app/api/supabase/health}"
+          code=$(curl -sS -o /tmp/keepalive.json -w "%{http_code}" "$URL" || true)
+          echo "keepalive_http=$code"
+          cat /tmp/keepalive.json || true
+          if [ "$code" = "200" ]; then
+            if grep -q '"write":false\|"ok":true' /tmp/keepalive.json; then
+              echo "keepalive_ok"
+              exit 0
+            fi
+          fi
+          echo "fallback_to_health"
+          code2=$(curl -sS -o /tmp/health.json -w "%{http_code}" "$FALLBACK")
+          echo "health_http=$code2"
+          cat /tmp/health.json
+          test "$code2" = "200"
