@@ -1,6 +1,26 @@
 .yds-home {
   display: grid;
   gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.yds-home > *,
+.yds-home__header,
+.yds-home__section,
+.yds-home-stage,
+.yds-home-priority-card,
+.yds-home-market-card,
+.yds-home-strategy-card,
+.yds-home-action-card,
+.yds-home-metric,
+.yds-home-account-summary,
+.yds-home-account-card {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .yds-home__header,
@@ -44,6 +64,20 @@
 .yds-home-form__field span {
   color: rgba(226, 232, 240, 0.75);
   font-size: 0.85rem;
+}
+
+.yds-home__title,
+.yds-home__sub,
+.yds-home__section-head p,
+.yds-home-priority-card__desc,
+.yds-home-market-card__desc,
+.yds-home-strategy-card__desc,
+.yds-home-strategy-card__note,
+.yds-home-action-card p,
+.yds-home-metric__value,
+.yds-home-strategy-actual__value {
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .yds-home__title {
@@ -172,7 +206,7 @@
 
 .yds-home-account-summary__row {
   display: grid;
-  grid-template-columns: minmax(110px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.75rem;
   align-items: center;
 }
@@ -708,11 +742,24 @@
 
 @media (max-width: 720px) {
   .yds-home-strategy-month-history__list li {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .yds-home-strategy-month__actions {
+    flex-wrap: wrap;
+  }
+
+  .yds-home-strategy-month__btn {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
 
 @media (max-width: 960px) {
+  .yds-home {
+    gap: 0.85rem;
+  }
+
   .yds-home__header,
   .yds-home-priority-card,
   .yds-home-market-card,
@@ -730,11 +777,84 @@
   .yds-home-form--crash,
   .yds-home-stage-percentages,
   .yds-home-principles,
-  .yds-home-form {
+  .yds-home-form,
+  .yds-home-account-summary__row,
+  .yds-home-strategy-card__table li {
     grid-template-columns: 1fr;
   }
 
   .yds-home-crash-stage {
     grid-template-columns: 1fr;
+  }
+
+  .yds-home-crash-stage__badge,
+  .yds-home-crash-stage__done {
+    white-space: normal;
+  }
+
+  .yds-home__header-main,
+  .yds-home__section,
+  .yds-home-stage,
+  .yds-home-priority-card,
+  .yds-home-market-card,
+  .yds-home-strategy-card,
+  .yds-home-target__main,
+  .yds-home-target__aside {
+    padding: 0.85rem 0.9rem;
+  }
+
+  .yds-home-metric,
+  .yds-home-account-card,
+  .yds-home-action-card {
+    padding: 0.85rem;
+  }
+
+  .yds-home__title {
+    font-size: clamp(1.35rem, 6.5vw, 1.85rem);
+  }
+
+  .yds-home-stage__title {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+  }
+
+  .yds-home-priority-card__title,
+  .yds-home-strategy-card__title {
+    font-size: clamp(1.15rem, 5.5vw, 1.45rem);
+  }
+
+  .yds-home-metric__value {
+    font-size: clamp(1rem, 4.8vw, 1.2rem);
+  }
+
+  .yds-home-strategy-actual__value {
+    font-size: clamp(1.25rem, 6.5vw, 1.7rem);
+  }
+
+  .yds-home-form--strategy-reserve {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .yds-home {
+    gap: 0.75rem;
+  }
+
+  .yds-home__header-main,
+  .yds-home__section,
+  .yds-home-stage,
+  .yds-home-priority-card,
+  .yds-home-market-card,
+  .yds-home-strategy-card,
+  .yds-home-target__main,
+  .yds-home-target__aside {
+    padding: 0.75rem 0.8rem;
+  }
+
+  .yds-home__metrics,
+  .yds-home-account-grid,
+  .yds-home-actions,
+  .yds-home-stress-grid {
+    gap: 0.65rem;
   }
 }
