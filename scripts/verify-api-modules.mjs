@@ -18,8 +18,6 @@ const modules = [
   "api/_lib/panicServeMeta.js",
   "api/_lib/dailyReportEngine.js",
   "api/_lib/cronAuth.js",
-  "api/cron/panic-collect.js",
-  "api/cron/supabase-keepalive.js",
   "api/_lib/stockPriceSummary.js",
   "api/_lib/kisTokenManager.js",
   "api/_lib/kisClient.js",
