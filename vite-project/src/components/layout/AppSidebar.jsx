@@ -1,9 +1,13 @@
+import { useState } from "react"
 import { NavLink } from "react-router-dom"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
-import { getPrimaryNavItems, getSecondaryNavItems } from "../../utils/appNavItems.js"
-import { LAUNCH_FOOTER_LINKS } from "../../content/ydsLaunchContent.js"
+import {
+  getCoreNavItems,
+  getOtherNavItems,
+  getSidebarFooterLinks,
+} from "../../utils/appNavItems.js"
 
 /**
  * @param {{
@@ -12,101 +16,150 @@ import { LAUNCH_FOOTER_LINKS } from "../../content/ydsLaunchContent.js"
  * }} props
  */
 export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
-  const navItems = getPrimaryNavItems()
-  const secondaryNavItems = getSecondaryNavItems()
+  const coreItems = getCoreNavItems()
+  const otherItems = getOtherNavItems()
+  const footerLinks = getSidebarFooterLinks()
   const aiStatus = sidebarPulse?.aiReportStatus ?? null
   const pickAlertUnread = countUnreadPickAlerts()
+  const [otherOpen, setOtherOpen] = useState(false)
 
   return (
-    <aside className="hidden w-[10rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
-      <div className="shrink-0 px-2 pb-2 pt-2.5 lg:border-b lg:border-white/[0.06] lg:px-2.5 lg:pb-2.5 lg:pt-3">
-        <p className="m-0 font-display text-[17px] font-bold leading-none tracking-[0.03em] text-slate-50">
+    <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
+      <div className="shrink-0 px-3 pb-2.5 pt-3 lg:border-b lg:border-white/[0.06]">
+        <p className="m-0 font-display text-[18px] font-bold leading-none tracking-[0.03em] text-slate-50">
           Y&apos;ds
         </p>
-        <div className="mt-1.5">
+        <p className="m-0 mt-1.5 text-[11px] font-medium tracking-tight text-sky-300/85">
+          함께하는 인생 투자
+        </p>
+        <div className="mt-2">
           <YdsV1ReleaseBadge compact />
         </div>
       </div>
-      <nav className="flex flex-col gap-0.5 px-2 py-2" aria-label="주요 메뉴">
-        {navItems.map((item, i) => (
+
+      <nav className="flex flex-col gap-2 px-2.5 py-3" aria-label="핵심 메뉴">
+        {coreItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.path === "/"}
             className={({ isActive }) =>
               [
-                "flex w-full items-center gap-1.5 rounded-card border px-2 py-1.5 text-[11px] transition",
-                isActive
-                  ? "border-indigo-500/30 bg-indigo-500/[0.14] text-slate-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-                  : "border-transparent text-slate-400 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-slate-200",
+                "yds-sidebar-core group block rounded-2xl border px-3 py-2.5 transition",
+                item.tone === "brand"
+                  ? isActive
+                    ? "border-sky-400/45 bg-sky-500/[0.16] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+                    : "border-sky-500/20 bg-sky-500/[0.07] hover:border-sky-400/35 hover:bg-sky-500/[0.12]"
+                  : isActive
+                    ? "border-rose-400/40 bg-rose-500/[0.14] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+                    : "border-rose-500/18 bg-rose-500/[0.06] hover:border-rose-400/30 hover:bg-rose-500/[0.1]",
               ].join(" ")
             }
           >
             {({ isActive }) => (
-              <>
-                <span
-                  className={`font-mono text-trading-2xs tabular-nums ${isActive ? "text-indigo-300/95" : "text-slate-600"}`}
-                >
-                  {String(i + 1).padStart(2, "0")}
+              <span className="flex items-start justify-between gap-2">
+                <span className="min-w-0">
+                  <span
+                    className={[
+                      "block text-[12.5px] font-semibold leading-snug tracking-tight",
+                      isActive ? "text-slate-50" : "text-slate-200",
+                    ].join(" ")}
+                  >
+                    {item.label}
+                  </span>
+                  <span className="mt-0.5 block text-[10px] leading-snug text-slate-400">
+                    {item.subtitle}
+                  </span>
                 </span>
-                <span className="min-w-0 truncate font-medium leading-tight tracking-tight">{item.label}</span>
+                <span
+                  className={[
+                    "mt-0.5 shrink-0 text-[12px]",
+                    isActive ? "text-slate-300" : "text-slate-600 group-hover:text-slate-400",
+                  ].join(" ")}
+                  aria-hidden
+                >
+                  ›
+                </span>
+              </span>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="mx-2.5 border-t border-white/[0.06]" />
+
+      <div className="px-2.5 py-2">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-[11px] font-semibold tracking-tight text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-300"
+          aria-expanded={otherOpen}
+          onClick={() => setOtherOpen((v) => !v)}
+        >
+          <span>기타 기능</span>
+          <span className="font-mono text-[10px] text-slate-600">{otherOpen ? "⌃" : "⌄"}</span>
+        </button>
+        {otherOpen ? (
+          <nav className="mt-0.5 flex flex-col gap-0.5" aria-label="기타 기능">
+            {otherItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  [
+                    "flex items-center rounded-md px-2 py-1.5 text-[11px] font-medium transition",
+                    isActive
+                      ? "bg-white/[0.07] text-slate-100"
+                      : "text-slate-500 hover:bg-white/[0.03] hover:text-slate-300",
+                  ].join(" ")
+                }
+              >
+                <span className="min-w-0 truncate">{item.label}</span>
                 {item.path === "/stock-picks" && pickAlertUnread > 0 ? (
                   <span className="ml-auto rounded-full bg-rose-500/90 px-1.5 py-0.5 text-[9px] font-bold text-white">
                     {pickAlertUnread}
                   </span>
                 ) : null}
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
-      <nav className="flex flex-col gap-0.5 px-2 pb-2" aria-label="보조 메뉴">
-        {secondaryNavItems.map((item) => (
+              </NavLink>
+            ))}
+          </nav>
+        ) : null}
+      </div>
+
+      <div className="mx-2.5 border-t border-white/[0.06]" />
+
+      <nav className="flex flex-col gap-0.5 px-2.5 py-2" aria-label="안내">
+        {footerLinks.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
               [
-                "flex w-full items-center rounded-card border px-2 py-1.5 text-[11px] transition",
-                isActive
-                  ? "border-indigo-500/30 bg-indigo-500/[0.14] text-slate-50"
-                  : "border-transparent text-slate-500 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-slate-300",
+                "rounded-md px-2 py-1.5 text-[11px] font-medium transition",
+                isActive ? "bg-white/[0.06] text-slate-200" : "text-slate-500 hover:text-slate-300",
               ].join(" ")
             }
           >
             {item.label}
           </NavLink>
         ))}
+        <button
+          type="button"
+          onClick={onOpenInputPanel}
+          className="mt-0.5 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-[11px] font-medium text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-300"
+        >
+          <span>계정 설정</span>
+          <span className="text-slate-600" aria-hidden>
+            ›
+          </span>
+        </button>
       </nav>
-      <nav
-        className="mt-2 hidden flex-col gap-0.5 border-t border-white/[0.06] px-2 pt-2 lg:flex"
-        aria-label="출시 안내"
-      >
-        <p className="m-0 px-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-600">
-          출시 안내
-        </p>
-        {LAUNCH_FOOTER_LINKS.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              [
-                "rounded-md px-2 py-1 text-[10px] font-medium transition",
-                isActive
-                  ? "bg-white/[0.06] text-slate-200"
-                  : "text-slate-500 hover:text-slate-300",
-              ].join(" ")
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-      <div className="mt-auto hidden lg:block lg:border-t lg:border-white/[0.06] lg:px-2 lg:pb-3 lg:pt-2.5">
+
+      <div className="mt-auto hidden border-t border-white/[0.06] px-2.5 pb-3 pt-2 lg:block">
         {aiStatus ? <AiReportMarketStatusBlock status={aiStatus} compact /> : null}
         <button
           type="button"
           onClick={onOpenInputPanel}
-          className="mt-3 w-full rounded-lg border border-violet-500/25 bg-violet-500/[0.08] px-2 py-2 text-[11px] font-medium text-violet-200/95 transition hover:border-violet-400/35 hover:bg-violet-500/[0.14]"
+          className="mt-2 w-full rounded-lg border border-sky-500/25 bg-sky-500/[0.08] px-2 py-2 text-[11px] font-medium text-sky-100/95 transition hover:border-sky-400/35 hover:bg-sky-500/[0.14]"
         >
           AI 리포트 입력
         </button>

@@ -33,6 +33,9 @@ const LEGACY_SETTINGS_KEY = "yds-investment-home-settings-v1"
  *     stagePercentages: number[]
  *     stageStatuses: boolean[]
  *   }
+ *   strategyReserve: {
+ *     currentAmount: number
+ *   }
  * }} InvestmentHomeSettings
  */
 
@@ -85,7 +88,23 @@ export function defaultInvestmentHomeSettings() {
       stagePercentages: [20, 20, 20, 20, 20],
       stageStatuses: [false, false, false, false, false],
     },
+    /** YDS 3.0 Strategy Reserve (여유자금) — Crash Reserve 와 별개 */
+    strategyReserve: {
+      currentAmount: 0,
+    },
   }
+}
+
+/**
+ * @param {unknown} raw
+ * @returns {{ currentAmount: number }}
+ */
+export function normalizeStrategyReserve(raw) {
+  const row = raw && typeof raw === "object" ? raw : {}
+  const n = Number(row.currentAmount)
+  const currentAmount =
+    Number.isFinite(n) && n > 0 ? Math.max(0, Math.round(n)) : 0
+  return { currentAmount }
 }
 
 /** @param {unknown} raw */
@@ -160,7 +179,13 @@ function normalizeSettings(raw) {
         : "",
     targetDurationYears: Math.max(0, Math.round(Number(row.targetDurationYears) || 0)),
     crashReserve: normalizeCrashReserve(row.crashReserve),
+    strategyReserve: normalizeStrategyReserve(row.strategyReserve),
   }
+}
+
+/** @param {unknown} raw @returns {InvestmentHomeSettings} */
+export function normalizeInvestmentHomeSettings(raw) {
+  return normalizeSettings(raw)
 }
 
 /** @returns {InvestmentHomeSettings} */

@@ -1,5 +1,6 @@
 import { stockList } from "../utils/stockRecommendations.js"
-import { buildCrashReservePlan, resolveMarketStressReport } from "./ydsInvestmentStressResolver.js"
+import { buildCrashReservePlan, computeSpyDrawdownFromPrices } from "./ydsCrashReserveEngine.js"
+import { resolveMarketStressReport } from "./ydsInvestmentStressResolver.js"
 
 /** @param {number | null | undefined} value */
 function fmtMoney(value) {
@@ -114,7 +115,7 @@ function safeMoney(value) {
  * @param {import("../hooks/useYdsMarketContext.js").useYdsMarketContext extends (...args: any) => infer R ? R : any} marketContext
  * @param {{ accounts?: Array<{ id: string; name: string; purpose: string; openingValuation: number; openingContribution: number; openingProfitLoss: number; monthlyContributionPlan: number; holdings?: Array<{ ticker: string; name: string; quantity: number; averageCost: number; currentValue: number }> }>; investmentStartMonth: string; targetDurationYears: number; crashReserve?: { targetAmount: number; currentAmount: number; stageCount: number; stagePercentages: number[]; stageStatuses?: boolean[] } }} settings
  */
-export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketContext, settings, panicData) {
+export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketContext, settings, panicData, spyPrices) {
   const monthKey = currentMonthKey()
   const accounts = Array.isArray(settings?.accounts) ? settings.accounts : []
   const investmentStartMonth = String(settings?.investmentStartMonth ?? "").trim()
@@ -130,7 +131,11 @@ export function buildInvestmentHomeReport(trades, cashAmount, portfolio, marketC
   const annualContributionPlan = monthlyContributionPlan * 12
   const hasOpeningBalance = totalOpeningValuation > 0 || totalOpeningContribution > 0
   const hasMonthlyPlan = monthlyContributionPlan > 0
-  const crashReserve = buildCrashReservePlan(settings?.crashReserve ?? null)
+  const spyDrawdown = computeSpyDrawdownFromPrices(spyPrices ?? null)
+  const crashReserve = buildCrashReservePlan(settings?.crashReserve ?? null, {
+    drawdown: spyDrawdown,
+    stressReport,
+  })
 
   const representativeEtfs = stockList
     .filter((item) => item.type === "etf" && ["SPY", "QQQ", "VGT"].includes(String(item.ticker)))

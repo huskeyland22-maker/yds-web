@@ -1,30 +1,72 @@
 /** V1 한글 UI 라벨 — 표시명만. path·id·엔진 key는 변경하지 않음 */
 
-/** @returns {{ label: string; path: string }[]} */
-export function getPrimaryNavItems() {
+/**
+ * 사이드바 최상위 핵심 2메뉴 (표시용 메타 포함)
+ * @returns {{ label: string; shortLabel: string; path: string; subtitle: string; tone: 'brand' | 'panic' }[]}
+ */
+export function getCoreNavItems() {
   return [
-    { label: "📊 시장분석", path: "/market-analysis" },
-    { label: "⭐ 종목추천", path: "/stock-picks" },
-    { label: "💼 포트폴리오", path: "/portfolio" },
-    { label: "📈 성과검증", path: "/performance-validation" },
+    {
+      label: "📈 YDS 인생 투자전략",
+      shortLabel: "인생전략",
+      path: "/",
+      subtitle: "지금, 그리고 10년 후까지",
+      tone: "brand",
+    },
+    {
+      label: "🚨 시장 공포·패닉",
+      shortLabel: "공포·패닉",
+      path: "/market-analysis",
+      subtitle: "지금 시장은 어떤 구간인가",
+      tone: "panic",
+    },
   ]
 }
 
-/** @returns {{ label: string; path: string }[]} */
-export function getSecondaryNavItems() {
+/**
+ * 기타 기능 (접기 그룹) — 기존 route 전부 유지
+ * @returns {{ label: string; path: string }[]}
+ */
+export function getOtherNavItems() {
   return [
+    { label: "⭐ 종목추천", path: "/stock-picks" },
+    { label: "💼 포트폴리오", path: "/portfolio" },
+    { label: "📈 성과검증", path: "/performance-validation" },
     { label: "⭐ 관심종목", path: "/watchlist" },
     { label: "🔔 알림", path: "/alert-center" },
     { label: "📋 투자 원칙", path: "/investment-playbook" },
     { label: "📅 투자 캘린더", path: "/investment-calendar" },
     { label: "🧪 패닉 연구실", path: "/panic-lab" },
     { label: "🧪 연구실", path: "/lab" },
+    { label: "시작하기", path: "/start" },
+    { label: "About", path: "/about" },
+    { label: "용어 설명", path: "/glossary" },
+  ]
+}
+
+/** @deprecated 호환용 — 핵심 메뉴만 반환 */
+export function getPrimaryNavItems() {
+  return getCoreNavItems().map((item) => ({ label: item.label, path: item.path }))
+}
+
+/** @deprecated 호환용 — 기타 기능과 동일 */
+export function getSecondaryNavItems() {
+  return getOtherNavItems()
+}
+
+/** 하단 고정 안내 (소개·FAQ·피드백) */
+export function getSidebarFooterLinks() {
+  return [
+    { label: "YDS 소개", path: "/intro" },
+    { label: "FAQ", path: "/faq" },
+    { label: "피드백", path: "/feedback" },
   ]
 }
 
 /** @type {Record<string, string>} */
 export const NAV_MOBILE_SHORT = {
-  "/market-analysis": "📊 시장",
+  "/": "📈 인생",
+  "/market-analysis": "🚨 패닉",
   "/stock-picks": "⭐ 종목",
   "/watchlist": "⭐ 관심",
   "/portfolio": "💼 포트",
@@ -83,6 +125,16 @@ export const UI_PAGE = {
     kicker: "Panic Lab · YDS V1",
     path: "/panic-lab",
   },
+  lifeStrategy: {
+    title: "YDS 인생 투자전략",
+    kicker: "지금, 그리고 10년 후까지",
+    path: "/",
+  },
+  marketPanic: {
+    title: "시장 공포·패닉",
+    kicker: "지금 시장은 어떤 구간인가",
+    path: "/market-analysis",
+  },
 }
 
 export const UI_BTN = {
@@ -93,7 +145,7 @@ export const UI_BTN = {
   performance: "성과 보기",
   watchlist: "관심종목 보기",
   watchlistFromAlert: "관심종목에서 보기",
-  marketAnalysis: "시장분석",
+  marketAnalysis: "시장 공포·패닉",
 }
 
 /** @type {Record<string, string>} */
@@ -113,7 +165,7 @@ export const UI_TERM_DISPLAY = {
   Confidence: "신뢰도",
   Regime: "시장 국면",
   Pattern: "위험 패턴",
-  "Market Analysis": "시장분석",
+  "Market Analysis": "시장 공포·패닉",
 }
 
 /**

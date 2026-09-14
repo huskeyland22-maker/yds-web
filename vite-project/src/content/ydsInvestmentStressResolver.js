@@ -235,35 +235,4 @@ export function resolveMarketStressReport(panicData) {
   }
 }
 
-/** @param {{ targetAmount: number; currentAmount: number; stageCount: number; stagePercentages: number[]; stageStatuses?: boolean[] }} crashReserve */
-export function buildCrashReservePlan(crashReserve) {
-  const targetAmount = Math.max(0, Math.round(Number(crashReserve?.targetAmount) || 0))
-  const currentAmount = Math.max(0, Math.round(Number(crashReserve?.currentAmount) || 0))
-  const stageCount = clamp(Math.round(Number(crashReserve?.stageCount) || 5), 3, 5)
-  const percentages = Array.isArray(crashReserve?.stagePercentages)
-    ? crashReserve.stagePercentages.slice(0, stageCount).map((value) => Math.max(0, Number(value) || 0))
-    : []
-  while (percentages.length < stageCount) percentages.push(0)
-  const totalPct = percentages.reduce((sum, value) => sum + value, 0)
-  const normalized = totalPct > 0 ? percentages.map((value) => (value / totalPct) * 100) : Array(stageCount).fill(100 / stageCount)
-  const readyPct = targetAmount > 0 ? clamp((currentAmount / targetAmount) * 100) : null
-  const stageStatuses = Array.isArray(crashReserve?.stageStatuses)
-    ? crashReserve.stageStatuses.slice(0, stageCount).map((value) => Boolean(value))
-    : Array(stageCount).fill(false)
-
-  return {
-    targetAmount: targetAmount || null,
-    currentAmount: currentAmount || null,
-    availableAmount: currentAmount || null,
-    stageCount,
-    stagePercentages: normalized.map((value) => Math.round(value * 10) / 10),
-    readyPct: readyPct == null ? null : Math.round(readyPct * 10) / 10,
-    stages: normalized.map((pct, index) => ({
-      id: `stage-${index + 1}`,
-      label: `${index + 1}차 투입`,
-      pct: Math.round(pct * 10) / 10,
-      amount: targetAmount > 0 ? Math.round((targetAmount * pct) / 100) : null,
-      completed: stageStatuses[index] ?? false,
-    })),
-  }
-}
+export { buildCrashReservePlan } from "./ydsCrashReserveEngine.js"

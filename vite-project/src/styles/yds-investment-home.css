@@ -8,6 +8,7 @@
 .yds-home-stage,
 .yds-home-priority-card,
 .yds-home-market-card,
+.yds-home-strategy-card,
 .yds-home-action-card,
 .yds-home-target__main,
 .yds-home-target__aside,
@@ -30,6 +31,7 @@
 .yds-home-stage,
 .yds-home-priority-card,
 .yds-home-market-card,
+.yds-home-strategy-card,
 .yds-home-target__main,
 .yds-home-target__aside {
   padding: 1rem 1.1rem;
@@ -362,6 +364,133 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.yds-home-crash-summary {
+  padding: 1rem 1.1rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.yds-home-crash-summary__grid,
+.yds-home-crash-summary__context {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.yds-home-crash-summary__context {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.yds-home-crash-summary dt {
+  color: rgba(226, 232, 240, 0.7);
+  font-size: 0.82rem;
+  margin-bottom: 0.2rem;
+}
+
+.yds-home-crash-summary dd {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.yds-home-crash-split {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.yds-home-crash-split__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.yds-home-crash-split__head span {
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.85rem;
+}
+
+.yds-home-crash-stage-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.yds-home-crash-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.yds-home-crash-stage__main {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.yds-home-crash-stage__label,
+.yds-home-crash-stage__hint {
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.82rem;
+}
+
+.yds-home-crash-stage__amount {
+  font-size: 1.05rem;
+}
+
+.yds-home-crash-stage__badge {
+  border-radius: 999px;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.yds-home-crash-stage__badge--waiting {
+  background: rgba(100, 116, 139, 0.25);
+  color: #e2e8f0;
+}
+
+.yds-home-crash-stage__badge--review {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fde68a;
+}
+
+.yds-home-crash-stage__badge--completed {
+  background: rgba(16, 185, 129, 0.2);
+  color: #a7f3d0;
+}
+
+.yds-home-crash-stage__badge--data {
+  background: rgba(59, 130, 246, 0.18);
+  color: #bfdbfe;
+}
+
+.yds-home-crash-stage__done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.yds-home-form--crash {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yds-home-crash-note {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
 .yds-home-stage-percentages {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
@@ -400,10 +529,194 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.yds-home-strategy-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+}
+
+.yds-home-strategy-card__title {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+.yds-home-strategy-card__desc,
+.yds-home-strategy-card__note {
+  margin: 0.4rem 0 0;
+  color: rgba(226, 232, 240, 0.78);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.yds-home-strategy-card__table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.yds-home-strategy-card__table li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(2, 6, 23, 0.35);
+  font-size: 0.88rem;
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.yds-home-strategy-card__table li.is-active {
+  border-color: rgba(96, 165, 250, 0.55);
+  background: rgba(30, 64, 175, 0.28);
+  color: #e2e8f0;
+}
+
+.yds-home-strategy-card--error {
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(120, 53, 15, 0.28);
+}
+
+.yds-home-form--strategy-reserve {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 22rem;
+}
+
+.yds-home-strategy-reserve__plan .yds-home-strategy-reserve__emphasis {
+  border-radius: 12px;
+  padding: 0.35rem 0.45rem;
+  background: rgba(30, 64, 175, 0.28);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+}
+
+.yds-home-strategy-reserve__plan .yds-home-strategy-reserve__emphasis dt {
+  color: rgba(191, 219, 254, 0.95);
+}
+
+.yds-home-strategy-actual {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.85rem 0 0.95rem;
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(96, 165, 250, 0.55);
+  background: linear-gradient(160deg, rgba(30, 64, 175, 0.55), rgba(15, 23, 42, 0.72));
+}
+
+.yds-home-strategy-actual--done {
+  border-color: rgba(125, 211, 252, 0.45);
+  background: linear-gradient(160deg, rgba(21, 94, 117, 0.45), rgba(15, 23, 42, 0.72));
+}
+
+.yds-home-strategy-actual__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(191, 219, 254, 0.95);
+}
+
+.yds-home-strategy-actual__value {
+  font-size: clamp(1.55rem, 5.5vw, 2.05rem);
+  line-height: 1.15;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.yds-home-strategy-actual__sub {
+  font-size: 0.86rem;
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.yds-home-strategy-month {
+  margin-top: 0.85rem;
+}
+
+.yds-home-strategy-month__status {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #bfdbfe;
+}
+
+.yds-home-strategy-month__confirm {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.yds-home-strategy-month__confirm-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.yds-home-strategy-month__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.yds-home-strategy-month__btn {
+  appearance: none;
+  border: 1px solid rgba(96, 165, 250, 0.55);
+  background: rgba(30, 64, 175, 0.45);
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.yds-home-strategy-month__btn--ghost {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(148, 163, 184, 0.35);
+  font-weight: 500;
+}
+
+.yds-home-strategy-month-history {
+  margin-top: 0.85rem;
+}
+
+.yds-home-strategy-month-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.yds-home-strategy-month-history__list li {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 1.1fr) minmax(3.5rem, 0.7fr) minmax(5rem, 1fr) minmax(5rem, 1fr) minmax(5rem, 1fr) minmax(2.5rem, 0.6fr);
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(2, 6, 23, 0.35);
+  font-size: 0.82rem;
+  color: rgba(226, 232, 240, 0.88);
+}
+
+@media (max-width: 720px) {
+  .yds-home-strategy-month-history__list li {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 960px) {
   .yds-home__header,
   .yds-home-priority-card,
   .yds-home-market-card,
+  .yds-home-strategy-card,
   .yds-home-target,
   .yds-home__metrics,
   .yds-home-account-grid,
@@ -412,13 +725,16 @@
   .yds-home-progress,
   .yds-home-stress-grid,
   .yds-home-crash-stages,
+  .yds-home-crash-summary__grid,
+  .yds-home-crash-summary__context,
+  .yds-home-form--crash,
   .yds-home-stage-percentages,
   .yds-home-principles,
   .yds-home-form {
     grid-template-columns: 1fr;
   }
 
-  .yds-home-account-summary__row {
+  .yds-home-crash-stage {
     grid-template-columns: 1fr;
   }
 }
