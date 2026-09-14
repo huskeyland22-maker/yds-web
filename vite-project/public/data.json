@@ -1,0 +1,33 @@
+{
+  "updated_at": "2026-09-14 05:35",
+  "vix": {
+    "value": null,
+    "delta": null
+  },
+  "vxn": {
+    "value": null,
+    "delta": null
+  },
+  "skew": {
+    "value": null,
+    "delta": null
+  },
+  "putCall": {
+    "value": null,
+    "delta": null
+  },
+  "move": {
+    "value": null,
+    "delta": null
+  },
+  "fearGreed": {
+    "value": null,
+    "delta": null
+  },
+  "highYield": {
+    "value": null,
+    "delta": null
+  },
+  "bofa": null,
+  "gs": null
+}
