@@ -5,16 +5,19 @@ on:
     - cron: "0 13 * * *" # UTC 13:00 = KST 22:00
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
 
     steps:
       - name: 코드 가져오기
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Python 설치
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
@@ -23,12 +26,16 @@ jobs:
           pip install yfinance pandas pandas_datareader requests pytz
 
       - name: 데이터 업데이트 실행
+        continue-on-error: true
         run: python update_data.py
+
+      - name: SPY 일별 종가 갱신
+        run: python scripts/fetch-etf-daily.py 2016-01-01 SPY
 
       - name: 변경사항 커밋
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add vite-project/public/data.json vite-project/public/cycle-metrics-history.json
+          git add vite-project/public/data.json vite-project/public/cycle-metrics-history.json vite-project/public/data/spy-daily.json
           git commit -m "자동 데이터 업데이트" || echo "No changes"
           git push

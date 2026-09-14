@@ -15,13 +15,17 @@ OUT_DIR = ROOT / "vite-project" / "public" / "data"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 SYMBOLS = {
+    "spy-daily.json": "SPY",
     "qqq-daily.json": "QQQ",
     "soxx-daily.json": "SOXX",
 }
 
 start = sys.argv[1] if len(sys.argv) > 1 else "2016-01-01"
+only = sys.argv[2].strip().upper() if len(sys.argv) > 2 else None
 
 for filename, ticker in SYMBOLS.items():
+    if only and ticker != only and only not in filename.upper():
+        continue
     df = yf.download(ticker, start=start, progress=False, auto_adjust=True)
     prices = {}
     if df is not None and not df.empty:
