@@ -4,10 +4,6 @@
   "outputDirectory": "vite-project/dist",
   "crons": [
     {
-      "path": "/api/cron/panic-collect",
-      "schedule": "0 0 * * *"
-    },
-    {
       "path": "/api/cron/supabase-keepalive",
       "schedule": "0 12 * * *"
     }

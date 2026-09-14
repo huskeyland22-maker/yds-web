@@ -7,8 +7,8 @@ function noStore(res) {
 }
 
 /**
- * Supabase Free Plan inactivity pause 예방 — SELECT only.
- * CRON_SECRET 불필요. INSERT/UPDATE 없음. Panic Index 데이터 미변경.
+ * Supabase Free Plan inactivity pause prevention — SELECT only.
+ * No CRON_SECRET. No INSERT/UPDATE. Does not change Panic Index data.
  */
 export default async function handler(req, res) {
   noStore(res)
