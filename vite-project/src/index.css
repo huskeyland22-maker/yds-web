@@ -27115,14 +27115,387 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 
-/* IA V2 — 시장분석 데스크 / 종목추천 페이지 */
-.yds-market-desk {
-  --yds-desk-space-title: 6px;
-  --yds-desk-space-section: 12px;
-  --yds-desk-space-card: 18px;
+/* Panic Index 중심 시장분석 */
+.yds-market-analysis__subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-market-desk--panic-focus .yds-market-desk__stream {
+  gap: 1.25rem;
+}
+
+.yds-panic-center {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 1rem;
+  background: linear-gradient(165deg, rgba(15, 23, 42, 0.92) 0%, rgba(8, 12, 20, 0.96) 100%);
+  padding: 1.15rem 1rem 1.25rem;
+}
+
+.yds-panic-center__eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+
+.yds-panic-center__title {
+  margin: 0.25rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-panic-center__score {
+  margin: 0.55rem 0 0;
+  font-size: clamp(2.8rem, 8vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.yds-panic-center__stage {
+  margin: 0.4rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.yds-panic-center__stage-range {
+  font-size: 0.78em;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-panic-center__lede {
+  margin: 0.55rem 0 0;
+  max-width: 36rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+.yds-panic-center__asof {
+  margin: 0.45rem 0 0;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.yds-panic-center__incomplete-title {
+  margin: 0.6rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.yds-panic-center__incomplete-body {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+.yds-panic-center__bar-wrap {
+  margin-top: 1rem;
+}
+
+.yds-panic-center__bar {
+  position: relative;
+  display: flex;
+  height: 0.7rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.yds-panic-center__bar-seg {
+  height: 100%;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.yds-panic-center__bar-seg.is-active {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.yds-panic-center__bar-marker {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 999px;
+  border: 2px solid #f8fafc;
+  background: #0f172a;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.35);
+  pointer-events: none;
+}
+
+.yds-panic-center__bar-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+
+.yds-panic-center__section {
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-panic-center__section-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-panic-center__stage-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 0.4rem;
+}
+
+.yds-panic-center__stage-item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.55rem;
+  border: 1px solid transparent;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.yds-panic-center__stage-item.is-current {
+  background: rgba(30, 41, 59, 0.75);
+}
+
+.yds-panic-center__stage-item-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.yds-panic-center__stage-item-blurb {
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
+.yds-panic-center__metrics {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (min-width: 720px) {
+  .yds-panic-center__metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.yds-panic-center__metric {
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.45);
+}
+
+.yds-panic-center__metric-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+}
+
+.yds-panic-center__metric-name {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.yds-panic-center__metric-src {
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.yds-panic-center__metric-value {
+  margin: 0.35rem 0 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-panic-center__metric-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin-top: 0.4rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-panic-center__metric-meta strong {
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.yds-panic-center__calc {
+  margin: 0;
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.55rem;
+  background: rgba(15, 23, 42, 0.65);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.yds-panic-center__calc-eq {
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.yds-panic-center__calc-missing {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #fbbf24;
+}
+
+.yds-panic-center__life-lead {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.yds-panic-center__life-map {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .yds-panic-center__life-map {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.yds-panic-center__life-map li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.yds-panic-center__life-map strong {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.yds-panic-center__life-map span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.yds-panic-center__life-now {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.yds-panic-center__life-note {
+  margin: 0.55rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.yds-market-trend__heading {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-market-trend__sub {
+  margin: 0.3rem 0 0.75rem;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.yds-market-trend--panic-only .yds-market-trend__grid {
+  display: block;
+}
+
+.yds-market-ref-fold {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.85rem;
+  background: rgba(8, 12, 20, 0.75);
+  padding: 0.15rem 0.85rem 0.85rem;
+}
+
+.yds-market-ref-fold__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  cursor: pointer;
+  list-style: none;
+  padding: 0.75rem 0.1rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.yds-market-ref-fold__summary::-webkit-details-marker {
+  display: none;
+}
+
+.yds-market-ref-fold__hint {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-market-ref-fold__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding-bottom: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  padding-top: 0.75rem;
+}
+
+.yds-market-desk__liquidity-lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 900px) {
+  .yds-market-desk__liquidity-lanes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 /* 시장분석 데스크 — 6 / 12 / 18px 세로 간격 */

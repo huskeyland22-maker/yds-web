@@ -73,10 +73,11 @@ export default function YdsMarketPanicSecondaryPanel({
               </div>
             ) : null}
             <ul className="yds-market-panic-secondary__band-list" aria-label="Panic Index 구간">
-              <li>0~39 평상</li>
-              <li>40~59 경계</li>
+              <li>0~19 평온</li>
+              <li>20~39 경계</li>
+              <li>40~59 공포</li>
               <li>60~79 강한 공포</li>
-              <li>80~100 패닉</li>
+              <li>80~100 극심한 패닉</li>
             </ul>
           </>
         ) : (

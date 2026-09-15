@@ -91,22 +91,74 @@ export function resolvePanicIndexScore(data) {
   return getPanicScoreV2(data)
 }
 
-/** @returns {{ id: string; label: string; min: number; max: number; color: string } | null} */
+/**
+ * Panic Index 5단계 (UI 표시용 · 계산식과 독립)
+ * 0~19 평온 · 20~39 경계 · 40~59 공포 · 60~79 강한 공포 · 80~100 극심한 패닉
+ */
+export const PANIC_INDEX_STAGE_BANDS = [
+  {
+    id: "calm",
+    label: "평온",
+    min: 0,
+    max: 19,
+    color: "#22c55e",
+    blurb: "시장에 특별한 공포가 낮은 구간",
+    lifeView: "평소와 같은 장기 적립을 이어가는 구간입니다.",
+  },
+  {
+    id: "watch",
+    label: "경계",
+    min: 20,
+    max: 39,
+    color: "#84cc16",
+    blurb: "일부 불안이 있지만 일반적인 시장 변동 범위",
+    lifeView: "시장 공포가 아직 크지 않은 일반적인 변동 구간입니다.",
+  },
+  {
+    id: "fear",
+    label: "공포",
+    min: 40,
+    max: 59,
+    color: "#eab308",
+    blurb: "투자자들의 공포가 뚜렷하게 나타나는 구간",
+    lifeView: "시장 불안이 뚜렷해지는 구간입니다. 참고 지표로 확인합니다.",
+  },
+  {
+    id: "strongFear",
+    label: "강한 공포",
+    min: 60,
+    max: 79,
+    color: "#f97316",
+    blurb: "시장 스트레스가 상당히 높은 구간",
+    lifeView: "장기 투자자가 시장 상황을 주의 깊게 확인할 구간입니다.",
+  },
+  {
+    id: "extremePanic",
+    label: "극심한 패닉",
+    min: 80,
+    max: 100,
+    color: "#ef4444",
+    blurb: "역사적으로도 매우 강한 공포가 나타날 수 있는 구간",
+    lifeView: "큰 공포가 나타날 수 있는 구간입니다. MA40과 함께 인생 투자 타점을 확인합니다.",
+  },
+]
+
+/** @returns {{ id: string; label: string; min: number; max: number; color: string; blurb?: string; lifeView?: string } | null} */
 export function resolvePanicIndexStatus(score) {
   if (score == null || !Number.isFinite(Number(score))) return null
   const s = Math.max(0, Math.min(100, Math.round(Number(score))))
-  if (s <= 39) return { id: "calm", label: "평상", min: 0, max: 39, color: "#22c55e" }
-  if (s <= 59) return { id: "watch", label: "경계", min: 40, max: 59, color: "#eab308" }
-  if (s <= 79) return { id: "strongFear", label: "강한 공포", min: 60, max: 79, color: "#f97316" }
-  return { id: "panic", label: "패닉", min: 80, max: 100, color: "#ef4444" }
+  for (const band of PANIC_INDEX_STAGE_BANDS) {
+    if (s <= band.max) return band
+  }
+  return PANIC_INDEX_STAGE_BANDS[PANIC_INDEX_STAGE_BANDS.length - 1]
 }
 
 /**
- * V2 구성 분해 (입력값 + 개별 Score)
+ * V2 구성 분해 (입력값 + 개별 Score + 가중 기여)
  * @returns {{
  *   ok: boolean
  *   total: number | null
- *   lines: Array<{ id: string; label: string; source: string; value: number | null; score: number | null; weight: number }>
+ *   lines: Array<{ id: string; label: string; source: string; value: number | null; score: number | null; weight: number; contrib: number | null }>
  * } | null}
  */
 export function buildPanicScoreV2Breakdown(data) {
@@ -125,6 +177,7 @@ export function buildPanicScoreV2Breakdown(data) {
       value: Number.isFinite(vix) ? vix : null,
       score: sV == null ? null : Math.round(sV * 10) / 10,
       weight: 0.45,
+      contrib: sV == null ? null : Math.round(sV * 0.45 * 10) / 10,
     },
     {
       id: "cnn",
@@ -133,6 +186,7 @@ export function buildPanicScoreV2Breakdown(data) {
       value: Number.isFinite(cnn) ? cnn : null,
       score: sC == null ? null : Math.round(sC * 10) / 10,
       weight: 0.35,
+      contrib: sC == null ? null : Math.round(sC * 0.35 * 10) / 10,
     },
     {
       id: "putCall",
@@ -141,12 +195,16 @@ export function buildPanicScoreV2Breakdown(data) {
       value: Number.isFinite(pc) ? pc : null,
       score: sP == null ? null : Math.round(sP * 10) / 10,
       weight: 0.2,
+      contrib: sP == null ? null : Math.round(sP * 0.2 * 10) / 10,
     },
   ]
   const ok = sV != null && sC != null && sP != null
+  const weighted = ok ? 0.45 * sV + 0.35 * sC + 0.2 * sP : null
   return {
     ok,
-    total: ok ? Math.round(clamp(0.45 * sV + 0.35 * sC + 0.2 * sP, 0, 100)) : null,
+    /** 반올림 전 가중합 (표시용 · 예: 32.35) */
+    rawTotal: weighted == null ? null : Math.round(weighted * 100) / 100,
+    total: weighted == null ? null : Math.round(clamp(weighted, 0, 100)),
     lines,
   }
 }

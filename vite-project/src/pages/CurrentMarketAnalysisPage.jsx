@@ -44,7 +44,10 @@ export default function CurrentMarketAnalysisPage() {
       <header className="yds-market-analysis__header">
         <div className="yds-market-analysis__header-main">
           {!simplified ? <YdsV1ReleaseBadge compact /> : null}
-          <h1 className="yds-market-analysis__title">시장분석</h1>
+          <h1 className="yds-market-analysis__title">시장 공포·패닉</h1>
+          <p className="yds-market-analysis__subtitle">
+            Panic Index · 장기 투자 참고 지표
+          </p>
         </div>
         {hasLive ? <YdsMarketAnalysisOpsMeta panicData={panicData} /> : null}
       </header>
