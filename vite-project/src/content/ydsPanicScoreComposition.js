@@ -1,19 +1,8 @@
 /**
- * 패닉 점수 구성 — getFinalScore 경로 기여도 (데스크 카드)
+ * Panic Index V2 구성 — VIX / CNN / Cboe Total P/C
  */
 
-import { getFinalScore } from "../utils/tradingScores.js"
-import { buildYdsScoreBreakdown } from "../trading-zone/ydsScoreBreakdown.js"
-
-/** @typedef {{ id: string; label: string; inputKey: string; contribKey: string }} PanicMetricRowDef */
-
-export const PANIC_COMPOSITION_ROWS = /** @type {PanicMetricRowDef[]} */ ([
-  { id: "vix", label: "VIX", inputKey: "vix", contribKey: "vix" },
-  { id: "cnn", label: "CNN 공포탐욕", inputKey: "fearGreed", contribKey: "cnn" },
-  { id: "bofa", label: "BofA Bull & Bear", inputKey: "bofa", contribKey: "bofa" },
-  { id: "putCall", label: "Put/Call", inputKey: "putCall", contribKey: "putCall" },
-  { id: "hy", label: "HY Spread", inputKey: "highYield", contribKey: "highYield" },
-])
+import { buildPanicScoreV2Breakdown, getPanicScoreV2 } from "../utils/tradingScores.js"
 
 /**
  * @typedef {{
@@ -22,15 +11,20 @@ export const PANIC_COMPOSITION_ROWS = /** @type {PanicMetricRowDef[]} */ ([
  *   value: number | null
  *   display: string
  *   missing: boolean
+ *   source?: string
+ *   rawValue?: number | null
+ *   score?: number | null
  * }} PanicCompositionLine
  */
 
 /**
  * @typedef {{
  *   visible: boolean
+ *   incomplete: boolean
  *   totalScore: number | null
  *   lines: PanicCompositionLine[]
  *   updatedAt: string | null
+ *   asOfDate: string | null
  * }} PanicScoreCompositionReport
  */
 
@@ -41,40 +35,47 @@ function hasMetricValue(v) {
   return Number.isFinite(n)
 }
 
+/** @param {unknown} v */
+function formatRaw(v) {
+  if (!hasMetricValue(v)) return "—"
+  const n = Number(v)
+  if (Number.isInteger(n)) return String(n)
+  return String(Math.round(n * 100) / 100)
+}
+
 /**
  * @param {object | null | undefined} panicData
  * @returns {PanicScoreCompositionReport}
  */
 export function buildPanicScoreCompositionReport(panicData) {
   if (!panicData) {
-    return { visible: false, totalScore: null, lines: [], updatedAt: null }
+    return {
+      visible: false,
+      incomplete: true,
+      totalScore: null,
+      lines: [],
+      updatedAt: null,
+      asOfDate: null,
+    }
   }
 
-  const breakdown = buildYdsScoreBreakdown({
-    vix: panicData.vix,
-    cnn: panicData.fearGreed,
-    bofa: panicData.bofa,
-    putCall: panicData.putCall,
-    highYield: panicData.highYield,
-  })
-
-  const totalRaw = getFinalScore(panicData)
-  const totalScore = Number.isFinite(totalRaw) ? Math.round(totalRaw) : null
+  const breakdown = buildPanicScoreV2Breakdown(panicData)
+  const totalScore = getPanicScoreV2(panicData)
 
   /** @type {PanicCompositionLine[]} */
-  const lines = PANIC_COMPOSITION_ROWS.map((row) => {
-    const raw = panicData[row.inputKey]
-    if (!hasMetricValue(raw)) {
-      return { id: row.id, label: row.label, value: null, display: "데이터 없음", missing: true }
-    }
-    const contrib = breakdown.contributions?.[row.contribKey]
-    const value = Number.isFinite(contrib) ? Math.round(contrib) : null
+  const lines = (breakdown?.lines ?? []).map((line) => {
+    const missing = line.value == null || line.score == null
     return {
-      id: row.id,
-      label: row.label,
-      value,
-      display: value != null ? `+${value}` : "데이터 없음",
-      missing: value == null,
+      id: line.id,
+      label: line.label,
+      value: line.score,
+      rawValue: line.value,
+      score: line.score,
+      source: line.source,
+      display: missing
+        ? "데이터 없음"
+        : `${formatRaw(line.value)} · Score ${Math.round(line.score)}`,
+      missing,
     }
   })
 
@@ -83,10 +84,20 @@ export function buildPanicScoreCompositionReport(panicData) {
     panicData.date ??
     (panicData.__syncedAt ? String(panicData.__syncedAt) : null)
 
+  const asOfRaw = panicData.date ?? panicData.asOfDate ?? panicData.updatedAt ?? null
+  const asOfDate =
+    asOfRaw && /^\d{4}-\d{2}-\d{2}/.test(String(asOfRaw))
+      ? String(asOfRaw).slice(0, 10)
+      : null
+
+  const incomplete = totalScore == null
+
   return {
-    visible: totalScore != null,
+    visible: true,
+    incomplete,
     totalScore,
     lines,
     updatedAt: updatedAt ? String(updatedAt) : null,
+    asOfDate,
   }
 }

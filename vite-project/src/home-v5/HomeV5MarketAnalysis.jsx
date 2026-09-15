@@ -1,7 +1,8 @@
 import { useId, useMemo, useState } from "react"
 import { formatMetricValue } from "../components/macroCycleChartUtils.js"
 import { getStatus } from "../utils/panicIndicatorStatus.js"
-import { EXPERT_METRICS } from "../utils/panicDeskMetrics.js"
+import { CORE_METRICS } from "../utils/panicDeskMetrics.js"
+import { getPanicScoreV2, resolvePanicIndexStatus } from "../utils/tradingScores.js"
 
 function fmt(key, v) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
@@ -16,13 +17,12 @@ export default function HomeV5MarketAnalysis({ panicData = null }) {
   const panelId = useId()
 
   const marketRows = useMemo(
-    () => [
-      { key: "bofa", label: "BofA Bull & Bear" },
-      { key: "putCall", label: "Put/Call Ratio" },
-      ...EXPERT_METRICS.filter((m) => ["move", "skew", "vxn"].includes(m.key)),
-    ],
+    () => CORE_METRICS.map((m) => ({ key: m.key, label: m.label })),
     [],
   )
+
+  const panicScore = useMemo(() => getPanicScoreV2(panicData), [panicData])
+  const panicStatus = useMemo(() => resolvePanicIndexStatus(panicScore), [panicScore])
 
   return (
     <section className={`home-v5-market home-v5-market--hero${open ? " is-open" : ""}`}>
@@ -34,14 +34,18 @@ export default function HomeV5MarketAnalysis({ panicData = null }) {
         onClick={() => setOpen((v) => !v)}
       >
         <span className="home-v5-market__toggle-main">
-          <span className="home-v5-market__title">시장 분석</span>
+          <span className="home-v5-market__title">시장 공포·패닉</span>
           <span aria-hidden>{open ? "▲" : "▼"}</span>
         </span>
         {!open ? (
-          <span className="home-v5-market__hint">BofA · Put/Call · MOVE · SKEW · 실험</span>
+          <span className="home-v5-market__hint">
+            {panicScore != null
+              ? `Panic Index ${panicScore} · ${panicStatus?.label ?? ""}`
+              : "VIX · CNN · Cboe Total P/C"}
+          </span>
         ) : null}
       </button>
-      <div id={panelId} className="home-v5-market__panel" role="region" aria-label="시장 분석" hidden={!open}>
+      <div id={panelId} className="home-v5-market__panel" role="region" aria-label="시장 공포·패닉" hidden={!open}>
         <ul className="home-v5-market__list">
           {marketRows.map(({ key, label }) => {
             const raw = panicData?.[key]
@@ -54,8 +58,14 @@ export default function HomeV5MarketAnalysis({ panicData = null }) {
               </li>
             )
           })}
+          <li className="home-v5-market__row home-v5-market__row--total">
+            <span className="home-v5-market__name">Panic Index</span>
+            <span className="home-v5-market__num">
+              {panicScore != null ? String(panicScore) : "데이터 입력 필요"}
+            </span>
+            <span className="home-v5-market__st">{panicStatus?.label ?? "—"}</span>
+          </li>
         </ul>
-        <p className="home-v5-market__lab">실험 · 준비 중 — Breadth, 신고가/신저가</p>
       </div>
     </section>
   )

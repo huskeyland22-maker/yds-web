@@ -1,64 +1,40 @@
 import { useMemo } from "react"
-import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
-import { resolveMarketStateCenterView } from "../../content/ydsMarketStateCenter.js"
-import { buildPanicIntensityComparison, formatPanicCompareDelta } from "../../content/ydsPanicIntensityComparison.js"
-import { buildPanicIntensityLegendView } from "../../content/ydsPanicIntensityLegend.js"
-import { resolvePanicCompositeActionView } from "../../content/ydsPanicCompositeVerdict.js"
-import { buildPanicEvidenceReport } from "../../content/ydsPanicEvidenceEngine.js"
-import YdsPanicIntensityLegend from "./YdsPanicIntensityLegend.jsx"
-import YdsPanicIntensityInfoTip from "./YdsPanicIntensityInfoTip.jsx"
-import YdsPanicScoreComposition from "./YdsPanicScoreComposition.jsx"
-import YdsPanicCompositeVerdict from "./YdsPanicCompositeVerdict.jsx"
+import { buildPanicScoreCompositionReport } from "../../content/ydsPanicScoreComposition.js"
+import {
+  getPanicScoreV2,
+  resolvePanicIndexStatus,
+} from "../../utils/tradingScores.js"
 
 /** @param {number} score */
 function resolvePanicAccentTier(score) {
   if (score >= 80) return "critical"
   if (score >= 60) return "high"
   if (score >= 40) return "mid"
-  if (score >= 20) return "warm"
-  return "overheat"
+  return "warm"
 }
 
 /**
- * V7 — 패닉 강도 보조 카드
+ * 시장 공포·패닉 — Panic Index V2 (VIX · CNN · Cboe Total P/C)
  * @param {{
  *   panicData?: object | null
  *   historyRows?: object[]
- *   etfContext?: { qqqPrices?: Record<string, number>; spyPrices?: Record<string, number>; asOfDate?: string | null } | null
+ *   etfContext?: object | null
  *   className?: string
  *   embedded?: boolean
  * }} props
  */
 export default function YdsMarketPanicSecondaryPanel({
   panicData = null,
-  historyRows = [],
-  etfContext = null,
+  historyRows: _historyRows = [],
+  etfContext: _etfContext = null,
   className = "",
   embedded = false,
 }) {
-  const view = useMemo(() => resolveMarketStateCenterView(panicData), [panicData])
-  const legendView = useMemo(
-    () => buildPanicIntensityLegendView(view?.panicScore ?? null),
-    [view?.panicScore],
-  )
-  const compositeAction = useMemo(
-    () =>
-      resolvePanicCompositeActionView(panicData, {
-        spyPrices: etfContext?.spyPrices,
-        qqqPrices: etfContext?.qqqPrices,
-        asOfDate: etfContext?.asOfDate ?? null,
-      }),
-    [panicData, etfContext],
-  )
-  const evidence = useMemo(() => buildPanicEvidenceReport(panicData), [panicData])
-  const comparison = useMemo(
-    () => buildPanicIntensityComparison(historyRows, panicData),
-    [historyRows, panicData],
-  )
+  const score = useMemo(() => getPanicScoreV2(panicData), [panicData])
+  const status = useMemo(() => resolvePanicIndexStatus(score), [score])
+  const composition = useMemo(() => buildPanicScoreCompositionReport(panicData), [panicData])
 
-  if (!view || view.panicScore == null || !legendView) return null
-
-  const accentTier = resolvePanicAccentTier(view.panicScore)
+  const accentTier = score != null ? resolvePanicAccentTier(score) : "overheat"
 
   const card = (
     <div
@@ -66,84 +42,95 @@ export default function YdsMarketPanicSecondaryPanel({
         "yds-market-panic-secondary",
         "yds-market-panic-secondary--v7",
         "yds-market-panic-secondary--interpret",
+        "yds-market-panic-secondary--core3",
         `yds-market-panic-secondary--accent-${accentTier}`,
       ].join(" ")}
     >
       <div className="yds-market-panic-secondary__title-row">
-        <p className="yds-market-panic-secondary__title">{MARKET_LABEL_PANIC_INTENSITY}</p>
-        <YdsPanicIntensityInfoTip />
+        <p className="yds-market-panic-secondary__title">시장 공포·패닉</p>
       </div>
 
       <div className="yds-market-panic-secondary__body">
-        <p className="yds-market-panic-secondary__score font-mono tabular-nums">
-          {view.panicScore}
-          <span className="yds-market-panic-secondary__score-unit">점</span>
-        </p>
-
-        <div className="yds-market-panic-secondary__stage" aria-label="패닉 심리 상태">
-          <p
-            className="yds-market-panic-secondary__stage-current yds-market-panic-secondary__state-only"
-            style={{ "--legend-color": legendView.color }}
-          >
-            {legendView.label}
-          </p>
-        </div>
-
-        <YdsPanicIntensityLegend
-          score={view.panicScore}
-          compact
-          className="yds-market-panic-secondary__legend"
-        />
-
-        {compositeAction ? (
-          <div className="yds-market-panic-secondary__action" aria-label="최종 투자 해석">
-            <p className="yds-market-panic-secondary__buy-strength">{compositeAction.buyStrength}</p>
-            <p className="yds-market-panic-secondary__action-line">{compositeAction.actionLine}</p>
-            <p className="yds-market-panic-secondary__action-note">최종 투자 해석 · 가격·추세 반영</p>
+        {score != null ? (
+          <>
+            <p className="yds-market-panic-secondary__score-label">Panic Index</p>
+            <p className="yds-market-panic-secondary__score font-mono tabular-nums">
+              {score}
+              <span className="yds-market-panic-secondary__score-unit">점</span>
+            </p>
+            {status ? (
+              <div className="yds-market-panic-secondary__stage" aria-label="패닉 심리 상태">
+                <p
+                  className="yds-market-panic-secondary__stage-current yds-market-panic-secondary__state-only"
+                  style={{ "--legend-color": status.color }}
+                >
+                  {status.label}
+                  <span className="yds-market-panic-secondary__band-hint">
+                    {" "}
+                    ({status.min}~{status.max})
+                  </span>
+                </p>
+              </div>
+            ) : null}
+            <ul className="yds-market-panic-secondary__band-list" aria-label="Panic Index 구간">
+              <li>0~39 평상</li>
+              <li>40~59 경계</li>
+              <li>60~79 강한 공포</li>
+              <li>80~100 패닉</li>
+            </ul>
+          </>
+        ) : (
+          <div className="yds-market-panic-secondary__incomplete" role="status">
+            <p className="yds-market-panic-secondary__incomplete-title">데이터 입력 필요</p>
+            <p className="yds-market-panic-secondary__incomplete-body">
+              일부 지표 데이터가 없어 Panic Index를 계산할 수 없습니다.
+            </p>
+            <p className="yds-market-panic-secondary__incomplete-hint">
+              VIX · CNN Fear &amp; Greed · Cboe Total P/C를 모두 입력해 주세요.
+            </p>
           </div>
-        ) : null}
+        )}
+      </div>
 
-        {evidence.briefChips.length ? (
-          <ul className="yds-market-panic-secondary__evidence-chips" aria-label="근거 요약">
-            {evidence.briefChips.map((chip) => (
-              <li key={chip.id} className="yds-market-panic-secondary__evidence-chip">
-                {chip.text}
+      {composition.visible ? (
+        <section className="yds-panic-composition yds-market-panic-secondary__composition" aria-label="Panic Index 계산 근거">
+          <p className="yds-panic-composition__title">계산 근거</p>
+          <ul className="yds-panic-composition__list">
+            {composition.lines.map((line) => (
+              <li key={line.id} className="yds-panic-composition__row">
+                <span className="yds-panic-composition__label">
+                  {line.label}
+                  {line.source ? (
+                    <span className="yds-panic-composition__source"> · {line.source}</span>
+                  ) : null}
+                </span>
+                <span
+                  className={[
+                    "yds-panic-composition__value",
+                    "font-mono",
+                    "tabular-nums",
+                    line.missing ? "yds-panic-composition__value--missing" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {line.display}
+                </span>
               </li>
             ))}
           </ul>
-        ) : null}
-      </div>
-
-      {comparison.visible ? (
-        <div className="yds-market-panic-secondary__compare" aria-label="패닉 강도 최근 변화">
-          {comparison.points.map((point) => (
-            <div key={point.label} className="yds-market-panic-secondary__compare-row">
-              <span className="yds-market-panic-secondary__compare-key">{point.label}</span>
-              <strong className="yds-market-panic-secondary__compare-val font-mono tabular-nums">
-                {point.score ?? "—"}
-                {point.delta != null ? (
-                  <span className="yds-market-panic-secondary__compare-delta">
-                    {" "}
-                    {formatPanicCompareDelta(point.delta)}
-                  </span>
-                ) : null}
-              </strong>
-            </div>
-          ))}
-          <p className="yds-market-panic-secondary__compare-conclusion">{comparison.conclusion}</p>
-          {comparison.subConclusion ? (
-            <p className="yds-market-panic-secondary__compare-sub">{comparison.subConclusion}</p>
+          <div className="yds-panic-composition__divider" aria-hidden />
+          <div className="yds-panic-composition__total">
+            <span className="yds-panic-composition__total-label">Panic Index</span>
+            <strong className="yds-panic-composition__total-value font-mono tabular-nums">
+              {composition.totalScore != null ? composition.totalScore : "—"}
+            </strong>
+          </div>
+          {composition.asOfDate ? (
+            <p className="yds-panic-composition__updated">기준일: {composition.asOfDate}</p>
           ) : null}
-        </div>
+        </section>
       ) : null}
-
-      <YdsPanicScoreComposition panicData={panicData} className="yds-market-panic-secondary__composition" />
-
-      <YdsPanicCompositeVerdict
-        panicData={panicData}
-        etfContext={etfContext}
-        className="yds-market-panic-secondary__composite"
-      />
     </div>
   )
 

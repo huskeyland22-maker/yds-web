@@ -70,6 +70,7 @@ import AppReleaseEnvBadge from "./components/AppReleaseEnvBadge.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
 import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
 import MobileDrawer from "./components/layout/MobileDrawer.jsx"
+import AccountSettingsPanel from "./components/layout/AccountSettingsPanel.jsx"
 import MobileShellDebugOverlay from "./components/layout/MobileShellDebugOverlay.jsx"
 import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
 import { isDevMode } from "./utils/devMode.js"
@@ -98,17 +99,13 @@ import { formatSaveErrorForUi, logSaveError } from "./utils/errorMessage.js"
 
 /* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
+/** Panic Index 입력·미리보기 — 핵심 3지표만 노출 (나머지 DB 필드는 보존) */
 const METRIC_DEFS = [
-  { key: "vix", label: "VIX" },
-  { key: "vxn", label: "VXN" },
-  { key: "fearGreed", label: "Fear & Greed" },
-  { key: "bofa", label: "BofA" },
-  { key: "move", label: "MOVE" },
-  { key: "skew", label: "SKEW" },
-  { key: "putCall", label: "Put/Call" },
-  { key: "highYield", label: "High Yield" },
+  { key: "vix", label: "VIX", source: "네이버" },
+  { key: "fearGreed", label: "CNN Fear & Greed", source: "CNN 공식" },
+  { key: "putCall", label: "Cboe Total P/C", source: "Cboe" },
 ]
-const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield"]
+const METRIC_KEYS = ["vix", "fearGreed", "putCall"] // kept for paste/debug parity
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim()
 const PWA_RESUME_RELOAD_COOLDOWN_MS = 10_000
@@ -116,16 +113,16 @@ const PANIC_TEXT_DRAFT_KEY = "yds-panic-text-draft-v1"
 const INPUT_PANEL_CLOSE_MS = 220
 const SAVE_SUCCESS_TOAST_MS = 2000
 const PANIC_TEXT_PLACEHOLDER = PANIC_NINE_BLOCK_TEMPLATE
-const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
+const REQUIRED_KEYS = ["vix", "fearGreed", "putCall"]
 
 const FIELD_LABELS = {
   vix: "VIX",
+  fearGreed: "CNN Fear & Greed",
+  putCall: "Cboe Total P/C",
   vxn: "VXN",
-  fearGreed: "Fear & Greed",
   bofa: "BofA",
   move: "MOVE",
   skew: "SKEW",
-  putCall: "Put/Call",
   highYield: "High Yield",
 }
 
@@ -486,6 +483,7 @@ function App() {
   const [pwaLastSyncLabel, setPwaLastSyncLabel] = useState("")
   const isMobileLayout = useIsMobileLayout()
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  const [isAccountSettingsOpen, setIsAccountSettingsOpen] = useState(false)
   const [hubSaveGlow, setHubSaveGlow] = useState(false)
   const cycleMetricHistory = useAppDataStore((s) => s.cycleMetricHistory)
   const cycleHistorySource = useAppDataStore((s) => s.cycleHistorySource)
@@ -545,8 +543,8 @@ function App() {
 
   const inputReady = useMemo(() => {
     try {
-      const { vix, fearGreed, bofa, putCall, highYield } = parsedData ?? {}
-      return [vix, fearGreed, bofa, putCall, highYield].every((v) => coerceMetricValue(v) != null)
+      const { vix, fearGreed, putCall } = parsedData ?? {}
+      return [vix, fearGreed, putCall].every((v) => coerceMetricValue(v) != null)
     } catch {
       return false
     }
@@ -594,6 +592,7 @@ function App() {
       window.clearTimeout(panelCloseTimerRef.current)
       panelCloseTimerRef.current = null
     }
+    setIsAccountSettingsOpen(false)
     setInputPanelClosing(false)
     setPanelEntered(false)
     resetAiReportInput()
@@ -607,6 +606,17 @@ function App() {
       }
     })
   }, [resetAiReportInput])
+
+  const openAccountSettings = useCallback(() => {
+    setIsInputPanelOpen(false)
+    setInputPanelClosing(false)
+    setPanelEntered(false)
+    setIsAccountSettingsOpen(true)
+  }, [])
+
+  const closeAccountSettings = useCallback(() => {
+    setIsAccountSettingsOpen(false)
+  }, [])
 
   /** 슬라이드 아웃 후 언마운트 — 저장 성공·X·배경 닫기 공통 */
   const closeInputPanel = useCallback(() => {
@@ -635,28 +645,29 @@ function App() {
 
   const submitInput = async () => {
     let vix
-    let vxn
     let fearGreed
+    let putCall
+    let vxn
     let bofa
     let move
     let skew
-    let putCall
     let highYield
     try {
       vix = coerceMetricValue(parsedData?.vix)
-      vxn = coerceMetricValue(parsedData?.vxn)
       fearGreed = coerceMetricValue(parsedData?.fearGreed)
+      putCall = coerceMetricValue(parsedData?.putCall)
+      // 레거시 필드: 붙여넣기에 있으면 보존 저장, 필수는 아님
+      vxn = coerceMetricValue(parsedData?.vxn)
       bofa = coerceMetricValue(parsedData?.bofa)
       move = coerceMetricValue(parsedData?.move)
       skew = coerceMetricValue(parsedData?.skew)
-      putCall = coerceMetricValue(parsedData?.putCall)
       highYield = coerceMetricValue(parsedData?.highYield)
     } catch (err) {
       console.warn("[submitInput] coerce failed", err)
       toast.error("입력 형식을 확인해주세요")
       return
     }
-    if (vix == null || fearGreed == null || bofa == null || putCall == null || highYield == null) {
+    if (vix == null || fearGreed == null || putCall == null) {
       const requiredMissingLabels = missingRequired.map((key) => FIELD_LABELS[key] ?? key)
       setInputError(`${requiredMissingLabels.join(", ")} 값을 찾을 수 없습니다. 입력 텍스트를 확인해 주세요.`)
       return
@@ -665,13 +676,13 @@ function App() {
 
     const normalizedParsedData = {
       vix,
-      vxn,
       fearGreed,
-      bofa,
-      move,
-      skew,
       putCall,
-      highYield,
+      ...(vxn != null ? { vxn } : {}),
+      ...(bofa != null ? { bofa } : {}),
+      ...(move != null ? { move } : {}),
+      ...(skew != null ? { skew } : {}),
+      ...(highYield != null ? { highYield } : {}),
     }
 
     const tradeDate =
@@ -1147,10 +1158,9 @@ function App() {
   )
   const tacticalView = useMemo(() => {
     const vix = Number(deskPanicData?.vix)
-    const vxn = Number(deskPanicData?.vxn)
     const putCall = Number(deskPanicData?.putCall)
     const state =
-      (Number.isFinite(vix) && vix >= 24) || (Number.isFinite(vxn) && vxn >= 30)
+      Number.isFinite(vix) && vix >= 24
         ? "단기 변동성 확대"
         : "단기 공포 완화"
     const action =
@@ -1162,15 +1172,12 @@ function App() {
       action,
       metrics: [
         { k: "VIX", v: deskPanicData?.vix },
-        { k: "VXN", v: deskPanicData?.vxn },
-        { k: "Put/Call", v: deskPanicData?.putCall },
+        { k: "Cboe Total P/C", v: deskPanicData?.putCall },
       ],
     }
   }, [deskPanicData])
   const strategicView = useMemo(() => {
     const fg = Number(deskPanicData?.fearGreed)
-    const move = Number(deskPanicData?.move)
-    const bofa = Number(deskPanicData?.bofa)
     const state =
       Number.isFinite(fg) && fg >= 75
         ? "탐욕 단계 진입"
@@ -1187,12 +1194,10 @@ function App() {
       state,
       action,
       metrics: [
-        { k: "Fear&Greed", v: deskPanicData?.fearGreed },
-        { k: "MOVE", v: deskPanicData?.move },
-        { k: "BofA B/B", v: deskPanicData?.bofa },
+        { k: "CNN Fear & Greed", v: deskPanicData?.fearGreed },
       ],
-      move,
-      bofa,
+      move: null,
+      bofa: null,
     }
   }, [deskPanicData])
   const macroView = useMemo(() => {
@@ -1287,7 +1292,11 @@ function App() {
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
-      <AppSidebar sidebarPulse={sidebarPulse} onOpenInputPanel={openInputPanel} />
+      <AppSidebar
+        sidebarPulse={sidebarPulse}
+        onOpenInputPanel={openInputPanel}
+        onOpenAccountSettings={openAccountSettings}
+      />
 
       <div className="app-column-host flex min-w-0 flex-1 flex-col overflow-visible">
         <MobileAppHeader
@@ -1710,7 +1719,7 @@ function App() {
               <div className="min-w-0">
                 <h3 className="m-0 text-[15px] font-semibold tracking-tight text-slate-50">시장 지표 입력</h3>
                 <p className="m-0 mt-1 text-[11px] leading-snug text-slate-500">
-                  8대 패닉 지수 블록 형식 — ①~⑧ 번호·%는 무시하고 숫자만 추출합니다.
+                  Panic Index 핵심 3지표 — VIX(네이버) · CNN Fear &amp; Greed · Cboe Total P/C. 숫자만 추출합니다.
                 </p>
               </div>
               <button
@@ -1847,13 +1856,16 @@ function App() {
               </summary>
               <div className="border-t border-white/[0.05] px-2 py-2 font-mono text-[10px] leading-relaxed text-slate-500">
                 <ul className="m-0 list-none space-y-1 p-0">
-                  {METRIC_DEFS.map(({ key, label }) => {
+                  {METRIC_DEFS.map(({ key, label, source }) => {
                     const v = parsedData?.[key]
                     const display = formatMetricValueForDisplay(v)
                     const ok = display !== "—"
                     return (
                       <li key={key} className="flex justify-between gap-2 border-b border-white/[0.04] pb-1 last:border-0 last:pb-0">
-                        <span className={ok ? "text-slate-400" : "text-slate-600"}>{label}</span>
+                        <span className={ok ? "text-slate-400" : "text-slate-600"}>
+                          {label}
+                          {source ? <span className="ml-1 text-slate-600">· {source}</span> : null}
+                        </span>
                         <span className={ok ? "tabular-nums text-slate-300" : "text-amber-200/70"}>{display}</span>
                       </li>
                     )
@@ -1884,7 +1896,7 @@ function App() {
           className="fixed top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[10002] max-w-[min(92vw,16rem)] rounded-lg border border-emerald-400/35 bg-[rgba(6,24,18,0.94)] px-3 py-2 shadow-[0_8px_28px_rgba(16,185,129,0.22)] backdrop-blur-md"
         >
           <p className="m-0 text-[13px] font-semibold text-emerald-100">✓ 저장 완료</p>
-          <p className="m-0 mt-0.5 text-[11px] text-emerald-200/80">8대 패닉지수 반영됨</p>
+          <p className="m-0 mt-0.5 text-[11px] text-emerald-200/80">Panic Index 3지표 반영됨</p>
         </div>
       ) : null}
       {appToast?.message ? (
@@ -1908,7 +1920,15 @@ function App() {
         open={mobileDrawerOpen}
         onClose={() => setMobileDrawerOpen(false)}
         onOpenInput={openInputPanel}
+        onOpenAccountSettings={openAccountSettings}
         buildVersion={showDevDebugChrome ? buildVersion : null}
+      />
+      <AccountSettingsPanel
+        open={isAccountSettingsOpen}
+        onClose={closeAccountSettings}
+        user={user}
+        onLogin={login}
+        onLogout={logout}
       />
       {showDevDebugChrome ? <MobileShellDebugOverlay /> : null}
       {showDevDebugChrome ? (

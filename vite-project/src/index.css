@@ -31443,6 +31443,63 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+.yds-panic-composition__source {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.yds-panic-composition__incomplete {
+  margin: 0.35rem 0 0;
+  font-size: 0.58rem;
+  line-height: 1.35;
+  color: #fbbf24;
+}
+
+.yds-market-panic-secondary__score-label {
+  margin: 0 0 0.15rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: none;
+}
+
+.yds-market-panic-secondary__band-hint {
+  font-size: 0.72em;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.yds-market-panic-secondary__band-list {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem 0.6rem;
+  font-size: 0.54rem;
+  color: #64748b;
+}
+
+.yds-market-panic-secondary__incomplete {
+  margin: 0.2rem 0 0;
+}
+
+.yds-market-panic-secondary__incomplete-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.yds-market-panic-secondary__incomplete-body,
+.yds-market-panic-secondary__incomplete-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
 .yds-market-panic-secondary__action-note {
   margin: 0.2rem 0 0;
   font-size: 0.54rem;

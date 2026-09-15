@@ -133,19 +133,17 @@ function compilePasteRegexes() {
     /(?:회복|주의|안정|탐욕|공포|과열|낙관|흔들림|패닉|극단|위험|급등|🟢|🟡|🔴|⚪)\b/giu
 }
 
-/** AI 입력 고정 포맷 (8대 패닉 지수) */
-export const PANIC_NINE_BLOCK_TEMPLATE = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 8대 패닉 지수 | YYYY-MM-DD 뉴욕 종가
+/** AI 입력 고정 포맷 — Panic Index 핵심 3지표 (VIX · CNN · Cboe Total P/C) */
+export const PANIC_CORE3_BLOCK_TEMPLATE = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 패닉 지수 | YYYY-MM-DD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-① VIX        18.43
-② VXN        24.08
-③ P/C Ratio   0.51
-④ CNN F&G       63
-⑤ MOVE       70.24
-⑥ BofA B&B     6.6
-⑦ SKEW      141.51
-⑧ HY OAS     2.82%
+① VIX                 17.10
+② CNN Fear & Greed       31
+③ Cboe Total P/C       0.91
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+
+/** @deprecated 레거시 8대 붙여넣기 호환용 — 신규 UI는 PANIC_CORE3_BLOCK_TEMPLATE */
+export const PANIC_NINE_BLOCK_TEMPLATE = PANIC_CORE3_BLOCK_TEMPLATE
 
 const NINE_PANIC_HEADER_RE = /8대\s*패닉\s*지수|패닉\s*지수\s*\|/i
 const NINE_CIRCLED_PREFIX_RE = /^[\s①②③④⑤⑥⑦⑧\d.]+/u
@@ -154,8 +152,11 @@ const NINE_CIRCLED_PREFIX_RE = /^[\s①②③④⑤⑥⑦⑧\d.]+/u
 const NINE_PANIC_LINE_RULES = [
   { key: "vix", label: /\bVIX\b/i },
   { key: "vxn", label: /\bVXN\b/i },
-  { key: "putCall", label: /P\s*\/\s*C\s*Ratio|Put\s*\/\s*Call|풋\s*\/\s*콜/i },
-  { key: "fearGreed", label: /CNN\s*F\s*&\s*G|CNN\s*Fear\s*&\s*Greed/i },
+  {
+    key: "putCall",
+    label: /Cboe\s*Total\s*P\s*\/\s*C|Total\s*P\s*\/\s*C|P\s*\/\s*C\s*Ratio|Put\s*\/\s*Call|풋\s*\/\s*콜/i,
+  },
+  { key: "fearGreed", label: /CNN\s*Fear\s*&\s*Greed|CNN\s*F\s*&\s*G|Fear\s*&\s*Greed/i },
   { key: "move", label: /\bMOVE\b/i },
   { key: "bofa", label: /BofA\s*B\s*&\s*B|BofA\s*B\s*\/\s*B|\bBofA\b/i },
   { key: "skew", label: /\bSKEW\b/i },

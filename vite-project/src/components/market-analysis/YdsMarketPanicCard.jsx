@@ -1,11 +1,11 @@
 import { useMemo } from "react"
 import { MARKET_LABEL_PANIC_INTENSITY } from "../../content/ydsMarketStageLabels.js"
 import { resolvePanicActionView } from "../../content/ydsPanicActionView.js"
-import { getFinalScore } from "../../utils/tradingScores.js"
+import { getPanicScoreV2 } from "../../utils/tradingScores.js"
 import YdsMarketDeskMiniCard from "./YdsMarketDeskMiniCard.jsx"
 
 /**
- * 패닉 강도 — 큰 수치 + 단계 레일
+ * 패닉 강도 — Panic Index V2
  * @param {{ panicData?: object | null; historyRows?: object[]; className?: string; embedded?: boolean }} props
  */
 export default function YdsMarketPanicCard({
@@ -16,8 +16,8 @@ export default function YdsMarketPanicCard({
 }) {
   const view = useMemo(() => {
     if (!panicData) return null
-    const score = getFinalScore(panicData)
-    if (!Number.isFinite(score)) return null
+    const score = getPanicScoreV2(panicData)
+    if (score == null) return null
     return resolvePanicActionView(Math.round(score))
   }, [panicData])
 

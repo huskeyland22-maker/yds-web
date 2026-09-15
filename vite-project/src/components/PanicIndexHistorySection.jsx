@@ -272,7 +272,7 @@ export default function PanicIndexHistorySection({
         ) : null}
 
         <details className="panic-history-v2__all-nine">
-          <summary>전체 8대 지표</summary>
+          <summary>보존 지표 (비활성)</summary>
           <div className="panic-history-v2__nine-grid">
             {allEightRows.map((row) => (
               <button

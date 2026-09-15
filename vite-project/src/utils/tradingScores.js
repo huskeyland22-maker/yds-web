@@ -13,7 +13,7 @@ function toNum(x) {
   return Number.isFinite(n) ? n : NaN
 }
 
-/** VIX ↑ → 공포 점수 ↑ (12 근처 낮음 ~ 40+ 높음) */
+/** VIX ↑ → 공포 점수 ↑ (12 근처 낮음 ~ 40+ 높음) · Legacy: 결측 시 50 */
 export function scoreVIX(vix) {
   const v = toNum(vix)
   if (!Number.isFinite(v)) return 50
@@ -22,7 +22,7 @@ export function scoreVIX(vix) {
   return clamp(((v - lo) / (hi - lo)) * 100, 0, 100)
 }
 
-/** Put/Call ↑ → 공포 점수 ↑ */
+/** Put/Call ↑ → 공포 점수 ↑ · Legacy 스케일(0.65~1.25) · 결측 시 50 */
 export function scorePutCall(pc) {
   const p = toNum(pc)
   if (!Number.isFinite(p)) return 50
@@ -31,11 +31,124 @@ export function scorePutCall(pc) {
   return clamp(((p - lo) / (hi - lo)) * 100, 0, 100)
 }
 
-/** Fear & Greed ↓ → 공포 점수 ↑ (지수 0~100 가정) */
+/** Fear & Greed ↓ → 공포 점수 ↑ (지수 0~100 가정) · Legacy: 결측 시 50 */
 export function scoreFearGreed(fg) {
   const f = toNum(fg)
   if (!Number.isFinite(f)) return 50
   return clamp(100 - f, 0, 100)
+}
+
+/** Panic Index V2 — VIX 점수 (결측 시 null, 임의 50 금지) */
+export function scoreVixV2(vix) {
+  const v = toNum(vix)
+  if (!Number.isFinite(v)) return null
+  return clamp(((v - 12) / (40 - 12)) * 100, 0, 100)
+}
+
+/** Panic Index V2 — CNN Fear & Greed 점수 (결측 시 null) */
+export function scoreCnnV2(fg) {
+  const f = toNum(fg)
+  if (!Number.isFinite(f)) return null
+  return clamp(100 - f, 0, 100)
+}
+
+/**
+ * Panic Index V2 — Cboe Total Put/Call Ratio 점수
+ * 0.92→0 · 1.14→50 · 1.39→100 (분포 기반 piecewise-linear)
+ */
+export function scoreTotalPutCallV2(pc) {
+  const x = toNum(pc)
+  if (!Number.isFinite(x)) return null
+  const lo = 0.92
+  const mid = 1.14
+  const hi = 1.39
+  if (x <= lo) return 0
+  if (x >= hi) return 100
+  if (x <= mid) return (50 * (x - lo)) / (mid - lo)
+  return 50 + (50 * (x - mid)) / (hi - mid)
+}
+
+/**
+ * 최종 Panic Index (V2) = 0.45·VIX + 0.35·CNN + 0.20·Cboe Total P/C
+ * 세 지표 중 하나라도 없으면 null (임의 50점 금지)
+ * @param {{ vix?: unknown; fearGreed?: unknown; putCall?: unknown } | null | undefined} data
+ * @returns {number | null}
+ */
+export function getPanicScoreV2(data) {
+  if (!data || typeof data !== "object") return null
+  const sV = scoreVixV2(data.vix)
+  const sC = scoreCnnV2(data.fearGreed)
+  const sP = scoreTotalPutCallV2(data.putCall)
+  if (sV == null || sC == null || sP == null) return null
+  return Math.round(clamp(0.45 * sV + 0.35 * sC + 0.2 * sP, 0, 100))
+}
+
+/**
+ * Panic Index 표시용 — V2만 사용 (Legacy getFinalScore와 혼합하지 않음)
+ * @returns {number | null}
+ */
+export function resolvePanicIndexScore(data) {
+  return getPanicScoreV2(data)
+}
+
+/** @returns {{ id: string; label: string; min: number; max: number; color: string } | null} */
+export function resolvePanicIndexStatus(score) {
+  if (score == null || !Number.isFinite(Number(score))) return null
+  const s = Math.max(0, Math.min(100, Math.round(Number(score))))
+  if (s <= 39) return { id: "calm", label: "평상", min: 0, max: 39, color: "#22c55e" }
+  if (s <= 59) return { id: "watch", label: "경계", min: 40, max: 59, color: "#eab308" }
+  if (s <= 79) return { id: "strongFear", label: "강한 공포", min: 60, max: 79, color: "#f97316" }
+  return { id: "panic", label: "패닉", min: 80, max: 100, color: "#ef4444" }
+}
+
+/**
+ * V2 구성 분해 (입력값 + 개별 Score)
+ * @returns {{
+ *   ok: boolean
+ *   total: number | null
+ *   lines: Array<{ id: string; label: string; source: string; value: number | null; score: number | null; weight: number }>
+ * } | null}
+ */
+export function buildPanicScoreV2Breakdown(data) {
+  if (!data || typeof data !== "object") return null
+  const vix = toNum(data.vix)
+  const cnn = toNum(data.fearGreed)
+  const pc = toNum(data.putCall)
+  const sV = scoreVixV2(vix)
+  const sC = scoreCnnV2(cnn)
+  const sP = scoreTotalPutCallV2(pc)
+  const lines = [
+    {
+      id: "vix",
+      label: "VIX",
+      source: "네이버",
+      value: Number.isFinite(vix) ? vix : null,
+      score: sV == null ? null : Math.round(sV * 10) / 10,
+      weight: 0.45,
+    },
+    {
+      id: "cnn",
+      label: "CNN Fear & Greed",
+      source: "CNN 공식",
+      value: Number.isFinite(cnn) ? cnn : null,
+      score: sC == null ? null : Math.round(sC * 10) / 10,
+      weight: 0.35,
+    },
+    {
+      id: "putCall",
+      label: "Cboe Total P/C",
+      source: "Cboe",
+      value: Number.isFinite(pc) ? pc : null,
+      score: sP == null ? null : Math.round(sP * 10) / 10,
+      weight: 0.2,
+    },
+  ]
+  const ok = sV != null && sC != null && sP != null
+  return {
+    ok,
+    total: ok ? Math.round(clamp(0.45 * sV + 0.35 * sC + 0.2 * sP, 0, 100)) : null,
+    lines,
+  }
 }
 
 /** BofA ↓ → 공포 점수 ↑ (0~6 스케일 가정) */
@@ -101,8 +214,24 @@ export function describeDynamicWeights(vix, highYield) {
   return `동적 가중: 단기 ${pct(wShort)} · 중기 ${pct(wMid)}`
 }
 
-/** 서버 data → 최종 0~100 (legacy · 프로덕션 기본) */
+/**
+ * 서버/엔진용 최종 점수.
+ * VIX+CNN+Cboe Total P/C 세 값이 모두 있으면 Panic Index V2를 반환.
+ * 불완전하면 Legacy 동적가중(결측 시 50 필)을 유지 — 기존 엔진 호환.
+ * Panic Index UI는 getPanicScoreV2 / resolvePanicIndexScore를 직접 사용.
+ */
 export function getFinalScore(data) {
+  const v2 = getPanicScoreV2(data)
+  if (v2 != null) return v2
+  const short = getShortScore(data.vix, data.putCall)
+  const mid = getMidScore(data.fearGreed, data.bofa, data.highYield)
+  const { wShort, wMid } = getDynamicWeights(data.vix, data.highYield)
+  const raw = short * wShort + mid * wMid
+  return Math.round(clamp(raw, 0, 100))
+}
+
+/** Legacy only — historical 재계산·비교용 (덮어쓰지 않음) */
+export function getFinalScoreLegacy(data) {
   const short = getShortScore(data.vix, data.putCall)
   const mid = getMidScore(data.fearGreed, data.bofa, data.highYield)
   const { wShort, wMid } = getDynamicWeights(data.vix, data.highYield)

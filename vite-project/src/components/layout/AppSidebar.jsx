@@ -13,9 +13,10 @@ import {
  * @param {{
  *   sidebarPulse: object
  *   onOpenInputPanel: () => void
+ *   onOpenAccountSettings: () => void
  * }} props
  */
-export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
+export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccountSettings }) {
   const coreItems = getCoreNavItems()
   const otherItems = getOtherNavItems()
   const footerLinks = getSidebarFooterLinks()
@@ -144,7 +145,7 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel }) {
         ))}
         <button
           type="button"
-          onClick={onOpenInputPanel}
+          onClick={onOpenAccountSettings}
           className="mt-0.5 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-[11px] font-medium text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-300"
         >
           <span>계정 설정</span>

@@ -3,10 +3,10 @@
  * "지금 시장이 어디에 있는가?" (시장 상태) → "얼마나 살 것인가?" (패닉 강도 보조)
  */
 
+import { getPanicScoreV2 } from "../utils/tradingScores.js"
 import { resolveMarketPositionView } from "./ydsMarketPositionEngine.js"
 import { resolvePanicActionView } from "./ydsPanicActionView.js"
 import { resolvePanicBandForMacroStage } from "./ydsLanguage.js"
-import { getFinalScore } from "../utils/tradingScores.js"
 
 /** @typedef {import("./ydsMarketPositionEngine.js").MarketPositionId} MarketPositionId */
 /** @typedef {import("../panic-v2/panicMacroV1Status.js").MacroV1StatusId} MacroV1StatusId */
@@ -130,9 +130,9 @@ export function resolveMarketStateCenterView(panicData, context = null) {
   const positionView = resolveMarketPositionView(panicData, context)
   if (!positionView) return null
 
-  const ydsScore = panicData ? getFinalScore(panicData) : null
+  const ydsScore = panicData ? getPanicScoreV2(panicData) : null
   const panicView =
-    Number.isFinite(ydsScore) ? resolvePanicActionView(Math.round(/** @type {number} */ (ydsScore))) : null
+    ydsScore != null ? resolvePanicActionView(Math.round(/** @type {number} */ (ydsScore))) : null
 
   const positionId = positionView.position.id
   const strategyBlock = MARKET_STATE_STRATEGY[positionId] ?? MARKET_STATE_STRATEGY.adjustment

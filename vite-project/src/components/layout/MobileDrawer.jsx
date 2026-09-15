@@ -10,7 +10,7 @@ import PanicHistoryVerifyPanel from "../settings/PanicHistoryVerifyPanel.jsx"
 import PwaDeveloperPanel from "../settings/PwaDeveloperPanel.jsx"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 
-export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion }) {
+export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccountSettings, buildVersion }) {
   const [otherOpen, setOtherOpen] = useState(false)
   const coreItems = getCoreNavItems()
   const otherItems = getOtherNavItems()
@@ -124,7 +124,7 @@ export default function MobileDrawer({ open, onClose, onOpenInput, buildVersion 
               type="button"
               onClick={() => {
                 onClose()
-                onOpenInput?.()
+                onOpenAccountSettings?.()
               }}
               className="mt-0.5 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-[12px] font-medium text-slate-500"
             >
