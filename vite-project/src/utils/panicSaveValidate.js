@@ -1,8 +1,8 @@
 import { metricValueForDb } from "./panicDbNumeric.js"
 
 /**
- * History 저장용 핵심 5지표 (완성 조건 — UI / history upsert와 동일)
- * Panic Index V2 점수 계산(VIX·CNN·P/C)과 별개로, history row는 5개가 한 세트.
+ * Panic Index 핵심 3지표 (저장·history upsert 완성 조건)
+ * BofA / HY는 보조·주간 — optional (coerce만, required 아님)
  * @type {{ key: string, label: string, aliases: string[] }[]}
  */
 export const PANIC_CORE_METRIC_SPECS = [
@@ -12,30 +12,30 @@ export const PANIC_CORE_METRIC_SPECS = [
     label: "CNN Fear & Greed",
     aliases: ["fearGreed", "fear_greed", "cnn_fg", "CNN"],
   },
-  { key: "bofa", label: "BofA Bull & Bear", aliases: ["bofa", "BofA"] },
   {
     key: "putCall",
     label: "Put/Call Ratio",
     aliases: ["putCall", "put_call", "PC"],
   },
-  {
-    key: "highYield",
-    label: "HY",
-    aliases: ["highYield", "hy_oas", "hyOas", "HY", "high_yield"],
-  },
 ]
 
-/** @deprecated alias — save required = core 5 + tradeDate */
+/** @deprecated alias — save required = core 3 + tradeDate */
 export const PANIC_SAVE_REQUIRED_SPECS = [
   { key: "tradeDate", label: "date", aliases: ["tradeDate", "historyDate", "date"] },
   ...PANIC_CORE_METRIC_SPECS,
 ]
 
 /**
- * Legacy 보조 지표 — 있으면 coerce, 없어도 저장 가능 (단 핵심 5는 필수)
+ * 보조 지표 — 있으면 coerce·저장, 없어도 핵심 3만으로 저장 가능
  * @type {{ key: string, label: string, aliases: string[] }[]}
  */
 export const PANIC_SAVE_OPTIONAL_SPECS = [
+  { key: "bofa", label: "BofA Bull & Bear", aliases: ["bofa", "BofA"] },
+  {
+    key: "highYield",
+    label: "HY",
+    aliases: ["highYield", "hy_oas", "hyOas", "HY", "high_yield"],
+  },
   { key: "vxn", label: "VXN", aliases: ["vxn", "VXN"] },
   { key: "move", label: "MOVE", aliases: ["move", "MOVE"] },
   { key: "skew", label: "SKEW", aliases: ["skew", "SKEW"] },
@@ -99,7 +99,7 @@ export function coercePanicSavePayload(body) {
 }
 
 /**
- * 핵심 5지표 존재·유효성 (history upsert 전용)
+ * 핵심 3지표 존재·유효성
  * @param {Record<string, unknown>} body
  * @returns {{
  *   ok: boolean,
@@ -119,7 +119,7 @@ export function validateCorePanicMetrics(body) {
       ok: false,
       code: "INCOMPLETE_CORE_METRICS",
       missing,
-      message: "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+      message: "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다.",
     }
   }
   return { ok: true, code: null, missing: [] }
@@ -127,7 +127,7 @@ export function validateCorePanicMetrics(body) {
 
 /**
  * @param {Record<string, unknown>} body
- * @returns {{ ok: boolean, missing: string[], error?: string, code?: string }}
+ * @returns {{ ok: boolean, missing: string[], error?: string, code?: string, message?: string }}
  */
 export function validatePanicSavePayload(body) {
   const missing = []
@@ -148,11 +148,9 @@ export function validatePanicSavePayload(body) {
       ok: false,
       missing,
       code: isCoreOnly ? "INCOMPLETE_CORE_METRICS" : "missing_required",
-      error: isCoreOnly
-        ? `missing_required: ${missing.join(", ")}`
-        : `missing_required: ${missing.join(", ")}`,
+      error: `missing_required: ${missing.join(", ")}`,
       message: isCoreOnly
-        ? "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다."
+        ? "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다."
         : `missing_required: ${missing.join(", ")}`,
     }
   }

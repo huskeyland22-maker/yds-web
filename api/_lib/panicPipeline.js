@@ -84,7 +84,8 @@ export async function persistPanicPayload(body, opts = {}) {
       detail === "incomplete_core_metrics" || history.code === "INCOMPLETE_CORE_METRICS"
     if (isIncomplete) {
       const err = new Error(
-        history.message || "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+        history.message ||
+          "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다.",
       )
       err.stage = "validation"
       err.statusCode = 400

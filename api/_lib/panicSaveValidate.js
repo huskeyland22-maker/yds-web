@@ -3,7 +3,8 @@ import { metricValueForDb } from "./panicNumeric.js"
 /** @typedef {{ key: string, label: string, aliases: string[] }} PanicRequiredSpec */
 
 /**
- * History 저장용 핵심 5지표
+ * Panic Index 핵심 3지표 (저장·history upsert 완성 조건)
+ * BofA / HY는 보조·주간 — optional
  * @type {PanicRequiredSpec[]}
  */
 export const PANIC_CORE_METRIC_SPECS = [
@@ -13,16 +14,10 @@ export const PANIC_CORE_METRIC_SPECS = [
     label: "CNN Fear & Greed",
     aliases: ["fearGreed", "fear_greed", "cnn_fg", "CNN"],
   },
-  { key: "bofa", label: "BofA Bull & Bear", aliases: ["bofa", "BofA"] },
   {
     key: "putCall",
     label: "Put/Call Ratio",
     aliases: ["putCall", "put_call", "PC"],
-  },
-  {
-    key: "highYield",
-    label: "HY",
-    aliases: ["highYield", "hy_oas", "hyOas", "HY", "high_yield"],
   },
 ]
 
@@ -34,6 +29,12 @@ export const PANIC_SAVE_REQUIRED_SPECS = [
 
 /** @type {PanicRequiredSpec[]} */
 export const PANIC_SAVE_OPTIONAL_SPECS = [
+  { key: "bofa", label: "BofA Bull & Bear", aliases: ["bofa", "BofA"] },
+  {
+    key: "highYield",
+    label: "HY",
+    aliases: ["highYield", "hy_oas", "hyOas", "HY", "high_yield"],
+  },
   { key: "vxn", label: "VXN", aliases: ["vxn", "VXN"] },
   { key: "move", label: "MOVE", aliases: ["move", "MOVE"] },
   { key: "skew", label: "SKEW", aliases: ["skew", "SKEW"] },
@@ -112,7 +113,8 @@ export function validateCorePanicMetrics(body) {
       ok: false,
       code: "INCOMPLETE_CORE_METRICS",
       missing,
-      message: "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+      message:
+        "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다.",
     }
   }
   return { ok: true, code: null, missing: [] }
@@ -143,7 +145,7 @@ export function validatePanicSavePayload(body) {
       code: isCoreOnly ? "INCOMPLETE_CORE_METRICS" : "missing_required",
       error: `missing_required: ${missing.join(", ")}`,
       message: isCoreOnly
-        ? "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다."
+        ? "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다."
         : `missing_required: ${missing.join(", ")}`,
     }
   }

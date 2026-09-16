@@ -92,7 +92,7 @@ export function preserveWeeklyCoreFields(row, existingSameDate) {
 
 /**
  * PK(date) upsert: 같은 날짜만 갱신, 다른 날짜 행은 유지(다중 일자 공존).
- * 핵심 5지표 미완이면 upsert를 실행하지 않음.
+ * 핵심 3지표 미완이면 upsert를 실행하지 않음. BofA/HY는 보조(preserve).
  */
 export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   const tradeDate = resolvePanicTradeDate(body, opts.tradeDate)
@@ -222,7 +222,7 @@ export async function upsertPanicIndexHistoryBatch(entries, opts = {}) {
       skipped: true,
       reason: "incomplete_core_metrics",
       code: "INCOMPLETE_CORE_METRICS",
-      message: "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+      message: "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다.",
     }
   }
   rows.sort((a, b) => String(a.row.date).localeCompare(String(b.row.date)))

@@ -18,51 +18,44 @@ function preserveWeekly(row, existing) {
 
 const TRADE_DATE = "2026-09-15"
 
-const FULL_FIVE = {
+const CORE_THREE = {
   tradeDate: TRADE_DATE,
   vix: 17.2,
   fearGreed: 29,
-  bofa: 3.5,
   putCall: 0.91,
-  highYield: 3.2,
 }
 
-describe("validateCorePanicMetrics — history 핵심 5지표", () => {
-  it("core specs are VIX · CNN · BofA · P/C · HY", () => {
+describe("validateCorePanicMetrics — 핵심 3지표", () => {
+  it("core specs are VIX · CNN · Put/Call only", () => {
     expect(PANIC_CORE_METRIC_SPECS.map((s) => s.key)).toEqual([
       "vix",
       "fearGreed",
-      "bofa",
       "putCall",
-      "highYield",
     ])
   })
 
-  it("TEST A: VIX+P/C+CNN only → FAIL, missing BofA+HY", () => {
-    const body = {
-      tradeDate: TRADE_DATE,
-      vix: 17.2,
-      fearGreed: 29,
-      putCall: 0.91,
-    }
+  it("TEST A: VIX+CNN+P/C only → PASS (BofA/HY not required)", () => {
+    const core = validateCorePanicMetrics(CORE_THREE)
+    expect(core.ok).toBe(true)
+    expect(core.missing).toEqual([])
+    expect(validatePanicSavePayload(CORE_THREE).ok).toBe(true)
+  })
+
+  it("missing one of core 3 → FAIL with missing label", () => {
+    const body = { tradeDate: TRADE_DATE, vix: 17.2, fearGreed: 29 }
     const core = validateCorePanicMetrics(body)
     expect(core.ok).toBe(false)
     expect(core.code).toBe("INCOMPLETE_CORE_METRICS")
-    expect(core.missing).toContain("BofA Bull & Bear")
-    expect(core.missing).toContain("HY")
-    expect(core.missing).not.toContain("VIX")
-
-    const save = validatePanicSavePayload(body)
-    expect(save.ok).toBe(false)
-    expect(save.code).toBe("INCOMPLETE_CORE_METRICS")
-    expect(save.missing).toEqual(expect.arrayContaining(["BofA Bull & Bear", "HY"]))
+    expect(core.missing).toContain("Put/Call Ratio")
+    expect(core.missing).not.toContain("BofA Bull & Bear")
+    expect(core.missing).not.toContain("HY")
   })
 
-  it("TEST B: 5개 모두 → PASS + Panic V2 score still computable", () => {
-    const core = validateCorePanicMetrics(FULL_FIVE)
-    expect(core.ok).toBe(true)
-    expect(validatePanicSavePayload(FULL_FIVE).ok).toBe(true)
-    const score = getPanicScoreV2(coercePanicSavePayload(FULL_FIVE))
+  it("TEST B: core 3 + optional BofA/HY → PASS + V2 score from 3 weights", () => {
+    const full = { ...CORE_THREE, bofa: 3.5, highYield: 3.2 }
+    expect(validateCorePanicMetrics(full).ok).toBe(true)
+    expect(validatePanicSavePayload(full).ok).toBe(true)
+    const score = getPanicScoreV2(coercePanicSavePayload(full))
     expect(score).toBe(getPanicScoreV2({ vix: 17.2, fearGreed: 29, putCall: 0.91 }))
     expect(resolvePanicIndexStatus(score)?.label).toBeTruthy()
   })
@@ -83,9 +76,9 @@ describe("validateCorePanicMetrics — history 핵심 5지표", () => {
     expect(merged.vix).toBe(17.2)
   })
 
-  it("legacy VXN/MOVE/SKEW missing does not block when core 5 present", () => {
+  it("legacy VXN/MOVE/SKEW missing does not block when core 3 present", () => {
     const v = validatePanicSavePayload({
-      ...FULL_FIVE,
+      ...CORE_THREE,
       vxn: null,
       move: null,
       skew: null,

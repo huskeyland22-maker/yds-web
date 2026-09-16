@@ -93,13 +93,7 @@ function deriveRiskRegimeFromSnap(snap) {
   return "neutral"
 }
 
-/** AI 수동 입력 최소 필드 */
+/** AI 수동 입력 최소 필드 — Panic Index 핵심 3지표 */
 export function snapshotHasRequiredHistoryMetrics(snap) {
-  return (
-    snap.vix != null &&
-    snap.fearGreed != null &&
-    snap.putCall != null &&
-    snap.highYield != null &&
-    snap.bofa != null
-  )
+  return snap.vix != null && snap.fearGreed != null && snap.putCall != null
 }

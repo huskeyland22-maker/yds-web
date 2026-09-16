@@ -248,7 +248,7 @@ export async function handlePanicModeUpdate(req, res) {
         message:
           validation.message ||
           (isIncomplete
-            ? "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다."
+            ? "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다."
             : validation.error),
         error: validation.error,
         payload: savePayload,
@@ -268,7 +268,7 @@ export async function handlePanicModeUpdate(req, res) {
           missing: result.history?.missing ?? [],
           message:
             result.history?.message ||
-            "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+            "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다.",
           error: reason,
           history: result.history,
           stage: "validation",

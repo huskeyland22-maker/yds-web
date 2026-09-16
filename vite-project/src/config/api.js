@@ -668,7 +668,7 @@ export async function submitManualPanicData(inputData) {
         isIncomplete
           ? toErrorMessage(
               out.history?.message ?? out?.message,
-              "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+              "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다.",
             )
           : toErrorMessage(
               out.history?.reason ?? out.history?.error,

@@ -99,15 +99,13 @@ import { formatSaveErrorForUi, logSaveError } from "./utils/errorMessage.js"
 
 /* 미국장 매크로 브리핑(OvernightUsBriefing): 프로덕션 복구 동안 비활성 — 재개 시 import + /cycle 하단 섹션 추가 */
 
-/** Panic Index history 저장 — 핵심 5지표 (VIX·CNN·BofA·P/C·HY) */
+/** Panic Index 핵심 3지표 (VIX·CNN·P/C) — BofA/HY는 보조·선택 */
 const METRIC_DEFS = [
   { key: "vix", label: "VIX", source: "네이버" },
   { key: "fearGreed", label: "CNN Fear & Greed", source: "CNN 공식" },
-  { key: "bofa", label: "BofA Bull & Bear", source: "BofA" },
-  { key: "putCall", label: "Put/Call Ratio", source: "Cboe" },
-  { key: "highYield", label: "HY", source: "ICE/FRED" },
+  { key: "putCall", label: "Cboe Total P/C", source: "Cboe" },
 ]
-const METRIC_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
+const METRIC_KEYS = ["vix", "fearGreed", "putCall"]
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const APP_VERSION_LABEL = String(import.meta.env.VITE_APP_VERSION_LABEL ?? "").trim()
 const PWA_RESUME_RELOAD_COOLDOWN_MS = 10_000
@@ -115,7 +113,7 @@ const PANIC_TEXT_DRAFT_KEY = "yds-panic-text-draft-v1"
 const INPUT_PANEL_CLOSE_MS = 220
 const SAVE_SUCCESS_TOAST_MS = 2000
 const PANIC_TEXT_PLACEHOLDER = PANIC_NINE_BLOCK_TEMPLATE
-const REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
+const REQUIRED_KEYS = ["vix", "fearGreed", "putCall"]
 
 const FIELD_LABELS = {
   vix: "VIX",
@@ -670,9 +668,7 @@ function App() {
     const coreMissing = []
     if (vix == null) coreMissing.push(FIELD_LABELS.vix)
     if (fearGreed == null) coreMissing.push(FIELD_LABELS.fearGreed)
-    if (bofa == null) coreMissing.push(FIELD_LABELS.bofa)
     if (putCall == null) coreMissing.push(FIELD_LABELS.putCall)
-    if (highYield == null) coreMissing.push(FIELD_LABELS.highYield)
     if (coreMissing.length) {
       setInputError(
         `저장할 수 없습니다.\n누락된 핵심 지표: ${coreMissing.join(", ")}`,
@@ -685,8 +681,8 @@ function App() {
       vix,
       fearGreed,
       putCall,
-      bofa,
-      highYield,
+      ...(bofa != null ? { bofa } : {}),
+      ...(highYield != null ? { highYield } : {}),
       ...(vxn != null ? { vxn } : {}),
       ...(move != null ? { move } : {}),
       ...(skew != null ? { skew } : {}),
@@ -1824,7 +1820,7 @@ function App() {
             <div className="mt-1.5 flex shrink-0 items-center justify-between gap-2 font-mono text-[10px] text-slate-500">
               <span className="tabular-nums">
                 {inputText.trim()
-                  ? `핵심 ${parsedFieldCount}/5 입력`
+                  ? `핵심 ${parsedFieldCount}/3 입력`
                   : "입력 대기"}
               </span>
               {inputText.trim() && missingRequired.length > 0 ? (
@@ -1905,7 +1901,7 @@ function App() {
           className="fixed top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-[10002] max-w-[min(92vw,16rem)] rounded-lg border border-emerald-400/35 bg-[rgba(6,24,18,0.94)] px-3 py-2 shadow-[0_8px_28px_rgba(16,185,129,0.22)] backdrop-blur-md"
         >
           <p className="m-0 text-[13px] font-semibold text-emerald-100">✓ 저장 완료</p>
-          <p className="m-0 mt-0.5 text-[11px] text-emerald-200/80">핵심 5지표 반영됨</p>
+          <p className="m-0 mt-0.5 text-[11px] text-emerald-200/80">핵심 3지표 반영됨</p>
         </div>
       ) : null}
       {appToast?.message ? (

@@ -40,8 +40,8 @@ const SNAPSHOT_MAX_AGE_MS = 1000 * 60 * 10
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const AUTO_REFRESH_MS = PANIC_DATA_POLL_MS
 const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield"]
-/** History 저장 완성 조건 — VIX·CNN·BofA·P/C·HY */
-const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
+/** History 저장 완성 조건 — VIX·CNN·Put/Call (BofA/HY 보조) */
+const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "putCall"]
 
 const HEAL_STALE_PANIC_SESSION_KEY = "yds-stale-panic-heal-once"
 
@@ -463,7 +463,8 @@ export const usePanicStore = create((set, get) => ({
       const coreCheck = validateCorePanicMetrics(payload)
       if (!coreCheck.ok) {
         const err = new Error(
-          coreCheck.message || "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+          coreCheck.message ||
+            "핵심 Panic Index 3개(VIX · CNN Fear & Greed · Put/Call)가 모두 입력되어야 저장할 수 있습니다.",
         )
         err.stage = "validation"
         err.status = 400

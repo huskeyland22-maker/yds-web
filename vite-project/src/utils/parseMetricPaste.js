@@ -133,22 +133,20 @@ function compilePasteRegexes() {
     /(?:회복|주의|안정|탐욕|공포|과열|낙관|흔들림|패닉|극단|위험|급등|🟢|🟡|🔴|⚪)\b/giu
 }
 
-/** AI 입력 고정 포맷 — History 저장용 핵심 5지표 */
-export const PANIC_CORE5_BLOCK_TEMPLATE = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/** AI 입력 고정 포맷 — Panic Index 핵심 3지표 */
+export const PANIC_CORE3_BLOCK_TEMPLATE = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 패닉 지수 | YYYY-MM-DD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ① VIX                 17.10
 ② CNN Fear & Greed       31
-③ BofA Bull & Bear      3.5
-④ Put/Call Ratio       0.91
-⑤ HY OAS               3.20
+③ Cboe Total P/C       0.91
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
 
-/** @deprecated 이름 유지 — 내용은 핵심 5지표 */
-export const PANIC_CORE3_BLOCK_TEMPLATE = PANIC_CORE5_BLOCK_TEMPLATE
+/** @deprecated alias — 핵심 3지표 템플릿 */
+export const PANIC_CORE5_BLOCK_TEMPLATE = PANIC_CORE3_BLOCK_TEMPLATE
 
-/** @deprecated 레거시 호환 — 신규 UI는 PANIC_CORE5_BLOCK_TEMPLATE */
-export const PANIC_NINE_BLOCK_TEMPLATE = PANIC_CORE5_BLOCK_TEMPLATE
+/** @deprecated 레거시 호환 — 신규 UI는 PANIC_CORE3_BLOCK_TEMPLATE */
+export const PANIC_NINE_BLOCK_TEMPLATE = PANIC_CORE3_BLOCK_TEMPLATE
 
 const NINE_PANIC_HEADER_RE = /8대\s*패닉\s*지수|패닉\s*지수\s*\|/i
 const NINE_CIRCLED_PREFIX_RE = /^[\s①②③④⑤⑥⑦⑧\d.]+/u
