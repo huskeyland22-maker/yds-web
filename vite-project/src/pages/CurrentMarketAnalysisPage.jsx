@@ -6,7 +6,6 @@ import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysis
 import YdsMarketAnalysisOpsMeta from "../components/market-analysis/YdsMarketAnalysisOpsMeta.jsx"
 import LaunchFirstVisitPanel from "../components/launch/LaunchFirstVisitPanel.jsx"
 import LaunchFooterNav from "../components/launch/LaunchFooterNav.jsx"
-import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import {
   completeLaunchOnboarding,
   isLaunchOnboardingComplete,
@@ -43,7 +42,6 @@ export default function CurrentMarketAnalysisPage() {
     <div className="yds-market-analysis min-w-0 w-full">
       <header className="yds-market-analysis__header">
         <div className="yds-market-analysis__header-main">
-          {!simplified ? <YdsV1ReleaseBadge compact /> : null}
           <h1 className="yds-market-analysis__title">시장 공포·패닉</h1>
           <p className="yds-market-analysis__subtitle">
             Panic Index · 장기 투자 참고 지표

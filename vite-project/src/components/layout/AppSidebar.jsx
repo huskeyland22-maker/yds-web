@@ -26,19 +26,19 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
 
   return (
     <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
-      <div className="shrink-0 px-3 pb-2.5 pt-3 lg:border-b lg:border-white/[0.06]">
-        <p className="m-0 font-display text-[18px] font-bold leading-none tracking-[0.03em] text-slate-50">
+      <div className="shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
+        <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
           Y&apos;ds
         </p>
-        <p className="m-0 mt-1.5 text-[11px] font-medium tracking-tight text-sky-300/85">
+        <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
           함께하는 인생 투자
         </p>
-        <div className="mt-2">
+        <div className="mt-2.5">
           <YdsV1ReleaseBadge compact />
         </div>
       </div>
 
-      <nav className="flex flex-col gap-2 px-2.5 py-3" aria-label="핵심 메뉴">
+      <nav className="flex flex-col gap-1 px-2.5 py-3" aria-label="핵심 메뉴">
         {coreItems.map((item) => (
           <NavLink
             key={item.path}
@@ -46,14 +46,14 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
             end={item.path === "/"}
             className={({ isActive }) =>
               [
-                "yds-sidebar-core group block rounded-2xl border px-3 py-2.5 transition",
+                "yds-sidebar-core group block rounded-md border-l-2 px-3 py-2.5 transition",
                 item.tone === "brand"
                   ? isActive
-                    ? "border-sky-400/45 bg-sky-500/[0.16] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-                    : "border-sky-500/20 bg-sky-500/[0.07] hover:border-sky-400/35 hover:bg-sky-500/[0.12]"
+                    ? "border-l-sky-400/70 bg-sky-500/[0.1]"
+                    : "border-l-transparent hover:border-l-sky-500/35 hover:bg-white/[0.03]"
                   : isActive
-                    ? "border-rose-400/40 bg-rose-500/[0.14] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
-                    : "border-rose-500/18 bg-rose-500/[0.06] hover:border-rose-400/30 hover:bg-rose-500/[0.1]",
+                    ? "border-l-rose-400/65 bg-rose-500/[0.08]"
+                    : "border-l-transparent hover:border-l-rose-500/30 hover:bg-white/[0.03]",
               ].join(" ")
             }
           >
@@ -63,23 +63,14 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
                   <span
                     className={[
                       "block text-[12.5px] font-semibold leading-snug tracking-tight",
-                      isActive ? "text-slate-50" : "text-slate-200",
+                      isActive ? "text-slate-50" : "text-slate-300",
                     ].join(" ")}
                   >
                     {item.label}
                   </span>
-                  <span className="mt-0.5 block text-[10px] leading-snug text-slate-400">
+                  <span className="mt-0.5 block text-[10px] leading-snug text-slate-500">
                     {item.subtitle}
                   </span>
-                </span>
-                <span
-                  className={[
-                    "mt-0.5 shrink-0 text-[12px]",
-                    isActive ? "text-slate-300" : "text-slate-600 group-hover:text-slate-400",
-                  ].join(" ")}
-                  aria-hidden
-                >
-                  ›
                 </span>
               </span>
             )}

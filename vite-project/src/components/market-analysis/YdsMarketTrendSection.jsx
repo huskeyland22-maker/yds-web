@@ -22,9 +22,9 @@ export default function YdsMarketTrendSection({ historyRows = [], className = ""
         .join(" ")}
       aria-label={`최근 ${MARKET_TREND_WINDOW_DAYS}일 Panic Index 추이`}
     >
-      <h3 className="yds-market-trend__heading">과거 Panic Index 추이</h3>
+      <h3 className="yds-market-trend__heading">PANIC INDEX HISTORY</h3>
       <p className="yds-market-trend__sub">
-        최근 {MARKET_TREND_WINDOW_DAYS}일 기록입니다. 단기 매매용이 아닌 참고용 추이입니다.
+        최근 {MARKET_TREND_WINDOW_DAYS}일 · 현재 판단을 보조하는 참고 추이
       </p>
       <div className="yds-market-trend__panel yds-market-trend__panel--solo">
         <YdsMarketTrendChart

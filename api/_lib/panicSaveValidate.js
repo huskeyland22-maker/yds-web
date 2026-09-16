@@ -2,18 +2,35 @@ import { metricValueForDb } from "./panicNumeric.js"
 
 /** @typedef {{ key: string, label: string, aliases: string[] }} PanicRequiredSpec */
 
-/** @type {PanicRequiredSpec[]} */
+/**
+ * Panic Index V2 저장 — 필수 입력 (UI / 계산식과 동일)
+ * VIX · CNN Fear & Greed · Cboe Total P/C (+ tradeDate)
+ * @type {PanicRequiredSpec[]}
+ */
 export const PANIC_SAVE_REQUIRED_SPECS = [
   { key: "tradeDate", label: "date", aliases: ["tradeDate", "historyDate", "date"] },
   { key: "vix", label: "VIX", aliases: ["vix", "VIX"] },
-  { key: "vxn", label: "VXN", aliases: ["vxn", "VXN"] },
-  { key: "putCall", label: "PC", aliases: ["putCall", "put_call", "PC"] },
   { key: "fearGreed", label: "CNN", aliases: ["fearGreed", "fear_greed", "cnn_fg", "CNN"] },
+  {
+    key: "putCall",
+    label: "Cboe Total P/C",
+    aliases: ["putCall", "put_call", "PC"],
+  },
+]
+
+/**
+ * Legacy 보조 지표 — 있으면 coerce, 없어도 저장 가능
+ * @type {PanicRequiredSpec[]}
+ */
+export const PANIC_SAVE_OPTIONAL_SPECS = [
+  { key: "vxn", label: "VXN", aliases: ["vxn", "VXN"] },
   { key: "move", label: "MOVE", aliases: ["move", "MOVE"] },
   { key: "bofa", label: "BofA", aliases: ["bofa", "BofA"] },
   { key: "skew", label: "SKEW", aliases: ["skew", "SKEW"] },
   { key: "highYield", label: "HY", aliases: ["highYield", "hy_oas", "hyOas", "HY"] },
 ]
+
+const PANIC_SAVE_COERCE_SPECS = [...PANIC_SAVE_REQUIRED_SPECS, ...PANIC_SAVE_OPTIONAL_SPECS]
 
 /** @param {Record<string, unknown>} obj */
 export function stripNilEntries(obj) {
@@ -36,7 +53,7 @@ function pickRaw(body, aliases) {
 }
 
 /**
- * VIX·VXN·PC·CNN·MOVE·BofA·SKEW·HY — Number() 강제 (%·쉼표 제거)
+ * V2 required + legacy optional coerce — Number() 강제 (%·쉼표 제거)
  * @param {Record<string, unknown>} body
  */
 export function coercePanicSavePayload(body) {
@@ -53,7 +70,7 @@ export function coercePanicSavePayload(body) {
   }
   if (tradeDate) out.tradeDate = tradeDate
 
-  for (const spec of PANIC_SAVE_REQUIRED_SPECS) {
+  for (const spec of PANIC_SAVE_COERCE_SPECS) {
     if (spec.key === "tradeDate") continue
     const raw = pickRaw(data, spec.aliases)
     const num = metricValueForDb(raw)

@@ -10,14 +10,14 @@ export function getCoreNavItems() {
       label: "📈 YDS 인생 투자전략",
       shortLabel: "인생전략",
       path: "/",
-      subtitle: "지금, 그리고 10년 후까지",
+      subtitle: "장기 전략 · MA40 · Reserve",
       tone: "brand",
     },
     {
       label: "🚨 시장 공포·패닉",
       shortLabel: "공포·패닉",
       path: "/market-analysis",
-      subtitle: "지금 시장은 어떤 구간인가",
+      subtitle: "Panic Index · 장기 참고",
       tone: "panic",
     },
   ]

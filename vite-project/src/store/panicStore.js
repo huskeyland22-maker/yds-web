@@ -40,7 +40,8 @@ const SNAPSHOT_MAX_AGE_MS = 1000 * 60 * 10
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const AUTO_REFRESH_MS = PANIC_DATA_POLL_MS
 const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield"]
-const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
+/** Panic Index V2 핵심 3지표 — UI / save validation / getPanicScoreV2 와 동일 */
+const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "putCall"]
 
 const HEAL_STALE_PANIC_SESSION_KEY = "yds-stale-panic-heal-once"
 
@@ -112,7 +113,9 @@ function isValidSnapshotShape(snapshot) {
 
 function hasAllRequiredMetrics(payload) {
   if (!payload || typeof payload !== "object") return false
-  return METRIC_KEYS.every((key) => payload[key] !== undefined && payload[key] !== null && payload[key] !== "-")
+  return CORE_REQUIRED_KEYS.every(
+    (key) => payload[key] !== undefined && payload[key] !== null && payload[key] !== "-",
+  )
 }
 
 function readMainEnvelope() {
