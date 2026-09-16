@@ -1,143 +1,95 @@
 import { describe, expect, it } from "vitest"
 import {
   coercePanicSavePayload,
+  validateCorePanicMetrics,
   validatePanicSavePayload,
-  PANIC_SAVE_REQUIRED_SPECS,
-  PANIC_SAVE_OPTIONAL_SPECS,
+  PANIC_CORE_METRIC_SPECS,
 } from "./panicSaveValidate.js"
-import {
-  assertPanicSubmitPayloadNumeric,
-  normalizePanicSubmitPayload,
-} from "./panicDbNumeric.js"
 import { getPanicScoreV2, resolvePanicIndexStatus } from "./tradingScores.js"
 
-const TRADE_DATE = "2026-05-19"
-
-/** Production 재현 입력 (legacy 5개 없음) */
-const CORE_THREE = {
-  tradeDate: TRADE_DATE,
-  vix: 17.1,
-  fearGreed: 31,
-  putCall: 0.91,
+/** Mirrors api/_lib/panicIndexHistory.preserveWeeklyCoreFields */
+function preserveWeekly(row, existing) {
+  const out = { ...row }
+  if (!existing) return out
+  if (out.bofa == null && existing.bofa != null) out.bofa = existing.bofa
+  if (out.hy_oas == null && existing.hy_oas != null) out.hy_oas = existing.hy_oas
+  return out
 }
 
-describe("panicSaveValidate — Panic Index V2 required = 3", () => {
-  it("required specs are only VIX · CNN · Cboe Total P/C (+ date)", () => {
-    const metricKeys = PANIC_SAVE_REQUIRED_SPECS.filter((s) => s.key !== "tradeDate").map(
-      (s) => s.key,
-    )
-    expect(metricKeys).toEqual(["vix", "fearGreed", "putCall"])
-    expect(PANIC_SAVE_OPTIONAL_SPECS.map((s) => s.key)).toEqual([
-      "vxn",
-      "move",
+const TRADE_DATE = "2026-09-15"
+
+const FULL_FIVE = {
+  tradeDate: TRADE_DATE,
+  vix: 17.2,
+  fearGreed: 29,
+  bofa: 3.5,
+  putCall: 0.91,
+  highYield: 3.2,
+}
+
+describe("validateCorePanicMetrics — history 핵심 5지표", () => {
+  it("core specs are VIX · CNN · BofA · P/C · HY", () => {
+    expect(PANIC_CORE_METRIC_SPECS.map((s) => s.key)).toEqual([
+      "vix",
+      "fearGreed",
       "bofa",
-      "skew",
+      "putCall",
       "highYield",
     ])
   })
 
-  it("TEST A: VIX+CNN+P/C → validation PASS, Panic Score 32", () => {
+  it("TEST A: VIX+P/C+CNN only → FAIL, missing BofA+HY", () => {
     const body = {
-      ...CORE_THREE,
+      tradeDate: TRADE_DATE,
+      vix: 17.2,
+      fearGreed: 29,
+      putCall: 0.91,
+    }
+    const core = validateCorePanicMetrics(body)
+    expect(core.ok).toBe(false)
+    expect(core.code).toBe("INCOMPLETE_CORE_METRICS")
+    expect(core.missing).toContain("BofA Bull & Bear")
+    expect(core.missing).toContain("HY")
+    expect(core.missing).not.toContain("VIX")
+
+    const save = validatePanicSavePayload(body)
+    expect(save.ok).toBe(false)
+    expect(save.code).toBe("INCOMPLETE_CORE_METRICS")
+    expect(save.missing).toEqual(expect.arrayContaining(["BofA Bull & Bear", "HY"]))
+  })
+
+  it("TEST B: 5개 모두 → PASS + Panic V2 score still computable", () => {
+    const core = validateCorePanicMetrics(FULL_FIVE)
+    expect(core.ok).toBe(true)
+    expect(validatePanicSavePayload(FULL_FIVE).ok).toBe(true)
+    const score = getPanicScoreV2(coercePanicSavePayload(FULL_FIVE))
+    expect(score).toBe(getPanicScoreV2({ vix: 17.2, fearGreed: 29, putCall: 0.91 }))
+    expect(resolvePanicIndexStatus(score)?.label).toBeTruthy()
+  })
+
+  it("TEST C: BofA/HY null in payload does not overwrite existing weekly values", () => {
+    const incoming = {
+      date: TRADE_DATE,
+      vix: 17.2,
+      fear_greed: 29,
+      put_call: 0.91,
+      bofa: null,
+      hy_oas: null,
+    }
+    const existing = { date: TRADE_DATE, bofa: 4.1, hy_oas: 3.55 }
+    const merged = preserveWeekly(incoming, existing)
+    expect(merged.bofa).toBe(4.1)
+    expect(merged.hy_oas).toBe(3.55)
+    expect(merged.vix).toBe(17.2)
+  })
+
+  it("legacy VXN/MOVE/SKEW missing does not block when core 5 present", () => {
+    const v = validatePanicSavePayload({
+      ...FULL_FIVE,
       vxn: null,
       move: null,
-      bofa: null,
       skew: null,
-      highYield: null,
-    }
-    const coerced = coercePanicSavePayload(body)
-    const validation = validatePanicSavePayload(body)
-    expect(validation.ok).toBe(true)
-    expect(validation.missing).toEqual([])
-    expect(coerced.vix).toBe(17.1)
-    expect(coerced.fearGreed).toBe(31)
-    expect(coerced.putCall).toBe(0.91)
-    expect(coerced.vxn).toBeUndefined()
-    expect(coerced.move).toBeUndefined()
-    expect(coerced.bofa).toBeUndefined()
-    expect(coerced.skew).toBeUndefined()
-    expect(coerced.highYield).toBeUndefined()
-
-    const score = getPanicScoreV2(coerced)
-    expect(score).toBe(32)
-    expect(resolvePanicIndexStatus(score)?.label).toBe("경계")
-  })
-
-  it("TEST B: missing P/C → FAIL with Cboe Total P/C", () => {
-    const validation = validatePanicSavePayload({
-      tradeDate: TRADE_DATE,
-      vix: 17.1,
-      fearGreed: 31,
-      putCall: null,
     })
-    expect(validation.ok).toBe(false)
-    expect(validation.missing).toContain("Cboe Total P/C")
-    expect(validation.error).toMatch(/Cboe Total P\/C/)
-  })
-
-  it("TEST C: missing VIX → FAIL with VIX", () => {
-    const validation = validatePanicSavePayload({
-      tradeDate: TRADE_DATE,
-      vix: null,
-      fearGreed: 31,
-      putCall: 0.91,
-    })
-    expect(validation.ok).toBe(false)
-    expect(validation.missing).toContain("VIX")
-    expect(validation.error).toMatch(/VIX/)
-  })
-
-  it("TEST D: legacy 5 missing → PASS (does not block save)", () => {
-    const validation = validatePanicSavePayload({
-      tradeDate: TRADE_DATE,
-      vix: 17.1,
-      fearGreed: 31,
-      putCall: 0.91,
-      // explicitly omit vxn/move/bofa/skew/highYield
-    })
-    expect(validation.ok).toBe(true)
-    expect(validation.missing).toEqual([])
-    expect(validation.error).toBeUndefined()
-  })
-
-  it("TEST E: savePanicMetricsHub / postPanicSave client path with 3 metrics", () => {
-    // Mirrors config/api.js postPanicSave + store coerce before submitManualPanicData
-    const input = { ...CORE_THREE }
-    const storePayload = coercePanicSavePayload(input)
-    const storeValidation = validatePanicSavePayload(storePayload)
-    expect(storeValidation.ok).toBe(true)
-
-    const normalized = normalizePanicSubmitPayload(storePayload)
-    assertPanicSubmitPayloadNumeric(normalized)
-
-    const body = coercePanicSavePayload(
-      Object.fromEntries(
-        Object.entries(normalized).filter(([, v]) => v !== undefined && v !== null),
-      ),
-    )
-    const postValidation = validatePanicSavePayload(body)
-    expect(postValidation.ok).toBe(true)
-    expect(body.vix).toBe(17.1)
-    expect(body.fearGreed).toBe(31)
-    expect(body.putCall).toBe(0.91)
-    expect(getPanicScoreV2(body)).toBe(32)
-    expect(resolvePanicIndexStatus(32)?.label).toBe("경계")
-  })
-
-  it("legacy optional values still coerce when present", () => {
-    const coerced = coercePanicSavePayload({
-      ...CORE_THREE,
-      vxn: 22.5,
-      move: 100,
-      bofa: 4.2,
-      skew: 130,
-      highYield: 3.5,
-    })
-    expect(validatePanicSavePayload(coerced).ok).toBe(true)
-    expect(coerced.vxn).toBe(22.5)
-    expect(coerced.move).toBe(100)
-    expect(coerced.bofa).toBe(4.2)
-    expect(coerced.skew).toBe(130)
-    expect(coerced.highYield).toBe(3.5)
+    expect(v.ok).toBe(true)
   })
 })

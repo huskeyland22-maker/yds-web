@@ -3,34 +3,46 @@ import { metricValueForDb } from "./panicNumeric.js"
 /** @typedef {{ key: string, label: string, aliases: string[] }} PanicRequiredSpec */
 
 /**
- * Panic Index V2 저장 — 필수 입력 (UI / 계산식과 동일)
- * VIX · CNN Fear & Greed · Cboe Total P/C (+ tradeDate)
+ * History 저장용 핵심 5지표
  * @type {PanicRequiredSpec[]}
  */
-export const PANIC_SAVE_REQUIRED_SPECS = [
-  { key: "tradeDate", label: "date", aliases: ["tradeDate", "historyDate", "date"] },
+export const PANIC_CORE_METRIC_SPECS = [
   { key: "vix", label: "VIX", aliases: ["vix", "VIX"] },
-  { key: "fearGreed", label: "CNN", aliases: ["fearGreed", "fear_greed", "cnn_fg", "CNN"] },
+  {
+    key: "fearGreed",
+    label: "CNN Fear & Greed",
+    aliases: ["fearGreed", "fear_greed", "cnn_fg", "CNN"],
+  },
+  { key: "bofa", label: "BofA Bull & Bear", aliases: ["bofa", "BofA"] },
   {
     key: "putCall",
-    label: "Cboe Total P/C",
+    label: "Put/Call Ratio",
     aliases: ["putCall", "put_call", "PC"],
+  },
+  {
+    key: "highYield",
+    label: "HY",
+    aliases: ["highYield", "hy_oas", "hyOas", "HY", "high_yield"],
   },
 ]
 
-/**
- * Legacy 보조 지표 — 있으면 coerce, 없어도 저장 가능
- * @type {PanicRequiredSpec[]}
- */
+/** @type {PanicRequiredSpec[]} */
+export const PANIC_SAVE_REQUIRED_SPECS = [
+  { key: "tradeDate", label: "date", aliases: ["tradeDate", "historyDate", "date"] },
+  ...PANIC_CORE_METRIC_SPECS,
+]
+
+/** @type {PanicRequiredSpec[]} */
 export const PANIC_SAVE_OPTIONAL_SPECS = [
   { key: "vxn", label: "VXN", aliases: ["vxn", "VXN"] },
   { key: "move", label: "MOVE", aliases: ["move", "MOVE"] },
-  { key: "bofa", label: "BofA", aliases: ["bofa", "BofA"] },
   { key: "skew", label: "SKEW", aliases: ["skew", "SKEW"] },
-  { key: "highYield", label: "HY", aliases: ["highYield", "hy_oas", "hyOas", "HY"] },
 ]
 
-const PANIC_SAVE_COERCE_SPECS = [...PANIC_SAVE_REQUIRED_SPECS, ...PANIC_SAVE_OPTIONAL_SPECS]
+const PANIC_SAVE_COERCE_SPECS = [
+  ...PANIC_SAVE_REQUIRED_SPECS,
+  ...PANIC_SAVE_OPTIONAL_SPECS,
+]
 
 /** @param {Record<string, unknown>} obj */
 export function stripNilEntries(obj) {
@@ -53,7 +65,6 @@ function pickRaw(body, aliases) {
 }
 
 /**
- * V2 required + legacy optional coerce — Number() 강제 (%·쉼표 제거)
  * @param {Record<string, unknown>} body
  */
 export function coercePanicSavePayload(body) {
@@ -89,7 +100,27 @@ export function coercePanicSavePayload(body) {
 
 /**
  * @param {Record<string, unknown>} body
- * @returns {{ ok: boolean, missing: string[], error?: string }}
+ */
+export function validateCorePanicMetrics(body) {
+  const data = coercePanicSavePayload(body)
+  const missing = []
+  for (const spec of PANIC_CORE_METRIC_SPECS) {
+    if (metricValueForDb(data[spec.key]) == null) missing.push(spec.label)
+  }
+  if (missing.length) {
+    return {
+      ok: false,
+      code: "INCOMPLETE_CORE_METRICS",
+      missing,
+      message: "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+    }
+  }
+  return { ok: true, code: null, missing: [] }
+}
+
+/**
+ * @param {Record<string, unknown>} body
+ * @returns {{ ok: boolean, missing: string[], error?: string, code?: string, message?: string }}
  */
 export function validatePanicSavePayload(body) {
   const missing = []
@@ -99,16 +130,21 @@ export function validatePanicSavePayload(body) {
     missing.push("date")
   }
 
-  for (const spec of PANIC_SAVE_REQUIRED_SPECS) {
-    if (spec.key === "tradeDate") continue
-    if (metricValueForDb(data[spec.key]) == null) missing.push(spec.label)
+  const core = validateCorePanicMetrics(data)
+  for (const label of core.missing) {
+    if (!missing.includes(label)) missing.push(label)
   }
 
   if (missing.length) {
+    const isCoreOnly = missing.every((m) => m !== "date")
     return {
       ok: false,
       missing,
+      code: isCoreOnly ? "INCOMPLETE_CORE_METRICS" : "missing_required",
       error: `missing_required: ${missing.join(", ")}`,
+      message: isCoreOnly
+        ? "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다."
+        : `missing_required: ${missing.join(", ")}`,
     }
   }
   return { ok: true, missing: [] }

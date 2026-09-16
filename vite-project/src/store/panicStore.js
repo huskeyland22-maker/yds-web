@@ -5,7 +5,7 @@ import { getFinalScore } from "../utils/tradingScores.js"
 import { validatePanicData, isPanicBusinessDataStale } from "../utils/validatePanicData.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
 import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
-import { coercePanicSavePayload, stripNilEntries } from "../utils/panicSaveValidate.js"
+import { coercePanicSavePayload, stripNilEntries, validateCorePanicMetrics } from "../utils/panicSaveValidate.js"
 import {
   computePayloadStale,
   logCacheHit,
@@ -40,8 +40,8 @@ const SNAPSHOT_MAX_AGE_MS = 1000 * 60 * 10
 const APP_BUILD_ID = import.meta.env.VITE_APP_BUILD_ID ?? "dev"
 const AUTO_REFRESH_MS = PANIC_DATA_POLL_MS
 const METRIC_KEYS = ["vix", "vxn", "fearGreed", "bofa", "move", "skew", "putCall", "highYield"]
-/** Panic Index V2 핵심 3지표 — UI / save validation / getPanicScoreV2 와 동일 */
-const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "putCall"]
+/** History 저장 완성 조건 — VIX·CNN·BofA·P/C·HY */
+const CORE_REQUIRED_KEYS = ["vix", "fearGreed", "bofa", "putCall", "highYield"]
 
 const HEAL_STALE_PANIC_SESSION_KEY = "yds-stale-panic-heal-once"
 
@@ -460,6 +460,18 @@ export const usePanicStore = create((set, get) => ({
       const payload = coercePanicSavePayload(
         stripNilEntries({ ...inputData, tradeDate, updatedAt }),
       )
+      const coreCheck = validateCorePanicMetrics(payload)
+      if (!coreCheck.ok) {
+        const err = new Error(
+          coreCheck.message || "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+        )
+        err.stage = "validation"
+        err.status = 400
+        err.code = "INCOMPLETE_CORE_METRICS"
+        err.missing = coreCheck.missing
+        logSaveError("save error", err)
+        return { ok: false, error: err }
+      }
       console.log("save payload", JSON.stringify(payload, null, 2))
       console.log("[panic pipeline] store-state")
       for (const key of ["vix", "vxn", "fearGreed", "putCall", "bofa", "move", "skew", "highYield"]) {

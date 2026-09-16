@@ -87,7 +87,8 @@ export function mapPanicIndexHistoryRowToClient(row) {
  */
 export function panicIndexHistoryDbPayloadFromNormalized(normalized) {
   const hy = pickHyFromRow(normalized) ?? normalized.hy_oas ?? null
-  return {
+  /** null 필드는 payload에서 제외 — merge upsert가 기존 BofA/HY를 0/null로 덮지 않도록 */
+  const raw = {
     date: normalized.date,
     vix: normalized.vix,
     vxn: normalized.vxn,
@@ -106,6 +107,9 @@ export function panicIndexHistoryDbPayloadFromNormalized(normalized) {
     created_at: normalized.created_at,
     updated_at: normalized.updated_at,
   }
+  return Object.fromEntries(
+    Object.entries(raw).filter(([, v]) => v !== undefined && v !== null),
+  )
 }
 
 /**

@@ -55,6 +55,18 @@ export function logSaveError(label, error) {
 export function formatSaveErrorForUi(error, fallback = "unknown error") {
   if (error == null) return fallback
   if (error instanceof Error) {
+    const code = /** @type {Error & { code?: string }} */ (error).code
+    const missing = /** @type {Error & { missing?: string[] }} */ (error).missing
+    if (
+      code === "INCOMPLETE_CORE_METRICS" ||
+      (Array.isArray(missing) && missing.length > 0) ||
+      /incomplete_core_metrics|INCOMPLETE_CORE_METRICS/i.test(String(error.message || ""))
+    ) {
+      const labels = Array.isArray(missing) && missing.length ? missing.join(", ") : null
+      return labels
+        ? `저장할 수 없습니다.\n누락된 핵심 지표: ${labels}`
+        : "저장할 수 없습니다.\n핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다."
+    }
     const lines = []
     const msg = toErrorMessage(error.message, "")
     if (msg) lines.push(msg)

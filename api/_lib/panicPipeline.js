@@ -80,6 +80,19 @@ export async function persistPanicPayload(body, opts = {}) {
   }
   if (requireHistory && !history.ok) {
     const detail = history.skipped ? history.reason : history.error
+    const isIncomplete =
+      detail === "incomplete_core_metrics" || history.code === "INCOMPLETE_CORE_METRICS"
+    if (isIncomplete) {
+      const err = new Error(
+        history.message || "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+      )
+      err.stage = "validation"
+      err.statusCode = 400
+      err.code = "INCOMPLETE_CORE_METRICS"
+      err.missing = history.missing ?? []
+      err.history = history
+      throw err
+    }
     const err = new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
     err.stage = "history"
     throw err

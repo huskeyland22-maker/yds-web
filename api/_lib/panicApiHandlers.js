@@ -240,11 +240,17 @@ export async function handlePanicModeUpdate(req, res) {
     savePayload = coercePanicSavePayload(stripNilEntries(raw))
     const validation = validatePanicSavePayload(savePayload)
     if (!validation.ok) {
+      const isIncomplete = validation.code === "INCOMPLETE_CORE_METRICS"
       res.status(400).json({
         ok: false,
-        error: validation.error,
-        message: validation.error,
+        code: validation.code ?? (isIncomplete ? "INCOMPLETE_CORE_METRICS" : "missing_required"),
         missing: validation.missing,
+        message:
+          validation.message ||
+          (isIncomplete
+            ? "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다."
+            : validation.error),
+        error: validation.error,
         payload: savePayload,
         stage: "validation",
       })
@@ -252,9 +258,26 @@ export async function handlePanicModeUpdate(req, res) {
     }
     const result = await persistPanicPayload(savePayload, { source: "manual", requireHistory: true })
     if (!result.history?.ok) {
+      const reason = result.history?.reason || result.history?.error || "panic_index_history_upsert_failed"
+      const isIncomplete =
+        reason === "incomplete_core_metrics" || result.history?.code === "INCOMPLETE_CORE_METRICS"
+      if (isIncomplete) {
+        res.status(400).json({
+          ok: false,
+          code: "INCOMPLETE_CORE_METRICS",
+          missing: result.history?.missing ?? [],
+          message:
+            result.history?.message ||
+            "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+          error: reason,
+          history: result.history,
+          stage: "validation",
+        })
+        return
+      }
       res.status(422).json({
         ok: false,
-        error: result.history?.reason || result.history?.error || "panic_index_history_upsert_failed",
+        error: reason,
         data: result.data,
         history: result.history,
         meta: result.meta,
@@ -274,8 +297,18 @@ export async function handlePanicModeUpdate(req, res) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error ?? "update_failed")
     const stage = error && typeof error === "object" && "stage" in error ? error.stage : "pipeline"
-    res.status(500).json({
+    const statusCode =
+      error && typeof error === "object" && Number(error.statusCode) >= 400
+        ? Number(error.statusCode)
+        : 500
+    const code =
+      error && typeof error === "object" && typeof error.code === "string" ? error.code : undefined
+    const missing =
+      error && typeof error === "object" && Array.isArray(error.missing) ? error.missing : undefined
+    res.status(statusCode).json({
       ok: false,
+      ...(code ? { code } : {}),
+      ...(missing ? { missing } : {}),
       message,
       error: message,
       payload: savePayload,

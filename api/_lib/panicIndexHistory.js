@@ -13,8 +13,8 @@ import {
   normalizePanicPayload,
   panicIndexHistoryRowFromSnapshot,
   resolvePanicTradeDate,
-  snapshotHasRequiredHistoryMetrics,
 } from "./panicSnapshot.js"
+import { validateCorePanicMetrics } from "./panicSaveValidate.js"
 
 /** @param {string} isoOrDate */
 export function calendarDateFromPayload(body) {
@@ -51,36 +51,81 @@ export async function fetchPanicHistoryRowBefore(tradeDate) {
   }
 }
 
+/** Same-date existing row — BofA/HY weekly 보존용 */
+export async function fetchPanicHistoryRowByDate(tradeDate) {
+  const d = String(tradeDate).slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null
+  try {
+    const rows = await supabaseRest(
+      `panic_index_history?select=*&date=eq.${d}&limit=1`,
+      { method: "GET" },
+    )
+    return Array.isArray(rows) && rows[0] ? rows[0] : null
+  } catch {
+    return null
+  }
+}
+
 function isRpcMissing(err) {
   const msg = err instanceof Error ? err.message : String(err || "")
   return /function|rpc|does not exist|42883|PGRST202/i.test(msg)
 }
 
-function rowHasRequiredHistoryMetrics(row) {
-  const snap = {
-    vix: row.vix,
-    fearGreed: row.fear_greed,
-    putCall: row.put_call,
-    highYield: pickHyFromRow(row),
-    bofa: row.bofa,
+/**
+ * 동일 date 기존 BofA/HY를 null로 덮지 않음 (weekly/지속형)
+ * @param {Record<string, unknown>} row
+ * @param {Record<string, unknown> | null} existingSameDate
+ */
+export function preserveWeeklyCoreFields(row, existingSameDate) {
+  if (!row || typeof row !== "object") return row
+  const out = { ...row }
+  if (!existingSameDate || typeof existingSameDate !== "object") return out
+  if (out.bofa == null && existingSameDate.bofa != null) {
+    out.bofa = existingSameDate.bofa
   }
-  return snapshotHasRequiredHistoryMetrics(snap)
+  const existingHy = pickHyFromRow(existingSameDate)
+  if (out.hy_oas == null && existingHy != null) {
+    out.hy_oas = existingHy
+  }
+  return out
 }
 
 /**
  * PK(date) upsert: 같은 날짜만 갱신, 다른 날짜 행은 유지(다중 일자 공존).
+ * 핵심 5지표 미완이면 upsert를 실행하지 않음.
  */
 export async function upsertPanicIndexHistoryFromPayload(body, opts = {}) {
   const tradeDate = resolvePanicTradeDate(body, opts.tradeDate)
   const snap = normalizePanicPayload(body, { tradeDate, source: opts.source })
-  const row = panicIndexHistoryRowFromSnapshot(snap)
+  let row = panicIndexHistoryRowFromSnapshot(snap)
   console.log("[YDS][upsertHistory] start", { tradeDate: row?.date ?? tradeDate ?? null })
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(row.date))) {
     return { ok: false, skipped: true, reason: "invalid_date", row }
   }
-  if (!rowHasRequiredHistoryMetrics(row)) {
-    return { ok: false, skipped: true, reason: "incomplete_core_metrics", row }
+
+  const existingSameDate = await fetchPanicHistoryRowByDate(row.date)
+  row = preserveWeeklyCoreFields(row, existingSameDate)
+
+  const coreCheck = validateCorePanicMetrics({
+    tradeDate: row.date,
+    vix: row.vix,
+    fearGreed: row.fear_greed,
+    putCall: row.put_call,
+    bofa: row.bofa,
+    highYield: row.hy_oas,
+  })
+  if (!coreCheck.ok) {
+    return {
+      ok: false,
+      skipped: true,
+      reason: "incomplete_core_metrics",
+      code: "INCOMPLETE_CORE_METRICS",
+      missing: coreCheck.missing,
+      message: coreCheck.message,
+      row,
+    }
   }
+
   const previous = await fetchPanicHistoryRowBefore(row.date)
   await postPanicIndexHistoryRow(row, snap, previous)
   console.log("[YDS][upsertHistory] ok", { tradeDate: row.date })
@@ -158,11 +203,27 @@ export async function upsertPanicIndexHistoryBatch(entries, opts = {}) {
   for (const entry of entries) {
     const tradeDate = entry?.tradeDate || entry?.date
     const snap = normalizePanicPayload(entry, { tradeDate, source: opts.source })
-    const row = panicIndexHistoryRowFromSnapshot(snap)
-    if (rowHasRequiredHistoryMetrics(row)) rows.push({ row, snap })
+    let row = panicIndexHistoryRowFromSnapshot(snap)
+    const existingSameDate = await fetchPanicHistoryRowByDate(row.date)
+    row = preserveWeeklyCoreFields(row, existingSameDate)
+    const coreCheck = validateCorePanicMetrics({
+      tradeDate: row.date,
+      vix: row.vix,
+      fearGreed: row.fear_greed,
+      putCall: row.put_call,
+      bofa: row.bofa,
+      highYield: row.hy_oas,
+    })
+    if (coreCheck.ok) rows.push({ row, snap })
   }
   if (!rows.length) {
-    return { ok: false, skipped: true, reason: "incomplete_core_metrics" }
+    return {
+      ok: false,
+      skipped: true,
+      reason: "incomplete_core_metrics",
+      code: "INCOMPLETE_CORE_METRICS",
+      message: "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+    }
   }
   rows.sort((a, b) => String(a.row.date).localeCompare(String(b.row.date)))
   let previous = null

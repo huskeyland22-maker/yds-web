@@ -593,8 +593,12 @@ async function postPanicSave(url, payload) {
   const body = coercePanicSavePayload(stripNilEntries(payload))
   const validation = validatePanicSavePayload(body)
   if (!validation.ok) {
-    const err = new Error(validation.error || "missing_required")
+    const err = new Error(
+      validation.message || validation.error || "missing_required",
+    )
     err.stage = "validation"
+    err.status = 400
+    err.code = validation.code ?? "missing_required"
     err.missing = validation.missing
     logSaveError("save error", err)
     throw err
@@ -637,6 +641,8 @@ export async function submitManualPanicData(inputData) {
       const err = new Error(detail)
       err.status = res.status
       err.stage = out?.stage ?? "http"
+      err.code = typeof out?.code === "string" ? out.code : undefined
+      err.missing = Array.isArray(out?.missing) ? out.missing : undefined
       err.history = out?.history
       if (typeof out?.stack === "string") err.stack = out.stack
       if (out?.payload) console.log("save error payload", out.payload)
@@ -644,23 +650,40 @@ export async function submitManualPanicData(inputData) {
       throw err
     }
     if (!out?.ok) {
-      const err = new Error(toErrorMessage(out?.error, "hub_update_failed"))
+      const err = new Error(toErrorMessage(out?.error ?? out?.message, "hub_update_failed"))
       err.status = res.status
       err.history = out.history
       err.stage = out?.stage ?? "hub"
+      err.code = typeof out?.code === "string" ? out.code : undefined
+      err.missing = Array.isArray(out?.missing) ? out.missing : undefined
       logSaveError("save error", err)
       throw err
     }
     if (!out.history?.ok) {
+      const isIncomplete =
+        out.history?.reason === "incomplete_core_metrics" ||
+        out.history?.code === "INCOMPLETE_CORE_METRICS" ||
+        out?.code === "INCOMPLETE_CORE_METRICS"
       const err = new Error(
-        toErrorMessage(
-          out.history?.reason ?? out.history?.error,
-          "panic_index_history_upsert_failed",
-        ),
+        isIncomplete
+          ? toErrorMessage(
+              out.history?.message ?? out?.message,
+              "핵심 Panic Index 5개가 모두 입력되어야 저장할 수 있습니다.",
+            )
+          : toErrorMessage(
+              out.history?.reason ?? out.history?.error,
+              "panic_index_history_upsert_failed",
+            ),
       )
-      err.status = res.status
+      err.status = isIncomplete ? 400 : res.status
       err.history = out.history
-      err.stage = out?.stage ?? "history"
+      err.stage = isIncomplete ? "validation" : out?.stage ?? "history"
+      err.code = isIncomplete ? "INCOMPLETE_CORE_METRICS" : out?.code
+      err.missing = Array.isArray(out?.missing)
+        ? out.missing
+        : Array.isArray(out.history?.missing)
+          ? out.history.missing
+          : undefined
       logSaveError("save error", err)
       throw err
     }
