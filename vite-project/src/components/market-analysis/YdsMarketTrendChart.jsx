@@ -19,7 +19,7 @@ import YdsPanicIntensityInfoTip from "./YdsPanicIntensityInfoTip.jsx"
 
 const CHART_HEIGHT = 210
 const CHART_MARGIN = { top: 18, right: 8, left: 4, bottom: 22 }
-const ZONE_FILL_OPACITY = 0.09
+const ZONE_FILL_OPACITY = 0.08
 
 /** @param {boolean} active @param {object[]} payload @param {string} title @param {"market" | "panic"} chartKind */
 function TrendTooltip({ active, payload, title, chartKind = "market" }) {
@@ -37,12 +37,14 @@ function TrendTooltip({ active, payload, title, chartKind = "market" }) {
       {panicLegend ? (
         <>
           <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
-            패닉 {panicLegend.score}
+            {panicLegend.score}
           </p>
-          <p className="yds-market-trend-chart__tooltip-stage">
-            {panicLegend.emoji} {panicLegend.label}
-          </p>
-          <p className="yds-market-trend-chart__tooltip-action">{panicLegend.tooltipText}</p>
+          <p className="yds-market-trend-chart__tooltip-stage">{panicLegend.label}</p>
+          {panicLegend.rangeLabel ? (
+            <p className="yds-market-trend-chart__tooltip-action font-mono tabular-nums">
+              {panicLegend.rangeLabel}
+            </p>
+          ) : null}
         </>
       ) : (
         <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
@@ -68,7 +70,7 @@ function CurrentPointDot({ cx, cy, index, dataLength, color }) {
 }
 
 /**
- * 0~100 점수 추이 라인 차트 (시장 상태 · 패닉 강도)
+ * 0~100 점수 추이 라인 차트 (시장 상태 · Panic Index)
  * @param {{
  *   title: string
  *   chartData: object[]
@@ -129,15 +131,11 @@ export default function YdsMarketTrendChart({
             style={{
               "--trend-badge-color": currentMeta?.color ?? lineStroke,
             }}
-            aria-label={`현재 ${displayScore}`}
+            aria-label={`현재 ${displayScore}${currentMeta?.label ? ` ${currentMeta.label}` : ""}`}
           >
             <span className="yds-market-trend-chart__badge-score">{displayScore}</span>
             {currentMeta?.label ? (
-              <span className="yds-market-trend-chart__badge-label">
-                {chartKind === "panic" && currentMeta?.emoji
-                  ? `${currentMeta.emoji} ${currentMeta.label}`
-                  : currentMeta.label}
-              </span>
+              <span className="yds-market-trend-chart__badge-label">{currentMeta.label}</span>
             ) : null}
           </div>
         ) : null}
@@ -170,7 +168,7 @@ export default function YdsMarketTrendChart({
             <YAxis
               domain={[0, 100]}
               allowDataOverflow
-              tickCount={6}
+              ticks={[0, 20, 40, 60, 80, 100]}
               tickFormatter={(v) => String(Math.round(v))}
               stroke="#64748b"
               tick={{ fill: "#94a3b8", fontSize: 10 }}

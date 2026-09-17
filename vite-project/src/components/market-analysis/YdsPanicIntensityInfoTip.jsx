@@ -2,7 +2,7 @@ import { useId, useState } from "react"
 import { PANIC_INTENSITY_LEGEND_STAGES } from "../../content/ydsPanicIntensityLegend.js"
 
 /**
- * 패닉 강도 단계 설명 (ⓘ)
+ * Panic Index 단계 설명 (ⓘ)
  * @param {{ className?: string }} props
  */
 export default function YdsPanicIntensityInfoTip({ className = "" }) {
@@ -20,7 +20,7 @@ export default function YdsPanicIntensityInfoTip({ className = "" }) {
         className="yds-panic-intensity-info__btn"
         aria-expanded={open}
         aria-controls={panelId}
-        aria-label="패닉 강도 단계 설명"
+        aria-label="Panic Index 단계 설명"
         onClick={() => setOpen((value) => !value)}
       >
         ⓘ
@@ -32,14 +32,19 @@ export default function YdsPanicIntensityInfoTip({ className = "" }) {
           className="yds-panic-intensity-info__panel"
           role="tooltip"
         >
-          <p className="yds-panic-intensity-info__panel-title">패닉 강도 단계</p>
+          <p className="yds-panic-intensity-info__panel-title">Panic Index 단계</p>
           <ul className="yds-panic-intensity-info__list">
             {PANIC_INTENSITY_LEGEND_STAGES.map((stage) => (
               <li key={stage.id} className="yds-panic-intensity-info__item">
                 <p className="yds-panic-intensity-info__item-title">
-                  {stage.emoji} {stage.label} ({stage.min}~{stage.max})
+                  {stage.label}{" "}
+                  <span className="font-mono tabular-nums">
+                    ({stage.min}–{stage.max})
+                  </span>
                 </p>
-                <p className="yds-panic-intensity-info__item-text">{stage.tooltipText}</p>
+                {stage.tooltipText ? (
+                  <p className="yds-panic-intensity-info__item-text">{stage.tooltipText}</p>
+                ) : null}
               </li>
             ))}
           </ul>

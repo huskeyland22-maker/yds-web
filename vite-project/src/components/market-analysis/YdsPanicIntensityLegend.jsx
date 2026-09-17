@@ -5,7 +5,7 @@ import {
 } from "../../content/ydsPanicIntensityLegend.js"
 
 /**
- * 패닉 강도 6단계 범례
+ * Panic Index 5단계 범례 (PANIC_INDEX_STAGE_BANDS)
  * @param {{
  *   score?: number | null
  *   className?: string
@@ -31,7 +31,7 @@ export default function YdsPanicIntensityLegend({
       ]
         .filter(Boolean)
         .join(" ")}
-      aria-label="패닉 강도 단계"
+      aria-label="Panic Index 단계"
     >
       <div className="yds-panic-intensity-legend__track">
         {PANIC_INTENSITY_LEGEND_STAGES.map((stage, index) => {
@@ -53,8 +53,11 @@ export default function YdsPanicIntensityLegend({
                 </span>
               ) : null}
               <span className="yds-panic-intensity-legend__label">{stage.shortLabel}</span>
+              <span className="yds-panic-intensity-legend__range font-mono tabular-nums">
+                {stage.min}–{stage.max}
+              </span>
               {isCurrent ? (
-                <span className="yds-panic-intensity-legend__marker">▲ 현재</span>
+                <span className="yds-panic-intensity-legend__marker">현재</span>
               ) : null}
             </div>
           )

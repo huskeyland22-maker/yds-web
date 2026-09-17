@@ -37,7 +37,6 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
         .join(" ")}
       aria-label="Panic Index"
     >
-      {/* Hero */}
       <header className="yds-panic-center__hero">
         <div className="yds-panic-center__hero-top">
           <p className="yds-panic-center__label">PANIC INDEX</p>
@@ -47,9 +46,9 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
         </div>
 
         {score != null && status ? (
-          <div className="yds-panic-center__metric-group">
+          <div className="yds-panic-center__metric-stack">
             <p className="yds-panic-center__score font-mono tabular-nums">{score}</p>
-            <div className="yds-panic-center__stage-block">
+            <div className="yds-panic-center__stage-row">
               <p
                 className="yds-panic-center__stage"
                 style={status.color ? { color: status.color } : undefined}
@@ -60,6 +59,7 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
                 {status.min}–{status.max}
               </p>
             </div>
+            <p className="yds-panic-center__scale-hint font-mono tabular-nums">0–100</p>
           </div>
         ) : (
           <div className="yds-panic-center__incomplete" role="status">
@@ -75,7 +75,6 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
         </p>
       </header>
 
-      {/* Scale */}
       <div className="yds-panic-center__scale" aria-hidden={score == null}>
         <div className="yds-panic-center__bar">
           {PANIC_INDEX_STAGE_BANDS.map((b) => {
@@ -93,7 +92,7 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
                   width: `${widthPct}%`,
                   background: b.color,
                 }}
-                title={`${b.min}–${b.max} ${b.label}`}
+                title={`${b.label} ${b.min}–${b.max}`}
               />
             )
           })}
@@ -101,6 +100,7 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
             <span
               className="yds-panic-center__bar-marker"
               style={{ left: `${markerPct}%` }}
+              title={`${score}`}
             />
           ) : null}
         </div>
@@ -114,38 +114,38 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
         </div>
       </div>
 
-      {/* Stage legend — compact table */}
       <section className="yds-panic-center__block">
         <h3 className="yds-panic-center__block-label">FEAR SCALE</h3>
         <table className="yds-panic-center__scale-table">
           <tbody>
-            {PANIC_INDEX_STAGE_BANDS.map((b) => (
-              <tr
-                key={b.id}
-                className={status?.id === b.id ? "is-current" : undefined}
-              >
-                <th scope="row">
-                  <span
-                    className="yds-panic-center__dot"
-                    style={{ background: b.color }}
-                    aria-hidden
-                  />
-                  {b.label}
-                  {status?.id === b.id ? (
-                    <span className="yds-panic-center__now-tag">현재</span>
-                  ) : null}
-                </th>
-                <td className="yds-panic-center__td-range font-mono tabular-nums">
-                  {b.min}–{b.max}
-                </td>
-                <td className="yds-panic-center__td-blurb">{b.blurb}</td>
-              </tr>
-            ))}
+            {PANIC_INDEX_STAGE_BANDS.map((b) => {
+              const isCurrent = status?.id === b.id
+              return (
+                <tr key={b.id} className={isCurrent ? "is-current" : undefined}>
+                  <th scope="row">
+                    <span className="yds-panic-center__stage-cell">
+                      <span
+                        className="yds-panic-center__dot"
+                        style={{ background: b.color }}
+                        aria-hidden
+                      />
+                      <span className="yds-panic-center__stage-name">{b.label}</span>
+                      {isCurrent ? (
+                        <span className="yds-panic-center__now-badge">현재</span>
+                      ) : null}
+                    </span>
+                  </th>
+                  <td className="yds-panic-center__td-range font-mono tabular-nums">
+                    {b.min}–{b.max}
+                  </td>
+                  <td className="yds-panic-center__td-blurb">{b.blurb}</td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </section>
 
-      {/* Panic drivers table */}
       <section className="yds-panic-center__block">
         <h3 className="yds-panic-center__block-label">PANIC DRIVERS</h3>
         <div className="yds-panic-center__drivers-wrap">
@@ -203,7 +203,6 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
           </table>
         </div>
 
-        {/* Mobile stacked drivers */}
         <ul className="yds-panic-center__drivers-mobile">
           {(breakdown?.lines ?? []).map((line) => (
             <li key={line.id}>
@@ -260,40 +259,42 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
         </div>
       </section>
 
-      {/* Long-term investor view */}
       <section className="yds-panic-center__block yds-panic-center__block--note">
         <h3 className="yds-panic-center__block-label">LONG-TERM INVESTOR VIEW</h3>
-        <p className="yds-panic-center__life-lead">
-          Panic Index는 단기 매매 신호가 아닙니다. 10년 이상 장기 투자에서 시장이 크게 흔들릴 때
-          공포 수준을 확인하는 참고 지표입니다.
-        </p>
-        <dl className="yds-panic-center__life-defs">
-          <div>
-            <dt>기본 투자</dt>
-            <dd>매월 적립식 지속</dd>
-          </div>
-          <div>
-            <dt>장기 추가 투입 기준</dt>
-            <dd>S&amp;P500 주봉 MA40</dd>
-          </div>
-          <div>
-            <dt>시장 공포 확인</dt>
-            <dd>Panic Index</dd>
-          </div>
-          <div>
-            <dt>추가 투입 자금</dt>
-            <dd>Strategy Reserve</dd>
-          </div>
-        </dl>
-        {status ? (
-          <p className="yds-panic-center__life-now">
-            현재 · {status.label} — {status.lifeView}
+        <div className="yds-panic-center__life-card">
+          <p className="yds-panic-center__life-kicker">참고 지표 · 매매 신호 아님</p>
+          <p className="yds-panic-center__life-lead">
+            Panic Index는 단기 매매 신호가 아닙니다. 10년 이상 장기 투자에서 시장이 크게 흔들릴 때
+            공포 수준을 확인하는 참고 지표입니다.
           </p>
-        ) : null}
-        <p className="yds-panic-center__life-note">
-          Panic Index가 높다고 해서 자동 매수·매도나 Reserve 전액 투입이 되지 않습니다. 실행
-          판단은 YDS 인생 투자전략의 MA40과 Strategy Reserve에서 합니다.
-        </p>
+          <dl className="yds-panic-center__life-defs">
+            <div>
+              <dt>기본 투자</dt>
+              <dd>매월 적립식 지속</dd>
+            </div>
+            <div>
+              <dt>장기 추가 투입 기준</dt>
+              <dd>S&amp;P500 주봉 MA40</dd>
+            </div>
+            <div>
+              <dt>시장 공포 확인</dt>
+              <dd>Panic Index</dd>
+            </div>
+            <div>
+              <dt>추가 투입 자금</dt>
+              <dd>Strategy Reserve</dd>
+            </div>
+          </dl>
+          {status ? (
+            <p className="yds-panic-center__life-now">
+              현재 · {status.label} — {status.lifeView}
+            </p>
+          ) : null}
+          <p className="yds-panic-center__life-note">
+            Panic Index가 높다고 해서 자동 매수·매도나 Reserve 전액 투입이 되지 않습니다. 실행
+            판단은 YDS 인생 투자전략의 MA40과 Strategy Reserve에서 합니다.
+          </p>
+        </div>
       </section>
     </article>
   )

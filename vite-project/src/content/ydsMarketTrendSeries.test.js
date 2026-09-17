@@ -39,13 +39,12 @@ describe("ydsMarketTrendSeries", () => {
 
   it("maps score zones for market and panic labels", () => {
     expect(resolveScoreZoneMeta(85, "market").label).toBe("과열")
-    expect(resolveScoreZoneMeta(33, "panic").label).toBe("공포 부족")
-    expect(resolveScoreZoneMeta(49, "panic").label).toBe("중립")
-    expect(resolveScoreZoneMeta(15, "panic").label).toBe("극단적 탐욕")
-    expect(resolveScoreZoneMeta(70, "panic").label).toBe("공포")
-    expect(resolveScoreZoneMeta(88, "panic").label).toBe("극단적 공포")
-    expect(resolveScoreZoneMeta(70, "panic").actionLine).toBe(
-      "투자심리가 위축된 구간으로 분할매수를 고려할 수 있습니다.",
-    )
+    expect(resolveScoreZoneMeta(15, "panic").label).toBe("평온")
+    expect(resolveScoreZoneMeta(35, "panic").label).toBe("경계")
+    expect(resolveScoreZoneMeta(50, "panic").label).toBe("공포")
+    expect(resolveScoreZoneMeta(70, "panic").label).toBe("강한 공포")
+    expect(resolveScoreZoneMeta(88, "panic").label).toBe("극심한 패닉")
+    expect(resolveScoreZoneMeta(35, "panic").actionLine).toMatch(/일반적인 시장 변동/)
+    expect(resolveScoreZoneMeta(35, "panic").label).not.toMatch(/탐욕/)
   })
 })

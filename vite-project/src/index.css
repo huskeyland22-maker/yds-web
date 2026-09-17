@@ -27190,12 +27190,20 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   flex-wrap: wrap;
 }
 
+.yds-panic-center__metric-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.95rem;
+}
+
 .yds-panic-center__score {
   margin: 0;
-  font-size: clamp(2.4rem, 6.5vw, 3.15rem);
+  font-size: clamp(2.6rem, 7vw, 3.4rem);
   font-weight: 600;
-  line-height: 0.95;
-  letter-spacing: -0.04em;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
   color: #f8fafc;
 }
 
@@ -27206,19 +27214,34 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   padding-bottom: 0.2rem;
 }
 
+.yds-panic-center__stage-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+}
+
 .yds-panic-center__stage {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 650;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   color: #e2e8f0;
 }
 
 .yds-panic-center__stage-range {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: #64748b;
+}
+
+.yds-panic-center__scale-hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #475569;
 }
 
 .yds-panic-center__lede {
@@ -27335,6 +27358,19 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 
+.yds-panic-center__stage-cell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  max-width: 100%;
+}
+
+.yds-panic-center__stage-name {
+  display: inline;
+  white-space: nowrap;
+}
+
 .yds-panic-center__scale-table tr.is-current th,
 .yds-panic-center__scale-table tr.is-current td {
   background: rgba(148, 163, 184, 0.06);
@@ -27350,19 +27386,27 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: inline-block;
   width: 0.4rem;
   height: 0.4rem;
-  margin-right: 0.45rem;
   border-radius: 1px;
-  vertical-align: 0.05em;
+  flex-shrink: 0;
   opacity: 0.85;
 }
 
-.yds-panic-center__now-tag {
-  margin-left: 0.45rem;
+.yds-panic-center__now-tag,
+.yds-panic-center__now-badge {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.12rem 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
   font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 650;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #cbd5e1;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .yds-panic-center__td-range {
@@ -27419,9 +27463,14 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-panic-center__drivers tbody td,
 .yds-panic-center__drivers tfoot th,
 .yds-panic-center__drivers tfoot td {
-  padding: 0.55rem;
+  padding: 0.65rem 0.55rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.06);
   vertical-align: top;
+}
+
+.yds-panic-center__drivers tbody tr:hover th,
+.yds-panic-center__drivers tbody tr:hover td {
+  background: rgba(148, 163, 184, 0.04);
 }
 
 .yds-panic-center__drivers tbody th {
@@ -27464,12 +27513,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-panic-center__drivers-mobile > li {
-  padding: 0.7rem 0;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  padding: 0.8rem 0.7rem;
+  margin-bottom: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.35);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .yds-panic-center__drivers-mobile > li:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .yds-panic-center__drivers-mobile-head {
@@ -27543,15 +27596,31 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-panic-center__block--note {
-  background: rgba(15, 23, 42, 0.35);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 2px;
-  padding: 1.15rem 1.1rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   margin-top: 1.75rem;
 }
 
 .yds-panic-center__block--note .yds-panic-center__block-label {
   margin-bottom: 0.7rem;
+}
+
+.yds-panic-center__life-card {
+  padding: 1.05rem 1rem 1.15rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.yds-panic-center__life-kicker {
+  margin: 0 0 0.45rem;
+  font-size: 0.58rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
 .yds-panic-center__life-lead {
@@ -33703,38 +33772,59 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.06rem;
-  font-size: clamp(0.48rem, 1.35vw, 0.56rem);
-  font-weight: 700;
+  gap: 0.08rem;
+  min-width: 3.4rem;
+  padding: 0.15rem 0.2rem;
+  font-size: clamp(0.52rem, 1.4vw, 0.62rem);
+  font-weight: 600;
   color: #64748b;
   text-align: center;
 }
 
 .yds-panic-intensity-legend__step--current {
-  color: var(--legend-color, #facc15);
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.08);
+  border-radius: 4px;
 }
 
 .yds-panic-intensity-legend__step--current .yds-panic-intensity-legend__label {
-  color: var(--legend-color, #facc15);
-  font-weight: 900;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--legend-color, #facc15) 45%, transparent);
+  color: var(--legend-color, #e2e8f0);
+  font-weight: 700;
+  text-shadow: none;
 }
 
 .yds-panic-intensity-legend__step:not(.yds-panic-intensity-legend__step--current) .yds-panic-intensity-legend__label {
-  opacity: 0.62;
+  opacity: 0.72;
+}
+
+.yds-panic-intensity-legend__range {
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #475569;
+}
+
+.yds-panic-intensity-legend__step--current .yds-panic-intensity-legend__range {
+  color: #94a3b8;
 }
 
 .yds-panic-intensity-legend__sep {
   align-self: center;
   margin: 0 0.08rem;
-  color: #475569;
+  color: #334155;
   font-weight: 400;
 }
 
 .yds-panic-intensity-legend__marker {
-  font-size: clamp(0.44rem, 1.2vw, 0.52rem);
-  font-weight: 800;
-  color: var(--legend-color, #facc15);
+  margin-top: 0.05rem;
+  padding: 0.08rem 0.32rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  font-size: 0.48rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #cbd5e1;
   white-space: nowrap;
   line-height: 1;
 }
