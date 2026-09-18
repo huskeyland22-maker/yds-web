@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { resolvePanicBottomDcaSignal } from "../../utils/panicBottomDcaSignal.js"
 import {
   buildPanicScoreV2Breakdown,
   getPanicScoreV2,
@@ -31,6 +32,7 @@ export default function YdsPanicIndexCenter({
 }) {
   const score = useMemo(() => getPanicScoreV2(panicData), [panicData])
   const status = useMemo(() => resolvePanicIndexStatus(score), [score])
+  const dcaSignal = useMemo(() => resolvePanicBottomDcaSignal(score), [score])
   const breakdown = useMemo(() => buildPanicScoreV2Breakdown(panicData), [panicData])
 
   const asOfRaw = panicData?.date ?? panicData?.asOfDate ?? panicData?.updatedAt ?? null
@@ -69,6 +71,35 @@ export default function YdsPanicIndexCenter({
               </p>
             </div>
             <p className="yds-panic-center__scale-hint font-mono tabular-nums">0–100</p>
+            {dcaSignal ? (
+              <div
+                className={[
+                  "yds-panic-center__dca",
+                  `yds-panic-center__dca--${dcaSignal.id}`,
+                ].join(" ")}
+                aria-label="SPX 저점 분할매수 참고 신호"
+              >
+                <p className="yds-panic-center__dca-band">{dcaSignal.bandLabel}</p>
+                {dcaSignal.stage === 0 ? (
+                  <p className="yds-panic-center__dca-line">
+                    {dcaSignal.addLabel}:{" "}
+                    <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
+                  </p>
+                ) : (
+                  <>
+                    <p className="yds-panic-center__dca-line">
+                      {dcaSignal.addLabel}:{" "}
+                      <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
+                    </p>
+                    <p className="yds-panic-center__dca-line">
+                      누적 투입:{" "}
+                      <span className="font-mono tabular-nums">{dcaSignal.cumulativePct}%</span>
+                    </p>
+                  </>
+                )}
+                <p className="yds-panic-center__dca-note">참고 신호 · 자동 주문 없음</p>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="yds-panic-center__incomplete" role="status">
