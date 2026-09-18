@@ -24,9 +24,9 @@ export default function YdsMarketTrendSection({ historyRows = [], className = ""
     >
       <h3 className="yds-market-trend__heading">PANIC INDEX HISTORY</h3>
       <p className="yds-market-trend__sub">
-        최근 {MARKET_TREND_WINDOW_DAYS}일 · 상단 FEAR SCALE과 동일한 5단계 기준
+        최근 {MARKET_TREND_WINDOW_DAYS}일 Panic Index 흐름 · FEAR SCALE과 동일한 5단계 기준
       </p>
-      <div className="yds-market-trend__panel yds-market-trend__panel--solo">
+      <div className="yds-market-trend__panel yds-market-trend__panel--solo yds-market-trend__panel--featured">
         <YdsMarketTrendChart
           title="Panic Index"
           chartData={view.panic.chartData}

@@ -46,5 +46,13 @@ describe("ydsMarketTrendSeries", () => {
     expect(resolveScoreZoneMeta(88, "panic").label).toBe("극심한 패닉")
     expect(resolveScoreZoneMeta(35, "panic").actionLine).toMatch(/일반적인 시장 변동/)
     expect(resolveScoreZoneMeta(35, "panic").label).not.toMatch(/탐욕/)
+    expect(resolveScoreZoneMeta(35, "panic").rangeLabel).toBe("20–39")
+    expect(resolveScoreZoneMeta(30, "panic")).toMatchObject({
+      score: 30,
+      label: "경계",
+      min: 20,
+      max: 39,
+      rangeLabel: "20–39",
+    })
   })
 })

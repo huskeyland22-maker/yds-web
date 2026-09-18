@@ -1,8 +1,9 @@
-import { useMemo } from "react"
+import { useId, useMemo } from "react"
 import {
+  Area,
   CartesianGrid,
   Line,
-  LineChart,
+  ComposedChart,
   ReferenceArea,
   ResponsiveContainer,
   Tooltip,
@@ -17,9 +18,10 @@ import { YDS_SCORE_ZONE_STEPS } from "../../content/ydsMarketTrendSeries.js"
 import YdsPanicIntensityLegend from "./YdsPanicIntensityLegend.jsx"
 import YdsPanicIntensityInfoTip from "./YdsPanicIntensityInfoTip.jsx"
 
-const CHART_HEIGHT = 210
-const CHART_MARGIN = { top: 18, right: 8, left: 4, bottom: 22 }
-const ZONE_FILL_OPACITY = 0.08
+const CHART_HEIGHT = 236
+const CHART_MARGIN = { top: 18, right: 10, left: 4, bottom: 22 }
+/** Stage bands stay quieter so the line / current point lead */
+const ZONE_FILL_OPACITY = 0.045
 
 /** @param {boolean} active @param {object[]} payload @param {string} title @param {"market" | "panic"} chartKind */
 function TrendTooltip({ active, payload, title, chartKind = "market" }) {
@@ -37,7 +39,7 @@ function TrendTooltip({ active, payload, title, chartKind = "market" }) {
       {panicLegend ? (
         <>
           <p className="yds-market-trend-chart__tooltip-value font-mono tabular-nums">
-            {panicLegend.score}
+            Panic Index {panicLegend.score}
           </p>
           <p className="yds-market-trend-chart__tooltip-stage">{panicLegend.label}</p>
           {panicLegend.rangeLabel ? (
@@ -56,16 +58,43 @@ function TrendTooltip({ active, payload, title, chartKind = "market" }) {
   )
 }
 
-/** @param {import("recharts").DotProps & { index?: number; dataLength?: number; color?: string }} props */
-function CurrentPointDot({ cx, cy, index, dataLength, color }) {
+/**
+ * @param {import("recharts").DotProps & {
+ *   index?: number
+ *   dataLength?: number
+ *   color?: string
+ * }} props
+ */
+function PanicPointDot({ cx, cy, index, dataLength, color }) {
   if (cx == null || cy == null || index == null || dataLength == null) return null
-  if (index !== dataLength - 1) return null
   const stroke = color ?? "#e2e8f0"
+  const isCurrent = index === dataLength - 1
+  if (isCurrent) {
+    return (
+      <g className="yds-market-trend-chart__current-dot">
+        <circle cx={cx} cy={cy} r={9} fill={stroke} fillOpacity={0.14} stroke="none" />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={5.25}
+          fill={stroke}
+          stroke="#0b0e14"
+          strokeWidth={1.75}
+        />
+      </g>
+    )
+  }
   return (
-    <g className="yds-market-trend-chart__current-dot">
-      <circle cx={cx} cy={cy} r={11} fill={stroke} fillOpacity={0.16} stroke="none" />
-      <circle cx={cx} cy={cy} r={5.5} fill={stroke} stroke="#0b0e14" strokeWidth={1.75} />
-    </g>
+    <circle
+      className="yds-market-trend-chart__point-dot"
+      cx={cx}
+      cy={cy}
+      r={2.75}
+      fill={stroke}
+      stroke="#0b0e14"
+      strokeWidth={1.25}
+      fillOpacity={0.92}
+    />
   )
 }
 
@@ -92,18 +121,20 @@ export default function YdsMarketTrendChart({
   emptyMessage = "최근 120일 데이터 없음",
   chartKind = "market",
 }) {
+  const fillId = useId().replace(/:/g, "")
   const lineStroke = stroke ?? currentMeta?.color ?? "#94a3b8"
   const pointCount = chartData.length
   const curveType = pointCount >= 3 ? "monotone" : "linear"
+  const isPanic = chartKind === "panic"
 
   const zoneBands = useMemo(() => {
-    const steps = chartKind === "panic" ? panicIntensityLegendZoneSteps() : YDS_SCORE_ZONE_STEPS
+    const steps = isPanic ? panicIntensityLegendZoneSteps() : YDS_SCORE_ZONE_STEPS
     return steps.map((zone, idx) => ({
       y1: zone.min,
       y2: idx === steps.length - 1 ? 100 : zone.max,
       color: zone.color,
     }))
-  }, [chartKind])
+  }, [isPanic])
 
   if (pointCount < 1) {
     return (
@@ -117,25 +148,41 @@ export default function YdsMarketTrendChart({
   }
 
   const displayScore = currentMeta?.score ?? current
+  const badgeText =
+    displayScore != null && currentMeta?.label
+      ? `${displayScore} · ${currentMeta.label}`
+      : displayScore != null
+        ? String(displayScore)
+        : null
 
   return (
-    <article className="yds-market-trend-chart">
+    <article
+      className={[
+        "yds-market-trend-chart",
+        isPanic ? "yds-market-trend-chart--panic" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <header className="yds-market-trend-chart__head">
         <div className="yds-market-trend-chart__title-row">
           <h3 className="yds-market-trend-chart__title">{title}</h3>
-          {chartKind === "panic" ? <YdsPanicIntensityInfoTip /> : null}
+          {isPanic ? <YdsPanicIntensityInfoTip /> : null}
         </div>
-        {displayScore != null ? (
+        {badgeText != null ? (
           <div
             className="yds-market-trend-chart__badge font-mono tabular-nums"
             style={{
               "--trend-badge-color": currentMeta?.color ?? lineStroke,
             }}
-            aria-label={`현재 ${displayScore}${currentMeta?.label ? ` ${currentMeta.label}` : ""}`}
+            aria-label={`현재 ${badgeText}`}
           >
-            <span className="yds-market-trend-chart__badge-score">{displayScore}</span>
-            {currentMeta?.label ? (
-              <span className="yds-market-trend-chart__badge-label">{currentMeta.label}</span>
+            <span className="yds-market-trend-chart__badge-score">{badgeText}</span>
+            {currentMeta?.rangeLabel ||
+            (currentMeta?.min != null && currentMeta?.max != null) ? (
+              <span className="yds-market-trend-chart__badge-range font-mono tabular-nums">
+                {currentMeta.rangeLabel ?? `${currentMeta.min}–${currentMeta.max}`}
+              </span>
             ) : null}
           </div>
         ) : null}
@@ -143,7 +190,14 @@ export default function YdsMarketTrendChart({
 
       <div className="yds-market-trend-chart__plot">
         <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-          <LineChart data={chartData} margin={CHART_MARGIN}>
+          <ComposedChart data={chartData} margin={CHART_MARGIN}>
+            <defs>
+              <linearGradient id={`panic-area-${fillId}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={lineStroke} stopOpacity={0.2} />
+                <stop offset="72%" stopColor={lineStroke} stopOpacity={0.05} />
+                <stop offset="100%" stopColor={lineStroke} stopOpacity={0} />
+              </linearGradient>
+            </defs>
             {zoneBands.map((band) => (
               <ReferenceArea
                 key={`${band.y1}-${band.y2}`}
@@ -155,7 +209,7 @@ export default function YdsMarketTrendChart({
                 ifOverflow="hidden"
               />
             ))}
-            <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
+            <CartesianGrid stroke="rgba(255,255,255,0.045)" vertical={false} />
             <XAxis
               dataKey="axisLabel"
               stroke="#64748b"
@@ -180,22 +234,37 @@ export default function YdsMarketTrendChart({
               content={(props) => (
                 <TrendTooltip {...props} title={title} chartKind={chartKind} />
               )}
-              cursor={{ stroke: "rgba(148,163,184,0.3)", strokeWidth: 1 }}
+              cursor={{ stroke: "rgba(148,163,184,0.28)", strokeWidth: 1 }}
             />
+            {isPanic ? (
+              <Area
+                type={curveType}
+                dataKey={dataKey}
+                stroke="none"
+                fill={`url(#panic-area-${fillId})`}
+                fillOpacity={1}
+                connectNulls
+                isAnimationActive={false}
+                activeDot={false}
+                dot={false}
+              />
+            ) : null}
             <Line
               type={curveType}
               dataKey={dataKey}
               stroke={lineStroke}
-              strokeWidth={pointCount === 1 ? 0 : 2.5}
+              strokeWidth={pointCount === 1 ? 0 : isPanic ? 2.75 : 2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
               dot={(dotProps) => (
-                <CurrentPointDot
+                <PanicPointDot
                   {...dotProps}
                   dataLength={pointCount}
                   color={lineStroke}
                 />
               )}
               activeDot={{
-                r: 5,
+                r: isPanic ? 6.5 : 5,
                 strokeWidth: 2,
                 fill: lineStroke,
                 stroke: "#0b0e14",
@@ -203,11 +272,11 @@ export default function YdsMarketTrendChart({
               connectNulls
               isAnimationActive={false}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
 
-      {chartKind === "panic" ? (
+      {isPanic ? (
         <YdsPanicIntensityLegend
           score={displayScore}
           compact

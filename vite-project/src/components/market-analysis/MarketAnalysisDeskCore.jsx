@@ -130,11 +130,12 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
         <YdsPanicIndexCenter
           panicData={panicData}
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--panic-center"
-        />
-
-        <YdsMarketTrendSection
-          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--trend"
-          historyRows={safeHistory}
+          historySlot={
+            <YdsMarketTrendSection
+              className="yds-market-desk__slot yds-market-desk__slot--trend"
+              historyRows={safeHistory}
+            />
+          }
         />
 
         {hasReferenceBody ? (

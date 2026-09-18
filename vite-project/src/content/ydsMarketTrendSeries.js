@@ -52,6 +52,9 @@ export function resolveScoreZoneMeta(score, kind = "panic") {
       emoji: legend.emoji,
       zoneIndex: legend.index,
       actionLine: legend.tooltipText,
+      min: legend.min,
+      max: legend.max,
+      rangeLabel: legend.rangeLabel,
     }
   }
   const zoneIdx =

@@ -17,9 +17,18 @@ function fmtNum(n, digits = 2) {
 
 /**
  * /market-analysis — Panic Index research desk (UI only)
- * @param {{ panicData?: object | null; className?: string }} props
+ * 순서: 현재 점수 → History(slot) → Drivers → FEAR SCALE → Long-Term
+ * @param {{
+ *   panicData?: object | null
+ *   className?: string
+ *   historySlot?: import("react").ReactNode
+ * }} props
  */
-export default function YdsPanicIndexCenter({ panicData = null, className = "" }) {
+export default function YdsPanicIndexCenter({
+  panicData = null,
+  className = "",
+  historySlot = null,
+}) {
   const score = useMemo(() => getPanicScoreV2(panicData), [panicData])
   const status = useMemo(() => resolvePanicIndexStatus(score), [score])
   const breakdown = useMemo(() => buildPanicScoreV2Breakdown(panicData), [panicData])
@@ -114,37 +123,9 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
         </div>
       </div>
 
-      <section className="yds-panic-center__block">
-        <h3 className="yds-panic-center__block-label">FEAR SCALE</h3>
-        <table className="yds-panic-center__scale-table">
-          <tbody>
-            {PANIC_INDEX_STAGE_BANDS.map((b) => {
-              const isCurrent = status?.id === b.id
-              return (
-                <tr key={b.id} className={isCurrent ? "is-current" : undefined}>
-                  <th scope="row">
-                    <span className="yds-panic-center__stage-cell">
-                      <span
-                        className="yds-panic-center__dot"
-                        style={{ background: b.color }}
-                        aria-hidden
-                      />
-                      <span className="yds-panic-center__stage-name">{b.label}</span>
-                      {isCurrent ? (
-                        <span className="yds-panic-center__now-badge">현재</span>
-                      ) : null}
-                    </span>
-                  </th>
-                  <td className="yds-panic-center__td-range font-mono tabular-nums">
-                    {b.min}–{b.max}
-                  </td>
-                  <td className="yds-panic-center__td-blurb">{b.blurb}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </section>
+      {historySlot ? (
+        <div className="yds-panic-center__history-slot">{historySlot}</div>
+      ) : null}
 
       <section className="yds-panic-center__block">
         <h3 className="yds-panic-center__block-label">PANIC DRIVERS</h3>
@@ -257,6 +238,38 @@ export default function YdsPanicIndexCenter({ panicData = null, className = "" }
             </p>
           )}
         </div>
+      </section>
+
+      <section className="yds-panic-center__block">
+        <h3 className="yds-panic-center__block-label">FEAR SCALE</h3>
+        <table className="yds-panic-center__scale-table">
+          <tbody>
+            {PANIC_INDEX_STAGE_BANDS.map((b) => {
+              const isCurrent = status?.id === b.id
+              return (
+                <tr key={b.id} className={isCurrent ? "is-current" : undefined}>
+                  <th scope="row">
+                    <span className="yds-panic-center__stage-cell">
+                      <span
+                        className="yds-panic-center__dot"
+                        style={{ background: b.color }}
+                        aria-hidden
+                      />
+                      <span className="yds-panic-center__stage-name">{b.label}</span>
+                      {isCurrent ? (
+                        <span className="yds-panic-center__now-badge">현재</span>
+                      ) : null}
+                    </span>
+                  </th>
+                  <td className="yds-panic-center__td-range font-mono tabular-nums">
+                    {b.min}–{b.max}
+                  </td>
+                  <td className="yds-panic-center__td-blurb">{b.blurb}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </section>
 
       <section className="yds-panic-center__block yds-panic-center__block--note">
