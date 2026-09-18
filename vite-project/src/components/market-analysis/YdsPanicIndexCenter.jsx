@@ -308,8 +308,9 @@ export default function YdsPanicIndexCenter({
         <div className="yds-panic-center__life-card">
           <p className="yds-panic-center__life-kicker">참고 지표 · 매매 신호 아님</p>
           <p className="yds-panic-center__life-lead">
-            Panic Index는 단기 매매 신호가 아닙니다. 10년 이상 장기 투자에서 시장이 크게 흔들릴 때
-            공포 수준을 확인하는 참고 지표입니다.
+            Panic Index는 단기 매매 신호가 아니라, S&amp;P500 조정·급락 구간에서 분할매수 판단을
+            보조하는 참고 지표입니다. 10년 이상 장기 투자에서 시장이 크게 흔들릴 때 공포 수준을
+            확인하는 참고 지표입니다.
           </p>
           <dl className="yds-panic-center__life-defs">
             <div>
