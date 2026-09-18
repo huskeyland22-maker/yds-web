@@ -1,5 +1,5 @@
 /**
- * 시장분석 30일 추이 — panic_history 단일 소스, 일별 자동 계산
+ * 시장분석 120일 추이 — panic_history 단일 소스, 일별 자동 계산
  */
 
 import { formatChartAxisMd } from "../utils/chartDateFormat.js"
@@ -17,7 +17,7 @@ import {
 } from "./ydsMarketPositionEngine.js"
 import { buildPanicIntensityLegendView } from "./ydsPanicIntensityLegend.js"
 
-export const MARKET_TREND_WINDOW_DAYS = 30
+export const MARKET_TREND_WINDOW_DAYS = 120
 
 /** @type {{ min: number; max: number; color: string; label: string }[]} */
 export const YDS_SCORE_ZONE_STEPS = [

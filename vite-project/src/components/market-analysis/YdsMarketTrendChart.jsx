@@ -89,7 +89,7 @@ export default function YdsMarketTrendChart({
   current = null,
   currentMeta = null,
   stroke,
-  emptyMessage = "최근 30일 데이터 없음",
+  emptyMessage = "최근 120일 데이터 없음",
   chartKind = "market",
 }) {
   const lineStroke = stroke ?? currentMeta?.color ?? "#94a3b8"
