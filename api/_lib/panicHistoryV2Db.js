@@ -3,9 +3,25 @@
  */
 import { fetchPanicIndexHistoryRows } from "./panicIndexHistory.js"
 import { mapPanicIndexHistoryRowToClient } from "./panicIndexHistoryColumns.js"
+import { getPanicScoreV2 } from "./panicScores.js"
 import { computePanicV2LevelScore } from "./panicV2LevelScore.js"
 import { resolvePanicV2Status } from "./panicV2Status.js"
 import { supabaseRest } from "./supabaseRest.js"
+
+/**
+ * 신규 snapshot → panic_v2 저장용 점수.
+ * History chart / Hero와 동일: tradingScores.getPanicScoreV2 (VIX 45% · CNN 35% · Total P/C 20%).
+ * 과거 row 재계산·backfill에는 사용하지 않는다.
+ * @param {{ vix?: unknown; fearGreed?: unknown; putCall?: unknown } | null | undefined} snap
+ * @returns {number | null}
+ */
+export function resolveNewSnapshotPanicV2Score(snap) {
+  return getPanicScoreV2({
+    vix: snap?.vix,
+    fearGreed: snap?.fearGreed,
+    putCall: snap?.putCall,
+  })
+}
 
 export const PANIC_INDEX_HISTORY_V2_TABLE = "panic_index_history_v2"
 export const PANIC_INDEX_HISTORY_V2_SELECT =
@@ -322,10 +338,16 @@ export async function upsertPanicHistoryV2ForSnapshot(snap, opts = {}) {
 
   if (!todayRow) return { ok: false, skipped: true, reason: "invalid_snapshot" }
 
-  const { score, status } = computePanicV2LevelScore(todayRow)
+  // 신규 저장만 3지표 V2 — MOVE/BofA/NDX level 엔진 사용 금지. 과거 DB는 이 경로로 덮지 않음.
+  const score = resolveNewSnapshotPanicV2Score({
+    vix: snap.vix ?? todayRow.vix,
+    fearGreed: snap.fearGreed ?? todayRow.fearGreed,
+    putCall: snap.putCall ?? todayRow.putCall,
+  })
   if (score == null) {
     return { ok: false, skipped: true, reason: "score_not_computed", date: tradeDate }
   }
+  const status = resolvePanicV2Status(score)
 
   const dbRow = panicIndexHistoryV2DbRow(todayRow, score, opts.source ?? snap.source ?? "save")
   const result = await upsertPanicHistoryV2Rows([dbRow])
