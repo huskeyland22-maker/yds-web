@@ -49,164 +49,179 @@ export default function YdsPanicIndexCenter({
       aria-label="Panic Index"
     >
       <header className="yds-panic-center__hero">
-        <div className="yds-panic-center__hero-top">
-          <p className="yds-panic-center__label">PANIC INDEX</p>
-          {asOfDate ? (
-            <p className="yds-panic-center__asof">As of {asOfDate}</p>
-          ) : null}
-        </div>
+        <div className="yds-panic-center__hero-card">
+          <div className="yds-panic-center__hero-top">
+            <p className="yds-panic-center__label">PANIC INDEX</p>
+            {asOfDate ? (
+              <p className="yds-panic-center__asof">As of {asOfDate}</p>
+            ) : null}
+          </div>
 
-        {score != null && status ? (
-          <div className="yds-panic-center__metric-stack">
-            <p className="yds-panic-center__score font-mono tabular-nums">{score}</p>
-            <div className="yds-panic-center__stage-row">
-              <p
-                className="yds-panic-center__stage"
-                style={status.color ? { color: status.color } : undefined}
-              >
-                {status.label}
-              </p>
-              <p className="yds-panic-center__stage-range font-mono tabular-nums">
-                {status.min}–{status.max}
-              </p>
-            </div>
-            <p className="yds-panic-center__scale-hint font-mono tabular-nums">0–100</p>
-            {dcaSignal ? (
-              <div
-                className={[
-                  "yds-panic-center__dca",
-                  `yds-panic-center__dca--${dcaSignal.id}`,
-                ].join(" ")}
-                aria-label="SPX 저점 분할매수 참고 신호"
-              >
-                <p className="yds-panic-center__dca-band">{dcaSignal.bandLabel}</p>
-                {dcaSignal.stage === 0 ? (
-                  <p className="yds-panic-center__dca-line">
-                    {dcaSignal.addLabel}:{" "}
-                    <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
+          {score != null && status ? (
+            <div className="yds-panic-center__hero-body">
+              <div className="yds-panic-center__hero-primary">
+                <p className="yds-panic-center__score font-mono tabular-nums">{score}</p>
+                <div className="yds-panic-center__stage-row">
+                  <p
+                    className="yds-panic-center__stage"
+                    style={status.color ? { color: status.color } : undefined}
+                  >
+                    {status.label}
                   </p>
-                ) : (
-                  <>
+                  <span className="yds-panic-center__stage-sep" aria-hidden>
+                    ·
+                  </span>
+                  <p className="yds-panic-center__stage-range font-mono tabular-nums">
+                    {status.min}–{status.max}
+                  </p>
+                </div>
+                <p className="yds-panic-center__scale-hint font-mono tabular-nums">0–100</p>
+              </div>
+
+              {dcaSignal ? (
+                <div
+                  className={[
+                    "yds-panic-center__dca",
+                    `yds-panic-center__dca--${dcaSignal.id}`,
+                  ].join(" ")}
+                  aria-label="SPX 저점 분할매수 참고 신호"
+                >
+                  <p className="yds-panic-center__dca-band">{dcaSignal.bandLabel}</p>
+                  {dcaSignal.stage === 0 ? (
                     <p className="yds-panic-center__dca-line">
                       {dcaSignal.addLabel}:{" "}
                       <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
                     </p>
-                    <p className="yds-panic-center__dca-line">
-                      누적 투입:{" "}
-                      <span className="font-mono tabular-nums">{dcaSignal.cumulativePct}%</span>
-                    </p>
-                  </>
-                )}
-                <p className="yds-panic-center__dca-note">참고 신호 · 자동 주문 없음</p>
-              </div>
-            ) : null}
-          </div>
-        ) : (
-          <div className="yds-panic-center__incomplete" role="status">
-            <p className="yds-panic-center__incomplete-title">데이터 입력 필요</p>
-            <p className="yds-panic-center__incomplete-body">
-              VIX · CNN Fear &amp; Greed · Cboe Total P/C가 모두 있어야 계산할 수 있습니다.
-            </p>
-          </div>
-        )}
+                  ) : (
+                    <>
+                      <p className="yds-panic-center__dca-line">
+                        {dcaSignal.addLabel}:{" "}
+                        <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
+                      </p>
+                      <p className="yds-panic-center__dca-line">
+                        누적 투입:{" "}
+                        <span className="font-mono tabular-nums">{dcaSignal.cumulativePct}%</span>
+                      </p>
+                    </>
+                  )}
+                  <p className="yds-panic-center__dca-note">참고 신호 · 자동 주문 없음</p>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="yds-panic-center__incomplete" role="status">
+              <p className="yds-panic-center__incomplete-title">데이터 입력 필요</p>
+              <p className="yds-panic-center__incomplete-body">
+                VIX · CNN Fear &amp; Greed · Cboe Total P/C가 모두 있어야 계산할 수 있습니다.
+              </p>
+            </div>
+          )}
 
-        <p className="yds-panic-center__lede">
-          현재 시장의 공포 수준을 나타내는 장기 투자 참고 지표입니다. 단기 매매 신호가 아닙니다.
-        </p>
+          <div className="yds-panic-center__scale" aria-hidden={score == null}>
+            <div className="yds-panic-center__bar">
+              {PANIC_INDEX_STAGE_BANDS.map((b) => {
+                const widthPct = b.max - b.min + (b.max === 100 ? 1 : 0)
+                return (
+                  <div
+                    key={b.id}
+                    className={[
+                      "yds-panic-center__bar-seg",
+                      status?.id === b.id ? "is-active" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    style={{
+                      width: `${widthPct}%`,
+                      background: b.color,
+                    }}
+                    title={`${b.label} ${b.min}–${b.max}`}
+                  />
+                )
+              })}
+              {markerPct != null ? (
+                <span
+                  className="yds-panic-center__bar-marker"
+                  style={{ left: `${markerPct}%` }}
+                  title={`${score}`}
+                />
+              ) : null}
+            </div>
+            <div className="yds-panic-center__bar-labels font-mono tabular-nums">
+              <span>0</span>
+              <span>20</span>
+              <span>40</span>
+              <span>60</span>
+              <span>80</span>
+              <span>100</span>
+            </div>
+          </div>
+
+          <p className="yds-panic-center__lede">
+            현재 시장의 공포 수준을 나타내는 장기 투자 참고 지표입니다. 단기 매매 신호가 아닙니다.
+          </p>
+        </div>
       </header>
 
-      <div className="yds-panic-center__scale" aria-hidden={score == null}>
-        <div className="yds-panic-center__bar">
+      <section className="yds-panic-center__block yds-panic-center__block--fear">
+        <h3 className="yds-panic-center__block-label">FEAR SCALE</h3>
+        <div className="yds-panic-center__fear-scale" role="list">
           {PANIC_INDEX_STAGE_BANDS.map((b) => {
+            const isCurrent = status?.id === b.id
             const widthPct = b.max - b.min + (b.max === 100 ? 1 : 0)
             return (
               <div
                 key={b.id}
+                role="listitem"
                 className={[
-                  "yds-panic-center__bar-seg",
-                  status?.id === b.id ? "is-active" : "",
+                  "yds-panic-center__fear-stage",
+                  isCurrent ? "is-current" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                style={{
-                  width: `${widthPct}%`,
-                  background: b.color,
-                }}
-                title={`${b.label} ${b.min}–${b.max}`}
-              />
+                style={{ "--fear-flex": widthPct, "--fear-color": b.color }}
+              >
+                <div className="yds-panic-center__fear-swatch" aria-hidden />
+                <div className="yds-panic-center__fear-meta">
+                  <div className="yds-panic-center__fear-title-row">
+                    <span className="yds-panic-center__stage-name">{b.label}</span>
+                    {isCurrent ? (
+                      <span className="yds-panic-center__now-badge">현재</span>
+                    ) : null}
+                  </div>
+                  <span className="yds-panic-center__td-range font-mono tabular-nums">
+                    {b.min}–{b.max}
+                  </span>
+                  {isCurrent ? (
+                    <span className="yds-panic-center__td-blurb">{b.blurb}</span>
+                  ) : null}
+                </div>
+              </div>
             )
           })}
-          {markerPct != null ? (
-            <span
-              className="yds-panic-center__bar-marker"
-              style={{ left: `${markerPct}%` }}
-              title={`${score}`}
-            />
-          ) : null}
         </div>
-        <div className="yds-panic-center__bar-labels font-mono tabular-nums">
-          <span>0</span>
-          <span>20</span>
-          <span>40</span>
-          <span>60</span>
-          <span>80</span>
-          <span>100</span>
-        </div>
-      </div>
-
-      <section className="yds-panic-center__block">
-        <h3 className="yds-panic-center__block-label">FEAR SCALE</h3>
-        <table className="yds-panic-center__scale-table">
-          <tbody>
-            {PANIC_INDEX_STAGE_BANDS.map((b) => {
-              const isCurrent = status?.id === b.id
-              return (
-                <tr key={b.id} className={isCurrent ? "is-current" : undefined}>
-                  <th scope="row">
-                    <span className="yds-panic-center__stage-cell">
-                      <span
-                        className="yds-panic-center__dot"
-                        style={{ background: b.color }}
-                        aria-hidden
-                      />
-                      <span className="yds-panic-center__stage-name">{b.label}</span>
-                      {isCurrent ? (
-                        <span className="yds-panic-center__now-badge">현재</span>
-                      ) : null}
-                    </span>
-                  </th>
-                  <td className="yds-panic-center__td-range font-mono tabular-nums">
-                    {b.min}–{b.max}
-                  </td>
-                  <td className="yds-panic-center__td-blurb">{b.blurb}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
       </section>
 
       {historySlot ? (
         <div className="yds-panic-center__history-slot">{historySlot}</div>
       ) : null}
 
-      <section className="yds-panic-center__block">
+      <section className="yds-panic-center__block yds-panic-center__block--drivers">
         <h3 className="yds-panic-center__block-label">PANIC DRIVERS</h3>
         <div className="yds-panic-center__drivers-wrap">
           <table className="yds-panic-center__drivers">
             <thead>
               <tr>
                 <th scope="col">지표</th>
-                <th scope="col" className="is-num">
+                <th scope="col" className="is-num is-primary">
                   Value
                 </th>
-                <th scope="col" className="is-num">
+                <th scope="col" className="is-num is-secondary">
                   Score
                 </th>
-                <th scope="col" className="is-num">
+                <th scope="col" className="is-num is-secondary">
                   Weight
                 </th>
-                <th scope="col" className="is-num">
+                <th scope="col" className="is-num is-secondary">
                   Contribution
                 </th>
               </tr>
@@ -218,16 +233,16 @@ export default function YdsPanicIndexCenter({
                     <span className="yds-panic-center__driver-name">{line.label}</span>
                     <span className="yds-panic-center__driver-src">{line.source}</span>
                   </th>
-                  <td className="is-num font-mono tabular-nums">
+                  <td className="is-num is-primary font-mono tabular-nums">
                     {line.value == null ? "—" : fmtNum(line.value)}
                   </td>
-                  <td className="is-num font-mono tabular-nums">
+                  <td className="is-num is-secondary font-mono tabular-nums">
                     {line.score == null ? "—" : fmtNum(line.score, 1)}
                   </td>
-                  <td className="is-num font-mono tabular-nums">
+                  <td className="is-num is-secondary font-mono tabular-nums">
                     {Math.round(line.weight * 100)}%
                   </td>
-                  <td className="is-num font-mono tabular-nums">
+                  <td className="is-num is-secondary font-mono tabular-nums">
                     {line.contrib == null ? "—" : fmtNum(line.contrib, 1)}
                   </td>
                 </tr>
@@ -236,9 +251,12 @@ export default function YdsPanicIndexCenter({
             {breakdown?.ok ? (
               <tfoot>
                 <tr>
-                  <th scope="row">Weighted total</th>
+                  <th scope="row">
+                    <span className="yds-panic-center__total-label">Weighted total</span>
+                    <span className="yds-panic-center__total-hint">최종 합산 점수</span>
+                  </th>
                   <td colSpan={3} />
-                  <td className="is-num font-mono tabular-nums">
+                  <td className="is-num is-total font-mono tabular-nums">
                     {breakdown.rawTotal != null ? fmtNum(breakdown.rawTotal, 2) : "—"}
                   </td>
                 </tr>
@@ -254,13 +272,10 @@ export default function YdsPanicIndexCenter({
                 <span>{line.label}</span>
                 <span className="yds-panic-center__driver-src">{line.source}</span>
               </div>
+              <p className="yds-panic-center__drivers-mobile-value font-mono tabular-nums">
+                {line.value == null ? "—" : fmtNum(line.value)}
+              </p>
               <dl>
-                <div>
-                  <dt>Value</dt>
-                  <dd className="font-mono tabular-nums">
-                    {line.value == null ? "—" : fmtNum(line.value)}
-                  </dd>
-                </div>
                 <div>
                   <dt>Score</dt>
                   <dd className="font-mono tabular-nums">
@@ -280,6 +295,17 @@ export default function YdsPanicIndexCenter({
               </dl>
             </li>
           ))}
+          {breakdown?.ok ? (
+            <li className="yds-panic-center__drivers-mobile-total">
+              <div className="yds-panic-center__drivers-mobile-head">
+                <span>Weighted total</span>
+                <span className="yds-panic-center__total-hint">최종 합산 점수</span>
+              </div>
+              <p className="yds-panic-center__drivers-mobile-value font-mono tabular-nums">
+                {breakdown.rawTotal != null ? fmtNum(breakdown.rawTotal, 2) : "—"}
+              </p>
+            </li>
+          ) : null}
         </ul>
       </section>
     </article>

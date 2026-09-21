@@ -185,13 +185,13 @@ export default function YdsPanicSpxValidationChart() {
       <div className="yds-panic-spx-val__plot">
         <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
           <ComposedChart data={filteredData} margin={MARGIN}>
-            <CartesianGrid stroke="rgba(148,163,184,0.12)" vertical={false} />
+            <CartesianGrid stroke="rgba(148,163,184,0.07)" vertical={false} />
             <XAxis
               dataKey="date"
               tickFormatter={(v) => formatChartAxisMd(String(v))}
               minTickGap={28}
-              tick={{ fill: "#64748b", fontSize: 10 }}
-              axisLine={{ stroke: "rgba(148,163,184,0.25)" }}
+              tick={{ fill: "#4b5563", fontSize: 10 }}
+              axisLine={{ stroke: "rgba(148,163,184,0.16)" }}
               tickLine={false}
             />
             <YAxis
@@ -199,7 +199,7 @@ export default function YdsPanicSpxValidationChart() {
               domain={[0, 100]}
               ticks={[0, 20, 40, 50, 60, 70, 80, 100]}
               width={36}
-              tick={{ fill: "#94a3b8", fontSize: 10 }}
+              tick={{ fill: "#6b7280", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               label={{
@@ -207,7 +207,7 @@ export default function YdsPanicSpxValidationChart() {
                 angle: -90,
                 position: "insideLeft",
                 offset: 4,
-                style: { fill: "#64748b", fontSize: 10 },
+                style: { fill: "#4b5563", fontSize: 10 },
               }}
             />
             <YAxis
@@ -215,7 +215,7 @@ export default function YdsPanicSpxValidationChart() {
               orientation="right"
               domain={["auto", "auto"]}
               width={44}
-              tick={{ fill: "#64748b", fontSize: 10 }}
+              tick={{ fill: "#4b5563", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) =>
@@ -226,39 +226,42 @@ export default function YdsPanicSpxValidationChart() {
                 angle: 90,
                 position: "insideRight",
                 offset: 4,
-                style: { fill: "#64748b", fontSize: 10 },
+                style: { fill: "#4b5563", fontSize: 10 },
               }}
             />
             <Tooltip content={<ValidationTooltip />} />
             <Legend
               verticalAlign="top"
               height={22}
-              wrapperStyle={{ fontSize: 11, color: "#94a3b8" }}
+              wrapperStyle={{ fontSize: 11, color: "#94a3b8", paddingBottom: 4 }}
             />
 
             <ReferenceLine
               yAxisId="panic"
               y={50}
-              stroke="#eab308"
-              strokeDasharray="4 4"
-              strokeOpacity={0.85}
-              label={{ value: "50", position: "insideTopLeft", fill: "#eab308", fontSize: 10 }}
+              stroke="#a16207"
+              strokeDasharray="3 5"
+              strokeWidth={1}
+              strokeOpacity={0.55}
+              label={{ value: "50", position: "insideTopLeft", fill: "#78716c", fontSize: 9 }}
             />
             <ReferenceLine
               yAxisId="panic"
               y={60}
-              stroke="#f97316"
-              strokeDasharray="4 4"
-              strokeOpacity={0.85}
-              label={{ value: "60", position: "insideTopLeft", fill: "#f97316", fontSize: 10 }}
+              stroke="#c2410c"
+              strokeDasharray="3 5"
+              strokeWidth={1}
+              strokeOpacity={0.55}
+              label={{ value: "60", position: "insideTopLeft", fill: "#78716c", fontSize: 9 }}
             />
             <ReferenceLine
               yAxisId="panic"
               y={70}
-              stroke="#ef4444"
-              strokeDasharray="4 4"
-              strokeOpacity={0.9}
-              label={{ value: "70", position: "insideTopLeft", fill: "#ef4444", fontSize: 10 }}
+              stroke="#b91c1c"
+              strokeDasharray="3 5"
+              strokeWidth={1}
+              strokeOpacity={0.6}
+              label={{ value: "70", position: "insideTopLeft", fill: "#78716c", fontSize: 9 }}
             />
 
             <Line
@@ -266,8 +269,9 @@ export default function YdsPanicSpxValidationChart() {
               type="monotone"
               dataKey="spx"
               name="S&P500"
-              stroke="#64748b"
-              strokeWidth={1.35}
+              stroke="#475569"
+              strokeWidth={1.1}
+              strokeOpacity={0.72}
               dot={false}
               isAnimationActive={false}
               connectNulls={false}
@@ -277,8 +281,8 @@ export default function YdsPanicSpxValidationChart() {
               type="monotone"
               dataKey="panic"
               name="Panic Index"
-              stroke="#38bdf8"
-              strokeWidth={1.75}
+              stroke="#7dd3fc"
+              strokeWidth={2}
               dot={false}
               isAnimationActive={false}
               connectNulls={false}
