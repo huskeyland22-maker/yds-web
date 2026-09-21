@@ -65,19 +65,20 @@ export function getSidebarFooterLinks() {
 
 /** @type {Record<string, string>} */
 export const NAV_MOBILE_SHORT = {
-  "/": "📈 인생",
-  "/market-analysis": "🚨 패닉",
-  "/stock-picks": "⭐ 종목",
-  "/watchlist": "⭐ 관심",
-  "/portfolio": "💼 포트",
-  "/performance-validation": "📈 검증",
-  "/performance-dashboard": "💼 포트",
-  "/ai-daily-report": "💡 인사이트",
-  "/alert-center": "🔔 알림",
-  "/panic-lab": "🧪 패닉",
-  "/investment-calendar": "📅 캘린더",
-  "/investment-playbook": "📋 원칙",
-  "/lab": "🧪 연구",
+  "/": "인생",
+  "/daily-bottom-buy": "일상 저점매수",
+  "/market-analysis": "패닉",
+  "/stock-picks": "종목",
+  "/watchlist": "관심",
+  "/portfolio": "포트",
+  "/performance-validation": "검증",
+  "/performance-dashboard": "포트",
+  "/ai-daily-report": "인사이트",
+  "/alert-center": "알림",
+  "/panic-lab": "패닉",
+  "/investment-calendar": "캘린더",
+  "/investment-playbook": "원칙",
+  "/lab": "연구",
 }
 
 export const UI_RADAR = {

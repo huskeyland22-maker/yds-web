@@ -31,6 +31,7 @@ import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
+import DailyBottomBuyPlaceholderPage from "./pages/DailyBottomBuyPlaceholderPage.jsx"
 import InvestmentHomePage from "./pages/InvestmentHomePage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import PerformanceValidationPage from "./pages/PerformanceValidationPage.jsx"
@@ -1378,6 +1379,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="투자 운영 대시보드">
                   <InvestmentHomePage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/daily-bottom-buy"
+              element={
+                <SectionErrorBoundary label="일상 저점매수">
+                  <DailyBottomBuyPlaceholderPage />
                 </SectionErrorBoundary>
               }
             />

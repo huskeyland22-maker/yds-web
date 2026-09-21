@@ -1,79 +1,57 @@
-import { Activity, Home, Menu, Sparkles } from "lucide-react"
+import { Activity, ArrowDownCircle } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { getCoreNavItems, NAV_MOBILE_SHORT } from "../../utils/ydsUiLabels.js"
+import { NAV_MOBILE_SHORT } from "../../utils/ydsUiLabels.js"
 
-const ICON_BY_PATH = {
-  "/": Home,
-  "/market-analysis": Activity,
-  "/stock-picks": Sparkles,
-}
+/** 모바일 하단 네비 — 최종 2탭 */
+const BOTTOM_ITEMS = [
+  {
+    id: "daily_bottom",
+    path: "/daily-bottom-buy",
+    label: NAV_MOBILE_SHORT["/daily-bottom-buy"] ?? "일상 저점매수",
+    icon: ArrowDownCircle,
+  },
+  {
+    id: "market_panic",
+    path: "/market-analysis",
+    label: NAV_MOBILE_SHORT["/market-analysis"] ?? "패닉",
+    icon: Activity,
+  },
+]
 
 /**
  * @param {{ onAi?: () => void; onSettings?: () => void }} props
  */
-export default function MobileBottomNav({ onAi: _onAi, onSettings }) {
+export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const core = getCoreNavItems()
-
-  const items = [
-    ...core.map((item) => ({
-      id: item.path === "/" ? "life_strategy" : "market_panic",
-      path: item.path,
-      label: NAV_MOBILE_SHORT[item.path] ?? item.shortLabel,
-      icon: ICON_BY_PATH[item.path] ?? Activity,
-      end: item.path === "/",
-    })),
-    {
-      id: "stock_picks",
-      path: "/stock-picks",
-      label: NAV_MOBILE_SHORT["/stock-picks"] ?? "종목",
-      icon: Sparkles,
-      end: false,
-    },
-    {
-      id: "more",
-      path: null,
-      label: "메뉴",
-      icon: Menu,
-      end: false,
-    },
-  ]
 
   const activeId = (() => {
     const p = location.pathname
-    if (p === "/" || p === "") return "life_strategy"
+    if (p.startsWith("/daily-bottom-buy")) return "daily_bottom"
     if (
       p.startsWith("/market-analysis") ||
       p.startsWith("/market-dashboard") ||
       p.startsWith("/cycle")
     )
       return "market_panic"
-    if (p.startsWith("/stock-picks")) return "stock_picks"
-    return "more"
+    return null
   })()
 
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-[8000] border-t border-white/[0.08] bg-[#080b12]/96 backdrop-blur-md lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      aria-label="핵심 메뉴"
+      aria-label="모바일 주요 화면"
     >
       <ul className="m-0 flex list-none items-stretch justify-around px-0.5 pt-0.5">
-        {items.map((item) => {
+        {BOTTOM_ITEMS.map((item) => {
           const Icon = item.icon
           const active = item.id === activeId
           return (
             <li key={item.id} className="flex min-w-0 flex-1">
               <button
                 type="button"
-                onClick={() => {
-                  if (item.id === "more") {
-                    onSettings?.()
-                    return
-                  }
-                  navigate(item.path)
-                }}
+                onClick={() => navigate(item.path)}
                 className={[
                   "flex min-h-[48px] w-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-md px-0.5 py-1 transition",
                   active ? "text-slate-100" : "text-slate-500 active:text-slate-300",

@@ -14549,6 +14549,39 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   overflow-x: clip;
 }
 
+@media (max-width: 639px) {
+  .yds-market-analysis {
+    padding: 0.75rem 0.35rem 1.25rem;
+  }
+
+  /* History 차트 — 모바일에서 viewport 가로를 최대한 사용 */
+  .yds-panic-center__history-slot {
+    margin-inline: -0.35rem;
+    width: calc(100% + 0.7rem);
+    max-width: none;
+  }
+
+  .yds-panic-center__history-slot .yds-market-trend__heading,
+  .yds-panic-center__history-slot .yds-market-trend__sub {
+    padding-inline: 0.35rem;
+  }
+
+  .yds-panic-spx-val__toolbar,
+  .yds-panic-spx-val__chips {
+    padding-inline: 0.35rem;
+  }
+
+  .yds-panic-spx-val__plot {
+    min-height: 248px;
+    margin-inline: 0;
+    width: 100%;
+  }
+
+  .yds-panic-spx-val__plot .recharts-responsive-container {
+    width: 100% !important;
+  }
+}
+
 @media (min-width: 640px) {
   .yds-market-analysis {
     padding-inline: 1rem;
@@ -27873,7 +27906,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 @media (max-width: 640px) {
   .yds-panic-spx-val__plot {
-    min-height: 260px;
+    min-height: 248px;
   }
 }
 

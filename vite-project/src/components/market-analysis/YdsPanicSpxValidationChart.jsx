@@ -17,9 +17,12 @@ import {
   PANIC_SPX_VALIDATION_SERIES_URL,
   resolveBottomWindowDomain,
 } from "../../content/ydsPanicSpxValidationSeries.js"
+import { useIsMobileLayout } from "../../hooks/useIsMobileLayout.js"
 
-const CHART_HEIGHT = 320
-const MARGIN = { top: 12, right: 48, left: 8, bottom: 8 }
+const CHART_HEIGHT_DESKTOP = 320
+const CHART_HEIGHT_MOBILE = 248
+const MARGIN_DESKTOP = { top: 12, right: 48, left: 8, bottom: 8 }
+const MARGIN_MOBILE = { top: 8, right: 22, left: 0, bottom: 4 }
 
 /** @param {{ active?: boolean; payload?: object[] }} props */
 function ValidationTooltip({ active, payload }) {
@@ -46,6 +49,12 @@ function ValidationTooltip({ active, payload }) {
  * Panic Index History — Panic V2 × S&P500 (시장 소스 재계산 시계열)
  */
 export default function YdsPanicSpxValidationChart() {
+  const isMobile = useIsMobileLayout()
+  const chartHeight = isMobile ? CHART_HEIGHT_MOBILE : CHART_HEIGHT_DESKTOP
+  const chartMargin = isMobile ? MARGIN_MOBILE : MARGIN_DESKTOP
+  const panicAxisWidth = isMobile ? 28 : 36
+  const spxAxisWidth = isMobile ? 30 : 44
+
   const [series, setSeries] = useState(
     /** @type {import("../../content/ydsPanicSpxValidationSeries.js").PanicSpxValidationSeries | null} */ (
       null
@@ -183,14 +192,14 @@ export default function YdsPanicSpxValidationChart() {
       </div>
 
       <div className="yds-panic-spx-val__plot">
-        <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
-          <ComposedChart data={filteredData} margin={MARGIN}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
+          <ComposedChart data={filteredData} margin={chartMargin}>
             <CartesianGrid stroke="rgba(148,163,184,0.07)" vertical={false} />
             <XAxis
               dataKey="date"
               tickFormatter={(v) => formatChartAxisMd(String(v))}
-              minTickGap={28}
-              tick={{ fill: "#4b5563", fontSize: 10 }}
+              minTickGap={isMobile ? 36 : 28}
+              tick={{ fill: "#4b5563", fontSize: isMobile ? 9 : 10 }}
               axisLine={{ stroke: "rgba(148,163,184,0.16)" }}
               tickLine={false}
             />
@@ -198,42 +207,50 @@ export default function YdsPanicSpxValidationChart() {
               yAxisId="panic"
               domain={[0, 100]}
               ticks={[0, 20, 40, 50, 60, 70, 80, 100]}
-              width={36}
-              tick={{ fill: "#6b7280", fontSize: 10 }}
+              width={panicAxisWidth}
+              tick={{ fill: "#6b7280", fontSize: isMobile ? 9 : 10 }}
               axisLine={false}
               tickLine={false}
-              label={{
-                value: "Panic",
-                angle: -90,
-                position: "insideLeft",
-                offset: 4,
-                style: { fill: "#4b5563", fontSize: 10 },
-              }}
+              label={
+                isMobile
+                  ? undefined
+                  : {
+                      value: "Panic",
+                      angle: -90,
+                      position: "insideLeft",
+                      offset: 4,
+                      style: { fill: "#4b5563", fontSize: 10 },
+                    }
+              }
             />
             <YAxis
               yAxisId="spx"
               orientation="right"
               domain={["auto", "auto"]}
-              width={44}
-              tick={{ fill: "#4b5563", fontSize: 10 }}
+              width={spxAxisWidth}
+              tick={{ fill: "#4b5563", fontSize: isMobile ? 9 : 10 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) =>
                 Number(v) >= 1000 ? `${Math.round(Number(v) / 100) / 10}k` : String(v)
               }
-              label={{
-                value: "SPX",
-                angle: 90,
-                position: "insideRight",
-                offset: 4,
-                style: { fill: "#4b5563", fontSize: 10 },
-              }}
+              label={
+                isMobile
+                  ? undefined
+                  : {
+                      value: "SPX",
+                      angle: 90,
+                      position: "insideRight",
+                      offset: 4,
+                      style: { fill: "#4b5563", fontSize: 10 },
+                    }
+              }
             />
             <Tooltip content={<ValidationTooltip />} />
             <Legend
               verticalAlign="top"
-              height={22}
-              wrapperStyle={{ fontSize: 11, color: "#94a3b8", paddingBottom: 4 }}
+              height={isMobile ? 18 : 22}
+              wrapperStyle={{ fontSize: isMobile ? 10 : 11, color: "#94a3b8", paddingBottom: 4 }}
             />
 
             <ReferenceLine
