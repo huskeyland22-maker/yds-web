@@ -182,6 +182,8 @@
 - [x] **Panic Index 저장 validation V2** — required 3개(VIX·CNN·P/C) · legacy 5개 optional · client/API 동기
 - [x] **계정 설정 버그 수정** — 사이드바/모바일 「계정 설정」이 시장 지표 입력 패널을 열던 연결 분리 · 계정 설정 모달
 - [x] **Panic Index 단순화** — VIX·CNN·Cboe Total P/C (0.45/0.35/0.20) · getPanicScoreV2 · 8대 UI 비노출 · Legacy/DB 보존 · 수동 입력 유지
+- [x] **Panic Index 일상 UI 정리** — 타이밍 표·점수 산식·장기 검증 뷰 제거 · 점수·DCA·History·Drivers·Fear Scale 유지
+- [x] **Panic Index 섹션 순서** — 현재 점수 → FEAR SCALE → History → Drivers (단계 직관 이해)
 - [ ] AI 리포트 개선
 - [ ] 패닉지수 데이터 검증
 - [ ] 연구실 기능 정리

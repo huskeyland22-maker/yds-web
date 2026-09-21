@@ -18,7 +18,7 @@ function fmtNum(n, digits = 2) {
 
 /**
  * /market-analysis — Panic Index (일상 화면)
- * 순서: 현재 점수·매수 단계 → History → Drivers → FEAR SCALE
+ * 순서: 현재 점수·매수 단계 → FEAR SCALE → History → Drivers
  * @param {{
  *   panicData?: object | null
  *   className?: string
@@ -154,6 +154,38 @@ export default function YdsPanicIndexCenter({
         </div>
       </div>
 
+      <section className="yds-panic-center__block">
+        <h3 className="yds-panic-center__block-label">FEAR SCALE</h3>
+        <table className="yds-panic-center__scale-table">
+          <tbody>
+            {PANIC_INDEX_STAGE_BANDS.map((b) => {
+              const isCurrent = status?.id === b.id
+              return (
+                <tr key={b.id} className={isCurrent ? "is-current" : undefined}>
+                  <th scope="row">
+                    <span className="yds-panic-center__stage-cell">
+                      <span
+                        className="yds-panic-center__dot"
+                        style={{ background: b.color }}
+                        aria-hidden
+                      />
+                      <span className="yds-panic-center__stage-name">{b.label}</span>
+                      {isCurrent ? (
+                        <span className="yds-panic-center__now-badge">현재</span>
+                      ) : null}
+                    </span>
+                  </th>
+                  <td className="yds-panic-center__td-range font-mono tabular-nums">
+                    {b.min}–{b.max}
+                  </td>
+                  <td className="yds-panic-center__td-blurb">{b.blurb}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </section>
+
       {historySlot ? (
         <div className="yds-panic-center__history-slot">{historySlot}</div>
       ) : null}
@@ -249,38 +281,6 @@ export default function YdsPanicIndexCenter({
             </li>
           ))}
         </ul>
-      </section>
-
-      <section className="yds-panic-center__block">
-        <h3 className="yds-panic-center__block-label">FEAR SCALE</h3>
-        <table className="yds-panic-center__scale-table">
-          <tbody>
-            {PANIC_INDEX_STAGE_BANDS.map((b) => {
-              const isCurrent = status?.id === b.id
-              return (
-                <tr key={b.id} className={isCurrent ? "is-current" : undefined}>
-                  <th scope="row">
-                    <span className="yds-panic-center__stage-cell">
-                      <span
-                        className="yds-panic-center__dot"
-                        style={{ background: b.color }}
-                        aria-hidden
-                      />
-                      <span className="yds-panic-center__stage-name">{b.label}</span>
-                      {isCurrent ? (
-                        <span className="yds-panic-center__now-badge">현재</span>
-                      ) : null}
-                    </span>
-                  </th>
-                  <td className="yds-panic-center__td-range font-mono tabular-nums">
-                    {b.min}–{b.max}
-                  </td>
-                  <td className="yds-panic-center__td-blurb">{b.blurb}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
       </section>
     </article>
   )
