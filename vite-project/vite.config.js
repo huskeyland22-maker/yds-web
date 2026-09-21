@@ -192,6 +192,10 @@ export default defineConfig({
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },
+      "/api/daily-bottom-buy": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
     },
   },
   preview: {
@@ -221,6 +225,10 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/portfolio-quote": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
+      "/api/daily-bottom-buy": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },

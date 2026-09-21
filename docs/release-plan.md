@@ -184,6 +184,7 @@
 - [x] **Panic Index 단순화** — VIX·CNN·Cboe Total P/C (0.45/0.35/0.20) · getPanicScoreV2 · 8대 UI 비노출 · Legacy/DB 보존 · 수동 입력 유지
 - [x] **Panic Index 일상 UI 정리** — 타이밍 표·점수 산식·장기 검증 뷰 제거 · 점수·DCA·History·Drivers·Fear Scale 유지
 - [x] **Panic Index 섹션 순서** — 현재 점수 → FEAR SCALE → History → Drivers (단계 직관 이해)
+- [x] **일상 저점매수 V1** — `/daily-bottom-buy` · 10 ETF · RSI/Stoch/BB/MA20 동결 임계값 · 3→50%/4→50% · PC 사이드바 핵심 메뉴(저점매수·패닉) · API+스냅샷
 - [ ] AI 리포트 개선
 - [ ] 패닉지수 데이터 검증
 - [ ] 연구실 기능 정리

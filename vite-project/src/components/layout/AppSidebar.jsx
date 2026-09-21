@@ -43,7 +43,7 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
           <NavLink
             key={item.path}
             to={item.path}
-            end={item.path === "/"}
+            end={item.path === "/" || item.path === "/daily-bottom-buy"}
             className={({ isActive }) =>
               [
                 "yds-sidebar-core group block rounded-md border-l-2 px-3 py-2.5 transition",

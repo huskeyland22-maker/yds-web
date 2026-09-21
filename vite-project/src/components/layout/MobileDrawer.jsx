@@ -44,7 +44,7 @@ export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccount
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.path === "/"}
+              end={item.path === "/" || item.path === "/daily-bottom-buy"}
               onClick={onClose}
               className={({ isActive }) =>
                 [

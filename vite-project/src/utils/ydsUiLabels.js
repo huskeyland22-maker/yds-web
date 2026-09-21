@@ -7,14 +7,14 @@
 export function getCoreNavItems() {
   return [
     {
-      label: "📈 YDS 인생 투자전략",
-      shortLabel: "인생전략",
-      path: "/",
-      subtitle: "장기 전략 · MA40 · Reserve",
+      label: "일상 저점매수",
+      shortLabel: "저점매수",
+      path: "/daily-bottom-buy",
+      subtitle: "섹터 ETF · 일상 조정 타점",
       tone: "brand",
     },
     {
-      label: "🚨 시장 공포·패닉",
+      label: "시장 공포·패닉",
       shortLabel: "공포·패닉",
       path: "/market-analysis",
       subtitle: "Panic Index · 장기 참고",
