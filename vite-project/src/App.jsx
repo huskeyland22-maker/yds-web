@@ -32,7 +32,6 @@ import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import DailyBottomBuyPage from "./pages/DailyBottomBuyPage.jsx"
-import InvestmentHomePage from "./pages/InvestmentHomePage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import PerformanceValidationPage from "./pages/PerformanceValidationPage.jsx"
 import PanicLabPage from "./pages/PanicLabPage.jsx"
@@ -1374,14 +1373,7 @@ function App() {
 
         <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <SectionErrorBoundary label="투자 운영 대시보드">
-                  <InvestmentHomePage />
-                </SectionErrorBoundary>
-              }
-            />
+            <Route path="/" element={<Navigate to="/daily-bottom-buy" replace />} />
             <Route
               path="/daily-bottom-buy"
               element={
