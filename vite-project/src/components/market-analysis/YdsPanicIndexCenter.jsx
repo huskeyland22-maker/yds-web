@@ -17,8 +17,8 @@ function fmtNum(n, digits = 2) {
 }
 
 /**
- * /market-analysis — Panic Index research desk (UI only)
- * 순서: 현재 점수 → History(slot) → Drivers → FEAR SCALE → Long-Term
+ * /market-analysis — Panic Index (일상 화면)
+ * 순서: 현재 점수·매수 단계 → History → Drivers → FEAR SCALE
  * @param {{
  *   panicData?: object | null
  *   className?: string
@@ -249,26 +249,6 @@ export default function YdsPanicIndexCenter({
             </li>
           ))}
         </ul>
-
-        <div className="yds-panic-center__calc-block">
-          <p className="yds-panic-center__block-label">SCORE CALCULATION</p>
-          {breakdown?.ok ? (
-            <pre className="yds-panic-center__calc font-mono tabular-nums">
-              {(breakdown.lines ?? [])
-                .map((l, i) => {
-                  const term = `${fmtNum(l.score, 1)} × ${Math.round(l.weight * 100)}%`
-                  return i === 0 ? term : `+ ${term}`
-                })
-                .join("\n")}
-              {`\n= ${breakdown.rawTotal != null ? fmtNum(breakdown.rawTotal, 2) : "—"}`}
-              {breakdown.total != null ? `  →  ${breakdown.total}` : ""}
-            </pre>
-          ) : (
-            <p className="yds-panic-center__calc-missing">
-              일부 지표가 없어 Panic Index를 계산할 수 없습니다.
-            </p>
-          )}
-        </div>
       </section>
 
       <section className="yds-panic-center__block">
@@ -301,45 +281,6 @@ export default function YdsPanicIndexCenter({
             })}
           </tbody>
         </table>
-      </section>
-
-      <section className="yds-panic-center__block yds-panic-center__block--note">
-        <h3 className="yds-panic-center__block-label">LONG-TERM INVESTOR VIEW</h3>
-        <div className="yds-panic-center__life-card">
-          <p className="yds-panic-center__life-kicker">참고 지표 · 매매 신호 아님</p>
-          <p className="yds-panic-center__life-lead">
-            Panic Index는 단기 매매 신호가 아니라, S&amp;P500 조정·급락 구간에서 분할매수 판단을
-            보조하는 참고 지표입니다. 10년 이상 장기 투자에서 시장이 크게 흔들릴 때 공포 수준을
-            확인하는 참고 지표입니다.
-          </p>
-          <dl className="yds-panic-center__life-defs">
-            <div>
-              <dt>기본 투자</dt>
-              <dd>매월 적립식 지속</dd>
-            </div>
-            <div>
-              <dt>장기 추가 투입 기준</dt>
-              <dd>S&amp;P500 주봉 MA40</dd>
-            </div>
-            <div>
-              <dt>시장 공포 확인</dt>
-              <dd>Panic Index</dd>
-            </div>
-            <div>
-              <dt>추가 투입 자금</dt>
-              <dd>Strategy Reserve</dd>
-            </div>
-          </dl>
-          {status ? (
-            <p className="yds-panic-center__life-now">
-              현재 · {status.label} — {status.lifeView}
-            </p>
-          ) : null}
-          <p className="yds-panic-center__life-note">
-            Panic Index가 높다고 해서 자동 매수·매도나 Reserve 전액 투입이 되지 않습니다. 실행
-            판단은 YDS 인생 투자전략의 MA40과 Strategy Reserve에서 합니다.
-          </p>
-        </div>
       </section>
     </article>
   )

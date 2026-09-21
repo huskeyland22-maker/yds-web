@@ -14,9 +14,6 @@ import {
 } from "recharts"
 import { formatChartAxisMd } from "../../utils/chartDateFormat.js"
 import {
-  buildPanicEntryTimingTable,
-  formatPanicSpxValidationSummary,
-  formatPanicTimingPct,
   PANIC_SPX_VALIDATION_SERIES_URL,
   resolveBottomWindowDomain,
 } from "../../content/ydsPanicSpxValidationSeries.js"
@@ -46,7 +43,7 @@ function ValidationTooltip({ active, payload }) {
 }
 
 /**
- * Panic V2 × S&P500 장기 검증 차트 (시장 소스 재계산)
+ * Panic Index History — Panic V2 × S&P500 (시장 소스 재계산 시계열)
  */
 export default function YdsPanicSpxValidationChart() {
   const [series, setSeries] = useState(
@@ -96,9 +93,6 @@ export default function YdsPanicSpxValidationChart() {
     return chartData.filter((r) => r.date >= lo && r.date <= hi)
   }, [chartData, domain])
 
-  const summary = useMemo(() => formatPanicSpxValidationSummary(series), [series])
-  const timingTable = useMemo(() => buildPanicEntryTimingTable(series), [series])
-
   const bottomMarkers = useMemo(() => {
     if (!series?.bottoms?.length) return []
     return series.bottoms
@@ -145,7 +139,7 @@ export default function YdsPanicSpxValidationChart() {
   if (loadError) {
     return (
       <div className="yds-panic-spx-val yds-panic-spx-val--empty" role="status">
-        <p className="yds-panic-spx-val__empty">장기 검증 시계열을 불러오지 못했습니다.</p>
+        <p className="yds-panic-spx-val__empty">히스토리 시계열을 불러오지 못했습니다.</p>
       </div>
     )
   }
@@ -153,7 +147,7 @@ export default function YdsPanicSpxValidationChart() {
   if (!series || chartData.length < 2) {
     return (
       <div className="yds-panic-spx-val yds-panic-spx-val--empty" role="status">
-        <p className="yds-panic-spx-val__empty">장기 검증 시계열 준비중…</p>
+        <p className="yds-panic-spx-val__empty">히스토리 시계열 준비중…</p>
       </div>
     )
   }
@@ -162,7 +156,7 @@ export default function YdsPanicSpxValidationChart() {
     <div className="yds-panic-spx-val">
       <div className="yds-panic-spx-val__toolbar">
         <p className="yds-panic-spx-val__hint">
-          저점 칩을 누르면 D−20~D+5 구간 · 전체는 Reset
+          저점 구간을 보려면 칩을 누르세요 · 전체는 Reset
         </p>
         <button type="button" className="yds-panic-spx-val__reset" onClick={resetZoom}>
           Reset
@@ -347,102 +341,6 @@ export default function YdsPanicSpxValidationChart() {
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-
-      {summary ? (
-        <aside className="yds-panic-spx-val__summary" aria-label="검증 요약">
-          <p className="yds-panic-spx-val__summary-head">{summary.headline}</p>
-          <ul className="yds-panic-spx-val__summary-list">
-            {summary.lines.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-          <p className="yds-panic-spx-val__summary-note">{summary.note}</p>
-          <p className="yds-panic-spx-val__quality">
-            시장 소스 재계산 V2 기준 · YDS History DB 저장값과 별도
-            {summary.missingPanicDates.length
-              ? ` · 공백: ${summary.missingPanicDates.join(", ")}`
-              : ""}
-          </p>
-        </aside>
-      ) : null}
-
-      {timingTable ? (
-        <section className="yds-panic-spx-val__timing" aria-label="저점별 매수 타이밍 검증표">
-          <h4 className="yds-panic-spx-val__timing-title">저점별 매수 타이밍 검증표</h4>
-          <p className="yds-panic-spx-val__timing-sub">D−20 ~ D0 · 각 threshold 최초 도달</p>
-          <div className="yds-panic-spx-val__timing-scroll">
-            <table className="yds-panic-spx-val__timing-table">
-              <thead>
-                <tr>
-                  <th scope="col">저점</th>
-                  <th scope="col" className="is-num">
-                    SPX 하락
-                  </th>
-                  <th scope="col">50 최초</th>
-                  <th scope="col" className="is-num">
-                    50→저점
-                  </th>
-                  <th scope="col">60 최초</th>
-                  <th scope="col" className="is-num">
-                    60→저점
-                  </th>
-                  <th scope="col">70 최초</th>
-                  <th scope="col" className="is-num">
-                    70→저점
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {timingTable.rows.map((r) => (
-                  <tr key={r.d0}>
-                    <th scope="row" className="font-mono tabular-nums">
-                      {r.d0}
-                    </th>
-                    <td className="is-num font-mono tabular-nums">{r.ddLabel}</td>
-                    <td className="font-mono tabular-nums">{r.t50Label}</td>
-                    <td className="is-num font-mono tabular-nums">{r.t50ToBottomLabel}</td>
-                    <td className="font-mono tabular-nums">{r.t60Label}</td>
-                    <td className="is-num font-mono tabular-nums">{r.t60ToBottomLabel}</td>
-                    <td className="font-mono tabular-nums">{r.t70Label}</td>
-                    <td className="is-num font-mono tabular-nums">{r.t70ToBottomLabel}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <ul className="yds-panic-spx-val__timing-agg">
-            <li>
-              Panic 50 → 저점 평균 추가하락:{" "}
-              <span className="font-mono tabular-nums">
-                {timingTable.aggregates.avgDropAfter50 == null
-                  ? "—"
-                  : formatPanicTimingPct(timingTable.aggregates.avgDropAfter50)}
-              </span>
-            </li>
-            <li>
-              Panic 60 → 저점 평균 추가하락:{" "}
-              <span className="font-mono tabular-nums">
-                {timingTable.aggregates.avgDropAfter60 == null
-                  ? "—"
-                  : formatPanicTimingPct(timingTable.aggregates.avgDropAfter60)}
-              </span>
-            </li>
-            <li>
-              Panic 70 → 저점 평균 추가하락:{" "}
-              <span className="font-mono tabular-nums">
-                {timingTable.aggregates.avgDropAfter70 == null
-                  ? "—"
-                  : formatPanicTimingPct(timingTable.aggregates.avgDropAfter70)}
-              </span>
-            </li>
-            <li>
-              D0 도달률: ≥50 {timingTable.aggregates.reach50} · ≥60{" "}
-              {timingTable.aggregates.reach60} · ≥70 {timingTable.aggregates.reach70}
-            </li>
-          </ul>
-          <p className="yds-panic-spx-val__timing-disclaimer">{timingTable.disclaimer}</p>
-        </section>
-      ) : null}
     </div>
   )
 }
