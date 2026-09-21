@@ -1,40 +1,24 @@
-import { useMemo } from "react"
-import {
-  buildMarketTrendView,
-  MARKET_TREND_WINDOW_DAYS,
-} from "../../content/ydsMarketTrendSeries.js"
-import YdsMarketTrendChart from "./YdsMarketTrendChart.jsx"
+import YdsPanicSpxValidationChart from "./YdsPanicSpxValidationChart.jsx"
 
 /**
- * Panic Index 추이만 표시 (시장 상태 추이 UI 제거)
+ * Panic Index History — 2023~현재 Panic V2 × S&P500 장기 검증
+ * (시장 소스 재계산 V2 · 현재 Panic 카드 / Fear Scale 비변경)
  * @param {{ historyRows?: object[]; className?: string }} props
  */
-export default function YdsMarketTrendSection({ historyRows = [], className = "" }) {
-  const view = useMemo(() => buildMarketTrendView(historyRows), [historyRows])
-
-  const hasData = view.panic.chartData.length > 0
-  if (!hasData) return null
-
+export default function YdsMarketTrendSection({ historyRows: _historyRows = [], className = "" }) {
   return (
     <section
-      className={["yds-market-trend", "yds-market-trend--panic-only", className]
+      className={["yds-market-trend", "yds-market-trend--panic-spx-val", className]
         .filter(Boolean)
         .join(" ")}
-      aria-label={`최근 ${MARKET_TREND_WINDOW_DAYS}일 Panic Index 추이`}
+      aria-label="Panic Index × S&P500 장기 검증"
     >
       <h3 className="yds-market-trend__heading">PANIC INDEX HISTORY</h3>
       <p className="yds-market-trend__sub">
-        최근 {MARKET_TREND_WINDOW_DAYS}일 Panic Index 흐름 · FEAR SCALE과 동일한 5단계 기준
+        2023–현재 · Panic V2와 S&P500을 같은 시간축에서 비교 · 기준선 50 / 60 / 70
       </p>
       <div className="yds-market-trend__panel yds-market-trend__panel--solo yds-market-trend__panel--featured">
-        <YdsMarketTrendChart
-          title="Panic Index"
-          chartData={view.panic.chartData}
-          dataKey="panicIntensity"
-          current={view.panic.current}
-          currentMeta={view.panic.currentMeta}
-          chartKind="panic"
-        />
+        <YdsPanicSpxValidationChart />
       </div>
     </section>
   )
