@@ -97,3 +97,145 @@ export function formatPanicSpxValidationSummary(series) {
     span: series.span,
   }
 }
+
+/** @param {string} date */
+export function formatPanicTimingMd(date) {
+  if (!date || date.length < 10) return "—"
+  return `${date.slice(5, 7)}-${date.slice(8, 10)}`
+}
+
+/**
+ * @param {number | null | undefined} n
+ * @param {number} [digits]
+ */
+export function formatPanicTimingPct(n, digits = 1) {
+  if (n == null || !Number.isFinite(Number(n))) return "미도달"
+  const v = Number(n)
+  const body = Math.abs(v).toFixed(digits)
+  if (v > 0) return `+${body}%`
+  if (v < 0) return `-${body}%`
+  return `${(0).toFixed(digits)}%`
+}
+
+/**
+ * D-20~D0 구간에서 threshold 최초 도달일
+ * @param {PanicSpxValidationRow[]} windowRows
+ * @param {number} thr
+ * @returns {{ date: string; spx: number; panic: number } | null}
+ */
+export function firstPanicReachInWindow(windowRows, thr) {
+  for (const row of windowRows) {
+    if (row?.panic != null && Number.isFinite(row.panic) && row.panic >= thr && row.spx > 0) {
+      return { date: row.date, spx: row.spx, panic: row.panic }
+    }
+  }
+  return null
+}
+
+/**
+ * @param {number} signalSpx
+ * @param {number} d0Spx
+ */
+export function additionalDrawdownToBottom(signalSpx, d0Spx) {
+  if (!Number.isFinite(signalSpx) || !Number.isFinite(d0Spx) || signalSpx === 0) return null
+  return round1((d0Spx / signalSpx - 1) * 100)
+}
+
+function round1(n) {
+  return Math.round(Number(n) * 10) / 10
+}
+
+function avgFinite(xs) {
+  const vals = xs.filter((x) => x != null && Number.isFinite(x))
+  if (!vals.length) return null
+  return round1(vals.reduce((a, b) => a + b, 0) / vals.length)
+}
+
+/**
+ * 저점별 매수 타이밍 검증표 (D-20~D0, 차트 rows만 사용)
+ * @param {PanicSpxValidationSeries | null | undefined} series
+ */
+export function buildPanicEntryTimingTable(series) {
+  if (!series?.rows?.length || !series?.bottoms?.length) return null
+
+  const byDate = new Map(series.rows.map((r) => [r.date, r]))
+  const dates = series.rows.map((r) => r.date)
+
+  /** @type {Array<{
+   *   d0: string
+   *   d0Label: string
+   *   ddPct: number | null
+   *   ddLabel: string
+   *   t50Date: string | null
+   *   t50Label: string
+   *   t50ToBottomPct: number | null
+   *   t50ToBottomLabel: string
+   *   t60Date: string | null
+   *   t60Label: string
+   *   t60ToBottomPct: number | null
+   *   t60ToBottomLabel: string
+   *   t70Date: string | null
+   *   t70Label: string
+   *   t70ToBottomPct: number | null
+   *   t70ToBottomLabel: string
+   * }>} */
+  const rows = []
+
+  for (const bottom of series.bottoms) {
+    const d0 = bottom.d0
+    const i0 = dates.indexOf(d0)
+    if (i0 < 0) continue
+    const d0Row = byDate.get(d0)
+    const d0Spx = d0Row?.spx ?? bottom.spx
+    const windowRows = series.rows.slice(Math.max(0, i0 - 20), i0 + 1)
+
+    const r50 = firstPanicReachInWindow(windowRows, 50)
+    const r60 = firstPanicReachInWindow(windowRows, 60)
+    const r70 = firstPanicReachInWindow(windowRows, 70)
+
+    const dd50 = r50 ? additionalDrawdownToBottom(r50.spx, d0Spx) : null
+    const dd60 = r60 ? additionalDrawdownToBottom(r60.spx, d0Spx) : null
+    const dd70 = r70 ? additionalDrawdownToBottom(r70.spx, d0Spx) : null
+
+    rows.push({
+      d0,
+      d0Label: d0,
+      ddPct: bottom.dd_pct ?? null,
+      ddLabel: formatPanicTimingPct(bottom.dd_pct ?? null),
+      t50Date: r50?.date ?? null,
+      t50Label: r50 ? formatPanicTimingMd(r50.date) : "미도달",
+      t50ToBottomPct: dd50,
+      t50ToBottomLabel: r50 ? formatPanicTimingPct(dd50) : "미도달",
+      t60Date: r60?.date ?? null,
+      t60Label: r60 ? formatPanicTimingMd(r60.date) : "미도달",
+      t60ToBottomPct: dd60,
+      t60ToBottomLabel: r60 ? formatPanicTimingPct(dd60) : "미도달",
+      t70Date: r70?.date ?? null,
+      t70Label: r70 ? formatPanicTimingMd(r70.date) : "미도달",
+      t70ToBottomPct: dd70,
+      t70ToBottomLabel: r70 ? formatPanicTimingPct(dd70) : "미도달",
+    })
+  }
+
+  const n = rows.length
+  const hit50 = rows.filter((r) => r.t50Date).length
+  const hit60 = rows.filter((r) => r.t60Date).length
+  const hit70 = rows.filter((r) => r.t70Date).length
+
+  return {
+    rows,
+    aggregates: {
+      avgDropAfter50: avgFinite(rows.map((r) => r.t50ToBottomPct)),
+      avgDropAfter60: avgFinite(rows.map((r) => r.t60ToBottomPct)),
+      avgDropAfter70: avgFinite(rows.map((r) => r.t70ToBottomPct)),
+      reach50: `${hit50}/${n}`,
+      reach60: `${hit60}/${n}`,
+      reach70: `${hit70}/${n}`,
+      reach50Pct: n ? round1((100 * hit50) / n) : null,
+      reach60Pct: n ? round1((100 * hit60) / n) : null,
+      reach70Pct: n ? round1((100 * hit70) / n) : null,
+    },
+    disclaimer:
+      "이 표는 과거 주요 저점에서 Panic 신호와 SPX 저점의 시간 관계를 확인하기 위한 참고 자료이며, 미래 수익을 보장하지 않습니다.",
+  }
+}

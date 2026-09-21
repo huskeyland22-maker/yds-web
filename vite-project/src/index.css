@@ -27900,6 +27900,80 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #64748b;
 }
 
+.yds-panic-spx-val__timing {
+  margin-top: 0.35rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.yds-panic-spx-val__timing-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #e2e8f0;
+}
+
+.yds-panic-spx-val__timing-sub {
+  margin: 0.25rem 0 0.55rem;
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+.yds-panic-spx-val__timing-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.yds-panic-spx-val__timing-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font-size: 0.68rem;
+}
+
+.yds-panic-spx-val__timing-table th,
+.yds-panic-spx-val__timing-table td {
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  text-align: left;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.yds-panic-spx-val__timing-table thead th {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.62rem;
+}
+
+.yds-panic-spx-val__timing-table .is-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.yds-panic-spx-val__timing-table tbody th {
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.yds-panic-spx-val__timing-agg {
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: #cbd5e1;
+}
+
+.yds-panic-spx-val__timing-disclaimer {
+  margin: 0.55rem 0 0;
+  font-size: 0.62rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
 @media (max-width: 640px) {
   .yds-panic-spx-val__summary-list {
     grid-template-columns: 1fr;

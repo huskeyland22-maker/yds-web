@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 import {
+  additionalDrawdownToBottom,
+  buildPanicEntryTimingTable,
+  firstPanicReachInWindow,
   formatPanicSpxValidationSummary,
+  formatPanicTimingMd,
+  formatPanicTimingPct,
   resolveBottomWindowDomain,
 } from "./ydsPanicSpxValidationSeries.js"
 
@@ -17,12 +22,17 @@ const sample = {
     avg_panic_peak: 64.2,
     avg_peak_lag_td: -0.8,
   },
-  bottoms: [],
+  bottoms: [
+    { d0: "2024-04-19", spx: 4967, dd_pct: -5.5 },
+    { d0: "2025-03-13", spx: 5521, dd_pct: -10.1 },
+  ],
   rows: [
-    { date: "2025-03-01", spx: 1, panic: 40 },
-    { date: "2025-03-04", spx: 1, panic: 50 },
-    { date: "2025-03-13", spx: 1, panic: 55 },
-    { date: "2025-03-20", spx: 1, panic: 45 },
+    { date: "2024-04-01", spx: 5200, panic: 35 },
+    { date: "2024-04-19", spx: 4967, panic: 41 },
+    { date: "2025-02-20", spx: 6000, panic: 40 },
+    { date: "2025-03-04", spx: 5778, panic: 50 },
+    { date: "2025-03-10", spx: 5600, panic: 55 },
+    { date: "2025-03-13", spx: 5521, panic: 55 },
   ],
 }
 
@@ -36,11 +46,53 @@ describe("ydsPanicSpxValidationSeries", () => {
   })
 
   it("resolves D-20..D+5 domain around a bottom", () => {
-    const domain = resolveBottomWindowDomain(sample, "2025-03-13", 2, 1)
+    const domain = resolveBottomWindowDomain(
+      {
+        ...sample,
+        rows: [
+          { date: "2025-03-01", spx: 1, panic: 40 },
+          { date: "2025-03-04", spx: 1, panic: 50 },
+          { date: "2025-03-13", spx: 1, panic: 55 },
+          { date: "2025-03-20", spx: 1, panic: 45 },
+        ],
+      },
+      "2025-03-13",
+      2,
+      1,
+    )
     expect(domain).toEqual(["2025-03-01", "2025-03-20"])
   })
 
   it("returns null for unknown bottom", () => {
     expect(resolveBottomWindowDomain(sample, "2099-01-01")).toBeNull()
+  })
+
+  it("formats timing labels", () => {
+    expect(formatPanicTimingMd("2025-04-08")).toBe("04-08")
+    expect(formatPanicTimingPct(-12.34)).toBe("-12.3%")
+    expect(formatPanicTimingPct(null)).toBe("미도달")
+  })
+
+  it("finds first reach and additional drawdown", () => {
+    const win = [
+      { date: "2025-03-01", spx: 6000, panic: 40 },
+      { date: "2025-03-04", spx: 5778, panic: 50 },
+      { date: "2025-03-13", spx: 5521, panic: 55 },
+    ]
+    expect(firstPanicReachInWindow(win, 50)?.date).toBe("2025-03-04")
+    expect(additionalDrawdownToBottom(5778, 5521)).toBe(-4.4)
+  })
+
+  it("builds entry timing table with 미도달", () => {
+    const table = buildPanicEntryTimingTable(sample)
+    expect(table?.rows).toHaveLength(2)
+    const march = table?.rows.find((r) => r.d0 === "2025-03-13")
+    expect(march?.t50Label).toBe("03-04")
+    expect(march?.t50ToBottomLabel).toMatch(/^-/)
+    expect(march?.t60Label).toBe("미도달")
+    const april = table?.rows.find((r) => r.d0 === "2024-04-19")
+    expect(april?.t50Label).toBe("미도달")
+    expect(table?.aggregates.reach50).toBe("1/2")
+    expect(table?.disclaimer).toContain("미래 수익을 보장하지 않습니다")
   })
 })
