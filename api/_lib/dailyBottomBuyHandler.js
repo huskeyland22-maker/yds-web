@@ -1,6 +1,5 @@
 /**
- * GET /api/daily-bottom-buy
- * Live snapshots for YDS Daily Bottom Buy V1 (10 ETFs).
+ * Daily Bottom Buy V1 HTTP handler (hosted by market-data via ydsMode dispatch).
  * Does not touch Panic Index.
  */
 import {
@@ -10,7 +9,7 @@ import {
   evaluateBars,
   buildEtfCard,
   sortCardsByOpportunity,
-} from "./_lib/dailyBottomBuyEngine.js"
+} from "./dailyBottomBuyEngine.js"
 
 const YAHOO_HEADERS = {
   "User-Agent":
@@ -53,7 +52,11 @@ async function fetchYahooOhlcv(symbol) {
   return bars
 }
 
-export default async function handler(req, res) {
+/**
+ * @param {import('http').IncomingMessage & { method?: string, query?: Record<string, string | string[]> }} req
+ * @param {import('http').ServerResponse & { setHeader: Function, status: Function, json: Function, end: Function }} res
+ */
+export async function handleDailyBottomBuy(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0")
   res.setHeader("Access-Control-Allow-Origin", "*")
   if (req.method === "OPTIONS") {

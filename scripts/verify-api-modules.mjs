@@ -36,7 +36,8 @@ const modules = [
   "api/_lib/firebaseIdToken.js",
   "api/portfolio-sync.js",
   "api/_lib/dailyBottomBuyEngine.js",
-  "api/daily-bottom-buy.js",
+  "api/_lib/dailyBottomBuyHandler.js",
+  "api/market-data.js",
 ]
 
 let failed = 0

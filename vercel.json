@@ -15,6 +15,7 @@
     { "source": "/api/panic/history-v2/backfill", "destination": "/api/panic?mode=backfill" },
     { "source": "/api/panic/history-v2", "destination": "/api/panic?mode=v2" },
     { "source": "/api/panic/update", "destination": "/api/panic?mode=update" },
+    { "source": "/api/daily-bottom-buy", "destination": "/api/market-data?ydsMode=daily-bottom-buy" },
     { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
   ],
   "headers": [

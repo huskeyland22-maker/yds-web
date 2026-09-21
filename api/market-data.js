@@ -1,4 +1,5 @@
 import { BOND_FRED_SERIES, fetchAllBondFredSeries } from "./_lib/fredBond.js"
+import { handleDailyBottomBuy } from "./_lib/dailyBottomBuyHandler.js"
 
 /** Yahoo — 채권 제외 (10Y는 FRED DGS10만) */
 const SYMBOLS = [
@@ -47,7 +48,19 @@ async function fetchYahooQuote(symbol) {
   return { price, changePct }
 }
 
-export default async function handler(_req, res) {
+function resolveYdsMode(req) {
+  const raw = req?.query?.ydsMode
+  if (Array.isArray(raw)) return String(raw[0] || "")
+  return raw == null ? "" : String(raw)
+}
+
+export default async function handler(req, res) {
+  // Early dispatch: /api/daily-bottom-buy → rewrite → ?ydsMode=daily-bottom-buy
+  // Must not alter existing /api/market-data behavior when mode is absent.
+  if (resolveYdsMode(req) === "daily-bottom-buy") {
+    return handleDailyBottomBuy(req, res)
+  }
+
   const parsedData = {
     kospi: null,
     kosdaq: null,
