@@ -27165,8 +27165,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-desk--panic-focus .yds-market-desk__slot--panic-center,
-.yds-market-desk--panic-focus .yds-market-desk__slot--trend,
-.yds-market-desk--panic-focus .yds-market-desk__slot--ref-fold {
+.yds-market-desk--panic-focus .yds-market-desk__slot--trend {
   background: transparent;
   border: none;
   box-shadow: none;

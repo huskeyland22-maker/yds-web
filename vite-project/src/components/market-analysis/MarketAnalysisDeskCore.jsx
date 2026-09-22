@@ -1,20 +1,11 @@
 import { useMemo, useEffect, useRef, useState } from "react"
 import YdsPanicIndexCenter from "./YdsPanicIndexCenter.jsx"
 import YdsMarketTrendSection from "./YdsMarketTrendSection.jsx"
-import YdsMarketAnalysisReferenceFold from "./YdsMarketAnalysisReferenceFold.jsx"
-import YdsMarketRecommendStrip from "./YdsMarketRecommendStrip.jsx"
-import YdsMarketTop20Strip from "./YdsMarketTop20Strip.jsx"
-import YdsDashboardWeekEvents from "./YdsDashboardWeekEvents.jsx"
-import SectionErrorBoundary from "../SectionErrorBoundary.jsx"
-import YdsDashboardLiquiditySynthesis from "./YdsDashboardLiquiditySynthesis.jsx"
-import YdsDashboardLiquidityLaneDesk from "./YdsDashboardLiquidityLaneDesk.jsx"
 import { isMacroRiskEnabled } from "../../macro-risk/featureFlag.js"
 import { useMacroRiskSnapshot } from "../../macro-risk/useMacroRiskSnapshot.js"
 import { buildMarketCycleFlowReport } from "../../content/ydsMarketCycleFlow.js"
 import { fetchPanicLabBenchmarks } from "../../content/ydsEtfDailyLoader.js"
-import { buildUnifiedWeekEventStrip } from "../../content/ydsInvestmentCalendarEngine.js"
 import { buildDualLiquidityReport } from "../../market-os/liquidityDualEngine.js"
-import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import { logPanicIntensityAudit } from "../../utils/panicIntensityAudit.js"
 import { captureTodayMarketStateHistory } from "../../content/ydsMarketStateHistory.js"
 import { resolveUnifiedMarketStateLabel } from "../../content/ydsUnifiedMarketState.js"
@@ -23,6 +14,7 @@ import { resolveMarketPositionView } from "../../content/ydsMarketPositionEngine
 
 /**
  * 시장분석 데스크 — Panic Index 중심 (장기 투자 참고)
+ * 노출: Panic Index · FEAR SCALE · HISTORY · DRIVERS
  * 시장 상태(Market State) 사용자 UI는 노출하지 않음. 내부 히스토리 캡처·엔진은 보존.
  * @param {{
  *   panicData: object | null
@@ -61,7 +53,7 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     const asOfDate = safeHistory[safeHistory.length - 1]?.date ?? null
     return {
       qqqPrices: etfPrices.QQQ,
-      soxxPrices: etfPrices.SOX,
+      soxxPrices: etfPrices.SOXX,
       spyPrices: etfPrices.SPY,
       asOfDate,
     }
@@ -74,12 +66,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
 
   const macroRiskEnabled = isMacroRiskEnabled()
   const bondSnapshot = useMacroRiskSnapshot(macroRiskEnabled ? panicData : null)
-  const marketContext = useYdsMarketContext()
-
-  const weekEvents = useMemo(
-    () => buildUnifiedWeekEventStrip(marketContext?.ready ? marketContext : null),
-    [marketContext],
-  )
 
   const dualLiquidity = useMemo(() => {
     if (!macroRiskEnabled) return null
@@ -119,11 +105,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     return null
   }
 
-  const hasReferenceBody =
-    Boolean(macroRiskEnabled && dualLiquidity) ||
-    Boolean(weekEvents) ||
-    true
-
   return (
     <div className="yds-market-desk yds-market-desk--panic-focus" id="market-desk" aria-label="YDS 시장분석">
       <div className="yds-market-desk__stream">
@@ -137,46 +118,6 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
             />
           }
         />
-
-        {hasReferenceBody ? (
-          <YdsMarketAnalysisReferenceFold className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--ref-fold">
-            {macroRiskEnabled ? (
-              <YdsDashboardLiquiditySynthesis
-                report={dualLiquidity}
-                className="yds-market-desk__slot yds-market-desk__slot--liquidity-summary"
-              />
-            ) : null}
-
-            {macroRiskEnabled && dualLiquidity ? (
-              <div className="yds-market-desk__liquidity-lanes">
-                {dualLiquidity.market ? (
-                  <YdsDashboardLiquidityLaneDesk
-                    lane={dualLiquidity.market}
-                    loading={bondSnapshot.loading}
-                    className="yds-market-desk__slot yds-market-desk__slot--liquidity-market"
-                  />
-                ) : null}
-                {dualLiquidity.policy ? (
-                  <YdsDashboardLiquidityLaneDesk
-                    lane={dualLiquidity.policy}
-                    loading={bondSnapshot.loading}
-                    className="yds-market-desk__slot yds-market-desk__slot--liquidity-policy"
-                  />
-                ) : null}
-              </div>
-            ) : null}
-
-            <SectionErrorBoundary label="이번주 주요 이벤트">
-              <YdsDashboardWeekEvents
-                report={weekEvents}
-                className="yds-market-desk__slot yds-market-desk__slot--week-events"
-              />
-            </SectionErrorBoundary>
-
-            <YdsMarketTop20Strip className="yds-market-desk__slot yds-market-desk__slot--top20" />
-            <YdsMarketRecommendStrip className="yds-market-desk__slot yds-market-desk__slot--recommend" />
-          </YdsMarketAnalysisReferenceFold>
-        ) : null}
       </div>
     </div>
   )

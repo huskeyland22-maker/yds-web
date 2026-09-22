@@ -12,7 +12,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { formatChartAxisMd } from "../../utils/chartDateFormat.js"
+import {
+  dayKeyToUtcMs,
+  formatHistoryTimeAxisTick,
+  pickEvenTimeAxisTicks,
+  resolveHistoryDefaultBrushIndex,
+} from "../../utils/chartDateFormat.js"
 import {
   PANIC_SPX_VALIDATION_SERIES_URL,
   resolveBottomWindowDomain,
@@ -23,6 +28,11 @@ const CHART_HEIGHT_DESKTOP = 320
 const CHART_HEIGHT_MOBILE = 248
 const MARGIN_DESKTOP = { top: 12, right: 48, left: 8, bottom: 8 }
 const MARGIN_MOBILE = { top: 8, right: 22, left: 0, bottom: 4 }
+/** Default-view X label density (data points unchanged). */
+const X_TICK_TARGET_DESKTOP = 6
+const X_TICK_TARGET_MOBILE = 5
+/** 첫 화면 기본 zoom — 끝날짜 기준 최근 개월 (전체 데이터는 Brush로 탐색). */
+const DEFAULT_ZOOM_MONTHS = 17
 
 /** @param {{ active?: boolean; payload?: object[] }} props */
 function ValidationTooltip({ active, payload }) {
@@ -47,6 +57,7 @@ function ValidationTooltip({ active, payload }) {
 
 /**
  * Panic Index History — Panic V2 × S&P500 (시장 소스 재계산 시계열)
+ * X축: timestamp 시간축 · 첫 화면은 최근 ~17개월 zoom · 전체 데이터는 Brush로 유지
  */
 export default function YdsPanicSpxValidationChart() {
   const isMobile = useIsMobileLayout()
@@ -63,6 +74,9 @@ export default function YdsPanicSpxValidationChart() {
   const [loadError, setLoadError] = useState(/** @type {string | null} */ (null))
   const [domain, setDomain] = useState(/** @type {[string, string] | null} */ (null))
   const [activeBottom, setActiveBottom] = useState(/** @type {string | null} */ (null))
+  const [brushIndex, setBrushIndex] = useState(
+    /** @type {{ startIndex: number; endIndex: number } | null} */ (null),
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -89,12 +103,23 @@ export default function YdsPanicSpxValidationChart() {
   const chartData = useMemo(() => {
     if (!series?.rows?.length) return []
     const bottomSet = new Set((series.bottoms ?? []).map((b) => b.d0))
-    return series.rows.map((r) => ({
-      ...r,
-      axisLabel: formatChartAxisMd(r.date),
-      isBottom: bottomSet.has(r.date),
-    }))
+    return series.rows.map((r) => {
+      const ts = dayKeyToUtcMs(r.date)
+      return {
+        ...r,
+        ts: ts ?? 0,
+        isBottom: bottomSet.has(r.date),
+      }
+    })
   }, [series])
+
+  const defaultBrushIndex = useMemo(
+    () => resolveHistoryDefaultBrushIndex(chartData, DEFAULT_ZOOM_MONTHS),
+    [chartData],
+  )
+
+  /** 활성 Brush 구간 — 미설정 시 기본 최근 N개월 */
+  const activeBrushIndex = brushIndex ?? defaultBrushIndex
 
   const filteredData = useMemo(() => {
     if (!domain) return chartData
@@ -102,13 +127,50 @@ export default function YdsPanicSpxValidationChart() {
     return chartData.filter((r) => r.date >= lo && r.date <= hi)
   }, [chartData, domain])
 
+  /** Visible rows for axis domain/ticks only (Brush / bottom focus). */
+  const visibleRows = useMemo(() => {
+    if (!filteredData.length) return []
+    if (!domain && activeBrushIndex) {
+      const lo = Math.max(0, Math.min(activeBrushIndex.startIndex, filteredData.length - 1))
+      const hi = Math.max(lo, Math.min(activeBrushIndex.endIndex, filteredData.length - 1))
+      return filteredData.slice(lo, hi + 1)
+    }
+    return filteredData
+  }, [filteredData, domain, activeBrushIndex])
+
+  const xTimeDomain = useMemo(() => {
+    if (visibleRows.length < 1) return /** @type {[number, number] | null} */ (null)
+    const startMs = visibleRows[0].ts
+    const endMs = visibleRows[visibleRows.length - 1].ts
+    if (!(endMs >= startMs)) return null
+    return /** @type {[number, number]} */ ([startMs, endMs])
+  }, [visibleRows])
+
+  const xAxisTicks = useMemo(() => {
+    if (!xTimeDomain) return []
+    const [startMs, endMs] = xTimeDomain
+    const base = isMobile ? X_TICK_TARGET_MOBILE : X_TICK_TARGET_DESKTOP
+    const maxT = isMobile ? 8 : 10
+    const fullSpan = Math.max(
+      1,
+      (chartData[chartData.length - 1]?.ts ?? 0) - (chartData[0]?.ts ?? 0),
+    )
+    const visSpan = Math.max(1, endMs - startMs)
+    const ratio = visSpan / fullSpan
+    const zoomBoost = Math.round((1 - Math.min(1, ratio)) * (maxT - base) * 1.2)
+    const target = Math.min(maxT, Math.max(base, base + zoomBoost))
+    return pickEvenTimeAxisTicks(startMs, endMs, target)
+  }, [xTimeDomain, chartData, isMobile])
+
+  const xSpanMs = xTimeDomain ? xTimeDomain[1] - xTimeDomain[0] : 0
+
   const bottomMarkers = useMemo(() => {
     if (!series?.bottoms?.length) return []
     return series.bottoms
       .map((b) => {
         const row = chartData.find((r) => r.date === b.d0)
         if (!row) return null
-        return { ...b, chartSpx: row.spx, chartPanic: row.panic }
+        return { ...b, chartSpx: row.spx, chartPanic: row.panic, ts: row.ts }
       })
       .filter(Boolean)
   }, [series, chartData])
@@ -117,11 +179,41 @@ export default function YdsPanicSpxValidationChart() {
     if (!series?.bottoms?.length || !activeBottom) return []
     const b = series.bottoms.find((x) => x.d0 === activeBottom)
     if (!b) return []
-    /** @type {{ key: string; date: string; panic: number; label: string }[]} */
+    /** @type {{ key: string; date: string; ts: number; panic: number; label: string }[]} */
     const marks = []
-    if (b.first50) marks.push({ key: "50", date: b.first50.date, panic: b.first50.panic, label: "50" })
-    if (b.first60) marks.push({ key: "60", date: b.first60.date, panic: b.first60.panic, label: "60" })
-    if (b.first70) marks.push({ key: "70", date: b.first70.date, panic: b.first70.panic, label: "70" })
+    if (b.first50) {
+      const ts = dayKeyToUtcMs(b.first50.date)
+      if (ts != null)
+        marks.push({
+          key: "50",
+          date: b.first50.date,
+          ts,
+          panic: b.first50.panic,
+          label: "50",
+        })
+    }
+    if (b.first60) {
+      const ts = dayKeyToUtcMs(b.first60.date)
+      if (ts != null)
+        marks.push({
+          key: "60",
+          date: b.first60.date,
+          ts,
+          panic: b.first60.panic,
+          label: "60",
+        })
+    }
+    if (b.first70) {
+      const ts = dayKeyToUtcMs(b.first70.date)
+      if (ts != null)
+        marks.push({
+          key: "70",
+          date: b.first70.date,
+          ts,
+          panic: b.first70.panic,
+          label: "70",
+        })
+    }
     return marks
   }, [series, activeBottom])
 
@@ -131,19 +223,37 @@ export default function YdsPanicSpxValidationChart() {
       if (activeBottom === d0) {
         setActiveBottom(null)
         setDomain(null)
+        setBrushIndex(defaultBrushIndex)
         return
       }
       const win = resolveBottomWindowDomain(series, d0, 20, 5)
       setActiveBottom(d0)
       setDomain(win)
+      setBrushIndex(null)
     },
-    [series, activeBottom],
+    [series, activeBottom, defaultBrushIndex],
   )
 
   const resetZoom = useCallback(() => {
     setActiveBottom(null)
     setDomain(null)
+    setBrushIndex(defaultBrushIndex)
+  }, [defaultBrushIndex])
+
+  const onBrushChange = useCallback((range) => {
+    if (
+      range &&
+      typeof range.startIndex === "number" &&
+      typeof range.endIndex === "number"
+    ) {
+      setBrushIndex({ startIndex: range.startIndex, endIndex: range.endIndex })
+    }
   }, [])
+
+  const formatXTick = useCallback(
+    (v) => formatHistoryTimeAxisTick(v, xSpanMs),
+    [xSpanMs],
+  )
 
   if (loadError) {
     return (
@@ -153,7 +263,7 @@ export default function YdsPanicSpxValidationChart() {
     )
   }
 
-  if (!series || chartData.length < 2) {
+  if (!series || chartData.length < 2 || !xTimeDomain) {
     return (
       <div className="yds-panic-spx-val yds-panic-spx-val--empty" role="status">
         <p className="yds-panic-spx-val__empty">히스토리 시계열 준비중…</p>
@@ -165,7 +275,7 @@ export default function YdsPanicSpxValidationChart() {
     <div className="yds-panic-spx-val">
       <div className="yds-panic-spx-val__toolbar">
         <p className="yds-panic-spx-val__hint">
-          저점 구간을 보려면 칩을 누르세요 · 전체는 Reset
+          저점 구간을 보려면 칩을 누르세요 · 최근 보기는 Reset
         </p>
         <button type="button" className="yds-panic-spx-val__reset" onClick={resetZoom}>
           Reset
@@ -196,9 +306,13 @@ export default function YdsPanicSpxValidationChart() {
           <ComposedChart data={filteredData} margin={chartMargin}>
             <CartesianGrid stroke="rgba(148,163,184,0.07)" vertical={false} />
             <XAxis
-              dataKey="date"
-              tickFormatter={(v) => formatChartAxisMd(String(v))}
-              minTickGap={isMobile ? 36 : 28}
+              dataKey="ts"
+              type="number"
+              scale="time"
+              domain={xTimeDomain}
+              ticks={xAxisTicks}
+              interval={0}
+              tickFormatter={formatXTick}
               tick={{ fill: "#4b5563", fontSize: isMobile ? 9 : 10 }}
               axisLine={{ stroke: "rgba(148,163,184,0.16)" }}
               tickLine={false}
@@ -309,7 +423,7 @@ export default function YdsPanicSpxValidationChart() {
               <ReferenceDot
                 key={`bottom-${b.d0}`}
                 yAxisId="spx"
-                x={b.d0}
+                x={b.ts}
                 y={b.chartSpx}
                 r={activeBottom === b.d0 ? 5 : 3.5}
                 fill="#f8fafc"
@@ -333,7 +447,7 @@ export default function YdsPanicSpxValidationChart() {
               <ReferenceDot
                 key={`tier-${m.key}-${m.date}`}
                 yAxisId="panic"
-                x={m.date}
+                x={m.ts}
                 y={m.panic}
                 r={4}
                 fill={m.key === "70" ? "#ef4444" : m.key === "60" ? "#f97316" : "#eab308"}
@@ -349,14 +463,17 @@ export default function YdsPanicSpxValidationChart() {
               />
             ))}
 
-            {!domain ? (
+            {!domain && activeBrushIndex ? (
               <Brush
-                dataKey="date"
+                dataKey="ts"
                 height={22}
                 stroke="rgba(148,163,184,0.35)"
                 fill="rgba(15,23,42,0.6)"
-                tickFormatter={(v) => formatChartAxisMd(String(v))}
+                tickFormatter={formatXTick}
                 travellerWidth={8}
+                startIndex={activeBrushIndex.startIndex}
+                endIndex={activeBrushIndex.endIndex}
+                onChange={onBrushChange}
               />
             ) : null}
           </ComposedChart>
