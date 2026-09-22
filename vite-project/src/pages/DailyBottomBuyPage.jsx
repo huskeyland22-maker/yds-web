@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
 import { fetchDailyBottomBuySnapshot } from "../utils/dailyBottomBuyApi.js"
 import {
+  formatDailyBottomDataBasis,
+  pickDailyBottomAsOfDate,
+} from "../utils/dailyBottomBuyDataBasis.js"
+import {
   acknowledgeEpisodeTranche,
   syncDailyBottomEpisodes,
 } from "../content/ydsDailyBottomBuyEpisodes.js"
@@ -122,6 +126,11 @@ export default function DailyBottomBuyPage() {
   const watch = payload?.watch || []
   const waiting = payload?.waiting || []
 
+  const dataBasis = useMemo(() => {
+    const asOfDate = pickDailyBottomAsOfDate(payload?.all)
+    return formatDailyBottomDataBasis({ asOfDate, source: payload?.source })
+  }, [payload])
+
   function onAck(symbol, kind) {
     acknowledgeEpisodeTranche(symbol, kind)
     if (payload?.all) setEpisodes(syncDailyBottomEpisodes(payload.all))
@@ -143,6 +152,9 @@ export default function DailyBottomBuyPage() {
         <p className="yds-dbb__notice-muted">
           분할매수 검토용 보조 신호입니다. 대형 시장 패닉은 Panic Index를 참고합니다.
         </p>
+        <p className="yds-dbb__notice-muted">
+          미국 거래일 종가가 갱신되면 같은 한국 날짜 안에서도 신호가 바뀔 수 있습니다.
+        </p>
       </aside>
 
       {loading && <p className="yds-dbb__status">불러오는 중…</p>}
@@ -150,12 +162,17 @@ export default function DailyBottomBuyPage() {
 
       {payload && (
         <>
-          <p className="yds-dbb__meta">
-            기준 {payload.all?.find((c) => c.asOfDate)?.asOfDate || "—"}
-            {payload.source === "snapshot" ? " · 캐시 스냅샷" : " · 실시간"}
-            {" · "}
-            RSI≤36 · Stoch≤15.4 · BB%B≤0.01 · MA20≤-4.2%
-          </p>
+          <div className="yds-dbb__meta-block">
+            <p className="yds-dbb__meta">{dataBasis.line}</p>
+            {dataBasis.warn ? (
+              <p className="yds-dbb__meta-warn" role="status">
+                {dataBasis.warn}
+              </p>
+            ) : null}
+            <p className="yds-dbb__meta yds-dbb__meta--thresholds">
+              RSI≤36 · Stoch≤15.4 · BB%B≤0.01 · MA20≤-4.2%
+            </p>
+          </div>
 
           <Section
             eyebrow="현재 매수 기회"

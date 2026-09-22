@@ -38607,11 +38607,24 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-dbb__notice p { margin: 0.15rem 0; }
 .yds-dbb__notice-muted { color: #64748b !important; }
-.yds-dbb__meta {
+.yds-dbb__meta-block {
   margin: 0 0 0.75rem;
+}
+.yds-dbb__meta {
+  margin: 0;
   font-size: 0.62rem;
   color: #64748b;
   line-height: 1.35;
+}
+.yds-dbb__meta--thresholds {
+  margin-top: 0.15rem;
+  opacity: 0.92;
+}
+.yds-dbb__meta-warn {
+  margin: 0.2rem 0 0;
+  font-size: 0.62rem;
+  line-height: 1.35;
+  color: #d6b56a;
 }
 .yds-dbb__status { margin: 0.5rem 0; font-size: 0.8rem; color: #94a3b8; }
 .yds-dbb__status--err { color: #fca5a5; }
