@@ -38731,6 +38731,13 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
   color: #94a3b8;
 }
+.yds-dbb-card__watch-hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.58rem;
+  line-height: 1.3;
+  color: #64748b;
+  font-weight: 500;
+}
 .yds-dbb-card__episode { color: #7dd3fc; }
 .yds-dbb-ack {
   margin-top: 0.3rem;

@@ -72,6 +72,9 @@ function EtfCard({ card, episodeNote, compact }) {
       {card.count >= 3 && (
         <p className="yds-dbb-card__hint">{card.stage?.splitHint}</p>
       )}
+      {card.count === 2 ? (
+        <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
+      ) : null}
       {episodeNote ? <p className="yds-dbb-card__episode">{episodeNote}</p> : null}
     </article>
   )
