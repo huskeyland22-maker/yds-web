@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useLocation } from "react-router-dom"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
 import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
@@ -17,12 +17,16 @@ import {
  * }} props
  */
 export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccountSettings }) {
+  const location = useLocation()
   const coreItems = getCoreNavItems()
   const otherItems = getOtherNavItems()
   const footerLinks = getSidebarFooterLinks()
   const aiStatus = sidebarPulse?.aiReportStatus ?? null
   const pickAlertUnread = countUnreadPickAlerts()
   const [otherOpen, setOtherOpen] = useState(false)
+  // Daily Bottom Buy는 신호·단계만으로 충분 — 패닉 기반「오늘의 해석」비표시
+  const hideTodayInterpretation =
+    location.pathname === "/daily-bottom-buy" || location.pathname === "/"
 
   return (
     <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
@@ -147,7 +151,9 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
       </nav>
 
       <div className="mt-auto hidden border-t border-white/[0.06] px-2.5 pb-3 pt-2 lg:block">
-        {aiStatus ? <AiReportMarketStatusBlock status={aiStatus} compact /> : null}
+        {!hideTodayInterpretation && aiStatus ? (
+          <AiReportMarketStatusBlock status={aiStatus} compact />
+        ) : null}
         <button
           type="button"
           onClick={onOpenInputPanel}
