@@ -97,7 +97,14 @@ describe("daily-bottom-buy hobby dispatch", () => {
     )
     assert.equal(snap.ok, true)
     assert.ok(Array.isArray(snap.all))
-    assert.ok(snap.all.length >= 1)
+    assert.equal(snap.all.length, 9)
+    assert.deepEqual(
+      snap.all.map((c) => c.symbol),
+      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB"],
+    )
+    for (const gone of ["XLK", "XLF", "XLY", "XLV"]) {
+      assert.ok(!snap.all.some((c) => c.symbol === gone))
+    }
   })
 
   it("market-data early-dispatches DBB without running market-data body", async () => {
@@ -123,7 +130,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.equal(res.state.body?.system, "daily_bottom_buy_v1")
     assert.equal(res.state.body?.separateFromPanic, true)
     assert.ok(Array.isArray(res.state.body?.all))
-    assert.equal(res.state.body.all.length, 10)
+    assert.equal(res.state.body.all.length, 9)
     assert.ok(dbbCalled, "DBB path should fetch Yahoo OHLCV")
     assert.equal(res.state.body?.parsedData, undefined, "must not return market-data shape")
   })

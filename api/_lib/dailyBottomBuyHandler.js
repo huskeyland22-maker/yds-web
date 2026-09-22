@@ -111,7 +111,8 @@ export async function handleDailyBottomBuy(req, res) {
       opportunities,
       watch,
       waiting,
-      all: cards,
+      // Official universe order (not opportunity-sorted)
+      all: settled,
     })
   } catch (err) {
     res.status(500).json({

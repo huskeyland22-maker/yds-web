@@ -15,18 +15,17 @@
 
 import { enrichBarsWithIndicators } from "./daily-bottom-indicators.mjs"
 
-/** V1 검증 대상 — 임의 추가/삭제 금지 */
+/** Official V2 ETF universe (product) — research studies should stay aligned */
 export const DAILY_BOTTOM_BUY_ETFS = [
-  { symbol: "SMH", theme: "반도체 / AI 칩", group: "ai" },
-  { symbol: "XLK", theme: "기술 / 빅테크 / AI 플랫폼", group: "ai" },
-  { symbol: "GRID", theme: "전력망 / 스마트그리드 / AI 인프라", group: "ai" },
-  { symbol: "URA", theme: "우라늄 / 원전", group: "ai" },
-  { symbol: "BOTZ", theme: "로봇 / 자동화 / Physical AI", group: "ai" },
+  { symbol: "SMH", theme: "반도체·AI 컴퓨팅", group: "ai" },
+  { symbol: "GRID", theme: "전력망·전기화", group: "ai" },
+  { symbol: "QQQ", theme: "빅테크·AI 플랫폼", group: "ai" },
+  { symbol: "IGV", theme: "소프트웨어·클라우드", group: "ai" },
   { symbol: "CIBR", theme: "사이버보안", group: "ai" },
-  { symbol: "ITA", theme: "방산 / 항공우주", group: "ai" },
-  { symbol: "XLF", theme: "금융", group: "cycle" },
-  { symbol: "XLY", theme: "경기소비재", group: "cycle" },
-  { symbol: "XLV", theme: "헬스케어", group: "cycle" },
+  { symbol: "BOTZ", theme: "로봇·자동화", group: "ai" },
+  { symbol: "ITA", theme: "방산·항공우주", group: "ai" },
+  { symbol: "URA", theme: "원전·우라늄", group: "ai" },
+  { symbol: "IBB", theme: "바이오·생명과학", group: "ai" },
 ]
 
 export const DIP_DEF = {

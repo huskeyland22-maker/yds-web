@@ -99,22 +99,21 @@ describe("daily-bottom event detection", () => {
     assert.ok(e.rsi14 != null)
   })
 
-  it("V1 ETF list is fixed at 10 and excludes leverage/XLP cores", () => {
-    assert.equal(DAILY_BOTTOM_BUY_ETFS.length, 10)
+  it("V2 ETF list is fixed at 9 in official order", () => {
+    assert.equal(DAILY_BOTTOM_BUY_ETFS.length, 9)
     const symbols = DAILY_BOTTOM_BUY_ETFS.map((e) => e.symbol)
     assert.deepEqual(symbols, [
       "SMH",
-      "XLK",
       "GRID",
-      "URA",
-      "BOTZ",
+      "QQQ",
+      "IGV",
       "CIBR",
+      "BOTZ",
       "ITA",
-      "XLF",
-      "XLY",
-      "XLV",
+      "URA",
+      "IBB",
     ])
-    for (const bad of ["TQQQ", "SOXL", "XLP", "VOO", "QQQM", "SCHD", "IAU"]) {
+    for (const bad of ["XLK", "XLF", "XLY", "XLV", "TQQQ", "SOXL", "XLP", "VOO", "QQQM", "SCHD", "IAU"]) {
       assert.ok(!symbols.includes(bad))
     }
   })

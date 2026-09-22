@@ -57,7 +57,7 @@ const payload = {
   opportunities: sorted.filter((c) => c.ok && c.count >= 3),
   watch: sorted.filter((c) => c.ok && c.count === 2),
   waiting: sorted.filter((c) => !c.ok || c.count <= 1),
-  all: sorted,
+  all: cards,
 }
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true })

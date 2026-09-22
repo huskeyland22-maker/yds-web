@@ -34,7 +34,10 @@ function EtfCard({ card, episodeNote, compact }) {
         <header className="yds-dbb-card__head">
           <div>
             <h3 className="yds-dbb-card__ticker">{card?.symbol || "—"}</h3>
-            <p className="yds-dbb-card__theme">{card?.themeShort || card?.theme || ""}</p>
+            <p className="yds-dbb-card__theme">
+              {card?.themeShort || card?.theme || ""}
+              {card?.role ? ` · ${card.role}` : ""}
+            </p>
           </div>
           <p className="yds-dbb-card__stage">데이터 없음</p>
         </header>
@@ -49,7 +52,11 @@ function EtfCard({ card, episodeNote, compact }) {
         <div className="min-w-0">
           <h3 className="yds-dbb-card__ticker">
             {card.symbol}
-            <span className="yds-dbb-card__theme-inline"> · {card.themeShort || card.theme}</span>
+            <span className="yds-dbb-card__theme-inline">
+              {" "}
+              · {card.themeShort || card.theme}
+              {card.role ? ` · ${card.role}` : ""}
+            </span>
           </h3>
         </div>
         <div className="yds-dbb-card__badge" aria-label={`${card.count} of 4`}>
@@ -242,13 +249,16 @@ export default function DailyBottomBuyPage() {
 
           <section className="yds-dbb-section">
             <header className="yds-dbb-section__head">
-              <h2 className="yds-dbb-section__title">전체 10개 ETF</h2>
+              <h2 className="yds-dbb-section__title">전체 9개 ETF</h2>
             </header>
             <div className="yds-dbb-all">
               {(payload.all || []).map((card) => (
                 <div key={`all-${card.symbol}`} className="yds-dbb-all__row">
                   <span className="yds-dbb-all__sym">{card.symbol}</span>
-                  <span className="yds-dbb-all__theme">{card.themeShort || card.theme}</span>
+                  <span className="yds-dbb-all__theme">
+                    {card.themeShort || card.theme}
+                    {card.role ? ` · ${card.role}` : ""}
+                  </span>
                   <span className="yds-dbb-all__count">
                     {card.ok ? `${card.count}/4` : "—"}
                   </span>

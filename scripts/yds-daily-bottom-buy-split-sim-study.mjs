@@ -27,7 +27,7 @@ const CACHE = path.join(ROOT, "scripts", ".cache")
 const OUT_JSON = path.join(CACHE, "yds-daily-bottom-buy-split-sim-result.json")
 const OUT_MD = path.join(ROOT, "docs", "YDS_DAILY_BOTTOM_BUY_SPLIT_SIM.md")
 
-const FOCUS = new Set(["SMH", "GRID", "URA", "BOTZ", "XLV"])
+const FOCUS = new Set(["SMH", "GRID", "URA", "BOTZ", "IBB"])
 
 function cachePath(symbol) {
   return path.join(CACHE, `dbb-${symbol.toLowerCase()}-daily-ohlcv.json`)

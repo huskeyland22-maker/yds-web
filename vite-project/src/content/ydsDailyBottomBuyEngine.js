@@ -4,16 +4,15 @@
  */
 
 export const DAILY_BOTTOM_BUY_ETFS = [
-  { symbol: "SMH", theme: "반도체 / AI 칩", themeShort: "반도체" },
-  { symbol: "XLK", theme: "기술 / 빅테크", themeShort: "기술" },
-  { symbol: "GRID", theme: "전력망 / AI 인프라", themeShort: "전력망" },
-  { symbol: "URA", theme: "원전 / 우라늄", themeShort: "우라늄" },
-  { symbol: "BOTZ", theme: "로봇 / Physical AI", themeShort: "로봇" },
-  { symbol: "CIBR", theme: "사이버보안", themeShort: "사이버" },
-  { symbol: "ITA", theme: "방산 / 항공우주", themeShort: "방산" },
-  { symbol: "XLF", theme: "금융", themeShort: "금융" },
-  { symbol: "XLY", theme: "경기소비재", themeShort: "소비재" },
-  { symbol: "XLV", theme: "헬스케어", themeShort: "헬스케어" },
+  { symbol: "SMH", theme: "반도체·AI 컴퓨팅", themeShort: "반도체·AI", role: "AI의 두뇌" },
+  { symbol: "GRID", theme: "전력망·전기화", themeShort: "전력망", role: "AI 데이터센터 전력 인프라" },
+  { symbol: "QQQ", theme: "빅테크·AI 플랫폼", themeShort: "빅테크·AI", role: "AI 플랫폼·클라우드" },
+  { symbol: "IGV", theme: "소프트웨어·클라우드", themeShort: "소프트웨어", role: "AI 수익화" },
+  { symbol: "CIBR", theme: "사이버보안", themeShort: "사이버", role: "AI 시대 보안 인프라" },
+  { symbol: "BOTZ", theme: "로봇·자동화", themeShort: "로봇", role: "Physical AI" },
+  { symbol: "ITA", theme: "방산·항공우주", themeShort: "방산", role: "국가 전략산업·국방" },
+  { symbol: "URA", theme: "원전·우라늄", themeShort: "원전", role: "에너지 안보·원전 공급망" },
+  { symbol: "IBB", theme: "바이오·생명과학", themeShort: "바이오", role: "AI 신약·정밀의료·생명공학" },
 ]
 
 /** V1 product constants — frozen from Train validation */
@@ -215,7 +214,7 @@ export function evaluateBars(bars, th = DAILY_BOTTOM_THRESHOLDS) {
 }
 
 /**
- * @param {{ symbol: string, theme: string, themeShort?: string }} meta
+ * @param {{ symbol: string, theme: string, themeShort?: string, role?: string }} meta
  * @param {object} evaluation evaluateBars result
  */
 export function buildEtfCard(meta, evaluation) {
@@ -224,6 +223,7 @@ export function buildEtfCard(meta, evaluation) {
       symbol: meta.symbol,
       theme: meta.theme,
       themeShort: meta.themeShort || meta.theme,
+      role: meta.role || null,
       ok: false,
       error: evaluation?.error || "error",
       count: 0,
@@ -234,6 +234,7 @@ export function buildEtfCard(meta, evaluation) {
     symbol: meta.symbol,
     theme: meta.theme,
     themeShort: meta.themeShort || meta.theme,
+    role: meta.role || null,
     ok: true,
     asOfDate: evaluation.asOfDate,
     close: evaluation.close,

@@ -14,8 +14,15 @@ import {
 } from "../api/_lib/dailyBottomBuyEngine.js"
 
 describe("daily-bottom-buy V1 product constants", () => {
-  it("keeps 10 ETFs and frozen thresholds", () => {
-    assert.equal(DAILY_BOTTOM_BUY_ETFS.length, 10)
+  it("keeps 9 ETFs and frozen thresholds", () => {
+    assert.equal(DAILY_BOTTOM_BUY_ETFS.length, 9)
+    assert.deepEqual(
+      DAILY_BOTTOM_BUY_ETFS.map((e) => e.symbol),
+      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB"],
+    )
+    for (const gone of ["XLK", "XLF", "XLY", "XLV"]) {
+      assert.ok(!DAILY_BOTTOM_BUY_ETFS.some((e) => e.symbol === gone))
+    }
     assert.equal(DAILY_BOTTOM_THRESHOLDS.rsiMax, 36)
     assert.equal(DAILY_BOTTOM_THRESHOLDS.stochKMax, 15.4)
     assert.equal(DAILY_BOTTOM_THRESHOLDS.bbPctBMax, 0.01)
