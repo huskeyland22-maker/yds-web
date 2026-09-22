@@ -24,9 +24,12 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
   const aiStatus = sidebarPulse?.aiReportStatus ?? null
   const pickAlertUnread = countUnreadPickAlerts()
   const [otherOpen, setOtherOpen] = useState(false)
-  // Daily Bottom Buy는 신호·단계만으로 충분 — 패닉 기반「오늘의 해석」비표시
+  // 핵심 매수 2화면은 신호·단계만으로 충분 — 패닉 기반「오늘의 해석」비표시
   const hideTodayInterpretation =
-    location.pathname === "/daily-bottom-buy" || location.pathname === "/"
+    location.pathname === "/daily-bottom-buy" ||
+    location.pathname === "/" ||
+    location.pathname === "/market-analysis" ||
+    location.pathname === "/market-dashboard"
 
   return (
     <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
