@@ -34,7 +34,7 @@ export default function HomeV5MarketAnalysis({ panicData = null }) {
         onClick={() => setOpen((v) => !v)}
       >
         <span className="home-v5-market__toggle-main">
-          <span className="home-v5-market__title">시장 공포·패닉</span>
+          <span className="home-v5-market__title">공포·패닉 매수</span>
           <span aria-hidden>{open ? "▲" : "▼"}</span>
         </span>
         {!open ? (
@@ -45,7 +45,7 @@ export default function HomeV5MarketAnalysis({ panicData = null }) {
           </span>
         ) : null}
       </button>
-      <div id={panelId} className="home-v5-market__panel" role="region" aria-label="시장 공포·패닉" hidden={!open}>
+      <div id={panelId} className="home-v5-market__panel" role="region" aria-label="공포·패닉 매수" hidden={!open}>
         <ul className="home-v5-market__list">
           {marketRows.map(({ key, label }) => {
             const raw = panicData?.[key]

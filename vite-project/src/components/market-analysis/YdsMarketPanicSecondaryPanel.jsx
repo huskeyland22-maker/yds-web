@@ -47,7 +47,7 @@ export default function YdsMarketPanicSecondaryPanel({
       ].join(" ")}
     >
       <div className="yds-market-panic-secondary__title-row">
-        <p className="yds-market-panic-secondary__title">시장 공포·패닉</p>
+        <p className="yds-market-panic-secondary__title">공포·패닉 매수</p>
       </div>
 
       <div className="yds-market-panic-secondary__body">

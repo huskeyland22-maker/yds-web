@@ -23,11 +23,15 @@ describe("root → daily-bottom-buy redirect", () => {
     assert.match(src, /path=["']\/market-analysis["']/)
   })
 
-  it("core nav stays daily-bottom-buy + market-analysis", () => {
+  it("core nav stays daily-bottom-buy + market-analysis with display labels", () => {
     const items = getCoreNavItems()
     assert.deepEqual(
       items.map((i) => i.path),
       ["/daily-bottom-buy", "/market-analysis"],
+    )
+    assert.deepEqual(
+      items.map((i) => i.label),
+      ["일상 조정 매수", "공포·패닉 매수"],
     )
   })
 })

@@ -7,13 +7,13 @@ const BOTTOM_ITEMS = [
   {
     id: "daily_bottom",
     path: "/daily-bottom-buy",
-    label: NAV_MOBILE_SHORT["/daily-bottom-buy"] ?? "일상 저점매수",
+    label: NAV_MOBILE_SHORT["/daily-bottom-buy"] ?? "일상 조정 매수",
     icon: ArrowDownCircle,
   },
   {
     id: "market_panic",
     path: "/market-analysis",
-    label: NAV_MOBILE_SHORT["/market-analysis"] ?? "패닉",
+    label: NAV_MOBILE_SHORT["/market-analysis"] ?? "공포·패닉 매수",
     icon: Activity,
   },
 ]

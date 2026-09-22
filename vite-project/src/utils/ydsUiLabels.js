@@ -7,15 +7,15 @@
 export function getCoreNavItems() {
   return [
     {
-      label: "일상 저점매수",
-      shortLabel: "저점매수",
+      label: "일상 조정 매수",
+      shortLabel: "조정매수",
       path: "/daily-bottom-buy",
       subtitle: "섹터 ETF · 일상 조정 타점",
       tone: "brand",
     },
     {
-      label: "시장 공포·패닉",
-      shortLabel: "공포·패닉",
+      label: "공포·패닉 매수",
+      shortLabel: "패닉매수",
       path: "/market-analysis",
       subtitle: "Panic Index · 장기 참고",
       tone: "panic",
@@ -66,8 +66,8 @@ export function getSidebarFooterLinks() {
 /** @type {Record<string, string>} */
 export const NAV_MOBILE_SHORT = {
   "/": "인생",
-  "/daily-bottom-buy": "일상 저점매수",
-  "/market-analysis": "패닉",
+  "/daily-bottom-buy": "일상 조정 매수",
+  "/market-analysis": "공포·패닉 매수",
   "/stock-picks": "종목",
   "/watchlist": "관심",
   "/portfolio": "포트",
@@ -132,7 +132,7 @@ export const UI_PAGE = {
     path: "/",
   },
   marketPanic: {
-    title: "시장 공포·패닉",
+    title: "공포·패닉 매수",
     kicker: "지금 시장은 어떤 구간인가",
     path: "/market-analysis",
   },
@@ -146,7 +146,7 @@ export const UI_BTN = {
   performance: "성과 보기",
   watchlist: "관심종목 보기",
   watchlistFromAlert: "관심종목에서 보기",
-  marketAnalysis: "시장 공포·패닉",
+  marketAnalysis: "공포·패닉 매수",
 }
 
 /** @type {Record<string, string>} */
@@ -166,7 +166,7 @@ export const UI_TERM_DISPLAY = {
   Confidence: "신뢰도",
   Regime: "시장 국면",
   Pattern: "위험 패턴",
-  "Market Analysis": "시장 공포·패닉",
+  "Market Analysis": "공포·패닉 매수",
 }
 
 /**

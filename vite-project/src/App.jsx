@@ -1377,7 +1377,7 @@ function App() {
             <Route
               path="/daily-bottom-buy"
               element={
-                <SectionErrorBoundary label="일상 저점매수">
+                <SectionErrorBoundary label="일상 조정 매수">
                   <DailyBottomBuyPage />
                 </SectionErrorBoundary>
               }
@@ -1385,7 +1385,7 @@ function App() {
             <Route
               path="/market-analysis"
               element={
-                <SectionErrorBoundary label="현재 시장 분석">
+                <SectionErrorBoundary label="공포·패닉 매수">
                   <CurrentMarketAnalysisPage />
                 </SectionErrorBoundary>
               }

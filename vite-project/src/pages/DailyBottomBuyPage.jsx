@@ -150,7 +150,7 @@ export default function DailyBottomBuyPage() {
     <div className="yds-dbb min-w-0 w-full">
       <header className="yds-dbb__hero">
         <p className="yds-dbb__kicker">DAILY BOTTOM BUY</p>
-        <h1 className="yds-dbb__title">일상 저점 매수 타점</h1>
+        <h1 className="yds-dbb__title">일상 조정 매수</h1>
         <p className="yds-dbb__lead">
           미국 주요 섹터 ETF의 일상적인 조정 구간을 4개 보조지표로 확인합니다.
         </p>

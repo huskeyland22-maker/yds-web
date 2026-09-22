@@ -42,7 +42,7 @@ export default function CurrentMarketAnalysisPage() {
     <div className="yds-market-analysis min-w-0 w-full">
       <header className="yds-market-analysis__header">
         <div className="yds-market-analysis__header-main">
-          <h1 className="yds-market-analysis__title">시장 공포·패닉</h1>
+          <h1 className="yds-market-analysis__title">공포·패닉 매수</h1>
           <p className="yds-market-analysis__subtitle">
             Panic Index · 장기 투자 참고 지표
           </p>
