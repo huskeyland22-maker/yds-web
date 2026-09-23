@@ -38793,3 +38793,187 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   .yds-dbb__title { font-size: 1.35rem; }
   .yds-dbb-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── Manual trade records (DBB / Panic) ── */
+.yds-dbb-trade {
+  margin-top: 0.4rem;
+}
+.yds-dbb-trade__toggle,
+.yds-panic-trade__toggle {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 7px;
+  background: rgba(30, 41, 59, 0.4);
+  color: #94a3b8;
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 0.32rem 0.5rem;
+  min-height: 1.85rem;
+}
+.yds-dbb-trade__toggle:active,
+.yds-panic-trade__toggle:active {
+  background: rgba(51, 65, 85, 0.65);
+}
+.yds-trade-status {
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(125, 211, 252, 0.14);
+  background: rgba(8, 47, 73, 0.22);
+  display: grid;
+  gap: 0.2rem;
+}
+.yds-trade-status__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+.yds-trade-status__row strong {
+  color: #e2e8f0;
+  font-weight: 650;
+  text-align: right;
+}
+.yds-trade-status__row strong.is-up { color: #86efac; }
+.yds-trade-status__row strong.is-down { color: #fca5a5; }
+.yds-trade-rec {
+  margin-top: 0.4rem;
+}
+.yds-trade-rec__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.yds-trade-rec__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+.yds-trade-rec__form label,
+.yds-trade-rec__memo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+.yds-trade-rec__form input {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  padding: 0.35rem 0.4rem;
+  min-height: 2rem;
+}
+.yds-trade-rec__memo { margin-top: 0.1rem; }
+.yds-trade-rec__err {
+  margin: 0;
+  font-size: 0.62rem;
+  color: #fca5a5;
+}
+.yds-trade-rec__actions {
+  display: flex;
+  gap: 0.35rem;
+}
+.yds-trade-rec__save,
+.yds-trade-rec__cancel {
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 650;
+  padding: 0.35rem 0.55rem;
+  min-height: 2rem;
+}
+.yds-trade-rec__save {
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  background: rgba(14, 116, 144, 0.35);
+  color: #e0f2fe;
+}
+.yds-trade-rec__cancel {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: transparent;
+  color: #94a3b8;
+}
+.yds-trade-rec__list {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.yds-trade-rec__list > li {
+  border-radius: 7px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.5);
+  padding: 0.4rem 0.45rem;
+}
+.yds-trade-rec__list-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 0.8fr;
+  gap: 0.25rem;
+  font-size: 0.62rem;
+  color: #cbd5e1;
+}
+.yds-trade-rec__list-memo {
+  margin: 0.2rem 0 0;
+  font-size: 0.58rem;
+  color: #64748b;
+}
+.yds-trade-rec__list-actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+.yds-trade-rec__list-actions button {
+  border: none;
+  background: transparent;
+  color: #7dd3fc;
+  font-size: 0.58rem;
+  font-weight: 600;
+  padding: 0.1rem 0;
+}
+.yds-panic-trade {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+.yds-panic-trade__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+.yds-panic-trade__title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.yds-panic-trade__sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.62rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+.yds-panic-trade__toggle {
+  width: auto;
+  flex-shrink: 0;
+  padding-inline: 0.65rem;
+}
+.yds-market-desk--panic-focus .yds-market-desk__slot--trade-rec {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+@media (max-width: 639px) {
+  .yds-trade-rec__list-main {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+

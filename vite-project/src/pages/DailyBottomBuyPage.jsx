@@ -8,6 +8,10 @@ import {
   acknowledgeEpisodeTranche,
   syncDailyBottomEpisodes,
 } from "../content/ydsDailyBottomBuyEpisodes.js"
+import { listTradeRecords } from "../content/ydsTradeRecords.js"
+import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
+import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
+import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 
 function fmtNum(v, digits = 1) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
@@ -27,7 +31,19 @@ function MetricRow({ label, value, ok, suffix = "" }) {
   )
 }
 
-function EtfCard({ card, episodeNote, compact }) {
+function EtfCard({ card, episodeNote, compact, recordsVersion, onRecordsChange }) {
+  const [openTrade, setOpenTrade] = useState(false)
+  const records = useMemo(() => {
+    void recordsVersion
+    if (!card?.symbol) return []
+    return listTradeRecords("dbb", card.symbol)
+  }, [card?.symbol, recordsVersion])
+
+  const statusView = useMemo(() => {
+    if (!card?.ok) return null
+    return buildDbbTradeStatusView(card, records, card.asOfDate)
+  }, [card, records])
+
   if (!card?.ok) {
     return (
       <article className="yds-dbb-card yds-dbb-card--error">
@@ -46,6 +62,7 @@ function EtfCard({ card, episodeNote, compact }) {
   }
 
   const stageId = card.stage?.id || "wait"
+
   return (
     <article className={`yds-dbb-card yds-dbb-card--${stageId}${compact ? " yds-dbb-card--compact" : ""}`}>
       <header className="yds-dbb-card__head">
@@ -60,9 +77,7 @@ function EtfCard({ card, episodeNote, compact }) {
           </h3>
         </div>
         <div className="yds-dbb-card__badge" aria-label={`${card.count} of 4`}>
-          <span className="yds-dbb-card__count">
-            {card.count} / 4
-          </span>
+          <span className="yds-dbb-card__count">{card.count} / 4</span>
           <span className="yds-dbb-card__stage">{card.stage?.label}</span>
         </div>
       </header>
@@ -83,6 +98,27 @@ function EtfCard({ card, episodeNote, compact }) {
         <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
       ) : null}
       {episodeNote ? <p className="yds-dbb-card__episode">{episodeNote}</p> : null}
+
+      {statusView?.hasRecords ? <TradeRecordStatusBlock view={statusView} /> : null}
+
+      <div className="yds-dbb-trade">
+        <button
+          type="button"
+          className="yds-dbb-trade__toggle"
+          aria-expanded={openTrade}
+          onClick={() => setOpenTrade((v) => !v)}
+        >
+          {openTrade ? "매수 기록 닫기" : "매수 기록"}
+        </button>
+        {openTrade ? (
+          <TradeRecordEditor
+            system="dbb"
+            symbol={card.symbol}
+            defaultWeightPct={50}
+            onChange={onRecordsChange}
+          />
+        ) : null}
+      </div>
     </article>
   )
 }
@@ -107,6 +143,7 @@ export default function DailyBottomBuyPage() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [episodes, setEpisodes] = useState({})
+  const [recordsVersion, setRecordsVersion] = useState(0)
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -144,6 +181,15 @@ export default function DailyBottomBuyPage() {
   function onAck(symbol, kind) {
     acknowledgeEpisodeTranche(symbol, kind)
     if (payload?.all) setEpisodes(syncDailyBottomEpisodes(payload.all))
+  }
+
+  function onRecordsChange() {
+    setRecordsVersion((n) => n + 1)
+  }
+
+  const cardProps = {
+    recordsVersion,
+    onRecordsChange,
   }
 
   return (
@@ -199,6 +245,7 @@ export default function DailyBottomBuyPage() {
                 <EtfCard
                   card={card}
                   episodeNote={episodes[card.symbol]?.uiNote}
+                  {...cardProps}
                 />
                 <button
                   type="button"
@@ -215,6 +262,7 @@ export default function DailyBottomBuyPage() {
                 <EtfCard
                   card={card}
                   episodeNote={episodes[card.symbol]?.uiNote}
+                  {...cardProps}
                 />
                 <button
                   type="button"
@@ -234,7 +282,7 @@ export default function DailyBottomBuyPage() {
           >
             <div className="yds-dbb-grid">
               {watch.map((card) => (
-                <EtfCard key={card.symbol} card={card} compact />
+                <EtfCard key={card.symbol} card={card} compact {...cardProps} />
               ))}
             </div>
           </Section>
@@ -242,7 +290,7 @@ export default function DailyBottomBuyPage() {
           <Section title="대기" eyebrow="0~1 / 4">
             <div className="yds-dbb-grid yds-dbb-grid--wait">
               {waiting.map((card) => (
-                <EtfCard key={card.symbol} card={card} compact />
+                <EtfCard key={card.symbol} card={card} compact {...cardProps} />
               ))}
             </div>
           </Section>

@@ -11,6 +11,7 @@ import { captureTodayMarketStateHistory } from "../../content/ydsMarketStateHist
 import { resolveUnifiedMarketStateLabel } from "../../content/ydsUnifiedMarketState.js"
 import { getPanicScoreV2 } from "../../utils/tradingScores.js"
 import { resolveMarketPositionView } from "../../content/ydsMarketPositionEngine.js"
+import YdsPanicTradeRecordPanel from "./YdsPanicTradeRecordPanel.jsx"
 
 /**
  * 시장분석 데스크 — Panic Index 중심 (장기 투자 참고)
@@ -105,6 +106,20 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     return null
   }
 
+  const spyPrices = etfPrices?.SPY ?? null
+  const spyDates = spyPrices ? Object.keys(spyPrices).sort() : []
+  const spyLastDate = spyDates.length ? spyDates[spyDates.length - 1] : null
+  const spyLastPrice =
+    spyLastDate != null && Number.isFinite(Number(spyPrices[spyLastDate]))
+      ? Number(spyPrices[spyLastDate])
+      : null
+  const panicAsOf =
+    panicData?.date ??
+    panicData?.asOfDate ??
+    safeHistory[safeHistory.length - 1]?.date ??
+    spyLastDate ??
+    null
+
   return (
     <div className="yds-market-desk yds-market-desk--panic-focus" id="market-desk" aria-label="YDS 시장분석">
       <div className="yds-market-desk__stream">
@@ -117,6 +132,12 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
               historyRows={safeHistory}
             />
           }
+        />
+        <YdsPanicTradeRecordPanel
+          panicData={panicData}
+          currentPrice={spyLastPrice}
+          asOfDate={typeof panicAsOf === "string" ? String(panicAsOf).slice(0, 10) : null}
+          className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--trade-rec"
         />
       </div>
     </div>
