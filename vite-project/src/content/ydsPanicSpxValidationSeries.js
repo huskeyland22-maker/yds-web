@@ -1,6 +1,8 @@
 /**
- * Panic × SPX 장기 검증 — 시장 소스 재계산 V2 시계열 (YDS History DB 비사용)
+ * Panic × SPX 장기 검증 — 정적 시계열 + 저장 직후 live history upsert 병합
  */
+
+import { getPanicScoreV2 } from "../utils/tradingScores.js"
 
 export const PANIC_SPX_VALIDATION_SERIES_URL = "/data/panic-spx-validation-series.json"
 
@@ -58,6 +60,74 @@ export const PANIC_SPX_VALIDATION_BOTTOMS = Object.freeze([
  *   rows: PanicSpxValidationRow[]
  * }} PanicSpxValidationSeries
  */
+
+function toFinitePanic(v) {
+  if (v == null || v === "") return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
+/** @param {Record<string, unknown>} row */
+export function resolvePanicScoreFromHistoryRow(row) {
+  if (!row || typeof row !== "object") return null
+  const stored = toFinitePanic(
+    row.panic_v2 ?? row.panicV2 ?? row.panicV2Score ?? row.panic_index_v2 ?? row.panic,
+  )
+  if (stored != null) return Math.round(stored)
+  return getPanicScoreV2(row)
+}
+
+/**
+ * 저장 직후 live panic_index_history(cycleMetricHistory)를 검증 시계열에 upsert.
+ * 같은 날짜 → panic 갱신, 새 날짜 → append (SPX는 직전 값 carry).
+ * @param {PanicSpxValidationSeries | null | undefined} series
+ * @param {object[] | null | undefined} historyRows
+ * @returns {PanicSpxValidationSeries | null | undefined}
+ */
+export function mergeLiveHistoryIntoPanicSpxSeries(series, historyRows) {
+  if (!series || !Array.isArray(series.rows) || !series.rows.length) return series
+  if (!Array.isArray(historyRows) || historyRows.length === 0) return series
+
+  /** @type {Map<string, PanicSpxValidationRow>} */
+  const byDate = new Map()
+  for (const r of series.rows) {
+    const date = String(r?.date ?? "").slice(0, 10)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue
+    byDate.set(date, { date, spx: r.spx, panic: r.panic ?? null })
+  }
+
+  let touched = false
+  let lastSpx = series.rows[series.rows.length - 1]?.spx ?? null
+  for (const hr of historyRows) {
+    const date = String(hr?.date ?? hr?.ts ?? "").slice(0, 10)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue
+    const panic = resolvePanicScoreFromHistoryRow(hr)
+    if (panic == null) continue
+    const prev = byDate.get(date)
+    if (prev) {
+      if (prev.panic !== panic) touched = true
+      byDate.set(date, { ...prev, panic })
+      if (prev.spx != null && Number.isFinite(Number(prev.spx))) lastSpx = Number(prev.spx)
+    } else {
+      touched = true
+      byDate.set(date, {
+        date,
+        spx: lastSpx != null && Number.isFinite(Number(lastSpx)) ? Number(lastSpx) : null,
+        panic,
+      })
+    }
+  }
+  if (!touched) return series
+
+  const rows = [...byDate.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
+  const spanStart = rows[0]?.date ?? series.span?.[0]
+  const spanEnd = rows[rows.length - 1]?.date ?? series.span?.[1]
+  return {
+    ...series,
+    span: [spanStart, spanEnd],
+    rows,
+  }
+}
 
 /**
  * @param {PanicSpxValidationSeries | null | undefined} series

@@ -20,6 +20,7 @@ import {
 } from "../../utils/chartDateFormat.js"
 import {
   PANIC_SPX_VALIDATION_SERIES_URL,
+  mergeLiveHistoryIntoPanicSpxSeries,
   resolveBottomWindowDomain,
 } from "../../content/ydsPanicSpxValidationSeries.js"
 import { useIsMobileLayout } from "../../hooks/useIsMobileLayout.js"
@@ -58,15 +59,16 @@ function ValidationTooltip({ active, payload }) {
 /**
  * Panic Index History — Panic V2 × S&P500 (시장 소스 재계산 시계열)
  * X축: timestamp 시간축 · 첫 화면은 최근 ~17개월 zoom · 전체 데이터는 Brush로 유지
+ * @param {{ historyRows?: object[] }} [props]
  */
-export default function YdsPanicSpxValidationChart() {
+export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
   const isMobile = useIsMobileLayout()
   const chartHeight = isMobile ? CHART_HEIGHT_MOBILE : CHART_HEIGHT_DESKTOP
   const chartMargin = isMobile ? MARGIN_MOBILE : MARGIN_DESKTOP
   const panicAxisWidth = isMobile ? 28 : 36
   const spxAxisWidth = isMobile ? 30 : 44
 
-  const [series, setSeries] = useState(
+  const [baseSeries, setBaseSeries] = useState(
     /** @type {import("../../content/ydsPanicSpxValidationSeries.js").PanicSpxValidationSeries | null} */ (
       null
     ),
@@ -87,18 +89,23 @@ export default function YdsPanicSpxValidationChart() {
       })
       .then((json) => {
         if (cancelled) return
-        setSeries(json)
+        setBaseSeries(json)
         setLoadError(null)
       })
       .catch((err) => {
         if (cancelled) return
         setLoadError(err?.message ?? "load failed")
-        setSeries(null)
+        setBaseSeries(null)
       })
     return () => {
       cancelled = true
     }
   }, [])
+
+  const series = useMemo(
+    () => mergeLiveHistoryIntoPanicSpxSeries(baseSeries, historyRows),
+    [baseSeries, historyRows],
+  )
 
   const chartData = useMemo(() => {
     if (!series?.rows?.length) return []

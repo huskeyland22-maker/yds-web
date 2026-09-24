@@ -6,6 +6,7 @@ import {
   formatPanicSpxValidationSummary,
   formatPanicTimingMd,
   formatPanicTimingPct,
+  mergeLiveHistoryIntoPanicSpxSeries,
   resolveBottomWindowDomain,
 } from "./ydsPanicSpxValidationSeries.js"
 
@@ -94,5 +95,29 @@ describe("ydsPanicSpxValidationSeries", () => {
     expect(april?.t50Label).toBe("미도달")
     expect(table?.aggregates.reach50).toBe("1/2")
     expect(table?.disclaimer).toContain("미래 수익을 보장하지 않습니다")
+  })
+
+  it("merges live history into validation series (upsert by date)", () => {
+    const merged = mergeLiveHistoryIntoPanicSpxSeries(sample, [
+      { date: "2025-03-13", panic_v2: 61 },
+      { date: "2026-09-23", vix: 22.22, fearGreed: 27, putCall: 0.71 },
+    ])
+    expect(merged?.rows.find((r) => r.date === "2025-03-13")?.panic).toBe(61)
+    const appended = merged?.rows.find((r) => r.date === "2026-09-23")
+    expect(appended?.panic).toBe(42)
+    expect(appended?.spx).toBe(5521)
+    expect(merged?.span?.[1]).toBe("2026-09-23")
+  })
+
+  it("re-merging same date does not duplicate rows", () => {
+    const once = mergeLiveHistoryIntoPanicSpxSeries(sample, [
+      { date: "2025-03-13", panic_v2: 70 },
+    ])
+    const twice = mergeLiveHistoryIntoPanicSpxSeries(once, [
+      { date: "2025-03-13", panic_v2: 72 },
+    ])
+    const count = twice?.rows.filter((r) => r.date === "2025-03-13").length
+    expect(count).toBe(1)
+    expect(twice?.rows.find((r) => r.date === "2025-03-13")?.panic).toBe(72)
   })
 })

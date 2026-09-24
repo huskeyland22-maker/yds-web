@@ -186,7 +186,9 @@
 - [x] **Panic Index 섹션 순서** — 현재 점수 → FEAR SCALE → History → Drivers (단계 직관 이해)
 - [x] **/market-analysis 추가 참고자료 제거** — 유동성·이벤트·TOP20·추천 종목 fold UI 제거 · Panic Index·FEAR SCALE·HISTORY·DRIVERS만 유지
 - [x] **PANIC INDEX HISTORY X축 라벨** — timestamp 시간축 · 실제 시간 균등 tick · 첫 화면 기본 zoom 최근 ~17개월 · Brush로 전체 탐색 · Reset=기본 보기
+- [x] **Panic 저장 → History upsert 연결** — 기존 지표 입력 저장 시 `panic_index_history` upsert + History 차트에 동일 날짜 live merge (신규 UI/cron/수집 없음)
 - [x] **매수 기록 관리 V1** — localStorage `yds.tradeRecords.v1` · DBB 카드/Panic 보조 패널 수동 입력 · 신호·다음단계·수익률 표시 · 자동주문/매도 없음
+- [x] **매수 기록 USD 정확성** — 매수가/금액 `$`·소수 2자리 · 수량(주) · card.close 현재가·asOf · USD 수익률 · 레거시 호환
 - [x] **일상 저점매수 V1** — `/daily-bottom-buy` · 10 ETF · RSI/Stoch/BB/MA20 동결 임계값 · 3→50%/4→50% · PC 사이드바 핵심 메뉴(저점매수·패닉) · API+스냅샷
 - [x] **Hobby Serverless 12개 한도 대응** — DBB를 `market-data` dispatch+rewrite로 통합 · `/api/daily-bottom-buy` URL 유지 · Panic 미변경
 - [ ] AI 리포트 개선

@@ -141,9 +141,24 @@ export function buildCycleRowFromPanic(panicData) {
   add("bofa", panicData.bofa)
   add("skew", panicData.skew)
   add("highYield", panicData.highYield)
-  const validKeys = ["vix", "fearGreed", "putCall", "highYield"]
+  // Panic Index 저장·history upsert와 동일: 핵심 3지표만 필수 (BofA/HY 보조)
+  const validKeys = ["vix", "fearGreed", "putCall"]
   if (!validKeys.every((k) => Number.isFinite(row[k]))) return null
+  const panicV2 = toNum(
+    panicData.panic_v2 ?? panicData.panicV2 ?? panicData.panicV2Score ?? panicData.panic_index_v2,
+  )
+  if (panicV2 != null) {
+    row.panic_v2 = panicV2
+    row.panicV2Score = panicV2
+    row.panicV2DynamicScore = panicV2
+  }
   return row
+}
+
+function toNum(v) {
+  if (v == null || v === "") return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
 }
 
 /** cycle 차트 최신 행 → panicStore·상단 카드 호환 객체 */

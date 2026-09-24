@@ -38,6 +38,7 @@ import {
   mergePanicHistoryV2IntoCycleRows,
 } from "../utils/panicHistoryV2Merge.js"
 import { hasPanicMetricValues, resolveLatestMetrics } from "../utils/resolveLatestPanicMetrics.js"
+import { getPanicScoreV2 } from "../utils/tradingScores.js"
 import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
 import {
@@ -433,10 +434,15 @@ export const useAppDataStore = create((set, get) => ({
 
   /** 저장 payload를 즉시 cycle history에 병합 (서버 refetch 전 UI 반영) */
   mergeCycleRowFromPanicPayload: (panicLike, tradeDate) => {
+    const base = panicLike && typeof panicLike === "object" ? panicLike : {}
+    const v2Score = getPanicScoreV2(base)
     const row = buildCycleRowFromPanic({
-      ...(panicLike && typeof panicLike === "object" ? panicLike : {}),
+      ...base,
+      ...(v2Score != null
+        ? { panic_v2: v2Score, panicV2Score: v2Score, panicV2DynamicScore: v2Score }
+        : {}),
       updatedAt:
-        panicLike?.updatedAt ??
+        base.updatedAt ??
         (tradeDate ? `${String(tradeDate).slice(0, 10)}T12:00:00.000Z` : undefined),
     })
     if (!row) return null
