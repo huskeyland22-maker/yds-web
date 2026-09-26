@@ -182,6 +182,25 @@ describe("USD format + return helpers", () => {
     expect(formatReturnPct(0)).toBe("0.00%")
   })
 
+  it("saved list line includes shares when present", () => {
+    const line = [
+      "2026-09-22",
+      formatUsdPrice(216),
+      formatShares(5),
+      formatUsdAmount(1080),
+      "50%",
+    ].join(" | ")
+    expect(line).toBe("2026-09-22 | $216.00 | 5주 | $1,080.00 | 50%")
+    const legacy = [
+      "2026-09-22",
+      formatUsdPrice(216),
+      formatShares(null),
+      formatUsdAmount(1080),
+      "50%",
+    ].join(" | ")
+    expect(legacy).toBe("2026-09-22 | $216.00 | — | $1,080.00 | 50%")
+  })
+
   it("ITA case: buy 216.17 vs close 214.05 → about -0.98%", () => {
     const pct = tradeReturnPct(216.17, 214.05)
     expect(pct).toBeLessThan(0)

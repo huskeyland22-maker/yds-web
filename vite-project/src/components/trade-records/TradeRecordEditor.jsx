@@ -187,12 +187,17 @@ export default function TradeRecordEditor({
         <ul className="yds-trade-rec__list" aria-label="매수 기록 목록">
           {records.map((r) => (
             <li key={r.id}>
-              <div className="yds-trade-rec__list-main yds-trade-rec__list-main--usd">
-                <span className="font-mono tabular-nums">{r.buyDate}</span>
-                <span className="font-mono tabular-nums">{formatUsdPrice(r.buyPrice)}</span>
-                <span className="font-mono tabular-nums">{formatShares(r.shares)}</span>
-                <span className="font-mono tabular-nums">{formatUsdAmount(r.buyAmountUsd)}</span>
-                <span className="font-mono tabular-nums">{Number(r.weightPct).toFixed(0)}%</span>
+              <div
+                className="yds-trade-rec__list-main yds-trade-rec__list-main--usd font-mono tabular-nums"
+                title="매수일 · 매수가 · 수량 · 금액 · 비중"
+              >
+                {[
+                  r.buyDate,
+                  formatUsdPrice(r.buyPrice),
+                  formatShares(r.shares),
+                  formatUsdAmount(r.buyAmountUsd),
+                  `${Number(r.weightPct).toFixed(0)}%`,
+                ].join(" | ")}
               </div>
               {r.memo ? <p className="yds-trade-rec__list-memo">{r.memo}</p> : null}
               <div className="yds-trade-rec__list-actions">

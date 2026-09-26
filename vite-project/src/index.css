@@ -38936,7 +38936,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #cbd5e1;
 }
 .yds-trade-rec__list-main--usd {
-  grid-template-columns: 1.1fr 1fr 0.7fr 1.1fr 0.6fr;
+  display: block;
+  line-height: 1.45;
+  word-break: break-word;
 }
 .yds-trade-rec__list-memo {
   margin: 0.2rem 0 0;
@@ -38994,9 +38996,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   padding: 0;
 }
 @media (max-width: 639px) {
-  .yds-trade-rec__list-main,
-  .yds-trade-rec__list-main--usd {
+  .yds-trade-rec__list-main {
     grid-template-columns: 1fr 1fr;
+  }
+  .yds-trade-rec__list-main--usd {
+    display: block;
+    font-size: 0.6rem;
   }
 }
 
