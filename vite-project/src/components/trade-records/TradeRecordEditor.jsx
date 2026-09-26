@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import {
   deleteTradeRecord,
-  formatShares,
+  formatTradeRecordShares,
   formatUsdAmount,
   formatUsdPrice,
   listTradeRecords,
@@ -194,7 +194,7 @@ export default function TradeRecordEditor({
                 {[
                   r.buyDate,
                   formatUsdPrice(r.buyPrice),
-                  formatShares(r.shares),
+                  formatTradeRecordShares(r),
                   formatUsdAmount(r.buyAmountUsd),
                   `${Number(r.weightPct).toFixed(0)}%`,
                 ].join(" | ")}

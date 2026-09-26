@@ -6,6 +6,7 @@ import {
   deleteTradeRecord,
   formatReturnPct,
   formatShares,
+  formatTradeRecordShares,
   formatUsdAmount,
   formatUsdPrice,
   listTradeRecords,
@@ -186,19 +187,46 @@ describe("USD format + return helpers", () => {
     const line = [
       "2026-09-22",
       formatUsdPrice(216),
-      formatShares(5),
+      formatTradeRecordShares({ shares: 5, buyPrice: 216, buyAmountUsd: 1080 }),
       formatUsdAmount(1080),
       "50%",
     ].join(" | ")
     expect(line).toBe("2026-09-22 | $216.00 | 5주 | $1,080.00 | 50%")
-    const legacy = [
-      "2026-09-22",
-      formatUsdPrice(216),
-      formatShares(null),
-      formatUsdAmount(1080),
-      "50%",
-    ].join(" | ")
-    expect(legacy).toBe("2026-09-22 | $216.00 | — | $1,080.00 | 50%")
+  })
+
+  it("display fallback: missing shares uses amount/price", () => {
+    expect(
+      formatTradeRecordShares({
+        shares: null,
+        buyPrice: 216,
+        buyAmountUsd: 1080,
+      }),
+    ).toBe("5주")
+    expect(
+      formatTradeRecordShares({
+        shares: null,
+        buyPrice: 216.17,
+        buyAmountUsd: 1080.85,
+      }),
+    ).toMatch(/주$/)
+    expect(
+      formatTradeRecordShares({
+        shares: null,
+        buyPrice: 0,
+        buyAmountUsd: 1080,
+      }),
+    ).toBe("—")
+    expect(formatTradeRecordShares({ shares: null, buyPrice: 216, buyAmountUsd: null })).toBe(
+      "—",
+    )
+    // stored shares wins over amount/price
+    expect(
+      formatTradeRecordShares({
+        shares: 2,
+        buyPrice: 216,
+        buyAmountUsd: 1080,
+      }),
+    ).toBe("2주")
   })
 
   it("ITA case: buy 216.17 vs close 214.05 → about -0.98%", () => {

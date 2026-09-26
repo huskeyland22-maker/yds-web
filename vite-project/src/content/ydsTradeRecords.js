@@ -341,6 +341,31 @@ export function formatShares(shares) {
 }
 
 /**
+ * Display-only shares for a trade record.
+ * Prefers stored `shares`; if missing, falls back to buyAmountUsd / buyPrice.
+ * Does not mutate stored data.
+ * @param {{ shares?: number | null, buyPrice?: number | null, buyAmountUsd?: number | null } | null | undefined} record
+ * @returns {string}
+ */
+export function formatTradeRecordShares(record) {
+  const direct = Number(record?.shares)
+  if (Number.isFinite(direct) && direct > 0) return formatShares(direct)
+
+  const price = Number(record?.buyPrice)
+  const amount = Number(record?.buyAmountUsd)
+  if (!Number.isFinite(price) || price <= 0) return "—"
+  if (!Number.isFinite(amount) || amount <= 0) return "—"
+  const computed = amount / price
+  if (!Number.isFinite(computed) || computed <= 0) return "—"
+  // Avoid float noise (e.g. 1080/216 → 5)
+  const cleaned =
+    Math.abs(computed - Math.round(computed)) < 1e-6
+      ? Math.round(computed)
+      : Math.round(computed * 1e6) / 1e6
+  return formatShares(cleaned)
+}
+
+/**
  * @param {number | null | undefined} pct
  * @returns {string}
  */
