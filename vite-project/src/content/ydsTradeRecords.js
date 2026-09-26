@@ -1,10 +1,28 @@
 /**
- * Manual buy trade records — localStorage only.
+ * Manual buy trade records — localStorage (`yds.tradeRecords.v1`).
+ * When logged in, cloud sync (see ydsTradeRecordsCloudSync.js) uses the same key as cache.
  * Separate from DBB episodes (`yds.dailyBottomBuy.episodes.v1`).
  * Amounts are USD · no FX · no auto orders · no sell.
  */
 
 export const TRADE_RECORDS_STORAGE_KEY = "yds.tradeRecords.v1"
+export const TRADE_RECORDS_CHANGED_EVENT = "yds-trade-records-changed"
+
+function notifyTradeRecordsChanged() {
+  try {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event(TRADE_RECORDS_CHANGED_EVENT))
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+function scheduleCloudPushAfterLocalWrite() {
+  void import("./ydsTradeRecordsCloudSync.js")
+    .then((m) => m.scheduleTradeRecordsCloudPush())
+    .catch(() => {})
+}
 
 /**
  * @typedef {{
@@ -79,6 +97,7 @@ export function writeTradeRecordsStore(store) {
         records: store?.records && typeof store.records === "object" ? store.records : {},
       }),
     )
+    notifyTradeRecordsChanged()
   } catch {
     /* ignore quota */
   }
@@ -185,6 +204,7 @@ export function upsertTradeRecord(input) {
   next.push(record)
   store.records[key] = next
   writeTradeRecordsStore(store)
+  scheduleCloudPushAfterLocalWrite()
   return record
 }
 
@@ -204,6 +224,7 @@ export function deleteTradeRecord(system, symbol, id) {
   if (next.length) store.records[key] = next
   else delete store.records[key]
   writeTradeRecordsStore(store)
+  scheduleCloudPushAfterLocalWrite()
   return true
 }
 

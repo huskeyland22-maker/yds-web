@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getPanicScoreV2 } from "../../utils/tradingScores.js"
-import { listTradeRecords } from "../../content/ydsTradeRecords.js"
+import { listTradeRecords, TRADE_RECORDS_CHANGED_EVENT } from "../../content/ydsTradeRecords.js"
 import { buildPanicTradeStatusView } from "../../content/ydsTradeRecordsStatus.js"
 import TradeRecordEditor from "../trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../trade-records/TradeRecordStatusBlock.jsx"
@@ -25,6 +25,12 @@ export default function YdsPanicTradeRecordPanel({
 }) {
   const [open, setOpen] = useState(false)
   const [version, setVersion] = useState(0)
+
+  useEffect(() => {
+    const onChange = () => setVersion((n) => n + 1)
+    window.addEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
+    return () => window.removeEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
+  }, [])
 
   const score = useMemo(() => getPanicScoreV2(panicData), [panicData])
   const records = useMemo(() => {

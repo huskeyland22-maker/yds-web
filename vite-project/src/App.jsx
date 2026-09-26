@@ -72,6 +72,7 @@ import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
 import MobileDrawer from "./components/layout/MobileDrawer.jsx"
 import AccountSettingsPanel from "./components/layout/AccountSettingsPanel.jsx"
 import MobileShellDebugOverlay from "./components/layout/MobileShellDebugOverlay.jsx"
+import TradeRecordsCloudSyncBootstrap from "./hooks/useTradeRecordsCloudSync.js"
 import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
 import { isDevMode } from "./utils/devMode.js"
 import { auth, db, hasFirebaseConfig } from "./firebase.js"
@@ -1295,6 +1296,7 @@ function App() {
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
+      <TradeRecordsCloudSyncBootstrap />
       <AppSidebar
         sidebarPulse={sidebarPulse}
         onOpenInputPanel={openInputPanel}

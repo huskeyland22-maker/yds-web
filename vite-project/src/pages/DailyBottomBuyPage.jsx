@@ -8,7 +8,7 @@ import {
   acknowledgeEpisodeTranche,
   syncDailyBottomEpisodes,
 } from "../content/ydsDailyBottomBuyEpisodes.js"
-import { listTradeRecords } from "../content/ydsTradeRecords.js"
+import { listTradeRecords, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
@@ -154,6 +154,12 @@ export default function DailyBottomBuyPage() {
   const [loading, setLoading] = useState(true)
   const [episodes, setEpisodes] = useState({})
   const [recordsVersion, setRecordsVersion] = useState(0)
+
+  useEffect(() => {
+    const onChange = () => setRecordsVersion((n) => n + 1)
+    window.addEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
+    return () => window.removeEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
+  }, [])
 
   useEffect(() => {
     const ctrl = new AbortController()

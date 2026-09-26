@@ -35,6 +35,7 @@ const modules = [
   "api/portfolio-quote.js",
   "api/_lib/firebaseIdToken.js",
   "api/portfolio-sync.js",
+  "api/_lib/tradeRecordsSyncHandler.js",
   "api/_lib/dailyBottomBuyEngine.js",
   "api/_lib/dailyBottomBuyHandler.js",
   "api/market-data.js",

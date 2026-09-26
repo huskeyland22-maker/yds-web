@@ -16,6 +16,7 @@
     { "source": "/api/panic/history-v2", "destination": "/api/panic?mode=v2" },
     { "source": "/api/panic/update", "destination": "/api/panic?mode=update" },
     { "source": "/api/daily-bottom-buy", "destination": "/api/market-data?ydsMode=daily-bottom-buy" },
+    { "source": "/api/trade-records-sync", "destination": "/api/portfolio-sync?ydsMode=trade-records" },
     { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
   ],
   "headers": [
