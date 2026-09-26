@@ -1,3 +1,8 @@
+import {
+  formatReturnPct,
+  formatUsdPrice,
+} from "../../content/ydsTradeRecords.js"
+
 /**
  * @param {{
  *   view: {
@@ -7,6 +12,7 @@
  *     recordedWeightPct: number
  *     nextStep: string
  *     currentPrice: number | null
+ *     priceAsOfDate?: string | null
  *     avgBuyPrice: number | null
  *     returnPct: number | null
  *     daysSinceBuy: number | null
@@ -33,28 +39,29 @@ export default function TradeRecordStatusBlock({ view }) {
       ) : null}
       <div className="yds-trade-status__row">
         <span>기록 비중</span>
-        <strong className="font-mono tabular-nums">{fmt(view.recordedWeightPct)}%</strong>
+        <strong className="font-mono tabular-nums">
+          {Number(view.recordedWeightPct).toFixed(0)}%
+        </strong>
       </div>
       <div className="yds-trade-status__row">
         <span>다음 단계</span>
         <strong>{view.nextStep}</strong>
       </div>
       <div className="yds-trade-status__row">
-        <span>평균 매수가</span>
-        <strong className="font-mono tabular-nums">
-          {view.avgBuyPrice != null ? fmt(view.avgBuyPrice) : "—"}
-        </strong>
+        <span>평균 매수가 (USD)</span>
+        <strong className="font-mono tabular-nums">{formatUsdPrice(view.avgBuyPrice)}</strong>
       </div>
       <div className="yds-trade-status__row">
-        <span>현재가</span>
-        <strong className="font-mono tabular-nums">
-          {view.currentPrice != null ? fmt(view.currentPrice) : "—"}
-        </strong>
+        <span>
+          현재가 USD
+          {view.priceAsOfDate ? ` · ${view.priceAsOfDate} 종가` : ""}
+        </span>
+        <strong className="font-mono tabular-nums">{formatUsdPrice(view.currentPrice)}</strong>
       </div>
       <div className="yds-trade-status__row">
         <span>현재 수익률</span>
         <strong className={`font-mono tabular-nums${pnlClass(view.returnPct)}`}>
-          {view.returnPct != null ? `${view.returnPct >= 0 ? "+" : ""}${view.returnPct.toFixed(1)}%` : "—"}
+          {formatReturnPct(view.returnPct)}
         </strong>
       </div>
       <div className="yds-trade-status__row">
@@ -65,13 +72,6 @@ export default function TradeRecordStatusBlock({ view }) {
       </div>
     </div>
   )
-}
-
-/** @param {number} n */
-function fmt(n) {
-  if (!Number.isFinite(Number(n))) return "—"
-  const x = Number(n)
-  return Number.isInteger(x) ? String(x) : x.toFixed(2)
 }
 
 /** @param {number | null} pct */

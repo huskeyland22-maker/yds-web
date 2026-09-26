@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react"
 import {
   deleteTradeRecord,
+  formatShares,
+  formatUsdAmount,
+  formatUsdPrice,
   listTradeRecords,
   upsertTradeRecord,
 } from "../../content/ydsTradeRecords.js"
@@ -21,7 +24,8 @@ export default function TradeRecordEditor({
 }) {
   const [buyDate, setBuyDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [buyPrice, setBuyPrice] = useState("")
-  const [buyAmountKrw, setBuyAmountKrw] = useState("")
+  const [shares, setShares] = useState("")
+  const [buyAmountUsd, setBuyAmountUsd] = useState("")
   const [weightPct, setWeightPct] = useState(String(defaultWeightPct))
   const [memo, setMemo] = useState("")
   const [editId, setEditId] = useState(/** @type {string | null} */ (null))
@@ -42,7 +46,8 @@ export default function TradeRecordEditor({
     setEditId(null)
     setBuyDate(new Date().toISOString().slice(0, 10))
     setBuyPrice("")
-    setBuyAmountKrw("")
+    setShares("")
+    setBuyAmountUsd("")
     setWeightPct(String(nextWeight))
     setMemo("")
     setError(null)
@@ -51,18 +56,22 @@ export default function TradeRecordEditor({
   function onSubmit(e) {
     e.preventDefault()
     setError(null)
+    const priceNum = Number(buyPrice)
+    const amountNum = Number(buyAmountUsd)
+    const sharesNum = shares === "" ? null : Number(shares)
     const saved = upsertTradeRecord({
       id: editId || undefined,
       system,
       symbol,
       buyDate,
-      buyPrice: Number(buyPrice),
-      buyAmountKrw: Number(buyAmountKrw),
+      buyPrice: priceNum,
+      buyAmountUsd: amountNum,
+      shares: sharesNum,
       weightPct: Number(weightPct),
       memo,
     })
     if (!saved) {
-      setError("입력값을 확인해 주세요. (매수일·매수가·금액·비중)")
+      setError("입력값을 확인해 주세요. (매수일·매수가 USD·금액 USD·비중)")
       return
     }
     resetForm(defaultWeightPct)
@@ -73,7 +82,8 @@ export default function TradeRecordEditor({
     setEditId(rec.id)
     setBuyDate(rec.buyDate)
     setBuyPrice(String(rec.buyPrice))
-    setBuyAmountKrw(String(rec.buyAmountKrw))
+    setShares(rec.shares != null ? String(rec.shares) : "")
+    setBuyAmountUsd(String(rec.buyAmountUsd))
     setWeightPct(String(rec.weightPct))
     setMemo(rec.memo || "")
     setError(null)
@@ -99,33 +109,45 @@ export default function TradeRecordEditor({
             />
           </label>
           <label>
-            <span>매수가</span>
+            <span>매수가 (USD)</span>
             <input
               type="number"
               inputMode="decimal"
-              step="any"
+              step="0.01"
               min="0"
-              placeholder="0"
+              placeholder="216.17"
               value={buyPrice}
               onChange={(ev) => setBuyPrice(ev.target.value)}
               required
             />
           </label>
           <label>
-            <span>매수금액(만원)</span>
+            <span>매수 수량 (주)</span>
             <input
               type="number"
               inputMode="decimal"
               step="any"
               min="0"
-              placeholder="0"
-              value={buyAmountKrw}
-              onChange={(ev) => setBuyAmountKrw(ev.target.value)}
+              placeholder="5"
+              value={shares}
+              onChange={(ev) => setShares(ev.target.value)}
+            />
+          </label>
+          <label>
+            <span>매수금액 (USD)</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              placeholder="1080"
+              value={buyAmountUsd}
+              onChange={(ev) => setBuyAmountUsd(ev.target.value)}
               required
             />
           </label>
           <label>
-            <span>매수 비중(%)</span>
+            <span>매수 비중 (%)</span>
             <input
               type="number"
               inputMode="decimal"
@@ -139,7 +161,7 @@ export default function TradeRecordEditor({
           </label>
         </div>
         <label className="yds-trade-rec__memo">
-          <span>메모(선택)</span>
+          <span>메모 (선택)</span>
           <input
             type="text"
             value={memo}
@@ -165,11 +187,12 @@ export default function TradeRecordEditor({
         <ul className="yds-trade-rec__list" aria-label="매수 기록 목록">
           {records.map((r) => (
             <li key={r.id}>
-              <div className="yds-trade-rec__list-main">
+              <div className="yds-trade-rec__list-main yds-trade-rec__list-main--usd">
                 <span className="font-mono tabular-nums">{r.buyDate}</span>
-                <span className="font-mono tabular-nums">{fmt(r.buyPrice)}</span>
-                <span className="font-mono tabular-nums">{fmt(r.buyAmountKrw)}만</span>
-                <span className="font-mono tabular-nums">{fmt(r.weightPct)}%</span>
+                <span className="font-mono tabular-nums">{formatUsdPrice(r.buyPrice)}</span>
+                <span className="font-mono tabular-nums">{formatShares(r.shares)}</span>
+                <span className="font-mono tabular-nums">{formatUsdAmount(r.buyAmountUsd)}</span>
+                <span className="font-mono tabular-nums">{Number(r.weightPct).toFixed(0)}%</span>
               </div>
               {r.memo ? <p className="yds-trade-rec__list-memo">{r.memo}</p> : null}
               <div className="yds-trade-rec__list-actions">
@@ -186,11 +209,4 @@ export default function TradeRecordEditor({
       ) : null}
     </div>
   )
-}
-
-/** @param {number} n */
-function fmt(n) {
-  if (!Number.isFinite(Number(n))) return "—"
-  const x = Number(n)
-  return Number.isInteger(x) ? String(x) : x.toFixed(2)
 }

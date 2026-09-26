@@ -1,6 +1,6 @@
 /**
  * Display helpers for manual trade records + live signal context.
- * Does not change DBB / Panic signal engines.
+ * Current price for DBB = card.close (latest DBB as-of close). No FX.
  */
 
 import { resolvePanicBottomDcaSignal } from "../utils/panicBottomDcaSignal.js"
@@ -25,23 +25,29 @@ import {
 export function buildDbbTradeStatusView(card, records, asOfDate) {
   const list = Array.isArray(records) ? records : []
   const count = Number(card?.count) || 0
-  const stageLabel = card?.stage?.label || (count >= 4 ? "강한 저점" : count >= 3 ? "1차 매수" : count >= 2 ? "관심" : "대기")
+  const stageLabel =
+    card?.stage?.label ||
+    (count >= 4 ? "강한 저점" : count >= 3 ? "1차 매수" : count >= 2 ? "관심" : "대기")
   const recordedWeight = sumTradeWeightPct(list)
   const avgPrice = averageTradeBuyPrice(list)
+  // DBB engine last-bar close (same source as signal asOfDate)
   const currentPrice =
     card?.close != null && Number.isFinite(Number(card.close)) ? Number(card.close) : null
   const pnlPct = tradeReturnPct(avgPrice, currentPrice)
   const asOf =
     (typeof asOfDate === "string" && asOfDate) ||
     (typeof card?.asOfDate === "string" && card.asOfDate) ||
-    new Date().toISOString().slice(0, 10)
+    null
   const firstBuy = earliestTradeBuyDate(list)
-  const daysSince = daysBetweenDayKeys(firstBuy, asOf)
+  const daysSince = daysBetweenDayKeys(
+    firstBuy,
+    asOf || new Date().toISOString().slice(0, 10),
+  )
 
   let userStageNote = ""
   let nextStep = ""
   if (list.length > 0 && count >= 3 && recordedWeight > 0) {
-    userStageNote = count >= 4 && recordedWeight >= 50 ? "1차 매수 완료" : recordedWeight > 0 ? "1차 매수 완료" : ""
+    userStageNote = "1차 매수 완료"
   }
   if (count >= 4) {
     nextStep = "추가 50% 매수 검토"
@@ -62,6 +68,7 @@ export function buildDbbTradeStatusView(card, records, asOfDate) {
     recordedWeightPct: recordedWeight,
     nextStep,
     currentPrice,
+    priceAsOfDate: asOf,
     avgBuyPrice: avgPrice,
     returnPct: pnlPct,
     daysSinceBuy: daysSince,
@@ -84,29 +91,36 @@ export function buildPanicTradeStatusView(panicScore, records, opts = {}) {
       ? Number(opts.currentPrice)
       : null
   const pnlPct = tradeReturnPct(avgPrice, currentPrice)
-  const asOf =
-    (typeof opts.asOfDate === "string" && opts.asOfDate) ||
-    new Date().toISOString().slice(0, 10)
+  const asOf = typeof opts.asOfDate === "string" && opts.asOfDate ? opts.asOfDate : null
   const firstBuy = earliestTradeBuyDate(list)
-  const daysSince = daysBetweenDayKeys(firstBuy, asOf)
+  const daysSince = daysBetweenDayKeys(
+    firstBuy,
+    asOf || new Date().toISOString().slice(0, 10),
+  )
 
   let nextStep = "매수 대기"
   if (dca) {
     if (dca.stage === 0) nextStep = "매수 대기"
-    else if (dca.stage === 1) nextStep = recordedWeight >= 40 ? "2차(27%) 구간 대기" : "1차 매수 구간 (40%)"
-    else if (dca.stage === 2) nextStep = recordedWeight >= 67 ? "3차(33%) 구간 대기" : "2차 추가 투입 (27%)"
+    else if (dca.stage === 1)
+      nextStep = recordedWeight >= 40 ? "2차(27%) 구간 대기" : "1차 매수 구간 (40%)"
+    else if (dca.stage === 2)
+      nextStep = recordedWeight >= 67 ? "3차(33%) 구간 대기" : "2차 추가 투입 (27%)"
     else nextStep = recordedWeight >= 100 ? "분할 완료 참고" : "3차 추가 투입 (33%)"
   }
 
   return {
     system: /** @type {'panic'} */ ("panic"),
     hasRecords: list.length > 0,
-    signalLabel: panicScore != null && Number.isFinite(Number(panicScore)) ? String(Math.round(Number(panicScore))) : "—",
+    signalLabel:
+      panicScore != null && Number.isFinite(Number(panicScore))
+        ? String(Math.round(Number(panicScore)))
+        : "—",
     stageLabel: dca?.bandLabel || "—",
     userStageNote: recordedWeight > 0 ? `기록 비중 ${round1(recordedWeight)}%` : "",
     recordedWeightPct: recordedWeight,
     nextStep,
     currentPrice,
+    priceAsOfDate: asOf,
     avgBuyPrice: avgPrice,
     returnPct: pnlPct,
     daysSinceBuy: daysSince,

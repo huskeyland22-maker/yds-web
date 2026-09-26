@@ -1,7 +1,7 @@
 /**
  * Manual buy trade records — localStorage only.
  * Separate from DBB episodes (`yds.dailyBottomBuy.episodes.v1`).
- * No auto orders · no sell · no server sync.
+ * Amounts are USD · no FX · no auto orders · no sell.
  */
 
 export const TRADE_RECORDS_STORAGE_KEY = "yds.tradeRecords.v1"
@@ -13,7 +13,8 @@ export const TRADE_RECORDS_STORAGE_KEY = "yds.tradeRecords.v1"
  *   symbol: string
  *   buyDate: string
  *   buyPrice: number
- *   buyAmountKrw: number
+ *   buyAmountUsd: number
+ *   shares: number | null
  *   weightPct: number
  *   memo: string
  *   createdAt: string
@@ -84,6 +85,7 @@ export function writeTradeRecordsStore(store) {
 }
 
 /**
+ * Legacy `buyAmountKrw` is treated as USD dollars (never convert FX).
  * @param {unknown} raw
  * @returns {TradeRecord | null}
  */
@@ -96,11 +98,18 @@ function normalizeRecord(raw) {
   const buyDate =
     typeof r.buyDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(r.buyDate) ? r.buyDate : null
   const buyPrice = Number(r.buyPrice)
-  const buyAmountKrw = Number(r.buyAmountKrw)
+  const amountRaw =
+    r.buyAmountUsd != null ? Number(r.buyAmountUsd) : Number(r.buyAmountKrw)
   const weightPct = Number(r.weightPct)
+  const sharesRaw = r.shares
+  let shares = null
+  if (sharesRaw != null && sharesRaw !== "") {
+    const s = Number(sharesRaw)
+    if (Number.isFinite(s) && s > 0) shares = s
+  }
   if (!id || !system || !symbol || !buyDate) return null
   if (!Number.isFinite(buyPrice) || buyPrice <= 0) return null
-  if (!Number.isFinite(buyAmountKrw) || buyAmountKrw < 0) return null
+  if (!Number.isFinite(amountRaw) || amountRaw < 0) return null
   if (!Number.isFinite(weightPct) || weightPct < 0) return null
   return {
     id,
@@ -108,7 +117,8 @@ function normalizeRecord(raw) {
     symbol,
     buyDate,
     buyPrice,
-    buyAmountKrw,
+    buyAmountUsd: amountRaw,
+    shares,
     weightPct,
     memo: typeof r.memo === "string" ? r.memo : "",
     createdAt: typeof r.createdAt === "string" ? r.createdAt : buyDate,
@@ -129,7 +139,12 @@ export function listTradeRecords(system, symbol) {
 }
 
 /**
- * @param {Omit<TradeRecord, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }} input
+ * @param {Omit<TradeRecord, 'id' | 'createdAt' | 'updatedAt' | 'shares'> & {
+ *   id?: string
+ *   shares?: number | null
+ *   buyAmountUsd?: number
+ *   buyAmountKrw?: number
+ * }} input
  * @returns {TradeRecord | null}
  */
 export function upsertTradeRecord(input) {
@@ -148,13 +163,17 @@ export function upsertTradeRecord(input) {
       ? input.id
       : `tr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 
+  const amountUsd =
+    input.buyAmountUsd != null ? input.buyAmountUsd : input.buyAmountKrw
+
   const record = normalizeRecord({
     id,
     system,
     symbol,
     buyDate: input.buyDate,
     buyPrice: input.buyPrice,
-    buyAmountKrw: input.buyAmountKrw,
+    buyAmountUsd: amountUsd,
+    shares: input.shares,
     weightPct: input.weightPct,
     memo: input.memo ?? "",
     createdAt: existing?.createdAt || now,
@@ -198,7 +217,7 @@ export function sumTradeWeightPct(records) {
 }
 
 /**
- * Amount-weighted average buy price.
+ * Shares-weighted average when shares exist; else USD-amount-weighted.
  * @param {TradeRecord[]} records
  * @returns {number | null}
  */
@@ -209,8 +228,14 @@ export function averageTradeBuyPrice(records) {
   for (const r of records) {
     const p = Number(r.buyPrice)
     if (!Number.isFinite(p) || p <= 0) continue
-    const w = Number(r.buyAmountKrw)
-    const weight = Number.isFinite(w) && w > 0 ? w : 1
+    const sh = Number(r.shares)
+    const amt = Number(r.buyAmountUsd)
+    const weight =
+      Number.isFinite(sh) && sh > 0
+        ? sh
+        : Number.isFinite(amt) && amt > 0
+          ? amt
+          : 1
     pSum += p * weight
     wSum += weight
   }
@@ -268,4 +293,40 @@ export function tradeReturnPct(buyPrice, currentPrice) {
   const c = Number(currentPrice)
   if (!Number.isFinite(b) || b <= 0 || !Number.isFinite(c) || c <= 0) return null
   return ((c - b) / b) * 100
+}
+
+/** ETF USD price — always $0.00 */
+export function formatUsdPrice(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "—"
+  return `$${Number(n).toFixed(2)}`
+}
+
+/** USD amount — $1,080.00 */
+export function formatUsdAmount(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "—"
+  return `$${Number(n).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+/** @param {number | null | undefined} shares */
+export function formatShares(shares) {
+  if (shares == null || shares === "") return "—"
+  const s = Number(shares)
+  if (!Number.isFinite(s) || s <= 0) return "—"
+  const text = Number.isInteger(s) ? String(s) : String(s)
+  return `${text}주`
+}
+
+/**
+ * @param {number | null | undefined} pct
+ * @returns {string}
+ */
+export function formatReturnPct(pct) {
+  if (pct == null || !Number.isFinite(Number(pct))) return "—"
+  const x = Number(pct)
+  if (Object.is(x, -0) || Math.abs(x) < 0.0000001) return "0.00%"
+  if (x > 0) return `+${x.toFixed(2)}%`
+  return `${x.toFixed(2)}%`
 }

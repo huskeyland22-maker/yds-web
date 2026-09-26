@@ -190,6 +190,7 @@
 - [x] **매수 기록 관리 V1** — localStorage `yds.tradeRecords.v1` · DBB 카드/Panic 보조 패널 수동 입력 · 신호·다음단계·수익률 표시 · 자동주문/매도 없음
 - [x] **매수 기록 USD 정확성** — 매수가/금액 `$`·소수 2자리 · 수량(주) · card.close 현재가·asOf · USD 수익률 · 레거시 호환
 - [x] **일상 저점매수 V1** — `/daily-bottom-buy` · 10 ETF · RSI/Stoch/BB/MA20 동결 임계값 · 3→50%/4→50% · PC 사이드바 핵심 메뉴(저점매수·패닉) · API+스냅샷
+- [x] **DBB 모바일 보유 표시** — 매수 기록 있는 ETF만 `보유 중 · N% 매수` · 상세는 매수 기록 버튼 · PC 기존 현황 유지
 - [x] **Hobby Serverless 12개 한도 대응** — DBB를 `market-data` dispatch+rewrite로 통합 · `/api/daily-bottom-buy` URL 유지 · Panic 미변경
 - [ ] AI 리포트 개선
 - [ ] 패닉지수 데이터 검증

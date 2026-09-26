@@ -82,6 +82,12 @@ function EtfCard({ card, episodeNote, compact, recordsVersion, onRecordsChange }
         </div>
       </header>
 
+      {statusView?.hasRecords ? (
+        <p className="yds-dbb-card__hold" aria-label="보유 상태">
+          보유 중 · {Number(statusView.recordedWeightPct).toFixed(0)}% 매수
+        </p>
+      ) : null}
+
       {!compact && (
         <div className="yds-dbb-card__metrics">
           <MetricRow label="RSI" value={fmtNum(card.rsi14)} ok={card.flags?.rsi} />
@@ -99,7 +105,11 @@ function EtfCard({ card, episodeNote, compact, recordsVersion, onRecordsChange }
       ) : null}
       {episodeNote ? <p className="yds-dbb-card__episode">{episodeNote}</p> : null}
 
-      {statusView?.hasRecords ? <TradeRecordStatusBlock view={statusView} /> : null}
+      {statusView?.hasRecords ? (
+        <div className="yds-dbb-card__trade-status">
+          <TradeRecordStatusBlock view={statusView} />
+        </div>
+      ) : null}
 
       <div className="yds-dbb-trade">
         <button

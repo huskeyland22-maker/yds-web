@@ -38707,6 +38707,25 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-dbb-card--strong .yds-dbb-card__stage { color: #fca5a5; }
 .yds-dbb-card--primary .yds-dbb-card__stage { color: #fdba74; }
+/* Mobile: compact hold cue when trade records exist (PC keeps full status block) */
+.yds-dbb-card__hold {
+  display: none;
+  margin: 0.28rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 650;
+  color: #7dd3fc;
+}
+.yds-dbb-card__trade-status {
+  display: block;
+}
+@media (max-width: 639px) {
+  .yds-dbb-card__hold {
+    display: block;
+  }
+  .yds-dbb-card__trade-status {
+    display: none;
+  }
+}
 .yds-dbb-card__metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -38916,6 +38935,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.62rem;
   color: #cbd5e1;
 }
+.yds-trade-rec__list-main--usd {
+  grid-template-columns: 1.1fr 1fr 0.7fr 1.1fr 0.6fr;
+}
 .yds-trade-rec__list-memo {
   margin: 0.2rem 0 0;
   font-size: 0.58rem;
@@ -38972,7 +38994,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   padding: 0;
 }
 @media (max-width: 639px) {
-  .yds-trade-rec__list-main {
+  .yds-trade-rec__list-main,
+  .yds-trade-rec__list-main--usd {
     grid-template-columns: 1fr 1fr;
   }
 }

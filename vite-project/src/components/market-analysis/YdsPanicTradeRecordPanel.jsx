@@ -50,7 +50,7 @@ export default function YdsPanicTradeRecordPanel({
         <div>
           <h3 className="yds-panic-trade__title">매수 기록</h3>
           <p className="yds-panic-trade__sub">
-            SPY 기준 수동 기록 · 자동 주문 없음 · 40/27/33 참고
+            SPY 기준 수동 기록 (USD) · 자동 주문 없음 · 40/27/33 참고
           </p>
         </div>
         <button
