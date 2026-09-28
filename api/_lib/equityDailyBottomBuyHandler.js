@@ -6,13 +6,10 @@
 import fs from "node:fs"
 import path from "node:path"
 import { barsFromYahooChartResult } from "./dailyBottomBuyHandler.js"
-import {
-  DATA_MISSING,
-  EQUITY_DAILY_BOTTOM_BUY_ID,
-  buildEquityDailyBottomBuyView,
-  equityUniverse,
-  findEquityCandidate,
-} from "../../scripts/lib/equity-daily-bottom-buy.mjs"
+
+function loadEquityEngine() {
+  return import("../../scripts/lib/equity-daily-bottom-buy.mjs")
+}
 
 const YAHOO_HEADERS = {
   "User-Agent":
@@ -69,6 +66,13 @@ function readCachedBars(yahoo) {
  * @param {{ fetchBars?: (yahoo: string) => Promise<any[]>, readCache?: (yahoo: string) => any[] | null }} [deps]
  */
 export async function loadEquityDailyBottomBuy(symbol, deps = {}) {
+  const {
+    DATA_MISSING,
+    EQUITY_DAILY_BOTTOM_BUY_ID,
+    buildEquityDailyBottomBuyView,
+    equityUniverse,
+    findEquityCandidate,
+  } = await loadEquityEngine()
   const universe = equityUniverse()
   const meta = findEquityCandidate(symbol)
   if (!meta) {
@@ -107,6 +111,7 @@ export async function loadEquityDailyBottomBuy(symbol, deps = {}) {
 }
 
 export async function handleEquityDailyBottomBuy(req, res) {
+  const { DATA_MISSING, EQUITY_DAILY_BOTTOM_BUY_ID } = await loadEquityEngine()
   res.setHeader("Cache-Control", "no-store, max-age=0")
   res.setHeader("Access-Control-Allow-Origin", "*")
   if (req.method === "OPTIONS") {
