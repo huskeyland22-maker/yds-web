@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Calendar, ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom"
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
+import {
+  GoogleAuthProvider,
+  getRedirectResult,
+  onAuthStateChanged,
+  signInWithPopup,
+  signInWithRedirect,
+  signOut,
+} from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { clearStoredEventHistory } from "./content/ydsMarketEventHistoryStorage.js"
@@ -447,6 +454,29 @@ function buildFinderCandidates(memos, marketStateKey) {
     })
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 8)
+}
+
+function shouldUseGoogleRedirectSignIn(win) {
+  const target = win ?? (typeof window !== "undefined" ? window : undefined)
+  const nav = target?.navigator
+  if (!target || !nav) return false
+  const standalone =
+    target.matchMedia?.("(display-mode: standalone)")?.matches === true || nav.standalone === true
+  if (standalone) return true
+  const ua = String(nav.userAgent || "")
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return true
+  return nav.platform === "MacIntel" && Number(nav.maxTouchPoints) > 1
+}
+
+async function settleGoogleRedirectSignIn(authInstance, getResult = getRedirectResult) {
+  if (!authInstance) return null
+  try {
+    const result = await getResult(authInstance)
+    return result?.user ?? null
+  } catch (err) {
+    console.error("로그인 실패", err)
+    return null
+  }
 }
 
 function App() {
@@ -936,6 +966,11 @@ function App() {
   }, [auth])
 
   useEffect(() => {
+    if (!auth) return undefined
+    void settleGoogleRedirectSignIn(auth)
+  }, [auth])
+
+  useEffect(() => {
     let cancelled = false
     async function loadBuildVersion() {
       try {
@@ -1075,6 +1110,10 @@ function App() {
     if (!auth) return
     try {
       const provider = new GoogleAuthProvider()
+      if (shouldUseGoogleRedirectSignIn()) {
+        await signInWithRedirect(auth, provider)
+        return
+      }
       await signInWithPopup(auth, provider)
     } catch (err) {
       console.error("로그인 실패", err)
