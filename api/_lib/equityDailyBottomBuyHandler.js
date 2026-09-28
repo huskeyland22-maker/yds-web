@@ -5,7 +5,6 @@
  */
 import fs from "node:fs"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { barsFromYahooChartResult } from "./dailyBottomBuyHandler.js"
 import {
   DATA_MISSING,
@@ -21,7 +20,11 @@ const YAHOO_HEADERS = {
   Accept: "application/json,text/plain,*/*",
 }
 
-const CACHE_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../scripts/.cache/eq-ohlcv")
+const CACHE_DIR =
+  [
+    path.resolve(process.cwd(), "scripts/.cache/eq-ohlcv"),
+    path.resolve(process.cwd(), "../scripts/.cache/eq-ohlcv"),
+  ].find((dir) => fs.existsSync(dir)) || path.resolve(process.cwd(), "scripts/.cache/eq-ohlcv")
 
 function readQuery(req) {
   if (req?.query && typeof req.query === "object") {
