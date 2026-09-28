@@ -143,9 +143,24 @@ function isIosStandalonePwa() {
   return ios && standalone
 }
 
+function shouldSkipResumeReloadForAuthRedirect(storage) {
+  if (!storage) return false
+  try {
+    if (storage.getItem("yds.firebaseRedirectSettling") === "1") return true
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i) || ""
+      if (key.startsWith("firebase:pendingRedirect:")) return true
+    }
+  } catch {
+    return false
+  }
+  return false
+}
+
 function forceResumeReloadWithCooldown() {
   if (!isIosStandalonePwa() || typeof window === "undefined") return
   if (!AUTO_DATA_ENGINE_ENABLED) return
+  if (shouldSkipResumeReloadForAuthRedirect(window.sessionStorage)) return
   try {
     const key = "yds-pwa-resume-reload-at"
     const now = Date.now()
@@ -474,8 +489,14 @@ async function settleGoogleRedirectSignIn(authInstance, getResult = getRedirectR
     const result = await getResult(authInstance)
     return result?.user ?? null
   } catch (err) {
-    console.error("로그인 실패", err)
+    console.error("로그인 실패", err?.code || err, err?.message || err)
     return null
+  } finally {
+    try {
+      globalThis.sessionStorage?.removeItem("yds.firebaseRedirectSettling")
+    } catch {
+      // ignore
+    }
   }
 }
 
@@ -958,16 +979,31 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!auth) return
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser || null)
-    })
-    return () => unsubscribe()
-  }, [auth])
-
-  useEffect(() => {
     if (!auth) return undefined
-    void settleGoogleRedirectSignIn(auth)
+    let redirectUser = null
+    let cancelled = false
+    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+      if (nextUser) {
+        redirectUser = null
+        setUser(nextUser)
+        return
+      }
+      if (redirectUser && auth.currentUser) {
+        setUser(redirectUser)
+        return
+      }
+      redirectUser = null
+      setUser(null)
+    })
+    void settleGoogleRedirectSignIn(auth).then((user) => {
+      if (cancelled || !user) return
+      redirectUser = user
+      setUser(user)
+    })
+    return () => {
+      cancelled = true
+      unsubscribe()
+    }
   }, [auth])
 
   useEffect(() => {

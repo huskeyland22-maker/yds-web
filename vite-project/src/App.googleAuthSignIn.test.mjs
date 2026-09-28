@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
+import { dirname, join } from "node:path"
 import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 
@@ -28,6 +29,24 @@ const shouldUseGoogleRedirectSignIn = new Function(
 const settleGoogleRedirectSignIn = new Function(
   `return (${extractFunction("settleGoogleRedirectSignIn")})`,
 )()
+const shouldSkipResumeReloadForAuthRedirect = new Function(
+  `return (${extractFunction("shouldSkipResumeReloadForAuthRedirect")})`,
+)()
+
+function memoryStorage(entries) {
+  const map = new Map(Object.entries(entries))
+  return {
+    get length() {
+      return map.size
+    },
+    key(index) {
+      return [...map.keys()][index] ?? null
+    },
+    getItem(key) {
+      return map.has(key) ? map.get(key) : null
+    },
+  }
+}
 
 function browser(userAgent, extra = {}) {
   return {
@@ -99,7 +118,8 @@ test("redirect failure is logged without the login alert", async () => {
     assert.equal(settled, null)
     assert.deepEqual(alerts, [])
     assert.equal(errors.length, 1)
-    assert.equal(errors[0][1].code, "auth/redirect-cancelled-by-user")
+    assert.equal(errors[0][1], "auth/redirect-cancelled-by-user")
+    assert.match(String(errors[0][2]), /redirect failed/)
   } finally {
     globalThis.alert = previousAlert
     console.error = previousError
@@ -114,14 +134,47 @@ test("login branches popup and redirect without changing the auth listener", () 
   assert.match(login, /signInWithRedirect\(auth, provider\)/)
   assert.match(login, /signInWithPopup\(auth, provider\)/)
   assert.match(login, /window\.alert\("로그인에 실패했습니다"\)/)
+  assert.match(source, /signInWithPopup\(auth, provider\)/)
+  assert.match(source, /settleGoogleRedirectSignIn\(auth\)\.then\(\(user\) =>/)
+  assert.match(source, /setUser\(user\)/)
+  assert.match(source, /if \(redirectUser && auth\.currentUser\)/)
+  const reload = extractFunction("forceResumeReloadWithCooldown")
+  assert.match(reload, /shouldSkipResumeReloadForAuthRedirect\(window\.sessionStorage\)/)
+  assert.match(reload, /window\.location\.reload\(\)/)
+})
+
+test("iOS resume reload waits while a Firebase redirect is pending", () => {
+  assert.equal(
+    shouldSkipResumeReloadForAuthRedirect(memoryStorage({ "yds.firebaseRedirectSettling": "1" })),
+    true,
+  )
+  assert.equal(
+    shouldSkipResumeReloadForAuthRedirect(
+      memoryStorage({ "firebase:pendingRedirect:key:app": "true" }),
+    ),
+    true,
+  )
+  assert.equal(
+    shouldSkipResumeReloadForAuthRedirect(memoryStorage({ "yds-pwa-resume-reload-at": "1" })),
+    false,
+  )
+})
+
+test("production auth helper stays on the YDS origin and proxies the Firebase project handler", () => {
+  const firebaseSource = readFileSync(new URL("./firebase.js", import.meta.url), "utf8")
+  const vercelSource = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "..", "..", "vercel.json"),
+    "utf8",
+  )
+  assert.match(firebaseSource, /PRODUCTION_APP_HOST = "yds-web-kappa.vercel.app"/)
+  assert.match(firebaseSource, /PROJECT_AUTH_DOMAIN = "yds-web-fec1e.firebaseapp.com"/)
+  assert.match(firebaseSource, /firebase:pendingRedirect:/)
   assert.match(
-    source,
-    /onAuthStateChanged\(auth, \(nextUser\) => \{\s*setUser\(nextUser \|\| null\)/,
+    vercelSource,
+    /"source": "\/__\/auth\/:path\*", "destination": "https:\/\/yds-web-fec1e.firebaseapp.com\/__\/auth\/:path\*"/,
   )
-  assert.match(source, /void settleGoogleRedirectSignIn\(auth\)/)
-  const redirectEffect = source.slice(
-    source.indexOf("void settleGoogleRedirectSignIn(auth)"),
-    source.indexOf("async function loadBuildVersion"),
+  assert.match(
+    vercelSource,
+    /"source": "\/__\/firebase\/:path\*", "destination": "https:\/\/yds-web-fec1e.firebaseapp.com\/__\/firebase\/:path\*"/,
   )
-  assert.doesNotMatch(redirectEffect, /alert\(/)
 })
