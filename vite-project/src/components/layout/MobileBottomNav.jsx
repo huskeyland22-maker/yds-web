@@ -27,7 +27,7 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
 
   const activeId = (() => {
     const p = location.pathname
-    if (p.startsWith("/daily-bottom-buy")) return "daily_bottom"
+    if (p.startsWith("/daily-bottom-buy") || p.startsWith("/equity-daily-bottom-buy")) return "daily_bottom"
     if (
       p.startsWith("/market-analysis") ||
       p.startsWith("/market-dashboard") ||

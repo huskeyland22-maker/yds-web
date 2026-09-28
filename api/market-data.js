@@ -57,6 +57,11 @@ function resolveYdsMode(req) {
 export default async function handler(req, res) {
   // Early dispatch: /api/daily-bottom-buy → rewrite → ?ydsMode=daily-bottom-buy
   // Must not alter existing /api/market-data behavior when mode is absent.
+  if (resolveYdsMode(req) === "equity-daily-bottom-buy") {
+    const { handleEquityDailyBottomBuy } = await import("./_lib/equityDailyBottomBuyHandler.js")
+    return handleEquityDailyBottomBuy(req, res)
+  }
+
   if (resolveYdsMode(req) === "daily-bottom-buy") {
     return handleDailyBottomBuy(req, res)
   }

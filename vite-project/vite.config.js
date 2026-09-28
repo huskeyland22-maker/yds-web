@@ -1,5 +1,6 @@
 import fs from "node:fs"
 import path from "node:path"
+import { pathToFileURL } from "node:url"
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import { VitePWA } from "vite-plugin-pwa"
@@ -71,6 +72,46 @@ function htmlBuildIdPlugin() {
   }
 }
 
+function equityDailyBottomBuyDevApi() {
+  const handlerPath = path.resolve(process.cwd(), "../api/_lib/equityDailyBottomBuyHandler.js")
+  return {
+    name: "equity-daily-bottom-buy-dev-api",
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const raw = req.url || ""
+        if (!raw.startsWith("/api/equity-daily-bottom-buy")) return next()
+        try {
+          const mod = await import(pathToFileURL(handlerPath).href)
+          const url = new URL(raw, "http://localhost")
+          await mod.handleEquityDailyBottomBuy(
+            { method: req.method, url: raw, query: { symbol: url.searchParams.get("symbol") || "" } },
+            {
+              setHeader(name, value) {
+                res.setHeader(name, value)
+              },
+              status(code) {
+                res.statusCode = code
+                return this
+              },
+              json(body) {
+                if (!res.getHeader("Content-Type")) res.setHeader("Content-Type", "application/json; charset=utf-8")
+                res.end(JSON.stringify(body))
+              },
+              end() {
+                res.end()
+              },
+            },
+          )
+        } catch {
+          res.statusCode = 200
+          res.setHeader("Content-Type", "application/json; charset=utf-8")
+          res.end(JSON.stringify({ ok: false, message: "데이터 준비 중", view: null }))
+        }
+      })
+    },
+  }
+}
+
 // https://vite.dev/config/
 // Network-first shell: index.html always from network; hashed /assets/* never precached (404 after deploy).
 export default defineConfig({
@@ -91,6 +132,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    equityDailyBottomBuyDevApi(),
     htmlBuildIdPlugin(),
     VitePWA({
       registerType: "autoUpdate",

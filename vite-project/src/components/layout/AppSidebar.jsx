@@ -24,9 +24,11 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
   const aiStatus = sidebarPulse?.aiReportStatus ?? null
   const pickAlertUnread = countUnreadPickAlerts()
   const [otherOpen, setOtherOpen] = useState(false)
-  // 핵심 매수 2화면은 신호·단계만으로 충분 — 패닉 기반「오늘의 해석」비표시
+  const [dbbOpen, setDbbOpen] = useState(true)
+  // 핵심 매수 화면은 신호·단계만으로 충분 — 패닉 기반「오늘의 해석」비표시
   const hideTodayInterpretation =
     location.pathname === "/daily-bottom-buy" ||
+    location.pathname === "/equity-daily-bottom-buy" ||
     location.pathname === "/" ||
     location.pathname === "/market-analysis" ||
     location.pathname === "/market-dashboard"
@@ -46,43 +48,81 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
       </div>
 
       <nav className="flex flex-col gap-1 px-2.5 py-3" aria-label="핵심 메뉴">
-        {coreItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === "/" || item.path === "/daily-bottom-buy"}
-            className={({ isActive }) =>
-              [
-                "yds-sidebar-core group block rounded-md border-l-2 px-3 py-2.5 transition",
-                item.tone === "brand"
-                  ? isActive
-                    ? "border-l-sky-400/70 bg-sky-500/[0.1]"
-                    : "border-l-transparent hover:border-l-sky-500/35 hover:bg-white/[0.03]"
-                  : isActive
-                    ? "border-l-rose-400/65 bg-rose-500/[0.08]"
-                    : "border-l-transparent hover:border-l-rose-500/30 hover:bg-white/[0.03]",
-              ].join(" ")
-            }
-          >
-            {({ isActive }) => (
-              <span className="flex items-start justify-between gap-2">
+        {coreItems.map((item) =>
+          item.children?.length ? (
+            <div key={item.path}>
+              <button
+                type="button"
+                className="yds-sidebar-core flex w-full items-start justify-between gap-2 rounded-md border-l-2 border-l-transparent px-3 py-2.5 text-left transition hover:border-l-sky-500/35 hover:bg-white/[0.03]"
+                aria-expanded={dbbOpen}
+                onClick={() => setDbbOpen((v) => !v)}
+              >
                 <span className="min-w-0">
-                  <span
-                    className={[
-                      "block text-[12.5px] font-semibold leading-snug tracking-tight",
-                      isActive ? "text-slate-50" : "text-slate-300",
-                    ].join(" ")}
-                  >
+                  <span className="block text-[12.5px] font-semibold leading-snug tracking-tight text-slate-300">
                     {item.label}
                   </span>
-                  <span className="mt-0.5 block text-[10px] leading-snug text-slate-500">
-                    {item.subtitle}
+                  <span className="mt-0.5 block text-[10px] leading-snug text-slate-500">{item.subtitle}</span>
+                </span>
+                <span className="font-mono text-[10px] text-slate-600">{dbbOpen ? "⌃" : "⌄"}</span>
+              </button>
+              {dbbOpen ? (
+                <nav className="mb-0.5 ml-3 flex flex-col gap-0.5 border-l border-white/[0.06] pl-2" aria-label={item.label}>
+                  {item.children.map((child) => (
+                    <NavLink
+                      key={child.path}
+                      to={child.path}
+                      end={child.path === "/daily-bottom-buy"}
+                      className={({ isActive }) =>
+                        [
+                          "rounded-md px-2 py-1.5 text-[11px] font-medium transition",
+                          isActive
+                            ? "bg-sky-500/[0.1] text-slate-50"
+                            : "text-slate-500 hover:bg-white/[0.03] hover:text-slate-300",
+                        ].join(" ")
+                      }
+                    >
+                      {child.label}
+                    </NavLink>
+                  ))}
+                </nav>
+              ) : null}
+            </div>
+          ) : (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === "/" || item.path === "/daily-bottom-buy"}
+              className={({ isActive }) =>
+                [
+                  "yds-sidebar-core group block rounded-md border-l-2 px-3 py-2.5 transition",
+                  item.tone === "brand"
+                    ? isActive
+                      ? "border-l-sky-400/70 bg-sky-500/[0.1]"
+                      : "border-l-transparent hover:border-l-sky-500/35 hover:bg-white/[0.03]"
+                    : isActive
+                      ? "border-l-rose-400/65 bg-rose-500/[0.08]"
+                      : "border-l-transparent hover:border-l-rose-500/30 hover:bg-white/[0.03]",
+                ].join(" ")
+              }
+            >
+              {({ isActive }) => (
+                <span className="flex items-start justify-between gap-2">
+                  <span className="min-w-0">
+                    <span
+                      className={[
+                        "block text-[12.5px] font-semibold leading-snug tracking-tight",
+                        isActive ? "text-slate-50" : "text-slate-300",
+                      ].join(" ")}
+                    >
+                      {item.label}
+                    </span>
+                    <span className="mt-0.5 block text-[10px] leading-snug text-slate-500">{item.subtitle}</span>
                   </span>
                 </span>
-              </span>
-            )}
-          </NavLink>
-        ))}
+              )}
+            </NavLink>
+          ),
+        )}
       </nav>
 
       <div className="mx-2.5 border-t border-white/[0.06]" />

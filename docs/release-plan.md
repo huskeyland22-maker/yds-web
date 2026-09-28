@@ -38,6 +38,7 @@
 - [x] 패닉 강도 카드 존재감 강화 — 시장 상태와 동급 핵심 지표 톤
 - [x] 시장분석 UI 동결 마감 — 패닉·유동성·시장전략 카드 최종 정리
 - [x] **시장분석 UI Freeze** — 구조 변경 중단 (2026-06-16)
+- [x] **개별종목 조정 매수** `/equity-daily-bottom-buy` — 48종목 READ-ONLY Score·4조건·ATR 표시, ETF 조정 매수와 메뉴 분리
 - [x] 패닉 8지표 체계 — GS B/B 제거, VIX/VXN/CNN/P-C/BofA/MOVE/SKEW/HY OAS
 - [x] **성과검증** 메뉴 `/performance-validation` — 추천 스냅샷·7/14/30일 잠금 수익률·KPI·등급별·TOP10·월별 차트
 - [x] **패닉 연구실** `/panic-lab` — 패닉 히스토리·80+ 이벤트·SPY/QQQ/SOXX 사후 수익·구간·8지표 기여도

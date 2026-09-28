@@ -10,8 +10,12 @@ export function getCoreNavItems() {
       label: "일상 조정 매수",
       shortLabel: "조정매수",
       path: "/daily-bottom-buy",
-      subtitle: "섹터 ETF · 일상 조정 타점",
+      subtitle: "ETF · 개별종목",
       tone: "brand",
+      children: [
+        { label: "ETF 조정 매수", path: "/daily-bottom-buy" },
+        { label: "개별종목 조정 매수", path: "/equity-daily-bottom-buy" },
+      ],
     },
     {
       label: "공포·패닉 매수",
@@ -67,6 +71,7 @@ export function getSidebarFooterLinks() {
 export const NAV_MOBILE_SHORT = {
   "/": "인생",
   "/daily-bottom-buy": "일상 조정 매수",
+  "/equity-daily-bottom-buy": "개별종목 조정 매수",
   "/market-analysis": "공포·패닉 매수",
   "/stock-picks": "종목",
   "/watchlist": "관심",

@@ -32,6 +32,7 @@ import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import DailyBottomBuyPage from "./pages/DailyBottomBuyPage.jsx"
+import EquityDailyBottomBuyPage from "./pages/EquityDailyBottomBuyPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import PerformanceValidationPage from "./pages/PerformanceValidationPage.jsx"
 import PanicLabPage from "./pages/PanicLabPage.jsx"
@@ -1381,6 +1382,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="일상 조정 매수">
                   <DailyBottomBuyPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/equity-daily-bottom-buy"
+              element={
+                <SectionErrorBoundary label="개별 종목 조정 매수">
+                  <EquityDailyBottomBuyPage />
                 </SectionErrorBoundary>
               }
             />

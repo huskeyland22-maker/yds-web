@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { NavLink, Link } from "react-router-dom"
+import { NavLink, Link, useLocation } from "react-router-dom"
 import { isDevMode } from "../../utils/devMode.js"
 import {
   getCoreNavItems,
@@ -11,7 +11,11 @@ import PwaDeveloperPanel from "../settings/PwaDeveloperPanel.jsx"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 
 export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccountSettings, buildVersion }) {
+  const location = useLocation()
   const [otherOpen, setOtherOpen] = useState(false)
+  const [dbbOpen, setDbbOpen] = useState(
+    () => location.pathname === "/daily-bottom-buy" || location.pathname === "/equity-daily-bottom-buy" || location.pathname === "/",
+  )
   const coreItems = getCoreNavItems()
   const otherItems = getOtherNavItems()
   const footerLinks = getSidebarFooterLinks()
@@ -40,29 +44,66 @@ export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccount
           </button>
         </div>
         <nav className="flex flex-1 flex-col gap-2 overflow-y-auto p-2.5" aria-label="핵심 메뉴">
-          {coreItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === "/" || item.path === "/daily-bottom-buy"}
-              onClick={onClose}
-              className={({ isActive }) =>
-                [
-                  "block rounded-2xl border px-3 py-2.5 transition",
-                  item.tone === "brand"
-                    ? isActive
-                      ? "border-sky-400/45 bg-sky-500/[0.16]"
-                      : "border-sky-500/20 bg-sky-500/[0.07]"
-                    : isActive
-                      ? "border-rose-400/40 bg-rose-500/[0.14]"
-                      : "border-rose-500/18 bg-rose-500/[0.06]",
-                ].join(" ")
-              }
-            >
-              <span className="block text-[13px] font-semibold text-slate-50">{item.label}</span>
-              <span className="mt-0.5 block text-[11px] text-slate-400">{item.subtitle}</span>
-            </NavLink>
-          ))}
+          {coreItems.map((item) =>
+            item.children?.length ? (
+              <div key={item.path} className="rounded-2xl border border-sky-500/20 bg-sky-500/[0.07] px-2 py-2">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between px-1 py-1 text-left"
+                  aria-expanded={dbbOpen}
+                  onClick={() => setDbbOpen((v) => !v)}
+                >
+                  <span>
+                    <span className="block text-[13px] font-semibold text-slate-50">{item.label}</span>
+                    <span className="mt-0.5 block text-[11px] text-slate-400">{item.subtitle}</span>
+                  </span>
+                  <span className="font-mono text-[11px] text-slate-500">{dbbOpen ? "⌃" : "⌄"}</span>
+                </button>
+                {dbbOpen ? (
+                  <div className="mt-1 flex flex-col gap-0.5" aria-label={item.label}>
+                    {item.children.map((child) => (
+                      <NavLink
+                        key={child.path}
+                        to={child.path}
+                        end={child.path === "/daily-bottom-buy"}
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                          [
+                            "rounded-md px-2 py-2 text-[12px] font-medium transition",
+                            isActive ? "bg-white/[0.1] text-slate-50" : "text-slate-300 hover:bg-white/[0.04]",
+                          ].join(" ")
+                        }
+                      >
+                        {child.label}
+                      </NavLink>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === "/" || item.path === "/daily-bottom-buy"}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  [
+                    "block rounded-2xl border px-3 py-2.5 transition",
+                    item.tone === "brand"
+                      ? isActive
+                        ? "border-sky-400/45 bg-sky-500/[0.16]"
+                        : "border-sky-500/20 bg-sky-500/[0.07]"
+                      : isActive
+                        ? "border-rose-400/40 bg-rose-500/[0.14]"
+                        : "border-rose-500/18 bg-rose-500/[0.06]",
+                  ].join(" ")
+                }
+              >
+                <span className="block text-[13px] font-semibold text-slate-50">{item.label}</span>
+                <span className="mt-0.5 block text-[11px] text-slate-400">{item.subtitle}</span>
+              </NavLink>
+            ),
+          )}
 
           <div className="mt-1 border-t border-white/[0.06] pt-2">
             <button
