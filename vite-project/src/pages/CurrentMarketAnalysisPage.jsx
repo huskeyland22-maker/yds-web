@@ -57,7 +57,9 @@ export default function CurrentMarketAnalysisPage() {
             setShowFull(true)
           }}
         />
-      ) : !hasLive ? (
+      ) : null}
+
+      {!hasLive ? (
         <div className="yds-market-analysis__loading" role="status" aria-live="polite">
           <span className="yds-market-analysis__loading-dot" aria-hidden />
           시장 지표를 동기화하고 있습니다. 잠시만 기다려 주세요.
