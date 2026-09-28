@@ -133,3 +133,20 @@ describe("handler", () => {
     assert.equal(result.body.view.score, null)
   })
 })
+
+describe("candidate display order", () => {
+  it("shows 4/4 before 3/4 and keeps universe order within a score", async () => {
+    const { selectEquityBuyCandidates } = await import(
+      pathToFileURL(join(root, "vite-project/src/utils/equityDailyBottomBuyCandidates.js")).href
+    )
+    const universe = ["MSFT", "AAPL", "HD", "NEE"]
+    const views = [
+      { ok: true, symbol: "MSFT", score: 0 },
+      { ok: true, symbol: "AAPL", score: 4 },
+      { ok: true, symbol: "HD", score: 3 },
+      { ok: true, symbol: "NEE", score: 4 },
+    ]
+    const picked = selectEquityBuyCandidates(views, universe)
+    assert.deepEqual(picked.map((row) => row.symbol), ["AAPL", "NEE", "HD"])
+  })
+})

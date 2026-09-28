@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
+import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
+import { selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 
 const DEFAULT_SYMBOL = "MSFT"
 
@@ -27,6 +29,8 @@ export default function EquityDailyBottomBuyPage() {
   const [query, setQuery] = useState("")
   const [payload, setPayload] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [candidates, setCandidates] = useState(null)
+  const [candidateAsOf, setCandidateAsOf] = useState(null)
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -46,6 +50,59 @@ export default function EquityDailyBottomBuyPage() {
   }, [symbol])
 
   const universe = payload?.universe || []
+  const universeKey = universe.map((row) => row.symbol).join("|")
+
+  useEffect(() => {
+    if (!universe.length) return undefined
+    const symbols = universe.map((row) => row.symbol)
+    const ctrl = new AbortController()
+    let cancelled = false
+    setCandidates(null)
+    setCandidateAsOf(null)
+
+    async function worker(cursor) {
+      const views = []
+      while (cursor.i < symbols.length) {
+        const index = cursor.i
+        cursor.i += 1
+        const sym = symbols[index]
+        try {
+          const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
+          views[index] = json?.view || null
+        } catch (err) {
+          if (ctrl.signal.aborted) throw err
+          views[index] = null
+        }
+      }
+      return views
+    }
+
+    const cursor = { i: 0 }
+    const workers = Array.from({ length: Math.min(6, symbols.length) }, () => worker(cursor))
+    Promise.all(workers)
+      .then((chunks) => {
+        if (cancelled || ctrl.signal.aborted) return
+        const views = []
+        for (const chunk of chunks) {
+          chunk.forEach((view, index) => {
+            if (view) views[index] = view
+          })
+        }
+        const packed = symbols.map((_, index) => views[index] || null)
+        const ok = packed.filter((view) => view?.ok)
+        if (!ok.length) return
+        setCandidateAsOf(ok.find((view) => view.asOf)?.asOf || null)
+        setCandidates(selectEquityBuyCandidates(packed, symbols))
+      })
+      .catch((err) => {
+        if (cancelled || ctrl.signal.aborted || err?.name === "AbortError") return
+      })
+
+    return () => {
+      cancelled = true
+      ctrl.abort()
+    }
+  }, [universeKey])
   const groups = useMemo(() => {
     const seen = []
     for (const row of universe) {
@@ -78,6 +135,35 @@ export default function EquityDailyBottomBuyPage() {
         <h1 className="yds-dbb__title">개별 종목 Daily Bottom Buy</h1>
         <p className="yds-dbb__lead">개별 종목의 조정/과매도 상태를 확인하는 READ-ONLY 화면</p>
       </header>
+
+      <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
+        <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
+        {candidateAsOf ? <p className="yds-dbb__meta mt-2">기준일 {candidateAsOf}</p> : null}
+        {candidates === null ? (
+          <p className="yds-dbb__status">데이터 준비 중</p>
+        ) : candidates.length === 0 ? (
+          <p className="yds-dbb__status">현재 조정매수 후보가 없습니다.</p>
+        ) : (
+          <ul className="mt-2 space-y-2">
+            {candidates.map((row) => (
+              <li key={row.symbol}>
+                <button
+                  type="button"
+                  className="w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100"
+                  onClick={() => setSymbol(row.symbol)}
+                >
+                  <p className="font-semibold">
+                    {row.score}/4 {row.symbol} {row.name}
+                  </p>
+                  <p className="tabular-nums">현재가 {formatPrice(row.price)}</p>
+                  <p className="tabular-nums">ATR {formatAtr(row.atrPct)}</p>
+                  <p>{row.state?.label}</p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="yds-dbb-card mb-3">
         <h2 className="yds-dbb-section__title">종목 선택</h2>
@@ -188,6 +274,13 @@ export default function EquityDailyBottomBuyPage() {
           </section>
         </>
       ) : null}
+
+      <section className="yds-dbb-card mb-3" aria-label="매수 기록">
+        <h2 className="yds-dbb-section__title">매수 기록</h2>
+        <div className="yds-dbb-trade mt-2">
+          <TradeRecordEditor key={symbol} system="dbb" symbol={symbol} defaultWeightPct={50} />
+        </div>
+      </section>
     </div>
   )
 }
