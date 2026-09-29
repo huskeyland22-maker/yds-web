@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest"
-import { upsertTradeRecord } from "./ydsTradeRecords.js"
+import {
+  equityBuyProgressMark,
+  formatEquityBuyProgressLine,
+} from "../components/trade-records/DbbBuyProgressSection.jsx"
+import { listTradeRecords, upsertTradeRecord } from "./ydsTradeRecords.js"
 import {
   collectDbbBuyProgress,
   equityViewProgressEntry,
@@ -118,5 +122,90 @@ describe("collectDbbBuyProgress", () => {
     expect(items[0].statusView).toBeNull()
     expect(items[0].recordedWeightPct).toBe(50)
     expect(items[0].avgBuyPrice).toBe(180)
+  })
+})
+
+describe("equity buy progress lines", () => {
+  it("labels stored strategy and discretionary buys, and reads missing fields as strategy stage 1", () => {
+    expect(equityBuyProgressMark(0)).toBe("①")
+    expect(equityBuyProgressMark(2)).toBe("③")
+    expect(
+      formatEquityBuyProgressLine({
+        buyDate: "2026-10-01",
+        buyPrice: 216,
+        shares: 5,
+        buyType: "strategy",
+        buyStage: 1,
+      }),
+    ).toBe("2026-10-01 · 전략 1차 · 5주 · $216.00")
+    expect(
+      formatEquityBuyProgressLine({
+        buyDate: "2026-10-05",
+        buyPrice: 76,
+        shares: 3,
+        buyType: "discretionary",
+        buyStage: null,
+      }),
+    ).toBe("2026-10-05 · 직관 매수 · 3주 · $76.00")
+    expect(
+      formatEquityBuyProgressLine({
+        buyDate: "2026-10-13",
+        buyPrice: 70,
+        shares: 5,
+        buyType: "strategy",
+        buyStage: 2,
+      }),
+    ).toBe("2026-10-13 · 전략 2차 · 5주 · $70.00")
+    expect(
+      formatEquityBuyProgressLine({
+        buyDate: "2026-09-01",
+        buyPrice: 100,
+        shares: 2,
+      }),
+    ).toBe("2026-09-01 · 전략 1차 · 2주 · $100.00")
+  })
+
+  it("keeps mixed buys in stored buy-date order", () => {
+    upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-13",
+      buyPrice: 70,
+      buyAmountUsd: 350,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 2,
+    })
+    upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-01",
+      buyPrice: 216,
+      buyAmountUsd: 1080,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 1,
+    })
+    upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-05",
+      buyPrice: 76,
+      buyAmountUsd: 228,
+      shares: 3,
+      weightPct: 30,
+      buyType: "discretionary",
+      buyStage: null,
+    })
+    const lines = listTradeRecords("dbb", "NEE").map((record, index) =>
+      `${equityBuyProgressMark(index)} ${formatEquityBuyProgressLine(record)}`,
+    )
+    expect(lines).toEqual([
+      "① 2026-10-01 · 전략 1차 · 5주 · $216.00",
+      "② 2026-10-05 · 직관 매수 · 3주 · $76.00",
+      "③ 2026-10-13 · 전략 2차 · 5주 · $70.00",
+    ])
   })
 })

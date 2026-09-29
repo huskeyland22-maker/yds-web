@@ -5,6 +5,7 @@ import {
   formatUsdAmount,
   formatUsdPrice,
   listTradeRecords,
+  readEquityBuyIntent,
   TRADE_RECORDS_CHANGED_EVENT,
   upsertTradeRecord,
 } from "../../content/ydsTradeRecords.js"
@@ -43,6 +44,7 @@ export function coerceUsdSaveNumber(raw, integerUsdInputs) {
  *   defaultWeightPct?: number
  *   onChange?: () => void
  *   integerUsdInputs?: boolean
+ *   equityBuyIntent?: boolean
  * }} props
  */
 export default function TradeRecordEditor({
@@ -51,6 +53,7 @@ export default function TradeRecordEditor({
   defaultWeightPct = 50,
   onChange,
   integerUsdInputs = false,
+  equityBuyIntent = false,
 }) {
   const [buyDate, setBuyDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [buyPrice, setBuyPrice] = useState("")
@@ -58,6 +61,8 @@ export default function TradeRecordEditor({
   const [buyAmountUsd, setBuyAmountUsd] = useState("")
   const [weightPct, setWeightPct] = useState(String(defaultWeightPct))
   const [memo, setMemo] = useState("")
+  const [buyType, setBuyType] = useState("strategy")
+  const [buyStage, setBuyStage] = useState("1")
   const [editId, setEditId] = useState(/** @type {string | null} */ (null))
   const [error, setError] = useState(/** @type {string | null} */ (null))
   const [tick, setTick] = useState(0)
@@ -86,6 +91,8 @@ export default function TradeRecordEditor({
     setBuyAmountUsd("")
     setWeightPct(String(nextWeight))
     setMemo("")
+    setBuyType("strategy")
+    setBuyStage("1")
     setError(null)
   }
 
@@ -105,6 +112,12 @@ export default function TradeRecordEditor({
       shares: sharesNum,
       weightPct: Number(weightPct),
       memo,
+      ...(equityBuyIntent
+        ? {
+            buyType,
+            buyStage: buyType === "discretionary" ? null : Number(buyStage),
+          }
+        : {}),
     })
     if (!saved) {
       setError("입력값을 확인해 주세요. (매수일·매수가 USD·금액 USD·비중)")
@@ -122,6 +135,11 @@ export default function TradeRecordEditor({
     setBuyAmountUsd(coerceUsdInputText(rec.buyAmountUsd, integerUsdInputs))
     setWeightPct(String(rec.weightPct))
     setMemo(rec.memo || "")
+    if (equityBuyIntent) {
+      const intent = readEquityBuyIntent(rec)
+      setBuyType(intent.buyType)
+      setBuyStage(intent.buyStage == null ? "1" : String(intent.buyStage))
+    }
     setError(null)
   }
 
@@ -134,6 +152,28 @@ export default function TradeRecordEditor({
   return (
     <div className="yds-trade-rec">
       <form className="yds-trade-rec__form" onSubmit={onSubmit}>
+        {equityBuyIntent ? (
+          <div className="yds-trade-rec__grid">
+            <label>
+              <span>매수 유형</span>
+              <select value={buyType} onChange={(ev) => setBuyType(ev.target.value)}>
+                <option value="strategy">전략 매수</option>
+                <option value="discretionary">직관 매수</option>
+              </select>
+            </label>
+            {buyType === "strategy" ? (
+              <label>
+                <span>매수 단계</span>
+                <select value={buyStage} onChange={(ev) => setBuyStage(ev.target.value)}>
+                  <option value="1">1차 매수</option>
+                  <option value="2">2차 매수</option>
+                  <option value="3">3차 매수</option>
+                  <option value="4">4차 매수</option>
+                </select>
+              </label>
+            ) : null}
+          </div>
+        ) : null}
         <div className="yds-trade-rec__grid">
           <label>
             <span>매수일</span>
@@ -223,6 +263,9 @@ export default function TradeRecordEditor({
         <ul className="yds-trade-rec__list" aria-label="매수 기록 목록">
           {records.map((r) => (
             <li key={r.id}>
+              {equityBuyIntent ? (
+                <p className="yds-trade-rec__list-kind">{readEquityBuyIntent(r).label}</p>
+              ) : null}
               <div
                 className="yds-trade-rec__list-main yds-trade-rec__list-main--usd font-mono tabular-nums"
                 title="매수일 · 매수가 · 수량 · 금액 · 비중"
@@ -232,7 +275,9 @@ export default function TradeRecordEditor({
                   formatUsdPrice(r.buyPrice),
                   formatTradeRecordShares(r),
                   formatUsdAmount(r.buyAmountUsd),
-                  `${Number(r.weightPct).toFixed(0)}%`,
+                  equityBuyIntent && readEquityBuyIntent(r).buyType === "discretionary"
+                    ? "-"
+                    : `${Number(r.weightPct).toFixed(0)}%`,
                 ].join(" | ")}
               </div>
               {r.memo ? <p className="yds-trade-rec__list-memo">{r.memo}</p> : null}

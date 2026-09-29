@@ -335,6 +335,134 @@ describe("logged-out behavior", () => {
   })
 })
 
+describe("equity buy intent survives cloud sync", () => {
+  const neeStrategy = {
+    id: "tr_nee_1",
+    system: "dbb",
+    symbol: "NEE",
+    buyDate: "2026-10-01",
+    buyPrice: 500,
+    buyAmountUsd: 2500,
+    shares: 5,
+    weightPct: 50,
+    memo: "",
+    buyType: "strategy",
+    buyStage: 1,
+    createdAt: "2026-10-01T00:00:00.000Z",
+    updatedAt: "2026-10-01T00:00:00.000Z",
+  }
+  const neeDiscretionary = {
+    id: "tr_nee_2",
+    system: "dbb",
+    symbol: "NEE",
+    buyDate: "2026-10-05",
+    buyPrice: 490,
+    buyAmountUsd: 1470,
+    shares: 3,
+    weightPct: 30,
+    memo: "",
+    buyType: "discretionary",
+    buyStage: null,
+    createdAt: "2026-10-05T00:00:00.000Z",
+    updatedAt: "2026-10-05T00:00:00.000Z",
+  }
+
+  it("keeps buyType and buyStage on both upload and download, and leaves ETF rows untouched", async () => {
+    writeTradeRecordsStore({
+      version: 1,
+      records: {
+        "dbb:NEE": [neeStrategy, neeDiscretionary],
+        "dbb:ITA": sampleIta.records["dbb:ITA"],
+      },
+    })
+
+    const calls = []
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url, opts = {}) => {
+        calls.push({ method: opts.method || "GET", body: opts.body })
+        if ((opts.method || "GET") === "GET") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              records: {
+                version: 1,
+                records: {
+                  "dbb:NEE": [
+                    {
+                      ...neeStrategy,
+                      buyStage: 2,
+                      updatedAt: "2026-10-02T00:00:00.000Z",
+                    },
+                  ],
+                  "dbb:QQQ": [
+                    {
+                      id: "tr_qqq",
+                      system: "dbb",
+                      symbol: "QQQ",
+                      buyDate: "2026-09-01",
+                      buyPrice: 480.55,
+                      buyAmountUsd: 2402.75,
+                      shares: 5,
+                      weightPct: 50,
+                      memo: "",
+                      createdAt: "2026-09-01T00:00:00.000Z",
+                      updatedAt: "2026-09-01T00:00:00.000Z",
+                    },
+                  ],
+                },
+              },
+              revision: 4,
+              updatedAt: null,
+              syncMode: "account",
+            }),
+          }
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            records: JSON.parse(opts.body).records,
+            revision: 5,
+            updatedAt: null,
+            syncMode: "account",
+          }),
+        }
+      }),
+    )
+
+    const result = await reconcileTradeRecordsWithCloud("token")
+    expect(result.mode).toBe("merged-upload")
+    const put = calls.find((c) => c.method === "PUT")
+    const uploaded = JSON.parse(put.body).records.records
+    expect(uploaded["dbb:NEE"].find((r) => r.id === "tr_nee_1")).toMatchObject({
+      buyType: "strategy",
+      buyStage: 2,
+    })
+    expect(uploaded["dbb:NEE"].find((r) => r.id === "tr_nee_2")).toMatchObject({
+      buyType: "discretionary",
+      buyStage: null,
+    })
+    expect(uploaded["dbb:ITA"][0].buyType).toBeUndefined()
+    expect(uploaded["dbb:QQQ"][0].buyType).toBeUndefined()
+    expect(uploaded["dbb:QQQ"][0].buyPrice).toBe(480.55)
+
+    const nee = listTradeRecords("dbb", "NEE")
+    expect(nee.map((r) => [r.id, r.buyType, r.buyStage])).toEqual([
+      ["tr_nee_1", "strategy", 2],
+      ["tr_nee_2", "discretionary", null],
+    ])
+    const qqq = listTradeRecords("dbb", "QQQ")[0]
+    expect(qqq.buyType).toBeUndefined()
+    expect(qqq.buyStage).toBeUndefined()
+    expect(qqq.buyPrice).toBe(480.55)
+    const ita = listTradeRecords("dbb", "ITA")[0]
+    expect(ita.buyType).toBeUndefined()
+    expect(ita.buyPrice).toBe(216.17)
+  })
+})
+
 describe("storage key unchanged", () => {
   it("still uses yds.tradeRecords.v1 and sync meta is separate", () => {
     expect(TRADE_RECORDS_STORAGE_KEY).toBe("yds.tradeRecords.v1")

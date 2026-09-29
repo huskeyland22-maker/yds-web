@@ -54,6 +54,8 @@ describe("equity integer USD inputs", () => {
     const row = listTradeRecords("dbb", "MSFT")[0]
     expect(row.buyPrice).toBe(100)
     expect(row.buyAmountUsd).toBe(506)
+    expect(Number.isInteger(row.buyPrice)).toBe(true)
+    expect(Number.isInteger(row.buyAmountUsd)).toBe(true)
   })
 
   it("516.17 / 1200.99 → 516 / 1200", () => {
@@ -76,5 +78,7 @@ describe("ETF decimal USD inputs stay unchanged", () => {
     const row = listTradeRecords("dbb", "QQQ")[0]
     expect(row.buyPrice).toBe(216.17)
     expect(row.buyAmountUsd).toBe(1080.5)
+    expect(row.buyType).toBeUndefined()
+    expect(row.buyStage).toBeUndefined()
   })
 })

@@ -1,5 +1,39 @@
-import { formatUsdPrice } from "../../content/ydsTradeRecords.js"
+import {
+  formatTradeRecordShares,
+  formatUsdPrice,
+  listTradeRecords,
+  readEquityBuyIntent,
+} from "../../content/ydsTradeRecords.js"
 import TradeRecordStatusBlock from "./TradeRecordStatusBlock.jsx"
+
+/**
+ * Display label for one stored equity buy. Missing fields use the existing
+ * read fallback (strategy stage 1). Does not invent a discretionary buy.
+ * @param {object | null | undefined} record
+ */
+export function equityBuyProgressKind(record) {
+  const intent = readEquityBuyIntent(record)
+  if (intent.buyType === "discretionary") return "직관 매수"
+  return `전략 ${intent.buyStage}차`
+}
+
+/**
+ * @param {number} index zero-based
+ */
+export function equityBuyProgressMark(index) {
+  const n = index + 1
+  if (n >= 1 && n <= 20) return String.fromCodePoint(0x2460 + n - 1)
+  if (n >= 21 && n <= 35) return String.fromCodePoint(0x3251 + n - 21)
+  return `${n}.`
+}
+
+/**
+ * @param {object | null | undefined} record
+ */
+export function formatEquityBuyProgressLine(record) {
+  const date = typeof record?.buyDate === "string" && record.buyDate ? `${record.buyDate} · ` : ""
+  return `${date}${equityBuyProgressKind(record)} · ${formatTradeRecordShares(record)} · ${formatUsdPrice(record?.buyPrice)}`
+}
 
 /**
  * Shared holdings strip for ETF and equity daily-bottom-buy pages.
@@ -12,9 +46,28 @@ import TradeRecordStatusBlock from "./TradeRecordStatusBlock.jsx"
  *     avgBuyPrice: number | null
  *   }>
  *   onSelectSymbol?: (symbol: string) => void
+ *   showBuyLines?: boolean
  * }} props
  */
-export default function DbbBuyProgressSection({ items, onSelectSymbol }) {
+function EquityBuyLines({ symbol }) {
+  const records = listTradeRecords("dbb", symbol)
+  if (!records.length) return null
+  return (
+    <div className="yds-dbb-holdings__buys">
+      <p className="yds-dbb-holdings__buys-title">매수 내역</p>
+      <ol className="yds-dbb-holdings__buys-list">
+        {records.map((record, index) => (
+          <li key={record.id}>
+            <span className="yds-dbb-holdings__buys-mark">{equityBuyProgressMark(index)}</span>
+            <span className="yds-dbb-holdings__buys-text">{formatEquityBuyProgressLine(record)}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+export default function DbbBuyProgressSection({ items, onSelectSymbol, showBuyLines = false }) {
   if (!items?.length) return null
   return (
     <section className="yds-dbb-holdings" aria-label="매수 현황">
@@ -52,6 +105,7 @@ export default function DbbBuyProgressSection({ items, onSelectSymbol }) {
                   </div>
                 </div>
               )}
+              {showBuyLines ? <EquityBuyLines symbol={item.symbol} /> : null}
             </>
           )
           if (onSelectSymbol) {

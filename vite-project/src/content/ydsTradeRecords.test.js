@@ -10,6 +10,7 @@ import {
   formatUsdAmount,
   formatUsdPrice,
   listTradeRecords,
+  readEquityBuyIntent,
   readTradeRecordsStore,
   sumTradeWeightPct,
   tradeRecordBucketKey,
@@ -68,6 +69,8 @@ describe("ydsTradeRecords storage", () => {
     expect(ita[0].buyPrice).toBe(216.17)
     expect(ita[0].buyAmountUsd).toBe(1080)
     expect(ita[0].shares).toBe(5)
+    expect(ita[0].buyType).toBeUndefined()
+    expect(ita[0].buyStage).toBeUndefined()
 
     const raw = localStorage.getItem(TRADE_RECORDS_STORAGE_KEY)
     installLocalStorageMock()
@@ -322,5 +325,139 @@ describe("trade status views", () => {
     )
     expect(view.stageLabel).toContain("1차")
     expect(view.nextStep).toContain("2차")
+  })
+})
+
+describe("equity buy intent", () => {
+  function saveNee(extra) {
+    return upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: extra.buyDate,
+      buyPrice: extra.buyPrice,
+      buyAmountUsd: extra.buyAmountUsd,
+      shares: extra.shares,
+      weightPct: extra.weightPct,
+      memo: "",
+      buyType: extra.buyType,
+      buyStage: extra.buyStage,
+    })
+  }
+
+  it("saves strategy stage 1 and stage 2", () => {
+    const first = saveNee({
+      buyDate: "2026-10-01",
+      buyPrice: 500,
+      buyAmountUsd: 2500,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 1,
+    })
+    const second = saveNee({
+      buyDate: "2026-10-13",
+      buyPrice: 475,
+      buyAmountUsd: 2375,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 2,
+    })
+    expect(first.buyType).toBe("strategy")
+    expect(first.buyStage).toBe(1)
+    expect(second.buyType).toBe("strategy")
+    expect(second.buyStage).toBe(2)
+    expect(readEquityBuyIntent(first).label).toBe("전략 1차 매수")
+    expect(readEquityBuyIntent(second).label).toBe("전략 2차 매수")
+  })
+
+  it("saves a discretionary buy with buyStage null", () => {
+    const row = saveNee({
+      buyDate: "2026-10-05",
+      buyPrice: 490,
+      buyAmountUsd: 1470,
+      shares: 3,
+      weightPct: 30,
+      buyType: "discretionary",
+      buyStage: null,
+    })
+    expect(row.buyType).toBe("discretionary")
+    expect(row.buyStage).toBeNull()
+    expect(readEquityBuyIntent(row).label).toBe("직관 매수")
+  })
+
+  it("reads missing buyType/buyStage as strategy stage 1 without rewriting storage", () => {
+    localStorage.setItem(
+      TRADE_RECORDS_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        records: {
+          "dbb:NEE": [
+            {
+              id: "tr_old",
+              system: "dbb",
+              symbol: "NEE",
+              buyDate: "2026-09-01",
+              buyPrice: 480,
+              buyAmountUsd: 1440,
+              shares: 3,
+              weightPct: 50,
+              memo: "",
+              createdAt: "2026-09-01T00:00:00.000Z",
+              updatedAt: "2026-09-01T00:00:00.000Z",
+            },
+          ],
+        },
+      }),
+    )
+    const before = localStorage.getItem(TRADE_RECORDS_STORAGE_KEY)
+    const row = listTradeRecords("dbb", "NEE")[0]
+    expect(row.buyType).toBeUndefined()
+    expect(row.buyStage).toBeUndefined()
+    expect(readEquityBuyIntent(row)).toEqual({
+      buyType: "strategy",
+      buyStage: 1,
+      label: "전략 1차 매수",
+    })
+    expect(localStorage.getItem(TRADE_RECORDS_STORAGE_KEY)).toBe(before)
+  })
+
+  it("keeps strategy 1, discretionary, and strategy 2 as three independent records", () => {
+    saveNee({
+      buyDate: "2026-10-01",
+      buyPrice: 500,
+      buyAmountUsd: 2500,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 1,
+    })
+    saveNee({
+      buyDate: "2026-10-05",
+      buyPrice: 490,
+      buyAmountUsd: 1470,
+      shares: 3,
+      weightPct: 30,
+      buyType: "discretionary",
+      buyStage: null,
+    })
+    saveNee({
+      buyDate: "2026-10-13",
+      buyPrice: 475,
+      buyAmountUsd: 2375,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 2,
+    })
+    const rows = listTradeRecords("dbb", "NEE")
+    expect(rows).toHaveLength(3)
+    expect(new Set(rows.map((r) => r.id)).size).toBe(3)
+    expect(rows.map((r) => [r.buyType, r.buyStage])).toEqual([
+      ["strategy", 1],
+      ["discretionary", null],
+      ["strategy", 2],
+    ])
+    expect(sumTradeWeightPct(rows)).toBe(130)
   })
 })

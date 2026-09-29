@@ -163,7 +163,7 @@ export default function EquityDailyBottomBuyPage() {
         <p className="yds-dbb__lead">개별 종목의 조정/과매도 상태를 확인하는 READ-ONLY 화면</p>
       </header>
 
-      <DbbBuyProgressSection items={buyProgress} onSelectSymbol={setSymbol} />
+      <DbbBuyProgressSection items={buyProgress} onSelectSymbol={setSymbol} showBuyLines />
 
       <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
         <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
@@ -313,6 +313,7 @@ export default function EquityDailyBottomBuyPage() {
             symbol={symbol}
             defaultWeightPct={50}
             integerUsdInputs
+            equityBuyIntent
           />
         </div>
       </section>

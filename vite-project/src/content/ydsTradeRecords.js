@@ -35,10 +35,16 @@ function scheduleCloudPushAfterLocalWrite() {
  *   shares: number | null
  *   weightPct: number
  *   memo: string
+ *   buyType?: 'strategy' | 'discretionary'
+ *   buyStage?: 1 | 2 | 3 | 4 | null
  *   createdAt: string
  *   updatedAt: string
  * }} TradeRecord
  */
+
+/** Equity intent only. Absent on ETF and panic rows. */
+export const EQUITY_BUY_TYPES = ["strategy", "discretionary"]
+export const EQUITY_BUY_STAGES = [1, 2, 3, 4]
 
 /**
  * @param {'dbb' | 'panic'} system
@@ -104,6 +110,36 @@ export function writeTradeRecordsStore(store) {
 }
 
 /**
+ * Keep an explicit equity intent. Missing fields stay missing so ETF rows
+ * and older equity rows are not rewritten.
+ * @param {Record<string, unknown>} raw
+ * @returns {{ buyType: 'strategy' | 'discretionary', buyStage: 1 | 2 | 3 | 4 | null } | null}
+ */
+function storedBuyIntent(raw) {
+  if (raw.buyType !== "strategy" && raw.buyType !== "discretionary") return null
+  if (raw.buyType === "discretionary") return { buyType: "discretionary", buyStage: null }
+  const stage = Number(raw.buyStage)
+  return {
+    buyType: "strategy",
+    buyStage: EQUITY_BUY_STAGES.includes(stage) ? /** @type {1|2|3|4} */ (stage) : 1,
+  }
+}
+
+/**
+ * Display fallback for the equity page. Does not describe stored ETF rows.
+ * A row with no intent fields reads as a first strategy buy.
+ * @param {Partial<TradeRecord> | null | undefined} record
+ */
+export function readEquityBuyIntent(record) {
+  if (record?.buyType === "discretionary") {
+    return { buyType: "discretionary", buyStage: null, label: "직관 매수" }
+  }
+  const stage = Number(record?.buyStage)
+  const buyStage = EQUITY_BUY_STAGES.includes(stage) ? stage : 1
+  return { buyType: "strategy", buyStage, label: `전략 ${buyStage}차 매수` }
+}
+
+/**
  * Legacy `buyAmountKrw` is treated as USD dollars (never convert FX).
  * @param {unknown} raw
  * @returns {TradeRecord | null}
@@ -130,6 +166,7 @@ function normalizeRecord(raw) {
   if (!Number.isFinite(buyPrice) || buyPrice <= 0) return null
   if (!Number.isFinite(amountRaw) || amountRaw < 0) return null
   if (!Number.isFinite(weightPct) || weightPct < 0) return null
+  const intent = storedBuyIntent(r)
   return {
     id,
     system,
@@ -140,6 +177,7 @@ function normalizeRecord(raw) {
     shares,
     weightPct,
     memo: typeof r.memo === "string" ? r.memo : "",
+    ...(intent ? { buyType: intent.buyType, buyStage: intent.buyStage } : {}),
     createdAt: typeof r.createdAt === "string" ? r.createdAt : buyDate,
     updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : buyDate,
   }
@@ -195,6 +233,8 @@ export function upsertTradeRecord(input) {
     shares: input.shares,
     weightPct: input.weightPct,
     memo: input.memo ?? "",
+    buyType: input.buyType,
+    buyStage: input.buyStage,
     createdAt: existing?.createdAt || now,
     updatedAt: now,
   })
