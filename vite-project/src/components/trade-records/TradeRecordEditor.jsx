@@ -1,12 +1,40 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   deleteTradeRecord,
   formatTradeRecordShares,
   formatUsdAmount,
   formatUsdPrice,
   listTradeRecords,
+  TRADE_RECORDS_CHANGED_EVENT,
   upsertTradeRecord,
 } from "../../content/ydsTradeRecords.js"
+
+/**
+ * Equity pages pass `integerUsdInputs` so price and amount drop the fraction.
+ * ETF leaves the flag unset and keeps decimals. Empty input stays empty.
+ * @param {string | number | null | undefined} raw
+ * @param {boolean} integerUsdInputs
+ * @returns {string}
+ */
+export function coerceUsdInputText(raw, integerUsdInputs) {
+  const text = raw == null ? "" : String(raw)
+  if (!integerUsdInputs) return text
+  if (text.trim() === "") return ""
+  const n = Number(text)
+  if (!Number.isFinite(n)) return text
+  return String(Math.trunc(n))
+}
+
+/**
+ * @param {string | number | null | undefined} raw
+ * @param {boolean} integerUsdInputs
+ * @returns {number}
+ */
+export function coerceUsdSaveNumber(raw, integerUsdInputs) {
+  const n = Number(raw)
+  if (!integerUsdInputs || !Number.isFinite(n)) return n
+  return Math.trunc(n)
+}
 
 /**
  * @param {{
@@ -14,6 +42,7 @@ import {
  *   symbol: string
  *   defaultWeightPct?: number
  *   onChange?: () => void
+ *   integerUsdInputs?: boolean
  * }} props
  */
 export default function TradeRecordEditor({
@@ -21,6 +50,7 @@ export default function TradeRecordEditor({
   symbol,
   defaultWeightPct = 50,
   onChange,
+  integerUsdInputs = false,
 }) {
   const [buyDate, setBuyDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [buyPrice, setBuyPrice] = useState("")
@@ -36,6 +66,12 @@ export default function TradeRecordEditor({
     void tick
     return listTradeRecords(system, symbol)
   }, [system, symbol, tick])
+
+  useEffect(() => {
+    const onRecordsChanged = () => setTick((n) => n + 1)
+    window.addEventListener(TRADE_RECORDS_CHANGED_EVENT, onRecordsChanged)
+    return () => window.removeEventListener(TRADE_RECORDS_CHANGED_EVENT, onRecordsChanged)
+  }, [])
 
   function refresh() {
     setTick((n) => n + 1)
@@ -56,8 +92,8 @@ export default function TradeRecordEditor({
   function onSubmit(e) {
     e.preventDefault()
     setError(null)
-    const priceNum = Number(buyPrice)
-    const amountNum = Number(buyAmountUsd)
+    const priceNum = coerceUsdSaveNumber(buyPrice, integerUsdInputs)
+    const amountNum = coerceUsdSaveNumber(buyAmountUsd, integerUsdInputs)
     const sharesNum = shares === "" ? null : Number(shares)
     const saved = upsertTradeRecord({
       id: editId || undefined,
@@ -81,9 +117,9 @@ export default function TradeRecordEditor({
   function onEdit(rec) {
     setEditId(rec.id)
     setBuyDate(rec.buyDate)
-    setBuyPrice(String(rec.buyPrice))
+    setBuyPrice(coerceUsdInputText(rec.buyPrice, integerUsdInputs))
     setShares(rec.shares != null ? String(rec.shares) : "")
-    setBuyAmountUsd(String(rec.buyAmountUsd))
+    setBuyAmountUsd(coerceUsdInputText(rec.buyAmountUsd, integerUsdInputs))
     setWeightPct(String(rec.weightPct))
     setMemo(rec.memo || "")
     setError(null)
@@ -117,7 +153,7 @@ export default function TradeRecordEditor({
               min="0"
               placeholder="216.17"
               value={buyPrice}
-              onChange={(ev) => setBuyPrice(ev.target.value)}
+              onChange={(ev) => setBuyPrice(coerceUsdInputText(ev.target.value, integerUsdInputs))}
               required
             />
           </label>
@@ -142,7 +178,7 @@ export default function TradeRecordEditor({
               min="0"
               placeholder="1080"
               value={buyAmountUsd}
-              onChange={(ev) => setBuyAmountUsd(ev.target.value)}
+              onChange={(ev) => setBuyAmountUsd(coerceUsdInputText(ev.target.value, integerUsdInputs))}
               required
             />
           </label>

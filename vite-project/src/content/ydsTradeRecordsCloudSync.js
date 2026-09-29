@@ -43,8 +43,84 @@ let authSession = null
 /** @type {ReturnType<typeof setTimeout> | null} */
 let pushTimer = null
 let skipCloudPush = true
+/** Save happened while reconcile was blocking pushes. Flushed when reconcile ends. */
+let deferredPush = false
 /** @type {number} */
 let knownRevision = 0
+
+/**
+ * @param {object | null | undefined} record
+ * @returns {number}
+ */
+function recordStamp(record) {
+  const t = Date.parse(String(record?.updatedAt || record?.createdAt || ""))
+  return Number.isFinite(t) ? t : 0
+}
+
+/**
+ * Cloud rows first, then local rows. Same id keeps the newer stamp.
+ * A tie keeps the local row so an in-flight save is not dropped.
+ * @param {object[] | null | undefined} cloudList
+ * @param {object[] | null | undefined} localList
+ * @returns {object[]}
+ */
+function mergeRecordLists(cloudList, localList) {
+  /** @type {Map<string, object>} */
+  const map = new Map()
+  for (const row of Array.isArray(cloudList) ? cloudList : []) {
+    if (row && typeof row.id === "string" && row.id) map.set(row.id, row)
+  }
+  for (const row of Array.isArray(localList) ? localList : []) {
+    if (!row || typeof row.id !== "string" || !row.id) continue
+    const prev = map.get(row.id)
+    if (!prev || recordStamp(row) >= recordStamp(prev)) map.set(row.id, row)
+  }
+  return [...map.values()]
+}
+
+/**
+ * Union of buckets. Local-only keys such as `dbb:MSFT` stay.
+ * @param {TradeRecordsStore | null | undefined} base
+ * @param {TradeRecordsStore | null | undefined} extra
+ * @returns {TradeRecordsStore}
+ */
+function mergeTradeRecordStores(base, extra) {
+  const baseRecords = base?.records && typeof base.records === "object" ? base.records : {}
+  const extraRecords = extra?.records && typeof extra.records === "object" ? extra.records : {}
+  /** @type {Record<string, object[]>} */
+  const records = {}
+  for (const key of new Set([...Object.keys(baseRecords), ...Object.keys(extraRecords)])) {
+    const merged = mergeRecordLists(baseRecords[key], extraRecords[key])
+    if (merged.length) records[key] = merged
+  }
+  return { version: 1, records }
+}
+
+/**
+ * True when `next` has a bucket row the `base` snapshot does not,
+ * or a newer stamp for an id that both have.
+ * @param {TradeRecordsStore | null | undefined} base
+ * @param {TradeRecordsStore | null | undefined} next
+ */
+function storeHasNewerLocalData(base, next) {
+  const baseRecords = base?.records && typeof base.records === "object" ? base.records : {}
+  const nextRecords = next?.records && typeof next.records === "object" ? next.records : {}
+  for (const [key, list] of Object.entries(nextRecords)) {
+    if (!Array.isArray(list)) continue
+    const baseList = Array.isArray(baseRecords[key]) ? baseRecords[key] : []
+    /** @type {Map<string, object>} */
+    const baseById = new Map()
+    for (const row of baseList) {
+      if (row && typeof row.id === "string" && row.id) baseById.set(row.id, row)
+    }
+    for (const row of list) {
+      if (!row || typeof row.id !== "string" || !row.id) continue
+      const prev = baseById.get(row.id)
+      if (!prev || recordStamp(row) > recordStamp(prev)) return true
+    }
+  }
+  return false
+}
 
 /**
  * @param {TradeRecordsStore | null | undefined} store
@@ -110,6 +186,7 @@ export function setTradeRecordsCloudAuth(session) {
   authSession = session
   if (!session) {
     skipCloudPush = true
+    deferredPush = false
     if (pushTimer) {
       clearTimeout(pushTimer)
       pushTimer = null
@@ -127,6 +204,9 @@ export function beginTradeRecordsCloudReconcile() {
 
 export function endTradeRecordsCloudReconcile() {
   skipCloudPush = false
+  if (!deferredPush) return
+  deferredPush = false
+  scheduleTradeRecordsCloudPush()
 }
 
 /**
@@ -173,13 +253,15 @@ export function reconcileTradeRecords(localStore, cloud) {
     }
   }
 
-  // Both have data → server is source of truth (cross-device).
+  // Both have data → keep cloud rows and any local bucket/row the cloud does not have.
+  const merged = mergeTradeRecordStores(/** @type {TradeRecordsStore} */ (cloudStore), local)
+  const shouldUpload = storeHasNewerLocalData(/** @type {TradeRecordsStore} */ (cloudStore), merged)
   return {
-    store: /** @type {TradeRecordsStore} */ (cloudStore),
+    store: merged,
     revision: cloudRev,
     source: "cloud",
-    mode: "cloud-authoritative",
-    shouldUpload: false,
+    mode: shouldUpload ? "merged-upload" : "cloud-authoritative",
+    shouldUpload,
   }
 }
 
@@ -250,9 +332,11 @@ export async function pushCloudTradeRecords(idToken, store, baseRevision) {
     try {
       const fresh = await fetchCloudTradeRecords(idToken)
       if (fresh && tradeRecordsStoreHasData(fresh.records)) {
-        writeTradeRecordsStore(fresh.records)
+        const merged = mergeTradeRecordStores(fresh.records, readTradeRecordsStore())
+        writeTradeRecordsStore(merged)
         writeTradeRecordsSyncRevision(fresh.revision)
-        return { ok: false, conflict: true, revision: fresh.revision, store: fresh.records }
+        if (storeHasNewerLocalData(fresh.records, merged)) scheduleTradeRecordsCloudPush()
+        return { ok: false, conflict: true, revision: fresh.revision, store: merged }
       }
       if (Number.isFinite(serverRev)) writeTradeRecordsSyncRevision(serverRev)
     } catch (e) {
@@ -294,9 +378,19 @@ export async function reconcileTradeRecordsWithCloud(idToken) {
   }
 
   const result = reconcileTradeRecords(localStore, cloud)
+  // A save during the cloud fetch is not in `localStore`. Fold it in before write/upload.
+  const localNow = readTradeRecordsStore()
+  const merged = mergeTradeRecordStores(result.store, localNow)
+  result.store = merged
+  if (storeHasNewerLocalData(cloud?.records, merged)) {
+    result.shouldUpload = true
+    if (result.mode === "cloud-authoritative" || result.mode === "cloud-download" || result.mode === "empty") {
+      result.mode = "merged-upload"
+    }
+  }
 
-  if (result.source === "cloud") {
-    // Apply server cache; never apply empty over local (guarded by reconcile).
+  if (result.source === "cloud" || storeHasNewerLocalData(localNow, merged)) {
+    // Apply merged cache. Local-only dbb:* buckets stay in `merged`.
     writeTradeRecordsStore(result.store)
   }
   writeTradeRecordsSyncRevision(result.revision)
@@ -327,7 +421,11 @@ export async function reconcileTradeRecordsWithCloud(idToken) {
  * Debounced PUT after local mutations (logged-in only).
  */
 export function scheduleTradeRecordsCloudPush() {
-  if (!authSession || skipCloudPush) return
+  if (!authSession) return
+  if (skipCloudPush) {
+    deferredPush = true
+    return
+  }
   if (pushTimer) clearTimeout(pushTimer)
   pushTimer = setTimeout(() => {
     void flushTradeRecordsCloudPush()

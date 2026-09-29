@@ -101,7 +101,7 @@ describe("reconcileTradeRecords", () => {
     expect(r.store.records["dbb:ITA"]).toHaveLength(1)
   })
 
-  it("both have data → server authoritative", () => {
+  it("both have data → keep cloud rows and local-only buckets, then upload", () => {
     const local = {
       version: 1,
       records: {
@@ -120,6 +120,21 @@ describe("reconcileTradeRecords", () => {
             updatedAt: "2026-01-01T00:00:00.000Z",
           },
         ],
+        "dbb:MSFT": [
+          {
+            id: "tr_msft",
+            system: "dbb",
+            symbol: "MSFT",
+            buyDate: "2026-09-29",
+            buyPrice: 100.25,
+            buyAmountUsd: 506.25,
+            shares: null,
+            weightPct: 50,
+            memo: "",
+            createdAt: "2026-09-29T00:00:00.000Z",
+            updatedAt: "2026-09-29T00:00:00.000Z",
+          },
+        ],
       },
     }
     const r = reconcileTradeRecords(local, {
@@ -128,9 +143,11 @@ describe("reconcileTradeRecords", () => {
       updatedAt: null,
       syncMode: "account",
     })
-    expect(r.mode).toBe("cloud-authoritative")
+    expect(r.mode).toBe("merged-upload")
+    expect(r.shouldUpload).toBe(true)
     expect(r.store.records["dbb:ITA"]).toHaveLength(1)
-    expect(r.store.records["dbb:QQQ"]).toBeUndefined()
+    expect(r.store.records["dbb:QQQ"]).toHaveLength(1)
+    expect(r.store.records["dbb:MSFT"][0].symbol).toBe("MSFT")
   })
 
   it("both empty → empty", () => {

@@ -278,7 +278,13 @@ export default function EquityDailyBottomBuyPage() {
       <section className="yds-dbb-card mb-3" aria-label="매수 기록">
         <h2 className="yds-dbb-section__title">매수 기록</h2>
         <div className="yds-dbb-trade mt-2">
-          <TradeRecordEditor key={symbol} system="dbb" symbol={symbol} defaultWeightPct={50} />
+          <TradeRecordEditor
+            key={symbol}
+            system="dbb"
+            symbol={symbol}
+            defaultWeightPct={50}
+            integerUsdInputs
+          />
         </div>
       </section>
     </div>
