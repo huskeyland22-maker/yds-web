@@ -8,8 +8,10 @@ import {
   acknowledgeEpisodeTranche,
   syncDailyBottomEpisodes,
 } from "../content/ydsDailyBottomBuyEpisodes.js"
+import { collectDbbBuyProgress, etfCardProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { listTradeRecords, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
+import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 
@@ -194,6 +196,13 @@ export default function DailyBottomBuyPage() {
     return formatDailyBottomDataBasis({ asOfDate, source: payload?.source })
   }, [payload])
 
+  const buyProgress = useMemo(() => {
+    void recordsVersion
+    return collectDbbBuyProgress(
+      (payload?.all || []).map((card) => etfCardProgressEntry(card)).filter(Boolean),
+    )
+  }, [payload, recordsVersion])
+
   function onAck(symbol, kind) {
     acknowledgeEpisodeTranche(symbol, kind)
     if (payload?.all) setEpisodes(syncDailyBottomEpisodes(payload.all))
@@ -217,6 +226,8 @@ export default function DailyBottomBuyPage() {
           미국 주요 섹터 ETF의 일상적인 조정 구간을 4개 보조지표로 확인합니다.
         </p>
       </header>
+
+      <DbbBuyProgressSection items={buyProgress} />
 
       <aside className="yds-dbb__notice" aria-label="안내">
         <p>3개 충족 → 1차 매수 후보 · 4개 충족 → 추가 매수 후보</p>

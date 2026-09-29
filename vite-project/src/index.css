@@ -38856,6 +38856,37 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-trade-status__row strong.is-up { color: #86efac; }
 .yds-trade-status__row strong.is-down { color: #fca5a5; }
+.yds-dbb-holdings { margin-top: 0.75rem; }
+.yds-dbb-holdings__grid {
+  display: grid;
+  gap: 0.45rem;
+}
+.yds-dbb-holdings__card {
+  min-width: 0;
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.55);
+  padding: 0.55rem 0.65rem 0.65rem;
+  color: inherit;
+}
+button.yds-dbb-holdings__card {
+  width: 100%;
+  cursor: pointer;
+}
+.yds-dbb-holdings__name {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 750;
+  color: #f1f5f9;
+}
+.yds-dbb-holdings__ticker {
+  font-weight: 650;
+  color: #94a3b8;
+}
+@media (min-width: 720px) {
+  .yds-dbb-holdings__grid { grid-template-columns: 1fr 1fr; }
+}
 .yds-trade-rec {
   margin-top: 0.4rem;
 }

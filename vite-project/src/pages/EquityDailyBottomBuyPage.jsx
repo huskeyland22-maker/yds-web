@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
+import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
+import { collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
+import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 
@@ -31,6 +34,14 @@ export default function EquityDailyBottomBuyPage() {
   const [loading, setLoading] = useState(true)
   const [candidates, setCandidates] = useState(null)
   const [candidateAsOf, setCandidateAsOf] = useState(null)
+  const [signalViews, setSignalViews] = useState(null)
+  const [recordsVersion, setRecordsVersion] = useState(0)
+
+  useEffect(() => {
+    const onChange = () => setRecordsVersion((n) => n + 1)
+    window.addEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
+    return () => window.removeEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
+  }, [])
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -59,6 +70,7 @@ export default function EquityDailyBottomBuyPage() {
     let cancelled = false
     setCandidates(null)
     setCandidateAsOf(null)
+    setSignalViews(null)
 
     async function worker(cursor) {
       const views = []
@@ -92,6 +104,7 @@ export default function EquityDailyBottomBuyPage() {
         const ok = packed.filter((view) => view?.ok)
         if (!ok.length) return
         setCandidateAsOf(ok.find((view) => view.asOf)?.asOf || null)
+        setSignalViews(packed)
         setCandidates(selectEquityBuyCandidates(packed, symbols))
       })
       .catch((err) => {
@@ -124,6 +137,20 @@ export default function EquityDailyBottomBuyPage() {
     ? visible
     : [universe.find((row) => row.symbol === symbol), ...visible].filter(Boolean)
 
+  const buyProgress = useMemo(() => {
+    void recordsVersion
+    const bySymbol = new Map()
+    for (const row of signalViews || []) {
+      if (row?.symbol) bySymbol.set(row.symbol, row)
+    }
+    if (payload?.view?.symbol) bySymbol.set(payload.view.symbol, payload.view)
+    return collectDbbBuyProgress(
+      universe
+        .map((row) => equityViewProgressEntry(row, bySymbol.get(row.symbol) || null))
+        .filter(Boolean),
+    )
+  }, [universe, signalViews, payload?.view, recordsVersion])
+
   const view = payload?.view
   const priceText = formatPrice(view?.price)
   const atrText = formatAtr(view?.atrPct)
@@ -135,6 +162,8 @@ export default function EquityDailyBottomBuyPage() {
         <h1 className="yds-dbb__title">개별 종목 Daily Bottom Buy</h1>
         <p className="yds-dbb__lead">개별 종목의 조정/과매도 상태를 확인하는 READ-ONLY 화면</p>
       </header>
+
+      <DbbBuyProgressSection items={buyProgress} onSelectSymbol={setSymbol} />
 
       <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
         <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
