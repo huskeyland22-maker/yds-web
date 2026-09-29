@@ -156,15 +156,19 @@ export default function EquityDailyBottomBuyPage() {
   const atrText = formatAtr(view?.atrPct)
 
   return (
-    <div className="yds-dbb min-w-0 w-full">
+    <div className="yds-dbb yds-dbb--equity min-w-0 w-full">
       <header className="yds-dbb__hero">
         <p className="yds-dbb__kicker">EQUITY DAILY BOTTOM BUY</p>
         <h1 className="yds-dbb__title">개별 종목 Daily Bottom Buy</h1>
         <p className="yds-dbb__lead">개별 종목의 조정/과매도 상태를 확인하는 READ-ONLY 화면</p>
       </header>
 
-      <DbbBuyProgressSection items={buyProgress} onSelectSymbol={setSymbol} />
+      <div className="yds-dbb__desk">
+        <div className="yds-dbb__main">
+          <DbbBuyProgressSection items={buyProgress} onSelectSymbol={setSymbol} />
+        </div>
 
+        <div className="yds-dbb__side">
       <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
         <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
         {candidateAsOf ? <p className="yds-dbb__meta mt-2">기준일 {candidateAsOf}</p> : null}
@@ -193,8 +197,11 @@ export default function EquityDailyBottomBuyPage() {
           </ul>
         )}
       </section>
+        </div>
 
-      <section className="yds-dbb-card mb-3">
+        <div className="yds-dbb__follow">
+          <div className="yds-dbb__follow-grid">
+      <section className="yds-dbb-card mb-3 yds-dbb__span">
         <h2 className="yds-dbb-section__title">종목 선택</h2>
         <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <label className="block text-xs text-slate-400">
@@ -241,10 +248,10 @@ export default function EquityDailyBottomBuyPage() {
         ) : null}
       </section>
 
-      {loading && <p className="yds-dbb__status">불러오는 중…</p>}
+      {loading && <p className="yds-dbb__status yds-dbb__span">불러오는 중…</p>}
 
       {!loading && (!view || !view.ok) ? (
-        <p className="yds-dbb__status" role="status">
+        <p className="yds-dbb__status yds-dbb__span" role="status">
           {view?.message || payload?.message || "데이터 준비 중"}
         </p>
       ) : null}
@@ -297,14 +304,14 @@ export default function EquityDailyBottomBuyPage() {
             <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
           </section>
 
-          <section className="yds-dbb__notice" aria-label="해석">
+          <section className="yds-dbb__notice yds-dbb__span" aria-label="해석">
             <p>{view.state?.reading}</p>
             <p>{view.note}</p>
           </section>
         </>
       ) : null}
 
-      <section className="yds-dbb-card mb-3" aria-label="매수 기록">
+      <section className="yds-dbb-card mb-3 yds-dbb__span" aria-label="매수 기록">
         <h2 className="yds-dbb-section__title">매수 기록</h2>
         <div className="yds-dbb-trade mt-2">
           <TradeRecordEditor
@@ -316,6 +323,9 @@ export default function EquityDailyBottomBuyPage() {
           />
         </div>
       </section>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

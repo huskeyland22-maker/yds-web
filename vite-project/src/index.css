@@ -38808,9 +38808,47 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #94a3b8;
 }
 .yds-dbb__footer p { margin: 0.2rem 0; }
+.yds-dbb__desk {
+  min-width: 0;
+}
+.yds-dbb__main,
+.yds-dbb__side,
+.yds-dbb__follow {
+  min-width: 0;
+}
 @media (min-width: 640px) {
   .yds-dbb__title { font-size: 1.35rem; }
   .yds-dbb-grid { grid-template-columns: 1fr 1fr; }
+}
+/* Desktop: main progress | secondary candidates. Below this, keep the single column. */
+@media (min-width: 1180px) {
+  .yds-dbb {
+    max-width: min(80rem, 100%);
+  }
+  .yds-dbb__desk {
+    display: grid;
+    grid-template-columns: minmax(22rem, 1.2fr) minmax(18rem, 0.8fr);
+    column-gap: 1.25rem;
+    row-gap: 0.75rem;
+    align-items: start;
+  }
+  .yds-dbb__main { grid-column: 1; grid-row: 1; }
+  .yds-dbb__side { grid-column: 2; grid-row: 1; }
+  .yds-dbb--equity .yds-dbb__side { grid-row: 1 / span 2; }
+  .yds-dbb--equity .yds-dbb__follow { grid-column: 1; grid-row: 2; }
+  .yds-dbb-grid {
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  }
+}
+.yds-dbb__follow { container-type: inline-size; }
+@container (min-width: 46rem) {
+  .yds-dbb__follow-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.75rem 1rem;
+    align-items: start;
+  }
+  .yds-dbb__follow-grid > .yds-dbb__span { grid-column: 1 / -1; }
 }
 
 /* ── Manual trade records (DBB / Panic) ── */
@@ -38856,7 +38894,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-trade-status__row strong.is-up { color: #86efac; }
 .yds-trade-status__row strong.is-down { color: #fca5a5; }
-.yds-dbb-holdings { margin-top: 0.75rem; }
+.yds-dbb-holdings {
+  margin-top: 0.75rem;
+  container-type: inline-size;
+}
 .yds-dbb-holdings__grid {
   display: grid;
   gap: 0.45rem;
@@ -38884,7 +38925,7 @@ button.yds-dbb-holdings__card {
   font-weight: 650;
   color: #94a3b8;
 }
-@media (min-width: 720px) {
+@container (min-width: 40rem) {
   .yds-dbb-holdings__grid { grid-template-columns: 1fr 1fr; }
 }
 .yds-trade-rec {

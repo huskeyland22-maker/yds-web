@@ -227,19 +227,23 @@ export default function DailyBottomBuyPage() {
         </p>
       </header>
 
-      <DbbBuyProgressSection items={buyProgress} />
+      <div className="yds-dbb__desk">
+        <div className="yds-dbb__main">
+          <DbbBuyProgressSection items={buyProgress} />
 
-      <aside className="yds-dbb__notice" aria-label="안내">
-        <p>3개 충족 → 1차 매수 후보 · 4개 충족 → 추가 매수 후보</p>
-        <p>신호 발생 후 추가 하락할 수 있습니다.</p>
-        <p className="yds-dbb__notice-muted">
-          분할매수 검토용 보조 신호입니다. 대형 시장 패닉은 Panic Index를 참고합니다.
-        </p>
-        <p className="yds-dbb__notice-muted">
-          미국 거래일 종가가 갱신되면 같은 한국 날짜 안에서도 신호가 바뀔 수 있습니다.
-        </p>
-      </aside>
+          <aside className="yds-dbb__notice" aria-label="안내">
+            <p>3개 충족 → 1차 매수 후보 · 4개 충족 → 추가 매수 후보</p>
+            <p>신호 발생 후 추가 하락할 수 있습니다.</p>
+            <p className="yds-dbb__notice-muted">
+              분할매수 검토용 보조 신호입니다. 대형 시장 패닉은 Panic Index를 참고합니다.
+            </p>
+            <p className="yds-dbb__notice-muted">
+              미국 거래일 종가가 갱신되면 같은 한국 날짜 안에서도 신호가 바뀔 수 있습니다.
+            </p>
+          </aside>
+        </div>
 
+        <div className="yds-dbb__side">
       {loading && <p className="yds-dbb__status">불러오는 중…</p>}
       {error && !payload && <p className="yds-dbb__status yds-dbb__status--err">{error}</p>}
 
@@ -301,7 +305,13 @@ export default function DailyBottomBuyPage() {
               </div>
             ))}
           </Section>
+        </>
+      )}
+        </div>
+      </div>
 
+      {payload && (
+        <>
           <Section
             title="관심"
             eyebrow="2 / 4"
