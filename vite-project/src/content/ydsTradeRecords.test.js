@@ -458,6 +458,119 @@ describe("equity buy intent", () => {
       ["discretionary", null],
       ["strategy", 2],
     ])
-    expect(sumTradeWeightPct(rows)).toBe(130)
+    expect(rows[1].weightPct).toBe(30)
+    expect(sumTradeWeightPct(rows)).toBe(100)
+  })
+
+  it("saves a discretionary buy without weightPct", () => {
+    const row = upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-05",
+      buyPrice: 76,
+      buyAmountUsd: 228,
+      shares: 3,
+      memo: "",
+      buyType: "discretionary",
+      buyStage: null,
+    })
+    expect(row).toBeTruthy()
+    expect(row.buyType).toBe("discretionary")
+    expect(row.buyStage).toBeNull()
+    expect(row.weightPct).toBeUndefined()
+    const stored = JSON.parse(localStorage.getItem(TRADE_RECORDS_STORAGE_KEY))
+    expect(stored.records["dbb:NEE"][0].weightPct).toBeUndefined()
+  })
+
+  it("still requires weightPct for a strategy buy", () => {
+    const row = upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-01",
+      buyPrice: 216,
+      buyAmountUsd: 1080,
+      shares: 5,
+      memo: "",
+      buyType: "strategy",
+      buyStage: 1,
+    })
+    expect(row).toBeNull()
+    expect(listTradeRecords("dbb", "NEE")).toHaveLength(0)
+  })
+
+  it("keeps ETF weight required and does not add buy intent", () => {
+    expect(
+      upsertTradeRecord({
+        system: "dbb",
+        symbol: "QQQ",
+        buyDate: "2026-09-22",
+        buyPrice: 480.55,
+        buyAmountUsd: 2402.75,
+        shares: 5,
+        memo: "",
+      }),
+    ).toBeNull()
+    const saved = upsertTradeRecord({
+      system: "dbb",
+      symbol: "QQQ",
+      buyDate: "2026-09-22",
+      buyPrice: 480.55,
+      buyAmountUsd: 2402.75,
+      shares: 5,
+      weightPct: 50,
+      memo: "",
+    })
+    expect(saved.weightPct).toBe(50)
+    expect(saved.buyType).toBeUndefined()
+    expect(saved.buyStage).toBeUndefined()
+    expect(saved.buyPrice).toBe(480.55)
+  })
+
+  it("excludes an older discretionary weightPct from the strategy total without rewriting it", () => {
+    localStorage.setItem(
+      TRADE_RECORDS_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        records: {
+          "dbb:NEE": [
+            {
+              id: "tr_s1",
+              system: "dbb",
+              symbol: "NEE",
+              buyDate: "2026-10-01",
+              buyPrice: 80,
+              buyAmountUsd: 400,
+              shares: 5,
+              weightPct: 50,
+              memo: "",
+              buyType: "strategy",
+              buyStage: 1,
+              createdAt: "2026-10-01T00:00:00.000Z",
+              updatedAt: "2026-10-01T00:00:00.000Z",
+            },
+            {
+              id: "tr_d",
+              system: "dbb",
+              symbol: "NEE",
+              buyDate: "2026-10-05",
+              buyPrice: 76,
+              buyAmountUsd: 228,
+              shares: 3,
+              weightPct: 20,
+              memo: "",
+              buyType: "discretionary",
+              buyStage: null,
+              createdAt: "2026-10-05T00:00:00.000Z",
+              updatedAt: "2026-10-05T00:00:00.000Z",
+            },
+          ],
+        },
+      }),
+    )
+    const before = localStorage.getItem(TRADE_RECORDS_STORAGE_KEY)
+    const rows = listTradeRecords("dbb", "NEE")
+    expect(rows[1].weightPct).toBe(20)
+    expect(sumTradeWeightPct(rows)).toBe(50)
+    expect(localStorage.getItem(TRADE_RECORDS_STORAGE_KEY)).toBe(before)
   })
 })

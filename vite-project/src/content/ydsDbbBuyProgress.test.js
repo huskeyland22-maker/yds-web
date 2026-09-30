@@ -123,6 +123,57 @@ describe("collectDbbBuyProgress", () => {
     expect(items[0].recordedWeightPct).toBe(50)
     expect(items[0].avgBuyPrice).toBe(180)
   })
+
+  it("counts only strategy weight in buy progress", () => {
+    upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-01",
+      buyPrice: 80,
+      buyAmountUsd: 400,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 1,
+    })
+    upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-05",
+      buyPrice: 76,
+      buyAmountUsd: 228,
+      shares: 3,
+      weightPct: 20,
+      buyType: "discretionary",
+      buyStage: null,
+    })
+    upsertTradeRecord({
+      system: "dbb",
+      symbol: "NEE",
+      buyDate: "2026-10-13",
+      buyPrice: 70,
+      buyAmountUsd: 350,
+      shares: 5,
+      weightPct: 50,
+      buyType: "strategy",
+      buyStage: 2,
+    })
+    const [item] = collectDbbBuyProgress([
+      equityViewProgressEntry(
+        { symbol: "NEE", name: "NextEra Energy" },
+        {
+          ok: true,
+          symbol: "NEE",
+          score: 4,
+          price: 75,
+          asOf: "2026-10-14",
+          state: { label: "STRONG LOW CANDIDATE" },
+        },
+      ),
+    ])
+    expect(item.recordedWeightPct).toBe(100)
+    expect(item.statusView.recordedWeightPct).toBe(100)
+  })
 })
 
 describe("equity buy progress lines", () => {

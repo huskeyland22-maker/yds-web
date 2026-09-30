@@ -463,6 +463,51 @@ describe("equity buy intent survives cloud sync", () => {
   })
 })
 
+describe("discretionary buy without weight survives sync", () => {
+  it("keeps buyType and a missing weightPct through reconcile and read", () => {
+    const local = {
+      version: 1,
+      records: {
+        "dbb:NEE": [
+          {
+            id: "tr_nee_d",
+            system: "dbb",
+            symbol: "NEE",
+            buyDate: "2026-10-05",
+            buyPrice: 76,
+            buyAmountUsd: 228,
+            shares: 3,
+            memo: "",
+            buyType: "discretionary",
+            buyStage: null,
+            createdAt: "2026-10-05T00:00:00.000Z",
+            updatedAt: "2026-10-05T00:00:00.000Z",
+          },
+        ],
+        "dbb:ITA": sampleIta.records["dbb:ITA"],
+      },
+    }
+    const merged = reconcileTradeRecords(local, {
+      records: { version: 1, records: {} },
+      revision: 0,
+      updatedAt: null,
+      syncMode: "empty",
+    })
+    expect(merged.store.records["dbb:NEE"][0].weightPct).toBeUndefined()
+    expect(merged.store.records["dbb:ITA"][0].weightPct).toBe(50)
+    expect(merged.store.records["dbb:ITA"][0].buyType).toBeUndefined()
+    writeTradeRecordsStore(merged.store)
+    const nee = listTradeRecords("dbb", "NEE")[0]
+    expect(nee.buyType).toBe("discretionary")
+    expect(nee.buyStage).toBeNull()
+    expect(nee.weightPct).toBeUndefined()
+    const ita = listTradeRecords("dbb", "ITA")[0]
+    expect(ita.weightPct).toBe(50)
+    expect(ita.buyPrice).toBe(216.17)
+    expect(ita.buyType).toBeUndefined()
+  })
+})
+
 describe("storage key unchanged", () => {
   it("still uses yds.tradeRecords.v1 and sync meta is separate", () => {
     expect(TRADE_RECORDS_STORAGE_KEY).toBe("yds.tradeRecords.v1")

@@ -102,6 +102,7 @@ export default function TradeRecordEditor({
     const priceNum = coerceUsdSaveNumber(buyPrice, integerUsdInputs)
     const amountNum = coerceUsdSaveNumber(buyAmountUsd, integerUsdInputs)
     const sharesNum = shares === "" ? null : Number(shares)
+    const discretionary = equityBuyIntent && buyType === "discretionary"
     const saved = upsertTradeRecord({
       id: editId || undefined,
       system,
@@ -110,7 +111,7 @@ export default function TradeRecordEditor({
       buyPrice: priceNum,
       buyAmountUsd: amountNum,
       shares: sharesNum,
-      weightPct: Number(weightPct),
+      ...(discretionary ? {} : { weightPct: Number(weightPct) }),
       memo,
       ...(equityBuyIntent
         ? {
@@ -222,19 +223,21 @@ export default function TradeRecordEditor({
               required
             />
           </label>
-          <label>
-            <span>매수 비중 (%)</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="any"
-              min="0"
-              max="100"
-              value={weightPct}
-              onChange={(ev) => setWeightPct(ev.target.value)}
-              required
-            />
-          </label>
+          {equityBuyIntent && buyType === "discretionary" ? null : (
+            <label>
+              <span>매수 비중 (%)</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="any"
+                min="0"
+                max="100"
+                value={weightPct}
+                onChange={(ev) => setWeightPct(ev.target.value)}
+                required
+              />
+            </label>
+          )}
         </div>
         <label className="yds-trade-rec__memo">
           <span>메모 (선택)</span>
@@ -275,9 +278,9 @@ export default function TradeRecordEditor({
                   formatUsdPrice(r.buyPrice),
                   formatTradeRecordShares(r),
                   formatUsdAmount(r.buyAmountUsd),
-                  equityBuyIntent && readEquityBuyIntent(r).buyType === "discretionary"
-                    ? "-"
-                    : `${Number(r.weightPct).toFixed(0)}%`,
+                  ...(equityBuyIntent && readEquityBuyIntent(r).buyType === "discretionary"
+                    ? []
+                    : [`${Number(r.weightPct).toFixed(0)}%`]),
                 ].join(" | ")}
               </div>
               {r.memo ? <p className="yds-trade-rec__list-memo">{r.memo}</p> : null}

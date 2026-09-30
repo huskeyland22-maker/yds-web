@@ -33,7 +33,7 @@ function scheduleCloudPushAfterLocalWrite() {
  *   buyPrice: number
  *   buyAmountUsd: number
  *   shares: number | null
- *   weightPct: number
+ *   weightPct?: number
  *   memo: string
  *   buyType?: 'strategy' | 'discretionary'
  *   buyStage?: 1 | 2 | 3 | 4 | null
@@ -155,7 +155,10 @@ function normalizeRecord(raw) {
   const buyPrice = Number(r.buyPrice)
   const amountRaw =
     r.buyAmountUsd != null ? Number(r.buyAmountUsd) : Number(r.buyAmountKrw)
+  const intent = storedBuyIntent(r)
+  const weightMissing = r.weightPct == null || r.weightPct === ""
   const weightPct = Number(r.weightPct)
+  const hasWeight = !weightMissing && Number.isFinite(weightPct) && weightPct >= 0
   const sharesRaw = r.shares
   let shares = null
   if (sharesRaw != null && sharesRaw !== "") {
@@ -165,8 +168,7 @@ function normalizeRecord(raw) {
   if (!id || !system || !symbol || !buyDate) return null
   if (!Number.isFinite(buyPrice) || buyPrice <= 0) return null
   if (!Number.isFinite(amountRaw) || amountRaw < 0) return null
-  if (!Number.isFinite(weightPct) || weightPct < 0) return null
-  const intent = storedBuyIntent(r)
+  if (intent?.buyType !== "discretionary" && !hasWeight) return null
   return {
     id,
     system,
@@ -175,7 +177,7 @@ function normalizeRecord(raw) {
     buyPrice,
     buyAmountUsd: amountRaw,
     shares,
-    weightPct,
+    ...(hasWeight ? { weightPct } : {}),
     memo: typeof r.memo === "string" ? r.memo : "",
     ...(intent ? { buyType: intent.buyType, buyStage: intent.buyStage } : {}),
     createdAt: typeof r.createdAt === "string" ? r.createdAt : buyDate,
@@ -274,7 +276,10 @@ export function deleteTradeRecord(system, symbol, id) {
  */
 export function sumTradeWeightPct(records) {
   if (!Array.isArray(records) || !records.length) return 0
-  return records.reduce((s, r) => s + (Number(r.weightPct) || 0), 0)
+  return records.reduce((s, r) => {
+    if (r?.buyType === "discretionary") return s
+    return s + (Number(r.weightPct) || 0)
+  }, 0)
 }
 
 /**
