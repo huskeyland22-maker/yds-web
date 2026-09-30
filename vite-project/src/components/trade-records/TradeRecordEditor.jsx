@@ -11,30 +11,38 @@ import {
 } from "../../content/ydsTradeRecords.js"
 
 /**
- * Equity pages pass `integerUsdInputs` so price and amount drop the fraction.
- * ETF leaves the flag unset and keeps decimals. Empty input stays empty.
+ * Round a USD price or amount to cents. Half-up.
+ * @param {number} n
+ * @returns {number}
+ */
+export function roundUsdToCents(n) {
+  return Math.round((n + Number.EPSILON) * 100) / 100
+}
+
+/**
+ * ETF and equity share this. A third decimal and beyond rounds to cents.
+ * Shorter input, including a trailing dot, stays as typed. Empty stays empty.
  * @param {string | number | null | undefined} raw
- * @param {boolean} integerUsdInputs
  * @returns {string}
  */
-export function coerceUsdInputText(raw, integerUsdInputs) {
+export function coerceUsdInputText(raw) {
   const text = raw == null ? "" : String(raw)
-  if (!integerUsdInputs) return text
   if (text.trim() === "") return ""
+  const frac = text.includes(".") ? text.slice(text.indexOf(".") + 1) : ""
+  if (frac.length <= 2) return text
   const n = Number(text)
   if (!Number.isFinite(n)) return text
-  return String(Math.trunc(n))
+  return roundUsdToCents(n).toFixed(2)
 }
 
 /**
  * @param {string | number | null | undefined} raw
- * @param {boolean} integerUsdInputs
  * @returns {number}
  */
-export function coerceUsdSaveNumber(raw, integerUsdInputs) {
+export function coerceUsdSaveNumber(raw) {
   const n = Number(raw)
-  if (!integerUsdInputs || !Number.isFinite(n)) return n
-  return Math.trunc(n)
+  if (!Number.isFinite(n)) return n
+  return roundUsdToCents(n)
 }
 
 /**
@@ -43,7 +51,6 @@ export function coerceUsdSaveNumber(raw, integerUsdInputs) {
  *   symbol: string
  *   defaultWeightPct?: number
  *   onChange?: () => void
- *   integerUsdInputs?: boolean
  *   equityBuyIntent?: boolean
  * }} props
  */
@@ -52,7 +59,6 @@ export default function TradeRecordEditor({
   symbol,
   defaultWeightPct = 50,
   onChange,
-  integerUsdInputs = false,
   equityBuyIntent = false,
 }) {
   const [buyDate, setBuyDate] = useState(() => new Date().toISOString().slice(0, 10))
@@ -99,8 +105,8 @@ export default function TradeRecordEditor({
   function onSubmit(e) {
     e.preventDefault()
     setError(null)
-    const priceNum = coerceUsdSaveNumber(buyPrice, integerUsdInputs)
-    const amountNum = coerceUsdSaveNumber(buyAmountUsd, integerUsdInputs)
+    const priceNum = coerceUsdSaveNumber(buyPrice)
+    const amountNum = coerceUsdSaveNumber(buyAmountUsd)
     const sharesNum = shares === "" ? null : Number(shares)
     const discretionary = equityBuyIntent && buyType === "discretionary"
     const saved = upsertTradeRecord({
@@ -131,9 +137,9 @@ export default function TradeRecordEditor({
   function onEdit(rec) {
     setEditId(rec.id)
     setBuyDate(rec.buyDate)
-    setBuyPrice(coerceUsdInputText(rec.buyPrice, integerUsdInputs))
+    setBuyPrice(coerceUsdInputText(rec.buyPrice))
     setShares(rec.shares != null ? String(rec.shares) : "")
-    setBuyAmountUsd(coerceUsdInputText(rec.buyAmountUsd, integerUsdInputs))
+    setBuyAmountUsd(coerceUsdInputText(rec.buyAmountUsd))
     setWeightPct(String(rec.weightPct))
     setMemo(rec.memo || "")
     if (equityBuyIntent) {
@@ -194,7 +200,7 @@ export default function TradeRecordEditor({
               min="0"
               placeholder="216.17"
               value={buyPrice}
-              onChange={(ev) => setBuyPrice(coerceUsdInputText(ev.target.value, integerUsdInputs))}
+              onChange={(ev) => setBuyPrice(coerceUsdInputText(ev.target.value))}
               required
             />
           </label>
@@ -219,7 +225,7 @@ export default function TradeRecordEditor({
               min="0"
               placeholder="1080"
               value={buyAmountUsd}
-              onChange={(ev) => setBuyAmountUsd(coerceUsdInputText(ev.target.value, integerUsdInputs))}
+              onChange={(ev) => setBuyAmountUsd(coerceUsdInputText(ev.target.value))}
               required
             />
           </label>

@@ -312,7 +312,6 @@ export default function EquityDailyBottomBuyPage() {
             system="dbb"
             symbol={symbol}
             defaultWeightPct={50}
-            integerUsdInputs
             equityBuyIntent
           />
         </div>
