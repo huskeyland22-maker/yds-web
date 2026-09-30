@@ -1,20 +1,11 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
 import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import YdsMarketAnalysisOpsMeta from "../components/market-analysis/YdsMarketAnalysisOpsMeta.jsx"
-import LaunchFirstVisitPanel from "../components/launch/LaunchFirstVisitPanel.jsx"
-import LaunchFooterNav from "../components/launch/LaunchFooterNav.jsx"
-import {
-  completeLaunchOnboarding,
-  isLaunchOnboardingComplete,
-} from "../utils/ydsLaunchOnboardingStorage.js"
 
 export default function CurrentMarketAnalysisPage() {
-  const [showFull, setShowFull] = useState(() => isLaunchOnboardingComplete())
-  const simplified = !showFull
-
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const history = useMemo(
     () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
@@ -50,15 +41,6 @@ export default function CurrentMarketAnalysisPage() {
         {hasLive ? <YdsMarketAnalysisOpsMeta panicData={panicData} /> : null}
       </header>
 
-      {simplified ? (
-        <LaunchFirstVisitPanel
-          onShowFull={() => {
-            completeLaunchOnboarding()
-            setShowFull(true)
-          }}
-        />
-      ) : null}
-
       {!hasLive ? (
         <div className="yds-market-analysis__loading" role="status" aria-live="polite">
           <span className="yds-market-analysis__loading-dot" aria-hidden />
@@ -69,8 +51,6 @@ export default function CurrentMarketAnalysisPage() {
           <MarketAnalysisDeskCore panicData={panicData} cycleMetricHistory={history} />
         </div>
       )}
-
-      {simplified ? <LaunchFooterNav /> : null}
     </div>
   )
 }
