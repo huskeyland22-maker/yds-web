@@ -508,6 +508,366 @@ describe("discretionary buy without weight survives sync", () => {
   })
 })
 
+function liveRecordIds(store) {
+  /** @type {string[]} */
+  const ids = []
+  for (const list of Object.values(store?.records || {})) {
+    if (!Array.isArray(list)) continue
+    for (const row of list) {
+      if (row && typeof row.id === "string") ids.push(row.id)
+    }
+  }
+  return ids
+}
+
+function expectNoResurrection(store) {
+  const live = new Set(liveRecordIds(store))
+  for (const id of store?.deletedRecordIds || []) expect(live.has(id)).toBe(false)
+}
+
+const hdRow = {
+  id: "tr_hd",
+  system: "dbb",
+  symbol: "HD",
+  buyDate: "2026-09-22",
+  buyPrice: 280.15,
+  buyAmountUsd: 1400.75,
+  shares: 5,
+  weightPct: 50,
+  memo: "",
+  buyType: "strategy",
+  buyStage: 1,
+  createdAt: "2026-09-23T08:06:11.847Z",
+  updatedAt: "2026-09-23T08:06:11.847Z",
+}
+
+const qqqRow = {
+  id: "tr_qqq",
+  system: "dbb",
+  symbol: "QQQ",
+  buyDate: "2026-09-01",
+  buyPrice: 480.55,
+  buyAmountUsd: 2402.75,
+  shares: 5,
+  weightPct: 50,
+  memo: "",
+  createdAt: "2026-09-01T00:00:00.000Z",
+  updatedAt: "2026-09-01T00:00:00.000Z",
+}
+
+describe("delete tombstones", () => {
+  it("delete creates a tombstone and keeps the other bucket", () => {
+    writeTradeRecordsStore({
+      version: 1,
+      records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+    })
+    expect(deleteTradeRecord("dbb", "HD", "tr_hd")).toBe(true)
+    const saved = readTradeRecordsStore()
+    expect(saved.records["dbb:HD"]).toBeUndefined()
+    expect(saved.records["dbb:QQQ"][0]).toMatchObject({
+      symbol: "QQQ",
+      buyPrice: 480.55,
+      buyAmountUsd: 2402.75,
+      weightPct: 50,
+    })
+    expect(saved.deletedRecordIds).toEqual(["tr_hd"])
+    expectNoResurrection(saved)
+    expect(listTradeRecords("dbb", "HD")).toHaveLength(0)
+    expect(
+      upsertTradeRecord({
+        id: "tr_hd",
+        system: "dbb",
+        symbol: "HD",
+        buyDate: "2026-09-22",
+        buyPrice: 280.15,
+        buyAmountUsd: 1400.75,
+        weightPct: 50,
+        buyType: "strategy",
+        buyStage: 1,
+      }),
+    ).toBeNull()
+    expect(listTradeRecords("dbb", "HD")).toHaveLength(0)
+  })
+
+  it("cloud tombstone removes a stale local HD and does not upload it again", () => {
+    const cloud = {
+      version: 1,
+      records: { "dbb:QQQ": [qqqRow] },
+      deletedRecordIds: ["tr_hd"],
+    }
+    let mobile = {
+      version: 1,
+      records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+      deletedRecordIds: [],
+    }
+    for (let i = 0; i < 3; i += 1) {
+      const result = reconcileTradeRecords(mobile, {
+        records: cloud,
+        revision: 4,
+        updatedAt: null,
+        syncMode: "account",
+      })
+      expect(result.shouldUpload).toBe(false)
+      expect(result.store.records["dbb:HD"]).toBeUndefined()
+      expect(result.store.records["dbb:QQQ"]).toHaveLength(1)
+      expect(result.store.deletedRecordIds).toContain("tr_hd")
+      expectNoResurrection(result.store)
+      mobile = result.store
+    }
+  })
+
+  it("a newer stale copy still loses to the tombstone", () => {
+    const result = reconcileTradeRecords(
+      {
+        version: 1,
+        records: {
+          "dbb:HD": [{ ...hdRow, buyPrice: 10, updatedAt: "2026-10-02T00:00:00.000Z" }],
+        },
+        deletedRecordIds: [],
+      },
+      {
+        records: { version: 1, records: {}, deletedRecordIds: ["tr_hd"] },
+        revision: 4,
+        updatedAt: null,
+        syncMode: "account",
+      },
+    )
+    expect(result.shouldUpload).toBe(false)
+    expect(liveRecordIds(result.store)).not.toContain("tr_hd")
+    expectNoResurrection(result.store)
+  })
+
+  it("mobile delete reaches a PC copy that still has the row", () => {
+    const result = reconcileTradeRecords(
+      {
+        version: 1,
+        records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+        deletedRecordIds: [],
+      },
+      {
+        records: {
+          version: 1,
+          records: { "dbb:HD": [hdRow] },
+          deletedRecordIds: ["tr_qqq"],
+        },
+        revision: 8,
+        updatedAt: null,
+        syncMode: "account",
+      },
+    )
+    expect(result.shouldUpload).toBe(false)
+    expect(result.store.records["dbb:QQQ"]).toBeUndefined()
+    expect(result.store.records["dbb:HD"][0]).toMatchObject({
+      buyType: "strategy",
+      buyStage: 1,
+      buyAmountUsd: 1400.75,
+    })
+    expectNoResurrection(result.store)
+  })
+
+  it("PC delete uploads the tombstone and leaves the ETF row", async () => {
+    writeTradeRecordsStore({
+      version: 1,
+      records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+    })
+    writeTradeRecordsSyncRevision(2)
+    expect(deleteTradeRecord("dbb", "HD", "tr_hd")).toBe(true)
+    /** @type {{ method: string, body?: string }[]} */
+    const calls = []
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url, opts = {}) => {
+        calls.push({ method: opts.method || "GET", body: opts.body })
+        if ((opts.method || "GET") === "GET") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              records: {
+                version: 1,
+                records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+                deletedRecordIds: [],
+              },
+              revision: 2,
+              updatedAt: null,
+              syncMode: "account",
+            }),
+          }
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            records: JSON.parse(opts.body).records,
+            revision: 3,
+            updatedAt: null,
+            syncMode: "account",
+          }),
+        }
+      }),
+    )
+    const result = await reconcileTradeRecordsWithCloud("token")
+    expect(result.mode).toBe("merged-upload")
+    const put = calls.find((c) => c.method === "PUT")
+    const uploaded = JSON.parse(put.body).records
+    expect(uploaded.deletedRecordIds).toContain("tr_hd")
+    expect(uploaded.records["dbb:HD"]).toBeUndefined()
+    expect(uploaded.records["dbb:QQQ"][0].symbol).toBe("QQQ")
+    expect(uploaded.records["dbb:QQQ"][0].buyType).toBeUndefined()
+    expectNoResurrection(uploaded)
+    expect(listTradeRecords("dbb", "HD")).toHaveLength(0)
+    expect(listTradeRecords("dbb", "QQQ")).toHaveLength(1)
+  })
+
+  it("cloud tombstone download removes local HD without a second upload", async () => {
+    writeTradeRecordsStore({
+      version: 1,
+      records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+    })
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          records: {
+            version: 1,
+            records: { "dbb:QQQ": [qqqRow] },
+            deletedRecordIds: ["tr_hd"],
+          },
+          revision: 9,
+          updatedAt: null,
+          syncMode: "account",
+        }),
+      })),
+    )
+    const result = await reconcileTradeRecordsWithCloud("token")
+    expect(result.shouldUpload).toBe(false)
+    expect(fetch.mock.calls.every((c) => (c[1]?.method || "GET") === "GET")).toBe(true)
+    expect(listTradeRecords("dbb", "HD")).toHaveLength(0)
+    expect(listTradeRecords("dbb", "QQQ")[0].buyPrice).toBe(480.55)
+    expect(readTradeRecordsStore().deletedRecordIds).toContain("tr_hd")
+    expectNoResurrection(readTradeRecordsStore())
+  })
+
+  it("a new equity row still merges beside an existing ETF row", () => {
+    const result = reconcileTradeRecords(
+      {
+        version: 1,
+        records: { "dbb:HD": [hdRow] },
+        deletedRecordIds: [],
+      },
+      {
+        records: { version: 1, records: { "dbb:QQQ": [qqqRow] }, deletedRecordIds: [] },
+        revision: 1,
+        updatedAt: null,
+        syncMode: "account",
+      },
+    )
+    expect(result.mode).toBe("merged-upload")
+    expect(result.store.records["dbb:HD"][0].buyType).toBe("strategy")
+    expect(result.store.records["dbb:QQQ"][0].symbol).toBe("QQQ")
+    expect(result.store.deletedRecordIds).toEqual([])
+  })
+
+  it("409 refetch applies the server tombstone and does not reupload HD", async () => {
+    setTradeRecordsCloudAuth({ getIdToken: async () => "token" })
+    endTradeRecordsCloudReconcile()
+    writeTradeRecordsStore({
+      version: 1,
+      records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+    })
+    writeTradeRecordsSyncRevision(5)
+    /** @type {string[]} */
+    const methods = []
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url, opts = {}) => {
+        const method = opts.method || "GET"
+        methods.push(method)
+        if (method === "PUT") {
+          return {
+            ok: false,
+            status: 409,
+            json: async () => ({ error: "revision_conflict", revision: 6 }),
+          }
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            records: {
+              version: 1,
+              records: { "dbb:QQQ": [qqqRow] },
+              deletedRecordIds: ["tr_hd"],
+            },
+            revision: 6,
+            updatedAt: null,
+            syncMode: "account",
+          }),
+        }
+      }),
+    )
+    const out = await pushCloudTradeRecords("token", readTradeRecordsStore(), 5)
+    await new Promise((r) => setTimeout(r, 1100))
+    expect(out.conflict).toBe(true)
+    expect(methods.filter((m) => m === "PUT")).toEqual(["PUT"])
+    expect(listTradeRecords("dbb", "HD")).toHaveLength(0)
+    expect(listTradeRecords("dbb", "QQQ")).toHaveLength(1)
+    const saved = readTradeRecordsStore()
+    expect(saved.deletedRecordIds).toContain("tr_hd")
+    expectNoResurrection(saved)
+    expect(readTradeRecordsSyncRevision()).toBe(6)
+  })
+
+  it("PC delete, then repeated mobile sync, never brings HD back", async () => {
+    writeTradeRecordsStore({
+      version: 1,
+      records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+    })
+    deleteTradeRecord("dbb", "HD", "tr_hd")
+    const pc = readTradeRecordsStore()
+    let cloud = {
+      version: 1,
+      records: pc.records,
+      deletedRecordIds: pc.deletedRecordIds,
+    }
+    let revision = 4
+    let mobile = {
+      version: 1,
+      records: { "dbb:HD": [hdRow], "dbb:QQQ": [qqqRow] },
+      deletedRecordIds: [],
+    }
+    for (let i = 0; i < 3; i += 1) {
+      const result = reconcileTradeRecords(mobile, {
+        records: cloud,
+        revision,
+        updatedAt: null,
+        syncMode: "account",
+      })
+      expect(liveRecordIds(result.store)).not.toContain("tr_hd")
+      expectNoResurrection(result.store)
+      expect(result.store.records["dbb:QQQ"]).toHaveLength(1)
+      if (result.shouldUpload) {
+        cloud = result.store
+        revision += 1
+      }
+      mobile = result.store
+    }
+    expect(liveRecordIds(cloud)).not.toContain("tr_hd")
+    expect(cloud.deletedRecordIds).toContain("tr_hd")
+    const pcAgain = reconcileTradeRecords(pc, {
+      records: cloud,
+      revision,
+      updatedAt: null,
+      syncMode: "account",
+    })
+    expect(liveRecordIds(pcAgain.store)).not.toContain("tr_hd")
+    expect(pcAgain.shouldUpload).toBe(false)
+    expectNoResurrection(pcAgain.store)
+  })
+})
+
 describe("storage key unchanged", () => {
   it("still uses yds.tradeRecords.v1 and sync meta is separate", () => {
     expect(TRADE_RECORDS_STORAGE_KEY).toBe("yds.tradeRecords.v1")

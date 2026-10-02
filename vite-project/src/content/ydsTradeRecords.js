@@ -58,15 +58,69 @@ export function tradeRecordBucketKey(system, symbol) {
   return `${sys}:${sym}`
 }
 
+/**
+ * Stable record ids already stored on each row (`tr_…`). Tombstones reuse that id.
+ * @param {unknown} raw
+ * @returns {string[]}
+ */
+export function normalizeDeletedRecordIds(raw) {
+  if (!Array.isArray(raw)) return []
+  /** @type {string[]} */
+  const out = []
+  const seen = new Set()
+  for (const id of raw) {
+    if (typeof id !== "string") continue
+    const trimmed = id.trim()
+    if (!trimmed || seen.has(trimmed)) continue
+    seen.add(trimmed)
+    out.push(trimmed)
+  }
+  return out
+}
+
+/**
+ * @param {unknown} a
+ * @param {unknown} b
+ * @returns {string[]}
+ */
+export function unionDeletedRecordIds(a, b) {
+  return normalizeDeletedRecordIds([
+    ...(Array.isArray(a) ? a : []),
+    ...(Array.isArray(b) ? b : []),
+  ])
+}
+
+/**
+ * Drop live rows whose id is tombstoned. Bucket keys such as `dbb:HD` stay otherwise.
+ * @param {unknown} records
+ * @param {unknown} deletedRecordIds
+ * @returns {Record<string, TradeRecord[]>}
+ */
+export function stripDeletedTradeRecords(records, deletedRecordIds) {
+  const deleted = new Set(normalizeDeletedRecordIds(deletedRecordIds))
+  const src = records && typeof records === "object" ? /** @type {Record<string, unknown>} */ (records) : {}
+  /** @type {Record<string, TradeRecord[]>} */
+  const next = {}
+  for (const [key, list] of Object.entries(src)) {
+    if (!Array.isArray(list)) continue
+    const kept = list.filter(
+      (row) => row && typeof row.id === "string" && row.id && !deleted.has(row.id),
+    )
+    if (kept.length) next[key] = kept
+  }
+  return next
+}
+
 function emptyStore() {
-  return /** @type {{ version: 1, records: Record<string, TradeRecord[]> }} */ ({
+  return /** @type {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds: string[] }} */ ({
     version: 1,
     records: {},
+    deletedRecordIds: [],
   })
 }
 
 /**
- * @returns {{ version: 1, records: Record<string, TradeRecord[]> }}
+ * @returns {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds: string[] }}
  */
 export function readTradeRecordsStore() {
   try {
@@ -76,6 +130,7 @@ export function readTradeRecordsStore() {
     if (!parsed || typeof parsed !== "object") return emptyStore()
     const records =
       parsed.records && typeof parsed.records === "object" ? parsed.records : {}
+    const deletedRecordIds = normalizeDeletedRecordIds(parsed.deletedRecordIds)
     /** @type {Record<string, TradeRecord[]>} */
     const clean = {}
     for (const [k, list] of Object.entries(records)) {
@@ -85,22 +140,28 @@ export function readTradeRecordsStore() {
         .map((r) => normalizeRecord(r))
         .filter(Boolean)
     }
-    return { version: 1, records: clean }
+    return {
+      version: 1,
+      records: stripDeletedTradeRecords(clean, deletedRecordIds),
+      deletedRecordIds,
+    }
   } catch {
     return emptyStore()
   }
 }
 
 /**
- * @param {{ version: 1, records: Record<string, TradeRecord[]> }} store
+ * @param {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds?: string[] }} store
  */
 export function writeTradeRecordsStore(store) {
   try {
+    const deletedRecordIds = normalizeDeletedRecordIds(store?.deletedRecordIds)
     localStorage.setItem(
       TRADE_RECORDS_STORAGE_KEY,
       JSON.stringify({
         version: 1,
-        records: store?.records && typeof store.records === "object" ? store.records : {},
+        records: stripDeletedTradeRecords(store?.records, deletedRecordIds),
+        deletedRecordIds,
       }),
     )
     notifyTradeRecordsChanged()
@@ -215,6 +276,9 @@ export function upsertTradeRecord(input) {
 
   const now = new Date().toISOString()
   const store = readTradeRecordsStore()
+  if (typeof input.id === "string" && input.id && store.deletedRecordIds.includes(input.id)) {
+    return null
+  }
   const key = tradeRecordBucketKey(system, symbol)
   const existing = (store.records[key] || []).find((r) => r.id === input.id)
   const id =
@@ -265,6 +329,7 @@ export function deleteTradeRecord(system, symbol, id) {
   if (next.length === list.length) return false
   if (next.length) store.records[key] = next
   else delete store.records[key]
+  store.deletedRecordIds = unionDeletedRecordIds(store.deletedRecordIds, [id])
   writeTradeRecordsStore(store)
   scheduleCloudPushAfterLocalWrite()
   return true

@@ -10,6 +10,7 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import {
   handleTradeRecordsSync,
+  mergeStoredTradeRecords,
   sanitizeTradeRecordsStore,
 } from "../api/_lib/tradeRecordsSyncHandler.js"
 
@@ -294,6 +295,219 @@ describe("trade-records-sync CRUD (mock)", () => {
     assert.equal(res.state.statusCode, 409)
     assert.equal(res.state.body?.error, "revision_conflict")
     assert.equal(res.state.body?.revision, 2)
+  })
+})
+
+const HD_ROW = {
+  id: "tr_hd",
+  system: "dbb",
+  symbol: "HD",
+  buyDate: "2026-09-22",
+  buyPrice: 280.15,
+  buyAmountUsd: 1400.75,
+  shares: 5,
+  weightPct: 50,
+  memo: "",
+  buyType: "strategy",
+  buyStage: 1,
+  createdAt: "2026-09-23T08:06:11.847Z",
+  updatedAt: "2026-09-23T08:06:11.847Z",
+}
+
+const QQQ_ROW = {
+  id: "tr_qqq",
+  system: "dbb",
+  symbol: "QQQ",
+  buyDate: "2026-09-01",
+  buyPrice: 480.55,
+  buyAmountUsd: 2402.75,
+  shares: 5,
+  weightPct: 50,
+  memo: "",
+  createdAt: "2026-09-01T00:00:00.000Z",
+  updatedAt: "2026-09-01T00:00:00.000Z",
+}
+
+function assertTombstoneWins(store) {
+  const deleted = new Set(store.deletedRecordIds || [])
+  for (const list of Object.values(store.records || {})) {
+    for (const row of list) assert.equal(deleted.has(row.id), false)
+  }
+}
+
+describe("trade-records deletion wins", () => {
+  it("sanitize keeps a tombstone and drops that live row", () => {
+    const out = sanitizeTradeRecordsStore({
+      version: 1,
+      records: { "dbb:HD": [HD_ROW], "dbb:QQQ": [QQQ_ROW] },
+      deletedRecordIds: ["tr_hd", "tr_hd", ""],
+    })
+    assert.equal(out.records["dbb:HD"], undefined)
+    assert.equal(out.records["dbb:QQQ"][0].symbol, "QQQ")
+    assert.deepEqual(out.deletedRecordIds, ["tr_hd"])
+    assertTombstoneWins(out)
+  })
+
+  it("stale live row cannot clear a stored tombstone", () => {
+    const merged = mergeStoredTradeRecords(
+      {
+        version: 1,
+        records: { "dbb:QQQ": [QQQ_ROW] },
+        deletedRecordIds: ["tr_hd"],
+      },
+      {
+        version: 1,
+        records: { "dbb:HD": [HD_ROW], "dbb:QQQ": [QQQ_ROW] },
+        deletedRecordIds: [],
+      },
+    )
+    assert.equal(merged.records["dbb:HD"], undefined)
+    assert.equal(merged.records["dbb:QQQ"][0].buyAmountUsd, 2402.75)
+    assert.ok(merged.deletedRecordIds.includes("tr_hd"))
+    assertTombstoneWins(merged)
+  })
+
+  it("PUT keeps a new equity row and rejects a resurrected HD", async () => {
+    let row = {
+      id: "row-1",
+      firebase_uid: "uid-alice",
+      records: {
+        version: 1,
+        records: { "dbb:QQQ": [QQQ_ROW] },
+        deletedRecordIds: ["tr_hd"],
+      },
+      revision: 5,
+      updated_at: "2026-10-02T00:00:00.000Z",
+    }
+    const nee = {
+      id: "tr_nee",
+      system: "dbb",
+      symbol: "NEE",
+      buyType: "discretionary",
+      buyStage: null,
+      buyDate: "2026-10-05",
+      buyPrice: 76.2,
+      buyAmountUsd: 228.6,
+      shares: 3,
+      memo: "",
+      createdAt: "2026-10-05T00:00:00.000Z",
+      updatedAt: "2026-10-05T00:00:00.000Z",
+    }
+    const res = mockRes()
+    await handleTradeRecordsSync(
+      {
+        method: "PUT",
+        headers: { authorization: "Bearer good" },
+        body: {
+          records: {
+            version: 1,
+            records: { "dbb:HD": [HD_ROW], "dbb:QQQ": [QQQ_ROW], "dbb:NEE": [nee] },
+            deletedRecordIds: [],
+          },
+          revision: 6,
+          baseRevision: 5,
+        },
+      },
+      res,
+      {
+        verifyFirebaseIdToken: async () => "uid-alice",
+        isSupabaseConfigured: () => true,
+        supabaseRest: async (_path, opts = {}) => {
+          if (opts.method === "POST") {
+            row = {
+              ...row,
+              records: opts.body.records,
+              revision: opts.body.revision,
+            }
+            return [row]
+          }
+          return [row]
+        },
+      },
+    )
+    assert.equal(res.state.statusCode, 200)
+    assert.equal(row.records.records["dbb:HD"], undefined)
+    assert.equal(row.records.records["dbb:NEE"][0].buyType, "discretionary")
+    assert.equal(row.records.records["dbb:QQQ"][0].symbol, "QQQ")
+    assert.ok(row.records.deletedRecordIds.includes("tr_hd"))
+    assertTombstoneWins(row.records)
+
+    const again = mockRes()
+    await handleTradeRecordsSync(
+      {
+        method: "PUT",
+        headers: { authorization: "Bearer good" },
+        body: {
+          records: { version: 1, records: { "dbb:HD": [HD_ROW] }, deletedRecordIds: [] },
+          revision: 7,
+          baseRevision: 6,
+        },
+      },
+      again,
+      {
+        verifyFirebaseIdToken: async () => "uid-alice",
+        isSupabaseConfigured: () => true,
+        supabaseRest: async (_path, opts = {}) => {
+          if (opts.method === "POST") {
+            row = { ...row, records: opts.body.records, revision: opts.body.revision }
+            return [row]
+          }
+          return [row]
+        },
+      },
+    )
+    assert.equal(again.state.statusCode, 200)
+    assert.equal(row.records.records["dbb:HD"], undefined)
+    assert.ok(row.records.deletedRecordIds.includes("tr_hd"))
+    assertTombstoneWins(row.records)
+  })
+
+  it("a delete PUT unions the tombstone onto the previous live row", async () => {
+    let row = {
+      id: "row-1",
+      firebase_uid: "uid-alice",
+      records: {
+        version: 1,
+        records: { "dbb:HD": [HD_ROW], "dbb:QQQ": [QQQ_ROW] },
+        deletedRecordIds: [],
+      },
+      revision: 3,
+      updated_at: "2026-10-01T00:00:00.000Z",
+    }
+    const res = mockRes()
+    await handleTradeRecordsSync(
+      {
+        method: "PUT",
+        headers: { authorization: "Bearer good" },
+        body: {
+          records: {
+            version: 1,
+            records: { "dbb:QQQ": [QQQ_ROW] },
+            deletedRecordIds: ["tr_hd"],
+          },
+          revision: 4,
+          baseRevision: 3,
+        },
+      },
+      res,
+      {
+        verifyFirebaseIdToken: async () => "uid-alice",
+        isSupabaseConfigured: () => true,
+        supabaseRest: async (_path, opts = {}) => {
+          if (opts.method === "POST") {
+            row = { ...row, records: opts.body.records, revision: opts.body.revision }
+            return [row]
+          }
+          return [row]
+        },
+      },
+    )
+    assert.equal(res.state.statusCode, 200)
+    assert.equal(row.records.records["dbb:HD"], undefined)
+    assert.equal(row.records.records["dbb:QQQ"][0].id, "tr_qqq")
+    assert.deepEqual(row.records.deletedRecordIds, ["tr_hd"])
+    assertTombstoneWins(row.records)
+    assert.equal(res.state.body.records.records["dbb:HD"], undefined)
   })
 })
 

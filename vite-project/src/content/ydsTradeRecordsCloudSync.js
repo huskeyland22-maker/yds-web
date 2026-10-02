@@ -4,7 +4,10 @@
  */
 
 import {
+  normalizeDeletedRecordIds,
   readTradeRecordsStore,
+  stripDeletedTradeRecords,
+  unionDeletedRecordIds,
   writeTradeRecordsStore,
 } from "./ydsTradeRecords.js"
 
@@ -12,7 +15,7 @@ export const TRADE_RECORDS_SYNC_META_KEY = "yds.tradeRecords.syncMeta.v1"
 export const TRADE_RECORDS_API_PATH = "/api/trade-records-sync"
 
 /**
- * @typedef {{ version: 1, records: Record<string, object[]> }} TradeRecordsStore
+ * @typedef {{ version: 1, records: Record<string, object[]>, deletedRecordIds?: string[] }} TradeRecordsStore
  */
 
 /**
@@ -52,6 +55,19 @@ let knownRevision = 0
  * @param {object | null | undefined} record
  * @returns {number}
  */
+/**
+ * @param {TradeRecordsStore | null | undefined} store
+ * @param {string} id
+ */
+function recordStillLive(store, id) {
+  const buckets = store?.records && typeof store.records === "object" ? store.records : {}
+  for (const list of Object.values(buckets)) {
+    if (!Array.isArray(list)) continue
+    if (list.some((row) => row && row.id === id)) return true
+  }
+  return false
+}
+
 function recordStamp(record) {
   const t = Date.parse(String(record?.updatedAt || record?.createdAt || ""))
   return Number.isFinite(t) ? t : 0
@@ -94,6 +110,59 @@ function mergeTradeRecordStores(base, extra) {
     if (merged.length) records[key] = merged
   }
   return { version: 1, records }
+}
+
+/**
+ * Union live rows, then drop every id in either tombstone list.
+ * A deleted id never survives a newer or older copy of the same row.
+ * @param {TradeRecordsStore | null | undefined} base
+ * @param {TradeRecordsStore | null | undefined} extra
+ * @returns {TradeRecordsStore}
+ */
+export function mergeTradeRecordsWithDeletions(base, extra) {
+  const deletedRecordIds = unionDeletedRecordIds(base?.deletedRecordIds, extra?.deletedRecordIds)
+  const merged = mergeTradeRecordStores(base, extra)
+  return {
+    version: 1,
+    records: stripDeletedTradeRecords(merged.records, deletedRecordIds),
+    deletedRecordIds,
+  }
+}
+
+/**
+ * Cloud is missing a tombstone, or it still contains a row that was deleted.
+ * @param {TradeRecordsStore | null | undefined} cloudStore
+ * @param {TradeRecordsStore | null | undefined} next
+ */
+function deletionsNeedUpload(cloudStore, next) {
+  const cloudIds = new Set(normalizeDeletedRecordIds(cloudStore?.deletedRecordIds))
+  for (const id of normalizeDeletedRecordIds(next?.deletedRecordIds)) {
+    if (!cloudIds.has(id)) return true
+  }
+  const deleted = new Set(normalizeDeletedRecordIds(next?.deletedRecordIds))
+  if (!deleted.size) return false
+  const buckets = cloudStore?.records && typeof cloudStore.records === "object" ? cloudStore.records : {}
+  for (const list of Object.values(buckets)) {
+    if (!Array.isArray(list)) continue
+    for (const row of list) {
+      if (row && typeof row.id === "string" && deleted.has(row.id)) return true
+    }
+  }
+  return false
+}
+
+/**
+ * @param {TradeRecordsStore | null | undefined} store
+ * @returns {TradeRecordsStore}
+ */
+function normalizeSyncStore(store) {
+  const records = store?.records && typeof store.records === "object" ? store.records : {}
+  const deletedRecordIds = normalizeDeletedRecordIds(store?.deletedRecordIds)
+  return {
+    version: 1,
+    records: stripDeletedTradeRecords(records, deletedRecordIds),
+    deletedRecordIds,
+  }
 }
 
 /**
@@ -215,15 +284,26 @@ export function endTradeRecordsCloudReconcile() {
  * @returns {TradeRecordsReconcileResult}
  */
 export function reconcileTradeRecords(localStore, cloud) {
-  const local = localStore?.version === 1 && localStore.records ? localStore : { version: 1, records: {} }
+  const local = normalizeSyncStore(
+    localStore?.version === 1 && localStore.records ? localStore : { version: 1, records: {} },
+  )
+  const cloudRaw =
+    cloud?.records && typeof cloud.records === "object"
+      ? cloud.records
+      : { version: 1, records: {}, deletedRecordIds: [] }
+  const cloudStore = normalizeSyncStore(cloudRaw)
   const localHas = tradeRecordsStoreHasData(local)
-  const cloudStore = cloud?.records
   const cloudHas = tradeRecordsStoreHasData(cloudStore)
+  const localTomb = local.deletedRecordIds.length > 0
+  const cloudTomb = cloudStore.deletedRecordIds.length > 0
   const cloudRev = Number.isFinite(Number(cloud?.revision)) ? Number(cloud.revision) : 0
+  const store = mergeTradeRecordsWithDeletions(cloudStore, local)
+  const uploadNewer = storeHasNewerLocalData(cloudStore, store)
+  const uploadDelete = deletionsNeedUpload(cloudRaw, store)
 
-  if (!cloudHas && !localHas) {
+  if (!cloudHas && !cloudTomb && !localHas && !localTomb) {
     return {
-      store: local,
+      store,
       revision: cloudRev,
       source: "local",
       mode: "empty",
@@ -231,10 +311,10 @@ export function reconcileTradeRecords(localStore, cloud) {
     }
   }
 
-  // Empty server must never wipe local — upload instead.
-  if (!cloudHas && localHas) {
+  // Empty server must never wipe local — upload instead. Local tombstones go with it.
+  if (!cloudHas && !cloudTomb && (localHas || localTomb)) {
     return {
-      store: local,
+      store,
       revision: cloudRev,
       source: "local",
       mode: "local-upload",
@@ -242,22 +322,21 @@ export function reconcileTradeRecords(localStore, cloud) {
     }
   }
 
-  // Empty local must never wipe server — download instead.
-  if (cloudHas && !localHas) {
+  // Empty local must never wipe server — download instead, including tombstones.
+  if ((cloudHas || cloudTomb) && !localHas && !localTomb) {
     return {
-      store: /** @type {TradeRecordsStore} */ (cloudStore),
+      store,
       revision: cloudRev,
       source: "cloud",
       mode: "cloud-download",
-      shouldUpload: false,
+      shouldUpload: uploadDelete,
     }
   }
 
-  // Both have data → keep cloud rows and any local bucket/row the cloud does not have.
-  const merged = mergeTradeRecordStores(/** @type {TradeRecordsStore} */ (cloudStore), local)
-  const shouldUpload = storeHasNewerLocalData(/** @type {TradeRecordsStore} */ (cloudStore), merged)
+  // Both sides have rows or tombstones. Deleted ids win over any live copy.
+  const shouldUpload = uploadNewer || uploadDelete
   return {
-    store: merged,
+    store,
     revision: cloudRev,
     source: "cloud",
     mode: shouldUpload ? "merged-upload" : "cloud-authoritative",
@@ -285,8 +364,12 @@ export async function fetchCloudTradeRecords(idToken) {
   const nested = json?.records
   const store =
     nested && typeof nested === "object" && nested.records && typeof nested.records === "object"
-      ? { version: 1, records: nested.records }
-      : { version: 1, records: {} }
+      ? {
+          version: 1,
+          records: nested.records,
+          deletedRecordIds: normalizeDeletedRecordIds(nested.deletedRecordIds),
+        }
+      : { version: 1, records: {}, deletedRecordIds: [] }
   return {
     records: store,
     revision: Number(json?.revision) || 0,
@@ -331,12 +414,12 @@ export async function pushCloudTradeRecords(idToken, store, baseRevision) {
     const serverRev = Number(err?.revision)
     try {
       const fresh = await fetchCloudTradeRecords(idToken)
-      if (fresh && tradeRecordsStoreHasData(fresh.records)) {
-        const merged = mergeTradeRecordStores(fresh.records, readTradeRecordsStore())
-        writeTradeRecordsStore(merged)
+      if (fresh) {
+        const reconciled = reconcileTradeRecords(readTradeRecordsStore(), fresh)
+        writeTradeRecordsStore(reconciled.store)
         writeTradeRecordsSyncRevision(fresh.revision)
-        if (storeHasNewerLocalData(fresh.records, merged)) scheduleTradeRecordsCloudPush()
-        return { ok: false, conflict: true, revision: fresh.revision, store: merged }
+        if (reconciled.shouldUpload) scheduleTradeRecordsCloudPush()
+        return { ok: false, conflict: true, revision: fresh.revision, store: reconciled.store }
       }
       if (Number.isFinite(serverRev)) writeTradeRecordsSyncRevision(serverRev)
     } catch (e) {
@@ -379,17 +462,25 @@ export async function reconcileTradeRecordsWithCloud(idToken) {
 
   const result = reconcileTradeRecords(localStore, cloud)
   // A save during the cloud fetch is not in `localStore`. Fold it in before write/upload.
+  // Tombstones from that save still beat a live row captured before the delete.
   const localNow = readTradeRecordsStore()
-  const merged = mergeTradeRecordStores(result.store, localNow)
+  const merged = mergeTradeRecordsWithDeletions(result.store, localNow)
   result.store = merged
-  if (storeHasNewerLocalData(cloud?.records, merged)) {
+  if (storeHasNewerLocalData(cloud?.records, merged) || deletionsNeedUpload(cloud?.records, merged)) {
     result.shouldUpload = true
     if (result.mode === "cloud-authoritative" || result.mode === "cloud-download" || result.mode === "empty") {
       result.mode = "merged-upload"
     }
   }
 
-  if (result.source === "cloud" || storeHasNewerLocalData(localNow, merged)) {
+  const localDeleted = new Set(normalizeDeletedRecordIds(localNow.deletedRecordIds))
+  const gainedTombstone = normalizeDeletedRecordIds(merged.deletedRecordIds).some((id) => !localDeleted.has(id))
+  const droppedLiveRow = Object.values(localNow.records || {}).some(
+    (list) =>
+      Array.isArray(list) &&
+      list.some((row) => row && typeof row.id === "string" && !recordStillLive(merged, row.id)),
+  )
+  if (result.source === "cloud" || storeHasNewerLocalData(localNow, merged) || gainedTombstone || droppedLiveRow) {
     // Apply merged cache. Local-only dbb:* buckets stay in `merged`.
     writeTradeRecordsStore(result.store)
   }

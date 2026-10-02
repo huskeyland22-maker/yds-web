@@ -10,7 +10,42 @@ import { isSupabaseConfigured, supabaseRest } from "./supabaseRest.js"
 export const EMPTY_TRADE_RECORDS_STORE = Object.freeze({
   version: 1,
   records: Object.freeze({}),
+  deletedRecordIds: Object.freeze([]),
 })
+
+/**
+ * @param {unknown} raw
+ * @returns {string[]}
+ */
+function normalizeDeletedRecordIds(raw) {
+  if (!Array.isArray(raw)) return []
+  /** @type {string[]} */
+  const out = []
+  const seen = new Set()
+  for (const id of raw) {
+    if (typeof id !== "string") continue
+    const trimmed = id.trim()
+    if (!trimmed || seen.has(trimmed)) continue
+    seen.add(trimmed)
+    out.push(trimmed)
+  }
+  return out
+}
+
+/**
+ * @param {Record<string, object[]>} records
+ * @param {string[]} deletedRecordIds
+ */
+function stripDeletedRecords(records, deletedRecordIds) {
+  const deleted = new Set(deletedRecordIds)
+  /** @type {Record<string, object[]>} */
+  const next = {}
+  for (const [key, list] of Object.entries(records)) {
+    const kept = list.filter((row) => !deleted.has(row.id))
+    if (kept.length) next[key] = kept
+  }
+  return next
+}
 
 /**
  * @param {unknown} req
@@ -23,19 +58,21 @@ export function readBearer(req) {
 }
 
 /**
- * Preserve localStorage `yds.tradeRecords.v1` shape: { version, records: { "dbb:SYM": [...] } }
+ * Preserve localStorage `yds.tradeRecords.v1` shape: { version, records: { "dbb:SYM": [...] }, deletedRecordIds }
+ * Tombstoned ids are removed from live rows. Tombstones are not purged.
  * @param {unknown} raw
- * @returns {{ version: 1, records: Record<string, object[]> }}
+ * @returns {{ version: 1, records: Record<string, object[]>, deletedRecordIds: string[] }}
  */
 export function sanitizeTradeRecordsStore(raw) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    return { version: 1, records: {} }
+    return { version: 1, records: {}, deletedRecordIds: [] }
   }
   const src = /** @type {Record<string, unknown>} */ (raw)
   const nested =
     src.records && typeof src.records === "object" && !Array.isArray(src.records)
       ? /** @type {Record<string, unknown>} */ (src.records)
       : {}
+  const deletedRecordIds = normalizeDeletedRecordIds(src.deletedRecordIds)
 
   /** @type {Record<string, object[]>} */
   const records = {}
@@ -47,7 +84,24 @@ export function sanitizeTradeRecordsStore(raw) {
     )
     if (cleaned.length) records[key] = cleaned
   }
-  return { version: 1, records }
+  return { version: 1, records: stripDeletedRecords(records, deletedRecordIds), deletedRecordIds }
+}
+
+/**
+ * Incoming live rows replace the previous live rows, but tombstones only grow.
+ * A stale client cannot recreate an id that either side has deleted.
+ * @param {unknown} previous
+ * @param {unknown} incoming
+ */
+export function mergeStoredTradeRecords(previous, incoming) {
+  const prev = sanitizeTradeRecordsStore(previous)
+  const next = sanitizeTradeRecordsStore(incoming)
+  const deletedRecordIds = normalizeDeletedRecordIds([...prev.deletedRecordIds, ...next.deletedRecordIds])
+  return {
+    version: 1,
+    records: stripDeletedRecords(next.records, deletedRecordIds),
+    deletedRecordIds,
+  }
 }
 
 /**
@@ -119,7 +173,7 @@ export async function handleTradeRecordsSync(req, res, deps = {}) {
       )
       const row = Array.isArray(rows) ? rows[0] : null
       if (!row) {
-        return res.status(200).json(okPayload({ version: 1, records: {} }, 0, null, "empty"))
+        return res.status(200).json(okPayload({ version: 1, records: {}, deletedRecordIds: [] }, 0, null, "empty"))
       }
       // Defense: never return another user's row even if PostgREST misbehaves.
       if (String(row.firebase_uid) !== uid) {
@@ -140,31 +194,34 @@ export async function handleTradeRecordsSync(req, res, deps = {}) {
   }
 
   const body = req.body && typeof req.body === "object" ? req.body : {}
-  const records = sanitizeTradeRecordsStore(body.records)
   const revisionRaw = Number(body.revision)
   const revision = Number.isFinite(revisionRaw) ? Math.round(revisionRaw) : Date.now()
 
-  // Optional minimal optimistic concurrency (portfolio-style revision field).
-  // If client sends baseRevision and it does not match server, reject.
-  if (body.baseRevision != null && body.baseRevision !== "") {
-    try {
-      const existingRows = await rest(`${pathBase}&select=revision,firebase_uid`, { method: "GET" })
-      const existing = Array.isArray(existingRows) ? existingRows[0] : null
-      if (existing && String(existing.firebase_uid) === uid) {
-        const serverRev = Number(existing.revision)
-        const baseRev = Number(body.baseRevision)
-        if (Number.isFinite(serverRev) && Number.isFinite(baseRev) && serverRev !== baseRev) {
-          return res.status(409).json({
-            error: "revision_conflict",
-            revision: serverRev,
-          })
-        }
-      }
-    } catch (e) {
-      console.error("[trade-records-sync] revision check failed", e)
-      return res.status(500).json({ error: "fetch_failed" })
+  // Read the current row once so tombstones survive a stale replace, and so
+  // baseRevision can still reject a conflicting write.
+  let existing = null
+  try {
+    const existingRows = await rest(`${pathBase}&select=records,revision,firebase_uid`, { method: "GET" })
+    existing = Array.isArray(existingRows) ? existingRows[0] : null
+  } catch (e) {
+    console.error("[trade-records-sync] revision check failed", e)
+    return res.status(500).json({ error: "fetch_failed" })
+  }
+  if (existing && String(existing.firebase_uid) !== uid) {
+    return res.status(403).json({ error: "forbidden" })
+  }
+  if (body.baseRevision != null && body.baseRevision !== "" && existing) {
+    const serverRev = Number(existing.revision)
+    const baseRev = Number(body.baseRevision)
+    if (Number.isFinite(serverRev) && Number.isFinite(baseRev) && serverRev !== baseRev) {
+      return res.status(409).json({
+        error: "revision_conflict",
+        revision: serverRev,
+      })
     }
   }
+
+  const records = mergeStoredTradeRecords(existing?.records, body.records)
 
   const payload = {
     firebase_uid: uid,
