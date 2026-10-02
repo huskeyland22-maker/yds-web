@@ -150,3 +150,40 @@ describe("candidate display order", () => {
     assert.deepEqual(picked.map((row) => row.symbol), ["AAPL", "NEE", "HD"])
   })
 })
+
+describe("candidate condition type", () => {
+  it("labels A, B, and 4/4 from the existing condition flags", async () => {
+    const { equityCandidateConditionType } = await import(
+      pathToFileURL(join(root, "vite-project/src/utils/equityDailyBottomBuyCandidates.js")).href
+    )
+    const asView = (partial) => {
+      const flags = conditionFlags(row(partial), FROZEN_THRESHOLDS)
+      return {
+        score: flags.count,
+        conditions: [
+          { id: "rsi", pass: flags.rsi },
+          { id: "stoch", pass: flags.stoch },
+          { id: "bb", pass: flags.bb },
+          { id: "ma20", pass: flags.ma },
+        ],
+      }
+    }
+    const typeA = equityCandidateConditionType(asView({ rsi14: 30, stochK: 10, bbPctB: 0, ma20DevPct: -3 }))
+    const typeB = equityCandidateConditionType(asView({ rsi14: 30, stochK: 10, bbPctB: 0.2, ma20DevPct: -5 }))
+    const typeB2 = equityCandidateConditionType(asView({ rsi14: 50, stochK: 10, bbPctB: 0, ma20DevPct: -5 }))
+    const typeB3 = equityCandidateConditionType(asView({ rsi14: 30, stochK: 40, bbPctB: 0, ma20DevPct: -5 }))
+    const typeC = equityCandidateConditionType(asView({ rsi14: 30, stochK: 10, bbPctB: 0, ma20DevPct: -5 }))
+    assert.equal(typeA.title, "A · 저위험 3/4")
+    assert.equal(typeA.detail, "RSI + Stoch + BB")
+    assert.equal(typeA.scoreText, "3/4")
+    assert.equal(typeB.title, "B · 고변동 3/4")
+    assert.equal(typeB.detail, "MA20 포함")
+    assert.equal(typeB2.id, "B")
+    assert.equal(typeB3.id, "B")
+    assert.equal(typeC.title, "4/4 · 전체 조건")
+    assert.equal(typeC.detail, "RSI + Stoch + BB + MA20")
+    assert.equal(typeC.scoreText, "4/4")
+    assert.equal(equityCandidateConditionType(conditionFlags(row({ rsi14: 30, stochK: 10, bbPctB: 0, ma20DevPct: -3 }), FROZEN_THRESHOLDS)).id, "A")
+    assert.equal(equityCandidateConditionType(asView({ rsi14: 30, stochK: 10, bbPctB: 0.5, ma20DevPct: 0 })), null)
+  })
+})

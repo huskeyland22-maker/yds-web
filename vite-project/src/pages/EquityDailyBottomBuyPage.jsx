@@ -4,7 +4,7 @@ import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx
 import { collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
-import { selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
+import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 
 const DEFAULT_SYMBOL = "MSFT"
 
@@ -174,22 +174,34 @@ export default function EquityDailyBottomBuyPage() {
           <p className="yds-dbb__status">현재 조정매수 후보가 없습니다.</p>
         ) : (
           <ul className="yds-dbb-cands">
-            {candidates.map((row) => (
-              <li key={row.symbol}>
-                <button
-                  type="button"
-                  className="w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100"
-                  onClick={() => setSymbol(row.symbol)}
-                >
-                  <p className="font-semibold">
-                    {row.score}/4 {row.symbol} {row.name}
-                  </p>
-                  <p className="tabular-nums">현재가 {formatPrice(row.price)}</p>
-                  <p className="tabular-nums">ATR {formatAtr(row.atrPct)}</p>
-                  <p>{row.state?.label}</p>
-                </button>
-              </li>
-            ))}
+            {candidates.map((row) => {
+              const type = equityCandidateConditionType(row)
+              return (
+                <li key={row.symbol} className="min-w-0">
+                  <button
+                    type="button"
+                    className="yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100"
+                    onClick={() => setSymbol(row.symbol)}
+                  >
+                    <p className="font-semibold">
+                      {row.symbol} <span className="font-normal text-slate-300">{row.name}</span>
+                    </p>
+                    {type ? (
+                      <>
+                        <p className={`yds-dbb-cand__type yds-dbb-cand__type--${type.id.toLowerCase()}`}>{type.title}</p>
+                        <p className="yds-dbb-cand__detail">{type.detail}</p>
+                        <p className="yds-dbb-cand__score">{type.scoreText}</p>
+                      </>
+                    ) : (
+                      <p className="yds-dbb-cand__score">{row.score}/4</p>
+                    )}
+                    <p className="tabular-nums">현재가 {formatPrice(row.price)}</p>
+                    <p className="tabular-nums">ATR {formatAtr(row.atrPct)}</p>
+                    <p>{row.state?.label}</p>
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         )}
       </section>

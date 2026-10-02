@@ -38817,6 +38817,37 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
+.yds-dbb-cand {
+  overflow-wrap: anywhere;
+}
+.yds-dbb-cand p {
+  margin: 0;
+}
+.yds-dbb-cand .yds-dbb-cand__type {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 0.28rem;
+  padding: 0.08rem 0.42rem;
+  border-radius: 999px;
+  background: rgba(51, 65, 85, 0.72);
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+.yds-dbb-cand .yds-dbb-cand__detail {
+  margin-top: 0.18rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+.yds-dbb-cand .yds-dbb-cand__score {
+  margin-top: 0.08rem;
+  margin-bottom: 0.2rem;
+  color: #cbd5e1;
+  font-size: 0.68rem;
+  line-height: 1.3;
+}
 @media (min-width: 640px) {
   .yds-dbb__title { font-size: 1.35rem; }
   .yds-dbb-grid { grid-template-columns: 1fr 1fr; }
