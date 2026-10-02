@@ -38823,6 +38823,21 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-dbb-cand p {
   margin: 0;
 }
+.yds-dbb-cand__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.yds-dbb-cand__title {
+  font-weight: 700;
+  color: #f8fafc;
+}
+.yds-dbb-cand__ticker {
+  color: #94a3b8;
+  font-weight: 650;
+}
 .yds-dbb-cand .yds-dbb-cand__type {
   display: inline-block;
   max-width: 100%;
@@ -38842,20 +38857,86 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   line-height: 1.35;
 }
 .yds-dbb-cand .yds-dbb-cand__score {
-  margin-top: 0.08rem;
-  margin-bottom: 0.2rem;
+  margin-top: 0.28rem;
   color: #cbd5e1;
   font-size: 0.68rem;
   line-height: 1.3;
+}
+.yds-dbb-cand__metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.16rem 0.7rem;
+  margin: 0.4rem 0 0;
+  min-width: 0;
+}
+.yds-dbb-cand__metrics div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.yds-dbb-cand__metrics dt {
+  color: #64748b;
+  font-size: 0.68rem;
+}
+.yds-dbb-cand__metrics dd {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.yds-dbb-cand__status {
+  margin-top: 0.4rem;
+  color: #e2e8f0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.yds-dbb-cand.is-selected {
+  border-color: rgba(226, 232, 240, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.16);
+}
+.yds-dbb-score__state {
+  margin: 0.35rem 0 0;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+.yds-dbb-score .yds-dbb-card__count {
+  margin-top: 0.12rem;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+.yds-dbb-holdings--focus .yds-trade-status__row--emphasis strong {
+  font-size: 0.78rem;
+  color: #f8fafc;
+}
+.yds-dbb-holdings--focus .yds-trade-status--meta {
+  margin-top: 0.35rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+.yds-dbb-holdings__card.is-selected {
+  border-color: rgba(226, 232, 240, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.12);
 }
 @media (min-width: 640px) {
   .yds-dbb__title { font-size: 1.35rem; }
   .yds-dbb-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (min-width: 768px) {
-  .yds-dbb-grid,
-  .yds-dbb-cands {
+  .yds-dbb-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+  .yds-dbb-cands {
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 22rem));
+    justify-content: start;
+  }
+  .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 24rem));
+    justify-content: start;
   }
   .yds-dbb-opps {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));

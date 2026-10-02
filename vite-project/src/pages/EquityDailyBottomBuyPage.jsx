@@ -26,6 +26,36 @@ function formatAtr(v) {
   return `${Number(v).toFixed(2)}%`
 }
 
+const CONDITION_SHORT_LABEL = {
+  rsi: "RSI",
+  stoch: "Stoch",
+  bb: "BB",
+  ma20: "MA20",
+}
+
+function CandidateFacts({ row }) {
+  const conditions = Array.isArray(row.conditions) ? row.conditions : []
+  const price = formatPrice(row.price)
+  return (
+    <dl className="yds-dbb-cand__metrics">
+      <div>
+        <dt>현재가</dt>
+        <dd>{price != null ? `$${price}` : "—"}</dd>
+      </div>
+      {conditions.map((item) => (
+        <div key={item.id}>
+          <dt>{CONDITION_SHORT_LABEL[item.id] || item.label}</dt>
+          <dd>{formatCondition(item) ?? "—"}</dd>
+        </div>
+      ))}
+      <div>
+        <dt>ATR</dt>
+        <dd>{formatAtr(row.atrPct) ?? "—"}</dd>
+      </div>
+    </dl>
+  )
+}
+
 export default function EquityDailyBottomBuyPage() {
   const [symbol, setSymbol] = useState(DEFAULT_SYMBOL)
   const [group, setGroup] = useState("all")
@@ -163,7 +193,13 @@ export default function EquityDailyBottomBuyPage() {
         <p className="yds-dbb__lead">개별 종목의 조정/과매도 상태를 확인하는 READ-ONLY 화면</p>
       </header>
 
-      <DbbBuyProgressSection items={buyProgress} onSelectSymbol={setSymbol} showBuyLines />
+      <DbbBuyProgressSection
+        items={buyProgress}
+        onSelectSymbol={setSymbol}
+        showBuyLines
+        selectedSymbol={symbol}
+        focusStatus
+      />
 
       <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
         <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
@@ -180,24 +216,24 @@ export default function EquityDailyBottomBuyPage() {
                 <li key={row.symbol} className="min-w-0">
                   <button
                     type="button"
-                    className="yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100"
+                    className={`yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100${row.symbol === symbol ? " is-selected" : ""}`}
+                    aria-pressed={row.symbol === symbol}
                     onClick={() => setSymbol(row.symbol)}
                   >
-                    <p className="font-semibold">
-                      {row.symbol} <span className="font-normal text-slate-300">{row.name}</span>
+                    <p className="yds-dbb-cand__name">
+                      <span className="yds-dbb-cand__title">{row.name}</span>
+                      <span className="yds-dbb-cand__ticker">{row.symbol}</span>
                     </p>
                     {type ? (
                       <>
-                        <p className={`yds-dbb-cand__type yds-dbb-cand__type--${type.id.toLowerCase()}`}>{type.title}</p>
+                        <p className="yds-dbb-cand__type">{type.title}</p>
                         <p className="yds-dbb-cand__detail">{type.detail}</p>
-                        <p className="yds-dbb-cand__score">{type.scoreText}</p>
                       </>
                     ) : (
                       <p className="yds-dbb-cand__score">{row.score}/4</p>
                     )}
-                    <p className="tabular-nums">현재가 {formatPrice(row.price)}</p>
-                    <p className="tabular-nums">ATR {formatAtr(row.atrPct)}</p>
-                    <p>{row.state?.label}</p>
+                    <CandidateFacts row={row} />
+                    {row.state?.label ? <p className="yds-dbb-cand__status">{row.state.label}</p> : null}
                   </button>
                 </li>
               )
@@ -275,10 +311,10 @@ export default function EquityDailyBottomBuyPage() {
             {view.source === "cache" ? <p className="yds-dbb__meta">저장된 시세 기준</p> : null}
           </section>
 
-          <section className={`yds-dbb-card mb-3 yds-dbb-card--${view.state?.id === "strongLow" ? "strong" : view.state?.id === "firstBuy" ? "primary" : view.state?.id === "interest" ? "watch" : "wait"}`}>
+          <section className={`yds-dbb-card yds-dbb-score mb-3 yds-dbb-card--${view.state?.id === "strongLow" ? "strong" : view.state?.id === "firstBuy" ? "primary" : view.state?.id === "interest" ? "watch" : "wait"}`}>
             <h2 className="yds-dbb-section__title">DBB SCORE</h2>
-            <p className="yds-dbb-card__count mt-2 text-2xl">{view.score} / 4</p>
-            <p className="yds-dbb-card__stage">{view.state?.label}</p>
+            <p className="yds-dbb-score__state">{view.state?.label}</p>
+            <p className="yds-dbb-card__count">{view.score} / 4</p>
             {view.state?.detail ? <p className="yds-dbb-card__hint">{view.state.detail}</p> : null}
           </section>
 

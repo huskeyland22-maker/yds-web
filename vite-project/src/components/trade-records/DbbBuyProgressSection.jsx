@@ -47,6 +47,8 @@ export function formatEquityBuyProgressLine(record) {
  *   }>
  *   onSelectSymbol?: (symbol: string) => void
  *   showBuyLines?: boolean
+ *   selectedSymbol?: string | null
+ *   focusStatus?: boolean
  * }} props
  */
 function EquityBuyLines({ symbol }) {
@@ -67,16 +69,23 @@ function EquityBuyLines({ symbol }) {
   )
 }
 
-export default function DbbBuyProgressSection({ items, onSelectSymbol, showBuyLines = false }) {
+export default function DbbBuyProgressSection({
+  items,
+  onSelectSymbol,
+  showBuyLines = false,
+  selectedSymbol = null,
+  focusStatus = false,
+}) {
   if (!items?.length) return null
   return (
-    <section className="yds-dbb-holdings" aria-label="매수 현황">
+    <section className={`yds-dbb-holdings${focusStatus ? " yds-dbb-holdings--focus" : ""}`} aria-label="매수 현황">
       <header className="yds-dbb-section__head">
         <p className="yds-dbb-section__eyebrow">내 매수 기록</p>
         <h2 className="yds-dbb-section__title">매수 현황</h2>
       </header>
       <div className="yds-dbb-holdings__grid">
         {items.map((item) => {
+          const selected = selectedSymbol != null && item.symbol === selectedSymbol
           const body = (
             <>
               <p className="yds-dbb-holdings__name">
@@ -84,7 +93,11 @@ export default function DbbBuyProgressSection({ items, onSelectSymbol, showBuyLi
                 <span className="yds-dbb-holdings__ticker"> {item.symbol}</span>
               </p>
               {item.statusView ? (
-                <TradeRecordStatusBlock view={item.statusView} />
+                focusStatus ? (
+                  <TradeRecordStatusBlock view={item.statusView} part="lead" />
+                ) : (
+                  <TradeRecordStatusBlock view={item.statusView} />
+                )
               ) : (
                 <div className="yds-trade-status" aria-label="매수 기록 현황">
                   <div className="yds-trade-status__row">
@@ -106,6 +119,9 @@ export default function DbbBuyProgressSection({ items, onSelectSymbol, showBuyLi
                 </div>
               )}
               {showBuyLines ? <EquityBuyLines symbol={item.symbol} /> : null}
+              {focusStatus && item.statusView ? (
+                <TradeRecordStatusBlock view={item.statusView} part="tail" />
+              ) : null}
             </>
           )
           if (onSelectSymbol) {
@@ -113,7 +129,8 @@ export default function DbbBuyProgressSection({ items, onSelectSymbol, showBuyLi
               <button
                 key={item.symbol}
                 type="button"
-                className="yds-dbb-holdings__card"
+                className={`yds-dbb-holdings__card${selected ? " is-selected" : ""}`}
+                aria-pressed={selected}
                 onClick={() => onSelectSymbol(item.symbol)}
               >
                 {body}
@@ -121,7 +138,7 @@ export default function DbbBuyProgressSection({ items, onSelectSymbol, showBuyLi
             )
           }
           return (
-            <article key={item.symbol} className="yds-dbb-holdings__card">
+            <article key={item.symbol} className={`yds-dbb-holdings__card${selected ? " is-selected" : ""}`}>
               {body}
             </article>
           )
