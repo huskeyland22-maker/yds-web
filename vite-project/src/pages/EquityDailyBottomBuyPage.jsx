@@ -6,7 +6,7 @@ import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 
-const DEFAULT_SYMBOL = "MSFT"
+const DEFAULT_SYMBOL = "AMZN"
 
 function formatPrice(v) {
   if (v == null || !Number.isFinite(Number(v))) return null
@@ -230,6 +230,9 @@ export default function EquityDailyBottomBuyPage() {
                     <p className="yds-dbb-cand__name">
                       <span className="yds-dbb-cand__title">{row.name}</span>
                       <span className="yds-dbb-cand__ticker">{row.symbol}</span>
+                      {row.priority === "CORE" || row.priority === "WATCH" ? (
+                        <span className={`yds-dbb-priority yds-dbb-priority--${row.priority.toLowerCase()}`}>{row.priority}</span>
+                      ) : null}
                     </p>
                     {type ? (
                       <>
@@ -287,6 +290,7 @@ export default function EquityDailyBottomBuyPage() {
             {options.map((row) => (
               <option key={row.symbol} value={row.symbol}>
                 {row.symbol} {row.name}
+                {row.priority === "CORE" || row.priority === "WATCH" ? ` · ${row.priority}` : ""}
               </option>
             ))}
           </select>
@@ -311,6 +315,9 @@ export default function EquityDailyBottomBuyPage() {
             <p className="yds-dbb-card__ticker mt-2">
               {view.name}
               <span className="yds-dbb-card__theme-inline"> {view.symbol}</span>
+              {view.priority === "CORE" || view.priority === "WATCH" ? (
+                <span className={`yds-dbb-priority yds-dbb-priority--${view.priority.toLowerCase()}`}>{view.priority}</span>
+              ) : null}
             </p>
             <p className="yds-dbb__meta">{view.group}</p>
             <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">{priceText}</p>

@@ -16,6 +16,7 @@ import {
   buildEquityDailyBottomBuyView,
   conditionFlags,
   equityUniverse,
+  researchEquityUniverse,
   scoreState,
 } from "./lib/equity-daily-bottom-buy.mjs"
 
@@ -88,19 +89,20 @@ describe("missing data", () => {
 })
 
 describe("universe", () => {
-  it("reuses the 48 study names and groups", () => {
+  it("scans the 20 active names and keeps the 48-name research list", () => {
     const list = equityUniverse()
-    assert.equal(list.length, 48)
+    const research = researchEquityUniverse()
+    assert.equal(list.length, 20)
+    assert.equal(research.length, 48)
     assert.deepEqual(
-      list.map((row) => row.symbol),
+      research.map((row) => row.symbol),
       EQUITY_CANDIDATES.map((row) => row.symbol),
     )
-    assert.deepEqual(
-      list.map((row) => row.group),
-      EQUITY_CANDIDATES.map((row) => row.group),
-    )
-    assert.equal(list.find((row) => row.symbol === "MSFT").name, "Microsoft")
-    assert.equal(list.find((row) => row.symbol === "BRK.B").yahoo, "BRK-B")
+    assert.equal(research.find((row) => row.symbol === "MSFT").name, "Microsoft")
+    assert.equal(research.find((row) => row.symbol === "BRK.B").yahoo, "BRK-B")
+    assert.equal(list.find((row) => row.symbol === "ETN").name, "Eaton")
+    assert.equal(list.some((row) => row.symbol === "MSFT"), false)
+    assert.equal(list.some((row) => row.symbol === "CRWD"), false)
   })
 })
 
@@ -123,17 +125,20 @@ describe("handler", () => {
     const { loadEquityDailyBottomBuy } = await import(
       pathToFileURL(join(root, "api/_lib/equityDailyBottomBuyHandler.js")).href
     )
-    const result = await loadEquityDailyBottomBuy("MSFT", {
+    const result = await loadEquityDailyBottomBuy("AMZN", {
       fetchBars: async () => {
         throw new Error("offline")
       },
       readCache: () => null,
     })
     assert.equal(result.body.system, "equityDailyBottomBuy")
-    assert.equal(result.body.universe.length, 48)
+    assert.equal(result.body.universe.length, 20)
+    assert.equal(result.body.view.symbol, "AMZN")
     assert.equal(result.body.view.ok, false)
     assert.equal(result.body.view.price, null)
     assert.equal(result.body.view.score, null)
+    assert.equal(result.body.universe.some((row) => row.symbol === "MSFT"), false)
+    assert.equal(EQUITY_CANDIDATES.some((row) => row.symbol === "MSFT"), true)
   })
 })
 

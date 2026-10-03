@@ -13,8 +13,26 @@ import {
 } from "./daily-bottom-buy-cross-asset-validation.mjs"
 import { atrBand } from "./daily-bottom-buy-individual-stock-train-test-validation.mjs"
 import { drawdownFromRollingHigh } from "./daily-bottom-buy-correction-stage-validation.mjs"
+import {
+  ACTIVE_UNIVERSE,
+  CORE_UNIVERSE,
+  FUTURE_WATCH_UNIVERSE,
+  LEGACY_UNIVERSE,
+  RESEARCH_UNIVERSE,
+  WATCH_UNIVERSE,
+  activeEquityMembers,
+  findOperatingCandidate,
+} from "./equity-daily-bottom-buy-universe.mjs"
 
 export { EQUITY_CANDIDATES, FROZEN_THRESHOLDS, atrBand, conditionFlags }
+export {
+  ACTIVE_UNIVERSE,
+  CORE_UNIVERSE,
+  WATCH_UNIVERSE,
+  FUTURE_WATCH_UNIVERSE,
+  LEGACY_UNIVERSE,
+  RESEARCH_UNIVERSE,
+}
 
 export const EQUITY_DAILY_BOTTOM_BUY_ID = "equityDailyBottomBuy"
 export const EQUITY_DAILY_BOTTOM_BUY_ROUTE = "/equity-daily-bottom-buy"
@@ -69,6 +87,8 @@ const DISPLAY_NAME = {
   PLD: "Prologis",
   EQIX: "Equinix",
   AMT: "American Tower",
+  ETN: "Eaton",
+  GEV: "GE Vernova",
 }
 
 export const COMMON_NOTE = "저점 확정 신호는 아닙니다."
@@ -127,20 +147,25 @@ export function atrRisk(atrPct) {
   return { band, label: ATR_LABEL[band] }
 }
 
+function withDisplayName(meta) {
+  if (!meta) return null
+  return { ...meta, name: DISPLAY_NAME[meta.symbol] || meta.name || meta.symbol }
+}
+
+/** Names the equity screen scans. Research code keeps EQUITY_CANDIDATES. */
 export function equityUniverse() {
-  return EQUITY_CANDIDATES.map((meta) => ({
-    symbol: meta.symbol,
-    yahoo: meta.yahoo,
-    group: meta.group,
-    name: DISPLAY_NAME[meta.symbol] || meta.symbol,
-  }))
+  return activeEquityMembers().map(withDisplayName)
+}
+
+/** Full 48-name study list, with the same display names as the screen catalog. */
+export function researchEquityUniverse() {
+  return EQUITY_CANDIDATES.map((meta) => withDisplayName(meta))
 }
 
 export function findEquityCandidate(symbol) {
-  const key = String(symbol || "").trim().toUpperCase()
-  const meta = EQUITY_CANDIDATES.find((row) => row.symbol.toUpperCase() === key || row.symbol === symbol)
-  if (!meta) return null
-  return { ...meta, name: DISPLAY_NAME[meta.symbol] || meta.symbol }
+  const meta = findOperatingCandidate(symbol)
+  if (meta) return withDisplayName(meta)
+  return null
 }
 
 function emptyView(meta, message) {
@@ -149,6 +174,7 @@ function emptyView(meta, message) {
     symbol: meta?.symbol ?? null,
     name: meta?.name ?? null,
     group: meta?.group ?? null,
+    priority: meta?.priority ?? null,
     message,
     price: null,
     asOf: null,
@@ -195,6 +221,7 @@ export function buildEquityDailyBottomBuyView(meta, bars, opts = {}) {
     symbol: meta.symbol,
     name: meta.name || DISPLAY_NAME[meta.symbol] || meta.symbol,
     group: meta.group ?? null,
+    priority: meta.priority ?? null,
     message: null,
     price: roundTo(last.close, 2),
     asOf: last.date,
