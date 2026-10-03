@@ -38909,6 +38909,33 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-size: 0.82rem;
   color: #cbd5e1;
 }
+.yds-dbb-score__type {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0.4rem 0 0;
+  padding: 0.08rem 0.42rem;
+  border-radius: 999px;
+  background: rgba(51, 65, 85, 0.72);
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.yds-dbb-score__dd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+  margin: 0.4rem 0 0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+.yds-dbb-score__dd strong {
+  color: #f8fafc;
+  font-weight: 650;
+}
 .yds-dbb-holdings--focus .yds-trade-status__row--emphasis strong {
   font-size: 0.78rem;
   color: #f8fafc;

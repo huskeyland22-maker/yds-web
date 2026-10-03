@@ -12,6 +12,7 @@ import {
   attachObservationFeatures,
 } from "./daily-bottom-buy-cross-asset-validation.mjs"
 import { atrBand } from "./daily-bottom-buy-individual-stock-train-test-validation.mjs"
+import { drawdownFromRollingHigh } from "./daily-bottom-buy-correction-stage-validation.mjs"
 
 export { EQUITY_CANDIDATES, FROZEN_THRESHOLDS, atrBand, conditionFlags }
 
@@ -156,6 +157,7 @@ function emptyView(meta, message) {
     conditions: null,
     atrPct: null,
     atrRisk: null,
+    dd120: null,
   }
 }
 
@@ -186,6 +188,8 @@ export function buildEquityDailyBottomBuyView(meta, bars, opts = {}) {
   const ma = roundTo(last.ma20DevPct, 2)
   const atrPct = roundTo(last.atrPct, 2)
   const state = scoreState(flags.count)
+  // Session high over the last 120 bars. The observation row's dd120 is a close peak and is not reused.
+  const dd120 = roundTo(drawdownFromRollingHigh(bars, bars.length - 1, 120), 2)
   return {
     ok: true,
     symbol: meta.symbol,
@@ -206,6 +210,7 @@ export function buildEquityDailyBottomBuyView(meta, bars, opts = {}) {
     ],
     atrPct,
     atrRisk: atrRisk(atrPct),
+    dd120,
     atrNote: ATR_NOTE,
     atrMeaning: ATR_MEANING,
     readOnly: true,

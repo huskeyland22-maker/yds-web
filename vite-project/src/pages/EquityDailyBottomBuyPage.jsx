@@ -26,6 +26,11 @@ function formatAtr(v) {
   return `${Number(v).toFixed(2)}%`
 }
 
+function formatDd120(v) {
+  if (v == null || !Number.isFinite(Number(v))) return null
+  return `${Number(v).toFixed(2)}%`
+}
+
 const CONDITION_SHORT_LABEL = {
   rsi: "RSI",
   stoch: "Stoch",
@@ -184,6 +189,8 @@ export default function EquityDailyBottomBuyPage() {
   const view = payload?.view
   const priceText = formatPrice(view?.price)
   const atrText = formatAtr(view?.atrPct)
+  const conditionType = equityCandidateConditionType(view)
+  const dd120Text = formatDd120(view?.dd120)
 
   return (
     <div className="yds-dbb min-w-0 w-full">
@@ -316,6 +323,13 @@ export default function EquityDailyBottomBuyPage() {
             <p className="yds-dbb-score__state">{view.state?.label}</p>
             <p className="yds-dbb-card__count">{view.score} / 4</p>
             {view.state?.detail ? <p className="yds-dbb-card__hint">{view.state.detail}</p> : null}
+            {conditionType ? <p className="yds-dbb-score__type">{conditionType.title}</p> : null}
+            {dd120Text ? (
+              <p className="yds-dbb-score__dd">
+                <span>120일 고점 대비</span>
+                <strong className="tabular-nums">{dd120Text}</strong>
+              </p>
+            ) : null}
           </section>
 
           <section className="yds-dbb-card mb-3">
