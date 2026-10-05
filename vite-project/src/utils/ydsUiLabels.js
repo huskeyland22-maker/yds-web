@@ -13,8 +13,9 @@ export function getCoreNavItems() {
       subtitle: "ETF · 개별종목",
       tone: "brand",
       children: [
-        { label: "ETF 조정 매수", path: "/daily-bottom-buy" },
-        { label: "개별종목 조정 매수", path: "/equity-daily-bottom-buy" },
+        { label: "ETF 조정매매", path: "/daily-bottom-buy" },
+        { label: "개별 종목 조정매매", path: "/equity-daily-bottom-buy" },
+        { label: "레버리지 조정매매", path: "/leverage-adjustment" },
       ],
     },
     {
@@ -71,7 +72,8 @@ export function getSidebarFooterLinks() {
 export const NAV_MOBILE_SHORT = {
   "/": "인생",
   "/daily-bottom-buy": "일상 조정 매수",
-  "/equity-daily-bottom-buy": "개별종목 조정 매수",
+  "/equity-daily-bottom-buy": "개별 종목 조정매매",
+  "/leverage-adjustment": "레버리지 조정매매",
   "/market-analysis": "공포·패닉 매수",
   "/stock-picks": "종목",
   "/watchlist": "관심",

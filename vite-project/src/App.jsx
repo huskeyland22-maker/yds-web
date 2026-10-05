@@ -40,6 +40,7 @@ import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import DailyBottomBuyPage from "./pages/DailyBottomBuyPage.jsx"
 import EquityDailyBottomBuyPage from "./pages/EquityDailyBottomBuyPage.jsx"
+import LeverageAdjustmentPage from "./pages/LeverageAdjustmentPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import PerformanceValidationPage from "./pages/PerformanceValidationPage.jsx"
 import PanicLabPage from "./pages/PanicLabPage.jsx"
@@ -1465,6 +1466,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="개별 종목 조정 매수">
                   <EquityDailyBottomBuyPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/leverage-adjustment"
+              element={
+                <SectionErrorBoundary label="레버리지 조정매매">
+                  <LeverageAdjustmentPage />
                 </SectionErrorBoundary>
               }
             />

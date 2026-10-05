@@ -29,6 +29,7 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
   const hideTodayInterpretation =
     location.pathname === "/daily-bottom-buy" ||
     location.pathname === "/equity-daily-bottom-buy" ||
+    location.pathname === "/leverage-adjustment" ||
     location.pathname === "/" ||
     location.pathname === "/market-analysis" ||
     location.pathname === "/market-dashboard"

@@ -14,7 +14,11 @@ export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccount
   const location = useLocation()
   const [otherOpen, setOtherOpen] = useState(false)
   const [dbbOpen, setDbbOpen] = useState(
-    () => location.pathname === "/daily-bottom-buy" || location.pathname === "/equity-daily-bottom-buy" || location.pathname === "/",
+    () =>
+      location.pathname === "/daily-bottom-buy" ||
+      location.pathname === "/equity-daily-bottom-buy" ||
+      location.pathname === "/leverage-adjustment" ||
+      location.pathname === "/",
   )
   const coreItems = getCoreNavItems()
   const otherItems = getOtherNavItems()
