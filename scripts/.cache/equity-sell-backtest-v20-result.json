@@ -1,0 +1,887 @@
+{
+  "selectedStrategy": null,
+  "note": "Research only. Not a sell rule.",
+  "baseline": {
+    "events": 103,
+    "lowEvents": 102,
+    "groups": {
+      "HIGH": 15,
+      "MID": 53,
+      "LOW": 35
+    },
+    "bands": {
+      "LOW": 34,
+      "MID": 34,
+      "HIGH": 35
+    }
+  },
+  "bands": {
+    "LOW": {
+      "n": 34,
+      "t0": {
+        "n": 34,
+        "mean": -1.35,
+        "median": -1.17,
+        "winRate": 0,
+        "lossRate": 100,
+        "sellNow": 0
+      },
+      "t1": {
+        "n": 34,
+        "mean": 0.29,
+        "median": 0.16,
+        "winRate": 52.94,
+        "lossRate": 47.06,
+        "holdAdvantageMean": 0.29,
+        "holdAdvantageMedian": 0.16,
+        "worse5": 0,
+        "worse10": 0,
+        "hit5": 0,
+        "hit10": 0,
+        "hit20": 0
+      },
+      "t3": {
+        "n": 34,
+        "mean": 1.85,
+        "median": 1.24,
+        "winRate": 64.71,
+        "lossRate": 35.29,
+        "holdAdvantageMean": 1.85,
+        "holdAdvantageMedian": 1.24,
+        "worse5": 0,
+        "worse10": 0,
+        "hit5": 20.59,
+        "hit10": 2.94,
+        "hit20": 2.94
+      },
+      "t5": {
+        "n": 34,
+        "mean": 3.25,
+        "median": 1.67,
+        "winRate": 67.65,
+        "lossRate": 32.35,
+        "holdAdvantageMean": 3.25,
+        "holdAdvantageMedian": 1.67,
+        "worse5": 2.94,
+        "worse10": 0,
+        "hit5": 35.29,
+        "hit10": 8.82,
+        "hit20": 8.82
+      },
+      "t10": {
+        "n": 34,
+        "mean": 2.6,
+        "median": 2.24,
+        "winRate": 61.76,
+        "lossRate": 38.24,
+        "holdAdvantageMean": 2.6,
+        "holdAdvantageMedian": 2.24,
+        "worse5": 17.65,
+        "worse10": 2.94,
+        "hit5": 50,
+        "hit10": 8.82,
+        "hit20": 8.82
+      },
+      "t20": {
+        "n": 34,
+        "mean": 3.96,
+        "median": 2.52,
+        "winRate": 67.65,
+        "lossRate": 32.35,
+        "holdAdvantageMean": 3.96,
+        "holdAdvantageMedian": 2.52,
+        "worse5": 35.29,
+        "worse10": 26.47,
+        "hit5": 61.76,
+        "hit10": 29.41,
+        "hit20": 8.82
+      },
+      "t40": {
+        "n": 34,
+        "mean": 5.31,
+        "median": 4.68,
+        "winRate": 61.76,
+        "lossRate": 38.24,
+        "holdAdvantageMean": 5.31,
+        "holdAdvantageMedian": 4.68,
+        "worse5": 44.12,
+        "worse10": 32.35,
+        "hit5": 76.47,
+        "hit10": 50,
+        "hit20": 8.82
+      },
+      "window": {
+        "n": 34,
+        "mean": 3.78,
+        "median": 0.81,
+        "winRate": 55.88,
+        "lossRate": 44.12,
+        "holdAdvantageMean": 3.78,
+        "holdAdvantageMedian": 0.81,
+        "worse5": 41.18,
+        "worse10": 29.41,
+        "hit5": 64.71,
+        "hit10": 35.29,
+        "hit20": 8.82
+      },
+      "t0Stored": {
+        "n": 34,
+        "mean": -1.35,
+        "median": -1.17,
+        "winRate": 0,
+        "lossRate": 100,
+        "sellNow": 0
+      },
+      "minimum": {
+        "n": 34,
+        "mean": -5.47,
+        "median": -3.09,
+        "p5": -15.43,
+        "p25": -10.56,
+        "worse5": 41.18,
+        "worse10": 29.41,
+        "worse15": 5.88,
+        "worse20": 2.94
+      },
+      "lowTo": {
+        "t5": {
+          "n": 26,
+          "mean": 9.62,
+          "median": 7.12,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "t10": {
+          "n": 20,
+          "mean": 12.04,
+          "median": 7.86,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "t20": {
+          "n": 14,
+          "mean": 14.86,
+          "median": 9.21,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "window": {
+          "n": 34,
+          "mean": 10.02,
+          "median": 8.35,
+          "winRate": 85.29,
+          "lossRate": 0
+        }
+      },
+      "recovery": {
+        "3": {
+          "eligible": 34,
+          "reached": 25,
+          "hitRate": 73.53,
+          "meanDays": 2.24,
+          "medianDays": 2,
+          "conclusion": "제한적"
+        },
+        "5": {
+          "eligible": 34,
+          "reached": 25,
+          "hitRate": 73.53,
+          "meanDays": 4.24,
+          "medianDays": 3,
+          "conclusion": "제한적"
+        },
+        "10": {
+          "eligible": 34,
+          "reached": 20,
+          "hitRate": 58.82,
+          "meanDays": 9.4,
+          "medianDays": 6,
+          "conclusion": "제한적"
+        },
+        "15": {
+          "eligible": 34,
+          "reached": 10,
+          "hitRate": 29.41,
+          "meanDays": 9.8,
+          "medianDays": 8,
+          "conclusion": "제한적"
+        },
+        "20": {
+          "eligible": 34,
+          "reached": 7,
+          "hitRate": 20.59,
+          "meanDays": 7.14,
+          "medianDays": 3,
+          "conclusion": "제한적"
+        }
+      },
+      "firstPositive": {
+        "mean": "t1",
+        "median": "t1",
+        "winRate": "t1"
+      }
+    },
+    "MID": {
+      "n": 34,
+      "t0": {
+        "n": 34,
+        "mean": -1.46,
+        "median": -0.99,
+        "winRate": 0,
+        "lossRate": 100,
+        "sellNow": 0
+      },
+      "t1": {
+        "n": 34,
+        "mean": 0.15,
+        "median": -0.27,
+        "winRate": 47.06,
+        "lossRate": 52.94,
+        "holdAdvantageMean": 0.15,
+        "holdAdvantageMedian": -0.27,
+        "worse5": 8.82,
+        "worse10": 0,
+        "hit5": 2.94,
+        "hit10": 0,
+        "hit20": 0
+      },
+      "t3": {
+        "n": 34,
+        "mean": 0.15,
+        "median": -0.27,
+        "winRate": 41.18,
+        "lossRate": 58.82,
+        "holdAdvantageMean": 0.15,
+        "holdAdvantageMedian": -0.27,
+        "worse5": 20.59,
+        "worse10": 0,
+        "hit5": 14.71,
+        "hit10": 5.88,
+        "hit20": 0
+      },
+      "t5": {
+        "n": 34,
+        "mean": 1.07,
+        "median": 1.51,
+        "winRate": 61.76,
+        "lossRate": 38.24,
+        "holdAdvantageMean": 1.07,
+        "holdAdvantageMedian": 1.51,
+        "worse5": 32.35,
+        "worse10": 8.82,
+        "hit5": 26.47,
+        "hit10": 14.71,
+        "hit20": 0
+      },
+      "t10": {
+        "n": 34,
+        "mean": 3.34,
+        "median": 4.14,
+        "winRate": 67.65,
+        "lossRate": 32.35,
+        "holdAdvantageMean": 3.34,
+        "holdAdvantageMedian": 4.14,
+        "worse5": 47.06,
+        "worse10": 17.65,
+        "hit5": 55.88,
+        "hit10": 35.29,
+        "hit20": 2.94
+      },
+      "t20": {
+        "n": 34,
+        "mean": 5.82,
+        "median": 4.52,
+        "winRate": 61.76,
+        "lossRate": 38.24,
+        "holdAdvantageMean": 5.82,
+        "holdAdvantageMedian": 4.52,
+        "worse5": 50,
+        "worse10": 29.41,
+        "hit5": 76.47,
+        "hit10": 55.88,
+        "hit20": 17.65
+      },
+      "t40": {
+        "n": 34,
+        "mean": 9.42,
+        "median": 8.73,
+        "winRate": 55.88,
+        "lossRate": 44.12,
+        "holdAdvantageMean": 9.42,
+        "holdAdvantageMedian": 8.73,
+        "worse5": 64.71,
+        "worse10": 41.18,
+        "hit5": 85.29,
+        "hit10": 67.65,
+        "hit20": 26.47
+      },
+      "window": {
+        "n": 34,
+        "mean": 7.9,
+        "median": 4.65,
+        "winRate": 55.88,
+        "lossRate": 44.12,
+        "holdAdvantageMean": 7.9,
+        "holdAdvantageMedian": 4.65,
+        "worse5": 61.76,
+        "worse10": 38.24,
+        "hit5": 79.41,
+        "hit10": 61.76,
+        "hit20": 26.47
+      },
+      "t0Stored": {
+        "n": 34,
+        "mean": -1.46,
+        "median": -0.99,
+        "winRate": 0,
+        "lossRate": 100,
+        "sellNow": 0
+      },
+      "minimum": {
+        "n": 34,
+        "mean": -9.27,
+        "median": -8.71,
+        "p5": -25.7,
+        "p25": -12.82,
+        "worse5": 61.76,
+        "worse10": 38.24,
+        "worse15": 23.53,
+        "worse20": 14.71
+      },
+      "lowTo": {
+        "t5": {
+          "n": 27,
+          "mean": 9.56,
+          "median": 9.67,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "t10": {
+          "n": 26,
+          "mean": 14.93,
+          "median": 14.13,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "t20": {
+          "n": 18,
+          "mean": 22.49,
+          "median": 17.87,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "window": {
+          "n": 34,
+          "mean": 18.62,
+          "median": 12.66,
+          "winRate": 94.12,
+          "lossRate": 0
+        }
+      },
+      "recovery": {
+        "3": {
+          "eligible": 34,
+          "reached": 30,
+          "hitRate": 88.24,
+          "meanDays": 1.77,
+          "medianDays": 1,
+          "conclusion": "제한적"
+        },
+        "5": {
+          "eligible": 34,
+          "reached": 28,
+          "hitRate": 82.35,
+          "meanDays": 2.93,
+          "medianDays": 2,
+          "conclusion": "제한적"
+        },
+        "10": {
+          "eligible": 34,
+          "reached": 24,
+          "hitRate": 70.59,
+          "meanDays": 5.63,
+          "medianDays": 5,
+          "conclusion": "제한적"
+        },
+        "15": {
+          "eligible": 34,
+          "reached": 20,
+          "hitRate": 58.82,
+          "meanDays": 8.85,
+          "medianDays": 8,
+          "conclusion": "제한적"
+        },
+        "20": {
+          "eligible": 34,
+          "reached": 17,
+          "hitRate": 50,
+          "meanDays": 10.94,
+          "medianDays": 9,
+          "conclusion": "제한적"
+        }
+      },
+      "firstPositive": {
+        "mean": "t1",
+        "median": "t5",
+        "winRate": "t5"
+      }
+    },
+    "HIGH": {
+      "n": 35,
+      "t0": {
+        "n": 35,
+        "mean": -1.81,
+        "median": -1.68,
+        "winRate": 0,
+        "lossRate": 100,
+        "sellNow": 0
+      },
+      "t1": {
+        "n": 35,
+        "mean": 0.78,
+        "median": -0.25,
+        "winRate": 48.57,
+        "lossRate": 51.43,
+        "holdAdvantageMean": 0.78,
+        "holdAdvantageMedian": -0.25,
+        "worse5": 5.71,
+        "worse10": 0,
+        "hit5": 11.43,
+        "hit10": 5.71,
+        "hit20": 0
+      },
+      "t3": {
+        "n": 35,
+        "mean": 3.17,
+        "median": 3.6,
+        "winRate": 65.71,
+        "lossRate": 34.29,
+        "holdAdvantageMean": 3.17,
+        "holdAdvantageMedian": 3.6,
+        "worse5": 20,
+        "worse10": 8.57,
+        "hit5": 45.71,
+        "hit10": 20,
+        "hit20": 2.86
+      },
+      "t5": {
+        "n": 35,
+        "mean": 2.68,
+        "median": 5.21,
+        "winRate": 68.57,
+        "lossRate": 31.43,
+        "holdAdvantageMean": 2.68,
+        "holdAdvantageMedian": 5.21,
+        "worse5": 25.71,
+        "worse10": 17.14,
+        "hit5": 62.86,
+        "hit10": 25.71,
+        "hit20": 5.71
+      },
+      "t10": {
+        "n": 35,
+        "mean": 6.19,
+        "median": 6.12,
+        "winRate": 77.14,
+        "lossRate": 22.86,
+        "holdAdvantageMean": 6.19,
+        "holdAdvantageMedian": 6.12,
+        "worse5": 31.43,
+        "worse10": 20,
+        "hit5": 77.14,
+        "hit10": 60,
+        "hit20": 11.43
+      },
+      "t20": {
+        "n": 35,
+        "mean": 9.76,
+        "median": 8.57,
+        "winRate": 71.43,
+        "lossRate": 28.57,
+        "holdAdvantageMean": 9.76,
+        "holdAdvantageMedian": 8.57,
+        "worse5": 34.29,
+        "worse10": 25.71,
+        "hit5": 82.86,
+        "hit10": 74.29,
+        "hit20": 34.29
+      },
+      "t40": {
+        "n": 35,
+        "mean": 15.26,
+        "median": 16.48,
+        "winRate": 65.71,
+        "lossRate": 34.29,
+        "holdAdvantageMean": 15.26,
+        "holdAdvantageMedian": 16.48,
+        "worse5": 45.71,
+        "worse10": 34.29,
+        "hit5": 85.71,
+        "hit10": 80,
+        "hit20": 51.43
+      },
+      "window": {
+        "n": 35,
+        "mean": 15.89,
+        "median": 17.81,
+        "winRate": 65.71,
+        "lossRate": 31.43,
+        "holdAdvantageMean": 15.89,
+        "holdAdvantageMedian": 17.81,
+        "worse5": 42.86,
+        "worse10": 37.14,
+        "hit5": 80,
+        "hit10": 71.43,
+        "hit20": 54.29
+      },
+      "t0Stored": {
+        "n": 35,
+        "mean": -1.81,
+        "median": -1.68,
+        "winRate": 0,
+        "lossRate": 100,
+        "sellNow": 0
+      },
+      "minimum": {
+        "n": 34,
+        "mean": -8.36,
+        "median": -4.61,
+        "p5": -24.23,
+        "p25": -15.8,
+        "worse5": 44.12,
+        "worse10": 38.24,
+        "worse15": 26.47,
+        "worse20": 17.65
+      },
+      "lowTo": {
+        "t5": {
+          "n": 27,
+          "mean": 12.68,
+          "median": 12.35,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "t10": {
+          "n": 25,
+          "mean": 16.42,
+          "median": 14.87,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "t20": {
+          "n": 21,
+          "mean": 25.7,
+          "median": 24.19,
+          "winRate": 100,
+          "lossRate": 0
+        },
+        "window": {
+          "n": 34,
+          "mean": 26.23,
+          "median": 25.06,
+          "winRate": 94.12,
+          "lossRate": 0
+        }
+      },
+      "recovery": {
+        "3": {
+          "eligible": 34,
+          "reached": 31,
+          "hitRate": 91.18,
+          "meanDays": 1.32,
+          "medianDays": 1,
+          "conclusion": "제한적"
+        },
+        "5": {
+          "eligible": 34,
+          "reached": 30,
+          "hitRate": 88.24,
+          "meanDays": 2.03,
+          "medianDays": 2,
+          "conclusion": "제한적"
+        },
+        "10": {
+          "eligible": 34,
+          "reached": 28,
+          "hitRate": 82.35,
+          "meanDays": 4,
+          "medianDays": 4,
+          "conclusion": "제한적"
+        },
+        "15": {
+          "eligible": 34,
+          "reached": 26,
+          "hitRate": 76.47,
+          "meanDays": 7.46,
+          "medianDays": 6,
+          "conclusion": "제한적"
+        },
+        "20": {
+          "eligible": 34,
+          "reached": 21,
+          "hitRate": 61.76,
+          "meanDays": 10.9,
+          "medianDays": 10,
+          "conclusion": "제한적"
+        }
+      },
+      "firstPositive": {
+        "mean": "t1",
+        "median": "t3",
+        "winRate": "t3"
+      }
+    }
+  },
+  "highLow": {
+    "t5": {
+      "mean": -0.57,
+      "median": 3.54,
+      "winRate": 0.92
+    },
+    "t10": {
+      "mean": 3.59,
+      "median": 3.88,
+      "winRate": 15.38
+    },
+    "t20": {
+      "mean": 5.8,
+      "median": 6.05,
+      "winRate": 3.78
+    },
+    "t40": {
+      "mean": 9.95,
+      "median": 11.8,
+      "winRate": 3.95
+    },
+    "window": {
+      "mean": 12.11,
+      "median": 17,
+      "winRate": 9.83
+    }
+  },
+  "lowWindowGap": 16.21,
+  "t0Means": {
+    "HIGH": -1.81,
+    "MID": -1.46,
+    "LOW": -1.35
+  },
+  "t0ControlledGap": {
+    "t5": -0.28,
+    "t10": 3.74,
+    "t20": 7.26,
+    "window": 14.06
+  },
+  "t0Buckets": {
+    "lt0": {
+      "n": 103,
+      "high": 35,
+      "low": 34,
+      "conclusion": "제한적"
+    },
+    "b0": {
+      "n": 0,
+      "high": 0,
+      "low": 0,
+      "conclusion": "결론 금지"
+    },
+    "b5": {
+      "n": 0,
+      "high": 0,
+      "low": 0,
+      "conclusion": "결론 금지"
+    },
+    "b10": {
+      "n": 0,
+      "high": 0,
+      "low": 0,
+      "conclusion": "결론 금지"
+    },
+    "b15": {
+      "n": 0,
+      "high": 0,
+      "low": 0,
+      "conclusion": "결론 금지"
+    },
+    "ge20": {
+      "n": 0,
+      "high": 0,
+      "low": 0,
+      "conclusion": "결론 금지"
+    }
+  },
+  "leadership": {
+    "HIGH": {
+      "HIGH": {
+        "n": 10,
+        "conclusion": "수치만",
+        "t5": 2.26,
+        "t10": 12.52,
+        "t20": 19.24,
+        "window": 29.97,
+        "lowToWindow": 35.46,
+        "hit10": 90
+      },
+      "LOW": {
+        "n": 1,
+        "conclusion": "결론 금지",
+        "t5": 1.11,
+        "t10": 3.05,
+        "t20": 6.18,
+        "window": 11.03,
+        "lowToWindow": 12.92,
+        "hit10": 100
+      }
+    },
+    "LOW": {
+      "HIGH": {
+        "n": 8,
+        "conclusion": "결론 금지",
+        "t5": 1.38,
+        "t10": 0.21,
+        "t20": 1.06,
+        "window": 3.56,
+        "lowToWindow": 17.99,
+        "hit10": 75
+      },
+      "LOW": {
+        "n": 16,
+        "conclusion": "수치만",
+        "t5": 5.5,
+        "t10": 6.16,
+        "t20": 6.29,
+        "window": 7.62,
+        "lowToWindow": 10.81,
+        "hit10": 62.5
+      }
+    }
+  },
+  "continuous": {
+    "t5": {
+      "n": 103,
+      "spearman": 0.0336
+    },
+    "t10": {
+      "n": 103,
+      "spearman": 0.2245
+    },
+    "t20": {
+      "n": 103,
+      "spearman": 0.1806
+    },
+    "t40": {
+      "n": 103,
+      "spearman": 0.1809
+    },
+    "window": {
+      "n": 103,
+      "spearman": 0.1967
+    },
+    "lowT10": {
+      "n": 71,
+      "spearman": 0.3494
+    },
+    "lowT20": {
+      "n": 53,
+      "spearman": 0.4541
+    },
+    "lowWindow": {
+      "n": 102,
+      "spearman": 0.4107
+    },
+    "hit10": {
+      "n": 72,
+      "spearman": -0.3421
+    }
+  },
+  "robust": {
+    "eventWeighted": {
+      "n": 103,
+      "spearman": 0.1967
+    },
+    "tickerWeighted": {
+      "tickers": 30,
+      "spearman": 0.4033,
+      "maxEvents": 9
+    },
+    "leaveOneTicker": {
+      "baseline": 0.1967,
+      "min": 0.1521,
+      "max": 0.234,
+      "median": 0.1992,
+      "signFlips": []
+    },
+    "holdGap": {
+      "baseline": 12.11,
+      "min": 10.79,
+      "max": 14.37,
+      "median": 11.94,
+      "signFlips": 0
+    },
+    "withinStock": "결론 금지"
+  },
+  "bootstrap": {
+    "t5": {
+      "nHigh": 35,
+      "nLow": 34,
+      "meanDiff": -0.57,
+      "medianDiff": 3.54,
+      "ci95": [
+        -4.59,
+        3.37
+      ],
+      "permutationTail": 0.7887
+    },
+    "t10": {
+      "nHigh": 35,
+      "nLow": 34,
+      "meanDiff": 3.59,
+      "medianDiff": 3.87,
+      "ci95": [
+        -1.17,
+        8.19
+      ],
+      "permutationTail": 0.1586
+    },
+    "t20": {
+      "nHigh": 35,
+      "nLow": 34,
+      "meanDiff": 5.8,
+      "medianDiff": 6.04,
+      "ci95": [
+        -1.24,
+        12.96
+      ],
+      "permutationTail": 0.1191
+    },
+    "window": {
+      "nHigh": 35,
+      "nLow": 34,
+      "meanDiff": 12.11,
+      "medianDiff": 17,
+      "ci95": [
+        3.3,
+        20.94
+      ],
+      "permutationTail": 0.0105
+    },
+    "lowWindow": {
+      "nHigh": 34,
+      "nLow": 34,
+      "meanDiff": 16.21,
+      "medianDiff": 16.7,
+      "ci95": [
+        9.19,
+        23.35
+      ],
+      "permutationTail": 0.0002
+    }
+  },
+  "v19Direction": {
+    "lowWindowSpearman": 0.4107,
+    "holdWindowSpearman": 0.1967,
+    "sameSign": true
+  },
+  "judgment": {
+    "label": "부분적으로 지지"
+  }
+}
