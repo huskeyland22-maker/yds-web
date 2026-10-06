@@ -1,0 +1,3181 @@
+{
+  "selectedStrategy": null,
+  "note": "Research only. Not a sell rule.",
+  "baseline": {
+    "events": 103,
+    "lowEvents": 102,
+    "groups": {
+      "HIGH": 15,
+      "MID": 53,
+      "LOW": 35
+    },
+    "bands": {
+      "LOW": 34,
+      "MID": 34,
+      "HIGH": 35
+    }
+  },
+  "splits": {
+    "50": {
+      "trainN": 52,
+      "testN": 51,
+      "target": 52,
+      "trainStart": "2016-05-06",
+      "trainEnd": "2022-02-23",
+      "testStart": "2022-04-06",
+      "testEnd": "2026-07-29",
+      "models": {
+        "M0": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.0391,
+              "adjustedR2": 0.0199,
+              "rawCoefficient": {
+                "intercept": 0.2327,
+                "t0": 3.1683
+              },
+              "standardizedBeta": {
+                "t0": 0.1978
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.0237,
+              "pearson": 0.1653,
+              "spearman": 0.1442,
+              "mae": 15.2027,
+              "rmse": 18.564,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.0013,
+              "adjustedR2": -0.0403,
+              "rawCoefficient": {
+                "intercept": 0.2237,
+                "t0": -0.6125
+              },
+              "standardizedBeta": {
+                "t0": -0.0361
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": -0.0617,
+              "pearson": -0.2583,
+              "spearman": -0.2778,
+              "mae": 12.6955,
+              "rmse": 17.0712,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.0031,
+              "adjustedR2": -0.0254,
+              "rawCoefficient": {
+                "intercept": 5.1707,
+                "t0": -32.8346
+              },
+              "standardizedBeta": {
+                "t0": -0.0558
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": -0.0242,
+              "pearson": 0.0294,
+              "spearman": -0.0028,
+              "mae": 3.8886,
+              "rmse": 5.6807,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M1": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.198,
+              "adjustedR2": 0.1653,
+              "rawCoefficient": {
+                "intercept": 0.1189,
+                "t0": 3.4104,
+                "leadership": 0.0028
+              },
+              "standardizedBeta": {
+                "t0": 0.213,
+                "leadership": 0.3989
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.0022,
+              "pearson": 0.1928,
+              "spearman": 0.1319,
+              "mae": 15.2216,
+              "rmse": 18.767,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1165,
+              "adjustedR2": 0.0397,
+              "rawCoefficient": {
+                "intercept": 0.1592,
+                "t0": 0.8725,
+                "leadership": 0.0018
+              },
+              "standardizedBeta": {
+                "t0": 0.0515,
+                "leadership": 0.3506
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.0788,
+              "pearson": 0.2998,
+              "spearman": 0.57,
+              "mae": 10.8493,
+              "rmse": 15.9016,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.0653,
+              "adjustedR2": 0.0104,
+              "rawCoefficient": {
+                "intercept": 7.0736,
+                "t0": -55.1694,
+                "leadership": -0.0491
+              },
+              "standardizedBeta": {
+                "t0": -0.0938,
+                "leadership": -0.2523
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": -0.0303,
+              "pearson": 0.0752,
+              "spearman": 0.1338,
+              "mae": 4.0293,
+              "rmse": 5.6976,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M2": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.3355,
+              "adjustedR2": 0.2939,
+              "rawCoefficient": {
+                "intercept": 0.0371,
+                "t0": 4.4188,
+                "leadership": 0.0018,
+                "eventAtr": 2.7326
+              },
+              "standardizedBeta": {
+                "t0": 0.2759,
+                "leadership": 0.2588,
+                "eventAtr": 0.4021
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.1661,
+              "pearson": 0.4128,
+              "spearman": 0.2639,
+              "mae": 13.6197,
+              "rmse": 17.1569,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1373,
+              "adjustedR2": 0.0196,
+              "rawCoefficient": {
+                "intercept": 0.1251,
+                "t0": 0.3188,
+                "leadership": 0.0012,
+                "eventAtr": 0.9405
+              },
+              "standardizedBeta": {
+                "t0": 0.0188,
+                "leadership": 0.2326,
+                "eventAtr": 0.1838
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.103,
+              "pearson": 0.3451,
+              "spearman": 0.6298,
+              "mae": 10.1699,
+              "rmse": 15.6913,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.1224,
+              "adjustedR2": 0.0426,
+              "rawCoefficient": {
+                "intercept": 9.1323,
+                "t0": -33.4947,
+                "leadership": -0.0157,
+                "eventAtr": -60.198
+              },
+              "standardizedBeta": {
+                "t0": -0.0569,
+                "leadership": -0.0809,
+                "eventAtr": -0.293
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.109,
+              "pearson": 0.3584,
+              "spearman": 0.3697,
+              "mae": 3.8864,
+              "rmse": 5.2985,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M3": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.2876,
+              "adjustedR2": 0.243,
+              "rawCoefficient": {
+                "intercept": 0.0459,
+                "t0": 3.7624,
+                "leadership": 0.0019,
+                "stockVol20": 0.2032
+              },
+              "standardizedBeta": {
+                "t0": 0.2349,
+                "leadership": 0.2691,
+                "stockVol20": 0.3272
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.1242,
+              "pearson": 0.358,
+              "spearman": 0.2192,
+              "mae": 13.9683,
+              "rmse": 17.5823,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1209,
+              "adjustedR2": 0.001,
+              "rawCoefficient": {
+                "intercept": 0.1414,
+                "t0": 0.544,
+                "leadership": 0.0016,
+                "stockVol20": 0.0336
+              },
+              "standardizedBeta": {
+                "t0": 0.0321,
+                "leadership": 0.3134,
+                "stockVol20": 0.0757
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.0926,
+              "pearson": 0.326,
+              "spearman": 0.5697,
+              "mae": 10.5526,
+              "rmse": 15.7817,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.1378,
+              "adjustedR2": 0.0594,
+              "rawCoefficient": {
+                "intercept": 9.4436,
+                "t0": -29.6769,
+                "leadership": -0.0216,
+                "stockVol20": -5.2159
+              },
+              "standardizedBeta": {
+                "t0": -0.0505,
+                "leadership": -0.1108,
+                "stockVol20": -0.3041
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.0608,
+              "pearson": 0.2499,
+              "spearman": 0.3002,
+              "mae": 3.995,
+              "rmse": 5.4397,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M4": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.3414,
+              "adjustedR2": 0.2854,
+              "rawCoefficient": {
+                "intercept": 0.0452,
+                "t0": 4.641,
+                "leadership": 0.002,
+                "eventAtr": 3.8938,
+                "stockVol20": -0.1191
+              },
+              "standardizedBeta": {
+                "t0": 0.2898,
+                "leadership": 0.2754,
+                "eventAtr": 0.573,
+                "stockVol20": -0.1918
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.1653,
+              "pearson": 0.4121,
+              "spearman": 0.2765,
+              "mae": 13.6315,
+              "rmse": 17.1651,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1771,
+              "adjustedR2": 0.0203,
+              "rawCoefficient": {
+                "intercept": 0.1523,
+                "t0": 1.1133,
+                "leadership": 0.0006,
+                "eventAtr": 4.4632,
+                "stockVol20": -0.2934
+              },
+              "standardizedBeta": {
+                "t0": 0.0657,
+                "leadership": 0.1157,
+                "eventAtr": 0.8724,
+                "stockVol20": -0.6614
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.0766,
+              "pearson": 0.2797,
+              "spearman": 0.5859,
+              "mae": 9.9736,
+              "rmse": 15.9208,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.138,
+              "adjustedR2": 0.0302,
+              "rawCoefficient": {
+                "intercept": 9.4229,
+                "t0": -29.8333,
+                "leadership": -0.0231,
+                "eventAtr": 8.4233,
+                "stockVol20": -5.8045
+              },
+              "standardizedBeta": {
+                "t0": -0.0507,
+                "leadership": -0.1188,
+                "eventAtr": 0.041,
+                "stockVol20": -0.3384
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.052,
+              "pearson": 0.2308,
+              "spearman": 0.2787,
+              "mae": 4.0015,
+              "rmse": 5.4653,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M5": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.4228,
+              "adjustedR2": 0.36,
+              "rawCoefficient": {
+                "intercept": 0.0554,
+                "t0": 3.7701,
+                "leadership": 0.001,
+                "eventAtr": 3.8917,
+                "stockVol20": -0.2354,
+                "spyVol20": 0.3238
+              },
+              "standardizedBeta": {
+                "t0": 0.2354,
+                "leadership": 0.1394,
+                "eventAtr": 0.5727,
+                "stockVol20": -0.3791,
+                "spyVol20": 0.3951
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.1395,
+              "pearson": 0.3884,
+              "spearman": 0.3026,
+              "mae": 13.4905,
+              "rmse": 17.4277,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1789,
+              "adjustedR2": -0.0264,
+              "rawCoefficient": {
+                "intercept": 0.1494,
+                "t0": 1.1448,
+                "leadership": 0.0007,
+                "eventAtr": 4.3347,
+                "stockVol20": -0.2708,
+                "spyVol20": -0.0302
+              },
+              "standardizedBeta": {
+                "t0": 0.0676,
+                "leadership": 0.1405,
+                "eventAtr": 0.8473,
+                "stockVol20": -0.6103,
+                "spyVol20": -0.0602
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.084,
+              "pearson": 0.2948,
+              "spearman": 0.595,
+              "mae": 9.9593,
+              "rmse": 15.8565,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.1391,
+              "adjustedR2": 0.0003,
+              "rawCoefficient": {
+                "intercept": 9.4759,
+                "t0": -31.7102,
+                "leadership": -0.0257,
+                "eventAtr": 7.2772,
+                "stockVol20": -6.0943,
+                "spyVol20": 0.9377
+              },
+              "standardizedBeta": {
+                "t0": -0.0539,
+                "leadership": -0.1318,
+                "eventAtr": 0.0354,
+                "stockVol20": -0.3553,
+                "spyVol20": 0.0459
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.0572,
+              "pearson": 0.2428,
+              "spearman": 0.2909,
+              "mae": 3.9601,
+              "rmse": 5.4501,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M6": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.4423,
+              "adjustedR2": 0.3948,
+              "rawCoefficient": {
+                "intercept": 0.0558,
+                "t0": 3.25,
+                "leadership": 0.0004,
+                "eventAtr": 1.3268,
+                "spyAtr": 4.4608
+              },
+              "standardizedBeta": {
+                "t0": 0.203,
+                "leadership": 0.0585,
+                "eventAtr": 0.1952,
+                "spyAtr": 0.4671
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.1635,
+              "pearson": 0.4169,
+              "spearman": 0.2817,
+              "mae": 13.1414,
+              "rmse": 17.1836,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1423,
+              "adjustedR2": -0.0211,
+              "rawCoefficient": {
+                "intercept": 0.1178,
+                "t0": 0.2535,
+                "leadership": 0.0013,
+                "eventAtr": 1.2157,
+                "spyAtr": -0.6188
+              },
+              "standardizedBeta": {
+                "t0": 0.015,
+                "leadership": 0.2659,
+                "eventAtr": 0.2376,
+                "spyAtr": -0.106
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.1031,
+              "pearson": 0.3405,
+              "spearman": 0.6158,
+              "mae": 10.279,
+              "rmse": 15.69,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.1228,
+              "adjustedR2": 0.0131,
+              "rawCoefficient": {
+                "intercept": 9.2097,
+                "t0": -33.3747,
+                "leadership": -0.0175,
+                "eventAtr": -63.4291,
+                "spyAtr": 7.1599
+              },
+              "standardizedBeta": {
+                "t0": -0.0567,
+                "leadership": -0.0897,
+                "eventAtr": -0.3087,
+                "spyAtr": 0.03
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.1139,
+              "pearson": 0.3675,
+              "spearman": 0.3836,
+              "mae": 3.8633,
+              "rmse": 5.2836,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M7": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.4531,
+              "adjustedR2": 0.3936,
+              "rawCoefficient": {
+                "intercept": 0.0672,
+                "t0": 3.5206,
+                "leadership": 0.0005,
+                "eventAtr": 2.863,
+                "stockVol20": -0.1613,
+                "spyAtr": 4.5767
+              },
+              "standardizedBeta": {
+                "t0": 0.2198,
+                "leadership": 0.0757,
+                "eventAtr": 0.4213,
+                "stockVol20": -0.2597,
+                "spyAtr": 0.4792
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.1581,
+              "pearson": 0.4092,
+              "spearman": 0.2591,
+              "mae": 13.1859,
+              "rmse": 17.2388,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1784,
+              "adjustedR2": -0.027,
+              "rawCoefficient": {
+                "intercept": 0.1476,
+                "t0": 1.0532,
+                "leadership": 0.0007,
+                "eventAtr": 4.4927,
+                "stockVol20": -0.2839,
+                "spyAtr": -0.3247
+              },
+              "standardizedBeta": {
+                "t0": 0.0621,
+                "leadership": 0.1369,
+                "eventAtr": 0.8782,
+                "stockVol20": -0.6399,
+                "spyAtr": -0.0556
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.0796,
+              "pearson": 0.2861,
+              "spearman": 0.5932,
+              "mae": 9.9717,
+              "rmse": 15.895,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.1383,
+              "adjustedR2": -0.0007,
+              "rawCoefficient": {
+                "intercept": 9.487,
+                "t0": -29.7454,
+                "leadership": -0.0245,
+                "eventAtr": 5.4564,
+                "stockVol20": -5.7836,
+                "spyAtr": 6.0278
+              },
+              "standardizedBeta": {
+                "t0": -0.0506,
+                "leadership": -0.1261,
+                "eventAtr": 0.0266,
+                "stockVol20": -0.3372,
+                "spyAtr": 0.0253
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.0565,
+              "pearson": 0.2408,
+              "spearman": 0.3035,
+              "mae": 3.9811,
+              "rmse": 5.4522,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M8": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.2288,
+              "adjustedR2": 0.1806,
+              "rawCoefficient": {
+                "intercept": 0.0508,
+                "t0": 3.9784,
+                "leadership": 0.0032,
+                "betweenAtr": 1.6834
+              },
+              "standardizedBeta": {
+                "t0": 0.2484,
+                "leadership": 0.45,
+                "betweenAtr": 0.1857
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.0418,
+              "pearson": 0.274,
+              "spearman": 0.1915,
+              "mae": 15.0674,
+              "rmse": 18.3908,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1165,
+              "adjustedR2": -0.004,
+              "rawCoefficient": {
+                "intercept": 0.1593,
+                "t0": 0.8742,
+                "leadership": 0.0018,
+                "betweenAtr": -0.0038
+              },
+              "standardizedBeta": {
+                "t0": 0.0516,
+                "leadership": 0.3505,
+                "betweenAtr": -0.0005
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.0786,
+              "pearson": 0.2993,
+              "spearman": 0.57,
+              "mae": 10.85,
+              "rmse": 15.9037,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.1011,
+              "adjustedR2": 0.0194,
+              "rawCoefficient": {
+                "intercept": 9.9891,
+                "t0": -36.8574,
+                "leadership": -0.0606,
+                "betweenAtr": -58.0942
+              },
+              "standardizedBeta": {
+                "t0": -0.0627,
+                "leadership": -0.3115,
+                "betweenAtr": -0.2021
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.0257,
+              "pearson": 0.222,
+              "spearman": 0.202,
+              "mae": 3.9144,
+              "rmse": 5.5406,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M9": {
+          "lowWindow": {
+            "train": {
+              "n": 52,
+              "r2": 0.2985,
+              "adjustedR2": 0.2547,
+              "rawCoefficient": {
+                "intercept": 0.152,
+                "t0": 3.5096,
+                "leadership": 0.001,
+                "withinAtr": 3.1381
+              },
+              "standardizedBeta": {
+                "t0": 0.2192,
+                "leadership": 0.1427,
+                "withinAtr": 0.4078
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 50,
+              "oosR2": 0.0737,
+              "pearson": 0.2993,
+              "spearman": 0.1566,
+              "mae": 13.659,
+              "rmse": 18.0823,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 26,
+              "r2": 0.1377,
+              "adjustedR2": 0.0201,
+              "rawCoefficient": {
+                "intercept": 0.1709,
+                "t0": 0.7458,
+                "leadership": 0.001,
+                "withinAtr": 0.9577
+              },
+              "standardizedBeta": {
+                "t0": 0.044,
+                "leadership": 0.2068,
+                "withinAtr": 0.2034
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 27,
+              "oosR2": 0.0388,
+              "pearson": 0.1997,
+              "spearman": 0.5187,
+              "mae": 10.4279,
+              "rmse": 16.2429,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 37,
+              "r2": 0.0732,
+              "adjustedR2": -0.011,
+              "rawCoefficient": {
+                "intercept": 6.6916,
+                "t0": -54.098,
+                "leadership": -0.0311,
+                "withinAtr": -23.8925
+              },
+              "standardizedBeta": {
+                "t0": -0.092,
+                "leadership": -0.16,
+                "withinAtr": -0.128
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 35,
+              "oosR2": 0.0038,
+              "pearson": 0.1222,
+              "spearman": 0.1517,
+              "mae": 4.0177,
+              "rmse": 5.6023,
+              "conclusion": "제한적"
+            }
+          }
+        }
+      },
+      "compare": {
+        "m1m2": {
+          "n": 50,
+          "deltaR2": 0.1639,
+          "deltaSpearman": 0.132,
+          "deltaPearson": 0.22,
+          "deltaMae": -1.6019,
+          "deltaRmse": -1.6101
+        },
+        "m3m4": {
+          "n": 50,
+          "deltaR2": 0.0411,
+          "deltaSpearman": 0.0573,
+          "deltaPearson": 0.0541,
+          "deltaMae": -0.3368,
+          "deltaRmse": -0.4172
+        },
+        "m2m4": {
+          "n": 50,
+          "deltaR2": -0.0008,
+          "deltaSpearman": 0.0126,
+          "deltaPearson": -0.0007,
+          "deltaMae": 0.0118,
+          "deltaRmse": 0.0082
+        },
+        "m2m5": {
+          "n": 50,
+          "deltaR2": -0.0266,
+          "deltaSpearman": 0.0387,
+          "deltaPearson": -0.0244,
+          "deltaMae": -0.1292,
+          "deltaRmse": 0.2708
+        },
+        "m2m6": {
+          "n": 50,
+          "deltaR2": -0.0026,
+          "deltaSpearman": 0.0178,
+          "deltaPearson": 0.0041,
+          "deltaMae": -0.4783,
+          "deltaRmse": 0.0267
+        },
+        "m2m7": {
+          "n": 50,
+          "deltaR2": -0.008,
+          "deltaSpearman": -0.0048,
+          "deltaPearson": -0.0036,
+          "deltaMae": -0.4338,
+          "deltaRmse": 0.0819
+        }
+      },
+      "permutation": {
+        "M0": 0.1672,
+        "M1": 0.179,
+        "M2": 0.0323,
+        "M3": 0.0648,
+        "M4": 0.0249,
+        "M5": 0.0156,
+        "M6": 0.0213,
+        "M7": 0.0319,
+        "M8": 0.0921,
+        "M9": 0.1357
+      }
+    },
+    "60": {
+      "trainN": 59,
+      "testN": 44,
+      "target": 62,
+      "trainStart": "2016-05-06",
+      "trainEnd": "2022-06-10",
+      "testStart": "2022-06-13",
+      "testEnd": "2026-07-29",
+      "models": {
+        "M0": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.0395,
+              "adjustedR2": 0.0227,
+              "rawCoefficient": {
+                "intercept": 0.2174,
+                "t0": 3.1795
+              },
+              "standardizedBeta": {
+                "t0": 0.1988
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": -0.0127,
+              "pearson": 0.1519,
+              "spearman": 0.0839,
+              "mae": 15.2911,
+              "rmse": 19.4403,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.0001,
+              "adjustedR2": -0.0399,
+              "rawCoefficient": {
+                "intercept": 0.2241,
+                "t0": -0.1409
+              },
+              "standardizedBeta": {
+                "t0": -0.0081
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": -0.0178,
+              "pearson": -0.2554,
+              "spearman": -0.2547,
+              "mae": 12.0588,
+              "rmse": 16.834,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.008,
+              "adjustedR2": -0.0188,
+              "rawCoefficient": {
+                "intercept": 5.1032,
+                "t0": -56.2987
+              },
+              "standardizedBeta": {
+                "t0": -0.0896
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": -0.0214,
+              "pearson": 0.0123,
+              "spearman": -0.0125,
+              "mae": 3.7995,
+              "rmse": 5.5189,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M1": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.1658,
+              "adjustedR2": 0.136,
+              "rawCoefficient": {
+                "intercept": 0.1163,
+                "t0": 3.4242,
+                "leadership": 0.0025
+              },
+              "standardizedBeta": {
+                "t0": 0.2141,
+                "leadership": 0.3557
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": -0.0028,
+              "pearson": 0.2038,
+              "spearman": 0.1809,
+              "mae": 15.3807,
+              "rmse": 19.3452,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.1501,
+              "adjustedR2": 0.0793,
+              "rawCoefficient": {
+                "intercept": 0.1516,
+                "t0": 1.2969,
+                "leadership": 0.002
+              },
+              "standardizedBeta": {
+                "t0": 0.0747,
+                "leadership": 0.3962
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.0835,
+              "pearson": 0.2929,
+              "spearman": 0.4979,
+              "mae": 10.549,
+              "rmse": 15.9747,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1009,
+              "adjustedR2": 0.051,
+              "rawCoefficient": {
+                "intercept": 7.4657,
+                "t0": -84.3011,
+                "leadership": -0.0628
+              },
+              "standardizedBeta": {
+                "t0": -0.1341,
+                "leadership": -0.3081
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": -0.0955,
+              "pearson": 0.012,
+              "spearman": 0.0628,
+              "mae": 4.111,
+              "rmse": 5.7156,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M2": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.3288,
+              "adjustedR2": 0.2922,
+              "rawCoefficient": {
+                "intercept": 0.027,
+                "t0": 4.4813,
+                "leadership": 0.0015,
+                "eventAtr": 3.0039
+              },
+              "standardizedBeta": {
+                "t0": 0.2802,
+                "leadership": 0.2091,
+                "eventAtr": 0.4355
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": 0.1378,
+              "pearson": 0.435,
+              "spearman": 0.2906,
+              "mae": 13.9215,
+              "rmse": 17.9376,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.1722,
+              "adjustedR2": 0.0643,
+              "rawCoefficient": {
+                "intercept": 0.116,
+                "t0": 0.6766,
+                "leadership": 0.0013,
+                "eventAtr": 0.9975
+              },
+              "standardizedBeta": {
+                "t0": 0.039,
+                "leadership": 0.2668,
+                "eventAtr": 0.1954
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.1086,
+              "pearson": 0.3427,
+              "spearman": 0.6093,
+              "mae": 9.8256,
+              "rmse": 15.7543,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1615,
+              "adjustedR2": 0.0896,
+              "rawCoefficient": {
+                "intercept": 9.7555,
+                "t0": -57.8779,
+                "leadership": -0.0251,
+                "eventAtr": -66.9483
+              },
+              "standardizedBeta": {
+                "t0": -0.0921,
+                "leadership": -0.1232,
+                "eventAtr": -0.307
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": 0.0734,
+              "pearson": 0.2739,
+              "spearman": 0.2808,
+              "mae": 3.9063,
+              "rmse": 5.2565,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M3": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.2749,
+              "adjustedR2": 0.2353,
+              "rawCoefficient": {
+                "intercept": 0.0376,
+                "t0": 3.8372,
+                "leadership": 0.0016,
+                "stockVol20": 0.2238
+              },
+              "standardizedBeta": {
+                "t0": 0.2399,
+                "leadership": 0.2172,
+                "stockVol20": 0.3595
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": 0.1004,
+              "pearson": 0.3802,
+              "spearman": 0.2462,
+              "mae": 14.3128,
+              "rmse": 18.3231,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.156,
+              "adjustedR2": 0.0459,
+              "rawCoefficient": {
+                "intercept": 0.1308,
+                "t0": 0.8803,
+                "leadership": 0.0017,
+                "stockVol20": 0.0401
+              },
+              "standardizedBeta": {
+                "t0": 0.0507,
+                "leadership": 0.349,
+                "stockVol20": 0.0906
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.0995,
+              "pearson": 0.3229,
+              "spearman": 0.5338,
+              "mae": 10.2283,
+              "rmse": 15.8348,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.177,
+              "adjustedR2": 0.1065,
+              "rawCoefficient": {
+                "intercept": 10.0261,
+                "t0": -54.4483,
+                "leadership": -0.031,
+                "stockVol20": -5.7654
+              },
+              "standardizedBeta": {
+                "t0": -0.0866,
+                "leadership": -0.1522,
+                "stockVol20": -0.317
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": 0.0089,
+              "pearson": 0.167,
+              "spearman": 0.2005,
+              "mae": 4.0346,
+              "rmse": 5.4365,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M4": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.3349,
+              "adjustedR2": 0.2856,
+              "rawCoefficient": {
+                "intercept": 0.034,
+                "t0": 4.6811,
+                "leadership": 0.0016,
+                "eventAtr": 4.211,
+                "stockVol20": -0.1219
+              },
+              "standardizedBeta": {
+                "t0": 0.2926,
+                "leadership": 0.2256,
+                "eventAtr": 0.6106,
+                "stockVol20": -0.1959
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": 0.1382,
+              "pearson": 0.4347,
+              "spearman": 0.3116,
+              "mae": 13.9958,
+              "rmse": 17.9337,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.2049,
+              "adjustedR2": 0.0603,
+              "rawCoefficient": {
+                "intercept": 0.14,
+                "t0": 1.4665,
+                "leadership": 0.0008,
+                "eventAtr": 4.2771,
+                "stockVol20": -0.2725
+              },
+              "standardizedBeta": {
+                "t0": 0.0845,
+                "leadership": 0.1619,
+                "eventAtr": 0.8379,
+                "stockVol20": -0.6157
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.0861,
+              "pearson": 0.2937,
+              "spearman": 0.5642,
+              "mae": 9.6255,
+              "rmse": 15.9521,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1771,
+              "adjustedR2": 0.0803,
+              "rawCoefficient": {
+                "intercept": 10.0049,
+                "t0": -54.6689,
+                "leadership": -0.0322,
+                "eventAtr": 6.5666,
+                "stockVol20": -6.2233
+              },
+              "standardizedBeta": {
+                "t0": -0.087,
+                "leadership": -0.158,
+                "eventAtr": 0.0301,
+                "stockVol20": -0.3421
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": 0.001,
+              "pearson": 0.1538,
+              "spearman": 0.1781,
+              "mae": 4.0424,
+              "rmse": 5.458,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M5": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.4125,
+              "adjustedR2": 0.3571,
+              "rawCoefficient": {
+                "intercept": 0.0367,
+                "t0": 3.7331,
+                "leadership": 0.0007,
+                "eventAtr": 4.1087,
+                "stockVol20": -0.2262,
+                "spyVol20": 0.322
+              },
+              "standardizedBeta": {
+                "t0": 0.2334,
+                "leadership": 0.1036,
+                "eventAtr": 0.5957,
+                "stockVol20": -0.3634,
+                "spyVol20": 0.3786
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": 0.0958,
+              "pearson": 0.4193,
+              "spearman": 0.3084,
+              "mae": 13.8603,
+              "rmse": 18.3699,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.2087,
+              "adjustedR2": 0.0203,
+              "rawCoefficient": {
+                "intercept": 0.1366,
+                "t0": 1.4898,
+                "leadership": 0.001,
+                "eventAtr": 4.0997,
+                "stockVol20": -0.2404,
+                "spyVol20": -0.0446
+              },
+              "standardizedBeta": {
+                "t0": 0.0859,
+                "leadership": 0.1959,
+                "eventAtr": 0.8031,
+                "stockVol20": -0.5432,
+                "spyVol20": -0.0868
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.0945,
+              "pearson": 0.3075,
+              "spearman": 0.5813,
+              "mae": 9.6513,
+              "rmse": 15.8787,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1802,
+              "adjustedR2": 0.056,
+              "rawCoefficient": {
+                "intercept": 10.0648,
+                "t0": -58.0151,
+                "leadership": -0.0362,
+                "eventAtr": 3.9109,
+                "stockVol20": -6.6757,
+                "spyVol20": 1.6522
+              },
+              "standardizedBeta": {
+                "t0": -0.0923,
+                "leadership": -0.1775,
+                "eventAtr": 0.0179,
+                "stockVol20": -0.367,
+                "spyVol20": 0.0749
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": 0.0095,
+              "pearson": 0.1707,
+              "spearman": 0.1961,
+              "mae": 3.9674,
+              "rmse": 5.4349,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M6": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.4291,
+              "adjustedR2": 0.3869,
+              "rawCoefficient": {
+                "intercept": 0.0371,
+                "t0": 3.2707,
+                "leadership": 0.0002,
+                "eventAtr": 1.6386,
+                "spyAtr": 4.3789
+              },
+              "standardizedBeta": {
+                "t0": 0.2045,
+                "leadership": 0.0305,
+                "eventAtr": 0.2376,
+                "spyAtr": 0.4419
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": 0.1186,
+              "pearson": 0.4491,
+              "spearman": 0.2702,
+              "mae": 13.4234,
+              "rmse": 18.1364,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.179,
+              "adjustedR2": 0.0297,
+              "rawCoefficient": {
+                "intercept": 0.1081,
+                "t0": 0.5719,
+                "leadership": 0.0015,
+                "eventAtr": 1.3196,
+                "spyAtr": -0.734
+              },
+              "standardizedBeta": {
+                "t0": 0.033,
+                "leadership": 0.3041,
+                "eventAtr": 0.2585,
+                "spyAtr": -0.1232
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.1069,
+              "pearson": 0.3354,
+              "spearman": 0.5683,
+              "mae": 9.9873,
+              "rmse": 15.7695,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1633,
+              "adjustedR2": 0.0649,
+              "rawCoefficient": {
+                "intercept": 9.9027,
+                "t0": -57.7217,
+                "leadership": -0.0286,
+                "eventAtr": -74.1776,
+                "spyAtr": 16.0641
+              },
+              "standardizedBeta": {
+                "t0": -0.0918,
+                "leadership": -0.1403,
+                "eventAtr": -0.3401,
+                "spyAtr": 0.0625
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": 0.0845,
+              "pearson": 0.2918,
+              "spearman": 0.2965,
+              "mae": 3.8489,
+              "rmse": 5.2249,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M7": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.4379,
+              "adjustedR2": 0.3849,
+              "rawCoefficient": {
+                "intercept": 0.0457,
+                "t0": 3.4936,
+                "leadership": 0.0003,
+                "eventAtr": 3.0724,
+                "stockVol20": -0.1468,
+                "spyAtr": 4.4431
+              },
+              "standardizedBeta": {
+                "t0": 0.2184,
+                "leadership": 0.0478,
+                "eventAtr": 0.4455,
+                "stockVol20": -0.2359,
+                "spyAtr": 0.4483
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": 0.1169,
+              "pearson": 0.4451,
+              "spearman": 0.2764,
+              "mae": 13.4778,
+              "rmse": 18.1536,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.2078,
+              "adjustedR2": 0.0192,
+              "rawCoefficient": {
+                "intercept": 0.1335,
+                "t0": 1.3588,
+                "leadership": 0.001,
+                "eventAtr": 4.3307,
+                "stockVol20": -0.2593,
+                "spyAtr": -0.4859
+              },
+              "standardizedBeta": {
+                "t0": 0.0783,
+                "leadership": 0.1918,
+                "eventAtr": 0.8484,
+                "stockVol20": -0.5857,
+                "spyAtr": -0.0815
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.089,
+              "pearson": 0.2983,
+              "spearman": 0.5827,
+              "mae": 9.6594,
+              "rmse": 15.9267,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1785,
+              "adjustedR2": 0.054,
+              "rawCoefficient": {
+                "intercept": 10.1275,
+                "t0": -54.582,
+                "leadership": -0.0351,
+                "eventAtr": -0.7159,
+                "stockVol20": -6.1319,
+                "spyAtr": 13.7819
+              },
+              "standardizedBeta": {
+                "t0": -0.0868,
+                "leadership": -0.1721,
+                "eventAtr": -0.0033,
+                "stockVol20": -0.3371,
+                "spyAtr": 0.0536
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": 0.0123,
+              "pearson": 0.1737,
+              "spearman": 0.2148,
+              "mae": 3.9866,
+              "rmse": 5.4271,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M8": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.1829,
+              "adjustedR2": 0.1384,
+              "rawCoefficient": {
+                "intercept": 0.0659,
+                "t0": 3.8595,
+                "leadership": 0.0028,
+                "betweenAtr": 1.2557
+              },
+              "standardizedBeta": {
+                "t0": 0.2413,
+                "leadership": 0.3901,
+                "betweenAtr": 0.1377
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": 0.0464,
+              "pearson": 0.2836,
+              "spearman": 0.246,
+              "mae": 15.1621,
+              "rmse": 18.8646,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.1501,
+              "adjustedR2": 0.0393,
+              "rawCoefficient": {
+                "intercept": 0.1506,
+                "t0": 1.2875,
+                "leadership": 0.002,
+                "betweenAtr": 0.0202
+              },
+              "standardizedBeta": {
+                "t0": 0.0742,
+                "leadership": 0.3966,
+                "betweenAtr": 0.0026
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.0849,
+              "pearson": 0.2955,
+              "spearman": 0.5064,
+              "mae": 10.5429,
+              "rmse": 15.9625,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1397,
+              "adjustedR2": 0.0659,
+              "rawCoefficient": {
+                "intercept": 10.7537,
+                "t0": -61.8649,
+                "leadership": -0.0755,
+                "betweenAtr": -65.2064
+              },
+              "standardizedBeta": {
+                "t0": -0.0984,
+                "leadership": -0.3701,
+                "betweenAtr": -0.2109
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": -0.0331,
+              "pearson": 0.152,
+              "spearman": 0.1387,
+              "mae": 4.0045,
+              "rmse": 5.5504,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M9": {
+          "lowWindow": {
+            "train": {
+              "n": 59,
+              "r2": 0.3188,
+              "adjustedR2": 0.2817,
+              "rawCoefficient": {
+                "intercept": 0.1555,
+                "t0": 3.4438,
+                "leadership": 0.0005,
+                "withinAtr": 3.7663
+              },
+              "standardizedBeta": {
+                "t0": 0.2153,
+                "leadership": 0.0687,
+                "withinAtr": 0.4852
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 43,
+              "oosR2": -0.0141,
+              "pearson": 0.261,
+              "spearman": 0.088,
+              "mae": 14.3923,
+              "rmse": 19.4543,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 27,
+              "r2": 0.172,
+              "adjustedR2": 0.064,
+              "rawCoefficient": {
+                "intercept": 0.1643,
+                "t0": 1.1402,
+                "leadership": 0.0012,
+                "withinAtr": 1.001
+              },
+              "standardizedBeta": {
+                "t0": 0.0657,
+                "leadership": 0.2423,
+                "withinAtr": 0.2122
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 26,
+              "oosR2": 0.0387,
+              "pearson": 0.1997,
+              "spearman": 0.4425,
+              "mae": 10.1005,
+              "rmse": 16.3606,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 39,
+              "r2": 0.1091,
+              "adjustedR2": 0.0328,
+              "rawCoefficient": {
+                "intercept": 7.0389,
+                "t0": -82.9699,
+                "leadership": -0.0429,
+                "withinAtr": -26.3087
+              },
+              "standardizedBeta": {
+                "t0": -0.132,
+                "leadership": -0.2104,
+                "withinAtr": -0.1329
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 33,
+              "oosR2": -0.0515,
+              "pearson": 0.0453,
+              "spearman": 0.0606,
+              "mae": 4.0756,
+              "rmse": 5.5997,
+              "conclusion": "제한적"
+            }
+          }
+        }
+      },
+      "compare": {
+        "m1m2": {
+          "n": 43,
+          "deltaR2": 0.1406,
+          "deltaSpearman": 0.1097,
+          "deltaPearson": 0.2312,
+          "deltaMae": -1.4592,
+          "deltaRmse": -1.4076
+        },
+        "m3m4": {
+          "n": 43,
+          "deltaR2": 0.0378,
+          "deltaSpearman": 0.0654,
+          "deltaPearson": 0.0545,
+          "deltaMae": -0.317,
+          "deltaRmse": -0.3894
+        },
+        "m2m4": {
+          "n": 43,
+          "deltaR2": 0.0004,
+          "deltaSpearman": 0.021,
+          "deltaPearson": -0.0003,
+          "deltaMae": 0.0743,
+          "deltaRmse": -0.0039
+        },
+        "m2m5": {
+          "n": 43,
+          "deltaR2": -0.042,
+          "deltaSpearman": 0.0178,
+          "deltaPearson": -0.0157,
+          "deltaMae": -0.0612,
+          "deltaRmse": 0.4323
+        },
+        "m2m6": {
+          "n": 43,
+          "deltaR2": -0.0192,
+          "deltaSpearman": -0.0204,
+          "deltaPearson": 0.0141,
+          "deltaMae": -0.4981,
+          "deltaRmse": 0.1988
+        },
+        "m2m7": {
+          "n": 43,
+          "deltaR2": -0.0209,
+          "deltaSpearman": -0.0142,
+          "deltaPearson": 0.0101,
+          "deltaMae": -0.4437,
+          "deltaRmse": 0.216
+        }
+      },
+      "permutation": {
+        "M0": 0.2914,
+        "M1": 0.1223,
+        "M2": 0.0297,
+        "M3": 0.0595,
+        "M4": 0.02,
+        "M5": 0.0216,
+        "M6": 0.0401,
+        "M7": 0.036,
+        "M8": 0.0561,
+        "M9": 0.2846
+      }
+    },
+    "70": {
+      "trainN": 72,
+      "testN": 31,
+      "target": 72,
+      "trainStart": "2016-05-06",
+      "trainEnd": "2022-11-03",
+      "testStart": "2023-01-04",
+      "testEnd": "2026-07-29",
+      "models": {
+        "M0": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.0146,
+              "adjustedR2": 0.0005,
+              "rawCoefficient": {
+                "intercept": 0.1832,
+                "t0": 1.6081
+              },
+              "standardizedBeta": {
+                "t0": 0.1209
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": -0.1294,
+              "pearson": 0.185,
+              "spearman": 0.1582,
+              "mae": 16.8462,
+              "rmse": 22.2485,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.0117,
+              "adjustedR2": -0.0213,
+              "rawCoefficient": {
+                "intercept": 0.2342,
+                "t0": 1.2251
+              },
+              "standardizedBeta": {
+                "t0": 0.108
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.0355,
+              "pearson": 0.2441,
+              "spearman": 0.2481,
+              "mae": 11.9595,
+              "rmse": 17.8018,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.0066,
+              "adjustedR2": -0.0155,
+              "rawCoefficient": {
+                "intercept": 5.7523,
+                "t0": -40.5588
+              },
+              "standardizedBeta": {
+                "t0": -0.081
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": -0.0429,
+              "pearson": -0.0405,
+              "spearman": -0.2004,
+              "mae": 3.7155,
+              "rmse": 5.2954,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M1": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.1041,
+              "adjustedR2": 0.0781,
+              "rawCoefficient": {
+                "intercept": 0.1012,
+                "t0": 1.9255,
+                "leadership": 0.002
+              },
+              "standardizedBeta": {
+                "t0": 0.1448,
+                "leadership": 0.3001
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": -0.0947,
+              "pearson": 0.3428,
+              "spearman": 0.3394,
+              "mae": 16.3054,
+              "rmse": 21.9043,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.1212,
+              "adjustedR2": 0.0606,
+              "rawCoefficient": {
+                "intercept": 0.1693,
+                "t0": 2.0891,
+                "leadership": 0.0016
+              },
+              "standardizedBeta": {
+                "t0": 0.1842,
+                "leadership": 0.3397
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.1184,
+              "pearson": 0.3971,
+              "spearman": 0.558,
+              "mae": 10.6758,
+              "rmse": 17.0196,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.0341,
+              "adjustedR2": -0.0098,
+              "rawCoefficient": {
+                "intercept": 7.1757,
+                "t0": -53.6544,
+                "leadership": -0.0344
+              },
+              "standardizedBeta": {
+                "t0": -0.1072,
+                "leadership": -0.1679
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": -0.0345,
+              "pearson": 0.1325,
+              "spearman": 0.0362,
+              "mae": 3.8905,
+              "rmse": 5.2739,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M2": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.2764,
+              "adjustedR2": 0.2445,
+              "rawCoefficient": {
+                "intercept": 0,
+                "t0": 2.7381,
+                "leadership": 0.0012,
+                "eventAtr": 3.0721
+              },
+              "standardizedBeta": {
+                "t0": 0.2059,
+                "leadership": 0.1857,
+                "eventAtr": 0.4361
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": 0.0693,
+              "pearson": 0.5281,
+              "spearman": 0.4057,
+              "mae": 14.9754,
+              "rmse": 20.197,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.1905,
+              "adjustedR2": 0.1038,
+              "rawCoefficient": {
+                "intercept": 0.1115,
+                "t0": 1.4042,
+                "leadership": 0.0008,
+                "eventAtr": 1.5436
+              },
+              "standardizedBeta": {
+                "t0": 0.1238,
+                "leadership": 0.1812,
+                "eventAtr": 0.3062
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.1239,
+              "pearson": 0.3954,
+              "spearman": 0.723,
+              "mae": 9.9593,
+              "rmse": 16.967,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.1741,
+              "adjustedR2": 0.1165,
+              "rawCoefficient": {
+                "intercept": 10.9937,
+                "t0": -27.9197,
+                "leadership": 0.0035,
+                "eventAtr": -101.3403
+              },
+              "standardizedBeta": {
+                "t0": -0.0558,
+                "leadership": 0.0173,
+                "eventAtr": -0.4172
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": 0.0354,
+              "pearson": 0.3044,
+              "spearman": 0.3499,
+              "mae": 3.9864,
+              "rmse": 5.0926,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M3": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.2288,
+              "adjustedR2": 0.1948,
+              "rawCoefficient": {
+                "intercept": 0.0093,
+                "t0": 2.1052,
+                "leadership": 0.0012,
+                "stockVol20": 0.2364
+              },
+              "standardizedBeta": {
+                "t0": 0.1583,
+                "leadership": 0.1852,
+                "stockVol20": 0.372
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": 0.0182,
+              "pearson": 0.452,
+              "spearman": 0.3425,
+              "mae": 15.539,
+              "rmse": 20.7437,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.1551,
+              "adjustedR2": 0.0646,
+              "rawCoefficient": {
+                "intercept": 0.1238,
+                "t0": 1.4788,
+                "leadership": 0.0012,
+                "stockVol20": 0.0879
+              },
+              "standardizedBeta": {
+                "t0": 0.1304,
+                "leadership": 0.2636,
+                "stockVol20": 0.2018
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.136,
+              "pearson": 0.4394,
+              "spearman": 0.6307,
+              "mae": 10.1731,
+              "rmse": 16.8495,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.1588,
+              "adjustedR2": 0.1001,
+              "rawCoefficient": {
+                "intercept": 10.9016,
+                "t0": -20.4116,
+                "leadership": -0.0063,
+                "stockVol20": -7.7321
+              },
+              "standardizedBeta": {
+                "t0": -0.0408,
+                "leadership": -0.0307,
+                "stockVol20": -0.381
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": -0.0416,
+              "pearson": 0.1977,
+              "spearman": 0.2452,
+              "mae": 4.072,
+              "rmse": 5.292,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M4": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.2795,
+              "adjustedR2": 0.2365,
+              "rawCoefficient": {
+                "intercept": 0.0052,
+                "t0": 2.9068,
+                "leadership": 0.0013,
+                "eventAtr": 3.9657,
+                "stockVol20": -0.0891
+              },
+              "standardizedBeta": {
+                "t0": 0.2185,
+                "leadership": 0.1958,
+                "eventAtr": 0.563,
+                "stockVol20": -0.1401
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": 0.0727,
+              "pearson": 0.5384,
+              "spearman": 0.4129,
+              "mae": 15.0115,
+              "rmse": 20.1597,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.2343,
+              "adjustedR2": 0.1209,
+              "rawCoefficient": {
+                "intercept": 0.1375,
+                "t0": 1.9676,
+                "leadership": 0.0004,
+                "eventAtr": 5.2469,
+                "stockVol20": -0.318
+              },
+              "standardizedBeta": {
+                "t0": 0.1735,
+                "leadership": 0.0761,
+                "eventAtr": 1.0407,
+                "stockVol20": -0.7294
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.063,
+              "pearson": 0.2748,
+              "spearman": 0.5547,
+              "mae": 10.3636,
+              "rmse": 17.5469,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.1748,
+              "adjustedR2": 0.0962,
+              "rawCoefficient": {
+                "intercept": 11.0713,
+                "t0": -25.9126,
+                "leadership": 0.0027,
+                "eventAtr": -85.3505,
+                "stockVol20": -1.4113
+              },
+              "standardizedBeta": {
+                "t0": -0.0518,
+                "leadership": 0.0131,
+                "eventAtr": -0.3513,
+                "stockVol20": -0.0695
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": 0.0225,
+              "pearson": 0.2891,
+              "spearman": 0.3086,
+              "mae": 4.0157,
+              "rmse": 5.1264,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M5": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.3684,
+              "adjustedR2": 0.3205,
+              "rawCoefficient": {
+                "intercept": 0.0074,
+                "t0": 2.3262,
+                "leadership": 0.0004,
+                "eventAtr": 3.8787,
+                "stockVol20": -0.1996,
+                "spyVol20": 0.3499
+              },
+              "standardizedBeta": {
+                "t0": 0.1749,
+                "leadership": 0.0657,
+                "eventAtr": 0.5507,
+                "stockVol20": -0.314,
+                "spyVol20": 0.3936
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": -0.0286,
+              "pearson": 0.5272,
+              "spearman": 0.4712,
+              "mae": 15.915,
+              "rmse": 21.2329,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.2382,
+              "adjustedR2": 0.0918,
+              "rawCoefficient": {
+                "intercept": 0.1347,
+                "t0": 1.9662,
+                "leadership": 0.0005,
+                "eventAtr": 5.0964,
+                "stockVol20": -0.2865,
+                "spyVol20": -0.0458
+              },
+              "standardizedBeta": {
+                "t0": 0.1733,
+                "leadership": 0.1054,
+                "eventAtr": 1.0109,
+                "stockVol20": -0.6573,
+                "spyVol20": -0.0854
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.0739,
+              "pearson": 0.2848,
+              "spearman": 0.5528,
+              "mae": 10.4587,
+              "rmse": 17.4443,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.1805,
+              "adjustedR2": 0.0806,
+              "rawCoefficient": {
+                "intercept": 11.1563,
+                "t0": -27.5254,
+                "leadership": -0.0024,
+                "eventAtr": -89.8682,
+                "stockVol20": -2.0631,
+                "spyVol20": 2.5255
+              },
+              "standardizedBeta": {
+                "t0": -0.055,
+                "leadership": -0.0115,
+                "eventAtr": -0.3699,
+                "stockVol20": -0.1016,
+                "spyVol20": 0.0988
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": 0.0416,
+              "pearson": 0.295,
+              "spearman": 0.3371,
+              "mae": 3.8447,
+              "rmse": 5.0761,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M6": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.3866,
+              "adjustedR2": 0.35,
+              "rawCoefficient": {
+                "intercept": 0.0095,
+                "t0": 1.9361,
+                "leadership": 0,
+                "eventAtr": 1.6594,
+                "spyAtr": 4.6543
+              },
+              "standardizedBeta": {
+                "t0": 0.1456,
+                "leadership": 0.0025,
+                "eventAtr": 0.2356,
+                "spyAtr": 0.4495
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": -0.0013,
+              "pearson": 0.5495,
+              "spearman": 0.4716,
+              "mae": 15.2827,
+              "rmse": 20.9492,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.1967,
+              "adjustedR2": 0.0777,
+              "rawCoefficient": {
+                "intercept": 0.1062,
+                "t0": 1.376,
+                "leadership": 0.001,
+                "eventAtr": 1.8561,
+                "spyAtr": -0.7112
+              },
+              "standardizedBeta": {
+                "t0": 0.1213,
+                "leadership": 0.2144,
+                "eventAtr": 0.3682,
+                "spyAtr": -0.1144
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.1296,
+              "pearson": 0.3964,
+              "spearman": 0.6905,
+              "mae": 10.1795,
+              "rmse": 16.9119,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.1796,
+              "adjustedR2": 0.1014,
+              "rawCoefficient": {
+                "intercept": 11.2262,
+                "t0": -27.6707,
+                "leadership": -0.0025,
+                "eventAtr": -114.9858,
+                "spyAtr": 31.014
+              },
+              "standardizedBeta": {
+                "t0": -0.0553,
+                "leadership": -0.0122,
+                "eventAtr": -0.4733,
+                "spyAtr": 0.1042
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": 0.0577,
+              "pearson": 0.3193,
+              "spearman": 0.3639,
+              "mae": 3.8475,
+              "rmse": 5.0335,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M7": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.3917,
+              "adjustedR2": 0.3456,
+              "rawCoefficient": {
+                "intercept": 0.0162,
+                "t0": 2.1442,
+                "leadership": 0.0001,
+                "eventAtr": 2.7908,
+                "stockVol20": -0.1142,
+                "spyAtr": 4.7016
+              },
+              "standardizedBeta": {
+                "t0": 0.1612,
+                "leadership": 0.0135,
+                "eventAtr": 0.3962,
+                "stockVol20": -0.1797,
+                "spyAtr": 0.4541
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": -0.0008,
+              "pearson": 0.5602,
+              "spearman": 0.4868,
+              "mae": 15.3154,
+              "rmse": 20.9437,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.2369,
+              "adjustedR2": 0.0902,
+              "rawCoefficient": {
+                "intercept": 0.1331,
+                "t0": 1.9306,
+                "leadership": 0.0005,
+                "eventAtr": 5.3279,
+                "stockVol20": -0.3074,
+                "spyAtr": -0.4636
+              },
+              "standardizedBeta": {
+                "t0": 0.1702,
+                "leadership": 0.1011,
+                "eventAtr": 1.0568,
+                "stockVol20": -0.7053,
+                "spyAtr": -0.0746
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.0699,
+              "pearson": 0.2811,
+              "spearman": 0.5489,
+              "mae": 10.4165,
+              "rmse": 17.4821,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.1801,
+              "adjustedR2": 0.0801,
+              "rawCoefficient": {
+                "intercept": 11.2927,
+                "t0": -25.8815,
+                "leadership": -0.0032,
+                "eventAtr": -100.5454,
+                "stockVol20": -1.2602,
+                "spyAtr": 30.6439
+              },
+              "standardizedBeta": {
+                "t0": -0.0517,
+                "leadership": -0.0156,
+                "eventAtr": -0.4139,
+                "stockVol20": -0.0621,
+                "spyAtr": 0.103
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": 0.0462,
+              "pearson": 0.306,
+              "spearman": 0.3402,
+              "mae": 3.8602,
+              "rmse": 5.064,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M8": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.1114,
+              "adjustedR2": 0.0722,
+              "rawCoefficient": {
+                "intercept": 0.0676,
+                "t0": 2.1362,
+                "leadership": 0.0021,
+                "betweenAtr": 0.839
+              },
+              "standardizedBeta": {
+                "t0": 0.1606,
+                "leadership": 0.3202,
+                "betweenAtr": 0.0888
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": -0.0369,
+              "pearson": 0.4335,
+              "spearman": 0.3857,
+              "mae": 15.9184,
+              "rmse": 21.3176,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.1212,
+              "adjustedR2": 0.0271,
+              "rawCoefficient": {
+                "intercept": 0.1689,
+                "t0": 2.0874,
+                "leadership": 0.0016,
+                "betweenAtr": 0.0104
+              },
+              "standardizedBeta": {
+                "t0": 0.184,
+                "leadership": 0.3399,
+                "betweenAtr": 0.0013
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": 0.1193,
+              "pearson": 0.3989,
+              "spearman": 0.558,
+              "mae": 10.6706,
+              "rmse": 17.0108,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.0653,
+              "adjustedR2": 0.0001,
+              "rawCoefficient": {
+                "intercept": 10.2203,
+                "t0": -42.2675,
+                "leadership": -0.044,
+                "betweenAtr": -65.3094
+              },
+              "standardizedBeta": {
+                "t0": -0.0844,
+                "leadership": -0.2148,
+                "betweenAtr": -0.1852
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": 0.0696,
+              "pearson": 0.3446,
+              "spearman": 0.2362,
+              "mae": 3.7358,
+              "rmse": 5.0014,
+              "conclusion": "제한적"
+            }
+          }
+        },
+        "M9": {
+          "lowWindow": {
+            "train": {
+              "n": 72,
+              "r2": 0.2923,
+              "adjustedR2": 0.2611,
+              "rawCoefficient": {
+                "intercept": 0.1296,
+                "t0": 1.9786,
+                "leadership": 0.0004,
+                "withinAtr": 3.9701
+              },
+              "standardizedBeta": {
+                "t0": 0.1488,
+                "leadership": 0.0572,
+                "withinAtr": 0.4974
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 30,
+              "oosR2": -0.1716,
+              "pearson": 0.2252,
+              "spearman": 0.0772,
+              "mae": 16.5764,
+              "rmse": 22.6606,
+              "conclusion": "제한적"
+            }
+          },
+          "lowT20": {
+            "train": {
+              "n": 32,
+              "r2": 0.1913,
+              "adjustedR2": 0.1046,
+              "rawCoefficient": {
+                "intercept": 0.1791,
+                "t0": 1.6542,
+                "leadership": 0.0007,
+                "withinAtr": 1.5659
+              },
+              "standardizedBeta": {
+                "t0": 0.1458,
+                "leadership": 0.1422,
+                "withinAtr": 0.3273
+              },
+              "direction": 1
+            },
+            "test": {
+              "n": 21,
+              "oosR2": -0.0151,
+              "pearson": 0.1239,
+              "spearman": 0.2254,
+              "mae": 10.7623,
+              "rmse": 18.2627,
+              "conclusion": "제한적"
+            }
+          },
+          "hitTiming": {
+            "train": {
+              "n": 47,
+              "r2": 0.0945,
+              "adjustedR2": 0.0313,
+              "rawCoefficient": {
+                "intercept": 6.5783,
+                "t0": -48.3369,
+                "leadership": 0.0004,
+                "withinAtr": -66.8101
+              },
+              "standardizedBeta": {
+                "t0": -0.0966,
+                "leadership": 0.0021,
+                "withinAtr": -0.2981
+              },
+              "direction": -1
+            },
+            "test": {
+              "n": 25,
+              "oosR2": -0.0886,
+              "pearson": 0.059,
+              "spearman": -0.058,
+              "mae": 4.0374,
+              "rmse": 5.4101,
+              "conclusion": "제한적"
+            }
+          }
+        }
+      },
+      "compare": {
+        "m1m2": {
+          "n": 30,
+          "deltaR2": 0.164,
+          "deltaSpearman": 0.0663,
+          "deltaPearson": 0.1853,
+          "deltaMae": -1.33,
+          "deltaRmse": -1.7073
+        },
+        "m3m4": {
+          "n": 30,
+          "deltaR2": 0.0545,
+          "deltaSpearman": 0.0704,
+          "deltaPearson": 0.0864,
+          "deltaMae": -0.5275,
+          "deltaRmse": -0.584
+        },
+        "m2m4": {
+          "n": 30,
+          "deltaR2": 0.0034,
+          "deltaSpearman": 0.0072,
+          "deltaPearson": 0.0103,
+          "deltaMae": 0.0361,
+          "deltaRmse": -0.0373
+        },
+        "m2m5": {
+          "n": 30,
+          "deltaR2": -0.0979,
+          "deltaSpearman": 0.0655,
+          "deltaPearson": -0.0009,
+          "deltaMae": 0.9396,
+          "deltaRmse": 1.0359
+        },
+        "m2m6": {
+          "n": 30,
+          "deltaR2": -0.0706,
+          "deltaSpearman": 0.0659,
+          "deltaPearson": 0.0214,
+          "deltaMae": 0.3073,
+          "deltaRmse": 0.7522
+        },
+        "m2m7": {
+          "n": 30,
+          "deltaR2": -0.0701,
+          "deltaSpearman": 0.0811,
+          "deltaPearson": 0.0321,
+          "deltaMae": 0.34,
+          "deltaRmse": 0.7467
+        }
+      },
+      "permutation": {
+        "M0": 0.1963,
+        "M1": 0.033,
+        "M2": 0.0135,
+        "M3": 0.0328,
+        "M4": 0.0127,
+        "M5": 0.0054,
+        "M6": 0.0053,
+        "M7": 0.0038,
+        "M8": 0.0177,
+        "M9": 0.3428
+      }
+    }
+  },
+  "vif": {
+    "M0": {
+      "n": 102,
+      "rows": []
+    },
+    "M1": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.01,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.01,
+          "high": false
+        }
+      ]
+    },
+    "M2": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.03,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.13,
+          "high": false
+        },
+        {
+          "key": "eventAtr",
+          "vif": 1.14,
+          "high": false
+        }
+      ]
+    },
+    "M3": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.01,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.15,
+          "high": false
+        },
+        {
+          "key": "stockVol20",
+          "vif": 1.15,
+          "high": false
+        }
+      ]
+    },
+    "M4": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.06,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.15,
+          "high": false
+        },
+        {
+          "key": "eventAtr",
+          "vif": 6.04,
+          "high": true
+        },
+        {
+          "key": "stockVol20",
+          "vif": 6.06,
+          "high": true
+        }
+      ]
+    },
+    "M5": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.09,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.35,
+          "high": false
+        },
+        {
+          "key": "eventAtr",
+          "vif": 6.05,
+          "high": true
+        },
+        {
+          "key": "stockVol20",
+          "vif": 6.36,
+          "high": true
+        },
+        {
+          "key": "spyVol20",
+          "vif": 1.82,
+          "high": false
+        }
+      ]
+    },
+    "M6": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.07,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.37,
+          "high": false
+        },
+        {
+          "key": "eventAtr",
+          "vif": 1.58,
+          "high": false
+        },
+        {
+          "key": "spyAtr",
+          "vif": 1.87,
+          "high": false
+        }
+      ]
+    },
+    "M7": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.1,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.39,
+          "high": false
+        },
+        {
+          "key": "eventAtr",
+          "vif": 6.43,
+          "high": true
+        },
+        {
+          "key": "stockVol20",
+          "vif": 6.06,
+          "high": true
+        },
+        {
+          "key": "spyAtr",
+          "vif": 1.87,
+          "high": false
+        }
+      ]
+    },
+    "M8": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.02,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.03,
+          "high": false
+        },
+        {
+          "key": "betweenAtr",
+          "vif": 1.03,
+          "high": false
+        }
+      ]
+    },
+    "M9": {
+      "n": 102,
+      "rows": [
+        {
+          "key": "t0",
+          "vif": 1.01,
+          "high": false
+        },
+        {
+          "key": "leadership",
+          "vif": 1.31,
+          "high": false
+        },
+        {
+          "key": "withinAtr",
+          "vif": 1.31,
+          "high": false
+        }
+      ]
+    }
+  },
+  "correlation": {
+    "n": 102,
+    "matrix": {
+      "eventAtr": {
+        "eventAtr": 1,
+        "stockVol20": 0.9091,
+        "spyAtr": 0.5742,
+        "spyVol20": 0.5359,
+        "betweenAtr": 0.5105,
+        "withinAtr": 0.7165
+      },
+      "stockVol20": {
+        "eventAtr": 0.9091,
+        "stockVol20": 1,
+        "spyAtr": 0.5574,
+        "spyVol20": 0.5853,
+        "betweenAtr": 0.4329,
+        "withinAtr": 0.6766
+      },
+      "spyAtr": {
+        "eventAtr": 0.5742,
+        "stockVol20": 0.5574,
+        "spyAtr": 1,
+        "spyVol20": 0.9504,
+        "betweenAtr": -0.1382,
+        "withinAtr": 0.7614
+      },
+      "spyVol20": {
+        "eventAtr": 0.5359,
+        "stockVol20": 0.5853,
+        "spyAtr": 0.9504,
+        "spyVol20": 1,
+        "betweenAtr": -0.1193,
+        "withinAtr": 0.7027
+      },
+      "betweenAtr": {
+        "eventAtr": 0.5105,
+        "stockVol20": 0.4329,
+        "spyAtr": -0.1382,
+        "spyVol20": -0.1193,
+        "betweenAtr": 1,
+        "withinAtr": -0.2341
+      },
+      "withinAtr": {
+        "eventAtr": 0.7165,
+        "stockVol20": 0.6766,
+        "spyAtr": 0.7614,
+        "spyVol20": 0.7027,
+        "betweenAtr": -0.2341,
+        "withinAtr": 1
+      }
+    }
+  },
+  "robustness": {
+    "eventWeighted": {
+      "n": 102,
+      "spearman": 0.4107
+    },
+    "tickerWeighted": {
+      "tickers": 30,
+      "spearman": 0.5715,
+      "n": 30,
+      "maxEvents": 9,
+      "withinStock": "결론 금지"
+    },
+    "leaveOneTicker": {
+      "baseline": 0.4107,
+      "n": 102,
+      "min": 0.3888,
+      "max": 0.4422,
+      "median": 0.4111,
+      "signFlips": []
+    }
+  },
+  "periods": {
+    "A": {
+      "label": "2016–2020",
+      "n": 42,
+      "spearman": 0.5589,
+      "conclusion": "제한적"
+    },
+    "B": {
+      "label": "2021–2023",
+      "n": 39,
+      "spearman": 0.1854,
+      "conclusion": "제한적"
+    },
+    "C": {
+      "label": "2024–current",
+      "n": 21,
+      "spearman": 0.2657,
+      "conclusion": "제한적"
+    }
+  },
+  "judgment": {
+    "label": "부분적으로 지지"
+  }
+}
