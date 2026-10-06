@@ -1,0 +1,3692 @@
+{
+  "selectedStrategy": null,
+  "note": "Early path uses only closes through the checkpoint. Low-to-window and +10% recovery are outcomes. Not a sell rule.",
+  "baseline": {
+    "events": 103,
+    "lowEvents": 102,
+    "groups": {
+      "HIGH": 15,
+      "MID": 53,
+      "LOW": 35
+    },
+    "bands": {
+      "LOW": 34,
+      "MID": 34,
+      "HIGH": 35
+    }
+  },
+  "checkpoints": {
+    "t1": {
+      "n": 103,
+      "buckets": [
+        {
+          "id": "A",
+          "label": "MAE > -3%",
+          "n": 90,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 90,
+            "mean": 4.48,
+            "median": 4.17,
+            "winRate": 70
+          },
+          "t20": {
+            "n": 90,
+            "mean": 6.4,
+            "median": 4.52,
+            "winRate": 66.67
+          },
+          "t40": {
+            "n": 90,
+            "mean": 10.06,
+            "median": 7.37,
+            "winRate": 60
+          },
+          "window": {
+            "n": 90,
+            "mean": 9.31,
+            "median": 4.91,
+            "winRate": 58.89
+          },
+          "lowToWindow": {
+            "n": 89,
+            "mean": 18.01,
+            "median": 12.78,
+            "winRate": 89.89
+          },
+          "hit10": 69.66,
+          "hit10Reached": 62,
+          "hit10Eligible": 89,
+          "hit10MedianDays": 4.5,
+          "checkpointMae": {
+            "n": 90,
+            "mean": 1.2,
+            "median": 0.6,
+            "winRate": 56.67
+          },
+          "checkpointDepth": {
+            "n": 90,
+            "mean": 0.48,
+            "median": 0,
+            "winRate": 43.33
+          }
+        },
+        {
+          "id": "B",
+          "label": "-3% to -5%",
+          "n": 8,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 8,
+            "mean": 1.4,
+            "median": 2.02,
+            "winRate": 62.5
+          },
+          "t20": {
+            "n": 8,
+            "mean": 10.85,
+            "median": 9.76,
+            "winRate": 75
+          },
+          "t40": {
+            "n": 8,
+            "mean": 13.62,
+            "median": 13.1,
+            "winRate": 75
+          },
+          "window": {
+            "n": 8,
+            "mean": 15.35,
+            "median": 18.19,
+            "winRate": 75
+          },
+          "lowToWindow": {
+            "n": 8,
+            "mean": 25.07,
+            "median": 27.24,
+            "winRate": 100
+          },
+          "hit10": 100,
+          "hit10Reached": 8,
+          "hit10Eligible": 8,
+          "hit10MedianDays": 4,
+          "checkpointMae": {
+            "n": 8,
+            "mean": -4.13,
+            "median": -4.43,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 8,
+            "mean": 4.13,
+            "median": 4.43,
+            "winRate": 100
+          }
+        },
+        {
+          "id": "C",
+          "label": "-5% to -10%",
+          "n": 5,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 5,
+            "mean": 0.87,
+            "median": 0.35,
+            "winRate": 60
+          },
+          "t20": {
+            "n": 5,
+            "mean": 2.14,
+            "median": 8.26,
+            "winRate": 60
+          },
+          "t40": {
+            "n": 5,
+            "mean": 4.13,
+            "median": 0.76,
+            "winRate": 60
+          },
+          "window": {
+            "n": 5,
+            "mean": -1.53,
+            "median": -9.77,
+            "winRate": 40
+          },
+          "lowToWindow": {
+            "n": 5,
+            "mean": 12.39,
+            "median": 7.71,
+            "winRate": 100
+          },
+          "hit10": 40,
+          "hit10Reached": 2,
+          "hit10Eligible": 5,
+          "hit10MedianDays": 3,
+          "checkpointMae": {
+            "n": 5,
+            "mean": -6.44,
+            "median": -6.19,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 5,
+            "mean": 6.44,
+            "median": 6.19,
+            "winRate": 100
+          }
+        },
+        {
+          "id": "D",
+          "label": "MAE <= -10%",
+          "n": 0,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "t20": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "t40": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "window": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "lowToWindow": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "hit10": null,
+          "hit10Reached": 0,
+          "hit10Eligible": 0,
+          "hit10MedianDays": null,
+          "checkpointMae": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "checkpointDepth": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          }
+        }
+      ],
+      "cut5": {
+        "SHALLOW": {
+          "n": 98,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 98,
+            "mean": 4.23,
+            "median": 4.09,
+            "winRate": 69.39
+          },
+          "t20": {
+            "n": 98,
+            "mean": 6.77,
+            "median": 4.63,
+            "winRate": 67.35
+          },
+          "t40": {
+            "n": 98,
+            "mean": 10.35,
+            "median": 7.67,
+            "winRate": 61.22
+          },
+          "window": {
+            "n": 98,
+            "mean": 9.81,
+            "median": 5.37,
+            "winRate": 60.2
+          },
+          "lowToWindow": {
+            "n": 97,
+            "mean": 18.59,
+            "median": 13.5,
+            "winRate": 90.72
+          },
+          "hit10": 72.16,
+          "hit10Reached": 70,
+          "hit10Eligible": 97,
+          "hit10MedianDays": 4,
+          "checkpointMae": {
+            "n": 98,
+            "mean": 0.76,
+            "median": 0.29,
+            "winRate": 52.04
+          },
+          "checkpointDepth": {
+            "n": 98,
+            "mean": 0.77,
+            "median": 0,
+            "winRate": 47.96
+          }
+        },
+        "DEEP": {
+          "n": 5,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 5,
+            "mean": 0.87,
+            "median": 0.35,
+            "winRate": 60
+          },
+          "t20": {
+            "n": 5,
+            "mean": 2.14,
+            "median": 8.26,
+            "winRate": 60
+          },
+          "t40": {
+            "n": 5,
+            "mean": 4.13,
+            "median": 0.76,
+            "winRate": 60
+          },
+          "window": {
+            "n": 5,
+            "mean": -1.53,
+            "median": -9.77,
+            "winRate": 40
+          },
+          "lowToWindow": {
+            "n": 5,
+            "mean": 12.39,
+            "median": 7.71,
+            "winRate": 100
+          },
+          "hit10": 40,
+          "hit10Reached": 2,
+          "hit10Eligible": 5,
+          "hit10MedianDays": 3,
+          "checkpointMae": {
+            "n": 5,
+            "mean": -6.44,
+            "median": -6.19,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 5,
+            "mean": 6.44,
+            "median": 6.19,
+            "winRate": 100
+          }
+        }
+      },
+      "cut10": {
+        "SHALLOW": {
+          "n": 103,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 103,
+            "mean": 4.06,
+            "median": 4.06,
+            "winRate": 68.93
+          },
+          "t20": {
+            "n": 103,
+            "mean": 6.54,
+            "median": 4.64,
+            "winRate": 66.99
+          },
+          "t40": {
+            "n": 103,
+            "mean": 10.05,
+            "median": 7.62,
+            "winRate": 61.17
+          },
+          "window": {
+            "n": 103,
+            "mean": 9.26,
+            "median": 4.94,
+            "winRate": 59.22
+          },
+          "lowToWindow": {
+            "n": 102,
+            "mean": 18.29,
+            "median": 13.21,
+            "winRate": 91.18
+          },
+          "hit10": 70.59,
+          "hit10Reached": 72,
+          "hit10Eligible": 102,
+          "hit10MedianDays": 4,
+          "checkpointMae": {
+            "n": 103,
+            "mean": 0.41,
+            "median": -0.13,
+            "winRate": 49.51
+          },
+          "checkpointDepth": {
+            "n": 103,
+            "mean": 1.05,
+            "median": 0.13,
+            "winRate": 50.49
+          }
+        },
+        "DEEP": {
+          "n": 0,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "t20": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "t40": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "window": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "lowToWindow": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "hit10": null,
+          "hit10Reached": 0,
+          "hit10Eligible": 0,
+          "hit10MedianDays": null,
+          "checkpointMae": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          },
+          "checkpointDepth": {
+            "n": 0,
+            "mean": null,
+            "median": null,
+            "winRate": null
+          }
+        }
+      },
+      "cells5": {
+        "HIGH": {
+          "SHALLOW": {
+            "n": 33,
+            "conclusion": "제한적",
+            "t10": 6.83,
+            "t20": 10.3,
+            "t40": 15.59,
+            "window": 16.7,
+            "lowToWindow": 26.67,
+            "hit10": 84.38,
+            "checkpointMae": 1.29
+          },
+          "DEEP": {
+            "n": 2,
+            "conclusion": "결론 금지",
+            "t10": -4.39,
+            "t20": 0.76,
+            "t40": 9.85,
+            "window": 2.58,
+            "lowToWindow": 19.17,
+            "hit10": 50,
+            "checkpointMae": -7.63
+          }
+        },
+        "MID": {
+          "SHALLOW": {
+            "n": 31,
+            "conclusion": "제한적",
+            "t10": 3.24,
+            "t20": 6.08,
+            "t40": 10.3,
+            "window": 9.08,
+            "lowToWindow": 19.66,
+            "hit10": 74.19,
+            "checkpointMae": 0.71
+          },
+          "DEEP": {
+            "n": 3,
+            "conclusion": "결론 금지",
+            "t10": 4.38,
+            "t20": 3.06,
+            "t40": 0.31,
+            "window": -4.27,
+            "lowToWindow": 7.87,
+            "hit10": 33.33,
+            "checkpointMae": -5.65
+          }
+        },
+        "LOW": {
+          "SHALLOW": {
+            "n": 34,
+            "conclusion": "제한적",
+            "t10": 2.6,
+            "t20": 3.96,
+            "t40": 5.31,
+            "window": 3.78,
+            "lowToWindow": 10.02,
+            "hit10": 58.82,
+            "checkpointMae": 0.29
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        }
+      },
+      "cells10": {
+        "HIGH": {
+          "SHALLOW": {
+            "n": 35,
+            "conclusion": "제한적",
+            "t10": 6.19,
+            "t20": 9.76,
+            "t40": 15.26,
+            "window": 15.89,
+            "lowToWindow": 26.23,
+            "hit10": 82.35,
+            "checkpointMae": 0.78
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        },
+        "MID": {
+          "SHALLOW": {
+            "n": 34,
+            "conclusion": "제한적",
+            "t10": 3.34,
+            "t20": 5.82,
+            "t40": 9.42,
+            "window": 7.9,
+            "lowToWindow": 18.62,
+            "hit10": 70.59,
+            "checkpointMae": 0.15
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        },
+        "LOW": {
+          "SHALLOW": {
+            "n": 34,
+            "conclusion": "제한적",
+            "t10": 2.6,
+            "t20": 3.96,
+            "t40": 5.31,
+            "window": 3.78,
+            "lowToWindow": 10.02,
+            "hit10": 58.82,
+            "checkpointMae": 0.29
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        }
+      },
+      "continuous": {
+        "mae": {
+          "t10": {
+            "n": 103,
+            "spearman": 0.2666,
+            "conclusion": "제한적"
+          },
+          "t20": {
+            "n": 103,
+            "spearman": 0.1655,
+            "conclusion": "제한적"
+          },
+          "t40": {
+            "n": 103,
+            "spearman": 0.1831,
+            "conclusion": "제한적"
+          },
+          "window": {
+            "n": 103,
+            "spearman": 0.2298,
+            "conclusion": "제한적"
+          },
+          "lowWindow": {
+            "n": 102,
+            "spearman": 0.0784,
+            "conclusion": "제한적"
+          },
+          "hit10": {
+            "n": 72,
+            "spearman": 0.0482,
+            "conclusion": "제한적"
+          }
+        },
+        "depth": {
+          "t10": {
+            "n": 103,
+            "spearman": -0.2472,
+            "conclusion": "제한적"
+          },
+          "t20": {
+            "n": 103,
+            "spearman": -0.1059,
+            "conclusion": "제한적"
+          },
+          "t40": {
+            "n": 103,
+            "spearman": -0.1577,
+            "conclusion": "제한적"
+          },
+          "window": {
+            "n": 103,
+            "spearman": -0.2054,
+            "conclusion": "제한적"
+          },
+          "lowWindow": {
+            "n": 102,
+            "spearman": -0.0639,
+            "conclusion": "제한적"
+          },
+          "hit10": {
+            "n": 72,
+            "spearman": -0.1244,
+            "conclusion": "제한적"
+          }
+        },
+        "note": "Signed MAE is the lowest return through the checkpoint. Positive additional-decline depth is abs(min(0, MAE)). A negative depth correlation means a deeper early decline lines up with a lower later outcome."
+      },
+      "models": {
+        "t10": {
+          "M0": {
+            "n": 103,
+            "r2": 0.0097,
+            "spearman": 0.1087,
+            "mae": 7.4191,
+            "rmse": 9.7731,
+            "standardized": {
+              "t0": 0.0483,
+              "leadership": 0.09
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.067,
+            "spearman": 0.2173,
+            "mae": 7.1871,
+            "rmse": 9.4861,
+            "standardized": {
+              "t0": 0.0814,
+              "leadership": 0.0076,
+              "eventAtr": 0.2563
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.1114,
+            "spearman": 0.3605,
+            "mae": 6.877,
+            "rmse": 9.2574,
+            "standardized": {
+              "t0": 0.0477,
+              "leadership": -0.0306,
+              "eventAtr": 0.2379,
+              "checkpointMae": 0.2178
+            },
+            "checkpointMaeBeta": 0.2178
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0573,
+            "deltaSpearman": 0.1086,
+            "deltaPearson": null,
+            "deltaMae": -0.232,
+            "deltaRmse": -0.287
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.0444,
+            "deltaSpearman": 0.1432,
+            "deltaPearson": null,
+            "deltaMae": -0.3101,
+            "deltaRmse": -0.2287
+          },
+          "maeSignHolds": true
+        },
+        "t20": {
+          "M0": {
+            "n": 103,
+            "r2": 0.0971,
+            "spearman": 0.2977,
+            "mae": 11.3583,
+            "rmse": 14.6958,
+            "standardized": {
+              "t0": 0.2633,
+              "leadership": 0.1919
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.1353,
+            "spearman": 0.3392,
+            "mae": 11.124,
+            "rmse": 14.3818,
+            "standardized": {
+              "t0": 0.2903,
+              "leadership": 0.1247,
+              "eventAtr": 0.2092
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.1466,
+            "spearman": 0.3626,
+            "mae": 11.0326,
+            "rmse": 14.2873,
+            "standardized": {
+              "t0": 0.2733,
+              "leadership": 0.1054,
+              "eventAtr": 0.1999,
+              "checkpointMae": 0.1099
+            },
+            "checkpointMaeBeta": 0.1099
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0382,
+            "deltaSpearman": 0.0415,
+            "deltaPearson": null,
+            "deltaMae": -0.2343,
+            "deltaRmse": -0.314
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.0113,
+            "deltaSpearman": 0.0234,
+            "deltaPearson": null,
+            "deltaMae": -0.0914,
+            "deltaRmse": -0.0945
+          },
+          "maeSignHolds": true
+        },
+        "window": {
+          "M0": {
+            "n": 103,
+            "r2": 0.1137,
+            "spearman": 0.316,
+            "mae": 15.5477,
+            "rmse": 19.2844,
+            "standardized": {
+              "t0": 0.2687,
+              "leadership": 0.2293
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.1892,
+            "spearman": 0.3593,
+            "mae": 14.4958,
+            "rmse": 18.4443,
+            "standardized": {
+              "t0": 0.3067,
+              "leadership": 0.1347,
+              "eventAtr": 0.2942
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.2064,
+            "spearman": 0.3912,
+            "mae": 14.1657,
+            "rmse": 18.2477,
+            "standardized": {
+              "t0": 0.2857,
+              "leadership": 0.111,
+              "eventAtr": 0.2828,
+              "checkpointMae": 0.1354
+            },
+            "checkpointMaeBeta": 0.1354
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0755,
+            "deltaSpearman": 0.0433,
+            "deltaPearson": null,
+            "deltaMae": -1.0519,
+            "deltaRmse": -0.8401
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.0172,
+            "deltaSpearman": 0.0319,
+            "deltaPearson": null,
+            "deltaMae": -0.3301,
+            "deltaRmse": -0.1966
+          },
+          "maeSignHolds": true
+        }
+      },
+      "ticker": {
+        "eventWeighted": {
+          "n": 103,
+          "spearman": 0.2298
+        },
+        "tickerWeighted": {
+          "tickers": 30,
+          "spearman": 0.3575,
+          "maxEvents": 9
+        },
+        "leaveOneTicker": {
+          "baseline": 0.2298,
+          "min": 0.2002,
+          "max": 0.282,
+          "median": 0.2274,
+          "signFlips": []
+        },
+        "withinStock": "결론 금지"
+      }
+    },
+    "t3": {
+      "n": 103,
+      "buckets": [
+        {
+          "id": "A",
+          "label": "MAE > -3%",
+          "n": 73,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 73,
+            "mean": 5.55,
+            "median": 5.09,
+            "winRate": 71.23
+          },
+          "t20": {
+            "n": 73,
+            "mean": 7.83,
+            "median": 6.12,
+            "winRate": 68.49
+          },
+          "t40": {
+            "n": 73,
+            "mean": 12.67,
+            "median": 10.03,
+            "winRate": 64.38
+          },
+          "window": {
+            "n": 73,
+            "mean": 11.08,
+            "median": 7.83,
+            "winRate": 63.01
+          },
+          "lowToWindow": {
+            "n": 72,
+            "mean": 18.52,
+            "median": 13.21,
+            "winRate": 90.28
+          },
+          "hit10": 66.67,
+          "hit10Reached": 48,
+          "hit10Eligible": 72,
+          "hit10MedianDays": 4.5,
+          "checkpointMae": {
+            "n": 73,
+            "mean": 0.35,
+            "median": -0.42,
+            "winRate": 38.36
+          },
+          "checkpointDepth": {
+            "n": 73,
+            "mean": 0.8,
+            "median": 0.42,
+            "winRate": 61.64
+          }
+        },
+        {
+          "id": "B",
+          "label": "-3% to -5%",
+          "n": 16,
+          "conclusion": "수치만",
+          "t10": {
+            "n": 16,
+            "mean": 1.66,
+            "median": 2.18,
+            "winRate": 68.75
+          },
+          "t20": {
+            "n": 16,
+            "mean": 7.91,
+            "median": 2.84,
+            "winRate": 68.75
+          },
+          "t40": {
+            "n": 16,
+            "mean": 7.24,
+            "median": 4.7,
+            "winRate": 56.25
+          },
+          "window": {
+            "n": 16,
+            "mean": 8.17,
+            "median": 2.35,
+            "winRate": 56.25
+          },
+          "lowToWindow": {
+            "n": 16,
+            "mean": 16.65,
+            "median": 10.3,
+            "winRate": 100
+          },
+          "hit10": 93.75,
+          "hit10Reached": 15,
+          "hit10Eligible": 16,
+          "hit10MedianDays": 4,
+          "checkpointMae": {
+            "n": 16,
+            "mean": -4.09,
+            "median": -3.98,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 16,
+            "mean": 4.09,
+            "median": 3.98,
+            "winRate": 100
+          }
+        },
+        {
+          "id": "C",
+          "label": "-5% to -10%",
+          "n": 11,
+          "conclusion": "수치만",
+          "t10": {
+            "n": 11,
+            "mean": 2.04,
+            "median": 2.15,
+            "winRate": 72.73
+          },
+          "t20": {
+            "n": 11,
+            "mean": 3.03,
+            "median": 6,
+            "winRate": 72.73
+          },
+          "t40": {
+            "n": 11,
+            "mean": 4.97,
+            "median": 2.84,
+            "winRate": 63.64
+          },
+          "window": {
+            "n": 11,
+            "mean": 4.8,
+            "median": 9.45,
+            "winRate": 54.55
+          },
+          "lowToWindow": {
+            "n": 11,
+            "mean": 21.76,
+            "median": 16.67,
+            "winRate": 90.91
+          },
+          "hit10": 63.64,
+          "hit10Reached": 7,
+          "hit10Eligible": 11,
+          "hit10MedianDays": 3,
+          "checkpointMae": {
+            "n": 11,
+            "mean": -6.73,
+            "median": -6.19,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 11,
+            "mean": 6.73,
+            "median": 6.19,
+            "winRate": 100
+          }
+        },
+        {
+          "id": "D",
+          "label": "MAE <= -10%",
+          "n": 3,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 3,
+            "mean": -11.81,
+            "median": -15.58,
+            "winRate": 0
+          },
+          "t20": {
+            "n": 3,
+            "mean": -19.28,
+            "median": -22.79,
+            "winRate": 0
+          },
+          "t40": {
+            "n": 3,
+            "mean": -20.04,
+            "median": -19.7,
+            "winRate": 0
+          },
+          "window": {
+            "n": 3,
+            "mean": -13.1,
+            "median": -12.9,
+            "winRate": 0
+          },
+          "lowToWindow": {
+            "n": 3,
+            "mean": 8.81,
+            "median": 10.2,
+            "winRate": 66.67
+          },
+          "hit10": 66.67,
+          "hit10Reached": 2,
+          "hit10Eligible": 3,
+          "hit10MedianDays": 6.5,
+          "checkpointMae": {
+            "n": 3,
+            "mean": -10.78,
+            "median": -10.92,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 3,
+            "mean": 10.78,
+            "median": 10.92,
+            "winRate": 100
+          }
+        }
+      ],
+      "cut5": {
+        "SHALLOW": {
+          "n": 89,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 89,
+            "mean": 4.85,
+            "median": 4.62,
+            "winRate": 70.79
+          },
+          "t20": {
+            "n": 89,
+            "mean": 7.85,
+            "median": 4.64,
+            "winRate": 68.54
+          },
+          "t40": {
+            "n": 89,
+            "mean": 11.69,
+            "median": 7.95,
+            "winRate": 62.92
+          },
+          "window": {
+            "n": 89,
+            "mean": 10.56,
+            "median": 5.8,
+            "winRate": 61.8
+          },
+          "lowToWindow": {
+            "n": 88,
+            "mean": 18.18,
+            "median": 13.21,
+            "winRate": 92.05
+          },
+          "hit10": 71.59,
+          "hit10Reached": 63,
+          "hit10Eligible": 88,
+          "hit10MedianDays": 4,
+          "checkpointMae": {
+            "n": 89,
+            "mean": -0.45,
+            "median": -0.6,
+            "winRate": 31.46
+          },
+          "checkpointDepth": {
+            "n": 89,
+            "mean": 1.39,
+            "median": 0.6,
+            "winRate": 68.54
+          }
+        },
+        "DEEP": {
+          "n": 14,
+          "conclusion": "수치만",
+          "t10": {
+            "n": 14,
+            "mean": -0.92,
+            "median": 0.75,
+            "winRate": 57.14
+          },
+          "t20": {
+            "n": 14,
+            "mean": -1.75,
+            "median": 2.99,
+            "winRate": 57.14
+          },
+          "t40": {
+            "n": 14,
+            "mean": -0.39,
+            "median": -0.15,
+            "winRate": 50
+          },
+          "window": {
+            "n": 14,
+            "mean": 0.97,
+            "median": -6.17,
+            "winRate": 42.86
+          },
+          "lowToWindow": {
+            "n": 14,
+            "mean": 18.98,
+            "median": 13.21,
+            "winRate": 85.71
+          },
+          "hit10": 64.29,
+          "hit10Reached": 9,
+          "hit10Eligible": 14,
+          "hit10MedianDays": 3,
+          "checkpointMae": {
+            "n": 14,
+            "mean": -7.6,
+            "median": -6.65,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 14,
+            "mean": 7.6,
+            "median": 6.65,
+            "winRate": 100
+          }
+        }
+      },
+      "cut10": {
+        "SHALLOW": {
+          "n": 100,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 100,
+            "mean": 4.54,
+            "median": 4.17,
+            "winRate": 71
+          },
+          "t20": {
+            "n": 100,
+            "mean": 7.32,
+            "median": 5.6,
+            "winRate": 69
+          },
+          "t40": {
+            "n": 100,
+            "mean": 10.95,
+            "median": 7.84,
+            "winRate": 63
+          },
+          "window": {
+            "n": 100,
+            "mean": 9.93,
+            "median": 6.81,
+            "winRate": 61
+          },
+          "lowToWindow": {
+            "n": 99,
+            "mean": 18.58,
+            "median": 13.5,
+            "winRate": 91.92
+          },
+          "hit10": 70.71,
+          "hit10Reached": 70,
+          "hit10Eligible": 99,
+          "hit10MedianDays": 4,
+          "checkpointMae": {
+            "n": 100,
+            "mean": -1.14,
+            "median": -1.22,
+            "winRate": 28
+          },
+          "checkpointDepth": {
+            "n": 100,
+            "mean": 1.98,
+            "median": 1.22,
+            "winRate": 72
+          }
+        },
+        "DEEP": {
+          "n": 3,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 3,
+            "mean": -11.81,
+            "median": -15.58,
+            "winRate": 0
+          },
+          "t20": {
+            "n": 3,
+            "mean": -19.28,
+            "median": -22.79,
+            "winRate": 0
+          },
+          "t40": {
+            "n": 3,
+            "mean": -20.04,
+            "median": -19.7,
+            "winRate": 0
+          },
+          "window": {
+            "n": 3,
+            "mean": -13.1,
+            "median": -12.9,
+            "winRate": 0
+          },
+          "lowToWindow": {
+            "n": 3,
+            "mean": 8.81,
+            "median": 10.2,
+            "winRate": 66.67
+          },
+          "hit10": 66.67,
+          "hit10Reached": 2,
+          "hit10Eligible": 3,
+          "hit10MedianDays": 6.5,
+          "checkpointMae": {
+            "n": 3,
+            "mean": -10.78,
+            "median": -10.92,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 3,
+            "mean": 10.78,
+            "median": 10.92,
+            "winRate": 100
+          }
+        }
+      },
+      "cells5": {
+        "HIGH": {
+          "SHALLOW": {
+            "n": 28,
+            "conclusion": "제한적",
+            "t10": 9.31,
+            "t20": 13.64,
+            "t40": 19.69,
+            "window": 19.13,
+            "lowToWindow": 26.62,
+            "hit10": 85.19,
+            "checkpointMae": 0.01
+          },
+          "DEEP": {
+            "n": 7,
+            "conclusion": "결론 금지",
+            "t10": -6.28,
+            "t20": -5.79,
+            "t40": -2.42,
+            "window": 2.91,
+            "lowToWindow": 24.7,
+            "hit10": 71.43,
+            "checkpointMae": -9.44
+          }
+        },
+        "MID": {
+          "SHALLOW": {
+            "n": 27,
+            "conclusion": "제한적",
+            "t10": 3.05,
+            "t20": 6.73,
+            "t40": 11.43,
+            "window": 10.21,
+            "lowToWindow": 20.01,
+            "hit10": 74.07,
+            "checkpointMae": -0.89
+          },
+          "DEEP": {
+            "n": 7,
+            "conclusion": "결론 금지",
+            "t10": 4.44,
+            "t20": 2.28,
+            "t40": 1.65,
+            "window": -0.98,
+            "lowToWindow": 13.26,
+            "hit10": 57.14,
+            "checkpointMae": -5.76
+          }
+        },
+        "LOW": {
+          "SHALLOW": {
+            "n": 34,
+            "conclusion": "제한적",
+            "t10": 2.6,
+            "t20": 3.96,
+            "t40": 5.31,
+            "window": 3.78,
+            "lowToWindow": 10.02,
+            "hit10": 58.82,
+            "checkpointMae": -0.48
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        }
+      },
+      "cells10": {
+        "HIGH": {
+          "SHALLOW": {
+            "n": 32,
+            "conclusion": "제한적",
+            "t10": 7.87,
+            "t20": 12.48,
+            "t40": 18.57,
+            "window": 18.61,
+            "lowToWindow": 27.91,
+            "hit10": 83.87,
+            "checkpointMae": -1.05
+          },
+          "DEEP": {
+            "n": 3,
+            "conclusion": "결론 금지",
+            "t10": -11.81,
+            "t20": -19.28,
+            "t40": -20.04,
+            "window": -13.1,
+            "lowToWindow": 8.81,
+            "hit10": 66.67,
+            "checkpointMae": -10.78
+          }
+        },
+        "MID": {
+          "SHALLOW": {
+            "n": 34,
+            "conclusion": "제한적",
+            "t10": 3.34,
+            "t20": 5.82,
+            "t40": 9.42,
+            "window": 7.9,
+            "lowToWindow": 18.62,
+            "hit10": 70.59,
+            "checkpointMae": -1.89
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        },
+        "LOW": {
+          "SHALLOW": {
+            "n": 34,
+            "conclusion": "제한적",
+            "t10": 2.6,
+            "t20": 3.96,
+            "t40": 5.31,
+            "window": 3.78,
+            "lowToWindow": 10.02,
+            "hit10": 58.82,
+            "checkpointMae": -0.48
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        }
+      },
+      "continuous": {
+        "mae": {
+          "t10": {
+            "n": 103,
+            "spearman": 0.344,
+            "conclusion": "제한적"
+          },
+          "t20": {
+            "n": 103,
+            "spearman": 0.2011,
+            "conclusion": "제한적"
+          },
+          "t40": {
+            "n": 103,
+            "spearman": 0.2139,
+            "conclusion": "제한적"
+          },
+          "window": {
+            "n": 103,
+            "spearman": 0.2155,
+            "conclusion": "제한적"
+          },
+          "lowWindow": {
+            "n": 102,
+            "spearman": 0.0534,
+            "conclusion": "제한적"
+          },
+          "hit10": {
+            "n": 72,
+            "spearman": 0.0477,
+            "conclusion": "제한적"
+          }
+        },
+        "depth": {
+          "t10": {
+            "n": 103,
+            "spearman": -0.3341,
+            "conclusion": "제한적"
+          },
+          "t20": {
+            "n": 103,
+            "spearman": -0.1837,
+            "conclusion": "제한적"
+          },
+          "t40": {
+            "n": 103,
+            "spearman": -0.2085,
+            "conclusion": "제한적"
+          },
+          "window": {
+            "n": 103,
+            "spearman": -0.2042,
+            "conclusion": "제한적"
+          },
+          "lowWindow": {
+            "n": 102,
+            "spearman": -0.0535,
+            "conclusion": "제한적"
+          },
+          "hit10": {
+            "n": 72,
+            "spearman": -0.0583,
+            "conclusion": "제한적"
+          }
+        },
+        "note": "Signed MAE is the lowest return through the checkpoint. Positive additional-decline depth is abs(min(0, MAE)). A negative depth correlation means a deeper early decline lines up with a lower later outcome."
+      },
+      "models": {
+        "t10": {
+          "M0": {
+            "n": 103,
+            "r2": 0.0097,
+            "spearman": 0.1087,
+            "mae": 7.4191,
+            "rmse": 9.7731,
+            "standardized": {
+              "t0": 0.0483,
+              "leadership": 0.09
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.067,
+            "spearman": 0.2173,
+            "mae": 7.1871,
+            "rmse": 9.4861,
+            "standardized": {
+              "t0": 0.0814,
+              "leadership": 0.0076,
+              "eventAtr": 0.2563
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.1895,
+            "spearman": 0.4789,
+            "mae": 6.5625,
+            "rmse": 8.8413,
+            "standardized": {
+              "t0": 0.0271,
+              "leadership": -0.0013,
+              "eventAtr": 0.2845,
+              "checkpointMae": 0.3558
+            },
+            "checkpointMaeBeta": 0.3558
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0573,
+            "deltaSpearman": 0.1086,
+            "deltaPearson": null,
+            "deltaMae": -0.232,
+            "deltaRmse": -0.287
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.1225,
+            "deltaSpearman": 0.2616,
+            "deltaPearson": null,
+            "deltaMae": -0.6246,
+            "deltaRmse": -0.6448
+          },
+          "maeSignHolds": true
+        },
+        "t20": {
+          "M0": {
+            "n": 103,
+            "r2": 0.0971,
+            "spearman": 0.2977,
+            "mae": 11.3583,
+            "rmse": 14.6958,
+            "standardized": {
+              "t0": 0.2633,
+              "leadership": 0.1919
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.1353,
+            "spearman": 0.3392,
+            "mae": 11.124,
+            "rmse": 14.3818,
+            "standardized": {
+              "t0": 0.2903,
+              "leadership": 0.1247,
+              "eventAtr": 0.2092
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.1889,
+            "spearman": 0.4162,
+            "mae": 10.7494,
+            "rmse": 13.9284,
+            "standardized": {
+              "t0": 0.2544,
+              "leadership": 0.1188,
+              "eventAtr": 0.2278,
+              "checkpointMae": 0.2354
+            },
+            "checkpointMaeBeta": 0.2354
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0382,
+            "deltaSpearman": 0.0415,
+            "deltaPearson": null,
+            "deltaMae": -0.2343,
+            "deltaRmse": -0.314
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.0536,
+            "deltaSpearman": 0.077,
+            "deltaPearson": null,
+            "deltaMae": -0.3746,
+            "deltaRmse": -0.4534
+          },
+          "maeSignHolds": true
+        },
+        "window": {
+          "M0": {
+            "n": 103,
+            "r2": 0.1137,
+            "spearman": 0.316,
+            "mae": 15.5477,
+            "rmse": 19.2844,
+            "standardized": {
+              "t0": 0.2687,
+              "leadership": 0.2293
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.1892,
+            "spearman": 0.3593,
+            "mae": 14.4958,
+            "rmse": 18.4443,
+            "standardized": {
+              "t0": 0.3067,
+              "leadership": 0.1347,
+              "eventAtr": 0.2942
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.2343,
+            "spearman": 0.4484,
+            "mae": 14.0894,
+            "rmse": 17.9239,
+            "standardized": {
+              "t0": 0.2738,
+              "leadership": 0.1293,
+              "eventAtr": 0.3114,
+              "checkpointMae": 0.2159
+            },
+            "checkpointMaeBeta": 0.2159
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0755,
+            "deltaSpearman": 0.0433,
+            "deltaPearson": null,
+            "deltaMae": -1.0519,
+            "deltaRmse": -0.8401
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.0451,
+            "deltaSpearman": 0.0891,
+            "deltaPearson": null,
+            "deltaMae": -0.4064,
+            "deltaRmse": -0.5204
+          },
+          "maeSignHolds": true
+        }
+      },
+      "ticker": {
+        "eventWeighted": {
+          "n": 103,
+          "spearman": 0.2155
+        },
+        "tickerWeighted": {
+          "tickers": 30,
+          "spearman": 0.0776,
+          "maxEvents": 9
+        },
+        "leaveOneTicker": {
+          "baseline": 0.2155,
+          "min": 0.1854,
+          "max": 0.2651,
+          "median": 0.2153,
+          "signFlips": []
+        },
+        "withinStock": "결론 금지"
+      }
+    },
+    "t5": {
+      "n": 103,
+      "buckets": [
+        {
+          "id": "A",
+          "label": "MAE > -3%",
+          "n": 63,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 63,
+            "mean": 7.04,
+            "median": 6.16,
+            "winRate": 79.37
+          },
+          "t20": {
+            "n": 63,
+            "mean": 9.4,
+            "median": 6.55,
+            "winRate": 73.02
+          },
+          "t40": {
+            "n": 63,
+            "mean": 14.19,
+            "median": 10.32,
+            "winRate": 66.67
+          },
+          "window": {
+            "n": 63,
+            "mean": 12.68,
+            "median": 9.56,
+            "winRate": 66.67
+          },
+          "lowToWindow": {
+            "n": 62,
+            "mean": 18.78,
+            "median": 13.21,
+            "winRate": 88.71
+          },
+          "hit10": 67.74,
+          "hit10Reached": 42,
+          "hit10Eligible": 62,
+          "hit10MedianDays": 4.5,
+          "checkpointMae": {
+            "n": 63,
+            "mean": 0.25,
+            "median": -0.34,
+            "winRate": 39.68
+          },
+          "checkpointDepth": {
+            "n": 63,
+            "mean": 0.87,
+            "median": 0.34,
+            "winRate": 60.32
+          }
+        },
+        {
+          "id": "B",
+          "label": "-3% to -5%",
+          "n": 19,
+          "conclusion": "수치만",
+          "t10": {
+            "n": 19,
+            "mean": -0.32,
+            "median": 1.16,
+            "winRate": 52.63
+          },
+          "t20": {
+            "n": 19,
+            "mean": 4.26,
+            "median": 1.4,
+            "winRate": 63.16
+          },
+          "t40": {
+            "n": 19,
+            "mean": 5.48,
+            "median": 2.89,
+            "winRate": 52.63
+          },
+          "window": {
+            "n": 19,
+            "mean": 4.08,
+            "median": -2.67,
+            "winRate": 42.11
+          },
+          "lowToWindow": {
+            "n": 19,
+            "mean": 12.96,
+            "median": 5.8,
+            "winRate": 100
+          },
+          "hit10": 78.95,
+          "hit10Reached": 15,
+          "hit10Eligible": 19,
+          "hit10MedianDays": 6,
+          "checkpointMae": {
+            "n": 19,
+            "mean": -3.94,
+            "median": -3.8,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 19,
+            "mean": 3.94,
+            "median": 3.8,
+            "winRate": 100
+          }
+        },
+        {
+          "id": "C",
+          "label": "-5% to -10%",
+          "n": 12,
+          "conclusion": "수치만",
+          "t10": {
+            "n": 12,
+            "mean": 3.13,
+            "median": 2.99,
+            "winRate": 75
+          },
+          "t20": {
+            "n": 12,
+            "mean": 6.87,
+            "median": 10.98,
+            "winRate": 66.67
+          },
+          "t40": {
+            "n": 12,
+            "mean": 3.22,
+            "median": 2.34,
+            "winRate": 50
+          },
+          "window": {
+            "n": 12,
+            "mean": 4.61,
+            "median": 7.17,
+            "winRate": 58.33
+          },
+          "lowToWindow": {
+            "n": 12,
+            "mean": 18.05,
+            "median": 17.25,
+            "winRate": 91.67
+          },
+          "hit10": 75,
+          "hit10Reached": 9,
+          "hit10Eligible": 12,
+          "hit10MedianDays": 3,
+          "checkpointMae": {
+            "n": 12,
+            "mean": -6.79,
+            "median": -6.25,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 12,
+            "mean": 6.79,
+            "median": 6.25,
+            "winRate": 100
+          }
+        },
+        {
+          "id": "D",
+          "label": "MAE <= -10%",
+          "n": 9,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 9,
+            "mean": -6.32,
+            "median": -5.19,
+            "winRate": 22.22
+          },
+          "t20": {
+            "n": 9,
+            "mean": -9.11,
+            "median": -9.15,
+            "winRate": 33.33
+          },
+          "t40": {
+            "n": 9,
+            "mean": -0.18,
+            "median": 0.76,
+            "winRate": 55.56
+          },
+          "window": {
+            "n": 9,
+            "mean": 2.41,
+            "median": -8.05,
+            "winRate": 44.44
+          },
+          "lowToWindow": {
+            "n": 9,
+            "mean": 26.44,
+            "median": 16.22,
+            "winRate": 88.89
+          },
+          "hit10": 66.67,
+          "hit10Reached": 6,
+          "hit10Eligible": 9,
+          "hit10MedianDays": 3.5,
+          "checkpointMae": {
+            "n": 9,
+            "mean": -14.77,
+            "median": -13.64,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 9,
+            "mean": 14.77,
+            "median": 13.64,
+            "winRate": 100
+          }
+        }
+      ],
+      "cut5": {
+        "SHALLOW": {
+          "n": 82,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 82,
+            "mean": 5.34,
+            "median": 4.88,
+            "winRate": 73.17
+          },
+          "t20": {
+            "n": 82,
+            "mean": 8.21,
+            "median": 5.22,
+            "winRate": 70.73
+          },
+          "t40": {
+            "n": 82,
+            "mean": 12.17,
+            "median": 8.3,
+            "winRate": 63.41
+          },
+          "window": {
+            "n": 82,
+            "mean": 10.69,
+            "median": 5.37,
+            "winRate": 60.98
+          },
+          "lowToWindow": {
+            "n": 81,
+            "mean": 17.42,
+            "median": 11.66,
+            "winRate": 91.36
+          },
+          "hit10": 70.37,
+          "hit10Reached": 57,
+          "hit10Eligible": 81,
+          "hit10MedianDays": 5,
+          "checkpointMae": {
+            "n": 82,
+            "mean": -0.72,
+            "median": -1.22,
+            "winRate": 30.49
+          },
+          "checkpointDepth": {
+            "n": 82,
+            "mean": 1.58,
+            "median": 1.22,
+            "winRate": 69.51
+          }
+        },
+        "DEEP": {
+          "n": 21,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 21,
+            "mean": -0.92,
+            "median": 0.35,
+            "winRate": 52.38
+          },
+          "t20": {
+            "n": 21,
+            "mean": 0.02,
+            "median": 0.59,
+            "winRate": 52.38
+          },
+          "t40": {
+            "n": 21,
+            "mean": 1.76,
+            "median": 0.76,
+            "winRate": 52.38
+          },
+          "window": {
+            "n": 21,
+            "mean": 3.67,
+            "median": 4.89,
+            "winRate": 52.38
+          },
+          "lowToWindow": {
+            "n": 21,
+            "mean": 21.65,
+            "median": 16.67,
+            "winRate": 90.48
+          },
+          "hit10": 71.43,
+          "hit10Reached": 15,
+          "hit10Eligible": 21,
+          "hit10MedianDays": 3,
+          "checkpointMae": {
+            "n": 21,
+            "mean": -10.21,
+            "median": -8.67,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 21,
+            "mean": 10.21,
+            "median": 8.67,
+            "winRate": 100
+          }
+        }
+      },
+      "cut10": {
+        "SHALLOW": {
+          "n": 94,
+          "conclusion": "제한적",
+          "t10": {
+            "n": 94,
+            "mean": 5.06,
+            "median": 4.6,
+            "winRate": 73.4
+          },
+          "t20": {
+            "n": 94,
+            "mean": 8.04,
+            "median": 5.96,
+            "winRate": 70.21
+          },
+          "t40": {
+            "n": 94,
+            "mean": 11.03,
+            "median": 7.84,
+            "winRate": 61.7
+          },
+          "window": {
+            "n": 94,
+            "mean": 9.91,
+            "median": 5.37,
+            "winRate": 60.64
+          },
+          "lowToWindow": {
+            "n": 93,
+            "mean": 17.5,
+            "median": 12.92,
+            "winRate": 91.4
+          },
+          "hit10": 70.97,
+          "hit10Reached": 66,
+          "hit10Eligible": 93,
+          "hit10MedianDays": 4,
+          "checkpointMae": {
+            "n": 94,
+            "mean": -1.5,
+            "median": -1.6,
+            "winRate": 26.6
+          },
+          "checkpointDepth": {
+            "n": 94,
+            "mean": 2.24,
+            "median": 1.6,
+            "winRate": 73.4
+          }
+        },
+        "DEEP": {
+          "n": 9,
+          "conclusion": "결론 금지",
+          "t10": {
+            "n": 9,
+            "mean": -6.32,
+            "median": -5.19,
+            "winRate": 22.22
+          },
+          "t20": {
+            "n": 9,
+            "mean": -9.11,
+            "median": -9.15,
+            "winRate": 33.33
+          },
+          "t40": {
+            "n": 9,
+            "mean": -0.18,
+            "median": 0.76,
+            "winRate": 55.56
+          },
+          "window": {
+            "n": 9,
+            "mean": 2.41,
+            "median": -8.05,
+            "winRate": 44.44
+          },
+          "lowToWindow": {
+            "n": 9,
+            "mean": 26.44,
+            "median": 16.22,
+            "winRate": 88.89
+          },
+          "hit10": 66.67,
+          "hit10Reached": 6,
+          "hit10Eligible": 9,
+          "hit10MedianDays": 3.5,
+          "checkpointMae": {
+            "n": 9,
+            "mean": -14.77,
+            "median": -13.64,
+            "winRate": 0
+          },
+          "checkpointDepth": {
+            "n": 9,
+            "mean": 14.77,
+            "median": 13.64,
+            "winRate": 100
+          }
+        }
+      },
+      "cells5": {
+        "HIGH": {
+          "SHALLOW": {
+            "n": 26,
+            "conclusion": "제한적",
+            "t10": 9.96,
+            "t20": 14.54,
+            "t40": 20.73,
+            "window": 19.9,
+            "lowToWindow": 26.3,
+            "hit10": 84,
+            "checkpointMae": -0.33
+          },
+          "DEEP": {
+            "n": 9,
+            "conclusion": "결론 금지",
+            "t10": -4.71,
+            "t20": -4.07,
+            "t40": -0.52,
+            "window": 4.31,
+            "lowToWindow": 26.03,
+            "hit10": 77.78,
+            "checkpointMae": -12.42
+          }
+        },
+        "MID": {
+          "SHALLOW": {
+            "n": 23,
+            "conclusion": "제한적",
+            "t10": 4.3,
+            "t20": 7.58,
+            "t40": 12.39,
+            "window": 10.57,
+            "lowToWindow": 19.02,
+            "hit10": 73.91,
+            "checkpointMae": -1.01
+          },
+          "DEEP": {
+            "n": 11,
+            "conclusion": "수치만",
+            "t10": 1.32,
+            "t20": 2.12,
+            "t40": 3.2,
+            "window": 2.33,
+            "lowToWindow": 17.78,
+            "hit10": 63.64,
+            "checkpointMae": -8.45
+          }
+        },
+        "LOW": {
+          "SHALLOW": {
+            "n": 33,
+            "conclusion": "제한적",
+            "t10": 2.42,
+            "t20": 3.66,
+            "t40": 5.28,
+            "window": 3.51,
+            "lowToWindow": 9.57,
+            "hit10": 57.58,
+            "checkpointMae": -0.83
+          },
+          "DEEP": {
+            "n": 1,
+            "conclusion": "결론 금지",
+            "t10": 8.58,
+            "t20": 13.71,
+            "t40": 6.51,
+            "window": 12.61,
+            "lowToWindow": 24.74,
+            "hit10": 100,
+            "checkpointMae": -9.73
+          }
+        }
+      },
+      "cells10": {
+        "HIGH": {
+          "SHALLOW": {
+            "n": 29,
+            "conclusion": "제한적",
+            "t10": 9,
+            "t20": 13.9,
+            "t40": 19.66,
+            "window": 19.21,
+            "lowToWindow": 26.77,
+            "hit10": 85.71,
+            "checkpointMae": -1
+          },
+          "DEEP": {
+            "n": 6,
+            "conclusion": "결론 금지",
+            "t10": -7.39,
+            "t20": -10.25,
+            "t40": -5.99,
+            "window": -0.18,
+            "lowToWindow": 23.71,
+            "hit10": 66.67,
+            "checkpointMae": -15.2
+          }
+        },
+        "MID": {
+          "SHALLOW": {
+            "n": 31,
+            "conclusion": "제한적",
+            "t10": 4.06,
+            "t20": 7.04,
+            "t40": 9.22,
+            "window": 7.93,
+            "lowToWindow": 17.33,
+            "hit10": 70.97,
+            "checkpointMae": -2.4
+          },
+          "DEEP": {
+            "n": 3,
+            "conclusion": "결론 금지",
+            "t10": -4.18,
+            "t20": -6.82,
+            "t40": 11.44,
+            "window": 7.61,
+            "lowToWindow": 31.91,
+            "hit10": 66.67,
+            "checkpointMae": -13.91
+          }
+        },
+        "LOW": {
+          "SHALLOW": {
+            "n": 34,
+            "conclusion": "제한적",
+            "t10": 2.6,
+            "t20": 3.96,
+            "t40": 5.31,
+            "window": 3.78,
+            "lowToWindow": 10.02,
+            "hit10": 58.82,
+            "checkpointMae": -1.09
+          },
+          "DEEP": {
+            "n": 0,
+            "conclusion": "결론 금지",
+            "t10": null,
+            "t20": null,
+            "t40": null,
+            "window": null,
+            "lowToWindow": null,
+            "hit10": null,
+            "checkpointMae": null
+          }
+        }
+      },
+      "continuous": {
+        "mae": {
+          "t10": {
+            "n": 103,
+            "spearman": 0.4204,
+            "conclusion": "제한적"
+          },
+          "t20": {
+            "n": 103,
+            "spearman": 0.2657,
+            "conclusion": "제한적"
+          },
+          "t40": {
+            "n": 103,
+            "spearman": 0.2702,
+            "conclusion": "제한적"
+          },
+          "window": {
+            "n": 103,
+            "spearman": 0.2626,
+            "conclusion": "제한적"
+          },
+          "lowWindow": {
+            "n": 102,
+            "spearman": 0.0096,
+            "conclusion": "제한적"
+          },
+          "hit10": {
+            "n": 72,
+            "spearman": 0.1666,
+            "conclusion": "제한적"
+          }
+        },
+        "depth": {
+          "t10": {
+            "n": 103,
+            "spearman": -0.4173,
+            "conclusion": "제한적"
+          },
+          "t20": {
+            "n": 103,
+            "spearman": -0.2547,
+            "conclusion": "제한적"
+          },
+          "t40": {
+            "n": 103,
+            "spearman": -0.2654,
+            "conclusion": "제한적"
+          },
+          "window": {
+            "n": 103,
+            "spearman": -0.2553,
+            "conclusion": "제한적"
+          },
+          "lowWindow": {
+            "n": 102,
+            "spearman": -0.0153,
+            "conclusion": "제한적"
+          },
+          "hit10": {
+            "n": 72,
+            "spearman": -0.1691,
+            "conclusion": "제한적"
+          }
+        },
+        "note": "Signed MAE is the lowest return through the checkpoint. Positive additional-decline depth is abs(min(0, MAE)). A negative depth correlation means a deeper early decline lines up with a lower later outcome."
+      },
+      "models": {
+        "t10": {
+          "M0": {
+            "n": 103,
+            "r2": 0.0097,
+            "spearman": 0.1087,
+            "mae": 7.4191,
+            "rmse": 9.7731,
+            "standardized": {
+              "t0": 0.0483,
+              "leadership": 0.09
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.067,
+            "spearman": 0.2173,
+            "mae": 7.1871,
+            "rmse": 9.4861,
+            "standardized": {
+              "t0": 0.0814,
+              "leadership": 0.0076,
+              "eventAtr": 0.2563
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.2466,
+            "spearman": 0.5634,
+            "mae": 6.3022,
+            "rmse": 8.5242,
+            "standardized": {
+              "t0": 0.0473,
+              "leadership": 0.0034,
+              "eventAtr": 0.3292,
+              "checkpointMae": 0.4321
+            },
+            "checkpointMaeBeta": 0.4321
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0573,
+            "deltaSpearman": 0.1086,
+            "deltaPearson": null,
+            "deltaMae": -0.232,
+            "deltaRmse": -0.287
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.1796,
+            "deltaSpearman": 0.3461,
+            "deltaPearson": null,
+            "deltaMae": -0.8849,
+            "deltaRmse": -0.9619
+          },
+          "maeSignHolds": true
+        },
+        "t20": {
+          "M0": {
+            "n": 103,
+            "r2": 0.0971,
+            "spearman": 0.2977,
+            "mae": 11.3583,
+            "rmse": 14.6958,
+            "standardized": {
+              "t0": 0.2633,
+              "leadership": 0.1919
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.1353,
+            "spearman": 0.3392,
+            "mae": 11.124,
+            "rmse": 14.3818,
+            "standardized": {
+              "t0": 0.2903,
+              "leadership": 0.1247,
+              "eventAtr": 0.2092
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.233,
+            "spearman": 0.4822,
+            "mae": 10.5736,
+            "rmse": 13.5444,
+            "standardized": {
+              "t0": 0.2652,
+              "leadership": 0.1216,
+              "eventAtr": 0.263,
+              "checkpointMae": 0.3188
+            },
+            "checkpointMaeBeta": 0.3188
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0382,
+            "deltaSpearman": 0.0415,
+            "deltaPearson": null,
+            "deltaMae": -0.2343,
+            "deltaRmse": -0.314
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.0977,
+            "deltaSpearman": 0.143,
+            "deltaPearson": null,
+            "deltaMae": -0.5504,
+            "deltaRmse": -0.8374
+          },
+          "maeSignHolds": true
+        },
+        "window": {
+          "M0": {
+            "n": 103,
+            "r2": 0.1137,
+            "spearman": 0.316,
+            "mae": 15.5477,
+            "rmse": 19.2844,
+            "standardized": {
+              "t0": 0.2687,
+              "leadership": 0.2293
+            },
+            "checkpointMaeBeta": null
+          },
+          "M1": {
+            "n": 103,
+            "r2": 0.1892,
+            "spearman": 0.3593,
+            "mae": 14.4958,
+            "rmse": 18.4443,
+            "standardized": {
+              "t0": 0.3067,
+              "leadership": 0.1347,
+              "eventAtr": 0.2942
+            },
+            "checkpointMaeBeta": null
+          },
+          "M2": {
+            "n": 103,
+            "r2": 0.245,
+            "spearman": 0.4457,
+            "mae": 14.0951,
+            "rmse": 17.7991,
+            "standardized": {
+              "t0": 0.2877,
+              "leadership": 0.1323,
+              "eventAtr": 0.3348,
+              "checkpointMae": 0.2407
+            },
+            "checkpointMaeBeta": 0.2407
+          },
+          "m0m1": {
+            "n": 103,
+            "deltaR2": 0.0755,
+            "deltaSpearman": 0.0433,
+            "deltaPearson": null,
+            "deltaMae": -1.0519,
+            "deltaRmse": -0.8401
+          },
+          "m1m2": {
+            "n": 103,
+            "deltaR2": 0.0558,
+            "deltaSpearman": 0.0864,
+            "deltaPearson": null,
+            "deltaMae": -0.4007,
+            "deltaRmse": -0.6452
+          },
+          "maeSignHolds": true
+        }
+      },
+      "ticker": {
+        "eventWeighted": {
+          "n": 103,
+          "spearman": 0.2626
+        },
+        "tickerWeighted": {
+          "tickers": 30,
+          "spearman": 0.0207,
+          "maxEvents": 9
+        },
+        "leaveOneTicker": {
+          "baseline": 0.2626,
+          "min": 0.2206,
+          "max": 0.3024,
+          "median": 0.2607,
+          "signFlips": []
+        },
+        "withinStock": "결론 금지"
+      }
+    }
+  },
+  "oos": {
+    "50": {
+      "window": {
+        "t1": {
+          "base": {
+            "n": 51,
+            "oosR2": 0.11,
+            "pearson": 0.3407,
+            "spearman": 0.2786,
+            "mae": 17.4862,
+            "rmse": 21.924
+          },
+          "withMae": {
+            "n": 51,
+            "oosR2": 0.1101,
+            "pearson": 0.3408,
+            "spearman": 0.2786,
+            "mae": 17.4834,
+            "rmse": 21.9222,
+            "checkpointMaeBeta": 0.0005
+          },
+          "delta": {
+            "n": 51,
+            "deltaR2": 0.0001,
+            "deltaSpearman": 0,
+            "deltaPearson": 0.0001,
+            "deltaMae": -0.0028,
+            "deltaRmse": -0.0018
+          },
+          "improves": false,
+          "conclusion": "제한적"
+        },
+        "t3": {
+          "base": {
+            "n": 51,
+            "oosR2": 0.11,
+            "pearson": 0.3407,
+            "spearman": 0.2786,
+            "mae": 17.4862,
+            "rmse": 21.924
+          },
+          "withMae": {
+            "n": 51,
+            "oosR2": 0.147,
+            "pearson": 0.3894,
+            "spearman": 0.3283,
+            "mae": 16.869,
+            "rmse": 21.4638,
+            "checkpointMaeBeta": 0.1238
+          },
+          "delta": {
+            "n": 51,
+            "deltaR2": 0.037,
+            "deltaSpearman": 0.0497,
+            "deltaPearson": 0.0487,
+            "deltaMae": -0.6172,
+            "deltaRmse": -0.4602
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t5": {
+          "base": {
+            "n": 51,
+            "oosR2": 0.11,
+            "pearson": 0.3407,
+            "spearman": 0.2786,
+            "mae": 17.4862,
+            "rmse": 21.924
+          },
+          "withMae": {
+            "n": 51,
+            "oosR2": 0.156,
+            "pearson": 0.3988,
+            "spearman": 0.3367,
+            "mae": 16.801,
+            "rmse": 21.349,
+            "checkpointMaeBeta": 0.1108
+          },
+          "delta": {
+            "n": 51,
+            "deltaR2": 0.046,
+            "deltaSpearman": 0.0581,
+            "deltaPearson": 0.0581,
+            "deltaMae": -0.6852,
+            "deltaRmse": -0.575
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        }
+      },
+      "t20": {
+        "t1": {
+          "base": {
+            "n": 51,
+            "oosR2": 0.0938,
+            "pearson": 0.3228,
+            "spearman": 0.2978,
+            "mae": 12.4656,
+            "rmse": 16.0971
+          },
+          "withMae": {
+            "n": 51,
+            "oosR2": 0.105,
+            "pearson": 0.3354,
+            "spearman": 0.3436,
+            "mae": 12.5231,
+            "rmse": 15.9971,
+            "checkpointMaeBeta": 0.0829
+          },
+          "delta": {
+            "n": 51,
+            "deltaR2": 0.0112,
+            "deltaSpearman": 0.0458,
+            "deltaPearson": 0.0126,
+            "deltaMae": 0.0575,
+            "deltaRmse": -0.1
+          },
+          "improves": false,
+          "conclusion": "제한적"
+        },
+        "t3": {
+          "base": {
+            "n": 51,
+            "oosR2": 0.0938,
+            "pearson": 0.3228,
+            "spearman": 0.2978,
+            "mae": 12.4656,
+            "rmse": 16.0971
+          },
+          "withMae": {
+            "n": 51,
+            "oosR2": 0.146,
+            "pearson": 0.389,
+            "spearman": 0.3934,
+            "mae": 12.0614,
+            "rmse": 15.6261,
+            "checkpointMaeBeta": 0.1863
+          },
+          "delta": {
+            "n": 51,
+            "deltaR2": 0.0522,
+            "deltaSpearman": 0.0956,
+            "deltaPearson": 0.0662,
+            "deltaMae": -0.4042,
+            "deltaRmse": -0.471
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t5": {
+          "base": {
+            "n": 51,
+            "oosR2": 0.0938,
+            "pearson": 0.3228,
+            "spearman": 0.2978,
+            "mae": 12.4656,
+            "rmse": 16.0971
+          },
+          "withMae": {
+            "n": 51,
+            "oosR2": 0.1988,
+            "pearson": 0.4525,
+            "spearman": 0.4632,
+            "mae": 11.6683,
+            "rmse": 15.1356,
+            "checkpointMaeBeta": 0.2015
+          },
+          "delta": {
+            "n": 51,
+            "deltaR2": 0.105,
+            "deltaSpearman": 0.1654,
+            "deltaPearson": 0.1297,
+            "deltaMae": -0.7973,
+            "deltaRmse": -0.9615
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        }
+      }
+    },
+    "60": {
+      "window": {
+        "t1": {
+          "base": {
+            "n": 44,
+            "oosR2": 0.0678,
+            "pearson": 0.3653,
+            "spearman": 0.2661,
+            "mae": 17.379,
+            "rmse": 22.6527
+          },
+          "withMae": {
+            "n": 44,
+            "oosR2": 0.0834,
+            "pearson": 0.3861,
+            "spearman": 0.3168,
+            "mae": 16.8852,
+            "rmse": 22.4626,
+            "checkpointMaeBeta": 0.1098
+          },
+          "delta": {
+            "n": 44,
+            "deltaR2": 0.0156,
+            "deltaSpearman": 0.0507,
+            "deltaPearson": 0.0208,
+            "deltaMae": -0.4938,
+            "deltaRmse": -0.1901
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t3": {
+          "base": {
+            "n": 44,
+            "oosR2": 0.0678,
+            "pearson": 0.3653,
+            "spearman": 0.2661,
+            "mae": 17.379,
+            "rmse": 22.6527
+          },
+          "withMae": {
+            "n": 44,
+            "oosR2": 0.1092,
+            "pearson": 0.4194,
+            "spearman": 0.359,
+            "mae": 16.6984,
+            "rmse": 22.1443,
+            "checkpointMaeBeta": 0.1894
+          },
+          "delta": {
+            "n": 44,
+            "deltaR2": 0.0414,
+            "deltaSpearman": 0.0929,
+            "deltaPearson": 0.0541,
+            "deltaMae": -0.6806,
+            "deltaRmse": -0.5084
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t5": {
+          "base": {
+            "n": 44,
+            "oosR2": 0.0678,
+            "pearson": 0.3653,
+            "spearman": 0.2661,
+            "mae": 17.379,
+            "rmse": 22.6527
+          },
+          "withMae": {
+            "n": 44,
+            "oosR2": 0.128,
+            "pearson": 0.4379,
+            "spearman": 0.3705,
+            "mae": 16.6475,
+            "rmse": 21.9091,
+            "checkpointMaeBeta": 0.1923
+          },
+          "delta": {
+            "n": 44,
+            "deltaR2": 0.0602,
+            "deltaSpearman": 0.1044,
+            "deltaPearson": 0.0726,
+            "deltaMae": -0.7315,
+            "deltaRmse": -0.7436
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        }
+      },
+      "t20": {
+        "t1": {
+          "base": {
+            "n": 44,
+            "oosR2": 0.0575,
+            "pearson": 0.3508,
+            "spearman": 0.3045,
+            "mae": 11.4746,
+            "rmse": 15.4845
+          },
+          "withMae": {
+            "n": 44,
+            "oosR2": 0.0279,
+            "pearson": 0.3225,
+            "spearman": 0.3582,
+            "mae": 11.6659,
+            "rmse": 15.7251,
+            "checkpointMaeBeta": 0.1945
+          },
+          "delta": {
+            "n": 44,
+            "deltaR2": -0.0296,
+            "deltaSpearman": 0.0537,
+            "deltaPearson": -0.0283,
+            "deltaMae": 0.1913,
+            "deltaRmse": 0.2406
+          },
+          "improves": false,
+          "conclusion": "제한적"
+        },
+        "t3": {
+          "base": {
+            "n": 44,
+            "oosR2": 0.0575,
+            "pearson": 0.3508,
+            "spearman": 0.3045,
+            "mae": 11.4746,
+            "rmse": 15.4845
+          },
+          "withMae": {
+            "n": 44,
+            "oosR2": 0.0852,
+            "pearson": 0.399,
+            "spearman": 0.4126,
+            "mae": 11.1487,
+            "rmse": 15.2552,
+            "checkpointMaeBeta": 0.2643
+          },
+          "delta": {
+            "n": 44,
+            "deltaR2": 0.0277,
+            "deltaSpearman": 0.1081,
+            "deltaPearson": 0.0482,
+            "deltaMae": -0.3259,
+            "deltaRmse": -0.2293
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t5": {
+          "base": {
+            "n": 44,
+            "oosR2": 0.0575,
+            "pearson": 0.3508,
+            "spearman": 0.3045,
+            "mae": 11.4746,
+            "rmse": 15.4845
+          },
+          "withMae": {
+            "n": 44,
+            "oosR2": 0.1724,
+            "pearson": 0.4845,
+            "spearman": 0.5497,
+            "mae": 10.4224,
+            "rmse": 14.51,
+            "checkpointMaeBeta": 0.2866
+          },
+          "delta": {
+            "n": 44,
+            "deltaR2": 0.1149,
+            "deltaSpearman": 0.2452,
+            "deltaPearson": 0.1337,
+            "deltaMae": -1.0522,
+            "deltaRmse": -0.9745
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        }
+      }
+    },
+    "70": {
+      "window": {
+        "t1": {
+          "base": {
+            "n": 31,
+            "oosR2": -0.0296,
+            "pearson": 0.4886,
+            "spearman": 0.3798,
+            "mae": 18.9642,
+            "rmse": 24.6828
+          },
+          "withMae": {
+            "n": 31,
+            "oosR2": -0.0132,
+            "pearson": 0.5226,
+            "spearman": 0.5185,
+            "mae": 18.6143,
+            "rmse": 24.4852,
+            "checkpointMaeBeta": 0.1337
+          },
+          "delta": {
+            "n": 31,
+            "deltaR2": 0.0164,
+            "deltaSpearman": 0.1387,
+            "deltaPearson": 0.034,
+            "deltaMae": -0.3499,
+            "deltaRmse": -0.1976
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t3": {
+          "base": {
+            "n": 31,
+            "oosR2": -0.0296,
+            "pearson": 0.4886,
+            "spearman": 0.3798,
+            "mae": 18.9642,
+            "rmse": 24.6828
+          },
+          "withMae": {
+            "n": 31,
+            "oosR2": 0.0214,
+            "pearson": 0.5372,
+            "spearman": 0.5165,
+            "mae": 18.3421,
+            "rmse": 24.0641,
+            "checkpointMaeBeta": 0.2198
+          },
+          "delta": {
+            "n": 31,
+            "deltaR2": 0.051,
+            "deltaSpearman": 0.1367,
+            "deltaPearson": 0.0486,
+            "deltaMae": -0.6221,
+            "deltaRmse": -0.6187
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t5": {
+          "base": {
+            "n": 31,
+            "oosR2": -0.0296,
+            "pearson": 0.4886,
+            "spearman": 0.3798,
+            "mae": 18.9642,
+            "rmse": 24.6828
+          },
+          "withMae": {
+            "n": 31,
+            "oosR2": 0.041,
+            "pearson": 0.5432,
+            "spearman": 0.4899,
+            "mae": 18.5942,
+            "rmse": 23.8222,
+            "checkpointMaeBeta": 0.2392
+          },
+          "delta": {
+            "n": 31,
+            "deltaR2": 0.0706,
+            "deltaSpearman": 0.1101,
+            "deltaPearson": 0.0546,
+            "deltaMae": -0.37,
+            "deltaRmse": -0.8606
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        }
+      },
+      "t20": {
+        "t1": {
+          "base": {
+            "n": 31,
+            "oosR2": -0.0341,
+            "pearson": 0.4331,
+            "spearman": 0.439,
+            "mae": 11.9771,
+            "rmse": 16.6055
+          },
+          "withMae": {
+            "n": 31,
+            "oosR2": -0.0377,
+            "pearson": 0.4299,
+            "spearman": 0.5011,
+            "mae": 11.9426,
+            "rmse": 16.6347,
+            "checkpointMaeBeta": 0.144
+          },
+          "delta": {
+            "n": 31,
+            "deltaR2": -0.0036,
+            "deltaSpearman": 0.0621,
+            "deltaPearson": -0.0032,
+            "deltaMae": -0.0345,
+            "deltaRmse": 0.0292
+          },
+          "improves": false,
+          "conclusion": "제한적"
+        },
+        "t3": {
+          "base": {
+            "n": 31,
+            "oosR2": -0.0341,
+            "pearson": 0.4331,
+            "spearman": 0.439,
+            "mae": 11.9771,
+            "rmse": 16.6055
+          },
+          "withMae": {
+            "n": 31,
+            "oosR2": 0.0141,
+            "pearson": 0.4673,
+            "spearman": 0.5009,
+            "mae": 11.4885,
+            "rmse": 16.2144,
+            "checkpointMaeBeta": 0.2572
+          },
+          "delta": {
+            "n": 31,
+            "deltaR2": 0.0482,
+            "deltaSpearman": 0.0619,
+            "deltaPearson": 0.0342,
+            "deltaMae": -0.4886,
+            "deltaRmse": -0.3911
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        },
+        "t5": {
+          "base": {
+            "n": 31,
+            "oosR2": -0.0341,
+            "pearson": 0.4331,
+            "spearman": 0.439,
+            "mae": 11.9771,
+            "rmse": 16.6055
+          },
+          "withMae": {
+            "n": 31,
+            "oosR2": 0.1089,
+            "pearson": 0.5665,
+            "spearman": 0.6519,
+            "mae": 10.6272,
+            "rmse": 15.4149,
+            "checkpointMaeBeta": 0.2932
+          },
+          "delta": {
+            "n": 31,
+            "deltaR2": 0.143,
+            "deltaSpearman": 0.2129,
+            "deltaPearson": 0.1334,
+            "deltaMae": -1.3499,
+            "deltaRmse": -1.1906
+          },
+          "improves": true,
+          "conclusion": "제한적"
+        }
+      }
+    }
+  },
+  "classification": {
+    "t1": {
+      "50": {
+        "windowPositive": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.5698,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.2577,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.5984,
+            "balancedAccuracy": 0.6143,
+            "brier": 0.2498,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.6444,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2211,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.6635,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2175,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.5859,
+            "balancedAccuracy": 0.4823,
+            "brier": 0.233,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.5892,
+            "balancedAccuracy": 0.5101,
+            "brier": 0.2311,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "60": {
+        "windowPositive": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2595,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.6119,
+            "balancedAccuracy": 0.5452,
+            "brier": 0.2482,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.6356,
+            "balancedAccuracy": 0.5952,
+            "brier": 0.2449,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.6812,
+            "balancedAccuracy": 0.5497,
+            "brier": 0.2369,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.573,
+            "balancedAccuracy": 0.5758,
+            "brier": 0.21,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.6033,
+            "balancedAccuracy": 0.5606,
+            "brier": 0.2086,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "70": {
+        "windowPositive": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.5109,
+            "brier": 0.249,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.6467,
+            "balancedAccuracy": 0.6196,
+            "brier": 0.2368,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.65,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2425,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.7333,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2322,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.6067,
+            "brier": 0.2088,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.58,
+            "balancedAccuracy": 0.5433,
+            "brier": 0.2032,
+            "conclusion": "제한적"
+          }
+        }
+      }
+    },
+    "t3": {
+      "50": {
+        "windowPositive": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.5698,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.2577,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.6476,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2476,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.6444,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2211,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.6841,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2125,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.5859,
+            "balancedAccuracy": 0.4823,
+            "brier": 0.233,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.6364,
+            "balancedAccuracy": 0.5505,
+            "brier": 0.225,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "60": {
+        "windowPositive": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2595,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.6381,
+            "balancedAccuracy": 0.5643,
+            "brier": 0.2494,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.6356,
+            "balancedAccuracy": 0.5952,
+            "brier": 0.2449,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.6936,
+            "balancedAccuracy": 0.5714,
+            "brier": 0.2338,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.573,
+            "balancedAccuracy": 0.5758,
+            "brier": 0.21,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.6281,
+            "balancedAccuracy": 0.5606,
+            "brier": 0.2035,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "70": {
+        "windowPositive": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.5109,
+            "brier": 0.249,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.5815,
+            "balancedAccuracy": 0.4511,
+            "brier": 0.2383,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.65,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2425,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.7333,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2283,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.6067,
+            "brier": 0.2088,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.56,
+            "balancedAccuracy": 0.5033,
+            "brier": 0.2054,
+            "conclusion": "제한적"
+          }
+        }
+      }
+    },
+    "t5": {
+      "50": {
+        "windowPositive": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.5698,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.2577,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.6333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2497,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.6444,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2211,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.6778,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2145,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 51,
+            "rocAuc": 0.5859,
+            "balancedAccuracy": 0.4823,
+            "brier": 0.233,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 51,
+            "rocAuc": 0.6061,
+            "balancedAccuracy": 0.5101,
+            "brier": 0.2279,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "60": {
+        "windowPositive": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2595,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.631,
+            "balancedAccuracy": 0.5286,
+            "brier": 0.2553,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.6356,
+            "balancedAccuracy": 0.5952,
+            "brier": 0.2449,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.706,
+            "balancedAccuracy": 0.5714,
+            "brier": 0.233,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 44,
+            "rocAuc": 0.573,
+            "balancedAccuracy": 0.5758,
+            "brier": 0.21,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 44,
+            "rocAuc": 0.6832,
+            "balancedAccuracy": 0.6061,
+            "brier": 0.1935,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "70": {
+        "windowPositive": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.5109,
+            "brier": 0.249,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.5652,
+            "balancedAccuracy": 0.4076,
+            "brier": 0.258,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.65,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2425,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.7417,
+            "balancedAccuracy": 0.6229,
+            "brier": 0.2247,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "base": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.6067,
+            "brier": 0.2088,
+            "conclusion": "제한적"
+          },
+          "withMae": {
+            "n": 31,
+            "rocAuc": 0.66,
+            "balancedAccuracy": 0.67,
+            "brier": 0.1877,
+            "conclusion": "제한적"
+          }
+        }
+      }
+    }
+  },
+  "bootstrap": {
+    "t1": {
+      "cut5": {
+        "window": {
+          "nShallow": 98,
+          "nDeep": 5,
+          "meanDiff": 11.33,
+          "medianDiff": 15.14,
+          "ci95": [
+            -2.81,
+            23.75
+          ],
+          "permutationTail": 0.2336
+        },
+        "t20": {
+          "nShallow": 98,
+          "nDeep": 5,
+          "meanDiff": 4.63,
+          "medianDiff": -3.62,
+          "ci95": [
+            -9.39,
+            19.28
+          ],
+          "permutationTail": 0.5226
+        },
+        "hit10": {
+          "nShallow": 97,
+          "nDeep": 5,
+          "meanDiff": 32.16,
+          "medianDiff": 100,
+          "ci95": [
+            -11.96,
+            74.23
+          ],
+          "permutationTail": 0.1491
+        }
+      },
+      "cut10": {
+        "window": null,
+        "t20": null,
+        "hit10": null
+      }
+    },
+    "t3": {
+      "cut5": {
+        "window": {
+          "nShallow": 89,
+          "nDeep": 14,
+          "meanDiff": 9.59,
+          "medianDiff": 11.97,
+          "ci95": [
+            -0.69,
+            20.23
+          ],
+          "permutationTail": 0.1041
+        },
+        "t20": {
+          "nShallow": 89,
+          "nDeep": 14,
+          "meanDiff": 9.6,
+          "medianDiff": 1.65,
+          "ci95": [
+            0.82,
+            18.41
+          ],
+          "permutationTail": 0.0322
+        },
+        "hit10": {
+          "nShallow": 88,
+          "nDeep": 14,
+          "meanDiff": 7.31,
+          "medianDiff": 0,
+          "ci95": [
+            -18.67,
+            34.42
+          ],
+          "permutationTail": 0.75
+        }
+      },
+      "cut10": {
+        "window": {
+          "nShallow": 100,
+          "nDeep": 3,
+          "meanDiff": 23.03,
+          "medianDiff": 19.71,
+          "ci95": [
+            16.89,
+            29.28
+          ],
+          "permutationTail": 0.051
+        },
+        "t20": {
+          "nShallow": 100,
+          "nDeep": 3,
+          "meanDiff": 26.6,
+          "medianDiff": 28.39,
+          "ci95": [
+            17.2,
+            34.15
+          ],
+          "permutationTail": 0.0056
+        },
+        "hit10": {
+          "nShallow": 99,
+          "nDeep": 3,
+          "meanDiff": 4.04,
+          "medianDiff": 0,
+          "ci95": [
+            -35.35,
+            69.7
+          ],
+          "permutationTail": 1
+        }
+      }
+    },
+    "t5": {
+      "cut5": {
+        "window": {
+          "nShallow": 82,
+          "nDeep": 21,
+          "meanDiff": 7.02,
+          "medianDiff": 0.48,
+          "ci95": [
+            -1.94,
+            16.05
+          ],
+          "permutationTail": 0.1627
+        },
+        "t20": {
+          "nShallow": 82,
+          "nDeep": 21,
+          "meanDiff": 8.19,
+          "medianDiff": 4.63,
+          "ci95": [
+            0.68,
+            15.57
+          ],
+          "permutationTail": 0.0299
+        },
+        "hit10": {
+          "nShallow": 81,
+          "nDeep": 21,
+          "meanDiff": -1.06,
+          "medianDiff": 0,
+          "ci95": [
+            -22.4,
+            20.63
+          ],
+          "permutationTail": 1
+        }
+      },
+      "cut10": {
+        "window": {
+          "nShallow": 94,
+          "nDeep": 9,
+          "meanDiff": 7.5,
+          "medianDiff": 13.42,
+          "ci95": [
+            -5.92,
+            20.07
+          ],
+          "permutationTail": 0.3025
+        },
+        "t20": {
+          "nShallow": 94,
+          "nDeep": 9,
+          "meanDiff": 17.15,
+          "medianDiff": 15.11,
+          "ci95": [
+            9,
+            25.36
+          ],
+          "permutationTail": 0.0013
+        },
+        "hit10": {
+          "nShallow": 93,
+          "nDeep": 9,
+          "meanDiff": 4.3,
+          "medianDiff": 0,
+          "ci95": [
+            -25.45,
+            37.63
+          ],
+          "permutationTail": 1
+        }
+      }
+    }
+  },
+  "judgment": {
+    "label": "부분적으로 지지"
+  }
+}
