@@ -21,8 +21,10 @@ import {
   RESEARCH_UNIVERSE,
   WATCH_UNIVERSE,
   activeEquityMembers,
+  equityPriority,
   findOperatingCandidate,
 } from "./equity-daily-bottom-buy-universe.mjs"
+import { EQUITY_SELL_RESEARCH_UNIVERSE } from "./equity-sell-research-universe.mjs"
 
 export { EQUITY_CANDIDATES, FROZEN_THRESHOLDS, atrBand, conditionFlags }
 export {
@@ -166,6 +168,21 @@ export function findEquityCandidate(symbol) {
   const meta = findOperatingCandidate(symbol)
   if (meta) return withDisplayName(meta)
   return null
+}
+
+/** Display lookup for the 31-name research list. Does not add a name to the 20-name scan. */
+export function findEquityResearchMember(symbol) {
+  const key = String(symbol || "").trim().toUpperCase()
+  const row = EQUITY_SELL_RESEARCH_UNIVERSE.find((item) => item.symbol === key)
+  if (!row) return null
+  const study = EQUITY_CANDIDATES.find((item) => item.symbol === key)
+  return withDisplayName({
+    symbol: key,
+    yahoo: study?.yahoo || key,
+    group: study?.group || null,
+    name: row.name,
+    priority: equityPriority(key),
+  })
 }
 
 function emptyView(meta, message) {

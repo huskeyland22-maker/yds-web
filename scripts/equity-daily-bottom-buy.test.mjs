@@ -140,6 +140,22 @@ describe("handler", () => {
     assert.equal(result.body.universe.some((row) => row.symbol === "MSFT"), false)
     assert.equal(EQUITY_CANDIDATES.some((row) => row.symbol === "MSFT"), true)
   })
+
+  it("opens a research name that is outside the 20-name scan without growing that scan", async () => {
+    const { loadEquityDailyBottomBuy } = await import(
+      pathToFileURL(join(root, "api/_lib/equityDailyBottomBuyHandler.js")).href
+    )
+    const result = await loadEquityDailyBottomBuy("KLAC", {
+      fetchBars: async () => {
+        throw new Error("offline")
+      },
+      readCache: () => null,
+    })
+    assert.equal(result.body.universe.length, 20)
+    assert.equal(result.body.universe.some((row) => row.symbol === "KLAC"), false)
+    assert.equal(result.body.view.symbol, "KLAC")
+    assert.equal(result.body.view.name, "KLA Corp")
+  })
 })
 
 describe("candidate display order", () => {

@@ -5,6 +5,7 @@ import { collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDb
 import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
+import { equityResearchDisplayList, visibleResearchStocks } from "../utils/equityResearchDisplay.js"
 
 const DEFAULT_SYMBOL = "AMZN"
 
@@ -97,6 +98,7 @@ export default function EquityDailyBottomBuyPage() {
 
   const universe = payload?.universe || []
   const universeKey = universe.map((row) => row.symbol).join("|")
+  const catalog = useMemo(() => equityResearchDisplayList(universe), [universe])
 
   useEffect(() => {
     if (!universe.length) return undefined
@@ -153,24 +155,20 @@ export default function EquityDailyBottomBuyPage() {
   }, [universeKey])
   const groups = useMemo(() => {
     const seen = []
-    for (const row of universe) {
+    for (const row of catalog) {
       if (row.group && !seen.includes(row.group)) seen.push(row.group)
     }
     return seen
-  }, [universe])
+  }, [catalog])
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return universe.filter((row) => {
-      if (group !== "all" && row.group !== group) return false
-      if (!q) return true
-      return row.symbol.toLowerCase().includes(q) || String(row.name || "").toLowerCase().includes(q)
-    })
-  }, [universe, group, query])
+  const visible = useMemo(
+    () => visibleResearchStocks(catalog, { group, query }),
+    [catalog, group, query],
+  )
 
   const options = visible.some((row) => row.symbol === symbol)
     ? visible
-    : [universe.find((row) => row.symbol === symbol), ...visible].filter(Boolean)
+    : [catalog.find((row) => row.symbol === symbol), ...visible].filter(Boolean)
 
   const buyProgress = useMemo(() => {
     void recordsVersion
@@ -290,11 +288,27 @@ export default function EquityDailyBottomBuyPage() {
             {options.map((row) => (
               <option key={row.symbol} value={row.symbol}>
                 {row.symbol} {row.name}
-                {row.priority === "CORE" || row.priority === "WATCH" ? ` · ${row.priority}` : ""}
+                {row.role === "CORE" || row.role === "WATCH" ? ` · ${row.role}` : ""}
               </option>
             ))}
           </select>
         </label>
+        <ul className="yds-dbb-research-list mt-2" aria-label="연구 종목 31">
+          {visible.map((row) => (
+            <li key={row.symbol}>
+              <button
+                type="button"
+                className={`yds-dbb-research-list__item${row.symbol === symbol ? " is-selected" : ""}`}
+                aria-pressed={row.symbol === symbol}
+                onClick={() => setSymbol(row.symbol)}
+              >
+                <span>{row.symbol}</span>
+                <span>{row.name}</span>
+                {row.role === "CORE" || row.role === "WATCH" ? <span>{row.role}</span> : null}
+              </button>
+            </li>
+          ))}
+        </ul>
         {universe.length > 0 && visible.length === 0 ? (
           <p className="yds-dbb__status">검색 결과가 없습니다.</p>
         ) : null}

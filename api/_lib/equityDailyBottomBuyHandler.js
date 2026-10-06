@@ -72,9 +72,10 @@ export async function loadEquityDailyBottomBuy(symbol, deps = {}) {
     buildEquityDailyBottomBuyView,
     equityUniverse,
     findEquityCandidate,
+    findEquityResearchMember,
   } = await loadEquityEngine()
   const universe = equityUniverse()
-  const meta = findEquityCandidate(symbol)
+  const meta = findEquityCandidate(symbol) || findEquityResearchMember(symbol)
   if (!meta) {
     return {
       status: 200,
