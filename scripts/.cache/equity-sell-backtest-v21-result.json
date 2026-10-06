@@ -1,0 +1,1407 @@
+{
+  "selectedStrategy": null,
+  "note": "Research only. Not a sell rule. MAE and Low depth are the same lowest entry-relative return inside the window.",
+  "baseline": {
+    "events": 103,
+    "lowEvents": 102,
+    "maeEvents": 102,
+    "groups": {
+      "HIGH": 15,
+      "MID": 53,
+      "LOW": 35
+    },
+    "bands": {
+      "LOW": 34,
+      "MID": 34,
+      "HIGH": 35
+    }
+  },
+  "bands": {
+    "LOW": {
+      "n": 34,
+      "window": {
+        "n": 34,
+        "mean": 3.78,
+        "median": 0.81,
+        "winRate": 55.88,
+        "lossRate": 44.12
+      },
+      "mae": {
+        "n": 34,
+        "mean": -5.47,
+        "median": -3.09,
+        "p5": -15.43,
+        "p25": -10.56,
+        "p75": -0.52
+      },
+      "mfe": {
+        "n": 34,
+        "mean": 9.5,
+        "median": 7.07,
+        "p75": 13.71,
+        "p95": 29.02
+      },
+      "lowDepth": {
+        "n": 34,
+        "mean": -5.47,
+        "median": -3.09
+      },
+      "lowToWindow": {
+        "n": 34,
+        "mean": 10.02,
+        "median": 8.35,
+        "winRate": 85.29,
+        "lossRate": 0
+      },
+      "ratio": {
+        "n": 34,
+        "mean": 6.15,
+        "median": 0.26
+      },
+      "efficiency": {
+        "n": 34,
+        "mean": 6.74,
+        "median": 1.04
+      },
+      "reboundPerDepth": {
+        "n": 34,
+        "mean": 6.81,
+        "median": 1.14
+      },
+      "positiveWindowAdverse": {
+        "denominator": 19,
+        "denominatorNote": "events with Window > 0 and an observed MAE",
+        "worse5": 15.79,
+        "worse10": 10.53,
+        "worse15": 0,
+        "worse20": 0
+      },
+      "horizons": {
+        "t1": {
+          "n": 34,
+          "mean": 0.29,
+          "median": 0.16,
+          "winRate": 52.94,
+          "lossRate": 47.06,
+          "maeN": 34,
+          "maeMean": 0.29,
+          "maeMedian": 0.16,
+          "worse5": 0,
+          "worse10": 0,
+          "worse15": 0
+        },
+        "t3": {
+          "n": 34,
+          "mean": 1.85,
+          "median": 1.24,
+          "winRate": 64.71,
+          "lossRate": 35.29,
+          "maeN": 34,
+          "maeMean": -0.48,
+          "maeMedian": -0.6,
+          "worse5": 0,
+          "worse10": 0,
+          "worse15": 0
+        },
+        "t5": {
+          "n": 34,
+          "mean": 3.25,
+          "median": 1.67,
+          "winRate": 67.65,
+          "lossRate": 32.35,
+          "maeN": 34,
+          "maeMean": -1.09,
+          "maeMedian": -0.9,
+          "worse5": 2.94,
+          "worse10": 0,
+          "worse15": 0
+        },
+        "t10": {
+          "n": 34,
+          "mean": 2.6,
+          "median": 2.24,
+          "winRate": 61.76,
+          "lossRate": 38.24,
+          "maeN": 34,
+          "maeMean": -2.92,
+          "maeMedian": -2.58,
+          "worse5": 17.65,
+          "worse10": 2.94,
+          "worse15": 2.94
+        },
+        "t20": {
+          "n": 34,
+          "mean": 3.96,
+          "median": 2.52,
+          "winRate": 67.65,
+          "lossRate": 32.35,
+          "maeN": 34,
+          "maeMean": -5.34,
+          "maeMedian": -2.98,
+          "worse5": 35.29,
+          "worse10": 26.47,
+          "worse15": 8.82
+        },
+        "t40": {
+          "n": 34,
+          "mean": 5.31,
+          "median": 4.68,
+          "winRate": 61.76,
+          "lossRate": 38.24,
+          "maeN": 34,
+          "maeMean": -6.62,
+          "maeMedian": -3.98,
+          "worse5": 44.12,
+          "worse10": 32.35,
+          "worse15": 11.76
+        },
+        "window": {
+          "n": 34,
+          "mean": 3.78,
+          "median": 0.81,
+          "winRate": 55.88,
+          "lossRate": 44.12,
+          "maeN": 34,
+          "maeMean": -5.47,
+          "maeMedian": -3.09,
+          "worse5": 41.18,
+          "worse10": 29.41,
+          "worse15": 5.88
+        }
+      },
+      "zeroMae": 0
+    },
+    "MID": {
+      "n": 34,
+      "window": {
+        "n": 34,
+        "mean": 7.9,
+        "median": 4.65,
+        "winRate": 55.88,
+        "lossRate": 44.12
+      },
+      "mae": {
+        "n": 34,
+        "mean": -9.27,
+        "median": -8.71,
+        "p5": -25.7,
+        "p25": -12.82,
+        "p75": -2.64
+      },
+      "mfe": {
+        "n": 34,
+        "mean": 18.14,
+        "median": 13.95,
+        "p75": 21.08,
+        "p95": 53.09
+      },
+      "lowDepth": {
+        "n": 34,
+        "mean": -9.27,
+        "median": -8.71
+      },
+      "lowToWindow": {
+        "n": 34,
+        "mean": 18.62,
+        "median": 12.66,
+        "winRate": 94.12,
+        "lossRate": 0
+      },
+      "ratio": {
+        "n": 34,
+        "mean": 10.67,
+        "median": 0.6
+      },
+      "efficiency": {
+        "n": 34,
+        "mean": 11.49,
+        "median": 1.4
+      },
+      "reboundPerDepth": {
+        "n": 34,
+        "mean": 11.63,
+        "median": 1.7
+      },
+      "positiveWindowAdverse": {
+        "denominator": 19,
+        "denominatorNote": "events with Window > 0 and an observed MAE",
+        "worse5": 42.11,
+        "worse10": 21.05,
+        "worse15": 5.26,
+        "worse20": 5.26
+      },
+      "horizons": {
+        "t1": {
+          "n": 34,
+          "mean": 0.15,
+          "median": -0.27,
+          "winRate": 47.06,
+          "lossRate": 52.94,
+          "maeN": 34,
+          "maeMean": 0.15,
+          "maeMedian": -0.27,
+          "worse5": 8.82,
+          "worse10": 0,
+          "worse15": 0
+        },
+        "t3": {
+          "n": 34,
+          "mean": 0.15,
+          "median": -0.27,
+          "winRate": 41.18,
+          "lossRate": 58.82,
+          "maeN": 34,
+          "maeMean": -1.89,
+          "maeMedian": -2.44,
+          "worse5": 20.59,
+          "worse10": 0,
+          "worse15": 0
+        },
+        "t5": {
+          "n": 34,
+          "mean": 1.07,
+          "median": 1.51,
+          "winRate": 61.76,
+          "lossRate": 38.24,
+          "maeN": 34,
+          "maeMean": -3.41,
+          "maeMedian": -2.9,
+          "worse5": 32.35,
+          "worse10": 8.82,
+          "worse15": 2.94
+        },
+        "t10": {
+          "n": 34,
+          "mean": 3.34,
+          "median": 4.14,
+          "winRate": 67.65,
+          "lossRate": 32.35,
+          "maeN": 34,
+          "maeMean": -5.23,
+          "maeMedian": -4.37,
+          "worse5": 47.06,
+          "worse10": 17.65,
+          "worse15": 2.94
+        },
+        "t20": {
+          "n": 34,
+          "mean": 5.82,
+          "median": 4.52,
+          "winRate": 61.76,
+          "lossRate": 38.24,
+          "maeN": 34,
+          "maeMean": -7.41,
+          "maeMedian": -4.72,
+          "worse5": 50,
+          "worse10": 29.41,
+          "worse15": 14.71
+        },
+        "t40": {
+          "n": 34,
+          "mean": 9.42,
+          "median": 8.73,
+          "winRate": 55.88,
+          "lossRate": 44.12,
+          "maeN": 34,
+          "maeMean": -9.87,
+          "maeMedian": -8.5,
+          "worse5": 64.71,
+          "worse10": 41.18,
+          "worse15": 26.47
+        },
+        "window": {
+          "n": 34,
+          "mean": 7.9,
+          "median": 4.65,
+          "winRate": 55.88,
+          "lossRate": 44.12,
+          "maeN": 34,
+          "maeMean": -9.27,
+          "maeMedian": -8.71,
+          "worse5": 61.76,
+          "worse10": 38.24,
+          "worse15": 23.53
+        }
+      },
+      "zeroMae": 0
+    },
+    "HIGH": {
+      "n": 35,
+      "window": {
+        "n": 35,
+        "mean": 15.89,
+        "median": 17.81,
+        "winRate": 65.71,
+        "lossRate": 31.43
+      },
+      "mae": {
+        "n": 34,
+        "mean": -8.36,
+        "median": -4.61,
+        "p5": -24.23,
+        "p25": -15.8,
+        "p75": -0.96
+      },
+      "mfe": {
+        "n": 34,
+        "mean": 26.17,
+        "median": 24.19,
+        "p75": 39.34,
+        "p95": 62.33
+      },
+      "lowDepth": {
+        "n": 34,
+        "mean": -8.36,
+        "median": -4.61
+      },
+      "lowToWindow": {
+        "n": 34,
+        "mean": 26.23,
+        "median": 25.06,
+        "winRate": 94.12,
+        "lossRate": 0
+      },
+      "ratio": {
+        "n": 34,
+        "mean": 12.41,
+        "median": 4.09
+      },
+      "efficiency": {
+        "n": 34,
+        "mean": 13,
+        "median": 4.34
+      },
+      "reboundPerDepth": {
+        "n": 34,
+        "mean": 13.11,
+        "median": 4.36
+      },
+      "positiveWindowAdverse": {
+        "denominator": 23,
+        "denominatorNote": "events with Window > 0 and an observed MAE",
+        "worse5": 21.74,
+        "worse10": 13.04,
+        "worse15": 4.35,
+        "worse20": 4.35
+      },
+      "horizons": {
+        "t1": {
+          "n": 35,
+          "mean": 0.78,
+          "median": -0.25,
+          "winRate": 48.57,
+          "lossRate": 51.43,
+          "maeN": 35,
+          "maeMean": 0.78,
+          "maeMedian": -0.25,
+          "worse5": 5.71,
+          "worse10": 0,
+          "worse15": 0
+        },
+        "t3": {
+          "n": 35,
+          "mean": 3.17,
+          "median": 3.6,
+          "winRate": 65.71,
+          "lossRate": 34.29,
+          "maeN": 35,
+          "maeMean": -1.88,
+          "maeMedian": -1.24,
+          "worse5": 20,
+          "worse10": 8.57,
+          "worse15": 0
+        },
+        "t5": {
+          "n": 35,
+          "mean": 2.68,
+          "median": 5.21,
+          "winRate": 68.57,
+          "lossRate": 31.43,
+          "maeN": 35,
+          "maeMean": -3.44,
+          "maeMedian": -2.41,
+          "worse5": 25.71,
+          "worse10": 17.14,
+          "worse15": 5.71
+        },
+        "t10": {
+          "n": 35,
+          "mean": 6.19,
+          "median": 6.12,
+          "winRate": 77.14,
+          "lossRate": 22.86,
+          "maeN": 35,
+          "maeMean": -4.98,
+          "maeMedian": -3.84,
+          "worse5": 31.43,
+          "worse10": 20,
+          "worse15": 14.29
+        },
+        "t20": {
+          "n": 35,
+          "mean": 9.76,
+          "median": 8.57,
+          "winRate": 71.43,
+          "lossRate": 28.57,
+          "maeN": 35,
+          "maeMean": -6.5,
+          "maeMedian": -4.51,
+          "worse5": 34.29,
+          "worse10": 25.71,
+          "worse15": 20
+        },
+        "t40": {
+          "n": 35,
+          "mean": 15.26,
+          "median": 16.48,
+          "winRate": 65.71,
+          "lossRate": 34.29,
+          "maeN": 35,
+          "maeMean": -8.36,
+          "maeMedian": -4.64,
+          "worse5": 45.71,
+          "worse10": 34.29,
+          "worse15": 22.86
+        },
+        "window": {
+          "n": 35,
+          "mean": 15.89,
+          "median": 17.81,
+          "winRate": 65.71,
+          "lossRate": 31.43,
+          "maeN": 34,
+          "maeMean": -8.36,
+          "maeMedian": -4.61,
+          "worse5": 44.12,
+          "worse10": 38.24,
+          "worse15": 26.47
+        }
+      },
+      "zeroMae": 0
+    }
+  },
+  "highLow": {
+    "windowMean": 12.11,
+    "windowMedian": 17,
+    "maeMean": -2.89,
+    "maeMedian": -1.52,
+    "mfeMean": 16.67,
+    "mfeMedian": 17.12,
+    "ratioMean": 6.26,
+    "ratioMedian": 3.83,
+    "lowDepthMean": -2.89,
+    "lowDepthMedian": -1.52,
+    "lowWindowMean": 16.21,
+    "lowWindowMedian": 16.71,
+    "worse15": 20.59,
+    "worse20": 14.71
+  },
+  "buckets": [
+    {
+      "id": "gt5",
+      "label": "MAE > -5%",
+      "n": 52,
+      "conclusion": "제한적",
+      "bands": {
+        "LOW": 20,
+        "MID": 13,
+        "HIGH": 19
+      },
+      "window": {
+        "n": 52,
+        "mean": 20.59,
+        "median": 14.31,
+        "winRate": 86.54,
+        "lossRate": 13.46
+      },
+      "lowToWindow": 21.54
+    },
+    {
+      "id": "m5",
+      "label": "-5% to -10%",
+      "n": 14,
+      "conclusion": "수치만",
+      "bands": {
+        "LOW": 4,
+        "MID": 8,
+        "HIGH": 2
+      },
+      "window": {
+        "n": 14,
+        "mean": 6.1,
+        "median": 3.48,
+        "winRate": 50,
+        "lossRate": 50
+      },
+      "lowToWindow": 15.44
+    },
+    {
+      "id": "m10",
+      "label": "-10% to -15%",
+      "n": 17,
+      "conclusion": "수치만",
+      "bands": {
+        "LOW": 8,
+        "MID": 5,
+        "HIGH": 4
+      },
+      "window": {
+        "n": 17,
+        "mean": 0.26,
+        "median": -2.57,
+        "winRate": 41.18,
+        "lossRate": 58.82
+      },
+      "lowToWindow": 13.49
+    },
+    {
+      "id": "m15",
+      "label": "-15% to -20%",
+      "n": 7,
+      "conclusion": "결론 금지",
+      "bands": {
+        "LOW": 1,
+        "MID": 3,
+        "HIGH": 3
+      },
+      "window": {
+        "n": 7,
+        "mean": -11.55,
+        "median": -12.5,
+        "winRate": 0,
+        "lossRate": 100
+      },
+      "lowToWindow": 7.56
+    },
+    {
+      "id": "le20",
+      "label": "MAE <= -20%",
+      "n": 12,
+      "conclusion": "수치만",
+      "bands": {
+        "LOW": 1,
+        "MID": 5,
+        "HIGH": 6
+      },
+      "window": {
+        "n": 12,
+        "mean": -10.54,
+        "median": -14.99,
+        "winRate": 16.67,
+        "lossRate": 83.33
+      },
+      "lowToWindow": 20.59
+    }
+  ],
+  "atrMae": {
+    "HIGH": {
+      "SHALLOW": {
+        "n": 21,
+        "conclusion": "제한적",
+        "window": 30.18,
+        "t10": 11.1,
+        "t20": 20.17,
+        "lowToWindow": 32.5,
+        "hit10": 100,
+        "mae": -1.79
+      },
+      "DEEP": {
+        "n": 13,
+        "conclusion": "수치만",
+        "window": -5.97,
+        "t10": -1.68,
+        "t20": -6.85,
+        "lowToWindow": 16.09,
+        "hit10": 53.85,
+        "mae": -18.99
+      }
+    },
+    "LOW": {
+      "SHALLOW": {
+        "n": 24,
+        "conclusion": "제한적",
+        "window": 7.38,
+        "t10": 5.99,
+        "t20": 8,
+        "lowToWindow": 9.32,
+        "hit10": 58.33,
+        "mae": -1.78
+      },
+      "DEEP": {
+        "n": 10,
+        "conclusion": "수치만",
+        "window": -4.86,
+        "t10": -5.54,
+        "t20": -5.76,
+        "lowToWindow": 11.71,
+        "hit10": 60,
+        "mae": -14.33
+      }
+    }
+  },
+  "bucketLinks": [
+    {
+      "id": "gt5",
+      "label": "MAE > -5%",
+      "n": 52,
+      "conclusion": "제한적",
+      "window": {
+        "n": 52,
+        "spearman": 0.5363
+      },
+      "lowToWindow": {
+        "n": 52,
+        "spearman": 0.5911
+      }
+    },
+    {
+      "id": "m5",
+      "label": "-5% to -10%",
+      "n": 14,
+      "conclusion": "수치만",
+      "window": {
+        "n": 14,
+        "spearman": 0.4549
+      },
+      "lowToWindow": {
+        "n": 14,
+        "spearman": 0.5033
+      }
+    },
+    {
+      "id": "m10",
+      "label": "-10% to -15%",
+      "n": 17,
+      "conclusion": "수치만",
+      "window": {
+        "n": 17,
+        "spearman": 0.2992
+      },
+      "lowToWindow": {
+        "n": 17,
+        "spearman": 0.3147
+      }
+    },
+    {
+      "id": "m15",
+      "label": "-15% to -20%",
+      "n": 7,
+      "conclusion": "결론 금지",
+      "window": {
+        "n": 7,
+        "spearman": -0.2857
+      },
+      "lowToWindow": {
+        "n": 7,
+        "spearman": -0.3214
+      }
+    },
+    {
+      "id": "le20",
+      "label": "MAE <= -20%",
+      "n": 12,
+      "conclusion": "수치만",
+      "window": {
+        "n": 12,
+        "spearman": -0.021
+      },
+      "lowToWindow": {
+        "n": 12,
+        "spearman": -0.1016
+      }
+    }
+  ],
+  "recovery": {
+    "LOW": {
+      "gt5": {
+        "3": {
+          "reached": 15,
+          "hitRate": 75,
+          "medianDays": 2
+        },
+        "5": {
+          "reached": 15,
+          "hitRate": 75,
+          "medianDays": 4
+        },
+        "10": {
+          "reached": 13,
+          "hitRate": 65,
+          "medianDays": 6
+        },
+        "15": {
+          "reached": 6,
+          "hitRate": 30,
+          "medianDays": 7.5
+        },
+        "20": {
+          "reached": 4,
+          "hitRate": 20,
+          "medianDays": 3
+        },
+        "eligible": 20,
+        "conclusion": "제한적"
+      },
+      "m5": {
+        "3": {
+          "reached": 2,
+          "hitRate": 50,
+          "medianDays": 2
+        },
+        "5": {
+          "reached": 2,
+          "hitRate": 50,
+          "medianDays": 5
+        },
+        "10": {
+          "reached": 1,
+          "hitRate": 25,
+          "medianDays": 4
+        },
+        "15": {
+          "reached": 1,
+          "hitRate": 25,
+          "medianDays": 5
+        },
+        "20": {
+          "reached": 1,
+          "hitRate": 25,
+          "medianDays": 6
+        },
+        "eligible": 4,
+        "conclusion": "결론 금지"
+      },
+      "m10": {
+        "3": {
+          "reached": 6,
+          "hitRate": 75,
+          "medianDays": 1.5
+        },
+        "5": {
+          "reached": 6,
+          "hitRate": 75,
+          "medianDays": 1.5
+        },
+        "10": {
+          "reached": 4,
+          "hitRate": 50,
+          "medianDays": 6.5
+        },
+        "15": {
+          "reached": 1,
+          "hitRate": 12.5,
+          "medianDays": 11
+        },
+        "20": {
+          "reached": 0,
+          "hitRate": 0,
+          "medianDays": null
+        },
+        "eligible": 8,
+        "conclusion": "결론 금지"
+      },
+      "m15": {
+        "3": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 2
+        },
+        "5": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 3
+        },
+        "10": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 3
+        },
+        "15": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 17
+        },
+        "20": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 20
+        },
+        "eligible": 1,
+        "conclusion": "결론 금지"
+      },
+      "le20": {
+        "3": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "10": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "15": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "20": {
+          "reached": 1,
+          "hitRate": 100,
+          "medianDays": 2
+        },
+        "eligible": 1,
+        "conclusion": "결론 금지"
+      }
+    },
+    "MID": {
+      "gt5": {
+        "3": {
+          "reached": 12,
+          "hitRate": 92.31,
+          "medianDays": 2
+        },
+        "5": {
+          "reached": 12,
+          "hitRate": 92.31,
+          "medianDays": 3.5
+        },
+        "10": {
+          "reached": 11,
+          "hitRate": 84.62,
+          "medianDays": 6
+        },
+        "15": {
+          "reached": 8,
+          "hitRate": 61.54,
+          "medianDays": 8.5
+        },
+        "20": {
+          "reached": 7,
+          "hitRate": 53.85,
+          "medianDays": 12
+        },
+        "eligible": 13,
+        "conclusion": "수치만"
+      },
+      "m5": {
+        "3": {
+          "reached": 7,
+          "hitRate": 87.5,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 6,
+          "hitRate": 75,
+          "medianDays": 2
+        },
+        "10": {
+          "reached": 6,
+          "hitRate": 75,
+          "medianDays": 3.5
+        },
+        "15": {
+          "reached": 5,
+          "hitRate": 62.5,
+          "medianDays": 8
+        },
+        "20": {
+          "reached": 5,
+          "hitRate": 62.5,
+          "medianDays": 9
+        },
+        "eligible": 8,
+        "conclusion": "결론 금지"
+      },
+      "m10": {
+        "3": {
+          "reached": 5,
+          "hitRate": 100,
+          "medianDays": 2
+        },
+        "5": {
+          "reached": 5,
+          "hitRate": 100,
+          "medianDays": 3
+        },
+        "10": {
+          "reached": 4,
+          "hitRate": 80,
+          "medianDays": 5.5
+        },
+        "15": {
+          "reached": 4,
+          "hitRate": 80,
+          "medianDays": 8
+        },
+        "20": {
+          "reached": 3,
+          "hitRate": 60,
+          "medianDays": 8
+        },
+        "eligible": 5,
+        "conclusion": "결론 금지"
+      },
+      "m15": {
+        "3": {
+          "reached": 3,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 2,
+          "hitRate": 66.67,
+          "medianDays": 2
+        },
+        "10": {
+          "reached": 0,
+          "hitRate": 0,
+          "medianDays": null
+        },
+        "15": {
+          "reached": 0,
+          "hitRate": 0,
+          "medianDays": null
+        },
+        "20": {
+          "reached": 0,
+          "hitRate": 0,
+          "medianDays": null
+        },
+        "eligible": 3,
+        "conclusion": "결론 금지"
+      },
+      "le20": {
+        "3": {
+          "reached": 3,
+          "hitRate": 60,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 3,
+          "hitRate": 60,
+          "medianDays": 1
+        },
+        "10": {
+          "reached": 3,
+          "hitRate": 60,
+          "medianDays": 2
+        },
+        "15": {
+          "reached": 3,
+          "hitRate": 60,
+          "medianDays": 3
+        },
+        "20": {
+          "reached": 2,
+          "hitRate": 40,
+          "medianDays": 3.5
+        },
+        "eligible": 5,
+        "conclusion": "결론 금지"
+      }
+    },
+    "HIGH": {
+      "gt5": {
+        "3": {
+          "reached": 19,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 19,
+          "hitRate": 100,
+          "medianDays": 2
+        },
+        "10": {
+          "reached": 19,
+          "hitRate": 100,
+          "medianDays": 4
+        },
+        "15": {
+          "reached": 17,
+          "hitRate": 89.47,
+          "medianDays": 7
+        },
+        "20": {
+          "reached": 14,
+          "hitRate": 73.68,
+          "medianDays": 11
+        },
+        "eligible": 19,
+        "conclusion": "수치만"
+      },
+      "m5": {
+        "3": {
+          "reached": 2,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 2,
+          "hitRate": 100,
+          "medianDays": 1.5
+        },
+        "10": {
+          "reached": 2,
+          "hitRate": 100,
+          "medianDays": 2
+        },
+        "15": {
+          "reached": 2,
+          "hitRate": 100,
+          "medianDays": 4
+        },
+        "20": {
+          "reached": 2,
+          "hitRate": 100,
+          "medianDays": 16
+        },
+        "eligible": 2,
+        "conclusion": "결론 금지"
+      },
+      "m10": {
+        "3": {
+          "reached": 2,
+          "hitRate": 50,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 2,
+          "hitRate": 50,
+          "medianDays": 1
+        },
+        "10": {
+          "reached": 2,
+          "hitRate": 50,
+          "medianDays": 5
+        },
+        "15": {
+          "reached": 2,
+          "hitRate": 50,
+          "medianDays": 7
+        },
+        "20": {
+          "reached": 2,
+          "hitRate": 50,
+          "medianDays": 8
+        },
+        "eligible": 4,
+        "conclusion": "결론 금지"
+      },
+      "m15": {
+        "3": {
+          "reached": 2,
+          "hitRate": 66.67,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 1,
+          "hitRate": 33.33,
+          "medianDays": 1
+        },
+        "10": {
+          "reached": 1,
+          "hitRate": 33.33,
+          "medianDays": 4
+        },
+        "15": {
+          "reached": 1,
+          "hitRate": 33.33,
+          "medianDays": 11
+        },
+        "20": {
+          "reached": 0,
+          "hitRate": 0,
+          "medianDays": null
+        },
+        "eligible": 3,
+        "conclusion": "결론 금지"
+      },
+      "le20": {
+        "3": {
+          "reached": 6,
+          "hitRate": 100,
+          "medianDays": 1
+        },
+        "5": {
+          "reached": 6,
+          "hitRate": 100,
+          "medianDays": 2
+        },
+        "10": {
+          "reached": 4,
+          "hitRate": 66.67,
+          "medianDays": 2.5
+        },
+        "15": {
+          "reached": 4,
+          "hitRate": 66.67,
+          "medianDays": 3.5
+        },
+        "20": {
+          "reached": 3,
+          "hitRate": 50,
+          "medianDays": 4
+        },
+        "eligible": 6,
+        "conclusion": "결론 금지"
+      }
+    }
+  },
+  "leadership": {
+    "HIGH": {
+      "HIGH": {
+        "n": 10,
+        "conclusion": "수치만",
+        "window": 29.97,
+        "mae": -4.27,
+        "mfe": 37.57,
+        "ratioMean": 22.56,
+        "ratioMedian": 19.39,
+        "lowToWindow": 35.46,
+        "hit10": 90
+      },
+      "LOW": {
+        "n": 1,
+        "conclusion": "결론 금지",
+        "window": 11.03,
+        "mae": -1.67,
+        "mfe": 12.45,
+        "ratioMean": 6.61,
+        "ratioMedian": 6.61,
+        "lowToWindow": 12.92,
+        "hit10": 100
+      }
+    },
+    "LOW": {
+      "HIGH": {
+        "n": 8,
+        "conclusion": "결론 금지",
+        "window": 3.56,
+        "mae": -12.83,
+        "mfe": 16.62,
+        "ratioMean": 2.09,
+        "ratioMedian": 1.14,
+        "lowToWindow": 17.99,
+        "hit10": 75
+      },
+      "LOW": {
+        "n": 16,
+        "conclusion": "수치만",
+        "window": 7.62,
+        "mae": -2.94,
+        "mfe": 12.34,
+        "ratioMean": 10.59,
+        "ratioMedian": 2.55,
+        "lowToWindow": 10.81,
+        "hit10": 62.5
+      }
+    }
+  },
+  "regression": {
+    "window": {
+      "n": 103,
+      "r2": 0.1731,
+      "t0": 0.3015,
+      "atr": 0.3383,
+      "atrOnlySpearman": 0.1967,
+      "sameSign": true
+    },
+    "mae": {
+      "n": 102,
+      "r2": 0.0528,
+      "t0": 0.1981,
+      "atr": -0.0898,
+      "atrOnlySpearman": -0.1712,
+      "sameSign": true
+    },
+    "note": "Standardized association. Not a causal estimate."
+  },
+  "continuous": {
+    "window": {
+      "n": 103,
+      "spearman": 0.1967
+    },
+    "mae": {
+      "n": 102,
+      "spearman": -0.1712
+    },
+    "mfe": {
+      "n": 102,
+      "spearman": 0.3915
+    },
+    "lowDepth": {
+      "n": 102,
+      "spearman": -0.1712
+    },
+    "lowWindow": {
+      "n": 102,
+      "spearman": 0.4107
+    },
+    "hit10": {
+      "n": 72,
+      "spearman": -0.3421
+    }
+  },
+  "robust": {
+    "withinStock": "결론 금지",
+    "window": {
+      "eventWeighted": {
+        "n": 103,
+        "spearman": 0.1967
+      },
+      "tickerWeighted": {
+        "tickers": 30,
+        "spearman": 0.4033,
+        "maxEvents": 9
+      },
+      "leaveOneTicker": {
+        "baseline": 0.1967,
+        "min": 0.1521,
+        "max": 0.234,
+        "median": 0.1992,
+        "signFlips": []
+      },
+      "highLowGap": {
+        "baseline": 12.11,
+        "min": 10.79,
+        "max": 14.37,
+        "median": 11.94,
+        "signFlips": 0
+      }
+    },
+    "mae": {
+      "eventWeighted": {
+        "n": 102,
+        "spearman": -0.1712
+      },
+      "tickerWeighted": {
+        "tickers": 30,
+        "spearman": -0.1973,
+        "maxEvents": 9
+      },
+      "leaveOneTicker": {
+        "baseline": -0.1712,
+        "min": -0.2102,
+        "max": -0.1295,
+        "median": -0.1682,
+        "signFlips": []
+      },
+      "highLowGap": {
+        "baseline": -2.89,
+        "min": -3.71,
+        "max": -1.87,
+        "median": -2.9,
+        "signFlips": 0
+      }
+    },
+    "lowWindow": {
+      "eventWeighted": {
+        "n": 102,
+        "spearman": 0.4107
+      },
+      "tickerWeighted": {
+        "tickers": 30,
+        "spearman": 0.5715,
+        "maxEvents": 9
+      },
+      "leaveOneTicker": {
+        "baseline": 0.4107,
+        "min": 0.3888,
+        "max": 0.4422,
+        "median": 0.4111,
+        "signFlips": []
+      },
+      "highLowGap": {
+        "baseline": 16.21,
+        "min": 15.01,
+        "max": 17.66,
+        "median": 16.16,
+        "signFlips": 0
+      }
+    }
+  },
+  "bootstrap": {
+    "window": {
+      "nHigh": 35,
+      "nLow": 34,
+      "meanDiff": 12.11,
+      "medianDiff": 17,
+      "ci95": [
+        3.42,
+        20.85
+      ],
+      "permutationTail": 0.009
+    },
+    "mae": {
+      "nHigh": 34,
+      "nLow": 34,
+      "meanDiff": -2.89,
+      "medianDiff": -1.53,
+      "ci95": [
+        -6.95,
+        1.15
+      ],
+      "permutationTail": 0.1674
+    },
+    "mfe": {
+      "nHigh": 34,
+      "nLow": 34,
+      "meanDiff": 16.67,
+      "medianDiff": 17.12,
+      "ci95": [
+        9.09,
+        24.58
+      ],
+      "permutationTail": 0.0001
+    },
+    "lowDepth": {
+      "nHigh": 34,
+      "nLow": 34,
+      "meanDiff": -2.89,
+      "medianDiff": -1.53,
+      "ci95": [
+        -6.85,
+        1.18
+      ],
+      "permutationTail": 0.1683
+    },
+    "lowWindow": {
+      "nHigh": 34,
+      "nLow": 34,
+      "meanDiff": 16.21,
+      "medianDiff": 16.7,
+      "ci95": [
+        8.95,
+        23.44
+      ],
+      "permutationTail": 0
+    },
+    "ratio": {
+      "nHigh": 34,
+      "nLow": 34,
+      "meanDiff": 6.26,
+      "medianDiff": 3.83,
+      "ci95": [
+        -1.96,
+        15.21
+      ],
+      "permutationTail": 0.1801
+    }
+  },
+  "v20Link": {
+    "windowSpearman": 0.1967,
+    "lowWindowSpearman": 0.4107,
+    "maeSpearman": -0.1712,
+    "sameReboundSign": true
+  },
+  "judgment": {
+    "label": "부분적으로 지지"
+  }
+}
