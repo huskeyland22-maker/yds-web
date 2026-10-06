@@ -1,11 +1,18 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import { collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
-import { equityResearchDisplayList, visibleResearchStocks } from "../utils/equityResearchDisplay.js"
+import {
+  closeTickerPicker,
+  equityResearchDisplayList,
+  equityTickerLabel,
+  initialTickerPickerState,
+  toggleTickerPicker,
+  visibleResearchStocks,
+} from "../utils/equityResearchDisplay.js"
 
 const DEFAULT_SYMBOL = "AMZN"
 
@@ -66,6 +73,8 @@ export default function EquityDailyBottomBuyPage() {
   const [symbol, setSymbol] = useState(DEFAULT_SYMBOL)
   const [group, setGroup] = useState("all")
   const [query, setQuery] = useState("")
+  const [picker, setPicker] = useState(initialTickerPickerState)
+  const pickerRef = useRef(null)
   const [payload, setPayload] = useState(null)
   const [loading, setLoading] = useState(true)
   const [candidates, setCandidates] = useState(null)
@@ -166,9 +175,17 @@ export default function EquityDailyBottomBuyPage() {
     [catalog, group, query],
   )
 
-  const options = visible.some((row) => row.symbol === symbol)
-    ? visible
-    : [catalog.find((row) => row.symbol === symbol), ...visible].filter(Boolean)
+  const selectedRow = catalog.find((row) => row.symbol === symbol) || null
+  const selectedLabel = equityTickerLabel(selectedRow) || symbol
+
+  useEffect(() => {
+    if (!picker.open) return undefined
+    function onPointerDown(event) {
+      if (!pickerRef.current?.contains(event.target)) setPicker(closeTickerPicker())
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    return () => document.removeEventListener("pointerdown", onPointerDown)
+  }, [picker.open])
 
   const buyProgress = useMemo(() => {
     void recordsVersion
@@ -228,9 +245,6 @@ export default function EquityDailyBottomBuyPage() {
                     <p className="yds-dbb-cand__name">
                       <span className="yds-dbb-cand__title">{row.name}</span>
                       <span className="yds-dbb-cand__ticker">{row.symbol}</span>
-                      {row.priority === "CORE" || row.priority === "WATCH" ? (
-                        <span className={`yds-dbb-priority yds-dbb-priority--${row.priority.toLowerCase()}`}>{row.priority}</span>
-                      ) : null}
                     </p>
                     {type ? (
                       <>
@@ -252,66 +266,64 @@ export default function EquityDailyBottomBuyPage() {
 
       <section className="yds-dbb-card mb-3">
         <h2 className="yds-dbb-section__title">종목 선택</h2>
-        <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <label className="block text-xs text-slate-400">
-            그룹
-            <select
-              className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
-              value={group}
-              onChange={(e) => setGroup(e.target.value)}
-            >
-              <option value="all">전체</option>
-              {groups.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block text-xs text-slate-400">
-            검색
-            <input
-              className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
-              value={query}
-              placeholder="티커 또는 이름"
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </label>
-        </div>
-        <label className="mt-2 block text-xs text-slate-400">
-          종목
-          <select
-            className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value)}
+        <div className="yds-dbb-picker" ref={pickerRef}>
+          <button
+            type="button"
+            className="yds-dbb-picker__toggle"
+            aria-expanded={picker.open}
+            aria-controls="equity-ticker-list"
+            onClick={() => setPicker((state) => toggleTickerPicker(state))}
           >
-            {options.map((row) => (
-              <option key={row.symbol} value={row.symbol}>
-                {row.symbol} {row.name}
-                {row.role === "CORE" || row.role === "WATCH" ? ` · ${row.role}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        <ul className="yds-dbb-research-list mt-2" aria-label="연구 종목 31">
-          {visible.map((row) => (
-            <li key={row.symbol}>
-              <button
-                type="button"
-                className={`yds-dbb-research-list__item${row.symbol === symbol ? " is-selected" : ""}`}
-                aria-pressed={row.symbol === symbol}
-                onClick={() => setSymbol(row.symbol)}
-              >
-                <span>{row.symbol}</span>
-                <span>{row.name}</span>
-                {row.role === "CORE" || row.role === "WATCH" ? <span>{row.role}</span> : null}
-              </button>
-            </li>
-          ))}
-        </ul>
-        {universe.length > 0 && visible.length === 0 ? (
-          <p className="yds-dbb__status">검색 결과가 없습니다.</p>
-        ) : null}
+            <span>{selectedLabel}</span>
+            <span aria-hidden="true">{picker.open ? "▲" : "▼"}</span>
+          </button>
+          {picker.open ? (
+            <div className="yds-dbb-picker__panel" id="equity-ticker-list">
+              <label className="block text-xs text-slate-400">
+                그룹
+                <select
+                  className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
+                  value={group}
+                  onChange={(e) => setGroup(e.target.value)}
+                >
+                  <option value="all">전체</option>
+                  {groups.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-xs text-slate-400">
+                검색
+                <input
+                  className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
+                  value={query}
+                  placeholder="티커 또는 종목명"
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </label>
+              <ul className="yds-dbb-research-list" aria-label="연구 종목 31">
+                {visible.map((row) => (
+                  <li key={row.symbol}>
+                    <button
+                      type="button"
+                      className={`yds-dbb-research-list__item${row.symbol === symbol ? " is-selected" : ""}`}
+                      aria-pressed={row.symbol === symbol}
+                      onClick={() => {
+                        setSymbol(row.symbol)
+                        setPicker(closeTickerPicker())
+                      }}
+                    >
+                      {equityTickerLabel(row)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {visible.length === 0 ? <p className="yds-dbb__status">검색 결과가 없습니다.</p> : null}
+            </div>
+          ) : null}
+        </div>
       </section>
 
       {loading && <p className="yds-dbb__status">불러오는 중…</p>}
@@ -329,9 +341,6 @@ export default function EquityDailyBottomBuyPage() {
             <p className="yds-dbb-card__ticker mt-2">
               {view.name}
               <span className="yds-dbb-card__theme-inline"> {view.symbol}</span>
-              {view.priority === "CORE" || view.priority === "WATCH" ? (
-                <span className={`yds-dbb-priority yds-dbb-priority--${view.priority.toLowerCase()}`}>{view.priority}</span>
-              ) : null}
             </p>
             <p className="yds-dbb__meta">{view.group}</p>
             <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">{priceText}</p>

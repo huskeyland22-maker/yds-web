@@ -38817,6 +38817,29 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
+.yds-dbb-picker {
+  position: relative;
+  margin-top: 0.5rem;
+}
+.yds-dbb-picker__toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgba(71, 85, 105, 0.9);
+  border-radius: 0.375rem;
+  background: #020617;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  text-align: left;
+}
+.yds-dbb-picker__panel {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
 .yds-dbb-research-list {
   display: grid;
   gap: 0.25rem;

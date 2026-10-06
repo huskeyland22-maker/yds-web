@@ -8,7 +8,14 @@ import {
   EQUITY_SELL_RESEARCH_SELECTED_STRATEGY,
   EQUITY_SELL_RESEARCH_UNIVERSE,
 } from "./lib/equity-sell-research-universe.mjs"
-import { equityResearchDisplayList, visibleResearchStocks } from "../vite-project/src/utils/equityResearchDisplay.js"
+import {
+  closeTickerPicker,
+  equityResearchDisplayList,
+  equityTickerLabel,
+  initialTickerPickerState,
+  toggleTickerPicker,
+  visibleResearchStocks,
+} from "../vite-project/src/utils/equityResearchDisplay.js"
 
 const EXPECTED = [
   "AMZN", "AAPL", "AMAT", "ASML", "AVGO", "CEG", "ETN", "FCX", "FTNT", "GOOGL",
@@ -30,5 +37,22 @@ describe("equity research display", () => {
     assert.equal(equityUniverse().length, 20)
     assert.equal(equityUniverse().some((row) => row.symbol === "CRWD"), false)
     assert.equal(equityUniverse().some((row) => row.symbol === "AMD"), false)
+  })
+
+  it("starts collapsed and labels tickers without CORE or WATCH", () => {
+    const shown = equityResearchDisplayList()
+    const labels = shown.map((row) => equityTickerLabel(row))
+    assert.equal(initialTickerPickerState().open, false)
+    const opened = toggleTickerPicker(initialTickerPickerState())
+    assert.equal(opened.open, true)
+    assert.equal(closeTickerPicker().open, false)
+    assert.equal(equityTickerLabel(shown.find((row) => row.symbol === "AMZN")), "AMZN · Amazon · 아마존")
+    assert.equal(equityTickerLabel(shown.find((row) => row.symbol === "NVDA")), "NVDA · NVIDIA · 엔비디아")
+    assert.equal(equityTickerLabel(shown.find((row) => row.symbol === "CRWD")), "CRWD · CrowdStrike · 크라우드스트라이크")
+    assert.equal(labels.some((label) => label.includes("CORE") || label.includes("WATCH")), false)
+    assert.deepEqual(visibleResearchStocks(shown, { query: "엔비디아" }).map((row) => row.symbol), ["NVDA"])
+    assert.deepEqual(visibleResearchStocks(shown, { query: "NVIDIA" }).map((row) => row.symbol), ["NVDA"])
+    assert.deepEqual(visibleResearchStocks(shown, { query: "NVDA" }).map((row) => row.symbol), ["NVDA"])
+    assert.deepEqual(visibleResearchStocks(shown, { query: "크라우드스트라이크" }).map((row) => row.symbol), ["CRWD"])
   })
 })
