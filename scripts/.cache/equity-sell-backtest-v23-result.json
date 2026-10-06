@@ -1,0 +1,5748 @@
+{
+  "selectedStrategy": null,
+  "note": "Depth, velocity, and persistence use only closes through the checkpoint. Average velocity is depth divided by a fixed day count. Regression velocity is the recent signed slope. Path types use the T+5 predictor median and a 2-day arrival cut, not the later outcome. Not a sell rule.",
+  "baseline": {
+    "events": 103,
+    "lowEvents": 102,
+    "groups": {
+      "HIGH": 15,
+      "MID": 53,
+      "LOW": 35
+    },
+    "bands": {
+      "LOW": 34,
+      "MID": 34,
+      "HIGH": 35
+    }
+  },
+  "rules": {
+    "depthMedian": 0.0199,
+    "fastMaxDays": 2,
+    "vifLimit": 5
+  },
+  "correlations": {
+    "t1": {
+      "depth": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.2472,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.1059,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.1577,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2054,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.0639,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.1244,
+          "conclusion": "제한적"
+        }
+      },
+      "avgVelocity": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.2472,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.1059,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.1577,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2054,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.0639,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.1244,
+          "conclusion": "제한적"
+        }
+      },
+      "recentSlope": {
+        "t10": {
+          "n": 103,
+          "spearman": 0.2666,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": 0.1655,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": 0.1831,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": 0.2298,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": 0.0784,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": 0.0482,
+          "conclusion": "제한적"
+        }
+      },
+      "arrivalSpeed": {
+        "t10": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": null,
+          "conclusion": "제한적"
+        }
+      },
+      "daysToMae": {
+        "t10": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": null,
+          "conclusion": "제한적"
+        }
+      },
+      "renewalCount": {
+        "t10": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": null,
+          "conclusion": "제한적"
+        }
+      },
+      "deterioration": {
+        "t10": {
+          "n": 0,
+          "spearman": null,
+          "conclusion": "결론 금지"
+        },
+        "t20": {
+          "n": 0,
+          "spearman": null,
+          "conclusion": "결론 금지"
+        },
+        "t40": {
+          "n": 0,
+          "spearman": null,
+          "conclusion": "결론 금지"
+        },
+        "window": {
+          "n": 0,
+          "spearman": null,
+          "conclusion": "결론 금지"
+        },
+        "lowWindow": {
+          "n": 0,
+          "spearman": null,
+          "conclusion": "결론 금지"
+        },
+        "hit10": {
+          "n": 0,
+          "spearman": null,
+          "conclusion": "결론 금지"
+        }
+      }
+    },
+    "t3": {
+      "depth": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.3341,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.1837,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2085,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2042,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.0535,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.0583,
+          "conclusion": "제한적"
+        }
+      },
+      "avgVelocity": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.3341,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.1837,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2085,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2042,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.0535,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.0583,
+          "conclusion": "제한적"
+        }
+      },
+      "recentSlope": {
+        "t10": {
+          "n": 103,
+          "spearman": 0.3653,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": 0.3445,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": 0.2923,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": 0.2708,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": 0.2051,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.1886,
+          "conclusion": "제한적"
+        }
+      },
+      "arrivalSpeed": {
+        "t10": {
+          "n": 103,
+          "spearman": 0.2303,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": 0.168,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": 0.1738,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": 0.1347,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": 0.158,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.2042,
+          "conclusion": "제한적"
+        }
+      },
+      "daysToMae": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.2303,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.168,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.1738,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.1347,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.158,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": 0.2042,
+          "conclusion": "제한적"
+        }
+      },
+      "renewalCount": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.2263,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.1811,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2105,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.1714,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.1859,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": 0.1821,
+          "conclusion": "제한적"
+        }
+      },
+      "deterioration": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.2077,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.1385,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.1705,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.1306,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.1542,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": 0.2234,
+          "conclusion": "제한적"
+        }
+      }
+    },
+    "t5": {
+      "depth": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.4173,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.2547,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2654,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2553,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.0153,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.1691,
+          "conclusion": "제한적"
+        }
+      },
+      "avgVelocity": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.4173,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.2547,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2654,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2553,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.0153,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.1691,
+          "conclusion": "제한적"
+        }
+      },
+      "recentSlope": {
+        "t10": {
+          "n": 103,
+          "spearman": 0.4093,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": 0.3156,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": 0.2125,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": 0.205,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": 0.0003,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": 0.061,
+          "conclusion": "제한적"
+        }
+      },
+      "arrivalSpeed": {
+        "t10": {
+          "n": 103,
+          "spearman": 0.3472,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": 0.3133,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": 0.2389,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": 0.2631,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": 0.1406,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.0673,
+          "conclusion": "제한적"
+        }
+      },
+      "daysToMae": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.3472,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.3133,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2389,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2631,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.1406,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": 0.0673,
+          "conclusion": "제한적"
+        }
+      },
+      "renewalCount": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.3587,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.3054,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2668,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2692,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.1655,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": 0.0707,
+          "conclusion": "제한적"
+        }
+      },
+      "deterioration": {
+        "t10": {
+          "n": 103,
+          "spearman": -0.3716,
+          "conclusion": "제한적"
+        },
+        "t20": {
+          "n": 103,
+          "spearman": -0.2912,
+          "conclusion": "제한적"
+        },
+        "t40": {
+          "n": 103,
+          "spearman": -0.2214,
+          "conclusion": "제한적"
+        },
+        "window": {
+          "n": 103,
+          "spearman": -0.2413,
+          "conclusion": "제한적"
+        },
+        "lowWindow": {
+          "n": 102,
+          "spearman": -0.0395,
+          "conclusion": "제한적"
+        },
+        "hit10": {
+          "n": 72,
+          "spearman": -0.1517,
+          "conclusion": "제한적"
+        }
+      }
+    }
+  },
+  "overlap": {
+    "t1": {
+      "n": 103,
+      "varying": [
+        "depth",
+        "velocity"
+      ],
+      "pairs": {
+        "depth_velocity": {
+          "n": 103,
+          "spearman": -0.9374,
+          "conclusion": "제한적"
+        },
+        "depth_persistence": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        },
+        "velocity_persistence": {
+          "n": 103,
+          "spearman": null,
+          "conclusion": "제한적"
+        }
+      },
+      "vif": {
+        "depth": 2.49,
+        "velocity": 2.49
+      },
+      "depthVelocityVif": 2.49,
+      "averageVelocityNote": "Average decline rate equals depth divided by a fixed day count, so it is not entered beside depth.",
+      "velocityJoint": "fit",
+      "fullJoint": "skipped"
+    },
+    "t3": {
+      "n": 103,
+      "varying": [
+        "depth",
+        "velocity",
+        "persistence"
+      ],
+      "pairs": {
+        "depth_velocity": {
+          "n": 103,
+          "spearman": -0.3295,
+          "conclusion": "제한적"
+        },
+        "depth_persistence": {
+          "n": 103,
+          "spearman": 0.3243,
+          "conclusion": "제한적"
+        },
+        "velocity_persistence": {
+          "n": 103,
+          "spearman": -0.7928,
+          "conclusion": "제한적"
+        }
+      },
+      "vif": {
+        "depth": 1.21,
+        "velocity": 2.22,
+        "persistence": 2
+      },
+      "depthVelocityVif": 1.21,
+      "averageVelocityNote": "Average decline rate equals depth divided by a fixed day count, so it is not entered beside depth.",
+      "velocityJoint": "fit",
+      "fullJoint": "fit"
+    },
+    "t5": {
+      "n": 103,
+      "varying": [
+        "depth",
+        "velocity",
+        "persistence"
+      ],
+      "pairs": {
+        "depth_velocity": {
+          "n": 103,
+          "spearman": -0.1509,
+          "conclusion": "제한적"
+        },
+        "depth_persistence": {
+          "n": 103,
+          "spearman": 0.5128,
+          "conclusion": "제한적"
+        },
+        "velocity_persistence": {
+          "n": 103,
+          "spearman": -0.3667,
+          "conclusion": "제한적"
+        }
+      },
+      "vif": {
+        "depth": 1.51,
+        "velocity": 1.34,
+        "persistence": 1.43
+      },
+      "depthVelocityVif": 1.26,
+      "averageVelocityNote": "Average decline rate equals depth divided by a fixed day count, so it is not entered beside depth.",
+      "velocityJoint": "fit",
+      "fullJoint": "fit"
+    }
+  },
+  "models": {
+    "t1": {
+      "t10": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0016,
+          "adjustedR2": -0.0083,
+          "spearman": 0.0613,
+          "mae": 7.4399,
+          "rmse": 9.8127,
+          "standardized": {
+            "t0": 0.0402
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.0097,
+          "adjustedR2": -0.0101,
+          "spearman": 0.1087,
+          "mae": 7.4191,
+          "rmse": 9.7731,
+          "standardized": {
+            "t0": 0.0483,
+            "leadership": 0.09
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.067,
+          "adjustedR2": 0.0387,
+          "spearman": 0.2173,
+          "mae": 7.1871,
+          "rmse": 9.4861,
+          "standardized": {
+            "t0": 0.0814,
+            "leadership": 0.0076,
+            "eventAtr": 0.2563
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.1046,
+          "adjustedR2": 0.0681,
+          "spearman": 0.3151,
+          "mae": 6.9235,
+          "rmse": 9.2927,
+          "standardized": {
+            "t0": 0.0683,
+            "leadership": -0.0148,
+            "eventAtr": 0.2826,
+            "depth": -0.1967
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.1114,
+          "adjustedR2": 0.0751,
+          "spearman": 0.3605,
+          "mae": 6.877,
+          "rmse": 9.2574,
+          "standardized": {
+            "t0": 0.0477,
+            "leadership": -0.0306,
+            "eventAtr": 0.2379,
+            "velocity": 0.2178
+          }
+        },
+        "M5": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.1133,
+          "adjustedR2": 0.0676,
+          "spearman": 0.3406,
+          "mae": 6.8747,
+          "rmse": 9.2475,
+          "standardized": {
+            "t0": 0.052,
+            "leadership": -0.0285,
+            "eventAtr": 0.2526,
+            "depth": -0.0729,
+            "velocity": 0.1587
+          }
+        },
+        "M7": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "M8": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.0376,
+          "deltaSpearman": 0.0978,
+          "deltaPearson": null,
+          "deltaMae": -0.2636,
+          "deltaRmse": -0.1934
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.0068,
+          "deltaSpearman": 0.0454,
+          "deltaPearson": null,
+          "deltaMae": -0.0465,
+          "deltaRmse": -0.0353
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.0087,
+          "deltaSpearman": 0.0255,
+          "deltaPearson": null,
+          "deltaMae": -0.0488,
+          "deltaRmse": -0.0452
+        },
+        "m3m5": null,
+        "m3m7": null,
+        "m3m8": null
+      },
+      "t20": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0606,
+          "adjustedR2": 0.0513,
+          "spearman": 0.2508,
+          "mae": 11.7167,
+          "rmse": 14.9902,
+          "standardized": {
+            "t0": 0.2461
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.0971,
+          "adjustedR2": 0.079,
+          "spearman": 0.2977,
+          "mae": 11.3583,
+          "rmse": 14.6958,
+          "standardized": {
+            "t0": 0.2633,
+            "leadership": 0.1919
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.1353,
+          "adjustedR2": 0.1091,
+          "spearman": 0.3392,
+          "mae": 11.124,
+          "rmse": 14.3818,
+          "standardized": {
+            "t0": 0.2903,
+            "leadership": 0.1247,
+            "eventAtr": 0.2092
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.1356,
+          "adjustedR2": 0.1003,
+          "spearman": 0.3393,
+          "mae": 11.1379,
+          "rmse": 14.3789,
+          "standardized": {
+            "t0": 0.2891,
+            "leadership": 0.1226,
+            "eventAtr": 0.2117,
+            "depth": -0.0187
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.1466,
+          "adjustedR2": 0.1118,
+          "spearman": 0.3626,
+          "mae": 11.0326,
+          "rmse": 14.2873,
+          "standardized": {
+            "t0": 0.2733,
+            "leadership": 0.1054,
+            "eventAtr": 0.1999,
+            "velocity": 0.1099
+          }
+        },
+        "M5": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.1585,
+          "adjustedR2": 0.1151,
+          "spearman": 0.4019,
+          "mae": 10.8613,
+          "rmse": 14.1876,
+          "standardized": {
+            "t0": 0.2626,
+            "leadership": 0.1003,
+            "eventAtr": 0.1631,
+            "depth": 0.182,
+            "velocity": 0.2573
+          }
+        },
+        "M7": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "M8": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.0003,
+          "deltaSpearman": 0.0001,
+          "deltaPearson": null,
+          "deltaMae": 0.0139,
+          "deltaRmse": -0.0029
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.011,
+          "deltaSpearman": 0.0233,
+          "deltaPearson": null,
+          "deltaMae": -0.1053,
+          "deltaRmse": -0.0916
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.0229,
+          "deltaSpearman": 0.0626,
+          "deltaPearson": null,
+          "deltaMae": -0.2766,
+          "deltaRmse": -0.1913
+        },
+        "m3m5": null,
+        "m3m7": null,
+        "m3m8": null
+      },
+      "window": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0615,
+          "adjustedR2": 0.0522,
+          "spearman": 0.2511,
+          "mae": 15.8459,
+          "rmse": 19.8436,
+          "standardized": {
+            "t0": 0.2481
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.1137,
+          "adjustedR2": 0.096,
+          "spearman": 0.316,
+          "mae": 15.5477,
+          "rmse": 19.2844,
+          "standardized": {
+            "t0": 0.2687,
+            "leadership": 0.2293
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.1892,
+          "adjustedR2": 0.1646,
+          "spearman": 0.3593,
+          "mae": 14.4958,
+          "rmse": 18.4443,
+          "standardized": {
+            "t0": 0.3067,
+            "leadership": 0.1347,
+            "eventAtr": 0.2942
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.1942,
+          "adjustedR2": 0.1613,
+          "spearman": 0.364,
+          "mae": 14.4364,
+          "rmse": 18.3877,
+          "standardized": {
+            "t0": 0.3019,
+            "leadership": 0.1266,
+            "eventAtr": 0.3038,
+            "depth": -0.0715
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.2064,
+          "adjustedR2": 0.174,
+          "spearman": 0.3912,
+          "mae": 14.1657,
+          "rmse": 18.2477,
+          "standardized": {
+            "t0": 0.2857,
+            "leadership": 0.111,
+            "eventAtr": 0.2828,
+            "velocity": 0.1354
+          }
+        },
+        "M5": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.2095,
+          "adjustedR2": 0.1688,
+          "spearman": 0.4054,
+          "mae": 14.1457,
+          "rmse": 18.2122,
+          "standardized": {
+            "t0": 0.2802,
+            "leadership": 0.1084,
+            "eventAtr": 0.264,
+            "depth": 0.0928,
+            "velocity": 0.2106
+          }
+        },
+        "M7": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "M8": {
+          "skipped": "T+1 renewal count does not vary"
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.005,
+          "deltaSpearman": 0.0047,
+          "deltaPearson": null,
+          "deltaMae": -0.0594,
+          "deltaRmse": -0.0566
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.0122,
+          "deltaSpearman": 0.0272,
+          "deltaPearson": null,
+          "deltaMae": -0.2707,
+          "deltaRmse": -0.14
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.0153,
+          "deltaSpearman": 0.0414,
+          "deltaPearson": null,
+          "deltaMae": -0.2907,
+          "deltaRmse": -0.1755
+        },
+        "m3m5": null,
+        "m3m7": null,
+        "m3m8": null
+      }
+    },
+    "t3": {
+      "t10": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0016,
+          "adjustedR2": -0.0083,
+          "spearman": 0.0613,
+          "mae": 7.4399,
+          "rmse": 9.8127,
+          "standardized": {
+            "t0": 0.0402
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.0097,
+          "adjustedR2": -0.0101,
+          "spearman": 0.1087,
+          "mae": 7.4191,
+          "rmse": 9.7731,
+          "standardized": {
+            "t0": 0.0483,
+            "leadership": 0.09
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.067,
+          "adjustedR2": 0.0387,
+          "spearman": 0.2173,
+          "mae": 7.1871,
+          "rmse": 9.4861,
+          "standardized": {
+            "t0": 0.0814,
+            "leadership": 0.0076,
+            "eventAtr": 0.2563
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.2134,
+          "adjustedR2": 0.1813,
+          "spearman": 0.4566,
+          "mae": 6.5667,
+          "rmse": 8.71,
+          "standardized": {
+            "t0": 0.0361,
+            "leadership": 0.0045,
+            "eventAtr": 0.3328,
+            "depth": -0.394
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.2061,
+          "adjustedR2": 0.1737,
+          "spearman": 0.4767,
+          "mae": 6.6984,
+          "rmse": 8.7503,
+          "standardized": {
+            "t0": 0.048,
+            "leadership": 0.0667,
+            "eventAtr": 0.2252,
+            "velocity": 0.3788
+          }
+        },
+        "M5": {
+          "n": 103,
+          "r2": 0.1131,
+          "adjustedR2": 0.0769,
+          "spearman": 0.3587,
+          "mae": 6.9027,
+          "rmse": 9.2485,
+          "standardized": {
+            "t0": 0.0731,
+            "leadership": 0.037,
+            "eventAtr": 0.2461,
+            "persistence": -0.2168
+          }
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.2673,
+          "adjustedR2": 0.2295,
+          "spearman": 0.5325,
+          "mae": 6.4381,
+          "rmse": 8.4063,
+          "standardized": {
+            "t0": 0.026,
+            "leadership": 0.046,
+            "eventAtr": 0.2896,
+            "depth": -0.2815,
+            "velocity": 0.2606
+          }
+        },
+        "M7": {
+          "n": 103,
+          "r2": 0.2256,
+          "adjustedR2": 0.1857,
+          "spearman": 0.4734,
+          "mae": 6.5754,
+          "rmse": 8.6423,
+          "standardized": {
+            "t0": 0.0355,
+            "leadership": 0.0205,
+            "eventAtr": 0.3208,
+            "depth": -0.3602,
+            "persistence": -0.1162
+          }
+        },
+        "M8": {
+          "n": 103,
+          "r2": 0.2709,
+          "adjustedR2": 0.2253,
+          "spearman": 0.5168,
+          "mae": 6.4417,
+          "rmse": 8.3855,
+          "standardized": {
+            "t0": 0.0241,
+            "leadership": 0.0439,
+            "eventAtr": 0.2883,
+            "depth": -0.2801,
+            "velocity": 0.3213,
+            "persistence": 0.0853
+          }
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.1464,
+          "deltaSpearman": 0.2393,
+          "deltaPearson": null,
+          "deltaMae": -0.6204,
+          "deltaRmse": -0.7761
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": -0.0073,
+          "deltaSpearman": 0.0201,
+          "deltaPearson": null,
+          "deltaMae": 0.1317,
+          "deltaRmse": 0.0403
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.0539,
+          "deltaSpearman": 0.0759,
+          "deltaPearson": null,
+          "deltaMae": -0.1286,
+          "deltaRmse": -0.3037
+        },
+        "m3m5": {
+          "n": 103,
+          "deltaR2": -0.1003,
+          "deltaSpearman": -0.0979,
+          "deltaPearson": null,
+          "deltaMae": 0.336,
+          "deltaRmse": 0.5385
+        },
+        "m3m7": {
+          "n": 103,
+          "deltaR2": 0.0122,
+          "deltaSpearman": 0.0168,
+          "deltaPearson": null,
+          "deltaMae": 0.0087,
+          "deltaRmse": -0.0677
+        },
+        "m3m8": {
+          "n": 103,
+          "deltaR2": 0.0575,
+          "deltaSpearman": 0.0602,
+          "deltaPearson": null,
+          "deltaMae": -0.125,
+          "deltaRmse": -0.3245
+        }
+      },
+      "t20": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0606,
+          "adjustedR2": 0.0513,
+          "spearman": 0.2508,
+          "mae": 11.7167,
+          "rmse": 14.9902,
+          "standardized": {
+            "t0": 0.2461
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.0971,
+          "adjustedR2": 0.079,
+          "spearman": 0.2977,
+          "mae": 11.3583,
+          "rmse": 14.6958,
+          "standardized": {
+            "t0": 0.2633,
+            "leadership": 0.1919
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.1353,
+          "adjustedR2": 0.1091,
+          "spearman": 0.3392,
+          "mae": 11.124,
+          "rmse": 14.3818,
+          "standardized": {
+            "t0": 0.2903,
+            "leadership": 0.1247,
+            "eventAtr": 0.2092
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.1912,
+          "adjustedR2": 0.1582,
+          "spearman": 0.3867,
+          "mae": 10.7122,
+          "rmse": 13.9088,
+          "standardized": {
+            "t0": 0.2623,
+            "leadership": 0.1228,
+            "eventAtr": 0.2565,
+            "depth": -0.2435
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.2166,
+          "adjustedR2": 0.1846,
+          "spearman": 0.4943,
+          "mae": 10.2938,
+          "rmse": 13.6885,
+          "standardized": {
+            "t0": 0.2648,
+            "leadership": 0.1699,
+            "eventAtr": 0.1854,
+            "velocity": 0.2897
+          }
+        },
+        "M5": {
+          "n": 103,
+          "r2": 0.1616,
+          "adjustedR2": 0.1274,
+          "spearman": 0.4128,
+          "mae": 10.7573,
+          "rmse": 14.1615,
+          "standardized": {
+            "t0": 0.2841,
+            "leadership": 0.1469,
+            "eventAtr": 0.2015,
+            "persistence": -0.1636
+          }
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.2328,
+          "adjustedR2": 0.1933,
+          "spearman": 0.4758,
+          "mae": 10.4181,
+          "rmse": 13.5465,
+          "standardized": {
+            "t0": 0.2535,
+            "leadership": 0.1592,
+            "eventAtr": 0.2185,
+            "depth": -0.1447,
+            "velocity": 0.2289
+          }
+        },
+        "M7": {
+          "n": 103,
+          "r2": 0.201,
+          "adjustedR2": 0.1598,
+          "spearman": 0.4159,
+          "mae": 10.6017,
+          "rmse": 13.8246,
+          "standardized": {
+            "t0": 0.2619,
+            "leadership": 0.1371,
+            "eventAtr": 0.2457,
+            "depth": -0.2133,
+            "persistence": -0.104
+          }
+        },
+        "M8": {
+          "n": 103,
+          "r2": 0.2353,
+          "adjustedR2": 0.1875,
+          "spearman": 0.4788,
+          "mae": 10.4212,
+          "rmse": 13.5241,
+          "standardized": {
+            "t0": 0.2519,
+            "leadership": 0.1575,
+            "eventAtr": 0.2174,
+            "depth": -0.1435,
+            "velocity": 0.2797,
+            "persistence": 0.0713
+          }
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.0559,
+          "deltaSpearman": 0.0475,
+          "deltaPearson": null,
+          "deltaMae": -0.4118,
+          "deltaRmse": -0.473
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.0254,
+          "deltaSpearman": 0.1076,
+          "deltaPearson": null,
+          "deltaMae": -0.4184,
+          "deltaRmse": -0.2203
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.0416,
+          "deltaSpearman": 0.0891,
+          "deltaPearson": null,
+          "deltaMae": -0.2941,
+          "deltaRmse": -0.3623
+        },
+        "m3m5": {
+          "n": 103,
+          "deltaR2": -0.0296,
+          "deltaSpearman": 0.0261,
+          "deltaPearson": null,
+          "deltaMae": 0.0451,
+          "deltaRmse": 0.2527
+        },
+        "m3m7": {
+          "n": 103,
+          "deltaR2": 0.0098,
+          "deltaSpearman": 0.0292,
+          "deltaPearson": null,
+          "deltaMae": -0.1105,
+          "deltaRmse": -0.0842
+        },
+        "m3m8": {
+          "n": 103,
+          "deltaR2": 0.0441,
+          "deltaSpearman": 0.0921,
+          "deltaPearson": null,
+          "deltaMae": -0.291,
+          "deltaRmse": -0.3847
+        }
+      },
+      "window": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0615,
+          "adjustedR2": 0.0522,
+          "spearman": 0.2511,
+          "mae": 15.8459,
+          "rmse": 19.8436,
+          "standardized": {
+            "t0": 0.2481
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.1137,
+          "adjustedR2": 0.096,
+          "spearman": 0.316,
+          "mae": 15.5477,
+          "rmse": 19.2844,
+          "standardized": {
+            "t0": 0.2687,
+            "leadership": 0.2293
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.1892,
+          "adjustedR2": 0.1646,
+          "spearman": 0.3593,
+          "mae": 14.4958,
+          "rmse": 18.4443,
+          "standardized": {
+            "t0": 0.3067,
+            "leadership": 0.1347,
+            "eventAtr": 0.2942
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.2295,
+          "adjustedR2": 0.1981,
+          "spearman": 0.4287,
+          "mae": 14.022,
+          "rmse": 17.9809,
+          "standardized": {
+            "t0": 0.2829,
+            "leadership": 0.1331,
+            "eventAtr": 0.3343,
+            "depth": -0.2065
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.2454,
+          "adjustedR2": 0.2146,
+          "spearman": 0.4492,
+          "mae": 13.9298,
+          "rmse": 17.7945,
+          "standardized": {
+            "t0": 0.2854,
+            "leadership": 0.1722,
+            "eventAtr": 0.2745,
+            "velocity": 0.2406
+          }
+        },
+        "M5": {
+          "n": 103,
+          "r2": 0.2187,
+          "adjustedR2": 0.1868,
+          "spearman": 0.4346,
+          "mae": 14.0611,
+          "rmse": 18.1058,
+          "standardized": {
+            "t0": 0.3001,
+            "leadership": 0.1582,
+            "eventAtr": 0.2861,
+            "persistence": -0.1733
+          }
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.2575,
+          "adjustedR2": 0.2192,
+          "spearman": 0.4685,
+          "mae": 13.8495,
+          "rmse": 17.6508,
+          "standardized": {
+            "t0": 0.2757,
+            "leadership": 0.163,
+            "eventAtr": 0.3031,
+            "depth": -0.1254,
+            "velocity": 0.1879
+          }
+        },
+        "M7": {
+          "n": 103,
+          "r2": 0.2437,
+          "adjustedR2": 0.2047,
+          "spearman": 0.4703,
+          "mae": 13.8843,
+          "rmse": 17.8135,
+          "standardized": {
+            "t0": 0.2823,
+            "leadership": 0.1504,
+            "eventAtr": 0.3213,
+            "depth": -0.1699,
+            "persistence": -0.1258
+          }
+        },
+        "M8": {
+          "n": 103,
+          "r2": 0.2576,
+          "adjustedR2": 0.2112,
+          "spearman": 0.4735,
+          "mae": 13.8368,
+          "rmse": 17.6496,
+          "standardized": {
+            "t0": 0.276,
+            "leadership": 0.1634,
+            "eventAtr": 0.3034,
+            "depth": -0.1256,
+            "velocity": 0.1776,
+            "persistence": -0.0145
+          }
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.0403,
+          "deltaSpearman": 0.0694,
+          "deltaPearson": null,
+          "deltaMae": -0.4738,
+          "deltaRmse": -0.4634
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.0159,
+          "deltaSpearman": 0.0205,
+          "deltaPearson": null,
+          "deltaMae": -0.0922,
+          "deltaRmse": -0.1864
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.028,
+          "deltaSpearman": 0.0398,
+          "deltaPearson": null,
+          "deltaMae": -0.1725,
+          "deltaRmse": -0.3301
+        },
+        "m3m5": {
+          "n": 103,
+          "deltaR2": -0.0108,
+          "deltaSpearman": 0.0059,
+          "deltaPearson": null,
+          "deltaMae": 0.0391,
+          "deltaRmse": 0.1249
+        },
+        "m3m7": {
+          "n": 103,
+          "deltaR2": 0.0142,
+          "deltaSpearman": 0.0416,
+          "deltaPearson": null,
+          "deltaMae": -0.1377,
+          "deltaRmse": -0.1674
+        },
+        "m3m8": {
+          "n": 103,
+          "deltaR2": 0.0281,
+          "deltaSpearman": 0.0448,
+          "deltaPearson": null,
+          "deltaMae": -0.1852,
+          "deltaRmse": -0.3313
+        }
+      }
+    },
+    "t5": {
+      "t10": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0016,
+          "adjustedR2": -0.0083,
+          "spearman": 0.0613,
+          "mae": 7.4399,
+          "rmse": 9.8127,
+          "standardized": {
+            "t0": 0.0402
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.0097,
+          "adjustedR2": -0.0101,
+          "spearman": 0.1087,
+          "mae": 7.4191,
+          "rmse": 9.7731,
+          "standardized": {
+            "t0": 0.0483,
+            "leadership": 0.09
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.067,
+          "adjustedR2": 0.0387,
+          "spearman": 0.2173,
+          "mae": 7.1871,
+          "rmse": 9.4861,
+          "standardized": {
+            "t0": 0.0814,
+            "leadership": 0.0076,
+            "eventAtr": 0.2563
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.2578,
+          "adjustedR2": 0.2275,
+          "spearman": 0.5589,
+          "mae": 6.3342,
+          "rmse": 8.4606,
+          "standardized": {
+            "t0": 0.0732,
+            "leadership": 0.0033,
+            "eventAtr": 0.3596,
+            "depth": -0.4489
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.3201,
+          "adjustedR2": 0.2923,
+          "spearman": 0.5131,
+          "mae": 6.2325,
+          "rmse": 8.0979,
+          "standardized": {
+            "t0": 0.112,
+            "leadership": 0.026,
+            "eventAtr": 0.3521,
+            "velocity": 0.5135
+          }
+        },
+        "M5": {
+          "n": 103,
+          "r2": 0.2292,
+          "adjustedR2": 0.1977,
+          "spearman": 0.488,
+          "mae": 6.4566,
+          "rmse": 8.6222,
+          "standardized": {
+            "t0": 0.0747,
+            "leadership": 0.0498,
+            "eventAtr": 0.2927,
+            "persistence": -0.4081
+          }
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.3785,
+          "adjustedR2": 0.3465,
+          "spearman": 0.6218,
+          "mae": 5.8704,
+          "rmse": 7.7421,
+          "standardized": {
+            "t0": 0.0999,
+            "leadership": 0.0191,
+            "eventAtr": 0.3933,
+            "depth": -0.276,
+            "velocity": 0.394
+          }
+        },
+        "M7": {
+          "n": 103,
+          "r2": 0.3024,
+          "adjustedR2": 0.2664,
+          "spearman": 0.5651,
+          "mae": 6.213,
+          "rmse": 8.2024,
+          "standardized": {
+            "t0": 0.0715,
+            "leadership": 0.0301,
+            "eventAtr": 0.3525,
+            "depth": -0.3221,
+            "persistence": -0.2479
+          }
+        },
+        "M8": {
+          "n": 103,
+          "r2": 0.3968,
+          "adjustedR2": 0.3591,
+          "spearman": 0.635,
+          "mae": 5.8164,
+          "rmse": 7.627,
+          "standardized": {
+            "t0": 0.0963,
+            "leadership": 0.0353,
+            "eventAtr": 0.3855,
+            "depth": -0.2083,
+            "velocity": 0.358,
+            "persistence": -0.1632
+          }
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.1908,
+          "deltaSpearman": 0.3416,
+          "deltaPearson": null,
+          "deltaMae": -0.8529,
+          "deltaRmse": -1.0255
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.0623,
+          "deltaSpearman": -0.0458,
+          "deltaPearson": null,
+          "deltaMae": -0.1017,
+          "deltaRmse": -0.3627
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.1207,
+          "deltaSpearman": 0.0629,
+          "deltaPearson": null,
+          "deltaMae": -0.4638,
+          "deltaRmse": -0.7185
+        },
+        "m3m5": {
+          "n": 103,
+          "deltaR2": -0.0286,
+          "deltaSpearman": -0.0709,
+          "deltaPearson": null,
+          "deltaMae": 0.1224,
+          "deltaRmse": 0.1616
+        },
+        "m3m7": {
+          "n": 103,
+          "deltaR2": 0.0446,
+          "deltaSpearman": 0.0062,
+          "deltaPearson": null,
+          "deltaMae": -0.1212,
+          "deltaRmse": -0.2582
+        },
+        "m3m8": {
+          "n": 103,
+          "deltaR2": 0.139,
+          "deltaSpearman": 0.0761,
+          "deltaPearson": null,
+          "deltaMae": -0.5178,
+          "deltaRmse": -0.8336
+        }
+      },
+      "t20": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0606,
+          "adjustedR2": 0.0513,
+          "spearman": 0.2508,
+          "mae": 11.7167,
+          "rmse": 14.9902,
+          "standardized": {
+            "t0": 0.2461
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.0971,
+          "adjustedR2": 0.079,
+          "spearman": 0.2977,
+          "mae": 11.3583,
+          "rmse": 14.6958,
+          "standardized": {
+            "t0": 0.2633,
+            "leadership": 0.1919
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.1353,
+          "adjustedR2": 0.1091,
+          "spearman": 0.3392,
+          "mae": 11.124,
+          "rmse": 14.3818,
+          "standardized": {
+            "t0": 0.2903,
+            "leadership": 0.1247,
+            "eventAtr": 0.2092
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.2371,
+          "adjustedR2": 0.206,
+          "spearman": 0.4616,
+          "mae": 10.5259,
+          "rmse": 13.5086,
+          "standardized": {
+            "t0": 0.2844,
+            "leadership": 0.1216,
+            "eventAtr": 0.2846,
+            "depth": -0.3279
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.2995,
+          "adjustedR2": 0.2709,
+          "spearman": 0.4851,
+          "mae": 9.9406,
+          "rmse": 12.9443,
+          "standardized": {
+            "t0": 0.315,
+            "leadership": 0.1395,
+            "eventAtr": 0.2863,
+            "velocity": 0.4136
+          }
+        },
+        "M5": {
+          "n": 103,
+          "r2": 0.2309,
+          "adjustedR2": 0.1995,
+          "spearman": 0.4965,
+          "mae": 10.2448,
+          "rmse": 13.5637,
+          "standardized": {
+            "t0": 0.2852,
+            "leadership": 0.1571,
+            "eventAtr": 0.2371,
+            "persistence": -0.3132
+          }
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.3246,
+          "adjustedR2": 0.2898,
+          "spearman": 0.5321,
+          "mae": 9.8486,
+          "rmse": 12.7107,
+          "standardized": {
+            "t0": 0.3071,
+            "leadership": 0.135,
+            "eventAtr": 0.3133,
+            "depth": -0.1808,
+            "velocity": 0.3354
+          }
+        },
+        "M7": {
+          "n": 103,
+          "r2": 0.2666,
+          "adjustedR2": 0.2288,
+          "spearman": 0.5178,
+          "mae": 10.2407,
+          "rmse": 13.2452,
+          "standardized": {
+            "t0": 0.283,
+            "leadership": 0.1434,
+            "eventAtr": 0.2789,
+            "depth": -0.2249,
+            "persistence": -0.2014
+          }
+        },
+        "M8": {
+          "n": 103,
+          "r2": 0.336,
+          "adjustedR2": 0.2945,
+          "spearman": 0.5615,
+          "mae": 9.6474,
+          "rmse": 12.6027,
+          "standardized": {
+            "t0": 0.3042,
+            "leadership": 0.1478,
+            "eventAtr": 0.3072,
+            "depth": -0.1273,
+            "velocity": 0.3069,
+            "persistence": -0.1288
+          }
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.1018,
+          "deltaSpearman": 0.1224,
+          "deltaPearson": null,
+          "deltaMae": -0.5981,
+          "deltaRmse": -0.8732
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.0624,
+          "deltaSpearman": 0.0235,
+          "deltaPearson": null,
+          "deltaMae": -0.5853,
+          "deltaRmse": -0.5643
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.0875,
+          "deltaSpearman": 0.0705,
+          "deltaPearson": null,
+          "deltaMae": -0.6773,
+          "deltaRmse": -0.7979
+        },
+        "m3m5": {
+          "n": 103,
+          "deltaR2": -0.0062,
+          "deltaSpearman": 0.0349,
+          "deltaPearson": null,
+          "deltaMae": -0.2811,
+          "deltaRmse": 0.0551
+        },
+        "m3m7": {
+          "n": 103,
+          "deltaR2": 0.0295,
+          "deltaSpearman": 0.0562,
+          "deltaPearson": null,
+          "deltaMae": -0.2852,
+          "deltaRmse": -0.2634
+        },
+        "m3m8": {
+          "n": 103,
+          "deltaR2": 0.0989,
+          "deltaSpearman": 0.0999,
+          "deltaPearson": null,
+          "deltaMae": -0.8785,
+          "deltaRmse": -0.9059
+        }
+      },
+      "window": {
+        "M0": {
+          "n": 103,
+          "r2": 0.0615,
+          "adjustedR2": 0.0522,
+          "spearman": 0.2511,
+          "mae": 15.8459,
+          "rmse": 19.8436,
+          "standardized": {
+            "t0": 0.2481
+          }
+        },
+        "M1": {
+          "n": 103,
+          "r2": 0.1137,
+          "adjustedR2": 0.096,
+          "spearman": 0.316,
+          "mae": 15.5477,
+          "rmse": 19.2844,
+          "standardized": {
+            "t0": 0.2687,
+            "leadership": 0.2293
+          }
+        },
+        "M2": {
+          "n": 103,
+          "r2": 0.1892,
+          "adjustedR2": 0.1646,
+          "spearman": 0.3593,
+          "mae": 14.4958,
+          "rmse": 18.4443,
+          "standardized": {
+            "t0": 0.3067,
+            "leadership": 0.1347,
+            "eventAtr": 0.2942
+          }
+        },
+        "M3": {
+          "n": 103,
+          "r2": 0.2344,
+          "adjustedR2": 0.2032,
+          "spearman": 0.4208,
+          "mae": 14.0943,
+          "rmse": 17.9232,
+          "standardized": {
+            "t0": 0.3027,
+            "leadership": 0.1326,
+            "eventAtr": 0.3445,
+            "depth": -0.2184
+          }
+        },
+        "M4": {
+          "n": 103,
+          "r2": 0.2677,
+          "adjustedR2": 0.2378,
+          "spearman": 0.4273,
+          "mae": 13.7572,
+          "rmse": 17.5295,
+          "standardized": {
+            "t0": 0.3237,
+            "leadership": 0.145,
+            "eventAtr": 0.3475,
+            "velocity": 0.2859
+          }
+        },
+        "M5": {
+          "n": 103,
+          "r2": 0.2641,
+          "adjustedR2": 0.2341,
+          "spearman": 0.4849,
+          "mae": 13.6441,
+          "rmse": 17.5718,
+          "standardized": {
+            "t0": 0.3021,
+            "leadership": 0.1634,
+            "eventAtr": 0.319,
+            "persistence": -0.2773
+          }
+        },
+        "M6": {
+          "n": 103,
+          "r2": 0.2778,
+          "adjustedR2": 0.2406,
+          "spearman": 0.4572,
+          "mae": 13.6675,
+          "rmse": 17.4082,
+          "standardized": {
+            "t0": 0.3187,
+            "leadership": 0.1421,
+            "eventAtr": 0.3647,
+            "depth": -0.1148,
+            "velocity": 0.2362
+          }
+        },
+        "M7": {
+          "n": 103,
+          "r2": 0.2716,
+          "adjustedR2": 0.2341,
+          "spearman": 0.4897,
+          "mae": 13.7296,
+          "rmse": 17.4828,
+          "standardized": {
+            "t0": 0.3011,
+            "leadership": 0.1571,
+            "eventAtr": 0.338,
+            "depth": -0.1026,
+            "persistence": -0.2262
+          }
+        },
+        "M8": {
+          "n": 103,
+          "r2": 0.3,
+          "adjustedR2": 0.2563,
+          "spearman": 0.4993,
+          "mae": 13.5016,
+          "rmse": 17.138,
+          "standardized": {
+            "t0": 0.3147,
+            "leadership": 0.16,
+            "eventAtr": 0.3562,
+            "depth": -0.0402,
+            "velocity": 0.1965,
+            "persistence": -0.1798
+          }
+        },
+        "m2m3": {
+          "n": 103,
+          "deltaR2": 0.0452,
+          "deltaSpearman": 0.0615,
+          "deltaPearson": null,
+          "deltaMae": -0.4015,
+          "deltaRmse": -0.5211
+        },
+        "m3m4": {
+          "n": 103,
+          "deltaR2": 0.0333,
+          "deltaSpearman": 0.0065,
+          "deltaPearson": null,
+          "deltaMae": -0.3371,
+          "deltaRmse": -0.3937
+        },
+        "m3m6": {
+          "n": 103,
+          "deltaR2": 0.0434,
+          "deltaSpearman": 0.0364,
+          "deltaPearson": null,
+          "deltaMae": -0.4268,
+          "deltaRmse": -0.515
+        },
+        "m3m5": {
+          "n": 103,
+          "deltaR2": 0.0297,
+          "deltaSpearman": 0.0641,
+          "deltaPearson": null,
+          "deltaMae": -0.4502,
+          "deltaRmse": -0.3514
+        },
+        "m3m7": {
+          "n": 103,
+          "deltaR2": 0.0372,
+          "deltaSpearman": 0.0689,
+          "deltaPearson": null,
+          "deltaMae": -0.3647,
+          "deltaRmse": -0.4404
+        },
+        "m3m8": {
+          "n": 103,
+          "deltaR2": 0.0656,
+          "deltaSpearman": 0.0785,
+          "deltaPearson": null,
+          "deltaMae": -0.5927,
+          "deltaRmse": -0.7852
+        }
+      }
+    }
+  },
+  "pathTypes": {
+    "STABLE": {
+      "n": 48,
+      "conclusion": "제한적",
+      "t10": 7.85,
+      "t20": 8.89,
+      "t40": 15.06,
+      "window": {
+        "n": 48,
+        "mean": 13.55,
+        "median": 10.98,
+        "winRate": 75
+      },
+      "lowToWindow": 18.82,
+      "hit10": 76.6
+    },
+    "GRADUAL": {
+      "n": 16,
+      "conclusion": "수치만",
+      "t10": 2.73,
+      "t20": 2.34,
+      "t40": 2.29,
+      "window": {
+        "n": 16,
+        "mean": 0.54,
+        "median": -1.48,
+        "winRate": 37.5
+      },
+      "lowToWindow": 12.51,
+      "hit10": 50
+    },
+    "FAST_DROP": {
+      "n": 19,
+      "conclusion": "수치만",
+      "t10": 3.3,
+      "t20": 10.42,
+      "t40": 11.56,
+      "window": {
+        "n": 19,
+        "mean": 10.75,
+        "median": 1.59,
+        "winRate": 52.63
+      },
+      "lowToWindow": 20.5,
+      "hit10": 84.21
+    },
+    "PERSISTENT_DROP": {
+      "n": 20,
+      "conclusion": "제한적",
+      "t10": -3.24,
+      "t20": 0.58,
+      "t40": 2.8,
+      "window": {
+        "n": 20,
+        "mean": 4.51,
+        "median": -2.65,
+        "winRate": 45
+      },
+      "lowToWindow": 19.55,
+      "hit10": 60
+    }
+  },
+  "withinDeep": {
+    "n": 51,
+    "fast": {
+      "n": 19,
+      "conclusion": "수치만",
+      "t10": 3.3,
+      "t20": 10.42,
+      "t40": 11.56,
+      "window": {
+        "n": 19,
+        "mean": 10.75,
+        "median": 1.59,
+        "winRate": 52.63
+      },
+      "lowToWindow": 20.5,
+      "hit10": 84.21
+    },
+    "slow": {
+      "n": 32,
+      "conclusion": "제한적",
+      "t10": -0.52,
+      "t20": 1.16,
+      "t40": 2.54,
+      "window": {
+        "n": 32,
+        "mean": 2.89,
+        "median": -1.43,
+        "winRate": 43.75
+      },
+      "lowToWindow": 17.04,
+      "hit10": 59.38
+    },
+    "persistent": {
+      "n": 23,
+      "conclusion": "제한적",
+      "t10": -2.86,
+      "t20": -1.15,
+      "t40": 1.93,
+      "window": {
+        "n": 23,
+        "mean": 2.51,
+        "median": -2.57,
+        "winRate": 43.48
+      },
+      "lowToWindow": 19.46,
+      "hit10": 60.87
+    },
+    "nonPersistent": {
+      "n": 28,
+      "conclusion": "제한적",
+      "t10": 3.99,
+      "t20": 9.34,
+      "t40": 9.16,
+      "window": {
+        "n": 28,
+        "mean": 8.54,
+        "median": -0.08,
+        "winRate": 50
+      },
+      "lowToWindow": 17.4,
+      "hit10": 75
+    },
+    "slope": {
+      "n": 51,
+      "spearman": 0.1018,
+      "conclusion": "제한적"
+    },
+    "renewal": {
+      "n": 51,
+      "spearman": -0.1824,
+      "conclusion": "제한적"
+    }
+  },
+  "atrPath": {
+    "MID": {
+      "STABLE": {
+        "n": 12,
+        "conclusion": "수치만",
+        "t10": 6.81,
+        "t20": 7.92,
+        "t40": 18.95,
+        "window": {
+          "n": 12,
+          "mean": 16,
+          "median": 12.73,
+          "winRate": 83.33
+        },
+        "lowToWindow": 20.58,
+        "hit10": 75
+      },
+      "GRADUAL": {
+        "n": 7,
+        "conclusion": "결론 금지",
+        "t10": 4.55,
+        "t20": 6.62,
+        "t40": 8.26,
+        "window": {
+          "n": 7,
+          "mean": 3.95,
+          "median": -0.3,
+          "winRate": 42.86
+        },
+        "lowToWindow": 18.78,
+        "hit10": 42.86
+      },
+      "FAST_DROP": {
+        "n": 9,
+        "conclusion": "결론 금지",
+        "t10": 0.91,
+        "t20": 2.72,
+        "t40": -0.73,
+        "window": {
+          "n": 9,
+          "mean": -0.16,
+          "median": -4.3,
+          "winRate": 22.22
+        },
+        "lowToWindow": 13.68,
+        "hit10": 88.89
+      },
+      "PERSISTENT_DROP": {
+        "n": 6,
+        "conclusion": "결론 금지",
+        "t10": -1.39,
+        "t20": 5.3,
+        "t40": 6.92,
+        "window": {
+          "n": 6,
+          "mean": 8.41,
+          "median": 8.41,
+          "winRate": 66.67
+        },
+        "lowToWindow": 21.94,
+        "hit10": 66.67
+      },
+      "FAST_OR_PERSISTENT": {
+        "n": 15,
+        "conclusion": "수치만",
+        "t10": -0.01,
+        "t20": 3.75,
+        "t40": 2.33,
+        "window": {
+          "n": 15,
+          "mean": 3.27,
+          "median": -3.07,
+          "winRate": 40
+        },
+        "lowToWindow": 16.98,
+        "hit10": 80
+      }
+    },
+    "LOW": {
+      "STABLE": {
+        "n": 21,
+        "conclusion": "제한적",
+        "t10": 4.69,
+        "t20": 5.22,
+        "t40": 8.81,
+        "window": {
+          "n": 21,
+          "mean": 7.16,
+          "median": 5.8,
+          "winRate": 71.43
+        },
+        "lowToWindow": 12.38,
+        "hit10": 71.43
+      },
+      "GRADUAL": {
+        "n": 7,
+        "conclusion": "결론 금지",
+        "t10": 2.04,
+        "t20": 1.83,
+        "t40": -2.96,
+        "window": {
+          "n": 7,
+          "mean": -0.01,
+          "median": -0.03,
+          "winRate": 42.86
+        },
+        "lowToWindow": 8.41,
+        "hit10": 57.14
+      },
+      "FAST_DROP": {
+        "n": 1,
+        "conclusion": "결론 금지",
+        "t10": 1.24,
+        "t20": 15.5,
+        "t40": 11.43,
+        "window": {
+          "n": 1,
+          "mean": -2.96,
+          "median": -2.96,
+          "winRate": 0
+        },
+        "lowToWindow": 0,
+        "hit10": 0
+      },
+      "PERSISTENT_DROP": {
+        "n": 5,
+        "conclusion": "결론 금지",
+        "t10": -5.12,
+        "t20": -0.7,
+        "t40": 0.96,
+        "window": {
+          "n": 5,
+          "mean": -3.76,
+          "median": -5.32,
+          "winRate": 20
+        },
+        "lowToWindow": 4.36,
+        "hit10": 20
+      },
+      "FAST_OR_PERSISTENT": {
+        "n": 6,
+        "conclusion": "결론 금지",
+        "t10": -4.06,
+        "t20": 2,
+        "t40": 2.71,
+        "window": {
+          "n": 6,
+          "mean": -3.62,
+          "median": -4.14,
+          "winRate": 16.67
+        },
+        "lowToWindow": 3.64,
+        "hit10": 16.67
+      }
+    },
+    "HIGH": {
+      "STABLE": {
+        "n": 15,
+        "conclusion": "수치만",
+        "t10": 13.12,
+        "t20": 14.79,
+        "t40": 20.68,
+        "window": {
+          "n": 15,
+          "mean": 20.53,
+          "median": 17.81,
+          "winRate": 73.33
+        },
+        "lowToWindow": 26.98,
+        "hit10": 85.71
+      },
+      "GRADUAL": {
+        "n": 2,
+        "conclusion": "결론 금지",
+        "t10": -1.23,
+        "t20": -10.84,
+        "t40": -0.2,
+        "window": {
+          "n": 2,
+          "mean": -9.49,
+          "median": -9.49,
+          "winRate": 0
+        },
+        "lowToWindow": 4.95,
+        "hit10": 50
+      },
+      "FAST_DROP": {
+        "n": 9,
+        "conclusion": "결론 금지",
+        "t10": 5.91,
+        "t20": 17.55,
+        "t40": 23.88,
+        "window": {
+          "n": 9,
+          "mean": 23.18,
+          "median": 23.78,
+          "winRate": 88.89
+        },
+        "lowToWindow": 29.61,
+        "hit10": 88.89
+      },
+      "PERSISTENT_DROP": {
+        "n": 9,
+        "conclusion": "결론 금지",
+        "t10": -3.43,
+        "t20": -1.86,
+        "t40": 1.07,
+        "window": {
+          "n": 9,
+          "mean": 6.5,
+          "median": -8.05,
+          "winRate": 44.44
+        },
+        "lowToWindow": 26.4,
+        "hit10": 77.78
+      },
+      "FAST_OR_PERSISTENT": {
+        "n": 18,
+        "conclusion": "수치만",
+        "t10": 1.24,
+        "t20": 7.85,
+        "t40": 12.47,
+        "window": {
+          "n": 18,
+          "mean": 14.84,
+          "median": 22.63,
+          "winRate": 66.67
+        },
+        "lowToWindow": 28,
+        "hit10": 83.33
+      }
+    }
+  },
+  "leadershipPath": {
+    "MID": {
+      "STABLE": {
+        "n": 23,
+        "conclusion": "제한적",
+        "t10": 5.89,
+        "t20": 9.68,
+        "t40": 14.04,
+        "window": {
+          "n": 23,
+          "mean": 12.78,
+          "median": 11.61,
+          "winRate": 73.91
+        },
+        "lowToWindow": 19.09,
+        "hit10": 72.73
+      },
+      "GRADUAL": {
+        "n": 12,
+        "conclusion": "수치만",
+        "t10": 2.72,
+        "t20": 2.05,
+        "t40": 1.13,
+        "window": {
+          "n": 12,
+          "mean": -0.66,
+          "median": -5.17,
+          "winRate": 25
+        },
+        "lowToWindow": 13.61,
+        "hit10": 41.67
+      },
+      "FAST_DROP": {
+        "n": 9,
+        "conclusion": "결론 금지",
+        "t10": 3.57,
+        "t20": 11.46,
+        "t40": 11.98,
+        "window": {
+          "n": 9,
+          "mean": 10.57,
+          "median": 1.59,
+          "winRate": 55.56
+        },
+        "lowToWindow": 21.86,
+        "hit10": 77.78
+      },
+      "PERSISTENT_DROP": {
+        "n": 9,
+        "conclusion": "결론 금지",
+        "t10": -4.92,
+        "t20": -5.18,
+        "t40": -3.65,
+        "window": {
+          "n": 9,
+          "mean": -1.04,
+          "median": -6.44,
+          "winRate": 33.33
+        },
+        "lowToWindow": 18.25,
+        "hit10": 55.56
+      },
+      "FAST_OR_PERSISTENT": {
+        "n": 18,
+        "conclusion": "수치만",
+        "t10": -0.68,
+        "t20": 3.14,
+        "t40": 4.16,
+        "window": {
+          "n": 18,
+          "mean": 4.76,
+          "median": -4.32,
+          "winRate": 44.44
+        },
+        "lowToWindow": 20.06,
+        "hit10": 66.67
+      }
+    },
+    "LOW": {
+      "STABLE": {
+        "n": 17,
+        "conclusion": "수치만",
+        "t10": 8.29,
+        "t20": 5.96,
+        "t40": 12.78,
+        "window": {
+          "n": 17,
+          "mean": 10.88,
+          "median": 9.32,
+          "winRate": 64.71
+        },
+        "lowToWindow": 15.6,
+        "hit10": 70.59
+      },
+      "GRADUAL": {
+        "n": 4,
+        "conclusion": "결론 금지",
+        "t10": 2.76,
+        "t20": 3.21,
+        "t40": 5.78,
+        "window": {
+          "n": 4,
+          "mean": 4.14,
+          "median": 1.63,
+          "winRate": 75
+        },
+        "lowToWindow": 9.23,
+        "hit10": 75
+      },
+      "FAST_DROP": {
+        "n": 8,
+        "conclusion": "결론 금지",
+        "t10": 1.3,
+        "t20": 6.69,
+        "t40": 6.05,
+        "window": {
+          "n": 8,
+          "mean": 7.47,
+          "median": 3.27,
+          "winRate": 50
+        },
+        "lowToWindow": 15.98,
+        "hit10": 100
+      },
+      "PERSISTENT_DROP": {
+        "n": 6,
+        "conclusion": "결론 금지",
+        "t10": -5.63,
+        "t20": -1.76,
+        "t40": -1.87,
+        "window": {
+          "n": 6,
+          "mean": -2.35,
+          "median": -4.03,
+          "winRate": 33.33
+        },
+        "lowToWindow": 11.09,
+        "hit10": 50
+      },
+      "FAST_OR_PERSISTENT": {
+        "n": 14,
+        "conclusion": "수치만",
+        "t10": -1.67,
+        "t20": 3.07,
+        "t40": 2.66,
+        "window": {
+          "n": 14,
+          "mean": 3.26,
+          "median": -2.9,
+          "winRate": 42.86
+        },
+        "lowToWindow": 13.89,
+        "hit10": 78.57
+      }
+    },
+    "HIGH": {
+      "STABLE": {
+        "n": 8,
+        "conclusion": "결론 금지",
+        "t10": 12.56,
+        "t20": 12.86,
+        "t40": 22.81,
+        "window": {
+          "n": 8,
+          "mean": 21.43,
+          "median": 13.54,
+          "winRate": 100
+        },
+        "lowToWindow": 24.92,
+        "hit10": 100
+      },
+      "GRADUAL": {
+        "n": 0,
+        "conclusion": "결론 금지",
+        "t10": null,
+        "t20": null,
+        "t40": null,
+        "window": {
+          "n": 0,
+          "mean": null,
+          "median": null,
+          "winRate": null
+        },
+        "lowToWindow": null,
+        "hit10": null
+      },
+      "FAST_DROP": {
+        "n": 2,
+        "conclusion": "결론 금지",
+        "t10": 10.05,
+        "t20": 20.68,
+        "t40": 31.75,
+        "window": {
+          "n": 2,
+          "mean": 24.65,
+          "median": 24.65,
+          "winRate": 50
+        },
+        "lowToWindow": 32.49,
+        "hit10": 50
+      },
+      "PERSISTENT_DROP": {
+        "n": 5,
+        "conclusion": "결론 금지",
+        "t10": 2.65,
+        "t20": 13.75,
+        "t40": 20,
+        "window": {
+          "n": 5,
+          "mean": 22.73,
+          "median": 27.5,
+          "winRate": 80
+        },
+        "lowToWindow": 32.03,
+        "hit10": 80
+      },
+      "FAST_OR_PERSISTENT": {
+        "n": 7,
+        "conclusion": "결론 금지",
+        "t10": 4.76,
+        "t20": 15.73,
+        "t40": 23.36,
+        "window": {
+          "n": 7,
+          "mean": 23.28,
+          "median": 27.5,
+          "winRate": 71.43
+        },
+        "lowToWindow": 32.17,
+        "hit10": 71.43
+      }
+    }
+  },
+  "oos": {
+    "50": {
+      "window": {
+        "t1": {
+          "A": {
+            "n": 51,
+            "oosR2": 0.11,
+            "pearson": 0.3407,
+            "spearman": 0.2786,
+            "mae": 17.4862,
+            "rmse": 21.924,
+            "standardized": {
+              "t0": 0.3842,
+              "leadership": 0.2436,
+              "eventAtr": 0.2665
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "oosR2": 0.0367,
+            "pearson": 0.2485,
+            "spearman": 0.1724,
+            "mae": 18.216,
+            "rmse": 22.8087,
+            "standardized": {
+              "t0": 0.3579,
+              "leadership": 0.2742,
+              "eventAtr": 0.247,
+              "depth": 0.1604
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "oosR2": 0.0258,
+            "pearson": 0.2258,
+            "spearman": 0.1934,
+            "mae": 17.94,
+            "rmse": 22.9376,
+            "standardized": {
+              "t0": 0.2987,
+              "leadership": 0.2249,
+              "eventAtr": 0.1817,
+              "depth": 0.3871,
+              "velocity": 0.3088
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "aToB": {
+            "n": 51,
+            "deltaR2": -0.0733,
+            "deltaSpearman": -0.1062,
+            "deltaPearson": -0.0922,
+            "deltaMae": 0.7298,
+            "deltaRmse": 0.8847
+          },
+          "bToC": {
+            "n": 51,
+            "deltaR2": -0.0109,
+            "deltaSpearman": 0.021,
+            "deltaPearson": -0.0227,
+            "deltaMae": -0.276,
+            "deltaRmse": 0.1289
+          },
+          "bToD": null,
+          "bToE": null,
+          "aToBImproves": false,
+          "bToCImproves": false,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t3": {
+          "A": {
+            "n": 51,
+            "oosR2": 0.11,
+            "pearson": 0.3407,
+            "spearman": 0.2786,
+            "mae": 17.4862,
+            "rmse": 21.924,
+            "standardized": {
+              "t0": 0.3842,
+              "leadership": 0.2436,
+              "eventAtr": 0.2665
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "oosR2": 0.1412,
+            "pearson": 0.3875,
+            "spearman": 0.3319,
+            "mae": 16.9189,
+            "rmse": 21.5359,
+            "standardized": {
+              "t0": 0.4054,
+              "leadership": 0.243,
+              "eventAtr": 0.3033,
+              "depth": -0.147
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "oosR2": 0.1423,
+            "pearson": 0.3992,
+            "spearman": 0.3329,
+            "mae": 17.188,
+            "rmse": 21.5219,
+            "standardized": {
+              "t0": 0.3714,
+              "leadership": 0.2849,
+              "eventAtr": 0.2909,
+              "depth": -0.0122,
+              "velocity": 0.3246
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "oosR2": 0.1332,
+            "pearson": 0.3895,
+            "spearman": 0.323,
+            "mae": 17.1976,
+            "rmse": 21.6362,
+            "standardized": {
+              "t0": 0.4125,
+              "leadership": 0.2721,
+              "eventAtr": 0.2948,
+              "depth": -0.0943,
+              "persistence": -0.2231
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "oosR2": 0.141,
+            "pearson": 0.3988,
+            "spearman": 0.3382,
+            "mae": 17.2234,
+            "rmse": 21.5385,
+            "standardized": {
+              "t0": 0.3754,
+              "leadership": 0.2864,
+              "eventAtr": 0.2905,
+              "depth": -0.0144,
+              "velocity": 0.2978,
+              "persistence": -0.0376
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 51,
+            "deltaR2": 0.0312,
+            "deltaSpearman": 0.0533,
+            "deltaPearson": 0.0468,
+            "deltaMae": -0.5673,
+            "deltaRmse": -0.3881
+          },
+          "bToC": {
+            "n": 51,
+            "deltaR2": 0.0011,
+            "deltaSpearman": 0.001,
+            "deltaPearson": 0.0117,
+            "deltaMae": 0.2691,
+            "deltaRmse": -0.014
+          },
+          "bToD": {
+            "n": 51,
+            "deltaR2": -0.008,
+            "deltaSpearman": -0.0089,
+            "deltaPearson": 0.002,
+            "deltaMae": 0.2787,
+            "deltaRmse": 0.1003
+          },
+          "bToE": {
+            "n": 51,
+            "deltaR2": -0.0002,
+            "deltaSpearman": 0.0063,
+            "deltaPearson": 0.0113,
+            "deltaMae": 0.3045,
+            "deltaRmse": 0.0026
+          },
+          "aToBImproves": true,
+          "bToCImproves": false,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t5": {
+          "A": {
+            "n": 51,
+            "oosR2": 0.11,
+            "pearson": 0.3407,
+            "spearman": 0.2786,
+            "mae": 17.4862,
+            "rmse": 21.924,
+            "standardized": {
+              "t0": 0.3842,
+              "leadership": 0.2436,
+              "eventAtr": 0.2665
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "oosR2": 0.1464,
+            "pearson": 0.3879,
+            "spearman": 0.3377,
+            "mae": 16.9207,
+            "rmse": 21.4709,
+            "standardized": {
+              "t0": 0.394,
+              "leadership": 0.2407,
+              "eventAtr": 0.2982,
+              "depth": -0.1
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "oosR2": 0.1936,
+            "pearson": 0.4411,
+            "spearman": 0.3252,
+            "mae": 16.5868,
+            "rmse": 20.8684,
+            "standardized": {
+              "t0": 0.3812,
+              "leadership": 0.2882,
+              "eventAtr": 0.3254,
+              "depth": -0.0103,
+              "velocity": 0.2241
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "oosR2": 0.1872,
+            "pearson": 0.4332,
+            "spearman": 0.3755,
+            "mae": 16.669,
+            "rmse": 20.9513,
+            "standardized": {
+              "t0": 0.375,
+              "leadership": 0.2729,
+              "eventAtr": 0.3024,
+              "depth": 0.0162,
+              "persistence": -0.2578
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "oosR2": 0.2162,
+            "pearson": 0.4651,
+            "spearman": 0.382,
+            "mae": 16.4544,
+            "rmse": 20.5742,
+            "standardized": {
+              "t0": 0.3693,
+              "leadership": 0.301,
+              "eventAtr": 0.321,
+              "depth": 0.0595,
+              "velocity": 0.1594,
+              "persistence": -0.2122
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 51,
+            "deltaR2": 0.0364,
+            "deltaSpearman": 0.0591,
+            "deltaPearson": 0.0472,
+            "deltaMae": -0.5655,
+            "deltaRmse": -0.4531
+          },
+          "bToC": {
+            "n": 51,
+            "deltaR2": 0.0472,
+            "deltaSpearman": -0.0125,
+            "deltaPearson": 0.0532,
+            "deltaMae": -0.3339,
+            "deltaRmse": -0.6025
+          },
+          "bToD": {
+            "n": 51,
+            "deltaR2": 0.0408,
+            "deltaSpearman": 0.0378,
+            "deltaPearson": 0.0453,
+            "deltaMae": -0.2517,
+            "deltaRmse": -0.5196
+          },
+          "bToE": {
+            "n": 51,
+            "deltaR2": 0.0698,
+            "deltaSpearman": 0.0443,
+            "deltaPearson": 0.0772,
+            "deltaMae": -0.4663,
+            "deltaRmse": -0.8967
+          },
+          "aToBImproves": true,
+          "bToCImproves": false,
+          "bToDImproves": true,
+          "bToEImproves": true
+        }
+      },
+      "t20": {
+        "t1": {
+          "A": {
+            "n": 51,
+            "oosR2": 0.0938,
+            "pearson": 0.3228,
+            "spearman": 0.2978,
+            "mae": 12.4656,
+            "rmse": 16.0971,
+            "standardized": {
+              "t0": 0.3301,
+              "leadership": 0.1555,
+              "eventAtr": 0.1921
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "oosR2": 0.0576,
+            "pearson": 0.2734,
+            "spearman": 0.2608,
+            "mae": 12.4267,
+            "rmse": 16.415,
+            "standardized": {
+              "t0": 0.3102,
+              "leadership": 0.1787,
+              "eventAtr": 0.1773,
+              "depth": 0.1215
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "oosR2": 0.0265,
+            "pearson": 0.2112,
+            "spearman": 0.3336,
+            "mae": 12.3614,
+            "rmse": 16.6842,
+            "standardized": {
+              "t0": 0.2272,
+              "leadership": 0.1097,
+              "eventAtr": 0.0858,
+              "depth": 0.439,
+              "velocity": 0.4326
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "aToB": {
+            "n": 51,
+            "deltaR2": -0.0362,
+            "deltaSpearman": -0.037,
+            "deltaPearson": -0.0494,
+            "deltaMae": -0.0389,
+            "deltaRmse": 0.3179
+          },
+          "bToC": {
+            "n": 51,
+            "deltaR2": -0.0311,
+            "deltaSpearman": 0.0728,
+            "deltaPearson": -0.0622,
+            "deltaMae": -0.0653,
+            "deltaRmse": 0.2692
+          },
+          "bToD": null,
+          "bToE": null,
+          "aToBImproves": false,
+          "bToCImproves": false,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t3": {
+          "A": {
+            "n": 51,
+            "oosR2": 0.0938,
+            "pearson": 0.3228,
+            "spearman": 0.2978,
+            "mae": 12.4656,
+            "rmse": 16.0971,
+            "standardized": {
+              "t0": 0.3301,
+              "leadership": 0.1555,
+              "eventAtr": 0.1921
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "oosR2": 0.1313,
+            "pearson": 0.3862,
+            "spearman": 0.3596,
+            "mae": 12.1693,
+            "rmse": 15.7603,
+            "standardized": {
+              "t0": 0.366,
+              "leadership": 0.1544,
+              "eventAtr": 0.2544,
+              "depth": -0.249
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "oosR2": 0.1863,
+            "pearson": 0.4478,
+            "spearman": 0.4454,
+            "mae": 11.8184,
+            "rmse": 15.2529,
+            "standardized": {
+              "t0": 0.3456,
+              "leadership": 0.1795,
+              "eventAtr": 0.247,
+              "depth": -0.1684,
+              "velocity": 0.194
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "oosR2": 0.1411,
+            "pearson": 0.4002,
+            "spearman": 0.4074,
+            "mae": 12.016,
+            "rmse": 15.6708,
+            "standardized": {
+              "t0": 0.369,
+              "leadership": 0.1668,
+              "eventAtr": 0.2508,
+              "depth": -0.2267,
+              "persistence": -0.0946
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "oosR2": 0.1908,
+            "pearson": 0.4519,
+            "spearman": 0.4327,
+            "mae": 11.8247,
+            "rmse": 15.2107,
+            "standardized": {
+              "t0": 0.3406,
+              "leadership": 0.1777,
+              "eventAtr": 0.2476,
+              "depth": -0.1656,
+              "velocity": 0.2277,
+              "persistence": 0.0473
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 51,
+            "deltaR2": 0.0375,
+            "deltaSpearman": 0.0618,
+            "deltaPearson": 0.0634,
+            "deltaMae": -0.2963,
+            "deltaRmse": -0.3368
+          },
+          "bToC": {
+            "n": 51,
+            "deltaR2": 0.055,
+            "deltaSpearman": 0.0858,
+            "deltaPearson": 0.0616,
+            "deltaMae": -0.3509,
+            "deltaRmse": -0.5074
+          },
+          "bToD": {
+            "n": 51,
+            "deltaR2": 0.0098,
+            "deltaSpearman": 0.0478,
+            "deltaPearson": 0.014,
+            "deltaMae": -0.1533,
+            "deltaRmse": -0.0895
+          },
+          "bToE": {
+            "n": 51,
+            "deltaR2": 0.0595,
+            "deltaSpearman": 0.0731,
+            "deltaPearson": 0.0657,
+            "deltaMae": -0.3446,
+            "deltaRmse": -0.5496
+          },
+          "aToBImproves": true,
+          "bToCImproves": true,
+          "bToDImproves": true,
+          "bToEImproves": true
+        },
+        "t5": {
+          "A": {
+            "n": 51,
+            "oosR2": 0.0938,
+            "pearson": 0.3228,
+            "spearman": 0.2978,
+            "mae": 12.4656,
+            "rmse": 16.0971,
+            "standardized": {
+              "t0": 0.3301,
+              "leadership": 0.1555,
+              "eventAtr": 0.1921
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "oosR2": 0.2053,
+            "pearson": 0.4576,
+            "spearman": 0.463,
+            "mae": 11.5794,
+            "rmse": 15.0738,
+            "standardized": {
+              "t0": 0.3529,
+              "leadership": 0.1488,
+              "eventAtr": 0.2658,
+              "depth": -0.2325
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "oosR2": 0.2921,
+            "pearson": 0.5514,
+            "spearman": 0.5056,
+            "mae": 10.6962,
+            "rmse": 14.2269,
+            "standardized": {
+              "t0": 0.332,
+              "leadership": 0.2266,
+              "eventAtr": 0.3103,
+              "depth": -0.0855,
+              "velocity": 0.367
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "oosR2": 0.2418,
+            "pearson": 0.5007,
+            "spearman": 0.5436,
+            "mae": 11.1721,
+            "rmse": 14.7238,
+            "standardized": {
+              "t0": 0.3431,
+              "leadership": 0.1654,
+              "eventAtr": 0.2679,
+              "depth": -0.1725,
+              "persistence": -0.1331
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "oosR2": 0.2994,
+            "pearson": 0.5595,
+            "spearman": 0.5304,
+            "mae": 10.5778,
+            "rmse": 14.154,
+            "standardized": {
+              "t0": 0.3302,
+              "leadership": 0.2284,
+              "eventAtr": 0.3097,
+              "depth": -0.0754,
+              "velocity": 0.3576,
+              "persistence": -0.0308
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 51,
+            "deltaR2": 0.1115,
+            "deltaSpearman": 0.1652,
+            "deltaPearson": 0.1348,
+            "deltaMae": -0.8862,
+            "deltaRmse": -1.0233
+          },
+          "bToC": {
+            "n": 51,
+            "deltaR2": 0.0868,
+            "deltaSpearman": 0.0426,
+            "deltaPearson": 0.0938,
+            "deltaMae": -0.8832,
+            "deltaRmse": -0.8469
+          },
+          "bToD": {
+            "n": 51,
+            "deltaR2": 0.0365,
+            "deltaSpearman": 0.0806,
+            "deltaPearson": 0.0431,
+            "deltaMae": -0.4073,
+            "deltaRmse": -0.35
+          },
+          "bToE": {
+            "n": 51,
+            "deltaR2": 0.0941,
+            "deltaSpearman": 0.0674,
+            "deltaPearson": 0.1019,
+            "deltaMae": -1.0016,
+            "deltaRmse": -0.9198
+          },
+          "aToBImproves": true,
+          "bToCImproves": true,
+          "bToDImproves": true,
+          "bToEImproves": true
+        }
+      }
+    },
+    "60": {
+      "window": {
+        "t1": {
+          "A": {
+            "n": 44,
+            "oosR2": 0.0678,
+            "pearson": 0.3653,
+            "spearman": 0.2661,
+            "mae": 17.379,
+            "rmse": 22.6527,
+            "standardized": {
+              "t0": 0.3629,
+              "leadership": 0.195,
+              "eventAtr": 0.2927
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "oosR2": 0.0687,
+            "pearson": 0.3663,
+            "spearman": 0.2732,
+            "mae": 17.3634,
+            "rmse": 22.6417,
+            "standardized": {
+              "t0": 0.3635,
+              "leadership": 0.1942,
+              "eventAtr": 0.2933,
+              "depth": -0.0059
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "oosR2": 0.0744,
+            "pearson": 0.3866,
+            "spearman": 0.3607,
+            "mae": 17.0354,
+            "rmse": 22.5723,
+            "standardized": {
+              "t0": 0.3157,
+              "leadership": 0.1526,
+              "eventAtr": 0.2324,
+              "depth": 0.2107,
+              "velocity": 0.2835
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "aToB": {
+            "n": 44,
+            "deltaR2": 0.0009,
+            "deltaSpearman": 0.0071,
+            "deltaPearson": 0.001,
+            "deltaMae": -0.0156,
+            "deltaRmse": -0.011
+          },
+          "bToC": {
+            "n": 44,
+            "deltaR2": 0.0057,
+            "deltaSpearman": 0.0875,
+            "deltaPearson": 0.0203,
+            "deltaMae": -0.328,
+            "deltaRmse": -0.0694
+          },
+          "bToD": null,
+          "bToE": null,
+          "aToBImproves": true,
+          "bToCImproves": true,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t3": {
+          "A": {
+            "n": 44,
+            "oosR2": 0.0678,
+            "pearson": 0.3653,
+            "spearman": 0.2661,
+            "mae": 17.379,
+            "rmse": 22.6527,
+            "standardized": {
+              "t0": 0.3629,
+              "leadership": 0.195,
+              "eventAtr": 0.2927
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "oosR2": 0.0974,
+            "pearson": 0.404,
+            "spearman": 0.3271,
+            "mae": 16.9903,
+            "rmse": 22.29,
+            "standardized": {
+              "t0": 0.3757,
+              "leadership": 0.2053,
+              "eventAtr": 0.3407,
+              "depth": -0.2151
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "oosR2": 0.1244,
+            "pearson": 0.4251,
+            "spearman": 0.3586,
+            "mae": 17.0298,
+            "rmse": 21.9541,
+            "standardized": {
+              "t0": 0.3444,
+              "leadership": 0.2431,
+              "eventAtr": 0.3233,
+              "depth": -0.105,
+              "velocity": 0.2554
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "oosR2": 0.1117,
+            "pearson": 0.4259,
+            "spearman": 0.3584,
+            "mae": 16.8104,
+            "rmse": 22.1128,
+            "standardized": {
+              "t0": 0.3766,
+              "leadership": 0.2223,
+              "eventAtr": 0.3374,
+              "depth": -0.1828,
+              "persistence": -0.1273
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "oosR2": 0.1218,
+            "pearson": 0.4187,
+            "spearman": 0.3673,
+            "mae": 17.0539,
+            "rmse": 21.9862,
+            "standardized": {
+              "t0": 0.3388,
+              "leadership": 0.2416,
+              "eventAtr": 0.3219,
+              "depth": -0.1015,
+              "velocity": 0.2973,
+              "persistence": 0.0576
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 44,
+            "deltaR2": 0.0296,
+            "deltaSpearman": 0.061,
+            "deltaPearson": 0.0387,
+            "deltaMae": -0.3887,
+            "deltaRmse": -0.3627
+          },
+          "bToC": {
+            "n": 44,
+            "deltaR2": 0.027,
+            "deltaSpearman": 0.0315,
+            "deltaPearson": 0.0211,
+            "deltaMae": 0.0395,
+            "deltaRmse": -0.3359
+          },
+          "bToD": {
+            "n": 44,
+            "deltaR2": 0.0143,
+            "deltaSpearman": 0.0313,
+            "deltaPearson": 0.0219,
+            "deltaMae": -0.1799,
+            "deltaRmse": -0.1772
+          },
+          "bToE": {
+            "n": 44,
+            "deltaR2": 0.0244,
+            "deltaSpearman": 0.0402,
+            "deltaPearson": 0.0147,
+            "deltaMae": 0.0636,
+            "deltaRmse": -0.3038
+          },
+          "aToBImproves": true,
+          "bToCImproves": false,
+          "bToDImproves": true,
+          "bToEImproves": false
+        },
+        "t5": {
+          "A": {
+            "n": 44,
+            "oosR2": 0.0678,
+            "pearson": 0.3653,
+            "spearman": 0.2661,
+            "mae": 17.379,
+            "rmse": 22.6527,
+            "standardized": {
+              "t0": 0.3629,
+              "leadership": 0.195,
+              "eventAtr": 0.2927
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "oosR2": 0.1145,
+            "pearson": 0.4219,
+            "spearman": 0.3452,
+            "mae": 16.91,
+            "rmse": 22.0783,
+            "standardized": {
+              "t0": 0.3724,
+              "leadership": 0.1988,
+              "eventAtr": 0.3473,
+              "depth": -0.1913
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "oosR2": 0.1714,
+            "pearson": 0.469,
+            "spearman": 0.3447,
+            "mae": 16.6537,
+            "rmse": 21.3569,
+            "standardized": {
+              "t0": 0.3663,
+              "leadership": 0.2396,
+              "eventAtr": 0.3744,
+              "depth": -0.0972,
+              "velocity": 0.224
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "oosR2": 0.1665,
+            "pearson": 0.4703,
+            "spearman": 0.4245,
+            "mae": 16.593,
+            "rmse": 21.4201,
+            "standardized": {
+              "t0": 0.3552,
+              "leadership": 0.2204,
+              "eventAtr": 0.3522,
+              "depth": -0.1044,
+              "persistence": -0.1858
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "oosR2": 0.2017,
+            "pearson": 0.497,
+            "spearman": 0.3794,
+            "mae": 16.4487,
+            "rmse": 20.9633,
+            "standardized": {
+              "t0": 0.3542,
+              "leadership": 0.2496,
+              "eventAtr": 0.3738,
+              "depth": -0.046,
+              "velocity": 0.1893,
+              "persistence": -0.1405
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 44,
+            "deltaR2": 0.0467,
+            "deltaSpearman": 0.0791,
+            "deltaPearson": 0.0566,
+            "deltaMae": -0.469,
+            "deltaRmse": -0.5744
+          },
+          "bToC": {
+            "n": 44,
+            "deltaR2": 0.0569,
+            "deltaSpearman": -0.0005,
+            "deltaPearson": 0.0471,
+            "deltaMae": -0.2563,
+            "deltaRmse": -0.7214
+          },
+          "bToD": {
+            "n": 44,
+            "deltaR2": 0.052,
+            "deltaSpearman": 0.0793,
+            "deltaPearson": 0.0484,
+            "deltaMae": -0.317,
+            "deltaRmse": -0.6582
+          },
+          "bToE": {
+            "n": 44,
+            "deltaR2": 0.0872,
+            "deltaSpearman": 0.0342,
+            "deltaPearson": 0.0751,
+            "deltaMae": -0.4613,
+            "deltaRmse": -1.115
+          },
+          "aToBImproves": true,
+          "bToCImproves": false,
+          "bToDImproves": true,
+          "bToEImproves": true
+        }
+      },
+      "t20": {
+        "t1": {
+          "A": {
+            "n": 44,
+            "oosR2": 0.0575,
+            "pearson": 0.3508,
+            "spearman": 0.3045,
+            "mae": 11.4746,
+            "rmse": 15.4845,
+            "standardized": {
+              "t0": 0.3033,
+              "leadership": 0.1101,
+              "eventAtr": 0.2172
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "oosR2": 0.0495,
+            "pearson": 0.3416,
+            "spearman": 0.3152,
+            "mae": 11.5425,
+            "rmse": 15.55,
+            "standardized": {
+              "t0": 0.3098,
+              "leadership": 0.1024,
+              "eventAtr": 0.2239,
+              "depth": -0.058
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "oosR2": 0.0283,
+            "pearson": 0.33,
+            "spearman": 0.4056,
+            "mae": 11.5692,
+            "rmse": 15.7225,
+            "standardized": {
+              "t0": 0.2429,
+              "leadership": 0.0443,
+              "eventAtr": 0.1387,
+              "depth": 0.2445,
+              "velocity": 0.396
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "aToB": {
+            "n": 44,
+            "deltaR2": -0.008,
+            "deltaSpearman": 0.0107,
+            "deltaPearson": -0.0092,
+            "deltaMae": 0.0679,
+            "deltaRmse": 0.0655
+          },
+          "bToC": {
+            "n": 44,
+            "deltaR2": -0.0212,
+            "deltaSpearman": 0.0904,
+            "deltaPearson": -0.0116,
+            "deltaMae": 0.0267,
+            "deltaRmse": 0.1725
+          },
+          "bToD": null,
+          "bToE": null,
+          "aToBImproves": false,
+          "bToCImproves": false,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t3": {
+          "A": {
+            "n": 44,
+            "oosR2": 0.0575,
+            "pearson": 0.3508,
+            "spearman": 0.3045,
+            "mae": 11.4746,
+            "rmse": 15.4845,
+            "standardized": {
+              "t0": 0.3033,
+              "leadership": 0.1101,
+              "eventAtr": 0.2172
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "oosR2": 0.0445,
+            "pearson": 0.3709,
+            "spearman": 0.3218,
+            "mae": 11.5406,
+            "rmse": 15.5907,
+            "standardized": {
+              "t0": 0.3227,
+              "leadership": 0.1257,
+              "eventAtr": 0.2899,
+              "depth": -0.3259
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "oosR2": 0.1126,
+            "pearson": 0.4276,
+            "spearman": 0.4057,
+            "mae": 10.9516,
+            "rmse": 15.0244,
+            "standardized": {
+              "t0": 0.3075,
+              "leadership": 0.144,
+              "eventAtr": 0.2815,
+              "depth": -0.2724,
+              "velocity": 0.124
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "oosR2": 0.0455,
+            "pearson": 0.372,
+            "spearman": 0.3286,
+            "mae": 11.5322,
+            "rmse": 15.5822,
+            "standardized": {
+              "t0": 0.3228,
+              "leadership": 0.126,
+              "eventAtr": 0.2899,
+              "depth": -0.3252,
+              "persistence": -0.0028
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "oosR2": 0.1147,
+            "pearson": 0.4188,
+            "spearman": 0.3676,
+            "mae": 11.1225,
+            "rmse": 15.0068,
+            "standardized": {
+              "t0": 0.2945,
+              "leadership": 0.1405,
+              "eventAtr": 0.2782,
+              "depth": -0.2642,
+              "velocity": 0.223,
+              "persistence": 0.1359
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 44,
+            "deltaR2": -0.013,
+            "deltaSpearman": 0.0173,
+            "deltaPearson": 0.0201,
+            "deltaMae": 0.066,
+            "deltaRmse": 0.1062
+          },
+          "bToC": {
+            "n": 44,
+            "deltaR2": 0.0681,
+            "deltaSpearman": 0.0839,
+            "deltaPearson": 0.0567,
+            "deltaMae": -0.589,
+            "deltaRmse": -0.5663
+          },
+          "bToD": {
+            "n": 44,
+            "deltaR2": 0.001,
+            "deltaSpearman": 0.0068,
+            "deltaPearson": 0.0011,
+            "deltaMae": -0.0084,
+            "deltaRmse": -0.0085
+          },
+          "bToE": {
+            "n": 44,
+            "deltaR2": 0.0702,
+            "deltaSpearman": 0.0458,
+            "deltaPearson": 0.0479,
+            "deltaMae": -0.4181,
+            "deltaRmse": -0.5839
+          },
+          "aToBImproves": false,
+          "bToCImproves": true,
+          "bToDImproves": true,
+          "bToEImproves": true
+        },
+        "t5": {
+          "A": {
+            "n": 44,
+            "oosR2": 0.0575,
+            "pearson": 0.3508,
+            "spearman": 0.3045,
+            "mae": 11.4746,
+            "rmse": 15.4845,
+            "standardized": {
+              "t0": 0.3033,
+              "leadership": 0.1101,
+              "eventAtr": 0.2172
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "oosR2": 0.1645,
+            "pearson": 0.4761,
+            "spearman": 0.5269,
+            "mae": 10.525,
+            "rmse": 14.5791,
+            "standardized": {
+              "t0": 0.3192,
+              "leadership": 0.1165,
+              "eventAtr": 0.309,
+              "depth": -0.321
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "oosR2": 0.2822,
+            "pearson": 0.5643,
+            "spearman": 0.5404,
+            "mae": 9.8317,
+            "rmse": 13.513,
+            "standardized": {
+              "t0": 0.3101,
+              "leadership": 0.1776,
+              "eventAtr": 0.3494,
+              "depth": -0.1801,
+              "velocity": 0.3353
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "oosR2": 0.1986,
+            "pearson": 0.5054,
+            "spearman": 0.5795,
+            "mae": 10.2576,
+            "rmse": 14.2784,
+            "standardized": {
+              "t0": 0.3133,
+              "leadership": 0.1239,
+              "eventAtr": 0.3106,
+              "depth": -0.2911,
+              "persistence": -0.0638
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "oosR2": 0.2745,
+            "pearson": 0.5581,
+            "spearman": 0.5286,
+            "mae": 9.9409,
+            "rmse": 13.5856,
+            "standardized": {
+              "t0": 0.3116,
+              "leadership": 0.1764,
+              "eventAtr": 0.3495,
+              "depth": -0.1865,
+              "velocity": 0.3396,
+              "persistence": 0.0175
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 44,
+            "deltaR2": 0.107,
+            "deltaSpearman": 0.2224,
+            "deltaPearson": 0.1253,
+            "deltaMae": -0.9496,
+            "deltaRmse": -0.9054
+          },
+          "bToC": {
+            "n": 44,
+            "deltaR2": 0.1177,
+            "deltaSpearman": 0.0135,
+            "deltaPearson": 0.0882,
+            "deltaMae": -0.6933,
+            "deltaRmse": -1.0661
+          },
+          "bToD": {
+            "n": 44,
+            "deltaR2": 0.0341,
+            "deltaSpearman": 0.0526,
+            "deltaPearson": 0.0293,
+            "deltaMae": -0.2674,
+            "deltaRmse": -0.3007
+          },
+          "bToE": {
+            "n": 44,
+            "deltaR2": 0.11,
+            "deltaSpearman": 0.0017,
+            "deltaPearson": 0.082,
+            "deltaMae": -0.5841,
+            "deltaRmse": -0.9935
+          },
+          "aToBImproves": true,
+          "bToCImproves": true,
+          "bToDImproves": true,
+          "bToEImproves": true
+        }
+      }
+    },
+    "70": {
+      "window": {
+        "t1": {
+          "A": {
+            "n": 31,
+            "oosR2": -0.0296,
+            "pearson": 0.4886,
+            "spearman": 0.3798,
+            "mae": 18.9642,
+            "rmse": 24.6828,
+            "standardized": {
+              "t0": 0.2622,
+              "leadership": 0.2044,
+              "eventAtr": 0.2533
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "oosR2": -0.0255,
+            "pearson": 0.4927,
+            "spearman": 0.3835,
+            "mae": 18.8889,
+            "rmse": 24.6337,
+            "standardized": {
+              "t0": 0.2626,
+              "leadership": 0.2026,
+              "eventAtr": 0.2549,
+              "depth": -0.0153
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "oosR2": -0.0496,
+            "pearson": 0.5182,
+            "spearman": 0.5278,
+            "mae": 19.0737,
+            "rmse": 24.9211,
+            "standardized": {
+              "t0": 0.2099,
+              "leadership": 0.1735,
+              "eventAtr": 0.1837,
+              "depth": 0.2237,
+              "velocity": 0.3147
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "aToB": {
+            "n": 31,
+            "deltaR2": 0.0041,
+            "deltaSpearman": 0.0037,
+            "deltaPearson": 0.0041,
+            "deltaMae": -0.0753,
+            "deltaRmse": -0.0491
+          },
+          "bToC": {
+            "n": 31,
+            "deltaR2": -0.0241,
+            "deltaSpearman": 0.1443,
+            "deltaPearson": 0.0255,
+            "deltaMae": 0.1848,
+            "deltaRmse": 0.2874
+          },
+          "bToD": null,
+          "bToE": null,
+          "aToBImproves": true,
+          "bToCImproves": false,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t3": {
+          "A": {
+            "n": 31,
+            "oosR2": -0.0296,
+            "pearson": 0.4886,
+            "spearman": 0.3798,
+            "mae": 18.9642,
+            "rmse": 24.6828,
+            "standardized": {
+              "t0": 0.2622,
+              "leadership": 0.2044,
+              "eventAtr": 0.2533
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "oosR2": 0.0204,
+            "pearson": 0.4991,
+            "spearman": 0.4347,
+            "mae": 18.3732,
+            "rmse": 24.0763,
+            "standardized": {
+              "t0": 0.2532,
+              "leadership": 0.2063,
+              "eventAtr": 0.3029,
+              "depth": -0.2232
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "oosR2": 0.0404,
+            "pearson": 0.4321,
+            "spearman": 0.3605,
+            "mae": 18.5405,
+            "rmse": 23.8295,
+            "standardized": {
+              "t0": 0.244,
+              "leadership": 0.244,
+              "eventAtr": 0.2839,
+              "depth": -0.1046,
+              "velocity": 0.2665
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "oosR2": 0.0209,
+            "pearson": 0.467,
+            "spearman": 0.4129,
+            "mae": 18.7341,
+            "rmse": 24.0696,
+            "standardized": {
+              "t0": 0.2607,
+              "leadership": 0.228,
+              "eventAtr": 0.2928,
+              "depth": -0.1625,
+              "persistence": -0.1928
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "oosR2": 0.039,
+            "pearson": 0.4342,
+            "spearman": 0.3883,
+            "mae": 18.5345,
+            "rmse": 23.847,
+            "standardized": {
+              "t0": 0.2466,
+              "leadership": 0.2444,
+              "eventAtr": 0.2839,
+              "depth": -0.105,
+              "velocity": 0.2371,
+              "persistence": -0.0401
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 31,
+            "deltaR2": 0.05,
+            "deltaSpearman": 0.0549,
+            "deltaPearson": 0.0105,
+            "deltaMae": -0.591,
+            "deltaRmse": -0.6065
+          },
+          "bToC": {
+            "n": 31,
+            "deltaR2": 0.02,
+            "deltaSpearman": -0.0742,
+            "deltaPearson": -0.067,
+            "deltaMae": 0.1673,
+            "deltaRmse": -0.2468
+          },
+          "bToD": {
+            "n": 31,
+            "deltaR2": 0.0005,
+            "deltaSpearman": -0.0218,
+            "deltaPearson": -0.0321,
+            "deltaMae": 0.3609,
+            "deltaRmse": -0.0067
+          },
+          "bToE": {
+            "n": 31,
+            "deltaR2": 0.0186,
+            "deltaSpearman": -0.0464,
+            "deltaPearson": -0.0649,
+            "deltaMae": 0.1613,
+            "deltaRmse": -0.2293
+          },
+          "aToBImproves": true,
+          "bToCImproves": false,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t5": {
+          "A": {
+            "n": 31,
+            "oosR2": -0.0296,
+            "pearson": 0.4886,
+            "spearman": 0.3798,
+            "mae": 18.9642,
+            "rmse": 24.6828,
+            "standardized": {
+              "t0": 0.2622,
+              "leadership": 0.2044,
+              "eventAtr": 0.2533
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "oosR2": 0.0297,
+            "pearson": 0.5144,
+            "spearman": 0.4173,
+            "mae": 18.6782,
+            "rmse": 23.9618,
+            "standardized": {
+              "t0": 0.2673,
+              "leadership": 0.2052,
+              "eventAtr": 0.3212,
+              "depth": -0.2287
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "oosR2": 0.0952,
+            "pearson": 0.5742,
+            "spearman": 0.4375,
+            "mae": 18.314,
+            "rmse": 23.1381,
+            "standardized": {
+              "t0": 0.285,
+              "leadership": 0.2214,
+              "eventAtr": 0.3555,
+              "depth": -0.1617,
+              "velocity": 0.1741
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "oosR2": 0.0722,
+            "pearson": 0.497,
+            "spearman": 0.404,
+            "mae": 18.5566,
+            "rmse": 23.4313,
+            "standardized": {
+              "t0": 0.2697,
+              "leadership": 0.2298,
+              "eventAtr": 0.33,
+              "depth": -0.0933,
+              "persistence": -0.272
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "oosR2": 0.1118,
+            "pearson": 0.5422,
+            "spearman": 0.3895,
+            "mae": 18.2698,
+            "rmse": 22.9258,
+            "standardized": {
+              "t0": 0.2809,
+              "leadership": 0.2377,
+              "eventAtr": 0.3514,
+              "depth": -0.0641,
+              "velocity": 0.1133,
+              "persistence": -0.243
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 31,
+            "deltaR2": 0.0593,
+            "deltaSpearman": 0.0375,
+            "deltaPearson": 0.0258,
+            "deltaMae": -0.286,
+            "deltaRmse": -0.721
+          },
+          "bToC": {
+            "n": 31,
+            "deltaR2": 0.0655,
+            "deltaSpearman": 0.0202,
+            "deltaPearson": 0.0598,
+            "deltaMae": -0.3642,
+            "deltaRmse": -0.8237
+          },
+          "bToD": {
+            "n": 31,
+            "deltaR2": 0.0425,
+            "deltaSpearman": -0.0133,
+            "deltaPearson": -0.0174,
+            "deltaMae": -0.1216,
+            "deltaRmse": -0.5305
+          },
+          "bToE": {
+            "n": 31,
+            "deltaR2": 0.0821,
+            "deltaSpearman": -0.0278,
+            "deltaPearson": 0.0278,
+            "deltaMae": -0.4084,
+            "deltaRmse": -1.036
+          },
+          "aToBImproves": true,
+          "bToCImproves": true,
+          "bToDImproves": false,
+          "bToEImproves": false
+        }
+      },
+      "t20": {
+        "t1": {
+          "A": {
+            "n": 31,
+            "oosR2": -0.0341,
+            "pearson": 0.4331,
+            "spearman": 0.439,
+            "mae": 11.9771,
+            "rmse": 16.6055,
+            "standardized": {
+              "t0": 0.2284,
+              "leadership": 0.1604,
+              "eventAtr": 0.1874
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "oosR2": -0.0358,
+            "pearson": 0.4319,
+            "spearman": 0.4398,
+            "mae": 11.9915,
+            "rmse": 16.6196,
+            "standardized": {
+              "t0": 0.2281,
+              "leadership": 0.1615,
+              "eventAtr": 0.1865,
+              "depth": 0.0091
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "oosR2": -0.1001,
+            "pearson": 0.3945,
+            "spearman": 0.4767,
+            "mae": 12.3698,
+            "rmse": 17.1278,
+            "standardized": {
+              "t0": 0.1624,
+              "leadership": 0.1252,
+              "eventAtr": 0.0976,
+              "depth": 0.3071,
+              "velocity": 0.3925
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "aToB": {
+            "n": 31,
+            "deltaR2": -0.0017,
+            "deltaSpearman": 0.0008,
+            "deltaPearson": -0.0012,
+            "deltaMae": 0.0144,
+            "deltaRmse": 0.0141
+          },
+          "bToC": {
+            "n": 31,
+            "deltaR2": -0.0643,
+            "deltaSpearman": 0.0369,
+            "deltaPearson": -0.0374,
+            "deltaMae": 0.3783,
+            "deltaRmse": 0.5082
+          },
+          "bToD": null,
+          "bToE": null,
+          "aToBImproves": false,
+          "bToCImproves": false,
+          "bToDImproves": false,
+          "bToEImproves": false
+        },
+        "t3": {
+          "A": {
+            "n": 31,
+            "oosR2": -0.0341,
+            "pearson": 0.4331,
+            "spearman": 0.439,
+            "mae": 11.9771,
+            "rmse": 16.6055,
+            "standardized": {
+              "t0": 0.2284,
+              "leadership": 0.1604,
+              "eventAtr": 0.1874
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "oosR2": 0.0061,
+            "pearson": 0.4126,
+            "spearman": 0.4531,
+            "mae": 11.5847,
+            "rmse": 16.2799,
+            "standardized": {
+              "t0": 0.2166,
+              "leadership": 0.1629,
+              "eventAtr": 0.252,
+              "depth": -0.2903
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "oosR2": 0.0738,
+            "pearson": 0.4301,
+            "spearman": 0.4996,
+            "mae": 11.1619,
+            "rmse": 15.7158,
+            "standardized": {
+              "t0": 0.2088,
+              "leadership": 0.1952,
+              "eventAtr": 0.2357,
+              "depth": -0.1888,
+              "velocity": 0.2279
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "oosR2": 0.0069,
+            "pearson": 0.3981,
+            "spearman": 0.465,
+            "mae": 11.4421,
+            "rmse": 16.2729,
+            "standardized": {
+              "t0": 0.2221,
+              "leadership": 0.1788,
+              "eventAtr": 0.2446,
+              "depth": -0.2458,
+              "persistence": -0.1413
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "oosR2": 0.0757,
+            "pearson": 0.4313,
+            "spearman": 0.4912,
+            "mae": 11.1763,
+            "rmse": 15.6996,
+            "standardized": {
+              "t0": 0.2081,
+              "leadership": 0.1951,
+              "eventAtr": 0.2357,
+              "depth": -0.1887,
+              "velocity": 0.2355,
+              "persistence": 0.0103
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 31,
+            "deltaR2": 0.0402,
+            "deltaSpearman": 0.0141,
+            "deltaPearson": -0.0205,
+            "deltaMae": -0.3924,
+            "deltaRmse": -0.3256
+          },
+          "bToC": {
+            "n": 31,
+            "deltaR2": 0.0677,
+            "deltaSpearman": 0.0465,
+            "deltaPearson": 0.0175,
+            "deltaMae": -0.4228,
+            "deltaRmse": -0.5641
+          },
+          "bToD": {
+            "n": 31,
+            "deltaR2": 0.0008,
+            "deltaSpearman": 0.0119,
+            "deltaPearson": -0.0145,
+            "deltaMae": -0.1426,
+            "deltaRmse": -0.007
+          },
+          "bToE": {
+            "n": 31,
+            "deltaR2": 0.0696,
+            "deltaSpearman": 0.0381,
+            "deltaPearson": 0.0187,
+            "deltaMae": -0.4084,
+            "deltaRmse": -0.5803
+          },
+          "aToBImproves": true,
+          "bToCImproves": true,
+          "bToDImproves": true,
+          "bToEImproves": true
+        },
+        "t5": {
+          "A": {
+            "n": 31,
+            "oosR2": -0.0341,
+            "pearson": 0.4331,
+            "spearman": 0.439,
+            "mae": 11.9771,
+            "rmse": 16.6055,
+            "standardized": {
+              "t0": 0.2284,
+              "leadership": 0.1604,
+              "eventAtr": 0.1874
+            },
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "oosR2": 0.1133,
+            "pearson": 0.5467,
+            "spearman": 0.6303,
+            "mae": 10.6351,
+            "rmse": 15.377,
+            "standardized": {
+              "t0": 0.2353,
+              "leadership": 0.1615,
+              "eventAtr": 0.281,
+              "depth": -0.3149
+            },
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "oosR2": 0.2268,
+            "pearson": 0.6329,
+            "spearman": 0.6839,
+            "mae": 10.0204,
+            "rmse": 14.3594,
+            "standardized": {
+              "t0": 0.269,
+              "leadership": 0.1924,
+              "eventAtr": 0.3463,
+              "depth": -0.1874,
+              "velocity": 0.331
+            },
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "oosR2": 0.1611,
+            "pearson": 0.5508,
+            "spearman": 0.6682,
+            "mae": 9.9487,
+            "rmse": 14.9568,
+            "standardized": {
+              "t0": 0.2371,
+              "leadership": 0.1796,
+              "eventAtr": 0.2874,
+              "depth": -0.2152,
+              "persistence": -0.2003
+            },
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "oosR2": 0.2487,
+            "pearson": 0.6318,
+            "spearman": 0.7031,
+            "mae": 9.4615,
+            "rmse": 14.1544,
+            "standardized": {
+              "t0": 0.2669,
+              "leadership": 0.2007,
+              "eventAtr": 0.3441,
+              "depth": -0.1379,
+              "velocity": 0.3002,
+              "persistence": -0.1233
+            },
+            "conclusion": "제한적"
+          },
+          "aToB": {
+            "n": 31,
+            "deltaR2": 0.1474,
+            "deltaSpearman": 0.1913,
+            "deltaPearson": 0.1136,
+            "deltaMae": -1.342,
+            "deltaRmse": -1.2285
+          },
+          "bToC": {
+            "n": 31,
+            "deltaR2": 0.1135,
+            "deltaSpearman": 0.0536,
+            "deltaPearson": 0.0862,
+            "deltaMae": -0.6147,
+            "deltaRmse": -1.0176
+          },
+          "bToD": {
+            "n": 31,
+            "deltaR2": 0.0478,
+            "deltaSpearman": 0.0379,
+            "deltaPearson": 0.0041,
+            "deltaMae": -0.6864,
+            "deltaRmse": -0.4202
+          },
+          "bToE": {
+            "n": 31,
+            "deltaR2": 0.1354,
+            "deltaSpearman": 0.0728,
+            "deltaPearson": 0.0851,
+            "deltaMae": -1.1736,
+            "deltaRmse": -1.2226
+          },
+          "aToBImproves": true,
+          "bToCImproves": true,
+          "bToDImproves": true,
+          "bToEImproves": true
+        }
+      }
+    }
+  },
+  "classification": {
+    "t1": {
+      "50": {
+        "windowPositive": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.5698,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.2577,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2716,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.5683,
+            "balancedAccuracy": 0.5571,
+            "brier": 0.2647,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.6444,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2211,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.5095,
+            "balancedAccuracy": 0.519,
+            "brier": 0.2767,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.5349,
+            "balancedAccuracy": 0.55,
+            "brier": 0.2981,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.5859,
+            "balancedAccuracy": 0.4823,
+            "brier": 0.233,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.4975,
+            "brier": 0.2563,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.5236,
+            "balancedAccuracy": 0.5051,
+            "brier": 0.2629,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        }
+      },
+      "60": {
+        "windowPositive": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2595,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2586,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.619,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.2456,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.6356,
+            "balancedAccuracy": 0.5952,
+            "brier": 0.2449,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.6004,
+            "balancedAccuracy": 0.5952,
+            "brier": 0.2563,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.6439,
+            "balancedAccuracy": 0.619,
+            "brier": 0.253,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.573,
+            "balancedAccuracy": 0.5758,
+            "brier": 0.21,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.5675,
+            "balancedAccuracy": 0.6212,
+            "brier": 0.2103,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.6006,
+            "balancedAccuracy": 0.5606,
+            "brier": 0.2127,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        }
+      },
+      "70": {
+        "windowPositive": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.5109,
+            "brier": 0.249,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.5272,
+            "balancedAccuracy": 0.4918,
+            "brier": 0.2461,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.6087,
+            "balancedAccuracy": 0.6603,
+            "brier": 0.2412,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.65,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2425,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.6083,
+            "balancedAccuracy": 0.5583,
+            "brier": 0.2586,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.6542,
+            "balancedAccuracy": 0.5271,
+            "brier": 0.2671,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.6067,
+            "brier": 0.2088,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.4867,
+            "balancedAccuracy": 0.6267,
+            "brier": 0.2147,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.5467,
+            "balancedAccuracy": 0.5467,
+            "brier": 0.2189,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "skipped": "T+1 renewal count does not vary"
+          },
+          "E": {
+            "skipped": "T+1 renewal count does not vary"
+          }
+        }
+      }
+    },
+    "t3": {
+      "50": {
+        "windowPositive": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.5698,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.2577,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.6143,
+            "balancedAccuracy": 0.5738,
+            "brier": 0.2511,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.6079,
+            "balancedAccuracy": 0.5167,
+            "brier": 0.2771,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "rocAuc": 0.6016,
+            "balancedAccuracy": 0.5881,
+            "brier": 0.2732,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "rocAuc": 0.5921,
+            "balancedAccuracy": 0.5238,
+            "brier": 0.2814,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.6444,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2211,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.6476,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2201,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.6603,
+            "balancedAccuracy": 0.6548,
+            "brier": 0.2305,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "rocAuc": 0.6603,
+            "balancedAccuracy": 0.5571,
+            "brier": 0.234,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "rocAuc": 0.646,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2355,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.5859,
+            "balancedAccuracy": 0.4823,
+            "brier": 0.233,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.5909,
+            "balancedAccuracy": 0.5379,
+            "brier": 0.2309,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.6768,
+            "balancedAccuracy": 0.6212,
+            "brier": 0.2159,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "rocAuc": 0.5926,
+            "balancedAccuracy": 0.5379,
+            "brier": 0.2303,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "rocAuc": 0.6582,
+            "balancedAccuracy": 0.5657,
+            "brier": 0.2198,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "60": {
+        "windowPositive": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2595,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.6071,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2524,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.6048,
+            "balancedAccuracy": 0.4952,
+            "brier": 0.26,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "rocAuc": 0.6286,
+            "balancedAccuracy": 0.55,
+            "brier": 0.2553,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "rocAuc": 0.6167,
+            "balancedAccuracy": 0.5143,
+            "brier": 0.2597,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.6356,
+            "balancedAccuracy": 0.5952,
+            "brier": 0.2449,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.6377,
+            "balancedAccuracy": 0.528,
+            "brier": 0.242,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.6667,
+            "balancedAccuracy": 0.5756,
+            "brier": 0.239,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "rocAuc": 0.6667,
+            "balancedAccuracy": 0.53,
+            "brier": 0.2431,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "rocAuc": 0.6646,
+            "balancedAccuracy": 0.6211,
+            "brier": 0.2395,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.573,
+            "balancedAccuracy": 0.5758,
+            "brier": 0.21,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.5923,
+            "balancedAccuracy": 0.5606,
+            "brier": 0.2077,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.6584,
+            "balancedAccuracy": 0.6212,
+            "brier": 0.1886,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "rocAuc": 0.5344,
+            "balancedAccuracy": 0.5455,
+            "brier": 0.2174,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "rocAuc": 0.573,
+            "balancedAccuracy": 0.6061,
+            "brier": 0.2046,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "70": {
+        "windowPositive": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.5109,
+            "brier": 0.249,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.5543,
+            "balancedAccuracy": 0.4946,
+            "brier": 0.2406,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.5761,
+            "balancedAccuracy": 0.4728,
+            "brier": 0.2504,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "rocAuc": 0.5707,
+            "balancedAccuracy": 0.4511,
+            "brier": 0.2542,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "rocAuc": 0.5924,
+            "balancedAccuracy": 0.4511,
+            "brier": 0.2544,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.65,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2425,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.675,
+            "balancedAccuracy": 0.6229,
+            "brier": 0.2369,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.6875,
+            "balancedAccuracy": 0.6208,
+            "brier": 0.2369,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "rocAuc": 0.6333,
+            "balancedAccuracy": 0.6542,
+            "brier": 0.2465,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "rocAuc": 0.675,
+            "balancedAccuracy": 0.6521,
+            "brier": 0.2409,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.6067,
+            "brier": 0.2088,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.5133,
+            "balancedAccuracy": 0.5033,
+            "brier": 0.2097,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.5933,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.1985,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "rocAuc": 0.4867,
+            "balancedAccuracy": 0.5867,
+            "brier": 0.2074,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "rocAuc": 0.6067,
+            "balancedAccuracy": 0.5867,
+            "brier": 0.1962,
+            "conclusion": "제한적"
+          }
+        }
+      }
+    },
+    "t5": {
+      "50": {
+        "windowPositive": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.5698,
+            "balancedAccuracy": 0.5667,
+            "brier": 0.2577,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.6016,
+            "balancedAccuracy": 0.5571,
+            "brier": 0.2529,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.6016,
+            "balancedAccuracy": 0.5571,
+            "brier": 0.252,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "rocAuc": 0.627,
+            "balancedAccuracy": 0.5976,
+            "brier": 0.2493,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "rocAuc": 0.6238,
+            "balancedAccuracy": 0.5976,
+            "brier": 0.2515,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.6444,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2211,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.6206,
+            "balancedAccuracy": 0.5833,
+            "brier": 0.2283,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.6444,
+            "balancedAccuracy": 0.5976,
+            "brier": 0.2212,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "rocAuc": 0.6746,
+            "balancedAccuracy": 0.5571,
+            "brier": 0.2261,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "rocAuc": 0.673,
+            "balancedAccuracy": 0.631,
+            "brier": 0.2183,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 51,
+            "rocAuc": 0.5859,
+            "balancedAccuracy": 0.4823,
+            "brier": 0.233,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 51,
+            "rocAuc": 0.5572,
+            "balancedAccuracy": 0.4975,
+            "brier": 0.2392,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 51,
+            "rocAuc": 0.5909,
+            "balancedAccuracy": 0.5126,
+            "brier": 0.2318,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 51,
+            "rocAuc": 0.5572,
+            "balancedAccuracy": 0.4975,
+            "brier": 0.2393,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 51,
+            "rocAuc": 0.5673,
+            "balancedAccuracy": 0.5404,
+            "brier": 0.2351,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "60": {
+        "windowPositive": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.5333,
+            "balancedAccuracy": 0.581,
+            "brier": 0.2595,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.5905,
+            "balancedAccuracy": 0.5286,
+            "brier": 0.2593,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.5929,
+            "balancedAccuracy": 0.5643,
+            "brier": 0.2597,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "rocAuc": 0.6381,
+            "balancedAccuracy": 0.5476,
+            "brier": 0.2478,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "rocAuc": 0.6333,
+            "balancedAccuracy": 0.5476,
+            "brier": 0.2479,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.6356,
+            "balancedAccuracy": 0.5952,
+            "brier": 0.2449,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.6398,
+            "balancedAccuracy": 0.5714,
+            "brier": 0.2425,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.6584,
+            "balancedAccuracy": 0.6253,
+            "brier": 0.2365,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "rocAuc": 0.6998,
+            "balancedAccuracy": 0.5518,
+            "brier": 0.2317,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "rocAuc": 0.7019,
+            "balancedAccuracy": 0.6035,
+            "brier": 0.2298,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 44,
+            "rocAuc": 0.573,
+            "balancedAccuracy": 0.5758,
+            "brier": 0.21,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 44,
+            "rocAuc": 0.6501,
+            "balancedAccuracy": 0.5606,
+            "brier": 0.1998,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 44,
+            "rocAuc": 0.6832,
+            "balancedAccuracy": 0.6061,
+            "brier": 0.1894,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 44,
+            "rocAuc": 0.5758,
+            "balancedAccuracy": 0.5455,
+            "brier": 0.21,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 44,
+            "rocAuc": 0.6171,
+            "balancedAccuracy": 0.5303,
+            "brier": 0.2053,
+            "conclusion": "제한적"
+          }
+        }
+      },
+      "70": {
+        "windowPositive": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.5109,
+            "brier": 0.249,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.538,
+            "balancedAccuracy": 0.4511,
+            "brier": 0.26,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.5217,
+            "balancedAccuracy": 0.4293,
+            "brier": 0.2625,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "rocAuc": 0.5435,
+            "balancedAccuracy": 0.4511,
+            "brier": 0.2604,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "rocAuc": 0.5435,
+            "balancedAccuracy": 0.4511,
+            "brier": 0.2604,
+            "conclusion": "제한적"
+          }
+        },
+        "window10": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.65,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2425,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.6875,
+            "balancedAccuracy": 0.5917,
+            "brier": 0.2356,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.7208,
+            "balancedAccuracy": 0.6854,
+            "brier": 0.2246,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "rocAuc": 0.6458,
+            "balancedAccuracy": 0.5875,
+            "brier": 0.2375,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "rocAuc": 0.7083,
+            "balancedAccuracy": 0.6521,
+            "brier": 0.232,
+            "conclusion": "제한적"
+          }
+        },
+        "t20Positive": {
+          "A": {
+            "n": 31,
+            "rocAuc": 0.5,
+            "balancedAccuracy": 0.6067,
+            "brier": 0.2088,
+            "conclusion": "제한적"
+          },
+          "B": {
+            "n": 31,
+            "rocAuc": 0.6333,
+            "balancedAccuracy": 0.67,
+            "brier": 0.1931,
+            "conclusion": "제한적"
+          },
+          "C": {
+            "n": 31,
+            "rocAuc": 0.6867,
+            "balancedAccuracy": 0.69,
+            "brier": 0.1859,
+            "conclusion": "제한적"
+          },
+          "D": {
+            "n": 31,
+            "rocAuc": 0.64,
+            "balancedAccuracy": 0.69,
+            "brier": 0.1833,
+            "conclusion": "제한적"
+          },
+          "E": {
+            "n": 31,
+            "rocAuc": 0.7,
+            "balancedAccuracy": 0.69,
+            "brier": 0.1795,
+            "conclusion": "제한적"
+          }
+        }
+      }
+    }
+  },
+  "ticker": {
+    "t5": {
+      "depth": {
+        "eventWeighted": {
+          "n": 103,
+          "spearman": -0.2553
+        },
+        "tickerWeighted": {
+          "tickers": 30,
+          "spearman": 0.0042,
+          "maxEvents": 9
+        },
+        "leaveOneTicker": {
+          "baseline": -0.2553,
+          "min": -0.2943,
+          "max": -0.212,
+          "median": -0.2534,
+          "signFlips": []
+        },
+        "withinStock": "결론 금지"
+      },
+      "velocity": {
+        "eventWeighted": {
+          "n": 103,
+          "spearman": 0.205
+        },
+        "tickerWeighted": {
+          "tickers": 30,
+          "spearman": 0.0643,
+          "maxEvents": 9
+        },
+        "leaveOneTicker": {
+          "baseline": 0.205,
+          "min": 0.1617,
+          "max": 0.2398,
+          "median": 0.2068,
+          "signFlips": []
+        },
+        "withinStock": "결론 금지"
+      },
+      "persistence": {
+        "eventWeighted": {
+          "n": 103,
+          "spearman": -0.2692
+        },
+        "tickerWeighted": {
+          "tickers": 30,
+          "spearman": -0.0743,
+          "maxEvents": 9
+        },
+        "leaveOneTicker": {
+          "baseline": -0.2692,
+          "min": -0.3231,
+          "max": -0.2021,
+          "median": -0.2698,
+          "signFlips": []
+        },
+        "withinStock": "결론 금지"
+      }
+    }
+  },
+  "bootstrap": {
+    "fastSlow": {
+      "nLeft": 32,
+      "nRight": 19,
+      "meanDiff": -7.86,
+      "ci95": [
+        -19.92,
+        3.74
+      ],
+      "permutationTail": 0.1846,
+      "usable": true
+    },
+    "persistent": {
+      "nLeft": 28,
+      "nRight": 23,
+      "meanDiff": 6.03,
+      "ci95": [
+        -4.56,
+        16.83
+      ],
+      "permutationTail": 0.3011,
+      "usable": true
+    },
+    "versusStable": {
+      "GRADUAL": {
+        "nLeft": 48,
+        "nRight": 16,
+        "meanDiff": 13.01,
+        "ci95": [
+          1.11,
+          23.16
+        ],
+        "permutationTail": 0.0281,
+        "usable": true
+      },
+      "FAST_DROP": {
+        "nLeft": 48,
+        "nRight": 19,
+        "meanDiff": 2.8,
+        "ci95": [
+          -9.12,
+          13.7
+        ],
+        "permutationTail": 0.6204,
+        "usable": true
+      },
+      "PERSISTENT_DROP": {
+        "nLeft": 48,
+        "nRight": 20,
+        "meanDiff": 9.04,
+        "ci95": [
+          -0.69,
+          18.89
+        ],
+        "permutationTail": 0.0907,
+        "usable": true
+      }
+    },
+    "fullSample": true
+  },
+  "judgment": {
+    "label": "부분적으로 지지"
+  }
+}
