@@ -1,0 +1,4723 @@
+{
+  "selectedStrategy": null,
+  "note": "T+5 observables are scored against later buy-and-hold results. They are not a sell rule and the loss limits are not inputs.",
+  "baseline": {
+    "events": 103,
+    "states": {
+      "RECOVERING": 53,
+      "STABILIZING": 4,
+      "STILL_FALLING": 46
+    },
+    "bands": {
+      "LOW": 34,
+      "MID": 34,
+      "HIGH": 35
+    },
+    "groups": {
+      "HIGH": 15,
+      "MID": 53,
+      "LOW": 35
+    }
+  },
+  "rules": {
+    "noRefit": true,
+    "noThresholdSearch": true,
+    "headlineSplit": "70",
+    "recoveryIsOutcome": true,
+    "tailIsOutcome": true,
+    "stabilizing": "결론 금지"
+  },
+  "states": {
+    "RECOVERING": 53,
+    "STABILIZING": 4,
+    "STILL_FALLING": 46
+  },
+  "identities": {
+    "ok": true,
+    "checked": 202,
+    "maxAbsError": 0
+  },
+  "lookAhead": {
+    "decision": {
+      "ok": true,
+      "checked": 103,
+      "violations": 0,
+      "t5LastBar": "T+5 close",
+      "thresholds": "T+5 return and depth only"
+    },
+    "hold": {
+      "ok": true,
+      "checked": 103,
+      "violations": 0,
+      "predictorLastBar": "T+5 close",
+      "outcomes": "recovery time and future tails stay out of the models"
+    },
+    "violations": 0
+  },
+  "levels": {
+    "window": {
+      "n": 99,
+      "conclusion": "제한적",
+      "mean": 7.29,
+      "median": 3.09,
+      "win": 59.6,
+      "tail5": 26.26,
+      "tail10": 16.16,
+      "tail15": 6.06,
+      "tail20": 3.03,
+      "rawTail20": 0.030303030303030304
+    },
+    "t20": {
+      "n": 103,
+      "conclusion": "제한적",
+      "mean": 4.19,
+      "median": 2.06,
+      "win": 60.19,
+      "tail5": 23.3,
+      "tail10": 10.68,
+      "tail15": 4.85,
+      "tail20": 0.97,
+      "rawTail20": 0.009708737864077669
+    },
+    "t40": {
+      "n": 103,
+      "conclusion": "제한적",
+      "mean": 7.57,
+      "median": 6.07,
+      "win": 64.08,
+      "tail5": 29.13,
+      "tail10": 13.59,
+      "tail15": 7.77,
+      "tail20": 1.94,
+      "rawTail20": 0.019417475728155338
+    },
+    "t10": {
+      "n": 103,
+      "conclusion": "제한적",
+      "mean": 1.86,
+      "median": 1.42,
+      "win": 61.17,
+      "tail5": 13.59,
+      "tail10": 4.85,
+      "tail15": 1.94,
+      "tail20": 0,
+      "rawTail20": 0
+    }
+  },
+  "failure": {
+    "entry": {
+      "failed": 7,
+      "n": 99,
+      "rate": 7.07
+    },
+    "plus5": {
+      "failed": 31,
+      "n": 99,
+      "rate": 31.31
+    },
+    "plus10": {
+      "failed": 52,
+      "n": 99,
+      "rate": 52.53
+    },
+    "conclusion": "제한적"
+  },
+  "univariate": {
+    "t0": {
+      "window": {
+        "n": 99,
+        "rho": 0.2412,
+        "rawRho": 0.24119975262832405,
+        "pearson": 0.23,
+        "ci95": [
+          0.0381,
+          0.4272
+        ],
+        "rawCi": [
+          0.03813459706257192,
+          0.42724555899987005
+        ],
+        "permutationTail": 0.0154
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.2296,
+        "rawRho": 0.22955752942116758,
+        "pearson": 0.2249,
+        "ci95": [
+          0.0358,
+          0.4067
+        ],
+        "rawCi": [
+          0.035809433827528055,
+          0.40673775829958614
+        ],
+        "permutationTail": 0.0174
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.2202,
+        "rawSpearman": 0.22024409330657532,
+        "pearson": 0.2018
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.1642,
+        "rawSpearman": -0.16420056912031236,
+        "pearson": -0.1799
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.1382,
+        "rawRho": -0.138151671556089,
+        "pearson": -0.1153,
+        "ci95": [
+          -0.2729,
+          0.0075
+        ],
+        "rawCi": [
+          -0.27285181704794587,
+          0.00753792301462567
+        ],
+        "permutationTail": 0.1877
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.0578,
+        "rawSpearman": 0.057817180026965065,
+        "pearson": 0.0629
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.018,
+        "rawSpearman": 0.018020022246941044
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 2.63,
+          "median": -0.16,
+          "win": 50,
+          "tail5": 34,
+          "tail10": 22,
+          "tail15": 10,
+          "tail20": 6,
+          "rawTail20": 0.06,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 12.05,
+          "median": 5.25,
+          "win": 69.39,
+          "tail5": 18.37,
+          "tail10": 10.2,
+          "tail15": 2.04,
+          "tail20": 0,
+          "rawTail20": 0,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 9.43,
+        "ci95": [
+          2.12,
+          16.72
+        ],
+        "permutationTail": 0.013
+      },
+      "tailGap": {
+        "meanDiff": 6,
+        "ci95": [
+          0,
+          14
+        ],
+        "permutationTail": 0.2419
+      },
+      "favorableTail": {
+        "meanDiff": 6,
+        "ci95": [
+          0,
+          14
+        ],
+        "rawCiLow": 0,
+        "permutationTail": 0.2525
+      }
+    },
+    "leadership": {
+      "window": {
+        "n": 99,
+        "rho": 0.1885,
+        "rawRho": 0.18845567523082254,
+        "pearson": 0.2663,
+        "ci95": [
+          -0.0068,
+          0.3685
+        ],
+        "rawCi": [
+          -0.006792873051744923,
+          0.36846469947519556
+        ],
+        "permutationTail": 0.0613
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.1891,
+        "rawRho": 0.18912032333704923,
+        "pearson": 0.2435,
+        "ci95": [
+          -0.0059,
+          0.3743
+        ],
+        "rawCi": [
+          -0.005851616199910989,
+          0.37430499087972224
+        ],
+        "permutationTail": 0.0554
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.2136,
+        "rawSpearman": 0.21356829451787745,
+        "pearson": 0.2696
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0557,
+        "rawSpearman": -0.055694276933316515,
+        "pearson": -0.1006
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.0206,
+        "rawRho": 0.02061984375064425,
+        "pearson": -0.01,
+        "ci95": [
+          -0.0577,
+          0.0988
+        ],
+        "rawCi": [
+          -0.057746277289681354,
+          0.09875153233669143
+        ],
+        "permutationTail": 0.8553
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.2244,
+        "rawSpearman": -0.22444175910009198,
+        "pearson": -0.1859
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.4652,
+        "rawSpearman": 0.46518353726362627
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 4.47,
+          "median": 2.68,
+          "win": 60,
+          "tail5": 26,
+          "tail10": 14,
+          "tail15": 6,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 10.18,
+          "median": 5.47,
+          "win": 59.18,
+          "tail5": 26.53,
+          "tail10": 18.37,
+          "tail15": 6.12,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 5.71,
+        "ci95": [
+          -1.69,
+          13.2
+        ],
+        "permutationTail": 0.1408
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.24,
+          4
+        ],
+        "permutationTail": 0.6084
+      },
+      "favorableTail": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.2,
+          4
+        ],
+        "rawCiLow": -0.08204081632653061,
+        "permutationTail": 0.6101
+      }
+    },
+    "eventAtr": {
+      "window": {
+        "n": 99,
+        "rho": 0.2583,
+        "rawRho": 0.25825224106467753,
+        "pearson": 0.3504,
+        "ci95": [
+          0.0602,
+          0.4377
+        ],
+        "rawCi": [
+          0.06024461616016612,
+          0.43768406464226495
+        ],
+        "permutationTail": 0.0103
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.1875,
+        "rawRho": 0.1874509200937941,
+        "pearson": 0.2818,
+        "ci95": [
+          -0.0196,
+          0.374
+        ],
+        "rawCi": [
+          -0.019577684515831337,
+          0.37397954138419787
+        ],
+        "permutationTail": 0.0614
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.2375,
+        "rawSpearman": 0.2375330173914476,
+        "pearson": 0.2805
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": 0.0115,
+        "rawSpearman": 0.011522953848272382,
+        "pearson": 0.0041
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.068,
+        "rawRho": 0.06804548437712603,
+        "pearson": -0.0053,
+        "ci95": [
+          0.0035,
+          0.1454
+        ],
+        "rawCi": [
+          0.0035354535556286256,
+          0.14543407489585464
+        ],
+        "permutationTail": 0.5264
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.2933,
+        "rawSpearman": -0.2933281143931202,
+        "pearson": -0.2559
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.5141,
+        "rawSpearman": 0.51412680756396
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 4.11,
+          "median": 1.98,
+          "win": 58,
+          "tail5": 26,
+          "tail10": 12,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 10.54,
+          "median": 5.47,
+          "win": 61.22,
+          "tail5": 26.53,
+          "tail10": 20.41,
+          "tail15": 12.24,
+          "tail20": 6.12,
+          "rawTail20": 0.061224489795918366,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 6.43,
+        "ci95": [
+          -0.99,
+          14.03
+        ],
+        "permutationTail": 0.0969
+      },
+      "tailGap": {
+        "meanDiff": -6.12,
+        "ci95": [
+          -14.29,
+          0
+        ],
+        "permutationTail": 0.1201
+      },
+      "favorableTail": {
+        "meanDiff": -6.12,
+        "ci95": [
+          -14.29,
+          0
+        ],
+        "rawCiLow": -0.14285714285714285,
+        "permutationTail": 0.1151
+      }
+    },
+    "withinAtr": {
+      "window": {
+        "n": 99,
+        "rho": 0.1438,
+        "rawRho": 0.14382941091599907,
+        "pearson": 0.3758,
+        "ci95": [
+          -0.0791,
+          0.3536
+        ],
+        "rawCi": [
+          -0.07907615588786666,
+          0.3535770416200055
+        ],
+        "permutationTail": 0.1544
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.1129,
+        "rawRho": 0.11286593703494215,
+        "pearson": 0.2964,
+        "ci95": [
+          -0.1074,
+          0.3319
+        ],
+        "rawCi": [
+          -0.10742403182120351,
+          0.3318939231618677
+        ],
+        "permutationTail": 0.2566
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.1496,
+        "rawSpearman": 0.14955985963833257,
+        "pearson": 0.2751
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0058,
+        "rawSpearman": -0.005761476924136191,
+        "pearson": -0.0839
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.0165,
+        "rawRho": -0.0164958750005154,
+        "pearson": -0.0145,
+        "ci95": [
+          -0.1856,
+          0.1831
+        ],
+        "rawCi": [
+          -0.18561073752285853,
+          0.18312674277458632
+        ],
+        "permutationTail": 0.8818
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.2177,
+        "rawSpearman": -0.21767014021442252,
+        "pearson": -0.2339
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.3108,
+        "rawSpearman": 0.31078976640711903
+      },
+      "buckets": {
+        "low": {
+          "n": 51,
+          "conclusion": "제한적",
+          "mean": 4.57,
+          "median": 1.81,
+          "win": 56.86,
+          "tail5": 27.45,
+          "tail10": 15.69,
+          "tail15": 5.88,
+          "tail20": 3.92,
+          "rawTail20": 0.0392156862745098,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 48,
+          "conclusion": "제한적",
+          "mean": 10.19,
+          "median": 4.74,
+          "win": 62.5,
+          "tail5": 25,
+          "tail10": 16.67,
+          "tail15": 6.25,
+          "tail20": 2.08,
+          "rawTail20": 0.020833333333333332,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 5.62,
+        "ci95": [
+          -1.66,
+          13.16
+        ],
+        "permutationTail": 0.1451
+      },
+      "tailGap": {
+        "meanDiff": 1.84,
+        "ci95": [
+          -4.29,
+          7.84
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": 1.84,
+        "ci95": [
+          -4.29,
+          7.84
+        ],
+        "rawCiLow": -0.0428921568627451,
+        "permutationTail": 1
+      }
+    },
+    "maeT1": {
+      "window": {
+        "n": 99,
+        "rho": 0.1014,
+        "rawRho": 0.10141714363896757,
+        "pearson": 0.1251,
+        "ci95": [
+          -0.1122,
+          0.305
+        ],
+        "rawCi": [
+          -0.11218751739880853,
+          0.305010084511922
+        ],
+        "permutationTail": 0.3169
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.0226,
+        "rawRho": 0.02264128148664752,
+        "pearson": 0.0603,
+        "ci95": [
+          -0.1874,
+          0.226
+        ],
+        "rawCi": [
+          -0.1873997406992331,
+          0.22603221340833682
+        ],
+        "permutationTail": 0.8219
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.0542,
+        "rawSpearman": 0.054217165199532125,
+        "pearson": 0.0606
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0326,
+        "rawSpearman": -0.03264836923677175,
+        "pearson": -0.0405
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.0392,
+        "rawRho": -0.039177703126224074,
+        "pearson": -0.0167,
+        "ci95": [
+          -0.2096,
+          0.1734
+        ],
+        "rawCi": [
+          -0.209641682699238,
+          0.1733995832777726
+        ],
+        "permutationTail": 0.7158
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.1527,
+        "rawSpearman": -0.15273549452606258,
+        "pearson": -0.058
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.2992,
+        "rawSpearman": 0.2992213570634038
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 4.04,
+          "median": 0.24,
+          "win": 50,
+          "tail5": 30,
+          "tail10": 20,
+          "tail15": 8,
+          "tail20": 4,
+          "rawTail20": 0.04,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 10.61,
+          "median": 3.3,
+          "win": 69.39,
+          "tail5": 22.45,
+          "tail10": 12.24,
+          "tail15": 4.08,
+          "tail20": 2.04,
+          "rawTail20": 0.02040816326530612,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 6.57,
+        "ci95": [
+          -0.89,
+          13.83
+        ],
+        "permutationTail": 0.0872
+      },
+      "tailGap": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "rawCiLow": -0.04122448979591836,
+        "permutationTail": 1
+      }
+    },
+    "maeT3": {
+      "window": {
+        "n": 99,
+        "rho": -0.0172,
+        "rawRho": -0.0172110440116621,
+        "pearson": -0.0415,
+        "ci95": [
+          -0.2181,
+          0.1867
+        ],
+        "rawCi": [
+          -0.21810093611014683,
+          0.18668374202218338
+        ],
+        "permutationTail": 0.8656
+      },
+      "t20": {
+        "n": 103,
+        "rho": -0.069,
+        "rawRho": -0.06900017023519915,
+        "pearson": -0.0751,
+        "ci95": [
+          -0.2752,
+          0.1352
+        ],
+        "rawCi": [
+          -0.2752248712862583,
+          0.13524768031467513
+        ],
+        "permutationTail": 0.4874
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": -0.0085,
+        "rawSpearman": -0.008473319751127122,
+        "pearson": -0.0056
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": 0.0384,
+        "rawSpearman": 0.038409846160907944,
+        "pearson": 0.0289
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.0268,
+        "rawRho": -0.026805796875837524,
+        "pearson": -0.0203,
+        "ci95": [
+          -0.2287,
+          0.1808
+        ],
+        "rawCi": [
+          -0.22867225764635307,
+          0.18078345387675354
+        ],
+        "permutationTail": 0.8083
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.1443,
+        "rawSpearman": 0.14433331585205914,
+        "pearson": 0.0912
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.0229,
+        "rawSpearman": -0.022914349276974416
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 8.55,
+          "median": 3.04,
+          "win": 56,
+          "tail5": 24,
+          "tail10": 14,
+          "tail15": 6,
+          "tail20": 4,
+          "rawTail20": 0.04,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 6.01,
+          "median": 3.09,
+          "win": 63.27,
+          "tail5": 28.57,
+          "tail10": 18.37,
+          "tail15": 6.12,
+          "tail20": 2.04,
+          "rawTail20": 0.02040816326530612,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": -2.54,
+        "ci95": [
+          -10.13,
+          4.87
+        ],
+        "permutationTail": 0.5108
+      },
+      "tailGap": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": -1.96,
+        "ci95": [
+          -9.92,
+          4.12
+        ],
+        "rawCiLow": -0.09918367346938778,
+        "permutationTail": 1
+      }
+    },
+    "maeT5": {
+      "window": {
+        "n": 99,
+        "rho": -0.0359,
+        "rawRho": -0.03591251619680985,
+        "pearson": -0.1803,
+        "ci95": [
+          -0.2385,
+          0.1677
+        ],
+        "rawCi": [
+          -0.23845173502199776,
+          0.1677432935653204
+        ],
+        "permutationTail": 0.7098
+      },
+      "t20": {
+        "n": 103,
+        "rho": -0.1161,
+        "rawRho": -0.1161388460250081,
+        "pearson": -0.175,
+        "ci95": [
+          -0.3166,
+          0.0884
+        ],
+        "rawCi": [
+          -0.3166424929676512,
+          0.08839718306764373
+        ],
+        "permutationTail": 0.2483
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": -0.0325,
+        "rawSpearman": -0.032514923037215614,
+        "pearson": -0.1153
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": 0.0125,
+        "rawSpearman": 0.01248320000229508,
+        "pearson": 0.0536
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.0144,
+        "rawRho": 0.014433890625450975,
+        "pearson": 0.0279,
+        "ci95": [
+          -0.1834,
+          0.2065
+        ],
+        "rawCi": [
+          -0.18343697776067894,
+          0.20647472820995225
+        ],
+        "permutationTail": 0.8984
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.2505,
+        "rawSpearman": 0.25051153265710263,
+        "pearson": 0.1854
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.1524,
+        "rawSpearman": -0.15239154616240266
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 8.21,
+          "median": 1.85,
+          "win": 52,
+          "tail5": 30,
+          "tail10": 18,
+          "tail15": 4,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 6.35,
+          "median": 3.3,
+          "win": 67.35,
+          "tail5": 22.45,
+          "tail10": 14.29,
+          "tail15": 8.16,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": -1.86,
+        "ci95": [
+          -9.58,
+          5.63
+        ],
+        "permutationTail": 0.6301
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.2,
+          4
+        ],
+        "permutationTail": 0.6224
+      },
+      "favorableTail": {
+        "meanDiff": 2.08,
+        "ci95": [
+          -4,
+          8.29
+        ],
+        "rawCiLow": -0.04,
+        "permutationTail": 0.615
+      }
+    },
+    "fromMae": {
+      "window": {
+        "n": 99,
+        "rho": 0.0958,
+        "rawRho": 0.09576238223314848,
+        "pearson": 0.0749,
+        "ci95": [
+          -0.1067,
+          0.2897
+        ],
+        "rawCi": [
+          -0.10668014958360052,
+          0.2896940169665264
+        ],
+        "permutationTail": 0.3477
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.1069,
+        "rawRho": 0.10694615280004849,
+        "pearson": 0.0617,
+        "ci95": [
+          -0.0874,
+          0.2932
+        ],
+        "rawCi": [
+          -0.0873812976664971,
+          0.29315695593063634
+        ],
+        "permutationTail": 0.2905
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.0398,
+        "rawSpearman": 0.039750872494341706,
+        "pearson": 0.0748
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0318,
+        "rawSpearman": -0.03180032237402402,
+        "pearson": -0.0727
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.0207,
+        "rawRho": 0.020692853182253102,
+        "pearson": -0.0242,
+        "ci95": [
+          -0.1043,
+          0.139
+        ],
+        "rawCi": [
+          -0.10425220878237645,
+          0.13896980249867935
+        ],
+        "permutationTail": 0.8548
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.1856,
+        "rawSpearman": 0.18555277535993553,
+        "pearson": 0.0694
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.1055,
+        "rawSpearman": 0.10546223226901577
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 6.27,
+          "median": 1.21,
+          "win": 52,
+          "tail5": 28,
+          "tail10": 18,
+          "tail15": 2,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 8.33,
+          "median": 5.47,
+          "win": 67.35,
+          "tail5": 24.49,
+          "tail10": 14.29,
+          "tail15": 10.2,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 2.06,
+        "ci95": [
+          -5.38,
+          9.37
+        ],
+        "permutationTail": 0.5957
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.2,
+          4
+        ],
+        "permutationTail": 0.6163
+      },
+      "favorableTail": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -10.2,
+          4
+        ],
+        "rawCiLow": -0.10204081632653061,
+        "permutationTail": 0.6239
+      }
+    },
+    "returnT5": {
+      "window": {
+        "n": 99,
+        "rho": 0.0712,
+        "rawRho": 0.07120041311759459,
+        "pearson": -0.0683,
+        "ci95": [
+          -0.135,
+          0.2793
+        ],
+        "rawCi": [
+          -0.1350462620740128,
+          0.2793169584854297
+        ],
+        "permutationTail": 0.4766
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.0255,
+        "rawRho": 0.02554077133019588,
+        "pearson": -0.0728,
+        "ci95": [
+          -0.1736,
+          0.233
+        ],
+        "rawCi": [
+          -0.17364933909087912,
+          0.23295994550259028
+        ],
+        "permutationTail": 0.7965
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.0393,
+        "rawSpearman": 0.039302365170976544,
+        "pearson": -0.0264
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0307,
+        "rawSpearman": -0.030727876928726354,
+        "pearson": -0.0116
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.0062,
+        "rawRho": -0.006185953125193275,
+        "pearson": 0.0026,
+        "ci95": [
+          -0.1179,
+          0.1231
+        ],
+        "rawCi": [
+          -0.11785104797997528,
+          0.12312321738937133
+        ],
+        "permutationTail": 0.9612
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.315,
+        "rawSpearman": 0.31496660193712905,
+        "pearson": 0.1632
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.0429,
+        "rawSpearman": -0.04293659621802002
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 6.28,
+          "median": 0.24,
+          "win": 50,
+          "tail5": 28,
+          "tail10": 18,
+          "tail15": 4,
+          "tail20": 4,
+          "rawTail20": 0.04,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 8.33,
+          "median": 5.25,
+          "win": 69.39,
+          "tail5": 24.49,
+          "tail10": 14.29,
+          "tail15": 8.16,
+          "tail20": 2.04,
+          "rawTail20": 0.02040816326530612,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 2.05,
+        "ci95": [
+          -5.81,
+          9.46
+        ],
+        "permutationTail": 0.5939
+      },
+      "tailGap": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          9.92
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "rawCiLow": -0.04122448979591836,
+        "permutationTail": 1
+      }
+    },
+    "depthT5": {
+      "window": {
+        "n": 99,
+        "rho": 0.0304,
+        "rawRho": 0.03036911417793625,
+        "pearson": 0.2308,
+        "ci95": [
+          -0.1727,
+          0.2309
+        ],
+        "rawCi": [
+          -0.17273496026780946,
+          0.23090051998124034
+        ],
+        "permutationTail": 0.7623
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.1072,
+        "rawRho": 0.10718691246307488,
+        "pearson": 0.1887,
+        "ci95": [
+          -0.1122,
+          0.3034
+        ],
+        "rawCi": [
+          -0.11221744504536499,
+          0.3033539050002141
+        ],
+        "permutationTail": 0.2788
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.0271,
+        "rawSpearman": 0.02714103820921144,
+        "pearson": 0.14
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0126,
+        "rawSpearman": -0.012584788311308975,
+        "pearson": -0.1087
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.0125,
+        "rawRho": -0.01247258885060317,
+        "pearson": -0.0305,
+        "ci95": [
+          -0.1969,
+          0.1853
+        ],
+        "rawCi": [
+          -0.19693974876586565,
+          0.18531003446588792
+        ],
+        "permutationTail": 0.9082
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.2387,
+        "rawSpearman": -0.2386660293770467,
+        "pearson": -0.1621
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.1818,
+        "rawSpearman": 0.18183843332806515
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 6,
+          "median": 3.2,
+          "win": 66,
+          "tail5": 24,
+          "tail10": 16,
+          "tail15": 8,
+          "tail20": 4,
+          "rawTail20": 0.04,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 8.61,
+          "median": 2.96,
+          "win": 53.06,
+          "tail5": 28.57,
+          "tail10": 16.33,
+          "tail15": 4.08,
+          "tail20": 2.04,
+          "rawTail20": 0.02040816326530612,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 2.62,
+        "ci95": [
+          -4.82,
+          10.13
+        ],
+        "permutationTail": 0.4997
+      },
+      "tailGap": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "rawCiLow": -0.04122448979591836,
+        "permutationTail": 1
+      }
+    },
+    "correctionDuration": {
+      "window": {
+        "n": 99,
+        "rho": -0.1255,
+        "rawRho": -0.12552055203394932,
+        "pearson": -0.1745,
+        "ci95": [
+          -0.3249,
+          0.0804
+        ],
+        "rawCi": [
+          -0.32490980822115784,
+          0.0803518171955347
+        ],
+        "permutationTail": 0.2126
+      },
+      "t20": {
+        "n": 103,
+        "rho": -0.1277,
+        "rawRho": -0.12773984258465712,
+        "pearson": -0.1596,
+        "ci95": [
+          -0.3152,
+          0.0701
+        ],
+        "rawCi": [
+          -0.3152165814366876,
+          0.07014995508983059
+        ],
+        "permutationTail": 0.2026
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": -0.1639,
+        "rawSpearman": -0.16387017501242307,
+        "pearson": -0.2067
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0506,
+        "rawSpearman": -0.05059110686413356,
+        "pearson": -0.0396
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.1086,
+        "rawRho": -0.10863680258863298,
+        "pearson": -0.103,
+        "ci95": [
+          -0.273,
+          0.0942
+        ],
+        "rawCi": [
+          -0.273046911678934,
+          0.09420290310436949
+        ],
+        "permutationTail": 0.299
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.3392,
+        "rawSpearman": 0.3392125478892279,
+        "pearson": 0.262
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.6003,
+        "rawSpearman": -0.6003119726920991
+      },
+      "buckets": {
+        "low": {
+          "n": 58,
+          "conclusion": "제한적",
+          "mean": 10.59,
+          "median": 3.94,
+          "win": 63.79,
+          "tail5": 24.14,
+          "tail10": 17.24,
+          "tail15": 8.62,
+          "tail20": 3.45,
+          "rawTail20": 0.034482758620689655,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 41,
+          "conclusion": "제한적",
+          "mean": 2.63,
+          "median": 1.81,
+          "win": 53.66,
+          "tail5": 29.27,
+          "tail10": 14.63,
+          "tail15": 2.44,
+          "tail20": 2.44,
+          "rawTail20": 0.024390243902439025,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": -7.95,
+        "ci95": [
+          -14.68,
+          -1.11
+        ],
+        "permutationTail": 0.0425
+      },
+      "tailGap": {
+        "meanDiff": 1.01,
+        "ci95": [
+          -5.59,
+          6.9
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": -1.01,
+        "ci95": [
+          -6.9,
+          5.59
+        ],
+        "rawCiLow": -0.06896551724137931,
+        "permutationTail": 1
+      }
+    },
+    "correctionSpeed": {
+      "window": {
+        "n": 99,
+        "rho": 0.1196,
+        "rawRho": 0.11958676178710384,
+        "pearson": 0.2608,
+        "ci95": [
+          -0.0907,
+          0.3228
+        ],
+        "rawCi": [
+          -0.09068748763315523,
+          0.3228245368194551
+        ],
+        "permutationTail": 0.2342
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.1059,
+        "rawRho": 0.10590276824399647,
+        "pearson": 0.2901,
+        "ci95": [
+          -0.0953,
+          0.2951
+        ],
+        "rawCi": [
+          -0.09526294682832234,
+          0.29512509955782595
+        ],
+        "permutationTail": 0.2873
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.158,
+        "rawSpearman": 0.1579837562671265,
+        "pearson": 0.2403
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": 0.0461,
+        "rawSpearman": 0.04609181539308953,
+        "pearson": -0.0548
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.101,
+        "rawRho": 0.10103723437815683,
+        "pearson": 0.0665,
+        "ci95": [
+          -0.1025,
+          0.266
+        ],
+        "rawCi": [
+          -0.1025252988851736,
+          0.26604534894174625
+        ],
+        "permutationTail": 0.3333
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.3647,
+        "rawSpearman": -0.3646699008968161,
+        "pearson": -0.2978
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.6165,
+        "rawSpearman": 0.6164627363737486
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 5.06,
+          "median": 2.62,
+          "win": 60,
+          "tail5": 24,
+          "tail10": 12,
+          "tail15": 2,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 9.57,
+          "median": 3.37,
+          "win": 59.18,
+          "tail5": 28.57,
+          "tail10": 20.41,
+          "tail15": 10.2,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 4.51,
+        "ci95": [
+          -2.91,
+          12.07
+        ],
+        "permutationTail": 0.2443
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.2,
+          4
+        ],
+        "permutationTail": 0.6179
+      },
+      "favorableTail": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -10.2,
+          4
+        ],
+        "rawCiLow": -0.10204081632653061,
+        "permutationTail": 0.6139
+      }
+    },
+    "ret20": {
+      "window": {
+        "n": 99,
+        "rho": -0.0428,
+        "rawRho": -0.04282661867795905,
+        "pearson": -0.0825,
+        "ci95": [
+          -0.2573,
+          0.1746
+        ],
+        "rawCi": [
+          -0.2573031031532017,
+          0.1746202629543697
+        ],
+        "permutationTail": 0.6731
+      },
+      "t20": {
+        "n": 103,
+        "rho": -0.1126,
+        "rawRho": -0.11255841538486884,
+        "pearson": -0.0775,
+        "ci95": [
+          -0.3158,
+          0.0897
+        ],
+        "rawCi": [
+          -0.31577414800041753,
+          0.08973746230037741
+        ],
+        "permutationTail": 0.2476
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.0679,
+        "rawSpearman": 0.06793482737601661,
+        "pearson": 0.051
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.1162,
+        "rawSpearman": -0.11618978463674652,
+        "pearson": -0.1339
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.0227,
+        "rawRho": -0.022681828125708674,
+        "pearson": -0.0474,
+        "ci95": [
+          -0.2341,
+          0.1831
+        ],
+        "rawCi": [
+          -0.23409276695248799,
+          0.1831318408238064
+        ],
+        "permutationTail": 0.8456
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.0674,
+        "rawSpearman": -0.06744762606802764,
+        "pearson": -0.0491
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.1155,
+        "rawSpearman": -0.11546162402669632
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 7.11,
+          "median": 2.45,
+          "win": 54,
+          "tail5": 32,
+          "tail10": 20,
+          "tail15": 8,
+          "tail20": 4,
+          "rawTail20": 0.04,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 7.48,
+          "median": 3.11,
+          "win": 65.31,
+          "tail5": 20.41,
+          "tail10": 12.24,
+          "tail15": 4.08,
+          "tail20": 2.04,
+          "rawTail20": 0.02040816326530612,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 0.37,
+        "ci95": [
+          -6.99,
+          7.84
+        ],
+        "permutationTail": 0.9246
+      },
+      "tailGap": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": 1.96,
+        "ci95": [
+          -4.12,
+          8
+        ],
+        "rawCiLow": -0.04122448979591836,
+        "permutationTail": 1
+      }
+    },
+    "distMa20": {
+      "window": {
+        "n": 99,
+        "rho": -0.1474,
+        "rawRho": -0.1474039647926576,
+        "pearson": -0.1257,
+        "ci95": [
+          -0.3584,
+          0.0792
+        ],
+        "rawCi": [
+          -0.3583896562011496,
+          0.0791570767501887
+        ],
+        "permutationTail": 0.148
+      },
+      "t20": {
+        "n": 103,
+        "rho": -0.1013,
+        "rawRho": -0.10134485807326703,
+        "pearson": -0.0261,
+        "ci95": [
+          -0.2991,
+          0.1057
+        ],
+        "rawCi": [
+          -0.2990638802821544,
+          0.10568900265307356
+        ],
+        "permutationTail": 0.3052
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": -0.0743,
+        "rawSpearman": -0.0743378674471859,
+        "pearson": -0.0186
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0154,
+        "rawSpearman": -0.015363938464363177,
+        "pearson": -0.0482
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.0845,
+        "rawRho": 0.08454135937764143,
+        "pearson": 0.1839,
+        "ci95": [
+          -0.2136,
+          0.3132
+        ],
+        "rawCi": [
+          -0.21361545234542847,
+          0.313236801311085
+        ],
+        "permutationTail": 0.4281
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.0595,
+        "rawSpearman": 0.059467474633357706,
+        "pearson": 0.0395
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.176,
+        "rawSpearman": -0.17597330367074526
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 10.56,
+          "median": 4.04,
+          "win": 64,
+          "tail5": 24,
+          "tail10": 16,
+          "tail15": 4,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 3.96,
+          "median": 2.15,
+          "win": 55.1,
+          "tail5": 28.57,
+          "tail10": 16.33,
+          "tail15": 8.16,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": -6.59,
+        "ci95": [
+          -14.1,
+          0.84
+        ],
+        "permutationTail": 0.0878
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -10.2,
+          4
+        ],
+        "permutationTail": 0.6221
+      },
+      "favorableTail": {
+        "meanDiff": 2.08,
+        "ci95": [
+          -4,
+          8.24
+        ],
+        "rawCiLow": -0.04,
+        "permutationTail": 0.617
+      }
+    },
+    "distMa50Prior": {
+      "window": {
+        "n": 99,
+        "rho": -0.1564,
+        "rawRho": -0.15638363992917698,
+        "pearson": -0.18,
+        "ci95": [
+          -0.3541,
+          0.0565
+        ],
+        "rawCi": [
+          -0.35411284609056953,
+          0.05646498391919482
+        ],
+        "permutationTail": 0.1217
+      },
+      "t20": {
+        "n": 103,
+        "rho": -0.0832,
+        "rawRho": -0.08316813197071955,
+        "pearson": -0.0554,
+        "ci95": [
+          -0.2798,
+          0.116
+        ],
+        "rawCi": [
+          -0.27976883693335386,
+          0.11595253790375741
+        ],
+        "permutationTail": 0.399
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": -0.0405,
+        "rawSpearman": -0.04045557135875146,
+        "pearson": -0.0524
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0326,
+        "rawSpearman": -0.03264836923677175,
+        "pearson": -0.0268
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.0515,
+        "rawRho": 0.05154960937661062,
+        "pearson": 0.0383,
+        "ci95": [
+          -0.1935,
+          0.2454
+        ],
+        "rawCi": [
+          -0.19349430463278114,
+          0.24540877351674875
+        ],
+        "permutationTail": 0.6351
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.0417,
+        "rawSpearman": -0.041665598356017075,
+        "pearson": -0.0814
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.1729,
+        "rawSpearman": -0.1728587319243604
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 9.21,
+          "median": 3.43,
+          "win": 58,
+          "tail5": 30,
+          "tail10": 18,
+          "tail15": 8,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 5.34,
+          "median": 2.96,
+          "win": 61.22,
+          "tail5": 22.45,
+          "tail10": 14.29,
+          "tail15": 4.08,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": -3.87,
+        "ci95": [
+          -11.31,
+          3.64
+        ],
+        "permutationTail": 0.3152
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.2,
+          4
+        ],
+        "permutationTail": 0.621
+      },
+      "favorableTail": {
+        "meanDiff": 2.08,
+        "ci95": [
+          -4,
+          8.24
+        ],
+        "rawCiLow": -0.04,
+        "permutationTail": 0.6277
+      }
+    },
+    "pos60": {
+      "window": {
+        "n": 99,
+        "rho": -0.0136,
+        "rawRho": -0.013636490135003567,
+        "pearson": 0.0279,
+        "ci95": [
+          -0.2115,
+          0.1883
+        ],
+        "rawCi": [
+          -0.21153780717471596,
+          0.188303713672347
+        ],
+        "permutationTail": 0.8912
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.0126,
+        "rawRho": 0.012580930362820632,
+        "pearson": 0.0694,
+        "ci95": [
+          -0.1822,
+          0.2045
+        ],
+        "rawCi": [
+          -0.1821542957912837,
+          0.20448551712012658
+        ],
+        "permutationTail": 0.8977
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.0797,
+        "rawSpearman": 0.07974146215561694,
+        "pearson": 0.0951
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0192,
+        "rawSpearman": -0.019204923080453972,
+        "pearson": -0.0329
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.033,
+        "rawRho": -0.0329917500010308,
+        "pearson": -0.0319,
+        "ci95": [
+          -0.2244,
+          0.14
+        ],
+        "rawCi": [
+          -0.22441794548953112,
+          0.1400480609174328
+        ],
+        "permutationTail": 0.7681
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.1244,
+        "rawSpearman": -0.12440212032171764,
+        "pearson": -0.1598
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.2952,
+        "rawSpearman": 0.29521690767519465
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 7.15,
+          "median": 3.43,
+          "win": 62,
+          "tail5": 28,
+          "tail10": 16,
+          "tail15": 8,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 7.43,
+          "median": 2.96,
+          "win": 57.14,
+          "tail5": 24.49,
+          "tail10": 16.33,
+          "tail15": 4.08,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 0.28,
+        "ci95": [
+          -7.4,
+          7.83
+        ],
+        "permutationTail": 0.9465
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.24,
+          4
+        ],
+        "permutationTail": 0.6192
+      },
+      "favorableTail": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.2,
+          4
+        ],
+        "rawCiLow": -0.08204081632653061,
+        "permutationTail": 0.6188
+      }
+    },
+    "pos120": {
+      "window": {
+        "n": 96,
+        "rho": -0.0592,
+        "rawRho": -0.05917043377714429,
+        "pearson": -0.0299,
+        "ci95": [
+          -0.2552,
+          0.1401
+        ],
+        "rawCi": [
+          -0.2552388711687464,
+          0.1400885691573688
+        ],
+        "permutationTail": 0.5667
+      },
+      "t20": {
+        "n": 100,
+        "rho": 0.0337,
+        "rawRho": 0.03369397588915492,
+        "pearson": 0.0745,
+        "ci95": [
+          -0.1734,
+          0.241
+        ],
+        "rawCi": [
+          -0.17336983603801565,
+          0.24098888168479696
+        ],
+        "permutationTail": 0.7258
+      },
+      "t40": {
+        "n": 100,
+        "conclusion": "제한적",
+        "spearman": -0.0172,
+        "rawSpearman": -0.017156024410880485,
+        "pearson": 0.022
+      },
+      "tail10": {
+        "n": 96,
+        "conclusion": "제한적",
+        "spearman": 0.0181,
+        "rawSpearman": 0.018117458757342317,
+        "pearson": 0.0089
+      },
+      "tail20": {
+        "n": 96,
+        "rho": 0.0464,
+        "rawRho": 0.04644978733012418,
+        "pearson": 0.0346,
+        "ci95": [
+          -0.0895,
+          0.1937
+        ],
+        "rawCi": [
+          -0.08949988773366487,
+          0.19374067708102155
+        ],
+        "permutationTail": 0.6748
+      },
+      "days5": {
+        "n": 65,
+        "conclusion": "제한적",
+        "spearman": -0.0296,
+        "rawSpearman": -0.02963867924188547,
+        "pearson": -0.0154
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.2085,
+        "rawSpearman": -0.20845383759733035
+      },
+      "buckets": {
+        "low": {
+          "n": 48,
+          "conclusion": "제한적",
+          "mean": 8.21,
+          "median": 4.04,
+          "win": 64.58,
+          "tail5": 20.83,
+          "tail10": 16.67,
+          "tail15": 6.25,
+          "tail20": 2.08,
+          "rawTail20": 0.020833333333333332,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 48,
+          "conclusion": "제한적",
+          "mean": 7.41,
+          "median": 3,
+          "win": 58.33,
+          "tail5": 29.17,
+          "tail10": 14.58,
+          "tail15": 4.17,
+          "tail20": 4.17,
+          "rawTail20": 0.041666666666666664,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": -0.8,
+        "ci95": [
+          -8.49,
+          6.73
+        ],
+        "permutationTail": 0.8405
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.33,
+          4.17
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": 2.08,
+        "ci95": [
+          -4.17,
+          8.33
+        ],
+        "rawCiLow": -0.04166666666666667,
+        "permutationTail": 1
+      }
+    },
+    "spyRet20": {
+      "window": {
+        "n": 99,
+        "rho": -0.1985,
+        "rawRho": -0.1984556257570147,
+        "pearson": -0.3571,
+        "ci95": [
+          -0.4138,
+          0.0249
+        ],
+        "rawCi": [
+          -0.4137715617702709,
+          0.024931622226947916
+        ],
+        "permutationTail": 0.0507
+      },
+      "t20": {
+        "n": 103,
+        "rho": -0.1114,
+        "rawRho": -0.1113710633950646,
+        "pearson": -0.2618,
+        "ci95": [
+          -0.3215,
+          0.1051
+        ],
+        "rawCi": [
+          -0.32151706814788106,
+          0.10512406356442225
+        ],
+        "permutationTail": 0.2624
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": -0.2266,
+        "rawSpearman": -0.22661394491200507,
+        "pearson": -0.2727
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.0341,
+        "rawSpearman": -0.03409190118720878,
+        "pearson": 0.0195
+      },
+      "tail20": {
+        "n": 99,
+        "rho": 0.0392,
+        "rawRho": 0.03918133799472936,
+        "pearson": 0.0592,
+        "ci95": [
+          -0.2042,
+          0.2568
+        ],
+        "rawCi": [
+          -0.2041920241796557,
+          0.2567794044754798
+        ],
+        "permutationTail": 0.7111
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": 0.0745,
+        "rawSpearman": 0.07450060645702568,
+        "pearson": 0.1427
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": -0.3686,
+        "rawSpearman": -0.3686318131256952
+      },
+      "buckets": {
+        "low": {
+          "n": 50,
+          "conclusion": "제한적",
+          "mean": 11.42,
+          "median": 6.34,
+          "win": 66,
+          "tail5": 22,
+          "tail10": 16,
+          "tail15": 4,
+          "tail20": 2,
+          "rawTail20": 0.02,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 49,
+          "conclusion": "제한적",
+          "mean": 3.09,
+          "median": 0.73,
+          "win": 53.06,
+          "tail5": 30.61,
+          "tail10": 16.33,
+          "tail15": 8.16,
+          "tail20": 4.08,
+          "rawTail20": 0.04081632653061224,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": -8.33,
+        "ci95": [
+          -15.8,
+          -1.11
+        ],
+        "permutationTail": 0.0272
+      },
+      "tailGap": {
+        "meanDiff": -2.08,
+        "ci95": [
+          -8.24,
+          4
+        ],
+        "permutationTail": 0.6189
+      },
+      "favorableTail": {
+        "meanDiff": 2.08,
+        "ci95": [
+          -4,
+          8.24
+        ],
+        "rawCiLow": -0.04,
+        "permutationTail": 0.6294
+      }
+    },
+    "spyAtr": {
+      "window": {
+        "n": 99,
+        "rho": 0.2777,
+        "rawRho": 0.27773396935265826,
+        "pearson": 0.4951,
+        "ci95": [
+          0.0726,
+          0.4605
+        ],
+        "rawCi": [
+          0.07264851618819587,
+          0.46053620763016245
+        ],
+        "permutationTail": 0.0065
+      },
+      "t20": {
+        "n": 103,
+        "rho": 0.1966,
+        "rawRho": 0.1965620459575303,
+        "pearson": 0.396,
+        "ci95": [
+          -0.0061,
+          0.3817
+        ],
+        "rawCi": [
+          -0.006148385484147533,
+          0.38166022446783004
+        ],
+        "permutationTail": 0.0437
+      },
+      "t40": {
+        "n": 103,
+        "conclusion": "제한적",
+        "spearman": 0.2954,
+        "rawSpearman": 0.29542796061002563,
+        "pearson": 0.3845
+      },
+      "tail10": {
+        "n": 99,
+        "conclusion": "제한적",
+        "spearman": -0.036,
+        "rawSpearman": -0.036012571676628996,
+        "pearson": -0.1011
+      },
+      "tail20": {
+        "n": 99,
+        "rho": -0.0392,
+        "rawRho": -0.03918133799472936,
+        "pearson": -0.052,
+        "ci95": [
+          -0.2119,
+          0.1734
+        ],
+        "rawCi": [
+          -0.21192265585990117,
+          0.17344734961507588
+        ],
+        "permutationTail": 0.7167
+      },
+      "days5": {
+        "n": 68,
+        "conclusion": "제한적",
+        "spearman": -0.1453,
+        "rawSpearman": -0.1453174332489087,
+        "pearson": -0.1911
+      },
+      "tickerEqual": {
+        "tickers": 30,
+        "spearman": 0.4803,
+        "rawSpearman": 0.48031145717463847
+      },
+      "buckets": {
+        "low": {
+          "n": 51,
+          "conclusion": "제한적",
+          "mean": 4.79,
+          "median": 2.31,
+          "win": 54.9,
+          "tail5": 31.37,
+          "tail10": 15.69,
+          "tail15": 5.88,
+          "tail20": 3.92,
+          "rawTail20": 0.0392156862745098,
+          "side": "at or below median"
+        },
+        "high": {
+          "n": 48,
+          "conclusion": "제한적",
+          "mean": 9.96,
+          "median": 4.74,
+          "win": 64.58,
+          "tail5": 20.83,
+          "tail10": 16.67,
+          "tail15": 6.25,
+          "tail20": 2.08,
+          "rawTail20": 0.020833333333333332,
+          "side": "above median"
+        }
+      },
+      "returnGap": {
+        "meanDiff": 5.17,
+        "ci95": [
+          -2.28,
+          12.8
+        ],
+        "permutationTail": 0.1833
+      },
+      "tailGap": {
+        "meanDiff": 1.84,
+        "ci95": [
+          -4.29,
+          7.84
+        ],
+        "permutationTail": 1
+      },
+      "favorableTail": {
+        "meanDiff": 1.84,
+        "ci95": [
+          -4.29,
+          9.68
+        ],
+        "rawCiLow": -0.0428921568627451,
+        "permutationTail": 1
+      }
+    }
+  },
+  "byState": {
+    "RECOVERING": {
+      "n": 53,
+      "conclusion": "제한적",
+      "window": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 8.42,
+        "median": 5.36,
+        "win": 66,
+        "tail5": 28,
+        "tail10": 12,
+        "tail15": 6,
+        "tail20": 2,
+        "rawTail20": 0.02
+      },
+      "t20": {
+        "n": 53,
+        "conclusion": "제한적",
+        "mean": 4.4,
+        "median": 2.6,
+        "win": 66.04,
+        "tail5": 22.64,
+        "tail10": 13.21,
+        "tail15": 5.66,
+        "tail20": 1.89,
+        "rawTail20": 0.018867924528301886
+      },
+      "t40": {
+        "n": 53,
+        "conclusion": "제한적",
+        "mean": 8.54,
+        "median": 8.28,
+        "win": 67.92,
+        "tail5": 28.3,
+        "tail10": 11.32,
+        "tail15": 9.43,
+        "tail20": 3.77,
+        "rawTail20": 0.03773584905660377
+      },
+      "t10": {
+        "n": 53,
+        "conclusion": "제한적",
+        "mean": 1.13,
+        "median": 0.6,
+        "win": 60.38,
+        "tail5": 11.32,
+        "tail10": 5.66,
+        "tail15": 3.77,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "STILL_FALLING": {
+      "n": 46,
+      "conclusion": "제한적",
+      "window": {
+        "n": 45,
+        "conclusion": "제한적",
+        "mean": 7.08,
+        "median": 2.15,
+        "win": 55.56,
+        "tail5": 22.22,
+        "tail10": 17.78,
+        "tail15": 4.44,
+        "tail20": 4.44,
+        "rawTail20": 0.044444444444444446
+      },
+      "t20": {
+        "n": 46,
+        "conclusion": "제한적",
+        "mean": 4.27,
+        "median": 1.96,
+        "win": 54.35,
+        "tail5": 21.74,
+        "tail10": 6.52,
+        "tail15": 2.17,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "t40": {
+        "n": 46,
+        "conclusion": "제한적",
+        "mean": 7.39,
+        "median": 2.98,
+        "win": 63.04,
+        "tail5": 26.09,
+        "tail10": 13.04,
+        "tail15": 4.35,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "t10": {
+        "n": 46,
+        "conclusion": "제한적",
+        "mean": 2.69,
+        "median": 1.42,
+        "win": 60.87,
+        "tail5": 15.22,
+        "tail10": 4.35,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "STABILIZING": {
+      "n": 4,
+      "conclusion": "결론 금지",
+      "window": {
+        "n": 4,
+        "conclusion": "결론 금지",
+        "mean": null,
+        "median": null,
+        "win": null,
+        "tail5": null,
+        "tail10": null,
+        "tail15": null,
+        "tail20": null
+      },
+      "t20": {
+        "n": 4,
+        "conclusion": "결론 금지",
+        "mean": null,
+        "median": null,
+        "win": null,
+        "tail5": null,
+        "tail10": null,
+        "tail15": null,
+        "tail20": null
+      },
+      "t40": {
+        "n": 4,
+        "conclusion": "결론 금지",
+        "mean": null,
+        "median": null,
+        "win": null,
+        "tail5": null,
+        "tail10": null,
+        "tail15": null,
+        "tail20": null
+      },
+      "t10": {
+        "n": 4,
+        "conclusion": "결론 금지",
+        "mean": null,
+        "median": null,
+        "win": null,
+        "tail5": null,
+        "tail10": null,
+        "tail15": null,
+        "tail20": null
+      }
+    }
+  },
+  "stateContrast": {
+    "returnGap": {
+      "meanDiff": 1.34,
+      "ci95": [
+        -6.45,
+        9.06
+      ],
+      "permutationTail": 0.7405
+    },
+    "tailGap": {
+      "meanDiff": 2.44,
+      "ci95": [
+        -4,
+        9.11
+      ],
+      "permutationTail": 0.5996
+    }
+  },
+  "stillFalling": {
+    "eventAtr": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 4.16,
+          "median": 2.15,
+          "win": 60.87,
+          "tail5": 17.39,
+          "tail10": 8.7,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 3.3,
+          "median": 2.07,
+          "win": 60.87,
+          "tail5": 21.74,
+          "tail10": 8.7,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 10.14,
+          "median": 1.18,
+          "win": 50,
+          "tail5": 27.27,
+          "tail10": 27.27,
+          "tail15": 9.09,
+          "tail20": 9.09,
+          "rawTail20": 0.09090909090909091
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 5.51,
+          "median": 1.1,
+          "win": 50,
+          "tail5": 22.73,
+          "tail10": 4.55,
+          "tail15": 4.55,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "withinAtr": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 4.03,
+          "median": 1.81,
+          "win": 52.17,
+          "tail5": 26.09,
+          "tail10": 17.39,
+          "tail15": 4.35,
+          "tail20": 4.35,
+          "rawTail20": 0.043478260869565216
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 1.85,
+          "median": -0.92,
+          "win": 47.83,
+          "tail5": 30.43,
+          "tail10": 4.35,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 10.27,
+          "median": 3,
+          "win": 59.09,
+          "tail5": 18.18,
+          "tail10": 18.18,
+          "tail15": 4.55,
+          "tail20": 4.55,
+          "rawTail20": 0.045454545454545456
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 7.03,
+          "median": 3.45,
+          "win": 63.64,
+          "tail5": 13.64,
+          "tail10": 9.09,
+          "tail15": 4.55,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "leadership": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 1.51,
+          "median": 1.81,
+          "win": 56.52,
+          "tail5": 21.74,
+          "tail10": 17.39,
+          "tail15": 4.35,
+          "tail20": 4.35,
+          "rawTail20": 0.043478260869565216
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 0.67,
+          "median": -1.1,
+          "win": 43.48,
+          "tail5": 30.43,
+          "tail10": 8.7,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 12.9,
+          "median": 3.96,
+          "win": 54.55,
+          "tail5": 22.73,
+          "tail10": 18.18,
+          "tail15": 4.55,
+          "tail20": 4.55,
+          "rawTail20": 0.045454545454545456
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 8.26,
+          "median": 4.96,
+          "win": 68.18,
+          "tail5": 13.64,
+          "tail10": 4.55,
+          "tail15": 4.55,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "returnT5": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 10.53,
+          "median": 2.96,
+          "win": 56.52,
+          "tail5": 17.39,
+          "tail10": 13.04,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 5.92,
+          "median": 2.23,
+          "win": 56.52,
+          "tail5": 26.09,
+          "tail10": 4.35,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 3.47,
+          "median": 1.98,
+          "win": 54.55,
+          "tail5": 27.27,
+          "tail10": 22.73,
+          "tail15": 9.09,
+          "tail20": 9.09,
+          "rawTail20": 0.09090909090909091
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 2.77,
+          "median": 1.07,
+          "win": 54.55,
+          "tail5": 18.18,
+          "tail10": 9.09,
+          "tail15": 4.55,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "fromMae": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 10.62,
+          "median": 2.96,
+          "win": 60.87,
+          "tail5": 13.04,
+          "tail10": 13.04,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 4.94,
+          "median": 1.86,
+          "win": 56.52,
+          "tail5": 26.09,
+          "tail10": 4.35,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 3.38,
+          "median": -0.55,
+          "win": 50,
+          "tail5": 31.82,
+          "tail10": 22.73,
+          "tail15": 9.09,
+          "tail20": 9.09,
+          "rawTail20": 0.09090909090909091
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 3.79,
+          "median": 2.42,
+          "win": 54.55,
+          "tail5": 18.18,
+          "tail10": 9.09,
+          "tail15": 4.55,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "maeT5": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 10.95,
+          "median": 2.96,
+          "win": 56.52,
+          "tail5": 13.04,
+          "tail10": 8.7,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 5.99,
+          "median": 2.23,
+          "win": 56.52,
+          "tail5": 26.09,
+          "tail10": 4.35,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 3.03,
+          "median": 1.98,
+          "win": 54.55,
+          "tail5": 31.82,
+          "tail10": 27.27,
+          "tail15": 9.09,
+          "tail20": 9.09,
+          "rawTail20": 0.09090909090909091
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 2.7,
+          "median": 1.07,
+          "win": 54.55,
+          "tail5": 18.18,
+          "tail10": 9.09,
+          "tail15": 4.55,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "correctionSpeed": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 3,
+          "median": 0.73,
+          "win": 52.17,
+          "tail5": 21.74,
+          "tail10": 17.39,
+          "tail15": 4.35,
+          "tail20": 4.35,
+          "rawTail20": 0.043478260869565216
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 2.39,
+          "median": 1.86,
+          "win": 56.52,
+          "tail5": 17.39,
+          "tail10": 4.35,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 11.34,
+          "median": 3.78,
+          "win": 59.09,
+          "tail5": 22.73,
+          "tail10": 18.18,
+          "tail15": 4.55,
+          "tail20": 4.55,
+          "rawTail20": 0.045454545454545456
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 6.46,
+          "median": 4.11,
+          "win": 54.55,
+          "tail5": 27.27,
+          "tail10": 9.09,
+          "tail15": 4.55,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "t0": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 5.13,
+          "median": -0.59,
+          "win": 47.83,
+          "tail5": 30.43,
+          "tail10": 26.09,
+          "tail15": 8.7,
+          "tail20": 8.7,
+          "rawTail20": 0.08695652173913043
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 3.26,
+          "median": 3.26,
+          "win": 56.52,
+          "tail5": 34.78,
+          "tail10": 13.04,
+          "tail15": 4.35,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 9.12,
+          "median": 3,
+          "win": 63.64,
+          "tail5": 13.64,
+          "tail10": 9.09,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 5.55,
+          "median": 1.07,
+          "win": 54.55,
+          "tail5": 9.09,
+          "tail10": 0,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    },
+    "ret20": {
+      "low": {
+        "n": 23,
+        "conclusion": "제한적",
+        "window": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 8.16,
+          "median": 1.81,
+          "win": 56.52,
+          "tail5": 21.74,
+          "tail10": 13.04,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        },
+        "t20": {
+          "n": 23,
+          "conclusion": "제한적",
+          "mean": 3.72,
+          "median": 2.23,
+          "win": 60.87,
+          "tail5": 21.74,
+          "tail10": 4.35,
+          "tail15": 4.35,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      },
+      "high": {
+        "n": 22,
+        "conclusion": "제한적",
+        "window": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 5.95,
+          "median": 2.56,
+          "win": 54.55,
+          "tail5": 22.73,
+          "tail10": 22.73,
+          "tail15": 9.09,
+          "tail20": 9.09,
+          "rawTail20": 0.09090909090909091
+        },
+        "t20": {
+          "n": 22,
+          "conclusion": "제한적",
+          "mean": 5.07,
+          "median": 0.91,
+          "win": 50,
+          "tail5": 22.73,
+          "tail10": 9.09,
+          "tail15": 0,
+          "tail20": 0,
+          "rawTail20": 0
+        }
+      }
+    }
+  },
+  "quartiles": {
+    "t0": {
+      "q25": -0.02266286839521081,
+      "q75": -0.00635990542330378,
+      "low": {
+        "n": 25,
+        "conclusion": "제한적",
+        "mean": 1.59,
+        "median": -2.72,
+        "win": 44,
+        "tail5": 40,
+        "tail10": 32,
+        "tail15": 16,
+        "tail20": 8,
+        "rawTail20": 0.08
+      },
+      "mid": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 7.41,
+        "median": 2.23,
+        "win": 62,
+        "tail5": 22,
+        "tail10": 12,
+        "tail15": 4,
+        "tail20": 2,
+        "rawTail20": 0.02
+      },
+      "high": {
+        "n": 24,
+        "conclusion": "제한적",
+        "mean": 12.98,
+        "median": 10.49,
+        "win": 70.83,
+        "tail5": 20.83,
+        "tail10": 8.33,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "leadership": {
+      "q25": 23.61111111111111,
+      "q75": 57.32758620689655,
+      "low": {
+        "n": 25,
+        "conclusion": "제한적",
+        "mean": 3.08,
+        "median": 3.05,
+        "win": 60,
+        "tail5": 28,
+        "tail10": 12,
+        "tail15": 4,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "mid": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 5.21,
+        "median": 1.75,
+        "win": 52,
+        "tail5": 30,
+        "tail10": 22,
+        "tail15": 10,
+        "tail20": 6,
+        "rawTail20": 0.06
+      },
+      "high": {
+        "n": 24,
+        "conclusion": "제한적",
+        "mean": 16.02,
+        "median": 9.46,
+        "win": 75,
+        "tail5": 16.67,
+        "tail10": 8.33,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "eventAtr": {
+      "q25": 0.03414893839151986,
+      "q75": 0.05536996021380873,
+      "low": {
+        "n": 25,
+        "conclusion": "제한적",
+        "mean": 0.89,
+        "median": 2.15,
+        "win": 60,
+        "tail5": 24,
+        "tail10": 12,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "mid": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 5.28,
+        "median": 1.04,
+        "win": 52,
+        "tail5": 34,
+        "tail10": 24,
+        "tail15": 10,
+        "tail20": 6,
+        "rawTail20": 0.06
+      },
+      "high": {
+        "n": 24,
+        "conclusion": "제한적",
+        "mean": 18.15,
+        "median": 18.21,
+        "win": 75,
+        "tail5": 12.5,
+        "tail10": 4.17,
+        "tail15": 4.17,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "withinAtr": {
+      "q25": -0.0006443433563038323,
+      "q75": 0.013117699060827916,
+      "low": {
+        "n": 25,
+        "conclusion": "제한적",
+        "mean": 8.2,
+        "median": 3.11,
+        "win": 60,
+        "tail5": 36,
+        "tail10": 16,
+        "tail15": 4,
+        "tail20": 4,
+        "rawTail20": 0.04
+      },
+      "mid": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 2.55,
+        "median": 0.66,
+        "win": 52,
+        "tail5": 26,
+        "tail10": 18,
+        "tail15": 6,
+        "tail20": 2,
+        "rawTail20": 0.02
+      },
+      "high": {
+        "n": 24,
+        "conclusion": "제한적",
+        "mean": 16.22,
+        "median": 13.87,
+        "win": 75,
+        "tail5": 16.67,
+        "tail10": 12.5,
+        "tail15": 8.33,
+        "tail20": 4.17,
+        "rawTail20": 0.041666666666666664
+      }
+    },
+    "returnT5": {
+      "q25": -0.01945346000990278,
+      "q75": 0.06688645400045679,
+      "low": {
+        "n": 25,
+        "conclusion": "제한적",
+        "mean": 10.67,
+        "median": 3.11,
+        "win": 60,
+        "tail5": 16,
+        "tail10": 12,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "mid": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 2.17,
+        "median": -0.49,
+        "win": 48,
+        "tail5": 38,
+        "tail10": 22,
+        "tail15": 8,
+        "tail20": 6,
+        "rawTail20": 0.06
+      },
+      "high": {
+        "n": 24,
+        "conclusion": "제한적",
+        "mean": 14.45,
+        "median": 12.26,
+        "win": 83.33,
+        "tail5": 12.5,
+        "tail10": 8.33,
+        "tail15": 8.33,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "fromMae": {
+      "q25": 0.012462748308009641,
+      "q75": 0.07786739023262212,
+      "low": {
+        "n": 25,
+        "conclusion": "제한적",
+        "mean": 9.7,
+        "median": 2.96,
+        "win": 60,
+        "tail5": 16,
+        "tail10": 12,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "mid": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 5.06,
+        "median": 2.06,
+        "win": 56,
+        "tail5": 32,
+        "tail10": 20,
+        "tail15": 8,
+        "tail20": 6,
+        "rawTail20": 0.06
+      },
+      "high": {
+        "n": 24,
+        "conclusion": "제한적",
+        "mean": 9.43,
+        "median": 5.92,
+        "win": 66.67,
+        "tail5": 25,
+        "tail10": 12.5,
+        "tail15": 8.33,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "correctionSpeed": {
+      "q25": 0.011845126509599173,
+      "q75": 0.033903415337150695,
+      "low": {
+        "n": 25,
+        "conclusion": "제한적",
+        "mean": 4.19,
+        "median": 2.15,
+        "win": 60,
+        "tail5": 32,
+        "tail10": 16,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "mid": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 6.74,
+        "median": 3.08,
+        "win": 58,
+        "tail5": 24,
+        "tail10": 16,
+        "tail15": 4,
+        "tail20": 2,
+        "rawTail20": 0.02
+      },
+      "high": {
+        "n": 24,
+        "conclusion": "제한적",
+        "mean": 11.67,
+        "median": 4.74,
+        "win": 62.5,
+        "tail5": 25,
+        "tail10": 16.67,
+        "tail15": 16.67,
+        "tail20": 8.33,
+        "rawTail20": 0.08333333333333333
+      }
+    }
+  },
+  "inSample": {
+    "M0": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.0529,
+        "adjustedR2": 0.0432,
+        "spearman": 0.2412,
+        "mae": 14.5509
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.0529,
+        "adjustedR2": 0.0432,
+        "spearman": 0.2412,
+        "mae": 14.5509
+      }
+    },
+    "M1": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.1377,
+        "adjustedR2": 0.1198,
+        "spearman": 0.3148,
+        "mae": 13.8125
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.1377,
+        "adjustedR2": 0.1198,
+        "spearman": 0.3148,
+        "mae": 13.8125
+      }
+    },
+    "M2": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.2379,
+        "adjustedR2": 0.2138,
+        "spearman": 0.3739,
+        "mae": 12.8845
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.2379,
+        "adjustedR2": 0.2138,
+        "spearman": 0.3739,
+        "mae": 12.8845
+      }
+    },
+    "M3": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.2412,
+        "adjustedR2": 0.2089,
+        "spearman": 0.3773,
+        "mae": 12.9417
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.2412,
+        "adjustedR2": 0.2089,
+        "spearman": 0.3773,
+        "mae": 12.9417
+      }
+    },
+    "M4": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.275,
+        "adjustedR2": 0.236,
+        "spearman": 0.4272,
+        "mae": 12.5715
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.275,
+        "adjustedR2": 0.236,
+        "spearman": 0.4272,
+        "mae": 12.5715
+      }
+    },
+    "M5": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.289,
+        "adjustedR2": 0.2426,
+        "spearman": 0.442,
+        "mae": 12.3183
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.289,
+        "adjustedR2": 0.2426,
+        "spearman": 0.442,
+        "mae": 12.3183
+      }
+    },
+    "M6": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.2926,
+        "adjustedR2": 0.2382,
+        "spearman": 0.4411,
+        "mae": 12.3849
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.2926,
+        "adjustedR2": 0.2382,
+        "spearman": 0.4411,
+        "mae": 12.3849
+      }
+    },
+    "M7": {
+      "identified": true,
+      "train": {
+        "n": 96,
+        "r2": 0.3732,
+        "adjustedR2": 0.2826,
+        "spearman": 0.476,
+        "mae": 11.5908
+      },
+      "test": {
+        "n": 96,
+        "r2": 0.3732,
+        "adjustedR2": 0.2826,
+        "spearman": 0.476,
+        "mae": 11.5908
+      }
+    },
+    "M8": {
+      "identified": true,
+      "train": {
+        "n": 96,
+        "r2": 0.3885,
+        "adjustedR2": 0.2828,
+        "spearman": 0.4829,
+        "mae": 11.3669
+      },
+      "test": {
+        "n": 96,
+        "r2": 0.3885,
+        "adjustedR2": 0.2828,
+        "spearman": 0.4829,
+        "mae": 11.3669
+      }
+    }
+  },
+  "oos": {
+    "50": {
+      "train": 52,
+      "test": 51,
+      "models": {
+        "M0": {
+          "identified": true,
+          "train": {
+            "n": 50,
+            "r2": 0.0792,
+            "adjustedR2": 0.06,
+            "spearman": 0.2838,
+            "mae": 13.1791
+          },
+          "test": {
+            "n": 49,
+            "r2": 0.0166,
+            "adjustedR2": -0.0043,
+            "spearman": 0.205,
+            "mae": 16.2625
+          }
+        },
+        "M1": {
+          "identified": true,
+          "train": {
+            "n": 50,
+            "r2": 0.2616,
+            "adjustedR2": 0.2302,
+            "spearman": 0.3827,
+            "mae": 12.25
+          },
+          "test": {
+            "n": 49,
+            "r2": 0.0006,
+            "adjustedR2": -0.0429,
+            "spearman": 0.2436,
+            "mae": 15.9112
+          }
+        },
+        "M2": {
+          "identified": true,
+          "train": {
+            "n": 50,
+            "r2": 0.3817,
+            "adjustedR2": 0.3414,
+            "spearman": 0.4832,
+            "mae": 11.6492
+          },
+          "test": {
+            "n": 49,
+            "r2": 0.0763,
+            "adjustedR2": 0.0148,
+            "spearman": 0.2708,
+            "mae": 14.8752
+          }
+        },
+        "M3": {
+          "identified": true,
+          "train": {
+            "n": 50,
+            "r2": 0.4131,
+            "adjustedR2": 0.3609,
+            "spearman": 0.4506,
+            "mae": 11.6067
+          },
+          "test": {
+            "n": 49,
+            "r2": 0.0329,
+            "adjustedR2": -0.055,
+            "spearman": 0.29,
+            "mae": 15.3418
+          }
+        },
+        "M4": {
+          "identified": true,
+          "train": {
+            "n": 50,
+            "r2": 0.4888,
+            "adjustedR2": 0.4307,
+            "spearman": 0.5332,
+            "mae": 10.4883
+          },
+          "test": {
+            "n": 49,
+            "r2": 0.0317,
+            "adjustedR2": -0.0809,
+            "spearman": 0.309,
+            "mae": 15.5149
+          }
+        },
+        "M5": {
+          "identified": true,
+          "train": {
+            "n": 50,
+            "r2": 0.4999,
+            "adjustedR2": 0.4301,
+            "spearman": 0.5325,
+            "mae": 10.507
+          },
+          "test": {
+            "n": 49,
+            "r2": -0.0513,
+            "adjustedR2": -0.2014,
+            "spearman": 0.2542,
+            "mae": 16.2206
+          }
+        },
+        "M6": {
+          "identified": true,
+          "train": {
+            "n": 50,
+            "r2": 0.5483,
+            "adjustedR2": 0.473,
+            "spearman": 0.498,
+            "mae": 10.0778
+          },
+          "test": {
+            "n": 49,
+            "r2": -0.1444,
+            "adjustedR2": -0.3398,
+            "spearman": 0.2123,
+            "mae": 16.8369
+          }
+        },
+        "M7": {
+          "identified": true,
+          "train": {
+            "n": 47,
+            "r2": 0.6227,
+            "adjustedR2": 0.4895,
+            "spearman": 0.5783,
+            "mae": 8.8554
+          },
+          "test": {
+            "n": 49,
+            "r2": 0.0069,
+            "adjustedR2": -0.3242,
+            "spearman": 0.2462,
+            "mae": 15.7629
+          }
+        },
+        "M8": {
+          "identified": true,
+          "train": {
+            "n": 47,
+            "r2": 0.6717,
+            "adjustedR2": 0.528,
+            "spearman": 0.6347,
+            "mae": 7.9237
+          },
+          "test": {
+            "n": 49,
+            "r2": -0.05,
+            "adjustedR2": -0.4823,
+            "spearman": 0.1132,
+            "mae": 15.7345
+          }
+        }
+      }
+    },
+    "60": {
+      "train": 59,
+      "test": 44,
+      "models": {
+        "M0": {
+          "identified": true,
+          "train": {
+            "n": 57,
+            "r2": 0.0657,
+            "adjustedR2": 0.0487,
+            "spearman": 0.2626,
+            "mae": 12.7298
+          },
+          "test": {
+            "n": 42,
+            "r2": 0.0035,
+            "adjustedR2": -0.0214,
+            "spearman": 0.1863,
+            "mae": 16.313
+          }
+        },
+        "M1": {
+          "identified": true,
+          "train": {
+            "n": 57,
+            "r2": 0.2265,
+            "adjustedR2": 0.1978,
+            "spearman": 0.3232,
+            "mae": 12.1424
+          },
+          "test": {
+            "n": 42,
+            "r2": 0.0037,
+            "adjustedR2": -0.0474,
+            "spearman": 0.2686,
+            "mae": 16.0416
+          }
+        },
+        "M2": {
+          "identified": true,
+          "train": {
+            "n": 57,
+            "r2": 0.36,
+            "adjustedR2": 0.3238,
+            "spearman": 0.4379,
+            "mae": 11.4161
+          },
+          "test": {
+            "n": 42,
+            "r2": 0.0547,
+            "adjustedR2": -0.0199,
+            "spearman": 0.3052,
+            "mae": 15.4498
+          }
+        },
+        "M3": {
+          "identified": true,
+          "train": {
+            "n": 57,
+            "r2": 0.3778,
+            "adjustedR2": 0.33,
+            "spearman": 0.4254,
+            "mae": 11.5111
+          },
+          "test": {
+            "n": 42,
+            "r2": 0.0304,
+            "adjustedR2": -0.0745,
+            "spearman": 0.3498,
+            "mae": 15.5475
+          }
+        },
+        "M4": {
+          "identified": true,
+          "train": {
+            "n": 57,
+            "r2": 0.4219,
+            "adjustedR2": 0.3652,
+            "spearman": 0.4807,
+            "mae": 10.9464
+          },
+          "test": {
+            "n": 42,
+            "r2": 0.0732,
+            "adjustedR2": -0.0555,
+            "spearman": 0.3612,
+            "mae": 15.2929
+          }
+        },
+        "M5": {
+          "identified": true,
+          "train": {
+            "n": 57,
+            "r2": 0.4299,
+            "adjustedR2": 0.3615,
+            "spearman": 0.4944,
+            "mae": 11.0089
+          },
+          "test": {
+            "n": 42,
+            "r2": 0.0043,
+            "adjustedR2": -0.1664,
+            "spearman": 0.3133,
+            "mae": 15.8809
+          }
+        },
+        "M6": {
+          "identified": true,
+          "train": {
+            "n": 57,
+            "r2": 0.509,
+            "adjustedR2": 0.4388,
+            "spearman": 0.4997,
+            "mae": 10.2766
+          },
+          "test": {
+            "n": 42,
+            "r2": -0.2002,
+            "adjustedR2": -0.4473,
+            "spearman": 0.1889,
+            "mae": 17.5886
+          }
+        },
+        "M7": {
+          "identified": true,
+          "train": {
+            "n": 54,
+            "r2": 0.5896,
+            "adjustedR2": 0.4695,
+            "spearman": 0.5037,
+            "mae": 9.1974
+          },
+          "test": {
+            "n": 42,
+            "r2": -0.0903,
+            "adjustedR2": -0.5414,
+            "spearman": 0.2497,
+            "mae": 16.7305
+          }
+        },
+        "M8": {
+          "identified": true,
+          "train": {
+            "n": 54,
+            "r2": 0.6207,
+            "adjustedR2": 0.4846,
+            "spearman": 0.5431,
+            "mae": 8.6495
+          },
+          "test": {
+            "n": 42,
+            "r2": -0.126,
+            "adjustedR2": -0.7098,
+            "spearman": 0.1247,
+            "mae": 16.7303
+          }
+        }
+      }
+    },
+    "70": {
+      "train": 72,
+      "test": 31,
+      "models": {
+        "M0": {
+          "identified": true,
+          "train": {
+            "n": 70,
+            "r2": 0.0357,
+            "adjustedR2": 0.0216,
+            "spearman": 0.1875,
+            "mae": 12.7339
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.1233,
+            "adjustedR2": -0.1649,
+            "spearman": 0.231,
+            "mae": 17.2944
+          }
+        },
+        "M1": {
+          "identified": true,
+          "train": {
+            "n": 70,
+            "r2": 0.1561,
+            "adjustedR2": 0.1309,
+            "spearman": 0.2533,
+            "mae": 12.2339
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.1036,
+            "adjustedR2": -0.1885,
+            "spearman": 0.4064,
+            "mae": 16.9593
+          }
+        },
+        "M2": {
+          "identified": true,
+          "train": {
+            "n": 70,
+            "r2": 0.2797,
+            "adjustedR2": 0.247,
+            "spearman": 0.3289,
+            "mae": 11.5715
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.0241,
+            "adjustedR2": -0.147,
+            "spearman": 0.4133,
+            "mae": 16.4995
+          }
+        },
+        "M3": {
+          "identified": true,
+          "train": {
+            "n": 70,
+            "r2": 0.291,
+            "adjustedR2": 0.2473,
+            "spearman": 0.3141,
+            "mae": 11.5841
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.0473,
+            "adjustedR2": -0.2219,
+            "spearman": 0.4877,
+            "mae": 16.8499
+          }
+        },
+        "M4": {
+          "identified": true,
+          "train": {
+            "n": 70,
+            "r2": 0.3165,
+            "adjustedR2": 0.2631,
+            "spearman": 0.3644,
+            "mae": 11.3313
+          },
+          "test": {
+            "n": 29,
+            "r2": 0.0077,
+            "adjustedR2": -0.208,
+            "spearman": 0.5,
+            "mae": 16.5469
+          }
+        },
+        "M5": {
+          "identified": true,
+          "train": {
+            "n": 70,
+            "r2": 0.3176,
+            "adjustedR2": 0.2526,
+            "spearman": 0.3526,
+            "mae": 11.3562
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.0169,
+            "adjustedR2": -0.2942,
+            "spearman": 0.4739,
+            "mae": 16.7736
+          }
+        },
+        "M6": {
+          "identified": true,
+          "train": {
+            "n": 70,
+            "r2": 0.3693,
+            "adjustedR2": 0.2981,
+            "spearman": 0.3338,
+            "mae": 10.9526
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.1925,
+            "adjustedR2": -0.5899,
+            "spearman": 0.3616,
+            "mae": 18.3244
+          }
+        },
+        "M7": {
+          "identified": true,
+          "train": {
+            "n": 67,
+            "r2": 0.4555,
+            "adjustedR2": 0.3345,
+            "spearman": 0.4322,
+            "mae": 10.5307
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.083,
+            "adjustedR2": -0.8952,
+            "spearman": 0.4813,
+            "mae": 16.9446
+          }
+        },
+        "M8": {
+          "identified": true,
+          "train": {
+            "n": 67,
+            "r2": 0.4963,
+            "adjustedR2": 0.3607,
+            "spearman": 0.4464,
+            "mae": 9.7777
+          },
+          "test": {
+            "n": 29,
+            "r2": -0.1388,
+            "adjustedR2": -1.2777,
+            "spearman": 0.4522,
+            "mae": 18.0696
+          }
+        }
+      }
+    }
+  },
+  "loo": {
+    "t0": {
+      "baseline": 0.2412,
+      "min": 0.1877,
+      "max": 0.3055,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "leadership": {
+      "baseline": 0.1885,
+      "min": 0.1471,
+      "max": 0.2145,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "eventAtr": {
+      "baseline": 0.2583,
+      "min": 0.2139,
+      "max": 0.3007,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "withinAtr": {
+      "baseline": 0.1438,
+      "min": 0.0841,
+      "max": 0.1847,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "maeT1": {
+      "baseline": 0.1014,
+      "min": 0.0579,
+      "max": 0.1375,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "maeT3": {
+      "baseline": -0.0172,
+      "min": -0.0536,
+      "max": 0.0273,
+      "signFlips": 4,
+      "withinStock": "결론 금지"
+    },
+    "maeT5": {
+      "baseline": -0.0359,
+      "min": -0.0931,
+      "max": -0.0021,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "fromMae": {
+      "baseline": 0.0958,
+      "min": 0.0584,
+      "max": 0.1293,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "returnT5": {
+      "baseline": 0.0712,
+      "min": 0.0386,
+      "max": 0.1072,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "depthT5": {
+      "baseline": 0.0304,
+      "min": -0.005,
+      "max": 0.0819,
+      "signFlips": 1,
+      "withinStock": "결론 금지"
+    },
+    "correctionDuration": {
+      "baseline": -0.1255,
+      "min": -0.1617,
+      "max": -0.0742,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "correctionSpeed": {
+      "baseline": 0.1196,
+      "min": 0.0816,
+      "max": 0.1568,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "ret20": {
+      "baseline": -0.0428,
+      "min": -0.0953,
+      "max": 0.0179,
+      "signFlips": 1,
+      "withinStock": "결론 금지"
+    },
+    "distMa20": {
+      "baseline": -0.1474,
+      "min": -0.2174,
+      "max": -0.1,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "distMa50Prior": {
+      "baseline": -0.1564,
+      "min": -0.2325,
+      "max": -0.1093,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "pos60": {
+      "baseline": -0.0136,
+      "min": -0.064,
+      "max": 0.0289,
+      "signFlips": 5,
+      "withinStock": "결론 금지"
+    },
+    "pos120": {
+      "baseline": -0.0592,
+      "min": -0.0835,
+      "max": -0.0095,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "spyRet20": {
+      "baseline": -0.1985,
+      "min": -0.2744,
+      "max": -0.1173,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    },
+    "spyAtr": {
+      "baseline": 0.2777,
+      "min": 0.2284,
+      "max": 0.3111,
+      "signFlips": 0,
+      "withinStock": "결론 금지"
+    }
+  },
+  "atr": {
+    "LOW": {
+      "n": 32,
+      "conclusion": "제한적",
+      "window": {
+        "n": 32,
+        "conclusion": "제한적",
+        "mean": 0.64,
+        "median": 1.21,
+        "win": 53.13,
+        "tail5": 28.13,
+        "tail10": 9.38,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "t20": {
+        "n": 32,
+        "conclusion": "제한적",
+        "mean": 0.27,
+        "median": 1.2,
+        "win": 56.25,
+        "tail5": 28.13,
+        "tail10": 15.63,
+        "tail15": 3.13,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "MID": {
+      "n": 33,
+      "conclusion": "제한적",
+      "window": {
+        "n": 33,
+        "conclusion": "제한적",
+        "mean": 7.15,
+        "median": 3.05,
+        "win": 60.61,
+        "tail5": 30.3,
+        "tail10": 24.24,
+        "tail15": 9.09,
+        "tail20": 6.06,
+        "rawTail20": 0.06060606060606061
+      },
+      "t20": {
+        "n": 33,
+        "conclusion": "제한적",
+        "mean": 4.58,
+        "median": 0.85,
+        "win": 57.58,
+        "tail5": 18.18,
+        "tail10": 12.12,
+        "tail15": 6.06,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "HIGH": {
+      "n": 34,
+      "conclusion": "제한적",
+      "window": {
+        "n": 34,
+        "conclusion": "제한적",
+        "mean": 13.69,
+        "median": 12.28,
+        "win": 64.71,
+        "tail5": 20.59,
+        "tail10": 14.71,
+        "tail15": 8.82,
+        "tail20": 2.94,
+        "rawTail20": 0.029411764705882353
+      },
+      "t20": {
+        "n": 34,
+        "conclusion": "제한적",
+        "mean": 7.24,
+        "median": 3.19,
+        "win": 64.71,
+        "tail5": 26.47,
+        "tail10": 5.88,
+        "tail15": 5.88,
+        "tail20": 2.94,
+        "rawTail20": 0.029411764705882353
+      }
+    }
+  },
+  "leadership": {
+    "HIGH": {
+      "n": 15,
+      "conclusion": "제한적",
+      "window": {
+        "n": 15,
+        "conclusion": "제한적",
+        "mean": 20.75,
+        "median": 17.21,
+        "win": 93.33,
+        "tail5": 6.67,
+        "tail10": 0,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "t20": {
+        "n": 15,
+        "conclusion": "제한적",
+        "mean": 12.81,
+        "median": 7.17,
+        "win": 80,
+        "tail5": 6.67,
+        "tail10": 0,
+        "tail15": 0,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "MID": {
+      "n": 50,
+      "conclusion": "제한적",
+      "window": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 5.7,
+        "median": -0.08,
+        "win": 50,
+        "tail5": 30,
+        "tail10": 22,
+        "tail15": 8,
+        "tail20": 6,
+        "rawTail20": 0.06
+      },
+      "t20": {
+        "n": 50,
+        "conclusion": "제한적",
+        "mean": 3.47,
+        "median": 2.04,
+        "win": 60,
+        "tail5": 30,
+        "tail10": 14,
+        "tail15": 8,
+        "tail20": 0,
+        "rawTail20": 0
+      }
+    },
+    "LOW": {
+      "n": 34,
+      "conclusion": "제한적",
+      "window": {
+        "n": 34,
+        "conclusion": "제한적",
+        "mean": 3.7,
+        "median": 3.07,
+        "win": 58.82,
+        "tail5": 29.41,
+        "tail10": 14.71,
+        "tail15": 5.88,
+        "tail20": 0,
+        "rawTail20": 0
+      },
+      "t20": {
+        "n": 34,
+        "conclusion": "제한적",
+        "mean": 1.19,
+        "median": 0.12,
+        "win": 50,
+        "tail5": 23.53,
+        "tail10": 11.76,
+        "tail15": 2.94,
+        "tail20": 2.94,
+        "rawTail20": 0.029411764705882353
+      }
+    }
+  },
+  "cards": [
+    {
+      "id": "t0",
+      "returnClear": true,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "leadership",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "eventAtr",
+      "returnClear": true,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "withinAtr",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "maeT1",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "maeT3",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 0
+    },
+    {
+      "id": "maeT5",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 1
+    },
+    {
+      "id": "fromMae",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "returnT5",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "depthT5",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 1
+    },
+    {
+      "id": "correctionDuration",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 1
+    },
+    {
+      "id": "correctionSpeed",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 0
+    },
+    {
+      "id": "ret20",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "distMa20",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "distMa50Prior",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "pos60",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 0
+    },
+    {
+      "id": "pos120",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 2
+    },
+    {
+      "id": "spyRet20",
+      "returnClear": false,
+      "tailClear": false,
+      "oosSame": 3
+    },
+    {
+      "id": "spyAtr",
+      "returnClear": true,
+      "tailClear": false,
+      "oosSame": 3
+    }
+  ],
+  "models": {
+    "M0": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.0529,
+        "adjustedR2": 0.0432,
+        "spearman": 0.2412,
+        "mae": 14.5509
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.0529,
+        "adjustedR2": 0.0432,
+        "spearman": 0.2412,
+        "mae": 14.5509
+      }
+    },
+    "M1": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.1377,
+        "adjustedR2": 0.1198,
+        "spearman": 0.3148,
+        "mae": 13.8125
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.1377,
+        "adjustedR2": 0.1198,
+        "spearman": 0.3148,
+        "mae": 13.8125
+      }
+    },
+    "M2": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.2379,
+        "adjustedR2": 0.2138,
+        "spearman": 0.3739,
+        "mae": 12.8845
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.2379,
+        "adjustedR2": 0.2138,
+        "spearman": 0.3739,
+        "mae": 12.8845
+      }
+    },
+    "M3": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.2412,
+        "adjustedR2": 0.2089,
+        "spearman": 0.3773,
+        "mae": 12.9417
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.2412,
+        "adjustedR2": 0.2089,
+        "spearman": 0.3773,
+        "mae": 12.9417
+      }
+    },
+    "M4": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.275,
+        "adjustedR2": 0.236,
+        "spearman": 0.4272,
+        "mae": 12.5715
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.275,
+        "adjustedR2": 0.236,
+        "spearman": 0.4272,
+        "mae": 12.5715
+      }
+    },
+    "M5": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.289,
+        "adjustedR2": 0.2426,
+        "spearman": 0.442,
+        "mae": 12.3183
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.289,
+        "adjustedR2": 0.2426,
+        "spearman": 0.442,
+        "mae": 12.3183
+      }
+    },
+    "M6": {
+      "identified": true,
+      "train": {
+        "n": 99,
+        "r2": 0.2926,
+        "adjustedR2": 0.2382,
+        "spearman": 0.4411,
+        "mae": 12.3849
+      },
+      "test": {
+        "n": 99,
+        "r2": 0.2926,
+        "adjustedR2": 0.2382,
+        "spearman": 0.4411,
+        "mae": 12.3849
+      }
+    },
+    "M7": {
+      "identified": true,
+      "train": {
+        "n": 96,
+        "r2": 0.3732,
+        "adjustedR2": 0.2826,
+        "spearman": 0.476,
+        "mae": 11.5908
+      },
+      "test": {
+        "n": 96,
+        "r2": 0.3732,
+        "adjustedR2": 0.2826,
+        "spearman": 0.476,
+        "mae": 11.5908
+      }
+    },
+    "M8": {
+      "identified": true,
+      "train": {
+        "n": 96,
+        "r2": 0.3885,
+        "adjustedR2": 0.2828,
+        "spearman": 0.4829,
+        "mae": 11.3669
+      },
+      "test": {
+        "n": 96,
+        "r2": 0.3885,
+        "adjustedR2": 0.2828,
+        "spearman": 0.4829,
+        "mae": 11.3669
+      }
+    }
+  },
+  "judgment": {
+    "label": "부분적인 보유 확신 신호",
+    "full": 0,
+    "returns": 3,
+    "anchoredSplit": "70",
+    "primary": [
+      "window return",
+      "T+20 return",
+      "window -20% tail"
+    ]
+  },
+  "maxEvents": 9
+}
