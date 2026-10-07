@@ -1,0 +1,5464 @@
+{
+  "selectedStrategy": null,
+  "note": "T+5 Recovery equals T+5 return minus T+5 MAE, so it is not a fully separate variable. The independence test is the added fit after T+5 return and T+5 depth. Hold advantage is the return after the T+5 close. Not a sell rule.",
+  "baseline": {
+    "events": 103,
+    "lowEvents": 102,
+    "groups": {
+      "HIGH": 15,
+      "MID": 53,
+      "LOW": 35
+    },
+    "bands": {
+      "LOW": 34,
+      "MID": 34,
+      "HIGH": 35
+    }
+  },
+  "lookAhead": {
+    "ok": true,
+    "checked": 103,
+    "violations": 0,
+    "t5LastBar": "T+5 close"
+  },
+  "identity": {
+    "recoveryEqualsReturnMinusMae": true,
+    "maeNegative": 78,
+    "maeNonNegative": 25,
+    "maxAbsReturnPlusDepthGap": 0,
+    "phrase": "기존 T+5 가격 상태를 통제한 뒤 추가적인 설명력이 남는가"
+  },
+  "associations": {
+    "returnT5": {
+      "n": 103,
+      "spearman": 0.8172,
+      "pearson": 0.7828,
+      "conclusion": "제한적"
+    },
+    "depthT5": {
+      "n": 103,
+      "spearman": -0.2156,
+      "pearson": -0.2465,
+      "conclusion": "제한적"
+    },
+    "maeT5": {
+      "n": 103,
+      "spearman": 0.2331,
+      "pearson": 0.2324,
+      "conclusion": "제한적"
+    },
+    "eventAtr": {
+      "n": 103,
+      "spearman": 0.1536,
+      "pearson": 0.0722,
+      "conclusion": "제한적"
+    },
+    "leadership": {
+      "n": 103,
+      "spearman": -0.0016,
+      "pearson": -0.0618,
+      "conclusion": "제한적"
+    },
+    "t0": {
+      "n": 103,
+      "spearman": 0.0305,
+      "pearson": 0.0405,
+      "conclusion": "제한적"
+    },
+    "slopeT5": {
+      "n": 103,
+      "spearman": 0.7372,
+      "pearson": 0.7094,
+      "conclusion": "제한적"
+    },
+    "ratioWindow": {
+      "n": 103,
+      "spearman": 0.2712,
+      "pearson": 0.2747,
+      "conclusion": "제한적"
+    },
+    "ratioT20": {
+      "n": 103,
+      "spearman": 0.2965,
+      "pearson": 0.2704,
+      "conclusion": "제한적"
+    }
+  },
+  "overlap": {
+    "M5": {
+      "vif": 2.33,
+      "joint": "fit"
+    },
+    "M7": {
+      "vif": 19.92,
+      "joint": "skipped"
+    },
+    "M8": {
+      "vif": 2.63,
+      "joint": "fit"
+    },
+    "M9": {
+      "vif": null,
+      "joint": "skipped"
+    },
+    "B": {
+      "vif": 2.33,
+      "joint": "fit"
+    },
+    "C": {
+      "vif": 19.92,
+      "joint": "skipped"
+    },
+    "T3C": {
+      "vif": 3.88,
+      "joint": "fit"
+    },
+    "T3D": {
+      "vif": 22.32,
+      "joint": "skipped"
+    }
+  },
+  "models": {
+    "window": {
+      "M0": {
+        "n": 103,
+        "r2": 0.0615,
+        "adjustedR2": 0.0522,
+        "spearman": 0.2511,
+        "mae": 15.8459,
+        "rmse": 19.8436,
+        "standardized": {
+          "t0": 0.2481
+        }
+      },
+      "M1": {
+        "n": 103,
+        "r2": 0.1137,
+        "adjustedR2": 0.096,
+        "spearman": 0.316,
+        "mae": 15.5477,
+        "rmse": 19.2844,
+        "standardized": {
+          "t0": 0.2687,
+          "leadership": 0.2293
+        }
+      },
+      "M2": {
+        "n": 103,
+        "r2": 0.1892,
+        "adjustedR2": 0.1646,
+        "spearman": 0.3593,
+        "mae": 14.4958,
+        "rmse": 18.4443,
+        "standardized": {
+          "t0": 0.3067,
+          "leadership": 0.1347,
+          "eventAtr": 0.2942
+        }
+      },
+      "M3": {
+        "n": 103,
+        "r2": 0.3455,
+        "adjustedR2": 0.3188,
+        "spearman": 0.5513,
+        "mae": 12.9544,
+        "rmse": 16.5718,
+        "standardized": {
+          "t0": 0.274,
+          "leadership": 0.1561,
+          "eventAtr": 0.3091,
+          "returnT5": 0.3981
+        }
+      },
+      "M4": {
+        "n": 103,
+        "r2": 0.2344,
+        "adjustedR2": 0.2032,
+        "spearman": 0.4208,
+        "mae": 14.0943,
+        "rmse": 17.9232,
+        "standardized": {
+          "t0": 0.3027,
+          "leadership": 0.1326,
+          "eventAtr": 0.3445,
+          "depthT5": -0.2184
+        }
+      },
+      "M5": {
+        "n": 103,
+        "r2": 0.3649,
+        "adjustedR2": 0.3322,
+        "spearman": 0.5569,
+        "mae": 12.6172,
+        "rmse": 16.3242,
+        "standardized": {
+          "t0": 0.2644,
+          "leadership": 0.1671,
+          "eventAtr": 0.2641,
+          "returnT5": 0.5647,
+          "depthT5": 0.2222
+        }
+      },
+      "M6": {
+        "n": 103,
+        "r2": 0.3401,
+        "adjustedR2": 0.3132,
+        "spearman": 0.5282,
+        "mae": 12.8604,
+        "rmse": 16.6398,
+        "standardized": {
+          "t0": 0.2872,
+          "leadership": 0.1717,
+          "eventAtr": 0.2505,
+          "recoveryT5": 0.3916
+        }
+      },
+      "M7": {
+        "skipped": "VIF",
+        "vif": 19.92
+      },
+      "M8": {
+        "n": 103,
+        "r2": 0.3609,
+        "adjustedR2": 0.328,
+        "spearman": 0.5482,
+        "mae": 12.6351,
+        "rmse": 16.3763,
+        "standardized": {
+          "t0": 0.2771,
+          "leadership": 0.1667,
+          "eventAtr": 0.2803,
+          "returnT5": 0.5587,
+          "maeT5": -0.2059
+        }
+      },
+      "M9": {
+        "skipped": "linear identity",
+        "note": "Recovery = Return - MAE"
+      },
+      "S": {
+        "n": 103,
+        "r2": 0.285,
+        "adjustedR2": 0.2558,
+        "spearman": 0.4764,
+        "mae": 13.5302,
+        "rmse": 17.3205,
+        "standardized": {
+          "t0": 0.3139,
+          "leadership": 0.121,
+          "eventAtr": 0.3313,
+          "stateRecovering": 0.3114
+        }
+      },
+      "A": {
+        "n": 103,
+        "r2": 0.1892,
+        "adjustedR2": 0.1646,
+        "spearman": 0.3593,
+        "mae": 14.4958,
+        "rmse": 18.4443,
+        "standardized": {
+          "t0": 0.3067,
+          "leadership": 0.1347,
+          "eventAtr": 0.2942
+        }
+      },
+      "B": {
+        "n": 103,
+        "r2": 0.3649,
+        "adjustedR2": 0.3322,
+        "spearman": 0.5569,
+        "mae": 12.6172,
+        "rmse": 16.3242,
+        "standardized": {
+          "t0": 0.2644,
+          "leadership": 0.1671,
+          "eventAtr": 0.2641,
+          "returnT5": 0.5647,
+          "depthT5": 0.2222
+        }
+      },
+      "C": {
+        "skipped": "VIF",
+        "vif": 19.92
+      },
+      "D": {
+        "n": 103,
+        "r2": 0.3401,
+        "adjustedR2": 0.3132,
+        "spearman": 0.5282,
+        "mae": 12.8604,
+        "rmse": 16.6398,
+        "standardized": {
+          "t0": 0.2872,
+          "leadership": 0.1717,
+          "eventAtr": 0.2505,
+          "recoveryT5": 0.3916
+        }
+      },
+      "T3": {
+        "n": 103,
+        "r2": 0.2499,
+        "adjustedR2": 0.2193,
+        "spearman": 0.4648,
+        "mae": 13.8912,
+        "rmse": 17.7404,
+        "standardized": {
+          "t0": 0.2782,
+          "leadership": 0.1579,
+          "eventAtr": 0.2228,
+          "recoveryT3": 0.256
+        }
+      },
+      "T3C": {
+        "n": 103,
+        "r2": 0.3664,
+        "adjustedR2": 0.3268,
+        "spearman": 0.5545,
+        "mae": 12.6027,
+        "rmse": 16.3047,
+        "standardized": {
+          "t0": 0.2669,
+          "leadership": 0.165,
+          "eventAtr": 0.2762,
+          "recoveryT3": -0.0538,
+          "returnT5": 0.6117,
+          "depthT5": 0.2425
+        }
+      },
+      "T3D": {
+        "skipped": "VIF",
+        "vif": 22.32
+      },
+      "Rgap": {
+        "n": 103,
+        "r2": 0.2677,
+        "adjustedR2": 0.2378,
+        "spearman": 0.4273,
+        "mae": 13.7572,
+        "rmse": 17.5295,
+        "standardized": {
+          "t0": 0.3237,
+          "leadership": 0.145,
+          "eventAtr": 0.3475,
+          "returnGap": 0.2859
+        }
+      },
+      "Mgap": {
+        "n": 103,
+        "r2": 0.211,
+        "adjustedR2": 0.1788,
+        "spearman": 0.3863,
+        "mae": 14.4086,
+        "rmse": 18.1955,
+        "standardized": {
+          "t0": 0.3161,
+          "leadership": 0.1372,
+          "eventAtr": 0.3252,
+          "maeGap": 0.1508
+        }
+      },
+      "Agap": {
+        "n": 103,
+        "r2": 0.2613,
+        "adjustedR2": 0.2311,
+        "spearman": 0.4354,
+        "mae": 13.5624,
+        "rmse": 17.6051,
+        "standardized": {
+          "t0": 0.3167,
+          "leadership": 0.1446,
+          "eventAtr": 0.3238,
+          "recoveryGap": 0.2707
+        }
+      },
+      "chain": {
+        "m0ToM1": {
+          "n": 103,
+          "deltaR2": 0.0522,
+          "deltaSpearman": 0.0649,
+          "deltaPearson": null,
+          "deltaMae": -0.2982,
+          "deltaRmse": -0.5592
+        },
+        "m1ToM2": {
+          "n": 103,
+          "deltaR2": 0.0755,
+          "deltaSpearman": 0.0433,
+          "deltaPearson": null,
+          "deltaMae": -1.0519,
+          "deltaRmse": -0.8401
+        },
+        "m2ToM3": {
+          "n": 103,
+          "deltaR2": 0.1563,
+          "deltaSpearman": 0.192,
+          "deltaPearson": null,
+          "deltaMae": -1.5414,
+          "deltaRmse": -1.8725
+        },
+        "m2ToM4": {
+          "n": 103,
+          "deltaR2": 0.0452,
+          "deltaSpearman": 0.0615,
+          "deltaPearson": null,
+          "deltaMae": -0.4015,
+          "deltaRmse": -0.5211
+        },
+        "m2ToM5": {
+          "n": 103,
+          "deltaR2": 0.1757,
+          "deltaSpearman": 0.1976,
+          "deltaPearson": null,
+          "deltaMae": -1.8786,
+          "deltaRmse": -2.1201
+        },
+        "m2ToM6": {
+          "n": 103,
+          "deltaR2": 0.1509,
+          "deltaSpearman": 0.1689,
+          "deltaPearson": null,
+          "deltaMae": -1.6354,
+          "deltaRmse": -1.8045
+        },
+        "m5ToM7": null,
+        "m8ToM9": {
+          "deltaR2": 0,
+          "deltaSpearman": 0,
+          "deltaMae": 0,
+          "reason": "Recovery = Return - MAE"
+        },
+        "aToT3": {
+          "n": 103,
+          "deltaR2": 0.0607,
+          "deltaSpearman": 0.1055,
+          "deltaPearson": null,
+          "deltaMae": -0.6046,
+          "deltaRmse": -0.7039
+        },
+        "t3ToT3C": {
+          "n": 103,
+          "deltaR2": 0.1165,
+          "deltaSpearman": 0.0897,
+          "deltaPearson": null,
+          "deltaMae": -1.2885,
+          "deltaRmse": -1.4357
+        },
+        "t3cToT3d": null,
+        "bToC": null,
+        "cToT3D": null
+      }
+    },
+    "t20": {
+      "M0": {
+        "n": 103,
+        "r2": 0.0606,
+        "adjustedR2": 0.0513,
+        "spearman": 0.2508,
+        "mae": 11.7167,
+        "rmse": 14.9902,
+        "standardized": {
+          "t0": 0.2461
+        }
+      },
+      "M1": {
+        "n": 103,
+        "r2": 0.0971,
+        "adjustedR2": 0.079,
+        "spearman": 0.2977,
+        "mae": 11.3583,
+        "rmse": 14.6958,
+        "standardized": {
+          "t0": 0.2633,
+          "leadership": 0.1919
+        }
+      },
+      "M2": {
+        "n": 103,
+        "r2": 0.1353,
+        "adjustedR2": 0.1091,
+        "spearman": 0.3392,
+        "mae": 11.124,
+        "rmse": 14.3818,
+        "standardized": {
+          "t0": 0.2903,
+          "leadership": 0.1247,
+          "eventAtr": 0.2092
+        }
+      },
+      "M3": {
+        "n": 103,
+        "r2": 0.3859,
+        "adjustedR2": 0.3608,
+        "spearman": 0.6349,
+        "mae": 9.3207,
+        "rmse": 12.1202,
+        "standardized": {
+          "t0": 0.249,
+          "leadership": 0.1517,
+          "eventAtr": 0.2279,
+          "returnT5": 0.5041
+        }
+      },
+      "M4": {
+        "n": 103,
+        "r2": 0.2371,
+        "adjustedR2": 0.206,
+        "spearman": 0.4616,
+        "mae": 10.5259,
+        "rmse": 13.5086,
+        "standardized": {
+          "t0": 0.2844,
+          "leadership": 0.1216,
+          "eventAtr": 0.2846,
+          "depthT5": -0.3279
+        }
+      },
+      "M5": {
+        "n": 103,
+        "r2": 0.3956,
+        "adjustedR2": 0.3644,
+        "spearman": 0.647,
+        "mae": 9.0384,
+        "rmse": 12.0233,
+        "standardized": {
+          "t0": 0.2422,
+          "leadership": 0.1596,
+          "eventAtr": 0.1961,
+          "returnT5": 0.6223,
+          "depthT5": 0.1577
+        }
+      },
+      "M6": {
+        "n": 103,
+        "r2": 0.364,
+        "adjustedR2": 0.338,
+        "spearman": 0.6112,
+        "mae": 9.0028,
+        "rmse": 12.3344,
+        "standardized": {
+          "t0": 0.2664,
+          "leadership": 0.1703,
+          "eventAtr": 0.1554,
+          "recoveryT5": 0.482
+        }
+      },
+      "M7": {
+        "skipped": "VIF",
+        "vif": 19.92
+      },
+      "M8": {
+        "n": 103,
+        "r2": 0.404,
+        "adjustedR2": 0.3733,
+        "spearman": 0.6443,
+        "mae": 8.8988,
+        "rmse": 11.9401,
+        "standardized": {
+          "t0": 0.2524,
+          "leadership": 0.1633,
+          "eventAtr": 0.1967,
+          "returnT5": 0.6785,
+          "maeT5": -0.2236
+        }
+      },
+      "M9": {
+        "skipped": "linear identity",
+        "note": "Recovery = Return - MAE"
+      },
+      "S": {
+        "n": 103,
+        "r2": 0.2367,
+        "adjustedR2": 0.2055,
+        "spearman": 0.4499,
+        "mae": 10.5329,
+        "rmse": 13.5123,
+        "standardized": {
+          "t0": 0.2977,
+          "leadership": 0.1106,
+          "eventAtr": 0.2473,
+          "stateRecovering": 0.3204
+        }
+      },
+      "A": {
+        "n": 103,
+        "r2": 0.1353,
+        "adjustedR2": 0.1091,
+        "spearman": 0.3392,
+        "mae": 11.124,
+        "rmse": 14.3818,
+        "standardized": {
+          "t0": 0.2903,
+          "leadership": 0.1247,
+          "eventAtr": 0.2092
+        }
+      },
+      "B": {
+        "n": 103,
+        "r2": 0.3956,
+        "adjustedR2": 0.3644,
+        "spearman": 0.647,
+        "mae": 9.0384,
+        "rmse": 12.0233,
+        "standardized": {
+          "t0": 0.2422,
+          "leadership": 0.1596,
+          "eventAtr": 0.1961,
+          "returnT5": 0.6223,
+          "depthT5": 0.1577
+        }
+      },
+      "C": {
+        "skipped": "VIF",
+        "vif": 19.92
+      },
+      "D": {
+        "n": 103,
+        "r2": 0.364,
+        "adjustedR2": 0.338,
+        "spearman": 0.6112,
+        "mae": 9.0028,
+        "rmse": 12.3344,
+        "standardized": {
+          "t0": 0.2664,
+          "leadership": 0.1703,
+          "eventAtr": 0.1554,
+          "recoveryT5": 0.482
+        }
+      },
+      "T3": {
+        "n": 103,
+        "r2": 0.2107,
+        "adjustedR2": 0.1785,
+        "spearman": 0.5029,
+        "mae": 10.373,
+        "rmse": 13.7399,
+        "standardized": {
+          "t0": 0.2586,
+          "leadership": 0.1506,
+          "eventAtr": 0.1295,
+          "recoveryT3": 0.2854
+        }
+      },
+      "T3C": {
+        "n": 103,
+        "r2": 0.4011,
+        "adjustedR2": 0.3637,
+        "spearman": 0.6342,
+        "mae": 8.8852,
+        "rmse": 11.9692,
+        "standardized": {
+          "t0": 0.2469,
+          "leadership": 0.1555,
+          "eventAtr": 0.2189,
+          "recoveryT3": -0.1016,
+          "returnT5": 0.7112,
+          "depthT5": 0.196
+        }
+      },
+      "T3D": {
+        "skipped": "VIF",
+        "vif": 22.32
+      },
+      "Rgap": {
+        "n": 103,
+        "r2": 0.2995,
+        "adjustedR2": 0.2709,
+        "spearman": 0.4851,
+        "mae": 9.9406,
+        "rmse": 12.9443,
+        "standardized": {
+          "t0": 0.315,
+          "leadership": 0.1395,
+          "eventAtr": 0.2863,
+          "returnGap": 0.4136
+        }
+      },
+      "Mgap": {
+        "n": 103,
+        "r2": 0.205,
+        "adjustedR2": 0.1726,
+        "spearman": 0.4342,
+        "mae": 10.7955,
+        "rmse": 13.7902,
+        "standardized": {
+          "t0": 0.3072,
+          "leadership": 0.1291,
+          "eventAtr": 0.2646,
+          "maeGap": 0.27
+        }
+      },
+      "Agap": {
+        "n": 103,
+        "r2": 0.2614,
+        "adjustedR2": 0.2313,
+        "spearman": 0.4433,
+        "mae": 10.1836,
+        "rmse": 13.2917,
+        "standardized": {
+          "t0": 0.3036,
+          "leadership": 0.1378,
+          "eventAtr": 0.2483,
+          "recoveryGap": 0.358
+        }
+      },
+      "chain": {
+        "m0ToM1": {
+          "n": 103,
+          "deltaR2": 0.0365,
+          "deltaSpearman": 0.0469,
+          "deltaPearson": null,
+          "deltaMae": -0.3584,
+          "deltaRmse": -0.2944
+        },
+        "m1ToM2": {
+          "n": 103,
+          "deltaR2": 0.0382,
+          "deltaSpearman": 0.0415,
+          "deltaPearson": null,
+          "deltaMae": -0.2343,
+          "deltaRmse": -0.314
+        },
+        "m2ToM3": {
+          "n": 103,
+          "deltaR2": 0.2506,
+          "deltaSpearman": 0.2957,
+          "deltaPearson": null,
+          "deltaMae": -1.8033,
+          "deltaRmse": -2.2616
+        },
+        "m2ToM4": {
+          "n": 103,
+          "deltaR2": 0.1018,
+          "deltaSpearman": 0.1224,
+          "deltaPearson": null,
+          "deltaMae": -0.5981,
+          "deltaRmse": -0.8732
+        },
+        "m2ToM5": {
+          "n": 103,
+          "deltaR2": 0.2603,
+          "deltaSpearman": 0.3078,
+          "deltaPearson": null,
+          "deltaMae": -2.0856,
+          "deltaRmse": -2.3585
+        },
+        "m2ToM6": {
+          "n": 103,
+          "deltaR2": 0.2287,
+          "deltaSpearman": 0.272,
+          "deltaPearson": null,
+          "deltaMae": -2.1212,
+          "deltaRmse": -2.0474
+        },
+        "m5ToM7": null,
+        "m8ToM9": {
+          "deltaR2": 0,
+          "deltaSpearman": 0,
+          "deltaMae": 0,
+          "reason": "Recovery = Return - MAE"
+        },
+        "aToT3": {
+          "n": 103,
+          "deltaR2": 0.0754,
+          "deltaSpearman": 0.1637,
+          "deltaPearson": null,
+          "deltaMae": -0.751,
+          "deltaRmse": -0.6419
+        },
+        "t3ToT3C": {
+          "n": 103,
+          "deltaR2": 0.1904,
+          "deltaSpearman": 0.1313,
+          "deltaPearson": null,
+          "deltaMae": -1.4878,
+          "deltaRmse": -1.7707
+        },
+        "t3cToT3d": null,
+        "bToC": null,
+        "cToT3D": null
+      }
+    },
+    "t10": {
+      "M0": {
+        "n": 103,
+        "r2": 0.0016,
+        "adjustedR2": -0.0083,
+        "spearman": 0.0613,
+        "mae": 7.4399,
+        "rmse": 9.8127,
+        "standardized": {
+          "t0": 0.0402
+        }
+      },
+      "M1": {
+        "n": 103,
+        "r2": 0.0097,
+        "adjustedR2": -0.0101,
+        "spearman": 0.1087,
+        "mae": 7.4191,
+        "rmse": 9.7731,
+        "standardized": {
+          "t0": 0.0483,
+          "leadership": 0.09
+        }
+      },
+      "M2": {
+        "n": 103,
+        "r2": 0.067,
+        "adjustedR2": 0.0387,
+        "spearman": 0.2173,
+        "mae": 7.1871,
+        "rmse": 9.4861,
+        "standardized": {
+          "t0": 0.0814,
+          "leadership": 0.0076,
+          "eventAtr": 0.2563
+        }
+      },
+      "M3": {
+        "n": 103,
+        "r2": 0.5103,
+        "adjustedR2": 0.4903,
+        "spearman": 0.7271,
+        "mae": 5.1972,
+        "rmse": 6.8726,
+        "standardized": {
+          "t0": 0.0264,
+          "leadership": 0.0436,
+          "eventAtr": 0.2813,
+          "returnT5": 0.6705
+        }
+      },
+      "M4": {
+        "n": 103,
+        "r2": 0.2578,
+        "adjustedR2": 0.2275,
+        "spearman": 0.5589,
+        "mae": 6.3342,
+        "rmse": 8.4606,
+        "standardized": {
+          "t0": 0.0732,
+          "leadership": 0.0033,
+          "eventAtr": 0.3596,
+          "depthT5": -0.4489
+        }
+      },
+      "M5": {
+        "n": 103,
+        "r2": 0.5229,
+        "adjustedR2": 0.4983,
+        "spearman": 0.7278,
+        "mae": 5.1074,
+        "rmse": 6.7837,
+        "standardized": {
+          "t0": 0.0186,
+          "leadership": 0.0525,
+          "eventAtr": 0.2451,
+          "returnT5": 0.8047,
+          "depthT5": 0.179
+        }
+      },
+      "M6": {
+        "n": 103,
+        "r2": 0.4615,
+        "adjustedR2": 0.4395,
+        "spearman": 0.6485,
+        "mae": 5.5533,
+        "rmse": 7.2067,
+        "standardized": {
+          "t0": 0.0499,
+          "leadership": 0.0675,
+          "eventAtr": 0.1857,
+          "recoveryT5": 0.6332
+        }
+      },
+      "M7": {
+        "skipped": "VIF",
+        "vif": 19.92
+      },
+      "M8": {
+        "n": 103,
+        "r2": 0.5378,
+        "adjustedR2": 0.514,
+        "spearman": 0.7271,
+        "mae": 5.1104,
+        "rmse": 6.6764,
+        "standardized": {
+          "t0": 0.0305,
+          "leadership": 0.0578,
+          "eventAtr": 0.2427,
+          "returnT5": 0.8857,
+          "maeT5": -0.2758
+        }
+      },
+      "M9": {
+        "skipped": "linear identity",
+        "note": "Recovery = Return - MAE"
+      },
+      "S": {
+        "n": 103,
+        "r2": 0.2095,
+        "adjustedR2": 0.1772,
+        "spearman": 0.4465,
+        "mae": 6.4425,
+        "rmse": 8.7313,
+        "standardized": {
+          "t0": 0.0901,
+          "leadership": -0.0091,
+          "eventAtr": 0.3015,
+          "stateRecovering": 0.38
+        }
+      },
+      "A": {
+        "n": 103,
+        "r2": 0.067,
+        "adjustedR2": 0.0387,
+        "spearman": 0.2173,
+        "mae": 7.1871,
+        "rmse": 9.4861,
+        "standardized": {
+          "t0": 0.0814,
+          "leadership": 0.0076,
+          "eventAtr": 0.2563
+        }
+      },
+      "B": {
+        "n": 103,
+        "r2": 0.5229,
+        "adjustedR2": 0.4983,
+        "spearman": 0.7278,
+        "mae": 5.1074,
+        "rmse": 6.7837,
+        "standardized": {
+          "t0": 0.0186,
+          "leadership": 0.0525,
+          "eventAtr": 0.2451,
+          "returnT5": 0.8047,
+          "depthT5": 0.179
+        }
+      },
+      "C": {
+        "skipped": "VIF",
+        "vif": 19.92
+      },
+      "D": {
+        "n": 103,
+        "r2": 0.4615,
+        "adjustedR2": 0.4395,
+        "spearman": 0.6485,
+        "mae": 5.5533,
+        "rmse": 7.2067,
+        "standardized": {
+          "t0": 0.0499,
+          "leadership": 0.0675,
+          "eventAtr": 0.1857,
+          "recoveryT5": 0.6332
+        }
+      },
+      "T3": {
+        "n": 103,
+        "r2": 0.2079,
+        "adjustedR2": 0.1756,
+        "spearman": 0.4493,
+        "mae": 6.7039,
+        "rmse": 8.7405,
+        "standardized": {
+          "t0": 0.038,
+          "leadership": 0.043,
+          "eventAtr": 0.1474,
+          "recoveryT3": 0.39
+        }
+      },
+      "T3C": {
+        "n": 103,
+        "r2": 0.529,
+        "adjustedR2": 0.4996,
+        "spearman": 0.7322,
+        "mae": 5.1158,
+        "rmse": 6.7399,
+        "standardized": {
+          "t0": 0.0237,
+          "leadership": 0.0481,
+          "eventAtr": 0.2694,
+          "recoveryT3": -0.1082,
+          "returnT5": 0.8993,
+          "depthT5": 0.2197
+        }
+      },
+      "T3D": {
+        "skipped": "VIF",
+        "vif": 22.32
+      },
+      "Rgap": {
+        "n": 103,
+        "r2": 0.3201,
+        "adjustedR2": 0.2923,
+        "spearman": 0.5131,
+        "mae": 6.2325,
+        "rmse": 8.0979,
+        "standardized": {
+          "t0": 0.112,
+          "leadership": 0.026,
+          "eventAtr": 0.3521,
+          "returnGap": 0.5135
+        }
+      },
+      "Mgap": {
+        "n": 103,
+        "r2": 0.1617,
+        "adjustedR2": 0.1275,
+        "spearman": 0.4662,
+        "mae": 6.7547,
+        "rmse": 8.9915,
+        "standardized": {
+          "t0": 0.1011,
+          "leadership": 0.0127,
+          "eventAtr": 0.3209,
+          "maeGap": 0.3149
+        }
+      },
+      "Agap": {
+        "n": 103,
+        "r2": 0.2731,
+        "adjustedR2": 0.2434,
+        "spearman": 0.4292,
+        "mae": 6.4559,
+        "rmse": 8.3732,
+        "standardized": {
+          "t0": 0.0983,
+          "leadership": 0.0244,
+          "eventAtr": 0.3063,
+          "recoveryGap": 0.4576
+        }
+      },
+      "chain": {
+        "m0ToM1": {
+          "n": 103,
+          "deltaR2": 0.0081,
+          "deltaSpearman": 0.0474,
+          "deltaPearson": null,
+          "deltaMae": -0.0208,
+          "deltaRmse": -0.0396
+        },
+        "m1ToM2": {
+          "n": 103,
+          "deltaR2": 0.0573,
+          "deltaSpearman": 0.1086,
+          "deltaPearson": null,
+          "deltaMae": -0.232,
+          "deltaRmse": -0.287
+        },
+        "m2ToM3": {
+          "n": 103,
+          "deltaR2": 0.4433,
+          "deltaSpearman": 0.5098,
+          "deltaPearson": null,
+          "deltaMae": -1.9899,
+          "deltaRmse": -2.6135
+        },
+        "m2ToM4": {
+          "n": 103,
+          "deltaR2": 0.1908,
+          "deltaSpearman": 0.3416,
+          "deltaPearson": null,
+          "deltaMae": -0.8529,
+          "deltaRmse": -1.0255
+        },
+        "m2ToM5": {
+          "n": 103,
+          "deltaR2": 0.4559,
+          "deltaSpearman": 0.5105,
+          "deltaPearson": null,
+          "deltaMae": -2.0797,
+          "deltaRmse": -2.7024
+        },
+        "m2ToM6": {
+          "n": 103,
+          "deltaR2": 0.3945,
+          "deltaSpearman": 0.4312,
+          "deltaPearson": null,
+          "deltaMae": -1.6338,
+          "deltaRmse": -2.2794
+        },
+        "m5ToM7": null,
+        "m8ToM9": {
+          "deltaR2": 0,
+          "deltaSpearman": 0,
+          "deltaMae": 0,
+          "reason": "Recovery = Return - MAE"
+        },
+        "aToT3": {
+          "n": 103,
+          "deltaR2": 0.1409,
+          "deltaSpearman": 0.232,
+          "deltaPearson": null,
+          "deltaMae": -0.4832,
+          "deltaRmse": -0.7456
+        },
+        "t3ToT3C": {
+          "n": 103,
+          "deltaR2": 0.3211,
+          "deltaSpearman": 0.2829,
+          "deltaPearson": null,
+          "deltaMae": -1.5881,
+          "deltaRmse": -2.0006
+        },
+        "t3cToT3d": null,
+        "bToC": null,
+        "cToT3D": null
+      }
+    }
+  },
+  "substitutes": {
+    "return": {
+      "window": {
+        "fit": {
+          "n": 103,
+          "r2": 0.3455,
+          "adjustedR2": 0.3188,
+          "spearman": 0.5513,
+          "mae": 12.9544,
+          "rmse": 16.5718,
+          "standardized": {
+            "t0": 0.274,
+            "leadership": 0.1561,
+            "eventAtr": 0.3091,
+            "returnT5": 0.3981
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.1563,
+          "deltaSpearman": 0.192,
+          "deltaPearson": null,
+          "deltaMae": -1.5414,
+          "deltaRmse": -1.8725
+        }
+      },
+      "t20": {
+        "fit": {
+          "n": 103,
+          "r2": 0.3859,
+          "adjustedR2": 0.3608,
+          "spearman": 0.6349,
+          "mae": 9.3207,
+          "rmse": 12.1202,
+          "standardized": {
+            "t0": 0.249,
+            "leadership": 0.1517,
+            "eventAtr": 0.2279,
+            "returnT5": 0.5041
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.2506,
+          "deltaSpearman": 0.2957,
+          "deltaPearson": null,
+          "deltaMae": -1.8033,
+          "deltaRmse": -2.2616
+        }
+      }
+    },
+    "depth": {
+      "window": {
+        "fit": {
+          "n": 103,
+          "r2": 0.2344,
+          "adjustedR2": 0.2032,
+          "spearman": 0.4208,
+          "mae": 14.0943,
+          "rmse": 17.9232,
+          "standardized": {
+            "t0": 0.3027,
+            "leadership": 0.1326,
+            "eventAtr": 0.3445,
+            "depthT5": -0.2184
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.0452,
+          "deltaSpearman": 0.0615,
+          "deltaPearson": null,
+          "deltaMae": -0.4015,
+          "deltaRmse": -0.5211
+        }
+      },
+      "t20": {
+        "fit": {
+          "n": 103,
+          "r2": 0.2371,
+          "adjustedR2": 0.206,
+          "spearman": 0.4616,
+          "mae": 10.5259,
+          "rmse": 13.5086,
+          "standardized": {
+            "t0": 0.2844,
+            "leadership": 0.1216,
+            "eventAtr": 0.2846,
+            "depthT5": -0.3279
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.1018,
+          "deltaSpearman": 0.1224,
+          "deltaPearson": null,
+          "deltaMae": -0.5981,
+          "deltaRmse": -0.8732
+        }
+      }
+    },
+    "recovery": {
+      "window": {
+        "fit": {
+          "n": 103,
+          "r2": 0.3401,
+          "adjustedR2": 0.3132,
+          "spearman": 0.5282,
+          "mae": 12.8604,
+          "rmse": 16.6398,
+          "standardized": {
+            "t0": 0.2872,
+            "leadership": 0.1717,
+            "eventAtr": 0.2505,
+            "recoveryT5": 0.3916
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.1509,
+          "deltaSpearman": 0.1689,
+          "deltaPearson": null,
+          "deltaMae": -1.6354,
+          "deltaRmse": -1.8045
+        }
+      },
+      "t20": {
+        "fit": {
+          "n": 103,
+          "r2": 0.364,
+          "adjustedR2": 0.338,
+          "spearman": 0.6112,
+          "mae": 9.0028,
+          "rmse": 12.3344,
+          "standardized": {
+            "t0": 0.2664,
+            "leadership": 0.1703,
+            "eventAtr": 0.1554,
+            "recoveryT5": 0.482
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.2287,
+          "deltaSpearman": 0.272,
+          "deltaPearson": null,
+          "deltaMae": -2.1212,
+          "deltaRmse": -2.0474
+        }
+      }
+    },
+    "returnAcceleration": {
+      "window": {
+        "fit": {
+          "n": 103,
+          "r2": 0.2677,
+          "adjustedR2": 0.2378,
+          "spearman": 0.4273,
+          "mae": 13.7572,
+          "rmse": 17.5295,
+          "standardized": {
+            "t0": 0.3237,
+            "leadership": 0.145,
+            "eventAtr": 0.3475,
+            "returnGap": 0.2859
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.0785,
+          "deltaSpearman": 0.068,
+          "deltaPearson": null,
+          "deltaMae": -0.7386,
+          "deltaRmse": -0.9148
+        }
+      },
+      "t20": {
+        "fit": {
+          "n": 103,
+          "r2": 0.2995,
+          "adjustedR2": 0.2709,
+          "spearman": 0.4851,
+          "mae": 9.9406,
+          "rmse": 12.9443,
+          "standardized": {
+            "t0": 0.315,
+            "leadership": 0.1395,
+            "eventAtr": 0.2863,
+            "returnGap": 0.4136
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.1642,
+          "deltaSpearman": 0.1459,
+          "deltaPearson": null,
+          "deltaMae": -1.1834,
+          "deltaRmse": -1.4375
+        }
+      }
+    },
+    "maeChange": {
+      "window": {
+        "fit": {
+          "n": 103,
+          "r2": 0.211,
+          "adjustedR2": 0.1788,
+          "spearman": 0.3863,
+          "mae": 14.4086,
+          "rmse": 18.1955,
+          "standardized": {
+            "t0": 0.3161,
+            "leadership": 0.1372,
+            "eventAtr": 0.3252,
+            "maeGap": 0.1508
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.0218,
+          "deltaSpearman": 0.027,
+          "deltaPearson": null,
+          "deltaMae": -0.0872,
+          "deltaRmse": -0.2488
+        }
+      },
+      "t20": {
+        "fit": {
+          "n": 103,
+          "r2": 0.205,
+          "adjustedR2": 0.1726,
+          "spearman": 0.4342,
+          "mae": 10.7955,
+          "rmse": 13.7902,
+          "standardized": {
+            "t0": 0.3072,
+            "leadership": 0.1291,
+            "eventAtr": 0.2646,
+            "maeGap": 0.27
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.0697,
+          "deltaSpearman": 0.095,
+          "deltaPearson": null,
+          "deltaMae": -0.3285,
+          "deltaRmse": -0.5916
+        }
+      }
+    },
+    "recoveryAcceleration": {
+      "window": {
+        "fit": {
+          "n": 103,
+          "r2": 0.2613,
+          "adjustedR2": 0.2311,
+          "spearman": 0.4354,
+          "mae": 13.5624,
+          "rmse": 17.6051,
+          "standardized": {
+            "t0": 0.3167,
+            "leadership": 0.1446,
+            "eventAtr": 0.3238,
+            "recoveryGap": 0.2707
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.0721,
+          "deltaSpearman": 0.0761,
+          "deltaPearson": null,
+          "deltaMae": -0.9334,
+          "deltaRmse": -0.8392
+        }
+      },
+      "t20": {
+        "fit": {
+          "n": 103,
+          "r2": 0.2614,
+          "adjustedR2": 0.2313,
+          "spearman": 0.4433,
+          "mae": 10.1836,
+          "rmse": 13.2917,
+          "standardized": {
+            "t0": 0.3036,
+            "leadership": 0.1378,
+            "eventAtr": 0.2483,
+            "recoveryGap": 0.358
+          }
+        },
+        "delta": {
+          "n": 103,
+          "deltaR2": 0.1261,
+          "deltaSpearman": 0.1041,
+          "deltaPearson": null,
+          "deltaMae": -0.9404,
+          "deltaRmse": -1.0901
+        }
+      }
+    }
+  },
+  "acceleration": {
+    "recovery": {
+      "window": {
+        "n": 103,
+        "spearman": 0.3853,
+        "pearson": 0.4107,
+        "conclusion": "제한적"
+      },
+      "t20": {
+        "n": 103,
+        "spearman": 0.4973,
+        "pearson": 0.4935,
+        "conclusion": "제한적"
+      }
+    },
+    "recoveryAcceleration": {
+      "window": {
+        "n": 103,
+        "spearman": 0.1922,
+        "pearson": 0.2179,
+        "conclusion": "제한적"
+      },
+      "t20": {
+        "n": 103,
+        "spearman": 0.2838,
+        "pearson": 0.3147,
+        "conclusion": "제한적"
+      }
+    },
+    "returnAcceleration": {
+      "window": {
+        "n": 103,
+        "spearman": 0.205,
+        "pearson": 0.198,
+        "conclusion": "제한적"
+      },
+      "t20": {
+        "n": 103,
+        "spearman": 0.3156,
+        "pearson": 0.3381,
+        "conclusion": "제한적"
+      }
+    },
+    "maeChange": {
+      "window": {
+        "n": 103,
+        "spearman": 0.2171,
+        "pearson": 0.0656,
+        "conclusion": "제한적"
+      },
+      "t20": {
+        "n": 103,
+        "spearman": 0.2832,
+        "pearson": 0.1979,
+        "conclusion": "제한적"
+      }
+    }
+  },
+  "states": {
+    "RECOVERING": {
+      "n": 53,
+      "conclusion": "제한적",
+      "recoveryMean": 7.48,
+      "entry": {
+        "t10": {
+          "n": 53,
+          "mean": 7.39,
+          "median": 5.62,
+          "winRate": 83.02
+        },
+        "t20": {
+          "n": 53,
+          "mean": 10.95,
+          "median": 8.26,
+          "winRate": 77.36
+        },
+        "t40": {
+          "n": 53,
+          "mean": 15.54,
+          "median": 12.16,
+          "winRate": 71.7
+        },
+        "window": {
+          "n": 53,
+          "mean": 14.75,
+          "median": 9.8,
+          "winRate": 67.92
+        }
+      },
+      "forward": {
+        "t10": {
+          "n": 53,
+          "mean": 1.13,
+          "median": 0.6,
+          "winRate": 60.38
+        },
+        "t20": {
+          "n": 53,
+          "mean": 4.4,
+          "median": 2.6,
+          "winRate": 66.04
+        },
+        "t40": {
+          "n": 53,
+          "mean": 8.54,
+          "median": 8.28,
+          "winRate": 67.92
+        },
+        "window": {
+          "n": 50,
+          "mean": 8.42,
+          "median": 5.36,
+          "winRate": 66
+        },
+        "mae": {
+          "n": 50,
+          "mean": -7,
+          "median": -3.85,
+          "p5": -24.44,
+          "p25": -11.12
+        },
+        "mfe": {
+          "n": 50,
+          "mean": 15.78,
+          "median": 9.48,
+          "p5": 0.14,
+          "p25": 4.06
+        }
+      },
+      "risk": {
+        "window": {
+          "n": 53,
+          "mean": 14.75,
+          "median": 9.8,
+          "p5": -10.09,
+          "p25": -2.48
+        },
+        "mae": {
+          "n": 53,
+          "mean": -4.96,
+          "median": -2.96,
+          "p5": -18.37,
+          "p25": -8.74
+        },
+        "mfe": {
+          "n": 53,
+          "mean": 22.27,
+          "median": 15.03,
+          "p5": 2.26,
+          "p25": 7.11
+        },
+        "ratio": {
+          "n": 53,
+          "mean": 13.18,
+          "median": 4.99,
+          "p5": -1,
+          "p25": -0.23
+        },
+        "reboundPerDepth": {
+          "n": 53,
+          "mean": 13.9,
+          "median": 4.38,
+          "p5": 0,
+          "p25": 0.8
+        },
+        "lowToPerCheckpointDepth": {
+          "n": 39,
+          "mean": 16.87,
+          "median": 6.93,
+          "p5": 0,
+          "p25": 0.69
+        },
+        "lowToWindow": {
+          "n": 53,
+          "mean": 20.42,
+          "median": 16.34,
+          "winRate": 90.57
+        }
+      },
+      "hit10": 79.25,
+      "tail": {
+        "le5": 13.21,
+        "le10": 5.66,
+        "le15": 1.89,
+        "le20": 1.89
+      }
+    },
+    "STABILIZING": {
+      "n": 4,
+      "conclusion": "결론 금지",
+      "recoveryMean": 5.02,
+      "entry": {
+        "t10": {
+          "n": 4,
+          "mean": 0.98,
+          "median": 4.84,
+          "winRate": 75
+        },
+        "t20": {
+          "n": 4,
+          "mean": -0.71,
+          "median": 0.34,
+          "winRate": 50
+        },
+        "t40": {
+          "n": 4,
+          "mean": -4.42,
+          "median": -6.12,
+          "winRate": 25
+        },
+        "window": {
+          "n": 4,
+          "mean": -5.96,
+          "median": -9.78,
+          "winRate": 25
+        }
+      },
+      "forward": {
+        "t10": {
+          "n": 4,
+          "mean": 1.88,
+          "median": 4.27,
+          "winRate": 75
+        },
+        "t20": {
+          "n": 4,
+          "mean": 0.43,
+          "median": -4.03,
+          "winRate": 50
+        },
+        "t40": {
+          "n": 4,
+          "mean": -3.11,
+          "median": -10.09,
+          "winRate": 25
+        },
+        "window": {
+          "n": 4,
+          "mean": -4.4,
+          "median": -8,
+          "winRate": 25
+        },
+        "mae": {
+          "n": 4,
+          "mean": -11.21,
+          "median": -9.57,
+          "p5": -24.09,
+          "p25": -17.59
+        },
+        "mfe": {
+          "n": 4,
+          "mean": 11.39,
+          "median": 5.93,
+          "p5": 0.45,
+          "p25": 2.26
+        }
+      },
+      "risk": {
+        "window": {
+          "n": 4,
+          "mean": -5.96,
+          "median": -9.78,
+          "p5": -15.7,
+          "p25": -13.72
+        },
+        "mae": {
+          "n": 4,
+          "mean": -13.63,
+          "median": -11.44,
+          "p5": -21.77,
+          "p25": -15.51
+        },
+        "mfe": {
+          "n": 4,
+          "mean": 12.04,
+          "median": 10.64,
+          "p5": 0.65,
+          "p25": 6.5
+        },
+        "ratio": {
+          "n": 4,
+          "mean": -0.23,
+          "median": -0.68,
+          "p5": -0.95,
+          "p25": -0.77
+        },
+        "reboundPerDepth": {
+          "n": 4,
+          "mean": 0.86,
+          "median": 0.38,
+          "p5": 0.06,
+          "p25": 0.28
+        },
+        "lowToPerCheckpointDepth": {
+          "n": 4,
+          "mean": 2.49,
+          "median": 1.96,
+          "p5": 0.19,
+          "p25": 0.96
+        },
+        "lowToWindow": {
+          "n": 4,
+          "mean": 8.77,
+          "median": 6.49,
+          "winRate": 75
+        }
+      },
+      "hit10": 25,
+      "tail": {
+        "le5": 75,
+        "le10": 50,
+        "le15": 25,
+        "le20": 0
+      }
+    },
+    "STILL_FALLING": {
+      "n": 46,
+      "conclusion": "제한적",
+      "recoveryMean": 2.13,
+      "entry": {
+        "t10": {
+          "n": 46,
+          "mean": 0.5,
+          "median": 0.31,
+          "winRate": 52.17
+        },
+        "t20": {
+          "n": 46,
+          "mean": 2.09,
+          "median": 1.4,
+          "winRate": 56.52
+        },
+        "t40": {
+          "n": 46,
+          "mean": 4.98,
+          "median": 1.8,
+          "winRate": 52.17
+        },
+        "window": {
+          "n": 46,
+          "mean": 4.25,
+          "median": 0.81,
+          "winRate": 52.17
+        }
+      },
+      "forward": {
+        "t10": {
+          "n": 46,
+          "mean": 2.69,
+          "median": 1.42,
+          "winRate": 60.87
+        },
+        "t20": {
+          "n": 46,
+          "mean": 4.27,
+          "median": 1.96,
+          "winRate": 54.35
+        },
+        "t40": {
+          "n": 46,
+          "mean": 7.39,
+          "median": 2.98,
+          "winRate": 63.04
+        },
+        "window": {
+          "n": 45,
+          "mean": 7.08,
+          "median": 2.15,
+          "winRate": 55.56
+        },
+        "mae": {
+          "n": 45,
+          "mean": -7.7,
+          "median": -5.65,
+          "p5": -23.36,
+          "p25": -9.86
+        },
+        "mfe": {
+          "n": 45,
+          "mean": 15.53,
+          "median": 7.98,
+          "p5": 0.27,
+          "p25": 3.05
+        }
+      },
+      "risk": {
+        "window": {
+          "n": 46,
+          "mean": 4.25,
+          "median": 0.81,
+          "p5": -18.81,
+          "p25": -10.92
+        },
+        "mae": {
+          "n": 45,
+          "mean": -10.4,
+          "median": -10.54,
+          "p5": -25.57,
+          "p25": -17.47
+        },
+        "mfe": {
+          "n": 45,
+          "mean": 13.36,
+          "median": 7.9,
+          "p5": -1.78,
+          "p25": 3.84
+        },
+        "ratio": {
+          "n": 45,
+          "mean": 6.58,
+          "median": 0.24,
+          "p5": -0.99,
+          "p25": -0.69
+        },
+        "reboundPerDepth": {
+          "n": 45,
+          "mean": 7.39,
+          "median": 1.13,
+          "p5": 0.01,
+          "p25": 0.39
+        },
+        "lowToPerCheckpointDepth": {
+          "n": 34,
+          "mean": 7.7,
+          "median": 2.55,
+          "p5": 0.11,
+          "p25": 0.73
+        },
+        "lowToWindow": {
+          "n": 45,
+          "mean": 16.63,
+          "median": 10.48,
+          "winRate": 93.33
+        }
+      },
+      "hit10": 64.44,
+      "tail": {
+        "le5": 36.96,
+        "le10": 26.09,
+        "le15": 10.87,
+        "le20": 2.17
+      }
+    }
+  },
+  "transitions": {
+    "RECOVERING→RECOVERING": {
+      "n": 29,
+      "conclusion": "제한적",
+      "recoveryMean": 9.36,
+      "entry": {
+        "t10": {
+          "n": 29,
+          "mean": 7.98,
+          "median": 7.49,
+          "winRate": 82.76
+        },
+        "t20": {
+          "n": 29,
+          "mean": 13.65,
+          "median": 13.83,
+          "winRate": 72.41
+        },
+        "t40": {
+          "n": 29,
+          "mean": 21.1,
+          "median": 18.95,
+          "winRate": 75.86
+        },
+        "window": {
+          "n": 29,
+          "mean": 19.49,
+          "median": 16.05,
+          "winRate": 72.41
+        }
+      },
+      "forward": {
+        "t10": {
+          "n": 29,
+          "mean": -0.88,
+          "median": 0.13,
+          "winRate": 51.72
+        },
+        "t20": {
+          "n": 29,
+          "mean": 4.27,
+          "median": 5.27,
+          "winRate": 68.97
+        },
+        "t40": {
+          "n": 29,
+          "mean": 11.04,
+          "median": 11.8,
+          "winRate": 68.97
+        },
+        "window": {
+          "n": 28,
+          "mean": 10.09,
+          "median": 6.34,
+          "winRate": 71.43
+        },
+        "mae": {
+          "n": 28,
+          "mean": -8.24,
+          "median": -4.1,
+          "p5": -25.02,
+          "p25": -12.82
+        },
+        "mfe": {
+          "n": 28,
+          "mean": 16.74,
+          "median": 10.64,
+          "p5": 0,
+          "p25": 4.09
+        }
+      },
+      "risk": {
+        "window": {
+          "n": 29,
+          "mean": 19.49,
+          "median": 16.05,
+          "p5": -9.06,
+          "p25": -0.99
+        },
+        "mae": {
+          "n": 29,
+          "mean": -5.43,
+          "median": -4.35,
+          "p5": -18.74,
+          "p25": -9.9
+        },
+        "mfe": {
+          "n": 29,
+          "mean": 26.6,
+          "median": 19.97,
+          "p5": 4.77,
+          "p25": 13.73
+        },
+        "ratio": {
+          "n": 29,
+          "mean": 13.2,
+          "median": 5.59,
+          "p5": -0.99,
+          "p25": -0.06
+        },
+        "reboundPerDepth": {
+          "n": 29,
+          "mean": 13.81,
+          "median": 6.48,
+          "p5": 0.01,
+          "p25": 1.15
+        },
+        "lowToPerCheckpointDepth": {
+          "n": 17,
+          "mean": 20.09,
+          "median": 12.89,
+          "p5": 0,
+          "p25": 4.38
+        },
+        "lowToWindow": {
+          "n": 29,
+          "mean": 25.95,
+          "median": 21.87,
+          "winRate": 93.1
+        }
+      },
+      "hit10": 86.21,
+      "tail": {
+        "le5": 13.79,
+        "le10": 3.45,
+        "le15": 0,
+        "le20": 0
+      }
+    },
+    "RECOVERING→STILL_FALLING": {
+      "n": 21,
+      "conclusion": "제한적",
+      "recoveryMean": 3.3,
+      "entry": {
+        "t10": {
+          "n": 21,
+          "mean": 2.58,
+          "median": 3.43,
+          "winRate": 61.9
+        },
+        "t20": {
+          "n": 21,
+          "mean": 2.26,
+          "median": 4.38,
+          "winRate": 61.9
+        },
+        "t40": {
+          "n": 21,
+          "mean": 6.1,
+          "median": 4.13,
+          "winRate": 57.14
+        },
+        "window": {
+          "n": 21,
+          "mean": 3.6,
+          "median": 4.87,
+          "winRate": 61.9
+        }
+      },
+      "forward": {
+        "t10": {
+          "n": 21,
+          "mean": 2.07,
+          "median": 1.42,
+          "winRate": 61.9
+        },
+        "t20": {
+          "n": 21,
+          "mean": 1.65,
+          "median": -0.9,
+          "winRate": 47.62
+        },
+        "t40": {
+          "n": 21,
+          "mean": 5.81,
+          "median": 2.37,
+          "winRate": 57.14
+        },
+        "window": {
+          "n": 20,
+          "mean": 3.61,
+          "median": 1.98,
+          "winRate": 55
+        },
+        "mae": {
+          "n": 20,
+          "mean": -7.66,
+          "median": -7.52,
+          "p5": -21.17,
+          "p25": -10.05
+        },
+        "mfe": {
+          "n": 20,
+          "mean": 12.87,
+          "median": 7.04,
+          "p5": 0,
+          "p25": 2.84
+        }
+      },
+      "risk": {
+        "window": {
+          "n": 21,
+          "mean": 3.6,
+          "median": 4.87,
+          "p5": -16.32,
+          "p25": -11.88
+        },
+        "mae": {
+          "n": 20,
+          "mean": -8.52,
+          "median": -6.78,
+          "p5": -24.15,
+          "p25": -17.61
+        },
+        "mfe": {
+          "n": 20,
+          "mean": 13.6,
+          "median": 11.04,
+          "p5": -4.45,
+          "p25": 4.28
+        },
+        "ratio": {
+          "n": 20,
+          "mean": 3.75,
+          "median": 0.59,
+          "p5": -0.84,
+          "p25": -0.6
+        },
+        "reboundPerDepth": {
+          "n": 20,
+          "mean": 4.34,
+          "median": 1.36,
+          "p5": 0.18,
+          "p25": 0.45
+        },
+        "lowToPerCheckpointDepth": {
+          "n": 12,
+          "mean": 6.18,
+          "median": 2.55,
+          "p5": 0.3,
+          "p25": 0.57
+        },
+        "lowToWindow": {
+          "n": 20,
+          "mean": 13.61,
+          "median": 9.04,
+          "winRate": 95
+        }
+      },
+      "hit10": 60,
+      "tail": {
+        "le5": 28.57,
+        "le10": 28.57,
+        "le15": 9.52,
+        "le20": 4.76
+      }
+    },
+    "STILL_FALLING→RECOVERING": {
+      "n": 18,
+      "conclusion": "수치만",
+      "recoveryMean": 4.33,
+      "entry": {
+        "t10": {
+          "n": 18,
+          "mean": 5.84,
+          "median": 4.29,
+          "winRate": 83.33
+        },
+        "t20": {
+          "n": 18,
+          "mean": 8.43,
+          "median": 3.7,
+          "winRate": 77.78
+        },
+        "t40": {
+          "n": 18,
+          "mean": 10.32,
+          "median": 7.37,
+          "winRate": 72.22
+        },
+        "window": {
+          "n": 18,
+          "mean": 8.78,
+          "median": 3.23,
+          "winRate": 61.11
+        }
+      },
+      "forward": {
+        "t10": {
+          "n": 18,
+          "mean": 3.57,
+          "median": 2.39,
+          "winRate": 77.78
+        },
+        "t20": {
+          "n": 18,
+          "mean": 6.01,
+          "median": 2.59,
+          "winRate": 72.22
+        },
+        "t40": {
+          "n": 18,
+          "mean": 7.72,
+          "median": 3.56,
+          "winRate": 72.22
+        },
+        "window": {
+          "n": 16,
+          "mean": 7.12,
+          "median": 0.99,
+          "winRate": 56.25
+        },
+        "mae": {
+          "n": 16,
+          "mean": -5.47,
+          "median": -2.69,
+          "p5": -17.06,
+          "p25": -7.57
+        },
+        "mfe": {
+          "n": 16,
+          "mean": 16.68,
+          "median": 9.48,
+          "p5": 1.62,
+          "p25": 5.52
+        }
+      },
+      "risk": {
+        "window": {
+          "n": 18,
+          "mean": 8.78,
+          "median": 3.23,
+          "p5": -13.25,
+          "p25": -2.12
+        },
+        "mae": {
+          "n": 18,
+          "mean": -4.73,
+          "median": -2.6,
+          "p5": -14.19,
+          "p25": -4.92
+        },
+        "mfe": {
+          "n": 18,
+          "mean": 17.78,
+          "median": 11.25,
+          "p5": 2.02,
+          "p25": 4.57
+        },
+        "ratio": {
+          "n": 18,
+          "mean": 13.96,
+          "median": 0.93,
+          "p5": -1,
+          "p25": -0.47
+        },
+        "reboundPerDepth": {
+          "n": 18,
+          "mean": 14.72,
+          "median": 1.26,
+          "p5": 0,
+          "p25": 0.32
+        },
+        "lowToPerCheckpointDepth": {
+          "n": 16,
+          "mean": 15.25,
+          "median": 1.56,
+          "p5": 0,
+          "p25": 0.44
+        },
+        "lowToWindow": {
+          "n": 18,
+          "mean": 13.81,
+          "median": 3.81,
+          "winRate": 83.33
+        }
+      },
+      "hit10": 66.67,
+      "tail": {
+        "le5": 16.67,
+        "le10": 11.11,
+        "le15": 5.56,
+        "le20": 5.56
+      }
+    },
+    "STILL_FALLING→STILL_FALLING": {
+      "n": 16,
+      "conclusion": "수치만",
+      "recoveryMean": 0.64,
+      "entry": {
+        "t10": {
+          "n": 16,
+          "mean": -1.81,
+          "median": -2.6,
+          "winRate": 37.5
+        },
+        "t20": {
+          "n": 16,
+          "mean": 0.77,
+          "median": -1.77,
+          "winRate": 43.75
+        },
+        "t40": {
+          "n": 16,
+          "mean": 2.47,
+          "median": -1.98,
+          "winRate": 37.5
+        },
+        "window": {
+          "n": 16,
+          "mean": 5.96,
+          "median": -2.65,
+          "winRate": 43.75
+        }
+      },
+      "forward": {
+        "t10": {
+          "n": 16,
+          "mean": 5.98,
+          "median": 3.72,
+          "winRate": 68.75
+        },
+        "t20": {
+          "n": 16,
+          "mean": 8.62,
+          "median": 2.67,
+          "winRate": 56.25
+        },
+        "t40": {
+          "n": 16,
+          "mean": 10.57,
+          "median": 2.13,
+          "winRate": 68.75
+        },
+        "window": {
+          "n": 16,
+          "mean": 14.74,
+          "median": 3.74,
+          "winRate": 62.5
+        },
+        "mae": {
+          "n": 16,
+          "mean": -6.19,
+          "median": -4.78,
+          "p5": -19.18,
+          "p25": -9.86
+        },
+        "mfe": {
+          "n": 16,
+          "mean": 21.45,
+          "median": 11.2,
+          "p5": 1.83,
+          "p25": 2.89
+        }
+      },
+      "risk": {
+        "window": {
+          "n": 16,
+          "mean": 5.96,
+          "median": -2.65,
+          "p5": -18.59,
+          "p25": -9.07
+        },
+        "mae": {
+          "n": 16,
+          "mean": -13.01,
+          "median": -10.76,
+          "p5": -26.54,
+          "p25": -17.8
+        },
+        "mfe": {
+          "n": 16,
+          "mean": 13.28,
+          "median": 5.28,
+          "p5": -1.56,
+          "p25": 3.33
+        },
+        "ratio": {
+          "n": 16,
+          "mean": 6.39,
+          "median": -0.32,
+          "p5": -0.95,
+          "p25": -0.72
+        },
+        "reboundPerDepth": {
+          "n": 16,
+          "mean": 7.44,
+          "median": 0.8,
+          "p5": 0.05,
+          "p25": 0.37
+        },
+        "lowToPerCheckpointDepth": {
+          "n": 15,
+          "mean": 2.99,
+          "median": 2.06,
+          "p5": 0.12,
+          "p25": 0.88
+        },
+        "lowToWindow": {
+          "n": 16,
+          "mean": 21.83,
+          "median": 14.5,
+          "winRate": 93.75
+        }
+      },
+      "hit10": 62.5,
+      "tail": {
+        "le5": 43.75,
+        "le10": 25,
+        "le15": 12.5,
+        "le20": 0
+      }
+    }
+  },
+  "thresholds": {
+    "q25": {
+      "lowCut": 0.0128,
+      "highCut": 0.0763,
+      "top": {
+        "n": 26,
+        "conclusion": "제한적",
+        "recoveryMean": 12.28,
+        "entry": {
+          "t10": {
+            "n": 26,
+            "mean": 12.13,
+            "median": 10.51,
+            "winRate": 100
+          },
+          "t20": {
+            "n": 26,
+            "mean": 15.38,
+            "median": 13.4,
+            "winRate": 88.46
+          },
+          "t40": {
+            "n": 26,
+            "mean": 19.77,
+            "median": 18.25,
+            "winRate": 73.08
+          },
+          "window": {
+            "n": 26,
+            "mean": 20.63,
+            "median": 16.93,
+            "winRate": 76.92
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 26,
+            "mean": 1.02,
+            "median": 0.19,
+            "winRate": 53.85
+          },
+          "t20": {
+            "n": 26,
+            "mean": 3.84,
+            "median": 3.46,
+            "winRate": 69.23
+          },
+          "t40": {
+            "n": 26,
+            "mean": 7.68,
+            "median": 10.79,
+            "winRate": 65.38
+          },
+          "window": {
+            "n": 25,
+            "mean": 9.18,
+            "median": 5.68,
+            "winRate": 68
+          },
+          "mae": {
+            "n": 25,
+            "mean": -6.48,
+            "median": -4.95,
+            "p5": -19.6,
+            "p25": -8.43
+          },
+          "mfe": {
+            "n": 25,
+            "mean": 15.62,
+            "median": 9.54,
+            "p5": 1.02,
+            "p25": 3.06
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 26,
+            "mean": 20.63,
+            "median": 16.93,
+            "p5": -7.67,
+            "p25": 3.55
+          },
+          "mae": {
+            "n": 25,
+            "mean": -3.18,
+            "median": -3.19,
+            "p5": -9.97,
+            "p25": -4.75
+          },
+          "mfe": {
+            "n": 25,
+            "mean": 28.64,
+            "median": 23.78,
+            "p5": 9.07,
+            "p25": 14.97
+          },
+          "ratio": {
+            "n": 25,
+            "mean": 19.12,
+            "median": 5.88,
+            "p5": -0.74,
+            "p25": 1.53
+          },
+          "reboundPerDepth": {
+            "n": 25,
+            "mean": 19.74,
+            "median": 6.8,
+            "p5": 0.28,
+            "p25": 2.5
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 17,
+            "mean": 21.42,
+            "median": 6.48,
+            "p5": 0.21,
+            "p25": 1.47
+          },
+          "lowToWindow": {
+            "n": 25,
+            "mean": 25.11,
+            "median": 21.69,
+            "winRate": 100
+          }
+        },
+        "hit10": 92,
+        "tail": {
+          "le5": 11.54,
+          "le10": 0,
+          "le15": 0,
+          "le20": 0
+        }
+      },
+      "bottom": {
+        "n": 26,
+        "conclusion": "제한적",
+        "recoveryMean": 0.18,
+        "entry": {
+          "t10": {
+            "n": 26,
+            "mean": -1.96,
+            "median": -2.77,
+            "winRate": 42.31
+          },
+          "t20": {
+            "n": 26,
+            "mean": -0.55,
+            "median": 1.17,
+            "winRate": 53.85
+          },
+          "t40": {
+            "n": 26,
+            "mean": 4.81,
+            "median": 2.17,
+            "winRate": 57.69
+          },
+          "window": {
+            "n": 26,
+            "mean": 3.32,
+            "median": 0.09,
+            "winRate": 50
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 26,
+            "mean": 3.59,
+            "median": 2.38,
+            "winRate": 69.23
+          },
+          "t20": {
+            "n": 26,
+            "mean": 4.92,
+            "median": 1.96,
+            "winRate": 61.54
+          },
+          "t40": {
+            "n": 26,
+            "mean": 10.71,
+            "median": 10.22,
+            "winRate": 80.77
+          },
+          "window": {
+            "n": 26,
+            "mean": 9.32,
+            "median": 2.56,
+            "winRate": 57.69
+          },
+          "mae": {
+            "n": 26,
+            "mean": -6.69,
+            "median": -5.34,
+            "p5": -20.25,
+            "p25": -9.58
+          },
+          "mfe": {
+            "n": 26,
+            "mean": 15.81,
+            "median": 9.25,
+            "p5": 0.33,
+            "p25": 2.71
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 26,
+            "mean": 3.32,
+            "median": 0.09,
+            "p5": -17.84,
+            "p25": -10.52
+          },
+          "mae": {
+            "n": 26,
+            "mean": -11.38,
+            "median": -10.85,
+            "p5": -25.49,
+            "p25": -17.73
+          },
+          "mfe": {
+            "n": 26,
+            "mean": 10.39,
+            "median": 4.55,
+            "p5": -3.75,
+            "p25": 1.4
+          },
+          "ratio": {
+            "n": 26,
+            "mean": 4.2,
+            "median": 0.06,
+            "p5": -0.84,
+            "p25": -0.66
+          },
+          "reboundPerDepth": {
+            "n": 26,
+            "mean": 5.09,
+            "median": 0.98,
+            "p5": 0.19,
+            "p25": 0.42
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 21,
+            "mean": 2.62,
+            "median": 1.94,
+            "p5": 0.54,
+            "p25": 0.57
+          },
+          "lowToWindow": {
+            "n": 26,
+            "mean": 16.87,
+            "median": 11.49,
+            "winRate": 96.15
+          }
+        },
+        "hit10": 57.69,
+        "tail": {
+          "le5": 34.62,
+          "le10": 26.92,
+          "le15": 11.54,
+          "le20": 0
+        }
+      },
+      "windowGap": 17.31,
+      "t20Gap": 15.93,
+      "windowSign": 1,
+      "t20Sign": 1
+    },
+    "q30": {
+      "lowCut": 0.0163,
+      "highCut": 0.0606,
+      "top": {
+        "n": 31,
+        "conclusion": "제한적",
+        "recoveryMean": 11.39,
+        "entry": {
+          "t10": {
+            "n": 31,
+            "mean": 11.37,
+            "median": 10.48,
+            "winRate": 96.77
+          },
+          "t20": {
+            "n": 31,
+            "mean": 14.97,
+            "median": 12.98,
+            "winRate": 83.87
+          },
+          "t40": {
+            "n": 31,
+            "mean": 20.11,
+            "median": 18.95,
+            "winRate": 70.97
+          },
+          "window": {
+            "n": 31,
+            "mean": 20.11,
+            "median": 17.81,
+            "winRate": 74.19
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 31,
+            "mean": 1.26,
+            "median": 1.59,
+            "winRate": 58.06
+          },
+          "t20": {
+            "n": 31,
+            "mean": 4.43,
+            "median": 2.6,
+            "winRate": 67.74
+          },
+          "t40": {
+            "n": 31,
+            "mean": 9.03,
+            "median": 11.8,
+            "winRate": 64.52
+          },
+          "window": {
+            "n": 30,
+            "mean": 9.61,
+            "median": 5.92,
+            "winRate": 66.67
+          },
+          "mae": {
+            "n": 30,
+            "mean": -7.71,
+            "median": -4.97,
+            "p5": -28.09,
+            "p25": -9.45
+          },
+          "mfe": {
+            "n": 30,
+            "mean": 17.63,
+            "median": 9.81,
+            "p5": 0.35,
+            "p25": 3.14
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 31,
+            "mean": 20.11,
+            "median": 17.81,
+            "p5": -8.88,
+            "p25": 0.79
+          },
+          "mae": {
+            "n": 30,
+            "mean": -4.74,
+            "median": -2.84,
+            "p5": -24.4,
+            "p25": -5.46
+          },
+          "mfe": {
+            "n": 30,
+            "mean": 29.6,
+            "median": 24.55,
+            "p5": 7.42,
+            "p25": 14.13
+          },
+          "ratio": {
+            "n": 30,
+            "mean": 19.69,
+            "median": 6.47,
+            "p5": -0.88,
+            "p25": 0.69
+          },
+          "reboundPerDepth": {
+            "n": 30,
+            "mean": 20.34,
+            "median": 7.01,
+            "p5": 0.13,
+            "p25": 1.73
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 21,
+            "mean": 22.15,
+            "median": 7.22,
+            "p5": 0.03,
+            "p25": 1.47
+          },
+          "lowToWindow": {
+            "n": 30,
+            "mean": 26.37,
+            "median": 28.92,
+            "winRate": 96.67
+          }
+        },
+        "hit10": 90,
+        "tail": {
+          "le5": 16.13,
+          "le10": 3.23,
+          "le15": 3.23,
+          "le20": 3.23
+        }
+      },
+      "bottom": {
+        "n": 31,
+        "conclusion": "제한적",
+        "recoveryMean": 0.38,
+        "entry": {
+          "t10": {
+            "n": 31,
+            "mean": -2.14,
+            "median": -2.53,
+            "winRate": 41.94
+          },
+          "t20": {
+            "n": 31,
+            "mean": -1.08,
+            "median": 0.81,
+            "winRate": 51.61
+          },
+          "t40": {
+            "n": 31,
+            "mean": 2.61,
+            "median": 0.32,
+            "winRate": 51.61
+          },
+          "window": {
+            "n": 31,
+            "mean": 1.66,
+            "median": -0.46,
+            "winRate": 45.16
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 31,
+            "mean": 3.07,
+            "median": 2,
+            "winRate": 67.74
+          },
+          "t20": {
+            "n": 31,
+            "mean": 4.04,
+            "median": 2.07,
+            "winRate": 64.52
+          },
+          "t40": {
+            "n": 31,
+            "mean": 8.04,
+            "median": 3.74,
+            "winRate": 70.97
+          },
+          "window": {
+            "n": 30,
+            "mean": 7.42,
+            "median": 1.44,
+            "winRate": 53.33
+          },
+          "mae": {
+            "n": 30,
+            "mean": -7.23,
+            "median": -6.48,
+            "p5": -20.34,
+            "p25": -9.84
+          },
+          "mfe": {
+            "n": 30,
+            "mean": 14.75,
+            "median": 8.8,
+            "p5": 0.6,
+            "p25": 3
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 31,
+            "mean": 1.66,
+            "median": -0.46,
+            "p5": -17.33,
+            "p25": -9.96
+          },
+          "mae": {
+            "n": 31,
+            "mean": -11.36,
+            "median": -10.85,
+            "p5": -25.07,
+            "p25": -17.76
+          },
+          "mfe": {
+            "n": 31,
+            "mean": 9.32,
+            "median": 4.43,
+            "p5": -3.12,
+            "p25": 1.4
+          },
+          "ratio": {
+            "n": 31,
+            "mean": 3.47,
+            "median": -0.21,
+            "p5": -0.89,
+            "p25": -0.69
+          },
+          "reboundPerDepth": {
+            "n": 31,
+            "mean": 4.32,
+            "median": 0.79,
+            "p5": 0.04,
+            "p25": 0.38
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 26,
+            "mean": 2.72,
+            "median": 1.64,
+            "p5": 0.04,
+            "p25": 0.57
+          },
+          "lowToWindow": {
+            "n": 31,
+            "mean": 15,
+            "median": 8.41,
+            "winRate": 93.55
+          }
+        },
+        "hit10": 54.84,
+        "tail": {
+          "le5": 41.94,
+          "le10": 25.81,
+          "le15": 9.68,
+          "le20": 0
+        }
+      },
+      "windowGap": 18.45,
+      "t20Gap": 16.05,
+      "windowSign": 1,
+      "t20Sign": 1
+    },
+    "median": {
+      "cut": 0.0365,
+      "above": {
+        "n": 51,
+        "conclusion": "제한적",
+        "recoveryMean": 8.85,
+        "entry": {
+          "t10": {
+            "n": 51,
+            "mean": 9.42,
+            "median": 8.58,
+            "winRate": 94.12
+          },
+          "t20": {
+            "n": 51,
+            "mean": 12.97,
+            "median": 12.5,
+            "winRate": 86.27
+          },
+          "t40": {
+            "n": 51,
+            "mean": 17.56,
+            "median": 15.7,
+            "winRate": 74.51
+          },
+          "window": {
+            "n": 51,
+            "mean": 16.03,
+            "median": 13.34,
+            "winRate": 72.55
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 51,
+            "mean": 1.8,
+            "median": 1.42,
+            "winRate": 60.78
+          },
+          "t20": {
+            "n": 51,
+            "mean": 5.06,
+            "median": 4.32,
+            "winRate": 66.67
+          },
+          "t40": {
+            "n": 51,
+            "mean": 9.18,
+            "median": 9.78,
+            "winRate": 68.63
+          },
+          "window": {
+            "n": 48,
+            "mean": 8.57,
+            "median": 5.58,
+            "winRate": 68.75
+          },
+          "mae": {
+            "n": 48,
+            "mean": -6.9,
+            "median": -3.7,
+            "p5": -26.59,
+            "p25": -8.77
+          },
+          "mfe": {
+            "n": 48,
+            "mean": 16.46,
+            "median": 9.81,
+            "p5": 0.47,
+            "p25": 5.19
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 51,
+            "mean": 16.03,
+            "median": 13.34,
+            "p5": -12.98,
+            "p25": -0.15
+          },
+          "mae": {
+            "n": 50,
+            "mean": -4.51,
+            "median": -2.53,
+            "p5": -21.59,
+            "p25": -6.06
+          },
+          "mfe": {
+            "n": 50,
+            "mean": 24.58,
+            "median": 17.41,
+            "p5": 4.77,
+            "p25": 12.55
+          },
+          "ratio": {
+            "n": 50,
+            "mean": 16.8,
+            "median": 5.39,
+            "p5": -0.99,
+            "p25": 0.02
+          },
+          "reboundPerDepth": {
+            "n": 50,
+            "mean": 17.41,
+            "median": 6.14,
+            "p5": 0.01,
+            "p25": 1.08
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 35,
+            "mean": 20.04,
+            "median": 6.48,
+            "p5": 0.02,
+            "p25": 1.51
+          },
+          "lowToWindow": {
+            "n": 50,
+            "mean": 21.5,
+            "median": 16.5,
+            "winRate": 94
+          }
+        },
+        "hit10": 84,
+        "tail": {
+          "le5": 13.73,
+          "le10": 5.88,
+          "le15": 5.88,
+          "le20": 1.96
+        }
+      },
+      "below": {
+        "n": 52,
+        "conclusion": "제한적",
+        "recoveryMean": 1.21,
+        "entry": {
+          "t10": {
+            "n": 52,
+            "mean": -1.19,
+            "median": -1.34,
+            "winRate": 44.23
+          },
+          "t20": {
+            "n": 52,
+            "mean": 0.23,
+            "median": -1,
+            "winRate": 48.08
+          },
+          "t40": {
+            "n": 52,
+            "mean": 2.68,
+            "median": -0.82,
+            "winRate": 48.08
+          },
+          "window": {
+            "n": 52,
+            "mean": 2.61,
+            "median": -0.73,
+            "winRate": 46.15
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 52,
+            "mean": 1.91,
+            "median": 1.37,
+            "winRate": 61.54
+          },
+          "t20": {
+            "n": 52,
+            "mean": 3.32,
+            "median": 1.51,
+            "winRate": 53.85
+          },
+          "t40": {
+            "n": 52,
+            "mean": 6,
+            "median": 1.84,
+            "winRate": 59.62
+          },
+          "window": {
+            "n": 51,
+            "mean": 6.09,
+            "median": 0.73,
+            "winRate": 50.98
+          },
+          "mae": {
+            "n": 51,
+            "mean": -8.05,
+            "median": -7.32,
+            "p5": -21.61,
+            "p25": -12.06
+          },
+          "mfe": {
+            "n": 51,
+            "mean": 14.57,
+            "median": 7.33,
+            "p5": 0,
+            "p25": 2.83
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 52,
+            "mean": 2.61,
+            "median": -0.73,
+            "p5": -17.23,
+            "p25": -10.9
+          },
+          "mae": {
+            "n": 52,
+            "mean": -10.77,
+            "median": -10.71,
+            "p5": -24.98,
+            "p25": -16.12
+          },
+          "mfe": {
+            "n": 52,
+            "mean": 11.55,
+            "median": 6,
+            "p5": -1.64,
+            "p25": 3.35
+          },
+          "ratio": {
+            "n": 52,
+            "mean": 2.96,
+            "median": -0.13,
+            "p5": -1,
+            "p25": -0.71
+          },
+          "reboundPerDepth": {
+            "n": 52,
+            "mean": 3.89,
+            "median": 0.81,
+            "p5": 0,
+            "p25": 0.33
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 42,
+            "mean": 5.44,
+            "median": 2,
+            "p5": 0,
+            "p25": 0.56
+          },
+          "lowToWindow": {
+            "n": 52,
+            "mean": 15.2,
+            "median": 8.38,
+            "winRate": 88.46
+          }
+        },
+        "hit10": 57.69,
+        "tail": {
+          "le5": 38.46,
+          "le10": 26.92,
+          "le15": 7.69,
+          "le20": 1.92
+        }
+      },
+      "windowGap": 13.42,
+      "t20Gap": 12.74,
+      "windowSign": 1,
+      "t20Sign": 1
+    },
+    "sameSign": true
+  },
+  "oos": {
+    "50": {
+      "window": {
+        "A": {
+          "n": 51,
+          "oosR2": 0.11,
+          "pearson": 0.3407,
+          "spearman": 0.2786,
+          "mae": 17.4862,
+          "rmse": 21.924,
+          "standardized": {
+            "t0": 0.3842,
+            "leadership": 0.2436,
+            "eventAtr": 0.2665
+          },
+          "conclusion": "제한적"
+        },
+        "B": {
+          "n": 51,
+          "oosR2": 0.278,
+          "pearson": 0.5276,
+          "spearman": 0.4424,
+          "mae": 15.6763,
+          "rmse": 19.747,
+          "standardized": {
+            "t0": 0.3052,
+            "leadership": 0.3076,
+            "eventAtr": 0.2552,
+            "returnT5": 0.6099,
+            "depthT5": 0.3547
+          },
+          "conclusion": "제한적"
+        },
+        "C": {
+          "skipped": "VIF",
+          "vif": 19.92
+        },
+        "D": {
+          "n": 51,
+          "oosR2": 0.2519,
+          "pearson": 0.5032,
+          "spearman": 0.4224,
+          "mae": 15.8501,
+          "rmse": 20.1004,
+          "standardized": {
+            "t0": 0.3377,
+            "leadership": 0.3298,
+            "eventAtr": 0.2696,
+            "recoveryT5": 0.4294
+          },
+          "conclusion": "제한적"
+        },
+        "T3": {
+          "n": 51,
+          "oosR2": 0.1204,
+          "pearson": 0.3822,
+          "spearman": 0.3306,
+          "mae": 17.1589,
+          "rmse": 21.7955,
+          "standardized": {
+            "t0": 0.3129,
+            "leadership": 0.2355,
+            "eventAtr": 0.1888,
+            "recoveryT3": 0.382
+          },
+          "conclusion": "제한적"
+        },
+        "T3C": {
+          "n": 51,
+          "oosR2": 0.2259,
+          "pearson": 0.4812,
+          "spearman": 0.4156,
+          "mae": 16.0521,
+          "rmse": 20.4469,
+          "standardized": {
+            "t0": 0.2867,
+            "leadership": 0.287,
+            "eventAtr": 0.2119,
+            "recoveryT3": 0.2012,
+            "returnT5": 0.4501,
+            "depthT5": 0.2786
+          },
+          "conclusion": "제한적"
+        },
+        "T3D": {
+          "skipped": "VIF",
+          "vif": 22.32
+        },
+        "bToC": null,
+        "cToT3D": null,
+        "t3cToT3d": null,
+        "bToCImproves": false,
+        "cToT3DImproves": false,
+        "t3cToT3dImproves": false
+      },
+      "t20": {
+        "A": {
+          "n": 51,
+          "oosR2": 0.0938,
+          "pearson": 0.3228,
+          "spearman": 0.2978,
+          "mae": 12.4656,
+          "rmse": 16.0971,
+          "standardized": {
+            "t0": 0.3301,
+            "leadership": 0.1555,
+            "eventAtr": 0.1921
+          },
+          "conclusion": "제한적"
+        },
+        "B": {
+          "n": 51,
+          "oosR2": 0.3641,
+          "pearson": 0.622,
+          "spearman": 0.6444,
+          "mae": 9.9042,
+          "rmse": 13.4843,
+          "standardized": {
+            "t0": 0.26,
+            "leadership": 0.2188,
+            "eventAtr": 0.2207,
+            "returnT5": 0.6384,
+            "depthT5": 0.2435
+          },
+          "conclusion": "제한적"
+        },
+        "C": {
+          "skipped": "VIF",
+          "vif": 19.92
+        },
+        "D": {
+          "n": 51,
+          "oosR2": 0.3097,
+          "pearson": 0.5808,
+          "spearman": 0.5927,
+          "mae": 10.2457,
+          "rmse": 14.0496,
+          "standardized": {
+            "t0": 0.2757,
+            "leadership": 0.2565,
+            "eventAtr": 0.1956,
+            "recoveryT5": 0.5027
+          },
+          "conclusion": "제한적"
+        },
+        "T3": {
+          "n": 51,
+          "oosR2": 0.1776,
+          "pearson": 0.4408,
+          "spearman": 0.4592,
+          "mae": 11.8084,
+          "rmse": 15.3345,
+          "standardized": {
+            "t0": 0.2794,
+            "leadership": 0.1497,
+            "eventAtr": 0.1368,
+            "recoveryT3": 0.2716
+          },
+          "conclusion": "제한적"
+        },
+        "T3C": {
+          "n": 51,
+          "oosR2": 0.3664,
+          "pearson": 0.6244,
+          "spearman": 0.6516,
+          "mae": 9.8531,
+          "rmse": 13.4596,
+          "standardized": {
+            "t0": 0.2623,
+            "leadership": 0.2213,
+            "eventAtr": 0.2261,
+            "recoveryT3": -0.0251,
+            "returnT5": 0.6583,
+            "depthT5": 0.253
+          },
+          "conclusion": "제한적"
+        },
+        "T3D": {
+          "skipped": "VIF",
+          "vif": 22.32
+        },
+        "bToC": null,
+        "cToT3D": null,
+        "t3cToT3d": null,
+        "bToCImproves": false,
+        "cToT3DImproves": false,
+        "t3cToT3dImproves": false
+      }
+    },
+    "60": {
+      "window": {
+        "A": {
+          "n": 44,
+          "oosR2": 0.0678,
+          "pearson": 0.3653,
+          "spearman": 0.2661,
+          "mae": 17.379,
+          "rmse": 22.6527,
+          "standardized": {
+            "t0": 0.3629,
+            "leadership": 0.195,
+            "eventAtr": 0.2927
+          },
+          "conclusion": "제한적"
+        },
+        "B": {
+          "n": 44,
+          "oosR2": 0.2661,
+          "pearson": 0.5404,
+          "spearman": 0.4451,
+          "mae": 15.6821,
+          "rmse": 20.099,
+          "standardized": {
+            "t0": 0.2881,
+            "leadership": 0.2629,
+            "eventAtr": 0.2893,
+            "returnT5": 0.6108,
+            "depthT5": 0.2824
+          },
+          "conclusion": "제한적"
+        },
+        "C": {
+          "skipped": "VIF",
+          "vif": 19.92
+        },
+        "D": {
+          "n": 44,
+          "oosR2": 0.2296,
+          "pearson": 0.5014,
+          "spearman": 0.4073,
+          "mae": 16.091,
+          "rmse": 20.5931,
+          "standardized": {
+            "t0": 0.3109,
+            "leadership": 0.2852,
+            "eventAtr": 0.2794,
+            "recoveryT5": 0.4306
+          },
+          "conclusion": "제한적"
+        },
+        "T3": {
+          "n": 44,
+          "oosR2": 0.0856,
+          "pearson": 0.3771,
+          "spearman": 0.2894,
+          "mae": 17.3675,
+          "rmse": 22.4357,
+          "standardized": {
+            "t0": 0.2838,
+            "leadership": 0.2054,
+            "eventAtr": 0.201,
+            "recoveryT3": 0.366
+          },
+          "conclusion": "제한적"
+        },
+        "T3C": {
+          "n": 44,
+          "oosR2": 0.2233,
+          "pearson": 0.4985,
+          "spearman": 0.4189,
+          "mae": 16.0706,
+          "rmse": 20.6772,
+          "standardized": {
+            "t0": 0.2703,
+            "leadership": 0.2529,
+            "eventAtr": 0.2517,
+            "recoveryT3": 0.1564,
+            "returnT5": 0.4807,
+            "depthT5": 0.2194
+          },
+          "conclusion": "제한적"
+        },
+        "T3D": {
+          "skipped": "VIF",
+          "vif": 22.32
+        },
+        "bToC": null,
+        "cToT3D": null,
+        "t3cToT3d": null,
+        "bToCImproves": false,
+        "cToT3DImproves": false,
+        "t3cToT3dImproves": false
+      },
+      "t20": {
+        "A": {
+          "n": 44,
+          "oosR2": 0.0575,
+          "pearson": 0.3508,
+          "spearman": 0.3045,
+          "mae": 11.4746,
+          "rmse": 15.4845,
+          "standardized": {
+            "t0": 0.3033,
+            "leadership": 0.1101,
+            "eventAtr": 0.2172
+          },
+          "conclusion": "제한적"
+        },
+        "B": {
+          "n": 44,
+          "oosR2": 0.3769,
+          "pearson": 0.6283,
+          "spearman": 0.6748,
+          "mae": 8.7329,
+          "rmse": 12.5901,
+          "standardized": {
+            "t0": 0.2357,
+            "leadership": 0.18,
+            "eventAtr": 0.2515,
+            "returnT5": 0.605,
+            "depthT5": 0.1482
+          },
+          "conclusion": "제한적"
+        },
+        "C": {
+          "skipped": "VIF",
+          "vif": 19.92
+        },
+        "D": {
+          "n": 44,
+          "oosR2": 0.3339,
+          "pearson": 0.5865,
+          "spearman": 0.6268,
+          "mae": 8.9305,
+          "rmse": 13.0168,
+          "standardized": {
+            "t0": 0.2452,
+            "leadership": 0.2109,
+            "eventAtr": 0.2024,
+            "recoveryT5": 0.4815
+          },
+          "conclusion": "제한적"
+        },
+        "T3": {
+          "n": 44,
+          "oosR2": 0.1719,
+          "pearson": 0.4564,
+          "spearman": 0.4901,
+          "mae": 10.4281,
+          "rmse": 14.514,
+          "standardized": {
+            "t0": 0.2483,
+            "leadership": 0.1173,
+            "eventAtr": 0.1535,
+            "recoveryT3": 0.2545
+          },
+          "conclusion": "제한적"
+        },
+        "T3C": {
+          "n": 44,
+          "oosR2": 0.3813,
+          "pearson": 0.6336,
+          "spearman": 0.6897,
+          "mae": 8.5905,
+          "rmse": 12.546,
+          "standardized": {
+            "t0": 0.2429,
+            "leadership": 0.184,
+            "eventAtr": 0.2667,
+            "recoveryT3": -0.0631,
+            "returnT5": 0.6575,
+            "depthT5": 0.1736
+          },
+          "conclusion": "제한적"
+        },
+        "T3D": {
+          "skipped": "VIF",
+          "vif": 22.32
+        },
+        "bToC": null,
+        "cToT3D": null,
+        "t3cToT3d": null,
+        "bToCImproves": false,
+        "cToT3DImproves": false,
+        "t3cToT3dImproves": false
+      }
+    },
+    "70": {
+      "window": {
+        "A": {
+          "n": 31,
+          "oosR2": -0.0296,
+          "pearson": 0.4886,
+          "spearman": 0.3798,
+          "mae": 18.9642,
+          "rmse": 24.6828,
+          "standardized": {
+            "t0": 0.2622,
+            "leadership": 0.2044,
+            "eventAtr": 0.2533
+          },
+          "conclusion": "제한적"
+        },
+        "B": {
+          "n": 31,
+          "oosR2": 0.2145,
+          "pearson": 0.6078,
+          "spearman": 0.4976,
+          "mae": 17.1499,
+          "rmse": 21.5595,
+          "standardized": {
+            "t0": 0.2459,
+            "leadership": 0.2434,
+            "eventAtr": 0.2863,
+            "returnT5": 0.5453,
+            "depthT5": 0.1936
+          },
+          "conclusion": "제한적"
+        },
+        "C": {
+          "skipped": "VIF",
+          "vif": 19.92
+        },
+        "D": {
+          "n": 31,
+          "oosR2": 0.1929,
+          "pearson": 0.5869,
+          "spearman": 0.4915,
+          "mae": 17.0177,
+          "rmse": 21.8533,
+          "standardized": {
+            "t0": 0.2731,
+            "leadership": 0.2507,
+            "eventAtr": 0.2625,
+            "recoveryT5": 0.3778
+          },
+          "conclusion": "제한적"
+        },
+        "T3": {
+          "n": 31,
+          "oosR2": -0.0283,
+          "pearson": 0.3256,
+          "spearman": 0.2782,
+          "mae": 19.4984,
+          "rmse": 24.6673,
+          "standardized": {
+            "t0": 0.2232,
+            "leadership": 0.2254,
+            "eventAtr": 0.1566,
+            "recoveryT3": 0.3729
+          },
+          "conclusion": "제한적"
+        },
+        "T3C": {
+          "n": 31,
+          "oosR2": 0.1405,
+          "pearson": 0.5,
+          "spearman": 0.444,
+          "mae": 17.9577,
+          "rmse": 22.5521,
+          "standardized": {
+            "t0": 0.232,
+            "leadership": 0.2425,
+            "eventAtr": 0.236,
+            "recoveryT3": 0.1816,
+            "returnT5": 0.3893,
+            "depthT5": 0.1172
+          },
+          "conclusion": "제한적"
+        },
+        "T3D": {
+          "skipped": "VIF",
+          "vif": 22.32
+        },
+        "bToC": null,
+        "cToT3D": null,
+        "t3cToT3d": null,
+        "bToCImproves": false,
+        "cToT3DImproves": false,
+        "t3cToT3dImproves": false
+      },
+      "t20": {
+        "A": {
+          "n": 31,
+          "oosR2": -0.0341,
+          "pearson": 0.4331,
+          "spearman": 0.439,
+          "mae": 11.9771,
+          "rmse": 16.6055,
+          "standardized": {
+            "t0": 0.2284,
+            "leadership": 0.1604,
+            "eventAtr": 0.1874
+          },
+          "conclusion": "제한적"
+        },
+        "B": {
+          "n": 31,
+          "oosR2": 0.2986,
+          "pearson": 0.6238,
+          "spearman": 0.7146,
+          "mae": 9.0283,
+          "rmse": 13.6763,
+          "standardized": {
+            "t0": 0.2098,
+            "leadership": 0.2072,
+            "eventAtr": 0.2392,
+            "returnT5": 0.6515,
+            "depthT5": 0.1896
+          },
+          "conclusion": "제한적"
+        },
+        "C": {
+          "skipped": "VIF",
+          "vif": 19.92
+        },
+        "D": {
+          "n": 31,
+          "oosR2": 0.2588,
+          "pearson": 0.5851,
+          "spearman": 0.67,
+          "mae": 9.2016,
+          "rmse": 14.0587,
+          "standardized": {
+            "t0": 0.2425,
+            "leadership": 0.2206,
+            "eventAtr": 0.1994,
+            "recoveryT5": 0.4915
+          },
+          "conclusion": "제한적"
+        },
+        "T3": {
+          "n": 31,
+          "oosR2": 0.0313,
+          "pearson": 0.3664,
+          "spearman": 0.4811,
+          "mae": 11.4108,
+          "rmse": 16.0719,
+          "standardized": {
+            "t0": 0.1942,
+            "leadership": 0.1789,
+            "eventAtr": 0.1027,
+            "recoveryT3": 0.3269
+          },
+          "conclusion": "제한적"
+        },
+        "T3C": {
+          "n": 31,
+          "oosR2": 0.296,
+          "pearson": 0.6206,
+          "spearman": 0.7146,
+          "mae": 9.075,
+          "rmse": 13.7011,
+          "standardized": {
+            "t0": 0.2092,
+            "leadership": 0.2072,
+            "eventAtr": 0.2369,
+            "recoveryT3": 0.0083,
+            "returnT5": 0.6444,
+            "depthT5": 0.1861
+          },
+          "conclusion": "제한적"
+        },
+        "T3D": {
+          "skipped": "VIF",
+          "vif": 22.32
+        },
+        "bToC": null,
+        "cToT3D": null,
+        "t3cToT3d": null,
+        "bToCImproves": false,
+        "cToT3DImproves": false,
+        "t3cToT3dImproves": false
+      }
+    }
+  },
+  "counts": {
+    "bToCWindow": 0,
+    "bToCHold": 0,
+    "cToDWindow": 0,
+    "t3ControlledWindow": 0
+  },
+  "atrCross": {
+    "HIGH": {
+      "RECOVERING": {
+        "n": 18,
+        "conclusion": "수치만",
+        "recoveryMean": 9.69,
+        "entry": {
+          "t10": {
+            "n": 18,
+            "mean": 10.54,
+            "median": 9.31,
+            "winRate": 94.44
+          },
+          "t20": {
+            "n": 18,
+            "mean": 17.03,
+            "median": 13.4,
+            "winRate": 88.89
+          },
+          "t40": {
+            "n": 18,
+            "mean": 22.9,
+            "median": 26.1,
+            "winRate": 77.78
+          },
+          "window": {
+            "n": 18,
+            "mean": 24.84,
+            "median": 24.13,
+            "winRate": 83.33
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 18,
+            "mean": 1.84,
+            "median": 1.03,
+            "winRate": 61.11
+          },
+          "t20": {
+            "n": 18,
+            "mean": 7.8,
+            "median": 3.77,
+            "winRate": 77.78
+          },
+          "t40": {
+            "n": 18,
+            "mean": 13.09,
+            "median": 13.27,
+            "winRate": 72.22
+          },
+          "window": {
+            "n": 18,
+            "mean": 14.82,
+            "median": 18.21,
+            "winRate": 77.78
+          },
+          "mae": {
+            "n": 18,
+            "mean": -5.81,
+            "median": -4.1,
+            "p5": -21.16,
+            "p25": -5.75
+          },
+          "mfe": {
+            "n": 18,
+            "mean": 21.7,
+            "median": 18.9,
+            "p5": 2.22,
+            "p25": 6.37
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 18,
+            "mean": 24.84,
+            "median": 24.13,
+            "p5": -8.22,
+            "p25": 15.12
+          },
+          "mae": {
+            "n": 18,
+            "mean": -3.39,
+            "median": -3.38,
+            "p5": -12.7,
+            "p25": -4.63
+          },
+          "mfe": {
+            "n": 18,
+            "mean": 32.14,
+            "median": 27.4,
+            "p5": 9.11,
+            "p25": 16.44
+          },
+          "ratio": {
+            "n": 18,
+            "mean": 16.3,
+            "median": 8.6,
+            "p5": -0.6,
+            "p25": 3.6
+          },
+          "reboundPerDepth": {
+            "n": 18,
+            "mean": 16.81,
+            "median": 9.47,
+            "p5": 0.42,
+            "p25": 4.9
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 11,
+            "mean": 13.42,
+            "median": 6.93,
+            "p5": 0.47,
+            "p25": 4.1
+          },
+          "lowToWindow": {
+            "n": 18,
+            "mean": 28.81,
+            "median": 29.94,
+            "winRate": 100
+          }
+        },
+        "hit10": 94.44,
+        "tail": {
+          "le5": 11.11,
+          "le10": 0,
+          "le15": 0,
+          "le20": 0
+        }
+      },
+      "STILL_FALLING": {
+        "n": 15,
+        "conclusion": "수치만",
+        "recoveryMean": 2.14,
+        "entry": {
+          "t10": {
+            "n": 15,
+            "mean": 2.17,
+            "median": 3.98,
+            "winRate": 60
+          },
+          "t20": {
+            "n": 15,
+            "mean": 4.24,
+            "median": 6.48,
+            "winRate": 60
+          },
+          "t40": {
+            "n": 15,
+            "mean": 9.84,
+            "median": 2.84,
+            "winRate": 60
+          },
+          "window": {
+            "n": 15,
+            "mean": 9.2,
+            "median": 1.59,
+            "winRate": 53.33
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 15,
+            "mean": 6.73,
+            "median": 6.12,
+            "winRate": 73.33
+          },
+          "t20": {
+            "n": 15,
+            "mean": 8.57,
+            "median": 3.26,
+            "winRate": 53.33
+          },
+          "t40": {
+            "n": 15,
+            "mean": 14.36,
+            "median": 6.07,
+            "winRate": 73.33
+          },
+          "window": {
+            "n": 14,
+            "mean": 15.84,
+            "median": 6.81,
+            "winRate": 57.14
+          },
+          "mae": {
+            "n": 14,
+            "mean": -8.32,
+            "median": -7.99,
+            "p5": -23.78,
+            "p25": -12.17
+          },
+          "mfe": {
+            "n": 14,
+            "mean": 26.88,
+            "median": 18.55,
+            "p5": 0.86,
+            "p25": 8.44
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 15,
+            "mean": 9.2,
+            "median": 1.59,
+            "p5": -19.06,
+            "p25": -15.26
+          },
+          "mae": {
+            "n": 14,
+            "mean": -13.36,
+            "median": -14.64,
+            "p5": -26.8,
+            "p25": -21.95
+          },
+          "mfe": {
+            "n": 14,
+            "mean": 21.41,
+            "median": 19.64,
+            "p5": -3.24,
+            "p25": 4.43
+          },
+          "ratio": {
+            "n": 14,
+            "mean": 9.3,
+            "median": 0.59,
+            "p5": -0.9,
+            "p25": -0.7
+          },
+          "reboundPerDepth": {
+            "n": 14,
+            "mean": 10.19,
+            "median": 1.74,
+            "p5": 0.12,
+            "p25": 0.41
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 10,
+            "mean": 4.69,
+            "median": 1.81,
+            "p5": 0.56,
+            "p25": 1.26
+          },
+          "lowToWindow": {
+            "n": 14,
+            "mean": 25.98,
+            "median": 20.55,
+            "winRate": 92.86
+          }
+        },
+        "hit10": 78.57,
+        "tail": {
+          "le5": 40,
+          "le10": 33.33,
+          "le15": 26.67,
+          "le20": 0
+        }
+      }
+    },
+    "LOW": {
+      "RECOVERING": {
+        "n": 20,
+        "conclusion": "제한적",
+        "recoveryMean": 5.84,
+        "entry": {
+          "t10": {
+            "n": 20,
+            "mean": 3.61,
+            "median": 2.32,
+            "winRate": 65
+          },
+          "t20": {
+            "n": 20,
+            "mean": 4.88,
+            "median": 3.32,
+            "winRate": 65
+          },
+          "t40": {
+            "n": 20,
+            "mean": 6.42,
+            "median": 5.38,
+            "winRate": 65
+          },
+          "window": {
+            "n": 20,
+            "mean": 4.89,
+            "median": 1.75,
+            "winRate": 55
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 20,
+            "mean": -1.58,
+            "median": -0.9,
+            "winRate": 40
+          },
+          "t20": {
+            "n": 20,
+            "mean": -0.45,
+            "median": 0.56,
+            "winRate": 50
+          },
+          "t40": {
+            "n": 20,
+            "mean": 0.85,
+            "median": 1.64,
+            "winRate": 60
+          },
+          "window": {
+            "n": 18,
+            "mean": -0.25,
+            "median": 0.72,
+            "winRate": 50
+          },
+          "mae": {
+            "n": 18,
+            "mean": -7.8,
+            "median": -3.57,
+            "p5": -23.35,
+            "p25": -12.14
+          },
+          "mfe": {
+            "n": 18,
+            "mean": 5.65,
+            "median": 4.68,
+            "p5": 0,
+            "p25": 2.01
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 20,
+            "mean": 4.89,
+            "median": 1.75,
+            "p5": -10.66,
+            "p25": -3.14
+          },
+          "mae": {
+            "n": 20,
+            "mean": -5.68,
+            "median": -2.37,
+            "p5": -18.38,
+            "p25": -10.54
+          },
+          "mfe": {
+            "n": 20,
+            "mean": 10.91,
+            "median": 7.47,
+            "p5": 0.45,
+            "p25": 4.15
+          },
+          "ratio": {
+            "n": 20,
+            "mean": 8.39,
+            "median": 0.64,
+            "p5": -1,
+            "p25": -0.3
+          },
+          "reboundPerDepth": {
+            "n": 20,
+            "mean": 9.09,
+            "median": 1.14,
+            "p5": 0,
+            "p25": 0.57
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 15,
+            "mean": 16.89,
+            "median": 7.74,
+            "p5": 0,
+            "p25": 0.18
+          },
+          "lowToWindow": {
+            "n": 20,
+            "mean": 11.56,
+            "median": 8.74,
+            "winRate": 80
+          }
+        },
+        "hit10": 65,
+        "tail": {
+          "le5": 15,
+          "le10": 10,
+          "le15": 0,
+          "le20": 0
+        }
+      },
+      "STILL_FALLING": {
+        "n": 14,
+        "conclusion": "수치만",
+        "recoveryMean": 2.21,
+        "entry": {
+          "t10": {
+            "n": 14,
+            "mean": 1.16,
+            "median": 1.6,
+            "winRate": 57.14
+          },
+          "t20": {
+            "n": 14,
+            "mean": 2.64,
+            "median": 1.95,
+            "winRate": 71.43
+          },
+          "t40": {
+            "n": 14,
+            "mean": 3.73,
+            "median": 4.68,
+            "winRate": 57.14
+          },
+          "window": {
+            "n": 14,
+            "mean": 2.19,
+            "median": 0.81,
+            "winRate": 57.14
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 14,
+            "mean": 0.73,
+            "median": 0.79,
+            "winRate": 57.14
+          },
+          "t20": {
+            "n": 14,
+            "mean": 2.29,
+            "median": 2.34,
+            "winRate": 71.43
+          },
+          "t40": {
+            "n": 14,
+            "mean": 3.4,
+            "median": 1.87,
+            "winRate": 57.14
+          },
+          "window": {
+            "n": 14,
+            "mean": 1.78,
+            "median": 1.44,
+            "winRate": 57.14
+          },
+          "mae": {
+            "n": 14,
+            "mean": -4.65,
+            "median": -4.76,
+            "p5": -10.16,
+            "p25": -7.73
+          },
+          "mfe": {
+            "n": 14,
+            "mean": 6.45,
+            "median": 4.04,
+            "p5": 1.29,
+            "p25": 2.16
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 14,
+            "mean": 2.19,
+            "median": 0.81,
+            "p5": -8.34,
+            "p25": -4.68
+          },
+          "mae": {
+            "n": 14,
+            "mean": -5.16,
+            "median": -5.11,
+            "p5": -12.8,
+            "p25": -10.57
+          },
+          "mfe": {
+            "n": 14,
+            "mean": 7.49,
+            "median": 5.39,
+            "p5": -0.47,
+            "p25": 1.6
+          },
+          "ratio": {
+            "n": 14,
+            "mean": 2.95,
+            "median": 0.19,
+            "p5": -0.96,
+            "p25": -0.59
+          },
+          "reboundPerDepth": {
+            "n": 14,
+            "mean": 3.56,
+            "median": 1.19,
+            "p5": 0.05,
+            "p25": 0.44
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 9,
+            "mean": 3.6,
+            "median": 1.71,
+            "p5": 0.07,
+            "p25": 0.54
+          },
+          "lowToWindow": {
+            "n": 14,
+            "mean": 7.82,
+            "median": 7.07,
+            "winRate": 92.86
+          }
+        },
+        "hit10": 50,
+        "tail": {
+          "le5": 28.57,
+          "le10": 7.14,
+          "le15": 0,
+          "le20": 0
+        }
+      }
+    },
+    "MID": {
+      "RECOVERING": {
+        "n": 15,
+        "conclusion": "수치만",
+        "recoveryMean": 7.01,
+        "entry": {
+          "t10": {
+            "n": 15,
+            "mean": 8.65,
+            "median": 9.24,
+            "winRate": 93.33
+          },
+          "t20": {
+            "n": 15,
+            "mean": 11.77,
+            "median": 8.26,
+            "winRate": 80
+          },
+          "t40": {
+            "n": 15,
+            "mean": 18.87,
+            "median": 12.16,
+            "winRate": 73.33
+          },
+          "window": {
+            "n": 15,
+            "mean": 15.79,
+            "median": 8.31,
+            "winRate": 66.67
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 15,
+            "mean": 3.9,
+            "median": 4.42,
+            "winRate": 86.67
+          },
+          "t20": {
+            "n": 15,
+            "mean": 6.79,
+            "median": 5.65,
+            "winRate": 73.33
+          },
+          "t40": {
+            "n": 15,
+            "mean": 13.34,
+            "median": 9.2,
+            "winRate": 73.33
+          },
+          "window": {
+            "n": 14,
+            "mean": 11.33,
+            "median": 6.03,
+            "winRate": 71.43
+          },
+          "mae": {
+            "n": 14,
+            "mean": -7.5,
+            "median": -5.34,
+            "p5": -21.5,
+            "p25": -11.98
+          },
+          "mfe": {
+            "n": 14,
+            "mean": 21.18,
+            "median": 11.43,
+            "p5": 3.36,
+            "p25": 9.37
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 15,
+            "mean": 15.79,
+            "median": 8.31,
+            "p5": -15.37,
+            "p25": -2.27
+          },
+          "mae": {
+            "n": 15,
+            "mean": -5.89,
+            "median": -3.58,
+            "p5": -16.32,
+            "p25": -9.32
+          },
+          "mfe": {
+            "n": 15,
+            "mean": 25.55,
+            "median": 15.03,
+            "p5": 3.47,
+            "p25": 11.7
+          },
+          "ratio": {
+            "n": 15,
+            "mean": 15.83,
+            "median": 0.99,
+            "p5": -0.99,
+            "p25": -0.3
+          },
+          "reboundPerDepth": {
+            "n": 15,
+            "mean": 16.84,
+            "median": 2.21,
+            "p5": 0.01,
+            "p25": 0.74
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 13,
+            "mean": 19.77,
+            "median": 2.69,
+            "p5": 0.02,
+            "p25": 0.91
+          },
+          "lowToWindow": {
+            "n": 15,
+            "mean": 22.15,
+            "median": 16.67,
+            "winRate": 93.33
+          }
+        },
+        "hit10": 80,
+        "tail": {
+          "le5": 13.33,
+          "le10": 6.67,
+          "le15": 6.67,
+          "le20": 6.67
+        }
+      },
+      "STILL_FALLING": {
+        "n": 17,
+        "conclusion": "수치만",
+        "recoveryMean": 2.05,
+        "entry": {
+          "t10": {
+            "n": 17,
+            "mean": -1.53,
+            "median": -1.26,
+            "winRate": 41.18
+          },
+          "t20": {
+            "n": 17,
+            "mean": -0.26,
+            "median": -2.1,
+            "winRate": 41.18
+          },
+          "t40": {
+            "n": 17,
+            "mean": 1.72,
+            "median": -1.83,
+            "winRate": 41.18
+          },
+          "window": {
+            "n": 17,
+            "mean": 1.56,
+            "median": -2.57,
+            "winRate": 47.06
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 17,
+            "mean": 0.73,
+            "median": 1.3,
+            "winRate": 52.94
+          },
+          "t20": {
+            "n": 17,
+            "mean": 2.09,
+            "median": -1.1,
+            "winRate": 41.18
+          },
+          "t40": {
+            "n": 17,
+            "mean": 4.52,
+            "median": 3.06,
+            "winRate": 58.82
+          },
+          "window": {
+            "n": 17,
+            "mean": 4.23,
+            "median": 1.81,
+            "winRate": 52.94
+          },
+          "mae": {
+            "n": 17,
+            "mean": -9.71,
+            "median": -7.32,
+            "p5": -24.26,
+            "p25": -17.66
+          },
+          "mfe": {
+            "n": 17,
+            "mean": 13.66,
+            "median": 7.33,
+            "p5": 2.15,
+            "p25": 3.32
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 17,
+            "mean": 1.56,
+            "median": -2.57,
+            "p5": -15.46,
+            "p25": -12.5
+          },
+          "mae": {
+            "n": 17,
+            "mean": -12.27,
+            "median": -12.32,
+            "p5": -26.15,
+            "p25": -18.05
+          },
+          "mfe": {
+            "n": 17,
+            "mean": 11.58,
+            "median": 7.26,
+            "p5": 0.24,
+            "p25": 4.89
+          },
+          "ratio": {
+            "n": 17,
+            "mean": 7.32,
+            "median": -0.25,
+            "p5": -0.85,
+            "p25": -0.69
+          },
+          "reboundPerDepth": {
+            "n": 17,
+            "mean": 8.23,
+            "median": 0.83,
+            "p5": 0.16,
+            "p25": 0.38
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 15,
+            "mean": 12.18,
+            "median": 3.52,
+            "p5": 0.14,
+            "p25": 1.45
+          },
+          "lowToWindow": {
+            "n": 17,
+            "mean": 16.18,
+            "median": 11.66,
+            "winRate": 94.12
+          }
+        },
+        "hit10": 64.71,
+        "tail": {
+          "le5": 41.18,
+          "le10": 35.29,
+          "le15": 5.88,
+          "le20": 5.88
+        }
+      }
+    }
+  },
+  "leadershipCross": {
+    "HIGH": {
+      "RECOVERING": {
+        "n": 8,
+        "conclusion": "결론 금지",
+        "recoveryMean": 6.11,
+        "entry": {
+          "t10": {
+            "n": 8,
+            "mean": 11.67,
+            "median": 8.72,
+            "winRate": 100
+          },
+          "t20": {
+            "n": 8,
+            "mean": 12.04,
+            "median": 6.85,
+            "winRate": 87.5
+          },
+          "t40": {
+            "n": 8,
+            "mean": 20.56,
+            "median": 20.55,
+            "winRate": 87.5
+          },
+          "window": {
+            "n": 8,
+            "mean": 19.05,
+            "median": 13.54,
+            "winRate": 87.5
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 8,
+            "mean": 5.83,
+            "median": 3.17,
+            "winRate": 87.5
+          },
+          "t20": {
+            "n": 8,
+            "mean": 6.08,
+            "median": 1.95,
+            "winRate": 75
+          },
+          "t40": {
+            "n": 8,
+            "mean": 13.94,
+            "median": 11.34,
+            "winRate": 87.5
+          },
+          "window": {
+            "n": 8,
+            "mean": 12.44,
+            "median": 8.24,
+            "winRate": 87.5
+          },
+          "mae": {
+            "n": 8,
+            "mean": -4.5,
+            "median": -3.73,
+            "p5": -11.52,
+            "p25": -6.7
+          },
+          "mfe": {
+            "n": 8,
+            "mean": 17.54,
+            "median": 10.85,
+            "p5": 5.69,
+            "p25": 7.74
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 8,
+            "mean": 19.05,
+            "median": 13.54,
+            "p5": -4.62,
+            "p25": 8.45
+          },
+          "mae": {
+            "n": 8,
+            "mean": -2.76,
+            "median": -1.15,
+            "p5": -10.95,
+            "p25": -3.73
+          },
+          "mfe": {
+            "n": 8,
+            "mean": 24.28,
+            "median": 14.89,
+            "p5": 7.62,
+            "p25": 11.85
+          },
+          "ratio": {
+            "n": 8,
+            "mean": 15.33,
+            "median": 17.37,
+            "p5": -0.19,
+            "p25": 5.2
+          },
+          "reboundPerDepth": {
+            "n": 8,
+            "mean": 15.85,
+            "median": 17.19,
+            "p5": 0.9,
+            "p25": 6.35
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 5,
+            "mean": 15,
+            "median": 17.92,
+            "p5": 1.93,
+            "p25": 7.74
+          },
+          "lowToWindow": {
+            "n": 8,
+            "mean": 22.06,
+            "median": 19.4,
+            "winRate": 100
+          }
+        },
+        "hit10": 87.5,
+        "tail": {
+          "le5": 12.5,
+          "le10": 0,
+          "le15": 0,
+          "le20": 0
+        }
+      },
+      "STILL_FALLING": {
+        "n": 6,
+        "conclusion": "결론 금지",
+        "recoveryMean": 1.06,
+        "entry": {
+          "t10": {
+            "n": 6,
+            "mean": 6.55,
+            "median": 7.91,
+            "winRate": 66.67
+          },
+          "t20": {
+            "n": 6,
+            "mean": 16.23,
+            "median": 14.17,
+            "winRate": 83.33
+          },
+          "t40": {
+            "n": 6,
+            "mean": 27.27,
+            "median": 24.59,
+            "winRate": 83.33
+          },
+          "window": {
+            "n": 6,
+            "mean": 28.34,
+            "median": 32.59,
+            "winRate": 83.33
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 6,
+            "mean": 9.81,
+            "median": 11.14,
+            "winRate": 83.33
+          },
+          "t20": {
+            "n": 6,
+            "mean": 19.78,
+            "median": 25.25,
+            "winRate": 83.33
+          },
+          "t40": {
+            "n": 6,
+            "mean": 30.99,
+            "median": 34.52,
+            "winRate": 100
+          },
+          "window": {
+            "n": 6,
+            "mean": 32.41,
+            "median": 40.52,
+            "winRate": 100
+          },
+          "mae": {
+            "n": 6,
+            "mean": -2.98,
+            "median": 0,
+            "p5": -10.91,
+            "p25": -3.77
+          },
+          "mfe": {
+            "n": 6,
+            "mean": 39.81,
+            "median": 42.85,
+            "p5": 8.24,
+            "p25": 27.68
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 6,
+            "mean": 28.34,
+            "median": 32.59,
+            "p5": 0.47,
+            "p25": 14.05
+          },
+          "mae": {
+            "n": 6,
+            "mean": -7.09,
+            "median": -8.74,
+            "p5": -12.01,
+            "p25": -10.43
+          },
+          "mfe": {
+            "n": 6,
+            "mean": 36.89,
+            "median": 34.67,
+            "p5": 8.94,
+            "p25": 26.36
+          },
+          "ratio": {
+            "n": 6,
+            "mean": 21.19,
+            "median": 3.86,
+            "p5": 0,
+            "p25": 1.23
+          },
+          "reboundPerDepth": {
+            "n": 6,
+            "mean": 22.11,
+            "median": 5.32,
+            "p5": 1.13,
+            "p25": 2.52
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 4,
+            "mean": 9.55,
+            "median": 5.32,
+            "p5": 1.94,
+            "p25": 3.42
+          },
+          "lowToWindow": {
+            "n": 6,
+            "mean": 37.67,
+            "median": 40.52,
+            "winRate": 100
+          }
+        },
+        "hit10": 83.33,
+        "tail": {
+          "le5": 0,
+          "le10": 0,
+          "le15": 0,
+          "le20": 0
+        }
+      }
+    },
+    "MID": {
+      "RECOVERING": {
+        "n": 26,
+        "conclusion": "제한적",
+        "recoveryMean": 7.91,
+        "entry": {
+          "t10": {
+            "n": 26,
+            "mean": 6.56,
+            "median": 5.82,
+            "winRate": 76.92
+          },
+          "t20": {
+            "n": 26,
+            "mean": 11.89,
+            "median": 11.65,
+            "winRate": 69.23
+          },
+          "t40": {
+            "n": 26,
+            "mean": 15.36,
+            "median": 11.8,
+            "winRate": 69.23
+          },
+          "window": {
+            "n": 26,
+            "mean": 14.91,
+            "median": 8.88,
+            "winRate": 61.54
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 26,
+            "mean": 0,
+            "median": 0.7,
+            "winRate": 53.85
+          },
+          "t20": {
+            "n": 26,
+            "mean": 4.81,
+            "median": 3.46,
+            "winRate": 61.54
+          },
+          "t40": {
+            "n": 26,
+            "mean": 7.94,
+            "median": 6.39,
+            "winRate": 65.38
+          },
+          "window": {
+            "n": 24,
+            "mean": 8.46,
+            "median": 2.63,
+            "winRate": 58.33
+          },
+          "mae": {
+            "n": 24,
+            "mean": -9.26,
+            "median": -6.05,
+            "p5": -27.77,
+            "p25": -14.16
+          },
+          "mfe": {
+            "n": 24,
+            "mean": 17.45,
+            "median": 9.48,
+            "p5": 0.11,
+            "p25": 3.84
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 26,
+            "mean": 14.91,
+            "median": 8.88,
+            "p5": -11.95,
+            "p25": -2.89
+          },
+          "mae": {
+            "n": 26,
+            "mean": -6.42,
+            "median": -3.85,
+            "p5": -25.73,
+            "p25": -10.41
+          },
+          "mfe": {
+            "n": 26,
+            "mean": 23.99,
+            "median": 16.92,
+            "p5": 1.46,
+            "p25": 7.05
+          },
+          "ratio": {
+            "n": 26,
+            "mean": 14.87,
+            "median": 1.81,
+            "p5": -1,
+            "p25": -0.48
+          },
+          "reboundPerDepth": {
+            "n": 26,
+            "mean": 15.61,
+            "median": 2.33,
+            "p5": 0,
+            "p25": 0.57
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 19,
+            "mean": 18.03,
+            "median": 4.38,
+            "p5": 0,
+            "p25": 0.2
+          },
+          "lowToWindow": {
+            "n": 26,
+            "mean": 22.39,
+            "median": 18.61,
+            "winRate": 84.62
+          }
+        },
+        "hit10": 76.92,
+        "tail": {
+          "le5": 19.23,
+          "le10": 11.54,
+          "le15": 3.85,
+          "le20": 3.85
+        }
+      },
+      "STILL_FALLING": {
+        "n": 25,
+        "conclusion": "제한적",
+        "recoveryMean": 1.98,
+        "entry": {
+          "t10": {
+            "n": 25,
+            "mean": -0.23,
+            "median": 0.31,
+            "winRate": 52
+          },
+          "t20": {
+            "n": 25,
+            "mean": 0.44,
+            "median": 1.4,
+            "winRate": 60
+          },
+          "t40": {
+            "n": 25,
+            "mean": 1.81,
+            "median": -1.06,
+            "winRate": 48
+          },
+          "window": {
+            "n": 25,
+            "mean": 0.15,
+            "median": 0,
+            "winRate": 48
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 25,
+            "mean": 2.87,
+            "median": 1.42,
+            "winRate": 60
+          },
+          "t20": {
+            "n": 25,
+            "mean": 3.43,
+            "median": 2.23,
+            "winRate": 60
+          },
+          "t40": {
+            "n": 25,
+            "mean": 5.15,
+            "median": 1.84,
+            "winRate": 52
+          },
+          "window": {
+            "n": 24,
+            "mean": 4.09,
+            "median": -0.97,
+            "winRate": 45.83
+          },
+          "mae": {
+            "n": 24,
+            "mean": -8.96,
+            "median": -7.52,
+            "p5": -23.89,
+            "p25": -10.26
+          },
+          "mfe": {
+            "n": 24,
+            "mean": 13.75,
+            "median": 8.93,
+            "p5": 0.32,
+            "p25": 4.39
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 25,
+            "mean": 0.15,
+            "median": 0,
+            "p5": -19.23,
+            "p25": -12.16
+          },
+          "mae": {
+            "n": 24,
+            "mean": -12.37,
+            "median": -12.65,
+            "p5": -27.82,
+            "p25": -20.93
+          },
+          "mfe": {
+            "n": 24,
+            "mean": 10.13,
+            "median": 7.58,
+            "p5": -3.86,
+            "p25": 3.43
+          },
+          "ratio": {
+            "n": 24,
+            "mean": 1.54,
+            "median": -0.13,
+            "p5": -1,
+            "p25": -0.7
+          },
+          "reboundPerDepth": {
+            "n": 24,
+            "mean": 2.32,
+            "median": 0.78,
+            "p5": 0,
+            "p25": 0.37
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 18,
+            "mean": 3.3,
+            "median": 1.89,
+            "p5": 0,
+            "p25": 0.73
+          },
+          "lowToWindow": {
+            "n": 24,
+            "mean": 14.94,
+            "median": 7.24,
+            "winRate": 87.5
+          }
+        },
+        "hit10": 54.17,
+        "tail": {
+          "le5": 48,
+          "le10": 32,
+          "le15": 16,
+          "le20": 4
+        }
+      }
+    },
+    "LOW": {
+      "RECOVERING": {
+        "n": 19,
+        "conclusion": "수치만",
+        "recoveryMean": 7.46,
+        "entry": {
+          "t10": {
+            "n": 19,
+            "mean": 6.73,
+            "median": 5.09,
+            "winRate": 84.21
+          },
+          "t20": {
+            "n": 19,
+            "mean": 9.22,
+            "median": 5.39,
+            "winRate": 84.21
+          },
+          "t40": {
+            "n": 19,
+            "mean": 13.67,
+            "median": 7.72,
+            "winRate": 68.42
+          },
+          "window": {
+            "n": 19,
+            "mean": 12.73,
+            "median": 9.6,
+            "winRate": 68.42
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 19,
+            "mean": 0.7,
+            "median": 0.47,
+            "winRate": 57.89
+          },
+          "t20": {
+            "n": 19,
+            "mean": 3.14,
+            "median": 2.06,
+            "winRate": 68.42
+          },
+          "t40": {
+            "n": 19,
+            "mean": 7.1,
+            "median": 6.32,
+            "winRate": 63.16
+          },
+          "window": {
+            "n": 18,
+            "mean": 6.58,
+            "median": 4.31,
+            "winRate": 66.67
+          },
+          "mae": {
+            "n": 18,
+            "mean": -5.1,
+            "median": -3.33,
+            "p5": -14.44,
+            "p25": -7.29
+          },
+          "mfe": {
+            "n": 18,
+            "mean": 12.76,
+            "median": 9.17,
+            "p5": 0.26,
+            "p25": 3.52
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 19,
+            "mean": 12.73,
+            "median": 9.6,
+            "p5": -4.67,
+            "p25": -1.47
+          },
+          "mae": {
+            "n": 19,
+            "mean": -3.9,
+            "median": -3.57,
+            "p5": -11.42,
+            "p25": -5.17
+          },
+          "mfe": {
+            "n": 19,
+            "mean": 19.06,
+            "median": 13.35,
+            "p5": 2.27,
+            "p25": 7.35
+          },
+          "ratio": {
+            "n": 19,
+            "mean": 9.97,
+            "median": 4.99,
+            "p5": -0.51,
+            "p25": -0.24
+          },
+          "reboundPerDepth": {
+            "n": 19,
+            "mean": 10.75,
+            "median": 3.9,
+            "p5": 0.23,
+            "p25": 0.77
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 15,
+            "mean": 16.03,
+            "median": 6.48,
+            "p5": 0.18,
+            "p25": 1.74
+          },
+          "lowToWindow": {
+            "n": 19,
+            "mean": 17.03,
+            "median": 11.48,
+            "winRate": 94.74
+          }
+        },
+        "hit10": 78.95,
+        "tail": {
+          "le5": 5.26,
+          "le10": 0,
+          "le15": 0,
+          "le20": 0
+        }
+      },
+      "STILL_FALLING": {
+        "n": 15,
+        "conclusion": "수치만",
+        "recoveryMean": 2.8,
+        "entry": {
+          "t10": {
+            "n": 15,
+            "mean": -0.71,
+            "median": -1.26,
+            "winRate": 46.67
+          },
+          "t20": {
+            "n": 15,
+            "mean": -0.82,
+            "median": -2.64,
+            "winRate": 40
+          },
+          "t40": {
+            "n": 15,
+            "mean": 1.34,
+            "median": -0.76,
+            "winRate": 46.67
+          },
+          "window": {
+            "n": 15,
+            "mean": 1.44,
+            "median": -0.03,
+            "winRate": 46.67
+          }
+        },
+        "forward": {
+          "t10": {
+            "n": 15,
+            "mean": -0.47,
+            "median": 0.16,
+            "winRate": 53.33
+          },
+          "t20": {
+            "n": 15,
+            "mean": -0.55,
+            "median": -3.95,
+            "winRate": 33.33
+          },
+          "t40": {
+            "n": 15,
+            "mean": 1.67,
+            "median": 1.36,
+            "winRate": 66.67
+          },
+          "window": {
+            "n": 15,
+            "mean": 1.74,
+            "median": 0.73,
+            "winRate": 53.33
+          },
+          "mae": {
+            "n": 15,
+            "mean": -7.59,
+            "median": -5.65,
+            "p5": -19.43,
+            "p25": -9.79
+          },
+          "mfe": {
+            "n": 15,
+            "mean": 8.67,
+            "median": 6.53,
+            "p5": 0.93,
+            "p25": 2.52
+          }
+        },
+        "risk": {
+          "window": {
+            "n": 15,
+            "mean": 1.44,
+            "median": -0.03,
+            "p5": -15.44,
+            "p25": -9.56
+          },
+          "mae": {
+            "n": 15,
+            "mean": -8.57,
+            "median": -5.72,
+            "p5": -24.67,
+            "p25": -14.4
+          },
+          "mfe": {
+            "n": 15,
+            "mean": 9.14,
+            "median": 5.68,
+            "p5": -1.58,
+            "p25": 2.92
+          },
+          "ratio": {
+            "n": 15,
+            "mean": 8.79,
+            "median": 0,
+            "p5": -0.87,
+            "p25": -0.76
+          },
+          "reboundPerDepth": {
+            "n": 15,
+            "mean": 9.6,
+            "median": 1.13,
+            "p5": 0.15,
+            "p25": 0.32
+          },
+          "lowToPerCheckpointDepth": {
+            "n": 12,
+            "mean": 13.7,
+            "median": 3.49,
+            "p5": 0.19,
+            "p25": 0.56
+          },
+          "lowToWindow": {
+            "n": 15,
+            "mean": 10.92,
+            "median": 10.2,
+            "winRate": 100
+          }
+        },
+        "hit10": 73.33,
+        "tail": {
+          "le5": 33.33,
+          "le10": 26.67,
+          "le15": 6.67,
+          "le20": 0
+        }
+      }
+    }
+  },
+  "ticker": {
+    "window": {
+      "eventWeighted": {
+        "n": 103,
+        "spearman": 0.3853
+      },
+      "tickerWeighted": {
+        "tickers": 30,
+        "spearman": 0.3735,
+        "maxEvents": 9
+      },
+      "leaveOneTicker": {
+        "baseline": 0.3853,
+        "min": 0.3591,
+        "max": 0.4215,
+        "median": 0.3839,
+        "signFlips": []
+      },
+      "withinStock": "결론 금지"
+    },
+    "t20": {
+      "eventWeighted": {
+        "n": 103,
+        "spearman": 0.4973
+      },
+      "tickerWeighted": {
+        "tickers": 30,
+        "spearman": 0.5083,
+        "maxEvents": 9
+      },
+      "leaveOneTicker": {
+        "baseline": 0.4973,
+        "min": 0.4678,
+        "max": 0.5264,
+        "median": 0.495,
+        "signFlips": []
+      },
+      "withinStock": "결론 금지"
+    },
+    "mae": {
+      "eventWeighted": {
+        "n": 102,
+        "spearman": 0.4074
+      },
+      "tickerWeighted": {
+        "tickers": 30,
+        "spearman": 0.1635,
+        "maxEvents": 9
+      },
+      "leaveOneTicker": {
+        "baseline": 0.4074,
+        "min": 0.3431,
+        "max": 0.4403,
+        "median": 0.4053,
+        "signFlips": []
+      },
+      "withinStock": "결론 금지"
+    },
+    "mfe": {
+      "eventWeighted": {
+        "n": 102,
+        "spearman": 0.5134
+      },
+      "tickerWeighted": {
+        "tickers": 30,
+        "spearman": 0.6699,
+        "maxEvents": 9
+      },
+      "leaveOneTicker": {
+        "baseline": 0.5134,
+        "min": 0.4904,
+        "max": 0.5594,
+        "median": 0.5114,
+        "signFlips": []
+      },
+      "withinStock": "결론 금지"
+    }
+  },
+  "bootstrap": {
+    "entryWindow": {
+      "nLeft": 53,
+      "nRight": 46,
+      "meanDiff": 10.51,
+      "medianDiff": 8.99,
+      "ci95": [
+        2.65,
+        18.3
+      ],
+      "permutationTail": 0.0116,
+      "usable": true
+    },
+    "entryT20": {
+      "nLeft": 53,
+      "nRight": 46,
+      "meanDiff": 8.87,
+      "medianDiff": 6.85,
+      "ci95": [
+        3.07,
+        14.53
+      ],
+      "permutationTail": 0.0035,
+      "usable": true
+    },
+    "entryT40": {
+      "nLeft": 53,
+      "nRight": 46,
+      "meanDiff": 10.56,
+      "medianDiff": 10.36,
+      "ci95": [
+        2.78,
+        18.22
+      ],
+      "permutationTail": 0.0092,
+      "usable": true
+    },
+    "forwardT10": {
+      "nLeft": 53,
+      "nRight": 46,
+      "meanDiff": -1.56,
+      "medianDiff": -0.82,
+      "ci95": [
+        -4.74,
+        1.49
+      ],
+      "permutationTail": 0.3371,
+      "usable": true
+    },
+    "forwardT20": {
+      "nLeft": 53,
+      "nRight": 46,
+      "meanDiff": 0.13,
+      "medianDiff": 0.64,
+      "ci95": [
+        -5.01,
+        5.34
+      ],
+      "permutationTail": 0.9624,
+      "usable": true
+    },
+    "forwardT40": {
+      "nLeft": 53,
+      "nRight": 46,
+      "meanDiff": 1.15,
+      "medianDiff": 5.3,
+      "ci95": [
+        -5.98,
+        8.21
+      ],
+      "permutationTail": 0.7504,
+      "usable": true
+    },
+    "forwardWindow": {
+      "nLeft": 50,
+      "nRight": 45,
+      "meanDiff": 1.34,
+      "medianDiff": 3.21,
+      "ci95": [
+        -6.52,
+        9.03
+      ],
+      "permutationTail": 0.7415,
+      "usable": true
+    },
+    "fullSample": true
+  },
+  "judgment": {
+    "independence": {
+      "label": "T+5 Recovery: 독립 신호 확인 실패"
+    },
+    "decision": {
+      "label": "실제 의사결정 가치: 부분적으로 지지"
+    }
+  }
+}
