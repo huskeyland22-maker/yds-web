@@ -1,0 +1,1400 @@
+{
+  "source": "Yahoo Finance quoteSummary financialData, defaultKeyStatistics, incomeStatementHistory",
+  "sourceDate": "2026-10-07",
+  "fetchedAt": "2026-10-07",
+  "currency": "USD as returned by Yahoo",
+  "roic": null,
+  "note": "ROIC is not in this source and is not estimated. debtToEquity is stored as Yahoo returns it. Annual revenue of 0 is treated as missing downstream.",
+  "tickers": {
+    "AMZN": {
+      "currentPrice": 256.29,
+      "totalRevenue": 775680032768,
+      "revenueGrowth": 0.196,
+      "earningsGrowth": 2.423,
+      "grossMargins": 0.5077,
+      "operatingMargins": 0.13689,
+      "profitMargins": 0.1744,
+      "ebitdaMargins": 0.21776,
+      "returnOnAssets": 0.06589,
+      "returnOnEquity": 0.30558002,
+      "freeCashflow": 3219124992,
+      "operatingCashflow": 161402994688,
+      "totalDebt": 251635007488,
+      "debtToEquity": 45.617,
+      "forwardPE": 24.48686,
+      "pegRatio": 1.49,
+      "enterpriseToRevenue": 3.73,
+      "enterpriseToEbitda": 17.128,
+      "forwardEps": 10.46643,
+      "trailingEps": 12.43,
+      "sharesOutstanding": 10786313572,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 716924000000,
+          "netIncome": 77670000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 637959000000,
+          "netIncome": 59248000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 574785000000,
+          "netIncome": 30425000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 513983000000,
+          "netIncome": -2722000000
+        }
+      ]
+    },
+    "AAPL": {
+      "currentPrice": 333.63,
+      "totalRevenue": 466822987776,
+      "revenueGrowth": 0.164,
+      "earningsGrowth": 0.287,
+      "grossMargins": 0.48653,
+      "operatingMargins": 0.32623002,
+      "profitMargins": 0.27618998,
+      "ebitdaMargins": 0.35979,
+      "returnOnAssets": 0.27082002,
+      "returnOnEquity": 1.4875101,
+      "freeCashflow": 107721875456,
+      "operatingCashflow": 146723995648,
+      "totalDebt": 84343996416,
+      "debtToEquity": 78.445,
+      "forwardPE": 34.81532,
+      "pegRatio": 2.66,
+      "enterpriseToRevenue": 10.477,
+      "enterpriseToEbitda": 29.12,
+      "forwardEps": 9.58285,
+      "trailingEps": 8.72,
+      "sharesOutstanding": 14594180000,
+      "annual": [
+        {
+          "end": "2025-09-30",
+          "revenue": 416161000000,
+          "netIncome": 112010000000
+        },
+        {
+          "end": "2024-09-30",
+          "revenue": 391035000000,
+          "netIncome": 93736000000
+        },
+        {
+          "end": "2023-09-30",
+          "revenue": 383285000000,
+          "netIncome": 96995000000
+        },
+        {
+          "end": "2022-09-30",
+          "revenue": 394328000000,
+          "netIncome": 99803000000
+        }
+      ]
+    },
+    "AMAT": {
+      "currentPrice": 530.27,
+      "totalRevenue": 30837000192,
+      "revenueGrowth": 0.248,
+      "earningsGrowth": 0.428,
+      "grossMargins": 0.49398,
+      "operatingMargins": 0.33736,
+      "profitMargins": 0.30052,
+      "ebitdaMargins": 0.32931,
+      "returnOnAssets": 0.15482001,
+      "returnOnEquity": 0.41068,
+      "freeCashflow": 3075375104,
+      "operatingCashflow": 8396000256,
+      "totalDebt": 7345999872,
+      "debtToEquity": 28.666,
+      "forwardPE": 28.716331,
+      "pegRatio": 1.08,
+      "enterpriseToRevenue": 13.585,
+      "enterpriseToEbitda": 41.254,
+      "forwardEps": 18.4658,
+      "trailingEps": 11.59,
+      "sharesOutstanding": 793597443,
+      "annual": [
+        {
+          "end": "2025-10-31",
+          "revenue": 28368000000,
+          "netIncome": 6998000000
+        },
+        {
+          "end": "2024-10-31",
+          "revenue": 27176000000,
+          "netIncome": 7177000000
+        },
+        {
+          "end": "2023-10-31",
+          "revenue": 26517000000,
+          "netIncome": 6856000000
+        },
+        {
+          "end": "2022-10-31",
+          "revenue": 25785000000,
+          "netIncome": 6525000000
+        }
+      ]
+    },
+    "ASML": {
+      "currentPrice": 1834.1,
+      "totalRevenue": 35327500288,
+      "revenueGrowth": 0.213,
+      "earningsGrowth": 0.285,
+      "grossMargins": 0.52733004,
+      "operatingMargins": 0.37057,
+      "profitMargins": 0.30114,
+      "ebitdaMargins": 0.38181,
+      "returnOnAssets": 0.16454001,
+      "returnOnEquity": 0.53942,
+      "freeCashflow": 8437675008,
+      "operatingCashflow": 11486900224,
+      "totalDebt": 1984400000,
+      "debtToEquity": 9.092,
+      "forwardPE": 35.32287,
+      "pegRatio": 1.15,
+      "enterpriseToRevenue": 1107.694,
+      "enterpriseToEbitda": 2901.164,
+      "forwardEps": 58.229393,
+      "trailingEps": 30.81,
+      "sharesOutstanding": 384100000,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 32667300000,
+          "netIncome": 9392700000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 28262900000,
+          "netIncome": 7571600000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 27558500000,
+          "netIncome": 7839000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 21173400000,
+          "netIncome": 5624200000
+        }
+      ]
+    },
+    "AVGO": {
+      "currentPrice": 375.81,
+      "totalRevenue": 89103998976,
+      "revenueGrowth": 0.855,
+      "earningsGrowth": 2.153,
+      "grossMargins": 0.75515,
+      "operatingMargins": 0.54307,
+      "profitMargins": 0.42944,
+      "ebitdaMargins": 0.58651,
+      "returnOnAssets": 0.15369001,
+      "returnOnEquity": 0.44245,
+      "freeCashflow": 30596499456,
+      "operatingCashflow": 40653000704,
+      "totalDebt": 59419000832,
+      "debtToEquity": 59.604,
+      "forwardPE": 19.377823,
+      "pegRatio": 0.36,
+      "enterpriseToRevenue": 20.531,
+      "enterpriseToEbitda": 35.006,
+      "forwardEps": 19.39382,
+      "trailingEps": 8.12,
+      "sharesOutstanding": 4773629865,
+      "annual": [
+        {
+          "end": "2025-10-31",
+          "revenue": 63887000000,
+          "netIncome": 23126000000
+        },
+        {
+          "end": "2024-10-31",
+          "revenue": 51574000000,
+          "netIncome": 5895000000
+        },
+        {
+          "end": "2023-10-31",
+          "revenue": 35819000000,
+          "netIncome": 14082000000
+        },
+        {
+          "end": "2022-10-31",
+          "revenue": 33203000000,
+          "netIncome": 11495000000
+        }
+      ]
+    },
+    "CEG": {
+      "currentPrice": 300.4,
+      "totalRevenue": 31270000640,
+      "revenueGrowth": 0.23,
+      "earningsGrowth": -0.468,
+      "grossMargins": 0.22107,
+      "operatingMargins": 0.086619996,
+      "profitMargins": 0.110810004,
+      "ebitdaMargins": 0.2543,
+      "returnOnAssets": 0.03888,
+      "returnOnEquity": 0.15055001,
+      "freeCashflow": -6625124864,
+      "operatingCashflow": 4206000128,
+      "totalDebt": 24700000256,
+      "debtToEquity": 76.419,
+      "forwardPE": 22.55228,
+      "pegRatio": 3.74,
+      "enterpriseToRevenue": 4.182,
+      "enterpriseToEbitda": 16.446,
+      "forwardEps": 13.32016,
+      "trailingEps": 10.23,
+      "sharesOutstanding": 354307379,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 25533000000,
+          "netIncome": 2319000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 23568000000,
+          "netIncome": 3749000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 24918000000,
+          "netIncome": 1623000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 24440000000,
+          "netIncome": -160000000
+        }
+      ]
+    },
+    "ETN": {
+      "currentPrice": 445.09,
+      "totalRevenue": 30026000384,
+      "revenueGrowth": 0.214,
+      "earningsGrowth": -0.159,
+      "grossMargins": 0.36022,
+      "operatingMargins": 0.16563,
+      "profitMargins": 0.12752,
+      "ebitdaMargins": 0.22111,
+      "returnOnAssets": 0.07052,
+      "returnOnEquity": 0.19684,
+      "freeCashflow": 3106125056,
+      "operatingCashflow": 4950000128,
+      "totalDebt": 21326000128,
+      "debtToEquity": 105.059,
+      "forwardPE": 27.39673,
+      "pegRatio": 2.63,
+      "enterpriseToRevenue": 6.446,
+      "enterpriseToEbitda": 29.153,
+      "forwardEps": 16.2461,
+      "trailingEps": 9.83,
+      "sharesOutstanding": 388400000,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 27448000000,
+          "netIncome": 4087000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 24878000000,
+          "netIncome": 3794000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 23196000000,
+          "netIncome": 3218000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 20752000000,
+          "netIncome": 2462000000
+        }
+      ]
+    },
+    "FCX": {
+      "currentPrice": 72.56,
+      "totalRevenue": 25867999232,
+      "revenueGrowth": -0.073,
+      "earningsGrowth": 0.281,
+      "grossMargins": 0.38275,
+      "operatingMargins": 0.33404,
+      "profitMargins": 0.113850005,
+      "ebitdaMargins": 0.36933997,
+      "returnOnAssets": 0.07585,
+      "returnOnEquity": 0.14755,
+      "freeCashflow": 2159249920,
+      "operatingCashflow": 5900000256,
+      "totalDebt": 10359000064,
+      "debtToEquity": 32.149,
+      "forwardPE": 17.124718,
+      "pegRatio": 4.54,
+      "enterpriseToRevenue": 4.739,
+      "enterpriseToEbitda": 12.831,
+      "forwardEps": 4.27185,
+      "trailingEps": 2.03,
+      "sharesOutstanding": 1436017523,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 25915000000,
+          "netIncome": 2204000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 25455000000,
+          "netIncome": 1889000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 22855000000,
+          "netIncome": 1848000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 22780000000,
+          "netIncome": 3468000000
+        }
+      ]
+    },
+    "FTNT": {
+      "currentPrice": 191.27,
+      "totalRevenue": 7527399936,
+      "revenueGrowth": 0.256,
+      "earningsGrowth": 0.439,
+      "grossMargins": 0.80204004,
+      "operatingMargins": 0.33595002,
+      "profitMargins": 0.28173,
+      "ebitdaMargins": 0.34485,
+      "returnOnAssets": 0.14166,
+      "returnOnEquity": 1.17442,
+      "freeCashflow": 2265587456,
+      "operatingCashflow": 3396100096,
+      "totalDebt": 561400000,
+      "debtToEquity": 36.194,
+      "forwardPE": 50.630398,
+      "pegRatio": 2.03,
+      "enterpriseToRevenue": 18.177,
+      "enterpriseToEbitda": 52.712,
+      "forwardEps": 3.77777,
+      "trailingEps": 2.83,
+      "sharesOutstanding": 733713653,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 6799600000,
+          "netIncome": 1853400000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 5955800000,
+          "netIncome": 1745200000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 5304800000,
+          "netIncome": 1147800000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 4417400000,
+          "netIncome": 857300000
+        }
+      ]
+    },
+    "GOOGL": {
+      "currentPrice": 347.68,
+      "totalRevenue": 445865984000,
+      "revenueGrowth": 0.242,
+      "earningsGrowth": 2.94,
+      "grossMargins": 0.60897,
+      "operatingMargins": 0.34033,
+      "profitMargins": 0.54771,
+      "ebitdaMargins": 0.38838002,
+      "returnOnAssets": 0.12958999,
+      "returnOnEquity": 0.48676,
+      "freeCashflow": 22665000960,
+      "operatingCashflow": 185675005952,
+      "totalDebt": 120790999040,
+      "debtToEquity": 18.859,
+      "forwardPE": 22.924055,
+      "pegRatio": 1.24,
+      "enterpriseToRevenue": 9.304,
+      "enterpriseToEbitda": 23.957,
+      "forwardEps": 15.07154,
+      "trailingEps": 19.93,
+      "sharesOutstanding": 5867155790,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 402836000000,
+          "netIncome": 132170000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 350018000000,
+          "netIncome": 100118000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 307394000000,
+          "netIncome": 73795000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 282836000000,
+          "netIncome": 59972000000
+        }
+      ]
+    },
+    "LRCX": {
+      "currentPrice": 333.89,
+      "totalRevenue": 23232690176,
+      "revenueGrowth": 0.3,
+      "earningsGrowth": 0.348,
+      "grossMargins": 0.50469,
+      "operatingMargins": 0.37390998,
+      "profitMargins": 0.31272,
+      "ebitdaMargins": 0.37195,
+      "returnOnAssets": 0.22840999,
+      "returnOnEquity": 0.65066004,
+      "freeCashflow": 3090484480,
+      "operatingCashflow": 5857656832,
+      "totalDebt": 4121564928,
+      "debtToEquity": 33.049,
+      "forwardPE": 28.381992,
+      "pegRatio": 1.61,
+      "enterpriseToRevenue": 17.921,
+      "enterpriseToEbitda": 48.181,
+      "forwardEps": 11.76415,
+      "trailingEps": 5.56,
+      "sharesOutstanding": 1251424362,
+      "annual": [
+        {
+          "end": "2026-06-30",
+          "revenue": 23232690000,
+          "netIncome": 7265396000
+        },
+        {
+          "end": "2025-06-30",
+          "revenue": 18435591000,
+          "netIncome": 5358217000
+        },
+        {
+          "end": "2024-06-30",
+          "revenue": 14905386000,
+          "netIncome": 3827772000
+        },
+        {
+          "end": "2023-06-30",
+          "revenue": 17428516000,
+          "netIncome": 4510931000
+        }
+      ]
+    },
+    "LLY": {
+      "currentPrice": 1157.49,
+      "totalRevenue": 79666003968,
+      "revenueGrowth": 0.477,
+      "earningsGrowth": 0.262,
+      "grossMargins": 0.83399004,
+      "operatingMargins": 0.54222,
+      "profitMargins": 0.33528998,
+      "ebitdaMargins": 0.52352,
+      "returnOnAssets": 0.20357001,
+      "returnOnEquity": 1.02286,
+      "freeCashflow": 11065900032,
+      "operatingCashflow": 28082999296,
+      "totalDebt": 54907998208,
+      "debtToEquity": 162.071,
+      "forwardPE": 24.320875,
+      "pegRatio": 1.13,
+      "enterpriseToRevenue": 13.528,
+      "enterpriseToEbitda": 25.84,
+      "forwardEps": 47.59245,
+      "trailingEps": 29.79,
+      "sharesOutstanding": 891741406,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 65179000000,
+          "netIncome": 20640000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 45042700000,
+          "netIncome": 10590000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 34124100000,
+          "netIncome": 5240400000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 28541400000,
+          "netIncome": 6244800000
+        }
+      ]
+    },
+    "MU": {
+      "currentPrice": 1045.56,
+      "totalRevenue": 133188001792,
+      "revenueGrowth": 3.793,
+      "earningsGrowth": 10.605,
+      "grossMargins": 0.80716,
+      "operatingMargins": 0.80678004,
+      "profitMargins": 0.63796,
+      "ebitdaMargins": 0.81721,
+      "returnOnAssets": 0.44557,
+      "returnOnEquity": 0.8826,
+      "freeCashflow": 29214251008,
+      "operatingCashflow": 89674997760,
+      "totalDebt": 5178999808,
+      "debtToEquity": 3.743,
+      "forwardPE": 5.067357,
+      "pegRatio": 0.16,
+      "enterpriseToRevenue": 8.584,
+      "enterpriseToEbitda": 10.503,
+      "forwardEps": 206.33243,
+      "trailingEps": 74.33,
+      "sharesOutstanding": 1129393151,
+      "annual": [
+        {
+          "end": "2026-08-31",
+          "revenue": 133188000000,
+          "netIncome": 84969000000
+        },
+        {
+          "end": "2025-08-31",
+          "revenue": 37378000000,
+          "netIncome": 8539000000
+        },
+        {
+          "end": "2024-08-31",
+          "revenue": 25111000000,
+          "netIncome": 778000000
+        },
+        {
+          "end": "2023-08-31",
+          "revenue": 15540000000,
+          "netIncome": -5833000000
+        }
+      ]
+    },
+    "NVDA": {
+      "currentPrice": 239.24,
+      "totalRevenue": 302970011648,
+      "revenueGrowth": 1.059,
+      "earningsGrowth": 1.278,
+      "grossMargins": 0.74674004,
+      "operatingMargins": 0.66236997,
+      "profitMargins": 0.63663,
+      "ebitdaMargins": 0.66431,
+      "returnOnAssets": 0.53572,
+      "returnOnEquity": 1.17211,
+      "freeCashflow": 41809874944,
+      "operatingCashflow": 134359998464,
+      "totalDebt": 38860001280,
+      "debtToEquity": 16.971,
+      "forwardPE": 15.14251,
+      "pegRatio": 0.29,
+      "enterpriseToRevenue": 18.953,
+      "enterpriseToEbitda": 28.53,
+      "forwardEps": 15.79923,
+      "trailingEps": 7.91,
+      "sharesOutstanding": 24147000000,
+      "annual": [
+        {
+          "end": "2026-01-31",
+          "revenue": 215938000000,
+          "netIncome": 120067000000
+        },
+        {
+          "end": "2025-01-31",
+          "revenue": 130497000000,
+          "netIncome": 72880000000
+        },
+        {
+          "end": "2024-01-31",
+          "revenue": 60922000000,
+          "netIncome": 29760000000
+        },
+        {
+          "end": "2023-01-31",
+          "revenue": 26974000000,
+          "netIncome": 4368000000
+        }
+      ]
+    },
+    "ORCL": {
+      "currentPrice": 144.77,
+      "totalRevenue": 71776002048,
+      "revenueGrowth": 0.296,
+      "earningsGrowth": 0.545,
+      "grossMargins": 0.63957,
+      "operatingMargins": 0.35632,
+      "profitMargins": 0.2636,
+      "ebitdaMargins": 0.47973,
+      "returnOnAssets": 0.06357,
+      "returnOnEquity": 0.41192,
+      "freeCashflow": -45853626368,
+      "operatingCashflow": 46940000256,
+      "totalDebt": 169142992896,
+      "debtToEquity": 251.716,
+      "forwardPE": 13.164271,
+      "pegRatio": 0.8,
+      "enterpriseToRevenue": 8.014,
+      "enterpriseToEbitda": 16.705,
+      "forwardEps": 10.99719,
+      "trailingEps": 6.38,
+      "sharesOutstanding": 3031501149,
+      "annual": [
+        {
+          "end": "2026-05-31",
+          "revenue": 67357000000,
+          "netIncome": 16984000000
+        },
+        {
+          "end": "2025-05-31",
+          "revenue": 57399000000,
+          "netIncome": 12443000000
+        },
+        {
+          "end": "2024-05-31",
+          "revenue": 52961000000,
+          "netIncome": 10467000000
+        },
+        {
+          "end": "2023-05-31",
+          "revenue": 49954000000,
+          "netIncome": 8503000000
+        }
+      ]
+    },
+    "PANW": {
+      "currentPrice": 419.91,
+      "totalRevenue": 11480000512,
+      "revenueGrowth": 0.345,
+      "earningsGrowth": null,
+      "grossMargins": 0.70383,
+      "operatingMargins": 0.05396,
+      "profitMargins": 0.02674,
+      "ebitdaMargins": 0.13588999,
+      "returnOnAssets": 0.014040001,
+      "returnOnEquity": 0.01739,
+      "freeCashflow": 4240624896,
+      "operatingCashflow": 4552999936,
+      "totalDebt": 2567000064,
+      "debtToEquity": 9.337,
+      "forwardPE": 86.06354,
+      "pegRatio": 2.08,
+      "enterpriseToRevenue": 29.877,
+      "enterpriseToEbitda": 219.861,
+      "forwardEps": 4.87907,
+      "trailingEps": 0.4,
+      "sharesOutstanding": 818000000,
+      "annual": [
+        {
+          "end": "2025-07-31",
+          "revenue": 9221500000,
+          "netIncome": 1133900000
+        },
+        {
+          "end": "2024-07-31",
+          "revenue": 8027500000,
+          "netIncome": 2577600000
+        },
+        {
+          "end": "2023-07-31",
+          "revenue": 6892700000,
+          "netIncome": 439700000
+        },
+        {
+          "end": "2022-07-31",
+          "revenue": 5501500000,
+          "netIncome": -267000000
+        }
+      ]
+    },
+    "PLTR": {
+      "currentPrice": 192.07,
+      "totalRevenue": 6155940864,
+      "revenueGrowth": 0.928,
+      "earningsGrowth": 2.154,
+      "grossMargins": 0.84796,
+      "operatingMargins": 0.47120997,
+      "profitMargins": 0.49005002,
+      "ebitdaMargins": 0.43253,
+      "returnOnAssets": 0.17292999,
+      "returnOnEquity": 0.38097,
+      "freeCashflow": 2159104512,
+      "operatingCashflow": 3400291072,
+      "totalDebt": 211400000,
+      "debtToEquity": 2.139,
+      "forwardPE": 81.93553,
+      "pegRatio": 1.64,
+      "enterpriseToRevenue": 73.501,
+      "enterpriseToEbitda": 169.933,
+      "forwardEps": 2.34416,
+      "trailingEps": 1.16,
+      "sharesOutstanding": 2300713329,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 4475446000,
+          "netIncome": 1625033000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 2865507000,
+          "netIncome": 462190000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 2225012000,
+          "netIncome": 209825000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 1905871000,
+          "netIncome": -373705000
+        }
+      ]
+    },
+    "TSLA": {
+      "currentPrice": 380.68,
+      "totalRevenue": 103619002368,
+      "revenueGrowth": 0.255,
+      "earningsGrowth": -0.03,
+      "grossMargins": 0.18852,
+      "operatingMargins": 0.014099999,
+      "profitMargins": 0.03671,
+      "ebitdaMargins": 0.10379,
+      "returnOnAssets": 0.019299999,
+      "returnOnEquity": 0.046669997,
+      "freeCashflow": 4835999744,
+      "operatingCashflow": 18684999680,
+      "totalDebt": 16080000000,
+      "debtToEquity": 18.373,
+      "forwardPE": 177.5717,
+      "pegRatio": 4.53,
+      "enterpriseToRevenue": 14.252,
+      "enterpriseToEbitda": 137.306,
+      "forwardEps": 2.14474,
+      "trailingEps": 1.08,
+      "sharesOutstanding": 3949547394,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 94827000000,
+          "netIncome": 3794000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 97690000000,
+          "netIncome": 7091000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 96773000000,
+          "netIncome": 14997000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 81462000000,
+          "netIncome": 12556000000
+        }
+      ]
+    },
+    "TSM": {
+      "currentPrice": 482.3,
+      "totalRevenue": 4440492343296,
+      "revenueGrowth": 0.36,
+      "earningsGrowth": 0.774,
+      "grossMargins": 0.6423,
+      "operatingMargins": 0.60344005,
+      "profitMargins": 0.49923,
+      "ebitdaMargins": 0.71331,
+      "returnOnAssets": 0.19002001,
+      "returnOnEquity": 0.39969003,
+      "freeCashflow": 730826014720,
+      "operatingCashflow": 2634679058432,
+      "totalDebt": 1068558516224,
+      "debtToEquity": 16.504,
+      "forwardPE": 21.873066,
+      "pegRatio": 0.92,
+      "enterpriseToRevenue": 3.964,
+      "enterpriseToEbitda": 5.558,
+      "forwardEps": 21.9251,
+      "trailingEps": 13.76,
+      "sharesOutstanding": 5186474013,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 3809054000000,
+          "netIncome": 1717883000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 2894308000000,
+          "netIncome": 1173268000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 2161740000000,
+          "netIncome": 838498000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 2263891000000,
+          "netIncome": 1016530000000
+        }
+      ]
+    },
+    "VST": {
+      "currentPrice": 160.5,
+      "totalRevenue": 19211999232,
+      "revenueGrowth": -0.055,
+      "earningsGrowth": -0.062,
+      "grossMargins": 0.38309,
+      "operatingMargins": 0.13766,
+      "profitMargins": 0.1155,
+      "ebitdaMargins": 0.34592998,
+      "returnOnAssets": 0.05886,
+      "returnOnEquity": 0.42962003,
+      "freeCashflow": 37125000,
+      "operatingCashflow": 5120999936,
+      "totalDebt": 20508000256,
+      "debtToEquity": 373.28,
+      "forwardPE": 15.4084835,
+      "pegRatio": 0.36,
+      "enterpriseToRevenue": 3.978,
+      "enterpriseToEbitda": 11.5,
+      "forwardEps": 10.41634,
+      "trailingEps": 5.93,
+      "sharesOutstanding": 335635195,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 17738000000,
+          "netIncome": 752000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 17224000000,
+          "netIncome": 2467000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 14779000000,
+          "netIncome": 1343000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 13728000000,
+          "netIncome": -1377000000
+        }
+      ]
+    },
+    "KLAC": {
+      "currentPrice": 197.46,
+      "totalRevenue": 13579475968,
+      "revenueGrowth": 0.152,
+      "earningsGrowth": 0.138,
+      "grossMargins": 0.61301,
+      "operatingMargins": 0.42486,
+      "profitMargins": 0.35574,
+      "ebitdaMargins": 0.44588003,
+      "returnOnAssets": 0.20799999,
+      "returnOnEquity": 0.87496,
+      "freeCashflow": 2624587520,
+      "operatingCashflow": 4143078912,
+      "totalDebt": 6151712768,
+      "debtToEquity": 96.88,
+      "forwardPE": 29.295042,
+      "pegRatio": 1.98,
+      "enterpriseToRevenue": 19.091,
+      "enterpriseToEbitda": 42.816,
+      "forwardEps": 6.70539,
+      "trailingEps": 3.66,
+      "sharesOutstanding": 1305006492,
+      "annual": [
+        {
+          "end": "2026-06-30",
+          "revenue": 13579476000,
+          "netIncome": 4830771000
+        },
+        {
+          "end": "2025-06-30",
+          "revenue": 12156162000,
+          "netIncome": 4061643000
+        },
+        {
+          "end": "2024-06-30",
+          "revenue": 9812247000,
+          "netIncome": 2761896000
+        },
+        {
+          "end": "2023-06-30",
+          "revenue": 10496056000,
+          "netIncome": 3387277000
+        }
+      ]
+    },
+    "ANET": {
+      "currentPrice": 215.36,
+      "totalRevenue": 10540800000,
+      "revenueGrowth": 0.377,
+      "earningsGrowth": 0.357,
+      "grossMargins": 0.63004,
+      "operatingMargins": 0.45393002,
+      "profitMargins": 0.38371,
+      "ebitdaMargins": 0.44015998,
+      "returnOnAssets": 0.14119,
+      "returnOnEquity": 0.31476,
+      "freeCashflow": 3891512576,
+      "operatingCashflow": 5306599936,
+      "totalDebt": 0,
+      "debtToEquity": null,
+      "forwardPE": 41.39954,
+      "pegRatio": 1.55,
+      "enterpriseToRevenue": 24.502,
+      "enterpriseToEbitda": 55.667,
+      "forwardEps": 5.20199,
+      "trailingEps": 3.17,
+      "sharesOutstanding": 1261224648,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 9005700000,
+          "netIncome": 3511400000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 7003146000,
+          "netIncome": 2852054000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 5860168000,
+          "netIncome": 2087321000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 4381310000,
+          "netIncome": 1352446000
+        }
+      ]
+    },
+    "VRT": {
+      "currentPrice": 253.14,
+      "totalRevenue": 11479600128,
+      "revenueGrowth": 0.241,
+      "earningsGrowth": 0.53,
+      "grossMargins": 0.38039002,
+      "operatingMargins": 0.20362,
+      "profitMargins": 0.15088001,
+      "ebitdaMargins": 0.23335,
+      "returnOnAssets": 0.10889,
+      "returnOnEquity": 0.43943,
+      "freeCashflow": 2696537600,
+      "operatingCashflow": 3354200064,
+      "totalDebt": 3338200064,
+      "debtToEquity": 70.166,
+      "forwardPE": 27.561623,
+      "pegRatio": 0.86,
+      "enterpriseToRevenue": 8.509,
+      "enterpriseToEbitda": 36.465,
+      "forwardEps": 9.17851,
+      "trailingEps": 4.42,
+      "sharesOutstanding": 384988173,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 10229900000,
+          "netIncome": 1332800000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 8011800000,
+          "netIncome": 495800000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 6863200000,
+          "netIncome": 460200000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 5691500000,
+          "netIncome": 76600000
+        }
+      ]
+    },
+    "PWR": {
+      "currentPrice": 719.56,
+      "totalRevenue": 32905140224,
+      "revenueGrowth": 0.411,
+      "earningsGrowth": 0.947,
+      "grossMargins": 0.15456,
+      "operatingMargins": 0.07217,
+      "profitMargins": 0.04032,
+      "ebitdaMargins": 0.092539996,
+      "returnOnAssets": 0.052259997,
+      "returnOnEquity": 0.15337,
+      "freeCashflow": 1955491328,
+      "operatingCashflow": 3178248960,
+      "totalDebt": 6603134976,
+      "debtToEquity": 67.78,
+      "forwardPE": 36.38931,
+      "pegRatio": 1.53,
+      "enterpriseToRevenue": 3.476,
+      "enterpriseToEbitda": 37.564,
+      "forwardEps": 19.77394,
+      "trailingEps": 8.73,
+      "sharesOutstanding": 150343393,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 28479697000,
+          "netIncome": 1028378000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 23672795000,
+          "netIncome": 904824000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 20882206000,
+          "netIncome": 744689000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 17073903000,
+          "netIncome": 491189000
+        }
+      ]
+    },
+    "V": {
+      "currentPrice": 370.64,
+      "totalRevenue": 44487999488,
+      "revenueGrowth": 0.144,
+      "earningsGrowth": 0.102,
+      "grossMargins": 0.97725,
+      "operatingMargins": 0.66130996,
+      "profitMargins": 0.50782,
+      "ebitdaMargins": 0.69892997,
+      "returnOnAssets": 0.1911,
+      "returnOnEquity": 0.6119,
+      "freeCashflow": 20404000768,
+      "operatingCashflow": 22580000768,
+      "totalDebt": 23857999872,
+      "debtToEquity": 67.821,
+      "forwardPE": 24.702253,
+      "pegRatio": 1.67,
+      "enterpriseToRevenue": 15.55,
+      "enterpriseToEbitda": 22.249,
+      "forwardEps": 15.0043,
+      "trailingEps": 11.75,
+      "sharesOutstanding": 1704112694,
+      "annual": [
+        {
+          "end": "2025-09-30",
+          "revenue": 40000000000,
+          "netIncome": 20058000000
+        },
+        {
+          "end": "2024-09-30",
+          "revenue": 35926000000,
+          "netIncome": 19743000000
+        },
+        {
+          "end": "2023-09-30",
+          "revenue": 32653000000,
+          "netIncome": 17273000000
+        },
+        {
+          "end": "2022-09-30",
+          "revenue": 29310000000,
+          "netIncome": 14957000000
+        }
+      ]
+    },
+    "MSFT": {
+      "currentPrice": 529.3,
+      "totalRevenue": 331839012864,
+      "revenueGrowth": 0.177,
+      "earningsGrowth": 0.317,
+      "grossMargins": 0.67944,
+      "operatingMargins": 0.45111,
+      "profitMargins": 0.40305,
+      "ebitdaMargins": 0.58534,
+      "returnOnAssets": 0.14088,
+      "returnOnEquity": 0.34039003,
+      "freeCashflow": 16545500160,
+      "operatingCashflow": 182934994944,
+      "totalDebt": 128812998656,
+      "debtToEquity": 29.118,
+      "forwardPE": 22.354725,
+      "pegRatio": 1.71,
+      "enterpriseToRevenue": 12.001,
+      "enterpriseToEbitda": 20.502,
+      "forwardEps": 23.67732,
+      "trailingEps": 18.09,
+      "sharesOutstanding": 7425545491,
+      "annual": [
+        {
+          "end": "2026-06-30",
+          "revenue": 331839000000,
+          "netIncome": 133749000000
+        },
+        {
+          "end": "2025-06-30",
+          "revenue": 281724000000,
+          "netIncome": 101832000000
+        },
+        {
+          "end": "2024-06-30",
+          "revenue": 245122000000,
+          "netIncome": 88136000000
+        },
+        {
+          "end": "2023-06-30",
+          "revenue": 211915000000,
+          "netIncome": 72361000000
+        }
+      ]
+    },
+    "GEV": {
+      "currentPrice": 1029.21,
+      "totalRevenue": 41366999040,
+      "revenueGrowth": 0.219,
+      "earningsGrowth": 0.328,
+      "grossMargins": 0.2057,
+      "operatingMargins": 0.07466,
+      "profitMargins": 0.23035,
+      "ebitdaMargins": 0.09493,
+      "returnOnAssets": 0.02544,
+      "returnOnEquity": 0.82577,
+      "freeCashflow": 15722125312,
+      "operatingCashflow": 14138999808,
+      "totalDebt": 3720000000,
+      "debtToEquity": 28.364,
+      "forwardPE": 40.86998,
+      "pegRatio": 1.94,
+      "enterpriseToRevenue": 6.437,
+      "enterpriseToEbitda": 67.805,
+      "forwardEps": 25.17476,
+      "trailingEps": 34.88,
+      "sharesOutstanding": 266333581,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 38068000000,
+          "netIncome": 4884000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 34935000000,
+          "netIncome": 1552000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 0,
+          "netIncome": -438000000
+        }
+      ]
+    },
+    "ISRG": {
+      "currentPrice": 404.76,
+      "totalRevenue": 11034399744,
+      "revenueGrowth": 0.185,
+      "earningsGrowth": 0.265,
+      "grossMargins": 0.66679,
+      "operatingMargins": 0.33603,
+      "profitMargins": 0.28445998,
+      "ebitdaMargins": 0.37889,
+      "returnOnAssets": 0.10512,
+      "returnOnEquity": 0.17423001,
+      "freeCashflow": 2615200000,
+      "operatingCashflow": 3706400000,
+      "totalDebt": 0,
+      "debtToEquity": null,
+      "forwardPE": 33.46125,
+      "pegRatio": 1.89,
+      "enterpriseToRevenue": 12.498,
+      "enterpriseToEbitda": 32.986,
+      "forwardEps": 12.11137,
+      "trailingEps": 8.72,
+      "sharesOutstanding": 353278038,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 10064700000,
+          "netIncome": 2856000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 8352100000,
+          "netIncome": 2322600000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 7124100000,
+          "netIncome": 1798000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 6222200000,
+          "netIncome": 1322300000
+        }
+      ]
+    },
+    "SNPS": {
+      "currentPrice": 505.17,
+      "totalRevenue": 9416465408,
+      "revenueGrowth": 0.424,
+      "earningsGrowth": 0.893,
+      "grossMargins": 0.82921,
+      "operatingMargins": 0.14521,
+      "profitMargins": 0.11432999,
+      "ebitdaMargins": 0.22041,
+      "returnOnAssets": 0.01353,
+      "returnOnEquity": 0.03661,
+      "freeCashflow": 3425542400,
+      "operatingCashflow": 2938341120,
+      "totalDebt": 10841789440,
+      "debtToEquity": 34.804,
+      "forwardPE": 27.18451,
+      "pegRatio": 2.62,
+      "enterpriseToRevenue": 11.049,
+      "enterpriseToEbitda": 50.129,
+      "forwardEps": 18.58301,
+      "trailingEps": 5.66,
+      "sharesOutstanding": 191636646,
+      "annual": [
+        {
+          "end": "2025-10-31",
+          "revenue": 7054178000,
+          "netIncome": 1332220000
+        },
+        {
+          "end": "2024-10-31",
+          "revenue": 6127436000,
+          "netIncome": 1441710000
+        },
+        {
+          "end": "2023-10-31",
+          "revenue": 5842619000,
+          "netIncome": 1229888000
+        },
+        {
+          "end": "2022-10-31",
+          "revenue": 5081542000,
+          "netIncome": 984594000
+        }
+      ]
+    },
+    "AMD": {
+      "currentPrice": 649.42,
+      "totalRevenue": 41305001984,
+      "revenueGrowth": 0.501,
+      "earningsGrowth": 1.595,
+      "grossMargins": 0.55724,
+      "operatingMargins": 0.1725,
+      "profitMargins": 0.15577,
+      "ebitdaMargins": 0.2315,
+      "returnOnAssets": 0.05128,
+      "returnOnEquity": 0.10196,
+      "freeCashflow": 8841499648,
+      "operatingCashflow": 10080000000,
+      "totalDebt": 4276000000,
+      "debtToEquity": 6.361,
+      "forwardPE": 41.306736,
+      "pegRatio": 0.64,
+      "enterpriseToRevenue": 25.453,
+      "enterpriseToEbitda": 109.948,
+      "forwardEps": 15.72189,
+      "trailingEps": 3.92,
+      "sharesOutstanding": 1632475042,
+      "annual": [
+        {
+          "end": "2025-12-31",
+          "revenue": 34639000000,
+          "netIncome": 4335000000
+        },
+        {
+          "end": "2024-12-31",
+          "revenue": 25785000000,
+          "netIncome": 1641000000
+        },
+        {
+          "end": "2023-12-31",
+          "revenue": 22680000000,
+          "netIncome": 854000000
+        },
+        {
+          "end": "2022-12-31",
+          "revenue": 23601000000,
+          "netIncome": 1320000000
+        }
+      ]
+    },
+    "CRWD": {
+      "currentPrice": 278.86,
+      "totalRevenue": 5396145152,
+      "revenueGrowth": 0.258,
+      "earningsGrowth": null,
+      "grossMargins": 0.75185996,
+      "operatingMargins": -0.02259,
+      "profitMargins": 0.00834,
+      "ebitdaMargins": 0.0198,
+      "returnOnAssets": -0.0078100003,
+      "returnOnEquity": 0.01461,
+      "freeCashflow": 1995385472,
+      "operatingCashflow": 2016615040,
+      "totalDebt": 820179008,
+      "debtToEquity": 15.958,
+      "forwardPE": 173.64609,
+      "pegRatio": 7.04,
+      "enterpriseToRevenue": 52.144,
+      "enterpriseToEbitda": 2633.127,
+      "forwardEps": 1.60591,
+      "trailingEps": 0.05,
+      "sharesOutstanding": 1023934842,
+      "annual": [
+        {
+          "end": "2026-01-31",
+          "revenue": 4812005000,
+          "netIncome": -162502000
+        },
+        {
+          "end": "2025-01-31",
+          "revenue": 3953624000,
+          "netIncome": -19271000
+        },
+        {
+          "end": "2024-01-31",
+          "revenue": 3055555000,
+          "netIncome": 89327000
+        },
+        {
+          "end": "2023-01-31",
+          "revenue": 2241236000,
+          "netIncome": -183245000
+        }
+      ]
+    }
+  }
+}
