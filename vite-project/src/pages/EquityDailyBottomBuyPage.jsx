@@ -8,8 +8,11 @@ import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 import {
   closeTickerPicker,
+  EQUITY_SUMMARY_PREVIEW_COUNT,
   equityResearchDisplayList,
   equitySummaryRow,
+  equitySummaryToggleLabel,
+  equitySummaryVisibleRows,
   equityTickerLabel,
   initialTickerPickerState,
   toggleTickerPicker,
@@ -83,6 +86,7 @@ export default function EquityDailyBottomBuyPage() {
   const [candidateAsOf, setCandidateAsOf] = useState(null)
   const [signalViews, setSignalViews] = useState(null)
   const [extraViews, setExtraViews] = useState(null)
+  const [summaryOpen, setSummaryOpen] = useState(false)
   const [recordsVersion, setRecordsVersion] = useState(0)
 
   useEffect(() => {
@@ -472,7 +476,7 @@ export default function EquityDailyBottomBuyPage() {
           <h2 className="yds-dbb-section__title">전체 개별 종목 목록</h2>
         </header>
         <div className="yds-dbb-all">
-          {catalog.map((row) => {
+          {equitySummaryVisibleRows(catalog, summaryOpen).map((row) => {
             const scanned = (signalViews || []).find((item) => item?.symbol === row.symbol) || null
             const extra = extraViews?.[row.symbol] || null
             const chosen = payload?.view?.symbol === row.symbol ? payload.view : scanned || extra
@@ -494,6 +498,16 @@ export default function EquityDailyBottomBuyPage() {
             )
           })}
         </div>
+        {catalog.length > EQUITY_SUMMARY_PREVIEW_COUNT ? (
+          <button
+            type="button"
+            className="yds-dbb-all__more"
+            aria-expanded={summaryOpen}
+            onClick={() => setSummaryOpen((open) => !open)}
+          >
+            {equitySummaryToggleLabel(catalog.length, summaryOpen)}
+          </button>
+        ) : null}
       </section>
     </div>
   )

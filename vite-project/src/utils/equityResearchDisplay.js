@@ -70,6 +70,8 @@ export function closeTickerPicker() {
   return { open: false }
 }
 
+export const EQUITY_SUMMARY_PREVIEW_COUNT = 10
+
 const EQUITY_STAGE_CLASS = {
   strongLow: "strong",
   firstBuy: "primary",
@@ -77,20 +79,40 @@ const EQUITY_STAGE_CLASS = {
   wait: "wait",
 }
 
+const EQUITY_STAGE_LABEL = {
+  strongLow: "강한 저점",
+  firstBuy: "1차 매수",
+  interest: "관심",
+  wait: "대기",
+}
+
 /**
  * Summary-row text for one already computed view.
  * A missing view stays blank. A real score of 0 stays 0/4.
+ * The Korean label is display copy. The view state id is unchanged.
  */
 export function equitySummaryRow(view) {
   const scored = view?.ok === true && Number.isFinite(Number(view.score))
   if (!scored) {
     return { countText: "—", stageLabel: "—", stageClass: "wait" }
   }
+  const stageId = view.state?.id
   return {
     countText: `${Number(view.score)}/4`,
-    stageLabel: view.state?.label || "—",
-    stageClass: EQUITY_STAGE_CLASS[view.state?.id] || "wait",
+    stageLabel: EQUITY_STAGE_LABEL[stageId] || "—",
+    stageClass: EQUITY_STAGE_CLASS[stageId] || "wait",
   }
+}
+
+export function equitySummaryVisibleRows(rows, expanded) {
+  const list = rows || []
+  if (expanded || list.length <= EQUITY_SUMMARY_PREVIEW_COUNT) return list
+  return list.slice(0, EQUITY_SUMMARY_PREVIEW_COUNT)
+}
+
+export function equitySummaryToggleLabel(total, expanded) {
+  if (expanded) return "접기 ▲"
+  return `전체 ${total}개 종목 보기 ▼`
 }
 
 /** Search and group filters only. Does not cap the list. */

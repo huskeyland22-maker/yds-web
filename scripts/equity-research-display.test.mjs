@@ -15,6 +15,8 @@ import {
   initialTickerPickerState,
   toggleTickerPicker,
   equitySummaryRow,
+  equitySummaryToggleLabel,
+  equitySummaryVisibleRows,
   visibleResearchStocks,
 } from "../vite-project/src/utils/equityResearchDisplay.js"
 
@@ -60,9 +62,21 @@ describe("equity research display", () => {
   it("keeps an unscored summary blank and shows a real zero", () => {
     assert.deepEqual(equitySummaryRow(null), { countText: "—", stageLabel: "—", stageClass: "wait" })
     assert.deepEqual(equitySummaryRow({ ok: false, score: null }), { countText: "—", stageLabel: "—", stageClass: "wait" })
-    assert.equal(equitySummaryRow({ ok: true, score: 0, state: { id: "wait", label: "WAIT" } }).countText, "0/4")
-    assert.equal(equitySummaryRow({ ok: true, score: 2, state: { id: "interest", label: "INTEREST" } }).stageLabel, "INTEREST")
-    assert.equal(equitySummaryRow({ ok: true, score: 3, state: { id: "firstBuy", label: "FIRST BUY CANDIDATE" } }).stageClass, "primary")
-    assert.equal(equitySummaryRow({ ok: true, score: 4, state: { id: "strongLow", label: "STRONG LOW CANDIDATE" } }).stageClass, "strong")
+    const zero = equitySummaryRow({ ok: true, score: 0, state: { id: "wait", label: "WAIT" } })
+    assert.equal(zero.countText, "0/4")
+    assert.equal(zero.stageLabel, "대기")
+    assert.equal(`${zero.countText} ${zero.stageLabel}`, "0/4 대기")
+    assert.equal(equitySummaryRow({ ok: true, score: 2, state: { id: "interest", label: "INTEREST" } }).stageLabel, "관심")
+    assert.equal(equitySummaryRow({ ok: true, score: 3, state: { id: "firstBuy", label: "FIRST BUY CANDIDATE" } }).stageLabel, "1차 매수")
+    assert.equal(equitySummaryRow({ ok: true, score: 4, state: { id: "strongLow", label: "STRONG LOW CANDIDATE" } }).stageLabel, "강한 저점")
+  })
+
+  it("shows the first 10 names until the full list is opened", () => {
+    const shown = equityResearchDisplayList()
+    assert.equal(shown.length, 31)
+    assert.deepEqual(equitySummaryVisibleRows(shown, false).map((row) => row.symbol), shown.slice(0, 10).map((row) => row.symbol))
+    assert.equal(equitySummaryVisibleRows(shown, true).length, 31)
+    assert.equal(equitySummaryToggleLabel(shown.length, false), "전체 31개 종목 보기 ▼")
+    assert.equal(equitySummaryToggleLabel(shown.length, true), "접기 ▲")
   })
 })
