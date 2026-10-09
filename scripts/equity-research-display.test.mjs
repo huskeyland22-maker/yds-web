@@ -14,6 +14,7 @@ import {
   equityTickerLabel,
   initialTickerPickerState,
   toggleTickerPicker,
+  equitySummaryRow,
   visibleResearchStocks,
 } from "../vite-project/src/utils/equityResearchDisplay.js"
 
@@ -54,5 +55,14 @@ describe("equity research display", () => {
     assert.deepEqual(visibleResearchStocks(shown, { query: "NVIDIA" }).map((row) => row.symbol), ["NVDA"])
     assert.deepEqual(visibleResearchStocks(shown, { query: "NVDA" }).map((row) => row.symbol), ["NVDA"])
     assert.deepEqual(visibleResearchStocks(shown, { query: "크라우드스트라이크" }).map((row) => row.symbol), ["CRWD"])
+  })
+
+  it("keeps an unscored summary blank and shows a real zero", () => {
+    assert.deepEqual(equitySummaryRow(null), { countText: "—", stageLabel: "—", stageClass: "wait" })
+    assert.deepEqual(equitySummaryRow({ ok: false, score: null }), { countText: "—", stageLabel: "—", stageClass: "wait" })
+    assert.equal(equitySummaryRow({ ok: true, score: 0, state: { id: "wait", label: "WAIT" } }).countText, "0/4")
+    assert.equal(equitySummaryRow({ ok: true, score: 2, state: { id: "interest", label: "INTEREST" } }).stageLabel, "INTEREST")
+    assert.equal(equitySummaryRow({ ok: true, score: 3, state: { id: "firstBuy", label: "FIRST BUY CANDIDATE" } }).stageClass, "primary")
+    assert.equal(equitySummaryRow({ ok: true, score: 4, state: { id: "strongLow", label: "STRONG LOW CANDIDATE" } }).stageClass, "strong")
   })
 })

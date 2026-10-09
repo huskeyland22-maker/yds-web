@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import EquityResearchPanel from "../components/equity/EquityResearchPanel.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import { collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
@@ -8,6 +9,7 @@ import { equityCandidateConditionType, selectEquityBuyCandidates } from "../util
 import {
   closeTickerPicker,
   equityResearchDisplayList,
+  equitySummaryRow,
   equityTickerLabel,
   initialTickerPickerState,
   toggleTickerPicker,
@@ -80,6 +82,7 @@ export default function EquityDailyBottomBuyPage() {
   const [candidates, setCandidates] = useState(null)
   const [candidateAsOf, setCandidateAsOf] = useState(null)
   const [signalViews, setSignalViews] = useState(null)
+  const [extraViews, setExtraViews] = useState(null)
   const [recordsVersion, setRecordsVersion] = useState(0)
 
   useEffect(() => {
@@ -155,6 +158,59 @@ export default function EquityDailyBottomBuyPage() {
       })
       .catch((err) => {
         if (cancelled || ctrl.signal.aborted || err?.name === "AbortError") return
+      })
+
+    return () => {
+      cancelled = true
+      ctrl.abort()
+    }
+  }, [universeKey])
+
+  useEffect(() => {
+    if (!universe.length) return undefined
+    const scan = new Set(universe.map((row) => row.symbol))
+    const extra = catalog.filter((row) => !scan.has(row.symbol))
+    if (!extra.length) {
+      setExtraViews({})
+      return undefined
+    }
+    const ctrl = new AbortController()
+    let cancelled = false
+    setExtraViews(null)
+
+    async function worker(cursor) {
+      const views = []
+      while (cursor.i < extra.length) {
+        const index = cursor.i
+        cursor.i += 1
+        const sym = extra[index].symbol
+        try {
+          const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
+          views[index] = json?.view || null
+        } catch (err) {
+          if (ctrl.signal.aborted) throw err
+          views[index] = null
+        }
+      }
+      return views
+    }
+
+    const cursor = { i: 0 }
+    const workers = Array.from({ length: Math.min(6, extra.length) }, () => worker(cursor))
+    Promise.all(workers)
+      .then((chunks) => {
+        if (cancelled || ctrl.signal.aborted) return
+        const next = {}
+        for (const chunk of chunks) {
+          chunk.forEach((view, index) => {
+            if (extra[index]) next[extra[index].symbol] = view
+          })
+        }
+        setExtraViews(next)
+      })
+      .catch((err) => {
+        if (cancelled || ctrl.signal.aborted || err?.name === "AbortError") return
+        if (!cancelled) setExtraViews({})
       })
 
     return () => {
@@ -362,6 +418,8 @@ export default function EquityDailyBottomBuyPage() {
             ) : null}
           </section>
 
+          <EquityResearchPanel />
+
           <section className="yds-dbb-card mb-3">
             <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
             <ul className="mt-2 space-y-2">
@@ -406,6 +464,35 @@ export default function EquityDailyBottomBuyPage() {
             defaultWeightPct={50}
             equityBuyIntent
           />
+        </div>
+      </section>
+
+      <section className="yds-dbb-section" aria-label="전체 개별 종목 목록">
+        <header className="yds-dbb-section__head">
+          <h2 className="yds-dbb-section__title">전체 개별 종목 목록</h2>
+        </header>
+        <div className="yds-dbb-all">
+          {catalog.map((row) => {
+            const scanned = (signalViews || []).find((item) => item?.symbol === row.symbol) || null
+            const extra = extraViews?.[row.symbol] || null
+            const chosen = payload?.view?.symbol === row.symbol ? payload.view : scanned || extra
+            const summary = equitySummaryRow(chosen)
+            const theme = chosen?.group || row.group || "—"
+            return (
+              <button
+                key={`all-${row.symbol}`}
+                type="button"
+                className={`yds-dbb-all__row${row.symbol === symbol ? " is-selected" : ""}`}
+                aria-pressed={row.symbol === symbol}
+                onClick={() => setSymbol(row.symbol)}
+              >
+                <span className="yds-dbb-all__sym">{row.symbol}</span>
+                <span className="yds-dbb-all__theme">{theme}</span>
+                <span className="yds-dbb-all__count">{summary.countText}</span>
+                <span className={`yds-dbb-all__stage is-${summary.stageClass}`}>{summary.stageLabel}</span>
+              </button>
+            )
+          })}
         </div>
       </section>
     </div>

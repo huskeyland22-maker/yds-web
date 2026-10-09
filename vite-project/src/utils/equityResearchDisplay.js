@@ -70,6 +70,29 @@ export function closeTickerPicker() {
   return { open: false }
 }
 
+const EQUITY_STAGE_CLASS = {
+  strongLow: "strong",
+  firstBuy: "primary",
+  interest: "watch",
+  wait: "wait",
+}
+
+/**
+ * Summary-row text for one already computed view.
+ * A missing view stays blank. A real score of 0 stays 0/4.
+ */
+export function equitySummaryRow(view) {
+  const scored = view?.ok === true && Number.isFinite(Number(view.score))
+  if (!scored) {
+    return { countText: "—", stageLabel: "—", stageClass: "wait" }
+  }
+  return {
+    countText: `${Number(view.score)}/4`,
+    stageLabel: view.state?.label || "—",
+    stageClass: EQUITY_STAGE_CLASS[view.state?.id] || "wait",
+  }
+}
+
 /** Search and group filters only. Does not cap the list. */
 export function visibleResearchStocks(rows, { group = "all", query = "" } = {}) {
   const q = String(query || "").trim().toLowerCase()

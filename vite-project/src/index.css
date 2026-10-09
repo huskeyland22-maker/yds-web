@@ -38671,6 +38671,38 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-dbb-card--watch { border-color: rgba(250, 204, 21, 0.22); }
 .yds-dbb-card--compact { padding: 0.4rem 0.5rem; }
+.yds-dbb-research summary {
+  cursor: pointer;
+  list-style: none;
+}
+.yds-dbb-research summary::-webkit-details-marker { display: none; }
+.yds-dbb-research__lead {
+  margin: 0.45rem 0 0.15rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+.yds-dbb-research__scroll {
+  margin-top: 0.45rem;
+  overflow-x: auto;
+}
+.yds-dbb-research__table {
+  width: 100%;
+  min-width: 16rem;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+.yds-dbb-research__table th,
+.yds-dbb-research__table td {
+  padding: 0.28rem 0.2rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  text-align: right;
+  font-weight: 500;
+}
+.yds-dbb-research__table th:first-child,
+.yds-dbb-research__table td:first-child { text-align: left; }
+.yds-dbb-research .yds-dbb__notice { margin-top: 0.45rem; }
 .yds-dbb-card__head {
   display: flex;
   align-items: flex-start;
@@ -38794,6 +38826,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   font-variant-numeric: tabular-nums;
   color: #cbd5e1;
   text-align: right;
+}
+button.yds-dbb-all__row {
+  width: 100%;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.yds-dbb-all__row.is-selected {
+  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.16);
 }
 .yds-dbb-all__stage { font-weight: 650; color: #94a3b8; }
 .yds-dbb-all__stage.is-strong { color: #fca5a5; }
