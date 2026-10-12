@@ -8,8 +8,11 @@ import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 import {
   closeTickerPicker,
+  EQUITY_HOLDING_DISPLAY,
   EQUITY_SUMMARY_PREVIEW_COUNT,
+  equityProgressMeta,
   equityResearchDisplayList,
+  equitySummaryCatalog,
   equitySummaryRow,
   equitySummaryToggleLabel,
   equitySummaryVisibleRows,
@@ -115,6 +118,7 @@ export default function EquityDailyBottomBuyPage() {
   const universe = payload?.universe || []
   const universeKey = universe.map((row) => row.symbol).join("|")
   const catalog = useMemo(() => equityResearchDisplayList(universe), [universe])
+  const summaryCatalog = useMemo(() => equitySummaryCatalog(catalog), [catalog])
 
   useEffect(() => {
     if (!universe.length) return undefined
@@ -173,7 +177,7 @@ export default function EquityDailyBottomBuyPage() {
   useEffect(() => {
     if (!universe.length) return undefined
     const scan = new Set(universe.map((row) => row.symbol))
-    const extra = catalog.filter((row) => !scan.has(row.symbol))
+    const extra = equitySummaryCatalog(catalog).filter((row) => !scan.has(row.symbol))
     if (!extra.length) {
       setExtraViews({})
       return undefined
@@ -224,18 +228,18 @@ export default function EquityDailyBottomBuyPage() {
   }, [universeKey])
   const groups = useMemo(() => {
     const seen = []
-    for (const row of catalog) {
+    for (const row of summaryCatalog) {
       if (row.group && !seen.includes(row.group)) seen.push(row.group)
     }
     return seen
-  }, [catalog])
+  }, [summaryCatalog])
 
   const visible = useMemo(
-    () => visibleResearchStocks(catalog, { group, query }),
-    [catalog, group, query],
+    () => visibleResearchStocks(summaryCatalog, { group, query }),
+    [summaryCatalog, group, query],
   )
 
-  const selectedRow = catalog.find((row) => row.symbol === symbol) || null
+  const selectedRow = summaryCatalog.find((row) => row.symbol === symbol) || null
   const selectedLabel = equityTickerLabel(selectedRow) || symbol
 
   useEffect(() => {
@@ -253,13 +257,17 @@ export default function EquityDailyBottomBuyPage() {
     for (const row of signalViews || []) {
       if (row?.symbol) bySymbol.set(row.symbol, row)
     }
+    for (const row of EQUITY_HOLDING_DISPLAY) {
+      const extra = extraViews?.[row.symbol]
+      if (extra?.symbol) bySymbol.set(extra.symbol, extra)
+    }
     if (payload?.view?.symbol) bySymbol.set(payload.view.symbol, payload.view)
     return collectDbbBuyProgress(
-      universe
-        .map((row) => equityViewProgressEntry(row, bySymbol.get(row.symbol) || null))
-        .filter(Boolean),
+      equityProgressMeta(universe).map((row) =>
+        equityViewProgressEntry(row, bySymbol.get(row.symbol) || null),
+      ),
     )
-  }, [universe, signalViews, payload?.view, recordsVersion])
+  }, [universe, signalViews, extraViews, payload?.view, recordsVersion])
 
   const view = payload?.view
   const priceText = formatPrice(view?.price)
@@ -363,7 +371,7 @@ export default function EquityDailyBottomBuyPage() {
                   onChange={(e) => setQuery(e.target.value)}
                 />
               </label>
-              <ul className="yds-dbb-research-list" aria-label="연구 종목 31">
+              <ul className="yds-dbb-research-list" aria-label="종목 선택 목록">
                 {visible.map((row) => (
                   <li key={row.symbol}>
                     <button
@@ -476,12 +484,12 @@ export default function EquityDailyBottomBuyPage() {
           <h2 className="yds-dbb-section__title">전체 개별 종목 목록</h2>
         </header>
         <div className="yds-dbb-all">
-          {equitySummaryVisibleRows(catalog, summaryOpen).map((row) => {
+          {equitySummaryVisibleRows(summaryCatalog, summaryOpen).map((row) => {
             const scanned = (signalViews || []).find((item) => item?.symbol === row.symbol) || null
             const extra = extraViews?.[row.symbol] || null
             const chosen = payload?.view?.symbol === row.symbol ? payload.view : scanned || extra
             const summary = equitySummaryRow(chosen)
-            const theme = chosen?.group || row.group || "—"
+            const theme = row.holding ? row.group : chosen?.group || row.group || "—"
             return (
               <button
                 key={`all-${row.symbol}`}
@@ -491,21 +499,24 @@ export default function EquityDailyBottomBuyPage() {
                 onClick={() => setSymbol(row.symbol)}
               >
                 <span className="yds-dbb-all__sym">{row.symbol}</span>
-                <span className="yds-dbb-all__theme">{theme}</span>
+                <span className={`yds-dbb-all__theme${row.holding ? " is-holding" : ""}`}>
+                  <span className="yds-dbb-all__theme-text">{theme}</span>
+                  {row.holding ? <span className="yds-dbb-all__hold">보유</span> : null}
+                </span>
                 <span className="yds-dbb-all__count">{summary.countText}</span>
                 <span className={`yds-dbb-all__stage is-${summary.stageClass}`}>{summary.stageLabel}</span>
               </button>
             )
           })}
         </div>
-        {catalog.length > EQUITY_SUMMARY_PREVIEW_COUNT ? (
+        {summaryCatalog.length > EQUITY_SUMMARY_PREVIEW_COUNT ? (
           <button
             type="button"
             className="yds-dbb-all__more"
             aria-expanded={summaryOpen}
             onClick={() => setSummaryOpen((open) => !open)}
           >
-            {equitySummaryToggleLabel(catalog.length, summaryOpen)}
+            {equitySummaryToggleLabel(summaryCatalog.length, summaryOpen)}
           </button>
         ) : null}
       </section>

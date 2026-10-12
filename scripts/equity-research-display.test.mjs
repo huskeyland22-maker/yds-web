@@ -2,7 +2,10 @@
  * node --test scripts/equity-research-display.test.mjs
  */
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
+import { dirname, join } from "node:path"
 import { describe, it } from "node:test"
+import { fileURLToPath } from "node:url"
 import { equityUniverse } from "./lib/equity-daily-bottom-buy.mjs"
 import {
   EQUITY_SELL_RESEARCH_SELECTED_STRATEGY,
@@ -10,7 +13,9 @@ import {
 } from "./lib/equity-sell-research-universe.mjs"
 import {
   closeTickerPicker,
+  equityProgressMeta,
   equityResearchDisplayList,
+  equitySummaryCatalog,
   equityTickerLabel,
   initialTickerPickerState,
   toggleTickerPicker,
@@ -78,5 +83,52 @@ describe("equity research display", () => {
     assert.equal(equitySummaryVisibleRows(shown, true).length, 31)
     assert.equal(equitySummaryToggleLabel(shown.length, false), "전체 31개 종목 보기 ▼")
     assert.equal(equitySummaryToggleLabel(shown.length, true), "접기 ▲")
+  })
+
+  it("appends held names after the 31 without joining the scan", () => {
+    const research = equityResearchDisplayList()
+    const shown = equitySummaryCatalog(research)
+    assert.equal(research.length, 31)
+    assert.equal(shown.length, 33)
+    assert.deepEqual(shown.slice(0, 31).map((row) => row.symbol), EXPECTED)
+    assert.deepEqual(shown.slice(-2).map((row) => row.symbol), ["NEE", "RXRX"])
+    assert.equal(shown.find((row) => row.symbol === "NEE").group, "전력·유틸리티·재생에너지")
+    assert.equal(shown.find((row) => row.symbol === "NEE").holding, true)
+    assert.equal(shown.find((row) => row.symbol === "RXRX").group, "바이오·AI 신약 개발")
+    assert.equal(shown.find((row) => row.symbol === "RXRX").nameKo, "리커전 파마슈티컬스")
+    assert.equal(equitySummaryVisibleRows(shown, false).length, 10)
+    assert.equal(equitySummaryVisibleRows(shown, true).length, 33)
+    assert.equal(equitySummaryToggleLabel(shown.length, false), "전체 33개 종목 보기 ▼")
+    assert.equal(equityUniverse().some((row) => row.symbol === "NEE" || row.symbol === "RXRX"), false)
+    assert.equal(EQUITY_SELL_RESEARCH_UNIVERSE.some((row) => row.symbol === "NEE" || row.symbol === "RXRX"), false)
+    assert.equal(equitySummaryRow(null).countText, "—")
+    assert.equal(equitySummaryRow({ ok: false, score: 0 }).stageLabel, "—")
+  })
+
+  it("offers held names in the picker and only those two on the progress list", () => {
+    const research = equityResearchDisplayList()
+    const picker = equitySummaryCatalog(research)
+    assert.equal(visibleResearchStocks(picker).length, 33)
+    assert.deepEqual(visibleResearchStocks(picker).slice(0, 31).map((row) => row.symbol), EXPECTED)
+    assert.deepEqual(visibleResearchStocks(picker, { query: "넥스트라" }).map((row) => row.symbol), ["NEE"])
+    assert.deepEqual(visibleResearchStocks(picker, { query: "리커전" }).map((row) => row.symbol), ["RXRX"])
+    assert.equal(equityTickerLabel(picker.find((row) => row.symbol === "NEE")), "NEE · NextEra Energy · 넥스트라 에너지")
+    assert.equal(equityTickerLabel(picker.find((row) => row.symbol === "RXRX")), "RXRX · Recursion Pharmaceuticals · 리커전 파마슈티컬스")
+    const scan = equityUniverse()
+    const progress = equityProgressMeta(scan)
+    assert.equal(progress.length, 22)
+    assert.deepEqual(progress.slice(0, 20).map((row) => row.symbol), scan.map((row) => row.symbol))
+    assert.deepEqual(progress.slice(-2).map((row) => row.symbol), ["NEE", "RXRX"])
+    assert.equal(progress.some((row) => row.symbol === "MSFT" || row.symbol === "CRWD"), false)
+    assert.deepEqual(equityProgressMeta([]).map((row) => row.symbol), ["NEE", "RXRX"])
+    const page = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "../vite-project/src/pages/EquityDailyBottomBuyPage.jsx"),
+      "utf8",
+    )
+    assert.match(page, /visibleResearchStocks\(summaryCatalog/)
+    assert.match(page, /equityProgressMeta\(universe\)/)
+    assert.match(page, /selectEquityBuyCandidates\(packed, symbols\)/)
+    assert.match(page, /system="dbb"\s+symbol=\{symbol\}/)
+    assert.doesNotMatch(page, /연구 종목 31/)
   })
 })

@@ -35,6 +35,24 @@ export const EQUITY_RESEARCH_NAME_KO = {
   CRWD: "크라우드스트라이크",
 }
 
+/** Held names shown after the research list. Not part of the 31-name universe or the 20-name scan. */
+export const EQUITY_HOLDING_DISPLAY = [
+  {
+    symbol: "NEE",
+    name: "NextEra Energy",
+    nameKo: "넥스트라 에너지",
+    group: "전력·유틸리티·재생에너지",
+    holding: true,
+  },
+  {
+    symbol: "RXRX",
+    name: "Recursion Pharmaceuticals",
+    nameKo: "리커전 파마슈티컬스",
+    group: "바이오·AI 신약 개발",
+    holding: true,
+  },
+]
+
 /** Frozen research names, in list order. Not the 20-name screen scan. */
 export function equityResearchDisplayList(scanRows = []) {
   const scan = new Map((scanRows || []).map((row) => [row.symbol, row]))
@@ -48,6 +66,23 @@ export function equityResearchDisplayList(scanRows = []) {
       role: row.role,
     }
   })
+}
+
+/** Research list, then held names. Does not insert them into the frozen universe. */
+export function equitySummaryCatalog(researchRows = []) {
+  const base = researchRows || []
+  const seen = new Set(base.map((row) => row.symbol))
+  return base.concat(EQUITY_HOLDING_DISPLAY.filter((row) => !seen.has(row.symbol)))
+}
+
+/**
+ * Buy-progress rows: the active scan, then held names.
+ * The other research names stay out of this list.
+ */
+export function equityProgressMeta(scanRows = []) {
+  const scan = scanRows || []
+  const seen = new Set(scan.map((row) => row.symbol))
+  return scan.concat(EQUITY_HOLDING_DISPLAY.filter((row) => row?.symbol && !seen.has(row.symbol)))
 }
 
 /** Ticker, English name, Korean name. Role badges stay off this label. */

@@ -38822,6 +38822,22 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.yds-dbb-all__theme.is-holding {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+.yds-dbb-all__theme-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yds-dbb-all__hold {
+  flex: none;
+  color: #e2e8f0;
+  font-weight: 650;
+}
 .yds-dbb-all__count {
   font-variant-numeric: tabular-nums;
   color: #cbd5e1;
