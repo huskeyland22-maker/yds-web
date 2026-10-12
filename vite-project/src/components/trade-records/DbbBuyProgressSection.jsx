@@ -1,4 +1,5 @@
 import {
+  formatReturnPct,
   formatTradeRecordShares,
   formatUsdPrice,
   listTradeRecords,
@@ -35,22 +36,39 @@ export function formatEquityBuyProgressLine(record) {
   return `${date}${equityBuyProgressKind(record)} · ${formatTradeRecordShares(record)} · ${formatUsdPrice(record?.buyPrice)}`
 }
 
-/**
- * Shared holdings strip for ETF and equity daily-bottom-buy pages.
- * @param {{
- *   items: Array<{
- *     symbol: string
- *     name: string
- *     statusView: object | null
- *     recordedWeightPct: number
- *     avgBuyPrice: number | null
- *   }>
- *   onSelectSymbol?: (symbol: string) => void
- *   showBuyLines?: boolean
- *   selectedSymbol?: string | null
- *   focusStatus?: boolean
- * }} props
- */
+/** @param {number | null | undefined} pct */
+function quotePnlClass(pct) {
+  if (pct == null || !Number.isFinite(pct)) return ""
+  if (pct > 0) return " is-up"
+  if (pct < 0) return " is-down"
+  return ""
+}
+
+/** @param {{ quotePrice?: number | null, quoteAsOf?: string | null }} item */
+function quotePriceRow(item) {
+  const price = Number(item?.quotePrice)
+  if (!Number.isFinite(price) || price <= 0) return null
+  const label = item.quoteAsOf ? `현재가 USD · ${item.quoteAsOf}` : "현재가 USD"
+  return (
+    <div className="yds-trade-status__row">
+      <span>{label}</span>
+      <strong className="font-mono tabular-nums">{formatUsdPrice(price)}</strong>
+    </div>
+  )
+}
+
+/** @param {{ quoteReturnPct?: number | null }} item */
+function quoteReturnRow(item) {
+  const pct = Number(item?.quoteReturnPct)
+  if (!Number.isFinite(pct)) return null
+  return (
+    <div className="yds-trade-status__row">
+      <span>현재 수익률</span>
+      <strong className={`font-mono tabular-nums${quotePnlClass(pct)}`}>{formatReturnPct(pct)}</strong>
+    </div>
+  )
+}
+
 function EquityBuyLines({ symbol }) {
   const records = listTradeRecords("dbb", symbol)
   if (!records.length) return null
@@ -69,6 +87,25 @@ function EquityBuyLines({ symbol }) {
   )
 }
 
+/**
+ * Shared holdings strip for ETF and equity daily-bottom-buy pages.
+ * @param {{
+ *   items: Array<{
+ *     symbol: string
+ *     name: string
+ *     statusView: object | null
+ *     recordedWeightPct: number
+ *     avgBuyPrice: number | null
+ *     quotePrice?: number | null
+ *     quoteAsOf?: string | null
+ *     quoteReturnPct?: number | null
+ *   }>
+ *   onSelectSymbol?: (symbol: string) => void
+ *   showBuyLines?: boolean
+ *   selectedSymbol?: string | null
+ *   focusStatus?: boolean
+ * }} props
+ */
 export default function DbbBuyProgressSection({
   items,
   onSelectSymbol,
@@ -116,6 +153,8 @@ export default function DbbBuyProgressSection({
                       {formatUsdPrice(item.avgBuyPrice)}
                     </strong>
                   </div>
+                  {quotePriceRow(item)}
+                  {quoteReturnRow(item)}
                 </div>
               )}
               {showBuyLines ? <EquityBuyLines symbol={item.symbol} /> : null}

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import EquityResearchPanel from "../components/equity/EquityResearchPanel.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
-import { collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
+import { attachHoldingQuote, collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
+import { fetchPortfolioQuotes } from "../content/ydsPortfolioQuoteService.js"
 import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
@@ -89,6 +90,7 @@ export default function EquityDailyBottomBuyPage() {
   const [candidateAsOf, setCandidateAsOf] = useState(null)
   const [signalViews, setSignalViews] = useState(null)
   const [extraViews, setExtraViews] = useState(null)
+  const [holdingQuotes, setHoldingQuotes] = useState({})
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [recordsVersion, setRecordsVersion] = useState(0)
 
@@ -251,6 +253,30 @@ export default function EquityDailyBottomBuyPage() {
     return () => document.removeEventListener("pointerdown", onPointerDown)
   }, [picker.open])
 
+  useEffect(() => {
+    let cancelled = false
+    const symbols = EQUITY_HOLDING_DISPLAY.map((row) => row.symbol)
+    fetchPortfolioQuotes(
+      symbols.map((symbol) => ({
+        id: symbol,
+        ticker: symbol,
+        country: "us",
+        priceReady: true,
+      })),
+    ).then((result) => {
+      if (cancelled) return
+      const next = {}
+      for (const symbol of symbols) {
+        const quote = result?.quoteMap?.get(symbol)
+        if (quote) next[symbol] = quote
+      }
+      setHoldingQuotes(next)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const buyProgress = useMemo(() => {
     void recordsVersion
     const bySymbol = new Map()
@@ -266,8 +292,8 @@ export default function EquityDailyBottomBuyPage() {
       equityProgressMeta(universe).map((row) =>
         equityViewProgressEntry(row, bySymbol.get(row.symbol) || null),
       ),
-    )
-  }, [universe, signalViews, extraViews, payload?.view, recordsVersion])
+    ).map((item) => attachHoldingQuote(item, holdingQuotes[item.symbol]))
+  }, [universe, signalViews, extraViews, payload?.view, recordsVersion, holdingQuotes])
 
   const view = payload?.view
   const priceText = formatPrice(view?.price)
@@ -475,6 +501,7 @@ export default function EquityDailyBottomBuyPage() {
             symbol={symbol}
             defaultWeightPct={50}
             equityBuyIntent
+            deriveAmount
           />
         </div>
       </section>

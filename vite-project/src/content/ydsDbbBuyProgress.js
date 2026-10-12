@@ -2,6 +2,7 @@ import {
   averageTradeBuyPrice,
   listTradeRecords,
   sumTradeWeightPct,
+  tradeReturnPct,
 } from "./ydsTradeRecords.js"
 import { buildDbbTradeStatusView } from "./ydsTradeRecordsStatus.js"
 
@@ -90,4 +91,46 @@ export function collectDbbBuyProgress(entries) {
     })
   }
   return items
+}
+
+/**
+ * New York trading date for a quote timestamp. Empty when the timestamp is missing.
+ * @param {string | null | undefined} updatedAt
+ * @returns {string | null}
+ */
+export function holdingQuoteAsOf(updatedAt) {
+  if (typeof updatedAt !== "string" || !updatedAt) return null
+  const ms = Date.parse(updatedAt)
+  if (!Number.isFinite(ms)) {
+    return /^\d{4}-\d{2}-\d{2}/.test(updatedAt) ? updatedAt.slice(0, 10) : null
+  }
+  try {
+    const formatted = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(ms))
+    return /^\d{4}-\d{2}-\d{2}$/.test(formatted) ? formatted : null
+  } catch {
+    return /^\d{4}-\d{2}-\d{2}/.test(updatedAt) ? updatedAt.slice(0, 10) : null
+  }
+}
+
+/**
+ * Attach a real quote to a holdings card that has no scored status view.
+ * A live score card (AAPL and the other scanned names) is left as-is.
+ * @param {object | null | undefined} item
+ * @param {{ price?: number | null, updatedAt?: string | null } | null | undefined} quote
+ */
+export function attachHoldingQuote(item, quote) {
+  if (!item || item.statusView) return item
+  const price = Number(quote?.price)
+  if (!Number.isFinite(price) || price <= 0) return item
+  return {
+    ...item,
+    quotePrice: price,
+    quoteAsOf: holdingQuoteAsOf(quote?.updatedAt),
+    quoteReturnPct: tradeReturnPct(item.avgBuyPrice, price),
+  }
 }

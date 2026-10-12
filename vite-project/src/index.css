@@ -39233,6 +39233,10 @@ button.yds-dbb-holdings__card {
   font-size: 0.58rem;
   color: #64748b;
 }
+.yds-trade-rec__form input[readonly] {
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.45);
+}
 .yds-trade-rec__form input,
 .yds-trade-rec__form select {
   border: 1px solid rgba(148, 163, 184, 0.22);

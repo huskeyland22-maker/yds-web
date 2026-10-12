@@ -9,6 +9,7 @@ import {
   TRADE_RECORDS_CHANGED_EVENT,
   upsertTradeRecord,
 } from "../../content/ydsTradeRecords.js"
+import { derivedBuyAmountUsdText, restoredShareCount } from "../../utils/derivedBuyAmount.js"
 
 /**
  * Round a USD price or amount to cents. Half-up.
@@ -52,6 +53,7 @@ export function coerceUsdSaveNumber(raw) {
  *   defaultWeightPct?: number
  *   onChange?: () => void
  *   equityBuyIntent?: boolean
+ *   deriveAmount?: boolean
  * }} props
  */
 export default function TradeRecordEditor({
@@ -60,6 +62,7 @@ export default function TradeRecordEditor({
   defaultWeightPct = 50,
   onChange,
   equityBuyIntent = false,
+  deriveAmount = false,
 }) {
   const [buyDate, setBuyDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [buyPrice, setBuyPrice] = useState("")
@@ -84,6 +87,11 @@ export default function TradeRecordEditor({
     return () => window.removeEventListener(TRADE_RECORDS_CHANGED_EVENT, onRecordsChanged)
   }, [])
 
+  useEffect(() => {
+    if (!deriveAmount) return
+    setBuyAmountUsd(derivedBuyAmountUsdText(buyPrice, shares))
+  }, [deriveAmount, buyPrice, shares])
+
   function refresh() {
     setTick((n) => n + 1)
     onChange?.()
@@ -106,7 +114,12 @@ export default function TradeRecordEditor({
     e.preventDefault()
     setError(null)
     const priceNum = coerceUsdSaveNumber(buyPrice)
-    const amountNum = coerceUsdSaveNumber(buyAmountUsd)
+    const amountText = deriveAmount ? derivedBuyAmountUsdText(buyPrice, shares) : buyAmountUsd
+    if (deriveAmount && amountText === "") {
+      setError("입력값을 확인해 주세요. (매수일·매수가 USD·수량)")
+      return
+    }
+    const amountNum = coerceUsdSaveNumber(amountText)
     const sharesNum = shares === "" ? null : Number(shares)
     const discretionary = equityBuyIntent && buyType === "discretionary"
     const saved = upsertTradeRecord({
@@ -138,8 +151,11 @@ export default function TradeRecordEditor({
     setEditId(rec.id)
     setBuyDate(rec.buyDate)
     setBuyPrice(coerceUsdInputText(rec.buyPrice))
-    setShares(rec.shares != null ? String(rec.shares) : "")
-    setBuyAmountUsd(coerceUsdInputText(rec.buyAmountUsd))
+    const shareCount = deriveAmount ? restoredShareCount(rec) : rec.shares
+    setShares(shareCount != null ? String(shareCount) : "")
+    setBuyAmountUsd(
+      deriveAmount ? derivedBuyAmountUsdText(rec.buyPrice, shareCount) : coerceUsdInputText(rec.buyAmountUsd),
+    )
     setWeightPct(String(rec.weightPct))
     setMemo(rec.memo || "")
     if (equityBuyIntent) {
@@ -214,19 +230,30 @@ export default function TradeRecordEditor({
               placeholder="5"
               value={shares}
               onChange={(ev) => setShares(ev.target.value)}
+              required={deriveAmount}
             />
           </label>
           <label>
             <span>매수금액 (USD)</span>
             <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min="0"
-              placeholder="1080"
-              value={buyAmountUsd}
-              onChange={(ev) => setBuyAmountUsd(coerceUsdInputText(ev.target.value))}
-              required
+              type={deriveAmount ? "text" : "number"}
+              inputMode={deriveAmount ? undefined : "decimal"}
+              step={deriveAmount ? undefined : "0.01"}
+              min={deriveAmount ? undefined : "0"}
+              placeholder={deriveAmount ? "" : "1080"}
+              value={
+                deriveAmount
+                  ? buyAmountUsd === ""
+                    ? ""
+                    : formatUsdAmount(Number(buyAmountUsd))
+                  : buyAmountUsd
+              }
+              onChange={
+                deriveAmount ? undefined : (ev) => setBuyAmountUsd(coerceUsdInputText(ev.target.value))
+              }
+              readOnly={deriveAmount}
+              aria-readonly={deriveAmount ? true : undefined}
+              required={!deriveAmount}
             />
           </label>
           {equityBuyIntent && buyType === "discretionary" ? null : (
