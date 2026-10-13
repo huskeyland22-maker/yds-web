@@ -3,7 +3,7 @@
   "system": "daily_bottom_buy_v1",
   "separateFromPanic": true,
   "source": "snapshot",
-  "updatedAt": "2026-09-22T09:37:59.395Z",
+  "updatedAt": "2026-10-13T10:11:55.266Z",
   "thresholds": {
     "rsiMax": 36,
     "stochKMax": 15.4,
@@ -25,7 +25,7 @@
   "counts": {
     "opportunity": 0,
     "watch": 1,
-    "wait": 8
+    "wait": 12
   },
   "opportunities": [],
   "watch": [
@@ -194,6 +194,38 @@
       }
     },
     {
+      "symbol": "IHE",
+      "theme": "제약",
+      "themeShort": "제약",
+      "role": "미국 제약",
+      "ok": false,
+      "error": "cache_missing",
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "POWR",
+      "theme": "청정에너지",
+      "themeShort": "청정에너지",
+      "role": "재생에너지·청정 전력",
+      "ok": false,
+      "error": "cache_missing",
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
       "symbol": "QQQ",
       "theme": "빅테크·AI 플랫폼",
       "themeShort": "빅테크·AI",
@@ -259,6 +291,49 @@
       "stochK": 22.4,
       "bbPctB": 0.29,
       "ma20DevPct": -4.2,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "XLE",
+      "theme": "에너지",
+      "themeShort": "에너지",
+      "role": "석유·가스·에너지",
+      "ok": false,
+      "error": "cache_missing",
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "XLV",
+      "theme": "헬스케어",
+      "themeShort": "헬스케어",
+      "role": "의료·헬스케어",
+      "ok": true,
+      "asOfDate": "2026-09-18",
+      "close": 168.38999938964844,
+      "rsi14": 49.8,
+      "stochK": 34.3,
+      "bbPctB": 0.346,
+      "ma20DevPct": -1.1,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -504,6 +579,81 @@
       "stochK": 38.8,
       "bbPctB": 0.418,
       "ma20DevPct": -0.7,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "POWR",
+      "theme": "청정에너지",
+      "themeShort": "청정에너지",
+      "role": "재생에너지·청정 전력",
+      "ok": false,
+      "error": "cache_missing",
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "IHE",
+      "theme": "제약",
+      "themeShort": "제약",
+      "role": "미국 제약",
+      "ok": false,
+      "error": "cache_missing",
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "XLE",
+      "theme": "에너지",
+      "themeShort": "에너지",
+      "role": "석유·가스·에너지",
+      "ok": false,
+      "error": "cache_missing",
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "XLV",
+      "theme": "헬스케어",
+      "themeShort": "헬스케어",
+      "role": "의료·헬스케어",
+      "ok": true,
+      "asOfDate": "2026-09-18",
+      "close": 168.38999938964844,
+      "rsi14": 49.8,
+      "stochK": 34.3,
+      "bbPctB": 0.346,
+      "ma20DevPct": -1.1,
       "flags": {
         "rsi": false,
         "stoch": false,

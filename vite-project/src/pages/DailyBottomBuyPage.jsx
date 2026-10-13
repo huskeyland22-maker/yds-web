@@ -326,7 +326,7 @@ export default function DailyBottomBuyPage() {
 
           <section className="yds-dbb-section">
             <header className="yds-dbb-section__head">
-              <h2 className="yds-dbb-section__title">전체 9개 ETF</h2>
+              <h2 className="yds-dbb-section__title">전체 {payload.all.length}개 ETF</h2>
             </header>
             <div className="yds-dbb-all">
               {(payload.all || []).map((card) => (
@@ -339,8 +339,8 @@ export default function DailyBottomBuyPage() {
                   <span className="yds-dbb-all__count">
                     {card.ok ? `${card.count}/4` : "—"}
                   </span>
-                  <span className={`yds-dbb-all__stage is-${card.stage?.id || "wait"}`}>
-                    {card.stage?.label || "대기"}
+                  <span className={`yds-dbb-all__stage is-${card.ok ? card.stage?.id || "wait" : "error"}`}>
+                    {card.ok ? card.stage?.label || "대기" : "데이터 없음"}
                   </span>
                 </div>
               ))}

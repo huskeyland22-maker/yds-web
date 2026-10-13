@@ -3,7 +3,7 @@
  * Does not touch Panic Index.
  */
 import {
-  DAILY_BOTTOM_BUY_ETFS,
+  DAILY_BOTTOM_BUY_WATCHLIST,
   DAILY_BOTTOM_THRESHOLDS,
   SPLIT_BUY_GUIDE,
   evaluateBars,
@@ -198,7 +198,7 @@ export async function handleDailyBottomBuy(req, res) {
 
   try {
     const settled = await Promise.all(
-      DAILY_BOTTOM_BUY_ETFS.map(async (meta) => {
+      DAILY_BOTTOM_BUY_WATCHLIST.map(async (meta) => {
         try {
           const bars = await fetchYahooOhlcv(meta.symbol)
           const evaluation = evaluateBars(bars, DAILY_BOTTOM_THRESHOLDS)

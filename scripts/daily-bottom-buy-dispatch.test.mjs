@@ -87,6 +87,16 @@ describe("daily-bottom-buy hobby dispatch", () => {
     ])
   })
 
+  it("dev server runs the local 13-ETF handler instead of the deployed proxy", () => {
+    const vite = readFileSync(join(root, "vite-project/vite.config.js"), "utf8")
+    assert.match(vite, /handleDailyBottomBuy/)
+    assert.equal(vite.split('"/api/daily-bottom-buy"').length, 2)
+    const page = readFileSync(join(root, "vite-project/src/pages/DailyBottomBuyPage.jsx"), "utf8")
+    assert.match(page, /전체 \{payload\.all\.length\}개 ETF/)
+    assert.match(page, /card\.ok \? `\$\{card\.count\}\/4` : "—"/)
+    assert.match(page, /: "데이터 없음"/)
+  })
+
   it("frontend API_PATH and snapshot path unchanged", () => {
     const src = readFileSync(join(root, "vite-project/src/utils/dailyBottomBuyApi.js"), "utf8")
     assert.match(src, /API_PATH\s*=\s*"\/api\/daily-bottom-buy"/)
@@ -100,12 +110,12 @@ describe("daily-bottom-buy hobby dispatch", () => {
     )
     assert.equal(snap.ok, true)
     assert.ok(Array.isArray(snap.all))
-    assert.equal(snap.all.length, 9)
+    assert.equal(snap.all.length, 13)
     assert.deepEqual(
       snap.all.map((c) => c.symbol),
-      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB"],
+      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB", "POWR", "IHE", "XLE", "XLV"],
     )
-    for (const gone of ["XLK", "XLF", "XLY", "XLV"]) {
+    for (const gone of ["XLK", "XLF", "XLY", "FAS", "LABU"]) {
       assert.ok(!snap.all.some((c) => c.symbol === gone))
     }
   })
@@ -133,7 +143,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.equal(res.state.body?.system, "daily_bottom_buy_v1")
     assert.equal(res.state.body?.separateFromPanic, true)
     assert.ok(Array.isArray(res.state.body?.all))
-    assert.equal(res.state.body.all.length, 9)
+    assert.equal(res.state.body.all.length, 13)
     assert.ok(dbbCalled, "DBB path should fetch Yahoo OHLCV")
     assert.equal(res.state.body?.parsedData, undefined, "must not return market-data shape")
   })

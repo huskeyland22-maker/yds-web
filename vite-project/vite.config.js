@@ -72,6 +72,53 @@ function htmlBuildIdPlugin() {
   }
 }
 
+function dailyBottomBuyDevApi() {
+  const handlerPath = path.resolve(process.cwd(), "../api/_lib/dailyBottomBuyHandler.js")
+  return {
+    name: "daily-bottom-buy-dev-api",
+    configureServer(server) {
+      attachDailyBottomBuyDevApi(server, handlerPath)
+    },
+    configurePreviewServer(server) {
+      attachDailyBottomBuyDevApi(server, handlerPath)
+    },
+  }
+}
+
+function attachDailyBottomBuyDevApi(server, handlerPath) {
+  server.middlewares.use(async (req, res, next) => {
+        const raw = req.url || ""
+        const pathOnly = raw.split("?")[0]
+        if (pathOnly !== "/api/daily-bottom-buy") return next()
+        try {
+          const mod = await import(pathToFileURL(handlerPath).href)
+          await mod.handleDailyBottomBuy(
+            { method: req.method, url: raw, query: {} },
+            {
+              setHeader(name, value) {
+                res.setHeader(name, value)
+              },
+              status(code) {
+                res.statusCode = code
+                return this
+              },
+              json(body) {
+                if (!res.getHeader("Content-Type")) res.setHeader("Content-Type", "application/json; charset=utf-8")
+                res.end(JSON.stringify(body))
+              },
+              end() {
+                res.end()
+              },
+            },
+          )
+        } catch (err) {
+          res.statusCode = 500
+          res.setHeader("Content-Type", "application/json; charset=utf-8")
+          res.end(JSON.stringify({ ok: false, error: err?.message || "daily_bottom_buy_failed" }))
+        }
+      })
+}
+
 function equityDailyBottomBuyDevApi() {
   const handlerPath = path.resolve(process.cwd(), "../api/_lib/equityDailyBottomBuyHandler.js")
   return {
@@ -132,6 +179,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    dailyBottomBuyDevApi(),
     equityDailyBottomBuyDevApi(),
     htmlBuildIdPlugin(),
     VitePWA({
@@ -234,10 +282,6 @@ export default defineConfig({
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },
-      "/api/daily-bottom-buy": {
-        target: "https://yds-web-kappa.vercel.app",
-        changeOrigin: true,
-      },
     },
   },
   preview: {
@@ -267,10 +311,6 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/portfolio-quote": {
-        target: "https://yds-web-kappa.vercel.app",
-        changeOrigin: true,
-      },
-      "/api/daily-bottom-buy": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },

@@ -6,6 +6,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import {
   DAILY_BOTTOM_BUY_ETFS,
+  DAILY_BOTTOM_BUY_WATCHLIST,
   DAILY_BOTTOM_THRESHOLDS,
   stageFromCount,
   evaluateBars,
@@ -27,6 +28,19 @@ describe("daily-bottom-buy V1 product constants", () => {
     assert.equal(DAILY_BOTTOM_THRESHOLDS.stochKMax, 15.4)
     assert.equal(DAILY_BOTTOM_THRESHOLDS.bbPctBMax, 0.01)
     assert.equal(DAILY_BOTTOM_THRESHOLDS.ma20DevMax, -4.2)
+  })
+
+  it("adds POWR, IHE, XLE, and XLV to the watchlist without leveraged ETFs", () => {
+    const symbols = DAILY_BOTTOM_BUY_WATCHLIST.map((e) => e.symbol)
+    assert.deepEqual(symbols, [
+      "SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB",
+      "POWR", "IHE", "XLE", "XLV",
+    ])
+    assert.equal(new Set(symbols).size, symbols.length)
+    assert.ok(symbols.includes("GRID") && symbols.includes("POWR"))
+    for (const gone of ["FAS", "LABU"]) {
+      assert.ok(!symbols.includes(gone))
+    }
   })
 
   it("maps counts to stages", () => {

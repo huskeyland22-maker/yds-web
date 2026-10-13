@@ -15,6 +15,19 @@ export const DAILY_BOTTOM_BUY_ETFS = [
   { symbol: "IBB", theme: "바이오·생명과학", themeShort: "바이오", role: "AI 신약·정밀의료·생명공학" },
 ]
 
+/**
+ * Screen watchlist. The sell-research universe stays DAILY_BOTTOM_BUY_ETFS.
+ * Same theme as an existing ticker is kept when the ticker differs.
+ * FAS and LABU stay off this list because they are leveraged ETFs.
+ */
+export const DAILY_BOTTOM_BUY_WATCHLIST = [
+  ...DAILY_BOTTOM_BUY_ETFS,
+  { symbol: "POWR", theme: "청정에너지", themeShort: "청정에너지", role: "재생에너지·청정 전력" },
+  { symbol: "IHE", theme: "제약", themeShort: "제약", role: "미국 제약" },
+  { symbol: "XLE", theme: "에너지", themeShort: "에너지", role: "석유·가스·에너지" },
+  { symbol: "XLV", theme: "헬스케어", themeShort: "헬스케어", role: "의료·헬스케어" },
+]
+
 /** V1 product constants — frozen from Train validation */
 export const DAILY_BOTTOM_THRESHOLDS = {
   rsiMax: 36,

@@ -44,6 +44,6 @@ test("v43 panel sits between the score and the conditions", () => {
   assert.ok(recordAt > 0 && listAt > recordAt)
   assert.match(page, /selectEquityBuyCandidates\(packed, symbols\)/)
   const etf = readFileSync(join(web, "src/pages/DailyBottomBuyPage.jsx"), "utf8")
-  assert.match(etf, /전체 9개 ETF/)
+  assert.match(etf, /전체 \{payload\.all\.length\}개 ETF/)
   assert.doesNotMatch(etf, /전체 개별 종목 목록/)
 })

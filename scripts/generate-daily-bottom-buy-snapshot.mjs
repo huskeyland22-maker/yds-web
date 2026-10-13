@@ -9,7 +9,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import {
-  DAILY_BOTTOM_BUY_ETFS,
+  DAILY_BOTTOM_BUY_WATCHLIST,
   DAILY_BOTTOM_THRESHOLDS,
   SPLIT_BUY_GUIDE,
   evaluateBars,
@@ -23,7 +23,7 @@ const CACHE = path.join(ROOT, "scripts", ".cache")
 const OUT = path.join(ROOT, "vite-project", "public", "data", "daily-bottom-buy-snapshot.json")
 
 const cards = []
-for (const meta of DAILY_BOTTOM_BUY_ETFS) {
+for (const meta of DAILY_BOTTOM_BUY_WATCHLIST) {
   const cp = path.join(CACHE, `dbb-${meta.symbol.toLowerCase()}-daily-ohlcv.json`)
   if (!fs.existsSync(cp)) {
     cards.push(buildEtfCard(meta, { ok: false, error: "cache_missing" }))
