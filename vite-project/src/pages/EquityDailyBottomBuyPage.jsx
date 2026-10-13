@@ -5,6 +5,7 @@ import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx
 import { attachHoldingQuote, collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { fetchPortfolioQuotes } from "../content/ydsPortfolioQuoteService.js"
 import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
+import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 import {
@@ -24,6 +25,13 @@ import {
 } from "../utils/equityResearchDisplay.js"
 
 const DEFAULT_SYMBOL = "AMZN"
+
+function chosenEquityView(row, signalViews, extraViews, payload) {
+  const scanned = (signalViews || []).find((item) => item?.symbol === row.symbol) || null
+  const extra = extraViews?.[row.symbol] || null
+  if (payload?.view?.symbol === row.symbol) return payload.view
+  return scanned || extra
+}
 
 function formatPrice(v) {
   if (v == null || !Number.isFinite(Number(v))) return null
@@ -121,6 +129,14 @@ export default function EquityDailyBottomBuyPage() {
   const universeKey = universe.map((row) => row.symbol).join("|")
   const catalog = useMemo(() => equityResearchDisplayList(universe), [universe])
   const summaryCatalog = useMemo(() => equitySummaryCatalog(catalog), [catalog])
+  const orderedSummary = useMemo(
+    () =>
+      sortByBuyConditionCount(summaryCatalog, (row) => {
+        const chosen = chosenEquityView(row, signalViews, extraViews, payload)
+        return scoredCountRank(chosen?.ok, chosen?.score)
+      }),
+    [summaryCatalog, signalViews, extraViews, payload],
+  )
 
   useEffect(() => {
     if (!universe.length) return undefined
@@ -511,10 +527,8 @@ export default function EquityDailyBottomBuyPage() {
           <h2 className="yds-dbb-section__title">전체 개별 종목 목록</h2>
         </header>
         <div className="yds-dbb-all">
-          {equitySummaryVisibleRows(summaryCatalog, summaryOpen).map((row) => {
-            const scanned = (signalViews || []).find((item) => item?.symbol === row.symbol) || null
-            const extra = extraViews?.[row.symbol] || null
-            const chosen = payload?.view?.symbol === row.symbol ? payload.view : scanned || extra
+          {equitySummaryVisibleRows(orderedSummary, summaryOpen).map((row) => {
+            const chosen = chosenEquityView(row, signalViews, extraViews, payload)
             const summary = equitySummaryRow(chosen)
             const theme = row.holding ? row.group : chosen?.group || row.group || "—"
             return (

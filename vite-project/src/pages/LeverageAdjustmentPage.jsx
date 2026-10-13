@@ -1,4 +1,5 @@
 import { LEVERAGE_ADJUSTMENT_UNIVERSE } from "../content/leverageAdjustmentUniverse.js"
+import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 
 const PLACEHOLDER = "—"
 const STATUS_WAITING = "대기"
@@ -16,7 +17,7 @@ export default function LeverageAdjustmentPage() {
       </header>
 
       <section className="flex flex-col gap-2" aria-label="레버리지 유니버스">
-        {LEVERAGE_ADJUSTMENT_UNIVERSE.map((item) => (
+        {sortByBuyConditionCount(LEVERAGE_ADJUSTMENT_UNIVERSE, (item) => scoredCountRank(item.ok, item.count)).map((item) => (
           <article key={item.symbol} className="yds-dbb-card" data-symbol={item.symbol}>
             <div className="yds-dbb-card__head">
               <h2 className="yds-dbb-card__ticker">{item.symbol}</h2>

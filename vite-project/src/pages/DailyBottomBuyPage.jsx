@@ -14,6 +14,7 @@ import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
+import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 
 function fmtNum(v, digits = 1) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
@@ -180,16 +181,14 @@ export default function DailyBottomBuyPage() {
     return () => ctrl.abort()
   }, [])
 
-  const strong = useMemo(
-    () => (payload?.opportunities || []).filter((c) => c.count >= 4),
+  const etfList = useMemo(
+    () => sortByBuyConditionCount(payload?.all || [], (card) => scoredCountRank(card?.ok, card?.count)),
     [payload],
   )
-  const primary = useMemo(
-    () => (payload?.opportunities || []).filter((c) => c.count === 3),
-    [payload],
-  )
-  const watch = payload?.watch || []
-  const waiting = payload?.waiting || []
+  const strong = useMemo(() => etfList.filter((card) => card.ok && card.count >= 4), [etfList])
+  const primary = useMemo(() => etfList.filter((card) => card.ok && card.count === 3), [etfList])
+  const watch = useMemo(() => etfList.filter((card) => card.ok && card.count === 2), [etfList])
+  const waiting = useMemo(() => etfList.filter((card) => !card.ok || card.count <= 1), [etfList])
 
   const dataBasis = useMemo(() => {
     const asOfDate = pickDailyBottomAsOfDate(payload?.all)
@@ -329,7 +328,7 @@ export default function DailyBottomBuyPage() {
               <h2 className="yds-dbb-section__title">전체 {payload.all.length}개 ETF</h2>
             </header>
             <div className="yds-dbb-all">
-              {(payload.all || []).map((card) => (
+              {etfList.map((card) => (
                 <div key={`all-${card.symbol}`} className="yds-dbb-all__row">
                   <span className="yds-dbb-all__sym">{card.symbol}</span>
                   <span className="yds-dbb-all__theme">
