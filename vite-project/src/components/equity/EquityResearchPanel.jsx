@@ -1,4 +1,5 @@
 import { useState } from "react"
+import DbbReturnHorizonNote from "../dbb/DbbReturnHorizonNote.jsx"
 import { EQUITY_RESEARCH_SUMMARY as study } from "../../content/equityResearchSummary.js"
 
 function signedPct(value) {
@@ -30,6 +31,7 @@ export default function EquityResearchPanel() {
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary className="yds-dbb-section__title">과거 연구 기준</summary>
+      <DbbReturnHorizonNote />
       <p className="yds-dbb-research__lead">개별주식 BUY 조건의 과거 연구 결과입니다.</p>
       <p className="yds-dbb__meta">
         {study.period} · 동일 조건 {study.episodes.toLocaleString("en-US")}건

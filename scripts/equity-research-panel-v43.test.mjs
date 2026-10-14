@@ -44,6 +44,12 @@ test("v43 panel sits between the score and the conditions", () => {
   assert.ok(recordAt > 0 && listAt > recordAt)
   assert.match(page, /selectEquityBuyCandidates\(packed, symbols\)/)
   const etf = readFileSync(join(web, "src/pages/DailyBottomBuyPage.jsx"), "utf8")
+  const note = readFileSync(join(web, "src/components/dbb/DbbReturnHorizonNote.jsx"), "utf8")
+  const horizon = "수익률 평가 기준: 매수 후 20·60·120거래일의 수익률을 비교하며, 60거래일을 핵심 평가 기간으로 삼습니다."
+  assert.ok(note.includes(horizon))
+  assert.ok(panel.indexOf("<DbbReturnHorizonNote />") < panel.indexOf("yds-dbb-research__table"))
+  assert.match(etf, /과거 연구 기준/)
+  assert.match(etf, /<DbbReturnHorizonNote \/>/)
   assert.match(etf, /전체 \{payload\.all\.length\}개 ETF/)
   assert.doesNotMatch(etf, /전체 개별 종목 목록/)
 })

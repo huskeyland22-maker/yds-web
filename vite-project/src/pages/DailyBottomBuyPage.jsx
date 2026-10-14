@@ -14,6 +14,7 @@ import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
+import DbbReturnHorizonNote from "../components/dbb/DbbReturnHorizonNote.jsx"
 import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 
 function fmtNum(v, digits = 1) {
@@ -227,6 +228,11 @@ export default function DailyBottomBuyPage() {
       </header>
 
       <DbbBuyProgressSection items={buyProgress} />
+
+      <details className="yds-dbb-card yds-dbb-research mb-3" open>
+        <summary className="yds-dbb-section__title">과거 연구 기준</summary>
+        <DbbReturnHorizonNote />
+      </details>
 
       <aside className="yds-dbb__notice" aria-label="안내">
         <p>3개 충족 → 1차 매수 후보 · 4개 충족 → 추가 매수 후보</p>
