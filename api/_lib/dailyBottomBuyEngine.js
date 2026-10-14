@@ -26,6 +26,10 @@ export const DAILY_BOTTOM_BUY_WATCHLIST = [
   { symbol: "IHE", theme: "제약", themeShort: "제약", role: "미국 제약" },
   { symbol: "XLE", theme: "에너지", themeShort: "에너지", role: "석유·가스·에너지" },
   { symbol: "XLV", theme: "헬스케어", themeShort: "헬스케어", role: "의료·헬스케어" },
+  { symbol: "VOO", theme: "Vanguard S&P 500 ETF", themeShort: "S&P 500", role: "미국 대형주" },
+  { symbol: "VTV", theme: "Vanguard Value ETF", themeShort: "가치주", role: "미국 가치주" },
+  { symbol: "SCHD", theme: "Schwab U.S. Dividend Equity ETF", themeShort: "배당", role: "미국 배당주" },
+  { symbol: "JEPQ", theme: "JPMorgan Nasdaq Equity Premium Income ETF", themeShort: "나스닥 인컴", role: "나스닥 프리미엄 인컴" },
 ]
 
 /** V1 product constants — frozen from Train validation */

@@ -113,7 +113,7 @@ describe("daily-bottom event detection", () => {
       "URA",
       "IBB",
     ])
-    for (const bad of ["XLK", "XLF", "XLY", "XLV", "TQQQ", "SOXL", "XLP", "VOO", "QQQM", "SCHD", "IAU"]) {
+    for (const bad of ["XLK", "XLF", "XLY", "XLV", "TQQQ", "SOXL", "XLP", "VOO", "VTV", "QQQM", "SCHD", "JEPQ", "IAU"]) {
       assert.ok(!symbols.includes(bad))
     }
   })

@@ -3,7 +3,7 @@
   "system": "daily_bottom_buy_v1",
   "separateFromPanic": true,
   "source": "snapshot",
-  "updatedAt": "2026-10-13T10:11:55.266Z",
+  "updatedAt": "2026-10-14T12:42:39.647Z",
   "thresholds": {
     "rsiMax": 36,
     "stochKMax": 15.4,
@@ -25,7 +25,7 @@
   "counts": {
     "opportunity": 0,
     "watch": 1,
-    "wait": 12
+    "wait": 16
   },
   "opportunities": [],
   "watch": [
@@ -58,6 +58,33 @@
     }
   ],
   "waiting": [
+    {
+      "symbol": "IHE",
+      "theme": "제약",
+      "themeShort": "제약",
+      "role": "미국 제약",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 97.36000061035156,
+      "rsi14": 35.9,
+      "stochK": 35.6,
+      "bbPctB": 0.035,
+      "ma20DevPct": -3.2,
+      "flags": {
+        "rsi": true,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 1,
+      "stage": {
+        "id": "wait",
+        "count": 1,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
     {
       "symbol": "BOTZ",
       "theme": "로봇·자동화",
@@ -194,12 +221,23 @@
       }
     },
     {
-      "symbol": "IHE",
-      "theme": "제약",
-      "themeShort": "제약",
-      "role": "미국 제약",
-      "ok": false,
-      "error": "cache_missing",
+      "symbol": "JEPQ",
+      "theme": "JPMorgan Nasdaq Equity Premium Income ETF",
+      "themeShort": "나스닥 인컴",
+      "role": "나스닥 프리미엄 인컴",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 60.91999816894531,
+      "rsi14": 54.5,
+      "stochK": 52.4,
+      "bbPctB": 0.512,
+      "ma20DevPct": 0,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
       "count": 0,
       "stage": {
         "id": "wait",
@@ -214,8 +252,19 @@
       "theme": "청정에너지",
       "themeShort": "청정에너지",
       "role": "재생에너지·청정 전력",
-      "ok": false,
-      "error": "cache_missing",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 25.68000030517578,
+      "rsi14": 58.2,
+      "stochK": 91.5,
+      "bbPctB": 0.939,
+      "ma20DevPct": 3.3,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
       "count": 0,
       "stage": {
         "id": "wait",
@@ -237,6 +286,33 @@
       "stochK": 88,
       "bbPctB": 1.331,
       "ma20DevPct": 3.8,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "SCHD",
+      "theme": "Schwab U.S. Dividend Equity ETF",
+      "themeShort": "배당",
+      "role": "미국 배당주",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 33.369998931884766,
+      "rsi14": 49.9,
+      "stochK": 70.3,
+      "bbPctB": 0.623,
+      "ma20DevPct": 0.6,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -307,12 +383,77 @@
       }
     },
     {
+      "symbol": "VOO",
+      "theme": "Vanguard S&P 500 ETF",
+      "themeShort": "S&P 500",
+      "role": "미국 대형주",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 715.2000122070312,
+      "rsi14": 58.8,
+      "stochK": 84.9,
+      "bbPctB": 0.779,
+      "ma20DevPct": 1,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "VTV",
+      "theme": "Vanguard Value ETF",
+      "themeShort": "가치주",
+      "role": "미국 가치주",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 220.6699981689453,
+      "rsi14": 50.5,
+      "stochK": 83.3,
+      "bbPctB": 0.649,
+      "ma20DevPct": 0.5,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
       "symbol": "XLE",
       "theme": "에너지",
       "themeShort": "에너지",
       "role": "석유·가스·에너지",
-      "ok": false,
-      "error": "cache_missing",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 67.19999694824219,
+      "rsi14": 69.8,
+      "stochK": 91.9,
+      "bbPctB": 1.116,
+      "ma20DevPct": 5.9,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
       "count": 0,
       "stage": {
         "id": "wait",
@@ -599,8 +740,19 @@
       "theme": "청정에너지",
       "themeShort": "청정에너지",
       "role": "재생에너지·청정 전력",
-      "ok": false,
-      "error": "cache_missing",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 25.68000030517578,
+      "rsi14": 58.2,
+      "stochK": 91.5,
+      "bbPctB": 0.939,
+      "ma20DevPct": 3.3,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
       "count": 0,
       "stage": {
         "id": "wait",
@@ -615,12 +767,23 @@
       "theme": "제약",
       "themeShort": "제약",
       "role": "미국 제약",
-      "ok": false,
-      "error": "cache_missing",
-      "count": 0,
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 97.36000061035156,
+      "rsi14": 35.9,
+      "stochK": 35.6,
+      "bbPctB": 0.035,
+      "ma20DevPct": -3.2,
+      "flags": {
+        "rsi": true,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 1,
       "stage": {
         "id": "wait",
-        "count": 0,
+        "count": 1,
         "label": "대기",
         "priority": 3,
         "splitHint": "대기"
@@ -631,8 +794,19 @@
       "theme": "에너지",
       "themeShort": "에너지",
       "role": "석유·가스·에너지",
-      "ok": false,
-      "error": "cache_missing",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 67.19999694824219,
+      "rsi14": 69.8,
+      "stochK": 91.9,
+      "bbPctB": 1.116,
+      "ma20DevPct": 5.9,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
       "count": 0,
       "stage": {
         "id": "wait",
@@ -654,6 +828,114 @@
       "stochK": 34.3,
       "bbPctB": 0.346,
       "ma20DevPct": -1.1,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "VOO",
+      "theme": "Vanguard S&P 500 ETF",
+      "themeShort": "S&P 500",
+      "role": "미국 대형주",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 715.2000122070312,
+      "rsi14": 58.8,
+      "stochK": 84.9,
+      "bbPctB": 0.779,
+      "ma20DevPct": 1,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "VTV",
+      "theme": "Vanguard Value ETF",
+      "themeShort": "가치주",
+      "role": "미국 가치주",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 220.6699981689453,
+      "rsi14": 50.5,
+      "stochK": 83.3,
+      "bbPctB": 0.649,
+      "ma20DevPct": 0.5,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "SCHD",
+      "theme": "Schwab U.S. Dividend Equity ETF",
+      "themeShort": "배당",
+      "role": "미국 배당주",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 33.369998931884766,
+      "rsi14": 49.9,
+      "stochK": 70.3,
+      "bbPctB": 0.623,
+      "ma20DevPct": 0.6,
+      "flags": {
+        "rsi": false,
+        "stoch": false,
+        "bb": false,
+        "ma20": false
+      },
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3,
+        "splitHint": "대기"
+      }
+    },
+    {
+      "symbol": "JEPQ",
+      "theme": "JPMorgan Nasdaq Equity Premium Income ETF",
+      "themeShort": "나스닥 인컴",
+      "role": "나스닥 프리미엄 인컴",
+      "ok": true,
+      "asOfDate": "2026-10-13",
+      "close": 60.91999816894531,
+      "rsi14": 54.5,
+      "stochK": 52.4,
+      "bbPctB": 0.512,
+      "ma20DevPct": 0,
       "flags": {
         "rsi": false,
         "stoch": false,

@@ -87,7 +87,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     ])
   })
 
-  it("dev server runs the local 13-ETF handler instead of the deployed proxy", () => {
+  it("dev server runs the local 17-ETF handler instead of the deployed proxy", () => {
     const vite = readFileSync(join(root, "vite-project/vite.config.js"), "utf8")
     assert.match(vite, /handleDailyBottomBuy/)
     assert.equal(vite.split('"/api/daily-bottom-buy"').length, 2)
@@ -113,11 +113,15 @@ describe("daily-bottom-buy hobby dispatch", () => {
     )
     assert.equal(snap.ok, true)
     assert.ok(Array.isArray(snap.all))
-    assert.equal(snap.all.length, 13)
+    assert.equal(snap.all.length, 17)
     assert.deepEqual(
       snap.all.map((c) => c.symbol),
-      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB", "POWR", "IHE", "XLE", "XLV"],
+      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB", "POWR", "IHE", "XLE", "XLV", "VOO", "VTV", "SCHD", "JEPQ"],
     )
+    for (const card of snap.all) {
+      assert.equal(card.ok, true, card.symbol)
+      assert.equal(Number.isFinite(card.count), true, card.symbol)
+    }
     for (const gone of ["XLK", "XLF", "XLY", "FAS", "LABU"]) {
       assert.ok(!snap.all.some((c) => c.symbol === gone))
     }
@@ -146,7 +150,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.equal(res.state.body?.system, "daily_bottom_buy_v1")
     assert.equal(res.state.body?.separateFromPanic, true)
     assert.ok(Array.isArray(res.state.body?.all))
-    assert.equal(res.state.body.all.length, 13)
+    assert.equal(res.state.body.all.length, 17)
     assert.ok(dbbCalled, "DBB path should fetch Yahoo OHLCV")
     assert.equal(res.state.body?.parsedData, undefined, "must not return market-data shape")
   })

@@ -21,7 +21,7 @@ describe("daily-bottom-buy V1 product constants", () => {
       DAILY_BOTTOM_BUY_ETFS.map((e) => e.symbol),
       ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB"],
     )
-    for (const gone of ["XLK", "XLF", "XLY", "XLV"]) {
+    for (const gone of ["XLK", "XLF", "XLY", "XLV", "VOO", "VTV", "SCHD", "JEPQ"]) {
       assert.ok(!DAILY_BOTTOM_BUY_ETFS.some((e) => e.symbol === gone))
     }
     assert.equal(DAILY_BOTTOM_THRESHOLDS.rsiMax, 36)
@@ -30,11 +30,11 @@ describe("daily-bottom-buy V1 product constants", () => {
     assert.equal(DAILY_BOTTOM_THRESHOLDS.ma20DevMax, -4.2)
   })
 
-  it("adds POWR, IHE, XLE, and XLV to the watchlist without leveraged ETFs", () => {
+  it("adds the screen ETFs to the watchlist without leveraged ETFs", () => {
     const symbols = DAILY_BOTTOM_BUY_WATCHLIST.map((e) => e.symbol)
     assert.deepEqual(symbols, [
       "SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB",
-      "POWR", "IHE", "XLE", "XLV",
+      "POWR", "IHE", "XLE", "XLV", "VOO", "VTV", "SCHD", "JEPQ",
     ])
     assert.equal(new Set(symbols).size, symbols.length)
     assert.ok(symbols.includes("GRID") && symbols.includes("POWR"))
