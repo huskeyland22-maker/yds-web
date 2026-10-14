@@ -95,6 +95,9 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.match(page, /전체 \{payload\.all\.length\}개 ETF/)
     assert.match(page, /card\.ok \? `\$\{card\.count\}\/4` : "—"/)
     assert.match(page, /: "데이터 없음"/)
+    assert.doesNotMatch(page, /title="관심"/)
+    assert.doesNotMatch(page, /title="대기"/)
+    assert.match(page, /etfList\.map/)
   })
 
   it("frontend API_PATH and snapshot path unchanged", () => {

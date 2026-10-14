@@ -137,6 +137,24 @@ function EtfCard({ card, episodeNote, compact, recordsVersion, onRecordsChange }
   )
 }
 
+function EtfListRow({ card }) {
+  return (
+    <div className="yds-dbb-all__row">
+      <span className="yds-dbb-all__sym">{card.symbol}</span>
+      <span className="yds-dbb-all__theme">
+        {card.themeShort || card.theme}
+        {card.role ? ` · ${card.role}` : ""}
+      </span>
+      <span className="yds-dbb-all__count">
+        {card.ok ? `${card.count}/4` : "—"}
+      </span>
+      <span className={`yds-dbb-all__stage is-${card.ok ? card.stage?.id || "wait" : "error"}`}>
+        {card.ok ? card.stage?.label || "대기" : "데이터 없음"}
+      </span>
+    </div>
+  )
+}
+
 function Section({ title, eyebrow, children, empty }) {
   return (
     <section className="yds-dbb-section">
@@ -188,8 +206,6 @@ export default function DailyBottomBuyPage() {
   )
   const strong = useMemo(() => etfList.filter((card) => card.ok && card.count >= 4), [etfList])
   const primary = useMemo(() => etfList.filter((card) => card.ok && card.count === 3), [etfList])
-  const watch = useMemo(() => etfList.filter((card) => card.ok && card.count === 2), [etfList])
-  const waiting = useMemo(() => etfList.filter((card) => !card.ok || card.count <= 1), [etfList])
 
   const dataBasis = useMemo(() => {
     const asOfDate = pickDailyBottomAsOfDate(payload?.all)
@@ -309,45 +325,13 @@ export default function DailyBottomBuyPage() {
             </div>
           </Section>
 
-          <Section
-            title="관심"
-            eyebrow="2 / 4"
-            empty={!watch.length ? "관심 단계 ETF가 없습니다." : null}
-          >
-            <div className="yds-dbb-grid">
-              {watch.map((card) => (
-                <EtfCard key={card.symbol} card={card} compact {...cardProps} />
-              ))}
-            </div>
-          </Section>
-
-          <Section title="대기" eyebrow="0~1 / 4">
-            <div className="yds-dbb-grid yds-dbb-grid--wait">
-              {waiting.map((card) => (
-                <EtfCard key={card.symbol} card={card} compact {...cardProps} />
-              ))}
-            </div>
-          </Section>
-
           <section className="yds-dbb-section">
             <header className="yds-dbb-section__head">
               <h2 className="yds-dbb-section__title">전체 {payload.all.length}개 ETF</h2>
             </header>
             <div className="yds-dbb-all">
               {etfList.map((card) => (
-                <div key={`all-${card.symbol}`} className="yds-dbb-all__row">
-                  <span className="yds-dbb-all__sym">{card.symbol}</span>
-                  <span className="yds-dbb-all__theme">
-                    {card.themeShort || card.theme}
-                    {card.role ? ` · ${card.role}` : ""}
-                  </span>
-                  <span className="yds-dbb-all__count">
-                    {card.ok ? `${card.count}/4` : "—"}
-                  </span>
-                  <span className={`yds-dbb-all__stage is-${card.ok ? card.stage?.id || "wait" : "error"}`}>
-                    {card.ok ? card.stage?.label || "대기" : "데이터 없음"}
-                  </span>
-                </div>
+                <EtfListRow key={`all-${card.symbol}`} card={card} />
               ))}
             </div>
           </section>
