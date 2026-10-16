@@ -43,6 +43,7 @@ export function getOtherNavItems() {
     { label: "📅 투자 캘린더", path: "/investment-calendar" },
     { label: "🧪 패닉 연구실", path: "/panic-lab" },
     { label: "🧪 연구실", path: "/lab" },
+    { label: "DBB 전향적 검증", path: "/dbb-prospective-v12" },
     { label: "시작하기", path: "/start" },
     { label: "About", path: "/about" },
     { label: "용어 설명", path: "/glossary" },
@@ -86,6 +87,7 @@ export const NAV_MOBILE_SHORT = {
   "/investment-calendar": "캘린더",
   "/investment-playbook": "원칙",
   "/lab": "연구",
+  "/dbb-prospective-v12": "전향 검증",
 }
 
 export const UI_RADAR = {

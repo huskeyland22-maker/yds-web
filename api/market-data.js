@@ -66,6 +66,11 @@ export default async function handler(req, res) {
     return handleDailyBottomBuy(req, res)
   }
 
+  if (resolveYdsMode(req) === "dbb-prospective-ohlcv") {
+    const { handleDbbProspectiveOhlcv } = await import("./_lib/dbbProspectiveOhlcvHandler.js")
+    return handleDbbProspectiveOhlcv(req, res)
+  }
+
   const parsedData = {
     kospi: null,
     kosdaq: null,

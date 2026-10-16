@@ -39,6 +39,7 @@ import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import DailyBottomBuyPage from "./pages/DailyBottomBuyPage.jsx"
+import DbbProspectiveV12Page from "./pages/DbbProspectiveV12Page.jsx"
 import EquityDailyBottomBuyPage from "./pages/EquityDailyBottomBuyPage.jsx"
 import LeverageAdjustmentPage from "./pages/LeverageAdjustmentPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
@@ -1458,6 +1459,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="일상 조정 매수">
                   <DailyBottomBuyPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/dbb-prospective-v12"
+              element={
+                <SectionErrorBoundary label="DBB 전향적 검증">
+                  <DbbProspectiveV12Page />
                 </SectionErrorBoundary>
               }
             />
