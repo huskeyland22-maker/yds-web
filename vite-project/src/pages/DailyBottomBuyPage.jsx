@@ -435,6 +435,7 @@ export default function DailyBottomBuyPage() {
                     system="dbb"
                     symbol={symbol}
                     defaultWeightPct={50}
+                    deriveAmount
                     onChange={onRecordsChange}
                   />
                 </div>
