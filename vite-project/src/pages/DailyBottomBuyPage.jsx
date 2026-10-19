@@ -177,7 +177,7 @@ export default function DailyBottomBuyPage() {
   const stageId = selected?.ok ? selected.stage?.id || "wait" : "error"
 
   return (
-    <div className="yds-dbb min-w-0 w-full">
+    <div className="yds-dbb yds-dbb--dashboard min-w-0 w-full">
       <header className="yds-dbb__hero">
         <p className="yds-dbb__kicker">DAILY BOTTOM BUY</p>
         <h1 className="yds-dbb__title">일상 조정 매수</h1>
@@ -194,7 +194,7 @@ export default function DailyBottomBuyPage() {
         focusStatus
       />
 
-      <details className="yds-dbb-card yds-dbb-research mb-3" open>
+      <details className="yds-dbb-card yds-dbb-research mb-3">
         <summary className="yds-dbb-section__title">과거 연구 기준</summary>
         <DbbReturnHorizonNote />
       </details>
@@ -237,7 +237,7 @@ export default function DailyBottomBuyPage() {
                 {opportunities.map((card) => {
                   const isStrong = card.count >= 4
                   return (
-                    <li key={card.symbol} className="min-w-0">
+                    <li key={card.symbol} className="yds-dbb-cands__item min-w-0">
                       <button
                         type="button"
                         className={`yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100${
@@ -320,100 +320,106 @@ export default function DailyBottomBuyPage() {
           </section>
 
           {symbol && selected ? (
-            <>
-              <section className="yds-dbb-card mb-3">
-                <h2 className="yds-dbb-section__title">현재 상태</h2>
-                <p className="yds-dbb-card__ticker mt-2">
-                  {selected.themeShort || selected.theme || selected.symbol}
-                  <span className="yds-dbb-card__theme-inline"> {selected.symbol}</span>
-                </p>
-                {selected.role ? <p className="yds-dbb__meta">{selected.role}</p> : null}
-                <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">
-                  {formatPrice(selected.close) != null ? `$${formatPrice(selected.close)}` : "—"}
-                </p>
-                <p className="yds-dbb__meta">
-                  {selected.ok && selected.asOfDate ? `기준일 ${selected.asOfDate}` : "기준일 확인 불가"}
-                </p>
-                {episodes[selected.symbol]?.uiNote ? (
-                  <p className="yds-dbb-card__episode">{episodes[selected.symbol].uiNote}</p>
-                ) : null}
-              </section>
-
-              <section
-                className={`yds-dbb-card yds-dbb-score mb-3 yds-dbb-card--${
-                  stageId === "strong" ? "strong" : stageId === "primary" ? "primary" : stageId === "watch" ? "watch" : "wait"
-                }`}
-              >
-                <h2 className="yds-dbb-section__title">DBB SCORE</h2>
-                <p className="yds-dbb-score__state">
-                  {selected.ok ? selected.stage?.label || "대기" : "데이터 없음"}
-                </p>
-                <p className="yds-dbb-card__count">{selected.ok ? `${selected.count} / 4` : "— / 4"}</p>
-                {selected.ok && selected.stage?.splitHint ? (
-                  <p className="yds-dbb-card__hint">{selected.stage.splitHint}</p>
-                ) : null}
-                {selected.ok && selected.count === 2 ? (
-                  <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
-                ) : null}
-              </section>
-
-              {selected.ok ? (
-                <section className="yds-dbb-card mb-3">
-                  <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
-                  <ul className="mt-2 space-y-2">
-                    {[
-                      { id: "rsi", label: "RSI", value: fmtNum(selected.rsi14), pass: selected.flags?.rsi, th: "≤36" },
-                      {
-                        id: "stoch",
-                        label: "Stoch",
-                        value: fmtNum(selected.stochK),
-                        pass: selected.flags?.stoch,
-                        th: "≤15.4",
-                      },
-                      {
-                        id: "bb",
-                        label: "BB %B",
-                        value: fmtNum(selected.bbPctB, 2),
-                        pass: selected.flags?.bb,
-                        th: "≤0.01",
-                      },
-                      {
-                        id: "ma20",
-                        label: "MA20",
-                        value: `${fmtNum(selected.ma20DevPct)}%`,
-                        pass: selected.flags?.ma20,
-                        th: "≤-4.2%",
-                      },
-                    ].map((row) => (
-                      <li key={row.id} className="flex items-baseline justify-between gap-2 text-sm">
-                        <span className="yds-dbb-metric__label w-24 shrink-0">{row.label}</span>
-                        <span
-                          className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
-                        >
-                          {row.value}
-                        </span>
-                        <span className="yds-dbb-metric__label">{row.th}</span>
-                        <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-
-              {selectedStatus?.hasRecords ? (
-                <section className="yds-dbb-card mb-3" aria-label="기록 현황">
-                  <h2 className="yds-dbb-section__title">기록 현황</h2>
-                  <p className="yds-dbb-card__hold mt-2">
-                    보유 중 · {Number(selectedStatus.recordedWeightPct).toFixed(0)}% 매수
+            <div className="yds-dbb-dash mb-3">
+              <div className="yds-dbb-dash__detail">
+                <section className="yds-dbb-card">
+                  <h2 className="yds-dbb-section__title">현재 상태</h2>
+                  <p className="yds-dbb-card__ticker mt-2">
+                    {selected.themeShort || selected.theme || selected.symbol}
+                    <span className="yds-dbb-card__theme-inline"> {selected.symbol}</span>
                   </p>
-                  <div className="yds-dbb-card__trade-status mt-2">
-                    <TradeRecordStatusBlock view={selectedStatus} />
-                  </div>
+                  {selected.role ? <p className="yds-dbb__meta">{selected.role}</p> : null}
+                  <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">
+                    {formatPrice(selected.close) != null ? `$${formatPrice(selected.close)}` : "—"}
+                  </p>
+                  <p className="yds-dbb__meta">
+                    {selected.ok && selected.asOfDate ? `기준일 ${selected.asOfDate}` : "기준일 확인 불가"}
+                  </p>
+                  {episodes[selected.symbol]?.uiNote ? (
+                    <p className="yds-dbb-card__episode">{episodes[selected.symbol].uiNote}</p>
+                  ) : null}
                 </section>
-              ) : null}
 
-              {selected.ok && selected.count >= 3 ? (
-                <div className="mb-3">
+                <section
+                  className={`yds-dbb-card yds-dbb-score yds-dbb-card--${
+                    stageId === "strong"
+                      ? "strong"
+                      : stageId === "primary"
+                        ? "primary"
+                        : stageId === "watch"
+                          ? "watch"
+                          : "wait"
+                  }`}
+                >
+                  <h2 className="yds-dbb-section__title">DBB SCORE</h2>
+                  <p className="yds-dbb-score__state">
+                    {selected.ok ? selected.stage?.label || "대기" : "데이터 없음"}
+                  </p>
+                  <p className="yds-dbb-card__count">{selected.ok ? `${selected.count} / 4` : "— / 4"}</p>
+                  {selected.ok && selected.stage?.splitHint ? (
+                    <p className="yds-dbb-card__hint">{selected.stage.splitHint}</p>
+                  ) : null}
+                  {selected.ok && selected.count === 2 ? (
+                    <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
+                  ) : null}
+                </section>
+
+                {selected.ok ? (
+                  <section className="yds-dbb-card">
+                    <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
+                    <ul className="mt-2 space-y-2">
+                      {[
+                        { id: "rsi", label: "RSI", value: fmtNum(selected.rsi14), pass: selected.flags?.rsi, th: "≤36" },
+                        {
+                          id: "stoch",
+                          label: "Stoch",
+                          value: fmtNum(selected.stochK),
+                          pass: selected.flags?.stoch,
+                          th: "≤15.4",
+                        },
+                        {
+                          id: "bb",
+                          label: "BB %B",
+                          value: fmtNum(selected.bbPctB, 2),
+                          pass: selected.flags?.bb,
+                          th: "≤0.01",
+                        },
+                        {
+                          id: "ma20",
+                          label: "MA20",
+                          value: `${fmtNum(selected.ma20DevPct)}%`,
+                          pass: selected.flags?.ma20,
+                          th: "≤-4.2%",
+                        },
+                      ].map((row) => (
+                        <li key={row.id} className="flex items-baseline justify-between gap-2 text-sm">
+                          <span className="yds-dbb-metric__label w-24 shrink-0">{row.label}</span>
+                          <span
+                            className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                          >
+                            {row.value}
+                          </span>
+                          <span className="yds-dbb-metric__label">{row.th}</span>
+                          <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
+
+                {selectedStatus?.hasRecords ? (
+                  <section className="yds-dbb-card" aria-label="기록 현황">
+                    <h2 className="yds-dbb-section__title">기록 현황</h2>
+                    <p className="yds-dbb-card__hold mt-2">
+                      보유 중 · {Number(selectedStatus.recordedWeightPct).toFixed(0)}% 매수
+                    </p>
+                    <div className="yds-dbb-card__trade-status mt-2">
+                      <TradeRecordStatusBlock view={selectedStatus} />
+                    </div>
+                  </section>
+                ) : null}
+
+                {selected.ok && selected.count >= 3 ? (
                   <button
                     type="button"
                     className="yds-dbb-ack"
@@ -421,10 +427,10 @@ export default function DailyBottomBuyPage() {
                   >
                     {selected.count >= 4 ? "추가 50% 검토 표시" : "1차 50% 검토 표시"}
                   </button>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
 
-              <section className="yds-dbb-card mb-3" aria-label="매수 기록">
+              <section className="yds-dbb-card yds-dbb-dash__trade" aria-label="매수 기록">
                 <h2 className="yds-dbb-section__title">매수 기록</h2>
                 <p className="yds-dbb__notice-muted mt-2">
                   기회 카드에서 쓰던 것과 같은 매수 기록입니다. 실제 매수일·가격·금액·비중을 입력하세요.
@@ -440,7 +446,7 @@ export default function DailyBottomBuyPage() {
                   />
                 </div>
               </section>
-            </>
+            </div>
           ) : (
             <p className="yds-dbb__status" role="status">
               종목을 선택하면 현재 상태와 매수 기록 입력이 표시됩니다. 선택 전에는 기록이 저장되지 않습니다.
