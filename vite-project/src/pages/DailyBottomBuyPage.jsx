@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { fetchDailyBottomBuySnapshot } from "../utils/dailyBottomBuyApi.js"
 import {
   formatDailyBottomDataBasis,
@@ -16,159 +16,58 @@ import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import DbbReturnHorizonNote from "../components/dbb/DbbReturnHorizonNote.jsx"
 import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
+import {
+  closeTickerPicker,
+  initialTickerPickerState,
+  toggleTickerPicker,
+} from "../utils/equityResearchDisplay.js"
 
 function fmtNum(v, digits = 1) {
   if (v == null || !Number.isFinite(Number(v))) return "—"
   return Number(v).toFixed(digits)
 }
 
-function MetricRow({ label, value, ok, suffix = "" }) {
-  return (
-    <div className="yds-dbb-metric">
-      <span className="yds-dbb-metric__label">{label}</span>
-      <span className={`yds-dbb-metric__value${ok ? " is-ok" : ""}`}>
-        {value}
-        {suffix}
-        {ok ? " ✓" : ""}
-      </span>
-    </div>
-  )
+function formatPrice(v) {
+  if (v == null || !Number.isFinite(Number(v))) return null
+  return Number(v).toFixed(2)
 }
 
-function EtfCard({ card, episodeNote, compact, recordsVersion, onRecordsChange }) {
-  const [openTrade, setOpenTrade] = useState(false)
-  const records = useMemo(() => {
-    void recordsVersion
-    if (!card?.symbol) return []
-    return listTradeRecords("dbb", card.symbol)
-  }, [card?.symbol, recordsVersion])
+function etfTickerLabel(card) {
+  if (!card?.symbol) return ""
+  const theme = card.themeShort || card.theme || ""
+  return theme ? `${theme} (${card.symbol})` : card.symbol
+}
 
-  const statusView = useMemo(() => {
-    if (!card?.ok) return null
-    return buildDbbTradeStatusView(card, records, card.asOfDate)
-  }, [card, records])
-
-  if (!card?.ok) {
-    return (
-      <article className="yds-dbb-card yds-dbb-card--error">
-        <header className="yds-dbb-card__head">
-          <div>
-            <h3 className="yds-dbb-card__ticker">{card?.symbol || "—"}</h3>
-            <p className="yds-dbb-card__theme">
-              {card?.themeShort || card?.theme || ""}
-              {card?.role ? ` · ${card.role}` : ""}
-            </p>
-          </div>
-          <p className="yds-dbb-card__stage">데이터 없음</p>
-        </header>
-      </article>
-    )
-  }
-
-  const stageId = card.stage?.id || "wait"
-
+function OpportunityFacts({ card }) {
   return (
-    <article className={`yds-dbb-card yds-dbb-card--${stageId}${compact ? " yds-dbb-card--compact" : ""}`}>
-      <header className="yds-dbb-card__head">
-        <div className="min-w-0">
-          <h3 className="yds-dbb-card__ticker">
-            {card.symbol}
-            <span className="yds-dbb-card__theme-inline">
-              {" "}
-              · {card.themeShort || card.theme}
-              {card.role ? ` · ${card.role}` : ""}
-            </span>
-          </h3>
-        </div>
-        <div className="yds-dbb-card__badge" aria-label={`${card.count} of 4`}>
-          <span className="yds-dbb-card__count">{card.count} / 4</span>
-          <span className="yds-dbb-card__stage">{card.stage?.label}</span>
-        </div>
-      </header>
-
-      {statusView?.hasRecords ? (
-        <p className="yds-dbb-card__hold" aria-label="보유 상태">
-          보유 중 · {Number(statusView.recordedWeightPct).toFixed(0)}% 매수
-        </p>
-      ) : null}
-
-      {!compact && (
-        <div className="yds-dbb-card__metrics">
-          <MetricRow label="RSI" value={fmtNum(card.rsi14)} ok={card.flags?.rsi} />
-          <MetricRow label="Stoch" value={fmtNum(card.stochK)} ok={card.flags?.stoch} />
-          <MetricRow label="BB %B" value={fmtNum(card.bbPctB, 2)} ok={card.flags?.bb} />
-          <MetricRow label="MA20" value={fmtNum(card.ma20DevPct)} ok={card.flags?.ma20} suffix="%" />
-        </div>
-      )}
-
-      {card.count >= 3 && (
-        <p className="yds-dbb-card__hint">{card.stage?.splitHint}</p>
-      )}
-      {card.count === 2 ? (
-        <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
-      ) : null}
-      {episodeNote ? <p className="yds-dbb-card__episode">{episodeNote}</p> : null}
-
-      {statusView?.hasRecords ? (
-        <div className="yds-dbb-card__trade-status">
-          <TradeRecordStatusBlock view={statusView} />
-        </div>
-      ) : null}
-
-      <div className="yds-dbb-trade">
-        <button
-          type="button"
-          className="yds-dbb-trade__toggle"
-          aria-expanded={openTrade}
-          onClick={() => setOpenTrade((v) => !v)}
-        >
-          {openTrade ? "매수 기록 닫기" : "매수 기록"}
-        </button>
-        {openTrade ? (
-          <TradeRecordEditor
-            system="dbb"
-            symbol={card.symbol}
-            defaultWeightPct={50}
-            onChange={onRecordsChange}
-          />
-        ) : null}
+    <dl className="yds-dbb-cand__metrics">
+      <div>
+        <dt>현재가</dt>
+        <dd>{formatPrice(card.close) != null ? `$${formatPrice(card.close)}` : "—"}</dd>
       </div>
-    </article>
-  )
-}
-
-function EtfListRow({ card }) {
-  return (
-    <div className="yds-dbb-all__row">
-      <span className="yds-dbb-all__sym">{card.symbol}</span>
-      <span className="yds-dbb-all__theme">
-        {card.themeShort || card.theme}
-        {card.role ? ` · ${card.role}` : ""}
-      </span>
-      <span className="yds-dbb-all__count">
-        {card.ok ? `${card.count}/4` : "—"}
-      </span>
-      <span className={`yds-dbb-all__stage is-${card.ok ? card.stage?.id || "wait" : "error"}`}>
-        {card.ok ? card.stage?.label || "대기" : "데이터 없음"}
-      </span>
-    </div>
-  )
-}
-
-function Section({ title, eyebrow, children, empty }) {
-  return (
-    <section className="yds-dbb-section">
-      <header className="yds-dbb-section__head">
-        {eyebrow ? <p className="yds-dbb-section__eyebrow">{eyebrow}</p> : null}
-        <h2 className="yds-dbb-section__title">{title}</h2>
-      </header>
-      {empty ? <p className="yds-dbb-section__empty">{empty}</p> : children}
-    </section>
+      <div>
+        <dt>RSI</dt>
+        <dd>{fmtNum(card.rsi14)}</dd>
+      </div>
+      <div>
+        <dt>Stoch</dt>
+        <dd>{fmtNum(card.stochK)}</dd>
+      </div>
+      <div>
+        <dt>BB</dt>
+        <dd>{fmtNum(card.bbPctB, 2)}</dd>
+      </div>
+      <div>
+        <dt>MA20</dt>
+        <dd>{fmtNum(card.ma20DevPct)}%</dd>
+      </div>
+    </dl>
   )
 }
 
 /**
  * 일상 저점매수 V1 — Panic과 분리된 보조 신호 화면
+ * UI flow mirrors equity daily-bottom-buy; ETF snapshot + trade records stay ETF-specific.
  */
 export default function DailyBottomBuyPage() {
   const [payload, setPayload] = useState(null)
@@ -176,6 +75,12 @@ export default function DailyBottomBuyPage() {
   const [loading, setLoading] = useState(true)
   const [episodes, setEpisodes] = useState({})
   const [recordsVersion, setRecordsVersion] = useState(0)
+  /** Empty until user picks an ETF — never auto-saves a trade. */
+  const [symbol, setSymbol] = useState("")
+  const [query, setQuery] = useState("")
+  const [picker, setPicker] = useState(initialTickerPickerState)
+  const pickerRef = useRef(null)
+  const [listOpen, setListOpen] = useState(false)
 
   useEffect(() => {
     const onChange = () => setRecordsVersion((n) => n + 1)
@@ -200,12 +105,47 @@ export default function DailyBottomBuyPage() {
     return () => ctrl.abort()
   }, [])
 
+  useEffect(() => {
+    if (!picker.open) return undefined
+    function onPointerDown(event) {
+      if (!pickerRef.current?.contains(event.target)) setPicker(closeTickerPicker())
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    return () => document.removeEventListener("pointerdown", onPointerDown)
+  }, [picker.open])
+
   const etfList = useMemo(
     () => sortByBuyConditionCount(payload?.all || [], (card) => scoredCountRank(card?.ok, card?.count)),
     [payload],
   )
   const strong = useMemo(() => etfList.filter((card) => card.ok && card.count >= 4), [etfList])
   const primary = useMemo(() => etfList.filter((card) => card.ok && card.count === 3), [etfList])
+  const opportunities = useMemo(() => [...strong, ...primary], [strong, primary])
+
+  const visibleEtfs = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return etfList
+    return etfList.filter((card) => {
+      const hay = `${card.symbol || ""} ${card.themeShort || ""} ${card.theme || ""} ${card.role || ""}`.toLowerCase()
+      return hay.includes(q)
+    })
+  }, [etfList, query])
+
+  const selected = useMemo(() => {
+    if (!symbol) return null
+    return etfList.find((card) => card.symbol === symbol) || null
+  }, [etfList, symbol])
+
+  const selectedRecords = useMemo(() => {
+    void recordsVersion
+    if (!symbol) return []
+    return listTradeRecords("dbb", symbol)
+  }, [symbol, recordsVersion])
+
+  const selectedStatus = useMemo(() => {
+    if (!selected?.ok) return null
+    return buildDbbTradeStatusView(selected, selectedRecords, selected.asOfDate)
+  }, [selected, selectedRecords])
 
   const dataBasis = useMemo(() => {
     const asOfDate = pickDailyBottomAsOfDate(payload?.all)
@@ -219,8 +159,8 @@ export default function DailyBottomBuyPage() {
     )
   }, [payload, recordsVersion])
 
-  function onAck(symbol, kind) {
-    acknowledgeEpisodeTranche(symbol, kind)
+  function onAck(sym, kind) {
+    acknowledgeEpisodeTranche(sym, kind)
     if (payload?.all) setEpisodes(syncDailyBottomEpisodes(payload.all))
   }
 
@@ -228,10 +168,13 @@ export default function DailyBottomBuyPage() {
     setRecordsVersion((n) => n + 1)
   }
 
-  const cardProps = {
-    recordsVersion,
-    onRecordsChange,
+  function selectSymbol(next) {
+    setSymbol(next)
+    setPicker(closeTickerPicker())
   }
+
+  const selectedLabel = selected ? etfTickerLabel(selected) : "ETF를 선택하세요"
+  const stageId = selected?.ok ? selected.stage?.id || "wait" : "error"
 
   return (
     <div className="yds-dbb min-w-0 w-full">
@@ -243,7 +186,13 @@ export default function DailyBottomBuyPage() {
         </p>
       </header>
 
-      <DbbBuyProgressSection items={buyProgress} />
+      <DbbBuyProgressSection
+        items={buyProgress}
+        onSelectSymbol={selectSymbol}
+        showBuyLines
+        selectedSymbol={symbol || null}
+        focusStatus
+      />
 
       <details className="yds-dbb-card yds-dbb-research mb-3" open>
         <summary className="yds-dbb-section__title">과거 연구 기준</summary>
@@ -264,7 +213,7 @@ export default function DailyBottomBuyPage() {
       {loading && <p className="yds-dbb__status">불러오는 중…</p>}
       {error && !payload && <p className="yds-dbb__status yds-dbb__status--err">{error}</p>}
 
-      {payload && (
+      {payload ? (
         <>
           <div className="yds-dbb__meta-block">
             <p className="yds-dbb__meta">{dataBasis.line}</p>
@@ -278,62 +227,260 @@ export default function DailyBottomBuyPage() {
             </p>
           </div>
 
-          <Section
-            eyebrow="현재 매수 기회"
-            title="3개 이상 조건"
-            empty={
-              !strong.length && !primary.length
-                ? "지금 3개 이상 충족 ETF가 없습니다."
-                : null
-            }
-          >
-            <div className="yds-dbb-opps">
-            {strong.map((card) => (
-              <div key={card.symbol} className="yds-dbb-opp">
-                <p className="yds-dbb-opp__tag yds-dbb-opp__tag--strong">강한 저점</p>
-                <EtfCard
-                  card={card}
-                  episodeNote={episodes[card.symbol]?.uiNote}
-                  {...cardProps}
-                />
-                <button
-                  type="button"
-                  className="yds-dbb-ack"
-                  onClick={() => onAck(card.symbol, "add")}
-                >
-                  추가 50% 검토 표시
-                </button>
-              </div>
-            ))}
-            {primary.map((card) => (
-              <div key={card.symbol} className="yds-dbb-opp">
-                <p className="yds-dbb-opp__tag yds-dbb-opp__tag--primary">1차 매수</p>
-                <EtfCard
-                  card={card}
-                  episodeNote={episodes[card.symbol]?.uiNote}
-                  {...cardProps}
-                />
-                <button
-                  type="button"
-                  className="yds-dbb-ack"
-                  onClick={() => onAck(card.symbol, "primary")}
-                >
-                  1차 50% 검토 표시
-                </button>
-              </div>
-            ))}
-            </div>
-          </Section>
+          <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
+            <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
+            <p className="yds-dbb__meta mt-2">3개 이상 조건 · 현재 매수 기회</p>
+            {!opportunities.length ? (
+              <p className="yds-dbb__status">지금 3개 이상 충족 ETF가 없습니다.</p>
+            ) : (
+              <ul className="yds-dbb-cands">
+                {opportunities.map((card) => {
+                  const isStrong = card.count >= 4
+                  return (
+                    <li key={card.symbol} className="min-w-0">
+                      <button
+                        type="button"
+                        className={`yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100${
+                          card.symbol === symbol ? " is-selected" : ""
+                        }`}
+                        aria-pressed={card.symbol === symbol}
+                        onClick={() => selectSymbol(card.symbol)}
+                      >
+                        <p className="yds-dbb-cand__name">
+                          <span className="yds-dbb-cand__title">{card.themeShort || card.theme || card.symbol}</span>
+                          <span className="yds-dbb-cand__ticker">{card.symbol}</span>
+                        </p>
+                        <p className="yds-dbb-cand__type">{isStrong ? "강한 저점" : "1차 매수"}</p>
+                        <p className="yds-dbb-cand__detail">{card.stage?.label || `${card.count}/4`}</p>
+                        <OpportunityFacts card={card} />
+                        {card.stage?.splitHint ? <p className="yds-dbb-cand__status">{card.stage.splitHint}</p> : null}
+                      </button>
+                      <button
+                        type="button"
+                        className="yds-dbb-ack"
+                        onClick={() => onAck(card.symbol, isStrong ? "add" : "primary")}
+                      >
+                        {isStrong ? "추가 50% 검토 표시" : "1차 50% 검토 표시"}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
 
-          <section className="yds-dbb-section">
+          <section className="yds-dbb-card mb-3" aria-label="종목 선택">
+            <h2 className="yds-dbb-section__title">종목 선택</h2>
+            <p className="yds-dbb__notice-muted mt-2">
+              현재 매수 기회에 없어도 워치리스트 ETF를 골라 상태를 보고 매수 기록을 입력할 수 있습니다. 매수일은
+              실제 체결일입니다. 과거 신호일은 메모에만 적으세요. 기록 입력이 신호·에피소드를 다시 만들지
+              않습니다.
+            </p>
+            <div className="yds-dbb-picker" ref={pickerRef}>
+              <button
+                type="button"
+                className="yds-dbb-picker__toggle"
+                aria-expanded={picker.open}
+                aria-controls="etf-ticker-list"
+                onClick={() => setPicker((state) => toggleTickerPicker(state))}
+              >
+                <span>{selectedLabel}</span>
+                <span aria-hidden="true">{picker.open ? "▲" : "▼"}</span>
+              </button>
+              {picker.open ? (
+                <div className="yds-dbb-picker__panel" id="etf-ticker-list">
+                  <label className="block text-xs text-slate-400">
+                    검색
+                    <input
+                      className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
+                      value={query}
+                      placeholder="티커 또는 테마"
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                  </label>
+                  <ul className="yds-dbb-research-list" aria-label="ETF 선택 목록">
+                    {visibleEtfs.map((card) => (
+                      <li key={card.symbol}>
+                        <button
+                          type="button"
+                          className={`yds-dbb-research-list__item${card.symbol === symbol ? " is-selected" : ""}`}
+                          aria-pressed={card.symbol === symbol}
+                          onClick={() => selectSymbol(card.symbol)}
+                        >
+                          {etfTickerLabel(card)}
+                          {card.ok ? ` · ${card.count}/4` : " · 데이터 없음"}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {visibleEtfs.length === 0 ? <p className="yds-dbb__status">검색 결과가 없습니다.</p> : null}
+                </div>
+              ) : null}
+            </div>
+          </section>
+
+          {symbol && selected ? (
+            <>
+              <section className="yds-dbb-card mb-3">
+                <h2 className="yds-dbb-section__title">현재 상태</h2>
+                <p className="yds-dbb-card__ticker mt-2">
+                  {selected.themeShort || selected.theme || selected.symbol}
+                  <span className="yds-dbb-card__theme-inline"> {selected.symbol}</span>
+                </p>
+                {selected.role ? <p className="yds-dbb__meta">{selected.role}</p> : null}
+                <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">
+                  {formatPrice(selected.close) != null ? `$${formatPrice(selected.close)}` : "—"}
+                </p>
+                <p className="yds-dbb__meta">
+                  {selected.ok && selected.asOfDate ? `기준일 ${selected.asOfDate}` : "기준일 확인 불가"}
+                </p>
+                {episodes[selected.symbol]?.uiNote ? (
+                  <p className="yds-dbb-card__episode">{episodes[selected.symbol].uiNote}</p>
+                ) : null}
+              </section>
+
+              <section
+                className={`yds-dbb-card yds-dbb-score mb-3 yds-dbb-card--${
+                  stageId === "strong" ? "strong" : stageId === "primary" ? "primary" : stageId === "watch" ? "watch" : "wait"
+                }`}
+              >
+                <h2 className="yds-dbb-section__title">DBB SCORE</h2>
+                <p className="yds-dbb-score__state">
+                  {selected.ok ? selected.stage?.label || "대기" : "데이터 없음"}
+                </p>
+                <p className="yds-dbb-card__count">{selected.ok ? `${selected.count} / 4` : "— / 4"}</p>
+                {selected.ok && selected.stage?.splitHint ? (
+                  <p className="yds-dbb-card__hint">{selected.stage.splitHint}</p>
+                ) : null}
+                {selected.ok && selected.count === 2 ? (
+                  <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
+                ) : null}
+              </section>
+
+              {selected.ok ? (
+                <section className="yds-dbb-card mb-3">
+                  <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
+                  <ul className="mt-2 space-y-2">
+                    {[
+                      { id: "rsi", label: "RSI", value: fmtNum(selected.rsi14), pass: selected.flags?.rsi, th: "≤36" },
+                      {
+                        id: "stoch",
+                        label: "Stoch",
+                        value: fmtNum(selected.stochK),
+                        pass: selected.flags?.stoch,
+                        th: "≤15.4",
+                      },
+                      {
+                        id: "bb",
+                        label: "BB %B",
+                        value: fmtNum(selected.bbPctB, 2),
+                        pass: selected.flags?.bb,
+                        th: "≤0.01",
+                      },
+                      {
+                        id: "ma20",
+                        label: "MA20",
+                        value: `${fmtNum(selected.ma20DevPct)}%`,
+                        pass: selected.flags?.ma20,
+                        th: "≤-4.2%",
+                      },
+                    ].map((row) => (
+                      <li key={row.id} className="flex items-baseline justify-between gap-2 text-sm">
+                        <span className="yds-dbb-metric__label w-24 shrink-0">{row.label}</span>
+                        <span
+                          className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                        >
+                          {row.value}
+                        </span>
+                        <span className="yds-dbb-metric__label">{row.th}</span>
+                        <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {selectedStatus?.hasRecords ? (
+                <section className="yds-dbb-card mb-3" aria-label="기록 현황">
+                  <h2 className="yds-dbb-section__title">기록 현황</h2>
+                  <p className="yds-dbb-card__hold mt-2">
+                    보유 중 · {Number(selectedStatus.recordedWeightPct).toFixed(0)}% 매수
+                  </p>
+                  <div className="yds-dbb-card__trade-status mt-2">
+                    <TradeRecordStatusBlock view={selectedStatus} />
+                  </div>
+                </section>
+              ) : null}
+
+              {selected.ok && selected.count >= 3 ? (
+                <div className="mb-3">
+                  <button
+                    type="button"
+                    className="yds-dbb-ack"
+                    onClick={() => onAck(selected.symbol, selected.count >= 4 ? "add" : "primary")}
+                  >
+                    {selected.count >= 4 ? "추가 50% 검토 표시" : "1차 50% 검토 표시"}
+                  </button>
+                </div>
+              ) : null}
+
+              <section className="yds-dbb-card mb-3" aria-label="매수 기록">
+                <h2 className="yds-dbb-section__title">매수 기록</h2>
+                <p className="yds-dbb__notice-muted mt-2">
+                  기회 카드에서 쓰던 것과 같은 매수 기록입니다. 실제 매수일·가격·금액·비중을 입력하세요.
+                </p>
+                <div className="yds-dbb-trade mt-2">
+                  <TradeRecordEditor
+                    key={symbol}
+                    system="dbb"
+                    symbol={symbol}
+                    defaultWeightPct={50}
+                    onChange={onRecordsChange}
+                  />
+                </div>
+              </section>
+            </>
+          ) : (
+            <p className="yds-dbb__status" role="status">
+              종목을 선택하면 현재 상태와 매수 기록 입력이 표시됩니다. 선택 전에는 기록이 저장되지 않습니다.
+            </p>
+          )}
+
+          <section className="yds-dbb-section" aria-label="전체 ETF 목록">
             <header className="yds-dbb-section__head">
               <h2 className="yds-dbb-section__title">전체 {payload.all.length}개 ETF</h2>
             </header>
             <div className="yds-dbb-all">
-              {etfList.map((card) => (
-                <EtfListRow key={`all-${card.symbol}`} card={card} />
+              {(listOpen ? etfList : etfList.slice(0, 10)).map((card) => (
+                <button
+                  key={`all-${card.symbol}`}
+                  type="button"
+                  className={`yds-dbb-all__row${card.symbol === symbol ? " is-selected" : ""}`}
+                  aria-pressed={card.symbol === symbol}
+                  onClick={() => selectSymbol(card.symbol)}
+                >
+                  <span className="yds-dbb-all__sym">{card.symbol}</span>
+                  <span className="yds-dbb-all__theme">
+                    {card.themeShort || card.theme}
+                    {card.role ? ` · ${card.role}` : ""}
+                  </span>
+                  <span className="yds-dbb-all__count">{card.ok ? `${card.count}/4` : "—"}</span>
+                  <span className={`yds-dbb-all__stage is-${card.ok ? card.stage?.id || "wait" : "error"}`}>
+                    {card.ok ? card.stage?.label || "대기" : "데이터 없음"}
+                  </span>
+                </button>
               ))}
             </div>
+            {etfList.length > 10 ? (
+              <button
+                type="button"
+                className="yds-dbb-all__more"
+                aria-expanded={listOpen}
+                onClick={() => setListOpen((open) => !open)}
+              >
+                {listOpen ? "목록 접기" : `나머지 ${etfList.length - 10}개 더 보기`}
+              </button>
+            ) : null}
           </section>
 
           <footer className="yds-dbb__footer">
@@ -342,7 +489,7 @@ export default function DailyBottomBuyPage() {
             <p className="yds-dbb__notice-muted">Panic Index와 완전히 별개의 시스템입니다.</p>
           </footer>
         </>
-      )}
+      ) : null}
     </div>
   )
 }
