@@ -39226,6 +39226,255 @@ button.yds-dbb-all__row.is-selected {
   }
 }
 
+/* Equity daily-bottom-buy dashboard (scoped; does not alter ETF --dashboard rules) */
+.yds-dbb--equity-dash {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0.4rem 0.35rem 1.35rem;
+}
+@media (min-width: 768px) {
+  .yds-dbb--equity-dash {
+    padding: 0.5rem 0.65rem 1.65rem;
+  }
+}
+.yds-dbb--equity-dash .yds-dbb-holdings {
+  margin-top: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+.yds-dbb--equity-dash .yds-dbb-holdings__grid,
+.yds-dbb--equity-dash .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
+  align-items: stretch;
+  gap: 0.65rem;
+  justify-content: stretch;
+  grid-template-columns: minmax(0, 1fr);
+}
+.yds-dbb--equity-dash .yds-dbb-holdings__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  height: 100%;
+  min-height: 0;
+  padding: 0.65rem 0.75rem 0.7rem;
+}
+.yds-dbb--equity-dash .yds-dbb-cands {
+  gap: 0.65rem;
+  justify-content: stretch;
+  grid-template-columns: minmax(0, 1fr);
+}
+.yds-dbb--equity-dash .yds-dbb-cands__item {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+.yds-dbb--equity-dash .yds-dbb-cands__item .yds-dbb-cand {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.yds-dbb--equity-dash .yds-dbb-cands__item .yds-dbb-cand__metrics {
+  margin-top: auto;
+  padding-top: 0.35rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.yds-dbb--equity-dash .yds-dbb-cand.is-selected {
+  border-color: rgba(125, 211, 252, 0.55);
+  background: rgba(14, 116, 144, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.18);
+}
+.yds-dbb--equity-dash .yds-dbb-picker-card {
+  border-color: rgba(125, 211, 252, 0.18);
+}
+.yds-dbb--equity-dash .yds-dbb-picker {
+  margin-top: 0.55rem;
+}
+.yds-dbb--equity-dash .yds-dbb-dash {
+  display: grid;
+  gap: 0.65rem;
+  align-items: stretch;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__detail {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  align-content: start;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__detail > .yds-dbb-card,
+.yds-dbb--equity-dash .yds-dbb-dash__detail > .yds-dbb-research {
+  margin-bottom: 0;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__detail .yds-dbb-card--compact {
+  padding: 0.55rem 0.7rem 0.6rem;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__detail .yds-dbb-card__hint {
+  margin-top: 0.25rem;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__detail .yds-dbb-score .yds-dbb-card__count {
+  margin-top: 0.15rem;
+}
+.yds-dbb--equity-dash .yds-dbb-cond {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.yds-dbb--equity-dash .yds-dbb-cond__row {
+  display: grid;
+  grid-template-columns: minmax(3.5rem, 4.5rem) minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.8125rem;
+  min-width: 0;
+}
+.yds-dbb--equity-dash .yds-dbb-cond__name {
+  min-width: 0;
+}
+.yds-dbb--equity-dash .yds-dbb-cond__th {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__reading {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  position: sticky;
+  top: 0.5rem;
+  padding: 0.7rem 0.8rem 0.85rem;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade-stack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+  min-height: 0;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-dbb-trade {
+  margin-top: 0;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade-fill {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  min-height: 0;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade-status {
+  min-width: 0;
+  padding: 0.55rem 0.6rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.55);
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade-sub {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec,
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__form,
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__grid,
+.yds-dbb--equity-dash .yds-dbb-dash__trade input,
+.yds-dbb--equity-dash .yds-dbb-dash__trade select {
+  max-width: 100%;
+  min-width: 0;
+}
+.yds-dbb--equity-dash .yds-dbb-research summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+.yds-dbb--equity-dash .yds-dbb-research summary::-webkit-details-marker {
+  display: none;
+}
+.yds-dbb--equity-dash .yds-dbb-research summary::after {
+  content: "펼치기";
+  flex: none;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+}
+.yds-dbb--equity-dash .yds-dbb-research[open] summary::after {
+  content: "접기";
+}
+.yds-dbb--equity-dash .yds-dbb-all-section {
+  margin-top: 0.35rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+.yds-dbb--equity-dash .yds-dbb-all {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.yds-dbb--equity-dash .yds-dbb-all__row {
+  min-width: 0;
+}
+.yds-dbb--equity-dash .yds-dbb-all__theme,
+.yds-dbb--equity-dash .yds-dbb-all__theme-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.yds-dbb--equity-dash button.yds-dbb-all__row.is-selected {
+  background: rgba(14, 116, 144, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.28);
+}
+@media (min-width: 640px) {
+  .yds-dbb--equity-dash .yds-dbb-holdings__grid,
+  .yds-dbb--equity-dash .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
+    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+  }
+  .yds-dbb--equity-dash .yds-dbb-cands {
+    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+  }
+}
+@media (min-width: 960px) {
+  .yds-dbb--equity-dash .yds-dbb-holdings__grid,
+  .yds-dbb--equity-dash .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
+    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+  }
+  .yds-dbb--equity-dash .yds-dbb-cands {
+    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+  }
+  .yds-dbb--equity-dash .yds-dbb-dash {
+    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+  }
+}
+@media (min-width: 1280px) {
+  .yds-dbb--equity-dash .yds-dbb-holdings__grid,
+  .yds-dbb--equity-dash .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
+    grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
+  }
+}
+@media (max-width: 959px) {
+  .yds-dbb--equity-dash .yds-dbb-dash__trade {
+    position: static;
+    height: auto;
+  }
+  .yds-dbb--equity-dash .yds-dbb-dash__trade-fill {
+    justify-content: flex-start;
+  }
+  .yds-dbb--equity-dash .yds-dbb-cond__row {
+    grid-template-columns: minmax(3.25rem, 4rem) minmax(0, 1fr) minmax(0, 1fr) auto;
+  }
+}
+
 /* ── Manual trade records (DBB / Panic) ── */
 .yds-dbb-trade {
   margin-top: 0.4rem;
@@ -39497,4 +39746,25 @@ button.yds-dbb-holdings__card {
     font-size: 0.6rem;
   }
 }
+
+
+.yds-signal-track__summary {
+  margin: 0.75rem 0;
+  color: var(--yds-text-muted, #9aa3b2);
+  font-size: 0.92rem;
+}
+.yds-signal-track__summary p + p { margin-top: 0.25rem; }
+.yds-signal-track__filters { display: flex; gap: 0.4rem; margin: 0.5rem 0 0.75rem; }
+.yds-signal-track__filter {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  background: transparent;
+  color: inherit;
+}
+.yds-signal-track__filter.is-on { border-color: #d4a017; color: #f3d48a; }
+.yds-signal-track__table td { white-space: nowrap; vertical-align: top; }
+.yds-signal-track__horizon,
+.yds-signal-track__pending { display: flex; flex-direction: column; gap: 0.1rem; }
+.yds-signal-track__name { opacity: 0.75; }
 

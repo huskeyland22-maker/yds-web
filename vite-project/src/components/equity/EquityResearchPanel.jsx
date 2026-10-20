@@ -21,7 +21,7 @@ const HORIZONS = [
 ]
 
 export default function EquityResearchPanel() {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const low = study.buyLimitation
   const stats = study["T60 statistical"]
   return (

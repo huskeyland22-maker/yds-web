@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import EquityResearchPanel from "../components/equity/EquityResearchPanel.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
+import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import { attachHoldingQuote, collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { fetchPortfolioQuotes } from "../content/ydsPortfolioQuoteService.js"
-import { TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
+import { formatUsdPrice, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
@@ -312,13 +313,16 @@ export default function EquityDailyBottomBuyPage() {
   }, [universe, signalViews, extraViews, payload?.view, recordsVersion, holdingQuotes])
 
   const view = payload?.view
+  const detailMatchesSymbol = Boolean(view?.ok && view.symbol === symbol)
+  const detailPending = Boolean(view?.ok && view.symbol !== symbol)
   const priceText = formatPrice(view?.price)
   const atrText = formatAtr(view?.atrPct)
-  const conditionType = equityCandidateConditionType(view)
-  const dd120Text = formatDd120(view?.dd120)
+  const conditionType = detailMatchesSymbol ? equityCandidateConditionType(view) : null
+  const dd120Text = detailMatchesSymbol ? formatDd120(view?.dd120) : null
+  const selectedProgress = buyProgress.find((item) => item.symbol === symbol) || null
 
   return (
-    <div className="yds-dbb min-w-0 w-full">
+    <div className="yds-dbb yds-dbb--equity-dash min-w-0 w-full">
       <header className="yds-dbb__hero">
         <p className="yds-dbb__kicker">EQUITY DAILY BOTTOM BUY</p>
         <h1 className="yds-dbb__title">개별 종목 Daily Bottom Buy</h1>
@@ -345,7 +349,7 @@ export default function EquityDailyBottomBuyPage() {
             {candidates.map((row) => {
               const type = equityCandidateConditionType(row)
               return (
-                <li key={row.symbol} className="min-w-0">
+                <li key={row.symbol} className="yds-dbb-cands__item min-w-0">
                   <button
                     type="button"
                     className={`yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100${row.symbol === symbol ? " is-selected" : ""}`}
@@ -374,8 +378,9 @@ export default function EquityDailyBottomBuyPage() {
         )}
       </section>
 
-      <section className="yds-dbb-card mb-3">
+      <section className="yds-dbb-card yds-dbb-picker-card mb-3" aria-label="종목 선택">
         <h2 className="yds-dbb-section__title">종목 선택</h2>
+        <p className="yds-dbb__meta mt-1">검색·그룹으로 워치리스트를 좁힌 뒤 종목을 고릅니다.</p>
         <div className="yds-dbb-picker" ref={pickerRef}>
           <button
             type="button"
@@ -436,95 +441,176 @@ export default function EquityDailyBottomBuyPage() {
         </div>
       </section>
 
-      {loading && <p className="yds-dbb__status">불러오는 중…</p>}
-
-      {!loading && (!view || !view.ok) ? (
-        <p className="yds-dbb__status" role="status">
-          {view?.message || payload?.message || "데이터 준비 중"}
-        </p>
-      ) : null}
-
-      {!loading && view?.ok ? (
-        <>
-          <section className="yds-dbb-card mb-3">
-            <h2 className="yds-dbb-section__title">현재 상태</h2>
-            <p className="yds-dbb-card__ticker mt-2">
-              {view.name}
-              <span className="yds-dbb-card__theme-inline"> {view.symbol}</span>
+      <div className="yds-dbb-dash mb-3">
+        <div className="yds-dbb-dash__detail">
+          {loading || detailPending ? (
+            <p className="yds-dbb__status" role="status">
+              {detailPending ? `${symbol} 상세를 불러오는 중…` : "불러오는 중…"}
             </p>
-            <p className="yds-dbb__meta">{view.group}</p>
-            <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">{priceText}</p>
-            <p className="yds-dbb__meta">기준일 {view.asOf}</p>
-            {view.source === "cache" ? <p className="yds-dbb__meta">저장된 시세 기준</p> : null}
-          </section>
+          ) : null}
 
-          <section className={`yds-dbb-card yds-dbb-score mb-3 yds-dbb-card--${view.state?.id === "strongLow" ? "strong" : view.state?.id === "firstBuy" ? "primary" : view.state?.id === "interest" ? "watch" : "wait"}`}>
-            <h2 className="yds-dbb-section__title">DBB SCORE</h2>
-            <p className="yds-dbb-score__state">{view.state?.label}</p>
-            <p className="yds-dbb-card__count">{view.score} / 4</p>
-            {view.state?.detail ? <p className="yds-dbb-card__hint">{view.state.detail}</p> : null}
-            {conditionType ? <p className="yds-dbb-score__type">{conditionType.title}</p> : null}
-            {dd120Text ? (
-              <p className="yds-dbb-score__dd">
-                <span>120일 고점 대비</span>
-                <strong className="tabular-nums">{dd120Text}</strong>
-              </p>
-            ) : null}
-          </section>
+          {!loading && !detailPending && (!view || !view.ok) ? (
+            <p className="yds-dbb__status" role="status">
+              {view?.message || payload?.message || "데이터 준비 중"}
+            </p>
+          ) : null}
 
-          <EquityResearchPanel />
+          {detailMatchesSymbol ? (
+            <>
+              <section className="yds-dbb-card yds-dbb-card--compact">
+                <h2 className="yds-dbb-section__title">현재 상태</h2>
+                <p className="yds-dbb-card__ticker mt-1.5">
+                  {view.name}
+                  <span className="yds-dbb-card__theme-inline"> {view.symbol}</span>
+                </p>
+                <p className="yds-dbb__meta">{view.group}</p>
+                <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{priceText}</p>
+                <p className="yds-dbb__meta">기준일 {view.asOf}</p>
+                {view.source === "cache" ? <p className="yds-dbb__meta">저장된 시세 기준</p> : null}
+              </section>
 
-          <section className="yds-dbb-card mb-3">
-            <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
-            <ul className="mt-2 space-y-2">
-              {view.conditions.map((row) => {
-                const valueText = formatCondition(row)
-                return (
-                  <li key={row.id} className="flex items-baseline justify-between gap-2 text-sm">
-                    <span className="yds-dbb-metric__label w-24 shrink-0">{row.label}</span>
-                    <span className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}>
-                      {valueText ?? "—"}
-                    </span>
-                    <span className="yds-dbb-metric__label">{row.thresholdText}</span>
-                    <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
-                  </li>
-                )
-              })}
-            </ul>
-          </section>
+              <section
+                className={`yds-dbb-card yds-dbb-card--compact yds-dbb-score yds-dbb-card--${
+                  view.state?.id === "strongLow"
+                    ? "strong"
+                    : view.state?.id === "firstBuy"
+                      ? "primary"
+                      : view.state?.id === "interest"
+                        ? "watch"
+                        : "wait"
+                }`}
+              >
+                <h2 className="yds-dbb-section__title">DBB SCORE</h2>
+                <p className="yds-dbb-score__state">{view.state?.label}</p>
+                <p className="yds-dbb-card__count">{view.score} / 4</p>
+                {view.state?.detail ? <p className="yds-dbb-card__hint">{view.state.detail}</p> : null}
+                {conditionType ? <p className="yds-dbb-score__type">{conditionType.title}</p> : null}
+                {dd120Text ? (
+                  <p className="yds-dbb-score__dd">
+                    <span>120일 고점 대비</span>
+                    <strong className="tabular-nums">{dd120Text}</strong>
+                  </p>
+                ) : null}
+              </section>
 
-          <section className="yds-dbb-card mb-3">
-            <h2 className="yds-dbb-section__title">ATR RISK</h2>
-            <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
-            <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
-            <p className="yds-dbb-card__hint">{view.atrNote}</p>
-            <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
-          </section>
+              <EquityResearchPanel />
 
-          <section className="yds-dbb__notice" aria-label="해석">
-            <p>{view.state?.reading}</p>
-            <p>{view.note}</p>
-          </section>
-        </>
-      ) : null}
+              <section className="yds-dbb-card yds-dbb-card--compact">
+                <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
+                <ul className="yds-dbb-cond mt-1.5">
+                  {view.conditions.map((row) => {
+                    const valueText = formatCondition(row)
+                    return (
+                      <li key={row.id} className="yds-dbb-cond__row">
+                        <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
+                        <span
+                          className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                        >
+                          {valueText ?? "—"}
+                        </span>
+                        <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.thresholdText}</span>
+                        <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
 
-      <section className="yds-dbb-card mb-3" aria-label="매수 기록">
-        <h2 className="yds-dbb-section__title">매수 기록</h2>
-        <div className="yds-dbb-trade mt-2">
-          <TradeRecordEditor
-            key={symbol}
-            system="dbb"
-            symbol={symbol}
-            defaultWeightPct={50}
-            equityBuyIntent
-            deriveAmount
-          />
+              <section className="yds-dbb-card yds-dbb-card--compact">
+                <h2 className="yds-dbb-section__title">ATR RISK</h2>
+                <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
+                <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
+                <p className="yds-dbb-card__hint">{view.atrNote}</p>
+                <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
+              </section>
+
+              <section className="yds-dbb__notice yds-dbb-dash__reading" aria-label="해석">
+                <p>{view.state?.reading}</p>
+                <p>{view.note}</p>
+              </section>
+            </>
+          ) : null}
         </div>
-      </section>
 
-      <section className="yds-dbb-section" aria-label="전체 개별 종목 목록">
+        <section className="yds-dbb-card yds-dbb-dash__trade" aria-label="매수 기록">
+          <h2 className="yds-dbb-section__title">매수 기록</h2>
+          <p className="yds-dbb__meta mt-1">
+            {selectedLabel} · 실제 체결 기준으로 입력합니다. 목록 수정·삭제는 아래 기록에서만 합니다.
+          </p>
+          <div className="yds-dbb-dash__trade-stack">
+            <div className="yds-dbb-trade">
+              {detailMatchesSymbol ? (
+                <TradeRecordEditor
+                  key={symbol}
+                  system="dbb"
+                  symbol={symbol}
+                  defaultWeightPct={50}
+                  equityBuyIntent
+                  deriveAmount
+                />
+              ) : (
+                <p className="yds-dbb__status" role="status">
+                  선택 종목 상세와 동기화되면 매수 기록을 입력할 수 있습니다.
+                </p>
+              )}
+            </div>
+            <div className="yds-dbb-dash__trade-fill">
+              {!detailMatchesSymbol ? (
+                <p className="yds-dbb__meta">종목 상세가 준비되면 신호 요약이 여기에 표시됩니다.</p>
+              ) : selectedProgress?.statusView ? (
+                <div className="yds-dbb-dash__trade-status" aria-label="이 종목 매수 현황">
+                  <h3 className="yds-dbb-dash__trade-sub">이 종목 현황</h3>
+                  <TradeRecordStatusBlock view={selectedProgress.statusView} />
+                </div>
+              ) : selectedProgress ? (
+                <div className="yds-dbb-dash__trade-status" aria-label="이 종목 매수 현황">
+                  <h3 className="yds-dbb-dash__trade-sub">이 종목 현황</h3>
+                  <div className="yds-trade-status">
+                    <div className="yds-trade-status__row">
+                      <span>기록 비중</span>
+                      <strong className="font-mono tabular-nums">
+                        {Number(selectedProgress.recordedWeightPct).toFixed(0)}%
+                      </strong>
+                    </div>
+                    <div className="yds-trade-status__row">
+                      <span>평균 매수가 (USD)</span>
+                      <strong className="font-mono tabular-nums">
+                        {formatUsdPrice(selectedProgress.avgBuyPrice)}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="yds-dbb-dash__trade-status" aria-label="선택 종목 신호 요약">
+                  <h3 className="yds-dbb-dash__trade-sub">선택 종목 신호</h3>
+                  <div className="yds-trade-status">
+                    <div className="yds-trade-status__row yds-trade-status__row--emphasis">
+                      <span>현재 신호</span>
+                      <strong>{view.state?.label || "—"}</strong>
+                    </div>
+                    <div className="yds-trade-status__row">
+                      <span>DBB SCORE</span>
+                      <strong className="font-mono tabular-nums">{view.score} / 4</strong>
+                    </div>
+                    {conditionType ? (
+                      <div className="yds-trade-status__row">
+                        <span>후보 유형</span>
+                        <strong>{conditionType.title}</strong>
+                      </div>
+                    ) : null}
+                  </div>
+                  <p className="yds-dbb__meta mt-2">저장된 매수 기록이 없으면 입력 폼만 표시됩니다.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section className="yds-dbb-section yds-dbb-all-section" aria-label="전체 개별 종목 목록">
         <header className="yds-dbb-section__head">
           <h2 className="yds-dbb-section__title">전체 개별 종목 목록</h2>
+          <p className="yds-dbb__meta">후보·보유와 별도로 워치리스트 전체를 훑어볼 수 있습니다.</p>
         </header>
         <div className="yds-dbb-all">
           {equitySummaryVisibleRows(orderedSummary, summaryOpen).map((row) => {
