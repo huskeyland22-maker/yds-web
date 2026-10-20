@@ -1,0 +1,534 @@
+/**
+ * YDS UI renewal — phase 6 stock picks / analysis chrome
+ * Opt-in: .app-shell-host.yds-theme-premium + stock-picks page roots only
+ *
+ * Roots: .yds-spick-page | .yds-spick-detail | .yds-spick-compare-page | .yds-spick-ranking-page
+ * Does not restyle validation/backtest/admin pages that also import stock-picks-platform.css.
+ * Signal up/down/buy/exclude meanings preserved (token hues).
+ */
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-spick-page,
+  .yds-spick-detail,
+  .yds-spick-compare-page,
+  .yds-spick-ranking-page
+) {
+  color: var(--yds-text);
+}
+
+/* Shorthand for nested rules */
+.app-shell-host.yds-theme-premium :is(
+  .yds-spick-page,
+  .yds-spick-detail,
+  .yds-spick-compare-page,
+  .yds-spick-ranking-page
+) .yds-spick-page__title,
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__title,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__title,
+.app-shell-host.yds-theme-premium .yds-spick-detail__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page__kicker,
+.app-shell-host.yds-theme-premium .yds-spick-page__sub,
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__sub,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__sub {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page__sub a,
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__link,
+.app-shell-host.yds-theme-premium .yds-spick-detail__back {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-empty {
+  color: var(--yds-text-muted);
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+  padding: var(--yds-space-3);
+}
+
+/* Sync / load banners */
+.app-shell-host.yds-theme-premium .yds-spick-sync-note {
+  background: color-mix(in srgb, var(--yds-signal-warn) 10%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 35%, var(--yds-border));
+  color: #a16207;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-load-banner {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-load-banner--ok {
+  border-color: color-mix(in srgb, var(--yds-signal-up) 35%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-load-banner--partial {
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-load-banner__headline,
+.app-shell-host.yds-theme-premium .yds-spick-load-banner__row {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-load-banner__note {
+  color: #a16207;
+}
+
+/* Invest dashboard */
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell dd {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell--buy dd {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell--watch dd {
+  color: #a16207;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell--exclude dd {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell--up dd {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell--down dd {
+  color: var(--yds-signal-down);
+}
+
+/* Filters / search / tabs / toolbar */
+.app-shell-host.yds-theme-premium .yds-spick-filter-bar {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-filter-bar__label,
+.app-shell-host.yds-theme-premium .yds-spick-filter-bar__count,
+.app-shell-host.yds-theme-premium .yds-spick-filter-bar__check {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-filter-bar__select,
+.app-shell-host.yds-theme-premium .yds-spick-search__input,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__input {
+  background: var(--yds-bg-elevated) !important;
+  border-color: var(--yds-border-strong) !important;
+  color: var(--yds-text) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-filter-bar__reset,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__btn,
+.app-shell-host.yds-theme-premium .yds-spick-toolbar__btn,
+.app-shell-host.yds-theme-premium .yds-spick-country-tabs__btn {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-toolbar__btn--active,
+.app-shell-host.yds-theme-premium .yds-spick-country-tabs__btn--active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-search__label,
+.app-shell-host.yds-theme-premium .yds-spick-search__meta {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-quick__link {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 28%, var(--yds-border));
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-quick__link:hover {
+  background: color-mix(in srgb, var(--yds-accent) 16%, var(--yds-bg-elevated));
+  color: var(--yds-text);
+}
+
+/* Sections / briefing / regime */
+.app-shell-host.yds-theme-premium .yds-spick-section__title,
+.app-shell-host.yds-theme-premium .yds-spick-section__title--tier {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-briefing,
+.app-shell-host.yds-theme-premium .yds-spick-section--briefing .yds-spick-briefing {
+  color: var(--yds-text-secondary);
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+  padding: var(--yds-space-3);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-briefing__line {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-regime-banner,
+.app-shell-host.yds-theme-premium .yds-spick-regime-banner--compact {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-regime-banner__copy,
+.app-shell-host.yds-theme-premium .yds-spick-regime-banner__meta {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-regime-line {
+  color: var(--yds-text-secondary);
+}
+
+/* Cards — list / signal / generic */
+.app-shell-host.yds-theme-premium .yds-spick-card,
+.app-shell-host.yds-theme-premium .yds-spick-signal-card,
+.app-shell-host.yds-theme-premium .yds-spick-card--top3,
+.app-shell-host.yds-theme-premium .yds-spick-card--top5 {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card--top3,
+.app-shell-host.yds-theme-premium .yds-spick-card--top5 {
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 40%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-signal-warn) 5%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card:hover,
+.app-shell-host.yds-theme-premium .yds-spick-signal-card:hover {
+  border-color: color-mix(in srgb, var(--yds-accent) 45%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card__name,
+.app-shell-host.yds-theme-premium .yds-spick-signal-card__name,
+.app-shell-host.yds-theme-premium .yds-spick-card__status,
+.app-shell-host.yds-theme-premium .yds-spick-card__price {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card__link:hover .yds-spick-card__name,
+.app-shell-host.yds-theme-premium .yds-spick-signal-card__link:hover .yds-spick-signal-card__name {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card__score,
+.app-shell-host.yds-theme-premium .yds-spick-signal-card__score,
+.app-shell-host.yds-theme-premium .yds-spick-action__score-lead {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-signal-card__reasons,
+.app-shell-host.yds-theme-premium .yds-spick-card__details-grid dd,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__opinion {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card__details-grid dt,
+.app-shell-host.yds-theme-premium .yds-spick-card__details-summary,
+.app-shell-host.yds-theme-premium .yds-spick-sector-list__price {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-signal-card__country {
+  color: #a16207;
+  background: color-mix(in srgb, var(--yds-signal-warn) 12%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 35%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card__status-change {
+  color: #a16207;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-card__held,
+.app-shell-host.yds-theme-premium .yds-spick-sector-list__held {
+  color: var(--yds-accent);
+  background: var(--yds-accent-soft);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__cta {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 35%, var(--yds-border));
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__cta:hover {
+  background: color-mix(in srgb, var(--yds-accent) 18%, var(--yds-bg-elevated));
+  color: var(--yds-text);
+}
+
+/* Rec status — keep meanings; strengthen light-bg contrast for buy */
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--buy {
+  color: var(--yds-signal-up);
+  background: color-mix(in srgb, var(--yds-signal-up) 10%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-up) 35%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--buy-strong {
+  color: #15803d;
+  background: color-mix(in srgb, #15803d 10%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, #15803d 35%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--watch {
+  color: #a16207;
+  background: color-mix(in srgb, var(--yds-signal-warn) 12%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--scale {
+  color: var(--yds-signal-caution);
+  background: color-mix(in srgb, var(--yds-signal-caution) 10%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-caution) 35%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--exclude {
+  color: var(--yds-signal-down);
+  background: color-mix(in srgb, var(--yds-signal-down) 10%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-down) 35%, var(--yds-border));
+}
+
+/* Up/down deltas readable on light */
+.app-shell-host.yds-theme-premium .yds-spick-price__chg--up,
+.app-shell-host.yds-theme-premium .yds-spick-insight__delta--up,
+.app-shell-host.yds-theme-premium .yds-spick-change__day1--up,
+.app-shell-host.yds-theme-premium .yds-spick-change__shift--up,
+.app-shell-host.yds-theme-premium .yds-spick-rank-track__delta--up,
+.app-shell-host.yds-theme-premium .yds-spick-ai-analysis__score-chg--up,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__return--up,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__ret--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-price__chg--down,
+.app-shell-host.yds-theme-premium .yds-spick-insight__delta--down,
+.app-shell-host.yds-theme-premium .yds-spick-change__day1--down,
+.app-shell-host.yds-theme-premium .yds-spick-change__shift--down,
+.app-shell-host.yds-theme-premium .yds-spick-rank-track__delta--down,
+.app-shell-host.yds-theme-premium .yds-spick-ai-analysis__score-chg--down,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__return--down,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__ret--down {
+  color: var(--yds-signal-down);
+}
+
+/* Detail page */
+.app-shell-host.yds-theme-premium .yds-spick-detail__hero {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  box-shadow: var(--yds-shadow-card);
+  padding: var(--yds-space-3);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-detail__ticker,
+.app-shell-host.yds-theme-premium .yds-spick-detail__country,
+.app-shell-host.yds-theme-premium .yds-spick-detail__status,
+.app-shell-host.yds-theme-premium .yds-spick-detail__comment,
+.app-shell-host.yds-theme-premium .yds-spick-detail__schema-note,
+.app-shell-host.yds-theme-premium .yds-spick-detail__status-label,
+.app-shell-host.yds-theme-premium .yds-spick-detail__eval-label {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-detail__source {
+  color: #15803d;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-detail__future-title,
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__section-title,
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__score-label {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel,
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__section {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__score-val,
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__levels dd,
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__meta dd {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__levels dt,
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__meta dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-detail-panel__bar-track {
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-conf-bar__pct,
+.app-shell-host.yds-theme-premium .yds-spick-conf-bar__meta {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-conf-bar__track {
+  background: var(--yds-bg-muted);
+}
+
+/* Ranking / compare tables */
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__table-wrap,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__table-wrap,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__radar,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__picker {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+  padding: var(--yds-space-3);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__table,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__table,
+.app-shell-host.yds-theme-premium .yds-spick-ranking__head,
+.app-shell-host.yds-theme-premium .yds-spick-ranking__th {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__table th,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__table th {
+  color: var(--yds-text-muted);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__table td,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__table td,
+.app-shell-host.yds-theme-premium .yds-spick-ranking__row {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__name,
+.app-shell-host.yds-theme-premium .yds-spick-ranking__name,
+.app-shell-host.yds-theme-premium .yds-spick-ranking__name strong,
+.app-shell-host.yds-theme-premium .yds-spick-ranking__score {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking__ticker {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking__link:hover {
+  background: var(--yds-accent-soft);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__sort button,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__quick button {
+  background: var(--yds-bg-muted);
+  border: 1px solid var(--yds-border);
+  color: var(--yds-text-secondary);
+  border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ranking-page__sort button[aria-selected="true"],
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__quick button.is-active,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__quick .is-selected {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+/* Alert popover */
+.app-shell-host.yds-theme-premium .yds-spick-alert-pop__trigger {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-alert-pop__trigger--unread {
+  border-color: color-mix(in srgb, var(--yds-accent) 45%, var(--yds-border));
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-alert-pop__panel {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-alert-pop__panel-head,
+.app-shell-host.yds-theme-premium .yds-spick-alert-pop__btn,
+.app-shell-host.yds-theme-premium .yds-spick-alert-pop__link {
+  color: var(--yds-text);
+}
+
+/* Chart tooltips / legend inside stock-picks pages */
+.app-shell-host.yds-theme-premium :is(
+  .yds-spick-page,
+  .yds-spick-detail,
+  .yds-spick-compare-page,
+  .yds-spick-ranking-page
+) .recharts-legend-item-text {
+  color: var(--yds-text-secondary) !important;
+  fill: var(--yds-text-secondary) !important;
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-spick-page,
+  .yds-spick-detail,
+  .yds-spick-compare-page,
+  .yds-spick-ranking-page
+) .recharts-default-tooltip {
+  background: var(--yds-bg-elevated) !important;
+  border-color: var(--yds-border) !important;
+  color: var(--yds-text) !important;
+}
+
+/* Mobile spacing */
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .yds-spick-page,
+  .app-shell-host.yds-theme-premium .yds-spick-detail,
+  .app-shell-host.yds-theme-premium .yds-spick-compare-page,
+  .app-shell-host.yds-theme-premium .yds-spick-ranking-page {
+    padding-inline: 0.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-spick-filter-bar__row {
+    gap: 0.45rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-spick-hub-quick {
+    gap: 0.35rem;
+  }
+}

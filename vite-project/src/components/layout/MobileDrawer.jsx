@@ -36,7 +36,7 @@ export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccount
         onClick={onClose}
       />
       <aside
-        className="fixed top-0 left-0 z-[8600] flex h-[100dvh] w-[min(18.5rem,90vw)] flex-col border-r border-white/[0.08] bg-[#0a0d14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] lg:hidden"
+        className="yds-mobile-drawer fixed top-0 left-0 z-[8600] flex h-[100dvh] w-[min(18.5rem,90vw)] flex-col border-r border-white/[0.08] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] lg:hidden"
       >
         <div className="flex items-center justify-between border-b border-white/[0.06] px-3 py-3">
           <div>

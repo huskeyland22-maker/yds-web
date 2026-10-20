@@ -35,7 +35,7 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
     location.pathname === "/market-dashboard"
 
   return (
-    <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] bg-[#0B0E14] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
+    <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
       <div className="shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
         <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
           Y&apos;ds

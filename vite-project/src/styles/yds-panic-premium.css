@@ -1,0 +1,420 @@
+/**
+ * YDS UI renewal — phase 5 panic / fear page chrome
+ * Opt-in: only under .app-shell-host.yds-theme-premium .yds-market-analysis
+ *
+ * Scope: /market-analysis page body (Panic Index desk).
+ * Does not restyle panic-lab, DBB, or signal calculation colors.
+ * Without .yds-theme-premium, legacy dark panic CSS in index.css applies unchanged.
+ */
+
+/* —— Page chrome —— */
+.app-shell-host.yds-theme-premium .yds-market-analysis {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__subtitle,
+.app-shell-host.yds-theme-premium .yds-market-analysis__sub {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__ops-live {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__ops-time {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__loading {
+  color: var(--yds-text-secondary);
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__lab-link {
+  color: var(--yds-text-secondary);
+  border-color: var(--yds-border);
+  background: var(--yds-bg-elevated);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__lab-link:hover {
+  color: var(--yds-accent);
+  border-color: var(--yds-border-strong);
+}
+
+/* —— Panic center root —— */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__hero {
+  border-bottom-color: var(--yds-border);
+  padding-bottom: var(--yds-space-4);
+  margin-bottom: var(--yds-space-1);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__label,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__asof,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__scale-hint,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__lede,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca-note,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block-label {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__score {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage-sep,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage-range {
+  color: var(--yds-text-muted);
+}
+
+/* DCA / action band */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  border-radius: var(--yds-radius-sm);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca--buy1 {
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 45%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-signal-warn) 8%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca--buy2 {
+  border-color: color-mix(in srgb, var(--yds-signal-caution) 45%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-signal-caution) 8%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca--buy3 {
+  border-color: color-mix(in srgb, var(--yds-signal-down) 45%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-signal-down) 8%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca-band {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca-line {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca-line .font-mono {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__incomplete-title {
+  color: #a16207;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__incomplete-body {
+  color: var(--yds-text-muted);
+}
+
+/* Gauge bar */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__bar {
+  background: var(--yds-bg-muted);
+  box-shadow: inset 0 0 0 1px var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__bar-marker {
+  background: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__bar-labels {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block {
+  border-top-color: var(--yds-border);
+  padding-top: var(--yds-space-4);
+}
+
+/* Fear scale stages */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  opacity: 0.88;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage.is-current {
+  opacity: 1;
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--fear-color, var(--yds-accent)) 42%, var(--yds-border));
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage-name {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage.is-current .yds-panic-center__stage-name {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__now-badge,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__now-tag {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border-strong);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__td-range,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__td-blurb {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage.is-current .yds-panic-center__td-range,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage.is-current .yds-panic-center__td-blurb {
+  color: var(--yds-text-secondary);
+}
+
+/* Drivers table + mobile list */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers thead th {
+  color: var(--yds-text-muted);
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody th,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody td,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tfoot th,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tfoot td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody th {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody td.is-primary {
+  color: var(--yds-text);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody td.is-secondary {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody tr:hover th,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody tr:hover td {
+  background: var(--yds-accent-soft);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tfoot th,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tfoot td {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tfoot td.is-total {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__driver-name {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__driver-src,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__total-hint {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers-mobile > li {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+  padding: var(--yds-space-3);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers-mobile-head,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers-mobile-value {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers-mobile dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers-mobile dd {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers-mobile-total {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 28%, var(--yds-border));
+}
+
+/* History / chart chrome */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-market-trend__heading,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-market-trend__sub,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__hint,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__empty {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__reset {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+  border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__reset:hover {
+  color: var(--yds-text);
+  border-color: var(--yds-border-strong);
+  background: var(--yds-accent-soft);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__chip {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+  border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__chip.is-active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__tooltip {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text);
+  box-shadow: var(--yds-shadow-card);
+  border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__tooltip-date {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .recharts-legend-item-text {
+  color: var(--yds-text-secondary) !important;
+  fill: var(--yds-text-secondary) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .recharts-default-tooltip,
+.app-shell-host.yds-theme-premium .yds-market-analysis .recharts-tooltip-wrapper .yds-panic-spx-val__tooltip {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-market-trend__panel,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__history-slot {
+  color: var(--yds-text-secondary);
+}
+
+/* Trade records (panic page only) */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade {
+  border-top-color: var(--yds-border);
+  margin-top: var(--yds-space-4);
+  padding-top: var(--yds-space-4);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__sub {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__toggle {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__toggle:active,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__toggle:hover {
+  background: var(--yds-accent-soft);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form label,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__memo {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form input,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form select {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border-strong);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form input[readonly] {
+  background: var(--yds-bg-muted);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__save {
+  background: var(--yds-accent);
+  border-color: var(--yds-accent);
+  color: #ffffff;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__cancel {
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__list > li {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__err {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__list-kind {
+  color: var(--yds-text-secondary);
+}
+
+/* Mobile readability */
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .yds-market-analysis {
+    padding-inline: 0.5rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--research {
+    gap: var(--yds-space-4);
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-scale {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage {
+    flex: 1 1 calc(50% - 0.35rem);
+    min-width: 7.5rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__score {
+    font-size: clamp(2.25rem, 12vw, 3rem);
+  }
+}

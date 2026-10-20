@@ -1370,7 +1370,7 @@ function App() {
   return (
     <div
       className={[
-        "app-shell-host flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden overflow-y-visible bg-[#0B0E14] text-slate-200 antialiased transition-shadow duration-700 lg:flex-row",
+        "app-shell-host yds-theme-premium flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden overflow-y-visible antialiased transition-shadow duration-700 lg:flex-row",
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
@@ -1388,7 +1388,7 @@ function App() {
           onLogin={login}
           onLogout={logout}
         />
-        <header className="hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] bg-[#0B0E14]/95 px-3 py-2 backdrop-blur-sm sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
+        <header className="yds-desktop-topbar hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] px-3 py-2 backdrop-blur-sm sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
           <div className="flex flex-wrap items-center justify-end gap-1.5">
             <AppReleaseEnvBadge className="shrink-0" />
             <div className="flex items-center gap-2">

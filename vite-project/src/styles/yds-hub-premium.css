@@ -1,0 +1,623 @@
+/**
+ * YDS UI renewal — phase 7 portfolio / watchlist / alert chrome
+ * Opt-in: .app-shell-host.yds-theme-premium + page roots only
+ *
+ * Roots:
+ *   .yds-pf-v1-page  — /portfolio
+ *   .yds-user-watchlist — /watchlist
+ *   .yds-alert-center — /alert-center (not --lab unless nested under alert page)
+ *
+ * Does not change storage, sync, APIs, or calc. Signal up/down hues preserved.
+ */
+
+/* ═══════════════════════════════════════
+   Portfolio (/portfolio)
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-pf-v1-page {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1-page__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1-page__kicker,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page__sub,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page__foot {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1-page__sub a {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1 {
+  --pf-border: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__market-line,
+.app-shell-host.yds-theme-premium .yds-pf-v1__muted,
+.app-shell-host.yds-theme-premium .yds-pf-v1__note,
+.app-shell-host.yds-theme-premium .yds-pf-v1__empty,
+.app-shell-host.yds-theme-premium .yds-pf-v1__label,
+.app-shell-host.yds-theme-premium .yds-pf-v1__metric-key,
+.app-shell-host.yds-theme-premium .yds-pf-v1__metric-sub,
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-bar-label,
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-caption,
+.app-shell-host.yds-theme-premium .yds-pf-v1__sync-line {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__block {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__h2,
+.app-shell-host.yds-theme-premium .yds-pf-v1__stage,
+.app-shell-host.yds-theme-premium .yds-pf-v1__ticker,
+.app-shell-host.yds-theme-premium .yds-pf-v1__metric-val {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__input,
+.app-shell-host.yds-theme-premium .yds-pf-v1__form input.yds-pf-v1__input,
+.app-shell-host.yds-theme-premium .yds-pf-v1__field-wide .yds-portfolio-v5__search-label input,
+.app-shell-host.yds-theme-premium .yds-pf-v1__field-wide input {
+  background: var(--yds-bg-elevated) !important;
+  border-color: var(--yds-border-strong) !important;
+  color: var(--yds-text) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__btn {
+  background: var(--yds-accent);
+  border-color: var(--yds-accent);
+  color: #ffffff;
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__btn--ghost {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__btn:disabled {
+  opacity: 0.55;
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__holding-row {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__cash-inline {
+  border-top-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__cash-inline input {
+  background: var(--yds-bg-elevated) !important;
+  border-color: var(--yds-border-strong) !important;
+  color: var(--yds-text) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__metric {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__metric-val {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-details-body {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-details-toggle {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-compare {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-posture--ok {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-posture--risk {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-details {
+  border-top-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-breakdown-label,
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-breakdown-detail,
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-subtitle {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-breakdown-score {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-breakdown-row--total {
+  border-top-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-score {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-label {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-grade--A {
+  color: var(--yds-signal-up);
+  background: color-mix(in srgb, var(--yds-signal-up) 12%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-grade--B {
+  color: var(--yds-accent);
+  background: var(--yds-accent-soft);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-grade--C {
+  color: #a16207;
+  background: color-mix(in srgb, var(--yds-signal-warn) 14%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-grade--D,
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit-grade--F {
+  color: var(--yds-signal-down);
+  background: color-mix(in srgb, var(--yds-signal-down) 12%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__remove {
+  color: var(--yds-signal-down);
+  border-color: color-mix(in srgb, var(--yds-signal-down) 30%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-signal-down) 8%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__metric--up .yds-pf-v1__metric-val {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__metric--down .yds-pf-v1__metric-val {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-table-wrap,
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-compare,
+.app-shell-host.yds-theme-premium .yds-pf-v1__fit {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-table th {
+  color: var(--yds-text-muted);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-table td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-bar-track {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-badge--ok {
+  color: var(--yds-signal-up);
+  background: color-mix(in srgb, var(--yds-signal-up) 10%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-badge--warn {
+  color: #a16207;
+  background: color-mix(in srgb, var(--yds-signal-warn) 12%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-badge--excess,
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-badge--short {
+  color: var(--yds-signal-caution);
+  background: color-mix(in srgb, var(--yds-signal-caution) 10%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-pf-v1__alloc-posture--warn {
+  color: #a16207;
+}
+
+/* Search dropdown chrome inside portfolio */
+.app-shell-host.yds-theme-premium .yds-pf-v1-page .yds-portfolio-v5__search-panel,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page .yds-portfolio-v5__suggest {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text);
+  box-shadow: var(--yds-shadow-card);
+}
+
+/* ═══════════════════════════════════════
+   Watchlist (/watchlist)
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-user-watchlist {
+  --uw-border: var(--yds-border);
+  --uw-muted: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__kicker,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__sub,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__note,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__h3,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__score-label,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__ticker,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta-key,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__grades dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__h2,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__name,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__score-val,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__grades dd {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__nav-link {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__alerts,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__dash-block,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__card {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__alerts a,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__dash-list a {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__alerts li,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__dash-list li {
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta--down {
+  color: var(--yds-signal-down);
+}
+
+/* Position badges — keep legacy hues (blue dip / green rise / orange overheat / red downturn) */
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position {
+  border-color: var(--yds-border);
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position--dip,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position--pullback {
+  color: var(--yds-signal-info);
+  background: color-mix(in srgb, var(--yds-signal-info) 10%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position--earlyRise,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position--rising {
+  color: var(--yds-signal-up);
+  background: color-mix(in srgb, var(--yds-signal-up) 10%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position--overheat {
+  color: var(--yds-signal-caution);
+  background: color-mix(in srgb, var(--yds-signal-caution) 10%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position--downturn {
+  color: var(--yds-signal-down);
+  background: color-mix(in srgb, var(--yds-signal-down) 10%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position--sideways {
+  color: var(--yds-text-secondary);
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist input[type="search"],
+.app-shell-host.yds-theme-premium .yds-user-watchlist input[type="text"],
+.app-shell-host.yds-theme-premium .yds-user-watchlist select {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  border-radius: var(--yds-radius-sm);
+}
+
+/* Empty state (shared component nested under watchlist) */
+.app-shell-host.yds-theme-premium .yds-user-watchlist .yds-empty-state,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page .yds-empty-state,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-empty-state {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist .yds-empty-state__title,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page .yds-empty-state__title,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-empty-state__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist .yds-empty-state__desc,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page .yds-empty-state__desc,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-empty-state__desc {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist .yds-empty-state__btn,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page .yds-empty-state__btn,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-empty-state__btn {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist .yds-empty-state__btn--primary,
+.app-shell-host.yds-theme-premium .yds-pf-v1-page .yds-empty-state__btn--primary,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-empty-state__btn--primary {
+  background: var(--yds-accent);
+  border-color: var(--yds-accent);
+  color: #ffffff;
+}
+
+/* ═══════════════════════════════════════
+   Alert center (/alert-center)
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) {
+  --ac-border: var(--yds-border);
+  --ac-muted: var(--yds-text-muted);
+  --ac-accent: var(--yds-accent);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__kicker,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__sub,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row-meta,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__grade-legend,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__causes-label,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__muted,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__empty,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__footnotes {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__active-tag {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__days-chips button {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__days-chips button.is-active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__link,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row-cta {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__section {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__h2 {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__h3,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row-title,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__stock-name {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row-text {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__grade-chips button {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__grade-chips button.is-active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+/* Grade badges — meaning kept, light-bg contrast */
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__grade--S {
+  background: color-mix(in srgb, var(--yds-signal-down) 14%, var(--yds-bg-elevated));
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__grade--A {
+  background: color-mix(in srgb, var(--yds-signal-up) 12%, var(--yds-bg-elevated));
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__grade--B {
+  background: var(--yds-accent-soft);
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__grade--C {
+  background: var(--yds-bg-muted);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__stock-list li,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__market-list li {
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) input,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) select,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) textarea {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) button.yds-alert-center__action,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__mark-read {
+  background: var(--yds-bg-muted);
+  border: 1px solid var(--yds-border);
+  color: var(--yds-text-secondary);
+  border-radius: var(--yds-radius-sm);
+}
+
+/* Unread emphasis if class exists */
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row--unread,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row.is-unread {
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  background: var(--yds-accent-soft);
+}
+
+/* Nested journey strip + pick-alert feed (on alert-center only) */
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-journey-strip {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-journey-strip__label {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-journey-strip__link {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-journey-strip__link--primary {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 35%, var(--yds-border));
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed__title {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed__btn,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed__link {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed__item-link {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed__type,
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed__empty {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-spick-alert-feed__item--unread .yds-spick-alert-feed__item-link {
+  border-color: color-mix(in srgb, var(--yds-accent) 35%, var(--yds-border));
+  background: var(--yds-accent-soft);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-why-explain__btn {
+  color: var(--yds-accent);
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 35%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-why-explain__panel {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-why-explain__panel ul {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-why-explain__title {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__row-cta {
+  color: var(--yds-accent);
+}
+
+/* Mobile */
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .yds-pf-v1-page,
+  .app-shell-host.yds-theme-premium .yds-user-watchlist,
+  .app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) {
+    padding-inline: 0.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-pf-v1__alloc-table-wrap,
+  .app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__stock-list,
+  .app-shell-host.yds-theme-premium .yds-alert-center:not(.yds-alert-center--lab) .yds-alert-center__list--history {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__cards {
+    grid-template-columns: 1fr;
+  }
+}

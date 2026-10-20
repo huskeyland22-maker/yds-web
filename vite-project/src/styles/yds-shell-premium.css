@@ -1,0 +1,165 @@
+/**
+ * YDS UI renewal — phase 3 shell chrome
+ * Opt-in: .yds-theme-premium on .app-shell-host
+ * Without the opt-in class, .app-shell-host keeps legacy terminal colors.
+ * Does not restyle .yds-dbb / .panic-* page domains or signal colors.
+ */
+
+/* —— Default (no premium): preserve prior shell look —— */
+.app-shell-host {
+  background-color: var(--yds-legacy-terminal-bg);
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.app-shell-host .yds-sidebar {
+  background-color: var(--yds-legacy-terminal-bg);
+  border-right-color: var(--yds-legacy-terminal-line);
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.app-shell-host .yds-mobile-app-header,
+.app-shell-host .yds-desktop-topbar {
+  background-color: color-mix(in srgb, var(--yds-legacy-terminal-bg) 95%, transparent);
+  border-bottom-color: var(--yds-legacy-terminal-line);
+  color: rgba(248, 250, 252, 0.92);
+}
+
+.app-shell-host .yds-mobile-bottom-nav {
+  background-color: color-mix(in srgb, var(--yds-legacy-terminal-bg) 96%, transparent);
+  border-top-color: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.app-shell-host .yds-mobile-drawer {
+  background-color: #0a0d14;
+  border-right-color: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.92);
+}
+
+/* —— Premium light shell (opt-in) —— */
+.app-shell-host.yds-theme-premium {
+  background-color: var(--yds-bg);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar {
+  background-color: var(--yds-bg-elevated);
+  border-right: 1px solid var(--yds-border);
+  color: var(--yds-text);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar .font-display,
+.app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-50"],
+.app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-100"] {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-500"],
+.app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-600"],
+.app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-400"] {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-300"] {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar a,
+.app-shell-host.yds-theme-premium .yds-sidebar button.yds-sidebar-core {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar a:hover,
+.app-shell-host.yds-theme-premium .yds-sidebar button.yds-sidebar-core:hover {
+  background-color: var(--yds-accent-soft);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar a[aria-current="page"],
+.app-shell-host.yds-theme-premium .yds-sidebar a.active {
+  background-color: var(--yds-accent-soft);
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar nav[aria-label] {
+  border-left-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-app-header,
+.app-shell-host.yds-theme-premium .yds-desktop-topbar {
+  background-color: color-mix(in srgb, var(--yds-bg-elevated) 92%, transparent);
+  border-bottom: 1px solid var(--yds-border);
+  color: var(--yds-text);
+  backdrop-filter: blur(8px);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-app-header .font-display,
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-white"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-200"] {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-"] {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-app-header button,
+.app-shell-host.yds-theme-premium .yds-desktop-topbar .rounded-card {
+  border-color: var(--yds-border);
+  background-color: var(--yds-bg-elevated);
+  color: var(--yds-text-secondary);
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-bottom-nav {
+  background-color: color-mix(in srgb, var(--yds-bg-elevated) 96%, transparent);
+  border-top: 1px solid var(--yds-border);
+  color: var(--yds-text-muted);
+  backdrop-filter: blur(10px);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-bottom-nav button[aria-current="page"],
+.app-shell-host.yds-theme-premium .yds-mobile-bottom-nav button[aria-current="page"] span {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-bottom-nav button[aria-current="page"] svg {
+  color: var(--yds-accent);
+  stroke: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-drawer {
+  background-color: var(--yds-bg-elevated);
+  border-right: 1px solid var(--yds-border);
+  color: var(--yds-text);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-50"],
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-100"] {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-300"],
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-400"],
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-500"] {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-drawer a[class*="bg-white"],
+.app-shell-host.yds-theme-premium .yds-mobile-drawer a[aria-current="page"] {
+  background-color: var(--yds-accent-soft);
+  color: var(--yds-accent);
+}
+
+/* Shell chrome cards only — not page domain cards (.yds-dbb-card, panic, etc.) */
+.app-shell-host.yds-theme-premium .yds-sidebar .rounded-md,
+.app-shell-host.yds-theme-premium .yds-desktop-topbar .rounded-card {
+  border-radius: var(--yds-radius-md);
+}

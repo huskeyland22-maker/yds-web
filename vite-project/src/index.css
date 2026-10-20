@@ -1,4 +1,7 @@
-﻿@tailwind base;
+﻿/* UI renewal phase 2: additive design tokens (--yds-*). */
+@import "./styles/yds-design-tokens.css";
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 

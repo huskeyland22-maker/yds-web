@@ -44,7 +44,7 @@ export default function MobileBottomNav({ onAi: _onAi, onSettings: _onSettings }
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-[8000] border-t border-white/[0.08] bg-[#080b12]/96 backdrop-blur-md lg:hidden"
+      className="yds-mobile-bottom-nav fixed bottom-0 left-0 right-0 z-[8000] border-t border-white/[0.08] backdrop-blur-md lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="모바일 주요 화면"
     >

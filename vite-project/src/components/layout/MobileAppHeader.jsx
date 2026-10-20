@@ -3,7 +3,7 @@ import AppReleaseEnvBadge from "../AppReleaseEnvBadge.jsx"
 
 export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout }) {
   return (
-    <header className="flex min-h-[44px] shrink-0 items-center justify-between gap-2 border-b border-white/[0.06] bg-[#0B0E14]/98 px-2.5 py-1.5 pt-[max(0.35rem,env(safe-area-inset-top))] backdrop-blur-sm lg:hidden">
+    <header className="yds-mobile-app-header flex min-h-[44px] shrink-0 items-center justify-between gap-2 border-b border-white/[0.06] px-2.5 py-1.5 pt-[max(0.35rem,env(safe-area-inset-top))] backdrop-blur-sm lg:hidden">
       <button
         type="button"
         onClick={onMenuOpen}

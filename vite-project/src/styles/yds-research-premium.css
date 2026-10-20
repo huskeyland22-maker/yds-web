@@ -1,0 +1,727 @@
+/**
+ * YDS UI renewal — phase 8 performance / research / lab chrome
+ * Opt-in: .app-shell-host.yds-theme-premium + page roots only
+ *
+ * Roots:
+ *   .yds-perf-center              — /performance-center
+ *   .yds-perf-val                 — /performance-validation
+ *   .yds-ai-dashboard             — /performance-validation/dashboard
+ *   .yds-track-record-page        — /performance-validation/track-record
+ *   .yds-spick-validation-page    — /performance-validation/picks|pick/:id
+ *   .yds-spick-backtest-page      — /performance-validation/backtest
+ *   .yds-panic-lab                — /panic-lab (market-analysis related)
+ *   .panic-validation-page        — /lab (research + backtest)
+ *   .yds-playbook                 — /investment-playbook
+ *   .yds-inv-cal--page            — /investment-calendar
+ *   .yds-market-analysis .yds-inv-cal--strip — calendar strip on panic page
+ *
+ * Does not change calc, API, storage, or sync. Signal up/down hues preserved.
+ * /market-analysis main chrome remains Phase 5 (yds-panic-premium.css).
+ */
+
+/* ═══════════════════════════════════════
+   Shared helpers under phase-8 roots
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium :is(
+  .yds-perf-center,
+  .yds-perf-val,
+  .yds-ai-dashboard,
+  .yds-track-record-page,
+  .yds-spick-validation-page,
+  .yds-spick-backtest-page,
+  .yds-panic-lab,
+  .panic-validation-page,
+  .yds-playbook,
+  .yds-inv-cal--page
+) {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-perf-center__title,
+  .yds-perf-val__title,
+  .yds-ai-dashboard__title,
+  .yds-track-record-page__title,
+  .yds-spick-validation-page__title,
+  .yds-spick-backtest-page__title,
+  .yds-panic-lab__title,
+  .panic-validation-page__title,
+  .yds-playbook__title,
+  .yds-inv-cal__title
+) {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-perf-center__kicker,
+  .yds-perf-center__sub,
+  .yds-perf-center__note,
+  .yds-perf-val__kicker,
+  .yds-perf-val__sub,
+  .yds-ai-dashboard__sub,
+  .yds-ai-dashboard__scope,
+  .yds-ai-dashboard__empty,
+  .yds-track-record-page__sub,
+  .yds-track-record__empty,
+  .yds-spick-validation-page__sub,
+  .yds-spick-backtest-page__sub,
+  .yds-spick-empty,
+  .yds-panic-lab__kicker,
+  .yds-panic-lab__sub,
+  .yds-panic-lab__note,
+  .panic-validation-page__sub,
+  .panic-validation-panel__note,
+  .panic-validation-panel__bench,
+  .yds-playbook__kicker,
+  .yds-playbook__sub,
+  .yds-playbook__note,
+  .yds-playbook__foot,
+  .yds-inv-cal__kicker,
+  .yds-inv-cal__sub,
+  .yds-inv-cal__empty
+) {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-perf-center__link,
+  .yds-perf-val__nav-link,
+  .yds-perf-val__link,
+  .yds-ai-dashboard__link,
+  .yds-track-record-page__link,
+  .yds-spick-validation-page__link,
+  .yds-spick-validation-page__detail-link,
+  .yds-panic-lab__nav-link,
+  .panic-validation-page__link,
+  .panic-validation-page__inline-link,
+  .yds-playbook__sub a,
+  .yds-inv-cal__link,
+  .yds-spick-detail__back
+) {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-perf-center__h2,
+  .yds-perf-val__h2,
+  .yds-ai-dashboard__h2,
+  .yds-panic-lab__h2,
+  .panic-validation-panel__h2,
+  .panic-validation-page__category-h2,
+  .panic-validation-vs__title,
+  .yds-playbook__h2,
+  .yds-inv-cal__h2,
+  .yds-spick-validation-section__title,
+  .yds-spick-backtest-section__title,
+  .yds-track-record__analysis-title
+) {
+  color: var(--yds-text);
+}
+
+/* ═══════════════════════════════════════
+   Performance Center
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-perf-center {
+  --pc-border: var(--yds-border);
+  --pc-muted: var(--yds-text-muted);
+  --pc-text: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__stat,
+.app-shell-host.yds-theme-premium .yds-perf-center__bench-wrap,
+.app-shell-host.yds-theme-premium .yds-perf-center__table-wrap {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__stat-val,
+.app-shell-host.yds-theme-premium .yds-perf-center__name {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__stat-key {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__stat--up .yds-perf-center__stat-val,
+.app-shell-host.yds-theme-premium .yds-perf-center__pct--up,
+.app-shell-host.yds-theme-premium .yds-perf-center__row--up td {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__stat--down .yds-perf-center__stat-val,
+.app-shell-host.yds-theme-premium .yds-perf-center__pct--down,
+.app-shell-host.yds-theme-premium .yds-perf-center__row--down td {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__table th {
+  background: var(--yds-bg-muted);
+  color: var(--yds-text-muted);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__table td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__row--primary td {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__year-filter select {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border-strong);
+  color: var(--yds-text);
+}
+
+/* Empty state (shared component; base styles are dark-theme) */
+.app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__desc {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__btn {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__btn--primary {
+  background: var(--yds-accent);
+  border-color: var(--yds-accent);
+  color: #ffffff;
+}
+
+/* ═══════════════════════════════════════
+   Performance Validation hub
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-perf-val {
+  --pv-border: var(--yds-border);
+  --pv-muted: var(--yds-text-muted);
+  --pv-text: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__section,
+.app-shell-host.yds-theme-premium .yds-perf-val__stat,
+.app-shell-host.yds-theme-premium .yds-perf-val__grade-block,
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-chip,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-card,
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome-panel,
+.app-shell-host.yds-theme-premium .yds-perf-val__mkt-env-table,
+.app-shell-host.yds-theme-premium .yds-perf-val__detail,
+.app-shell-host.yds-theme-premium .yds-perf-val__system-info,
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-card,
+.app-shell-host.yds-theme-premium .yds-perf-val__table-wrap {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-chip {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-card-title,
+.app-shell-host.yds-theme-premium .yds-perf-val__mkt-env-label,
+.app-shell-host.yds-theme-premium .yds-perf-val__detail-summary,
+.app-shell-host.yds-theme-premium .yds-perf-val__system-info-summary {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-card-line,
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-meta {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-ret--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-ret--down {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__mkt-env-row {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__mkt-env-row--head {
+  color: var(--yds-text-muted);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__h3,
+.app-shell-host.yds-theme-premium .yds-perf-val__note {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__detail-body,
+.app-shell-host.yds-theme-premium .yds-perf-val__system-info-body {
+  border-top-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__detail-summary,
+.app-shell-host.yds-theme-premium .yds-perf-val__system-info-summary {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__stat-val,
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val,
+.app-shell-host.yds-theme-premium .yds-perf-val__grade-label,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-card-title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__stat-key,
+.app-shell-host.yds-theme-premium .yds-perf-val__stat-sub,
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-label,
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-n,
+.app-shell-host.yds-theme-premium .yds-perf-val__grade-meta,
+.app-shell-host.yds-theme-premium .yds-perf-val__chart-empty,
+.app-shell-host.yds-theme-premium .yds-perf-val__chart-label,
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome-lede,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-lede,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-kicker,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-card-n {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val--up,
+.app-shell-host.yds-theme-premium .yds-perf-val__stat--up .yds-perf-val__stat-val {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val--down,
+.app-shell-host.yds-theme-premium .yds-perf-val__stat--down .yds-perf-val__stat-val {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__grade-row {
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__chart-bar-wrap {
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome-horizon,
+.app-shell-host.yds-theme-premium .yds-perf-val select,
+.app-shell-host.yds-theme-premium .yds-perf-val input:not([type="checkbox"]):not([type="radio"]) {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  border-radius: var(--yds-radius-sm);
+}
+
+/* ═══════════════════════════════════════
+   AI dashboard / track record / validation picks / backtest
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__section,
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__card,
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__drill,
+.app-shell-host.yds-theme-premium .yds-track-record__summary > div,
+.app-shell-host.yds-theme-premium .yds-track-record__analysis,
+.app-shell-host.yds-theme-premium .yds-track-record__history,
+.app-shell-host.yds-theme-premium .yds-spick-validation-kpi,
+.app-shell-host.yds-theme-premium .yds-spick-backtest-kpi,
+.app-shell-host.yds-theme-premium .yds-spick-validation-section,
+.app-shell-host.yds-theme-premium .yds-spick-backtest-section {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__card-value,
+.app-shell-host.yds-theme-premium .yds-track-record__summary dd,
+.app-shell-host.yds-theme-premium .yds-spick-validation-kpi dd,
+.app-shell-host.yds-theme-premium .yds-spick-backtest-kpi dd,
+.app-shell-host.yds-theme-premium .yds-spick-validation-page__lifecycle {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__card-label,
+.app-shell-host.yds-theme-premium .yds-track-record__summary dt,
+.app-shell-host.yds-theme-premium .yds-spick-validation-kpi dt,
+.app-shell-host.yds-theme-premium .yds-spick-backtest-kpi dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-ai-dashboard__filter,
+  .yds-track-record__filter,
+  .yds-spick-backtest-page__period
+) {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-ai-dashboard__filter--active,
+  .yds-track-record__filter--active,
+  .yds-spick-backtest-page__period--active
+) {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__date-range input {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-ai-dashboard__table,
+  .yds-track-record__analysis-table,
+  .yds-spick-validation-page__table,
+  .yds-spick-backtest-page__table
+) th {
+  color: var(--yds-text-muted);
+  border-bottom-color: var(--yds-border);
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium :is(
+  .yds-ai-dashboard__table,
+  .yds-track-record__analysis-table,
+  .yds-spick-validation-page__table,
+  .yds-spick-backtest-page__table
+) td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-validation-page__table-wrap,
+.app-shell-host.yds-theme-premium .yds-spick-backtest-page__table-wrap,
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__table-scroll,
+.app-shell-host.yds-theme-premium .yds-track-record__analysis-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--yds-radius-md);
+  border: 1px solid var(--yds-border);
+  background: var(--yds-bg-elevated);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-validation-page__badge {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-ai-dashboard__drill-clear {
+  background: var(--yds-bg-muted);
+  border: 1px solid var(--yds-border);
+  color: var(--yds-text-secondary);
+  border-radius: var(--yds-radius-sm);
+}
+
+/* ═══════════════════════════════════════
+   Panic Lab (market-analysis related)
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-panic-lab {
+  --pl-border: var(--yds-border);
+  --pl-muted: var(--yds-text-muted);
+  --pl-text: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__stat,
+.app-shell-host.yds-theme-premium .yds-panic-lab__chart-wrap,
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-list,
+.app-shell-host.yds-theme-premium .yds-panic-lab__table-wrap {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab table th {
+  color: var(--yds-text-muted);
+  background: var(--yds-bg-muted);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab table td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__stat-val {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__stat-key,
+.app-shell-host.yds-theme-premium .yds-panic-lab__stat-sub,
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-label,
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-sub,
+.app-shell-host.yds-theme-premium .yds-panic-lab__legend-item {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-val {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-bar-wrap {
+  background: var(--yds-bg-muted);
+}
+
+/* Calendar strip on panic page (related chrome; Phase 5 left this dark) */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-inv-cal--strip {
+  --ic-border: var(--yds-border);
+  --ic-muted: var(--yds-text-muted);
+  --ic-text: var(--yds-text-secondary);
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-inv-cal__strip-title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-inv-cal__strip-sub {
+  color: var(--yds-text-muted);
+}
+
+/* ═══════════════════════════════════════
+   Research Lab (/lab) — panic-validation-page
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .panic-validation-page__lab-badge {
+  background: color-mix(in srgb, var(--yds-signal-warn) 14%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 35%, var(--yds-border));
+  color: #a16207;
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-kpi__card,
+.app-shell-host.yds-theme-premium .panic-validation-panel,
+.app-shell-host.yds-theme-premium .panic-validation-vs,
+.app-shell-host.yds-theme-premium .panic-validation-yds-window {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-kpi__label,
+.app-shell-host.yds-theme-premium .panic-validation-vs__sub,
+.app-shell-host.yds-theme-premium .panic-validation-vs__metric-label,
+.app-shell-host.yds-theme-premium .panic-validation-vs__col-head {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-kpi__value,
+.app-shell-host.yds-theme-premium .panic-validation-vs__metric-val,
+.app-shell-host.yds-theme-premium .panic-validation-panel__h3 {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-kpi__value--up,
+.app-shell-host.yds-theme-premium .panic-validation-vs__metric-val--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-kpi__value--down,
+.app-shell-host.yds-theme-premium .panic-validation-vs__metric-val--down {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-yds-tabs button,
+.app-shell-host.yds-theme-premium .panic-validation-event-select {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-yds-tabs button.is-active,
+.app-shell-host.yds-theme-premium .panic-validation-event-select.is-active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-year-table th {
+  color: var(--yds-text-muted);
+  border-bottom-color: var(--yds-border);
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-year-table td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-yds-histogram__bar-wrap {
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-yds-histogram__label,
+.app-shell-host.yds-theme-premium .panic-validation-yds-histogram__value {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-page .yds-empty-state {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-page .yds-empty-state__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-page .yds-empty-state__desc {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-page .yds-empty-state__btn--primary {
+  background: var(--yds-accent);
+  border-color: var(--yds-accent);
+  color: #ffffff;
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-page .research-category-accordion,
+.app-shell-host.yds-theme-premium .panic-validation-page .yds-engine-candidate__validation {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-page .yds-engine-candidate__verdict--adopt {
+  background: color-mix(in srgb, var(--yds-signal-up) 12%, var(--yds-bg-elevated));
+  color: var(--yds-signal-up);
+  border-color: color-mix(in srgb, var(--yds-signal-up) 30%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .panic-validation-page .panic-validation-yds-grade__badge {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text);
+}
+
+/* ═══════════════════════════════════════
+   Investment playbook + calendar page
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-playbook {
+  --pb-border: var(--yds-border);
+  --pb-muted: var(--yds-text-muted);
+  --pb-text: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__section,
+.app-shell-host.yds-theme-premium .yds-playbook__card,
+.app-shell-host.yds-theme-premium .yds-playbook__compliance-badge,
+.app-shell-host.yds-theme-premium .yds-playbook__alloc {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__card-title,
+.app-shell-host.yds-theme-premium .yds-playbook__compliance-pct,
+.app-shell-host.yds-theme-premium .yds-playbook__strategy {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__compliance-label,
+.app-shell-host.yds-theme-premium .yds-playbook__cash,
+.app-shell-host.yds-theme-premium .yds-playbook__alloc-key,
+.app-shell-host.yds-theme-premium .yds-playbook__avoid-title {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__compliance-row--ok {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__compliance-row--warn {
+  color: var(--yds-signal-caution);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__card--active {
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  background: var(--yds-accent-soft);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page {
+  --ic-border: var(--yds-border);
+  --ic-muted: var(--yds-text-muted);
+  --ic-text: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__section,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__week-badge,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__legend {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__h3 {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__impact--positive {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__impact--negative {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__impact--neutral {
+  color: var(--yds-text-muted);
+}
+
+/* Mobile spacing / overflow */
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium :is(
+    .yds-perf-center,
+    .yds-perf-val,
+    .yds-ai-dashboard,
+    .yds-track-record-page,
+    .yds-spick-validation-page,
+    .yds-spick-backtest-page,
+    .yds-panic-lab,
+    .panic-validation-page,
+    .yds-playbook,
+    .yds-inv-cal--page
+  ) {
+    padding-inline: 0.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-perf-center__table-wrap,
+  .app-shell-host.yds-theme-premium .panic-validation-year-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
