@@ -80,6 +80,30 @@
   color: var(--yds-text);
 }
 
+/* AI / metric input CTA — dark-theme sky utilities are unreadable on light shell */
+.app-shell-host.yds-theme-premium .yds-sidebar-metric-input-btn,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-sidebar-metric-input-btn {
+  background: var(--yds-accent) !important;
+  border: 1px solid var(--yds-accent) !important;
+  color: #ffffff !important;
+  font-weight: 650;
+  opacity: 1 !important;
+  box-shadow: 0 1px 2px rgba(7, 22, 40, 0.12);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar-metric-input-btn:hover,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-sidebar-metric-input-btn:hover {
+  background: color-mix(in srgb, var(--yds-accent) 88%, #000) !important;
+  border-color: color-mix(in srgb, var(--yds-accent) 88%, #000) !important;
+  color: #ffffff !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar-metric-input-btn:focus-visible,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-sidebar-metric-input-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--yds-shadow-focus);
+}
+
 .app-shell-host.yds-theme-premium .yds-sidebar a[aria-current="page"],
 .app-shell-host.yds-theme-premium .yds-sidebar a.active {
   background-color: var(--yds-accent-soft);
@@ -100,12 +124,20 @@
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header .font-display,
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-white"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-50"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-100"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-200"] {
   color: var(--yds-text);
 }
 
-.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-"],
-.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-"] {
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-300"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-400"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-500"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-600"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-300"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-400"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-500"],
+.app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-600"] {
   color: var(--yds-text-muted);
 }
 
@@ -162,4 +194,169 @@
 .app-shell-host.yds-theme-premium .yds-sidebar .rounded-md,
 .app-shell-host.yds-theme-premium .yds-desktop-topbar .rounded-card {
   border-radius: var(--yds-radius-md);
+}
+
+/* —— Shared form controls (premium) —— */
+.app-shell-host.yds-theme-premium input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+.app-shell-host.yds-theme-premium select,
+.app-shell-host.yds-theme-premium textarea {
+  background-color: var(--yds-input-bg);
+  color: var(--yds-input-text);
+  border-color: var(--yds-input-border);
+  caret-color: var(--yds-input-text);
+}
+
+.app-shell-host.yds-theme-premium input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"])::placeholder,
+.app-shell-host.yds-theme-premium textarea::placeholder {
+  color: var(--yds-input-placeholder);
+  opacity: 1;
+}
+
+.app-shell-host.yds-theme-premium input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):focus,
+.app-shell-host.yds-theme-premium select:focus,
+.app-shell-host.yds-theme-premium textarea:focus {
+  border-color: var(--yds-input-border-focus);
+  outline: none;
+  box-shadow: var(--yds-shadow-focus);
+}
+
+.app-shell-host.yds-theme-premium input:disabled,
+.app-shell-host.yds-theme-premium select:disabled,
+.app-shell-host.yds-theme-premium textarea:disabled,
+.app-shell-host.yds-theme-premium input[readonly],
+.app-shell-host.yds-theme-premium textarea[readonly] {
+  background-color: var(--yds-input-disabled-bg);
+  color: var(--yds-input-disabled-text);
+  border-color: var(--yds-border);
+  cursor: default;
+  opacity: 1;
+}
+
+/* —— Metric / panic paste input panel (right drawer) —— */
+.app-shell-host.yds-theme-premium .yds-metric-input-panel {
+  background: var(--yds-bg-elevated) !important;
+  border-left: 1px solid var(--yds-border-strong) !important;
+  color: var(--yds-text) !important;
+  box-shadow: -12px 0 36px rgba(7, 22, 40, 0.12) !important;
+  backdrop-filter: blur(10px);
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel [class*="border-white"]:not(input):not(textarea):not(select) {
+  border-color: var(--yds-border) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel h3,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-slate-50,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-slate-100,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-slate-200,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-slate-300 {
+  color: var(--yds-text) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel header h3 {
+  color: var(--yds-text) !important;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel header p {
+  color: var(--yds-text-secondary) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-slate-400,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-slate-500,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-slate-600 {
+  color: var(--yds-text-secondary) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-emerald-100,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-emerald-200,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel [class*="text-emerald-"] {
+  color: var(--yds-signal-up) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-amber-200,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel [class*="text-amber-"] {
+  color: var(--yds-signal-warn) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .text-rose-100,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel [class*="text-rose-"] {
+  color: var(--yds-signal-down) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel input,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel textarea,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel select {
+  background: var(--yds-input-bg) !important;
+  color: var(--yds-input-text) !important;
+  border: 1.5px solid var(--yds-input-border) !important;
+  border-color: var(--yds-input-border) !important;
+  box-shadow: inset 0 1px 2px rgba(7, 22, 40, 0.04) !important;
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel input::placeholder,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel textarea::placeholder {
+  color: var(--yds-text-muted) !important;
+  opacity: 1;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel input:focus,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel textarea:focus,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel select:focus {
+  border-color: var(--yds-input-border-focus) !important;
+  box-shadow: var(--yds-shadow-focus) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel input:disabled,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel textarea:disabled,
+.app-shell-host.yds-theme-premium .yds-metric-input-panel input[readonly],
+.app-shell-host.yds-theme-premium .yds-metric-input-panel textarea[readonly] {
+  background: var(--yds-input-disabled-bg) !important;
+  color: var(--yds-input-disabled-text) !important;
+  border-color: var(--yds-border) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel button {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong) !important;
+  color: var(--yds-text) !important;
+  opacity: 1 !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel button:hover {
+  background: var(--yds-bg-muted) !important;
+  color: var(--yds-text) !important;
+  border-color: var(--yds-border-strong) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .yds-metric-input-submit {
+  background: var(--yds-accent) !important;
+  border-color: var(--yds-accent) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(7, 22, 40, 0.14) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .yds-metric-input-submit:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--yds-accent) 88%, #000) !important;
+  border-color: color-mix(in srgb, var(--yds-accent) 88%, #000) !important;
+  color: #ffffff !important;
+}
+
+/* Disabled only when input not ready — keep readable, do not wash out with opacity */
+.app-shell-host.yds-theme-premium .yds-metric-input-panel .yds-metric-input-submit:disabled {
+  background: var(--yds-bg-muted) !important;
+  border-color: var(--yds-border-strong) !important;
+  color: var(--yds-text-secondary) !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .yds-metric-input-panel input,
+  .app-shell-host.yds-theme-premium .yds-metric-input-panel textarea {
+    font-size: max(0.875rem, 14px);
+  }
 }

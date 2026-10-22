@@ -245,9 +245,20 @@
 
 .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__panel input,
 .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__panel select {
-  background-color: var(--yds-bg-elevated) !important;
-  border-color: var(--yds-border-strong) !important;
-  color: var(--yds-text) !important;
+  background-color: var(--yds-input-bg) !important;
+  border-color: var(--yds-input-border) !important;
+  color: var(--yds-input-text) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__panel input::placeholder {
+  color: var(--yds-input-placeholder) !important;
+  opacity: 1;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__panel input:focus,
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__panel select:focus {
+  border-color: var(--yds-input-border-focus) !important;
+  box-shadow: var(--yds-shadow-focus) !important;
 }
 
 /* Tailwind slate utilities used inside DBB pages (exact class tokens — avoid slate-50/500 substring clash) */
@@ -447,19 +458,21 @@
 
 .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form label,
 .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__memo {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form input,
 .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form select {
-  background: var(--yds-bg-elevated);
-  border-color: var(--yds-border-strong);
-  color: var(--yds-text);
+  background: var(--yds-input-bg);
+  border-color: var(--yds-input-border);
+  color: var(--yds-input-text);
 }
 
-.app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form input[readonly] {
-  background: var(--yds-bg-muted);
-  color: var(--yds-text-secondary);
+.app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form input[readonly],
+.app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form input:disabled {
+  background: var(--yds-input-disabled-bg);
+  color: var(--yds-input-disabled-text);
+  border-color: var(--yds-border);
 }
 
 .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__list-kind {

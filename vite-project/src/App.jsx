@@ -1811,7 +1811,7 @@ function App() {
           <MetricInputErrorBoundary>
           <div
             className={[
-              "fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-transform ease-out sm:w-[24rem] sm:pl-4 sm:pr-4",
+              "yds-metric-input-panel fixed top-0 right-[env(safe-area-inset-right)] z-[9999] flex h-[100dvh] min-h-0 w-[min(100vw,22rem)] flex-col overflow-hidden border-l border-white/[0.08] bg-[#070a10]/92 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-3 pr-3 shadow-[-12px_0_40px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-transform ease-out sm:w-[24rem] sm:pl-4 sm:pr-4",
               panelEntered && !inputPanelClosing ? "translate-x-0" : "translate-x-full",
               inputPanelFlash
                 ? "ring-2 ring-emerald-400/50 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.2),-16px_0_56px_rgba(16,185,129,0.12)]"
@@ -1990,7 +1990,7 @@ function App() {
                 onClick={() => void submitInput()}
                 disabled={isSaving || !inputReady}
                 aria-busy={isSaving}
-                className="w-full rounded-lg border border-emerald-500/35 bg-emerald-500/15 px-3 py-2.5 text-[13px] font-semibold text-emerald-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition hover:bg-emerald-500/22 disabled:cursor-not-allowed disabled:opacity-40"
+                className="yds-metric-input-submit w-full rounded-lg border border-emerald-500/35 bg-emerald-500/15 px-3 py-2.5 text-[13px] font-semibold text-emerald-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition hover:bg-emerald-500/22 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isSaving ? "저장 중…" : "저장 · 대시보드 반영"}
               </button>

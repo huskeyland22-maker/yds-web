@@ -324,10 +324,15 @@
 .app-shell-host.yds-theme-premium .yds-perf-val__outcome-horizon,
 .app-shell-host.yds-theme-premium .yds-perf-val select,
 .app-shell-host.yds-theme-premium .yds-perf-val input:not([type="checkbox"]):not([type="radio"]) {
-  background: var(--yds-bg-elevated);
-  border: 1px solid var(--yds-border-strong);
-  color: var(--yds-text);
+  background: var(--yds-input-bg);
+  border: 1px solid var(--yds-input-border);
+  color: var(--yds-input-text);
   border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val input::placeholder {
+  color: var(--yds-input-placeholder);
+  opacity: 1;
 }
 
 /* ═══════════════════════════════════════

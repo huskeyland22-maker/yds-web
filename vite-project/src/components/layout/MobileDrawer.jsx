@@ -182,7 +182,7 @@ export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccount
                 onClose()
                 onOpenInput?.()
               }}
-              className="mt-2 rounded-md border border-sky-500/30 bg-sky-500/10 px-3 py-2.5 text-left text-[13px] font-medium text-sky-100"
+              className="yds-sidebar-metric-input-btn mt-2 rounded-md border border-sky-500/30 bg-sky-500/10 px-3 py-2.5 text-left text-[13px] font-medium text-sky-100"
             >
               AI 지표 입력
             </button>

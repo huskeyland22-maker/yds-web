@@ -201,7 +201,7 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
         <button
           type="button"
           onClick={onOpenInputPanel}
-          className="mt-2 w-full rounded-lg border border-sky-500/25 bg-sky-500/[0.08] px-2 py-2 text-[11px] font-medium text-sky-100/95 transition hover:border-sky-400/35 hover:bg-sky-500/[0.14]"
+          className="yds-sidebar-metric-input-btn mt-2 w-full rounded-lg border border-sky-500/25 bg-sky-500/[0.08] px-2 py-2 text-[11px] font-medium text-sky-100/95 transition hover:border-sky-400/35 hover:bg-sky-500/[0.14]"
         >
           AI 리포트 입력
         </button>

@@ -137,9 +137,21 @@
 .app-shell-host.yds-theme-premium .yds-spick-filter-bar__select,
 .app-shell-host.yds-theme-premium .yds-spick-search__input,
 .app-shell-host.yds-theme-premium .yds-spick-compare-page__input {
-  background: var(--yds-bg-elevated) !important;
-  border-color: var(--yds-border-strong) !important;
-  color: var(--yds-text) !important;
+  background: var(--yds-input-bg) !important;
+  border-color: var(--yds-input-border) !important;
+  color: var(--yds-input-text) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-search__input::placeholder,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__input::placeholder {
+  color: var(--yds-input-placeholder) !important;
+  opacity: 1;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-search__input:focus,
+.app-shell-host.yds-theme-premium .yds-spick-compare-page__input:focus {
+  border-color: var(--yds-input-border-focus) !important;
+  box-shadow: var(--yds-shadow-focus) !important;
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-filter-bar__reset,

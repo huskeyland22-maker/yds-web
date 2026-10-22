@@ -14,6 +14,8 @@
 
 .app-shell-host.yds-theme-premium .yds-market-analysis__title {
   color: var(--yds-text);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis__subtitle,
@@ -65,15 +67,23 @@
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__lede,
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__dca-note,
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block-label {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block-label {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--yds-text);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__score {
   color: var(--yds-text);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage {
   color: var(--yds-text);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage-sep,
@@ -153,9 +163,10 @@
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage.is-current {
   opacity: 1;
-  background: var(--yds-accent-soft);
-  border-color: color-mix(in srgb, var(--fear-color, var(--yds-accent)) 42%, var(--yds-border));
+  background: var(--yds-bg-elevated);
+  border-color: color-mix(in srgb, var(--fear-color, var(--yds-accent)) 55%, var(--yds-border-strong));
   box-shadow: var(--yds-shadow-card);
+  border-width: 1.5px;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage-name {
@@ -189,8 +200,9 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers thead th {
-  color: var(--yds-text-muted);
-  border-bottom: 1px solid var(--yds-border);
+  color: var(--yds-text-secondary);
+  border-bottom: 1px solid var(--yds-border-strong);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody th,
@@ -216,7 +228,7 @@
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody tr:hover th,
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tbody tr:hover td {
-  background: var(--yds-accent-soft);
+  background: var(--yds-bg-muted);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers tfoot th,
@@ -259,8 +271,8 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__drivers-mobile-total {
-  background: var(--yds-accent-soft);
-  border-color: color-mix(in srgb, var(--yds-accent) 28%, var(--yds-border));
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border-strong);
 }
 
 /* History / chart chrome */
@@ -281,20 +293,21 @@
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__reset:hover {
   color: var(--yds-text);
   border-color: var(--yds-border-strong);
-  background: var(--yds-accent-soft);
+  background: var(--yds-bg-muted);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__chip {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border-color: var(--yds-border-strong);
   color: var(--yds-text-secondary);
   border-radius: var(--yds-radius-sm);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__chip.is-active {
-  background: var(--yds-accent-soft);
-  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-accent);
   color: var(--yds-text);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__tooltip {
@@ -333,10 +346,11 @@
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__title {
   color: var(--yds-text);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__sub {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__toggle {
@@ -347,25 +361,33 @@
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__toggle:active,
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-trade__toggle:hover {
-  background: var(--yds-accent-soft);
+  background: var(--yds-bg-muted);
   color: var(--yds-text);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form label,
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__memo {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form input,
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form select {
-  background: var(--yds-bg-elevated);
-  border-color: var(--yds-border-strong);
-  color: var(--yds-text);
+  background: var(--yds-input-bg);
+  border-color: var(--yds-input-border);
+  color: var(--yds-input-text);
 }
 
-.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form input[readonly] {
-  background: var(--yds-bg-muted);
-  color: var(--yds-text-secondary);
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form input:focus,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form select:focus {
+  border-color: var(--yds-input-border-focus);
+  box-shadow: var(--yds-shadow-focus);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form input[readonly],
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__form input:disabled {
+  background: var(--yds-input-disabled-bg);
+  color: var(--yds-input-disabled-text);
+  border-color: var(--yds-border);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-trade-rec__save {
