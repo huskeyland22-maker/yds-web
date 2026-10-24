@@ -38595,66 +38595,66 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     padding: 0.5rem 0.25rem 1.5rem;
   }
 }
-.yds-dbb__hero { margin-bottom: 0.75rem; }
+.yds-dbb__hero { margin-bottom: 0.85rem; }
 .yds-dbb__kicker {
   margin: 0;
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #64748b;
 }
 .yds-dbb__title {
-  margin: 0.2rem 0 0;
-  font-size: 1.2rem;
+  margin: 0.25rem 0 0;
+  font-size: 1.28rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #f1f5f9;
 }
 .yds-dbb__lead {
-  margin: 0.35rem 0 0;
-  font-size: 0.8rem;
-  line-height: 1.45;
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: #94a3b8;
 }
 .yds-dbb__notice {
-  margin: 0 0 0.85rem;
-  padding: 0.55rem 0.65rem;
+  margin: 0 0 0.95rem;
+  padding: 0.7rem 0.8rem;
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.16);
   background: rgba(15, 23, 42, 0.55);
-  font-size: 0.68rem;
-  line-height: 1.45;
+  font-size: 0.8125rem;
+  line-height: 1.5;
   color: #cbd5e1;
 }
-.yds-dbb__notice p { margin: 0.15rem 0; }
+.yds-dbb__notice p { margin: 0.2rem 0; }
 .yds-dbb__notice-muted { color: #64748b !important; }
 .yds-dbb__meta-block {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.85rem;
 }
 .yds-dbb__meta {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: #64748b;
-  line-height: 1.35;
+  line-height: 1.45;
 }
 .yds-dbb__meta--thresholds {
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
   opacity: 0.92;
 }
 .yds-dbb__meta-warn {
-  margin: 0.2rem 0 0;
-  font-size: 0.62rem;
-  line-height: 1.35;
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
   color: #d6b56a;
 }
-.yds-dbb__status { margin: 0.5rem 0; font-size: 0.8rem; color: #94a3b8; }
+.yds-dbb__status { margin: 0.55rem 0; font-size: 0.875rem; color: #94a3b8; line-height: 1.45; }
 .yds-dbb__status--err { color: #fca5a5; }
-.yds-dbb-section { margin-bottom: 1rem; }
-.yds-dbb-section__head { margin-bottom: 0.4rem; }
+.yds-dbb-section { margin-bottom: 1.1rem; }
+.yds-dbb-section__head { margin-bottom: 0.5rem; }
 .yds-dbb-section__eyebrow {
   margin: 0;
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -38662,27 +38662,29 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-dbb-section__title {
   margin: 0.1rem 0 0;
-  font-size: 0.92rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #e2e8f0;
+  letter-spacing: -0.01em;
 }
 .yds-dbb-section__empty {
   margin: 0;
-  padding: 0.55rem 0.6rem;
+  padding: 0.65rem 0.75rem;
   border-radius: 8px;
   background: rgba(30, 41, 59, 0.45);
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
   color: #94a3b8;
 }
-.yds-dbb-opp { margin-bottom: 0.55rem; }
-.yds-dbb-opp__tag { margin: 0 0 0.25rem; font-size: 0.65rem; font-weight: 700; }
+.yds-dbb-opp { margin-bottom: 0.65rem; }
+.yds-dbb-opp__tag { margin: 0 0 0.3rem; font-size: 0.72rem; font-weight: 700; }
 .yds-dbb-opp__tag--strong { color: #f87171; }
 .yds-dbb-opp__tag--primary { color: #fb923c; }
 .yds-dbb-card {
   border-radius: 10px;
   border: 1px solid rgba(148, 163, 184, 0.14);
   background: rgba(15, 23, 42, 0.72);
-  padding: 0.55rem 0.65rem;
+  padding: 0.75rem 0.85rem;
 }
 .yds-dbb-card--strong {
   border-color: rgba(248, 113, 113, 0.35);
@@ -38693,71 +38695,75 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   background: rgba(67, 20, 7, 0.28);
 }
 .yds-dbb-card--watch { border-color: rgba(250, 204, 21, 0.22); }
-.yds-dbb-card--compact { padding: 0.4rem 0.5rem; }
+.yds-dbb-card--compact { padding: 0.7rem 0.8rem; }
 .yds-dbb-research summary {
   cursor: pointer;
   list-style: none;
 }
 .yds-dbb-research summary::-webkit-details-marker { display: none; }
 .yds-dbb-research__lead {
-  margin: 0.45rem 0 0.15rem;
-  font-size: 0.8rem;
-  line-height: 1.45;
+  margin: 0.5rem 0 0.2rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: #e2e8f0;
 }
 .yds-dbb-research__scroll {
-  margin-top: 0.45rem;
+  margin-top: 0.55rem;
   overflow-x: auto;
 }
 .yds-dbb-research__table {
   width: 100%;
   min-width: 16rem;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
   color: #cbd5e1;
 }
 .yds-dbb-research__table th,
 .yds-dbb-research__table td {
-  padding: 0.28rem 0.2rem;
+  padding: 0.4rem 0.35rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.14);
   text-align: right;
   font-weight: 500;
 }
 .yds-dbb-research__table th:first-child,
 .yds-dbb-research__table td:first-child { text-align: left; }
-.yds-dbb-research .yds-dbb__notice { margin-top: 0.45rem; }
+.yds-dbb-research .yds-dbb__notice { margin-top: 0.5rem; }
 .yds-dbb-card__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 .yds-dbb-card__ticker {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #f8fafc;
 }
 .yds-dbb-card__theme-inline,
 .yds-dbb-card__theme {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   font-weight: 500;
+  line-height: 1.4;
   color: #94a3b8;
 }
 .yds-dbb-card__badge { text-align: right; flex-shrink: 0; }
 .yds-dbb-card__count {
   display: block;
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
   color: #f1f5f9;
 }
 .yds-dbb-card__stage {
   display: block;
-  margin-top: 0.05rem;
-  font-size: 0.68rem;
+  margin-top: 0.1rem;
+  font-size: 0.78rem;
   font-weight: 650;
+  line-height: 1.4;
   color: #cbd5e1;
 }
 .yds-dbb-card--strong .yds-dbb-card__stage { color: #fca5a5; }
@@ -38765,9 +38771,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 /* Mobile: compact hold cue when trade records exist (PC keeps full status block) */
 .yds-dbb-card__hold {
   display: none;
-  margin: 0.28rem 0 0;
-  font-size: 0.68rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
   font-weight: 650;
+  line-height: 1.4;
   color: #7dd3fc;
 }
 .yds-dbb-card__trade-status {
@@ -38784,14 +38791,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-dbb-card__metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.2rem 0.55rem;
-  margin-top: 0.45rem;
+  gap: 0.3rem 0.65rem;
+  margin-top: 0.55rem;
 }
 .yds-dbb-metric {
   display: flex;
   justify-content: space-between;
-  gap: 0.35rem;
-  font-size: 0.68rem;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
   font-variant-numeric: tabular-nums;
 }
 .yds-dbb-metric__label { color: #64748b; }
@@ -38799,44 +38807,45 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-dbb-metric__value.is-ok { color: #86efac; font-weight: 650; }
 .yds-dbb-card__hint,
 .yds-dbb-card__episode {
-  margin: 0.35rem 0 0;
-  font-size: 0.65rem;
-  line-height: 1.35;
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
   color: #94a3b8;
 }
 .yds-dbb-card__watch-hint {
-  margin: 0.2rem 0 0;
-  font-size: 0.58rem;
-  line-height: 1.3;
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
   color: #64748b;
   font-weight: 500;
 }
 .yds-dbb-card__episode { color: #7dd3fc; }
 .yds-dbb-ack {
-  margin-top: 0.3rem;
+  margin-top: 0.4rem;
   width: 100%;
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 7px;
   background: rgba(30, 41, 59, 0.55);
   color: #cbd5e1;
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  padding: 0.35rem 0.5rem;
-  min-height: 2rem;
+  padding: 0.45rem 0.6rem;
+  min-height: 2.15rem;
 }
 .yds-dbb-ack:active { background: rgba(51, 65, 85, 0.7); }
-.yds-dbb-grid { display: grid; gap: 0.4rem; }
+.yds-dbb-grid { display: grid; gap: 0.55rem; }
 .yds-dbb-grid--wait { opacity: 0.88; }
-.yds-dbb-all { display: flex; flex-direction: column; gap: 0.25rem; }
+.yds-dbb-all { display: flex; flex-direction: column; gap: 0.35rem; }
 .yds-dbb-all__row {
   display: grid;
-  grid-template-columns: 3.2rem 1fr 2.2rem auto;
-  gap: 0.35rem;
+  grid-template-columns: 3.4rem 1fr 2.4rem auto;
+  gap: 0.4rem;
   align-items: center;
-  padding: 0.32rem 0.4rem;
+  padding: 0.45rem 0.55rem;
   border-radius: 6px;
   background: rgba(15, 23, 42, 0.45);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
 }
 .yds-dbb-all__sym { font-weight: 700; color: #e2e8f0; }
 .yds-dbb-all__theme {
@@ -38878,16 +38887,16 @@ button.yds-dbb-all__row.is-selected {
 }
 .yds-dbb-all__more {
   width: 100%;
-  margin-top: 0.15rem;
+  margin-top: 0.25rem;
   border: 0;
   border-radius: 6px;
   background: rgba(15, 23, 42, 0.45);
   color: #94a3b8;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 650;
   text-align: center;
-  padding: 0.5rem 0.4rem;
-  min-height: 2.25rem;
+  padding: 0.55rem 0.5rem;
+  min-height: 2.35rem;
   cursor: pointer;
 }
 .yds-dbb-all__stage { font-weight: 650; color: #94a3b8; }
@@ -38895,22 +38904,22 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb-all__stage.is-primary { color: #fdba74; }
 .yds-dbb-all__stage.is-watch { color: #fde68a; }
 .yds-dbb__footer {
-  margin-top: 0.75rem;
-  padding-top: 0.65rem;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
   border-top: 1px solid rgba(148, 163, 184, 0.12);
-  font-size: 0.65rem;
-  line-height: 1.4;
+  font-size: 0.78rem;
+  line-height: 1.5;
   color: #94a3b8;
 }
-.yds-dbb__footer p { margin: 0.2rem 0; }
+.yds-dbb__footer p { margin: 0.25rem 0; }
 .yds-dbb-opps {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.65rem;
 }
 .yds-dbb-cands {
   display: grid;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.65rem;
+  margin-top: 0.6rem;
 }
 .yds-dbb-picker {
   position: relative;
@@ -38945,14 +38954,15 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb-research-list__item {
   display: flex;
   width: 100%;
-  gap: 0.5rem;
+  gap: 0.55rem;
   align-items: baseline;
-  padding: 0.35rem 0.5rem;
+  padding: 0.45rem 0.6rem;
   border: 1px solid rgba(71, 85, 105, 0.7);
   border-radius: 0.375rem;
   background: #020617;
   color: #e2e8f0;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
   text-align: left;
 }
 .yds-dbb-research-list__item.is-selected {
@@ -38982,11 +38992,11 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb-priority {
   display: inline-block;
   margin-left: 0.35rem;
-  padding: 0.02rem 0.32rem;
+  padding: 0.04rem 0.36rem;
   border-radius: 999px;
   background: rgba(51, 65, 85, 0.72);
   color: #cbd5e1;
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 650;
   letter-spacing: 0.02em;
   line-height: 1.4;
@@ -38995,96 +39005,103 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb-cand .yds-dbb-cand__type {
   display: inline-block;
   max-width: 100%;
-  margin-top: 0.28rem;
-  padding: 0.08rem 0.42rem;
+  margin-top: 0.32rem;
+  padding: 0.1rem 0.48rem;
   border-radius: 999px;
   background: rgba(51, 65, 85, 0.72);
   color: #e2e8f0;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 650;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 .yds-dbb-cand .yds-dbb-cand__detail {
-  margin-top: 0.18rem;
+  margin-top: 0.22rem;
   color: #94a3b8;
-  font-size: 0.75rem;
-  line-height: 1.35;
+  font-size: 0.8125rem;
+  line-height: 1.45;
 }
 .yds-dbb-cand .yds-dbb-cand__score {
-  margin-top: 0.28rem;
+  margin-top: 0.32rem;
   color: #cbd5e1;
-  font-size: 0.68rem;
-  line-height: 1.3;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  font-weight: 700;
 }
 .yds-dbb-cand__metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.16rem 0.7rem;
-  margin: 0.4rem 0 0;
+  gap: 0.28rem 0.75rem;
+  margin: 0.5rem 0 0;
   min-width: 0;
 }
 .yds-dbb-cand__metrics div {
   display: flex;
   justify-content: space-between;
-  gap: 0.35rem;
+  gap: 0.4rem;
   min-width: 0;
 }
 .yds-dbb-cand__metrics dt {
   color: #64748b;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 .yds-dbb-cand__metrics dd {
   margin: 0;
   color: #e2e8f0;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 .yds-dbb-cand__status {
-  margin-top: 0.4rem;
+  margin-top: 0.45rem;
   color: #e2e8f0;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 .yds-dbb-cand.is-selected {
   border-color: rgba(226, 232, 240, 0.55);
   box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.16);
 }
 .yds-dbb-score__state {
-  margin: 0.35rem 0 0;
+  margin: 0.4rem 0 0;
   color: #f8fafc;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 750;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
 }
 .yds-dbb-score .yds-dbb-card__count {
-  margin-top: 0.12rem;
-  font-size: 0.82rem;
-  color: #cbd5e1;
+  margin-top: 0.2rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #f1f5f9;
 }
 .yds-dbb-score__type {
   display: inline-block;
   max-width: 100%;
-  margin: 0.4rem 0 0;
-  padding: 0.08rem 0.42rem;
+  margin: 0.45rem 0 0;
+  padding: 0.1rem 0.48rem;
   border-radius: 999px;
   background: rgba(51, 65, 85, 0.72);
   color: #e2e8f0;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 650;
-  line-height: 1.35;
+  line-height: 1.4;
   overflow-wrap: anywhere;
 }
 .yds-dbb-score__dd {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.05rem;
-  margin: 0.4rem 0 0;
+  gap: 0.1rem;
+  margin: 0.45rem 0 0;
   color: #94a3b8;
-  font-size: 0.75rem;
-  line-height: 1.35;
+  font-size: 0.8125rem;
+  line-height: 1.45;
 }
 .yds-dbb-score__dd strong {
   color: #f8fafc;
@@ -39150,13 +39167,13 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb--dashboard .yds-dbb-holdings__card {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
   height: 100%;
   min-height: 0;
-  padding: 0.65rem 0.75rem 0.7rem;
+  padding: 0.75rem 0.85rem 0.8rem;
 }
 .yds-dbb--dashboard .yds-dbb-cands {
-  gap: 0.65rem;
+  gap: 0.9rem;
   justify-content: stretch;
   grid-template-columns: minmax(0, 1fr);
 }
@@ -39173,7 +39190,8 @@ button.yds-dbb-all__row.is-selected {
 }
 .yds-dbb--dashboard .yds-dbb-cands__item .yds-dbb-cand__metrics {
   margin-top: auto;
-  padding-top: 0.35rem;
+  padding-top: 0.5rem;
+  gap: 0.3rem 0.75rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .yds-dbb--dashboard .yds-dbb-cand.is-selected {
@@ -39183,18 +39201,20 @@ button.yds-dbb-all__row.is-selected {
 }
 .yds-dbb--dashboard .yds-dbb-dash {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.75rem;
   align-items: start;
 }
 .yds-dbb--dashboard .yds-dbb-dash__detail {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.75rem;
   min-width: 0;
 }
 .yds-dbb--dashboard .yds-dbb-dash__trade {
   min-width: 0;
+  max-width: 100%;
   position: sticky;
   top: 0.5rem;
+  align-self: start;
 }
 .yds-dbb--dashboard .yds-dbb-research summary {
   display: flex;
@@ -39219,28 +39239,32 @@ button.yds-dbb-all__row.is-selected {
 @media (min-width: 640px) {
   .yds-dbb--dashboard .yds-dbb-holdings__grid,
   .yds-dbb--dashboard .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
-    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
   }
   .yds-dbb--dashboard .yds-dbb-cands {
-    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 1rem;
   }
 }
 @media (min-width: 960px) {
   .yds-dbb--dashboard .yds-dbb-holdings__grid,
   .yds-dbb--dashboard .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
-    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
   }
   .yds-dbb--dashboard .yds-dbb-cands {
-    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18.5rem, 1fr));
   }
   .yds-dbb--dashboard .yds-dbb-dash {
-    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(17rem, 22rem);
   }
 }
 @media (min-width: 1280px) {
   .yds-dbb--dashboard .yds-dbb-holdings__grid,
   .yds-dbb--dashboard .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
-    grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+  .yds-dbb--dashboard .yds-dbb-cands {
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
   }
 }
 @media (max-width: 959px) {
@@ -39275,13 +39299,13 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb--equity-dash .yds-dbb-holdings__card {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
   height: 100%;
   min-height: 0;
-  padding: 0.65rem 0.75rem 0.7rem;
+  padding: 0.75rem 0.85rem 0.8rem;
 }
 .yds-dbb--equity-dash .yds-dbb-cands {
-  gap: 0.65rem;
+  gap: 0.9rem;
   justify-content: stretch;
   grid-template-columns: minmax(0, 1fr);
 }
@@ -39298,7 +39322,8 @@ button.yds-dbb-all__row.is-selected {
 }
 .yds-dbb--equity-dash .yds-dbb-cands__item .yds-dbb-cand__metrics {
   margin-top: auto;
-  padding-top: 0.35rem;
+  padding-top: 0.5rem;
+  gap: 0.3rem 0.75rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .yds-dbb--equity-dash .yds-dbb-cand.is-selected {
@@ -39314,12 +39339,12 @@ button.yds-dbb-all__row.is-selected {
 }
 .yds-dbb--equity-dash .yds-dbb-dash {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.75rem;
   align-items: stretch;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__detail {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.75rem;
   min-width: 0;
   align-content: start;
 }
@@ -39328,18 +39353,18 @@ button.yds-dbb-all__row.is-selected {
   margin-bottom: 0;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__detail .yds-dbb-card--compact {
-  padding: 0.55rem 0.7rem 0.6rem;
+  padding: 0.75rem 0.85rem 0.8rem;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__detail .yds-dbb-card__hint {
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__detail .yds-dbb-score .yds-dbb-card__count {
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
 }
 .yds-dbb--equity-dash .yds-dbb-cond {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.45rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -39348,8 +39373,9 @@ button.yds-dbb-all__row.is-selected {
   display: grid;
   grid-template-columns: minmax(3.5rem, 4.5rem) minmax(0, 1fr) minmax(0, 1.2fr) auto;
   align-items: baseline;
-  gap: 0.35rem 0.5rem;
-  font-size: 0.8125rem;
+  gap: 0.4rem 0.55rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
   min-width: 0;
 }
 .yds-dbb--equity-dash .yds-dbb-cond__name {
@@ -39361,60 +39387,109 @@ button.yds-dbb-all__row.is-selected {
 }
 .yds-dbb--equity-dash .yds-dbb-dash__reading {
   margin: 0;
-  padding: 0.55rem 0.7rem;
+  padding: 0.7rem 0.8rem;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__trade {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: 100%;
+  max-width: 100%;
+  height: auto;
+  align-self: start;
   position: sticky;
   top: 0.5rem;
-  padding: 0.7rem 0.8rem 0.85rem;
+  padding: 0.75rem 0.85rem 0.9rem;
+  overflow-x: clip;
+  box-sizing: border-box;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__trade-stack {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 0.55rem;
+  gap: 0.85rem;
+  margin-top: 0.65rem;
+  min-width: 0;
   min-height: 0;
+  width: 100%;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-dbb-trade {
   margin-top: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 .yds-dbb--equity-dash .yds-dbb-dash__trade-fill {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 0.45rem;
+  gap: 0.55rem;
+  min-width: 0;
   min-height: 0;
-  padding-top: 0.55rem;
+  width: 100%;
+  padding-top: 0.65rem;
   border-top: 1px solid rgba(148, 163, 184, 0.14);
 }
 .yds-dbb--equity-dash .yds-dbb-dash__trade-status {
   min-width: 0;
-  padding: 0.55rem 0.6rem 0.6rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.7rem 0.7rem;
   border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  /* Match surrounding white/light cards — avoid dark slate wash */
+  background: rgba(248, 250, 252, 0.92);
 }
 .yds-dbb--equity-dash .yds-dbb-dash__trade-sub {
-  margin: 0 0 0.4rem;
-  font-size: 0.72rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #94a3b8;
+  color: #64748b;
   text-transform: uppercase;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-status {
+  background: rgba(241, 245, 249, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.2);
 }
 .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec,
 .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__form,
 .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__grid,
-.yds-dbb--equity-dash .yds-dbb-dash__trade input,
-.yds-dbb--equity-dash .yds-dbb-dash__trade select {
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__actions {
   max-width: 100%;
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__form label,
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__memo {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__form input,
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__form select {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__actions .yds-trade-rec__save,
+.yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__actions .yds-trade-rec__cancel {
+  width: auto;
+  flex: 1 1 auto;
+  min-width: min(100%, 7.5rem);
+  box-sizing: border-box;
 }
 .yds-dbb--equity-dash .yds-dbb-research summary {
   display: flex;
@@ -39461,28 +39536,36 @@ button.yds-dbb-all__row.is-selected {
 @media (min-width: 640px) {
   .yds-dbb--equity-dash .yds-dbb-holdings__grid,
   .yds-dbb--equity-dash .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
-    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
   }
   .yds-dbb--equity-dash .yds-dbb-cands {
-    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 1rem;
   }
 }
 @media (min-width: 960px) {
   .yds-dbb--equity-dash .yds-dbb-holdings__grid,
   .yds-dbb--equity-dash .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
-    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
   }
   .yds-dbb--equity-dash .yds-dbb-cands {
-    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18.5rem, 1fr));
   }
   .yds-dbb--equity-dash .yds-dbb-dash {
-    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+    /* Wider trade column so 2-col inputs fit without overflow */
+    grid-template-columns: minmax(0, 1.25fr) minmax(22rem, 28rem);
   }
 }
 @media (min-width: 1280px) {
   .yds-dbb--equity-dash .yds-dbb-holdings__grid,
   .yds-dbb--equity-dash .yds-dbb-holdings--focus .yds-dbb-holdings__grid {
-    grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+  .yds-dbb--equity-dash .yds-dbb-cands {
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  }
+  .yds-dbb--equity-dash .yds-dbb-dash {
+    grid-template-columns: minmax(0, 1.3fr) minmax(24rem, 30rem);
   }
 }
 @media (max-width: 959px) {
@@ -39493,8 +39576,17 @@ button.yds-dbb-all__row.is-selected {
   .yds-dbb--equity-dash .yds-dbb-dash__trade-fill {
     justify-content: flex-start;
   }
+  .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .yds-dbb--equity-dash .yds-dbb-cond__row {
     grid-template-columns: minmax(3.25rem, 4rem) minmax(0, 1fr) minmax(0, 1fr) auto;
+  }
+}
+/* Mid-width: trade column may still be tight — prefer single column inputs */
+@media (min-width: 960px) and (max-width: 1199px) {
+  .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
