@@ -14545,9 +14545,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-market-analysis {
   width: 100%;
-  max-width: min(60rem, 100%);
+  max-width: min(80rem, 100%);
   margin-inline: auto;
-  padding: 1rem 0.75rem 1.5rem;
+  padding: 0.85rem 0.75rem 1.35rem;
   min-width: 0;
   overflow-x: clip;
 }
@@ -14600,7 +14600,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-market-analysis__body {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.55rem;
 }
 
 .yds-market-analysis__header {
@@ -27164,7 +27164,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-market-desk--panic-focus .yds-market-desk__stream {
-  gap: 2rem;
+  gap: 0.55rem;
 }
 
 .yds-market-desk--panic-focus .yds-market-desk__slot--panic-center,
@@ -27187,12 +27187,12 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-panic-center--research {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.35rem;
 }
 
 /* ── Hero (compact block, not a big card) ── */
 .yds-panic-center__hero {
-  padding: 0 0 0.85rem;
+  padding: 0 0 0.65rem;
   border: none;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
 }
@@ -27214,19 +27214,21 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-center__label {
   margin: 0;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #64748b;
+  line-height: 1.35;
 }
 
 .yds-panic-center__asof {
   margin: 0;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.02em;
   color: #475569;
+  line-height: 1.35;
 }
 
 .yds-panic-center__hero-body {
@@ -27257,10 +27259,10 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-center__score {
   margin: 0;
-  font-size: clamp(2.5rem, 6.5vw, 3.25rem);
-  font-weight: 600;
+  font-size: clamp(2.75rem, 6.8vw, 3.5rem);
+  font-weight: 650;
   line-height: 0.92;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.04em;
   color: #f8fafc;
 }
 
@@ -27279,7 +27281,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-center__stage {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 650;
   letter-spacing: -0.015em;
   color: #e2e8f0;
@@ -27300,10 +27302,11 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-center__scale-hint {
   margin: 0;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: #475569;
+  line-height: 1.4;
 }
 
 .yds-panic-center__dca {
@@ -27441,18 +27444,22 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 /* ── Sections (light separators, not heavy cards) ── */
 .yds-panic-center__block {
   margin-top: 0;
-  padding: 0.7rem 0 0;
+  padding: 0.55rem 0 0;
   border: none;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 0;
   background: transparent;
 }
 
+.yds-panic-center__block--drivers {
+  padding-top: 0.3rem;
+}
+
 .yds-panic-center__block-label {
-  margin: 0 0 0.55rem;
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #64748b;
 }
@@ -27461,7 +27468,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-panic-center__fear-scale {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.25rem;
+  gap: 0.35rem;
   width: 100%;
 }
 
@@ -27471,7 +27478,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: flex;
   flex-direction: column;
   gap: 0.28rem;
-  padding: 0.35rem 0.3rem 0.4rem;
+  padding: 0.45rem 0.4rem 0.5rem;
   border: 1px solid transparent;
   border-radius: 1px;
   background: rgba(8, 11, 18, 0.22);
@@ -27512,8 +27519,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-panic-center__stage-name {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 650;
   color: #94a3b8;
   white-space: nowrap;
 }
@@ -27541,7 +27548,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-panic-center__td-range {
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 500;
   color: #475569;
   white-space: nowrap;
@@ -27552,8 +27559,8 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-panic-center__td-blurb {
-  font-size: 0.6rem;
-  line-height: 1.3;
+  font-size: 0.7rem;
+  line-height: 1.35;
   color: #64748b;
 }
 
@@ -27592,15 +27599,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-panic-center__drivers {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.74rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
 }
 
 .yds-panic-center__drivers thead th {
-  padding: 0.2rem 0.4rem 0.35rem;
+  padding: 0.45rem 0.5rem 0.55rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-  font-size: 0.54rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #64748b;
   text-align: left;
@@ -27620,9 +27628,9 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-panic-center__drivers tbody td,
 .yds-panic-center__drivers tfoot th,
 .yds-panic-center__drivers tfoot td {
-  padding: 0.48rem 0.4rem;
+  padding: 0.7rem 0.55rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.06);
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .yds-panic-center__drivers tbody tr:last-child th,
@@ -27642,15 +27650,15 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 
 .yds-panic-center__drivers tbody td.is-primary {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #f8fafc;
 }
 
 .yds-panic-center__drivers tbody td.is-secondary {
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .yds-panic-center__drivers tfoot th,
@@ -27676,26 +27684,28 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-center__total-hint {
   display: block;
-  margin-top: 0.1rem;
-  font-size: 0.54rem;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  color: #64748b;
+  letter-spacing: 0.03em;
+  color: #94a3b8;
+  line-height: 1.4;
 }
 
 .yds-panic-center__driver-name {
   display: block;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: #f1f5f9;
 }
 
 .yds-panic-center__driver-src {
   display: block;
-  margin-top: 0.08rem;
-  font-size: 0.56rem;
+  margin-top: 0.12rem;
+  font-size: 0.68rem;
   font-weight: 500;
-  color: #475569;
+  line-height: 1.35;
+  color: #94a3b8;
 }
 
 .yds-panic-center__drivers-mobile {
@@ -27743,18 +27753,18 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-center__drivers-mobile dt {
   margin: 0;
-  font-size: 0.52rem;
+  font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .yds-panic-center__drivers-mobile dd {
   margin: 0.08rem 0 0;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 550;
-  color: #94a3b8;
+  color: #cbd5e1;
   text-align: left;
 }
 
@@ -27780,16 +27790,17 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 /* ── History slot + chart shell (tight) ── */
 .yds-market-trend__heading {
   margin: 0;
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #64748b;
 }
 
 .yds-market-trend__sub {
-  margin: 0.25rem 0 0.55rem;
-  font-size: 0.68rem;
+  margin: 0.2rem 0 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
   color: #475569;
 }
 
@@ -27808,7 +27819,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 .yds-panic-spx-val {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .yds-panic-spx-val--empty {
@@ -27879,7 +27890,14 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-spx-val__plot {
   width: 100%;
-  min-height: 300px;
+  min-width: 0;
+  min-height: 320px;
+}
+
+@media (min-width: 1280px) {
+  .yds-panic-spx-val__plot {
+    min-height: 360px;
+  }
 }
 
 .yds-panic-spx-val__tooltip {
@@ -27914,22 +27932,24 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 
 .yds-panic-center__history-slot {
   margin: 0;
-  padding: 0.7rem 0 0;
+  padding: 0.5rem 0 0;
   border: none;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 0;
   background: transparent;
+  width: 100%;
+  min-width: 0;
 }
 
 .yds-panic-center__history-slot .yds-market-trend__heading {
-  font-size: 0.58rem;
-  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
   color: #64748b;
 }
 
 .yds-panic-center__history-slot .yds-market-trend__sub {
-  margin: 0.25rem 0 0.55rem;
-  font-size: 0.68rem;
+  margin: 0.2rem 0 0.4rem;
+  font-size: 0.78rem;
   color: #475569;
 }
 
@@ -39704,30 +39724,30 @@ button.yds-dbb-holdings__card {
   padding: 0.1rem 0;
 }
 .yds-panic-trade {
-  margin-top: 0.25rem;
-  padding-top: 0.75rem;
+  margin-top: 0.1rem;
+  padding-top: 0.35rem;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
 }
 .yds-panic-trade__head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 .yds-panic-trade__title {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #94a3b8;
 }
 .yds-panic-trade__sub {
-  margin: 0.2rem 0 0;
-  font-size: 0.62rem;
-  color: #64748b;
-  line-height: 1.35;
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.4;
 }
 .yds-panic-trade__toggle {
   width: auto;
