@@ -575,6 +575,29 @@
   padding: 0.75rem 0.85rem;
 }
 
+.app-shell-host.yds-theme-premium .yds-dbb__notice--fold {
+  padding: 0.5rem 0.75rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__notice-summary-label {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__notice-summary-lead {
+  color: var(--yds-text-secondary);
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.4;
+  font-weight: 550;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__notice--fold > .yds-dbb__notice-summary::after {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__notice-body {
+  border-top-color: var(--yds-border);
+}
+
 .app-shell-host.yds-theme-premium .yds-dbb__notice-muted,
 .app-shell-host.yds-theme-premium .yds-dbb__meta,
 .app-shell-host.yds-theme-premium .yds-dbb__meta--thresholds,

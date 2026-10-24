@@ -38629,6 +38629,54 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-dbb__notice p { margin: 0.2rem 0; }
 .yds-dbb__notice-muted { color: #64748b !important; }
+.yds-dbb__notice--fold {
+  padding: 0.45rem 0.7rem;
+}
+.yds-dbb__notice--fold > .yds-dbb__notice-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+.yds-dbb__notice--fold > .yds-dbb__notice-summary::-webkit-details-marker {
+  display: none;
+}
+.yds-dbb__notice--fold > .yds-dbb__notice-summary::after {
+  content: "펼치기";
+  flex: none;
+  margin-top: 0.15rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+}
+.yds-dbb__notice--fold[open] > .yds-dbb__notice-summary::after {
+  content: "접기";
+}
+.yds-dbb__notice-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.yds-dbb__notice-summary-label {
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+}
+.yds-dbb__notice-summary-lead {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 550;
+  color: #cbd5e1;
+}
+.yds-dbb__notice-body {
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
 .yds-dbb__meta-block {
   margin: 0 0 0.85rem;
 }
