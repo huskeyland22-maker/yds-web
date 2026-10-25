@@ -94,6 +94,7 @@ function EquityBuyLines({ symbol }) {
  *     symbol: string
  *     name: string
  *     statusView: object | null
+ *     statusMetaView?: object | null
  *     recordedWeightPct: number
  *     avgBuyPrice: number | null
  *     quotePrice?: number | null
@@ -123,6 +124,7 @@ export default function DbbBuyProgressSection({
       <div className="yds-dbb-holdings__grid">
         {items.map((item) => {
           const selected = selectedSymbol != null && item.symbol === selectedSymbol
+          const tailView = item.statusView || item.statusMetaView || null
           const body = (
             <>
               <p className="yds-dbb-holdings__name">
@@ -142,12 +144,6 @@ export default function DbbBuyProgressSection({
                     <strong>준비 중</strong>
                   </div>
                   <div className="yds-trade-status__row">
-                    <span>기록 비중</span>
-                    <strong className="font-mono tabular-nums">
-                      {Number(item.recordedWeightPct).toFixed(0)}%
-                    </strong>
-                  </div>
-                  <div className="yds-trade-status__row">
                     <span>평균 매수가 (USD)</span>
                     <strong className="font-mono tabular-nums">
                       {formatUsdPrice(item.avgBuyPrice)}
@@ -158,8 +154,8 @@ export default function DbbBuyProgressSection({
                 </div>
               )}
               {showBuyLines ? <EquityBuyLines symbol={item.symbol} /> : null}
-              {focusStatus && item.statusView ? (
-                <TradeRecordStatusBlock view={item.statusView} part="tail" />
+              {focusStatus && tailView ? (
+                <TradeRecordStatusBlock view={tailView} part="tail" />
               ) : null}
             </>
           )
