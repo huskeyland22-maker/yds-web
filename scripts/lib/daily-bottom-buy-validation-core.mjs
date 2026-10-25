@@ -13,20 +13,20 @@
  * Panic Index와 완전 분리.
  */
 
+import { DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1 } from "../../api/_lib/dailyBottomBuyEngine.js"
 import { enrichBarsWithIndicators } from "./daily-bottom-indicators.mjs"
 
-/** Official V2 ETF universe (product) — research studies should stay aligned */
-export const DAILY_BOTTOM_BUY_ETFS = [
-  { symbol: "SMH", theme: "반도체·AI 컴퓨팅", group: "ai" },
-  { symbol: "GRID", theme: "전력망·전기화", group: "ai" },
-  { symbol: "QQQ", theme: "빅테크·AI 플랫폼", group: "ai" },
-  { symbol: "IGV", theme: "소프트웨어·클라우드", group: "ai" },
-  { symbol: "CIBR", theme: "사이버보안", group: "ai" },
-  { symbol: "BOTZ", theme: "로봇·자동화", group: "ai" },
-  { symbol: "ITA", theme: "방산·항공우주", group: "ai" },
-  { symbol: "URA", theme: "원전·우라늄", group: "ai" },
-  { symbol: "IBB", theme: "바이오·생명과학", group: "ai" },
-]
+/**
+ * Frozen V1 nine for historical validation studies (not the product six).
+ * `group` kept for study grouping helpers.
+ */
+export const DAILY_BOTTOM_BUY_ETFS = DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1.map((m) => ({
+  symbol: m.symbol,
+  theme: m.theme,
+  group: "ai",
+}))
+
+export { DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1 }
 
 export const DIP_DEF = {
   swingHalfWindow: 10,

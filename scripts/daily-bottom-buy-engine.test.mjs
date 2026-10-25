@@ -6,6 +6,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import {
   DAILY_BOTTOM_BUY_ETFS,
+  DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1,
   DAILY_BOTTOM_BUY_WATCHLIST,
   DAILY_BOTTOM_THRESHOLDS,
   stageFromCount,
@@ -14,14 +15,14 @@ import {
   buildEtfCard,
 } from "../api/_lib/dailyBottomBuyEngine.js"
 
+const PRODUCT_SIX = ["SMH", "GRID", "IGV", "BOTZ", "CIBR", "VOO"]
+const RESEARCH_NINE = ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB"]
+
 describe("daily-bottom-buy V1 product constants", () => {
-  it("keeps 9 ETFs and frozen thresholds", () => {
-    assert.equal(DAILY_BOTTOM_BUY_ETFS.length, 9)
-    assert.deepEqual(
-      DAILY_BOTTOM_BUY_ETFS.map((e) => e.symbol),
-      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB"],
-    )
-    for (const gone of ["XLK", "XLF", "XLY", "XLV", "VOO", "VTV", "SCHD", "JEPQ"]) {
+  it("keeps product six ETFs and frozen thresholds", () => {
+    assert.equal(DAILY_BOTTOM_BUY_ETFS.length, 6)
+    assert.deepEqual(DAILY_BOTTOM_BUY_ETFS.map((e) => e.symbol), PRODUCT_SIX)
+    for (const gone of ["QQQ", "JEPQ", "IBB", "URA", "POWR", "IHE", "XLV", "VTV", "SCHD", "XLE", "ITA", "XLK", "XLF", "XLY"]) {
       assert.ok(!DAILY_BOTTOM_BUY_ETFS.some((e) => e.symbol === gone))
     }
     assert.equal(DAILY_BOTTOM_THRESHOLDS.rsiMax, 36)
@@ -30,15 +31,20 @@ describe("daily-bottom-buy V1 product constants", () => {
     assert.equal(DAILY_BOTTOM_THRESHOLDS.ma20DevMax, -4.2)
   })
 
-  it("adds the screen ETFs to the watchlist without leveraged ETFs", () => {
+  it("freezes research V1 nine separately from the product six", () => {
+    assert.equal(DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1.length, 9)
+    assert.deepEqual(
+      DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1.map((e) => e.symbol),
+      RESEARCH_NINE,
+    )
+  })
+
+  it("keeps the screen watchlist identical to the product six without leveraged ETFs", () => {
     const symbols = DAILY_BOTTOM_BUY_WATCHLIST.map((e) => e.symbol)
-    assert.deepEqual(symbols, [
-      "SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB",
-      "POWR", "IHE", "XLE", "XLV", "VOO", "VTV", "SCHD", "JEPQ",
-    ])
+    assert.deepEqual(symbols, PRODUCT_SIX)
     assert.equal(new Set(symbols).size, symbols.length)
-    assert.ok(symbols.includes("GRID") && symbols.includes("POWR"))
-    for (const gone of ["FAS", "LABU"]) {
+    assert.ok(symbols.includes("GRID") && symbols.includes("VOO") && symbols.includes("CIBR"))
+    for (const gone of ["FAS", "LABU", "QQQ", "ITA", "XLE", "POWR"]) {
       assert.ok(!symbols.includes(gone))
     }
   })
