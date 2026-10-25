@@ -1,9 +1,12 @@
 /**
- * Daily Bottom Buy V1 — product evaluation engine (API).
- * Independent of Panic Index.
+ * Daily Bottom Buy V1 — product evaluation engine (frontend mirror of api/_lib/dailyBottomBuyEngine.js).
+ * Independent of Panic Index. Screen cards come from API/snapshot (WATCHLIST); keep lists in sync.
  */
 
-export const DAILY_BOTTOM_BUY_ETFS = [
+/**
+ * Frozen sell/signal research universe (historical V1 nine).
+ */
+export const DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1 = [
   { symbol: "SMH", theme: "반도체·AI 컴퓨팅", themeShort: "반도체·AI", role: "AI의 두뇌" },
   { symbol: "GRID", theme: "전력망·전기화", themeShort: "전력망", role: "AI 데이터센터 전력 인프라" },
   { symbol: "QQQ", theme: "빅테크·AI 플랫폼", themeShort: "빅테크·AI", role: "AI 플랫폼·클라우드" },
@@ -14,6 +17,19 @@ export const DAILY_BOTTOM_BUY_ETFS = [
   { symbol: "URA", theme: "원전·우라늄", themeShort: "원전", role: "에너지 안보·원전 공급망" },
   { symbol: "IBB", theme: "바이오·생명과학", themeShort: "바이오", role: "AI 신약·정밀의료·생명공학" },
 ]
+
+/** Product ETF set (AI growth watchlist). */
+export const DAILY_BOTTOM_BUY_ETFS = [
+  { symbol: "SMH", theme: "반도체·AI 컴퓨팅", themeShort: "반도체·AI", role: "AI의 두뇌" },
+  { symbol: "GRID", theme: "전력망·전기화", themeShort: "전력망", role: "AI 데이터센터 전력 인프라" },
+  { symbol: "IGV", theme: "소프트웨어·클라우드", themeShort: "소프트웨어", role: "AI 수익화" },
+  { symbol: "BOTZ", theme: "로봇·자동화", themeShort: "로봇", role: "Physical AI" },
+  { symbol: "CIBR", theme: "사이버보안", themeShort: "사이버", role: "AI 시대 보안 인프라" },
+  { symbol: "VOO", theme: "Vanguard S&P 500 ETF", themeShort: "S&P 500", role: "미국 대형주" },
+]
+
+/** Screen watchlist — identical to the product six. */
+export const DAILY_BOTTOM_BUY_WATCHLIST = [...DAILY_BOTTOM_BUY_ETFS]
 
 /** V1 product constants — frozen from Train validation */
 export const DAILY_BOTTOM_THRESHOLDS = {

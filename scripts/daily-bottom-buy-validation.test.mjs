@@ -99,7 +99,7 @@ describe("daily-bottom event detection", () => {
     assert.ok(e.rsi14 != null)
   })
 
-  it("V2 ETF list is fixed at 9 in official order", () => {
+  it("validation-core research universe stays frozen V1 nine", () => {
     assert.equal(DAILY_BOTTOM_BUY_ETFS.length, 9)
     const symbols = DAILY_BOTTOM_BUY_ETFS.map((e) => e.symbol)
     assert.deepEqual(symbols, [

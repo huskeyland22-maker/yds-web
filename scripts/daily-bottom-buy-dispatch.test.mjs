@@ -87,7 +87,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     ])
   })
 
-  it("dev server runs the local 17-ETF handler instead of the deployed proxy", () => {
+  it("dev server runs the local product-six ETF handler instead of the deployed proxy", () => {
     const vite = readFileSync(join(root, "vite-project/vite.config.js"), "utf8")
     assert.match(vite, /handleDailyBottomBuy/)
     assert.equal(vite.split('"/api/daily-bottom-buy"').length, 2)
@@ -97,7 +97,8 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.match(page, /: "데이터 없음"/)
     assert.doesNotMatch(page, /title="관심"/)
     assert.doesNotMatch(page, /title="대기"/)
-    assert.match(page, /etfList\.map/)
+    assert.match(page, /\betfList\b/)
+    assert.match(page, /etfList\.slice\(0, 10\)\)\.map\(/)
   })
 
   it("frontend API_PATH and snapshot path unchanged", () => {
@@ -113,10 +114,10 @@ describe("daily-bottom-buy hobby dispatch", () => {
     )
     assert.equal(snap.ok, true)
     assert.ok(Array.isArray(snap.all))
-    assert.equal(snap.all.length, 17)
+    assert.equal(snap.all.length, 6)
     assert.deepEqual(
       snap.all.map((c) => c.symbol),
-      ["SMH", "GRID", "QQQ", "IGV", "CIBR", "BOTZ", "ITA", "URA", "IBB", "POWR", "IHE", "XLE", "XLV", "VOO", "VTV", "SCHD", "JEPQ"],
+      ["SMH", "GRID", "IGV", "BOTZ", "CIBR", "VOO"],
     )
     for (const card of snap.all) {
       assert.equal(card.ok, true, card.symbol)
@@ -150,7 +151,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.equal(res.state.body?.system, "daily_bottom_buy_v1")
     assert.equal(res.state.body?.separateFromPanic, true)
     assert.ok(Array.isArray(res.state.body?.all))
-    assert.equal(res.state.body.all.length, 17)
+    assert.equal(res.state.body.all.length, 6)
     assert.ok(dbbCalled, "DBB path should fetch Yahoo OHLCV")
     assert.equal(res.state.body?.parsedData, undefined, "must not return market-data shape")
   })

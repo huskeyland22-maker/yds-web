@@ -3,7 +3,11 @@
  * Independent of Panic Index.
  */
 
-export const DAILY_BOTTOM_BUY_ETFS = [
+/**
+ * Frozen sell/signal research universe (historical V1 nine).
+ * Backtests and validation studies that must reproduce prior results import this — not the product six.
+ */
+export const DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1 = [
   { symbol: "SMH", theme: "반도체·AI 컴퓨팅", themeShort: "반도체·AI", role: "AI의 두뇌" },
   { symbol: "GRID", theme: "전력망·전기화", themeShort: "전력망", role: "AI 데이터센터 전력 인프라" },
   { symbol: "QQQ", theme: "빅테크·AI 플랫폼", themeShort: "빅테크·AI", role: "AI 플랫폼·클라우드" },
@@ -16,21 +20,20 @@ export const DAILY_BOTTOM_BUY_ETFS = [
 ]
 
 /**
- * Screen watchlist. The sell-research universe stays DAILY_BOTTOM_BUY_ETFS.
- * Same theme as an existing ticker is kept when the ticker differs.
+ * Product ETF set (AI growth watchlist). Same order as the screen.
  * FAS and LABU stay off this list because they are leveraged ETFs.
  */
-export const DAILY_BOTTOM_BUY_WATCHLIST = [
-  ...DAILY_BOTTOM_BUY_ETFS,
-  { symbol: "POWR", theme: "청정에너지", themeShort: "청정에너지", role: "재생에너지·청정 전력" },
-  { symbol: "IHE", theme: "제약", themeShort: "제약", role: "미국 제약" },
-  { symbol: "XLE", theme: "에너지", themeShort: "에너지", role: "석유·가스·에너지" },
-  { symbol: "XLV", theme: "헬스케어", themeShort: "헬스케어", role: "의료·헬스케어" },
+export const DAILY_BOTTOM_BUY_ETFS = [
+  { symbol: "SMH", theme: "반도체·AI 컴퓨팅", themeShort: "반도체·AI", role: "AI의 두뇌" },
+  { symbol: "GRID", theme: "전력망·전기화", themeShort: "전력망", role: "AI 데이터센터 전력 인프라" },
+  { symbol: "IGV", theme: "소프트웨어·클라우드", themeShort: "소프트웨어", role: "AI 수익화" },
+  { symbol: "BOTZ", theme: "로봇·자동화", themeShort: "로봇", role: "Physical AI" },
+  { symbol: "CIBR", theme: "사이버보안", themeShort: "사이버", role: "AI 시대 보안 인프라" },
   { symbol: "VOO", theme: "Vanguard S&P 500 ETF", themeShort: "S&P 500", role: "미국 대형주" },
-  { symbol: "VTV", theme: "Vanguard Value ETF", themeShort: "가치주", role: "미국 가치주" },
-  { symbol: "SCHD", theme: "Schwab U.S. Dividend Equity ETF", themeShort: "배당", role: "미국 배당주" },
-  { symbol: "JEPQ", theme: "JPMorgan Nasdaq Equity Premium Income ETF", themeShort: "나스닥 인컴", role: "나스닥 프리미엄 인컴" },
 ]
+
+/** Screen watchlist — identical to the product six. */
+export const DAILY_BOTTOM_BUY_WATCHLIST = [...DAILY_BOTTOM_BUY_ETFS]
 
 /** V1 product constants — frozen from Train validation */
 export const DAILY_BOTTOM_THRESHOLDS = {

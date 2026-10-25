@@ -3,7 +3,7 @@
   "system": "daily_bottom_buy_v1",
   "separateFromPanic": true,
   "source": "snapshot",
-  "updatedAt": "2026-10-14T12:42:39.647Z",
+  "updatedAt": "2026-10-25T02:00:49.273Z",
   "thresholds": {
     "rsiMax": 36,
     "stochKMax": 15.4,
@@ -24,79 +24,24 @@
   ],
   "counts": {
     "opportunity": 0,
-    "watch": 1,
-    "wait": 16
+    "watch": 0,
+    "wait": 6
   },
   "opportunities": [],
-  "watch": [
-    {
-      "symbol": "ITA",
-      "theme": "방산·항공우주",
-      "themeShort": "방산",
-      "role": "국가 전략산업·국방",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 216.13999938964844,
-      "rsi14": 31.9,
-      "stochK": 13.3,
-      "bbPctB": 0.255,
-      "ma20DevPct": -3.3,
-      "flags": {
-        "rsi": true,
-        "stoch": true,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 2,
-      "stage": {
-        "id": "watch",
-        "count": 2,
-        "label": "관심",
-        "priority": 2,
-        "splitHint": "관심 · 아직 매수 단계 아님"
-      }
-    }
-  ],
+  "watch": [],
   "waiting": [
-    {
-      "symbol": "IHE",
-      "theme": "제약",
-      "themeShort": "제약",
-      "role": "미국 제약",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 97.36000061035156,
-      "rsi14": 35.9,
-      "stochK": 35.6,
-      "bbPctB": 0.035,
-      "ma20DevPct": -3.2,
-      "flags": {
-        "rsi": true,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 1,
-      "stage": {
-        "id": "wait",
-        "count": 1,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
     {
       "symbol": "BOTZ",
       "theme": "로봇·자동화",
       "themeShort": "로봇",
       "role": "Physical AI",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 35.81999969482422,
-      "rsi14": 52.5,
-      "stochK": 56.2,
-      "bbPctB": 0.744,
-      "ma20DevPct": 1.2,
+      "asOfDate": "2026-10-13",
+      "close": 34.959999084472656,
+      "rsi14": 44.6,
+      "stochK": 24.6,
+      "bbPctB": 0.25,
+      "ma20DevPct": -1.2,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -118,12 +63,12 @@
       "themeShort": "사이버",
       "role": "AI 시대 보안 인프라",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 103.08999633789062,
-      "rsi14": 62.6,
-      "stochK": 86.4,
-      "bbPctB": 0.946,
-      "ma20DevPct": 6.2,
+      "asOfDate": "2026-10-13",
+      "close": 107.47000122070312,
+      "rsi14": 61.3,
+      "stochK": 82,
+      "bbPctB": 0.798,
+      "ma20DevPct": 3.2,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -145,39 +90,12 @@
       "themeShort": "전력망",
       "role": "AI 데이터센터 전력 인프라",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 181.0800018310547,
-      "rsi14": 53.3,
-      "stochK": 62.9,
-      "bbPctB": 0.779,
-      "ma20DevPct": 1.7,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "IBB",
-      "theme": "바이오·생명과학",
-      "themeShort": "바이오",
-      "role": "AI 신약·정밀의료·생명공학",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 207.16000366210938,
-      "rsi14": 53.4,
-      "stochK": 38.8,
-      "bbPctB": 0.418,
-      "ma20DevPct": -0.7,
+      "asOfDate": "2026-10-13",
+      "close": 179.25,
+      "rsi14": 49.2,
+      "stochK": 39.7,
+      "bbPctB": 0.481,
+      "ma20DevPct": -0.1,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -199,120 +117,12 @@
       "themeShort": "소프트웨어",
       "role": "AI 수익화",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 107.12999725341797,
-      "rsi14": 57.5,
-      "stochK": 56.7,
-      "bbPctB": 0.695,
-      "ma20DevPct": 2.1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "JEPQ",
-      "theme": "JPMorgan Nasdaq Equity Premium Income ETF",
-      "themeShort": "나스닥 인컴",
-      "role": "나스닥 프리미엄 인컴",
-      "ok": true,
       "asOfDate": "2026-10-13",
-      "close": 60.91999816894531,
-      "rsi14": 54.5,
-      "stochK": 52.4,
-      "bbPctB": 0.512,
-      "ma20DevPct": 0,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "POWR",
-      "theme": "청정에너지",
-      "themeShort": "청정에너지",
-      "role": "재생에너지·청정 전력",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 25.68000030517578,
-      "rsi14": 58.2,
-      "stochK": 91.5,
-      "bbPctB": 0.939,
-      "ma20DevPct": 3.3,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "QQQ",
-      "theme": "빅테크·AI 플랫폼",
-      "themeShort": "빅테크·AI",
-      "role": "AI 플랫폼·클라우드",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 741.469970703125,
-      "rsi14": 65.7,
-      "stochK": 88,
-      "bbPctB": 1.331,
-      "ma20DevPct": 3.8,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "SCHD",
-      "theme": "Schwab U.S. Dividend Equity ETF",
-      "themeShort": "배당",
-      "role": "미국 배당주",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 33.369998931884766,
-      "rsi14": 49.9,
-      "stochK": 70.3,
-      "bbPctB": 0.623,
-      "ma20DevPct": 0.6,
+      "close": 110.9800033569336,
+      "rsi14": 60.2,
+      "stochK": 83.1,
+      "bbPctB": 0.819,
+      "ma20DevPct": 2.8,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -334,39 +144,12 @@
       "themeShort": "반도체·AI",
       "role": "AI의 두뇌",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 596.030029296875,
-      "rsi14": 61.1,
-      "stochK": 77,
-      "bbPctB": 1.174,
-      "ma20DevPct": 6.5,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "URA",
-      "theme": "원전·우라늄",
-      "themeShort": "원전",
-      "role": "에너지 안보·원전 공급망",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 42.97999954223633,
-      "rsi14": 46.4,
-      "stochK": 22.4,
-      "bbPctB": 0.29,
-      "ma20DevPct": -4.2,
+      "asOfDate": "2026-10-13",
+      "close": 588.1199951171875,
+      "rsi14": 46.5,
+      "stochK": 17.8,
+      "bbPctB": 0.345,
+      "ma20DevPct": -2.3,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -394,87 +177,6 @@
       "stochK": 84.9,
       "bbPctB": 0.779,
       "ma20DevPct": 1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "VTV",
-      "theme": "Vanguard Value ETF",
-      "themeShort": "가치주",
-      "role": "미국 가치주",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 220.6699981689453,
-      "rsi14": 50.5,
-      "stochK": 83.3,
-      "bbPctB": 0.649,
-      "ma20DevPct": 0.5,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "XLE",
-      "theme": "에너지",
-      "themeShort": "에너지",
-      "role": "석유·가스·에너지",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 67.19999694824219,
-      "rsi14": 69.8,
-      "stochK": 91.9,
-      "bbPctB": 1.116,
-      "ma20DevPct": 5.9,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "XLV",
-      "theme": "헬스케어",
-      "themeShort": "헬스케어",
-      "role": "의료·헬스케어",
-      "ok": true,
-      "asOfDate": "2026-09-18",
-      "close": 168.38999938964844,
-      "rsi14": 49.8,
-      "stochK": 34.3,
-      "bbPctB": 0.346,
-      "ma20DevPct": -1.1,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -498,12 +200,12 @@
       "themeShort": "반도체·AI",
       "role": "AI의 두뇌",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 596.030029296875,
-      "rsi14": 61.1,
-      "stochK": 77,
-      "bbPctB": 1.174,
-      "ma20DevPct": 6.5,
+      "asOfDate": "2026-10-13",
+      "close": 588.1199951171875,
+      "rsi14": 46.5,
+      "stochK": 17.8,
+      "bbPctB": 0.345,
+      "ma20DevPct": -2.3,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -525,39 +227,12 @@
       "themeShort": "전력망",
       "role": "AI 데이터센터 전력 인프라",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 181.0800018310547,
-      "rsi14": 53.3,
-      "stochK": 62.9,
-      "bbPctB": 0.779,
-      "ma20DevPct": 1.7,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "QQQ",
-      "theme": "빅테크·AI 플랫폼",
-      "themeShort": "빅테크·AI",
-      "role": "AI 플랫폼·클라우드",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 741.469970703125,
-      "rsi14": 65.7,
-      "stochK": 88,
-      "bbPctB": 1.331,
-      "ma20DevPct": 3.8,
+      "asOfDate": "2026-10-13",
+      "close": 179.25,
+      "rsi14": 49.2,
+      "stochK": 39.7,
+      "bbPctB": 0.481,
+      "ma20DevPct": -0.1,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -579,39 +254,12 @@
       "themeShort": "소프트웨어",
       "role": "AI 수익화",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 107.12999725341797,
-      "rsi14": 57.5,
-      "stochK": 56.7,
-      "bbPctB": 0.695,
-      "ma20DevPct": 2.1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "CIBR",
-      "theme": "사이버보안",
-      "themeShort": "사이버",
-      "role": "AI 시대 보안 인프라",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 103.08999633789062,
-      "rsi14": 62.6,
-      "stochK": 86.4,
-      "bbPctB": 0.946,
-      "ma20DevPct": 6.2,
+      "asOfDate": "2026-10-13",
+      "close": 110.9800033569336,
+      "rsi14": 60.2,
+      "stochK": 83.1,
+      "bbPctB": 0.819,
+      "ma20DevPct": 2.8,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -633,12 +281,12 @@
       "themeShort": "로봇",
       "role": "Physical AI",
       "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 35.81999969482422,
-      "rsi14": 52.5,
-      "stochK": 56.2,
-      "bbPctB": 0.744,
-      "ma20DevPct": 1.2,
+      "asOfDate": "2026-10-13",
+      "close": 34.959999084472656,
+      "rsi14": 44.6,
+      "stochK": 24.6,
+      "bbPctB": 0.25,
+      "ma20DevPct": -1.2,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -655,179 +303,17 @@
       }
     },
     {
-      "symbol": "ITA",
-      "theme": "방산·항공우주",
-      "themeShort": "방산",
-      "role": "국가 전략산업·국방",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 216.13999938964844,
-      "rsi14": 31.9,
-      "stochK": 13.3,
-      "bbPctB": 0.255,
-      "ma20DevPct": -3.3,
-      "flags": {
-        "rsi": true,
-        "stoch": true,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 2,
-      "stage": {
-        "id": "watch",
-        "count": 2,
-        "label": "관심",
-        "priority": 2,
-        "splitHint": "관심 · 아직 매수 단계 아님"
-      }
-    },
-    {
-      "symbol": "URA",
-      "theme": "원전·우라늄",
-      "themeShort": "원전",
-      "role": "에너지 안보·원전 공급망",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 42.97999954223633,
-      "rsi14": 46.4,
-      "stochK": 22.4,
-      "bbPctB": 0.29,
-      "ma20DevPct": -4.2,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "IBB",
-      "theme": "바이오·생명과학",
-      "themeShort": "바이오",
-      "role": "AI 신약·정밀의료·생명공학",
-      "ok": true,
-      "asOfDate": "2026-09-21",
-      "close": 207.16000366210938,
-      "rsi14": 53.4,
-      "stochK": 38.8,
-      "bbPctB": 0.418,
-      "ma20DevPct": -0.7,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "POWR",
-      "theme": "청정에너지",
-      "themeShort": "청정에너지",
-      "role": "재생에너지·청정 전력",
+      "symbol": "CIBR",
+      "theme": "사이버보안",
+      "themeShort": "사이버",
+      "role": "AI 시대 보안 인프라",
       "ok": true,
       "asOfDate": "2026-10-13",
-      "close": 25.68000030517578,
-      "rsi14": 58.2,
-      "stochK": 91.5,
-      "bbPctB": 0.939,
-      "ma20DevPct": 3.3,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "IHE",
-      "theme": "제약",
-      "themeShort": "제약",
-      "role": "미국 제약",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 97.36000061035156,
-      "rsi14": 35.9,
-      "stochK": 35.6,
-      "bbPctB": 0.035,
-      "ma20DevPct": -3.2,
-      "flags": {
-        "rsi": true,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 1,
-      "stage": {
-        "id": "wait",
-        "count": 1,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "XLE",
-      "theme": "에너지",
-      "themeShort": "에너지",
-      "role": "석유·가스·에너지",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 67.19999694824219,
-      "rsi14": 69.8,
-      "stochK": 91.9,
-      "bbPctB": 1.116,
-      "ma20DevPct": 5.9,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "XLV",
-      "theme": "헬스케어",
-      "themeShort": "헬스케어",
-      "role": "의료·헬스케어",
-      "ok": true,
-      "asOfDate": "2026-09-18",
-      "close": 168.38999938964844,
-      "rsi14": 49.8,
-      "stochK": 34.3,
-      "bbPctB": 0.346,
-      "ma20DevPct": -1.1,
+      "close": 107.47000122070312,
+      "rsi14": 61.3,
+      "stochK": 82,
+      "bbPctB": 0.798,
+      "ma20DevPct": 3.2,
       "flags": {
         "rsi": false,
         "stoch": false,
@@ -855,87 +341,6 @@
       "stochK": 84.9,
       "bbPctB": 0.779,
       "ma20DevPct": 1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "VTV",
-      "theme": "Vanguard Value ETF",
-      "themeShort": "가치주",
-      "role": "미국 가치주",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 220.6699981689453,
-      "rsi14": 50.5,
-      "stochK": 83.3,
-      "bbPctB": 0.649,
-      "ma20DevPct": 0.5,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "SCHD",
-      "theme": "Schwab U.S. Dividend Equity ETF",
-      "themeShort": "배당",
-      "role": "미국 배당주",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 33.369998931884766,
-      "rsi14": 49.9,
-      "stochK": 70.3,
-      "bbPctB": 0.623,
-      "ma20DevPct": 0.6,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
-      "count": 0,
-      "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
-      }
-    },
-    {
-      "symbol": "JEPQ",
-      "theme": "JPMorgan Nasdaq Equity Premium Income ETF",
-      "themeShort": "나스닥 인컴",
-      "role": "나스닥 프리미엄 인컴",
-      "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 60.91999816894531,
-      "rsi14": 54.5,
-      "stochK": 52.4,
-      "bbPctB": 0.512,
-      "ma20DevPct": 0,
       "flags": {
         "rsi": false,
         "stoch": false,
