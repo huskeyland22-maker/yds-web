@@ -915,6 +915,25 @@
   box-sizing: border-box;
 }
 
+/* ETF dashboard trade panel: same containment as equity */
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade {
+  overflow-x: clip;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__form label,
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__memo,
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__form input,
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__form select {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-dash__trade-status {
   background: var(--yds-bg-elevated);
   border: 1px solid var(--yds-border);
@@ -948,10 +967,18 @@
   .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__grid {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (min-width: 1200px) {
   .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-dash__trade .yds-trade-rec__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -39258,11 +39258,56 @@ button.yds-dbb-all__row.is-selected {
   min-width: 0;
 }
 .yds-dbb--dashboard .yds-dbb-dash__trade {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   max-width: 100%;
+  width: 100%;
   position: sticky;
   top: 0.5rem;
   align-self: start;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-dbb-trade,
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec,
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__form,
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__grid,
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__actions {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__form label,
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__memo {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__form input,
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__form select {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__actions .yds-trade-rec__save,
+.yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__actions .yds-trade-rec__cancel {
+  width: auto;
+  flex: 1 1 auto;
+  min-width: min(100%, 7.5rem);
+  box-sizing: border-box;
 }
 .yds-dbb--dashboard .yds-dbb-research summary {
   display: flex;
@@ -39303,7 +39348,8 @@ button.yds-dbb-all__row.is-selected {
     grid-template-columns: repeat(auto-fit, minmax(18.5rem, 1fr));
   }
   .yds-dbb--dashboard .yds-dbb-dash {
-    grid-template-columns: minmax(0, 1.4fr) minmax(17rem, 22rem);
+    /* Wider trade column so 2-col inputs fit without overflow */
+    grid-template-columns: minmax(0, 1.25fr) minmax(20rem, 26rem);
   }
 }
 @media (min-width: 1280px) {
@@ -39314,10 +39360,22 @@ button.yds-dbb-all__row.is-selected {
   .yds-dbb--dashboard .yds-dbb-cands {
     grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
   }
+  .yds-dbb--dashboard .yds-dbb-dash {
+    grid-template-columns: minmax(0, 1.3fr) minmax(22rem, 28rem);
+  }
 }
 @media (max-width: 959px) {
   .yds-dbb--dashboard .yds-dbb-dash__trade {
     position: static;
+  }
+  .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* Mid-width: trade column may still be tight — prefer single column inputs */
+@media (min-width: 960px) and (max-width: 1199px) {
+  .yds-dbb--dashboard .yds-dbb-dash__trade .yds-trade-rec__grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
