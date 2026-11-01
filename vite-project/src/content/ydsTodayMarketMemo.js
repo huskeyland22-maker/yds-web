@@ -2,7 +2,7 @@
  * 오늘의 해석 — 시장 위치 + 패닉 강도 (메뉴·시장분석 공통)
  */
 
-import { getFinalScore } from "../utils/tradingScores.js"
+import { getOfficialPanicScore } from "../utils/tradingScores.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
 import { resolveMarketPosition } from "./ydsMarketPositionEngine.js"
 /** @typedef {import("./ydsMarketPositionEngine.js").MarketPositionId} MarketPositionId */
@@ -117,9 +117,11 @@ function applyScoreTemplate(lines, score) {
  * @returns {TodayMarketMemo | null}
  */
 export function buildTodayMarketMemo(panicData) {
+  if (!panicData || typeof panicData !== "object") return null
   const position = resolveMarketPosition(panicData)
-  const score = getFinalScore(panicData ?? {})
-  const macro = Number.isFinite(score) ? resolveMacroV1Status(score) : null
+  const score = getOfficialPanicScore(panicData)
+  if (score == null || !Number.isFinite(score)) return null
+  const macro = resolveMacroV1Status(score)
 
   if (!position || !macro) return null
 

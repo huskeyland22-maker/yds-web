@@ -27,14 +27,17 @@ import { getRegimeTopStocks } from "./ydsStockPickMarketRegime.js"
 function resolveCashPct(ctx, dualLiquidity) {
   let cash = 25
   const pos = ctx?.marketPositionId ?? "adjustment"
-  const panic = ctx?.ydsScore ?? 50
+  const panic = Number.isFinite(ctx?.ydsScore) ? Number(ctx.ydsScore) : null
   const marketLiq = dualLiquidity?.marketScore ?? 50
   const policyLiq = dualLiquidity?.policyScore ?? 50
 
   if (pos === "overheat" || pos === "boundary") cash += 15
   if (pos === "panic" || pos === "fear") cash -= 10
-  if (panic >= 70) cash -= 5
-  if (panic <= 30) cash += 5
+  // Official/adapter 결측 시 50 필 금지 — 패닉 점수 가산만 생략
+  if (panic != null) {
+    if (panic >= 70) cash -= 5
+    if (panic <= 30) cash += 5
+  }
   if (marketLiq < 45) cash += 8
   if (policyLiq < 45) cash += 7
   if (dualLiquidity?.actionMode === "defense") cash += 10

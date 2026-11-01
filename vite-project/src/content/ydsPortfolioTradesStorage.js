@@ -5,7 +5,13 @@
 import { loadActionLogs } from "./ydsActionLogStorage.js"
 import { PORTFOLIO_LEGACY_ALIAS_KEYS } from "./ydsPortfolioKeyRegistry.js"
 import { PORTFOLIO_POSITIONS_KEY } from "./ydsPortfolioPositionsStorage.js"
+import {
+  getActivePortfolioOwnerUid,
+  portfolioTradesKeyForOwner,
+  writePortfolioOwnerMeta,
+} from "./ydsPortfolioStorageScope.js"
 
+/** Shared/orphan key — preserved; not used for active account/guest IO (Phase A). */
 export const PORTFOLIO_TRADES_KEY = "yds-portfolio-trades-v1"
 export const PORTFOLIO_TRADES_MIGRATED_KEY = "yds-portfolio-trades-migrated-v1"
 const MANUAL_TO_TRADES_KEY = "yds-portfolio-v4-manual-migrated-v1"
@@ -170,46 +176,36 @@ function migrateManualPositionsToTrades(trades) {
   }
 }
 
-/** @returns {PortfolioTrade[]} */
+/**
+ * Load trades for the active owner scope (guest or uid).
+ * Does not read/write the shared orphan key `yds-portfolio-trades-v1`.
+ * @returns {PortfolioTrade[]}
+ */
 export function loadPortfolioTrades() {
-  /** @type {string | null} */
-  let migratedFrom = null
+  return loadPortfolioTradesForOwner(getActivePortfolioOwnerUid())
+}
+
+/**
+ * @param {string | null | undefined} ownerUid
+ * @returns {PortfolioTrade[]}
+ */
+export function loadPortfolioTradesForOwner(ownerUid) {
+  const sourceKey = portfolioTradesKeyForOwner(ownerUid)
   try {
-    const raw = localStorage.getItem(PORTFOLIO_TRADES_KEY)
-    let base = []
-    let sourceKey = PORTFOLIO_TRADES_KEY
-
+    const raw = localStorage.getItem(sourceKey)
     if (!raw) {
-      base = migrateTradesFromActionLog()
-      if (base.length) sourceKey = PORTFOLIO_TRADES_KEY
-    } else {
-      const parsed = JSON.parse(raw)
-      base = Array.isArray(parsed) ? parsed.filter((t) => t && typeof t.id === "string") : migrateTradesFromActionLog()
+      lastLoadMeta = { sourceKey, migratedFrom: null }
+      return []
     }
-
-    const beforeLegacy = base.length
-    base = migrateLegacyAliasKeys(base)
-    if (base.length > beforeLegacy && !migratedFrom) {
-      migratedFrom = "legacy-alias"
-    }
-
-    const before = base.length
-    const result = migrateManualPositionsToTrades(base)
-    if (result.length > before && !migratedFrom) {
-      migratedFrom = MANUAL_POSITIONS_KEY
-    }
-    if (result.length > beforeLegacy && beforeLegacy === 0 && !migratedFrom) {
-      migratedFrom = "yds-portfolio-manual-v1|yds-portfolio-positions-v1"
-    }
-    if (result.length > before) savePortfolioTrades(result)
-
-    lastLoadMeta = { sourceKey, migratedFrom }
-    return result
+    const parsed = JSON.parse(raw)
+    const base = Array.isArray(parsed)
+      ? parsed.filter((t) => t && typeof t.id === "string")
+      : []
+    lastLoadMeta = { sourceKey, migratedFrom: null }
+    return base
   } catch {
-    const result = migrateManualPositionsToTrades(migrateLegacyAliasKeys(migrateTradesFromActionLog()))
-    if (result.length) savePortfolioTrades(result)
-    lastLoadMeta = { sourceKey: PORTFOLIO_TRADES_KEY, migratedFrom: migratedFrom ?? "error-recover" }
-    return result
+    lastLoadMeta = { sourceKey, migratedFrom: "error-recover" }
+    return []
   }
 }
 
@@ -256,10 +252,24 @@ function migrateTradesFromActionLog() {
   return trades
 }
 
-/** @param {PortfolioTrade[]} trades */
+/**
+ * Save trades for the active owner scope (guest or uid).
+ * Never writes the shared orphan key.
+ * @param {PortfolioTrade[]} trades
+ */
 export function savePortfolioTrades(trades) {
+  savePortfolioTradesForOwner(getActivePortfolioOwnerUid(), trades)
+}
+
+/**
+ * @param {string | null | undefined} ownerUid
+ * @param {PortfolioTrade[]} trades
+ */
+export function savePortfolioTradesForOwner(ownerUid, trades) {
+  const key = portfolioTradesKeyForOwner(ownerUid)
   try {
-    localStorage.setItem(PORTFOLIO_TRADES_KEY, JSON.stringify(trades))
+    localStorage.setItem(key, JSON.stringify(Array.isArray(trades) ? trades : []))
+    writePortfolioOwnerMeta(ownerUid)
   } catch {
     /* ignore */
   }

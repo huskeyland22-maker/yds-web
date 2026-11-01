@@ -15,19 +15,21 @@ import { buildMarketCycleFlowReport } from "./ydsMarketCycleFlow.js"
 import { resolveUnifiedMarketStateLabel } from "./ydsUnifiedMarketState.js"
 import { getMarketStatePickLimit } from "./ydsMarketStateCenter.js"
 import { resolveMacroV1Status } from "../panic-v2/panicMacroV1Status.js"
-import { getFinalScore } from "../utils/tradingScores.js"
+import { getOfficialPanicScore } from "../utils/tradingScores.js"
 import { clampScore } from "./ydsStockScoreEngine.js"
 import { STOCK_STATUS_VIEWS } from "./ydsStockActionEngine.js"
 import { YDS_SCORE_WEIGHTS } from "./ydsStockScoreConfig.js"
 
 /** @typedef {import("./ydsStockActionEngine.js").StockActionStatusId} StockActionStatusId */
 /** @typedef {import("../panic-v2/panicMacroV1Status.js").MacroV1StatusId} MacroV1StatusId */
+/** @typedef {"ok" | "dataInsufficient"} YdsMarketScoreStatus */
 
 /**
  * @typedef {{
  *   ready: boolean
+ *   scoreStatus: YdsMarketScoreStatus
  *   ydsScore: number | null
- *   macroId: MacroV1StatusId
+ *   macroId: MacroV1StatusId | "unknown"
  *   macroLabel: string
  *   macroEmoji: string
  *   panicBandId: string
@@ -52,23 +54,28 @@ import { YDS_SCORE_WEIGHTS } from "./ydsStockScoreConfig.js"
  * }} YdsMarketAdapterContext
  */
 
-/** @type {YdsMarketAdapterContext} */
+/**
+ * Official 점수 결측·무효 시 컨텍스트.
+ * 정상 국면(neutral/공포 부족)이나 매수(panicBuy)로 오인되지 않도록 라벨·플래그를 분리한다.
+ * @type {YdsMarketAdapterContext}
+ */
 export const DEFAULT_MARKET_CONTEXT = {
   ready: false,
+  scoreStatus: "dataInsufficient",
   ydsScore: null,
-  macroId: "neutral",
-  macroLabel: "공포 부족",
-  macroEmoji: "🟢",
-  panicBandId: "neutral",
-  panicLabel: "공포 부족",
-  strategyLabel: "공포 부족",
-  strategyEmoji: "🟢",
-  isDefensive: true,
+  macroId: "unknown",
+  macroLabel: "데이터 부족",
+  macroEmoji: "—",
+  panicBandId: "dataInsufficient",
+  panicLabel: "데이터 부족",
+  strategyLabel: "데이터 부족",
+  strategyEmoji: "—",
+  isDefensive: false,
   marketLabel: "—",
   marketEmoji: "—",
   cycleStageId: "normal",
-  cycleLabel: "성장",
-  cycleEmoji: "🟡",
+  cycleLabel: "—",
+  cycleEmoji: "—",
   marketStateId: null,
   marketStateLabel: null,
   marketPositionId: null,
@@ -97,8 +104,10 @@ const REGIME_ACTION_FIT = {
 export function resolveMarketAdapterContext(panicData, historyRows = []) {
   if (!panicData) return { ...DEFAULT_MARKET_CONTEXT }
 
-  const ydsScore = getFinalScore(panicData)
-  if (!Number.isFinite(ydsScore)) return { ...DEFAULT_MARKET_CONTEXT }
+  const ydsScore = getOfficialPanicScore(panicData)
+  if (ydsScore == null || !Number.isFinite(ydsScore)) {
+    return { ...DEFAULT_MARKET_CONTEXT }
+  }
 
   const rounded = Math.round(ydsScore)
   const snapshot = resolveMarketStageSnapshot(rounded)
@@ -140,14 +149,15 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
 
   return {
     ready: true,
-    ydsScore: Math.round(ydsScore),
+    scoreStatus: "ok",
+    ydsScore: rounded,
     macroId,
-    macroLabel: macro?.label ?? DEFAULT_MARKET_CONTEXT.macroLabel,
-    macroEmoji: macro?.emoji ?? DEFAULT_MARKET_CONTEXT.macroEmoji,
+    macroLabel: macro?.label ?? "공포 부족",
+    macroEmoji: macro?.emoji ?? "🟢",
     panicBandId,
-    panicLabel: snapshot?.panic?.label ?? macro?.label ?? DEFAULT_MARKET_CONTEXT.panicLabel,
-    strategyLabel: signal?.strategyLabel ?? market?.label ?? actions?.band?.label ?? DEFAULT_MARKET_CONTEXT.strategyLabel,
-    strategyEmoji: signal?.strategyEmoji ?? actions?.band?.emoji ?? DEFAULT_MARKET_CONTEXT.strategyEmoji,
+    panicLabel: snapshot?.panic?.label ?? macro?.label ?? "공포 부족",
+    strategyLabel: signal?.strategyLabel ?? market?.label ?? actions?.band?.label ?? "공포 부족",
+    strategyEmoji: signal?.strategyEmoji ?? actions?.band?.emoji ?? "🟢",
     isDefensive,
     marketLabel: market?.label ?? "—",
     marketEmoji: market?.emoji ?? "—",
@@ -167,11 +177,25 @@ export function resolveMarketAdapterContext(panicData, historyRows = []) {
 }
 
 /**
+ * MarketFit 산출 불가 — unknown을 neutral 표로 위장하지 않음.
+ * @param {YdsMarketAdapterContext | null | undefined} context
+ */
+function isMarketFitContextInsufficient(context) {
+  if (!context || typeof context !== "object") return true
+  if (context.ready === false) return true
+  if (context.scoreStatus === "dataInsufficient") return true
+  if (context.macroId === "unknown") return true
+  return false
+}
+
+/**
  * @param {YdsMarketAdapterContext} context
  * @param {StockActionStatusId} actionStatusId
  * @param {import("./ydsStockScoreConfig.js").YdsScoreBreakdown} scores
  */
 export function computeMarketFitScore(context, actionStatusId, scores) {
+  if (isMarketFitContextInsufficient(context)) return 0
+
   const table = REGIME_ACTION_FIT[context.macroId] ?? REGIME_ACTION_FIT.neutral
   let fit = table[actionStatusId] ?? 12
 
@@ -210,6 +234,7 @@ export function computeMarketFitScore(context, actionStatusId, scores) {
  * @param {number} fitScore
  */
 export function buildMarketFitReason(context, actionStatusId, fitScore) {
+  if (isMarketFitContextInsufficient(context)) return null
   if (fitScore < Math.round(YDS_SCORE_WEIGHTS.marketFit * 0.55)) return null
 
   const statusLabel = STOCK_STATUS_VIEWS[actionStatusId]?.label ?? "종목"
@@ -237,6 +262,8 @@ export function buildMarketFitReason(context, actionStatusId, fitScore) {
  * @returns {import("./ydsStockRecommendReasons.js").RecommendReason[]}
  */
 export function buildMarketFitReasons(context, actionStatusId, fitScore) {
+  if (isMarketFitContextInsufficient(context)) return []
+
   const detail = buildMarketFitReason(context, actionStatusId, fitScore)
   if (!detail) return []
 

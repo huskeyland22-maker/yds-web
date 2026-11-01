@@ -1,7 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { normalizeCashBalance } from "../content/ydsPortfolioCashEngine.js"
-import { loadCashBalance, saveCashBalance } from "../content/ydsPortfolioCashBalanceStorage.js"
 import {
+  loadCashBalanceForOwner,
+  saveCashBalance,
+  saveCashBalanceForOwner,
+} from "../content/ydsPortfolioCashBalanceStorage.js"
+import {
+  PortfolioSyncConflictError,
+  hasPortfolioSyncConflict,
   pushCloudPortfolio,
   reconcilePortfolioWithCloud,
 } from "../content/ydsPortfolioCloudSync.js"
@@ -13,6 +19,11 @@ import {
 import { logPortfolioLoad } from "../content/ydsPortfolioLoadLog.js"
 import { logPortfolioStorageAudit } from "../content/ydsPortfolioStorageDebug.js"
 import {
+  getActivePortfolioOwnerUid,
+  setActivePortfolioOwnerUid,
+  writePortfolioOwnerMeta,
+} from "../content/ydsPortfolioStorageScope.js"
+import {
   buildV5Holdings,
   emptyPortfolioHoldings,
   replayPortfolioFromTrades,
@@ -21,8 +32,9 @@ import {
 import {
   createTradeId,
   getPortfolioLoadMeta,
-  loadPortfolioTrades,
+  loadPortfolioTradesForOwner,
   savePortfolioTrades,
+  savePortfolioTradesForOwner,
   todayDateKey,
 } from "../content/ydsPortfolioTradesStorage.js"
 import { useFirebaseAuthUser } from "../hooks/useFirebaseAuthUser.js"
@@ -37,21 +49,9 @@ const PortfolioStateContext = createContext(null)
 
 function usePortfolioStateValue() {
   const { user, authReady } = useFirebaseAuthUser()
-  const [trades, setTrades] = useState(() => {
-    try {
-      const loaded = loadPortfolioTrades()
-      return Array.isArray(loaded) ? loaded : []
-    } catch {
-      return []
-    }
-  })
-  const [cashBalance, setCashBalanceState] = useState(() => {
-    try {
-      return loadCashBalance() ?? 0
-    } catch {
-      return 0
-    }
-  })
+  // Start empty until auth scope is known — never hydrate from shared orphan key.
+  const [trades, setTrades] = useState(/** @type {PortfolioTrade[]} */ ([]))
+  const [cashBalance, setCashBalanceState] = useState(0)
   const [sortBy, setSortBy] = useState(/** @type {HoldingsSortKey} */ ("returnPct"))
   /** @type {[Map<string, PortfolioQuote>, import("react").Dispatch<import("react").SetStateAction<Map<string, PortfolioQuote>>>]} */
   const [quoteMap, setQuoteMap] = useState(() => new Map())
@@ -63,6 +63,19 @@ function usePortfolioStateValue() {
   const [syncReady, setSyncReady] = useState(false)
   const cloudPushTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null))
   const skipCloudPushRef = useRef(true)
+  /** @type {import("react").MutableRefObject<string | null | undefined>} undefined = not hydrated yet */
+  const ownerScopeRef = useRef(undefined)
+  const tradesRef = useRef(trades)
+  const cashRef = useRef(cashBalance)
+  const scopeReadyRef = useRef(false)
+
+  useEffect(() => {
+    tradesRef.current = trades
+  }, [trades])
+
+  useEffect(() => {
+    cashRef.current = cashBalance
+  }, [cashBalance])
 
   useEffect(() => {
     logPortfolioLoad(trades, getPortfolioLoadMeta(), { user, syncMode })
@@ -70,44 +83,82 @@ function usePortfolioStateValue() {
   }, [])
 
   useEffect(() => {
+    if (!scopeReadyRef.current) return
+    if (getActivePortfolioOwnerUid() !== (ownerScopeRef.current ?? null)) return
     savePortfolioTrades(trades)
   }, [trades])
 
   useEffect(() => {
+    if (!scopeReadyRef.current) return
+    if (getActivePortfolioOwnerUid() !== (ownerScopeRef.current ?? null)) return
     saveCashBalance(cashBalance)
   }, [cashBalance])
 
   useEffect(() => {
     if (!authReady) return
 
-    if (!user?.uid) {
+    const nextUid = user?.uid ? String(user.uid) : null
+    const prevUid = ownerScopeRef.current
+
+    if (cloudPushTimerRef.current) {
+      clearTimeout(cloudPushTimerRef.current)
+      cloudPushTimerRef.current = null
+    }
+    skipCloudPushRef.current = true
+    setSyncReady(false)
+
+    // Persist in-memory data to the previous scope before switching (never touch other slots).
+    if (prevUid !== undefined && prevUid !== nextUid) {
+      savePortfolioTradesForOwner(prevUid, tradesRef.current)
+      saveCashBalanceForOwner(prevUid, cashRef.current)
+    }
+
+    setActivePortfolioOwnerUid(nextUid)
+    ownerScopeRef.current = nextUid
+    writePortfolioOwnerMeta(nextUid)
+    scopeReadyRef.current = true
+
+    const localTrades = loadPortfolioTradesForOwner(nextUid)
+    const localCash = loadCashBalanceForOwner(nextUid) ?? 0
+    setTrades(localTrades)
+    setCashBalanceState(localCash)
+
+    if (!nextUid) {
       setSyncMode("device-local")
       setSyncReady(true)
       skipCloudPushRef.current = false
       return
     }
 
+    // Persisted per-uid conflict — block debounce push for this session until cleared.
+    if (hasPortfolioSyncConflict(nextUid)) {
+      setSyncMode("account-conflict")
+    }
+
     let cancelled = false
-    skipCloudPushRef.current = true
-    setSyncReady(false)
 
     async function pullAndReconcile() {
       try {
         const token = await user.getIdToken()
-        const localTrades = loadPortfolioTrades()
-        const localCash = loadCashBalance() ?? 0
-        const result = await reconcilePortfolioWithCloud(token, localTrades, localCash)
+        const result = await reconcilePortfolioWithCloud(token, localTrades, localCash, {
+          ownerUid: nextUid,
+        })
         if (cancelled) return
+        if (ownerScopeRef.current !== nextUid) return
         setTrades(result.trades)
         setCashBalanceState(result.cashBalance)
-        setSyncMode(result.source === "cloud" ? "account-cloud" : "account-local")
+        if (result.mode === "conflict-hold" || hasPortfolioSyncConflict(nextUid)) {
+          setSyncMode("account-conflict")
+        } else {
+          setSyncMode(result.source === "cloud" ? "account-cloud" : "account-local")
+        }
       } catch (e) {
         if (!cancelled) {
           console.error("[portfolio-sync] reconcile failed", e)
           setSyncMode("account-error")
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelled && ownerScopeRef.current === nextUid) {
           setSyncReady(true)
           skipCloudPushRef.current = false
         }
@@ -122,16 +173,38 @@ function usePortfolioStateValue() {
 
   useEffect(() => {
     if (!user?.uid || !syncReady || skipCloudPushRef.current) return
+    const ownerUid = String(user.uid)
+    if (ownerScopeRef.current !== ownerUid) return
+    // Conflict hold blocks automatic PUT even after local edits (flag is not cleared by edits).
+    if (hasPortfolioSyncConflict(ownerUid)) {
+      setSyncMode("account-conflict")
+      return
+    }
 
     if (cloudPushTimerRef.current) clearTimeout(cloudPushTimerRef.current)
     cloudPushTimerRef.current = setTimeout(async () => {
       try {
+        if (ownerScopeRef.current !== ownerUid) return
+        if (hasPortfolioSyncConflict(ownerUid)) {
+          setSyncMode("account-conflict")
+          return
+        }
         const token = await user.getIdToken()
-        await pushCloudPortfolio(token, trades, cashBalance)
-        setSyncMode("account-synced")
+        const pushed = await pushCloudPortfolio(token, trades, cashBalance, { ownerUid })
+        if (ownerScopeRef.current !== ownerUid) return
+        if (pushed == null && hasPortfolioSyncConflict(ownerUid)) {
+          setSyncMode("account-conflict")
+          return
+        }
+        if (pushed != null) setSyncMode("account-synced")
       } catch (e) {
+        if (e instanceof PortfolioSyncConflictError) {
+          console.warn("[portfolio-sync] push conflict — local held, uploads blocked", e)
+          if (ownerScopeRef.current === ownerUid) setSyncMode("account-conflict")
+          return
+        }
         console.warn("[portfolio-sync] push failed", e)
-        setSyncMode("account-push-error")
+        if (ownerScopeRef.current === ownerUid) setSyncMode("account-push-error")
       }
     }, 900)
 

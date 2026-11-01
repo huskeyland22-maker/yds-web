@@ -273,19 +273,34 @@ export function describeDynamicWeights(vix, highYield) {
 }
 
 /**
- * 서버/엔진용 최종 점수.
- * VIX+CNN+Cboe Total P/C 세 값이 모두 있으면 Panic Index V2를 반환.
- * 불완전하면 Legacy 동적가중(결측 시 50 필)을 유지 — 기존 엔진 호환.
- * Panic Index UI는 getPanicScoreV2 / resolvePanicIndexScore를 직접 사용.
+ * Official panic score — V2 only.
+ * Core VIX·CNN·Put/Call incomplete → null (no Legacy 50 fill).
+ * @param {{ vix?: unknown; fearGreed?: unknown; putCall?: unknown } | null | undefined} data
+ * @returns {number | null}
+ */
+export function getOfficialPanicScore(data) {
+  return getPanicScoreV2(data)
+}
+
+/**
+ * Legacy panic score — short/mid dynamic weights (missing metrics fill 50).
+ * Explicit Legacy path; does not prefer V2.
+ * @param {{ vix?: unknown; fearGreed?: unknown; putCall?: unknown; bofa?: unknown; highYield?: unknown } | null | undefined} data
+ * @returns {number}
+ */
+export function getLegacyPanicScore(data) {
+  return getFinalScoreLegacy(data)
+}
+
+/**
+ * 서버/엔진용 최종 점수 (호환 래퍼).
+ * Official(V2) 가능 시 Official, 아니면 Legacy — 기존 호출처 동작 유지.
+ * Panic Index UI는 getPanicScoreV2 / getOfficialPanicScore / resolvePanicIndexScore를 직접 사용.
  */
 export function getFinalScore(data) {
-  const v2 = getPanicScoreV2(data)
-  if (v2 != null) return v2
-  const short = getShortScore(data.vix, data.putCall)
-  const mid = getMidScore(data.fearGreed, data.bofa, data.highYield)
-  const { wShort, wMid } = getDynamicWeights(data.vix, data.highYield)
-  const raw = short * wShort + mid * wMid
-  return Math.round(clamp(raw, 0, 100))
+  const official = getOfficialPanicScore(data)
+  if (official != null) return official
+  return getLegacyPanicScore(data)
 }
 
 /** Legacy only — historical 재계산·비교용 (덮어쓰지 않음) */

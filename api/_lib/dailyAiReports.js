@@ -9,10 +9,78 @@ function isRpcMissing(err) {
   return /function|rpc|does not exist|42883|PGRST202/i.test(msg)
 }
 
+/**
+ * Map stored daily_ai_reports panic_score (+ optional DB panic_score_status) to client contract.
+ * Official certification requires DB status === "ok" and a finite 0..100 score (P2-32).
+ *
+ * @param {unknown} raw
+ * @param {unknown} [statusFromDb]
+ * @returns {{
+ *   panic_score: number | null,
+ *   panic_score_status: "absent" | "stored_unverified" | "ok" | "data_insufficient",
+ *   official_panic_score: number | null
+ * }}
+ */
+export function resolveStoredDailyPanicScoreContract(raw, statusFromDb) {
+  const dbStatus =
+    statusFromDb == null || statusFromDb === "" ? null : String(statusFromDb)
+
+  if (dbStatus === "ok") {
+    const n = Number(raw)
+    const official = Number.isFinite(n) && n >= 0 && n <= 100 ? n : null
+    return {
+      panic_score: Number.isFinite(n) ? n : null,
+      panic_score_status: "ok",
+      official_panic_score: official,
+    }
+  }
+  if (dbStatus === "data_insufficient") {
+    return {
+      panic_score: null,
+      panic_score_status: "data_insufficient",
+      official_panic_score: null,
+    }
+  }
+  if (dbStatus === "stored_unverified") {
+    const n = Number(raw)
+    return {
+      panic_score: Number.isFinite(n) ? n : null,
+      panic_score_status: "stored_unverified",
+      official_panic_score: null,
+    }
+  }
+
+  // No DB status: legacy inference — number is never certified Official
+  if (raw == null || raw === "") {
+    return {
+      panic_score: null,
+      panic_score_status: "absent",
+      official_panic_score: null,
+    }
+  }
+  const n = Number(raw)
+  if (!Number.isFinite(n)) {
+    return {
+      panic_score: null,
+      panic_score_status: "absent",
+      official_panic_score: null,
+    }
+  }
+  return {
+    panic_score: n,
+    panic_score_status: "stored_unverified",
+    official_panic_score: null,
+  }
+}
+
 export function dailyReportToClient(row) {
   if (!row || typeof row !== "object") return null
   const date = String(row.date ?? "").slice(0, 10)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+  const scoreContract = resolveStoredDailyPanicScoreContract(
+    row.panic_score,
+    row.panic_score_status,
+  )
   return {
     date,
     tradeDate: date,
@@ -33,7 +101,9 @@ export function dailyReportToClient(row) {
       .split(/\n|·/)
       .map((s) => s.trim())
       .filter(Boolean),
-    panic_score: row.panic_score,
+    panic_score: scoreContract.panic_score,
+    panic_score_status: scoreContract.panic_score_status,
+    official_panic_score: scoreContract.official_panic_score,
     market_state: row.market_state,
     updatedAt: row.updated_at ?? null,
   }
@@ -41,6 +111,13 @@ export function dailyReportToClient(row) {
 
 export async function upsertDailyAiReport(report, source = "auto") {
   if (!report?.date) return { ok: false, reason: "no_report" }
+  const status =
+    report.panic_score_status === "ok" ||
+    report.panic_score_status === "data_insufficient" ||
+    report.panic_score_status === "stored_unverified"
+      ? report.panic_score_status
+      : null
+
   const payload = {
     date: report.date,
     summary: report.summary ?? "",
@@ -50,9 +127,14 @@ export async function upsertDailyAiReport(report, source = "auto") {
     long_strategy: report.long_strategy ?? report.longTerm ?? "",
     risk_note: report.risk_note ?? report.risk ?? "",
     priority_sector: report.priority_sector ?? report.sector ?? "",
+    // Keep null key when status is set (RPC clear / ok contract)
     panic_score: report.panic_score ?? null,
     market_state: report.market_state ?? null,
     source,
+  }
+  if (status) {
+    payload.panic_score_status = status
+    if (status === "data_insufficient") payload.panic_score = null
   }
 
   try {

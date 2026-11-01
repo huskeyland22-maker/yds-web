@@ -161,28 +161,64 @@ export function buildPortfolioCenterV1Report(
   const actualStockPct = (analysis.actual?.usPct ?? 0) + (analysis.actual?.krPct ?? 0)
   const actualCashPct = analysis.actual?.cashPct ?? holdings?.cashPct ?? 0
 
-  const allocationCompare = buildAllocationCompareReport({
-    actualStockPct,
-    actualCashPct,
-    recommendedStockPct: recommended.stockPct,
-    recommendedCashPct: recommended.cashPct,
-  })
+  // Official 결측·미준비 — 0% 권장을 정상 비교로 노출하지 않음
+  const allocationUnavailable =
+    recommended?.available === false ||
+    marketContext?.ready === false ||
+    marketContext?.scoreStatus === "dataInsufficient"
+
+  const allocationCompare = allocationUnavailable
+    ? null
+    : buildAllocationCompareReport({
+        actualStockPct,
+        actualCashPct,
+        recommendedStockPct: recommended.stockPct,
+        recommendedCashPct: recommended.cashPct,
+      })
 
   const sectors = buildSectorBreakdown(rows, holdings?.cashPct ?? 0)
   const themes = buildThemeBreakdown(rows)
 
-  const fitDetail = buildPortfolioFitDetail({
-    actualStockPct,
-    actualCashPct,
-    recommendedStockPct: recommended.stockPct,
-    recommendedCashPct: recommended.cashPct,
-    sectors,
-    themes,
-    marketContext: marketContext ?? null,
-    allocationCompare,
-  })
+  // 권장 배분 불가 시 0% 대비 fit 산출·개선 문구 금지
+  const fit = allocationUnavailable
+    ? {
+        available: false,
+        score: null,
+        grade: null,
+        label: "데이터 부족 · 적합도 산출 불가",
+        detail: null,
+      }
+    : (() => {
+        const fitDetail = buildPortfolioFitDetail({
+          actualStockPct,
+          actualCashPct,
+          recommendedStockPct: recommended.stockPct,
+          recommendedCashPct: recommended.cashPct,
+          sectors,
+          themes,
+          marketContext: marketContext ?? null,
+          allocationCompare,
+        })
+        return {
+          available: true,
+          score: fitDetail.total,
+          grade: fitDetail.grade,
+          label: fitDetail.label,
+          detail: fitDetail,
+        }
+      })()
 
-  const riskChecks = buildRiskChecks(rows, sectors, themes, actualCashPct, recommended.cashPct)
+  const riskChecks = allocationUnavailable
+    ? buildRiskChecks(rows, sectors, themes, actualCashPct, actualCashPct).map((check) =>
+        check.id === "cash"
+          ? {
+              ...check,
+              status: /** @type {'ok'} */ ("ok"),
+              message: "데이터 부족 · 배분 산출 불가",
+            }
+          : check,
+      )
+    : buildRiskChecks(rows, sectors, themes, actualCashPct, recommended.cashPct)
 
   const holdingsSimple = rows.map((row) => ({
     id: row.id,
@@ -209,17 +245,15 @@ export function buildPortfolioCenterV1Report(
       stageLabel: marketContext?.strategyLabel ?? "—",
       stageEmoji: marketContext?.strategyEmoji ?? "",
       panicLabel: marketContext?.panicLabel ?? "—",
-      recommendedCashPct: recommended.cashPct,
-      recommendedStockPct: recommended.stockPct,
-      note: recommended.note,
+      recommendedCashPct: allocationUnavailable ? null : recommended.cashPct,
+      recommendedStockPct: allocationUnavailable ? null : recommended.stockPct,
+      note: allocationUnavailable
+        ? recommended.note || "데이터 부족 · 배분 산출 불가"
+        : recommended.note,
+      allocationAvailable: !allocationUnavailable,
       allocationCompare,
     },
-    fit: {
-      score: fitDetail.total,
-      grade: fitDetail.grade,
-      label: fitDetail.label,
-      detail: fitDetail,
-    },
+    fit,
     riskChecks,
     sectors,
     themes,

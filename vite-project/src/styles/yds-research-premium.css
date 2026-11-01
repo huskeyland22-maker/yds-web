@@ -119,34 +119,118 @@
 }
 
 /* ═══════════════════════════════════════
-   Performance Center
+   Performance Center (/performance-center) — contrast pass
+   Light cards; navy titles; secondary labels; signal hues preserved.
+   Scoped to .yds-perf-center only (perf-val / panic-lab unchanged).
    ═══════════════════════════════════════ */
 .app-shell-host.yds-theme-premium .yds-perf-center {
-  --pc-border: var(--yds-border);
-  --pc-muted: var(--yds-text-muted);
+  --pc-border: var(--yds-border-strong);
+  --pc-muted: var(--yds-text-secondary);
   --pc-text: var(--yds-text-secondary);
+  color: var(--yds-text);
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__title {
+  color: var(--yds-text);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__kicker {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__sub {
+  color: var(--yds-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-weight: 550;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__link {
+  color: var(--yds-accent);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__h2 {
+  color: var(--yds-text);
+  font-weight: 750;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__note,
+.app-shell-host.yds-theme-premium .yds-perf-center__footnotes {
+  color: var(--yds-text-secondary);
+  font-size: max(0.75rem, 12px);
+  line-height: 1.45;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center__stat,
 .app-shell-host.yds-theme-premium .yds-perf-center__bench-wrap,
-.app-shell-host.yds-theme-premium .yds-perf-center__table-wrap {
+.app-shell-host.yds-theme-premium .yds-perf-center__table-wrap,
+.app-shell-host.yds-theme-premium .yds-perf-center__top-card {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border: 1px solid var(--yds-border-strong);
   box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
 }
 
-.app-shell-host.yds-theme-premium .yds-perf-center__stat-val,
-.app-shell-host.yds-theme-premium .yds-perf-center__name {
+.app-shell-host.yds-theme-premium .yds-perf-center__stat {
+  padding: 0.7rem 0.75rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__stat-key,
+.app-shell-host.yds-theme-premium .yds-perf-center__top-key {
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__stat-val {
   color: var(--yds-text);
+  font-size: clamp(1.15rem, 2.8vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 0.3rem;
+  line-height: 1.2;
 }
 
-.app-shell-host.yds-theme-premium .yds-perf-center__stat-key {
-  color: var(--yds-text-muted);
+.app-shell-host.yds-theme-premium .yds-perf-center__name,
+.app-shell-host.yds-theme-premium .yds-perf-center__top-card strong,
+.app-shell-host.yds-theme-premium .yds-perf-center__name-link {
+  color: var(--yds-text);
+  font-weight: 700;
 }
 
+.app-shell-host.yds-theme-premium .yds-perf-center__name-link:hover {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__top-meta {
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__top-card .font-mono {
+  color: var(--yds-text);
+  font-weight: 750;
+  font-size: max(0.875rem, 14px);
+}
+
+/* Profit / loss / caution — keep semantic signal hues */
 .app-shell-host.yds-theme-premium .yds-perf-center__stat--up .yds-perf-center__stat-val,
 .app-shell-host.yds-theme-premium .yds-perf-center__pct--up,
-.app-shell-host.yds-theme-premium .yds-perf-center__row--up td {
+.app-shell-host.yds-theme-premium .yds-perf-center__row--up td,
+.app-shell-host.yds-theme-premium .yds-perf-center__top-card .yds-perf-center__pct--up {
   color: var(--yds-signal-up);
 }
 
@@ -156,62 +240,164 @@
   color: var(--yds-signal-down);
 }
 
+.app-shell-host.yds-theme-premium .yds-perf-center__table {
+  font-size: max(0.78rem, 12.5px);
+}
+
 .app-shell-host.yds-theme-premium .yds-perf-center__table th {
-  background: var(--yds-bg-muted);
-  color: var(--yds-text-muted);
-  border-bottom-color: var(--yds-border);
+  background: #f1f5f9;
+  color: var(--yds-text);
+  font-weight: 700;
+  font-size: max(0.72rem, 11.5px);
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid var(--yds-border-strong);
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center__table td {
   color: var(--yds-text-secondary);
-  border-bottom-color: var(--yds-border);
+  font-weight: 550;
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__table td.font-mono,
+.app-shell-host.yds-theme-premium .yds-perf-center__table .font-mono {
+  color: var(--yds-text);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center__row--primary td {
   color: var(--yds-accent);
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__status--open {
+  color: var(--yds-signal-info);
+  font-weight: 700;
+  font-size: max(0.72rem, 11.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__status--closed {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+  font-size: max(0.72rem, 11.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__year-filter {
+  color: var(--yds-text-secondary);
+  font-size: max(0.78rem, 12.5px);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center__year-filter select {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border-strong);
+  border: 1.5px solid var(--yds-border-strong);
   color: var(--yds-text);
+  font-weight: 650;
+  font-size: max(0.78rem, 12.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center__empty {
+  background: var(--yds-bg-elevated);
+  border: 1px dashed var(--yds-border-strong);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-center .yds-perf-tools__h3 {
+  color: var(--yds-text);
+  font-weight: 750;
+  font-size: max(0.8125rem, 13px);
 }
 
 /* Empty state (shared component; base styles are dark-theme) */
 .app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border: 1px solid var(--yds-border-strong);
   box-shadow: var(--yds-shadow-card);
   color: var(--yds-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__title {
   color: var(--yds-text);
+  font-weight: 800;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__desc {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.5;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__btn {
-  background: var(--yds-bg-muted);
-  border-color: var(--yds-border);
-  color: var(--yds-text-secondary);
+  background: #f1f5f9;
+  border: 1.5px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center .yds-empty-state__btn--primary {
   background: var(--yds-accent);
   border-color: var(--yds-accent);
   color: #ffffff;
+  font-weight: 800;
 }
 
 /* ═══════════════════════════════════════
-   Performance Validation hub
+   Performance Validation (/performance-validation) — contrast pass
+   Scoped to .yds-perf-val only.
    ═══════════════════════════════════════ */
 .app-shell-host.yds-theme-premium .yds-perf-val {
-  --pv-border: var(--yds-border);
-  --pv-muted: var(--yds-text-muted);
+  --pv-border: var(--yds-border-strong);
+  --pv-muted: var(--yds-text-secondary);
   --pv-text: var(--yds-text-secondary);
+  color: var(--yds-text);
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__title {
+  color: var(--yds-text);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__kicker {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__sub {
+  color: var(--yds-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-weight: 550;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__nav-link,
+.app-shell-host.yds-theme-premium .yds-perf-val__link {
+  color: var(--yds-accent);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__h2 {
+  color: var(--yds-text);
+  font-weight: 750;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__h3,
+.app-shell-host.yds-theme-premium .yds-perf-val__note,
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome-lede,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-lede,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-kicker {
+  color: var(--yds-text-secondary);
+  font-size: max(0.75rem, 12px);
+  line-height: 1.45;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__section,
@@ -224,17 +410,26 @@
 .app-shell-host.yds-theme-premium .yds-perf-val__detail,
 .app-shell-host.yds-theme-premium .yds-perf-val__system-info,
 .app-shell-host.yds-theme-premium .yds-perf-val__snap-card,
-.app-shell-host.yds-theme-premium .yds-perf-val__table-wrap {
+.app-shell-host.yds-theme-premium .yds-perf-val__table-wrap,
+.app-shell-host.yds-theme-premium .yds-perf-val__score-corr-card {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border: 1px solid var(--yds-border-strong);
   box-shadow: var(--yds-shadow-card);
   color: var(--yds-text-secondary);
 }
 
+.app-shell-host.yds-theme-premium .yds-perf-val__table-wrap--scroll {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .app-shell-host.yds-theme-premium .yds-perf-val__snap-chip {
-  background: var(--yds-bg-muted);
-  border-color: var(--yds-border);
-  color: var(--yds-text-secondary);
+  background: #f1f5f9;
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__snap-card-title,
@@ -242,18 +437,28 @@
 .app-shell-host.yds-theme-premium .yds-perf-val__detail-summary,
 .app-shell-host.yds-theme-premium .yds-perf-val__system-info-summary {
   color: var(--yds-text);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__snap-card-line,
 .app-shell-host.yds-theme-premium .yds-perf-val__snap-meta {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
 }
 
-.app-shell-host.yds-theme-premium .yds-perf-val__snap-ret--up {
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-ret--up,
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val--up,
+.app-shell-host.yds-theme-premium .yds-perf-val__stat--up .yds-perf-val__stat-val,
+.app-shell-host.yds-theme-premium .yds-perf-val__grade-val--up,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-val--up {
   color: var(--yds-signal-up);
 }
 
-.app-shell-host.yds-theme-premium .yds-perf-val__snap-ret--down {
+.app-shell-host.yds-theme-premium .yds-perf-val__snap-ret--down,
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val--down,
+.app-shell-host.yds-theme-premium .yds-perf-val__stat--down .yds-perf-val__stat-val,
+.app-shell-host.yds-theme-premium .yds-perf-val__grade-val--down,
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-val--down {
   color: var(--yds-signal-down);
 }
 
@@ -262,13 +467,9 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__mkt-env-row--head {
-  color: var(--yds-text-muted);
-  border-bottom-color: var(--yds-border);
-}
-
-.app-shell-host.yds-theme-premium .yds-perf-val__h3,
-.app-shell-host.yds-theme-premium .yds-perf-val__note {
-  color: var(--yds-text-muted);
+  color: var(--yds-text);
+  font-weight: 700;
+  border-bottom: 1px solid var(--yds-border-strong);
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__detail-body,
@@ -278,15 +479,23 @@
 
 .app-shell-host.yds-theme-premium .yds-perf-val__detail-summary,
 .app-shell-host.yds-theme-premium .yds-perf-val__system-info-summary {
-  background: var(--yds-bg-muted);
-  border-color: var(--yds-border);
+  background: #f1f5f9;
+  border-color: var(--yds-border-strong);
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__stat-val,
-.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val,
+.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val {
+  color: var(--yds-text);
+  font-size: clamp(1.1rem, 2.6vw, 1.3rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
 .app-shell-host.yds-theme-premium .yds-perf-val__grade-label,
 .app-shell-host.yds-theme-premium .yds-perf-val__ev-card-title {
   color: var(--yds-text);
+  font-weight: 750;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__stat-key,
@@ -296,21 +505,11 @@
 .app-shell-host.yds-theme-premium .yds-perf-val__grade-meta,
 .app-shell-host.yds-theme-premium .yds-perf-val__chart-empty,
 .app-shell-host.yds-theme-premium .yds-perf-val__chart-label,
-.app-shell-host.yds-theme-premium .yds-perf-val__outcome-lede,
-.app-shell-host.yds-theme-premium .yds-perf-val__ev-lede,
-.app-shell-host.yds-theme-premium .yds-perf-val__ev-kicker,
-.app-shell-host.yds-theme-premium .yds-perf-val__ev-card-n {
-  color: var(--yds-text-muted);
-}
-
-.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val--up,
-.app-shell-host.yds-theme-premium .yds-perf-val__stat--up .yds-perf-val__stat-val {
-  color: var(--yds-signal-up);
-}
-
-.app-shell-host.yds-theme-premium .yds-perf-val__horizon-val--down,
-.app-shell-host.yds-theme-premium .yds-perf-val__stat--down .yds-perf-val__stat-val {
-  color: var(--yds-signal-down);
+.app-shell-host.yds-theme-premium .yds-perf-val__ev-card-n,
+.app-shell-host.yds-theme-premium .yds-perf-val__pattern-empty {
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__grade-row {
@@ -318,21 +517,119 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__chart-bar-wrap {
-  background: var(--yds-bg-muted);
+  background: #e8eef5;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__table {
+  font-size: max(0.78rem, 12.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__table th {
+  background: #f1f5f9;
+  color: var(--yds-text);
+  font-weight: 700;
+  font-size: max(0.72rem, 11.5px);
+  border-bottom: 1px solid var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__table td {
+  color: var(--yds-text-secondary);
+  font-weight: 550;
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__table td.font-mono,
+.app-shell-host.yds-theme-premium .yds-perf-val__table .font-mono {
+  color: var(--yds-text);
+  font-weight: 700;
+}
+
+/* Outcome badges — light-theme semantic hues */
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome--success {
+  color: #14532d;
+  background: color-mix(in srgb, var(--yds-signal-up) 14%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-up) 35%, var(--yds-border));
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome--normal {
+  color: #854d0e;
+  background: color-mix(in srgb, var(--yds-signal-warn) 16%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 40%, var(--yds-border));
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome--failure {
+  color: #7f1d1d;
+  background: color-mix(in srgb, var(--yds-signal-down) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-down) 35%, var(--yds-border));
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome--pending {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome-tab {
+  background: #f1f5f9;
+  border: 1.5px solid var(--yds-border-strong);
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val__outcome-tab--active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 45%, var(--yds-border-strong));
+  color: var(--yds-text);
+  font-weight: 750;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__outcome-horizon,
 .app-shell-host.yds-theme-premium .yds-perf-val select,
 .app-shell-host.yds-theme-premium .yds-perf-val input:not([type="checkbox"]):not([type="radio"]) {
-  background: var(--yds-input-bg);
-  border: 1px solid var(--yds-input-border);
-  color: var(--yds-input-text);
+  background: var(--yds-bg-elevated);
+  border: 1.5px solid var(--yds-border-strong);
+  color: var(--yds-text);
   border-radius: var(--yds-radius-sm);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val input::placeholder {
-  color: var(--yds-input-placeholder);
-  opacity: 1;
+  color: var(--yds-text-secondary);
+  opacity: 0.85;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val .yds-empty-state {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val .yds-empty-state__title {
+  color: var(--yds-text);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val .yds-empty-state__desc {
+  color: var(--yds-text-secondary);
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.5;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val .yds-empty-state__btn {
+  background: #f1f5f9;
+  border: 1.5px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-perf-val .yds-empty-state__btn--primary {
+  background: var(--yds-accent);
+  border-color: var(--yds-accent);
+  color: #ffffff;
+  font-weight: 800;
 }
 
 /* ═══════════════════════════════════════
@@ -442,12 +739,52 @@
 }
 
 /* ═══════════════════════════════════════
-   Panic Lab (market-analysis related)
+   Panic Lab (/panic-lab) — contrast pass
+   Scoped to .yds-panic-lab; risk/warn hues preserved.
    ═══════════════════════════════════════ */
 .app-shell-host.yds-theme-premium .yds-panic-lab {
-  --pl-border: var(--yds-border);
-  --pl-muted: var(--yds-text-muted);
+  --pl-border: var(--yds-border-strong);
+  --pl-muted: var(--yds-text-secondary);
   --pl-text: var(--yds-text-secondary);
+  color: var(--yds-text);
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__title {
+  color: var(--yds-text);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__kicker {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__sub,
+.app-shell-host.yds-theme-premium .yds-panic-lab__note {
+  color: var(--yds-text-secondary);
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.45;
+  font-weight: 550;
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__nav-link {
+  color: var(--yds-accent);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__h2 {
+  color: var(--yds-text);
+  font-weight: 750;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
 }
 
 .app-shell-host.yds-theme-premium .yds-panic-lab__stat,
@@ -455,28 +792,50 @@
 .app-shell-host.yds-theme-premium .yds-panic-lab__contrib-list,
 .app-shell-host.yds-theme-premium .yds-panic-lab__table-wrap {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border: 1px solid var(--yds-border-strong);
   box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-panic-lab__table-wrap {
+  display: block;
+  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.app-shell-host.yds-theme-premium .yds-panic-lab table th {
-  color: var(--yds-text-muted);
-  background: var(--yds-bg-muted);
-  border-bottom-color: var(--yds-border);
+.app-shell-host.yds-theme-premium .yds-panic-lab table,
+.app-shell-host.yds-theme-premium .yds-panic-lab__table {
+  font-size: max(0.78rem, 12.5px);
 }
 
-.app-shell-host.yds-theme-premium .yds-panic-lab table td {
-  color: var(--yds-text-secondary);
-  border-bottom-color: var(--yds-border);
-}
-
-.app-shell-host.yds-theme-premium .yds-panic-lab__stat-val {
+.app-shell-host.yds-theme-premium .yds-panic-lab table th,
+.app-shell-host.yds-theme-premium .yds-panic-lab__table th {
   color: var(--yds-text);
+  background: #f1f5f9;
+  font-weight: 700;
+  border-bottom: 1px solid var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab table td,
+.app-shell-host.yds-theme-premium .yds-panic-lab__table td {
+  color: var(--yds-text-secondary);
+  font-weight: 550;
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab table td.font-mono,
+.app-shell-host.yds-theme-premium .yds-panic-lab__table .font-mono {
+  color: var(--yds-text);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__stat-val,
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-val {
+  color: var(--yds-text);
+  font-weight: 800;
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  letter-spacing: -0.02em;
 }
 
 .app-shell-host.yds-theme-premium .yds-panic-lab__stat-key,
@@ -484,34 +843,49 @@
 .app-shell-host.yds-theme-premium .yds-panic-lab__contrib-label,
 .app-shell-host.yds-theme-premium .yds-panic-lab__contrib-sub,
 .app-shell-host.yds-theme-premium .yds-panic-lab__legend-item {
-  color: var(--yds-text-muted);
-}
-
-.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-val {
-  color: var(--yds-text);
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-panic-lab__contrib-bar-wrap {
-  background: var(--yds-bg-muted);
+  background: #e8eef5;
 }
 
-/* Calendar strip on panic page (related chrome; Phase 5 left this dark) */
+.app-shell-host.yds-theme-premium .yds-panic-lab__dot--low {
+  background: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__dot--high {
+  background: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab select {
+  background: var(--yds-bg-elevated);
+  border: 1.5px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  font-weight: 650;
+}
+
+/* Calendar strip on market-analysis (related chrome) */
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-inv-cal--strip {
-  --ic-border: var(--yds-border);
-  --ic-muted: var(--yds-text-muted);
+  --ic-border: var(--yds-border-strong);
+  --ic-muted: var(--yds-text-secondary);
   --ic-text: var(--yds-text-secondary);
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border: 1px solid var(--yds-border-strong);
   box-shadow: var(--yds-shadow-card);
   color: var(--yds-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-inv-cal__strip-title {
   color: var(--yds-text);
+  font-weight: 750;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-inv-cal__strip-sub {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-weight: 550;
 }
 
 /* ═══════════════════════════════════════
@@ -631,12 +1005,53 @@
 }
 
 /* ═══════════════════════════════════════
-   Investment playbook + calendar page
+   Investment playbook (/investment-playbook) — contrast pass
+   Strategy copy unchanged; visual hierarchy only.
    ═══════════════════════════════════════ */
 .app-shell-host.yds-theme-premium .yds-playbook {
-  --pb-border: var(--yds-border);
-  --pb-muted: var(--yds-text-muted);
+  --pb-border: var(--yds-border-strong);
+  --pb-muted: var(--yds-text-secondary);
   --pb-text: var(--yds-text-secondary);
+  color: var(--yds-text);
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__title {
+  color: var(--yds-text);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__kicker {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__sub,
+.app-shell-host.yds-theme-premium .yds-playbook__note,
+.app-shell-host.yds-theme-premium .yds-playbook__foot {
+  color: var(--yds-text-secondary);
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.5;
+  font-weight: 550;
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__sub a {
+  color: var(--yds-accent);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__h2 {
+  color: var(--yds-text);
+  font-weight: 750;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
 }
 
 .app-shell-host.yds-theme-premium .yds-playbook__section,
@@ -644,7 +1059,7 @@
 .app-shell-host.yds-theme-premium .yds-playbook__compliance-badge,
 .app-shell-host.yds-theme-premium .yds-playbook__alloc {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border: 1px solid var(--yds-border-strong);
   box-shadow: var(--yds-shadow-card);
   color: var(--yds-text-secondary);
 }
@@ -653,57 +1068,169 @@
 .app-shell-host.yds-theme-premium .yds-playbook__compliance-pct,
 .app-shell-host.yds-theme-premium .yds-playbook__strategy {
   color: var(--yds-text);
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__compliance-pct {
+  font-size: clamp(1.15rem, 2.8vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .app-shell-host.yds-theme-premium .yds-playbook__compliance-label,
 .app-shell-host.yds-theme-premium .yds-playbook__cash,
 .app-shell-host.yds-theme-premium .yds-playbook__alloc-key,
 .app-shell-host.yds-theme-premium .yds-playbook__avoid-title {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-size: max(0.78rem, 12.5px);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-playbook__compliance-row--ok {
   color: var(--yds-signal-up);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-playbook__compliance-row--warn {
   color: var(--yds-signal-caution);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-playbook__card--active {
-  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  border-color: color-mix(in srgb, var(--yds-accent) 45%, var(--yds-border-strong));
   background: var(--yds-accent-soft);
+  box-shadow: var(--yds-shadow-card);
 }
 
+.app-shell-host.yds-theme-premium .yds-playbook__list li,
+.app-shell-host.yds-theme-premium .yds-playbook__rule-row {
+  color: var(--yds-text-secondary);
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__rule-th,
+.app-shell-host.yds-theme-premium .yds-playbook__alloc-actual {
+  color: var(--yds-text);
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__rule-row--loss .yds-playbook__rule-th {
+  color: var(--yds-signal-caution);
+}
+
+.app-shell-host.yds-theme-premium .yds-playbook__compliance-grade {
+  color: var(--yds-text);
+  font-weight: 800;
+}
+
+/* ═══════════════════════════════════════
+   Investment calendar (/investment-calendar) — contrast pass
+   Date/event logic unchanged.
+   ═══════════════════════════════════════ */
 .app-shell-host.yds-theme-premium .yds-inv-cal--page {
-  --ic-border: var(--yds-border);
-  --ic-muted: var(--yds-text-muted);
+  --ic-border: var(--yds-border-strong);
+  --ic-muted: var(--yds-text-secondary);
   --ic-text: var(--yds-text-secondary);
+  color: var(--yds-text);
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__title {
+  color: var(--yds-text);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  font-size: clamp(1.2rem, 3vw, 1.45rem);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__kicker {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__sub,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__empty,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__note {
+  color: var(--yds-text-secondary);
+  font-size: max(0.8125rem, 13px);
+  line-height: 1.45;
+  font-weight: 550;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__link {
+  color: var(--yds-accent);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__h2,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__h3 {
+  color: var(--yds-text);
+  font-weight: 750;
 }
 
 .app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__section,
 .app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__week-badge,
-.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__legend {
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__legend,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__row {
   background: var(--yds-bg-elevated);
-  border-color: var(--yds-border);
+  border: 1px solid var(--yds-border-strong);
   box-shadow: var(--yds-shadow-card);
   color: var(--yds-text-secondary);
 }
 
-.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__h3 {
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__date {
   color: var(--yds-text);
+  font-weight: 800;
+  font-size: max(0.875rem, 14px);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__weekday,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__cat {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__row .yds-inv-cal__title {
+  color: var(--yds-text);
+  font-weight: 750;
+  font-size: max(0.875rem, 14px);
+  letter-spacing: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__ticker,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__stars {
+  color: var(--yds-text);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__impact--positive {
   color: var(--yds-signal-up);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__impact--negative {
   color: var(--yds-signal-down);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__impact--neutral {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__week-badge {
+  color: var(--yds-text);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__legend {
+  font-size: max(0.75rem, 12px);
+  font-weight: 550;
 }
 
 /* Mobile spacing / overflow */
@@ -721,12 +1248,37 @@
     .yds-inv-cal--page
   ) {
     padding-inline: 0.65rem;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .app-shell-host.yds-theme-premium .yds-perf-center__table-wrap,
+  .app-shell-host.yds-theme-premium .yds-perf-center__bench-wrap,
+  .app-shell-host.yds-theme-premium .yds-perf-val__table-wrap,
+  .app-shell-host.yds-theme-premium .yds-panic-lab__table-wrap,
   .app-shell-host.yds-theme-premium .panic-validation-year-table {
     display: block;
+    max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-perf-center__stat-grid,
+  .app-shell-host.yds-theme-premium .yds-perf-center__top-grid,
+  .app-shell-host.yds-theme-premium .yds-perf-center__header,
+  .app-shell-host.yds-theme-premium .yds-perf-val__stat-grid,
+  .app-shell-host.yds-theme-premium .yds-perf-val__header,
+  .app-shell-host.yds-theme-premium .yds-panic-lab__stat-grid,
+  .app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__row {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-perf-center__name {
+    max-width: min(8rem, 42vw);
+  }
+
+  .app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__date {
+    white-space: nowrap;
   }
 }

@@ -130,7 +130,7 @@ export const RATING_STARS = {
  *   actionReason: string
  *   recommendReasons: import("./ydsStockRecommendReasons.js").RecommendReason[]
  *   recommendReasonSummary: string
- *   marketFitSource: 'adapter' | 'manual'
+ *   marketFitSource: 'adapter' | 'manual' | 'unavailable'
  *   sectorLabel: string
  *   dataSource: 'live' | 'fallback'
  *   quoteSource: string | null
@@ -187,11 +187,20 @@ export function filterRecommendableStockPicks(stocks) {
  * @param {import("./ydsMarketAdapter.js").YdsMarketAdapterContext | null} [marketContext]
  * @param {import("./ydsStockPickLiveFetcher.js").LivePickSnapshotEntry | null} [liveEntry]
  */
+function isMarketContextReadyForFit(marketContext) {
+  if (!marketContext?.ready) return false
+  if (marketContext.scoreStatus === "dataInsufficient") return false
+  if (marketContext.macroId === "unknown") return false
+  return true
+}
+
 function enrichStock(row, marketContext = null, liveEntry = null) {
   const sectorLabel =
     STOCK_PICK_SECTORS.find((s) => s.id === row.sector)?.label ?? row.sector
 
-  const ctx = marketContext?.ready ? marketContext : null
+  const ctx = isMarketContextReadyForFit(marketContext) ? marketContext : null
+  /** 유니버스 원본은 유지 · 적합도 산출에만 미사용 */
+  const universeMarketFit = row.marketFitScore ?? 0
 
   const engineSnapshot = liveEntry?.engineSnapshot
     ? liveEntry.engineSnapshot
@@ -242,9 +251,9 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     accumulateComputeMs("status", performance.now() - statusT0)
   }
 
-  const marketFitScore = ctx
-    ? computeMarketFitScore(ctx, statusId, baseScores)
-    : row.marketFitScore ?? 0
+  // 데이터 부족: 수동 universe 점수를 현재 시장 적합도로 쓰지 않음
+  const marketFitScore = ctx ? computeMarketFitScore(ctx, statusId, baseScores) : 0
+  const marketFitSource = ctx ? "adapter" : "unavailable"
 
   const scores =
     normalizeScoreBreakdown({
@@ -259,7 +268,8 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     : []
 
   const reasonOpts = {
-    skipMarketFit: Boolean(ctx),
+    // adapter 경로: adapter 이유만 사용 / 부족: 수동 점수 기반 "현재 시장과 적합" 금지
+    skipMarketFit: true,
     marketFitReasons,
     engineSnapshot,
   }
@@ -281,10 +291,10 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     ticker: row.ticker,
     name: row.name,
     rating: row.rating,
-    marketFitScore: row.marketFitScore,
+    marketFitScore: ctx ? universeMarketFit : 0,
     scores,
     scoreMeta: computed.meta,
-    marketFitSource: ctx ? "adapter" : "manual",
+    marketFitSource,
   })
 
   const timingScore = computeTimingScore(
@@ -297,7 +307,7 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     ticker: row.ticker,
     name: row.name,
     rating: row.rating,
-    manualMarketFit: row.marketFitScore,
+    manualMarketFit: ctx ? universeMarketFit : 0,
     scores,
     timingScore,
   })
@@ -394,7 +404,7 @@ function enrichStock(row, marketContext = null, liveEntry = null) {
     recommendReasonSummary:
       recommendEngine.reasons.map((r) => r.text).join(" · ") ||
       formatRecommendReasonSummary(recommendReasons),
-    marketFitSource: ctx ? "adapter" : "manual",
+    marketFitSource,
     sectorLabel,
     investThemes: resolveStockPickThemes(row),
     decomposedScores,

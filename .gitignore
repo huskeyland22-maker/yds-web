@@ -1,0 +1,10 @@
+.env*
+.env*
+
+# 임시 및 자동 생성 파일
+node_modules/
+.cursor-tmp/
+scripts/.cache/
+scripts/__pycache__/
+supabase/.temp/
+vite-project/dist-rc/

@@ -4,7 +4,7 @@
 import { generatePanicMarketReport } from "./panicMarketReportEngine.js"
 import { sectorFlowFromPanic } from "./sectorFlowLite.js"
 import { computeMarketState } from "./marketCycleCompute.js"
-import { getFinalScore } from "./panicScores.js"
+import { getOfficialPanicScore } from "./panicScores.js"
 
 /** @type {Record<string, string>} */
 export const SECTOR_KO_LABELS = {
@@ -26,12 +26,19 @@ const MARKET_STATE_KO = {
   insufficient: "지표 부족",
 }
 
+/**
+ * market_view 패닉 숫자는 Official panicScore만 사용 (cycle 캐시 Legacy 미사용).
+ * @param {object | null | undefined} cycleRow
+ * @param {number | null} panicScore
+ */
 function formatMarketView(cycleRow, panicScore) {
   if (!cycleRow) {
     return panicScore != null ? `패닉지수 ${Math.round(panicScore)}` : ""
   }
   const parts = []
-  if (cycleRow.panic_score != null) parts.push(`패닉 ${Math.round(Number(cycleRow.panic_score))}`)
+  if (panicScore != null && Number.isFinite(panicScore)) {
+    parts.push(`패닉 ${Math.round(Number(panicScore))}`)
+  }
   if (cycleRow.market_state) {
     parts.push(MARKET_STATE_KO[cycleRow.market_state] ?? cycleRow.market_state)
   }
@@ -50,13 +57,16 @@ function buildLongStrategy(baseLong, leaderSectors) {
   return `${baseLong}\n\n우선 산업:\n${names.map((n) => `· ${n}`).join("\n")}`
 }
 
-function enrichShortStrategy(shortTerm, cycleRow) {
-  if (!cycleRow) return shortTerm
-  const ps = Number(cycleRow.panic_score)
-  if (Number.isFinite(ps) && ps >= 65) {
+/**
+ * @param {string} shortTerm
+ * @param {object | null | undefined} cycleRow
+ * @param {number | null} panicScore Official only
+ */
+function enrichShortStrategy(shortTerm, cycleRow, panicScore) {
+  if (panicScore != null && Number.isFinite(panicScore) && panicScore >= 65) {
     return `${shortTerm}\n\n과열 일부 존재 — 눌림·분할 매수 검토`
   }
-  if (cycleRow.market_state === "risk_on") {
+  if (cycleRow?.market_state === "risk_on") {
     return `${shortTerm}\n\n단기 모멘텀 양호 — 추격보다 눌림 매수`
   }
   return shortTerm
@@ -106,16 +116,18 @@ export function createDailyReport(panicData, cycleRow = null, tradeDate) {
       )
 
   const flow = sectorFlowFromPanic(panicData, marketState)
-  const panicScore =
-    cycleRow?.panic_score != null
-      ? Number(cycleRow.panic_score)
-      : getFinalScore({
-          vix: panicData?.vix,
-          fearGreed: panicData?.fearGreed,
-          putCall: panicData?.putCall,
-          bofa: panicData?.bofa,
-          highYield: panicData?.highYield,
-        })
+  // Official only — never trust cycleRow.panic_score (may be legacy cache) or getFinalScore Legacy fill
+  const official = getOfficialPanicScore({
+    vix: panicData?.vix,
+    fearGreed: panicData?.fearGreed,
+    putCall: panicData?.putCall,
+    bofa: panicData?.bofa,
+    highYield: panicData?.highYield,
+  })
+  const scoreOk =
+    official != null && Number.isFinite(official) && official >= 0 && official <= 100
+  const panicScore = scoreOk ? official : null
+  const panicScoreStatus = scoreOk ? "ok" : "data_insufficient"
 
   const priorityNames = flow.leaderSector
     .map((s) => SECTOR_KO_LABELS[s.id] ?? s.shortLabel)
@@ -124,6 +136,7 @@ export function createDailyReport(panicData, cycleRow = null, tradeDate) {
   const short_strategy = enrichShortStrategy(
     cycleRow?.recommendation || base.shortTerm,
     cycleRow,
+    panicScore,
   )
   const mid_strategy =
     cycleRow?.mid_score != null && Number(cycleRow.mid_score) >= 60
@@ -141,6 +154,7 @@ export function createDailyReport(panicData, cycleRow = null, tradeDate) {
     risk_note: buildRiskNote(base.risks, cycleRow),
     priority_sector: priorityNames || base.sector,
     panic_score: panicScore,
+    panic_score_status: panicScoreStatus,
     market_state: stateKey,
     sectorScores: flow.scores,
     sectorFlow: flow,

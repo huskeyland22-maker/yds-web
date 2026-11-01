@@ -42,7 +42,7 @@ export function buildAiRationaleProgressBars(stock) {
     { id: "technical", label: "기술적 분석", score: scores.technical ?? 0, invertTone: false },
     { id: "earnings", label: "실적", score: scores.earnings ?? 0, invertTone: false },
     { id: "supply", label: "수급", score: supply, invertTone: false },
-    { id: "momentum", label: "AI 산업 모멘텀", score: scores.momentum ?? 0, invertTone: false },
+    { id: "momentum", label: "모멘텀 축", score: scores.momentum ?? 0, invertTone: false },
     { id: "risk", label: "리스크", score: scores.risk ?? 50, invertTone: true },
   ]
 }
@@ -156,8 +156,8 @@ function buildScoreChangeReasons(stock) {
   else if (!volPass && scale100(Number(stock.scores?.volumeScore), 20) < 45) {
     reasons.push("거래량 감소")
   }
-  if ((engine.momentum ?? 0) >= 72) reasons.push("AI 산업 모멘텀 증가")
-  if ((engine.momentum ?? 0) <= 45) reasons.push("산업 모멘텀 둔화")
+  if ((engine.momentum ?? 0) >= 72) reasons.push("모멘텀 축 상승")
+  if ((engine.momentum ?? 0) <= 45) reasons.push("모멘텀 축 하락")
 
   return [...new Set(reasons)].slice(0, 5)
 }

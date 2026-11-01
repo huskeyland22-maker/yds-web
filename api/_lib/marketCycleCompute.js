@@ -2,7 +2,7 @@
  * 서버용 시장 상태 (marketStateEngine computeMarketState 규칙 이식, window 없음)
  */
 
-import { getAction, getFinalScore, getMidScore, getShortScore } from "./panicScores.js"
+import { getAction, getOfficialPanicScore, getMidScore, getShortScore } from "./panicScores.js"
 
 const RULES = {
   riskOn: { vixMax: 18, fearGreedMin: 65, bofaMin: 5 },
@@ -117,14 +117,19 @@ export function buildMarketCyclePayload(snap, previousHistoryRow, source = "api"
   const metrics = extractPanicMetrics(data)
   const prev = historyRowToMetrics(previousHistoryRow)
   const state = computeMarketState(metrics, prev)
-  const panicScore = getFinalScore(data)
+  const official = getOfficialPanicScore(data)
+  const scoreOk =
+    official != null && Number.isFinite(official) && official >= 0 && official <= 100
+  const panicScore = scoreOk ? official : null
   const shortScore = getShortScore(data.vix, data.putCall)
   const midScore = getMidScore(data.fearGreed, data.bofa, data.highYield)
-  const recommendation = getAction(panicScore)
+  const recommendation = scoreOk ? getAction(panicScore) : null
 
   return {
     date: snap.tradeDate,
+    // Always include panic_score key (null = clear intent with data_insufficient)
     panic_score: panicScore,
+    panic_score_status: scoreOk ? "ok" : "data_insufficient",
     market_state: state.stateKey,
     risk_signal: state.keySignalRisk,
     sector: null,
@@ -150,12 +155,17 @@ export function enrichPanicHistoryRow(baseRow, snap, previousHistoryRow) {
   const metrics = extractPanicMetrics(data)
   const prev = historyRowToMetrics(previousHistoryRow)
   const state = computeMarketState(metrics, prev)
-  const panicScore = getFinalScore(data)
+  const official = getOfficialPanicScore(data)
+  const scoreOk =
+    official != null && Number.isFinite(official) && official >= 0 && official <= 100
+  // Official only — never keep Legacy baseRow.panic_score when Official is missing
+  const panicScore = scoreOk ? official : null
   return {
     ...baseRow,
-    panic_score: baseRow.panic_score ?? panicScore,
+    panic_score: panicScore,
+    panic_score_status: scoreOk ? "ok" : "data_insufficient",
     market_phase: baseRow.market_phase ?? state.stateKey,
     risk_level: baseRow.risk_level ?? state.risk,
-    strategy: baseRow.strategy ?? getAction(panicScore),
+    strategy: baseRow.strategy ?? (scoreOk ? getAction(panicScore) : null),
   }
 }

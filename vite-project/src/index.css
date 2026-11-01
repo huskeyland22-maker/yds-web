@@ -39713,29 +39713,30 @@ button.yds-dbb-all__row.is-selected {
   border-radius: 7px;
   background: rgba(30, 41, 59, 0.4);
   color: #94a3b8;
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  padding: 0.32rem 0.5rem;
-  min-height: 1.85rem;
+  padding: 0.45rem 0.6rem;
+  min-height: 2.25rem;
 }
 .yds-dbb-trade__toggle:active,
 .yds-panic-trade__toggle:active {
   background: rgba(51, 65, 85, 0.65);
 }
 .yds-trade-status {
-  margin-top: 0.45rem;
-  padding: 0.45rem 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.65rem;
   border-radius: 8px;
   border: 1px solid rgba(125, 211, 252, 0.14);
   background: rgba(8, 47, 73, 0.22);
   display: grid;
-  gap: 0.2rem;
+  gap: 0.3rem;
 }
 .yds-trade-status__row {
   display: flex;
   justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.62rem;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
   color: #94a3b8;
 }
 .yds-trade-status__row strong {
@@ -39814,24 +39815,25 @@ button.yds-dbb-holdings__card {
   color: #94a3b8;
 }
 .yds-trade-rec {
-  margin-top: 0.4rem;
+  margin-top: 0.45rem;
 }
 .yds-trade-rec__form {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
 .yds-trade-rec__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
 .yds-trade-rec__form label,
 .yds-trade-rec__memo {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  font-size: 0.58rem;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
   color: #64748b;
 }
 .yds-trade-rec__form input[readonly] {
@@ -39844,34 +39846,34 @@ button.yds-dbb-holdings__card {
   border-radius: 6px;
   background: rgba(15, 23, 42, 0.75);
   color: #e2e8f0;
-  font-size: 0.72rem;
-  padding: 0.35rem 0.4rem;
-  min-height: 2rem;
+  font-size: 0.875rem;
+  padding: 0.45rem 0.55rem;
+  min-height: 2.35rem;
   max-width: 100%;
 }
 .yds-trade-rec__list-kind {
-  margin: 0 0 0.15rem;
-  font-size: 0.62rem;
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #cbd5e1;
 }
-.yds-trade-rec__memo { margin-top: 0.1rem; }
+.yds-trade-rec__memo { margin-top: 0.15rem; }
 .yds-trade-rec__err {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   color: #fca5a5;
 }
 .yds-trade-rec__actions {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.45rem;
 }
 .yds-trade-rec__save,
 .yds-trade-rec__cancel {
   border-radius: 6px;
-  font-size: 0.65rem;
+  font-size: 0.8125rem;
   font-weight: 650;
-  padding: 0.35rem 0.55rem;
-  min-height: 2rem;
+  padding: 0.45rem 0.7rem;
+  min-height: 2.35rem;
 }
 .yds-trade-rec__save {
   border: 1px solid rgba(125, 211, 252, 0.28);

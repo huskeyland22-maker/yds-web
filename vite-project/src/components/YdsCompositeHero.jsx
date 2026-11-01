@@ -59,7 +59,7 @@ function buildStageGuide(stageId) {
   if (stageId === "interest") {
     return {
       recommend: ["종목 발굴 · 현금 확보", "소량 분할 진입 검토"],
-      caution: ["패닉(80+)만 기다리지 않기", "추격매수 금지"],
+      caution: ["인생 타점(Macro 81+)만 기다리지 않기", "추격매수 금지"],
       avoid: ["일괄·추격 매수"],
     }
   }
