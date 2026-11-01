@@ -9,7 +9,7 @@ export const RECOMMEND_ENGINE_LABELS = {
   technical: "기술적 점수",
   earnings: "실적 점수",
   growth: "성장성 점수",
-  momentum: "AI/산업 모멘텀",
+  momentum: "모멘텀 축",
   risk: "리스크 점수",
 }
 
@@ -259,10 +259,10 @@ function buildRecommendEngineReasons(ctx) {
       "momentum",
       scores.momentum,
       aiSectors.has(sector) && scores.momentum >= 70
-        ? "AI 산업 모멘텀"
+        ? "AI 섹터 모멘텀 축"
         : scores.momentum >= 75
-          ? "산업 모멘텀 강세"
-          : "섹터 모멘텀 양호",
+          ? "모멘텀 축 강세"
+          : "모멘텀 축 양호",
     )
   }
 

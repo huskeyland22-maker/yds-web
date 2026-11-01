@@ -144,8 +144,8 @@ function buildBreakdownInsights(ctx) {
     lines.push(`CNN ${payload.fearGreed}은 극단 공포(0~10)가 아니어서 중기 점수가 상대적으로 완화됩니다.`)
   }
 
-  if (finalYds < 80 && componentScores.vix >= 99) {
-    lines.push("VIX는 극단 공포 수준이나, 중기 지표·동적 가중 때문에 인생 타점(80+) 구간에 도달하지 못했습니다.")
+  if (finalYds < 81 && componentScores.vix >= 99) {
+    lines.push("VIX는 극단 공포 수준이나, 중기 지표·동적 가중 때문에 Macro V1 인생 타점(81+) 구간에 도달하지 못했습니다.")
   }
 
   return lines

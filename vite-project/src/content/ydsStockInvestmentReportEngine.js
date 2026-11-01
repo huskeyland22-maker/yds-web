@@ -57,7 +57,7 @@ function buildRecommendReasons(stock, marketContext) {
 
   const breakdown = stock.scoreBreakdown
   if (breakdown?.performance >= 24) reasons.push("실적·펀더멘털 강세")
-  if (breakdown?.industry >= 18) reasons.push("산업 성장성 우위")
+  if (breakdown?.industry >= 18) reasons.push("정적 적합 점수 높음")
   if (breakdown?.sector >= 14) {
     reasons.push(`${stock.sectorLabel ?? "해당"} 섹터 적합`)
   }

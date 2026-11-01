@@ -9,8 +9,10 @@ import { isDevMode, isShowDebugPanel } from "../utils/devMode.js"
 
 export const PHASE3_SCORE_COMPONENTS = [
   { id: "performance", label: "실적", max: 30 },
-  { id: "industry", label: "산업", max: 25 },
-  { id: "sector", label: "섹터", max: 20 },
+  /** 유니버스 수동 marketFit 스케일 — 실제 산업 평가 아님 */
+  { id: "industry", label: "정적 적합 프록시", max: 25 },
+  /** live adapter marketFit 스케일 — 섹터 펀더멘털 아님 */
+  { id: "sector", label: "시장 적합도(라이브)", max: 20 },
   { id: "marketEnv", label: "시장환경", max: 15 },
   { id: "technical", label: "기술적분석", max: 5 },
   { id: "volume", label: "거래량", max: 5 },
@@ -93,7 +95,7 @@ export function computePhase3ScoreBreakdown(input) {
   const debug = {
     ticker: input.ticker ?? null,
     name: input.name ?? null,
-    formula: "total = 실적+산업+섹터+시장환경+기술적분석+거래량",
+    formula: "total = 실적+정적적합프록시+시장적합(라이브)+시장환경+기술적분석+거래량",
     inputs: {
       rating,
       manualMarketFit,

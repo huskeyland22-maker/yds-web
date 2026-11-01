@@ -103,14 +103,27 @@ export function getPanicScoreV2(data) {
   return Math.round(clamp(0.45 * sV + 0.35 * sC + 0.2 * sP, 0, 100))
 }
 
-/** Legacy getFinalScore — V2 가능 시 V2, 아니면 Legacy 동적가중 */
+/**
+ * Official panic score — V2 only.
+ * Core VIX·CNN·Put/Call incomplete → null (no Legacy 50 fill).
+ */
+export function getOfficialPanicScore(data) {
+  return getPanicScoreV2(data)
+}
+
+/**
+ * Legacy panic score — short/mid dynamic weights (missing metrics fill 50).
+ * Explicit Legacy path; does not prefer V2.
+ */
+export function getLegacyPanicScore(data) {
+  return getFinalScoreLegacy(data)
+}
+
+/** getFinalScore — Official(V2) 가능 시 Official, 아니면 Legacy (호환 래퍼) */
 export function getFinalScore(data) {
-  const v2 = getPanicScoreV2(data)
-  if (v2 != null) return v2
-  const short = getShortScore(data?.vix, data?.putCall)
-  const mid = getMidScore(data?.fearGreed, data?.bofa, data?.highYield)
-  const { wShort, wMid } = getDynamicWeights(data?.vix, data?.highYield)
-  return Math.round(clamp(short * wShort + mid * wMid, 0, 100))
+  const official = getOfficialPanicScore(data)
+  if (official != null) return official
+  return getLegacyPanicScore(data)
 }
 
 /** Legacy only — 덮어쓰지 않고 보존 호출용 */

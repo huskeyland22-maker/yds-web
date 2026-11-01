@@ -10,12 +10,44 @@ import { buildStockActionResult } from "./ydsStockActionEngine.js"
 /** @typedef {import("./ydsStockActionEngine.js").StockActionResult} StockActionResult */
 
 /**
+ * @param {YdsMarketAdapterContext} ctx
+ */
+function isHoldingMarketScoreInsufficient(ctx) {
+  if (ctx.scoreStatus === "dataInsufficient") return true
+  if (ctx.ready === false) return true
+  if (ctx.macroId === "unknown") return true
+  if (!Number.isFinite(ctx.ydsScore)) return true
+  return false
+}
+
+/**
  * @param {HoldingRow | null | undefined} holding
  * @param {YdsMarketAdapterContext | null | undefined} marketContext
  * @returns {StockActionResult}
  */
 export function derivePortfolioHoldingAction(holding, marketContext) {
   const ctx = marketContext && typeof marketContext === "object" ? marketContext : DEFAULT_MARKET_CONTEXT
+
+  // Official 결측 — 과열/분할매수 등 정상 국면 라벨로 위장하지 않음
+  if (isHoldingMarketScoreInsufficient(ctx)) {
+    return {
+      stockStatus: {
+        id: "interest",
+        emoji: "—",
+        label: "데이터 부족",
+        description: "시장 점수 산출 불가",
+      },
+      stockAction: {
+        id: "watchlist",
+        emoji: "—",
+        label: "매매 판단 보류",
+      },
+      actionReason: "데이터 부족 · 시장 점수 산출 불가 · 매매 판단 보류",
+      statusId: "interest",
+      actionId: "watchlist",
+    }
+  }
+
   const returnPct = holding?.returnPct
 
   /** @type {import("./ydsStockActionEngine.js").StockActionStatusId} */

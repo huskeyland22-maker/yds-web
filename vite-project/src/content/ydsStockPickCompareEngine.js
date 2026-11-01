@@ -20,7 +20,7 @@ export const COMPARE_METRICS = [
   { id: "technical", label: "기술적 점수", category: "score" },
   { id: "earnings", label: "실적", category: "score" },
   { id: "supply", label: "수급", category: "score" },
-  { id: "momentum", label: "산업 모멘텀", category: "score" },
+  { id: "momentum", label: "모멘텀 축", category: "score" },
   { id: "riskSafety", label: "리스크(안전)", category: "score" },
   { id: "status", label: "추천 상태", category: "text" },
   { id: "expectedReturn", label: "예상 수익률", category: "pct" },

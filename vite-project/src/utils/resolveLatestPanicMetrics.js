@@ -74,13 +74,27 @@ export function panicDataFromHistoryApiRow(row) {
 export function reportMetricsFromDeskReport(report) {
   if (!report || typeof report !== "object") return null
   const date = String(report.date ?? report.tradeDate ?? "").slice(0, 10)
+  const status = report.panic_score_status ?? null
+  const official = toNum(report.official_panic_score)
+  // P2-20: never promote stored_unverified panic_score as an Official metric
+  let panicScore = null
+  if (official != null) {
+    panicScore = official
+  } else if (status === "stored_unverified" || status === "absent") {
+    panicScore = null
+  } else {
+    // Pre-contract payloads (no status) — preserve prior coalesce behavior
+    panicScore = toNum(report.panic_score)
+  }
   const out = {
     updatedAt: report.updatedAt ?? (date ? `${date}T12:00:00.000Z` : null),
     accessTier: "pro",
     __fromReport: true,
     market_state: report.market_state ?? null,
     market_view: report.market_view ?? report.marketView ?? null,
-    panic_score: toNum(report.panic_score),
+    panic_score: panicScore,
+    panic_score_status: status,
+    official_panic_score: official,
   }
   if (hasPanicMetricValues(out)) return out
   if (out.market_state || out.market_view || out.panic_score != null) return out
@@ -157,6 +171,7 @@ export function resolveLatestMetrics(input = {}) {
   return latestMetrics
 }
 
+/** Known market_cycle / history state keys only — never free-form market_view prose */
 const STATE_KEY_LABELS = {
   risk_on: "Risk-on",
   neutral: "중립",
@@ -166,26 +181,48 @@ const STATE_KEY_LABELS = {
 }
 
 /**
+ * @param {unknown} raw
+ * @returns {keyof typeof STATE_KEY_LABELS | null}
+ */
+function resolveKnownMarketStateKey(raw) {
+  if (raw == null || raw === "") return null
+  const s = String(raw)
+  if (Object.prototype.hasOwnProperty.call(STATE_KEY_LABELS, s)) {
+    return /** @type {keyof typeof STATE_KEY_LABELS} */ (s)
+  }
+  return null
+}
+
+/**
+ * Desk market-state label when live compute is insufficient.
+ * Accepts only known state keys from history/cycle/report.market_state.
+ * Does NOT use deskReport.market_view / marketView (may embed Legacy panic score text).
+ *
  * @param {ReturnType<typeof import("./marketStateEngine.js").resolveMarketState>} computed
  * @param {{ latestHistory?: object | null; marketCycleRow?: object | null; deskReport?: object | null }} sources
  */
 export function resolveDeskMarketStateLabel(computed, sources = {}) {
   if (computed?.stateKey && computed.stateKey !== "insufficient") return computed
 
-  const raw =
-    sources.latestHistory?.market_state ??
-    sources.latestHistory?.marketState ??
-    sources.marketCycleRow?.market_state ??
-    sources.marketCycleRow?.marketState ??
-    sources.deskReport?.market_state ??
-    sources.deskReport?.market_view ??
-    sources.deskReport?.marketView ??
-    "중립"
+  const candidates = [
+    sources.latestHistory?.market_state,
+    sources.latestHistory?.marketState,
+    sources.marketCycleRow?.market_state,
+    sources.marketCycleRow?.marketState,
+    sources.deskReport?.market_state,
+  ]
 
-  const label = STATE_KEY_LABELS[raw] ?? String(raw)
+  let stateKey = /** @type {keyof typeof STATE_KEY_LABELS | null} */ (null)
+  for (const c of candidates) {
+    stateKey = resolveKnownMarketStateKey(c)
+    if (stateKey) break
+  }
+  if (!stateKey) stateKey = "neutral"
+
+  const label = STATE_KEY_LABELS[stateKey]
   return {
     ...computed,
-    stateKey: STATE_KEY_LABELS[raw] ? raw : "neutral",
+    stateKey,
     label,
     shortLabel: label,
     headline: label,

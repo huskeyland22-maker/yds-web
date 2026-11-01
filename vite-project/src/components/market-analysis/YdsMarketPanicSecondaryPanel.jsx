@@ -79,6 +79,9 @@ export default function YdsMarketPanicSecondaryPanel({
               <li>60~79 강한 공포</li>
               <li>80~100 극심한 패닉</li>
             </ul>
+            <p className="yds-market-panic-secondary__resolver-note">
+              Panic Index 기준입니다. 배분·Macro V1 인생 타점(보너스)은 81+입니다.
+            </p>
           </>
         ) : (
           <div className="yds-market-panic-secondary__incomplete" role="status">

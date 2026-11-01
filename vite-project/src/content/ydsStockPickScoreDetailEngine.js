@@ -49,7 +49,8 @@ function buildQualityItems(stock) {
   return [
     { id: "growth", label: "실적 성장", points: growth, max: 20, display: fmtPlus(growth, 20) },
     { id: "roe", label: "수익성(ROE)", points: roe, max: 15, display: fmtPlus(roe, 15) },
-    { id: "finance", label: "재무 건전성", points: finance, max: 15, display: fmtPlus(finance, 15) },
+    // industry 칸 = 수동 marketFit 프록시 (실제 재무 지표 아님)
+    { id: "finance", label: "정적 적합 프록시", points: finance, max: 15, display: fmtPlus(finance, 15) },
     { id: "supply", label: "수급", points: supply, max: 15, display: fmtPlus(supply, 15) },
     { id: "value", label: "밸류에이션", points: value, max: 12, display: fmtPlus(value, 12) },
   ]

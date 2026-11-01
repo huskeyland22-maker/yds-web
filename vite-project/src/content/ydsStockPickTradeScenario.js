@@ -25,7 +25,9 @@ export function buildStockPickTradeScenarioReport(stock, marketContext = null, d
   let flat = 100 - bull - bear
 
   const pos = marketContext?.marketPositionId
-  const panic = marketContext?.ydsScore ?? 50
+  const panic = Number.isFinite(marketContext?.ydsScore)
+    ? Number(marketContext.ydsScore)
+    : null
   const liq = dualLiquidity?.marketScore ?? 50
 
   if (pos === "fear" || pos === "panic") bull += 8
@@ -33,8 +35,11 @@ export function buildStockPickTradeScenarioReport(stock, marketContext = null, d
     bull -= 10
     bear += 8
   }
-  if (panic >= 65) bear += 6
-  if (panic <= 35) bull += 5
+  // Official/adapter 결측 시 50 필 금지 — 패닉 점수 가산만 생략
+  if (panic != null) {
+    if (panic >= 65) bear += 6
+    if (panic <= 35) bull += 5
+  }
   if (liq < 45) bear += 5
   if (dualLiquidity?.actionMode === "defense") bear += 6
 

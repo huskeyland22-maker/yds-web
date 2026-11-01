@@ -260,7 +260,11 @@ export default function YdsPortfolioCenterSection() {
           <span className="yds-pf-v1__muted"> · {report.market.panicLabel}</span>
         </p>
 
-        {report.market.allocationCompare ? (
+        {report.market.allocationAvailable === false ? (
+          <p className="yds-pf-v1__note" role="status">
+            데이터 부족 · 배분 산출 불가
+          </p>
+        ) : report.market.allocationCompare ? (
           <div className="yds-pf-v1__alloc-compare">
             <p
               className={`yds-pf-v1__alloc-posture yds-pf-v1__alloc-posture--${report.market.allocationCompare.postureTone}`}
@@ -313,72 +317,88 @@ export default function YdsPortfolioCenterSection() {
           </div>
         ) : null}
 
-        {report.market.note ? <p className="yds-pf-v1__note">{report.market.note}</p> : null}
-        <p className="yds-pf-v1__note">
-          <Link to="/market-analysis">시장분석</Link> 기준 권장 비중
-        </p>
+        {report.market.allocationAvailable === false
+          ? null
+          : report.market.note
+            ? <p className="yds-pf-v1__note">{report.market.note}</p>
+            : null}
+        {report.market.allocationAvailable === false ? null : (
+          <p className="yds-pf-v1__note">
+            <Link to="/market-analysis">시장분석</Link> 기준 권장 비중
+          </p>
+        )}
       </section>
 
       <section className="yds-pf-v1__block" aria-labelledby="pfv1-fit">
         <h2 id="pfv1-fit" className="yds-pf-v1__h2">
           4 · 포트폴리오 적합도
         </h2>
-        <div className="yds-pf-v1__fit">
-          <span className={`yds-pf-v1__fit-grade yds-pf-v1__fit-grade--${report.fit.grade}`}>
-            {report.fit.grade}
-          </span>
-          <div>
-            <strong className="yds-pf-v1__fit-score font-mono tabular-nums">{report.fit.score}점</strong>
-            <span className="yds-pf-v1__fit-label">{report.fit.label}</span>
-          </div>
-        </div>
-
-        {report.fit.detail ? (
-          <details className="yds-pf-v1__fit-details">
-            <summary className="yds-pf-v1__fit-details-toggle">점수 근거 보기</summary>
-            <div className="yds-pf-v1__fit-details-body">
-              <ul className="yds-pf-v1__fit-breakdown">
-                {report.fit.detail.components.map((row) => (
-                  <li key={row.id} className="yds-pf-v1__fit-breakdown-row">
-                    <span className="yds-pf-v1__fit-breakdown-label">{row.label}</span>
-                    <span className="yds-pf-v1__fit-breakdown-score font-mono tabular-nums">
-                      {row.score}/{row.max}
-                    </span>
-                    <span className="yds-pf-v1__fit-breakdown-detail">{row.detail}</span>
-                  </li>
-                ))}
-                <li className="yds-pf-v1__fit-breakdown-row yds-pf-v1__fit-breakdown-row--total">
-                  <span className="yds-pf-v1__fit-breakdown-label">총점</span>
-                  <strong className="yds-pf-v1__fit-breakdown-score font-mono tabular-nums">
-                    {report.fit.detail.total}
-                  </strong>
-                </li>
-              </ul>
-
-              {report.fit.detail.deductions.length ? (
-                <div className="yds-pf-v1__fit-subblock">
-                  <h3 className="yds-pf-v1__fit-subtitle">감점 사유</h3>
-                  <ul className="yds-pf-v1__fit-list yds-pf-v1__fit-list--warn">
-                    {report.fit.detail.deductions.map((d) => (
-                      <li key={d.id}>{d.reason}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {report.fit.detail.improvements.length ? (
-                <div className="yds-pf-v1__fit-subblock">
-                  <h3 className="yds-pf-v1__fit-subtitle">개선 방법</h3>
-                  <ul className="yds-pf-v1__fit-list yds-pf-v1__fit-list--ok">
-                    {report.fit.detail.improvements.map((item) => (
-                      <li key={item.id}>{item.text}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+        {report.fit.available === false ? (
+          <p className="yds-pf-v1__note" role="status">
+            데이터 부족 · 배분 및 포트폴리오 적합도 산출 불가
+          </p>
+        ) : (
+          <>
+            <div className="yds-pf-v1__fit">
+              <span className={`yds-pf-v1__fit-grade yds-pf-v1__fit-grade--${report.fit.grade}`}>
+                {report.fit.grade}
+              </span>
+              <div>
+                <strong className="yds-pf-v1__fit-score font-mono tabular-nums">
+                  {report.fit.score}점
+                </strong>
+                <span className="yds-pf-v1__fit-label">{report.fit.label}</span>
+              </div>
             </div>
-          </details>
-        ) : null}
+
+            {report.fit.detail ? (
+              <details className="yds-pf-v1__fit-details">
+                <summary className="yds-pf-v1__fit-details-toggle">점수 근거 보기</summary>
+                <div className="yds-pf-v1__fit-details-body">
+                  <ul className="yds-pf-v1__fit-breakdown">
+                    {report.fit.detail.components.map((row) => (
+                      <li key={row.id} className="yds-pf-v1__fit-breakdown-row">
+                        <span className="yds-pf-v1__fit-breakdown-label">{row.label}</span>
+                        <span className="yds-pf-v1__fit-breakdown-score font-mono tabular-nums">
+                          {row.score}/{row.max}
+                        </span>
+                        <span className="yds-pf-v1__fit-breakdown-detail">{row.detail}</span>
+                      </li>
+                    ))}
+                    <li className="yds-pf-v1__fit-breakdown-row yds-pf-v1__fit-breakdown-row--total">
+                      <span className="yds-pf-v1__fit-breakdown-label">총점</span>
+                      <strong className="yds-pf-v1__fit-breakdown-score font-mono tabular-nums">
+                        {report.fit.detail.total}
+                      </strong>
+                    </li>
+                  </ul>
+
+                  {report.fit.detail.deductions.length ? (
+                    <div className="yds-pf-v1__fit-subblock">
+                      <h3 className="yds-pf-v1__fit-subtitle">감점 사유</h3>
+                      <ul className="yds-pf-v1__fit-list yds-pf-v1__fit-list--warn">
+                        {report.fit.detail.deductions.map((d) => (
+                          <li key={d.id}>{d.reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {report.fit.detail.improvements.length ? (
+                    <div className="yds-pf-v1__fit-subblock">
+                      <h3 className="yds-pf-v1__fit-subtitle">개선 방법</h3>
+                      <ul className="yds-pf-v1__fit-list yds-pf-v1__fit-list--ok">
+                        {report.fit.detail.improvements.map((item) => (
+                          <li key={item.id}>{item.text}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              </details>
+            ) : null}
+          </>
+        )}
       </section>
 
       <section className="yds-pf-v1__block" aria-labelledby="pfv1-risk">

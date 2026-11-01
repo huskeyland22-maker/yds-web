@@ -77,11 +77,11 @@ function buildSectorMomentumRationale(industry, sector, trend, volume) {
   if (ratio < MIN_RATIO && trend < 22 && volume < 11) return null
 
   let text
-  if (industry >= 18) text = cap20(`산업 모멘텀 ${industry}점`)
-  else if (sector >= 14) text = cap20(`섹터 강세 ${sector}점`)
+  if (industry >= 18) text = cap20(`정적 적합 ${industry}점`)
+  else if (sector >= 14) text = cap20(`라이브 적합 ${sector}점`)
   else if (trend >= 28) text = cap20(`추세 점수 ${Math.round(trend)}`)
   else if (volume >= 12) text = cap20(`거래량 ${Math.round(volume)}점`)
-  else text = cap20(`산업·섹터 ${combined}점`)
+  else text = cap20(`적합 프록시 ${combined}점`)
 
   return {
     id: "sectorMomentum",

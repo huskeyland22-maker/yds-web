@@ -83,6 +83,8 @@ export function mapPanicIndexHistoryRowToClient(row) {
 
 /**
  * 스냅샷 → DB upsert payload (alias 컬럼 미포함)
+ * Metric nulls are omitted (NULL-fill coalesce). Score contract keys are handled
+ * separately so `data_insufficient` + `panic_score: null` is never dropped (P2-32).
  * @param {Record<string, unknown>} normalized finalizePanicHistoryRow 결과
  */
 export function panicIndexHistoryDbPayloadFromNormalized(normalized) {
@@ -100,16 +102,36 @@ export function panicIndexHistoryDbPayloadFromNormalized(normalized) {
     hy_oas: hy,
     market: normalized.market ?? "global",
     source: normalized.source ?? "manual",
-    panic_score: normalized.panic_score,
     market_phase: normalized.market_phase,
     risk_level: normalized.risk_level,
     strategy: normalized.strategy,
     created_at: normalized.created_at,
     updated_at: normalized.updated_at,
   }
-  return Object.fromEntries(
+  const payload = Object.fromEntries(
     Object.entries(raw).filter(([, v]) => v !== undefined && v !== null),
   )
+
+  const statusRaw = normalized.panic_score_status ?? normalized.score_status
+  const status =
+    statusRaw == null || statusRaw === "" ? null : String(statusRaw)
+
+  if (status === "ok" || status === "data_insufficient" || status === "stored_unverified") {
+    payload.panic_score_status = status
+    if (status === "data_insufficient") {
+      // Explicit clear — key must remain for RPC (P2-24/28)
+      payload.panic_score = null
+    } else {
+      const n = Number(normalized.panic_score)
+      payload.panic_score = Number.isFinite(n) ? n : null
+    }
+  } else if (normalized.panic_score != null && normalized.panic_score !== "") {
+    // Legacy number-only: omit status → RPC stored_unverified (never mint ok here)
+    const n = Number(normalized.panic_score)
+    if (Number.isFinite(n)) payload.panic_score = n
+  }
+
+  return payload
 }
 
 /**

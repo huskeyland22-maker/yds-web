@@ -33,7 +33,7 @@
 .app-shell-host.yds-theme-premium .yds-spick-page__sub,
 .app-shell-host.yds-theme-premium .yds-spick-ranking-page__sub,
 .app-shell-host.yds-theme-premium .yds-spick-compare-page__sub {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-page__sub a,
@@ -94,7 +94,8 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell dt {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-invest-dash__cell dd {
@@ -131,7 +132,8 @@
 .app-shell-host.yds-theme-premium .yds-spick-filter-bar__label,
 .app-shell-host.yds-theme-premium .yds-spick-filter-bar__count,
 .app-shell-host.yds-theme-premium .yds-spick-filter-bar__check {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-weight: 650;
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-filter-bar__select,
@@ -409,11 +411,14 @@
 
 .app-shell-host.yds-theme-premium .yds-spick-conf-bar__pct,
 .app-shell-host.yds-theme-premium .yds-spick-conf-bar__meta {
-  color: var(--yds-text-muted);
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-conf-bar__track {
-  background: var(--yds-bg-muted);
+  background: #e2e8f0;
+  border: 1px solid var(--yds-border);
 }
 
 /* Ranking / compare tables */
@@ -527,6 +532,606 @@
   color: var(--yds-text) !important;
 }
 
+/* ═══════════════════════════════════════
+   Contrast pass — TOP5 hero / all-table / perf report / history
+   Light cards on light page; keep status meaning hues.
+   Scoped to premium + stock-picks roots only.
+   ═══════════════════════════════════════ */
+
+/* —— TOP5 / hero cards: kill dark gradients —— */
+.app-shell-host.yds-theme-premium .yds-spick-hero-card,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-1,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-2,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-3,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-n,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--priority,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--compact,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--why {
+  background: var(--yds-bg-elevated);
+  background-image: none;
+  border: 1px solid var(--yds-border-strong);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-1 {
+  border-color: color-mix(in srgb, #d97706 45%, var(--yds-border));
+  background: color-mix(in srgb, #fbbf24 8%, #ffffff);
+  background-image: none;
+  box-shadow: var(--yds-shadow-card), 0 0 0 1px color-mix(in srgb, #fbbf24 18%, transparent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-2 {
+  border-color: color-mix(in srgb, #64748b 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-3 {
+  border-color: color-mix(in srgb, #b45309 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__name {
+  color: var(--yds-text);
+  font-size: clamp(0.88rem, 2.2vw, 1.02rem);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__name-link:hover .yds-spick-hero-card__name {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__rank-num {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-1 .yds-spick-hero-card__rank-num {
+  color: #b45309;
+  text-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__best-badge {
+  color: #92400e;
+  background: color-mix(in srgb, #fbbf24 22%, #ffffff);
+  border-color: color-mix(in srgb, #d97706 45%, var(--yds-border));
+  font-size: max(0.65rem, 10px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card--rank-1 .yds-spick-hero-card__best-badge {
+  color: #1c1917;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-color: #d97706;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__grade-badge,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__grade-badge {
+  color: #1e3a8a;
+  background: color-mix(in srgb, var(--yds-accent) 12%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--yds-accent) 35%, var(--yds-border));
+  font-size: max(0.72rem, 11px);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__grade,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__status,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__price-line,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__rec,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__arrow,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__held {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__status {
+  font-size: max(0.72rem, 11px);
+  font-weight: 800;
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__price-line {
+  font-size: max(0.75rem, 12px);
+  color: var(--yds-text);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__metrics,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__priority-metrics,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__grid2,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__tech {
+  font-size: max(0.72rem, 11.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__metrics dt,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__metric dt,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__grid2 dt,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__tech dt,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__hero-return-label,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__accordion-summary,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__detail-toggle {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__metrics dd,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__metric dd,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__grid2 dd,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__tech dd {
+  color: var(--yds-text);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__hero-return {
+  background: #f8fafc;
+  border: 1px solid var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__hero-return-value {
+  color: var(--yds-text);
+  font-size: clamp(1.05rem, 2.8vw, 1.3rem);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__return--muted,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__return--pending {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__action,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__rationale,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__action-guide,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__opinion {
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__footer,
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__accordion {
+  border-top-color: var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__cta {
+  background: var(--yds-accent);
+  border: 1px solid var(--yds-accent);
+  color: #ffffff;
+  font-size: max(0.75rem, 12px);
+  font-weight: 800;
+  box-shadow: 0 1px 2px rgba(7, 22, 40, 0.12);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hero-card__cta:hover {
+  background: color-mix(in srgb, var(--yds-accent) 88%, #000000);
+  border-color: color-mix(in srgb, var(--yds-accent) 88%, #000000);
+  color: #ffffff;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-recommend-profit-info__btn {
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-recommend-profit-info__btn:hover,
+.app-shell-host.yds-theme-premium .yds-spick-recommend-profit-info__btn:focus-visible {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-recommend-profit-info__panel {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text-secondary);
+  box-shadow: var(--yds-shadow-card);
+  font-size: max(0.72rem, 11px);
+}
+
+/* Rec status badges: meaning hues, stronger type */
+.app-shell-host.yds-theme-premium .yds-spick-rec-status {
+  font-size: max(0.72rem, 11px);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--buy {
+  color: #14532d;
+  background: color-mix(in srgb, var(--yds-signal-up) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-up) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--buy-strong {
+  color: #14532d;
+  background: color-mix(in srgb, #15803d 14%, #ffffff);
+  border-color: color-mix(in srgb, #15803d 42%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--watch {
+  color: #854d0e;
+  background: color-mix(in srgb, var(--yds-signal-warn) 16%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 45%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--scale {
+  color: #9a3412;
+  background: color-mix(in srgb, var(--yds-signal-caution) 14%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-caution) 42%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-rec-status--exclude {
+  color: #991b1b;
+  background: color-mix(in srgb, var(--yds-signal-down) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-down) 40%, var(--yds-border));
+}
+
+/* —— All stocks table —— */
+.app-shell-host.yds-theme-premium .yds-spick-section--all-table,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__scroll {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__scroll {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table {
+  font-size: max(0.75rem, 12px);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table th,
+.app-shell-host.yds-theme-premium .yds-spick-all-table thead th {
+  color: var(--yds-text);
+  font-weight: 700;
+  font-size: max(0.72rem, 11.5px);
+  background: #f8fafc;
+  border-bottom: 1px solid var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table td {
+  color: var(--yds-text-secondary);
+  font-size: max(0.75rem, 12px);
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__name {
+  color: var(--yds-text);
+  font-weight: 800;
+  font-size: max(0.78rem, 12.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__name:hover {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__sector,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__td--text,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__elapsed {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__td--price,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__td--emph {
+  color: var(--yds-text);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__count {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__ret--muted,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__ret--pending {
+  color: var(--yds-text-secondary);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__row:hover {
+  background: color-mix(in srgb, var(--yds-accent) 6%, #ffffff);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__th-sort,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__sort,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__col-btn {
+  color: var(--yds-text-secondary);
+  border-color: var(--yds-border-strong);
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__th-sort--active,
+.app-shell-host.yds-theme-premium .yds-spick-all-table__sort--active {
+  color: var(--yds-text);
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__col-picker {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-ai-score__bar {
+  background: #e2e8f0;
+  border: 1px solid var(--yds-border);
+}
+
+/* —— Recommend performance report (stock-picks only) —— */
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report,
+.app-shell-host.yds-theme-premium .yds-spick-hub__perf-report {
+  background: var(--yds-bg-elevated);
+  background-image: none;
+  border: 1px solid var(--yds-border-strong);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__title {
+  color: var(--yds-text);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__sub,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__empty {
+  color: var(--yds-text-secondary);
+  font-size: max(0.75rem, 12px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__link {
+  color: var(--yds-accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__briefing,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__hero-card {
+  background: #f8fafc;
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text-secondary);
+  font-size: max(0.78rem, 12.5px);
+  line-height: 1.5;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__hero-card dt,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__kpi dt,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__summary-kpi dt,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__summary-breakdown dt {
+  color: var(--yds-text-secondary);
+  font-weight: 650;
+  font-size: max(0.72rem, 11.5px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__hero-card dd,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__kpi dd,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__summary-kpi dd,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__summary-breakdown dd,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__hero-name {
+  color: var(--yds-text);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__summary-kpi dd {
+  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__table-title {
+  color: var(--yds-accent);
+  font-size: max(0.75rem, 12px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__table {
+  font-size: max(0.75rem, 12px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__table th {
+  color: var(--yds-text);
+  font-weight: 700;
+  background: #f8fafc;
+  border-bottom-color: var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__table td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__up {
+  color: var(--yds-signal-up);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__down {
+  color: var(--yds-signal-down);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__tab,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__toggle {
+  background: #f1f5f9;
+  border: 1.5px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  font-weight: 700;
+  font-size: max(0.75rem, 12px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__tab--active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__toggle:hover {
+  color: var(--yds-accent);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__detail {
+  border-top-color: var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-spick-hub-table-scroll {
+  background: #f8fafc;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-sm);
+}
+
+/* —— Recommend history —— */
+.app-shell-host.yds-theme-premium .yds-spick-hub-history {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border-strong);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+  padding: var(--yds-space-3);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__count,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__empty,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__group-chevron,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__group-meta,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__group-preview,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__entry-date,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__reason {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__filter {
+  background: #f8fafc;
+  border: 1px solid var(--yds-border-strong);
+  color: var(--yds-text-secondary);
+  font-size: max(0.72rem, 11.5px);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__filter--active {
+  background: var(--yds-accent-soft);
+  border-color: color-mix(in srgb, var(--yds-accent) 42%, var(--yds-border));
+  color: var(--yds-text);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__table {
+  font-size: max(0.75rem, 12px);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__table th {
+  color: var(--yds-text);
+  font-weight: 700;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__table td {
+  color: var(--yds-text-secondary);
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__name-link,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__link {
+  color: var(--yds-text);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__name-link:hover,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__link:hover {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__status--active {
+  color: #14532d;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__status--success {
+  color: #1e40af;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__status--failure {
+  color: #991b1b;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__status--ended {
+  color: #475569;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__badge-chip {
+  font-size: max(0.65rem, 10px);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__badge-chip--active {
+  color: #14532d;
+  background: color-mix(in srgb, var(--yds-signal-up) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-up) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__badge-chip--success {
+  color: #854d0e;
+  background: color-mix(in srgb, var(--yds-signal-warn) 14%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 42%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__badge-chip--failure {
+  color: #991b1b;
+  background: color-mix(in srgb, var(--yds-signal-down) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--yds-signal-down) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__badge-chip--highlight {
+  color: #5b21b6;
+  background: color-mix(in srgb, #8b5cf6 12%, #ffffff);
+  border-color: color-mix(in srgb, #8b5cf6 35%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__ret--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__ret--down {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__ret--muted {
+  color: var(--yds-text-secondary);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__more {
+  background: #f1f5f9;
+  border: 1.5px solid var(--yds-border-strong);
+  color: var(--yds-text);
+  font-size: max(0.75rem, 12px);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__more:hover {
+  color: var(--yds-accent);
+  border-color: color-mix(in srgb, var(--yds-accent) 40%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__group {
+  background: #f8fafc;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-sm);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__group-head:hover {
+  background: color-mix(in srgb, var(--yds-accent) 6%, #ffffff);
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-page {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.app-shell-host.yds-theme-premium .yds-spick-all-table__scroll,
+.app-shell-host.yds-theme-premium .yds-spick-hub-history__scroll,
+.app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
 /* Mobile spacing */
 @media (max-width: 639px) {
   .app-shell-host.yds-theme-premium .yds-spick-page,
@@ -542,5 +1147,19 @@
 
   .app-shell-host.yds-theme-premium .yds-spick-hub-quick {
     gap: 0.35rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-spick-hero-card__name {
+    font-size: 0.9rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-spick-hero-card__cta {
+    font-size: max(0.72rem, 11.5px);
+  }
+
+  .app-shell-host.yds-theme-premium .yds-spick-all-table,
+  .app-shell-host.yds-theme-premium .yds-spick-hub-history__table,
+  .app-shell-host.yds-theme-premium .yds-spick-page .yds-rec-perf-report__table {
+    font-size: max(0.72rem, 11.5px);
   }
 }

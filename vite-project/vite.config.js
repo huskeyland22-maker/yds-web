@@ -159,6 +159,46 @@ function equityDailyBottomBuyDevApi() {
   }
 }
 
+function dbbProspectiveOhlcvDevApi() {
+  const handlerPath = path.resolve(process.cwd(), "../api/_lib/dbbProspectiveOhlcvHandler.js")
+  return {
+    name: "dbb-prospective-ohlcv-dev-api",
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const raw = req.url || ""
+        if (!raw.startsWith("/api/dbb-prospective-ohlcv")) return next()
+        try {
+          const mod = await import(pathToFileURL(handlerPath).href)
+          const url = new URL(raw, "http://localhost")
+          await mod.handleDbbProspectiveOhlcv(
+            { method: req.method, url: raw, query: { symbol: url.searchParams.get("symbol") || "" } },
+            {
+              setHeader(name, value) {
+                res.setHeader(name, value)
+              },
+              status(code) {
+                res.statusCode = code
+                return this
+              },
+              json(body) {
+                if (!res.getHeader("Content-Type")) res.setHeader("Content-Type", "application/json; charset=utf-8")
+                res.end(JSON.stringify(body))
+              },
+              end() {
+                res.end()
+              },
+            },
+          )
+        } catch (err) {
+          res.statusCode = 500
+          res.setHeader("Content-Type", "application/json; charset=utf-8")
+          res.end(JSON.stringify({ ok: false, error: err?.message || "ohlcv_failed" }))
+        }
+      })
+    },
+  }
+}
+
 // https://vite.dev/config/
 // Network-first shell: index.html always from network; hashed /assets/* never precached (404 after deploy).
 export default defineConfig({
@@ -181,6 +221,7 @@ export default defineConfig({
     react(),
     dailyBottomBuyDevApi(),
     equityDailyBottomBuyDevApi(),
+    dbbProspectiveOhlcvDevApi(),
     htmlBuildIdPlugin(),
     VitePWA({
       registerType: "autoUpdate",
@@ -282,6 +323,10 @@ export default defineConfig({
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },
+      "/api/trade-records-sync": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
     },
   },
   preview: {
@@ -311,6 +356,10 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/portfolio-quote": {
+        target: "https://yds-web-kappa.vercel.app",
+        changeOrigin: true,
+      },
+      "/api/trade-records-sync": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },

@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { fetchPanicDataJson, isPanicHubEnabled, submitManualPanicData } from "../config/api.js"
 import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
-import { getFinalScore } from "../utils/tradingScores.js"
+import { getOfficialPanicScore } from "../utils/tradingScores.js"
 import { validatePanicData, isPanicBusinessDataStale } from "../utils/validatePanicData.js"
 import { emitDebugEvent } from "../utils/debugLogger.js"
 import { logSaveError, toErrorMessage } from "../utils/errorMessage.js"
@@ -610,7 +610,11 @@ export const usePanicStore = create((set, get) => ({
         next[key] = incoming?.[key] ?? null
       }
       next.updatedAt = nowIso
-      next.manualFinalScore = getFinalScore(next)
+      {
+        const official = getOfficialPanicScore(next)
+        next.manualFinalScore =
+          official != null && Number.isFinite(official) ? official : null
+      }
       next.manualSentiment = "manual"
       next.manualTrend = "manual"
       next.manualSavedAt = nowIso

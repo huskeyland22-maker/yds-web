@@ -238,7 +238,9 @@ function buildTradeStrategy(stock, marketContext) {
   const engine = stock.recommendEngine
   const risk = engine?.scores?.risk ?? 50
   const momentum = engine?.scores?.momentum ?? 50
-  const panic = marketContext?.ydsScore ?? 50
+  const panic = Number.isFinite(marketContext?.ydsScore)
+    ? Number(marketContext.ydsScore)
+    : null
   const pos = marketContext?.marketPositionId
 
   let weightPct = 12
@@ -246,7 +248,8 @@ function buildTradeStrategy(stock, marketContext) {
   else if (engine?.compositeScore >= 70) weightPct = 15
   if (pos === "fear" || pos === "panic") weightPct += 3
   if (pos === "overheat") weightPct -= 4
-  if (panic >= 65) weightPct -= 2
+  // Official/adapter 결측 시 50 필 금지 — 패닉 기반 비중 조정만 생략
+  if (panic != null && panic >= 65) weightPct -= 2
   weightPct = Math.max(5, Math.min(25, weightPct))
 
   if (!Number.isFinite(price) || price <= 0) {

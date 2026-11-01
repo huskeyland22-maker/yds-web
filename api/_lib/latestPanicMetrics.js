@@ -6,10 +6,18 @@ import {
 } from "./panicIndexHistoryColumns.js"
 import { supabaseRest } from "./supabaseRest.js"
 import { panicObjectFromSnapshot } from "./panicSnapshot.js"
-import { getFinalScore } from "./panicScores.js"
+import { getOfficialPanicScore } from "./panicScores.js"
 
 /** @param {ReturnType<typeof import('./panicSnapshot.js').normalizePanicPayload>} snap */
 export function latestPanicMetricsRowFromSnapshot(snap) {
+  const official = getOfficialPanicScore({
+    vix: snap.vix,
+    fearGreed: snap.fearGreed,
+    putCall: snap.putCall,
+    bofa: snap.bofa,
+    highYield: snap.highYield,
+  })
+  const scoreOk = official != null && Number.isFinite(official)
   return {
     id: "global",
     date: snap.tradeDate,
@@ -21,13 +29,8 @@ export function latestPanicMetricsRowFromSnapshot(snap) {
     bofa: snap.bofa,
     skew: snap.skew,
     hy_oas: snap.highYield,
-    panic_score: getFinalScore({
-      vix: snap.vix,
-      fearGreed: snap.fearGreed,
-      putCall: snap.putCall,
-      bofa: snap.bofa,
-      highYield: snap.highYield,
-    }),
+    // Official only — never persist Legacy 50 / partial fill as panic_score
+    panic_score: scoreOk ? official : null,
     updated_at: snap.updatedAt,
   }
 }

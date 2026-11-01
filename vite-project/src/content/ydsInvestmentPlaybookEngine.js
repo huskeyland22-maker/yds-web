@@ -5,7 +5,10 @@
 import { MARKET_STATE_STRATEGY } from "./ydsMarketStateCenter.js"
 import { MARKET_POSITION_STAGES } from "./ydsMarketPositionEngine.js"
 import { MACRO_V1_STATUS_BANDS } from "../panic-v2/panicMacroV1Status.js"
-import { computeRecommendedAssetAllocation } from "./ydsPortfolioAllocationEngine.js"
+import {
+  computeRecommendedAssetAllocation,
+  isMarketContextScoreInsufficient,
+} from "./ydsPortfolioAllocationEngine.js"
 import { buildV5Analysis, buildV5Holdings } from "./ydsPortfolioV5Engine.js"
 import { resolveMarketStateCenterView } from "./ydsMarketStateCenter.js"
 
@@ -71,15 +74,15 @@ export const PLAYBOOK_PANIC_BANDS = [
     rules: ["월 투입 20% 목표", "우량주 2~3종목 분할", "한 종목 5% 이내", "추격 금지"],
   },
   {
-    min: 60,
+    min: 61,
     max: 80,
-    label: "60~80 · 분할매수",
+    label: "61~80 · 분할매수 (Macro V1)",
     rules: ["월 투입 50% 목표", "4~6회 분할", "섹터 분산", "현금 15~30%"],
   },
   {
-    min: 80,
+    min: 81,
     max: 100,
-    label: "80~100 · 인생 타점",
+    label: "81~100 · 인생 타점 (Macro V1)",
     rules: ["계획 현금의 80%까지 투입 가능", "우량주 집중", "변동성 감내", "장기 보유 전제"],
   },
 ]
@@ -100,14 +103,36 @@ export const PLAYBOOK_LOSS_RULES = [
 
 /**
  * @param {YdsMarketAdapterContext | null | undefined} ctx
+ */
+function isPlaybookScoreInsufficient(ctx) {
+  if (!ctx) return true
+  if (isMarketContextScoreInsufficient(ctx)) return true
+  if (ctx.ready !== true) return true
+  if (ctx.scoreStatus === "dataInsufficient") return true
+  if (!Number.isFinite(ctx.ydsScore)) return true
+  return false
+}
+
+/**
+ * @param {YdsMarketAdapterContext | null | undefined} ctx
  * @param {object | null | undefined} panicData
  */
 export function buildPlaybookSnapshot(ctx, panicData = null) {
   const center = panicData ? resolveMarketStateCenterView(panicData) : null
+  const insufficient = isPlaybookScoreInsufficient(ctx)
   const positionId = center?.position?.id ?? ctx?.marketPositionId ?? "adjustment"
-  const panicScore = center?.panicScore ?? ctx?.ydsScore ?? null
-  const macroId = center?.macroId ?? ctx?.macroId ?? "neutral"
-  const recommended = ctx?.ready ? computeRecommendedAssetAllocation(ctx) : computeRecommendedAssetAllocation({ macroId, isDefensive: true, cycleStageId: "normal" })
+  const panicScore = insufficient
+    ? center?.panicScore ?? null
+    : center?.panicScore ?? ctx?.ydsScore ?? null
+
+  // !ready 시 macroId·isDefensive로 가짜 neutral/방어 배분을 만들지 않음
+  const recommended = insufficient
+    ? computeRecommendedAssetAllocation({
+        ready: false,
+        scoreStatus: "dataInsufficient",
+        macroId: "unknown",
+      })
+    : computeRecommendedAssetAllocation(ctx)
 
   const marketPrinciples = MARKET_POSITION_STAGES.map((stage) => {
     const id = stage.id
@@ -121,18 +146,24 @@ export function buildPlaybookSnapshot(ctx, panicData = null) {
       actions: extra?.actions ?? strategy?.actions ?? [],
       avoid: extra?.avoid ?? [],
       cashGuide: extra?.cash ?? "—",
-      isCurrent: id === positionId,
+      // 점수 결측 시 현재 국면 하이라이트(매수 원칙 강조) 금지
+      isCurrent: insufficient ? false : id === positionId,
     }
   })
 
-  const activeBand = MACRO_V1_STATUS_BANDS.find(
-    (b) => panicScore != null && panicScore >= b.min && panicScore <= b.max,
-  )
+  const activeBand =
+    !insufficient && panicScore != null
+      ? MACRO_V1_STATUS_BANDS.find(
+          (b) => panicScore >= b.min && panicScore <= b.max,
+        )
+      : null
 
   return {
-    currentMarketLabel: PLAYBOOK_MARKET_LABELS[positionId] ?? positionId,
-    currentMarketId: positionId,
-    panicScore,
+    currentMarketLabel: insufficient
+      ? "데이터 부족"
+      : PLAYBOOK_MARKET_LABELS[positionId] ?? positionId,
+    currentMarketId: insufficient ? "dataInsufficient" : positionId,
+    panicScore: insufficient ? null : panicScore,
     activePanicBand: activeBand,
     marketPrinciples,
     panicBands: PLAYBOOK_PANIC_BANDS,
@@ -144,8 +175,9 @@ export function buildPlaybookSnapshot(ctx, panicData = null) {
       recommendedUsPct: recommended.usPct,
       recommendedKrPct: recommended.krPct,
       note: recommended.note,
+      available: recommended.available !== false,
     },
-    buyIntensityPct: center?.buyIntensityPct ?? null,
+    buyIntensityPct: insufficient ? null : center?.buyIntensityPct ?? null,
   }
 }
 
@@ -164,16 +196,19 @@ export function computePlaybookCompliance(ctx, trades, cashAmount, quoteMap, usd
   const rows = holdings?.rows ?? []
   const actualCash = analysis.actual?.cashPct ?? 0
   const recCash = snapshot.portfolio.recommendedCashPct
+  const allocationAvailable = snapshot.portfolio.available !== false
 
   /** @type {{ id: string; label: string; ok: boolean; detail: string; weight: number }[]} */
   const items = []
 
-  const cashDiff = Math.abs(actualCash - recCash)
+  const cashDiff = allocationAvailable ? Math.abs(actualCash - recCash) : null
   items.push({
     id: "cash",
     label: "현금 비중",
-    ok: cashDiff <= 12,
-    detail: `실제 ${actualCash}% · 권장 ${recCash}% (차이 ${Math.round(cashDiff)}%p)`,
+    ok: allocationAvailable ? cashDiff <= 12 : false,
+    detail: allocationAvailable
+      ? `실제 ${actualCash}% · 권장 ${recCash}% (차이 ${Math.round(cashDiff)}%p)`
+      : "데이터 부족 · 권장 배분 산출 불가",
     weight: 25,
   })
 
@@ -187,18 +222,24 @@ export function computePlaybookCompliance(ctx, trades, cashAmount, quoteMap, usd
   for (const t of recentTrades) {
     tradeTotal += 1
     let ok = true
+    if (!allocationAvailable) ok = false
     if (defensiveStates.includes(positionId) && t.action === "buy") ok = false
     if (aggressiveStates.includes(positionId) && t.action === "sell") ok = false
     if (ok) tradeOk += 1
   }
 
-  const tradeCompliance = tradeTotal ? Math.round((tradeOk / tradeTotal) * 100) : 70
+  const tradeCompliance = !allocationAvailable
+    ? 0
+    : tradeTotal
+      ? Math.round((tradeOk / tradeTotal) * 100)
+      : 70
   items.push({
     id: "trades",
     label: "최근 거래 방향",
-    ok: tradeCompliance >= 60,
-    detail:
-      tradeTotal > 0
+    ok: allocationAvailable && tradeCompliance >= 60,
+    detail: !allocationAvailable
+      ? "데이터 부족 · 거래 방향 적합도 산출 불가"
+      : tradeTotal > 0
         ? `${snapshot.currentMarketLabel} 구간 · 최근 ${tradeTotal}건 중 ${tradeOk}건 적합`
         : "거래 기록 없음 · 중립 평가",
     weight: 30,
@@ -229,11 +270,17 @@ export function computePlaybookCompliance(ctx, trades, cashAmount, quoteMap, usd
     weight: 25,
   })
 
-  const tradeScore = tradeTotal ? tradeCompliance : 70
-  const cashScore = cashDiff <= 12 ? 100 : cashDiff <= 20 ? 70 : Math.max(30, 100 - cashDiff * 2)
+  const tradeScore = !allocationAvailable ? 0 : tradeTotal ? tradeCompliance : 70
+  const cashScore = !allocationAvailable
+    ? 0
+    : cashDiff <= 12
+      ? 100
+      : cashDiff <= 20
+        ? 70
+        : Math.max(30, 100 - cashDiff * 2)
   const weighted =
     (cashScore * 25 + tradeScore * 30 + holdingScore * 25) / 80 +
-    (rows.length || tradeTotal ? 0 : 20)
+    (allocationAvailable && !(rows.length || tradeTotal) ? 20 : 0)
 
   const scorePct = Math.round(Math.min(100, Math.max(0, weighted)))
   let grade = "C"

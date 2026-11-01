@@ -240,6 +240,36 @@
 
 ---
 
+## RC 후보 — HEAD `d654507` (2026-10-24)
+
+로컬 `main` 기준. push·프로덕션 배포는 아직 하지 않음. 아래는 확인된 사실만 기록.
+
+### UI 개선 (커밋)
+
+- [x] **Panic UI 간격·Drivers 가독성** — `1043eea` · `/market-analysis` spacing·drivers (`yds-panic-premium.css`, `index.css`)
+- [x] **DBB 대시보드 타이포·equity 레이아웃** — `8fc7368` · DBB premium typography·equity layout (`yds-dbb-premium.css`, `index.css`)
+- [x] **DBB 이용 안내 기본 접힘** — `3f22df2` · `/daily-bottom-buy` notice summary+펼침 · 경고 4항 유지 (`DailyBottomBuyPage.jsx`, notice fold CSS)
+
+### 시장 데이터 (커밋)
+
+- [x] **자동 시장 데이터 병합** — `d654507` merge · 부모 `3f22df2` + `0620e01` · `data.json`·`spy-daily.json`만 · 원격 github-actions 데이터(`c2b23ae`→`0620e01`) 포함
+
+### 검증 완료
+
+- [x] `npm run build` 성공 (API module verify 포함) · HEAD `d654507`
+- [x] `data.json` / `spy-daily.json` JSON 파싱 OK · blob이 `origin/main`과 일치 · `updated_at` / SPY `last` = 2026-10-23
+- [x] 모바일(390)·데스크톱 화면 스모크 — `/daily-bottom-buy` 안내 접힘·후보 데이터, `/market-analysis` Panic 표시 (로컬 RC; 프로덕션 화면 재검증 아님)
+- [x] `VITE_APP_RELEASE_CHANNEL=rc` 빌드(`dist-rc`)·preview(`127.0.0.1:4190`)·RC 배지 확인 (로컬 RC)
+- [x] 이번 UI·merge 변경 범위에서 **신규** eslint 오류 없음 (전체 `npm run lint`는 기존 부채로 실패)
+
+### 검증 미완료
+
+- [ ] `docs/deploy-checklist.md` 배포 게이트 최종 체크 — 현재 필수: DBB·Panic Index·Drivers·History·`/admin` 기본 로드 등. YDS SCORE·유사사례·행동 가이드는 **레거시/복원 RC** (현재 `/market-analysis` 필수 범위 아님)
+- [ ] 프로덕션(Vercel) 환경변수·운영 배포 상태·`PROD` 배지 — **미확인** (로컬 RC와 별개; 이번 턴 프로덕션 재검증 없음)
+- [ ] 사용자 명시 「배포해」 후 `git push origin main`
+
+---
+
 ## 배포 조건
 
 - 주요 기능 완료

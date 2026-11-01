@@ -178,31 +178,37 @@ function PlaybookContent() {
         <h2 id="pb-portfolio" className="yds-playbook__h2">
           5 · 포트폴리오 원칙
         </h2>
-        <div className="yds-playbook__alloc">
-          <div>
-            <span className="yds-playbook__alloc-key">권장 현금</span>
-            <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedCashPct}%</strong>
-            <span className="yds-playbook__alloc-actual">
-              실제 {compliance.analysis.actualCashPct}%
-            </span>
-          </div>
-          <div>
-            <span className="yds-playbook__alloc-key">권장 주식</span>
-            <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedStockPct}%</strong>
-          </div>
-          <div>
-            <span className="yds-playbook__alloc-key">미국</span>
-            <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedUsPct}%</strong>
-          </div>
-          <div>
-            <span className="yds-playbook__alloc-key">한국</span>
-            <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedKrPct}%</strong>
-          </div>
-        </div>
-        <p className="yds-playbook__note">{snapshot.portfolio.note}</p>
-        {snapshot.buyIntensityPct != null ? (
-          <p className="yds-playbook__note">신규 투입 매수 강도 · {snapshot.buyIntensityPct}%</p>
-        ) : null}
+        {snapshot.portfolio.available === false ? (
+          <p className="yds-playbook__note">데이터 부족 · 배분 산출 불가</p>
+        ) : (
+          <>
+            <div className="yds-playbook__alloc">
+              <div>
+                <span className="yds-playbook__alloc-key">권장 현금</span>
+                <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedCashPct}%</strong>
+                <span className="yds-playbook__alloc-actual">
+                  실제 {compliance.analysis.actualCashPct}%
+                </span>
+              </div>
+              <div>
+                <span className="yds-playbook__alloc-key">권장 주식</span>
+                <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedStockPct}%</strong>
+              </div>
+              <div>
+                <span className="yds-playbook__alloc-key">미국</span>
+                <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedUsPct}%</strong>
+              </div>
+              <div>
+                <span className="yds-playbook__alloc-key">한국</span>
+                <strong className="font-mono tabular-nums">{snapshot.portfolio.recommendedKrPct}%</strong>
+              </div>
+            </div>
+            <p className="yds-playbook__note">{snapshot.portfolio.note}</p>
+            {snapshot.buyIntensityPct != null ? (
+              <p className="yds-playbook__note">신규 투입 매수 강도 · {snapshot.buyIntensityPct}%</p>
+            ) : null}
+          </>
+        )}
       </section>
 
       <p className="yds-playbook__foot">

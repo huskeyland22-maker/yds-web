@@ -11,10 +11,21 @@
  *   cashPct: number
  *   stockPct: number
  *   note: string
+ *   available?: boolean
  * }} AssetAllocation
  */
 
 /** @typedef {{ usPct: number; krPct: number; cashPct: number }} AssetHoldings */
+
+/** Official 점수 결측 시 — 중립/공포 부족 배분으로 위장하지 않음 */
+const UNAVAILABLE_ASSET_ALLOCATION = /** @type {AssetAllocation} */ ({
+  usPct: 0,
+  krPct: 0,
+  cashPct: 0,
+  stockPct: 0,
+  note: "데이터 부족 · 배분 산출 불가",
+  available: false,
+})
 
 /** @type {Record<string, { us: number; kr: number; cash: number; note: string }>} */
 const BASE_ASSET = {
@@ -23,6 +34,19 @@ const BASE_ASSET = {
   interest: { us: 45, kr: 25, cash: 30, note: "관심 구간 · 분할 진입" },
   dca: { us: 55, kr: 30, cash: 15, note: "분할매수 · 비중 확대" },
   panicBuy: { us: 65, kr: 30, cash: 5, note: "인생 타점 · 공격적 배분" },
+}
+
+/**
+ * 어댑터 Official 결측·미준비 컨텍스트 여부.
+ * `{}`·부분 객체(레거시 호출)는 false — 기존 neutral 폴백 유지.
+ * @param {YdsMarketAdapterContext | Record<string, unknown> | null | undefined} context
+ */
+export function isMarketContextScoreInsufficient(context) {
+  if (!context || typeof context !== "object") return false
+  if (context.scoreStatus === "dataInsufficient") return true
+  if (context.ready === false) return true
+  if (context.macroId === "unknown") return true
+  return false
 }
 
 /** @type {Record<string, { us: number; kr: number; cash: number }>} */
@@ -44,6 +68,10 @@ function clampPct(n) {
  */
 export function computeRecommendedAssetAllocation(context) {
   const ctx = context && typeof context === "object" ? context : {}
+  if (isMarketContextScoreInsufficient(ctx)) {
+    return { ...UNAVAILABLE_ASSET_ALLOCATION }
+  }
+
   const macroId = ctx.macroId ?? "neutral"
   const base = BASE_ASSET[macroId] ?? BASE_ASSET.neutral
 
@@ -73,6 +101,7 @@ export function computeRecommendedAssetAllocation(context) {
     cashPct,
     stockPct: usPct + krPct,
     note: base.note,
+    available: true,
   }
 }
 

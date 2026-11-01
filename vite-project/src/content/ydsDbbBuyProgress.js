@@ -1,9 +1,4 @@
-import {
-  averageTradeBuyPrice,
-  listTradeRecords,
-  sumTradeWeightPct,
-  tradeReturnPct,
-} from "./ydsTradeRecords.js"
+import { listTradeRecords, tradeReturnPct } from "./ydsTradeRecords.js"
 import { buildDbbTradeStatusView } from "./ydsTradeRecordsStatus.js"
 
 /**
@@ -80,14 +75,20 @@ export function collectDbbBuyProgress(entries) {
     const statusView = entry.card
       ? buildDbbTradeStatusView(entry.card, records, entry.card.asOfDate)
       : null
+    // No live score card: keep statusView null (UI shows 준비 중) but still
+    // compute weight / next step / days from records via the same status helper.
+    const statusMetaView = statusView
+      ? null
+      : buildDbbTradeStatusView({ count: 0 }, records, null)
     items.push({
       symbol: entry.symbol,
       name: entry.name || entry.symbol,
       statusView,
+      statusMetaView,
       recordedWeightPct: statusView
         ? statusView.recordedWeightPct
-        : sumTradeWeightPct(records),
-      avgBuyPrice: statusView ? statusView.avgBuyPrice : averageTradeBuyPrice(records),
+        : statusMetaView.recordedWeightPct,
+      avgBuyPrice: statusView ? statusView.avgBuyPrice : statusMetaView.avgBuyPrice,
     })
   }
   return items

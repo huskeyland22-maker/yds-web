@@ -120,8 +120,96 @@ describe("collectDbbBuyProgress", () => {
     expect(items).toHaveLength(1)
     expect(items[0].symbol).toBe("NVDA")
     expect(items[0].statusView).toBeNull()
+    expect(items[0].statusMetaView).not.toBeNull()
+    expect(items[0].statusMetaView.recordedWeightPct).toBe(50)
+    expect(items[0].statusMetaView.nextStep).toBe("대기")
+    expect(items[0].statusMetaView.daysSinceBuy).toBeGreaterThanOrEqual(0)
     expect(items[0].recordedWeightPct).toBe(50)
     expect(items[0].avgBuyPrice).toBe(180)
+  })
+
+  it("exposes record meta for holding names without a live score (NEE / RXRX)", () => {
+    save("NEE", 80, 400, 50)
+    save("RXRX", 7.5, 375, 40)
+    const items = collectDbbBuyProgress([
+      equityViewProgressEntry({ symbol: "NEE", name: "NextEra Energy" }, { ok: false, symbol: "NEE" }),
+      equityViewProgressEntry(
+        { symbol: "RXRX", name: "Recursion Pharmaceuticals" },
+        null,
+      ),
+      equityViewProgressEntry(
+        { symbol: "AAPL", name: "애플" },
+        {
+          ok: true,
+          symbol: "AAPL",
+          score: 3,
+          price: 190,
+          asOf: "2026-09-26",
+          state: { label: "1차 매수" },
+        },
+      ),
+      equityViewProgressEntry(
+        { symbol: "LRCX", name: "램리서치" },
+        {
+          ok: true,
+          symbol: "LRCX",
+          score: 4,
+          price: 100,
+          asOf: "2026-09-26",
+          state: { label: "STRONG LOW CANDIDATE" },
+        },
+      ),
+    ])
+    const bySymbol = Object.fromEntries(items.map((item) => [item.symbol, item]))
+    expect(Object.keys(bySymbol).sort()).toEqual(["NEE", "RXRX"])
+
+    expect(bySymbol.NEE.statusView).toBeNull()
+    expect(bySymbol.NEE.statusMetaView.recordedWeightPct).toBe(50)
+    expect(bySymbol.NEE.statusMetaView.nextStep).toBe("대기")
+    expect(bySymbol.NEE.statusMetaView.daysSinceBuy).toBeGreaterThanOrEqual(0)
+
+    expect(bySymbol.RXRX.statusView).toBeNull()
+    expect(bySymbol.RXRX.statusMetaView.recordedWeightPct).toBe(40)
+    expect(bySymbol.RXRX.statusMetaView.nextStep).toBe("대기")
+    expect(bySymbol.RXRX.statusMetaView.daysSinceBuy).toBeGreaterThanOrEqual(0)
+  })
+
+  it("keeps live-score statusView for scanned names and leaves statusMetaView empty", () => {
+    save("AAPL", 190, 950, 50)
+    save("LRCX", 95, 475, 50)
+    const items = collectDbbBuyProgress([
+      equityViewProgressEntry(
+        { symbol: "AAPL", name: "애플" },
+        {
+          ok: true,
+          symbol: "AAPL",
+          score: 3,
+          price: 200,
+          asOf: "2026-09-26",
+          state: { label: "1차 매수" },
+        },
+      ),
+      equityViewProgressEntry(
+        { symbol: "LRCX", name: "램리서치" },
+        {
+          ok: true,
+          symbol: "LRCX",
+          score: 4,
+          price: 100,
+          asOf: "2026-09-26",
+          state: { label: "STRONG LOW CANDIDATE" },
+        },
+      ),
+    ])
+    expect(items).toHaveLength(2)
+    for (const item of items) {
+      expect(item.statusView).not.toBeNull()
+      expect(item.statusMetaView).toBeNull()
+    }
+    expect(items[0].statusView.signalLabel).toBe("3/4")
+    expect(items[0].statusView.nextStep).toBe("4/4 추가 매수 후보 대기")
+    expect(items[1].statusView.signalLabel).toBe("4/4")
+    expect(items[1].statusView.nextStep).toBe("추가 50% 매수 검토")
   })
 
   it("counts only strategy weight in buy progress", () => {

@@ -34,6 +34,12 @@ export default function YdsPortfolioYdsCompareSection() {
         (t.amount ?? 0) > 0),
   )
 
+  // buildV5Analysis → computeRecommendedAssetAllocation sets available:false on Official 결측
+  const allocationUnavailable =
+    recommended?.available === false ||
+    marketContext?.ready === false ||
+    marketContext?.scoreStatus === "dataInsufficient"
+
   return (
     <section
       className="yds-portfolio__section yds-portfolio-v2__section yds-portfolio-v3__compare yds-portfolio-v5__compare"
@@ -48,46 +54,54 @@ export default function YdsPortfolioYdsCompareSection() {
         평가 + 현금 비중 비교
       </p>
 
-      <div className="yds-portfolio-v4__alloc-bars">
-        <div className="yds-portfolio-v4__alloc-row">
-          <span>🇺🇸 미국</span>
-          <span className="font-mono tabular-nums">현재 {actual.usPct}%</span>
-          <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">
-            권장 {recommended.usPct}%
-          </span>
-        </div>
-        <div className="yds-portfolio-v4__alloc-row">
-          <span>🇰🇷 한국</span>
-          <span className="font-mono tabular-nums">현재 {actual.krPct}%</span>
-          <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">
-            권장 {recommended.krPct}%
-          </span>
-        </div>
-        <div className="yds-portfolio-v4__alloc-row">
-          <span>💵 현금</span>
-          <span className="font-mono tabular-nums">현재 {actual.cashPct}%</span>
-          <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">
-            권장 {recommended.cashPct}%
-          </span>
-        </div>
-      </div>
+      {allocationUnavailable ? (
+        <p className="yds-portfolio-v2__conclusion" role="status">
+          데이터 부족 · 배분 산출 불가
+        </p>
+      ) : (
+        <>
+          <div className="yds-portfolio-v4__alloc-bars">
+            <div className="yds-portfolio-v4__alloc-row">
+              <span>🇺🇸 미국</span>
+              <span className="font-mono tabular-nums">현재 {actual.usPct}%</span>
+              <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">
+                권장 {recommended.usPct}%
+              </span>
+            </div>
+            <div className="yds-portfolio-v4__alloc-row">
+              <span>🇰🇷 한국</span>
+              <span className="font-mono tabular-nums">현재 {actual.krPct}%</span>
+              <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">
+                권장 {recommended.krPct}%
+              </span>
+            </div>
+            <div className="yds-portfolio-v4__alloc-row">
+              <span>💵 현금</span>
+              <span className="font-mono tabular-nums">현재 {actual.cashPct}%</span>
+              <span className="font-mono tabular-nums yds-portfolio-v4__alloc-rec">
+                권장 {recommended.cashPct}%
+              </span>
+            </div>
+          </div>
 
-      <div className="yds-portfolio-v3__compare-metrics">
-        <div className="yds-portfolio-v3__compare-metric">
-          <span className="yds-portfolio-v3__compare-metric-label">괴리도</span>
-          <strong className="yds-portfolio-v3__compare-metric-value font-mono tabular-nums">
-            {hasData ? `${compliance.gapPct}%` : "—"}
-          </strong>
-        </div>
-        <div className="yds-portfolio-v3__compare-metric yds-portfolio-v3__compare-metric--accent">
-          <span className="yds-portfolio-v3__compare-metric-label">준수율</span>
-          <strong className="yds-portfolio-v3__compare-metric-value font-mono tabular-nums">
-            {hasData ? `${compliance.compliancePct}%` : "—"}
-          </strong>
-        </div>
-      </div>
+          <div className="yds-portfolio-v3__compare-metrics">
+            <div className="yds-portfolio-v3__compare-metric">
+              <span className="yds-portfolio-v3__compare-metric-label">괴리도</span>
+              <strong className="yds-portfolio-v3__compare-metric-value font-mono tabular-nums">
+                {hasData ? `${compliance.gapPct}%` : "—"}
+              </strong>
+            </div>
+            <div className="yds-portfolio-v3__compare-metric yds-portfolio-v3__compare-metric--accent">
+              <span className="yds-portfolio-v3__compare-metric-label">준수율</span>
+              <strong className="yds-portfolio-v3__compare-metric-value font-mono tabular-nums">
+                {hasData ? `${compliance.compliancePct}%` : "—"}
+              </strong>
+            </div>
+          </div>
 
-      <p className="yds-portfolio-v2__conclusion">{rebalance?.conclusion ?? "—"}</p>
+          <p className="yds-portfolio-v2__conclusion">{rebalance?.conclusion ?? "—"}</p>
+        </>
+      )}
 
       <p className="yds-portfolio-v2__market-link">
         판단 · <Link to="/market-analysis">시장분석</Link>

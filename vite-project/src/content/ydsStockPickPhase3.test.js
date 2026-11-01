@@ -1,11 +1,22 @@
 import { describe, expect, it } from "vitest"
-import { computePhase3ScoreBreakdown } from "./ydsStockPickPhase3Breakdown.js"
+import {
+  computePhase3ScoreBreakdown,
+  PHASE3_SCORE_COMPONENTS,
+} from "./ydsStockPickPhase3Breakdown.js"
 import { computeTimingScore } from "./ydsStockPickTimingScore.js"
 import { computeTechnicalScore } from "./ydsStockTechnicalScore.js"
 import { buildSectorStrengthMap, getSectorTopStocks } from "./ydsStockPickSectorStrength.js"
 import { buildStockPickOpinion } from "./ydsStockPickOpinion.js"
 
 describe("computePhase3ScoreBreakdown", () => {
+  it("labels industry/sector as marketFit proxies (not real industry/finance)", () => {
+    const byId = Object.fromEntries(PHASE3_SCORE_COMPONENTS.map((c) => [c.id, c.label]))
+    expect(byId.industry).toBe("정적 적합 프록시")
+    expect(byId.sector).toBe("시장 적합도(라이브)")
+    expect(byId.industry).not.toBe("산업")
+    expect(byId.sector).not.toBe("섹터")
+  })
+
   it("sums quality + timing to total max 100", () => {
     const snapshot = {
       close: 110,
