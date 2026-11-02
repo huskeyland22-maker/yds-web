@@ -1,4 +1,5 @@
 import { supabaseRest } from "./supabaseRest.js"
+import { normalizePanicAccessTier } from "./panicAccessTier.js"
 import {
   assertPanicMetricRowsNumeric,
   finalizePanicMetricRows,
@@ -23,7 +24,7 @@ export function panicObjectFromRows(rows) {
     const out = Object.fromEntries(METRIC_KEYS.map((k) => [k, null]))
     out.riskRegime = "neutral"
     out.updatedAt = new Date().toISOString()
-    out.accessTier = "pro"
+    out.accessTier = normalizePanicAccessTier(undefined)
     return out
   }
   const byKey = Object.fromEntries(rows.map((r) => [String(r.metric_key || ""), r]))
@@ -39,7 +40,7 @@ export function panicObjectFromRows(rows) {
   const times = rows.map((r) => Date.parse(String(r.updated_at || ""))).filter((n) => Number.isFinite(n))
   const maxTs = times.length ? Math.max(...times) : Date.now()
   out.updatedAt = new Date(maxTs).toISOString()
-  out.accessTier = "pro"
+  out.accessTier = normalizePanicAccessTier(undefined)
   return out
 }
 

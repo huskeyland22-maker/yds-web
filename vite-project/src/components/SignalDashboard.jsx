@@ -25,6 +25,7 @@ import BuyTop5Card from "./BuyTop5Card.jsx"
 import CombinedSignalCard from "./CombinedSignalCard.jsx"
 import MarketSummaryCard from "./MarketSummaryCard.jsx"
 import PanicIndexCard from "./PanicIndexCard.jsx"
+import { useMembership } from "../context/MembershipContext.jsx"
 import PanicHistoryChartCard from "./PanicHistoryChartCard.jsx"
 import PanicNotifyToolbar, { readNotifyOn } from "./PanicNotifyToolbar.jsx"
 import SectorStrengthPanel from "./SectorStrengthPanel.jsx"
@@ -269,8 +270,8 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
   const renderCountRef = useRef(0)
   const fetchCountRef = useRef(0)
   renderCountRef.current += 1
+  const { isPro } = useMembership()
   const [data, setData] = useState(null)
-  const [isPro, setIsPro] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [loadError, setLoadError] = useState(null)
@@ -323,7 +324,6 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
     if (externalData && validatePanicData(externalData)) {
       if (isCancelled?.()) return
       setData(externalData)
-      setIsPro(externalData?.accessTier === "pro")
       setLoadError(null)
       setError(false)
       setUpdatedAt(externalData?.updatedAt ?? externalData?.updated_at ?? new Date().toLocaleTimeString())
@@ -345,7 +345,6 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
       } else {
         if (isCancelled?.()) return
         setData(panicDataCache.data)
-        setIsPro(panicDataCache.data?.accessTier === "pro")
         setLoadError(null)
         setError(false)
         setLoading(false)
@@ -381,7 +380,6 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
       }
       panicDataCache = { data: json, savedAt: Date.now() }
       setData(json)
-      setIsPro(json?.accessTier === "pro")
       setLoadError(null)
       setError(false)
       setUpdatedAt(json?.updatedAt ?? json?.updated_at ?? new Date().toLocaleTimeString())
@@ -400,7 +398,6 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
       }
       setLoadError(message)
       setData(null)
-      setIsPro(false)
       setError(true)
       emitDebugEvent("FETCH_FAIL", { source: "dashboard", message, stack: err instanceof Error ? err.stack : String(err) }, "error")
     } finally {
@@ -484,7 +481,6 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
   useEffect(() => {
     if (!externalData || !validatePanicData(externalData)) return
     setData(externalData)
-    setIsPro(externalData?.accessTier === "pro")
     setUpdatedAt(externalData?.updatedAt ?? externalData?.updated_at ?? new Date().toLocaleTimeString())
     setLoading(false)
     setError(false)
@@ -739,7 +735,6 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
               setLoadError(null)
               setError(false)
               setData(null)
-              setIsPro(false)
               setLoading(true)
               setRetryKey((k) => k + 1)
             }}

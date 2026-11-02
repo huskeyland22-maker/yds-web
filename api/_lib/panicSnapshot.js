@@ -1,5 +1,6 @@
 /** AI·수동 입력 — panic_metrics / panic_index_history 동일 스냅샷 */
 
+import { normalizePanicAccessTier } from "./panicAccessTier.js"
 import { toDbDouble } from "./panicNumeric.js"
 export { PANIC_METRIC_KEYS } from "./panicMetricKeys.js"
 
@@ -79,7 +80,7 @@ export function panicObjectFromSnapshot(snap) {
     skew: snap.skew,
     highYield: snap.highYield,
     updatedAt: snap.updatedAt,
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(snap.accessTier),
     riskRegime: deriveRiskRegimeFromSnap(snap),
   }
 }

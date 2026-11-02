@@ -165,7 +165,10 @@ export default function PanicIndexCard({
     >
       <h3 className="text-lg font-semibold text-white">패닉 지수</h3>
       <p className="mt-1 text-xs font-medium text-amber-200/90">
-        {isPro ? "PRO — 차트·고급 시그널·브라우저 알림 사용 중" : "무료 — 지표·기본 시그널만 (PRO는 VITE_PRO_API_KEY + 서버 PRO_API_KEY 일치)"}
+        {isPro
+          ? "PRO — 차트·고급 시그널·브라우저 알림 사용 중"
+          : "무료 — 지표·기본 시그널만 (PRO 멤버십에서 차트·브라우저 알림 개방)"}
+
       </p>
       <p className="mt-1 text-xs text-gray-500">
         단기·중기·장기 지표 → 0~100 환산 → 동적 가중 최종 점수 → 매매 행동

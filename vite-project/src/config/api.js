@@ -26,6 +26,8 @@ import {
   validatePanicSavePayload,
 } from "../utils/panicSaveValidate.js"
 import { panicEmergencyHubPayload } from "../utils/panicEmergencyFallback.js"
+import { normalizePanicAccessTier } from "../content/ydsPanicAccessTier.js"
+import { withOptionalBearerAuth } from "../utils/firebaseIdTokenClient.js"
 const PANIC_FETCH_RETRIES = 3
 const PANIC_FETCH_BACKOFF_MS = [400, 1200, 2500]
 
@@ -297,7 +299,16 @@ export async function fetchPanicIndexHistory(options = {}) {
   if (options.withCycle) extra.cycle = "1"
   const url = panicApiUrl("history", extra)
   if (isDataTraceEnabled()) logFetchStart("panic-index-history", { url })
-  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  const headers = await withOptionalBearerAuth(LIVE_JSON_GET_INIT.headers)
+  const res = await fetch(url, { ...LIVE_JSON_GET_INIT, headers })
+  if (res.status === 401 || res.status === 403) {
+    // PRO-gated series — FREE / logged-out keep empty history (score uses latest).
+    if (isDataTraceEnabled()) {
+      logFetchFail("panic-index-history", new Error(`HTTP ${res.status}`), { url, gated: true })
+    }
+    const empty = { rows: [], cycleRows: [], invalidReason: "pro_required", schemaIssues: [] }
+    return options.withCycle ? empty : []
+  }
   if (!res.ok) {
     if (isDataTraceEnabled()) logFetchFail("panic-index-history", new Error(`HTTP ${res.status}`), { url })
     console.error("[YDS] fetchHistory HTTP error", res.status, url)
@@ -379,7 +390,14 @@ export async function fetchPanicHistoryV2(options = {}) {
   if (options.to) extra.to = String(options.to).slice(0, 10)
   const url = panicApiUrl("v2", extra)
   if (isDataTraceEnabled()) logFetchStart("panic-history-v2", { url })
-  const res = await fetch(url, LIVE_JSON_GET_INIT)
+  const headers = await withOptionalBearerAuth(LIVE_JSON_GET_INIT.headers)
+  const res = await fetch(url, { ...LIVE_JSON_GET_INIT, headers })
+  if (res.status === 401 || res.status === 403) {
+    if (isDataTraceEnabled()) {
+      logFetchFail("panic-history-v2", new Error(`HTTP ${res.status}`), { url, gated: true })
+    }
+    return []
+  }
   if (!res.ok) {
     if (isDataTraceEnabled()) logFetchFail("panic-history-v2", new Error(`HTTP ${res.status}`), { url })
     console.warn("[YDS] fetchPanicHistoryV2 HTTP", res.status)
@@ -446,6 +464,7 @@ function pickMetricValue(obj) {
 
 function normalizePanicPayload(data) {
   if (!data || typeof data !== "object") return data
+  // accessTier = payload shape only (free|full). Not billing membership.
   return {
     ...data,
     vix: pickMetricValue(data.vix),
@@ -456,7 +475,7 @@ function normalizePanicPayload(data) {
     fearGreed: pickMetricValue(data.fearGreed),
     highYield: pickMetricValue(data.highYield),
     updatedAt: typeof data.updated_at === "string" ? data.updated_at : data.updatedAt,
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(data.accessTier),
   }
 }
 

@@ -1,19 +1,36 @@
 import { useMemo } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
+import { usePanicStore } from "../store/panicStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
 import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
+import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
 import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import YdsMarketAnalysisOpsMeta from "../components/market-analysis/YdsMarketAnalysisOpsMeta.jsx"
 
+/**
+ * FREE users may not receive PRO-gated history series.
+ * Keep score/FEAR SCALE working via latest desk/hub snapshot.
+ */
+function resolveLivePanicData(historyPanic, deskPanic, storePanic) {
+  if (historyPanic && hasPanicMetricValues(historyPanic)) return historyPanic
+  if (deskPanic && hasPanicMetricValues(deskPanic)) return deskPanic
+  if (storePanic && hasPanicMetricValues(storePanic)) return storePanic
+  return historyPanic ?? deskPanic ?? storePanic ?? null
+}
+
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
+  const deskPanic = useAppDataStore((s) => s.deskResolvedPanicData)
+  const hubPanic = useAppDataStore((s) => s.hubPanicMetrics)
+  const storePanic = usePanicStore((s) => s.panicData)
+
   const history = useMemo(
     () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
     [storeRows],
   )
   const latestCycleRow = history[history.length - 1] ?? null
 
-  const panicData = useMemo(() => {
+  const historyPanic = useMemo(() => {
     if (!latestCycleRow) return null
     const panic = panicDataFromCycleRow(latestCycleRow)
     const rowDate = String(latestCycleRow.date ?? "").slice(0, 10)
@@ -27,7 +44,12 @@ export default function CurrentMarketAnalysisPage() {
     return latestCycleRow
   }, [latestCycleRow])
 
-  const hasLive = Boolean(panicData)
+  const panicData = useMemo(
+    () => resolveLivePanicData(historyPanic, deskPanic ?? hubPanic, storePanic),
+    [historyPanic, deskPanic, hubPanic, storePanic],
+  )
+
+  const hasLive = Boolean(panicData && hasPanicMetricValues(panicData))
 
   return (
     <div className="yds-market-analysis min-w-0 w-full">

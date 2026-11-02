@@ -1,3 +1,4 @@
+import { normalizePanicAccessTier } from "./panicAccessTier.js"
 import { metricValueForDb } from "./panicNumeric.js"
 
 /** @typedef {{ key: string, label: string, aliases: string[] }} PanicRequiredSpec */
@@ -78,7 +79,7 @@ export function coercePanicSavePayload(body) {
 
   const out = {
     ...stripNilEntries(data),
-    accessTier: data.accessTier ?? "pro",
+    accessTier: normalizePanicAccessTier(data.accessTier),
   }
   if (tradeDate) out.tradeDate = tradeDate
 

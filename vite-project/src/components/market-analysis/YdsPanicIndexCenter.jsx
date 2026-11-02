@@ -1,4 +1,6 @@
 import { useMemo } from "react"
+import { useMembership } from "../../context/MembershipContext.jsx"
+import { buildPanicCenterVisibility } from "../../content/ydsMarketAnalysisProGate.js"
 import { resolvePanicBottomDcaSignal } from "../../utils/panicBottomDcaSignal.js"
 import {
   buildPanicScoreV2Breakdown,
@@ -6,6 +8,7 @@ import {
   PANIC_INDEX_STAGE_BANDS,
   resolvePanicIndexStatus,
 } from "../../utils/tradingScores.js"
+import YdsProFeatureGate from "./YdsProFeatureGate.jsx"
 
 /** @param {number | null | undefined} n @param {number} [digits] */
 function fmtNum(n, digits = 2) {
@@ -30,6 +33,8 @@ export default function YdsPanicIndexCenter({
   className = "",
   historySlot = null,
 }) {
+  const { isPro } = useMembership()
+  const visibility = useMemo(() => buildPanicCenterVisibility(isPro), [isPro])
   const score = useMemo(() => getPanicScoreV2(panicData), [panicData])
   const status = useMemo(() => resolvePanicIndexStatus(score), [score])
   const dcaSignal = useMemo(() => resolvePanicBottomDcaSignal(score), [score])
@@ -79,33 +84,39 @@ export default function YdsPanicIndexCenter({
               </div>
 
               {dcaSignal ? (
-                <div
-                  className={[
-                    "yds-panic-center__dca",
-                    `yds-panic-center__dca--${dcaSignal.id}`,
-                  ].join(" ")}
-                  aria-label="SPX 저점 분할매수 참고 신호"
+                <YdsProFeatureGate
+                  unlocked={visibility.proDcaGuidance}
+                  className="yds-pro-gate--compact"
+                  body="분할매수 참고 안내는 PRO 멤버십에서 확인할 수 있습니다."
                 >
-                  <p className="yds-panic-center__dca-band">{dcaSignal.bandLabel}</p>
-                  {dcaSignal.stage === 0 ? (
-                    <p className="yds-panic-center__dca-line">
-                      {dcaSignal.addLabel}:{" "}
-                      <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
-                    </p>
-                  ) : (
-                    <>
+                  <div
+                    className={[
+                      "yds-panic-center__dca",
+                      `yds-panic-center__dca--${dcaSignal.id}`,
+                    ].join(" ")}
+                    aria-label="SPX 저점 분할매수 참고 신호"
+                  >
+                    <p className="yds-panic-center__dca-band">{dcaSignal.bandLabel}</p>
+                    {dcaSignal.stage === 0 ? (
                       <p className="yds-panic-center__dca-line">
                         {dcaSignal.addLabel}:{" "}
                         <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
                       </p>
-                      <p className="yds-panic-center__dca-line">
-                        누적 투입:{" "}
-                        <span className="font-mono tabular-nums">{dcaSignal.cumulativePct}%</span>
-                      </p>
-                    </>
-                  )}
-                  <p className="yds-panic-center__dca-note">참고 신호 · 자동 주문 없음</p>
-                </div>
+                    ) : (
+                      <>
+                        <p className="yds-panic-center__dca-line">
+                          {dcaSignal.addLabel}:{" "}
+                          <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
+                        </p>
+                        <p className="yds-panic-center__dca-line">
+                          누적 투입:{" "}
+                          <span className="font-mono tabular-nums">{dcaSignal.cumulativePct}%</span>
+                        </p>
+                      </>
+                    )}
+                    <p className="yds-panic-center__dca-note">참고 신호 · 자동 주문 없음</p>
+                  </div>
+                </YdsProFeatureGate>
               ) : null}
             </div>
           ) : (
@@ -202,111 +213,117 @@ export default function YdsPanicIndexCenter({
       </section>
 
       {historySlot ? (
-        <div className="yds-panic-center__history-slot">{historySlot}</div>
+        <div className="yds-panic-center__history-slot">
+          <YdsProFeatureGate unlocked={visibility.proHistoryChart}>
+            {historySlot}
+          </YdsProFeatureGate>
+        </div>
       ) : null}
 
       <section className="yds-panic-center__block yds-panic-center__block--drivers">
         <h3 className="yds-panic-center__block-label">PANIC DRIVERS</h3>
-        <div className="yds-panic-center__drivers-wrap">
-          <table className="yds-panic-center__drivers">
-            <thead>
-              <tr>
-                <th scope="col">지표</th>
-                <th scope="col" className="is-num is-primary">
-                  Value
-                </th>
-                <th scope="col" className="is-num is-secondary">
-                  Score
-                </th>
-                <th scope="col" className="is-num is-secondary">
-                  Weight
-                </th>
-                <th scope="col" className="is-num is-secondary">
-                  Contribution
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(breakdown?.lines ?? []).map((line) => (
-                <tr key={line.id}>
-                  <th scope="row">
-                    <span className="yds-panic-center__driver-name">{line.label}</span>
-                    <span className="yds-panic-center__driver-src">{line.source}</span>
-                  </th>
-                  <td className="is-num is-primary font-mono tabular-nums">
-                    {line.value == null ? "—" : fmtNum(line.value)}
-                  </td>
-                  <td className="is-num is-secondary font-mono tabular-nums">
-                    {line.score == null ? "—" : fmtNum(line.score, 1)}
-                  </td>
-                  <td className="is-num is-secondary font-mono tabular-nums">
-                    {Math.round(line.weight * 100)}%
-                  </td>
-                  <td className="is-num is-secondary font-mono tabular-nums">
-                    {line.contrib == null ? "—" : fmtNum(line.contrib, 1)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            {breakdown?.ok ? (
-              <tfoot>
+        <YdsProFeatureGate unlocked={visibility.proDriversDetail}>
+          <div className="yds-panic-center__drivers-wrap">
+            <table className="yds-panic-center__drivers">
+              <thead>
                 <tr>
-                  <th scope="row">
-                    <span className="yds-panic-center__total-label">Weighted total</span>
-                    <span className="yds-panic-center__total-hint">최종 합산 점수</span>
+                  <th scope="col">지표</th>
+                  <th scope="col" className="is-num is-primary">
+                    Value
                   </th>
-                  <td colSpan={3} />
-                  <td className="is-num is-total font-mono tabular-nums">
-                    {breakdown.rawTotal != null ? fmtNum(breakdown.rawTotal, 2) : "—"}
-                  </td>
+                  <th scope="col" className="is-num is-secondary">
+                    Score
+                  </th>
+                  <th scope="col" className="is-num is-secondary">
+                    Weight
+                  </th>
+                  <th scope="col" className="is-num is-secondary">
+                    Contribution
+                  </th>
                 </tr>
-              </tfoot>
-            ) : null}
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {(breakdown?.lines ?? []).map((line) => (
+                  <tr key={line.id}>
+                    <th scope="row">
+                      <span className="yds-panic-center__driver-name">{line.label}</span>
+                      <span className="yds-panic-center__driver-src">{line.source}</span>
+                    </th>
+                    <td className="is-num is-primary font-mono tabular-nums">
+                      {line.value == null ? "—" : fmtNum(line.value)}
+                    </td>
+                    <td className="is-num is-secondary font-mono tabular-nums">
+                      {line.score == null ? "—" : fmtNum(line.score, 1)}
+                    </td>
+                    <td className="is-num is-secondary font-mono tabular-nums">
+                      {Math.round(line.weight * 100)}%
+                    </td>
+                    <td className="is-num is-secondary font-mono tabular-nums">
+                      {line.contrib == null ? "—" : fmtNum(line.contrib, 1)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {breakdown?.ok ? (
+                <tfoot>
+                  <tr>
+                    <th scope="row">
+                      <span className="yds-panic-center__total-label">Weighted total</span>
+                      <span className="yds-panic-center__total-hint">최종 합산 점수</span>
+                    </th>
+                    <td colSpan={3} />
+                    <td className="is-num is-total font-mono tabular-nums">
+                      {breakdown.rawTotal != null ? fmtNum(breakdown.rawTotal, 2) : "—"}
+                    </td>
+                  </tr>
+                </tfoot>
+              ) : null}
+            </table>
+          </div>
 
-        <ul className="yds-panic-center__drivers-mobile">
-          {(breakdown?.lines ?? []).map((line) => (
-            <li key={line.id}>
-              <div className="yds-panic-center__drivers-mobile-head">
-                <span>{line.label}</span>
-                <span className="yds-panic-center__driver-src">{line.source}</span>
-              </div>
-              <p className="yds-panic-center__drivers-mobile-value font-mono tabular-nums">
-                {line.value == null ? "—" : fmtNum(line.value)}
-              </p>
-              <dl>
-                <div>
-                  <dt>Score</dt>
-                  <dd className="font-mono tabular-nums">
-                    {line.score == null ? "—" : fmtNum(line.score, 1)}
-                  </dd>
+          <ul className="yds-panic-center__drivers-mobile">
+            {(breakdown?.lines ?? []).map((line) => (
+              <li key={line.id}>
+                <div className="yds-panic-center__drivers-mobile-head">
+                  <span>{line.label}</span>
+                  <span className="yds-panic-center__driver-src">{line.source}</span>
                 </div>
-                <div>
-                  <dt>Weight</dt>
-                  <dd className="font-mono tabular-nums">{Math.round(line.weight * 100)}%</dd>
+                <p className="yds-panic-center__drivers-mobile-value font-mono tabular-nums">
+                  {line.value == null ? "—" : fmtNum(line.value)}
+                </p>
+                <dl>
+                  <div>
+                    <dt>Score</dt>
+                    <dd className="font-mono tabular-nums">
+                      {line.score == null ? "—" : fmtNum(line.score, 1)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Weight</dt>
+                    <dd className="font-mono tabular-nums">{Math.round(line.weight * 100)}%</dd>
+                  </div>
+                  <div>
+                    <dt>Contrib.</dt>
+                    <dd className="font-mono tabular-nums">
+                      {line.contrib == null ? "—" : fmtNum(line.contrib, 1)}
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+            {breakdown?.ok ? (
+              <li className="yds-panic-center__drivers-mobile-total">
+                <div className="yds-panic-center__drivers-mobile-head">
+                  <span>Weighted total</span>
+                  <span className="yds-panic-center__total-hint">최종 합산 점수</span>
                 </div>
-                <div>
-                  <dt>Contrib.</dt>
-                  <dd className="font-mono tabular-nums">
-                    {line.contrib == null ? "—" : fmtNum(line.contrib, 1)}
-                  </dd>
-                </div>
-              </dl>
-            </li>
-          ))}
-          {breakdown?.ok ? (
-            <li className="yds-panic-center__drivers-mobile-total">
-              <div className="yds-panic-center__drivers-mobile-head">
-                <span>Weighted total</span>
-                <span className="yds-panic-center__total-hint">최종 합산 점수</span>
-              </div>
-              <p className="yds-panic-center__drivers-mobile-value font-mono tabular-nums">
-                {breakdown.rawTotal != null ? fmtNum(breakdown.rawTotal, 2) : "—"}
-              </p>
-            </li>
-          ) : null}
-        </ul>
+                <p className="yds-panic-center__drivers-mobile-value font-mono tabular-nums">
+                  {breakdown.rawTotal != null ? fmtNum(breakdown.rawTotal, 2) : "—"}
+                </p>
+              </li>
+            ) : null}
+          </ul>
+        </YdsProFeatureGate>
       </section>
     </article>
   )

@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { normalizePanicAccessTier } from "../content/ydsPanicAccessTier.js"
 import { fetchPanicDataJson, isPanicHubEnabled, submitManualPanicData } from "../config/api.js"
 import { AUTO_DATA_ENGINE_ENABLED, PANIC_DATA_POLL_MS } from "../config/dataEngine.js"
 import { getOfficialPanicScore } from "../utils/tradingScores.js"
@@ -77,7 +78,7 @@ function toSnapshotData(raw) {
     out[key] = src[key] ?? null
   }
   out.updatedAt = src.updatedAt ?? null
-  out.accessTier = src.accessTier ?? "pro"
+  out.accessTier = normalizePanicAccessTier(src.accessTier)
   out.manualFinalScore = src.manualFinalScore ?? null
   out.manualSentiment = src.manualSentiment ?? null
   out.manualTrend = src.manualTrend ?? null

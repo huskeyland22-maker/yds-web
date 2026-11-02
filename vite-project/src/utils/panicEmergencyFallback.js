@@ -1,3 +1,5 @@
+import { normalizePanicAccessTier } from "../content/ydsPanicAccessTier.js"
+
 /** 클라이언트 긴급 복구 스냅샷 (api/_lib/panicEmergencyFallback.js 와 동일 값) */
 export function panicEmergencyHubPayload() {
   return {
@@ -11,7 +13,7 @@ export function panicEmergencyHubPayload() {
     bofa: 5,
     skew: 140,
     highYield: 3.5,
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(undefined),
     __emergency: true,
     __fetchSource: "EMERGENCY",
     __fetchedAt: Date.now(),

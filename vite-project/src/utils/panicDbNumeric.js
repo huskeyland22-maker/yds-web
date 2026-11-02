@@ -1,5 +1,7 @@
 /** Client-side mirror of api/_lib/panicNumeric.js — coerce before POST /api/panic?mode=update */
 
+import { normalizePanicAccessTier } from "../content/ydsPanicAccessTier.js"
+
 export function metricValueForDb(value) {
   if (value == null || value === "") return null
   if (typeof value === "number") {
@@ -30,7 +32,7 @@ export function normalizePanicSubmitPayload(data) {
   if (!data || typeof data !== "object") return data
   const out = {
     ...data,
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(data.accessTier),
     updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 16).replace("T", " "),
   }
   for (const key of PANIC_SUBMIT_NUMERIC_KEYS) {

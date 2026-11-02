@@ -1,3 +1,4 @@
+import { normalizePanicAccessTier } from "../content/ydsPanicAccessTier.js"
 import {
   CYCLE_HISTORY_MAX,
   CYCLE_HISTORY_KEY,
@@ -188,7 +189,7 @@ export function panicDataFromCycleRow(row) {
       pick("soxxDistance") ?? (row.soxx_distance != null ? Number(row.soxx_distance) : null),
     dxy: pick("dxy"),
     updatedAt: ts,
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(row.accessTier),
   }
 }
 

@@ -2,6 +2,7 @@
  * panic_index_history 단일 source of truth — 데스크 차트·상단 카드.
  */
 
+import { normalizePanicAccessTier } from "../content/ydsPanicAccessTier.js"
 import { formatChartAxisMd } from "./chartDateFormat.js"
 import { panicIndexRowToCycleChart } from "./panicIndexHistory.js"
 import { rawRowToCycle } from "./panicHistoryRows.js"
@@ -86,7 +87,7 @@ export function panicDeskDataFromHistory(cycleRows) {
     highYield: pick("highYield"),
     ts: last.ts ?? `${date}T12:00:00.000Z`,
     updatedAt: last.ts ?? `${date}T12:00:00.000Z`,
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(last.accessTier),
     __fromHistory: true,
   }
 }

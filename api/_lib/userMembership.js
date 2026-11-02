@@ -23,7 +23,6 @@ export const MEMBERSHIP_PLANS = Object.freeze({ FREE: "free", PRO: "pro" })
  *   plan: MembershipPlan
  *   status: MembershipStatus
  *   source: string | null
- *   note: string | null
  *   updatedAt: string | null
  *   reason: "missing_row" | "inactive" | "plan_free" | "plan_pro"
  * }} MembershipResolution
@@ -60,7 +59,6 @@ export function resolveMembershipFromRow(row) {
       plan: MEMBERSHIP_PLANS.FREE,
       status: "none",
       source: null,
-      note: null,
       updatedAt: null,
       reason: "missing_row",
     }
@@ -68,8 +66,6 @@ export function resolveMembershipFromRow(row) {
 
   const status = asTrimmedString(row.status) || "active"
   const source = asTrimmedString(row.source) || null
-  const noteRaw = row.note
-  const note = typeof noteRaw === "string" ? noteRaw : noteRaw == null ? null : String(noteRaw)
   const updatedAt = row.updated_at == null ? null : String(row.updated_at)
   const planRaw = asTrimmedString(row.plan).toLowerCase()
 
@@ -78,7 +74,6 @@ export function resolveMembershipFromRow(row) {
       plan: MEMBERSHIP_PLANS.FREE,
       status,
       source,
-      note,
       updatedAt,
       reason: "inactive",
     }
@@ -89,7 +84,6 @@ export function resolveMembershipFromRow(row) {
       plan: MEMBERSHIP_PLANS.PRO,
       status: "active",
       source,
-      note,
       updatedAt,
       reason: "plan_pro",
     }
@@ -99,7 +93,6 @@ export function resolveMembershipFromRow(row) {
     plan: MEMBERSHIP_PLANS.FREE,
     status: "active",
     source,
-    note,
     updatedAt,
     reason: "plan_free",
   }
@@ -133,9 +126,11 @@ export async function resolveUserMembership(firebaseUid, deps = {}) {
     throw new MembershipLookupError("supabase_not_configured", "Supabase is not configured")
   }
 
+  // Staging ledger columns (no `note`): firebase_uid, plan, status, source, created_at, updated_at.
+  // `note` is not required for FREE/PRO resolution and must not be selected.
   const path =
     `user_membership?firebase_uid=eq.${encodeURIComponent(uid)}` +
-    `&select=firebase_uid,plan,status,source,note,updated_at`
+    `&select=firebase_uid,plan,status,source,updated_at`
 
   let rows
   try {

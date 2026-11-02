@@ -3,6 +3,7 @@
  * priority: latest_panic_metrics → panic_index_history 최신 → cycle history → daily report
  */
 
+import { normalizePanicAccessTier } from "../content/ydsPanicAccessTier.js"
 import { panicDataFromCycleRow } from "./cycleHistoryUtils.js"
 import { panicDeskDataFromHistory } from "./panicHistoryDesk.js"
 
@@ -42,7 +43,7 @@ export function panicDataFromHubMetrics(hub) {
     skew: toNum(hub.skew),
     highYield: toNum(hub.highYield ?? hub.hyOas),
     updatedAt: hub.updatedAt ?? hub.updated_at ?? null,
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(hub.accessTier),
     __fromHub: true,
   }
   return hasPanicMetricValues(out) ? out : null
@@ -63,7 +64,7 @@ export function panicDataFromHistoryApiRow(row) {
     skew: toNum(row.skew),
     highYield: toNum(row.hyOas ?? row.highYield),
     updatedAt: row.createdAt ?? row.updated_at ?? (date ? `${date}T12:00:00.000Z` : null),
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(row.accessTier),
     __fromHistory: true,
     market_state: row.market_state ?? row.marketState ?? null,
   }
@@ -88,7 +89,7 @@ export function reportMetricsFromDeskReport(report) {
   }
   const out = {
     updatedAt: report.updatedAt ?? (date ? `${date}T12:00:00.000Z` : null),
-    accessTier: "pro",
+    accessTier: normalizePanicAccessTier(report.accessTier),
     __fromReport: true,
     market_state: report.market_state ?? null,
     market_view: report.market_view ?? report.marketView ?? null,
@@ -110,7 +111,7 @@ export function coalesceLatestMetrics(...sources) {
   if (!valid.length) return null
 
   /** @type {Record<string, unknown>} */
-  const out = { accessTier: "pro" }
+  const out = { accessTier: normalizePanicAccessTier(valid[0]?.accessTier) }
   for (const key of METRIC_KEYS) {
     for (const src of valid) {
       const n = toNum(src[key])

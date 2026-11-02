@@ -11,6 +11,7 @@ import "./styles/yds-hub-premium.css"
 import "./styles/yds-research-premium.css"
 import App from "./App.jsx"
 import RootErrorBoundary from "./components/RootErrorBoundary.jsx"
+import { MembershipProvider } from "./context/MembershipContext.jsx"
 import { bootSupabaseEnvReport } from "./utils/supabaseEnvBoot.js"
 import { resetFirstEntryTimeline, markTimeline } from "./content/ydsFirstEntryTimeline.js"
 import {
@@ -214,7 +215,9 @@ async function bootstrapApp() {
       <StrictMode>
         <RootErrorBoundary>
           <BrowserRouter>
-            <App />
+            <MembershipProvider>
+              <App />
+            </MembershipProvider>
           </BrowserRouter>
         </RootErrorBoundary>
       </StrictMode>,
