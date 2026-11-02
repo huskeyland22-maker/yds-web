@@ -36,7 +36,7 @@ const modules = [
   "api/_lib/firebaseIdToken.js",
   "api/_lib/requireProMembership.js",
   "api/_lib/userMembership.js",
-  "api/me-membership.js",
+  "api/_lib/meMembershipHandler.js",
   "api/portfolio-sync.js",
   "api/_lib/portfolioSyncHandler.js",
   "api/_lib/tradeRecordsSyncHandler.js",

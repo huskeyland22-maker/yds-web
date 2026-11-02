@@ -1,5 +1,5 @@
 /**
- * GET /api/me-membership
+ * GET /api/me-membership (hosted by portfolio-sync via ?ydsMode=me-membership)
  * Authorization: Bearer <Firebase ID token>
  *
  * Returns the caller's membership plan from the server ledger.
@@ -7,11 +7,11 @@
  * No POST/PUT — clients cannot change plan here.
  */
 
-import { verifyFirebaseIdToken } from "./_lib/firebaseIdToken.js"
+import { verifyFirebaseIdToken } from "./firebaseIdToken.js"
 import {
   MembershipLookupError,
   resolveUserMembership,
-} from "./_lib/userMembership.js"
+} from "./userMembership.js"
 
 /**
  * @param {unknown} req
@@ -26,8 +26,15 @@ function readBearer(req) {
 /**
  * @param {import("http").IncomingMessage & { method?: string, body?: unknown, headers?: Record<string, string>, query?: Record<string, unknown> }} req
  * @param {import("http").ServerResponse & { status: (n: number) => { json: (b: unknown) => void }, setHeader: (k: string, v: string) => void }} res
+ * @param {{
+ *   verifyFirebaseIdToken?: typeof verifyFirebaseIdToken
+ *   resolveUserMembership?: typeof resolveUserMembership
+ * }} [deps]
  */
-export default async function handler(req, res) {
+export async function handleMeMembership(req, res, deps = {}) {
+  const verify = deps.verifyFirebaseIdToken ?? verifyFirebaseIdToken
+  const resolve = deps.resolveUserMembership ?? resolveUserMembership
+
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET")
     return res.status(405).json({ error: "method_not_allowed" })
@@ -40,7 +47,7 @@ export default async function handler(req, res) {
 
   let uid
   try {
-    uid = await verifyFirebaseIdToken(token)
+    uid = await verify(token)
   } catch (e) {
     return res.status(401).json({
       error: "invalid_token",
@@ -53,7 +60,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const membership = await resolveUserMembership(uid)
+    const membership = await resolve(uid)
     return res.status(200).json({
       plan: membership.plan,
       status: membership.status,

@@ -88,13 +88,14 @@ async function main() {
   loadEnvFile(envPath)
   assertStagingUrl()
 
-  const { default: handler } = await import(
-    pathToFileURL(path.join(ROOT, "api", "me-membership.js")).href
+  // Same handler hosted by portfolio-sync (?ydsMode=me-membership) in production.
+  const { handleMeMembership } = await import(
+    pathToFileURL(path.join(ROOT, "api", "_lib", "meMembershipHandler.js")).href
   )
 
   const server = http.createServer(async (req, res) => {
     try {
-      await handler(req, makeRes(res))
+      await handleMeMembership(req, makeRes(res))
     } catch {
       res.statusCode = 500
       res.end(JSON.stringify({ error: "wrapper_failed" }))

@@ -9,7 +9,7 @@
 |------|------|
 | Vite 프론트 | `vite-project/.env.local` 등 (`VITE_*`) — 빌드/개발 서버 |
 | Vercel API (`api/*.js`) | Node `process.env` — 로컬에서는 **직접 넣거나** 아래 Staging 파일을 스크립트가 읽음 |
-| Flask `server.py` | `/api/me-membership` **없음** (시세용). 회원 API는 `api/me-membership.js` |
+| Flask `server.py` | `/api/me-membership` **없음** (시세용). 회원 API는 `api/_lib/meMembershipHandler.js` (Vercel: `portfolio-sync?ydsMode=me-membership`) |
 
 `.gitignore`에 `.env*`가 있어, 루트의 `.env.staging.local`은 Git에 안 올라갑니다.
 
@@ -95,5 +95,7 @@ node scripts/smoke-me-membership-local.mjs
 | `docs/templates/staging-me-membership.env.example` | PLACEHOLDER 템플릿 |
 | `.env.staging.local` | 사용자가 만드는 실제 키 파일 (Git 제외) |
 | `scripts/smoke-me-membership-local.mjs` | 로컬 스모크 스크립트 |
-| `api/me-membership.js` | API 핸들러 |
+| `api/_lib/meMembershipHandler.js` | 회원 plan 조회 핸들러 |
+| `api/portfolio-sync.js` | Hobby 한도용 호스트 (`ydsMode=me-membership`) |
+| `vercel.json` | `/api/me-membership` → `portfolio-sync?ydsMode=me-membership` rewrite |
 | `api/_lib/userMembership.js` | FREE/PRO 조회 |

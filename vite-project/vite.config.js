@@ -102,7 +102,8 @@ function loadStagingEnvForMeMembership() {
 }
 
 function attachMeMembershipDevApi(server) {
-  const handlerPath = path.resolve(process.cwd(), "../api/me-membership.js")
+  // Hosted on portfolio-sync in production (rewrite); local Vite keeps public URL.
+  const handlerPath = path.resolve(process.cwd(), "../api/_lib/meMembershipHandler.js")
   server.middlewares.use(async (req, res, next) => {
     const raw = req.url || ""
     const pathOnly = raw.split("?")[0]
@@ -117,7 +118,7 @@ function attachMeMembershipDevApi(server) {
       }
       const authHeader = req.headers.authorization || req.headers.Authorization || ""
       const mod = await import(pathToFileURL(handlerPath).href)
-      const handler = mod.default
+      const handler = mod.handleMeMembership
       await handler(
         { method: req.method, url: raw, headers: { authorization: authHeader } },
         {
