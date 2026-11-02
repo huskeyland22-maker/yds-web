@@ -1155,7 +1155,8 @@ function App() {
       await signInWithPopup(auth, provider)
     } catch (err) {
       console.error("로그인 실패", err)
-      window.alert("로그인에 실패했습니다")
+      const code = typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "unknown"
+      window.alert(`로그인에 실패했습니다. 오류 코드: ${code}`)
     }
   }
 
