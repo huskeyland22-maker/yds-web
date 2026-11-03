@@ -211,6 +211,40 @@ describe("handleDailyBottomBuy membership access", () => {
     assert.equal(res.state.body.access, "summary")
     assert.equal(payloadHasProDetails(res.state.body), false)
   })
+
+  it("logged-in FREE member gets the same summary as anonymous (no analysis gap)", async () => {
+    const anon = mockRes()
+    const free = mockRes()
+    const depsAnon = {
+      requireProMembership: async () => ({
+        ok: false,
+        status: 401,
+        body: { error: "missing_token" },
+      }),
+      fetchYahooOhlcv: async () => fakeBars,
+    }
+    const depsFree = {
+      requireProMembership: async () => ({
+        ok: false,
+        status: 403,
+        body: { error: "pro_required", plan: "free", reason: "missing_row" },
+      }),
+      fetchYahooOhlcv: async () => fakeBars,
+    }
+    await handleDailyBottomBuy({ method: "GET", headers: {} }, anon, depsAnon)
+    await handleDailyBottomBuy(
+      { method: "GET", headers: { authorization: "Bearer tok" } },
+      free,
+      depsFree,
+    )
+    assert.equal(anon.state.body.access, "summary")
+    assert.equal(free.state.body.access, "summary")
+    assert.equal(payloadHasProDetails(anon.state.body), false)
+    assert.equal(payloadHasProDetails(free.state.body), false)
+    assert.equal(anon.state.body.all?.[0]?.count, free.state.body.all?.[0]?.count)
+    assert.equal(anon.state.body.all?.[0]?.rsi14, undefined)
+    assert.equal(free.state.body.all?.[0]?.rsi14, undefined)
+  })
 })
 
 describe("snapshot + hobby cap", () => {

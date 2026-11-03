@@ -11,6 +11,7 @@ import {
   acknowledgeEpisodeTranche,
   syncDailyBottomEpisodes,
 } from "../content/ydsDailyBottomBuyEpisodes.js"
+import { buildDbbMembershipAudienceCta } from "../content/ydsDailyBottomBuyAccessPolicy.js"
 import {
   buildDailyBottomBuyVisibility,
   DBB_PRO_LOCK_COPY,
@@ -20,6 +21,7 @@ import { listTradeRecords, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTra
 import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
 import { useMembership } from "../context/MembershipContext.jsx"
 import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
+import DbbMembershipAccessNotice from "../components/dbb/DbbMembershipAccessNotice.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
@@ -79,8 +81,12 @@ function OpportunityFacts({ card }) {
  * UI flow mirrors equity daily-bottom-buy; ETF snapshot + trade records stay ETF-specific.
  */
 export default function DailyBottomBuyPage() {
-  const { isPro, authReady, isLoading: membershipLoading } = useMembership()
+  const { isPro, isLoggedOut, status, authReady, isLoading: membershipLoading } = useMembership()
   const visibility = useMemo(() => buildDailyBottomBuyVisibility(isPro), [isPro])
+  const audienceCta = useMemo(
+    () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
+    [isPro, isLoggedOut, status],
+  )
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -206,6 +212,8 @@ export default function DailyBottomBuyPage() {
         selectedSymbol={symbol || null}
         focusStatus
       />
+
+      <DbbMembershipAccessNotice cta={audienceCta} />
 
       <details className="yds-dbb-card yds-dbb-research mb-3">
         <summary className="yds-dbb-section__title">과거 연구 기준</summary>
@@ -356,9 +364,11 @@ export default function DailyBottomBuyPage() {
                     <span className="yds-dbb-card__theme-inline"> {selected.symbol}</span>
                   </p>
                   {selected.role ? <p className="yds-dbb__meta">{selected.role}</p> : null}
-                  <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">
-                    {formatPrice(selected.close) != null ? `$${formatPrice(selected.close)}` : "—"}
-                  </p>
+                  {visibility.proPrice && formatPrice(selected.close) != null ? (
+                    <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">
+                      ${formatPrice(selected.close)}
+                    </p>
+                  ) : null}
                   <p className="yds-dbb__meta">
                     {selected.ok && selected.asOfDate ? `기준일 ${selected.asOfDate}` : "기준일 확인 불가"}
                   </p>

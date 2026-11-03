@@ -1,7 +1,10 @@
 /**
  * /daily-bottom-buy ETF — which blocks need PRO membership.
  * Visibility is driven only by useMembership().isPro (server plan).
+ * Logged-out and FREE share the same analysis visibility (FREE tier).
  */
+
+import { DBB_SHARED_PRO_LOCK_COPY } from "./ydsDailyBottomBuyAccessPolicy.js"
 
 /**
  * @param {boolean} isPro
@@ -11,7 +14,9 @@
  *   freeOpportunitySummary: true
  *   freeWatchlistPicker: true
  *   freeTradeRecords: true
+ *   freeScoreSummary: true
  *   proOpportunityMetrics: boolean
+ *   proPrice: boolean
  *   proScoreDetail: boolean
  *   proConditions: boolean
  *   proSplitActions: boolean
@@ -25,14 +30,13 @@ export function buildDailyBottomBuyVisibility(isPro) {
     freeOpportunitySummary: true,
     freeWatchlistPicker: true,
     freeTradeRecords: true,
+    freeScoreSummary: true,
     proOpportunityMetrics: unlocked,
+    proPrice: unlocked,
     proScoreDetail: unlocked,
     proConditions: unlocked,
     proSplitActions: unlocked,
   }
 }
 
-export const DBB_PRO_LOCK_COPY = Object.freeze({
-  title: "PRO 전용 상세 분석입니다",
-  body: "RSI·Stoch·BB %B·MA20 수치와 4 CONDITIONS·분할 검토 안내는 PRO 멤버십에서 확인할 수 있습니다. 오늘 후보 심볼과 충족 개수(N/4)는 계속 볼 수 있습니다.",
-})
+export const DBB_PRO_LOCK_COPY = DBB_SHARED_PRO_LOCK_COPY
