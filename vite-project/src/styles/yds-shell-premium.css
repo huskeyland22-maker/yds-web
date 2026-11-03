@@ -29,8 +29,8 @@
   position: relative;
   z-index: 40;
   isolation: isolate;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app-shell-host .yds-mobile-bottom-nav {
@@ -131,8 +131,8 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header .font-display,

@@ -5,7 +5,10 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
   const name = user?.displayName || user?.email || "로그인 유저"
 
   return (
-    <header className="yds-mobile-app-header flex min-h-[44px] shrink-0 items-center justify-between gap-2 border-b border-white/[0.06] px-2.5 py-1.5 pt-[max(0.35rem,env(safe-area-inset-top))] lg:hidden">
+    <header
+      className="yds-mobile-app-header flex min-h-[48px] shrink-0 items-center justify-between gap-2 border-b border-white/[0.06] px-2.5 py-1.5 pt-[max(0.35rem,env(safe-area-inset-top))] lg:hidden"
+      data-yds-mobile-header="mhb-20261104"
+    >
       <button
         type="button"
         onClick={onMenuOpen}
@@ -14,7 +17,7 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
       >
         <Menu size={18} />
       </button>
-      <div className="min-w-0 flex-1 text-center">
+      <div className="min-w-0 flex-1 px-1 text-center">
         <p className="m-0 font-display text-[15px] font-bold leading-none tracking-[0.03em] text-slate-50">
           Y&apos;ds
         </p>
@@ -22,14 +25,14 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
           Market Cycle Lab
         </p>
       </div>
-      <div className="yds-mobile-app-header__account flex min-w-0 max-w-[42%] shrink-0 flex-col items-end justify-center gap-0.5">
+      <div className="yds-mobile-app-header__account flex min-h-[2.25rem] min-w-[6.5rem] max-w-[46%] shrink-0 flex-col items-end justify-center gap-0.5 overflow-visible">
         {user ? (
           <>
-            <div className="flex max-w-full items-center gap-1">
-              <span className="min-w-0 truncate text-[10px] font-semibold leading-none text-slate-100">
+            <div className="yds-mobile-app-header__identity flex max-w-full items-center justify-end gap-1 overflow-visible">
+              <span className="min-w-0 truncate text-[11px] font-semibold leading-tight text-slate-100">
                 {name}
               </span>
-              <MembershipPlanBadge className="shrink-0" />
+              <MembershipPlanBadge className="yds-membership-plan-badge--mobile shrink-0" />
             </div>
             <button
               type="button"
@@ -40,7 +43,7 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
             </button>
           </>
         ) : (
-          <button type="button" onClick={onLogin} className="text-[10px] font-medium text-slate-400">
+          <button type="button" onClick={onLogin} className="text-[11px] font-medium text-slate-300">
             로그인
           </button>
         )}

@@ -22,8 +22,15 @@ describe("membership plan badge UI", () => {
     const mobile = readFileSync(join(root, "vite-project/src/components/layout/MobileAppHeader.jsx"), "utf8")
     assert.match(mobile, /MembershipPlanBadge/)
     assert.match(mobile, /displayName|\.email/)
+    assert.match(mobile, /data-yds-mobile-header="mhb-20261104"/)
     assert.doesNotMatch(mobile, /AppReleaseEnvBadge/)
     assert.doesNotMatch(mobile, /backdrop-blur/)
+  })
+
+  it("MembershipPlanBadge uses header state including pending/error paths", () => {
+    const badge = readFileSync(join(root, "vite-project/src/components/MembershipPlanBadge.jsx"), "utf8")
+    assert.match(badge, /membershipHeaderBadgeState/)
+    assert.match(badge, /pending/)
   })
 
   it("premium shell keeps mobile header opaque without backdrop blur", () => {

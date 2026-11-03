@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   isProUnlocked,
   MEMBERSHIP_STATUS,
+  membershipHeaderBadgeState,
   membershipPlanBadgeLabel,
   membershipStatusFromApiBody,
 } from "./ydsMembership.js"
@@ -33,5 +34,22 @@ describe("ydsMembership", () => {
     expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.LOGGED_OUT)).toBe(null)
     expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.ERROR)).toBe(null)
     expect(membershipPlanBadgeLabel(null)).toBe(null)
+  })
+
+  it("header presentation keeps layout during loading and fail-closed FREE on error", () => {
+    expect(membershipHeaderBadgeState(MEMBERSHIP_STATUS.PRO)).toEqual({ kind: "pro", label: "PRO" })
+    expect(membershipHeaderBadgeState(MEMBERSHIP_STATUS.FREE)).toEqual({ kind: "free", label: "FREE" })
+    expect(membershipHeaderBadgeState(MEMBERSHIP_STATUS.LOADING)).toEqual({
+      kind: "pending",
+      label: "···",
+    })
+    expect(membershipHeaderBadgeState(MEMBERSHIP_STATUS.ERROR)).toEqual({
+      kind: "free",
+      label: "FREE",
+    })
+    expect(membershipHeaderBadgeState(MEMBERSHIP_STATUS.LOGGED_OUT)).toEqual({
+      kind: "hidden",
+      label: null,
+    })
   })
 })
