@@ -2,12 +2,14 @@ import { Menu } from "lucide-react"
 import MembershipPlanBadge from "../MembershipPlanBadge.jsx"
 
 export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout }) {
+  const name = user?.displayName || user?.email || "로그인 유저"
+
   return (
-    <header className="yds-mobile-app-header flex min-h-[44px] shrink-0 items-center justify-between gap-2 border-b border-white/[0.06] px-2.5 py-1.5 pt-[max(0.35rem,env(safe-area-inset-top))] backdrop-blur-sm lg:hidden">
+    <header className="yds-mobile-app-header flex min-h-[44px] shrink-0 items-center justify-between gap-2 border-b border-white/[0.06] px-2.5 py-1.5 pt-[max(0.35rem,env(safe-area-inset-top))] lg:hidden">
       <button
         type="button"
         onClick={onMenuOpen}
-        className="touch-target flex items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.03] text-slate-300"
+        className="touch-target flex shrink-0 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.03] text-slate-300"
         aria-label="메뉴"
       >
         <Menu size={18} />
@@ -20,14 +22,19 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
           Market Cycle Lab
         </p>
       </div>
-      <div className="flex items-center gap-1 justify-end">
+      <div className="yds-mobile-app-header__account flex min-w-0 max-w-[42%] shrink-0 flex-col items-end justify-center gap-0.5">
         {user ? (
           <>
-            <MembershipPlanBadge />
+            <div className="flex max-w-full items-center gap-1">
+              <span className="min-w-0 truncate text-[10px] font-semibold leading-none text-slate-100">
+                {name}
+              </span>
+              <MembershipPlanBadge className="shrink-0" />
+            </div>
             <button
               type="button"
               onClick={onLogout}
-              className="max-w-[4.5rem] truncate text-[10px] font-medium text-slate-400"
+              className="text-[10px] font-medium leading-none text-slate-400"
             >
               로그아웃
             </button>

@@ -19,9 +19,18 @@
 
 .app-shell-host .yds-mobile-app-header,
 .app-shell-host .yds-desktop-topbar {
-  background-color: color-mix(in srgb, var(--yds-legacy-terminal-bg) 95%, transparent);
+  background-color: var(--yds-legacy-terminal-bg);
   border-bottom-color: var(--yds-legacy-terminal-line);
   color: rgba(248, 250, 252, 0.92);
+}
+
+/* Mobile header must stay opaque on iOS — blur + translucent bg makes chrome look stacked. */
+.app-shell-host .yds-mobile-app-header {
+  position: relative;
+  z-index: 40;
+  isolation: isolate;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .app-shell-host .yds-mobile-bottom-nav {
@@ -116,10 +125,14 @@
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header,
 .app-shell-host.yds-theme-premium .yds-desktop-topbar {
-  background-color: color-mix(in srgb, var(--yds-bg-elevated) 92%, transparent);
+  background-color: var(--yds-bg-elevated);
   border-bottom: 1px solid var(--yds-border);
   color: var(--yds-text);
-  backdrop-filter: blur(8px);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-app-header {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header .font-display,

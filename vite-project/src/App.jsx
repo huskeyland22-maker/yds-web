@@ -1389,7 +1389,7 @@ function App() {
           onLogin={login}
           onLogout={logout}
         />
-        <header className="yds-desktop-topbar hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] px-3 py-2 backdrop-blur-sm sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
+        <header className="yds-desktop-topbar hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] px-3 py-2 sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
           <div className="flex flex-wrap items-center justify-end gap-1.5">
             <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 rounded-card border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 transition hover:border-white/[0.12]">

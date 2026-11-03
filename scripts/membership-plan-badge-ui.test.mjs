@@ -18,10 +18,19 @@ describe("membership plan badge UI", () => {
     assert.doesNotMatch(app, /AppReleaseEnvBadge/)
   })
 
-  it("mobile header uses MembershipPlanBadge and drops release-env badge", () => {
+  it("mobile header uses MembershipPlanBadge beside name and drops release-env badge", () => {
     const mobile = readFileSync(join(root, "vite-project/src/components/layout/MobileAppHeader.jsx"), "utf8")
     assert.match(mobile, /MembershipPlanBadge/)
+    assert.match(mobile, /displayName|\.email/)
     assert.doesNotMatch(mobile, /AppReleaseEnvBadge/)
+    assert.doesNotMatch(mobile, /backdrop-blur/)
+  })
+
+  it("premium shell keeps mobile header opaque without backdrop blur", () => {
+    const shell = readFileSync(join(root, "vite-project/src/styles/yds-shell-premium.css"), "utf8")
+    assert.match(shell, /\.app-shell-host \.yds-mobile-app-header \{[\s\S]*?backdrop-filter:\s*none/)
+    assert.match(shell, /\.yds-theme-premium \.yds-mobile-app-header \{[\s\S]*?backdrop-filter:\s*none/)
+    assert.equal(shell.includes("backdrop-filter: blur(8px)"), false)
   })
 
   it("admin dashboard still keeps AppReleaseEnvBadge for ops", () => {

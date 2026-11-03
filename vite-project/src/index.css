@@ -14703,18 +14703,37 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   letter-spacing: 0.08em;
   line-height: 1;
   vertical-align: middle;
+  /* Distinct from .app-release-env-badge--prod green */
+  flex-shrink: 0;
 }
 
 .yds-membership-plan-badge--pro {
-  color: #fcd34d;
-  border: 1px solid rgba(250, 204, 21, 0.4);
-  background: rgba(250, 204, 21, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  background: rgba(251, 191, 36, 0.16);
 }
 
 .yds-membership-plan-badge--free {
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(148, 163, 184, 0.08);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.app-shell-host.yds-theme-premium .yds-membership-plan-badge--pro {
+  color: #92400e;
+  border-color: rgba(180, 83, 9, 0.45);
+  background: rgba(251, 191, 36, 0.22);
+}
+
+.app-shell-host.yds-theme-premium .yds-membership-plan-badge--free {
+  color: #334155;
+  border-color: rgba(100, 116, 139, 0.45);
+  background: rgba(148, 163, 184, 0.2);
+}
+
+/* Defense: never show release-channel PROD chip inside mobile account chrome */
+.yds-mobile-app-header .app-release-env-badge {
+  display: none !important;
 }
 
 .yds-market-analysis__title {
