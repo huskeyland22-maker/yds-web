@@ -41,6 +41,7 @@ const modules = [
   "api/_lib/portfolioSyncHandler.js",
   "api/_lib/tradeRecordsSyncHandler.js",
   "api/_lib/dailyBottomBuyEngine.js",
+  "api/_lib/dailyBottomBuyRedact.js",
   "api/_lib/dailyBottomBuyHandler.js",
   "api/_lib/dbbProspectiveOhlcvHandler.js",
   "api/market-data.js",

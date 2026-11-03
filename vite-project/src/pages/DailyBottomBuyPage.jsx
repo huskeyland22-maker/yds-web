@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { fetchDailyBottomBuySnapshot } from "../utils/dailyBottomBuyApi.js"
+import {
+  applyDailyBottomBuyAccess,
+  fetchDailyBottomBuySnapshot,
+} from "../utils/dailyBottomBuyApi.js"
 import {
   formatDailyBottomDataBasis,
   pickDailyBottomAsOfDate,
@@ -8,9 +11,15 @@ import {
   acknowledgeEpisodeTranche,
   syncDailyBottomEpisodes,
 } from "../content/ydsDailyBottomBuyEpisodes.js"
+import {
+  buildDailyBottomBuyVisibility,
+  DBB_PRO_LOCK_COPY,
+} from "../content/ydsDailyBottomBuyProGate.js"
 import { collectDbbBuyProgress, etfCardProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { listTradeRecords, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
+import { useMembership } from "../context/MembershipContext.jsx"
+import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
@@ -70,6 +79,8 @@ function OpportunityFacts({ card }) {
  * UI flow mirrors equity daily-bottom-buy; ETF snapshot + trade records stay ETF-specific.
  */
 export default function DailyBottomBuyPage() {
+  const { isPro, authReady, isLoading: membershipLoading } = useMembership()
+  const visibility = useMemo(() => buildDailyBottomBuyVisibility(isPro), [isPro])
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -89,13 +100,15 @@ export default function DailyBottomBuyPage() {
   }, [])
 
   useEffect(() => {
+    if (!authReady || membershipLoading) return undefined
     const ctrl = new AbortController()
     setLoading(true)
     setError(null)
     fetchDailyBottomBuySnapshot({ signal: ctrl.signal })
       .then((data) => {
-        setPayload(data)
-        setEpisodes(syncDailyBottomEpisodes(data.all || []))
+        const gated = applyDailyBottomBuyAccess(data, isPro)
+        setPayload(gated)
+        setEpisodes(syncDailyBottomEpisodes(gated.all || []))
       })
       .catch((err) => {
         if (err?.name === "AbortError") return
@@ -103,7 +116,7 @@ export default function DailyBottomBuyPage() {
       })
       .finally(() => setLoading(false))
     return () => ctrl.abort()
-  }, [])
+  }, [authReady, membershipLoading, isPro])
 
   useEffect(() => {
     if (!picker.open) return undefined
@@ -262,16 +275,20 @@ export default function DailyBottomBuyPage() {
                         </p>
                         <p className="yds-dbb-cand__type">{isStrong ? "강한 저점" : "1차 매수"}</p>
                         <p className="yds-dbb-cand__detail">{card.stage?.label || `${card.count}/4`}</p>
-                        <OpportunityFacts card={card} />
-                        {card.stage?.splitHint ? <p className="yds-dbb-cand__status">{card.stage.splitHint}</p> : null}
+                        {visibility.proOpportunityMetrics ? <OpportunityFacts card={card} /> : null}
+                        {visibility.proSplitActions && card.stage?.splitHint ? (
+                          <p className="yds-dbb-cand__status">{card.stage.splitHint}</p>
+                        ) : null}
                       </button>
-                      <button
-                        type="button"
-                        className="yds-dbb-ack"
-                        onClick={() => onAck(card.symbol, isStrong ? "add" : "primary")}
-                      >
-                        {isStrong ? "추가 50% 검토 표시" : "1차 50% 검토 표시"}
-                      </button>
+                      {visibility.proSplitActions ? (
+                        <button
+                          type="button"
+                          className="yds-dbb-ack"
+                          onClick={() => onAck(card.symbol, isStrong ? "add" : "primary")}
+                        >
+                          {isStrong ? "추가 50% 검토 표시" : "1차 50% 검토 표시"}
+                        </button>
+                      ) : null}
                     </li>
                   )
                 })}
@@ -366,55 +383,74 @@ export default function DailyBottomBuyPage() {
                     {selected.ok ? selected.stage?.label || "대기" : "데이터 없음"}
                   </p>
                   <p className="yds-dbb-card__count">{selected.ok ? `${selected.count} / 4` : "— / 4"}</p>
-                  {selected.ok && selected.stage?.splitHint ? (
-                    <p className="yds-dbb-card__hint">{selected.stage.splitHint}</p>
-                  ) : null}
-                  {selected.ok && selected.count === 2 ? (
-                    <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
-                  ) : null}
+                  <YdsProFeatureGate
+                    unlocked={visibility.proScoreDetail}
+                    title={DBB_PRO_LOCK_COPY.title}
+                    body={DBB_PRO_LOCK_COPY.body}
+                    className="yds-pro-gate--compact"
+                  >
+                    {selected.ok && selected.stage?.splitHint ? (
+                      <p className="yds-dbb-card__hint">{selected.stage.splitHint}</p>
+                    ) : null}
+                    {selected.ok && selected.count === 2 ? (
+                      <p className="yds-dbb-card__watch-hint">아직 매수 단계 아님</p>
+                    ) : null}
+                  </YdsProFeatureGate>
                 </section>
 
                 {selected.ok ? (
-                  <section className="yds-dbb-card">
-                    <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
-                    <ul className="mt-2 space-y-2">
-                      {[
-                        { id: "rsi", label: "RSI", value: fmtNum(selected.rsi14), pass: selected.flags?.rsi, th: "≤36" },
-                        {
-                          id: "stoch",
-                          label: "Stoch",
-                          value: fmtNum(selected.stochK),
-                          pass: selected.flags?.stoch,
-                          th: "≤15.4",
-                        },
-                        {
-                          id: "bb",
-                          label: "BB %B",
-                          value: fmtNum(selected.bbPctB, 2),
-                          pass: selected.flags?.bb,
-                          th: "≤0.01",
-                        },
-                        {
-                          id: "ma20",
-                          label: "MA20",
-                          value: `${fmtNum(selected.ma20DevPct)}%`,
-                          pass: selected.flags?.ma20,
-                          th: "≤-4.2%",
-                        },
-                      ].map((row) => (
-                        <li key={row.id} className="flex items-baseline justify-between gap-2 text-sm">
-                          <span className="yds-dbb-metric__label w-24 shrink-0">{row.label}</span>
-                          <span
-                            className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
-                          >
-                            {row.value}
-                          </span>
-                          <span className="yds-dbb-metric__label">{row.th}</span>
-                          <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
+                  <YdsProFeatureGate
+                    unlocked={visibility.proConditions}
+                    title={DBB_PRO_LOCK_COPY.title}
+                    body={DBB_PRO_LOCK_COPY.body}
+                  >
+                    <section className="yds-dbb-card">
+                      <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
+                      <ul className="mt-2 space-y-2">
+                        {[
+                          {
+                            id: "rsi",
+                            label: "RSI",
+                            value: fmtNum(selected.rsi14),
+                            pass: selected.flags?.rsi,
+                            th: "≤36",
+                          },
+                          {
+                            id: "stoch",
+                            label: "Stoch",
+                            value: fmtNum(selected.stochK),
+                            pass: selected.flags?.stoch,
+                            th: "≤15.4",
+                          },
+                          {
+                            id: "bb",
+                            label: "BB %B",
+                            value: fmtNum(selected.bbPctB, 2),
+                            pass: selected.flags?.bb,
+                            th: "≤0.01",
+                          },
+                          {
+                            id: "ma20",
+                            label: "MA20",
+                            value: `${fmtNum(selected.ma20DevPct)}%`,
+                            pass: selected.flags?.ma20,
+                            th: "≤-4.2%",
+                          },
+                        ].map((row) => (
+                          <li key={row.id} className="flex items-baseline justify-between gap-2 text-sm">
+                            <span className="yds-dbb-metric__label w-24 shrink-0">{row.label}</span>
+                            <span
+                              className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                            >
+                              {row.value}
+                            </span>
+                            <span className="yds-dbb-metric__label">{row.th}</span>
+                            <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  </YdsProFeatureGate>
                 ) : null}
 
                 {selectedStatus?.hasRecords ? (
@@ -429,7 +465,7 @@ export default function DailyBottomBuyPage() {
                   </section>
                 ) : null}
 
-                {selected.ok && selected.count >= 3 ? (
+                {visibility.proSplitActions && selected.ok && selected.count >= 3 ? (
                   <button
                     type="button"
                     className="yds-dbb-ack"

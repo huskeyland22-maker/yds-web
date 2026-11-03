@@ -10,6 +10,8 @@ import {
   buildEtfCard,
   sortCardsByOpportunity,
 } from "./dailyBottomBuyEngine.js"
+import { redactDailyBottomBuyPayload } from "./dailyBottomBuyRedact.js"
+import { requireProMembership } from "./requireProMembership.js"
 
 const YAHOO_HEADERS = {
   "User-Agent":
@@ -181,10 +183,14 @@ async function fetchYahooOhlcv(symbol) {
 }
 
 /**
- * @param {import('http').IncomingMessage & { method?: string, query?: Record<string, string | string[]> }} req
+ * @param {import('http').IncomingMessage & { method?: string, query?: Record<string, string | string[]>, headers?: Record<string, string> }} req
  * @param {import('http').ServerResponse & { setHeader: Function, status: Function, json: Function, end: Function }} res
+ * @param {{
+ *   requireProMembership?: typeof requireProMembership
+ *   fetchYahooOhlcv?: typeof fetchYahooOhlcv
+ * }} [deps]
  */
-export async function handleDailyBottomBuy(req, res) {
+export async function handleDailyBottomBuy(req, res, deps = {}) {
   res.setHeader("Cache-Control", "no-store, max-age=0")
   res.setHeader("Access-Control-Allow-Origin", "*")
   if (req.method === "OPTIONS") {
@@ -196,11 +202,15 @@ export async function handleDailyBottomBuy(req, res) {
     return
   }
 
+  const requirePro = deps.requireProMembership ?? requireProMembership
+  const fetchBars = deps.fetchYahooOhlcv ?? fetchYahooOhlcv
+
   try {
+    // Always evaluate full cards first; membership only affects response redaction.
     const settled = await Promise.all(
       DAILY_BOTTOM_BUY_WATCHLIST.map(async (meta) => {
         try {
-          const bars = await fetchYahooOhlcv(meta.symbol)
+          const bars = await fetchBars(meta.symbol)
           const evaluation = evaluateBars(bars, DAILY_BOTTOM_THRESHOLDS)
           return buildEtfCard(meta, evaluation)
         } catch (err) {
@@ -217,7 +227,7 @@ export async function handleDailyBottomBuy(req, res) {
     const watch = cards.filter((c) => c.ok && c.count === 2)
     const waiting = cards.filter((c) => !c.ok || c.count <= 1)
 
-    res.status(200).json({
+    const fullPayload = {
       ok: true,
       system: "daily_bottom_buy_v1",
       separateFromPanic: true,
@@ -240,7 +250,16 @@ export async function handleDailyBottomBuy(req, res) {
       watch,
       waiting,
       all: settled,
-    })
+    }
+
+    const gate = await requirePro(req)
+    if (gate.ok) {
+      res.status(200).json({ ...fullPayload, access: "full" })
+      return
+    }
+
+    // FREE / logged-out / membership errors → summary only (never leak details).
+    res.status(200).json(redactDailyBottomBuyPayload(fullPayload))
   } catch (err) {
     res.status(500).json({
       ok: false,
