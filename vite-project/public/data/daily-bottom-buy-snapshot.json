@@ -36,25 +36,12 @@
       "themeShort": "로봇",
       "role": "Physical AI",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 34.959999084472656,
-      "rsi14": 44.6,
-      "stochK": 24.6,
-      "bbPctB": 0.25,
-      "ma20DevPct": -1.2,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -63,25 +50,12 @@
       "themeShort": "사이버",
       "role": "AI 시대 보안 인프라",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 107.47000122070312,
-      "rsi14": 61.3,
-      "stochK": 82,
-      "bbPctB": 0.798,
-      "ma20DevPct": 3.2,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -90,25 +64,12 @@
       "themeShort": "전력망",
       "role": "AI 데이터센터 전력 인프라",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 179.25,
-      "rsi14": 49.2,
-      "stochK": 39.7,
-      "bbPctB": 0.481,
-      "ma20DevPct": -0.1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -117,25 +78,12 @@
       "themeShort": "소프트웨어",
       "role": "AI 수익화",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 110.9800033569336,
-      "rsi14": 60.2,
-      "stochK": 83.1,
-      "bbPctB": 0.819,
-      "ma20DevPct": 2.8,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -144,25 +92,12 @@
       "themeShort": "반도체·AI",
       "role": "AI의 두뇌",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 588.1199951171875,
-      "rsi14": 46.5,
-      "stochK": 17.8,
-      "bbPctB": 0.345,
-      "ma20DevPct": -2.3,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -171,25 +106,12 @@
       "themeShort": "S&P 500",
       "role": "미국 대형주",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 715.2000122070312,
-      "rsi14": 58.8,
-      "stochK": 84.9,
-      "bbPctB": 0.779,
-      "ma20DevPct": 1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     }
   ],
@@ -200,25 +122,12 @@
       "themeShort": "반도체·AI",
       "role": "AI의 두뇌",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 588.1199951171875,
-      "rsi14": 46.5,
-      "stochK": 17.8,
-      "bbPctB": 0.345,
-      "ma20DevPct": -2.3,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -227,25 +136,12 @@
       "themeShort": "전력망",
       "role": "AI 데이터센터 전력 인프라",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 179.25,
-      "rsi14": 49.2,
-      "stochK": 39.7,
-      "bbPctB": 0.481,
-      "ma20DevPct": -0.1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -254,25 +150,12 @@
       "themeShort": "소프트웨어",
       "role": "AI 수익화",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 110.9800033569336,
-      "rsi14": 60.2,
-      "stochK": 83.1,
-      "bbPctB": 0.819,
-      "ma20DevPct": 2.8,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -281,25 +164,12 @@
       "themeShort": "로봇",
       "role": "Physical AI",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 34.959999084472656,
-      "rsi14": 44.6,
-      "stochK": 24.6,
-      "bbPctB": 0.25,
-      "ma20DevPct": -1.2,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -308,25 +178,12 @@
       "themeShort": "사이버",
       "role": "AI 시대 보안 인프라",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 107.47000122070312,
-      "rsi14": 61.3,
-      "stochK": 82,
-      "bbPctB": 0.798,
-      "ma20DevPct": 3.2,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     },
     {
@@ -335,26 +192,14 @@
       "themeShort": "S&P 500",
       "role": "미국 대형주",
       "ok": true,
-      "asOfDate": "2026-10-13",
-      "close": 715.2000122070312,
-      "rsi14": 58.8,
-      "stochK": 84.9,
-      "bbPctB": 0.779,
-      "ma20DevPct": 1,
-      "flags": {
-        "rsi": false,
-        "stoch": false,
-        "bb": false,
-        "ma20": false
-      },
       "count": 0,
       "stage": {
         "id": "wait",
         "count": 0,
         "label": "대기",
-        "priority": 3,
-        "splitHint": "대기"
+        "priority": 3
       }
     }
-  ]
+  ],
+  "access": "summary"
 }

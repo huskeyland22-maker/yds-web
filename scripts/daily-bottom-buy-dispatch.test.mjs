@@ -108,11 +108,12 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.ok(existsSync(join(root, "vite-project/public/data/daily-bottom-buy-snapshot.json")))
   })
 
-  it("snapshot JSON is usable as fallback payload", () => {
+  it("snapshot JSON is usable as FREE-safe fallback payload", () => {
     const snap = JSON.parse(
       readFileSync(join(root, "vite-project/public/data/daily-bottom-buy-snapshot.json"), "utf8"),
     )
     assert.equal(snap.ok, true)
+    assert.equal(snap.access, "summary")
     assert.ok(Array.isArray(snap.all))
     assert.equal(snap.all.length, 6)
     assert.deepEqual(
@@ -122,6 +123,8 @@ describe("daily-bottom-buy hobby dispatch", () => {
     for (const card of snap.all) {
       assert.equal(card.ok, true, card.symbol)
       assert.equal(Number.isFinite(card.count), true, card.symbol)
+      assert.equal(card.rsi14, undefined, card.symbol)
+      assert.equal(card.flags, undefined, card.symbol)
     }
     for (const gone of ["XLK", "XLF", "XLY", "FAS", "LABU"]) {
       assert.ok(!snap.all.some((c) => c.symbol === gone))

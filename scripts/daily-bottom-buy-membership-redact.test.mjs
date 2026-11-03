@@ -214,14 +214,27 @@ describe("handleDailyBottomBuy membership access", () => {
 })
 
 describe("snapshot + hobby cap", () => {
-  it("static snapshot must be client-redacted (file may contain details)", () => {
+  it("public static snapshot must be summary-only (no PRO detail leak via CDN)", () => {
     const snapPath = join(root, "vite-project/public/data/daily-bottom-buy-snapshot.json")
     assert.ok(existsSync(snapPath))
     const snap = JSON.parse(readFileSync(snapPath, "utf8"))
-    if (payloadHasProDetails(snap)) {
-      const redacted = redactDailyBottomBuyPayload(snap)
-      assert.equal(payloadHasProDetails(redacted), false)
+    assert.equal(snap.access, "summary")
+    assert.equal(payloadHasProDetails(snap), false)
+    for (const card of snap.all || []) {
+      assert.equal(card.rsi14, undefined, card.symbol)
+      assert.equal(card.stochK, undefined, card.symbol)
+      assert.equal(card.bbPctB, undefined, card.symbol)
+      assert.equal(card.ma20DevPct, undefined, card.symbol)
+      assert.equal(card.flags, undefined, card.symbol)
+      assert.equal(card.close, undefined, card.symbol)
+      assert.equal(card.stage?.splitHint, undefined, card.symbol)
     }
+  })
+
+  it("snapshot generator writes redactDailyBottomBuyPayload output", () => {
+    const gen = readFileSync(join(root, "scripts/generate-daily-bottom-buy-snapshot.mjs"), "utf8")
+    assert.match(gen, /redactDailyBottomBuyPayload/)
+    assert.match(gen, /summary-only/)
   })
 
   it("serverless entry count stays 12 (no new api/*.js entry)", () => {

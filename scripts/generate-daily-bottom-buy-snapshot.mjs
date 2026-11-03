@@ -3,6 +3,9 @@
  * Build static fallback snapshot for Daily Bottom Buy UI.
  * Uses scripts/.cache/dbb-*-daily-ohlcv.json when present.
  *
+ * Public file is SUMMARY-ONLY (FREE-safe). PRO indicator details come from
+ * the membership-gated API only — never from this static JSON.
+ *
  *   node scripts/generate-daily-bottom-buy-snapshot.mjs
  */
 import fs from "node:fs"
@@ -16,6 +19,7 @@ import {
   buildEtfCard,
   sortCardsByOpportunity,
 } from "../api/_lib/dailyBottomBuyEngine.js"
+import { redactDailyBottomBuyPayload } from "../api/_lib/dailyBottomBuyRedact.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, "..")
@@ -60,6 +64,14 @@ const payload = {
   all: cards,
 }
 
+// Evaluate full cards, then persist FREE-safe summary only (no PRO detail leak via CDN).
+const publicPayload = redactDailyBottomBuyPayload({
+  ...payload,
+  source: "snapshot",
+})
+
 fs.mkdirSync(path.dirname(OUT), { recursive: true })
-fs.writeFileSync(OUT, JSON.stringify(payload, null, 2), "utf8")
-console.log(`Wrote ${OUT} (opp=${payload.counts.opportunity})`)
+fs.writeFileSync(OUT, JSON.stringify(publicPayload, null, 2), "utf8")
+console.log(
+  `Wrote ${OUT} summary-only (opp=${payload.counts.opportunity}, access=${publicPayload.access})`,
+)
