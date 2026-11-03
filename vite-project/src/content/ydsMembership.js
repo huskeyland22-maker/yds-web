@@ -24,6 +24,18 @@ export function isProUnlocked(status) {
 }
 
 /**
+ * Header plan badge label from server membership status.
+ * Shows nothing while loading / logged out / error (never invent a plan).
+ * @param {MembershipStatus | string | null | undefined} status
+ * @returns {"PRO" | "FREE" | null}
+ */
+export function membershipPlanBadgeLabel(status) {
+  if (status === MEMBERSHIP_STATUS.PRO) return "PRO"
+  if (status === MEMBERSHIP_STATUS.FREE) return "FREE"
+  return null
+}
+
+/**
  * Map API JSON to UI status. Never trust client-supplied plan.
  * @param {{ plan?: unknown } | null | undefined} body
  * @returns {"free" | "pro"}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   isProUnlocked,
   MEMBERSHIP_STATUS,
+  membershipPlanBadgeLabel,
   membershipStatusFromApiBody,
 } from "./ydsMembership.js"
 
@@ -23,5 +24,14 @@ describe("ydsMembership", () => {
     expect(membershipStatusFromApiBody({ plan: "PRO" })).toBe(MEMBERSHIP_STATUS.PRO)
     expect(membershipStatusFromApiBody({})).toBe(MEMBERSHIP_STATUS.FREE)
     expect(membershipStatusFromApiBody(null)).toBe(MEMBERSHIP_STATUS.FREE)
+  })
+
+  it("header badge shows PRO/FREE only after resolved membership", () => {
+    expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.PRO)).toBe("PRO")
+    expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.FREE)).toBe("FREE")
+    expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.LOADING)).toBe(null)
+    expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.LOGGED_OUT)).toBe(null)
+    expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.ERROR)).toBe(null)
+    expect(membershipPlanBadgeLabel(null)).toBe(null)
   })
 })

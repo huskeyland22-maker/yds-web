@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react"
-import AppReleaseEnvBadge from "../AppReleaseEnvBadge.jsx"
+import MembershipPlanBadge from "../MembershipPlanBadge.jsx"
 
 export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout }) {
   return (
@@ -21,15 +21,17 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
         </p>
       </div>
       <div className="flex items-center gap-1 justify-end">
-        <AppReleaseEnvBadge />
         {user ? (
-          <button
-            type="button"
-            onClick={onLogout}
-            className="max-w-[4.5rem] truncate text-[10px] font-medium text-slate-400"
-          >
-            로그아웃
-          </button>
+          <>
+            <MembershipPlanBadge />
+            <button
+              type="button"
+              onClick={onLogout}
+              className="max-w-[4.5rem] truncate text-[10px] font-medium text-slate-400"
+            >
+              로그아웃
+            </button>
+          </>
         ) : (
           <button type="button" onClick={onLogin} className="text-[10px] font-medium text-slate-400">
             로그인
