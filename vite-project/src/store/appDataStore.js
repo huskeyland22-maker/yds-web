@@ -38,6 +38,7 @@ import {
   mergePanicHistoryV2IntoCycleRows,
 } from "../utils/panicHistoryV2Merge.js"
 import { hasPanicMetricValues, resolveLatestMetrics } from "../utils/resolveLatestPanicMetrics.js"
+import { selectPanicHistoryRows } from "../content/ydsPanicBuyAsOf.js"
 import { getPanicScoreV2 } from "../utils/tradingScores.js"
 import { deskReportKey } from "../utils/panicMarketReportEngine.js"
 import { replacePanicIndexHistory } from "../utils/panicIndexHistory.js"
@@ -573,13 +574,16 @@ export const useAppDataStore = create((set, get) => ({
         const dbProbe = await probePanicIndexHistoryDirect()
         const dbRows = dbProbe.count
 
-        const bundle = await fetchPanicIndexHistory({
+        const rawBundle = await fetchPanicIndexHistory({
           limit,
-          withCycle: false,
+          withCycle: true,
           debugMetric: "vix",
           debugRange: "6M",
         })
-        const hubRows = bundle.rows ?? []
+        const bundle = Array.isArray(rawBundle)
+          ? { rows: rawBundle, cycleRows: [], invalidReason: null, schemaIssues: [] }
+          : (rawBundle ?? { rows: [], cycleRows: [], invalidReason: null, schemaIssues: [] })
+        const hubRows = Array.isArray(bundle.rows) ? bundle.rows : []
         const apiRows = hubRows.length
         const fromHub = historyRowsToCycleRows(hubRows)
         const mappedCycleRows = fromHub.length
@@ -598,22 +602,18 @@ export const useAppDataStore = create((set, get) => ({
           set({ marketCycleHistory: bundle.cycleRows })
         }
 
-        let cycleRows = mergeCycleRows(fromHub, localCycleRows)
-        let fallbackUsed = false
-        let fallbackReason = null
+        const historyPick = selectPanicHistoryRows({
+          hubRows: fromHub,
+          localSeedRows: localCycleRows,
+        })
+        let cycleRows = historyPick.rows
+        let fallbackUsed = historyPick.fallbackUsed
+        let fallbackReason = historyPick.fallbackReason
 
-        if (cycleRows.length < localCycleRows.length && localCycleRows.length > 0) {
-          cycleRows = localCycleRows
-          fallbackUsed = true
-          fallbackReason = "prefer_local_seed"
-          console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — prefer local seed", {
-            localRows: localCycleRows.length,
-            hubRows: hubRows.length,
-          })
-          logReliabilityPipeline("fallback", { reason: fallbackReason, localRows: localCycleRows.length })
-        }
         if (cycleRows.length < 1 && hubRows.length > 0) {
           cycleRows = historyRowsToCycleRows(hubRows)
+          fallbackUsed = false
+          fallbackReason = null
         }
         if (cycleRows.length < 1 && localCycleRows.length > 0) {
           cycleRows = localCycleRows

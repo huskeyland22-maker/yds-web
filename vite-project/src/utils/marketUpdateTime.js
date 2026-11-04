@@ -12,17 +12,22 @@ import { formatMarketBasisKst } from "./marketTimestamp.js"
  * }}
  */
 export function resolveMarketUpdateTime(panicData) {
-  const iso =
+  const raw =
     panicData?.updatedAt ??
     panicData?.updated_at ??
     panicData?.marketUpdateTime ??
     null
+  const iso = raw == null || raw === "" ? null : String(raw)
+  const valid = iso != null && Number.isFinite(new Date(iso).getTime())
+  if (!valid) {
+    return { iso: null, basisNote: "미국장 종가 기준", kstLabel: null }
+  }
 
   const kstRaw = formatMarketBasisKst(iso)
   const kstLabel = kstRaw !== "—" ? kstRaw : null
 
   return {
-    iso: iso != null ? String(iso) : null,
+    iso,
     basisNote: "미국장 종가 기준",
     kstLabel,
   }

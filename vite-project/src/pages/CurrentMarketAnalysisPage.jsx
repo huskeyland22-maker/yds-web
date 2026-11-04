@@ -1,33 +1,20 @@
 import { useMemo } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
-import { usePanicStore } from "../store/panicStore.js"
-import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
-import { resolveCycleHistoryRows } from "../utils/panicHistoryRows.js"
+import { panicDataFromCycleRow } from "../utils/cycleHistoryUtils.js"
 import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
+import { resolvePanicBuyDisplay } from "../content/ydsPanicBuyAsOf.js"
 import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import YdsMarketAnalysisOpsMeta from "../components/market-analysis/YdsMarketAnalysisOpsMeta.jsx"
 
-/**
- * FREE users may not receive PRO-gated history series.
- * Keep score/FEAR SCALE working via latest desk/hub snapshot.
- */
-function resolveLivePanicData(historyPanic, deskPanic, storePanic) {
-  if (historyPanic && hasPanicMetricValues(historyPanic)) return historyPanic
-  if (deskPanic && hasPanicMetricValues(deskPanic)) return deskPanic
-  if (storePanic && hasPanicMetricValues(storePanic)) return storePanic
-  return historyPanic ?? deskPanic ?? storePanic ?? null
-}
-
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
-  const deskPanic = useAppDataStore((s) => s.deskResolvedPanicData)
+  const historySource = useAppDataStore((s) => s.cycleHistorySource)
   const hubPanic = useAppDataStore((s) => s.hubPanicMetrics)
-  const storePanic = usePanicStore((s) => s.panicData)
 
-  const history = useMemo(
-    () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
-    [storeRows],
-  )
+  const history = useMemo(() => {
+    if (historySource !== "supabase-index-history" || !Array.isArray(storeRows)) return []
+    return [...storeRows].sort((a, b) => String(a?.date ?? "").localeCompare(String(b?.date ?? "")))
+  }, [historySource, storeRows])
   const latestCycleRow = history[history.length - 1] ?? null
 
   const historyPanic = useMemo(() => {
@@ -44,10 +31,17 @@ export default function CurrentMarketAnalysisPage() {
     return latestCycleRow
   }, [latestCycleRow])
 
-  const panicData = useMemo(
-    () => resolveLivePanicData(historyPanic, deskPanic ?? hubPanic, storePanic),
-    [historyPanic, deskPanic, hubPanic, storePanic],
+  const display = useMemo(
+    () =>
+      resolvePanicBuyDisplay({
+        historySource,
+        historyPanic: historySource === "supabase-index-history" ? historyPanic : null,
+        hubPanic,
+      }),
+    [historySource, historyPanic, hubPanic],
   )
+  const panicData = display.panicData
+  const chartHistory = display.source === "pro-history" ? history : []
 
   const hasLive = Boolean(panicData && hasPanicMetricValues(panicData))
 
@@ -70,7 +64,7 @@ export default function CurrentMarketAnalysisPage() {
         </div>
       ) : (
         <div className="yds-market-analysis__body">
-          <MarketAnalysisDeskCore panicData={panicData} cycleMetricHistory={history} />
+          <MarketAnalysisDeskCore panicData={panicData} cycleMetricHistory={chartHistory} />
         </div>
       )}
     </div>
