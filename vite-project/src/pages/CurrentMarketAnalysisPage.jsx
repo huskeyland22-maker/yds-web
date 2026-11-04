@@ -2,7 +2,10 @@ import { useMemo } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow } from "../utils/cycleHistoryUtils.js"
 import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
-import { resolvePanicBuyDisplay } from "../content/ydsPanicBuyAsOf.js"
+import {
+  resolvePanicBuyDisplay,
+  resolvePanicBuyLoadingState,
+} from "../content/ydsPanicBuyAsOf.js"
 import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import YdsMarketAnalysisOpsMeta from "../components/market-analysis/YdsMarketAnalysisOpsMeta.jsx"
 
@@ -10,6 +13,10 @@ export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const historySource = useAppDataStore((s) => s.cycleHistorySource)
   const hubPanic = useAppDataStore((s) => s.hubPanicMetrics)
+  const latestHistoryRow = useAppDataStore((s) => s.latestHistoryRow)
+  const panicIndexFetchedAt = useAppDataStore((s) => s.panicIndexFetchedAt)
+  const panicDeskSourcesFetchedAt = useAppDataStore((s) => s.panicDeskSourcesFetchedAt)
+  const lastCycleBundleError = useAppDataStore((s) => s.lastCycleBundleError)
 
   const history = useMemo(() => {
     if (historySource !== "supabase-index-history" || !Array.isArray(storeRows)) return []
@@ -37,13 +44,19 @@ export default function CurrentMarketAnalysisPage() {
         historySource,
         historyPanic: historySource === "supabase-index-history" ? historyPanic : null,
         hubPanic,
+        latestHistoryRow,
       }),
-    [historySource, historyPanic, hubPanic],
+    [historySource, historyPanic, hubPanic, latestHistoryRow],
   )
   const panicData = display.panicData
   const chartHistory = display.source === "pro-history" ? history : []
 
   const hasLive = Boolean(panicData && hasPanicMetricValues(panicData))
+  const bootSettled =
+    panicDeskSourcesFetchedAt != null ||
+    panicIndexFetchedAt != null ||
+    lastCycleBundleError != null
+  const loadingState = resolvePanicBuyLoadingState({ bootSettled, hasLive })
 
   return (
     <div className="yds-market-analysis min-w-0 w-full">
@@ -57,10 +70,16 @@ export default function CurrentMarketAnalysisPage() {
         {hasLive ? <YdsMarketAnalysisOpsMeta panicData={panicData} /> : null}
       </header>
 
-      {!hasLive ? (
+      {loadingState.showSyncing ? (
         <div className="yds-market-analysis__loading" role="status" aria-live="polite">
           <span className="yds-market-analysis__loading-dot" aria-hidden />
           시장 지표를 동기화하고 있습니다. 잠시만 기다려 주세요.
+        </div>
+      ) : loadingState.showEmpty ? (
+        <div className="yds-market-analysis__loading" role="status" aria-live="polite">
+          {lastCycleBundleError
+            ? "시장 지표를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+            : "표시할 시장 지표가 없습니다. 잠시 후 다시 확인해 주세요."}
         </div>
       ) : (
         <div className="yds-market-analysis__body">

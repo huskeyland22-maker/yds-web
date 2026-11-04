@@ -12,6 +12,7 @@ import {
   syncDailyBottomEpisodes,
 } from "../content/ydsDailyBottomBuyEpisodes.js"
 import { buildDbbMembershipAudienceCta } from "../content/ydsDailyBottomBuyAccessPolicy.js"
+import { resolveDbbSnapshotFetchGate } from "../content/ydsDbbAuthRefresh.js"
 import {
   buildDailyBottomBuyVisibility,
   DBB_PRO_LOCK_COPY,
@@ -81,7 +82,14 @@ function OpportunityFacts({ card }) {
  * UI flow mirrors equity daily-bottom-buy; ETF snapshot + trade records stay ETF-specific.
  */
 export default function DailyBottomBuyPage() {
-  const { isPro, isLoggedOut, status, authReady, isLoading: membershipLoading } = useMembership()
+  const {
+    isPro,
+    isLoggedOut,
+    status,
+    authReady,
+    refreshedAt,
+    isLoading: membershipLoading,
+  } = useMembership()
   const visibility = useMemo(() => buildDailyBottomBuyVisibility(isPro), [isPro])
   const audienceCta = useMemo(
     () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
@@ -106,23 +114,30 @@ export default function DailyBottomBuyPage() {
   }, [])
 
   useEffect(() => {
-    if (!authReady || membershipLoading) return undefined
+    const gate = resolveDbbSnapshotFetchGate({ authReady, membershipLoading, status })
+    if (gate.showLoading) setLoading(true)
+    if (!gate.canFetch) return undefined
     const ctrl = new AbortController()
     setLoading(true)
     setError(null)
+    // Drop pre-login cache so FREE/PRO payload swap is visible after auth settles.
+    setPayload(null)
     fetchDailyBottomBuySnapshot({ signal: ctrl.signal })
       .then((data) => {
+        if (ctrl.signal.aborted) return
         const gated = applyDailyBottomBuyAccess(data, isPro)
         setPayload(gated)
         setEpisodes(syncDailyBottomEpisodes(gated.all || []))
       })
       .catch((err) => {
-        if (err?.name === "AbortError") return
+        if (err?.name === "AbortError" || ctrl.signal.aborted) return
         setError(err?.message || "불러오기 실패")
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false)
+      })
     return () => ctrl.abort()
-  }, [authReady, membershipLoading, isPro])
+  }, [authReady, membershipLoading, isPro, status, refreshedAt])
 
   useEffect(() => {
     if (!picker.open) return undefined

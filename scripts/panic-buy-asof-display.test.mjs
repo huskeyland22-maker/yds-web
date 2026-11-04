@@ -7,6 +7,7 @@ import { describe, it } from "node:test"
 import { resolveMarketUpdateTime } from "../vite-project/src/utils/marketUpdateTime.js"
 import {
   resolvePanicBuyDisplay,
+  resolvePanicBuyLoadingState,
   selectPanicHistoryRows,
 } from "../vite-project/src/content/ydsPanicBuyAsOf.js"
 
@@ -85,6 +86,51 @@ describe("panic buy as-of display", () => {
     assert.equal(view.source, "none")
     assert.equal(view.panicData, null)
     assert.equal(resolveMarketUpdateTime(null).kstLabel, null)
+  })
+
+  it("uses history-latest API row when hub is emergency (never seed)", () => {
+    const apiLatest = {
+      date: "2026-11-03",
+      updatedAt: LATEST_AT,
+      vix: 18.4,
+      fearGreed: 41,
+      putCall: 0.92,
+    }
+    const view = resolvePanicBuyDisplay({
+      historySource: "localStorage",
+      historyPanic: seedPanic,
+      hubPanic: {
+        __emergency: true,
+        updatedAt: "2026-05-21T12:00:00.000Z",
+        vix: 16.76,
+        fearGreed: 50,
+        putCall: 1,
+      },
+      latestHistoryRow: apiLatest,
+    })
+    assert.equal(view.source, "history-latest")
+    assert.equal(view.panicData.date, "2026-11-03")
+    assert.equal(view.panicData.updatedAt, LATEST_AT)
+    assert.doesNotMatch(resolveMarketUpdateTime(view.panicData).kstLabel, /2026-05-19/)
+    assert.doesNotMatch(resolveMarketUpdateTime(view.panicData).kstLabel, /2026-05-21/)
+  })
+
+  it("exits syncing UI after boot settles even with empty metrics", () => {
+    assert.deepEqual(resolvePanicBuyLoadingState({ bootSettled: false, hasLive: false }), {
+      phase: "syncing",
+      showSyncing: true,
+      showEmpty: false,
+    })
+    assert.deepEqual(resolvePanicBuyLoadingState({ bootSettled: true, hasLive: false }), {
+      phase: "empty",
+      showSyncing: false,
+      showEmpty: true,
+    })
+    assert.deepEqual(resolvePanicBuyLoadingState({ bootSettled: true, hasLive: true }), {
+      phase: "ready",
+      showSyncing: false,
+      showEmpty: false,
+    })
   })
 
   it("keeps PRO history when the index-history API succeeded", () => {

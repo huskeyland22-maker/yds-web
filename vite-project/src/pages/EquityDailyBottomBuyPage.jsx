@@ -5,6 +5,7 @@ import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSec
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import { buildDbbMembershipAudienceCta } from "../content/ydsDailyBottomBuyAccessPolicy.js"
+import { resolveDbbSnapshotFetchGate } from "../content/ydsDbbAuthRefresh.js"
 import {
   buildEquityDailyBottomBuyVisibility,
   EQUITY_DBB_PRO_LOCK_COPY,
@@ -99,7 +100,14 @@ function CandidateFacts({ row }) {
 }
 
 export default function EquityDailyBottomBuyPage() {
-  const { isPro, isLoggedOut, status, authReady, isLoading: membershipLoading } = useMembership()
+  const {
+    isPro,
+    isLoggedOut,
+    status,
+    authReady,
+    refreshedAt,
+    isLoading: membershipLoading,
+  } = useMembership()
   const visibility = useMemo(() => buildEquityDailyBottomBuyVisibility(isPro), [isPro])
   const audienceCta = useMemo(
     () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
@@ -127,9 +135,12 @@ export default function EquityDailyBottomBuyPage() {
   }, [])
 
   useEffect(() => {
-    if (!authReady || membershipLoading) return undefined
+    const gate = resolveDbbSnapshotFetchGate({ authReady, membershipLoading, status })
+    if (gate.showLoading) setLoading(true)
+    if (!gate.canFetch) return undefined
     const ctrl = new AbortController()
     setLoading(true)
+    setPayload(null)
     fetchEquityDailyBottomBuy(symbol, { signal: ctrl.signal })
       .then((json) => {
         if (!ctrl.signal.aborted) setPayload(applyEquityDailyBottomBuyAccess(json, isPro))
@@ -142,7 +153,7 @@ export default function EquityDailyBottomBuyPage() {
         if (!ctrl.signal.aborted) setLoading(false)
       })
     return () => ctrl.abort()
-  }, [symbol, authReady, membershipLoading, isPro])
+  }, [symbol, authReady, membershipLoading, isPro, status, refreshedAt])
 
   const universe = payload?.universe || []
   const universeKey = universe.map((row) => row.symbol).join("|")
@@ -210,7 +221,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey, authReady, membershipLoading, isPro])
+  }, [universeKey, authReady, membershipLoading, isPro, status, refreshedAt])
 
   useEffect(() => {
     if (!authReady || membershipLoading || !universe.length) return undefined
@@ -264,7 +275,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey, catalog, authReady, membershipLoading, isPro])
+  }, [universeKey, catalog, authReady, membershipLoading, isPro, status, refreshedAt])
   const groups = useMemo(() => {
     const seen = []
     for (const row of summaryCatalog) {

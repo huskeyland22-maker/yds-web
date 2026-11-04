@@ -107,6 +107,8 @@ export const useAppDataStore = create((set, get) => ({
 
   cycleStaticFetchedAt: null,
   panicIndexFetchedAt: null,
+  /** desk hub + history-latest parallel fetch settled (null = not attempted yet) */
+  panicDeskSourcesFetchedAt: null,
   lastCycleBundleError: null,
 
   realtimeLastEventAt: null,
@@ -245,6 +247,7 @@ export const useAppDataStore = create((set, get) => ({
       cycleHistoryUpdatedAt: null,
       cycleStaticFetchedAt: null,
       panicIndexFetchedAt: null,
+      panicDeskSourcesFetchedAt: null,
     })
     logStoreWrite("appDataStore.cycleHistory", { action: "invalidate-cache", keepPanicHistoryLs: true })
   },
@@ -494,7 +497,10 @@ export const useAppDataStore = create((set, get) => ({
 
   /** 허브·히스토리·리포트 병렬 로드 후 데스크 지표 갱신 */
   loadDeskMetricSources: async (opts = {}) => {
-    if (!isPanicHubEnabled()) return null
+    if (!isPanicHubEnabled()) {
+      set({ panicDeskSourcesFetchedAt: Date.now(), deskMarketReportLoading: false })
+      return null
+    }
     const tradeDate = opts.tradeDate ?? get().deskSnapshotTradeDate ?? null
     logFetchStart("desk-metric-sources", { tradeDate })
     let hub = null
@@ -520,7 +526,7 @@ export const useAppDataStore = create((set, get) => ({
       logFetchFail("desk-metric-sources", e)
       return get().refreshDeskResolvedPanicData()
     } finally {
-      set({ deskMarketReportLoading: false })
+      set({ deskMarketReportLoading: false, panicDeskSourcesFetchedAt: Date.now() })
     }
   },
 
