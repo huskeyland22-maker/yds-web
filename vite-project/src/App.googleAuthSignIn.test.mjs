@@ -27,8 +27,9 @@ const shouldUseGoogleRedirectSignIn = new Function(
   `return (${extractFunction("shouldUseGoogleRedirectSignIn")})`,
 )()
 const settleGoogleRedirectSignIn = new Function(
+  "clearFirebaseRedirectSettling",
   `return (${extractFunction("settleGoogleRedirectSignIn")})`,
-)()
+)(() => {})
 const shouldSkipResumeReloadForAuthRedirect = new Function(
   `return (${extractFunction("shouldSkipResumeReloadForAuthRedirect")})`,
 )()
@@ -88,21 +89,21 @@ test("mobile Safari, Chrome, and standalone PWA use redirect", () => {
   assert.equal(shouldUseGoogleRedirectSignIn(iosHome), true)
 })
 
-test("redirect success returns the user and does not alert", async () => {
+test("redirect success returns the user envelope and does not alert", async () => {
   const user = { uid: "google-user" }
   const alerts = []
   const previous = globalThis.alert
   globalThis.alert = (message) => alerts.push(message)
   try {
     const settled = await settleGoogleRedirectSignIn({ app: "auth" }, async () => ({ user }))
-    assert.deepEqual(settled, user)
+    assert.deepEqual(settled, { user, error: null })
     assert.deepEqual(alerts, [])
   } finally {
     globalThis.alert = previous
   }
 })
 
-test("redirect failure is logged without the login alert", async () => {
+test("redirect failure returns error envelope without the login alert", async () => {
   const alerts = []
   const errors = []
   const previousAlert = globalThis.alert
@@ -115,7 +116,8 @@ test("redirect failure is logged without the login alert", async () => {
       err.code = "auth/redirect-cancelled-by-user"
       throw err
     })
-    assert.equal(settled, null)
+    assert.equal(settled.user, null)
+    assert.equal(settled.error.code, "auth/redirect-cancelled-by-user")
     assert.deepEqual(alerts, [])
     assert.equal(errors.length, 1)
     assert.equal(errors[0][1], "auth/redirect-cancelled-by-user")
@@ -133,14 +135,13 @@ test("login branches popup and redirect without changing the auth listener", () 
   assert.match(login, /if \(shouldUseGoogleRedirectSignIn\(\)\)/)
   assert.match(login, /signInWithRedirect\(auth, provider\)/)
   assert.match(login, /signInWithPopup\(auth, provider\)/)
-  assert.match(login, /window\.alert\("로그인에 실패했습니다"\)/)
+  assert.match(login, /로그인에 실패했습니다/)
   assert.match(source, /signInWithPopup\(auth, provider\)/)
-  assert.match(source, /settleGoogleRedirectSignIn\(auth\)\.then\(\(user\) =>/)
-  assert.match(source, /setUser\(user\)/)
+  assert.match(source, /settleGoogleRedirectSignIn\(auth\)\.then\(\(settled\) =>/)
+  assert.match(source, /setUser\(settled\.user\)/)
   assert.match(source, /if \(redirectUser && auth\.currentUser\)/)
-  const reload = extractFunction("forceResumeReloadWithCooldown")
-  assert.match(reload, /shouldSkipResumeReloadForAuthRedirect\(window\.sessionStorage\)/)
-  assert.match(reload, /window\.location\.reload\(\)/)
+  assert.match(source, /shouldSkipResumeReloadForAuthRedirect\(window\.sessionStorage\)/)
+  assert.match(source, /window\.location\.reload\(\)/)
 })
 
 test("iOS resume reload waits while a Firebase redirect is pending", () => {
@@ -162,13 +163,18 @@ test("iOS resume reload waits while a Firebase redirect is pending", () => {
 
 test("production auth helper stays on the YDS origin and proxies the Firebase project handler", () => {
   const firebaseSource = readFileSync(new URL("./firebase.js", import.meta.url), "utf8")
+  const domainSource = readFileSync(
+    new URL("./content/ydsFirebaseAuthDomain.js", import.meta.url),
+    "utf8",
+  )
   const vercelSource = readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), "..", "..", "vercel.json"),
     "utf8",
   )
-  assert.match(firebaseSource, /PRODUCTION_APP_HOST = "yds-web-kappa.vercel.app"/)
-  assert.match(firebaseSource, /PROJECT_AUTH_DOMAIN = "yds-web-fec1e.firebaseapp.com"/)
+  assert.match(domainSource, /FIREBASE_PRODUCTION_APP_HOST = "yds-web-kappa.vercel.app"/)
+  assert.match(domainSource, /FIREBASE_PROJECT_AUTH_DOMAIN = "yds-web-fec1e.firebaseapp.com"/)
   assert.match(firebaseSource, /firebase:pendingRedirect:/)
+  assert.match(firebaseSource, /resolveFirebaseAuthDomain/)
   assert.match(
     vercelSource,
     /"source": "\/__\/auth\/:path\*", "destination": "https:\/\/yds-web-fec1e.firebaseapp.com\/__\/auth\/:path\*"/,

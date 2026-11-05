@@ -19,6 +19,10 @@ import { collectPanicMetricsLive } from "./panicCollectors.js"
 import { logPanicPipelineStage } from "./panicNumeric.js"
 import { upsertPanicHistoryV2ForSnapshot } from "./panicHistoryV2Db.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
+import {
+  isMissingPanicRelationError,
+  toPreviewSchemaMissingError,
+} from "./panicSchemaErrors.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
 
@@ -73,10 +77,16 @@ export async function persistPanicPayload(body, opts = {}) {
   )
   logPanicPipelineStage("2-snapshot", snap)
 
-  let history = await upsertPanicIndexHistoryFromPayload(snap, { source, tradeDate: snap.tradeDate })
-  if (Array.isArray(body.historyRows) && body.historyRows.length > 0) {
-    const batch = await upsertPanicIndexHistoryBatch(body.historyRows, { source })
-    history = { ...history, batch }
+  let history
+  try {
+    history = await upsertPanicIndexHistoryFromPayload(snap, { source, tradeDate: snap.tradeDate })
+    if (Array.isArray(body.historyRows) && body.historyRows.length > 0) {
+      const batch = await upsertPanicIndexHistoryBatch(body.historyRows, { source })
+      history = { ...history, batch }
+    }
+  } catch (err) {
+    if (isMissingPanicRelationError(err)) throw toPreviewSchemaMissingError(err)
+    throw err
   }
   if (requireHistory && !history.ok) {
     const detail = history.skipped ? history.reason : history.error
@@ -93,6 +103,9 @@ export async function persistPanicPayload(body, opts = {}) {
       err.missing = history.missing ?? []
       err.history = history
       throw err
+    }
+    if (isMissingPanicRelationError(detail) || isMissingPanicRelationError(history?.error)) {
+      throw toPreviewSchemaMissingError(detail || history?.error)
     }
     const err = new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
     err.stage = "history"

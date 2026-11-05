@@ -32,6 +32,7 @@ import {
   isUsablePanicHistoryLatestMirror,
   isUsablePanicLatestMirror,
 } from "./panicPreviewMirror.js"
+import { isMissingPanicRelationError, toPreviewSchemaMissingError } from "./panicSchemaErrors.js"
 
 export function panicNoStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -378,20 +379,31 @@ export async function handlePanicModeUpdate(req, res) {
       reportKey: result.reportKey ?? null,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error ?? "update_failed")
-    const stage = error && typeof error === "object" && "stage" in error ? error.stage : "pipeline"
+    const schemaErr = isMissingPanicRelationError(error) ? toPreviewSchemaMissingError(error) : error
+    const message = schemaErr instanceof Error ? schemaErr.message : String(schemaErr ?? "update_failed")
+    const stage =
+      schemaErr && typeof schemaErr === "object" && "stage" in schemaErr ? schemaErr.stage : "pipeline"
     const statusCode =
-      error && typeof error === "object" && Number(error.statusCode) >= 400
-        ? Number(error.statusCode)
+      schemaErr && typeof schemaErr === "object" && Number(schemaErr.statusCode) >= 400
+        ? Number(schemaErr.statusCode)
         : 500
     const code =
-      error && typeof error === "object" && typeof error.code === "string" ? error.code : undefined
+      schemaErr && typeof schemaErr === "object" && typeof schemaErr.code === "string"
+        ? schemaErr.code
+        : undefined
     const missing =
-      error && typeof error === "object" && Array.isArray(error.missing) ? error.missing : undefined
+      schemaErr && typeof schemaErr === "object" && Array.isArray(schemaErr.missing)
+        ? schemaErr.missing
+        : undefined
+    const detail =
+      schemaErr && typeof schemaErr === "object" && typeof schemaErr.detail === "string"
+        ? schemaErr.detail
+        : undefined
     res.status(statusCode).json({
       ok: false,
       ...(code ? { code } : {}),
       ...(missing ? { missing } : {}),
+      ...(detail ? { detail } : {}),
       message,
       error: message,
       payload: savePayload,

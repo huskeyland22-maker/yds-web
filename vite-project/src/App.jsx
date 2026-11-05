@@ -11,6 +11,12 @@ import {
 } from "firebase/auth"
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
+import {
+  clearFirebaseRedirectSettling,
+  isFirebaseRedirectSettling,
+  markFirebaseRedirectSettling,
+  shouldClearUserOnAuthNull,
+} from "./content/ydsFirebaseAuthDomain.js"
 import { clearStoredEventHistory } from "./content/ydsMarketEventHistoryStorage.js"
 import { persistHistory } from "./utils/panicHistoryLocalPersist.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
@@ -85,7 +91,7 @@ import MobileShellDebugOverlay from "./components/layout/MobileShellDebugOverlay
 import TradeRecordsCloudSyncBootstrap from "./hooks/useTradeRecordsCloudSync.js"
 import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
 import { isDevMode } from "./utils/devMode.js"
-import { auth, db, hasFirebaseConfig } from "./firebase.js"
+import { auth, db, getResolvedFirebaseAuthDomainForDebug, hasFirebaseConfig } from "./firebase.js"
 import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
 import { useAppDataStore } from "./store/appDataStore.js"
 import { usePanicStore } from "./store/panicStore.js"
@@ -486,19 +492,21 @@ function shouldUseGoogleRedirectSignIn(win) {
 }
 
 async function settleGoogleRedirectSignIn(authInstance, getResult = getRedirectResult) {
-  if (!authInstance) return null
+  if (!authInstance) return { user: null, error: null }
   try {
     const result = await getResult(authInstance)
-    return result?.user ?? null
+    return { user: result?.user ?? null, error: null }
   } catch (err) {
     console.error("로그인 실패", err?.code || err, err?.message || err)
-    return null
-  } finally {
-    try {
-      globalThis.sessionStorage?.removeItem("yds.firebaseRedirectSettling")
-    } catch {
-      // ignore
+    return {
+      user: null,
+      error: {
+        code: typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "redirect_failed",
+        message: typeof err?.message === "string" ? err.message : String(err ?? "redirect_failed"),
+      },
     }
+  } finally {
+    clearFirebaseRedirectSettling()
   }
 }
 
@@ -987,6 +995,7 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       if (nextUser) {
         redirectUser = null
+        clearFirebaseRedirectSettling()
         setUser(nextUser)
         return
       }
@@ -994,13 +1003,32 @@ function App() {
         setUser(redirectUser)
         return
       }
+      // Do not wipe UI auth while Google redirect is still settling (mobile Preview).
+      if (
+        !shouldClearUserOnAuthNull({
+          nextUser,
+          redirectSettling: isFirebaseRedirectSettling(),
+          authCurrentUser: auth.currentUser,
+        })
+      ) {
+        return
+      }
       redirectUser = null
       setUser(null)
     })
-    void settleGoogleRedirectSignIn(auth).then((user) => {
-      if (cancelled || !user) return
-      redirectUser = user
-      setUser(user)
+    void settleGoogleRedirectSignIn(auth).then((settled) => {
+      if (cancelled) return
+      if (settled?.user) {
+        redirectUser = settled.user
+        setUser(settled.user)
+        return
+      }
+      if (settled?.error?.code) {
+        const authDomain = getResolvedFirebaseAuthDomainForDebug() || "(unknown)"
+        window.alert(
+          `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${authDomain}\nPreview 도메인이 Firebase Authorized domains에 있는지 확인하세요.`,
+        )
+      }
     })
     return () => {
       cancelled = true
@@ -1149,14 +1177,22 @@ function App() {
     try {
       const provider = new GoogleAuthProvider()
       if (shouldUseGoogleRedirectSignIn()) {
+        markFirebaseRedirectSettling()
         await signInWithRedirect(auth, provider)
         return
       }
-      await signInWithPopup(auth, provider)
+      const cred = await signInWithPopup(auth, provider)
+      if (cred?.user) setUser(cred.user)
     } catch (err) {
+      clearFirebaseRedirectSettling()
       console.error("로그인 실패", err)
       const code = typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "unknown"
-      window.alert(`로그인에 실패했습니다. 오류 코드: ${code}`)
+      const authDomain = getResolvedFirebaseAuthDomainForDebug() || "(unknown)"
+      const hint =
+        code === "auth/unauthorized-domain"
+          ? `\nFirebase Authorized domains에 현재 호스트를 추가하세요.\nauthDomain=${authDomain}`
+          : `\nauthDomain=${authDomain}`
+      window.alert(`로그인에 실패했습니다. 오류 코드: ${code}${hint}`)
     }
   }
 
