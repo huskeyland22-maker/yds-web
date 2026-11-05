@@ -23,5 +23,7 @@ describe("panic schema errors", () => {
     assert.equal(err.code, "preview_schema_missing")
     assert.equal(err.statusCode, 503)
     assert.equal(err.stage, "pipeline")
+    assert.equal(err.retryable, true)
+    assert.match(String(err.hint || ""), /staging-panic-bootstrap/)
   })
 })

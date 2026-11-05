@@ -29,5 +29,7 @@ export function toPreviewSchemaMissingError(err) {
   out.statusCode = 503
   out.code = "preview_schema_missing"
   out.detail = detail
+  out.hint = "Run scripts/staging-panic-bootstrap.sql on Staging (qzunuksx) via scripts/apply-staging-panic-bootstrap.mjs"
+  out.retryable = true
   return out
 }

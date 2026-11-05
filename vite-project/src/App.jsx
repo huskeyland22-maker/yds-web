@@ -2381,10 +2381,23 @@ function App() {
 
             {inputError ? (
               <div
-                className="mt-2 shrink-0 whitespace-pre-wrap break-words border-l-2 border-rose-400/70 bg-rose-500/[0.07] py-2 pl-2.5 pr-2 font-mono text-[11px] leading-snug text-rose-100/95"
+                className="mt-2 shrink-0 border-l-2 border-rose-400/70 bg-rose-500/[0.07] py-2 pl-2.5 pr-2"
                 role="alert"
               >
-                {inputError}
+                <p className="m-0 whitespace-pre-wrap break-words font-mono text-[11px] leading-snug text-rose-100/95">
+                  {inputError}
+                </p>
+                <button
+                  type="button"
+                  className="mt-2 rounded border border-rose-300/35 bg-rose-500/15 px-2.5 py-1 text-[11px] font-medium text-rose-50 transition hover:bg-rose-500/25 disabled:opacity-50"
+                  disabled={isSaving}
+                  onClick={() => {
+                    setInputError("")
+                    void submitInput()
+                  }}
+                >
+                  다시 시도
+                </button>
               </div>
             ) : null}
 

@@ -399,11 +399,19 @@ export async function handlePanicModeUpdate(req, res) {
       schemaErr && typeof schemaErr === "object" && typeof schemaErr.detail === "string"
         ? schemaErr.detail
         : undefined
+    const hint =
+      schemaErr && typeof schemaErr === "object" && typeof schemaErr.hint === "string"
+        ? schemaErr.hint
+        : undefined
+    const retryable =
+      schemaErr && typeof schemaErr === "object" && schemaErr.retryable === true ? true : undefined
     res.status(statusCode).json({
       ok: false,
       ...(code ? { code } : {}),
       ...(missing ? { missing } : {}),
       ...(detail ? { detail } : {}),
+      ...(hint ? { hint } : {}),
+      ...(retryable ? { retryable: true } : {}),
       message,
       error: message,
       payload: savePayload,
