@@ -165,6 +165,14 @@ describe("ydsAuthDiagnostics", () => {
       currentUserPresent: false,
     })
     assert.equal(failed.flowStage, AUTH_FLOW_STAGE.AUTH_FAILURE)
+
+    const coldBootNoise = classifyRedirectSettleOutcome({
+      redirectStarted: false,
+      redirectErrorCode: "auth/argument-error",
+      currentUserPresent: false,
+    })
+    assert.equal(coldBootNoise.flowStage, AUTH_FLOW_STAGE.IDLE)
+    assert.equal(coldBootNoise.redirectErrorCode, "auth/argument-error")
   })
 
   it("diagPatchFromAuthFlow exposes step flags without secrets", () => {

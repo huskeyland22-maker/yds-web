@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app"
 import { getApps, getApp } from "firebase/app"
 import {
   browserLocalPersistence,
+  browserPopupRedirectResolver,
   getAuth,
   getRedirectResult,
   initializeAuth,
@@ -67,13 +68,18 @@ if (hasFirebaseConfig()) {
 }
 
 /**
- * Persistence must be set at Auth construction — never call setPersistence
- * before getRedirectResult on redirect return (drops the result).
+ * Persistence + popup/redirect resolver must be set at Auth construction.
+ * Never call setPersistence before getRedirectResult on redirect return.
+ * Without browserPopupRedirectResolver, getRedirectResult/signInWithRedirect
+ * throw auth/argument-error.
  */
 function createFirebaseAuth(firebaseApp) {
   if (!firebaseApp) return null
   try {
-    return initializeAuth(firebaseApp, { persistence: browserLocalPersistence })
+    return initializeAuth(firebaseApp, {
+      persistence: browserLocalPersistence,
+      popupRedirectResolver: browserPopupRedirectResolver,
+    })
   } catch {
     return getAuth(firebaseApp)
   }

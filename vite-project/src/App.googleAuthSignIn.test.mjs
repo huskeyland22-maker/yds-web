@@ -158,6 +158,7 @@ test("redirect settle does not clear settling flag inside settleGoogleRedirectSi
   const firebaseSource = readFileSync(new URL("./firebase.js", import.meta.url), "utf8")
   assert.match(firebaseSource, /initializeAuth/)
   assert.match(firebaseSource, /browserLocalPersistence/)
+  assert.match(firebaseSource, /browserPopupRedirectResolver/)
   assert.match(firebaseSource, /redirectResultPromise/)
   assert.doesNotMatch(firebaseSource, /setPersistence\(/)
   assert.match(source, /patchAuthFlowPersisted/)

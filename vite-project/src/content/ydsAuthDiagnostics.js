@@ -243,8 +243,16 @@ export function classifyRedirectSettleOutcome(input = {}) {
     return { flowStage: AUTH_FLOW_STAGE.AUTH_SUCCESS, redirectErrorCode: null }
   }
   if (input.redirectErrorCode) {
+    // Cold boot getRedirectResult noise must not look like a completed login failure
+    // unless a redirect was actually started from this tab.
+    if (input.redirectStarted) {
+      return {
+        flowStage: AUTH_FLOW_STAGE.AUTH_FAILURE,
+        redirectErrorCode: input.redirectErrorCode,
+      }
+    }
     return {
-      flowStage: AUTH_FLOW_STAGE.AUTH_FAILURE,
+      flowStage: AUTH_FLOW_STAGE.IDLE,
       redirectErrorCode: input.redirectErrorCode,
     }
   }
@@ -254,8 +262,14 @@ export function classifyRedirectSettleOutcome(input = {}) {
       redirectErrorCode: "yds/no-redirect-result-after-return",
     }
   }
+  if (input.redirectStarted) {
+    return {
+      flowStage: AUTH_FLOW_STAGE.REDIRECT_RESULT_CHECKED,
+      redirectErrorCode: null,
+    }
+  }
   return {
-    flowStage: AUTH_FLOW_STAGE.REDIRECT_RESULT_CHECKED,
+    flowStage: AUTH_FLOW_STAGE.IDLE,
     redirectErrorCode: null,
   }
 }

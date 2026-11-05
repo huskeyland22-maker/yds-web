@@ -1252,7 +1252,7 @@ function App() {
         })
         return
       }
-      if (settled?.error?.code) {
+      if (settled?.error?.code && readAuthFlowPersisted().redirectStarted) {
         const domain = authDomain || "(unknown)"
         window.alert(
           `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${domain}\nGoogle redirect_uri는 https://${domain}/__/auth/handler 입니다.\nPreview 호스트는 Firebase Authorized domains에 추가하세요.`,
