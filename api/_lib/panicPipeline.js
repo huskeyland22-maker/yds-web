@@ -21,7 +21,8 @@ import { upsertPanicHistoryV2ForSnapshot } from "./panicHistoryV2Db.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
 import {
   isMissingPanicRelationError,
-  toPreviewSchemaMissingError,
+  isPanicTablePermissionError,
+  mapPanicPersistSchemaError,
 } from "./panicSchemaErrors.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
@@ -85,8 +86,7 @@ export async function persistPanicPayload(body, opts = {}) {
       history = { ...history, batch }
     }
   } catch (err) {
-    if (isMissingPanicRelationError(err)) throw toPreviewSchemaMissingError(err)
-    throw err
+    throw mapPanicPersistSchemaError(err)
   }
   if (requireHistory && !history.ok) {
     const detail = history.skipped ? history.reason : history.error
@@ -104,8 +104,13 @@ export async function persistPanicPayload(body, opts = {}) {
       err.history = history
       throw err
     }
-    if (isMissingPanicRelationError(detail) || isMissingPanicRelationError(history?.error)) {
-      throw toPreviewSchemaMissingError(detail || history?.error)
+    if (
+      isMissingPanicRelationError(detail) ||
+      isMissingPanicRelationError(history?.error) ||
+      isPanicTablePermissionError(detail) ||
+      isPanicTablePermissionError(history?.error)
+    ) {
+      throw mapPanicPersistSchemaError(detail || history?.error)
     }
     const err = new Error(`panic_index_history_upsert_failed:${detail || "unknown"}`)
     err.stage = "history"
@@ -158,6 +163,9 @@ export async function persistPanicPayload(body, opts = {}) {
     metricsError = err instanceof Error ? err.message : String(err)
     console.error("[panic] panic_metrics upsert failed", metricsError)
     if (source === "manual") {
+      if (isMissingPanicRelationError(metricsError) || isPanicTablePermissionError(metricsError)) {
+        throw mapPanicPersistSchemaError(metricsError)
+      }
       const e = new Error(metricsError)
       e.stage = "panic_metrics"
       throw e

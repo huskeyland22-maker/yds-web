@@ -101,8 +101,23 @@ export function formatSaveErrorForUi(error, fallback = "unknown error") {
   }
 
   if (
+    code === "preview_table_permission_denied" ||
+    /preview_table_permission_denied|테이블 권한이 없습니다|permission denied for table/i.test(msg)
+  ) {
+    const lines = [
+      "클라우드 저장에 실패했습니다.",
+      "Staging panic 테이블 권한(GRANT)이 없습니다.",
+      "Staging SQL Editor에서 scripts/staging-panic-grants.sql 을 실행한 뒤 다시 시도하세요.",
+      "입력한 값은 이 화면에 유지됩니다.",
+    ]
+    if (status != null) lines.push(`status: ${status}`)
+    if (stage) lines.push(`stage: ${stage}`)
+    return lines.join("\n")
+  }
+
+  if (
     code === "preview_schema_missing" ||
-    /preview_schema_missing|Staging DB에 panic|panic_index_history/i.test(msg)
+    /preview_schema_missing|Staging DB에 panic 테이블이 없습니다/i.test(msg)
   ) {
     const lines = [
       "클라우드 저장에 실패했습니다.",

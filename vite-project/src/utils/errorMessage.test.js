@@ -29,4 +29,16 @@ describe("formatSaveErrorForUi", () => {
     assert.match(text, /누락된 핵심 지표: vix/)
     assert.doesNotMatch(text, /foo\.js/)
   })
+
+  it("shows grant guidance for preview_table_permission_denied", () => {
+    const err = new Error("Staging panic 테이블 권한이 없습니다.")
+    err.status = 503
+    err.stage = "pipeline"
+    err.code = "preview_table_permission_denied"
+    err.stack = "Error: boom\n    at index-xyz.js:1:1"
+    const text = formatSaveErrorForUi(err)
+    assert.match(text, /GRANT/)
+    assert.match(text, /staging-panic-grants/)
+    assert.doesNotMatch(text, /index-xyz\.js/)
+  })
 })

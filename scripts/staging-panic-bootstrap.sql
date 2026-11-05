@@ -78,4 +78,10 @@ drop policy if exists "latest_panic_metrics_select_public" on public.latest_pani
 create policy "latest_panic_metrics_select_public"
   on public.latest_panic_metrics for select to anon, authenticated using (true);
 
+-- Required for Vercel Preview API (service_role) and PostgREST roles.
+-- Without these GRANTs, tables exist but upsert returns 403 permission denied.
+grant select, insert, update, delete on table public.panic_metrics to anon, authenticated, service_role;
+grant select, insert, update, delete on table public.panic_index_history to anon, authenticated, service_role;
+grant select, insert, update, delete on table public.latest_panic_metrics to anon, authenticated, service_role;
+
 notify pgrst, 'reload schema';

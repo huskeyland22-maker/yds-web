@@ -32,7 +32,7 @@ import {
   isUsablePanicHistoryLatestMirror,
   isUsablePanicLatestMirror,
 } from "./panicPreviewMirror.js"
-import { isMissingPanicRelationError, toPreviewSchemaMissingError } from "./panicSchemaErrors.js"
+import { mapPanicPersistSchemaError } from "./panicSchemaErrors.js"
 
 export function panicNoStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -379,7 +379,9 @@ export async function handlePanicModeUpdate(req, res) {
       reportKey: result.reportKey ?? null,
     })
   } catch (error) {
-    const schemaErr = isMissingPanicRelationError(error) ? toPreviewSchemaMissingError(error) : error
+    const mapped = mapPanicPersistSchemaError(error)
+    const schemaErr =
+      mapped && typeof mapped === "object" && typeof mapped.code === "string" ? mapped : error
     const message = schemaErr instanceof Error ? schemaErr.message : String(schemaErr ?? "update_failed")
     const stage =
       schemaErr && typeof schemaErr === "object" && "stage" in schemaErr ? schemaErr.stage : "pipeline"

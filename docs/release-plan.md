@@ -215,7 +215,7 @@
 - [x] **Preview auth 진단** — AUTH DIAG 패널 · getRedirectResult settle 후 clearing · boot 중 로그인 버튼 보류 · persistence
 - [x] **Preview auth 단계 추적** — login click→redirect→복귀 sessionStorage flow · early getRedirectResult · handoff empty 코드
 - [x] **Preview auth_handoff_empty** — same-origin authDomain on `*.vercel.app` + `/__/auth` proxy (Firebase Option 3)
-- [ ] **Preview 시장지표 저장 503** — Staging `panic_index_history` 없음(PGRST205). UI 스택 제거·재시도 안내 배포. Staging SQL(`scripts/staging-panic-bootstrap.sql`) 적용 대기
+- [x] **Preview 시장지표 저장** — Staging 테이블 생성 후 `service_role` GRANT 누락(42501) → `scripts/staging-panic-grants.sql` 적용. Preview `POST /api/panic?mode=update` 200·history.ok 검증. 권한 오류 매핑(`preview_table_permission_denied`) 추가
 
 ---
 
