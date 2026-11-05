@@ -88,18 +88,38 @@ function createFirebaseAuth(firebaseApp) {
 export const auth = app ? createFirebaseAuth(app) : null
 export const db = app ? getFirestore(app) : null
 
+function snapshotFirebasePendingRedirectKey() {
+  if (typeof window === "undefined") return false
+  try {
+    const storage = window.sessionStorage
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i) || ""
+      if (key.startsWith("firebase:pendingRedirect:")) return true
+    }
+  } catch {
+    return false
+  }
+  return false
+}
+
 /**
  * Consume redirect result once at module load (before React effects).
  * App.jsx must await this promise — do not call getRedirectResult again.
+ * Captures pendingRedirect *before* getRedirectResult clears it.
  */
 export const redirectResultPromise = auth
-  ? getRedirectResult(auth)
-      .then((result) => ({
-        user: result?.user ?? null,
-        error: null,
-        redirectResultPresent: result != null,
-      }))
-      .catch((err) => {
+  ? (async () => {
+      const pendingRedirectBeforeSettle = snapshotFirebasePendingRedirectKey()
+      try {
+        const result = await getRedirectResult(auth)
+        return {
+          user: result?.user ?? null,
+          error: null,
+          redirectResultPresent: result != null,
+          pendingRedirectBeforeSettle,
+          pendingRedirectAfterSettle: snapshotFirebasePendingRedirectKey(),
+        }
+      } catch (err) {
         console.error("로그인 실패", err?.code || err, err?.message || err)
         return {
           user: null,
@@ -112,9 +132,18 @@ export const redirectResultPromise = auth
               typeof err?.message === "string" ? err.message : String(err ?? "redirect_failed"),
           },
           redirectResultPresent: false,
+          pendingRedirectBeforeSettle,
+          pendingRedirectAfterSettle: snapshotFirebasePendingRedirectKey(),
         }
-      })
-  : Promise.resolve({ user: null, error: null, redirectResultPresent: false })
+      }
+    })()
+  : Promise.resolve({
+      user: null,
+      error: null,
+      redirectResultPresent: false,
+      pendingRedirectBeforeSettle: false,
+      pendingRedirectAfterSettle: false,
+    })
 
 /** @deprecated kept for call sites that awaited persistence before settle — now a no-op ready. */
 export const authPersistenceReady = Promise.resolve(null)

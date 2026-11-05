@@ -195,7 +195,10 @@ test("production auth helper stays on the YDS origin and proxies the Firebase pr
   )
   assert.match(domainSource, /FIREBASE_PRODUCTION_APP_HOST = "yds-web-kappa.vercel.app"/)
   assert.match(domainSource, /FIREBASE_PROJECT_AUTH_DOMAIN = "yds-web-fec1e.firebaseapp.com"/)
+  assert.match(domainSource, /hostname\.endsWith\("\.vercel\.app"\)/)
+  assert.match(domainSource, /resolveAuthHandoffMode/)
   assert.match(firebaseSource, /firebase:pendingRedirect:/)
+  assert.match(firebaseSource, /pendingRedirectBeforeSettle/)
   assert.match(firebaseSource, /resolveFirebaseAuthDomain/)
   assert.match(
     vercelSource,

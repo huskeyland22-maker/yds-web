@@ -79,6 +79,9 @@ const FLOW_STAGE_LABELS = Object.freeze({
  * @property {boolean} redirectResultChecked
  * @property {string | null} signInErrorCode
  * @property {boolean | null} pendingRedirectKeyPresent
+ * @property {boolean | null} pendingRedirectBeforeSettle
+ * @property {boolean | null} pendingRedirectAfterSettle
+ * @property {string | null} authHandoffMode
  * @property {string} flowStage
  * @property {string} flowStageLabel
  * @property {string | null} lastUpdatedAt
@@ -128,6 +131,9 @@ export function createEmptyAuthDiagSnapshot() {
     redirectResultChecked: flow.redirectResultChecked,
     signInErrorCode: flow.signInErrorCode,
     pendingRedirectKeyPresent: flow.pendingRedirectKeyPresent,
+    pendingRedirectBeforeSettle: null,
+    pendingRedirectAfterSettle: null,
+    authHandoffMode: null,
     flowStage: flow.flowStage,
     flowStageLabel: flowStageLabel(flow.flowStage),
     lastUpdatedAt: null,
@@ -257,6 +263,19 @@ export function classifyRedirectSettleOutcome(input = {}) {
     }
   }
   if (input.redirectStarted && !input.redirectResultPresent && !input.redirectResultHasUser) {
+    // Distinguish lost pending flag vs cross-origin iframe handoff after pending was set.
+    if (input.pendingRedirectBeforeSettle === false) {
+      return {
+        flowStage: AUTH_FLOW_STAGE.AUTH_HANDOFF_EMPTY,
+        redirectErrorCode: "yds/pending-redirect-missing-on-return",
+      }
+    }
+    if (input.authHandoffMode === "cross-origin") {
+      return {
+        flowStage: AUTH_FLOW_STAGE.AUTH_HANDOFF_EMPTY,
+        redirectErrorCode: "yds/cross-origin-authdomain-handoff",
+      }
+    }
     return {
       flowStage: AUTH_FLOW_STAGE.AUTH_HANDOFF_EMPTY,
       redirectErrorCode: "yds/no-redirect-result-after-return",

@@ -152,6 +152,26 @@ describe("ydsAuthDiagnostics", () => {
     assert.equal(empty.flowStage, AUTH_FLOW_STAGE.AUTH_HANDOFF_EMPTY)
     assert.equal(empty.redirectErrorCode, "yds/no-redirect-result-after-return")
 
+    const crossOrigin = classifyRedirectSettleOutcome({
+      redirectStarted: true,
+      redirectResultPresent: false,
+      redirectResultHasUser: false,
+      currentUserPresent: false,
+      pendingRedirectBeforeSettle: true,
+      authHandoffMode: "cross-origin",
+    })
+    assert.equal(crossOrigin.redirectErrorCode, "yds/cross-origin-authdomain-handoff")
+
+    const missingPending = classifyRedirectSettleOutcome({
+      redirectStarted: true,
+      redirectResultPresent: false,
+      redirectResultHasUser: false,
+      currentUserPresent: false,
+      pendingRedirectBeforeSettle: false,
+      authHandoffMode: "same-origin",
+    })
+    assert.equal(missingPending.redirectErrorCode, "yds/pending-redirect-missing-on-return")
+
     const ok = classifyRedirectSettleOutcome({
       redirectStarted: true,
       redirectResultHasUser: true,

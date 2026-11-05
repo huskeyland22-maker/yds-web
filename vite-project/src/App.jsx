@@ -28,6 +28,7 @@ import {
   firebaseAuthHandlerRedirectUri,
   isFirebaseRedirectSettling,
   markFirebaseRedirectSettling,
+  resolveAuthHandoffMode,
   shouldClearUserOnAuthNull,
 } from "./content/ydsFirebaseAuthDomain.js"
 import { clearStoredEventHistory } from "./content/ydsMarketEventHistoryStorage.js"
@@ -596,6 +597,7 @@ function App() {
   const [authBootReady, setAuthBootReady] = useState(() => !auth)
   const [authDiag, setAuthDiag] = useState(() => {
     const authDomain = getResolvedFirebaseAuthDomainForDebug()
+    const pageHostname = typeof window !== "undefined" ? window.location.hostname : null
     const flow = readAuthFlowPersisted()
     return mergeAuthDiagSnapshot(createEmptyAuthDiagSnapshot(), {
       authConfigPresent: hasFirebaseConfig(),
@@ -605,7 +607,8 @@ function App() {
       authLoading: Boolean(auth),
       authDomain,
       handlerRedirectUri: firebaseAuthHandlerRedirectUri(authDomain),
-      pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
+      pageHostname,
+      authHandoffMode: resolveAuthHandoffMode(authDomain, pageHostname),
       redirectSettling: isFirebaseRedirectSettling(),
       pendingRedirectKeyPresent: hasFirebasePendingRedirectKey(
         typeof window !== "undefined" ? window.sessionStorage : null,
@@ -1133,6 +1136,9 @@ function App() {
       })
     }
 
+    const pageHostname = typeof window !== "undefined" ? window.location.hostname : null
+    const authHandoffMode = resolveAuthHandoffMode(authDomain, pageHostname)
+
     const patchDiag = (patch) => {
       setAuthDiag((prev) => {
         const next = mergeAuthDiagSnapshot(prev, {
@@ -1141,7 +1147,8 @@ function App() {
           authInitialized: true,
           authDomain,
           handlerRedirectUri: firebaseAuthHandlerRedirectUri(authDomain),
-          pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
+          pageHostname,
+          authHandoffMode,
           membershipStatus: membershipStatus ?? null,
           ...diagPatchFromAuthFlow(readAuthFlowPersisted()),
           ...patch,
@@ -1215,18 +1222,28 @@ function App() {
       redirectSettleDone = true
 
       const hasUser = Boolean(settled?.user || auth.currentUser)
+      const pendingBefore =
+        typeof settled?.pendingRedirectBeforeSettle === "boolean"
+          ? settled.pendingRedirectBeforeSettle
+          : null
+      const pendingAfter =
+        typeof settled?.pendingRedirectAfterSettle === "boolean"
+          ? settled.pendingRedirectAfterSettle
+          : hasFirebasePendingRedirectKey(window.sessionStorage)
       const outcome = classifyRedirectSettleOutcome({
         redirectStarted: Boolean(readAuthFlowPersisted().redirectStarted),
         redirectResultPresent: Boolean(settled?.redirectResultPresent),
         redirectResultHasUser: Boolean(settled?.user),
         redirectErrorCode: settled?.error?.code ?? null,
         currentUserPresent: hasUser,
+        pendingRedirectBeforeSettle: pendingBefore,
+        authHandoffMode,
       })
       flow = patchAuthFlowPersisted({
         redirectResultChecked: true,
         flowStage: outcome.flowStage,
         redirectErrorCode: outcome.redirectErrorCode,
-        pendingRedirectKeyPresent: hasFirebasePendingRedirectKey(window.sessionStorage),
+        pendingRedirectKeyPresent: pendingAfter,
       })
 
       patchDiag({
@@ -1235,6 +1252,9 @@ function App() {
         redirectErrorCode: outcome.redirectErrorCode ?? settled?.error?.code ?? null,
         currentUserPresent: hasUser,
         redirectResultChecked: true,
+        pendingRedirectBeforeSettle: pendingBefore,
+        pendingRedirectAfterSettle: pendingAfter,
+        authHandoffMode,
         ...diagPatchFromAuthFlow(flow),
       })
       if (settled?.user) {
@@ -1258,13 +1278,25 @@ function App() {
           `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${domain}\nGoogle redirect_uri는 https://${domain}/__/auth/handler 입니다.\nPreview 호스트는 Firebase Authorized domains에 추가하세요.`,
         )
       } else if (outcome.flowStage === AUTH_FLOW_STAGE.AUTH_HANDOFF_EMPTY) {
+        const handler = firebaseAuthHandlerRedirectUri(authDomain) || "(unknown)"
         console.warn(
           "[yds-auth] redirect returned without Firebase result",
+          "code=",
+          outcome.redirectErrorCode,
           "authDomain=",
           authDomain,
+          "handoff=",
+          authHandoffMode,
           "handler=",
-          firebaseAuthHandlerRedirectUri(authDomain),
+          handler,
+          "pendingBefore=",
+          pendingBefore,
         )
+        if (outcome.redirectErrorCode === "yds/cross-origin-authdomain-handoff") {
+          window.alert(
+            `로그인 redirect 결과가 전달되지 않았습니다.\n오류: ${outcome.redirectErrorCode}\nauthDomain(${authDomain}) ≠ page host → 모바일 브라우저가 cross-origin 저장소를 차단합니다.\nPreview는 same-origin authDomain + Google OAuth에 다음 URI가 필요합니다.\n${handler}`,
+          )
+        }
       }
       if (auth.currentUser) {
         setUser(auth.currentUser)

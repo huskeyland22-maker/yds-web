@@ -6,6 +6,7 @@ import { describe, it } from "node:test"
 import {
   FIREBASE_PROJECT_AUTH_DOMAIN,
   firebaseAuthHandlerRedirectUri,
+  resolveAuthHandoffMode,
   resolveFirebaseAuthDomain,
   shouldClearUserOnAuthNull,
 } from "../vite-project/src/content/ydsFirebaseAuthDomain.js"
@@ -22,22 +23,27 @@ describe("firebase auth domain", () => {
       firebaseAuthHandlerRedirectUri("yds-web-kappa.vercel.app"),
       "https://yds-web-kappa.vercel.app/__/auth/handler",
     )
+    assert.equal(
+      resolveAuthHandoffMode("yds-web-kappa.vercel.app", "yds-web-kappa.vercel.app"),
+      "same-origin",
+    )
   })
 
-  it("keeps project authDomain on Preview vercel.app (avoids redirect_uri_mismatch)", () => {
+  it("uses Preview vercel.app hostname as same-origin authDomain (Firebase Option 3)", () => {
     const previewHost = "yds-web-git-integration-yds-windows-mac-so-sung-yangs-projects.vercel.app"
     assert.equal(
       resolveFirebaseAuthDomain("yds-web-fec1e.firebaseapp.com", { hostname: previewHost }),
-      FIREBASE_PROJECT_AUTH_DOMAIN,
+      previewHost,
     )
     assert.equal(
-      firebaseAuthHandlerRedirectUri(FIREBASE_PROJECT_AUTH_DOMAIN),
-      "https://yds-web-fec1e.firebaseapp.com/__/auth/handler",
-    )
-    // Broken previous behavior produced this mismatched redirect_uri:
-    assert.notEqual(
-      firebaseAuthHandlerRedirectUri(FIREBASE_PROJECT_AUTH_DOMAIN),
+      firebaseAuthHandlerRedirectUri(previewHost),
       `https://${previewHost}/__/auth/handler`,
+    )
+    assert.equal(resolveAuthHandoffMode(previewHost, previewHost), "same-origin")
+    // Previous cross-origin Preview config (broken on mobile Chrome/Safari):
+    assert.equal(
+      resolveAuthHandoffMode(FIREBASE_PROJECT_AUTH_DOMAIN, previewHost),
+      "cross-origin",
     )
   })
 

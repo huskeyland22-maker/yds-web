@@ -4,14 +4,19 @@
  * Google OAuth redirect_uri is always:
  *   https://<authDomain>/__/auth/handler
  *
- * Production uses the custom app host (already registered on the Firebase
- * Google OAuth client). Preview must NOT use the Preview hostname as
- * authDomain — that produces redirect_uri_mismatch unless every Preview
- * alias is manually added to Google Cloud Authorized redirect URIs.
+ * Browsers that partition third-party storage (Chrome M115+, Safari 16.1+,
+ * mobile Chrome/Firefox on iOS) break signInWithRedirect when authDomain is a
+ * different origin than the page (e.g. *.firebaseapp.com vs *.vercel.app).
+ * Symptom: getRedirectResult() → null, no Firebase error → auth_handoff_empty.
  *
- * Preview keeps the Firebase project authDomain so redirect_uri stays:
- *   https://yds-web-fec1e.firebaseapp.com/__/auth/handler
- * The Preview page origin still must be in Firebase Authorized domains.
+ * Fix (Firebase Option 3): authDomain = page hostname + transparent proxy of
+ * /__/auth and /__/firebase to the Firebase project (see vercel.json).
+ * Production and Preview Vercel hosts both use same-origin authDomain.
+ *
+ * Google Cloud OAuth client must allow:
+ *   https://<that-host>/__/auth/handler
+ * Production host is already registered. Preview branch alias must be added
+ * once or redirect_uri_mismatch appears (loud) instead of silent handoff empty.
  */
 
 export const FIREBASE_PROJECT_AUTH_DOMAIN = "yds-web-fec1e.firebaseapp.com"
@@ -36,9 +41,12 @@ export function resolveFirebaseAuthDomain(configured, loc) {
         : ""
 
   if (!hostname) return projectDomain
-  // Only Production custom host uses same-origin authDomain (OAuth client already allows it).
-  if (hostname === FIREBASE_PRODUCTION_APP_HOST) return FIREBASE_PRODUCTION_APP_HOST
-  // Preview / localhost / other hosts → project authDomain (stable Google redirect_uri).
+  // Same-origin authDomain on any Vercel app host (Prod + Preview aliases).
+  // Relies on vercel.json transparent /__/auth proxy to firebaseapp.com.
+  if (hostname === FIREBASE_PRODUCTION_APP_HOST || hostname.endsWith(".vercel.app")) {
+    return hostname
+  }
+  // localhost / unknown → project authDomain (expect cross-origin limits on mobile).
   return projectDomain
 }
 
@@ -51,6 +59,20 @@ export function firebaseAuthHandlerRedirectUri(authDomain) {
   const host = typeof authDomain === "string" ? authDomain.trim().replace(/^https?:\/\//, "") : ""
   if (!host) return null
   return `https://${host}/__/auth/handler`
+}
+
+/**
+ * @param {string | null | undefined} authDomain
+ * @param {string | null | undefined} pageHostname
+ * @returns {"same-origin" | "cross-origin" | "unknown"}
+ */
+export function resolveAuthHandoffMode(authDomain, pageHostname) {
+  const domain =
+    typeof authDomain === "string" ? authDomain.trim().toLowerCase().replace(/^https?:\/\//, "") : ""
+  const host =
+    typeof pageHostname === "string" ? pageHostname.trim().toLowerCase().replace(/^https?:\/\//, "") : ""
+  if (!domain || !host) return "unknown"
+  return domain === host ? "same-origin" : "cross-origin"
 }
 
 /**
