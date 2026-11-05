@@ -75,8 +75,8 @@ let baseManifest = {
   scope: "/",
   display: "standalone",
   orientation: "portrait",
-  background_color: "#0b0f1a",
-  theme_color: "#0b0f1a",
+  background_color: "#ffffff",
+  theme_color: "#ffffff",
   icons: [
     { src: "/icon.svg", sizes: "192x192", type: "image/svg+xml" },
     { src: "/icon-maskable.svg", sizes: "512x512", type: "image/svg+xml", purpose: "maskable" },
@@ -95,6 +95,9 @@ try {
 const versionedManifest = {
   id: "/?source=pwa",
   ...baseManifest,
+  /* Force light chrome — dark theme_color + iOS status bar made standalone header look clipped/blurred. */
+  background_color: "#ffffff",
+  theme_color: "#ffffff",
   start_url: `/?source=pwa&v=${buildId}`,
   version,
   build_id: buildId,

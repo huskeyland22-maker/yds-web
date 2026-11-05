@@ -9840,22 +9840,52 @@
   }
 }
 
-/* PWA standalone (홈화면에 추가) 일 때만 작동하는 보정.
-   iOS Safari 표시줄에서는 env(safe-area-inset-top) 이 0 인 경우가 있어
-   브라우저 정상 모드 레이아웃을 건드리지 않고 standalone 만 보강한다. */
+/* Mobile header: dedicated opaque safe-area band (works with viewport-fit=cover). */
+.yds-mobile-app-header__safe {
+  flex-shrink: 0;
+  width: 100%;
+  height: env(safe-area-inset-top, 0px);
+  min-height: env(safe-area-inset-top, 0px);
+  background-color: #ffffff;
+  pointer-events: none;
+}
+
+.yds-mobile-app-header__bar {
+  position: relative;
+  z-index: 1;
+  background-color: #ffffff;
+}
+
+/* PWA standalone (홈화면에 추가) only — do not alter Safari browser chrome layout. */
 @media all and (display-mode: standalone) {
+  html,
   body {
-    /* 노치 보호: standalone 에서는 body 가 root 와 함께 위로 붙기 때문에
-       padding 이 아닌 background-color 만 추가로 깔아 둔다 (실제 padding 은
-       App.jsx 내부 컨테이너에서 처리). */
-    background-color: #0b0e14;
+    /* Match light premium shell — dark body under status bar caused muddy/blurred header. */
+    background-color: #ffffff;
   }
-  /* iOS 17+ standalone 에서 100vh 가 viewport 보다 큰 값을 반환해
-     상단 콘텐츠가 viewport 위로 밀려나는 케이스가 보고된다 → 보강 */
+  /* iOS 17+ standalone: prefer svh/dvh so content is not pushed under the status region */
   #root {
     min-height: 100dvh;
     min-height: 100svh;
   }
+}
+
+/* iOS home-screen PWA (class set before paint in index.html). */
+html.yds-ios-standalone,
+html.yds-ios-standalone body {
+  background-color: #ffffff;
+}
+
+html.yds-ios-standalone .yds-mobile-app-header,
+html.yds-ios-standalone .yds-mobile-app-header__safe,
+html.yds-ios-standalone .yds-mobile-app-header__bar {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 @keyframes marketFlashUp {

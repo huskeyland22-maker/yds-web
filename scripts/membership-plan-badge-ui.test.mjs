@@ -22,12 +22,15 @@ describe("membership plan badge UI", () => {
     const mobile = readFileSync(join(root, "vite-project/src/components/layout/MobileAppHeader.jsx"), "utf8")
     assert.match(mobile, /MembershipPlanBadge/)
     assert.match(mobile, /displayName|\.email/)
-    assert.match(mobile, /data-yds-mobile-header="sharp-20261105"/)
+    assert.match(mobile, /data-yds-mobile-header="pwa-safe-20261105"/)
+    assert.match(mobile, /yds-mobile-app-header__safe/)
+    assert.match(mobile, /yds-mobile-app-header__bar/)
     assert.match(mobile, /bg-white/)
     assert.doesNotMatch(mobile, /AppReleaseEnvBadge/)
     assert.doesNotMatch(mobile, /backdrop-blur/)
     assert.doesNotMatch(mobile, /bg-white\/\[/)
     assert.doesNotMatch(mobile, /text-slate-300\/65/)
+    assert.doesNotMatch(mobile, /pt-\[max\(0\.35rem,env\(safe-area-inset-top\)\)\]/)
   })
 
   it("MembershipPlanBadge uses header state including pending/error paths", () => {
