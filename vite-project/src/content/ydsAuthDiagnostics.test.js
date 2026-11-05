@@ -56,13 +56,13 @@ describe("ydsAuthDiagnostics", () => {
     assert.equal(Object.prototype.hasOwnProperty.call(next, "idToken"), false)
   })
 
-  it("shows panel on Preview vercel hosts, not Production unless forced", () => {
+  it("hides AUTH DIAG on Preview/Production unless explicitly opted in", () => {
     assert.equal(
       shouldShowAuthDebugPanel({
         hostname: "yds-web-git-integration-yds-windows-mac-so-sung-yangs-projects.vercel.app",
         search: "",
       }),
-      true,
+      false,
     )
     assert.equal(
       shouldShowAuthDebugPanel({
@@ -74,6 +74,13 @@ describe("ydsAuthDiagnostics", () => {
     assert.equal(
       shouldShowAuthDebugPanel({
         hostname: "yds-web-kappa.vercel.app",
+        search: "?yds_auth_debug=1",
+      }),
+      true,
+    )
+    assert.equal(
+      shouldShowAuthDebugPanel({
+        hostname: "yds-web-git-integration-yds-windows-mac-so-sung-yangs-projects.vercel.app",
         search: "?yds_auth_debug=1",
       }),
       true,

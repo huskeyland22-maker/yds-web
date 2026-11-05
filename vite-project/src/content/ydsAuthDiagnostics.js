@@ -3,8 +3,6 @@
  * Never stores or exposes email, ID tokens, access tokens, passwords, or cookies.
  */
 
-import { FIREBASE_PRODUCTION_APP_HOST } from "./ydsFirebaseAuthDomain.js"
-
 export const YDS_AUTH_DIAG_WINDOW_KEY = "__YDS_AUTH_DIAG"
 export const YDS_AUTH_DEBUG_QUERY = "yds_auth_debug"
 export const YDS_AUTH_FLOW_STORAGE_KEY = "yds.authFlowDiag"
@@ -352,33 +350,25 @@ export function publishAuthDiagSnapshot(snapshot, target = typeof window !== "un
 }
 
 /**
- * Show auth debug chrome on Preview hosts or when explicitly requested.
- * Production app host never auto-shows (query/localStorage override only).
- * @param {{ hostname?: string, search?: string, localStorage?: Storage } | null | undefined} loc
+ * AUTH DIAG panel — never auto-show for general users (Preview/Production).
+ * Visible only with explicit opt-in or local Vite DEV.
+ * @param {{ hostname?: string, search?: string } | null | undefined} loc
  */
 export function shouldShowAuthDebugPanel(loc = typeof window !== "undefined" ? window.location : null) {
-  if (!loc) return false
-  const hostname =
-    typeof loc.hostname === "string" ? loc.hostname.trim().toLowerCase() : ""
-  let search = typeof loc.search === "string" ? loc.search : ""
-  let forced = false
+  let search = typeof loc?.search === "string" ? loc.search : ""
   try {
     if (typeof window !== "undefined") {
       search = search || window.location.search || ""
-      forced =
-        new URLSearchParams(search).get(YDS_AUTH_DEBUG_QUERY) === "1" ||
-        window.localStorage?.getItem("yds-auth-debug") === "1"
-    } else if (search) {
-      forced = new URLSearchParams(search).get(YDS_AUTH_DEBUG_QUERY) === "1"
+      if (new URLSearchParams(search).get(YDS_AUTH_DEBUG_QUERY) === "1") return true
+      if (window.localStorage?.getItem("yds-auth-debug") === "1") return true
+      // Local `npm run dev` only — not Preview/Production builds.
+      if (import.meta.env?.DEV) return true
+      return false
     }
+    if (search) return new URLSearchParams(search).get(YDS_AUTH_DEBUG_QUERY) === "1"
   } catch {
-    forced = false
+    return false
   }
-
-  if (hostname === FIREBASE_PRODUCTION_APP_HOST) return forced
-  if (forced) return true
-  if (hostname.endsWith(".vercel.app")) return true
-  if (hostname === "localhost" || hostname === "127.0.0.1") return forced
   return false
 }
 
