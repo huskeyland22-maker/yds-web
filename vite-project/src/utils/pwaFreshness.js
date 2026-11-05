@@ -149,14 +149,33 @@ export function isIosStandalone() {
   }
 }
 
+/** iOS PWA: SW/Cache APIs can stall indefinitely — never block hard reload. */
+function withTimeout(promise, ms, label = "pwa-op") {
+  return Promise.race([
+    Promise.resolve(promise).catch(() => null),
+    new Promise((resolve) => {
+      window.setTimeout(() => {
+        console.warn(`[PWA] ${label} timed out after ${ms}ms`)
+        resolve(null)
+      }, ms)
+    }),
+  ])
+}
+
 export async function unregisterAllServiceWorkers() {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return
   try {
-    const regs = await navigator.serviceWorker.getRegistrations()
-    await Promise.all(regs.map((r) => r.unregister().catch(() => null)))
-    if (regs.length) {
-      await new Promise((r) => setTimeout(r, 120))
-    }
+    await withTimeout(
+      (async () => {
+        const regs = await navigator.serviceWorker.getRegistrations()
+        await Promise.all(regs.map((r) => r.unregister().catch(() => null)))
+        if (regs.length) {
+          await new Promise((r) => setTimeout(r, 120))
+        }
+      })(),
+      3500,
+      "unregisterAllServiceWorkers",
+    )
   } catch {
     // ignore
   }
@@ -165,8 +184,14 @@ export async function unregisterAllServiceWorkers() {
 export async function clearAllCacheStorage() {
   if (typeof window === "undefined" || !("caches" in window)) return
   try {
-    const keys = await caches.keys()
-    await Promise.all(keys.map((k) => caches.delete(k).catch(() => null)))
+    await withTimeout(
+      (async () => {
+        const keys = await caches.keys()
+        await Promise.all(keys.map((k) => caches.delete(k).catch(() => null)))
+      })(),
+      3500,
+      "clearAllCacheStorage",
+    )
   } catch {
     // ignore
   }
@@ -406,10 +431,75 @@ export async function forcePwaUpdate() {
 }
 
 const CHUNK_RECOVERY_OVERLAY_ID = "yds-chunk-recovery-overlay"
+const CHUNK_RECOVERY_APPLY_WATCHDOG_MS = 10_000
+let chunkRecoveryWatchdogTimer = 0
+
+function styleChunkRecoveryButton(btn) {
+  if (!btn) return
+  btn.style.cssText = [
+    "margin-top:16px",
+    "width:100%",
+    "padding:10px 14px",
+    "border-radius:8px",
+    "border:1px solid rgba(56,189,248,0.45)",
+    "background:rgba(14,116,144,0.35)",
+    "color:#f0f9ff",
+    "font-size:14px",
+    "font-weight:700",
+    "cursor:pointer",
+  ].join(";")
+}
+
+function paintChunkRecoveryOverlay(el, { failed = false } = {}) {
+  const title = el.querySelector(".yds-chunk-recovery__title")
+  const desc = el.querySelector(".yds-chunk-recovery__desc")
+  const btn = el.querySelector(".yds-chunk-recovery__btn")
+  if (title) {
+    title.textContent = failed ? "업데이트 적용 지연" : "업데이트 감지됨"
+  }
+  if (desc) {
+    desc.textContent = failed
+      ? "새 버전 적용이 완료되지 않았습니다. 다시 시도해 주세요."
+      : "새 버전 적용중…"
+  }
+  if (btn) {
+    btn.disabled = false
+    btn.textContent = failed ? "다시 시도" : "새로고침"
+    btn.dataset.ydsRecoveryMode = failed ? "retry" : "reload"
+  }
+}
+
+function armChunkRecoveryWatchdog() {
+  if (typeof window === "undefined") return
+  if (chunkRecoveryWatchdogTimer) window.clearTimeout(chunkRecoveryWatchdogTimer)
+  chunkRecoveryWatchdogTimer = window.setTimeout(() => {
+    chunkRecoveryWatchdogTimer = 0
+    chunkRecoveryInFlight = false
+    const el = document.getElementById(CHUNK_RECOVERY_OVERLAY_ID)
+    if (!el || el.hidden) return
+    showChunkRecoveryFallback({ failed: true })
+  }, CHUNK_RECOVERY_APPLY_WATCHDOG_MS)
+}
+
+/**
+ * User-facing hard retry — clears the one-shot latch so reload is never a no-op.
+ * @param {string} [reason]
+ */
+export async function retryChunkRecovery(reason = "user-retry") {
+  chunkRecoveryInFlight = false
+  clearChunkRecoveryFlag()
+  try {
+    safeRemove("sessionStorage", HARD_RELOAD_AT_KEY)
+  } catch {
+    // ignore
+  }
+  return recoverFromChunk404(reason, { force: true })
+}
 
 /** Chunk / stale asset 실패 시 검은 화면 대신 표시. */
-export function showChunkRecoveryFallback() {
+export function showChunkRecoveryFallback(options = {}) {
   if (typeof document === "undefined") return
+  const failed = options?.failed === true
 
   try {
     let el = document.getElementById(CHUNK_RECOVERY_OVERLAY_ID)
@@ -460,21 +550,17 @@ export function showChunkRecoveryFallback() {
         desc.style.cssText = "margin:8px 0 0;font-size:13px;font-weight:500;color:#94a3b8"
       }
       const btn = el.querySelector(".yds-chunk-recovery__btn")
+      styleChunkRecoveryButton(btn)
       if (btn) {
-        btn.style.cssText = [
-          "margin-top:16px",
-          "width:100%",
-          "padding:10px 14px",
-          "border-radius:8px",
-          "border:1px solid rgba(56,189,248,0.45)",
-          "background:rgba(14,116,144,0.35)",
-          "color:#f0f9ff",
-          "font-size:14px",
-          "font-weight:700",
-          "cursor:pointer",
-        ].join(";")
         btn.addEventListener("click", () => {
-          void recoverFromChunk404("user-reload")
+          btn.disabled = true
+          btn.textContent = "다시 적용중…"
+          paintChunkRecoveryOverlay(el, { failed: false })
+          armChunkRecoveryWatchdog()
+          void retryChunkRecovery("user-reload").catch(() => {
+            chunkRecoveryInFlight = false
+            showChunkRecoveryFallback({ failed: true })
+          })
         })
       }
       ;(document.body || document.documentElement).appendChild(el)
@@ -482,6 +568,9 @@ export function showChunkRecoveryFallback() {
       el.hidden = false
       el.style.display = "flex"
     }
+
+    paintChunkRecoveryOverlay(el, { failed })
+    if (!failed) armChunkRecoveryWatchdog()
 
     const root = document.getElementById("root")
     if (root && !root.textContent?.trim()) {
@@ -515,44 +604,69 @@ let chunkRecoveryInFlight = false
 
 /**
  * Chunk asset 404 — SW·캐시 제거 후 hard replace (업데이트 모달·updateAvailable 없음).
- * yds_chunk_recovery=true 이미 있으면 재실행하지 않음.
+ * One-shot latch (yds_chunk_recovery) blocks automatic loops; user/force retries always run.
  * @param {string} [reason]
+ * @param {{ force?: boolean }} [options]
  */
-export async function recoverFromChunk404(reason = "chunk-asset-404") {
+export async function recoverFromChunk404(reason = "chunk-asset-404", options = {}) {
   if (typeof window === "undefined") return
 
-  if (isChunkRecoveryActive()) {
+  const force =
+    options?.force === true || /^(user-reload|user-retry|manual-retry)$/i.test(String(reason || ""))
+
+  if (force) {
+    chunkRecoveryInFlight = false
+    clearChunkRecoveryFlag()
+  }
+
+  if (!force && isChunkRecoveryActive()) {
     console.warn("[Chunk Recovery] skip — recovery flag already set", { reason })
+    // Auto path blocked, but keep a usable retry UI if the apply overlay is up.
+    showChunkRecoveryFallback({ failed: true })
     return
   }
 
   if (chunkRecoveryInFlight) return
   chunkRecoveryInFlight = true
+  showChunkRecoveryFallback({ failed: false })
+  armChunkRecoveryWatchdog()
 
   try {
-    await unregisterAllServiceWorkers()
-    console.log("[Chunk Recovery] SW removed")
-  } catch {
-    // ignore
+    try {
+      await unregisterAllServiceWorkers()
+      console.log("[Chunk Recovery] SW removed")
+    } catch {
+      // ignore
+    }
+
+    try {
+      await clearAllCacheStorage()
+      console.log("[Chunk Recovery] Cache cleared")
+    } catch {
+      // ignore
+    }
+
+    try {
+      // Keep Firebase Auth persistence (IndexedDB / localStorage) — only clear session scratch.
+      window.sessionStorage?.removeItem(HARD_RELOAD_AT_KEY)
+    } catch {
+      // ignore
+    }
+
+    safeWrite("localStorage", CHUNK_RECOVERY_FLAG_KEY, "true")
+
+    console.log("[Chunk Recovery] Hard reload", { reason, force })
+    const next = new URL(window.location.origin)
+    next.pathname = "/"
+    next.searchParams.set("recovered", "1")
+    next.searchParams.set("pwa_v", String(Date.now()))
+    next.searchParams.set("reason", String(reason || "chunk-asset-404"))
+    window.location.replace(`${next.pathname}${next.search}`)
+  } catch (err) {
+    console.error("[Chunk Recovery] failed", err)
+    chunkRecoveryInFlight = false
+    showChunkRecoveryFallback({ failed: true })
   }
-
-  try {
-    await clearAllCacheStorage()
-    console.log("[Chunk Recovery] Cache cleared")
-  } catch {
-    // ignore
-  }
-
-  try {
-    window.sessionStorage?.clear()
-  } catch {
-    // ignore
-  }
-
-  safeWrite("localStorage", CHUNK_RECOVERY_FLAG_KEY, "true")
-
-  console.log("[Chunk Recovery] Hard reload", { reason })
-  window.location.replace("/?recovered=1")
 }
 
 /**
@@ -610,36 +724,44 @@ export async function evictStaleBuildAndReload(reason, latestMeta, options = {})
 
   console.warn("[PWA] stale build detected — evicting and reloading", { reason, latestMeta })
   showUpdateBanner()
+  armChunkRecoveryWatchdog()
 
-  await unregisterAllServiceWorkers()
-  await clearAllCacheStorage()
-  await sweepIosStandaloneCachesOnce()
-  purgeOldBuildLocalStorage()
-  for (const key of STALE_EVICT_EXTRA_LS_KEYS) {
-    safeRemove("localStorage", key)
-  }
-
-  if (latestMeta?.buildId) {
-    safeWrite("localStorage", BUILD_ID_KEY, String(latestMeta.buildId))
-    if (typeof latestMeta.version === "string" && latestMeta.version) {
-      safeWrite("localStorage", BUILD_VERSION_KEY, latestMeta.version)
+  try {
+    await unregisterAllServiceWorkers()
+    await clearAllCacheStorage()
+    await sweepIosStandaloneCachesOnce()
+    purgeOldBuildLocalStorage()
+    for (const key of STALE_EVICT_EXTRA_LS_KEYS) {
+      safeRemove("localStorage", key)
     }
-  }
 
-  if (String(reason || "").includes("stale-panic")) {
-    try {
-      const raw = safeRead("localStorage", "yds-panic-main-v2")
-      if (raw) {
-        const p = JSON.parse(raw)
-        if (!p || p.isManual !== true) safeRemove("localStorage", "yds-panic-main-v2")
+    if (latestMeta?.buildId) {
+      safeWrite("localStorage", BUILD_ID_KEY, String(latestMeta.buildId))
+      if (typeof latestMeta.version === "string" && latestMeta.version) {
+        safeWrite("localStorage", BUILD_VERSION_KEY, latestMeta.version)
       }
-    } catch {
-      safeRemove("localStorage", "yds-panic-main-v2")
     }
-  }
 
-  window.location.replace(buildCacheBustUrl(reason || "stale-build"))
-  return true
+    if (String(reason || "").includes("stale-panic")) {
+      try {
+        const raw = safeRead("localStorage", "yds-panic-main-v2")
+        if (raw) {
+          const p = JSON.parse(raw)
+          if (!p || p.isManual !== true) safeRemove("localStorage", "yds-panic-main-v2")
+        }
+      } catch {
+        safeRemove("localStorage", "yds-panic-main-v2")
+      }
+    }
+
+    window.location.replace(buildCacheBustUrl(reason || "stale-build"))
+    return true
+  } catch (err) {
+    console.error("[PWA] stale-build eviction failed", err)
+    chunkRecoveryInFlight = false
+    showChunkRecoveryFallback({ failed: true })
+    return false
+  }
 }
 
 export async function fetchLatestBuildMeta() {
@@ -976,4 +1098,5 @@ export const __testing__ = {
   BUILD_SCOPED_LS_PREFIXES,
   PROTECTED_LS_KEYS,
   STALE_EVICT_EXTRA_LS_KEYS,
+  CHUNK_RECOVERY_APPLY_WATCHDOG_MS,
 }

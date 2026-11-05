@@ -125,6 +125,11 @@ async function bootstrapApp() {
       window.location.replace(`${currentUrl.pathname}${currentUrl.search}`)
       return
     }
+    // main.jsx already loaded — clear one-shot recovery latch so later 404/retry can run
+    // and checkAndEvictStaleBuild is not permanently skipped after a partial apply.
+    if (isChunkRecoveryPending()) {
+      clearChunkRecoveryFlag()
+    }
   }
 
   markTimeline("SW_START", { segment: "sw" })

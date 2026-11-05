@@ -64,21 +64,28 @@
           if (recovering) return
           try {
             if (localStorage.getItem(RECOVERY_KEY) === "true") {
-              console.warn("[Chunk Recovery] skip — recovery flag already set", reason)
-              return
+              var attempts = Number(sessionStorage.getItem("yds_chunk_recovery_attempts") || "0")
+              if (!Number.isFinite(attempts) || attempts < 0) attempts = 0
+              if (attempts >= 2) {
+                console.warn("[Chunk Recovery] skip — recovery flag already set", reason)
+                return
+              }
+              sessionStorage.setItem("yds_chunk_recovery_attempts", String(attempts + 1))
+              localStorage.removeItem(RECOVERY_KEY)
+              console.warn("[Chunk Recovery] retry after latch", { reason: reason, attempt: attempts + 1 })
             }
           } catch (e) {}
           recovering = true
 
           var done = function () {
             try {
-              sessionStorage.clear()
+              sessionStorage.removeItem("yds-hard-reload-at")
             } catch (e) {}
             try {
               localStorage.setItem(RECOVERY_KEY, "true")
             } catch (e) {}
             console.log("[Chunk Recovery] Hard reload", reason || "chunk-asset-404")
-            window.location.replace("/?recovered=1")
+            window.location.replace("/?recovered=1&pwa_v=" + Date.now())
           }
 
           var swP = Promise.resolve()
@@ -102,7 +109,15 @@
             done()
             return
           }
-          Promise.all([swP, cacheP]).then(done).catch(done)
+          // iOS standalone: getRegistrations()/caches.keys() can hang — always navigate.
+          var settled = false
+          var finish = function () {
+            if (settled) return
+            settled = true
+            done()
+          }
+          Promise.all([swP, cacheP]).then(finish).catch(finish)
+          setTimeout(finish, 4000)
         }
 
         window.addEventListener(
