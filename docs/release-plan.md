@@ -213,6 +213,7 @@
 - [x] **Preview redirect_uri_mismatch** — Preview는 project authDomain(`*.firebaseapp.com`) 유지 · Production만 custom host
 - [x] **시장 지표 저장 pipeline 500** — Staging missing table → `preview_schema_missing` 503 + bootstrap SQL
 - [x] **Preview auth 진단** — AUTH DIAG 패널 · getRedirectResult settle 후 clearing · boot 중 로그인 버튼 보류 · persistence
+- [x] **Preview auth 단계 추적** — login click→redirect→복귀 sessionStorage flow · early getRedirectResult · handoff empty 코드
 
 ---
 

@@ -4,12 +4,41 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import {
+  AUTH_FLOW_STAGE,
+  classifyRedirectSettleOutcome,
   createEmptyAuthDiagSnapshot,
+  diagPatchFromAuthFlow,
+  flowStageLabel,
   isAuthUiPending,
   mergeAuthDiagSnapshot,
+  patchAuthFlowPersisted,
+  readAuthFlowPersisted,
+  shouldMarkRedirectReturned,
   shouldShowAuthDebugPanel,
 } from "./ydsAuthDiagnostics.js"
 import { shouldClearUserOnAuthNull } from "./ydsFirebaseAuthDomain.js"
+
+function memoryWindow(initial = {}) {
+  const map = new Map(Object.entries(initial))
+  const sessionStorage = {
+    get length() {
+      return map.size
+    },
+    key(index) {
+      return [...map.keys()][index] ?? null
+    },
+    getItem(key) {
+      return map.has(key) ? map.get(key) : null
+    },
+    setItem(key, value) {
+      map.set(key, String(value))
+    },
+    removeItem(key) {
+      map.delete(key)
+    },
+  }
+  return { sessionStorage }
+}
 
 describe("ydsAuthDiagnostics", () => {
   it("merges only safe fields and stamps lastUpdatedAt", () => {
@@ -89,5 +118,72 @@ describe("ydsAuthDiagnostics", () => {
       }),
       true,
     )
+  })
+
+  it("persists login flow stages across sessionStorage for redirect return", () => {
+    const win = memoryWindow()
+    patchAuthFlowPersisted(
+      {
+        flowStage: AUTH_FLOW_STAGE.REDIRECT_STARTED,
+        loginButtonClicked: true,
+        signInMethod: "redirect",
+        signInCallStarted: true,
+        signInCallCompleted: true,
+        redirectStarted: true,
+      },
+      win,
+    )
+    const restored = readAuthFlowPersisted(win)
+    assert.equal(restored.redirectStarted, true)
+    assert.equal(restored.loginButtonClicked, true)
+    assert.equal(restored.signInMethod, "redirect")
+    assert.equal(shouldMarkRedirectReturned(restored), true)
+    assert.equal(flowStageLabel(AUTH_FLOW_STAGE.REDIRECT_STARTED), "redirect 시작")
+  })
+
+  it("classifies empty redirect after start as handoff empty", () => {
+    const empty = classifyRedirectSettleOutcome({
+      redirectStarted: true,
+      redirectResultPresent: false,
+      redirectResultHasUser: false,
+      redirectErrorCode: null,
+      currentUserPresent: false,
+    })
+    assert.equal(empty.flowStage, AUTH_FLOW_STAGE.AUTH_HANDOFF_EMPTY)
+    assert.equal(empty.redirectErrorCode, "yds/no-redirect-result-after-return")
+
+    const ok = classifyRedirectSettleOutcome({
+      redirectStarted: true,
+      redirectResultHasUser: true,
+      currentUserPresent: true,
+    })
+    assert.equal(ok.flowStage, AUTH_FLOW_STAGE.AUTH_SUCCESS)
+
+    const failed = classifyRedirectSettleOutcome({
+      redirectStarted: true,
+      redirectErrorCode: "auth/unauthorized-domain",
+      currentUserPresent: false,
+    })
+    assert.equal(failed.flowStage, AUTH_FLOW_STAGE.AUTH_FAILURE)
+  })
+
+  it("diagPatchFromAuthFlow exposes step flags without secrets", () => {
+    const patch = diagPatchFromAuthFlow({
+      flowStage: AUTH_FLOW_STAGE.LOGIN_BUTTON_CLICKED,
+      loginButtonClicked: true,
+      signInMethod: "redirect",
+      signInCallStarted: true,
+      signInCallCompleted: false,
+      redirectStarted: false,
+      redirectResultChecked: false,
+      redirectErrorCode: null,
+      signInErrorCode: null,
+      pendingRedirectKeyPresent: false,
+      updatedAt: "x",
+      email: "nope@example.com",
+    })
+    assert.equal(patch.loginButtonClicked, true)
+    assert.equal(patch.signInMethod, "redirect")
+    assert.equal(Object.prototype.hasOwnProperty.call(patch, "email"), false)
   })
 })

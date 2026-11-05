@@ -3,7 +3,6 @@ import { Calendar, ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom"
 import {
   GoogleAuthProvider,
-  getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
   signInWithRedirect,
@@ -12,10 +11,17 @@ import {
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import {
+  AUTH_FLOW_STAGE,
+  classifyRedirectSettleOutcome,
   createEmptyAuthDiagSnapshot,
+  diagPatchFromAuthFlow,
+  hasFirebasePendingRedirectKey,
   isAuthUiPending,
   mergeAuthDiagSnapshot,
+  patchAuthFlowPersisted,
   publishAuthDiagSnapshot,
+  readAuthFlowPersisted,
+  shouldMarkRedirectReturned,
 } from "./content/ydsAuthDiagnostics.js"
 import {
   clearFirebaseRedirectSettling,
@@ -102,10 +108,10 @@ import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
 import { isDevMode } from "./utils/devMode.js"
 import {
   auth,
-  authPersistenceReady,
   db,
   getResolvedFirebaseAuthDomainForDebug,
   hasFirebaseConfig,
+  redirectResultPromise,
 } from "./firebase.js"
 import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
 import { useAppDataStore } from "./store/appDataStore.js"
@@ -170,6 +176,14 @@ function shouldSkipResumeReloadForAuthRedirect(storage) {
   if (!storage) return false
   try {
     if (storage.getItem("yds.firebaseRedirectSettling") === "1") return true
+    const flowRaw = storage.getItem("yds.authFlowDiag")
+    if (flowRaw) {
+      const flow = JSON.parse(flowRaw)
+      if (flow?.redirectStarted && !flow?.redirectResultChecked) return true
+      if (flow?.flowStage === "redirect_started" || flow?.flowStage === "redirect_returned") {
+        return true
+      }
+    }
     for (let i = 0; i < storage.length; i += 1) {
       const key = storage.key(i) || ""
       if (key.startsWith("firebase:pendingRedirect:")) return true
@@ -506,24 +520,51 @@ function shouldUseGoogleRedirectSignIn(win) {
   return nav.platform === "MacIntel" && Number(nav.maxTouchPoints) > 1
 }
 
-async function settleGoogleRedirectSignIn(authInstance, getResult = getRedirectResult) {
+/**
+ * Prefer the module-level redirectResultPromise (single getRedirectResult).
+ * Tests may inject getResult for the legacy path.
+ */
+async function settleGoogleRedirectSignIn(authInstance, getResult = null, earlyPromise = null) {
   if (!authInstance) {
     return { user: null, error: null, redirectResultPresent: false }
   }
-  try {
-    const result = await getResult(authInstance)
-    const hasEnvelope = result != null
-    return {
-      user: result?.user ?? null,
-      error: null,
-      redirectResultPresent: hasEnvelope,
+  if (typeof getResult === "function") {
+    try {
+      const result = await getResult(authInstance)
+      return {
+        user: result?.user ?? null,
+        error: null,
+        redirectResultPresent: result != null,
+      }
+    } catch (err) {
+      console.error("로그인 실패", err?.code || err, err?.message || err)
+      return {
+        user: null,
+        error: {
+          code:
+            typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "redirect_failed",
+          message: typeof err?.message === "string" ? err.message : String(err ?? "redirect_failed"),
+        },
+        redirectResultPresent: false,
+      }
     }
+  }
+  try {
+    const settled = await (earlyPromise ?? redirectResultPromise)
+    return (
+      settled ?? {
+        user: null,
+        error: null,
+        redirectResultPresent: false,
+      }
+    )
   } catch (err) {
     console.error("로그인 실패", err?.code || err, err?.message || err)
     return {
       user: null,
       error: {
-        code: typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "redirect_failed",
+        code:
+          typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "redirect_failed",
         message: typeof err?.message === "string" ? err.message : String(err ?? "redirect_failed"),
       },
       redirectResultPresent: false,
@@ -555,6 +596,7 @@ function App() {
   const [authBootReady, setAuthBootReady] = useState(() => !auth)
   const [authDiag, setAuthDiag] = useState(() => {
     const authDomain = getResolvedFirebaseAuthDomainForDebug()
+    const flow = readAuthFlowPersisted()
     return mergeAuthDiagSnapshot(createEmptyAuthDiagSnapshot(), {
       authConfigPresent: hasFirebaseConfig(),
       authInstancePresent: Boolean(auth),
@@ -565,6 +607,10 @@ function App() {
       handlerRedirectUri: firebaseAuthHandlerRedirectUri(authDomain),
       pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
       redirectSettling: isFirebaseRedirectSettling(),
+      pendingRedirectKeyPresent: hasFirebasePendingRedirectKey(
+        typeof window !== "undefined" ? window.sessionStorage : null,
+      ),
+      ...diagPatchFromAuthFlow(flow),
     })
   })
   const { status: membershipStatus } = useMembership()
@@ -1033,12 +1079,14 @@ function App() {
 
   useEffect(() => {
     setAuthDiag((prev) => {
+      const flow = readAuthFlowPersisted()
       const next = mergeAuthDiagSnapshot(prev, {
         membershipStatus: membershipStatus ?? null,
         authBootReady,
         authLoading: !authBootReady,
         redirectSettling: redirectSettlingUi,
         currentUserPresent: Boolean(user),
+        ...diagPatchFromAuthFlow(flow),
       })
       publishAuthDiagSnapshot(next)
       return next
@@ -1049,6 +1097,7 @@ function App() {
     if (!auth) {
       setAuthBootReady(true)
       setRedirectSettlingUi(false)
+      const flow = readAuthFlowPersisted()
       const snap = mergeAuthDiagSnapshot(createEmptyAuthDiagSnapshot(), {
         authConfigPresent: hasFirebaseConfig(),
         authInstancePresent: false,
@@ -1062,6 +1111,7 @@ function App() {
         redirectResultPresent: false,
         membershipStatus: membershipStatus ?? null,
         pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
+        ...diagPatchFromAuthFlow(flow),
       })
       setAuthDiag(snap)
       publishAuthDiagSnapshot(snap)
@@ -1075,6 +1125,14 @@ function App() {
     setAuthBootReady(false)
     setRedirectSettlingUi(isFirebaseRedirectSettling())
 
+    let flow = readAuthFlowPersisted()
+    if (shouldMarkRedirectReturned(flow)) {
+      flow = patchAuthFlowPersisted({
+        flowStage: AUTH_FLOW_STAGE.REDIRECT_RETURNED,
+        pendingRedirectKeyPresent: hasFirebasePendingRedirectKey(window.sessionStorage),
+      })
+    }
+
     const patchDiag = (patch) => {
       setAuthDiag((prev) => {
         const next = mergeAuthDiagSnapshot(prev, {
@@ -1085,6 +1143,7 @@ function App() {
           handlerRedirectUri: firebaseAuthHandlerRedirectUri(authDomain),
           pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
           membershipStatus: membershipStatus ?? null,
+          ...diagPatchFromAuthFlow(readAuthFlowPersisted()),
           ...patch,
         })
         publishAuthDiagSnapshot(next)
@@ -1096,6 +1155,7 @@ function App() {
       authBootReady: false,
       authLoading: true,
       redirectSettling: isFirebaseRedirectSettling(),
+      ...diagPatchFromAuthFlow(flow),
     })
 
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
@@ -1108,9 +1168,20 @@ function App() {
         clearFirebaseRedirectSettling()
         setRedirectSettlingUi(false)
         setUser(nextUser)
+        patchAuthFlowPersisted({
+          flowStage: AUTH_FLOW_STAGE.AUTH_SUCCESS,
+          redirectResultChecked: true,
+          redirectErrorCode: null,
+          signInErrorCode: null,
+        })
         if (redirectSettleDone) {
           setAuthBootReady(true)
-          patchDiag({ authBootReady: true, authLoading: false, redirectSettling: false })
+          patchDiag({
+            authBootReady: true,
+            authLoading: false,
+            redirectSettling: false,
+            ...diagPatchFromAuthFlow(readAuthFlowPersisted()),
+          })
         }
         return
       }
@@ -1138,20 +1209,33 @@ function App() {
     })
 
     void (async () => {
-      try {
-        await authPersistenceReady
-      } catch {
-        // persistence warning already logged
-      }
       if (cancelled) return
       const settled = await settleGoogleRedirectSignIn(auth)
       if (cancelled) return
       redirectSettleDone = true
-      patchDiag({
+
+      const hasUser = Boolean(settled?.user || auth.currentUser)
+      const outcome = classifyRedirectSettleOutcome({
+        redirectStarted: Boolean(readAuthFlowPersisted().redirectStarted),
         redirectResultPresent: Boolean(settled?.redirectResultPresent),
         redirectResultHasUser: Boolean(settled?.user),
         redirectErrorCode: settled?.error?.code ?? null,
-        currentUserPresent: Boolean(settled?.user || auth.currentUser),
+        currentUserPresent: hasUser,
+      })
+      flow = patchAuthFlowPersisted({
+        redirectResultChecked: true,
+        flowStage: outcome.flowStage,
+        redirectErrorCode: outcome.redirectErrorCode,
+        pendingRedirectKeyPresent: hasFirebasePendingRedirectKey(window.sessionStorage),
+      })
+
+      patchDiag({
+        redirectResultPresent: Boolean(settled?.redirectResultPresent),
+        redirectResultHasUser: Boolean(settled?.user),
+        redirectErrorCode: outcome.redirectErrorCode ?? settled?.error?.code ?? null,
+        currentUserPresent: hasUser,
+        redirectResultChecked: true,
+        ...diagPatchFromAuthFlow(flow),
       })
       if (settled?.user) {
         redirectUser = settled.user
@@ -1164,6 +1248,7 @@ function App() {
           authLoading: false,
           redirectSettling: false,
           currentUserPresent: true,
+          ...diagPatchFromAuthFlow(readAuthFlowPersisted()),
         })
         return
       }
@@ -1171,6 +1256,14 @@ function App() {
         const domain = authDomain || "(unknown)"
         window.alert(
           `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${domain}\nGoogle redirect_uri는 https://${domain}/__/auth/handler 입니다.\nPreview 호스트는 Firebase Authorized domains에 추가하세요.`,
+        )
+      } else if (outcome.flowStage === AUTH_FLOW_STAGE.AUTH_HANDOFF_EMPTY) {
+        console.warn(
+          "[yds-auth] redirect returned without Firebase result",
+          "authDomain=",
+          authDomain,
+          "handler=",
+          firebaseAuthHandlerRedirectUri(authDomain),
         )
       }
       if (auth.currentUser) {
@@ -1185,6 +1278,7 @@ function App() {
         authLoading: false,
         redirectSettling: false,
         currentUserPresent: Boolean(auth.currentUser),
+        ...diagPatchFromAuthFlow(readAuthFlowPersisted()),
       })
     })()
 
@@ -1329,24 +1423,130 @@ function App() {
 
 
   const login = async () => {
+    let flow = patchAuthFlowPersisted({
+      flowStage: AUTH_FLOW_STAGE.LOGIN_BUTTON_CLICKED,
+      loginButtonClicked: true,
+      signInCallStarted: false,
+      signInCallCompleted: false,
+      redirectStarted: false,
+      redirectResultChecked: false,
+      redirectErrorCode: null,
+      signInErrorCode: null,
+    })
+    setAuthDiag((prev) => {
+      const next = mergeAuthDiagSnapshot(prev, diagPatchFromAuthFlow(flow))
+      publishAuthDiagSnapshot(next)
+      return next
+    })
+
     if (!hasFirebaseConfig()) {
+      flow = patchAuthFlowPersisted({
+        flowStage: AUTH_FLOW_STAGE.AUTH_FAILURE,
+        signInErrorCode: "yds/missing-firebase-config",
+      })
+      setAuthDiag((prev) => {
+        const next = mergeAuthDiagSnapshot(prev, diagPatchFromAuthFlow(flow))
+        publishAuthDiagSnapshot(next)
+        return next
+      })
       window.alert("Firebase 환경변수 설정이 필요합니다 (.env.local 확인)")
       return
     }
-    if (!auth) return
+    if (!auth) {
+      flow = patchAuthFlowPersisted({
+        flowStage: AUTH_FLOW_STAGE.AUTH_FAILURE,
+        signInErrorCode: "yds/auth-instance-missing",
+      })
+      setAuthDiag((prev) => {
+        const next = mergeAuthDiagSnapshot(prev, diagPatchFromAuthFlow(flow))
+        publishAuthDiagSnapshot(next)
+        return next
+      })
+      return
+    }
+
+    const useRedirect = shouldUseGoogleRedirectSignIn()
+    const method = useRedirect ? "redirect" : "popup"
+    flow = patchAuthFlowPersisted({
+      flowStage: AUTH_FLOW_STAGE.LOGIN_FN_CALLED,
+      signInMethod: method,
+      signInCallStarted: true,
+    })
+    setAuthDiag((prev) => {
+      const next = mergeAuthDiagSnapshot(prev, diagPatchFromAuthFlow(flow))
+      publishAuthDiagSnapshot(next)
+      return next
+    })
+
     try {
       const provider = new GoogleAuthProvider()
-      if (shouldUseGoogleRedirectSignIn()) {
+      if (useRedirect) {
+        flow = patchAuthFlowPersisted({
+          flowStage: AUTH_FLOW_STAGE.GOOGLE_REDIRECT_PREPARING,
+          signInMethod: "redirect",
+        })
+        setAuthDiag((prev) => {
+          const next = mergeAuthDiagSnapshot(prev, diagPatchFromAuthFlow(flow))
+          publishAuthDiagSnapshot(next)
+          return next
+        })
         markFirebaseRedirectSettling()
+        setRedirectSettlingUi(true)
+        flow = patchAuthFlowPersisted({
+          flowStage: AUTH_FLOW_STAGE.REDIRECT_STARTED,
+          redirectStarted: true,
+          signInCallCompleted: true,
+          pendingRedirectKeyPresent: hasFirebasePendingRedirectKey(window.sessionStorage),
+        })
+        setAuthDiag((prev) => {
+          const next = mergeAuthDiagSnapshot(prev, {
+            ...diagPatchFromAuthFlow(flow),
+            redirectSettling: true,
+          })
+          publishAuthDiagSnapshot(next)
+          return next
+        })
         await signInWithRedirect(auth, provider)
+        // Navigation should leave this page; if it returns, treat as incomplete handoff.
         return
       }
+      flow = patchAuthFlowPersisted({
+        flowStage: AUTH_FLOW_STAGE.SIGN_IN_STARTED,
+        signInMethod: "popup",
+      })
       const cred = await signInWithPopup(auth, provider)
+      flow = patchAuthFlowPersisted({
+        signInCallCompleted: true,
+        redirectResultChecked: true,
+        flowStage: cred?.user ? AUTH_FLOW_STAGE.AUTH_SUCCESS : AUTH_FLOW_STAGE.AUTH_FAILURE,
+        signInErrorCode: cred?.user ? null : "yds/popup-no-user",
+      })
       if (cred?.user) setUser(cred.user)
+      setAuthDiag((prev) => {
+        const next = mergeAuthDiagSnapshot(prev, {
+          ...diagPatchFromAuthFlow(flow),
+          currentUserPresent: Boolean(cred?.user),
+        })
+        publishAuthDiagSnapshot(next)
+        return next
+      })
     } catch (err) {
       clearFirebaseRedirectSettling()
+      setRedirectSettlingUi(false)
       console.error("로그인 실패", err)
       const code = typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "unknown"
+      flow = patchAuthFlowPersisted({
+        flowStage: AUTH_FLOW_STAGE.AUTH_FAILURE,
+        signInCallCompleted: true,
+        signInErrorCode: code,
+        redirectErrorCode: code,
+        redirectStarted: false,
+      })
+      setAuthDiag((prev) => {
+        const next = mergeAuthDiagSnapshot(prev, diagPatchFromAuthFlow(flow))
+        publishAuthDiagSnapshot(next)
+        return next
+      })
       const authDomain = getResolvedFirebaseAuthDomainForDebug() || "(unknown)"
       const handler = `https://${authDomain}/__/auth/handler`
       const hint =

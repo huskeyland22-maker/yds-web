@@ -1,6 +1,11 @@
 import { initializeApp } from "firebase/app"
 import { getApps, getApp } from "firebase/app"
-import { browserLocalPersistence, getAuth, setPersistence } from "firebase/auth"
+import {
+  browserLocalPersistence,
+  getAuth,
+  getRedirectResult,
+  initializeAuth,
+} from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import { getMessaging, isSupported } from "firebase/messaging"
 import {
@@ -61,16 +66,52 @@ if (hasFirebaseConfig()) {
   console.warn("[firebase] partial env (need all VITE_FIREBASE_* keys) — Firebase disabled")
 }
 
-export const auth = app ? getAuth(app) : null
+/**
+ * Persistence must be set at Auth construction — never call setPersistence
+ * before getRedirectResult on redirect return (drops the result).
+ */
+function createFirebaseAuth(firebaseApp) {
+  if (!firebaseApp) return null
+  try {
+    return initializeAuth(firebaseApp, { persistence: browserLocalPersistence })
+  } catch {
+    return getAuth(firebaseApp)
+  }
+}
+
+export const auth = app ? createFirebaseAuth(app) : null
 export const db = app ? getFirestore(app) : null
 
-/** Ensure Auth persists across redirect return (IndexedDB / local). */
-export const authPersistenceReady = auth
-  ? setPersistence(auth, browserLocalPersistence).catch((err) => {
-      console.warn("[firebase] setPersistence failed", err?.code || err)
-      return null
-    })
-  : Promise.resolve(null)
+/**
+ * Consume redirect result once at module load (before React effects).
+ * App.jsx must await this promise — do not call getRedirectResult again.
+ */
+export const redirectResultPromise = auth
+  ? getRedirectResult(auth)
+      .then((result) => ({
+        user: result?.user ?? null,
+        error: null,
+        redirectResultPresent: result != null,
+      }))
+      .catch((err) => {
+        console.error("로그인 실패", err?.code || err, err?.message || err)
+        return {
+          user: null,
+          error: {
+            code:
+              typeof err?.code === "string" && err.code.trim()
+                ? err.code.trim()
+                : "redirect_failed",
+            message:
+              typeof err?.message === "string" ? err.message : String(err ?? "redirect_failed"),
+          },
+          redirectResultPresent: false,
+        }
+      })
+  : Promise.resolve({ user: null, error: null, redirectResultPresent: false })
+
+/** @deprecated kept for call sites that awaited persistence before settle — now a no-op ready. */
+export const authPersistenceReady = Promise.resolve(null)
 
 // Re-export settling key for App redirect flow (no secret).
 export { FIREBASE_REDIRECT_SETTLING_KEY }
