@@ -29,6 +29,11 @@ describe("iOS PWA header meta + safe area", () => {
       /@media all and \(display-mode: standalone\)\s*\{[\s\S]*?background-color:\s*#0b0e14/,
     )
     assert.match(css, /html\.yds-ios-standalone/)
+    /* Do not force filter on every header descendant (iOS soft-raster bug) */
+    assert.doesNotMatch(
+      css,
+      /\.yds-mobile-app-header \*,\s*\n\s*\.yds-mobile-app-header \*::before/,
+    )
   })
 
   it("build-meta forces light PWA manifest chrome colors", () => {

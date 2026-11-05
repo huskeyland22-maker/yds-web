@@ -9879,13 +9879,10 @@ html.yds-ios-standalone body {
 html.yds-ios-standalone .yds-mobile-app-header,
 html.yds-ios-standalone .yds-mobile-app-header__safe,
 html.yds-ios-standalone .yds-mobile-app-header__bar {
-  background-color: #ffffff !important;
-  background-image: none !important;
-  opacity: 1 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  -webkit-filter: none !important;
+  background-color: #ffffff;
+  background-image: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 @keyframes marketFlashUp {
@@ -14791,24 +14788,16 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
     display: none !important;
   }
 
-  /* Mobile top chrome: opaque white, no glass blur (Safari / PWA). */
+  /*
+   * Header only — never apply filter/-webkit-filter to descendants.
+   * Explicit filter:none on * was promoting compositor layers and soft-rasterizing
+   * menu/logo/login text in iOS home-screen PWA (white blur; body/nav stayed sharp).
+   */
   .yds-mobile-app-header {
-    background-color: #ffffff !important;
-    background-image: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    -webkit-filter: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .yds-mobile-app-header *,
-  .yds-mobile-app-header *::before,
-  .yds-mobile-app-header *::after {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    filter: none !important;
-    -webkit-filter: none !important;
+    background-color: #ffffff;
+    background-image: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 

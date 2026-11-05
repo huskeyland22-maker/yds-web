@@ -22,7 +22,7 @@ describe("membership plan badge UI", () => {
     const mobile = readFileSync(join(root, "vite-project/src/components/layout/MobileAppHeader.jsx"), "utf8")
     assert.match(mobile, /MembershipPlanBadge/)
     assert.match(mobile, /displayName|\.email/)
-    assert.match(mobile, /data-yds-mobile-header="pwa-safe-20261105"/)
+    assert.match(mobile, /data-yds-mobile-header="pwa-sharp-20261106"/)
     assert.match(mobile, /yds-mobile-app-header__safe/)
     assert.match(mobile, /yds-mobile-app-header__bar/)
     assert.match(mobile, /bg-white/)
@@ -43,8 +43,14 @@ describe("membership plan badge UI", () => {
     const shell = readFileSync(join(root, "vite-project/src/styles/yds-shell-premium.css"), "utf8")
     assert.match(shell, /\.app-shell-host \.yds-mobile-app-header \{[\s\S]*?backdrop-filter:\s*none/)
     assert.match(shell, /\.yds-theme-premium \.yds-mobile-app-header \{[\s\S]*?backdrop-filter:\s*none/)
-    assert.match(shell, /background-color:\s*#ffffff\s*!important/)
+    assert.match(shell, /background-color:\s*#ffffff/)
     assert.equal(shell.includes("backdrop-filter: blur(8px)"), false)
+    /* Explicit filter on header descendants causes iOS PWA soft rasterization */
+    assert.doesNotMatch(
+      shell,
+      /\.yds-mobile-app-header \*,\s*\n\.app-shell-host \.yds-mobile-app-header \*::before/,
+    )
+    assert.doesNotMatch(shell, /\.yds-mobile-app-header \{[\s\S]*?isolation:\s*isolate/)
   })
 
   it("admin dashboard still keeps AppReleaseEnvBadge for ops", () => {

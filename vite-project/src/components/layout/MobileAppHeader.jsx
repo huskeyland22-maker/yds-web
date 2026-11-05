@@ -7,7 +7,7 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout, a
   return (
     <header
       className="yds-mobile-app-header flex shrink-0 flex-col border-b border-slate-200 bg-white lg:hidden"
-      data-yds-mobile-header="pwa-safe-20261105"
+      data-yds-mobile-header="pwa-sharp-20261106"
     >
       {/* Opaque safe-area band — keeps notch/status region white in iOS PWA */}
       <div className="yds-mobile-app-header__safe" aria-hidden="true" />

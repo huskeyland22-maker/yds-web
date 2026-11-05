@@ -218,6 +218,7 @@
 - [x] **Preview 시장지표 저장** — Staging 테이블 생성 후 `service_role` GRANT 누락(42501) → `scripts/staging-panic-grants.sql` 적용. Preview `POST /api/panic?mode=update` 200·history.ok 검증. 권한 오류 매핑(`preview_table_permission_denied`) 추가
 - [x] **모바일 상단 헤더 선명화** — 반투명/`backdrop-filter` 제거, 불투명 `#fff` 배경·로고/메뉴/PRO/로그아웃 고대비 (하단 네비·카드 미변경)
 - [x] **iPhone 홈화면 PWA 헤더 잘림** — `black-translucent`→`default`, light `theme-color`/manifest, safe-area 밴드, standalone body 다크 제거
+- [x] **iPhone PWA 헤더 흰 흐림** — 헤더 자손 `filter:none !important` + `isolation:isolate` 제거 (WebKit compositing soft-raster)
 
 ---
 

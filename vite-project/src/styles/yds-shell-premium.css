@@ -24,27 +24,19 @@
   color: rgba(248, 250, 252, 0.92);
 }
 
-/* Mobile header must stay opaque & sharp on iOS — no glass / translucency. */
+/*
+ * Mobile header chrome.
+ * Do NOT set filter / -webkit-filter (even to none) on the header or its descendants,
+ * and avoid isolation:isolate — WebKit iOS standalone promotes those into compositor
+ * layers that rasterize soft (white-blurred text/icons while the 1px border stays sharp).
+ */
 .app-shell-host .yds-mobile-app-header {
   position: relative;
   z-index: 40;
-  isolation: isolate;
-  background-color: #ffffff !important;
-  background-image: none !important;
-  opacity: 1 !important;
-  filter: none !important;
-  -webkit-filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.app-shell-host .yds-mobile-app-header *,
-.app-shell-host .yds-mobile-app-header *::before,
-.app-shell-host .yds-mobile-app-header *::after {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  -webkit-filter: none !important;
+  background-color: #ffffff;
+  background-image: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .app-shell-host .yds-mobile-bottom-nav {
@@ -145,13 +137,10 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header {
-  background-color: #ffffff !important;
-  background-image: none !important;
-  opacity: 1 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  -webkit-filter: none !important;
+  background-color: #ffffff;
+  background-image: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header .font-display,
@@ -162,8 +151,7 @@
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-50"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-100"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-200"] {
-  color: #071628 !important;
-  opacity: 1 !important;
+  color: #071628;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-500"],
@@ -176,25 +164,15 @@
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-400"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-500"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-600"] {
-  color: #334155 !important;
-  opacity: 1 !important;
+  color: #334155;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header button,
 .app-shell-host.yds-theme-premium .yds-desktop-topbar .rounded-card {
-  border-color: #c2ccd9 !important;
-  background-color: #ffffff !important;
-  color: #071628 !important;
-  opacity: 1 !important;
+  border-color: #c2ccd9;
+  background-color: #ffffff;
+  color: #071628;
   box-shadow: none;
-}
-
-.app-shell-host.yds-theme-premium .yds-mobile-app-header .yds-membership-plan-badge {
-  opacity: 1 !important;
-  filter: none !important;
-  -webkit-filter: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-bottom-nav {
