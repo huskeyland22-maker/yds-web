@@ -27,6 +27,11 @@ import {
   stripNilEntries,
   validatePanicSavePayload,
 } from "./panicSaveValidate.js"
+import {
+  fetchPanicMirrorJson,
+  isUsablePanicHistoryLatestMirror,
+  isUsablePanicLatestMirror,
+} from "./panicPreviewMirror.js"
 
 export function panicNoStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -96,10 +101,30 @@ export async function handlePanicModeLatest(req, res) {
   const fromLatest = panicObjectFromLatestRow(latestRow)
   const fromHistory = panicObjectFromHistoryCoreRow(historyRow)
   const fromEav = rows?.length ? panicObjectFromRows(rows) : null
-  const data = fromLatest ?? fromHistory ?? fromEav
+  let data = fromLatest ?? fromHistory ?? fromEav
+  let mirrored = false
 
   if (!data) {
-    respondEmergency("no_db_rows")
+    const mirror = await fetchPanicMirrorJson("/api/panic?mode=latest")
+    if (mirror?.ok && isUsablePanicLatestMirror(mirror.json)) {
+      const mirroredJson = mirror.json
+      mirrored = true
+      res.status(200).json({
+        ...mirroredJson,
+        meta: {
+          ...(mirroredJson.meta && typeof mirroredJson.meta === "object" ? mirroredJson.meta : {}),
+          mirroredFrom: "preview_read_mirror",
+        },
+        sources: {
+          ...(mirroredJson.sources && typeof mirroredJson.sources === "object"
+            ? mirroredJson.sources
+            : {}),
+          preview_read_mirror: true,
+        },
+      })
+      return
+    }
+    respondEmergency(mirrored ? "mirror_empty" : "no_db_rows")
     return
   }
 
@@ -153,6 +178,26 @@ export async function handlePanicModeHistory(req, res) {
       from: from || null,
       to: to || null,
     })
+    if (rows.length < 1) {
+      const qs = new URLSearchParams({ mode: "history" })
+      if (limit) qs.set("limit", String(limit))
+      if (from) qs.set("from", String(from))
+      if (to) qs.set("to", String(to))
+      if (includeCycle) qs.set("cycle", "1")
+      const mirror = await fetchPanicMirrorJson(`/api/panic?${qs}`)
+      const mirroredRows = Array.isArray(mirror?.json?.rows) ? mirror.json.rows : []
+      if (mirror?.ok && mirroredRows.length > 0) {
+        res.status(200).json({
+          ...mirror.json,
+          meta: {
+            ...(mirror.json.meta && typeof mirror.json.meta === "object" ? mirror.json.meta : {}),
+            dbRowCount: mirroredRows.length,
+            mirroredFrom: "preview_read_mirror",
+          },
+        })
+        return
+      }
+    }
     res.status(200).json({
       ok: true,
       rows,
@@ -162,6 +207,20 @@ export async function handlePanicModeHistory(req, res) {
   } catch (e) {
     const msg = e instanceof Error ? e.message : "fetch_failed"
     console.warn("[panic] mode=history", msg)
+    const qs = new URLSearchParams({ mode: "history", limit: "120" })
+    const mirror = await fetchPanicMirrorJson(`/api/panic?${qs}`)
+    const mirroredRows = Array.isArray(mirror?.json?.rows) ? mirror.json.rows : []
+    if (mirror?.ok && mirroredRows.length > 0) {
+      res.status(200).json({
+        ...mirror.json,
+        warning: msg,
+        meta: {
+          ...(mirror.json.meta && typeof mirror.json.meta === "object" ? mirror.json.meta : {}),
+          mirroredFrom: "preview_read_mirror",
+        },
+      })
+      return
+    }
     res.status(200).json({ ok: true, warning: msg, rows: [], cycleRows: undefined })
   }
 }
@@ -175,10 +234,34 @@ export async function handlePanicModeHistoryLatest(req, res) {
   try {
     const rows = await fetchPanicIndexHistoryRows({ limit: 1 })
     const row = rows.length ? rows[rows.length - 1] : null
-    res.status(200).json({ ok: true, row, rows: row ? [row] : [] })
+    if (row) {
+      res.status(200).json({ ok: true, row, rows: [row] })
+      return
+    }
+    const mirror = await fetchPanicMirrorJson("/api/panic?mode=history-latest")
+    if (mirror?.ok && isUsablePanicHistoryLatestMirror(mirror.json)) {
+      res.status(200).json({
+        ...mirror.json,
+        meta: {
+          ...(mirror.json.meta && typeof mirror.json.meta === "object" ? mirror.json.meta : {}),
+          mirroredFrom: "preview_read_mirror",
+        },
+      })
+      return
+    }
+    res.status(200).json({ ok: true, row: null, rows: [] })
   } catch (e) {
     const msg = e instanceof Error ? e.message : "fetch_failed"
     console.warn("[panic] mode=historylatest", msg)
+    const mirror = await fetchPanicMirrorJson("/api/panic?mode=history-latest")
+    if (mirror?.ok && isUsablePanicHistoryLatestMirror(mirror.json)) {
+      res.status(200).json({
+        ...mirror.json,
+        warning: msg,
+        meta: { mirroredFrom: "preview_read_mirror" },
+      })
+      return
+    }
     res.status(200).json({ ok: true, warning: msg, row: null, rows: [] })
   }
 }

@@ -208,6 +208,7 @@
 - [x] AI 상세분석 추천 성과 검증 복구 — `repairImmutableLedgerRecord()` 오타로 비어지던 원장 로드 수정
 - [x] **공포·패닉 동기화 무한 로딩** — hub emergency 시 history-latest 보조 · boot settled 후 empty/error · 시드 날짜 미사용
 - [x] **DBB 로그인 후 화면 미갱신** — 멤버십 확정 전 로딩 유지 · 로그인 캐시 클리어 후 재조회
+- [x] **Preview panic 실데이터 장애** — Staging에 panic 테이블 없음 → Preview read-mirror · SSO 해제 · desk boot timeout
 
 ---
 

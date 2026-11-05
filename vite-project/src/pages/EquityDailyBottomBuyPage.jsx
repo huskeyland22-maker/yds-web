@@ -134,13 +134,32 @@ export default function EquityDailyBottomBuyPage() {
     return () => window.removeEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
   }, [])
 
+  const membershipLoadingSinceRef = useRef(null)
+  const [membershipWaitTick, setMembershipWaitTick] = useState(0)
+  if (membershipLoading) {
+    if (membershipLoadingSinceRef.current == null) membershipLoadingSinceRef.current = Date.now()
+  } else {
+    membershipLoadingSinceRef.current = null
+  }
+
   useEffect(() => {
-    const gate = resolveDbbSnapshotFetchGate({ authReady, membershipLoading, status })
+    if (!membershipLoading) return undefined
+    const timer = window.setTimeout(() => setMembershipWaitTick((n) => n + 1), 8000)
+    return () => window.clearTimeout(timer)
+  }, [membershipLoading, status, refreshedAt])
+
+  useEffect(() => {
+    const gate = resolveDbbSnapshotFetchGate({
+      authReady,
+      membershipLoading,
+      status,
+      membershipLoadingSinceMs: membershipLoadingSinceRef.current,
+      nowMs: Date.now(),
+    })
     if (gate.showLoading) setLoading(true)
     if (!gate.canFetch) return undefined
     const ctrl = new AbortController()
     setLoading(true)
-    setPayload(null)
     fetchEquityDailyBottomBuy(symbol, { signal: ctrl.signal })
       .then((json) => {
         if (!ctrl.signal.aborted) setPayload(applyEquityDailyBottomBuyAccess(json, isPro))
@@ -153,7 +172,7 @@ export default function EquityDailyBottomBuyPage() {
         if (!ctrl.signal.aborted) setLoading(false)
       })
     return () => ctrl.abort()
-  }, [symbol, authReady, membershipLoading, isPro, status, refreshedAt])
+  }, [symbol, authReady, membershipLoading, isPro, status, refreshedAt, membershipWaitTick])
 
   const universe = payload?.universe || []
   const universeKey = universe.map((row) => row.symbol).join("|")

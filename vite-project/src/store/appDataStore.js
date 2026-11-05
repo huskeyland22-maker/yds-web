@@ -510,7 +510,13 @@ export const useAppDataStore = create((set, get) => ({
         fetchPanicHubLatestOptional({ debugLog: false }),
         fetchPanicIndexLatest().catch(() => null),
       ])
-      set({ hubPanicMetrics: hub, latestHistoryRow: latest })
+      // Mark desk sources settled before optional AI report so the panic desk
+      // never waits forever on /api/ai/reports (missing tables on Staging).
+      set({
+        hubPanicMetrics: hub,
+        latestHistoryRow: latest,
+        panicDeskSourcesFetchedAt: Date.now(),
+      })
       if (!get().deskMarketReport && !get().deskMarketReportLoading) {
         await get().loadDeskMarketReport(tradeDate ?? new Date().toISOString().slice(0, 10))
       }
@@ -526,7 +532,10 @@ export const useAppDataStore = create((set, get) => ({
       logFetchFail("desk-metric-sources", e)
       return get().refreshDeskResolvedPanicData()
     } finally {
-      set({ deskMarketReportLoading: false, panicDeskSourcesFetchedAt: Date.now() })
+      set({
+        deskMarketReportLoading: false,
+        panicDeskSourcesFetchedAt: get().panicDeskSourcesFetchedAt ?? Date.now(),
+      })
     }
   },
 

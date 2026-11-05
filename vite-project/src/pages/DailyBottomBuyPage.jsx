@@ -113,15 +113,33 @@ export default function DailyBottomBuyPage() {
     return () => window.removeEventListener(TRADE_RECORDS_CHANGED_EVENT, onChange)
   }, [])
 
+  const membershipLoadingSinceRef = useRef(null)
+  const [membershipWaitTick, setMembershipWaitTick] = useState(0)
+  if (membershipLoading) {
+    if (membershipLoadingSinceRef.current == null) membershipLoadingSinceRef.current = Date.now()
+  } else {
+    membershipLoadingSinceRef.current = null
+  }
+
   useEffect(() => {
-    const gate = resolveDbbSnapshotFetchGate({ authReady, membershipLoading, status })
+    if (!membershipLoading) return undefined
+    const timer = window.setTimeout(() => setMembershipWaitTick((n) => n + 1), 8000)
+    return () => window.clearTimeout(timer)
+  }, [membershipLoading, status, refreshedAt])
+
+  useEffect(() => {
+    const gate = resolveDbbSnapshotFetchGate({
+      authReady,
+      membershipLoading,
+      status,
+      membershipLoadingSinceMs: membershipLoadingSinceRef.current,
+      nowMs: Date.now(),
+    })
     if (gate.showLoading) setLoading(true)
     if (!gate.canFetch) return undefined
     const ctrl = new AbortController()
     setLoading(true)
     setError(null)
-    // Drop pre-login cache so FREE/PRO payload swap is visible after auth settles.
-    setPayload(null)
     fetchDailyBottomBuySnapshot({ signal: ctrl.signal })
       .then((data) => {
         if (ctrl.signal.aborted) return
@@ -137,7 +155,7 @@ export default function DailyBottomBuyPage() {
         if (!ctrl.signal.aborted) setLoading(false)
       })
     return () => ctrl.abort()
-  }, [authReady, membershipLoading, isPro, status, refreshedAt])
+  }, [authReady, membershipLoading, isPro, status, refreshedAt, membershipWaitTick])
 
   useEffect(() => {
     if (!picker.open) return undefined

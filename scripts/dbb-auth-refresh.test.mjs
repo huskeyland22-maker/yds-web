@@ -11,6 +11,7 @@ describe("dbb auth refresh gate", () => {
     assert.deepEqual(resolveDbbSnapshotFetchGate({ authReady: false, membershipLoading: false }), {
       canFetch: false,
       showLoading: true,
+      softTimedOut: false,
     })
   })
 
@@ -18,17 +19,30 @@ describe("dbb auth refresh gate", () => {
     assert.deepEqual(resolveDbbSnapshotFetchGate({ authReady: true, membershipLoading: true }), {
       canFetch: false,
       showLoading: true,
+      softTimedOut: false,
     })
   })
 
   it("fetches only after auth + membership are ready", () => {
     assert.deepEqual(
       resolveDbbSnapshotFetchGate({ authReady: true, membershipLoading: false, status: "free" }),
-      { canFetch: true, showLoading: false },
+      { canFetch: true, showLoading: false, softTimedOut: false },
     )
     assert.deepEqual(
       resolveDbbSnapshotFetchGate({ authReady: true, membershipLoading: false, status: "pro" }),
-      { canFetch: true, showLoading: false },
+      { canFetch: true, showLoading: false, softTimedOut: false },
     )
+  })
+
+  it("soft-times out a stuck membership loading state", () => {
+    const gate = resolveDbbSnapshotFetchGate({
+      authReady: true,
+      membershipLoading: true,
+      membershipLoadingSinceMs: 1,
+      nowMs: 20_000,
+      membershipWaitMs: 8000,
+    })
+    assert.equal(gate.canFetch, true)
+    assert.equal(gate.softTimedOut, true)
   })
 })

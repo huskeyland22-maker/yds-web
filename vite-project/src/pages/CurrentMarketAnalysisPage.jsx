@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { panicDataFromCycleRow } from "../utils/cycleHistoryUtils.js"
 import { hasPanicMetricValues } from "../utils/resolveLatestPanicMetrics.js"
@@ -9,6 +9,8 @@ import {
 import MarketAnalysisDeskCore from "../components/market-analysis/MarketAnalysisDeskCore.jsx"
 import YdsMarketAnalysisOpsMeta from "../components/market-analysis/YdsMarketAnalysisOpsMeta.jsx"
 
+const BOOT_FORCE_MS = 10_000
+
 export default function CurrentMarketAnalysisPage() {
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const historySource = useAppDataStore((s) => s.cycleHistorySource)
@@ -17,6 +19,14 @@ export default function CurrentMarketAnalysisPage() {
   const panicIndexFetchedAt = useAppDataStore((s) => s.panicIndexFetchedAt)
   const panicDeskSourcesFetchedAt = useAppDataStore((s) => s.panicDeskSourcesFetchedAt)
   const lastCycleBundleError = useAppDataStore((s) => s.lastCycleBundleError)
+  const loadDeskMetricSources = useAppDataStore((s) => s.loadDeskMetricSources)
+  const [forceSettled, setForceSettled] = useState(false)
+
+  useEffect(() => {
+    void loadDeskMetricSources()
+    const timer = window.setTimeout(() => setForceSettled(true), BOOT_FORCE_MS)
+    return () => window.clearTimeout(timer)
+  }, [loadDeskMetricSources])
 
   const history = useMemo(() => {
     if (historySource !== "supabase-index-history" || !Array.isArray(storeRows)) return []
@@ -53,10 +63,16 @@ export default function CurrentMarketAnalysisPage() {
 
   const hasLive = Boolean(panicData && hasPanicMetricValues(panicData))
   const bootSettled =
+    forceSettled ||
     panicDeskSourcesFetchedAt != null ||
     panicIndexFetchedAt != null ||
     lastCycleBundleError != null
   const loadingState = resolvePanicBuyLoadingState({ bootSettled, hasLive })
+  const emptyMessage = lastCycleBundleError
+    ? "시장 지표를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+    : hubPanic?.__emergency === true
+      ? "시장 지표 저장소에 데이터가 없습니다. Preview Staging 스키마 또는 미러 설정을 확인해 주세요."
+      : "표시할 시장 지표가 없습니다. 잠시 후 다시 확인해 주세요."
 
   return (
     <div className="yds-market-analysis min-w-0 w-full">
@@ -77,9 +93,7 @@ export default function CurrentMarketAnalysisPage() {
         </div>
       ) : loadingState.showEmpty ? (
         <div className="yds-market-analysis__loading" role="status" aria-live="polite">
-          {lastCycleBundleError
-            ? "시장 지표를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
-            : "표시할 시장 지표가 없습니다. 잠시 후 다시 확인해 주세요."}
+          {emptyMessage}
         </div>
       ) : (
         <div className="yds-market-analysis__body">
