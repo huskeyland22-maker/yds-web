@@ -1026,7 +1026,7 @@ function App() {
       if (settled?.error?.code) {
         const authDomain = getResolvedFirebaseAuthDomainForDebug() || "(unknown)"
         window.alert(
-          `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${authDomain}\nPreview 도메인이 Firebase Authorized domains에 있는지 확인하세요.`,
+          `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${authDomain}\nGoogle redirect_uri는 https://${authDomain}/__/auth/handler 입니다.\nPreview 호스트는 Firebase Authorized domains에 추가하세요.`,
         )
       }
     })
@@ -1188,10 +1188,13 @@ function App() {
       console.error("로그인 실패", err)
       const code = typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "unknown"
       const authDomain = getResolvedFirebaseAuthDomainForDebug() || "(unknown)"
+      const handler = `https://${authDomain}/__/auth/handler`
       const hint =
         code === "auth/unauthorized-domain"
-          ? `\nFirebase Authorized domains에 현재 호스트를 추가하세요.\nauthDomain=${authDomain}`
-          : `\nauthDomain=${authDomain}`
+          ? `\nFirebase Authorized domains에 현재 페이지 호스트를 추가하세요.\nauthDomain=${authDomain}\nredirect_uri=${handler}`
+          : code === "auth/redirect-uri-mismatch" || /redirect_uri_mismatch/i.test(String(err?.message || ""))
+            ? `\nGoogle OAuth Authorized redirect URIs에 다음이 있어야 합니다.\n${handler}\nauthDomain=${authDomain}`
+            : `\nauthDomain=${authDomain}\nredirect_uri=${handler}`
       window.alert(`로그인에 실패했습니다. 오류 코드: ${code}${hint}`)
     }
   }

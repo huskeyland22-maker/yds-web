@@ -4,6 +4,8 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import {
+  FIREBASE_PROJECT_AUTH_DOMAIN,
+  firebaseAuthHandlerRedirectUri,
   resolveFirebaseAuthDomain,
   shouldClearUserOnAuthNull,
 } from "../vite-project/src/content/ydsFirebaseAuthDomain.js"
@@ -16,20 +18,36 @@ describe("firebase auth domain", () => {
       }),
       "yds-web-kappa.vercel.app",
     )
-  })
-
-  it("uses same-origin host on Preview vercel.app aliases", () => {
     assert.equal(
-      resolveFirebaseAuthDomain("yds-web-fec1e.firebaseapp.com", {
-        hostname: "yds-web-git-integration-yds-windows-mac-so-sung-yangs-projects.vercel.app",
-      }),
-      "yds-web-git-integration-yds-windows-mac-so-sung-yangs-projects.vercel.app",
+      firebaseAuthHandlerRedirectUri("yds-web-kappa.vercel.app"),
+      "https://yds-web-kappa.vercel.app/__/auth/handler",
     )
   })
 
-  it("keeps project auth domain for unknown hosts", () => {
+  it("keeps project authDomain on Preview vercel.app (avoids redirect_uri_mismatch)", () => {
+    const previewHost = "yds-web-git-integration-yds-windows-mac-so-sung-yangs-projects.vercel.app"
+    assert.equal(
+      resolveFirebaseAuthDomain("yds-web-fec1e.firebaseapp.com", { hostname: previewHost }),
+      FIREBASE_PROJECT_AUTH_DOMAIN,
+    )
+    assert.equal(
+      firebaseAuthHandlerRedirectUri(FIREBASE_PROJECT_AUTH_DOMAIN),
+      "https://yds-web-fec1e.firebaseapp.com/__/auth/handler",
+    )
+    // Broken previous behavior produced this mismatched redirect_uri:
+    assert.notEqual(
+      firebaseAuthHandlerRedirectUri(FIREBASE_PROJECT_AUTH_DOMAIN),
+      `https://${previewHost}/__/auth/handler`,
+    )
+  })
+
+  it("keeps project auth domain for unknown hosts and localhost", () => {
     assert.equal(
       resolveFirebaseAuthDomain("yds-web-fec1e.firebaseapp.com", { hostname: "example.com" }),
+      "yds-web-fec1e.firebaseapp.com",
+    )
+    assert.equal(
+      resolveFirebaseAuthDomain("yds-web-fec1e.firebaseapp.com", { hostname: "localhost" }),
       "yds-web-fec1e.firebaseapp.com",
     )
   })

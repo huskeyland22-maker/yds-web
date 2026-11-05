@@ -1,7 +1,17 @@
 /**
  * Firebase authDomain resolution for multi-host deploys.
- * Same-origin authDomain + vercel.json /__/auth rewrite avoids iOS Safari
- * losing the redirect session when authDomain stays on *.firebaseapp.com.
+ *
+ * Google OAuth redirect_uri is always:
+ *   https://<authDomain>/__/auth/handler
+ *
+ * Production uses the custom app host (already registered on the Firebase
+ * Google OAuth client). Preview must NOT use the Preview hostname as
+ * authDomain — that produces redirect_uri_mismatch unless every Preview
+ * alias is manually added to Google Cloud Authorized redirect URIs.
+ *
+ * Preview keeps the Firebase project authDomain so redirect_uri stays:
+ *   https://yds-web-fec1e.firebaseapp.com/__/auth/handler
+ * The Preview page origin still must be in Firebase Authorized domains.
  */
 
 export const FIREBASE_PROJECT_AUTH_DOMAIN = "yds-web-fec1e.firebaseapp.com"
@@ -26,11 +36,21 @@ export function resolveFirebaseAuthDomain(configured, loc) {
         : ""
 
   if (!hostname) return projectDomain
+  // Only Production custom host uses same-origin authDomain (OAuth client already allows it).
   if (hostname === FIREBASE_PRODUCTION_APP_HOST) return FIREBASE_PRODUCTION_APP_HOST
-  if (hostname === "localhost" || hostname === "127.0.0.1") return hostname
-  // Stable Preview / deployment aliases — require Firebase Authorized Domains entry.
-  if (hostname.endsWith(".vercel.app")) return hostname
+  // Preview / localhost / other hosts → project authDomain (stable Google redirect_uri).
   return projectDomain
+}
+
+/**
+ * Exact Google OAuth redirect_uri derived from authDomain (Firebase Auth handler).
+ * @param {string | null | undefined} authDomain
+ * @returns {string | null}
+ */
+export function firebaseAuthHandlerRedirectUri(authDomain) {
+  const host = typeof authDomain === "string" ? authDomain.trim().replace(/^https?:\/\//, "") : ""
+  if (!host) return null
+  return `https://${host}/__/auth/handler`
 }
 
 /**

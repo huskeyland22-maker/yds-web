@@ -209,7 +209,8 @@
 - [x] **공포·패닉 동기화 무한 로딩** — hub emergency 시 history-latest 보조 · boot settled 후 empty/error · 시드 날짜 미사용
 - [x] **DBB 로그인 후 화면 미갱신** — 멤버십 확정 전 로딩 유지 · 로그인 캐시 클리어 후 재조회
 - [x] **Preview panic 실데이터 장애** — Staging에 panic 테이블 없음 → Preview read-mirror · SSO 해제 · desk boot timeout
-- [x] **Preview 로그인 유지** — vercel.app same-origin authDomain · redirect settle 보호 · unauthorized-domain 안내
+- [x] **Preview 로그인 유지** — redirect settle 보호 · unauthorized-domain 안내
+- [x] **Preview redirect_uri_mismatch** — Preview는 project authDomain(`*.firebaseapp.com`) 유지 · Production만 custom host
 - [x] **시장 지표 저장 pipeline 500** — Staging missing table → `preview_schema_missing` 503 + bootstrap SQL
 
 ---
