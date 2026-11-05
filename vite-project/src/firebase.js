@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app"
 import { getApps, getApp } from "firebase/app"
-import { getAuth } from "firebase/auth"
+import { browserLocalPersistence, getAuth, setPersistence } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import { getMessaging, isSupported } from "firebase/messaging"
 import {
@@ -63,6 +63,14 @@ if (hasFirebaseConfig()) {
 
 export const auth = app ? getAuth(app) : null
 export const db = app ? getFirestore(app) : null
+
+/** Ensure Auth persists across redirect return (IndexedDB / local). */
+export const authPersistenceReady = auth
+  ? setPersistence(auth, browserLocalPersistence).catch((err) => {
+      console.warn("[firebase] setPersistence failed", err?.code || err)
+      return null
+    })
+  : Promise.resolve(null)
 
 // Re-export settling key for App redirect flow (no secret).
 export { FIREBASE_REDIRECT_SETTLING_KEY }

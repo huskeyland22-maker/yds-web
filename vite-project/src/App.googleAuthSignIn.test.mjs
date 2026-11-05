@@ -27,9 +27,8 @@ const shouldUseGoogleRedirectSignIn = new Function(
   `return (${extractFunction("shouldUseGoogleRedirectSignIn")})`,
 )()
 const settleGoogleRedirectSignIn = new Function(
-  "clearFirebaseRedirectSettling",
   `return (${extractFunction("settleGoogleRedirectSignIn")})`,
-)(() => {})
+)()
 const shouldSkipResumeReloadForAuthRedirect = new Function(
   `return (${extractFunction("shouldSkipResumeReloadForAuthRedirect")})`,
 )()
@@ -96,7 +95,7 @@ test("redirect success returns the user envelope and does not alert", async () =
   globalThis.alert = (message) => alerts.push(message)
   try {
     const settled = await settleGoogleRedirectSignIn({ app: "auth" }, async () => ({ user }))
-    assert.deepEqual(settled, { user, error: null })
+    assert.deepEqual(settled, { user, error: null, redirectResultPresent: true })
     assert.deepEqual(alerts, [])
   } finally {
     globalThis.alert = previous
@@ -118,6 +117,7 @@ test("redirect failure returns error envelope without the login alert", async ()
     })
     assert.equal(settled.user, null)
     assert.equal(settled.error.code, "auth/redirect-cancelled-by-user")
+    assert.equal(settled.redirectResultPresent, false)
     assert.deepEqual(alerts, [])
     assert.equal(errors.length, 1)
     assert.equal(errors[0][1], "auth/redirect-cancelled-by-user")
@@ -137,11 +137,22 @@ test("login branches popup and redirect without changing the auth listener", () 
   assert.match(login, /signInWithPopup\(auth, provider\)/)
   assert.match(login, /로그인에 실패했습니다/)
   assert.match(source, /signInWithPopup\(auth, provider\)/)
-  assert.match(source, /settleGoogleRedirectSignIn\(auth\)\.then\(\(settled\) =>/)
+  assert.match(source, /settleGoogleRedirectSignIn\(auth\)/)
   assert.match(source, /setUser\(settled\.user\)/)
   assert.match(source, /if \(redirectUser && auth\.currentUser\)/)
+  assert.match(source, /authBootPending/)
+  assert.match(source, /AuthDebugPanel/)
+  assert.match(source, /authPending/)
   assert.match(source, /shouldSkipResumeReloadForAuthRedirect\(window\.sessionStorage\)/)
   assert.match(source, /window\.location\.reload\(\)/)
+})
+
+test("redirect settle does not clear settling flag inside settleGoogleRedirectSignIn", () => {
+  assert.doesNotMatch(
+    extractFunction("settleGoogleRedirectSignIn"),
+    /clearFirebaseRedirectSettling/,
+  )
+  assert.match(source, /browserLocalPersistence|authPersistenceReady/)
 })
 
 test("iOS resume reload waits while a Firebase redirect is pending", () => {

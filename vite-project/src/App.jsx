@@ -12,7 +12,14 @@ import {
 import { doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import {
+  createEmptyAuthDiagSnapshot,
+  isAuthUiPending,
+  mergeAuthDiagSnapshot,
+  publishAuthDiagSnapshot,
+} from "./content/ydsAuthDiagnostics.js"
+import {
   clearFirebaseRedirectSettling,
+  firebaseAuthHandlerRedirectUri,
   isFirebaseRedirectSettling,
   markFirebaseRedirectSettling,
   shouldClearUserOnAuthNull,
@@ -83,15 +90,23 @@ import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
 import { isHomeV5ValidationRoute } from "./home-preview/homeV5ValidationRoute.js"
 import AppSidebar from "./components/layout/AppSidebar.jsx"
 import MembershipPlanBadge from "./components/MembershipPlanBadge.jsx"
+import AuthDebugPanel from "./components/AuthDebugPanel.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
 import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
 import MobileDrawer from "./components/layout/MobileDrawer.jsx"
 import AccountSettingsPanel from "./components/layout/AccountSettingsPanel.jsx"
 import MobileShellDebugOverlay from "./components/layout/MobileShellDebugOverlay.jsx"
+import { useMembership } from "./context/MembershipContext.jsx"
 import TradeRecordsCloudSyncBootstrap from "./hooks/useTradeRecordsCloudSync.js"
 import { useIsMobileLayout } from "./hooks/useIsMobileLayout.js"
 import { isDevMode } from "./utils/devMode.js"
-import { auth, db, getResolvedFirebaseAuthDomainForDebug, hasFirebaseConfig } from "./firebase.js"
+import {
+  auth,
+  authPersistenceReady,
+  db,
+  getResolvedFirebaseAuthDomainForDebug,
+  hasFirebaseConfig,
+} from "./firebase.js"
 import { subscribePanicHubRealtime } from "./lib/panicHubRealtime.js"
 import { useAppDataStore } from "./store/appDataStore.js"
 import { usePanicStore } from "./store/panicStore.js"
@@ -492,10 +507,17 @@ function shouldUseGoogleRedirectSignIn(win) {
 }
 
 async function settleGoogleRedirectSignIn(authInstance, getResult = getRedirectResult) {
-  if (!authInstance) return { user: null, error: null }
+  if (!authInstance) {
+    return { user: null, error: null, redirectResultPresent: false }
+  }
   try {
     const result = await getResult(authInstance)
-    return { user: result?.user ?? null, error: null }
+    const hasEnvelope = result != null
+    return {
+      user: result?.user ?? null,
+      error: null,
+      redirectResultPresent: hasEnvelope,
+    }
   } catch (err) {
     console.error("로그인 실패", err?.code || err, err?.message || err)
     return {
@@ -504,9 +526,8 @@ async function settleGoogleRedirectSignIn(authInstance, getResult = getRedirectR
         code: typeof err?.code === "string" && err.code.trim() ? err.code.trim() : "redirect_failed",
         message: typeof err?.message === "string" ? err.message : String(err ?? "redirect_failed"),
       },
+      redirectResultPresent: false,
     }
-  } finally {
-    clearFirebaseRedirectSettling()
   }
 }
 
@@ -531,6 +552,28 @@ function App() {
   const panelCloseTimerRef = useRef(null)
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
+  const [authBootReady, setAuthBootReady] = useState(() => !auth)
+  const [authDiag, setAuthDiag] = useState(() => {
+    const authDomain = getResolvedFirebaseAuthDomainForDebug()
+    return mergeAuthDiagSnapshot(createEmptyAuthDiagSnapshot(), {
+      authConfigPresent: hasFirebaseConfig(),
+      authInstancePresent: Boolean(auth),
+      authInitialized: Boolean(auth),
+      authBootReady: !auth,
+      authLoading: Boolean(auth),
+      authDomain,
+      handlerRedirectUri: firebaseAuthHandlerRedirectUri(authDomain),
+      pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
+      redirectSettling: isFirebaseRedirectSettling(),
+    })
+  })
+  const { status: membershipStatus } = useMembership()
+  const [redirectSettlingUi, setRedirectSettlingUi] = useState(() => isFirebaseRedirectSettling())
+  const authPending = isAuthUiPending({
+    authBootReady,
+    redirectSettling: redirectSettlingUi,
+    hasUser: Boolean(user),
+  })
   const [saveSuccessToast, setSaveSuccessToast] = useState(false)
   const [appToast, setAppToast] = useState(null)
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
@@ -989,51 +1032,168 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!auth) return undefined
+    setAuthDiag((prev) => {
+      const next = mergeAuthDiagSnapshot(prev, {
+        membershipStatus: membershipStatus ?? null,
+        authBootReady,
+        authLoading: !authBootReady,
+        redirectSettling: redirectSettlingUi,
+        currentUserPresent: Boolean(user),
+      })
+      publishAuthDiagSnapshot(next)
+      return next
+    })
+  }, [membershipStatus, authBootReady, redirectSettlingUi, user])
+
+  useEffect(() => {
+    if (!auth) {
+      setAuthBootReady(true)
+      setRedirectSettlingUi(false)
+      const snap = mergeAuthDiagSnapshot(createEmptyAuthDiagSnapshot(), {
+        authConfigPresent: hasFirebaseConfig(),
+        authInstancePresent: false,
+        authInitialized: false,
+        authBootReady: true,
+        authLoading: false,
+        redirectSettling: false,
+        currentUserPresent: false,
+        onAuthStateChangedHasUser: false,
+        redirectResultHasUser: false,
+        redirectResultPresent: false,
+        membershipStatus: membershipStatus ?? null,
+        pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
+      })
+      setAuthDiag(snap)
+      publishAuthDiagSnapshot(snap)
+      return undefined
+    }
+
     let redirectUser = null
+    let redirectSettleDone = false
     let cancelled = false
+    const authDomain = getResolvedFirebaseAuthDomainForDebug()
+    setAuthBootReady(false)
+    setRedirectSettlingUi(isFirebaseRedirectSettling())
+
+    const patchDiag = (patch) => {
+      setAuthDiag((prev) => {
+        const next = mergeAuthDiagSnapshot(prev, {
+          authConfigPresent: hasFirebaseConfig(),
+          authInstancePresent: true,
+          authInitialized: true,
+          authDomain,
+          handlerRedirectUri: firebaseAuthHandlerRedirectUri(authDomain),
+          pageHostname: typeof window !== "undefined" ? window.location.hostname : null,
+          membershipStatus: membershipStatus ?? null,
+          ...patch,
+        })
+        publishAuthDiagSnapshot(next)
+        return next
+      })
+    }
+
+    patchDiag({
+      authBootReady: false,
+      authLoading: true,
+      redirectSettling: isFirebaseRedirectSettling(),
+    })
+
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+      patchDiag({
+        onAuthStateChangedHasUser: Boolean(nextUser),
+        currentUserPresent: Boolean(nextUser || auth.currentUser),
+      })
       if (nextUser) {
         redirectUser = null
         clearFirebaseRedirectSettling()
+        setRedirectSettlingUi(false)
         setUser(nextUser)
+        if (redirectSettleDone) {
+          setAuthBootReady(true)
+          patchDiag({ authBootReady: true, authLoading: false, redirectSettling: false })
+        }
         return
       }
       if (redirectUser && auth.currentUser) {
         setUser(redirectUser)
         return
       }
-      // Do not wipe UI auth while Google redirect is still settling (mobile Preview).
+      // Do not wipe UI auth while Google redirect / boot is still settling (mobile Preview).
       if (
         !shouldClearUserOnAuthNull({
           nextUser,
-          redirectSettling: isFirebaseRedirectSettling(),
+          redirectSettling: isFirebaseRedirectSettling() || !redirectSettleDone,
           authCurrentUser: auth.currentUser,
+          authBootPending: !redirectSettleDone,
         })
       ) {
         return
       }
       redirectUser = null
       setUser(null)
+      patchDiag({
+        currentUserPresent: false,
+        onAuthStateChangedHasUser: false,
+      })
     })
-    void settleGoogleRedirectSignIn(auth).then((settled) => {
+
+    void (async () => {
+      try {
+        await authPersistenceReady
+      } catch {
+        // persistence warning already logged
+      }
       if (cancelled) return
+      const settled = await settleGoogleRedirectSignIn(auth)
+      if (cancelled) return
+      redirectSettleDone = true
+      patchDiag({
+        redirectResultPresent: Boolean(settled?.redirectResultPresent),
+        redirectResultHasUser: Boolean(settled?.user),
+        redirectErrorCode: settled?.error?.code ?? null,
+        currentUserPresent: Boolean(settled?.user || auth.currentUser),
+      })
       if (settled?.user) {
         redirectUser = settled.user
         setUser(settled.user)
+        clearFirebaseRedirectSettling()
+        setRedirectSettlingUi(false)
+        setAuthBootReady(true)
+        patchDiag({
+          authBootReady: true,
+          authLoading: false,
+          redirectSettling: false,
+          currentUserPresent: true,
+        })
         return
       }
       if (settled?.error?.code) {
-        const authDomain = getResolvedFirebaseAuthDomainForDebug() || "(unknown)"
+        const domain = authDomain || "(unknown)"
         window.alert(
-          `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${authDomain}\nGoogle redirect_uri는 https://${authDomain}/__/auth/handler 입니다.\nPreview 호스트는 Firebase Authorized domains에 추가하세요.`,
+          `로그인에 실패했습니다. 오류 코드: ${settled.error.code}\nauthDomain: ${domain}\nGoogle redirect_uri는 https://${domain}/__/auth/handler 입니다.\nPreview 호스트는 Firebase Authorized domains에 추가하세요.`,
         )
       }
-    })
+      if (auth.currentUser) {
+        setUser(auth.currentUser)
+        patchDiag({ currentUserPresent: true })
+      }
+      clearFirebaseRedirectSettling()
+      setRedirectSettlingUi(false)
+      setAuthBootReady(true)
+      patchDiag({
+        authBootReady: true,
+        authLoading: false,
+        redirectSettling: false,
+        currentUserPresent: Boolean(auth.currentUser),
+      })
+    })()
+
     return () => {
       cancelled = true
       unsubscribe()
     }
+    // membershipStatus read only for diag stamps; auth boot must not re-run on membership changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth])
 
   useEffect(() => {
@@ -1427,6 +1587,7 @@ function App() {
           user={user}
           onLogin={login}
           onLogout={logout}
+          authPending={authPending}
         />
         <header className="yds-desktop-topbar hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] px-3 py-2 sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
           <div className="flex flex-wrap items-center justify-end gap-1.5">
@@ -1455,6 +1616,14 @@ function App() {
                         로그아웃
                       </button>
                     </>
+                  ) : authPending ? (
+                    <span
+                      className="text-trading-sm font-medium text-slate-400"
+                      data-yds-auth-pending="1"
+                      aria-live="polite"
+                    >
+                      확인 중…
+                    </span>
                   ) : (
                     <button
                       type="button"
@@ -2081,6 +2250,7 @@ function App() {
         onLogin={login}
         onLogout={logout}
       />
+      <AuthDebugPanel snapshot={authDiag} />
       {showDevDebugChrome ? <MobileShellDebugOverlay /> : null}
       {showDevDebugChrome ? (
         <>

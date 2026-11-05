@@ -88,11 +88,17 @@ export function isFirebaseRedirectSettling(storeTarget = typeof window !== "unde
 
 /**
  * Decide whether an auth-null event should clear the UI user during redirect settle.
- * @param {{ nextUser?: object | null, redirectSettling?: boolean, authCurrentUser?: object | null }} input
+ * @param {{
+ *   nextUser?: object | null
+ *   redirectSettling?: boolean
+ *   authCurrentUser?: object | null
+ *   authBootPending?: boolean
+ * }} input
  */
 export function shouldClearUserOnAuthNull(input = {}) {
   if (input.nextUser) return false
   if (input.authCurrentUser) return false
   if (input.redirectSettling) return false
+  if (input.authBootPending) return false
   return true
 }

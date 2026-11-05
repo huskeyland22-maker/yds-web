@@ -1,7 +1,7 @@
 import { Menu } from "lucide-react"
 import MembershipPlanBadge from "../MembershipPlanBadge.jsx"
 
-export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout }) {
+export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout, authPending = false }) {
   const name = user?.displayName || user?.email || "로그인 유저"
 
   return (
@@ -42,6 +42,14 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
               로그아웃
             </button>
           </>
+        ) : authPending ? (
+          <span
+            className="text-[11px] font-medium text-slate-400"
+            data-yds-auth-pending="1"
+            aria-live="polite"
+          >
+            확인 중…
+          </span>
         ) : (
           <button type="button" onClick={onLogin} className="text-[11px] font-medium text-slate-300">
             로그인
