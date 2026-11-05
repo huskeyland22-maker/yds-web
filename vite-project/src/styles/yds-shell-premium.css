@@ -24,13 +24,27 @@
   color: rgba(248, 250, 252, 0.92);
 }
 
-/* Mobile header must stay opaque on iOS — blur + translucent bg makes chrome look stacked. */
+/* Mobile header must stay opaque & sharp on iOS — no glass / translucency. */
 .app-shell-host .yds-mobile-app-header {
   position: relative;
   z-index: 40;
   isolation: isolate;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  -webkit-filter: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+.app-shell-host .yds-mobile-app-header *,
+.app-shell-host .yds-mobile-app-header *::before,
+.app-shell-host .yds-mobile-app-header *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 .app-shell-host .yds-mobile-bottom-nav {
@@ -125,41 +139,62 @@
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header,
 .app-shell-host.yds-theme-premium .yds-desktop-topbar {
-  background-color: var(--yds-bg-elevated);
+  background-color: #ffffff;
   border-bottom: 1px solid var(--yds-border);
   color: var(--yds-text);
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  opacity: 1 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header .font-display,
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-900"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-50"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-100"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-white"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-50"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-100"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-200"] {
-  color: var(--yds-text);
+  color: #071628 !important;
+  opacity: 1 !important;
 }
 
-.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-300"],
-.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-400"],
 .app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-500"],
 .app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-600"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-700"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-800"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-300"],
+.app-shell-host.yds-theme-premium .yds-mobile-app-header [class*="text-slate-400"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-300"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-400"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-500"],
 .app-shell-host.yds-theme-premium .yds-desktop-topbar [class*="text-slate-600"] {
-  color: var(--yds-text-muted);
+  color: #334155 !important;
+  opacity: 1 !important;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header button,
 .app-shell-host.yds-theme-premium .yds-desktop-topbar .rounded-card {
-  border-color: var(--yds-border);
-  background-color: var(--yds-bg-elevated);
-  color: var(--yds-text-secondary);
+  border-color: #c2ccd9 !important;
+  background-color: #ffffff !important;
+  color: #071628 !important;
+  opacity: 1 !important;
   box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-app-header .yds-membership-plan-badge {
+  opacity: 1 !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-bottom-nav {

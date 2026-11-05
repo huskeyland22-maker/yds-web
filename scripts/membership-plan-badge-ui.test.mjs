@@ -22,9 +22,12 @@ describe("membership plan badge UI", () => {
     const mobile = readFileSync(join(root, "vite-project/src/components/layout/MobileAppHeader.jsx"), "utf8")
     assert.match(mobile, /MembershipPlanBadge/)
     assert.match(mobile, /displayName|\.email/)
-    assert.match(mobile, /data-yds-mobile-header="mhb-20261104"/)
+    assert.match(mobile, /data-yds-mobile-header="sharp-20261105"/)
+    assert.match(mobile, /bg-white/)
     assert.doesNotMatch(mobile, /AppReleaseEnvBadge/)
     assert.doesNotMatch(mobile, /backdrop-blur/)
+    assert.doesNotMatch(mobile, /bg-white\/\[/)
+    assert.doesNotMatch(mobile, /text-slate-300\/65/)
   })
 
   it("MembershipPlanBadge uses header state including pending/error paths", () => {
@@ -37,6 +40,7 @@ describe("membership plan badge UI", () => {
     const shell = readFileSync(join(root, "vite-project/src/styles/yds-shell-premium.css"), "utf8")
     assert.match(shell, /\.app-shell-host \.yds-mobile-app-header \{[\s\S]*?backdrop-filter:\s*none/)
     assert.match(shell, /\.yds-theme-premium \.yds-mobile-app-header \{[\s\S]*?backdrop-filter:\s*none/)
+    assert.match(shell, /background-color:\s*#ffffff\s*!important/)
     assert.equal(shell.includes("backdrop-filter: blur(8px)"), false)
   })
 
