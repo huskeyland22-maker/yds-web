@@ -76,7 +76,6 @@ import HomeV5StrategyValidationPage from "./pages/HomeV5StrategyValidationPage.j
 import { isHomeV5PreviewRoute } from "./home-preview/homeV5PreviewRoute.js"
 import { isHomeV5ValidationRoute } from "./home-preview/homeV5ValidationRoute.js"
 import AppSidebar from "./components/layout/AppSidebar.jsx"
-import AppReleaseEnvBadge from "./components/AppReleaseEnvBadge.jsx"
 import MobileAppHeader from "./components/layout/MobileAppHeader.jsx"
 import MobileBottomNav from "./components/layout/MobileBottomNav.jsx"
 import MobileDrawer from "./components/layout/MobileDrawer.jsx"
@@ -1390,7 +1389,6 @@ function App() {
         />
         <header className="yds-desktop-topbar hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] px-3 py-2 backdrop-blur-sm sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
           <div className="flex flex-wrap items-center justify-end gap-1.5">
-            <AppReleaseEnvBadge className="shrink-0" />
             <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 rounded-card border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 transition hover:border-white/[0.12]">
                   {user ? (

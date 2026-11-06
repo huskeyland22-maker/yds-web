@@ -50,6 +50,9 @@
   .yds-inv-cal__title
 ) {
   color: var(--yds-text);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  font-size: var(--yds-fs-page-title);
 }
 
 .app-shell-host.yds-theme-premium :is(

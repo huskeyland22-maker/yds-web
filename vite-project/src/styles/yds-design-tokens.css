@@ -42,16 +42,31 @@
   --yds-legacy-terminal-panel: #0f1319;
   --yds-legacy-terminal-line: rgba(255, 255, 255, 0.06);
 
-  /* —— Typography —— */
+  /* —— Typography ——
+   * Dense investment-desk scale (html root ≈ 14–15px).
+   * Prefer semantic --yds-fs-* in premium sheets over hard-coded max()/clamp().
+   */
   --yds-font-sans: "IBM Plex Sans", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   --yds-font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --yds-text-xs: 0.6875rem;
-  --yds-text-sm: 0.8125rem;
-  --yds-text-base: 0.875rem;
-  --yds-text-md: 0.9375rem;
-  --yds-text-lg: 1.125rem;
-  --yds-text-xl: 1.25rem;
+  --yds-text-xs: 0.6875rem; /* ~11px meta */
+  --yds-text-sm: 0.75rem; /* ~12px aux */
+  --yds-text-base: 0.875rem; /* ~13–14px body */
+  --yds-text-md: 0.875rem; /* ~14px card title */
+  --yds-text-lg: 1.0625rem; /* ~16–17px section */
+  --yds-text-xl: 1.125rem; /* ~18px score */
+  --yds-text-2xl: 1.25rem; /* ~20px major score */
+  --yds-text-page: clamp(1.15rem, 2.2vw, 1.35rem); /* page H1 denser than prior 1.35–1.55 */
+
+  --yds-fs-meta: var(--yds-text-xs);
+  --yds-fs-aux: var(--yds-text-sm);
+  --yds-fs-body: var(--yds-text-base);
+  --yds-fs-card-title: var(--yds-text-md);
+  --yds-fs-section: var(--yds-text-lg);
+  --yds-fs-score: var(--yds-text-xl);
+  --yds-fs-score-lg: var(--yds-text-2xl);
+  --yds-fs-page-title: var(--yds-text-page);
+
   --yds-leading-tight: 1.3;
   --yds-leading-normal: 1.45;
 

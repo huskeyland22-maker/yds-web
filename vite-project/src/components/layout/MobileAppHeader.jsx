@@ -1,5 +1,4 @@
 import { Menu } from "lucide-react"
-import AppReleaseEnvBadge from "../AppReleaseEnvBadge.jsx"
 
 export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout }) {
   return (
@@ -21,7 +20,6 @@ export default function MobileAppHeader({ onMenuOpen, user, onLogin, onLogout })
         </p>
       </div>
       <div className="flex items-center gap-1 justify-end">
-        <AppReleaseEnvBadge />
         {user ? (
           <button
             type="button"

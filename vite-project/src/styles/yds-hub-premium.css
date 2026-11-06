@@ -19,6 +19,9 @@
 
 .app-shell-host.yds-theme-premium .yds-pf-v1-page__title {
   color: var(--yds-text);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  font-size: var(--yds-fs-page-title);
 }
 
 .app-shell-host.yds-theme-premium .yds-pf-v1-page__kicker,
@@ -170,6 +173,9 @@
 
 .app-shell-host.yds-theme-premium .yds-pf-v1__fit-score {
   color: var(--yds-text);
+  font-weight: 750;
+  font-size: var(--yds-fs-score-lg);
+  font-variant-numeric: tabular-nums;
 }
 
 .app-shell-host.yds-theme-premium .yds-pf-v1__fit-label {
@@ -292,6 +298,12 @@
 .app-shell-host.yds-theme-premium .yds-user-watchlist__score-val,
 .app-shell-host.yds-theme-premium .yds-user-watchlist__grades dd {
   color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__score-val {
+  font-weight: 800;
+  font-size: var(--yds-fs-score-lg);
+  letter-spacing: -0.02em;
 }
 
 .app-shell-host.yds-theme-premium .yds-user-watchlist__nav-link {
