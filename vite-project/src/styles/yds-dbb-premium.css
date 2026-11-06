@@ -1096,6 +1096,13 @@
   row-gap: 0.35rem;
 }
 
+@media (max-width: 379px) {
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all,
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all--cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all__row {
   background: var(--yds-bg-elevated);
   border: 1px solid var(--yds-border);
