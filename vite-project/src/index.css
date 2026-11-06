@@ -39629,21 +39629,73 @@ button.yds-dbb-all__row.is-selected {
   padding-top: 0.85rem;
   border-top: 1px solid rgba(148, 163, 184, 0.16);
 }
-.yds-dbb--equity-dash .yds-dbb-all {
+/* 2-column list of original compact rows (not enlarged card tiles) */
+.yds-dbb--equity-dash .yds-dbb-all,
+.yds-dbb--equity-dash .yds-dbb-all--cards {
+  display: grid;
+  /* Responsive halves (~48–49% each after column-gap) */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0.55rem;
+  row-gap: 0.35rem;
+  width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  align-items: start;
 }
 .yds-dbb--equity-dash .yds-dbb-all__row {
   min-width: 0;
+  width: 100%;
+  /* Compact row metrics (same as .yds-dbb-all__row) */
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr) 2.4rem auto;
+  grid-template-areas: none;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  border: 0;
+  background: rgba(15, 23, 42, 0.45);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.yds-dbb--equity-dash .yds-dbb-all__sym,
+.yds-dbb--equity-dash .yds-dbb-all__count,
+.yds-dbb--equity-dash .yds-dbb-all__theme,
+.yds-dbb--equity-dash .yds-dbb-all__stage {
+  grid-area: auto;
+}
+.yds-dbb--equity-dash .yds-dbb-all__sym {
+  font-size: inherit;
+  font-weight: 700;
+}
+.yds-dbb--equity-dash .yds-dbb-all__count {
+  text-align: right;
+  font-weight: inherit;
+  font-size: inherit;
 }
 .yds-dbb--equity-dash .yds-dbb-all__theme,
 .yds-dbb--equity-dash .yds-dbb-all__theme-text {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.yds-dbb--equity-dash .yds-dbb-all__stage {
+  font-size: inherit;
 }
 .yds-dbb--equity-dash button.yds-dbb-all__row.is-selected {
   background: rgba(14, 116, 144, 0.14);
   box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.28);
+}
+.yds-dbb--equity-dash .yds-dbb-all__more {
+  margin-top: 0.35rem;
+}
+@media (max-width: 379px) {
+  .yds-dbb--equity-dash .yds-dbb-all,
+  .yds-dbb--equity-dash .yds-dbb-all--cards {
+    grid-template-columns: 1fr;
+  }
 }
 @media (min-width: 640px) {
   .yds-dbb--equity-dash .yds-dbb-holdings__grid,

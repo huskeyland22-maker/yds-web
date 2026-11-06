@@ -76,10 +76,10 @@ describe("equity research display", () => {
     assert.equal(equitySummaryRow({ ok: true, score: 4, state: { id: "strongLow", label: "STRONG LOW CANDIDATE" } }).stageLabel, "강한 저점")
   })
 
-  it("shows the first 10 names until the full list is opened", () => {
+  it("shows the first 20 names until the full list is opened", () => {
     const shown = equityResearchDisplayList()
     assert.equal(shown.length, 31)
-    assert.deepEqual(equitySummaryVisibleRows(shown, false).map((row) => row.symbol), shown.slice(0, 10).map((row) => row.symbol))
+    assert.deepEqual(equitySummaryVisibleRows(shown, false).map((row) => row.symbol), shown.slice(0, 20).map((row) => row.symbol))
     assert.equal(equitySummaryVisibleRows(shown, true).length, 31)
     assert.equal(equitySummaryToggleLabel(shown.length, false), "전체 31개 종목 보기 ▼")
     assert.equal(equitySummaryToggleLabel(shown.length, true), "접기 ▲")
@@ -96,7 +96,7 @@ describe("equity research display", () => {
     assert.equal(shown.find((row) => row.symbol === "NEE").holding, true)
     assert.equal(shown.find((row) => row.symbol === "RXRX").group, "바이오·AI 신약 개발")
     assert.equal(shown.find((row) => row.symbol === "RXRX").nameKo, "리커전 파마슈티컬스")
-    assert.equal(equitySummaryVisibleRows(shown, false).length, 10)
+    assert.equal(equitySummaryVisibleRows(shown, false).length, 20)
     assert.equal(equitySummaryVisibleRows(shown, true).length, 33)
     assert.equal(equitySummaryToggleLabel(shown.length, false), "전체 33개 종목 보기 ▼")
     assert.equal(equityUniverse().some((row) => row.symbol === "NEE" || row.symbol === "RXRX"), false)

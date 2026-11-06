@@ -612,7 +612,7 @@ export default function EquityDailyBottomBuyPage() {
           <h2 className="yds-dbb-section__title">전체 개별 종목 목록</h2>
           <p className="yds-dbb__meta">후보·보유와 별도로 워치리스트 전체를 훑어볼 수 있습니다.</p>
         </header>
-        <div className="yds-dbb-all">
+        <div className="yds-dbb-all yds-dbb-all--cards">
           {equitySummaryVisibleRows(orderedSummary, summaryOpen).map((row) => {
             const chosen = chosenEquityView(row, signalViews, extraViews, payload)
             const summary = equitySummaryRow(chosen)
