@@ -25,7 +25,7 @@
   color: var(--yds-text);
   font-weight: 750;
   letter-spacing: -0.015em;
-  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+  font-size: var(--yds-fs-page-title);
 }
 
 .app-shell-host.yds-theme-premium .yds-pf-v1-page__kicker {
@@ -249,7 +249,7 @@
 .app-shell-host.yds-theme-premium .yds-pf-v1__fit-score {
   color: var(--yds-text);
   font-weight: 750;
-  font-size: clamp(1.15rem, 3vw, 1.4rem);
+  font-size: var(--yds-fs-score-lg);
   font-variant-numeric: tabular-nums;
 }
 
@@ -534,7 +534,7 @@
 .app-shell-host.yds-theme-premium .yds-user-watchlist__score-val {
   color: var(--yds-text);
   font-weight: 800;
-  font-size: clamp(1.15rem, 3vw, 1.35rem);
+  font-size: var(--yds-fs-score-lg);
   letter-spacing: -0.02em;
 }
 

@@ -14,12 +14,12 @@
     min-height: 100%;
     scroll-behavior: smooth;
     background: #0b0e14;
-    /* 모바일 퍼스트: 기본 글자 축소 · 데스크에서만 약간 확대 */
+    /* 정보 밀도 우선: 모바일·데스크 동일 14px (사이드바는 shell CSS 유지) */
     font-size: 14px;
   }
   @media (min-width: 1024px) {
     html {
-      font-size: 15px;
+      font-size: 14px;
     }
   }
   body {

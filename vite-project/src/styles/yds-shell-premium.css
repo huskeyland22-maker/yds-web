@@ -66,6 +66,8 @@
   border-right: 1px solid var(--yds-border);
   color: var(--yds-text);
   box-shadow: var(--yds-shadow-card);
+  /* 본문 밀도 조정과 분리 — 사이드바 메뉴 크기 유지 */
+  font-size: 14px;
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar .font-display,

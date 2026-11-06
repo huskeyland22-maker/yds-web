@@ -136,7 +136,7 @@
   color: var(--yds-text);
   font-weight: 750;
   letter-spacing: -0.015em;
-  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+  font-size: var(--yds-fs-page-title);
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-center__kicker {
@@ -358,7 +358,7 @@
   color: var(--yds-text);
   font-weight: 750;
   letter-spacing: -0.015em;
-  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+  font-size: var(--yds-fs-page-title);
 }
 
 .app-shell-host.yds-theme-premium .yds-perf-val__kicker {
@@ -755,7 +755,7 @@
   color: var(--yds-text);
   font-weight: 750;
   letter-spacing: -0.015em;
-  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+  font-size: var(--yds-fs-page-title);
 }
 
 .app-shell-host.yds-theme-premium .yds-panic-lab__kicker {
@@ -1021,7 +1021,7 @@
   color: var(--yds-text);
   font-weight: 750;
   letter-spacing: -0.015em;
-  font-size: clamp(1.35rem, 3.2vw, 1.55rem);
+  font-size: var(--yds-fs-page-title);
 }
 
 .app-shell-host.yds-theme-premium .yds-playbook__kicker {
