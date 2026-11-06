@@ -15,6 +15,10 @@ import {
 } from "../api/_lib/creditSpreads.js"
 import { finiteMetricOrNull, pickHyFromRow } from "../api/_lib/panicIndexHistoryColumns.js"
 import { rowsFromPanicPayload } from "../api/_lib/panicMetricsHub.js"
+import {
+  applyLatestCreditEavMerge,
+  mergeLatestCreditMetric,
+} from "../api/_lib/panicApiHandlers.js"
 
 describe("creditSpreads schedule + series", () => {
   it("uses expected FRED series ids", () => {
@@ -101,5 +105,65 @@ describe("credit risk analysis for AI", () => {
     assert.equal(widening.trend, "widening")
     assert.match(widening.summaryKo, /확대/)
     assert.match(widening.summaryKo, /기준일 2026-11-04/)
+  })
+})
+
+describe("latest credit EAV merge", () => {
+  it("lets cron-credit override probe/manual residual highYield 0", () => {
+    assert.equal(mergeLatestCreditMetric(0, 3.32, "cron-credit"), 3.32)
+    assert.equal(mergeLatestCreditMetric(null, 1.13, "cron-credit"), 1.13)
+  })
+
+  it("does not treat non-cron 0 as globally missing", () => {
+    assert.equal(mergeLatestCreditMetric(0, 3.32, "probe"), 0)
+    assert.equal(mergeLatestCreditMetric(0, 3.32, "manual"), 0)
+    assert.equal(mergeLatestCreditMetric(2.5, 3.32, "manual"), 2.5)
+  })
+
+  it("fills null from any finite EAV value", () => {
+    assert.equal(mergeLatestCreditMetric(null, 1.13, "manual"), 1.13)
+    assert.equal(mergeLatestCreditMetric(undefined, 0, "manual"), 0)
+  })
+
+  it("applies Preview bugfix scenario into creditRisk inputs", () => {
+    const data = {
+      vix: 28.18,
+      fearGreed: 20,
+      putCall: 0.8,
+      highYield: 0,
+      bbbOas: null,
+      panicIndex: 54,
+    }
+    const fromEav = {
+      highYield: 3.32,
+      bbbOas: 1.13,
+      highYieldAsOf: "2026-11-04",
+      bbbOasAsOf: "2026-11-04",
+    }
+    const rows = [
+      { metric_key: "highYield", metric_value: 3.32, source: "cron-credit" },
+      { metric_key: "bbbOas", metric_value: 1.13, source: "cron-credit" },
+      { metric_key: "vix", metric_value: 28.18, source: "manual" },
+    ]
+    applyLatestCreditEavMerge(data, fromEav, rows)
+    assert.equal(data.highYield, 3.32)
+    assert.equal(data.bbbOas, 1.13)
+    assert.equal(data.highYieldAsOf, "2026-11-04")
+    assert.equal(data.bbbOasAsOf, "2026-11-04")
+    assert.equal(data.vix, 28.18)
+    assert.equal(data.fearGreed, 20)
+    assert.equal(data.putCall, 0.8)
+    assert.equal(data.panicIndex, 54)
+
+    const risk = buildCreditRiskAnalysis({
+      highYield: data.highYield,
+      bbbOas: data.bbbOas,
+      highYieldAsOf: data.highYieldAsOf,
+      bbbOasAsOf: data.bbbOasAsOf,
+    })
+    assert.equal(risk.highYield, 3.32)
+    assert.equal(risk.bbbOas, 1.13)
+    assert.match(risk.summaryKo, /3\.32/)
+    assert.match(risk.summaryKo, /1\.13/)
   })
 })

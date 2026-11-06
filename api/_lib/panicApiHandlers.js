@@ -45,6 +45,54 @@ function queryParams(req) {
   return new URL(req.url || "", "http://localhost").searchParams
 }
 
+/**
+ * latest 본문(history/latest)과 EAV credit 값을 병합.
+ * - cron-credit EAV는 probe/manual 잔존값(예: highYield 0)보다 우선
+ * - 그 외에는 null일 때만 EAV로 채움 (유효 0을 전역 결측 취급하지 않음)
+ * @param {unknown} current
+ * @param {unknown} eavValue
+ * @param {unknown} eavSource
+ */
+export function mergeLatestCreditMetric(current, eavValue, eavSource) {
+  if (eavValue == null || eavValue === "") return current ?? null
+  const n = Number(eavValue)
+  if (!Number.isFinite(n)) return current ?? null
+  if (current == null) return n
+  const src = String(eavSource || "")
+  if (src === "cron-credit") return n
+  return current
+}
+
+function eavMetricRow(rows, key) {
+  if (!Array.isArray(rows)) return null
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    if (String(rows[i]?.metric_key || "") === key) return rows[i]
+  }
+  return null
+}
+
+/** @param {Record<string, unknown>} data @param {object|null} fromEav @param {unknown[]} rows */
+export function applyLatestCreditEavMerge(data, fromEav, rows) {
+  if (!data || !fromEav) return data
+  const hyRow = eavMetricRow(rows, "highYield")
+  const bbbRow = eavMetricRow(rows, "bbbOas")
+  const nextHy = mergeLatestCreditMetric(data.highYield, fromEav.highYield, hyRow?.source)
+  const nextBbb = mergeLatestCreditMetric(data.bbbOas, fromEav.bbbOas, bbbRow?.source)
+  if (nextHy !== data.highYield) {
+    data.highYield = nextHy
+    if (fromEav.highYieldAsOf) data.highYieldAsOf = fromEav.highYieldAsOf
+  } else if (data.highYieldAsOf == null && fromEav.highYieldAsOf) {
+    data.highYieldAsOf = fromEav.highYieldAsOf
+  }
+  if (nextBbb !== data.bbbOas) {
+    data.bbbOas = nextBbb
+    if (fromEav.bbbOasAsOf) data.bbbOasAsOf = fromEav.bbbOasAsOf
+  } else if (data.bbbOasAsOf == null && fromEav.bbbOasAsOf) {
+    data.bbbOasAsOf = fromEav.bbbOasAsOf
+  }
+  return data
+}
+
 /** mode=latest — 허브 스냅샷 (구 /api/panic/latest) */
 export async function handlePanicModeLatest(req, res) {
   const respondEmergency = (reason, error) => {
@@ -130,13 +178,8 @@ export async function handlePanicModeLatest(req, res) {
     return
   }
 
-  // Merge credit spreads from EAV when history/latest omit them; attach creditRisk axis.
-  if (fromEav) {
-    if (data.highYield == null && fromEav.highYield != null) data.highYield = fromEav.highYield
-    if (data.bbbOas == null && fromEav.bbbOas != null) data.bbbOas = fromEav.bbbOas
-    if (data.highYieldAsOf == null && fromEav.highYieldAsOf) data.highYieldAsOf = fromEav.highYieldAsOf
-    if (data.bbbOasAsOf == null && fromEav.bbbOasAsOf) data.bbbOasAsOf = fromEav.bbbOasAsOf
-  }
+  // Merge credit spreads from EAV; cron-credit wins over probe/manual residual 0 on history.
+  applyLatestCreditEavMerge(data, fromEav, rows)
   data.creditRisk = buildCreditRiskAnalysis({
     highYield: data.highYield,
     bbbOas: data.bbbOas,
