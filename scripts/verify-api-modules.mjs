@@ -42,6 +42,7 @@ const modules = [
   "api/portfolio-sync.js",
   "api/_lib/portfolioSyncHandler.js",
   "api/_lib/tradeRecordsSyncHandler.js",
+  "api/_lib/previewSupabaseRefDiag.js",
   "api/_lib/dailyBottomBuyEngine.js",
   "api/_lib/dailyBottomBuyRedact.js",
   "api/_lib/dailyBottomBuyHandler.js",

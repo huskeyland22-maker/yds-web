@@ -5,9 +5,11 @@
  * Also hosts (Hobby serverless function cap):
  * - /api/trade-records-sync → rewrite → ?ydsMode=trade-records
  * - /api/me-membership → rewrite → ?ydsMode=me-membership
+ * - /api/preview-supabase-ref → rewrite → ?ydsMode=preview-supabase-ref (TEMP Preview diag)
  */
 import { handleMeMembership } from "./_lib/meMembershipHandler.js"
 import { handlePortfolioSync } from "./_lib/portfolioSyncHandler.js"
+import { handlePreviewSupabaseRefDiag } from "./_lib/previewSupabaseRefDiag.js"
 import { handleTradeRecordsSync } from "./_lib/tradeRecordsSyncHandler.js"
 
 /** @param {{ query?: Record<string, unknown> }} req */
@@ -31,6 +33,11 @@ export default async function handler(req, res) {
   // /api/trade-records-sync → rewrite → ?ydsMode=trade-records
   if (mode === "trade-records") {
     return handleTradeRecordsSync(req, res)
+  }
+
+  // /api/preview-supabase-ref → rewrite → ?ydsMode=preview-supabase-ref (TEMP)
+  if (mode === "preview-supabase-ref") {
+    return handlePreviewSupabaseRefDiag(req, res)
   }
 
   return handlePortfolioSync(req, res)

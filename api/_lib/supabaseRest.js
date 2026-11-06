@@ -11,7 +11,8 @@ import {
   logPanicInsertPayloadTable,
 } from "./panicNumeric.js"
 
-function getSupabaseConfig() {
+/** Same path used by all server Supabase callers (trade-records, membership, …). */
+export function getSupabaseConfig() {
   const url = String(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "").replace(/\/+$/, "")
   const key = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim()
   return { url, key }

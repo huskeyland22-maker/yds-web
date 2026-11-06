@@ -22,6 +22,7 @@
     { "source": "/api/dbb-prospective-ohlcv", "destination": "/api/market-data?ydsMode=dbb-prospective-ohlcv" },
     { "source": "/api/trade-records-sync", "destination": "/api/portfolio-sync?ydsMode=trade-records" },
     { "source": "/api/me-membership", "destination": "/api/portfolio-sync?ydsMode=me-membership" },
+    { "source": "/api/preview-supabase-ref", "destination": "/api/portfolio-sync?ydsMode=preview-supabase-ref" },
     { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
   ],
   "headers": [
