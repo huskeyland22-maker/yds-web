@@ -17,7 +17,7 @@ describe("daily bottom buy data basis labels", () => {
     assert.equal(asOf, "2026-09-21")
     const basis = formatDailyBottomDataBasis({ asOfDate: asOf, source: "api" })
     assert.equal(basis.isSnapshot, false)
-    assert.equal(basis.line, "기준일 2026-09-21 · 미국장 최근 종가 · 실시간")
+    assert.equal(basis.line, "기준일 2026-09-21 · 미국장 종가 기준")
     assert.equal(basis.warn, null)
   })
 
@@ -27,13 +27,13 @@ describe("daily bottom buy data basis labels", () => {
     const basis = formatDailyBottomDataBasis({ asOfDate: asOf, source: "snapshot" })
     assert.equal(basis.isSnapshot, true)
     assert.equal(basis.line, "기준일 2026-09-18 · 최근 저장 데이터")
-    assert.equal(basis.warn, "⚠️ 실시간 데이터 연결 실패 · 최근 저장 데이터 표시 중")
+    assert.equal(basis.warn, "시세 연결에 실패해 최근 저장 데이터를 표시합니다.")
   })
 
   it("does not invent a date when asOfDate is missing", () => {
     assert.equal(pickDailyBottomAsOfDate([{ ok: true }, { asOfDate: "" }]), null)
     const live = formatDailyBottomDataBasis({ asOfDate: null, source: "api" })
-    assert.equal(live.line, "미국장 최근 종가 · 실시간")
+    assert.equal(live.line, "미국장 종가 기준")
     assert.doesNotMatch(live.line, /\d{4}-\d{2}-\d{2}/)
     const snap = formatDailyBottomDataBasis({ asOfDate: null, source: "snapshot" })
     assert.equal(snap.line, "최근 저장 데이터")

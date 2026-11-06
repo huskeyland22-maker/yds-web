@@ -258,7 +258,7 @@ export default function DailyBottomBuyPage() {
           <span className="yds-dbb__notice-summary-text">
             <span className="yds-dbb__notice-summary-label">이용 안내</span>
             <span className="yds-dbb__notice-summary-lead">
-              3개→1차 · 4개→추가 · 신호 후 추가 하락 가능
+              매수 신호에 따라 단계적으로 접근하며, 시장 상황에 따라 추가 매수 기회를 고려합니다.
             </span>
           </span>
         </summary>
@@ -287,7 +287,7 @@ export default function DailyBottomBuyPage() {
               </p>
             ) : null}
             <p className="yds-dbb__meta yds-dbb__meta--thresholds">
-              RSI≤36 · Stoch≤15.4 · BB%B≤0.01 · MA20≤-4.2%
+              기술적 조건 충족도에 따라 매수 후보와 단계를 구분합니다.
             </p>
           </div>
 
