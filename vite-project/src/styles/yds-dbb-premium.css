@@ -1079,25 +1079,37 @@
   font-weight: 800;
 }
 
-/* ETF all-list stays compact single column; equity uses card grid below */
+/* ETF all-list: compact single column */
 .app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-all {
   gap: 0.3rem;
 }
 
+/* Equity all-list: 2-col outer grid, original compact row chrome */
 .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all--cards {
-  gap: 0.55rem;
+  grid-template-columns: repeat(2, minmax(0, 22rem));
+  column-gap: 0.45rem;
+  row-gap: 0.35rem;
+  justify-content: start;
 }
 
 .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all__row {
   background: var(--yds-bg-elevated);
   border: 1px solid var(--yds-border);
-  border-radius: var(--yds-radius-md);
+  border-radius: 6px;
   box-shadow: none;
-  padding: 0.6rem 0.7rem;
+  max-width: 22rem;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all__count {
+  font-size: inherit;
+  font-weight: 700;
 }
 
 .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all__more {
-  margin-top: 0.65rem;
+  margin-top: 0.35rem;
 }
 
 .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__list > li {

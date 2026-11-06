@@ -699,11 +699,11 @@ export default function EquityDailyBottomBuyPage() {
                 onClick={() => setSymbol(row.symbol)}
               >
                 <span className="yds-dbb-all__sym">{row.symbol}</span>
-                <span className="yds-dbb-all__count">{summary.countText}</span>
                 <span className={`yds-dbb-all__theme${row.holding ? " is-holding" : ""}`}>
                   <span className="yds-dbb-all__theme-text">{theme}</span>
                   {row.holding ? <span className="yds-dbb-all__hold">보유</span> : null}
                 </span>
+                <span className="yds-dbb-all__count">{summary.countText}</span>
                 <span className={`yds-dbb-all__stage is-${summary.stageClass}`}>{summary.stageLabel}</span>
               </button>
             )
