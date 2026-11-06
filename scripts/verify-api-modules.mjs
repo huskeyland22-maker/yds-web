@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Vercel 배포 전 api/_lib 모듈 resolve 검증.
  * 사용: node scripts/verify-api-modules.mjs
  */
@@ -14,7 +14,7 @@ const modules = [
   "api/_lib/fredBond.js",
   "api/_lib/panicCollectors.js",
   "api/_lib/creditSpreads.js",
-  "api/cron/credit-spreads-collect.js",
+  "api/cron/panic-collect.js",
   "api/_lib/panicPipeline.js",
   "api/_lib/panicMarketReportEngine.js",
   "api/_lib/panicServeMeta.js",
