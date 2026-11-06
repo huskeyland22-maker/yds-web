@@ -39743,11 +39743,10 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb--equity-dash .yds-dbb-all,
 .yds-dbb--equity-dash .yds-dbb-all--cards {
   display: grid;
-  /* Cap column width so half-panel 1fr stretch does not inflate compact rows */
-  grid-template-columns: repeat(2, minmax(0, 22rem));
-  column-gap: 0.45rem;
+  /* Responsive halves (~48–49% each after column-gap); no fixed 22rem cap */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0.55rem;
   row-gap: 0.35rem;
-  justify-content: start;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
@@ -39756,8 +39755,7 @@ button.yds-dbb-all__row.is-selected {
 .yds-dbb--equity-dash .yds-dbb-all__row {
   min-width: 0;
   width: 100%;
-  max-width: 22rem;
-  /* Restore pre-grid compact row metrics (same as .yds-dbb-all__row) */
+  /* Compact row metrics unchanged (same as .yds-dbb-all__row) */
   display: grid;
   grid-template-columns: 3.4rem minmax(0, 1fr) 2.4rem auto;
   grid-template-areas: none;
