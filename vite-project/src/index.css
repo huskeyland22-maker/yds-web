@@ -39739,21 +39739,64 @@ button.yds-dbb-all__row.is-selected {
   padding-top: 0.85rem;
   border-top: 1px solid rgba(148, 163, 184, 0.16);
 }
-.yds-dbb--equity-dash .yds-dbb-all {
+.yds-dbb--equity-dash .yds-dbb-all,
+.yds-dbb--equity-dash .yds-dbb-all--cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
   max-width: 100%;
   overflow-x: hidden;
 }
 .yds-dbb--equity-dash .yds-dbb-all__row {
   min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "sym count"
+    "theme theme"
+    "stage stage";
+  gap: 0.2rem 0.45rem;
+  align-items: baseline;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.5);
+}
+.yds-dbb--equity-dash .yds-dbb-all__sym {
+  grid-area: sym;
+  font-size: 0.875rem;
+}
+.yds-dbb--equity-dash .yds-dbb-all__count {
+  grid-area: count;
+  text-align: right;
+  font-weight: 700;
+}
+.yds-dbb--equity-dash .yds-dbb-all__theme {
+  grid-area: theme;
+  white-space: normal;
 }
 .yds-dbb--equity-dash .yds-dbb-all__theme,
 .yds-dbb--equity-dash .yds-dbb-all__theme-text {
   min-width: 0;
   overflow-wrap: anywhere;
+  white-space: normal;
+}
+.yds-dbb--equity-dash .yds-dbb-all__stage {
+  grid-area: stage;
+  font-size: 0.75rem;
 }
 .yds-dbb--equity-dash button.yds-dbb-all__row.is-selected {
   background: rgba(14, 116, 144, 0.14);
   box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.28);
+}
+.yds-dbb--equity-dash .yds-dbb-all__more {
+  margin-top: 0.55rem;
+}
+@media (max-width: 379px) {
+  .yds-dbb--equity-dash .yds-dbb-all,
+  .yds-dbb--equity-dash .yds-dbb-all--cards {
+    grid-template-columns: 1fr;
+  }
 }
 @media (min-width: 640px) {
   .yds-dbb--equity-dash .yds-dbb-holdings__grid,

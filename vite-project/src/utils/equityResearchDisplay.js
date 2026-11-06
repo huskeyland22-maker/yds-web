@@ -105,7 +105,8 @@ export function closeTickerPicker() {
   return { open: false }
 }
 
-export const EQUITY_SUMMARY_PREVIEW_COUNT = 10
+/** Collapsed all-list preview: 2 columns × 10 rows. */
+export const EQUITY_SUMMARY_PREVIEW_COUNT = 20
 
 const EQUITY_STAGE_CLASS = {
   strongLow: "strong",

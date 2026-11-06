@@ -1079,9 +1079,25 @@
   font-weight: 800;
 }
 
-/* Keep all-list compact (do not inflate list density further) */
-.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all {
+/* ETF all-list stays compact single column; equity uses card grid below */
+.app-shell-host.yds-theme-premium .yds-dbb--dashboard .yds-dbb-all {
   gap: 0.3rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all--cards {
+  gap: 0.55rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all__row {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  box-shadow: none;
+  padding: 0.6rem 0.7rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all__more {
+  margin-top: 0.65rem;
 }
 
 .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__list > li {
