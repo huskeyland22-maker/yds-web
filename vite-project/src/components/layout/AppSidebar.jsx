@@ -2,7 +2,6 @@ import { useState } from "react"
 import { NavLink, useLocation } from "react-router-dom"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
-import YdsV1ReleaseBadge from "../trust/YdsV1ReleaseBadge.jsx"
 import {
   getCoreNavItems,
   getOtherNavItems,
@@ -43,9 +42,6 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
         <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
           함께하는 인생 투자
         </p>
-        <div className="mt-2.5">
-          <YdsV1ReleaseBadge compact />
-        </div>
       </div>
 
       <nav className="flex flex-col gap-1 px-2.5 py-3" aria-label="핵심 메뉴">
