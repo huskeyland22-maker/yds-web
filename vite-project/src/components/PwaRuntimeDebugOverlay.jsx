@@ -14,6 +14,8 @@ export function isPwaRuntimeDebugOverlayVisible() {
   } catch {
     // ignore
   }
+  // Preview hosts: opt-in via ?pwa-debug=1 / localStorage only — avoid cluttering Preview UI.
+  // Full auto overlay remains DEV-only; PreviewBuildChip covers day-to-day version checks.
   return isDevMode()
 }
 

@@ -11,6 +11,7 @@
 // -----------------------------------------------------------------------------
 
 import { LIVE_JSON_GET_INIT, withNoStoreQuery } from "../config/liveDataFetch.js"
+import { isVercelPreviewHost } from "./previewDeployHost.js"
 
 const BUILD_VERSION_ENDPOINT = "/build-version.json"
 const BUILD_ID_KEY = "yds-build-id"
@@ -1031,13 +1032,16 @@ export function installLifecycleVersionPoller() {
     if (event?.persisted) void checkAndEvictStaleBuild()
   })
 
-  if (isIosStandalone()) {
+  // iOS home-screen PWA + Vercel Preview bookmarks: keep polling briefly after boot
+  // so a newly finished deploy is picked up without manual cache wipe.
+  const previewHost = isVercelPreviewHost(window.location.hostname)
+  if (isIosStandalone() || previewHost) {
     let ticks = 0
     const id = window.setInterval(() => {
       ticks += 1
       void pollLatestBuildIfDue()
       if (ticks >= 72) window.clearInterval(id)
-    }, 5_000)
+    }, previewHost && !isIosStandalone() ? 8_000 : 5_000)
   }
 }
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { BUILD_ID, VERSION_LABEL } from "../../constants/build.js"
 import { isDevMode } from "../../utils/devMode.js"
+import { isPreviewOpsToolsEnabled } from "../../utils/previewDeployHost.js"
 import {
   fetchLatestBuildMeta,
   forcePwaCacheClear,
@@ -86,7 +87,8 @@ export default function PwaDeveloperPanel() {
   const localBuild = getLocalBuildId() || BUILD_ID
   const htmlBuild = readHtmlBuildId() || "(none)"
 
-  if (!isDevMode()) return null
+  const allow = isDevMode() || isPreviewOpsToolsEnabled()
+  if (!allow) return null
 
   return (
     <div className="mt-2 border-t border-white/[0.06] pt-2">
@@ -95,7 +97,7 @@ export default function PwaDeveloperPanel() {
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-[12px] font-medium text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
       >
-        <span>개발자</span>
+        <span>개발자 · 빌드</span>
         <span className="text-[10px] text-slate-600">{open ? "▲" : "▼"}</span>
       </button>
       {open ? (

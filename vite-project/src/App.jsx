@@ -51,6 +51,7 @@ import {
 } from "./components/DataTraceBadge.jsx"
 import PanicSyncDebugPanel from "./components/PanicSyncDebugPanel.jsx"
 import PwaRuntimeDebugOverlay from "./components/PwaRuntimeDebugOverlay.jsx"
+import PreviewBuildChip from "./components/PreviewBuildChip.jsx"
 import PwaUpdateToast from "./components/PwaUpdateToast.jsx"
 import SupabaseRawDebugPanel from "./components/SupabaseRawDebugPanel.jsx"
 import SectionErrorBoundary from "./components/SectionErrorBoundary.jsx"
@@ -2501,9 +2502,10 @@ function App() {
         <>
           <PanicSyncDebugPanel />
           <SupabaseRawDebugPanel />
-          <PwaRuntimeDebugOverlay />
         </>
       ) : null}
+      <PwaRuntimeDebugOverlay />
+      <PreviewBuildChip />
     </div>
   )
 }

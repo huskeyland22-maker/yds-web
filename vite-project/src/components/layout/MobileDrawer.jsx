@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { NavLink, Link, useLocation } from "react-router-dom"
 import { isDevMode } from "../../utils/devMode.js"
+import { isPreviewOpsToolsEnabled } from "../../utils/previewDeployHost.js"
 import {
   getCoreNavItems,
   getOtherNavItems,
@@ -207,6 +208,8 @@ export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccount
               <PwaDeveloperPanel />
               <PanicHistoryVerifyPanel />
             </>
+          ) : isPreviewOpsToolsEnabled() ? (
+            <PwaDeveloperPanel />
           ) : null}
         </nav>
         {buildVersion ? (

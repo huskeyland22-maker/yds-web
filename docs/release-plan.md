@@ -220,6 +220,7 @@
 - [x] **iPhone 홈화면 PWA 헤더 잘림** — `black-translucent`→`default`, light `theme-color`/manifest, safe-area 밴드, standalone body 다크 제거
 - [x] **iPhone PWA 헤더 흰 흐림** — 헤더 자손 `filter:none !important` + `isolation:isolate` 제거 (WebKit compositing soft-raster)
 - [x] **iPhone PWA 업데이트 무한 대기** — `yds_chunk_recovery` latch / inFlight로 재시도 no-op 수정, 적용 타임아웃·다시 시도 UI
+- [x] **즐겨찾기 구버전** — SPA HTML `no-store` 헤더 누락 수정 · 고정 Preview alias 문서화 · Preview 빌드 칩/ops 패널 (`docs/preview-bookmark.md`)
 
 ---
 
