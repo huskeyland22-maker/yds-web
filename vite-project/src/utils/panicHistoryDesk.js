@@ -38,7 +38,10 @@ export function historyRowsToCycleRows(hubRows) {
  */
 function rowMetricValue(row, dataKey) {
   if (dataKey === "highYield" || dataKey === "hyOas") {
-    return Number(row.highYield ?? row.hyOas)
+    const raw = row.highYield ?? row.hyOas
+    if (raw == null || raw === "") return null
+    const n = Number(raw)
+    return Number.isFinite(n) ? n : null
   }
   return Number(row[dataKey])
 }

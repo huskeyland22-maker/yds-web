@@ -13,6 +13,8 @@ const modules = [
   "api/_lib/yahooQuote.js",
   "api/_lib/fredBond.js",
   "api/_lib/panicCollectors.js",
+  "api/_lib/creditSpreads.js",
+  "api/cron/credit-spreads-collect.js",
   "api/_lib/panicPipeline.js",
   "api/_lib/panicMarketReportEngine.js",
   "api/_lib/panicServeMeta.js",

@@ -1,4 +1,4 @@
-/** YDS 패닉 8지표 — API·DB 파이프라인 */
+/** YDS 패닉 지표 + 신용 스프레드(EAV) — API·DB 파이프라인 */
 export const PANIC_METRIC_KEYS = [
   "vix",
   "vxn",
@@ -8,4 +8,5 @@ export const PANIC_METRIC_KEYS = [
   "move",
   "skew",
   "highYield",
+  "bbbOas",
 ]

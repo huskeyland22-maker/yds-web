@@ -4,8 +4,16 @@ import {
   fetchYahooQuoteSeries,
 } from "./yahooQuote.js"
 
+import {
+  fetchFredHighYieldOas as fetchFredHighYieldOasFromCredit,
+} from "./creditSpreads.js"
+
 const CNN_FG_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
-const FRED_HY_SERIES = "BAMLH0A0HYM2"
+
+/** @deprecated use creditSpreads.fetchFredHighYieldOas — kept for callers */
+export async function fetchFredHighYieldOas() {
+  return fetchFredHighYieldOasFromCredit()
+}
 
 function toNum(v) {
   if (v == null || v === "") return null
@@ -68,34 +76,8 @@ export async function fetchAlternativeMeFearGreed() {
   }
 }
 
-/** @returns {Promise<{ value: number | null, delta: number | null, error?: string }>} */
-export async function fetchFredHighYieldOas() {
-  const key = String(process.env.FRED_API_KEY || "").trim()
-  if (!key) return { value: null, delta: null, error: "fred_key_missing" }
-  try {
-    const url = new URL("https://api.stlouisfed.org/fred/series/observations")
-    url.searchParams.set("series_id", FRED_HY_SERIES)
-    url.searchParams.set("api_key", key)
-    url.searchParams.set("file_type", "json")
-    url.searchParams.set("sort_order", "desc")
-    url.searchParams.set("limit", "3")
-    const res = await fetch(url.toString(), { cache: "no-store" })
-    if (!res.ok) return { value: null, delta: null, error: `fred_http_${res.status}` }
-    const json = await res.json()
-    const obs = (Array.isArray(json?.observations) ? json.observations : [])
-      .map((o) => toNum(o?.value))
-      .filter((n) => n != null)
-    if (!obs.length) return { value: null, delta: null, error: "fred_empty" }
-    const value = obs[0]
-    const delta = obs.length >= 2 ? value - obs[1] : null
-    return { value, delta }
-  } catch (e) {
-    return { value: null, delta: null, error: e instanceof Error ? e.message : "fred_fetch" }
-  }
-}
-
 /**
- * Live 수집 — 실패한 필드는 null, changes 에 delta 반영.
+ * Live 수집 — HY/BBB는 creditSpreads 주 2회 경로로 분리 (여기 포함하지 않음).
  * @param {{ preserve?: Record<string, number | null> }} [opts]
  */
 export async function collectPanicMetricsLive(opts = {}) {
@@ -119,7 +101,6 @@ export async function collectPanicMetricsLive(opts = {}) {
       if (cnn.value != null) return cnn
       return fetchAlternativeMeFearGreed()
     }],
-    ["highYield", () => fetchFredHighYieldOas()],
   ]
 
   const settled = await Promise.all(
@@ -149,14 +130,12 @@ export async function collectPanicMetricsLive(opts = {}) {
 
   if (Object.keys(changes).length) payload.changes = changes
 
-  const fetchedCount = ["vix", "fearGreed", "putCall", "move", "highYield"].filter(
-    (k) => payload[k] != null,
-  ).length
+  const fetchedCount = ["vix", "fearGreed", "putCall", "move"].filter((k) => payload[k] != null).length
 
   return {
     payload,
     errors,
     fetchedCount,
-    partial: fetchedCount < 5,
+    partial: fetchedCount < 4,
   }
 }

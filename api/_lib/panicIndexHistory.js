@@ -87,6 +87,10 @@ export function preserveWeeklyCoreFields(row, existingSameDate) {
   if (out.hy_oas == null && existingHy != null) {
     out.hy_oas = existingHy
   }
+  // bbb_oas 컬럼이 있는 스키마에서만 의미 있음 — null이면 기존 보존
+  if (out.bbb_oas == null && existingSameDate.bbb_oas != null) {
+    out.bbb_oas = existingSameDate.bbb_oas
+  }
   return out
 }
 

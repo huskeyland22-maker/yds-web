@@ -30,14 +30,20 @@ export function isSchemaColumnError(err) {
   return /column|schema|does not exist|42703|PGRST204/i.test(msg)
 }
 
+/** Finite number only — never treat null/undefined as 0 via Number(null). */
+export function finiteMetricOrNull(v) {
+  if (v == null || v === "") return null
+  const n = typeof v === "number" ? v : Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
 /**
  * @param {Record<string, unknown> | null | undefined} row
  * @param {string} dbCol
  */
 function pickNum(row, dbCol) {
   if (!row || typeof row !== "object") return null
-  const n = Number(row[dbCol])
-  return Number.isFinite(n) ? n : null
+  return finiteMetricOrNull(row[dbCol])
 }
 
 /** HY — hy_oas 우선, 레거시 high_yield/hy 등은 읽기 전용 fallback */
@@ -45,8 +51,19 @@ export function pickHyFromRow(row) {
   if (!row || typeof row !== "object") return null
   const candidates = [row.hy_oas, row.highYield, row.hyOas, row.high_yield, row.hy]
   for (const v of candidates) {
-    const n = Number(v)
-    if (Number.isFinite(n)) return n
+    const n = finiteMetricOrNull(v)
+    if (n != null) return n
+  }
+  return null
+}
+
+/** BBB OAS — bbb_oas 우선 (컬럼 추가 전 EAV/클라이언트 필드만 있을 수 있음) */
+export function pickBbbFromRow(row) {
+  if (!row || typeof row !== "object") return null
+  const candidates = [row.bbb_oas, row.bbbOas, row.bbb]
+  for (const v of candidates) {
+    const n = finiteMetricOrNull(v)
+    if (n != null) return n
   }
   return null
 }
@@ -60,6 +77,7 @@ export function mapPanicIndexHistoryRowToClient(row) {
   const dateStr = String(row.date ?? "").slice(0, 10)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null
   const hy = pickHyFromRow(row)
+  const bbb = pickBbbFromRow(row)
   return {
     date: dateStr,
     vix: pickNum(row, "vix"),
@@ -70,6 +88,7 @@ export function mapPanicIndexHistoryRowToClient(row) {
     skew: pickNum(row, "skew"),
     hyOas: hy,
     highYield: hy,
+    bbbOas: bbb,
     putCall: pickNum(row, "put_call"),
     panicScore: pickNum(row, "panic_score"),
     market_state: row.market_state ?? null,

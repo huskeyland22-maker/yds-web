@@ -5,6 +5,7 @@ import { generatePanicMarketReport } from "./panicMarketReportEngine.js"
 import { sectorFlowFromPanic } from "./sectorFlowLite.js"
 import { computeMarketState } from "./marketCycleCompute.js"
 import { getOfficialPanicScore } from "./panicScores.js"
+import { buildCreditRiskAnalysis } from "./creditSpreads.js"
 
 /** @type {Record<string, string>} */
 export const SECTOR_KO_LABELS = {
@@ -144,6 +145,18 @@ export function createDailyReport(panicData, cycleRow = null, tradeDate) {
       : base.midTerm
   const long_strategy = buildLongStrategy(base.longTerm, flow.leaderSector)
 
+  // Credit risk axis — separate from Panic Index weights / DBB / DCA
+  const credit_risk =
+    panicData?.creditRisk && typeof panicData.creditRisk === "object"
+      ? panicData.creditRisk
+      : buildCreditRiskAnalysis({
+          highYield: panicData?.highYield,
+          bbbOas: panicData?.bbbOas,
+          highYieldAsOf: panicData?.highYieldAsOf,
+          bbbOasAsOf: panicData?.bbbOasAsOf,
+          collectedAt: panicData?.updatedAt ?? null,
+        })
+
   return {
     date,
     summary: base.summary,
@@ -156,6 +169,7 @@ export function createDailyReport(panicData, cycleRow = null, tradeDate) {
     panic_score: panicScore,
     panic_score_status: panicScoreStatus,
     market_state: stateKey,
+    credit_risk,
     sectorScores: flow.scores,
     sectorFlow: flow,
     // PanicMarketReportPanel 호환

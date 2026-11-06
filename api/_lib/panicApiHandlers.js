@@ -33,6 +33,7 @@ import {
   isUsablePanicLatestMirror,
 } from "./panicPreviewMirror.js"
 import { mapPanicPersistSchemaError } from "./panicSchemaErrors.js"
+import { buildCreditRiskAnalysis } from "./creditSpreads.js"
 
 export function panicNoStore(res) {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -128,6 +129,21 @@ export async function handlePanicModeLatest(req, res) {
     respondEmergency(mirrored ? "mirror_empty" : "no_db_rows")
     return
   }
+
+  // Merge credit spreads from EAV when history/latest omit them; attach creditRisk axis.
+  if (fromEav) {
+    if (data.highYield == null && fromEav.highYield != null) data.highYield = fromEav.highYield
+    if (data.bbbOas == null && fromEav.bbbOas != null) data.bbbOas = fromEav.bbbOas
+    if (data.highYieldAsOf == null && fromEav.highYieldAsOf) data.highYieldAsOf = fromEav.highYieldAsOf
+    if (data.bbbOasAsOf == null && fromEav.bbbOasAsOf) data.bbbOasAsOf = fromEav.bbbOasAsOf
+  }
+  data.creditRisk = buildCreditRiskAnalysis({
+    highYield: data.highYield,
+    bbbOas: data.bbbOas,
+    highYieldAsOf: data.highYieldAsOf,
+    bbbOasAsOf: data.bbbOasAsOf,
+    collectedAt: data.updatedAt ?? null,
+  })
 
   const meta = computePanicServeMeta(rows, data)
   res.status(200).json({

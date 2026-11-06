@@ -40,6 +40,15 @@ export function normalizePanicPayload(body, opts = {}) {
     move: toPanicNum(body?.move),
     skew: toPanicNum(body?.skew),
     highYield: toPanicNum(body?.highYield ?? body?.hyOas ?? body?.hy_oas ?? body?.high_yield),
+    bbbOas: toPanicNum(body?.bbbOas ?? body?.bbb_oas ?? body?.bbb),
+    highYieldAsOf:
+      typeof body?.highYieldAsOf === "string" && /^\d{4}-\d{2}-\d{2}/.test(body.highYieldAsOf)
+        ? body.highYieldAsOf.slice(0, 10)
+        : null,
+    bbbOasAsOf:
+      typeof body?.bbbOasAsOf === "string" && /^\d{4}-\d{2}-\d{2}/.test(body.bbbOasAsOf)
+        ? body.bbbOasAsOf.slice(0, 10)
+        : null,
     vvix: toPanicNum(body?.vvix),
     vixTerm: toPanicNum(body?.vixTerm ?? body?.vix_term),
     ndxDistance: toPanicNum(body?.ndxDistance ?? body?.ndx_distance),
@@ -79,6 +88,9 @@ export function panicObjectFromSnapshot(snap) {
     move: snap.move,
     skew: snap.skew,
     highYield: snap.highYield,
+    bbbOas: snap.bbbOas,
+    highYieldAsOf: snap.highYieldAsOf ?? null,
+    bbbOasAsOf: snap.bbbOasAsOf ?? null,
     updatedAt: snap.updatedAt,
     accessTier: normalizePanicAccessTier(snap.accessTier),
     riskRegime: deriveRiskRegimeFromSnap(snap),

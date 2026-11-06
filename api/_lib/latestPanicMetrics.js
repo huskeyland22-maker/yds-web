@@ -2,6 +2,7 @@ import {
   fetchPanicIndexHistoryRaw,
   mapPanicIndexHistoryRowToClient,
   PANIC_INDEX_HISTORY_SELECT,
+  pickBbbFromRow,
   pickHyFromRow,
 } from "./panicIndexHistoryColumns.js"
 import { supabaseRest } from "./supabaseRest.js"
@@ -82,6 +83,7 @@ export function panicObjectFromLatestRow(row) {
     move: row.move,
     skew: row.skew,
     highYield: pickHyFromRow(row),
+    bbbOas: pickBbbFromRow(row),
   }
   const data = panicObjectFromSnapshot(snap)
   if (row.panic_score != null) data.panicIndex = Number(row.panic_score)

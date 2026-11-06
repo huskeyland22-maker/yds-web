@@ -16,6 +16,11 @@ import {
   upsertMarketCycleHistoryFromSnapshot,
 } from "./marketCycleHistory.js"
 import { collectPanicMetricsLive } from "./panicCollectors.js"
+import {
+  buildCreditRiskAnalysis,
+  collectCreditSpreadsLive,
+  CREDIT_SPREAD_KEYS,
+} from "./creditSpreads.js"
 import { logPanicPipelineStage } from "./panicNumeric.js"
 import { upsertPanicHistoryV2ForSnapshot } from "./panicHistoryV2Db.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
@@ -30,7 +35,7 @@ const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 *
 function preserveFromExistingRows(rows) {
   const data = panicObjectFromRows(rows)
   const out = {}
-  for (const k of ["bofa", "vxn", "skew"]) {
+  for (const k of ["bofa", "vxn", "skew", "highYield", "bbbOas"]) {
     if (data[k] != null) out[k] = data[k]
   }
   return out
@@ -180,7 +185,24 @@ export async function persistPanicPayload(body, opts = {}) {
   }
   const fromDb = fresh?.length ? panicObjectFromRows(fresh) : null
   const data = panicObjectFromSnapshot(snap)
-  if (fromDb) data.riskRegime = fromDb.riskRegime ?? data.riskRegime
+  if (fromDb) {
+    data.riskRegime = fromDb.riskRegime ?? data.riskRegime
+    // Manual/core persist must not wipe credit spreads — merge from EAV when snap omitted them.
+    for (const k of CREDIT_SPREAD_KEYS) {
+      if (data[k] == null && fromDb[k] != null) data[k] = fromDb[k]
+    }
+    if (data.highYieldAsOf == null && fromDb.highYieldAsOf) data.highYieldAsOf = fromDb.highYieldAsOf
+    if (data.bbbOasAsOf == null && fromDb.bbbOasAsOf) data.bbbOasAsOf = fromDb.bbbOasAsOf
+  }
+  data.creditRisk = buildCreditRiskAnalysis({
+    highYield: data.highYield,
+    bbbOas: data.bbbOas,
+    highYieldDelta: body?.changes?.highYield,
+    bbbOasDelta: body?.changes?.bbbOas,
+    highYieldAsOf: data.highYieldAsOf,
+    bbbOasAsOf: data.bbbOasAsOf,
+    collectedAt: fromDb?.updatedAt ?? data.updatedAt,
+  })
   const meta = computePanicServeMeta(fresh, data)
 
   let dailyReportResult = { ok: false }
@@ -215,18 +237,100 @@ export async function persistPanicPayload(body, opts = {}) {
   }
 }
 
-/** Cron / 수집기: 외부 소스 fetch → DB upsert */
+/**
+ * HY/BBB only — does not touch VIX/CNN/P-C rows.
+ * @param {{ force?: boolean }} [opts] force=true bypasses Tue/Fri KST gate (Preview manual test)
+ */
+export async function runCreditSpreadsCollectJob(opts = {}) {
+  const existing = await fetchPanicMetricsRows()
+  const preserve = preserveFromExistingRows(existing)
+  const collected = await collectCreditSpreadsLive({
+    preserve,
+    force: opts.force === true,
+  })
+  if (collected.skipped) {
+    return {
+      ok: true,
+      skipped: true,
+      reason: collected.reason,
+      collectedAt: collected.collectedAt,
+      credit: null,
+    }
+  }
+
+  const body = {
+    ...collected.payload,
+    highYieldAsOf: collected.meta?.highYieldAsOf ?? null,
+    bbbOasAsOf: collected.meta?.bbbOasAsOf ?? null,
+    changes: collected.changes,
+    updatedAt: collected.collectedAt,
+  }
+  // Only upsert credit keys (rowsFromPanicPayload skips missing non-forced keys).
+  const rows = rowsFromPanicSnapshot({
+    ...normalizePanicPayload(body, { source: "cron-credit" }),
+    highYield: body.highYield,
+    bbbOas: body.bbbOas,
+    highYieldAsOf: body.highYieldAsOf,
+    bbbOasAsOf: body.bbbOasAsOf,
+    source: "cron-credit",
+    updatedAt: collected.collectedAt,
+  }).filter((r) => CREDIT_SPREAD_KEYS.includes(r.metric_key))
+
+  if (rows.length) {
+    await upsertPanicMetricsRows(rows, { source: "cron-credit" })
+  }
+
+  const fresh = await fetchPanicMetricsRows().catch(() => [])
+  const fromDb = fresh?.length ? panicObjectFromRows(fresh) : {}
+  const credit = buildCreditRiskAnalysis({
+    highYield: fromDb.highYield ?? body.highYield,
+    bbbOas: fromDb.bbbOas ?? body.bbbOas,
+    highYieldDelta: collected.changes?.highYield,
+    bbbOasDelta: collected.changes?.bbbOas,
+    highYieldAsOf: fromDb.highYieldAsOf ?? body.highYieldAsOf,
+    bbbOasAsOf: fromDb.bbbOasAsOf ?? body.bbbOasAsOf,
+    collectedAt: collected.collectedAt,
+  })
+
+  return {
+    ok: true,
+    skipped: false,
+    collectedAt: collected.collectedAt,
+    fetchedCount: collected.fetchedCount,
+    collectorErrors: collected.errors,
+    preserved: {
+      highYield: Boolean(collected.meta?.highYieldPreserved),
+      bbbOas: Boolean(collected.meta?.bbbOasPreserved),
+    },
+    credit,
+    rowCount: rows.length,
+  }
+}
+
+/** Cron / 수집기: 외부 소스 fetch → DB upsert (+ 화·금 신용 스프레드) */
 export async function runPanicCollectJob() {
   const existing = await fetchPanicMetricsRows()
   const preserve = preserveFromExistingRows(existing)
   const { payload, errors, fetchedCount, partial } = await collectPanicMetricsLive({ preserve })
+  // Do not put null HY/BBB into panic persist — credit job owns those keys.
   const result = await persistPanicPayload(payload, { source: "cron" })
+  let creditResult = null
+  try {
+    creditResult = await runCreditSpreadsCollectJob({ force: false })
+  } catch (err) {
+    creditResult = {
+      ok: false,
+      error: err instanceof Error ? err.message : String(err),
+    }
+    console.warn("[panic] credit spreads collect failed", creditResult.error)
+  }
   return {
     ok: true,
     collectedAt: new Date().toISOString(),
     fetchedCount,
     partial,
     collectorErrors: errors,
+    creditSpreads: creditResult,
     ...result,
   }
 }

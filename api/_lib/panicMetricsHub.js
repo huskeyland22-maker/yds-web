@@ -7,6 +7,11 @@ import {
   toDbDouble,
 } from "./panicNumeric.js"
 import { PANIC_METRIC_KEYS, panicObjectFromSnapshot, toPanicNum } from "./panicSnapshot.js"
+import {
+  formatCreditAsOfStatus,
+  isCreditSpreadMetricKey,
+  parseCreditAsOfStatus,
+} from "./creditSpreads.js"
 
 const METRIC_KEYS = PANIC_METRIC_KEYS
 
@@ -32,8 +37,17 @@ export function panicObjectFromRows(rows) {
   for (const k of METRIC_KEYS) {
     const cell = byKey[k]
     const v = cell?.metric_value
-    out[k] = v === null || v === undefined ? null : Number(v)
-    if (typeof out[k] === "number" && !Number.isFinite(out[k])) out[k] = null
+    if (v === null || v === undefined || v === "") {
+      out[k] = null
+    } else {
+      const n = Number(v)
+      out[k] = Number.isFinite(n) ? n : null
+    }
+    if (isCreditSpreadMetricKey(k)) {
+      const asOf = parseCreditAsOfStatus(cell?.status)
+      if (k === "highYield") out.highYieldAsOf = asOf
+      if (k === "bbbOas") out.bbbOasAsOf = asOf
+    }
   }
   const meta = byKey.risk_regime
   out.riskRegime = typeof meta?.status === "string" && meta.status ? meta.status : deriveRiskRegime(out)
@@ -55,7 +69,30 @@ export function rowsFromPanicPayload(body, opts = {}) {
   const o = {}
   const shouldLog = source === "manual" || source === "api"
   for (const key of METRIC_KEYS) {
-    if (!forceAllKeys && !Object.prototype.hasOwnProperty.call(body, key)) continue
+    const hasOwn = Object.prototype.hasOwnProperty.call(body, key)
+    // Credit spreads: never write null / missing — preserve prior EAV rows (manual & partial cron).
+    if (isCreditSpreadMetricKey(key)) {
+      if (!hasOwn) continue
+      const creditVal = toPanicNum(body[key])
+      if (creditVal == null) continue
+      o[key] = creditVal
+      const asOfKey = key === "highYield" ? "highYieldAsOf" : "bbbOasAsOf"
+      const asOf =
+        typeof body?.[asOfKey] === "string" && /^\d{4}-\d{2}-\d{2}/.test(body[asOfKey])
+          ? body[asOfKey].slice(0, 10)
+          : null
+      rows.push({
+        metric_key: key,
+        metric_value: creditVal,
+        change_percent: toDbDouble(body?.changes?.[key]),
+        status: formatCreditAsOfStatus(asOf),
+        market: "global",
+        source,
+        updated_at: updatedAt,
+      })
+      continue
+    }
+    if (!forceAllKeys && !hasOwn) continue
     const raw = body[key]
     const metricValue = toPanicNum(raw)
     o[key] = metricValue
