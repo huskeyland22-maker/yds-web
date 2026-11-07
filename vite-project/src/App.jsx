@@ -484,13 +484,37 @@ function shouldUseGoogleRedirectSignIn(win) {
   return nav.platform === "MacIntel" && Number(nav.maxTouchPoints) > 1
 }
 
+/** Only `auth/popup-blocked` may fall back to redirect (not closed/cancelled popup). */
+function isGooglePopupBlockedError(err) {
+  return Boolean(err && typeof err === "object" && err.code === "auth/popup-blocked")
+}
+
+function readFirebaseAuthErrorCode(err) {
+  return typeof err?.code === "string" && err.code.trim() ? err.code.trim() : ""
+}
+
+function markFirebaseRedirectSettling(storage) {
+  const store = storage ?? (typeof globalThis !== "undefined" ? globalThis.sessionStorage : null)
+  if (!store) return
+  try {
+    store.setItem("yds.firebaseRedirectSettling", "1")
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+function googleLoginFailureAlertMessage(code) {
+  return code ? `로그인에 실패했습니다 (${code})` : "로그인에 실패했습니다"
+}
+
 async function settleGoogleRedirectSignIn(authInstance, getResult = getRedirectResult) {
   if (!authInstance) return null
   try {
     const result = await getResult(authInstance)
     return result?.user ?? null
   } catch (err) {
-    console.error("로그인 실패", err?.code || err, err?.message || err)
+    const code = typeof err?.code === "string" && err.code.trim() ? err.code.trim() : ""
+    console.error("로그인 실패", code || "error")
     return null
   } finally {
     try {
@@ -1148,13 +1172,29 @@ function App() {
     try {
       const provider = new GoogleAuthProvider()
       if (shouldUseGoogleRedirectSignIn()) {
+        markFirebaseRedirectSettling()
         await signInWithRedirect(auth, provider)
         return
       }
       await signInWithPopup(auth, provider)
     } catch (err) {
-      console.error("로그인 실패", err)
-      window.alert("로그인에 실패했습니다")
+      const code = readFirebaseAuthErrorCode(err)
+      // Log code only — never tokens, email, or secrets.
+      console.error("로그인 실패", code || "error")
+      if (isGooglePopupBlockedError(err)) {
+        try {
+          markFirebaseRedirectSettling()
+          const provider = new GoogleAuthProvider()
+          await signInWithRedirect(auth, provider)
+          return
+        } catch (redirectErr) {
+          const redirectCode = readFirebaseAuthErrorCode(redirectErr)
+          console.error("로그인 실패", redirectCode || "error")
+          window.alert(googleLoginFailureAlertMessage(redirectCode))
+          return
+        }
+      }
+      window.alert(googleLoginFailureAlertMessage(code))
     }
   }
 

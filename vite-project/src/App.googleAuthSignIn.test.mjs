@@ -32,6 +32,18 @@ const settleGoogleRedirectSignIn = new Function(
 const shouldSkipResumeReloadForAuthRedirect = new Function(
   `return (${extractFunction("shouldSkipResumeReloadForAuthRedirect")})`,
 )()
+const isGooglePopupBlockedError = new Function(
+  `return (${extractFunction("isGooglePopupBlockedError")})`,
+)()
+const readFirebaseAuthErrorCode = new Function(
+  `return (${extractFunction("readFirebaseAuthErrorCode")})`,
+)()
+const markFirebaseRedirectSettling = new Function(
+  `return (${extractFunction("markFirebaseRedirectSettling")})`,
+)()
+const googleLoginFailureAlertMessage = new Function(
+  `return (${extractFunction("googleLoginFailureAlertMessage")})`,
+)()
 
 function memoryStorage(entries) {
   const map = new Map(Object.entries(entries))
@@ -119,11 +131,32 @@ test("redirect failure is logged without the login alert", async () => {
     assert.deepEqual(alerts, [])
     assert.equal(errors.length, 1)
     assert.equal(errors[0][1], "auth/redirect-cancelled-by-user")
-    assert.match(String(errors[0][2]), /redirect failed/)
   } finally {
     globalThis.alert = previousAlert
     console.error = previousError
   }
+})
+
+test("only auth/popup-blocked is treated as popup-blocked fallback", () => {
+  assert.equal(isGooglePopupBlockedError({ code: "auth/popup-blocked" }), true)
+  assert.equal(isGooglePopupBlockedError({ code: "auth/cancelled-popup-request" }), false)
+  assert.equal(isGooglePopupBlockedError({ code: "auth/popup-closed-by-user" }), false)
+  assert.equal(isGooglePopupBlockedError({ code: "auth/unauthorized-domain" }), false)
+  assert.equal(isGooglePopupBlockedError(null), false)
+  assert.equal(readFirebaseAuthErrorCode({ code: "auth/popup-blocked" }), "auth/popup-blocked")
+  assert.equal(readFirebaseAuthErrorCode({}), "")
+  assert.equal(googleLoginFailureAlertMessage("auth/popup-blocked"), "로그인에 실패했습니다 (auth/popup-blocked)")
+  assert.equal(googleLoginFailureAlertMessage(""), "로그인에 실패했습니다")
+})
+
+test("markFirebaseRedirectSettling reuses the existing settling key", () => {
+  const writes = []
+  markFirebaseRedirectSettling({
+    setItem(key, value) {
+      writes.push([key, value])
+    },
+  })
+  assert.deepEqual(writes, [["yds.firebaseRedirectSettling", "1"]])
 })
 
 test("login branches popup and redirect without changing the auth listener", () => {
@@ -133,7 +166,7 @@ test("login branches popup and redirect without changing the auth listener", () 
   assert.match(login, /if \(shouldUseGoogleRedirectSignIn\(\)\)/)
   assert.match(login, /signInWithRedirect\(auth, provider\)/)
   assert.match(login, /signInWithPopup\(auth, provider\)/)
-  assert.match(login, /window\.alert\("로그인에 실패했습니다"\)/)
+  assert.match(login, /googleLoginFailureAlertMessage\(/)
   assert.match(source, /signInWithPopup\(auth, provider\)/)
   assert.match(source, /settleGoogleRedirectSignIn\(auth\)\.then\(\(user\) =>/)
   assert.match(source, /setUser\(user\)/)
@@ -141,6 +174,32 @@ test("login branches popup and redirect without changing the auth listener", () 
   const reload = extractFunction("forceResumeReloadWithCooldown")
   assert.match(reload, /shouldSkipResumeReloadForAuthRedirect\(window\.sessionStorage\)/)
   assert.match(reload, /window\.location\.reload\(\)/)
+})
+
+test("desktop login keeps popup first and falls back to redirect only on popup-blocked", () => {
+  const loginStart = source.indexOf("const login = async () => {")
+  const logoutStart = source.indexOf("const logout = async () => {")
+  const login = source.slice(loginStart, logoutStart)
+  const popupAt = login.indexOf("signInWithPopup(auth, provider)")
+  const fallbackGateAt = login.indexOf("isGooglePopupBlockedError(err)")
+  const fallbackRedirectAt = login.indexOf("signInWithRedirect(auth, provider)", fallbackGateAt)
+  assert.ok(popupAt >= 0, "desktop path still uses signInWithPopup")
+  assert.ok(fallbackGateAt > popupAt, "popup-blocked check comes after popup")
+  assert.ok(fallbackRedirectAt > fallbackGateAt, "redirect fallback is gated by popup-blocked")
+  assert.match(login, /isGooglePopupBlockedError\(err\)/)
+  assert.match(login, /markFirebaseRedirectSettling\(\)/)
+  assert.doesNotMatch(login, /auth\/cancelled-popup-request/)
+  assert.doesNotMatch(login, /auth\/popup-closed-by-user/)
+})
+
+test("non-blocked popup errors do not use the redirect fallback gate alone", () => {
+  assert.equal(isGooglePopupBlockedError({ code: "auth/cancelled-popup-request" }), false)
+  assert.equal(isGooglePopupBlockedError({ code: "auth/popup-closed-by-user" }), false)
+  const loginStart = source.indexOf("const login = async () => {")
+  const logoutStart = source.indexOf("const logout = async () => {")
+  const login = source.slice(loginStart, logoutStart)
+  assert.match(login, /if \(isGooglePopupBlockedError\(err\)\) \{/)
+  assert.match(login, /window\.alert\(googleLoginFailureAlertMessage\(code\)\)/)
 })
 
 test("iOS resume reload waits while a Firebase redirect is pending", () => {
