@@ -2,11 +2,13 @@
  * GET/PUT /api/portfolio-sync
  * Authorization: Bearer <Firebase ID token>
  *
- * Also hosts /api/trade-records-sync via vercel rewrite (?ydsMode=trade-records)
- * to stay within the Hobby serverless function cap.
+ * Also hosts via vercel rewrite (Hobby serverless function cap):
+ * - /api/trade-records-sync → ?ydsMode=trade-records
+ * - /api/me-membership → ?ydsMode=me-membership
  */
 import { verifyFirebaseIdToken } from "./_lib/firebaseIdToken.js"
 import { isSupabaseConfigured, supabaseRest } from "./_lib/supabaseRest.js"
+import { handleMeMembership } from "./_lib/meMembershipHandler.js"
 import { handleTradeRecordsSync } from "./_lib/tradeRecordsSyncHandler.js"
 
 function readBearer(req) {
@@ -32,8 +34,15 @@ function resolveYdsMode(req) {
  * @param {import("http").ServerResponse & { status: (n: number) => { json: (b: unknown) => void }, setHeader: (k: string, v: string) => void }} res
  */
 export default async function handler(req, res) {
+  const mode = resolveYdsMode(req)
+
+  // /api/me-membership → rewrite → ?ydsMode=me-membership
+  if (mode === "me-membership") {
+    return handleMeMembership(req, res)
+  }
+
   // /api/trade-records-sync → rewrite → ?ydsMode=trade-records
-  if (resolveYdsMode(req) === "trade-records") {
+  if (mode === "trade-records") {
     return handleTradeRecordsSync(req, res)
   }
 

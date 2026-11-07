@@ -72,6 +72,92 @@ function htmlBuildIdPlugin() {
   }
 }
 
+const STAGING_SUPABASE_REF = "qzunuksxwwzusyivaznx"
+const PRODUCTION_SUPABASE_REF = "oausvweyocgynjpeguka"
+
+/** Load repo-root `.env.staging.local` into process.env for local me-membership (Staging only). */
+function loadStagingEnvForMeMembership() {
+  const envPath = path.resolve(process.cwd(), "../.env.staging.local")
+  if (!fs.existsSync(envPath)) return { ok: false, reason: "missing_env_file" }
+  const text = fs.readFileSync(envPath, "utf8")
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim()
+    if (!line || line.startsWith("#")) continue
+    const eq = line.indexOf("=")
+    if (eq <= 0) continue
+    const key = line.slice(0, eq).trim()
+    let val = line.slice(eq + 1).trim()
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1)
+    }
+    if (key && process.env[key] == null) process.env[key] = val
+  }
+  const url = String(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "")
+  if (url.includes(PRODUCTION_SUPABASE_REF)) return { ok: false, reason: "production_url_refused" }
+  if (!url.includes(STAGING_SUPABASE_REF)) return { ok: false, reason: "staging_url_required" }
+  return { ok: true }
+}
+
+function attachMeMembershipDevApi(server) {
+  // Hosted on portfolio-sync in production (rewrite); local Vite keeps public URL.
+  const handlerPath = path.resolve(process.cwd(), "../api/_lib/meMembershipHandler.js")
+  server.middlewares.use(async (req, res, next) => {
+    const raw = req.url || ""
+    const pathOnly = raw.split("?")[0]
+    if (pathOnly !== "/api/me-membership") return next()
+    try {
+      const staged = loadStagingEnvForMeMembership()
+      if (!staged.ok) {
+        res.statusCode = 503
+        res.setHeader("Content-Type", "application/json; charset=utf-8")
+        res.end(JSON.stringify({ error: "supabase_not_configured", reason: staged.reason }))
+        return
+      }
+      const authHeader = req.headers.authorization || req.headers.Authorization || ""
+      const mod = await import(pathToFileURL(handlerPath).href)
+      const handler = mod.handleMeMembership
+      await handler(
+        { method: req.method, url: raw, headers: { authorization: authHeader } },
+        {
+          setHeader(name, value) {
+            res.setHeader(name, value)
+          },
+          status(code) {
+            res.statusCode = code
+            return this
+          },
+          json(body) {
+            if (!res.getHeader("Content-Type")) {
+              res.setHeader("Content-Type", "application/json; charset=utf-8")
+            }
+            res.end(JSON.stringify(body))
+          },
+        },
+      )
+    } catch (err) {
+      res.statusCode = 500
+      res.setHeader("Content-Type", "application/json; charset=utf-8")
+      res.end(JSON.stringify({ error: "me_membership_dev_failed" }))
+      void err
+    }
+  })
+}
+
+function meMembershipDevApi() {
+  return {
+    name: "me-membership-dev-api",
+    configureServer(server) {
+      attachMeMembershipDevApi(server)
+    },
+    configurePreviewServer(server) {
+      attachMeMembershipDevApi(server)
+    },
+  }
+}
+
 function dailyBottomBuyDevApi() {
   const handlerPath = path.resolve(process.cwd(), "../api/_lib/dailyBottomBuyHandler.js")
   return {
@@ -179,6 +265,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    meMembershipDevApi(),
     dailyBottomBuyDevApi(),
     equityDailyBottomBuyDevApi(),
     htmlBuildIdPlugin(),
