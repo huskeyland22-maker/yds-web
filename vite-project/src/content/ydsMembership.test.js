@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest"
 import {
+  isMembershipVerifyUiEnabled,
   isProUnlocked,
   MEMBERSHIP_STATUS,
   membershipHeaderBadgeState,
   membershipPlanBadgeLabel,
   membershipStatusFromApiBody,
+  membershipVerifyDisplayModel,
 } from "./ydsMembership.js"
 
 describe("ydsMembership", () => {
@@ -51,5 +53,50 @@ describe("ydsMembership", () => {
       kind: "hidden",
       label: null,
     })
+  })
+
+  it("enables membership verify UI on Preview/local hosts only", () => {
+    expect(isMembershipVerifyUiEnabled("yds-web-kappa.vercel.app", { dev: false })).toBe(false)
+    expect(
+      isMembershipVerifyUiEnabled("yds-d7k3q1jzy-so-sung-yangs-projects.vercel.app", {
+        dev: false,
+      }),
+    ).toBe(true)
+    expect(
+      isMembershipVerifyUiEnabled(
+        "yds-web-git-rc1-membership-infra-so-sung-yangs-projects.vercel.app",
+        { dev: false },
+      ),
+    ).toBe(true)
+    expect(isMembershipVerifyUiEnabled("localhost", { dev: false })).toBe(true)
+    expect(isMembershipVerifyUiEnabled("yds-web-kappa.vercel.app", { dev: true })).toBe(true)
+  })
+
+  it("builds a safe membership verify display model", () => {
+    expect(
+      membershipVerifyDisplayModel({
+        isLoading: false,
+        isError: false,
+        isLoggedOut: false,
+        plan: "free",
+        ledgerStatus: "none",
+        source: null,
+        reason: "missing_row",
+      }),
+    ).toEqual({
+      phase: "ready",
+      planLabel: "FREE",
+      statusLabel: "none",
+      sourceLabel: "—",
+      reasonLabel: "missing_row",
+      showRefresh: true,
+    })
+    expect(membershipVerifyDisplayModel({ isLoading: true }).phase).toBe("loading")
+    expect(membershipVerifyDisplayModel({ isError: true, reason: "http_500" })).toMatchObject({
+      phase: "error",
+      reasonLabel: "http_500",
+      showRefresh: true,
+    })
+    expect(membershipVerifyDisplayModel({ isLoggedOut: true }).showRefresh).toBe(false)
   })
 })

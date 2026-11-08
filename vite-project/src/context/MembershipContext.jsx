@@ -8,15 +8,28 @@ const MembershipContext = createContext(null)
  * Provides membership status from the server ledger (via /api/me-membership).
  */
 export function MembershipProvider({ children }) {
-  const { status, authReady, reason, refreshedAt } = useMembershipQuery()
+  const {
+    status,
+    authReady,
+    plan,
+    ledgerStatus,
+    source,
+    reason,
+    refreshedAt,
+    refresh,
+  } = useMembershipQuery()
 
   const value = useMemo(() => {
     const isPro = isProUnlocked(status)
     return {
       status,
       authReady,
+      plan,
+      ledgerStatus,
+      source,
       reason,
       refreshedAt,
+      refresh,
       isPro,
       /** True while auth is not ready or membership fetch is in flight */
       isLoading: !authReady || status === MEMBERSHIP_STATUS.LOADING,
@@ -28,7 +41,7 @@ export function MembershipProvider({ children }) {
         status === MEMBERSHIP_STATUS.LOADING ||
         status === MEMBERSHIP_STATUS.ERROR,
     }
-  }, [status, authReady, reason, refreshedAt])
+  }, [status, authReady, plan, ledgerStatus, source, reason, refreshedAt, refresh])
 
   return <MembershipContext.Provider value={value}>{children}</MembershipContext.Provider>
 }
@@ -37,8 +50,12 @@ export function MembershipProvider({ children }) {
  * @returns {{
  *   status: import("../content/ydsMembership.js").MembershipStatus
  *   authReady: boolean
+ *   plan: "free" | "pro" | null
+ *   ledgerStatus: string | null
+ *   source: string | null
  *   reason: string | null
  *   refreshedAt: number | null
+ *   refresh: () => void
  *   isPro: boolean
  *   isLoading: boolean
  *   isLoggedOut: boolean
@@ -53,8 +70,12 @@ export function useMembership() {
     return {
       status: MEMBERSHIP_STATUS.ERROR,
       authReady: true,
+      plan: null,
+      ledgerStatus: null,
+      source: null,
       reason: "provider_missing",
       refreshedAt: null,
+      refresh: () => {},
       isPro: false,
       isLoading: false,
       isLoggedOut: false,

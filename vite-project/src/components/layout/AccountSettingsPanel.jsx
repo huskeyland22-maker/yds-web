@@ -2,6 +2,8 @@
  * 계정 설정 — 로그인/로그아웃 (시장 지표 입력과 분리)
  */
 
+import MembershipVerifyPanel from "../MembershipVerifyPanel.jsx"
+
 /**
  * @param {{
  *   open: boolean
@@ -63,6 +65,9 @@ export default function AccountSettingsPanel({ open, onClose, user, onLogin, onL
                   <p className="m-0 mt-0.5 truncate text-[11px] text-slate-500">{user.email}</p>
                 ) : null}
               </div>
+            </div>
+            <div className="mt-3">
+              <MembershipVerifyPanel />
             </div>
             <button
               type="button"
