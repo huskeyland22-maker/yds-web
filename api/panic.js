@@ -13,6 +13,13 @@ import {
   handlePanicModeV2History,
   panicNoStore,
 } from "./_lib/panicApiHandlers.js"
+import {
+  requireProMembership,
+  sendProMembershipDenied,
+} from "./_lib/requireProMembership.js"
+
+/** History / V2 series power PRO-only charts — latest stays FREE for score UI. */
+const PRO_PANIC_MODES = new Set(["history", "v2", "v2history"])
 
 /** @param {string} raw */
 function normalizeMode(raw) {
@@ -43,6 +50,14 @@ export default async function handler(req, res) {
   const mode = resolveMode(req)
 
   try {
+    if (PRO_PANIC_MODES.has(mode)) {
+      const gate = await requireProMembership(req)
+      if (!gate.ok) {
+        sendProMembershipDenied(res, gate)
+        return
+      }
+    }
+
     switch (mode) {
       case "latest":
         if (req.method !== "GET") {

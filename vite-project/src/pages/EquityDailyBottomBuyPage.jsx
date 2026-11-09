@@ -1,13 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import EquityResearchPanel from "../components/equity/EquityResearchPanel.jsx"
+import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
+import DbbMembershipAccessNotice from "../components/dbb/DbbMembershipAccessNotice.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
+import { buildDbbMembershipAudienceCta } from "../content/ydsDailyBottomBuyAccessPolicy.js"
+import {
+  buildEquityDailyBottomBuyVisibility,
+  EQUITY_DBB_PRO_LOCK_COPY,
+} from "../content/ydsEquityDailyBottomBuyProGate.js"
 import { attachHoldingQuote, collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { fetchPortfolioQuotes } from "../content/ydsPortfolioQuoteService.js"
 import { formatUsdPrice, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
+import { useMembership } from "../context/MembershipContext.jsx"
 import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
-import { fetchEquityDailyBottomBuy } from "../utils/equityDailyBottomBuyApi.js"
+import {
+  applyEquityDailyBottomBuyAccess,
+  fetchEquityDailyBottomBuy,
+} from "../utils/equityDailyBottomBuyApi.js"
 import { equityCandidateConditionType, selectEquityBuyCandidates } from "../utils/equityDailyBottomBuyCandidates.js"
 import {
   closeTickerPicker,
@@ -88,6 +99,18 @@ function CandidateFacts({ row }) {
 }
 
 export default function EquityDailyBottomBuyPage() {
+  const {
+    isPro,
+    authReady,
+    isLoading: membershipLoading,
+    isLoggedOut,
+    status,
+  } = useMembership()
+  const visibility = useMemo(() => buildEquityDailyBottomBuyVisibility(isPro), [isPro])
+  const audienceCta = useMemo(
+    () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
+    [isPro, isLoggedOut, status],
+  )
   const [symbol, setSymbol] = useState(DEFAULT_SYMBOL)
   const [group, setGroup] = useState("all")
   const [query, setQuery] = useState("")
@@ -110,11 +133,12 @@ export default function EquityDailyBottomBuyPage() {
   }, [])
 
   useEffect(() => {
+    if (!authReady || membershipLoading) return undefined
     const ctrl = new AbortController()
     setLoading(true)
     fetchEquityDailyBottomBuy(symbol, { signal: ctrl.signal })
       .then((json) => {
-        if (!ctrl.signal.aborted) setPayload(json)
+        if (!ctrl.signal.aborted) setPayload(applyEquityDailyBottomBuyAccess(json, isPro))
       })
       .catch((err) => {
         if (ctrl.signal.aborted) return
@@ -124,7 +148,7 @@ export default function EquityDailyBottomBuyPage() {
         if (!ctrl.signal.aborted) setLoading(false)
       })
     return () => ctrl.abort()
-  }, [symbol])
+  }, [symbol, authReady, membershipLoading, isPro])
 
   const universe = payload?.universe || []
   const universeKey = universe.map((row) => row.symbol).join("|")
@@ -156,7 +180,8 @@ export default function EquityDailyBottomBuyPage() {
         const sym = symbols[index]
         try {
           const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
-          views[index] = json?.view || null
+          const gated = applyEquityDailyBottomBuyAccess(json, isPro)
+          views[index] = gated?.view || null
         } catch (err) {
           if (ctrl.signal.aborted) throw err
           views[index] = null
@@ -191,7 +216,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey])
+  }, [universeKey, isPro])
 
   useEffect(() => {
     if (!universe.length) return undefined
@@ -213,7 +238,8 @@ export default function EquityDailyBottomBuyPage() {
         const sym = extra[index].symbol
         try {
           const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
-          views[index] = json?.view || null
+          const gated = applyEquityDailyBottomBuyAccess(json, isPro)
+          views[index] = gated?.view || null
         } catch (err) {
           if (ctrl.signal.aborted) throw err
           views[index] = null
@@ -244,7 +270,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey])
+  }, [universeKey, isPro])
   const groups = useMemo(() => {
     const seen = []
     for (const row of summaryCatalog) {
@@ -329,6 +355,8 @@ export default function EquityDailyBottomBuyPage() {
         <p className="yds-dbb__lead">개별 종목의 조정/과매도 상태를 확인하는 READ-ONLY 화면</p>
       </header>
 
+      <DbbMembershipAccessNotice cta={audienceCta} />
+
       <DbbBuyProgressSection
         items={buyProgress}
         onSelectSymbol={setSymbol}
@@ -347,7 +375,7 @@ export default function EquityDailyBottomBuyPage() {
         ) : (
           <ul className="yds-dbb-cands">
             {candidates.map((row) => {
-              const type = equityCandidateConditionType(row)
+              const type = visibility.proConditionType ? equityCandidateConditionType(row) : null
               return (
                 <li key={row.symbol} className="yds-dbb-cands__item min-w-0">
                   <button
@@ -368,7 +396,7 @@ export default function EquityDailyBottomBuyPage() {
                     ) : (
                       <p className="yds-dbb-cand__score">{row.score}/4</p>
                     )}
-                    <CandidateFacts row={row} />
+                    {visibility.proCandidateMetrics ? <CandidateFacts row={row} /> : null}
                     {row.state?.label ? <p className="yds-dbb-cand__status">{row.state.label}</p> : null}
                   </button>
                 </li>
@@ -464,7 +492,9 @@ export default function EquityDailyBottomBuyPage() {
                   <span className="yds-dbb-card__theme-inline"> {view.symbol}</span>
                 </p>
                 <p className="yds-dbb__meta">{view.group}</p>
-                <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{priceText}</p>
+                {visibility.proPrice && priceText != null ? (
+                  <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">${priceText}</p>
+                ) : null}
                 <p className="yds-dbb__meta">기준일 {view.asOf}</p>
                 {view.source === "cache" ? <p className="yds-dbb__meta">저장된 시세 기준</p> : null}
               </section>
@@ -483,9 +513,13 @@ export default function EquityDailyBottomBuyPage() {
                 <h2 className="yds-dbb-section__title">DBB SCORE</h2>
                 <p className="yds-dbb-score__state">{view.state?.label}</p>
                 <p className="yds-dbb-card__count">{view.score} / 4</p>
-                {view.state?.detail ? <p className="yds-dbb-card__hint">{view.state.detail}</p> : null}
-                {conditionType ? <p className="yds-dbb-score__type">{conditionType.title}</p> : null}
-                {dd120Text ? (
+                {visibility.proScoreExtras && view.state?.detail ? (
+                  <p className="yds-dbb-card__hint">{view.state.detail}</p>
+                ) : null}
+                {visibility.proScoreExtras && conditionType ? (
+                  <p className="yds-dbb-score__type">{conditionType.title}</p>
+                ) : null}
+                {visibility.proScoreExtras && dd120Text ? (
                   <p className="yds-dbb-score__dd">
                     <span>120일 고점 대비</span>
                     <strong className="tabular-nums">{dd120Text}</strong>
@@ -495,39 +529,53 @@ export default function EquityDailyBottomBuyPage() {
 
               <EquityResearchPanel />
 
-              <section className="yds-dbb-card yds-dbb-card--compact">
-                <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
-                <ul className="yds-dbb-cond mt-1.5">
-                  {view.conditions.map((row) => {
-                    const valueText = formatCondition(row)
-                    return (
-                      <li key={row.id} className="yds-dbb-cond__row">
-                        <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
-                        <span
-                          className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
-                        >
-                          {valueText ?? "—"}
-                        </span>
-                        <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.thresholdText}</span>
-                        <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </section>
+              <YdsProFeatureGate
+                unlocked={visibility.proConditions}
+                title={EQUITY_DBB_PRO_LOCK_COPY.title}
+                body={EQUITY_DBB_PRO_LOCK_COPY.body}
+              >
+                <section className="yds-dbb-card yds-dbb-card--compact">
+                  <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
+                  <ul className="yds-dbb-cond mt-1.5">
+                    {view.conditions.map((row) => {
+                      const valueText = formatCondition(row)
+                      return (
+                        <li key={row.id} className="yds-dbb-cond__row">
+                          <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
+                          <span
+                            className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                          >
+                            {valueText ?? "—"}
+                          </span>
+                          <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.thresholdText}</span>
+                          <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+              </YdsProFeatureGate>
 
-              <section className="yds-dbb-card yds-dbb-card--compact">
-                <h2 className="yds-dbb-section__title">ATR RISK</h2>
-                <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
-                <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
-                <p className="yds-dbb-card__hint">{view.atrNote}</p>
-                <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
-              </section>
+              <YdsProFeatureGate
+                unlocked={visibility.proAtr}
+                title={EQUITY_DBB_PRO_LOCK_COPY.title}
+                body={EQUITY_DBB_PRO_LOCK_COPY.body}
+              >
+                <section className="yds-dbb-card yds-dbb-card--compact">
+                  <h2 className="yds-dbb-section__title">ATR RISK</h2>
+                  <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
+                  <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
+                  <p className="yds-dbb-card__hint">{view.atrNote}</p>
+                  <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
+                </section>
+              </YdsProFeatureGate>
 
-              <section className="yds-dbb__notice yds-dbb-dash__reading" aria-label="해석">
-                <p>{view.state?.reading}</p>
-                <p>{view.note}</p>
-              </section>
+              {visibility.proReading ? (
+                <section className="yds-dbb__notice yds-dbb-dash__reading" aria-label="해석">
+                  <p>{view.state?.reading}</p>
+                  <p>{view.note}</p>
+                </section>
+              ) : null}
             </>
           ) : null}
         </div>

@@ -39,8 +39,12 @@ const modules = [
   "api/_lib/userMembership.js",
   "api/_lib/requireProMembership.js",
   "api/_lib/meMembershipHandler.js",
+  "api/_lib/panicAccessTier.js",
   "api/_lib/dailyBottomBuyEngine.js",
+  "api/_lib/dailyBottomBuyRedact.js",
   "api/_lib/dailyBottomBuyHandler.js",
+  "api/_lib/equityDailyBottomBuyRedact.js",
+  "api/_lib/equityDailyBottomBuyHandler.js",
   "api/market-data.js",
 ]
 

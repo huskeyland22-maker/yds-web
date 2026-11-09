@@ -2,10 +2,15 @@
  * Read-only equity Daily Bottom Buy HTTP handler.
  * Hosted by market-data via ydsMode so the serverless entry count stays put.
  * Does not read or write trade records or the ETF snapshot.
+ * Membership only affects response redaction — engine evaluation stays full.
  */
 import fs from "node:fs"
 import path from "node:path"
 import { barsFromYahooChartResult } from "./dailyBottomBuyHandler.js"
+import {
+  redactEquityDailyBottomBuyPayload,
+} from "./equityDailyBottomBuyRedact.js"
+import { requireProMembership } from "./requireProMembership.js"
 
 function loadEquityEngine() {
   return import("../../scripts/lib/equity-daily-bottom-buy.mjs")
@@ -111,7 +116,15 @@ export async function loadEquityDailyBottomBuy(symbol, deps = {}) {
   }
 }
 
-export async function handleEquityDailyBottomBuy(req, res) {
+/**
+ * @param {import('http').IncomingMessage & { method?: string, query?: Record<string, string | string[]>, headers?: Record<string, string> }} req
+ * @param {import('http').ServerResponse & { setHeader: Function, status: Function, json: Function, end: Function }} res
+ * @param {{
+ *   requireProMembership?: typeof requireProMembership
+ *   load?: typeof loadEquityDailyBottomBuy
+ * }} [deps]
+ */
+export async function handleEquityDailyBottomBuy(req, res, deps = {}) {
   const { DATA_MISSING, EQUITY_DAILY_BOTTOM_BUY_ID } = await loadEquityEngine()
   res.setHeader("Cache-Control", "no-store, max-age=0")
   res.setHeader("Access-Control-Allow-Origin", "*")
@@ -123,16 +136,32 @@ export async function handleEquityDailyBottomBuy(req, res) {
     res.status(405).json({ ok: false, error: "method_not_allowed", system: EQUITY_DAILY_BOTTOM_BUY_ID })
     return
   }
+
+  const requirePro = deps.requireProMembership ?? requireProMembership
+  const load = deps.load ?? loadEquityDailyBottomBuy
+
   try {
     const { symbol } = readQuery(req)
-    const result = await loadEquityDailyBottomBuy(symbol)
-    res.status(result.status).json(result.body)
+    // Always evaluate full view first; membership only affects response redaction.
+    const result = await load(symbol)
+    const fullPayload = result.body
+
+    const gate = await requirePro(req)
+    if (gate.ok) {
+      res.status(result.status).json({ ...fullPayload, access: "full" })
+      return
+    }
+
+    // FREE / logged-out / membership errors → summary only (never leak details).
+    res.status(result.status).json(redactEquityDailyBottomBuyPayload(fullPayload))
   } catch {
-    res.status(200).json({
-      ok: false,
-      system: EQUITY_DAILY_BOTTOM_BUY_ID,
-      message: DATA_MISSING,
-      view: null,
-    })
+    res.status(200).json(
+      redactEquityDailyBottomBuyPayload({
+        ok: false,
+        system: EQUITY_DAILY_BOTTOM_BUY_ID,
+        message: DATA_MISSING,
+        view: null,
+      }),
+    )
   }
 }

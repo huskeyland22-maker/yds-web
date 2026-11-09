@@ -559,3 +559,39 @@
     font-size: clamp(2rem, 10vw, 2.5rem);
   }
 }
+
+/* Membership PRO gate (market-analysis panic detail) */
+.yds-pro-gate {
+  margin-top: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(120, 53, 15, 0.28);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  color: rgba(255, 251, 235, 0.95);
+}
+
+.yds-pro-gate__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.yds-pro-gate__body {
+  margin: 0.5rem auto 0;
+  max-width: 28rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(253, 230, 138, 0.85);
+}
+
+.yds-pro-gate--compact {
+  margin-top: 0.5rem;
+  padding: 0.85rem 0.75rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-pro-gate {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(69, 26, 3, 0.45);
+  box-shadow: var(--yds-shadow-card, none);
+}

@@ -38,6 +38,7 @@
 - [x] 패닉 강도 카드 존재감 강화 — 시장 상태와 동급 핵심 지표 톤
 - [x] 시장분석 UI 동결 마감 — 패닉·유동성·시장전략 카드 최종 정리
 - [x] **시장분석 UI Freeze** — 구조 변경 중단 (2026-06-16)
+- [x] **FREE/PRO 핵심 지표 게이트 (RC 선택 이식)** — Panic history/v2 API `requireProMembership` · DBB/Equity 서버 redact · UI `YdsProFeatureGate` · snapshot summary-only · fail-closed (`rc1/port-pro-gates`, base `fd2b8bf`)
 - [x] **개별종목 조정 매수** `/equity-daily-bottom-buy` — 48종목 READ-ONLY Score·4조건·ATR 표시, ETF 조정 매수와 메뉴 분리
 - [x] **개별종목 DBB equity-dash 레이아웃** — 후보·매수현황 `auto-fit`/`1fr` 정렬, SCORE→연구패널→CONDITIONS 순서 복원 (ETF `--dashboard` 격리)
 - [x] 패닉 8지표 체계 — GS B/B 제거, VIX/VXN/CNN/P-C/BofA/MOVE/SKEW/HY OAS
