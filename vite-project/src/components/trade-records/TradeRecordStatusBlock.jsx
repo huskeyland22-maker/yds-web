@@ -53,6 +53,7 @@ function statusRow(view, key) {
     return { key, label: "현재 신호", value: view.signalLabel, strongClass: "font-mono tabular-nums", emphasis: true }
   }
   if (key === "stage") {
+    if (view.hideDcaGuidance || !view.stageLabel) return null
     return { key, label: "현재 매수 단계", value: view.stageLabel, strongClass: "", emphasis: true }
   }
   if (key === "note") {
@@ -69,6 +70,7 @@ function statusRow(view, key) {
     }
   }
   if (key === "next") {
+    if (view.hideDcaGuidance || !view.nextStep) return null
     return { key, label: "다음 단계", value: view.nextStep, strongClass: "", emphasis: false }
   }
   if (key === "avg") {

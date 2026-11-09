@@ -1,8 +1,10 @@
 /**
- * panic_index_history API 응답 — panic_v2 보강 (DB V2 + 실전 레벨 점수)
+ * panic_index_history API 응답 — panic_v2 보강
+ * stored V2 우선 · 없을 때만 Hero/신규 스냅샷과 동일 3지표 getPanicScoreV2.
+ * level-score(computePanicV2LevelScore)는 panic_v2에 혼합하지 않음 (backfill 경로 보존).
  */
-import { cycleRowFromHistorySource, fetchPanicHistoryV2Rows } from "./panicHistoryV2Db.js"
-import { computePanicV2LevelScore } from "./panicV2LevelScore.js"
+import { fetchPanicHistoryV2Rows } from "./panicHistoryV2Db.js"
+import { getPanicScoreV2 } from "./panicScores.js"
 
 /**
  * @param {object} clientRow — mapPanicIndexHistoryRowToClient 결과
@@ -13,41 +15,16 @@ export function resolvePanicV2ForHistoryRow(clientRow, storedV2) {
     return Math.round(Number(storedV2))
   }
 
-  const cycle = cycleRowFromHistorySource({
-    date: clientRow.date,
-    vix: clientRow.vix,
-    vxn: clientRow.vxn,
-    fear_greed: clientRow.fearGreed,
-    put_call: clientRow.putCall,
-    move: clientRow.move,
-    bofa: clientRow.bofa,
-    skew: clientRow.skew,
-    hy_oas: clientRow.highYield ?? clientRow.hyOas,
-    vvix: clientRow.vvix,
-    vix_term: clientRow.vixTerm,
-    ndx_distance: clientRow.ndxDistance,
-    soxx_distance: clientRow.soxxDistance,
-    dxy: clientRow.dxy,
+  return getPanicScoreV2({
+    vix: clientRow?.vix,
+    fearGreed: clientRow?.fearGreed,
+    putCall: clientRow?.putCall,
   })
-
-  const practical = {
-    ...(cycle ?? clientRow),
-    vvix: clientRow.vvix ?? cycle?.vvix,
-    vixTerm: clientRow.vixTerm ?? cycle?.vixTerm,
-    ndxDistance: clientRow.ndxDistance ?? cycle?.ndxDistance,
-    soxxDistance: clientRow.soxxDistance ?? cycle?.soxxDistance,
-    dxy: clientRow.dxy ?? cycle?.dxy,
-    putCall: clientRow.putCall ?? cycle?.putCall,
-    move: clientRow.move ?? cycle?.move,
-    vix: clientRow.vix ?? cycle?.vix,
-  }
-
-  const { score } = computePanicV2LevelScore(practical)
-  return score != null ? score : null
 }
 
 /**
- * @param {object[]} clientRows
+ * @param {object} clientRow
+ * @param {number | null | undefined} storedV2
  */
 export function attachPanicV2ToHistoryRow(clientRow, storedV2) {
   const panic_v2 = resolvePanicV2ForHistoryRow(clientRow, storedV2)

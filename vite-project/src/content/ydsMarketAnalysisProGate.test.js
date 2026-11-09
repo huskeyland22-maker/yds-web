@@ -33,4 +33,9 @@ describe("market-analysis panic PRO gate", () => {
     // @ts-expect-error intentional misuse
     expect(buildPanicCenterVisibility(1).proHistoryChart).toBe(false)
   })
+
+  it("trade-record DCA guidance shares the same proDcaGuidance flag as hero", () => {
+    expect(buildPanicCenterVisibility(false).proDcaGuidance).toBe(false)
+    expect(buildPanicCenterVisibility(true).proDcaGuidance).toBe(true)
+  })
 })

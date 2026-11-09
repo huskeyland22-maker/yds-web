@@ -325,6 +325,39 @@ describe("trade status views", () => {
     )
     expect(view.stageLabel).toContain("1차")
     expect(view.nextStep).toContain("2차")
+    expect(view.hideDcaGuidance).toBe(false)
+  })
+
+  it("panic FREE status hides DCA band and 40/27/33 nextStep", () => {
+    const records = [
+      {
+        id: "1",
+        system: "panic",
+        symbol: "SPY",
+        buyDate: "2026-09-01",
+        buyPrice: 500,
+        buyAmountUsd: 400,
+        shares: null,
+        weightPct: 40,
+        memo: "",
+        createdAt: "",
+        updatedAt: "",
+      },
+    ]
+    const view = buildPanicTradeStatusView(55, records, {
+      currentPrice: 520,
+      asOfDate: "2026-09-21",
+      includeDcaGuidance: false,
+    })
+    expect(view.hideDcaGuidance).toBe(true)
+    expect(view.stageLabel).toBe("")
+    expect(view.nextStep).toBe("")
+    expect(view.dcaAddPct).toBeNull()
+    expect(view.dcaCumulativePct).toBeNull()
+    expect(view.signalLabel).toBe("55")
+    expect(view.returnPct).not.toBeNull()
+    expect(view.recordedWeightPct).toBe(40)
+    expect(JSON.stringify(view)).not.toMatch(/40\/27\/33|1차 매수 구간 \(40%\)|2차\(27%\)|3차\(33%\)/)
   })
 })
 

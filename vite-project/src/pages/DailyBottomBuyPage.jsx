@@ -26,6 +26,7 @@ import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSec
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import DbbReturnHorizonNote from "../components/dbb/DbbReturnHorizonNote.jsx"
+import DbbSplitSimResearchNote from "../components/dbb/DbbSplitSimResearchNote.jsx"
 import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 import {
   closeTickerPicker,
@@ -218,6 +219,7 @@ export default function DailyBottomBuyPage() {
       <details className="yds-dbb-card yds-dbb-research mb-3">
         <summary className="yds-dbb-section__title">과거 연구 기준</summary>
         <DbbReturnHorizonNote />
+        <DbbSplitSimResearchNote />
       </details>
 
       <details className="yds-dbb__notice yds-dbb__notice--fold">
@@ -232,6 +234,7 @@ export default function DailyBottomBuyPage() {
         <div className="yds-dbb__notice-body">
           <p>3개 충족 → 1차 매수 후보 · 4개 충족 → 추가 매수 후보</p>
           <p>신호 발생 후 추가 하락할 수 있습니다.</p>
+          <DbbSplitSimResearchNote />
           <p className="yds-dbb__notice-muted">
             분할매수 검토용 보조 신호입니다. 대형 시장 패닉은 Panic Index를 참고합니다.
           </p>

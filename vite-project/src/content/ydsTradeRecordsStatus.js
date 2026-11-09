@@ -79,11 +79,17 @@ export function buildDbbTradeStatusView(card, records, asOfDate) {
 /**
  * @param {number | null | undefined} panicScore
  * @param {import('./ydsTradeRecords.js').TradeRecord[]} records
- * @param {{ currentPrice?: number | null, asOfDate?: string | null }} [opts]
+ * @param {{
+ *   currentPrice?: number | null
+ *   asOfDate?: string | null
+ *   includeDcaGuidance?: boolean
+ * }} [opts]
+ * `includeDcaGuidance` 기본 true. FREE 매수기록 패널은 false로 두어 40/27/33·밴드·nextStep을 숨긴다.
  */
 export function buildPanicTradeStatusView(panicScore, records, opts = {}) {
   const list = Array.isArray(records) ? records : []
-  const dca = resolvePanicBottomDcaSignal(panicScore)
+  const includeDcaGuidance = opts.includeDcaGuidance !== false
+  const dca = includeDcaGuidance ? resolvePanicBottomDcaSignal(panicScore) : null
   const recordedWeight = sumTradeWeightPct(list)
   const avgPrice = averageTradeBuyPrice(list)
   const currentPrice =
@@ -99,7 +105,9 @@ export function buildPanicTradeStatusView(panicScore, records, opts = {}) {
   )
 
   let nextStep = "매수 대기"
-  if (dca) {
+  if (!includeDcaGuidance) {
+    nextStep = ""
+  } else if (dca) {
     if (dca.stage === 0) nextStep = "매수 대기"
     else if (dca.stage === 1)
       nextStep = recordedWeight >= 40 ? "2차(27%) 구간 대기" : "1차 매수 구간 (40%)"
@@ -115,7 +123,7 @@ export function buildPanicTradeStatusView(panicScore, records, opts = {}) {
       panicScore != null && Number.isFinite(Number(panicScore))
         ? String(Math.round(Number(panicScore)))
         : "—",
-    stageLabel: dca?.bandLabel || "—",
+    stageLabel: includeDcaGuidance ? dca?.bandLabel || "—" : "",
     userStageNote: recordedWeight > 0 ? `기록 비중 ${round1(recordedWeight)}%` : "",
     recordedWeightPct: recordedWeight,
     nextStep,
@@ -127,6 +135,7 @@ export function buildPanicTradeStatusView(panicScore, records, opts = {}) {
     recordCount: list.length,
     dcaAddPct: dca?.addPct ?? null,
     dcaCumulativePct: dca?.cumulativePct ?? null,
+    hideDcaGuidance: !includeDcaGuidance,
   }
 }
 

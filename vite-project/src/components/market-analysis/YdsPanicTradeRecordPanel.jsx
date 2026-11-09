@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import { getPanicScoreV2 } from "../../utils/tradingScores.js"
 import { listTradeRecords, TRADE_RECORDS_CHANGED_EVENT } from "../../content/ydsTradeRecords.js"
 import { buildPanicTradeStatusView } from "../../content/ydsTradeRecordsStatus.js"
+import { buildPanicCenterVisibility } from "../../content/ydsMarketAnalysisProGate.js"
+import { useMembership } from "../../context/MembershipContext.jsx"
 import TradeRecordEditor from "../trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../trade-records/TradeRecordStatusBlock.jsx"
 
@@ -10,6 +12,7 @@ const PANIC_TRADE_SYMBOL = "SPY"
 /**
  * Panic 매수 수동 기록 — 핵심 Panic UI와 분리된 보조 영역.
  * 자동 주문 없음 · Panic 계산/단계 로직 변경 없음.
+ * DCA 40/27/33·밴드·nextStep 안내는 히어로와 동일하게 PRO만 노출.
  * @param {{
  *   panicData?: object | null
  *   currentPrice?: number | null
@@ -23,6 +26,10 @@ export default function YdsPanicTradeRecordPanel({
   asOfDate = null,
   className = "",
 }) {
+  const { isPro } = useMembership()
+  const visibility = useMemo(() => buildPanicCenterVisibility(isPro), [isPro])
+  const proDca = visibility.proDcaGuidance === true
+
   const [open, setOpen] = useState(false)
   const [version, setVersion] = useState(0)
 
@@ -43,8 +50,9 @@ export default function YdsPanicTradeRecordPanel({
       buildPanicTradeStatusView(score, records, {
         currentPrice,
         asOfDate,
+        includeDcaGuidance: proDca,
       }),
-    [score, records, currentPrice, asOfDate],
+    [score, records, currentPrice, asOfDate, proDca],
   )
 
   return (
@@ -56,7 +64,9 @@ export default function YdsPanicTradeRecordPanel({
         <div>
           <h3 className="yds-panic-trade__title">매수 기록</h3>
           <p className="yds-panic-trade__sub">
-            SPY 기준 수동 기록 (USD) · 자동 주문 없음 · 40/27/33 참고
+            {proDca
+              ? "SPY 기준 수동 기록 (USD) · 자동 주문 없음 · 40/27/33 참고"
+              : "SPY 기준 수동 기록 (USD) · 자동 주문 없음"}
           </p>
         </div>
         <button
@@ -75,7 +85,7 @@ export default function YdsPanicTradeRecordPanel({
         <TradeRecordEditor
           system="panic"
           symbol={PANIC_TRADE_SYMBOL}
-          defaultWeightPct={40}
+          defaultWeightPct={proDca ? 40 : ""}
           onChange={() => setVersion((n) => n + 1)}
         />
       ) : null}

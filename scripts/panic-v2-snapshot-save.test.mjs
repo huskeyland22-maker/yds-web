@@ -94,6 +94,20 @@ assert.equal(enriched.panicV2, EXPECTED)
 assert.equal(enriched.panic_v2, EXPECTED)
 assert.equal(enriched.panicV2Score, EXPECTED)
 
+// 5b) enrich fallback without stored V2 = 3-indicator getPanicScoreV2 (not level-score)
+const { computePanicV2LevelScore } = await import(
+  pathToFileURL(join(root, "api/_lib/panicV2LevelScore.js")).href,
+)
+const levelFallback = computePanicV2LevelScore(RAW)
+assert.ok(levelFallback?.score != null)
+assert.notEqual(levelFallback.score, EXPECTED)
+const enrichFallbackScore = resolvePanicV2ForHistoryRow(indexClient, null)
+assert.equal(enrichFallbackScore, EXPECTED)
+assert.notEqual(enrichFallbackScore, levelFallback.score)
+const enrichedFallback = attachPanicV2ToHistoryRow(indexClient, null)
+assert.equal(enrichedFallback.panic_v2, EXPECTED)
+assert.equal(enrichedFallback.panicV2, EXPECTED)
+
 // 6) History chart transform (raw → getFinalScore / panicIntensityScoreForRow)
 const chartFromFinal = getFinalScore({
   vix: RAW.vix,
