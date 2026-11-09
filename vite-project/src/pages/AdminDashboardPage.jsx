@@ -148,8 +148,12 @@ export default function AdminDashboardPage() {
       setApiHealth(apis)
       setLastRefreshAt(new Date().toISOString())
       if (isPanicHubEnabled()) {
-        void useAppDataStore.getState().loadCycleHistoryBundle({ force: true })
-        void useAppDataStore.getState().loadDeskMarketReport(
+        const store = useAppDataStore.getState()
+        void store.loadCycleHistoryBundle({
+          force: true,
+          isPro: store.membershipIsPro === true,
+        })
+        void store.loadDeskMarketReport(
           latestRow?.date ?? new Date().toISOString().slice(0, 10),
         )
       }

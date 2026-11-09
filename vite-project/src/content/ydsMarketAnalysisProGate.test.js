@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 import { isProUnlocked, MEMBERSHIP_STATUS } from "./ydsMembership.js"
-import { buildPanicCenterVisibility } from "./ydsMarketAnalysisProGate.js"
+import {
+  allowLocalPanicHistoryFallbackOnApiError,
+  allowLocalPanicHistoryMergeAfterHubFetch,
+  buildPanicCenterVisibility,
+  PANIC_LAB_PRO_LOCK_COPY,
+  resolvePanicHistoryRowsForProFeature,
+} from "./ydsMarketAnalysisProGate.js"
 
 describe("market-analysis panic PRO gate", () => {
   it("locks history/drivers/dca unless membership is PRO", () => {
@@ -37,5 +43,37 @@ describe("market-analysis panic PRO gate", () => {
   it("trade-record DCA guidance shares the same proDcaGuidance flag as hero", () => {
     expect(buildPanicCenterVisibility(false).proDcaGuidance).toBe(false)
     expect(buildPanicCenterVisibility(true).proDcaGuidance).toBe(true)
+  })
+
+  it("Panic Lab reuses proHistoryChart (FREE locked, PRO unlocked)", () => {
+    expect(buildPanicCenterVisibility(false).proHistoryChart).toBe(false)
+    expect(buildPanicCenterVisibility(true).proHistoryChart).toBe(true)
+    expect(PANIC_LAB_PRO_LOCK_COPY.title).toBeTruthy()
+    expect(PANIC_LAB_PRO_LOCK_COPY.body).toMatch(/패닉 연구실|Panic Lab/)
+  })
+
+  it("FREE cannot feed local/store history into PRO Lab/history consumers", () => {
+    const localRows = [{ date: "2026-01-01", vix: 20 }, { date: "2026-01-02", vix: 22 }]
+    expect(resolvePanicHistoryRowsForProFeature(localRows, false)).toEqual([])
+    expect(resolvePanicHistoryRowsForProFeature(localRows, true)).toEqual(localRows)
+    expect(resolvePanicHistoryRowsForProFeature(null, true)).toEqual([])
+  })
+
+  it("blocks localStorage merge into store when hub returns pro_required", () => {
+    expect(allowLocalPanicHistoryMergeAfterHubFetch("pro_required")).toBe(false)
+    expect(allowLocalPanicHistoryMergeAfterHubFetch(null)).toBe(true)
+    expect(allowLocalPanicHistoryMergeAfterHubFetch("api_empty")).toBe(true)
+  })
+
+  it("api_error LS→store fallback is PRO-only (fail-closed for FREE/loading/unknown)", () => {
+    expect(allowLocalPanicHistoryFallbackOnApiError(true)).toBe(true)
+    expect(allowLocalPanicHistoryFallbackOnApiError(false)).toBe(false)
+    expect(allowLocalPanicHistoryFallbackOnApiError(undefined)).toBe(false)
+    expect(allowLocalPanicHistoryFallbackOnApiError(null)).toBe(false)
+    // @ts-expect-error intentional misuse
+    expect(allowLocalPanicHistoryFallbackOnApiError("pro")).toBe(false)
+    const localRows = [{ date: "2026-01-01", vix: 20 }]
+    expect(resolvePanicHistoryRowsForProFeature(localRows, false)).toEqual([])
+    expect(resolvePanicHistoryRowsForProFeature(localRows, true)).toEqual(localRows)
   })
 })

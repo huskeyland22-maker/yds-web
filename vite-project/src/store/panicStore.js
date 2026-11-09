@@ -507,6 +507,7 @@ export const usePanicStore = create((set, get) => ({
         tradeDate,
         payload: data ?? payload,
         limit: 500,
+        isPro: appStore.membershipIsPro === true,
       })
       if (!desk) {
         useAppDataStore.setState({ deskMarketReportLoading: false })

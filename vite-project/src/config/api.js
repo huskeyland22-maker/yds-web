@@ -411,22 +411,33 @@ export async function fetchPanicHistoryV2(options = {}) {
   return rows
 }
 
-/** panic_index_history → panic_history_v2 백필 */
+/**
+ * panic_index_history → panic_history_v2 백필 (운영 전용).
+ * 서버는 CRON_SECRET (Authorization: Bearer / x-cron-secret) · POST only.
+ * 브라우저/멤버십 토큰으로는 호출하지 말 것.
+ */
 export async function backfillPanicHistoryV2(options = {}) {
   if (!isPanicHubEnabled()) return { ok: false, skipped: true, reason: "hub_disabled" }
   const days = options.days ?? 30
   const limit = options.limit ?? days + 5
   const url = panicApiUrl("backfill", { limit: String(limit), days: String(days) })
   if (isDataTraceEnabled()) logFetchStart("panic-history-v2-backfill", { url })
+  const headers = { ...(LIVE_POST_JSON_INIT.headers || {}) }
+  const cronSecret =
+    typeof options.cronSecret === "string" && options.cronSecret.trim()
+      ? options.cronSecret.trim()
+      : ""
+  if (cronSecret) headers.Authorization = `Bearer ${cronSecret}`
   const res = await fetch(url, {
     ...LIVE_POST_JSON_INIT,
     method: "POST",
-    body: JSON.stringify({ limit, days, source: options.source ?? "client" }),
+    headers,
+    body: JSON.stringify({ limit, days, source: options.source ?? "ops_backfill" }),
   })
   const json = await res.json().catch(() => ({}))
   if (!res.ok) {
     if (isDataTraceEnabled()) logFetchFail("panic-history-v2-backfill", new Error(`HTTP ${res.status}`))
-    return { ok: false, error: `HTTP ${res.status}` }
+    return { ok: false, error: json?.error || `HTTP ${res.status}`, status: res.status }
   }
   if (isDataTraceEnabled()) logFetchSuccess("panic-history-v2-backfill", json)
   return json

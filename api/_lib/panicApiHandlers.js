@@ -204,7 +204,10 @@ export async function handlePanicModeV2History(req, res) {
   }
 }
 
-/** mode=backfill — V2 백필 (구 /api/panic/history-v2/backfill) */
+/**
+ * mode=backfill — V2 백필 (구 /api/panic/history-v2/backfill)
+ * Auth/method gate는 api/panic.js (CRON_SECRET · POST only)에서 선행한다.
+ */
 export async function handlePanicModeBackfill(req, res) {
   if (!isSupabaseConfigured()) {
     res.status(200).json({ ok: true, warning: "supabase_not_configured", skipped: true })

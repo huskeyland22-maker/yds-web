@@ -1,8 +1,10 @@
 /**
  * Panic API — 단일 Vercel Serverless Function
  *
- * GET  ?mode=latest | history | history-latest | v2 | v2history | backfill
+ * GET  ?mode=latest | history | history-latest | v2 | v2history
  * POST ?mode=update | backfill
+ *
+ * backfill: CRON_SECRET (verifyCronRequest) 필수 · POST only · membership PRO로는 불가
  */
 import {
   handlePanicModeBackfill,
@@ -13,6 +15,7 @@ import {
   handlePanicModeV2History,
   panicNoStore,
 } from "./_lib/panicApiHandlers.js"
+import { authorizePanicBackfillRequest } from "./_lib/panicBackfillAccess.js"
 import {
   requireProMembership,
   sendProMembershipDenied,
@@ -92,13 +95,19 @@ export default async function handler(req, res) {
         await handlePanicModeV2History(req, res)
         return
 
-      case "backfill":
-        if (req.method !== "GET" && req.method !== "POST") {
-          res.status(405).json({ ok: false, error: "method_not_allowed", mode })
+      case "backfill": {
+        const access = authorizePanicBackfillRequest(req)
+        if (!access.ok) {
+          res.status(access.status || 401).json({
+            ok: false,
+            error: access.error || "unauthorized",
+            mode,
+          })
           return
         }
         await handlePanicModeBackfill(req, res)
         return
+      }
 
       case "update":
         if (req.method !== "POST") {

@@ -550,7 +550,14 @@ function App() {
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
   const membership = useMembership()
+  const membershipIsPro = membership.isPro === true
+  const membershipReady = membership.isLoading !== true
   const accountAccessCaption = membershipAccountAccessCaption(membership.status)
+
+  /** Mirror PRO unlock into appDataStore for hub history LS fallback (fail-closed while loading). */
+  useEffect(() => {
+    useAppDataStore.getState().setMembershipIsPro(membershipReady && membershipIsPro)
+  }, [membershipReady, membershipIsPro])
   const [saveSuccessToast, setSaveSuccessToast] = useState(false)
   const [appToast, setAppToast] = useState(null)
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
@@ -811,6 +818,7 @@ function App() {
             tradeDate,
             payload: serverData ?? payload,
             limit: 500,
+            isPro: membershipIsPro,
           })
           applyServerPanicSnapshot(desk ?? serverData, { skipAutoRefresh: true })
           console.log("UI UPDATED", { tradeDate, vix: desk?.vix ?? serverData?.vix })
@@ -828,7 +836,11 @@ function App() {
         persistHistory(deskSnap, tradeDate)
         if (!isPanicHubEnabled()) {
           appendPanicIndexHistory({ ...normalizedParsedData, updatedAt: savedAt }, tradeDate)
-          await appAfterSave.loadCycleHistoryBundle({ limit: 500, force: true })
+          await appAfterSave.loadCycleHistoryBundle({
+            limit: 500,
+            force: true,
+            isPro: membershipIsPro,
+          })
         }
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
         resetAiReportInput()
@@ -853,7 +865,11 @@ function App() {
 
         if (!usedHubSavePath) {
           try {
-            await useAppDataStore.getState().loadCycleHistoryBundle({ limit: 500, force: true })
+            await useAppDataStore.getState().loadCycleHistoryBundle({
+              limit: 500,
+              force: true,
+              isPro: membershipIsPro,
+            })
           } catch (e) {
             console.warn("[panic] post-save refresh", e)
           }
@@ -882,13 +898,20 @@ function App() {
   }, [])
 
   useEffect(() => {
+    // Wait for membership so api_error LS fallback can distinguish FREE vs PRO (fail-closed while loading).
+    if (!membershipReady) return undefined
+    let cancelled = false
     void (async () => {
       const store = useAppDataStore.getState()
       try {
         await store.loadDeskMetricSources()
+        if (cancelled) return
         await store.loadCycleLatestSnapshot({ force: true })
-        await store.loadCycleHistoryBundle({ limit: 500 })
+        if (cancelled) return
+        await store.loadCycleHistoryBundle({ limit: 500, isPro: membershipIsPro })
+        if (cancelled) return
         await store.loadDeskMetricSources()
+        if (cancelled) return
         const desk = store.resolveDeskPanicData()
         if (desk && isPanicHubEnabled()) {
           applyServerPanicSnapshot(desk, { skipAutoRefresh: true })
@@ -896,10 +919,13 @@ function App() {
       } catch (err) {
         console.error("[App] cycle boot load failed", err)
       } finally {
-        useAppDataStore.setState({ deskMarketReportLoading: false })
+        if (!cancelled) useAppDataStore.setState({ deskMarketReportLoading: false })
       }
     })()
-  }, [applyServerPanicSnapshot])
+    return () => {
+      cancelled = true
+    }
+  }, [applyServerPanicSnapshot, membershipReady, membershipIsPro])
 
   /** history refetch 후 panicStore 스냅샷 = 최신 history row (허브 데스크·기타 화면) */
   useEffect(() => {
@@ -922,7 +948,11 @@ function App() {
         void (async () => {
           const store = useAppDataStore.getState()
           await store.loadCycleLatestSnapshot({ force: true })
-          await store.loadCycleHistoryBundle({ limit: 500, force: true })
+          await store.loadCycleHistoryBundle({
+            limit: 500,
+            force: true,
+            isPro: store.membershipIsPro === true,
+          })
           await store.loadDeskMetricSources()
         })()
       },

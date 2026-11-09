@@ -65,10 +65,15 @@ export default function PanicIndexHistorySection({
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
   const loadCycleHistoryBundle = useAppDataStore((s) => s.loadCycleHistoryBundle)
   const panicHistoryV2SyncStatus = useAppDataStore((s) => s.panicHistoryV2SyncStatus)
+  const membershipIsPro = useAppDataStore((s) => s.membershipIsPro)
 
   useEffect(() => {
-    void loadCycleHistoryBundle({ limit: 600, force: false })
-  }, [loadCycleHistoryBundle])
+    void loadCycleHistoryBundle({
+      limit: 600,
+      force: false,
+      isPro: membershipIsPro === true,
+    })
+  }, [loadCycleHistoryBundle, membershipIsPro])
 
   const history = useMemo(() => {
     const propsMerged = mergeCycleRows(storeRows ?? [], rowsProp ?? [])

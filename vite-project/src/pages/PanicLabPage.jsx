@@ -19,6 +19,13 @@ import {
   formatLabPct,
   PANIC_LAB_HORIZONS,
 } from "../content/ydsPanicLabEngine.js"
+import {
+  buildPanicCenterVisibility,
+  PANIC_LAB_PRO_LOCK_COPY,
+  resolvePanicHistoryRowsForProFeature,
+} from "../content/ydsMarketAnalysisProGate.js"
+import { useMembership } from "../context/MembershipContext.jsx"
+import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
 import YdsV1ReleaseBadge from "../components/trust/YdsV1ReleaseBadge.jsx"
 import YdsEmptyState from "../components/trust/YdsEmptyState.jsx"
 
@@ -131,14 +138,22 @@ function ComponentBars({ items }) {
 }
 
 export default function PanicLabPage() {
+  const { isPro } = useMembership()
+  const visibility = useMemo(() => buildPanicCenterVisibility(isPro), [isPro])
+  const labUnlocked = visibility.proHistoryChart === true
+
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
-  const history = useMemo(
-    () => resolveCycleHistoryRows(mergeCycleRows(storeRows ?? [], [])),
-    [storeRows],
-  )
+  const history = useMemo(() => {
+    const allowed = resolvePanicHistoryRowsForProFeature(storeRows, labUnlocked)
+    return resolveCycleHistoryRows(mergeCycleRows(allowed, []))
+  }, [storeRows, labUnlocked])
 
   const [benchmarks, setBenchmarks] = useState(null)
   useEffect(() => {
+    if (!labUnlocked) {
+      setBenchmarks(null)
+      return
+    }
     let cancelled = false
     fetchPanicLabBenchmarks().then((b) => {
       if (!cancelled) setBenchmarks(b)
@@ -146,14 +161,14 @@ export default function PanicLabPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [labUnlocked])
 
   const report = useMemo(() => {
-    if (!benchmarks) return null
+    if (!labUnlocked || !benchmarks) return null
     return buildPanicLabReport(history, benchmarks)
-  }, [history, benchmarks])
+  }, [history, benchmarks, labUnlocked])
 
-  const loading = benchmarks == null
+  const loading = labUnlocked && benchmarks == null
   const hasHistory = (report?.historyDays ?? 0) > 0
 
   return (
@@ -172,6 +187,11 @@ export default function PanicLabPage() {
         </Link>
       </header>
 
+      <YdsProFeatureGate
+        unlocked={labUnlocked}
+        title={PANIC_LAB_PRO_LOCK_COPY.title}
+        body={PANIC_LAB_PRO_LOCK_COPY.body}
+      >
       {loading ? (
         <p className="yds-panic-lab__note">벤치마크·히스토리 로딩 중…</p>
       ) : !hasHistory ? (
@@ -320,6 +340,7 @@ export default function PanicLabPage() {
           </section>
         </>
       )}
+      </YdsProFeatureGate>
     </div>
   )
 }

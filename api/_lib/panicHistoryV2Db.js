@@ -256,15 +256,48 @@ export async function upsertPanicHistoryV2Rows(dbRows) {
 }
 
 /**
+ * 이미 저장된 panic_v2가 있는 날짜는 backfill 후보에서 제외 (3지표 V2 보존).
+ * @param {object[]} candidateCycleRows
+ * @param {Iterable<string> | Set<string>} storedV2Dates
+ * @returns {{ toFill: object[]; preserved: number }}
+ */
+export function selectBackfillCandidatesWithoutStoredV2(candidateCycleRows, storedV2Dates) {
+  const stored = storedV2Dates instanceof Set ? storedV2Dates : new Set(storedV2Dates || [])
+  const toFill = []
+  let preserved = 0
+  for (const row of candidateCycleRows || []) {
+    const date = String(row?.date ?? "").slice(0, 10)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue
+    if (stored.has(date)) {
+      preserved += 1
+      continue
+    }
+    toFill.push(row)
+  }
+  return { toFill, preserved }
+}
+
+/**
  * panic_index_history → 최근 N일 레벨 V2 백필
- * @param {{ days?: number; limit?: number; source?: string }} [opts]
+ * stored V2가 있는 날짜는 upsert하지 않음 (기존 3지표 점수 우선).
+ * @param {{
+ *   days?: number
+ *   limit?: number
+ *   source?: string
+ *   fetchIndexRows?: typeof fetchPanicIndexHistoryRows
+ *   fetchV2Rows?: typeof fetchPanicHistoryV2Rows
+ *   upsertRows?: typeof upsertPanicHistoryV2Rows
+ * }} [opts]
  */
 export async function backfillPanicHistoryV2FromIndexHistory(opts = {}) {
   const days = Math.min(Math.max(Number(opts.days) || 30, 1), 90)
   const limit = Math.min(Math.max(Number(opts.limit) || days + 5, days), 2000)
   const source = opts.source ?? "backfill_30d"
+  const fetchIndex = opts.fetchIndexRows ?? fetchPanicIndexHistoryRows
+  const fetchV2 = opts.fetchV2Rows ?? fetchPanicHistoryV2Rows
+  const upsertRows = opts.upsertRows ?? upsertPanicHistoryV2Rows
 
-  const indexRows = await fetchPanicIndexHistoryRows({ limit })
+  const indexRows = await fetchIndex({ limit })
   if (!indexRows.length) {
     return { ok: false, skipped: true, reason: "panic_index_history_empty", count: 0 }
   }
@@ -273,10 +306,34 @@ export async function backfillPanicHistoryV2FromIndexHistory(opts = {}) {
   const sorted = cycleRows.sort((a, b) => String(a.date).localeCompare(String(b.date)))
   const lastN = sorted.slice(-days)
 
+  let storedV2Dates = new Set()
+  try {
+    const existingV2 = await fetchV2({ limit: Math.max(limit, days, lastN.length || 1) })
+    storedV2Dates = new Set(
+      (existingV2 || [])
+        .filter((r) => r?.date && r.panicV2 != null && Number.isFinite(Number(r.panicV2)))
+        .map((r) => String(r.date).slice(0, 10)),
+    )
+  } catch (err) {
+    console.warn(
+      "[panic] backfill existing V2 lookup failed — refusing overwrite without inventory",
+      err instanceof Error ? err.message : err,
+    )
+    return {
+      ok: false,
+      skipped: true,
+      reason: "existing_v2_lookup_failed",
+      indexRows: indexRows.length,
+      daysRequested: days,
+    }
+  }
+
+  const { toFill, preserved } = selectBackfillCandidatesWithoutStoredV2(lastN, storedV2Dates)
+
   const dbRows = []
   const clientPreview = []
 
-  for (const row of lastN) {
+  for (const row of toFill) {
     const { score } = computePanicV2LevelScore(row)
     if (score == null) continue
     const dbRow = panicIndexHistoryV2DbRow(row, score, source)
@@ -287,15 +344,18 @@ export async function backfillPanicHistoryV2FromIndexHistory(opts = {}) {
 
   if (!dbRows.length) {
     return {
-      ok: false,
+      ok: true,
       skipped: true,
-      reason: "no_scored_rows",
+      reason: preserved > 0 ? "all_dates_have_stored_v2" : "no_scored_rows",
       indexRows: indexRows.length,
       daysRequested: days,
+      preserved,
+      inserted: 0,
+      count: 0,
     }
   }
 
-  const result = await upsertPanicHistoryV2Rows(dbRows)
+  const result = await upsertRows(dbRows)
   const summary = logPanicV2BackfillSummary(clientPreview)
 
   return {
@@ -303,6 +363,8 @@ export async function backfillPanicHistoryV2FromIndexHistory(opts = {}) {
     indexRows: indexRows.length,
     scored: dbRows.length,
     daysRequested: days,
+    preserved,
+    inserted: dbRows.length,
     summary,
   }
 }

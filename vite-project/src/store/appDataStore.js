@@ -5,7 +5,11 @@
 
 import { create } from "zustand"
 import {
-  backfillPanicHistoryV2,
+  allowLocalPanicHistoryFallbackOnApiError,
+  allowLocalPanicHistoryMergeAfterHubFetch,
+  resolvePanicHistoryRowsForProFeature,
+} from "../content/ydsMarketAnalysisProGate.js"
+import {
   fetchCycleMetricsHistory,
   fetchPanicHistoryV2,
   fetchPanicHubLatestOptional,
@@ -77,6 +81,11 @@ export const useAppDataStore = create((set, get) => ({
   sectorHeatLoading: false,
 
   cycleMetricHistory: [],
+  /**
+   * Mirrored from useMembership().isPro (App). Fail-closed default.
+   * Used when loadCycleHistoryBundle callers omit opts.isPro (realtime / refresh).
+   */
+  membershipIsPro: false,
   /** Supabase market_cycle_history (일별 사이클·점수) */
   marketCycleHistory: [],
   /** @type {CycleHistorySource} */
@@ -232,6 +241,11 @@ export const useAppDataStore = create((set, get) => ({
     set({ realtimeLastEventAt: t, realtimeEventCount: get().realtimeEventCount + 1 })
   },
 
+  /** Sync from MembershipProvider / useMembership().isPro (fail-closed unless strictly true). */
+  setMembershipIsPro: (isPro) => {
+    set({ membershipIsPro: isPro === true })
+  },
+
   invalidateCycleHistoryCache: () => {
     try {
       writeCycleMetricHistoryToLS([])
@@ -278,19 +292,8 @@ export const useAppDataStore = create((set, get) => ({
       let v2Rows = await fetchPanicHistoryV2({ limit: 30 })
       let v2Count = v2Rows.length
 
-      if (v2Count < 1 && base.length >= 1) {
-        set({ panicHistoryV2SyncStatus: "backfilling" })
-        const backfill = await backfillPanicHistoryV2({
-          limit: 35,
-          days: 30,
-          source: "client_mount",
-        })
-        if (backfill?.ok && !backfill?.skipped) {
-          v2Rows = await fetchPanicHistoryV2({ limit: 30 })
-          v2Count = v2Rows.length
-          if (backfill.summary) console.log("[패닉V2 백필 API]", backfill.summary)
-        }
-      }
+      // Server backfill requires CRON_SECRET (ops only). Browser mounts must not call it —
+      // fall through to local V2 compute below when hub V2 rows are empty.
 
       let merged =
         base.length >= 1
@@ -529,7 +532,11 @@ export const useAppDataStore = create((set, get) => ({
       get().mergeCycleRowFromPanicPayload(opts.payload, tradeDate)
     }
     await get().loadCycleLatestSnapshot({ force: false, tradeDate })
-    await get().loadCycleHistoryBundle({ limit: opts.limit ?? 500, force: true })
+    await get().loadCycleHistoryBundle({
+      limit: opts.limit ?? 500,
+      force: true,
+      isPro: opts.isPro,
+    })
     await get().loadDeskMetricSources({ tradeDate })
     const desk = get().resolveDeskPanicData()
     console.log("DASHBOARD REFRESHED", {
@@ -546,8 +553,11 @@ export const useAppDataStore = create((set, get) => ({
   loadCycleHistoryBundle: async (opts = {}) => {
     const limit = opts.limit ?? 120
     const force = Boolean(opts.force)
+    // Explicit opts.isPro wins; otherwise mirrored membershipIsPro. Never coerce truthy non-boolean.
+    const isPro =
+      (typeof opts.isPro === "boolean" ? opts.isPro : get().membershipIsPro) === true
     if (force) get().invalidateCycleHistoryCache()
-    logFetchStart("cycle-history-bundle", { limit, force })
+    logFetchStart("cycle-history-bundle", { limit, force, isPro })
     markTimeline("SUPABASE_START", { segment: "supabase" })
     try {
     get().purgeLegacyCycleStorage()
@@ -573,9 +583,10 @@ export const useAppDataStore = create((set, get) => ({
         const dbProbe = await probePanicIndexHistoryDirect()
         const dbRows = dbProbe.count
 
+        // withCycle:true so 401/403 returns { invalidReason: "pro_required" } (not a bare []).
         const bundle = await fetchPanicIndexHistory({
           limit,
-          withCycle: false,
+          withCycle: true,
           debugMetric: "vix",
           debugRange: "6M",
         })
@@ -583,6 +594,12 @@ export const useAppDataStore = create((set, get) => ({
         const apiRows = hubRows.length
         const fromHub = historyRowsToCycleRows(hubRows)
         const mappedCycleRows = fromHub.length
+        // FREE/logged-out: do not promote localStorage timeseries into PRO history store.
+        // LS rows are left intact for later PRO use; they are not deleted.
+        const hubDeniedPro = bundle.invalidReason === "pro_required"
+        const allowLocalHistoryMerge = allowLocalPanicHistoryMergeAfterHubFetch(
+          bundle.invalidReason,
+        )
 
         logReliabilityPipeline("api", {
           dbRows,
@@ -591,6 +608,7 @@ export const useAppDataStore = create((set, get) => ({
           mappedCycleRows,
           invalidReason: bundle.invalidReason ?? null,
           schemaIssues: bundle.schemaIssues ?? [],
+          hubDeniedPro,
         })
 
         replacePanicIndexHistory(hubRows)
@@ -598,11 +616,17 @@ export const useAppDataStore = create((set, get) => ({
           set({ marketCycleHistory: bundle.cycleRows })
         }
 
-        let cycleRows = mergeCycleRows(fromHub, localCycleRows)
+        let cycleRows = allowLocalHistoryMerge
+          ? mergeCycleRows(fromHub, localCycleRows)
+          : fromHub
         let fallbackUsed = false
         let fallbackReason = null
 
-        if (cycleRows.length < localCycleRows.length && localCycleRows.length > 0) {
+        if (
+          allowLocalHistoryMerge &&
+          cycleRows.length < localCycleRows.length &&
+          localCycleRows.length > 0
+        ) {
           cycleRows = localCycleRows
           fallbackUsed = true
           fallbackReason = "prefer_local_seed"
@@ -615,7 +639,7 @@ export const useAppDataStore = create((set, get) => ({
         if (cycleRows.length < 1 && hubRows.length > 0) {
           cycleRows = historyRowsToCycleRows(hubRows)
         }
-        if (cycleRows.length < 1 && localCycleRows.length > 0) {
+        if (allowLocalHistoryMerge && cycleRows.length < 1 && localCycleRows.length > 0) {
           cycleRows = localCycleRows
           fallbackUsed = true
           fallbackReason = hubRows.length === 0 ? "api_empty" : "mapping_zero"
@@ -627,7 +651,7 @@ export const useAppDataStore = create((set, get) => ({
           })
           logReliabilityPipeline("fallback", { reason: fallbackReason, localRows: localCycleRows.length })
         }
-        if (cycleRows.length < 1) {
+        if (allowLocalHistoryMerge && cycleRows.length < 1) {
           const v2OnlySync = await get().syncPanicHistoryV2([])
           if (v2OnlySync.rows?.length >= 1) {
             cycleRows = v2OnlySync.rows
@@ -636,6 +660,14 @@ export const useAppDataStore = create((set, get) => ({
             console.warn("[YDS] loadCycleHistoryBundle v2-only fallback", cycleRows.length)
             logReliabilityPipeline("fallback", { reason: fallbackReason, rows: cycleRows.length })
           }
+        }
+        if (hubDeniedPro && cycleRows.length < 1) {
+          fallbackReason = "pro_required_no_local_merge"
+          logReliabilityPipeline("fallback", {
+            reason: fallbackReason,
+            localRows: localCycleRows.length,
+            note: "local history retained in LS but not loaded for FREE",
+          })
         }
 
         const diagnosis = diagnoseZeroHistoryRows({
@@ -714,8 +746,12 @@ export const useAppDataStore = create((set, get) => ({
         logReliabilityPipeline("fallback", {
           reason: "api_error",
           message: e instanceof Error ? e.message : String(e),
+          isPro,
+          allowLsFallback: allowLocalPanicHistoryFallbackOnApiError(isPro),
         })
-        const fromLs = readCycleMetricHistoryFromLS()
+        // PRO-only LS → store. FREE / unknown: keep LS on disk, do not promote into store.
+        const fromLsRaw = readCycleMetricHistoryFromLs()
+        const fromLs = resolvePanicHistoryRowsForProFeature(fromLsRaw, isPro)
         const pipeline = {
           dbRows: null,
           apiRows: 0,
@@ -729,9 +765,9 @@ export const useAppDataStore = create((set, get) => ({
           cycleMetricHistory: fromLs,
           cycleHistorySource: fromLs.length ? "localStorage" : "none",
           cycleDataReliability: buildCycleDataReliability(pipeline, {
-            source: "localStorage",
+            source: fromLs.length ? "localStorage" : "none",
             realtime: false,
-            fallbackUsed: true,
+            fallbackUsed: fromLs.length > 0,
             fallbackReason: "api_error",
             diagnosis: diagnoseZeroHistoryRows({
               apiRows: 0,
@@ -742,7 +778,11 @@ export const useAppDataStore = create((set, get) => ({
             }),
           }),
         })
-        console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — api_error", fromLs.length)
+        console.warn("[YDS] loadCycleHistoryBundle localStorage fallback — api_error", {
+          rawLs: fromLsRaw.length,
+          promoted: fromLs.length,
+          isPro,
+        })
         return { hubRows: [], fetchedAt: null, error: e, merged: fromLs }
       }
     }
