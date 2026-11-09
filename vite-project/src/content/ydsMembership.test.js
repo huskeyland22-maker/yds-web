@@ -3,6 +3,7 @@ import {
   isMembershipVerifyUiEnabled,
   isProUnlocked,
   MEMBERSHIP_STATUS,
+  membershipAccountAccessCaption,
   membershipHeaderBadgeState,
   membershipPlanBadgeLabel,
   membershipStatusFromApiBody,
@@ -36,6 +37,15 @@ describe("ydsMembership", () => {
     expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.LOGGED_OUT)).toBe(null)
     expect(membershipPlanBadgeLabel(MEMBERSHIP_STATUS.ERROR)).toBe(null)
     expect(membershipPlanBadgeLabel(null)).toBe(null)
+  })
+
+  it("account card caption follows me-membership status (never hardcodes Premium for FREE)", () => {
+    expect(membershipAccountAccessCaption(MEMBERSHIP_STATUS.PRO)).toBe("Premium access")
+    expect(membershipAccountAccessCaption(MEMBERSHIP_STATUS.FREE)).toBe("Free access")
+    expect(membershipAccountAccessCaption(MEMBERSHIP_STATUS.LOADING)).toBe("확인 중…")
+    expect(membershipAccountAccessCaption(MEMBERSHIP_STATUS.ERROR)).toBe("Free access")
+    expect(membershipAccountAccessCaption(MEMBERSHIP_STATUS.LOGGED_OUT)).toBe(null)
+    expect(membershipAccountAccessCaption(null)).toBe(null)
   })
 
   it("header presentation keeps layout during loading and fail-closed FREE on error", () => {

@@ -62,6 +62,22 @@ export function membershipHeaderBadgeState(status) {
 }
 
 /**
+ * Caption under the signed-in user name on the desktop account card.
+ * Driven by GET /api/me-membership only — never hardcoded Premium.
+ * @param {MembershipStatus | string | null | undefined} status
+ * @returns {string | null} null when logged out / unknown (caller should hide)
+ */
+export function membershipAccountAccessCaption(status) {
+  if (status == null || status === MEMBERSHIP_STATUS.LOGGED_OUT) return null
+  if (status === MEMBERSHIP_STATUS.LOADING) return "확인 중…"
+  if (status === MEMBERSHIP_STATUS.PRO) return "Premium access"
+  if (status === MEMBERSHIP_STATUS.FREE || status === MEMBERSHIP_STATUS.ERROR) {
+    return "Free access"
+  }
+  return null
+}
+
+/**
  * Map API JSON to UI status. Never trust client-supplied plan.
  * @param {{ plan?: unknown } | null | undefined} body
  * @returns {"free" | "pro"}

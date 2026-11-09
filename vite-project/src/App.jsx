@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Calendar, ChevronDown, LogIn } from "lucide-react"
 import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom"
 import MembershipVerifyPanel from "./components/MembershipVerifyPanel.jsx"
+import { useMembership } from "./context/MembershipContext.jsx"
+import { membershipAccountAccessCaption } from "./content/ydsMembership.js"
 import {
   GoogleAuthProvider,
   getRedirectResult,
@@ -547,6 +549,8 @@ function App() {
   const panelCloseTimerRef = useRef(null)
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
+  const membership = useMembership()
+  const accountAccessCaption = membershipAccountAccessCaption(membership.status)
   const [saveSuccessToast, setSaveSuccessToast] = useState(false)
   const [appToast, setAppToast] = useState(null)
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
@@ -1447,7 +1451,9 @@ function App() {
                         <span className="max-w-[120px] truncate text-trading-sm font-semibold text-white">
                           {user.displayName || user.email || "로그인 유저"}
                         </span>
-                        <div className="text-trading-2xs text-slate-500">Premium access</div>
+                        {accountAccessCaption ? (
+                          <div className="text-trading-2xs text-slate-500">{accountAccessCaption}</div>
+                        ) : null}
                       </div>
                       <button
                         type="button"
