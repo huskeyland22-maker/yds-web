@@ -534,26 +534,28 @@ export default function EquityDailyBottomBuyPage() {
                 title={EQUITY_DBB_PRO_LOCK_COPY.title}
                 body={EQUITY_DBB_PRO_LOCK_COPY.body}
               >
-                <section className="yds-dbb-card yds-dbb-card--compact">
-                  <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
-                  <ul className="yds-dbb-cond mt-1.5">
-                    {view.conditions.map((row) => {
-                      const valueText = formatCondition(row)
-                      return (
-                        <li key={row.id} className="yds-dbb-cond__row">
-                          <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
-                          <span
-                            className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
-                          >
-                            {valueText ?? "—"}
-                          </span>
-                          <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.thresholdText}</span>
-                          <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </section>
+                {visibility.proConditions ? (
+                  <section className="yds-dbb-card yds-dbb-card--compact">
+                    <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
+                    <ul className="yds-dbb-cond mt-1.5">
+                      {(view.conditions || []).map((row) => {
+                        const valueText = formatCondition(row)
+                        return (
+                          <li key={row.id} className="yds-dbb-cond__row">
+                            <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
+                            <span
+                              className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                            >
+                              {valueText ?? "—"}
+                            </span>
+                            <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.thresholdText}</span>
+                            <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </section>
+                ) : null}
               </YdsProFeatureGate>
 
               <YdsProFeatureGate
@@ -561,13 +563,15 @@ export default function EquityDailyBottomBuyPage() {
                 title={EQUITY_DBB_PRO_LOCK_COPY.title}
                 body={EQUITY_DBB_PRO_LOCK_COPY.body}
               >
-                <section className="yds-dbb-card yds-dbb-card--compact">
-                  <h2 className="yds-dbb-section__title">ATR RISK</h2>
-                  <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
-                  <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
-                  <p className="yds-dbb-card__hint">{view.atrNote}</p>
-                  <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
-                </section>
+                {visibility.proAtr ? (
+                  <section className="yds-dbb-card yds-dbb-card--compact">
+                    <h2 className="yds-dbb-section__title">ATR RISK</h2>
+                    <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
+                    <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
+                    <p className="yds-dbb-card__hint">{view.atrNote}</p>
+                    <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
+                  </section>
+                ) : null}
               </YdsProFeatureGate>
 
               {visibility.proReading ? (

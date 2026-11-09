@@ -247,6 +247,29 @@ describe("handleDailyBottomBuy membership access", () => {
   })
 })
 
+describe("daily-bottom-buy gate wiring", () => {
+  it("client API uses Bearer and applyDailyBottomBuyAccess", () => {
+    const src = readFileSync(join(root, "vite-project/src/utils/dailyBottomBuyApi.js"), "utf8")
+    assert.match(src, /withOptionalBearerAuth/)
+    assert.match(src, /applyDailyBottomBuyAccess/)
+    assert.match(src, /redactDailyBottomBuyPayload/)
+  })
+
+  it("vite daily-bottom-buy middleware forwards Authorization like equity/me-membership", () => {
+    const vite = readFileSync(join(root, "vite-project/vite.config.js"), "utf8")
+    const start = vite.indexOf("function attachDailyBottomBuyDevApi")
+    const end = vite.indexOf("function equityDailyBottomBuyDevApi")
+    const dbbBlock = start >= 0 && end > start ? vite.slice(start, end) : ""
+    assert.ok(dbbBlock.length > 0, "attachDailyBottomBuyDevApi block missing")
+    assert.match(dbbBlock, /req\.headers\.authorization \|\| req\.headers\.Authorization/)
+    assert.match(dbbBlock, /headers:\s*\{\s*authorization:\s*authHeader\s*\}/)
+    assert.match(dbbBlock, /handleDailyBottomBuy/)
+    // equity/me-membership already established the same auth-forward pattern.
+    assert.match(vite, /function equityDailyBottomBuyDevApi/)
+    assert.match(vite, /function attachMeMembershipDevApi/)
+  })
+})
+
 describe("snapshot + hobby cap", () => {
   it("public static snapshot must be summary-only (no PRO detail leak via CDN)", () => {
     const snapPath = join(root, "vite-project/public/data/daily-bottom-buy-snapshot.json")

@@ -178,8 +178,15 @@ function attachDailyBottomBuyDevApi(server, handlerPath) {
         if (pathOnly !== "/api/daily-bottom-buy") return next()
         try {
           const mod = await import(pathToFileURL(handlerPath).href)
+          // Same pattern as equity/me-membership: forward Bearer so requireProMembership can unlock full views.
+          const authHeader = req.headers.authorization || req.headers.Authorization || ""
           await mod.handleDailyBottomBuy(
-            { method: req.method, url: raw, query: {} },
+            {
+              method: req.method,
+              url: raw,
+              query: {},
+              headers: { authorization: authHeader },
+            },
             {
               setHeader(name, value) {
                 res.setHeader(name, value)
@@ -216,8 +223,15 @@ function equityDailyBottomBuyDevApi() {
         try {
           const mod = await import(pathToFileURL(handlerPath).href)
           const url = new URL(raw, "http://localhost")
+          // Same pattern as me-membership: forward Bearer so requireProMembership can unlock full views.
+          const authHeader = req.headers.authorization || req.headers.Authorization || ""
           await mod.handleEquityDailyBottomBuy(
-            { method: req.method, url: raw, query: { symbol: url.searchParams.get("symbol") || "" } },
+            {
+              method: req.method,
+              url: raw,
+              query: { symbol: url.searchParams.get("symbol") || "" },
+              headers: { authorization: authHeader },
+            },
             {
               setHeader(name, value) {
                 res.setHeader(name, value)

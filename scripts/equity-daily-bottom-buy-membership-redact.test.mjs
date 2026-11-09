@@ -225,12 +225,34 @@ describe("equity gate wiring + hobby cap + no public equity snapshot", () => {
     assert.match(src, /redactEquityDailyBottomBuyPayload/)
   })
 
+  it("vite equity-daily-bottom-buy middleware forwards Authorization like me-membership", () => {
+    const vite = readFileSync(join(root, "vite-project/vite.config.js"), "utf8")
+    const equityBlock = vite.slice(
+      vite.indexOf("function equityDailyBottomBuyDevApi"),
+      vite.indexOf("function equityDailyBottomBuyDevApi") >= 0
+        ? vite.indexOf("\nexport default defineConfig")
+        : -1,
+    )
+    assert.ok(equityBlock.length > 0, "equityDailyBottomBuyDevApi block missing")
+    assert.match(equityBlock, /req\.headers\.authorization \|\| req\.headers\.Authorization/)
+    assert.match(equityBlock, /headers:\s*\{\s*authorization:\s*authHeader\s*\}/)
+    assert.match(equityBlock, /handleEquityDailyBottomBuy/)
+    // me-membership already established the same auth-forward pattern.
+    assert.match(vite, /function attachMeMembershipDevApi/)
+    assert.match(vite, /headers:\s*\{\s*authorization:\s*authHeader\s*\}/)
+  })
+
   it("page gates PRO blocks with membership visibility", () => {
     const page = readFileSync(join(root, "vite-project/src/pages/EquityDailyBottomBuyPage.jsx"), "utf8")
     assert.match(page, /useMembership/)
     assert.match(page, /buildEquityDailyBottomBuyVisibility/)
     assert.match(page, /YdsProFeatureGate/)
     assert.match(page, /applyEquityDailyBottomBuyAccess/)
+    // FREE summary omits conditions — never map bare view.conditions; defer PRO children.
+    assert.match(page, /\(view\.conditions \|\| \[\]\)\.map/)
+    assert.doesNotMatch(page, /\{view\.conditions\.map/)
+    assert.match(page, /visibility\.proConditions \? \(/)
+    assert.match(page, /visibility\.proAtr \? \(/)
   })
 
   it("no public equity daily-bottom-buy snapshot JSON under public/data", () => {
