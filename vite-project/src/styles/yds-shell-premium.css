@@ -46,6 +46,25 @@
   color: var(--yds-text);
 }
 
+.app-shell-host.yds-theme-premium .yds-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar__mark {
+  display: grid;
+  width: 1.85rem;
+  height: 1.85rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: var(--yds-ai-gradient);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 750;
+}
+
 .app-shell-host.yds-theme-premium .yds-sidebar {
   background-color: var(--yds-sidebar-bg);
   border-right: 1px solid var(--yds-sidebar-border);
@@ -85,8 +104,8 @@
 /* AI / metric input CTA — dark-theme sky utilities are unreadable on light shell */
 .app-shell-host.yds-theme-premium .yds-sidebar-metric-input-btn,
 .app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-sidebar-metric-input-btn {
-  background: var(--yds-accent) !important;
-  border: 1px solid var(--yds-accent) !important;
+  background: var(--yds-ai-gradient) !important;
+  border: 1px solid transparent !important;
   color: #ffffff !important;
   font-weight: 650;
   opacity: 1 !important;
@@ -95,8 +114,8 @@
 
 .app-shell-host.yds-theme-premium .yds-sidebar-metric-input-btn:hover,
 .app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-sidebar-metric-input-btn:hover {
-  background: color-mix(in srgb, var(--yds-accent) 88%, #000) !important;
-  border-color: color-mix(in srgb, var(--yds-accent) 88%, #000) !important;
+  background: linear-gradient(135deg, var(--yds-ai-to) 0%, var(--yds-ai-from) 100%) !important;
+  border-color: transparent !important;
   color: #ffffff !important;
 }
 
@@ -405,5 +424,46 @@
   .app-shell-host.yds-theme-premium .yds-metric-input-panel input,
   .app-shell-host.yds-theme-premium .yds-metric-input-panel textarea {
     font-size: max(0.875rem, 14px);
+  }
+}
+
+/* Collapsed dev pills: one right-edge stack, clear of the page body. */
+.app-shell-host.yds-theme-premium .yds-dev-pill {
+  position: fixed;
+  right: 0.55rem;
+  left: auto;
+  top: auto;
+  z-index: 8900;
+  opacity: 0.8;
+  max-width: 8rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="debug"] {
+  bottom: calc(4.6rem + env(safe-area-inset-bottom));
+}
+
+.app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="pwa"] {
+  bottom: calc(6.55rem + env(safe-area-inset-bottom));
+}
+
+.app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="shell"] {
+  bottom: calc(8.5rem + env(safe-area-inset-bottom));
+}
+
+.app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="panic"] {
+  bottom: calc(10.45rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 1024px) {
+  .app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="debug"] {
+    bottom: 0.75rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="pwa"] {
+    bottom: 2.7rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="panic"] {
+    bottom: 4.65rem;
   }
 }

@@ -8,18 +8,14 @@ import {
   getSidebarFooterLinks,
 } from "../../utils/appNavItems.js"
 
-const AI_REPORT_PATH = "/ai-daily-report"
-
 /**
- * AI 리포트 화면만: 본문과 같은 사이클 이력이 있으면 그 해석을 쓰고,
- * 로딩이 끝났는데도 지표가 없으면 로딩 문구를 남기지 않는다.
- * 다른 경로의 사이드바 상태는 그대로 둔다.
- * @param {string} pathname
+ * 로딩 중에는 로딩 문구를 유지한다.
+ * 사이클 이력이 있거나 조회가 끝났는데 지표가 없으면, 어느 화면이든 로딩 문구를 남기지 않는다.
+ * @param {string} _pathname
  * @param {object | null | undefined} sidebarPulse
  */
-function resolveSidebarAiStatus(pathname, sidebarPulse) {
+function resolveSidebarAiStatus(_pathname, sidebarPulse) {
   const live = sidebarPulse?.aiReportStatus ?? null
-  if (pathname !== AI_REPORT_PATH) return live
   if (live?.ready) return live
   const fromHistory = sidebarPulse?.historyAiReportStatus
   if (fromHistory?.ready) return fromHistory
@@ -75,13 +71,18 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
 
   return (
     <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
-      <div className="shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
-        <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
-          Y&apos;ds
-        </p>
-        <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
-          함께하는 인생 투자
-        </p>
+      <div className="yds-sidebar__brand shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
+        <span className="yds-sidebar__mark" aria-hidden>
+          Y
+        </span>
+        <span className="min-w-0">
+          <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
+            Y&apos;ds
+          </p>
+          <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
+            함께하는 인생 투자
+          </p>
+        </span>
       </div>
 
       <nav className="flex flex-col gap-1 px-2.5 py-3" aria-label="핵심 메뉴">

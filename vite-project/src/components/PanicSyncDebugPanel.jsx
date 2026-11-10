@@ -36,7 +36,7 @@ function detectPlatform() {
  * 패닉 동기화 진단용 임시 패널 — `?panic-debug=1` 또는 localStorage `yds-panic-sync-debug=1` 또는 dev.
  */
 export default function PanicSyncDebugPanel() {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(() => isPanicSyncDebugPanelVisible())
   const [remoteVersion, setRemoteVersion] = useState("-")
   const panicData = usePanicStore((s) => s.panicData)
@@ -96,7 +96,8 @@ export default function PanicSyncDebugPanel() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed left-3 top-14 z-[9400] rounded-full border border-cyan-400/35 bg-slate-950/90 px-2.5 py-1 text-[10px] font-medium text-cyan-100 shadow-lg backdrop-blur"
+        className="yds-dev-pill rounded-full border border-cyan-400/35 bg-slate-950/90 px-2.5 py-1 text-[10px] font-medium text-cyan-100 shadow-lg backdrop-blur"
+        data-dev-slot="panic"
       >
         📡 패닉동기
       </button>

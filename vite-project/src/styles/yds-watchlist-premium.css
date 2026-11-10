@@ -1,0 +1,90 @@
+/**
+ * Watchlist light skin. Opt-in under .yds-theme-premium.
+ * Does not change favorite add/remove or score engines.
+ */
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist {
+  color: var(--yds-text);
+  max-width: 72rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__kicker,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__sub,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__note,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__h3,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__score-label,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__ticker,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta-key,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__grades dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__title,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__h2,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__name,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__score-val,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__grades dd,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__dash-list a {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__nav-link,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__alerts a {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__card,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__dash-block,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__alerts {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__cards {
+  gap: 0.75rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__score-val {
+  font-size: var(--yds-fs-score-lg);
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__position {
+  border-color: var(--yds-border);
+  background: var(--yds-bg-muted);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta-grid,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__dash-list li,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__alerts li {
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta--down {
+  color: var(--yds-signal-down);
+}
+
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__cards,
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__delta-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

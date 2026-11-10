@@ -29,7 +29,7 @@ export default function DebugPanel({ metrics = {} }) {
   const manualMode = usePanicStore((s) => s.manualMode)
   const releaseManualMode = usePanicStore((s) => s.releaseManualMode)
   const [enabled, setEnabled] = useState(() => isDebugModeEnabled())
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [events, setEvents] = useState([])
   const [swInfo, setSwInfo] = useState({ active: false, version: "n/a", cacheCount: 0 })
   const [memoCount, setMemoCount] = useState(() => readMemosCount())
@@ -170,7 +170,8 @@ export default function DebugPanel({ metrics = {} }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 z-[9000] rounded-full border border-amber-300/40 bg-amber-900/70 px-3 py-2 text-[11px] text-amber-100 backdrop-blur"
+        className="yds-dev-pill rounded-full border border-amber-300/40 bg-amber-900/70 px-3 py-2 text-[11px] text-amber-100 backdrop-blur"
+        data-dev-slot="debug"
       >
         🛠 DEBUG
       </button>

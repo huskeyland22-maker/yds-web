@@ -19,7 +19,7 @@ export function isMobileShellDebugVisible() {
  */
 export default function MobileShellDebugOverlay() {
   const [visible, setVisible] = useState(() => isMobileShellDebugVisible())
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [tick, setTick] = useState(0)
   const [lastError, setLastError] = useState(null)
 
@@ -72,7 +72,8 @@ export default function MobileShellDebugOverlay() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed left-2 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-[9050] rounded-full border border-sky-400/40 bg-[#0a0d12]/95 px-2 py-1 text-[10px] font-medium text-sky-100 shadow-lg lg:hidden"
+        className="yds-dev-pill rounded-full border border-sky-400/40 bg-[#0a0d12]/95 px-2 py-1 text-[10px] font-medium text-sky-100 shadow-lg lg:hidden"
+        data-dev-slot="shell"
       >
         모바일 진단
       </button>

@@ -590,10 +590,19 @@
   padding: 0.85rem 0.75rem;
 }
 
-.app-shell-host.yds-theme-premium .yds-market-analysis .yds-pro-gate {
-  border-color: rgba(245, 158, 11, 0.4);
-  background: rgba(69, 26, 3, 0.45);
-  box-shadow: var(--yds-shadow-card, none);
+.app-shell-host.yds-theme-premium .yds-pro-gate {
+  border-color: color-mix(in srgb, var(--yds-signal-warn) 42%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-signal-warn) 8%, var(--yds-bg-elevated));
+  color: var(--yds-text);
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-pro-gate__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-pro-gate__body {
+  color: var(--yds-text-secondary);
 }
 
 /* —— Premium desk hero (approved mock: gauge + summary + metric cards) —— */
@@ -754,11 +763,48 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-card {
-  background: var(--yds-bg-muted);
+  background: var(--yds-bg-elevated);
   border: 1px solid var(--yds-border);
   border-radius: var(--yds-radius-md);
-  padding: 0.55rem 0.65rem 0.6rem;
+  box-shadow: var(--yds-shadow-card);
+  padding: 0.65rem 0.7rem 0.7rem;
   min-width: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__focus-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__focus-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: var(--yds-fs-aux);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__focus-list strong {
+  color: var(--yds-text);
+  font-weight: 750;
+}
+
+@media (min-width: 1100px) {
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--premium-desk {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--premium-desk > header,
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--premium-desk > .yds-panic-center__history-slot {
+    grid-column: 1 / -1;
+  }
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-label {

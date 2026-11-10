@@ -125,6 +125,16 @@ export default function YdsPanicIndexCenter({
                     ? status.blurb
                     : "현재 시장의 공포 수준을 나타내는 장기 투자 참고 지표입니다. 단기 매매 신호가 아닙니다."}
                 </p>
+                {metricCards.length > 0 ? (
+                  <ul className="yds-panic-center__focus-list">
+                    {metricCards.slice(0, 3).map((card) => (
+                      <li key={card.id}>
+                        <span>{card.label}</span>
+                        <strong className="font-mono tabular-nums">{card.value}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 {dcaSignal ? (
                   <YdsProFeatureGate
                     unlocked={visibility.proDcaGuidance}
