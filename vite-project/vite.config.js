@@ -176,6 +176,13 @@ function attachDailyBottomBuyDevApi(server, handlerPath) {
         const raw = req.url || ""
         const pathOnly = raw.split("?")[0]
         if (pathOnly !== "/api/daily-bottom-buy") return next()
+        const staged = loadStagingEnvForMeMembership()
+        if (!staged.ok) {
+          res.statusCode = 503
+          res.setHeader("Content-Type", "application/json; charset=utf-8")
+          res.end(JSON.stringify({ ok: false, error: "supabase_not_configured", reason: staged.reason }))
+          return
+        }
         try {
           const mod = await import(pathToFileURL(handlerPath).href)
           // Same pattern as equity/me-membership: forward Bearer so requireProMembership can unlock full views.
@@ -220,6 +227,13 @@ function equityDailyBottomBuyDevApi() {
       server.middlewares.use(async (req, res, next) => {
         const raw = req.url || ""
         if (!raw.startsWith("/api/equity-daily-bottom-buy")) return next()
+        const staged = loadStagingEnvForMeMembership()
+        if (!staged.ok) {
+          res.statusCode = 503
+          res.setHeader("Content-Type", "application/json; charset=utf-8")
+          res.end(JSON.stringify({ ok: false, error: "supabase_not_configured", reason: staged.reason }))
+          return
+        }
         try {
           const mod = await import(pathToFileURL(handlerPath).href)
           const url = new URL(raw, "http://localhost")

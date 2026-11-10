@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { Link } from "react-router-dom"
 import { useAppDataStore } from "../store/appDataStore.js"
 import { usePanicStore } from "../store/panicStore.js"
 import { panicDataFromCycleRow, mergeCycleRows } from "../utils/cycleHistoryUtils.js"
@@ -60,7 +61,12 @@ export default function CurrentMarketAnalysisPage() {
             Panic Index · 장기 투자 참고 지표
           </p>
         </div>
-        {hasLive ? <YdsMarketAnalysisOpsMeta panicData={panicData} /> : null}
+        <div className="yds-market-analysis__header-actions">
+          {hasLive ? <YdsMarketAnalysisOpsMeta panicData={panicData} /> : null}
+          <Link to="/ai-daily-report" className="yds-ai-cta yds-market-analysis__ai-cta">
+            AI 시장 리포트
+          </Link>
+        </div>
       </header>
 
       {!hasLive ? (

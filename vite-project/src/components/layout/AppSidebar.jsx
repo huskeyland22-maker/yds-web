@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { NavLink, useLocation } from "react-router-dom"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
@@ -7,6 +7,43 @@ import {
   getOtherNavItems,
   getSidebarFooterLinks,
 } from "../../utils/appNavItems.js"
+
+const AI_REPORT_PATH = "/ai-daily-report"
+
+/**
+ * AI 리포트 화면만: 본문과 같은 사이클 이력이 있으면 그 해석을 쓰고,
+ * 로딩이 끝났는데도 지표가 없으면 로딩 문구를 남기지 않는다.
+ * 다른 경로의 사이드바 상태는 그대로 둔다.
+ * @param {string} pathname
+ * @param {object | null | undefined} sidebarPulse
+ */
+function resolveSidebarAiStatus(pathname, sidebarPulse) {
+  const live = sidebarPulse?.aiReportStatus ?? null
+  if (pathname !== AI_REPORT_PATH) return live
+  if (live?.ready) return live
+  const fromHistory = sidebarPulse?.historyAiReportStatus
+  if (fromHistory?.ready) return fromHistory
+  const phase = sidebarPulse?.memoLoad?.phase
+  if (phase === "error") {
+    return {
+      ready: false,
+      title: "오늘의 해석",
+      memoLines: ["시장 데이터를 불러오지 못했습니다."],
+      updateLine: "업데이트 —",
+      basisLine: "",
+    }
+  }
+  if (phase === "empty") {
+    return {
+      ready: false,
+      title: "오늘의 해석",
+      memoLines: ["시장 해석에 필요한 지표가 없습니다."],
+      updateLine: "업데이트 —",
+      basisLine: "",
+    }
+  }
+  return live
+}
 
 /**
  * @param {{
@@ -20,7 +57,10 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
   const coreItems = getCoreNavItems()
   const otherItems = getOtherNavItems()
   const footerLinks = getSidebarFooterLinks()
-  const aiStatus = sidebarPulse?.aiReportStatus ?? null
+  const aiStatus = useMemo(
+    () => resolveSidebarAiStatus(location.pathname, sidebarPulse),
+    [location.pathname, sidebarPulse],
+  )
   const pickAlertUnread = countUnreadPickAlerts()
   const [otherOpen, setOtherOpen] = useState(false)
   const [dbbOpen, setDbbOpen] = useState(true)

@@ -15,7 +15,7 @@ const API_PATH = "/api/equity-daily-bottom-buy"
 export function applyEquityDailyBottomBuyAccess(payload, isPro) {
   if (!payload || typeof payload !== "object") return payload
   if (isPro === true) {
-    return payload?.access === "full" ? payload : { ...payload, access: payload.access || "full" }
+    return payload
   }
   if (payload.access === "summary" && !equityPayloadHasProDetails(payload)) return payload
   return redactEquityDailyBottomBuyPayload(payload)

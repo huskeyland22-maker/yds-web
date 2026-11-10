@@ -17,7 +17,7 @@ const SNAPSHOT_PATH = "/data/daily-bottom-buy-snapshot.json"
 export function applyDailyBottomBuyAccess(payload, isPro) {
   if (!payload || typeof payload !== "object") return payload
   if (isPro === true) {
-    return payload?.access === "full" ? payload : { ...payload, access: payload.access || "full" }
+    return payload
   }
   if (payload.access === "summary" && !payloadHasProDetails(payload)) return payload
   return redactDailyBottomBuyPayload(payload)

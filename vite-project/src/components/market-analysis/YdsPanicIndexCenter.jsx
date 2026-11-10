@@ -20,6 +20,32 @@ function fmtNum(n, digits = 2) {
 }
 
 /**
+ * Live metric chips from existing panicData only (no invented series / BBB).
+ * @param {object | null | undefined} panicData
+ * @returns {{ id: string; label: string; value: string }[]}
+ */
+function buildLiveMetricCards(panicData) {
+  if (!panicData || typeof panicData !== "object") return []
+  /** @type {{ id: string; label: string; key: string; digits: number }[]} */
+  const defs = [
+    { id: "vix", label: "VIX", key: "vix", digits: 1 },
+    { id: "cnn", label: "CNN Fear & Greed", key: "fearGreed", digits: 0 },
+    { id: "putCall", label: "Put/Call", key: "putCall", digits: 2 },
+    { id: "bofa", label: "BofA Bull & Bear", key: "bofa", digits: 1 },
+    { id: "highYield", label: "HY Spread", key: "highYield", digits: 2 },
+    { id: "move", label: "MOVE", key: "move", digits: 1 },
+  ]
+  const out = []
+  for (const d of defs) {
+    const raw = Number(panicData[d.key])
+    if (!Number.isFinite(raw)) continue
+    out.push({ id: d.id, label: d.label, value: fmtNum(raw, d.digits) })
+    if (out.length >= 6) break
+  }
+  return out
+}
+
+/**
  * /market-analysis — Panic Index (일상 화면)
  * 순서: 현재 점수·매수 단계 → FEAR SCALE → History → Drivers
  * @param {{
@@ -45,10 +71,12 @@ export default function YdsPanicIndexCenter({
     asOfRaw && /^\d{4}-\d{2}-\d{2}/.test(String(asOfRaw)) ? String(asOfRaw).slice(0, 10) : null
 
   const markerPct = score != null ? Math.max(0, Math.min(100, score)) : null
+  const metricCards = useMemo(() => buildLiveMetricCards(panicData), [panicData])
+  const gaugeDeg = markerPct != null ? Math.round((markerPct / 100) * 180) : 0
 
   return (
     <article
-      className={["yds-panic-center", "yds-panic-center--research", className]
+      className={["yds-panic-center", "yds-panic-center--research", "yds-panic-center--premium-desk", className]
         .filter(Boolean)
         .join(" ")}
       aria-label="Panic Index"
@@ -63,61 +91,76 @@ export default function YdsPanicIndexCenter({
           </div>
 
           {score != null && status ? (
-            <div className="yds-panic-center__hero-body">
-              <div className="yds-panic-center__hero-primary">
-                <p className="yds-panic-center__score font-mono tabular-nums">{score}</p>
-                <div className="yds-panic-center__stage-row">
+            <div className="yds-panic-center__hero-body yds-panic-center__hero-body--desk">
+              <div
+                className="yds-panic-center__gauge"
+                style={{ "--yds-gauge-deg": `${gaugeDeg}deg` }}
+                aria-label={`Panic Index ${score}점 · ${status.label}`}
+              >
+                <div className="yds-panic-center__gauge-arc" aria-hidden />
+                <div className="yds-panic-center__gauge-readout">
+                  <p className="yds-panic-center__score font-mono tabular-nums">
+                    {score}
+                    <span className="yds-panic-center__score-den">/100</span>
+                  </p>
                   <p
                     className="yds-panic-center__stage"
                     style={status.color ? { color: status.color } : undefined}
                   >
                     {status.label}
                   </p>
-                  <span className="yds-panic-center__stage-sep" aria-hidden>
-                    ·
-                  </span>
                   <p className="yds-panic-center__stage-range font-mono tabular-nums">
                     {status.min}–{status.max}
                   </p>
                 </div>
-                <p className="yds-panic-center__scale-hint font-mono tabular-nums">0–100</p>
               </div>
 
-              {dcaSignal ? (
-                <YdsProFeatureGate
-                  unlocked={visibility.proDcaGuidance}
-                  className="yds-pro-gate--compact"
-                  body="분할매수 참고 안내는 PRO 멤버십에서 확인할 수 있습니다."
-                >
-                  <div
-                    className={[
-                      "yds-panic-center__dca",
-                      `yds-panic-center__dca--${dcaSignal.id}`,
-                    ].join(" ")}
-                    aria-label="SPX 저점 분할매수 참고 신호"
+              <div className="yds-panic-center__summary-card">
+                <div className="yds-panic-center__summary-head">
+                  <span className="yds-ai-badge">AI 해석</span>
+                  <span className="yds-panic-center__summary-kicker">핵심 요약</span>
+                </div>
+                <p className="yds-panic-center__lede">
+                  {status.blurb
+                    ? status.blurb
+                    : "현재 시장의 공포 수준을 나타내는 장기 투자 참고 지표입니다. 단기 매매 신호가 아닙니다."}
+                </p>
+                {dcaSignal ? (
+                  <YdsProFeatureGate
+                    unlocked={visibility.proDcaGuidance}
+                    className="yds-pro-gate--compact"
+                    body="분할매수 참고 안내는 PRO 멤버십에서 확인할 수 있습니다."
                   >
-                    <p className="yds-panic-center__dca-band">{dcaSignal.bandLabel}</p>
-                    {dcaSignal.stage === 0 ? (
-                      <p className="yds-panic-center__dca-line">
-                        {dcaSignal.addLabel}:{" "}
-                        <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
-                      </p>
-                    ) : (
-                      <>
+                    <div
+                      className={[
+                        "yds-panic-center__dca",
+                        `yds-panic-center__dca--${dcaSignal.id}`,
+                      ].join(" ")}
+                      aria-label="SPX 저점 분할매수 참고 신호"
+                    >
+                      <p className="yds-panic-center__dca-band">{dcaSignal.bandLabel}</p>
+                      {dcaSignal.stage === 0 ? (
                         <p className="yds-panic-center__dca-line">
                           {dcaSignal.addLabel}:{" "}
                           <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
                         </p>
-                        <p className="yds-panic-center__dca-line">
-                          누적 투입:{" "}
-                          <span className="font-mono tabular-nums">{dcaSignal.cumulativePct}%</span>
-                        </p>
-                      </>
-                    )}
-                    <p className="yds-panic-center__dca-note">참고 신호 · 자동 주문 없음</p>
-                  </div>
-                </YdsProFeatureGate>
-              ) : null}
+                      ) : (
+                        <>
+                          <p className="yds-panic-center__dca-line">
+                            {dcaSignal.addLabel}:{" "}
+                            <span className="font-mono tabular-nums">{dcaSignal.addPct}%</span>
+                          </p>
+                          <p className="yds-panic-center__dca-line">
+                            누적 투입:{" "}
+                            <span className="font-mono tabular-nums">{dcaSignal.cumulativePct}%</span>
+                          </p>
+                        </>
+                      )}
+                      <p className="yds-panic-center__dca-note">참고 신호 · 자동 주문 없음</p>
+                    </div>
+                  </YdsProFeatureGate>
+                ) : null}
+              </div>
             </div>
           ) : (
             <div className="yds-panic-center__incomplete" role="status">
@@ -167,9 +210,16 @@ export default function YdsPanicIndexCenter({
             </div>
           </div>
 
-          <p className="yds-panic-center__lede">
-            현재 시장의 공포 수준을 나타내는 장기 투자 참고 지표입니다. 단기 매매 신호가 아닙니다.
-          </p>
+          {metricCards.length > 0 ? (
+            <div className="yds-panic-center__metric-grid" aria-label="주요 지표">
+              {metricCards.map((card) => (
+                <div key={card.id} className="yds-panic-center__metric-card">
+                  <p className="yds-panic-center__metric-label">{card.label}</p>
+                  <p className="yds-panic-center__metric-value font-mono tabular-nums">{card.value}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </header>
 

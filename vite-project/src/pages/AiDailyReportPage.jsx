@@ -42,13 +42,16 @@ export default function AiDailyReportPage() {
     <div className="yds-ai-report min-w-0 px-3 py-4 sm:px-4">
       <header className="yds-ai-report__header">
         <div>
-          <p className="yds-ai-report__kicker">{AI_DAILY_REPORT_LABEL}</p>
+          <p className="yds-ai-report__kicker">
+            <span className="yds-ai-badge">AI</span>
+            {AI_DAILY_REPORT_LABEL}
+          </p>
           <h1 className="yds-ai-report__title">{report.title}</h1>
           <p className="yds-ai-report__sub">
             기준 {report.asOfDisplay} · {report.generatedNote}
           </p>
         </div>
-        <Link to="/market-analysis" className="yds-ai-report__link">
+        <Link to="/market-analysis" className="yds-ai-cta yds-ai-report__link">
           현재 시장 분석
         </Link>
       </header>

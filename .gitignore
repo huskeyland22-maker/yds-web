@@ -1,0 +1,25 @@
+# Root protections. vite-project/.gitignore still applies inside that app.
+# Do not ignore dist/ here: vite-project/.gitignore already ignores its own dist,
+# and vite-project/dist-rc/ must stay visible.
+# Do not ignore supabase/drafts/ or scripts/verify-prod-deploy.mjs.
+
+# Environment files. Templates stay trackable.
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Local agent scratch and secrets dumps
+.cursor-tmp/
+
+# Dependencies and Python bytecode
+node_modules/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Supabase CLI temp
+supabase/.temp/
+
+# Local research and OHLCV caches
+scripts/.cache/

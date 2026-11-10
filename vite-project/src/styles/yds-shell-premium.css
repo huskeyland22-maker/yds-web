@@ -47,10 +47,10 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar {
-  background-color: var(--yds-bg-elevated);
-  border-right: 1px solid var(--yds-border);
-  color: var(--yds-text);
-  box-shadow: var(--yds-shadow-card);
+  background-color: var(--yds-sidebar-bg);
+  border-right: 1px solid var(--yds-sidebar-border);
+  color: var(--yds-sidebar-text);
+  box-shadow: 4px 0 24px rgba(7, 22, 40, 0.18);
   /* 본문 밀도 조정과 분리 — 사이드바 메뉴 크기 유지 */
   font-size: 14px;
 }
@@ -58,28 +58,28 @@
 .app-shell-host.yds-theme-premium .yds-sidebar .font-display,
 .app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-50"],
 .app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-100"] {
-  color: var(--yds-text);
+  color: var(--yds-sidebar-text);
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-500"],
 .app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-600"],
 .app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-400"] {
-  color: var(--yds-text-muted);
+  color: var(--yds-sidebar-text-muted);
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar [class*="text-slate-300"] {
-  color: var(--yds-text-secondary);
+  color: var(--yds-sidebar-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar a,
 .app-shell-host.yds-theme-premium .yds-sidebar button.yds-sidebar-core {
-  color: var(--yds-text-secondary);
+  color: var(--yds-sidebar-text-secondary);
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar a:hover,
 .app-shell-host.yds-theme-premium .yds-sidebar button.yds-sidebar-core:hover {
-  background-color: var(--yds-accent-soft);
-  color: var(--yds-text);
+  background-color: var(--yds-sidebar-hover);
+  color: var(--yds-sidebar-text);
 }
 
 /* AI / metric input CTA — dark-theme sky utilities are unreadable on light shell */
@@ -108,12 +108,18 @@
 
 .app-shell-host.yds-theme-premium .yds-sidebar a[aria-current="page"],
 .app-shell-host.yds-theme-premium .yds-sidebar a.active {
-  background-color: var(--yds-accent-soft);
-  color: var(--yds-accent);
+  background-color: var(--yds-sidebar-active);
+  color: var(--yds-sidebar-text);
+  border-left-color: var(--yds-sidebar-active-border);
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar nav[aria-label] {
-  border-left-color: var(--yds-border);
+  border-left-color: var(--yds-sidebar-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar .lg\:border-b,
+.app-shell-host.yds-theme-premium .yds-sidebar [class*="border-white"] {
+  border-color: var(--yds-sidebar-border) !important;
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-app-header,
@@ -169,27 +175,66 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-drawer {
-  background-color: var(--yds-bg-elevated);
-  border-right: 1px solid var(--yds-border);
-  color: var(--yds-text);
-  box-shadow: var(--yds-shadow-card);
+  background-color: var(--yds-sidebar-bg);
+  border-right: 1px solid var(--yds-sidebar-border);
+  color: var(--yds-sidebar-text);
+  box-shadow: 8px 0 28px rgba(7, 22, 40, 0.28);
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-50"],
 .app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-100"] {
-  color: var(--yds-text);
+  color: var(--yds-sidebar-text);
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-300"],
 .app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-400"],
 .app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-500"] {
-  color: var(--yds-text-muted);
+  color: var(--yds-sidebar-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-200"],
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-slate-600"],
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="text-sky-"] {
+  color: var(--yds-sidebar-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="bg-sky-"],
+.app-shell-host.yds-theme-premium .yds-mobile-drawer [class*="bg-rose-"] {
+  background-color: var(--yds-sidebar-bg-elevated);
+  border-color: var(--yds-sidebar-border);
 }
 
 .app-shell-host.yds-theme-premium .yds-mobile-drawer a[class*="bg-white"],
 .app-shell-host.yds-theme-premium .yds-mobile-drawer a[aria-current="page"] {
-  background-color: var(--yds-accent-soft);
-  color: var(--yds-accent);
+  background-color: var(--yds-sidebar-active);
+  color: var(--yds-sidebar-text);
+  border-color: var(--yds-sidebar-active-border);
+}
+
+/* AI CTA accent (shell) */
+.app-shell-host.yds-theme-premium .yds-ai-cta {
+  background: var(--yds-ai-gradient);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+}
+
+.app-shell-host.yds-theme-premium .yds-ai-cta:hover {
+  filter: brightness(1.05);
+  color: #fff;
+}
+
+.app-shell-host.yds-theme-premium .yds-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--yds-ai-gradient);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 /* Shell chrome cards only — not page domain cards (.yds-dbb-card, panic, etc.) */

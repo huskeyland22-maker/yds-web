@@ -17,6 +17,23 @@ import { handleEquityDailyBottomBuy } from "../api/_lib/equityDailyBottomBuyHand
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 
+/**
+ * Run one exported function from a client module without loading Firebase.
+ * @param {string} file
+ * @param {string} name
+ * @param {string} nextExport
+ * @param {Record<string, unknown>} deps
+ */
+function loadExportedFunction(file, name, nextExport, deps) {
+  const src = readFileSync(file, "utf8")
+  const start = src.indexOf(`export function ${name}`)
+  const end = src.indexOf(`export async function ${nextExport}`)
+  assert.ok(start >= 0 && end > start, `${name} source range missing`)
+  const body = src.slice(start, end).replace("export function", "function")
+  const keys = Object.keys(deps)
+  return new Function(...keys, `${body}\nreturn ${name}`)(...keys.map((key) => deps[key]))
+}
+
 function mockRes() {
   const state = { statusCode: 0, body: null, headers: {} }
   return {
@@ -104,6 +121,36 @@ describe("equityDailyBottomBuyRedact", () => {
     assert.equal(redacted.access, "summary")
     assert.equal(equityPayloadHasProDetails(redacted), false)
     assert.ok(Array.isArray(redacted.universe))
+  })
+
+  it("keeps score and state from the same full view and drops price, ATR, and conditions", () => {
+    const full = sampleFullView()
+    const payload = {
+      ok: true,
+      access: "full",
+      system: "equityDailyBottomBuy",
+      universe: [{ symbol: "NVDA" }],
+      view: { ...full, symbol: "NVDA", score: 4 },
+    }
+    const free = redactEquityDailyBottomBuyPayload(payload)
+    assert.equal(free.access, "summary")
+    assert.equal(free.view.score, payload.view.score)
+    assert.equal(free.view.state.id, payload.view.state.id)
+    assert.equal(free.view.state.label, payload.view.state.label)
+    assert.equal(free.view.state.detail, undefined)
+    assert.equal(free.view.state.reading, undefined)
+    for (const key of ["price", "atrPct", "atrRisk", "dd120", "atrNote", "atrMeaning", "note", "conditions"]) {
+      assert.equal(free.view[key], undefined, key)
+    }
+    assert.equal(equityViewHasProDetails(free.view), false)
+    assert.equal(payload.view.price, 180.5)
+    assert.equal(payload.view.conditions.length, 4)
+    assert.equal(payload.access, "full")
+
+    const zero = redactEquityDailyBottomBuyView({ ...sampleFullView(), score: 0, symbol: "AMZN" })
+    assert.equal(zero.score, 0)
+    const missing = redactEquityDailyBottomBuyView({ ...sampleFullView(), score: null })
+    assert.equal(missing.score, null)
   })
 })
 
@@ -215,6 +262,51 @@ describe("handleEquityDailyBottomBuy membership access", () => {
     assert.equal(anon.state.body.view.atrPct, undefined)
     assert.equal(free.state.body.view.atrPct, undefined)
   })
+
+  it("PRO full and FREE summary share score and state from the same view", async () => {
+    const pro = mockRes()
+    const free = mockRes()
+    const load = async () => ({ status: 200, body: structuredClone(fullBody) })
+    await handleEquityDailyBottomBuy(
+      { method: "GET", query: { symbol: "AMZN" }, headers: { authorization: "Bearer tok" } },
+      pro,
+      {
+        requireProMembership: async () => ({
+          ok: true,
+          uid: "u1",
+          membership: { plan: "pro", status: "active", source: null, updatedAt: null, reason: "plan_pro" },
+        }),
+        load,
+      },
+    )
+    await handleEquityDailyBottomBuy(
+      { method: "GET", query: { symbol: "AMZN" }, headers: {} },
+      free,
+      {
+        requireProMembership: async () => ({
+          ok: false,
+          status: 401,
+          body: { error: "missing_token" },
+        }),
+        load,
+      },
+    )
+    assert.equal(pro.state.body.access, "full")
+    assert.equal(free.state.body.access, "summary")
+    assert.equal(free.state.body.view.score, pro.state.body.view.score)
+    assert.equal(free.state.body.view.state.id, pro.state.body.view.state.id)
+    assert.equal(free.state.body.view.state.label, pro.state.body.view.state.label)
+    assert.equal(pro.state.body.view.price, 180.5)
+    assert.equal(pro.state.body.view.atrPct, 3.2)
+    assert.equal(pro.state.body.view.conditions.length, 4)
+    assert.equal(free.state.body.view.price, undefined)
+    assert.equal(free.state.body.view.atrPct, undefined)
+    assert.equal(free.state.body.view.conditions, undefined)
+    assert.equal(free.state.body.view.note, undefined)
+    assert.equal(free.state.body.view.state.detail, undefined)
+    assert.equal(equityPayloadHasProDetails(free.state.body), false)
+    assert.equal(equityPayloadHasProDetails(pro.state.body), true)
+  })
 })
 
 describe("equity gate wiring + hobby cap + no public equity snapshot", () => {
@@ -223,6 +315,52 @@ describe("equity gate wiring + hobby cap + no public equity snapshot", () => {
     assert.match(src, /withOptionalBearerAuth/)
     assert.match(src, /applyEquityDailyBottomBuyAccess/)
     assert.match(src, /redactEquityDailyBottomBuyPayload/)
+  })
+
+  it("applyEquityDailyBottomBuyAccess does not recompute score and does not force PRO access", () => {
+    const apply = loadExportedFunction(
+      join(root, "vite-project/src/utils/equityDailyBottomBuyApi.js"),
+      "applyEquityDailyBottomBuyAccess",
+      "fetchEquityDailyBottomBuy",
+      { equityPayloadHasProDetails, redactEquityDailyBottomBuyPayload },
+    )
+    const full = {
+      ok: true,
+      access: "full",
+      view: sampleFullView(),
+    }
+    full.view.score = 1
+    const asPro = apply(full, true)
+    assert.equal(asPro, full)
+    assert.equal(asPro.access, "full")
+    assert.equal(asPro.view.score, 1)
+    assert.equal(asPro.view.price, 180.5)
+
+    const serverSummary = {
+      ok: true,
+      access: "summary",
+      view: { ok: true, symbol: "NVDA", score: 4, state: { id: "strongLow", label: "STRONG LOW CANDIDATE" }, readOnly: true },
+    }
+    const untouched = apply(serverSummary, true)
+    assert.equal(untouched, serverSummary)
+    assert.equal(untouched.access, "summary")
+    assert.equal(untouched.view.score, 4)
+
+    const asFree = apply(full, false)
+    assert.notEqual(asFree, full)
+    assert.equal(asFree.access, "summary")
+    assert.equal(asFree.view.score, 1)
+    assert.equal(asFree.view.state.id, "strongLow")
+    assert.equal(asFree.view.state.label, "STRONG LOW CANDIDATE")
+    assert.equal(asFree.view.price, undefined)
+    assert.equal(asFree.view.atrPct, undefined)
+    assert.equal(asFree.view.conditions, undefined)
+    assert.equal(equityPayloadHasProDetails(asFree), false)
+    assert.equal(full.view.score, 1)
+    assert.equal(full.view.conditions.length, 4)
+
+    const already = apply(asFree, false)
+    assert.equal(already, asFree)
   })
 
   it("vite equity-daily-bottom-buy middleware forwards Authorization like me-membership", () => {
@@ -248,9 +386,9 @@ describe("equity gate wiring + hobby cap + no public equity snapshot", () => {
     assert.match(page, /buildEquityDailyBottomBuyVisibility/)
     assert.match(page, /YdsProFeatureGate/)
     assert.match(page, /applyEquityDailyBottomBuyAccess/)
-    // FREE summary omits conditions — never map bare view.conditions; defer PRO children.
-    assert.match(page, /\(view\.conditions \|\| \[\]\)\.map/)
-    assert.doesNotMatch(page, /\{view\.conditions\.map/)
+    // Detail rows render only when the server payload says access is full.
+    assert.match(page, /payload\?\.access === "full" && Array\.isArray\(view\.conditions\)/)
+    assert.match(page, /row\.access === "full"/)
     assert.match(page, /visibility\.proConditions \? \(/)
     assert.match(page, /visibility\.proAtr \? \(/)
   })
