@@ -48,6 +48,7 @@ export default function YdsPortfolioCenterSection() {
     usdkrw,
     quotesLoading,
     syncMode,
+    syncNotice,
     syncReady,
     isLoggedIn,
   } = usePortfolioHoldings()
@@ -203,6 +204,7 @@ export default function YdsPortfolioCenterSection() {
         {isLoggedIn ? (
           <p className="yds-pf-v1__sync-line">
             동기화: {syncReady ? syncMode : "loading…"}
+            {syncNotice ? ` · ${syncNotice}` : ""}
           </p>
         ) : null}
 

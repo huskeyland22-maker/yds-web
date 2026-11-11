@@ -87,6 +87,16 @@ export function membershipStatusFromApiBody(body) {
   return plan === "pro" ? MEMBERSHIP_STATUS.PRO : MEMBERSHIP_STATUS.FREE
 }
 
+/**
+ * Server-declared detail access. A missing flag stays closed.
+ * This does not turn an operator into a PRO subscription.
+ * @param {{ detailAccess?: unknown } | null | undefined} body
+ * @returns {boolean}
+ */
+export function detailAccessFromApiBody(body) {
+  return body?.detailAccess === true
+}
+
 const PRODUCTION_APP_HOST = "yds-web-kappa.vercel.app"
 
 /**

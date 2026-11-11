@@ -4,6 +4,10 @@ import { loadCashBalance, saveCashBalance } from "../content/ydsPortfolioCashBal
 import {
   pushCloudPortfolio,
   reconcilePortfolioWithCloud,
+  rememberDeletedPortfolioTradeIds,
+  writePortfolioCashUpdatedAt,
+  PORTFOLIO_DELETED_TRADE_ID,
+  PORTFOLIO_CASH_META_ID,
 } from "../content/ydsPortfolioCloudSync.js"
 import { setPortfolioUsdKrw, getPortfolioUsdKrw } from "../content/ydsPortfolioPriceProvider.js"
 import {
@@ -60,6 +64,7 @@ function usePortfolioStateValue() {
   const [quotesFetchedAt, setQuotesFetchedAt] = useState(/** @type {string | null} */ (null))
   const [quotesError, setQuotesError] = useState(/** @type {string | null} */ (null))
   const [syncMode, setSyncMode] = useState(/** @type {string} */ ("device-local"))
+  const [syncNotice, setSyncNotice] = useState("")
   const [syncReady, setSyncReady] = useState(false)
   const cloudPushTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null))
   const skipCloudPushRef = useRef(true)
@@ -127,7 +132,21 @@ function usePortfolioStateValue() {
     cloudPushTimerRef.current = setTimeout(async () => {
       try {
         const token = await user.getIdToken()
-        await pushCloudPortfolio(token, trades, cashBalance)
+        const pushed = await pushCloudPortfolio(token, trades, cashBalance)
+        const mergedTrades = Array.isArray(pushed?.mergedTrades) ? pushed.mergedTrades : null
+        const omitted = Number(pushed?.omittedWithoutId) || 0
+        setSyncNotice(
+          omitted > 0 ? `ID 없는 기록 ${omitted}건은 서버에 저장되지 않았습니다.` : "",
+        )
+        const cashFromServer = Number(pushed?.mergedCash)
+        const tradesChanged = mergedTrades && JSON.stringify(mergedTrades) !== JSON.stringify(trades)
+        const cashChanged = Number.isFinite(cashFromServer) && cashFromServer !== cashBalance
+        if (tradesChanged || cashChanged) {
+          skipCloudPushRef.current = true
+          if (tradesChanged) setTrades(mergedTrades)
+          if (cashChanged) setCashBalanceState(cashFromServer)
+          skipCloudPushRef.current = false
+        }
         setSyncMode("account-synced")
       } catch (e) {
         console.warn("[portfolio-sync] push failed", e)
@@ -236,11 +255,15 @@ function usePortfolioStateValue() {
 
   /** @param {string} id */
   const removeTrade = useCallback((id) => {
+    if (typeof id === "string" && id && id !== PORTFOLIO_DELETED_TRADE_ID && id !== PORTFOLIO_CASH_META_ID) {
+      rememberDeletedPortfolioTradeIds([id])
+    }
     setTrades((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
   /** @param {number} amount */
   const setCashBalance = useCallback((amount) => {
+    writePortfolioCashUpdatedAt(Date.now())
     setCashBalanceState(normalizeCashBalance(amount))
   }, [])
 
@@ -271,6 +294,7 @@ function usePortfolioStateValue() {
     sortBy,
     setSortBy,
     syncMode,
+    syncNotice,
     syncReady,
     isLoggedIn: Boolean(user?.uid),
   }

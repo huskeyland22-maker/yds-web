@@ -112,15 +112,20 @@ function CandidateFacts({ row }) {
 export default function EquityDailyBottomBuyPage() {
   const {
     isPro,
+    detailAccess,
     authReady,
     isLoading: membershipLoading,
     isLoggedOut,
     status,
   } = useMembership()
-  const visibility = useMemo(() => buildEquityDailyBottomBuyVisibility(isPro), [isPro])
+  const analysisAllowed = detailAccess === true
+  const visibility = useMemo(
+    () => buildEquityDailyBottomBuyVisibility(analysisAllowed),
+    [analysisAllowed],
+  )
   const audienceCta = useMemo(
-    () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
-    [isPro, isLoggedOut, status],
+    () => buildDbbMembershipAudienceCta({ isPro, detailAccess: analysisAllowed, isLoggedOut, status }),
+    [isPro, analysisAllowed, isLoggedOut, status],
   )
   const [symbol, setSymbol] = useState(DEFAULT_SYMBOL)
   const [group, setGroup] = useState("all")
@@ -149,7 +154,7 @@ export default function EquityDailyBottomBuyPage() {
     setLoading(true)
     fetchEquityDailyBottomBuy(symbol, { signal: ctrl.signal })
       .then((json) => {
-        if (!ctrl.signal.aborted) setPayload(applyEquityDailyBottomBuyAccess(json, isPro))
+        if (!ctrl.signal.aborted) setPayload(applyEquityDailyBottomBuyAccess(json, analysisAllowed))
       })
       .catch((err) => {
         if (ctrl.signal.aborted) return
@@ -159,7 +164,7 @@ export default function EquityDailyBottomBuyPage() {
         if (!ctrl.signal.aborted) setLoading(false)
       })
     return () => ctrl.abort()
-  }, [symbol, authReady, membershipLoading, isPro])
+  }, [symbol, authReady, membershipLoading, analysisAllowed])
 
   const universe = payload?.universe || []
   const universeKey = universe.map((row) => row.symbol).join("|")
@@ -191,7 +196,7 @@ export default function EquityDailyBottomBuyPage() {
         const sym = symbols[index]
         try {
           const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
-          const gated = applyEquityDailyBottomBuyAccess(json, isPro)
+          const gated = applyEquityDailyBottomBuyAccess(json, analysisAllowed)
           views[index] = viewForDisplay(gated)
         } catch (err) {
           if (ctrl.signal.aborted) throw err
@@ -227,7 +232,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey, isPro])
+  }, [universeKey, analysisAllowed])
 
   useEffect(() => {
     if (!universe.length) return undefined
@@ -249,7 +254,7 @@ export default function EquityDailyBottomBuyPage() {
         const sym = extra[index].symbol
         try {
           const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
-          const gated = applyEquityDailyBottomBuyAccess(json, isPro)
+          const gated = applyEquityDailyBottomBuyAccess(json, analysisAllowed)
           views[index] = viewForDisplay(gated)
         } catch (err) {
           if (ctrl.signal.aborted) throw err
@@ -281,7 +286,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey, isPro])
+  }, [universeKey, analysisAllowed])
   const groups = useMemo(() => {
     const seen = []
     for (const row of summaryCatalog) {

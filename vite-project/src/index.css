@@ -38198,6 +38198,28 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   color: #f8fafc;
   margin-top: 0.1rem;
 }
+@media (max-width: 639px) {
+  .yds-pf-v1__form-grid {
+    --yds-pf-v1-input-h: 44px;
+  }
+  .yds-pf-v1__form input.yds-pf-v1__input,
+  .yds-pf-v1__cash-inline input,
+  .yds-pf-v1__field-wide .yds-portfolio-v5__search-label input {
+    height: 44px;
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .yds-pf-v1__btn {
+    min-height: 44px;
+    padding-inline: 0.9rem;
+    font-size: 16px;
+  }
+  .yds-pf-v1__metric-val,
+  .yds-pf-v1__ticker {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
 
 .yds-pf-v1__metric--up .yds-pf-v1__metric-val {
   color: #4ade80;
@@ -38822,7 +38844,7 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
 }
 .yds-dbb-card--strong .yds-dbb-card__stage { color: #fca5a5; }
 .yds-dbb-card--primary .yds-dbb-card__stage { color: #fdba74; }
-/* Mobile: compact hold cue when trade records exist (PC keeps full status block) */
+/* Hold cue stays unused. Mobile and PC both show the full trade-status block. */
 .yds-dbb-card__hold {
   display: none;
   margin: 0.35rem 0 0;
@@ -38835,11 +38857,94 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   display: block;
 }
 @media (max-width: 639px) {
-  .yds-dbb-card__hold {
+  .yds-dbb-card__trade-status,
+  .yds-dbb-dash__trade-status,
+  .yds-dbb--equity-dash .yds-dbb-dash__trade-status {
     display: block;
+    max-width: 100%;
+    min-width: 0;
   }
-  .yds-dbb-card__trade-status {
+  .yds-trade-status__row {
+    align-items: baseline;
+    min-width: 0;
+  }
+  .yds-trade-status__row span,
+  .yds-trade-status__row strong {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .yds-dbb-all__theme,
+  .yds-dbb-all__theme-text,
+  .yds-dbb--equity-dash .yds-dbb-all__theme,
+  .yds-dbb--equity-dash .yds-dbb-all__theme-text,
+  .yds-dbb-metric__value,
+  .yds-dbb-metric__label {
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    overflow-wrap: anywhere;
+  }
+  .yds-dbb--equity-dash .yds-dbb-all,
+  .yds-dbb--equity-dash .yds-dbb-all--cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .yds-trade-rec__form input,
+  .yds-trade-rec__form select,
+  .yds-trade-rec__save,
+  .yds-trade-rec__cancel {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .yds-portfolio-v2__form-grid--trade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .yds-portfolio-v2__form input,
+  .yds-portfolio-v2__form select,
+  .yds-portfolio-v2__btn--primary,
+  .yds-portfolio-v2__action-option {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .yds-portfolio-v2__btn--primary {
+    width: 100%;
+    align-self: stretch;
+  }
+  .yds-portfolio-v2__table-wrap {
+    overflow-x: visible;
+  }
+  .yds-portfolio-v2__table--trades,
+  .yds-portfolio-v2__table--trades tbody,
+  .yds-portfolio-v2__table--trades tr,
+  .yds-portfolio-v2__table--trades td {
+    display: block;
+    width: auto;
+    min-width: 0;
+  }
+  .yds-portfolio-v2__table--trades thead {
     display: none;
+  }
+  .yds-portfolio-v2__table--trades tr {
+    margin: 0 0 0.55rem;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 8px;
+  }
+  .yds-portfolio-v2__table--trades td {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border: 0;
+    padding: 0.22rem 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .yds-portfolio-v2__table--trades td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    color: #64748b;
+    font-weight: 700;
   }
 }
 .yds-dbb-card__metrics {

@@ -148,7 +148,11 @@ export async function handleEquityDailyBottomBuy(req, res, deps = {}) {
 
     const gate = await requirePro(req)
     if (gate.ok) {
-      res.status(result.status).json({ ...fullPayload, access: "full" })
+      res.status(result.status).json({
+        ...fullPayload,
+        access: "full",
+        audience: gate.audience === "operator" ? "operator" : "pro",
+      })
       return
     }
 

@@ -1540,7 +1540,7 @@ function App() {
           </div>
         ) : null}
 
-        <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
+        <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/daily-bottom-buy" replace />} />
             <Route

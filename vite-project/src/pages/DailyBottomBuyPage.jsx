@@ -89,11 +89,12 @@ function OpportunityFacts({ card }) {
  * UI flow mirrors equity daily-bottom-buy; ETF snapshot + trade records stay ETF-specific.
  */
 export default function DailyBottomBuyPage() {
-  const { isPro, authReady, isLoading: membershipLoading, isLoggedOut, status } = useMembership()
-  const visibility = useMemo(() => buildDailyBottomBuyVisibility(isPro), [isPro])
+  const { isPro, detailAccess, authReady, isLoading: membershipLoading, isLoggedOut, status } = useMembership()
+  const analysisAllowed = detailAccess === true
+  const visibility = useMemo(() => buildDailyBottomBuyVisibility(analysisAllowed), [analysisAllowed])
   const audienceCta = useMemo(
-    () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
-    [isPro, isLoggedOut, status],
+    () => buildDbbMembershipAudienceCta({ isPro, detailAccess: analysisAllowed, isLoggedOut, status }),
+    [isPro, analysisAllowed, isLoggedOut, status],
   )
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState(null)
@@ -120,7 +121,7 @@ export default function DailyBottomBuyPage() {
     setError(null)
     fetchDailyBottomBuySnapshot({ signal: ctrl.signal })
       .then((data) => {
-        const gated = applyDailyBottomBuyAccess(data, isPro)
+        const gated = applyDailyBottomBuyAccess(data, analysisAllowed)
         setPayload(gated)
         setEpisodes(syncDailyBottomEpisodes(gated.all || []))
       })
@@ -130,7 +131,7 @@ export default function DailyBottomBuyPage() {
       })
       .finally(() => setLoading(false))
     return () => ctrl.abort()
-  }, [authReady, membershipLoading, isPro])
+  }, [authReady, membershipLoading, analysisAllowed])
 
   useEffect(() => {
     if (!picker.open) return undefined

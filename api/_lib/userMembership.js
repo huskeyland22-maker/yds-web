@@ -157,3 +157,28 @@ export async function resolveUserMembership(firebaseUid, deps = {}) {
 export function isProMembership(resolution) {
   return resolution?.plan === MEMBERSHIP_PLANS.PRO
 }
+
+/**
+ * Operator is a Firebase custom claim, not a subscription plan.
+ * Only the exact role "operator" counts. "pro" or other strings do not.
+ * @param {unknown} claims
+ * @returns {boolean}
+ */
+export function isOperatorClaim(claims) {
+  if (!claims || typeof claims !== "object" || Array.isArray(claims)) return false
+  const role = typeof claims.role === "string" ? claims.role.trim().toLowerCase() : ""
+  return role === "operator"
+}
+
+/**
+ * Detail analysis allowance. Subscription PRO and operator stay distinct.
+ * Lookup failure must be handled by the caller — this does not treat errors as allowed.
+ * @param {MembershipResolution | null | undefined} membership
+ * @param {unknown} claims
+ * @returns {{ detailAccess: boolean, audience: "pro" | "operator" | "free" }}
+ */
+export function resolveDetailAccess(membership, claims) {
+  if (isProMembership(membership)) return { detailAccess: true, audience: "pro" }
+  if (isOperatorClaim(claims)) return { detailAccess: true, audience: "operator" }
+  return { detailAccess: false, audience: "free" }
+}

@@ -21,6 +21,7 @@ export default function YdsPortfolioTradesSection() {
   const [unitPrice, setUnitPrice] = useState("")
   const [memo, setMemo] = useState("")
   const [date, setDate] = useState(todayDateKey())
+  const [formError, setFormError] = useState("")
 
   const needsTradeSize = action === "buy" || action === "sell"
   const country = selectedStock?.country ?? "us"
@@ -43,13 +44,17 @@ export default function YdsPortfolioTradesSection() {
 
   function handleSubmit(e) {
     e.preventDefault()
-    if (!selectedStock?.name) return
+    setFormError("")
+    if (!selectedStock?.name) {
+      setFormError("종목을 선택해 주세요.")
+      return
+    }
 
     const qty = quantity ? Number(quantity) : null
     const unit = unitPrice ? Number(unitPrice) : null
-    if (needsTradeSize) {
-      if (!selectedStock.ticker) return
-      if (!qty || qty <= 0 || !unit || unit <= 0) return
+    if (needsTradeSize && (!selectedStock.ticker || !qty || qty <= 0 || !unit || unit <= 0)) {
+      setFormError("매수·매도는 수량과 단가를 입력해야 저장됩니다.")
+      return
     }
 
     addTrade({
@@ -161,6 +166,15 @@ export default function YdsPortfolioTradesSection() {
           </label>
         </div>
 
+        {needsTradeSize ? (
+          <p className="yds-portfolio-v2__hint-inline">수량과 단가는 필수입니다. 빠지면 저장되지 않습니다.</p>
+        ) : null}
+        {formError ? (
+          <p className="yds-portfolio-v2__err" role="alert">
+            {formError}
+          </p>
+        ) : null}
+
         {needsTradeSize && derivedAmount != null ? (
           <p className="yds-portfolio-v2__derived font-mono tabular-nums">
             거래 금액(현지) {derivedAmount.toLocaleString("ko-KR")}
@@ -198,13 +212,13 @@ export default function YdsPortfolioTradesSection() {
             <tbody>
               {trades.map((trade) => (
                 <tr key={trade.id}>
-                  <td className="font-mono tabular-nums">{trade.date}</td>
-                  <td>
+                  <td className="font-mono tabular-nums" data-label="날짜">{trade.date}</td>
+                  <td data-label="구분">
                     <span className={`yds-portfolio-v2__badge yds-portfolio-v2__badge--${trade.action}`}>
                       {tradeActionLabel(trade.action)}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="종목">
                     {trade.name}
                     {trade.country ? (
                       <span className="yds-portfolio-v4__country">
@@ -212,15 +226,15 @@ export default function YdsPortfolioTradesSection() {
                       </span>
                     ) : null}
                   </td>
-                  <td className="font-mono tabular-nums">{trade.ticker || "—"}</td>
-                  <td className="font-mono tabular-nums">
+                  <td className="font-mono tabular-nums" data-label="코드">{trade.ticker || "—"}</td>
+                  <td className="font-mono tabular-nums" data-label="수량">
                     {trade.quantity != null ? trade.quantity : "—"}
                   </td>
-                  <td className="font-mono tabular-nums">
+                  <td className="font-mono tabular-nums" data-label="단가">
                     {trade.unitPrice != null ? trade.unitPrice.toLocaleString("ko-KR") : "—"}
                   </td>
-                  <td className="font-mono tabular-nums">{formatKrw(trade.amount)}</td>
-                  <td className="yds-portfolio-v2__memo">{trade.memo || "—"}</td>
+                  <td className="font-mono tabular-nums" data-label="금액">{formatKrw(trade.amount)}</td>
+                  <td className="yds-portfolio-v2__memo" data-label="메모">{trade.memo || "—"}</td>
                   <td>
                     <button
                       type="button"

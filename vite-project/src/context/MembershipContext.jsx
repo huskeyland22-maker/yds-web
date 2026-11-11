@@ -15,6 +15,7 @@ export function MembershipProvider({ children }) {
     ledgerStatus,
     source,
     reason,
+    detailAccess,
     refreshedAt,
     refresh,
   } = useMembershipQuery()
@@ -28,6 +29,7 @@ export function MembershipProvider({ children }) {
       ledgerStatus,
       source,
       reason,
+      detailAccess: detailAccess === true,
       refreshedAt,
       refresh,
       isPro,
@@ -41,7 +43,7 @@ export function MembershipProvider({ children }) {
         status === MEMBERSHIP_STATUS.LOADING ||
         status === MEMBERSHIP_STATUS.ERROR,
     }
-  }, [status, authReady, plan, ledgerStatus, source, reason, refreshedAt, refresh])
+  }, [status, authReady, plan, ledgerStatus, source, reason, detailAccess, refreshedAt, refresh])
 
   return <MembershipContext.Provider value={value}>{children}</MembershipContext.Provider>
 }
@@ -54,6 +56,7 @@ export function MembershipProvider({ children }) {
  *   ledgerStatus: string | null
  *   source: string | null
  *   reason: string | null
+ *   detailAccess: boolean
  *   refreshedAt: number | null
  *   refresh: () => void
  *   isPro: boolean
@@ -74,6 +77,7 @@ export function useMembership() {
       ledgerStatus: null,
       source: null,
       reason: "provider_missing",
+      detailAccess: false,
       refreshedAt: null,
       refresh: () => {},
       isPro: false,

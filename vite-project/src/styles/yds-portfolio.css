@@ -1303,6 +1303,14 @@
   gap: 0.5rem;
 }
 
+.yds-portfolio-v2__err {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fca5a5;
+}
+
 .yds-portfolio-v2__derived {
   grid-column: 1 / -1;
   margin: 0;

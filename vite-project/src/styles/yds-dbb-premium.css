@@ -1184,6 +1184,36 @@
   .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-research__scroll {
     max-width: 100%;
   }
+
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-card__trade-status,
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-dash__trade-status {
+    display: block;
+    max-width: 100%;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-status__row span,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-status__row strong,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__theme,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__theme-text {
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    overflow-wrap: anywhere;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all,
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all--cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form input,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form select,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__save,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__cancel {
+    min-height: 44px;
+    font-size: 16px;
+  }
 }
 
 /* —— Shared 4-condition pass/fail cards (ETF + equity) —— */

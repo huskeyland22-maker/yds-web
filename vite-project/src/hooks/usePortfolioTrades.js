@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react"
 import { tradeAmountKrw } from "../content/ydsPortfolioV5Engine.js"
 import {
+  PORTFOLIO_DELETED_TRADE_ID,
+  rememberDeletedPortfolioTradeIds,
+} from "../content/ydsPortfolioCloudSync.js"
+import {
   createTradeId,
   loadPortfolioTrades,
   savePortfolioTrades,
@@ -74,6 +78,9 @@ export function usePortfolioTrades() {
 
   /** @param {string} id */
   const removeTrade = useCallback((id) => {
+    if (typeof id === "string" && id && id !== PORTFOLIO_DELETED_TRADE_ID) {
+      rememberDeletedPortfolioTradeIds([id])
+    }
     setTrades((prev) => prev.filter((t) => t.id !== id))
   }, [])
 

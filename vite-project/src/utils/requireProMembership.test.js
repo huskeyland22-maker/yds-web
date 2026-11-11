@@ -87,6 +87,21 @@ describe("requireProMembership", () => {
     }
   })
 
+  it("allows an operator claim without changing the free ledger plan", async () => {
+    const result = await requireProMembership(reqWithAuth("tok"), {
+      verifyFirebaseAuthUser: vi.fn(async () => ({
+        uid: "uid-operator",
+        claims: { role: "operator" },
+      })),
+      resolveUserMembership: vi.fn(async () => resolveMembershipFromRow(null)),
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.audience).toBe("operator")
+      expect(result.membership.plan).toBe("free")
+    }
+  })
+
   it("allows active PRO membership", async () => {
     const membership = resolveMembershipFromRow({
       firebase_uid: "uid-pro",

@@ -47,6 +47,15 @@ export function equityViewProgressEntry(meta, view) {
   const symbol = meta?.symbol || view?.symbol
   if (!symbol) return null
   const live = view?.ok ? view : null
+  const price = Number(live?.price)
+  const hasPrice = Number.isFinite(price) && price > 0
+  const priceState = !live
+    ? "error"
+    : live.access === "summary"
+      ? "forbidden"
+      : hasPrice
+        ? "ready"
+        : "missing"
   return {
     symbol,
     name: meta?.name || live?.name || symbol,
@@ -54,8 +63,9 @@ export function equityViewProgressEntry(meta, view) {
       ? {
           count: Number(live.score) || 0,
           stage: { label: live.state?.label || "" },
-          close: live.price,
+          close: priceState === "ready" ? price : null,
           asOfDate: live.asOf,
+          priceState,
         }
       : null,
   }

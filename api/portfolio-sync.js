@@ -10,17 +10,12 @@ import { verifyFirebaseIdToken } from "./_lib/firebaseIdToken.js"
 import { isSupabaseConfigured, supabaseRest } from "./_lib/supabaseRest.js"
 import { handleMeMembership } from "./_lib/meMembershipHandler.js"
 import { handleTradeRecordsSync } from "./_lib/tradeRecordsSyncHandler.js"
+import { mergePortfolioServerPut } from "../vite-project/src/content/ydsPortfolioCloudSync.js"
 
 function readBearer(req) {
   const raw = String(req.headers?.authorization ?? "")
   if (!raw.startsWith("Bearer ")) return null
   return raw.slice(7).trim() || null
-}
-
-/** @param {unknown} trades */
-function sanitizeTrades(trades) {
-  if (!Array.isArray(trades)) return []
-  return trades.filter((t) => t && typeof t.id === "string")
 }
 
 /** @param {{ query?: Record<string, unknown> }} req */
@@ -33,7 +28,19 @@ function resolveYdsMode(req) {
  * @param {import("http").IncomingMessage & { method?: string, body?: unknown, headers?: Record<string, string>, query?: Record<string, unknown> }} req
  * @param {import("http").ServerResponse & { status: (n: number) => { json: (b: unknown) => void }, setHeader: (k: string, v: string) => void }} res
  */
-export default async function handler(req, res) {
+/**
+ * @param {Parameters<typeof handler>[0]} req
+ * @param {Parameters<typeof handler>[1]} res
+ * @param {{
+ *   verifyFirebaseIdToken?: typeof verifyFirebaseIdToken
+ *   isSupabaseConfigured?: typeof isSupabaseConfigured
+ *   supabaseRest?: typeof supabaseRest
+ * }} [deps]
+ */
+export default async function handler(req, res, deps = {}) {
+  const verify = deps.verifyFirebaseIdToken ?? verifyFirebaseIdToken
+  const configured = deps.isSupabaseConfigured ?? isSupabaseConfigured
+  const rest = deps.supabaseRest ?? supabaseRest
   const mode = resolveYdsMode(req)
 
   // /api/me-membership → rewrite → ?ydsMode=me-membership
@@ -56,12 +63,12 @@ export default async function handler(req, res) {
 
   let uid
   try {
-    uid = await verifyFirebaseIdToken(token)
+    uid = await verify(token)
   } catch (e) {
     return res.status(401).json({ error: "invalid_token", message: e instanceof Error ? e.message : "invalid" })
   }
 
-  if (!isSupabaseConfigured()) {
+  if (!configured()) {
     return res.status(503).json({ error: "supabase_not_configured" })
   }
 
@@ -69,7 +76,7 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const rows = await supabaseRest(`${pathBase}&select=firebase_uid,trades,cash_balance,revision,updated_at`, {
+      const rows = await rest(`${pathBase}&select=firebase_uid,trades,cash_balance,revision,updated_at`, {
         method: "GET",
       })
       const row = Array.isArray(rows) ? rows[0] : null
@@ -81,24 +88,44 @@ export default async function handler(req, res) {
   }
 
   const body = req.body ?? {}
-  const trades = sanitizeTrades(body.trades)
-  const cashBalance = Number(body.cash_balance)
+  let existing = null
+  try {
+    const rows = await rest(`${pathBase}&select=firebase_uid,trades,cash_balance,revision,updated_at`, {
+      method: "GET",
+    })
+    existing = Array.isArray(rows) ? rows[0] : null
+  } catch (e) {
+    console.error("[portfolio-sync] PUT read failed — refusing replace", e)
+    return res.status(500).json({ error: "save_failed" })
+  }
+
+  const merged = mergePortfolioServerPut({
+    existingTrades: existing?.trades,
+    existingCash: Number(existing?.cash_balance) || 0,
+    requestTrades: body.trades,
+    requestCash: body.cash_balance,
+    requestCashUpdatedAt: body.cash_updated_at,
+  })
   const revision = Number(body.revision)
   const payload = {
     firebase_uid: uid,
-    trades,
-    cash_balance: Number.isFinite(cashBalance) ? cashBalance : 0,
+    trades: merged.storedTrades,
+    cash_balance: merged.cashBalance,
     revision: Number.isFinite(revision) ? Math.round(revision) : Date.now(),
   }
 
   try {
-    const saved = await supabaseRest("user_portfolio?on_conflict=firebase_uid", {
+    const saved = await rest("user_portfolio?on_conflict=firebase_uid", {
       method: "POST",
       body: payload,
       prefer: "resolution=merge-duplicates,return=representation",
     })
     const row = Array.isArray(saved) ? saved[0] : saved
-    return res.status(200).json({ portfolio: row ?? payload, syncMode: "account" })
+    return res.status(200).json({
+      portfolio: row ?? payload,
+      syncMode: "account",
+      omittedWithoutId: merged.omittedWithoutId,
+    })
   } catch (e) {
     console.error("[portfolio-sync] PUT failed", e)
     return res.status(500).json({ error: "save_failed" })

@@ -95,6 +95,8 @@ describe("handleMeMembership", () => {
       source: "manual",
       updatedAt: "2026-11-02T00:00:00.000Z",
       reason: "plan_pro",
+      audience: "pro",
+      detailAccess: true,
     })
   })
 

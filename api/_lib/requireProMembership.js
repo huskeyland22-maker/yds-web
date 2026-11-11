@@ -4,10 +4,10 @@
  * Never trusts accessTier, client plan/uid, or UI isPro.
  */
 
-import { verifyFirebaseIdToken } from "./firebaseIdToken.js"
+import { verifyFirebaseAuthUser } from "./firebaseIdToken.js"
 import {
   MembershipLookupError,
-  isProMembership,
+  resolveDetailAccess,
   resolveUserMembership,
 } from "./userMembership.js"
 
@@ -23,13 +23,15 @@ export function readBearerToken(req) {
 
 /**
  * @typedef {{
- *   verifyFirebaseIdToken?: typeof verifyFirebaseIdToken
+ *   verifyFirebaseIdToken?: (token: string) => Promise<string | { uid?: string, claims?: unknown }>
+ *   verifyFirebaseAuthUser?: typeof verifyFirebaseAuthUser
  *   resolveUserMembership?: typeof resolveUserMembership
  * }} RequireProDeps
  *
  * @typedef {{
  *   ok: true
  *   uid: string
+ *   audience: "pro" | "operator"
  *   membership: import("./userMembership.js").MembershipResolution
  * } | {
  *   ok: false
@@ -39,12 +41,24 @@ export function readBearerToken(req) {
  */
 
 /**
+ * @param {string | { uid?: string, claims?: unknown } | null | undefined} result
+ * @returns {{ uid: string, claims: unknown }}
+ */
+function identityFromVerifyResult(result) {
+  if (typeof result === "string") return { uid: result, claims: {} }
+  if (result && typeof result === "object") {
+    const uid = typeof result.uid === "string" ? result.uid : ""
+    return { uid, claims: result.claims ?? {} }
+  }
+  return { uid: "", claims: {} }
+}
+
+/**
  * @param {unknown} req
  * @param {RequireProDeps} [deps]
  * @returns {Promise<RequireProResult>}
  */
 export async function requireProMembership(req, deps = {}) {
-  const verify = deps.verifyFirebaseIdToken ?? verifyFirebaseIdToken
   const resolve = deps.resolveUserMembership ?? resolveUserMembership
 
   const token = readBearerToken(req)
@@ -52,20 +66,27 @@ export async function requireProMembership(req, deps = {}) {
     return { ok: false, status: 401, body: { error: "missing_token" } }
   }
 
-  let uid
+  let identity
   try {
-    uid = await verify(token)
+    if (deps.verifyFirebaseAuthUser) {
+      identity = identityFromVerifyResult(await deps.verifyFirebaseAuthUser(token))
+    } else if (deps.verifyFirebaseIdToken) {
+      identity = identityFromVerifyResult(await deps.verifyFirebaseIdToken(token))
+    } else {
+      identity = identityFromVerifyResult(await verifyFirebaseAuthUser(token))
+    }
   } catch {
     return { ok: false, status: 401, body: { error: "invalid_token" } }
   }
 
-  if (!uid || typeof uid !== "string") {
+  if (!identity.uid) {
     return { ok: false, status: 401, body: { error: "invalid_token" } }
   }
 
   try {
-    const membership = await resolve(uid)
-    if (!isProMembership(membership)) {
+    const membership = await resolve(identity.uid)
+    const access = resolveDetailAccess(membership, identity.claims)
+    if (!access.detailAccess || access.audience === "free") {
       return {
         ok: false,
         status: 403,
@@ -73,10 +94,11 @@ export async function requireProMembership(req, deps = {}) {
           error: "pro_required",
           plan: membership.plan,
           reason: membership.reason,
+          audience: "free",
         },
       }
     }
-    return { ok: true, uid, membership }
+    return { ok: true, uid: identity.uid, audience: access.audience, membership }
   } catch (e) {
     if (e instanceof MembershipLookupError && e.code === "supabase_not_configured") {
       return { ok: false, status: 503, body: { error: "supabase_not_configured" } }

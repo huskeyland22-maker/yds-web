@@ -3,6 +3,11 @@
  */
 
 import { loadActionLogs } from "./ydsActionLogStorage.js"
+import {
+  PORTFOLIO_CASH_META_ID,
+  PORTFOLIO_DELETED_TRADE_ID,
+  rememberDeletedPortfolioTradeIds,
+} from "./ydsPortfolioCloudSync.js"
 import { PORTFOLIO_LEGACY_ALIAS_KEYS } from "./ydsPortfolioKeyRegistry.js"
 import { PORTFOLIO_POSITIONS_KEY } from "./ydsPortfolioPositionsStorage.js"
 
@@ -184,7 +189,21 @@ export function loadPortfolioTrades() {
       if (base.length) sourceKey = PORTFOLIO_TRADES_KEY
     } else {
       const parsed = JSON.parse(raw)
-      base = Array.isArray(parsed) ? parsed.filter((t) => t && typeof t.id === "string") : migrateTradesFromActionLog()
+      base = Array.isArray(parsed)
+        ? parsed.filter(
+            (t) =>
+              t &&
+              typeof t.id === "string" &&
+              t.id !== PORTFOLIO_DELETED_TRADE_ID &&
+              t.id !== PORTFOLIO_CASH_META_ID,
+          )
+        : migrateTradesFromActionLog()
+      const marker = Array.isArray(parsed)
+        ? parsed.find((t) => t && t.id === PORTFOLIO_DELETED_TRADE_ID)
+        : null
+      if (marker && Array.isArray(marker.deletedIds)) {
+        rememberDeletedPortfolioTradeIds(marker.deletedIds.filter((id) => typeof id === "string"))
+      }
     }
 
     const beforeLegacy = base.length
