@@ -1042,25 +1042,24 @@ function App() {
 
   useEffect(() => {
     if (!auth) return undefined
-    let redirectUser = null
     let cancelled = false
+    let redirectSettled = false
+    const publish = (nextUser) => {
+      if (!cancelled) setUser(nextUser || null)
+    }
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       if (nextUser) {
-        redirectUser = null
-        setUser(nextUser)
+        publish(nextUser)
         return
       }
-      if (redirectUser && auth.currentUser) {
-        setUser(redirectUser)
-        return
-      }
-      redirectUser = null
-      setUser(null)
+      // A null event before redirect settlement must not wipe a session
+      // that Firebase is still restoring.
+      if (!redirectSettled) return
+      publish(auth.currentUser)
     })
-    void settleGoogleRedirectSignIn(auth).then((user) => {
-      if (cancelled || !user) return
-      redirectUser = user
-      setUser(user)
+    void settleGoogleRedirectSignIn(auth).finally(() => {
+      redirectSettled = true
+      publish(auth.currentUser)
     })
     return () => {
       cancelled = true

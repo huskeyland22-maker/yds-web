@@ -179,6 +179,16 @@ describe("quote display", () => {
     assert.equal(view.currentPrice, null)
     assert.equal(view.returnPct, null)
     assert.ok(view.avgBuyPrice > 0)
+    const missingPrice = equityViewProgressEntry(
+      { symbol: "NEE", name: "NextEra" },
+      { ok: true, symbol: "NEE", access: "full", score: 0, price: null, state: { label: "대기" } },
+    )
+    assert.equal(missingPrice.card.priceState, "missing")
+    const unavailable = equityViewProgressEntry(
+      { symbol: "RXRX", name: "Recursion" },
+      { ok: false, symbol: "RXRX", access: "summary" },
+    )
+    assert.equal(unavailable.card, null)
     assert.equal(tradeQuoteStateLabel("forbidden"), "권한 없음")
     assert.equal(tradeQuoteStateLabel("loading"), "확인 중")
     assert.equal(tradeQuoteStateLabel("error"), "데이터 오류")
@@ -189,17 +199,34 @@ describe("quote display", () => {
 })
 
 describe("temporary owner pro", () => {
-  it("opens Pro for the owner UID only and does not mutate the ledger row", async () => {
-    const { applyTemporaryOwnerPro, isTemporaryOwnerProUid } = await import("../api/_lib/temporaryOwnerPro.js")
+  it("opens Pro only when the verified UID and email both match", async () => {
+    const { applyTemporaryOwnerPro, isTemporaryOwnerPro } = await import("../api/_lib/temporaryOwnerPro.js")
     const ownerUid = "9mm60sKonGc3NoSC71lQG2Vp2jG2"
-    assert.equal(isTemporaryOwnerProUid(ownerUid), true)
-    assert.equal(isTemporaryOwnerProUid("someone-else"), false)
-    const upgraded = applyTemporaryOwnerPro(ownerUid, freeRow)
+    const ownerEmail = "huskeyland22@gmail.com"
+    assert.equal(isTemporaryOwnerPro(ownerUid, ownerEmail), true)
+    assert.equal(isTemporaryOwnerPro(ownerUid, "other@example.com"), false)
+    assert.equal(isTemporaryOwnerPro("someone-else", ownerEmail), false)
+    const upgraded = applyTemporaryOwnerPro(ownerUid, ownerEmail, freeRow)
     assert.equal(upgraded.plan, "pro")
     assert.equal(upgraded.reason, "temporary_owner_pro")
     assert.equal(freeRow.plan, "free")
     assert.equal(resolveDetailAccess(upgraded, {}).audience, "pro")
-    assert.equal(applyTemporaryOwnerPro("someone-else", freeRow).plan, "free")
-    assert.equal(applyTemporaryOwnerPro(ownerUid, proRow).reason, "plan_pro")
+    assert.equal(applyTemporaryOwnerPro(ownerUid, "other@example.com", freeRow).plan, "free")
+    assert.equal(applyTemporaryOwnerPro(ownerUid, ownerEmail, proRow).reason, "plan_pro")
+  })
+
+  it("lets the verified owner through the Pro gate without a ledger write", async () => {
+    const result = await requireProMembership(req("tok"), {
+      verifyFirebaseAuthUser: async () => ({
+        uid: "9mm60sKonGc3NoSC71lQG2Vp2jG2",
+        email: "huskeyland22@gmail.com",
+        claims: {},
+      }),
+      resolveUserMembership: async () => freeRow,
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.audience, "pro")
+    assert.equal(result.membership.reason, "temporary_owner_pro")
+    assert.equal(freeRow.plan, "free")
   })
 })

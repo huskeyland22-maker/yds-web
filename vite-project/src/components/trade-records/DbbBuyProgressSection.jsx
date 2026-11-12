@@ -149,8 +149,18 @@ export default function DbbBuyProgressSection({
                       {formatUsdPrice(item.avgBuyPrice)}
                     </strong>
                   </div>
-                  {quotePriceRow(item)}
-                  {quoteReturnRow(item)}
+                  {quotePriceRow(item) || (
+                    <div className="yds-trade-status__row">
+                      <span>현재가 USD</span>
+                      <strong>시세 없음</strong>
+                    </div>
+                  )}
+                  {quoteReturnRow(item) || (
+                    <div className="yds-trade-status__row">
+                      <span>현재 수익률</span>
+                      <strong>시세 없음</strong>
+                    </div>
+                  )}
                 </div>
               )}
               {showBuyLines ? <EquityBuyLines symbol={item.symbol} /> : null}

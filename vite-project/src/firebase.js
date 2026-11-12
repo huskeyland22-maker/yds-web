@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app"
 import { getApps, getApp } from "firebase/app"
-import { getAuth } from "firebase/auth"
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import { getMessaging, isSupported } from "firebase/messaging"
 
@@ -64,6 +64,10 @@ if (hasFirebaseConfig()) {
 }
 
 export const auth = app ? getAuth(app) : null
+if (auth) {
+  // Keep the signed-in session across refresh. Do not log the user or token.
+  void setPersistence(auth, browserLocalPersistence).catch(() => {})
+}
 export const db = app ? getFirestore(app) : null
 
 export async function getFirebaseMessagingSafe() {

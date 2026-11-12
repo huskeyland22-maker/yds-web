@@ -11,8 +11,10 @@ import { verifyFirebaseAuthUser } from "./firebaseIdToken.js"
 import {
   MembershipLookupError,
   resolveDetailAccess,
+  resolveMembershipFromRow,
   resolveUserMembership,
 } from "./userMembership.js"
+import { applyTemporaryOwnerPro, isTemporaryOwnerPro } from "./temporaryOwnerPro.js"
 
 /**
  * @param {unknown} req
@@ -57,13 +59,21 @@ export async function handleMeMembership(req, res, deps = {}) {
   }
 
   const uid = typeof profile === "string" ? profile : profile?.uid
+  const email = profile && typeof profile === "object" && typeof profile.email === "string" ? profile.email : ""
   const claims = profile && typeof profile === "object" ? profile.claims : {}
   if (!uid || typeof uid !== "string") {
     return res.status(401).json({ error: "invalid_token" })
   }
 
   try {
-    const membership = await resolve(uid)
+    let membership
+    try {
+      membership = await resolve(uid)
+    } catch (lookupError) {
+      if (!isTemporaryOwnerPro(uid, email)) throw lookupError
+      membership = resolveMembershipFromRow(null)
+    }
+    membership = applyTemporaryOwnerPro(uid, email, membership)
     const access = resolveDetailAccess(membership, claims)
     return res.status(200).json({
       plan: membership.plan,
