@@ -652,6 +652,8 @@
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge {
   --yds-gauge-deg: 0deg;
+  --yds-gauge-r: 5.5rem;
+  --yds-gauge-band: 0.85rem;
   position: relative;
   height: 7.6rem;
   min-height: 7.6rem;
@@ -662,10 +664,10 @@
   top: 0;
   left: 50%;
   z-index: 0;
-  width: 11rem;
-  height: 5.5rem;
+  width: calc(var(--yds-gauge-r) * 2);
+  height: var(--yds-gauge-r);
   transform: translateX(-50%);
-  border-radius: 11rem 11rem 0 0;
+  border-radius: calc(var(--yds-gauge-r) * 2) calc(var(--yds-gauge-r) * 2) 0 0;
   background:
     conic-gradient(
       from 270deg at 50% 100%,
@@ -677,23 +679,20 @@
       #e2e7ef var(--yds-gauge-deg),
       #e2e7ef 180deg
     );
-  -webkit-mask: radial-gradient(farthest-side at 50% 100%, transparent calc(100% - 0.85rem), #000 calc(100% - 0.84rem));
-  mask: radial-gradient(farthest-side at 50% 100%, transparent calc(100% - 0.85rem), #000 calc(100% - 0.84rem));
+  -webkit-mask: radial-gradient(farthest-side at 50% 100%, transparent calc(100% - var(--yds-gauge-band)), #000 calc(100% - var(--yds-gauge-band) + 0.01rem));
+  mask: radial-gradient(farthest-side at 50% 100%, transparent calc(100% - var(--yds-gauge-band)), #000 calc(100% - var(--yds-gauge-band) + 0.01rem));
 }
 
-.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge::before {
-  content: "";
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge-needle {
   position: absolute;
-  z-index: 1;
+  top: 0;
   left: 50%;
-  top: 3.15rem;
-  width: 2px;
-  height: 2.35rem;
-  margin-left: -1px;
-  border-radius: 999px;
-  background: #0f172a;
-  transform-origin: center bottom;
-  transform: rotate(calc(var(--yds-gauge-deg) - 90deg));
+  z-index: 1;
+  width: calc(var(--yds-gauge-r) * 2);
+  height: var(--yds-gauge-r);
+  transform: translateX(-50%);
+  overflow: visible;
+  pointer-events: none;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge-readout {

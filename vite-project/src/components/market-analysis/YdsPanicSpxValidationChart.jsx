@@ -171,6 +171,17 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
 
   const xSpanMs = xTimeDomain ? xTimeDomain[1] - xTimeDomain[0] : 0
 
+  const spxDomain = useMemo(() => {
+    const values = visibleRows
+      .map((row) => Number(row.spx))
+      .filter((value) => Number.isFinite(value) && value > 0)
+    if (values.length < 2) return /** @type {[number, number] | ["auto", "auto"]} */ (["auto", "auto"])
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const pad = Math.max((max - min) * 0.08, 1)
+    return /** @type {[number, number]} */ ([Math.floor(min - pad), Math.ceil(max + pad)])
+  }, [visibleRows])
+
   const bottomMarkers = useMemo(() => {
     if (!series?.bottoms?.length) return []
     return series.bottoms
@@ -347,7 +358,8 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
             <YAxis
               yAxisId="spx"
               orientation="right"
-              domain={["auto", "auto"]}
+              domain={spxDomain}
+              allowDataOverflow
               width={spxAxisWidth}
               tick={{ fill: "#4b5563", fontSize: isMobile ? 9 : 10 }}
               axisLine={false}

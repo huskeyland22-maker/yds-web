@@ -79,7 +79,7 @@ export function resolvePanicScoreFromHistoryRow(row) {
 
 /**
  * 저장 직후 live panic_index_history(cycleMetricHistory)를 검증 시계열에 upsert.
- * 같은 날짜 → panic 갱신, 새 날짜 → append (SPX는 직전 값 carry).
+ * 같은 날짜 → panic만 갱신. 새 날짜에 실제 SPX가 없으면 null로 두어 결측 구간으로 남긴다.
  * @param {PanicSpxValidationSeries | null | undefined} series
  * @param {object[] | null | undefined} historyRows
  * @returns {PanicSpxValidationSeries | null | undefined}
@@ -97,7 +97,6 @@ export function mergeLiveHistoryIntoPanicSpxSeries(series, historyRows) {
   }
 
   let touched = false
-  let lastSpx = series.rows[series.rows.length - 1]?.spx ?? null
   for (const hr of historyRows) {
     const date = String(hr?.date ?? hr?.ts ?? "").slice(0, 10)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue
@@ -107,12 +106,12 @@ export function mergeLiveHistoryIntoPanicSpxSeries(series, historyRows) {
     if (prev) {
       if (prev.panic !== panic) touched = true
       byDate.set(date, { ...prev, panic })
-      if (prev.spx != null && Number.isFinite(Number(prev.spx))) lastSpx = Number(prev.spx)
     } else {
       touched = true
+      const quoted = Number(hr?.spx)
       byDate.set(date, {
         date,
-        spx: lastSpx != null && Number.isFinite(Number(lastSpx)) ? Number(lastSpx) : null,
+        spx: Number.isFinite(quoted) && quoted > 0 ? quoted : null,
         panic,
       })
     }

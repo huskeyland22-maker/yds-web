@@ -98,6 +98,22 @@ export default function YdsPanicIndexCenter({
                 aria-label={`Panic Index ${score}점 · ${status.label}`}
               >
                 <div className="yds-panic-center__gauge-arc" aria-hidden />
+                <svg
+                  className="yds-panic-center__gauge-needle"
+                  viewBox="0 0 220 110"
+                  aria-hidden
+                >
+                  <line
+                    x1="110"
+                    y1="28"
+                    x2="110"
+                    y2="6"
+                    stroke="#0f172a"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    transform={`rotate(${gaugeDeg - 90} 110 110)`}
+                  />
+                </svg>
                 <div className="yds-panic-center__gauge-readout">
                   <p className="yds-panic-center__score font-mono tabular-nums">
                     {score}

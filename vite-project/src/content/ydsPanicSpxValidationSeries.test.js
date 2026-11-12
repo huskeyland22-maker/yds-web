@@ -105,7 +105,7 @@ describe("ydsPanicSpxValidationSeries", () => {
     expect(merged?.rows.find((r) => r.date === "2025-03-13")?.panic).toBe(61)
     const appended = merged?.rows.find((r) => r.date === "2026-09-23")
     expect(appended?.panic).toBe(42)
-    expect(appended?.spx).toBe(5521)
+    expect(appended?.spx).toBeNull()
     expect(merged?.span?.[1]).toBe("2026-09-23")
   })
 
