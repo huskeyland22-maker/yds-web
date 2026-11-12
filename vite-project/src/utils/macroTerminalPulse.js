@@ -1,6 +1,8 @@
 import { buildAiReportMarketStatus } from "./buildAiReportMarketStatus.js"
-import { buildResearchDeskBriefing } from "./researchDeskBriefing.js"
+import { mergeCycleRows, panicDataFromCycleRow } from "./cycleHistoryUtils.js"
 import { resolveMarketState } from "./marketStateEngine.js"
+import { resolveCycleHistoryRows } from "./panicHistoryRows.js"
+import { buildResearchDeskBriefing } from "./researchDeskBriefing.js"
 
 /**
  * 좌측 사이드바 시장 상태 (YDS 단계 · 행동 가이드 — VIX/F&G 수치 없음).
@@ -8,14 +10,19 @@ import { resolveMarketState } from "./marketStateEngine.js"
  * @param {string} [_cycleStage] — 레거시 호환 (미사용)
  * @param {object[]} [historyRows]
  */
-export function buildMarketSidebarPulse(panicData, _cycleStage, historyRows = []) {
+export function buildMarketSidebarPulse(panicData, _cycleStage, historyRows = [], memoLoad = { phase: "loading" }) {
   const status = buildAiReportMarketStatus(panicData, historyRows)
+  const history = resolveCycleHistoryRows(mergeCycleRows(Array.isArray(historyRows) ? historyRows : [], []))
+  const historyPanic = panicDataFromCycleRow(history[history.length - 1])
+  const historyStatus = buildAiReportMarketStatus(historyPanic, history)
   const ms = resolveMarketState(panicData)
 
   const memoSummary = status.memoLines?.filter(Boolean).join(" ") || "—"
 
   return {
     aiReportStatus: status,
+    historyAiReportStatus: historyStatus,
+    memoLoad,
     marketLabel: memoSummary,
     updateTimestampLine: status.updateLine,
     basisLine: status.basisLine,

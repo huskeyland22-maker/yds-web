@@ -16,7 +16,7 @@ export default function LeverageAdjustmentPage() {
         <p className="yds-dbb__lead">레버리지 ETF 화면입니다. 매수·매도 기준은 아직 정하지 않았습니다.</p>
       </header>
 
-      <section className="flex flex-col gap-2" aria-label="레버리지 유니버스">
+      <section className="yds-lev-board" aria-label="레버리지 유니버스">
         {sortByBuyConditionCount(LEVERAGE_ADJUSTMENT_UNIVERSE, (item) => scoredCountRank(item.ok, item.count)).map((item) => (
           <article key={item.symbol} className="yds-dbb-card" data-symbol={item.symbol}>
             <div className="yds-dbb-card__head">

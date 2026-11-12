@@ -7,9 +7,10 @@
  * No POST/PUT — clients cannot change plan here.
  */
 
-import { verifyFirebaseIdToken } from "./firebaseIdToken.js"
+import { verifyFirebaseAuthUser } from "./firebaseIdToken.js"
 import {
   MembershipLookupError,
+  resolveDetailAccess,
   resolveUserMembership,
 } from "./userMembership.js"
 
@@ -27,12 +28,12 @@ function readBearer(req) {
  * @param {import("http").IncomingMessage & { method?: string, body?: unknown, headers?: Record<string, string>, query?: Record<string, unknown> }} req
  * @param {import("http").ServerResponse & { status: (n: number) => { json: (b: unknown) => void }, setHeader: (k: string, v: string) => void }} res
  * @param {{
- *   verifyFirebaseIdToken?: typeof verifyFirebaseIdToken
+ *   verifyFirebaseAuthUser?: typeof verifyFirebaseAuthUser
  *   resolveUserMembership?: typeof resolveUserMembership
  * }} [deps]
  */
 export async function handleMeMembership(req, res, deps = {}) {
-  const verify = deps.verifyFirebaseIdToken ?? verifyFirebaseIdToken
+  const verify = deps.verifyFirebaseAuthUser ?? deps.verifyFirebaseIdToken ?? verifyFirebaseAuthUser
   const resolve = deps.resolveUserMembership ?? resolveUserMembership
 
   if (req.method !== "GET") {
@@ -45,9 +46,9 @@ export async function handleMeMembership(req, res, deps = {}) {
     return res.status(401).json({ error: "missing_token" })
   }
 
-  let uid
+  let profile
   try {
-    uid = await verify(token)
+    profile = await verify(token)
   } catch (e) {
     return res.status(401).json({
       error: "invalid_token",
@@ -55,18 +56,23 @@ export async function handleMeMembership(req, res, deps = {}) {
     })
   }
 
+  const uid = typeof profile === "string" ? profile : profile?.uid
+  const claims = profile && typeof profile === "object" ? profile.claims : {}
   if (!uid || typeof uid !== "string") {
     return res.status(401).json({ error: "invalid_token" })
   }
 
   try {
     const membership = await resolve(uid)
+    const access = resolveDetailAccess(membership, claims)
     return res.status(200).json({
       plan: membership.plan,
       status: membership.status,
       source: membership.source,
       updatedAt: membership.updatedAt,
       reason: membership.reason,
+      audience: access.audience,
+      detailAccess: access.detailAccess,
     })
   } catch (e) {
     if (e instanceof MembershipLookupError && e.code === "supabase_not_configured") {

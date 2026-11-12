@@ -23,7 +23,7 @@ export function isPwaRuntimeDebugOverlayVisible() {
  */
 export default function PwaRuntimeDebugOverlay() {
   const [visible, setVisible] = useState(() => isPwaRuntimeDebugOverlayVisible())
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [tick, setTick] = useState(0)
   const [swInfo, setSwInfo] = useState(null)
 
@@ -104,7 +104,8 @@ export default function PwaRuntimeDebugOverlay() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed right-3 bottom-3 z-[9300] rounded-full border border-amber-400/40 bg-slate-950/92 px-2 py-1 text-[10px] font-medium text-amber-100 shadow-lg backdrop-blur"
+        className="yds-dev-pill rounded-full border border-amber-400/40 bg-slate-950/92 px-2 py-1 text-[10px] font-medium text-amber-100 shadow-lg backdrop-blur"
+        data-dev-slot="pwa"
       >
         PWA 빌드
       </button>

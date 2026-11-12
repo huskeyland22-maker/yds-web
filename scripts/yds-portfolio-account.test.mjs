@@ -117,6 +117,28 @@ const fifo = replayPortfolioFifoFromTrades(fifoTrades)
 assert(fifo.totalRealizedPnl === 500, `fifo realized ${fifo.totalRealizedPnl}`)
 assert(fifo.lots[0].quantity === 10, "remaining qty")
 assert(fifo.lots[0].avgUnitPrice === 120, `avg ${fifo.lots[0].avgUnitPrice}`)
+assert(fifo.lots[0].realizedPnl === 500, "open lot keeps partial realized pnl")
+
+const soldOut = replayPortfolioFifoFromTrades([
+  ...fifoTrades,
+  {
+    id: "s2",
+    date: "2025-04-01",
+    action: "sell",
+    name: "테스트",
+    ticker: "TEST",
+    country: "kr",
+    quantity: 10,
+    unitPrice: 160,
+    amount: 1600,
+    memo: "",
+    createdAt: 4,
+    updatedAt: 4,
+  },
+])
+assert(soldOut.lots.length === 0, "full sell leaves no open lot")
+assert(soldOut.closedLots.length === 1, "full sell keeps the closed record")
+assert(soldOut.closedLots[0].realizedPnl === 500 + 400, `closed realized ${soldOut.closedLots[0].realizedPnl}`)
 
 console.log("OK portfolio account", {
   cash,

@@ -8,7 +8,7 @@
 
 :root {
   /* —— Light premium surfaces —— */
-  --yds-bg: #eef1f6;
+  --yds-bg: #f5f7fc;
   --yds-bg-elevated: #ffffff;
   --yds-bg-muted: #e2e7ef;
   --yds-text: #071628;
@@ -19,6 +19,24 @@
   --yds-accent: #134087;
   --yds-accent-soft: #e8edf4;
   --yds-focus-ring: #2563eb;
+
+  /* —— Deep-blue sidebar (approved premium mock) —— */
+  --yds-sidebar-bg: #0c1b33;
+  --yds-sidebar-bg-elevated: #122744;
+  --yds-sidebar-border: rgba(255, 255, 255, 0.1);
+  --yds-sidebar-text: #f1f5f9;
+  --yds-sidebar-text-muted: #94a3b8;
+  --yds-sidebar-text-secondary: #cbd5e1;
+  --yds-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --yds-sidebar-active: rgba(99, 102, 241, 0.22);
+  --yds-sidebar-active-border: #818cf8;
+
+  /* —— AI accent (purple gradient) —— */
+  --yds-ai-from: #7c3aed;
+  --yds-ai-to: #4f46e5;
+  --yds-ai-soft: #f3e8ff;
+  --yds-ai-text: #5b21b6;
+  --yds-ai-gradient: linear-gradient(135deg, var(--yds-ai-from) 0%, var(--yds-ai-to) 100%);
 
   /* —— Form controls (premium inputs) —— */
   --yds-input-bg: #ffffff;

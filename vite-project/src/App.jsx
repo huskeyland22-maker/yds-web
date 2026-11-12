@@ -537,6 +537,8 @@ function App() {
   const panicDataStale = usePanicStore((s) => s.panicDataStale)
   const manualMode = usePanicStore((s) => s.manualMode)
   const panicInitialized = usePanicStore((s) => s.initialized)
+  const lastPanicFetchAt = usePanicStore((s) => s.lastPanicFetchAt)
+  const lastPanicFetchError = usePanicStore((s) => s.lastPanicFetchError)
   const initializePanicData = usePanicStore((s) => s.initializePanicData)
   const applyServerPanicSnapshot = usePanicStore((s) => s.applyServerPanicSnapshot)
   const savePanicMetricsHub = usePanicStore((s) => s.savePanicMetricsHub)
@@ -1281,9 +1283,17 @@ function App() {
   }, [deskPanicData, latestHistoryRow, marketCycleHistory, deskMarketReport])
   const marketCycleStage = marketState.label
   const safeRecentMemos = Array.isArray(recentMemos) ? recentMemos : []
+  const sidebarMemoLoad = useMemo(() => {
+    if (!panicInitialized) return { phase: "loading" }
+    const hasMetric = (value) => value != null && value !== "" && Number.isFinite(Number(value))
+    if (hasMetric(deskPanicData?.vix) || hasMetric(deskPanicData?.fearGreed)) return { phase: "ready" }
+    if (lastPanicFetchError) return { phase: "error" }
+    if (lastPanicFetchAt != null || manualMode) return { phase: "empty" }
+    return { phase: "loading" }
+  }, [panicInitialized, deskPanicData, lastPanicFetchError, lastPanicFetchAt, manualMode])
   const sidebarPulse = useMemo(
-    () => buildMarketSidebarPulse(deskPanicData, marketCycleStage, cycleMetricHistory ?? []),
-    [deskPanicData, marketCycleStage, cycleMetricHistory],
+    () => buildMarketSidebarPulse(deskPanicData, marketCycleStage, cycleMetricHistory ?? [], sidebarMemoLoad),
+    [deskPanicData, marketCycleStage, cycleMetricHistory, sidebarMemoLoad],
   )
   const insightRows = useMemo(() => buildMemoInsightRows(safeRecentMemos), [recentMemos])
   const flowStats = useMemo(() => buildMemoFlowStats(safeRecentMemos), [recentMemos])
@@ -1530,7 +1540,7 @@ function App() {
           </div>
         ) : null}
 
-        <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
+        <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/daily-bottom-buy" replace />} />
             <Route

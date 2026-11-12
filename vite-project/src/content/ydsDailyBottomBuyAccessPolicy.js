@@ -46,7 +46,7 @@ export const DBB_SHARED_PRO_LOCK_COPY = Object.freeze({
  * @returns {{ kind: "login" | "upgrade", title: string, body: string } | null}
  */
 export function buildDbbMembershipAudienceCta(opts = {}) {
-  if (opts.isPro === true) return null
+  if (opts.isPro === true || opts.detailAccess === true) return null
 
   const loggedOut =
     opts.isLoggedOut === true || opts.status === MEMBERSHIP_STATUS.LOGGED_OUT

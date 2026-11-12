@@ -104,6 +104,7 @@ export function emptyPortfolioHoldings() {
     totalUnrealizedPnl: 0,
     totalPnl: 0,
     totalReturnPct: null,
+    closedRows: [],
   }
 }
 
@@ -180,7 +181,7 @@ export function sortHoldingRows(rows, sortBy) {
 export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPct", usdkrw) {
   const safeTrades = Array.isArray(trades) ? trades : []
   const safeQuoteMap = quoteMap instanceof Map ? quoteMap : new Map()
-  const { lots, totalRealizedPnl } = replayPortfolioFromTrades(safeTrades)
+  const { lots, closedLots = [], totalRealizedPnl } = replayPortfolioFromTrades(safeTrades)
   const cash = Math.max(0, Number(cashAmount) || 0)
 
   /** @type {HoldingRow[]} */
@@ -206,6 +207,20 @@ export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPc
 
   rows = sortHoldingRows(rows, sortBy)
 
+  const closedRows = closedLots.map((lot) => ({
+    ...lot,
+    quantity: 0,
+    currentPrice: null,
+    marketValueKrw: 0,
+    costBasisKrw: 0,
+    unrealizedPnl: null,
+    returnPct: null,
+    weightPct: 0,
+    priceStatus: null,
+    priceUpdatedAt: null,
+    priceStale: false,
+  }))
+
   return {
     rows,
     lots,
@@ -219,6 +234,7 @@ export function buildV5Holdings(trades, cashAmount, quoteMap, sortBy = "returnPc
     totalUnrealizedPnl,
     totalPnl,
     totalReturnPct,
+    closedRows,
   }
 }
 

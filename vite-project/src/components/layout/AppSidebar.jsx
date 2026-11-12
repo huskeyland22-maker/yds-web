@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { NavLink, useLocation } from "react-router-dom"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
 import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
@@ -7,6 +7,39 @@ import {
   getOtherNavItems,
   getSidebarFooterLinks,
 } from "../../utils/appNavItems.js"
+
+/**
+ * 로딩 중에는 로딩 문구를 유지한다.
+ * 사이클 이력이 있거나 조회가 끝났는데 지표가 없으면, 어느 화면이든 로딩 문구를 남기지 않는다.
+ * @param {string} _pathname
+ * @param {object | null | undefined} sidebarPulse
+ */
+function resolveSidebarAiStatus(_pathname, sidebarPulse) {
+  const live = sidebarPulse?.aiReportStatus ?? null
+  if (live?.ready) return live
+  const fromHistory = sidebarPulse?.historyAiReportStatus
+  if (fromHistory?.ready) return fromHistory
+  const phase = sidebarPulse?.memoLoad?.phase
+  if (phase === "error") {
+    return {
+      ready: false,
+      title: "오늘의 해석",
+      memoLines: ["시장 데이터를 불러오지 못했습니다."],
+      updateLine: "업데이트 —",
+      basisLine: "",
+    }
+  }
+  if (phase === "empty") {
+    return {
+      ready: false,
+      title: "오늘의 해석",
+      memoLines: ["시장 해석에 필요한 지표가 없습니다."],
+      updateLine: "업데이트 —",
+      basisLine: "",
+    }
+  }
+  return live
+}
 
 /**
  * @param {{
@@ -20,7 +53,10 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
   const coreItems = getCoreNavItems()
   const otherItems = getOtherNavItems()
   const footerLinks = getSidebarFooterLinks()
-  const aiStatus = sidebarPulse?.aiReportStatus ?? null
+  const aiStatus = useMemo(
+    () => resolveSidebarAiStatus(location.pathname, sidebarPulse),
+    [location.pathname, sidebarPulse],
+  )
   const pickAlertUnread = countUnreadPickAlerts()
   const [otherOpen, setOtherOpen] = useState(false)
   const [dbbOpen, setDbbOpen] = useState(true)
@@ -35,13 +71,18 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
 
   return (
     <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
-      <div className="shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
-        <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
-          Y&apos;ds
-        </p>
-        <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
-          함께하는 인생 투자
-        </p>
+      <div className="yds-sidebar__brand shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
+        <span className="yds-sidebar__mark" aria-hidden>
+          Y
+        </span>
+        <span className="min-w-0">
+          <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
+            Y&apos;ds
+          </p>
+          <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
+            함께하는 인생 투자
+          </p>
+        </span>
       </div>
 
       <nav className="flex flex-col gap-1 px-2.5 py-3" aria-label="핵심 메뉴">

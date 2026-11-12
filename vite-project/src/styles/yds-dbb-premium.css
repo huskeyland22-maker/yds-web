@@ -31,6 +31,24 @@
   box-shadow: var(--yds-shadow-card);
 }
 
+.app-shell-host.yds-theme-premium .yds-dbb-access-notice {
+  border-left: 3px solid var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb-access-notice[data-cta-kind="upgrade"] {
+  border-left-color: var(--yds-ai-from);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__row.is-pass .yds-dbb-cond__mark {
+  color: var(--yds-signal-up);
+  background: color-mix(in srgb, var(--yds-signal-up) 14%, var(--yds-bg-elevated));
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__row.is-fail .yds-dbb-cond__mark {
+  color: var(--yds-signal-down);
+  background: color-mix(in srgb, var(--yds-signal-down) 12%, var(--yds-bg-elevated));
+}
+
 .app-shell-host.yds-theme-premium .yds-dbb__notice-muted {
   color: var(--yds-text-muted) !important;
 }
@@ -1165,5 +1183,129 @@
 
   .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-research__scroll {
     max-width: 100%;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-card__trade-status,
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-dash__trade-status {
+    display: block;
+    max-width: 100%;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-status__row span,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-status__row strong,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__theme,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-all__theme-text {
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    overflow-wrap: anywhere;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all,
+  .app-shell-host.yds-theme-premium .yds-dbb--equity-dash .yds-dbb-all--cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form input,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__form select,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__save,
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-trade-rec__cancel {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
+/* —— Shared 4-condition pass/fail cards (ETF + equity) —— */
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name mark"
+    "value value"
+    "th th";
+  gap: 0.12rem 0.45rem;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0.55rem 0.65rem 0.6rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  background: var(--yds-bg-elevated);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__row.is-pass {
+  background: color-mix(in srgb, var(--yds-signal-up) 9%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-up) 38%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__row.is-fail {
+  background: color-mix(in srgb, var(--yds-signal-down) 7%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-down) 32%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__name {
+  grid-area: name;
+  font-weight: 700;
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__mark {
+  grid-area: mark;
+  justify-self: end;
+  font-weight: 750;
+  line-height: 1;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-lev-board {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-lev-board .yds-dbb-cand__metrics dd {
+  color: var(--yds-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+  .app-shell-host.yds-theme-premium .yds-lev-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-shell-host.yds-theme-premium .yds-lev-board {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__row .yds-dbb-cond__value {
+  grid-area: value;
+  font-size: var(--yds-fs-section, 1rem);
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__th {
+  grid-area: th;
+  color: var(--yds-text-muted);
+}
+
+@media (max-width: 520px) {
+  .app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond {
+    grid-template-columns: 1fr;
   }
 }

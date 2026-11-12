@@ -12,6 +12,15 @@ import {
   tradeReturnPct,
 } from "./ydsTradeRecords.js"
 
+/** @param {string | null | undefined} priceState */
+export function tradeQuoteStateLabel(priceState) {
+  if (priceState === "loading") return "확인 중"
+  if (priceState === "forbidden") return "권한 없음"
+  if (priceState === "error") return "데이터 오류"
+  if (priceState === "missing") return "시세 없음"
+  return null
+}
+
 /**
  * @param {{
  *   count?: number
@@ -30,9 +39,17 @@ export function buildDbbTradeStatusView(card, records, asOfDate) {
     (count >= 4 ? "강한 저점" : count >= 3 ? "1차 매수" : count >= 2 ? "관심" : "대기")
   const recordedWeight = sumTradeWeightPct(list)
   const avgPrice = averageTradeBuyPrice(list)
-  // DBB engine last-bar close (same source as signal asOfDate)
-  const currentPrice =
-    card?.close != null && Number.isFinite(Number(card.close)) ? Number(card.close) : null
+  // DBB engine last-bar close (same source as signal asOfDate).
+  // A non-ready price state never becomes a number or a return.
+  const closePrice =
+    card?.close != null && Number.isFinite(Number(card.close)) && Number(card.close) > 0
+      ? Number(card.close)
+      : null
+  const allowedStates = new Set(["loading", "missing", "forbidden", "error", "ready"])
+  const requested = typeof card?.priceState === "string" ? card.priceState : ""
+  let priceState = allowedStates.has(requested) ? requested : closePrice != null ? "ready" : "missing"
+  if (priceState === "ready" && closePrice == null) priceState = "missing"
+  const currentPrice = priceState === "ready" ? closePrice : null
   const pnlPct = tradeReturnPct(avgPrice, currentPrice)
   const asOf =
     (typeof asOfDate === "string" && asOfDate) ||
@@ -68,6 +85,7 @@ export function buildDbbTradeStatusView(card, records, asOfDate) {
     recordedWeightPct: recordedWeight,
     nextStep,
     currentPrice,
+    priceState,
     priceAsOfDate: asOf,
     avgBuyPrice: avgPrice,
     returnPct: pnlPct,

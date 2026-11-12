@@ -8,6 +8,7 @@ import { STOCK_PICK_THEMES_BY_TICKER } from "./ydsStockPickThemes.js"
 import { buildV5Analysis } from "./ydsPortfolioV5Engine.js"
 import { buildAllocationCompareReport } from "./ydsPortfolioAllocationCompare.js"
 import { buildPortfolioFitDetail } from "./ydsPortfolioFitEngine.js"
+import { normalizePositionName } from "./ydsPortfolioTradeSync.js"
 
 export { fitGradeFromScore } from "./ydsPortfolioFitEngine.js"
 
@@ -184,16 +185,44 @@ export function buildPortfolioCenterV1Report(
 
   const riskChecks = buildRiskChecks(rows, sectors, themes, actualCashPct, recommended.cashPct)
 
+  /** @type {Map<string, PortfolioTrade[]>} */
+  const sellsByName = new Map()
+  for (const trade of Array.isArray(trades) ? trades : []) {
+    if (trade?.action !== "sell") continue
+    const key = normalizePositionName(trade.name)
+    if (!key) continue
+    const list = sellsByName.get(key) ?? []
+    list.push(trade)
+    sellsByName.set(key, list)
+  }
+
   const holdingsSimple = rows.map((row) => ({
     id: row.id,
     ticker: row.ticker,
     name: row.name,
+    country: row.country,
     quantity: row.quantity,
     avgUnitPrice: row.avgUnitPrice,
+    firstBuyDate: row.firstBuyDate,
+    currentPrice: row.currentPrice,
+    costBasisKrw: row.costBasisKrw,
+    marketValueKrw: row.marketValueKrw,
+    unrealizedPnl: row.unrealizedPnl,
+    realizedPnl: row.realizedPnl,
     weightPct: row.weightPct,
     returnPct: row.returnPct,
-    marketValueKrw: row.marketValueKrw,
     sectorLabel: sectorLabelForTicker(row.ticker),
+    sells: (sellsByName.get(row.id) ?? []).map(sellView),
+  }))
+
+  const closed = (holdings?.closedRows ?? []).map((row) => ({
+    id: row.id,
+    ticker: row.ticker,
+    name: row.name,
+    country: row.country,
+    firstBuyDate: row.firstBuyDate,
+    realizedPnl: row.realizedPnl,
+    sells: (sellsByName.get(row.id) ?? []).map(sellView),
   }))
 
   return {
@@ -204,6 +233,8 @@ export function buildPortfolioCenterV1Report(
       stockPct: actualStockPct,
       cashPct: actualCashPct,
       cashAmount: holdings?.cashAmount ?? 0,
+      totalUnrealizedPnl: holdings?.totalUnrealizedPnl ?? 0,
+      totalRealizedPnl: holdings?.totalRealizedPnl ?? 0,
     },
     market: {
       stageLabel: marketContext?.strategyLabel ?? "—",
@@ -224,6 +255,20 @@ export function buildPortfolioCenterV1Report(
     sectors,
     themes,
     holdings: holdingsSimple,
+    closed,
+  }
+}
+
+/**
+ * @param {PortfolioTrade} trade
+ */
+function sellView(trade) {
+  return {
+    id: trade.id,
+    date: trade.date,
+    quantity: Number(trade.quantity) || 0,
+    unitPrice: Number(trade.unitPrice) || 0,
+    amount: Number(trade.amount) || 0,
   }
 }
 

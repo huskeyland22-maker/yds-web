@@ -2,6 +2,7 @@ import {
   formatReturnPct,
   formatUsdPrice,
 } from "../../content/ydsTradeRecords.js"
+import { tradeQuoteStateLabel } from "../../content/ydsTradeRecordsStatus.js"
 
 /**
  * @param {{
@@ -83,20 +84,22 @@ function statusRow(view, key) {
     }
   }
   if (key === "price") {
+    const stateLabel = tradeQuoteStateLabel(view.priceState)
     return {
       key,
       label: `현재가 USD${view.priceAsOfDate ? ` · ${view.priceAsOfDate} 종가` : ""}`,
-      value: formatUsdPrice(view.currentPrice),
+      value: stateLabel || formatUsdPrice(view.currentPrice),
       strongClass: "font-mono tabular-nums",
       emphasis: false,
     }
   }
   if (key === "return") {
+    const stateLabel = tradeQuoteStateLabel(view.priceState)
     return {
       key,
       label: "현재 수익률",
-      value: formatReturnPct(view.returnPct),
-      strongClass: `font-mono tabular-nums${pnlClass(view.returnPct)}`,
+      value: stateLabel || formatReturnPct(view.returnPct),
+      strongClass: `font-mono tabular-nums${stateLabel ? "" : pnlClass(view.returnPct)}`,
       emphasis: false,
     }
   }

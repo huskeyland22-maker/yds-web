@@ -38,6 +38,17 @@ import {
 
 const DEFAULT_SYMBOL = "AMZN"
 
+function viewForDisplay(gated) {
+  if (!gated?.view || typeof gated.view !== "object") return null
+  return { ...gated.view, access: gated.access === "full" ? "full" : "summary" }
+}
+
+function equityCandidateHasDetails(row) {
+  if (!row || row.access !== "full") return false
+  if (row.price != null || row.atrPct != null) return true
+  return Array.isArray(row.conditions) && row.conditions.length > 0
+}
+
 function chosenEquityView(row, signalViews, extraViews, payload) {
   const scanned = (signalViews || []).find((item) => item?.symbol === row.symbol) || null
   const extra = extraViews?.[row.symbol] || null
@@ -101,15 +112,20 @@ function CandidateFacts({ row }) {
 export default function EquityDailyBottomBuyPage() {
   const {
     isPro,
+    detailAccess,
     authReady,
     isLoading: membershipLoading,
     isLoggedOut,
     status,
   } = useMembership()
-  const visibility = useMemo(() => buildEquityDailyBottomBuyVisibility(isPro), [isPro])
+  const analysisAllowed = detailAccess === true
+  const visibility = useMemo(
+    () => buildEquityDailyBottomBuyVisibility(analysisAllowed),
+    [analysisAllowed],
+  )
   const audienceCta = useMemo(
-    () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
-    [isPro, isLoggedOut, status],
+    () => buildDbbMembershipAudienceCta({ isPro, detailAccess: analysisAllowed, isLoggedOut, status }),
+    [isPro, analysisAllowed, isLoggedOut, status],
   )
   const [symbol, setSymbol] = useState(DEFAULT_SYMBOL)
   const [group, setGroup] = useState("all")
@@ -138,7 +154,7 @@ export default function EquityDailyBottomBuyPage() {
     setLoading(true)
     fetchEquityDailyBottomBuy(symbol, { signal: ctrl.signal })
       .then((json) => {
-        if (!ctrl.signal.aborted) setPayload(applyEquityDailyBottomBuyAccess(json, isPro))
+        if (!ctrl.signal.aborted) setPayload(applyEquityDailyBottomBuyAccess(json, analysisAllowed))
       })
       .catch((err) => {
         if (ctrl.signal.aborted) return
@@ -148,7 +164,7 @@ export default function EquityDailyBottomBuyPage() {
         if (!ctrl.signal.aborted) setLoading(false)
       })
     return () => ctrl.abort()
-  }, [symbol, authReady, membershipLoading, isPro])
+  }, [symbol, authReady, membershipLoading, analysisAllowed])
 
   const universe = payload?.universe || []
   const universeKey = universe.map((row) => row.symbol).join("|")
@@ -180,8 +196,8 @@ export default function EquityDailyBottomBuyPage() {
         const sym = symbols[index]
         try {
           const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
-          const gated = applyEquityDailyBottomBuyAccess(json, isPro)
-          views[index] = gated?.view || null
+          const gated = applyEquityDailyBottomBuyAccess(json, analysisAllowed)
+          views[index] = viewForDisplay(gated)
         } catch (err) {
           if (ctrl.signal.aborted) throw err
           views[index] = null
@@ -216,7 +232,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey, isPro])
+  }, [universeKey, analysisAllowed])
 
   useEffect(() => {
     if (!universe.length) return undefined
@@ -238,8 +254,8 @@ export default function EquityDailyBottomBuyPage() {
         const sym = extra[index].symbol
         try {
           const json = await fetchEquityDailyBottomBuy(sym, { signal: ctrl.signal })
-          const gated = applyEquityDailyBottomBuyAccess(json, isPro)
-          views[index] = gated?.view || null
+          const gated = applyEquityDailyBottomBuyAccess(json, analysisAllowed)
+          views[index] = viewForDisplay(gated)
         } catch (err) {
           if (ctrl.signal.aborted) throw err
           views[index] = null
@@ -270,7 +286,7 @@ export default function EquityDailyBottomBuyPage() {
       cancelled = true
       ctrl.abort()
     }
-  }, [universeKey, isPro])
+  }, [universeKey, analysisAllowed])
   const groups = useMemo(() => {
     const seen = []
     for (const row of summaryCatalog) {
@@ -396,7 +412,13 @@ export default function EquityDailyBottomBuyPage() {
                     ) : (
                       <p className="yds-dbb-cand__score">{row.score}/4</p>
                     )}
-                    {visibility.proCandidateMetrics ? <CandidateFacts row={row} /> : null}
+                    {row.access === "full" ? (
+                      equityCandidateHasDetails(row) ? (
+                        <CandidateFacts row={row} />
+                      ) : (
+                        <p className="yds-dbb-cand__status">상세 데이터 없음</p>
+                      )
+                    ) : null}
                     {row.state?.label ? <p className="yds-dbb-cand__status">{row.state.label}</p> : null}
                   </button>
                 </li>
@@ -537,23 +559,32 @@ export default function EquityDailyBottomBuyPage() {
                 {visibility.proConditions ? (
                   <section className="yds-dbb-card yds-dbb-card--compact">
                     <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
-                    <ul className="yds-dbb-cond mt-1.5">
-                      {(view.conditions || []).map((row) => {
-                        const valueText = formatCondition(row)
-                        return (
-                          <li key={row.id} className="yds-dbb-cond__row">
-                            <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
-                            <span
-                              className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                    {payload?.access === "full" && Array.isArray(view.conditions) && view.conditions.length > 0 ? (
+                      <ul className="yds-dbb-cond mt-1.5">
+                        {view.conditions.map((row) => {
+                          const valueText = formatCondition(row)
+                          return (
+                            <li
+                              key={row.id}
+                              className={`yds-dbb-cond__row${row.pass ? " is-pass" : " is-fail"}`}
                             >
-                              {valueText ?? "—"}
-                            </span>
-                            <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.thresholdText}</span>
-                            <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
-                          </li>
-                        )
-                      })}
-                    </ul>
+                              <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
+                              <span
+                                className={`yds-dbb-cond__value tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                              >
+                                {valueText ?? "—"}
+                              </span>
+                              <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.thresholdText}</span>
+                              <span className="yds-dbb-cond__mark" aria-label={row.pass ? "충족" : "미충족"}>
+                                {row.pass ? "✓" : "✕"}
+                              </span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="yds-dbb-card__hint mt-2">상세 데이터 없음</p>
+                    )}
                   </section>
                 ) : null}
               </YdsProFeatureGate>
@@ -566,10 +597,16 @@ export default function EquityDailyBottomBuyPage() {
                 {visibility.proAtr ? (
                   <section className="yds-dbb-card yds-dbb-card--compact">
                     <h2 className="yds-dbb-section__title">ATR RISK</h2>
-                    <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
-                    <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
-                    <p className="yds-dbb-card__hint">{view.atrNote}</p>
-                    <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
+                    {payload?.access === "full" && atrText ? (
+                      <>
+                        <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
+                        <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
+                        <p className="yds-dbb-card__hint">{view.atrNote}</p>
+                        <p className="yds-dbb-card__hint">{view.atrMeaning}</p>
+                      </>
+                    ) : (
+                      <p className="yds-dbb-card__hint mt-2">상세 데이터 없음</p>
+                    )}
                   </section>
                 ) : null}
               </YdsProFeatureGate>
@@ -668,7 +705,8 @@ export default function EquityDailyBottomBuyPage() {
           {equitySummaryVisibleRows(orderedSummary, summaryOpen).map((row) => {
             const chosen = chosenEquityView(row, signalViews, extraViews, payload)
             const summary = equitySummaryRow(chosen)
-            const theme = row.holding ? row.group : chosen?.group || row.group || "—"
+            const pending = row.holding ? extraViews == null : signalViews == null
+            const theme = row.holding ? row.group : chosen?.group || row.group || ""
             return (
               <button
                 key={`all-${row.symbol}`}
@@ -679,11 +717,19 @@ export default function EquityDailyBottomBuyPage() {
               >
                 <span className="yds-dbb-all__sym">{row.symbol}</span>
                 <span className={`yds-dbb-all__theme${row.holding ? " is-holding" : ""}`}>
-                  <span className="yds-dbb-all__theme-text">{theme}</span>
+                  <span className="yds-dbb-all__theme-text">{pending ? "" : theme || "그룹 없음"}</span>
                   {row.holding ? <span className="yds-dbb-all__hold">보유</span> : null}
                 </span>
-                <span className="yds-dbb-all__count">{summary.countText}</span>
-                <span className={`yds-dbb-all__stage is-${summary.stageClass}`}>{summary.stageLabel}</span>
+                {pending ? (
+                  <span className="yds-dbb-all__stage">불러오는 중</span>
+                ) : summary.countText === "—" ? (
+                  <span className="yds-dbb-all__stage">데이터 없음</span>
+                ) : (
+                  <>
+                    <span className="yds-dbb-all__count">{summary.countText}</span>
+                    <span className={`yds-dbb-all__stage is-${summary.stageClass}`}>{summary.stageLabel}</span>
+                  </>
+                )}
               </button>
             )
           })}

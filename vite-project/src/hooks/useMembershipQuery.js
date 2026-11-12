@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useFirebaseAuthUser } from "./useFirebaseAuthUser.js"
 import {
+  detailAccessFromApiBody,
   MEMBERSHIP_STATUS,
   membershipStatusFromApiBody,
 } from "../content/ydsMembership.js"
@@ -17,6 +18,7 @@ import {
  *   ledgerStatus: string | null
  *   source: string | null
  *   reason: string | null
+ *   detailAccess: boolean
  *   refreshedAt: number | null
  *   refresh: () => void
  * }}
@@ -32,6 +34,7 @@ export function useMembershipQuery() {
   const [ledgerStatus, setLedgerStatus] = useState(/** @type {string | null} */ (null))
   const [source, setSource] = useState(/** @type {string | null} */ (null))
   const [reason, setReason] = useState(/** @type {string | null} */ (null))
+  const [detailAccess, setDetailAccess] = useState(false)
   const [refreshedAt, setRefreshedAt] = useState(/** @type {number | null} */ (null))
   const [refreshNonce, setRefreshNonce] = useState(0)
 
@@ -44,6 +47,7 @@ export function useMembershipQuery() {
     setLedgerStatus(null)
     setSource(null)
     setReason(null)
+    setDetailAccess(false)
   }
 
   useEffect(() => {
@@ -63,6 +67,7 @@ export function useMembershipQuery() {
     let cancelled = false
     setStatus(MEMBERSHIP_STATUS.LOADING)
     setReason(null)
+    setDetailAccess(false)
 
     ;(async () => {
       try {
@@ -83,6 +88,7 @@ export function useMembershipQuery() {
           setLedgerStatus(null)
           setSource(null)
           setReason(`http_${res.status}`)
+          setDetailAccess(false)
           setRefreshedAt(Date.now())
           return
         }
@@ -94,6 +100,7 @@ export function useMembershipQuery() {
         setLedgerStatus(typeof body?.status === "string" ? body.status : null)
         setSource(typeof body?.source === "string" ? body.source : null)
         setReason(typeof body?.reason === "string" ? body.reason : null)
+        setDetailAccess(detailAccessFromApiBody(body))
         setRefreshedAt(Date.now())
       } catch {
         if (cancelled) return
@@ -102,6 +109,7 @@ export function useMembershipQuery() {
         setLedgerStatus(null)
         setSource(null)
         setReason("fetch_failed")
+        setDetailAccess(false)
         setRefreshedAt(Date.now())
       }
     })()
@@ -118,6 +126,7 @@ export function useMembershipQuery() {
     ledgerStatus,
     source,
     reason,
+    detailAccess,
     refreshedAt,
     refresh,
   }

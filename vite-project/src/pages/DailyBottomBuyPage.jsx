@@ -50,6 +50,13 @@ function etfTickerLabel(card) {
   return theme ? `${theme} (${card.symbol})` : card.symbol
 }
 
+function opportunityCardHasDetails(card) {
+  if (!card) return false
+  return [card.close, card.rsi14, card.stochK, card.bbPctB, card.ma20DevPct].some(
+    (value) => value != null && value !== "",
+  )
+}
+
 function OpportunityFacts({ card }) {
   return (
     <dl className="yds-dbb-cand__metrics">
@@ -82,11 +89,12 @@ function OpportunityFacts({ card }) {
  * UI flow mirrors equity daily-bottom-buy; ETF snapshot + trade records stay ETF-specific.
  */
 export default function DailyBottomBuyPage() {
-  const { isPro, authReady, isLoading: membershipLoading, isLoggedOut, status } = useMembership()
-  const visibility = useMemo(() => buildDailyBottomBuyVisibility(isPro), [isPro])
+  const { isPro, detailAccess, authReady, isLoading: membershipLoading, isLoggedOut, status } = useMembership()
+  const analysisAllowed = detailAccess === true
+  const visibility = useMemo(() => buildDailyBottomBuyVisibility(analysisAllowed), [analysisAllowed])
   const audienceCta = useMemo(
-    () => buildDbbMembershipAudienceCta({ isPro, isLoggedOut, status }),
-    [isPro, isLoggedOut, status],
+    () => buildDbbMembershipAudienceCta({ isPro, detailAccess: analysisAllowed, isLoggedOut, status }),
+    [isPro, analysisAllowed, isLoggedOut, status],
   )
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState(null)
@@ -113,7 +121,7 @@ export default function DailyBottomBuyPage() {
     setError(null)
     fetchDailyBottomBuySnapshot({ signal: ctrl.signal })
       .then((data) => {
-        const gated = applyDailyBottomBuyAccess(data, isPro)
+        const gated = applyDailyBottomBuyAccess(data, analysisAllowed)
         setPayload(gated)
         setEpisodes(syncDailyBottomEpisodes(gated.all || []))
       })
@@ -123,7 +131,7 @@ export default function DailyBottomBuyPage() {
       })
       .finally(() => setLoading(false))
     return () => ctrl.abort()
-  }, [authReady, membershipLoading, isPro])
+  }, [authReady, membershipLoading, analysisAllowed])
 
   useEffect(() => {
     if (!picker.open) return undefined
@@ -286,7 +294,13 @@ export default function DailyBottomBuyPage() {
                         </p>
                         <p className="yds-dbb-cand__type">{isStrong ? "강한 저점" : "1차 매수"}</p>
                         <p className="yds-dbb-cand__detail">{card.stage?.label || `${card.count}/4`}</p>
-                        {visibility.proOpportunityMetrics ? <OpportunityFacts card={card} /> : null}
+                        {payload?.access === "full" ? (
+                          opportunityCardHasDetails(card) ? (
+                            <OpportunityFacts card={card} />
+                          ) : (
+                            <p className="yds-dbb-cand__status">상세 데이터 없음</p>
+                          )
+                        ) : null}
                         {visibility.proSplitActions && card.stage?.splitHint ? (
                           <p className="yds-dbb-cand__status">{card.stage.splitHint}</p>
                         ) : null}
@@ -419,49 +433,58 @@ export default function DailyBottomBuyPage() {
                   >
                     <section className="yds-dbb-card">
                       <h2 className="yds-dbb-section__title">4 CONDITIONS</h2>
-                      <ul className="mt-2 space-y-2">
-                        {[
-                          {
-                            id: "rsi",
-                            label: "RSI",
-                            value: fmtNum(selected.rsi14),
-                            pass: selected.flags?.rsi,
-                            th: "≤36",
-                          },
-                          {
-                            id: "stoch",
-                            label: "Stoch",
-                            value: fmtNum(selected.stochK),
-                            pass: selected.flags?.stoch,
-                            th: "≤15.4",
-                          },
-                          {
-                            id: "bb",
-                            label: "BB %B",
-                            value: fmtNum(selected.bbPctB, 2),
-                            pass: selected.flags?.bb,
-                            th: "≤0.01",
-                          },
-                          {
-                            id: "ma20",
-                            label: "MA20",
-                            value: `${fmtNum(selected.ma20DevPct)}%`,
-                            pass: selected.flags?.ma20,
-                            th: "≤-4.2%",
-                          },
-                        ].map((row) => (
-                          <li key={row.id} className="flex items-baseline justify-between gap-2 text-sm">
-                            <span className="yds-dbb-metric__label w-24 shrink-0">{row.label}</span>
-                            <span
-                              className={`tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                      {payload?.access === "full" && selected.flags ? (
+                        <ul className="yds-dbb-cond mt-2">
+                          {[
+                            {
+                              id: "rsi",
+                              label: "RSI",
+                              value: fmtNum(selected.rsi14),
+                              pass: selected.flags.rsi,
+                              th: "≤36",
+                            },
+                            {
+                              id: "stoch",
+                              label: "Stoch",
+                              value: fmtNum(selected.stochK),
+                              pass: selected.flags.stoch,
+                              th: "≤15.4",
+                            },
+                            {
+                              id: "bb",
+                              label: "BB %B",
+                              value: fmtNum(selected.bbPctB, 2),
+                              pass: selected.flags.bb,
+                              th: "≤0.01",
+                            },
+                            {
+                              id: "ma20",
+                              label: "MA20",
+                              value: `${fmtNum(selected.ma20DevPct)}%`,
+                              pass: selected.flags.ma20,
+                              th: "≤-4.2%",
+                            },
+                          ].map((row) => (
+                            <li
+                              key={row.id}
+                              className={`yds-dbb-cond__row${row.pass ? " is-pass" : " is-fail"}`}
                             >
-                              {row.value}
-                            </span>
-                            <span className="yds-dbb-metric__label">{row.th}</span>
-                            <span aria-label={row.pass ? "충족" : "미충족"}>{row.pass ? "✓" : "✕"}</span>
-                          </li>
-                        ))}
-                      </ul>
+                              <span className="yds-dbb-metric__label yds-dbb-cond__name">{row.label}</span>
+                              <span
+                                className={`yds-dbb-cond__value tabular-nums ${row.pass ? "yds-dbb-metric__value is-ok" : "yds-dbb-metric__value"}`}
+                              >
+                                {row.value}
+                              </span>
+                              <span className="yds-dbb-metric__label yds-dbb-cond__th">{row.th}</span>
+                              <span className="yds-dbb-cond__mark" aria-label={row.pass ? "충족" : "미충족"}>
+                                {row.pass ? "✓" : "✕"}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="yds-dbb-card__hint mt-2">상세 데이터 없음</p>
+                      )}
                     </section>
                   </YdsProFeatureGate>
                 ) : null}
