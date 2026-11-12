@@ -792,18 +792,21 @@
   font-weight: 750;
 }
 
-@media (min-width: 1100px) {
-  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--premium-desk {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-    gap: 0.75rem;
-    align-items: start;
-  }
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--premium-desk {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
 
-  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--premium-desk > header,
-  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center--premium-desk > .yds-panic-center__history-slot {
-    grid-column: 1 / -1;
-  }
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block--fear,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__history-slot,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-scale,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__plot {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
 }
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-label {
