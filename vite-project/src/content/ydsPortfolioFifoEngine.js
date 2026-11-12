@@ -90,11 +90,13 @@ function fifoRealizedLocal(queue, sellQty, sellUnitPrice) {
 
 /**
  * @param {PortfolioTrade[]} trades
- * @returns {{ lots: PositionLot[], totalRealizedPnl: number }}
+ * @returns {{ lots: PositionLot[], closedLots: PositionLot[], totalRealizedPnl: number }}
  */
 export function replayPortfolioFifoFromTrades(trades) {
   /** @type {Map<string, { lot: PositionLot, fifo: FifoBuyLot[] }>} */
   const map = new Map()
+  /** @type {PositionLot[]} */
+  const closedLots = []
   let totalRealizedPnl = 0
   const safeTrades = Array.isArray(trades) ? trades : []
 
@@ -163,6 +165,7 @@ export function replayPortfolioFifoFromTrades(trades) {
 
         const agg = syncAggregateFromFifo(entry.fifo)
         if (agg.quantity <= 0) {
+          closedLots.push({ ...entry.lot, quantity: 0, costBasisLocal: 0 })
           map.delete(key)
         } else {
           entry.lot.quantity = agg.quantity
@@ -219,6 +222,12 @@ export function replayPortfolioFifoFromTrades(trades) {
       if (proceeds >= holding) {
         const realized = proceeds - (lot.costBasis ?? 0)
         totalRealizedPnl += realized
+        closedLots.push({
+          ...lot,
+          quantity: 0,
+          holdingAmount: 0,
+          realizedPnl: (lot.realizedPnl || 0) + realized,
+        })
         map.delete(key)
       } else {
         const proportion = proceeds / holding
@@ -239,5 +248,5 @@ export function replayPortfolioFifoFromTrades(trades) {
       return (l.holdingAmount ?? 0) > 0
     })
 
-  return { lots, totalRealizedPnl }
+  return { lots, closedLots, totalRealizedPnl }
 }

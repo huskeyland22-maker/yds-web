@@ -187,3 +187,19 @@ describe("quote display", () => {
     assert.equal(detailAccessFromApiBody({ plan: "free", detailAccess: "true" }), false)
   })
 })
+
+describe("temporary owner pro", () => {
+  it("opens Pro for the owner UID only and does not mutate the ledger row", async () => {
+    const { applyTemporaryOwnerPro, isTemporaryOwnerProUid } = await import("../api/_lib/temporaryOwnerPro.js")
+    const ownerUid = "9mm60sKonGc3NoSC71lQG2Vp2jG2"
+    assert.equal(isTemporaryOwnerProUid(ownerUid), true)
+    assert.equal(isTemporaryOwnerProUid("someone-else"), false)
+    const upgraded = applyTemporaryOwnerPro(ownerUid, freeRow)
+    assert.equal(upgraded.plan, "pro")
+    assert.equal(upgraded.reason, "temporary_owner_pro")
+    assert.equal(freeRow.plan, "free")
+    assert.equal(resolveDetailAccess(upgraded, {}).audience, "pro")
+    assert.equal(applyTemporaryOwnerPro("someone-else", freeRow).plan, "free")
+    assert.equal(applyTemporaryOwnerPro(ownerUid, proRow).reason, "plan_pro")
+  })
+})

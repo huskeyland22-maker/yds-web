@@ -16,6 +16,35 @@ function Metric({ label, value, sub, tone = "" }) {
   )
 }
 
+function moneyKrw(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "—"
+  return `${Math.round(Number(n)).toLocaleString("ko-KR")}원`
+}
+
+function signedKrw(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "—"
+  const value = Math.round(Number(n))
+  return `${value > 0 ? "+" : ""}${value.toLocaleString("ko-KR")}원`
+}
+
+function localPrice(n, country) {
+  if (n == null || !Number.isFinite(Number(n)) || Number(n) <= 0) return "—"
+  const value = Number(n)
+  if (country === "kr") return `${Math.round(value).toLocaleString("ko-KR")}원`
+  return `$${value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`
+}
+
+function signedPct(n) {
+  if (n == null || !Number.isFinite(Number(n))) return "—"
+  return `${Number(n) > 0 ? "+" : ""}${n}%`
+}
+
+function sellLabel(sell, country) {
+  const qty = sell.quantity > 0 ? `${sell.quantity}주` : ""
+  const price = sell.unitPrice > 0 ? localPrice(sell.unitPrice, country) : sell.amount > 0 ? moneyKrw(sell.amount) : ""
+  return [`매도`, sell.date, qty, price].filter(Boolean).join(" ")
+}
+
 /** @param {{ row: import("../../content/ydsPortfolioAllocationCompare.js").AllocationCompareRow }} props */
 function AllocationCompareRow({ row }) {
   return (
@@ -179,12 +208,30 @@ export default function YdsPortfolioCenterSection() {
                   <span className="yds-pf-v1__ticker font-mono">{row.ticker}</span>
                 </div>
                 <span className="font-mono tabular-nums">
-                  {row.quantity}주 · 평단 {row.avgUnitPrice?.toLocaleString("ko-KR")}
+                  {row.quantity}주 · 평단 {localPrice(row.avgUnitPrice, row.country)}
                 </span>
                 <span className="font-mono tabular-nums">{row.weightPct}%</span>
                 <button type="button" className="yds-pf-v1__remove" onClick={() => removeHolding(row.ticker)}>
                   제거
                 </button>
+                <dl className="yds-pf-v1__holding-facts">
+                  <div><dt>매수일</dt><dd>{row.firstBuyDate || "—"}</dd></div>
+                  <div><dt>보유수량</dt><dd>{row.quantity}주</dd></div>
+                  <div><dt>매수가</dt><dd>{localPrice(row.avgUnitPrice, row.country)}</dd></div>
+                  <div><dt>현재가</dt><dd>{localPrice(row.currentPrice, row.country)}</dd></div>
+                  <div><dt>매수금액</dt><dd>{moneyKrw(row.costBasisKrw)}</dd></div>
+                  <div><dt>평가금액</dt><dd>{moneyKrw(row.marketValueKrw)}</dd></div>
+                  <div><dt>평가손익</dt><dd>{signedKrw(row.unrealizedPnl)}</dd></div>
+                  <div><dt>수익률</dt><dd>{signedPct(row.returnPct)}</dd></div>
+                  <div><dt>실현손익</dt><dd>{signedKrw(row.realizedPnl || 0)}</dd></div>
+                </dl>
+                {row.sells?.length ? (
+                  <ul className="yds-pf-v1__sells">
+                    {row.sells.map((sell) => (
+                      <li key={sell.id}>{sellLabel(sell, row.country)}</li>
+                    ))}
+                  </ul>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -200,6 +247,29 @@ export default function YdsPortfolioCenterSection() {
             </p>
           </>
         )}
+
+        {report.closed?.length ? (
+          <div className="yds-pf-v1__closed">
+            <h3 className="yds-pf-v1__h3">매도 기록</h3>
+            <ul className="yds-pf-v1__holdings">
+              {report.closed.map((row) => (
+                <li key={row.id} className="yds-pf-v1__holding-row">
+                  <div>
+                    <strong>{row.name}</strong>
+                    <span className="yds-pf-v1__ticker font-mono">{row.ticker}</span>
+                  </div>
+                  <span className="font-mono tabular-nums">매수일 {row.firstBuyDate || "—"}</span>
+                  <span className="font-mono tabular-nums">실현손익 {signedKrw(row.realizedPnl)}</span>
+                  <ul className="yds-pf-v1__sells">
+                    {(row.sells ?? []).map((sell) => (
+                      <li key={sell.id}>{sellLabel(sell, row.country)}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         {isLoggedIn ? (
           <p className="yds-pf-v1__sync-line">
@@ -241,13 +311,11 @@ export default function YdsPortfolioCenterSection() {
           />
           <Metric
             label="총 수익률"
-            value={
-              report.status.totalReturnPct != null
-                ? `${report.status.totalReturnPct > 0 ? "+" : ""}${report.status.totalReturnPct}%`
-                : "—"
-            }
+            value={signedPct(report.status.totalReturnPct)}
             tone={returnTone}
           />
+          <Metric label="평가손익" value={signedKrw(report.status.totalUnrealizedPnl)} />
+          <Metric label="실현손익" value={signedKrw(report.status.totalRealizedPnl)} />
           <Metric label="주식 비중" value={`${report.status.stockPct}%`} />
           <Metric label="현금 비중" value={`${report.status.cashPct}%`} />
         </div>

@@ -12,6 +12,7 @@
  */
 
 import { isSupabaseConfigured, supabaseRest } from "./supabaseRest.js"
+import { applyTemporaryOwnerPro } from "./temporaryOwnerPro.js"
 
 export const MEMBERSHIP_PLANS = Object.freeze({ FREE: "free", PRO: "pro" })
 
@@ -24,7 +25,7 @@ export const MEMBERSHIP_PLANS = Object.freeze({ FREE: "free", PRO: "pro" })
  *   status: MembershipStatus
  *   source: string | null
  *   updatedAt: string | null
- *   reason: "missing_row" | "inactive" | "plan_free" | "plan_pro"
+ *   reason: "missing_row" | "inactive" | "plan_free" | "plan_pro" | "temporary_owner_pro"
  * }} MembershipResolution
  */
 
@@ -147,7 +148,7 @@ export async function resolveUserMembership(firebaseUid, deps = {}) {
     throw new MembershipLookupError("membership_uid_mismatch", "membership row uid mismatch")
   }
 
-  return resolveMembershipFromRow(row)
+  return applyTemporaryOwnerPro(uid, resolveMembershipFromRow(row))
 }
 
 /**

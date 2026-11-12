@@ -38112,6 +38112,45 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   }
 }
 
+.yds-pf-v1__holding-facts,
+.yds-pf-v1__sells {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.yds-pf-v1__holding-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.15rem 0.75rem;
+}
+
+.yds-pf-v1__holding-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.yds-pf-v1__holding-facts dt {
+  color: #94a3b8;
+}
+
+.yds-pf-v1__holding-facts dd,
+.yds-pf-v1__sells {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.yds-pf-v1__sells {
+  padding-left: 1rem;
+  color: #cbd5e1;
+}
+
+.yds-pf-v1__h3 {
+  margin: 0.8rem 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
 .yds-pf-v1__ticker {
   display: block;
   font-size: 0.58rem;
