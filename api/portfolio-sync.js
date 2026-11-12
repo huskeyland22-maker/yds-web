@@ -10,7 +10,7 @@ import { verifyFirebaseIdToken } from "./_lib/firebaseIdToken.js"
 import { isSupabaseConfigured, supabaseRest } from "./_lib/supabaseRest.js"
 import { handleMeMembership } from "./_lib/meMembershipHandler.js"
 import { handleTradeRecordsSync } from "./_lib/tradeRecordsSyncHandler.js"
-import { mergePortfolioServerPut } from "../vite-project/src/content/ydsPortfolioCloudSync.js"
+import { mergePortfolioServerPut } from "./_lib/portfolioServerMerge.js"
 
 function readBearer(req) {
   const raw = String(req.headers?.authorization ?? "")
