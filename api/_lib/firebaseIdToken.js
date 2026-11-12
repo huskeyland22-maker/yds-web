@@ -54,7 +54,8 @@ export async function verifyFirebaseAuthUser(idToken) {
   const user = json?.users?.[0]
   const uid = user?.localId
   if (!uid) throw new Error("invalid_token")
-  return { uid: String(uid), claims: claimsFromLookupUser(user) }
+  const email = typeof user?.email === "string" ? user.email : ""
+  return { uid: String(uid), email, claims: claimsFromLookupUser(user) }
 }
 
 /**

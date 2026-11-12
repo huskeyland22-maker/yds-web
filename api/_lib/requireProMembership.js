@@ -8,8 +8,10 @@ import { verifyFirebaseAuthUser } from "./firebaseIdToken.js"
 import {
   MembershipLookupError,
   resolveDetailAccess,
+  resolveMembershipFromRow,
   resolveUserMembership,
 } from "./userMembership.js"
+import { applyTemporaryOwnerPro, isTemporaryOwnerPro } from "./temporaryOwnerPro.js"
 
 /**
  * @param {unknown} req
@@ -42,15 +44,16 @@ export function readBearerToken(req) {
 
 /**
  * @param {string | { uid?: string, claims?: unknown } | null | undefined} result
- * @returns {{ uid: string, claims: unknown }}
+ * @returns {{ uid: string, email: string, claims: unknown }}
  */
 function identityFromVerifyResult(result) {
-  if (typeof result === "string") return { uid: result, claims: {} }
+  if (typeof result === "string") return { uid: result, email: "", claims: {} }
   if (result && typeof result === "object") {
     const uid = typeof result.uid === "string" ? result.uid : ""
-    return { uid, claims: result.claims ?? {} }
+    const email = typeof result.email === "string" ? result.email : ""
+    return { uid, email, claims: result.claims ?? {} }
   }
-  return { uid: "", claims: {} }
+  return { uid: "", email: "", claims: {} }
 }
 
 /**
@@ -84,7 +87,14 @@ export async function requireProMembership(req, deps = {}) {
   }
 
   try {
-    const membership = await resolve(identity.uid)
+    let membership
+    try {
+      membership = await resolve(identity.uid)
+    } catch (lookupError) {
+      if (!isTemporaryOwnerPro(identity.uid, identity.email)) throw lookupError
+      membership = resolveMembershipFromRow(null)
+    }
+    membership = applyTemporaryOwnerPro(identity.uid, identity.email, membership)
     const access = resolveDetailAccess(membership, identity.claims)
     if (!access.detailAccess || access.audience === "free") {
       return {
