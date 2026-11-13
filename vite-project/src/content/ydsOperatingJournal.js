@@ -1,9 +1,10 @@
 /**
- * Read-only report over the real buy ledger (`yds.tradeRecords.v1`).
- * Does not create buys or sells and does not read the portfolio analysis store.
+ * Realized sells from the operating buy ledger (`yds.tradeRecords.v1`).
+ * Buy rows stay in storage and are not listed here.
+ * Mark-to-market quotes are not part of this report.
  */
 
-import { recordedShareCount, replayEquityPosition } from "./ydsEquitySellLedger.js"
+import { replayEquityPosition } from "./ydsEquitySellLedger.js"
 import { EQUITY_HOLDING_DISPLAY, EQUITY_RESEARCH_NAME_KO } from "../utils/equityResearchDisplay.js"
 
 /**
@@ -17,34 +18,29 @@ export function operatingSymbolName(symbol) {
 }
 
 /**
- * @param {number} shares
- * @param {number} price
- * @param {number} amount
+ * @param {{ buyDate?: string }[]} links
  */
-function buyCash(shares, price, amount) {
-  if (Number.isFinite(amount) && amount > 0) return amount
-  if (shares > 0 && price > 0) return shares * price
-  return 0
+function buyDateLabel(links) {
+  const dates = []
+  for (const link of links || []) {
+    if (link?.buyDate && !dates.includes(link.buyDate)) dates.push(link.buyDate)
+  }
+  return dates.join(", ")
 }
 
 /**
+ * One row per stored sell. A symbol with only buys contributes nothing.
  * @param {{ records?: Record<string, object[]>, sells?: object[] }} store
- * @param {Record<string, number | null | undefined>} [prices]
  */
-export function buildOperatingJournal(store, prices = {}) {
-  /** @type {object[]} */
-  const holdings = []
-  /** @type {object[]} */
-  const closed = []
+export function buildOperatingJournal(store) {
   /** @type {object[]} */
   const rows = []
   /** @type {object[]} */
-  const settlements = []
-  let totalBuyUsd = 0
+  const sellTargets = []
+  const seen = new Set()
   let soldCost = 0
-  let missingPriceCount = 0
-
   const sells = Array.isArray(store?.sells) ? store.sells : []
+
   for (const [key, list] of Object.entries(store?.records || {})) {
     const split = key.indexOf(":")
     if (split < 1) continue
@@ -56,171 +52,90 @@ export function buildOperatingJournal(store, prices = {}) {
     const ownSells = sells.filter((row) => row?.system === system && row?.symbol === symbol)
     const position = replayEquityPosition(buys, ownSells)
     const name = operatingSymbolName(symbol)
-    const quote = Number(prices[symbol])
-    const price = Number.isFinite(quote) && quote > 0 ? quote : null
-    const unrealized =
-      position.openShares > 1e-8 && position.avgPrice != null && price != null
-        ? position.openShares * (price - position.avgPrice)
-        : null
-    if (position.openShares > 1e-8 && price == null) missingPriceCount += 1
-
-    for (const buy of buys) {
-      const shares = recordedShareCount(buy) || 0
-      const amount = buyCash(shares, Number(buy.buyPrice), Number(buy.buyAmountUsd))
-      totalBuyUsd += amount
-      rows.push({
-        id: buy.id,
-        date: buy.buyDate,
-        createdAt: buy.createdAt || buy.buyDate,
-        system,
-        symbol,
-        name,
-        kind: "buy",
-        typeLabel: "매수",
-        buyPrice: Number(buy.buyPrice),
-        sellPrice: null,
-        shares,
-        buyAmount: amount,
-        sellAmount: null,
-        realizedPnl: null,
-        returnPct: null,
-        holding: position.openShares > 1e-8,
-        closed: position.settlements.length > 0 && position.openShares <= 1e-8,
-        order: 0,
-      })
+    if (position.openShares > 1e-8) {
+      sellTargets.push({ system, symbol, name, openShares: position.openShares })
     }
-
     for (const sell of position.settlements) {
+      if (!sell.id || seen.has(sell.id)) continue
+      seen.add(sell.id)
       soldCost += sell.cost
-      const entry = {
+      rows.push({
         id: sell.id,
         date: sell.sellDate,
+        buyDateLabel: buyDateLabel(sell.links),
         createdAt: sell.createdAt || sell.sellDate,
         system,
         symbol,
         name,
-        kind: "sell",
-        typeLabel: sell.fullClose ? "전량 매도" : "부분 매도",
-        buyPrice: sell.filledShares > 0 ? sell.cost / sell.filledShares : null,
+        avgBuyPrice: sell.filledShares > 0 ? sell.cost / sell.filledShares : null,
         sellPrice: sell.sellPrice,
         shares: sell.filledShares,
-        buyAmount: sell.cost,
-        sellAmount: sell.proceeds,
-        realizedPnl: sell.realizedPnl,
-        returnPct: sell.returnPct,
+        cost: sell.cost,
+        proceeds: sell.proceeds,
         feeUsd: sell.feeUsd,
         taxUsd: sell.taxUsd,
-        chargesKnown: sell.chargesKnown,
-        links: sell.links,
-        holding: position.openShares > 1e-8,
-        closed: position.openShares <= 1e-8,
-        order: 1,
-      }
-      rows.push(entry)
-      settlements.push(entry)
+        memo: sell.memo || "",
+        realizedPnl: sell.realizedPnl,
+        returnPct: sell.returnPct,
+        fullClose: sell.fullClose,
+      })
     }
-
-    const book = {
-      system,
-      symbol,
-      name,
-      openShares: position.openShares,
-      avgPrice: position.avgPrice,
-      openCost: position.openCost,
-      price,
-      unrealizedPnl: unrealized,
-      realizedPnl: position.settlements.length ? position.realizedPnl : 0,
-      sellCount: position.settlements.length,
-    }
-    if (position.openShares > 1e-8) holdings.push(book)
-    else if (position.settlements.length) closed.push(book)
   }
 
   rows.sort(
     (a, b) =>
-      String(a.date).localeCompare(String(b.date)) ||
-      a.order - b.order ||
-      String(a.createdAt).localeCompare(String(b.createdAt)),
+      String(b.date).localeCompare(String(a.date)) ||
+      String(b.createdAt).localeCompare(String(a.createdAt)),
   )
-  const realized = settlements.reduce((sum, row) => sum + row.realizedPnl, 0)
-  const unrealizedKnown = holdings.reduce(
-    (sum, row) => (row.unrealizedPnl == null ? sum : sum + row.unrealizedPnl),
-    0,
-  )
-  const wins = settlements.filter((row) => row.realizedPnl > 0)
-  const losses = settlements.filter((row) => row.realizedPnl < 0)
-
+  const realized = rows.reduce((sum, row) => sum + row.realizedPnl, 0)
+  const wins = rows.filter((row) => row.realizedPnl > 0)
+  const losses = rows.filter((row) => row.realizedPnl < 0)
   /** @type {Record<string, number>} */
   const byMonth = {}
   /** @type {Record<string, number>} */
   const byYear = {}
-  /** @type {Record<string, { symbol: string, name: string, realizedPnl: number, sellCount: number }>} */
-  const bySymbol = {}
-  for (const row of settlements) {
+  for (const row of rows) {
     const month = String(row.date).slice(0, 7)
     const year = String(row.date).slice(0, 4)
     byMonth[month] = (byMonth[month] || 0) + row.realizedPnl
     byYear[year] = (byYear[year] || 0) + row.realizedPnl
-    const key = `${row.system}:${row.symbol}`
-    if (!bySymbol[key]) {
-      bySymbol[key] = { symbol: row.symbol, name: row.name, realizedPnl: 0, sellCount: 0 }
-    }
-    bySymbol[key].realizedPnl += row.realizedPnl
-    bySymbol[key].sellCount += 1
   }
 
-  const nee = [...holdings, ...closed].filter((row) => row.symbol === "NEE")
   return {
-    totalBuyUsd,
     realizedPnl: realized,
-    unrealizedPnl: holdings.some((row) => row.unrealizedPnl != null) ? unrealizedKnown : null,
-    missingPriceCount,
     cumulativeReturnPct: soldCost > 0 ? (realized / soldCost) * 100 : null,
-    sellCount: settlements.length,
+    sellCount: rows.length,
     winCount: wins.length,
     lossCount: losses.length,
-    winRatePct: settlements.length ? (wins.length / settlements.length) * 100 : null,
-    holdingCount: holdings.length,
-    holdings,
-    closed,
+    winRatePct: rows.length ? (wins.length / rows.length) * 100 : null,
     rows,
+    sellTargets,
     months: Object.entries(byMonth)
       .map(([key, pnl]) => ({ key, pnl }))
-      .sort((a, b) => a.key.localeCompare(b.key)),
+      .sort((a, b) => b.key.localeCompare(a.key)),
     years: Object.entries(byYear)
       .map(([key, pnl]) => ({ key, pnl }))
-      .sort((a, b) => a.key.localeCompare(b.key)),
-    symbols: Object.values(bySymbol).sort((a, b) => b.realizedPnl - a.realizedPnl),
-    winners: wins,
-    losers: losses,
-    recentSells: settlements
-      .slice()
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.createdAt).localeCompare(String(a.createdAt)))
-      .slice(0, 8),
-    nee,
+      .sort((a, b) => b.key.localeCompare(a.key)),
   }
 }
 
 /**
  * @param {object[]} rows
- * @param {{ kind?: string, query?: string, from?: string, to?: string }} filter
+ * @param {{ query?: string, year?: string, month?: string }} filter
  */
 export function filterJournalRows(rows, filter = {}) {
-  const kind = filter.kind || "all"
   const query = String(filter.query || "").trim().toLowerCase()
-  const from = /^\d{4}-\d{2}-\d{2}$/.test(filter.from || "") ? filter.from : ""
-  const to = /^\d{4}-\d{2}-\d{2}$/.test(filter.to || "") ? filter.to : ""
+  const year = /^\d{4}$/.test(filter.year || "") ? filter.year : ""
+  const month = /^\d{4}-\d{2}$/.test(filter.month || "") ? filter.month : ""
   return (rows || []).filter((row) => {
-    if (kind === "buy" && row.kind !== "buy") return false
-    if (kind === "sell" && row.kind !== "sell") return false
-    if (kind === "open" && !row.holding) return false
-    if (kind === "closed" && !row.closed) return false
-    if (from && String(row.date) < from) return false
-    if (to && String(row.date) > to) return false
+    const date = String(row.date || "")
+    if (year && !date.startsWith(year)) return false
+    if (month && !date.startsWith(month)) return false
     if (!query) return true
     return (
       String(row.symbol).toLowerCase().includes(query) ||
-      String(row.name).toLowerCase().includes(query)
+      String(row.name).toLowerCase().includes(query) ||
+      String(row.memo || "").toLowerCase().includes(query)
     )
   })
 }

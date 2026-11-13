@@ -40263,7 +40263,7 @@ button.yds-dbb-holdings__card {
 .yds-signal-track__name { opacity: 0.75; }
 
 .yds-oj {
-  max-width: 1180px;
+  max-width: 1280px;
   margin: 0 auto;
   color: #10233f;
 }
@@ -40315,11 +40315,25 @@ button.yds-dbb-holdings__card {
   font-variant-numeric: tabular-nums;
 }
 .yds-oj__notice { margin: 0.6rem 0; }
-.yds-oj__forms {
+.yds-oj__sell-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: 0.8rem;
-  margin-bottom: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.45rem 0.7rem;
+}
+.yds-oj__months {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.35rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.yds-oj__months li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #e1e8f0;
 }
 .yds-oj__panel { margin-bottom: 0.8rem; }
 .yds-oj label {
@@ -40384,6 +40398,13 @@ button.yds-dbb-holdings__card {
   gap: 0.8rem;
 }
 .yds-oj__mobile { display: none; }
+.yds-oj__mobile p {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.15rem 0;
+}
+.yds-oj__mobile span { color: #5b6e86; }
 .yds-oj button[type="button"] { margin-left: 0.35rem; }
 @media (max-width: 800px) {
   .yds-oj__table-wrap { display: none; }
