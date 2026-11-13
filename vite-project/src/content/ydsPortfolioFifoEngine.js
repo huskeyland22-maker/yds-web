@@ -2,7 +2,7 @@
  * Phase 6-2 — FIFO 실현손익 엔진
  */
 
-import { toKrwValue } from "./ydsPortfolioPriceProvider.js"
+import { PORTFOLIO_USDKRW_DEFAULT } from "./ydsPortfolioPriceProvider.js"
 import { inferCountryFromName, normalizePositionName } from "./ydsPortfolioTradeSync.js"
 import { tradeAmountKrw, tradeLocalAmount } from "./ydsPortfolioV5Engine.js"
 
@@ -14,7 +14,36 @@ import { tradeAmountKrw, tradeLocalAmount } from "./ydsPortfolioV5Engine.js"
  *   unitPrice: number
  *   costLocal: number
  *   date: string
+ *   tradeId: string
  * }} FifoBuyLot
+ */
+
+/**
+ * One saved sell that actually closed quantity. Partial and full sells each count once.
+ * @typedef {{
+ *   id: string
+ *   date: string
+ *   name: string
+ *   ticker: string
+ *   country: 'us' | 'kr'
+ *   currency: 'USD' | 'KRW'
+ *   quantity: number
+ *   sellPrice: number
+ *   proceeds: number
+ *   cost: number
+ *   fee: number
+ *   tax: number
+ *   realizedLocal: number
+ *   returnPct: number | null
+ *   fxRate: number | null
+ *   fxRateUsed: number | null
+ *   fxSource: 'recorded' | 'live' | null
+ *   realizedKrw: number | null
+ *   costKrw: number | null
+ *   links: { buyTradeId: string, buyDate: string, quantity: number, unitPrice: number }[]
+ *   fullClose: boolean
+ *   memo: string
+ * }} SellSettlement
  */
 
 /**
@@ -69,35 +98,75 @@ function syncAggregateFromFifo(queue) {
  * @param {number} sellQty
  * @param {number} sellUnitPrice
  */
-function fifoRealizedLocal(queue, sellQty, sellUnitPrice) {
+/**
+ * Signed local amount to KRW. Losses stay negative.
+ * A missing USD rate uses the same fallback the holdings view already uses.
+ * @param {'us' | 'kr'} country
+ * @param {number} localAmount
+ * @param {number | null | undefined} rate
+ */
+function signedToKrw(country, localAmount, rate) {
+  const n = Number(localAmount)
+  if (!Number.isFinite(n) || n === 0) return 0
+  if (country !== "us") return Math.round(n)
+  const fx = rate > 0 ? rate : PORTFOLIO_USDKRW_DEFAULT
+  return Math.round(n * fx)
+}
+
+function round4(n) {
+  return Math.round(Number(n) * 10000) / 10000
+}
+
+/**
+ * Fill a sell from the oldest buy lots. Does not consume more than the open quantity.
+ * @param {FifoBuyLot[]} queue
+ * @param {number} sellQty
+ * @param {number} sellUnitPrice
+ */
+function consumeFifo(queue, sellQty, sellUnitPrice) {
   let remaining = sellQty
   let realized = 0
+  let cost = 0
+  let filled = 0
+  /** @type {{ buyTradeId: string, buyDate: string, quantity: number, unitPrice: number }[]} */
+  const links = []
 
-  while (remaining > 0 && queue.length > 0) {
+  while (remaining > 1e-9 && queue.length > 0) {
     const lot = queue[0]
     const take = Math.min(remaining, lot.qty)
-    const proceeds = take * sellUnitPrice
-    const cost = take * lot.unitPrice
-    realized += proceeds - cost
+    const lotCost = take * lot.unitPrice
+    realized += take * sellUnitPrice - lotCost
+    cost += lotCost
+    filled += take
+    links.push({
+      buyTradeId: lot.tradeId || "",
+      buyDate: lot.date,
+      quantity: take,
+      unitPrice: lot.unitPrice,
+    })
     lot.qty -= take
-    lot.costLocal -= cost
+    lot.costLocal -= lotCost
     remaining -= take
-    if (lot.qty <= 0) queue.shift()
+    if (lot.qty <= 1e-9) queue.shift()
   }
 
-  return realized
+  return { realized, cost, filled, links }
 }
 
 /**
  * @param {PortfolioTrade[]} trades
- * @returns {{ lots: PositionLot[], closedLots: PositionLot[], totalRealizedPnl: number }}
+ * @param {number | null | undefined} [usdkrw] live USD/KRW rate; does not replace a rate stored on the sell
+ * @returns {{ lots: PositionLot[], closedLots: PositionLot[], totalRealizedPnl: number, settlements: SellSettlement[] }}
  */
-export function replayPortfolioFifoFromTrades(trades) {
+export function replayPortfolioFifoFromTrades(trades, usdkrw) {
   /** @type {Map<string, { lot: PositionLot, fifo: FifoBuyLot[] }>} */
   const map = new Map()
   /** @type {PositionLot[]} */
   const closedLots = []
+  /** @type {SellSettlement[]} */
+  const settlements = []
   let totalRealizedPnl = 0
+  const liveRate = Number(usdkrw) > 0 ? Number(usdkrw) : null
   const safeTrades = Array.isArray(trades) ? trades : []
 
   for (const trade of sortTrades(safeTrades)) {
@@ -141,6 +210,7 @@ export function replayPortfolioFifoFromTrades(trades) {
           unitPrice,
           costLocal: localAmount,
           date: trade.date,
+          tradeId: trade.id,
         })
         const agg = syncAggregateFromFifo(entry.fifo)
         entry.lot.quantity = agg.quantity
@@ -158,12 +228,53 @@ export function replayPortfolioFifoFromTrades(trades) {
         const entry = map.get(key)
         if (!entry || !entry.lot.priceReady || entry.fifo.length === 0) continue
 
-        const realizedLocal = fifoRealizedLocal(entry.fifo, qty, unitPrice)
-        const realizedKrw = toKrwValue(entry.lot.country, realizedLocal)
+        const consumed = consumeFifo(entry.fifo, qty, unitPrice)
+        if (consumed.filled <= 0) continue
+        const fee = Math.max(0, Number(trade.fee) || 0)
+        const tax = Math.max(0, Number(trade.tax) || 0)
+        const realizedLocal = round4(consumed.realized - fee - tax)
+        const storedRate = Number(trade.fxRate)
+        const recordedRate = storedRate > 0 ? storedRate : null
+        const rate = entry.lot.country === "us" ? recordedRate ?? liveRate : null
+        const realizedKrw = signedToKrw(entry.lot.country, realizedLocal, rate)
         entry.lot.realizedPnl += realizedKrw
         totalRealizedPnl += realizedKrw
 
+        if (consumed.filled > 0) {
+          const cost = round4(consumed.cost)
+          const currency = entry.lot.country === "kr" ? "KRW" : "USD"
+          const costKrw = currency === "KRW" ? Math.round(cost) : rate ? Math.round(cost * rate) : null
+          const converted = currency === "KRW" ? Math.round(realizedLocal) : rate ? Math.round(realizedLocal * rate) : null
+          settlements.push({
+            id: trade.id,
+            date: trade.date,
+            name,
+            ticker: ticker || entry.lot.ticker || "",
+            country: entry.lot.country,
+            currency,
+            quantity: round4(consumed.filled),
+            sellPrice: unitPrice,
+            proceeds: round4(consumed.filled * unitPrice),
+            cost,
+            fee,
+            tax,
+            realizedLocal,
+            returnPct: cost > 0 ? Math.round((realizedLocal / cost) * 1000) / 10 : null,
+            fxRate: recordedRate,
+            fxRateUsed: currency === "USD" ? rate : null,
+            fxSource: currency === "KRW" ? null : recordedRate ? "recorded" : rate ? "live" : null,
+            realizedKrw: converted,
+            costKrw,
+            links: consumed.links,
+            fullClose: false,
+            memo: String(trade.memo ?? ""),
+          })
+        }
+
         const agg = syncAggregateFromFifo(entry.fifo)
+        if (settlements.length && settlements[settlements.length - 1].id === trade.id) {
+          settlements[settlements.length - 1].fullClose = agg.quantity <= 0
+        }
         if (agg.quantity <= 0) {
           closedLots.push({ ...entry.lot, quantity: 0, costBasisLocal: 0 })
           map.delete(key)
@@ -248,5 +359,5 @@ export function replayPortfolioFifoFromTrades(trades) {
       return (l.holdingAmount ?? 0) > 0
     })
 
-  return { lots, closedLots, totalRealizedPnl }
+  return { lots, closedLots, totalRealizedPnl, settlements }
 }

@@ -42,6 +42,9 @@ export function getPortfolioLoadMeta() {
  *   memo: string
  *   createdAt: number
  *   updatedAt: number
+ *   fee?: number
+ *   tax?: number
+ *   fxRate?: number
  * }} PortfolioTrade
  */
 

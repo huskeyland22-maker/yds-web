@@ -21,7 +21,7 @@ export default function YdsPortfolioPage() {
         <YdsPortfolioCenterSection />
       </PortfolioStateProvider>
 
-      <p className="yds-pf-v1-page__foot">V1 · 보유·현금만 입력 · 매매일지·세금·자동매매 미포함</p>
+      <p className="yds-pf-v1-page__foot">보유·매도·실현손익 · 자동매매 미포함</p>
     </div>
   )
 }

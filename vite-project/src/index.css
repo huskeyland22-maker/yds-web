@@ -38118,6 +38118,71 @@ body.home-v5-preview-route [aria-label="모바일 셸 진단"] {
   margin: 0;
 }
 
+.yds-pf-v1__perf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.4rem;
+  margin: 0.6rem 0;
+}
+
+.yds-pf-v1__sell-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+.yds-pf-v1__sell-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.yds-pf-v1__bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.yds-pf-v1__bar-row {
+  display: grid;
+  grid-template-columns: 4.6rem 1fr auto;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.68rem;
+}
+
+.yds-pf-v1__bar-track {
+  height: 0.45rem;
+  background: rgba(42, 54, 72, 0.45);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.yds-pf-v1__bar-fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 99px;
+}
+
+.yds-pf-v1__bar-fill--up {
+  background: #15803d;
+}
+
+.yds-pf-v1__bar-fill--down {
+  background: #b91c1c;
+}
+
+@media (min-width: 640px) {
+  .yds-pf-v1__sell-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .yds-pf-v1__holding-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

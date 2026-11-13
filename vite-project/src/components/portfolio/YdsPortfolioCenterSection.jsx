@@ -5,6 +5,7 @@ import { todayDateKey } from "../../content/ydsPortfolioTradesStorage.js"
 import { usePortfolioHoldings } from "../../hooks/usePortfolioHoldings.js"
 import { useYdsMarketContext } from "../../hooks/useYdsMarketContext.js"
 import YdsPortfolioStockSearchInput from "./YdsPortfolioStockSearchInput.jsx"
+import YdsPortfolioSellDesk from "./YdsPortfolioSellDesk.jsx"
 
 function Metric({ label, value, sub, tone = "" }) {
   return (
@@ -295,6 +296,8 @@ export default function YdsPortfolioCenterSection() {
           </button>
         </form>
       </section>
+
+      <YdsPortfolioSellDesk />
 
       <section className="yds-pf-v1__block" aria-labelledby="pfv1-status">
         <h2 id="pfv1-status" className="yds-pf-v1__h2">

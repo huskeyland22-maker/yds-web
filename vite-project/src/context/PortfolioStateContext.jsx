@@ -219,6 +219,9 @@ function usePortfolioStateValue() {
    *   amount?: number | null
    *   memo?: string
    *   date?: string
+   *   fee?: number
+   *   tax?: number
+   *   fxRate?: number | null
    * }} input
    */
   const addTrade = useCallback((input) => {
@@ -241,6 +244,16 @@ function usePortfolioStateValue() {
       memo: String(input.memo ?? "").trim(),
       createdAt: now,
       updatedAt: now,
+    }
+
+    if (input.fee != null && Number.isFinite(Number(input.fee)) && Number(input.fee) > 0) {
+      trade.fee = Number(input.fee)
+    }
+    if (input.tax != null && Number.isFinite(Number(input.tax)) && Number(input.tax) > 0) {
+      trade.tax = Number(input.tax)
+    }
+    if (input.fxRate != null && Number(input.fxRate) > 0) {
+      trade.fxRate = Number(input.fxRate)
     }
 
     if (qty != null && qty > 0 && unit != null && unit > 0) {
@@ -288,6 +301,7 @@ function usePortfolioStateValue() {
     portfolio,
     quoteMap,
     usdkrw: fxRate,
+    fxQuote: usdkrw,
     quotesLoading,
     quotesFetchedAt,
     quotesError,
