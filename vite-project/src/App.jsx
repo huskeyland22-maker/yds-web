@@ -44,6 +44,7 @@ import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
 import DailyBottomBuyPage from "./pages/DailyBottomBuyPage.jsx"
 import DbbProspectiveV12Page from "./pages/DbbProspectiveV12Page.jsx"
 import EquityDailyBottomBuyPage from "./pages/EquityDailyBottomBuyPage.jsx"
+import OperatingJournalPage from "./pages/OperatingJournalPage.jsx"
 import LeverageAdjustmentPage from "./pages/LeverageAdjustmentPage.jsx"
 import PerformanceCenterPage from "./pages/PerformanceCenterPage.jsx"
 import PerformanceValidationPage from "./pages/PerformanceValidationPage.jsx"
@@ -1563,6 +1564,14 @@ function App() {
               element={
                 <SectionErrorBoundary label="개별 종목 조정 매수">
                   <EquityDailyBottomBuyPage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/operating-journal"
+              element={
+                <SectionErrorBoundary label="실전 매매일지">
+                  <OperatingJournalPage />
                 </SectionErrorBoundary>
               }
             />

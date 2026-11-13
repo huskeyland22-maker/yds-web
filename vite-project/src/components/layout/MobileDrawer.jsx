@@ -12,7 +12,9 @@ import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js
 
 export default function MobileDrawer({ open, onClose, onOpenInput, onOpenAccountSettings, buildVersion }) {
   const location = useLocation()
-  const [otherOpen, setOtherOpen] = useState(false)
+  const [otherOpen, setOtherOpen] = useState(() =>
+    getOtherNavItems().some((item) => item.path === location.pathname),
+  )
   const [dbbOpen, setDbbOpen] = useState(
     () =>
       location.pathname === "/daily-bottom-buy" ||

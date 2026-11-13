@@ -226,6 +226,7 @@ export function addEquitySell(system, symbol, input) {
   }
   store.sells = normalizeEquitySells([...(store.sells || []), sell], store.deletedSellIds)
   writeTradeRecordsStore(store)
+  scheduleOperatingCloudPush()
   return { ok: true, message: "", sell }
 }
 
@@ -241,5 +242,12 @@ export function cancelEquitySell(id) {
   store.sells = store.sells.filter((row) => row.id !== sellId)
   store.deletedSellIds = [...new Set([...(store.deletedSellIds || []), sellId])]
   writeTradeRecordsStore(store)
+  scheduleOperatingCloudPush()
   return true
+}
+
+function scheduleOperatingCloudPush() {
+  void import("./ydsTradeRecordsCloudSync.js")
+    .then((mod) => mod.scheduleTradeRecordsCloudPush())
+    .catch(() => {})
 }

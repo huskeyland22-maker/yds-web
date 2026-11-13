@@ -34,6 +34,7 @@ export function getCoreNavItems() {
  */
 export function getOtherNavItems() {
   return [
+    { label: "📒 실전 매매일지", path: "/operating-journal" },
     { label: "⭐ 종목추천", path: "/stock-picks" },
     { label: "💼 포트폴리오", path: "/portfolio" },
     { label: "📈 성과검증", path: "/performance-validation" },
@@ -74,6 +75,7 @@ export const NAV_MOBILE_SHORT = {
   "/": "인생",
   "/daily-bottom-buy": "일상 조정 매수",
   "/equity-daily-bottom-buy": "개별 종목 조정매매",
+  "/operating-journal": "실전 매매일지",
   "/leverage-adjustment": "레버리지 조정매매",
   "/market-analysis": "공포·패닉 매수",
   "/stock-picks": "종목",

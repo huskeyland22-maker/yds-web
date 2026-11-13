@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { Link } from "react-router-dom"
 import EquityResearchPanel from "../components/equity/EquityResearchPanel.jsx"
 import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
 import DbbMembershipAccessNotice from "../components/dbb/DbbMembershipAccessNotice.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
-import EquityOperatingLedger from "../components/trade-records/EquityOperatingLedger.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import { buildDbbMembershipAudienceCta } from "../content/ydsDailyBottomBuyAccessPolicy.js"
@@ -728,7 +728,9 @@ export default function EquityDailyBottomBuyPage() {
               )}
             </div>
           </div>
-          <EquityOperatingLedger system="dbb" symbol={symbol} name={selectedLabel} />
+          <p className="yds-dbb__meta">
+            매도, 잔량, 실현손익은 <Link to="/operating-journal">실전 매매일지</Link>에서 기록합니다.
+          </p>
         </section>
       </div>
 

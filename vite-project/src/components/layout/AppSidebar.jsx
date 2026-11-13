@@ -58,7 +58,9 @@ export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccou
     [location.pathname, sidebarPulse],
   )
   const pickAlertUnread = countUnreadPickAlerts()
-  const [otherOpen, setOtherOpen] = useState(false)
+  const [otherOpen, setOtherOpen] = useState(() =>
+    otherItems.some((item) => item.path === location.pathname),
+  )
   const [dbbOpen, setDbbOpen] = useState(true)
   // 핵심 매수 화면은 신호·단계만으로 충분 — 패닉 기반「오늘의 해석」비표시
   const hideTodayInterpretation =
