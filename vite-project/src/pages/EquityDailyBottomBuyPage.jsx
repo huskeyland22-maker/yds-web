@@ -3,6 +3,7 @@ import EquityResearchPanel from "../components/equity/EquityResearchPanel.jsx"
 import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
 import DbbMembershipAccessNotice from "../components/dbb/DbbMembershipAccessNotice.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
+import EquityOperatingLedger from "../components/trade-records/EquityOperatingLedger.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import { buildDbbMembershipAudienceCta } from "../content/ydsDailyBottomBuyAccessPolicy.js"
@@ -10,9 +11,9 @@ import {
   buildEquityDailyBottomBuyVisibility,
   EQUITY_DBB_PRO_LOCK_COPY,
 } from "../content/ydsEquityDailyBottomBuyProGate.js"
-import { attachHoldingQuote, collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
+import { attachHoldingQuote, collectClosedDbbProgress, collectDbbBuyProgress, equityViewProgressEntry } from "../content/ydsDbbBuyProgress.js"
 import { fetchPortfolioQuotes } from "../content/ydsPortfolioQuoteService.js"
-import { formatUsdPrice, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
+import { formatUsdAmount, formatUsdPrice, TRADE_RECORDS_CHANGED_EVENT } from "../content/ydsTradeRecords.js"
 import { useMembership } from "../context/MembershipContext.jsx"
 import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 import {
@@ -354,6 +355,24 @@ export default function EquityDailyBottomBuyPage() {
     ).map((item) => attachHoldingQuote(item, holdingQuotes[item.symbol]))
   }, [universe, signalViews, extraViews, payload?.view, recordsVersion, holdingQuotes])
 
+  const closedProgress = useMemo(() => {
+    void recordsVersion
+    const bySymbol = new Map()
+    for (const row of signalViews || []) {
+      if (row?.symbol) bySymbol.set(row.symbol, row)
+    }
+    for (const row of EQUITY_HOLDING_DISPLAY) {
+      const extra = extraViews?.[row.symbol]
+      if (extra?.symbol) bySymbol.set(extra.symbol, extra)
+    }
+    if (payload?.view?.symbol) bySymbol.set(payload.view.symbol, payload.view)
+    return collectClosedDbbProgress(
+      equityProgressMeta(universe).map((row) =>
+        equityViewProgressEntry(row, bySymbol.get(row.symbol) || null),
+      ),
+    )
+  }, [universe, signalViews, extraViews, payload?.view, recordsVersion])
+
   const view = payload?.view
   const detailMatchesSymbol = Boolean(view?.ok && view.symbol === symbol)
   const detailPending = Boolean(view?.ok && view.symbol !== symbol)
@@ -380,6 +399,22 @@ export default function EquityDailyBottomBuyPage() {
         selectedSymbol={symbol}
         focusStatus
       />
+
+      {closedProgress.length ? (
+        <section className="yds-dbb-card mb-3" aria-label="전량 매도 이력">
+          <h2 className="yds-dbb-section__title">전량 매도</h2>
+          <p className="yds-dbb__meta mt-1">보유 목록에서는 빠지고, 매수·매도 기록은 남습니다.</p>
+          <ul className="yds-dbb-cands">
+            {closedProgress.map((item) => (
+              <li key={item.symbol}>
+                <button type="button" className="yds-dbb-cand w-full text-left" onClick={() => setSymbol(item.symbol)}>
+                  {item.name} {item.symbol} · 실현손익 {formatUsdAmount(item.realizedPnlUsd)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
         <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
@@ -693,6 +728,7 @@ export default function EquityDailyBottomBuyPage() {
               )}
             </div>
           </div>
+          <EquityOperatingLedger system="dbb" symbol={symbol} name={selectedLabel} />
         </section>
       </div>
 

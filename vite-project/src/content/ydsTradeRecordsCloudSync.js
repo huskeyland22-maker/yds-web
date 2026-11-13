@@ -5,6 +5,7 @@
 
 import {
   normalizeDeletedRecordIds,
+  normalizeEquitySells,
   readTradeRecordsStore,
   stripDeletedTradeRecords,
   unionDeletedRecordIds,
@@ -109,7 +110,14 @@ function mergeTradeRecordStores(base, extra) {
     const merged = mergeRecordLists(baseRecords[key], extraRecords[key])
     if (merged.length) records[key] = merged
   }
-  return { version: 1, records }
+  const deletedSellIds = unionDeletedRecordIds(base?.deletedSellIds, extra?.deletedSellIds)
+  /** @type {Map<string, object>} */
+  const sells = new Map()
+  for (const row of normalizeEquitySells([...(base?.sells || []), ...(extra?.sells || [])], deletedSellIds)) {
+    const old = sells.get(row.id)
+    if (!old || String(row.updatedAt || "") >= String(old.updatedAt || "")) sells.set(row.id, row)
+  }
+  return { version: 1, records, sells: [...sells.values()], deletedSellIds }
 }
 
 /**
@@ -126,6 +134,8 @@ export function mergeTradeRecordsWithDeletions(base, extra) {
     version: 1,
     records: stripDeletedTradeRecords(merged.records, deletedRecordIds),
     deletedRecordIds,
+    sells: merged.sells,
+    deletedSellIds: merged.deletedSellIds,
   }
 }
 
@@ -140,13 +150,21 @@ function deletionsNeedUpload(cloudStore, next) {
     if (!cloudIds.has(id)) return true
   }
   const deleted = new Set(normalizeDeletedRecordIds(next?.deletedRecordIds))
-  if (!deleted.size) return false
+  const deletedSells = new Set(normalizeDeletedRecordIds(next?.deletedSellIds))
+  if (!deleted.size && !deletedSells.size) return false
   const buckets = cloudStore?.records && typeof cloudStore.records === "object" ? cloudStore.records : {}
   for (const list of Object.values(buckets)) {
     if (!Array.isArray(list)) continue
     for (const row of list) {
       if (row && typeof row.id === "string" && deleted.has(row.id)) return true
     }
+  }
+  for (const row of Array.isArray(cloudStore?.sells) ? cloudStore.sells : []) {
+    if (row && typeof row.id === "string" && deletedSells.has(row.id)) return true
+  }
+  for (const id of deletedSells) {
+    const cloudSellIds = new Set(normalizeDeletedRecordIds(cloudStore?.deletedSellIds))
+    if (!cloudSellIds.has(id)) return true
   }
   return false
 }
@@ -158,10 +176,13 @@ function deletionsNeedUpload(cloudStore, next) {
 function normalizeSyncStore(store) {
   const records = store?.records && typeof store.records === "object" ? store.records : {}
   const deletedRecordIds = normalizeDeletedRecordIds(store?.deletedRecordIds)
+  const deletedSellIds = normalizeDeletedRecordIds(store?.deletedSellIds)
   return {
     version: 1,
     records: stripDeletedTradeRecords(records, deletedRecordIds),
     deletedRecordIds,
+    sells: normalizeEquitySells(store?.sells, deletedSellIds),
+    deletedSellIds,
   }
 }
 
@@ -187,6 +208,14 @@ function storeHasNewerLocalData(base, next) {
       const prev = baseById.get(row.id)
       if (!prev || recordStamp(row) > recordStamp(prev)) return true
     }
+  }
+  const baseSells = new Map(
+    (Array.isArray(base?.sells) ? base.sells : []).filter((row) => row?.id).map((row) => [row.id, row]),
+  )
+  for (const row of Array.isArray(next?.sells) ? next.sells : []) {
+    if (!row?.id) continue
+    const prev = baseSells.get(row.id)
+    if (!prev || recordStamp(row) > recordStamp(prev)) return true
   }
   return false
 }
@@ -368,6 +397,8 @@ export async function fetchCloudTradeRecords(idToken) {
           version: 1,
           records: nested.records,
           deletedRecordIds: normalizeDeletedRecordIds(nested.deletedRecordIds),
+          sells: normalizeEquitySells(nested.sells, nested.deletedSellIds),
+          deletedSellIds: normalizeDeletedRecordIds(nested.deletedSellIds),
         }
       : { version: 1, records: {}, deletedRecordIds: [] }
   return {

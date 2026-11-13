@@ -2,7 +2,8 @@
  * Manual buy trade records — localStorage (`yds.tradeRecords.v1`).
  * When logged in, cloud sync (see ydsTradeRecordsCloudSync.js) uses the same key as cache.
  * Separate from DBB episodes (`yds.dailyBottomBuy.episodes.v1`).
- * Amounts are USD · no FX · no auto orders · no sell.
+ * Amounts are USD · no FX · no auto orders.
+ * Sells live beside the buys in `sells` and do not change stored buy rows.
  */
 
 export const TRADE_RECORDS_STORAGE_KEY = "yds.tradeRecords.v1"
@@ -112,15 +113,84 @@ export function stripDeletedTradeRecords(records, deletedRecordIds) {
 }
 
 function emptyStore() {
-  return /** @type {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds: string[] }} */ ({
+  return /** @type {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds: string[], sells: EquitySellRecord[], deletedSellIds: string[] }} */ ({
     version: 1,
     records: {},
     deletedRecordIds: [],
+    sells: [],
+    deletedSellIds: [],
   })
 }
 
 /**
- * @returns {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds: string[] }}
+ * @typedef {{
+ *   id: string
+ *   system: 'dbb' | 'panic'
+ *   symbol: string
+ *   sellDate: string
+ *   sellPrice: number
+ *   shares: number
+ *   feeUsd: number | null
+ *   taxUsd: number | null
+ *   memo: string
+ *   createdAt: string
+ *   updatedAt: string
+ * }} EquitySellRecord
+ */
+
+/**
+ * @param {unknown} raw
+ * @returns {number | null}
+ */
+function optionalUsdCharge(raw) {
+  if (raw == null || raw === "") return null
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n < 0) return null
+  return n
+}
+
+/**
+ * @param {unknown} raw
+ * @param {unknown} deletedIds
+ * @returns {EquitySellRecord[]}
+ */
+export function normalizeEquitySells(raw, deletedIds) {
+  const deleted = new Set(normalizeDeletedRecordIds(deletedIds))
+  if (!Array.isArray(raw)) return []
+  /** @type {EquitySellRecord[]} */
+  const out = []
+  const seen = new Set()
+  for (const row of raw) {
+    if (!row || typeof row !== "object") continue
+    const item = /** @type {Record<string, unknown>} */ (row)
+    const id = typeof item.id === "string" ? item.id.trim() : ""
+    const symbol = typeof item.symbol === "string" ? item.symbol.trim().toUpperCase() : ""
+    const sellDate =
+      typeof item.sellDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(item.sellDate) ? item.sellDate : ""
+    const sellPrice = Number(item.sellPrice)
+    const shares = Number(item.shares)
+    if (!id || seen.has(id) || deleted.has(id) || !symbol || !sellDate) continue
+    if (!Number.isFinite(sellPrice) || sellPrice <= 0 || !Number.isFinite(shares) || shares <= 0) continue
+    seen.add(id)
+    out.push({
+      id,
+      system: item.system === "panic" ? "panic" : "dbb",
+      symbol,
+      sellDate,
+      sellPrice,
+      shares,
+      feeUsd: optionalUsdCharge(item.feeUsd),
+      taxUsd: optionalUsdCharge(item.taxUsd),
+      memo: typeof item.memo === "string" ? item.memo : "",
+      createdAt: typeof item.createdAt === "string" ? item.createdAt : sellDate,
+      updatedAt: typeof item.updatedAt === "string" ? item.updatedAt : sellDate,
+    })
+  }
+  return out.sort((a, b) => a.sellDate.localeCompare(b.sellDate) || a.createdAt.localeCompare(b.createdAt))
+}
+
+/**
+ * @returns {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds: string[], sells: EquitySellRecord[], deletedSellIds: string[] }}
  */
 export function readTradeRecordsStore() {
   try {
@@ -131,6 +201,7 @@ export function readTradeRecordsStore() {
     const records =
       parsed.records && typeof parsed.records === "object" ? parsed.records : {}
     const deletedRecordIds = normalizeDeletedRecordIds(parsed.deletedRecordIds)
+    const deletedSellIds = normalizeDeletedRecordIds(parsed.deletedSellIds)
     /** @type {Record<string, TradeRecord[]>} */
     const clean = {}
     for (const [k, list] of Object.entries(records)) {
@@ -144,6 +215,8 @@ export function readTradeRecordsStore() {
       version: 1,
       records: stripDeletedTradeRecords(clean, deletedRecordIds),
       deletedRecordIds,
+      sells: normalizeEquitySells(parsed.sells, deletedSellIds),
+      deletedSellIds,
     }
   } catch {
     return emptyStore()
@@ -151,17 +224,20 @@ export function readTradeRecordsStore() {
 }
 
 /**
- * @param {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds?: string[] }} store
+ * @param {{ version: 1, records: Record<string, TradeRecord[]>, deletedRecordIds?: string[], sells?: EquitySellRecord[], deletedSellIds?: string[] }} store
  */
 export function writeTradeRecordsStore(store) {
   try {
     const deletedRecordIds = normalizeDeletedRecordIds(store?.deletedRecordIds)
+    const deletedSellIds = normalizeDeletedRecordIds(store?.deletedSellIds)
     localStorage.setItem(
       TRADE_RECORDS_STORAGE_KEY,
       JSON.stringify({
         version: 1,
         records: stripDeletedTradeRecords(store?.records, deletedRecordIds),
         deletedRecordIds,
+        sells: normalizeEquitySells(store?.sells, deletedSellIds),
+        deletedSellIds,
       }),
     )
     notifyTradeRecordsChanged()

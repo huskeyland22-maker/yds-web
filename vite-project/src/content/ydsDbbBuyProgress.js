@@ -1,4 +1,5 @@
 import { listTradeRecords, tradeReturnPct } from "./ydsTradeRecords.js"
+import { equityPosition } from "./ydsEquitySellLedger.js"
 import { buildDbbTradeStatusView } from "./ydsTradeRecordsStatus.js"
 
 /**
@@ -72,36 +73,82 @@ export function equityViewProgressEntry(meta, view) {
 }
 
 /**
- * Symbols with at least one dbb record. Missing live cards stay in the list
- * without a fabricated score.
+ * Open holdings stay in the list. A symbol with no remaining shares
+ * moves to the closed list and is not shown as a holding.
  * @param {Array<{ symbol: string, name?: string, card?: object | null } | null>} entries
  */
-export function collectDbbBuyProgress(entries) {
-  const items = []
+function partitionDbbProgress(entries) {
+  /** @type {object[]} */
+  const open = []
+  /** @type {object[]} */
+  const closed = []
   for (const entry of entries || []) {
     if (!entry?.symbol) continue
     const records = listTradeRecords("dbb", entry.symbol)
     if (!records.length) continue
+    const position = equityPosition("dbb", entry.symbol)
     const statusView = entry.card
       ? buildDbbTradeStatusView(entry.card, records, entry.card.asOfDate)
       : null
-    // No live score card: keep statusView null (UI shows 준비 중) but still
-    // compute weight / next step / days from records via the same status helper.
     const statusMetaView = statusView
       ? null
       : buildDbbTradeStatusView({ count: 0 }, records, null)
-    items.push({
+    const base = statusView || statusMetaView
+    const sold = position.settlements.length > 0
+    const displayAvg =
+      sold && position.openShares > 0 ? position.avgPrice : base?.avgBuyPrice ?? null
+    const current = base?.currentPrice ?? null
+    const unrealizedPnlUsd =
+      current != null && position.openShares > 0 && displayAvg != null
+        ? position.openShares * (current - displayAvg)
+        : null
+    const adjustedView = (view) => {
+      if (!view) return null
+      if (!sold || !(position.openShares > 0)) {
+        return { ...view, openShares: position.openShares, realizedPnlUsd: position.realizedPnl, unrealizedPnlUsd }
+      }
+      return {
+        ...view,
+        avgBuyPrice: displayAvg,
+        returnPct: tradeReturnPct(displayAvg, view.currentPrice),
+        openShares: position.openShares,
+        realizedPnlUsd: position.realizedPnl,
+        unrealizedPnlUsd,
+      }
+    }
+    const item = {
       symbol: entry.symbol,
       name: entry.name || entry.symbol,
-      statusView,
-      statusMetaView,
-      recordedWeightPct: statusView
-        ? statusView.recordedWeightPct
-        : statusMetaView.recordedWeightPct,
-      avgBuyPrice: statusView ? statusView.avgBuyPrice : statusMetaView.avgBuyPrice,
-    })
+      statusView: adjustedView(statusView),
+      statusMetaView: adjustedView(statusMetaView),
+      recordedWeightPct: base?.recordedWeightPct ?? 0,
+      avgBuyPrice: displayAvg,
+      openShares: position.openShares,
+      realizedPnlUsd: position.settlements.length ? position.realizedPnl : null,
+      unrealizedPnlUsd,
+      settlements: position.settlements,
+    }
+    if (position.openShares > 1e-8) open.push(item)
+    else if (position.settlements.length) closed.push(item)
   }
-  return items
+  return { open, closed }
+}
+
+/**
+ * Symbols with remaining shares. Missing live cards stay in the list
+ * without a fabricated score.
+ * @param {Array<{ symbol: string, name?: string, card?: object | null } | null>} entries
+ */
+export function collectDbbBuyProgress(entries) {
+  return partitionDbbProgress(entries).open
+}
+
+/**
+ * Symbols whose stored buys are fully sold. Buy and sell rows are kept.
+ * @param {Array<{ symbol: string, name?: string, card?: object | null } | null>} entries
+ */
+export function collectClosedDbbProgress(entries) {
+  return partitionDbbProgress(entries).closed
 }
 
 /**
@@ -138,10 +185,16 @@ export function attachHoldingQuote(item, quote) {
   if (!item || item.statusView) return item
   const price = Number(quote?.price)
   if (!Number.isFinite(price) || price <= 0) return item
+  const avg = Number(item.avgBuyPrice)
+  const unrealized =
+    item.unrealizedPnlUsd == null && item.openShares > 0 && Number.isFinite(avg)
+      ? item.openShares * (price - avg)
+      : item.unrealizedPnlUsd
   return {
     ...item,
     quotePrice: price,
     quoteAsOf: holdingQuoteAsOf(quote?.updatedAt),
     quoteReturnPct: tradeReturnPct(item.avgBuyPrice, price),
+    unrealizedPnlUsd: unrealized,
   }
 }

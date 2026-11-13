@@ -1,6 +1,8 @@
 import {
   formatReturnPct,
+  formatShares,
   formatTradeRecordShares,
+  formatUsdAmount,
   formatUsdPrice,
   listTradeRecords,
   readEquityBuyIntent,
@@ -164,6 +166,24 @@ export default function DbbBuyProgressSection({
                 </div>
               )}
               {showBuyLines ? <EquityBuyLines symbol={item.symbol} /> : null}
+              {item.openShares > 0 ? (
+                <div className="yds-trade-status__row">
+                  <span>남은 보유수량</span>
+                  <strong className="font-mono tabular-nums">{formatShares(item.openShares)}</strong>
+                </div>
+              ) : null}
+              {item.unrealizedPnlUsd != null ? (
+                <div className="yds-trade-status__row">
+                  <span>평가손익</span>
+                  <strong className="font-mono tabular-nums">{formatUsdAmount(item.unrealizedPnlUsd)}</strong>
+                </div>
+              ) : null}
+              {item.realizedPnlUsd != null ? (
+                <div className="yds-trade-status__row">
+                  <span>실현손익</span>
+                  <strong className="font-mono tabular-nums">{formatUsdAmount(item.realizedPnlUsd)}</strong>
+                </div>
+              ) : null}
               {focusStatus && tailView ? (
                 <TradeRecordStatusBlock view={tailView} part="tail" />
               ) : null}

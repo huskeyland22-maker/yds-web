@@ -73,6 +73,7 @@ export function sanitizeTradeRecordsStore(raw) {
       ? /** @type {Record<string, unknown>} */ (src.records)
       : {}
   const deletedRecordIds = normalizeDeletedRecordIds(src.deletedRecordIds)
+  const deletedSellIds = normalizeDeletedRecordIds(src.deletedSellIds)
 
   /** @type {Record<string, object[]>} */
   const records = {}
@@ -84,7 +85,33 @@ export function sanitizeTradeRecordsStore(raw) {
     )
     if (cleaned.length) records[key] = cleaned
   }
-  return { version: 1, records: stripDeletedRecords(records, deletedRecordIds), deletedRecordIds }
+  return { version: 1, records: stripDeletedRecords(records, deletedRecordIds), deletedRecordIds, sells: keptSells(src.sells, deletedSellIds), deletedSellIds }
+}
+
+/**
+ * Keep a sell only when the saved facts are present. Computed profit is not stored.
+ * @param {unknown} raw
+ * @param {string[]} deletedSellIds
+ */
+function keptSells(raw, deletedSellIds) {
+  const deleted = new Set(deletedSellIds)
+  if (!Array.isArray(raw)) return []
+  /** @type {object[]} */
+  const out = []
+  const seen = new Set()
+  for (const row of raw) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) continue
+    const id = typeof row.id === "string" ? row.id.trim() : ""
+    const symbol = typeof row.symbol === "string" ? row.symbol.trim().toUpperCase() : ""
+    const sellDate = typeof row.sellDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(row.sellDate) ? row.sellDate : ""
+    const sellPrice = Number(row.sellPrice)
+    const shares = Number(row.shares)
+    if (!id || seen.has(id) || deleted.has(id) || !symbol || !sellDate) continue
+    if (!(sellPrice > 0) || !(shares > 0)) continue
+    seen.add(id)
+    out.push(row)
+  }
+  return out
 }
 
 /**
@@ -97,10 +124,21 @@ export function mergeStoredTradeRecords(previous, incoming) {
   const prev = sanitizeTradeRecordsStore(previous)
   const next = sanitizeTradeRecordsStore(incoming)
   const deletedRecordIds = normalizeDeletedRecordIds([...prev.deletedRecordIds, ...next.deletedRecordIds])
+  const deletedSellIds = normalizeDeletedRecordIds([...(prev.deletedSellIds || []), ...(next.deletedSellIds || [])])
+  const deletedSells = new Set(deletedSellIds)
+  /** @type {Map<string, object>} */
+  const sells = new Map()
+  for (const row of [...(prev.sells || []), ...(next.sells || [])]) {
+    if (!row || deletedSells.has(row.id)) continue
+    const old = sells.get(row.id)
+    if (!old || String(row.updatedAt || "") >= String(old.updatedAt || "")) sells.set(row.id, row)
+  }
   return {
     version: 1,
     records: stripDeletedRecords(next.records, deletedRecordIds),
     deletedRecordIds,
+    sells: [...sells.values()],
+    deletedSellIds,
   }
 }
 

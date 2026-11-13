@@ -348,6 +348,22 @@ describe("trade-records deletion wins", () => {
     assertTombstoneWins(out)
   })
 
+  it("keeps a sell beside the buys and drops a sell without a date", () => {
+    const out = sanitizeTradeRecordsStore({
+      version: 1,
+      records: { "dbb:NEE": [QQQ_ROW] },
+      sells: [
+        { id: "ts_nee", symbol: "NEE", sellDate: "2024-06-01", sellPrice: 70, shares: 4, feeUsd: null },
+        { id: "ts_bad", symbol: "NEE", sellPrice: 70, shares: 1 },
+      ],
+      deletedSellIds: [],
+    })
+    assert.equal(out.records["dbb:NEE"][0].id, QQQ_ROW.id)
+    assert.equal(out.sells.length, 1)
+    assert.equal(out.sells[0].id, "ts_nee")
+    assert.equal(out.sells[0].feeUsd, null)
+  })
+
   it("stale live row cannot clear a stored tombstone", () => {
     const merged = mergeStoredTradeRecords(
       {
