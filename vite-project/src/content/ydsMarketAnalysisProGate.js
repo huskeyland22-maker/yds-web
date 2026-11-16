@@ -1,10 +1,11 @@
 /**
- * /market-analysis Panic Index — which blocks need PRO membership.
- * Visibility is driven only by useMembership().isPro (server plan).
+ * /market-analysis Panic Index — which blocks need detail access.
+ * Pass useMembership().detailAccess (PRO ledger or operator claim).
+ * Do not pass plan==="pro" alone — operator stays plan free.
  */
 
 /**
- * @param {boolean} isPro — must be useMembership().isPro (fail-closed elsewhere)
+ * @param {boolean} unlocked — must be useMembership().detailAccess === true (fail-closed elsewhere)
  * @returns {{
  *   freeHero: true
  *   freeFearScale: true
@@ -14,15 +15,15 @@
  *   proDcaGuidance: boolean
  * }}
  */
-export function buildPanicCenterVisibility(isPro) {
-  const unlocked = isPro === true
+export function buildPanicCenterVisibility(unlocked) {
+  const open = unlocked === true
   return {
     freeHero: true,
     freeFearScale: true,
     freeLede: true,
-    proHistoryChart: unlocked,
-    proDriversDetail: unlocked,
-    proDcaGuidance: unlocked,
+    proHistoryChart: open,
+    proDriversDetail: open,
+    proDcaGuidance: open,
   }
 }
 
@@ -37,14 +38,14 @@ export const PANIC_LAB_PRO_LOCK_COPY = Object.freeze({
 })
 
 /**
- * PRO 전용 히스토리 소비(Lab·차트)용 — FREE/비PRO는 로컬·store 시계열을 넘기지 않는다.
+ * Detail-access 히스토리 소비(Lab·차트)용 — 잠금 시 로컬·store 시계열을 넘기지 않는다.
  * localStorage는 삭제하지 않으며, 호출 측에서 빈 배열만 사용한다.
  * @param {unknown} rows
- * @param {boolean} isPro — useMembership().isPro
+ * @param {boolean} unlocked — useMembership().detailAccess === true
  * @returns {object[]}
  */
-export function resolvePanicHistoryRowsForProFeature(rows, isPro) {
-  if (isPro !== true) return []
+export function resolvePanicHistoryRowsForProFeature(rows, unlocked) {
+  if (unlocked !== true) return []
   return Array.isArray(rows) ? rows : []
 }
 
@@ -58,9 +59,9 @@ export function allowLocalPanicHistoryMergeAfterHubFetch(invalidReason) {
 
 /**
  * Hub history fetch threw (network / 5xx) — localStorage → store fallback.
- * PRO only; FREE / loading / unknown stay fail-closed (LS on disk is not deleted).
- * @param {boolean} isPro — useMembership().isPro (must be strictly true)
+ * Detail-access only; FREE / loading / unknown stay fail-closed (LS on disk is not deleted).
+ * @param {boolean} unlocked — useMembership().detailAccess === true
  */
-export function allowLocalPanicHistoryFallbackOnApiError(isPro) {
-  return isPro === true
+export function allowLocalPanicHistoryFallbackOnApiError(unlocked) {
+  return unlocked === true
 }

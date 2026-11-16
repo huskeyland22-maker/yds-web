@@ -553,14 +553,15 @@ function App() {
   const [inputText, setInputText] = useState("")
   const [user, setUser] = useState(null)
   const membership = useMembership()
-  const membershipIsPro = membership.isPro === true
+  /** PRO ledger or operator claim — unlocks detail/history (plan badge stays FREE for operator). */
+  const membershipDetailAccess = membership.detailAccess === true
   const membershipReady = membership.isLoading !== true
   const accountAccessCaption = membershipAccountAccessCaption(membership.status)
 
-  /** Mirror PRO unlock into appDataStore for hub history LS fallback (fail-closed while loading). */
+  /** Mirror detailAccess into appDataStore for hub history LS fallback (fail-closed while loading). */
   useEffect(() => {
-    useAppDataStore.getState().setMembershipIsPro(membershipReady && membershipIsPro)
-  }, [membershipReady, membershipIsPro])
+    useAppDataStore.getState().setMembershipIsPro(membershipReady && membershipDetailAccess)
+  }, [membershipReady, membershipDetailAccess])
   const [saveSuccessToast, setSaveSuccessToast] = useState(false)
   const [appToast, setAppToast] = useState(null)
   const [inputPanelFlash, setInputPanelFlash] = useState(false)
@@ -821,7 +822,7 @@ function App() {
             tradeDate,
             payload: serverData ?? payload,
             limit: 500,
-            isPro: membershipIsPro,
+            isPro: membershipDetailAccess,
           })
           applyServerPanicSnapshot(desk ?? serverData, { skipAutoRefresh: true })
           console.log("UI UPDATED", { tradeDate, vix: desk?.vix ?? serverData?.vix })
@@ -842,7 +843,7 @@ function App() {
           await appAfterSave.loadCycleHistoryBundle({
             limit: 500,
             force: true,
-            isPro: membershipIsPro,
+            isPro: membershipDetailAccess,
           })
         }
         console.log("SAVE_SUCCESS", { hub: usedHubSavePath })
@@ -871,7 +872,7 @@ function App() {
             await useAppDataStore.getState().loadCycleHistoryBundle({
               limit: 500,
               force: true,
-              isPro: membershipIsPro,
+              isPro: membershipDetailAccess,
             })
           } catch (e) {
             console.warn("[panic] post-save refresh", e)
@@ -911,7 +912,7 @@ function App() {
         if (cancelled) return
         await store.loadCycleLatestSnapshot({ force: true })
         if (cancelled) return
-        await store.loadCycleHistoryBundle({ limit: 500, isPro: membershipIsPro })
+        await store.loadCycleHistoryBundle({ limit: 500, isPro: membershipDetailAccess })
         if (cancelled) return
         await store.loadDeskMetricSources()
         if (cancelled) return
@@ -928,7 +929,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [applyServerPanicSnapshot, membershipReady, membershipIsPro])
+  }, [applyServerPanicSnapshot, membershipReady, membershipDetailAccess])
 
   /** history refetch 후 panicStore 스냅샷 = 최신 history row (허브 데스크·기타 화면) */
   useEffect(() => {

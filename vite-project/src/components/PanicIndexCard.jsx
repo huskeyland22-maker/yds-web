@@ -76,6 +76,10 @@ const LONG_METRICS = [
   { key: "highYield", title: "하이일드", type: "highYield" },
 ]
 
+/**
+ * Legacy card. `isPro` prop means detailAccess unlock (ledger PRO or operator),
+ * not billing `useMembership().isPro` alone.
+ */
 export default function PanicIndexCard({
   data,
   isPro = false,

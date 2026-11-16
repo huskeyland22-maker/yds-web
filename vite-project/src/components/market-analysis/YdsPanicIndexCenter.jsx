@@ -59,8 +59,11 @@ export default function YdsPanicIndexCenter({
   className = "",
   historySlot = null,
 }) {
-  const { isPro } = useMembership()
-  const visibility = useMemo(() => buildPanicCenterVisibility(isPro), [isPro])
+  const { detailAccess } = useMembership()
+  const visibility = useMemo(
+    () => buildPanicCenterVisibility(detailAccess === true),
+    [detailAccess],
+  )
   const score = useMemo(() => getPanicScoreV2(panicData), [panicData])
   const status = useMemo(() => resolvePanicIndexStatus(score), [score])
   const dcaSignal = useMemo(() => resolvePanicBottomDcaSignal(score), [score])

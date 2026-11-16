@@ -270,7 +270,8 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
   const renderCountRef = useRef(0)
   const fetchCountRef = useRef(0)
   renderCountRef.current += 1
-  const { isPro } = useMembership()
+  /** Detail unlock (ledger PRO or operator) — not billing isPro. */
+  const { detailAccess } = useMembership()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -1051,7 +1052,7 @@ export default function SignalDashboard({ externalData = null, externalOnly = fa
           <MarketSummaryCard brief={aiBrief} integrationFlowText={integrationFlowText} />
           <PanicIndexCard
             data={data}
-            isPro={isPro}
+            isPro={detailAccess === true}
             finalScore={finalScore}
             action={action}
             weightsDescription={weightsDescription}

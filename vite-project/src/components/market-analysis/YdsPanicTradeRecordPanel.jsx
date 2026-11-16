@@ -26,8 +26,11 @@ export default function YdsPanicTradeRecordPanel({
   asOfDate = null,
   className = "",
 }) {
-  const { isPro } = useMembership()
-  const visibility = useMemo(() => buildPanicCenterVisibility(isPro), [isPro])
+  const { detailAccess } = useMembership()
+  const visibility = useMemo(
+    () => buildPanicCenterVisibility(detailAccess === true),
+    [detailAccess],
+  )
   const proDca = visibility.proDcaGuidance === true
 
   const [open, setOpen] = useState(false)

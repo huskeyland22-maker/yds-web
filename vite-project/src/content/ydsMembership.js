@@ -14,8 +14,8 @@ export const MEMBERSHIP_STATUS = Object.freeze({
 })
 
 /**
- * PRO UI/features unlock only when the server returned plan === "pro".
- * loading / free / error / logged_out stay locked (fail closed).
+ * Billing PRO chip only (`plan === "pro"`).
+ * Detail features must use `detailAccess` — operators stay plan free / isPro false.
  * @param {MembershipStatus | string | null | undefined} status
  * @returns {boolean}
  */
@@ -90,6 +90,7 @@ export function membershipStatusFromApiBody(body) {
 /**
  * Server-declared detail access. A missing flag stays closed.
  * This does not turn an operator into a PRO subscription.
+ * Panic/DBB detail UI should unlock on this flag (not plan==="pro" alone).
  * @param {{ detailAccess?: unknown } | null | undefined} body
  * @returns {boolean}
  */
