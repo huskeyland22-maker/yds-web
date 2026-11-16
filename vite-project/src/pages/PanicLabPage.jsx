@@ -138,8 +138,11 @@ function ComponentBars({ items }) {
 }
 
 export default function PanicLabPage() {
-  const { isPro } = useMembership()
-  const visibility = useMemo(() => buildPanicCenterVisibility(isPro), [isPro])
+  const { detailAccess } = useMembership()
+  const visibility = useMemo(
+    () => buildPanicCenterVisibility(detailAccess === true),
+    [detailAccess],
+  )
   const labUnlocked = visibility.proHistoryChart === true
 
   const storeRows = useAppDataStore((s) => s.cycleMetricHistory)
