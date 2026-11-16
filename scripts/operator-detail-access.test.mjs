@@ -198,8 +198,8 @@ describe("quote display", () => {
   })
 })
 
-describe("temporary owner pro", () => {
-  it("opens Pro only when the verified UID and email both match", async () => {
+describe("temporary owner pro module (unused by handlers on Preview branch)", () => {
+  it("still documents UID+email matching helpers without wiring into requireProMembership", async () => {
     const { applyTemporaryOwnerPro, isTemporaryOwnerPro } = await import("../api/_lib/temporaryOwnerPro.js")
     const ownerUid = "9mm60sKonGc3NoSC71lQG2Vp2jG2"
     const ownerEmail = "huskeyland22@gmail.com"
@@ -210,12 +210,11 @@ describe("temporary owner pro", () => {
     assert.equal(upgraded.plan, "pro")
     assert.equal(upgraded.reason, "temporary_owner_pro")
     assert.equal(freeRow.plan, "free")
-    assert.equal(resolveDetailAccess(upgraded, {}).audience, "pro")
-    assert.equal(applyTemporaryOwnerPro(ownerUid, "other@example.com", freeRow).plan, "free")
-    assert.equal(applyTemporaryOwnerPro(ownerUid, ownerEmail, proRow).reason, "plan_pro")
   })
+})
 
-  it("lets the verified owner through the Pro gate without a ledger write", async () => {
+describe("owner without temporary bypass", () => {
+  it("blocks free ledger without operator claim (no temporary_owner_pro)", async () => {
     const result = await requireProMembership(req("tok"), {
       verifyFirebaseAuthUser: async () => ({
         uid: "9mm60sKonGc3NoSC71lQG2Vp2jG2",
@@ -224,9 +223,37 @@ describe("temporary owner pro", () => {
       }),
       resolveUserMembership: async () => freeRow,
     })
+    assert.equal(result.ok, false)
+    assert.equal(result.status, 403)
+    assert.equal(result.body.audience, "free")
+  })
+
+  it("allows operator claim with free ledger plan unchanged", async () => {
+    const result = await requireProMembership(req("tok"), {
+      verifyFirebaseAuthUser: async () => ({
+        uid: "9mm60sKonGc3NoSC71lQG2Vp2jG2",
+        email: "huskeyland22@gmail.com",
+        claims: { role: "operator" },
+      }),
+      resolveUserMembership: async () => freeRow,
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.audience, "operator")
+    assert.equal(result.membership.plan, "free")
+    assert.notEqual(result.membership.reason, "temporary_owner_pro")
+  })
+
+  it("keeps ledger PRO on the pro audience (unaffected by operator path)", async () => {
+    const result = await requireProMembership(req("tok"), {
+      verifyFirebaseAuthUser: async () => ({
+        uid: "pro-user",
+        email: "pro@example.com",
+        claims: {},
+      }),
+      resolveUserMembership: async () => proRow,
+    })
     assert.equal(result.ok, true)
     assert.equal(result.audience, "pro")
-    assert.equal(result.membership.reason, "temporary_owner_pro")
-    assert.equal(freeRow.plan, "free")
+    assert.equal(result.membership.plan, "pro")
   })
 })

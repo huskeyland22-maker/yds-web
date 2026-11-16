@@ -8,10 +8,8 @@ import { verifyFirebaseAuthUser } from "./firebaseIdToken.js"
 import {
   MembershipLookupError,
   resolveDetailAccess,
-  resolveMembershipFromRow,
   resolveUserMembership,
 } from "./userMembership.js"
-import { applyTemporaryOwnerPro, isTemporaryOwnerPro } from "./temporaryOwnerPro.js"
 
 /**
  * @param {unknown} req
@@ -87,14 +85,8 @@ export async function requireProMembership(req, deps = {}) {
   }
 
   try {
-    let membership
-    try {
-      membership = await resolve(identity.uid)
-    } catch (lookupError) {
-      if (!isTemporaryOwnerPro(identity.uid, identity.email)) throw lookupError
-      membership = resolveMembershipFromRow(null)
-    }
-    membership = applyTemporaryOwnerPro(identity.uid, identity.email, membership)
+    // Ledger PRO or Firebase role=operator → detailAccess. No temporaryOwnerPro bypass.
+    const membership = await resolve(identity.uid)
     const access = resolveDetailAccess(membership, identity.claims)
     if (!access.detailAccess || access.audience === "free") {
       return {

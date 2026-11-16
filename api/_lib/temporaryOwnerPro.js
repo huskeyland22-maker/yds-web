@@ -1,7 +1,13 @@
 /**
  * TEMPORARY owner Pro access for the operating site.
- * Remove this module and the calls in the membership handlers
- * after Firebase custom claim role=operator is set.
+ *
+ * Preview verification branch (`ops/remove-temporary-owner-pro-preview`):
+ * This module is kept on disk but is NO LONGER imported by meMembershipHandler
+ * or requireProMembership. Formal access is ledger PRO or Firebase role=operator.
+ *
+ * After Preview proves Owner me-membership returns audience=operator without
+ * this bypass, delete this file and remaining unit coverage in a later step.
+ *
  * Does not write user_membership and does not apply to any other account.
  */
 
