@@ -12,6 +12,7 @@ import { resolveUnifiedMarketStateLabel } from "../../content/ydsUnifiedMarketSt
 import { getPanicScoreV2 } from "../../utils/tradingScores.js"
 import { resolveMarketPositionView } from "../../content/ydsMarketPositionEngine.js"
 import YdsPanicTradeRecordPanel from "./YdsPanicTradeRecordPanel.jsx"
+import YdsRiskStockDesk from "./YdsRiskStockDesk.jsx"
 
 /**
  * 시장분석 데스크 — Panic Index 중심 (장기 투자 참고)
@@ -20,9 +21,14 @@ import YdsPanicTradeRecordPanel from "./YdsPanicTradeRecordPanel.jsx"
  * @param {{
  *   panicData: object | null
  *   cycleMetricHistory: object[]
+ *   historyWindowMonths?: number | null
  * }} props
  */
-export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }) {
+export default function MarketAnalysisDeskCore({
+  panicData,
+  cycleMetricHistory,
+  historyWindowMonths = 3,
+}) {
   const safeHistory = Array.isArray(cycleMetricHistory) ? cycleMetricHistory : []
   const [etfPrices, setEtfPrices] = useState(
     /** @type {{ QQQ: Record<string, number>; SOXX: Record<string, number>; SPY: Record<string, number> } | null} */ (
@@ -121,17 +127,23 @@ export default function MarketAnalysisDeskCore({ panicData, cycleMetricHistory }
     null
 
   return (
-    <div className="yds-market-desk yds-market-desk--panic-focus" id="market-desk" aria-label="YDS 시장분석">
+    <div className="yds-market-desk yds-market-desk--panic-focus yds-market-desk--design-b" id="market-desk" aria-label="YDS 시장분석">
       <div className="yds-market-desk__stream">
         <YdsPanicIndexCenter
           panicData={panicData}
+          historyRows={safeHistory}
+          cycleFlow={cycleFlow}
+          dualLiquidity={dualLiquidity}
+          etfContext={etfContext}
           className="yds-market-desk__block yds-market-desk__slot yds-market-desk__slot--panic-center"
           historySlot={
             <YdsMarketTrendSection
               className="yds-market-desk__slot yds-market-desk__slot--trend"
               historyRows={safeHistory}
+              windowMonths={historyWindowMonths}
             />
           }
+          belowHero={<YdsRiskStockDesk />}
         />
         <YdsPanicTradeRecordPanel
           panicData={panicData}

@@ -847,14 +847,53 @@
 
 .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.65rem;
   margin-top: 0.95rem;
 }
 
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__credit-ref {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--yds-mkt-line, rgba(148, 163, 184, 0.35));
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__credit-ref-title {
+  margin: 0 0 0.55rem;
+  color: var(--yds-text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__credit-ref-title a {
+  color: var(--yds-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-grid--credit {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-card.is-credit-ref {
+  opacity: 0.88;
+}
+
 @media (max-width: 900px) {
   .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-grid--credit {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-grid--credit {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
