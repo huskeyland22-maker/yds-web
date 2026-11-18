@@ -4,6 +4,14 @@ import { pathToFileURL } from "node:url"
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import { VitePWA } from "vite-plugin-pwa"
+import {
+  classifyPanicReadRequest,
+  inspectStagingPanicEnv,
+  parseStagingEnvText,
+  PRODUCTION_SUPABASE_REF as PANIC_PRODUCTION_REF,
+  stagingClientPublicEnv,
+  stagingServerEnvAssignments,
+} from "../api/_lib/stagingPanicRead.js"
 
 function resolveBuildId() {
   // 우선순위:
@@ -55,6 +63,9 @@ function resolveReleaseChannel(mode) {
 }
 
 const APP_RELEASE_CHANNEL = resolveReleaseChannel(process.env.NODE_ENV)
+
+/** Vercel sets VERCEL_ENV=production|preview|development during builds. Empty locally. */
+const APP_VERCEL_ENV = String(process.env.VERCEL_ENV ?? "").trim().toLowerCase()
 
 function htmlBuildIdPlugin() {
   return {
@@ -144,6 +155,119 @@ function attachMeMembershipDevApi(server) {
       void err
     }
   })
+}
+
+function sendPanicJson(res, status, body) {
+  res.statusCode = status
+  res.setHeader("Content-Type", "application/json; charset=utf-8")
+  res.setHeader("Cache-Control", "no-store")
+  res.end(JSON.stringify(body))
+}
+
+/** Local /api/panic reads Staging only. It never calls next(), so the Production proxy cannot see it. */
+function attachStagingPanicReadApi(server) {
+  const handlerPath = path.resolve(process.cwd(), "../api/panic.js")
+  const envPath = path.resolve(process.cwd(), "../.env.staging.local")
+  server.middlewares.use(async (req, res, next) => {
+    const raw = req.url || ""
+    const pathOnly = raw.split("?")[0].replace(/\/+$/, "") || "/"
+    if (pathOnly !== "/api/panic") return next()
+    const parsed = fs.existsSync(envPath) ? parseStagingEnvText(fs.readFileSync(envPath, "utf8")) : {}
+    const info = inspectStagingPanicEnv(parsed)
+    const currentUrl = String(process.env.SUPABASE_URL || "")
+    if (currentUrl.includes(PANIC_PRODUCTION_REF) || !info.serverReadReady) {
+      sendPanicJson(res, 503, {
+        ok: false,
+        error: "staging_panic_read_blocked",
+        reason: currentUrl.includes(PANIC_PRODUCTION_REF) ? "production_url_refused" : info.reason,
+      })
+      return
+    }
+    const requestUrl = new URL(raw, "http://localhost")
+    const gate = classifyPanicReadRequest({
+      method: req.method,
+      mode: requestUrl.searchParams.get("mode"),
+      probe: requestUrl.searchParams.get("probe") || requestUrl.searchParams.get("probeInsert"),
+    })
+    if (!gate.allow) {
+      sendPanicJson(res, gate.status, { ok: false, error: gate.reason, mode: gate.mode })
+      return
+    }
+    const assigned = stagingServerEnvAssignments(parsed)
+    if (!assigned.ok || !assigned.assignments) {
+      sendPanicJson(res, 503, { ok: false, error: "staging_panic_read_blocked", reason: assigned.reason })
+      return
+    }
+    if (!process.env.SUPABASE_URL) process.env.SUPABASE_URL = assigned.assignments.SUPABASE_URL
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      process.env.SUPABASE_SERVICE_ROLE_KEY = assigned.assignments.SUPABASE_SERVICE_ROLE_KEY
+    }
+    try {
+      const mod = await import(pathToFileURL(handlerPath).href)
+      await mod.default(
+        {
+          method: req.method,
+          url: raw,
+          query: Object.fromEntries(requestUrl.searchParams),
+          headers: { authorization: req.headers.authorization || req.headers.Authorization || "" },
+        },
+        {
+          setHeader(name, value) {
+            res.setHeader(name, value)
+          },
+          status(code) {
+            res.statusCode = code
+            return this
+          },
+          json(body) {
+            if (!res.getHeader("Content-Type")) {
+              res.setHeader("Content-Type", "application/json; charset=utf-8")
+            }
+            res.end(JSON.stringify(body))
+          },
+        },
+      )
+    } catch {
+      sendPanicJson(res, 500, { ok: false, error: "staging_panic_read_failed" })
+    }
+  })
+}
+
+function stagingPanicReadDevApi() {
+  return {
+    name: "staging-panic-read-dev-api",
+    apply: "serve",
+    configureServer(server) {
+      attachStagingPanicReadApi(server)
+    },
+    configurePreviewServer(server) {
+      attachStagingPanicReadApi(server)
+    },
+  }
+}
+
+/** Dev/preview only. Does not write env files and does not copy the service role into the browser. */
+function stagingPanicClientEnvPlugin() {
+  return {
+    name: "staging-panic-client-env",
+    apply: "serve",
+    config() {
+      const envPath = path.resolve(process.cwd(), "../.env.staging.local")
+      if (!fs.existsSync(envPath)) return {}
+      const parsed = parseStagingEnvText(fs.readFileSync(envPath, "utf8"))
+      const client = stagingClientPublicEnv(parsed)
+      if (!client.ok || !client.url || !client.anonKey) {
+        console.warn("[YDS] staging panic client env skipped:", client.reason)
+        return {}
+      }
+      const define = {
+        "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(client.url),
+        "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(client.anonKey),
+      }
+      if (client.hub === "1") define["import.meta.env.VITE_PANIC_HUB"] = JSON.stringify("1")
+      return { define }
+    },
+  }
 }
 
 function meMembershipDevApi() {
@@ -280,6 +404,7 @@ export default defineConfig({
     "import.meta.env.VITE_APP_BUILD_ID": JSON.stringify(BUILD_ID),
     "import.meta.env.VITE_APP_VERSION_LABEL": JSON.stringify(APP_VERSION_LABEL),
     "import.meta.env.VITE_APP_RELEASE_CHANNEL": JSON.stringify(APP_RELEASE_CHANNEL),
+    "import.meta.env.VITE_VERCEL_ENV": JSON.stringify(APP_VERCEL_ENV),
   },
   build: {
     emptyOutDir: true,
@@ -293,6 +418,8 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    stagingPanicReadDevApi(),
+    stagingPanicClientEnvPlugin(),
     meMembershipDevApi(),
     dailyBottomBuyDevApi(),
     equityDailyBottomBuyDevApi(),
@@ -389,10 +516,6 @@ export default defineConfig({
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },
-      "/api/panic": {
-        target: "https://yds-web-kappa.vercel.app",
-        changeOrigin: true,
-      },
       "/api/portfolio-quote": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
@@ -418,10 +541,6 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/api/macro-briefing-ai": {
-        target: "https://yds-web-kappa.vercel.app",
-        changeOrigin: true,
-      },
-      "/api/panic": {
         target: "https://yds-web-kappa.vercel.app",
         changeOrigin: true,
       },
