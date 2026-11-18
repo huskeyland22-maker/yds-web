@@ -7,6 +7,7 @@
  * the membership-gated API only — never from this static JSON.
  *
  *   node scripts/generate-daily-bottom-buy-snapshot.mjs
+ *   node scripts/generate-daily-bottom-buy-snapshot.mjs --out <path>   # Phase K local prep
  */
 import fs from "node:fs"
 import path from "node:path"
@@ -19,23 +20,50 @@ import {
   buildEtfCard,
   sortCardsByOpportunity,
 } from "../api/_lib/dailyBottomBuyEngine.js"
+import { evaluateEtfQualityUniverse } from "../api/_lib/etfQualityEngine.js"
 import { redactDailyBottomBuyPayload } from "../api/_lib/dailyBottomBuyRedact.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, "..")
 const CACHE = path.join(ROOT, "scripts", ".cache")
-const OUT = path.join(ROOT, "vite-project", "public", "data", "daily-bottom-buy-snapshot.json")
+const DEFAULT_OUT = path.join(ROOT, "vite-project", "public", "data", "daily-bottom-buy-snapshot.json")
 
-const cards = []
+function resolveOutPath(argv = process.argv.slice(2)) {
+  const idx = argv.indexOf("--out")
+  if (idx >= 0) {
+    const raw = argv[idx + 1]
+    if (!raw || raw.startsWith("-")) {
+      throw new Error("generate-daily-bottom-buy-snapshot: --out requires a file path")
+    }
+    return path.resolve(ROOT, raw)
+  }
+  return DEFAULT_OUT
+}
+
+const OUT = resolveOutPath()
+
+/** @type {Record<string, any[]>} */
+const barsBySymbol = {}
+const drafts = []
 for (const meta of DAILY_BOTTOM_BUY_WATCHLIST) {
   const cp = path.join(CACHE, `dbb-${meta.symbol.toLowerCase()}-daily-ohlcv.json`)
   if (!fs.existsSync(cp)) {
-    cards.push(buildEtfCard(meta, { ok: false, error: "cache_missing" }))
+    drafts.push({ meta, evaluation: { ok: false, error: "cache_missing" } })
     continue
   }
   const bars = JSON.parse(fs.readFileSync(cp, "utf8")).bars
-  cards.push(buildEtfCard(meta, evaluateBars(bars, DAILY_BOTTOM_THRESHOLDS)))
+  barsBySymbol[meta.symbol] = bars
+  drafts.push({ meta, evaluation: evaluateBars(bars, DAILY_BOTTOM_THRESHOLDS) })
 }
+
+const qualityBySymbol = evaluateEtfQualityUniverse(
+  DAILY_BOTTOM_BUY_WATCHLIST.map((m) => m.symbol),
+  barsBySymbol,
+)
+
+const cards = drafts.map(({ meta, evaluation }) =>
+  buildEtfCard(meta, evaluation, qualityBySymbol[meta.symbol]),
+)
 
 const sorted = sortCardsByOpportunity(cards)
 const payload = {
