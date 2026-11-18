@@ -98,6 +98,29 @@ export function detailAccessFromApiBody(body) {
   return body?.detailAccess === true
 }
 
+/** @typedef {"pro" | "operator" | "free" | null} MembershipAudience */
+
+/**
+ * Server `audience` from GET /api/me-membership only.
+ * Does not invent operator from plan or detailAccess.
+ * @param {{ audience?: unknown } | null | undefined} body
+ * @returns {MembershipAudience}
+ */
+export function audienceFromApiBody(body) {
+  const raw = typeof body?.audience === "string" ? body.audience.trim().toLowerCase() : ""
+  if (raw === "operator" || raw === "pro" || raw === "free") return raw
+  return null
+}
+
+/**
+ * OPERATOR badge is display-only. Never unlocks features by itself.
+ * @param {MembershipAudience | string | null | undefined} audience
+ * @returns {boolean}
+ */
+export function showOperatorMembershipBadge(audience) {
+  return audience === "operator"
+}
+
 const PRODUCTION_APP_HOST = "yds-web-kappa.vercel.app"
 
 /**
@@ -118,6 +141,7 @@ export function isMembershipVerifyUiEnabled(hostname, opts = {}) {
 
 /**
  * Safe display model for membership verify panel (no tokens / PII).
+ * Plan labels stay billing-only; OPERATOR is a separate audience badge.
  * @param {{
  *   isLoggedOut?: boolean
  *   isLoading?: boolean
@@ -126,6 +150,7 @@ export function isMembershipVerifyUiEnabled(hostname, opts = {}) {
  *   ledgerStatus?: string | null
  *   source?: string | null
  *   reason?: string | null
+ *   audience?: MembershipAudience | string | null
  * }} input
  */
 export function membershipVerifyDisplayModel(input) {
@@ -136,6 +161,7 @@ export function membershipVerifyDisplayModel(input) {
       statusLabel: "—",
       sourceLabel: "—",
       reasonLabel: "—",
+      showOperatorBadge: false,
       showRefresh: false,
     }
   }
@@ -146,6 +172,7 @@ export function membershipVerifyDisplayModel(input) {
       statusLabel: "…",
       sourceLabel: "…",
       reasonLabel: "…",
+      showOperatorBadge: false,
       showRefresh: true,
     }
   }
@@ -156,6 +183,7 @@ export function membershipVerifyDisplayModel(input) {
       statusLabel: "—",
       sourceLabel: "—",
       reasonLabel: typeof input.reason === "string" && input.reason ? input.reason : "error",
+      showOperatorBadge: false,
       showRefresh: true,
     }
   }
@@ -167,6 +195,7 @@ export function membershipVerifyDisplayModel(input) {
     statusLabel: typeof input?.ledgerStatus === "string" && input.ledgerStatus ? input.ledgerStatus : "—",
     sourceLabel: typeof input?.source === "string" && input.source ? input.source : "—",
     reasonLabel: typeof input?.reason === "string" && input.reason ? input.reason : "—",
+    showOperatorBadge: showOperatorMembershipBadge(input?.audience),
     showRefresh: true,
   }
 }

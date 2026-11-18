@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  audienceFromApiBody,
   isMembershipVerifyUiEnabled,
   isProUnlocked,
   MEMBERSHIP_STATUS,
@@ -8,6 +9,7 @@ import {
   membershipPlanBadgeLabel,
   membershipStatusFromApiBody,
   membershipVerifyDisplayModel,
+  showOperatorMembershipBadge,
 } from "./ydsMembership.js"
 
 describe("ydsMembership", () => {
@@ -99,14 +101,71 @@ describe("ydsMembership", () => {
       statusLabel: "none",
       sourceLabel: "—",
       reasonLabel: "missing_row",
+      showOperatorBadge: false,
       showRefresh: true,
     })
     expect(membershipVerifyDisplayModel({ isLoading: true }).phase).toBe("loading")
     expect(membershipVerifyDisplayModel({ isError: true, reason: "http_500" })).toMatchObject({
       phase: "error",
       reasonLabel: "http_500",
+      showOperatorBadge: false,
       showRefresh: true,
     })
     expect(membershipVerifyDisplayModel({ isLoggedOut: true }).showRefresh).toBe(false)
+  })
+
+  it("preserves server audience without inventing operator from plan", () => {
+    expect(audienceFromApiBody({ audience: "operator", plan: "free" })).toBe("operator")
+    expect(audienceFromApiBody({ audience: "pro", plan: "pro" })).toBe("pro")
+    expect(audienceFromApiBody({ audience: "free", plan: "free" })).toBe("free")
+    expect(audienceFromApiBody({ audience: "OPERATOR" })).toBe("operator")
+    expect(audienceFromApiBody({ plan: "free", detailAccess: true })).toBe(null)
+    expect(audienceFromApiBody({})).toBe(null)
+    expect(audienceFromApiBody(null)).toBe(null)
+  })
+
+  it("shows OPERATOR badge only for audience operator (FREE plan caption unchanged)", () => {
+    expect(showOperatorMembershipBadge("operator")).toBe(true)
+    expect(showOperatorMembershipBadge("pro")).toBe(false)
+    expect(showOperatorMembershipBadge("free")).toBe(false)
+    expect(showOperatorMembershipBadge(null)).toBe(false)
+
+    expect(
+      membershipVerifyDisplayModel({
+        plan: "free",
+        ledgerStatus: "active",
+        source: "manual",
+        reason: "plan_free",
+        audience: "operator",
+      }),
+    ).toMatchObject({
+      planLabel: "FREE",
+      showOperatorBadge: true,
+    })
+    expect(
+      membershipVerifyDisplayModel({
+        plan: "free",
+        ledgerStatus: "active",
+        source: "manual",
+        reason: "plan_free",
+        audience: "free",
+      }),
+    ).toMatchObject({
+      planLabel: "FREE",
+      showOperatorBadge: false,
+    })
+    expect(
+      membershipVerifyDisplayModel({
+        plan: "pro",
+        ledgerStatus: "active",
+        source: "stripe",
+        reason: "plan_pro",
+        audience: "pro",
+      }),
+    ).toMatchObject({
+      planLabel: "PRO",
+      showOperatorBadge: false,
+    })
+    expect(membershipAccountAccessCaption(MEMBERSHIP_STATUS.FREE)).toBe("Free access")
   })
 })
