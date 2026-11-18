@@ -22,11 +22,22 @@ import { buildDbbTradeStatusView } from "../content/ydsTradeRecordsStatus.js"
 import { useMembership } from "../context/MembershipContext.jsx"
 import YdsProFeatureGate from "../components/market-analysis/YdsProFeatureGate.jsx"
 import DbbMembershipAccessNotice from "../components/dbb/DbbMembershipAccessNotice.jsx"
+import EtfDataAsOfBanner from "../components/dbb/EtfDataAsOfBanner.jsx"
+import EtfInvestDecisionBoard from "../components/dbb/EtfInvestDecisionBoard.jsx"
+import EtfInvestOverviewCards from "../components/dbb/EtfInvestOverviewCards.jsx"
+import EtfInvestOverviewTable from "../components/dbb/EtfInvestOverviewTable.jsx"
+import EtfQualityDetailPanel from "../components/dbb/EtfQualityDetailPanel.jsx"
 import DbbBuyProgressSection from "../components/trade-records/DbbBuyProgressSection.jsx"
 import TradeRecordEditor from "../components/trade-records/TradeRecordEditor.jsx"
 import TradeRecordStatusBlock from "../components/trade-records/TradeRecordStatusBlock.jsx"
 import DbbReturnHorizonNote from "../components/dbb/DbbReturnHorizonNote.jsx"
 import DbbSplitSimResearchNote from "../components/dbb/DbbSplitSimResearchNote.jsx"
+import {
+  classifyEtfInvestDecision,
+  formatEtfDbbStatusLabel,
+  getEtfDbbComputeStatus,
+  pickEtfDataAsOf,
+} from "../content/ydsEtfInvestDecision.js"
 import { scoredCountRank, sortByBuyConditionCount } from "../utils/buyConditionOrder.js"
 import {
   closeTickerPicker,
@@ -48,6 +59,16 @@ function etfTickerLabel(card) {
   if (!card?.symbol) return ""
   const theme = card.themeShort || card.theme || ""
   return theme ? `${theme} (${card.symbol})` : card.symbol
+}
+
+function etfClassLabel(card) {
+  if (!card) return ""
+  const parts = [card.sector, card.industry].filter(Boolean)
+  return parts.join(" · ")
+}
+
+function etfQualityLabel(card) {
+  return card?.qualityLabel || card?.quality?.label || "평가 보류"
 }
 
 function opportunityCardHasDetails(card) {
@@ -154,7 +175,8 @@ export default function DailyBottomBuyPage() {
     const q = query.trim().toLowerCase()
     if (!q) return etfList
     return etfList.filter((card) => {
-      const hay = `${card.symbol || ""} ${card.themeShort || ""} ${card.theme || ""} ${card.role || ""}`.toLowerCase()
+      const hay =
+        `${card.symbol || ""} ${card.themeShort || ""} ${card.theme || ""} ${card.role || ""} ${card.sector || ""} ${card.industry || ""}`.toLowerCase()
       return hay.includes(q)
     })
   }, [etfList, query])
@@ -207,10 +229,11 @@ export default function DailyBottomBuyPage() {
   return (
     <div className="yds-dbb yds-dbb--dashboard min-w-0 w-full">
       <header className="yds-dbb__hero">
-        <p className="yds-dbb__kicker">DAILY BOTTOM BUY</p>
+        <p className="yds-dbb__kicker">DAILY BOTTOM BUY · QUALITY</p>
         <h1 className="yds-dbb__title">일상 조정 매수</h1>
         <p className="yds-dbb__lead">
-          미국 주요 섹터 ETF의 일상적인 조정 구간을 4개 보조지표로 확인합니다.
+          15개 ETF의 장기 품질평가와 현재 저점 매수 조건을 나란히 확인해 투자 판단을 돕습니다. 두
+          결과는 합산하지 않습니다.
         </p>
       </header>
 
@@ -269,6 +292,14 @@ export default function DailyBottomBuyPage() {
             </p>
           </div>
 
+          <EtfDataAsOfBanner cards={etfList} />
+
+          <EtfInvestOverviewCards cards={etfList} selectedSymbol={symbol} onSelect={selectSymbol} />
+
+          <EtfInvestOverviewTable cards={etfList} selectedSymbol={symbol} onSelect={selectSymbol} />
+
+          <EtfInvestDecisionBoard cards={etfList} selectedSymbol={symbol} onSelect={selectSymbol} />
+
           <section className="yds-dbb-card mb-3" aria-label="오늘의 조정매수 후보">
             <h2 className="yds-dbb-section__title">오늘의 조정매수 후보</h2>
             <p className="yds-dbb__meta mt-2">3개 이상 조건 · 현재 매수 기회</p>
@@ -292,8 +323,15 @@ export default function DailyBottomBuyPage() {
                           <span className="yds-dbb-cand__title">{card.themeShort || card.theme || card.symbol}</span>
                           <span className="yds-dbb-cand__ticker">{card.symbol}</span>
                         </p>
+                        {etfClassLabel(card) ? (
+                          <p className="yds-dbb-cand__detail">{etfClassLabel(card)}</p>
+                        ) : null}
                         <p className="yds-dbb-cand__type">{isStrong ? "강한 저점" : "1차 매수"}</p>
                         <p className="yds-dbb-cand__detail">{card.stage?.label || `${card.count}/4`}</p>
+                        <p className="yds-dbb-cand__status">품질 {etfQualityLabel(card)}</p>
+                        <p className="yds-dbb-cand__status">
+                          {classifyEtfInvestDecision(card).shortLabel}
+                        </p>
                         {payload?.access === "full" ? (
                           opportunityCardHasDetails(card) ? (
                             <OpportunityFacts card={card} />
@@ -346,7 +384,7 @@ export default function DailyBottomBuyPage() {
                     <input
                       className="yds-dbb-picker__input"
                       value={query}
-                      placeholder="티커 또는 테마"
+                      placeholder="티커 · 테마 · 섹터"
                       onChange={(e) => setQuery(e.target.value)}
                     />
                   </label>
@@ -360,6 +398,7 @@ export default function DailyBottomBuyPage() {
                           onClick={() => selectSymbol(card.symbol)}
                         >
                           {etfTickerLabel(card)}
+                          {etfClassLabel(card) ? ` · ${etfClassLabel(card)}` : ""}
                           {card.ok ? ` · ${card.count}/4` : " · 데이터 없음"}
                         </button>
                       </li>
@@ -381,16 +420,38 @@ export default function DailyBottomBuyPage() {
                     <span className="yds-dbb-card__theme-inline"> {selected.symbol}</span>
                   </p>
                   {selected.role ? <p className="yds-dbb__meta">{selected.role}</p> : null}
+                  {etfClassLabel(selected) ? (
+                    <p className="yds-dbb__meta">{etfClassLabel(selected)}</p>
+                  ) : null}
+                  <p className="yds-dbb__meta">품질 평가 · {etfQualityLabel(selected)}</p>
+                  <p className="yds-dbb__meta">
+                    통합 분류 · {classifyEtfInvestDecision(selected).shortLabel}
+                  </p>
+                  <p className="yds-dbb__meta">DBB · {formatEtfDbbStatusLabel(selected)}</p>
                   {visibility.proPrice && formatPrice(selected.close) != null ? (
                     <p className="yds-dbb-price tabular-nums">${formatPrice(selected.close)}</p>
                   ) : null}
                   <p className="yds-dbb__meta">
-                    {selected.ok && selected.asOfDate ? `기준일 ${selected.asOfDate}` : "기준일 확인 불가"}
+                    {(() => {
+                      const st = getEtfDbbComputeStatus(selected)
+                      const asOf = pickEtfDataAsOf(selected)
+                      if (st.id === "error") {
+                        return `DBB 데이터 오류 · ${st.detailLabel || st.detail || "unavailable"}`
+                      }
+                      if (st.id === "stale") {
+                        return `가격 기준일 ${st.detail} · 데이터 지연 (${st.lagDays}일)`
+                      }
+                      if (selected.ok && asOf) return `가격 기준일 ${asOf}`
+                      if (selected.ok) return "가격 기준일 확인 불가"
+                      return "데이터 부족 · 신호 미표시"
+                    })()}
                   </p>
                   {episodes[selected.symbol]?.uiNote ? (
                     <p className="yds-dbb-card__episode">{episodes[selected.symbol].uiNote}</p>
                   ) : null}
                 </section>
+
+                <EtfQualityDetailPanel card={selected} />
 
                 <section
                   className={`yds-dbb-card yds-dbb-score yds-dbb-card--${
@@ -402,8 +463,9 @@ export default function DailyBottomBuyPage() {
                           ? "watch"
                           : "wait"
                   }`}
+                  aria-label="DBB 매수 분석"
                 >
-                  <h2 className="yds-dbb-section__title">DBB SCORE</h2>
+                  <h2 className="yds-dbb-section__title">DBB 매수 분석</h2>
                   <p className="yds-dbb-score__state">
                     {selected.ok ? selected.stage?.label || "대기" : "데이터 없음"}
                   </p>
@@ -549,7 +611,11 @@ export default function DailyBottomBuyPage() {
                   <span className="yds-dbb-all__sym">{card.symbol}</span>
                   <span className="yds-dbb-all__theme">
                     {card.themeShort || card.theme}
-                    {card.role ? ` · ${card.role}` : ""}
+                    {etfClassLabel(card) ? ` · ${etfClassLabel(card)}` : ""}
+                    {card.qualityGrade
+                      ? ` · Q ${card.qualityGrade}${card.qualityScore != null ? ` ${card.qualityScore}` : ""}`
+                      : ` · 품질 ${etfQualityLabel(card)}`}
+                    {` · ${classifyEtfInvestDecision(card).shortLabel}`}
                   </span>
                   <span className="yds-dbb-all__count">{card.ok ? `${card.count}/4` : "—"}</span>
                   <span className={`yds-dbb-all__stage is-${card.ok ? card.stage?.id || "wait" : "error"}`}>

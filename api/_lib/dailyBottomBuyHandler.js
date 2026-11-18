@@ -10,8 +10,12 @@ import {
   buildEtfCard,
   sortCardsByOpportunity,
 } from "./dailyBottomBuyEngine.js"
+import { evaluateEtfQualityUniverse } from "./etfQualityEngine.js"
 import { redactDailyBottomBuyPayload } from "./dailyBottomBuyRedact.js"
 import { requireProMembership } from "./requireProMembership.js"
+
+/** ~12y lookback: DBB uses recent bars only; quality needs ≥3y history. */
+const YAHOO_LOOKBACK_DAYS = 4400
 
 const YAHOO_HEADERS = {
   "User-Agent":
@@ -170,7 +174,7 @@ export function barsFromYahooChartResult(chartResult, nowUnix = Math.floor(Date.
  */
 async function fetchYahooOhlcv(symbol) {
   const period2 = Math.floor(Date.now() / 1000)
-  const period1 = period2 - 400 * 86400
+  const period1 = period2 - YAHOO_LOOKBACK_DAYS * 86400
   const url =
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
     `?period1=${period1}&period2=${period2}&interval=1d&events=history`
@@ -206,20 +210,31 @@ export async function handleDailyBottomBuy(req, res, deps = {}) {
   const fetchBars = deps.fetchYahooOhlcv ?? fetchYahooOhlcv
 
   try {
-    // Always evaluate full cards first; membership only affects response redaction.
-    const settled = await Promise.all(
+    // Fetch once per symbol: DBB signals + quality share bars; scoring stays independent.
+    /** @type {Record<string, any[]>} */
+    const barsBySymbol = {}
+    const drafts = await Promise.all(
       DAILY_BOTTOM_BUY_WATCHLIST.map(async (meta) => {
         try {
           const bars = await fetchBars(meta.symbol)
-          const evaluation = evaluateBars(bars, DAILY_BOTTOM_THRESHOLDS)
-          return buildEtfCard(meta, evaluation)
+          barsBySymbol[meta.symbol] = bars
+          return { meta, evaluation: evaluateBars(bars, DAILY_BOTTOM_THRESHOLDS) }
         } catch (err) {
-          return buildEtfCard(meta, {
-            ok: false,
-            error: err?.message || "fetch_failed",
-          })
+          return {
+            meta,
+            evaluation: { ok: false, error: err?.message || "fetch_failed" },
+          }
         }
       }),
+    )
+
+    const qualityBySymbol = evaluateEtfQualityUniverse(
+      DAILY_BOTTOM_BUY_WATCHLIST.map((m) => m.symbol),
+      barsBySymbol,
+    )
+
+    const settled = drafts.map(({ meta, evaluation }) =>
+      buildEtfCard(meta, evaluation, qualityBySymbol[meta.symbol]),
     )
 
     const cards = sortCardsByOpportunity(settled)

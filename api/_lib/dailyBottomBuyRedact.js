@@ -38,11 +38,45 @@ export function redactDailyBottomBuyCard(card) {
   if (!card || typeof card !== "object") return card
   const c = /** @type {Record<string, unknown>} */ (card)
   /** @type {Record<string, unknown>} */
+  const q = c.quality && typeof c.quality === "object" ? /** @type {Record<string, unknown>} */ (c.quality) : null
   const out = {
     symbol: c.symbol,
     theme: c.theme,
     themeShort: c.themeShort,
     role: c.role ?? null,
+    sector: c.sector ?? null,
+    industry: c.industry ?? null,
+    qualityStatus: c.qualityStatus ?? q?.status ?? "pending",
+    qualityLabel: c.qualityLabel ?? q?.label ?? "평가 보류",
+    qualityScore: c.qualityScore ?? q?.score ?? null,
+    qualityGrade: c.qualityGrade ?? q?.grade ?? null,
+    // FREE may see quality summary (not DBB PRO indicator details).
+    quality: q
+      ? {
+          status: q.status,
+          label: q.label,
+          score: q.score ?? null,
+          grade: q.grade ?? null,
+          peerGroup: q.peerGroup ?? null,
+          peerGroupLabel: q.peerGroupLabel ?? null,
+          pendingReasons: q.pendingReasons ?? [],
+          dataCoveragePct: q.dataCoveragePct ?? null,
+          dataConfidence: q.dataConfidence ?? null,
+          scoringMode: q.scoringMode ?? null,
+          peerSampleSize: q.peerSampleSize ?? null,
+          nominalWeights: q.nominalWeights ?? null,
+          appliedWeights: q.appliedWeights ?? null,
+          pillars: q.pillars ?? null,
+          asOfDate: q.asOfDate ?? null,
+          sources: q.sources ?? [],
+          morningstar: q.morningstar ?? {
+            status: "license_required",
+            label: "라이선스 확보 후 표시",
+            starRating: null,
+            medalistRating: null,
+          },
+        }
+      : null,
     ok: c.ok === true,
     count: typeof c.count === "number" ? c.count : 0,
     stage: redactStage(c.stage),
