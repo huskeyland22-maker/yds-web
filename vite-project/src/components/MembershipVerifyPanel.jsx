@@ -16,7 +16,6 @@ export default function MembershipVerifyPanel({ compact = false, className = "" 
   const membership = useMembership()
 
   if (!enabled) return null
-  if (membership.isLoggedOut) return null
 
   const model = membershipVerifyDisplayModel({
     isLoggedOut: membership.isLoggedOut,
@@ -26,24 +25,35 @@ export default function MembershipVerifyPanel({ compact = false, className = "" 
     ledgerStatus: membership.ledgerStatus,
     source: membership.source,
     reason: membership.reason,
+    audience: membership.audience,
   })
 
   const shell = compact
-    ? "inline-flex max-w-[min(100%,18rem)] flex-col gap-1 rounded-md border border-white/[0.1] bg-white/[0.03] px-2 py-1.5"
-    : "rounded-lg border border-white/[0.1] bg-white/[0.03] px-3 py-2.5"
+    ? "yds-membership-verify inline-flex w-full max-w-full flex-col gap-1 rounded-md border border-white/[0.1] bg-white/[0.03] px-2 py-1.5"
+    : "yds-membership-verify rounded-lg border border-white/[0.1] bg-white/[0.03] px-3 py-2.5"
 
   return (
     <div className={`${shell} ${className}`.trim()} data-testid="membership-verify-panel">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-1.5">
         <p className="m-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
           Membership
         </p>
-        {model.phase === "loading" ? (
-          <span className="text-[10px] text-amber-200/90">Loading</span>
-        ) : null}
-        {model.phase === "error" ? (
-          <span className="text-[10px] text-rose-300">오류</span>
-        ) : null}
+        <div className="flex min-w-0 flex-wrap items-center justify-end gap-1">
+          {model.showOperatorBadge ? (
+            <span
+              className="yds-membership-operator-badge shrink-0"
+              data-testid="membership-operator-badge"
+            >
+              OPERATOR
+            </span>
+          ) : null}
+          {model.phase === "loading" ? (
+            <span className="text-[10px] text-amber-200/90">Loading</span>
+          ) : null}
+          {model.phase === "error" ? (
+            <span className="text-[10px] text-rose-300">오류</span>
+          ) : null}
+        </div>
       </div>
       <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[10px] leading-snug text-slate-300">
         <dt className="text-slate-500">plan</dt>

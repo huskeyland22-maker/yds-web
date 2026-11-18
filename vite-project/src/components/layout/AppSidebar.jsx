@@ -1,249 +1,72 @@
-import { useMemo, useState } from "react"
-import { NavLink, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { countUnreadPickAlerts } from "../../content/ydsStockPickAlertStorage.js"
-import AiReportMarketStatusBlock from "../AiReportMarketStatusBlock.jsx"
-import {
-  getCoreNavItems,
-  getOtherNavItems,
-  getSidebarFooterLinks,
-} from "../../utils/appNavItems.js"
-
-/**
- * 로딩 중에는 로딩 문구를 유지한다.
- * 사이클 이력이 있거나 조회가 끝났는데 지표가 없으면, 어느 화면이든 로딩 문구를 남기지 않는다.
- * @param {string} _pathname
- * @param {object | null | undefined} sidebarPulse
- */
-function resolveSidebarAiStatus(_pathname, sidebarPulse) {
-  const live = sidebarPulse?.aiReportStatus ?? null
-  if (live?.ready) return live
-  const fromHistory = sidebarPulse?.historyAiReportStatus
-  if (fromHistory?.ready) return fromHistory
-  const phase = sidebarPulse?.memoLoad?.phase
-  if (phase === "error") {
-    return {
-      ready: false,
-      title: "오늘의 해석",
-      memoLines: ["시장 데이터를 불러오지 못했습니다."],
-      updateLine: "업데이트 —",
-      basisLine: "",
-    }
-  }
-  if (phase === "empty") {
-    return {
-      ready: false,
-      title: "오늘의 해석",
-      memoLines: ["시장 해석에 필요한 지표가 없습니다."],
-      updateLine: "업데이트 —",
-      basisLine: "",
-    }
-  }
-  return live
-}
+import MarketShellNav from "./MarketShellNav.jsx"
+import SidebarAccountPanel from "./SidebarAccountPanel.jsx"
 
 /**
  * @param {{
- *   sidebarPulse: object
+ *   sidebarPulse?: object
  *   onOpenInputPanel: () => void
  *   onOpenAccountSettings: () => void
+ *   user: object | null
+ *   onLogin: () => void
+ *   onLogout: () => void
+ *   buildVersion?: string | null
+ *   pwaLastSyncLabel?: string | null
  * }} props
  */
-export default function AppSidebar({ sidebarPulse, onOpenInputPanel, onOpenAccountSettings }) {
+export default function AppSidebar({
+  onOpenInputPanel,
+  onOpenAccountSettings,
+  user,
+  onLogin,
+  onLogout,
+}) {
   const location = useLocation()
-  const coreItems = getCoreNavItems()
-  const otherItems = getOtherNavItems()
-  const footerLinks = getSidebarFooterLinks()
-  const aiStatus = useMemo(
-    () => resolveSidebarAiStatus(location.pathname, sidebarPulse),
-    [location.pathname, sidebarPulse],
-  )
   const pickAlertUnread = countUnreadPickAlerts()
-  const [otherOpen, setOtherOpen] = useState(() =>
-    otherItems.some((item) => item.path === location.pathname),
-  )
-  const [dbbOpen, setDbbOpen] = useState(true)
-  // 핵심 매수 화면은 신호·단계만으로 충분 — 패닉 기반「오늘의 해석」비표시
-  const hideTodayInterpretation =
-    location.pathname === "/daily-bottom-buy" ||
-    location.pathname === "/equity-daily-bottom-buy" ||
-    location.pathname === "/leverage-adjustment" ||
-    location.pathname === "/" ||
-    location.pathname === "/market-analysis" ||
-    location.pathname === "/market-dashboard"
+  const isMarket = location.pathname === "/market-analysis"
 
   return (
-    <aside className="yds-sidebar hidden w-[15.5rem] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex lg:h-[100dvh]">
-      <div className="yds-sidebar__brand shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
-        <span className="yds-sidebar__mark" aria-hidden>
-          Y
-        </span>
-        <span className="min-w-0">
-          <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
-            Y&apos;ds
-          </p>
-          <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
-            함께하는 인생 투자
-          </p>
-        </span>
-      </div>
-
-      <nav className="flex flex-col gap-1 px-2.5 py-3" aria-label="핵심 메뉴">
-        {coreItems.map((item) =>
-          item.children?.length ? (
-            <div key={item.path}>
-              <button
-                type="button"
-                className="yds-sidebar-core flex w-full items-start justify-between gap-2 rounded-md border-l-2 border-l-transparent px-3 py-2.5 text-left transition hover:border-l-sky-500/35 hover:bg-white/[0.03]"
-                aria-expanded={dbbOpen}
-                onClick={() => setDbbOpen((v) => !v)}
-              >
-                <span className="min-w-0">
-                  <span className="block text-[12.5px] font-semibold leading-snug tracking-tight text-slate-300">
-                    {item.label}
-                  </span>
-                  <span className="mt-0.5 block text-[10px] leading-snug text-slate-500">{item.subtitle}</span>
-                </span>
-                <span className="font-mono text-[10px] text-slate-600">{dbbOpen ? "⌃" : "⌄"}</span>
-              </button>
-              {dbbOpen ? (
-                <nav className="mb-0.5 ml-3 flex flex-col gap-0.5 border-l border-white/[0.06] pl-2" aria-label={item.label}>
-                  {item.children.map((child) => (
-                    <NavLink
-                      key={child.path}
-                      to={child.path}
-                      end={child.path === "/daily-bottom-buy"}
-                      className={({ isActive }) =>
-                        [
-                          "rounded-md px-2 py-1.5 text-[11px] font-medium transition",
-                          isActive
-                            ? "bg-sky-500/[0.1] text-slate-50"
-                            : "text-slate-500 hover:bg-white/[0.03] hover:text-slate-300",
-                        ].join(" ")
-                      }
-                    >
-                      {child.label}
-                    </NavLink>
-                  ))}
-                </nav>
-              ) : null}
-            </div>
-          ) : (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === "/" || item.path === "/daily-bottom-buy"}
-              className={({ isActive }) =>
-                [
-                  "yds-sidebar-core group block rounded-md border-l-2 px-3 py-2.5 transition",
-                  item.tone === "brand"
-                    ? isActive
-                      ? "border-l-sky-400/70 bg-sky-500/[0.1]"
-                      : "border-l-transparent hover:border-l-sky-500/35 hover:bg-white/[0.03]"
-                    : isActive
-                      ? "border-l-rose-400/65 bg-rose-500/[0.08]"
-                      : "border-l-transparent hover:border-l-rose-500/30 hover:bg-white/[0.03]",
-                ].join(" ")
-              }
-            >
-              {({ isActive }) => (
-                <span className="flex items-start justify-between gap-2">
-                  <span className="min-w-0">
-                    <span
-                      className={[
-                        "block text-[12.5px] font-semibold leading-snug tracking-tight",
-                        isActive ? "text-slate-50" : "text-slate-300",
-                      ].join(" ")}
-                    >
-                      {item.label}
-                    </span>
-                    <span className="mt-0.5 block text-[10px] leading-snug text-slate-500">{item.subtitle}</span>
-                  </span>
-                </span>
-              )}
-            </NavLink>
-          ),
-        )}
-      </nav>
-
-      <div className="mx-2.5 border-t border-white/[0.06]" />
-
-      <div className="px-2.5 py-2">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-[11px] font-semibold tracking-tight text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-300"
-          aria-expanded={otherOpen}
-          onClick={() => setOtherOpen((v) => !v)}
-        >
-          <span>기타 기능</span>
-          <span className="font-mono text-[10px] text-slate-600">{otherOpen ? "⌃" : "⌄"}</span>
-        </button>
-        {otherOpen ? (
-          <nav className="mt-0.5 flex flex-col gap-0.5" aria-label="기타 기능">
-            {otherItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  [
-                    "flex items-center rounded-md px-2 py-1.5 text-[11px] font-medium transition",
-                    isActive
-                      ? "bg-white/[0.07] text-slate-100"
-                      : "text-slate-500 hover:bg-white/[0.03] hover:text-slate-300",
-                  ].join(" ")
-                }
-              >
-                <span className="min-w-0 truncate">{item.label}</span>
-                {item.path === "/stock-picks" && pickAlertUnread > 0 ? (
-                  <span className="ml-auto rounded-full bg-rose-500/90 px-1.5 py-0.5 text-[9px] font-bold text-white">
-                    {pickAlertUnread}
-                  </span>
-                ) : null}
-              </NavLink>
-            ))}
-          </nav>
-        ) : null}
-      </div>
-
-      <div className="mx-2.5 border-t border-white/[0.06]" />
-
-      <nav className="flex flex-col gap-0.5 px-2.5 py-2" aria-label="안내">
-        {footerLinks.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              [
-                "rounded-md px-2 py-1.5 text-[11px] font-medium transition",
-                isActive ? "bg-white/[0.06] text-slate-200" : "text-slate-500 hover:text-slate-300",
-              ].join(" ")
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-        <button
-          type="button"
-          onClick={onOpenAccountSettings}
-          className="mt-0.5 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-[11px] font-medium text-slate-500 transition hover:bg-white/[0.03] hover:text-slate-300"
-        >
-          <span>계정 설정</span>
-          <span className="text-slate-600" aria-hidden>
-            ›
+    <aside
+      className={[
+        "yds-sidebar hidden w-[15.5rem] shrink-0 flex-col border-r border-white/[0.06] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] lg:flex",
+        isMarket ? "yds-sidebar--market" : "",
+      ].join(" ")}
+    >
+      {isMarket ? (
+        <div className="yds-sidebar__brand shrink-0 px-3.5 pb-3 pt-3.5">
+          <span className="min-w-0">
+            <p className="m-0 text-[15px] font-semibold leading-tight text-slate-50">YDS 투자 시스템</p>
+            <p className="m-0 mt-1 text-[10px] font-semibold tracking-wide text-violet-300">PRO</p>
           </span>
-        </button>
-      </nav>
+        </div>
+      ) : (
+        <div className="yds-sidebar__brand shrink-0 px-3.5 pb-3 pt-3.5 lg:border-b lg:border-white/[0.06]">
+          <span className="yds-sidebar__mark" aria-hidden>
+            Y
+          </span>
+          <span className="min-w-0">
+            <p className="m-0 font-display text-[17px] font-semibold leading-none tracking-[0.04em] text-slate-50">
+              Y&apos;ds
+            </p>
+            <p className="m-0 mt-1.5 text-[10px] font-medium tracking-[0.02em] text-slate-500">
+              함께하는 인생 투자
+            </p>
+          </span>
+        </div>
+      )}
 
-      <div className="mt-auto hidden border-t border-white/[0.06] px-2.5 pb-3 pt-2 lg:block">
-        {!hideTodayInterpretation && aiStatus ? (
-          <AiReportMarketStatusBlock status={aiStatus} compact />
-        ) : null}
-        <button
-          type="button"
-          onClick={onOpenInputPanel}
-          className="yds-sidebar-metric-input-btn mt-2 w-full rounded-lg border border-sky-500/25 bg-sky-500/[0.08] px-2 py-2 text-[11px] font-medium text-sky-100/95 transition hover:border-sky-400/35 hover:bg-sky-500/[0.14]"
-        >
-          AI 리포트 입력
-        </button>
+      <div className="yds-sidebar__scroll">
+        <MarketShellNav
+          pickAlertUnread={pickAlertUnread}
+          onOpenAccountSettings={onOpenAccountSettings}
+          onOpenInputPanel={onOpenInputPanel}
+          inputLabel="AI 리포트 입력"
+        />
+      </div>
+
+      <div className="yds-sidebar__dock">
+        <SidebarAccountPanel user={user} onLogin={onLogin} onLogout={onLogout} />
       </div>
     </aside>
   )

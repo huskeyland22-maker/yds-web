@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useFirebaseAuthUser } from "./useFirebaseAuthUser.js"
 import {
+  audienceFromApiBody,
   detailAccessFromApiBody,
   MEMBERSHIP_STATUS,
   membershipStatusFromApiBody,
@@ -18,6 +19,7 @@ import {
  *   ledgerStatus: string | null
  *   source: string | null
  *   reason: string | null
+ *   audience: import("../content/ydsMembership.js").MembershipAudience
  *   detailAccess: boolean
  *   refreshedAt: number | null
  *   refresh: () => void
@@ -34,6 +36,9 @@ export function useMembershipQuery() {
   const [ledgerStatus, setLedgerStatus] = useState(/** @type {string | null} */ (null))
   const [source, setSource] = useState(/** @type {string | null} */ (null))
   const [reason, setReason] = useState(/** @type {string | null} */ (null))
+  const [audience, setAudience] = useState(
+    /** @type {import("../content/ydsMembership.js").MembershipAudience} */ (null),
+  )
   const [detailAccess, setDetailAccess] = useState(false)
   const [refreshedAt, setRefreshedAt] = useState(/** @type {number | null} */ (null))
   const [refreshNonce, setRefreshNonce] = useState(0)
@@ -47,6 +52,7 @@ export function useMembershipQuery() {
     setLedgerStatus(null)
     setSource(null)
     setReason(null)
+    setAudience(null)
     setDetailAccess(false)
   }
 
@@ -67,6 +73,7 @@ export function useMembershipQuery() {
     let cancelled = false
     setStatus(MEMBERSHIP_STATUS.LOADING)
     setReason(null)
+    setAudience(null)
     setDetailAccess(false)
 
     ;(async () => {
@@ -88,6 +95,7 @@ export function useMembershipQuery() {
           setLedgerStatus(null)
           setSource(null)
           setReason(`http_${res.status}`)
+          setAudience(null)
           setDetailAccess(false)
           setRefreshedAt(Date.now())
           return
@@ -100,6 +108,7 @@ export function useMembershipQuery() {
         setLedgerStatus(typeof body?.status === "string" ? body.status : null)
         setSource(typeof body?.source === "string" ? body.source : null)
         setReason(typeof body?.reason === "string" ? body.reason : null)
+        setAudience(audienceFromApiBody(body))
         setDetailAccess(detailAccessFromApiBody(body))
         setRefreshedAt(Date.now())
       } catch {
@@ -109,6 +118,7 @@ export function useMembershipQuery() {
         setLedgerStatus(null)
         setSource(null)
         setReason("fetch_failed")
+        setAudience(null)
         setDetailAccess(false)
         setRefreshedAt(Date.now())
       }
@@ -126,6 +136,7 @@ export function useMembershipQuery() {
     ledgerStatus,
     source,
     reason,
+    audience,
     detailAccess,
     refreshedAt,
     refresh,

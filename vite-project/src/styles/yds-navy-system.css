@@ -1,0 +1,2550 @@
+/**
+ * Deep-navy catch-all. Loads last.
+ * Remaps leftover light Tailwind surfaces inside the content column.
+ * Does not touch sidebar, drawer, formulas, or signal class names.
+ */
+
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-white"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-slate-50"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-slate-100"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-gray-50"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-gray-100"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-zinc-50"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-neutral-50"],
+.app-shell-host.yds-theme-premium [role="dialog"] [class*="bg-white"],
+.app-shell-host.yds-theme-premium [role="dialog"][class*="bg-white"] {
+  background-color: var(--yds-bg-elevated);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-slate-950"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-slate-900"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-slate-800"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-gray-900"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-gray-800"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-zinc-900"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-black"],
+.app-shell-host.yds-theme-premium [role="dialog"] [class*="text-slate-900"],
+.app-shell-host.yds-theme-premium [role="dialog"] [class*="text-slate-800"] {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-slate-700"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-slate-600"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-gray-700"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-gray-600"] {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-slate-500"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-slate-400"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="text-gray-500"] {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host [class*="border-slate-200"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="border-slate-100"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="border-gray-200"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="border-gray-100"] {
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]),
+  select,
+  textarea
+) {
+  background-color: var(--yds-input-bg);
+  color: var(--yds-input-text);
+  border-color: var(--yds-input-border);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host :is(input, textarea)::placeholder {
+  color: var(--yds-input-placeholder);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host :is(input, select, textarea):focus-visible {
+  outline: none;
+  border-color: var(--yds-input-border-focus);
+  box-shadow: var(--yds-shadow-focus);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host select option {
+  background-color: var(--yds-input-bg);
+  color: var(--yds-input-text);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host table {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host thead th {
+  background-color: var(--yds-bg-muted);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host tbody tr {
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .recharts-cartesian-grid line {
+  stroke: rgba(186, 198, 220, 0.22);
+}
+
+.app-shell-host.yds-theme-premium .recharts-cartesian-axis-tick text,
+.app-shell-host.yds-theme-premium .recharts-legend-item-text {
+  fill: #b7c3d6;
+}
+
+.app-shell-host.yds-theme-premium [role="dialog"] {
+  color: var(--yds-text);
+}
+
+/* Account settings — was terminal charcoal; align with navy cards. */
+.app-shell-host.yds-theme-premium [role="dialog"][aria-labelledby="yds-account-settings-title"] {
+  background-color: var(--yds-bg-elevated) !important;
+  border-color: var(--yds-border) !important;
+  color: var(--yds-text);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium [role="dialog"][aria-labelledby="yds-account-settings-title"] h2 {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium [role="dialog"][aria-labelledby="yds-account-settings-title"] p {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium [role="dialog"][aria-labelledby="yds-account-settings-title"] button {
+  border-color: var(--yds-border-strong);
+}
+
+.app-shell-host.yds-theme-premium .yds-track-record-modal__panel {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-track-record-modal__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-track-record-modal__sub,
+.app-shell-host.yds-theme-premium .yds-track-record-modal__grid dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-track-record-modal__ret--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-track-record-modal__ret--down {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__title,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page h1 {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__sub,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__note {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj,
+.app-shell-host.yds-theme-premium .yds-oj label,
+.app-shell-host.yds-theme-premium .yds-oj__head p,
+.app-shell-host.yds-theme-premium .yds-oj__panel p,
+.app-shell-host.yds-theme-premium .yds-oj__note p {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__head h1,
+.app-shell-host.yds-theme-premium .yds-oj__panel h2,
+.app-shell-host.yds-theme-premium .yds-oj__analysis h3,
+.app-shell-host.yds-theme-premium .yds-oj__card-value {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__kicker,
+.app-shell-host.yds-theme-premium .yds-oj__card-label,
+.app-shell-host.yds-theme-premium .yds-oj__card-hint,
+.app-shell-host.yds-theme-premium .yds-oj__sub {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj a {
+  color: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__card,
+.app-shell-host.yds-theme-premium .yds-oj__panel,
+.app-shell-host.yds-theme-premium .yds-oj__note,
+.app-shell-host.yds-theme-premium .yds-oj__notice {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__down {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__filters .is-on {
+  background: var(--yds-ai-soft);
+  color: var(--yds-ai-text);
+  border-color: var(--yds-ai-from);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__table th,
+.app-shell-host.yds-theme-premium .yds-oj__table td,
+.app-shell-host.yds-theme-premium .yds-oj__holdings li,
+.app-shell-host.yds-theme-premium .yds-oj__mobile li,
+.app-shell-host.yds-theme-premium .yds-oj__months li {
+  border-bottom-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__months li,
+.app-shell-host.yds-theme-premium .yds-oj__panel {
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj button {
+  background: var(--yds-bg-elevated);
+  color: var(--yds-text);
+  border-color: var(--yds-border-strong);
+}
+
+/* Help pages written for the old terminal: lift dim slate text onto the navy canvas. */
+.app-shell-host.yds-theme-premium .yds-glossary__title,
+.app-shell-host.yds-theme-premium .yds-glossary__item dt,
+.app-shell-host.yds-theme-premium .yds-launch-page__title,
+.app-shell-host.yds-theme-premium .yds-launch-block__h2,
+.app-shell-host.yds-theme-premium .yds-launch-steps__title,
+.app-shell-host.yds-theme-premium .yds-launch-faq__item dt {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-glossary__item dd,
+.app-shell-host.yds-theme-premium .yds-launch-page__sub,
+.app-shell-host.yds-theme-premium .yds-launch-block__p,
+.app-shell-host.yds-theme-premium .yds-launch-block__ol,
+.app-shell-host.yds-theme-premium .yds-launch-faq__item dd {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-glossary__sub,
+.app-shell-host.yds-theme-premium .yds-launch-footer__label,
+.app-shell-host.yds-theme-premium .yds-launch-footer__list a,
+.app-shell-host.yds-theme-premium .yds-launch-steps__time,
+.app-shell-host.yds-theme-premium .yds-feedback__label {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-glossary__item,
+.app-shell-host.yds-theme-premium .yds-launch-faq__item,
+.app-shell-host.yds-theme-premium .yds-launch-steps__item,
+.app-shell-host.yds-theme-premium .yds-launch-footer {
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-feedback__area {
+  background: var(--yds-input-bg);
+  color: var(--yds-input-text);
+  border-color: var(--yds-input-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-feedback__types button {
+  color: var(--yds-text-secondary);
+  border-color: var(--yds-border);
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-feedback__types button.is-active {
+  color: var(--yds-ai-text);
+  border-color: color-mix(in srgb, var(--yds-ai-from) 55%, var(--yds-border));
+  background: var(--yds-ai-soft);
+}
+
+/* Update toast sits above the mobile tab bar and was covering form fields. */
+@media (max-width: 720px) {
+  .app-shell-host.yds-theme-premium div[role="status"][class*="z-[10002]"] {
+    top: calc(3.35rem + env(safe-area-inset-top));
+    bottom: auto;
+  }
+}
+
+.app-shell-host.yds-theme-premium div[role="status"][class*="z-[10002]"] [class*="text-slate-500"] {
+  color: var(--yds-text-muted);
+}
+
+/* ═══════════════════════════════════════
+   Pass 2 — glossary / About / calendar cards
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-glossary__link,
+.app-shell-host.yds-theme-premium .yds-launch-page__back,
+.app-shell-host.yds-theme-premium .yds-launch-steps__cta,
+.app-shell-host.yds-theme-premium .yds-launch-footer__list a:hover,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__sub a,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__link,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__more {
+  color: var(--yds-ai-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-glossary__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-glossary__item {
+  margin: 0;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  background: var(--yds-bg-elevated);
+  box-shadow: var(--yds-shadow-card);
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-glossary__item dt {
+  font-size: 0.88rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-glossary__item dd {
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.app-shell-host.yds-theme-premium .yds-launch-block,
+.app-shell-host.yds-theme-premium .yds-launch-faq__item,
+.app-shell-host.yds-theme-premium .yds-launch-steps__item {
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  background: var(--yds-bg-elevated);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-launch-welcome__link--primary,
+.app-shell-host.yds-theme-premium .yds-launch-done__btn {
+  background: var(--yds-ai-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+.app-shell-host.yds-theme-premium .yds-launch-welcome__link,
+.app-shell-host.yds-theme-premium .yds-launch-welcome__btn {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__row {
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__date,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__weekday,
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__cat {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-inv-cal__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-stock-week-event {
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  background: var(--yds-bg-muted);
+  border-bottom: 1px solid var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-stock-week-event__date {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-stock-week-event__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-stock-week-event__impact {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-inv-cal--page .yds-stock-week-event__link:hover {
+  color: var(--yds-ai-text);
+}
+
+/* ═══════════════════════════════════════
+   Pass 2 — Panic Lab chart/table contrast
+   ═══════════════════════════════════════ */
+.app-shell-host.yds-theme-premium .yds-panic-lab {
+  --pl-border: var(--yds-border);
+  --pl-muted: var(--yds-text-muted);
+  --pl-text: var(--yds-text-secondary);
+  background: var(--yds-bg-muted);
+  border-color: var(--yds-border);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__section,
+.app-shell-host.yds-theme-premium .yds-panic-lab__stat,
+.app-shell-host.yds-theme-premium .yds-panic-lab__chart-wrap,
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-list,
+.app-shell-host.yds-theme-premium .yds-panic-lab__table-wrap {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__section:not(:first-of-type) {
+  border-left: 3px solid var(--yds-ai-from);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab table th {
+  background: var(--yds-bg-muted);
+  color: var(--yds-text);
+  border-bottom-color: var(--yds-border);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab table td {
+  color: var(--yds-text-secondary);
+  border-bottom-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__cell-n {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-bar {
+  background: var(--yds-ai-from);
+}
+
+.app-shell-host.yds-theme-premium .yds-panic-lab__contrib-bar-wrap {
+  background: var(--yds-bg-muted);
+}
+
+/* ═══════════════════════════════════════
+   Pass 2 — mobile portfolio / AI / watchlist
+   ═══════════════════════════════════════ */
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .yds-glossary,
+  .app-shell-host.yds-theme-premium .yds-launch-page,
+  .app-shell-host.yds-theme-premium .yds-ai-report,
+  .app-shell-host.yds-theme-premium .yds-pf-v1-page,
+  .app-shell-host.yds-theme-premium .yds-user-watchlist {
+    padding-inline: 0.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-pf-v1__form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-pf-v1__btn,
+  .app-shell-host.yds-theme-premium .yds-pf-v1__btn--ghost,
+  .app-shell-host.yds-theme-premium .yds-pf-v1__remove {
+    min-height: 2.5rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-pf-v1__holding-row,
+  .app-shell-host.yds-theme-premium .yds-pf-v1__block {
+    padding: 0.85rem 0.8rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-pf-v1__alloc-table {
+    font-size: 0.78rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__card {
+    padding: 0.85rem 0.8rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-ai-report__meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-glossary__header,
+  .app-shell-host.yds-theme-premium .yds-launch-page__header,
+  .app-shell-host.yds-theme-premium .yds-inv-cal__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-panic-lab__table-wrap {
+    margin-inline: -0.15rem;
+  }
+}
+
+/* Residual light buttons / chips inside main column */
+.app-shell-host.yds-theme-premium .app-main-host button[class*="bg-white"],
+.app-shell-host.yds-theme-premium .app-main-host a[class*="bg-white"] {
+  background-color: var(--yds-bg-elevated);
+  color: var(--yds-text);
+  border-color: var(--yds-border);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host button[class*="bg-slate-100"],
+.app-shell-host.yds-theme-premium .app-main-host button[class*="bg-gray-100"] {
+  background-color: var(--yds-bg-muted);
+  color: var(--yds-text-secondary);
+}
+
+/* Membership verify — OPERATOR audience badge (display-only; plan stays FREE) */
+.yds-membership-operator-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.1rem 0.36rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--yds-ai-from) 40%, transparent);
+  background: color-mix(in srgb, var(--yds-ai-from) 16%, #0b1224 84%);
+  box-shadow: none;
+  color: #ede9fe;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.yds-membership-verify {
+  min-width: 0;
+}
+
+/* ═══════════════════════════════════════
+   Pass 3 — 시안 B 전체 디자인 통일 (공통 서피스)
+   메뉴 구조·기능·차트 Tooltip 세부 제외
+   ═══════════════════════════════════════ */
+
+/* Extra light utility leftovers → navy */
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-zinc-100"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-zinc-200"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-stone-50"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-stone-100"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-neutral-100"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-neutral-200"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-slate-200"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="bg-gray-200"] {
+  background-color: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host [class*="border-zinc-200"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="border-stone-200"],
+.app-shell-host.yds-theme-premium .app-main-host [class*="border-neutral-200"] {
+  border-color: var(--yds-border);
+}
+
+/* Common card / panel rhythm under main column */
+.app-shell-host.yds-theme-premium .app-main-host .rounded-card {
+  background-color: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]),
+  select,
+  textarea
+) {
+  border-radius: var(--yds-radius-sm);
+}
+
+/* Investment home — slate charcoal → 시안 B navy cards */
+.app-shell-host.yds-theme-premium .yds-home {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-home__header,
+.app-shell-host.yds-theme-premium .yds-home__section,
+.app-shell-host.yds-theme-premium .yds-home-stage,
+.app-shell-host.yds-theme-premium .yds-home-priority-card,
+.app-shell-host.yds-theme-premium .yds-home-market-card,
+.app-shell-host.yds-theme-premium .yds-home-strategy-card,
+.app-shell-host.yds-theme-premium .yds-home-action-card,
+.app-shell-host.yds-theme-premium .yds-home-target__main,
+.app-shell-host.yds-theme-premium .yds-home-target__aside,
+.app-shell-host.yds-theme-premium .yds-home-metric,
+.app-shell-host.yds-theme-premium .yds-home-form__field,
+.app-shell-host.yds-theme-premium .yds-home-account-card {
+  background: var(--yds-bg-elevated);
+  border-color: var(--yds-border);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-home__title,
+.app-shell-host.yds-theme-premium .yds-home-stage__title,
+.app-shell-host.yds-theme-premium .yds-home__section-head h2 {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-home__kicker,
+.app-shell-host.yds-theme-premium .yds-home__section-head p,
+.app-shell-host.yds-theme-premium .yds-home-metric__sub,
+.app-shell-host.yds-theme-premium .yds-home-stage__eyebrow,
+.app-shell-host.yds-theme-premium .yds-home-form__field span {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-home__sub,
+.app-shell-host.yds-theme-premium .yds-home-priority-card__desc,
+.app-shell-host.yds-theme-premium .yds-home-market-card__desc,
+.app-shell-host.yds-theme-premium .yds-home-strategy-card__desc {
+  color: var(--yds-text-secondary);
+}
+
+/* Value chain desk */
+.app-shell-host.yds-theme-premium .value-chain-page,
+.app-shell-host.yds-theme-premium .value-chain-dashboard {
+  background: var(--yds-bg-elevated) !important;
+  border-color: var(--yds-border) !important;
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .value-chain-page h1,
+.app-shell-host.yds-theme-premium .value-chain-page h2,
+.app-shell-host.yds-theme-premium .value-chain-dashboard h2 {
+  color: var(--yds-text);
+}
+
+/* Recommendation history */
+.app-shell-host.yds-theme-premium .reco-history-page {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .reco-history-page__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .reco-history-page__sub,
+.app-shell-host.yds-theme-premium .reco-history-search__label {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .reco-history-page__link {
+  color: var(--yds-ai-text);
+}
+
+.app-shell-host.yds-theme-premium .reco-history-summary,
+.app-shell-host.yds-theme-premium .reco-history-search {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  box-shadow: var(--yds-shadow-card);
+  color: var(--yds-text-secondary);
+  padding: 0.75rem 0.9rem;
+}
+
+.app-shell-host.yds-theme-premium .reco-history-page table {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .reco-history-search__input {
+  background: var(--yds-input-bg) !important;
+  border-color: var(--yds-input-border) !important;
+  color: var(--yds-input-text) !important;
+}
+
+/* Trading log + journal */
+.app-shell-host.yds-theme-premium .trading-log-page {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .trading-log-page > header,
+.app-shell-host.yds-theme-premium .trading-log-page .rounded-2xl {
+  background: var(--yds-bg-elevated) !important;
+  border-color: var(--yds-border) !important;
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__stat,
+.app-shell-host.yds-theme-premium .yds-trading-journal__table-wrap {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__stat-key,
+.app-shell-host.yds-theme-premium .yds-trading-journal__empty,
+.app-shell-host.yds-theme-premium .yds-trading-journal__asof,
+.app-shell-host.yds-theme-premium .yds-trading-journal__foot {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__stat-val,
+.app-shell-host.yds-theme-premium .yds-trading-journal__name {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__stat-val--up {
+  color: var(--yds-signal-up);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__stat-val--down {
+  color: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__link {
+  color: var(--yds-ai-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__table th {
+  background: var(--yds-bg-muted);
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-trading-journal__table td {
+  color: var(--yds-text-secondary);
+  border-color: var(--yds-border);
+}
+
+/* Admin / 404 */
+.app-shell-host.yds-theme-premium .yds-admin {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-admin__header,
+.app-shell-host.yds-theme-premium .yds-admin__section,
+.app-shell-host.yds-theme-premium .yds-admin__metric {
+  background: var(--yds-bg-elevated);
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-admin__section-title,
+.app-shell-host.yds-theme-premium .yds-admin__metric-val {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-admin__section-sub,
+.app-shell-host.yds-theme-premium .yds-admin__metric-key,
+.app-shell-host.yds-theme-premium .yds-admin__metric-sub {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-not-found {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-not-found__title {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-not-found__sub,
+.app-shell-host.yds-theme-premium .yds-not-found__code {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-not-found__primary {
+  background: var(--yds-ai-gradient);
+  border-color: transparent;
+  color: #fff;
+  border-radius: var(--yds-radius-md);
+  box-shadow: var(--yds-glow-purple);
+}
+
+.app-shell-host.yds-theme-premium .yds-not-found__link {
+  color: var(--yds-ai-text);
+}
+
+/* Shared elevated cards — 절제된 그림자 (강한 purple glow 지양) */
+.app-shell-host.yds-theme-premium .yds-pf-v1__block,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__card,
+.app-shell-host.yds-theme-premium .yds-dbb-card,
+.app-shell-host.yds-theme-premium .yds-panic-lab__section,
+.app-shell-host.yds-theme-premium .yds-perf-center__stat,
+.app-shell-host.yds-theme-premium .yds-perf-val__section,
+.app-shell-host.yds-theme-premium .yds-ai-report .yds-ai-report__card,
+.app-shell-host.yds-theme-premium .yds-glossary__item,
+.app-shell-host.yds-theme-premium .yds-launch-block {
+  box-shadow: var(--yds-shadow-card);
+}
+
+/* Soft purple accent rail on primary content sections */
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  .yds-pf-v1__block,
+  .yds-dbb-card,
+  .yds-perf-val__section,
+  .yds-ai-report__card,
+  .yds-user-watchlist__card
+) {
+  border-left: 2px solid color-mix(in srgb, var(--yds-ai-from) 55%, var(--yds-border));
+}
+
+/* ═══════════════════════════════════════
+   Pass 4 — PC·모바일 화면 통일 (레이아웃만)
+   차트·표·Tooltip 세부는 4단계. 메뉴 구조 변경 없음.
+   ═══════════════════════════════════════ */
+
+.app-shell-host.yds-theme-premium,
+.app-shell-host.yds-theme-premium .app-column-host,
+.app-shell-host.yds-theme-premium .app-main-host {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host {
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Tables / wide boards: contain scroll inside section, not the viewport */
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  .yds-panic-lab__table-wrap,
+  .yds-perf-center__table-wrap,
+  .yds-perf-val__table-wrap,
+  .yds-trading-journal__table-wrap,
+  .yds-oj__table,
+  .yds-dbb__table-wrap,
+  .yds-spick-platform [class*="table-wrap"],
+  .reco-history-page [class*="table"]
+) {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Page headers: prevent title/action collision on mid widths */
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  .yds-panic-lab__header,
+  .yds-pf-v1-page__header,
+  .yds-user-watchlist__header,
+  .yds-ai-report__header,
+  .yds-perf-val__header,
+  .yds-perf-center__header,
+  .yds-dbb__hero,
+  .yds-spick-page__header,
+  .yds-glossary__header,
+  .yds-launch-page__header,
+  .yds-inv-cal__header,
+  .yds-oj__head
+) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.65rem 1rem;
+  min-width: 0;
+}
+
+/* Desktop content column breathing room */
+@media (min-width: 1024px) {
+  .app-shell-host.yds-theme-premium .app-main-host {
+    padding-inline: clamp(0.85rem, 1.6vw, 1.5rem);
+    padding-block: 0.85rem 1.35rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-desktop-topbar {
+    gap: 0.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-membership-verify {
+    max-width: min(100%, 22rem);
+  }
+}
+
+@media (max-width: 1023px) {
+  .app-shell-host.yds-theme-premium .app-main-host {
+    padding-inline: 0.7rem;
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+
+  /* Membership strip under mobile header */
+  .app-shell-host.yds-theme-premium .app-column-host > .shrink-0.border-b {
+    padding-inline: 0.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-membership-verify {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-mobile-app-header {
+    min-height: 2.85rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-mobile-app-header button,
+  .app-shell-host.yds-theme-premium .yds-mobile-bottom-nav button {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav a,
+  .app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav button,
+  .app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav summary {
+    min-height: 2.6rem;
+  }
+
+  .app-shell-host.yds-theme-premium .app-main-host :is(
+    button,
+    .yds-pf-v1__btn,
+    .yds-pf-v1__btn--ghost,
+    .yds-dbb__btn,
+    .yds-launch-welcome__link,
+    .yds-launch-done__btn,
+    a.yds-panic-lab__nav-link
+  ) {
+    min-height: 2.5rem;
+  }
+
+  .app-shell-host.yds-theme-premium .app-main-host :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]),
+    select,
+    textarea
+  ) {
+    min-height: 2.5rem;
+    font-size: max(0.875rem, 14px);
+  }
+
+  .app-shell-host.yds-theme-premium .app-main-host :is(
+    .yds-dbb,
+    .yds-panic-lab,
+    .yds-spick-page,
+    .yds-spick-detail,
+    .yds-spick-compare-page,
+    .yds-spick-ranking-page,
+    .yds-perf-center,
+    .yds-perf-val,
+    .yds-ai-dashboard,
+    .yds-track-record-page,
+    .yds-oj,
+    .yds-home,
+    .reco-history-page,
+    .trading-log-page,
+    .value-chain-page,
+    .yds-admin,
+    .yds-alert-center,
+    .yds-playbook
+  ) {
+    padding-inline: 0.15rem;
+  }
+
+  /* Long mono / title lines wrap instead of clipping */
+  .app-shell-host.yds-theme-premium .app-main-host :is(h1, h2, h3, .yds-dbb__title, .yds-panic-lab__title) {
+    overflow-wrap: anywhere;
+    word-break: keep-all;
+  }
+}
+
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .app-main-host {
+    padding-inline: 0.55rem;
+  }
+
+  .app-shell-host.yds-theme-premium .app-main-host :is(
+    .yds-dbb__hero,
+    .yds-panic-lab__header,
+    .yds-spick-page__header--with-alert,
+    .yds-pf-v1-page__header
+  ) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-nav__group {
+    min-width: 0;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dev-pill {
+    max-width: calc(100vw - 1.25rem);
+  }
+}
+
+/* ═══════════════════════════════════════
+   Pass 5 — 사이드바 계정 + 차트/표/Tooltip/버튼 (UI 4단계)
+   ═══════════════════════════════════════ */
+
+/* PC: shell locks to viewport; main scrolls independently; sidebar stays put */
+@media (min-width: 1024px) {
+  html:has(.app-shell-host.yds-theme-premium),
+  body:has(.app-shell-host.yds-theme-premium) {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-host.yds-theme-premium {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-sidebar {
+    position: relative;
+    top: 0;
+    align-self: stretch;
+    flex: none;
+    width: 15.5rem;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-host.yds-theme-premium .app-column-host {
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .app-shell-host.yds-theme-premium .app-main-host {
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+.yds-sidebar__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 0.35rem 0.35rem;
+}
+
+.yds-sidebar__dock {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.55rem 0.65rem 0.7rem;
+  border-top: 1px solid var(--yds-sidebar-border, rgba(186, 198, 220, 0.12));
+  background: color-mix(in srgb, var(--yds-sidebar-bg, #07111f) 92%, #000 8%);
+}
+
+.yds-sidebar__ai-status {
+  padding-top: 0.15rem;
+}
+
+.yds-mobile-drawer__dock {
+  background: color-mix(in srgb, var(--yds-sidebar-bg, #07111f) 94%, #000 6%);
+}
+
+.yds-mobile-drawer__dock .yds-sidebar-account {
+  margin-top: 0;
+}
+
+.yds-sidebar-account {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.yds-sidebar-account__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid rgba(186, 198, 220, 0.1);
+  border-radius: 0.65rem;
+  background: rgba(11, 21, 40, 0.72);
+}
+
+.yds-sidebar-account__user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.yds-sidebar-account__avatar {
+  width: 1.55rem;
+  height: 1.55rem;
+  flex: none;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  object-fit: cover;
+}
+
+.yds-sidebar-account__avatar--guest {
+  display: inline-grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--yds-sidebar-text-muted, #8ea0b8);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.yds-sidebar-account__user-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.yds-sidebar-account__name {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--yds-sidebar-text, #f4f7fb);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.yds-sidebar-account__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.22rem;
+  margin-top: 0.18rem;
+  min-width: 0;
+}
+
+.yds-sidebar-account__phase {
+  color: #fde68a;
+  font-size: 0.55rem;
+  font-weight: 650;
+}
+
+.yds-sidebar-account__phase--error {
+  color: #fda4af;
+}
+
+.yds-sidebar-account__plan {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.04rem 0.3rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  background: rgba(124, 58, 237, 0.12);
+  color: #ddd6fe;
+  font-size: 0.52rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+.yds-sidebar-account__actions {
+  display: block;
+}
+
+.yds-sidebar-account__login,
+.yds-sidebar-account__logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  width: 100%;
+  min-height: 1.75rem;
+  border-radius: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.yds-sidebar-account__login {
+  border: 1px solid transparent;
+  background: var(--yds-ai-gradient);
+  color: #fff;
+}
+
+.yds-sidebar-account__login:hover {
+  filter: brightness(1.04);
+}
+
+.yds-sidebar-account__logout {
+  border: 1px solid rgba(244, 63, 94, 0.22);
+  background: rgba(244, 63, 94, 0.08);
+  color: #fda4af;
+}
+
+.yds-sidebar-account__logout:hover {
+  background: rgba(244, 63, 94, 0.14);
+}
+
+.yds-sidebar-account__meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding: 0 0.05rem;
+  color: var(--yds-sidebar-text-muted, #8ea0b8);
+  font-family: var(--yds-font-mono, ui-monospace, monospace);
+  font-size: 0.52rem;
+  line-height: 1.3;
+  opacity: 0.78;
+}
+
+.app-shell-host.yds-theme-premium .yds-desktop-topbar {
+  display: none !important;
+}
+
+/* Charts — contrast inside cards */
+.app-shell-host.yds-theme-premium .app-main-host .recharts-wrapper,
+.app-shell-host.yds-theme-premium .app-main-host .recharts-responsive-container {
+  max-width: 100%;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host .recharts-cartesian-grid line {
+  stroke: rgba(148, 163, 184, 0.22);
+  stroke-dasharray: 3 4;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host .recharts-cartesian-axis-tick text,
+.app-shell-host.yds-theme-premium .app-main-host .recharts-legend-item-text {
+  fill: var(--yds-text-muted) !important;
+  color: var(--yds-text-muted) !important;
+  font-size: 11px;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host .recharts-default-tooltip {
+  background: #0b1224 !important;
+  border: 1px solid var(--yds-border) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: var(--yds-shadow-card) !important;
+  color: var(--yds-text) !important;
+  font-size: 11px !important;
+  padding: 0.45rem 0.55rem !important;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host .recharts-tooltip-wrapper {
+  z-index: 20;
+  max-width: min(16rem, 70vw);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host .recharts-default-tooltip .recharts-tooltip-label,
+.app-shell-host.yds-theme-premium .app-main-host .recharts-default-tooltip .recharts-tooltip-item {
+  color: var(--yds-text-secondary) !important;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host .recharts-tooltip-item-name,
+.app-shell-host.yds-theme-premium .app-main-host .recharts-tooltip-item-separator {
+  color: var(--yds-text-muted) !important;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host .recharts-tooltip-item-value {
+  color: var(--yds-text) !important;
+  font-weight: 650;
+}
+
+/* Tables */
+.app-shell-host.yds-theme-premium .app-main-host table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host thead th {
+  background: var(--yds-bg-muted);
+  color: var(--yds-text);
+  border-bottom: 1px solid var(--yds-border-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.55rem 0.6rem;
+  text-align: left;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host tbody td {
+  border-bottom: 1px solid var(--yds-border);
+  color: var(--yds-text-secondary);
+  font-size: 0.78rem;
+  padding: 0.55rem 0.6rem;
+  vertical-align: middle;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--yds-bg-muted) 55%, transparent);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host td.font-mono,
+.app-shell-host.yds-theme-premium .app-main-host th.font-mono,
+.app-shell-host.yds-theme-premium .app-main-host .tabular-nums {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Buttons — primary / secondary rhythm */
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  .yds-pf-v1__btn,
+  .yds-launch-welcome__link--primary,
+  .yds-launch-done__btn,
+  .yds-not-found__primary
+) {
+  min-height: 2.35rem;
+  border-radius: var(--yds-radius-md);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  .yds-pf-v1__btn--ghost,
+  .yds-launch-welcome__link,
+  .yds-launch-welcome__btn,
+  .yds-panic-lab__nav-link
+) {
+  min-height: 2.25rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-md);
+  background: var(--yds-bg-muted);
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  .yds-pf-v1__btn--ghost,
+  .yds-launch-welcome__link,
+  .yds-panic-lab__nav-link
+):hover {
+  border-color: var(--yds-border-strong);
+  color: var(--yds-text);
+  background: var(--yds-bg-elevated);
+}
+
+.app-shell-host.yds-theme-premium .app-main-host :is(
+  .yds-pf-v1__btn,
+  .yds-launch-welcome__link--primary,
+  .yds-launch-done__btn
+):active {
+  filter: brightness(0.96);
+}
+
+/* ═══════════════════════════════════════
+   Pass 6 — UI 5단계: 사이드바·시장분석 마감
+   ═══════════════════════════════════════ */
+
+.app-shell-host.yds-theme-premium .yds-sidebar .yds-market-nav,
+.app-shell-host.yds-theme-premium .yds-sidebar--market .yds-market-nav {
+  flex: none;
+  overflow: visible;
+  height: auto;
+  padding: 0.2rem 0.2rem 0.55rem;
+  gap: 0.1rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__group,
+.app-shell-host.yds-theme-premium .yds-market-nav__accordion,
+.app-shell-host.yds-theme-premium .yds-market-nav__more,
+.app-shell-host.yds-theme-premium .yds-market-nav__footer {
+  padding-top: 1.05rem !important;
+  margin-top: 0.35rem !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__group:first-child,
+.app-shell-host.yds-theme-premium .yds-market-nav > .yds-market-nav__group:first-child,
+.app-shell-host.yds-theme-premium .yds-market-nav > .yds-market-nav__accordion:first-child {
+  padding-top: 0.25rem !important;
+  margin-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__main-title,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__main-title {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 0.4rem !important;
+  padding: 0 0.35rem !important;
+  gap: 0.15rem !important;
+  line-height: 1.2 !important;
+}
+
+/* 5대메뉴 한글 타이틀 — 굵고 명확 (uppercase 제거) */
+.app-shell-host.yds-theme-premium .yds-market-nav__kicker,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__kicker,
+.app-shell-host.yds-theme-premium .yds-market-nav__accordion > summary.yds-market-nav__kicker,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__accordion > summary.yds-market-nav__kicker {
+  display: block !important;
+  color: #f3e8ff !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  line-height: 1.35 !important;
+  opacity: 1 !important;
+  list-style: none;
+  cursor: pointer;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__accordion > summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__accordion > summary.yds-market-nav__kicker::after {
+  content: "▾";
+  float: right;
+  margin-left: 0.35rem;
+  color: #c4b5fd;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__accordion:not([open]) > summary.yds-market-nav__kicker::after {
+  content: "▸";
+}
+
+/* 탑레벨 직결 메뉴(시장 브리핑·신용 사이클) */
+.app-shell-host.yds-theme-premium .yds-market-nav__group--main-link > .yds-market-nav__link,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__group--main-link > .yds-market-nav__link {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  min-height: 2.15rem !important;
+  margin: 0 !important;
+  padding: 0.4rem 0.45rem !important;
+  border-radius: 0.45rem;
+  color: #f3e8ff !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__status,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__status {
+  flex: 0 0 auto;
+  padding: 0.12rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  background: rgba(91, 33, 182, 0.28);
+  color: #e9d5ff !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__title,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__title {
+  color: #94a3b8 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.25 !important;
+}
+
+/* 방법론 구분(장기 조정 매수 / 패닉·공포 매수) */
+.app-shell-host.yds-theme-premium .yds-market-nav__method {
+  margin-top: 0.55rem;
+  padding: 0.45rem 0.2rem 0.15rem;
+  border-top: 1px dashed rgba(167, 139, 250, 0.22);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__method:first-child {
+  margin-top: 0.25rem;
+  border-top: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__method-label,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__method-label {
+  margin: 0 0 0.3rem;
+  padding: 0 0.55rem;
+  color: #c4b5fd;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav a,
+.app-shell-host.yds-theme-premium .yds-market-nav__settings {
+  min-height: 2rem;
+  padding: 0.34rem 0.55rem;
+  border-radius: 0.45rem;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+}
+
+/* 세부 메뉴 한 단계 들여쓰기 (PC + 모바일) */
+.app-shell-host.yds-theme-premium .yds-sidebar .yds-market-nav__children > a,
+.app-shell-host.yds-theme-premium .yds-sidebar .yds-market-nav__children > .yds-market-nav__settings,
+.app-shell-host.yds-theme-premium .yds-sidebar .yds-market-nav__children > .yds-sidebar-metric-input-btn,
+.app-shell-host.yds-theme-premium .yds-sidebar .yds-market-nav__accordion-body > a,
+.app-shell-host.yds-theme-premium .yds-sidebar .yds-market-nav__accordion-body > .yds-market-nav__settings,
+.app-shell-host.yds-theme-premium .yds-sidebar .yds-market-nav__accordion-body > .yds-sidebar-metric-input-btn,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__children > a,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__children > .yds-market-nav__settings,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__children > .yds-sidebar-metric-input-btn,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__accordion-body > a,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__accordion-body > .yds-market-nav__settings,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__accordion-body > .yds-sidebar-metric-input-btn {
+  display: flex;
+  margin-left: 0 !important;
+  padding-left: 1.15rem !important;
+  padding-right: 0.5rem !important;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav a.is-active,
+.app-shell-host.yds-theme-premium .yds-market-nav__dash.is-active,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav a.is-active {
+  background: rgba(124, 58, 237, 0.22);
+  color: #f5f3ff;
+  box-shadow: inset 2px 0 0 #a78bfa;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav a.is-emphasis,
+.app-shell-host.yds-theme-premium .yds-market-nav__settings.is-emphasis,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav a.is-emphasis,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__settings.is-emphasis {
+  font-weight: 750 !important;
+  color: #e2e8f0;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 0.35rem 0.15rem 1.5rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__eyebrow {
+  margin: 0 0 0.35rem;
+  color: #c4b5fd;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__title {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__sub,
+.app-shell-host.yds-theme-premium .yds-menu-hub__notice {
+  margin: 0.45rem 0 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__notice {
+  color: #cbd5e1;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.75rem;
+  background: rgba(8, 14, 28, 0.88);
+  color: #e2e8f0;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__link:hover {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__link-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__link-note {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__panel {
+  margin-top: 1rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.85rem;
+  background: rgba(8, 14, 28, 0.88);
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__panel-title {
+  margin: 0;
+  color: #fcd34d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__panel-body,
+.app-shell-host.yds-theme-premium .yds-menu-hub__bullets {
+  margin: 0.45rem 0 0;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__bullets {
+  padding-left: 1.1rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub__footer-links a {
+  color: #c4b5fd;
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__accordion > summary.yds-market-nav__kicker,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-market-nav__accordion > summary.yds-market-nav__kicker {
+  padding: 0.15rem 0.35rem 0.45rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-nav__accordion-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding-bottom: 0.2rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar-metric-input-btn,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-sidebar-metric-input-btn {
+  margin-top: 0.4rem;
+  min-height: 2.05rem;
+  border-radius: 0.5rem !important;
+  border: 1px solid rgba(167, 139, 250, 0.28) !important;
+  background: rgba(124, 58, 237, 0.18) !important;
+  box-shadow: none !important;
+  color: #ede9fe !important;
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-sidebar-metric-input-btn:hover,
+.app-shell-host.yds-theme-premium .yds-mobile-drawer .yds-sidebar-metric-input-btn:hover {
+  background: rgba(124, 58, 237, 0.28) !important;
+  border-color: rgba(167, 139, 250, 0.4) !important;
+  filter: none;
+}
+
+.yds-sidebar__dock {
+  padding: 0.5rem 0.6rem 0.65rem;
+  border-top-color: rgba(186, 198, 220, 0.08);
+  background: transparent;
+}
+
+.app-shell-host.yds-theme-premium .yds-membership-operator-badge {
+  box-shadow: none;
+  font-size: 8px;
+  padding: 0.08rem 0.32rem;
+}
+
+/* —— /market-analysis body polish —— */
+.app-shell-host.yds-theme-premium .yds-market-analysis {
+  --yds-ma-radius: 0.75rem;
+  --yds-ma-line: rgba(186, 198, 220, 0.12);
+  --yds-ma-surface: rgba(11, 21, 40, 0.78);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__header {
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.9rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__title {
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--yds-text, #f1f5f9);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__sub {
+  margin-top: 0.3rem;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--yds-text-secondary, #94a3b8);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__ops {
+  opacity: 0.85;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__ops-live,
+.app-shell-host.yds-theme-premium .yds-market-analysis__ops-time {
+  font-size: 0.62rem;
+  color: var(--yds-text-muted, #8ea0b8);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .app-release-env-badge {
+  border-radius: 0.35rem;
+  font-size: 0.55rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__hero-card,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-card,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__main,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__points {
+  border-radius: var(--yds-ma-radius);
+  border-color: var(--yds-ma-line);
+  background: var(--yds-ma-surface);
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__hero-card {
+  padding: 1rem 1.05rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-grid {
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-card {
+  padding: 0.65rem 0.7rem 0.55rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--yds-text-secondary, #94a3b8);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-value,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-value strong {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-tone,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__points p,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__meta,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__empty {
+  color: var(--yds-text-muted, #8ea0b8);
+  font-size: 0.7rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis [class*="MISSING"],
+.app-shell-host.yds-theme-premium .yds-market-analysis .is-missing {
+  color: var(--yds-text-muted, #8ea0b8);
+  opacity: 0.85;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__points {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(167, 139, 250, 0.2);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__points li > span {
+  background: rgba(124, 58, 237, 0.35);
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock h2,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock h3 {
+  letter-spacing: -0.01em;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__status {
+  border-radius: 999px;
+  border-color: rgba(186, 198, 220, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__tabs {
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--yds-ma-line);
+  margin-bottom: 0.55rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__tabs button {
+  min-height: 1.9rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 0.4rem 0.4rem 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--yds-text-muted, #8ea0b8);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__tabs button.is-active {
+  color: #ede9fe;
+  background: rgba(124, 58, 237, 0.16);
+  box-shadow: inset 0 -2px 0 #a78bfa;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__plot,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__candles {
+  border-radius: 0.55rem;
+  border: 1px solid var(--yds-ma-line);
+  background: rgba(7, 14, 28, 0.55);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card--ai,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card--study,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__next {
+  border-radius: var(--yds-ma-radius);
+  border: 1px solid var(--yds-ma-line);
+  background: var(--yds-ma-surface);
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card--ai {
+  border-color: rgba(167, 139, 250, 0.22);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__insight li,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__checks li,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__stats p {
+  gap: 0.4rem;
+  padding-block: 0.28rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__stats strong,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__signals strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-pro-gate,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__lock {
+  border-radius: var(--yds-ma-radius);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  background: rgba(124, 58, 237, 0.08);
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage.is-current {
+  box-shadow: none;
+  outline: 1px solid rgba(167, 139, 250, 0.35);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__toolbar,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-market-analysis__lab-link,
+.app-shell-host.yds-theme-premium .yds-market-analysis select,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__chips button {
+  min-height: 2rem;
+  border-radius: 0.45rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis a.yds-panic-spx-val__ai-link,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-market-analysis__lab-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  background: rgba(124, 58, 237, 0.14);
+  color: #ede9fe;
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+/* —— Design B: /market-analysis desk composition —— */
+.app-shell-host.yds-theme-premium .yds-market-analysis {
+  --yds-ma-radius: 0.9rem;
+  --yds-ma-line: rgba(167, 139, 250, 0.16);
+  --yds-ma-surface: linear-gradient(165deg, rgba(18, 28, 52, 0.96), rgba(10, 16, 32, 0.92));
+  --yds-ma-glow: 0 0 0 1px rgba(167, 139, 250, 0.1), 0 10px 28px rgba(2, 6, 23, 0.45);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__env {
+  margin: 0 0 0.45rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.42rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.7rem;
+  background: rgba(8, 14, 28, 0.72);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__primary,
+.app-shell-host.yds-theme-premium .yds-market-env-strip__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.28rem 0.4rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__env {
+  color: #e2e8f0;
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__source,
+.app-shell-host.yds-theme-premium .yds-market-env-strip__sep,
+.app-shell-host.yds-theme-premium .yds-market-env-strip__asof,
+.app-shell-host.yds-theme-premium .yds-market-env-strip__updated {
+  color: #94a3b8;
+  font-size: 0.58rem;
+  font-weight: 550;
+  line-height: 1.25;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__state {
+  font-size: 0.58rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__state--live {
+  color: #4ade80;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__state--stale {
+  color: #fbbf24;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__state--missing,
+.app-shell-host.yds-theme-premium .yds-market-env-strip__state--unknown,
+.app-shell-host.yds-theme-premium .yds-market-env-strip__state--seed {
+  color: #94a3b8;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip--local .yds-market-env-strip__env {
+  color: #fcd34d;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip--production .yds-market-env-strip__env {
+  color: #86efac;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip--preview .yds-market-env-strip__env {
+  color: #7dd3fc;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip--unknown .yds-market-env-strip__env {
+  color: #fca5a5;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-env-strip__metric-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #94a3b8;
+  font-size: 0.56rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis__ticker {
+  margin: 0 0 0.95rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker {
+  overflow: hidden;
+  border: 1px solid var(--yds-ma-line);
+  border-radius: 0.85rem;
+  background: rgba(8, 14, 28, 0.88);
+  box-shadow: var(--yds-ma-glow);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__loading {
+  margin: 0;
+  padding: 0.7rem 0.95rem;
+  color: #94a3b8;
+  font-size: 0.74rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__item {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: baseline;
+  gap: 0.35rem 0.45rem;
+  min-width: max-content;
+  padding: 0.72rem 1rem;
+  border-right: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__item:last-child {
+  border-right: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__label {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__value {
+  color: #f8fafc;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__chg {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__item.is-up .yds-market-ticker__chg {
+  color: #fb7185;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__item.is-down .yds-market-ticker__chg {
+  color: #34d399;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__item.is-flat .yds-market-ticker__chg {
+  color: #94a3b8;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__item.is-flash-up {
+  background: rgba(244, 63, 94, 0.12);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-ticker__item.is-flash-down {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__hero-card,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-card,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__main,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report {
+  background: var(--yds-ma-surface);
+  border: 1px solid var(--yds-ma-line);
+  border-radius: var(--yds-ma-radius);
+  box-shadow: var(--yds-ma-glow);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__hero-card {
+  padding: 1.15rem 1.2rem 1.25rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__hero-body--desk {
+  gap: 1rem 1.15rem;
+  margin-top: 0.75rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge {
+  --yds-gauge-r: 7.6rem;
+  --yds-gauge-band: 1.15rem;
+  height: 11.4rem;
+  min-height: 11.4rem;
+  border-radius: 0.85rem;
+  background: radial-gradient(120% 90% at 50% 100%, rgba(124, 58, 237, 0.14), transparent 70%);
+  padding: 0.2rem 0.4rem 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge .yds-panic-center__score {
+  font-size: 2.65rem;
+  font-weight: 780;
+  color: #f8fafc;
+  text-shadow: 0 0 18px rgba(167, 139, 250, 0.28);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge .yds-panic-center__stage {
+  margin-top: 0.35rem;
+  padding: 0.22rem 0.7rem;
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--yds-signal-warn, #f59e0b) 22%, rgba(15, 23, 42, 0.9));
+  border: 1px solid color-mix(in srgb, var(--yds-signal-warn, #f59e0b) 45%, transparent);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__summary-card {
+  gap: 0.55rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  background: rgba(124, 58, 237, 0.07);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin: 0;
+  padding: 0.22rem 0.55rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--yds-stage-tone, #f59e0b) 18%, rgba(15, 23, 42, 0.85));
+  border: 1px solid color-mix(in srgb, var(--yds-stage-tone, #f59e0b) 40%, transparent);
+  color: var(--yds-stage-tone, #fbbf24);
+  font-size: 0.74rem;
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__lede {
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.9rem 0.95rem;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(139, 92, 246, 0.22), transparent 55%),
+    linear-gradient(165deg, rgba(22, 30, 58, 0.98), rgba(10, 16, 32, 0.94));
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report-mark {
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.7rem;
+  background: linear-gradient(145deg, #a78bfa, #6d28d9 55%, #4c1d95);
+  box-shadow: 0 0 18px rgba(139, 92, 246, 0.45);
+  color: #f5f3ff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report-title {
+  margin: 0;
+  color: #f5f3ff;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report-sub {
+  margin: 0.12rem 0 0;
+  color: #94a3b8;
+  font-size: 0.68rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__briefing {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__briefing .yds-ai-market-briefing__title {
+  display: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__briefing .yds-ai-market-briefing__reasons,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report-deltas {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__briefing .yds-ai-market-briefing__reason,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report-deltas li {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  color: #e2e8f0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__briefing .yds-ai-market-briefing__check,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__report-check {
+  color: #c4b5fd;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__briefing .yds-ai-market-briefing__narrative {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__briefing .yds-ai-market-briefing__line {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-grid {
+  gap: 0.7rem;
+  margin-top: 1.05rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0.85rem 0.85rem 0.7rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -55% auto;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.18), transparent 70%);
+  pointer-events: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: #94a3b8;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__metric-value {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.35rem;
+  font-weight: 780;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__history-slot--design-b {
+  margin-top: 0.95rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock {
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__main,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card {
+  padding: 1.1rem 1.15rem 1.15rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card--ai {
+  border-color: rgba(167, 139, 250, 0.28);
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(139, 92, 246, 0.18), transparent 50%),
+    linear-gradient(165deg, rgba(22, 30, 58, 0.98), rgba(10, 16, 32, 0.94));
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__card--signals .yds-risk-stock__table-wrap {
+  overflow-x: auto;
+  margin-top: 0.35rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table th,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table td {
+  padding: 0.55rem 0.4rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  text-align: left;
+  vertical-align: top;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table thead th {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table tbody th {
+  color: #e2e8f0;
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table tbody th em {
+  display: block;
+  margin-top: 0.15rem;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table td {
+  color: #cbd5e1;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table tr.is-pass td:nth-child(3) {
+  color: #34d399;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__table tr.is-fail td:nth-child(3) {
+  color: #fb7185;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__next {
+  margin-top: 0.85rem;
+  padding: 0.8rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__next h4 {
+  margin: 0 0 0.45rem;
+  color: #ede9fe;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__next-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__next-list li {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  color: #e2e8f0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__next-mark {
+  color: #c4b5fd;
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__next-mark.is-done {
+  color: #34d399;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__stats--kpi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__stats--kpi p {
+  margin: 0;
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(7, 14, 28, 0.55);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__stats--kpi span {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #94a3b8;
+  font-size: 0.68rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__stats--kpi strong {
+  color: #f8fafc;
+  font-size: 1.05rem;
+  font-weight: 780;
+}
+
+@media (max-width: 720px) {
+  .app-shell-host.yds-theme-premium .yds-market-ticker__item {
+    padding: 0.62rem 0.75rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__stats--kpi {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* —— UI7 RC: empty states + denser desk —— */
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__gauge.is-empty .yds-panic-center__gauge-arc {
+  opacity: 0.35;
+  filter: grayscale(0.35);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__score--empty,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage--empty,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stage-pill--empty {
+  color: #94a3b8 !important;
+  border-color: rgba(148, 163, 184, 0.28);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__scale-empty,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__empty-note,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-ai-market-briefing__empty {
+  margin: 0.45rem 0 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  background: rgba(8, 14, 28, 0.55);
+  color: #94a3b8;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block-status {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__block-status.is-live {
+  color: #c4b5fd;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__fear-stage.is-dormant {
+  opacity: 0.55;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val--empty {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0.95rem 1rem;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  border-radius: 0.75rem;
+  background: rgba(8, 14, 28, 0.55);
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__empty-title {
+  margin: 0 0 0.3rem;
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-spx-val__empty {
+  margin: 0.15rem 0 0;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-market-trend__panel--featured:has(.yds-panic-spx-val--empty) {
+  min-height: 0;
+  padding: 0.35rem;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock {
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.95fr);
+  align-items: start;
+  gap: 0.85rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__plot,
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__candles {
+  min-height: 14.5rem;
+  height: 15.5rem;
+}
+
+@media (min-width: 1100px) {
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__plot,
+  .app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__candles {
+    min-height: 17rem;
+    height: 17rem;
+  }
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-risk-stock__side {
+  gap: 0.65rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__history-slot--design-b {
+  margin-top: 0.75rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-market-analysis .yds-panic-center__stock-slot {
+  margin-top: 0.75rem;
+}
