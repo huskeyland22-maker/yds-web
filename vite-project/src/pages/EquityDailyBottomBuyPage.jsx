@@ -431,7 +431,7 @@ export default function EquityDailyBottomBuyPage() {
                 <li key={row.symbol} className="yds-dbb-cands__item min-w-0">
                   <button
                     type="button"
-                    className={`yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100${row.symbol === symbol ? " is-selected" : ""}`}
+                    className={`yds-dbb-cand w-full min-w-0 px-3 py-2 text-left text-sm${row.symbol === symbol ? " is-selected" : ""}`}
                     aria-pressed={row.symbol === symbol}
                     onClick={() => setSymbol(row.symbol)}
                   >
@@ -479,10 +479,10 @@ export default function EquityDailyBottomBuyPage() {
           </button>
           {picker.open ? (
             <div className="yds-dbb-picker__panel" id="equity-ticker-list">
-              <label className="block text-xs text-slate-400">
+              <label className="yds-dbb-picker__field">
                 그룹
                 <select
-                  className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
+                  className="yds-dbb-picker__input"
                   value={group}
                   onChange={(e) => setGroup(e.target.value)}
                 >
@@ -494,10 +494,10 @@ export default function EquityDailyBottomBuyPage() {
                   ))}
                 </select>
               </label>
-              <label className="block text-xs text-slate-400">
+              <label className="yds-dbb-picker__field">
                 검색
                 <input
-                  className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
+                  className="yds-dbb-picker__input"
                   value={query}
                   placeholder="티커 또는 종목명"
                   onChange={(e) => setQuery(e.target.value)}
@@ -550,7 +550,7 @@ export default function EquityDailyBottomBuyPage() {
                 </p>
                 <p className="yds-dbb__meta">{view.group}</p>
                 {visibility.proPrice && priceText != null ? (
-                  <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">${priceText}</p>
+                  <p className="yds-dbb-price tabular-nums">${priceText}</p>
                 ) : null}
                 <p className="yds-dbb__meta">기준일 {view.asOf}</p>
                 {view.source === "cache" ? <p className="yds-dbb__meta">저장된 시세 기준</p> : null}
@@ -634,7 +634,7 @@ export default function EquityDailyBottomBuyPage() {
                     <h2 className="yds-dbb-section__title">ATR RISK</h2>
                     {payload?.access === "full" && atrText ? (
                       <>
-                        <p className="mt-1.5 text-lg font-semibold tabular-nums text-slate-50">{atrText}</p>
+                        <p className="yds-dbb-price tabular-nums">{atrText}</p>
                         <p className="yds-dbb-card__stage">{view.atrRisk?.label}</p>
                         <p className="yds-dbb-card__hint">{view.atrNote}</p>
                         <p className="yds-dbb-card__hint">{view.atrMeaning}</p>

@@ -310,9 +310,9 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-rec-status--buy-strong {
-  color: #15803d;
-  background: color-mix(in srgb, #15803d 10%, var(--yds-bg-elevated));
-  border-color: color-mix(in srgb, #15803d 35%, var(--yds-border));
+  color: var(--yds-signal-up);
+  background: color-mix(in srgb, var(--yds-signal-up) 10%, var(--yds-bg-elevated));
+  border-color: color-mix(in srgb, var(--yds-signal-up) 35%, var(--yds-border));
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-rec-status--watch {
@@ -376,7 +376,7 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-detail__source {
-  color: #15803d;
+  color: var(--yds-signal-up);
 }
 
 .app-shell-host.yds-theme-premium .yds-spick-detail__future-title,

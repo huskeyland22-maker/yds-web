@@ -313,7 +313,7 @@ export default function DailyBottomBuyPage() {
                     <li key={card.symbol} className="yds-dbb-cands__item min-w-0">
                       <button
                         type="button"
-                        className={`yds-dbb-cand w-full min-w-0 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-left text-sm text-slate-100${
+                        className={`yds-dbb-cand w-full min-w-0 px-3 py-2 text-left text-sm${
                           card.symbol === symbol ? " is-selected" : ""
                         }`}
                         aria-pressed={card.symbol === symbol}
@@ -379,10 +379,10 @@ export default function DailyBottomBuyPage() {
               </button>
               {picker.open ? (
                 <div className="yds-dbb-picker__panel" id="etf-ticker-list">
-                  <label className="block text-xs text-slate-400">
+                  <label className="yds-dbb-picker__field">
                     검색
                     <input
-                      className="mt-1 w-full rounded-md border border-slate-600 bg-slate-950 px-2 py-2 text-sm text-slate-100"
+                      className="yds-dbb-picker__input"
                       value={query}
                       placeholder="티커 · 테마 · 섹터"
                       onChange={(e) => setQuery(e.target.value)}
@@ -429,9 +429,7 @@ export default function DailyBottomBuyPage() {
                   </p>
                   <p className="yds-dbb__meta">DBB · {formatEtfDbbStatusLabel(selected)}</p>
                   {visibility.proPrice && formatPrice(selected.close) != null ? (
-                    <p className="mt-2 text-lg font-semibold tabular-nums text-slate-50">
-                      ${formatPrice(selected.close)}
-                    </p>
+                    <p className="yds-dbb-price tabular-nums">${formatPrice(selected.close)}</p>
                   ) : null}
                   <p className="yds-dbb__meta">
                     {(() => {

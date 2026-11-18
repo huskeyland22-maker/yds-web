@@ -53,31 +53,35 @@ function IntensityChart({ series, minDate, maxDate }) {
     <div className="yds-panic-lab__chart-wrap">
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={data} margin={{ top: 12, right: 8, left: 0, bottom: 4 }}>
-          <CartesianGrid stroke="rgba(148,163,184,0.12)" vertical={false} />
+          <CartesianGrid stroke="rgba(186,198,220,0.22)" vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={(d) => String(d).slice(5)}
-            tick={{ fill: "#64748b", fontSize: 10 }}
+            tick={{ fill: "#b7c3d6", fontSize: 11 }}
             interval="preserveStartEnd"
             minTickGap={28}
           />
-          <YAxis domain={[0, 100]} tick={{ fill: "#64748b", fontSize: 10 }} width={32} />
+          <YAxis domain={[0, 100]} tick={{ fill: "#b7c3d6", fontSize: 11 }} width={32} />
           <Tooltip
             contentStyle={{
-              background: "#070a10",
-              border: "1px solid rgba(148,163,184,0.2)",
+              background: "#1a3054",
+              border: "1px solid rgba(124,58,237,0.45)",
+              borderRadius: 8,
+              color: "#f7f9fc",
               fontSize: 11,
             }}
+            labelStyle={{ color: "#95a6be" }}
+            itemStyle={{ color: "#d6c6ff" }}
             formatter={(v) => [`${v}점`, "패닉 강도"]}
             labelFormatter={(_, payload) => payload?.[0]?.payload?.date ?? ""}
           />
           <Line
             type="monotone"
             dataKey="score"
-            stroke="#94a3b8"
+            stroke="#c4b5fd"
             strokeWidth={1.75}
             dot={false}
-            activeDot={{ r: 3, fill: "#e2e8f0" }}
+            activeDot={{ r: 3, fill: "#ddd6fe" }}
           />
           {minDate ? (
             <ReferenceDot

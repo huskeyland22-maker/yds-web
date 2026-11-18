@@ -193,7 +193,7 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-pf-v1__fit-grade--C {
-  color: #a16207;
+  color: var(--yds-signal-warn);
   background: color-mix(in srgb, var(--yds-signal-warn) 14%, var(--yds-bg-elevated));
 }
 
@@ -246,7 +246,7 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-pf-v1__alloc-badge--warn {
-  color: #a16207;
+  color: var(--yds-signal-warn);
   background: color-mix(in srgb, var(--yds-signal-warn) 12%, var(--yds-bg-elevated));
 }
 
@@ -257,7 +257,7 @@
 }
 
 .app-shell-host.yds-theme-premium .yds-pf-v1__alloc-posture--warn {
-  color: #a16207;
+  color: var(--yds-signal-warn);
 }
 
 /* Search dropdown chrome inside portfolio */

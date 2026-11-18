@@ -1,5 +1,5 @@
 /**
- * Watchlist light skin. Opt-in under .yds-theme-premium.
+ * Watchlist deep-navy skin. Opt-in under .yds-theme-premium.
  * Does not change favorite add/remove or score engines.
  */
 
@@ -86,5 +86,71 @@
 @media (min-width: 1100px) {
   .app-shell-host.yds-theme-premium .yds-user-watchlist__cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__title {
+  margin: 0.15rem 0 0.2rem;
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  letter-spacing: -0.03em;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__nav-link {
+  flex: none;
+  border-radius: 999px;
+  padding: 0.42rem 0.8rem;
+  background: var(--yds-ai-gradient);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem 0.95rem;
+  border-radius: 1rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__name {
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__grades > div,
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta-grid > div {
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--yds-border);
+  border-radius: 0.65rem;
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__grades dd {
+  margin-top: 0.12rem;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-user-watchlist__delta-grid {
+  border-top: 0;
+  padding-top: 0;
+}
+
+@media (max-width: 639px) {
+  .app-shell-host.yds-theme-premium .yds-user-watchlist__header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

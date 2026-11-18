@@ -36,14 +36,33 @@
   color: rgba(248, 250, 252, 0.92);
 }
 
-/* —— Premium light shell (opt-in) —— */
+/* —— Premium deep-navy shell (opt-in) —— */
 .app-shell-host.yds-theme-premium {
   background-color: var(--yds-bg);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 12% -10%, rgba(124, 58, 237, 0.14), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 100% 0%, rgba(99, 102, 241, 0.1), transparent 50%);
   color: var(--yds-text);
 }
 
 .app-shell-host.yds-theme-premium .app-main-host {
+  background-color: var(--yds-bg-canvas, var(--yds-bg));
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -20%, rgba(124, 58, 237, 0.08), transparent 55%);
   color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-desktop-topbar,
+.app-shell-host.yds-theme-premium .yds-mobile-app-header {
+  background-color: color-mix(in srgb, var(--yds-bg) 92%, transparent);
+  border-bottom-color: var(--yds-sidebar-border);
+  color: var(--yds-text);
+}
+
+@media (max-width: 1023px) {
+  .app-shell-host.yds-theme-premium .app-main-host {
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  }
 }
 
 .app-shell-host.yds-theme-premium .yds-sidebar__brand {
@@ -427,15 +446,38 @@
   }
 }
 
-/* Collapsed dev pills: one right-edge stack, clear of the page body. */
+/* Collapsed dev pills: one right-edge stack. Labels stay on one line and are not clipped. */
 .app-shell-host.yds-theme-premium .yds-dev-pill {
   position: fixed;
-  right: 0.55rem;
+  right: 0.75rem;
   left: auto;
   top: auto;
   z-index: 8900;
-  opacity: 0.8;
-  max-width: 8rem;
+  width: max-content;
+  max-width: calc(100vw - 1.5rem);
+  white-space: nowrap;
+  overflow: visible;
+  opacity: 0.92;
+}
+
+.app-shell-host.yds-theme-premium .yds-dev-pill--raw {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  background: rgba(15, 10, 30, 0.92);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+}
+
+.app-shell-host.yds-theme-premium .yds-dev-pill--raw button {
+  border: 0;
+  background: transparent;
+  color: #ede9fe;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.45rem 0.55rem;
 }
 
 .app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="debug"] {
@@ -454,6 +496,28 @@
   bottom: calc(10.45rem + env(safe-area-inset-bottom));
 }
 
+.app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="raw"] {
+  bottom: calc(12.4rem + env(safe-area-inset-bottom));
+}
+
+.app-shell-host.yds-theme-premium .yds-raw-debug {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  left: auto;
+  z-index: 9200;
+  display: flex;
+  width: min(26rem, calc(100vw - 1.5rem));
+  max-height: min(52vh, 420px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 1rem;
+  background: rgba(7, 5, 15, 0.96);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.28);
+  padding-bottom: max(0.25rem, env(safe-area-inset-bottom));
+}
+
 @media (min-width: 1024px) {
   .app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="debug"] {
     bottom: 0.75rem;
@@ -465,5 +529,9 @@
 
   .app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="panic"] {
     bottom: 4.65rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dev-pill[data-dev-slot="raw"] {
+    bottom: 6.6rem;
   }
 }
