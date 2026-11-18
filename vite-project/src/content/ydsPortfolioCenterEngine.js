@@ -225,16 +225,25 @@ export function buildPortfolioCenterV1Report(
     sells: (sellsByName.get(row.id) ?? []).map(sellView),
   }))
 
+  /** V5 math unchanged; incomplete quotes must not look like full marked-to-market totals. */
+  const quotesIncomplete = rows.some(
+    (row) => row.currentPrice == null || row.unrealizedPnl == null,
+  )
+
   return {
     hasData: rows.length > 0 || (holdings?.cashAmount ?? 0) > 0,
     status: {
       totalAssets: holdings?.totalAssets ?? 0,
-      totalReturnPct: holdings?.totalReturnPct ?? null,
+      totalReturnPct: quotesIncomplete ? null : (holdings?.totalReturnPct ?? null),
       stockPct: actualStockPct,
       cashPct: actualCashPct,
       cashAmount: holdings?.cashAmount ?? 0,
-      totalUnrealizedPnl: holdings?.totalUnrealizedPnl ?? 0,
+      totalUnrealizedPnl: quotesIncomplete ? null : (holdings?.totalUnrealizedPnl ?? 0),
       totalRealizedPnl: holdings?.totalRealizedPnl ?? 0,
+      quotesIncomplete,
+      quotesIncompleteNote: quotesIncomplete
+        ? "일부 종목 시세 미수신 · 평가손익·수익률 합계는 확정값이 아닙니다."
+        : null,
     },
     market: {
       stageLabel: marketContext?.strategyLabel ?? "—",

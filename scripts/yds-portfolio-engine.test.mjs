@@ -1,5 +1,8 @@
 /**
  * Phase 3-1 portfolio engine — node scripts/yds-portfolio-engine.test.mjs
+ *
+ * Expectations follow current adapter + BASE_ALLOCATION / CYCLE_ADJUST
+ * (not a stale "defensive = 35–50" band).
  */
 import {
   computeRecommendedAllocation,
@@ -11,12 +14,17 @@ function assert(cond, msg) {
   if (!cond) throw new Error(msg)
 }
 
-const defensive = resolveMarketAdapterContext(
+// FG 58 / VIX 15 → macro overheated (공포 부족), cycle warning → stock 30 − 5 = 25
+const calm = resolveMarketAdapterContext(
   { fearGreed: 58, bofa: 6.5, vix: 15, putCall: 0.8 },
   [],
 )
-const alloc = computeRecommendedAllocation(defensive)
-assert(alloc.stockPct >= 35 && alloc.stockPct <= 50, `defensive stock ${alloc.stockPct}`)
+assert(calm.macroId === "overheated", `expected overheated, got ${calm.macroId}`)
+assert(calm.cycleStageId === "warning", `expected warning cycle, got ${calm.cycleStageId}`)
+assert(calm.isDefensive === true, "calm tape is defensive posture")
+const alloc = computeRecommendedAllocation(calm)
+assert(alloc.stockPct === 25, `overheated+warning stock ${alloc.stockPct}`)
+assert(alloc.cashPct === 75, `overheated+warning cash ${alloc.cashPct}`)
 assert(alloc.stockPct + alloc.cashPct === 100, "sum 100")
 
 const dca = resolveMarketAdapterContext(
@@ -34,7 +42,7 @@ const neutralReb = derivePortfolioRebalance(alloc, { stockPct: alloc.stockPct, c
 assert(neutralReb.tone === "neutral", "balanced")
 
 console.log("OK portfolio engine", {
-  defensive: alloc,
+  calm: { macroId: calm.macroId, cycleStageId: calm.cycleStageId, alloc },
   dca: dcaAlloc,
   rebalance: rebalance.conclusion,
 })
