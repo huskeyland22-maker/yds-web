@@ -12,6 +12,12 @@
 # Local agent scratch and secrets dumps
 .cursor-tmp/
 
+# Firebase Admin service account keys (never commit)
+*-firebase-adminsdk*.json
+**/service-account*.json
+**/firebase-service-account*.json
+
+
 # Dependencies and Python bytecode
 node_modules/
 __pycache__/
