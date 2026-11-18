@@ -1,6 +1,12 @@
 import { useMemo } from "react"
 import { useAppDataStore } from "../../store/appDataStore.js"
-import { resolveMarketUpdateTime } from "../../utils/marketUpdateTime.js"
+import { formatMarketBasisKst } from "../../utils/marketTimestamp.js"
+import {
+  classifyPanicScoreState,
+  hasConfirmedCollection,
+  isPlaceholderUpdatedAt,
+  panicAsOfDate,
+} from "../../utils/panicDataFreshness.js"
 
 /** @param {string | undefined} badge */
 function resolveOpsLiveLabel(badge, fallbackLabel) {
@@ -15,7 +21,13 @@ function resolveOpsLiveLabel(badge, fallbackLabel) {
  */
 export default function YdsMarketAnalysisOpsMeta({ panicData = null }) {
   const reliability = useAppDataStore((s) => s.cycleDataReliability)
-  const marketTime = useMemo(() => resolveMarketUpdateTime(panicData), [panicData])
+  const scoreState = useMemo(() => classifyPanicScoreState(panicData), [panicData])
+  const asOfDate = panicAsOfDate(panicData)
+  const showCollectionClock =
+    scoreState === "LIVE" && hasConfirmedCollection(panicData) && !isPlaceholderUpdatedAt(panicData)
+  const collectionLabel = showCollectionClock
+    ? formatMarketBasisKst(panicData?.updatedAt ?? panicData?.updated_at)
+    : null
 
   const badge = reliability?.badge ?? "none"
   const liveLabel = resolveOpsLiveLabel(badge, reliability?.badgeLabel)
@@ -23,8 +35,9 @@ export default function YdsMarketAnalysisOpsMeta({ panicData = null }) {
 
   const title = [
     reliability?.badgeLabel,
-    marketTime.basisNote,
-    marketTime.kstLabel ? `동기화 ${marketTime.kstLabel}` : null,
+    scoreState,
+    asOfDate ? `기준일 ${asOfDate}` : "기준일 없음",
+    collectionLabel ? `수집 ${collectionLabel}` : "수집 시각 없음",
     clientRows > 0 ? `히스토리 ${clientRows}행` : null,
   ]
     .filter(Boolean)
@@ -42,7 +55,11 @@ export default function YdsMarketAnalysisOpsMeta({ panicData = null }) {
         {liveLabel}
       </p>
       <p className="yds-market-analysis__ops-time font-mono tabular-nums">
-        {marketTime.kstLabel ?? "—"}
+        {!asOfDate && scoreState === "MISSING"
+          ? "최신 데이터 없음"
+          : `${scoreState} · ${asOfDate ? `기준일 ${asOfDate}` : "기준일 없음"}${
+              collectionLabel ? ` · 수집 ${collectionLabel}` : " · 수집 시각 없음"
+            }`}
       </p>
     </div>
   )

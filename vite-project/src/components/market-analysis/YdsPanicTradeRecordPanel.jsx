@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { getPanicScoreV2 } from "../../utils/tradingScores.js"
 import { listTradeRecords, TRADE_RECORDS_CHANGED_EVENT } from "../../content/ydsTradeRecords.js"
 import { buildPanicTradeStatusView } from "../../content/ydsTradeRecordsStatus.js"
@@ -70,6 +71,9 @@ export default function YdsPanicTradeRecordPanel({
             {proDca
               ? "SPY 기준 수동 기록 (USD) · 자동 주문 없음 · 40/27/33 참고"
               : "SPY 기준 수동 기록 (USD) · 자동 주문 없음"}
+          </p>
+          <p className="yds-panic-trade__sub">
+            실현 매도는 <Link to="/operating-journal">실전 매매일지</Link>에서 봅니다.
           </p>
         </div>
         <button

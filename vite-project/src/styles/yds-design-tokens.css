@@ -103,3 +103,61 @@
   --yds-shadow-card: 0 1px 2px rgba(7, 22, 40, 0.07), 0 4px 14px rgba(7, 22, 40, 0.05);
   --yds-shadow-focus: 0 0 0 3px color-mix(in srgb, var(--yds-accent) 32%, transparent);
 }
+
+/*
+ * 시안 B — 딥 네이비 전문가형 (확정 기준).
+ * :root 값은 프리미엄 밖 호환용으로 두고, 앱 셸에서만 명도 단계를 덮는다.
+ * 사이드바 < 본문 캔버스 < 카드, 입력·표는 카드보다 한 단계 어둡게.
+ * 포인트: 보라(#7c3aed) + 은은한 퍼플 글로우. 흰 표면은 사용하지 않는다.
+ */
+.app-shell-host.yds-theme-premium {
+  color-scheme: dark;
+  --yds-bg: #070b16;
+  --yds-bg-canvas: #0c1428;
+  --yds-bg-elevated: #152844;
+  --yds-bg-muted: #101c36;
+  --yds-text: #f7f9fc;
+  --yds-text-secondary: #c9d4e4;
+  --yds-text-muted: #95a6be;
+  --yds-border: #2a4064;
+  --yds-border-strong: #45638c;
+  --yds-accent: #a78bfa;
+  --yds-accent-soft: rgba(124, 58, 237, 0.2);
+  --yds-focus-ring: #c4b5fd;
+
+  --yds-sidebar-bg: #050914;
+  --yds-sidebar-bg-elevated: #0b1528;
+  --yds-sidebar-border: rgba(186, 198, 220, 0.12);
+  --yds-sidebar-text: #f4f7fb;
+  --yds-sidebar-text-muted: #8ea0b8;
+  --yds-sidebar-text-secondary: #c5d0e0;
+  --yds-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --yds-sidebar-active: rgba(124, 58, 237, 0.32);
+  --yds-sidebar-active-border: #c4b5fd;
+
+  --yds-ai-from: #7c3aed;
+  --yds-ai-to: #6366f1;
+  --yds-ai-soft: rgba(124, 58, 237, 0.24);
+  --yds-ai-text: #ddd6fe;
+  --yds-ai-gradient: linear-gradient(135deg, var(--yds-ai-from) 0%, var(--yds-ai-to) 100%);
+  --yds-glow-purple: 0 0 0 1px rgba(124, 58, 237, 0.18), 0 0 28px rgba(124, 58, 237, 0.14);
+
+  --yds-input-bg: #0a1224;
+  --yds-input-bg-muted: #0e1a30;
+  --yds-input-text: #f7f9fc;
+  --yds-input-placeholder: #8b9cb3;
+  --yds-input-border: #35507a;
+  --yds-input-border-focus: #a78bfa;
+  --yds-input-disabled-bg: #101a2e;
+  --yds-input-disabled-text: #7d8fa6;
+
+  --yds-signal-up: #3ddc84;
+  --yds-signal-down: #ff6b6b;
+  --yds-signal-warn: #f5c451;
+  --yds-signal-caution: #ff9a5a;
+  --yds-signal-info: #5ec8ff;
+
+  --yds-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 32px rgba(0, 0, 0, 0.38);
+  --yds-shadow-focus: 0 0 0 3px rgba(167, 139, 250, 0.35);
+  --yds-radius-card: 0.875rem;
+}

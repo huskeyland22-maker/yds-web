@@ -2,9 +2,13 @@ import YdsPanicSpxValidationChart from "./YdsPanicSpxValidationChart.jsx"
 
 /**
  * Panic Index History
- * @param {{ historyRows?: object[]; className?: string }} props
+ * @param {{ historyRows?: object[]; windowMonths?: number | null; className?: string }} props
  */
-export default function YdsMarketTrendSection({ historyRows = [], className = "" }) {
+export default function YdsMarketTrendSection({
+  historyRows = [],
+  windowMonths = 3,
+  className = "",
+}) {
   return (
     <section
       className={["yds-market-trend", "yds-market-trend--panic-spx-val", className]
@@ -17,7 +21,7 @@ export default function YdsMarketTrendSection({ historyRows = [], className = ""
         Panic Index와 S&amp;P500 · 기준선 50 / 60 / 70
       </p>
       <div className="yds-market-trend__panel yds-market-trend__panel--solo yds-market-trend__panel--featured">
-        <YdsPanicSpxValidationChart historyRows={historyRows} />
+        <YdsPanicSpxValidationChart historyRows={historyRows} windowMonths={windowMonths} />
       </div>
     </section>
   )

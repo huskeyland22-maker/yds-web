@@ -16,7 +16,7 @@ import {
   dayKeyToUtcMs,
   formatHistoryTimeAxisTick,
   pickEvenTimeAxisTicks,
-  resolveHistoryDefaultBrushIndex,
+  resolveHistoryWindow,
 } from "../../utils/chartDateFormat.js"
 import {
   PANIC_SPX_VALIDATION_SERIES_URL,
@@ -32,9 +32,6 @@ const MARGIN_MOBILE = { top: 8, right: 22, left: 0, bottom: 4 }
 /** Default-view X label density (data points unchanged). */
 const X_TICK_TARGET_DESKTOP = 6
 const X_TICK_TARGET_MOBILE = 5
-/** 첫 화면 기본 zoom — 끝날짜 기준 최근 개월 (전체 데이터는 Brush로 탐색). */
-const DEFAULT_ZOOM_MONTHS = 17
-
 /** @param {{ active?: boolean; payload?: object[] }} props */
 function ValidationTooltip({ active, payload }) {
   if (!active || !payload?.length) return null
@@ -58,10 +55,10 @@ function ValidationTooltip({ active, payload }) {
 
 /**
  * Panic Index History — Panic V2 × S&P500 (시장 소스 재계산 시계열)
- * X축: timestamp 시간축 · 첫 화면은 최근 ~17개월 zoom · 전체 데이터는 Brush로 유지
- * @param {{ historyRows?: object[] }} [props]
+ * X축: timestamp 시간축 · 표시 구간은 선택한 기간의 저장된 날짜만
+ * @param {{ historyRows?: object[]; windowMonths?: number | null }} [props]
  */
-export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
+export default function YdsPanicSpxValidationChart({ historyRows = [], windowMonths = 3 }) {
   const isMobile = useIsMobileLayout()
   const chartHeight = isMobile ? CHART_HEIGHT_MOBILE : CHART_HEIGHT_DESKTOP
   const chartMargin = isMobile ? MARGIN_MOBILE : MARGIN_DESKTOP
@@ -120,19 +117,31 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
     })
   }, [series])
 
-  const defaultBrushIndex = useMemo(
-    () => resolveHistoryDefaultBrushIndex(chartData, DEFAULT_ZOOM_MONTHS),
-    [chartData],
+  const historyWindow = useMemo(
+    () => resolveHistoryWindow(chartData, windowMonths),
+    [chartData, windowMonths],
   )
+  const periodData = historyWindow.rows
 
-  /** 활성 Brush 구간 — 미설정 시 기본 최근 N개월 */
+  useEffect(() => {
+    setDomain(null)
+    setActiveBottom(null)
+    setBrushIndex(null)
+  }, [windowMonths])
+
+  const defaultBrushIndex = useMemo(() => {
+    if (periodData.length < 2) return null
+    return { startIndex: 0, endIndex: periodData.length - 1 }
+  }, [periodData])
+
+  /** 활성 Brush 구간 — 미설정이면 선택한 기간 전체 */
   const activeBrushIndex = brushIndex ?? defaultBrushIndex
 
   const filteredData = useMemo(() => {
-    if (!domain) return chartData
+    if (!domain) return periodData
     const [lo, hi] = domain
-    return chartData.filter((r) => r.date >= lo && r.date <= hi)
-  }, [chartData, domain])
+    return periodData.filter((r) => r.date >= lo && r.date <= hi)
+  }, [periodData, domain])
 
   /** Visible rows for axis domain/ticks only (Brush / bottom focus). */
   const visibleRows = useMemo(() => {
@@ -160,14 +169,14 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
     const maxT = isMobile ? 8 : 10
     const fullSpan = Math.max(
       1,
-      (chartData[chartData.length - 1]?.ts ?? 0) - (chartData[0]?.ts ?? 0),
+      (periodData[periodData.length - 1]?.ts ?? 0) - (periodData[0]?.ts ?? 0),
     )
     const visSpan = Math.max(1, endMs - startMs)
     const ratio = visSpan / fullSpan
     const zoomBoost = Math.round((1 - Math.min(1, ratio)) * (maxT - base) * 1.2)
     const target = Math.min(maxT, Math.max(base, base + zoomBoost))
     return pickEvenTimeAxisTicks(startMs, endMs, target)
-  }, [xTimeDomain, chartData, isMobile])
+  }, [xTimeDomain, periodData, isMobile])
 
   const xSpanMs = xTimeDomain ? xTimeDomain[1] - xTimeDomain[0] : 0
 
@@ -186,12 +195,12 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
     if (!series?.bottoms?.length) return []
     return series.bottoms
       .map((b) => {
-        const row = chartData.find((r) => r.date === b.d0)
+        const row = periodData.find((r) => r.date === b.d0)
         if (!row) return null
         return { ...b, chartSpx: row.spx, chartPanic: row.panic, ts: row.ts }
       })
       .filter(Boolean)
-  }, [series, chartData])
+  }, [series, periodData])
 
   const tierMarkers = useMemo(() => {
     if (!series?.bottoms?.length || !activeBottom) return []
@@ -273,27 +282,55 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
     [xSpanMs],
   )
 
+  const periodHasPlot =
+    periodData.length >= 2 &&
+    periodData.some((row) => Number.isFinite(Number(row.panic)) || Number.isFinite(Number(row.spx)))
+
   if (loadError) {
     return (
       <div className="yds-panic-spx-val yds-panic-spx-val--empty" role="status">
-        <p className="yds-panic-spx-val__empty">히스토리 시계열을 불러오지 못했습니다.</p>
+        <p className="yds-panic-spx-val__empty-title">히스토리를 불러오지 못했습니다</p>
+        <p className="yds-panic-spx-val__empty">네트워크 또는 시계열 파일을 확인한 뒤 다시 열어 주세요.</p>
       </div>
     )
   }
 
-  if (!series || chartData.length < 2 || !xTimeDomain) {
+  if (!series || chartData.length < 2) {
     return (
       <div className="yds-panic-spx-val yds-panic-spx-val--empty" role="status">
-        <p className="yds-panic-spx-val__empty">히스토리 시계열 준비중…</p>
+        <p className="yds-panic-spx-val__empty-title">히스토리 준비 중</p>
+        <p className="yds-panic-spx-val__empty">Panic × S&amp;P500 시계열을 불러오는 중입니다.</p>
       </div>
     )
   }
+
+  if (!periodHasPlot || !xTimeDomain) {
+    return (
+      <div className="yds-panic-spx-val yds-panic-spx-val--empty" role="status">
+        <p className="yds-panic-spx-val__empty-title">이 기간에 표시할 데이터 없음</p>
+        {historyWindow.seriesEnd ? (
+          <p className="yds-panic-spx-val__empty">차트 마지막 데이터 {historyWindow.seriesEnd}</p>
+        ) : null}
+        <p className="yds-panic-spx-val__empty">
+          선택한 기간에 Panic Index 또는 S&amp;P500 값이 없습니다. 기간을 넓히거나 전체로 바꿔 주세요.
+        </p>
+      </div>
+    )
+  }
+
+  const visibleStart = visibleRows[0]?.date ?? historyWindow.start
+  const visibleEnd = visibleRows[visibleRows.length - 1]?.date ?? historyWindow.end
+  const periodBottoms = (series.bottoms ?? []).filter((b) =>
+    periodData.some((row) => row.date === b.d0),
+  )
 
   return (
     <div className="yds-panic-spx-val">
       <div className="yds-panic-spx-val__toolbar">
         <p className="yds-panic-spx-val__hint">
-          저점 구간을 보려면 칩을 누르세요 · 최근 보기는 Reset
+          {historyWindow.seriesEnd ? `차트 마지막 데이터 ${historyWindow.seriesEnd}` : null}
+          {visibleStart && visibleEnd ? ` · 표시 ${visibleStart} ~ ${visibleEnd}` : null}
+          {" · 위 위험 점수는 이 기간으로 바뀌지 않습니다"}
         </p>
         <button type="button" className="yds-panic-spx-val__reset" onClick={resetZoom}>
           Reset
@@ -301,7 +338,7 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
       </div>
 
       <div className="yds-panic-spx-val__chips" role="list" aria-label="SPX 주요 저점">
-        {(series.bottoms ?? []).map((b) => (
+        {periodBottoms.map((b) => (
           <button
             key={b.d0}
             type="button"
@@ -484,6 +521,7 @@ export default function YdsPanicSpxValidationChart({ historyRows = [] }) {
 
             {!domain && activeBrushIndex ? (
               <Brush
+                key={`${windowMonths ?? "all"}-${periodData.length}`}
                 dataKey="ts"
                 height={22}
                 stroke="rgba(148,163,184,0.35)"

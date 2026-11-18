@@ -84,22 +84,9 @@ function probeSummaryLine(probes, loading) {
   return probes.map((p) => `${p.tableName?.split(".").pop() ?? p.id}:${p.status}`).join(" · ")
 }
 
-function useMobileLayout() {
-  const [mobile, setMobile] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)").matches : false,
-  )
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)")
-    const fn = () => setMobile(mq.matches)
-    mq.addEventListener("change", fn)
-    return () => mq.removeEventListener("change", fn)
-  }, [])
-  return mobile
-}
-
 /**
- * 하단 고정 RAW DB — Supabase 실제 query JSON (fallback 없음).
- * 모바일: 항상 하단 바 표시. 탭하면 펼침 + 즉시 query.
+ * RAW DB — Supabase 실제 query JSON (fallback 없음).
+ * 접힌 상태는 우측 알약, 펼치면 우측 하단 패널. 탭하면 즉시 query.
  */
 export default function SupabaseRawDebugPanel() {
   if (!isDevMode()) return null
@@ -108,7 +95,6 @@ export default function SupabaseRawDebugPanel() {
   const panicInitialized = usePanicStore((s) => s.initialized)
   const env = getSupabaseEnv()
   const hubStatus = getPanicHubEnvStatus()
-  const isMobile = useMobileLayout()
 
   const [dismissed, setDismissed] = useState(false)
   const [buildManifest, setBuildManifest] = useState(null)
@@ -175,24 +161,11 @@ export default function SupabaseRawDebugPanel() {
 
   if (!expanded) {
     return (
-      <div
-        className="fixed bottom-0 left-0 right-0 z-[9200] flex border-t border-violet-500/50 bg-[#0a0612]/98 shadow-[0_-4px_20px_rgba(0,0,0,0.45)]"
-        style={{ paddingBottom: "max(0.35rem, env(safe-area-inset-bottom))" }}
-      >
-        <button
-          type="button"
-          onClick={openExpanded}
-          className="min-h-[44px] flex-1 px-3 py-2 text-left font-mono text-[11px] font-bold leading-snug text-violet-100"
-        >
-          <span className="text-violet-300">RAW DB</span>
-          <span className="mt-0.5 block text-[9px] font-normal text-slate-500">{summary}</span>
+      <div className="yds-dev-pill yds-dev-pill--raw" data-dev-slot="raw">
+        <button type="button" onClick={openExpanded} title={summary}>
+          RAW DB
         </button>
-        <button
-          type="button"
-          onClick={() => setDismissed(true)}
-          className="shrink-0 px-3 text-[10px] text-slate-600"
-          aria-label="숨기기"
-        >
+        <button type="button" onClick={() => setDismissed(true)} aria-label="숨기기">
           ✕
         </button>
       </div>
@@ -200,10 +173,7 @@ export default function SupabaseRawDebugPanel() {
   }
 
   return (
-    <aside
-      className="fixed bottom-0 left-0 right-0 z-[9200] flex max-h-[min(55vh,440px)] flex-col border-t-2 border-violet-500/55 bg-[#07050f]/98 shadow-[0_-8px_32px_rgba(0,0,0,0.55)] backdrop-blur-md"
-      style={{ paddingBottom: "max(0.25rem, env(safe-area-inset-bottom))" }}
-    >
+    <aside className="yds-raw-debug" aria-label="RAW DB">
       <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-white/[0.08] px-3 py-2">
         <div className="min-w-0 flex-1">
           <p className="m-0 text-[12px] font-bold text-violet-100">RAW DB — Supabase query 결과</p>

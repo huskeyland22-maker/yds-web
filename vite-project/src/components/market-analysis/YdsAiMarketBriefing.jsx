@@ -32,12 +32,27 @@ export default function YdsAiMarketBriefing({
     [panicData, cycleFlow, dualLiquidity, etfContext],
   )
 
-  if (!report.visible) return null
+  if (!report.visible) {
+    return (
+      <section
+        className={["yds-ai-market-briefing", "yds-ai-market-briefing--empty", className]
+          .filter(Boolean)
+          .join(" ")}
+        aria-label={report.title}
+        data-empty="true"
+      >
+        <p className="yds-ai-market-briefing__empty">
+          연결된 시장 지표·가격 구조가 없어 브리핑을 만들지 못했습니다.
+        </p>
+      </section>
+    )
+  }
 
   return (
     <section
       className={["yds-ai-market-briefing", className].filter(Boolean).join(" ")}
       aria-label={report.title}
+      data-empty="false"
     >
       <p className="yds-ai-market-briefing__title">{report.title}</p>
 
