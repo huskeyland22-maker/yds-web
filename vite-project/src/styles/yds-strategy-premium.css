@@ -1,0 +1,340 @@
+/**
+ * STRATEGY desk renewal — deep-navy expert chrome only.
+ * Scope: buy/panic hubs, DBB (ETF·equity·leverage), operating journal.
+ * Does not change engines, gates, API, routes, or MARKET/RESEARCH pages.
+ */
+
+/* —— Strategy menu hubs (buy-strategy · panic-fear-buy) —— */
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy {
+  max-width: 46rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__header {
+  padding: 0.85rem 1rem 1rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  background:
+    linear-gradient(165deg, rgba(124, 58, 237, 0.14), transparent 55%),
+    var(--yds-bg-elevated);
+  box-shadow: var(--yds-glow-purple), var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__title {
+  font-family: var(--yds-font-sans);
+  font-size: var(--yds-fs-page-title);
+  letter-spacing: -0.025em;
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__sub,
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__notice {
+  color: var(--yds-text-secondary);
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__link {
+  border-color: var(--yds-border);
+  background: var(--yds-bg-elevated);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__link:hover {
+  border-color: color-mix(in srgb, var(--yds-accent) 55%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-ai-from) 14%, var(--yds-bg-elevated));
+  box-shadow: var(--yds-glow-purple);
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__link-label {
+  color: var(--yds-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__link-note {
+  color: var(--yds-text-muted);
+}
+
+/* —— DBB / leverage hero —— */
+.app-shell-host.yds-theme-premium .yds-dbb__hero {
+  margin-bottom: 1rem;
+  padding: 0.95rem 1rem 1.05rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  background:
+    linear-gradient(160deg, rgba(124, 58, 237, 0.16), transparent 52%),
+    linear-gradient(180deg, var(--yds-bg-elevated), var(--yds-bg-muted));
+  box-shadow: var(--yds-glow-purple), var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__kicker {
+  margin: 0 0 0.35rem;
+  color: var(--yds-ai-text);
+  font-size: var(--yds-fs-meta);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__title {
+  margin: 0;
+  font-family: var(--yds-font-sans);
+  font-size: var(--yds-fs-page-title);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: var(--yds-leading-tight);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__lead {
+  margin: 0.45rem 0 0;
+  max-width: 40rem;
+  color: var(--yds-text-secondary);
+  font-size: var(--yds-fs-body);
+  line-height: var(--yds-leading-normal);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__meta-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--yds-border);
+  border-radius: 0.7rem;
+  background: var(--yds-bg-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb__meta-block .yds-dbb__meta {
+  margin: 0;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb-section__title {
+  font-size: var(--yds-fs-section);
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+/* —— Candidate chips (replace slate utility reliance) —— */
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand {
+  border: 1px solid var(--yds-border);
+  border-radius: 0.7rem;
+  background: var(--yds-bg-elevated);
+  color: var(--yds-text);
+  box-shadow: var(--yds-shadow-card);
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand:hover {
+  border-color: color-mix(in srgb, var(--yds-accent) 45%, var(--yds-border));
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand.is-selected {
+  border-color: color-mix(in srgb, var(--yds-accent) 70%, var(--yds-border));
+  background: color-mix(in srgb, var(--yds-ai-from) 16%, var(--yds-bg-elevated));
+  box-shadow: inset 2px 0 0 var(--yds-accent), var(--yds-glow-purple);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__type {
+  color: var(--yds-signal-caution);
+  font-weight: 700;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__metrics {
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__metrics dt {
+  color: var(--yds-text-muted);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cand__metrics dd {
+  color: var(--yds-text);
+  font-family: var(--yds-font-mono);
+}
+
+/* —— Judgment desk (status · score · conditions) —— */
+.app-shell-host.yds-theme-premium .yds-dbb-dash {
+  gap: 0.7rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb-dash__detail {
+  gap: 0.65rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-score {
+  position: relative;
+  overflow: hidden;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-score::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--yds-accent);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-card--strong.yds-dbb-score::before {
+  background: var(--yds-signal-down);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-card--primary.yds-dbb-score::before {
+  background: var(--yds-signal-caution);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-card--watch.yds-dbb-score::before {
+  background: var(--yds-signal-warn);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-score__state {
+  margin: 0.45rem 0 0;
+  color: var(--yds-text);
+  font-size: var(--yds-fs-score);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-card__count {
+  margin: 0.2rem 0 0;
+  color: var(--yds-ai-text);
+  font-family: var(--yds-font-mono);
+  font-size: var(--yds-fs-score-lg);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-price {
+  margin: 0.45rem 0 0;
+  color: var(--yds-text);
+  font-family: var(--yds-font-mono);
+  font-size: var(--yds-fs-score);
+  font-weight: 750;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__field {
+  display: block;
+  margin: 0;
+  color: var(--yds-text-muted);
+  font-size: var(--yds-fs-meta);
+  font-weight: 650;
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__input {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--yds-input-border);
+  border-radius: 0.55rem;
+  background: var(--yds-input-bg);
+  color: var(--yds-input-text);
+  font-size: var(--yds-fs-body);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-picker__input:focus-visible {
+  outline: none;
+  border-color: var(--yds-input-border-focus);
+  box-shadow: var(--yds-shadow-focus);
+}
+
+.app-shell-host.yds-theme-premium .yds-dbb .yds-dbb-cond__row {
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+/* —— Leverage board —— */
+.app-shell-host.yds-theme-premium .yds-lev-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
+  gap: 0.7rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-lev-board .yds-dbb-card {
+  min-height: 100%;
+}
+
+.app-shell-host.yds-theme-premium .yds-lev-board .yds-dbb-card__ticker {
+  font-family: var(--yds-font-mono);
+  font-weight: 800;
+}
+
+/* —— Operating journal —— */
+.app-shell-host.yds-theme-premium .yds-oj__head {
+  margin-bottom: 0.95rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--yds-border);
+  border-radius: var(--yds-radius-card);
+  background:
+    linear-gradient(165deg, rgba(124, 58, 237, 0.12), transparent 55%),
+    var(--yds-bg-elevated);
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__kicker {
+  color: var(--yds-ai-text);
+  font-size: var(--yds-fs-meta);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__head h1 {
+  margin: 0.25rem 0 0;
+  font-size: var(--yds-fs-page-title);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+  gap: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__card {
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--yds-shadow-card);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__card-value {
+  font-family: var(--yds-font-mono);
+  font-weight: 800;
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__filters {
+  gap: 0.45rem;
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__filters input,
+.app-shell-host.yds-theme-premium .yds-oj__filters select,
+.app-shell-host.yds-theme-premium .yds-oj__panel input,
+.app-shell-host.yds-theme-premium .yds-oj__panel select {
+  background: var(--yds-input-bg);
+  border-color: var(--yds-input-border);
+  color: var(--yds-input-text);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__table {
+  border: 1px solid var(--yds-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--yds-bg-elevated);
+}
+
+.app-shell-host.yds-theme-premium .yds-oj__table th {
+  background: var(--yds-bg-muted);
+  color: var(--yds-text-muted);
+  font-size: var(--yds-fs-meta);
+  font-weight: 700;
+}
+
+/* —— Mobile density —— */
+@media (max-width: 640px) {
+  .app-shell-host.yds-theme-premium .yds-dbb__hero,
+  .app-shell-host.yds-theme-premium .yds-oj__head,
+  .app-shell-host.yds-theme-premium .yds-menu-hub--strategy .yds-menu-hub__header {
+    padding: 0.75rem 0.8rem 0.85rem;
+  }
+
+  .app-shell-host.yds-theme-premium .yds-dbb-dash__detail {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

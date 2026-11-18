@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Calendar, ChevronDown, LogIn } from "lucide-react"
+import { Calendar, ChevronDown } from "lucide-react"
 import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom"
-import MembershipVerifyPanel from "./components/MembershipVerifyPanel.jsx"
 import { useMembership } from "./context/MembershipContext.jsx"
-import { membershipAccountAccessCaption } from "./content/ydsMembership.js"
 import {
   GoogleAuthProvider,
   getRedirectResult,
@@ -17,6 +15,8 @@ import { isPanicHubEnabled, submitManualPanicData } from "./config/api.js"
 import { clearStoredEventHistory } from "./content/ydsMarketEventHistoryStorage.js"
 import { persistHistory } from "./utils/panicHistoryLocalPersist.js"
 import { appendPanicIndexHistory } from "./utils/panicIndexHistory.js"
+import { panicAsOfDate } from "./utils/panicDataFreshness.js"
+import { shouldRefreshLatestPanicSnapshot } from "./utils/resolveLatestPanicMetrics.js"
 import { CYCLE_HISTORY_MAX, latestCycleHistoryRow, panicDataFromCycleRow } from "./utils/cycleHistoryUtils.js"
 import { panicDeskDataFromHistory } from "./utils/panicHistoryDesk.js"
 import { rowCalendarKey } from "./utils/cycleHistoryHygiene.js"
@@ -41,6 +41,8 @@ import ValueChainPage from "./components/ValueChainPage.jsx"
 import TradingLogPage from "./pages/TradingLogPage.jsx"
 import PanicIndexValidationPage from "./pages/PanicIndexValidationPage.jsx"
 import CurrentMarketAnalysisPage from "./pages/CurrentMarketAnalysisPage.jsx"
+import CreditCyclePage from "./pages/CreditCyclePage.jsx"
+import MenuHubPage from "./pages/MenuHubPage.jsx"
 import DailyBottomBuyPage from "./pages/DailyBottomBuyPage.jsx"
 import DbbProspectiveV12Page from "./pages/DbbProspectiveV12Page.jsx"
 import EquityDailyBottomBuyPage from "./pages/EquityDailyBottomBuyPage.jsx"
@@ -556,7 +558,6 @@ function App() {
   /** PRO ledger or operator claim — unlocks detail/history (plan badge stays FREE for operator). */
   const membershipDetailAccess = membership.detailAccess === true
   const membershipReady = membership.isLoading !== true
-  const accountAccessCaption = membershipAccountAccessCaption(membership.status)
 
   /** Mirror detailAccess into appDataStore for hub history LS fallback (fail-closed while loading). */
   useEffect(() => {
@@ -824,7 +825,10 @@ function App() {
             limit: 500,
             isPro: membershipDetailAccess,
           })
-          applyServerPanicSnapshot(desk ?? serverData, { skipAutoRefresh: true })
+          const currentAsOf = panicAsOfDate(usePanicStore.getState().panicData)
+          if (shouldRefreshLatestPanicSnapshot(tradeDate, currentAsOf)) {
+            applyServerPanicSnapshot(desk ?? serverData, { skipAutoRefresh: true })
+          }
           console.log("UI UPDATED", { tradeDate, vix: desk?.vix ?? serverData?.vix })
           saveSucceeded = true
         } catch (err) {
@@ -836,8 +840,7 @@ function App() {
       if (saveSucceeded) {
         const savedAt = payload.updatedAt
         const appAfterSave = useAppDataStore.getState()
-        const deskSnap = appAfterSave.resolveDeskPanicData() ?? normalizedParsedData
-        persistHistory(deskSnap, tradeDate)
+        persistHistory(normalizedParsedData, tradeDate)
         if (!isPanicHubEnabled()) {
           appendPanicIndexHistory({ ...normalizedParsedData, updatedAt: savedAt }, tradeDate)
           await appAfterSave.loadCycleHistoryBundle({
@@ -1455,7 +1458,7 @@ function App() {
   return (
     <div
       className={[
-        "app-shell-host yds-theme-premium flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden overflow-y-visible antialiased transition-shadow duration-700 lg:flex-row",
+        "app-shell-host yds-theme-premium flex min-h-[100dvh] min-h-svh flex-col overflow-x-hidden antialiased transition-shadow duration-700 lg:h-[100dvh] lg:max-h-[100dvh] lg:min-h-0 lg:flex-row lg:overflow-hidden",
         hubSaveGlow && !isMobileLayout ? "shadow-[inset_0_0_40px_rgba(34,211,238,0.05)]" : "",
       ].join(" ")}
     >
@@ -1464,72 +1467,20 @@ function App() {
         sidebarPulse={sidebarPulse}
         onOpenInputPanel={openInputPanel}
         onOpenAccountSettings={openAccountSettings}
+        user={user}
+        onLogin={login}
+        onLogout={logout}
+        buildVersion={buildVersion}
+        pwaLastSyncLabel={pwaLastSyncLabel}
       />
 
-      <div className="app-column-host flex min-w-0 flex-1 flex-col overflow-visible">
+      <div className="app-column-host flex min-h-0 min-w-0 flex-1 flex-col lg:h-full lg:overflow-hidden">
         <MobileAppHeader
           onMenuOpen={() => setMobileDrawerOpen(true)}
           user={user}
           onLogin={login}
           onLogout={logout}
         />
-        <div className="shrink-0 border-b border-white/[0.06] px-2.5 py-1 lg:hidden">
-          <MembershipVerifyPanel compact />
-        </div>
-        <header className="yds-desktop-topbar hidden min-h-[44px] shrink-0 flex-wrap items-center justify-end gap-1.5 border-b border-white/[0.06] px-3 py-2 backdrop-blur-sm sm:px-4 lg:flex lg:pt-[calc(0.5rem+env(safe-area-inset-top))]">
-          <div className="flex flex-wrap items-center justify-end gap-1.5">
-            <MembershipVerifyPanel compact className="mr-auto" />
-            <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 rounded-card border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 transition hover:border-white/[0.12]">
-                  {user ? (
-                    <>
-                      <img
-                        src={user.photoURL || "https://placehold.co/72x72/0f172a/e2e8f0?text=U"}
-                        alt="사용자 프로필"
-                        className="h-8 w-8 rounded-full border border-white/15 object-cover"
-                      />
-                      <div className="leading-tight">
-                        <span className="max-w-[120px] truncate text-trading-sm font-semibold text-white">
-                          {user.displayName || user.email || "로그인 유저"}
-                        </span>
-                        {accountAccessCaption ? (
-                          <div className="text-trading-2xs text-slate-500">{accountAccessCaption}</div>
-                        ) : null}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={logout}
-                        className="rounded-md bg-red-500/10 px-1.5 py-0.5 text-trading-xs text-red-300 transition hover:bg-red-500/20"
-                      >
-                        로그아웃
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={login}
-                      className="flex items-center gap-1.5 text-trading-sm font-medium text-slate-200 transition hover:text-white"
-                      style={{ width: "auto" }}
-                    >
-                      <LogIn size={16} />
-                      로그인
-                    </button>
-                  )}
-                </div>
-              </div>
-              {showDevDebugChrome ? (
-                <span
-                  className="flex max-w-[min(42vw,14rem)] flex-col items-end gap-0.5 rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-0.5 font-mono text-trading-2xs text-slate-400"
-                  title={`id ${APP_BUILD_ID}`}
-                >
-                  <span className="truncate text-slate-300">{buildVersion}</span>
-                  <span className="text-[9px] font-normal leading-tight text-slate-500">
-                    {pwaLastSyncLabel ? `sync ${pwaLastSyncLabel}` : "sync …"}
-                  </span>
-                </span>
-              ) : null}
-          </div>
-        </header>
 
         {showDevDebugChrome && isDataTraceUiEnabled() ? (
           <div className="flex flex-wrap items-start gap-2 border-b border-amber-500/20 bg-[#070a0f]/95 px-3 py-2">
@@ -1541,9 +1492,36 @@ function App() {
           </div>
         ) : null}
 
-        <main className="app-main-host flex-1 overflow-visible px-2.5 py-2 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4 lg:px-6 lg:py-5 lg:pb-5">
+        <main className="app-main-host min-h-0 flex-1 px-2.5 py-2 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4 lg:overflow-y-auto lg:overscroll-contain lg:px-6 lg:py-5 lg:pb-5">
           <Routes>
             <Route path="/" element={<Navigate to="/daily-bottom-buy" replace />} />
+            <Route path="/market-briefing" element={<Navigate to="/market-analysis" replace />} />
+            <Route
+              path="/credit-cycle"
+              element={
+                <SectionErrorBoundary label="신용 사이클">
+                  <CreditCyclePage />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route path="/buy-strategy" element={<Navigate to="/daily-bottom-buy" replace />} />
+            <Route path="/panic-fear-buy" element={<Navigate to="/market-analysis" replace />} />
+            <Route
+              path="/strategy-validation"
+              element={
+                <SectionErrorBoundary label="전략 검증">
+                  <MenuHubPage hubId="strategy-validation" />
+                </SectionErrorBoundary>
+              }
+            />
+            <Route
+              path="/ai-insight"
+              element={
+                <SectionErrorBoundary label="AI 투자 인사이트">
+                  <MenuHubPage hubId="ai-insight" />
+                </SectionErrorBoundary>
+              }
+            />
             <Route
               path="/daily-bottom-buy"
               element={
@@ -2129,7 +2107,11 @@ function App() {
         onClose={() => setMobileDrawerOpen(false)}
         onOpenInput={openInputPanel}
         onOpenAccountSettings={openAccountSettings}
-        buildVersion={showDevDebugChrome ? buildVersion : null}
+        buildVersion={buildVersion}
+        pwaLastSyncLabel={pwaLastSyncLabel}
+        user={user}
+        onLogin={login}
+        onLogout={logout}
       />
       <AccountSettingsPanel
         open={isAccountSettingsOpen}
