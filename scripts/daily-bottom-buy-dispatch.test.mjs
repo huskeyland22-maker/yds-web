@@ -87,7 +87,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     ])
   })
 
-  it("dev server runs the local product-six ETF handler instead of the deployed proxy", () => {
+  it("dev server runs the local product-fifteen ETF handler instead of the deployed proxy", () => {
     const vite = readFileSync(join(root, "vite-project/vite.config.js"), "utf8")
     assert.match(vite, /handleDailyBottomBuy/)
     assert.equal(vite.split('"/api/daily-bottom-buy"').length, 2)
@@ -114,16 +114,44 @@ describe("daily-bottom-buy hobby dispatch", () => {
     )
     assert.equal(snap.ok, true)
     assert.ok(Array.isArray(snap.all))
-    assert.equal(snap.all.length, 6)
+    assert.equal(snap.all.length, 15)
     assert.deepEqual(
       snap.all.map((c) => c.symbol),
-      ["SMH", "GRID", "IGV", "BOTZ", "CIBR", "VOO"],
+      [
+        "SMH",
+        "GRID",
+        "IGV",
+        "BOTZ",
+        "CIBR",
+        "VOO",
+        "QQQM",
+        "SCHD",
+        "AVUV",
+        "VGT",
+        "AIQ",
+        "XLU",
+        "XLI",
+        "XLV",
+        "XLF",
+      ],
     )
     for (const card of snap.all) {
-      assert.equal(card.ok, true, card.symbol)
       assert.equal(Number.isFinite(card.count), true, card.symbol)
+      assert.ok(card.sector, card.symbol)
+      assert.ok(card.industry, card.symbol)
+      assert.ok(card.qualityStatus === "pending" || card.qualityStatus === "scored", card.symbol)
+      assert.ok(card.qualityLabel, card.symbol)
+      if (card.qualityStatus === "scored") {
+        assert.ok(Number.isFinite(card.qualityScore), card.symbol)
+        assert.ok(card.qualityGrade, card.symbol)
+      }
     }
-    for (const gone of ["XLK", "XLF", "XLY", "FAS", "LABU"]) {
+    for (const core of ["SMH", "GRID", "IGV", "BOTZ", "CIBR", "VOO"]) {
+      const card = snap.all.find((c) => c.symbol === core)
+      assert.ok(card, core)
+      assert.equal(card.ok, true, core)
+    }
+    for (const gone of ["XLK", "XLY", "FAS", "LABU", "QQQ"]) {
       assert.ok(!snap.all.some((c) => c.symbol === gone))
     }
   })
@@ -151,7 +179,7 @@ describe("daily-bottom-buy hobby dispatch", () => {
     assert.equal(res.state.body?.system, "daily_bottom_buy_v1")
     assert.equal(res.state.body?.separateFromPanic, true)
     assert.ok(Array.isArray(res.state.body?.all))
-    assert.equal(res.state.body.all.length, 6)
+    assert.equal(res.state.body.all.length, 15)
     assert.ok(dbbCalled, "DBB path should fetch Yahoo OHLCV")
     assert.equal(res.state.body?.parsedData, undefined, "must not return market-data shape")
   })

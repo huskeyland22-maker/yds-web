@@ -1,11 +1,23 @@
 /**
  * Daily Bottom Buy V1 — product evaluation engine (API).
  * Independent of Panic Index.
+ * Product ETF list / sector taxonomy: dailyBottomBuyUniverse.js
  */
+
+import {
+  DAILY_BOTTOM_BUY_ETFS as PRODUCT_ETFS,
+  DAILY_BOTTOM_BUY_WATCHLIST as PRODUCT_WATCHLIST,
+  DAILY_BOTTOM_BUY_LEGACY_CORE_SIX,
+  DAILY_BOTTOM_BUY_EXCLUDED_ETFS,
+  ETF_QUALITY_LABEL_PENDING,
+  ETF_QUALITY_STATUS_PENDING,
+  resolveEtfQualityEvaluation,
+} from "./dailyBottomBuyUniverse.js"
 
 /**
  * Frozen sell/signal research universe (historical V1 nine).
- * Backtests and validation studies that must reproduce prior results import this — not the product six.
+ * Backtests and validation studies that must reproduce prior results import this — not the product list.
+ * Do not rewrite this array when expanding the product universe.
  */
 export const DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1 = [
   { symbol: "SMH", theme: "반도체·AI 컴퓨팅", themeShort: "반도체·AI", role: "AI의 두뇌" },
@@ -19,21 +31,19 @@ export const DAILY_BOTTOM_BUY_ETFS_RESEARCH_V1 = [
   { symbol: "IBB", theme: "바이오·생명과학", themeShort: "바이오", role: "AI 신약·정밀의료·생명공학" },
 ]
 
-/**
- * Product ETF set (AI growth watchlist). Same order as the screen.
- * FAS and LABU stay off this list because they are leveraged ETFs.
- */
-export const DAILY_BOTTOM_BUY_ETFS = [
-  { symbol: "SMH", theme: "반도체·AI 컴퓨팅", themeShort: "반도체·AI", role: "AI의 두뇌" },
-  { symbol: "GRID", theme: "전력망·전기화", themeShort: "전력망", role: "AI 데이터센터 전력 인프라" },
-  { symbol: "IGV", theme: "소프트웨어·클라우드", themeShort: "소프트웨어", role: "AI 수익화" },
-  { symbol: "BOTZ", theme: "로봇·자동화", themeShort: "로봇", role: "Physical AI" },
-  { symbol: "CIBR", theme: "사이버보안", themeShort: "사이버", role: "AI 시대 보안 인프라" },
-  { symbol: "VOO", theme: "Vanguard S&P 500 ETF", themeShort: "S&P 500", role: "미국 대형주" },
-]
+/** Product ETF set (fifteen). Same order as the screen. Source: dailyBottomBuyUniverse.js */
+export const DAILY_BOTTOM_BUY_ETFS = PRODUCT_ETFS
 
-/** Screen watchlist — identical to the product six. */
-export const DAILY_BOTTOM_BUY_WATCHLIST = [...DAILY_BOTTOM_BUY_ETFS]
+/** Screen watchlist — identical to the product fifteen. */
+export const DAILY_BOTTOM_BUY_WATCHLIST = PRODUCT_WATCHLIST
+
+export {
+  DAILY_BOTTOM_BUY_LEGACY_CORE_SIX,
+  DAILY_BOTTOM_BUY_EXCLUDED_ETFS,
+  ETF_QUALITY_LABEL_PENDING,
+  ETF_QUALITY_STATUS_PENDING,
+  resolveEtfQualityEvaluation,
+}
 
 /** V1 product constants — frozen from Train validation */
 export const DAILY_BOTTOM_THRESHOLDS = {
@@ -234,16 +244,36 @@ export function evaluateBars(bars, th = DAILY_BOTTOM_THRESHOLDS) {
 }
 
 /**
- * @param {{ symbol: string, theme: string, themeShort?: string, role?: string }} meta
- * @param {object} evaluation evaluateBars result
+ * Attach classification + quality fields. Quality is independent of DBB signals.
+ * @param {{ symbol: string, theme: string, themeShort?: string, role?: string, sector?: string, industry?: string }} meta
+ * @param {object | null | undefined} qualityEvaluation
  */
-export function buildEtfCard(meta, evaluation) {
+function cardMetaFields(meta, qualityEvaluation) {
+  const quality = qualityEvaluation || resolveEtfQualityEvaluation(meta.symbol)
+  return {
+    symbol: meta.symbol,
+    theme: meta.theme,
+    themeShort: meta.themeShort || meta.theme,
+    role: meta.role || null,
+    sector: meta.sector || null,
+    industry: meta.industry || null,
+    qualityStatus: quality.status,
+    qualityLabel: quality.label,
+    qualityScore: quality.score ?? null,
+    qualityGrade: quality.grade ?? null,
+    quality: quality,
+  }
+}
+
+/**
+ * @param {{ symbol: string, theme: string, themeShort?: string, role?: string, sector?: string, industry?: string }} meta
+ * @param {object} evaluation evaluateBars result
+ * @param {object | null | undefined} [qualityEvaluation]
+ */
+export function buildEtfCard(meta, evaluation, qualityEvaluation) {
   if (!evaluation?.ok) {
     return {
-      symbol: meta.symbol,
-      theme: meta.theme,
-      themeShort: meta.themeShort || meta.theme,
-      role: meta.role || null,
+      ...cardMetaFields(meta, qualityEvaluation),
       ok: false,
       error: evaluation?.error || "error",
       count: 0,
@@ -251,10 +281,7 @@ export function buildEtfCard(meta, evaluation) {
     }
   }
   return {
-    symbol: meta.symbol,
-    theme: meta.theme,
-    themeShort: meta.themeShort || meta.theme,
-    role: meta.role || null,
+    ...cardMetaFields(meta, qualityEvaluation),
     ok: true,
     asOfDate: evaluation.asOfDate,
     close: evaluation.close,
