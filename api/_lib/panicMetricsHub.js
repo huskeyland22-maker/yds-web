@@ -8,6 +8,43 @@ import {
 import { PANIC_METRIC_KEYS, panicObjectFromSnapshot, toPanicNum } from "./panicSnapshot.js"
 
 const METRIC_KEYS = PANIC_METRIC_KEYS
+const BBB_DISPLAY_KEYS = ["bbbOas", "bbb", "bbbSpread"]
+const MANUAL_PANIC_CORE_KEYS = new Set(["vix", "fearGreed", "putCall"])
+
+/**
+ * 최신 스냅샷 갱신 여부. 판단 기준은 updatedAt이 아니라 이력 날짜다.
+ * latestHistoryDate를 모르면 더 늦은 행이 확인되지 않은 것이므로 갱신을 막지 않는다.
+ * DB 함수 sync_latest_panic_metrics는 전달된 날짜를 그대로 덮어쓴다.
+ * 과거 날짜 보호는 이 함수로 RPC를 호출하지 않는 쪽에 있다.
+ */
+export function shouldRefreshLatestPanicSnapshot(tradeDate, latestHistoryDate) {
+  const input = String(tradeDate ?? "").slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input)) return false
+  const latest = String(latestHistoryDate ?? "").slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(latest)) return true
+  return input >= latest
+}
+
+function metricCell(value) {
+  if (value == null || value === "") return null
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
+/** panic_metrics의 BBB 값을 점수 입력과 분리해 카드 스냅샷에만 붙인다. */
+export function attachBbbDisplay(snapshot, rows) {
+  if (!snapshot || typeof snapshot !== "object") return snapshot
+  const byKey = new Map((rows || []).map((row) => [String(row?.metric_key || ""), row]))
+  const next = { ...snapshot }
+  for (const key of BBB_DISPLAY_KEYS) {
+    if (metricCell(next[key]) != null) continue
+    const cell = byKey.get(key)
+    if (!cell) continue
+    const n = metricCell(cell.metric_value)
+    if (n != null) next[key] = n
+  }
+  return next
+}
 
 function deriveRiskRegime(row) {
   const vix = Number(row?.vix)
@@ -31,8 +68,13 @@ export function panicObjectFromRows(rows) {
   for (const k of METRIC_KEYS) {
     const cell = byKey[k]
     const v = cell?.metric_value
-    out[k] = v === null || v === undefined ? null : Number(v)
-    if (typeof out[k] === "number" && !Number.isFinite(out[k])) out[k] = null
+    out[k] = metricCell(v)
+  }
+  for (const key of BBB_DISPLAY_KEYS) {
+    const cell = byKey[key]
+    if (!cell) continue
+    const n = metricCell(cell.metric_value)
+    if (n != null) out[key] = n
   }
   const meta = byKey.risk_regime
   out.riskRegime = typeof meta?.status === "string" && meta.status ? meta.status : deriveRiskRegime(out)
@@ -50,10 +92,12 @@ export function rowsFromPanicPayload(body, opts = {}) {
       : new Date().toISOString()
   const source = typeof opts.source === "string" && opts.source ? opts.source : "api"
   const forceAllKeys = Boolean(opts.forceAllKeys) || source === "manual"
+  const leaveManualCore = source === "cron"
   const rows = []
   const o = {}
   const shouldLog = source === "manual" || source === "api"
   for (const key of METRIC_KEYS) {
+    if (leaveManualCore && MANUAL_PANIC_CORE_KEYS.has(key)) continue
     if (!forceAllKeys && !Object.prototype.hasOwnProperty.call(body, key)) continue
     const raw = body[key]
     const metricValue = toPanicNum(raw)
@@ -71,16 +115,18 @@ export function rowsFromPanicPayload(body, opts = {}) {
       updated_at: updatedAt,
     })
   }
-  const regime = deriveRiskRegime(o)
-  rows.push({
-    metric_key: "risk_regime",
-    metric_value: null,
-    change_percent: null,
-    status: regime,
-    market: "global",
-    source,
-    updated_at: updatedAt,
-  })
+  if (!leaveManualCore) {
+    const regime = deriveRiskRegime(o)
+    rows.push({
+      metric_key: "risk_regime",
+      metric_value: null,
+      change_percent: null,
+      status: regime,
+      market: "global",
+      source,
+      updated_at: updatedAt,
+    })
+  }
   return rows
 }
 

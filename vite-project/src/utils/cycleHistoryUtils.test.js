@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildCycleRowFromPanic } from "./cycleHistoryUtils.js"
+import { buildCycleRowFromPanic, panicDataFromCycleRow } from "./cycleHistoryUtils.js"
 import { getPanicScoreV2 } from "./tradingScores.js"
 
 describe("buildCycleRowFromPanic", () => {
@@ -39,5 +39,24 @@ describe("buildCycleRowFromPanic", () => {
         updatedAt: "2026-09-23T12:00:00.000Z",
       }),
     ).toBeNull()
+  })
+})
+
+describe("panicDataFromCycleRow", () => {
+  it("keeps null metric payloads null", () => {
+    const row = panicDataFromCycleRow({
+      date: "2026-11-12",
+      vix: { value: null, delta: null },
+      fearGreed: null,
+      putCall: { value: null },
+      bofa: null,
+      highYield: { value: null },
+    })
+    expect(row?.vix).toBeNull()
+    expect(row?.fearGreed).toBeNull()
+    expect(row?.putCall).toBeNull()
+    expect(row?.bofa).toBeNull()
+    expect(row?.highYield).toBeNull()
+    expect(row?.date).toBe("2026-11-12")
   })
 })

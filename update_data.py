@@ -4,7 +4,7 @@
 요구사항:
 - 미국 동부시간 기준 업데이트 시각 저장
 - Yahoo Finance 지표는 Adj Close 기반 value/delta 계산
-- CNN Fear & Greed score + delta 계산
+- VIX, CNN Fear & Greed, Put/Call 은 기존 data.json 값 유지
 - FRED(BAMLH0A0HYM2) value/delta 계산
 - bofa / gs 는 기존 data.json 값 유지(덮어쓰기 금지)
 - 실패 시 기존 data.json 유지
@@ -150,23 +150,31 @@ def fetch_fred_high_yield() -> dict[str, float | None]:
         return {"value": None, "delta": None}
 
 
+MANUAL_CORE_KEYS = ("vix", "fearGreed", "putCall")
+
+
+def apply_manual_core(existing: dict[str, Any] | None, payload: dict[str, Any]) -> dict[str, Any]:
+    """자동 수집 결과가 data.json의 VIX·CNN·Put/Call을 바꾸지 않게 한다."""
+    source = existing if isinstance(existing, dict) else {}
+    for key in MANUAL_CORE_KEYS:
+        payload[key] = source.get(key)
+    return payload
+
+
 def build_payload(existing: dict[str, Any]) -> dict[str, Any]:
     now_ny = datetime.now(NY_TZ)
 
     payload = {
         "updated_at": now_ny.strftime("%Y-%m-%d %H:%M"),
-        "vix": fetch_yahoo_adj_close("^VIX"),
         "vxn": fetch_yahoo_adj_close("^VXN"),
         "skew": fetch_yahoo_adj_close("^SKEW"),
-        "putCall": fetch_yahoo_adj_close("^PCC"),
         "move": fetch_yahoo_adj_close("^MOVE"),
-        "fearGreed": fetch_cnn_fear_greed(),
         "highYield": fetch_fred_high_yield(),
         # 수동값 보호: 기존 값 유지
         "bofa": existing.get("bofa"),
         "gs": existing.get("gs"),
     }
-    return payload
+    return apply_manual_core(existing, payload)
 
 
 def save_payload(path: Path, payload: dict[str, Any]) -> None:

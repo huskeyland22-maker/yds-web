@@ -141,7 +141,42 @@ export function shiftDayKeyMonths(dayKey, deltaMonths) {
 }
 
 /**
- * 히스토리 차트 첫 화면 Brush 구간 — 끝날짜 기준 최근 N개월 (데이터 삭제 없음).
+ * 저장된 날짜만으로 기간 창을 자른다. 없는 날짜는 만들지 않는다.
+ * monthsBack가 null이면 전체. 시작일은 컷오프 이후 첫 실제 날짜다.
+ * @param {readonly { date?: string }[]} rows
+ * @param {number | null | undefined} monthsBack
+ * @returns {{ rows: { date?: string }[]; start: string | null; end: string | null; seriesEnd: string | null }}
+ */
+export function resolveHistoryWindow(rows, monthsBack) {
+  const dated = (Array.isArray(rows) ? rows : []).filter(
+    (row) => typeof row?.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(row.date),
+  )
+  if (!dated.length) return { rows: [], start: null, end: null, seriesEnd: null }
+  const seriesEnd = dated[dated.length - 1].date
+  if (monthsBack == null) {
+    return { rows: dated, start: dated[0].date, end: seriesEnd, seriesEnd }
+  }
+  const startKey = shiftDayKeyMonths(seriesEnd, -Math.abs(Number(monthsBack)))
+  if (!startKey) return { rows: [], start: null, end: null, seriesEnd }
+  const windowRows = dated.filter((row) => row.date >= startKey)
+  if (!windowRows.length) return { rows: [], start: null, end: null, seriesEnd }
+  return {
+    rows: windowRows,
+    start: windowRows[0].date,
+    end: windowRows[windowRows.length - 1].date,
+    seriesEnd,
+  }
+}
+
+export const HISTORY_WINDOW_OPTIONS = Object.freeze([
+  { id: "3m", label: "최근 3개월", months: 3 },
+  { id: "6m", label: "최근 6개월", months: 6 },
+  { id: "12m", label: "최근 1년", months: 12 },
+  { id: "all", label: "전체", months: null },
+])
+
+/**
+ * 히스토리 차트 Brush 기본 구간. 끝날짜 기준 최근 N개월이며 원본 행은 지우지 않는다.
  * @param {readonly { date?: string }[]} rows
  * @param {number} [monthsBack=17]
  * @returns {{ startIndex: number; endIndex: number } | null}

@@ -36,10 +36,10 @@ export function historyRowsToCycleRows(hubRows) {
  * @param {string} dataKey
  */
 function rowMetricValue(row, dataKey) {
-  if (dataKey === "highYield" || dataKey === "hyOas") {
-    return Number(row.highYield ?? row.hyOas)
-  }
-  return Number(row[dataKey])
+  const raw = dataKey === "highYield" || dataKey === "hyOas" ? (row.highYield ?? row.hyOas) : row[dataKey]
+  if (raw == null || raw === "") return null
+  const n = Number(raw)
+  return Number.isFinite(n) ? n : null
 }
 
 export function buildChartDataFromHistory(cycleRows, dataKey = "vix") {

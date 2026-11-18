@@ -5,6 +5,7 @@ import {
   pickEvenAxisTickValues,
   pickEvenTimeAxisTicks,
   resolveHistoryDefaultBrushIndex,
+  resolveHistoryWindow,
   shiftDayKeyMonths,
   utcMsToDayKey,
 } from "./chartDateFormat.js"
@@ -99,5 +100,47 @@ describe("shiftDayKeyMonths / resolveHistoryDefaultBrushIndex", () => {
     expect(brush.startIndex).toBeGreaterThan(0)
     // visible window roughly 17 months, not full series
     expect(brush.endIndex - brush.startIndex).toBeLessThan(rows.length * 0.55)
+  })
+})
+
+describe("resolveHistoryWindow", () => {
+  const rows = [
+    { date: "2026-01-02" },
+    { date: "2026-06-01" },
+    { date: "2026-08-20" },
+    { date: "2026-09-18" },
+  ]
+
+  it("starts on the first stored date on or after the cutoff", () => {
+    const window = resolveHistoryWindow(rows, 3)
+    expect(shiftDayKeyMonths("2026-09-18", -3)).toBe("2026-06-18")
+    expect(window.seriesEnd).toBe("2026-09-18")
+    expect(window.start).toBe("2026-08-20")
+    expect(window.end).toBe("2026-09-18")
+    expect(window.rows.map((row) => row.date)).toEqual(["2026-08-20", "2026-09-18"])
+  })
+
+  it("uses a wider start when the window is 12 months", () => {
+    const short = resolveHistoryWindow(rows, 3)
+    const year = resolveHistoryWindow(rows, 12)
+    expect(year.start < short.start).toBe(true)
+    expect(year.rows[0].date).toBe("2026-01-02")
+  })
+
+  it("returns every stored date for the full series", () => {
+    const all = resolveHistoryWindow(rows, null)
+    expect(all.start).toBe("2026-01-02")
+    expect(all.end).toBe("2026-09-18")
+    expect(all.rows).toHaveLength(4)
+  })
+
+  it("does not invent a date when nothing is stored", () => {
+    expect(resolveHistoryWindow([], 3)).toEqual({
+      rows: [],
+      start: null,
+      end: null,
+      seriesEnd: null,
+    })
+    expect(resolveHistoryWindow([{ date: "not-a-date" }], 3).rows).toEqual([])
   })
 })

@@ -36,7 +36,9 @@ export function isSchemaColumnError(err) {
  */
 function pickNum(row, dbCol) {
   if (!row || typeof row !== "object") return null
-  const n = Number(row[dbCol])
+  const raw = row[dbCol]
+  if (raw == null || raw === "") return null
+  const n = Number(raw)
   return Number.isFinite(n) ? n : null
 }
 
@@ -45,6 +47,7 @@ export function pickHyFromRow(row) {
   if (!row || typeof row !== "object") return null
   const candidates = [row.hy_oas, row.highYield, row.hyOas, row.high_yield, row.hy]
   for (const v of candidates) {
+    if (v == null || v === "") continue
     const n = Number(v)
     if (Number.isFinite(n)) return n
   }

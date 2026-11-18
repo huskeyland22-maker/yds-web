@@ -6,6 +6,22 @@ import {
 
 const CNN_FG_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
 const FRED_HY_SERIES = "BAMLH0A0HYM2"
+/** 수동 입력만 갱신한다. Cron 수집 결과는 이 키를 저장 payload에 넣지 않는다. */
+export const MANUAL_PANIC_CORE_KEYS = ["vix", "fearGreed", "putCall"]
+const MANUAL_PANIC_CORE_KEY_SET = new Set(MANUAL_PANIC_CORE_KEYS)
+
+export function omitManualPanicCore(payload) {
+  if (!payload || typeof payload !== "object") return payload
+  const next = { ...payload }
+  for (const key of MANUAL_PANIC_CORE_KEYS) delete next[key]
+  if (next.changes && typeof next.changes === "object") {
+    const changes = { ...next.changes }
+    for (const key of MANUAL_PANIC_CORE_KEYS) delete changes[key]
+    if (Object.keys(changes).length) next.changes = changes
+    else delete next.changes
+  }
+  return next
+}
 
 function toNum(v) {
   if (v == null || v === "") return null
@@ -104,7 +120,6 @@ export async function collectPanicMetricsLive(opts = {}) {
   const errors = {}
 
   const tasks = [
-    ["vix", () => fetchYahooQuoteSeries("^VIX")],
     ["vvix", () => fetchYahooQuoteSeries("^VVIX")],
     ["vixTerm", () => fetchVixTermStructurePercent()],
     ["ndxDistance", () => fetchYahooMaDistancePercent("^NDX")],
@@ -112,13 +127,7 @@ export async function collectPanicMetricsLive(opts = {}) {
     ["dxy", () => fetchYahooQuoteSeries("DX-Y.NYB")],
     ["vxn", () => fetchYahooQuoteSeries("^VXN")],
     ["skew", () => fetchYahooQuoteSeries("^SKEW")],
-    ["putCall", () => fetchYahooQuoteSeries("^PCC")],
     ["move", () => fetchYahooQuoteSeries("^MOVE")],
-    ["fearGreed", async () => {
-      const cnn = await fetchCnnFearGreed()
-      if (cnn.value != null) return cnn
-      return fetchAlternativeMeFearGreed()
-    }],
     ["highYield", () => fetchFredHighYieldOas()],
   ]
 
@@ -135,6 +144,7 @@ export async function collectPanicMetricsLive(opts = {}) {
 
   for (const { key, value, delta, error } of settled) {
     if (error) errors[key] = error
+    if (MANUAL_PANIC_CORE_KEY_SET.has(key)) continue
     if (value != null) {
       payload[key] = value
       if (delta != null) changes[key] = delta
@@ -149,14 +159,14 @@ export async function collectPanicMetricsLive(opts = {}) {
 
   if (Object.keys(changes).length) payload.changes = changes
 
-  const fetchedCount = ["vix", "fearGreed", "putCall", "move", "highYield"].filter(
-    (k) => payload[k] != null,
-  ).length
+  const savedPayload = omitManualPanicCore(payload)
+  const autoSavedKeys = ["move", "highYield"]
+  const fetchedCount = autoSavedKeys.filter((k) => savedPayload[k] != null).length
 
   return {
-    payload,
+    payload: savedPayload,
     errors,
     fetchedCount,
-    partial: fetchedCount < 5,
+    partial: fetchedCount < autoSavedKeys.length,
   }
 }

@@ -1,6 +1,5 @@
 /**
- * 데스크 상단 패닉 지표 — 다중 소스 순차 fallback.
- * priority: latest_panic_metrics → panic_index_history 최신 → cycle history → daily report
+ * 데스크 상단 패닉 지표. 핵심 3지표는 같은 날짜 스냅샷만 사용한다.
  */
 
 import { panicDataFromCycleRow } from "./cycleHistoryUtils.js"
@@ -16,11 +15,36 @@ const METRIC_KEYS = [
   "skew",
   "highYield",
 ]
+const CORE_KEYS = ["vix", "fearGreed", "putCall"]
+const DISPLAY_ONLY_KEYS = ["bbbOas", "bbb", "bbbSpread"]
 
 function toNum(v) {
   if (v == null || v === "") return null
   const n = Number(v)
   return Number.isFinite(n) ? n : null
+}
+
+/** 데이터 기준일. updatedAt은 저장 시각이므로 기준일로 쓰지 않는다. */
+export function panicDataDate(data) {
+  const raw = data?.date ?? data?.tradeDate ?? data?.asOfDate
+  const date = String(raw ?? "").slice(0, 10)
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null
+}
+
+/**
+ * 입력 날짜가 알려진 최신 이력 날짜 이상일 때만 최신 스냅샷을 갱신한다.
+ * 최신 이력 날짜를 모르면 더 늦은 행이 확인되지 않은 것으로 보고 갱신을 막지 않는다.
+ */
+export function shouldRefreshLatestPanicSnapshot(tradeDate, latestHistoryDate) {
+  const input = String(tradeDate ?? "").slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input)) return false
+  const latest = String(latestHistoryDate ?? "").slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(latest)) return true
+  return input >= latest
+}
+
+function hasCoreTrio(data) {
+  return CORE_KEYS.every((key) => toNum(data?.[key]) != null)
 }
 
 /** @param {Record<string, unknown> | null | undefined} data */
@@ -41,6 +65,11 @@ export function panicDataFromHubMetrics(hub) {
     move: toNum(hub.move),
     skew: toNum(hub.skew),
     highYield: toNum(hub.highYield ?? hub.hyOas),
+    bbbOas: toNum(hub.bbbOas),
+    bbb: toNum(hub.bbb),
+    bbbSpread: toNum(hub.bbbSpread),
+    date: panicDataDate(hub),
+    tradeDate: panicDataDate(hub),
     updatedAt: hub.updatedAt ?? hub.updated_at ?? null,
     accessTier: "pro",
     __fromHub: true,
@@ -62,6 +91,9 @@ export function panicDataFromHistoryApiRow(row) {
     bofa: toNum(row.bofa),
     skew: toNum(row.skew),
     highYield: toNum(row.hyOas ?? row.highYield),
+    bbbOas: toNum(row.bbbOas),
+    bbb: toNum(row.bbb),
+    bbbSpread: toNum(row.bbbSpread),
     updatedAt: row.createdAt ?? row.updated_at ?? (date ? `${date}T12:00:00.000Z` : null),
     accessTier: "pro",
     __fromHistory: true,
@@ -88,39 +120,29 @@ export function reportMetricsFromDeskReport(report) {
 }
 
 /**
- * 필드별 coalesce — 앞 소스 우선
+ * 핵심 3지표는 같은 날짜의 한 스냅샷에서만 가져온다.
+ * 날짜가 다르거나 3지표가 한 스냅샷에 없으면 null이다.
  * @param {...(Record<string, unknown> | null)} sources
  */
 export function coalesceLatestMetrics(...sources) {
-  const valid = sources.filter((s) => s && typeof s === "object")
-  if (!valid.length) return null
-
+  const complete = sources.filter((src) => src && typeof src === "object" && hasCoreTrio(src))
+  if (!complete.length) return null
+  const dated = complete.filter((src) => panicDataDate(src))
+  const pool = dated.length ? dated : complete
+  pool.sort((left, right) => String(panicDataDate(right) ?? "").localeCompare(String(panicDataDate(left) ?? "")))
+  const chosen = pool[0]
+  const date = panicDataDate(chosen)
   /** @type {Record<string, unknown>} */
-  const out = { accessTier: "pro" }
-  for (const key of METRIC_KEYS) {
-    for (const src of valid) {
-      const n = toNum(src[key])
-      if (n != null) {
-        out[key] = n
-        break
-      }
-    }
-  }
-  for (const src of valid) {
-    if (src.updatedAt) {
-      out.updatedAt = src.updatedAt
-      break
-    }
-  }
-  if (valid[0].__fromHub) out.__fromHub = true
-  if (valid.some((s) => s.__fromHistory)) out.__fromHistory = true
-  if (valid.some((s) => s.__fromReport)) out.__fromReport = true
-  const hist = valid.find((s) => s.market_state)
-  if (hist?.market_state) out.market_state = hist.market_state
-  const rep = valid.find((s) => s.market_view)
-  if (rep?.market_view) out.market_view = rep.market_view
-
-  return hasPanicMetricValues(out) ? out : null
+  const out = { accessTier: "pro", date, tradeDate: date }
+  for (const key of METRIC_KEYS) out[key] = toNum(chosen[key])
+  for (const key of DISPLAY_ONLY_KEYS) out[key] = toNum(chosen[key])
+  if (chosen.updatedAt) out.updatedAt = chosen.updatedAt
+  if (chosen.__fromHub) out.__fromHub = true
+  if (chosen.__fromHistory) out.__fromHistory = true
+  if (chosen.__fromReport) out.__fromReport = true
+  if (chosen.market_state) out.market_state = chosen.market_state
+  if (chosen.market_view) out.market_view = chosen.market_view
+  return out
 }
 
 /**
@@ -140,11 +162,10 @@ export function resolveLatestMetrics(input = {}) {
       ? panicDeskDataFromHistory(input.cycleRows)
       : null
   const cycleFromRow = input.cycleRow ? panicDataFromCycleRow(input.cycleRow) : null
-  const cycle = cycleFromRow ?? cycleFromRows
   const report = reportMetricsFromDeskReport(input.reportMetrics)
 
-  const latestMetrics = coalesceLatestMetrics(hub, history, cycle, report)
-  const fallbackUsed = Boolean(!hub && (history || cycle || report))
+  const latestMetrics = coalesceLatestMetrics(hub, history, cycleFromRows, cycleFromRow, report)
+  const fallbackUsed = Boolean(!hasCoreTrio(hub) && (history || cycleFromRows || cycleFromRow))
   if (fallbackUsed || !latestMetrics) {
     console.log("[YDS] panic metrics fallback", {
       panicMetrics: hub,

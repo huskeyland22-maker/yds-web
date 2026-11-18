@@ -165,7 +165,14 @@ function toNum(v) {
 export function panicDataFromCycleRow(row) {
   if (!row || typeof row !== "object") return null
   const pick = (k) => {
-    const n = Number(row[k])
+    const raw = row[k]
+    if (raw == null || raw === "") return null
+    if (typeof raw === "object" && Object.prototype.hasOwnProperty.call(raw, "value")) {
+      if (raw.value == null || raw.value === "") return null
+      const nested = Number(raw.value)
+      return Number.isFinite(nested) ? nested : null
+    }
+    const n = Number(raw)
     return Number.isFinite(n) ? n : null
   }
   const date = row.date ? String(row.date).slice(0, 10) : null

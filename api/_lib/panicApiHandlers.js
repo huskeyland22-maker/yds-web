@@ -10,6 +10,7 @@ import {
   panicObjectFromLatestRow,
 } from "./latestPanicMetrics.js"
 import {
+  attachBbbDisplay,
   fetchPanicMetricsRows,
   panicObjectFromRows,
   probePanicMetricsNumericInsert,
@@ -96,7 +97,7 @@ export async function handlePanicModeLatest(req, res) {
   const fromLatest = panicObjectFromLatestRow(latestRow)
   const fromHistory = panicObjectFromHistoryCoreRow(historyRow)
   const fromEav = rows?.length ? panicObjectFromRows(rows) : null
-  const data = fromLatest ?? fromHistory ?? fromEav
+  const data = attachBbbDisplay(fromLatest ?? fromHistory ?? fromEav, rows)
 
   if (!data) {
     respondEmergency("no_db_rows")

@@ -19,6 +19,8 @@ import { markTimeline } from "../content/ydsFirstEntryTimeline.js"
 import { evictStaleBuildAndReload, fetchLatestBuildMeta } from "../utils/pwaFreshness.js"
 import { useAppDataStore } from "./appDataStore.js"
 import { deskReportKey, generatePanicMarketReport } from "../utils/panicMarketReportEngine.js"
+import { panicAsOfDate } from "../utils/panicDataFreshness.js"
+import { shouldRefreshLatestPanicSnapshot } from "../utils/resolveLatestPanicMetrics.js"
 import {
   appendHistory,
   buildPanicHistoryRow,
@@ -514,7 +516,10 @@ export const usePanicStore = create((set, get) => ({
         return { ok: false, error: new Error("panic_index_history_empty_after_save"), history }
       }
 
-      get().applyServerPanicSnapshot(desk, { skipAutoRefresh: true })
+      const currentAsOf = panicAsOfDate(get().panicData)
+      if (shouldRefreshLatestPanicSnapshot(tradeDate, currentAsOf)) {
+        get().applyServerPanicSnapshot(desk, { skipAutoRefresh: true })
+      }
       console.log("UI UPDATED", {
         tradeDate: tradeDate ?? null,
         vix: desk.vix,
@@ -526,15 +531,15 @@ export const usePanicStore = create((set, get) => ({
         apiReport && typeof apiReport === "object" && apiReport.summary
           ? apiReport
           : generatePanicMarketReport(desk)
-      if (report) {
+      if (report && shouldRefreshLatestPanicSnapshot(tradeDate, currentAsOf)) {
         useAppDataStore.getState().setDeskMarketReport(
           report,
           result?.reportKey ?? deskReportKey(tradeDate ?? report.tradeDate),
         )
       }
 
-      persistHistory(desk ?? data ?? payload, tradeDate, {
-        marketState: report?.regimeLabel ?? desk?.marketState ?? null,
+      persistHistory(payload, tradeDate, {
+        marketState: report?.regimeLabel ?? null,
         sector: report?.priority_sector ?? report?.sector ?? null,
       })
       const cycleRows = useAppDataStore.getState().cycleMetricHistory ?? []

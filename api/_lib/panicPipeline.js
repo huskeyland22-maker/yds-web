@@ -3,10 +3,12 @@ import {
   panicObjectFromRows,
   probePanicMetricsNumericInsert,
   rowsFromPanicSnapshot,
+  shouldRefreshLatestPanicSnapshot,
   upsertPanicMetricsRows,
 } from "./panicMetricsHub.js"
 import {
   fetchPanicHistoryRowBefore,
+  fetchPanicIndexHistoryRows,
   upsertPanicIndexHistoryBatch,
   upsertPanicIndexHistoryFromPayload,
 } from "./panicIndexHistory.js"
@@ -15,19 +17,32 @@ import {
   fetchMarketCycleRowByDate,
   upsertMarketCycleHistoryFromSnapshot,
 } from "./marketCycleHistory.js"
-import { collectPanicMetricsLive } from "./panicCollectors.js"
+import { collectPanicMetricsLive, MANUAL_PANIC_CORE_KEYS, omitManualPanicCore } from "./panicCollectors.js"
 import { logPanicPipelineStage } from "./panicNumeric.js"
 import { upsertPanicHistoryV2ForSnapshot } from "./panicHistoryV2Db.js"
 import { normalizePanicPayload, panicObjectFromSnapshot } from "./panicSnapshot.js"
 
 const STALE_AFTER_MS = Number(process.env.PANIC_STALE_AFTER_MS) || 6 * 60 * 60 * 1000
 
-function preserveFromExistingRows(rows) {
+export async function readLatestPanicHistoryDate() {
+  try {
+    const rows = await fetchPanicIndexHistoryRows({ limit: 1 })
+    const row = rows.length ? rows[rows.length - 1] : null
+    const date = String(row?.date ?? "").slice(0, 10)
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null
+  } catch (err) {
+    console.warn("[panic] latest history date unread", err instanceof Error ? err.message : err)
+    return null
+  }
+}
+
+export function preserveFromExistingRows(rows) {
   const data = panicObjectFromRows(rows)
   const out = {}
   for (const k of ["bofa", "vxn", "skew"]) {
     if (data[k] != null) out[k] = data[k]
   }
+  for (const key of MANUAL_PANIC_CORE_KEYS) delete out[key]
   return out
 }
 
@@ -100,26 +115,40 @@ export async function persistPanicPayload(body, opts = {}) {
   }
 
   let panicHistoryV2 = { ok: false }
-  try {
-    panicHistoryV2 = await upsertPanicHistoryV2ForSnapshot(snap, { source })
-    if (!panicHistoryV2.ok && !panicHistoryV2.skipped) {
-      console.warn("[panic] panic_history_v2 save failed", panicHistoryV2)
-    } else if (panicHistoryV2.ok) {
-      console.log("[panic] panic_history_v2 saved", panicHistoryV2.date, panicHistoryV2.panic_v2)
+  const latestHistoryDate = await readLatestPanicHistoryDate()
+  const refreshLatest = shouldRefreshLatestPanicSnapshot(snap.tradeDate, latestHistoryDate)
+  const pastManual = source === "manual" && !refreshLatest
+  if (pastManual) {
+    panicHistoryV2 = { ok: false, skipped: true, reason: "past_manual_history_only" }
+  } else {
+    try {
+      panicHistoryV2 = await upsertPanicHistoryV2ForSnapshot(snap, { source })
+      if (!panicHistoryV2.ok && !panicHistoryV2.skipped) {
+        console.warn("[panic] panic_history_v2 save failed", panicHistoryV2)
+      } else if (panicHistoryV2.ok) {
+        console.log("[panic] panic_history_v2 saved", panicHistoryV2.date, panicHistoryV2.panic_v2)
+      }
+    } catch (err) {
+      panicHistoryV2 = {
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      }
+      console.warn("[panic] panic_history_v2 save error", panicHistoryV2.error)
     }
-  } catch (err) {
-    panicHistoryV2 = {
-      ok: false,
-      error: err instanceof Error ? err.message : String(err),
-    }
-    console.warn("[panic] panic_history_v2 save error", panicHistoryV2.error)
   }
 
   let cycleHistory = { ok: false }
+  const cronWithoutManualCore = source === "cron" && [snap.vix, snap.fearGreed, snap.putCall].some((v) => v == null)
   try {
-    const previous = await fetchPanicHistoryRowBefore(snap.tradeDate)
-    cycleHistory = await upsertMarketCycleHistoryFromSnapshot(snap, previous, { source })
-    await syncLatestPanicMetricsRpc(snap.tradeDate)
+    if (pastManual) {
+      cycleHistory = { ok: false, skipped: true, reason: "past_manual_history_only" }
+    } else if (cronWithoutManualCore) {
+      cycleHistory = { ok: false, skipped: true, reason: "manual_core_not_in_cron" }
+    } else {
+      const previous = await fetchPanicHistoryRowBefore(snap.tradeDate)
+      cycleHistory = await upsertMarketCycleHistoryFromSnapshot(snap, previous, { source })
+      await syncLatestPanicMetricsRpc(snap.tradeDate)
+    }
   } catch (err) {
     cycleHistory = {
       ok: false,
@@ -128,26 +157,30 @@ export async function persistPanicPayload(body, opts = {}) {
     console.warn("[panic] post-history sync failed", cycleHistory.error)
   }
 
-  const rows = rowsFromPanicSnapshot(snap)
-  console.log("[panic pipeline] 3-metric-rows", rows.length)
-  for (const r of rows) {
-    console.log(
-      "[panic pipeline] 3-row",
-      r.metric_key,
-      r.metric_value,
-      typeof r.metric_value,
-    )
-  }
   let metricsError = null
-  try {
-    await upsertPanicMetricsRows(rows, { log: source === "manual", source })
-  } catch (err) {
-    metricsError = err instanceof Error ? err.message : String(err)
-    console.error("[panic] panic_metrics upsert failed", metricsError)
-    if (source === "manual") {
-      const e = new Error(metricsError)
-      e.stage = "panic_metrics"
-      throw e
+  if (pastManual) {
+    metricsError = null
+  } else {
+    const rows = rowsFromPanicSnapshot(snap)
+    console.log("[panic pipeline] 3-metric-rows", rows.length)
+    for (const r of rows) {
+      console.log(
+        "[panic pipeline] 3-row",
+        r.metric_key,
+        r.metric_value,
+        typeof r.metric_value,
+      )
+    }
+    try {
+      await upsertPanicMetricsRows(rows, { log: source === "manual", source })
+    } catch (err) {
+      metricsError = err instanceof Error ? err.message : String(err)
+      console.error("[panic] panic_metrics upsert failed", metricsError)
+      if (source === "manual") {
+        const e = new Error(metricsError)
+        e.stage = "panic_metrics"
+        throw e
+      }
     }
   }
 
@@ -163,19 +196,21 @@ export async function persistPanicPayload(body, opts = {}) {
   const meta = computePanicServeMeta(fresh, data)
 
   let dailyReportResult = { ok: false }
-  try {
-    const cycleRow = cycleHistory?.ok ? await fetchMarketCycleRowByDate(snap.tradeDate) : null
-    const { createAndPersistDailyReport } = await import("./dailyAiReports.js")
-    dailyReportResult = await createAndPersistDailyReport(data, snap.tradeDate, {
-      source,
-      cycleRow,
-    })
-  } catch (err) {
-    dailyReportResult = {
-      ok: false,
-      error: err instanceof Error ? err.message : String(err),
+  if (!pastManual) {
+    try {
+      const cycleRow = cycleHistory?.ok ? await fetchMarketCycleRowByDate(snap.tradeDate) : null
+      const { createAndPersistDailyReport } = await import("./dailyAiReports.js")
+      dailyReportResult = await createAndPersistDailyReport(data, snap.tradeDate, {
+        source,
+        cycleRow,
+      })
+    } catch (err) {
+      dailyReportResult = {
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      }
+      console.warn("[panic] daily report failed", dailyReportResult.error)
     }
-    console.warn("[panic] daily report failed", dailyReportResult.error)
   }
 
   return {
@@ -186,6 +221,8 @@ export async function persistPanicPayload(body, opts = {}) {
     meta,
     rowCount: fresh?.length ?? 0,
     tradeDate: snap.tradeDate,
+    latestHistoryDate,
+    latestSnapshotUpdated: !pastManual && refreshLatest,
     metricsError,
     report: dailyReportResult.ok ? dailyReportResult.report : null,
     dailyReport: dailyReportResult.ok ? dailyReportResult.daily : null,
@@ -198,7 +235,9 @@ export async function persistPanicPayload(body, opts = {}) {
 export async function runPanicCollectJob() {
   const existing = await fetchPanicMetricsRows()
   const preserve = preserveFromExistingRows(existing)
-  const { payload, errors, fetchedCount, partial } = await collectPanicMetricsLive({ preserve })
+  const collected = await collectPanicMetricsLive({ preserve })
+  const payload = omitManualPanicCore(collected.payload)
+  const { errors, fetchedCount, partial } = collected
   const result = await persistPanicPayload(payload, { source: "cron" })
   return {
     ok: true,

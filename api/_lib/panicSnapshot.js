@@ -69,7 +69,12 @@ export function panicIndexHistoryRowFromSnapshot(snap) {
 
 /** @param {ReturnType<typeof normalizePanicPayload>} snap */
 export function panicObjectFromSnapshot(snap) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(String(snap?.tradeDate ?? "").slice(0, 10))
+    ? String(snap.tradeDate).slice(0, 10)
+    : null
   return {
+    date,
+    tradeDate: date,
     vix: snap.vix,
     vxn: snap.vxn,
     fearGreed: snap.fearGreed,

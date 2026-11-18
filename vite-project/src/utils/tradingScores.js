@@ -173,7 +173,7 @@ export function buildPanicScoreV2Breakdown(data) {
     {
       id: "vix",
       label: "VIX",
-      source: "네이버",
+      source: "Yahoo ^VIX",
       value: Number.isFinite(vix) ? vix : null,
       score: sV == null ? null : Math.round(sV * 10) / 10,
       weight: 0.45,
@@ -182,7 +182,7 @@ export function buildPanicScoreV2Breakdown(data) {
     {
       id: "cnn",
       label: "CNN Fear & Greed",
-      source: "CNN 공식",
+      source: "CNN graphdata, 없으면 alternative.me",
       value: Number.isFinite(cnn) ? cnn : null,
       score: sC == null ? null : Math.round(sC * 10) / 10,
       weight: 0.35,
@@ -191,7 +191,7 @@ export function buildPanicScoreV2Breakdown(data) {
     {
       id: "putCall",
       label: "Cboe Total P/C",
-      source: "Cboe",
+      source: "Yahoo ^PCC",
       value: Number.isFinite(pc) ? pc : null,
       score: sP == null ? null : Math.round(sP * 10) / 10,
       weight: 0.2,

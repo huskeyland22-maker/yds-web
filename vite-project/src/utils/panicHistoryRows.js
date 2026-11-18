@@ -156,7 +156,7 @@ function mapRows(arr) {
   return [...byDate.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
 }
 
-/** 여러 소스 병합 — store 1건이 seed 5건을 덮어쓰지 않음 */
+/** 시드를 바닥에 두고, 같은 날짜의 실수집 행이 시드를 덮는다. 다른 날짜의 시드는 남는다. */
 function mergeCycleHistorySources(...lists) {
   const byDate = new Map()
   for (const list of lists) {
@@ -197,5 +197,5 @@ export function resolveCycleHistoryRows(rows) {
     }
   }
 
-  return mergeCycleHistorySources(fromProp, fromPanicHistory, fromLegacy)
+  return mergeCycleHistorySources(fromPanicHistory, fromProp, fromLegacy)
 }
