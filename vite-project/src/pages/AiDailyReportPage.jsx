@@ -47,8 +47,14 @@ export default function AiDailyReportPage() {
             {AI_DAILY_REPORT_LABEL}
           </p>
           <h1 className="yds-ai-report__title">{report.title}</h1>
-          <p className="yds-ai-report__sub">
-            기준 {report.asOfDisplay} · {report.generatedNote}
+          <p className="yds-ai-report__meta-row">
+            <time
+              className="yds-ai-report__date"
+              dateTime={report.asOfDisplay !== "—" ? report.asOfDisplay : undefined}
+            >
+              기준 {report.asOfDisplay}
+            </time>
+            <span className="yds-ai-report__generated">{report.generatedNote}</span>
           </p>
         </div>
         <Link to="/market-analysis" className="yds-ai-cta yds-ai-report__link">
@@ -69,17 +75,18 @@ export default function AiDailyReportPage() {
       ) : (
         <>
           <article className="yds-ai-report__narrative" aria-label="오늘의 종합 해석">
+            <p className="yds-ai-report__narrative-label">오늘의 종합 해석</p>
             <p className="yds-ai-report__narrative-text">{narrative}</p>
           </article>
 
-          <section className="yds-ai-report__section" aria-labelledby="ai-report-a">
+          <section className="yds-ai-report__section yds-ai-report__section--summary" aria-labelledby="ai-report-a">
             <h2 id="ai-report-a" className="yds-ai-report__h2">
               현재 시장
             </h2>
             <p className="yds-ai-report__lead">{sectionA.headline}</p>
           </section>
 
-          <section className="yds-ai-report__section" aria-labelledby="ai-report-b">
+          <section className="yds-ai-report__section yds-ai-report__section--outlook" aria-labelledby="ai-report-b">
             <h2 id="ai-report-b" className="yds-ai-report__h2">
               시장 단계
             </h2>
@@ -90,7 +97,7 @@ export default function AiDailyReportPage() {
             ) : null}
           </section>
 
-          <section className="yds-ai-report__section" aria-labelledby="ai-report-c">
+          <section className="yds-ai-report__section yds-ai-report__section--risk" aria-labelledby="ai-report-c">
             <h2 id="ai-report-c" className="yds-ai-report__h2">
               핵심 위험
             </h2>
@@ -103,7 +110,7 @@ export default function AiDailyReportPage() {
             ) : null}
           </section>
 
-          <section className="yds-ai-report__section" aria-labelledby="ai-report-d">
+          <section className="yds-ai-report__section yds-ai-report__section--metrics" aria-labelledby="ai-report-d">
             <h2 id="ai-report-d" className="yds-ai-report__h2">
               기회 요인 · 추천 섹터
             </h2>
@@ -121,7 +128,7 @@ export default function AiDailyReportPage() {
             ) : null}
           </section>
 
-          <section className="yds-ai-report__section" aria-labelledby="ai-report-e">
+          <section className="yds-ai-report__section yds-ai-report__section--metrics" aria-labelledby="ai-report-e">
             <h2 id="ai-report-e" className="yds-ai-report__h2">
               기회 요인 · 추천 종목
             </h2>
@@ -147,7 +154,7 @@ export default function AiDailyReportPage() {
             ) : null}
           </section>
 
-          <section className="yds-ai-report__section" aria-labelledby="ai-report-f">
+          <section className="yds-ai-report__section yds-ai-report__section--action" aria-labelledby="ai-report-f">
             <h2 id="ai-report-f" className="yds-ai-report__h2">
               추천 행동
             </h2>
