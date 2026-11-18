@@ -3,7 +3,7 @@
   "system": "daily_bottom_buy_v1",
   "separateFromPanic": true,
   "source": "snapshot",
-  "updatedAt": "2026-11-09T06:49:55.619Z",
+  "updatedAt": "2026-11-18T14:00:36.970Z",
   "thresholds": {
     "rsiMax": 36,
     "stochKMax": 15.4,
@@ -23,23 +23,1088 @@
     "대형 시장 패닉은 Panic Index를 참고합니다."
   ],
   "counts": {
-    "opportunity": 0,
-    "watch": 0,
-    "wait": 6
+    "opportunity": 3,
+    "watch": 2,
+    "wait": 10
   },
-  "opportunities": [],
-  "watch": [],
-  "waiting": [
+  "opportunities": [
     {
       "symbol": "BOTZ",
       "theme": "로봇·자동화",
       "themeShort": "로봇",
       "role": "Physical AI",
+      "sector": "산업·자동화",
+      "industry": "로봇·자동화",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 38.5",
+      "qualityScore": 38.5,
+      "qualityGrade": "D",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 38.5",
+        "score": 38.5,
+        "grade": "D",
+        "peerGroup": "ai_robotics",
+        "peerGroupLabel": "AI / Robotics",
+        "pendingReasons": [],
+        "dataCoveragePct": 100,
+        "dataConfidence": {
+          "score": 96,
+          "dataCoveragePct": 100,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 38.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 47.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 10,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 49.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 49.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 32.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2016-09-12"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 4,
+      "stage": {
+        "id": "strong",
+        "count": 4,
+        "label": "강한 저점",
+        "priority": 0
+      }
+    },
+    {
+      "symbol": "IGV",
+      "theme": "소프트웨어·클라우드",
+      "themeShort": "소프트웨어",
+      "role": "AI 수익화",
+      "sector": "기술",
+      "industry": "소프트웨어·클라우드",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 59.3",
+      "qualityScore": 59.3,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 59.3",
+        "score": 59.3,
+        "grade": "C",
+        "peerGroup": "software_security",
+        "peerGroupLabel": "Software / Security",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 86,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 58.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 39.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 52.9,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 51.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 62.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.blackrock.com/us/individual/products/239771/ishares-expanded-tech-software-sector-etf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2001-07-10"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2026-10-09"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 3,
+      "stage": {
+        "id": "primary",
+        "count": 3,
+        "label": "1차 매수",
+        "priority": 1
+      }
+    },
+    {
+      "symbol": "VGT",
+      "theme": "정보기술 섹터",
+      "themeShort": "정보기술",
+      "role": "미국 IT 섹터",
+      "sector": "기술",
+      "industry": "정보기술",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 75.8",
+      "qualityScore": 75.8,
+      "qualityGrade": "B",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 75.8",
+        "score": 75.8,
+        "grade": "B",
+        "peerGroup": "broad_tech",
+        "peerGroupLabel": "Broad Technology",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 82,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 1,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 1,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 39.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 94.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 25.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://fund-docs.vanguard.com/F0958.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "aum",
+            "source": "https://fund-docs.vanguard.com/F0958.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://investor.vanguard.com/investment-products/etfs/profile/vgt",
+            "asOf": "2004-01-26"
+          },
+          {
+            "field": "holdings",
+            "source": "https://fund-docs.vanguard.com/F0958.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 3,
+      "stage": {
+        "id": "primary",
+        "count": 3,
+        "label": "1차 매수",
+        "priority": 1
+      }
+    }
+  ],
+  "watch": [
+    {
+      "symbol": "AIQ",
+      "theme": "인공지능 테마",
+      "themeShort": "AI 테마",
+      "role": "AI 산업 바스켓",
+      "sector": "기술",
+      "industry": "인공지능",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 60.7",
+      "qualityScore": 60.7,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 60.7",
+        "score": 60.7,
+        "grade": "C",
+        "peerGroup": "ai_robotics",
+        "peerGroupLabel": "AI / Robotics",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 86,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 96.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 48.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 10,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 59.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 89.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 31.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2018-05-11"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 2,
+      "stage": {
+        "id": "watch",
+        "count": 2,
+        "label": "관심",
+        "priority": 2
+      }
+    },
+    {
+      "symbol": "SMH",
+      "theme": "반도체·AI 컴퓨팅",
+      "themeShort": "반도체·AI",
+      "role": "AI의 두뇌",
+      "sector": "기술",
+      "industry": "반도체",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 66.6",
+      "qualityScore": 66.6,
+      "qualityGrade": "B",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 66.6",
+        "score": 66.6,
+        "grade": "B",
+        "peerGroup": "semiconductor",
+        "peerGroupLabel": "Semiconductor",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 82,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 1,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 1,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 25.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 57.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 19.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 99.6,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh-fact-sheet.pdf/",
+            "asOf": "2026-10-31"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh-fact-sheet.pdf/",
+            "asOf": "2026-10-31"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh",
+            "asOf": "2011-12-20"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 2,
+      "stage": {
+        "id": "watch",
+        "count": 2,
+        "label": "관심",
+        "priority": 2
+      }
+    }
+  ],
+  "waiting": [
+    {
+      "symbol": "AVUV",
+      "theme": "미국 소형 가치",
+      "themeShort": "소형 가치",
+      "role": "미국 스몰캡 가치",
+      "sector": "광역 시장",
+      "industry": "소형 가치",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 34.2",
+      "qualityScore": 34.2,
+      "qualityGrade": "E",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 34.2",
+        "score": 34.2,
+        "grade": "E",
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [],
+        "dataCoveragePct": 80,
+        "dataConfidence": {
+          "score": 80,
+          "dataCoveragePct": 80,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 3,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 3,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.avantisinvestors.com/avantis-investments/en-us/avantis-us-small-cap-value-etf/AVUV/",
+            "asOf": "2026-01-01"
+          },
+          {
+            "field": "aum",
+            "source": "https://res.avantisinvestors.com/docs/avantis-us-small-cap-value-avuv-etf-fact-sheet.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.avantisinvestors.com/avantis-investments/en-us/avantis-us-small-cap-value-etf/AVUV/",
+            "asOf": "2019-09-24"
+          },
+          {
+            "field": "holdings",
+            "source": "https://res.avantisinvestors.com/docs/avantis-us-small-cap-value-avuv-etf-fact-sheet.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 1,
       "stage": {
         "id": "wait",
-        "count": 0,
+        "count": 1,
         "label": "대기",
         "priority": 3
       }
@@ -49,11 +1114,180 @@
       "theme": "사이버보안",
       "themeShort": "사이버",
       "role": "AI 시대 보안 인프라",
+      "sector": "기술",
+      "industry": "사이버보안",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 62.8",
+      "qualityScore": 62.8,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 62.8",
+        "score": 62.8,
+        "grade": "C",
+        "peerGroup": "software_security",
+        "peerGroupLabel": "Software / Security",
+        "pendingReasons": [],
+        "dataCoveragePct": 100,
+        "dataConfidence": {
+          "score": 96,
+          "dataCoveragePct": 100,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 95.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 68.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 24.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 51.9,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 58.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 50.8,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-02-02"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2015-07-06"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 1,
       "stage": {
         "id": "wait",
-        "count": 0,
+        "count": 1,
         "label": "대기",
         "priority": 3
       }
@@ -63,34 +1297,432 @@
       "theme": "전력망·전기화",
       "themeShort": "전력망",
       "role": "AI 데이터센터 전력 인프라",
+      "sector": "유틸리티·인프라",
+      "industry": "전력망·전기화",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 58.8",
+      "qualityScore": 58.8,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 58.8",
+        "score": 58.8,
+        "grade": "C",
+        "peerGroup": "infrastructure",
+        "peerGroupLabel": "Infrastructure",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 82,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 1,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 1,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 89.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 67.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 27.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 32.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 53.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 60,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2009-11-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 1,
       "stage": {
         "id": "wait",
-        "count": 0,
+        "count": 1,
         "label": "대기",
         "priority": 3
       }
     },
     {
-      "symbol": "IGV",
-      "theme": "소프트웨어·클라우드",
-      "themeShort": "소프트웨어",
-      "role": "AI 수익화",
+      "symbol": "QQQM",
+      "theme": "Nasdaq-100",
+      "themeShort": "Nasdaq-100",
+      "role": "미국 성장·빅테크",
+      "sector": "광역 시장",
+      "industry": "성장·기술",
+      "qualityStatus": "pending",
+      "qualityLabel": "평가 보류",
+      "qualityScore": null,
+      "qualityGrade": null,
+      "quality": {
+        "status": "pending",
+        "label": "평가 보류",
+        "score": null,
+        "grade": null,
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [
+          "missing_aum"
+        ],
+        "dataCoveragePct": 70,
+        "dataConfidence": {
+          "score": 40,
+          "dataCoveragePct": 70,
+          "holdEvaluation": true,
+          "holdReasons": [
+            "missing_aum"
+          ]
+        },
+        "scoringMode": null,
+        "peerSampleSize": 0,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": null,
+        "pillars": null,
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.invesco.com/us-rest/contentdetail?contentId=5b4d8e58e0737710VgnVCM1000006e36b50aRCRD&dnsName=us",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.invesco.com/us-rest/contentdetail?contentId=5b4d8e58e0737710VgnVCM1000006e36b50aRCRD&dnsName=us",
+            "asOf": "2020-10-13"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.invesco.com/us-rest/contentdetail?contentId=5b4d8e58e0737710VgnVCM1000006e36b50aRCRD&dnsName=us",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 1,
       "stage": {
         "id": "wait",
-        "count": 0,
+        "count": 1,
         "label": "대기",
         "priority": 3
       }
     },
     {
-      "symbol": "SMH",
-      "theme": "반도체·AI 컴퓨팅",
-      "themeShort": "반도체·AI",
-      "role": "AI의 두뇌",
+      "symbol": "SCHD",
+      "theme": "배당 우량주",
+      "themeShort": "배당",
+      "role": "미국 배당 퀄리티",
+      "sector": "광역 시장",
+      "industry": "배당·퀄리티",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 37.1",
+      "qualityScore": 37.1,
+      "qualityGrade": "D",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 37.1",
+        "score": 37.1,
+        "grade": "D",
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 3,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 3,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 66.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 25,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2011-10-20"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
       "count": 0,
       "stage": {
@@ -105,6 +1737,876 @@
       "theme": "Vanguard S&P 500 ETF",
       "themeShort": "S&P 500",
       "role": "미국 대형주",
+      "sector": "광역 시장",
+      "industry": "미국 대형주",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 78.8",
+      "qualityScore": 78.8,
+      "qualityGrade": "B",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 78.8",
+        "score": 78.8,
+        "grade": "B",
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 3,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 3,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 25,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://investor.vanguard.com/investment-products/etfs/profile/voo",
+            "asOf": "2025-04-29"
+          },
+          {
+            "field": "aum",
+            "source": "https://fund-docs.vanguard.com/F0968.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://investor.vanguard.com/investment-products/etfs/profile/voo",
+            "asOf": "2010-09-07"
+          },
+          {
+            "field": "holdings",
+            "source": "https://fund-docs.vanguard.com/F0968.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "XLF",
+      "theme": "금융 섹터",
+      "themeShort": "금융",
+      "role": "미국 금융",
+      "sector": "금융",
+      "industry": "금융",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 63.6",
+      "qualityScore": 63.6,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 63.6",
+        "score": 63.6,
+        "grade": "C",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 88.9,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 44.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 66.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 75,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "XLI",
+      "theme": "산업재 섹터",
+      "themeShort": "산업재",
+      "role": "미국 산업·자본재",
+      "sector": "산업·자동화",
+      "industry": "산업재",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 57.8",
+      "qualityScore": 57.8,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 57.8",
+        "score": 57.8,
+        "grade": "C",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 77.8,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 41.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "XLU",
+      "theme": "유틸리티 섹터",
+      "themeShort": "유틸리티",
+      "role": "방어·전력 수요",
+      "sector": "유틸리티·인프라",
+      "industry": "유틸리티",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 30.8",
+      "qualityScore": 30.8,
+      "qualityGrade": "E",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 30.8",
+        "score": 30.8,
+        "grade": "E",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 80,
+        "dataConfidence": {
+          "score": 80,
+          "dataCoveragePct": 80,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 66.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 25,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "XLV",
+      "theme": "헬스케어 섹터",
+      "themeShort": "헬스케어",
+      "role": "미국 헬스케어",
+      "sector": "헬스케어",
+      "industry": "헬스케어",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 48.9",
+      "qualityScore": 48.9,
+      "qualityGrade": "D",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 48.9",
+        "score": 48.9,
+        "grade": "D",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 61.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 58.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
       "count": 0,
       "stage": {
@@ -121,13 +2623,176 @@
       "theme": "반도체·AI 컴퓨팅",
       "themeShort": "반도체·AI",
       "role": "AI의 두뇌",
+      "sector": "기술",
+      "industry": "반도체",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 66.6",
+      "qualityScore": 66.6,
+      "qualityGrade": "B",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 66.6",
+        "score": 66.6,
+        "grade": "B",
+        "peerGroup": "semiconductor",
+        "peerGroupLabel": "Semiconductor",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 82,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 1,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 1,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 25.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 57.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 19.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 99.6,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh-fact-sheet.pdf/",
+            "asOf": "2026-10-31"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh-fact-sheet.pdf/",
+            "asOf": "2026-10-31"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh",
+            "asOf": "2011-12-20"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 2,
       "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3
+        "id": "watch",
+        "count": 2,
+        "label": "관심",
+        "priority": 2
       }
     },
     {
@@ -135,11 +2800,179 @@
       "theme": "전력망·전기화",
       "themeShort": "전력망",
       "role": "AI 데이터센터 전력 인프라",
+      "sector": "유틸리티·인프라",
+      "industry": "전력망·전기화",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 58.8",
+      "qualityScore": 58.8,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 58.8",
+        "score": 58.8,
+        "grade": "C",
+        "peerGroup": "infrastructure",
+        "peerGroupLabel": "Infrastructure",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 82,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 1,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 1,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 89.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 67.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 27.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 32.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 53.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 60,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2009-11-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.ftportfolios.com/etf/GRID",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 1,
       "stage": {
         "id": "wait",
-        "count": 0,
+        "count": 1,
         "label": "대기",
         "priority": 3
       }
@@ -149,13 +2982,181 @@
       "theme": "소프트웨어·클라우드",
       "themeShort": "소프트웨어",
       "role": "AI 수익화",
+      "sector": "기술",
+      "industry": "소프트웨어·클라우드",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 59.3",
+      "qualityScore": 59.3,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 59.3",
+        "score": 59.3,
+        "grade": "C",
+        "peerGroup": "software_security",
+        "peerGroupLabel": "Software / Security",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 86,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 58.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 39.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 52.9,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 51.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 62.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.blackrock.com/us/individual/products/239771/ishares-expanded-tech-software-sector-etf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2001-07-10"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.ishares.com/us/products/239771/ishares-north-american-techsoftware-etf",
+            "asOf": "2026-10-09"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 3,
       "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3
+        "id": "primary",
+        "count": 3,
+        "label": "1차 매수",
+        "priority": 1
       }
     },
     {
@@ -163,13 +3164,182 @@
       "theme": "로봇·자동화",
       "themeShort": "로봇",
       "role": "Physical AI",
+      "sector": "산업·자동화",
+      "industry": "로봇·자동화",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 38.5",
+      "qualityScore": 38.5,
+      "qualityGrade": "D",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 38.5",
+        "score": 38.5,
+        "grade": "D",
+        "peerGroup": "ai_robotics",
+        "peerGroupLabel": "AI / Robotics",
+        "pendingReasons": [],
+        "dataCoveragePct": 100,
+        "dataConfidence": {
+          "score": 96,
+          "dataCoveragePct": 100,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 38.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 47.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 10,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 49.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 49.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 32.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2016-09-12"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.globalxetfs.com/funds/botz",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 4,
       "stage": {
-        "id": "wait",
-        "count": 0,
-        "label": "대기",
-        "priority": 3
+        "id": "strong",
+        "count": 4,
+        "label": "강한 저점",
+        "priority": 0
       }
     },
     {
@@ -177,11 +3347,180 @@
       "theme": "사이버보안",
       "themeShort": "사이버",
       "role": "AI 시대 보안 인프라",
+      "sector": "기술",
+      "industry": "사이버보안",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 62.8",
+      "qualityScore": 62.8,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 62.8",
+        "score": 62.8,
+        "grade": "C",
+        "peerGroup": "software_security",
+        "peerGroupLabel": "Software / Security",
+        "pendingReasons": [],
+        "dataCoveragePct": 100,
+        "dataConfidence": {
+          "score": 96,
+          "dataCoveragePct": 100,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 95.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 68.2,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 24.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 51.9,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 58.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 50.8,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-02-02"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2015-07-06"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.ftportfolios.com/ETF/CIBR",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
-      "count": 0,
+      "count": 1,
       "stage": {
         "id": "wait",
-        "count": 0,
+        "count": 1,
         "label": "대기",
         "priority": 3
       }
@@ -191,6 +3530,1669 @@
       "theme": "Vanguard S&P 500 ETF",
       "themeShort": "S&P 500",
       "role": "미국 대형주",
+      "sector": "광역 시장",
+      "industry": "미국 대형주",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 78.8",
+      "qualityScore": 78.8,
+      "qualityGrade": "B",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 78.8",
+        "score": 78.8,
+        "grade": "B",
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 3,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 3,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 25,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://investor.vanguard.com/investment-products/etfs/profile/voo",
+            "asOf": "2025-04-29"
+          },
+          {
+            "field": "aum",
+            "source": "https://fund-docs.vanguard.com/F0968.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://investor.vanguard.com/investment-products/etfs/profile/voo",
+            "asOf": "2010-09-07"
+          },
+          {
+            "field": "holdings",
+            "source": "https://fund-docs.vanguard.com/F0968.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "QQQM",
+      "theme": "Nasdaq-100",
+      "themeShort": "Nasdaq-100",
+      "role": "미국 성장·빅테크",
+      "sector": "광역 시장",
+      "industry": "성장·기술",
+      "qualityStatus": "pending",
+      "qualityLabel": "평가 보류",
+      "qualityScore": null,
+      "qualityGrade": null,
+      "quality": {
+        "status": "pending",
+        "label": "평가 보류",
+        "score": null,
+        "grade": null,
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [
+          "missing_aum"
+        ],
+        "dataCoveragePct": 70,
+        "dataConfidence": {
+          "score": 40,
+          "dataCoveragePct": 70,
+          "holdEvaluation": true,
+          "holdReasons": [
+            "missing_aum"
+          ]
+        },
+        "scoringMode": null,
+        "peerSampleSize": 0,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": null,
+        "pillars": null,
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.invesco.com/us-rest/contentdetail?contentId=5b4d8e58e0737710VgnVCM1000006e36b50aRCRD&dnsName=us",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.invesco.com/us-rest/contentdetail?contentId=5b4d8e58e0737710VgnVCM1000006e36b50aRCRD&dnsName=us",
+            "asOf": "2020-10-13"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.invesco.com/us-rest/contentdetail?contentId=5b4d8e58e0737710VgnVCM1000006e36b50aRCRD&dnsName=us",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 1,
+      "stage": {
+        "id": "wait",
+        "count": 1,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "SCHD",
+      "theme": "배당 우량주",
+      "themeShort": "배당",
+      "role": "미국 배당 퀄리티",
+      "sector": "광역 시장",
+      "industry": "배당·퀄리티",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 37.1",
+      "qualityScore": 37.1,
+      "qualityGrade": "D",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 37.1",
+        "score": 37.1,
+        "grade": "D",
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 3,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 3,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 66.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 25,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2011-10-20"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.schwabassetmanagement.com/products/schd",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "AVUV",
+      "theme": "미국 소형 가치",
+      "themeShort": "소형 가치",
+      "role": "미국 스몰캡 가치",
+      "sector": "광역 시장",
+      "industry": "소형 가치",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 34.2",
+      "qualityScore": 34.2,
+      "qualityGrade": "E",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 34.2",
+        "score": 34.2,
+        "grade": "E",
+        "peerGroup": "core_style",
+        "peerGroupLabel": "Core / Style",
+        "pendingReasons": [],
+        "dataCoveragePct": 80,
+        "dataConfidence": {
+          "score": 80,
+          "dataCoveragePct": 80,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 3,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 3,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.avantisinvestors.com/avantis-investments/en-us/avantis-us-small-cap-value-etf/AVUV/",
+            "asOf": "2026-01-01"
+          },
+          {
+            "field": "aum",
+            "source": "https://res.avantisinvestors.com/docs/avantis-us-small-cap-value-avuv-etf-fact-sheet.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.avantisinvestors.com/avantis-investments/en-us/avantis-us-small-cap-value-etf/AVUV/",
+            "asOf": "2019-09-24"
+          },
+          {
+            "field": "holdings",
+            "source": "https://res.avantisinvestors.com/docs/avantis-us-small-cap-value-avuv-etf-fact-sheet.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 1,
+      "stage": {
+        "id": "wait",
+        "count": 1,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "VGT",
+      "theme": "정보기술 섹터",
+      "themeShort": "정보기술",
+      "role": "미국 IT 섹터",
+      "sector": "기술",
+      "industry": "정보기술",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 75.8",
+      "qualityScore": 75.8,
+      "qualityGrade": "B",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 75.8",
+        "score": 75.8,
+        "grade": "B",
+        "peerGroup": "broad_tech",
+        "peerGroupLabel": "Broad Technology",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 82,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 1,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 1,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 39.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 94.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 25.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://fund-docs.vanguard.com/F0958.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "aum",
+            "source": "https://fund-docs.vanguard.com/F0958.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "inception",
+            "source": "https://investor.vanguard.com/investment-products/etfs/profile/vgt",
+            "asOf": "2004-01-26"
+          },
+          {
+            "field": "holdings",
+            "source": "https://fund-docs.vanguard.com/F0958.pdf",
+            "asOf": "2026-09-30"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 3,
+      "stage": {
+        "id": "primary",
+        "count": 3,
+        "label": "1차 매수",
+        "priority": 1
+      }
+    },
+    {
+      "symbol": "AIQ",
+      "theme": "인공지능 테마",
+      "themeShort": "AI 테마",
+      "role": "AI 산업 바스켓",
+      "sector": "기술",
+      "industry": "인공지능",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 60.7",
+      "qualityScore": 60.7,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 60.7",
+        "score": 60.7,
+        "grade": "C",
+        "peerGroup": "ai_robotics",
+        "peerGroupLabel": "AI / Robotics",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 86,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 2,
+          "scoringMode": "absolute_reference",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "absolute_reference",
+        "peerSampleSize": 2,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 96.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 48.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 10,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 59.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume",
+              "spread"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 89.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 31.5,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2018-05-11"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "spread",
+            "source": "https://www.globalxetfs.com/funds/aiq",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 2,
+      "stage": {
+        "id": "watch",
+        "count": 2,
+        "label": "관심",
+        "priority": 2
+      }
+    },
+    {
+      "symbol": "XLU",
+      "theme": "유틸리티 섹터",
+      "themeShort": "유틸리티",
+      "role": "방어·전력 수요",
+      "sector": "유틸리티·인프라",
+      "industry": "유틸리티",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 30.8",
+      "qualityScore": 30.8,
+      "qualityGrade": "E",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 30.8",
+        "score": 30.8,
+        "grade": "E",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 80,
+        "dataConfidence": {
+          "score": 80,
+          "dataCoveragePct": 80,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 66.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 25,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "XLI",
+      "theme": "산업재 섹터",
+      "themeShort": "산업재",
+      "role": "미국 산업·자본재",
+      "sector": "산업·자동화",
+      "industry": "산업재",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 57.8",
+      "qualityScore": 57.8,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 57.8",
+        "score": 57.8,
+        "grade": "C",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 77.8,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 41.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "XLV",
+      "theme": "헬스케어 섹터",
+      "themeShort": "헬스케어",
+      "role": "미국 헬스케어",
+      "sector": "헬스케어",
+      "industry": "헬스케어",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 48.9",
+      "qualityScore": 48.9,
+      "qualityGrade": "D",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 48.9",
+        "score": 48.9,
+        "grade": "D",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 33.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 61.1,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 100,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 0,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 58.3,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
+      "ok": true,
+      "count": 0,
+      "stage": {
+        "id": "wait",
+        "count": 0,
+        "label": "대기",
+        "priority": 3
+      }
+    },
+    {
+      "symbol": "XLF",
+      "theme": "금융 섹터",
+      "themeShort": "금융",
+      "role": "미국 금융",
+      "sector": "금융",
+      "industry": "금융",
+      "qualityStatus": "scored",
+      "qualityLabel": "YDS 63.6",
+      "qualityScore": 63.6,
+      "qualityGrade": "C",
+      "quality": {
+        "status": "scored",
+        "label": "YDS 63.6",
+        "score": 63.6,
+        "grade": "C",
+        "peerGroup": "sector_spdr",
+        "peerGroupLabel": "Sector SPDR",
+        "pendingReasons": [],
+        "dataCoveragePct": 90,
+        "dataConfidence": {
+          "score": 90,
+          "dataCoveragePct": 90,
+          "excludedPillars": [],
+          "appliedWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "nominalWeights": {
+            "performance": 25,
+            "risk": 20,
+            "cost": 15,
+            "liquidity": 15,
+            "composition": 15,
+            "stability": 10
+          },
+          "peerSampleSize": 4,
+          "scoringMode": "peer_relative",
+          "holdEvaluation": false,
+          "holdReasons": [],
+          "minDataCoveragePct": 70,
+          "maxExcludedNominal": 25
+        },
+        "scoringMode": "peer_relative",
+        "peerSampleSize": 4,
+        "nominalWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "appliedWeights": {
+          "performance": 25,
+          "risk": 20,
+          "cost": 15,
+          "liquidity": 15,
+          "composition": 15,
+          "stability": 10
+        },
+        "pillars": {
+          "performance": {
+            "nominalWeight": 25,
+            "appliedWeight": 25,
+            "score": 88.9,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "ret3y",
+              "ret5y",
+              "ret10y"
+            ]
+          },
+          "risk": {
+            "nominalWeight": 20,
+            "appliedWeight": 20,
+            "score": 44.4,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "vol3y",
+              "mdd3y",
+              "recoveryDays"
+            ]
+          },
+          "cost": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "expenseRatio"
+            ]
+          },
+          "liquidity": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 66.7,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "dollarVolume"
+            ]
+          },
+          "composition": {
+            "nominalWeight": 15,
+            "appliedWeight": 15,
+            "score": 50,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "top10",
+              "maxWeight"
+            ]
+          },
+          "stability": {
+            "nominalWeight": 10,
+            "appliedWeight": 10,
+            "score": 75,
+            "excluded": false,
+            "excludeReason": null,
+            "usedMetrics": [
+              "aum",
+              "age"
+            ]
+          }
+        },
+        "asOfDate": "2026-11-17",
+        "sources": [
+          {
+            "field": "expenseRatio",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "aum",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "2026-11-16"
+          },
+          {
+            "field": "inception",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "1998-12-16"
+          },
+          {
+            "field": "holdings",
+            "source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+            "asOf": "2026-11-17"
+          },
+          {
+            "field": "priceSeries",
+            "source": "YDS Yahoo OHLCV (daily_bottom_buy fetch path)",
+            "asOf": "2026-11-17"
+          }
+        ],
+        "morningstar": {
+          "status": "license_required",
+          "label": "라이선스 확보 후 표시",
+          "starRating": null,
+          "medalistRating": null
+        }
+      },
       "ok": true,
       "count": 0,
       "stage": {
